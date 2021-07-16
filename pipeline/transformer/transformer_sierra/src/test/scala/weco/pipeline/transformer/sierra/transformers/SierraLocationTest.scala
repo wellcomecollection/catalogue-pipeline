@@ -64,7 +64,7 @@ class SierraLocationTest
           List(AccessCondition(method = AccessMethod.OnlineRequest))
       )
 
-      transformer.getPhysicalLocation(bibId, itemId, itemData, bibData) shouldBe Some(
+      transformer.getPhysicalLocation(bibId, itemData, bibData) shouldBe Some(
         expectedLocation)
     }
 
@@ -74,7 +74,7 @@ class SierraLocationTest
       )
 
       val location =
-        transformer.getPhysicalLocation(bibId, itemId, itemData, bibData).get
+        transformer.getPhysicalLocation(bibId, itemData, bibData).get
       location.label shouldBe "Folios"
     }
 
@@ -83,14 +83,14 @@ class SierraLocationTest
         location = Some(SierraSourceLocation("", ""))
       )
 
-      transformer.getPhysicalLocation(bibId, itemId, itemData, bibData) shouldBe None
+      transformer.getPhysicalLocation(bibId, itemData, bibData) shouldBe None
     }
 
     it("returns None if the location field only contains the string 'none'") {
       val itemData = createSierraItemDataWith(
         location = Some(SierraSourceLocation("none", "none"))
       )
-      transformer.getPhysicalLocation(bibId, itemId, itemData, bibData) shouldBe None
+      transformer.getPhysicalLocation(bibId, itemData, bibData) shouldBe None
     }
 
     it("returns None if there is no location in the item data") {
@@ -98,7 +98,7 @@ class SierraLocationTest
         location = None
       )
 
-      transformer.getPhysicalLocation(bibId, itemId, itemData, bibData) shouldBe None
+      transformer.getPhysicalLocation(bibId, itemData, bibData) shouldBe None
     }
 
     it("adds access conditions to the items") {
@@ -135,7 +135,7 @@ class SierraLocationTest
       )
 
       val location =
-        transformer.getPhysicalLocation(bibId, itemId, itemData, bibData).get
+        transformer.getPhysicalLocation(bibId, itemData, bibData).get
       location.accessConditions shouldBe List(
         AccessCondition(
           method = AccessMethod.OnlineRequest,
@@ -158,7 +158,7 @@ class SierraLocationTest
       )
 
       val location =
-        transformer.getPhysicalLocation(bibId, itemId, itemData, bibData).get
+        transformer.getPhysicalLocation(bibId, itemData, bibData).get
 
       location.shelfmark shouldBe Some("AX1234:Box 1")
     }
@@ -167,7 +167,6 @@ class SierraLocationTest
       it("returns an empty location if location name is 'bound in above'") {
         val result = transformer.getPhysicalLocation(
           bibNumber = createSierraBibNumber,
-          itemNumber = createSierraItemNumber,
           bibData = createSierraBibData,
           itemData = createSierraItemDataWith(
             location = Some(SierraSourceLocation("bwith", "bound in above"))
@@ -180,7 +179,6 @@ class SierraLocationTest
       it("uses the fallback location if location name is 'bound in above'") {
         val result = transformer.getPhysicalLocation(
           bibNumber = createSierraBibNumber,
-          itemNumber = createSierraItemNumber,
           bibData = createSierraBibData,
           itemData = createSierraItemDataWith(
             location = Some(SierraSourceLocation("bwith", "bound in above"))
@@ -197,7 +195,6 @@ class SierraLocationTest
       it("returns an empty location if location name is 'contained in above'") {
         val result = transformer.getPhysicalLocation(
           bibNumber = createSierraBibNumber,
-          itemNumber = createSierraItemNumber,
           bibData = createSierraBibData,
           itemData = createSierraItemDataWith(
             location = Some(SierraSourceLocation("cwith", "contained in above"))
@@ -210,7 +207,6 @@ class SierraLocationTest
       it("uses the fallback location if location name is 'contained in above'") {
         val result = transformer.getPhysicalLocation(
           bibNumber = createSierraBibNumber,
-          itemNumber = createSierraItemNumber,
           bibData = createSierraBibData,
           itemData = createSierraItemDataWith(
             location = Some(SierraSourceLocation("cwith", "contained in above"))

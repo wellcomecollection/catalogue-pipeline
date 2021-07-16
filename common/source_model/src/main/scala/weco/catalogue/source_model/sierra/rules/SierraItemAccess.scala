@@ -37,13 +37,17 @@ import weco.catalogue.source_model.sierra.source.{
 object SierraItemAccess extends SierraQueryOps with Logging {
   def apply(
     bibId: SierraBibNumber,
-    itemId: SierraItemNumber,
     bibStatus: Option[AccessStatus],
     location: Option[PhysicalLocationType],
     itemData: SierraItemData
   ): (Option[AccessCondition], Option[String]) =
     (
-      createAccessCondition(bibId, itemId, bibStatus, location, itemData),
+      createAccessCondition(
+        bibId = bibId,
+        bibStatus = bibStatus,
+        location = location,
+        itemData = itemData
+      ),
       itemData.displayNote) match {
       // If the item note is already on the access condition, we don't need to copy it.
       case ((Some(ac), displayNote)) if ac.note == displayNote =>
@@ -67,7 +71,6 @@ object SierraItemAccess extends SierraQueryOps with Logging {
 
   private def createAccessCondition(
     bibId: SierraBibNumber,
-    itemId: SierraItemNumber,
     bibStatus: Option[AccessStatus],
     location: Option[PhysicalLocationType],
     itemData: SierraItemData
@@ -375,7 +378,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
       // this apply() method.
       case (bibStatus, holdCount, status, opacmsg, isRequestable, location) =>
         warn(
-          s"Unable to assign access status for item ${itemId.withCheckDigit}: " +
+          s"Unable to assign access status for item ${itemData.id.withCheckDigit}: " +
             s"bibStatus=$bibStatus, holdCount=$holdCount, status=$status, " +
             s"opacmsg=$opacmsg, isRequestable=$isRequestable, location=$location"
         )

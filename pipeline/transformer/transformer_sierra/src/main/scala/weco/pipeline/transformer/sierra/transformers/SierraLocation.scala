@@ -15,7 +15,6 @@ import weco.catalogue.source_model.sierra.{SierraBibData, SierraItemData}
 trait SierraLocation {
   def getPhysicalLocation(
     bibNumber: SierraBibNumber,
-    itemNumber: SierraItemNumber,
     itemData: SierraItemData,
     bibData: SierraBibData,
     fallbackLocation: Option[(PhysicalLocationType, String)] = None)
@@ -25,7 +24,10 @@ trait SierraLocation {
 
       (locationType, label) <- {
         val parsedLocationType =
-          SierraPhysicalLocationType.fromName(itemNumber, sourceLocation.name)
+          SierraPhysicalLocationType.fromName(
+            id = itemData.id,
+            name = sourceLocation.name
+          )
 
         (parsedLocationType, fallbackLocation) match {
           case (Some(locationType), _) =>

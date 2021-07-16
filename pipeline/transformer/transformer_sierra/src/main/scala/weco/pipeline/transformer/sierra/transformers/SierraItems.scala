@@ -125,13 +125,23 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
     debug(s"Attempting to transform ${itemData.id}")
 
     val location =
-      getPhysicalLocation(bibId, itemData.id, itemData, bibData, fallbackLocation)
+      getPhysicalLocation(
+        bibNumber = bibId,
+        itemData = itemData,
+        bibData = bibData,
+        fallbackLocation = fallbackLocation
+      )
 
-    val (title, hasInferredTitle) = getItemTitle(itemData.id, itemData)
+    val (title, hasInferredTitle) = getItemTitle(itemData)
 
     val item = Item(
       title = title,
-      note = getItemNote(bibId, itemData.id, itemData, bibData, location),
+      note = getItemNote(
+        bibId = bibId,
+        itemData = itemData,
+        bibData = bibData,
+        location = location
+      ),
       locations = List(location).flatten,
       id = IdState.Identifiable(
         sourceIdentifier = SourceIdentifier(
@@ -167,9 +177,7 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
     *     In general, we prefer the human-written title where possible.
     *
     */
-  private def getItemTitle(
-    itemId: SierraItemNumber,
-    data: SierraItemData): (Option[String], HasAutomatedTitle) = {
+  private def getItemTitle(data: SierraItemData): (Option[String], HasAutomatedTitle) = {
     val titleCandidates: List[String] =
       data.varFields
         .filter { _.fieldTag.contains("v") }
@@ -190,7 +198,7 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
 
       case multipleTitles =>
         warn(
-          s"Multiple title candidates on item $itemId: ${titleCandidates.mkString("; ")}")
+          s"Multiple title candidates on item ${data.id}: ${titleCandidates.mkString("; ")}")
         (Some(multipleTitles.head), false)
     }
   }
@@ -244,16 +252,14 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
     */
   private def getItemNote(
     bibId: SierraBibNumber,
-    itemId: SierraItemNumber,
     itemData: SierraItemData,
     bibData: SierraBibData,
     location: Option[PhysicalLocation]): Option[String] = {
     val (_, note) = SierraItemAccess(
-      bibId,
-      itemId,
-      SierraAccessStatus.forBib(bibId, bibData),
-      location.map(_.locationType),
-      itemData
+      bibId = bibId,
+      bibStatus = SierraAccessStatus.forBib(bibId, bibData),
+      location = location.map(_.locationType),
+      itemData = itemData
     )
 
     note
