@@ -17,7 +17,6 @@ import weco.pipeline.transformer.sierra.exceptions.{
 import weco.pipeline.transformer.sierra.transformers._
 import java.time.Instant
 
-import scala.collection.immutable
 import scala.util.{Failure, Success, Try}
 
 class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
