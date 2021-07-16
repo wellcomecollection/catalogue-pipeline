@@ -103,7 +103,6 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
     val items = itemDataEntries.map { itemData =>
       transformItemData(
         bibId = bibId,
-        itemId = itemData.id,
         itemData = itemData,
         bibData = bibData,
         fallbackLocation = fallbackLocation
@@ -119,33 +118,32 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
 
   private def transformItemData(
     bibId: SierraBibNumber,
-    itemId: SierraItemNumber,
     itemData: SierraItemData,
     bibData: SierraBibData,
     fallbackLocation: Option[(PhysicalLocationType, String)]
   ): (Item[IdState.Identifiable], HasAutomatedTitle) = {
-    debug(s"Attempting to transform $itemId")
+    debug(s"Attempting to transform ${itemData.id}")
 
     val location =
-      getPhysicalLocation(bibId, itemId, itemData, bibData, fallbackLocation)
+      getPhysicalLocation(bibId, itemData.id, itemData, bibData, fallbackLocation)
 
-    val (title, hasInferredTitle) = getItemTitle(itemId, itemData)
+    val (title, hasInferredTitle) = getItemTitle(itemData.id, itemData)
 
     val item = Item(
       title = title,
-      note = getItemNote(bibId, itemId, itemData, bibData, location),
+      note = getItemNote(bibId, itemData.id, itemData, bibData, location),
       locations = List(location).flatten,
       id = IdState.Identifiable(
         sourceIdentifier = SourceIdentifier(
           identifierType = IdentifierType.SierraSystemNumber,
           ontologyType = "Item",
-          value = itemId.withCheckDigit
+          value = itemData.id.withCheckDigit
         ),
         otherIdentifiers = List(
           SourceIdentifier(
             identifierType = IdentifierType.SierraIdentifier,
             ontologyType = "Item",
-            value = itemId.withoutCheckDigit
+            value = itemData.id.withoutCheckDigit
           )
         )
       )
