@@ -32,8 +32,9 @@ object ImageUtils {
 
   // The /thumbs URL is routed to DLCS which handles only images
   // other asset types are routed to the iiif-builder service at /thumb
+  // See: https://github.com/wellcomecollection/iiif-builder/blob/master/docs/thumbnails.md
   val imagesThumbBaseUrl = "https://iiif.wellcomecollection.org/thumbs"
-  val notImagesThumbBaseUrl = "https://iiif.wellcomecollection.org/thumb"
+  val othersThumbBaseUrl = "https://iiif.wellcomecollection.org/thumb"
 
   def buildThumbnailUrl(
     bnumber: String,
@@ -42,9 +43,9 @@ object ImageUtils {
     validThumbnailFile.mimeType match {
       case Some(mimeType) if mimeType.startsWith("image/") =>
         Some(
-          s"${imagesThumbBaseUrl}/${validThumbnailFile.location}/${thumbnailPathSuffix}")
+          s"$imagesThumbBaseUrl/${validThumbnailFile.location}/$thumbnailPathSuffix")
       case _ =>
-        Some(s"${notImagesThumbBaseUrl}/thumb/${bnumber}")
+        Some(s"$othersThumbBaseUrl/$bnumber")
     }
 
   def buildImageUrl(validImageFile: FileReference): Option[String] =
