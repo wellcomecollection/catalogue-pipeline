@@ -5,7 +5,11 @@ import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.akka.fixtures.Akka
-import weco.catalogue.tei.id_extractor.fixtures.{LocalResources, Wiremock, XmlAssertions}
+import weco.catalogue.tei.id_extractor.fixtures.{
+  LocalResources,
+  Wiremock,
+  XmlAssertions
+}
 import weco.http.client.AkkaHttpClient
 
 import java.net.URI
