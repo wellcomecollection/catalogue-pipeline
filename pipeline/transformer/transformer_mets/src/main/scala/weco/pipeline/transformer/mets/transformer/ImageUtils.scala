@@ -27,19 +27,22 @@ object ImageUtils {
     )
 
   private final val thumbnailDim = "200"
+  private final val thumbnailPathSuffix = s"full/!$thumbnailDim,$thumbnailDim/0/default.jpg"
 
-  def buildThumbnailUrl(bnumber: String,
-                        validThumbnailFile: FileReference): Option[String] =
+  // The /thumbs URL is routed to DLCS which handles only images
+  // other asset types are routed to the iiif-builder service at /thumb
+  val imagesThumbBaseUrl = "https://iiif.wellcomecollection.org/thumbs"
+  val notImagesThumbBaseUrl = "https://iiif.wellcomecollection.org/thumb"
+
+  def buildThumbnailUrl(
+    bnumber: String,
+    validThumbnailFile: FileReference
+  ): Option[String] =
     validThumbnailFile.mimeType match {
-      case Some("application/pdf") =>
-        // TODO: This URL pattern should either be updated to use iiif.wellcomecollection.org
-        // or removed entirely.  I couldn't find any uses of it in a snapshot (2021-07-05),
-        // so it's possible this path is unused or wrong.
-        Some(
-          s"https://wellcomelibrary.org/pdfthumbs/$bnumber/0/${validThumbnailFile.location}.jpg")
+      case Some(mimeType) if mimeType.startsWith("image/") =>
+        Some(s"${imagesThumbBaseUrl}/${validThumbnailFile.location}/${thumbnailPathSuffix}")
       case _ =>
-        Some(
-          s"https://dlcs.io/thumbs/wellcome/5/${validThumbnailFile.location}/full/!$thumbnailDim,$thumbnailDim/0/default.jpg")
+        Some(s"${notImagesThumbBaseUrl}/thumb/${bnumber}")
     }
 
   def buildImageUrl(validImageFile: FileReference): Option[String] =
