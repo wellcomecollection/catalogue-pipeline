@@ -39,7 +39,7 @@ object ImageUtils {
           s"https://wellcomelibrary.org/pdfthumbs/$bnumber/0/${validThumbnailFile.location}.jpg")
       case _ =>
         Some(
-          s"https://iiif.wellcomecollection.org/thumb/${validThumbnailFile.location}/full/!$thumbnailDim,$thumbnailDim/0/default.jpg")
+          s"https://dlcs.io/thumbs/wellcome/5/${validThumbnailFile.location}/full/!$thumbnailDim,$thumbnailDim/0/default.jpg")
     }
 
   def buildImageUrl(validImageFile: FileReference): Option[String] =
