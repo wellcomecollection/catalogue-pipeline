@@ -1,16 +1,14 @@
 package weco.catalogue.tei.id_extractor
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import org.apache.commons.io.IOUtils
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.akka.fixtures.Akka
-import weco.catalogue.tei.id_extractor.fixtures.{Wiremock, XmlAssertions}
+import weco.catalogue.tei.id_extractor.fixtures.{LocalResources, Wiremock, XmlAssertions}
 import weco.http.client.AkkaHttpClient
 
 import java.net.URI
-import java.nio.charset.StandardCharsets
 
 class GitHubBlobContentReaderTest
     extends AnyFunSpec
@@ -19,6 +17,7 @@ class GitHubBlobContentReaderTest
     with Matchers
     with Akka
     with IntegrationPatience
+    with LocalResources
     with XmlAssertions {
 
   it("reads a blob from GitHub") {
@@ -30,12 +29,7 @@ class GitHubBlobContentReaderTest
           new GitHubBlobContentReader(new AkkaHttpClient(), "fake_token")
 
         whenReady(gitHubBlobReader.getBlob(uri)) {
-          assertXmlStringsAreEqual(
-            _,
-            IOUtils.resourceToString(
-              "/WMS_Arabic_1.xml",
-              StandardCharsets.UTF_8)
-          )
+          assertXmlStringsAreEqual(_, readResource("/WMS_Arabic_1.xml"))
         }
       }
     }
@@ -49,12 +43,7 @@ class GitHubBlobContentReaderTest
           new GitHubBlobContentReader(new AkkaHttpClient(), "fake_token")
 
         whenReady(gitHubBlobReader.getBlob(uri)) {
-          assertXmlStringsAreEqual(
-            _,
-            IOUtils.resourceToString(
-              "/Javanese_11.xml",
-              StandardCharsets.UTF_8)
-          )
+          assertXmlStringsAreEqual(_, readResource("/Javanese_11.xml"))
         }
       }
     }
