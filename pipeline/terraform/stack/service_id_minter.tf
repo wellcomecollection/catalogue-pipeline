@@ -54,7 +54,7 @@ module "id_minter" {
     floor(
       local.id_minter_rds_max_connections / local.id_minter_task_max_connections
     ),
-    var.max_capacity
+    local.max_capacity
   )
 
   scale_down_adjustment = local.scale_down_adjustment
