@@ -177,7 +177,8 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
     *     In general, we prefer the human-written title where possible.
     *
     */
-  private def getItemTitle(data: SierraItemData): (Option[String], HasAutomatedTitle) = {
+  private def getItemTitle(
+    data: SierraItemData): (Option[String], HasAutomatedTitle) = {
     val titleCandidates: List[String] =
       data.varFields
         .filter { _.fieldTag.contains("v") }
