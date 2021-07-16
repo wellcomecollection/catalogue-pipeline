@@ -6,13 +6,11 @@ import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.akka.fixtures.Akka
-import weco.catalogue.tei.id_extractor.fixtures.Wiremock
+import weco.catalogue.tei.id_extractor.fixtures.{Wiremock, XmlAssertions}
 import weco.http.client.AkkaHttpClient
 
 import java.net.URI
 import java.nio.charset.StandardCharsets
-import scala.xml.XML
-import scala.xml.Utility.trim
 
 class GitHubBlobContentReaderTest
     extends AnyFunSpec
@@ -20,7 +18,9 @@ class GitHubBlobContentReaderTest
     with ScalaFutures
     with Matchers
     with Akka
-    with IntegrationPatience {
+    with IntegrationPatience
+    with XmlAssertions {
+
   it("reads a blob from GitHub") {
     withWiremock("localhost") { port =>
       withActorSystem { implicit ac =>
@@ -28,11 +28,14 @@ class GitHubBlobContentReaderTest
           s"http://localhost:$port/git/blobs/2e6b5fa45462510d5549b6bcf2bbc8b53ae08aed")
         val gitHubBlobReader =
           new GitHubBlobContentReader(new AkkaHttpClient(), "fake_token")
-        whenReady(gitHubBlobReader.getBlob(uri)) { result =>
-          val str = IOUtils.resourceToString(
-            "/WMS_Arabic_1.xml",
-            StandardCharsets.UTF_8)
-          trim(XML.loadString(result)) shouldBe trim(XML.loadString(str))
+
+        whenReady(gitHubBlobReader.getBlob(uri)) {
+          assertXmlStringsAreEqual(
+            _,
+            IOUtils.resourceToString(
+              "/WMS_Arabic_1.xml",
+              StandardCharsets.UTF_8)
+          )
         }
       }
     }
@@ -44,10 +47,14 @@ class GitHubBlobContentReaderTest
           s"http://localhost:$port/git/blobs/ddffeb761e5158b41a3780cda22346978d2cd6bd")
         val gitHubBlobReader =
           new GitHubBlobContentReader(new AkkaHttpClient(), "fake_token")
-        whenReady(gitHubBlobReader.getBlob(uri)) { result =>
-          val str =
-            IOUtils.resourceToString("/Javanese_11.xml", StandardCharsets.UTF_8)
-          trim(XML.loadString(result)) shouldBe trim(XML.loadString(str))
+
+        whenReady(gitHubBlobReader.getBlob(uri)) {
+          assertXmlStringsAreEqual(
+            _,
+            IOUtils.resourceToString(
+              "/Javanese_11.xml",
+              StandardCharsets.UTF_8)
+          )
         }
       }
     }

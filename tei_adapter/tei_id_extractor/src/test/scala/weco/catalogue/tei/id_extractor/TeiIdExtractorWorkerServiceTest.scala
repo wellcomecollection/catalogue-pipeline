@@ -12,7 +12,11 @@ import weco.catalogue.source_model.tei.{
   TeiIdMessage
 }
 import weco.catalogue.tei.id_extractor.database.TableProvisioner
-import weco.catalogue.tei.id_extractor.fixtures.{PathIdDatabase, Wiremock}
+import weco.catalogue.tei.id_extractor.fixtures.{
+  PathIdDatabase,
+  Wiremock,
+  XmlAssertions
+}
 import weco.fixtures.TestWith
 import weco.http.client.AkkaHttpClient
 import weco.json.JsonUtil._
@@ -30,8 +34,6 @@ import java.time.Instant
 import java.time.temporal.ChronoUnit
 import scala.concurrent.duration._
 import scala.util.Try
-import scala.xml.Utility.trim
-import scala.xml.XML
 
 class TeiIdExtractorWorkerServiceTest
     extends AnyFunSpec
@@ -40,7 +42,8 @@ class TeiIdExtractorWorkerServiceTest
     with Akka
     with Eventually
     with IntegrationPatience
-    with PathIdDatabase {
+    with PathIdDatabase
+    with XmlAssertions {
 
   it(
     "receives a message, stores the file in s3 and send a message to the tei adapter with the file id") {
@@ -386,8 +389,9 @@ class TeiIdExtractorWorkerServiceTest
       s"tei_files/manuscript_15651/${Instant.parse(modifiedTime).getEpochSecond}.xml"
     val expectedS3Location = S3ObjectLocation(bucket.name, expectedKey)
     store.entries.keySet should contain(expectedS3Location)
-    trim(XML.loadString(store.entries(expectedS3Location))) shouldBe trim(
-      XML.loadString(fileContents))
+
+    assertXmlStringsAreEqual(store.entries(expectedS3Location), fileContents)
+
     expectedS3Location
   }
 }
