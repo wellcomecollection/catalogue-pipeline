@@ -150,10 +150,10 @@ class PathIdManagerTest extends AnyFunSpec with PathIdDatabase {
             updatedPathId.id)
 
           messageSender
-            .getMessages[TeiIdChangeMessage]() should contain only (TeiIdChangeMessage(
+            .getMessages[TeiIdChangeMessage]() should contain only TeiIdChangeMessage(
             id = updatedPathId.id,
             s3Location = expectedS3Location,
-            newTime))
+            newTime)
       }
 
     }
@@ -347,9 +347,9 @@ class PathIdManagerTest extends AnyFunSpec with PathIdDatabase {
           }.map(PathId(table.p)).single.apply()
           maybePathId shouldBe None
           messageSender
-            .getMessages[TeiIdDeletedMessage]() should contain only (TeiIdDeletedMessage(
+            .getMessages[TeiIdDeletedMessage]() should contain only TeiIdDeletedMessage(
             id = "manuscript_1234",
-            newTime))
+            newTime)
       }
     }
 
