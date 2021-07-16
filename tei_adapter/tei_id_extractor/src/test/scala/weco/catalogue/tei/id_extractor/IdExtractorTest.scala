@@ -34,7 +34,7 @@ class IdExtractorTest extends AnyFunSpec with Matchers with LocalResources {
     )
     triedId shouldBe a[Failure[_]]
     triedId.failed.get shouldBe a[RuntimeException]
-    triedId.failed.get.getMessage should include(path.toString)
+    triedId.failed.get.getMessage should include(path)
   }
   it("fails if tei xml has more than one xml:id property") {
 
@@ -47,7 +47,7 @@ class IdExtractorTest extends AnyFunSpec with Matchers with LocalResources {
     )
     triedId shouldBe a[Failure[_]]
     triedId.failed.get shouldBe a[RuntimeException]
-    triedId.failed.get.getMessage should include(path.toString)
+    triedId.failed.get.getMessage should include(path)
   }
   it("does not read the xml:id from anywhere else in the xml") {
 
@@ -60,6 +60,6 @@ class IdExtractorTest extends AnyFunSpec with Matchers with LocalResources {
     )
     triedId shouldBe a[Failure[_]]
     triedId.failed.get shouldBe a[RuntimeException]
-    triedId.failed.get.getMessage should include(path.toString)
+    triedId.failed.get.getMessage should include(path)
   }
 }
