@@ -5,9 +5,18 @@ import io.circe.Encoder
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import weco.akka.fixtures.Akka
-import weco.catalogue.source_model.tei.{TeiIdChangeMessage, TeiIdDeletedMessage, TeiIdMessage}
+import weco.catalogue.source_model.tei.{
+  TeiIdChangeMessage,
+  TeiIdDeletedMessage,
+  TeiIdMessage
+}
 import weco.catalogue.tei.id_extractor.database.TableProvisioner
-import weco.catalogue.tei.id_extractor.fixtures.{LocalResources, PathIdDatabase, Wiremock, XmlAssertions}
+import weco.catalogue.tei.id_extractor.fixtures.{
+  LocalResources,
+  PathIdDatabase,
+  Wiremock,
+  XmlAssertions
+}
 import weco.fixtures.TestWith
 import weco.http.client.AkkaHttpClient
 import weco.json.JsonUtil._
@@ -379,7 +388,9 @@ class TeiIdExtractorWorkerServiceTest
     val expectedS3Location = S3ObjectLocation(bucket.name, expectedKey)
     store.entries.keySet should contain(expectedS3Location)
 
-    assertXmlStringsAreEqual(store.entries(expectedS3Location), readResource(filename))
+    assertXmlStringsAreEqual(
+      store.entries(expectedS3Location),
+      readResource(filename))
 
     expectedS3Location
   }
