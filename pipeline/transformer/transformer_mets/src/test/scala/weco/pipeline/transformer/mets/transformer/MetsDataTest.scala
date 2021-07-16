@@ -321,7 +321,6 @@ class MetsDataTest
 
   it("serves the thumbnail from wellcomelibrary for PDFs") {
     val bibNumber = createBibNumber
-    val assetId = "location.pdf"
     val metsData = MetsData(
       recordIdentifier = bibNumber,
       accessConditionDz = Some("CC-BY-NC"),
