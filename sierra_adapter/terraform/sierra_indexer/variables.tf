@@ -14,10 +14,6 @@ variable "cluster_arn" {}
 variable "dlq_alarm_arn" {}
 variable "lambda_error_alarm_arn" {}
 
-variable "aws_region" {
-  default = "eu-west-1"
-}
-
 variable "subnets" {
   type = list(string)
 }

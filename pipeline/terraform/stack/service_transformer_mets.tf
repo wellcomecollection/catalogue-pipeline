@@ -1,8 +1,7 @@
 module "mets_transformer_queue" {
-  source          = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
-  queue_name      = "${local.namespace_hyphen}_mets_transformer"
+  source          = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
+  queue_name      = "${local.namespace}_mets_transformer"
   topic_arns      = local.mets_adapter_topic_arns
-  aws_region      = var.aws_region
   alarm_topic_arn = var.dlq_alarm_arn
 
   # The default visibility timeout is 30 seconds, and occasionally we see
@@ -70,7 +69,7 @@ module "mets_transformer" {
 module "mets_transformer_output_topic" {
   source = "github.com/wellcomecollection/terraform-aws-sns-topic?ref=v1.0.1"
 
-  name = "${local.namespace_hyphen}_mets_transformer_output"
+  name = "${local.namespace}_mets_transformer_output"
 }
 
 resource "aws_iam_role_policy" "allow_mets_transformer_sns_publish" {
@@ -79,7 +78,7 @@ resource "aws_iam_role_policy" "allow_mets_transformer_sns_publish" {
 }
 
 module "mets_transformer_scaling_alarm" {
-  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.1.3"
+  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.2.1"
   queue_name = module.mets_transformer_queue.name
 
   queue_high_actions = [module.mets_transformer.scale_up_arn]

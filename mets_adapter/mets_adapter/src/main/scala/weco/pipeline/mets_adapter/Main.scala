@@ -31,7 +31,7 @@ object Main extends WellcomeTypesafeApp {
       AkkaBuilder.buildActorSystem()
 
     implicit val dynamoClilent: DynamoDbClient =
-      DynamoBuilder.buildDynamoClient(config)
+      DynamoBuilder.buildDynamoClient
 
     val client = new AkkaHttpClient() with HttpGet with HttpPost {
       override val baseUri: Uri = Uri(config.requireString("bags.api.url"))

@@ -1,8 +1,7 @@
 module "tei_id_extractor_queue" {
-  source                     = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
+  source                     = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
   queue_name                 = "tei-id-extractor"
   topic_arns                 = [module.tei_updater_lambda.topic_arn]
-  aws_region                 = local.aws_region
   alarm_topic_arn            = local.dlq_alarm_arn
   visibility_timeout_seconds = local.rds_lock_timeout_seconds + 30
 }
@@ -92,7 +91,7 @@ resource "aws_iam_role_policy" "tei_id_extractor_put_policy" {
 }
 
 module "tei_id_extractor_scaling_alarm" {
-  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.1.2"
+  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.2.1"
   queue_name = module.tei_id_extractor_queue.name
 
   queue_high_actions = [

@@ -20,7 +20,7 @@ object Main extends WellcomeTypesafeApp {
     implicit val actorSystem: ActorSystem =
       AkkaBuilder.buildActorSystem()
     implicit val dynamoClilent: DynamoDbClient =
-      DynamoBuilder.buildDynamoClient(config)
+      DynamoBuilder.buildDynamoClient
     new TeiAdapterWorkerService(
       messageStream = SQSBuilder.buildSQSStream(config),
       messageSender =

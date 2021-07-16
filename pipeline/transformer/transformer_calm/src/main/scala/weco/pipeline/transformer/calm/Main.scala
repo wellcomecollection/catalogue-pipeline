@@ -4,28 +4,27 @@ import akka.actor.ActorSystem
 import com.amazonaws.services.s3.AmazonS3
 import com.typesafe.config.Config
 import weco.catalogue.internal_model.index.WorksIndexConfig
+import weco.catalogue.internal_model.work.Work
+import weco.catalogue.internal_model.work.WorkState.Source
+import weco.catalogue.source_model.calm.CalmRecord
+import weco.elasticsearch.typesafe.ElasticBuilder
 import weco.json.JsonUtil._
 import weco.messaging.sns.NotificationMessage
 import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
-import weco.catalogue.internal_model.work.WorkState.Source
-import weco.elasticsearch.typesafe.ElasticBuilder
-import weco.pipeline_storage.typesafe.ElasticSourceRetrieverBuilder
-import weco.storage.store.s3.S3TypedStore
-import weco.storage.typesafe.S3Builder
-import weco.typesafe.WellcomeTypesafeApp
-import weco.typesafe.config.builders.{AWSClientConfigBuilder, AkkaBuilder}
-import weco.catalogue.internal_model.work.Work
-import weco.catalogue.source_model.calm.CalmRecord
 import weco.pipeline.transformer.calm.services.CalmTransformerWorker
 import weco.pipeline_storage.typesafe.{
   ElasticIndexerBuilder,
   ElasticSourceRetrieverBuilder,
   PipelineStorageStreamBuilder
 }
+import weco.storage.store.s3.S3TypedStore
+import weco.storage.typesafe.S3Builder
+import weco.typesafe.WellcomeTypesafeApp
+import weco.typesafe.config.builders.AkkaBuilder
 
 import scala.concurrent.ExecutionContext
 
-object Main extends WellcomeTypesafeApp with AWSClientConfigBuilder {
+object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
     implicit val actorSystem: ActorSystem =
       AkkaBuilder.buildActorSystem()
@@ -48,7 +47,7 @@ object Main extends WellcomeTypesafeApp with AWSClientConfigBuilder {
             subject = "Sent from the CALM transformer")
       )(config)
 
-    implicit val s3Client: AmazonS3 = S3Builder.buildS3Client(config)
+    implicit val s3Client: AmazonS3 = S3Builder.buildS3Client
 
     new CalmTransformerWorker(
       pipelineStream = pipelineStream,

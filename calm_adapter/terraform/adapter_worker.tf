@@ -1,8 +1,7 @@
 module "calm_windows_queue" {
-  source                     = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
+  source                     = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
   queue_name                 = "calm-windows"
   topic_arns                 = [aws_sns_topic.calm_windows_topic.arn]
-  aws_region                 = local.aws_region
   alarm_topic_arn            = local.dlq_alarm_arn
   visibility_timeout_seconds = 10800
 }
@@ -72,7 +71,7 @@ data "aws_iam_policy_document" "allow_cloudwatch_push_metrics" {
 }
 
 module "adapter_scaling_alarm" {
-  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.1.2"
+  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.2.1"
   queue_name = module.calm_windows_queue.name
 
   queue_high_actions = [

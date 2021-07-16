@@ -2,7 +2,6 @@ package weco.catalogue.tei.id_extractor
 
 import com.github.tomakehurst.wiremock.client.WireMock
 import io.circe.Encoder
-import org.apache.commons.io.IOUtils
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import weco.akka.fixtures.Akka
@@ -12,7 +11,12 @@ import weco.catalogue.source_model.tei.{
   TeiIdMessage
 }
 import weco.catalogue.tei.id_extractor.database.TableProvisioner
-import weco.catalogue.tei.id_extractor.fixtures.{PathIdDatabase, Wiremock}
+import weco.catalogue.tei.id_extractor.fixtures.{
+  LocalResources,
+  PathIdDatabase,
+  Wiremock,
+  XmlAssertions
+}
 import weco.fixtures.TestWith
 import weco.http.client.AkkaHttpClient
 import weco.json.JsonUtil._
@@ -25,13 +29,10 @@ import weco.storage.fixtures.S3Fixtures.Bucket
 import weco.storage.s3.S3ObjectLocation
 import weco.storage.store.memory.MemoryStore
 
-import java.nio.charset.StandardCharsets
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import scala.concurrent.duration._
 import scala.util.Try
-import scala.xml.Utility.trim
-import scala.xml.XML
 
 class TeiIdExtractorWorkerServiceTest
     extends AnyFunSpec
@@ -40,7 +41,9 @@ class TeiIdExtractorWorkerServiceTest
     with Akka
     with Eventually
     with IntegrationPatience
-    with PathIdDatabase {
+    with PathIdDatabase
+    with LocalResources
+    with XmlAssertions {
 
   it(
     "receives a message, stores the file in s3 and send a message to the tei adapter with the file id") {
@@ -64,14 +67,13 @@ class TeiIdExtractorWorkerServiceTest
             store,
             bucket,
             modifiedTime,
-            IOUtils
-              .resourceToString("/WMS_Arabic_1.xml", StandardCharsets.UTF_8))
+            filename = "/WMS_Arabic_1.xml")
 
           messageSender
-            .getMessages[TeiIdChangeMessage]() should contain only (TeiIdChangeMessage(
+            .getMessages[TeiIdChangeMessage]() should contain only TeiIdChangeMessage(
             id = "manuscript_15651",
             s3Location = expectedS3Location,
-            Instant.parse(modifiedTime)))
+            Instant.parse(modifiedTime))
 
         }
     }
@@ -135,7 +137,7 @@ class TeiIdExtractorWorkerServiceTest
           store.entries.keySet shouldNot contain(
             S3ObjectLocation(bucket.name, newKeyKey))
           messageSender
-            .getMessages[TeiIdMessage]() should contain only (changeMessage)
+            .getMessages[TeiIdMessage]() should contain only changeMessage
         }
 
     }
@@ -249,14 +251,13 @@ class TeiIdExtractorWorkerServiceTest
             store,
             bucket,
             modifiedTime,
-            IOUtils
-              .resourceToString("/WMS_Arabic_1.xml", StandardCharsets.UTF_8))
+            filename = "/WMS_Arabic_1.xml")
 
           messageSender
-            .getMessages[TeiIdChangeMessage]() should contain only (TeiIdChangeMessage(
+            .getMessages[TeiIdChangeMessage]() should contain only TeiIdChangeMessage(
             id = "manuscript_15651",
             s3Location = expectedS3Location,
-            Instant.parse(modifiedTime)))
+            Instant.parse(modifiedTime))
 
         }
     }
@@ -292,8 +293,8 @@ class TeiIdExtractorWorkerServiceTest
             store,
             bucket,
             movedTime,
-            IOUtils
-              .resourceToString("/WMS_Arabic_1.xml", StandardCharsets.UTF_8))
+            filename = "/WMS_Arabic_1.xml")
+
           val fileCreatedMessage = TeiIdChangeMessage(
             id = "manuscript_15651",
             s3Location = expectedS3Location,
@@ -373,7 +374,7 @@ class TeiIdExtractorWorkerServiceTest
         store,
         bucket,
         modifiedTime,
-        IOUtils.resourceToString("/WMS_Arabic_1.xml", StandardCharsets.UTF_8))
+        filename = "/WMS_Arabic_1.xml")
     }
     (modifiedTime, expectedS3Location)
   }
@@ -381,13 +382,16 @@ class TeiIdExtractorWorkerServiceTest
   private def checkFileIsStored(store: MemoryStore[S3ObjectLocation, String],
                                 bucket: Bucket,
                                 modifiedTime: String,
-                                fileContents: String) = {
+                                filename: String) = {
     val expectedKey =
       s"tei_files/manuscript_15651/${Instant.parse(modifiedTime).getEpochSecond}.xml"
     val expectedS3Location = S3ObjectLocation(bucket.name, expectedKey)
     store.entries.keySet should contain(expectedS3Location)
-    trim(XML.loadString(store.entries(expectedS3Location))) shouldBe trim(
-      XML.loadString(fileContents))
+
+    assertXmlStringsAreEqual(
+      store.entries(expectedS3Location),
+      readResource(filename))
+
     expectedS3Location
   }
 }

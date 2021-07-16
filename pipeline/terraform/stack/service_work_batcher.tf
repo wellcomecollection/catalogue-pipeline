@@ -3,11 +3,10 @@ locals {
 }
 
 module "batcher_queue" {
-  source                     = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
-  queue_name                 = "${local.namespace_hyphen}_batcher"
+  source                     = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
+  queue_name                 = "${local.namespace}_batcher"
   topic_arns                 = [module.router_path_output_topic.arn]
   visibility_timeout_seconds = (local.wait_minutes + 5) * 60
-  aws_region                 = var.aws_region
   alarm_topic_arn            = var.dlq_alarm_arn
 }
 
@@ -68,12 +67,12 @@ module "batcher" {
 module "batcher_output_topic" {
   source = "../modules/topic"
 
-  name       = "${local.namespace_hyphen}_batcher_output"
+  name       = "${local.namespace}_batcher_output"
   role_names = [module.batcher.task_role_name]
 }
 
 module "batcher_scaling_alarm" {
-  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.1.3"
+  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.2.1"
   queue_name = module.batcher_queue.name
 
   queue_high_actions = [module.batcher.scale_up_arn]

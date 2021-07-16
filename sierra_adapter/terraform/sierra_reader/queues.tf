@@ -1,5 +1,5 @@
 module "windows_queue" {
-  source = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
+  source = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
 
   queue_name = "${var.namespace}-sierra_${var.resource_type}_windows"
   topic_arns = var.windows_topic_arns
@@ -18,12 +18,10 @@ module "windows_queue" {
   max_receive_count = 12
 
   alarm_topic_arn = var.dlq_alarm_arn
-
-  aws_region = var.aws_region
 }
 
 module "scaling_alarm" {
-  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.1.2"
+  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.2.1"
   queue_name = module.windows_queue.name
 
   queue_high_actions = [module.sierra_reader_service.scale_up_arn]

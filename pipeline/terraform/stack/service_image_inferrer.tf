@@ -20,10 +20,9 @@ locals {
 }
 
 module "image_inferrer_queue" {
-  source                     = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
-  queue_name                 = "${local.namespace_hyphen}_image_inferrer"
+  source                     = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
+  queue_name                 = "${local.namespace}_image_inferrer"
   topic_arns                 = [module.merger_images_topic.arn]
-  aws_region                 = var.aws_region
   alarm_topic_arn            = var.dlq_alarm_arn
   visibility_timeout_seconds = local.queue_visibility_timeout
 }
@@ -198,12 +197,12 @@ data "aws_iam_policy_document" "allow_inferrer_data_access" {
 module "image_inferrer_topic" {
   source = "../modules/topic"
 
-  name       = "${local.namespace_hyphen}_image_inferrer"
+  name       = "${local.namespace}_image_inferrer"
   role_names = [module.image_inferrer.task_role_name]
 }
 
 module "image_inferrer_scaling_alarm" {
-  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.1.3"
+  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.2.1"
   queue_name = module.image_inferrer_queue.name
 
   queue_high_actions = [module.image_inferrer.scale_up_arn]

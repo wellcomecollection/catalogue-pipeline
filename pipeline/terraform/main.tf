@@ -41,9 +41,8 @@ module "catalogue_pipeline_2021-07-06" {
     }
   }
 
-  aws_region = local.aws_region
-  vpc_id     = local.vpc_id
-  subnets    = local.private_subnets
+  vpc_id  = local.vpc_id
+  subnets = local.private_subnets
 
   dlq_alarm_arn = local.dlq_alarm_arn
 
@@ -128,9 +127,8 @@ module "catalogue_pipeline_2021-07-13" {
     }
   }
 
-  aws_region = local.aws_region
-  vpc_id     = local.vpc_id
-  subnets    = local.private_subnets
+  vpc_id  = local.vpc_id
+  subnets = local.private_subnets
 
   dlq_alarm_arn = local.dlq_alarm_arn
 

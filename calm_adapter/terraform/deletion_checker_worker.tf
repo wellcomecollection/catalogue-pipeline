@@ -1,8 +1,7 @@
 module "calm_deletion_checker_queue" {
-  source                     = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
+  source                     = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
   queue_name                 = "calm-deletion-checker-input"
   topic_arns                 = [local.calm_deletion_checker_topic_arn]
-  aws_region                 = local.aws_region
   alarm_topic_arn            = local.dlq_alarm_arn
   visibility_timeout_seconds = 30 * 60
 }
@@ -65,7 +64,7 @@ resource "aws_iam_role_policy" "read_from_deletion_checker_queue" {
 
 
 module "deletion_checker_scaling_alarm" {
-  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.1.2"
+  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.2.1"
   queue_name = module.calm_deletion_checker_queue.name
 
   queue_high_actions = [

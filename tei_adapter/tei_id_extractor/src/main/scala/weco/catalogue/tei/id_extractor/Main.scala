@@ -23,9 +23,12 @@ import scala.concurrent.ExecutionContext
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config =>
     implicit val ec: ExecutionContext = AkkaBuilder.buildExecutionContext()
+
     implicit val actorSystem: ActorSystem =
       AkkaBuilder.buildActorSystem()
-    implicit val s3Client: AmazonS3 = S3Builder.buildS3Client(config)
+
+    implicit val s3Client: AmazonS3 = S3Builder.buildS3Client
+
     val rdsConfig = RDSClientBuilder.buildRDSClientConfig(config)
     val tableConfig = PathIdTableBuilder.buildTableConfig(config)
     val table = new PathIdTable(tableConfig)
@@ -33,6 +36,7 @@ object Main extends WellcomeTypesafeApp {
     val messageSender =
       SNSBuilder.buildSNSMessageSender(config, subject = "TEI id extractor")
     val store = S3TypedStore[String]
+
     new TeiIdExtractorWorkerService(
       messageStream = SQSBuilder.buildSQSStream(config),
       gitHubBlobReader = new GitHubBlobContentReader(

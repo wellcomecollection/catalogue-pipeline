@@ -3,14 +3,13 @@ locals {
 }
 
 module "matcher_input_queue" {
-  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
-  queue_name = "${local.namespace_hyphen}_matcher_input"
+  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
+  queue_name = "${local.namespace}_matcher_input"
 
   topic_arns = [
     module.id_minter_topic.arn
   ]
 
-  aws_region      = var.aws_region
   alarm_topic_arn = var.dlq_alarm_arn
 
   # The records in the locktable expire after local.lock_timeout
@@ -108,12 +107,12 @@ resource "aws_iam_role_policy" "matcher_lock_readwrite" {
 module "matcher_topic" {
   source = "../modules/topic"
 
-  name       = "${local.namespace_hyphen}_matcher"
+  name       = "${local.namespace}_matcher"
   role_names = [module.matcher.task_role_name]
 }
 
 module "matcher_scaling_alarm" {
-  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.1.3"
+  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.2.1"
   queue_name = module.matcher_input_queue.name
 
   queue_high_actions = [module.matcher.scale_up_arn]

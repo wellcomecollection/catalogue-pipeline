@@ -1,8 +1,7 @@
 module "relation_embedder_queue" {
-  source          = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
-  queue_name      = "${local.namespace_hyphen}_relation_embedder"
+  source          = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
+  queue_name      = "${local.namespace}_relation_embedder"
   topic_arns      = [module.batcher_output_topic.arn]
-  aws_region      = var.aws_region
   alarm_topic_arn = var.dlq_alarm_arn
 
   # We know that 10 minutes is too short; some big archives can't be
@@ -72,12 +71,12 @@ module "relation_embedder" {
 module "relation_embedder_output_topic" {
   source = "../modules/topic"
 
-  name       = "${local.namespace_hyphen}_relation_embedder_output"
+  name       = "${local.namespace}_relation_embedder_output"
   role_names = [module.relation_embedder.task_role_name]
 }
 
 module "relation_embedder_scaling_alarm" {
-  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.1.3"
+  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.2.1"
   queue_name = module.relation_embedder_queue.name
 
   queue_high_actions = [module.relation_embedder.scale_up_arn]

@@ -1,6 +1,6 @@
 module "id_minter_queue" {
-  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
-  queue_name = "${local.namespace_hyphen}_id_minter"
+  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
+  queue_name = "${local.namespace}_id_minter"
   topic_arns = [
     module.calm_transformer_output_topic.arn,
     module.mets_transformer_output_topic.arn,
@@ -8,7 +8,6 @@ module "id_minter_queue" {
     module.sierra_transformer_output_topic.arn,
     module.tei_transformer_output_topic.arn,
   ]
-  aws_region                 = var.aws_region
   alarm_topic_arn            = var.dlq_alarm_arn
   visibility_timeout_seconds = 120
 }
@@ -83,12 +82,12 @@ module "id_minter" {
 module "id_minter_topic" {
   source = "../modules/topic"
 
-  name       = "${local.namespace_hyphen}_id_minter_output"
+  name       = "${local.namespace}_id_minter_output"
   role_names = [module.id_minter.task_role_name]
 }
 
 module "id_minter_scaling_alarm" {
-  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.1.3"
+  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.2.1"
   queue_name = module.id_minter_queue.name
 
   queue_high_actions = [module.id_minter.scale_up_arn]
