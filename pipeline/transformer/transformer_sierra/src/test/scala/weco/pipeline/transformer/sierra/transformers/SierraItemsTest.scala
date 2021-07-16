@@ -371,9 +371,7 @@ class SierraItemsTest
     )
 
     val results =
-      getTransformedItems(
-        bibData = bibData,
-        itemDataEntries = Seq(itemData))
+      getTransformedItems(bibData = bibData, itemDataEntries = Seq(itemData))
 
     results.head.locations should be(
       List(
@@ -408,7 +406,8 @@ class SierraItemsTest
           location = Some(SierraSourceLocation("bwith", "bound in above"))
         ),
         createSierraItemDataWith(
-          location = Some(SierraSourceLocation("sicon", "Closed stores Iconographic"))
+          location =
+            Some(SierraSourceLocation("sicon", "Closed stores Iconographic"))
         ),
         createSierraItemDataWith(
           location = Some(SierraSourceLocation("cwith", "contained in above"))
@@ -433,7 +432,8 @@ class SierraItemsTest
 
     it(
       "adds a location to 'bound/contained in above' if the other locations are all closed") {
-      val itemDataEntries = Seq(createSierraItemDataWith(
+      val itemDataEntries = Seq(
+        createSierraItemDataWith(
           location = Some(SierraSourceLocation("bwith", "bound in above"))
         ),
         createSierraItemDataWith(
@@ -463,7 +463,8 @@ class SierraItemsTest
 
     it(
       "skips adding a location to 'bound/contained in above' if the other locations are ambiguous") {
-      val itemDataEntries = Seq(createSierraItemDataWith(
+      val itemDataEntries = Seq(
+        createSierraItemDataWith(
           location = Some(SierraSourceLocation("bwith", "bound in above"))
         ),
         createSierraItemDataWith(
@@ -488,10 +489,10 @@ class SierraItemsTest
 
   it("sorts items by sierra-identifier") {
     val itemData = Seq(
-      createSierraItemDataWith(id=SierraItemNumber("0000002")),
-      createSierraItemDataWith(id=SierraItemNumber("0000001")),
-      createSierraItemDataWith(id=SierraItemNumber("0000004")),
-      createSierraItemDataWith(id=SierraItemNumber("0000003")),
+      createSierraItemDataWith(id = SierraItemNumber("0000002")),
+      createSierraItemDataWith(id = SierraItemNumber("0000001")),
+      createSierraItemDataWith(id = SierraItemNumber("0000004")),
+      createSierraItemDataWith(id = SierraItemNumber("0000003")),
     )
     getTransformedItems(itemDataEntries = itemData)
       .map(_.id.asInstanceOf[IdState.Identifiable].otherIdentifiers.head.value) shouldBe
@@ -503,13 +504,12 @@ class SierraItemsTest
       )
   }
 
-  private def getTransformedItems(
-    bibData: SierraBibData = createSierraBibData,
-    itemDataEntries: Seq[SierraItemData] = Seq())
+  private def getTransformedItems(bibData: SierraBibData = createSierraBibData,
+                                  itemDataEntries: Seq[SierraItemData] = Seq())
     : List[Item[IdState.Unminted]] =
     SierraItems(
-      bibId = createSierraBibNumber, 
-      bibData = bibData, 
+      bibId = createSierraBibNumber,
+      bibData = bibData,
       itemDataEntries = itemDataEntries
     )
 }
