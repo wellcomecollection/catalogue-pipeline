@@ -27,7 +27,8 @@ object ImageUtils {
     )
 
   private final val thumbnailDim = "200"
-  private final val thumbnailPathSuffix = s"full/!$thumbnailDim,$thumbnailDim/0/default.jpg"
+  private final val thumbnailPathSuffix =
+    s"full/!$thumbnailDim,$thumbnailDim/0/default.jpg"
 
   // The /thumbs URL is routed to DLCS which handles only images
   // other asset types are routed to the iiif-builder service at /thumb
@@ -40,7 +41,8 @@ object ImageUtils {
   ): Option[String] =
     validThumbnailFile.mimeType match {
       case Some(mimeType) if mimeType.startsWith("image/") =>
-        Some(s"${imagesThumbBaseUrl}/${validThumbnailFile.location}/${thumbnailPathSuffix}")
+        Some(
+          s"${imagesThumbBaseUrl}/${validThumbnailFile.location}/${thumbnailPathSuffix}")
       case _ =>
         Some(s"${notImagesThumbBaseUrl}/thumb/${bnumber}")
     }
