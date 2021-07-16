@@ -61,10 +61,10 @@ class TeiIdExtractorWorkerServiceTest
             filename = "/WMS_Arabic_1.xml")
 
           messageSender
-            .getMessages[TeiIdChangeMessage]() should contain only (TeiIdChangeMessage(
+            .getMessages[TeiIdChangeMessage]() should contain only TeiIdChangeMessage(
             id = "manuscript_15651",
             s3Location = expectedS3Location,
-            Instant.parse(modifiedTime)))
+            Instant.parse(modifiedTime))
 
         }
     }
@@ -128,7 +128,7 @@ class TeiIdExtractorWorkerServiceTest
           store.entries.keySet shouldNot contain(
             S3ObjectLocation(bucket.name, newKeyKey))
           messageSender
-            .getMessages[TeiIdMessage]() should contain only (changeMessage)
+            .getMessages[TeiIdMessage]() should contain only changeMessage
         }
 
     }
@@ -245,10 +245,10 @@ class TeiIdExtractorWorkerServiceTest
             filename = "/WMS_Arabic_1.xml")
 
           messageSender
-            .getMessages[TeiIdChangeMessage]() should contain only (TeiIdChangeMessage(
+            .getMessages[TeiIdChangeMessage]() should contain only TeiIdChangeMessage(
             id = "manuscript_15651",
             s3Location = expectedS3Location,
-            Instant.parse(modifiedTime)))
+            Instant.parse(modifiedTime))
 
         }
     }
