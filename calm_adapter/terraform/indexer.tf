@@ -1,5 +1,5 @@
 module "calm_indexer_queue" {
-  source = "github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
+  source = "github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
 
   queue_name = "calm-indexer-input"
   topic_arns = [
@@ -7,7 +7,6 @@ module "calm_indexer_queue" {
     local.calm_reporting_topic_arn
   ]
 
-  aws_region      = local.aws_region
   alarm_topic_arn = local.dlq_alarm_arn
 }
 
@@ -63,7 +62,7 @@ resource "aws_iam_role_policy" "indexer_read_from_vhs" {
 }
 
 module "indexer_scaling" {
-  source     = "github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.1.2"
+  source     = "github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.2.1"
   queue_name = module.calm_indexer_queue.name
 
   queue_high_actions = [

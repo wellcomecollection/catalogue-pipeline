@@ -22,8 +22,6 @@ variable "shared_logging_secrets" {
 
 variable "vpc_id" {}
 
-variable "aws_region" {}
-
 variable "dlq_alarm_arn" {}
 
 variable "rds_cluster_id" {

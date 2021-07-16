@@ -22,10 +22,6 @@ variable "container_image" {}
 
 variable "dlq_alarm_arn" {}
 
-variable "aws_region" {
-  default = "eu-west-1"
-}
-
 variable "subnets" {
   type = list(string)
 }

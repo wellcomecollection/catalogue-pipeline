@@ -1,9 +1,7 @@
 module "merger_queue" {
-  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
-  queue_name = "${local.namespace_hyphen}_merger"
-  topic_arns = [
-  module.matcher_topic.arn]
-  aws_region      = var.aws_region
+  source          = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
+  queue_name      = "${local.namespace}_merger"
+  topic_arns      = [module.matcher_topic.arn]
   alarm_topic_arn = var.dlq_alarm_arn
 
   # This has to be longer than the `flush_interval_seconds` in the merger.
@@ -69,19 +67,19 @@ module "merger" {
 module "merger_works_topic" {
   source = "../modules/topic"
 
-  name       = "${local.namespace_hyphen}_merger_works"
+  name       = "${local.namespace}_merger_works"
   role_names = [module.merger.task_role_name]
 }
 
 module "merger_images_topic" {
   source = "../modules/topic"
 
-  name       = "${local.namespace_hyphen}_merger_images"
+  name       = "${local.namespace}_merger_images"
   role_names = [module.merger.task_role_name]
 }
 
 module "merger_scaling_alarm" {
-  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.1.3"
+  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.2.1"
   queue_name = module.merger_queue.name
 
   queue_high_actions = [module.merger.scale_up_arn]

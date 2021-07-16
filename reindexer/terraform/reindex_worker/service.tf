@@ -38,7 +38,7 @@ module "service" {
 }
 
 module "reindexer_scaling" {
-  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.1.3"
+  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.2.1"
   queue_name = module.reindexer_queue.name
 
   queue_high_actions = [module.service.scale_up_arn]
