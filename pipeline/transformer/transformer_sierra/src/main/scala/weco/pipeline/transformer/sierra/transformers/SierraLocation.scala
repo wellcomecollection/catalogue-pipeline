@@ -1,10 +1,7 @@
 package weco.pipeline.transformer.sierra.transformers
 
 import weco.catalogue.internal_model.locations._
-import weco.catalogue.source_model.sierra.identifiers.{
-  SierraBibNumber,
-  SierraItemNumber
-}
+import weco.catalogue.source_model.sierra.identifiers.SierraBibNumber
 import weco.catalogue.source_model.sierra.rules.{
   SierraAccessStatus,
   SierraItemAccess,
@@ -15,7 +12,6 @@ import weco.catalogue.source_model.sierra.{SierraBibData, SierraItemData}
 trait SierraLocation {
   def getPhysicalLocation(
     bibNumber: SierraBibNumber,
-    itemNumber: SierraItemNumber,
     itemData: SierraItemData,
     bibData: SierraBibData,
     fallbackLocation: Option[(PhysicalLocationType, String)] = None)
@@ -25,7 +21,10 @@ trait SierraLocation {
 
       (locationType, label) <- {
         val parsedLocationType =
-          SierraPhysicalLocationType.fromName(itemNumber, sourceLocation.name)
+          SierraPhysicalLocationType.fromName(
+            id = itemData.id,
+            name = sourceLocation.name
+          )
 
         (parsedLocationType, fallbackLocation) match {
           case (Some(locationType), _) =>
@@ -45,7 +44,6 @@ trait SierraLocation {
 
       (accessCondition, _) = SierraItemAccess(
         bibId = bibNumber,
-        itemId = itemNumber,
         bibStatus = SierraAccessStatus.forBib(bibNumber, bibData),
         location = Some(locationType),
         itemData = itemData

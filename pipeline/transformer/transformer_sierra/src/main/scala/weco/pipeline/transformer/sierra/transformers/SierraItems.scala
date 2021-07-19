@@ -18,10 +18,7 @@ import weco.catalogue.source_model.sierra.rules.{
   SierraPhysicalLocationType
 }
 import weco.catalogue.source_model.sierra.source.SierraQueryOps
-import weco.catalogue.source_model.sierra.identifiers.{
-  SierraBibNumber,
-  SierraItemNumber
-}
+import weco.catalogue.source_model.sierra.identifiers.SierraBibNumber
 import weco.catalogue.source_model.sierra.marc.VarField
 import weco.catalogue.source_model.sierra.{SierraBibData, SierraItemData}
 import weco.pipeline.transformer.sierra.data.SierraPhysicalItemOrder
@@ -37,14 +34,14 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
     * sierra-identifier.  We want to revisit this at some point.
     * See https://github.com/wellcomecollection/platform/issues/4993
     */
-  def apply(bibId: SierraBibNumber,
-            bibData: SierraBibData,
-            itemDataMap: Map[SierraItemNumber, SierraItemData])
-    : List[Item[IdState.Identifiable]] = {
+  def apply(
+    bibId: SierraBibNumber,
+    bibData: SierraBibData,
+    itemDataEntries: Seq[SierraItemData]): List[Item[IdState.Identifiable]] = {
     val visibleItems =
-      itemDataMap
-        .filterNot {
-          case (_, itemData) => itemData.deleted || itemData.suppressed
+      itemDataEntries
+        .filterNot { itemData =>
+          itemData.deleted || itemData.suppressed
         }
 
     SierraPhysicalItemOrder(
@@ -55,7 +52,7 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
 
   private def getPhysicalItems(
     bibId: SierraBibNumber,
-    sierraItemDataMap: Map[SierraItemNumber, SierraItemData],
+    itemDataEntries: Seq[SierraItemData],
     bibData: SierraBibData): List[Item[IdState.Identifiable]] = {
 
     // Some of the Sierra items have a location like "contained in above"
@@ -68,8 +65,10 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
     // We assume that "in above" refers to another item on the same bib, so if the
     // non-above locations are unambiguous, we use them instead.
     val otherLocations =
-      sierraItemDataMap
-        .collect { case (id, itemData) => id -> itemData.location }
+      itemDataEntries
+        .map { itemData =>
+          itemData.id -> itemData.location
+        }
         .collect { case (id, Some(location)) => id -> location }
         .filterNot {
           case (_, loc) =>
@@ -85,7 +84,6 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
               case other => (other, loc.name)
             }
         }
-        .toSeq
         .distinct
 
     val fallbackLocation = otherLocations match {
@@ -93,21 +91,19 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
       case _                                => None
     }
 
-    sierraItemDataMap.values
+    itemDataEntries
       .foreach { itemData =>
         require(!itemData.deleted)
         require(!itemData.suppressed)
       }
 
-    val items = sierraItemDataMap.map {
-      case (itemId, itemData) =>
-        transformItemData(
-          bibId = bibId,
-          itemId = itemId,
-          itemData = itemData,
-          bibData = bibData,
-          fallbackLocation = fallbackLocation
-        )
+    val items = itemDataEntries.map { itemData =>
+      transformItemData(
+        bibId = bibId,
+        itemData = itemData,
+        bibData = bibData,
+        fallbackLocation = fallbackLocation
+      )
     }.toList
 
     tidyTitles(items)
@@ -119,33 +115,42 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
 
   private def transformItemData(
     bibId: SierraBibNumber,
-    itemId: SierraItemNumber,
     itemData: SierraItemData,
     bibData: SierraBibData,
     fallbackLocation: Option[(PhysicalLocationType, String)]
   ): (Item[IdState.Identifiable], HasAutomatedTitle) = {
-    debug(s"Attempting to transform $itemId")
+    debug(s"Attempting to transform ${itemData.id}")
 
     val location =
-      getPhysicalLocation(bibId, itemId, itemData, bibData, fallbackLocation)
+      getPhysicalLocation(
+        bibNumber = bibId,
+        itemData = itemData,
+        bibData = bibData,
+        fallbackLocation = fallbackLocation
+      )
 
-    val (title, hasInferredTitle) = getItemTitle(itemId, itemData)
+    val (title, hasInferredTitle) = getItemTitle(itemData)
 
     val item = Item(
       title = title,
-      note = getItemNote(bibId, itemId, itemData, bibData, location),
+      note = getItemNote(
+        bibId = bibId,
+        itemData = itemData,
+        bibData = bibData,
+        location = location
+      ),
       locations = List(location).flatten,
       id = IdState.Identifiable(
         sourceIdentifier = SourceIdentifier(
           identifierType = IdentifierType.SierraSystemNumber,
           ontologyType = "Item",
-          value = itemId.withCheckDigit
+          value = itemData.id.withCheckDigit
         ),
         otherIdentifiers = List(
           SourceIdentifier(
             identifierType = IdentifierType.SierraIdentifier,
             ontologyType = "Item",
-            value = itemId.withoutCheckDigit
+            value = itemData.id.withoutCheckDigit
           )
         )
       )
@@ -170,7 +175,6 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
     *
     */
   private def getItemTitle(
-    itemId: SierraItemNumber,
     data: SierraItemData): (Option[String], HasAutomatedTitle) = {
     val titleCandidates: List[String] =
       data.varFields
@@ -192,7 +196,7 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
 
       case multipleTitles =>
         warn(
-          s"Multiple title candidates on item $itemId: ${titleCandidates.mkString("; ")}")
+          s"Multiple title candidates on item ${data.id}: ${titleCandidates.mkString("; ")}")
         (Some(multipleTitles.head), false)
     }
   }
@@ -246,16 +250,14 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
     */
   private def getItemNote(
     bibId: SierraBibNumber,
-    itemId: SierraItemNumber,
     itemData: SierraItemData,
     bibData: SierraBibData,
     location: Option[PhysicalLocation]): Option[String] = {
     val (_, note) = SierraItemAccess(
-      bibId,
-      itemId,
-      SierraAccessStatus.forBib(bibId, bibData),
-      location.map(_.locationType),
-      itemData
+      bibId = bibId,
+      bibStatus = SierraAccessStatus.forBib(bibId, bibData),
+      location = location.map(_.locationType),
+      itemData = itemData
     )
 
     note
