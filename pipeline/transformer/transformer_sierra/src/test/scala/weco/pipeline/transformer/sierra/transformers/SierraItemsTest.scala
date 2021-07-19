@@ -60,7 +60,7 @@ class SierraItemsTest
     )
 
     val itemData = createSierraItemDataWith(
-      id=itemId
+      id = itemId
     )
 
     val transformedItem = getTransformedItems(
