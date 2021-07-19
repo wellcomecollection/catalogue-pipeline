@@ -6,8 +6,6 @@ import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.source_model.generators.SierraDataGenerators
 import weco.pipeline.transformer.tei.fixtures.TeiGenerators
 
-import scala.xml.XML
-
 class TeiDataParserTest
     extends AnyFunSpec
     with Matchers
@@ -58,11 +56,9 @@ class TeiDataParserTest
         teiXml(
           id = id,
           languages = List(
-            XML.loadString(
-              s"""
-                 |<textLang mainLang="sa" source="IANA">Sanskrit</textLang>
-                 |""".stripMargin
-            )
+            s"""
+               |<textLang mainLang="sa" source="IANA">Sanskrit</textLang>
+               |""".stripMargin
           )
         ).toString()
       ).right.get
