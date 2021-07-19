@@ -31,7 +31,7 @@ class SierraItemsTest
 
   it("creates both forms of the Sierra ID in 'identifiers'") {
     val itemData = createSierraItemData
-    val itemId = createSierraItemNumber
+    val itemId = itemData.id
 
     val sourceIdentifier1 = createSierraSystemSourceIdentifierWith(
       ontologyType = "Item",
@@ -58,7 +58,10 @@ class SierraItemsTest
       ontologyType = "Item",
       value = itemId.withCheckDigit
     )
-    val itemData = createSierraItemData
+
+    val itemData = createSierraItemDataWith(
+      id=itemId
+    )
 
     val transformedItem = getTransformedItems(
       itemDataEntries = Seq(itemData)

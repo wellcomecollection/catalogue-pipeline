@@ -31,7 +31,6 @@ class SierraLocationTest
 
   describe("Physical locations") {
     val bibId = createSierraBibNumber
-    val itemId = createSierraItemNumber
     val bibData = createSierraBibData
 
     val itemData = createSierraItemDataWith(
@@ -235,7 +234,12 @@ class SierraLocationTest
       )
 
       val location =
-        transformer.getPhysicalLocation(bibId, itemId, itemData, bibData).get
+        transformer.getPhysicalLocation(
+          bibNumber = bibId,
+          itemData = itemData,
+          bibData = bibData
+        ).get
+
       location.accessConditions shouldBe List(
         AccessCondition(
           method = AccessMethod.NotRequestable,
