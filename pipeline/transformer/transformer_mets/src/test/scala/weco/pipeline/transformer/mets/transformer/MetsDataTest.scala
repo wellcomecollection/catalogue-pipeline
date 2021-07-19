@@ -276,7 +276,7 @@ class MetsDataTest
     result.right.get.data.thumbnail shouldBe Some(
       DigitalLocation(
         url =
-          "https://dlcs.io/thumbs/wellcome/5/location.jp2/full/!200,200/0/default.jpg",
+          "https://iiif.wellcomecollection.org/thumbs/location.jp2/full/!200,200/0/default.jpg",
         locationType = LocationType.ThumbnailImage,
         license = Some(License.CCBYNC)
       )
@@ -298,7 +298,7 @@ class MetsDataTest
     result.right.get.data.thumbnail shouldBe Some(
       DigitalLocation(
         url =
-          "https://dlcs.io/thumbs/wellcome/5/title.jp2/full/!200,200/0/default.jpg",
+          "https://iiif.wellcomecollection.org/thumbs/title.jp2/full/!200,200/0/default.jpg",
         locationType = LocationType.ThumbnailImage,
         license = Some(License.CCBYNC)
       )
@@ -321,7 +321,6 @@ class MetsDataTest
 
   it("serves the thumbnail from wellcomelibrary for PDFs") {
     val bibNumber = createBibNumber
-    val assetId = "location.pdf"
     val metsData = MetsData(
       recordIdentifier = bibNumber,
       accessConditionDz = Some("CC-BY-NC"),
@@ -333,7 +332,7 @@ class MetsDataTest
     result shouldBe a[Right[_, _]]
     result.right.get.data.thumbnail shouldBe Some(
       DigitalLocation(
-        url = s"https://wellcomelibrary.org/pdfthumbs/$bibNumber/0/$assetId.jpg",
+        url = s"https://iiif.wellcomecollection.org/thumb/$bibNumber",
         locationType = LocationType.ThumbnailImage,
         license = Some(License.CCBYNC)
       )
