@@ -67,7 +67,7 @@ class TeiTransformerTest
     val timeModified = instantInLast30Days
     val id = "Wellcome_Javanese_4"
     transformer(id, TeiChangedMetadata(location, timeModified), 1).right.get.data.languages shouldBe List(
-      Language("jv", "Javanese"))
+      Language(id = "jv", label = "Javanese"))
   }
 
   it("handles delete messages") {

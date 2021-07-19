@@ -81,7 +81,7 @@ class TeiIdExtractorWorkerServiceTest
 
   it("a message for a non TEI file is ignored") {
     withWorkerService() {
-      case (QueuePair(queue, dlq), messageSender, store, bucket, repoUrl) =>
+      case (QueuePair(queue, dlq), messageSender, store, _, repoUrl) =>
         val modifiedTime = "2021-05-27T14:05:00Z"
         val message = {
           s"""
