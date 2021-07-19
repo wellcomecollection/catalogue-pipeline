@@ -27,7 +27,7 @@ object TeiLanguages {
     val nodes = (xml \\ "msDesc" \ "msContents" \ "textLang").toList
 
     val eitherLanguages = nodes.map { n =>
-      val langText = n.text
+      val label = n.text
       val mainLangId = (n \@ "mainLang").toLowerCase
       val otherLangId = (n \@ "otherLangs").toLowerCase
       val langId = (mainLangId, otherLangId) match {
@@ -44,7 +44,7 @@ object TeiLanguages {
             new RuntimeException(s"Multiple language ids in ${n.toString()}")
           )
       }
-      langId.map(id => Language(id, langText))
+      langId.map(id => Language(id = id, label = label))
     }
     eitherLanguages.sequence
   }

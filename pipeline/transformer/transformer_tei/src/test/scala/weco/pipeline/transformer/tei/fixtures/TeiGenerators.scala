@@ -1,10 +1,11 @@
 package weco.pipeline.transformer.tei.fixtures
 
 import org.scalatest.Suite
+import weco.fixtures.RandomGenerators
 
 import scala.xml.{Elem, NodeSeq}
 
-trait TeiGenerators { this: Suite =>
+trait TeiGenerators extends RandomGenerators { this: Suite =>
   def sierraIdentifiers(bnumber: String) =
     <altIdentifier type="Sierra">
         <idno>{bnumber} </idno>
@@ -28,7 +29,7 @@ trait TeiGenerators { this: Suite =>
     </msItem>
 
   def teiXml(
-    id: String,
+    id: String = randomAlphanumeric(),
     title: Elem = titleElem("test title"),
     identifiers: Option[Elem] = None,
     summary: Option[Elem] = None,

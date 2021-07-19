@@ -1,72 +1,82 @@
 package weco.pipeline.transformer.tei.transformers
 
+import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.languages.Language
-import weco.pipeline.transformer.tei.TeiXml
 import weco.pipeline.transformer.tei.fixtures.TeiGenerators
 
-class TeiLanguagesTest extends AnyFunSpec with Matchers with TeiGenerators {
-  val id = "manuscript_15651"
+import scala.xml.{Elem, XML}
 
+class TeiLanguagesTest extends AnyFunSpec with Matchers with EitherValues with TeiGenerators {
   it("gets a single language from the TEI") {
-    val languageLabel = "Sanskrit"
-    val languageId = "sa"
-    val result = TeiXml(
-      id,
-      teiXml(id = id, languages = List(mainLanguage(languageId, languageLabel)))
-        .toString()
-    ).flatMap(TeiLanguages(_))
-    result shouldBe a[Right[_, _]]
-    result.right.get shouldBe List(Language(languageId, languageLabel))
+    val xml: Elem =
+      teiXml(
+        languages = List(
+          XML.loadString(
+            s"""
+               |<textLang mainLang="sa" source="IANA">Sanskrit</textLang>
+               |""".stripMargin
+          )
+        )
+      )
+
+    val languages = TeiLanguages(xml)
+
+    languages shouldBe a[Right[_, _]]
+    languages.value shouldBe List(Language(id = "sa", label = "Sanskrit"))
   }
 
   it("gets multiple languages from tei") {
-    val languageLabel1 = "Sanskrit"
-    val languageId1 = "sa"
-    val languageLabel2 = "Latin"
-    val languageId2 = "la"
-    val result = TeiXml(
-      id,
+    val xml: Elem =
       teiXml(
-        id = id,
         languages = List(
-          mainLanguage(languageId1, languageLabel1),
-          otherLanguage(languageId2, languageLabel2)
+          XML.loadString(
+            s"""
+               |<textLang mainLang="sa" source="IANA">Sanskrit</textLang>
+               |""".stripMargin
+          ),
+          XML.loadString(
+            s"""
+               |<textLang otherLangs="la" source="IANA">Latin</textLang>
+               |""".stripMargin
+          )
         )
-      ).toString()
-    ).flatMap(TeiLanguages(_))
-    result shouldBe a[Right[_, _]]
-    result.right.get shouldBe List(
-      Language(languageId1, languageLabel1),
-      Language(languageId2, languageLabel2)
+      )
+
+    val languages = TeiLanguages(xml)
+
+    languages shouldBe a[Right[_, _]]
+    languages.value shouldBe List(
+      Language(id = "sa", label = "Sanskrit"),
+      Language(id = "la", label = "Latin")
     )
   }
 
   it("fails if it cannot parse the language id") {
-    val languageLabel = "Sanskrit"
-    val result = TeiXml(
-      id,
+    val xml =
       teiXml(
-        id = id,
-        languages = List(<textLang>{
-          languageLabel
-          }</textLang>)).toString()).flatMap(TeiLanguages(_))
+        languages = List(
+          XML.loadString("""<textLang>Sanskrit</textLang>""")
+        )
+      )
+
+    val result = TeiLanguages(xml)
+
     result shouldBe a[Left[_, _]]
     result.left.get.getMessage should include("language id")
   }
 
   it("fails if it there is more than one language id attribute") {
-    val languageLabel = "Sanskrit"
-    val result = TeiXml(
-      id,
+    val xml =
       teiXml(
-        id = id,
-        languages = List(<textLang mainLang="id1" otherLangs="id2">{
-          languageLabel
-          }</textLang>)
-      ).toString()
-    ).flatMap(TeiLanguages(_))
+        languages = List(
+          XML.loadString("""<textLang mainLang="id1" otherLangs="id2">Sanskrit</textLang>""")
+        )
+      )
+
+    val result = TeiLanguages(xml)
+
     result shouldBe a[Left[_, _]]
     result.left.get.getMessage should include("language id")
   }
