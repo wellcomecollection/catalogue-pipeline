@@ -22,25 +22,27 @@ class ElasticWorkLinksRetrieverTest
     with WorkGenerators
     with WorkLinksGenerators {
 
-  it("can retrieve a deleted work"){
+  it("can retrieve a deleted work") {
     val work: Work[WorkState.Identified] = identifiedWork().deleted()
-    withLocalElasticsearchIndex(config = WorksIndexConfig.identified) { implicit index =>
-      withElasticIndexer(index) { indexer: ElasticIndexer[Work[WorkState.Identified]] =>
-        whenReady(indexer(Seq(work))) { _ =>
-          implicit val id: IndexId[Work[WorkState.Identified]] =
-            (w: Work[WorkState.Identified]) => w.id
-          assertElasticsearchEventuallyHas(index, work)
+    withLocalElasticsearchIndex(config = WorksIndexConfig.identified) {
+      implicit index =>
+        withElasticIndexer(index) {
+          indexer: ElasticIndexer[Work[WorkState.Identified]] =>
+            whenReady(indexer(Seq(work))) { _ =>
+              implicit val id: IndexId[Work[WorkState.Identified]] =
+                (w: Work[WorkState.Identified]) => w.id
+              assertElasticsearchEventuallyHas(index, work)
 
-          withRetriever { retriever: Retriever[WorkLinks] =>
-            whenReady(retriever(id.indexId(work))) { result =>
-
-            result shouldBe WorkLinks(work)
-          } }
+              withRetriever { retriever: Retriever[WorkLinks] =>
+                whenReady(retriever(id.indexId(work))) { result =>
+                  result shouldBe WorkLinks(work)
+                }
+              }
+            }
         }
-      }}
+    }
 
   }
-
 
   override def withContext[R](links: Seq[WorkLinks])(
     testWith: TestWith[Index, R]): R =

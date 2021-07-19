@@ -36,7 +36,8 @@ class ElasticWorkLinksRetriever(val client: ElasticClient, val index: Index)(
         "deletedReason.info",
         "deletedReason.type",
         "version",
-        "type")
+        "type"
+      )
 
   override def parseGetResponse(response: GetResponse): Try[WorkLinks] =
     response.safeTo[Work[Identified]].map { work =>
