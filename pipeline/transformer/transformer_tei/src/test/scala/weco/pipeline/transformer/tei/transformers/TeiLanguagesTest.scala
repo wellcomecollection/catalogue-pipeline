@@ -8,7 +8,11 @@ import weco.pipeline.transformer.tei.fixtures.TeiGenerators
 
 import scala.xml.Elem
 
-class TeiLanguagesTest extends AnyFunSpec with Matchers with EitherValues with TeiGenerators {
+class TeiLanguagesTest
+    extends AnyFunSpec
+    with Matchers
+    with EitherValues
+    with TeiGenerators {
   it("gets a single language from the TEI") {
     val xml: Elem =
       teiXml(

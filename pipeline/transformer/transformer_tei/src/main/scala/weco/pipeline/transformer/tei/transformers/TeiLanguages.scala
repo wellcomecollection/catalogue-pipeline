@@ -13,16 +13,16 @@ object TeiLanguages {
     apply(teiXml.xml)
 
   /**
-   * The languages of the TEI are in `textLang` nodes under `msContents`.
-   * <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id={id}>
-   *  <teiHeader>
-   *    <fileDesc>
-   *      <sourceDesc>
-   *        <msDesc xml:lang="en" xml:id="MS_Arabic_1">
-   *          <msContents>
-   *            <textLang mainLang={id} source="IANA">{label}</textLang>
-   *
-   */
+    * The languages of the TEI are in `textLang` nodes under `msContents`.
+    * <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id={id}>
+    *  <teiHeader>
+    *    <fileDesc>
+    *      <sourceDesc>
+    *        <msDesc xml:lang="en" xml:id="MS_Arabic_1">
+    *          <msContents>
+    *            <textLang mainLang={id} source="IANA">{label}</textLang>
+    *
+    */
   def apply(xml: Elem): Result[List[Language]] = {
     val nodes = (xml \\ "msDesc" \ "msContents" \ "textLang").toList
 
