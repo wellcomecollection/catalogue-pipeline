@@ -33,6 +33,8 @@ class ElasticWorkLinksRetriever(val client: ElasticClient, val index: Index)(
         "state.sourceIdentifier.value",
         "state.sourceModifiedTime",
         "data.mergeCandidates",
+        "deletedReason.info",
+        "deletedReason.type",
         "version",
         "type"
       )

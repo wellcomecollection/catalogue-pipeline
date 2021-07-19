@@ -1,18 +1,18 @@
 package weco.pipeline.matcher.storage.elastic
 
 import com.sksamuel.elastic4s.Index
+import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.index.WorksIndexConfig
+import weco.catalogue.internal_model.work.generators.WorkGenerators
+import weco.catalogue.internal_model.work.{MergeCandidate, Work, WorkState}
 import weco.elasticsearch.model.IndexId
 import weco.fixtures.TestWith
 import weco.json.JsonUtil._
-import weco.pipeline_storage.Retriever
-import weco.catalogue.internal_model.identifiers.IdState
-import weco.catalogue.internal_model.work.generators.WorkGenerators
-import weco.catalogue.internal_model.work.{MergeCandidate, Work, WorkState}
 import weco.pipeline.matcher.generators.WorkLinksGenerators
 import weco.pipeline.matcher.models.WorkLinks
-import weco.pipeline_storage.{Retriever, RetrieverTestCases}
+import weco.pipeline_storage.elastic.ElasticIndexer
 import weco.pipeline_storage.fixtures.ElasticIndexerFixtures
+import weco.pipeline_storage.{Retriever, RetrieverTestCases}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -21,6 +21,28 @@ class ElasticWorkLinksRetrieverTest
     with ElasticIndexerFixtures
     with WorkGenerators
     with WorkLinksGenerators {
+
+  it("can retrieve a deleted work") {
+    val work: Work[WorkState.Identified] = identifiedWork().deleted()
+    withLocalElasticsearchIndex(config = WorksIndexConfig.identified) {
+      implicit index =>
+        withElasticIndexer(index) {
+          indexer: ElasticIndexer[Work[WorkState.Identified]] =>
+            whenReady(indexer(Seq(work))) { _ =>
+              implicit val id: IndexId[Work[WorkState.Identified]] =
+                (w: Work[WorkState.Identified]) => w.id
+              assertElasticsearchEventuallyHas(index, work)
+
+              withRetriever { retriever: Retriever[WorkLinks] =>
+                whenReady(retriever(id.indexId(work))) { result =>
+                  result shouldBe WorkLinks(work)
+                }
+              }
+            }
+        }
+    }
+
+  }
 
   override def withContext[R](links: Seq[WorkLinks])(
     testWith: TestWith[Index, R]): R =
