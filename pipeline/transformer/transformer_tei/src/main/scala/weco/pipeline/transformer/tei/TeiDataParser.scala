@@ -14,6 +14,7 @@ import weco.catalogue.internal_model.work.{
   WorkData
 }
 import weco.pipeline.transformer.identifiers.SourceIdentifierValidation._
+import weco.pipeline.transformer.tei.transformers.TeiLanguages
 
 import java.time.Instant
 
@@ -23,7 +24,7 @@ object TeiDataParser {
       summary <- teiXml.summary
       bNumber <- teiXml.bNumber
       title <- teiXml.title
-      languages <- teiXml.languages
+      languages <- TeiLanguages(teiXml)
     } yield TeiData(teiXml.id, title, bNumber, summary, languages)
 }
 
