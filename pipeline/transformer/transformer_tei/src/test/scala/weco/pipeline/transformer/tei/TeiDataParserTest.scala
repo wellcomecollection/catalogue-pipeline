@@ -6,6 +6,8 @@ import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.source_model.generators.SierraDataGenerators
 import weco.pipeline.transformer.tei.fixtures.TeiGenerators
 
+import scala.xml.XML
+
 class TeiDataParserTest
     extends AnyFunSpec
     with Matchers
@@ -41,20 +43,33 @@ class TeiDataParserTest
         description = None,
         languages = Nil))
   }
-  it("add the languages from a tei into the WorkData") {
-    val languageId = "sa"
-    val languageLabel = "Sanskrit"
+
+  it("add the languages from a TEI into the WorkData") {
     val expectedTeiData = TeiData(
       id = id,
       title = "test title",
       bNumber = None,
       description = None,
-      languages = List(Language(languageId, languageLabel)))
-    TeiDataParser.parse(TeiXml(
-      id,
-      teiXml(id = id, languages = List(mainLanguage(languageId, languageLabel)))
-        .toString()).right.get) shouldBe Right(expectedTeiData)
+      languages = List(Language(id = "sa", label = "Sanskrit")))
+
+    val xml =
+      TeiXml(
+        id,
+        teiXml(
+          id = id,
+          languages = List(
+            XML.loadString(
+              s"""
+                 |<textLang mainLang="sa" source="IANA">Sanskrit</textLang>
+                 |""".stripMargin
+            )
+          )
+        ).toString()
+      ).right.get
+
+    TeiDataParser.parse(xml) shouldBe Right(expectedTeiData)
   }
+
   it("strips xml from descriptions TeiData") {
     val description = "a <note>manuscript</note> about stuff"
     TeiDataParser.parse(
