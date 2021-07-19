@@ -34,7 +34,8 @@ class ElasticWorkLinksRetriever(val client: ElasticClient, val index: Index)(
         "state.sourceModifiedTime",
         "data.mergeCandidates",
         "version",
-        "type")
+        "type"
+      )
 
   override def parseGetResponse(response: GetResponse): Try[WorkLinks] =
     response.safeTo[Work[Identified]].map { work =>
