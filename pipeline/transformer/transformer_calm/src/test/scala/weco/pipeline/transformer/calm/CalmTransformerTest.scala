@@ -1,5 +1,7 @@
 package weco.pipeline.transformer.calm
 
+import org.scalatest.EitherValues
+
 import java.time.LocalDate
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
@@ -16,6 +18,7 @@ import weco.pipeline.transformer.calm.models.CalmSourceData
 class CalmTransformerTest
     extends AnyFunSpec
     with Matchers
+    with EitherValues
     with CalmRecordGenerators {
 
   val version = 3
@@ -597,5 +600,20 @@ class CalmTransformerTest
         deletedReason = SuppressedFromSource("Calm")
       )
     )
+  }
+
+  it("unpicks bad encoding in the source record") {
+    // This is based on a real record: 995b1ac1-fdaa-4e6d-91c9-056c6030f6fb
+    val record = createCalmRecordWith(
+      "Title" -> "'Correspondence re \u0093Junk\u0094'",
+      "Level" -> "Section",
+      "RefNo" -> "PPCRI/H/6/13/8",
+      "CatalogueStatus" -> "Catalogued"
+
+    )
+
+    val work = CalmTransformer(record, version).value
+
+    work.data.title shouldBe Some("'Correspondence re “Junk”'")
   }
 }
