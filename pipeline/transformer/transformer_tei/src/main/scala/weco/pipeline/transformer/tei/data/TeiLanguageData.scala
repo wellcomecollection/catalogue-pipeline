@@ -75,7 +75,7 @@ object TeiLanguageData extends Logging {
       case ("spq", "Spanish") => MarcLanguageCodeList.fromName("Spanish")
 
       // This is a weird one that might want fixing in the TEI data.
-      case ("es-ES", "Spanish Spain") => MarcLanguageCodeList.fromName("Spanish")
+      case ("es-es", "Spanish Spain") => MarcLanguageCodeList.fromName("Spanish")
 
       // Map languages where there isn't a 1:1 distinction, or where the IANA language
       // is an alternative name for one of the MARC languages.  We use the MARC code, but
