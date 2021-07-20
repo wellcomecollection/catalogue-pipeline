@@ -18,6 +18,7 @@ import weco.catalogue.internal_model.identifiers.{
   IdState,
   SourceIdentifier
 }
+import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.locations.{
   AccessCondition,
   AccessMethod,
@@ -80,6 +81,14 @@ class WorksIndexConfigTest
   implicit val arbitraryCanonicalId: Arbitrary[CanonicalId] =
     Arbitrary {
       createCanonicalId
+    }
+
+  // We have a rule that says language codes should be exactly 3 characters long
+  implicit val arbitraryLanguage: Arbitrary[Language] =
+    Arbitrary {
+      Language(
+        id = randomAlphanumeric(length = 3),
+        label = randomAlphanumeric())
     }
 
   implicit val badObjectEncoder: Encoder[BadTestObject] = deriveEncoder
