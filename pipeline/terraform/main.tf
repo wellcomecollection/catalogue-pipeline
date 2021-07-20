@@ -205,12 +205,14 @@ module "catalogue_pipeline_2021-07-19" {
       ],
       reindex_topic = local.calm_reindexer_topic_arn,
     }
-
+    // we want to keep tei out of the prod pipeline for now,
+    // while me make sure that the data is good enough to present
+    // and while we extend the transformer to extract more of it.
     tei = {
       topics = [
-        local.tei_adapter_topic_arn,
+        //local.tei_adapter_topic_arn,
       ],
-      reindex_topic = local.tei_reindexer_topic_arn,
+      reindex_topic = null //local.tei_reindexer_topic_arn,
     }
   }
 
