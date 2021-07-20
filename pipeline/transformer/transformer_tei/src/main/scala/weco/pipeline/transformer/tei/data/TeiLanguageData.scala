@@ -16,7 +16,7 @@ import weco.catalogue.internal_model.languages.{Language, MarcLanguageCodeList}
   */
 object TeiLanguageData extends Logging {
 
-  /** Given a <textLang> element of the form
+  /** Given the ID and label from a <textLang> element of the form
     *
     *     <textLang mainLang={id}>{label}</textLang>
     *
@@ -24,7 +24,7 @@ object TeiLanguageData extends Logging {
     *
     *     <textLang otherLangs={id}>{label}</textLang>
     *
-    * Create a Language based on the MARC language code list.
+    * create a Language based on the MARC language code list.
     */
   def apply(id: String, label: String): Option[Language] =
     (id, label) match {
