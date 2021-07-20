@@ -23,7 +23,7 @@ class TeiLanguagesTest
         )
       )
 
-    TeiLanguages(xml) shouldBe List(Language(id = "san", label = "Sanskrit"))
+    TeiLanguages(xml).value shouldBe List(Language(id = "san", label = "Sanskrit"))
   }
 
   it("gets multiple languages from TEI") {
@@ -39,7 +39,7 @@ class TeiLanguagesTest
         )
       )
 
-    TeiLanguages(xml) shouldBe List(
+    TeiLanguages(xml).value shouldBe List(
       Language(id = "san", label = "Sanskrit"),
       Language(id = "lat", label = "Latin")
     )
@@ -53,10 +53,13 @@ class TeiLanguagesTest
         )
       )
 
-    TeiLanguages(xml) shouldBe empty
+    val result = TeiLanguages(xml)
+
+    result shouldBe a[Left[_, _]]
+    result.left.get.getMessage should include("language ID")
   }
 
-  it("skips languages that have more than one lang attribute") {
+  it("errors on languages that have more than one lang attribute") {
     val xml =
       teiXml(
         languages = List(
@@ -64,6 +67,9 @@ class TeiLanguagesTest
         )
       )
 
-    TeiLanguages(xml) shouldBe empty
+    val result = TeiLanguages(xml)
+
+    result shouldBe a[Left[_, _]]
+    result.left.get.getMessage should include("language ID")
   }
 }

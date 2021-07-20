@@ -10,6 +10,7 @@ import java.io.FileInputStream
 import java.nio.file.{Files, Path, Paths}
 import java.util.stream.Collectors
 import scala.collection.JavaConverters._
+import scala.util.{Failure, Success}
 import scala.xml.XML
 
 class TeiLanguageDataTest extends AnyFunSpec with Matchers with TableDrivenPropertyChecks {
@@ -52,7 +53,12 @@ class TeiLanguageDataTest extends AnyFunSpec with Matchers with TableDrivenPrope
     xmlPaths.foreach { p =>
       val xml = XML.load(new FileInputStream(p.toAbsolutePath.toString))
 
-      val textLangNodes = TeiLanguages.findNodes(xml)
+      val textLangNodes = TeiLanguages.findNodes(xml) match {
+        case Success(nodes) => nodes
+        case Failure(err) =>
+          println(s"$p: error while reading <textLang> nodes: $err")
+          Seq[(String, String)]()
+      }
 
       textLangNodes.foreach { case (id, label) =>
         TeiLanguageData(id = id, label = label) match {
