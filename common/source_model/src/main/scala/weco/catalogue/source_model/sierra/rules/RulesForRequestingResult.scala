@@ -30,5 +30,5 @@ object NotRequestable {
 
   case class BelongsInStrongroom(message: String) extends NotRequestable
 
-  case object NoReason extends NotRequestable
+  case class NoPublicReason(message: String) extends NotRequestable
 }

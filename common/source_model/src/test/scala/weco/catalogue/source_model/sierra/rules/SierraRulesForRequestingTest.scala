@@ -26,7 +26,7 @@ class SierraRulesForRequestingTest
       fixedFields = Map("97" -> FixedField(label = "IMESSAGE", value = "j"))
     )
 
-    SierraRulesForRequesting(item) shouldBe NotRequestable.NoReason
+    SierraRulesForRequesting(item) shouldBe a[NotRequestable.NoPublicReason]
   }
 
   it("blocks an item based on the status") {
@@ -36,7 +36,7 @@ class SierraRulesForRequestingTest
       ("s", NotRequestable.ItemOnSearch("This item is on search.")),
       ("x", NotRequestable.ItemWithdrawn("This item is withdrawn.")),
       ("r", NotRequestable.ItemUnavailable("This item is unavailable.")),
-      ("z", NotRequestable.NoReason),
+      ("z", NotRequestable.NoPublicReason("fixed field 88 = z")),
       ("v", NotRequestable.AtConservation("This item is with conservation.")),
       ("h", NotRequestable.ItemClosed("This item is closed.")),
       ("b", NotRequestable.RequestTopItem("Please request top item.")),
@@ -46,7 +46,7 @@ class SierraRulesForRequestingTest
         "e",
         NotRequestable.OnExhibition(
           "On exhibition. Please ask at Enquiry Desk.")),
-      ("y", NotRequestable.NoReason),
+      ("y", NotRequestable.NoPublicReason("fixed field 88 = y")),
     )
 
     forAll(testCases) {
@@ -210,7 +210,7 @@ class SierraRulesForRequestingTest
       val testCases = Table("locationCode", "sepep", "rm001", "rmdda")
 
       forAll(testCases) { locationCode =>
-        assertBlockedWith(_, expectedResult = NotRequestable.NoReason)
+        assertBlockedWith(_, expectedResult = NotRequestable.NoPublicReason(s"fixed field 79 = $locationCode"))
       }
     }
 
@@ -277,9 +277,9 @@ class SierraRulesForRequestingTest
         "22",
         NotRequestable.OnExhibition(
           "Item is on Exhibition Reserve. Please ask at the Enquiry Desk")),
-      ("17", NotRequestable.NoReason),
-      ("18", NotRequestable.NoReason),
-      ("15", NotRequestable.NoReason),
+      ("17", NotRequestable.NoPublicReason("fixed field 61 = 17")),
+      ("18", NotRequestable.NoPublicReason("fixed field 61 = 18")),
+      ("15", NotRequestable.NoPublicReason("fixed field 61 = 15")),
       (
         "4",
         NotRequestable.NeedsManualRequest(

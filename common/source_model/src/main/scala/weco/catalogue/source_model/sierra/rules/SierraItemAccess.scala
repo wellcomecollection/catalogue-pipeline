@@ -47,7 +47,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
       ),
       itemData.displayNote) match {
       // If the item note is already on the access condition, we don't need to copy it.
-      case ((Some(ac), displayNote)) if ac.note == displayNote =>
+      case (Some(ac), displayNote) if ac.note == displayNote =>
         (Some(ac), None)
 
       // If the item note is an access note but there's already an access note on the
@@ -267,7 +267,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           Some(0),
           Some(Status.PermissionRequired),
           Some(OpacMsg.ByAppointment),
-          NotRequestable.NoReason,
+          NotRequestable.NoPublicReason(_),
           Some(LocationType.ClosedStores))
           if bibStatus.isEmpty || bibStatus.contains(AccessStatus.ByAppointment) || bibStatus
             .contains(AccessStatus.PermissionRequired) =>
