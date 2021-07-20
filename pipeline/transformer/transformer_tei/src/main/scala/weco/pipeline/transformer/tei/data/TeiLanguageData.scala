@@ -84,7 +84,7 @@ object TeiLanguageData extends Logging {
       case ("bbc", "Toba-Batak")           => Some(Language(id = "btk", label = "Toba-Batak"))
       case ("btk", "Toba-Batak")           => Some(Language(id = "btk", label = "Toba-Batak"))
       case ("gu", "(Old) Gujarati")        => Some(Language(id = "guj", label = "(Old) Gujarati"))
-      case ("btd", "Batak Dairi")          => Some(Language(id = "btd", label = "Batak Dairi"))
+      case ("btd", "Batak Dairi")          => Some(Language(id = "btk", label = "Batak Dairi"))
       case ("ms", "Middle Malay")          => Some(Language(id = "may", label = "Middle Malay"))
       case ("pka", "Ardhamāgadhi Prakrit") => Some(Language(id = "pra", label = "Ardhamāgadhi Prakrit"))
       case ("pka", "Ardhamāgadhī Prākrit") => Some(Language(id = "pra", label = "Ardhamāgadhī Prākrit"))
