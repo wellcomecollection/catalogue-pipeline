@@ -65,11 +65,6 @@ object TeiLanguageData extends Logging {
       // The IANA entry for "el" is "Modern Greek (1453-)"
       case ("el", "Greek") => MarcLanguageCodeList.fromName("Greek, Modern (1453- )")
 
-      // The IANA entry for "egy" is "Egyptian (Ancient)".  There doesn't seem to be
-      // a distinction for this in MARC.
-      case ("egy", "Ancient Egyptian")   => MarcLanguageCodeList.fromName("Egyptian")
-      case ("egy", "Egyptian (Ancient)") => MarcLanguageCodeList.fromName("Egyptian")
-
       // The IANA entry for "spq" is "Loreto-Ucayali Spanish".  For now we file it under
       // "Spanish", but we should ask the TEI team if they want to use the longer form.
       case ("spq", "Spanish") => MarcLanguageCodeList.fromName("Spanish")
@@ -84,6 +79,8 @@ object TeiLanguageData extends Logging {
       // This means we'll display the most accurate label on the individual work pages,
       // but these works will filter/aggregate alongside the "parent" language.
       //
+      case ("egy", "Ancient Egyptian")     => Some(Language(id = "egy", label = "Ancient Egyptian"))
+      case ("egy", "Egyptian (Ancient)")   => Some(Language(id = "egy", label = "Ancient Egyptian"))
       case ("btx", "Karo-Batak")           => Some(Language(id = "btk", label = "Karo-Batak"))
       case ("bbc", "Toba-Batak")           => Some(Language(id = "btk", label = "Toba-Batak"))
       case ("btk", "Toba-Batak")           => Some(Language(id = "btk", label = "Toba-Batak"))
