@@ -119,7 +119,7 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
     bibData: SierraBibData,
     fallbackLocation: Option[(PhysicalLocationType, String)]
   ): (Item[IdState.Identifiable], HasAutomatedTitle) = {
-    debug(s"Attempting to transform ${itemData.id}")
+    debug(s"Attempting to transform ${itemData.id.withCheckDigit}")
 
     val location =
       getPhysicalLocation(
