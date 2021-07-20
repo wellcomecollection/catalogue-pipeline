@@ -23,7 +23,8 @@ class TeiLanguagesTest
         )
       )
 
-    TeiLanguages(xml).value shouldBe List(Language(id = "san", label = "Sanskrit"))
+    TeiLanguages(xml).value shouldBe List(
+      Language(id = "san", label = "Sanskrit"))
   }
 
   it("gets multiple languages from TEI") {

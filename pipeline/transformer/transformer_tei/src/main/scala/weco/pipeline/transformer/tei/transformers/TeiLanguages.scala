@@ -42,7 +42,7 @@ object TeiLanguages {
 
         (langId, label) match {
           case (Some(id), label) if label.trim.nonEmpty => Some((id, label))
-          case _ => None
+          case _                                        => None
         }
       }
     }
@@ -54,11 +54,10 @@ object TeiLanguages {
     findNodes(xml) match {
       case Success(languages) =>
         Right(
-          languages
-            .map { case (id, label) =>
+          languages.map {
+            case (id, label) =>
               TeiLanguageData(id = id, label = label).get
-            }
-            .toList
+          }.toList
         )
 
       case Failure(err) => Left(err)

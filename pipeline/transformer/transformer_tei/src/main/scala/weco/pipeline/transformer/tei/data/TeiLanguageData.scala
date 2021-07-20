@@ -38,40 +38,46 @@ object TeiLanguageData extends Logging {
       // help spot problems that should be fixed in the source data,
       // e.g. mismatched code/label or the wrong code for a language.
       //
-      case ("ar", "Arabic")             => MarcLanguageCodeList.fromName("Arabic")
-      case ("sa", "Sanskrit")           => MarcLanguageCodeList.fromName("Sanskrit")
-      case ("he", "Hebrew")             => MarcLanguageCodeList.fromName("Hebrew")
-      case ("ms", "Malay")              => MarcLanguageCodeList.fromName("Malay")
-      case ("eng", "English")           => MarcLanguageCodeList.fromName("English")
-      case ("en", "English")            => MarcLanguageCodeList.fromName("English")
-      case ("hi", "Hindi")              => MarcLanguageCodeList.fromName("Hindi")
-      case ("jv", "Javanese")           => MarcLanguageCodeList.fromName("Javanese")
-      case ("pra", "Prakrit languages") => MarcLanguageCodeList.fromName("Prakrit languages")
-      case ("it", "Italian")            => MarcLanguageCodeList.fromName("Italian")
-      case ("ta", "Tamil")              => MarcLanguageCodeList.fromName("Tamil")
-      case ("jpr", "Judeo-Persian")     => MarcLanguageCodeList.fromName("Judeo-Persian")
-      case ("la", "Latin")              => MarcLanguageCodeList.fromName("Latin")
-      case ("cop", "Coptic")            => MarcLanguageCodeList.fromName("Coptic")
-      case ("es", "Spanish")            => MarcLanguageCodeList.fromName("Spanish")
-      case ("btk", "Batak")             => MarcLanguageCodeList.fromName("Batak")
-      case ("fa", "Persian")            => MarcLanguageCodeList.fromName("Persian")
-      case ("ji", "Yiddish")            => MarcLanguageCodeList.fromName("Yiddish")
-      case ("yi", "Yiddish")            => MarcLanguageCodeList.fromName("Yiddish")
-      case ("fr", "French")             => MarcLanguageCodeList.fromName("French")
+      case ("ar", "Arabic")   => MarcLanguageCodeList.fromName("Arabic")
+      case ("sa", "Sanskrit") => MarcLanguageCodeList.fromName("Sanskrit")
+      case ("he", "Hebrew")   => MarcLanguageCodeList.fromName("Hebrew")
+      case ("ms", "Malay")    => MarcLanguageCodeList.fromName("Malay")
+      case ("eng", "English") => MarcLanguageCodeList.fromName("English")
+      case ("en", "English")  => MarcLanguageCodeList.fromName("English")
+      case ("hi", "Hindi")    => MarcLanguageCodeList.fromName("Hindi")
+      case ("jv", "Javanese") => MarcLanguageCodeList.fromName("Javanese")
+      case ("pra", "Prakrit languages") =>
+        MarcLanguageCodeList.fromName("Prakrit languages")
+      case ("it", "Italian") => MarcLanguageCodeList.fromName("Italian")
+      case ("ta", "Tamil")   => MarcLanguageCodeList.fromName("Tamil")
+      case ("jpr", "Judeo-Persian") =>
+        MarcLanguageCodeList.fromName("Judeo-Persian")
+      case ("la", "Latin")   => MarcLanguageCodeList.fromName("Latin")
+      case ("cop", "Coptic") => MarcLanguageCodeList.fromName("Coptic")
+      case ("es", "Spanish") => MarcLanguageCodeList.fromName("Spanish")
+      case ("btk", "Batak")  => MarcLanguageCodeList.fromName("Batak")
+      case ("fa", "Persian") => MarcLanguageCodeList.fromName("Persian")
+      case ("ji", "Yiddish") => MarcLanguageCodeList.fromName("Yiddish")
+      case ("yi", "Yiddish") => MarcLanguageCodeList.fromName("Yiddish")
+      case ("fr", "French")  => MarcLanguageCodeList.fromName("French")
 
       // The IANA entry for "grc" is "Ancient Greek (to 1453)"
-      case ("grc", "Ancient Greek") => MarcLanguageCodeList.fromName("Greek, Ancient (to 1453)")
-      case ("grc", "Greek")         => MarcLanguageCodeList.fromName("Greek, Ancient (to 1453)")
+      case ("grc", "Ancient Greek") =>
+        MarcLanguageCodeList.fromName("Greek, Ancient (to 1453)")
+      case ("grc", "Greek") =>
+        MarcLanguageCodeList.fromName("Greek, Ancient (to 1453)")
 
       // The IANA entry for "el" is "Modern Greek (1453-)"
-      case ("el", "Greek") => MarcLanguageCodeList.fromName("Greek, Modern (1453- )")
+      case ("el", "Greek") =>
+        MarcLanguageCodeList.fromName("Greek, Modern (1453- )")
 
       // The IANA entry for "spq" is "Loreto-Ucayali Spanish".  For now we file it under
       // "Spanish", but we should ask the TEI team if they want to use the longer form.
       case ("spq", "Spanish") => MarcLanguageCodeList.fromName("Spanish")
 
       // This is a weird one that might want fixing in the TEI data.
-      case ("es-es", "Spanish Spain") => MarcLanguageCodeList.fromName("Spanish")
+      case ("es-es", "Spanish Spain") =>
+        MarcLanguageCodeList.fromName("Spanish")
 
       // Map languages where there isn't a 1:1 distinction, or where the IANA language
       // is an alternative name for one of the MARC languages.  We use the MARC code, but
@@ -80,34 +86,55 @@ object TeiLanguageData extends Logging {
       // This means we'll display the most accurate label on the individual work pages,
       // but these works will filter/aggregate alongside the "parent" language.
       //
-      case ("egy", "Ancient Egyptian")     => customLanguage("Egyptian", overrideLabel = "Ancient Egyptian")
-      case ("egy", "Egyptian (Ancient)")   => customLanguage("Egyptian", overrideLabel = "Ancient Egyptian")
-      case ("btx", "Karo-Batak")           => customLanguage("Batak", overrideLabel = "Karo-Batak")
-      case ("bbc", "Toba-Batak")           => customLanguage("Batak", overrideLabel = "Toba-Batak")
-      case ("btk", "Toba-Batak")           => customLanguage("Batak", overrideLabel = "Toba-Batak")
-      case ("btd", "Batak Dairi")          => customLanguage("Batak", overrideLabel = "Batak Dairi")
-      case ("gu", "(Old) Gujarati")        => customLanguage("Gujarati", overrideLabel = "(Old) Gujarati")
-      case ("ms", "Middle Malay")          => customLanguage("Malay", overrideLabel = "Middle Malay")
-      case ("pka", "Ardhamāgadhi Prakrit") => customLanguage("Prakrit languages", overrideLabel = "Ardhamāgadhi Prakrit")
-      case ("pka", "Ardhamāgadhī Prākrit") => customLanguage("Prakrit languages", overrideLabel = "Ardhamāgadhī Prākrit")
-      case ("itk", "Judeo-Italian")        => customLanguage("Italian", overrideLabel = "Judeo-Italian")
-      case ("jv", "Java")                  => customLanguage("Javanese", overrideLabel = "Java")
+      case ("egy", "Ancient Egyptian") =>
+        customLanguage("Egyptian", overrideLabel = "Ancient Egyptian")
+      case ("egy", "Egyptian (Ancient)") =>
+        customLanguage("Egyptian", overrideLabel = "Ancient Egyptian")
+      case ("btx", "Karo-Batak") =>
+        customLanguage("Batak", overrideLabel = "Karo-Batak")
+      case ("bbc", "Toba-Batak") =>
+        customLanguage("Batak", overrideLabel = "Toba-Batak")
+      case ("btk", "Toba-Batak") =>
+        customLanguage("Batak", overrideLabel = "Toba-Batak")
+      case ("btd", "Batak Dairi") =>
+        customLanguage("Batak", overrideLabel = "Batak Dairi")
+      case ("gu", "(Old) Gujarati") =>
+        customLanguage("Gujarati", overrideLabel = "(Old) Gujarati")
+      case ("ms", "Middle Malay") =>
+        customLanguage("Malay", overrideLabel = "Middle Malay")
+      case ("pka", "Ardhamāgadhi Prakrit") =>
+        customLanguage(
+          "Prakrit languages",
+          overrideLabel = "Ardhamāgadhi Prakrit")
+      case ("pka", "Ardhamāgadhī Prākrit") =>
+        customLanguage(
+          "Prakrit languages",
+          overrideLabel = "Ardhamāgadhī Prākrit")
+      case ("itk", "Judeo-Italian") =>
+        customLanguage("Italian", overrideLabel = "Judeo-Italian")
+      case ("jv", "Java") => customLanguage("Javanese", overrideLabel = "Java")
 
       // If we're not sure what to do, don't map any language for now.  Drop a warning in
       // the logs for us to come back and investigate further.
       case (id, label) =>
-        warn(s"Unable to map TEI language to catalogue language: id=$id, label=$label")
+        warn(
+          s"Unable to map TEI language to catalogue language: id=$id, label=$label")
         None
     }
 
     result match {
       case Some(lang) => Success(lang)
-      case None => Failure(new Throwable(s"Unable to map TEI language to catalogue language: id=$id, label=$label"))
+      case None =>
+        Failure(new Throwable(
+          s"Unable to map TEI language to catalogue language: id=$id, label=$label"))
     }
   }
 
-  private def customLanguage(name: String, overrideLabel: String): Option[Language] =
+  private def customLanguage(name: String,
+                             overrideLabel: String): Option[Language] =
     MarcLanguageCodeList
       .fromName(name)
-      .map { lang => lang.copy(label = overrideLabel) }
+      .map { lang =>
+        lang.copy(label = overrideLabel)
+      }
 }

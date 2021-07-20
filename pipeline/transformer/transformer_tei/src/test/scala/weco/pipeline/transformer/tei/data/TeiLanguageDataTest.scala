@@ -13,18 +13,26 @@ import scala.collection.JavaConverters._
 import scala.util.{Failure, Success}
 import scala.xml.XML
 
-class TeiLanguageDataTest extends AnyFunSpec with Matchers with TableDrivenPropertyChecks {
+class TeiLanguageDataTest
+    extends AnyFunSpec
+    with Matchers
+    with TableDrivenPropertyChecks {
   val testCases = Table(
     ("id", "label", "expectedLanguage"),
     ("ar", "Arabic", Language(id = "ara", label = "Arabic")),
     ("jv", "Javanese", Language(id = "jav", label = "Javanese")),
-    ("grc", "Ancient Greek", Language(id = "grc", label = "Greek, Ancient (to 1453)")),
+    (
+      "grc",
+      "Ancient Greek",
+      Language(id = "grc", label = "Greek, Ancient (to 1453)")),
     ("btk", "Toba-Batak", Language(id = "btk", label = "Toba-Batak"))
   )
 
   it("handles the test cases") {
-    forAll(testCases) { case (id, label, expectedLanguage) =>
-      TeiLanguageData(id = id, label = label) shouldBe Success(expectedLanguage)
+    forAll(testCases) {
+      case (id, label, expectedLanguage) =>
+        TeiLanguageData(id = id, label = label) shouldBe Success(
+          expectedLanguage)
     }
   }
 
@@ -48,7 +56,8 @@ class TeiLanguageDataTest extends AnyFunSpec with Matchers with TableDrivenPrope
   ignore("handles all the TEI languages") {
     val root = Paths.get("/Users/alexwlchan/repos", "wellcome-collection-tei")
     val xmlPaths =
-      Files.walk(root)
+      Files
+        .walk(root)
         .collect(Collectors.toList[Path])
         .asScala
         .filter { Files.isRegularFile(_) }
@@ -64,12 +73,14 @@ class TeiLanguageDataTest extends AnyFunSpec with Matchers with TableDrivenPrope
           Seq[(String, String)]()
       }
 
-      textLangNodes.foreach { case (id, label) =>
-        TeiLanguageData(id = id, label = label) match {
-          case Success(_) => ()
-          case Failure(_) =>
-            println(s"$p: Unable to map TEI <textLang> node id=$id label=$label")
-        }
+      textLangNodes.foreach {
+        case (id, label) =>
+          TeiLanguageData(id = id, label = label) match {
+            case Success(_) => ()
+            case Failure(_) =>
+              println(
+                s"$p: Unable to map TEI <textLang> node id=$id label=$label")
+          }
       }
     }
   }
