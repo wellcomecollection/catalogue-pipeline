@@ -23,13 +23,10 @@ class TeiLanguagesTest
         )
       )
 
-    val languages = TeiLanguages(xml)
-
-    languages shouldBe a[Right[_, _]]
-    languages.value shouldBe List(Language(id = "sa", label = "Sanskrit"))
+    TeiLanguages(xml) shouldBe List(Language(id = "san", label = "Sanskrit"))
   }
 
-  it("gets multiple languages from tei") {
+  it("gets multiple languages from TEI") {
     val xml: Elem =
       teiXml(
         languages = List(
@@ -42,16 +39,13 @@ class TeiLanguagesTest
         )
       )
 
-    val languages = TeiLanguages(xml)
-
-    languages shouldBe a[Right[_, _]]
-    languages.value shouldBe List(
-      Language(id = "sa", label = "Sanskrit"),
-      Language(id = "la", label = "Latin")
+    TeiLanguages(xml) shouldBe List(
+      Language(id = "san", label = "Sanskrit"),
+      Language(id = "lat", label = "Latin")
     )
   }
 
-  it("fails if it cannot parse the language id") {
+  it("skips languages that it can't parse") {
     val xml =
       teiXml(
         languages = List(
@@ -59,13 +53,10 @@ class TeiLanguagesTest
         )
       )
 
-    val result = TeiLanguages(xml)
-
-    result shouldBe a[Left[_, _]]
-    result.left.get.getMessage should include("language id")
+    TeiLanguages(xml) shouldBe empty
   }
 
-  it("fails if it there is more than one language id attribute") {
+  it("skips languages that have more than one lang attribute") {
     val xml =
       teiXml(
         languages = List(
@@ -73,9 +64,6 @@ class TeiLanguagesTest
         )
       )
 
-    val result = TeiLanguages(xml)
-
-    result shouldBe a[Left[_, _]]
-    result.left.get.getMessage should include("language id")
+    TeiLanguages(xml) shouldBe empty
   }
 }

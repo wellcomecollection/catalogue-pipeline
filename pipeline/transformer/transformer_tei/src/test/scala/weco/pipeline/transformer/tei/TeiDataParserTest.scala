@@ -1,5 +1,6 @@
 package weco.pipeline.transformer.tei
 
+import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.languages.Language
@@ -9,6 +10,7 @@ import weco.pipeline.transformer.tei.fixtures.TeiGenerators
 class TeiDataParserTest
     extends AnyFunSpec
     with Matchers
+    with EitherValues
     with TeiGenerators
     with SierraDataGenerators {
   val id = "manuscript_15651"
@@ -43,12 +45,7 @@ class TeiDataParserTest
   }
 
   it("add the languages from a TEI into the WorkData") {
-    val expectedTeiData = TeiData(
-      id = id,
-      title = "test title",
-      bNumber = None,
-      description = None,
-      languages = List(Language(id = "sa", label = "Sanskrit")))
+    val expectedLanguages = List(Language(id = "san", label = "Sanskrit"))
 
     val xml =
       TeiXml(
@@ -63,7 +60,7 @@ class TeiDataParserTest
         ).toString()
       ).right.get
 
-    TeiDataParser.parse(xml) shouldBe Right(expectedTeiData)
+    TeiDataParser.parse(xml).value.languages shouldBe expectedLanguages
   }
 
   it("strips xml from descriptions TeiData") {

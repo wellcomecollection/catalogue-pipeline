@@ -24,7 +24,7 @@ object TeiDataParser {
       summary <- teiXml.summary
       bNumber <- teiXml.bNumber
       title <- teiXml.title
-      languages <- TeiLanguages(teiXml)
+      languages = TeiLanguages(teiXml)
     } yield TeiData(teiXml.id, title, bNumber, summary, languages)
 }
 
