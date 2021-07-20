@@ -55,8 +55,8 @@ object TeiLanguages {
       case Success(languages) =>
         Right(
           languages
-            .flatMap { case (id, label) =>
-              TeiLanguageData(id = id, label = label)
+            .map { case (id, label) =>
+              TeiLanguageData(id = id, label = label).get
             }
             .toList
         )

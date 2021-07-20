@@ -3,6 +3,8 @@ package weco.pipeline.transformer.tei.data
 import grizzled.slf4j.Logging
 import weco.catalogue.internal_model.languages.{Language, MarcLanguageCodeList}
 
+import scala.util.{Failure, Success, Try}
+
 /** The TEI language data uses the IANA language codes from:
   * https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
   *
@@ -26,8 +28,8 @@ object TeiLanguageData extends Logging {
     *
     * create a Language based on the MARC language code list.
     */
-  def apply(id: String, label: String): Option[Language] =
-    (id, label) match {
+  def apply(id: String, label: String): Try[Language] = {
+    val result = (id, label) match {
 
       // Map languages where there's a 1:1 correspondence between the IANA language
       // and the MARC language codes.
@@ -97,6 +99,12 @@ object TeiLanguageData extends Logging {
         warn(s"Unable to map TEI language to catalogue language: id=$id, label=$label")
         None
     }
+
+    result match {
+      case Some(lang) => Success(lang)
+      case None => Failure(new Throwable(s"Unable to map TEI language to catalogue language: id=$id, label=$label"))
+    }
+  }
 
   private def customLanguage(name: String, overrideLabel: String): Option[Language] =
     MarcLanguageCodeList

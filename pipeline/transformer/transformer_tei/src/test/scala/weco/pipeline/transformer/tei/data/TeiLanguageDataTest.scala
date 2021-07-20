@@ -24,8 +24,12 @@ class TeiLanguageDataTest extends AnyFunSpec with Matchers with TableDrivenPrope
 
   it("handles the test cases") {
     forAll(testCases) { case (id, label, expectedLanguage) =>
-      TeiLanguageData(id = id, label = label) shouldBe Some(expectedLanguage)
+      TeiLanguageData(id = id, label = label) shouldBe Success(expectedLanguage)
     }
+  }
+
+  it("fails if it sees an unexpected language") {
+    TeiLanguageData(id = "xyz", label = "???") shouldBe a[Failure[_]]
   }
 
   /** This test is to help you find languages in the TEI files that aren't currently
@@ -62,8 +66,8 @@ class TeiLanguageDataTest extends AnyFunSpec with Matchers with TableDrivenPrope
 
       textLangNodes.foreach { case (id, label) =>
         TeiLanguageData(id = id, label = label) match {
-          case Some(_) => ()
-          case None =>
+          case Success(_) => ()
+          case Failure(_) =>
             println(s"$p: Unable to map TEI <textLang> node id=$id label=$label")
         }
       }
