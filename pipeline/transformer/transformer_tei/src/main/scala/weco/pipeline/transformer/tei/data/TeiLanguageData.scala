@@ -78,18 +78,18 @@ object TeiLanguageData extends Logging {
       // This means we'll display the most accurate label on the individual work pages,
       // but these works will filter/aggregate alongside the "parent" language.
       //
-      case ("egy", "Ancient Egyptian")     => Some(Language(id = "egy", label = "Ancient Egyptian"))
-      case ("egy", "Egyptian (Ancient)")   => Some(Language(id = "egy", label = "Ancient Egyptian"))
-      case ("btx", "Karo-Batak")           => Some(Language(id = "btk", label = "Karo-Batak"))
-      case ("bbc", "Toba-Batak")           => Some(Language(id = "btk", label = "Toba-Batak"))
-      case ("btk", "Toba-Batak")           => Some(Language(id = "btk", label = "Toba-Batak"))
-      case ("gu", "(Old) Gujarati")        => Some(Language(id = "guj", label = "(Old) Gujarati"))
-      case ("btd", "Batak Dairi")          => Some(Language(id = "btk", label = "Batak Dairi"))
-      case ("ms", "Middle Malay")          => Some(Language(id = "may", label = "Middle Malay"))
-      case ("pka", "Ardhamāgadhi Prakrit") => Some(Language(id = "pra", label = "Ardhamāgadhi Prakrit"))
-      case ("pka", "Ardhamāgadhī Prākrit") => Some(Language(id = "pra", label = "Ardhamāgadhī Prākrit"))
-      case ("itk", "Judeo-Italian")        => Some(Language(id = "ita", label = "Judeo-Italian"))
-      case ("jv", "Java")                  => Some(Language(id = "jav", label = "Java"))
+      case ("egy", "Ancient Egyptian")     => customLanguage("Egyptian", overrideLabel = "Ancient Egyptian")
+      case ("egy", "Egyptian (Ancient)")   => customLanguage("Egyptian", overrideLabel = "Ancient Egyptian")
+      case ("btx", "Karo-Batak")           => customLanguage("Batak", overrideLabel = "Karo-Batak")
+      case ("bbc", "Toba-Batak")           => customLanguage("Batak", overrideLabel = "Toba-Batak")
+      case ("btk", "Toba-Batak")           => customLanguage("Batak", overrideLabel = "Toba-Batak")
+      case ("btd", "Batak Dairi")          => customLanguage("Batak", overrideLabel = "Batak Dairi")
+      case ("gu", "(Old) Gujarati")        => customLanguage("Gujarati", overrideLabel = "(Old) Gujarati")
+      case ("ms", "Middle Malay")          => customLanguage("Malay", overrideLabel = "Middle Malay")
+      case ("pka", "Ardhamāgadhi Prakrit") => customLanguage("Prakrit languages", overrideLabel = "Ardhamāgadhi Prakrit")
+      case ("pka", "Ardhamāgadhī Prākrit") => customLanguage("Prakrit languages", overrideLabel = "Ardhamāgadhī Prākrit")
+      case ("itk", "Judeo-Italian")        => customLanguage("Italian", overrideLabel = "Judeo-Italian")
+      case ("jv", "Java")                  => customLanguage("Javanese", overrideLabel = "Java")
 
       // If we're not sure what to do, don't map any language for now.  Drop a warning in
       // the logs for us to come back and investigate further.
@@ -97,4 +97,9 @@ object TeiLanguageData extends Logging {
         warn(s"Unable to map TEI language to catalogue language: id=$id, label=$label")
         None
     }
+
+  private def customLanguage(name: String, overrideLabel: String): Option[Language] =
+    MarcLanguageCodeList
+      .fromName(name)
+      .map { lang => lang.copy(label = overrideLabel) }
 }
