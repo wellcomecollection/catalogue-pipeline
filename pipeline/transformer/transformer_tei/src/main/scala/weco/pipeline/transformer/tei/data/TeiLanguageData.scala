@@ -29,7 +29,6 @@ object TeiLanguageData extends Logging {
   def apply(id: String, label: String): Option[Language] =
     (id, label) match {
 
-
       // Map languages where there's a 1:1 correspondence between the IANA language
       // and the MARC language codes.
       //
