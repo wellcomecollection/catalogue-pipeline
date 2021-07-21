@@ -45,8 +45,7 @@ trait CalmRecordOps {
   //       and the adapter, and it's not important enough to do a more detailed analysis.
   //
   private def fixEncoding(s: String): String =
-    s
-      .replaceAll("â\u0080\u0093", "–")
+    s.replaceAll("â\u0080\u0093", "–")
       .replaceAll("Â°", "°")
       .replaceAll("Ã§", "ç")
       .replaceAll("Ã¨", "è")

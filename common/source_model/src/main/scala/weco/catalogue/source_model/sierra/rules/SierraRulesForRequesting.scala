@@ -67,7 +67,8 @@ object SierraRulesForRequesting {
         NotRequestable.ItemWithdrawn("This item is withdrawn.")
       case i if i.fixedField("88").contains("r") =>
         NotRequestable.ItemUnavailable("This item is unavailable.")
-      case i if i.fixedField("88").contains("z") => NotRequestable.NoPublicMessage("fixed field 88 = z")
+      case i if i.fixedField("88").contains("z") =>
+        NotRequestable.NoPublicMessage("fixed field 88 = z")
       case i if i.fixedField("88").contains("v") =>
         NotRequestable.AtConservation("This item is with conservation.")
       case i if i.fixedField("88").contains("h") =>
@@ -286,7 +287,8 @@ object SierraRulesForRequesting {
           "Item is on Exhibition Reserve. Please ask at the Enquiry Desk")
 
       case i if i.fixedField("61").containsAnyOf("17", "18", "15") =>
-        NotRequestable.NoPublicMessage(s"fixed field 61 = ${i.fixedField("61").get}")
+        NotRequestable.NoPublicMessage(
+          s"fixed field 61 = ${i.fixedField("61").get}")
 
       case i
           if i.fixedField("61").containsAnyOf("4", "14") || i
@@ -384,7 +386,8 @@ object SierraRulesForRequesting {
       //    q|i||79||=|rmdda||
       //
       case i if i.fixedField("79").containsAnyOf("rm001", "rmdda") =>
-        NotRequestable.NoPublicMessage(s"fixed field 79 = ${i.fixedField("79").get}")
+        NotRequestable.NoPublicMessage(
+          s"fixed field 79 = ${i.fixedField("79").get}")
 
       // This case covers the line:
       //

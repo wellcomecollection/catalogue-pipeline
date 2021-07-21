@@ -210,7 +210,10 @@ class SierraRulesForRequestingTest
       val testCases = Table("locationCode", "sepep", "rm001", "rmdda")
 
       forAll(testCases) { locationCode =>
-        assertBlockedWith(_, expectedResult = NotRequestable.NoPublicMessage(s"fixed field 79 = $locationCode"))
+        assertBlockedWith(
+          _,
+          expectedResult =
+            NotRequestable.NoPublicMessage(s"fixed field 79 = $locationCode"))
       }
     }
 

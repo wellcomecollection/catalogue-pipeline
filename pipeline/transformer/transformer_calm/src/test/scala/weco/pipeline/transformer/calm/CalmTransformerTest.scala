@@ -609,7 +609,6 @@ class CalmTransformerTest
       "Level" -> "Section",
       "RefNo" -> "PPCRI/H/6/13/8",
       "CatalogueStatus" -> "Catalogued"
-
     )
 
     val work = CalmTransformer(record, version).value
