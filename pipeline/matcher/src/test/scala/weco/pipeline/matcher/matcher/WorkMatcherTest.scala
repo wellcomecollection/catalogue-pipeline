@@ -8,11 +8,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 import org.scanamo.syntax._
-import weco.catalogue.internal_model.matcher.{
-  MatchedIdentifiers,
-  WorkIdentifier,
-  WorkNode
-}
+import weco.catalogue.internal_model.matcher.{MatchedIdentifiers, MatcherResult, WorkIdentifier, WorkNode}
 import weco.storage.locking.LockFailure
 import weco.storage.locking.memory.{MemoryLockDao, MemoryLockingService}
 import weco.fixtures.TimeAssertions
@@ -206,7 +202,7 @@ class WorkMatcherTest
       }
 
     val lockingService =
-      new MemoryLockingService[Set[MatchedIdentifiers], Future]()
+      new MemoryLockingService[MatcherResult, Future]()
 
     withWorkGraphTable { graphTable =>
       withWorkGraphStore(graphTable) { workGraphStore =>
@@ -257,7 +253,7 @@ class WorkMatcherTest
             }
 
           val lockingService =
-            new MemoryLockingService[Set[MatchedIdentifiers], Future]()
+            new MemoryLockingService[MatcherResult, Future]()
 
           val workMatcher = new WorkMatcher(workGraphStore, lockingService)
 

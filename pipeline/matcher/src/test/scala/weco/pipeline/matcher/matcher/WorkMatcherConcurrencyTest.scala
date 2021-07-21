@@ -3,7 +3,7 @@ package weco.pipeline.matcher.matcher
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.matcher.{MatchedIdentifiers, MatcherResult}
+import weco.catalogue.internal_model.matcher.MatcherResult
 import weco.pipeline.matcher.exceptions.MatcherException
 import weco.pipeline.matcher.fixtures.MatcherFixtures
 import weco.pipeline.matcher.generators.WorkLinksGenerators
@@ -24,7 +24,7 @@ class WorkMatcherConcurrencyTest
     implicit val lockDao: MemoryLockDao[String, UUID] =
       new MemoryLockDao[String, UUID]
     val lockingService =
-      new MemoryLockingService[Set[MatchedIdentifiers], Future]()
+      new MemoryLockingService[MatcherResult, Future]()
 
     withWorkGraphTable { graphTable =>
       withWorkGraphStore(graphTable) { workGraphStore =>

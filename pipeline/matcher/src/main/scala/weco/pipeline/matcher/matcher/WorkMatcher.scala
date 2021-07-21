@@ -24,21 +24,16 @@ import java.time.Instant
 import java.util.UUID
 
 class WorkMatcher(workGraphStore: WorkGraphStore,
-                  lockingService: LockingService[Set[MatchedIdentifiers],
+                  lockingService: LockingService[MatcherResult,
                                                  Future,
                                                  LockDao[String, UUID]])(
   implicit ec: ExecutionContext)
     extends Logging {
 
-  type Out = Set[MatchedIdentifiers]
-
   def matchWork(links: WorkLinks): Future[MatcherResult] =
     doMatch(links)
-      .map { works =>
-        MatcherResult(works = works, createdTime = Instant.now())
-      }
 
-  private def doMatch(links: WorkLinks): Future[Out] =
+  private def doMatch(links: WorkLinks): Future[MatcherResult] =
     withLocks(links, links.ids.map(_.toString)) {
       for {
         beforeGraph <- workGraphStore.findAffectedWorks(links)
@@ -56,27 +51,24 @@ class WorkMatcher(workGraphStore: WorkGraphStore,
         // but I haven't thought hard enough about whether it might introduce a
         // hard-to-debug consistency error if another process updates the graph
         // between us reading it and writing it.
-        _ <- if (updatedNodes.isEmpty) {
-          Future.successful(())
+        matcherResult <- if (updatedNodes.isEmpty) {
+          Future.successful(MatcherResult(works = toMatchedIdentifiers(afterGraph), createdTime = Instant.now()))
         } else {
           val affectedComponentIds =
             (beforeGraph.nodes ++ afterGraph.nodes)
               .map { _.componentId }
 
           withLocks(links, ids = affectedComponentIds) {
-            // We are returning empty set here, as LockingService is tied to a
-            // single `Out` type, here set to `Set[MatchedIdentifiers]`.
-            // See issue here: https://github.com/wellcometrust/platform/issues/3873
-            workGraphStore.put(afterGraph).map(_ => Set.empty)
+            workGraphStore.put(afterGraph).map(_ => MatcherResult(works = toMatchedIdentifiers(afterGraph), createdTime = Instant.now()))
           }
         }
       } yield {
-        toMatchedIdentifiers(afterGraph)
+        matcherResult
       }
     }
 
   private def withLocks(links: WorkLinks, ids: Set[String])(
-    f: => Future[Out]): Future[Out] =
+    f: => Future[MatcherResult]): Future[MatcherResult] =
     lockingService
       .withLocks(ids)(f)
       .map {
