@@ -23,10 +23,9 @@ import weco.storage.locking.{
 import java.time.Instant
 import java.util.UUID
 
-class WorkMatcher(workGraphStore: WorkGraphStore,
-                  lockingService: LockingService[MatcherResult,
-                                                 Future,
-                                                 LockDao[String, UUID]])(
+class WorkMatcher(
+  workGraphStore: WorkGraphStore,
+  lockingService: LockingService[MatcherResult, Future, LockDao[String, UUID]])(
   implicit ec: ExecutionContext)
     extends Logging {
 
@@ -52,14 +51,23 @@ class WorkMatcher(workGraphStore: WorkGraphStore,
         // hard-to-debug consistency error if another process updates the graph
         // between us reading it and writing it.
         matcherResult <- if (updatedNodes.isEmpty) {
-          Future.successful(MatcherResult(works = toMatchedIdentifiers(afterGraph), createdTime = Instant.now()))
+          Future.successful(
+            MatcherResult(
+              works = toMatchedIdentifiers(afterGraph),
+              createdTime = Instant.now()))
         } else {
           val affectedComponentIds =
             (beforeGraph.nodes ++ afterGraph.nodes)
               .map { _.componentId }
 
           withLocks(links, ids = affectedComponentIds) {
-            workGraphStore.put(afterGraph).map(_ => MatcherResult(works = toMatchedIdentifiers(afterGraph), createdTime = Instant.now()))
+            workGraphStore
+              .put(afterGraph)
+              .map(
+                _ =>
+                  MatcherResult(
+                    works = toMatchedIdentifiers(afterGraph),
+                    createdTime = Instant.now()))
           }
         }
       } yield {

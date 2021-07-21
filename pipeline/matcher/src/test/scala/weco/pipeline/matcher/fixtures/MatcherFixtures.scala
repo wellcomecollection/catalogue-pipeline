@@ -3,7 +3,12 @@ package weco.pipeline.matcher.fixtures
 import org.apache.commons.codec.digest.DigestUtils
 import org.scanamo.generic.semiauto.deriveDynamoFormat
 import org.scanamo.query.UniqueKey
-import org.scanamo.{DynamoFormat, DynamoReadError, Scanamo, Table => ScanamoTable}
+import org.scanamo.{
+  DynamoFormat,
+  DynamoReadError,
+  Scanamo,
+  Table => ScanamoTable
+}
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import weco.catalogue.internal_model.identifiers.CanonicalId
 import weco.catalogue.internal_model.matcher.{MatcherResult, WorkNode}
@@ -18,7 +23,11 @@ import weco.pipeline.matcher.storage.{WorkGraphStore, WorkNodeDao}
 import weco.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 import weco.pipeline_storage.memory.MemoryRetriever
 import weco.storage.fixtures.DynamoFixtures.Table
-import weco.storage.locking.dynamo.{DynamoLockDaoFixtures, DynamoLockingService, ExpiringLock}
+import weco.storage.locking.dynamo.{
+  DynamoLockDaoFixtures,
+  DynamoLockingService,
+  ExpiringLock
+}
 import weco.storage.locking.memory.{MemoryLockDao, MemoryLockingService}
 
 import java.util.UUID
