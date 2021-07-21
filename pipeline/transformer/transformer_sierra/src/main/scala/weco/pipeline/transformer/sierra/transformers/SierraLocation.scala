@@ -51,7 +51,7 @@ trait SierraLocation {
 
       physicalLocation = PhysicalLocation(
         locationType = locationType,
-        accessConditions = accessCondition.toList,
+        accessConditions = List(accessCondition),
         label = label,
         shelfmark = SierraShelfmark(bibData, itemData)
       )

@@ -37,7 +37,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
     bibStatus: Option[AccessStatus],
     location: Option[PhysicalLocationType],
     itemData: SierraItemData
-  ): (Option[AccessCondition], Option[String]) =
+  ): (AccessCondition, Option[String]) =
     (
       createAccessCondition(
         bibId = bibId,
@@ -47,19 +47,19 @@ object SierraItemAccess extends SierraQueryOps with Logging {
       ),
       itemData.displayNote) match {
       // If the item note is already on the access condition, we don't need to copy it.
-      case (Some(ac), displayNote) if ac.note == displayNote =>
-        (Some(ac), None)
+      case (ac, displayNote) if ac.note == displayNote =>
+        (ac, None)
 
       // If the item note is an access note but there's already an access note on the
       // access condition, we discard the item note.
       //
       // Otherwise, we copy the item note onto the access condition.
-      case (Some(ac), Some(displayNote))
+      case (ac, Some(displayNote))
           if ac.note.isDefined && displayNote.isAccessNote =>
-        (Some(ac), None)
-      case (Some(ac), Some(displayNote))
+        (ac, None)
+      case (ac, Some(displayNote))
           if ac.note.isEmpty && displayNote.isAccessNote =>
-        (Some(ac.copy(note = Some(displayNote))), None)
+        (ac.copy(note = Some(displayNote)), None)
 
       // If the item note is nothing to do with the access condition, we return it to
       // be copied onto the item.
@@ -71,7 +71,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
     bibStatus: Option[AccessStatus],
     location: Option[PhysicalLocationType],
     itemData: SierraItemData
-  ): Option[AccessCondition] = {
+  ): AccessCondition = {
     val holdCount = itemData.holdCount
     val status = itemData.status
     val opacmsg = itemData.opacmsg
@@ -90,12 +90,10 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           Requestable,
           Some(LocationType.ClosedStores))
           if bibStatus.isEmpty || bibStatus.contains(AccessStatus.Open) =>
-        val ac = AccessCondition(
+        AccessCondition(
           method = AccessMethod.OnlineRequest,
           status = bibStatus
         )
-
-        Some(ac)
 
       // Note: it is possible for individual items within a restricted bib to be available
       // online, e.g. in archives.  The "restricted" on the bib applies to the archive as
@@ -121,12 +119,10 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           Some(OpacMsg.OnlineRequest),
           Requestable,
           Some(LocationType.ClosedStores)) =>
-        val ac = AccessCondition(
+        AccessCondition(
           method = AccessMethod.OnlineRequest,
           status = AccessStatus.Open,
         )
-
-        Some(ac)
 
       // Items on the open shelves don't have any access conditions.
       //
@@ -147,17 +143,15 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           Some(OpacMsg.OpenShelves),
           NotRequestable.OnOpenShelves(_),
           Some(LocationType.OpenShelves)) =>
-        Some(AccessCondition(method = AccessMethod.OpenShelves))
+        AccessCondition(method = AccessMethod.OpenShelves)
 
       // There are some items that are labelled "bound in above" or "contained in above".
       //
       // These items aren't requestable on their own; you have to request the "primary" item.
       case (None, _, _, _, NotRequestable.RequestTopItem(message), _) =>
-        Some(
-          AccessCondition(
-            method = AccessMethod.NotRequestable,
-            note = Some(message)
-          )
+        AccessCondition(
+          method = AccessMethod.NotRequestable,
+          note = Some(message)
         )
 
       // Handle any cases that require a manual request.
@@ -185,11 +179,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
             case _ => None
           }
 
-        Some(
-          AccessCondition(
-            method = AccessMethod.ManualRequest,
-            note = accessNote)
-        )
+        AccessCondition(method = AccessMethod.ManualRequest, note = accessNote)
 
       // Handle any cases where the item is closed.
       //
@@ -206,11 +196,9 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           locationType)
           if locationType.isEmpty || locationType.contains(
             LocationType.ClosedStores) =>
-        Some(
-          AccessCondition(
-            method = AccessMethod.NotRequestable,
-            status = AccessStatus.Closed)
-        )
+        AccessCondition(
+          method = AccessMethod.NotRequestable,
+          status = AccessStatus.Closed)
 
       // Handle any cases where the item is explicitly unavailable.
       case (
@@ -220,11 +208,9 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           Some(OpacMsg.Unavailable),
           NotRequestable.ItemUnavailable(_),
           _) =>
-        Some(
-          AccessCondition(
-            method = AccessMethod.NotRequestable,
-            status = AccessStatus.Unavailable)
-        )
+        AccessCondition(
+          method = AccessMethod.NotRequestable,
+          status = AccessStatus.Unavailable)
 
       case (
           None,
@@ -233,13 +219,11 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           Some(OpacMsg.AtDigitisation),
           NotRequestable.ItemUnavailable(_),
           _) =>
-        Some(
-          AccessCondition(
-            method = AccessMethod.NotRequestable,
-            status = Some(AccessStatus.TemporarilyUnavailable),
-            note =
-              Some("This item is being digitised and is currently unavailable.")
-          )
+        AccessCondition(
+          method = AccessMethod.NotRequestable,
+          status = Some(AccessStatus.TemporarilyUnavailable),
+          note =
+            Some("This item is being digitised and is currently unavailable.")
         )
 
       // An item which is restricted can be requested online -- the user will have to fill in
@@ -253,11 +237,9 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           Some(OpacMsg.OnlineRequest),
           Requestable,
           Some(LocationType.ClosedStores)) =>
-        Some(
-          AccessCondition(
-            method = AccessMethod.OnlineRequest,
-            status = AccessStatus.Restricted)
-        )
+        AccessCondition(
+          method = AccessMethod.OnlineRequest,
+          status = AccessStatus.Restricted)
 
       // The status "by appointment" takes precedence over "permission required".
       //
@@ -271,11 +253,9 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           Some(LocationType.ClosedStores))
           if bibStatus.isEmpty || bibStatus.contains(AccessStatus.ByAppointment) || bibStatus
             .contains(AccessStatus.PermissionRequired) =>
-        Some(
-          AccessCondition(
-            method = AccessMethod.ManualRequest,
-            status = AccessStatus.ByAppointment)
-        )
+        AccessCondition(
+          method = AccessMethod.ManualRequest,
+          status = AccessStatus.ByAppointment)
 
       case (
           bibStatus,
@@ -286,11 +266,9 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           Some(LocationType.ClosedStores))
           if bibStatus.isEmpty || bibStatus.contains(
             AccessStatus.PermissionRequired) =>
-        Some(
-          AccessCondition(
-            method = AccessMethod.ManualRequest,
-            status = AccessStatus.PermissionRequired)
-        )
+        AccessCondition(
+          method = AccessMethod.ManualRequest,
+          status = AccessStatus.PermissionRequired)
 
       // A missing status overrides all other values.
       //
@@ -302,12 +280,10 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           _,
           NotRequestable.ItemMissing(message),
           _) =>
-        Some(
-          AccessCondition(
-            method = AccessMethod.NotRequestable,
-            status = Some(AccessStatus.Unavailable),
-            note = Some(message))
-        )
+        AccessCondition(
+          method = AccessMethod.NotRequestable,
+          status = Some(AccessStatus.Unavailable),
+          note = Some(message))
 
       // A withdrawn status also overrides all other values.
       case (
@@ -317,12 +293,10 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           _,
           NotRequestable.ItemWithdrawn(message),
           _) =>
-        Some(
-          AccessCondition(
-            method = AccessMethod.NotRequestable,
-            status = Some(AccessStatus.Unavailable),
-            note = Some(message))
-        )
+        AccessCondition(
+          method = AccessMethod.NotRequestable,
+          status = Some(AccessStatus.Unavailable),
+          note = Some(message))
 
       // If an item is on hold for another reader, it can't be requested -- even
       // if it would ordinarily be requestable.
@@ -340,13 +314,11 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           _,
           Requestable,
           Some(LocationType.ClosedStores)) if holdCount > 0 =>
-        Some(
-          AccessCondition(
-            method = AccessMethod.ManualRequest,
-            status = Some(AccessStatus.TemporarilyUnavailable),
-            note = Some(
-              "Item is in use by another reader. Please ask at Enquiry Desk.")
-          )
+        AccessCondition(
+          method = AccessMethod.ManualRequest,
+          status = Some(AccessStatus.TemporarilyUnavailable),
+          note = Some(
+            "Item is in use by another reader. Please ask at Enquiry Desk.")
         )
 
       case (
@@ -356,13 +328,12 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           _,
           NotRequestable.OnHold(_),
           Some(LocationType.ClosedStores)) =>
-        Some(
-          AccessCondition(
-            method = AccessMethod.ManualRequest,
-            status = Some(AccessStatus.TemporarilyUnavailable),
-            note = Some(
-              "Item is in use by another reader. Please ask at Enquiry Desk.")
-          ))
+        AccessCondition(
+          method = AccessMethod.ManualRequest,
+          status = Some(AccessStatus.TemporarilyUnavailable),
+          note = Some(
+            "Item is in use by another reader. Please ask at Enquiry Desk.")
+        )
 
       // If we can't work out how this item should be handled, then let's mark it
       // as unavailable for now.
@@ -380,12 +351,10 @@ object SierraItemAccess extends SierraQueryOps with Logging {
             s"opacmsg=$opacmsg, isRequestable=$isRequestable, location=$location"
         )
 
-        Some(
-          AccessCondition(
-            method = AccessMethod.NotRequestable,
-            note = Some(
-              s"""Please check this item <a href="https://search.wellcomelibrary.org/iii/encore/record/C__Rb${bibId.withoutCheckDigit}?lang=eng">on the Wellcome Library website</a> for access information""")
-          )
+        AccessCondition(
+          method = AccessMethod.NotRequestable,
+          note = Some(
+            s"""Please check this item <a href="https://search.wellcomelibrary.org/iii/encore/record/C__Rb${bibId.withoutCheckDigit}?lang=eng">on the Wellcome Library website</a> for access information""")
         )
     }
   }
