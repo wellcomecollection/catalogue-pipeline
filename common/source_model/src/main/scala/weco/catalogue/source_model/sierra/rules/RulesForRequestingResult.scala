@@ -30,5 +30,11 @@ object NotRequestable {
 
   case class BelongsInStrongroom(message: String) extends NotRequestable
 
-  case object NoReason extends NotRequestable
+  // This is used for items that are prevented from requesting, and the rule
+  // doesn't include a message to display to users.
+  //
+  // This message is only meant for internal debugging to help people looking
+  // at application logs and understand which particular rule was used, and
+  // should not be displayed publicly.
+  case class NoPublicMessage(internalMessage: String) extends NotRequestable
 }

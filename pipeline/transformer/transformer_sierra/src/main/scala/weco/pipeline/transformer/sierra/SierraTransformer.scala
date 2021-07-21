@@ -25,7 +25,7 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
   def transform: Try[Work[Source]] =
     sierraTransformable.maybeBibRecord
       .map { bibRecord =>
-        debug(s"Attempting to transform ${bibRecord.id}")
+        debug(s"Attempting to transform ${bibRecord.id.withCheckDigit}")
         workFromBibRecord(bibRecord)
       }
       .getOrElse {
