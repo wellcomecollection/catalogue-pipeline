@@ -10,11 +10,18 @@ import org.scanamo.{
   Table => ScanamoTable
 }
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
+import weco.catalogue.internal_model.identifiers.CanonicalId
+import weco.catalogue.internal_model.matcher.{MatcherResult, WorkNode}
 import weco.fixtures.TestWith
 import weco.messaging.fixtures.SQS
 import weco.messaging.memory.MemoryMessageSender
 import weco.messaging.sns.NotificationMessage
-import weco.catalogue.internal_model.matcher.{MatchedIdentifiers, WorkNode}
+import weco.pipeline.matcher.matcher.WorkMatcher
+import weco.pipeline.matcher.models.WorkLinks
+import weco.pipeline.matcher.services.MatcherWorkerService
+import weco.pipeline.matcher.storage.{WorkGraphStore, WorkNodeDao}
+import weco.pipeline_storage.fixtures.PipelineStorageStreamFixtures
+import weco.pipeline_storage.memory.MemoryRetriever
 import weco.storage.fixtures.DynamoFixtures.Table
 import weco.storage.locking.dynamo.{
   DynamoLockDaoFixtures,
@@ -22,13 +29,6 @@ import weco.storage.locking.dynamo.{
   ExpiringLock
 }
 import weco.storage.locking.memory.{MemoryLockDao, MemoryLockingService}
-import weco.catalogue.internal_model.identifiers.CanonicalId
-import weco.pipeline.matcher.matcher.WorkMatcher
-import weco.pipeline.matcher.models.WorkLinks
-import weco.pipeline.matcher.services.MatcherWorkerService
-import weco.pipeline.matcher.storage.{WorkGraphStore, WorkNodeDao}
-import weco.pipeline_storage.fixtures.PipelineStorageStreamFixtures
-import weco.pipeline_storage.memory.MemoryRetriever
 
 import java.util.UUID
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -87,7 +87,7 @@ trait MatcherFixtures
     implicit val lockDao: MemoryLockDao[String, UUID] =
       new MemoryLockDao[String, UUID]
     val lockingService =
-      new MemoryLockingService[Set[MatchedIdentifiers], Future]()
+      new MemoryLockingService[MatcherResult, Future]()
 
     val workMatcher = new WorkMatcher(
       workGraphStore = workGraphStore,
@@ -99,7 +99,7 @@ trait MatcherFixtures
 
   def withWorkMatcherAndLockingService[R](
     workGraphStore: WorkGraphStore,
-    lockingService: DynamoLockingService[Set[MatchedIdentifiers], Future])(
+    lockingService: DynamoLockingService[MatcherResult, Future])(
     testWith: TestWith[WorkMatcher, R]): R = {
     val workMatcher = new WorkMatcher(workGraphStore, lockingService)
     testWith(workMatcher)

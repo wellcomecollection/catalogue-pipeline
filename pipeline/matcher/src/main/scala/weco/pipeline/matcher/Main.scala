@@ -1,22 +1,22 @@
 package weco.pipeline.matcher
 
 import akka.actor.ActorSystem
+import com.sksamuel.elastic4s.Index
 import com.typesafe.config.Config
 import org.scanamo.generic.auto._
+import weco.catalogue.internal_model.matcher.MatcherResult
 import weco.elasticsearch.typesafe.ElasticBuilder
 import weco.messaging.sns.NotificationMessage
 import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
-import weco.catalogue.internal_model.matcher.MatchedIdentifiers
+import weco.pipeline.matcher.matcher.WorkMatcher
+import weco.pipeline.matcher.services.MatcherWorkerService
+import weco.pipeline.matcher.storage.elastic.ElasticWorkLinksRetriever
+import weco.pipeline.matcher.storage.{WorkGraphStore, WorkNodeDao}
+import weco.pipeline_storage.typesafe.PipelineStorageStreamBuilder
 import weco.storage.typesafe.{DynamoBuilder, LockingBuilder}
 import weco.typesafe.WellcomeTypesafeApp
 import weco.typesafe.config.builders.AkkaBuilder
 import weco.typesafe.config.builders.EnrichConfig._
-import com.sksamuel.elastic4s.Index
-import weco.pipeline.matcher.matcher.WorkMatcher
-import weco.pipeline.matcher.services.MatcherWorkerService
-import weco.pipeline.matcher.storage.{WorkGraphStore, WorkNodeDao}
-import weco.pipeline.matcher.storage.elastic.ElasticWorkLinksRetriever
-import weco.pipeline_storage.typesafe.PipelineStorageStreamBuilder
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.higherKinds
@@ -39,7 +39,7 @@ object Main extends WellcomeTypesafeApp {
 
     val lockingService =
       LockingBuilder
-        .buildDynamoLockingService[Set[MatchedIdentifiers], Future](
+        .buildDynamoLockingService[MatcherResult, Future](
           config,
           namespace = "locking")
 
