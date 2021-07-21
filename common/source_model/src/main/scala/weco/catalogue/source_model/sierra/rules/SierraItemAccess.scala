@@ -179,9 +179,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
             case _ => None
           }
 
-        AccessCondition(
-          method = AccessMethod.ManualRequest,
-          note = accessNote)
+        AccessCondition(method = AccessMethod.ManualRequest, note = accessNote)
 
       // Handle any cases where the item is closed.
       //
