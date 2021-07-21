@@ -249,7 +249,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           Some(0),
           Some(Status.PermissionRequired),
           Some(OpacMsg.ByAppointment),
-          NotRequestable.NoReason,
+          NotRequestable.NoPublicMessage(_),
           Some(LocationType.ClosedStores))
           if bibStatus.isEmpty || bibStatus.contains(AccessStatus.ByAppointment) || bibStatus
             .contains(AccessStatus.PermissionRequired) =>
