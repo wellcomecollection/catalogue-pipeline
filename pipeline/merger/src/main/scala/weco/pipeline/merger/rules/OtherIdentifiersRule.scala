@@ -19,35 +19,7 @@ import weco.pipeline.merger.models.FieldMergeResult
   *   of these linked IDs merged into them
   * - METS identifiers are not merged as they are not useful
   */
-object OtherIdentifiersRule extends BaseOtherIdentifiersRule{
-
-  override def merge(
-                      target: Work.Visible[Identified],
-                      sources: Seq[Work[Identified]]): FieldMergeResult[FieldData] = {
-    val ids = (
-      mergeDigitalIntoPhysicalSierraTarget(target, sources) |+|
-        mergeIntoCalmTarget(target, sources)
-          .orElse(
-            mergeSingleMiroIntoSingleOrZeroItemSierraTarget(target, sources))
-      ).getOrElse(target.data.otherIdentifiers).distinct
-
-    val mergedSources = (
-      List(
-        mergeIntoCalmTarget,
-        mergeSingleMiroIntoSingleOrZeroItemSierraTarget
-      ).flatMap { rule =>
-        rule.mergedSources(target, sources)
-      } ++ findFirstLinkedDigitisedSierraWorkFor(target, sources)
-      ).distinct
-
-    FieldMergeResult(
-      data = ids,
-      sources = mergedSources
-    )
-  }
-}
-
-trait BaseOtherIdentifiersRule extends FieldMergeRule with MergerLogging {
+object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
   import WorkPredicates._
 
   type FieldData = List[SourceIdentifier]
@@ -58,16 +30,43 @@ trait BaseOtherIdentifiersRule extends FieldMergeRule with MergerLogging {
   // - wellcome-digcode is present to persist digcode identifiers from
   //   Encore records onto Calm target works if they are merged, because
   //   digcode identifiers are used as a tagging/classification system.
-  protected val otherIdentifiersTypeAllowList =
+  private val otherIdentifiersTypeAllowList =
     Set(IdentifierType.WellcomeDigcode, IdentifierType.SierraIdentifier)
 
-  protected def getAllowedIdentifiersFromSource(
+  override def merge(
+    target: Work.Visible[Identified],
+    sources: Seq[Work[Identified]]): FieldMergeResult[FieldData] = {
+    val ids = (
+      mergeDigitalIntoPhysicalSierraTarget(target, sources) |+|
+        mergeIntoTeiTarget(target, sources)
+          .orElse(mergeIntoCalmTarget(target, sources))
+          .orElse(
+            mergeSingleMiroIntoSingleOrZeroItemSierraTarget(target, sources))
+    ).getOrElse(target.data.otherIdentifiers).distinct
+
+    val mergedSources = (
+      List(
+        mergeIntoTeiTarget,
+        mergeIntoCalmTarget,
+        mergeSingleMiroIntoSingleOrZeroItemSierraTarget
+      ).flatMap { rule =>
+        rule.mergedSources(target, sources)
+      } ++ findFirstLinkedDigitisedSierraWorkFor(target, sources)
+    ).distinct
+
+    FieldMergeResult(
+      data = ids,
+      sources = mergedSources
+    )
+  }
+
+  private def getAllowedIdentifiersFromSource(
     source: Work[Identified]): List[SourceIdentifier] =
     (source.sourceIdentifier +: source.data.otherIdentifiers.filter { id =>
       otherIdentifiersTypeAllowList.exists(_ == id.identifierType)
     }).distinct
 
-  protected val mergeSingleMiroIntoSingleOrZeroItemSierraTarget =
+  private val mergeSingleMiroIntoSingleOrZeroItemSierraTarget =
     new PartialRule {
       val isDefinedForTarget: WorkPredicate =
         (singleItemSierra or zeroItemSierra) and sierraPictureDigitalImageOr3DObject
@@ -82,7 +81,18 @@ trait BaseOtherIdentifiersRule extends FieldMergeRule with MergerLogging {
           getAllowedIdentifiersFromSource)
     }
 
-  protected val mergeIntoCalmTarget = new PartialRule {
+  private val mergeIntoTeiTarget = new PartialRule {
+    val isDefinedForTarget: WorkPredicate = teiWork
+    val isDefinedForSource: WorkPredicate =
+      singleDigitalItemMetsWork or sierraWork or singleDigitalItemMiroWork or singlePhysicalItemCalmWork
+
+    def rule(target: Work.Visible[Identified],
+             sources: NonEmptyList[Work[Identified]]): FieldData =
+      target.data.otherIdentifiers ++ sources.toList.flatMap(
+        getAllowedIdentifiersFromSource)
+  }
+
+  private val mergeIntoCalmTarget = new PartialRule {
     val isDefinedForTarget: WorkPredicate = singlePhysicalItemCalmWork
     val isDefinedForSource: WorkPredicate =
       singleDigitalItemMetsWork or sierraWork or singleDigitalItemMiroWork
@@ -93,7 +103,7 @@ trait BaseOtherIdentifiersRule extends FieldMergeRule with MergerLogging {
         getAllowedIdentifiersFromSource)
   }
 
-  protected val mergeDigitalIntoPhysicalSierraTarget = new PartialRule {
+  private val mergeDigitalIntoPhysicalSierraTarget = new PartialRule {
 
     // We don't merge physical/digitised audiovisual works, because the
     // original bib records often contain different data.

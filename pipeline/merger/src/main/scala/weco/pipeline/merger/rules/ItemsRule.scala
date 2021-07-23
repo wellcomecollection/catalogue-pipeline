@@ -18,13 +18,18 @@ import weco.pipeline.merger.models.FieldMergeResult
   * * Sierra - Multi item
   *   * METS works
   */
-object ItemsRule extends BaseItemsRule{
+object ItemsRule extends FieldMergeRule with MergerLogging {
+  import WorkPredicates._
+
+  type FieldData = List[Item[IdState.Minted]]
+
   override def merge(
-                      target: Work.Visible[Identified],
-                      sources: Seq[Work[Identified]]
-                    ): FieldMergeResult[FieldData] = {
+    target: Work.Visible[Identified],
+    sources: Seq[Work[Identified]]
+  ): FieldMergeResult[FieldData] = {
     val items =
-      mergeIntoCalmTarget(target, sources)
+      mergeIntoTeiTarget(target, sources)
+        .orElse(mergeIntoCalmTarget(target, sources))
         .orElse(mergeMetsIntoSierraTarget(target, sources))
         .orElse(
           mergeSingleMiroIntoSingleOrZeroItemSierraTarget(target, sources)
@@ -34,6 +39,7 @@ object ItemsRule extends BaseItemsRule{
 
     val mergedSources = (
       List(
+        mergeIntoTeiTarget,
         mergeIntoCalmTarget,
         mergeMetsIntoSierraTarget,
         mergeSingleMiroIntoSingleOrZeroItemSierraTarget,
@@ -42,20 +48,13 @@ object ItemsRule extends BaseItemsRule{
         rule.mergedSources(target, sources)
       } ++ findFirstLinkedDigitisedSierraWorkFor(target, sources)
         ++ knownDuplicateSources(target, sources)
-      ).distinct
+    ).distinct
 
     FieldMergeResult(
       data = items,
       sources = mergedSources
     )
   }
-}
-
-trait BaseItemsRule extends FieldMergeRule with MergerLogging {
-  import WorkPredicates._
-
-  type FieldData = List[Item[IdState.Minted]]
-
 
   /** When there is only 1 Sierra item, we assume that the METS work item
     * is associated with that and merge the locations onto the Sierra item.
@@ -63,7 +62,7 @@ trait BaseItemsRule extends FieldMergeRule with MergerLogging {
     * Otherwise (including if there are no Sierra items) we append the METS
     * item to the Sierra items
     */
-  protected val mergeMetsIntoSierraTarget = new PartialRule {
+  private val mergeMetsIntoSierraTarget = new PartialRule {
     val isDefinedForTarget: WorkPredicate = sierraWork
     val isDefinedForSource: WorkPredicate = singleDigitalItemMetsWork
 
@@ -97,7 +96,7 @@ trait BaseItemsRule extends FieldMergeRule with MergerLogging {
     * Thus we don't append it to the Sierra items to avoid certain duplication,
     * and leave the works unmerged.
     */
-  protected val mergeSingleMiroIntoSingleOrZeroItemSierraTarget =
+  private val mergeSingleMiroIntoSingleOrZeroItemSierraTarget =
     new PartialRule {
       val isDefinedForTarget
         : WorkPredicate = (singleItemSierra or zeroItemSierra) and sierraPictureDigitalImageOr3DObject
@@ -154,10 +153,25 @@ trait BaseItemsRule extends FieldMergeRule with MergerLogging {
     * we'll also pick up any items linked to the Sierra work from METS or Miro.
     *
     */
-  protected val mergeIntoCalmTarget = new PartialRule {
+  private val mergeIntoCalmTarget = new PartialRule {
     val isDefinedForTarget: WorkPredicate = singlePhysicalItemCalmWork
     val isDefinedForSource: WorkPredicate =
       singleDigitalItemMetsWork or
+        singleDigitalItemMiroWork or
+        sierraWork
+
+    def rule(
+      target: Work.Visible[Identified],
+      sources: NonEmptyList[Work[Identified]]
+    ): FieldData =
+      sources.map(_.data.items).toList.flatten
+  }
+
+  private val mergeIntoTeiTarget = new PartialRule {
+    val isDefinedForTarget: WorkPredicate = teiWork
+    val isDefinedForSource: WorkPredicate =
+      singlePhysicalItemCalmWork or
+        singleDigitalItemMetsWork or
         singleDigitalItemMiroWork or
         sierraWork
 
@@ -173,7 +187,7 @@ trait BaseItemsRule extends FieldMergeRule with MergerLogging {
     * in the 856 web link field.
     *
     */
-  protected val mergeDigitalIntoPhysicalSierraTarget = new PartialRule {
+  private val mergeDigitalIntoPhysicalSierraTarget = new PartialRule {
 
     // We don't merge physical/digitised audiovisual works, because the
     // original bib records often contain different data.

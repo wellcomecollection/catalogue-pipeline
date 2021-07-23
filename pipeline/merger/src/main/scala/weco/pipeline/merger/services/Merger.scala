@@ -2,15 +2,14 @@ package weco.pipeline.merger.services
 
 import cats.data.State
 import weco.catalogue.internal_model.identifiers.{DataState, IdState}
-import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.catalogue.internal_model.image
 import weco.catalogue.internal_model.image.{ImageData, ParentWorks}
+import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.catalogue.internal_model.work.{Work, WorkData, WorkState}
 import weco.pipeline.merger.logging.MergerLogging
 import weco.pipeline.merger.models
 import weco.pipeline.merger.models.{FieldMergeResult, ImageDataWithSource, MergeResult, MergerOutcome}
 import weco.pipeline.merger.rules._
-import weco.pipeline.merger.rules.tei.{TeiItemsRule, TeiOtherIdentifiersRule}
 
 /*
  * The implementor of a Merger must provide:
@@ -172,25 +171,22 @@ object Merger {
   }
 }
 
-object PlatformMerger extends BasePlatformMerger{
-  override val itemsRule: BaseItemsRule = ItemsRule
-  override val otherIdentifiersRule: BaseOtherIdentifiersRule = OtherIdentifiersRule
+object DefaultPlatformMerger extends BasePlatformMerger{
+  override val targetPrecedence: BaseTargetPrecedence = DefaultTargetPrecedence
 }
 
 object TeiPlatformMerger extends BasePlatformMerger{
-  override val itemsRule: BaseItemsRule = TeiItemsRule
-  override val otherIdentifiersRule: BaseOtherIdentifiersRule = TeiOtherIdentifiersRule
+  override val targetPrecedence: BaseTargetPrecedence = TeiTargetPrecedence
 }
 trait BasePlatformMerger extends Merger {
-  import weco.catalogue.internal_model.image.ParentWork._
   import Merger.WorkMergingOps
+  import weco.catalogue.internal_model.image.ParentWork._
 
-  val itemsRule: BaseItemsRule
-  val otherIdentifiersRule: BaseOtherIdentifiersRule
+  val targetPrecedence: BaseTargetPrecedence
   override def findTarget(
     works: Seq[Work[Identified]]
   ): Option[Work.Visible[Identified]] =
-    TargetPrecedence.getTarget(works)
+    targetPrecedence.getTarget(works)
 
   override def createMergeResult(
     target: Work.Visible[Identified],
@@ -213,9 +209,9 @@ trait BasePlatformMerger extends Merger {
       )
     else
       for {
-        items <- itemsRule(target, sources).redirectSources
+        items <- ItemsRule(target, sources).redirectSources
         thumbnail <- ThumbnailRule(target, sources).redirectSources
-        otherIdentifiers <- otherIdentifiersRule(target, sources).redirectSources
+        otherIdentifiers <- OtherIdentifiersRule(target, sources).redirectSources
         sourceImageData <- ImageDataRule(target, sources).redirectSources
         work = target.mapData { data =>
           data.copy[DataState.Identified](

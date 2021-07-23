@@ -19,9 +19,9 @@ object ImageDataRule extends FieldMergeRule {
     // We first try to merge images into Sierra targets, regardless of whether this is the principal
     // target of the graph we're currently merging (ie if there's a Calm target, it's ignored).
     // If this fails, we try to merge into a Calm target
-    TargetPrecedence
+    DefaultTargetPrecedence
       .targetSatisfying(sierraWork)(
-        target +: sources.collect(TargetPrecedence.visibleWork)
+        target +: sources.collect(DefaultTargetPrecedence.visibleWork)
       )
       .map(mergeSierraImages(sources))
       .getOrElse(mergeCalmImages(target, sources))

@@ -6,13 +6,15 @@ import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.work.Format
 import weco.catalogue.internal_model.work.generators.SourceWorkGenerators
 
-class TargetPrecedenceTest
+
+
+trait BaseTargetPrecedenceTest
     extends AnyFunSpec
     with Matchers
     with SourceWorkGenerators
     with OptionValues {
+  val targetPrecedence: BaseTargetPrecedence
 
-  val tei = teiIdentifiedWork()
   val calm = calmIdentifiedWork()
   val videoSierra = sierraDigitalIdentifiedWork().format(Format.Videos)
   val multiItemPhysicalSierra = sierraIdentifiedWork().items(
@@ -22,42 +24,30 @@ class TargetPrecedenceTest
   val miro = miroIdentifiedWork()
 
   describe("target precedence is respected") {
-    it("first, chooses a Tei work") {
-      TargetPrecedence
-        .getTarget(
-          Seq(
-            tei,
-            calm,
-            videoSierra,
-            multiItemPhysicalSierra,
-            digitalSierra,
-            miro)
-        )
-        .value shouldBe tei
-    }
-    it("second, chooses a Calm work") {
-      TargetPrecedence
+
+    it("first, chooses a Calm work") {
+      targetPrecedence
         .getTarget(
           Seq(calm, videoSierra, multiItemPhysicalSierra, digitalSierra, miro)
         )
         .value shouldBe calm
     }
-    it("third, chooses a Sierra e-video") {
-      TargetPrecedence
+    it("second, chooses a Sierra e-video") {
+      targetPrecedence
         .getTarget(
           Seq(videoSierra, multiItemPhysicalSierra, digitalSierra, miro)
         )
         .value shouldBe videoSierra
     }
-    it("fourth, chooses a physical Sierra work") {
-      TargetPrecedence
+    it("third, chooses a physical Sierra work") {
+      targetPrecedence
         .getTarget(
           Seq(multiItemPhysicalSierra, digitalSierra, miro)
         )
         .value shouldBe multiItemPhysicalSierra
     }
     it("finally, chooses any remaining Sierra work") {
-      TargetPrecedence
+      targetPrecedence
         .getTarget(
           Seq(digitalSierra, miro)
         )
@@ -66,14 +56,14 @@ class TargetPrecedenceTest
   }
 
   it("returns None if no valid targets are present") {
-    TargetPrecedence.getTarget(Seq(miro)) shouldBe empty
+    targetPrecedence.getTarget(Seq(miro)) shouldBe empty
   }
 
   it("can apply an additional predicate for target selection") {
     val works = Seq(multiItemPhysicalSierra, digitalSierra, miro)
-    val nonPredicated = TargetPrecedence.getTarget(works)
+    val nonPredicated = targetPrecedence.getTarget(works)
     val singleItemPredicated =
-      TargetPrecedence.targetSatisfying(WorkPredicates.singleItemSierra)(works)
+      targetPrecedence.targetSatisfying(WorkPredicates.singleItemSierra)(works)
 
     nonPredicated.value shouldBe multiItemPhysicalSierra
     singleItemPredicated.value shouldBe digitalSierra

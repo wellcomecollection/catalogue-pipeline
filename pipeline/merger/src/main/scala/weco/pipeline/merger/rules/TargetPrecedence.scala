@@ -2,18 +2,29 @@ package weco.pipeline.merger.rules
 
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.Identified
-
-object TargetPrecedence {
-  import WorkPredicates._
-
-  // This is the canonical list of the order in which we try to select target works
-  private val targetPrecedence = Seq(
+import weco.pipeline.merger.rules.WorkPredicates.{WorkPredicate, physicalSierra, sierraElectronicVideo, sierraWork, singlePhysicalItemCalmWork, teiWork}
+object TeiTargetPrecedence extends BaseTargetPrecedence {
+  override val targetPrecedence: Seq[WorkPredicate] =  Seq(
     teiWork,
     singlePhysicalItemCalmWork,
     sierraElectronicVideo,
     physicalSierra,
     sierraWork
   )
+}
+object DefaultTargetPrecedence extends BaseTargetPrecedence {
+  override val targetPrecedence: Seq[WorkPredicate] =  Seq(
+    singlePhysicalItemCalmWork,
+    sierraElectronicVideo,
+    physicalSierra,
+    sierraWork
+  )
+}
+trait BaseTargetPrecedence {
+  import WorkPredicates._
+
+  // This is the canonical list of the order in which we try to select target works
+  val targetPrecedence: Seq[WorkPredicate]
 
   def targetSatisfying(
     additionalPredicate: WorkPredicate
