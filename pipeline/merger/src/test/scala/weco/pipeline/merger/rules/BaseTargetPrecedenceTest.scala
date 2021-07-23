@@ -6,8 +6,6 @@ import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.work.Format
 import weco.catalogue.internal_model.work.generators.SourceWorkGenerators
 
-
-
 trait BaseTargetPrecedenceTest
     extends AnyFunSpec
     with Matchers

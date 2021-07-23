@@ -14,10 +14,10 @@ import weco.catalogue.internal_model.image.Image
 import weco.catalogue.internal_model.image.ImageState.Initial
 import weco.catalogue.internal_model.work.Work
 import weco.pipeline.merger.services.{
+  DefaultPlatformMerger,
   IdentifiedWorkLookup,
   MergerManager,
-  MergerWorkerService,
-  DefaultPlatformMerger
+  MergerWorkerService
 }
 import weco.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 import weco.pipeline_storage.memory.{MemoryIndexer, MemoryRetriever}

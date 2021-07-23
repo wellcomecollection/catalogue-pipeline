@@ -8,7 +8,12 @@ import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.catalogue.internal_model.work.{Work, WorkData, WorkState}
 import weco.pipeline.merger.logging.MergerLogging
 import weco.pipeline.merger.models
-import weco.pipeline.merger.models.{FieldMergeResult, ImageDataWithSource, MergeResult, MergerOutcome}
+import weco.pipeline.merger.models.{
+  FieldMergeResult,
+  ImageDataWithSource,
+  MergeResult,
+  MergerOutcome
+}
 import weco.pipeline.merger.rules._
 
 /*
@@ -81,7 +86,6 @@ trait Merger extends MergerLogging {
       }
   }
 
-
   def merge(works: Seq[Work[Identified]]): MergerOutcome =
     categoriseWorks(works)
       .map {
@@ -113,7 +117,8 @@ trait Merger extends MergerLogging {
               redirectSources = result.mergedTarget.redirectSources ++ redirectedIdentifiers
             )
           MergerOutcome(
-            resultWorks = redirects.toList ++ passThroughTransform((remaining ++ deleted ).toSeq :+ targetWork) ,
+            resultWorks = redirects.toList ++ passThroughTransform(
+              (remaining ++ deleted).toSeq :+ targetWork),
             imagesWithSources = result.imageDataWithSources
           )
       }
@@ -172,14 +177,16 @@ object Merger {
   }
 }
 
-object DefaultPlatformMerger extends BasePlatformMerger{
+object DefaultPlatformMerger extends BasePlatformMerger {
   override val targetPrecedence: BaseTargetPrecedence = DefaultTargetPrecedence
-  override val passThroughTransform: PassThroughTransform = DefaultPassThroughTransform$
+  override val passThroughTransform: PassThroughTransform =
+    DefaultPassThroughTransform$
 }
 
-object TeiPlatformMerger extends BasePlatformMerger{
+object TeiPlatformMerger extends BasePlatformMerger {
   override val targetPrecedence: BaseTargetPrecedence = TeiTargetPrecedence
-  override val passThroughTransform: PassThroughTransform = TeiPassThroughTransform$
+  override val passThroughTransform: PassThroughTransform =
+    TeiPassThroughTransform$
 }
 trait BasePlatformMerger extends Merger {
   import Merger.WorkMergingOps

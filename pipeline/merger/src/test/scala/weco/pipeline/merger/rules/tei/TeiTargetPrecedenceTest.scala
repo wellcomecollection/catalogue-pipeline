@@ -1,6 +1,10 @@
 package weco.pipeline.merger.rules.tei
 
-import weco.pipeline.merger.rules.{BaseTargetPrecedence, BaseTargetPrecedenceTest, TeiTargetPrecedence}
+import weco.pipeline.merger.rules.{
+  BaseTargetPrecedence,
+  BaseTargetPrecedenceTest,
+  TeiTargetPrecedence
+}
 
 class TeiTargetPrecedenceTest extends BaseTargetPrecedenceTest {
   override val targetPrecedence: BaseTargetPrecedence = TeiTargetPrecedence

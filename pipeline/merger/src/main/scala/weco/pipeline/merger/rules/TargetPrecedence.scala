@@ -2,9 +2,16 @@ package weco.pipeline.merger.rules
 
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.Identified
-import weco.pipeline.merger.rules.WorkPredicates.{WorkPredicate, physicalSierra, sierraElectronicVideo, sierraWork, singlePhysicalItemCalmWork, teiWork}
+import weco.pipeline.merger.rules.WorkPredicates.{
+  physicalSierra,
+  sierraElectronicVideo,
+  sierraWork,
+  singlePhysicalItemCalmWork,
+  teiWork,
+  WorkPredicate
+}
 object TeiTargetPrecedence extends BaseTargetPrecedence {
-  override val targetPrecedence: Seq[WorkPredicate] =  Seq(
+  override val targetPrecedence: Seq[WorkPredicate] = Seq(
     teiWork,
     singlePhysicalItemCalmWork,
     sierraElectronicVideo,
@@ -13,7 +20,7 @@ object TeiTargetPrecedence extends BaseTargetPrecedence {
   )
 }
 object DefaultTargetPrecedence extends BaseTargetPrecedence {
-  override val targetPrecedence: Seq[WorkPredicate] =  Seq(
+  override val targetPrecedence: Seq[WorkPredicate] = Seq(
     singlePhysicalItemCalmWork,
     sierraElectronicVideo,
     physicalSierra,

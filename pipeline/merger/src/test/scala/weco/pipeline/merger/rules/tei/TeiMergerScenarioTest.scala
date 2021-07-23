@@ -4,7 +4,7 @@ import weco.catalogue.internal_model.identifiers.IdentifierType
 import weco.pipeline.merger.MergerScenarioTest
 import weco.pipeline.merger.services.{Merger, TeiPlatformMerger}
 
-class TeiMergerScenarioTest extends MergerScenarioTest{
+class TeiMergerScenarioTest extends MergerScenarioTest {
   override val merger: Merger = TeiPlatformMerger
 
   Scenario("A Tei and a Sierra digital and a sierra physical work are merged") {

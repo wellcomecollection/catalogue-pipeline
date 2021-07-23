@@ -1,9 +1,9 @@
 package weco.pipeline.merger
 
 import weco.catalogue.internal_model.work.Work
-import weco.pipeline.merger.services.{Merger, DefaultPlatformMerger}
+import weco.pipeline.merger.services.{DefaultPlatformMerger, Merger}
 
-class PlatformMergerScenarioTest extends MergerScenarioTest{
+class PlatformMergerScenarioTest extends MergerScenarioTest {
   override val merger: Merger = DefaultPlatformMerger
   Scenario("A Tei is not merged with a Sierra digital and a sierra physical") {
     Given("a Tei, a Sierra physical record and a Sierra digital record")

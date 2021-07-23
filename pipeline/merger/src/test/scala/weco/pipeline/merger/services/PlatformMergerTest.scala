@@ -19,12 +19,11 @@ import weco.catalogue.internal_model.locations.{
 import weco.catalogue.internal_model.work.generators.SourceWorkGenerators
 import weco.catalogue.internal_model.work.{Format, Item, MergeCandidate, Work}
 
-object DefaultPlatformMergerTest extends BasePlatformMergerTest{
+object DefaultPlatformMergerTest extends BasePlatformMergerTest {
   override val merger: BasePlatformMerger = DefaultPlatformMerger
 }
-object TeiPlatformMergerTest extends BasePlatformMergerTest{
+object TeiPlatformMergerTest extends BasePlatformMergerTest {
   override val merger: BasePlatformMerger = TeiPlatformMerger
-
 
   it("merges a physical sierra with a tei") {
     val physicalWork =

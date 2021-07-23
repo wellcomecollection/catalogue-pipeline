@@ -9,7 +9,10 @@ import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.catalogue.internal_model.work.WorkFsm._
 import weco.catalogue.internal_model.work.generators.WorkGenerators
 import weco.pipeline.merger.models.{MergeResult, MergerOutcome}
-import weco.pipeline.merger.rules.{DefaultPassThroughTransform$, PassThroughTransform}
+import weco.pipeline.merger.rules.{
+  DefaultPassThroughTransform$,
+  PassThroughTransform
+}
 
 class MergerManagerTest extends AnyFunSpec with Matchers with WorkGenerators {
 
@@ -90,7 +93,8 @@ class MergerManagerTest extends AnyFunSpec with Matchers with WorkGenerators {
           (sources zip Stream.continually(true) toMap, MergeResult(target, Nil))
       )
 
-    override val passThroughTransform: PassThroughTransform = DefaultPassThroughTransform$
+    override val passThroughTransform: PassThroughTransform =
+      DefaultPassThroughTransform$
   }
 
   val mergerManager = new MergerManager(mergerRules = mergerRules)

@@ -15,7 +15,7 @@ trait MergerScenarioTest
     with Matchers
     with FeatureTestSugar
     with SourceWorkGenerators {
-  val merger:Merger
+  val merger: Merger
 
   /*
    * We test field-level behaviour in the rule tests, and have to replicate it

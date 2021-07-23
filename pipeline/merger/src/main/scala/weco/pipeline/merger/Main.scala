@@ -14,9 +14,19 @@ import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.catalogue.internal_model.image.Image
 import weco.catalogue.internal_model.image.ImageState.Initial
 import weco.catalogue.internal_model.work.Work
-import weco.pipeline.merger.services.{IdentifiedWorkLookup, MergerManager, MergerWorkerService, DefaultPlatformMerger, TeiPlatformMerger}
+import weco.pipeline.merger.services.{
+  DefaultPlatformMerger,
+  IdentifiedWorkLookup,
+  MergerManager,
+  MergerWorkerService,
+  TeiPlatformMerger
+}
 import weco.pipeline_storage.EitherIndexer
-import weco.pipeline_storage.typesafe.{ElasticIndexerBuilder, ElasticSourceRetrieverBuilder, PipelineStorageStreamBuilder}
+import weco.pipeline_storage.typesafe.{
+  ElasticIndexerBuilder,
+  ElasticSourceRetrieverBuilder,
+  PipelineStorageStreamBuilder
+}
 import weco.typesafe.config.builders.EnrichConfig._
 
 object Main extends WellcomeTypesafeApp {
@@ -35,8 +45,10 @@ object Main extends WellcomeTypesafeApp {
         namespace = "identified-works"
       )
     )
-    val mergerMode = config.getStringOption("merger.rules.mode").getOrElse("default")
-    val mergerRules = if (mergerMode == "tei") TeiPlatformMerger else DefaultPlatformMerger
+    val mergerMode =
+      config.getStringOption("merger.rules.mode").getOrElse("default")
+    val mergerRules =
+      if (mergerMode == "tei") TeiPlatformMerger else DefaultPlatformMerger
     val mergerManager = new MergerManager(
       mergerRules = mergerRules
     )
