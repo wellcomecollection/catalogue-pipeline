@@ -19,8 +19,19 @@ class PlatformMergerScenarioTest extends MergerScenarioTest{
     outcome.getMerged(digitalSierra) should beRedirectedTo(physicalSierra)
     outcome.getMerged(physicalSierra) shouldBe a[Work.Visible[_]]
 
-    And("the tei work passes through unchanged")
+    And("the tei work becomes invisible")
     outcome
-      .getMerged(teiWork) shouldBe teiWork
+      .getMerged(teiWork) shouldBe a[Work.Invisible[_]]
+  }
+  Scenario("A Tei work becomes invisible") {
+    Given("a Tei")
+    val teiWork = teiIdentifiedWork().title("A tei work")
+
+    When("the tei work is merged")
+    val outcome = merger.merge(List(teiWork))
+
+    Then("the tei work becomes invisible")
+    outcome
+      .getMerged(teiWork) shouldBe a[Work.Invisible[_]]
   }
 }

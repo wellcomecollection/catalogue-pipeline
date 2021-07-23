@@ -43,4 +43,16 @@ class TeiMergerScenarioTest extends MergerScenarioTest{
       .otherIdentifiers should contain allElementsOf digitalSierra.data.otherIdentifiers
       .filter(_.identifierType == IdentifierType.SierraIdentifier)
   }
+
+  Scenario("A Tei work passes unchanged") {
+    Given("a Tei")
+    val teiWork = teiIdentifiedWork().title("A tei work")
+
+    When("the tei work is merged")
+    val outcome = merger.merge(List(teiWork))
+
+    Then("the tei work becomes invisible")
+    outcome
+      .getMerged(teiWork) shouldBe teiWork
+  }
 }
