@@ -25,6 +25,7 @@ import weco.pipeline.merger.rules._
  */
 trait Merger extends MergerLogging {
   type MergeState = Map[Work[Identified], Boolean]
+  val passThrough: PassThrough
 
   protected def findTarget(
     works: Seq[Work[Identified]]
@@ -80,6 +81,7 @@ trait Merger extends MergerLogging {
       }
   }
 
+
   def merge(works: Seq[Work[Identified]]): MergerOutcome =
     categoriseWorks(works)
       .map {
@@ -110,13 +112,12 @@ trait Merger extends MergerLogging {
               state = result.mergedTarget.state,
               redirectSources = result.mergedTarget.redirectSources ++ redirectedIdentifiers
             )
-
           MergerOutcome(
-            resultWorks = redirects.toList ++ remaining ++ deleted :+ targetWork,
+            resultWorks = redirects.toList ++ passThrough((remaining ++ deleted ).toSeq :+ targetWork) ,
             imagesWithSources = result.imageDataWithSources
           )
       }
-      .getOrElse(MergerOutcome.passThrough(works))
+      .getOrElse(MergerOutcome(passThrough(works), Nil))
 
   private def redirectSourceToTarget(
     target: Work.Visible[Identified]
@@ -173,10 +174,12 @@ object Merger {
 
 object DefaultPlatformMerger extends BasePlatformMerger{
   override val targetPrecedence: BaseTargetPrecedence = DefaultTargetPrecedence
+  override val passThrough: PassThrough = DefaultPassThrough
 }
 
 object TeiPlatformMerger extends BasePlatformMerger{
   override val targetPrecedence: BaseTargetPrecedence = TeiTargetPrecedence
+  override val passThrough: PassThrough = TeiPassThrough
 }
 trait BasePlatformMerger extends Merger {
   import Merger.WorkMergingOps

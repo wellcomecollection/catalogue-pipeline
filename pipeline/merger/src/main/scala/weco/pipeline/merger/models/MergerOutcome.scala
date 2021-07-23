@@ -39,9 +39,3 @@ case class MergerOutcome(resultWorks: Seq[Work[Identified]],
         )
     }
 }
-
-object MergerOutcome {
-
-  def passThrough(works: Seq[Work[Identified]]): MergerOutcome =
-    new MergerOutcome(works, Nil)
-}

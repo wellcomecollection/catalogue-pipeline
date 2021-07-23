@@ -9,4 +9,5 @@ object InvisibilityReason {
   case object UnlinkedHistoricalLibraryMiro extends InvisibilityReason
   case class UnableToTransform(message: String) extends InvisibilityReason
   case object MetsWorksAreNotVisible extends InvisibilityReason
+  case object TeiWorksAreNotVisible extends InvisibilityReason
 }

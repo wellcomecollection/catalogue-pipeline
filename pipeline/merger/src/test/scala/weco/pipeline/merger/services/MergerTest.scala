@@ -6,19 +6,11 @@ import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.catalogue.internal_model.work.WorkFsm._
 import cats.data.State
 import weco.catalogue.internal_model.work.generators.SierraWorkGenerators
-import weco.catalogue.internal_model.identifiers.{
-  DataState,
-  IdState,
-  SourceIdentifier
-}
-import weco.catalogue.internal_model.work.generators.{
-  MetsWorkGenerators,
-  MiroWorkGenerators,
-  SierraWorkGenerators
-}
+import weco.catalogue.internal_model.identifiers.{DataState, IdState, SourceIdentifier}
+import weco.catalogue.internal_model.work.generators.{MetsWorkGenerators, MiroWorkGenerators, SierraWorkGenerators}
 import weco.catalogue.internal_model.work.{Item, Work}
 import weco.pipeline.merger.models.{FieldMergeResult, MergeResult}
-import weco.pipeline.merger.rules.FieldMergeRule
+import weco.pipeline.merger.rules.{DefaultPassThrough, FieldMergeRule, PassThrough}
 
 class MergerTest
     extends AnyFunSpec
@@ -64,6 +56,7 @@ class MergerTest
 
   // Merges everything into the first Work in a given input.
   object FirstWorkMerger extends Merger {
+
     import Merger.WorkMergingOps
 
     override protected def findTarget(
@@ -87,6 +80,8 @@ class MergerTest
             },
           imageDataWithSources = Nil
         )
+
+    override val passThrough: PassThrough = DefaultPassThrough
   }
 
   val mergedWorks = FirstWorkMerger.merge(inputWorks)
