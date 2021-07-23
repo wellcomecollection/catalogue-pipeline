@@ -20,6 +20,6 @@ class MergerManager(mergerRules: Merger) {
       assert(result.resultWorks.size == works.size)
       result
     } else
-      MergerOutcome(mergerRules.passThrough(works), Nil)
+      MergerOutcome(mergerRules.passThroughTransform(works), Nil)
   }
 }

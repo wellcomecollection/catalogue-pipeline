@@ -10,7 +10,7 @@ import weco.catalogue.internal_model.identifiers.{DataState, IdState, SourceIden
 import weco.catalogue.internal_model.work.generators.{MetsWorkGenerators, MiroWorkGenerators, SierraWorkGenerators}
 import weco.catalogue.internal_model.work.{Item, Work}
 import weco.pipeline.merger.models.{FieldMergeResult, MergeResult}
-import weco.pipeline.merger.rules.{DefaultPassThrough, FieldMergeRule, PassThrough}
+import weco.pipeline.merger.rules.{DefaultPassThroughTransform$, FieldMergeRule, PassThroughTransform}
 
 class MergerTest
     extends AnyFunSpec
@@ -81,7 +81,7 @@ class MergerTest
           imageDataWithSources = Nil
         )
 
-    override val passThrough: PassThrough = DefaultPassThrough
+    override val passThroughTransform: PassThroughTransform = DefaultPassThroughTransform$
   }
 
   val mergedWorks = FirstWorkMerger.merge(inputWorks)
