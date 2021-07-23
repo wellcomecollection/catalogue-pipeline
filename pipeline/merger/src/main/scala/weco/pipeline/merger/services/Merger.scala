@@ -10,7 +10,7 @@ import weco.pipeline.merger.logging.MergerLogging
 import weco.pipeline.merger.models
 import weco.pipeline.merger.models.{FieldMergeResult, ImageDataWithSource, MergeResult, MergerOutcome}
 import weco.pipeline.merger.rules._
-import weco.pipeline.merger.rules.tei.TeiItemsRule
+import weco.pipeline.merger.rules.tei.{TeiItemsRule, TeiOtherIdentifiersRule}
 
 /*
  * The implementor of a Merger must provide:
@@ -174,16 +174,19 @@ object Merger {
 
 object PlatformMerger extends BasePlatformMerger{
   override val itemsRule: BaseItemsRule = ItemsRule
+  override val otherIdentifiersRule: BaseOtherIdentifiersRule = OtherIdentifiersRule
 }
 
 object TeiPlatformMerger extends BasePlatformMerger{
   override val itemsRule: BaseItemsRule = TeiItemsRule
+  override val otherIdentifiersRule: BaseOtherIdentifiersRule = TeiOtherIdentifiersRule
 }
 trait BasePlatformMerger extends Merger {
   import weco.catalogue.internal_model.image.ParentWork._
   import Merger.WorkMergingOps
 
   val itemsRule: BaseItemsRule
+  val otherIdentifiersRule: BaseOtherIdentifiersRule
   override def findTarget(
     works: Seq[Work[Identified]]
   ): Option[Work.Visible[Identified]] =
@@ -212,7 +215,7 @@ trait BasePlatformMerger extends Merger {
       for {
         items <- itemsRule(target, sources).redirectSources
         thumbnail <- ThumbnailRule(target, sources).redirectSources
-        otherIdentifiers <- OtherIdentifiersRule(target, sources).redirectSources
+        otherIdentifiers <- otherIdentifiersRule(target, sources).redirectSources
         sourceImageData <- ImageDataRule(target, sources).redirectSources
         work = target.mapData { data =>
           data.copy[DataState.Identified](
