@@ -381,7 +381,6 @@ class TeiIdExtractorWorkerServiceTest
                     parallelism = 10,
                     deleteMessageDelay = 500 milliseconds)
                 )
-                println(s"@@AWLC t5 = ${Instant.now()}")
                 service.run()
                 testWith((q, messageSender, store, bucket))
             }
