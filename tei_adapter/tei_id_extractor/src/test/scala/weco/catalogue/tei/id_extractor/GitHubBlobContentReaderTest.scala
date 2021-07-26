@@ -1,22 +1,18 @@
 package weco.catalogue.tei.id_extractor
 
-import com.github.tomakehurst.wiremock.client.WireMock._
+import akka.http.scaladsl.model._
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.akka.fixtures.Akka
-import weco.catalogue.tei.id_extractor.fixtures.{
-  LocalResources,
-  Wiremock,
-  XmlAssertions
-}
-import weco.http.client.AkkaHttpClient
+import weco.catalogue.tei.id_extractor.fixtures.{LocalResources, XmlAssertions}
+import weco.http.client.MemoryHttpClient
 
 import java.net.URI
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class GitHubBlobContentReaderTest
     extends AnyFunSpec
-    with Wiremock
     with ScalaFutures
     with Matchers
     with Akka
@@ -25,48 +21,80 @@ class GitHubBlobContentReaderTest
     with XmlAssertions {
 
   it("reads a blob from GitHub") {
-    withWiremock("localhost") { port =>
-      withActorSystem { implicit ac =>
-        val uri = new URI(
-          s"http://localhost:$port/git/blobs/2e6b5fa45462510d5549b6bcf2bbc8b53ae08aed")
-        val gitHubBlobReader =
-          new GitHubBlobContentReader(new AkkaHttpClient(), "fake_token")
+    val uri =
+      "http://github:1234/git/blobs/2e6b5fa45462510d5549b6bcf2bbc8b53ae08aed"
 
-        whenReady(gitHubBlobReader.getBlob(uri)) {
-          assertXmlStringsAreEqual(_, readResource("/WMS_Arabic_1.xml"))
-        }
+    val responses = Seq(
+      (
+        HttpRequest(uri = Uri(uri)),
+        HttpResponse(
+          entity = HttpEntity(
+            contentType = ContentTypes.`application/json`,
+            readResource("/github-blob-2e6b5fa.json")
+          )
+        )
+      )
+    )
+
+    val httpClient = new MemoryHttpClient(responses)
+
+    withActorSystem { implicit ac =>
+      val gitHubBlobReader = new GitHubBlobContentReader(httpClient)
+
+      whenReady(gitHubBlobReader.getBlob(new URI(uri))) {
+        assertXmlStringsAreEqual(_, readResource("/WMS_Arabic_1.xml"))
       }
     }
   }
+
   it("strips bom in tei files read from GitHub") {
-    withWiremock("localhost") { port =>
-      withActorSystem { implicit ac =>
-        val uri = new URI(
-          s"http://localhost:$port/git/blobs/ddffeb761e5158b41a3780cda22346978d2cd6bd")
-        val gitHubBlobReader =
-          new GitHubBlobContentReader(new AkkaHttpClient(), "fake_token")
+    val uri =
+      "http://github:1234/git/blobs/ddffeb761e5158b41a3780cda22346978d2cd6bd"
 
-        whenReady(gitHubBlobReader.getBlob(uri)) {
-          assertXmlStringsAreEqual(_, readResource("/Javanese_11.xml"))
-        }
+    val responses = Seq(
+      (
+        HttpRequest(uri = Uri(uri)),
+        HttpResponse(
+          entity = HttpEntity(
+            contentType = ContentTypes.`application/json`,
+            readResource("/github-blob-ddffeb7.json")
+          )
+        )
+      )
+    )
+
+    val httpClient = new MemoryHttpClient(responses)
+
+    withActorSystem { implicit ac =>
+      val gitHubBlobReader = new GitHubBlobContentReader(httpClient)
+
+      whenReady(gitHubBlobReader.getBlob(new URI(uri))) {
+        assertXmlStringsAreEqual(_, readResource("/Javanese_11.xml"))
       }
     }
   }
-  it("handles error from github") {
-    withWiremock("localhost") { port =>
-      withActorSystem { implicit ac =>
-        val uri = new URI(s"http://localhost:$port/git/blobs/123456789qwertyu")
-        val gitHubBlobReader =
-          new GitHubBlobContentReader(new AkkaHttpClient(), "fake_token")
-        stubFor(
-          get("/git/blobs/123456789qwertyu")
-            .willReturn(serverError()
-              .withBody("<response>ERROR!</response>")))
 
-        whenReady(gitHubBlobReader.getBlob(uri).failed) { result =>
-          result shouldBe a[RuntimeException]
-          result.getMessage should include("Server Error")
-        }
+  it("handles error from github") {
+    val uri = "http://github:1234/git/blobs/123456789qwertyu"
+
+    val responses = Seq(
+      (
+        HttpRequest(uri = Uri(uri)),
+        HttpResponse(
+          status = StatusCodes.InternalServerError,
+          entity = HttpEntity("<response>ERROR!</response>")
+        )
+      )
+    )
+
+    val httpClient = new MemoryHttpClient(responses)
+
+    withActorSystem { implicit ac =>
+      val gitHubBlobReader = new GitHubBlobContentReader(httpClient)
+
+      whenReady(gitHubBlobReader.getBlob(new URI(uri)).failed) { result =>
+        result shouldBe a[RuntimeException]
+        result.getMessage should include("Server Error")
       }
     }
   }
