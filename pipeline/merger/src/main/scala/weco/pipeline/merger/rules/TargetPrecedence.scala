@@ -10,24 +10,6 @@ import weco.pipeline.merger.rules.WorkPredicates.{
   teiWork,
   WorkPredicate
 }
-object TeiTargetPrecedence extends BaseTargetPrecedence {
-  override val targetPrecedence: Seq[WorkPredicate] = Seq(
-    teiWork,
-    singlePhysicalItemCalmWork,
-    sierraElectronicVideo,
-    physicalSierra,
-    sierraWork
-  )
-}
-
-object DefaultTargetPrecedence extends BaseTargetPrecedence {
-  override val targetPrecedence: Seq[WorkPredicate] = Seq(
-    singlePhysicalItemCalmWork,
-    sierraElectronicVideo,
-    physicalSierra,
-    sierraWork
-  )
-}
 
 trait BaseTargetPrecedence {
   import WorkPredicates._
@@ -54,4 +36,18 @@ trait BaseTargetPrecedence {
     : PartialFunction[Work[Identified], Work.Visible[Identified]] = {
     case work: Work.Visible[Identified] => work
   }
+}
+
+object DefaultTargetPrecedence extends BaseTargetPrecedence {
+  override val targetPrecedence: Seq[WorkPredicate] = Seq(
+    singlePhysicalItemCalmWork,
+    sierraElectronicVideo,
+    physicalSierra,
+    sierraWork
+  )
+}
+
+object TeiTargetPrecedence extends BaseTargetPrecedence {
+  override val targetPrecedence: Seq[WorkPredicate] =
+    teiWork +: DefaultTargetPrecedence.targetPrecedence
 }
