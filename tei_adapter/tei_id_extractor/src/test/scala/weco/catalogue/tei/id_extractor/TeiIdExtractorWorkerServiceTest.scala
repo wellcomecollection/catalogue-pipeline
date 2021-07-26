@@ -1,5 +1,13 @@
 package weco.catalogue.tei.id_extractor
 
+import akka.http.scaladsl.model.Uri.Path
+import akka.http.scaladsl.model.{
+  ContentTypes,
+  HttpEntity,
+  HttpRequest,
+  HttpResponse,
+  StatusCodes
+}
 import com.github.tomakehurst.wiremock.client.WireMock
 import io.circe.Encoder
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
@@ -14,12 +22,10 @@ import weco.catalogue.tei.id_extractor.database.TableProvisioner
 import weco.catalogue.tei.id_extractor.fixtures.{
   LocalResources,
   PathIdDatabase,
-  Wiremock,
   XmlAssertions
 }
-import weco.catalogue.tei.id_extractor.github.GitHubAuthenticatedHttpClient
 import weco.fixtures.TestWith
-import weco.http.client.AkkaHttpClient
+import weco.http.client.HttpClient
 import weco.json.JsonUtil._
 import weco.messaging.fixtures.SQS
 import weco.messaging.fixtures.SQS.QueuePair
@@ -32,12 +38,12 @@ import weco.storage.store.memory.MemoryStore
 
 import java.time.Instant
 import java.time.temporal.ChronoUnit
+import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.util.Try
 
 class TeiIdExtractorWorkerServiceTest
     extends AnyFunSpec
-    with Wiremock
     with SQS
     with Akka
     with Eventually
@@ -311,6 +317,35 @@ class TeiIdExtractorWorkerServiceTest
     }
   }
 
+  private val httpClient = new HttpClient {
+    override def singleRequest(request: HttpRequest): Future[HttpResponse] =
+      request.uri.path match {
+        case Path("/git/blobs/2e6b5fa45462510d5549b6bcf2bbc8b53ae08aed") =>
+          Future.successful(
+            HttpResponse(
+              entity = HttpEntity(
+                contentType = ContentTypes.`application/json`,
+                readResource("/__files/body-git-blobs-2e6b5fa45462510d5549b6bcf2bbc8b53ae08aed-Q9z4L.json")
+              )
+            )
+          )
+
+        case Path("/git/blobs/ddffeb761e5158b41a3780cda22346978d2cd6bd") =>
+          Future.successful(
+            HttpResponse(
+              entity = HttpEntity(
+                contentType = ContentTypes.`application/json`,
+                readResource("/__files/body-git-blobs-ddffeb761e5158b41a3780cda22346978d2cd6bd-dGrXS.json")
+              )
+            )
+          )
+
+        case _ =>
+
+          Future.successful(HttpResponse(status = StatusCodes.NotFound))
+      }
+  }
+
   def withWorkerService[R](messageSender: MemoryMessageSender =
                              new MemoryMessageSender())(
     testWith: TestWith[(QueuePair,
@@ -328,13 +363,7 @@ class TeiIdExtractorWorkerServiceTest
             withSQSStream(queue) { stream: SQSStream[NotificationMessage] =>
               withPathIdTable {
                 case (config, table) =>
-
-                  val client = new GitHubAuthenticatedHttpClient(
-                    underlying = new AkkaHttpClient(),
-                    token = "fake_token"
-                  )
-
-                  val gitHubBlobReader = new GitHubBlobContentReader(client)
+                  val gitHubBlobReader = new GitHubBlobContentReader(httpClient)
 
                   val store = new MemoryStore[S3ObjectLocation, String](Map())
                   val bucket = Bucket("bucket")
