@@ -21,7 +21,8 @@ class GitHubBlobContentReaderTest
     with XmlAssertions {
 
   it("reads a blob from GitHub") {
-    val uri = "http://github:1234/git/blobs/2e6b5fa45462510d5549b6bcf2bbc8b53ae08aed"
+    val uri =
+      "http://github:1234/git/blobs/2e6b5fa45462510d5549b6bcf2bbc8b53ae08aed"
 
     val responses = Seq(
       (
@@ -47,7 +48,8 @@ class GitHubBlobContentReaderTest
   }
 
   it("strips bom in tei files read from GitHub") {
-    val uri = "http://github:1234/git/blobs/ddffeb761e5158b41a3780cda22346978d2cd6bd"
+    val uri =
+      "http://github:1234/git/blobs/ddffeb761e5158b41a3780cda22346978d2cd6bd"
 
     val responses = Seq(
       (

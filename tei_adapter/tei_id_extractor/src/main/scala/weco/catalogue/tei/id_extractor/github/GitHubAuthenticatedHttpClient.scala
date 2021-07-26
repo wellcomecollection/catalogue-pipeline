@@ -15,7 +15,8 @@ import weco.http.client.HttpClient
 
 import scala.concurrent.Future
 
-class GitHubAuthenticatedHttpClient(underlying: HttpClient, token: String) extends HttpClient {
+class GitHubAuthenticatedHttpClient(underlying: HttpClient, token: String)
+    extends HttpClient {
   override def singleRequest(request: HttpRequest): Future[HttpResponse] =
     underlying.singleRequest(
       request.copy(

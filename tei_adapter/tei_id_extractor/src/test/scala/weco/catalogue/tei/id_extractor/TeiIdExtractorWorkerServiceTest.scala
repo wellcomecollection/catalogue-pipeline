@@ -92,7 +92,7 @@ class TeiIdExtractorWorkerServiceTest
       override def singleRequest(request: HttpRequest): Future[HttpResponse] =
         Future.failed(new Throwable("This should never be called!"))
     }
-    
+
     withWorkerService(httpClient = neverCallClient) {
       case (QueuePair(queue, dlq), messageSender, store, _) =>
         val modifiedTime = "2021-05-27T14:05:00Z"
@@ -347,17 +347,16 @@ class TeiIdExtractorWorkerServiceTest
       }
   }
 
-  def withWorkerService[R](
-    messageSender: MemoryMessageSender =
-      new MemoryMessageSender(),
-    httpClient: HttpClient = httpClient)(
+  def withWorkerService[R](messageSender: MemoryMessageSender =
+                             new MemoryMessageSender(),
+                           httpClient: HttpClient = httpClient)(
     testWith: TestWith[(QueuePair,
                         MemoryMessageSender,
                         MemoryStore[S3ObjectLocation, String],
                         Bucket),
                        R]): R =
     withLocalSqsQueuePair(visibilityTimeout = 3.seconds) {
-      case q@QueuePair(queue, _) =>
+      case q @ QueuePair(queue, _) =>
         withActorSystem { implicit ac =>
           implicit val ec = ac.dispatcher
           withSQSStream(queue) { stream: SQSStream[NotificationMessage] =>
@@ -372,11 +371,8 @@ class TeiIdExtractorWorkerServiceTest
                   tableProvisioner =
                     new TableProvisioner(rdsClientConfig, config),
                   gitHubBlobReader = gitHubBlobReader,
-                  pathIdManager = new PathIdManager(
-                    table,
-                    store,
-                    messageSender,
-                    bucket.name),
+                  pathIdManager =
+                    new PathIdManager(table, store, messageSender, bucket.name),
                   config = TeiIdExtractorConfig(
                     parallelism = 10,
                     deleteMessageDelay = 500 milliseconds)
