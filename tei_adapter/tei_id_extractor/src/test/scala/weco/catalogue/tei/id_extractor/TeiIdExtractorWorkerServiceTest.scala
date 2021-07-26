@@ -52,10 +52,12 @@ class TeiIdExtractorWorkerServiceTest
     with LocalResources
     with XmlAssertions {
 
+  val repoUrl = "http://github:1234"
+
   it(
     "receives a message, stores the file in s3 and send a message to the tei adapter with the file id") {
     withWorkerService() {
-      case (QueuePair(queue, dlq), messageSender, store, bucket, repoUrl) =>
+      case (QueuePair(queue, dlq), messageSender, store, bucket) =>
         val modifiedTime = "2021-05-27T14:05:00Z"
         val message = {
           s"""
@@ -88,7 +90,7 @@ class TeiIdExtractorWorkerServiceTest
 
   it("a message for a non TEI file is ignored") {
     withWorkerService() {
-      case (QueuePair(queue, dlq), messageSender, store, _, repoUrl) =>
+      case (QueuePair(queue, dlq), messageSender, store, _) =>
         val modifiedTime = "2021-05-27T14:05:00Z"
         val message = {
           s"""
@@ -118,7 +120,7 @@ class TeiIdExtractorWorkerServiceTest
 
   it("an older message for a file changed is ignored") {
     withWorkerService() {
-      case (QueuePair(queue, dlq), messageSender, store, bucket, repoUrl) =>
+      case (QueuePair(queue, dlq), messageSender, store, bucket) =>
         val (createdTime: String, expectedS3Location: S3ObjectLocation) =
           createFile(queue, store, bucket, repoUrl)
         val modifiedTime = Instant.parse(createdTime).minus(2, ChronoUnit.HOURS)
@@ -152,7 +154,7 @@ class TeiIdExtractorWorkerServiceTest
 
   it("handles file deleted messages") {
     withWorkerService() {
-      case (QueuePair(queue, dlq), messageSender, store, bucket, repoUrl) =>
+      case (QueuePair(queue, dlq), messageSender, store, bucket) =>
         val (modifiedTime: String, expectedS3Location: S3ObjectLocation) =
           createFile(queue, store, bucket, repoUrl)
         val deletedTime = "2021-05-27T16:05:00Z"
@@ -196,7 +198,7 @@ class TeiIdExtractorWorkerServiceTest
       }
     }
     withWorkerService(messageSender) {
-      case (QueuePair(queue, dlq), _, store, bucket, repoUrl) =>
+      case (QueuePair(queue, dlq), _, store, bucket) =>
         val (modifiedTime: String, expectedS3Location: S3ObjectLocation) =
           createFile(queue, store, bucket, repoUrl)
         val deletedTime = "2021-05-27T16:05:00Z"
@@ -239,7 +241,7 @@ class TeiIdExtractorWorkerServiceTest
       }
     }
     withWorkerService(messageSender) {
-      case (QueuePair(queue, dlq), _, store, bucket, repoUrl) =>
+      case (QueuePair(queue, dlq), _, store, bucket) =>
         val modifiedTime = "2021-05-27T14:05:00Z"
         val message = {
           s"""
@@ -272,7 +274,7 @@ class TeiIdExtractorWorkerServiceTest
 
   it("handles a file being moved") {
     withWorkerService() {
-      case (QueuePair(queue, dlq), messageSender, store, bucket, repoUrl) =>
+      case (QueuePair(queue, dlq), messageSender, store, bucket) =>
         val (createdTime: String, expectedS3Location: S3ObjectLocation) =
           createFile(queue, store, bucket, repoUrl)
         val movedTime = "2021-05-27T16:05:00Z"
@@ -351,42 +353,38 @@ class TeiIdExtractorWorkerServiceTest
     testWith: TestWith[(QueuePair,
                         MemoryMessageSender,
                         MemoryStore[S3ObjectLocation, String],
-                        Bucket,
-                        String),
+                        Bucket),
                        R]): R =
-    withWiremock("localhost") { port =>
-      val repoUrl = s"http://localhost:$port"
-      withLocalSqsQueuePair(visibilityTimeout = 3.seconds) {
-        case q @ QueuePair(queue, _) =>
-          withActorSystem { implicit ac =>
-            implicit val ec = ac.dispatcher
-            withSQSStream(queue) { stream: SQSStream[NotificationMessage] =>
-              withPathIdTable {
-                case (config, table) =>
-                  val gitHubBlobReader = new GitHubBlobContentReader(httpClient)
+    withLocalSqsQueuePair(visibilityTimeout = 3.seconds) {
+      case q@QueuePair(queue, _) =>
+        withActorSystem { implicit ac =>
+          implicit val ec = ac.dispatcher
+          withSQSStream(queue) { stream: SQSStream[NotificationMessage] =>
+            withPathIdTable {
+              case (config, table) =>
+                val gitHubBlobReader = new GitHubBlobContentReader(httpClient)
 
-                  val store = new MemoryStore[S3ObjectLocation, String](Map())
-                  val bucket = Bucket("bucket")
-                  val service = new TeiIdExtractorWorkerService(
-                    messageStream = stream,
-                    tableProvisioner =
-                      new TableProvisioner(rdsClientConfig, config),
-                    gitHubBlobReader = gitHubBlobReader,
-                    pathIdManager = new PathIdManager(
-                      table,
-                      store,
-                      messageSender,
-                      bucket.name),
-                    config = TeiIdExtractorConfig(
-                      parallelism = 10,
-                      deleteMessageDelay = 500 milliseconds)
-                  )
-                  service.run()
-                  testWith((q, messageSender, store, bucket, repoUrl))
-              }
+                val store = new MemoryStore[S3ObjectLocation, String](Map())
+                val bucket = Bucket("bucket")
+                val service = new TeiIdExtractorWorkerService(
+                  messageStream = stream,
+                  tableProvisioner =
+                    new TableProvisioner(rdsClientConfig, config),
+                  gitHubBlobReader = gitHubBlobReader,
+                  pathIdManager = new PathIdManager(
+                    table,
+                    store,
+                    messageSender,
+                    bucket.name),
+                  config = TeiIdExtractorConfig(
+                    parallelism = 10,
+                    deleteMessageDelay = 500 milliseconds)
+                )
+                service.run()
+                testWith((q, messageSender, store, bucket))
             }
           }
-      }
+        }
     }
 
   private def createFile(queue: SQS.Queue,
