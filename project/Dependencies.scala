@@ -123,10 +123,6 @@ object ExternalDependencies {
     "org.scalatestplus" %% versions.scalatestplusMockitoArtifactId % versions.scalatestplus % "test"
   )
 
-  val wireMockDependencies = Seq(
-    "com.github.tomakehurst" % "wiremock" % "2.25.1" % Test
-  )
-
   val mySqlDependencies = Seq(
     "org.flywaydb" % "flyway-core" % "4.2.0",
     "org.scalikejdbc" %% "scalikejdbc" % "3.4.0",
@@ -290,8 +286,7 @@ object CatalogueDependencies {
 
   // Inference manager
   val inferenceManagerDependencies: Seq[ModuleID] =
-    ExternalDependencies.wireMockDependencies ++
-      WellcomeDependencies.httpLibrary
+    WellcomeDependencies.httpLibrary
 
   // TEI adapter
 
