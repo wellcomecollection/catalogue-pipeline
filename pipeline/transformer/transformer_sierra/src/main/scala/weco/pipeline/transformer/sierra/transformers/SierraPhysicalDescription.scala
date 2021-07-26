@@ -40,7 +40,7 @@ object SierraPhysicalDescription
 
     lines.mkString("<br/>") match {
       case s if s.isEmpty => None
-      case s => Some(s)
+      case s              => Some(s)
     }
   }
 }

@@ -80,7 +80,9 @@ class SierraPhysicalDescriptionTest
         VarField(
           marcTag = Some("300"),
           subfields = List(
-            MarcSubfield(tag = "a", content = "1 videocassette (VHS) (1 min.) :"),
+            MarcSubfield(
+              tag = "a",
+              content = "1 videocassette (VHS) (1 min.) :"),
             MarcSubfield(tag = "b", content = "sound, color, PAL."),
           )
         ),
@@ -94,7 +96,8 @@ class SierraPhysicalDescriptionTest
       )
     )
 
-    SierraPhysicalDescription(bibData) shouldBe Some("1 videocassette (VHS) (1 min.) : sound, color, PAL.<br/>1 DVD (1 min.) : sound, color")
+    SierraPhysicalDescription(bibData) shouldBe Some(
+      "1 videocassette (VHS) (1 min.) : sound, color, PAL.<br/>1 DVD (1 min.) : sound, color")
   }
 
   it("uses field 300 ǂa, ǂb and ǂc") {
