@@ -327,7 +327,7 @@ class TeiIdExtractorWorkerServiceTest
             HttpResponse(
               entity = HttpEntity(
                 contentType = ContentTypes.`application/json`,
-                readResource("/__files/body-git-blobs-2e6b5fa45462510d5549b6bcf2bbc8b53ae08aed-Q9z4L.json")
+                readResource("/github-blob-2e6b5fa.json")
               )
             )
           )
@@ -337,13 +337,12 @@ class TeiIdExtractorWorkerServiceTest
             HttpResponse(
               entity = HttpEntity(
                 contentType = ContentTypes.`application/json`,
-                readResource("/__files/body-git-blobs-ddffeb761e5158b41a3780cda22346978d2cd6bd-dGrXS.json")
+                readResource("/github-blob-ddffeb7.json")
               )
             )
           )
 
         case _ =>
-
           Future.successful(HttpResponse(status = StatusCodes.NotFound))
       }
   }
