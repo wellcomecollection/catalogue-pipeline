@@ -49,7 +49,7 @@ object Main extends WellcomeTypesafeApp {
       config.getStringOption("merger.rules.mode").getOrElse("default")
     val mergerRules = mergerMode match {
       case "tei" => TeiPlatformMerger
-      case _ => DefaultPlatformMerger
+      case _     => DefaultPlatformMerger
     }
     val mergerManager = new MergerManager(
       mergerRules = mergerRules
