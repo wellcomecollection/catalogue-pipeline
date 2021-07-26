@@ -8,7 +8,6 @@ import akka.http.scaladsl.model.{
   HttpResponse,
   StatusCodes
 }
-import com.github.tomakehurst.wiremock.client.WireMock
 import io.circe.Encoder
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
@@ -89,7 +88,12 @@ class TeiIdExtractorWorkerServiceTest
   }
 
   it("a message for a non TEI file is ignored") {
-    withWorkerService() {
+    val neverCallClient = new HttpClient {
+      override def singleRequest(request: HttpRequest): Future[HttpResponse] =
+        Future.failed(new Throwable("This should never be called!"))
+    }
+    
+    withWorkerService(httpClient = neverCallClient) {
       case (QueuePair(queue, dlq), messageSender, store, _) =>
         val modifiedTime = "2021-05-27T14:05:00Z"
         val message = {
@@ -102,16 +106,12 @@ class TeiIdExtractorWorkerServiceTest
         }
 
         sendNotificationToSQS(queue, message)
-        Thread.sleep(200)
+
         eventually {
-          WireMock.verify(
-            WireMock.exactly(0),
-            WireMock.getRequestedFor(
-              WireMock.urlEqualTo(
-                "/git/blobs/4bfe74311d86293447f173108190a4b4664d68ea")))
           store.entries.keySet shouldBe empty
 
-          messageSender.getMessages[TeiIdChangeMessage]() shouldBe empty
+          messageSender.messages shouldBe empty
+
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
         }
@@ -348,8 +348,10 @@ class TeiIdExtractorWorkerServiceTest
       }
   }
 
-  def withWorkerService[R](messageSender: MemoryMessageSender =
-                             new MemoryMessageSender())(
+  def withWorkerService[R](
+    messageSender: MemoryMessageSender =
+      new MemoryMessageSender(),
+    httpClient: HttpClient = httpClient)(
     testWith: TestWith[(QueuePair,
                         MemoryMessageSender,
                         MemoryStore[S3ObjectLocation, String],
@@ -380,6 +382,7 @@ class TeiIdExtractorWorkerServiceTest
                     parallelism = 10,
                     deleteMessageDelay = 500 milliseconds)
                 )
+                println(s"@@AWLC t5 = ${Instant.now()}")
                 service.run()
                 testWith((q, messageSender, store, bucket))
             }
