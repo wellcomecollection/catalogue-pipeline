@@ -2,7 +2,7 @@ package weco.pipeline.merger.rules
 
 class DefaultTargetPrecedenceTest extends BaseTargetPrecedenceTest {
   override val targetPrecedence: BaseTargetPrecedence = DefaultTargetPrecedence
-  val tei = teiIdentifiedWork()
+
   it("doesn't chooses a Tei work") {
     targetPrecedence
       .getTarget(

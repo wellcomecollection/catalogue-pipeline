@@ -7,7 +7,8 @@ import weco.catalogue.internal_model.work.WorkState.Identified
 sealed trait PassThroughTransform {
   def apply(works: Seq[Work[Identified]]): Seq[Work[Identified]]
 }
-object DefaultPassThroughTransform$ extends PassThroughTransform {
+
+object DefaultPassThroughTransform extends PassThroughTransform {
   override def apply(works: Seq[Work[Identified]]): Seq[Work[Identified]] =
     works.map {
       // In the default pipeline behaviour we want tei works to be invisible
@@ -23,7 +24,7 @@ object DefaultPassThroughTransform$ extends PassThroughTransform {
     }
 }
 
-object TeiPassThroughTransform$ extends PassThroughTransform {
+object TeiPassThroughTransform extends PassThroughTransform {
   override def apply(works: Seq[Work[Identified]]): Seq[Work[Identified]] =
     works
 }

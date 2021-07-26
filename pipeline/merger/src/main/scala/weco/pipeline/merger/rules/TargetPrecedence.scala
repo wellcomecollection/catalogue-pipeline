@@ -19,6 +19,7 @@ object TeiTargetPrecedence extends BaseTargetPrecedence {
     sierraWork
   )
 }
+
 object DefaultTargetPrecedence extends BaseTargetPrecedence {
   override val targetPrecedence: Seq[WorkPredicate] = Seq(
     singlePhysicalItemCalmWork,
@@ -27,6 +28,7 @@ object DefaultTargetPrecedence extends BaseTargetPrecedence {
     sierraWork
   )
 }
+
 trait BaseTargetPrecedence {
   import WorkPredicates._
 

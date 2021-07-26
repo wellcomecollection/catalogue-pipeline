@@ -180,13 +180,13 @@ object Merger {
 object DefaultPlatformMerger extends BasePlatformMerger {
   override val targetPrecedence: BaseTargetPrecedence = DefaultTargetPrecedence
   override val passThroughTransform: PassThroughTransform =
-    DefaultPassThroughTransform$
+    DefaultPassThroughTransform
 }
 
 object TeiPlatformMerger extends BasePlatformMerger {
   override val targetPrecedence: BaseTargetPrecedence = TeiTargetPrecedence
   override val passThroughTransform: PassThroughTransform =
-    TeiPassThroughTransform$
+    TeiPassThroughTransform
 }
 trait BasePlatformMerger extends Merger {
   import Merger.WorkMergingOps

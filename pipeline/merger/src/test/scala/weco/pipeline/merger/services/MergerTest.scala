@@ -19,7 +19,7 @@ import weco.catalogue.internal_model.work.generators.{
 import weco.catalogue.internal_model.work.{Item, Work}
 import weco.pipeline.merger.models.{FieldMergeResult, MergeResult}
 import weco.pipeline.merger.rules.{
-  DefaultPassThroughTransform$,
+  DefaultPassThroughTransform,
   FieldMergeRule,
   PassThroughTransform
 }
@@ -94,7 +94,7 @@ class MergerTest
         )
 
     override val passThroughTransform: PassThroughTransform =
-      DefaultPassThroughTransform$
+      DefaultPassThroughTransform
   }
 
   val mergedWorks = FirstWorkMerger.merge(inputWorks)

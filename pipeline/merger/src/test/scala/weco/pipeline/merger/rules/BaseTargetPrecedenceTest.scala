@@ -13,6 +13,7 @@ trait BaseTargetPrecedenceTest
     with OptionValues {
   val targetPrecedence: BaseTargetPrecedence
 
+  val tei = teiIdentifiedWork()
   val calm = calmIdentifiedWork()
   val videoSierra = sierraDigitalIdentifiedWork().format(Format.Videos)
   val multiItemPhysicalSierra = sierraIdentifiedWork().items(
