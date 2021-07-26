@@ -10,6 +10,7 @@ import weco.catalogue.tei.id_extractor.fixtures.{
   Wiremock,
   XmlAssertions
 }
+import weco.catalogue.tei.id_extractor.github.GitHubAuthenticatedHttpClient
 import weco.http.client.AkkaHttpClient
 
 import java.net.URI
@@ -29,8 +30,13 @@ class GitHubBlobContentReaderTest
       withActorSystem { implicit ac =>
         val uri = new URI(
           s"http://localhost:$port/git/blobs/2e6b5fa45462510d5549b6bcf2bbc8b53ae08aed")
-        val gitHubBlobReader =
-          new GitHubBlobContentReader(new AkkaHttpClient(), "fake_token")
+
+        val client = new GitHubAuthenticatedHttpClient(
+          underlying = new AkkaHttpClient(),
+          token = "fake_token"
+        )
+
+        val gitHubBlobReader = new GitHubBlobContentReader(client)
 
         whenReady(gitHubBlobReader.getBlob(uri)) {
           assertXmlStringsAreEqual(_, readResource("/WMS_Arabic_1.xml"))
@@ -43,8 +49,13 @@ class GitHubBlobContentReaderTest
       withActorSystem { implicit ac =>
         val uri = new URI(
           s"http://localhost:$port/git/blobs/ddffeb761e5158b41a3780cda22346978d2cd6bd")
-        val gitHubBlobReader =
-          new GitHubBlobContentReader(new AkkaHttpClient(), "fake_token")
+
+        val client = new GitHubAuthenticatedHttpClient(
+          underlying = new AkkaHttpClient(),
+          token = "fake_token"
+        )
+
+        val gitHubBlobReader = new GitHubBlobContentReader(client)
 
         whenReady(gitHubBlobReader.getBlob(uri)) {
           assertXmlStringsAreEqual(_, readResource("/Javanese_11.xml"))
@@ -56,8 +67,14 @@ class GitHubBlobContentReaderTest
     withWiremock("localhost") { port =>
       withActorSystem { implicit ac =>
         val uri = new URI(s"http://localhost:$port/git/blobs/123456789qwertyu")
-        val gitHubBlobReader =
-          new GitHubBlobContentReader(new AkkaHttpClient(), "fake_token")
+
+        val client = new GitHubAuthenticatedHttpClient(
+          underlying = new AkkaHttpClient(),
+          token = "fake_token"
+        )
+
+        val gitHubBlobReader = new GitHubBlobContentReader(client)
+
         stubFor(
           get("/git/blobs/123456789qwertyu")
             .willReturn(serverError()

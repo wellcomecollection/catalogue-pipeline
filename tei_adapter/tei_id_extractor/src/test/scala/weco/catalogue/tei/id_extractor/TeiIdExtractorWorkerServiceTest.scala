@@ -17,6 +17,7 @@ import weco.catalogue.tei.id_extractor.fixtures.{
   Wiremock,
   XmlAssertions
 }
+import weco.catalogue.tei.id_extractor.github.GitHubAuthenticatedHttpClient
 import weco.fixtures.TestWith
 import weco.http.client.AkkaHttpClient
 import weco.json.JsonUtil._
@@ -327,9 +328,14 @@ class TeiIdExtractorWorkerServiceTest
             withSQSStream(queue) { stream: SQSStream[NotificationMessage] =>
               withPathIdTable {
                 case (config, table) =>
-                  val gitHubBlobReader = new GitHubBlobContentReader(
-                    new AkkaHttpClient(),
-                    "fake_token")
+
+                  val client = new GitHubAuthenticatedHttpClient(
+                    underlying = new AkkaHttpClient(),
+                    token = "fake_token"
+                  )
+
+                  val gitHubBlobReader = new GitHubBlobContentReader(client)
+
                   val store = new MemoryStore[S3ObjectLocation, String](Map())
                   val bucket = Bucket("bucket")
                   val service = new TeiIdExtractorWorkerService(

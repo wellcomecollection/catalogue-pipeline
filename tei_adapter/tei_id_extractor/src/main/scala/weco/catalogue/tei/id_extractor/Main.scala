@@ -17,6 +17,7 @@ import weco.storage.typesafe.S3Builder
 import weco.typesafe.config.builders.EnrichConfig.RichConfig
 import weco.http.client.AkkaHttpClient
 import weco.catalogue.tei.id_extractor.database.TableProvisioner
+import weco.catalogue.tei.id_extractor.github.GitHubAuthenticatedHttpClient
 
 import scala.concurrent.ExecutionContext
 
@@ -37,11 +38,14 @@ object Main extends WellcomeTypesafeApp {
       SNSBuilder.buildSNSMessageSender(config, subject = "TEI id extractor")
     val store = S3TypedStore[String]
 
+    val httpClient = new GitHubAuthenticatedHttpClient(
+      underlying = new AkkaHttpClient(),
+      token = config.requireString("tei.github.token")
+    )
+
     new TeiIdExtractorWorkerService(
       messageStream = SQSBuilder.buildSQSStream(config),
-      gitHubBlobReader = new GitHubBlobContentReader(
-        new AkkaHttpClient(),
-        config.requireString("tei.github.token")),
+      gitHubBlobReader = new GitHubBlobContentReader(httpClient),
       tableProvisioner = new TableProvisioner(rdsConfig, tableConfig),
       pathIdManager = new PathIdManager[SNSConfig](
         table,
