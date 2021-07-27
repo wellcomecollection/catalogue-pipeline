@@ -1,17 +1,27 @@
 package weco.catalogue.internal_model.generators
 
+import org.scalacheck.Arbitrary
 import weco.fixtures.RandomGenerators
-import weco.catalogue.internal_model.identifiers.{
-  CanonicalId,
-  IdentifierType,
-  SourceIdentifier
-}
+import weco.catalogue.internal_model.identifiers.{CanonicalId, IdentifierType, SourceIdentifier}
 
 import scala.util.Random
 
 trait IdentifiersGenerators extends RandomGenerators {
-  def createCanonicalId: CanonicalId =
-    CanonicalId(randomAlphanumeric(length = 8).toLowerCase())
+  implicit val arbitraryCanonicalId: Arbitrary[CanonicalId] =
+    Arbitrary {
+      createCanonicalId
+    }
+
+  // We have a rule that says SourceIdentifier isn't allowed to contain whitespace,
+  // but sometimes scalacheck will happen to generate such a string, which breaks
+  // tests in CI.  This generator is meant to create SourceIdentifiers that
+  // don't contain whitespace.
+  implicit val arbitrarySourceIdentifier: Arbitrary[SourceIdentifier] =
+    Arbitrary {
+      createSourceIdentifier
+    }
+
+  def createCanonicalId: CanonicalId = CanonicalId(randomAlphanumeric(length = 8).toLowerCase())
 
   def createSourceIdentifier: SourceIdentifier = createSourceIdentifierWith()
 
