@@ -17,7 +17,7 @@ import java.time.Instant
 import scala.util.Random
 
 trait WorkGenerators
-  extends IdentifiersGenerators
+    extends IdentifiersGenerators
     with InstantGenerators
     with LanguageGenerators {
 

@@ -13,10 +13,13 @@ import weco.json.utils.JsonAssertions
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.generators.ImageGenerators
 import weco.catalogue.internal_model.identifiers.IdState
-import weco.catalogue.internal_model.locations.{AccessCondition, AccessMethod, AccessStatus}
+import weco.catalogue.internal_model.locations.{
+  AccessCondition,
+  AccessMethod,
+  AccessStatus
+}
 import weco.catalogue.internal_model.work._
 import weco.catalogue.internal_model.work.generators.WorkGenerators
-
 
 class WorksIndexConfigTest
     extends AnyFunSpec
