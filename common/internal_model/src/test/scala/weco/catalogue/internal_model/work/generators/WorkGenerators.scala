@@ -16,7 +16,11 @@ import weco.catalogue.internal_model.work._
 import java.time.Instant
 import scala.util.Random
 
-trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
+trait WorkGenerators
+    extends IdentifiersGenerators
+    with InstantGenerators
+    with LanguageGenerators {
+
   private def createVersion: Int =
     Random.nextInt(100) + 1
 
