@@ -2,7 +2,11 @@ package weco.catalogue.internal_model.generators
 
 import org.scalacheck.Arbitrary
 import weco.fixtures.RandomGenerators
-import weco.catalogue.internal_model.identifiers.{CanonicalId, IdentifierType, SourceIdentifier}
+import weco.catalogue.internal_model.identifiers.{
+  CanonicalId,
+  IdentifierType,
+  SourceIdentifier
+}
 
 import scala.util.Random
 
@@ -21,7 +25,8 @@ trait IdentifiersGenerators extends RandomGenerators {
       createSourceIdentifier
     }
 
-  def createCanonicalId: CanonicalId = CanonicalId(randomAlphanumeric(length = 8).toLowerCase())
+  def createCanonicalId: CanonicalId =
+    CanonicalId(randomAlphanumeric(length = 8).toLowerCase())
 
   def createSourceIdentifier: SourceIdentifier = createSourceIdentifierWith()
 
