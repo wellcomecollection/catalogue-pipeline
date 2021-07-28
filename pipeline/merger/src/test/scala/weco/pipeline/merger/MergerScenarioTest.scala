@@ -19,7 +19,7 @@ class MergerScenarioTest
 
   /*
    * We test field-level behaviour in the rule tests, and have to replicate it
-   * in the PlatformMergerTest. This obscures the top-level merging behaviour
+   * in the TeiOnPlatformMergerTest. This obscures the top-level merging behaviour
    * which has led to confusion about intended/desired/actual behaviour.
    *
    * These feature tests are intended to be simple smoke tests of merging
