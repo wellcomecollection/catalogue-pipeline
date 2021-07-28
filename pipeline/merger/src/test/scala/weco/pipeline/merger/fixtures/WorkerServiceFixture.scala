@@ -13,7 +13,12 @@ import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.catalogue.internal_model.image.Image
 import weco.catalogue.internal_model.image.ImageState.Initial
 import weco.catalogue.internal_model.work.Work
-import weco.pipeline.merger.services.{IdentifiedWorkLookup, MergerManager, MergerWorkerService, TeiOffMerger}
+import weco.pipeline.merger.services.{
+  IdentifiedWorkLookup,
+  MergerManager,
+  MergerWorkerService,
+  TeiOffMerger
+}
 import weco.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 import weco.pipeline_storage.memory.{MemoryIndexer, MemoryRetriever}
 
