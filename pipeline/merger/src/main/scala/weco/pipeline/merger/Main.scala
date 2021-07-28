@@ -45,12 +45,15 @@ object Main extends WellcomeTypesafeApp {
         namespace = "identified-works"
       )
     )
+
     val mergerMode =
       config.getStringOption("merger.rules.mode").getOrElse("default")
+
     val mergerRules = mergerMode match {
       case "tei" => TeiPlatformMerger
       case _     => DefaultPlatformMerger
     }
+
     val mergerManager = new MergerManager(
       mergerRules = mergerRules
     )
@@ -92,7 +95,7 @@ object Main extends WellcomeTypesafeApp {
       workOrImageIndexer = workOrImageIndexer,
       workMsgSender = workMsgSender,
       imageMsgSender = imageMsgSender,
-      config = PipelineStorageStreamBuilder.buildPipelineStorageConfig(config),
+      config = PipelineStorageStreamBuilder.buildPipelineStorageConfig(config)
     )
   }
 }
