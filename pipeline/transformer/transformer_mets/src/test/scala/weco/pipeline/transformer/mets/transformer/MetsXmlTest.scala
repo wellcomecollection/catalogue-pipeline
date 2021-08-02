@@ -1,12 +1,11 @@
 package weco.pipeline.transformer.mets.transformer
 
-import org.apache.commons.io.IOUtils
 import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.pipeline.transformer.mets.fixtures.MetsGenerators
+import weco.pipeline.transformer.mets.fixtures.{LocalResources, MetsGenerators}
 
-class MetsXmlTest extends AnyFunSpec with Matchers with EitherValues with MetsGenerators {
+class MetsXmlTest extends AnyFunSpec with Matchers with EitherValues with LocalResources with MetsGenerators {
 
   val xml = loadXmlFile("/b30246039.xml")
 
@@ -312,7 +311,4 @@ class MetsXmlTest extends AnyFunSpec with Matchers with EitherValues with MetsGe
           </mets:div>
         </mets:structMap>
     )
-
-  def loadXmlFile(path: String) =
-    IOUtils.toString(getClass.getResourceAsStream(path), "UTF-8")
 }
