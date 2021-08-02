@@ -10,6 +10,7 @@ import weco.catalogue.internal_model.Implicits._
 import weco.elasticsearch.typesafe.ElasticBuilder
 import weco.typesafe.WellcomeTypesafeApp
 import weco.typesafe.config.builders.AkkaBuilder
+import weco.typesafe.config.builders.EnrichConfig._
 import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.catalogue.internal_model.image.Image
 import weco.catalogue.internal_model.image.ImageState.Initial
@@ -18,7 +19,8 @@ import weco.pipeline.merger.services.{
   IdentifiedWorkLookup,
   MergerManager,
   MergerWorkerService,
-  TeiOffMerger
+  TeiOffMerger,
+  TeiOnMerger
 }
 import weco.pipeline_storage.EitherIndexer
 import weco.pipeline_storage.typesafe.{
@@ -44,8 +46,17 @@ object Main extends WellcomeTypesafeApp {
       )
     )
 
+    val toggleTeiOn =
+      config.getBooleanOption("toggle.tei_on").getOrElse(false)
+
+    val mergerRules = if (toggleTeiOn) {
+      TeiOnMerger
+    } else {
+      TeiOffMerger
+    }
+
     val mergerManager = new MergerManager(
-      mergerRules = TeiOffMerger
+      mergerRules = mergerRules
     )
 
     val workMsgSender =

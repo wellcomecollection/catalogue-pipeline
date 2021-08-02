@@ -36,6 +36,8 @@ module "merger" {
 
     batch_size             = 50
     flush_interval_seconds = 120
+
+    toggle_tei_on = false
   }
 
   secret_env_vars = local.pipeline_storage_es_service_secrets["merger"]
