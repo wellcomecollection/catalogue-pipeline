@@ -1,16 +1,17 @@
 package weco.pipeline.transformer.mets.transformer
 
 import org.apache.commons.io.IOUtils
+import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.pipeline.transformer.mets.fixtures.MetsGenerators
 
-class MetsXmlTest extends AnyFunSpec with Matchers with MetsGenerators {
+class MetsXmlTest extends AnyFunSpec with Matchers with EitherValues with MetsGenerators {
 
   val xml = loadXmlFile("/b30246039.xml")
 
   it("parses recordIdentifier from XML") {
-    MetsXml(xml).right.get.recordIdentifier shouldBe Right("b30246039")
+    MetsXml(xml).value.recordIdentifier shouldBe Right("b30246039")
   }
 
   it("does not parse a mets if recordIdentifier is outside of dmdSec element") {
@@ -26,15 +27,15 @@ class MetsXmlTest extends AnyFunSpec with Matchers with MetsGenerators {
   }
 
   it("parses accessConditionDz from XML") {
-    MetsXml(xml).right.get.accessConditionDz shouldBe Right(Some("CC-BY-NC"))
+    MetsXml(xml).value.accessConditionDz shouldBe Right(Some("CC-BY-NC"))
   }
 
   it("parses accessConditionStatus from XML") {
-    MetsXml(xml).right.get.accessConditionStatus shouldBe Right(Some("Open"))
+    MetsXml(xml).value.accessConditionStatus shouldBe Right(Some("Open"))
   }
 
   it("parses accessConditionUsage from XML") {
-    MetsXml(xml).right.get.accessConditionUsage shouldBe Right(
+    MetsXml(xml).value.accessConditionUsage shouldBe Right(
       Some("Some terms"))
   }
 
@@ -44,7 +45,7 @@ class MetsXmlTest extends AnyFunSpec with Matchers with MetsGenerators {
       accessConditionStatus = Some("Open"),
       secondarySections =
         metsSecondarySection(accessConditionStatus = "Restricted"))
-    MetsXml(str).getRight.accessConditionStatus shouldBe Right(Some("Open"))
+    MetsXml(str).value.accessConditionStatus shouldBe Right(Some("Open"))
   }
 
   it("parses a METS with no access condition") {
@@ -65,7 +66,7 @@ class MetsXmlTest extends AnyFunSpec with Matchers with MetsGenerators {
   }
 
   it("parses file references mapping from XML") {
-    MetsXml(xml).right.get.fileReferencesMapping("b30246039") shouldBe List(
+    MetsXml(xml).value.fileReferencesMapping("b30246039") shouldBe List(
       "PHYS_0001" -> FileReference(
         id = "FILE_0001_OBJECTS",
         location = "b30246039_0001.jp2",
@@ -100,11 +101,11 @@ class MetsXmlTest extends AnyFunSpec with Matchers with MetsGenerators {
   }
 
   it("parses title page ID from the XML when present") {
-    MetsXml(xml).right.get.titlePageId shouldBe Some("PHYS_0006")
+    MetsXml(xml).value.titlePageId shouldBe Some("PHYS_0006")
   }
 
   it("parses thumbnail from XML") {
-    MetsXml(xml).right.get
+    MetsXml(xml).value
       .fileReferencesMapping("b30246039")
       .head
       ._2
@@ -116,7 +117,7 @@ class MetsXmlTest extends AnyFunSpec with Matchers with MetsGenerators {
       recordIdentifier = "b30246039",
       fileSec = fileSec(filePrefix = "b30246039"),
       structMap = structMap)
-    MetsXml(str).getRight
+    MetsXml(str).value
       .fileReferencesMapping("b30246039")
       .head
       ._2
@@ -124,7 +125,7 @@ class MetsXmlTest extends AnyFunSpec with Matchers with MetsGenerators {
   }
 
   it("parses thumbnail using ORDER attrib when non-sequential order") {
-    MetsXml(xmlNonSequentialOrder("b30246039")).getRight
+    MetsXml(xmlNonSequentialOrder("b30246039")).value
       .fileReferencesMapping("b30246039")
       .head
       ._2
@@ -134,11 +135,15 @@ class MetsXmlTest extends AnyFunSpec with Matchers with MetsGenerators {
   it("parses thumbnail if filename doesn't start with bnumber") {
     val bnumber = "b30246039"
     val filePrefix = "V000012"
-    MetsXml(
-      metsXmlWith(
-        recordIdentifier = bnumber,
-        fileSec = fileSec(filePrefix),
-        structMap = structMap)).getRight
+    
+    val metsXml =
+      MetsXml(
+        metsXmlWith(
+          recordIdentifier = bnumber,
+          fileSec = fileSec(filePrefix),
+          structMap = structMap)).value
+    
+    metsXml
       .fileReferencesMapping(bnumber)
       .head
       ._2
@@ -148,11 +153,15 @@ class MetsXmlTest extends AnyFunSpec with Matchers with MetsGenerators {
   it("parses thumbnail if filename starts with uppercase bnumber") {
     val bnumber = "b30246039"
     val filePrefix = bnumber.toUpperCase
-    MetsXml(
-      metsXmlWith(
-        recordIdentifier = bnumber,
-        fileSec = fileSec(filePrefix),
-        structMap = structMap)).getRight
+
+    val metsXml =
+      MetsXml(
+        metsXmlWith(
+          recordIdentifier = bnumber,
+          fileSec = fileSec(filePrefix),
+          structMap = structMap)).value
+    
+    metsXml
       .fileReferencesMapping(bnumber)
       .head
       ._2
@@ -160,7 +169,7 @@ class MetsXmlTest extends AnyFunSpec with Matchers with MetsGenerators {
   }
 
   it("cannot parse thumbnail when invalid file ID") {
-    MetsXml(xmlInvalidFileId("b30246039")).getRight
+    MetsXml(xmlInvalidFileId("b30246039")).value
       .fileReferencesMapping("b30246039")
       .headOption shouldBe None
   }
@@ -306,8 +315,4 @@ class MetsXmlTest extends AnyFunSpec with Matchers with MetsGenerators {
 
   def loadXmlFile(path: String) =
     IOUtils.toString(getClass.getResourceAsStream(path), "UTF-8")
-
-  implicit class GetRight[T](b: Either[Throwable, T]) {
-    def getRight = b.right.get
-  }
 }
