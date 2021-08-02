@@ -4,10 +4,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.fixtures.RandomGenerators
 
-class InstantRangeTest
-    extends AnyFunSpec
-    with Matchers
-    with RandomGenerators {
+class InstantRangeTest extends AnyFunSpec with Matchers with RandomGenerators {
 
   describe("unapply") {
     it("extracts an AfterDate") {
@@ -18,8 +15,9 @@ class InstantRangeTest
       val afterRange = InstantRange.after(range)
 
       afterRange match {
-        case InstantRange.AfterDate(extractedFrom) => extractedFrom shouldBe from
-        case _                                     => assert(false)
+        case InstantRange.AfterDate(extractedFrom) =>
+          extractedFrom shouldBe from
+        case _ => assert(false)
       }
     }
 
