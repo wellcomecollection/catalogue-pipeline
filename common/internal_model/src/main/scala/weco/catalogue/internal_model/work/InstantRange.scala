@@ -1,7 +1,6 @@
 package weco.catalogue.internal_model.work
 
 import weco.catalogue.internal_model.parse.Parser
-import weco.catalogue.internal_model.work.InstantRange.instantOrdering
 
 import java.time.{Instant, LocalDate, LocalDateTime, ZoneOffset}
 
@@ -13,6 +12,8 @@ case class InstantRange(from: Instant, to: Instant, label: String = "") {
   def withLabel(label: String): InstantRange =
     InstantRange(from, to, label)
 
+  private val instantOrdering: Ordering[Instant] = _ compareTo _
+
   def +(x: InstantRange): InstantRange = InstantRange(
     from = instantOrdering.min(x.from, from),
     to = instantOrdering.max(x.to, to),
@@ -21,8 +22,6 @@ case class InstantRange(from: Instant, to: Instant, label: String = "") {
 }
 
 object InstantRange {
-  val instantOrdering: Ordering[Instant] = _ compareTo _
-
   def apply(from: LocalDate, to: LocalDate, label: String): InstantRange =
     InstantRange(
       from.atStartOfDay(),
