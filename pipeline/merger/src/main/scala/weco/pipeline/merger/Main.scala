@@ -18,7 +18,7 @@ import weco.pipeline.merger.services.{
   IdentifiedWorkLookup,
   MergerManager,
   MergerWorkerService,
-  PlatformMerger
+  TeiOffMerger
 }
 import weco.pipeline_storage.EitherIndexer
 import weco.pipeline_storage.typesafe.{
@@ -45,7 +45,7 @@ object Main extends WellcomeTypesafeApp {
     )
 
     val mergerManager = new MergerManager(
-      mergerRules = PlatformMerger
+      mergerRules = TeiOffMerger
     )
 
     val workMsgSender =
@@ -85,7 +85,7 @@ object Main extends WellcomeTypesafeApp {
       workOrImageIndexer = workOrImageIndexer,
       workMsgSender = workMsgSender,
       imageMsgSender = imageMsgSender,
-      config = PipelineStorageStreamBuilder.buildPipelineStorageConfig(config),
+      config = PipelineStorageStreamBuilder.buildPipelineStorageConfig(config)
     )
   }
 }

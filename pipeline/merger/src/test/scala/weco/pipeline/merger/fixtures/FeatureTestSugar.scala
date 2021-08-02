@@ -14,6 +14,10 @@ trait FeatureTestSugar {
         .find(_.sourceIdentifier == originalWork.sourceIdentifier)
         .get
 
+    def isMissing(work: Work[Identified]): Boolean =
+      !mergerOutcome.resultWorks.exists(
+        _.sourceIdentifier == work.sourceIdentifier)
+
     def imageSourceIds: Seq[IdState.Identified] =
       mergerOutcome.imagesWithSources.map(_.source.id)
 

@@ -49,6 +49,12 @@ trait Merger extends MergerLogging {
     require(deleted.intersect(sources).isEmpty)
   }
 
+  // This allows us to mess with the works before they hit the
+  // merge process
+  protected def preMergeFilter(
+    works: Seq[Work[Identified]]
+  ): Seq[Work[Identified]] = works
+
   private def categoriseWorks(
     works: Seq[Work[Identified]]
   ): Option[CategorisedWorks] =
@@ -85,11 +91,12 @@ trait Merger extends MergerLogging {
       }
   }
 
-  def merge(works: Seq[Work[Identified]]): MergerOutcome =
-    categoriseWorks(works)
+  def merge(works: Seq[Work[Identified]]): MergerOutcome = {
+    val filteredWorks = preMergeFilter(works)
+    categoriseWorks(filteredWorks)
       .map {
         case CategorisedWorks(target, sources, deleted) =>
-          assert((sources ++ deleted :+ target).toSet == works.toSet)
+          assert((sources ++ deleted :+ target).toSet == filteredWorks.toSet)
 
           logIntentions(target, sources)
           val (mergeResultSources, result) = createMergeResult(target, sources)
@@ -121,7 +128,8 @@ trait Merger extends MergerLogging {
             imagesWithSources = result.imageDataWithSources
           )
       }
-      .getOrElse(MergerOutcome.passThrough(works))
+      .getOrElse(MergerOutcome.passThrough(filteredWorks))
+  }
 
   private def redirectSourceToTarget(
     target: Work.Visible[Identified]
@@ -176,7 +184,7 @@ object Merger {
   }
 }
 
-object PlatformMerger extends Merger {
+trait PlatformMerger extends Merger {
   import weco.catalogue.internal_model.image.ParentWork._
   import Merger.WorkMergingOps
 
@@ -239,4 +247,17 @@ object PlatformMerger extends Merger {
   ): List[ImageData[IdState.Identified]] =
     if (WorkPredicates.singleDigitalItemMiroWork(target)) target.data.imageData
     else Nil
+}
+
+// We should be available to avoid drift by not extending these any further.
+// Once the TEI works are rich enough to present to the public, we'll swap TeiOnMerger for PlatformMerger
+// and go back to just having 1 merger.
+object TeiOnMerger extends PlatformMerger
+object TeiOffMerger extends PlatformMerger {
+  override protected def preMergeFilter(works: Seq[Work[Identified]]) =
+    works.filter(
+      // In the default pipeline behaviour we want tei works to be filtered out
+      // until we're happy with the merging work.
+      !WorkPredicates.teiWork(_)
+    )
 }

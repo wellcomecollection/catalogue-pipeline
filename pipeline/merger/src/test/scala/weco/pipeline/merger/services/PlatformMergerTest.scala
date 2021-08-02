@@ -99,7 +99,7 @@ class PlatformMergerTest
 
   val calmWork: Work.Visible[Identified] = calmIdentifiedWork()
 
-  private val merger = PlatformMerger
+  private val merger = TeiOffMerger
 
   it(
     "finds Calm || Sierra with physical item || Sierra work || Nothing as a target") {
@@ -947,34 +947,5 @@ class PlatformMergerTest
     visibleWorks should have size 1
 
     visibleWorks.head.data.items should contain(item)
-  }
-
-  it("merges a physical sierra with a tei") {
-    val physicalWork =
-      sierraIdentifiedWork()
-        .items(List(createIdentifiedPhysicalItem))
-    val teiWork = teiIdentifiedWork().mergeCandidates(
-      List(
-        MergeCandidate(
-          id = IdState.Identified(
-            canonicalId = physicalWork.state.canonicalId,
-            sourceIdentifier = physicalWork.state.sourceIdentifier
-          ),
-          reason = "Physical/digitised Sierra work"
-        )
-      )
-    )
-
-    val result = merger
-      .merge(works = Seq(teiWork, physicalWork))
-      .mergedWorksWithTime(now)
-    val redirectedWorks = result.collect {
-      case w: Work.Redirected[Merged] => w
-    }
-    val visibleWorks = result.collect { case w: Work.Visible[Merged] => w }
-
-    redirectedWorks should have size 1
-    visibleWorks should have size 1
-
   }
 }
