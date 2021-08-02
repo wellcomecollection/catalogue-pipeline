@@ -5,7 +5,12 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.pipeline.transformer.mets.fixtures.{LocalResources, MetsGenerators}
 
-class MetsXmlTest extends AnyFunSpec with Matchers with EitherValues with LocalResources with MetsGenerators {
+class MetsXmlTest
+    extends AnyFunSpec
+    with Matchers
+    with EitherValues
+    with LocalResources
+    with MetsGenerators {
 
   val xml = loadXmlFile("/b30246039.xml")
 
@@ -34,8 +39,7 @@ class MetsXmlTest extends AnyFunSpec with Matchers with EitherValues with LocalR
   }
 
   it("parses accessConditionUsage from XML") {
-    MetsXml(xml).value.accessConditionUsage shouldBe Right(
-      Some("Some terms"))
+    MetsXml(xml).value.accessConditionUsage shouldBe Right(Some("Some terms"))
   }
 
   it("gets the first accessConditionStatus if there are more than one") {
@@ -134,14 +138,14 @@ class MetsXmlTest extends AnyFunSpec with Matchers with EitherValues with LocalR
   it("parses thumbnail if filename doesn't start with bnumber") {
     val bnumber = "b30246039"
     val filePrefix = "V000012"
-    
+
     val metsXml =
       MetsXml(
         metsXmlWith(
           recordIdentifier = bnumber,
           fileSec = fileSec(filePrefix),
           structMap = structMap)).value
-    
+
     metsXml
       .fileReferencesMapping(bnumber)
       .head
@@ -159,7 +163,7 @@ class MetsXmlTest extends AnyFunSpec with Matchers with EitherValues with LocalR
           recordIdentifier = bnumber,
           fileSec = fileSec(filePrefix),
           structMap = structMap)).value
-    
+
     metsXml
       .fileReferencesMapping(bnumber)
       .head
