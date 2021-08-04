@@ -154,8 +154,9 @@ sealed trait WorkState {
 object WorkState {
 
   case class Source(
-    sourceIdentifier: SourceIdentifier,
-    sourceModifiedTime: Instant
+                     sourceIdentifier: SourceIdentifier,
+                     sourceModifiedTime: Instant,
+                     internalWorks: List[Work[Source]]
   ) extends WorkState {
 
     type WorkDataState = DataState.Unidentified
@@ -168,9 +169,10 @@ object WorkState {
   }
 
   case class Identified(
-    sourceIdentifier: SourceIdentifier,
-    canonicalId: CanonicalId,
-    sourceModifiedTime: Instant,
+                         sourceIdentifier: SourceIdentifier,
+                         canonicalId: CanonicalId,
+                         sourceModifiedTime: Instant,
+                         internalWorks: List[Work[Identified]]
   ) extends WorkState {
 
     type WorkDataState = DataState.Identified
@@ -188,13 +190,13 @@ object WorkState {
     mergedTime: Instant,
     sourceModifiedTime: Instant,
     availabilities: Set[Availability] = Set.empty,
+    relations: Relations = Relations.none
   ) extends WorkState {
 
     type WorkDataState = DataState.Identified
     type TransitionArgs = Instant
 
     def id: String = canonicalId.toString
-    val relations: Relations = Relations.none
 
     // This is used to order updates in pipeline-storage.
     // See https://github.com/wellcomecollection/docs/tree/main/rfcs/038-matcher-versioning
