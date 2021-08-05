@@ -3,6 +3,7 @@ package weco.pipeline.transformer.sierra.transformers
 import grizzled.slf4j.Logging
 import weco.catalogue.internal_model.locations.LocationType.OnlineResource
 import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.locations.AccessStatus.LicensedResources
 import weco.catalogue.internal_model.locations.{
   AccessCondition,
   AccessMethod,
@@ -40,6 +41,22 @@ object SierraElectronicResources extends SierraQueryOps with Logging {
   private def createItem(id: TypedSierraRecordNumber,
                          vf: VarField): Option[Item[IdState.Unminted]] = {
     assert(vf.marcTag.contains("856"))
+
+    // 856 indicator 2 takes the following values:
+    //
+    //      Relationship
+    //      # - No information provided
+    //      0 - Resource
+    //      1 - Version of resource
+    //      2 - Related resource
+    //      8 - No display constant generated
+    //
+    // This allows us to include URLs that are related to the work, but not the
+    // work itself (e.g. a description on a publisher website).
+    val status = vf.indicator2 match {
+      case Some("2") => AccessStatus.LicensedResources(relationship = LicensedResources.RelatedResource)
+      case _         => AccessStatus.LicensedResources(relationship = LicensedResources.Resource)
+    }
 
     getUrl(id, vf).map { url =>
       // We don't want the link text to be too long (at most seven words), so
@@ -95,7 +112,7 @@ object SierraElectronicResources extends SierraQueryOps with Logging {
             accessConditions = List(
               AccessCondition(
                 method = AccessMethod.ViewOnline,
-                status = AccessStatus.LicensedResources())
+                status = status)
             )
           )
         )
