@@ -34,7 +34,6 @@ object FuzzyDateRange {
 }
 
 sealed trait TimePeriod extends DateHelpers {
-
   lazy val label: String =
     this match {
       case CalendarDate(day, month, year) =>
@@ -53,6 +52,13 @@ sealed trait TimePeriod extends DateHelpers {
         centuryToFuzzyDateRange(century).label
       case CenturyAndDecade(century, decade) =>
         centuryAndDecadeToFuzzyDateRange(century, decade).label
+
+      // In Sierra, the year 9999 is used to indicate an open-ended range.
+      // We still want to extract this value for date-based filtering, but we
+      // shouldn't show it in the display labels.
+      case FuzzyDateRange(from, to) if to == Year(9999) =>
+        s"${from.label}-"
+
       case FuzzyDateRange(from, to) =>
         f"${from.label}-${to.label}"
     }

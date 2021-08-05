@@ -80,7 +80,7 @@ class Marc008DateParserTest extends AnyFunSpec with Matchers {
       InstantRange(
         LocalDate of (2000, 1, 1),
         LocalDate of (9999, 12, 31),
-        "2000-9999"))
+        "2000-"))
   }
 
   it("parses continuing resource status unknown") {
@@ -88,7 +88,7 @@ class Marc008DateParserTest extends AnyFunSpec with Matchers {
       InstantRange(
         LocalDate of (1959, 1, 1),
         LocalDate of (9999, 12, 31),
-        "1959-9999"))
+        "1959-"))
   }
 
   it("parses questionable dates") {
@@ -115,8 +115,17 @@ class Marc008DateParserTest extends AnyFunSpec with Matchers {
         "1874"))
   }
 
+  it("drops an explicit 9999 from the displayed range") {
+    Marc008DateParser("c20179999") shouldBe Some(
+      InstantRange(
+        LocalDate of (2017, 1, 1),
+        LocalDate of (9999, 12, 31),
+        "2017-"))
+  }
+
   it("works") {
     val writer = new PrintWriter("/Users/alexwlchan/Desktop/parsed_labels.txt")
+    val writer2 = new PrintWriter("/Users/alexwlchan/Desktop/parsed_labels2.txt")
 
     Source.fromFile("/Users/alexwlchan/Desktop/008.txt").getLines
       .flatMap { line =>
@@ -125,17 +134,18 @@ class Marc008DateParserTest extends AnyFunSpec with Matchers {
           None
         } else {
 
-          Some(s)
+          Some((line, s))
         }
       }
-      .flatMap { slice =>
+      .flatMap { case (line, slice) =>
         Marc008DateParser(slice) match {
-          case Some(d) => Some((slice, d))
+          case Some(d) => Some((line, slice, d))
           case _ => None
         }
       }
-      .foreach { case (slice, d) =>
-        writer.write(s"$slice ~> ${d.label}\n")
+      .foreach { case (line, slice, d) =>
+        writer.write(s"$line ~> $slice ~> ${d.label}\n")
+        writer2.write(s"${d.label}\n")
       }
   }
 }
