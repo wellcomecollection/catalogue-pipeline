@@ -2,6 +2,7 @@ package weco.pipeline.transformer.sierra.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import weco.catalogue.internal_model.locations.AccessStatus.LicensedResources
 import weco.catalogue.internal_model.locations.LocationType.OnlineResource
 import weco.catalogue.internal_model.locations.{
   AccessCondition,
@@ -38,7 +39,8 @@ class SierraElectronicResourcesTest
             accessConditions = List(
               AccessCondition(
                 method = AccessMethod.ViewOnline,
-                status = AccessStatus.LicensedResources)
+                status = AccessStatus.LicensedResources(
+                  relationship = LicensedResources.Resource))
             )
           )
         )
@@ -74,7 +76,7 @@ class SierraElectronicResourcesTest
             accessConditions = List(
               AccessCondition(
                 method = AccessMethod.ViewOnline,
-                status = AccessStatus.LicensedResources)
+                status = AccessStatus.LicensedResources())
             )
           )
         )
@@ -88,7 +90,37 @@ class SierraElectronicResourcesTest
             accessConditions = List(
               AccessCondition(
                 method = AccessMethod.ViewOnline,
-                status = AccessStatus.LicensedResources)
+                status = AccessStatus.LicensedResources())
+            )
+          )
+        )
+      )
+    )
+  }
+
+  it("marks the item as a related resource if 856 ind2 = 2") {
+    val varFields = List(
+      createVarFieldWith(
+        marcTag = "856",
+        indicator2 = "2",
+        subfields = List(
+          MarcSubfield(tag = "u", content = "https://example.org/journal")
+        )
+      )
+    )
+
+    getElectronicResources(varFields) shouldBe List(
+      Item(
+        title = None,
+        locations = List(
+          DigitalLocation(
+            url = "https://example.org/journal",
+            locationType = OnlineResource,
+            accessConditions = List(
+              AccessCondition(
+                method = AccessMethod.ViewOnline,
+                status = AccessStatus.LicensedResources(
+                  relationship = LicensedResources.RelatedResource))
             )
           )
         )
@@ -123,7 +155,7 @@ class SierraElectronicResourcesTest
               accessConditions = List(
                 AccessCondition(
                   method = AccessMethod.ViewOnline,
-                  status = AccessStatus.LicensedResources)
+                  status = AccessStatus.LicensedResources())
               )
             )
           )
@@ -168,7 +200,7 @@ class SierraElectronicResourcesTest
               accessConditions = List(
                 AccessCondition(
                   method = AccessMethod.ViewOnline,
-                  status = AccessStatus.LicensedResources)
+                  status = AccessStatus.LicensedResources())
               )
             )
           )
@@ -183,7 +215,7 @@ class SierraElectronicResourcesTest
               accessConditions = List(
                 AccessCondition(
                   method = AccessMethod.ViewOnline,
-                  status = AccessStatus.LicensedResources)
+                  status = AccessStatus.LicensedResources())
               )
             )
           )
@@ -198,7 +230,7 @@ class SierraElectronicResourcesTest
               accessConditions = List(
                 AccessCondition(
                   method = AccessMethod.ViewOnline,
-                  status = AccessStatus.LicensedResources)
+                  status = AccessStatus.LicensedResources())
               )
             )
           )
@@ -228,7 +260,7 @@ class SierraElectronicResourcesTest
               accessConditions = List(
                 AccessCondition(
                   method = AccessMethod.ViewOnline,
-                  status = AccessStatus.LicensedResources)
+                  status = AccessStatus.LicensedResources())
               )
             )
           )
@@ -258,7 +290,7 @@ class SierraElectronicResourcesTest
               accessConditions = List(
                 AccessCondition(
                   method = AccessMethod.ViewOnline,
-                  status = AccessStatus.LicensedResources)
+                  status = AccessStatus.LicensedResources())
               )
             )
           )
@@ -288,7 +320,7 @@ class SierraElectronicResourcesTest
               accessConditions = List(
                 AccessCondition(
                   method = AccessMethod.ViewOnline,
-                  status = AccessStatus.LicensedResources)
+                  status = AccessStatus.LicensedResources())
               )
             )
           )
@@ -318,7 +350,7 @@ class SierraElectronicResourcesTest
               accessConditions = List(
                 AccessCondition(
                   method = AccessMethod.ViewOnline,
-                  status = AccessStatus.LicensedResources)
+                  status = AccessStatus.LicensedResources())
               )
             )
           )
@@ -350,7 +382,7 @@ class SierraElectronicResourcesTest
               accessConditions = List(
                 AccessCondition(
                   method = AccessMethod.ViewOnline,
-                  status = AccessStatus.LicensedResources)
+                  status = AccessStatus.LicensedResources())
               )
             )
           )

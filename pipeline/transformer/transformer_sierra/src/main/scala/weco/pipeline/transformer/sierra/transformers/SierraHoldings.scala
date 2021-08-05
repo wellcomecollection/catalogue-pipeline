@@ -1,6 +1,7 @@
 package weco.pipeline.transformer.sierra.transformers
 
 import com.github.tototoshi.csv.CSVReader
+import weco.catalogue.internal_model.locations.AccessStatus.LicensedResources
 import weco.catalogue.internal_model.locations.LocationType.ClosedStores
 import weco.catalogue.internal_model.locations.{
   AccessCondition,
@@ -258,7 +259,13 @@ object SierraHoldings extends SierraQueryOps {
                   accessConditions = List(
                     AccessCondition(
                       method = AccessMethod.ViewOnline,
-                      status = AccessStatus.LicensedResources)
+                      // Note: it's theoretically possible for an 856 URL to have the
+                      // relationship "Related resources" -- see SierraElectronicResources --
+                      // but at time of writing (Aug 2021), there are no holdings records
+                      // where this is the case.
+                      status = AccessStatus.LicensedResources(
+                        relationship = LicensedResources.Resource)
+                    )
                   )
                 )
               )
