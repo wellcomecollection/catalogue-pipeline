@@ -58,27 +58,11 @@ object InstantRange {
     label = start.label
   )
 
-  object AfterDate {
-    def unapply(range: InstantRange): Option[Instant] =
-      range.to match {
-        case `positiveInfinity` => Some(range.from)
-        case _                  => None
-      }
-  }
-
   def before(end: InstantRange): InstantRange = InstantRange(
     from = negativeInfinity,
     to = end.to,
     label = end.label
   )
-
-  object BeforeDate {
-    def unapply(range: InstantRange): Option[Instant] =
-      range.from match {
-        case `negativeInfinity` => Some(range.to)
-        case _                  => None
-      }
-  }
 
   def parse(label: String)(
     implicit parser: Parser[InstantRange]): Option[InstantRange] =
