@@ -82,7 +82,9 @@ trait ElasticRetriever[T] extends Retriever[T] with Logging {
           // Stopping the application will cause it to be restarted, and hopefully the
           // next set of messages won't throw this error.
           case e: OutOfMemoryError =>
-            error(s"Out of memory error thrown while trying to retrieve ${ids.size} IDs: $ids", e)
+            error(
+              s"Out of memory error thrown while trying to retrieve ${ids.size} IDs: $ids",
+              e)
             System.exit(1)
 
             // This line is just to keep the compiler happy, because it can't see that
