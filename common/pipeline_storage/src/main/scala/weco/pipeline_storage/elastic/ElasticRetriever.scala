@@ -70,5 +70,26 @@ trait ElasticRetriever[T] extends Retriever[T] with Logging {
               notFound = documents.collect { case (id, Failure(e)) => id -> e }
             )
         }
+        .recoverWith {
+          // If we try to retrieve too large a set of documents in one go, we can throw
+          // an OutOfMemory error here.
+          //
+          // This bubbles up to SQSStream as an org.apache.http.ConnectionClosedException,
+          // which isn't necessarily terminal -- but running out of memory and losing
+          // the Akka actor is.  The app will no longer process messages because Akka has
+          // stopped, so there's nothing more useful we can do.
+          //
+          // Stopping the application will cause it to be restarted, and hopefully the
+          // next set of messages won't throw this error.
+          case e: OutOfMemoryError =>
+            error(
+              s"Out of memory error thrown while trying to retrieve ${ids.size} IDs: $ids",
+              e)
+            System.exit(1)
+
+            // This line is just to keep the compiler happy, because it can't see that
+            // it's unhittable.
+            Future.failed(e)
+        }
     } yield result
 }
