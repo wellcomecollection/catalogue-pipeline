@@ -2,6 +2,7 @@ package weco.catalogue.internal_model.work
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import weco.catalogue.internal_model.locations.AccessStatus.LicensedResources
 import weco.catalogue.internal_model.locations.{AccessStatus, LocationType}
 import weco.catalogue.internal_model.work.generators.{
   ItemsGenerators,
@@ -23,7 +24,7 @@ class AvailabilityTest
           createDigitalItemWith(accessStatus = AccessStatus.OpenWithAdvisory)))
       val licensedResourcesWork = denormalisedWork().items(
         List(
-          createDigitalItemWith(accessStatus = AccessStatus.LicensedResources)))
+          createDigitalItemWith(accessStatus = AccessStatus.LicensedResources())))
       val availabilities =
         List(openWork, openWithAdvisoryWork, licensedResourcesWork)
           .map(work => Availabilities.forWorkData(work.data))
@@ -37,6 +38,19 @@ class AvailabilityTest
       val workAvailabilities = Availabilities.forWorkData(work.data)
 
       workAvailabilities should contain only Availability.InLibrary
+    }
+
+    it("doesn't add Availability.Online if the only digital location is a related resource") {
+      val items =
+        List(
+          createDigitalItemWith(
+            accessStatus = AccessStatus.LicensedResources(LicensedResources.RelatedResource)
+          )
+        )
+
+      val work = denormalisedWork().items(items)
+
+      Availabilities.forWorkData(work.data) shouldBe empty
     }
 
     it("does not add Availability.InLibrary if the only location is OnOrder") {

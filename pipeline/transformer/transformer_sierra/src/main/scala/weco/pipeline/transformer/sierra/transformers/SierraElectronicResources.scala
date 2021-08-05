@@ -95,7 +95,7 @@ object SierraElectronicResources extends SierraQueryOps with Logging {
             accessConditions = List(
               AccessCondition(
                 method = AccessMethod.ViewOnline,
-                status = AccessStatus.LicensedResources)
+                status = AccessStatus.LicensedResources())
             )
           )
         )

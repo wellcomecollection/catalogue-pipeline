@@ -836,7 +836,7 @@ class PlatformMergerTest
                   accessConditions = List(
                     AccessCondition(
                       method = AccessMethod.ViewOnline,
-                      status = AccessStatus.LicensedResources
+                      status = AccessStatus.LicensedResources()
                     )
                   )
                 )
@@ -910,7 +910,7 @@ class PlatformMergerTest
           accessConditions = List(
             AccessCondition(
               method = AccessMethod.ViewOnline,
-              status = AccessStatus.LicensedResources
+              status = AccessStatus.LicensedResources()
             )
           )
         )

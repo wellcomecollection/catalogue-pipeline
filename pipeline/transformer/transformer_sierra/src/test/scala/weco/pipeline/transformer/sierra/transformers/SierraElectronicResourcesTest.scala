@@ -38,7 +38,7 @@ class SierraElectronicResourcesTest
             accessConditions = List(
               AccessCondition(
                 method = AccessMethod.ViewOnline,
-                status = AccessStatus.LicensedResources)
+                status = AccessStatus.LicensedResources())
             )
           )
         )
@@ -74,7 +74,7 @@ class SierraElectronicResourcesTest
             accessConditions = List(
               AccessCondition(
                 method = AccessMethod.ViewOnline,
-                status = AccessStatus.LicensedResources)
+                status = AccessStatus.LicensedResources())
             )
           )
         )
@@ -88,7 +88,7 @@ class SierraElectronicResourcesTest
             accessConditions = List(
               AccessCondition(
                 method = AccessMethod.ViewOnline,
-                status = AccessStatus.LicensedResources)
+                status = AccessStatus.LicensedResources())
             )
           )
         )
@@ -123,7 +123,7 @@ class SierraElectronicResourcesTest
               accessConditions = List(
                 AccessCondition(
                   method = AccessMethod.ViewOnline,
-                  status = AccessStatus.LicensedResources)
+                  status = AccessStatus.LicensedResources())
               )
             )
           )
@@ -168,7 +168,7 @@ class SierraElectronicResourcesTest
               accessConditions = List(
                 AccessCondition(
                   method = AccessMethod.ViewOnline,
-                  status = AccessStatus.LicensedResources)
+                  status = AccessStatus.LicensedResources())
               )
             )
           )
@@ -183,7 +183,7 @@ class SierraElectronicResourcesTest
               accessConditions = List(
                 AccessCondition(
                   method = AccessMethod.ViewOnline,
-                  status = AccessStatus.LicensedResources)
+                  status = AccessStatus.LicensedResources())
               )
             )
           )
@@ -198,7 +198,7 @@ class SierraElectronicResourcesTest
               accessConditions = List(
                 AccessCondition(
                   method = AccessMethod.ViewOnline,
-                  status = AccessStatus.LicensedResources)
+                  status = AccessStatus.LicensedResources())
               )
             )
           )
@@ -228,7 +228,7 @@ class SierraElectronicResourcesTest
               accessConditions = List(
                 AccessCondition(
                   method = AccessMethod.ViewOnline,
-                  status = AccessStatus.LicensedResources)
+                  status = AccessStatus.LicensedResources())
               )
             )
           )
@@ -258,7 +258,7 @@ class SierraElectronicResourcesTest
               accessConditions = List(
                 AccessCondition(
                   method = AccessMethod.ViewOnline,
-                  status = AccessStatus.LicensedResources)
+                  status = AccessStatus.LicensedResources())
               )
             )
           )
@@ -288,7 +288,7 @@ class SierraElectronicResourcesTest
               accessConditions = List(
                 AccessCondition(
                   method = AccessMethod.ViewOnline,
-                  status = AccessStatus.LicensedResources)
+                  status = AccessStatus.LicensedResources())
               )
             )
           )
@@ -318,7 +318,7 @@ class SierraElectronicResourcesTest
               accessConditions = List(
                 AccessCondition(
                   method = AccessMethod.ViewOnline,
-                  status = AccessStatus.LicensedResources)
+                  status = AccessStatus.LicensedResources())
               )
             )
           )
@@ -350,7 +350,7 @@ class SierraElectronicResourcesTest
               accessConditions = List(
                 AccessCondition(
                   method = AccessMethod.ViewOnline,
-                  status = AccessStatus.LicensedResources)
+                  status = AccessStatus.LicensedResources())
               )
             )
           )
