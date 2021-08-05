@@ -3,7 +3,14 @@ package weco.pipeline.transformer.sierra.transformers
 import com.github.tototoshi.csv.CSVReader
 import weco.catalogue.internal_model.locations.AccessStatus.LicensedResources
 import weco.catalogue.internal_model.locations.LocationType.ClosedStores
-import weco.catalogue.internal_model.locations.{AccessCondition, AccessMethod, AccessStatus, DigitalLocation, LocationType, PhysicalLocation}
+import weco.catalogue.internal_model.locations.{
+  AccessCondition,
+  AccessMethod,
+  AccessStatus,
+  DigitalLocation,
+  LocationType,
+  PhysicalLocation
+}
 import weco.catalogue.internal_model.work.{Holdings, Item}
 import weco.catalogue.source_model.sierra.marc.FixedField
 import weco.catalogue.source_model.sierra.rules.SierraPhysicalLocationType
@@ -256,7 +263,8 @@ object SierraHoldings extends SierraQueryOps {
                       // relationship "Related resources" -- see SierraElectronicResources --
                       // but at time of writing (Aug 2021), there are no holdings records
                       // where this is the case.
-                      status = AccessStatus.LicensedResources(relationship = LicensedResources.Resource)
+                      status = AccessStatus.LicensedResources(
+                        relationship = LicensedResources.Resource)
                     )
                   )
                 )

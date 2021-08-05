@@ -54,8 +54,12 @@ object SierraElectronicResources extends SierraQueryOps with Logging {
     // This allows us to include URLs that are related to the work, but not the
     // work itself (e.g. a description on a publisher website).
     val status = vf.indicator2 match {
-      case Some("2") => AccessStatus.LicensedResources(relationship = LicensedResources.RelatedResource)
-      case _         => AccessStatus.LicensedResources(relationship = LicensedResources.Resource)
+      case Some("2") =>
+        AccessStatus.LicensedResources(
+          relationship = LicensedResources.RelatedResource)
+      case _ =>
+        AccessStatus.LicensedResources(
+          relationship = LicensedResources.Resource)
     }
 
     getUrl(id, vf).map { url =>
@@ -110,9 +114,7 @@ object SierraElectronicResources extends SierraQueryOps with Logging {
             // See https://github.com/wellcomecollection/platform/issues/5062 for
             // more discussion and conversations about this.
             accessConditions = List(
-              AccessCondition(
-                method = AccessMethod.ViewOnline,
-                status = status)
+              AccessCondition(method = AccessMethod.ViewOnline, status = status)
             )
           )
         )

@@ -22,7 +22,8 @@ sealed trait AccessStatus extends EnumEntry { this: AccessStatus =>
     //
     // We still want these items on the work, we just don't want these items
     // to match the "available online" filter.
-    case AccessStatus.LicensedResources(LicensedResources.RelatedResource) => false
+    case AccessStatus.LicensedResources(LicensedResources.RelatedResource) =>
+      false
 
     case _ => false
   }
@@ -96,7 +97,9 @@ object AccessStatus extends Enum[AccessStatus] {
     case object RelatedResource extends Relationship
   }
 
-  case class LicensedResources(relationship: LicensedResources.Relationship = LicensedResources.Resource) extends AccessStatus {
+  case class LicensedResources(
+    relationship: LicensedResources.Relationship = LicensedResources.Resource)
+      extends AccessStatus {
     override val id: String = "licensed-resources"
     override val label: String = "Licensed resources"
   }

@@ -39,7 +39,8 @@ class SierraElectronicResourcesTest
             accessConditions = List(
               AccessCondition(
                 method = AccessMethod.ViewOnline,
-                status = AccessStatus.LicensedResources(relationship = LicensedResources.Resource))
+                status = AccessStatus.LicensedResources(
+                  relationship = LicensedResources.Resource))
             )
           )
         )
@@ -118,7 +119,8 @@ class SierraElectronicResourcesTest
             accessConditions = List(
               AccessCondition(
                 method = AccessMethod.ViewOnline,
-                status = AccessStatus.LicensedResources(relationship = LicensedResources.RelatedResource))
+                status = AccessStatus.LicensedResources(
+                  relationship = LicensedResources.RelatedResource))
             )
           )
         )

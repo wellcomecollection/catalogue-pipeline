@@ -22,9 +22,8 @@ class AvailabilityTest
       val openWithAdvisoryWork = denormalisedWork().items(
         List(
           createDigitalItemWith(accessStatus = AccessStatus.OpenWithAdvisory)))
-      val licensedResourcesWork = denormalisedWork().items(
-        List(
-          createDigitalItemWith(accessStatus = AccessStatus.LicensedResources())))
+      val licensedResourcesWork = denormalisedWork().items(List(
+        createDigitalItemWith(accessStatus = AccessStatus.LicensedResources())))
       val availabilities =
         List(openWork, openWithAdvisoryWork, licensedResourcesWork)
           .map(work => Availabilities.forWorkData(work.data))
@@ -40,11 +39,13 @@ class AvailabilityTest
       workAvailabilities should contain only Availability.InLibrary
     }
 
-    it("doesn't add Availability.Online if the only digital location is a related resource") {
+    it(
+      "doesn't add Availability.Online if the only digital location is a related resource") {
       val items =
         List(
           createDigitalItemWith(
-            accessStatus = AccessStatus.LicensedResources(LicensedResources.RelatedResource)
+            accessStatus =
+              AccessStatus.LicensedResources(LicensedResources.RelatedResource)
           )
         )
 
