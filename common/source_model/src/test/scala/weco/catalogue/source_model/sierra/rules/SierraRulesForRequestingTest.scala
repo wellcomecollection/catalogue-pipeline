@@ -280,9 +280,9 @@ class SierraRulesForRequestingTest
         "22",
         NotRequestable.OnExhibition(
           "Item is on Exhibition Reserve. Please ask at the Enquiry Desk")),
-      ("17", NotRequestable.NoPublicMessage("fixed field 61 = 17")),
-      ("18", NotRequestable.NoPublicMessage("fixed field 61 = 18")),
-      ("15", NotRequestable.NoPublicMessage("fixed field 61 = 15")),
+      ("17", NotRequestable.NoPublicMessage("fixed field 61 = 17 (<none>)")),
+      ("18", NotRequestable.NoPublicMessage("fixed field 61 = 18 (<none>)")),
+      ("15", NotRequestable.NoPublicMessage("fixed field 61 = 15 (<none>)")),
       (
         "4",
         NotRequestable.NeedsManualRequest(
