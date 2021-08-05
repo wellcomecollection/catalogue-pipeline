@@ -322,6 +322,36 @@ class SierraItemAccessTest
               status = AccessStatus.Unavailable)
         }
 
+        it("if the item is unavailable and the bib is temporarily unavailable") {
+          val itemData = createSierraItemDataWith(
+            fixedFields = Map(
+              "79" -> FixedField(
+                label = "LOCATION",
+                value = "sc#ac",
+                display = "Unrequestable Arch. & MSS"),
+              "88" -> FixedField(
+                label = "STATUS",
+                value = "r",
+                display = "Unavailable"),
+              "108" -> FixedField(
+                label = "OPACMSG",
+                value = "u",
+                display = "Unavailable"),
+            )
+          )
+
+          val (ac, _) = getItemAccess(
+            bibStatus = Some(AccessStatus.TemporarilyUnavailable),
+            location = Some(LocationType.ClosedStores),
+            itemData = itemData
+          )
+
+          ac shouldBe
+            AccessCondition(
+              method = AccessMethod.NotRequestable,
+              status = AccessStatus.Unavailable)
+        }
+
         it("if the item is at digitisation") {
           val itemData = createSierraItemDataWith(
             fixedFields = Map(
