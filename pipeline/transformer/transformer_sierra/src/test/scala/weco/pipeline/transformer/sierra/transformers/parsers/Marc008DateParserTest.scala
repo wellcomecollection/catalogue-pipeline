@@ -6,6 +6,9 @@ import java.time.LocalDate
 import org.scalatest.funspec.AnyFunSpec
 import weco.catalogue.internal_model.work.InstantRange
 
+import java.io.PrintWriter
+import scala.io.Source
+
 class Marc008DateParserTest extends AnyFunSpec with Matchers {
 
   it("parses single date") {
@@ -110,5 +113,29 @@ class Marc008DateParserTest extends AnyFunSpec with Matchers {
         LocalDate of (1874, 1, 1),
         LocalDate of (1874, 12, 31),
         "1874"))
+  }
+
+  it("works") {
+    val writer = new PrintWriter("/Users/alexwlchan/Desktop/parsed_labels.txt")
+
+    Source.fromFile("/Users/alexwlchan/Desktop/008.txt").getLines
+      .flatMap { line =>
+        val s = line.slice(6, 15)
+        if (s.trim.isEmpty) {
+          None
+        } else {
+
+          Some(s)
+        }
+      }
+      .flatMap { slice =>
+        Marc008DateParser(slice) match {
+          case Some(d) => Some((slice, d))
+          case _ => None
+        }
+      }
+      .foreach { case (slice, d) =>
+        writer.write(s"$slice ~> ${d.label}\n")
+      }
   }
 }
