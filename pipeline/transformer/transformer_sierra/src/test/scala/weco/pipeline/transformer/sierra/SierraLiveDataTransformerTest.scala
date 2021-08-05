@@ -1,12 +1,18 @@
 package weco.pipeline.transformer.sierra
 
-import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicSessionCredentials}
+import com.amazonaws.auth.{
+  AWSStaticCredentialsProvider,
+  BasicSessionCredentials
+}
 import com.amazonaws.services.s3.{AmazonS3, AmazonS3ClientBuilder}
 import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scanamo.generic.auto._
-import software.amazon.awssdk.auth.credentials.{AwsSessionCredentials, StaticCredentialsProvider}
+import software.amazon.awssdk.auth.credentials.{
+  AwsSessionCredentials,
+  StaticCredentialsProvider
+}
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.sts.StsClient
 import software.amazon.awssdk.services.sts.model.AssumeRoleRequest
@@ -22,7 +28,10 @@ import weco.storage.{Identified, Version}
 
 import scala.language.higherKinds
 
-class SierraLiveDataTransformerTest extends AnyFunSpec with Matchers with EitherValues {
+class SierraLiveDataTransformerTest
+    extends AnyFunSpec
+    with Matchers
+    with EitherValues {
 
   /** This "test" will fetch a Sierra record from the VHS using your local credentials
     * and transform it with your local transformer.
@@ -44,9 +53,12 @@ class SierraLiveDataTransformerTest extends AnyFunSpec with Matchers with Either
     println(work)
   }
 
-  private def getSierraTransformable(tableName: String, bibNumber: SierraBibNumber): Identified[Version[String, Int], SierraTransformable] = {
+  private def getSierraTransformable(tableName: String,
+                                     bibNumber: SierraBibNumber)
+    : Identified[Version[String, Int], SierraTransformable] = {
     val assumeRoleRequest =
-      AssumeRoleRequest.builder()
+      AssumeRoleRequest
+        .builder()
         .roleArn("arn:aws:iam::760097843905:role/platform-read_only")
         .roleSessionName("SierraTransformerTests")
         .build()
@@ -66,37 +78,52 @@ class SierraLiveDataTransformerTest extends AnyFunSpec with Matchers with Either
       )
 
     implicit val dynamoClient: DynamoDbClient =
-      DynamoDbClient.builder()
+      DynamoDbClient
+        .builder()
         .credentialsProvider(sessionCredentials)
         .build()
 
     implicit val s3Client: AmazonS3 =
-      AmazonS3ClientBuilder.standard()
-        .withCredentials(new AWSStaticCredentialsProvider(
-          new BasicSessionCredentials(
-            credentials.accessKeyId(),
-            credentials.secretAccessKey(),
-            credentials.sessionToken()
-          )
-        ))
+      AmazonS3ClientBuilder
+        .standard()
+        .withCredentials(
+          new AWSStaticCredentialsProvider(
+            new BasicSessionCredentials(
+              credentials.accessKeyId(),
+              credentials.secretAccessKey(),
+              credentials.sessionToken()
+            )
+          ))
         .withPathStyleAccessEnabled(true)
         .build()
 
-    implicit val typedStore: S3TypedStore[SierraTransformable] = S3TypedStore[SierraTransformable]
+    implicit val typedStore: S3TypedStore[SierraTransformable] =
+      S3TypedStore[SierraTransformable]
 
-    implicit val indexedStore = new DynamoHashStore[String, Int, S3ObjectLocation](
-      config = DynamoConfig(tableName = tableName)
-    )
+    implicit val indexedStore =
+      new DynamoHashStore[String, Int, S3ObjectLocation](
+        config = DynamoConfig(tableName = tableName)
+      )
 
     class VHSInternalStore(prefix: S3ObjectLocationPrefix)(
       implicit
       indexedStore: DynamoHashStore[String, Int, S3ObjectLocation],
       typedStore: S3TypedStore[SierraTransformable]
-    ) extends DynamoHybridStore[SierraTransformable](prefix)(indexedStore, typedStore)
-      with HybridStoreWithMaxima[String, Int, S3ObjectLocation, SierraTransformable]
+    ) extends DynamoHybridStore[SierraTransformable](prefix)(
+          indexedStore,
+          typedStore)
+        with HybridStoreWithMaxima[
+          String,
+          Int,
+          S3ObjectLocation,
+          SierraTransformable]
 
     val vhs =
-      new VersionedHybridStore[String, Int, S3ObjectLocation, SierraTransformable](
+      new VersionedHybridStore[
+        String,
+        Int,
+        S3ObjectLocation,
+        SierraTransformable](
         new VHSInternalStore(
           prefix = S3ObjectLocationPrefix("", "")
         )
