@@ -1,15 +1,3 @@
-locals {
-  lsh_model_key = var.release_label == "prod" ? "prod" : "stage"
-}
-
-data "aws_ssm_parameter" "inferrer_lsh_model_key" {
-  name = "/catalogue_pipeline/config/models/${local.lsh_model_key}/lsh_model"
-}
-
-data "aws_ssm_parameter" "latest_lsh_model_key" {
-  name = "/catalogue_pipeline/config/models/latest/lsh_model"
-}
-
 data "aws_ecr_repository" "service" {
   count = length(local.services)
   name  = "uk.ac.wellcome/${local.services[count.index]}"
