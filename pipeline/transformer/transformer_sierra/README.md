@@ -1,6 +1,6 @@
 # transformer_sierra
 
-The [`SierraLiveDataTransformerTest.scala`](SierraLiveDataTransformerTest.scala) file alongside this README allows you to transform "live" data with your local transformer.
+The [`SierraLiveDataTransformerTest.scala`](SierraLiveDataTransformerTest.scala.txt) file alongside this README allows you to transform "live" data with your local transformer.
 This is useful for debugging and testing new transformer code.
 
 To use it:
