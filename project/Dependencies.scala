@@ -103,11 +103,7 @@ object ExternalDependencies {
     val enumeratumScalacheck = "1.6.1"
     val jsoup = "1.13.1"
     val logback = "1.1.8"
-
-    // This should match the version in scala-libs
-    // See https://github.com/wellcomecollection/scala-libs/blob/main/project/Dependencies.scala
-    val aws2 = "2.11.14"
-  }
+å  }
 
   val enumeratumDependencies = Seq(
     "com.beachape" %% "enumeratum" % versions.enumeratum,
@@ -166,10 +162,6 @@ object ExternalDependencies {
     "ch.qos.logback" % "logback-classic" % versions.logback,
     "ch.qos.logback" % "logback-core" % versions.logback,
     "ch.qos.logback" % "logback-access" % versions.logback
-  )
-
-  val stsDependencies = Seq(
-    "software.amazon.awssdk" % "sts" % versions.aws2
   )
 }
 
@@ -248,7 +240,6 @@ object CatalogueDependencies {
 
   val sierraTransformerDependencies: Seq[ModuleID] =
     ExternalDependencies.apacheCommonsDependencies ++
-      ExternalDependencies.stsDependencies ++
       WellcomeDependencies.jsonLibrary
 
   val metsTransformerDependencies: Seq[ModuleID] =
