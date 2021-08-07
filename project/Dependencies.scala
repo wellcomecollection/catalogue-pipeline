@@ -103,7 +103,7 @@ object ExternalDependencies {
     val enumeratumScalacheck = "1.6.1"
     val jsoup = "1.13.1"
     val logback = "1.1.8"
-å  }
+  }
 
   val enumeratumDependencies = Seq(
     "com.beachape" %% "enumeratum" % versions.enumeratum,
