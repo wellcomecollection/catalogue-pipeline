@@ -207,7 +207,9 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           Some(Status.Unavailable),
           Some(OpacMsg.Unavailable),
           NotRequestable.ItemUnavailable(_),
-          _) if status.isEmpty || status.contains(AccessStatus.TemporarilyUnavailable) =>
+          _)
+          if status.isEmpty || status.contains(
+            AccessStatus.TemporarilyUnavailable) =>
         AccessCondition(
           method = AccessMethod.NotRequestable,
           status = AccessStatus.Unavailable)
