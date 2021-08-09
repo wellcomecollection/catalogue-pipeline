@@ -616,6 +616,41 @@ class SierraItemAccessTest
           )
       }
 
+      it("can't be requested when an item is on hold for a loan rule") {
+        val itemData = createSierraItemDataWith(
+          holdCount = Some(1),
+          fixedFields = Map(
+            "79" -> FixedField(
+              label = "LOCATION",
+              value = "sgeph",
+              display = "Closed stores ephemera"),
+            "87" -> FixedField(label = "LOANRULE", value = "5"),
+            "88" -> FixedField(
+              label = "STATUS",
+              value = "-",
+              display = "Available"),
+            "108" -> FixedField(
+              label = "OPACMSG",
+              value = "f",
+              display = "Online request"),
+          )
+        )
+
+        val (ac, _) = getItemAccess(
+          bibStatus = None,
+          location = Some(LocationType.ClosedStores),
+          itemData = itemData
+        )
+
+        ac shouldBe
+          AccessCondition(
+            method = AccessMethod.OnlineRequest,
+            status = Some(AccessStatus.TemporarilyUnavailable),
+            note = Some(
+              "Item is in use by another reader. Please ask at Enquiry Desk.")
+          )
+      }
+
       it("can't be requested when a manual request item is on hold for somebody else") {
         val itemData = createSierraItemDataWith(
           holdCount = Some(1),

@@ -38,15 +38,19 @@ object SierraItemAccess extends SierraQueryOps with Logging {
     bibStatus: Option[AccessStatus],
     location: Option[PhysicalLocationType],
     itemData: SierraItemData
-  ): (AccessCondition, Option[String]) =
-    (
-      createAccessCondition(
-        bibId = bibId,
-        bibStatus = bibStatus,
-        location = location,
-        itemData = itemData
-      ),
-      itemData.displayNote) match {
+  ): (AccessCondition, Option[String]) = {
+    val accessCondition = createAccessCondition(
+      bibId = bibId,
+      bibStatus = bibStatus,
+      holdCount = itemData.holdCount,
+      status = itemData.status,
+      opacmsg = itemData.opacmsg,
+      rulesForRequestingResult = SierraRulesForRequesting(itemData),
+      location = location,
+      itemData = itemData
+    )
+
+    (accessCondition, itemData.displayNote) match {
       // If the item note is already on the access condition, we don't need to copy it.
       case (ac, displayNote) if ac.note == displayNote =>
         (ac, None)
@@ -66,23 +70,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
       // be copied onto the item.
       case (ac, displayNote) => (ac, displayNote)
     }
-
-  private def createAccessCondition(
-    bibId: SierraBibNumber,
-    bibStatus: Option[AccessStatus],
-    location: Option[PhysicalLocationType],
-    itemData: SierraItemData
-  ): AccessCondition =
-    createAccessCondition(
-      bibId = bibId,
-      bibStatus = bibStatus,
-      holdCount = itemData.holdCount,
-      status = itemData.status,
-      opacmsg = itemData.opacmsg,
-      rulesForRequestingResult = SierraRulesForRequesting(itemData),
-      location = location,
-      itemData = itemData
-    )
+  }
 
   private def createAccessCondition(
     bibId: SierraBibNumber,
@@ -338,6 +326,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
         val inferredItemData = itemData.copy(
           holdCount = Some(0),
           fixedFields = itemData.fixedFields ++ Map(
+            "87" -> FixedField(label = "LOANRULE", value = "0"),
             "88" -> FixedField(
               label = "STATUS",
               value = "-",
