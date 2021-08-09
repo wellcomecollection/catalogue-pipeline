@@ -117,6 +117,12 @@ class CalmTermsOfUseTest
     CalmTermsOfUse(record) shouldBe empty
   }
 
+  it("doesn't create a note for an item with no access information") {
+    val record = createCalmRecord
+
+    CalmTermsOfUse(record) shouldBe empty
+  }
+
   it("creates a note for an item with permission + restrictions") {
     val record = createCalmRecordWith(
       (
