@@ -10,6 +10,7 @@ import weco.catalogue.internal_model.locations.{
 }
 import weco.catalogue.source_model.sierra.SierraItemData
 import weco.catalogue.source_model.sierra.identifiers.SierraBibNumber
+import weco.catalogue.source_model.sierra.marc.FixedField
 import weco.catalogue.source_model.sierra.source.{
   OpacMsg,
   SierraQueryOps,
@@ -303,35 +304,36 @@ object SierraItemAccess extends SierraQueryOps with Logging {
       // If an item is on hold for another reader, it can't be requested -- even
       // if it would ordinarily be requestable.
       //
-      // Note that an item on hold goes through two stages:
-      //  1. A reader places a hold, but the item is still in the store.
-      //     The status is still "-" (Available)
-      //  2. A staff member collects the item from the store, and places it on the holdshelf
-      //     Then the status becomes "!" (On holdshelf)
+      // We try to work out what the access condition would have been before the item
+      // was on hold -- this allows us to preserve the original access method.
+      //
+      // e.g. if an item is usually an "online request" but is temporarily on hold for
+      // somebody else, we can show that it's an online request at other times.
       //
       case (
           None,
-          Some(holdCount),
+          holdCount,
           _,
           _,
-          Requestable,
-          Some(LocationType.ClosedStores)) if holdCount > 0 =>
-        AccessCondition(
-          method = AccessMethod.ManualRequest,
-          status = Some(AccessStatus.TemporarilyUnavailable),
-          note = Some(
-            "Item is in use by another reader. Please ask at Enquiry Desk.")
-        )
+          rulesForRequestingResult,
+          Some(LocationType.ClosedStores))
+          if isOnHold(holdCount, rulesForRequestingResult) =>
+        val originalAccessCondition =
+          createAccessCondition(
+            bibId = bibId,
+            bibStatus = bibStatus,
+            location = location,
+            itemData = itemData.copy(
+              holdCount = Some(0),
+              fixedFields = itemData.fixedFields ++ Map(
+                "88" -> FixedField(
+                  label = "STATUS",
+                  value = "-",
+                  display = "Available"))
+            )
+          )
 
-      case (
-          None,
-          _,
-          _,
-          _,
-          NotRequestable.OnHold(_),
-          Some(LocationType.ClosedStores)) =>
-        AccessCondition(
-          method = AccessMethod.ManualRequest,
+        originalAccessCondition.copy(
           status = Some(AccessStatus.TemporarilyUnavailable),
           note = Some(
             "Item is in use by another reader. Please ask at Enquiry Desk.")
@@ -356,10 +358,26 @@ object SierraItemAccess extends SierraQueryOps with Logging {
         AccessCondition(
           method = AccessMethod.NotRequestable,
           note = Some(
-            s"""Please check this item <a href="https://search.wellcomelibrary.org/iii/encore/record/C__Rb${bibId.withoutCheckDigit}?lang=eng">on the Wellcome Library website</a> for access information""")
+            s"""This item cannot be requested online. Please contact <a href="mailto:library@wellcomecollection.org">library@wellcomecollection.org</a> for more information.""")
         )
     }
   }
+
+  // Note that an item on hold goes through two stages:
+  //
+  //  1. A reader places a hold, but the item is still in the store.
+  //     The status is still "-" (Available)
+  //  2. A staff member collects the item from the store, and places it on the holdshelf
+  //     Then the status becomes "!" (On holdshelf)  This is reflected in the rules for requesting.
+  //
+  private def isOnHold(
+    holdCount: Option[Int],
+    rulesForRequestingResult: RulesForRequestingResult): Boolean =
+    (holdCount, rulesForRequestingResult) match {
+      case (Some(holdCount), _) if holdCount > 0 => true
+      case (_, NotRequestable.OnHold(_))         => true
+      case _                                     => false
+    }
 
   implicit class ItemDataAccessOps(itemData: SierraItemData) {
     def status: Option[String] =
