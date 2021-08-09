@@ -72,13 +72,29 @@ object SierraItemAccess extends SierraQueryOps with Logging {
     bibStatus: Option[AccessStatus],
     location: Option[PhysicalLocationType],
     itemData: SierraItemData
-  ): AccessCondition = {
-    val holdCount = itemData.holdCount
-    val status = itemData.status
-    val opacmsg = itemData.opacmsg
-    val isRequestable = SierraRulesForRequesting(itemData)
+  ): AccessCondition =
+    createAccessCondition(
+      bibId = bibId,
+      bibStatus = bibStatus,
+      holdCount = itemData.holdCount,
+      status = itemData.status,
+      opacmsg = itemData.opacmsg,
+      rulesForRequestingResult = SierraRulesForRequesting(itemData),
+      location = location,
+      itemData = itemData
+    )
 
-    (bibStatus, holdCount, status, opacmsg, isRequestable, location) match {
+  private def createAccessCondition(
+    bibId: SierraBibNumber,
+    bibStatus: Option[AccessStatus],
+    holdCount: Option[Int],
+    status: Option[String],
+    opacmsg: Option[String],
+    rulesForRequestingResult: RulesForRequestingResult,
+    location: Option[PhysicalLocationType],
+    itemData: SierraItemData
+  ): AccessCondition =
+    (bibStatus, holdCount, status, opacmsg, rulesForRequestingResult, location) match {
 
       // Items in the closed stores that are requestable get the "Online request" condition.
       //
@@ -318,19 +334,32 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           rulesForRequestingResult,
           Some(LocationType.ClosedStores))
           if isOnHold(holdCount, rulesForRequestingResult) =>
+
+        val inferredItemData = itemData.copy(
+          holdCount = Some(0),
+          fixedFields = itemData.fixedFields ++ Map(
+            "88" -> FixedField(
+              label = "STATUS",
+              value = "-",
+              display = "Available"))
+        )
+
+        val rulesForRequestingResult = SierraRulesForRequesting(inferredItemData)
+
+        // Make sure we only recurse here once, not infinitely many times.
+        assert(!rulesForRequestingResult.isInstanceOf[NotRequestable.OnHold])
+        assert(!isOnHold(inferredItemData.holdCount, rulesForRequestingResult))
+
         val originalAccessCondition =
           createAccessCondition(
             bibId = bibId,
             bibStatus = bibStatus,
+            holdCount = Some(0),
+            status = Some(Status.Available),
+            opacmsg = inferredItemData.opacmsg,
+            rulesForRequestingResult = rulesForRequestingResult,
             location = location,
-            itemData = itemData.copy(
-              holdCount = Some(0),
-              fixedFields = itemData.fixedFields ++ Map(
-                "88" -> FixedField(
-                  label = "STATUS",
-                  value = "-",
-                  display = "Available"))
-            )
+            itemData = inferredItemData
           )
 
         originalAccessCondition.copy(
@@ -361,7 +390,6 @@ object SierraItemAccess extends SierraQueryOps with Logging {
             s"""This item cannot be requested online. Please contact <a href="mailto:library@wellcomecollection.org">library@wellcomecollection.org</a> for more information.""")
         )
     }
-  }
 
   // Note that an item on hold goes through two stages:
   //
