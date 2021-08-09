@@ -139,7 +139,7 @@ module "catalogue_pipeline_2021-08-09" {
       topics = [
         # local.tei_adapter_topic_arn,
       ],
-      reindex_topic = aws_sns_topic.tei_transformer_donotuse.arn,  # local.tei_reindexer_topic_arn,
+      reindex_topic = aws_sns_topic.tei_transformer_donotuse.arn, # local.tei_reindexer_topic_arn,
     }
   }
 
