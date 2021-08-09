@@ -322,7 +322,6 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           rulesForRequestingResult,
           Some(LocationType.ClosedStores))
           if isOnHold(holdCount, rulesForRequestingResult) =>
-
         val inferredItemData = itemData.copy(
           holdCount = Some(0),
           fixedFields = itemData.fixedFields ++ Map(
@@ -333,7 +332,8 @@ object SierraItemAccess extends SierraQueryOps with Logging {
               display = "Available"))
         )
 
-        val rulesForRequestingResult = SierraRulesForRequesting(inferredItemData)
+        val rulesForRequestingResult = SierraRulesForRequesting(
+          inferredItemData)
 
         // Make sure we only recurse here once, not infinitely many times.
         assert(!rulesForRequestingResult.isInstanceOf[NotRequestable.OnHold])
