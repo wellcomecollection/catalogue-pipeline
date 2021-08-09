@@ -316,8 +316,8 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           _,
           _,
           rulesForRequestingResult,
-          Some(LocationType.ClosedStores)) if isOnHold(holdCount, rulesForRequestingResult) =>
-
+          Some(LocationType.ClosedStores))
+          if isOnHold(holdCount, rulesForRequestingResult) =>
         val originalAccessCondition =
           createAccessCondition(
             bibId = bibId,
@@ -325,7 +325,11 @@ object SierraItemAccess extends SierraQueryOps with Logging {
             location = location,
             itemData = itemData.copy(
               holdCount = Some(0),
-              fixedFields = itemData.fixedFields ++ Map("88" -> FixedField(label = "STATUS", value = "-", display = "Available"))
+              fixedFields = itemData.fixedFields ++ Map(
+                "88" -> FixedField(
+                  label = "STATUS",
+                  value = "-",
+                  display = "Available"))
             )
           )
 
@@ -366,7 +370,9 @@ object SierraItemAccess extends SierraQueryOps with Logging {
   //  2. A staff member collects the item from the store, and places it on the holdshelf
   //     Then the status becomes "!" (On holdshelf)  This is reflected in the rules for requesting.
   //
-  private def isOnHold(holdCount: Option[Int], rulesForRequestingResult: RulesForRequestingResult): Boolean =
+  private def isOnHold(
+    holdCount: Option[Int],
+    rulesForRequestingResult: RulesForRequestingResult): Boolean =
     (holdCount, rulesForRequestingResult) match {
       case (Some(holdCount), _) if holdCount > 0 => true
       case (_, NotRequestable.OnHold(_))         => true
