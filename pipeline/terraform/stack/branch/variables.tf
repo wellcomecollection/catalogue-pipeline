@@ -3,7 +3,7 @@ variable "is_reindexing" {
   description = "Are you reindexing through this pipeline right now?"
 }
 
-variable "namespace" {
+variable "namespace_hyphen" {
   type = string
 }
 
@@ -107,7 +107,6 @@ variable "es_works_index" {
   type = string
 }
 variable "pipeline_storage_es_service_secrets"{
-  type = map(string)
 }
 variable "pipeline_storage_private_host"{
   type = string
@@ -135,4 +134,7 @@ variable "inferrer_model_data_bucket_name" {}
 
 
 variable "toggle_tei_on" {
+}
+
+variable "inferrer_lsh_model_key_value" {
 }

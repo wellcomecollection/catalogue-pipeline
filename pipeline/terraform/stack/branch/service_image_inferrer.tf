@@ -19,21 +19,9 @@ locals {
   inferrer_memory     = floor(0.5 * (local.total_memory - local.manager_memory - local.aspect_ratio_memory))
 }
 
-locals {
-  lsh_model_key = var.release_label == "prod" ? "prod" : "stage"
-}
-
-data "aws_ssm_parameter" "inferrer_lsh_model_key" {
-  name = "/catalogue_pipeline/config/models/${local.lsh_model_key}/lsh_model"
-}
-
-data "aws_ssm_parameter" "latest_lsh_model_key" {
-  name = "/catalogue_pipeline/config/models/latest/lsh_model"
-}
-
 module "image_inferrer_queue" {
   source                     = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
-  queue_name                 = "${var.namespace}_image_inferrer"
+  queue_name                 = "${local.namespace}_image_inferrer"
   topic_arns                 = [module.merger_images_topic.arn]
   alarm_topic_arn            = var.dlq_alarm_arn
   visibility_timeout_seconds = local.queue_visibility_timeout
@@ -41,7 +29,7 @@ module "image_inferrer_queue" {
 module "image_inferrer" {
   source = "../../modules/services_with_manager"
 
-  service_name = "${local.namespace_hyphen}_image_inferrer"
+  service_name = "${local.namespace}_image_inferrer"
   security_group_ids = [
     var.service_egress_security_group_id,
   ]
@@ -49,7 +37,7 @@ module "image_inferrer" {
   elastic_cloud_vpce_sg_id = var.ec_privatelink_security_group_id
 
   cluster_name = var.cluster_name
-  cluster_arn  = data.aws_ecs_cluster.cluster.arn
+  cluster_arn  = data.aws_ecs_cluster.cluster.id
 
   launch_type = "EC2"
   capacity_provider_strategies = [{
@@ -84,7 +72,7 @@ module "image_inferrer" {
       memory = local.inferrer_memory
       env_vars = {
         PORT              = local.feature_inferrer_port
-        MODEL_OBJECT_KEY  = data.aws_ssm_parameter.inferrer_lsh_model_key.value
+        MODEL_OBJECT_KEY  = var.inferrer_lsh_model_key_value
         MODEL_DATA_BUCKET = var.inferrer_model_data_bucket_name
       }
       secret_env_vars = {}
@@ -149,13 +137,13 @@ module "image_inferrer" {
     palette_inferrer_port      = local.palette_inferrer_port
     aspect_ratio_inferrer_host = "localhost"
     aspect_ratio_inferrer_port = local.aspect_ratio_inferrer_port
-    metrics_namespace          = "${local.namespace_hyphen}_image_inferrer"
+    metrics_namespace          = "${local.namespace}_image_inferrer"
     topic_arn                  = module.image_inferrer_topic.arn
     queue_url                  = module.image_inferrer_queue.url
     images_root                = local.shared_storage_path
 
-    es_initial_images_index   = var.es_images_initial_index
-    es_augmented_images_index = var.es_images_augmented_index
+    es_initial_images_index   = local.es_images_initial_index
+    es_augmented_images_index = local.es_images_augmented_index
 
     flush_interval_seconds = 30
 
@@ -182,7 +170,7 @@ module "image_inferrer" {
   ]
 
   deployment_service_env  = var.release_label
-  deployment_service_name = "image-inferrer"
+  deployment_service_name = "image-inferrer-${local.tei}"
   shared_logging_secrets  = var.shared_logging_secrets
 }
 
@@ -208,7 +196,7 @@ data "aws_iam_policy_document" "allow_inferrer_data_access" {
 module "image_inferrer_topic" {
   source = "../../modules/topic"
 
-  name       = "${var.namespace}_image_inferrer"
+  name       = "${local.namespace}_image_inferrer"
   role_names = [module.image_inferrer.task_role_name]
 }
 

@@ -1,7 +1,7 @@
 module "router_queue" {
   source          = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
-  queue_name      = "${var.namespace}_router"
-  topic_arns      = [var.merger_works_topic_arn]
+  queue_name      = "${local.namespace}_router"
+  topic_arns      = [module.merger_works_topic.arn]
   alarm_topic_arn = var.dlq_alarm_arn
 
   visibility_timeout_seconds = 60
@@ -9,7 +9,7 @@ module "router_queue" {
 
 module "router" {
   source          = "../../modules/service"
-  service_name    = "${local.namespace_hyphen}_router"
+  service_name    = "${local.namespace}_router"
   container_image = var.router_image
 
   security_group_ids = [
@@ -23,7 +23,7 @@ module "router" {
   cluster_arn  = data.aws_ecs_cluster.cluster.id
 
   env_vars = {
-    metrics_namespace = "${local.namespace_hyphen}_router"
+    metrics_namespace = "${local.namespace}_router"
 
     queue_url         = module.router_queue.url
     queue_parallelism = 10
@@ -31,8 +31,8 @@ module "router" {
     paths_topic_arn = module.router_path_output_topic.arn
     works_topic_arn = module.router_work_output_topic.arn
 
-    es_merged_index        = var.es_works_merged_index
-    es_denormalised_index  = var.es_works_denormalised_index
+    es_merged_index        = local.es_works_merged_index
+    es_denormalised_index  = local.es_works_denormalised_index
     batch_size             = 100
     flush_interval_seconds = 30
   }
@@ -61,20 +61,20 @@ module "router" {
   ]
 
   deployment_service_env  = var.release_label
-  deployment_service_name = "work-router"
+  deployment_service_name = "work-router-${local.tei}"
 }
 
 module "router_path_output_topic" {
   source = "../../modules/topic"
 
-  name       = "${var.namespace}_router_path_output"
+  name       = "${local.namespace}_router_path_output"
   role_names = [module.router.task_role_name]
 }
 
 module "router_work_output_topic" {
   source = "../../modules/topic"
 
-  name       = "${var.namespace}_router_work_output"
+  name       = "${local.namespace}_router_work_output"
   role_names = [module.router.task_role_name]
 }
 

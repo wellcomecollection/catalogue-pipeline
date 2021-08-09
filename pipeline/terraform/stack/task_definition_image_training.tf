@@ -8,6 +8,7 @@ locals {
     MODEL_SSM_PATH    = data.aws_ssm_parameter.latest_lsh_model_key.name
     ES_INDEX          = local.es_images_index
   }
+  lsh_model_key = var.release_label == "prod" ? "prod" : "stage"
 
   secret_env_vars = {
     ES_HOST     = "catalogue/image_training/es_host"
@@ -16,6 +17,14 @@ locals {
     ES_PASSWORD = "catalogue/image_training/es_password"
     ES_PROTOCOL = "catalogue/image_training/es_protocol"
   }
+}
+
+data "aws_ssm_parameter" "inferrer_lsh_model_key" {
+  name = "/catalogue_pipeline/config/models/${local.lsh_model_key}/lsh_model"
+}
+
+data "aws_ssm_parameter" "latest_lsh_model_key" {
+  name = "/catalogue_pipeline/config/models/latest/lsh_model"
 }
 
 module "app_container" {

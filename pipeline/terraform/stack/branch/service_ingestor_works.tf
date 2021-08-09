@@ -4,7 +4,7 @@ locals {
 
 module "ingestor_works_queue" {
   source          = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
-  queue_name      = "${var.namespace}_ingestor_works"
+  queue_name      = "${local.namespace}_ingestor_works"
   topic_arns      = [module.router_work_output_topic.arn, module.relation_embedder_output_topic.arn]
   alarm_topic_arn = var.dlq_alarm_arn
 
@@ -17,7 +17,7 @@ module "ingestor_works_queue" {
 
 module "ingestor_works" {
   source          = "../../modules/service"
-  service_name    = "${local.namespace_hyphen}_ingestor_works"
+  service_name    = "${local.namespace}_ingestor_works"
   container_image = var.ingestor_works_image
   security_group_ids = [
     var.service_egress_security_group_id,
@@ -26,14 +26,14 @@ module "ingestor_works" {
   elastic_cloud_vpce_sg_id = var.ec_privatelink_security_group_id
 
   cluster_name = var.cluster_name
-  cluster_arn  = data.aws_ecs_cluster.cluster.arn
+  cluster_arn  = data.aws_ecs_cluster.cluster.id
 
   env_vars = {
-    metrics_namespace = "${local.namespace_hyphen}_ingestor_works"
+    metrics_namespace = "${local.namespace}_ingestor_works"
     topic_arn         = module.work_ingestor_topic.arn
 
-    es_works_index        = var.es_works_index
-    es_denormalised_index = var.es_works_denormalised_index
+    es_works_index        = local.es_works_index
+    es_denormalised_index = local.es_works_denormalised_index
     es_is_reindexing      = var.is_reindexing
 
     ingest_queue_id               = module.ingestor_works_queue.url
@@ -89,7 +89,7 @@ module "ingestor_works" {
   ]
 
   deployment_service_env  = var.release_label
-  deployment_service_name = "work-ingestor"
+  deployment_service_name = "work-ingestor-${local.tei}"
   shared_logging_secrets  = var.shared_logging_secrets
 }
 
@@ -98,7 +98,7 @@ module "ingestor_works" {
 module "work_ingestor_topic" {
   source = "../../modules/topic"
 
-  name       = "${var.namespace}_work_ingestor"
+  name       = "${local.namespace}_work_ingestor"
   role_names = [module.ingestor_works.task_role_name]
 }
 

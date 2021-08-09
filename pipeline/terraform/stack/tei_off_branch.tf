@@ -1,8 +1,9 @@
-module "relation_embedder" {
-  source = "./subpipeline"
+module "tei_off_branch" {
+  source = "./branch"
 
-  toggle_tei_on = true
+  toggle_tei_on = false
 
+  depends_on = [aws_ecs_cluster.cluster]
   matcher_topic_arn = module.matcher_topic.arn
   is_reindexing = var.is_reindexing
   dlq_alarm_arn = var.dlq_alarm_arn
@@ -12,11 +13,11 @@ module "relation_embedder" {
   subnets = var.subnets
 
   inferrer_model_data_bucket_name = var.inferrer_model_data_bucket_name
-  max_capacity = var.min_capacity
-  min_capacity = local.max_capacity
+  min_capacity = var.min_capacity
+  max_capacity = local.max_capacity
 
   batcher_image = local.batcher_image
-  router_image = local.relation_embedder_image
+  router_image = local.router_image
   relation_embedder_image = local.relation_embedder_image
   aspect_ratio_inferrer_image = local.aspect_ratio_inferrer_image
   feature_inferrer_image = local.feature_inferrer_image
@@ -39,7 +40,7 @@ module "relation_embedder" {
   scale_down_adjustment = local.scale_down_adjustment
   scale_up_adjustment = local.scale_up_adjustment
   elasticsearch_users = null_resource.elasticsearch_users
-  namespace = local.namespace
+  namespace_hyphen = local.namespace_hyphen
   pipeline_storage_es_service_secrets = local.pipeline_storage_es_service_secrets
   service_egress_security_group_id = aws_security_group.service_egress.id
 
@@ -50,4 +51,5 @@ module "relation_embedder" {
   pipeline_storage_port = local.pipeline_storage_port
   pipeline_storage_private_host = local.pipeline_storage_private_host
   pipeline_storage_protocol = local.pipeline_storage_protocol
+  inferrer_lsh_model_key_value = data.aws_ssm_parameter.inferrer_lsh_model_key.value
 }

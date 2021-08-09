@@ -4,7 +4,7 @@ locals {
 
 module "ingestor_images_queue" {
   source          = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
-  queue_name      = "${var.namespace}_ingestor_images"
+  queue_name      = "${local.namespace}_ingestor_images"
   topic_arns      = [module.image_inferrer_topic.arn]
   alarm_topic_arn = var.dlq_alarm_arn
 
@@ -16,7 +16,7 @@ module "ingestor_images_queue" {
 
 module "ingestor_images" {
   source          = "../../modules/service"
-  service_name    = "${local.namespace_hyphen}_ingestor_images"
+  service_name    = "${local.namespace}_ingestor_images"
   container_image = var.ingestor_images_image
   security_group_ids = [
     var.service_egress_security_group_id,
@@ -25,16 +25,16 @@ module "ingestor_images" {
   elastic_cloud_vpce_sg_id = var.ec_privatelink_security_group_id
 
   cluster_name = var.cluster_name
-  cluster_arn  = data.aws_ecs_cluster.cluster.arn
+  cluster_arn  = data.aws_ecs_cluster.cluster.id
 
   memory = 4096
 
   env_vars = {
-    metrics_namespace = "${local.namespace_hyphen}_ingestor_images"
+    metrics_namespace = "${local.namespace}_ingestor_images"
     topic_arn         = module.image_ingestor_topic.arn
 
-    es_images_index    = var.es_images_index
-    es_augmented_index = var.es_images_augmented_index
+    es_images_index    = local.es_images_index
+    es_augmented_index = local.es_images_augmented_index
     es_is_reindexing   = var.is_reindexing
 
     ingest_queue_id               = module.ingestor_images_queue.url
@@ -77,7 +77,7 @@ module "ingestor_images" {
   queue_read_policy = module.ingestor_images_queue.read_policy
 
   deployment_service_env  = var.release_label
-  deployment_service_name = "image-ingestor"
+  deployment_service_name = "image-ingestor-${local.tei}"
 
   depends_on = [
     var.elasticsearch_users,
@@ -89,7 +89,7 @@ module "ingestor_images" {
 module "image_ingestor_topic" {
   source = "../../modules/topic"
 
-  name       = "${var.namespace}_image_ingestor_output"
+  name       = "${local.namespace}_image_ingestor_output"
   role_names = [module.ingestor_images.task_role_name]
 }
 

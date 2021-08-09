@@ -1,6 +1,6 @@
 module "merger_queue" {
   source          = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
-  queue_name      = "${var.namespace}_merger"
+  queue_name      = "${local.namespace}_merger"
   topic_arns      = [var.matcher_topic_arn]
   alarm_topic_arn = var.dlq_alarm_arn
 
@@ -11,7 +11,7 @@ module "merger_queue" {
 }
 module "merger" {
   source          = "../../modules/service"
-  service_name    = "${local.namespace_hyphen}_merger"
+  service_name    = "${local.namespace}_merger"
   container_image = var.merger_image
   security_group_ids = [
     var.service_egress_security_group_id,
@@ -23,15 +23,14 @@ module "merger" {
   cluster_arn  = data.aws_ecs_cluster.cluster.arn
 
   env_vars = {
-    metrics_namespace       = "${local.namespace_hyphen}_merger"
-    topic_arn               = var.matcher_topic_arn
+    metrics_namespace       = "${local.namespace}_merger"
     merger_queue_id         = module.merger_queue.url
     merger_works_topic_arn  = module.merger_works_topic.arn
     merger_images_topic_arn = module.merger_images_topic.arn
 
     es_identified_works_index = var.es_works_identified_index
-    es_merged_works_index     = var.es_works_merged_index
-    es_initial_images_index   = var.es_images_initial_index
+    es_merged_works_index     = local.es_works_merged_index
+    es_initial_images_index   = local.es_images_initial_index
 
     batch_size             = 50
     flush_interval_seconds = 120
@@ -61,21 +60,21 @@ module "merger" {
   ]
 
   deployment_service_env  = var.release_label
-  deployment_service_name = "merger"
+  deployment_service_name = "merger-${local.tei}"
   shared_logging_secrets  = var.shared_logging_secrets
 }
 
 module "merger_works_topic" {
   source = "../../modules/topic"
 
-  name       = "${var.namespace}_merger_works"
+  name       = "${local.namespace}_merger_works"
   role_names = [module.merger.task_role_name]
 }
 
 module "merger_images_topic" {
   source = "../../modules/topic"
 
-  name       = "${var.namespace}_merger_images"
+  name       = "${local.namespace}_merger_images"
   role_names = [module.merger.task_role_name]
 }
 

@@ -1,6 +1,6 @@
 module "relation_embedder_queue" {
   source          = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
-  queue_name      = "${var.namespace}_relation_embedder"
+  queue_name      = "${local.namespace}_relation_embedder"
   topic_arns      = [module.batcher_output_topic.arn]
   alarm_topic_arn = var.dlq_alarm_arn
 
@@ -11,7 +11,7 @@ module "relation_embedder_queue" {
 
 module "relation_embedder" {
   source          = "../../modules/service"
-  service_name    = "${local.namespace_hyphen}_relation_embedder"
+  service_name    = "${local.namespace}_relation_embedder"
   container_image = var.relation_embedder_image
 
   security_group_ids = [
@@ -25,13 +25,13 @@ module "relation_embedder" {
   cluster_arn  = data.aws_ecs_cluster.cluster.id
 
   env_vars = {
-    metrics_namespace = "${local.namespace_hyphen}_relation_embedder"
+    metrics_namespace = "${local.namespace}_relation_embedder"
 
     queue_url = module.relation_embedder_queue.url
     topic_arn = module.relation_embedder_output_topic.arn
 
-    es_merged_index       = var.es_works_merged_index
-    es_denormalised_index = var.es_works_denormalised_index
+    es_merged_index       = local.es_works_merged_index
+    es_denormalised_index = local.es_works_denormalised_index
 
     queue_parallelism            = 3  // NOTE: limit to avoid memory errors
     affected_works_scroll_size   = 50 // NOTE: limit to avoid memory errors
@@ -62,7 +62,7 @@ module "relation_embedder" {
   ]
 
   deployment_service_env  = var.release_label
-  deployment_service_name = "work-relation-embedder"
+  deployment_service_name = "work-relation-embedder-${local.tei}"
   shared_logging_secrets  = var.shared_logging_secrets
 }
 
@@ -71,7 +71,7 @@ module "relation_embedder" {
 module "relation_embedder_output_topic" {
   source = "../../modules/topic"
 
-  name       = "${var.namespace}_relation_embedder_output"
+  name       = "${local.namespace}_relation_embedder_output"
   role_names = [module.relation_embedder.task_role_name]
 }
 
