@@ -5,11 +5,16 @@ locals {
   es_memory = var.is_reindexing ? "58g" : "15g"
 }
 
+data "ec_stack" "latest" {
+  version_regex = "latest"
+  region        = "eu-west-1"
+}
+
 resource "ec_deployment" "pipeline" {
   name = "pipeline-${var.pipeline_date}"
 
   region                 = "eu-west-1"
-  version                = "7.12.1"
+  version                = data.ec_stack.latest.version
   deployment_template_id = "aws-io-optimized-v2"
 
   traffic_filter = [
