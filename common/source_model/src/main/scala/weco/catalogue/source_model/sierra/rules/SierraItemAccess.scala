@@ -356,7 +356,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
         AccessCondition(
           method = AccessMethod.NotRequestable,
           note = Some(
-            s"""Please check this item <a href="https://search.wellcomelibrary.org/iii/encore/record/C__Rb${bibId.withoutCheckDigit}?lang=eng">on the Wellcome Library website</a> for access information""")
+            s"""This item cannot be requested online. Please contact <a href="mailto:library@wellcomecollection.org">library@wellcomecollection.org</a> for more information.""")
         )
     }
   }
