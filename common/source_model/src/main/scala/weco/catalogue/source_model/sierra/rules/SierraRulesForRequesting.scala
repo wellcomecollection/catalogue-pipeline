@@ -288,7 +288,7 @@ object SierraRulesForRequesting {
 
       case i if i.fixedField("61").containsAnyOf("17", "18", "15") =>
         NotRequestable.NoPublicMessage(
-          s"fixed field 61 = ${i.fixedField("61").get}")
+          s"fixed field 61 = ${i.fixedField("61").get} (${i.fixedFields("61").display.getOrElse("<none>")})")
 
       case i
           if i.fixedField("61").containsAnyOf("4", "14") || i
