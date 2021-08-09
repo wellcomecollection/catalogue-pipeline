@@ -99,29 +99,29 @@ variable "shared_logging_secrets" {
 }
 
 locals {
-  namespace = var.namespace
-  namespace_hyphen = var.namespace_hyphen
-  merger_images_topic_arn = var.merger_images_topic_arn
-  dlq_alarm_arn = var.dlq_alarm_arn
+  namespace                            = var.namespace
+  namespace_hyphen                     = var.namespace_hyphen
+  merger_images_topic_arn              = var.merger_images_topic_arn
+  dlq_alarm_arn                        = var.dlq_alarm_arn
   aws_security_group_service_egress_id = var.aws_security_group_service_egress_id
-  ec_privatelink_security_group_id = var.ec_privatelink_security_group_id
-  aws_ecs_cluster_cluster_name = var.aws_ecs_cluster_cluster_name
-  aws_ecs_cluster_cluster_arn = var.aws_ecs_cluster_cluster_arn
-  inference_capacity_provider_name = var.inference_capacity_provider_name
-  inference_manager_image = var.inference_manager_image
-  feature_inferrer_image = var.feature_inferrer_image
-  lsh_model_key = var.lsh_model_key
-  inferrer_model_data_bucket_name = var.inferrer_model_data_bucket_name
-  palette_inferrer_image = var.palette_inferrer_image
-  aspect_ratio_inferrer_image = var.aspect_ratio_inferrer_image
-  es_images_initial_index = var.es_images_initial_index
-  es_images_augmented_index = var.es_images_augmented_index
-  pipeline_storage_es_service_secrets = var.pipeline_storage_es_service_secrets
-  subnets = var.subnets
-  min_capacity = var.min_capacity
-  max_capacity = var.max_capacity
-  scale_down_adjustment = var.scale_down_adjustment
-  scale_up_adjustment = var.scale_up_adjustment
-  release_label = var.release_label
-  shared_logging_secrets = var.shared_logging_secrets
+  ec_privatelink_security_group_id     = var.ec_privatelink_security_group_id
+  aws_ecs_cluster_cluster_name         = var.aws_ecs_cluster_cluster_name
+  aws_ecs_cluster_cluster_arn          = var.aws_ecs_cluster_cluster_arn
+  inference_capacity_provider_name     = var.inference_capacity_provider_name
+  inference_manager_image              = var.inference_manager_image
+  feature_inferrer_image               = var.feature_inferrer_image
+  lsh_model_key                        = var.lsh_model_key
+  inferrer_model_data_bucket_name      = var.inferrer_model_data_bucket_name
+  palette_inferrer_image               = var.palette_inferrer_image
+  aspect_ratio_inferrer_image          = var.aspect_ratio_inferrer_image
+  es_images_initial_index              = var.es_images_initial_index
+  es_images_augmented_index            = var.es_images_augmented_index
+  pipeline_storage_es_service_secrets  = var.pipeline_storage_es_service_secrets
+  subnets                              = var.subnets
+  min_capacity                         = var.min_capacity
+  max_capacity                         = var.max_capacity
+  scale_down_adjustment                = var.scale_down_adjustment
+  scale_up_adjustment                  = var.scale_up_adjustment
+  release_label                        = var.release_label
+  shared_logging_secrets               = var.shared_logging_secrets
 }
