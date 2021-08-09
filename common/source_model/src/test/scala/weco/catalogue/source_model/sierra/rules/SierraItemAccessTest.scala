@@ -609,6 +609,44 @@ class SierraItemAccessTest
 
         ac shouldBe
           AccessCondition(
+            method = AccessMethod.OnlineRequest,
+            status = Some(AccessStatus.TemporarilyUnavailable),
+            note = Some(
+              "Item is in use by another reader. Please ask at Enquiry Desk.")
+          )
+      }
+
+      it("can't be requested when a manual request item is on hold for somebody else") {
+        val itemData = createSierraItemDataWith(
+          holdCount = Some(1),
+          fixedFields = Map(
+            "61" -> FixedField(
+              label = "I TYPE",
+              value = "4",
+              display = "serial"),
+            "79" -> FixedField(
+              label = "LOCATION",
+              value = "sgser",
+              display = "Closed stores journals"),
+            "88" -> FixedField(
+              label = "STATUS",
+              value = "-",
+              display = "Available"),
+            "108" -> FixedField(
+              label = "OPACMSG",
+              value = "n",
+              display = "Manual request"),
+          )
+        )
+
+        val (ac, _) = getItemAccess(
+          bibStatus = None,
+          location = Some(LocationType.ClosedStores),
+          itemData = itemData
+        )
+
+        ac shouldBe
+          AccessCondition(
             method = AccessMethod.ManualRequest,
             status = Some(AccessStatus.TemporarilyUnavailable),
             note = Some(
@@ -643,7 +681,7 @@ class SierraItemAccessTest
 
         ac shouldBe
           AccessCondition(
-            method = AccessMethod.ManualRequest,
+            method = AccessMethod.OnlineRequest,
             status = Some(AccessStatus.TemporarilyUnavailable),
             note = Some(
               "Item is in use by another reader. Please ask at Enquiry Desk.")
