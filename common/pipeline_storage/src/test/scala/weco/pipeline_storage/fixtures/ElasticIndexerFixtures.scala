@@ -3,7 +3,6 @@ package weco.pipeline_storage.fixtures
 import com.sksamuel.elastic4s.{ElasticClient, Index}
 import io.circe.Encoder
 import org.scalatest.Suite
-import weco.akka.fixtures.Akka
 import weco.elasticsearch.model.IndexId
 import weco.elasticsearch.test.fixtures.ElasticsearchFixtures
 import weco.elasticsearch.IndexConfig
@@ -13,7 +12,7 @@ import weco.pipeline_storage.elastic.ElasticIndexer
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait ElasticIndexerFixtures extends ElasticsearchFixtures with Akka {
+trait ElasticIndexerFixtures extends ElasticsearchFixtures {
   this: Suite =>
 
   def withElasticIndexer[T, R](idx: Index,
