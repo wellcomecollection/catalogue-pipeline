@@ -18,6 +18,7 @@ class ImagesIndexerTest
     extends AnyFunSpec
     with Matchers
     with IndexFixtures
+    with ElasticIndexerFixtures
     with ScalaFutures
     with ImageGenerators {
 
