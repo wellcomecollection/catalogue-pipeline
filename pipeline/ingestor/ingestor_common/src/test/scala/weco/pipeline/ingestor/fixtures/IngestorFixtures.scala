@@ -1,27 +1,30 @@
-package weco.pipeline.ingestor.images
+package weco.pipeline.ingestor.fixtures
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import org.scalatest.Suite
 import weco.fixtures.TestWith
 import weco.messaging.fixtures.SQS.Queue
-import weco.catalogue.internal_model.image.Image
-import weco.catalogue.internal_model.image.ImageState.{Augmented, Indexed}
 import weco.pipeline.ingestor.common.IngestorWorkerService
-import weco.pipeline_storage.{Indexer, Retriever}
 import weco.pipeline_storage.fixtures.{
   ElasticIndexerFixtures,
   PipelineStorageStreamFixtures
 }
+import weco.pipeline_storage.{Indexable, Indexer, Retriever}
+
+import scala.concurrent.ExecutionContext.Implicits.global
 
 trait IngestorFixtures
     extends ElasticIndexerFixtures
     with PipelineStorageStreamFixtures {
   this: Suite =>
 
-  def withWorkerService[R](queue: Queue,
-                           retriever: Retriever[Image[Augmented]],
-                           indexer: Indexer[Image[Indexed]])(
-    testWith: TestWith[IngestorWorkerService[String, Image[Augmented], Image[Indexed]], R]): R = {
+  def withWorkerService[In, Out, R](
+    queue: Queue,
+    retriever: Retriever[In],
+    indexer: Indexer[Out],
+    transform: In => Out
+  )(
+    testWith: TestWith[IngestorWorkerService[String, In, Out], R]
+  )(implicit indexable: Indexable[Out]): R =
     withPipelineStream(
       queue,
       indexer,
@@ -29,12 +32,11 @@ trait IngestorFixtures
       val workerService = new IngestorWorkerService(
         pipelineStream = msgStream,
         retriever = retriever,
-        transform = ImageTransformer.deriveData
+        transform = transform
       )
 
       workerService.run()
 
       testWith(workerService)
     }
-  }
 }

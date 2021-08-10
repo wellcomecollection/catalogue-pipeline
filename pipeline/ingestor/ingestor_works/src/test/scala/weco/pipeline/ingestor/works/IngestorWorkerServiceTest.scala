@@ -3,23 +3,22 @@ package weco.pipeline.ingestor.works
 import org.scalatest.Assertion
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.index.WorksIndexConfig
-import weco.messaging.fixtures.SQS.QueuePair
 import weco.catalogue.internal_model.Implicits._
-import weco.catalogue.internal_model.work.WorkState.{Denormalised, Indexed}
-import weco.pipeline_storage.Indexable.workIndexable
 import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.index.IndexFixtures
 import weco.catalogue.internal_model.work.Work
+import weco.catalogue.internal_model.work.WorkState.Denormalised
 import weco.catalogue.internal_model.work.generators.WorkGenerators
-import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
+import weco.messaging.fixtures.SQS.QueuePair
+import weco.pipeline.ingestor.works.fixtures.WorksIngestorFixtures
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
 class IngestorWorkerServiceTest
     extends AnyFunSpec
     with Matchers
-    with IngestorFixtures
+    with IndexFixtures
+    with WorksIngestorFixtures
     with WorkGenerators {
 
   it("indexes a Miro denormalised Work") {
@@ -119,21 +118,11 @@ class IngestorWorkerServiceTest
   private def assertWorksIndexedCorrectly(
     works: Work[Denormalised]*): Assertion =
     withLocalWorksIndex { indexedIndex =>
-      withLocalDenormalisedWorksIndex { identifiedIndex =>
-        insertIntoElasticsearch(identifiedIndex, works: _*)
+      withLocalDenormalisedWorksIndex { denormalisedIndex =>
+        insertIntoElasticsearch(denormalisedIndex, works: _*)
         withLocalSqsQueuePair(visibilityTimeout = 10.seconds) {
           case QueuePair(queue, dlq) =>
-            withWorkerService(
-              queue,
-              indexer = new ElasticIndexer[Work[Indexed]](
-                elasticClient,
-                indexedIndex,
-                WorksIndexConfig.ingested),
-              retriever = new ElasticSourceRetriever[Work[Denormalised]](
-                elasticClient,
-                identifiedIndex
-              )
-            ) { _ =>
+            withWorkIngestorWorkerService(queue, denormalisedIndex, indexedIndex) { _ =>
               works.map { work =>
                 sendNotificationToSQS(queue = queue, body = work.id)
               }

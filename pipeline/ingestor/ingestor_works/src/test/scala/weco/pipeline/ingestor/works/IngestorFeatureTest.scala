@@ -1,26 +1,19 @@
 package weco.pipeline.ingestor.works
 
-import com.sksamuel.elastic4s.Index
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.fixtures.TestWith
 import weco.json.utils.JsonAssertions
-import weco.messaging.fixtures.SQS.Queue
 import weco.catalogue.internal_model.Implicits._
-import weco.catalogue.internal_model.index.WorksIndexConfig
-import weco.pipeline_storage.Indexable.workIndexable
-import weco.catalogue.internal_model.work.Work
-import weco.catalogue.internal_model.work.WorkState.{Denormalised, Indexed}
+import weco.catalogue.internal_model.index.IndexFixtures
 import weco.catalogue.internal_model.work.generators.WorkGenerators
-import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
-
-import scala.concurrent.ExecutionContext.Implicits.global
+import weco.pipeline.ingestor.works.fixtures.WorksIngestorFixtures
 
 class IngestorFeatureTest
     extends AnyFunSpec
     with Matchers
     with JsonAssertions
-    with IngestorFixtures
+    with IndexFixtures
+    with WorksIngestorFixtures
     with WorkGenerators {
 
   it("ingests a Miro work") {
@@ -32,7 +25,7 @@ class IngestorFeatureTest
       withLocalDenormalisedWorksIndex { denormalisedIndex =>
         insertIntoElasticsearch(denormalisedIndex, work)
         withLocalSqsQueue() { queue =>
-          withWorkIngestorWorkerService(queue, indexedIndex, denormalisedIndex) {
+          withWorkIngestorWorkerService(queue, denormalisedIndex, indexedIndex) {
             _ =>
               sendNotificationToSQS(queue = queue, body = work.id)
               assertWorkIndexed(indexedIndex, work)
@@ -51,7 +44,7 @@ class IngestorFeatureTest
       withLocalDenormalisedWorksIndex { denormalisedIndex =>
         insertIntoElasticsearch(denormalisedIndex, work)
         withLocalSqsQueue() { queue =>
-          withWorkIngestorWorkerService(queue, indexedIndex, denormalisedIndex) {
+          withWorkIngestorWorkerService(queue, denormalisedIndex, indexedIndex) {
             _ =>
               sendNotificationToSQS(queue = queue, body = work.id)
               assertWorkIndexed(indexedIndex, work)
@@ -60,20 +53,4 @@ class IngestorFeatureTest
       }
     }
   }
-
-  def withWorkIngestorWorkerService[R](queue: Queue,
-                                       indexedIndex: Index,
-                                       denormalisedIndex: Index)(
-    testWith: TestWith[WorkIngestorWorkerService[String], R]): R =
-    withWorkerService(
-      queue,
-      indexer = new ElasticIndexer[Work[Indexed]](
-        elasticClient,
-        indexedIndex,
-        WorksIndexConfig.ingested),
-      retriever = new ElasticSourceRetriever[Work[Denormalised]](
-        elasticClient,
-        denormalisedIndex
-      )
-    )(testWith)
 }
