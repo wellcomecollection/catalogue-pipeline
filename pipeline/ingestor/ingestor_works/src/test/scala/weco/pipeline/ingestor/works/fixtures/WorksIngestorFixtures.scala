@@ -11,7 +11,7 @@ import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.index.WorksIndexConfig
 import weco.catalogue.internal_model.work.WorkState.{Denormalised, Indexed}
 import weco.catalogue.internal_model.work.{Work, WorkState}
-import weco.fixtures.TestWith
+import weco.fixtures.{TestWith, TimeAssertions}
 import weco.messaging.fixtures.SQS.Queue
 import weco.pipeline.ingestor.common.IngestorWorkerService
 import weco.pipeline.ingestor.fixtures.IngestorFixtures
@@ -19,15 +19,8 @@ import weco.pipeline.ingestor.works.WorkTransformer
 import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
 import weco.pipeline_storage.Indexable.workIndexable
 
-import java.time.{Duration, Instant}
-
-trait WorksIngestorFixtures extends IngestorFixtures {
+trait WorksIngestorFixtures extends IngestorFixtures with TimeAssertions {
   this: Suite =>
-
-  def assertRecent(instant: Instant, recentSeconds: Int = 1): Assertion =
-    Duration
-      .between(instant, Instant.now)
-      .getSeconds should be <= recentSeconds.toLong
 
   def assertWorkIndexed(
     index: Index,
