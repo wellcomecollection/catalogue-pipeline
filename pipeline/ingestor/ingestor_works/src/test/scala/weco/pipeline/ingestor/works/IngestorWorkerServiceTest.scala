@@ -120,7 +120,10 @@ class IngestorWorkerServiceTest
         insertIntoElasticsearch(denormalisedIndex, works: _*)
         withLocalSqsQueuePair(visibilityTimeout = 10.seconds) {
           case QueuePair(queue, dlq) =>
-            withWorkIngestorWorkerService(queue, denormalisedIndex, indexedIndex) { _ =>
+            withWorkIngestorWorkerService(
+              queue,
+              denormalisedIndex,
+              indexedIndex) { _ =>
               works.map { work =>
                 sendNotificationToSQS(queue = queue, body = work.id)
               }

@@ -19,7 +19,10 @@ import weco.pipeline.ingestor.works.WorkTransformer
 import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
 import weco.pipeline_storage.Indexable.workIndexable
 
-trait WorksIngestorFixtures extends IndexFixtures with IngestorFixtures with TimeAssertions {
+trait WorksIngestorFixtures
+    extends IndexFixtures
+    with IngestorFixtures
+    with TimeAssertions {
   this: Suite =>
 
   def assertWorkIndexed(
@@ -56,7 +59,9 @@ trait WorksIngestorFixtures extends IndexFixtures with IngestorFixtures with Tim
   def withWorkIngestorWorkerService[R](queue: Queue,
                                        denormalisedIndex: Index,
                                        indexedIndex: Index)(
-                                        testWith: TestWith[IngestorWorkerService[String, Work[Denormalised], Work[Indexed]], R]): R = {
+    testWith: TestWith[
+      IngestorWorkerService[String, Work[Denormalised], Work[Indexed]],
+      R]): R = {
     val retriever = new ElasticSourceRetriever[Work[Denormalised]](
       client = elasticClient,
       index = denormalisedIndex
@@ -68,7 +73,11 @@ trait WorksIngestorFixtures extends IndexFixtures with IngestorFixtures with Tim
       config = WorksIndexConfig.ingested
     )
 
-    withWorkerService(queue, retriever, indexer, transform = WorkTransformer.deriveData) { service =>
+    withWorkerService(
+      queue,
+      retriever,
+      indexer,
+      transform = WorkTransformer.deriveData) { service =>
       testWith(service)
     }
   }

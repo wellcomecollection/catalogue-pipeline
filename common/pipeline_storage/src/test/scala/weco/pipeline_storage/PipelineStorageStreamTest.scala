@@ -18,7 +18,10 @@ import weco.messaging.memory.MemoryMessageSender
 import weco.messaging.sns.NotificationMessage
 import weco.pipeline_storage.elastic.ElasticIndexer
 import weco.pipeline_storage.fixtures.PipelineStorageStreamFixtures
-import weco.pipeline_storage.generators.{SampleDocument, SampleDocumentGenerators}
+import weco.pipeline_storage.generators.{
+  SampleDocument,
+  SampleDocumentGenerators
+}
 import weco.pipeline_storage.memory.{MemoryIndexer, MemoryRetriever}
 
 import scala.concurrent.ExecutionContext.Implicits.global

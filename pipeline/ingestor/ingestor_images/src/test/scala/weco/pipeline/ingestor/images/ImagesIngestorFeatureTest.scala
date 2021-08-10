@@ -38,7 +38,11 @@ class ImagesIngestorFeatureTest
               elasticClient,
               index,
               ImagesIndexConfig.ingested)
-            withWorkerService(queue, retriever, indexer, transform = ImageTransformer.deriveData) { _ =>
+            withWorkerService(
+              queue,
+              retriever,
+              indexer,
+              transform = ImageTransformer.deriveData) { _ =>
               assertElasticsearchEventuallyHasImage[Indexed](
                 index,
                 ImageTransformer.deriveData(image))
@@ -64,7 +68,11 @@ class ImagesIngestorFeatureTest
               elasticClient,
               augmentedIndex
             )
-            withWorkerService(queue, retriever, indexer, transform = ImageTransformer.deriveData) { _ =>
+            withWorkerService(
+              queue,
+              retriever,
+              indexer,
+              transform = ImageTransformer.deriveData) { _ =>
               assertElasticsearchEmpty(index)
               eventually(Timeout(Span(5, Seconds))) {
                 assertQueueEmpty(queue)
