@@ -9,7 +9,6 @@ import weco.elasticsearch.test.fixtures.ElasticsearchFixtures
 import weco.elasticsearch.IndexConfig
 import weco.fixtures.TestWith
 import weco.pipeline_storage.Indexable
-import weco.pipeline_storage.Indexable
 import weco.pipeline_storage.elastic.ElasticIndexer
 
 import scala.concurrent.{ExecutionContext, Future}
