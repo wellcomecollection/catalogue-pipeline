@@ -41,7 +41,7 @@ class WorkIndexableTest
 
       withWorksIndexAndIndexer {
         case (index, indexer) =>
-          val unmergedWorkInsertFuture = ingestInOrder(indexer)(
+          val unmergedWorkInsertFuture = indexInOrder(indexer)(
             originalWork,
             newWork
           )
@@ -64,7 +64,7 @@ class WorkIndexableTest
 
       withWorksIndexAndIndexer {
         case (index, indexer) =>
-          val unmergedWorkInsertFuture = ingestInOrder(indexer)(
+          val unmergedWorkInsertFuture = indexInOrder(indexer)(
             originalWork,
             newWork
           )
@@ -86,7 +86,7 @@ class WorkIndexableTest
 
       withWorksIndexAndIndexer {
         case (index, indexer) =>
-          val unmergedWorkInsertFuture = ingestInOrder(indexer)(
+          val unmergedWorkInsertFuture = indexInOrder(indexer)(
             originalWork,
             olderWork
           )

@@ -27,7 +27,7 @@ trait ElasticIndexerFixtures extends ElasticsearchFixtures {
   implicit def canonicalId[T](implicit indexable: Indexable[T]): IndexId[T] =
     (doc: T) => indexable.id(doc)
 
-  def ingestInOrder[T](indexer: ElasticIndexer[T])(documents: T*)(
+  def indexInOrder[T](indexer: ElasticIndexer[T])(documents: T*)(
     implicit ec: ExecutionContext): Future[Either[Seq[T], Seq[T]]] =
     documents.tail.foldLeft(indexer(List(documents.head))) { (future, doc) =>
       future.flatMap { _ =>

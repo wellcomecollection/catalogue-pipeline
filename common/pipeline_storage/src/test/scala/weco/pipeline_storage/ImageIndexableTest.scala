@@ -41,7 +41,7 @@ class ImageIndexableTest
 
       withImagesIndexAndIndexer {
         case (index, indexer) =>
-          val insertFuture = ingestInOrder(indexer)(
+          val insertFuture = indexInOrder(indexer)(
             originalImage,
             updatedModifiedTimeImage
           )
@@ -63,7 +63,7 @@ class ImageIndexableTest
 
       withImagesIndexAndIndexer {
         case (index, indexer) =>
-          val insertFuture = ingestInOrder(indexer)(
+          val insertFuture = indexInOrder(indexer)(
             originalImage,
             updatedModifiedTimeImage
           )
@@ -85,7 +85,7 @@ class ImageIndexableTest
 
       withImagesIndexAndIndexer {
         case (index, indexer) =>
-          val insertFuture = ingestInOrder(indexer)(
+          val insertFuture = indexInOrder(indexer)(
             originalImage,
             updatedLocationImage
           )
