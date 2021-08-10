@@ -12,6 +12,7 @@ import weco.messaging.sns.NotificationMessage
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.image.Image
 import weco.catalogue.internal_model.image.ImageState.{Augmented, Indexed}
+import weco.pipeline.ingestor.common.IngestorWorkerService
 import weco.pipeline_storage.typesafe.{
   ElasticIndexerBuilder,
   ElasticSourceRetrieverBuilder,
@@ -53,9 +54,9 @@ object Main extends WellcomeTypesafeApp {
         imageIndexer,
         msgSender)(config)
 
-    new ImageIngestorWorkerService(
+    new IngestorWorkerService(
       pipelineStream = pipelineStream,
-      imageRetriever = imageRetriever,
+      retriever = imageRetriever,
       transform = ImageTransformer.deriveData
     )
   }
