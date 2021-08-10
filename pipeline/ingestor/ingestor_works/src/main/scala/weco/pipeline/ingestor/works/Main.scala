@@ -13,6 +13,7 @@ import weco.messaging.sns.NotificationMessage
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.{Denormalised, Indexed}
+import weco.pipeline.ingestor.common.IngestorWorkerService
 import weco.pipeline_storage.typesafe.{
   ElasticIndexerBuilder,
   ElasticSourceRetrieverBuilder,
@@ -53,9 +54,9 @@ object Main extends WellcomeTypesafeApp {
         workIndexer,
         messageSender)(config)
 
-    new WorkIngestorWorkerService(
+    new IngestorWorkerService(
       pipelineStream = pipelineStream,
-      workRetriever = workRetriever,
+      retriever = workRetriever,
       transform = WorkTransformer.deriveData
     )
   }
