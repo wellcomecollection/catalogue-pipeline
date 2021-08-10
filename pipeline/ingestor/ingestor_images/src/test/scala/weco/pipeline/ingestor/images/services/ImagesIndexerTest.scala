@@ -19,7 +19,6 @@ class ImagesIndexerTest
     with Matchers
     with IndexFixtures
     with ScalaFutures
-    with ElasticIndexerFixtures
     with ImageGenerators {
 
   it("ingests an image") {
