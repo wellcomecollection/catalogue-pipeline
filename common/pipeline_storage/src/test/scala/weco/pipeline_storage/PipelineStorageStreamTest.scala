@@ -9,26 +9,16 @@ import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.time.{Seconds, Span}
 import software.amazon.awssdk.services.sqs.model.Message
+import weco.catalogue.internal_model.index.IndexFixtures
 import weco.elasticsearch.{ElasticClientBuilder, IndexConfig}
 import weco.json.JsonUtil
 import weco.json.JsonUtil._
 import weco.messaging.fixtures.SQS.QueuePair
 import weco.messaging.memory.MemoryMessageSender
 import weco.messaging.sns.NotificationMessage
-import weco.pipeline_storage.fixtures.{
-  ElasticIndexerFixtures,
-  PipelineStorageStreamFixtures
-}
-import weco.pipeline_storage.generators.SampleDocument
 import weco.pipeline_storage.elastic.ElasticIndexer
-import weco.pipeline_storage.fixtures.{
-  ElasticIndexerFixtures,
-  PipelineStorageStreamFixtures
-}
-import weco.pipeline_storage.generators.{
-  SampleDocument,
-  SampleDocumentGenerators
-}
+import weco.pipeline_storage.fixtures.PipelineStorageStreamFixtures
+import weco.pipeline_storage.generators.{SampleDocument, SampleDocumentGenerators}
 import weco.pipeline_storage.memory.{MemoryIndexer, MemoryRetriever}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -38,7 +28,7 @@ import scala.util.{Failure, Random, Try}
 
 class PipelineStorageStreamTest
     extends AnyFunSpec
-    with ElasticIndexerFixtures
+    with IndexFixtures
     with PipelineStorageStreamFixtures
     with SampleDocumentGenerators {
 
