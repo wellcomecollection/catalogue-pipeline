@@ -79,8 +79,9 @@ object CalmTermsOfUse extends CalmRecordOps with Logging {
           if conditions.toLowerCase.contains("permission") & conditions.hasRestrictions =>
           Some(s"$conditions Restricted until ${restrictedUntil.format(displayFormat)}.")
 
-        // If the item only has an access status, there's nothing useful to put in the access terms.
-        case (None, Some(accessStatus), None, None) =>
+        // If the item only has an access status or there's no information at all, there's
+        // nothing useful to put in the access terms.
+        case (None, _, None, None) =>
           None
 
         // Otherwise, we create a TermsOfUse note that smushes together all the bits of
