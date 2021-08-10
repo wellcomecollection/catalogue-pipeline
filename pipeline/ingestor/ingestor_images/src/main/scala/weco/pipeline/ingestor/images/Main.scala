@@ -6,7 +6,6 @@ import com.typesafe.config.Config
 import weco.typesafe.WellcomeTypesafeApp
 import weco.typesafe.config.builders.AkkaBuilder
 import weco.elasticsearch.typesafe.ElasticBuilder
-import weco.pipeline_storage.typesafe.ElasticSourceRetrieverBuilder
 import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import weco.catalogue.internal_model.index.ImagesIndexConfig
 import weco.messaging.sns.NotificationMessage

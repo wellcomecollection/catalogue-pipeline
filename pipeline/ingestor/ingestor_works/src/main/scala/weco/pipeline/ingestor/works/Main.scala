@@ -7,7 +7,6 @@ import weco.typesafe.WellcomeTypesafeApp
 import weco.pipeline_storage.Indexable.workIndexable
 import weco.typesafe.config.builders.AkkaBuilder
 import weco.elasticsearch.typesafe.ElasticBuilder
-import weco.pipeline_storage.typesafe.ElasticSourceRetrieverBuilder
 import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import weco.catalogue.internal_model.index.WorksIndexConfig
 import weco.messaging.sns.NotificationMessage

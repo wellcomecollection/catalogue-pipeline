@@ -12,7 +12,6 @@ import weco.messaging.fixtures.SQS.Queue
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.index.IndexFixtures
 import weco.catalogue.internal_model.work.WorkState.{Denormalised, Indexed}
-import weco.pipeline_storage.Retriever
 import weco.catalogue.internal_model.work.{Work, WorkState}
 import weco.pipeline_storage.{Indexer, Retriever}
 import weco.pipeline_storage.fixtures.PipelineStorageStreamFixtures

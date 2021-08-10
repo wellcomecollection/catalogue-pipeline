@@ -4,8 +4,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import org.scalatest.Suite
 import weco.fixtures.TestWith
 import weco.messaging.fixtures.SQS.Queue
-import weco.pipeline_storage.fixtures.PipelineStorageStreamFixtures
-import weco.pipeline_storage.Retriever
 import weco.catalogue.internal_model.image.Image
 import weco.catalogue.internal_model.image.ImageState.{Augmented, Indexed}
 import weco.pipeline_storage.{Indexer, Retriever}
