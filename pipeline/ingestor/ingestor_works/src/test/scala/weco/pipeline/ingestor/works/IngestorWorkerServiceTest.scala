@@ -5,7 +5,6 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.identifiers.IdState
-import weco.catalogue.internal_model.index.IndexFixtures
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.Denormalised
 import weco.catalogue.internal_model.work.generators.WorkGenerators
@@ -17,7 +16,6 @@ import scala.concurrent.duration._
 class IngestorWorkerServiceTest
     extends AnyFunSpec
     with Matchers
-    with IndexFixtures
     with WorksIngestorFixtures
     with WorkGenerators {
 

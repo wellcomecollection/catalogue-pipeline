@@ -4,17 +4,12 @@ import org.scalatest.Suite
 import weco.fixtures.TestWith
 import weco.messaging.fixtures.SQS.Queue
 import weco.pipeline.ingestor.common.IngestorWorkerService
-import weco.pipeline_storage.fixtures.{
-  ElasticIndexerFixtures,
-  PipelineStorageStreamFixtures
-}
+import weco.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 import weco.pipeline_storage.{Indexable, Indexer, Retriever}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-trait IngestorFixtures
-    extends ElasticIndexerFixtures
-    with PipelineStorageStreamFixtures {
+trait IngestorFixtures extends PipelineStorageStreamFixtures {
   this: Suite =>
 
   def withWorkerService[In, Out, R](

@@ -8,7 +8,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import org.scalatest.{Assertion, Suite}
 import weco.json.JsonUtil._
 import weco.catalogue.internal_model.Implicits._
-import weco.catalogue.internal_model.index.WorksIndexConfig
+import weco.catalogue.internal_model.index.{IndexFixtures, WorksIndexConfig}
 import weco.catalogue.internal_model.work.WorkState.{Denormalised, Indexed}
 import weco.catalogue.internal_model.work.{Work, WorkState}
 import weco.fixtures.{TestWith, TimeAssertions}
@@ -19,7 +19,7 @@ import weco.pipeline.ingestor.works.WorkTransformer
 import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
 import weco.pipeline_storage.Indexable.workIndexable
 
-trait WorksIngestorFixtures extends IngestorFixtures with TimeAssertions {
+trait WorksIngestorFixtures extends IndexFixtures with IngestorFixtures with TimeAssertions {
   this: Suite =>
 
   def assertWorkIndexed(

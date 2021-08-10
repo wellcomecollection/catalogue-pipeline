@@ -4,7 +4,6 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.json.utils.JsonAssertions
 import weco.catalogue.internal_model.Implicits._
-import weco.catalogue.internal_model.index.IndexFixtures
 import weco.catalogue.internal_model.work.generators.WorkGenerators
 import weco.pipeline.ingestor.works.fixtures.WorksIngestorFixtures
 
@@ -12,7 +11,6 @@ class IngestorFeatureTest
     extends AnyFunSpec
     with Matchers
     with JsonAssertions
-    with IndexFixtures
     with WorksIngestorFixtures
     with WorkGenerators {
 
