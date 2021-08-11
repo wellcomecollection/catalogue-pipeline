@@ -11,9 +11,9 @@ import weco.storage.Version
 import weco.storage.store.memory.MemoryVersionedStore
 import weco.catalogue.source_model.generators.SierraGenerators
 import weco.catalogue.source_model.sierra.SierraItemRecord
-import weco.catalogue.source_model.sierra.identifiers.SierraItemNumber
 import weco.pipeline.sierra_linker.fixtures.WorkerFixture
 import weco.pipeline.sierra_linker.models.{Link, LinkOps}
+import weco.sierra.models.identifiers.SierraItemNumber
 
 class SierraLinkerWorkerTest
     extends AnyFunSpec

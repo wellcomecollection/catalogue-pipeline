@@ -10,9 +10,9 @@ import grizzled.slf4j.Logging
 import io.circe.Json
 import io.circe.optics.JsonPath.root
 import weco.catalogue.source_model.json.JsonOps._
-import weco.catalogue.source_model.sierra.identifiers.SierraRecordTypes
 import weco.http.client.HttpGet
 import weco.http.json.CirceMarshalling
+import weco.sierra.models.identifiers.SierraRecordTypes
 
 import scala.concurrent.{ExecutionContext, Future}
 

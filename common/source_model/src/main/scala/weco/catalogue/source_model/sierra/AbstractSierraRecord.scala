@@ -1,6 +1,6 @@
 package weco.catalogue.source_model.sierra
 
-import weco.catalogue.source_model.sierra.identifiers.TypedSierraRecordNumber
+import weco.sierra.models.identifiers.TypedSierraRecordNumber
 
 import java.time.Instant
 

@@ -5,8 +5,8 @@ import akka.actor.ActorSystem
 import akka.stream.ThrottleMode
 import akka.stream.scaladsl.Source
 import io.circe.Json
-import weco.catalogue.source_model.sierra.identifiers.SierraRecordTypes
 import weco.http.client.HttpGet
+import weco.sierra.models.identifiers.SierraRecordTypes
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._

@@ -9,9 +9,9 @@ import weco.catalogue.internal_model.identifiers.{
 import weco.catalogue.internal_model.work.MergeCandidate
 import weco.catalogue.source_model.sierra.source.SierraQueryOps
 import weco.catalogue.source_model.sierra.SierraBibData
-import weco.catalogue.source_model.sierra.identifiers.SierraBibNumber
 import weco.pipeline.transformer.identifiers.SourceIdentifierValidation._
 import weco.pipeline.transformer.sierra.transformers.parsers.MiroIdParsing
+import weco.sierra.models.identifiers.SierraBibNumber
 
 import scala.util.{Success, Try}
 import scala.util.matching.Regex

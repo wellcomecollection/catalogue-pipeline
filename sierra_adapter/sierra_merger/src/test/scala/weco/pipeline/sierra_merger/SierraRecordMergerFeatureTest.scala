@@ -14,11 +14,11 @@ import weco.storage.{Identified, Version}
 import weco.catalogue.source_model.fixtures.SourceVHSFixture
 import weco.catalogue.source_model.generators.SierraGenerators
 import weco.catalogue.source_model.sierra._
-import weco.catalogue.source_model.sierra.identifiers.SierraBibNumber
 import weco.catalogue.source_model.store.SourceVHS
 import weco.pipeline.sierra_merger.fixtures.RecordMergerFixtures
 import weco.pipeline.sierra_merger.models.TransformableOps
 import weco.pipeline.sierra_merger.services.Worker
+import weco.sierra.models.identifiers.SierraBibNumber
 
 trait SierraRecordMergerFeatureTestCases[Record <: AbstractSierraRecord[_]]
     extends AnyFunSpec

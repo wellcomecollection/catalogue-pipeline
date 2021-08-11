@@ -4,9 +4,9 @@ import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work._
 import weco.catalogue.source_model.sierra.source.SierraQueryOps
 import weco.catalogue.source_model.sierra.SierraBibData
-import weco.catalogue.source_model.sierra.identifiers.SierraBibNumber
 import weco.pipeline.transformer.sierra.exceptions.CataloguingException
 import weco.pipeline.transformer.sierra.transformers.parsers.Marc008Parser
+import weco.sierra.models.identifiers.SierraBibNumber
 import weco.sierra.models.marc.{Subfield, VarField}
 
 object SierraProduction

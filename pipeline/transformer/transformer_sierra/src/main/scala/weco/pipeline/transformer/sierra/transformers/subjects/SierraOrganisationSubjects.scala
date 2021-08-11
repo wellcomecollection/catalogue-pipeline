@@ -2,9 +2,9 @@ package weco.pipeline.transformer.sierra.transformers.subjects
 
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.{Organisation, Subject}
-import weco.catalogue.source_model.sierra.identifiers.SierraBibNumber
 import weco.pipeline.transformer.sierra.exceptions.CataloguingException
 import weco.pipeline.transformer.sierra.transformers.SierraAgents
+import weco.sierra.models.identifiers.SierraBibNumber
 import weco.sierra.models.marc.VarField
 
 // Populate wwork:subject

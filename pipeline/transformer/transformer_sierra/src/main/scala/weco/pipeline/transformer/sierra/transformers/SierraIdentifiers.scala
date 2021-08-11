@@ -6,7 +6,7 @@ import weco.catalogue.internal_model.identifiers.{
 }
 import weco.catalogue.source_model.sierra.source.SierraQueryOps
 import weco.catalogue.source_model.sierra.SierraBibData
-import weco.catalogue.source_model.sierra.identifiers.SierraBibNumber
+import weco.sierra.models.identifiers.SierraBibNumber
 
 // Populate wwork:identifiers.
 //

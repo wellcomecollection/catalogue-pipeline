@@ -32,13 +32,10 @@ import weco.catalogue.internal_model.work._
 import weco.catalogue.internal_model.work.generators.WorkGenerators
 import weco.catalogue.source_model.generators.SierraGenerators
 import weco.catalogue.source_model.sierra._
-import weco.catalogue.source_model.sierra.identifiers.{
-  SierraBibNumber,
-  SierraItemNumber
-}
 import weco.pipeline.transformer.sierra.SierraTransformer
 import weco.pipeline.transformer.sierra.exceptions.SierraTransformerException
 import weco.sierra.generators.MarcGenerators
+import weco.sierra.models.identifiers.{SierraBibNumber, SierraItemNumber}
 import weco.sierra.models.marc.Subfield
 
 class SierraTransformerTest

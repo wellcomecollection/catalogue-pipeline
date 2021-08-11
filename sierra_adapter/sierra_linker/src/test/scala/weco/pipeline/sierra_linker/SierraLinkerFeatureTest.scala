@@ -9,13 +9,13 @@ import weco.messaging.memory.MemoryMessageSender
 import weco.storage.store.memory.MemoryVersionedStore
 import weco.catalogue.source_model.generators.SierraGenerators
 import weco.catalogue.source_model.sierra._
-import weco.catalogue.source_model.sierra.identifiers.{
+import weco.pipeline.sierra_linker.fixtures.WorkerFixture
+import weco.pipeline.sierra_linker.models.Link
+import weco.sierra.models.identifiers.{
   SierraHoldingsNumber,
   SierraItemNumber,
   SierraOrderNumber
 }
-import weco.pipeline.sierra_linker.fixtures.WorkerFixture
-import weco.pipeline.sierra_linker.models.Link
 
 class SierraLinkerFeatureTest
     extends AnyFunSpec

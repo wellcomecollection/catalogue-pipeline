@@ -8,8 +8,8 @@ import weco.storage.store.memory.{MemoryStore, MemoryVersionedStore}
 import weco.storage.{Identified, StoreWriteError, UpdateWriteError, Version}
 import weco.catalogue.source_model.generators.SierraGenerators
 import weco.catalogue.source_model.sierra.SierraItemRecord
-import weco.catalogue.source_model.sierra.identifiers.SierraItemNumber
 import weco.pipeline.sierra_linker.models.Link
+import weco.sierra.models.identifiers.SierraItemNumber
 
 class LinkStoreTest
     extends AnyFunSpec

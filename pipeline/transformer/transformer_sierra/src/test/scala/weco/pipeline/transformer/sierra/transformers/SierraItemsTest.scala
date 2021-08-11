@@ -14,10 +14,10 @@ import weco.catalogue.internal_model.locations.{
   PhysicalLocation
 }
 import weco.catalogue.internal_model.work.Item
-import weco.catalogue.source_model.sierra.identifiers.SierraItemNumber
 import weco.catalogue.source_model.sierra.source.SierraSourceLocation
 import weco.catalogue.source_model.sierra.{SierraBibData, SierraItemData}
 import weco.sierra.generators.SierraDataGenerators
+import weco.sierra.models.identifiers.SierraItemNumber
 import weco.sierra.models.marc.{FixedField, Subfield, VarField}
 
 class SierraItemsTest

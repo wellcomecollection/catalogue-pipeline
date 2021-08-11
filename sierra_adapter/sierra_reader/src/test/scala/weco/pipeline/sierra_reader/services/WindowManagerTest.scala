@@ -11,11 +11,8 @@ import weco.fixtures.TestWith
 import weco.storage.fixtures.S3Fixtures
 import weco.storage.fixtures.S3Fixtures.Bucket
 import weco.catalogue.source_model.generators.SierraGenerators
-import weco.catalogue.source_model.sierra.identifiers.{
-  SierraBibNumber,
-  SierraRecordTypes
-}
 import weco.pipeline.sierra_reader.models.WindowStatus
+import weco.sierra.models.identifiers.{SierraBibNumber, SierraRecordTypes}
 
 class WindowManagerTest
     extends AnyFunSpec

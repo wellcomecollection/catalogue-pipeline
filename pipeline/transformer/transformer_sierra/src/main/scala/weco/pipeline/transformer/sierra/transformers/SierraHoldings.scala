@@ -15,7 +15,11 @@ import weco.catalogue.internal_model.work.{Holdings, Item}
 import weco.catalogue.source_model.sierra.rules.SierraPhysicalLocationType
 import weco.catalogue.source_model.sierra.source.SierraQueryOps
 import weco.catalogue.source_model.sierra.SierraHoldingsData
-import weco.catalogue.source_model.sierra.identifiers._
+import weco.sierra.models.identifiers.{
+  SierraBibNumber,
+  SierraHoldingsNumber,
+  TypedSierraRecordNumber
+}
 import weco.sierra.models.marc.FixedField
 
 import java.io.InputStream

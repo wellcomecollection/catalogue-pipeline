@@ -5,7 +5,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.json.JsonUtil._
 import weco.catalogue.source_model.generators.SierraGenerators
-import weco.catalogue.source_model.sierra.identifiers.SierraItemNumber
+import weco.sierra.models.identifiers.SierraItemNumber
 
 class SierraItemRecordTest
     extends AnyFunSpec

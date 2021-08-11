@@ -1,6 +1,6 @@
 package weco.pipeline.transformer.sierra.exceptions
 
-import weco.catalogue.source_model.sierra.identifiers.SierraBibNumber
+import weco.sierra.models.identifiers.SierraBibNumber
 
 // Thrown if the data has a cataloguing error -- that is, the transformer
 // cannot handle it without a change in the source data.

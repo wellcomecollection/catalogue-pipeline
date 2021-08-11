@@ -16,13 +16,13 @@ import weco.storage.store.{
 import weco.storage.{StoreWriteError, UpdateWriteError, Version}
 import weco.catalogue.source_model.fixtures.SourceVHSFixture
 import weco.catalogue.source_model.generators.SierraGenerators
-import weco.catalogue.source_model.sierra.identifiers.TypedSierraRecordNumber
 import weco.catalogue.source_model.sierra.{
   SierraItemRecord,
   SierraTransformable
 }
 import weco.catalogue.source_model.store.SourceVHS
 import weco.pipeline.sierra_merger.fixtures.RecordMergerFixtures
+import weco.sierra.models.identifiers.TypedSierraRecordNumber
 
 class UpdaterTest
     extends AnyFunSpec

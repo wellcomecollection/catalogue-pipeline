@@ -1,7 +1,12 @@
 package weco.pipeline.sierra_linker.dynamo
 
 import org.scanamo.DynamoFormat
-import weco.catalogue.source_model.sierra.identifiers._
+import weco.sierra.models.identifiers.{
+  SierraBibNumber,
+  SierraHoldingsNumber,
+  SierraItemNumber,
+  SierraOrderNumber
+}
 
 object Implicits {
   implicit val formatBibNumber: DynamoFormat[SierraBibNumber] =

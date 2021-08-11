@@ -3,7 +3,7 @@ package weco.catalogue.source_model.generators
 import weco.fixtures.RandomGenerators
 import weco.json.JsonUtil.toJson
 import weco.catalogue.source_model.sierra._
-import weco.catalogue.source_model.sierra.identifiers.{
+import weco.sierra.models.identifiers.{
   SierraBibNumber,
   SierraHoldingsNumber,
   SierraItemNumber,

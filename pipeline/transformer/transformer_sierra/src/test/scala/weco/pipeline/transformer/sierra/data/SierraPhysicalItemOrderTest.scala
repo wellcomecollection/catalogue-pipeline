@@ -10,10 +10,7 @@ import weco.catalogue.internal_model.identifiers.{
 import weco.catalogue.internal_model.work.Item
 import weco.catalogue.internal_model.work.generators.ItemsGenerators
 import weco.catalogue.source_model.generators.SierraGenerators
-import weco.catalogue.source_model.sierra.identifiers.{
-  SierraBibNumber,
-  SierraItemNumber
-}
+import weco.sierra.models.identifiers.{SierraBibNumber, SierraItemNumber}
 
 class SierraPhysicalItemOrderTest
     extends AnyFunSpec

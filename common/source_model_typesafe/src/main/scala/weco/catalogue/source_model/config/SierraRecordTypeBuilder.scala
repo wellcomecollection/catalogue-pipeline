@@ -1,8 +1,7 @@
 package weco.catalogue.source_model.config
 
 import com.typesafe.config.Config
-import weco.catalogue.source_model.sierra.identifiers.SierraRecordTypes
-import weco.catalogue.source_model.sierra.identifiers.SierraRecordTypes._
+import weco.sierra.models.identifiers.SierraRecordTypes
 import weco.typesafe.config.builders.EnrichConfig._
 
 object SierraRecordTypeBuilder {

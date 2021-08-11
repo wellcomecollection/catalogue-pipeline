@@ -1,7 +1,7 @@
 package weco.catalogue.source_model.sierra
 
-import weco.catalogue.source_model.sierra.identifiers.SierraItemNumber
 import weco.catalogue.source_model.sierra.source.SierraSourceLocation
+import weco.sierra.models.identifiers.SierraItemNumber
 import weco.sierra.models.marc.{FixedField, VarField}
 
 case class SierraItemData(

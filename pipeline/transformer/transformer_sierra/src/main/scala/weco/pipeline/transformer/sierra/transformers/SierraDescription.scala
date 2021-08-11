@@ -5,7 +5,7 @@ import grizzled.slf4j.Logging
 import java.net.URL
 import weco.catalogue.source_model.sierra.source.SierraQueryOps
 import weco.catalogue.source_model.sierra.SierraBibData
-import weco.catalogue.source_model.sierra.identifiers.SierraBibNumber
+import weco.sierra.models.identifiers.SierraBibNumber
 import weco.sierra.models.marc.{Subfield, VarField}
 
 import scala.util.Try

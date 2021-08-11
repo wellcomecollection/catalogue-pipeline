@@ -6,12 +6,12 @@ import weco.catalogue.source_model.config.{
   SierraRecordTypeBuilder,
   SourceVHSBuilder
 }
-import weco.catalogue.source_model.sierra.identifiers.SierraRecordTypes
 import weco.catalogue.source_model.sierra._
 import weco.json.JsonUtil._
 import weco.messaging.sns.NotificationMessage
 import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import weco.pipeline.sierra_merger.services.{Updater, Worker}
+import weco.sierra.models.identifiers.SierraRecordTypes
 import weco.typesafe.WellcomeTypesafeApp
 import weco.typesafe.config.builders.AkkaBuilder
 

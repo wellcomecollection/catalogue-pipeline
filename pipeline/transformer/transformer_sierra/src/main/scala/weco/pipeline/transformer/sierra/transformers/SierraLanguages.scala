@@ -7,7 +7,7 @@ import weco.catalogue.source_model.sierra.source.{
   SierraSourceLanguage
 }
 import weco.catalogue.source_model.sierra.SierraBibData
-import weco.catalogue.source_model.sierra.identifiers.SierraBibNumber
+import weco.sierra.models.identifiers.SierraBibNumber
 
 object SierraLanguages
     extends SierraIdentifiedDataTransformer
