@@ -1,6 +1,6 @@
 package weco.pipeline.transformer.sierra.transformers
 
-import weco.catalogue.source_model.sierra.SierraBibData
+import weco.sierra.models.data.SierraBibData
 import weco.sierra.models.identifiers.SierraBibNumber
 
 trait SierraDataTransformer {

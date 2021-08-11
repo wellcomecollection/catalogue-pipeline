@@ -17,8 +17,8 @@ import weco.catalogue.internal_model.locations.{
 }
 import weco.catalogue.internal_model.work.Holdings
 import weco.catalogue.source_model.generators.SierraRecordGenerators
-import weco.catalogue.source_model.sierra.SierraHoldingsData
 import weco.sierra.generators.MarcGenerators
+import weco.sierra.models.data.SierraHoldingsData
 import weco.sierra.models.identifiers.SierraHoldingsNumber
 import weco.sierra.models.marc.{FixedField, Subfield, VarField}
 

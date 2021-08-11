@@ -2,8 +2,8 @@ package weco.pipeline.transformer.sierra.transformers
 
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work._
-import weco.catalogue.source_model.sierra.SierraBibData
 import weco.sierra.models.SierraQueryOps
+import weco.sierra.models.data.SierraBibData
 import weco.sierra.models.marc.Subfield
 
 /* Populate wwork:contributors. Rules:

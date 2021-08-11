@@ -14,6 +14,12 @@ import weco.pipeline.transformer.sierra.exceptions.{
   SierraTransformerException
 }
 import weco.pipeline.transformer.sierra.transformers._
+import weco.sierra.models.data.{
+  SierraBibData,
+  SierraHoldingsData,
+  SierraItemData,
+  SierraOrderData
+}
 import weco.sierra.models.identifiers.{
   SierraBibNumber,
   SierraHoldingsNumber,

@@ -6,7 +6,7 @@ import weco.catalogue.source_model.sierra.rules.{
   SierraItemAccess,
   SierraPhysicalLocationType
 }
-import weco.catalogue.source_model.sierra.{SierraBibData, SierraItemData}
+import weco.sierra.models.data.{SierraBibData, SierraItemData}
 import weco.sierra.models.identifiers.SierraBibNumber
 
 trait SierraLocation {

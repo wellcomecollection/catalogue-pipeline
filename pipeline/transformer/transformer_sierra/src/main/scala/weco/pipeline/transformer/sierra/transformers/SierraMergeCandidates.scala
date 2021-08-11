@@ -7,10 +7,10 @@ import weco.catalogue.internal_model.identifiers.{
   SourceIdentifier
 }
 import weco.catalogue.internal_model.work.MergeCandidate
-import weco.catalogue.source_model.sierra.SierraBibData
 import weco.pipeline.transformer.identifiers.SourceIdentifierValidation._
 import weco.pipeline.transformer.sierra.transformers.parsers.MiroIdParsing
 import weco.sierra.models.SierraQueryOps
+import weco.sierra.models.data.SierraBibData
 import weco.sierra.models.identifiers.SierraBibNumber
 
 import scala.util.{Success, Try}

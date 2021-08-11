@@ -1,8 +1,8 @@
 package weco.pipeline.transformer.sierra.transformers
 
 import weco.catalogue.internal_model.work.Format
-import weco.catalogue.source_model.sierra.SierraBibData
 import weco.pipeline.transformer.sierra.data.SierraMaterialTypes
+import weco.sierra.models.data.SierraBibData
 
 object SierraFormat extends SierraDataTransformer {
 

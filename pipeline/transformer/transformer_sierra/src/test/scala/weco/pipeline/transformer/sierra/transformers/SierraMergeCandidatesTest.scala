@@ -8,8 +8,8 @@ import weco.catalogue.internal_model.identifiers.{
   SourceIdentifier
 }
 import weco.catalogue.internal_model.work.MergeCandidate
-import weco.catalogue.source_model.sierra.SierraBibData
 import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
+import weco.sierra.models.data.SierraBibData
 import weco.sierra.models.fields.SierraMaterialType
 import weco.sierra.models.marc.{Subfield, VarField}
 

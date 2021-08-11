@@ -1,6 +1,6 @@
 package weco.catalogue.source_model.sierra.rules
 
-import weco.catalogue.source_model.sierra.SierraItemData
+import weco.sierra.models.data.SierraItemData
 
 /** The Rules for Requesting are a set of rules in Sierra that can block an item
   * from being requested, and if so, optionally explain to the user why an item

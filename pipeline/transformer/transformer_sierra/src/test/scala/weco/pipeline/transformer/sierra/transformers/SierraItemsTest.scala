@@ -14,8 +14,8 @@ import weco.catalogue.internal_model.locations.{
   PhysicalLocation
 }
 import weco.catalogue.internal_model.work.Item
-import weco.catalogue.source_model.sierra.{SierraBibData, SierraItemData}
 import weco.sierra.generators.SierraDataGenerators
+import weco.sierra.models.data.{SierraBibData, SierraItemData}
 import weco.sierra.models.fields.SierraLocation
 import weco.sierra.models.identifiers.SierraItemNumber
 import weco.sierra.models.marc.{FixedField, Subfield, VarField}

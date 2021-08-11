@@ -7,9 +7,9 @@ import weco.catalogue.internal_model.identifiers.{
   IdentifierType,
   SourceIdentifier
 }
-import weco.catalogue.source_model.sierra.SierraBibData
 import weco.pipeline.transformer.sierra.exceptions.CataloguingException
 import weco.sierra.generators.SierraDataGenerators
+import weco.sierra.models.data.SierraBibData
 import weco.sierra.models.identifiers.SierraBibNumber
 import weco.sierra.models.marc
 import weco.sierra.models.marc.{Subfield, VarField}

@@ -2,8 +2,8 @@ package weco.pipeline.transformer.sierra.transformers
 
 import grizzled.slf4j.Logging
 import weco.catalogue.internal_model.languages.{Language, MarcLanguageCodeList}
-import weco.catalogue.source_model.sierra.SierraBibData
 import weco.sierra.models.SierraQueryOps
+import weco.sierra.models.data.SierraBibData
 import weco.sierra.models.fields.SierraLanguage
 import weco.sierra.models.identifiers.SierraBibNumber
 

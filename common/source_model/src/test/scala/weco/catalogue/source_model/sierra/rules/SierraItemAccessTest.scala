@@ -9,8 +9,8 @@ import weco.catalogue.internal_model.locations.{
   LocationType,
   PhysicalLocationType
 }
-import weco.catalogue.source_model.sierra.SierraItemData
 import weco.sierra.generators.SierraDataGenerators
+import weco.sierra.models.data.SierraItemData
 import weco.sierra.models.identifiers.SierraBibNumber
 import weco.sierra.models.marc.{FixedField, VarField}
 

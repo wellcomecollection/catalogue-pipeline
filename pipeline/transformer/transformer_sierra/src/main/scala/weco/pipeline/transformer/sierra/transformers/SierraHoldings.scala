@@ -13,8 +13,8 @@ import weco.catalogue.internal_model.locations.{
 }
 import weco.catalogue.internal_model.work.{Holdings, Item}
 import weco.catalogue.source_model.sierra.rules.SierraPhysicalLocationType
-import weco.catalogue.source_model.sierra.SierraHoldingsData
 import weco.sierra.models.SierraQueryOps
+import weco.sierra.models.data.SierraHoldingsData
 import weco.sierra.models.identifiers.{
   SierraBibNumber,
   SierraHoldingsNumber,
