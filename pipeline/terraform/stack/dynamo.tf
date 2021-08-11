@@ -13,17 +13,34 @@
 # https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/switching.capacitymode.html
 
 locals {
-  # These numbers were chosen by running a reindex and seeing when the
-  # matcher started throttling.
-  graph_table_billing_mode   = var.is_reindexing ? "PROVISIONED" : "PAY_PER_REQUEST"
-  graph_table_write_capacity = var.is_reindexing ? 1000 : null
-  graph_table_read_capacity  = var.is_reindexing ? 600 : null
+  graph_table_billing_mode = var.is_reindexing ? "PROVISIONED" : "PAY_PER_REQUEST"
+  lock_table_billing_mode  = var.is_reindexing ? "PROVISIONED" : "PAY_PER_REQUEST"
+}
 
-  # These numbers were chosen by running a reindex and seeing when the
-  # matcher started throttling.
-  lock_table_billing_mode   = var.is_reindexing ? "PROVISIONED" : "PAY_PER_REQUEST"
-  lock_table_write_capacity = var.is_reindexing ? 2000 : null
-  lock_table_read_capacity  = var.is_reindexing ? 1500 : null
+# These numbers were chosen by running a reindex and seeing when the
+# matcher started throttling.
+module "matcher_graph_table_autoscaling" {
+  source = "../modules/dynamodb_autoscaling"
+
+  count = var.is_reindexing ? 1 : 0
+
+  table_name = aws_dynamodb_table.matcher_graph_table.name
+
+  max_read_capacity  = 600
+  max_write_capacity = 1000
+}
+
+# These numbers were chosen by running a reindex and seeing when the
+# matcher started throttling.
+module "lock_table_autoscaling" {
+  source = "../modules/dynamodb_autoscaling"
+
+  count = var.is_reindexing ? 1 : 0
+
+  table_name = aws_dynamodb_table.matcher_lock_table.name
+
+  max_read_capacity  = 1500
+  max_write_capacity = 2000
 }
 
 # Graph table
@@ -45,21 +62,24 @@ resource "aws_dynamodb_table" "matcher_graph_table" {
     type = "S"
   }
 
-  billing_mode   = local.graph_table_billing_mode
-  write_capacity = local.graph_table_write_capacity
-  read_capacity  = local.graph_table_read_capacity
+  billing_mode = local.graph_table_billing_mode
 
   global_secondary_index {
     name            = "work-sets-index"
     hash_key        = "componentId"
     projection_type = "ALL"
-
-    write_capacity = local.graph_table_write_capacity
-    read_capacity  = local.graph_table_read_capacity
   }
 
   tags = {
     Name = local.graph_table_name
+  }
+
+  lifecycle {
+    ignore_changes = [
+      global_secondary_index,
+      read_capacity,
+      write_capacity
+    ]
   }
 }
 
@@ -99,9 +119,7 @@ resource "aws_dynamodb_table" "matcher_lock_table" {
   name     = local.lock_table_name
   hash_key = "id"
 
-  billing_mode   = local.lock_table_billing_mode
-  write_capacity = local.lock_table_write_capacity
-  read_capacity  = local.lock_table_read_capacity
+  billing_mode = local.lock_table_billing_mode
 
   attribute {
     name = "id"
@@ -117,9 +135,6 @@ resource "aws_dynamodb_table" "matcher_lock_table" {
     name            = "context-ids-index"
     hash_key        = "contextId"
     projection_type = "ALL"
-
-    write_capacity = local.lock_table_write_capacity
-    read_capacity  = local.lock_table_read_capacity
   }
 
   ttl {
@@ -129,6 +144,14 @@ resource "aws_dynamodb_table" "matcher_lock_table" {
 
   tags = {
     Name = local.lock_table_name
+  }
+
+  lifecycle {
+    ignore_changes = [
+      global_secondary_index,
+      read_capacity,
+      write_capacity
+    ]
   }
 }
 
