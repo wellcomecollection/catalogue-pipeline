@@ -63,8 +63,8 @@ object SierraGenres
   // Extract the primary concept, which comes from subfield $a.  This is the
   // only concept which might be identified.
   private def getPrimaryConcept(
-                                 primarySubfields: List[Subfield],
-                                 varField: VarField): List[Concept[IdState.Unminted]] =
+    primarySubfields: List[Subfield],
+    varField: VarField): List[Concept[IdState.Unminted]] =
     primarySubfields.map { subfield =>
       val concept = Concept.normalised(label = subfield.content)
       concept.copy(id = identifyConcept(concept, varField))

@@ -540,8 +540,7 @@ class SierraContributorsTest
       val varFields = List(
         createVarFieldWith(
           marcTag = "110",
-          subfields =
-            List(Subfield(tag = "a", content = "The organisation,"))
+          subfields = List(Subfield(tag = "a", content = "The organisation,"))
         ),
         createVarFieldWith(
           marcTag = "710",

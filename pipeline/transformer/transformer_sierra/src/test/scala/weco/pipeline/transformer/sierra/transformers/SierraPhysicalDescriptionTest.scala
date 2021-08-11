@@ -77,9 +77,7 @@ class SierraPhysicalDescriptionTest
         VarField(
           marcTag = Some("300"),
           subfields = List(
-            Subfield(
-              tag = "a",
-              content = "1 videocassette (VHS) (1 min.) :"),
+            Subfield(tag = "a", content = "1 videocassette (VHS) (1 min.) :"),
             Subfield(tag = "b", content = "sound, color, PAL."),
           )
         ),

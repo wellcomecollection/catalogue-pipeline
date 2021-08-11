@@ -131,9 +131,7 @@ class SierraHoldingsTest
         createVarFieldWith(
           marcTag = "856",
           subfields = List(
-            Subfield(
-              tag = "u",
-              content = "https://example.org/subscriptions")
+            Subfield(tag = "u", content = "https://example.org/subscriptions")
           )
         )
       )
@@ -197,9 +195,7 @@ class SierraHoldingsTest
         createVarFieldWith(
           marcTag = "856",
           subfields = List(
-            Subfield(
-              tag = "u",
-              content = "https://example.org/subscriptions")
+            Subfield(tag = "u", content = "https://example.org/subscriptions")
           )
         )
       )
@@ -381,9 +377,7 @@ class SierraHoldingsTest
         createVarFieldWith(
           marcTag = "856",
           subfields = List(
-            Subfield(
-              tag = "u",
-              content = "https://deleted.example.org/journal")
+            Subfield(tag = "u", content = "https://deleted.example.org/journal")
           )
         )
       )

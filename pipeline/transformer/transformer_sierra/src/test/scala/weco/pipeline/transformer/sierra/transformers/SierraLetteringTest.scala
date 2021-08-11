@@ -82,9 +82,7 @@ class SierraLetteringTest
           marcTag = "246",
           indicator2 = "6",
           subfields = List(
-            Subfield(
-              tag = "a",
-              content = "Daring dalmations dance with danger")
+            Subfield(tag = "a", content = "Daring dalmations dance with danger")
           )
         ),
         createVarFieldWith(

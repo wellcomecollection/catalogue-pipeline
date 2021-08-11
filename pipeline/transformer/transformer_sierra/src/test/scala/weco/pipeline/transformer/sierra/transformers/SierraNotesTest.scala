@@ -106,8 +106,8 @@ class SierraNotesTest
         createVarFieldWith(
           marcTag = "535",
           indicator1 = Some("2"),
-          subfields = List(
-            Subfield(tag = "a", content = "The duplicates are in Denmark"))
+          subfields =
+            List(Subfield(tag = "a", content = "The duplicates are in Denmark"))
         )
       )
     )

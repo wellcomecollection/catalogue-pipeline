@@ -32,7 +32,7 @@ object SierraAlternativeTitles
         varfield.subfields
           .filter {
             case Subfield("5", "UkLW") => false
-            case _                         => true
+            case _                     => true
           }
           .contentString(" ")
       }

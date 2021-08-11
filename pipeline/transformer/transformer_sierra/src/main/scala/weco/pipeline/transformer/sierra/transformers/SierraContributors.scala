@@ -74,8 +74,8 @@ object SierraContributors
     "Meeting" -> getMeeting(subfields)
 
   private def getContributionRoles(
-                                    subfields: List[Subfield],
-                                    subfieldTag: String): List[ContributionRole] =
+    subfields: List[Subfield],
+    subfieldTag: String): List[ContributionRole] =
     subfields
       .withTag(subfieldTag)
       .contents

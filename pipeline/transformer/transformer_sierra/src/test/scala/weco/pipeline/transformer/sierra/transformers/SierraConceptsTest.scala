@@ -57,9 +57,7 @@ class SierraConceptsTest extends AnyFunSpec with Matchers with MarcGenerators {
           // Including whitespace
           Subfield(tag = "0", content = "lcsh / bbb"),
           // Including a MESH URL prefix
-          Subfield(
-            tag = "0",
-            content = "https://id.nlm.nih.gov/mesh/lcsh/bbb")
+          Subfield(tag = "0", content = "https://id.nlm.nih.gov/mesh/lcsh/bbb")
         )
       )
     )

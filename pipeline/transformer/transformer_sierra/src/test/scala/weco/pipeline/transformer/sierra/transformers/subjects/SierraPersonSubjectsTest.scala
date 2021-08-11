@@ -138,9 +138,7 @@ class SierraPersonSubjectsTest
           marcTag = "600",
           subfields = List(
             Subfield(tag = "a", content = "Rita Levi Montalcini,"),
-            Subfield(
-              tag = "d",
-              content = "22 April 1909 – 30 December 2012")
+            Subfield(tag = "d", content = "22 April 1909 – 30 December 2012")
           )
         )
       )

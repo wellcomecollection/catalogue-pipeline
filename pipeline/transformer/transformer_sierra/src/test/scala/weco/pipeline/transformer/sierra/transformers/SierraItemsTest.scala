@@ -405,15 +405,13 @@ class SierraItemsTest
           location = Some(SierraLocation("bwith", "bound in above"))
         ),
         createSierraItemDataWith(
-          location =
-            Some(SierraLocation("sicon", "Closed stores Iconographic"))
+          location = Some(SierraLocation("sicon", "Closed stores Iconographic"))
         ),
         createSierraItemDataWith(
           location = Some(SierraLocation("cwith", "contained in above"))
         ),
         createSierraItemDataWith(
-          location =
-            Some(SierraLocation("sicon", "Closed stores Iconographic"))
+          location = Some(SierraLocation("sicon", "Closed stores Iconographic"))
         )
       )
 
@@ -436,15 +434,13 @@ class SierraItemsTest
           location = Some(SierraLocation("bwith", "bound in above"))
         ),
         createSierraItemDataWith(
-          location =
-            Some(SierraLocation("sicon", "Closed stores Iconographic"))
+          location = Some(SierraLocation("sicon", "Closed stores Iconographic"))
         ),
         createSierraItemDataWith(
           location = Some(SierraLocation("cwith", "contained in above"))
         ),
         createSierraItemDataWith(
-          location =
-            Some(SierraLocation("sobhi", "Closed stores P.B. Hindi"))
+          location = Some(SierraLocation("sobhi", "Closed stores P.B. Hindi"))
         )
       )
 
@@ -467,8 +463,7 @@ class SierraItemsTest
           location = Some(SierraLocation("bwith", "bound in above"))
         ),
         createSierraItemDataWith(
-          location =
-            Some(SierraLocation("sicon", "Closed stores Iconographic"))
+          location = Some(SierraLocation("sicon", "Closed stores Iconographic"))
         ),
         createSierraItemDataWith(
           location = Some(SierraLocation("cwith", "contained in above"))

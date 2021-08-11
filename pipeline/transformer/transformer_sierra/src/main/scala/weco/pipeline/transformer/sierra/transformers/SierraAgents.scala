@@ -17,8 +17,8 @@ trait SierraAgents extends SierraQueryOps {
   //  - subfield $c populates the person prefixes
   //
   def getPerson(
-                 subfields: List[Subfield],
-                 normalisePerson: Boolean = false): Option[Person[IdState.Unminted]] =
+    subfields: List[Subfield],
+    normalisePerson: Boolean = false): Option[Person[IdState.Unminted]] =
     getLabel(subfields).map { label =>
       // The rule is to only normalise the 'Person' label when a contributor.  Strictly a 'Person' within
       // 'Subjects' (sourced from Marc 600) should not be normalised -- however, as these labels
@@ -52,8 +52,7 @@ trait SierraAgents extends SierraQueryOps {
     getLabel(subfields.filterNot(_.tag == "n"))
       .map { Organisation.normalised }
 
-  def getMeeting(
-    subfields: List[Subfield]): Option[Meeting[IdState.Unminted]] =
+  def getMeeting(subfields: List[Subfield]): Option[Meeting[IdState.Unminted]] =
     getLabel(subfields.withTags("a", "c", "d", "t"))
       .map { Meeting.normalised }
 

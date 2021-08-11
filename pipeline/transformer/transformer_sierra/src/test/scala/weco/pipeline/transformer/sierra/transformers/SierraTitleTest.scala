@@ -32,9 +32,7 @@ class SierraTitleTest
     (
       List(
         Subfield(tag = "a", content = "The “winter mind” :"),
-        Subfield(
-          tag = "b",
-          content = "William Bronk and American letters /"),
+        Subfield(tag = "b", content = "William Bronk and American letters /"),
         Subfield(tag = "c", content = "Burt Kimmelman.")
       ),
       "The “winter mind” : William Bronk and American letters / Burt Kimmelman."
