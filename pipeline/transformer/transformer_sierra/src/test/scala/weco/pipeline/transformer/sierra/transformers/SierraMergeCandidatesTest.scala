@@ -8,13 +8,10 @@ import weco.catalogue.internal_model.identifiers.{
   SourceIdentifier
 }
 import weco.catalogue.internal_model.work.MergeCandidate
-import weco.catalogue.source_model.generators.{
-  MarcGenerators,
-  SierraDataGenerators
-}
 import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
 import weco.catalogue.source_model.sierra.SierraBibData
 import weco.catalogue.source_model.sierra.source.SierraMaterialType
+import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
 
 class SierraMergeCandidatesTest
     extends AnyFunSpec

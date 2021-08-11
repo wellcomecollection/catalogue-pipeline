@@ -10,12 +10,9 @@ import weco.catalogue.internal_model.work.{
   Place,
   ProductionEvent
 }
-import weco.catalogue.source_model.generators.{
-  MarcGenerators,
-  SierraDataGenerators
-}
 import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
 import weco.pipeline.transformer.sierra.exceptions.CataloguingException
+import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
 
 class SierraProductionTest
     extends AnyFunSpec

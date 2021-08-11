@@ -6,8 +6,8 @@ import weco.catalogue.internal_model.identifiers.{
   IdentifierType,
   SourceIdentifier
 }
-import weco.catalogue.source_model.generators.MarcGenerators
 import weco.catalogue.source_model.sierra.marc.VarField
+import weco.sierra.generators.MarcGenerators
 
 class SierraConceptIdentifierTest
     extends AnyFunSpec

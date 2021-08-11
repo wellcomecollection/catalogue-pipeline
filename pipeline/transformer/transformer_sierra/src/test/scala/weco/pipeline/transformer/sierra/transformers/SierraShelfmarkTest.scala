@@ -3,13 +3,10 @@ package weco.pipeline.transformer.sierra.transformers
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.work.Format.ArchivesAndManuscripts
-import weco.catalogue.source_model.generators.{
-  MarcGenerators,
-  SierraDataGenerators
-}
 import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
 import weco.catalogue.source_model.sierra.source.SierraMaterialType
 import weco.catalogue.source_model.sierra.{SierraBibData, SierraItemData}
+import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
 
 class SierraShelfmarkTest
     extends AnyFunSpec

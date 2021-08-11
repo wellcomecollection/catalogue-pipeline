@@ -30,7 +30,7 @@ import weco.catalogue.internal_model.work.InvisibilityReason.{
 }
 import weco.catalogue.internal_model.work._
 import weco.catalogue.internal_model.work.generators.WorkGenerators
-import weco.catalogue.source_model.generators.{MarcGenerators, SierraGenerators}
+import weco.catalogue.source_model.generators.SierraGenerators
 import weco.catalogue.source_model.sierra._
 import weco.catalogue.source_model.sierra.identifiers.{
   SierraBibNumber,
@@ -39,6 +39,7 @@ import weco.catalogue.source_model.sierra.identifiers.{
 import weco.catalogue.source_model.sierra.marc.MarcSubfield
 import weco.pipeline.transformer.sierra.SierraTransformer
 import weco.pipeline.transformer.sierra.exceptions.SierraTransformerException
+import weco.sierra.generators.MarcGenerators
 
 class SierraTransformerTest
     extends AnyFunSpec

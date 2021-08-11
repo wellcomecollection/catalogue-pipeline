@@ -8,11 +8,8 @@ import weco.catalogue.internal_model.identifiers.{
   SourceIdentifier
 }
 import weco.catalogue.internal_model.work.{Concept, Period, Place, Subject}
-import weco.catalogue.source_model.generators.{
-  MarcGenerators,
-  SierraDataGenerators
-}
 import weco.catalogue.source_model.sierra.marc.MarcSubfield
+import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
 
 class SierraConceptSubjectsTest
     extends AnyFunSpec

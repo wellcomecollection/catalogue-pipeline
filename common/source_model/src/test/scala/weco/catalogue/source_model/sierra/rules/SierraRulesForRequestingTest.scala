@@ -4,8 +4,8 @@ import org.scalatest.Assertion
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks
-import weco.catalogue.source_model.generators.SierraDataGenerators
 import weco.catalogue.source_model.sierra.marc.FixedField
+import weco.sierra.generators.SierraDataGenerators
 
 class SierraRulesForRequestingTest
     extends AnyFunSpec

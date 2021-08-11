@@ -9,10 +9,6 @@ import weco.catalogue.internal_model.locations.{
   LocationType,
   PhysicalLocation
 }
-import weco.catalogue.source_model.generators.{
-  MarcGenerators,
-  SierraDataGenerators
-}
 import weco.catalogue.source_model.sierra.marc.{
   FixedField,
   MarcSubfield,
@@ -20,6 +16,7 @@ import weco.catalogue.source_model.sierra.marc.{
 }
 import weco.catalogue.source_model.sierra.source.SierraSourceLocation
 import weco.catalogue.source_model.sierra.SierraItemData
+import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
 
 class SierraLocationTest
     extends AnyFunSpec

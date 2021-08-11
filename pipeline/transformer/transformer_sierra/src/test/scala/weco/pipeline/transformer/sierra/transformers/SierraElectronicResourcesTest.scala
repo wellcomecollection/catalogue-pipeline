@@ -11,8 +11,9 @@ import weco.catalogue.internal_model.locations.{
   DigitalLocation
 }
 import weco.catalogue.internal_model.work.Item
-import weco.catalogue.source_model.generators.{MarcGenerators, SierraGenerators}
+import weco.catalogue.source_model.generators.SierraGenerators
 import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
+import weco.sierra.generators.MarcGenerators
 
 class SierraElectronicResourcesTest
     extends AnyFunSpec

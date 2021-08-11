@@ -2,8 +2,9 @@ package weco.pipeline.transformer.sierra.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.source_model.generators.{MarcGenerators, SierraGenerators}
+import weco.catalogue.source_model.generators.SierraGenerators
 import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
+import weco.sierra.generators.MarcGenerators
 
 class SierraHoldingsEnumerationTest
     extends AnyFunSpec

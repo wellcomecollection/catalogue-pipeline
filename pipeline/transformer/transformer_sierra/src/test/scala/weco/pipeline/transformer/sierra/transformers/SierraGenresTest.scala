@@ -8,11 +8,8 @@ import weco.catalogue.internal_model.identifiers.{
   SourceIdentifier
 }
 import weco.catalogue.internal_model.work.{Concept, Genre, Period, Place}
-import weco.catalogue.source_model.generators.{
-  MarcGenerators,
-  SierraDataGenerators
-}
 import weco.catalogue.source_model.sierra.marc.MarcSubfield
+import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
 
 class SierraGenresTest
     extends AnyFunSpec

@@ -8,8 +8,8 @@ import weco.catalogue.internal_model.identifiers.{
   SourceIdentifier
 }
 import weco.catalogue.internal_model.work.Concept
-import weco.catalogue.source_model.generators.MarcGenerators
 import weco.catalogue.source_model.sierra.marc.MarcSubfield
+import weco.sierra.generators.MarcGenerators
 
 class SierraConceptsTest extends AnyFunSpec with Matchers with MarcGenerators {
 

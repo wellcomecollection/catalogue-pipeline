@@ -7,11 +7,11 @@ import weco.catalogue.internal_model.identifiers.{
   IdentifierType,
   SourceIdentifier
 }
-import weco.catalogue.source_model.generators.SierraDataGenerators
 import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
 import weco.catalogue.source_model.sierra.SierraBibData
 import weco.catalogue.source_model.sierra.identifiers.SierraBibNumber
 import weco.pipeline.transformer.sierra.exceptions.CataloguingException
+import weco.sierra.generators.SierraDataGenerators
 
 class SierraOrganisationSubjectsTest
     extends AnyFunSpec

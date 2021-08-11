@@ -16,7 +16,7 @@ import weco.catalogue.internal_model.locations.{
   PhysicalLocation
 }
 import weco.catalogue.internal_model.work.Holdings
-import weco.catalogue.source_model.generators.{MarcGenerators, SierraGenerators}
+import weco.catalogue.source_model.generators.SierraGenerators
 import weco.catalogue.source_model.sierra.marc.{
   FixedField,
   MarcSubfield,
@@ -24,6 +24,7 @@ import weco.catalogue.source_model.sierra.marc.{
 }
 import weco.catalogue.source_model.sierra.SierraHoldingsData
 import weco.catalogue.source_model.sierra.identifiers.SierraHoldingsNumber
+import weco.sierra.generators.MarcGenerators
 
 class SierraHoldingsTest
     extends AnyFunSpec

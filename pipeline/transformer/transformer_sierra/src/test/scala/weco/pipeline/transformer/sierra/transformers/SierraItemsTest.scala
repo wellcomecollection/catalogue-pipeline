@@ -14,7 +14,6 @@ import weco.catalogue.internal_model.locations.{
   PhysicalLocation
 }
 import weco.catalogue.internal_model.work.Item
-import weco.catalogue.source_model.generators.SierraDataGenerators
 import weco.catalogue.source_model.sierra.identifiers.SierraItemNumber
 import weco.catalogue.source_model.sierra.marc.{
   FixedField,
@@ -23,6 +22,7 @@ import weco.catalogue.source_model.sierra.marc.{
 }
 import weco.catalogue.source_model.sierra.source.SierraSourceLocation
 import weco.catalogue.source_model.sierra.{SierraBibData, SierraItemData}
+import weco.sierra.generators.SierraDataGenerators
 
 class SierraItemsTest
     extends AnyFunSpec
