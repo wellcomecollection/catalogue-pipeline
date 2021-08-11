@@ -12,7 +12,7 @@ import weco.messaging.fixtures.SQS.Queue
 import weco.messaging.memory.MemoryMessageSender
 import weco.storage.{Identified, Version}
 import weco.catalogue.source_model.fixtures.SourceVHSFixture
-import weco.catalogue.source_model.generators.SierraGenerators
+import weco.catalogue.source_model.generators.SierraRecordGenerators
 import weco.catalogue.source_model.sierra._
 import weco.catalogue.source_model.store.SourceVHS
 import weco.pipeline.sierra_merger.fixtures.RecordMergerFixtures
@@ -25,7 +25,7 @@ trait SierraRecordMergerFeatureTestCases[Record <: AbstractSierraRecord[_]]
     with EitherValues
     with SQS
     with SourceVHSFixture
-    with SierraGenerators
+    with SierraRecordGenerators
     with Eventually
     with IntegrationPatience {
 

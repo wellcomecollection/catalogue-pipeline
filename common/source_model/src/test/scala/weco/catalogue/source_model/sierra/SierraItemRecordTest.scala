@@ -4,13 +4,13 @@ import java.time.Instant
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.json.JsonUtil._
-import weco.catalogue.source_model.generators.SierraGenerators
+import weco.catalogue.source_model.generators.SierraRecordGenerators
 import weco.sierra.models.identifiers.SierraItemNumber
 
 class SierraItemRecordTest
     extends AnyFunSpec
     with Matchers
-    with SierraGenerators {
+    with SierraRecordGenerators {
 
   it("can cast a SierraItemRecord to JSON and back again") {
     val originalRecord = createSierraItemRecord

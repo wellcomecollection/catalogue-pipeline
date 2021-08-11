@@ -6,7 +6,7 @@ import org.scalatest.{Assertion, EitherValues}
 import weco.storage.maxima.memory.MemoryMaxima
 import weco.storage.store.memory.{MemoryStore, MemoryVersionedStore}
 import weco.storage.{Identified, StoreWriteError, UpdateWriteError, Version}
-import weco.catalogue.source_model.generators.SierraGenerators
+import weco.catalogue.source_model.generators.SierraRecordGenerators
 import weco.catalogue.source_model.sierra.SierraItemRecord
 import weco.pipeline.sierra_linker.models.Link
 import weco.sierra.models.identifiers.SierraItemNumber
@@ -15,7 +15,7 @@ class LinkStoreTest
     extends AnyFunSpec
     with Matchers
     with EitherValues
-    with SierraGenerators {
+    with SierraRecordGenerators {
 
   it("inserts an ItemRecord into the VHS") {
     implicit val store =

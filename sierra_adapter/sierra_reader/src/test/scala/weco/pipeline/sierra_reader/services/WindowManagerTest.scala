@@ -10,7 +10,7 @@ import weco.pipeline.sierra_reader.exceptions.SierraReaderException
 import weco.fixtures.TestWith
 import weco.storage.fixtures.S3Fixtures
 import weco.storage.fixtures.S3Fixtures.Bucket
-import weco.catalogue.source_model.generators.SierraGenerators
+import weco.catalogue.source_model.generators.SierraRecordGenerators
 import weco.pipeline.sierra_reader.models.WindowStatus
 import weco.sierra.models.identifiers.{SierraBibNumber, SierraRecordTypes}
 
@@ -20,7 +20,7 @@ class WindowManagerTest
     with S3Fixtures
     with ScalaFutures
     with IntegrationPatience
-    with SierraGenerators {
+    with SierraRecordGenerators {
 
   private def withWindowManager[R](bucket: Bucket)(
     testWith: TestWith[WindowManager, R]) = {

@@ -11,7 +11,7 @@ import weco.storage.generators.S3ObjectLocationGenerators
 import weco.storage.s3.S3ObjectLocation
 import weco.storage.store.memory.MemoryTypedStore
 import weco.catalogue.source_model.SierraSourcePayload
-import weco.catalogue.source_model.generators.SierraGenerators
+import weco.catalogue.source_model.generators.SierraRecordGenerators
 import weco.catalogue.source_model.sierra.{
   SierraHoldingsRecord,
   SierraItemRecord,
@@ -27,7 +27,7 @@ class SierraIndexerFeatureTest
     extends AnyFunSpec
     with Matchers
     with EitherValues
-    with SierraGenerators
+    with SierraRecordGenerators
     with S3ObjectLocationGenerators
     with IndexerFixtures {
   it("indexes bib records and their varFields/fixedFields") {

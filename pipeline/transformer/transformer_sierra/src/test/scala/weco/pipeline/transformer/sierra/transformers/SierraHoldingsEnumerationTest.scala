@@ -2,7 +2,7 @@ package weco.pipeline.transformer.sierra.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.source_model.generators.SierraGenerators
+import weco.catalogue.source_model.generators.SierraRecordGenerators
 import weco.sierra.generators.MarcGenerators
 import weco.sierra.models.marc.{Subfield, VarField}
 
@@ -10,7 +10,7 @@ class SierraHoldingsEnumerationTest
     extends AnyFunSpec
     with Matchers
     with MarcGenerators
-    with SierraGenerators {
+    with SierraRecordGenerators {
   it("returns an empty list if there are no varFields with 853/863") {
     val varFields = List(
       createVarFieldWith(marcTag = "866"),

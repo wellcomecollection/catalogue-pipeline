@@ -7,7 +7,7 @@ import org.scalatest.matchers.should.Matchers
 import weco.json.JsonUtil._
 import weco.messaging.memory.MemoryMessageSender
 import weco.storage.store.memory.MemoryVersionedStore
-import weco.catalogue.source_model.generators.SierraGenerators
+import weco.catalogue.source_model.generators.SierraRecordGenerators
 import weco.catalogue.source_model.sierra._
 import weco.pipeline.sierra_linker.fixtures.WorkerFixture
 import weco.pipeline.sierra_linker.models.Link
@@ -23,7 +23,7 @@ class SierraLinkerFeatureTest
     with Eventually
     with EitherValues
     with IntegrationPatience
-    with SierraGenerators
+    with SierraRecordGenerators
     with WorkerFixture {
 
   it("links item records") {

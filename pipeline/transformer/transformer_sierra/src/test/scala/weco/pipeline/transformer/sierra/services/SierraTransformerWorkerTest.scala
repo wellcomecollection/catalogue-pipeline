@@ -6,7 +6,7 @@ import org.scalatest.EitherValues
 import weco.catalogue.internal_model.identifiers.IdentifierType
 import weco.catalogue.internal_model.work.{Work, WorkState}
 import weco.catalogue.source_model.SierraSourcePayload
-import weco.catalogue.source_model.generators.SierraGenerators
+import weco.catalogue.source_model.generators.SierraRecordGenerators
 import weco.catalogue.source_model.sierra.SierraTransformable
 import weco.fixtures.TestWith
 import weco.json.JsonUtil._
@@ -25,7 +25,7 @@ class SierraTransformerWorkerTest
       MemoryTypedStore[S3ObjectLocation, SierraTransformable],
       SierraSourcePayload,
       SierraTransformable]
-    with SierraGenerators
+    with SierraRecordGenerators
     with S3ObjectLocationGenerators
     with EitherValues {
 

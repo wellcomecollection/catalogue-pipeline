@@ -16,7 +16,7 @@ import weco.catalogue.internal_model.locations.{
   PhysicalLocation
 }
 import weco.catalogue.internal_model.work.Holdings
-import weco.catalogue.source_model.generators.SierraGenerators
+import weco.catalogue.source_model.generators.SierraRecordGenerators
 import weco.catalogue.source_model.sierra.SierraHoldingsData
 import weco.sierra.generators.MarcGenerators
 import weco.sierra.models.identifiers.SierraHoldingsNumber
@@ -26,7 +26,7 @@ class SierraHoldingsTest
     extends AnyFunSpec
     with Matchers
     with MarcGenerators
-    with SierraGenerators {
+    with SierraRecordGenerators {
   it("an empty map becomes an empty list of items and holdings") {
     getHoldings(holdingsDataMap = Map.empty) shouldBe empty
   }

@@ -9,7 +9,7 @@ import weco.storage.generators.S3ObjectLocationGenerators
 import weco.storage.s3.S3ObjectLocation
 import weco.storage.store.memory.MemoryTypedStore
 import weco.catalogue.source_model.SierraSourcePayload
-import weco.catalogue.source_model.generators.SierraGenerators
+import weco.catalogue.source_model.generators.SierraRecordGenerators
 import weco.catalogue.source_model.sierra.SierraTransformable
 import weco.pipeline.sierra_indexer.fixtures.IndexerFixtures
 
@@ -17,7 +17,7 @@ class WorkerTest
     extends AnyFunSpec
     with IndexerFixtures
     with S3ObjectLocationGenerators
-    with SierraGenerators {
+    with SierraRecordGenerators {
   it("returns an error if one of the bulk requests fails") {
     withIndices { indexPrefix =>
       val location = createS3ObjectLocation

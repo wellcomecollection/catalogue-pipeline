@@ -3,6 +3,7 @@ package weco.catalogue.source_model.generators
 import weco.fixtures.RandomGenerators
 import weco.json.JsonUtil.toJson
 import weco.catalogue.source_model.sierra._
+import weco.sierra.generators.SierraIdentifierGenerators
 import weco.sierra.models.identifiers.{
   SierraBibNumber,
   SierraHoldingsNumber,
@@ -13,34 +14,12 @@ import weco.sierra.models.identifiers.{
 import java.time.Instant
 import scala.util.Random
 
-trait SierraGenerators extends RandomGenerators {
+trait SierraRecordGenerators extends SierraIdentifierGenerators {
   // A lot of Sierra tests (e.g. mergers) check the behaviour when merging
   // a record with a newer version, or vice versa.  Provide two dates here
   // for convenience.
   val olderDate: Instant = Instant.parse("1999-09-09T09:09:09Z")
   val newerDate: Instant = Instant.parse("2001-01-01T01:01:01Z")
-
-  // Sierra record numbers should be seven digits long, and start with
-  // a non-zero digit
-  def createSierraRecordNumberString: String =
-    (1000000 + Random.nextInt(9999999 - 1000000)).toString
-
-  def createSierraBibNumber: SierraBibNumber =
-    SierraBibNumber(createSierraRecordNumberString)
-
-  def createSierraBibNumbers(count: Int): List[SierraBibNumber] =
-    (1 to count).map { _ =>
-      createSierraBibNumber
-    }.toList
-
-  def createSierraItemNumber: SierraItemNumber =
-    SierraItemNumber(createSierraRecordNumberString)
-
-  def createSierraHoldingsNumber: SierraHoldingsNumber =
-    SierraHoldingsNumber(createSierraRecordNumberString)
-
-  def createSierraOrderNumber: SierraOrderNumber =
-    SierraOrderNumber(createSierraRecordNumberString)
 
   protected def createTitleVarfield(
     title: String = s"title-${randomAlphanumeric()}"): String =

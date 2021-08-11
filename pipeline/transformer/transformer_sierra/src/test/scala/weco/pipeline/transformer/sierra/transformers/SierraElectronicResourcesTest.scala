@@ -11,7 +11,7 @@ import weco.catalogue.internal_model.locations.{
   DigitalLocation
 }
 import weco.catalogue.internal_model.work.Item
-import weco.catalogue.source_model.generators.SierraGenerators
+import weco.catalogue.source_model.generators.SierraRecordGenerators
 import weco.sierra.generators.MarcGenerators
 import weco.sierra.models.marc.{Subfield, VarField}
 
@@ -19,7 +19,7 @@ class SierraElectronicResourcesTest
     extends AnyFunSpec
     with Matchers
     with MarcGenerators
-    with SierraGenerators {
+    with SierraRecordGenerators {
   it("returns an Item that uses the URL from 856 ǂu") {
     val varFields = List(
       createVarFieldWith(
