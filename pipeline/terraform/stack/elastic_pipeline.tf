@@ -47,16 +47,25 @@ resource "ec_deployment" "pipeline" {
 # We create the username/password secrets in Terraform, and set the values in the
 # Python script.  This ensures the secrets will be properly cleaned up when we delete
 # a pipeline.
+#
+# We set the recovery window to 0 so that secrets are deleted immediately,
+# rather than hanging around for a 30 day recovery period.
+# See https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret#recovery_window_in_days
+#
 resource "aws_secretsmanager_secret" "es_username" {
   for_each = toset(concat(local.pipeline_storage_service_list, ["image_ingestor", "work_ingestor", "read_only"]))
 
   name = "elasticsearch/pipeline_storage_${var.pipeline_date}/${each.key}/es_username"
+
+  recovery_window_in_days = 0
 }
 
 resource "aws_secretsmanager_secret" "es_password" {
   for_each = toset(concat(local.pipeline_storage_service_list, ["image_ingestor", "work_ingestor", "read_only"]))
 
   name = "elasticsearch/pipeline_storage_${var.pipeline_date}/${each.key}/es_password"
+
+  recovery_window_in_days = 0
 }
 
 resource "aws_secretsmanager_secret" "es_username_catalogue" {
@@ -65,6 +74,8 @@ resource "aws_secretsmanager_secret" "es_username_catalogue" {
   for_each = toset(["snapshot_generator"])
 
   name = "elasticsearch/pipeline_storage_${var.pipeline_date}/${each.key}/es_username"
+
+  recovery_window_in_days = 0
 }
 
 resource "aws_secretsmanager_secret" "es_password_catalogue" {
@@ -73,6 +84,8 @@ resource "aws_secretsmanager_secret" "es_password_catalogue" {
   for_each = toset(["snapshot_generator"])
 
   name = "elasticsearch/pipeline_storage_${var.pipeline_date}/${each.key}/es_password"
+
+  recovery_window_in_days = 0
 }
 
 # We can't attach the provisioner directly to the Elastic Cloud resource (I'm not
