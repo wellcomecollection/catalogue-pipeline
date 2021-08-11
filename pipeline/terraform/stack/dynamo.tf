@@ -62,7 +62,7 @@ resource "aws_dynamodb_table" "matcher_graph_table" {
     type = "S"
   }
 
-  billing_mode   = local.graph_table_billing_mode
+  billing_mode = local.graph_table_billing_mode
 
   global_secondary_index {
     name            = "work-sets-index"
@@ -119,7 +119,7 @@ resource "aws_dynamodb_table" "matcher_lock_table" {
   name     = local.lock_table_name
   hash_key = "id"
 
-  billing_mode   = local.lock_table_billing_mode
+  billing_mode = local.lock_table_billing_mode
 
   attribute {
     name = "id"

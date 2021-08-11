@@ -27,7 +27,7 @@ resource "aws_appautoscaling_policy" "dynamodb_table_read_policy" {
   service_namespace  = aws_appautoscaling_target.read.service_namespace
 
   target_tracking_scaling_policy_configuration {
-    target_value       = 70
+    target_value = 70
 
     predefined_metric_specification {
       predefined_metric_type = "DynamoDBReadCapacityUtilization"
@@ -60,7 +60,7 @@ resource "aws_appautoscaling_policy" "dynamodb_table_write_policy" {
   service_namespace  = aws_appautoscaling_target.write.service_namespace
 
   target_tracking_scaling_policy_configuration {
-    target_value       = 70
+    target_value = 70
 
     predefined_metric_specification {
       predefined_metric_type = "DynamoDBWriteCapacityUtilization"
