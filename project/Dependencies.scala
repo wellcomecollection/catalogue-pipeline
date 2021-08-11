@@ -81,6 +81,16 @@ object WellcomeDependencies {
     version = versions.messaging
   ) ++ monitoringLibrary
 
+  val sierraLibrary: Seq[ModuleID] = library(
+    name = "sierra",
+    version = defaultVersion
+  )
+
+  val sierraTypesafeLibrary: Seq[ModuleID] = sierraLibrary ++ library(
+    name = "sierra_typesafe",
+    version = defaultVersion
+  )
+
   private def library(name: String, version: String): Seq[ModuleID] = Seq(
     "weco" %% name % version,
     "weco" %% name % version % "test" classifier "tests"
@@ -184,6 +194,7 @@ object CatalogueDependencies {
   val sourceModelDependencies: Seq[sbt.ModuleID] =
     WellcomeDependencies.storageLibrary ++
       WellcomeDependencies.fixturesLibrary ++
+      WellcomeDependencies.sierraLibrary ++
       ExternalDependencies.scalatestDependencies ++
       ExternalDependencies.logbackDependencies
 
@@ -282,7 +293,7 @@ object CatalogueDependencies {
       WellcomeDependencies.messagingTypesafeLibrary ++
       WellcomeDependencies.jsonLibrary ++
       WellcomeDependencies.typesafeLibrary ++
-      WellcomeDependencies.httpLibrary
+      WellcomeDependencies.sierraTypesafeLibrary
 
   // Inference manager
   val inferenceManagerDependencies: Seq[ModuleID] =
