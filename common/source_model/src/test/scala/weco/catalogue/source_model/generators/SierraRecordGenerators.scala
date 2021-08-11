@@ -1,6 +1,5 @@
 package weco.catalogue.source_model.generators
 
-import weco.fixtures.RandomGenerators
 import weco.json.JsonUtil.toJson
 import weco.catalogue.source_model.sierra._
 import weco.sierra.generators.SierraIdentifierGenerators
@@ -12,7 +11,6 @@ import weco.sierra.models.identifiers.{
 }
 
 import java.time.Instant
-import scala.util.Random
 
 trait SierraRecordGenerators extends SierraIdentifierGenerators {
   // A lot of Sierra tests (e.g. mergers) check the behaviour when merging
