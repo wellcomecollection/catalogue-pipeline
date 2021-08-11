@@ -1,4 +1,4 @@
-package weco.catalogue.source_model.sierra.rules
+package weco.pipeline.transformer.sierra.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers

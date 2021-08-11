@@ -13,7 +13,6 @@ import weco.catalogue.internal_model.locations.{
 }
 import weco.catalogue.internal_model.work.Item
 import weco.catalogue.source_model.sierra.rules.{
-  SierraAccessStatus,
   SierraItemAccess,
   SierraPhysicalLocationType
 }
