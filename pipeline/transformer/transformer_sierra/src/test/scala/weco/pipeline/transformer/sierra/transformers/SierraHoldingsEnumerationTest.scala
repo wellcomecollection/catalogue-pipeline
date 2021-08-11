@@ -3,8 +3,8 @@ package weco.pipeline.transformer.sierra.transformers
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.source_model.generators.SierraGenerators
-import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
 import weco.sierra.generators.MarcGenerators
+import weco.sierra.models.marc.{Subfield, VarField}
 
 class SierraHoldingsEnumerationTest
     extends AnyFunSpec
@@ -30,17 +30,17 @@ class SierraHoldingsEnumerationTest
         createVarFieldWith(
           marcTag = "853",
           subfields = List(
-            MarcSubfield(tag = "8", content = "10"),
-            MarcSubfield(tag = "a", content = "vol."),
-            MarcSubfield(tag = "i", content = "(year)")
+            Subfield(tag = "8", content = "10"),
+            Subfield(tag = "a", content = "vol."),
+            Subfield(tag = "i", content = "(year)")
           )
         ),
         createVarFieldWith(
           marcTag = "863",
           subfields = List(
-            MarcSubfield(tag = "8", content = "10.1"),
-            MarcSubfield(tag = "a", content = "1"),
-            MarcSubfield(tag = "i", content = "1995")
+            Subfield(tag = "8", content = "10.1"),
+            Subfield(tag = "a", content = "1"),
+            Subfield(tag = "i", content = "1995")
           )
         )
       )
@@ -55,19 +55,19 @@ class SierraHoldingsEnumerationTest
       createVarFieldWith(
         marcTag = "863",
         subfields = List(
-          MarcSubfield(tag = "8", content = "1.1"),
-          MarcSubfield(tag = "a", content = "1-35"),
-          MarcSubfield(tag = "b", content = "1-2"),
-          MarcSubfield(tag = "i", content = "1984-2018"),
+          Subfield(tag = "8", content = "1.1"),
+          Subfield(tag = "a", content = "1-35"),
+          Subfield(tag = "b", content = "1-2"),
+          Subfield(tag = "i", content = "1984-2018"),
         )
       ),
       createVarFieldWith(
         marcTag = "853",
         subfields = List(
-          MarcSubfield(tag = "8", content = "1"),
-          MarcSubfield(tag = "a", content = "v."),
-          MarcSubfield(tag = "b", content = "no."),
-          MarcSubfield(tag = "i", content = "(year)"),
+          Subfield(tag = "8", content = "1"),
+          Subfield(tag = "a", content = "v."),
+          Subfield(tag = "b", content = "no."),
+          Subfield(tag = "i", content = "(year)"),
         )
       )
     )
@@ -81,25 +81,25 @@ class SierraHoldingsEnumerationTest
       createVarFieldWith(
         marcTag = "853",
         subfields = List(
-          MarcSubfield(tag = "8", content = "10"),
-          MarcSubfield(tag = "a", content = "vol."),
-          MarcSubfield(tag = "i", content = "(year)")
+          Subfield(tag = "8", content = "10"),
+          Subfield(tag = "a", content = "vol."),
+          Subfield(tag = "i", content = "(year)")
         )
       ),
       createVarFieldWith(
         marcTag = "853",
         subfields = List(
-          MarcSubfield(tag = "8", content = "10"),
-          MarcSubfield(tag = "a", content = "vol."),
-          MarcSubfield(tag = "i", content = "(year)")
+          Subfield(tag = "8", content = "10"),
+          Subfield(tag = "a", content = "vol."),
+          Subfield(tag = "i", content = "(year)")
         )
       ),
       createVarFieldWith(
         marcTag = "863",
         subfields = List(
-          MarcSubfield(tag = "8", content = "10.1"),
-          MarcSubfield(tag = "a", content = "1"),
-          MarcSubfield(tag = "i", content = "2001")
+          Subfield(tag = "8", content = "10.1"),
+          Subfield(tag = "a", content = "1"),
+          Subfield(tag = "i", content = "2001")
         )
       )
     )
@@ -114,28 +114,28 @@ class SierraHoldingsEnumerationTest
       createVarFieldWith(
         marcTag = "863",
         subfields = List(
-          MarcSubfield(tag = "8", content = "1.1"),
-          MarcSubfield(tag = "i", content = "2004-"),
-          MarcSubfield(tag = "j", content = "01-"),
-          MarcSubfield(tag = "k", content = "01-"),
+          Subfield(tag = "8", content = "1.1"),
+          Subfield(tag = "i", content = "2004-"),
+          Subfield(tag = "j", content = "01-"),
+          Subfield(tag = "k", content = "01-"),
         )
       ),
       createVarFieldWith(
         marcTag = "863",
         subfields = List(
-          MarcSubfield(tag = "8", content = "1.2"),
-          MarcSubfield(tag = "i", content = "2004-"),
-          MarcSubfield(tag = "j", content = "01-"),
-          MarcSubfield(tag = "k", content = "01-"),
+          Subfield(tag = "8", content = "1.2"),
+          Subfield(tag = "i", content = "2004-"),
+          Subfield(tag = "j", content = "01-"),
+          Subfield(tag = "k", content = "01-"),
         )
       ),
       createVarFieldWith(
         marcTag = "853",
         subfields = List(
-          MarcSubfield(tag = "8", content = "1"),
-          MarcSubfield(tag = "i", content = "(year)"),
-          MarcSubfield(tag = "j", content = "(month)"),
-          MarcSubfield(tag = "k", content = "(day)"),
+          Subfield(tag = "8", content = "1"),
+          Subfield(tag = "i", content = "(year)"),
+          Subfield(tag = "j", content = "(month)"),
+          Subfield(tag = "k", content = "(day)"),
         )
       )
     )
@@ -149,19 +149,19 @@ class SierraHoldingsEnumerationTest
       createVarFieldWith(
         marcTag = "863",
         subfields = List(
-          MarcSubfield(tag = "8", content = "1.1"),
-          MarcSubfield(tag = "a", content = ""),
-          MarcSubfield(tag = "b", content = "1-101"),
-          MarcSubfield(tag = "i", content = "1982-2010")
+          Subfield(tag = "8", content = "1.1"),
+          Subfield(tag = "a", content = ""),
+          Subfield(tag = "b", content = "1-101"),
+          Subfield(tag = "i", content = "1982-2010")
         )
       ),
       createVarFieldWith(
         marcTag = "853",
         subfields = List(
-          MarcSubfield(tag = "8", content = "1"),
-          MarcSubfield(tag = "a", content = "v."),
-          MarcSubfield(tag = "b", content = "no."),
-          MarcSubfield(tag = "i", content = "(year)")
+          Subfield(tag = "8", content = "1"),
+          Subfield(tag = "a", content = "v."),
+          Subfield(tag = "b", content = "no."),
+          Subfield(tag = "i", content = "(year)")
         )
       )
     )
@@ -175,19 +175,19 @@ class SierraHoldingsEnumerationTest
       createVarFieldWith(
         marcTag = "863",
         subfields = List(
-          MarcSubfield(tag = "8", content = "1.1"),
-          MarcSubfield(tag = "a", content = "1-130"),
-          MarcSubfield(tag = "b", content = "-1"),
-          MarcSubfield(tag = "i", content = "1979-2010")
+          Subfield(tag = "8", content = "1.1"),
+          Subfield(tag = "a", content = "1-130"),
+          Subfield(tag = "b", content = "-1"),
+          Subfield(tag = "i", content = "1979-2010")
         )
       ),
       createVarFieldWith(
         marcTag = "853",
         subfields = List(
-          MarcSubfield(tag = "8", content = "1"),
-          MarcSubfield(tag = "a", content = "v."),
-          MarcSubfield(tag = "b", content = "no."),
-          MarcSubfield(tag = "i", content = "(year)")
+          Subfield(tag = "8", content = "1"),
+          Subfield(tag = "a", content = "v."),
+          Subfield(tag = "b", content = "no."),
+          Subfield(tag = "i", content = "(year)")
         )
       )
     )
@@ -201,19 +201,19 @@ class SierraHoldingsEnumerationTest
       createVarFieldWith(
         marcTag = "863",
         subfields = List(
-          MarcSubfield(tag = "8", content = "1.1"),
-          MarcSubfield(tag = "a", content = "-"),
-          MarcSubfield(tag = "b", content = "1-21"),
-          MarcSubfield(tag = "i", content = "1984-2004")
+          Subfield(tag = "8", content = "1.1"),
+          Subfield(tag = "a", content = "-"),
+          Subfield(tag = "b", content = "1-21"),
+          Subfield(tag = "i", content = "1984-2004")
         )
       ),
       createVarFieldWith(
         marcTag = "853",
         subfields = List(
-          MarcSubfield(tag = "8", content = "1"),
-          MarcSubfield(tag = "a", content = "v."),
-          MarcSubfield(tag = "b", content = "no."),
-          MarcSubfield(tag = "i", content = "(year)")
+          Subfield(tag = "8", content = "1"),
+          Subfield(tag = "a", content = "v."),
+          Subfield(tag = "b", content = "no."),
+          Subfield(tag = "i", content = "(year)")
         )
       )
     )
@@ -227,19 +227,19 @@ class SierraHoldingsEnumerationTest
       createVarFieldWith(
         marcTag = "863",
         subfields = List(
-          MarcSubfield(tag = "8", content = "1.1"),
-          MarcSubfield(tag = "a", content = "12-21"),
-          MarcSubfield(tag = "b", content = "1-1-2"),
-          MarcSubfield(tag = "i", content = "2009-2018")
+          Subfield(tag = "8", content = "1.1"),
+          Subfield(tag = "a", content = "12-21"),
+          Subfield(tag = "b", content = "1-1-2"),
+          Subfield(tag = "i", content = "2009-2018")
         )
       ),
       createVarFieldWith(
         marcTag = "853",
         subfields = List(
-          MarcSubfield(tag = "8", content = "1"),
-          MarcSubfield(tag = "a", content = "v."),
-          MarcSubfield(tag = "b", content = "no."),
-          MarcSubfield(tag = "i", content = "(year)")
+          Subfield(tag = "8", content = "1"),
+          Subfield(tag = "a", content = "v."),
+          Subfield(tag = "b", content = "no."),
+          Subfield(tag = "i", content = "(year)")
         )
       )
     )
@@ -253,15 +253,15 @@ class SierraHoldingsEnumerationTest
       createVarFieldWith(
         marcTag = "863",
         subfields = List(
-          MarcSubfield(tag = "8", content = "1.1"),
-          MarcSubfield(tag = "i", content = "2010-2020")
+          Subfield(tag = "8", content = "1.1"),
+          Subfield(tag = "i", content = "2010-2020")
         )
       ),
       createVarFieldWith(
         marcTag = "853",
         subfields = List(
-          MarcSubfield(tag = "8", content = "1"),
-          MarcSubfield(tag = "i", content = "(year)")
+          Subfield(tag = "8", content = "1"),
+          Subfield(tag = "i", content = "(year)")
         )
       )
     )
@@ -275,41 +275,41 @@ class SierraHoldingsEnumerationTest
       createVarFieldWith(
         marcTag = "863",
         subfields = List(
-          MarcSubfield(tag = "8", content = "1.1"),
-          MarcSubfield(tag = "a", content = "41-57"),
-          MarcSubfield(tag = "b", content = "4-2"),
-          MarcSubfield(tag = "i", content = "1992-2008"),
-          MarcSubfield(tag = "j", content = "23-21"),
+          Subfield(tag = "8", content = "1.1"),
+          Subfield(tag = "a", content = "41-57"),
+          Subfield(tag = "b", content = "4-2"),
+          Subfield(tag = "i", content = "1992-2008"),
+          Subfield(tag = "j", content = "23-21"),
         )
       ),
       createVarFieldWith(
         marcTag = "863",
         subfields = List(
-          MarcSubfield(tag = "8", content = "1.2"),
-          MarcSubfield(tag = "a", content = "57-59"),
-          MarcSubfield(tag = "b", content = "4-1"),
-          MarcSubfield(tag = "i", content = "2008-2009"),
-          MarcSubfield(tag = "j", content = "23-24"),
+          Subfield(tag = "8", content = "1.2"),
+          Subfield(tag = "a", content = "57-59"),
+          Subfield(tag = "b", content = "4-1"),
+          Subfield(tag = "i", content = "2008-2009"),
+          Subfield(tag = "j", content = "23-24"),
         )
       ),
       createVarFieldWith(
         marcTag = "863",
         subfields = List(
-          MarcSubfield(tag = "8", content = "1.4"),
-          MarcSubfield(tag = "a", content = "60-61"),
-          MarcSubfield(tag = "b", content = "3-2"),
-          MarcSubfield(tag = "i", content = "2011-2012"),
-          MarcSubfield(tag = "j", content = "22-21"),
+          Subfield(tag = "8", content = "1.4"),
+          Subfield(tag = "a", content = "60-61"),
+          Subfield(tag = "b", content = "3-2"),
+          Subfield(tag = "i", content = "2011-2012"),
+          Subfield(tag = "j", content = "22-21"),
         )
       ),
       createVarFieldWith(
         marcTag = "853",
         subfields = List(
-          MarcSubfield(tag = "8", content = "1"),
-          MarcSubfield(tag = "a", content = "v."),
-          MarcSubfield(tag = "b", content = "no."),
-          MarcSubfield(tag = "i", content = "(year)"),
-          MarcSubfield(tag = "j", content = "(season)"),
+          Subfield(tag = "8", content = "1"),
+          Subfield(tag = "a", content = "v."),
+          Subfield(tag = "b", content = "no."),
+          Subfield(tag = "i", content = "(year)"),
+          Subfield(tag = "j", content = "(season)"),
         )
       )
     )
@@ -327,21 +327,21 @@ class SierraHoldingsEnumerationTest
       createVarFieldWith(
         marcTag = "863",
         subfields = List(
-          MarcSubfield(tag = "8", content = "1.1"),
-          MarcSubfield(tag = "a", content = "1-3"),
-          MarcSubfield(tag = "b", content = "1-2"),
-          MarcSubfield(tag = "i", content = "2015-2017"),
-          MarcSubfield(tag = "j", content = "21-22"),
+          Subfield(tag = "8", content = "1.1"),
+          Subfield(tag = "a", content = "1-3"),
+          Subfield(tag = "b", content = "1-2"),
+          Subfield(tag = "i", content = "2015-2017"),
+          Subfield(tag = "j", content = "21-22"),
         )
       ),
       createVarFieldWith(
         marcTag = "853",
         subfields = List(
-          MarcSubfield(tag = "8", content = "1"),
-          MarcSubfield(tag = "a", content = "v."),
-          MarcSubfield(tag = "b", content = "no."),
-          MarcSubfield(tag = "i", content = "(year)"),
-          MarcSubfield(tag = "j", content = "(month)"),
+          Subfield(tag = "8", content = "1"),
+          Subfield(tag = "a", content = "v."),
+          Subfield(tag = "b", content = "no."),
+          Subfield(tag = "i", content = "(year)"),
+          Subfield(tag = "j", content = "(month)"),
         )
       )
     )
@@ -357,21 +357,21 @@ class SierraHoldingsEnumerationTest
       createVarFieldWith(
         marcTag = "863",
         subfields = List(
-          MarcSubfield(tag = "8", content = "1.1"),
-          MarcSubfield(tag = "a", content = "7-18"),
-          MarcSubfield(tag = "b", content = "1-2"),
-          MarcSubfield(tag = "i", content = "2000-2011"),
-          MarcSubfield(tag = "j", content = "04-08"),
+          Subfield(tag = "8", content = "1.1"),
+          Subfield(tag = "a", content = "7-18"),
+          Subfield(tag = "b", content = "1-2"),
+          Subfield(tag = "i", content = "2000-2011"),
+          Subfield(tag = "j", content = "04-08"),
         )
       ),
       createVarFieldWith(
         marcTag = "853",
         subfields = List(
-          MarcSubfield(tag = "8", content = "1"),
-          MarcSubfield(tag = "a", content = "v."),
-          MarcSubfield(tag = "b", content = "no."),
-          MarcSubfield(tag = "i", content = "(year)"),
-          MarcSubfield(tag = "j", content = "(month)"),
+          Subfield(tag = "8", content = "1"),
+          Subfield(tag = "a", content = "v."),
+          Subfield(tag = "b", content = "no."),
+          Subfield(tag = "i", content = "(year)"),
+          Subfield(tag = "j", content = "(month)"),
         )
       )
     )
@@ -387,21 +387,21 @@ class SierraHoldingsEnumerationTest
       createVarFieldWith(
         marcTag = "863",
         subfields = List(
-          MarcSubfield(tag = "8", content = "1.1"),
-          MarcSubfield(tag = "a", content = ""),
-          MarcSubfield(tag = "b", content = "1-4"),
-          MarcSubfield(tag = "i", content = "2017-2019"),
-          MarcSubfield(tag = "j", content = "-21/22"),
+          Subfield(tag = "8", content = "1.1"),
+          Subfield(tag = "a", content = ""),
+          Subfield(tag = "b", content = "1-4"),
+          Subfield(tag = "i", content = "2017-2019"),
+          Subfield(tag = "j", content = "-21/22"),
         )
       ),
       createVarFieldWith(
         marcTag = "853",
         subfields = List(
-          MarcSubfield(tag = "8", content = "1"),
-          MarcSubfield(tag = "a", content = "v."),
-          MarcSubfield(tag = "b", content = "no."),
-          MarcSubfield(tag = "i", content = "(year)"),
-          MarcSubfield(tag = "j", content = "(month)"),
+          Subfield(tag = "8", content = "1"),
+          Subfield(tag = "a", content = "v."),
+          Subfield(tag = "b", content = "no."),
+          Subfield(tag = "i", content = "(year)"),
+          Subfield(tag = "j", content = "(month)"),
         )
       )
     )
@@ -417,21 +417,21 @@ class SierraHoldingsEnumerationTest
       createVarFieldWith(
         marcTag = "863",
         subfields = List(
-          MarcSubfield(tag = "8", content = "1.1"),
-          MarcSubfield(tag = "a", content = "26-47"),
-          MarcSubfield(tag = "b", content = "-2"),
-          MarcSubfield(tag = "i", content = "1996-2017"),
-          MarcSubfield(tag = "j", content = "24-05"),
+          Subfield(tag = "8", content = "1.1"),
+          Subfield(tag = "a", content = "26-47"),
+          Subfield(tag = "b", content = "-2"),
+          Subfield(tag = "i", content = "1996-2017"),
+          Subfield(tag = "j", content = "24-05"),
         )
       ),
       createVarFieldWith(
         marcTag = "853",
         subfields = List(
-          MarcSubfield(tag = "8", content = "1"),
-          MarcSubfield(tag = "a", content = "v."),
-          MarcSubfield(tag = "b", content = "no."),
-          MarcSubfield(tag = "i", content = "(year)"),
-          MarcSubfield(tag = "j", content = "(month)"),
+          Subfield(tag = "8", content = "1"),
+          Subfield(tag = "a", content = "v."),
+          Subfield(tag = "b", content = "no."),
+          Subfield(tag = "i", content = "(year)"),
+          Subfield(tag = "j", content = "(month)"),
         )
       )
     )
@@ -447,17 +447,17 @@ class SierraHoldingsEnumerationTest
       createVarFieldWith(
         marcTag = "853",
         subfields = List(
-          MarcSubfield(tag = "8", content = "1"),
-          MarcSubfield(tag = "i", content = "(year)"),
-          MarcSubfield(tag = "j", content = "(month)")
+          Subfield(tag = "8", content = "1"),
+          Subfield(tag = "i", content = "(year)"),
+          Subfield(tag = "j", content = "(month)")
         )
       ),
       createVarFieldWith(
         marcTag = "863",
         subfields = List(
-          MarcSubfield(tag = "8", content = "1.1"),
-          MarcSubfield(tag = "i", content = "2005-2014/2015"),
-          MarcSubfield(tag = "j", content = "07-12/01")
+          Subfield(tag = "8", content = "1.1"),
+          Subfield(tag = "i", content = "2005-2014/2015"),
+          Subfield(tag = "j", content = "07-12/01")
         )
       )
     )
@@ -476,17 +476,17 @@ class SierraHoldingsEnumerationTest
       createVarFieldWith(
         marcTag = "853",
         subfields = List(
-          MarcSubfield(tag = "8", content = "1"),
-          MarcSubfield(tag = "i", content = "(year)"),
-          MarcSubfield(tag = "j", content = "(month)")
+          Subfield(tag = "8", content = "1"),
+          Subfield(tag = "i", content = "(year)"),
+          Subfield(tag = "j", content = "(month)")
         )
       ),
       createVarFieldWith(
         marcTag = "863",
         subfields = List(
-          MarcSubfield(tag = "8", content = "1.1"),
-          MarcSubfield(tag = "i", content = "2001-2002"),
-          MarcSubfield(tag = "j", content = "XX-YY")
+          Subfield(tag = "8", content = "1.1"),
+          Subfield(tag = "i", content = "2001-2002"),
+          Subfield(tag = "j", content = "XX-YY")
         )
       )
     )
@@ -500,17 +500,17 @@ class SierraHoldingsEnumerationTest
       createVarFieldWith(
         marcTag = "853",
         subfields = List(
-          MarcSubfield(tag = "8", content = "1"),
-          MarcSubfield(tag = "i", content = "(year)"),
-          MarcSubfield(tag = "j", content = "(month)")
+          Subfield(tag = "8", content = "1"),
+          Subfield(tag = "i", content = "(year)"),
+          Subfield(tag = "j", content = "(month)")
         )
       ),
       createVarFieldWith(
         marcTag = "863",
         subfields = List(
-          MarcSubfield(tag = "8", content = "1.1"),
-          MarcSubfield(tag = "i", content = "1968-1969"),
-          MarcSubfield(tag = "j", content = "09-11-12")
+          Subfield(tag = "8", content = "1.1"),
+          Subfield(tag = "i", content = "1968-1969"),
+          Subfield(tag = "j", content = "09-11-12")
         )
       )
     )
@@ -524,18 +524,18 @@ class SierraHoldingsEnumerationTest
       createVarFieldWith(
         marcTag = "863",
         subfields = List(
-          MarcSubfield(tag = "8", content = "1.1"),
-          MarcSubfield(tag = "a", content = "1-2"),
-          MarcSubfield(tag = "b", content = "1-2"),
-          MarcSubfield(tag = "z", content = "Current issue on display")
+          Subfield(tag = "8", content = "1.1"),
+          Subfield(tag = "a", content = "1-2"),
+          Subfield(tag = "b", content = "1-2"),
+          Subfield(tag = "z", content = "Current issue on display")
         )
       ),
       createVarFieldWith(
         marcTag = "853",
         subfields = List(
-          MarcSubfield(tag = "8", content = "1"),
-          MarcSubfield(tag = "a", content = "v."),
-          MarcSubfield(tag = "b", content = "no."),
+          Subfield(tag = "8", content = "1"),
+          Subfield(tag = "a", content = "v."),
+          Subfield(tag = "b", content = "no."),
         )
       )
     )
@@ -549,41 +549,41 @@ class SierraHoldingsEnumerationTest
       createVarFieldWith(
         marcTag = "863",
         subfields = List(
-          MarcSubfield(tag = "8", content = "1.2"),
-          MarcSubfield(tag = "a", content = "1"),
-          MarcSubfield(tag = "b", content = "2")
+          Subfield(tag = "8", content = "1.2"),
+          Subfield(tag = "a", content = "1"),
+          Subfield(tag = "b", content = "2")
         )
       ),
       createVarFieldWith(
         marcTag = "863",
         subfields = List(
-          MarcSubfield(tag = "8", content = "2.1"),
-          MarcSubfield(tag = "a", content = "2"),
-          MarcSubfield(tag = "b", content = "1"),
+          Subfield(tag = "8", content = "2.1"),
+          Subfield(tag = "a", content = "2"),
+          Subfield(tag = "b", content = "1"),
         )
       ),
       createVarFieldWith(
         marcTag = "863",
         subfields = List(
-          MarcSubfield(tag = "8", content = "1.1"),
-          MarcSubfield(tag = "a", content = "1"),
-          MarcSubfield(tag = "b", content = "1")
+          Subfield(tag = "8", content = "1.1"),
+          Subfield(tag = "a", content = "1"),
+          Subfield(tag = "b", content = "1")
         )
       ),
       createVarFieldWith(
         marcTag = "853",
         subfields = List(
-          MarcSubfield(tag = "8", content = "1"),
-          MarcSubfield(tag = "a", content = "v."),
-          MarcSubfield(tag = "b", content = "no."),
+          Subfield(tag = "8", content = "1"),
+          Subfield(tag = "a", content = "v."),
+          Subfield(tag = "b", content = "no."),
         )
       ),
       createVarFieldWith(
         marcTag = "853",
         subfields = List(
-          MarcSubfield(tag = "8", content = "2"),
-          MarcSubfield(tag = "a", content = "v."),
-          MarcSubfield(tag = "b", content = "no."),
+          Subfield(tag = "8", content = "2"),
+          Subfield(tag = "a", content = "v."),
+          Subfield(tag = "b", content = "no."),
         )
       )
     )
@@ -597,17 +597,17 @@ class SierraHoldingsEnumerationTest
       createVarFieldWith(
         marcTag = "863",
         subfields = List(
-          MarcSubfield(tag = "8", content = "1.1"),
-          MarcSubfield(tag = "a", content = "42"),
-          MarcSubfield(tag = "b", content = "1-2")
+          Subfield(tag = "8", content = "1.1"),
+          Subfield(tag = "a", content = "42"),
+          Subfield(tag = "b", content = "1-2")
         )
       ),
       createVarFieldWith(
         marcTag = "853",
         subfields = List(
-          MarcSubfield(tag = "8", content = "1"),
-          MarcSubfield(tag = "a", content = "v"),
-          MarcSubfield(tag = "b", content = "no."),
+          Subfield(tag = "8", content = "1"),
+          Subfield(tag = "a", content = "v"),
+          Subfield(tag = "b", content = "no."),
         )
       )
     )
@@ -624,15 +624,15 @@ class SierraHoldingsEnumerationTest
       createVarFieldWith(
         marcTag = "863",
         subfields = List(
-          MarcSubfield(tag = "8", content = "1.1"),
-          MarcSubfield(tag = "i", content = "1985-2002.")
+          Subfield(tag = "8", content = "1.1"),
+          Subfield(tag = "i", content = "1985-2002.")
         )
       ),
       createVarFieldWith(
         marcTag = "853",
         subfields = List(
-          MarcSubfield(tag = "8", content = "1"),
-          MarcSubfield(tag = "i", content = "year")
+          Subfield(tag = "8", content = "1"),
+          Subfield(tag = "i", content = "year")
         )
       )
     )
@@ -645,19 +645,19 @@ class SierraHoldingsEnumerationTest
       createVarFieldWith(
         marcTag = "863",
         subfields = List(
-          MarcSubfield(tag = "8", content = "1.1"),
-          MarcSubfield(tag = "i", content = "1991-2017"),
-          MarcSubfield(tag = "j", content = "02-04"),
-          MarcSubfield(tag = "k", content = "13-17"),
+          Subfield(tag = "8", content = "1.1"),
+          Subfield(tag = "i", content = "1991-2017"),
+          Subfield(tag = "j", content = "02-04"),
+          Subfield(tag = "k", content = "13-17"),
         )
       ),
       createVarFieldWith(
         marcTag = "853",
         subfields = List(
-          MarcSubfield(tag = "8", content = "1"),
-          MarcSubfield(tag = "i", content = "(year)"),
-          MarcSubfield(tag = "j", content = "(month)"),
-          MarcSubfield(tag = "k", content = "(day)"),
+          Subfield(tag = "8", content = "1"),
+          Subfield(tag = "i", content = "(year)"),
+          Subfield(tag = "j", content = "(month)"),
+          Subfield(tag = "k", content = "(day)"),
         )
       )
     )
@@ -670,19 +670,19 @@ class SierraHoldingsEnumerationTest
       createVarFieldWith(
         marcTag = "863",
         subfields = List(
-          MarcSubfield(tag = "8", content = "1.1"),
-          MarcSubfield(tag = "i", content = "2001"),
-          MarcSubfield(tag = "j", content = "23"),
-          MarcSubfield(tag = "k", content = "1"),
+          Subfield(tag = "8", content = "1.1"),
+          Subfield(tag = "i", content = "2001"),
+          Subfield(tag = "j", content = "23"),
+          Subfield(tag = "k", content = "1"),
         )
       ),
       createVarFieldWith(
         marcTag = "853",
         subfields = List(
-          MarcSubfield(tag = "8", content = "1"),
-          MarcSubfield(tag = "i", content = "(year)"),
-          MarcSubfield(tag = "j", content = "(month)"),
-          MarcSubfield(tag = "k", content = "(day)"),
+          Subfield(tag = "8", content = "1"),
+          Subfield(tag = "i", content = "(year)"),
+          Subfield(tag = "j", content = "(month)"),
+          Subfield(tag = "k", content = "(day)"),
         )
       )
     )
@@ -695,19 +695,19 @@ class SierraHoldingsEnumerationTest
       createVarFieldWith(
         marcTag = "863",
         subfields = List(
-          MarcSubfield(tag = "8", content = "1.1"),
-          MarcSubfield(tag = "i", content = "2001"),
-          MarcSubfield(tag = "j", content = "01"),
-          MarcSubfield(tag = "k", content = "01"),
+          Subfield(tag = "8", content = "1.1"),
+          Subfield(tag = "i", content = "2001"),
+          Subfield(tag = "j", content = "01"),
+          Subfield(tag = "k", content = "01"),
         )
       ),
       createVarFieldWith(
         marcTag = "853",
         subfields = List(
-          MarcSubfield(tag = "8", content = "1"),
-          MarcSubfield(tag = "i", content = "(year)"),
-          MarcSubfield(tag = "j", content = "(month)"),
-          MarcSubfield(tag = "k", content = "(day)"),
+          Subfield(tag = "8", content = "1"),
+          Subfield(tag = "i", content = "(year)"),
+          Subfield(tag = "j", content = "(month)"),
+          Subfield(tag = "k", content = "(day)"),
         )
       )
     )
@@ -721,25 +721,25 @@ class SierraHoldingsEnumerationTest
         createVarFieldWith(
           marcTag = "853",
           subfields = List(
-            MarcSubfield(tag = "8", content = "10"),
-            MarcSubfield(tag = "a", content = "vol."),
-            MarcSubfield(tag = "i", content = "(year)")
+            Subfield(tag = "8", content = "10"),
+            Subfield(tag = "a", content = "vol."),
+            Subfield(tag = "i", content = "(year)")
           )
         ),
         createVarFieldWith(
           marcTag = "863",
           subfields = List(
-            MarcSubfield(tag = "8", content = "10.1"),
-            MarcSubfield(tag = "a", content = "1"),
-            MarcSubfield(tag = "i", content = "1995")
+            Subfield(tag = "8", content = "10.1"),
+            Subfield(tag = "a", content = "1"),
+            Subfield(tag = "i", content = "1995")
           )
         ),
         createVarFieldWith(
           marcTag = "863",
           subfields = List(
-            MarcSubfield(tag = "8", content = "2.1"),
-            MarcSubfield(tag = "a", content = "1"),
-            MarcSubfield(tag = "i", content = "1995")
+            Subfield(tag = "8", content = "2.1"),
+            Subfield(tag = "a", content = "1"),
+            Subfield(tag = "i", content = "1995")
           )
         )
       )
@@ -752,16 +752,16 @@ class SierraHoldingsEnumerationTest
         createVarFieldWith(
           marcTag = "853",
           subfields = List(
-            MarcSubfield(tag = "8", content = "10"),
-            MarcSubfield(tag = "a", content = "vol."),
+            Subfield(tag = "8", content = "10"),
+            Subfield(tag = "a", content = "vol."),
           )
         ),
         createVarFieldWith(
           marcTag = "863",
           subfields = List(
-            MarcSubfield(tag = "8", content = "10.1"),
-            MarcSubfield(tag = "a", content = "1"),
-            MarcSubfield(tag = "i", content = "1995")
+            Subfield(tag = "8", content = "10.1"),
+            Subfield(tag = "a", content = "1"),
+            Subfield(tag = "i", content = "1995")
           )
         )
       )
@@ -774,40 +774,40 @@ class SierraHoldingsEnumerationTest
         createVarFieldWith(
           marcTag = "853",
           subfields = List(
-            MarcSubfield(tag = "8", content = "10"),
-            MarcSubfield(tag = "a", content = "vol."),
-            MarcSubfield(tag = "i", content = "(year)")
+            Subfield(tag = "8", content = "10"),
+            Subfield(tag = "a", content = "vol."),
+            Subfield(tag = "i", content = "(year)")
           )
         ),
         createVarFieldWith(
           marcTag = "863",
           subfields = List(
-            MarcSubfield(tag = "8", content = "10.1"),
-            MarcSubfield(tag = "a", content = "1"),
-            MarcSubfield(tag = "i", content = "2001")
+            Subfield(tag = "8", content = "10.1"),
+            Subfield(tag = "a", content = "1"),
+            Subfield(tag = "i", content = "2001")
           )
         ),
         createVarFieldWith(
           marcTag = "863",
           subfields = List(
-            MarcSubfield(tag = "8", content = "b.b"),
-            MarcSubfield(tag = "a", content = "2"),
-            MarcSubfield(tag = "i", content = "2002")
+            Subfield(tag = "8", content = "b.b"),
+            Subfield(tag = "a", content = "2"),
+            Subfield(tag = "i", content = "2002")
           )
         ),
         createVarFieldWith(
           marcTag = "863",
           subfields = List(
-            MarcSubfield(tag = "8", content = "3.3.3"),
-            MarcSubfield(tag = "a", content = "3"),
-            MarcSubfield(tag = "i", content = "2003")
+            Subfield(tag = "8", content = "3.3.3"),
+            Subfield(tag = "a", content = "3"),
+            Subfield(tag = "i", content = "2003")
           )
         ),
         createVarFieldWith(
           marcTag = "863",
           subfields = List(
-            MarcSubfield(tag = "a", content = "4"),
-            MarcSubfield(tag = "i", content = "2004")
+            Subfield(tag = "a", content = "4"),
+            Subfield(tag = "i", content = "2004")
           )
         ),
       )
@@ -820,32 +820,32 @@ class SierraHoldingsEnumerationTest
         createVarFieldWith(
           marcTag = "853",
           subfields = List(
-            MarcSubfield(tag = "8", content = "10"),
-            MarcSubfield(tag = "a", content = "vol."),
-            MarcSubfield(tag = "i", content = "(year)")
+            Subfield(tag = "8", content = "10"),
+            Subfield(tag = "a", content = "vol."),
+            Subfield(tag = "i", content = "(year)")
           )
         ),
         createVarFieldWith(
           marcTag = "853",
           subfields = List(
-            MarcSubfield(tag = "8", content = "a"),
-            MarcSubfield(tag = "a", content = "vol."),
-            MarcSubfield(tag = "i", content = "(year)")
+            Subfield(tag = "8", content = "a"),
+            Subfield(tag = "a", content = "vol."),
+            Subfield(tag = "i", content = "(year)")
           )
         ),
         createVarFieldWith(
           marcTag = "853",
           subfields = List(
-            MarcSubfield(tag = "a", content = "vol."),
-            MarcSubfield(tag = "i", content = "(year)")
+            Subfield(tag = "a", content = "vol."),
+            Subfield(tag = "i", content = "(year)")
           )
         ),
         createVarFieldWith(
           marcTag = "863",
           subfields = List(
-            MarcSubfield(tag = "8", content = "10.1"),
-            MarcSubfield(tag = "a", content = "1"),
-            MarcSubfield(tag = "i", content = "1995")
+            Subfield(tag = "8", content = "10.1"),
+            Subfield(tag = "a", content = "1"),
+            Subfield(tag = "i", content = "1995")
           )
         ),
       )
@@ -858,25 +858,25 @@ class SierraHoldingsEnumerationTest
         createVarFieldWith(
           marcTag = "853",
           subfields = List(
-            MarcSubfield(tag = "8", content = "10"),
-            MarcSubfield(tag = "a", content = "vol."),
-            MarcSubfield(tag = "i", content = "(year)")
+            Subfield(tag = "8", content = "10"),
+            Subfield(tag = "a", content = "vol."),
+            Subfield(tag = "i", content = "(year)")
           )
         ),
         createVarFieldWith(
           marcTag = "853",
           subfields = List(
-            MarcSubfield(tag = "8", content = "10"),
-            MarcSubfield(tag = "a", content = "v."),
-            MarcSubfield(tag = "i", content = "(year)")
+            Subfield(tag = "8", content = "10"),
+            Subfield(tag = "a", content = "v."),
+            Subfield(tag = "i", content = "(year)")
           )
         ),
         createVarFieldWith(
           marcTag = "863",
           subfields = List(
-            MarcSubfield(tag = "8", content = "10.1"),
-            MarcSubfield(tag = "a", content = "1"),
-            MarcSubfield(tag = "i", content = "2001")
+            Subfield(tag = "8", content = "10.1"),
+            Subfield(tag = "a", content = "1"),
+            Subfield(tag = "i", content = "2001")
           )
         )
       )

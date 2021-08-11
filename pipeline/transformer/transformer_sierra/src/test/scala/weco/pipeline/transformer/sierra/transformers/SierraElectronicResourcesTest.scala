@@ -12,8 +12,8 @@ import weco.catalogue.internal_model.locations.{
 }
 import weco.catalogue.internal_model.work.Item
 import weco.catalogue.source_model.generators.SierraGenerators
-import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
 import weco.sierra.generators.MarcGenerators
+import weco.sierra.models.marc.{Subfield, VarField}
 
 class SierraElectronicResourcesTest
     extends AnyFunSpec
@@ -25,7 +25,7 @@ class SierraElectronicResourcesTest
       createVarFieldWith(
         marcTag = "856",
         subfields = List(
-          MarcSubfield(tag = "u", content = "https://example.org/journal")
+          Subfield(tag = "u", content = "https://example.org/journal")
         )
       )
     )
@@ -54,13 +54,13 @@ class SierraElectronicResourcesTest
       createVarFieldWith(
         marcTag = "856",
         subfields = List(
-          MarcSubfield(tag = "u", content = "https://example.org/journal")
+          Subfield(tag = "u", content = "https://example.org/journal")
         )
       ),
       createVarFieldWith(
         marcTag = "856",
         subfields = List(
-          MarcSubfield(
+          Subfield(
             tag = "u",
             content = "https://example.org/another-journal")
         )
@@ -105,7 +105,7 @@ class SierraElectronicResourcesTest
         marcTag = "856",
         indicator2 = "2",
         subfields = List(
-          MarcSubfield(tag = "u", content = "https://example.org/journal")
+          Subfield(tag = "u", content = "https://example.org/journal")
         )
       )
     )
@@ -137,10 +137,10 @@ class SierraElectronicResourcesTest
         createVarFieldWith(
           marcTag = "856",
           subfields = List(
-            MarcSubfield(tag = "u", content = "https://example.org/journal"),
-            MarcSubfield(tag = "3", content = "Related archival materials:"),
-            MarcSubfield(tag = "z", content = "available to library members."),
-            MarcSubfield(tag = "z", content = "Cambridge Books Online."),
+            Subfield(tag = "u", content = "https://example.org/journal"),
+            Subfield(tag = "3", content = "Related archival materials:"),
+            Subfield(tag = "z", content = "available to library members."),
+            Subfield(tag = "z", content = "Cambridge Books Online."),
           )
         )
       )
@@ -170,22 +170,22 @@ class SierraElectronicResourcesTest
         createVarFieldWith(
           marcTag = "856",
           subfields = List(
-            MarcSubfield(tag = "u", content = "https://example.org/viewer"),
-            MarcSubfield(tag = "3", content = "View online")
+            Subfield(tag = "u", content = "https://example.org/viewer"),
+            Subfield(tag = "3", content = "View online")
           )
         ),
         createVarFieldWith(
           marcTag = "856",
           subfields = List(
-            MarcSubfield(tag = "u", content = "https://example.org/resource"),
-            MarcSubfield(tag = "z", content = "Access resource")
+            Subfield(tag = "u", content = "https://example.org/resource"),
+            Subfield(tag = "z", content = "Access resource")
           )
         ),
         createVarFieldWith(
           marcTag = "856",
           subfields = List(
-            MarcSubfield(tag = "u", content = "https://example.org/journal"),
-            MarcSubfield(tag = "z", content = "Connect to journal")
+            Subfield(tag = "u", content = "https://example.org/journal"),
+            Subfield(tag = "z", content = "Connect to journal")
           )
         )
       )
@@ -245,8 +245,8 @@ class SierraElectronicResourcesTest
         createVarFieldWith(
           marcTag = "856",
           subfields = List(
-            MarcSubfield(tag = "u", content = "https://example.org/oxford"),
-            MarcSubfield(tag = "3", content = "Oxford Libraries Online")
+            Subfield(tag = "u", content = "https://example.org/oxford"),
+            Subfield(tag = "3", content = "Oxford Libraries Online")
           )
         )
       )
@@ -274,8 +274,8 @@ class SierraElectronicResourcesTest
         createVarFieldWith(
           marcTag = "856",
           subfields = List(
-            MarcSubfield(tag = "u", content = "https://example.org/resource"),
-            MarcSubfield(tag = "3", content = "View resource ")
+            Subfield(tag = "u", content = "https://example.org/resource"),
+            Subfield(tag = "3", content = "View resource ")
           )
         )
       )
@@ -304,8 +304,8 @@ class SierraElectronicResourcesTest
         createVarFieldWith(
           marcTag = "856",
           subfields = List(
-            MarcSubfield(tag = "u", content = "https://example.org/resource"),
-            MarcSubfield(tag = "3", content = "View resource.")
+            Subfield(tag = "u", content = "https://example.org/resource"),
+            Subfield(tag = "3", content = "View resource.")
           )
         )
       )
@@ -334,8 +334,8 @@ class SierraElectronicResourcesTest
         createVarFieldWith(
           marcTag = "856",
           subfields = List(
-            MarcSubfield(tag = "u", content = "https://example.org/resource"),
-            MarcSubfield(tag = "3", content = "view resource")
+            Subfield(tag = "u", content = "https://example.org/resource"),
+            Subfield(tag = "3", content = "view resource")
           )
         )
       )
@@ -364,8 +364,8 @@ class SierraElectronicResourcesTest
         createVarFieldWith(
           marcTag = "856",
           subfields = List(
-            MarcSubfield(tag = "u", content = "https://example.org/resource"),
-            MarcSubfield(
+            Subfield(tag = "u", content = "https://example.org/resource"),
+            Subfield(
               tag = "3",
               content = "You can view this resource online")
           )
@@ -409,7 +409,7 @@ class SierraElectronicResourcesTest
         createVarFieldWith(
           marcTag = "856",
           subfields = List(
-            MarcSubfield(tag = "u", content = "search for 'online journals'")
+            Subfield(tag = "u", content = "search for 'online journals'")
           )
         )
       )
@@ -422,8 +422,8 @@ class SierraElectronicResourcesTest
         createVarFieldWith(
           marcTag = "856",
           subfields = List(
-            MarcSubfield(tag = "u", content = "https://example.org/journal"),
-            MarcSubfield(
+            Subfield(tag = "u", content = "https://example.org/journal"),
+            Subfield(
               tag = "u",
               content = "https://example.org/another-journal")
           )
@@ -442,7 +442,7 @@ class SierraElectronicResourcesTest
         createVarFieldWith(
           marcTag = "856",
           subfields = List(
-            MarcSubfield(tag = "a", content = "https://example.org/journal")
+            Subfield(tag = "a", content = "https://example.org/journal")
           )
         )
       )

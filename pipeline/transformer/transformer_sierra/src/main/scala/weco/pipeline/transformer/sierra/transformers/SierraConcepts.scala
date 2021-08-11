@@ -8,16 +8,16 @@ import weco.catalogue.internal_model.work.{
   Period,
   Place
 }
-import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
 import weco.catalogue.source_model.sierra.source.SierraQueryOps
+import weco.sierra.models.marc.{Subfield, VarField}
 
 trait SierraConcepts extends SierraQueryOps {
 
   // Get the label.  This is populated by the label of subfield $a, followed
   // by other subfields, in the order they come from MARC.  The labels are
   // joined by " - ".
-  protected def getLabel(primarySubfields: List[MarcSubfield],
-                         subdivisionSubfields: List[MarcSubfield]): String = {
+  protected def getLabel(primarySubfields: List[Subfield],
+                         subdivisionSubfields: List[Subfield]): String = {
     val orderedSubfields = primarySubfields ++ subdivisionSubfields
     orderedSubfields.map { _.content }.mkString(" - ").trimTrailingPeriod
   }
@@ -89,7 +89,7 @@ trait SierraConcepts extends SierraQueryOps {
 
   // Extract the subdivisions, which come from everything except subfield $a.
   // These are never identified.  We preserve the order from MARC.
-  protected def getSubdivisions(subdivisionSubfields: List[MarcSubfield])
+  protected def getSubdivisions(subdivisionSubfields: List[Subfield])
     : List[AbstractConcept[IdState.Unminted]] =
     subdivisionSubfields.map { subfield =>
       subfield.tag match {

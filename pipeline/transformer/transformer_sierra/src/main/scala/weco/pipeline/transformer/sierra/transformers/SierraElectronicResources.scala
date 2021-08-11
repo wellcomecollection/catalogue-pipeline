@@ -12,8 +12,8 @@ import weco.catalogue.internal_model.locations.{
 }
 import weco.catalogue.internal_model.work.Item
 import weco.catalogue.source_model.sierra.identifiers.TypedSierraRecordNumber
-import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
 import weco.catalogue.source_model.sierra.source.SierraQueryOps
+import weco.sierra.models.marc.{Subfield, VarField}
 
 import java.net.URL
 import scala.util.Try
@@ -127,9 +127,9 @@ object SierraElectronicResources extends SierraQueryOps with Logging {
   private def getUrl(id: TypedSierraRecordNumber,
                      vf: VarField): Option[String] =
     vf.subfieldsWithTag("u") match {
-      case Seq(MarcSubfield(_, content)) if isUrl(content) => Some(content)
+      case Seq(Subfield(_, content)) if isUrl(content) => Some(content)
 
-      case Seq(MarcSubfield(_, content)) =>
+      case Seq(Subfield(_, content)) =>
         warn(
           s"Record ${id.withCheckDigit} has a value in 856 ǂu which isn't a URL: $content")
         None

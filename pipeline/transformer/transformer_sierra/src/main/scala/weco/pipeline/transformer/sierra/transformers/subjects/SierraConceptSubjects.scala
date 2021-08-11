@@ -4,8 +4,8 @@ import weco.catalogue.internal_model.text.TextNormalisation._
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work._
 import weco.catalogue.source_model.sierra.identifiers.SierraBibNumber
-import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
 import weco.pipeline.transformer.sierra.transformers.SierraConcepts
+import weco.sierra.models.marc.{Subfield, VarField}
 
 // Populate wwork:subject
 //
@@ -77,7 +77,7 @@ object SierraConceptSubjects
   }
 
   private def getPrimaryConcept(
-    primarySubfields: List[MarcSubfield],
+    primarySubfields: List[Subfield],
     varField: VarField): List[AbstractConcept[IdState.Unminted]] =
     primarySubfields.map { subfield =>
       val label = subfield.content.trimTrailingPeriod

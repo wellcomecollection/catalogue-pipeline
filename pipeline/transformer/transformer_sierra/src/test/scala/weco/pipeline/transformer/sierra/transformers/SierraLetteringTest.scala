@@ -2,8 +2,8 @@ package weco.pipeline.transformer.sierra.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
 import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
+import weco.sierra.models.marc.{Subfield, VarField}
 
 class SierraLetteringTest
     extends AnyFunSpec
@@ -18,7 +18,7 @@ class SierraLetteringTest
           marcTag = "300",
           indicator2 = "6",
           subfields = List(
-            MarcSubfield(tag = "a", content = "Alas, ailments are annoying")
+            Subfield(tag = "a", content = "Alas, ailments are annoying")
           )
         )
       ),
@@ -33,7 +33,7 @@ class SierraLetteringTest
           marcTag = "246",
           indicator2 = "7",
           subfields = List(
-            MarcSubfield(tag = "a", content = "Alas, ailments are annoying")
+            Subfield(tag = "a", content = "Alas, ailments are annoying")
           )
         )
       ),
@@ -48,7 +48,7 @@ class SierraLetteringTest
           marcTag = "246",
           indicator2 = "6",
           subfields = List(
-            MarcSubfield(
+            Subfield(
               tag = "b",
               content = "Belligerent beavers beneath a bridge")
           )
@@ -65,7 +65,7 @@ class SierraLetteringTest
           marcTag = "246",
           indicator2 = "6",
           subfields = List(
-            MarcSubfield(
+            Subfield(
               tag = "a",
               content = "Crowded crows carry a chocolate crepe")
           )
@@ -82,7 +82,7 @@ class SierraLetteringTest
           marcTag = "246",
           indicator2 = "6",
           subfields = List(
-            MarcSubfield(
+            Subfield(
               tag = "a",
               content = "Daring dalmations dance with danger")
           )
@@ -91,7 +91,7 @@ class SierraLetteringTest
           marcTag = "246",
           indicator2 = "6",
           subfields = List(
-            MarcSubfield(
+            Subfield(
               tag = "a",
               content = "Enterprising eskimos exile every eagle")
           )

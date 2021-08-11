@@ -2,7 +2,7 @@ package weco.catalogue.source_model.sierra.source
 
 import grizzled.slf4j.Logging
 import weco.catalogue.source_model.sierra.{SierraBibData, SierraItemData}
-import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
+import weco.sierra.models.marc.{Subfield, VarField}
 
 trait SierraQueryOps extends Logging {
 
@@ -39,13 +39,13 @@ trait SierraQueryOps extends Logging {
           Some(multiple.head)
       }
 
-    def subfieldsWithTags(tags: (String, String)*): List[MarcSubfield] =
+    def subfieldsWithTags(tags: (String, String)*): List[Subfield] =
       tags.toList.flatMap {
         case (tag, subfieldTag) =>
           varfieldsWithTag(tag).subfieldsWithTag(subfieldTag)
       }
 
-    def subfieldsWithTag(tag: (String, String)): List[MarcSubfield] =
+    def subfieldsWithTag(tag: (String, String)): List[Subfield] =
       subfieldsWithTags(tag)
   }
 
@@ -87,18 +87,18 @@ trait SierraQueryOps extends Logging {
     def withIndicator2(ind: String): List[VarField] =
       varfields.filter(_.indicator2.contains(ind))
 
-    def subfields: List[MarcSubfield] = varfields.flatMap(_.subfields)
+    def subfields: List[Subfield] = varfields.flatMap(_.subfields)
 
-    def subfieldsWithTags(tags: String*): List[MarcSubfield] =
+    def subfieldsWithTags(tags: String*): List[Subfield] =
       varfields.subfields.withTags(tags: _*)
 
-    def subfieldsWithoutTags(tags: String*): List[MarcSubfield] =
+    def subfieldsWithoutTags(tags: String*): List[Subfield] =
       varfields.subfields.withoutTags(tags: _*)
 
-    def subfieldsWithTag(tag: String): List[MarcSubfield] =
+    def subfieldsWithTag(tag: String): List[Subfield] =
       subfieldsWithTags(tag)
 
-    def nonrepeatableSubfieldWithTag(tag: String): Option[MarcSubfield] =
+    def nonrepeatableSubfieldWithTag(tag: String): Option[Subfield] =
       subfieldsWithTag(tag) match {
         case Seq(sf) => Some(sf)
         case Nil     => None
@@ -107,7 +107,7 @@ trait SierraQueryOps extends Logging {
             s"Multiple instances of non-repeatable subfield with tag ǂ$tag: $multiple"
           )
           Some(
-            MarcSubfield(
+            Subfield(
               tag = tag,
               content = multiple.map { _.content }.mkString(" ")
             )
@@ -119,17 +119,17 @@ trait SierraQueryOps extends Logging {
     def subfieldContents: List[String] = varfields.subfields.contents
   }
 
-  implicit class SubfieldsOps(subfields: List[MarcSubfield]) {
+  implicit class SubfieldsOps(subfields: List[Subfield]) {
 
-    def withTags(tags: String*): List[MarcSubfield] =
+    def withTags(tags: String*): List[Subfield] =
       subfields
         .filter { subfield =>
           tags.contains(subfield.tag)
         }
 
-    def withTag(tag: String): List[MarcSubfield] = withTags(tag)
+    def withTag(tag: String): List[Subfield] = withTags(tag)
 
-    def withoutTags(tags: String*): List[MarcSubfield] =
+    def withoutTags(tags: String*): List[Subfield] =
       subfields
         .filterNot { subfield =>
           tags.contains(subfield.tag)

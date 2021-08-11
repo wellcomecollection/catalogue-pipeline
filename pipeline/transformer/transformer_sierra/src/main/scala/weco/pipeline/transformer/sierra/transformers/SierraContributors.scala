@@ -3,8 +3,8 @@ package weco.pipeline.transformer.sierra.transformers
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work._
 import weco.catalogue.source_model.sierra.SierraBibData
-import weco.catalogue.source_model.sierra.marc.MarcSubfield
 import weco.catalogue.source_model.sierra.source.SierraQueryOps
+import weco.sierra.models.marc.Subfield
 
 /* Populate wwork:contributors. Rules:
  *
@@ -61,21 +61,21 @@ object SierraContributors
           }
     }.distinct
 
-  private def getPersonContributors(subfields: List[MarcSubfield]) =
+  private def getPersonContributors(subfields: List[Subfield]) =
     if (subfields.withTags("t").isEmpty)
       "Person" -> getPerson(subfields, normalisePerson = true)
     else
       "Agent" -> getLabel(subfields).map(Agent(_))
 
-  private def getOrganisationContributors(subfields: List[MarcSubfield]) =
+  private def getOrganisationContributors(subfields: List[Subfield]) =
     "Organisation" -> getOrganisation(subfields)
 
-  private def getMeetingContributors(subfields: List[MarcSubfield]) =
+  private def getMeetingContributors(subfields: List[Subfield]) =
     "Meeting" -> getMeeting(subfields)
 
   private def getContributionRoles(
-    subfields: List[MarcSubfield],
-    subfieldTag: String): List[ContributionRole] =
+                                    subfields: List[Subfield],
+                                    subfieldTag: String): List[ContributionRole] =
     subfields
       .withTag(subfieldTag)
       .contents

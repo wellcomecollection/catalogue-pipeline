@@ -2,8 +2,8 @@ package weco.pipeline.transformer.sierra.transformers.subjects
 
 import weco.catalogue.internal_model.work.{Meeting, Subject}
 import weco.catalogue.source_model.sierra.identifiers.SierraBibNumber
-import weco.catalogue.source_model.sierra.marc.VarField
 import weco.pipeline.transformer.sierra.transformers.SierraAgents
+import weco.sierra.models.marc.VarField
 
 // Populate wwork:subject
 //

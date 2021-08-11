@@ -2,8 +2,8 @@ package weco.pipeline.transformer.sierra.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
 import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
+import weco.sierra.models.marc.{Subfield, VarField}
 
 class SierraPhysicalDescriptionTest
     extends AnyFunSpec
@@ -17,7 +17,7 @@ class SierraPhysicalDescriptionTest
         VarField(
           marcTag = Some("563"),
           subfields = List(
-            MarcSubfield("b", "The edifying extent of early emus")
+            Subfield("b", "The edifying extent of early emus")
           )
         )
       )
@@ -34,8 +34,8 @@ class SierraPhysicalDescriptionTest
         VarField(
           marcTag = Some("300"),
           subfields = List(
-            MarcSubfield("b", description),
-            MarcSubfield("d", "The edifying extent of early emus"),
+            Subfield("b", description),
+            Subfield("d", "The edifying extent of early emus"),
           )
         )
       )
@@ -54,14 +54,14 @@ class SierraPhysicalDescriptionTest
         VarField(
           marcTag = Some("300"),
           subfields = List(
-            MarcSubfield("b", description1)
+            Subfield("b", description1)
           )
         ),
         VarField(
           marcTag = Some("300"),
           subfields = List(
-            MarcSubfield("b", description2),
-            MarcSubfield("d", "Egad!  An early eagle is eating the earwig."),
+            Subfield("b", description2),
+            Subfield("d", "Egad!  An early eagle is eating the earwig."),
           )
         )
       )
@@ -77,17 +77,17 @@ class SierraPhysicalDescriptionTest
         VarField(
           marcTag = Some("300"),
           subfields = List(
-            MarcSubfield(
+            Subfield(
               tag = "a",
               content = "1 videocassette (VHS) (1 min.) :"),
-            MarcSubfield(tag = "b", content = "sound, color, PAL."),
+            Subfield(tag = "b", content = "sound, color, PAL."),
           )
         ),
         VarField(
           marcTag = Some("300"),
           subfields = List(
-            MarcSubfield(tag = "a", content = "1 DVD (1 min.) :"),
-            MarcSubfield(tag = "b", content = "sound, color"),
+            Subfield(tag = "a", content = "1 DVD (1 min.) :"),
+            Subfield(tag = "b", content = "sound, color"),
           )
         )
       )
@@ -108,9 +108,9 @@ class SierraPhysicalDescriptionTest
         VarField(
           marcTag = Some("300"),
           subfields = List(
-            MarcSubfield(tag = "a", content = descriptionA),
-            MarcSubfield(tag = "b", content = descriptionB),
-            MarcSubfield(tag = "c", content = descriptionC),
+            Subfield(tag = "a", content = descriptionA),
+            Subfield(tag = "b", content = descriptionB),
+            Subfield(tag = "c", content = descriptionC),
           )
         )
       )
@@ -130,10 +130,10 @@ class SierraPhysicalDescriptionTest
         VarField(
           marcTag = Some("300"),
           subfields = List(
-            MarcSubfield(tag = "a", content = extent),
-            MarcSubfield(tag = "b", content = otherPhysicalDetails),
-            MarcSubfield(tag = "c", content = dimensions),
-            MarcSubfield(tag = "e", content = accompanyingMaterial),
+            Subfield(tag = "a", content = extent),
+            Subfield(tag = "b", content = otherPhysicalDetails),
+            Subfield(tag = "c", content = dimensions),
+            Subfield(tag = "e", content = accompanyingMaterial),
           )
         )
       )

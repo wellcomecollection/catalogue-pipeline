@@ -3,8 +3,8 @@ package weco.pipeline.transformer.sierra.transformers
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.work.{Concept, Subject}
-import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
 import weco.sierra.generators.SierraDataGenerators
+import weco.sierra.models.marc.{Subfield, VarField}
 
 class SierraSubjectsTest
     extends AnyFunSpec
@@ -19,12 +19,12 @@ class SierraSubjectsTest
         VarField(
           marcTag = Some("650"),
           indicator2 = Some("0"),
-          subfields = List(MarcSubfield(tag = "a", content = "Medicine"))
+          subfields = List(Subfield(tag = "a", content = "Medicine"))
         ),
         VarField(
           marcTag = Some("650"),
           indicator2 = Some("2"),
-          subfields = List(MarcSubfield(tag = "a", content = "Medicine"))
+          subfields = List(Subfield(tag = "a", content = "Medicine"))
         )
       )
     )

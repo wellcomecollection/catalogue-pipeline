@@ -8,10 +8,10 @@ import weco.catalogue.internal_model.identifiers.{
   SourceIdentifier
 }
 import weco.catalogue.internal_model.work.MergeCandidate
-import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
 import weco.catalogue.source_model.sierra.SierraBibData
 import weco.catalogue.source_model.sierra.source.SierraMaterialType
 import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
+import weco.sierra.models.marc.{Subfield, VarField}
 
 class SierraMergeCandidatesTest
     extends AnyFunSpec
@@ -66,7 +66,7 @@ class SierraMergeCandidatesTest
           createVarFieldWith(
             marcTag = "776",
             subfields = List(
-              MarcSubfield(tag = "a", content = s"blah blah")
+              Subfield(tag = "a", content = s"blah blah")
             )
           )
         )
@@ -360,7 +360,7 @@ class SierraMergeCandidatesTest
       varFields = List(
         VarField(
           marcTag = Some("035"),
-          subfields = calmIds.map(MarcSubfield("a", _)).toList
+          subfields = calmIds.map(Subfield("a", _)).toList
         )))
 
   private def createCalmMergeCandidate(calmId: String) = MergeCandidate(
@@ -394,7 +394,7 @@ class SierraMergeCandidatesTest
       createVarFieldWith(
         marcTag = "776",
         subfields = List(
-          MarcSubfield(tag = "w", content = idString)
+          Subfield(tag = "w", content = idString)
         )
       )
     }
@@ -404,7 +404,7 @@ class SierraMergeCandidatesTest
       createVarFieldWith(
         marcTag = "962",
         subfields = List(
-          MarcSubfield(tag = "u", content = url)
+          Subfield(tag = "u", content = url)
         )
       )
     }
@@ -419,7 +419,7 @@ class SierraMergeCandidatesTest
       createVarFieldWith(
         marcTag = "089",
         subfields = List(
-          MarcSubfield(tag = "a", content = miroId)
+          Subfield(tag = "a", content = miroId)
         )
       )
     }

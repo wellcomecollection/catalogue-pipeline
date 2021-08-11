@@ -8,8 +8,8 @@ import weco.catalogue.internal_model.identifiers.{
   SourceIdentifier
 }
 import weco.catalogue.internal_model.work.Concept
-import weco.catalogue.source_model.sierra.marc.MarcSubfield
 import weco.sierra.generators.MarcGenerators
+import weco.sierra.models.marc.Subfield
 
 class SierraConceptsTest extends AnyFunSpec with Matchers with MarcGenerators {
 
@@ -23,8 +23,8 @@ class SierraConceptsTest extends AnyFunSpec with Matchers with MarcGenerators {
         marcTag = "CCC",
         indicator2 = "0",
         subfields = List(
-          MarcSubfield(tag = "a", content = "pilots"),
-          MarcSubfield(tag = "0", content = "lcsh/ppp")
+          Subfield(tag = "a", content = "pilots"),
+          Subfield(tag = "0", content = "lcsh/ppp")
         )
       )
     )
@@ -47,17 +47,17 @@ class SierraConceptsTest extends AnyFunSpec with Matchers with MarcGenerators {
         marcTag = "CCC",
         indicator2 = "0",
         subfields = List(
-          MarcSubfield(tag = "a", content = "martians"),
-          MarcSubfield(tag = "0", content = "lcsh/bbb"),
-          MarcSubfield(tag = "0", content = "lcsh/bbb"),
+          Subfield(tag = "a", content = "martians"),
+          Subfield(tag = "0", content = "lcsh/bbb"),
+          Subfield(tag = "0", content = "lcsh/bbb"),
           // Including the (DNLM) prefix
-          MarcSubfield(tag = "0", content = "(DNLM)lcsh/bbb"),
+          Subfield(tag = "0", content = "(DNLM)lcsh/bbb"),
           // With trailing punctuation
-          MarcSubfield(tag = "0", content = "lcsh/bbb."),
+          Subfield(tag = "0", content = "lcsh/bbb."),
           // Including whitespace
-          MarcSubfield(tag = "0", content = "lcsh / bbb"),
+          Subfield(tag = "0", content = "lcsh / bbb"),
           // Including a MESH URL prefix
-          MarcSubfield(
+          Subfield(
             tag = "0",
             content = "https://id.nlm.nih.gov/mesh/lcsh/bbb")
         )
@@ -81,9 +81,9 @@ class SierraConceptsTest extends AnyFunSpec with Matchers with MarcGenerators {
       varField = createVarFieldWith(
         marcTag = "CCC",
         subfields = List(
-          MarcSubfield(tag = "a", content = "hitchhiking"),
-          MarcSubfield(tag = "0", content = "u/xxx"),
-          MarcSubfield(tag = "0", content = "u/yyy")
+          Subfield(tag = "a", content = "hitchhiking"),
+          Subfield(tag = "0", content = "u/xxx"),
+          Subfield(tag = "0", content = "u/yyy")
         )
       )
     )

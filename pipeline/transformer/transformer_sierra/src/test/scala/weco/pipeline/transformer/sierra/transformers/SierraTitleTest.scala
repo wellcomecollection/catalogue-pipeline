@@ -3,9 +3,9 @@ package weco.pipeline.transformer.sierra.transformers
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks._
-import weco.catalogue.source_model.sierra.marc.MarcSubfield
 import weco.pipeline.transformer.sierra.exceptions.ShouldNotTransformException
 import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
+import weco.sierra.models.marc.Subfield
 
 class SierraTitleTest
     extends AnyFunSpec
@@ -16,13 +16,13 @@ class SierraTitleTest
   val titleTestCases = Table(
     ("subfields", "expectedTitle"),
     (
-      List(MarcSubfield(tag = "a", content = "[Man smoking at window].")),
+      List(Subfield(tag = "a", content = "[Man smoking at window].")),
       "[Man smoking at window]."
     ),
     (
       List(
-        MarcSubfield(tag = "a", content = "Cancer research :"),
-        MarcSubfield(
+        Subfield(tag = "a", content = "Cancer research :"),
+        Subfield(
           tag = "b",
           content =
             "official organ of the American Association for Cancer Research, Inc.")
@@ -31,29 +31,29 @@ class SierraTitleTest
     ),
     (
       List(
-        MarcSubfield(tag = "a", content = "The “winter mind” :"),
-        MarcSubfield(
+        Subfield(tag = "a", content = "The “winter mind” :"),
+        Subfield(
           tag = "b",
           content = "William Bronk and American letters /"),
-        MarcSubfield(tag = "c", content = "Burt Kimmelman.")
+        Subfield(tag = "c", content = "Burt Kimmelman.")
       ),
       "The “winter mind” : William Bronk and American letters / Burt Kimmelman."
     ),
     // This example is based on Sierra bib b20053538
     (
       List(
-        MarcSubfield(tag = "a", content = "One & other."),
-        MarcSubfield(tag = "p", content = "Mark Jordan post-plinth interview.")
+        Subfield(tag = "a", content = "One & other."),
+        Subfield(tag = "p", content = "Mark Jordan post-plinth interview.")
       ),
       "One & other. Mark Jordan post-plinth interview."
     ),
     // This example is based on Sierra bib b11000466
     (
       List(
-        MarcSubfield(tag = "a", content = "Quain's elements of anatomy."),
-        MarcSubfield(tag = "n", content = "Vol. I, Part I,"),
-        MarcSubfield(tag = "n", content = "Embryology /"),
-        MarcSubfield(
+        Subfield(tag = "a", content = "Quain's elements of anatomy."),
+        Subfield(tag = "n", content = "Vol. I, Part I,"),
+        Subfield(tag = "n", content = "Embryology /"),
+        Subfield(
           tag = "c",
           content = "edited by Edward Albert Schäfer and George Dancer Thane.")
       ),
@@ -80,7 +80,7 @@ class SierraTitleTest
         createVarFieldWith(
           marcTag = "245",
           subfields = List(
-            MarcSubfield(tag = "a", content = "A book with multiple covers")
+            Subfield(tag = "a", content = "A book with multiple covers")
           )
         ),
         createVarFieldWith(marcTag = "245")
@@ -97,11 +97,11 @@ class SierraTitleTest
         createVarFieldWith(
           marcTag = "245",
           subfields = List(
-            MarcSubfield(tag = "a", content = "The Book of common prayer:"),
-            MarcSubfield(
+            Subfield(tag = "a", content = "The Book of common prayer:"),
+            Subfield(
               tag = "b",
               content = "together with the Psalter or Psalms of David,"),
-            MarcSubfield(
+            Subfield(
               tag = "b",
               content = "and the form and manner of making bishops")
           )

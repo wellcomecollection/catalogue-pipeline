@@ -9,14 +9,10 @@ import weco.catalogue.internal_model.locations.{
   LocationType,
   PhysicalLocation
 }
-import weco.catalogue.source_model.sierra.marc.{
-  FixedField,
-  MarcSubfield,
-  VarField
-}
 import weco.catalogue.source_model.sierra.source.SierraSourceLocation
 import weco.catalogue.source_model.sierra.SierraItemData
 import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
+import weco.sierra.models.marc.{FixedField, Subfield, VarField}
 
 class SierraLocationTest
     extends AnyFunSpec
@@ -103,8 +99,8 @@ class SierraLocationTest
           VarField(
             marcTag = Some("506"),
             subfields = List(
-              MarcSubfield("a", "You can look at this"),
-              MarcSubfield("f", "Open")
+              Subfield("a", "You can look at this"),
+              Subfield("f", "Open")
             )
           )
         )
@@ -147,7 +143,7 @@ class SierraLocationTest
             marcTag = Some("949"),
             fieldTag = Some("c"),
             subfields = List(
-              MarcSubfield(tag = "a", content = "AX1234:Box 1")
+              Subfield(tag = "a", content = "AX1234:Box 1")
             )
           )
         )
@@ -223,8 +219,8 @@ class SierraLocationTest
           VarField(
             marcTag = Some("506"),
             subfields = List(
-              MarcSubfield("a", "You're not allowed yet"),
-              MarcSubfield("g", "2099-12-31"),
+              Subfield("a", "You're not allowed yet"),
+              Subfield("g", "2099-12-31"),
             )
           )
         )

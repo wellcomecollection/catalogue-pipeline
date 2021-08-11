@@ -1,8 +1,8 @@
 package weco.pipeline.transformer.sierra.transformers
 
 import weco.catalogue.source_model.sierra.SierraBibData
-import weco.catalogue.source_model.sierra.marc.MarcSubfield
 import weco.catalogue.source_model.sierra.source.SierraQueryOps
+import weco.sierra.models.marc.Subfield
 
 // Populate work:alternativeTitles
 //
@@ -31,7 +31,7 @@ object SierraAlternativeTitles
       .flatMap { varfield =>
         varfield.subfields
           .filter {
-            case MarcSubfield("5", "UkLW") => false
+            case Subfield("5", "UkLW") => false
             case _                         => true
           }
           .contentString(" ")

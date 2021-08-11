@@ -11,8 +11,8 @@ import weco.catalogue.internal_model.locations.{
 }
 import weco.catalogue.source_model.sierra.SierraItemData
 import weco.catalogue.source_model.sierra.identifiers.SierraBibNumber
-import weco.catalogue.source_model.sierra.marc.{FixedField, VarField}
 import weco.sierra.generators.SierraDataGenerators
+import weco.sierra.models.marc.{FixedField, VarField}
 
 class SierraItemAccessTest
     extends AnyFunSpec

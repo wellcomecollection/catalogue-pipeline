@@ -2,12 +2,12 @@ package weco.pipeline.transformer.sierra.transformers
 
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work._
-import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
 import weco.catalogue.source_model.sierra.source.SierraQueryOps
 import weco.catalogue.source_model.sierra.SierraBibData
 import weco.catalogue.source_model.sierra.identifiers.SierraBibNumber
 import weco.pipeline.transformer.sierra.exceptions.CataloguingException
 import weco.pipeline.transformer.sierra.transformers.parsers.Marc008Parser
+import weco.sierra.models.marc.{Subfield, VarField}
 
 object SierraProduction
     extends SierraIdentifiedDataTransformer
@@ -196,7 +196,7 @@ object SierraProduction
             _,
             _,
             _,
-            List(MarcSubfield("c", content)))) =>
+            List(Subfield("c", content)))) =>
         content.matches("^©\\d{4}$")
       case _ => false
     }

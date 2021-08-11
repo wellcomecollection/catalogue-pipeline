@@ -6,9 +6,9 @@ import weco.catalogue.internal_model.identifiers.{
   IdentifierType,
   SourceIdentifier
 }
-import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
 import weco.catalogue.source_model.sierra.source.SierraMaterialType
 import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
+import weco.sierra.models.marc.{Subfield, VarField}
 
 class SierraIdentifiersTest
     extends AnyFunSpec
@@ -300,7 +300,7 @@ class SierraIdentifiersTest
     createVarFieldWith(
       marcTag = marcTag,
       subfields = List(
-        MarcSubfield(tag = "a", content = subfieldA)
+        Subfield(tag = "a", content = subfieldA)
       )
     )
 }

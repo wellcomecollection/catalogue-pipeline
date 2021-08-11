@@ -7,11 +7,12 @@ import weco.catalogue.internal_model.identifiers.{
   IdentifierType,
   SourceIdentifier
 }
-import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
 import weco.catalogue.source_model.sierra.SierraBibData
 import weco.catalogue.source_model.sierra.identifiers.SierraBibNumber
 import weco.pipeline.transformer.sierra.exceptions.CataloguingException
 import weco.sierra.generators.SierraDataGenerators
+import weco.sierra.models.marc
+import weco.sierra.models.marc.{Subfield, VarField}
 
 class SierraOrganisationSubjectsTest
     extends AnyFunSpec
@@ -26,11 +27,11 @@ class SierraOrganisationSubjectsTest
     it("uses subfields a, b, c, d and e as the label") {
       val bibData = create610bibDataWith(
         subfields = List(
-          MarcSubfield(tag = "a", content = "United States."),
-          MarcSubfield(tag = "b", content = "Supreme Court,"),
-          MarcSubfield(tag = "c", content = "Washington, DC."),
-          MarcSubfield(tag = "d", content = "September 29, 2005,"),
-          MarcSubfield(tag = "e", content = "pictured.")
+          Subfield(tag = "a", content = "United States."),
+          Subfield(tag = "b", content = "Supreme Court,"),
+          Subfield(tag = "c", content = "Washington, DC."),
+          Subfield(tag = "d", content = "September 29, 2005,"),
+          Subfield(tag = "e", content = "pictured.")
         )
       )
 
@@ -44,11 +45,11 @@ class SierraOrganisationSubjectsTest
       // This is based on an example from the MARC spec
       val bibData = create610bibDataWith(
         subfields = List(
-          MarcSubfield(tag = "a", content = "United States."),
-          MarcSubfield(tag = "b", content = "Army."),
-          MarcSubfield(tag = "b", content = "Cavalry, 7th."),
-          MarcSubfield(tag = "b", content = "Company E,"),
-          MarcSubfield(tag = "e", content = "depicted.")
+          Subfield(tag = "a", content = "United States."),
+          Subfield(tag = "b", content = "Army."),
+          Subfield(tag = "b", content = "Cavalry, 7th."),
+          Subfield(tag = "b", content = "Company E,"),
+          Subfield(tag = "e", content = "depicted.")
         )
       )
 
@@ -63,7 +64,7 @@ class SierraOrganisationSubjectsTest
     it("creates an Organisation as the concept") {
       val bibData = create610bibDataWith(
         subfields = List(
-          MarcSubfield(tag = "a", content = "Wellcome Trust."),
+          Subfield(tag = "a", content = "Wellcome Trust."),
         )
       )
 
@@ -78,10 +79,10 @@ class SierraOrganisationSubjectsTest
     it("uses subfields a and b for the Organisation label") {
       val bibData = create610bibDataWith(
         subfields = List(
-          MarcSubfield(tag = "a", content = "Wellcome Trust."),
-          MarcSubfield(tag = "b", content = "Facilities,"),
-          MarcSubfield(tag = "b", content = "Health & Safety"),
-          MarcSubfield(tag = "c", content = "27 September 2018")
+          Subfield(tag = "a", content = "Wellcome Trust."),
+          Subfield(tag = "b", content = "Facilities,"),
+          Subfield(tag = "b", content = "Health & Safety"),
+          Subfield(tag = "c", content = "27 September 2018")
         )
       )
 
@@ -95,8 +96,8 @@ class SierraOrganisationSubjectsTest
       val bibData = create610bibDataWith(
         indicator2 = "0",
         subfields = List(
-          MarcSubfield(tag = "a", content = "ACME Corp"),
-          MarcSubfield(tag = "0", content = lcNamesCode)
+          Subfield(tag = "a", content = "ACME Corp"),
+          Subfield(tag = "0", content = lcNamesCode)
         )
       )
 
@@ -118,9 +119,9 @@ class SierraOrganisationSubjectsTest
       val bibData = create610bibDataWith(
         indicator2 = "0",
         subfields = List(
-          MarcSubfield(tag = "a", content = "ACME Corp"),
-          MarcSubfield(tag = "0", content = "  n1234"),
-          MarcSubfield(tag = "0", content = "n1234"),
+          Subfield(tag = "a", content = "ACME Corp"),
+          Subfield(tag = "0", content = "  n1234"),
+          Subfield(tag = "0", content = "n1234"),
         )
       )
 
@@ -141,9 +142,9 @@ class SierraOrganisationSubjectsTest
       val bibData = create610bibDataWith(
         indicator2 = "0",
         subfields = List(
-          MarcSubfield(tag = "a", content = "ACME Corp"),
-          MarcSubfield(tag = "0", content = "n12345"),
-          MarcSubfield(tag = "0", content = "n67890")
+          Subfield(tag = "a", content = "ACME Corp"),
+          Subfield(tag = "0", content = "n12345"),
+          Subfield(tag = "0", content = "n67890")
         )
       )
 
@@ -157,8 +158,8 @@ class SierraOrganisationSubjectsTest
       val bibData = create610bibDataWith(
         indicator2 = "2",
         subfields = List(
-          MarcSubfield(tag = "a", content = "ACME Corp"),
-          MarcSubfield(tag = "0", content = "n12345")
+          Subfield(tag = "a", content = "ACME Corp"),
+          Subfield(tag = "0", content = "n12345")
         )
       )
 
@@ -197,17 +198,17 @@ class SierraOrganisationSubjectsTest
       varFields = List(
         createMarc610VarField(
           subfields = List(
-            MarcSubfield(tag = "a", content = "ACME Corp.")
+            Subfield(tag = "a", content = "ACME Corp.")
           )
         ),
         createMarc610VarField(
           subfields = List(
-            MarcSubfield(tag = "a", content = "BBC.")
+            Subfield(tag = "a", content = "BBC.")
           )
         ),
         createMarc610VarField(
           subfields = List(
-            MarcSubfield(tag = "a", content = "Charlie's Chocolate Factory.")
+            Subfield(tag = "a", content = "Charlie's Chocolate Factory.")
           )
         )
       )
@@ -217,7 +218,7 @@ class SierraOrganisationSubjectsTest
     subjects should have size 3
   }
 
-  private def create610bibDataWith(subfields: List[MarcSubfield],
+  private def create610bibDataWith(subfields: List[Subfield],
                                    indicator2: String = ""): SierraBibData =
     createSierraBibDataWith(
       varFields = List(
@@ -225,9 +226,9 @@ class SierraOrganisationSubjectsTest
       )
     )
 
-  private def createMarc610VarField(subfields: List[MarcSubfield],
+  private def createMarc610VarField(subfields: List[Subfield],
                                     indicator2: String = ""): VarField =
-    VarField(
+    marc.VarField(
       marcTag = Some("610"),
       indicator1 = Some(""),
       indicator2 = Some(indicator2),

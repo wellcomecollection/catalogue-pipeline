@@ -8,8 +8,8 @@ import weco.catalogue.internal_model.identifiers.{
   SourceIdentifier
 }
 import weco.catalogue.internal_model.work._
-import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
 import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
+import weco.sierra.models.marc.{Subfield, VarField}
 
 class SierraContributorsTest
     extends AnyFunSpec
@@ -28,39 +28,39 @@ class SierraContributorsTest
       createVarFieldWith(
         marcTag = "100",
         subfields = List(
-          MarcSubfield(tag = "a", content = "Sarah the soybean")
+          Subfield(tag = "a", content = "Sarah the soybean")
         )
       ),
       createVarFieldWith(
         marcTag = "100",
         subfields = List(
-          MarcSubfield(tag = "a", content = "Sam the squash,"),
-          MarcSubfield(tag = "c", content = "Sir")
+          Subfield(tag = "a", content = "Sam the squash,"),
+          Subfield(tag = "c", content = "Sir")
         )
       ),
       createVarFieldWith(
         marcTag = "110",
         subfields = List(
-          MarcSubfield(tag = "a", content = "Spinach Solicitors")
+          Subfield(tag = "a", content = "Spinach Solicitors")
         )
       ),
       createVarFieldWith(
         marcTag = "700",
         subfields = List(
-          MarcSubfield(tag = "a", content = "Sebastian the sugarsnap")
+          Subfield(tag = "a", content = "Sebastian the sugarsnap")
         )
       ),
       createVarFieldWith(
         marcTag = "710",
         subfields = List(
-          MarcSubfield(tag = "a", content = "Shallot Swimmers")
+          Subfield(tag = "a", content = "Shallot Swimmers")
         )
       ),
       createVarFieldWith(
         marcTag = "711",
         subfields = List(
-          MarcSubfield(tag = "a", content = "Sammys meet the Sammys"),
-          MarcSubfield(tag = "c", content = "at Sammys")
+          Subfield(tag = "a", content = "Sammys meet the Sammys"),
+          Subfield(tag = "c", content = "at Sammys")
         )
       ),
     )
@@ -84,19 +84,19 @@ class SierraContributorsTest
         createVarFieldWith(
           marcTag = "100",
           subfields = List(
-            MarcSubfield(tag = "a", content = "Charles Emmanuel"),
-            MarcSubfield(tag = "b", content = "III,"),
-            MarcSubfield(tag = "c", content = "King of Sardinia,"),
-            MarcSubfield(tag = "d", content = "1701-1773"),
+            Subfield(tag = "a", content = "Charles Emmanuel"),
+            Subfield(tag = "b", content = "III,"),
+            Subfield(tag = "c", content = "King of Sardinia,"),
+            Subfield(tag = "d", content = "1701-1773"),
           )
         ),
         createVarFieldWith(
           marcTag = "700",
           subfields = List(
-            MarcSubfield(tag = "a", content = "Charles Emmanuel"),
-            MarcSubfield(tag = "b", content = "IV,"),
-            MarcSubfield(tag = "c", content = "King of Sardinia,"),
-            MarcSubfield(tag = "d", content = "1796-1802"),
+            Subfield(tag = "a", content = "Charles Emmanuel"),
+            Subfield(tag = "b", content = "IV,"),
+            Subfield(tag = "c", content = "King of Sardinia,"),
+            Subfield(tag = "d", content = "1796-1802"),
           )
         )
       )
@@ -123,9 +123,9 @@ class SierraContributorsTest
         createVarFieldWith(
           marcTag = "700",
           subfields = List(
-            MarcSubfield(tag = "a", content = "Shakespeare, William,"),
-            MarcSubfield(tag = "d", content = "1564-1616."),
-            MarcSubfield(tag = "t", content = "Hamlet.")
+            Subfield(tag = "a", content = "Shakespeare, William,"),
+            Subfield(tag = "d", content = "1564-1616."),
+            Subfield(tag = "t", content = "Hamlet.")
           )
         )
       )
@@ -151,15 +151,15 @@ class SierraContributorsTest
       val varFields = List(
         createVarFieldWith(
           marcTag = "700",
-          subfields = List(MarcSubfield(tag = "a", content = name2))
+          subfields = List(Subfield(tag = "a", content = name2))
         ),
         createVarFieldWith(
           marcTag = "100",
-          subfields = List(MarcSubfield(tag = "a", content = name1))
+          subfields = List(Subfield(tag = "a", content = name1))
         ),
         createVarFieldWith(
           marcTag = "700",
-          subfields = List(MarcSubfield(tag = "a", content = name3))
+          subfields = List(Subfield(tag = "a", content = name3))
         )
       )
 
@@ -183,9 +183,9 @@ class SierraContributorsTest
         createVarFieldWith(
           marcTag = "100",
           subfields = List(
-            MarcSubfield(tag = "a", content = name),
-            MarcSubfield(tag = "e", content = role1),
-            MarcSubfield(tag = "e", content = role2)
+            Subfield(tag = "a", content = name),
+            Subfield(tag = "e", content = role1),
+            Subfield(tag = "e", content = role2)
           )
         )
       )
@@ -210,8 +210,8 @@ class SierraContributorsTest
         createVarFieldWith(
           marcTag = "100",
           subfields = List(
-            MarcSubfield(tag = "a", content = name),
-            MarcSubfield(tag = "0", content = lcshCode)
+            Subfield(tag = "a", content = name),
+            Subfield(tag = "0", content = lcshCode)
           )
         )
       )
@@ -248,11 +248,11 @@ class SierraContributorsTest
         createVarFieldWith(
           marcTag = "100",
           subfields = List(
-            MarcSubfield(tag = "a", content = name),
-            MarcSubfield(tag = "0", content = lcshCode1),
-            MarcSubfield(tag = "0", content = lcshCode2),
-            MarcSubfield(tag = "0", content = lcshCode3),
-            MarcSubfield(tag = "0", content = lcshCode4)
+            Subfield(tag = "a", content = name),
+            Subfield(tag = "0", content = lcshCode1),
+            Subfield(tag = "0", content = lcshCode2),
+            Subfield(tag = "0", content = lcshCode3),
+            Subfield(tag = "0", content = lcshCode4)
           )
         )
       )
@@ -281,9 +281,9 @@ class SierraContributorsTest
         createVarFieldWith(
           marcTag = "100",
           subfields = List(
-            MarcSubfield(tag = "a", content = name),
-            MarcSubfield(tag = "0", content = "lcsh9069541"),
-            MarcSubfield(tag = "0", content = "lcsh3384149")
+            Subfield(tag = "a", content = name),
+            Subfield(tag = "0", content = "lcsh9069541"),
+            Subfield(tag = "0", content = "lcsh3384149")
           )
         )
       )
@@ -301,12 +301,12 @@ class SierraContributorsTest
       val varFields = List(
         createVarFieldWith(
           marcTag = "100",
-          subfields = List(MarcSubfield(tag = "a", content = "George,"))
+          subfields = List(Subfield(tag = "a", content = "George,"))
         ),
         createVarFieldWith(
           marcTag = "700",
           subfields = List(
-            MarcSubfield(tag = "a", content = "Sebastian,")
+            Subfield(tag = "a", content = "Sebastian,")
           )
         )
       )
@@ -329,7 +329,7 @@ class SierraContributorsTest
       val varFields = List(
         createVarFieldWith(
           marcTag = "110",
-          subfields = List(MarcSubfield(tag = "a", content = name))
+          subfields = List(Subfield(tag = "a", content = name))
         )
       )
 
@@ -356,11 +356,11 @@ class SierraContributorsTest
         createVarFieldWith(
           marcTag = "110",
           subfields = List(
-            MarcSubfield(tag = "a", content = name),
-            MarcSubfield(tag = "b", content = subordinateUnit),
-            MarcSubfield(tag = "d", content = date),
-            MarcSubfield(tag = "c", content = place),
-            MarcSubfield(tag = "n", content = "  79125097")
+            Subfield(tag = "a", content = name),
+            Subfield(tag = "b", content = subordinateUnit),
+            Subfield(tag = "d", content = date),
+            Subfield(tag = "c", content = place),
+            Subfield(tag = "n", content = "  79125097")
           )
         )
       )
@@ -391,15 +391,15 @@ class SierraContributorsTest
       val varFields = List(
         createVarFieldWith(
           marcTag = "710",
-          subfields = List(MarcSubfield(tag = "a", content = name2))
+          subfields = List(Subfield(tag = "a", content = name2))
         ),
         createVarFieldWith(
           marcTag = "110",
-          subfields = List(MarcSubfield(tag = "a", content = name1))
+          subfields = List(Subfield(tag = "a", content = name1))
         ),
         createVarFieldWith(
           marcTag = "710",
-          subfields = List(MarcSubfield(tag = "a", content = name3))
+          subfields = List(Subfield(tag = "a", content = name3))
         )
       )
 
@@ -423,9 +423,9 @@ class SierraContributorsTest
         createVarFieldWith(
           marcTag = "110",
           subfields = List(
-            MarcSubfield(tag = "a", content = name),
-            MarcSubfield(tag = "e", content = role1),
-            MarcSubfield(tag = "e", content = role2)
+            Subfield(tag = "a", content = name),
+            Subfield(tag = "e", content = role1),
+            Subfield(tag = "e", content = role2)
           )
         )
       )
@@ -450,8 +450,8 @@ class SierraContributorsTest
         createVarFieldWith(
           marcTag = "110",
           subfields = List(
-            MarcSubfield(tag = "a", content = name),
-            MarcSubfield(tag = "0", content = lcshCode)
+            Subfield(tag = "a", content = name),
+            Subfield(tag = "0", content = lcshCode)
           )
         )
       )
@@ -486,10 +486,10 @@ class SierraContributorsTest
         createVarFieldWith(
           marcTag = "110",
           subfields = List(
-            MarcSubfield(tag = "a", content = name),
-            MarcSubfield(tag = "0", content = lcshCode1),
-            MarcSubfield(tag = "0", content = lcshCode2),
-            MarcSubfield(tag = "0", content = lcshCode3)
+            Subfield(tag = "a", content = name),
+            Subfield(tag = "0", content = lcshCode1),
+            Subfield(tag = "0", content = lcshCode2),
+            Subfield(tag = "0", content = lcshCode3)
           )
         )
       )
@@ -520,9 +520,9 @@ class SierraContributorsTest
         createVarFieldWith(
           marcTag = "110",
           subfields = List(
-            MarcSubfield(tag = "a", content = name),
-            MarcSubfield(tag = "0", content = "lcsh3349285"),
-            MarcSubfield(tag = "0", content = "lcsh9059917")
+            Subfield(tag = "a", content = name),
+            Subfield(tag = "0", content = "lcsh3349285"),
+            Subfield(tag = "0", content = "lcsh9059917")
           )
         )
       )
@@ -541,12 +541,12 @@ class SierraContributorsTest
         createVarFieldWith(
           marcTag = "110",
           subfields =
-            List(MarcSubfield(tag = "a", content = "The organisation,"))
+            List(Subfield(tag = "a", content = "The organisation,"))
         ),
         createVarFieldWith(
           marcTag = "710",
           subfields =
-            List(MarcSubfield(tag = "a", content = "Another organisation,"))
+            List(Subfield(tag = "a", content = "Another organisation,"))
         )
       )
 
@@ -569,7 +569,7 @@ class SierraContributorsTest
       createVarFieldWith(
         marcTag = "100",
         subfields = List(
-          MarcSubfield(tag = "e", content = "")
+          Subfield(tag = "e", content = "")
         )
       )
     )
@@ -583,7 +583,7 @@ class SierraContributorsTest
     it("gets the name from MARC tag 111 subfield $$a") {
       val varField = createVarFieldWith(
         marcTag = "111",
-        subfields = List(MarcSubfield(tag = "a", content = "Big meeting"))
+        subfields = List(Subfield(tag = "a", content = "Big meeting"))
       )
       val contributor = Contributor(Meeting(label = "Big meeting"), roles = Nil)
       transformAndCheckContributors(List(varField), List(contributor))
@@ -592,7 +592,7 @@ class SierraContributorsTest
     it("gets the name from MARC tag 711 subfield $$a") {
       val varField = createVarFieldWith(
         marcTag = "711",
-        subfields = List(MarcSubfield(tag = "a", content = "Big meeting"))
+        subfields = List(Subfield(tag = "a", content = "Big meeting"))
       )
       val contributor = Contributor(Meeting(label = "Big meeting"), roles = Nil)
       transformAndCheckContributors(List(varField), List(contributor))
@@ -602,11 +602,11 @@ class SierraContributorsTest
       val varField = createVarFieldWith(
         marcTag = "111",
         subfields = List(
-          MarcSubfield(tag = "a", content = "1"),
-          MarcSubfield(tag = "b", content = "not used"),
-          MarcSubfield(tag = "c", content = "2"),
-          MarcSubfield(tag = "d", content = "3"),
-          MarcSubfield(tag = "t", content = "4"),
+          Subfield(tag = "a", content = "1"),
+          Subfield(tag = "b", content = "not used"),
+          Subfield(tag = "c", content = "2"),
+          Subfield(tag = "d", content = "3"),
+          Subfield(tag = "t", content = "4"),
         )
       )
       val contributor = Contributor(Meeting(label = "1 2 3 4"), roles = Nil)
@@ -617,10 +617,10 @@ class SierraContributorsTest
       val varField = createVarFieldWith(
         marcTag = "111",
         subfields = List(
-          MarcSubfield(tag = "a", content = "label"),
-          MarcSubfield(tag = "e", content = "not a role"),
-          MarcSubfield(tag = "j", content = "1st role"),
-          MarcSubfield(tag = "j", content = "2nd role"),
+          Subfield(tag = "a", content = "label"),
+          Subfield(tag = "e", content = "not a role"),
+          Subfield(tag = "j", content = "1st role"),
+          Subfield(tag = "j", content = "2nd role"),
         )
       )
       val contributor = Contributor(
@@ -634,8 +634,8 @@ class SierraContributorsTest
       val varField = createVarFieldWith(
         marcTag = "111",
         subfields = List(
-          MarcSubfield(tag = "a", content = "label"),
-          MarcSubfield(tag = "0", content = "456")
+          Subfield(tag = "a", content = "label"),
+          Subfield(tag = "0", content = "456")
         )
       )
       val sourceIdentifier = SourceIdentifier(
@@ -658,17 +658,17 @@ class SierraContributorsTest
       createVarFieldWith(
         marcTag = "100",
         subfields = List(
-          MarcSubfield(tag = "a", content = "Steele, Richard,"),
-          MarcSubfield(tag = "c", content = "Sir,"),
-          MarcSubfield(tag = "d", content = "1672-1729.")
+          Subfield(tag = "a", content = "Steele, Richard,"),
+          Subfield(tag = "c", content = "Sir,"),
+          Subfield(tag = "d", content = "1672-1729.")
         )
       ),
       createVarFieldWith(
         marcTag = "700",
         subfields = List(
-          MarcSubfield(tag = "a", content = "Steele, Richard,"),
-          MarcSubfield(tag = "c", content = "Sir,"),
-          MarcSubfield(tag = "d", content = "1672-1729.")
+          Subfield(tag = "a", content = "Steele, Richard,"),
+          Subfield(tag = "c", content = "Sir,"),
+          Subfield(tag = "d", content = "1672-1729.")
         )
       )
     )
@@ -689,11 +689,11 @@ class SierraContributorsTest
       createVarFieldWith(
         marcTag = "700",
         subfields = List(
-          MarcSubfield(tag = "a", content = "Brewer, George."),
-          MarcSubfield(
+          Subfield(tag = "a", content = "Brewer, George."),
+          Subfield(
             tag = "t",
             content = "Essays after the manner of Goldsmith,"),
-          MarcSubfield(tag = "n", content = "No. 1-22.")
+          Subfield(tag = "n", content = "No. 1-22.")
         )
       )
     )
@@ -717,14 +717,14 @@ class SierraContributorsTest
       createVarFieldWith(
         marcTag = "700",
         subfields = List(
-          MarcSubfield(tag = "a", content = "Hippocrates."),
-          MarcSubfield(tag = "t", content = "Epistolae."),
-          MarcSubfield(
+          Subfield(tag = "a", content = "Hippocrates."),
+          Subfield(tag = "t", content = "Epistolae."),
+          Subfield(
             tag = "p",
             content = "Ad Ptolemaeum regem de hominis fabrica."),
-          MarcSubfield(tag = "l", content = "Latin."),
-          MarcSubfield(tag = "f", content = "1561."),
-          MarcSubfield(tag = "0", content = "n  79005643"),
+          Subfield(tag = "l", content = "Latin."),
+          Subfield(tag = "f", content = "1561."),
+          Subfield(tag = "0", content = "n  79005643"),
         )
       )
     )

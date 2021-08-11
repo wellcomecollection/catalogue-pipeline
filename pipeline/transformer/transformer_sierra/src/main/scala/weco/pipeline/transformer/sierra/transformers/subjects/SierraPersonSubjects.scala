@@ -3,8 +3,8 @@ package weco.pipeline.transformer.sierra.transformers.subjects
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work._
 import weco.catalogue.source_model.sierra.identifiers.SierraBibNumber
-import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
 import weco.pipeline.transformer.sierra.transformers.SierraAgents
+import weco.sierra.models.marc.{Subfield, VarField}
 
 // Populate wwork:subject
 //
@@ -45,7 +45,7 @@ object SierraPersonSubjects
         val generalSubdivisions =
           varField.subfields
             .collect {
-              case MarcSubfield("x", content) => content
+              case Subfield("x", content) => content
             }
 
         maybePerson.map { person =>
@@ -82,8 +82,8 @@ object SierraPersonSubjects
     : List[AbstractRootConcept[IdState.Unminted]] =
     person +: generalSubdivisions.map(Concept(_))
 
-  private def getRoles(secondarySubfields: List[MarcSubfield]) =
-    secondarySubfields.collect { case MarcSubfield("e", role) => role }
-  private def getDates(secondarySubfields: List[MarcSubfield]) =
+  private def getRoles(secondarySubfields: List[Subfield]) =
+    secondarySubfields.collect { case Subfield("e", role) => role }
+  private def getDates(secondarySubfields: List[Subfield]) =
     secondarySubfields.find(_.tag == "d").map(_.content)
 }

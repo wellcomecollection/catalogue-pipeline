@@ -1,6 +1,6 @@
 package weco.catalogue.source_model.sierra
 
-import weco.catalogue.source_model.sierra.marc.FixedField
+import weco.sierra.models.marc.FixedField
 
 case class SierraOrderData(
   deleted: Boolean = false,

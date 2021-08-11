@@ -1,12 +1,12 @@
 package weco.catalogue.source_model.sierra
 
-import weco.catalogue.source_model.sierra.marc.{FixedField, VarField}
 import weco.catalogue.source_model.sierra.source.{
   SierraMaterialType,
   SierraSourceCountry,
   SierraSourceLanguage,
   SierraSourceLocation
 }
+import weco.sierra.models.marc.{FixedField, VarField}
 
 // https://techdocs.iii.com/sierraapi/Content/zReference/objects/bibObjectDescription.htm
 // We only parse fields that we're going to use.

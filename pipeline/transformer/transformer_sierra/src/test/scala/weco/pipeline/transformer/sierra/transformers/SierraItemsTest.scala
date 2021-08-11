@@ -15,14 +15,10 @@ import weco.catalogue.internal_model.locations.{
 }
 import weco.catalogue.internal_model.work.Item
 import weco.catalogue.source_model.sierra.identifiers.SierraItemNumber
-import weco.catalogue.source_model.sierra.marc.{
-  FixedField,
-  MarcSubfield,
-  VarField
-}
 import weco.catalogue.source_model.sierra.source.SierraSourceLocation
 import weco.catalogue.source_model.sierra.{SierraBibData, SierraItemData}
 import weco.sierra.generators.SierraDataGenerators
+import weco.sierra.models.marc.{FixedField, Subfield, VarField}
 
 class SierraItemsTest
     extends AnyFunSpec
@@ -109,7 +105,7 @@ class SierraItemsTest
           VarField(
             fieldTag = Some("v"),
             subfields = List(
-              MarcSubfield(tag = "a", content = "Vol 1–5")
+              Subfield(tag = "a", content = "Vol 1–5")
             ))
         )
       )
@@ -125,7 +121,7 @@ class SierraItemsTest
           VarField(
             fieldTag = Some("v"),
             subfields = List(
-              MarcSubfield(tag = "a", content = "Vol 1–5")
+              Subfield(tag = "a", content = "Vol 1–5")
             ))
         )
       )

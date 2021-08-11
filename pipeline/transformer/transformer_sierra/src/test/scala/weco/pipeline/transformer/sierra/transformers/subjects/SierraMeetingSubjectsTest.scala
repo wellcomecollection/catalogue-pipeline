@@ -8,8 +8,8 @@ import weco.catalogue.internal_model.identifiers.{
   SourceIdentifier
 }
 import weco.catalogue.internal_model.work.{Meeting, Person, Subject}
-import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
 import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
+import weco.sierra.models.marc.{Subfield, VarField}
 
 class SierraMeetingSubjectsTest
     extends AnyFunSpec
@@ -22,7 +22,7 @@ class SierraMeetingSubjectsTest
   def bibData(varFields: VarField*) =
     createSierraBibDataWith(varFields = varFields.toList)
 
-  def varField(tag: String, subfields: MarcSubfield*) =
+  def varField(tag: String, subfields: Subfield*) =
     createVarFieldWith(
       marcTag = tag,
       subfields = subfields.toList,
@@ -34,8 +34,8 @@ class SierraMeetingSubjectsTest
 
   it("returns subjects for varfield 611, subfield $$a") {
     val data = bibData(
-      varField("600", MarcSubfield(tag = "a", content = "Not content")),
-      varField("611", MarcSubfield(tag = "a", content = "Content")),
+      varField("600", Subfield(tag = "a", content = "Not content")),
+      varField("611", Subfield(tag = "a", content = "Content")),
     )
     SierraMeetingSubjects(bibId, data) shouldBe List(
       Subject(
@@ -50,9 +50,9 @@ class SierraMeetingSubjectsTest
     val data = bibData(
       varField(
         "611",
-        MarcSubfield(tag = "c", content = "C"),
-        MarcSubfield(tag = "a", content = "A"),
-        MarcSubfield(tag = "d", content = "D"),
+        Subfield(tag = "c", content = "C"),
+        Subfield(tag = "a", content = "A"),
+        Subfield(tag = "d", content = "D"),
       )
     )
     SierraMeetingSubjects(bibId, data) shouldBe List(
@@ -65,7 +65,7 @@ class SierraMeetingSubjectsTest
 
   it("returns zero subjects if subfields all $$a, $$c and $$d are missing") {
     val data = bibData(
-      varField("611", MarcSubfield(tag = "x", content = "Hmmm"))
+      varField("611", Subfield(tag = "x", content = "Hmmm"))
     )
     SierraMeetingSubjects(bibId, data) shouldBe Nil
   }
@@ -74,8 +74,8 @@ class SierraMeetingSubjectsTest
     val data = bibData(
       varField(
         "600",
-        MarcSubfield(tag = "a", content = "Content"),
-        MarcSubfield(tag = "0", content = "lcsh7212")
+        Subfield(tag = "a", content = "Content"),
+        Subfield(tag = "0", content = "lcsh7212")
       )
     )
     val sourceIdentifier = SourceIdentifier(
@@ -94,8 +94,8 @@ class SierraMeetingSubjectsTest
 
   it("returns multiple subjects if multiple 611") {
     val data = bibData(
-      varField("611", MarcSubfield(tag = "a", content = "First")),
-      varField("611", MarcSubfield(tag = "a", content = "Second")),
+      varField("611", Subfield(tag = "a", content = "First")),
+      varField("611", Subfield(tag = "a", content = "Second")),
     )
     SierraMeetingSubjects(bibId, data) shouldBe List(
       Subject(

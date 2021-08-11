@@ -5,8 +5,8 @@ import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.source_model.sierra.source.SierraSourceLanguage
 import weco.catalogue.source_model.sierra.SierraBibData
-import weco.catalogue.source_model.sierra.marc.MarcSubfield
 import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
+import weco.sierra.models.marc.Subfield
 
 class SierraLanguagesTest
     extends AnyFunSpec
@@ -40,9 +40,9 @@ class SierraLanguagesTest
         createVarFieldWith(
           marcTag = "041",
           subfields = List(
-            MarcSubfield(tag = "a", content = "ger"),
-            MarcSubfield(tag = "b", content = "dut"),
-            MarcSubfield(tag = "a", content = "eng")
+            Subfield(tag = "a", content = "ger"),
+            Subfield(tag = "b", content = "dut"),
+            Subfield(tag = "a", content = "eng")
           )
         )
       )
@@ -63,11 +63,11 @@ class SierraLanguagesTest
       varFields = List(
         createVarFieldWith(
           marcTag = "041",
-          subfields = List(MarcSubfield(tag = "a", content = "ger"))
+          subfields = List(Subfield(tag = "a", content = "ger"))
         ),
         createVarFieldWith(
           marcTag = "041",
-          subfields = List(MarcSubfield(tag = "a", content = "eng"))
+          subfields = List(Subfield(tag = "a", content = "eng"))
         )
       )
     )
@@ -88,7 +88,7 @@ class SierraLanguagesTest
         createVarFieldWith(
           marcTag = "041",
           subfields = List(
-            MarcSubfield(tag = "a", content = "???")
+            Subfield(tag = "a", content = "???")
           )
         )
       )
@@ -107,9 +107,9 @@ class SierraLanguagesTest
         createVarFieldWith(
           marcTag = "041",
           subfields = List(
-            MarcSubfield(tag = "a", content = "fre"),
-            MarcSubfield(tag = "a", content = "eng"),
-            MarcSubfield(tag = "a", content = "ger")
+            Subfield(tag = "a", content = "fre"),
+            Subfield(tag = "a", content = "eng"),
+            Subfield(tag = "a", content = "ger")
           )
         )
       )
@@ -131,11 +131,11 @@ class SierraLanguagesTest
         createVarFieldWith(
           marcTag = "041",
           subfields = List(
-            MarcSubfield(tag = "a", content = "mul"), // Multiple languages
-            MarcSubfield(tag = "a", content = "eng"),
-            MarcSubfield(tag = "a", content = "und"), // Undetermined
-            MarcSubfield(tag = "a", content = "fre"),
-            MarcSubfield(tag = "a", content = "zxx") // No linguistic content
+            Subfield(tag = "a", content = "mul"), // Multiple languages
+            Subfield(tag = "a", content = "eng"),
+            Subfield(tag = "a", content = "und"), // Undetermined
+            Subfield(tag = "a", content = "fre"),
+            Subfield(tag = "a", content = "zxx") // No linguistic content
           )
         )
       )
@@ -154,7 +154,7 @@ class SierraLanguagesTest
         createVarFieldWith(
           marcTag = "041",
           subfields = List(
-            MarcSubfield(tag = "a", content = "eng "),
+            Subfield(tag = "a", content = "eng "),
           )
         )
       )
@@ -171,8 +171,8 @@ class SierraLanguagesTest
         createVarFieldWith(
           marcTag = "041",
           subfields = List(
-            MarcSubfield(tag = "a", content = "ENG"),
-            MarcSubfield(tag = "a", content = "Lat"),
+            Subfield(tag = "a", content = "ENG"),
+            Subfield(tag = "a", content = "Lat"),
           )
         )
       )
