@@ -3,9 +3,9 @@ package weco.pipeline.transformer.sierra.transformers
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.languages.Language
-import weco.catalogue.source_model.sierra.source.SierraSourceLanguage
 import weco.catalogue.source_model.sierra.SierraBibData
 import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
+import weco.sierra.models.fields.SierraLanguage
 import weco.sierra.models.marc.Subfield
 
 class SierraLanguagesTest
@@ -23,7 +23,7 @@ class SierraLanguagesTest
     // e.g. b11751198
     val bibData = createSierraBibDataWith(
       lang = Some(
-        SierraSourceLanguage(code = "fre", name = "French")
+        SierraLanguage(code = "fre", name = "French")
       ),
       varFields = List.empty
     )
@@ -34,7 +34,7 @@ class SierraLanguagesTest
   it("combines the language from the 'lang' field and 041") {
     val bibData = createSierraBibDataWith(
       lang = Some(
-        SierraSourceLanguage(code = "fre", name = "French")
+        SierraLanguage(code = "fre", name = "French")
       ),
       varFields = List(
         createVarFieldWith(
@@ -58,7 +58,7 @@ class SierraLanguagesTest
   it("gets languages from multiple instances of 041") {
     val bibData = createSierraBibDataWith(
       lang = Some(
-        SierraSourceLanguage(code = "fre", name = "French")
+        SierraLanguage(code = "fre", name = "French")
       ),
       varFields = List(
         createVarFieldWith(
@@ -82,7 +82,7 @@ class SierraLanguagesTest
   it("ignores unrecognised language codes in 041") {
     val bibData = createSierraBibDataWith(
       lang = Some(
-        SierraSourceLanguage(code = "chi", name = "Chinese")
+        SierraLanguage(code = "chi", name = "Chinese")
       ),
       varFields = List(
         createVarFieldWith(
@@ -101,7 +101,7 @@ class SierraLanguagesTest
     // e.g. b11953640
     val bibData = createSierraBibDataWith(
       lang = Some(
-        SierraSourceLanguage(code = "ger", name = "German")
+        SierraLanguage(code = "ger", name = "German")
       ),
       varFields = List(
         createVarFieldWith(
@@ -125,7 +125,7 @@ class SierraLanguagesTest
   it("suppresses codes that don't correspond to languages") {
     val bibData = createSierraBibDataWith(
       lang = Some(
-        SierraSourceLanguage(code = "chi", name = "Chinese")
+        SierraLanguage(code = "chi", name = "Chinese")
       ),
       varFields = List(
         createVarFieldWith(
@@ -186,7 +186,7 @@ class SierraLanguagesTest
 
   it("skips a language with no name and an unidentifiable code") {
     val bibData = createSierraBibDataWith(
-      lang = Some(SierraSourceLanguage(code = "idk", name = None))
+      lang = Some(SierraLanguage(code = "idk", name = None))
     )
 
     getLanguages(bibData) shouldBe empty
@@ -194,7 +194,7 @@ class SierraLanguagesTest
 
   it("ignores a language code which is only whitespace") {
     val bibData = createSierraBibDataWith(
-      lang = Some(SierraSourceLanguage(code = "   ", name = None))
+      lang = Some(SierraLanguage(code = "   ", name = None))
     )
 
     getLanguages(bibData) shouldBe empty

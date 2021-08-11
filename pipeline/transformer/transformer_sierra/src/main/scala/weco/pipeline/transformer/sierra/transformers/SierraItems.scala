@@ -17,9 +17,9 @@ import weco.catalogue.source_model.sierra.rules.{
   SierraItemAccess,
   SierraPhysicalLocationType
 }
-import weco.catalogue.source_model.sierra.source.SierraQueryOps
 import weco.catalogue.source_model.sierra.{SierraBibData, SierraItemData}
 import weco.pipeline.transformer.sierra.data.SierraPhysicalItemOrder
+import weco.sierra.models.SierraQueryOps
 import weco.sierra.models.identifiers.SierraBibNumber
 import weco.sierra.models.marc.VarField
 

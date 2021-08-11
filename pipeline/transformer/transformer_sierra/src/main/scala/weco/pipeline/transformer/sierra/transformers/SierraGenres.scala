@@ -3,7 +3,7 @@ package weco.pipeline.transformer.sierra.transformers
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.{Concept, Genre}
 import weco.catalogue.source_model.sierra.SierraBibData
-import weco.catalogue.source_model.sierra.source.SierraQueryOps
+import weco.sierra.models.SierraQueryOps
 import weco.sierra.models.marc.{Subfield, VarField}
 
 // Populate wwork:genres

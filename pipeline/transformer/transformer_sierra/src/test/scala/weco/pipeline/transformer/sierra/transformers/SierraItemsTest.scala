@@ -14,9 +14,9 @@ import weco.catalogue.internal_model.locations.{
   PhysicalLocation
 }
 import weco.catalogue.internal_model.work.Item
-import weco.catalogue.source_model.sierra.source.SierraSourceLocation
 import weco.catalogue.source_model.sierra.{SierraBibData, SierraItemData}
 import weco.sierra.generators.SierraDataGenerators
+import weco.sierra.models.fields.SierraLocation
 import weco.sierra.models.identifiers.SierraItemNumber
 import weco.sierra.models.marc.{FixedField, Subfield, VarField}
 
@@ -244,8 +244,8 @@ class SierraItemsTest
     val bibData = createSierraBibDataWith(
       locations = Some(
         List(
-          SierraSourceLocation("digi", "Digitised Collections"),
-          SierraSourceLocation("dlnk", "Digitised content")
+          SierraLocation("digi", "Digitised Collections"),
+          SierraLocation("dlnk", "Digitised content")
         ))
     )
 
@@ -253,7 +253,7 @@ class SierraItemsTest
   }
 
   it("creates an item with a physical location") {
-    val sierraLocation = SierraSourceLocation(
+    val sierraLocation = SierraLocation(
       code = "sghi2",
       name = "Closed stores Hist. 2"
     )
@@ -289,7 +289,7 @@ class SierraItemsTest
   }
 
   it("adds a note to the item") {
-    val sierraLocation = SierraSourceLocation(
+    val sierraLocation = SierraLocation(
       code = "scmac",
       name = "Closed stores Arch. & MSS"
     )
@@ -324,7 +324,7 @@ class SierraItemsTest
   }
 
   it("uses the Sierra location name as the label for non-closed locations") {
-    val openLocation = SierraSourceLocation(
+    val openLocation = SierraLocation(
       code = "wghib",
       name = "Biographies"
     )
@@ -342,14 +342,14 @@ class SierraItemsTest
 
   it("creates an item with a physical location and ignores digital locations") {
     val sierraPhysicalLocation1 =
-      SierraSourceLocation("sicon", "Closed stores Iconographic")
+      SierraLocation("sicon", "Closed stores Iconographic")
 
     val bibData =
       createSierraBibDataWith(
         locations = Some(
           List(
-            SierraSourceLocation("digi", "Digitised Collections"),
-            SierraSourceLocation("dlnk", "Digitised content"))))
+            SierraLocation("digi", "Digitised Collections"),
+            SierraLocation("dlnk", "Digitised content"))))
 
     val itemData = createSierraItemDataWith(
       location = Some(sierraPhysicalLocation1),
@@ -388,7 +388,7 @@ class SierraItemsTest
     it("skips adding a location if the Sierra location is 'bound in above'") {
       val itemDataEntries = Seq(
         createSierraItemDataWith(
-          location = Some(SierraSourceLocation("bwith", "bound in above"))
+          location = Some(SierraLocation("bwith", "bound in above"))
         )
       )
 
@@ -402,18 +402,18 @@ class SierraItemsTest
       "adds a location to 'bound/contained in above' if the other locations are unambiguous") {
       val itemDataEntries = Seq(
         createSierraItemDataWith(
-          location = Some(SierraSourceLocation("bwith", "bound in above"))
+          location = Some(SierraLocation("bwith", "bound in above"))
         ),
         createSierraItemDataWith(
           location =
-            Some(SierraSourceLocation("sicon", "Closed stores Iconographic"))
+            Some(SierraLocation("sicon", "Closed stores Iconographic"))
         ),
         createSierraItemDataWith(
-          location = Some(SierraSourceLocation("cwith", "contained in above"))
+          location = Some(SierraLocation("cwith", "contained in above"))
         ),
         createSierraItemDataWith(
           location =
-            Some(SierraSourceLocation("sicon", "Closed stores Iconographic"))
+            Some(SierraLocation("sicon", "Closed stores Iconographic"))
         )
       )
 
@@ -433,18 +433,18 @@ class SierraItemsTest
       "adds a location to 'bound/contained in above' if the other locations are all closed") {
       val itemDataEntries = Seq(
         createSierraItemDataWith(
-          location = Some(SierraSourceLocation("bwith", "bound in above"))
+          location = Some(SierraLocation("bwith", "bound in above"))
         ),
         createSierraItemDataWith(
           location =
-            Some(SierraSourceLocation("sicon", "Closed stores Iconographic"))
+            Some(SierraLocation("sicon", "Closed stores Iconographic"))
         ),
         createSierraItemDataWith(
-          location = Some(SierraSourceLocation("cwith", "contained in above"))
+          location = Some(SierraLocation("cwith", "contained in above"))
         ),
         createSierraItemDataWith(
           location =
-            Some(SierraSourceLocation("sobhi", "Closed stores P.B. Hindi"))
+            Some(SierraLocation("sobhi", "Closed stores P.B. Hindi"))
         )
       )
 
@@ -464,17 +464,17 @@ class SierraItemsTest
       "skips adding a location to 'bound/contained in above' if the other locations are ambiguous") {
       val itemDataEntries = Seq(
         createSierraItemDataWith(
-          location = Some(SierraSourceLocation("bwith", "bound in above"))
+          location = Some(SierraLocation("bwith", "bound in above"))
         ),
         createSierraItemDataWith(
           location =
-            Some(SierraSourceLocation("sicon", "Closed stores Iconographic"))
+            Some(SierraLocation("sicon", "Closed stores Iconographic"))
         ),
         createSierraItemDataWith(
-          location = Some(SierraSourceLocation("cwith", "contained in above"))
+          location = Some(SierraLocation("cwith", "contained in above"))
         ),
         createSierraItemDataWith(
-          location = Some(SierraSourceLocation("info", "Open shelves"))
+          location = Some(SierraLocation("info", "Open shelves"))
         )
       )
 

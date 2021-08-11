@@ -8,7 +8,7 @@ import weco.catalogue.internal_model.work.{
   Period,
   Place
 }
-import weco.catalogue.source_model.sierra.source.SierraQueryOps
+import weco.sierra.models.SierraQueryOps
 import weco.sierra.models.marc.{Subfield, VarField}
 
 trait SierraConcepts extends SierraQueryOps {

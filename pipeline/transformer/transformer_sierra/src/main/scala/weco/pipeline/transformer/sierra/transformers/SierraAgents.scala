@@ -6,7 +6,7 @@ import weco.catalogue.internal_model.identifiers.{
   SourceIdentifier
 }
 import weco.catalogue.internal_model.work.{Meeting, Organisation, Person}
-import weco.catalogue.source_model.sierra.source.SierraQueryOps
+import weco.sierra.models.SierraQueryOps
 import weco.sierra.models.marc.Subfield
 
 trait SierraAgents extends SierraQueryOps {

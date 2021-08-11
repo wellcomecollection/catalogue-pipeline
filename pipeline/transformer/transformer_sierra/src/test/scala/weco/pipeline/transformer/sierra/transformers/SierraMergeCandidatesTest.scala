@@ -9,8 +9,8 @@ import weco.catalogue.internal_model.identifiers.{
 }
 import weco.catalogue.internal_model.work.MergeCandidate
 import weco.catalogue.source_model.sierra.SierraBibData
-import weco.catalogue.source_model.sierra.source.SierraMaterialType
 import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
+import weco.sierra.models.fields.SierraMaterialType
 import weco.sierra.models.marc.{Subfield, VarField}
 
 class SierraMergeCandidatesTest

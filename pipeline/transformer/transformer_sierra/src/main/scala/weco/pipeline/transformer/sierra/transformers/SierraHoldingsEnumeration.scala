@@ -1,7 +1,7 @@
 package weco.pipeline.transformer.sierra.transformers
 
 import grizzled.slf4j.Logging
-import weco.catalogue.source_model.sierra.source.SierraQueryOps
+import weco.sierra.models.SierraQueryOps
 import weco.sierra.models.identifiers.TypedSierraRecordNumber
 import weco.sierra.models.marc.{Subfield, VarField}
 

@@ -1,6 +1,6 @@
 package weco.catalogue.source_model.sierra
 
-import weco.catalogue.source_model.sierra.source.SierraSourceLocation
+import weco.sierra.models.fields.SierraLocation
 import weco.sierra.models.identifiers.SierraItemNumber
 import weco.sierra.models.marc.{FixedField, VarField}
 
@@ -10,7 +10,7 @@ case class SierraItemData(
   suppressed: Boolean = false,
   copyNo: Option[Int] = None,
   holdCount: Option[Int] = Some(0),
-  location: Option[SierraSourceLocation] = None,
+  location: Option[SierraLocation] = None,
   fixedFields: Map[String, FixedField] = Map(),
   varFields: List[VarField] = List()
 ) {

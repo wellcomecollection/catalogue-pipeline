@@ -3,7 +3,7 @@ package weco.pipeline.transformer.sierra.transformers
 import scala.util.Try
 import scala.concurrent.duration._
 import weco.catalogue.source_model.sierra.SierraBibData
-import weco.catalogue.source_model.sierra.source.SierraQueryOps
+import weco.sierra.models.SierraQueryOps
 
 object SierraDuration extends SierraDataTransformer with SierraQueryOps {
 

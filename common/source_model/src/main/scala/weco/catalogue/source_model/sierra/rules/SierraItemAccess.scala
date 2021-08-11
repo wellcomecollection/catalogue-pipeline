@@ -9,11 +9,8 @@ import weco.catalogue.internal_model.locations.{
   PhysicalLocationType
 }
 import weco.catalogue.source_model.sierra.SierraItemData
-import weco.catalogue.source_model.sierra.source.{
-  OpacMsg,
-  SierraQueryOps,
-  Status
-}
+import weco.catalogue.source_model.sierra.source.{OpacMsg, Status}
+import weco.sierra.models.SierraQueryOps
 import weco.sierra.models.identifiers.SierraBibNumber
 import weco.sierra.models.marc.FixedField
 

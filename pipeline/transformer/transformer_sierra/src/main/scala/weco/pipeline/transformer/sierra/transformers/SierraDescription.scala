@@ -3,8 +3,8 @@ package weco.pipeline.transformer.sierra.transformers
 import grizzled.slf4j.Logging
 
 import java.net.URL
-import weco.catalogue.source_model.sierra.source.SierraQueryOps
 import weco.catalogue.source_model.sierra.SierraBibData
+import weco.sierra.models.SierraQueryOps
 import weco.sierra.models.identifiers.SierraBibNumber
 import weco.sierra.models.marc.{Subfield, VarField}
 

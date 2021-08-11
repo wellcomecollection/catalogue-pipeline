@@ -1,8 +1,8 @@
 package weco.pipeline.transformer.sierra.transformers
 
 import weco.catalogue.source_model.sierra.SierraBibData
-import weco.catalogue.source_model.sierra.source.SierraQueryOps
 import weco.pipeline.transformer.sierra.exceptions.ShouldNotTransformException
+import weco.sierra.models.SierraQueryOps
 
 object SierraTitle extends SierraDataTransformer with SierraQueryOps {
 

@@ -1,10 +1,10 @@
 package weco.catalogue.source_model.sierra
 
-import weco.catalogue.source_model.sierra.source.{
-  SierraMaterialType,
-  SierraSourceCountry,
-  SierraSourceLanguage,
-  SierraSourceLocation
+import weco.sierra.models.fields.{
+  SierraCountry,
+  SierraLanguage,
+  SierraLocation,
+  SierraMaterialType
 }
 import weco.sierra.models.marc.{FixedField, VarField}
 
@@ -13,10 +13,10 @@ import weco.sierra.models.marc.{FixedField, VarField}
 case class SierraBibData(
   deleted: Boolean = false,
   suppressed: Boolean = false,
-  country: Option[SierraSourceCountry] = None,
-  lang: Option[SierraSourceLanguage] = None,
+  country: Option[SierraCountry] = None,
+  lang: Option[SierraLanguage] = None,
   materialType: Option[SierraMaterialType] = None,
-  locations: Option[List[SierraSourceLocation]] = None,
+  locations: Option[List[SierraLocation]] = None,
   fixedFields: Map[String, FixedField] = Map(),
   varFields: List[VarField] = List()
 ) {

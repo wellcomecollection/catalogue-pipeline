@@ -1,7 +1,7 @@
 package weco.pipeline.transformer.sierra.transformers
 
 import weco.catalogue.source_model.sierra.SierraBibData
-import weco.catalogue.source_model.sierra.source.SierraQueryOps
+import weco.sierra.models.SierraQueryOps
 
 // Populate wwork:lettering.
 //

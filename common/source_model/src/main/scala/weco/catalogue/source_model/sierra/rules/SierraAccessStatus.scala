@@ -1,8 +1,8 @@
 package weco.catalogue.source_model.sierra.rules
 
 import weco.catalogue.internal_model.locations.AccessStatus
-import weco.catalogue.source_model.sierra.source.SierraQueryOps
 import weco.catalogue.source_model.sierra.SierraBibData
+import weco.sierra.models.SierraQueryOps
 import weco.sierra.models.identifiers.SierraBibNumber
 import weco.sierra.models.marc.VarField
 
