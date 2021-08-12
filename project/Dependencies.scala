@@ -297,7 +297,8 @@ object CatalogueDependencies {
       WellcomeDependencies.messagingTypesafeLibrary ++
       WellcomeDependencies.jsonLibrary ++
       WellcomeDependencies.storageTypesafeLibrary ++
-      WellcomeDependencies.sierraTypesafeLibrary
+      WellcomeDependencies.sierraTypesafeLibrary ++
+      WellcomeDependencies.typesafeLibrary
 
   val sierraIndexerDependencies: Seq[ModuleID] =
     WellcomeDependencies.storageTypesafeLibrary
