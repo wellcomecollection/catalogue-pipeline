@@ -2,6 +2,7 @@ package weco.pipeline.transformer.sierra.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import weco.catalogue.internal_model.generators.IdentifiersGenerators
 import weco.catalogue.internal_model.identifiers.{
   IdentifierType,
   SourceIdentifier
@@ -14,6 +15,7 @@ class SierraIdentifiersTest
     extends AnyFunSpec
     with Matchers
     with MarcGenerators
+    with IdentifiersGenerators
     with SierraDataGenerators {
 
   it("passes through the main identifier from the bib record") {

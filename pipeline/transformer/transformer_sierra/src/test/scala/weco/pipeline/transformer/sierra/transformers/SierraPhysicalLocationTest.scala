@@ -14,13 +14,13 @@ import weco.sierra.models.data.SierraItemData
 import weco.sierra.models.fields.SierraLocation
 import weco.sierra.models.marc.{FixedField, Subfield, VarField}
 
-class SierraLocationTest
+class SierraPhysicalLocationTest
     extends AnyFunSpec
     with Matchers
     with MarcGenerators
     with SierraDataGenerators {
 
-  private val transformer = new SierraLocation {}
+  private val transformer = new SierraPhysicalLocation {}
 
   describe("Physical locations") {
     val bibId = createSierraBibNumber

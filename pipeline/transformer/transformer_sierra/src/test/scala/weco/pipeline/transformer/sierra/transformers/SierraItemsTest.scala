@@ -2,6 +2,7 @@ package weco.pipeline.transformer.sierra.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import weco.catalogue.internal_model.generators.IdentifiersGenerators
 import weco.catalogue.internal_model.identifiers.{
   IdState,
   IdentifierType,
@@ -23,6 +24,7 @@ import weco.sierra.models.marc.{FixedField, Subfield, VarField}
 class SierraItemsTest
     extends AnyFunSpec
     with Matchers
+    with IdentifiersGenerators
     with SierraDataGenerators {
 
   it("creates both forms of the Sierra ID in 'identifiers'") {

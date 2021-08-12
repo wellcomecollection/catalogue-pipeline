@@ -8,7 +8,7 @@ import weco.catalogue.source_model.sierra.rules.{
 import weco.sierra.models.data.{SierraBibData, SierraItemData}
 import weco.sierra.models.identifiers.SierraBibNumber
 
-trait SierraLocation {
+trait SierraPhysicalLocation {
   def getPhysicalLocation(
     bibNumber: SierraBibNumber,
     itemData: SierraItemData,
