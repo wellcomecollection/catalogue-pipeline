@@ -2,7 +2,7 @@ import sbt._
 
 object WellcomeDependencies {
 
-  val defaultVersion = "30.2.0" // This is automatically bumped by the scala-libs release process, do not edit this line manually
+  val defaultVersion = "30.3.0" // This is automatically bumped by the scala-libs release process, do not edit this line manually
 
   lazy val versions = new {
     val typesafe = defaultVersion
@@ -283,16 +283,18 @@ object CatalogueDependencies {
   // Sierra adapter stack
 
   val sierraLinkerDependencies: Seq[ModuleID] =
-    WellcomeDependencies.typesafeLibrary
+    WellcomeDependencies.sierraTypesafeLibrary ++
+      WellcomeDependencies.messagingTypesafeLibrary ++
+      WellcomeDependencies.storageTypesafeLibrary
 
   val sierraMergerDependencies: Seq[ModuleID] =
-    WellcomeDependencies.typesafeLibrary
+    WellcomeDependencies.sierraTypesafeLibrary
 
   val sierraReaderDependencies: Seq[ModuleID] =
     ExternalDependencies.circeOpticsDependencies ++
       WellcomeDependencies.messagingTypesafeLibrary ++
       WellcomeDependencies.jsonLibrary ++
-      WellcomeDependencies.typesafeLibrary ++
+      WellcomeDependencies.storageTypesafeLibrary ++
       WellcomeDependencies.sierraTypesafeLibrary
 
   // Inference manager

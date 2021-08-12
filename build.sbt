@@ -189,7 +189,7 @@ lazy val transformer_tei= setupProject(
 lazy val sierra_reader = setupProject(
   project,
   "sierra_adapter/sierra_reader",
-  localDependencies = Seq(source_model_typesafe),
+  localDependencies = Seq(source_model),
   externalDependencies = CatalogueDependencies.sierraReaderDependencies
 )
 
@@ -203,14 +203,14 @@ lazy val sierra_merger = setupProject(
 lazy val sierra_linker = setupProject(
   project,
   folder = "sierra_adapter/sierra_linker",
-  localDependencies = Seq(source_model_typesafe),
+  localDependencies = Seq(source_model),
   externalDependencies = CatalogueDependencies.sierraLinkerDependencies
 )
 
 lazy val sierra_indexer = setupProject(
   project,
   folder = "sierra_adapter/sierra_indexer",
-  localDependencies = Seq(source_model_typesafe, pipeline_storage_typesafe))
+  localDependencies = Seq(source_model, pipeline_storage_typesafe))
 
 // METS adapter
 

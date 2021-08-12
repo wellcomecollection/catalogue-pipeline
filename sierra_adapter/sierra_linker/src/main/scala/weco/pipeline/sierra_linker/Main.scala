@@ -5,7 +5,6 @@ import com.typesafe.config.Config
 import org.scanamo.DynamoFormat
 import org.scanamo.generic.auto._
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import weco.catalogue.source_model.config.SierraRecordTypeBuilder
 import weco.catalogue.source_model.sierra.{
   AbstractSierraRecord,
   SierraHoldingsRecord,
@@ -25,6 +24,7 @@ import weco.sierra.models.identifiers.{
   SierraRecordTypes,
   TypedSierraRecordNumber
 }
+import weco.sierra.typesafe.SierraRecordTypeBuilder
 import weco.storage.store.dynamo.DynamoSingleVersionStore
 import weco.storage.typesafe.DynamoBuilder
 import weco.typesafe.WellcomeTypesafeApp
