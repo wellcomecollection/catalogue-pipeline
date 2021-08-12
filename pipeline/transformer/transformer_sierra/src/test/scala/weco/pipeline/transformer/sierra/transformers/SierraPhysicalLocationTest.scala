@@ -53,7 +53,7 @@ class SierraPhysicalLocationTest
         locationType = LocationType.ClosedStores,
         label = LocationType.ClosedStores.label,
         accessConditions =
-          List(AccessCondition(method = AccessMethod.OnlineRequest))
+          List(AccessCondition(method = AccessMethod.OnlineRequest, status = AccessStatus.Open))
       )
 
       transformer.getPhysicalLocation(bibId, itemData, bibData) shouldBe Some(

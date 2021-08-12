@@ -13,6 +13,8 @@ object AccessMethod extends Enum[License] {
     "IDs for AccessMethod are not unique!"
   )
 
+  // This is kept for compatibility with the 2021-08-09 index, but is no longer
+  // set anywhere.  We should remove it after the next reindex.
   case object OpenShelves extends AccessMethod
 
   case object ViewOnline extends AccessMethod

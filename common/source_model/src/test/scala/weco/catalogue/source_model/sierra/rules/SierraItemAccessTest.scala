@@ -45,7 +45,7 @@ class SierraItemAccessTest
             itemData = itemData
           )
 
-          ac shouldBe AccessCondition(method = AccessMethod.OnlineRequest)
+          ac shouldBe AccessCondition(method = AccessMethod.OnlineRequest, status = AccessStatus.Open)
         }
 
         it("if it has no restrictions and the bib is open") {
@@ -609,7 +609,7 @@ class SierraItemAccessTest
 
         ac shouldBe
           AccessCondition(
-            method = AccessMethod.OnlineRequest,
+            method = AccessMethod.NotRequestable,
             status = Some(AccessStatus.TemporarilyUnavailable),
             note = Some(
               "Item is in use by another reader. Please ask at Enquiry Desk.")
@@ -644,7 +644,7 @@ class SierraItemAccessTest
 
         ac shouldBe
           AccessCondition(
-            method = AccessMethod.OnlineRequest,
+            method = AccessMethod.NotRequestable,
             status = Some(AccessStatus.TemporarilyUnavailable),
             note = Some(
               "Item is in use by another reader. Please ask at Enquiry Desk.")
@@ -682,7 +682,7 @@ class SierraItemAccessTest
 
         ac shouldBe
           AccessCondition(
-            method = AccessMethod.ManualRequest,
+            method = AccessMethod.NotRequestable,
             status = Some(AccessStatus.TemporarilyUnavailable),
             note = Some(
               "Item is in use by another reader. Please ask at Enquiry Desk.")
@@ -716,7 +716,7 @@ class SierraItemAccessTest
 
         ac shouldBe
           AccessCondition(
-            method = AccessMethod.OnlineRequest,
+            method = AccessMethod.NotRequestable,
             status = Some(AccessStatus.TemporarilyUnavailable),
             note = Some(
               "Item is in use by another reader. Please ask at Enquiry Desk.")
@@ -907,7 +907,7 @@ class SierraItemAccessTest
           itemData = itemData
         )
 
-        ac shouldBe AccessCondition(method = AccessMethod.OpenShelves)
+        ac shouldBe AccessCondition(method = AccessMethod.NotRequestable)
       }
 
       it("gets a display note") {
@@ -941,12 +941,8 @@ class SierraItemAccessTest
           itemData = itemData
         )
 
-        ac shouldBe
-          AccessCondition(
-            method = AccessMethod.OpenShelves,
-            note = Some(
-              "Shelved at the end of the Quick Ref. section with the oversize Quick Ref. books.")
-          )
+        ac.note shouldBe Some(
+          "Shelved at the end of the Quick Ref. section with the oversize Quick Ref. books.")
       }
     }
 

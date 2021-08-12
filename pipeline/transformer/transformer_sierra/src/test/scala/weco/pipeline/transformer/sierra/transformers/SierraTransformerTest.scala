@@ -190,7 +190,7 @@ class SierraTransformerTest
           locationType = LocationType.ClosedStores,
           label = LocationType.ClosedStores.label,
           accessConditions =
-            List(AccessCondition(method = AccessMethod.OnlineRequest))
+            List(AccessCondition(method = AccessMethod.OnlineRequest, status = AccessStatus.Open))
         )
       )
     )
