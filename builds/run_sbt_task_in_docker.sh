@@ -22,6 +22,8 @@ fi
 
 set -o xtrace
 
+echo "$ROOT"
+
 docker run --tty --rm \
   --volume ~/.sbt:/root/.sbt \
   --volume ~/.ivy2:/root/.ivy2 \
