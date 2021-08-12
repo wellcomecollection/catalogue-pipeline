@@ -4,7 +4,7 @@ set -o errexit
 set -o nounset
 set -o verbose
 
-ROOT=$(git rev-parse --show-toplevel)
+export ROOT=$(git rev-parse --show-toplevel)
 BUILDS_DIR="$ROOT/builds"
 
 for PROJECT in feature_inferrer palette_inferrer aspect_ratio_inferrer
