@@ -285,10 +285,12 @@ object CatalogueDependencies {
   val sierraLinkerDependencies: Seq[ModuleID] =
     WellcomeDependencies.sierraTypesafeLibrary ++
       WellcomeDependencies.messagingTypesafeLibrary ++
-      WellcomeDependencies.storageTypesafeLibrary
+      WellcomeDependencies.storageTypesafeLibrary ++
+      WellcomeDependencies.typesafeLibrary
 
   val sierraMergerDependencies: Seq[ModuleID] =
-    WellcomeDependencies.sierraTypesafeLibrary
+    WellcomeDependencies.sierraTypesafeLibrary ++
+      WellcomeDependencies.typesafeLibrary
 
   val sierraReaderDependencies: Seq[ModuleID] =
     ExternalDependencies.circeOpticsDependencies ++
@@ -296,6 +298,9 @@ object CatalogueDependencies {
       WellcomeDependencies.jsonLibrary ++
       WellcomeDependencies.storageTypesafeLibrary ++
       WellcomeDependencies.sierraTypesafeLibrary
+
+  val sierraIndexerDependencies: Seq[ModuleID] =
+    WellcomeDependencies.storageTypesafeLibrary
 
   // Inference manager
   val inferenceManagerDependencies: Seq[ModuleID] =

@@ -210,7 +210,9 @@ lazy val sierra_linker = setupProject(
 lazy val sierra_indexer = setupProject(
   project,
   folder = "sierra_adapter/sierra_indexer",
-  localDependencies = Seq(source_model, pipeline_storage_typesafe))
+  localDependencies = Seq(source_model, pipeline_storage_typesafe),
+  externalDependencies = CatalogueDependencies.sierraIndexerDependencies
+)
 
 // METS adapter
 
