@@ -9,11 +9,11 @@ import weco.messaging.memory.MemoryMessageSender
 import weco.monitoring.memory.MemoryMetrics
 import weco.storage.Version
 import weco.storage.store.memory.MemoryVersionedStore
-import weco.catalogue.source_model.generators.SierraGenerators
+import weco.catalogue.source_model.generators.SierraRecordGenerators
 import weco.catalogue.source_model.sierra.SierraItemRecord
-import weco.catalogue.source_model.sierra.identifiers.SierraItemNumber
 import weco.pipeline.sierra_linker.fixtures.WorkerFixture
 import weco.pipeline.sierra_linker.models.{Link, LinkOps}
+import weco.sierra.models.identifiers.SierraItemNumber
 
 class SierraLinkerWorkerTest
     extends AnyFunSpec
@@ -21,7 +21,7 @@ class SierraLinkerWorkerTest
     with Eventually
     with IntegrationPatience
     with ScalaFutures
-    with SierraGenerators
+    with SierraRecordGenerators
     with WorkerFixture {
 
   it("reads a Sierra record from SQS and stores it") {

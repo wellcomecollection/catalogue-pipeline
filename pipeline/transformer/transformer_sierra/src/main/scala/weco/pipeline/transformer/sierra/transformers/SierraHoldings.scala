@@ -12,11 +12,15 @@ import weco.catalogue.internal_model.locations.{
   PhysicalLocation
 }
 import weco.catalogue.internal_model.work.{Holdings, Item}
-import weco.catalogue.source_model.sierra.marc.FixedField
 import weco.catalogue.source_model.sierra.rules.SierraPhysicalLocationType
-import weco.catalogue.source_model.sierra.source.SierraQueryOps
-import weco.catalogue.source_model.sierra.SierraHoldingsData
-import weco.catalogue.source_model.sierra.identifiers._
+import weco.sierra.models.SierraQueryOps
+import weco.sierra.models.data.SierraHoldingsData
+import weco.sierra.models.identifiers.{
+  SierraBibNumber,
+  SierraHoldingsNumber,
+  TypedSierraRecordNumber
+}
+import weco.sierra.models.marc.FixedField
 
 import java.io.InputStream
 import scala.io.Source

@@ -6,14 +6,14 @@ import org.scalatest.EitherValues
 import weco.catalogue.internal_model.identifiers.IdentifierType
 import weco.catalogue.internal_model.work.{Work, WorkState}
 import weco.catalogue.source_model.SierraSourcePayload
-import weco.catalogue.source_model.generators.SierraGenerators
+import weco.catalogue.source_model.generators.SierraRecordGenerators
 import weco.catalogue.source_model.sierra.SierraTransformable
-import weco.catalogue.source_model.sierra.identifiers.SierraBibNumber
 import weco.fixtures.TestWith
 import weco.json.JsonUtil._
 import weco.messaging.sns.NotificationMessage
 import weco.pipeline.transformer.{TransformerWorker, TransformerWorkerTestCases}
 import weco.pipeline_storage.{PipelineStorageStream, Retriever}
+import weco.sierra.models.identifiers.SierraBibNumber
 import weco.storage.generators.S3ObjectLocationGenerators
 import weco.storage.s3.S3ObjectLocation
 import weco.storage.store.memory.MemoryTypedStore
@@ -25,7 +25,7 @@ class SierraTransformerWorkerTest
       MemoryTypedStore[S3ObjectLocation, SierraTransformable],
       SierraSourcePayload,
       SierraTransformable]
-    with SierraGenerators
+    with SierraRecordGenerators
     with S3ObjectLocationGenerators
     with EitherValues {
 

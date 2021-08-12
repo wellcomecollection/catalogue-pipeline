@@ -9,10 +9,10 @@ import weco.catalogue.internal_model.locations.{
   LocationType,
   PhysicalLocationType
 }
-import weco.catalogue.source_model.generators.SierraDataGenerators
-import weco.catalogue.source_model.sierra.SierraItemData
-import weco.catalogue.source_model.sierra.identifiers.SierraBibNumber
-import weco.catalogue.source_model.sierra.marc.{FixedField, VarField}
+import weco.sierra.generators.SierraDataGenerators
+import weco.sierra.models.data.SierraItemData
+import weco.sierra.models.identifiers.SierraBibNumber
+import weco.sierra.models.marc.{FixedField, VarField}
 
 class SierraItemAccessTest
     extends AnyFunSpec

@@ -13,13 +13,13 @@ import weco.akka.fixtures.Akka
 import weco.fixtures.TestWith
 import weco.json.JsonUtil._
 import weco.json.utils.JsonAssertions
-import weco.catalogue.source_model.generators.SierraGenerators
-import weco.catalogue.source_model.sierra.identifiers.SierraBibNumber
+import weco.catalogue.source_model.generators.SierraRecordGenerators
 import weco.catalogue.source_model.sierra.{
   AbstractSierraRecord,
   SierraBibRecord,
   SierraItemRecord
 }
+import weco.sierra.models.identifiers.SierraBibNumber
 
 class SierraRecordWrapperFlowTest
     extends AnyFunSpec
@@ -28,7 +28,7 @@ class SierraRecordWrapperFlowTest
     with IntegrationPatience
     with Matchers
     with JsonAssertions
-    with SierraGenerators {
+    with SierraRecordGenerators {
 
   private def withRecordWrapperFlow[T <: AbstractSierraRecord[_]](
     createRecord: (String, String, Instant) => T)(

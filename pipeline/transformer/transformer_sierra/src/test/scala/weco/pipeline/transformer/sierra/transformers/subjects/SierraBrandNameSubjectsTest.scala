@@ -3,11 +3,8 @@ package weco.pipeline.transformer.sierra.transformers.subjects
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.work.{Concept, Subject}
-import weco.catalogue.source_model.generators.{
-  MarcGenerators,
-  SierraDataGenerators
-}
-import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
+import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
+import weco.sierra.models.marc.{Subfield, VarField}
 
 class SierraBrandNameSubjectsTest
     extends AnyFunSpec
@@ -20,7 +17,7 @@ class SierraBrandNameSubjectsTest
   def bibData(varFields: VarField*) =
     createSierraBibDataWith(varFields = varFields.toList)
 
-  def varField(tag: String, subfields: MarcSubfield*) =
+  def varField(tag: String, subfields: Subfield*) =
     createVarFieldWith(marcTag = tag, subfields = subfields.toList)
 
   it("returns zero subjects if there are none") {
@@ -29,8 +26,8 @@ class SierraBrandNameSubjectsTest
 
   it("returns subjects for varfield 652") {
     val data = bibData(
-      varField("600", MarcSubfield("a", "Not Content")),
-      varField("652", MarcSubfield("a", "Content")),
+      varField("600", Subfield("a", "Not Content")),
+      varField("652", Subfield("a", "Content")),
     )
     SierraBrandNameSubjects(bibId, data) shouldBe List(
       Subject(
@@ -42,15 +39,15 @@ class SierraBrandNameSubjectsTest
 
   it("does not used non 'a' subfields to parse the content") {
     val data = bibData(
-      varField("652", MarcSubfield(tag = "b", content = "Hmmm"))
+      varField("652", Subfield(tag = "b", content = "Hmmm"))
     )
     SierraBrandNameSubjects(bibId, data) shouldBe Nil
   }
 
   it("returns multiple subjects if multiple 652") {
     val data = bibData(
-      varField("652", MarcSubfield("a", "First")),
-      varField("652", MarcSubfield("a", "Second")),
+      varField("652", Subfield("a", "First")),
+      varField("652", Subfield("a", "Second")),
     )
     SierraBrandNameSubjects(bibId, data) shouldBe List(
       Subject(

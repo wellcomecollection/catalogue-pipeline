@@ -1,10 +1,8 @@
 package weco.pipeline.transformer.sierra.transformers
 
-import weco.catalogue.source_model.sierra.SierraBibData
-import weco.catalogue.source_model.sierra.source.{
-  SierraMaterialType,
-  SierraQueryOps
-}
+import weco.sierra.models.SierraQueryOps
+import weco.sierra.models.data.SierraBibData
+import weco.sierra.models.fields.SierraMaterialType
 
 object SierraIconographicNumber
     extends SierraDataTransformer

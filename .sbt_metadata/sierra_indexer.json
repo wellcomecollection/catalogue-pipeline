@@ -2,7 +2,7 @@
   "id" : "sierra_indexer",
   "folder" : "sierra_adapter/sierra_indexer",
   "dependencyIds" : [
-    "source_model_typesafe",
+    "source_model",
     "pipeline_storage_typesafe"
   ]
 }

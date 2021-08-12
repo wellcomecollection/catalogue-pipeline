@@ -8,11 +8,8 @@ import weco.catalogue.internal_model.identifiers.{
   SourceIdentifier
 }
 import weco.catalogue.internal_model.work.{Concept, Period, Place, Subject}
-import weco.catalogue.source_model.generators.{
-  MarcGenerators,
-  SierraDataGenerators
-}
-import weco.catalogue.source_model.sierra.marc.MarcSubfield
+import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
+import weco.sierra.models.marc.Subfield
 
 class SierraConceptSubjectsTest
     extends AnyFunSpec
@@ -33,7 +30,7 @@ class SierraConceptSubjectsTest
         createVarFieldWith(
           marcTag = "650",
           subfields = List(
-            MarcSubfield(tag = "a", content = "A Content")
+            Subfield(tag = "a", content = "A Content")
           )
         )
       )
@@ -54,8 +51,8 @@ class SierraConceptSubjectsTest
         createVarFieldWith(
           marcTag = "650",
           subfields = List(
-            MarcSubfield(tag = "a", content = "A Content"),
-            MarcSubfield(tag = "v", content = "V Content")
+            Subfield(tag = "a", content = "A Content"),
+            Subfield(tag = "v", content = "V Content")
           )
         )
       )
@@ -77,8 +74,8 @@ class SierraConceptSubjectsTest
         createVarFieldWith(
           marcTag = "650",
           subfields = List(
-            MarcSubfield(tag = "v", content = "V Content"),
-            MarcSubfield(tag = "a", content = "A Content")
+            Subfield(tag = "v", content = "V Content"),
+            Subfield(tag = "a", content = "A Content")
           )
         )
       )
@@ -98,9 +95,9 @@ class SierraConceptSubjectsTest
         createVarFieldWith(
           marcTag = "650",
           subfields = List(
-            MarcSubfield(tag = "a", content = "A Content"),
-            MarcSubfield(tag = "x", content = "X Content"),
-            MarcSubfield(tag = "v", content = "V Content")
+            Subfield(tag = "a", content = "A Content"),
+            Subfield(tag = "x", content = "X Content"),
+            Subfield(tag = "v", content = "V Content")
           )
         )
       )
@@ -124,8 +121,8 @@ class SierraConceptSubjectsTest
         createVarFieldWith(
           marcTag = "650",
           subfields = List(
-            MarcSubfield(tag = "y", content = "Y Content"),
-            MarcSubfield(tag = "a", content = "A Content")
+            Subfield(tag = "y", content = "Y Content"),
+            Subfield(tag = "a", content = "A Content")
           )
         )
       )
@@ -148,8 +145,8 @@ class SierraConceptSubjectsTest
         createVarFieldWith(
           marcTag = "650",
           subfields = List(
-            MarcSubfield(tag = "z", content = "Z Content"),
-            MarcSubfield(tag = "a", content = "A Content")
+            Subfield(tag = "z", content = "Z Content"),
+            Subfield(tag = "a", content = "A Content")
           )
         )
       )
@@ -171,15 +168,15 @@ class SierraConceptSubjectsTest
         createVarFieldWith(
           marcTag = "650",
           subfields = List(
-            MarcSubfield(tag = "a", content = "A1 Content"),
-            MarcSubfield(tag = "z", content = "Z1 Content")
+            Subfield(tag = "a", content = "A1 Content"),
+            Subfield(tag = "z", content = "Z1 Content")
           )
         ),
         createVarFieldWith(
           marcTag = "650",
           subfields = List(
-            MarcSubfield(tag = "a", content = "A2 Content"),
-            MarcSubfield(tag = "v", content = "V2 Content")
+            Subfield(tag = "a", content = "A2 Content"),
+            Subfield(tag = "v", content = "V2 Content")
           )
         )
       )
@@ -209,9 +206,9 @@ class SierraConceptSubjectsTest
         createVarFieldWith(
           marcTag = "648",
           subfields = List(
-            MarcSubfield(tag = "a", content = "A Content"),
-            MarcSubfield(tag = "x", content = "X Content"),
-            MarcSubfield(tag = "v", content = "V Content")
+            Subfield(tag = "a", content = "A Content"),
+            Subfield(tag = "x", content = "X Content"),
+            Subfield(tag = "v", content = "V Content")
           )
         )
       )
@@ -235,9 +232,9 @@ class SierraConceptSubjectsTest
         createVarFieldWith(
           marcTag = "651",
           subfields = List(
-            MarcSubfield(tag = "x", content = "X Content"),
-            MarcSubfield(tag = "a", content = "A Content"),
-            MarcSubfield(tag = "v", content = "V Content")
+            Subfield(tag = "x", content = "X Content"),
+            Subfield(tag = "a", content = "A Content"),
+            Subfield(tag = "v", content = "V Content")
           )
         )
       )
@@ -263,8 +260,8 @@ class SierraConceptSubjectsTest
           // LCSH heading
           indicator2 = "0",
           subfields = List(
-            MarcSubfield(tag = "a", content = "absence"),
-            MarcSubfield(tag = "0", content = "lcsh/123")
+            Subfield(tag = "a", content = "absence"),
+            Subfield(tag = "0", content = "lcsh/123")
           )
         ),
         createVarFieldWith(
@@ -272,8 +269,8 @@ class SierraConceptSubjectsTest
           // MESH heading
           indicator2 = "2",
           subfields = List(
-            MarcSubfield(tag = "a", content = "abolition"),
-            MarcSubfield(tag = "0", content = "mesh/456")
+            Subfield(tag = "a", content = "abolition"),
+            Subfield(tag = "0", content = "mesh/456")
           )
         )
       )
@@ -309,8 +306,8 @@ class SierraConceptSubjectsTest
           marcTag = "650",
           indicator2 = "7",
           subfields = List(
-            MarcSubfield(tag = "a", content = "absence"),
-            MarcSubfield(tag = "0", content = "lcsh/123")
+            Subfield(tag = "a", content = "absence"),
+            Subfield(tag = "0", content = "lcsh/123")
           )
         ),
         createVarFieldWith(
@@ -318,8 +315,8 @@ class SierraConceptSubjectsTest
           // MESH heading
           indicator2 = "2",
           subfields = List(
-            MarcSubfield(tag = "a", content = "abolition"),
-            MarcSubfield(tag = "0", content = "mesh/456")
+            Subfield(tag = "a", content = "abolition"),
+            Subfield(tag = "0", content = "mesh/456")
           )
         )
       )
@@ -347,7 +344,7 @@ class SierraConceptSubjectsTest
           marcTag = "650",
           indicator2 = "7",
           subfields = List(
-            MarcSubfield(tag = "a", content = "abolition")
+            Subfield(tag = "a", content = "abolition")
           )
         )
       )
@@ -362,7 +359,7 @@ class SierraConceptSubjectsTest
         createVarFieldWith(
           marcTag = "650",
           subfields = List(
-            MarcSubfield(tag = "a", content = "Diet, Food, and Nutrition.")
+            Subfield(tag = "a", content = "Diet, Food, and Nutrition.")
           )
         )
       )

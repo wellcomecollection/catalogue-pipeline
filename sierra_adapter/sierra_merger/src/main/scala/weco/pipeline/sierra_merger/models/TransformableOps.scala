@@ -1,12 +1,5 @@
 package weco.pipeline.sierra_merger.models
 
-import weco.catalogue.source_model.sierra.identifiers.{
-  SierraBibNumber,
-  SierraHoldingsNumber,
-  SierraItemNumber,
-  SierraOrderNumber,
-  TypedSierraRecordNumber
-}
 import weco.catalogue.source_model.sierra.{
   AbstractSierraRecord,
   SierraBibRecord,
@@ -14,6 +7,13 @@ import weco.catalogue.source_model.sierra.{
   SierraItemRecord,
   SierraOrderRecord,
   SierraTransformable
+}
+import weco.sierra.models.identifiers.{
+  SierraBibNumber,
+  SierraHoldingsNumber,
+  SierraItemNumber,
+  SierraOrderNumber,
+  TypedSierraRecordNumber
 }
 
 trait TransformableOps[Record <: AbstractSierraRecord[_]] {

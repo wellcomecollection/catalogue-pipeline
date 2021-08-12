@@ -75,7 +75,7 @@ steps:
   - label: publish internal model
     if: build.branch == "main"
     env:
-      PROJECTS: internal_model source_model
+      PROJECTS: internal_model
     plugins:
       - docker#v3.5.0:
           image: "wellcome/sbt_wrapper"

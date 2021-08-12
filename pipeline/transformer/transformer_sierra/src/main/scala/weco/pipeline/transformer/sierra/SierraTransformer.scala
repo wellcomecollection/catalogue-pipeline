@@ -7,7 +7,6 @@ import weco.catalogue.internal_model.work.InvisibilityReason._
 import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.internal_model.work.{Work, WorkData}
 import weco.catalogue.source_model.sierra._
-import weco.catalogue.source_model.sierra.identifiers._
 import weco.json.JsonUtil._
 import weco.json.exceptions.JsonDecodingError
 import weco.pipeline.transformer.sierra.exceptions.{
@@ -15,8 +14,19 @@ import weco.pipeline.transformer.sierra.exceptions.{
   SierraTransformerException
 }
 import weco.pipeline.transformer.sierra.transformers._
-import java.time.Instant
+import weco.sierra.models.data.{
+  SierraBibData,
+  SierraHoldingsData,
+  SierraItemData,
+  SierraOrderData
+}
+import weco.sierra.models.identifiers.{
+  SierraBibNumber,
+  SierraHoldingsNumber,
+  SierraOrderNumber
+}
 
+import java.time.Instant
 import scala.util.{Failure, Success, Try}
 
 class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)

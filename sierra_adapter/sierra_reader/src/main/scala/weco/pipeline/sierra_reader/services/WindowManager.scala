@@ -11,8 +11,8 @@ import weco.storage.Identified
 import weco.storage.listing.s3.S3ObjectLocationListing
 import weco.storage.s3.{S3Config, S3ObjectLocation, S3ObjectLocationPrefix}
 import weco.storage.store.s3.S3TypedStore
-import weco.catalogue.source_model.sierra.identifiers.UntypedSierraRecordNumber
 import weco.pipeline.sierra_reader.models.WindowStatus
+import weco.sierra.models.identifiers.UntypedSierraRecordNumber
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}

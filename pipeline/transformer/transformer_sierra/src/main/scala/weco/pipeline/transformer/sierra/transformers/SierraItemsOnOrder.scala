@@ -4,11 +4,11 @@ import grizzled.slf4j.Logging
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.locations.{LocationType, PhysicalLocation}
 import weco.catalogue.internal_model.work.Item
-import weco.catalogue.source_model.sierra.identifiers.{
+import weco.sierra.models.data.{SierraBibData, SierraOrderData}
+import weco.sierra.models.identifiers.{
   SierraOrderNumber,
   TypedSierraRecordNumber
 }
-import weco.catalogue.source_model.sierra.{SierraBibData, SierraOrderData}
 
 import java.text.SimpleDateFormat
 import java.util.Date

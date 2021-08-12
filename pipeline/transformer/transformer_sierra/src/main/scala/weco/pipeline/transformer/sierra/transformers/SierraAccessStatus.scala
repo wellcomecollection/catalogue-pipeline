@@ -1,14 +1,16 @@
-package weco.catalogue.source_model.sierra.rules
+package weco.pipeline.transformer.sierra.transformers
 
 import weco.catalogue.internal_model.locations.AccessStatus
-import weco.catalogue.source_model.sierra.marc.VarField
-import weco.catalogue.source_model.sierra.source.SierraQueryOps
-import weco.catalogue.source_model.sierra.SierraBibData
-import weco.catalogue.source_model.sierra.identifiers.SierraBibNumber
+import weco.sierra.models.SierraQueryOps
+import weco.sierra.models.data.SierraBibData
+import weco.sierra.models.identifiers.SierraBibNumber
+import weco.sierra.models.marc.VarField
 
 object SierraAccessStatus extends SierraQueryOps {
-  def forBib(bibId: SierraBibNumber,
-             bibData: SierraBibData): Option[AccessStatus] = {
+  def forBib(
+    bibId: SierraBibNumber,
+    bibData: SierraBibData
+  ): Option[AccessStatus] = {
     val statuses =
       bibData
         .varfieldsWithTag("506")
@@ -48,7 +50,8 @@ object SierraAccessStatus extends SierraQueryOps {
   private def getAccessStatus(
     bibId: SierraBibNumber,
     varfield: VarField,
-    termsStatus: Option[AccessStatus]): Option[AccessStatus] = {
+    termsStatus: Option[AccessStatus]
+  ): Option[AccessStatus] = {
 
     // If the first indicator is 0, then there are no restrictions
     val indicator0 =
@@ -68,7 +71,8 @@ object SierraAccessStatus extends SierraQueryOps {
             case Right(status) => Some(status)
             case Left(err) =>
               warn(
-                s"$bibId: Unable to parse access status from subfield ǂf: $contents ($err)")
+                s"$bibId: Unable to parse access status from subfield ǂf: $contents ($err)"
+              )
               None
           }
         }

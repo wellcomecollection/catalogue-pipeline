@@ -30,21 +30,19 @@ import weco.catalogue.internal_model.work.InvisibilityReason.{
 }
 import weco.catalogue.internal_model.work._
 import weco.catalogue.internal_model.work.generators.WorkGenerators
-import weco.catalogue.source_model.generators.{MarcGenerators, SierraGenerators}
+import weco.catalogue.source_model.generators.SierraRecordGenerators
 import weco.catalogue.source_model.sierra._
-import weco.catalogue.source_model.sierra.identifiers.{
-  SierraBibNumber,
-  SierraItemNumber
-}
-import weco.catalogue.source_model.sierra.marc.MarcSubfield
 import weco.pipeline.transformer.sierra.SierraTransformer
 import weco.pipeline.transformer.sierra.exceptions.SierraTransformerException
+import weco.sierra.generators.MarcGenerators
+import weco.sierra.models.identifiers.{SierraBibNumber, SierraItemNumber}
+import weco.sierra.models.marc.Subfield
 
 class SierraTransformerTest
     extends AnyFunSpec
     with Matchers
     with MarcGenerators
-    with SierraGenerators
+    with SierraRecordGenerators
     with SierraTransformableTestBase
     with WorkGenerators {
 
@@ -332,25 +330,25 @@ class SierraTransformerTest
     val titleField = createVarFieldWith(
       marcTag = "245",
       subfields = List(
-        MarcSubfield(tag = "a", content = title)
+        Subfield(tag = "a", content = title)
       )
     )
 
     val productionField = createVarFieldWith(
       marcTag = "260",
       subfields = List(
-        MarcSubfield(tag = "b", content = "Peaceful Poetry"),
-        MarcSubfield(tag = "c", content = "1923")
+        Subfield(tag = "b", content = "Peaceful Poetry"),
+        Subfield(tag = "c", content = "1923")
       )
     )
 
     val descriptionField = createVarFieldWith(
       marcTag = "520",
       subfields = List(
-        MarcSubfield(
+        Subfield(
           tag = "a",
           content = "A delightful description of a dead daisy."),
-        MarcSubfield(tag = "c", content = "1923")
+        Subfield(tag = "c", content = "1923")
       )
     )
 
@@ -358,14 +356,14 @@ class SierraTransformerTest
       marcTag = "246",
       indicator2 = "6",
       subfields = List(
-        MarcSubfield(tag = "a", content = lettering)
+        Subfield(tag = "a", content = lettering)
       )
     )
 
     val notesField = createVarFieldWith(
       marcTag = "500",
       subfields = List(
-        MarcSubfield(tag = "a", content = "It's a note")
+        Subfield(tag = "a", content = "It's a note")
       )
     )
 
@@ -374,8 +372,8 @@ class SierraTransformerTest
       createVarFieldWith(
         marcTag = "041",
         subfields = List(
-          MarcSubfield(tag = "a", content = "ger"),
-          MarcSubfield(tag = "a", content = "fre"),
+          Subfield(tag = "a", content = "ger"),
+          Subfield(tag = "a", content = "fre"),
         )
       )
     )

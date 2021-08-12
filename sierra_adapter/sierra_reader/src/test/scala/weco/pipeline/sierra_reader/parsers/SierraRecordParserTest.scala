@@ -7,23 +7,20 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.json.JsonUtil.toJson
 import weco.json.utils.JsonAssertions
-import weco.catalogue.source_model.generators.SierraGenerators
-import weco.catalogue.source_model.sierra.identifiers.{
-  SierraBibNumber,
-  SierraHoldingsNumber
-}
+import weco.catalogue.source_model.generators.SierraRecordGenerators
 import weco.catalogue.source_model.sierra.{
   AbstractSierraRecord,
   SierraBibRecord,
   SierraHoldingsRecord,
   SierraItemRecord
 }
+import weco.sierra.models.identifiers.{SierraBibNumber, SierraHoldingsNumber}
 
 class SierraRecordParserTest
     extends AnyFunSpec
     with Matchers
     with JsonAssertions
-    with SierraGenerators {
+    with SierraRecordGenerators {
   it("parses a bib record") {
     val id = createSierraBibNumber
     val updatedDate = "2013-12-13T12:43:16Z"

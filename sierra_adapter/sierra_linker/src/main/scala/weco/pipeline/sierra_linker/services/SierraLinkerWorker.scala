@@ -8,7 +8,7 @@ import weco.messaging.sns.NotificationMessage
 import weco.messaging.sqs.SQSStream
 import weco.typesafe.Runnable
 import weco.catalogue.source_model.sierra.AbstractSierraRecord
-import weco.catalogue.source_model.sierra.identifiers.TypedSierraRecordNumber
+import weco.sierra.models.identifiers.TypedSierraRecordNumber
 
 import scala.concurrent.Future
 import scala.util.Success

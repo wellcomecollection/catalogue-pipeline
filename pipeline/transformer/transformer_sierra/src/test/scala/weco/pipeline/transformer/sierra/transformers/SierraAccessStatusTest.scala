@@ -1,14 +1,11 @@
-package weco.catalogue.source_model.sierra.rules
+package weco.pipeline.transformer.sierra.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks
 import weco.catalogue.internal_model.locations.AccessStatus
-import weco.catalogue.source_model.generators.{
-  MarcGenerators,
-  SierraDataGenerators
-}
-import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
+import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
+import weco.sierra.models.marc.{Subfield, VarField}
 
 class SierraAccessStatusTest
     extends AnyFunSpec
@@ -46,7 +43,7 @@ class SierraAccessStatusTest
             VarField(
               marcTag = Some("506"),
               subfields = List(
-                MarcSubfield(tag = "a", content = text)
+                Subfield(tag = "a", content = text)
               )
             )
           )
@@ -62,7 +59,7 @@ class SierraAccessStatusTest
         VarField(
           marcTag = Some("506"),
           subfields = List(
-            MarcSubfield(
+            Subfield(
               tag = "a",
               content = "ACME Library membership required for access.")
           )
@@ -79,8 +76,8 @@ class SierraAccessStatusTest
         VarField(
           marcTag = Some("506"),
           subfields = List(
-            MarcSubfield(tag = "a", content = "Restricted"),
-            MarcSubfield(tag = "f", content = "Open")
+            Subfield(tag = "a", content = "Restricted"),
+            Subfield(tag = "f", content = "Open")
           )
         )
       )
@@ -109,7 +106,7 @@ class SierraAccessStatusTest
           marcTag = Some("506"),
           indicator1 = Some("0"),
           subfields = List(
-            MarcSubfield(tag = "f", content = "Restricted")
+            Subfield(tag = "f", content = "Restricted")
           )
         )
       )
@@ -124,10 +121,10 @@ class SierraAccessStatusTest
         VarField(
           marcTag = Some("506"),
           subfields = List(
-            MarcSubfield(
+            Subfield(
               tag = "a",
               content = "Access restricted to authorized subscribers"),
-            MarcSubfield(tag = "f", content = ".")
+            Subfield(tag = "f", content = ".")
           )
         )
       )

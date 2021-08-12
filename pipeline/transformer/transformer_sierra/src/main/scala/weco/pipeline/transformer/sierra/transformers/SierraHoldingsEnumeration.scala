@@ -1,9 +1,9 @@
 package weco.pipeline.transformer.sierra.transformers
 
 import grizzled.slf4j.Logging
-import weco.catalogue.source_model.sierra.identifiers.TypedSierraRecordNumber
-import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
-import weco.catalogue.source_model.sierra.source.SierraQueryOps
+import weco.sierra.models.SierraQueryOps
+import weco.sierra.models.identifiers.TypedSierraRecordNumber
+import weco.sierra.models.marc.{Subfield, VarField}
 
 import scala.util.{Failure, Success, Try}
 
@@ -112,7 +112,7 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
         }
         .flatMap { sf =>
           label.varField.subfieldsWithTag(sf.tag).headOption match {
-            case Some(MarcSubfield(_, subfieldLabel)) =>
+            case Some(Subfield(_, subfieldLabel)) =>
               Some((subfieldLabel, sf.content))
             case None => None
           }
@@ -323,7 +323,7 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
   private def createLabel(id: TypedSierraRecordNumber,
                           vf: VarField): Option[Label] =
     vf.subfieldsWithTag("8").headOption match {
-      case Some(MarcSubfield(_, content)) =>
+      case Some(Subfield(_, content)) =>
         Try { content.toInt } match {
           case Success(link) => Some(Label(link, vf))
           case Failure(_) =>
@@ -345,7 +345,7 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
   private def createValue(id: TypedSierraRecordNumber,
                           vf: VarField): Option[Value] =
     vf.subfieldsWithTag("8").headOption match {
-      case Some(MarcSubfield(_, content)) =>
+      case Some(Subfield(_, content)) =>
         Try { content.split('.').map(_.toInt).toSeq } match {
           case Success(Seq(link, sequence)) => Some(Value(link, sequence, vf))
           case _ =>

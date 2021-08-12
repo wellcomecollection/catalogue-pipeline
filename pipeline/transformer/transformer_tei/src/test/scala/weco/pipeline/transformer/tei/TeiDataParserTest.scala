@@ -4,15 +4,15 @@ import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.languages.Language
-import weco.catalogue.source_model.generators.SierraDataGenerators
 import weco.pipeline.transformer.tei.fixtures.TeiGenerators
+import weco.sierra.generators.SierraIdentifierGenerators
 
 class TeiDataParserTest
     extends AnyFunSpec
     with Matchers
     with EitherValues
     with TeiGenerators
-    with SierraDataGenerators {
+    with SierraIdentifierGenerators {
   val id = "manuscript_15651"
   val bnumber = createSierraBibNumber.withCheckDigit
   it("parses a tei xml and returns TeiData") {

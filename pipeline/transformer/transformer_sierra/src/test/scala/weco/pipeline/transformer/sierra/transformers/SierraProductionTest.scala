@@ -10,12 +10,9 @@ import weco.catalogue.internal_model.work.{
   Place,
   ProductionEvent
 }
-import weco.catalogue.source_model.generators.{
-  MarcGenerators,
-  SierraDataGenerators
-}
-import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
 import weco.pipeline.transformer.sierra.exceptions.CataloguingException
+import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
+import weco.sierra.models.marc.{Subfield, VarField}
 
 class SierraProductionTest
     extends AnyFunSpec
@@ -34,8 +31,8 @@ class SierraProductionTest
     it("populates places from subfield a") {
       val production = transform260ToProduction(
         subfields = List(
-          MarcSubfield(tag = "a", content = "Paris"),
-          MarcSubfield(tag = "a", content = "London")
+          Subfield(tag = "a", content = "Paris"),
+          Subfield(tag = "a", content = "London")
         ))
 
       production.places shouldBe List(
@@ -47,8 +44,8 @@ class SierraProductionTest
     it("populates agents from subfield b") {
       val production = transform260ToProduction(
         subfields = List(
-          MarcSubfield(tag = "b", content = "Gauthier-Villars ;"),
-          MarcSubfield(tag = "b", content = "Vogue")
+          Subfield(tag = "b", content = "Gauthier-Villars ;"),
+          Subfield(tag = "b", content = "Vogue")
         ))
 
       production.agents shouldBe List(
@@ -60,9 +57,9 @@ class SierraProductionTest
     it("populates dates from subfield c") {
       val production = transform260ToProduction(
         subfields = List(
-          MarcSubfield(tag = "c", content = "1955"),
-          MarcSubfield(tag = "c", content = "1984"),
-          MarcSubfield(tag = "c", content = "1999")
+          Subfield(tag = "c", content = "1955"),
+          Subfield(tag = "c", content = "1984"),
+          Subfield(tag = "c", content = "1999")
         ))
 
       production.dates shouldBe List(
@@ -75,9 +72,9 @@ class SierraProductionTest
     it("sets the function as None if it only has subfields a/b/c") {
       val production = transform260ToProduction(
         subfields = List(
-          MarcSubfield(tag = "a", content = "New York"),
-          MarcSubfield(tag = "b", content = "Xerox Films"),
-          MarcSubfield(tag = "c", content = "1973")
+          Subfield(tag = "a", content = "New York"),
+          Subfield(tag = "b", content = "Xerox Films"),
+          Subfield(tag = "c", content = "1973")
         ))
 
       production.function shouldBe None
@@ -86,9 +83,9 @@ class SierraProductionTest
     it("populates places from a and e, and sets the function as Manufacture") {
       val production = transform260ToProduction(
         subfields = List(
-          MarcSubfield(tag = "a", content = "New York, N.Y."),
-          MarcSubfield(tag = "e", content = "Reston, Va."),
-          MarcSubfield(tag = "e", content = "[Philadelphia]"),
+          Subfield(tag = "a", content = "New York, N.Y."),
+          Subfield(tag = "e", content = "Reston, Va."),
+          Subfield(tag = "e", content = "[Philadelphia]"),
         ))
 
       production.places shouldBe List(
@@ -103,9 +100,9 @@ class SierraProductionTest
     it("populates agents from b and f, and sets the function as Manufacture") {
       val production = transform260ToProduction(
         subfields = List(
-          MarcSubfield(tag = "b", content = "Macmillan"),
-          MarcSubfield(tag = "f", content = "Sussex Tapes"),
-          MarcSubfield(tag = "f", content = "US Dept of Energy"),
+          Subfield(tag = "b", content = "Macmillan"),
+          Subfield(tag = "f", content = "Sussex Tapes"),
+          Subfield(tag = "f", content = "US Dept of Energy"),
         ))
 
       production.agents shouldBe List(
@@ -120,9 +117,9 @@ class SierraProductionTest
     it("populates dates from c and g, and sets the function as Manufacture") {
       val production = transform260ToProduction(
         subfields = List(
-          MarcSubfield(tag = "c", content = "1981"),
-          MarcSubfield(tag = "g", content = "April 15, 1977"),
-          MarcSubfield(tag = "g", content = "1973 printing")
+          Subfield(tag = "c", content = "1981"),
+          Subfield(tag = "g", content = "April 15, 1977"),
+          Subfield(tag = "g", content = "1973 printing")
         ))
 
       production.dates shouldBe List(
@@ -139,27 +136,27 @@ class SierraProductionTest
         createVarFieldWith(
           marcTag = "260",
           subfields = List(
-            MarcSubfield(tag = "a", content = "London :"),
-            MarcSubfield(tag = "b", content = "Arts Council of Great Britain,"),
-            MarcSubfield(tag = "c", content = "1976;"),
-            MarcSubfield(tag = "e", content = "Twickenham :"),
-            MarcSubfield(tag = "f", content = "CTD Printers,"),
-            MarcSubfield(tag = "g", content = "1974")
+            Subfield(tag = "a", content = "London :"),
+            Subfield(tag = "b", content = "Arts Council of Great Britain,"),
+            Subfield(tag = "c", content = "1976;"),
+            Subfield(tag = "e", content = "Twickenham :"),
+            Subfield(tag = "f", content = "CTD Printers,"),
+            Subfield(tag = "g", content = "1974")
           )
         ),
         createVarFieldWith(
           marcTag = "260",
           subfields = List(
-            MarcSubfield(tag = "a", content = "Bethesda, Md. :"),
-            MarcSubfield(
+            Subfield(tag = "a", content = "Bethesda, Md. :"),
+            Subfield(
               tag = "b",
               content =
                 "Toxicology Information Program, National Library of Medicine [producer] ;"),
-            MarcSubfield(tag = "a", content = "Springfield, Va. :"),
-            MarcSubfield(
+            Subfield(tag = "a", content = "Springfield, Va. :"),
+            Subfield(
               tag = "b",
               content = "National Technical Information Service [distributor],"),
-            MarcSubfield(tag = "c", content = "1974-")
+            Subfield(tag = "c", content = "1974-")
           )
         )
       )
@@ -196,10 +193,10 @@ class SierraProductionTest
     it("normalises Place and Period labels") {
       val production = transform260ToProduction(
         subfields = List(
-          MarcSubfield(tag = "a", content = "Paris  : "),
-          MarcSubfield(tag = "a", content = "London :"),
-          MarcSubfield(tag = "c", content = "1984 . "),
-          MarcSubfield(tag = "c", content = "1999.")
+          Subfield(tag = "a", content = "Paris  : "),
+          Subfield(tag = "a", content = "London :"),
+          Subfield(tag = "c", content = "1984 . "),
+          Subfield(tag = "c", content = "1999.")
         ))
 
       production.places shouldBe List(
@@ -221,8 +218,8 @@ class SierraProductionTest
     it("populates places from subfield a") {
       val production = transform264ToProduction(
         subfields = List(
-          MarcSubfield(tag = "a", content = "Boston"),
-          MarcSubfield(tag = "a", content = "Cambridge")
+          Subfield(tag = "a", content = "Boston"),
+          Subfield(tag = "a", content = "Cambridge")
         ))
 
       production.places shouldBe List(
@@ -234,8 +231,8 @@ class SierraProductionTest
     it("populates agents from subfield b") {
       val production = transform264ToProduction(
         subfields = List(
-          MarcSubfield(tag = "b", content = "ABC Publishers"),
-          MarcSubfield(tag = "b", content = "Iverson Company")
+          Subfield(tag = "b", content = "ABC Publishers"),
+          Subfield(tag = "b", content = "Iverson Company")
         ))
 
       production.agents shouldBe List(
@@ -247,9 +244,9 @@ class SierraProductionTest
     it("populates dates from subfield c") {
       val production = transform264ToProduction(
         subfields = List(
-          MarcSubfield(tag = "c", content = "2002"),
-          MarcSubfield(tag = "c", content = "1983"),
-          MarcSubfield(tag = "c", content = "copyright 2005")
+          Subfield(tag = "c", content = "2002"),
+          Subfield(tag = "c", content = "1983"),
+          Subfield(tag = "c", content = "copyright 2005")
         ))
 
       production.dates shouldBe List(
@@ -314,15 +311,15 @@ class SierraProductionTest
           marcTag = "264",
           indicator2 = "4",
           subfields = List(
-            MarcSubfield(tag = "c", content = "copyright 2005")
+            Subfield(tag = "c", content = "copyright 2005")
           )
         ),
         createVarFieldWith(
           marcTag = "264",
           indicator2 = "3",
           subfields = List(
-            MarcSubfield(tag = "a", content = "Cambridge :"),
-            MarcSubfield(tag = "b", content = "Kinsey Printing Company")
+            Subfield(tag = "a", content = "Cambridge :"),
+            Subfield(tag = "b", content = "Kinsey Printing Company")
           )
         )
       )
@@ -346,15 +343,15 @@ class SierraProductionTest
           marcTag = "264",
           indicator2 = " ",
           subfields = List(
-            MarcSubfield(tag = "c", content = "copyright 2005")
+            Subfield(tag = "c", content = "copyright 2005")
           )
         ),
         createVarFieldWith(
           marcTag = "264",
           indicator2 = "3",
           subfields = List(
-            MarcSubfield(tag = "a", content = "London :"),
-            MarcSubfield(tag = "b", content = "Wellcome Collection Publishing")
+            Subfield(tag = "a", content = "London :"),
+            Subfield(tag = "b", content = "Wellcome Collection Publishing")
           )
         )
       )
@@ -378,18 +375,18 @@ class SierraProductionTest
           marcTag = "264",
           indicator2 = "1",
           subfields = List(
-            MarcSubfield(tag = "a", content = "Columbia, S.C. :"),
-            MarcSubfield(tag = "b", content = "H.W. Williams Co.,"),
-            MarcSubfield(tag = "c", content = "1982")
+            Subfield(tag = "a", content = "Columbia, S.C. :"),
+            Subfield(tag = "b", content = "H.W. Williams Co.,"),
+            Subfield(tag = "c", content = "1982")
           )
         ),
         createVarFieldWith(
           marcTag = "264",
           indicator2 = "2",
           subfields = List(
-            MarcSubfield(tag = "a", content = "Washington :"),
-            MarcSubfield(tag = "b", content = "U.S. G.P.O.,"),
-            MarcSubfield(tag = "c", content = "1981-")
+            Subfield(tag = "a", content = "Washington :"),
+            Subfield(tag = "b", content = "U.S. G.P.O.,"),
+            Subfield(tag = "c", content = "1981-")
           )
         )
       )
@@ -417,13 +414,13 @@ class SierraProductionTest
     it("normalises Place and Period labels") {
       val production = transform264ToProduction(
         subfields = List(
-          MarcSubfield(tag = "a", content = "Boston:"),
-          MarcSubfield(tag = "a", content = "Cambridge : "),
-          MarcSubfield(tag = "b", content = "ABC Publishers,"),
-          MarcSubfield(tag = "b", content = "Iverson Ltd. , "),
-          MarcSubfield(tag = "c", content = "2002."),
-          MarcSubfield(tag = "c", content = "1983 ."),
-          MarcSubfield(tag = "c", content = "copyright 2005.")
+          Subfield(tag = "a", content = "Boston:"),
+          Subfield(tag = "a", content = "Cambridge : "),
+          Subfield(tag = "b", content = "ABC Publishers,"),
+          Subfield(tag = "b", content = "Iverson Ltd. , "),
+          Subfield(tag = "c", content = "2002."),
+          Subfield(tag = "c", content = "1983 ."),
+          Subfield(tag = "c", content = "copyright 2005.")
         ))
 
       production.places shouldBe List(
@@ -448,13 +445,13 @@ class SierraProductionTest
         createVarFieldWith(
           marcTag = "260",
           subfields = List(
-            MarcSubfield(tag = "a", content = "Paris")
+            Subfield(tag = "a", content = "Paris")
           )
         ),
         createVarFieldWith(
           marcTag = "264",
           subfields = List(
-            MarcSubfield(tag = "a", content = "London")
+            Subfield(tag = "a", content = "London")
           )
         )
       )
@@ -476,15 +473,15 @@ class SierraProductionTest
         createVarFieldWith(
           marcTag = "260",
           subfields = List(
-            MarcSubfield(tag = "a", content = "San Francisco :"),
-            MarcSubfield(tag = "b", content = "Morgan Kaufmann Publishers,"),
-            MarcSubfield(tag = "c", content = "2004")
+            Subfield(tag = "a", content = "San Francisco :"),
+            Subfield(tag = "b", content = "Morgan Kaufmann Publishers,"),
+            Subfield(tag = "c", content = "2004")
           )
         ),
         createVarFieldWith(
           marcTag = "264",
           subfields = List(
-            MarcSubfield(tag = "c", content = "©2004")
+            Subfield(tag = "c", content = "©2004")
           )
         )
       )
@@ -506,9 +503,9 @@ class SierraProductionTest
 
     it("returns correctly if 260 and 264 contain the same subfields") {
       val subfields = List(
-        MarcSubfield(tag = "a", content = "London :"),
-        MarcSubfield(tag = "b", content = "Wellcome Trust,"),
-        MarcSubfield(tag = "c", content = "1992")
+        Subfield(tag = "a", content = "London :"),
+        Subfield(tag = "b", content = "Wellcome Trust,"),
+        Subfield(tag = "c", content = "1992")
       )
 
       val varFields = List(
@@ -541,15 +538,15 @@ class SierraProductionTest
         createVarFieldWith(
           marcTag = "260",
           subfields = List(
-            MarcSubfield(tag = "c", content = "2019")
+            Subfield(tag = "c", content = "2019")
           )
         ),
         createVarFieldWith(
           marcTag = "264",
           subfields = List(
-            MarcSubfield(tag = "a", content = ":"),
-            MarcSubfield(tag = "b", content = ","),
-            MarcSubfield(tag = "c", content = "")
+            Subfield(tag = "a", content = ":"),
+            Subfield(tag = "b", content = ","),
+            Subfield(tag = "c", content = "")
           )
         )
       )
@@ -592,8 +589,8 @@ class SierraProductionTest
           marcTag = "264",
           indicator2 = "1",
           subfields = List(
-            MarcSubfield(tag = "c", content = "2002"),
-            MarcSubfield(tag = "a", content = "London"))))
+            Subfield(tag = "c", content = "2002"),
+            Subfield(tag = "a", content = "London"))))
 
       transformToProduction(varFields) shouldBe List(
         ProductionEvent(
@@ -612,8 +609,8 @@ class SierraProductionTest
           marcTag = "260",
           indicator2 = "1",
           subfields = List(
-            MarcSubfield(tag = "c", content = "2002"),
-            MarcSubfield(tag = "a", content = "London"))))
+            Subfield(tag = "c", content = "2002"),
+            Subfield(tag = "a", content = "London"))))
 
       transformToProduction(varFields) shouldBe List(
         ProductionEvent(
@@ -631,7 +628,7 @@ class SierraProductionTest
         createVarFieldWith(
           marcTag = "260",
           indicator2 = "1",
-          subfields = List(MarcSubfield(tag = "a", content = "London"))))
+          subfields = List(Subfield(tag = "a", content = "London"))))
 
       transformToProduction(varFields) shouldBe List(
         ProductionEvent(
@@ -655,8 +652,8 @@ class SierraProductionTest
           marcTag = "264",
           indicator2 = "0",
           subfields = List(
-            MarcSubfield(tag = "a", content = "[Netherne, Surrey],"),
-            MarcSubfield(
+            Subfield(tag = "a", content = "[Netherne, Surrey],"),
+            Subfield(
               tag = "c",
               content = "B̷A̴D̸ ̴U̶N̸P̵A̸R̸S̷E̷A̶B̵L̶E̸ ̵N̴O̴N̶S̵E̷N̷S̴E̴")
           )
@@ -680,7 +677,7 @@ class SierraProductionTest
 
   // Test helpers
 
-  private def transform260ToProduction(subfields: List[MarcSubfield]) = {
+  private def transform260ToProduction(subfields: List[Subfield]) = {
     val varFields = List(
       createVarFieldWith(
         marcTag = "260",
@@ -691,7 +688,7 @@ class SierraProductionTest
     transformToProduction(varFields = varFields).head
   }
 
-  private def transform264ToProduction(subfields: List[MarcSubfield]) = {
+  private def transform264ToProduction(subfields: List[Subfield]) = {
     val varFields = List(
       createVarFieldWith(
         marcTag = "264",

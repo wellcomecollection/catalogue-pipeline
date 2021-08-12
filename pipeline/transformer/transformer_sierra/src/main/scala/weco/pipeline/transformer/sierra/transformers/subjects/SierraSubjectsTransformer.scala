@@ -3,11 +3,11 @@ package weco.pipeline.transformer.sierra.transformers.subjects
 import weco.catalogue.internal_model.text.TextNormalisation._
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.Subject
-import weco.catalogue.source_model.sierra.marc.VarField
-import weco.catalogue.source_model.sierra.source.SierraQueryOps
-import weco.catalogue.source_model.sierra.SierraBibData
-import weco.catalogue.source_model.sierra.identifiers.SierraBibNumber
 import weco.pipeline.transformer.sierra.transformers.SierraIdentifiedDataTransformer
+import weco.sierra.models.SierraQueryOps
+import weco.sierra.models.data.SierraBibData
+import weco.sierra.models.identifiers.SierraBibNumber
+import weco.sierra.models.marc.VarField
 
 trait SierraSubjectsTransformer
     extends SierraIdentifiedDataTransformer

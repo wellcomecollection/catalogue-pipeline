@@ -3,13 +3,10 @@ package weco.pipeline.transformer.sierra.transformers
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.work.Format.ArchivesAndManuscripts
-import weco.catalogue.source_model.generators.{
-  MarcGenerators,
-  SierraDataGenerators
-}
-import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
-import weco.catalogue.source_model.sierra.source.SierraMaterialType
-import weco.catalogue.source_model.sierra.{SierraBibData, SierraItemData}
+import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
+import weco.sierra.models.data.{SierraBibData, SierraItemData}
+import weco.sierra.models.fields.SierraMaterialType
+import weco.sierra.models.marc.{Subfield, VarField}
 
 class SierraShelfmarkTest
     extends AnyFunSpec
@@ -30,7 +27,7 @@ class SierraShelfmarkTest
         marcTag = Some("949"),
         fieldTag = Some("c"),
         subfields = List(
-          MarcSubfield(tag = "a", content = "S7956")
+          Subfield(tag = "a", content = "S7956")
         )
       )
     )
@@ -46,7 +43,7 @@ class SierraShelfmarkTest
         marcTag = Some("949"),
         fieldTag = Some("c"),
         subfields = List(
-          MarcSubfield(tag = "a", content = "/LEATHER            ")
+          Subfield(tag = "a", content = "/LEATHER            ")
         )
       )
     )
@@ -62,7 +59,7 @@ class SierraShelfmarkTest
         marcTag = Some("949"),
         fieldTag = Some("c"),
         subfields = List(
-          MarcSubfield(tag = "a", content = "PP/BOW/P.1.2.3/10:Box 123,1")
+          Subfield(tag = "a", content = "PP/BOW/P.1.2.3/10:Box 123,1")
         )
       )
     )
@@ -84,7 +81,7 @@ class SierraShelfmarkTest
         marcTag = Some("949"),
         fieldTag = Some("c"),
         subfields = List(
-          MarcSubfield(tag = "d", content = "X42461")
+          Subfield(tag = "d", content = "X42461")
         )
       )
     )
@@ -100,7 +97,7 @@ class SierraShelfmarkTest
         marcTag = Some("949"),
         fieldTag = Some("a"),
         subfields = List(
-          MarcSubfield(tag = "a", content = "X42461")
+          Subfield(tag = "a", content = "X42461")
         )
       )
     )
@@ -124,7 +121,7 @@ class SierraShelfmarkTest
           marcTag = Some("949"),
           fieldTag = Some("c"),
           subfields = List(
-            MarcSubfield(tag = "a", content = "S7956")
+            Subfield(tag = "a", content = "S7956")
           )
         )
       )
@@ -152,7 +149,7 @@ class SierraShelfmarkTest
         marcTag = Some("949"),
         fieldTag = Some("c"),
         subfields = List(
-          MarcSubfield(tag = "a", content = "12345i.1")
+          Subfield(tag = "a", content = "12345i.1")
         )
       )
     )
@@ -177,7 +174,7 @@ class SierraShelfmarkTest
         marcTag = Some("949"),
         fieldTag = Some("c"),
         subfields = List(
-          MarcSubfield(tag = "a", content = "12345i")
+          Subfield(tag = "a", content = "12345i")
         )
       )
     )

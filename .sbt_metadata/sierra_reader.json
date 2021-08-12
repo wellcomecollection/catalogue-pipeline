@@ -2,6 +2,6 @@
   "id" : "sierra_reader",
   "folder" : "sierra_adapter/sierra_reader",
   "dependencyIds" : [
-    "source_model_typesafe"
+    "source_model"
   ]
 }

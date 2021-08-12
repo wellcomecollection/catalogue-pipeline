@@ -6,8 +6,8 @@ import weco.catalogue.internal_model.identifiers.{
   SourceIdentifier
 }
 import weco.catalogue.internal_model.work.{Meeting, Organisation, Person}
-import weco.catalogue.source_model.sierra.marc.MarcSubfield
-import weco.catalogue.source_model.sierra.source.SierraQueryOps
+import weco.sierra.models.SierraQueryOps
+import weco.sierra.models.marc.Subfield
 
 trait SierraAgents extends SierraQueryOps {
   // This is used to construct a Person from MARc tags 100, 700 and 600.
@@ -17,7 +17,7 @@ trait SierraAgents extends SierraQueryOps {
   //  - subfield $c populates the person prefixes
   //
   def getPerson(
-    subfields: List[MarcSubfield],
+    subfields: List[Subfield],
     normalisePerson: Boolean = false): Option[Person[IdState.Unminted]] =
     getLabel(subfields).map { label =>
       // The rule is to only normalise the 'Person' label when a contributor.  Strictly a 'Person' within
@@ -48,12 +48,11 @@ trait SierraAgents extends SierraQueryOps {
   //    in the label.
   //
   def getOrganisation(
-    subfields: List[MarcSubfield]): Option[Organisation[IdState.Unminted]] =
+    subfields: List[Subfield]): Option[Organisation[IdState.Unminted]] =
     getLabel(subfields.filterNot(_.tag == "n"))
       .map { Organisation.normalised }
 
-  def getMeeting(
-    subfields: List[MarcSubfield]): Option[Meeting[IdState.Unminted]] =
+  def getMeeting(subfields: List[Subfield]): Option[Meeting[IdState.Unminted]] =
     getLabel(subfields.withTags("a", "c", "d", "t"))
       .map { Meeting.normalised }
 
@@ -63,7 +62,7 @@ trait SierraAgents extends SierraQueryOps {
    * This methods them (if present) and wraps the agent in Unidentifiable or Identifiable
    * as appropriate.
    */
-  def identify(subfields: List[MarcSubfield],
+  def identify(subfields: List[Subfield],
                ontologyType: String): IdState.Unminted = {
 
     // We take the contents of subfield $0.  They may contain inconsistent
@@ -78,7 +77,7 @@ trait SierraAgents extends SierraQueryOps {
     // For consistency, we remove all whitespace and some punctuation
     // before continuing.
     val codes = subfields.collect {
-      case MarcSubfield("0", content) => content.replaceAll("[.,\\s]", "")
+      case Subfield("0", content) => content.replaceAll("[.,\\s]", "")
     }
 
     // If we get exactly one value, we can use it to identify the record.
@@ -97,7 +96,7 @@ trait SierraAgents extends SierraQueryOps {
     }
   }
 
-  def getLabel(subfields: List[MarcSubfield]): Option[String] =
+  def getLabel(subfields: List[Subfield]): Option[String] =
     subfields.filter { s =>
       List("a", "b", "c", "d", "t", "p", "n").contains(s.tag)
     } map (_.content) match {

@@ -1,6 +1,6 @@
 package weco.pipeline.sierra_reader.models
 
-import weco.catalogue.source_model.sierra.identifiers.UntypedSierraRecordNumber
+import weco.sierra.models.identifiers.UntypedSierraRecordNumber
 
 case class WindowStatus(
   id: Option[UntypedSierraRecordNumber],

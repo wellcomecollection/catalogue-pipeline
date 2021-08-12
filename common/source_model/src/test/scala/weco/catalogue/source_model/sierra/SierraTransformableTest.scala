@@ -2,13 +2,13 @@ package weco.catalogue.source_model.sierra
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.source_model.generators.SierraGenerators
-import weco.catalogue.source_model.sierra.identifiers.SierraItemNumber
+import weco.catalogue.source_model.generators.SierraRecordGenerators
+import weco.sierra.models.identifiers.SierraItemNumber
 
 class SierraTransformableTest
     extends AnyFunSpec
     with Matchers
-    with SierraGenerators {
+    with SierraRecordGenerators {
 
   it("allows creation of SierraTransformable with no data") {
     SierraTransformable(sierraId = createSierraBibNumber)

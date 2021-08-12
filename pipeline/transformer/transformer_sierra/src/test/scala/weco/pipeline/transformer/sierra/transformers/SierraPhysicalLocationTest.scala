@@ -9,37 +9,30 @@ import weco.catalogue.internal_model.locations.{
   LocationType,
   PhysicalLocation
 }
-import weco.catalogue.source_model.generators.{
-  MarcGenerators,
-  SierraDataGenerators
-}
-import weco.catalogue.source_model.sierra.marc.{
-  FixedField,
-  MarcSubfield,
-  VarField
-}
-import weco.catalogue.source_model.sierra.source.SierraSourceLocation
-import weco.catalogue.source_model.sierra.SierraItemData
+import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
+import weco.sierra.models.data.SierraItemData
+import weco.sierra.models.fields.SierraLocation
+import weco.sierra.models.marc.{FixedField, Subfield, VarField}
 
-class SierraLocationTest
+class SierraPhysicalLocationTest
     extends AnyFunSpec
     with Matchers
     with MarcGenerators
     with SierraDataGenerators {
 
-  private val transformer = new SierraLocation {}
+  private val transformer = new SierraPhysicalLocation {}
 
   describe("Physical locations") {
     val bibId = createSierraBibNumber
     val bibData = createSierraBibData
 
     val itemData = createSierraItemDataWith(
-      location = Some(SierraSourceLocation("sgmed", "Closed stores Med."))
+      location = Some(SierraLocation("sgmed", "Closed stores Med."))
     )
 
     it("extracts location from item data") {
       val itemData = createSierraItemDataWith(
-        location = Some(SierraSourceLocation("sgmed", "Closed stores Med.")),
+        location = Some(SierraLocation("sgmed", "Closed stores Med.")),
         fixedFields = Map(
           "79" -> FixedField(
             label = "LOCATION",
@@ -69,7 +62,7 @@ class SierraLocationTest
 
     it("uses the name as the label for non-closed locations") {
       val itemData: SierraItemData = createSierraItemDataWith(
-        location = Some(SierraSourceLocation("wghxg", "Folios"))
+        location = Some(SierraLocation("wghxg", "Folios"))
       )
 
       val location =
@@ -79,7 +72,7 @@ class SierraLocationTest
 
     it("returns None if the location field only contains empty strings") {
       val itemData = createSierraItemDataWith(
-        location = Some(SierraSourceLocation("", ""))
+        location = Some(SierraLocation("", ""))
       )
 
       transformer.getPhysicalLocation(bibId, itemData, bibData) shouldBe None
@@ -87,7 +80,7 @@ class SierraLocationTest
 
     it("returns None if the location field only contains the string 'none'") {
       val itemData = createSierraItemDataWith(
-        location = Some(SierraSourceLocation("none", "none"))
+        location = Some(SierraLocation("none", "none"))
       )
       transformer.getPhysicalLocation(bibId, itemData, bibData) shouldBe None
     }
@@ -106,8 +99,8 @@ class SierraLocationTest
           VarField(
             marcTag = Some("506"),
             subfields = List(
-              MarcSubfield("a", "You can look at this"),
-              MarcSubfield("f", "Open")
+              Subfield("a", "You can look at this"),
+              Subfield("f", "Open")
             )
           )
         )
@@ -129,7 +122,7 @@ class SierraLocationTest
             display = "Online request"),
         ),
         location = Some(
-          SierraSourceLocation(code = "sgmed", name = "Closed stores Med.")
+          SierraLocation(code = "sgmed", name = "Closed stores Med.")
         )
       )
 
@@ -144,13 +137,13 @@ class SierraLocationTest
 
     it("uses 949 subfield ǂa as the shelfmark") {
       val itemData: SierraItemData = createSierraItemDataWith(
-        location = Some(SierraSourceLocation("info", "Open shelves")),
+        location = Some(SierraLocation("info", "Open shelves")),
         varFields = List(
           VarField(
             marcTag = Some("949"),
             fieldTag = Some("c"),
             subfields = List(
-              MarcSubfield(tag = "a", content = "AX1234:Box 1")
+              Subfield(tag = "a", content = "AX1234:Box 1")
             )
           )
         )
@@ -168,7 +161,7 @@ class SierraLocationTest
           bibNumber = createSierraBibNumber,
           bibData = createSierraBibData,
           itemData = createSierraItemDataWith(
-            location = Some(SierraSourceLocation("bwith", "bound in above"))
+            location = Some(SierraLocation("bwith", "bound in above"))
           )
         )
 
@@ -180,7 +173,7 @@ class SierraLocationTest
           bibNumber = createSierraBibNumber,
           bibData = createSierraBibData,
           itemData = createSierraItemDataWith(
-            location = Some(SierraSourceLocation("bwith", "bound in above"))
+            location = Some(SierraLocation("bwith", "bound in above"))
           ),
           fallbackLocation = Some(
             (LocationType.OpenShelves, "History of Medicine")
@@ -196,7 +189,7 @@ class SierraLocationTest
           bibNumber = createSierraBibNumber,
           bibData = createSierraBibData,
           itemData = createSierraItemDataWith(
-            location = Some(SierraSourceLocation("cwith", "contained in above"))
+            location = Some(SierraLocation("cwith", "contained in above"))
           )
         )
 
@@ -208,7 +201,7 @@ class SierraLocationTest
           bibNumber = createSierraBibNumber,
           bibData = createSierraBibData,
           itemData = createSierraItemDataWith(
-            location = Some(SierraSourceLocation("cwith", "contained in above"))
+            location = Some(SierraLocation("cwith", "contained in above"))
           ),
           fallbackLocation = Some(
             (LocationType.OpenShelves, "History of Medicine")
@@ -226,8 +219,8 @@ class SierraLocationTest
           VarField(
             marcTag = Some("506"),
             subfields = List(
-              MarcSubfield("a", "You're not allowed yet"),
-              MarcSubfield("g", "2099-12-31"),
+              Subfield("a", "You're not allowed yet"),
+              Subfield("g", "2099-12-31"),
             )
           )
         )

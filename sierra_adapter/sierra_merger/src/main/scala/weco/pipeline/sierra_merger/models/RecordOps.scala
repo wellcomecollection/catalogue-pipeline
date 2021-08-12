@@ -1,7 +1,6 @@
 package weco.pipeline.sierra_merger.models
 
 import grizzled.slf4j.Logging
-import weco.catalogue.source_model.sierra.identifiers.SierraBibNumber
 import weco.catalogue.source_model.sierra.{
   AbstractSierraRecord,
   SierraBibRecord,
@@ -9,6 +8,7 @@ import weco.catalogue.source_model.sierra.{
   SierraItemRecord,
   SierraOrderRecord
 }
+import weco.sierra.models.identifiers.SierraBibNumber
 
 trait RecordOps[Record <: AbstractSierraRecord[_]] extends Logging {
   def getBibIds(r: Record): List[SierraBibNumber]

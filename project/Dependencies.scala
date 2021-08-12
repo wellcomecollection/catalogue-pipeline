@@ -2,7 +2,7 @@ import sbt._
 
 object WellcomeDependencies {
 
-  val defaultVersion = "30.1.1" // This is automatically bumped by the scala-libs release process, do not edit this line manually
+  val defaultVersion = "30.4.0" // This is automatically bumped by the scala-libs release process, do not edit this line manually
 
   lazy val versions = new {
     val typesafe = defaultVersion
@@ -80,6 +80,16 @@ object WellcomeDependencies {
     name = "messaging_typesafe",
     version = versions.messaging
   ) ++ monitoringLibrary
+
+  val sierraLibrary: Seq[ModuleID] = library(
+    name = "sierra",
+    version = defaultVersion
+  )
+
+  val sierraTypesafeLibrary: Seq[ModuleID] = sierraLibrary ++ library(
+    name = "sierra_typesafe",
+    version = defaultVersion
+  )
 
   private def library(name: String, version: String): Seq[ModuleID] = Seq(
     "weco" %% name % version,
@@ -184,6 +194,7 @@ object CatalogueDependencies {
   val sourceModelDependencies: Seq[sbt.ModuleID] =
     WellcomeDependencies.storageLibrary ++
       WellcomeDependencies.fixturesLibrary ++
+      WellcomeDependencies.sierraLibrary ++
       ExternalDependencies.scalatestDependencies ++
       ExternalDependencies.logbackDependencies
 
@@ -272,17 +283,25 @@ object CatalogueDependencies {
   // Sierra adapter stack
 
   val sierraLinkerDependencies: Seq[ModuleID] =
-    WellcomeDependencies.typesafeLibrary
+    WellcomeDependencies.sierraTypesafeLibrary ++
+      WellcomeDependencies.messagingTypesafeLibrary ++
+      WellcomeDependencies.storageTypesafeLibrary ++
+      WellcomeDependencies.typesafeLibrary
 
   val sierraMergerDependencies: Seq[ModuleID] =
-    WellcomeDependencies.typesafeLibrary
+    WellcomeDependencies.sierraTypesafeLibrary ++
+      WellcomeDependencies.typesafeLibrary
 
   val sierraReaderDependencies: Seq[ModuleID] =
     ExternalDependencies.circeOpticsDependencies ++
       WellcomeDependencies.messagingTypesafeLibrary ++
       WellcomeDependencies.jsonLibrary ++
-      WellcomeDependencies.typesafeLibrary ++
-      WellcomeDependencies.httpLibrary
+      WellcomeDependencies.storageTypesafeLibrary ++
+      WellcomeDependencies.sierraTypesafeLibrary ++
+      WellcomeDependencies.typesafeLibrary
+
+  val sierraIndexerDependencies: Seq[ModuleID] =
+    WellcomeDependencies.storageTypesafeLibrary
 
   // Inference manager
   val inferenceManagerDependencies: Seq[ModuleID] =

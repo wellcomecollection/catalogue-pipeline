@@ -13,17 +13,19 @@ import weco.catalogue.internal_model.locations.{
 }
 import weco.catalogue.internal_model.work.Item
 import weco.catalogue.source_model.sierra.rules.{
-  SierraAccessStatus,
   SierraItemAccess,
   SierraPhysicalLocationType
 }
-import weco.catalogue.source_model.sierra.source.SierraQueryOps
-import weco.catalogue.source_model.sierra.identifiers.SierraBibNumber
-import weco.catalogue.source_model.sierra.marc.VarField
-import weco.catalogue.source_model.sierra.{SierraBibData, SierraItemData}
 import weco.pipeline.transformer.sierra.data.SierraPhysicalItemOrder
+import weco.sierra.models.SierraQueryOps
+import weco.sierra.models.data.{SierraBibData, SierraItemData}
+import weco.sierra.models.identifiers.SierraBibNumber
+import weco.sierra.models.marc.VarField
 
-object SierraItems extends Logging with SierraLocation with SierraQueryOps {
+object SierraItems
+    extends Logging
+    with SierraPhysicalLocation
+    with SierraQueryOps {
 
   type Output = List[Item[IdState.Unminted]]
 

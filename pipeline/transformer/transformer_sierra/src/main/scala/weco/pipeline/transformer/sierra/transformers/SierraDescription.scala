@@ -3,10 +3,10 @@ package weco.pipeline.transformer.sierra.transformers
 import grizzled.slf4j.Logging
 
 import java.net.URL
-import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
-import weco.catalogue.source_model.sierra.source.SierraQueryOps
-import weco.catalogue.source_model.sierra.SierraBibData
-import weco.catalogue.source_model.sierra.identifiers.SierraBibNumber
+import weco.sierra.models.SierraQueryOps
+import weco.sierra.models.data.SierraBibData
+import weco.sierra.models.identifiers.SierraBibNumber
+import weco.sierra.models.marc.{Subfield, VarField}
 
 import scala.util.Try
 
@@ -55,7 +55,7 @@ object SierraDescription
     val contents =
       subfields
         .map {
-          case MarcSubfield("u", contents) if isUrl(contents) =>
+          case Subfield("u", contents) if isUrl(contents) =>
             s"""<a href="$contents">$contents</a>"""
 
           // The spec says that MARC 520 ǂu is "Uniform Resource Identifier", which
@@ -64,12 +64,12 @@ object SierraDescription
           //
           // For now, log the value and don't make it clickable -- we can decide how
           // best to handle it later.
-          case MarcSubfield("u", contents) =>
+          case Subfield("u", contents) =>
             warn(
               s"Bib $bibId has MARC 520 ǂu which doesn't look like a URL: $contents")
             contents
 
-          case MarcSubfield(_, contents) => contents
+          case Subfield(_, contents) => contents
         }
         .mkString(" ")
 

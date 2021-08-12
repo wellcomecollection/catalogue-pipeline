@@ -2,11 +2,8 @@ package weco.pipeline.transformer.sierra.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.source_model.generators.{
-  MarcGenerators,
-  SierraDataGenerators
-}
-import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
+import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
+import weco.sierra.models.marc.{Subfield, VarField}
 
 class SierraEditionTest
     extends AnyFunSpec
@@ -49,5 +46,5 @@ class SierraEditionTest
     createVarFieldWith(
       tag,
       "1",
-      MarcSubfield(tag = contentTag, content = content) :: Nil)
+      Subfield(tag = contentTag, content = content) :: Nil)
 }

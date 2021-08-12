@@ -4,9 +4,9 @@ import weco.catalogue.internal_model.identifiers.{
   IdentifierType,
   SourceIdentifier
 }
-import weco.catalogue.source_model.sierra.source.SierraQueryOps
-import weco.catalogue.source_model.sierra.SierraBibData
-import weco.catalogue.source_model.sierra.identifiers.SierraBibNumber
+import weco.sierra.models.SierraQueryOps
+import weco.sierra.models.data.SierraBibData
+import weco.sierra.models.identifiers.SierraBibNumber
 
 // Populate wwork:identifiers.
 //

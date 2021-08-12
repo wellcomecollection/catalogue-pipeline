@@ -2,9 +2,9 @@ package weco.pipeline.transformer.sierra.transformers
 
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.{Concept, Genre}
-import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
-import weco.catalogue.source_model.sierra.SierraBibData
-import weco.catalogue.source_model.sierra.source.SierraQueryOps
+import weco.sierra.models.SierraQueryOps
+import weco.sierra.models.data.SierraBibData
+import weco.sierra.models.marc.{Subfield, VarField}
 
 // Populate wwork:genres
 //
@@ -63,7 +63,7 @@ object SierraGenres
   // Extract the primary concept, which comes from subfield $a.  This is the
   // only concept which might be identified.
   private def getPrimaryConcept(
-    primarySubfields: List[MarcSubfield],
+    primarySubfields: List[Subfield],
     varField: VarField): List[Concept[IdState.Unminted]] =
     primarySubfields.map { subfield =>
       val concept = Concept.normalised(label = subfield.content)

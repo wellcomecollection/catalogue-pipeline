@@ -2,13 +2,13 @@ package weco.pipeline.sierra_merger.models
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.source_model.generators.SierraGenerators
+import weco.catalogue.source_model.generators.SierraRecordGenerators
 import weco.catalogue.source_model.sierra.SierraTransformable
 
 class TransformableOpsTest
     extends AnyFunSpec
     with Matchers
-    with SierraGenerators {
+    with SierraRecordGenerators {
   import TransformableOps._
 
   describe("bibTransformableOps") {

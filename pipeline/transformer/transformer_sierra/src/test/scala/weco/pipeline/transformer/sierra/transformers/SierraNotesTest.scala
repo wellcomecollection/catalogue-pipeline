@@ -3,12 +3,9 @@ package weco.pipeline.transformer.sierra.transformers
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.work._
-import weco.catalogue.source_model.generators.{
-  MarcGenerators,
-  SierraDataGenerators
-}
-import weco.catalogue.source_model.sierra.SierraBibData
-import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
+import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
+import weco.sierra.models.data.SierraBibData
+import weco.sierra.models.marc.{Subfield, VarField}
 
 class SierraNotesTest
     extends AnyFunSpec
@@ -77,9 +74,9 @@ class SierraNotesTest
         createVarFieldWith(
           marcTag = "500",
           subfields = List(
-            MarcSubfield(tag = "a", content = "1st part."),
-            MarcSubfield(tag = "b", content = "2nd part."),
-            MarcSubfield(tag = "c", content = "3rd part."),
+            Subfield(tag = "a", content = "1st part."),
+            Subfield(tag = "b", content = "2nd part."),
+            Subfield(tag = "c", content = "3rd part."),
           )
         )
       )
@@ -104,13 +101,13 @@ class SierraNotesTest
           marcTag = "535",
           indicator1 = Some("1"),
           subfields =
-            List(MarcSubfield(tag = "a", content = "The originals are in Oman"))
+            List(Subfield(tag = "a", content = "The originals are in Oman"))
         ),
         createVarFieldWith(
           marcTag = "535",
           indicator1 = Some("2"),
-          subfields = List(
-            MarcSubfield(tag = "a", content = "The duplicates are in Denmark"))
+          subfields =
+            List(Subfield(tag = "a", content = "The duplicates are in Denmark"))
         )
       )
     )
@@ -128,7 +125,7 @@ class SierraNotesTest
           marcTag = Some("561"),
           indicator1 = Some("1"),
           subfields = List(
-            MarcSubfield(
+            Subfield(
               tag = "a",
               content = "Provenance: one plate in the set of plates"),
           )
@@ -137,7 +134,7 @@ class SierraNotesTest
           marcTag = Some("561"),
           indicator1 = Some("0"),
           subfields = List(
-            MarcSubfield(
+            Subfield(
               tag = "a",
               content = "Purchased from John Smith on 01/01/2001"),
           )
@@ -146,7 +143,7 @@ class SierraNotesTest
           marcTag = Some("561"),
           indicator1 = None,
           subfields = List(
-            MarcSubfield(
+            Subfield(
               tag = "a",
               content = "Private contact details for John Smith"),
           )
@@ -163,8 +160,8 @@ class SierraNotesTest
       createVarFieldWith(
         marcTag = key,
         subfields = List(
-          MarcSubfield(tag = "a", content = "Main bit."),
-          MarcSubfield(tag = "5", content = "UkLW"),
+          Subfield(tag = "a", content = "Main bit."),
+          Subfield(tag = "5", content = "UkLW"),
         )
       )
     })
@@ -179,7 +176,7 @@ class SierraNotesTest
             createVarFieldWith(
               marcTag = "000",
               subfields = List(
-                MarcSubfield(tag = "a", content = "Main bit.")
+                Subfield(tag = "a", content = "Main bit.")
               )
             )
         ))
@@ -197,7 +194,7 @@ class SierraNotesTest
         case (tag, content) =>
           createVarFieldWith(
             marcTag = tag,
-            subfields = List(MarcSubfield(tag = "a", content = content))
+            subfields = List(Subfield(tag = "a", content = content))
           )
       }
     )

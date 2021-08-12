@@ -3,11 +3,8 @@ package weco.pipeline.transformer.sierra.transformers
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import shapeless.tag
-import weco.catalogue.source_model.generators.{
-  MarcGenerators,
-  SierraDataGenerators
-}
-import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
+import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
+import weco.sierra.models.marc.{Subfield, VarField}
 
 class SierraAlternativeTitlesTest
     extends AnyFunSpec
@@ -54,8 +51,8 @@ class SierraAlternativeTitlesTest
       createVarFieldWith(
         marcTag = "240",
         subfields = List(
-          MarcSubfield(tag = "a", content = "start,"),
-          MarcSubfield(tag = "b", content = "end.")
+          Subfield(tag = "a", content = "start,"),
+          Subfield(tag = "b", content = "end.")
         )
       )
     )
@@ -86,9 +83,9 @@ class SierraAlternativeTitlesTest
         "246",
         "1",
         List(
-          MarcSubfield(tag = "a", content = "Apples"),
-          MarcSubfield(tag = "5", content = "Oranges"),
-          MarcSubfield(tag = "5", content = "UkLW")
+          Subfield(tag = "a", content = "Apples"),
+          Subfield(tag = "5", content = "Oranges"),
+          Subfield(tag = "5", content = "UkLW")
         )
       ),
     )
@@ -105,9 +102,9 @@ class SierraAlternativeTitlesTest
         "246",
         "1",
         List(
-          MarcSubfield(tag = "a", content = "Apples"),
-          MarcSubfield(tag = "5", content = "Oranges"),
-          MarcSubfield(tag = "5", content = "Carrots")
+          Subfield(tag = "a", content = "Apples"),
+          Subfield(tag = "5", content = "Oranges"),
+          Subfield(tag = "5", content = "Carrots")
         )
       ),
     )
@@ -125,14 +122,14 @@ class SierraAlternativeTitlesTest
         marcTag = "240",
         indicator2 = "1",
         subfields = List(
-          MarcSubfield(tag = "a", content = "De rerum natura")
+          Subfield(tag = "a", content = "De rerum natura")
         )
       ),
       createVarFieldWith(
         marcTag = "246",
         indicator2 = "1",
         subfields = List(
-          MarcSubfield(tag = "a", content = "De rerum natura")
+          Subfield(tag = "a", content = "De rerum natura")
         )
       )
     )
@@ -152,5 +149,5 @@ class SierraAlternativeTitlesTest
     createVarFieldWith(
       tag,
       indicator2,
-      MarcSubfield(tag = contentTag, content = content) :: Nil)
+      Subfield(tag = contentTag, content = content) :: Nil)
 }

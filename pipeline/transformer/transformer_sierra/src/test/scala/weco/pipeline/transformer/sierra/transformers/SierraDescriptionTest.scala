@@ -3,11 +3,8 @@ package weco.pipeline.transformer.sierra.transformers
 import org.scalatest.Assertion
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.source_model.generators.{
-  MarcGenerators,
-  SierraDataGenerators
-}
-import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
+import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
+import weco.sierra.models.marc.{Subfield, VarField}
 
 class SierraDescriptionTest
     extends AnyFunSpec
@@ -24,7 +21,7 @@ class SierraDescriptionTest
         createVarFieldWith(
           marcTag = "520",
           subfields = List(
-            MarcSubfield(tag = "a", content = description)
+            Subfield(tag = "a", content = description)
           )
         )
       ),
@@ -43,13 +40,13 @@ class SierraDescriptionTest
         createVarFieldWith(
           marcTag = "520",
           subfields = List(
-            MarcSubfield(tag = "a", content = description1)
+            Subfield(tag = "a", content = description1)
           )
         ),
         createVarFieldWith(
           marcTag = "520",
           subfields = List(
-            MarcSubfield(tag = "a", content = description2)
+            Subfield(tag = "a", content = description2)
           )
         )
       ),
@@ -68,8 +65,8 @@ class SierraDescriptionTest
         createVarFieldWith(
           marcTag = "520",
           subfields = List(
-            MarcSubfield(tag = "a", content = description),
-            MarcSubfield(tag = "b", content = summaryDescription)
+            Subfield(tag = "a", content = description),
+            Subfield(tag = "b", content = summaryDescription)
           )
         )
       ),
@@ -92,9 +89,9 @@ class SierraDescriptionTest
           createVarFieldWith(
             marcTag = "520",
             subfields = List(
-              MarcSubfield(tag = "a", content = description),
-              MarcSubfield(tag = "b", content = summaryDescription),
-              MarcSubfield(tag = "u", content = url)
+              Subfield(tag = "a", content = description),
+              Subfield(tag = "b", content = summaryDescription),
+              Subfield(tag = "u", content = url)
             )
           )
         ),
@@ -114,10 +111,10 @@ class SierraDescriptionTest
           createVarFieldWith(
             marcTag = "520",
             subfields = List(
-              MarcSubfield(tag = "a", content = description),
-              MarcSubfield(tag = "b", content = summaryDescription),
-              MarcSubfield(tag = "u", content = url1),
-              MarcSubfield(tag = "u", content = url2)
+              Subfield(tag = "a", content = description),
+              Subfield(tag = "b", content = summaryDescription),
+              Subfield(tag = "u", content = url1),
+              Subfield(tag = "u", content = url2)
             )
           )
         ),
@@ -138,10 +135,10 @@ class SierraDescriptionTest
           createVarFieldWith(
             marcTag = "520",
             subfields = List(
-              MarcSubfield(tag = "a", content = description),
-              MarcSubfield(tag = "b", content = summaryDescription),
-              MarcSubfield(tag = "u", content = url1),
-              MarcSubfield(tag = "u", content = uContents)
+              Subfield(tag = "a", content = description),
+              Subfield(tag = "b", content = summaryDescription),
+              Subfield(tag = "u", content = url1),
+              Subfield(tag = "u", content = uContents)
             )
           )
         ),

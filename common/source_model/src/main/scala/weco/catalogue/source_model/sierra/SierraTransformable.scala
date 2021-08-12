@@ -1,6 +1,6 @@
 package weco.catalogue.source_model.sierra
 
-import weco.catalogue.source_model.sierra.identifiers.{
+import weco.sierra.models.identifiers.{
   SierraBibNumber,
   SierraHoldingsNumber,
   SierraItemNumber,
