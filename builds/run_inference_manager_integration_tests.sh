@@ -15,6 +15,14 @@ do
     "$ROOT/pipeline/inferrer/$PROJECT"
 done
 
+pushd "$ROOT/pipeline/inferrer/inference_manager"
+  docker-compose up -d
+popd
+
 $BUILDS_DIR/run_sbt_task_in_docker.sh \
   "project inference_manager" \
-  ";dockerComposeUp;testOnly **.integration.*;dockerComposeStop"
+  ";testOnly **.integration.*"
+
+pushd "$ROOT/pipeline/inferrer/inference_manager"
+  docker-compose down
+popd
