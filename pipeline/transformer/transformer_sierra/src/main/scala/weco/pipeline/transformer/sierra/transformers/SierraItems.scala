@@ -22,7 +22,10 @@ import weco.sierra.models.data.{SierraBibData, SierraItemData}
 import weco.sierra.models.identifiers.SierraBibNumber
 import weco.sierra.models.marc.VarField
 
-object SierraItems extends Logging with SierraPhysicalLocation with SierraQueryOps {
+object SierraItems
+    extends Logging
+    with SierraPhysicalLocation
+    with SierraQueryOps {
 
   type Output = List[Item[IdState.Unminted]]
 
