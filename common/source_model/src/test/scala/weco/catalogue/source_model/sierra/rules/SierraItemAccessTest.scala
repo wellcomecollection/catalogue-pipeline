@@ -45,7 +45,9 @@ class SierraItemAccessTest
             itemData = itemData
           )
 
-          ac shouldBe AccessCondition(method = AccessMethod.OnlineRequest, status = AccessStatus.Open)
+          ac shouldBe AccessCondition(
+            method = AccessMethod.OnlineRequest,
+            status = AccessStatus.Open)
         }
 
         it("if it has no restrictions and the bib is open") {

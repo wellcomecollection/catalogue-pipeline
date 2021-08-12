@@ -314,13 +314,8 @@ object SierraItemAccess extends SierraQueryOps with Logging {
       // It is possible for an item to have a non-zero hold count but still be available
       // for requesting, e.g. some of our long-lived test holds didn't get cleared properly.
       // If an item seems to be stuck on a non-zero hold count, ask somebody to check Sierra.
-      case (
-          None,
-          Some(holdCount),
-          _,
-          _,
-          _,
-          Some(LocationType.ClosedStores)) if holdCount > 0 =>
+      case (None, Some(holdCount), _, _, _, Some(LocationType.ClosedStores))
+          if holdCount > 0 =>
         AccessCondition(
           method = AccessMethod.NotRequestable,
           status = Some(AccessStatus.TemporarilyUnavailable),
@@ -329,12 +324,12 @@ object SierraItemAccess extends SierraQueryOps with Logging {
         )
 
       case (
-        None,
-        _,
-        _,
-        _,
-        NotRequestable.OnHold(_),
-        Some(LocationType.ClosedStores)) =>
+          None,
+          _,
+          _,
+          _,
+          NotRequestable.OnHold(_),
+          Some(LocationType.ClosedStores)) =>
         AccessCondition(
           method = AccessMethod.NotRequestable,
           status = Some(AccessStatus.TemporarilyUnavailable),

@@ -285,8 +285,10 @@ class SierraItemsTest
       PhysicalLocation(
         locationType = LocationType.ClosedStores,
         label = LocationType.ClosedStores.label,
-        accessConditions =
-          List(AccessCondition(method = AccessMethod.OnlineRequest, status = AccessStatus.Open))
+        accessConditions = List(
+          AccessCondition(
+            method = AccessMethod.OnlineRequest,
+            status = AccessStatus.Open))
       )
     )
   }
@@ -380,8 +382,10 @@ class SierraItemsTest
         PhysicalLocation(
           locationType = LocationType.ClosedStores,
           label = LocationType.ClosedStores.label,
-          accessConditions =
-            List(AccessCondition(method = AccessMethod.OnlineRequest, status = AccessStatus.Open))
+          accessConditions = List(
+            AccessCondition(
+              method = AccessMethod.OnlineRequest,
+              status = AccessStatus.Open))
         )
       ))
   }
