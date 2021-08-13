@@ -583,8 +583,8 @@ class SierraItemAccessTest
       }
     }
 
-    describe("that's on hold") {
-      it("can't be requested when another reader has placed a hold") {
+    describe("that's on hold can't be requested") {
+      it("when another reader has placed a hold") {
         val itemData = createSierraItemDataWith(
           holdCount = Some(1),
           fixedFields = Map(
@@ -618,7 +618,7 @@ class SierraItemAccessTest
           )
       }
 
-      it("can't be requested when an item is on hold for a loan rule") {
+      it("when an item is on hold for a loan rule") {
         val itemData = createSierraItemDataWith(
           holdCount = Some(1),
           fixedFields = Map(
@@ -653,7 +653,7 @@ class SierraItemAccessTest
           )
       }
 
-      it("can't be requested when a manual request item is on hold for somebody else") {
+      it("when a manual request item is on hold for somebody else") {
         val itemData = createSierraItemDataWith(
           holdCount = Some(1),
           fixedFields = Map(
@@ -691,7 +691,7 @@ class SierraItemAccessTest
           )
       }
 
-      it("can't be requested when it's on the hold shelf for another reader") {
+      it("when it's on the hold shelf for another reader") {
         val itemData = createSierraItemDataWith(
           holdCount = Some(1),
           fixedFields = Map(
@@ -712,6 +712,41 @@ class SierraItemAccessTest
 
         val (ac, _) = getItemAccess(
           bibStatus = None,
+          location = Some(LocationType.ClosedStores),
+          itemData = itemData
+        )
+
+        ac shouldBe
+          AccessCondition(
+            method = AccessMethod.NotRequestable,
+            status = Some(AccessStatus.TemporarilyUnavailable),
+            note = Some(
+              "Item is in use by another reader. Please ask at Enquiry Desk.")
+          )
+      }
+
+      it("if there's a status on the bib") {
+        // This is based on b32204887 / i19379778, as retrieved 13 August 2021
+        val itemData = createSierraItemDataWith(
+          holdCount = Some(1),
+          fixedFields = Map(
+            "79" -> FixedField(
+              label = "scmac",
+              value = "swms4",
+              display = "Closed stores Arch. & MSS"),
+            "88" -> FixedField(
+              label = "STATUS",
+              value = "!",
+              display = "On holdshelf"),
+            "108" -> FixedField(
+              label = "OPACMSG",
+              value = "a",
+              display = "By appointment"),
+          )
+        )
+
+        val (ac, _) = getItemAccess(
+          bibStatus = Some(AccessStatus.ByAppointment),
           location = Some(LocationType.ClosedStores),
           itemData = itemData
         )
