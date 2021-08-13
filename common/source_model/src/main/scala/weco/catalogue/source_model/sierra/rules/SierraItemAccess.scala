@@ -12,7 +12,6 @@ import weco.catalogue.source_model.sierra.source.{OpacMsg, Status}
 import weco.sierra.models.SierraQueryOps
 import weco.sierra.models.data.SierraItemData
 import weco.sierra.models.identifiers.SierraBibNumber
-import weco.sierra.models.marc.FixedField
 
 /** There are multiple sources of truth for item information in Sierra, and whether
   * a given item can be requested online.
@@ -94,7 +93,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           if bibStatus.isEmpty || bibStatus.contains(AccessStatus.Open) =>
         AccessCondition(
           method = AccessMethod.OnlineRequest,
-          status = bibStatus
+          status = AccessStatus.Open
         )
 
       // Note: it is possible for individual items within a restricted bib to be available
@@ -145,7 +144,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           Some(OpacMsg.OpenShelves),
           NotRequestable.OnOpenShelves(_),
           Some(LocationType.OpenShelves)) =>
-        AccessCondition(method = AccessMethod.OpenShelves)
+        AccessCondition(method = AccessMethod.NotRequestable)
 
       // There are some items that are labelled "bound in above" or "contained in above".
       //
@@ -305,50 +304,34 @@ object SierraItemAccess extends SierraQueryOps with Logging {
       // If an item is on hold for another reader, it can't be requested -- even
       // if it would ordinarily be requestable.
       //
-      // We try to work out what the access condition would have been before the item
-      // was on hold -- this allows us to preserve the original access method.
+      // Note that an item on hold goes through two stages:
       //
-      // e.g. if an item is usually an "online request" but is temporarily on hold for
-      // somebody else, we can show that it's an online request at other times.
+      //  1. A reader places a hold, but the item is still in the store.
+      //     The status is still "-" (Available)
+      //  2. A staff member collects the item from the store, and places it on the holdshelf
+      //     Then the status becomes "!" (On holdshelf)  This is reflected in the rules for requesting.
       //
-      case (
-          None,
-          holdCount,
-          _,
-          _,
-          rulesForRequestingResult,
-          Some(LocationType.ClosedStores))
-          if isOnHold(holdCount, rulesForRequestingResult) =>
-        val inferredItemData = itemData.copy(
-          holdCount = Some(0),
-          fixedFields = itemData.fixedFields ++ Map(
-            "87" -> FixedField(label = "LOANRULE", value = "0"),
-            "88" -> FixedField(
-              label = "STATUS",
-              value = "-",
-              display = "Available"))
+      // It is possible for an item to have a non-zero hold count but still be available
+      // for requesting, e.g. some of our long-lived test holds didn't get cleared properly.
+      // If an item seems to be stuck on a non-zero hold count, ask somebody to check Sierra.
+      case (None, Some(holdCount), _, _, _, Some(LocationType.ClosedStores))
+          if holdCount > 0 =>
+        AccessCondition(
+          method = AccessMethod.NotRequestable,
+          status = Some(AccessStatus.TemporarilyUnavailable),
+          note = Some(
+            "Item is in use by another reader. Please ask at Enquiry Desk.")
         )
 
-        val rulesForRequestingResult = SierraRulesForRequesting(
-          inferredItemData)
-
-        // Make sure we only recurse here once, not infinitely many times.
-        assert(!rulesForRequestingResult.isInstanceOf[NotRequestable.OnHold])
-        assert(!isOnHold(inferredItemData.holdCount, rulesForRequestingResult))
-
-        val originalAccessCondition =
-          createAccessCondition(
-            bibId = bibId,
-            bibStatus = bibStatus,
-            holdCount = Some(0),
-            status = Some(Status.Available),
-            opacmsg = inferredItemData.opacmsg,
-            rulesForRequestingResult = rulesForRequestingResult,
-            location = location,
-            itemData = inferredItemData
-          )
-
-        originalAccessCondition.copy(
+      case (
+          None,
+          _,
+          _,
+          _,
+          NotRequestable.OnHold(_),
+          Some(LocationType.ClosedStores)) =>
+        AccessCondition(
+          method = AccessMethod.NotRequestable,
           status = Some(AccessStatus.TemporarilyUnavailable),
           note = Some(
             "Item is in use by another reader. Please ask at Enquiry Desk.")
@@ -375,22 +358,6 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           note = Some(
             s"""This item cannot be requested online. Please contact <a href="mailto:library@wellcomecollection.org">library@wellcomecollection.org</a> for more information.""")
         )
-    }
-
-  // Note that an item on hold goes through two stages:
-  //
-  //  1. A reader places a hold, but the item is still in the store.
-  //     The status is still "-" (Available)
-  //  2. A staff member collects the item from the store, and places it on the holdshelf
-  //     Then the status becomes "!" (On holdshelf)  This is reflected in the rules for requesting.
-  //
-  private def isOnHold(
-    holdCount: Option[Int],
-    rulesForRequestingResult: RulesForRequestingResult): Boolean =
-    (holdCount, rulesForRequestingResult) match {
-      case (Some(holdCount), _) if holdCount > 0 => true
-      case (_, NotRequestable.OnHold(_))         => true
-      case _                                     => false
     }
 
   implicit class ItemDataAccessOps(itemData: SierraItemData) {

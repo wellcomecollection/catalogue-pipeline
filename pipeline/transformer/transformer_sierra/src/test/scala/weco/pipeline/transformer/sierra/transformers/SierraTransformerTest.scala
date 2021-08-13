@@ -189,8 +189,10 @@ class SierraTransformerTest
         PhysicalLocation(
           locationType = LocationType.ClosedStores,
           label = LocationType.ClosedStores.label,
-          accessConditions =
-            List(AccessCondition(method = AccessMethod.OnlineRequest))
+          accessConditions = List(
+            AccessCondition(
+              method = AccessMethod.OnlineRequest,
+              status = AccessStatus.Open))
         )
       )
     )

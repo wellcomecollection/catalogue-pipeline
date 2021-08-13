@@ -11,6 +11,7 @@ import weco.catalogue.internal_model.identifiers.{
 import weco.catalogue.internal_model.locations.{
   AccessCondition,
   AccessMethod,
+  AccessStatus,
   LocationType,
   PhysicalLocation
 }
@@ -284,8 +285,10 @@ class SierraItemsTest
       PhysicalLocation(
         locationType = LocationType.ClosedStores,
         label = LocationType.ClosedStores.label,
-        accessConditions =
-          List(AccessCondition(method = AccessMethod.OnlineRequest))
+        accessConditions = List(
+          AccessCondition(
+            method = AccessMethod.OnlineRequest,
+            status = AccessStatus.Open))
       )
     )
   }
@@ -379,8 +382,10 @@ class SierraItemsTest
         PhysicalLocation(
           locationType = LocationType.ClosedStores,
           label = LocationType.ClosedStores.label,
-          accessConditions =
-            List(AccessCondition(method = AccessMethod.OnlineRequest))
+          accessConditions = List(
+            AccessCondition(
+              method = AccessMethod.OnlineRequest,
+              status = AccessStatus.Open))
         )
       ))
   }
