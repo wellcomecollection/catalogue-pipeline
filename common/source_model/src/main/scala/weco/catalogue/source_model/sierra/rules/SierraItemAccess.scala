@@ -90,10 +90,10 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           Some(OpacMsg.OnlineRequest),
           Requestable,
           Some(LocationType.ClosedStores))
-          if bibStatus.isEmpty || bibStatus.contains(AccessStatus.Open) =>
+          if bibStatus.isEmpty || bibStatus.contains(AccessStatus.Open) || bibStatus.contains(AccessStatus.OpenWithAdvisory) =>
         AccessCondition(
           method = AccessMethod.OnlineRequest,
-          status = AccessStatus.Open
+          status = bibStatus.getOrElse(AccessStatus.Open)
         )
 
       // Note: it is possible for individual items within a restricted bib to be available

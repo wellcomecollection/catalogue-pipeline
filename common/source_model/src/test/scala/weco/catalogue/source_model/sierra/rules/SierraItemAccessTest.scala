@@ -80,6 +80,36 @@ class SierraItemAccessTest
               status = AccessStatus.Open)
         }
 
+        it("if it has no restrictions and the bib is open with advisory") {
+          val itemData = createSierraItemDataWith(
+            fixedFields = Map(
+              "79" -> FixedField(
+                label = "LOCATION",
+                value = "scmac",
+                display = "Closed stores Arch. & MSS"),
+              "88" -> FixedField(
+                label = "STATUS",
+                value = "-",
+                display = "Available"),
+              "108" -> FixedField(
+                label = "OPACMSG",
+                value = "f",
+                display = "Online request"),
+            )
+          )
+
+          val (ac, _) = getItemAccess(
+            bibStatus = Some(AccessStatus.OpenWithAdvisory),
+            location = Some(LocationType.ClosedStores),
+            itemData = itemData
+          )
+
+          ac shouldBe
+            AccessCondition(
+              method = AccessMethod.OnlineRequest,
+              status = AccessStatus.OpenWithAdvisory)
+        }
+
         it("if it's restricted") {
           val itemData = createSierraItemDataWith(
             fixedFields = Map(
