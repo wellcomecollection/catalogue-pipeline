@@ -17,8 +17,8 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.sts.StsClient
 import software.amazon.awssdk.services.sts.model.AssumeRoleRequest
 import weco.catalogue.source_model.sierra.SierraTransformable
-import weco.catalogue.source_model.sierra.identifiers.SierraBibNumber
 import weco.json.JsonUtil._
+import weco.sierra.models.identifiers.SierraBibNumber
 import weco.storage.dynamo.DynamoConfig
 import weco.storage.s3.{S3ObjectLocation, S3ObjectLocationPrefix}
 import weco.storage.store.dynamo.{DynamoHashStore, DynamoHybridStore}
