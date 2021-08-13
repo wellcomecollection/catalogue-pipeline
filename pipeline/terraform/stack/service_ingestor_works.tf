@@ -37,8 +37,28 @@ module "ingestor_works" {
     es_is_reindexing      = var.is_reindexing
 
     ingest_queue_id               = module.ingestor_works_queue.url
-    ingest_batch_size             = 100
     ingest_flush_interval_seconds = local.work_ingestor_flush_interval_seconds
+
+    # When an ingestor retrieves a batch from the denormalised index,
+    # it might OutOfMemoryError when it deserialises the JSON into
+    # in-memory Works.
+    #
+    # This happens when the collection has a lot of large Works,
+    # i.e. Works with lots of relations.
+    #
+    # During a reindex, the batch is likely a mix of deleted/suppressed Works
+    # (small) and visible Works (small to large), so it's unlikely to throw
+    # an OOM error.  If it does, the service can restart and the next batch
+    # will have a different distribution of Works.
+    #
+    # When we're not reindexing, a batch of large Works can potentially
+    # gum up the ingestor: it throws an OOM, the messages get retried,
+    # it throws another OOM.  Continue until messages go to the DLQ.
+    #
+    # To avoid this happening, we reduce the batch size when we're not
+    # reindexing.  A smaller batch size is a bit less efficient, but
+    # we don't process many messages when not reindexing so this is fine.
+    ingest_batch_size = var.is_reindexing ? 100 : 10
   }
 
   secret_env_vars = merge({
