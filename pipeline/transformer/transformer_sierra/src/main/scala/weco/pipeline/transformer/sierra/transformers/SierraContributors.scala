@@ -79,6 +79,14 @@ object SierraContributors
     subfields
       .withTag(subfieldTag)
       .contents
+      .map { role =>
+        // The contribution role in the raw MARC data sometimes includes a
+        // trailing full stop, because all the subfields are meant to be concatenated
+        // into a single sentence.
+        //
+        // This full stop doesn't make sense in a structured field, so remove it.
+        role.stripSuffix(".")
+      }
       .map(ContributionRole)
 
   private def withId(agent: AbstractAgent[IdState.Unminted],

@@ -98,7 +98,7 @@ trait SierraAgents extends SierraQueryOps {
 
   def getLabel(subfields: List[Subfield]): Option[String] =
     subfields.filter { s =>
-      List("a", "b", "c", "d", "t", "p", "n").contains(s.tag)
+      List("a", "b", "c", "d", "t", "p", "n", "q").contains(s.tag)
     } map (_.content) match {
       case Nil          => None
       case nonEmptyList => Some(nonEmptyList mkString " ")
