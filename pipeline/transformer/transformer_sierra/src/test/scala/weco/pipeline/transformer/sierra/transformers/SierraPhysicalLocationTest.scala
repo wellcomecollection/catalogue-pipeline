@@ -99,7 +99,7 @@ class SierraPhysicalLocationTest
       val bibData = createSierraBibDataWith(
         varFields = List(
           VarField(
-            marcTag = Some("506"),
+            marcTag = "506",
             subfields = List(
               Subfield("a", "You can look at this"),
               Subfield("f", "Open")
@@ -219,7 +219,7 @@ class SierraPhysicalLocationTest
       val bibData = createSierraBibDataWith(
         varFields = List(
           VarField(
-            marcTag = Some("506"),
+            marcTag = "506",
             subfields = List(
               Subfield("a", "You're not allowed yet"),
               Subfield("g", "2099-12-31"),

@@ -206,7 +206,7 @@ class SierraContributorsTest
       // This is based on b11941820
       val varFields = List(
         VarField(
-          marcTag = Some("700"),
+          marcTag = "700",
           subfields = List(
             Subfield(tag = "a", content = "Faujas-de-St.-Fond,"),
             Subfield(tag = "c", content = "cit."),

@@ -359,7 +359,7 @@ class SierraMergeCandidatesTest
     createSierraBibDataWith(
       varFields = List(
         VarField(
-          marcTag = Some("035"),
+          marcTag = "035",
           subfields = calmIds.map(Subfield("a", _)).toList
         )))
 

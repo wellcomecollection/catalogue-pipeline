@@ -254,7 +254,7 @@ class SierraHoldingsTest
         ),
         varFields = List(
           VarField(
-            marcTag = Some("863"),
+            marcTag = "863",
             subfields = List(
               Subfield(tag = "8", content = "1.1"),
               Subfield(tag = "i", content = "1787-1789"),
@@ -263,7 +263,7 @@ class SierraHoldingsTest
             )
           ),
           VarField(
-            marcTag = Some("853"),
+            marcTag = "853",
             subfields = List(
               Subfield(tag = "8", content = "1"),
               Subfield(tag = "i", content = "(year)"),
@@ -272,7 +272,7 @@ class SierraHoldingsTest
             )
           ),
           VarField(
-            marcTag = Some("856"),
+            marcTag = "856",
             subfields = List(
               Subfield(tag = "u", content = "http://example.org/journal"),
               Subfield(
@@ -290,7 +290,7 @@ class SierraHoldingsTest
         ),
         varFields = List(
           VarField(
-            marcTag = Some("863"),
+            marcTag = "863",
             subfields = List(
               Subfield(tag = "8", content = "1.1"),
               Subfield(tag = "i", content = "1787-1789"),
@@ -299,7 +299,7 @@ class SierraHoldingsTest
             )
           ),
           VarField(
-            marcTag = Some("853"),
+            marcTag = "853",
             subfields = List(
               Subfield(tag = "8", content = "1"),
               Subfield(tag = "i", content = "(year)"),
@@ -308,7 +308,7 @@ class SierraHoldingsTest
             )
           ),
           VarField(
-            marcTag = Some("856"),
+            marcTag = "856",
             subfields = List(
               Subfield(tag = "u", content = "http://example.org/journal"),
               Subfield(

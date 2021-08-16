@@ -41,7 +41,7 @@ class SierraAccessStatusTest
         val accessStatus = getAccessStatus(
           bibVarFields = List(
             VarField(
-              marcTag = Some("506"),
+              marcTag = "506",
               subfields = List(
                 Subfield(tag = "a", content = text)
               )
@@ -57,7 +57,7 @@ class SierraAccessStatusTest
     val accessStatus = getAccessStatus(
       bibVarFields = List(
         VarField(
-          marcTag = Some("506"),
+          marcTag = "506",
           subfields = List(
             Subfield(
               tag = "a",
@@ -74,7 +74,7 @@ class SierraAccessStatusTest
     val accessStatus = getAccessStatus(
       bibVarFields = List(
         VarField(
-          marcTag = Some("506"),
+          marcTag = "506",
           subfields = List(
             Subfield(tag = "a", content = "Restricted"),
             Subfield(tag = "f", content = "Open")
@@ -119,7 +119,7 @@ class SierraAccessStatusTest
     val accessStatus = getAccessStatus(
       bibVarFields = List(
         VarField(
-          marcTag = Some("506"),
+          marcTag = "506",
           subfields = List(
             Subfield(
               tag = "a",
