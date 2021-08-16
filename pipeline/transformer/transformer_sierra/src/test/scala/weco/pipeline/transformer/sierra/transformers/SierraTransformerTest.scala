@@ -36,7 +36,7 @@ import weco.pipeline.transformer.sierra.SierraTransformer
 import weco.pipeline.transformer.sierra.exceptions.SierraTransformerException
 import weco.sierra.generators.MarcGenerators
 import weco.sierra.models.identifiers.{SierraBibNumber, SierraItemNumber}
-import weco.sierra.models.marc.Subfield
+import weco.sierra.models.marc.{Subfield, VarField}
 
 class SierraTransformerTest
     extends AnyFunSpec
@@ -329,14 +329,14 @@ class SierraTransformerTest
     val title = "Hi Diddle Dee Dee"
     val lettering = "An actor's life for me"
 
-    val titleField = createVarFieldWith(
+    val titleField = VarField(
       marcTag = "245",
       subfields = List(
         Subfield(tag = "a", content = title)
       )
     )
 
-    val productionField = createVarFieldWith(
+    val productionField = VarField(
       marcTag = "260",
       subfields = List(
         Subfield(tag = "b", content = "Peaceful Poetry"),
@@ -344,7 +344,7 @@ class SierraTransformerTest
       )
     )
 
-    val descriptionField = createVarFieldWith(
+    val descriptionField = VarField(
       marcTag = "520",
       subfields = List(
         Subfield(
@@ -362,7 +362,7 @@ class SierraTransformerTest
       )
     )
 
-    val notesField = createVarFieldWith(
+    val notesField = VarField(
       marcTag = "500",
       subfields = List(
         Subfield(tag = "a", content = "It's a note")
@@ -371,7 +371,7 @@ class SierraTransformerTest
 
     val langField = """{"code": "eng", "name": "English"}"""
     val langVarFields = List(
-      createVarFieldWith(
+      VarField(
         marcTag = "041",
         subfields = List(
           Subfield(tag = "a", content = "ger"),

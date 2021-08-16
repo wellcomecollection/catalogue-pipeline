@@ -9,7 +9,7 @@ import weco.catalogue.internal_model.identifiers.{
 }
 import weco.catalogue.internal_model.work.{Concept, Person, Subject}
 import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
-import weco.sierra.models.marc.Subfield
+import weco.sierra.models.marc.{Subfield, VarField}
 
 class SierraPersonSubjectsTest
     extends AnyFunSpec
@@ -27,7 +27,7 @@ class SierraPersonSubjectsTest
   it("returns subjects for tag 600 with only subfield a") {
     val bibData = createSierraBibDataWith(
       varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "600",
           subfields = List(
             Subfield(tag = "a", content = "A Content")
@@ -47,7 +47,7 @@ class SierraPersonSubjectsTest
   it("returns subjects for tag 600 with only subfields a and c") {
     val bibData = createSierraBibDataWith(
       varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "600",
           subfields = List(
             Subfield(tag = "a", content = "Larrey, D. J."),
@@ -70,7 +70,7 @@ class SierraPersonSubjectsTest
   it("returns subjects for tag 600 with only subfields a and multiple c") {
     val bibData = createSierraBibDataWith(
       varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "600",
           subfields = List(
             Subfield(tag = "a", content = "David Attenborough"),
@@ -92,7 +92,7 @@ class SierraPersonSubjectsTest
   it("returns subjects for tag 600 with only subfields a and b") {
     val bibData = createSierraBibDataWith(
       varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "600",
           subfields = List(
             Subfield(tag = "a", content = "David Attenborough"),
@@ -113,7 +113,7 @@ class SierraPersonSubjectsTest
   it("returns subjects for tag 600 with subfields a and e") {
     val bibData = createSierraBibDataWith(
       varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "600",
           subfields = List(
             Subfield(tag = "a", content = "David Attenborough,"),
@@ -134,7 +134,7 @@ class SierraPersonSubjectsTest
   it("returns subjects for tag 600 with subfields a and d") {
     val bibData = createSierraBibDataWith(
       varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "600",
           subfields = List(
             Subfield(tag = "a", content = "Rita Levi Montalcini,"),
@@ -157,7 +157,7 @@ class SierraPersonSubjectsTest
   it("returns subjects for tag 600 with subfields a and multiple e") {
     val bibData = createSierraBibDataWith(
       varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "600",
           subfields = List(
             Subfield(tag = "a", content = "David Attenborough,"),
@@ -182,7 +182,7 @@ class SierraPersonSubjectsTest
   it("errors transforming a subject 600 if subfield a is missing") {
     val bibData = createSierraBibDataWith(
       varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "600",
           subfields = List()
         )
@@ -253,7 +253,7 @@ class SierraPersonSubjectsTest
     // as retrieved 22 January 2019.
     val bibData = createSierraBibDataWith(
       varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "600",
           subfields = List(
             Subfield(tag = "a", content = "Shakespeare, William,"),
@@ -286,7 +286,7 @@ class SierraPersonSubjectsTest
     // as retrieved 22 January 2019.
     val bibData = createSierraBibDataWith(
       varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "600",
           subfields = List(
             Subfield(tag = "a", content = "Aristophanes."),
@@ -312,7 +312,7 @@ class SierraPersonSubjectsTest
   it("doesn't remove a trailing ellipsis from a subject label") {
     val bibData = createSierraBibDataWith(
       varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "600",
           subfields = List(
             Subfield(tag = "a", content = "Agate, John,"),

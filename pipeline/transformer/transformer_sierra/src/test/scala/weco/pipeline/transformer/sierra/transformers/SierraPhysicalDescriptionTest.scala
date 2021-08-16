@@ -2,20 +2,19 @@ package weco.pipeline.transformer.sierra.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
+import weco.sierra.generators.SierraDataGenerators
 import weco.sierra.models.marc.{Subfield, VarField}
 
 class SierraPhysicalDescriptionTest
     extends AnyFunSpec
     with Matchers
-    with MarcGenerators
     with SierraDataGenerators {
 
   it("gets no physical description if there is no MARC field 300") {
     val bibData = createSierraBibDataWith(
       varFields = List(
         VarField(
-          marcTag = Some("563"),
+          marcTag = "563",
           subfields = List(
             Subfield("b", "The edifying extent of early emus")
           )
@@ -32,7 +31,7 @@ class SierraPhysicalDescriptionTest
     val bibData = createSierraBibDataWith(
       varFields = List(
         VarField(
-          marcTag = Some("300"),
+          marcTag = "300",
           subfields = List(
             Subfield("b", description),
             Subfield("d", "The edifying extent of early emus"),
@@ -52,13 +51,13 @@ class SierraPhysicalDescriptionTest
     val bibData = createSierraBibDataWith(
       varFields = List(
         VarField(
-          marcTag = Some("300"),
+          marcTag = "300",
           subfields = List(
             Subfield("b", description1)
           )
         ),
         VarField(
-          marcTag = Some("300"),
+          marcTag = "300",
           subfields = List(
             Subfield("b", description2),
             Subfield("d", "Egad!  An early eagle is eating the earwig."),
@@ -75,14 +74,14 @@ class SierraPhysicalDescriptionTest
     val bibData = createSierraBibDataWith(
       varFields = List(
         VarField(
-          marcTag = Some("300"),
+          marcTag = "300",
           subfields = List(
             Subfield(tag = "a", content = "1 videocassette (VHS) (1 min.) :"),
             Subfield(tag = "b", content = "sound, color, PAL."),
           )
         ),
         VarField(
-          marcTag = Some("300"),
+          marcTag = "300",
           subfields = List(
             Subfield(tag = "a", content = "1 DVD (1 min.) :"),
             Subfield(tag = "b", content = "sound, color"),
@@ -104,7 +103,7 @@ class SierraPhysicalDescriptionTest
     val bibData = createSierraBibDataWith(
       varFields = List(
         VarField(
-          marcTag = Some("300"),
+          marcTag = "300",
           subfields = List(
             Subfield(tag = "a", content = descriptionA),
             Subfield(tag = "b", content = descriptionB),
@@ -126,7 +125,7 @@ class SierraPhysicalDescriptionTest
     val bibData = createSierraBibDataWith(
       varFields = List(
         VarField(
-          marcTag = Some("300"),
+          marcTag = "300",
           subfields = List(
             Subfield(tag = "a", content = extent),
             Subfield(tag = "b", content = otherPhysicalDetails),

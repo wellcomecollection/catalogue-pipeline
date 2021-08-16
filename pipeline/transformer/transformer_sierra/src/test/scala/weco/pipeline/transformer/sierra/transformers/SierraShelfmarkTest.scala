@@ -3,7 +3,7 @@ package weco.pipeline.transformer.sierra.transformers
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.work.Format.ArchivesAndManuscripts
-import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
+import weco.sierra.generators.SierraDataGenerators
 import weco.sierra.models.data.{SierraBibData, SierraItemData}
 import weco.sierra.models.fields.SierraMaterialType
 import weco.sierra.models.marc.{Subfield, VarField}
@@ -11,7 +11,6 @@ import weco.sierra.models.marc.{Subfield, VarField}
 class SierraShelfmarkTest
     extends AnyFunSpec
     with Matchers
-    with MarcGenerators
     with SierraDataGenerators {
   it("returns no shelfmark if there is no 949") {
     val varFields = List()

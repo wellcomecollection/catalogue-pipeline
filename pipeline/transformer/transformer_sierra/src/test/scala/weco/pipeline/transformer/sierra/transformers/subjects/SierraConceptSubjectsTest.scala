@@ -9,7 +9,7 @@ import weco.catalogue.internal_model.identifiers.{
 }
 import weco.catalogue.internal_model.work.{Concept, Period, Place, Subject}
 import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
-import weco.sierra.models.marc.Subfield
+import weco.sierra.models.marc.{Subfield, VarField}
 
 class SierraConceptSubjectsTest
     extends AnyFunSpec
@@ -27,7 +27,7 @@ class SierraConceptSubjectsTest
   it("returns subjects for tag 650 with only subfield a") {
     val bibData = createSierraBibDataWith(
       varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "650",
           subfields = List(
             Subfield(tag = "a", content = "A Content")
@@ -48,7 +48,7 @@ class SierraConceptSubjectsTest
   it("returns subjects for tag 650 with only subfields a and v") {
     val bibData = createSierraBibDataWith(
       varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "650",
           subfields = List(
             Subfield(tag = "a", content = "A Content"),
@@ -71,7 +71,7 @@ class SierraConceptSubjectsTest
     "subfield a is always first concept when returning subjects for tag 650 with subfields a, v") {
     val bibData = createSierraBibDataWith(
       varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "650",
           subfields = List(
             Subfield(tag = "v", content = "V Content"),
@@ -92,7 +92,7 @@ class SierraConceptSubjectsTest
   it("returns subjects for tag 650 subfields a, v, and x") {
     val bibData = createSierraBibDataWith(
       varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "650",
           subfields = List(
             Subfield(tag = "a", content = "A Content"),
@@ -118,7 +118,7 @@ class SierraConceptSubjectsTest
   it("returns subjects for tag 650 with subfields a, y") {
     val bibData = createSierraBibDataWith(
       varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "650",
           subfields = List(
             Subfield(tag = "y", content = "Y Content"),
@@ -142,7 +142,7 @@ class SierraConceptSubjectsTest
   it("returns subjects for tag 650 with subfields a, z") {
     val bibData = createSierraBibDataWith(
       varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "650",
           subfields = List(
             Subfield(tag = "z", content = "Z Content"),
@@ -165,14 +165,14 @@ class SierraConceptSubjectsTest
   it("returns subjects for multiple 650 tags with different subfields") {
     val bibData = createSierraBibDataWith(
       varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "650",
           subfields = List(
             Subfield(tag = "a", content = "A1 Content"),
             Subfield(tag = "z", content = "Z1 Content")
           )
         ),
-        createVarFieldWith(
+        VarField(
           marcTag = "650",
           subfields = List(
             Subfield(tag = "a", content = "A2 Content"),
@@ -203,7 +203,7 @@ class SierraConceptSubjectsTest
   it("returns subjects with primary concept Period for tag 648") {
     val bibData = createSierraBibDataWith(
       varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "648",
           subfields = List(
             Subfield(tag = "a", content = "A Content"),
@@ -229,7 +229,7 @@ class SierraConceptSubjectsTest
   it("returns subjects with primary concept Place for tag 651") {
     val bibData = createSierraBibDataWith(
       varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "651",
           subfields = List(
             Subfield(tag = "x", content = "X Content"),
@@ -356,7 +356,7 @@ class SierraConceptSubjectsTest
   it("removes a trailing period from a subject label") {
     val bibData = createSierraBibDataWith(
       varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "650",
           subfields = List(
             Subfield(tag = "a", content = "Diet, Food, and Nutrition.")

@@ -3,33 +3,25 @@ package weco.pipeline.transformer.sierra.transformers.subjects
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.work.{Concept, Subject}
-import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
+import weco.sierra.generators.SierraDataGenerators
 import weco.sierra.models.marc.{Subfield, VarField}
 
 class SierraBrandNameSubjectsTest
     extends AnyFunSpec
     with Matchers
-    with MarcGenerators
     with SierraDataGenerators {
 
-  def bibId = createSierraBibNumber
-
-  def bibData(varFields: VarField*) =
-    createSierraBibDataWith(varFields = varFields.toList)
-
-  def varField(tag: String, subfields: Subfield*) =
-    createVarFieldWith(marcTag = tag, subfields = subfields.toList)
-
   it("returns zero subjects if there are none") {
-    SierraBrandNameSubjects(bibId, bibData()) shouldBe Nil
+    getBrandNameSubjects(varFields = List()) shouldBe Nil
   }
 
   it("returns subjects for varfield 652") {
-    val data = bibData(
-      varField("600", Subfield("a", "Not Content")),
-      varField("652", Subfield("a", "Content")),
+    val varFields = List(
+      VarField(marcTag = "600", subfields = List(Subfield("a", "Not Content"))),
+      VarField(marcTag = "652", subfields = List(Subfield("a", "Content"))),
     )
-    SierraBrandNameSubjects(bibId, data) shouldBe List(
+
+    getBrandNameSubjects(varFields) shouldBe List(
       Subject(
         label = "Content",
         concepts = List(Concept(label = "Content"))
@@ -38,18 +30,22 @@ class SierraBrandNameSubjectsTest
   }
 
   it("does not used non 'a' subfields to parse the content") {
-    val data = bibData(
-      varField("652", Subfield(tag = "b", content = "Hmmm"))
+    val varFields = List(
+      VarField(
+        marcTag = "652",
+        subfields = List(Subfield(tag = "b", content = "Hmmm")))
     )
-    SierraBrandNameSubjects(bibId, data) shouldBe Nil
+
+    getBrandNameSubjects(varFields) shouldBe Nil
   }
 
   it("returns multiple subjects if multiple 652") {
-    val data = bibData(
-      varField("652", Subfield("a", "First")),
-      varField("652", Subfield("a", "Second")),
+    val varFields = List(
+      VarField(marcTag = "652", subfields = List(Subfield("a", "First"))),
+      VarField(marcTag = "652", subfields = List(Subfield("a", "Second")))
     )
-    SierraBrandNameSubjects(bibId, data) shouldBe List(
+
+    getBrandNameSubjects(varFields) shouldBe List(
       Subject(
         label = "First",
         concepts = List(Concept(label = "First"))
@@ -60,4 +56,9 @@ class SierraBrandNameSubjectsTest
       )
     )
   }
+
+  private def getBrandNameSubjects(varFields: List[VarField]) =
+    SierraBrandNameSubjects(
+      createSierraBibNumber,
+      createSierraBibDataWith(varFields = varFields))
 }

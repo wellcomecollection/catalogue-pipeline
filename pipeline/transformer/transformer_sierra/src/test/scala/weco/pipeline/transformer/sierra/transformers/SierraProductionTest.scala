@@ -133,7 +133,7 @@ class SierraProductionTest
 
     it("picks up multiple instances of the 260 field") {
       val varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "260",
           subfields = List(
             Subfield(tag = "a", content = "London :"),
@@ -144,7 +144,7 @@ class SierraProductionTest
             Subfield(tag = "g", content = "1974")
           )
         ),
-        createVarFieldWith(
+        VarField(
           marcTag = "260",
           subfields = List(
             Subfield(tag = "a", content = "Bethesda, Md. :"),
@@ -442,13 +442,13 @@ class SierraProductionTest
   describe("Both MARC field 260 and 264") {
     it("throws a cataloguing error if both 260 and 264 are present") {
       val varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "260",
           subfields = List(
             Subfield(tag = "a", content = "Paris")
           )
         ),
-        createVarFieldWith(
+        VarField(
           marcTag = "264",
           subfields = List(
             Subfield(tag = "a", content = "London")
@@ -470,7 +470,7 @@ class SierraProductionTest
 
     it("uses 260 if 264 only contains a copyright statement in subfield c") {
       val varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "260",
           subfields = List(
             Subfield(tag = "a", content = "San Francisco :"),
@@ -478,7 +478,7 @@ class SierraProductionTest
             Subfield(tag = "c", content = "2004")
           )
         ),
-        createVarFieldWith(
+        VarField(
           marcTag = "264",
           subfields = List(
             Subfield(tag = "c", content = "©2004")
@@ -509,11 +509,11 @@ class SierraProductionTest
       )
 
       val varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "260",
           subfields = subfields
         ),
-        createVarFieldWith(
+        VarField(
           marcTag = "264",
           subfields = subfields
         )
@@ -535,13 +535,13 @@ class SierraProductionTest
     // Based on b31500018, as retrieved on 28 March 2019
     it("returns correctly if the 264 subfields only contain punctuation") {
       val varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "260",
           subfields = List(
             Subfield(tag = "c", content = "2019")
           )
         ),
-        createVarFieldWith(
+        VarField(
           marcTag = "264",
           subfields = List(
             Subfield(tag = "a", content = ":"),
@@ -679,7 +679,7 @@ class SierraProductionTest
 
   private def transform260ToProduction(subfields: List[Subfield]) = {
     val varFields = List(
-      createVarFieldWith(
+      VarField(
         marcTag = "260",
         subfields = subfields
       )

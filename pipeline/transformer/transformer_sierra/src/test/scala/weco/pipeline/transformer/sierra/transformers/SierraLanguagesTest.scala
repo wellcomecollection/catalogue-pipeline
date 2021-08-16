@@ -3,15 +3,14 @@ package weco.pipeline.transformer.sierra.transformers
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.languages.Language
-import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
+import weco.sierra.generators.SierraDataGenerators
 import weco.sierra.models.data.SierraBibData
 import weco.sierra.models.fields.SierraLanguage
-import weco.sierra.models.marc.Subfield
+import weco.sierra.models.marc.{Subfield, VarField}
 
 class SierraLanguagesTest
     extends AnyFunSpec
     with Matchers
-    with MarcGenerators
     with SierraDataGenerators {
   it("ignores records without any languages") {
     val bibData = createSierraBibDataWith(lang = None, varFields = List.empty)
@@ -37,7 +36,7 @@ class SierraLanguagesTest
         SierraLanguage(code = "fre", name = "French")
       ),
       varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "041",
           subfields = List(
             Subfield(tag = "a", content = "ger"),
@@ -61,11 +60,11 @@ class SierraLanguagesTest
         SierraLanguage(code = "fre", name = "French")
       ),
       varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "041",
           subfields = List(Subfield(tag = "a", content = "ger"))
         ),
-        createVarFieldWith(
+        VarField(
           marcTag = "041",
           subfields = List(Subfield(tag = "a", content = "eng"))
         )
@@ -85,7 +84,7 @@ class SierraLanguagesTest
         SierraLanguage(code = "chi", name = "Chinese")
       ),
       varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "041",
           subfields = List(
             Subfield(tag = "a", content = "???")
@@ -104,7 +103,7 @@ class SierraLanguagesTest
         SierraLanguage(code = "ger", name = "German")
       ),
       varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "041",
           subfields = List(
             Subfield(tag = "a", content = "fre"),
@@ -128,7 +127,7 @@ class SierraLanguagesTest
         SierraLanguage(code = "chi", name = "Chinese")
       ),
       varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "041",
           subfields = List(
             Subfield(tag = "a", content = "mul"), // Multiple languages
@@ -151,7 +150,7 @@ class SierraLanguagesTest
   it("strips whitespace from values in the 041 field") {
     val bibData = createSierraBibDataWith(
       varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "041",
           subfields = List(
             Subfield(tag = "a", content = "eng "),
@@ -168,7 +167,7 @@ class SierraLanguagesTest
   it("lowercases values in the 041 field") {
     val bibData = createSierraBibDataWith(
       varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "041",
           subfields = List(
             Subfield(tag = "a", content = "ENG"),

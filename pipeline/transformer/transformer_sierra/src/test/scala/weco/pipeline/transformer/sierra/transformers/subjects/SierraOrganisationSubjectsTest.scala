@@ -11,7 +11,6 @@ import weco.pipeline.transformer.sierra.exceptions.CataloguingException
 import weco.sierra.generators.SierraDataGenerators
 import weco.sierra.models.data.SierraBibData
 import weco.sierra.models.identifiers.SierraBibNumber
-import weco.sierra.models.marc
 import weco.sierra.models.marc.{Subfield, VarField}
 
 class SierraOrganisationSubjectsTest
@@ -228,7 +227,7 @@ class SierraOrganisationSubjectsTest
 
   private def createMarc610VarField(subfields: List[Subfield],
                                     indicator2: String = ""): VarField =
-    marc.VarField(
+    VarField(
       marcTag = Some("610"),
       indicator1 = Some(""),
       indicator2 = Some(indicator2),
