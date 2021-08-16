@@ -217,7 +217,8 @@ class SierraContributorsTest
         )
       )
 
-      val contributors = SierraContributors(createSierraBibDataWith(varFields = varFields))
+      val contributors =
+        SierraContributors(createSierraBibDataWith(varFields = varFields))
       contributors should have size 1
 
       contributors.head.agent.label shouldBe "Faujas-de-St.-Fond, cit. (Barthélemey), 1741-1819"
@@ -782,10 +783,12 @@ class SierraContributorsTest
       ),
     )
 
-    val contributors = SierraContributors(createSierraBibDataWith(varFields = varFields))
+    val contributors =
+      SierraContributors(createSierraBibDataWith(varFields = varFields))
     contributors should have size 1
 
-    contributors.head.roles shouldBe List(ContributionRole("writer of introduction"))
+    contributors.head.roles shouldBe List(
+      ContributionRole("writer of introduction"))
   }
 
   private def transformAndCheckContributors(
