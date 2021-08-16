@@ -395,7 +395,7 @@ class SierraElectronicResourcesTest
       getElectronicResources(
         varFields = List(
           createVarFieldWith(marcTag = "855"),
-          VarField(marcTag = "857")
+          createVarFieldWith(marcTag = "857")
         )
       ) shouldBe empty
     }
