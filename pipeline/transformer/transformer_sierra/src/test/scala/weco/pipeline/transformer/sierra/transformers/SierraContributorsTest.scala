@@ -202,6 +202,27 @@ class SierraContributorsTest
         expectedContributors = expectedContributors)
     }
 
+    it("gets the full form of a name from subfield ǂq") {
+      // This is based on b11941820
+      val varFields = List(
+        VarField(
+          marcTag = Some("700"),
+          subfields = List(
+            Subfield(tag = "a", content = "Faujas-de-St.-Fond,"),
+            Subfield(tag = "c", content = "cit."),
+            Subfield(tag = "q", content = "(Barthélemey),"),
+            Subfield(tag = "d", content = "1741-1819"),
+            Subfield(tag = "e", content = "dedicatee."),
+          )
+        )
+      )
+
+      val contributors = SierraContributors(createSierraBibDataWith(varFields = varFields))
+      contributors should have size 1
+
+      contributors.head.agent.label shouldBe "Faujas-de-St.-Fond, cit. (Barthélemey), 1741-1819"
+    }
+
     it("gets an identifier from subfield $$0") {
       val name = "Ivan the ivy"
       val lcshCode = "lcsh7101607"
