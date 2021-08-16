@@ -1,46 +1,61 @@
-# Catalogue Pipeline
+# catalogue-pipelione
 
 [![Build status](https://badge.buildkite.com/0ca819db1215b66ecb17019d8ee5331d8e537094d051141219.svg?branch=main)](https://buildkite.com/wellcomecollection/catalogue-pipeline)
 
-## Overview
+The catalogue pipeline creates the search index for our [unified collections search][search].
+It populates an Elasticsearch index with data which is read by our [catalogue API][api].
+This allows users to search data from all our catalogues in one place, rather than searching multiple systems which each have different views of the data.
 
-If you are new to the catalogue pipeline the [GitBook documentation](https://docs.wellcomecollection.org/catalogue-pipeline) is a good place to start.
+[search]: https://wellcomecollection.org/works
+[api]: https://github.com/wellcomecollection/catalogue-api
 
-## Developing
 
-Information for developers working on the catalogue-pipeline.
 
-### Deploying
+## Requirements
 
-We deploy catalogue-pipeline services using the [weco-deploy](https://github.com/wellcomecollection/weco-deploy) tool.
+The catalogue pipeline is designed to:
 
-### Things you might want to do
+*   Create a single search index for records from all our source systems (including image collections, library catalogue, and archive records)
+*   Stay up-to-date with updates and changes in those source systems
+*   Transforming those records into a common model
+*   Combining records from different systems that refer to the same object
 
-#### Reindexing
 
-If the [internal_model](./common/internal_model) has been changed you will want to update the information stored by the pipeline to match that model.
 
-A reindex operation runs the source data from the [adapters](docs/adapters/README.md) through the pipeline causing it to be re-transformed / matched & merged as appropriate.
+## High-level design
 
-If you want to perform a reindex, follow the instructions in [REINDEX.md](REINDEX.md).
+<img src="docs/images/high_level_design.svg">
 
-#### Scripts
+We have a series of "adapters" that fetch records from our source systems.
+The adapters are responsible for staying up-to-date with changes in the source systems.
 
-Generally small things you might want to do irregularly involving the
-API & data are in [./scripts](./scripts)
+The adapters feed a transformation pipeline, which transforms source records into a common model, adds a pipeline identifier, and combines records from different systems.
+The structure and logic of the transformation pipeline evolves over time, as we find new and better ways to transform the data.
 
-### Problems you might have
+Once the transformation pipeline has finished processing the records, it stores them in a search index, which can be read by the [catalogue API][api].
 
-* **Stack overflow from scalac \(in IntelliJ\) when building projects**:
+The catalogue pipeline runs entirely in AWS, with no on-premise infrastructure required.
 
-  Go to `Settings > Build, Execution, Deployment > Compiler` and change
-  `Build process heap size (Mbytes)` to something large, eg 2048.
 
-* **Pulling docker containers from ECR**
-  
-  You'll need to log into ECR before local docker can pull from there:
-  
-  ```bash
-  aws ecr get-login-password --region eu-west-1 --profile platform-dev | \
-  docker login --username AWS --password-stdin 760097843905.dkr.ecr.eu-west-1.amazonaws.com
-  ```
+
+## Usage
+
+We always have at least one pipeline which is populating the currently-live search index, but we may have more than one pipeline running at a time.
+
+Running multiple pipelines means we can try experiments or breaking changes in a new pipeline, and keep them isolated from the live search index (and the public API).
+Over time, newer pipelines replace older pipelines, and the older pipelines are deleted.
+
+We publish our source code so that other people can learn from it, but it's very unlikely anybody would want to run it themselves.
+It contains a lot of Wellcome-specific logic, and would need extensive modification to be useful elsewhere.
+
+
+
+## Development
+
+See [docs/developers.md](docs/developers.md).
+
+
+
+## License
+
+MIT.
