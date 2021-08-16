@@ -31,7 +31,9 @@ class SierraBrandNameSubjectsTest
 
   it("does not used non 'a' subfields to parse the content") {
     val varFields = List(
-      VarField(marcTag = "652", subfields = List(Subfield(tag = "b", content = "Hmmm")))
+      VarField(
+        marcTag = "652",
+        subfields = List(Subfield(tag = "b", content = "Hmmm")))
     )
 
     getBrandNameSubjects(varFields) shouldBe Nil
@@ -56,5 +58,7 @@ class SierraBrandNameSubjectsTest
   }
 
   private def getBrandNameSubjects(varFields: List[VarField]) =
-    SierraBrandNameSubjects(createSierraBibNumber, createSierraBibDataWith(varFields = varFields))
+    SierraBrandNameSubjects(
+      createSierraBibNumber,
+      createSierraBibDataWith(varFields = varFields))
 }

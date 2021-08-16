@@ -2,7 +2,11 @@ package weco.pipeline.transformer.sierra.transformers.subjects
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, SourceIdentifier}
+import weco.catalogue.internal_model.identifiers.{
+  IdState,
+  IdentifierType,
+  SourceIdentifier
+}
 import weco.catalogue.internal_model.work.{Concept, Person, Subject}
 import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
 import weco.sierra.models.marc.{Subfield, VarField}

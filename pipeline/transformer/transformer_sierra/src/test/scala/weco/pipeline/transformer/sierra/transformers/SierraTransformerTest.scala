@@ -6,14 +6,28 @@ import org.scalatest.matchers.should.Matchers
 import weco.json.JsonUtil._
 import weco.catalogue.internal_model.work.WorkState.Source
 import org.scalatest.Assertion
-import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, ReferenceNumber, SourceIdentifier}
+import weco.catalogue.internal_model.identifiers.{
+  IdState,
+  IdentifierType,
+  ReferenceNumber,
+  SourceIdentifier
+}
 import weco.catalogue.internal_model.identifiers.IdState.Unidentifiable
 import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.locations._
-import weco.catalogue.internal_model.locations.LocationType.{ClosedStores, OnlineResource}
-import weco.catalogue.internal_model.work.DeletedReason.{DeletedFromSource, SuppressedFromSource}
+import weco.catalogue.internal_model.locations.LocationType.{
+  ClosedStores,
+  OnlineResource
+}
+import weco.catalogue.internal_model.work.DeletedReason.{
+  DeletedFromSource,
+  SuppressedFromSource
+}
 import weco.catalogue.internal_model.work.Format.{Books, Pictures}
-import weco.catalogue.internal_model.work.InvisibilityReason.{SourceFieldMissing, UnableToTransform}
+import weco.catalogue.internal_model.work.InvisibilityReason.{
+  SourceFieldMissing,
+  UnableToTransform
+}
 import weco.catalogue.internal_model.work._
 import weco.catalogue.internal_model.work.generators.WorkGenerators
 import weco.catalogue.source_model.generators.SierraRecordGenerators

@@ -12,7 +12,9 @@ class SierraDurationTest
 
   it("should extract duration in milliseconds from 306") {
     val varFields = List(
-      VarField(marcTag = "306", subfields = List(Subfield(tag = "a", content = "011012")))
+      VarField(
+        marcTag = "306",
+        subfields = List(Subfield(tag = "a", content = "011012")))
     )
 
     getDuration(varFields) shouldBe Some(4212000)
@@ -20,8 +22,12 @@ class SierraDurationTest
 
   it("should use first duration when multiple defined") {
     val varFields = List(
-      VarField(marcTag = "306", subfields = List(Subfield(tag = "a", content = "001000"))),
-      VarField(marcTag = "306", subfields = List(Subfield(tag = "a", content = "001132")))
+      VarField(
+        marcTag = "306",
+        subfields = List(Subfield(tag = "a", content = "001000"))),
+      VarField(
+        marcTag = "306",
+        subfields = List(Subfield(tag = "a", content = "001132")))
     )
 
     getDuration(varFields) shouldBe Some(600000)
@@ -29,7 +35,9 @@ class SierraDurationTest
 
   it("should not extract duration when varfield badly formatted") {
     val varFields = List(
-      VarField(marcTag = "500", subfields = List(Subfield(tag = "a", content = "01xx1012")))
+      VarField(
+        marcTag = "500",
+        subfields = List(Subfield(tag = "a", content = "01xx1012")))
     )
 
     getDuration(varFields) shouldBe None
@@ -37,7 +45,9 @@ class SierraDurationTest
 
   it("should not extract duration when incorrect varfield") {
     val varFields = List(
-      VarField(marcTag = "500", subfields = List(Subfield(tag = "a", content = "011012")))
+      VarField(
+        marcTag = "500",
+        subfields = List(Subfield(tag = "a", content = "011012")))
     )
 
     getDuration(varFields) shouldBe None
@@ -45,7 +55,9 @@ class SierraDurationTest
 
   it("should not extract duration when incorrect subfield") {
     val varFields = List(
-      VarField(marcTag = "306", subfields = List(Subfield(tag = "b", content = "011012")))
+      VarField(
+        marcTag = "306",
+        subfields = List(Subfield(tag = "b", content = "011012")))
     )
 
     getDuration(varFields) shouldBe None
