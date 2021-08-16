@@ -1,10 +1,10 @@
 package weco.pipeline.merger.fixtures
 
 import org.scalatest.matchers.{MatchResult, Matcher}
-import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.image.ImageData
 import weco.catalogue.internal_model.work.Work
+import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.pipeline.merger.models.MergerOutcome
 
 trait FeatureTestSugar {
@@ -14,9 +14,8 @@ trait FeatureTestSugar {
         .find(_.sourceIdentifier == originalWork.sourceIdentifier)
         .get
 
-    def isMissing(work: Work[Identified]): Boolean =
-      !mergerOutcome.resultWorks.exists(
-        _.sourceIdentifier == work.sourceIdentifier)
+    def isDeleted(work: Work[Identified]): Boolean =
+      mergerOutcome.resultWorks.exists(w =>w.sourceIdentifier == work.sourceIdentifier && w.isInstanceOf[Work.Deleted[Identified]])
 
     def imageSourceIds: Seq[IdState.Identified] =
       mergerOutcome.imagesWithSources.map(_.source.id)

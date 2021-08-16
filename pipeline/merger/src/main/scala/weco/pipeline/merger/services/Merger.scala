@@ -5,15 +5,10 @@ import weco.catalogue.internal_model.identifiers.{DataState, IdState}
 import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.catalogue.internal_model.image
 import weco.catalogue.internal_model.image.{ImageData, ParentWorks}
-import weco.catalogue.internal_model.work.{Work, WorkData, WorkState}
+import weco.catalogue.internal_model.work.{DeletedReason, Work, WorkData, WorkState}
 import weco.pipeline.merger.logging.MergerLogging
 import weco.pipeline.merger.models
-import weco.pipeline.merger.models.{
-  FieldMergeResult,
-  ImageDataWithSource,
-  MergeResult,
-  MergerOutcome
-}
+import weco.pipeline.merger.models.{FieldMergeResult, ImageDataWithSource, MergeResult, MergerOutcome}
 import weco.pipeline.merger.rules._
 
 /*
@@ -255,9 +250,13 @@ trait PlatformMerger extends Merger {
 object TeiOnMerger extends PlatformMerger
 object TeiOffMerger extends PlatformMerger {
   override protected def preMergeFilter(works: Seq[Work[Identified]]) =
-    works.filter(
+    works.map( work =>
       // In the default pipeline behaviour we want tei works to be filtered out
       // until we're happy with the merging work.
-      !WorkPredicates.teiWork(_)
+      if (WorkPredicates.teiWork(work)) {
+        Work.Deleted[Identified](version = work.version, state = work.state, deletedReason = DeletedReason.TeiDeletedInMerger)
+      }else {
+        work
+      }
     )
 }

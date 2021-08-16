@@ -29,6 +29,7 @@ object WorkPredicates {
   private val teiIdentified: WorkPredicate = identifierTypeId(
     IdentifierType.Tei
   )
+  private val isVisible: WorkPredicate = work => work.isInstanceOf[Work.Visible[_]]
   private val miroIdentified: WorkPredicate = identifierTypeId(
     IdentifierType.MiroImageNumber
   )
@@ -45,7 +46,8 @@ object WorkPredicates {
 
   val teiWork: WorkPredicate = satisfiesAll(
     teiIdentified,
-    zeroItem
+    zeroItem,
+    isVisible
   )
 
   /**

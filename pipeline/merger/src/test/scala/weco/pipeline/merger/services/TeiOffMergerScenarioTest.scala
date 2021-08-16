@@ -23,7 +23,7 @@ class TeiOffMergerScenarioTest extends MergerScenarioTest {
     outcome.getMerged(physicalSierra) shouldBe a[Work.Visible[_]]
 
     And("the tei work is missing")
-    outcome.isMissing(teiWork) shouldBe true
+    outcome.isDeleted(teiWork) shouldBe true
   }
 
   Scenario("A Tei work becomes deleted") {
@@ -33,7 +33,7 @@ class TeiOffMergerScenarioTest extends MergerScenarioTest {
     When("the tei work is merged")
     val outcome = merger.merge(List(teiWork))
 
-    And("the tei work is missing")
-    outcome.isMissing(teiWork) shouldBe true
+    And("the tei work is deleted")
+    outcome.isDeleted(teiWork) shouldBe true
   }
 }
