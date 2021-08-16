@@ -7,6 +7,7 @@ import weco.pipeline.merger.rules.WorkPredicates
 
 trait MergerManager {
   val mergerRules: Merger
+
   /** Given a list of recorder work entries retrieved from VHS, and a
     * merging function, apply the function to these works.
     *
@@ -24,27 +25,33 @@ trait MergerManager {
       MergerOutcome.passThrough(modifiedWorks)
   }
 
-  protected def preMergeModify(works: Seq[Work[Identified]]): Seq[Work[Identified]]
+  protected def preMergeModify(
+    works: Seq[Work[Identified]]): Seq[Work[Identified]]
 }
 
-class TeiOffMergerManager(val mergerRules: Merger) extends MergerManager{
-  override protected def preMergeModify(works: Seq[Work[Identified]]): Seq[Work[Identified]] =
-    works.map( work =>
-      // In the default pipeline behaviour we want tei works to be filtered out
-      // until we're happy with the merging work.
-      if (WorkPredicates.teiWork(work)) {
-        Work.Deleted[Identified](version = work.version, state = work.state, deletedReason = DeletedReason.TeiDeletedInMerger)
-      }else {
-        work
-      }
-    )
+class TeiOffMergerManager(val mergerRules: Merger) extends MergerManager {
+  override protected def preMergeModify(
+    works: Seq[Work[Identified]]): Seq[Work[Identified]] =
+    works.map(
+      work =>
+        // In the default pipeline behaviour we want tei works to be filtered out
+        // until we're happy with the merging work.
+        if (WorkPredicates.teiWork(work)) {
+          Work.Deleted[Identified](
+            version = work.version,
+            state = work.state,
+            deletedReason = DeletedReason.TeiDeletedInMerger)
+        } else {
+          work
+      })
 }
-class TeiOnMergerManager(val mergerRules: Merger) extends MergerManager{
+class TeiOnMergerManager(val mergerRules: Merger) extends MergerManager {
 
-  override protected def preMergeModify(works: Seq[Work[Identified]]): Seq[Work[Identified]] = works
+  override protected def preMergeModify(
+    works: Seq[Work[Identified]]): Seq[Work[Identified]] = works
 }
 
-object MergerManager{
+object MergerManager {
   def teiOnMergerManager = new TeiOnMergerManager(PlatformMerger)
   def teiOffMergerManager = new TeiOffMergerManager(PlatformMerger)
 }

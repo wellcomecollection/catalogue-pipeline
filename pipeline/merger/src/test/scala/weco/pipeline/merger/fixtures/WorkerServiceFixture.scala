@@ -10,7 +10,12 @@ import weco.messaging.memory.MemoryMessageSender
 import weco.messaging.sns.NotificationMessage
 import weco.monitoring.Metrics
 import weco.monitoring.memory.MemoryMetrics
-import weco.pipeline.merger.services.{IdentifiedWorkLookup, MergerWorkerService, PlatformMerger, TeiOffMergerManager}
+import weco.pipeline.merger.services.{
+  IdentifiedWorkLookup,
+  MergerWorkerService,
+  PlatformMerger,
+  TeiOffMergerManager
+}
 import weco.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 import weco.pipeline_storage.memory.{MemoryIndexer, MemoryRetriever}
 

@@ -8,7 +8,12 @@ import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.catalogue.internal_model.work.{Work, WorkData, WorkState}
 import weco.pipeline.merger.logging.MergerLogging
 import weco.pipeline.merger.models
-import weco.pipeline.merger.models.{FieldMergeResult, ImageDataWithSource, MergeResult, MergerOutcome}
+import weco.pipeline.merger.models.{
+  FieldMergeResult,
+  ImageDataWithSource,
+  MergeResult,
+  MergerOutcome
+}
 import weco.pipeline.merger.rules._
 
 /*

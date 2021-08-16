@@ -15,7 +15,10 @@ trait FeatureTestSugar {
         .get
 
     def isDeleted(work: Work[Identified]): Boolean =
-      mergerOutcome.resultWorks.exists(w =>w.sourceIdentifier == work.sourceIdentifier && w.isInstanceOf[Work.Deleted[Identified]])
+      mergerOutcome.resultWorks.exists(
+        w =>
+          w.sourceIdentifier == work.sourceIdentifier && w
+            .isInstanceOf[Work.Deleted[Identified]])
 
     def imageSourceIds: Seq[IdState.Identified] =
       mergerOutcome.imagesWithSources.map(_.source.id)

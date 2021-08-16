@@ -9,11 +9,12 @@ import weco.pipeline.merger.fixtures.FeatureTestSugar
 
 // We should never really be adding to this test as it is just there to ensure we don't get TEI works
 // through the pipes until they are rich enough for us to want to present them to the public
-class TeiOffMergerScenarioTest extends AnyFeatureSpec
-  with GivenWhenThen
-  with Matchers
-  with FeatureTestSugar
-  with SourceWorkGenerators {
+class TeiOffMergerScenarioTest
+    extends AnyFeatureSpec
+    with GivenWhenThen
+    with Matchers
+    with FeatureTestSugar
+    with SourceWorkGenerators {
   val merger = MergerManager.teiOffMergerManager
 
   Scenario("A Tei is not merged with a Sierra digital and a sierra physical") {
