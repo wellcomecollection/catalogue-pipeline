@@ -17,8 +17,8 @@ The catalogue pipeline is designed to:
 
 *   Create a single search index for records from all our source systems (including image collections, library catalogue, and archive records)
 *   Stay up-to-date with updates and changes in those source systems
-*   Transforming those records into a common model
-*   Combining records from different systems that refer to the same object
+*   Transform those records into a common model
+*   Combine records from different systems that refer to the same object
 
 
 
