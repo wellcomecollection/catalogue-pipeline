@@ -769,6 +769,25 @@ class SierraContributorsTest
     )
   }
 
+  it("removes trailing punctuation from the contribution role") {
+    // This is based on the MARC record for b28975005
+    val varFields = List(
+      createVarFieldWith(
+        marcTag = "700",
+        subfields = List(
+          Subfield(tag = "a", content = "Nurse, Paul,"),
+          Subfield(tag = "d", content = "1949-"),
+          Subfield(tag = "e", content = "writer of introduction."),
+        )
+      ),
+    )
+
+    val contributors = SierraContributors(createSierraBibDataWith(varFields = varFields))
+    contributors should have size 1
+
+    contributors.head.roles shouldBe List(ContributionRole("writer of introduction"))
+  }
+
   private def transformAndCheckContributors(
     varFields: List[VarField],
     expectedContributors: List[Contributor[IdState.Unminted]]
