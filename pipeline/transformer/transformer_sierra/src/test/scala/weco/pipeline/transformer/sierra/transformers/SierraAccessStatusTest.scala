@@ -4,13 +4,12 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks
 import weco.catalogue.internal_model.locations.AccessStatus
-import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
+import weco.sierra.generators.SierraDataGenerators
 import weco.sierra.models.marc.{Subfield, VarField}
 
 class SierraAccessStatusTest
     extends AnyFunSpec
     with Matchers
-    with MarcGenerators
     with SierraDataGenerators
     with TableDrivenPropertyChecks {
 

@@ -27,7 +27,7 @@ class SierraHoldingsEnumerationTest
 
     it("handles a single 853/863 pair") {
       val varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "853",
           subfields = List(
             Subfield(tag = "8", content = "10"),
@@ -35,7 +35,7 @@ class SierraHoldingsEnumerationTest
             Subfield(tag = "i", content = "(year)")
           )
         ),
-        createVarFieldWith(
+        VarField(
           marcTag = "863",
           subfields = List(
             Subfield(tag = "8", content = "10.1"),
@@ -52,7 +52,7 @@ class SierraHoldingsEnumerationTest
   it("handles an 853/863 pair that features a range with start/end") {
     // This is based on b13488557 / h10310770
     val varFields = List(
-      createVarFieldWith(
+      VarField(
         marcTag = "863",
         subfields = List(
           Subfield(tag = "8", content = "1.1"),
@@ -61,7 +61,7 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "i", content = "1984-2018"),
         )
       ),
-      createVarFieldWith(
+      VarField(
         marcTag = "853",
         subfields = List(
           Subfield(tag = "8", content = "1"),
@@ -78,7 +78,7 @@ class SierraHoldingsEnumerationTest
 
   it("handles a duplicated field") {
     val varFields = List(
-      createVarFieldWith(
+      VarField(
         marcTag = "853",
         subfields = List(
           Subfield(tag = "8", content = "10"),
@@ -86,7 +86,7 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "i", content = "(year)")
         )
       ),
-      createVarFieldWith(
+      VarField(
         marcTag = "853",
         subfields = List(
           Subfield(tag = "8", content = "10"),
@@ -94,7 +94,7 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "i", content = "(year)")
         )
       ),
-      createVarFieldWith(
+      VarField(
         marcTag = "863",
         subfields = List(
           Subfield(tag = "8", content = "10.1"),
@@ -111,7 +111,7 @@ class SierraHoldingsEnumerationTest
     // This is based on holdings record c11058213, which is linked
     // to bib b29248164
     val varFields = List(
-      createVarFieldWith(
+      VarField(
         marcTag = "863",
         subfields = List(
           Subfield(tag = "8", content = "1.1"),
@@ -120,7 +120,7 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "k", content = "01-"),
         )
       ),
-      createVarFieldWith(
+      VarField(
         marcTag = "863",
         subfields = List(
           Subfield(tag = "8", content = "1.2"),
@@ -129,7 +129,7 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "k", content = "01-"),
         )
       ),
-      createVarFieldWith(
+      VarField(
         marcTag = "853",
         subfields = List(
           Subfield(tag = "8", content = "1"),
@@ -146,7 +146,7 @@ class SierraHoldingsEnumerationTest
   it("skips empty values in field 863") {
     // This is based on b13108608
     val varFields = List(
-      createVarFieldWith(
+      VarField(
         marcTag = "863",
         subfields = List(
           Subfield(tag = "8", content = "1.1"),
@@ -155,7 +155,7 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "i", content = "1982-2010")
         )
       ),
-      createVarFieldWith(
+      VarField(
         marcTag = "853",
         subfields = List(
           Subfield(tag = "8", content = "1"),
@@ -172,7 +172,7 @@ class SierraHoldingsEnumerationTest
   it("skips empty values at one end of a range in field 863") {
     // This test case is based on b13107884
     val varFields = List(
-      createVarFieldWith(
+      VarField(
         marcTag = "863",
         subfields = List(
           Subfield(tag = "8", content = "1.1"),
@@ -181,7 +181,7 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "i", content = "1979-2010")
         )
       ),
-      createVarFieldWith(
+      VarField(
         marcTag = "853",
         subfields = List(
           Subfield(tag = "8", content = "1"),
@@ -198,7 +198,7 @@ class SierraHoldingsEnumerationTest
   it("skips empty values at both ends of a range in field 863") {
     // This test case is based on b13108487
     val varFields = List(
-      createVarFieldWith(
+      VarField(
         marcTag = "863",
         subfields = List(
           Subfield(tag = "8", content = "1.1"),
@@ -207,7 +207,7 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "i", content = "1984-2004")
         )
       ),
-      createVarFieldWith(
+      VarField(
         marcTag = "853",
         subfields = List(
           Subfield(tag = "8", content = "1"),
@@ -224,7 +224,7 @@ class SierraHoldingsEnumerationTest
   it("handles ranges that contain multiple parts") {
     // This test case is based on b16734567
     val varFields = List(
-      createVarFieldWith(
+      VarField(
         marcTag = "863",
         subfields = List(
           Subfield(tag = "8", content = "1.1"),
@@ -233,7 +233,7 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "i", content = "2009-2018")
         )
       ),
-      createVarFieldWith(
+      VarField(
         marcTag = "853",
         subfields = List(
           Subfield(tag = "8", content = "1"),
@@ -250,14 +250,14 @@ class SierraHoldingsEnumerationTest
 
   it("removes parentheses from a single date") {
     val varFields = List(
-      createVarFieldWith(
+      VarField(
         marcTag = "863",
         subfields = List(
           Subfield(tag = "8", content = "1.1"),
           Subfield(tag = "i", content = "2010-2020")
         )
       ),
-      createVarFieldWith(
+      VarField(
         marcTag = "853",
         subfields = List(
           Subfield(tag = "8", content = "1"),
@@ -272,7 +272,7 @@ class SierraHoldingsEnumerationTest
   it("maps numeric Season values to names") {
     // This test case is based on b15268688
     val varFields = List(
-      createVarFieldWith(
+      VarField(
         marcTag = "863",
         subfields = List(
           Subfield(tag = "8", content = "1.1"),
@@ -282,7 +282,7 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "j", content = "23-21"),
         )
       ),
-      createVarFieldWith(
+      VarField(
         marcTag = "863",
         subfields = List(
           Subfield(tag = "8", content = "1.2"),
@@ -292,7 +292,7 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "j", content = "23-24"),
         )
       ),
-      createVarFieldWith(
+      VarField(
         marcTag = "863",
         subfields = List(
           Subfield(tag = "8", content = "1.4"),
@@ -302,7 +302,7 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "j", content = "22-21"),
         )
       ),
-      createVarFieldWith(
+      VarField(
         marcTag = "853",
         subfields = List(
           Subfield(tag = "8", content = "1"),
@@ -324,7 +324,7 @@ class SierraHoldingsEnumerationTest
   it("maps numeric Season values to names in the month field") {
     // This test case is based on b24968912
     val varFields = List(
-      createVarFieldWith(
+      VarField(
         marcTag = "863",
         subfields = List(
           Subfield(tag = "8", content = "1.1"),
@@ -334,7 +334,7 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "j", content = "21-22"),
         )
       ),
-      createVarFieldWith(
+      VarField(
         marcTag = "853",
         subfields = List(
           Subfield(tag = "8", content = "1"),
@@ -354,7 +354,7 @@ class SierraHoldingsEnumerationTest
   it("maps numeric month values to names") {
     // This test case is based on b14604863
     val varFields = List(
-      createVarFieldWith(
+      VarField(
         marcTag = "863",
         subfields = List(
           Subfield(tag = "8", content = "1.1"),
@@ -364,7 +364,7 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "j", content = "04-08"),
         )
       ),
-      createVarFieldWith(
+      VarField(
         marcTag = "853",
         subfields = List(
           Subfield(tag = "8", content = "1"),
@@ -384,7 +384,7 @@ class SierraHoldingsEnumerationTest
   it("handles slashes in the season field") {
     // This test case is based on b3186692x
     val varFields = List(
-      createVarFieldWith(
+      VarField(
         marcTag = "863",
         subfields = List(
           Subfield(tag = "8", content = "1.1"),
@@ -394,7 +394,7 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "j", content = "-21/22"),
         )
       ),
-      createVarFieldWith(
+      VarField(
         marcTag = "853",
         subfields = List(
           Subfield(tag = "8", content = "1"),
@@ -414,7 +414,7 @@ class SierraHoldingsEnumerationTest
   it("handles a mix of month/season in the same record") {
     // This test case is based on b13544019
     val varFields = List(
-      createVarFieldWith(
+      VarField(
         marcTag = "863",
         subfields = List(
           Subfield(tag = "8", content = "1.1"),
@@ -424,7 +424,7 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "j", content = "24-05"),
         )
       ),
-      createVarFieldWith(
+      VarField(
         marcTag = "853",
         subfields = List(
           Subfield(tag = "8", content = "1"),
@@ -444,7 +444,7 @@ class SierraHoldingsEnumerationTest
   it("handles a range and a slash in the month field") {
     // This example is based on b1652927
     val varFields = List(
-      createVarFieldWith(
+      VarField(
         marcTag = "853",
         subfields = List(
           Subfield(tag = "8", content = "1"),
@@ -452,7 +452,7 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "j", content = "(month)")
         )
       ),
-      createVarFieldWith(
+      VarField(
         marcTag = "863",
         subfields = List(
           Subfield(tag = "8", content = "1.1"),
@@ -473,7 +473,7 @@ class SierraHoldingsEnumerationTest
 
   it("skips adding a value if it can't parse it as a date") {
     val varFields = List(
-      createVarFieldWith(
+      VarField(
         marcTag = "853",
         subfields = List(
           Subfield(tag = "8", content = "1"),
@@ -481,7 +481,7 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "j", content = "(month)")
         )
       ),
-      createVarFieldWith(
+      VarField(
         marcTag = "863",
         subfields = List(
           Subfield(tag = "8", content = "1.1"),
@@ -497,7 +497,7 @@ class SierraHoldingsEnumerationTest
   it("uses the first month of a range") {
     // This example is based on b3225790
     val varFields = List(
-      createVarFieldWith(
+      VarField(
         marcTag = "853",
         subfields = List(
           Subfield(tag = "8", content = "1"),
@@ -505,7 +505,7 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "j", content = "(month)")
         )
       ),
-      createVarFieldWith(
+      VarField(
         marcTag = "863",
         subfields = List(
           Subfield(tag = "8", content = "1.1"),
@@ -521,7 +521,7 @@ class SierraHoldingsEnumerationTest
   it("includes the contents of the public note in subfield ǂz") {
     // This test case is based on b14975993
     val varFields = List(
-      createVarFieldWith(
+      VarField(
         marcTag = "863",
         subfields = List(
           Subfield(tag = "8", content = "1.1"),
@@ -530,7 +530,7 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "z", content = "Current issue on display")
         )
       ),
-      createVarFieldWith(
+      VarField(
         marcTag = "853",
         subfields = List(
           Subfield(tag = "8", content = "1"),
@@ -546,7 +546,7 @@ class SierraHoldingsEnumerationTest
 
   it("sorts based on the link/sequence number") {
     val varFields = List(
-      createVarFieldWith(
+      VarField(
         marcTag = "863",
         subfields = List(
           Subfield(tag = "8", content = "1.2"),
@@ -554,7 +554,7 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "b", content = "2")
         )
       ),
-      createVarFieldWith(
+      VarField(
         marcTag = "863",
         subfields = List(
           Subfield(tag = "8", content = "2.1"),
@@ -562,7 +562,7 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "b", content = "1"),
         )
       ),
-      createVarFieldWith(
+      VarField(
         marcTag = "863",
         subfields = List(
           Subfield(tag = "8", content = "1.1"),
@@ -570,7 +570,7 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "b", content = "1")
         )
       ),
-      createVarFieldWith(
+      VarField(
         marcTag = "853",
         subfields = List(
           Subfield(tag = "8", content = "1"),
@@ -578,7 +578,7 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "b", content = "no."),
         )
       ),
-      createVarFieldWith(
+      VarField(
         marcTag = "853",
         subfields = List(
           Subfield(tag = "8", content = "2"),
@@ -594,7 +594,7 @@ class SierraHoldingsEnumerationTest
   it("uses a colon as a separator between 'v' and 'no.'") {
     // This example is based on b1310812
     val varFields = List(
-      createVarFieldWith(
+      VarField(
         marcTag = "863",
         subfields = List(
           Subfield(tag = "8", content = "1.1"),
@@ -602,7 +602,7 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "b", content = "1-2")
         )
       ),
-      createVarFieldWith(
+      VarField(
         marcTag = "853",
         subfields = List(
           Subfield(tag = "8", content = "1"),
@@ -621,14 +621,14 @@ class SierraHoldingsEnumerationTest
   it("trims trailing punctuation from the year") {
     // This example is based on b1310916
     val varFields = List(
-      createVarFieldWith(
+      VarField(
         marcTag = "863",
         subfields = List(
           Subfield(tag = "8", content = "1.1"),
           Subfield(tag = "i", content = "1985-2002.")
         )
       ),
-      createVarFieldWith(
+      VarField(
         marcTag = "853",
         subfields = List(
           Subfield(tag = "8", content = "1"),
@@ -642,7 +642,7 @@ class SierraHoldingsEnumerationTest
 
   it("includes the day if the range is a month") {
     val varFields = List(
-      createVarFieldWith(
+      VarField(
         marcTag = "863",
         subfields = List(
           Subfield(tag = "8", content = "1.1"),
@@ -651,7 +651,7 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "k", content = "13-17"),
         )
       ),
-      createVarFieldWith(
+      VarField(
         marcTag = "853",
         subfields = List(
           Subfield(tag = "8", content = "1"),
@@ -667,7 +667,7 @@ class SierraHoldingsEnumerationTest
 
   it("skips the day if the month value contains a season") {
     val varFields = List(
-      createVarFieldWith(
+      VarField(
         marcTag = "863",
         subfields = List(
           Subfield(tag = "8", content = "1.1"),
@@ -676,7 +676,7 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "k", content = "1"),
         )
       ),
-      createVarFieldWith(
+      VarField(
         marcTag = "853",
         subfields = List(
           Subfield(tag = "8", content = "1"),
@@ -692,7 +692,7 @@ class SierraHoldingsEnumerationTest
 
   it("strips a leading zero from the day") {
     val varFields = List(
-      createVarFieldWith(
+      VarField(
         marcTag = "863",
         subfields = List(
           Subfield(tag = "8", content = "1.1"),
@@ -701,7 +701,7 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "k", content = "01"),
         )
       ),
-      createVarFieldWith(
+      VarField(
         marcTag = "853",
         subfields = List(
           Subfield(tag = "8", content = "1"),
@@ -718,7 +718,7 @@ class SierraHoldingsEnumerationTest
   describe("handles malformed MARC data") {
     it("skips a field 863 if it has a missing sequence number") {
       val varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "853",
           subfields = List(
             Subfield(tag = "8", content = "10"),
@@ -726,7 +726,7 @@ class SierraHoldingsEnumerationTest
             Subfield(tag = "i", content = "(year)")
           )
         ),
-        createVarFieldWith(
+        VarField(
           marcTag = "863",
           subfields = List(
             Subfield(tag = "8", content = "10.1"),
@@ -734,7 +734,7 @@ class SierraHoldingsEnumerationTest
             Subfield(tag = "i", content = "1995")
           )
         ),
-        createVarFieldWith(
+        VarField(
           marcTag = "863",
           subfields = List(
             Subfield(tag = "8", content = "2.1"),
@@ -749,14 +749,14 @@ class SierraHoldingsEnumerationTest
 
     it("skips a subfield in field 863 if it doesn't have a corresponding label") {
       val varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "853",
           subfields = List(
             Subfield(tag = "8", content = "10"),
             Subfield(tag = "a", content = "vol."),
           )
         ),
-        createVarFieldWith(
+        VarField(
           marcTag = "863",
           subfields = List(
             Subfield(tag = "8", content = "10.1"),
@@ -771,7 +771,7 @@ class SierraHoldingsEnumerationTest
 
     it("skips a field 863 if it can't parse the link/sequence as two integers") {
       val varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "853",
           subfields = List(
             Subfield(tag = "8", content = "10"),
@@ -779,7 +779,7 @@ class SierraHoldingsEnumerationTest
             Subfield(tag = "i", content = "(year)")
           )
         ),
-        createVarFieldWith(
+        VarField(
           marcTag = "863",
           subfields = List(
             Subfield(tag = "8", content = "10.1"),
@@ -787,7 +787,7 @@ class SierraHoldingsEnumerationTest
             Subfield(tag = "i", content = "2001")
           )
         ),
-        createVarFieldWith(
+        VarField(
           marcTag = "863",
           subfields = List(
             Subfield(tag = "8", content = "b.b"),
@@ -795,7 +795,7 @@ class SierraHoldingsEnumerationTest
             Subfield(tag = "i", content = "2002")
           )
         ),
-        createVarFieldWith(
+        VarField(
           marcTag = "863",
           subfields = List(
             Subfield(tag = "8", content = "3.3.3"),
@@ -803,7 +803,7 @@ class SierraHoldingsEnumerationTest
             Subfield(tag = "i", content = "2003")
           )
         ),
-        createVarFieldWith(
+        VarField(
           marcTag = "863",
           subfields = List(
             Subfield(tag = "a", content = "4"),
@@ -817,7 +817,7 @@ class SierraHoldingsEnumerationTest
 
     it("skips a field 853 if it can't find a sequence number") {
       val varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "853",
           subfields = List(
             Subfield(tag = "8", content = "10"),
@@ -825,7 +825,7 @@ class SierraHoldingsEnumerationTest
             Subfield(tag = "i", content = "(year)")
           )
         ),
-        createVarFieldWith(
+        VarField(
           marcTag = "853",
           subfields = List(
             Subfield(tag = "8", content = "a"),
@@ -833,14 +833,14 @@ class SierraHoldingsEnumerationTest
             Subfield(tag = "i", content = "(year)")
           )
         ),
-        createVarFieldWith(
+        VarField(
           marcTag = "853",
           subfields = List(
             Subfield(tag = "a", content = "vol."),
             Subfield(tag = "i", content = "(year)")
           )
         ),
-        createVarFieldWith(
+        VarField(
           marcTag = "863",
           subfields = List(
             Subfield(tag = "8", content = "10.1"),
@@ -855,7 +855,7 @@ class SierraHoldingsEnumerationTest
 
     it("handles a duplicate 853") {
       val varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "853",
           subfields = List(
             Subfield(tag = "8", content = "10"),
@@ -863,7 +863,7 @@ class SierraHoldingsEnumerationTest
             Subfield(tag = "i", content = "(year)")
           )
         ),
-        createVarFieldWith(
+        VarField(
           marcTag = "853",
           subfields = List(
             Subfield(tag = "8", content = "10"),
@@ -871,7 +871,7 @@ class SierraHoldingsEnumerationTest
             Subfield(tag = "i", content = "(year)")
           )
         ),
-        createVarFieldWith(
+        VarField(
           marcTag = "863",
           subfields = List(
             Subfield(tag = "8", content = "10.1"),

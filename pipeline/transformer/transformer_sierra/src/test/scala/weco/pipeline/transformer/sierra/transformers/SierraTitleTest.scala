@@ -4,13 +4,12 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import weco.pipeline.transformer.sierra.exceptions.ShouldNotTransformException
-import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
-import weco.sierra.models.marc.Subfield
+import weco.sierra.generators.SierraDataGenerators
+import weco.sierra.models.marc.{Subfield, VarField}
 
 class SierraTitleTest
     extends AnyFunSpec
     with Matchers
-    with MarcGenerators
     with SierraDataGenerators {
 
   val titleTestCases = Table(
@@ -64,7 +63,7 @@ class SierraTitleTest
       case (subfields, expectedTitle) =>
         val bibData = createSierraBibDataWith(
           varFields = List(
-            createVarFieldWith(marcTag = "245", subfields = subfields)
+            VarField(marcTag = "245", subfields = subfields)
           )
         )
 
@@ -75,13 +74,13 @@ class SierraTitleTest
   it("uses the first instance of MARC 245 if there are multiple instances") {
     val bibData = createSierraBibDataWith(
       varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "245",
           subfields = List(
             Subfield(tag = "a", content = "A book with multiple covers")
           )
         ),
-        createVarFieldWith(marcTag = "245")
+        VarField(marcTag = "245", subfields = List())
       )
     )
 
@@ -92,7 +91,7 @@ class SierraTitleTest
     // This is based on https://search.wellcomelibrary.org/iii/encore/record/C__Rb1057466?lang=eng&marcData=Y
     val bibData = createSierraBibDataWith(
       varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "245",
           subfields = List(
             Subfield(tag = "a", content = "The Book of common prayer:"),
@@ -127,9 +126,9 @@ class SierraTitleTest
     it("if there are no subfields a, b or c") {
       val bibData = createSierraBibDataWith(
         varFields = List(
-          createVarFieldWith(
+          VarField(
             marcTag = "245",
-            subfields = List.empty
+            subfields = List()
           )
         )
       )

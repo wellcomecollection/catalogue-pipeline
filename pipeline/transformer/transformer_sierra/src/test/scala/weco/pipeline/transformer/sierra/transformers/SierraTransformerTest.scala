@@ -6,28 +6,14 @@ import org.scalatest.matchers.should.Matchers
 import weco.json.JsonUtil._
 import weco.catalogue.internal_model.work.WorkState.Source
 import org.scalatest.Assertion
-import weco.catalogue.internal_model.identifiers.{
-  IdState,
-  IdentifierType,
-  ReferenceNumber,
-  SourceIdentifier
-}
+import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, ReferenceNumber, SourceIdentifier}
 import weco.catalogue.internal_model.identifiers.IdState.Unidentifiable
 import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.locations._
-import weco.catalogue.internal_model.locations.LocationType.{
-  ClosedStores,
-  OnlineResource
-}
-import weco.catalogue.internal_model.work.DeletedReason.{
-  DeletedFromSource,
-  SuppressedFromSource
-}
+import weco.catalogue.internal_model.locations.LocationType.{ClosedStores, OnlineResource}
+import weco.catalogue.internal_model.work.DeletedReason.{DeletedFromSource, SuppressedFromSource}
 import weco.catalogue.internal_model.work.Format.{Books, Pictures}
-import weco.catalogue.internal_model.work.InvisibilityReason.{
-  SourceFieldMissing,
-  UnableToTransform
-}
+import weco.catalogue.internal_model.work.InvisibilityReason.{SourceFieldMissing, UnableToTransform}
 import weco.catalogue.internal_model.work._
 import weco.catalogue.internal_model.work.generators.WorkGenerators
 import weco.catalogue.source_model.generators.SierraRecordGenerators
@@ -36,7 +22,7 @@ import weco.pipeline.transformer.sierra.SierraTransformer
 import weco.pipeline.transformer.sierra.exceptions.SierraTransformerException
 import weco.sierra.generators.MarcGenerators
 import weco.sierra.models.identifiers.{SierraBibNumber, SierraItemNumber}
-import weco.sierra.models.marc.Subfield
+import weco.sierra.models.marc.{Subfield, VarField}
 
 class SierraTransformerTest
     extends AnyFunSpec
@@ -329,14 +315,14 @@ class SierraTransformerTest
     val title = "Hi Diddle Dee Dee"
     val lettering = "An actor's life for me"
 
-    val titleField = createVarFieldWith(
+    val titleField = VarField(
       marcTag = "245",
       subfields = List(
         Subfield(tag = "a", content = title)
       )
     )
 
-    val productionField = createVarFieldWith(
+    val productionField = VarField(
       marcTag = "260",
       subfields = List(
         Subfield(tag = "b", content = "Peaceful Poetry"),
@@ -344,7 +330,7 @@ class SierraTransformerTest
       )
     )
 
-    val descriptionField = createVarFieldWith(
+    val descriptionField = VarField(
       marcTag = "520",
       subfields = List(
         Subfield(
@@ -362,7 +348,7 @@ class SierraTransformerTest
       )
     )
 
-    val notesField = createVarFieldWith(
+    val notesField = VarField(
       marcTag = "500",
       subfields = List(
         Subfield(tag = "a", content = "It's a note")
@@ -371,7 +357,7 @@ class SierraTransformerTest
 
     val langField = """{"code": "eng", "name": "English"}"""
     val langVarFields = List(
-      createVarFieldWith(
+      VarField(
         marcTag = "041",
         subfields = List(
           Subfield(tag = "a", content = "ger"),

@@ -31,7 +31,7 @@ class SierraGenresTest
 
     val bibData = createSierraBibDataWith(
       varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "655",
           subfields = List(Subfield(tag = "a", content = "A Content"))
         )
@@ -55,7 +55,7 @@ class SierraGenresTest
 
     val bibData = createSierraBibDataWith(
       varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "655",
           subfields = List(
             Subfield(tag = "a", content = "A Content"),
@@ -83,7 +83,7 @@ class SierraGenresTest
 
     val bibData = createSierraBibDataWith(
       varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "655",
           subfields = List(
             Subfield(tag = "v", content = "V Content"),
@@ -110,7 +110,7 @@ class SierraGenresTest
 
     val bibData = createSierraBibDataWith(
       varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "655",
           subfields = List(
             Subfield(tag = "a", content = "A Content"),
@@ -136,7 +136,7 @@ class SierraGenresTest
 
     val bibData = createSierraBibDataWith(
       varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "655",
           subfields = List(
             Subfield(tag = "y", content = "Y Content"),
@@ -161,7 +161,7 @@ class SierraGenresTest
 
     val bibData = createSierraBibDataWith(
       varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "655",
           subfields = List(
             Subfield(tag = "z", content = "Z Content"),
@@ -178,32 +178,32 @@ class SierraGenresTest
     // This is based on bib b25028042 as of 23 January 2021
     val bibData = createSierraBibDataWith(
       varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "655",
           subfields = List(
             Subfield(tag = "a", content = "Electronic journals")
           )
         ),
-        createVarFieldWith(
+        VarField(
           marcTag = "655",
           subfields = List(
             Subfield(tag = "a", content = "Electronic journals")
           )
         ),
-        createVarFieldWith(
+        VarField(
           marcTag = "655",
           subfields = List(
             Subfield(tag = "a", content = "Periodical")
           )
         ),
-        createVarFieldWith(
+        VarField(
           marcTag = "655",
           subfields = List(
             Subfield(tag = "a", content = "Periodicals"),
             Subfield(tag = "2", content = "rbgenr")
           )
         ),
-        createVarFieldWith(
+        VarField(
           marcTag = "655",
           subfields = List(
             Subfield(tag = "a", content = "Periodicals"),
@@ -230,14 +230,14 @@ class SierraGenresTest
   it("returns subjects for multiple 655 tags with different subfields") {
     val bibData = createSierraBibDataWith(
       varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "655",
           subfields = List(
             Subfield(tag = "a", content = "A1 Content"),
             Subfield(tag = "z", content = "Z1 Content")
           )
         ),
-        createVarFieldWith(
+        VarField(
           marcTag = "655",
           subfields = List(
             Subfield(tag = "a", content = "A2 Content"),
@@ -268,7 +268,7 @@ class SierraGenresTest
   it("strips punctuation from Sierra genres") {
     val bibData = createSierraBibDataWith(
       varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "655",
           subfields = List(
             Subfield(tag = "a", content = "Printed books.")

@@ -9,7 +9,7 @@ import weco.catalogue.internal_model.locations.{
   LocationType,
   PhysicalLocation
 }
-import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
+import weco.sierra.generators.SierraDataGenerators
 import weco.sierra.models.data.SierraItemData
 import weco.sierra.models.fields.SierraLocation
 import weco.sierra.models.marc.{FixedField, Subfield, VarField}
@@ -17,7 +17,6 @@ import weco.sierra.models.marc.{FixedField, Subfield, VarField}
 class SierraPhysicalLocationTest
     extends AnyFunSpec
     with Matchers
-    with MarcGenerators
     with SierraDataGenerators {
 
   private val transformer = new SierraPhysicalLocation {}

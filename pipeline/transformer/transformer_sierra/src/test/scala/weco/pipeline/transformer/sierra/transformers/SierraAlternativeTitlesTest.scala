@@ -2,7 +2,6 @@ package weco.pipeline.transformer.sierra.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import shapeless.tag
 import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
 import weco.sierra.models.marc.{Subfield, VarField}
 
@@ -13,9 +12,9 @@ class SierraAlternativeTitlesTest
     with SierraDataGenerators {
 
   val (field240, field130, field246) = (
-    createVarField("Apples", "240"),
-    createVarField("Bananas", "130"),
-    createVarField("Cherries", "246")
+    createVarField(content = "Apples", marcTag = "240"),
+    createVarField(content = "Bananas", marcTag = "130"),
+    createVarField(content = "Cherries", marcTag = "246")
   )
 
   it("extracts an alternative title when there is 240") {
@@ -42,7 +41,7 @@ class SierraAlternativeTitlesTest
   }
 
   it("extracts all alternative titles when repeated fields") {
-    val varFields = List(field240, createVarField("Durian", "240"))
+    val varFields = List(field240, createVarField(content = "Durian", marcTag = "240"))
     getAlternativeTitles(varFields) shouldBe List("Apples", "Durian")
   }
 
@@ -60,19 +59,19 @@ class SierraAlternativeTitlesTest
   }
 
   it("does not extract any alternative titles when no 240 / 130 / 246") {
-    val varFields = List(createVarField("Xigua", "251"))
+    val varFields = List(createVarField(content = "Xigua", marcTag = "251"))
     getAlternativeTitles(varFields) shouldBe Nil
   }
 
   it("does not extract any alternative titles when 246 indicator2 is 6") {
-    val varFields = List(createVarField("Xigua", "246", indicator2 = "6"))
+    val varFields = List(createVarField(content = "Xigua", marcTag = "246", indicator2 = "6"))
     getAlternativeTitles(varFields) shouldBe Nil
   }
 
   it("extracts alternative titles when 240 / 130 indicator2 is 6") {
     val varFields = List(
-      createVarField("Apples", "240", indicator2 = "6"),
-      createVarField("Bananas", "130", indicator2 = "6")
+      createVarField(content = "Apples", marcTag = "240", indicator2 = "6"),
+      createVarField(content = "Bananas", marcTag = "130", indicator2 = "6")
     )
     getAlternativeTitles(varFields) shouldBe List("Apples", "Bananas")
   }
@@ -80,9 +79,9 @@ class SierraAlternativeTitlesTest
   it("omits a subfield $5 with content UkLW") {
     val varFields = List(
       createVarFieldWith(
-        "246",
-        "1",
-        List(
+        marcTag = "246",
+        indicator2 = "1",
+        subfields = List(
           Subfield(tag = "a", content = "Apples"),
           Subfield(tag = "5", content = "Oranges"),
           Subfield(tag = "5", content = "UkLW")
@@ -99,9 +98,9 @@ class SierraAlternativeTitlesTest
   it("does not omit a subfield $5 with content != UkLW") {
     val varFields = List(
       createVarFieldWith(
-        "246",
-        "1",
-        List(
+        marcTag = "246",
+        indicator2 = "1",
+        subfields = List(
           Subfield(tag = "a", content = "Apples"),
           Subfield(tag = "5", content = "Oranges"),
           Subfield(tag = "5", content = "Carrots")
@@ -142,12 +141,14 @@ class SierraAlternativeTitlesTest
 
   private def createVarField(
     content: String,
-    tag: String,
-    indicator2: String = "1",
-    contentTag: String = "a"
+    marcTag: String,
+    indicator2: String = "1"
   ) =
-    createVarFieldWith(
-      tag,
-      indicator2,
-      Subfield(tag = contentTag, content = content) :: Nil)
+    VarField(
+      marcTag = Some(marcTag),
+      indicator2 = Some(indicator2),
+      subfields = List(
+        Subfield(tag = "a", content = content)
+      )
+    )
 }

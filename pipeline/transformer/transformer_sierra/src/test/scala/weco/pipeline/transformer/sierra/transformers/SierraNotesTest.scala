@@ -71,7 +71,7 @@ class SierraNotesTest
   it("concatenate all the subfields on a single MARC field into a single note") {
     val bibData = createSierraBibDataWith(
       varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "500",
           subfields = List(
             Subfield(tag = "a", content = "1st part."),
@@ -157,7 +157,7 @@ class SierraNotesTest
 
   it("suppresses subfield ǂ5 universally") {
     val varFields = SierraNotes.notesFields.keys.map(key => {
-      createVarFieldWith(
+      VarField(
         marcTag = key,
         subfields = List(
           Subfield(tag = "a", content = "Main bit."),
@@ -173,7 +173,7 @@ class SierraNotesTest
       .map(
         createNote =>
           createNote(
-            createVarFieldWith(
+            VarField(
               marcTag = "000",
               subfields = List(
                 Subfield(tag = "a", content = "Main bit.")
@@ -192,7 +192,7 @@ class SierraNotesTest
     createSierraBibDataWith(
       varFields = contents.toList.map {
         case (tag, content) =>
-          createVarFieldWith(
+          VarField(
             marcTag = tag,
             subfields = List(Subfield(tag = "a", content = content))
           )
