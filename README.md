@@ -1,4 +1,4 @@
-# catalogue-pipelione
+# catalogue-pipeline
 
 [![Build status](https://badge.buildkite.com/0ca819db1215b66ecb17019d8ee5331d8e537094d051141219.svg?branch=main)](https://buildkite.com/wellcomecollection/catalogue-pipeline)
 
