@@ -15,7 +15,7 @@ class TeiOnMergerTest
     with Matchers {
 
   it("merges a physical sierra with a tei") {
-    val merger = TeiOnMerger
+    val merger = PlatformMerger
     val physicalWork =
       sierraIdentifiedWork()
         .items(List(createIdentifiedPhysicalItem))

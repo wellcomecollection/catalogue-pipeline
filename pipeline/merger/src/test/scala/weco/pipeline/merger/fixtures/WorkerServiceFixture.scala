@@ -1,26 +1,22 @@
 package weco.pipeline.merger.fixtures
 
-import scala.collection.mutable
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import weco.catalogue.internal_model.image.Image
+import weco.catalogue.internal_model.image.ImageState.Initial
+import weco.catalogue.internal_model.work.Work
+import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.fixtures.TestWith
 import weco.messaging.fixtures.SQS.Queue
 import weco.messaging.memory.MemoryMessageSender
 import weco.messaging.sns.NotificationMessage
 import weco.monitoring.Metrics
 import weco.monitoring.memory.MemoryMetrics
-import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
-import weco.catalogue.internal_model.image.Image
-import weco.catalogue.internal_model.image.ImageState.Initial
-import weco.catalogue.internal_model.work.Work
-import weco.pipeline.merger.services.{
-  IdentifiedWorkLookup,
-  MergerManager,
-  MergerWorkerService,
-  TeiOffMerger
-}
+import weco.pipeline.merger.services.{IdentifiedWorkLookup, MergerWorkerService, PlatformMerger, TeiOffMergerManager}
 import weco.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 import weco.pipeline_storage.memory.{MemoryIndexer, MemoryRetriever}
+
+import scala.collection.mutable
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 trait WorkerServiceFixture extends PipelineStorageStreamFixtures {
 
@@ -39,7 +35,7 @@ trait WorkerServiceFixture extends PipelineStorageStreamFixtures {
         val workerService = new MergerWorkerService(
           msgStream = msgStream,
           sourceWorkLookup = new IdentifiedWorkLookup(retriever),
-          mergerManager = new MergerManager(TeiOffMerger),
+          mergerManager = new TeiOffMergerManager(PlatformMerger),
           workOrImageIndexer = new MemoryIndexer(index),
           workMsgSender = workSender,
           imageMsgSender = imageSender,
