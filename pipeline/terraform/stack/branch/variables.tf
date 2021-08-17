@@ -63,21 +63,21 @@ variable "shared_logging_secrets" {
 }
 
 variable "min_capacity" {
-  type    = number
+  type = number
 }
 
 variable "max_capacity" {
-  type    = number
+  type = number
 }
 
 variable "subnets" {
   type = list(string)
 }
-variable "scale_down_adjustment"{
-  type    = number
+variable "scale_down_adjustment" {
+  type = number
 }
-variable "scale_up_adjustment"{
-  type    = number
+variable "scale_up_adjustment" {
+  type = number
 }
 variable "dlq_alarm_arn" {}
 variable "release_label" {
@@ -106,15 +106,15 @@ variable "es_works_denormalised_index" {
 variable "es_works_index" {
   type = string
 }
-variable "pipeline_storage_es_service_secrets"{
+variable "pipeline_storage_es_service_secrets" {
 }
-variable "pipeline_storage_private_host"{
+variable "pipeline_storage_private_host" {
   type = string
 }
-variable "pipeline_storage_protocol"{
+variable "pipeline_storage_protocol" {
   type = string
 }
-variable "pipeline_storage_port"{
+variable "pipeline_storage_port" {
   type = string
 }
 
