@@ -1,12 +1,21 @@
 package weco.pipeline.merger.services
 
+import org.scalatest.GivenWhenThen
+import org.scalatest.featurespec.AnyFeatureSpec
+import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.IdentifierType
-import weco.pipeline.merger.MergerScenarioTest
+import weco.catalogue.internal_model.work.generators.SourceWorkGenerators
+import weco.pipeline.merger.fixtures.FeatureTestSugar
 
 // We'll eventually fold these tests into the base MergerScenarioTest
 // once the TEI works are rich enough for the public
-class TeiOnMergerScenarioTest extends MergerScenarioTest {
-  override val merger = TeiOnMerger
+class TeiOnMergerScenarioTest
+    extends AnyFeatureSpec
+    with GivenWhenThen
+    with Matchers
+    with FeatureTestSugar
+    with SourceWorkGenerators {
+  val merger = MergerManager.teiOnMergerManager
 
   Scenario("A Tei and a Sierra digital and a sierra physical work are merged") {
     Given("a Tei, a Sierra physical record and a Sierra digital record")
@@ -16,7 +25,7 @@ class TeiOnMergerScenarioTest extends MergerScenarioTest {
     When("the works are merged")
     val sierraWorks = List(digitalSierra, physicalSierra)
     val works = sierraWorks :+ teiWork
-    val outcome = merger.merge(works)
+    val outcome = merger.applyMerge(works.map(Some(_)))
 
     Then("the Sierra works are redirected to the tei")
     outcome.getMerged(digitalSierra) should beRedirectedTo(teiWork)
@@ -50,7 +59,7 @@ class TeiOnMergerScenarioTest extends MergerScenarioTest {
     val teiWork = teiIdentifiedWork().title("A tei work")
 
     When("the tei work is merged")
-    val outcome = merger.merge(List(teiWork))
+    val outcome = merger.applyMerge(List(Some(teiWork)))
 
     Then("the tei work should be a TEI work")
     outcome

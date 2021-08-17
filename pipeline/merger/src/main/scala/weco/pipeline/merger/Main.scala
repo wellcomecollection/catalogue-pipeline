@@ -1,26 +1,20 @@
 package weco.pipeline.merger
 
-import scala.concurrent.ExecutionContext
 import akka.actor.ActorSystem
 import com.typesafe.config.Config
-import weco.catalogue.internal_model.index.{ImagesIndexConfig, WorksIndexConfig}
-import weco.messaging.sns.NotificationMessage
-import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import weco.catalogue.internal_model.Implicits._
-import weco.elasticsearch.typesafe.ElasticBuilder
-import weco.typesafe.WellcomeTypesafeApp
-import weco.typesafe.config.builders.AkkaBuilder
-import weco.typesafe.config.builders.EnrichConfig._
-import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.catalogue.internal_model.image.Image
 import weco.catalogue.internal_model.image.ImageState.Initial
+import weco.catalogue.internal_model.index.{ImagesIndexConfig, WorksIndexConfig}
 import weco.catalogue.internal_model.work.Work
+import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
+import weco.elasticsearch.typesafe.ElasticBuilder
+import weco.messaging.sns.NotificationMessage
+import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import weco.pipeline.merger.services.{
   IdentifiedWorkLookup,
   MergerManager,
-  MergerWorkerService,
-  TeiOffMerger,
-  TeiOnMerger
+  MergerWorkerService
 }
 import weco.pipeline_storage.EitherIndexer
 import weco.pipeline_storage.typesafe.{
@@ -28,6 +22,11 @@ import weco.pipeline_storage.typesafe.{
   ElasticSourceRetrieverBuilder,
   PipelineStorageStreamBuilder
 }
+import weco.typesafe.WellcomeTypesafeApp
+import weco.typesafe.config.builders.AkkaBuilder
+import weco.typesafe.config.builders.EnrichConfig._
+
+import scala.concurrent.ExecutionContext
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
@@ -49,15 +48,10 @@ object Main extends WellcomeTypesafeApp {
     val toggleTeiOn =
       config.getBooleanOption("toggle.tei_on").getOrElse(false)
 
-    val mergerRules = if (toggleTeiOn) {
-      TeiOnMerger
-    } else {
-      TeiOffMerger
+    val mergerManager = toggleTeiOn match {
+      case true  => MergerManager.teiOnMergerManager
+      case false => MergerManager.teiOffMergerManager
     }
-
-    val mergerManager = new MergerManager(
-      mergerRules = mergerRules
-    )
 
     val workMsgSender =
       SNSBuilder.buildSNSMessageSender(

@@ -99,7 +99,7 @@ class PlatformMergerTest
 
   val calmWork: Work.Visible[Identified] = calmIdentifiedWork()
 
-  private val merger = TeiOffMerger
+  private val merger = PlatformMerger
 
   it(
     "finds Calm || Sierra with physical item || Sierra work || Nothing as a target") {

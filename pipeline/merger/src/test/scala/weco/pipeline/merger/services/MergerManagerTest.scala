@@ -53,7 +53,7 @@ class MergerManagerTest extends AnyFunSpec with Matchers with WorkGenerators {
       expectedWorks.map(_.transition[Merged](now))
   }
 
-  val mergerRules = new Merger {
+  val merger = new Merger {
 
     /** Make every work a redirect to the first work in the list, and leave
       * the first work intact.
@@ -90,5 +90,10 @@ class MergerManagerTest extends AnyFunSpec with Matchers with WorkGenerators {
       )
   }
 
-  val mergerManager = new MergerManager(mergerRules = mergerRules)
+  val mergerManager = new MergerManager {
+    override val mergerRules: Merger = merger
+
+    override protected def preMergeModify(
+      works: Seq[Work[Identified]]): Seq[Work[Identified]] = works
+  }
 }

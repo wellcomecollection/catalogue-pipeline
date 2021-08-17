@@ -7,7 +7,7 @@ import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.generators.SourceWorkGenerators
 import weco.catalogue.internal_model.work.{Format, MergeCandidate}
 import weco.pipeline.merger.fixtures.FeatureTestSugar
-import weco.pipeline.merger.services.{PlatformMerger, TeiOffMerger}
+import weco.pipeline.merger.services.PlatformMerger
 
 class MergerScenarioTest
     extends AnyFeatureSpec
@@ -15,7 +15,7 @@ class MergerScenarioTest
     with Matchers
     with FeatureTestSugar
     with SourceWorkGenerators {
-  val merger: PlatformMerger = TeiOffMerger
+  val merger = PlatformMerger
 
   /*
    * We test field-level behaviour in the rule tests, and have to replicate it
