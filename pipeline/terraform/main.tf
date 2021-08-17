@@ -141,7 +141,7 @@ module "catalogue_pipeline_2021-08-16" {
     # that will never receive messages.
     tei = {
       topics = [
-        # local.tei_adapter_topic_arn,
+         local.tei_adapter_topic_arn,
       ],
       reindex_topic = local.tei_reindexer_topic_arn,
     }

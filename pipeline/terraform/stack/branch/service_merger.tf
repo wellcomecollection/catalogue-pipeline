@@ -60,7 +60,7 @@ module "merger" {
   ]
 
   deployment_service_env  = var.release_label
-  deployment_service_name = "merger-${local.tei}"
+  deployment_service_name = "merger-${local.tei_suffix}"
   shared_logging_secrets  = var.shared_logging_secrets
 }
 

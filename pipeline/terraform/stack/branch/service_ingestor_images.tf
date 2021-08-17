@@ -77,7 +77,7 @@ module "ingestor_images" {
   queue_read_policy = module.ingestor_images_queue.read_policy
 
   deployment_service_env  = var.release_label
-  deployment_service_name = "image-ingestor-${local.tei}"
+  deployment_service_name = "image-ingestor-${local.tei_suffix}"
 
   depends_on = [
     var.elasticsearch_users,

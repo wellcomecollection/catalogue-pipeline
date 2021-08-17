@@ -61,7 +61,7 @@ module "router" {
   ]
 
   deployment_service_env  = var.release_label
-  deployment_service_name = "work-router-${local.tei}"
+  deployment_service_name = "work-router-${local.tei_suffix}"
 }
 
 module "router_path_output_topic" {
