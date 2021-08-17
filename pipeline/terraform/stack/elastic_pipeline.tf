@@ -180,8 +180,8 @@ locals {
     "relation_embedder",
     "router",
     "inferrer",
-    "ingestor_works",
-    "ingestor_images",
+    "work_ingestor",
+    "image_ingestor",
   ]
 
   pipeline_storage_es_service_secrets = zipmap(local.pipeline_storage_service_list, [

@@ -16,20 +16,20 @@ module "ingestor_works_queue" {
 # Service
 
 module "ingestor_works" {
-  source          = "../modules/service"
-  service_name    = "${local.namespace_hyphen}_ingestor_works"
-  container_image = local.ingestor_works_image
+  source          = "../../modules/service"
+  service_name    = "${local.namespace}_ingestor_works"
+  container_image = var.ingestor_works_image
   security_group_ids = [
-    aws_security_group.service_egress.id,
+    var.service_egress_security_group_id,
   ]
 
   elastic_cloud_vpce_sg_id = var.ec_privatelink_security_group_id
 
-  cluster_name = aws_ecs_cluster.cluster.name
-  cluster_arn  = aws_ecs_cluster.cluster.arn
+  cluster_name = var.cluster_name
+  cluster_arn  = data.aws_ecs_cluster.cluster.id
 
   env_vars = {
-    metrics_namespace = "${local.namespace_hyphen}_ingestor_works"
+    metrics_namespace = "${local.namespace}_ingestor_works"
     topic_arn         = module.work_ingestor_topic.arn
 
     es_works_index        = local.es_works_index
@@ -62,9 +62,9 @@ module "ingestor_works" {
   }
 
   secret_env_vars = merge({
-    es_host_pipeline_storage     = local.pipeline_storage_private_host
-    es_port_pipeline_storage     = local.pipeline_storage_port
-    es_protocol_pipeline_storage = local.pipeline_storage_protocol
+    es_host_pipeline_storage     = var.pipeline_storage_private_host
+    es_port_pipeline_storage     = var.pipeline_storage_port
+    es_protocol_pipeline_storage = var.pipeline_storage_protocol
     es_username_pipeline_storage = "elasticsearch/pipeline_storage_${var.pipeline_date}/work_ingestor/es_username"
     es_password_pipeline_storage = "elasticsearch/pipeline_storage_${var.pipeline_date}/work_ingestor/es_password"
   })
@@ -72,10 +72,10 @@ module "ingestor_works" {
   subnets = var.subnets
 
   min_capacity = var.min_capacity
-  max_capacity = local.max_capacity
+  max_capacity = var.max_capacity
 
-  scale_down_adjustment = local.scale_down_adjustment
-  scale_up_adjustment   = local.scale_up_adjustment
+  scale_down_adjustment = var.scale_down_adjustment
+  scale_up_adjustment   = var.scale_up_adjustment
 
   queue_read_policy = module.ingestor_works_queue.read_policy
 
@@ -85,18 +85,18 @@ module "ingestor_works" {
   use_fargate_spot = true
 
   depends_on = [
-    null_resource.elasticsearch_users,
+    var.elasticsearch_users,
   ]
 
   deployment_service_env  = var.release_label
-  deployment_service_name = "work-ingestor"
+  deployment_service_name = "work-ingestor-${local.tei_suffix}"
   shared_logging_secrets  = var.shared_logging_secrets
 }
 
 # Output topic
 
 module "work_ingestor_topic" {
-  source = "../modules/topic"
+  source = "../../modules/topic"
 
   name       = "${local.namespace}_work_ingestor"
   role_names = [module.ingestor_works.task_role_name]

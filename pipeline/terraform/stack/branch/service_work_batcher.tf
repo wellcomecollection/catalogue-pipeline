@@ -1,5 +1,10 @@
+
 locals {
   wait_minutes = var.is_reindexing ? 45 : 5
+}
+
+data "aws_ecs_cluster" "cluster" {
+  cluster_name = var.cluster_name
 }
 
 module "batcher_queue" {
@@ -11,21 +16,21 @@ module "batcher_queue" {
 }
 
 module "batcher" {
-  source          = "../modules/service"
-  service_name    = "${local.namespace_hyphen}_batcher"
-  container_image = local.batcher_image
+  source          = "../../modules/service"
+  service_name    = "${local.namespace}_batcher"
+  container_image = var.batcher_image
 
   security_group_ids = [
-    aws_security_group.service_egress.id,
+    var.service_egress_security_group_id,
   ]
 
   elastic_cloud_vpce_sg_id = var.ec_privatelink_security_group_id
 
-  cluster_name = aws_ecs_cluster.cluster.name
-  cluster_arn  = aws_ecs_cluster.cluster.id
+  cluster_name = var.cluster_name
+  cluster_arn  = data.aws_ecs_cluster.cluster.id
 
   env_vars = {
-    metrics_namespace = "${local.namespace_hyphen}_batcher"
+    metrics_namespace = "${local.namespace}_batcher"
 
     queue_url        = module.batcher_queue.url
     output_topic_arn = module.batcher_output_topic.arn
@@ -46,10 +51,10 @@ module "batcher" {
   subnets = var.subnets
 
   min_capacity = var.min_capacity
-  max_capacity = min(1, local.max_capacity)
+  max_capacity = min(1, var.max_capacity)
 
-  scale_down_adjustment = local.scale_down_adjustment
-  scale_up_adjustment   = local.scale_up_adjustment
+  scale_down_adjustment = var.scale_down_adjustment
+  scale_up_adjustment   = var.scale_up_adjustment
 
   queue_read_policy = module.batcher_queue.read_policy
 
@@ -57,7 +62,7 @@ module "batcher" {
   memory = 2048
 
   depends_on = [
-    null_resource.elasticsearch_users,
+    var.elasticsearch_users,
   ]
 
   deployment_service_env  = var.release_label
@@ -65,7 +70,7 @@ module "batcher" {
 }
 
 module "batcher_output_topic" {
-  source = "../modules/topic"
+  source = "../../modules/topic"
 
   name       = "${local.namespace}_batcher_output"
   role_names = [module.batcher.task_role_name]

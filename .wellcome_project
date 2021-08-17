@@ -85,47 +85,57 @@ catalogue_pipeline:
       name: Production
     - id: stage
       name: Staging
-    - id: "2021-07-19"
-      name: "2021-07-19"
     - id: "2021-08-09"
       name: "2021-08-09"
+    - id: "2021-08-16"
+      name: "2021-08-16"
   image_repositories:
     - id: id_minter
       services:
         - id: id-minter
     - id: inference_manager
       services:
-        - id: image-inferrer
+        - id: image-inferrer-tei-on
+        - id: image-inferrer-tei-off
     - id: feature_inferrer
       services:
-        - id: image-inferrer
+        - id: image-inferrer-tei-on
+        - id: image-inferrer-tei-off
     - id: palette_inferrer
       services:
-        - id: image-inferrer
+        - id: image-inferrer-tei-on
+        - id: image-inferrer-tei-off
     - id: aspect_ratio_inferrer
       services:
-        - id: image-inferrer
+        - id: image-inferrer-tei-on
+        - id: image-inferrer-tei-off
     - id: matcher
       services:
         - id: matcher
     - id: merger
       services:
-        - id: merger
+        - id: merger-tei-on
+        - id: merger-tei-off
     - id: ingestor_images
       services:
-        - id: image-ingestor
+        - id: image-ingestor-tei-on
+        - id: image-ingestor-tei-off
     - id: ingestor_works
       services:
-        - id: work-ingestor
+        - id: work-ingestor-tei-on
+        - id: work-ingestor-tei-off
     - id: router
       services:
-        - id: work-router
+        - id: work-router-tei-on
+        - id: work-router-tei-off
     - id: batcher
       services:
-        - id: work-batcher
+        - id: work-batcher-tei-on
+        - id: work-batcher-tei-off
     - id: relation_embedder
       services:
-        - id: work-relation-embedder
+        - id: work-relation-embedder-tei-on
+        - id: work-relation-embedder-tei-off
     - id: transformer_calm
       services:
         - id: calm-transformer
