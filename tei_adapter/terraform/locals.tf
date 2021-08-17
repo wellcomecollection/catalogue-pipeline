@@ -3,7 +3,6 @@ locals {
   lambda_error_alarm_arn           = data.terraform_remote_state.shared_infra.outputs.lambda_error_alarm_arn
   namespace                        = "tei-adapter"
   release_label                    = "prod"
-  dlq_alarm_arn                    = data.terraform_remote_state.shared_infra.outputs.dlq_alarm_arn
   vpc_id                           = local.catalogue_vpcs["catalogue_vpc_delta_id"]
   private_subnets                  = local.catalogue_vpcs["catalogue_vpc_delta_private_subnets"]
   shared_logging_secrets           = data.terraform_remote_state.shared_infra.outputs.shared_secrets_logging
@@ -14,7 +13,10 @@ locals {
   rds_max_connections              = 45
   tei_id_extractor_max_connections = 5
   rds_lock_timeout_seconds         = 10 * 60
+
+  dlq_alarm_arn = data.terraform_remote_state.monitoring.outputs.platform_dlq_alarm_topic_arn
 }
+
 data "aws_ssm_parameter" "admin_cidr_ingress" {
   name = "/infra_critical/config/prod/admin_cidr_ingress"
 }
