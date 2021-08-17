@@ -4,7 +4,7 @@ locals {
 
   infra_bucket           = data.terraform_remote_state.shared_infra.outputs.infra_bucket
   account_id             = data.aws_caller_identity.current.account_id
-  dlq_alarm_arn          = data.terraform_remote_state.shared_infra.outputs.dlq_alarm_arn
+  dlq_alarm_arn          = data.terraform_remote_state.monitoring.outputs.platform_dlq_alarm_topic_arn
   vpc_id                 = local.catalogue_vpcs["catalogue_vpc_delta_id"]
   private_subnets        = local.catalogue_vpcs["catalogue_vpc_delta_private_subnets"]
   shared_logging_secrets = data.terraform_remote_state.shared_infra.outputs.shared_secrets_logging
