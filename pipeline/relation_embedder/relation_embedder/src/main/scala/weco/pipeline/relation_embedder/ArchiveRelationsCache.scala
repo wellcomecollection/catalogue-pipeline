@@ -80,7 +80,7 @@ class ArchiveRelationsCache(works: Map[String, RelationWork]) extends Logging {
   import weco.pipeline.relation_embedder.models.PathOps._
 
   private def getSiblings(path: String): (List[Relation], List[Relation]) = {
-    val (preceding, succeeding) = works.keySet.siblingsOf(path)
+    val (preceding, succeeding) = paths.siblingsOf(path)
 
     (preceding.map(relations), succeeding.map(relations))
   }
