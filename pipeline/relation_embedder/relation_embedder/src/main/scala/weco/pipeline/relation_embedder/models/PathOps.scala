@@ -16,6 +16,14 @@ object PathOps {
       val parentParts = parts.dropRight(1)
       parentParts.mkString("/")
     }
+
+    /** Returns true if the path is a descendent, false otherwise.
+      *
+      * For these purposes, a path is not a descendent of itself.
+      *
+      */
+    def isDescendentOf(possibleAncestorPath: String): Boolean =
+      path.startsWith(possibleAncestorPath + "/")
   }
 
   implicit class CollectionOps(paths: Set[String]) {
@@ -134,5 +142,15 @@ object PathOps {
       */
     def childrenOf(p: String): List[String] =
       childMapping.getOrElse(p, List())
+
+    /** Returns the descendents of ``path``.
+      *
+      * The result is a list, which may be empty if this path isn't in the set
+      * or it doesn't have any children.
+      *
+      */
+    def descendentsOf(p: String): List[String] =
+      CollectionPathSorter.sortPaths(paths.toList)
+        .filter { _.isDescendentOf(p) }
   }
 }

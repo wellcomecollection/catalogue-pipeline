@@ -94,24 +94,13 @@ class ArchiveRelationsCache(works: Map[String, RelationWork]) extends Logging {
         getAncestors(parentPath, relations(parentPath) :: accum)
     }
 
-  private def getNumDescendents(path: String): Int = {
-    @tailrec
-    def numDescendents(stack: List[String], accum: Int = 0): Int =
-      stack match {
-        case Nil => accum
-        case head :: tail =>
-          numDescendents(childMapping.getOrElse(head, Nil) ++ tail, 1 + accum)
-      }
-    numDescendents(childMapping.getOrElse(path, Nil))
-  }
-
   private lazy val relations: Map[String, Relation] =
     works.map {
       case (path, work) =>
         path -> work.toRelation(
           depth = path.split("/").length - 1,
           numChildren = paths.childrenOf(path).length,
-          numDescendents = getNumDescendents(path)
+          numDescendents = paths.descendentsOf(path).length
         )
     }
 
