@@ -125,12 +125,7 @@ class ArchiveRelationsCache(works: Map[String, RelationWork]) extends Logging {
   import weco.pipeline.relation_embedder.models.PathOps._
 
   private lazy val parentMapping: Map[String, String] =
-    works
-      .map {
-        case (path, _) =>
-          path -> Some(path.parent).filter(works.contains)
-      }
-      .collect { case (path, Some(parentPath)) => path -> parentPath }
+    works.keySet.parentMapping
 
   private lazy val childMapping: Map[String, List[String]] =
     works.map {

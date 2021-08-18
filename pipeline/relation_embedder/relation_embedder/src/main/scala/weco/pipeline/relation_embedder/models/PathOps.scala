@@ -15,4 +15,37 @@ object PathOps {
       parentParts.mkString("/")
     }
   }
+
+  implicit class CollectionOps(paths: Set[String]) {
+    /** Returns a list of paths in ``works`` whose parents are also in the
+     * list of works.
+     *
+     * e.g. if the works have paths
+     *
+     *      A/B
+     *      A/B/1
+     *      A/B/2
+     *      A/B/2/1
+     *      A/B/2/2
+     *      A/B/3/1
+     *
+     * then this would return
+     *
+     *      Map(
+     *        A/B/1 -> A/B,
+     *        A/B/2 -> A/B,
+     *        A/B/2/1 -> A/B/2,
+     *        A/B/2/2 -> A/B/2
+     *      )
+     *
+     * Notice that A/B and A/B/3/1 are missing, because their parents (A and A/B/3)
+     * are not in the list of works.
+     *
+     */
+    def parentMapping: Map[String, String] =
+      paths
+        .map { p => p -> p.parent }
+        .filter { case (_, parentPath) => paths.contains(parentPath) }
+        .toMap
+  }
 }
