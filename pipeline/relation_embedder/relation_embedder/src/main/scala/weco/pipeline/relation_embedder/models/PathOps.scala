@@ -93,5 +93,38 @@ object PathOps {
           p -> CollectionPathSorter.sortPaths(childPaths)
         }
         .toMap
+
+    /** Returns the siblings of ``path``.
+     *
+     * The result is two lists: the before/after siblings when arranged in order.
+     *
+     * e.g. if the works have paths
+     *
+     *   A/B
+     *   A/B/1
+     *   A/B/2
+     *   A/B/3
+     *   A/B/3/1
+     *   A/B/4
+     *   A/B/4/1
+     *
+     * then the siblings of A/B/3 would be (A/B/1, A/B/2) and (A/B/4,)
+     */
+    def siblingsOf(p: String): (List[String], List[String]) = {
+      val siblings = for {
+        // The children of your parents are your siblings
+        parent <- parentMapping.get(p)
+        childrenOfParent = childMapping(parent)
+
+        // Where does this path fall in the list of children?
+        index = childrenOfParent.indexOf(p)
+        (preceding, succeedingAndSelf) = childrenOfParent.splitAt(index)
+
+        // Remember to remove yourself from the list of children
+        succeeding = succeedingAndSelf.tail
+      } yield (preceding, succeeding)
+
+      siblings.getOrElse((List(), List()))
+    }
   }
 }

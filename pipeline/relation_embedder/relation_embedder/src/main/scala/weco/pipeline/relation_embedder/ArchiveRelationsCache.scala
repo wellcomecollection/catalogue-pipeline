@@ -75,18 +75,12 @@ class ArchiveRelationsCache(works: Map[String, RelationWork]) extends Logging {
       .getOrElse(path, default = Nil)
       .map(relations)
 
+  import weco.pipeline.relation_embedder.models.PathOps._
+
   private def getSiblings(path: String): (List[Relation], List[Relation]) = {
-    val siblings = parentMapping
-      .get(path)
-      .map(childMapping)
-      .getOrElse(Nil)
-    siblings match {
-      case Nil => (Nil, Nil)
-      case siblings =>
-        val splitIdx = siblings.indexOf(path)
-        val (preceding, succeeding) = siblings.splitAt(splitIdx)
-        (preceding.map(relations), succeeding.tail.map(relations))
-    }
+    val (preceding, succeeding) = works.keySet.siblingsOf(path)
+
+    (preceding.map(relations), succeeding.map(relations))
   }
 
   @tailrec
@@ -121,8 +115,6 @@ class ArchiveRelationsCache(works: Map[String, RelationWork]) extends Logging {
           numDescendents = getNumDescendents(path)
         )
     }
-
-  import weco.pipeline.relation_embedder.models.PathOps._
 
   private lazy val parentMapping: Map[String, String] =
     works.keySet.parentMapping

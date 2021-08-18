@@ -28,4 +28,16 @@ class PathOpsTest extends AnyFunSpec with Matchers {
       "A/B/3/1" -> List()
     )
   }
+
+  it("finds the siblings of a path") {
+    val paths = Set("A/B", "A/B/1", "A/B/2", "A/B/2/2", "A/B/3", "A/B/3/1", "A/B/4", "A/B/4/1")
+
+    paths.siblingsOf("A/B/1") shouldBe ((List(), List("A/B/2", "A/B/3", "A/B/4")))
+    paths.siblingsOf("A/B/3") shouldBe ((List("A/B/1", "A/B/2"), List("A/B/4")))
+    paths.siblingsOf("A/B/4") shouldBe ((List("A/B/1", "A/B/2", "A/B/3"), List()))
+
+    paths.siblingsOf("A/B/2/2") shouldBe ((List(), List()))
+
+    paths.siblingsOf("doesnotexist") shouldBe ((List(), List()))
+  }
 }
