@@ -126,5 +126,13 @@ object PathOps {
 
       siblings.getOrElse((List(), List()))
     }
+
+    /** Returns the children of ``path``.
+      *
+      * The result is a list, which may be empty if this path isn't in the set
+      * or it doesn't have any children.
+      */
+    def childrenOf(p: String): List[String] =
+      childMapping.getOrElse(p, List())
   }
 }

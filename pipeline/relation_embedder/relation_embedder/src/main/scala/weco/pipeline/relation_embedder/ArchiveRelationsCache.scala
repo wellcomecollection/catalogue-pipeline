@@ -33,6 +33,8 @@ class ArchiveRelationsCache(works: Map[String, RelationWork]) extends Logging {
         Relations.none
       }
 
+  private val paths: Set[String] = works.keySet
+
   // The availabilities of an archive's Relations are the union of
   // all of its descendants' availabilities, as well as its own
   def getAvailabilities(work: Work[Merged]): Set[Availability] =
@@ -92,9 +94,6 @@ class ArchiveRelationsCache(works: Map[String, RelationWork]) extends Logging {
         getAncestors(parentPath, relations(parentPath) :: accum)
     }
 
-  private def getNumChildren(path: String): Int =
-    childMapping.get(path).map(_.length).getOrElse(0)
-
   private def getNumDescendents(path: String): Int = {
     @tailrec
     def numDescendents(stack: List[String], accum: Int = 0): Int =
@@ -111,7 +110,7 @@ class ArchiveRelationsCache(works: Map[String, RelationWork]) extends Logging {
       case (path, work) =>
         path -> work.toRelation(
           depth = path.split("/").length - 1,
-          numChildren = getNumChildren(path),
+          numChildren = paths.childrenOf(path).length,
           numDescendents = getNumDescendents(path)
         )
     }
