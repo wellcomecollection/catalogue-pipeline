@@ -10,18 +10,6 @@ class PathOpsTest extends AnyFunSpec with Matchers {
     "PP/CRI/J/2/3".parent shouldBe "PP/CRI/J/2"
   }
 
-  it("tests for being a descendent") {
-    "PP/CRI/J/2/3".isDescendentOf("PP/CRI/J/2/3") shouldBe false
-
-    "PP/CRI/J/2/3".isDescendentOf("PP/CRI/J/2") shouldBe true
-    "PP/CRI/J/2/3".isDescendentOf("PP/CRI/J") shouldBe true
-    "PP/CRI/J/2/3".isDescendentOf("PP/CRI") shouldBe true
-
-    "PP/CRI/J/2/3".isDescendentOf("PP/CRI/I/1") shouldBe false
-
-    "PP/CRI/J/2/3".isDescendentOf("PP/CRI/J1") shouldBe false
-  }
-
   it("creates a parent mapping") {
     val paths = Set("A/B", "A/B/1", "A/B/2", "A/B/2/1", "A/B/2/2", "A/B/3/1")
 
@@ -62,14 +50,14 @@ class PathOpsTest extends AnyFunSpec with Matchers {
     paths.childrenOf("A/B/4/1") shouldBe empty
   }
 
-  it("finds the descendents of a path") {
-    val paths = Set("A/B", "A/B/1", "A/B/2", "A/B/2/1", "A/B/2/2", "A/B/3", "A/B/3/1")
+  it("finds the known descendents of a path") {
+    val paths = Set("A", "A/B", "A/B/1", "A/B/1/2/3", "A/B/1/2/2", "A/B/1/2/3/4", "A/B/1/2/3/5", "A/B/2")
 
-    paths.descendentsOf("A/B") shouldBe List("A/B/1", "A/B/2", "A/B/2/1", "A/B/2/2", "A/B/3", "A/B/3/1")
-    paths.descendentsOf("A/B/2") shouldBe List("A/B/2/1", "A/B/2/2")
-    paths.descendentsOf("A/B/3/1") shouldBe empty
+    paths.knownDescendentsOf("A") shouldBe List("A/B", "A/B/1", "A/B/2")
+    paths.knownDescendentsOf("A/B") shouldBe List("A/B/1", "A/B/2")
+    paths.knownDescendentsOf("A/B/1") shouldBe empty
 
-    paths.descendentsOf("doesnotexist") shouldBe empty
+    paths.knownDescendentsOf("A/B/1/2/3") shouldBe List("A/B/1/2/3/4", "A/B/1/2/3/5")
   }
 
   it("finds the known ancestors of a path") {

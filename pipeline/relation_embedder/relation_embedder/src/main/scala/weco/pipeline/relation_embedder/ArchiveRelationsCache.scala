@@ -35,14 +35,28 @@ class ArchiveRelationsCache(works: Map[String, RelationWork]) extends Logging {
 
   private val paths: Set[String] = works.keySet
 
-  // The availabilities of an archive's Relations are the union of
-  // all of its descendants' availabilities, as well as its own
+  /** Find the availabilities of this Work.
+   *
+   * The availabilities of an archive's Relations are the union of all the
+   * availabilities of its descendents, as well as its own.
+   *
+   * Note that this only covers *known* descendents.  e.g. if the works have
+   * paths (A, A/B/1), then A will not inherit availabilities from A/B/1 --
+   * the intermediate path A/B is missing.
+   *
+   * This preserves the original behaviour of the relation embedder, but it's
+   * not clear if it's intentional -- it was a side effect of the implementation,
+   * not something that was explicitly tested.
+   *
+   */
   def getAvailabilities(work: Work[Merged]): Set[Availability] =
     work.data.collectionPath match {
       case Some(CollectionPath(workPath, _)) =>
+        val affectedPaths = paths.knownDescendentsOf(workPath) :+ workPath
+
         works
           .filter {
-            case (path, _) => path == workPath || path.isDescendentOf(workPath)
+            case (path, _) => affectedPaths.contains(path)
           }
           .flatMap { case (_, work) => work.state.availabilities }
           .toSet
@@ -79,7 +93,7 @@ class ArchiveRelationsCache(works: Map[String, RelationWork]) extends Logging {
         path -> work.toRelation(
           depth = path.split("/").length - 1,
           numChildren = paths.childrenOf(path).length,
-          numDescendents = paths.descendentsOf(path).length
+          numDescendents = paths.knownDescendentsOf(path).length
         )
     }
 }

@@ -18,14 +18,6 @@ object PathOps {
       val parentParts = parts.dropRight(1)
       parentParts.mkString("/")
     }
-
-    /** Returns true if the path is a descendent, false otherwise.
-      *
-      * For these purposes, a path is not a descendent of itself.
-      *
-      */
-    def isDescendentOf(possibleAncestorPath: String): Boolean =
-      path.startsWith(possibleAncestorPath + "/")
   }
 
   implicit class CollectionOps(paths: Set[String]) {
@@ -150,10 +142,37 @@ object PathOps {
       * The result is a list, which may be empty if this path isn't in the set
       * or it doesn't have any descendents.
       *
+      * Here "known" means we're looking for a unbroken chain.  e.g. if the paths are
+      *
+      *       A
+      *       A/B
+      *       A/B/1
+      *       A/B/1/2/3
+      *       A/B/1/2/3/4
+      *
+      * then the known descendents of A are (A/B, A/B/1).  The missing link means the
+      * descendents don't go lower.
+      *
       */
-    def descendentsOf(p: String): List[String] =
-      CollectionPathSorter.sortPaths(paths.toList)
-        .filter { _.isDescendentOf(p) }
+    def knownDescendentsOf(p: String): List[String] = {
+
+      @tailrec
+      def getKnownDescendents(stack: List[String], accum: List[String] = Nil): List[String] = {
+        stack match {
+          case Nil => accum
+          case head :: tail =>
+            val children = childMapping.getOrElse(head, Nil)
+            getKnownDescendents(
+              children ++ tail,
+              accum :+ head
+            )
+        }
+      }
+
+      CollectionPathSorter.sortPaths(
+        getKnownDescendents(childMapping.getOrElse(p, Nil))
+      )
+    }
 
     /** Returns the known ancestors of ``path``.
       *
