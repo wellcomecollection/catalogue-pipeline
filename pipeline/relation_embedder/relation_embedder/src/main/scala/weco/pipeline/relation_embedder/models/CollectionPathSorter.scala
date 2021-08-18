@@ -55,6 +55,9 @@ object CollectionPathSorter {
           case (Nil, Nil) => 0
 
           // Shorter lists sort higher, e.g. "A/B" sorts above "A/B/C".
+          //
+          // Also within a single path, shorter parts sort higher,
+          // e.g. "1" sorts above "1a"
           case (Nil, _) => -1
           case (_, Nil) => 1
 
