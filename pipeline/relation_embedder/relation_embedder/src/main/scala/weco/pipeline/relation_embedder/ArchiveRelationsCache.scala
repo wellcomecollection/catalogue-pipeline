@@ -59,7 +59,7 @@ class ArchiveRelationsCache(works: Map[String, RelationWork]) extends Logging {
 
   def size = relations.size
 
-  def numParents = parentMapping.size
+  def numParents: Int = works.keySet.parentMapping.size
 
   private def getChildren(path: String): List[Relation] =
     paths.childrenOf(path).map(relations)
@@ -82,9 +82,6 @@ class ArchiveRelationsCache(works: Map[String, RelationWork]) extends Logging {
           numDescendents = paths.descendentsOf(path).length
         )
     }
-
-  private lazy val parentMapping: Map[String, String] =
-    works.keySet.parentMapping
 }
 
 object ArchiveRelationsCache {
