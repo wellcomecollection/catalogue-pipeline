@@ -3,7 +3,7 @@ package weco.pipeline.relation_embedder
 import grizzled.slf4j.Logging
 import weco.catalogue.internal_model.work.WorkState.Merged
 import weco.catalogue.internal_model.work._
-import weco.pipeline.relation_embedder.models.{CollectionPathSorter, PathCollection}
+import weco.pipeline.relation_embedder.models.PathCollection
 
 class ArchiveRelationsCache(works: Map[String, RelationWork]) extends Logging {
 

@@ -1,25 +1,42 @@
 package weco.pipeline.relation_embedder.models
 
 import scala.annotation.tailrec
-import scala.util.Try
+import scala.util.{Success, Try}
 
 object CollectionPathSorter {
-  def sortPaths(paths: List[String]): List[String] =
-    paths.sortBy(tokenizePath)
+  def sortPaths(paths: Set[String]): List[String] =
+    paths.toList.sortBy(tokenizePath)
 
   type TokenizedPath = List[PathToken]
   type PathToken = List[PathTokenPart]
   type PathTokenPart = Either[Int, String]
 
   private def tokenizePath(path: String): TokenizedPath =
-    path.split("/").toList.map { str =>
-      """\d+|\D+""".r
-        .findAllIn(str)
-        .toList
-        .map { token =>
-          Try(token.toInt).map(Left(_)).getOrElse(Right(token))
+    path.split("/")
+      .map(parsePathToken)
+      .toList
+
+  // Given a single part of a path, parse it into a PathToken.
+  //
+  // This means identifying the runs of numbers and letters within the path,
+  //
+  // e.g. parsePathToken("ab1cd") = List(Right(ab), Left(1), Right(cd)
+  //
+  private def parsePathToken(s: String): PathToken =
+    """\d+|\D+""".r.findAllIn(s).toList
+      .map { part =>
+        Try(part.toInt) match {
+          case Success(number) => Left(number)
+          case _               => Right(part)
         }
-    }
+      }
+
+  // Note: when calling compare(a, b), the result sign has the following meaning:
+  //
+  //    - negative if a < b
+  //    - positive if a > b
+  //    - zero otherwise (if a == b)
+  //
 
   implicit val tokenizedPathOrdering: Ordering[TokenizedPath] =
     new Ordering[TokenizedPath] {
@@ -27,8 +44,13 @@ object CollectionPathSorter {
       override def compare(a: TokenizedPath, b: TokenizedPath): Int =
         (a, b) match {
           case (Nil, Nil) => 0
-          case (Nil, _)   => -1
-          case (_, Nil)   => 1
+
+          // Shorter paths sort higher, e.g. "A/B" sorts above "A/B/C".
+          case (Nil, _) => -1
+          case (_, Nil) => 1
+
+          // Otherwise compare the first part, then compare subsequent
+          // parts if they're the same.
           case (xHead :: xTail, yHead :: yTail) =>
             if (xHead == yHead)
               compare(xTail, yTail)
