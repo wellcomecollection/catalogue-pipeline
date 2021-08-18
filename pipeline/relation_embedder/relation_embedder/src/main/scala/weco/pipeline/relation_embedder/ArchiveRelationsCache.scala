@@ -71,13 +71,10 @@ class ArchiveRelationsCache(works: Map[String, RelationWork]) extends Logging {
 
   def numParents = parentMapping.size
 
-  private def getChildren(path: String): List[Relation] =
-    childMapping
-    // Relations might not exist in the cache if e.g. the work is not Visible
-      .getOrElse(path, default = Nil)
-      .map(relations)
-
   import weco.pipeline.relation_embedder.models.PathOps._
+
+  private def getChildren(path: String): List[Relation] =
+    paths.childrenOf(path).map(relations)
 
   private def getSiblings(path: String): (List[Relation], List[Relation]) = {
     val (preceding, succeeding) = paths.siblingsOf(path)
