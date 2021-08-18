@@ -122,12 +122,13 @@ class ArchiveRelationsCache(works: Map[String, RelationWork]) extends Logging {
         )
     }
 
+  import weco.pipeline.relation_embedder.models.PathOps._
+
   private lazy val parentMapping: Map[String, String] =
     works
       .map {
         case (path, _) =>
-          val parent = tokenize(path).dropRight(1)
-          path -> Some(parent.mkString("/")).filter(works.contains)
+          path -> Some(path.parent).filter(works.contains)
       }
       .collect { case (path, Some(parentPath)) => path -> parentPath }
 
@@ -141,9 +142,6 @@ class ArchiveRelationsCache(works: Map[String, RelationWork]) extends Logging {
           }.toList
         )
     }
-
-  private def tokenize(path: String): List[String] =
-    path.split("/").toList
 }
 
 object ArchiveRelationsCache {
