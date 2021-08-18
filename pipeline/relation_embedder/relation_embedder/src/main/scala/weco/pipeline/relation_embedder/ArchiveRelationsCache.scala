@@ -128,15 +128,7 @@ class ArchiveRelationsCache(works: Map[String, RelationWork]) extends Logging {
     works.keySet.parentMapping
 
   private lazy val childMapping: Map[String, List[String]] =
-    works.map {
-      case (path, _) =>
-        path -> CollectionPathSorter.sortPaths(
-          parentMapping.collect {
-            case (childPath, parentPath) if parentPath == path =>
-              childPath
-          }.toList
-        )
-    }
+    works.keySet.childMapping
 }
 
 object ArchiveRelationsCache {

@@ -15,4 +15,17 @@ class PathOpsTest extends AnyFunSpec with Matchers {
 
     paths.parentMapping shouldBe Map("A/B/1" -> "A/B", "A/B/2" -> "A/B", "A/B/2/1" -> "A/B/2", "A/B/2/2" -> "A/B/2")
   }
+
+  it("creates a child mapping") {
+    val paths = Set("A/B", "A/B/1", "A/B/2", "A/B/2/1", "A/B/2/2", "A/B/3/1")
+
+    paths.childMapping shouldBe Map(
+      "A/B" -> List("A/B/1", "A/B/2"),
+      "A/B/1" -> List(),
+      "A/B/2" -> List("A/B/2/1", "A/B/2/2"),
+      "A/B/2/1" -> List(),
+      "A/B/2/2" -> List(),
+      "A/B/3/1" -> List()
+    )
+  }
 }
