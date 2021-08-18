@@ -17,6 +17,13 @@ class CollectionPathSorterTest extends AnyFunSpec with Matchers with TableDriven
       // a common prefix
       List("A/B/C", "B"),
       List("A/B/C", "B", "B/1"),
+
+      // Numbers sort higher than letters
+      List("A/B/1", "A/B/A"),
+
+      // Sort within runs of letters/numbers
+      List("A/B/1", "A/B/2", "A/B/3"),
+      List("A/B/a", "A/B/b", "A/B/c"),
     )
 
     forAll(testCases) { paths =>
