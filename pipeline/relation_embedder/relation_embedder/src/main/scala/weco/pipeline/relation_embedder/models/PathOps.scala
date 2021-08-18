@@ -2,6 +2,8 @@ package weco.pipeline.relation_embedder.models
 
 import weco.pipeline.relation_embedder.CollectionPathSorter
 
+import scala.annotation.tailrec
+
 object PathOps {
   implicit class StringOps(path: String) {
 
@@ -146,11 +148,41 @@ object PathOps {
     /** Returns the descendents of ``path``.
       *
       * The result is a list, which may be empty if this path isn't in the set
-      * or it doesn't have any children.
+      * or it doesn't have any descendents.
       *
       */
     def descendentsOf(p: String): List[String] =
       CollectionPathSorter.sortPaths(paths.toList)
         .filter { _.isDescendentOf(p) }
+
+    /** Returns the known ancestors of ``path``.
+      *
+      * The result is a list, which may be empty if this path isn't in the set
+      * or it doesn't have any ancestors.
+      *
+      * Here "known" means we're looking for a unbroken chain.  e.g. if the paths are
+      *
+      *       A
+      *       A/B
+      *       A/B/1/2
+      *       A/B/1/2/3
+      *       A/B/1/2/3/4
+      *
+      * then the known ancestors of A/B/1/2/3/4 are (A/B/1/2, A/B/1/2/3).  The missing
+      * link means the ancestry doesn't go higher.
+      *
+      */
+    def knownAncestorsOf(p: String): List[String] = {
+
+      @tailrec
+      def getKnownAncestors(path: String, accum: List[String] = Nil): List[String] = {
+        parentMapping.get(path) match {
+          case None             => accum
+          case Some(parentPath) => getKnownAncestors(parentPath, parentPath :: accum)
+        }
+      }
+
+      getKnownAncestors(p)
+    }
   }
 }

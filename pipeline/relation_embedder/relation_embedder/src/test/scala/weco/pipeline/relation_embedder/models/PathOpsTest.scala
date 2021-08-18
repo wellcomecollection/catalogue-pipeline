@@ -71,4 +71,15 @@ class PathOpsTest extends AnyFunSpec with Matchers {
 
     paths.descendentsOf("doesnotexist") shouldBe empty
   }
+
+  it("finds the known ancestors of a path") {
+    val paths = Set("A", "A/B", "A/B/1/2", "A/B/1/2/3", "A/B/1/2/2", "A/B/1/2/3/4")
+
+    paths.knownAncestorsOf("A") shouldBe List()
+    paths.knownAncestorsOf("A/B") shouldBe List("A")
+    paths.knownAncestorsOf("A/B/1/2") shouldBe List()
+    paths.knownAncestorsOf("A/B/1/2/3") shouldBe List("A/B/1/2")
+    paths.knownAncestorsOf("A/B/1/2/2") shouldBe List("A/B/1/2")
+    paths.knownAncestorsOf("A/B/1/2/3/4") shouldBe List("A/B/1/2", "A/B/1/2/3")
+  }
 }

@@ -4,8 +4,6 @@ import grizzled.slf4j.Logging
 import weco.catalogue.internal_model.work.WorkState.Merged
 import weco.catalogue.internal_model.work._
 
-import scala.annotation.tailrec
-
 class ArchiveRelationsCache(works: Map[String, RelationWork]) extends Logging {
 
   def apply(work: Work[Merged]): Relations =
@@ -72,14 +70,8 @@ class ArchiveRelationsCache(works: Map[String, RelationWork]) extends Logging {
     (preceding.map(relations), succeeding.map(relations))
   }
 
-  @tailrec
-  private def getAncestors(path: String,
-                           accum: List[Relation] = Nil): List[Relation] =
-    parentMapping.get(path) match {
-      case None => accum
-      case Some(parentPath) =>
-        getAncestors(parentPath, relations(parentPath) :: accum)
-    }
+  private def getAncestors(path: String): List[Relation] =
+    paths.knownAncestorsOf(path).map(relations)
 
   private lazy val relations: Map[String, Relation] =
     works.map {
