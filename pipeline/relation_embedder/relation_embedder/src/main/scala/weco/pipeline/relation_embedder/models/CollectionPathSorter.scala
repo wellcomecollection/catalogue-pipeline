@@ -1,7 +1,7 @@
-package weco.pipeline.relation_embedder
+package weco.pipeline.relation_embedder.models
 
-import scala.util.Try
 import scala.annotation.tailrec
+import scala.util.Try
 
 object CollectionPathSorter {
   def sortPaths(paths: List[String]): List[String] =
