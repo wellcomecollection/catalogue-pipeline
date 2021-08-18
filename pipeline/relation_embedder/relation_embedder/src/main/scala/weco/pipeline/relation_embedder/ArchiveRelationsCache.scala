@@ -33,45 +33,35 @@ class ArchiveRelationsCache(works: Map[String, RelationWork]) extends Logging {
         Relations.none
       }
 
+  import weco.pipeline.relation_embedder.models.PathOps._
+
   private val paths: Set[String] = works.keySet
 
   // The availabilities of an archive's Relations are the union of
   // all of its descendants' availabilities, as well as its own
   def getAvailabilities(work: Work[Merged]): Set[Availability] =
-    work.data.collectionPath
-      .map {
-        case CollectionPath(path, _) =>
-          @tailrec
-          def availabilities(stack: List[String],
-                             accum: Set[Availability]): Set[Availability] =
-            stack match {
-              case Nil => accum
-              case head :: tail =>
-                val children = childMapping.getOrElse(head, Nil)
+    work.data.collectionPath match {
+      case Some(CollectionPath(workPath, _)) =>
+        works
+          .filter {
+            case (path, _) => path == workPath || path.isDescendentOf(workPath)
+          }
+          .flatMap { case (_, work) => work.state.availabilities }
+          .toSet
 
-                val childAvailabilities =
-                  (head :: children)
-                    .map(works)
-                    .map(_.state.availabilities)
-                    .foldLeft(Set.empty[Availability])(_ union _)
-
-                availabilities(
-                  childMapping.getOrElse(head, Nil) ++ tail,
-                  accum union childAvailabilities
-                )
-            }
-          availabilities(
-            childMapping.getOrElse(path, Nil),
-            works.get(path).map(_.state.availabilities).getOrElse(Set.empty)
-          )
-      }
-      .getOrElse(Set.empty)
+      // We shouldn't be dealing with any works without a collectionPath field in the
+      // relation embedder; if we are then something has gone wrong.
+      case _ =>
+        assert(
+          assertion = false,
+          message = s"Cannot get availabilities for work with empty collectionPath field: $work"
+        )
+        Set()
+    }
 
   def size = relations.size
 
   def numParents = parentMapping.size
-
-  import weco.pipeline.relation_embedder.models.PathOps._
 
   private def getChildren(path: String): List[Relation] =
     paths.childrenOf(path).map(relations)
@@ -103,9 +93,6 @@ class ArchiveRelationsCache(works: Map[String, RelationWork]) extends Logging {
 
   private lazy val parentMapping: Map[String, String] =
     works.keySet.parentMapping
-
-  private lazy val childMapping: Map[String, List[String]] =
-    works.keySet.childMapping
 }
 
 object ArchiveRelationsCache {
