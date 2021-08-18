@@ -31,18 +31,18 @@ object CollectionPathSorter {
         }
       }
 
-  // Note: when calling compare(a, b), the result sign has the following meaning:
+  // Note: when calling compare(x, y), the result sign has the following meaning:
   //
-  //    - negative if a < b
-  //    - positive if a > b
-  //    - zero otherwise (if a == b)
+  //    - negative if x < y
+  //    - positive if x > y
+  //    - zero otherwise (if x == y)
   //
 
   implicit val tokenizedPathOrdering: Ordering[TokenizedPath] =
     new Ordering[TokenizedPath] {
       @tailrec
-      override def compare(a: TokenizedPath, b: TokenizedPath): Int =
-        (a, b) match {
+      override def compare(x: TokenizedPath, y: TokenizedPath): Int =
+        (x, y) match {
           case (Nil, Nil) => 0
 
           // Shorter paths sort higher, e.g. "A/B" sorts above "A/B/C".
