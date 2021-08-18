@@ -141,7 +141,8 @@ class ArchiveRelationsCacheTest
         Seq(workB, workB11).map(toRelationWork)
       )
 
-      cacheWithDirectDescendents.getAvailabilities(workB) shouldBe Set(Availability.Online)
+      cacheWithDirectDescendents.getAvailabilities(workB) shouldBe Set(
+        Availability.Online)
       cacheWithoutDirectDescendents.getAvailabilities(workB) shouldBe empty
     }
   }

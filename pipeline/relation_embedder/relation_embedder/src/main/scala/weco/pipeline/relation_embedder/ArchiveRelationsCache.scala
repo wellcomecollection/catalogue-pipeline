@@ -36,19 +36,19 @@ class ArchiveRelationsCache(works: Map[String, RelationWork]) extends Logging {
   private val paths: Set[String] = works.keySet
 
   /** Find the availabilities of this Work.
-   *
-   * The availabilities of an archive's Relations are the union of all the
-   * availabilities of its descendents, as well as its own.
-   *
-   * Note that this only covers *known* descendents.  e.g. if the works have
-   * paths (A, A/B/1), then A will not inherit availabilities from A/B/1 --
-   * the intermediate path A/B is missing.
-   *
-   * This preserves the original behaviour of the relation embedder, but it's
-   * not clear if it's intentional -- it was a side effect of the implementation,
-   * not something that was explicitly tested.
-   *
-   */
+    *
+    * The availabilities of an archive's Relations are the union of all the
+    * availabilities of its descendents, as well as its own.
+    *
+    * Note that this only covers *known* descendents.  e.g. if the works have
+    * paths (A, A/B/1), then A will not inherit availabilities from A/B/1 --
+    * the intermediate path A/B is missing.
+    *
+    * This preserves the original behaviour of the relation embedder, but it's
+    * not clear if it's intentional -- it was a side effect of the implementation,
+    * not something that was explicitly tested.
+    *
+    */
   def getAvailabilities(work: Work[Merged]): Set[Availability] =
     work.data.collectionPath match {
       case Some(CollectionPath(workPath, _)) =>
@@ -66,7 +66,8 @@ class ArchiveRelationsCache(works: Map[String, RelationWork]) extends Logging {
       case _ =>
         assert(
           assertion = false,
-          message = s"Cannot get availabilities for work with empty collectionPath field: $work"
+          message =
+            s"Cannot get availabilities for work with empty collectionPath field: $work"
         )
         Set()
     }

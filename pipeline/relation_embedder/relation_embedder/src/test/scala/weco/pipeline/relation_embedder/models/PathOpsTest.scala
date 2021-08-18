@@ -13,7 +13,11 @@ class PathOpsTest extends AnyFunSpec with Matchers {
   it("creates a parent mapping") {
     val paths = Set("A/B", "A/B/1", "A/B/2", "A/B/2/1", "A/B/2/2", "A/B/3/1")
 
-    paths.parentMapping shouldBe Map("A/B/1" -> "A/B", "A/B/2" -> "A/B", "A/B/2/1" -> "A/B/2", "A/B/2/2" -> "A/B/2")
+    paths.parentMapping shouldBe Map(
+      "A/B/1" -> "A/B",
+      "A/B/2" -> "A/B",
+      "A/B/2/1" -> "A/B/2",
+      "A/B/2/2" -> "A/B/2")
   }
 
   it("creates a child mapping") {
@@ -30,11 +34,25 @@ class PathOpsTest extends AnyFunSpec with Matchers {
   }
 
   it("finds the siblings of a path") {
-    val paths = Set("A/B", "A/B/1", "A/B/2", "A/B/2/2", "A/B/3", "A/B/3/1", "A/B/4", "A/B/4/1")
+    val paths = Set(
+      "A/B",
+      "A/B/1",
+      "A/B/2",
+      "A/B/2/2",
+      "A/B/3",
+      "A/B/3/1",
+      "A/B/4",
+      "A/B/4/1")
 
-    paths.siblingsOf("A/B/1") shouldBe ((List(), List("A/B/2", "A/B/3", "A/B/4")))
+    paths.siblingsOf("A/B/1") shouldBe (
+      (
+        List(),
+        List("A/B/2", "A/B/3", "A/B/4")))
     paths.siblingsOf("A/B/3") shouldBe ((List("A/B/1", "A/B/2"), List("A/B/4")))
-    paths.siblingsOf("A/B/4") shouldBe ((List("A/B/1", "A/B/2", "A/B/3"), List()))
+    paths.siblingsOf("A/B/4") shouldBe (
+      (
+        List("A/B/1", "A/B/2", "A/B/3"),
+        List()))
 
     paths.siblingsOf("A/B/2/2") shouldBe ((List(), List()))
 
@@ -42,7 +60,15 @@ class PathOpsTest extends AnyFunSpec with Matchers {
   }
 
   it("finds the children of a path") {
-    val paths = Set("A/B", "A/B/1", "A/B/2", "A/B/2/2", "A/B/3", "A/B/3/1", "A/B/4", "A/B/4/1")
+    val paths = Set(
+      "A/B",
+      "A/B/1",
+      "A/B/2",
+      "A/B/2/2",
+      "A/B/3",
+      "A/B/3/1",
+      "A/B/4",
+      "A/B/4/1")
 
     paths.childrenOf("A/B") shouldBe List("A/B/1", "A/B/2", "A/B/3", "A/B/4")
     paths.childrenOf("A/B/1") shouldBe empty
@@ -51,17 +77,28 @@ class PathOpsTest extends AnyFunSpec with Matchers {
   }
 
   it("finds the known descendents of a path") {
-    val paths = Set("A", "A/B", "A/B/1", "A/B/1/2/3", "A/B/1/2/2", "A/B/1/2/3/4", "A/B/1/2/3/5", "A/B/2")
+    val paths = Set(
+      "A",
+      "A/B",
+      "A/B/1",
+      "A/B/1/2/3",
+      "A/B/1/2/2",
+      "A/B/1/2/3/4",
+      "A/B/1/2/3/5",
+      "A/B/2")
 
     paths.knownDescendentsOf("A") shouldBe List("A/B", "A/B/1", "A/B/2")
     paths.knownDescendentsOf("A/B") shouldBe List("A/B/1", "A/B/2")
     paths.knownDescendentsOf("A/B/1") shouldBe empty
 
-    paths.knownDescendentsOf("A/B/1/2/3") shouldBe List("A/B/1/2/3/4", "A/B/1/2/3/5")
+    paths.knownDescendentsOf("A/B/1/2/3") shouldBe List(
+      "A/B/1/2/3/4",
+      "A/B/1/2/3/5")
   }
 
   it("finds the known ancestors of a path") {
-    val paths = Set("A", "A/B", "A/B/1/2", "A/B/1/2/3", "A/B/1/2/2", "A/B/1/2/3/4")
+    val paths =
+      Set("A", "A/B", "A/B/1/2", "A/B/1/2/3", "A/B/1/2/2", "A/B/1/2/3/4")
 
     paths.knownAncestorsOf("A") shouldBe List()
     paths.knownAncestorsOf("A/B") shouldBe List("A")
