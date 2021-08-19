@@ -85,8 +85,6 @@ catalogue_pipeline:
       name: Production
     - id: stage
       name: Staging
-    - id: "2021-08-09"
-      name: "2021-08-09"
     - id: "2021-08-16"
       name: "2021-08-16"
   image_repositories:

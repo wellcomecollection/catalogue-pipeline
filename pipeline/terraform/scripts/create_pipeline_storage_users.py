@@ -37,7 +37,7 @@ SERVICES = {
     "snapshot_generator": ["works-indexed_read"],
     # This role isn't used by applications, but instead provided to give developer scripts
     # read-only access to the pipeline_storage cluster.
-    "read_only": [f"works-{index}_read" for index in WORK_INDICES] + [f"images-{index}_read" for index in IMAGE_INDICES],
+    "read_only": [f"works-{index}_read" for index in WORK_INDICES] + [f"images-{index}_read" for index in IMAGE_INDICES] + ["viewer"],
 }
 
 
