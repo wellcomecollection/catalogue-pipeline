@@ -34,14 +34,15 @@ def get_index_internal_model_versions(sess, *, pipeline_date, index_name):
     """
     secret_prefix = f"elasticsearch/pipeline_storage_{pipeline_date}"
 
-    username = get_secret_value(sess, secret_id=f"{secret_prefix}/read_only/es_username")
-    password = get_secret_value(sess, secret_id=f"{secret_prefix}/read_only/es_password")
+    username = get_secret_value(
+        sess, secret_id=f"{secret_prefix}/read_only/es_username"
+    )
+    password = get_secret_value(
+        sess, secret_id=f"{secret_prefix}/read_only/es_password"
+    )
     host = get_secret_value(sess, secret_id=f"{secret_prefix}/public_host")
 
-    resp = httpx.get(
-        f"https://{host}:9243/{index_name}",
-        auth=(username, password)
-    )
+    resp = httpx.get(f"https://{host}:9243/{index_name}", auth=(username, password))
     resp.raise_for_status()
 
     return resp.json()[index_name]["mappings"]["_meta"]
@@ -85,7 +86,9 @@ if __name__ == "__main__":
 
     print()
 
-    internal_model_folder = json.load(open(".sbt_metadata/internal_model.json"))["folder"]
+    internal_model_folder = json.load(open(".sbt_metadata/internal_model.json"))[
+        "folder"
+    ]
     internal_model_paths = [
         p
         for p in changed_paths
@@ -95,22 +98,37 @@ if __name__ == "__main__":
     if not internal_model_paths:
         print("Nothing in internal_model has changed.  It is SAFE to deploy.")
 
-        root = subprocess.check_output(["git", "rev-parse", "--show-toplevel"]).decode("utf8").strip()
+        root = (
+            subprocess.check_output(["git", "rev-parse", "--show-toplevel"])
+            .decode("utf8")
+            .strip()
+        )
 
-        subprocess.check_call([
-            "docker",
-            "run", "--rm", "--tty",
-            "--volume", f"{root}:/repo",
-            "--workdir", "/repo",
-            "760097843905.dkr.ecr.eu-west-1.amazonaws.com/wellcome/weco-deploy:5.6",
-            "--project-id", "catalogue_pipeline",
-            "--confirm",
-            "release-deploy",
-            "--from-label", f"ref.{os.environ['BUILDKITE_COMMIT']}",
-            "--environment-id", pipeline_date,
-            "--description", os.environ["BUILDKITE_BUILD_URL"],
-            "--confirmation-wait-for", "3600"
-        ])
+        subprocess.check_call(
+            [
+                "docker",
+                "run",
+                "--rm",
+                "--tty",
+                "--volume",
+                f"{root}:/repo",
+                "--workdir",
+                "/repo",
+                "760097843905.dkr.ecr.eu-west-1.amazonaws.com/wellcome/weco-deploy:5.6",
+                "--project-id",
+                "catalogue_pipeline",
+                "--confirm",
+                "release-deploy",
+                "--from-label",
+                f"ref.{os.environ['BUILDKITE_COMMIT']}",
+                "--environment-id",
+                pipeline_date,
+                "--description",
+                os.environ["BUILDKITE_BUILD_URL"],
+                "--confirmation-wait-for",
+                "3600",
+            ]
+        )
     else:
         print("The following files in internal_model have changed:")
         for p in internal_model_paths:
@@ -120,6 +138,8 @@ if __name__ == "__main__":
         print("BuildKite cannot determine if these changes are compatible with the")
         print("existing pipeline.")
         print()
-        print("Please inspect the changes and do a manual deploy if you know these changes")
+        print(
+            "Please inspect the changes and do a manual deploy if you know these changes"
+        )
         print("are safe to deploy.")
         sys.exit(1)
