@@ -43,20 +43,7 @@ def get_secret_value(sess, *, secret_id):
     Retrieve a secret from Secrets Manager.
     """
     client = sess.client("secretsmanager")
-    return client.get_secret_value(SecretId=secret_id)["SecretValue"]
-
-
-def get_aws_session(*, role_arn):
-    sts_client = boto3.client("sts")
-    assumed_role_object = sts_client.assume_role(
-        RoleArn=role_arn, RoleSessionName="AssumeRoleSession1"
-    )
-    credentials = assumed_role_object["Credentials"]
-    return boto3.Session(
-        aws_access_key_id=credentials["AccessKeyId"],
-        aws_secret_access_key=credentials["SecretAccessKey"],
-        aws_session_token=credentials["SessionToken"],
-    )
+    return client.get_secret_value(SecretId=secret_id)["SecretString"]
 
 
 if __name__ == "__main__":
@@ -66,5 +53,5 @@ if __name__ == "__main__":
     internal_model_version = get_internal_model_version()
     print(f"The current version of internal model is {internal_model_version}")
 
-    sess = get_aws_session(role_arn="arn:aws:iam::760097843905:role/platform-ci")
+    sess = boto3.Session()
     print(get_secret_value(sess, secret_id=f"elasticsearch/pipeline_storage_{pipeline_date}/read_only/es_username"))
