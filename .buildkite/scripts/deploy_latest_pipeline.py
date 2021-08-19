@@ -47,6 +47,7 @@ def get_secret_value(sess, *, secret_id):
 
 
 def get_aws_session(*, role_arn):
+    sts_client = boto3.client("sts")
     assumed_role_object = sts_client.assume_role(
         RoleArn=role_arn, RoleSessionName="AssumeRoleSession1"
     )
