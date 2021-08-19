@@ -1,20 +1,14 @@
 #!/usr/bin/env python3
 
 import json
+import os
 import re
+import subprocess
+import sys
 import urllib.request
 
 import boto3
 import httpx
-
-
-def get_internal_model_version():
-    with open("project/Dependencies.scala") as infile:
-        internal_model_line = next(
-            line for line in infile if line.strip().startswith("val internalModel =")
-        )
-
-        return internal_model_line.split()[-1].strip('"')
 
 
 def get_current_index_name():
@@ -57,6 +51,8 @@ if __name__ == "__main__":
     index_name = get_current_index_name()
     print(f"The current index name is {index_name}")
 
+    print()
+
     # The works index name is a string that looks something like
     #
     #     works-indexed-2021-08-19
@@ -65,8 +61,7 @@ if __name__ == "__main__":
     pipeline_date = index_regex.match(index_name).group("date")
     print(f"The current prod pipeline is {pipeline_date}")
 
-    internal_model_version = get_internal_model_version()
-    print(f"The current version of internal model is {internal_model_version}")
+    print()
 
     sess = boto3.Session()
     index_versions = get_index_internal_model_versions(
@@ -75,3 +70,39 @@ if __name__ == "__main__":
     print(f"The current index supports the following internal models:")
     for name, git_hash in sorted(index_versions.items()):
         print(f" - {name.ljust(20)}: {git_hash}")
+
+    print()
+
+    latest_version, latest_commit = max(index_versions.items())
+    print(f"The following files have changed since {latest_version}/{latest_commit}:")
+    command = ["git", "diff", "--name-only", latest_commit, "HEAD"]
+    changed_paths = [
+        line.strip().decode("utf8")
+        for line in subprocess.check_output(command).splitlines()
+    ]
+    for p in changed_paths:
+        print(f" - {p}")
+
+    print()
+
+    internal_model_folder = json.load(open(".sbt_metadata/internal_model.json"))["folder"]
+    internal_model_paths = [
+        p
+        for p in changed_paths
+        if p.startswith(os.path.join(internal_model_folder, "src", "main"))
+    ]
+
+    if not internal_model_paths and False:
+        print("Nothing in internal_model has changed.  It is SAFE to deploy.")
+    else:
+        print("The following files in internal_model have changed:")
+        for p in internal_model_paths:
+            print(f" - {p}")
+        print("It MAY NOT BE SAFE to deploy.")
+        print()
+        print("BuildKite cannot determine if these changes are compatible with the")
+        print("existing pipeline.")
+        print()
+        print("Please inspect the changes and do a manual deploy if you know these changes")
+        print("are safe to deploy.")
+        sys.exit(1)
