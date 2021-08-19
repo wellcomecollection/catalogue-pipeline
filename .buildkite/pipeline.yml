@@ -1,5 +1,7 @@
 steps:
-  - command: .buildkite/scripts/deploy_latest_pipeline.py
+  - command:
+      pip3 install --user boto3
+      .buildkite/scripts/deploy_latest_pipeline.py
   # - command: .buildkite/scripts/run_autoformat.py
   #   label: "autoformat"
   # - wait
