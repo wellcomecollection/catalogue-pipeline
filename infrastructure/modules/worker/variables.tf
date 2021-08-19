@@ -41,8 +41,7 @@ variable "desired_task_count" {
 }
 
 variable "min_capacity" {
-  type    = number
-  default = 1
+  type = number
 }
 
 variable "max_capacity" {
