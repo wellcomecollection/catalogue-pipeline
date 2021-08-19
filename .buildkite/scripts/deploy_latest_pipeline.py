@@ -100,9 +100,9 @@ if __name__ == "__main__":
         subprocess.check_call([
             "docker",
             "run", "--rm", "--tty",
-            "760097843905.dkr.ecr.eu-west-1.amazonaws.com/wellcome/weco-deploy:5.6",
             "--volume", f"{root}:{root}",
             "--workdir", root,
+            "760097843905.dkr.ecr.eu-west-1.amazonaws.com/wellcome/weco-deploy:5.6",
             "--project-id", "catalogue_pipeline",
             "--confirm",
             "release-deploy",
