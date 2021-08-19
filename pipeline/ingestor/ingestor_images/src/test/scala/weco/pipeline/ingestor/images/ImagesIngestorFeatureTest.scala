@@ -11,6 +11,7 @@ import weco.pipeline_storage.Indexable.imageIndexable
 import weco.catalogue.internal_model.image.ImageState.{Augmented, Indexed}
 import weco.catalogue.internal_model.generators.ImageGenerators
 import weco.catalogue.internal_model.image.Image
+import weco.pipeline.ingestor.fixtures.IngestorFixtures
 import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
 
 import scala.concurrent.duration._
@@ -37,7 +38,11 @@ class ImagesIngestorFeatureTest
               elasticClient,
               index,
               ImagesIndexConfig.ingested)
-            withWorkerService(queue, retriever, indexer) { _ =>
+            withWorkerService(
+              queue,
+              retriever,
+              indexer,
+              transform = ImageTransformer.deriveData) { _ =>
               assertElasticsearchEventuallyHasImage[Indexed](
                 index,
                 ImageTransformer.deriveData(image))
@@ -63,7 +68,11 @@ class ImagesIngestorFeatureTest
               elasticClient,
               augmentedIndex
             )
-            withWorkerService(queue, retriever, indexer) { _ =>
+            withWorkerService(
+              queue,
+              retriever,
+              indexer,
+              transform = ImageTransformer.deriveData) { _ =>
               assertElasticsearchEmpty(index)
               eventually(Timeout(Span(5, Seconds))) {
                 assertQueueEmpty(queue)

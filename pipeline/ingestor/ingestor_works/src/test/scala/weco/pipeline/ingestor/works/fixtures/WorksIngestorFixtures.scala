@@ -1,4 +1,4 @@
-package weco.pipeline.ingestor.works
+package weco.pipeline.ingestor.works.fixtures
 
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.{Index, Response}
@@ -6,31 +6,29 @@ import com.sksamuel.elastic4s.requests.get.GetResponse
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.scalatest.{Assertion, Suite}
-import weco.fixtures.TestWith
 import weco.json.JsonUtil._
-import weco.messaging.fixtures.SQS.Queue
 import weco.catalogue.internal_model.Implicits._
-import weco.catalogue.internal_model.index.IndexFixtures
+import weco.catalogue.internal_model.index.{IndexFixtures, WorksIndexConfig}
 import weco.catalogue.internal_model.work.WorkState.{Denormalised, Indexed}
-import weco.pipeline_storage.Retriever
 import weco.catalogue.internal_model.work.{Work, WorkState}
-import weco.pipeline_storage.{Indexer, Retriever}
-import weco.pipeline_storage.fixtures.PipelineStorageStreamFixtures
+import weco.fixtures.{TestWith, TimeAssertions}
+import weco.messaging.fixtures.SQS.Queue
+import weco.pipeline.ingestor.common.IngestorWorkerService
+import weco.pipeline.ingestor.fixtures.IngestorFixtures
+import weco.pipeline.ingestor.works.WorkTransformer
+import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
+import weco.pipeline_storage.Indexable.workIndexable
 
-import java.time.{Duration, Instant}
-
-trait IngestorFixtures
+trait WorksIngestorFixtures
     extends IndexFixtures
-    with PipelineStorageStreamFixtures {
+    with IngestorFixtures
+    with TimeAssertions {
   this: Suite =>
 
-  def assertRecent(instant: Instant, recentSeconds: Int = 1): Assertion =
-    Duration
-      .between(instant, Instant.now)
-      .getSeconds should be <= recentSeconds.toLong
-
-  def assertWorkIndexed(index: Index,
-                        work: Work[WorkState.Denormalised]): Assertion =
+  def assertWorkIndexed(
+    index: Index,
+    work: Work[WorkState.Denormalised]
+  ): Assertion =
     eventually {
       val response: Response[GetResponse] = elasticClient.execute {
         get(index, work.state.canonicalId.toString)
@@ -58,22 +56,29 @@ trait IngestorFixtures
       assertRecent(storedWork.state.indexedTime)
     }
 
-  def withWorkerService[R](queue: Queue,
-                           retriever: Retriever[Work[Denormalised]],
-                           indexer: Indexer[Work[Indexed]])(
-    testWith: TestWith[WorkIngestorWorkerService[String], R]): R = {
-    withPipelineStream(
+  def withWorkIngestorWorkerService[R](queue: Queue,
+                                       denormalisedIndex: Index,
+                                       indexedIndex: Index)(
+    testWith: TestWith[
+      IngestorWorkerService[String, Work[Denormalised], Work[Indexed]],
+      R]): R = {
+    val retriever = new ElasticSourceRetriever[Work[Denormalised]](
+      client = elasticClient,
+      index = denormalisedIndex
+    )
+
+    val indexer = new ElasticIndexer[Work[Indexed]](
+      client = elasticClient,
+      index = indexedIndex,
+      config = WorksIndexConfig.ingested
+    )
+
+    withWorkerService(
       queue,
+      retriever,
       indexer,
-      pipelineStorageConfig = pipelineStorageConfig) { pipelineStream =>
-      val workerService = new WorkIngestorWorkerService(
-        pipelineStream = pipelineStream,
-        workRetriever = retriever
-      )
-
-      workerService.run()
-
-      testWith(workerService)
+      transform = WorkTransformer.deriveData) { service =>
+      testWith(service)
     }
   }
 }

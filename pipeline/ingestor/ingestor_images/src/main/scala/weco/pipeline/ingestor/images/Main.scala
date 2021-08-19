@@ -6,13 +6,13 @@ import com.typesafe.config.Config
 import weco.typesafe.WellcomeTypesafeApp
 import weco.typesafe.config.builders.AkkaBuilder
 import weco.elasticsearch.typesafe.ElasticBuilder
-import weco.pipeline_storage.typesafe.ElasticSourceRetrieverBuilder
 import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import weco.catalogue.internal_model.index.ImagesIndexConfig
 import weco.messaging.sns.NotificationMessage
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.image.Image
 import weco.catalogue.internal_model.image.ImageState.{Augmented, Indexed}
+import weco.pipeline.ingestor.common.IngestorWorkerService
 import weco.pipeline_storage.typesafe.{
   ElasticIndexerBuilder,
   ElasticSourceRetrieverBuilder,
@@ -54,9 +54,9 @@ object Main extends WellcomeTypesafeApp {
         imageIndexer,
         msgSender)(config)
 
-    new ImageIngestorWorkerService(
+    new IngestorWorkerService(
       pipelineStream = pipelineStream,
-      imageRetriever = imageRetriever,
+      retriever = imageRetriever,
       transform = ImageTransformer.deriveData
     )
   }

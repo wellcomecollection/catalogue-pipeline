@@ -16,7 +16,7 @@ import weco.pipeline_storage.{Indexable, PipelineStorageStream, Retriever}
 
 class IngestorWorkerService[Destination, In, Out](
   pipelineStream: PipelineStorageStream[NotificationMessage, Out, Destination],
-  workRetriever: Retriever[In],
+  retriever: Retriever[In],
   transform: In => Out)(implicit ec: ExecutionContext,
                         indexable: Indexable[Out])
     extends Runnable {
@@ -25,7 +25,7 @@ class IngestorWorkerService[Destination, In, Out](
     pipelineStream.run(
       this.getClass.getSimpleName,
       Flow[(Message, NotificationMessage)]
-        .via(batchRetrieveFlow(pipelineStream.config, workRetriever))
+        .via(batchRetrieveFlow(pipelineStream.config, retriever))
         .via(processFlow(pipelineStream.config, item => processMessage(item)))
     )
 
