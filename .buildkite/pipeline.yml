@@ -87,6 +87,83 @@ steps:
           entrypoint: "/usr/bin/python3"
     command: "/workdir/.buildkite/scripts/publish.py"
   - wait
+
+  - label: deploy CALM adapter
+    if: build.branch == "main"
+    plugins:
+      - docker#v3.5.0:
+          image: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/wellcome/weco-deploy:5.6
+          workdir: /repo
+          mount-ssh-agent: true
+          command: [
+              "--project-id", "calm_adapter",
+              "--confirm",
+              "release-deploy",
+              "--from-label", "ref.$BUILDKITE_COMMIT",
+              "--environment-id", "prod",
+              "--description", $BUILDKITE_BUILD_URL,
+              "--confirmation-wait-for", 3600]
+  - label: deploy METS adapter
+    if: build.branch == "main"
+    plugins:
+      - docker#v3.5.0:
+          image: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/wellcome/weco-deploy:5.6
+          workdir: /repo
+          mount-ssh-agent: true
+          command: [
+              "--project-id", "mets_adapter",
+              "--confirm",
+              "release-deploy",
+              "--from-label", "ref.$BUILDKITE_COMMIT",
+              "--environment-id", "prod",
+              "--description", $BUILDKITE_BUILD_URL,
+              "--confirmation-wait-for", 3600]
+  - label: deploy Sierra adapter
+    if: build.branch == "main"
+    plugins:
+      - docker#v3.5.0:
+          image: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/wellcome/weco-deploy:5.6
+          workdir: /repo
+          mount-ssh-agent: true
+          command: [
+              "--project-id", "sierra_adapter",
+              "--confirm",
+              "release-deploy",
+              "--from-label", "ref.$BUILDKITE_COMMIT",
+              "--environment-id", "prod",
+              "--description", $BUILDKITE_BUILD_URL,
+              "--confirmation-wait-for", 3600]
+  - label: deploy TEI adapter
+    if: build.branch == "main"
+    plugins:
+      - docker#v3.5.0:
+          image: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/wellcome/weco-deploy:5.6
+          workdir: /repo
+          mount-ssh-agent: true
+          command: [
+              "--project-id", "tei_adapter",
+              "--confirm",
+              "release-deploy",
+              "--from-label", "ref.$BUILDKITE_COMMIT",
+              "--environment-id", "prod",
+              "--description", $BUILDKITE_BUILD_URL,
+              "--confirmation-wait-for", 3600]
+  - label: deploy reindexer
+    if: build.branch == "main"
+    plugins:
+      - docker#v3.5.0:
+          image: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/wellcome/weco-deploy:5.6
+          workdir: /repo
+          mount-ssh-agent: true
+          command: [
+              "--project-id", "reindexer",
+              "--confirm",
+              "release-deploy",
+              "--from-label", "ref.$BUILDKITE_COMMIT",
+              "--environment-id", "prod",
+              "--description", $BUILDKITE_BUILD_URL,
+              "--confirmation-wait-for", 3600]
+
+  - wait
   - command: .buildkite/scripts/tag_commit_as_latest.py
     label: "tag commit as latest"
-
