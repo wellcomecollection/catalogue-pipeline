@@ -92,8 +92,25 @@ if __name__ == "__main__":
         if p.startswith(os.path.join(internal_model_folder, "src", "main"))
     ]
 
-    if not internal_model_paths and False:
+    if not internal_model_paths:
         print("Nothing in internal_model has changed.  It is SAFE to deploy.")
+
+        root = subprocess.check_output(["git", "rev-parse", "--show-toplevel"]).decode("utf8")
+
+        subprocess.check_call([
+            "docker",
+            "run", "--rm", "--tty",
+            "760097843905.dkr.ecr.eu-west-1.amazonaws.com/wellcome/weco-deploy:5.6",
+            "--volume", f"{root}:{root}",
+            "--workdir": root,
+            "--project-id", "catalogue_pipeline",
+            "--confirm",
+            "release-deploy",
+            "--from-label", f"ref.{os.environ['BUILDKITE_COMMIT']}",
+            "--environment-id", pipeline_date,
+            "--description", os.environ["BUILDKITE_BUILD_URL"],
+            "--confirmation-wait-for", 3600
+        ])
     else:
         print("The following files in internal_model have changed:")
         for p in internal_model_paths:
