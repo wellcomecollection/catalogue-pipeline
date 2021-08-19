@@ -3,14 +3,7 @@ package weco.pipeline.relation_embedder
 import scala.util.Try
 import scala.annotation.tailrec
 
-import weco.catalogue.internal_model.work.Work
-import weco.catalogue.internal_model.work.WorkState.Identified
-
 object CollectionPathSorter {
-
-  def sortWorks(works: List[Work[Identified]]): List[Work[Identified]] =
-    works.sortBy(tokenizePath)
-
   def sortPaths(paths: List[String]): List[String] =
     paths.sortBy(tokenizePath)
 
@@ -27,12 +20,6 @@ object CollectionPathSorter {
           Try(token.toInt).map(Left(_)).getOrElse(Right(token))
         }
     }
-
-  private def tokenizePath(work: Work[Identified]): Option[TokenizedPath] =
-    work.data.collectionPath
-      .map { collectionPath =>
-        tokenizePath(collectionPath.path)
-      }
 
   implicit val tokenizedPathOrdering: Ordering[TokenizedPath] =
     new Ordering[TokenizedPath] {

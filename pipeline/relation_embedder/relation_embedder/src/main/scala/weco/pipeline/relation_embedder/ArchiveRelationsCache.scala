@@ -4,8 +4,6 @@ import grizzled.slf4j.Logging
 import weco.catalogue.internal_model.work.WorkState.Merged
 import weco.catalogue.internal_model.work._
 
-import scala.annotation.tailrec
-
 class ArchiveRelationsCache(works: Map[String, RelationWork]) extends Logging {
 
   def apply(work: Work[Merged]): Relations =
@@ -33,117 +31,72 @@ class ArchiveRelationsCache(works: Map[String, RelationWork]) extends Logging {
         Relations.none
       }
 
-  // The availabilities of an archive's Relations are the union of
-  // all of its descendants' availabilities, as well as its own
+  import weco.pipeline.relation_embedder.models.PathOps._
+
+  private val paths: Set[String] = works.keySet
+
+  /** Find the availabilities of this Work.
+    *
+    * The availabilities of an archive's Relations are the union of all the
+    * availabilities of its descendents, as well as its own.
+    *
+    * Note that this only covers *known* descendents.  e.g. if the works have
+    * paths (A, A/B/1), then A will not inherit availabilities from A/B/1 --
+    * the intermediate path A/B is missing.
+    *
+    * This preserves the original behaviour of the relation embedder, but it's
+    * not clear if it's intentional -- it was a side effect of the implementation,
+    * not something that was explicitly tested.
+    *
+    */
   def getAvailabilities(work: Work[Merged]): Set[Availability] =
-    work.data.collectionPath
-      .map {
-        case CollectionPath(path, _) =>
-          @tailrec
-          def availabilities(stack: List[String],
-                             accum: Set[Availability]): Set[Availability] =
-            stack match {
-              case Nil => accum
-              case head :: tail =>
-                val children = childMapping.getOrElse(head, Nil)
+    work.data.collectionPath match {
+      case Some(CollectionPath(workPath, _)) =>
+        val affectedPaths = paths.knownDescendentsOf(workPath) :+ workPath
 
-                val childAvailabilities =
-                  (head :: children)
-                    .map(works)
-                    .map(_.state.availabilities)
-                    .foldLeft(Set.empty[Availability])(_ union _)
+        works
+          .filter {
+            case (path, _) => affectedPaths.contains(path)
+          }
+          .flatMap { case (_, work) => work.state.availabilities }
+          .toSet
 
-                availabilities(
-                  childMapping.getOrElse(head, Nil) ++ tail,
-                  accum union childAvailabilities
-                )
-            }
-          availabilities(
-            childMapping.getOrElse(path, Nil),
-            works.get(path).map(_.state.availabilities).getOrElse(Set.empty)
-          )
-      }
-      .getOrElse(Set.empty)
+      // We shouldn't be dealing with any works without a collectionPath field in the
+      // relation embedder; if we are then something has gone wrong.
+      case _ =>
+        assert(
+          assertion = false,
+          message =
+            s"Cannot get availabilities for work with empty collectionPath field: $work"
+        )
+        Set()
+    }
 
   def size = relations.size
 
-  def numParents = parentMapping.size
+  def numParents: Int = works.keySet.parentMapping.size
 
   private def getChildren(path: String): List[Relation] =
-    childMapping
-    // Relations might not exist in the cache if e.g. the work is not Visible
-      .getOrElse(path, default = Nil)
-      .map(relations)
+    paths.childrenOf(path).map(relations)
 
   private def getSiblings(path: String): (List[Relation], List[Relation]) = {
-    val siblings = parentMapping
-      .get(path)
-      .map(childMapping)
-      .getOrElse(Nil)
-    siblings match {
-      case Nil => (Nil, Nil)
-      case siblings =>
-        val splitIdx = siblings.indexOf(path)
-        val (preceding, succeeding) = siblings.splitAt(splitIdx)
-        (preceding.map(relations), succeeding.tail.map(relations))
-    }
+    val (preceding, succeeding) = paths.siblingsOf(path)
+
+    (preceding.map(relations), succeeding.map(relations))
   }
 
-  @tailrec
-  private def getAncestors(path: String,
-                           accum: List[Relation] = Nil): List[Relation] =
-    parentMapping.get(path) match {
-      case None => accum
-      case Some(parentPath) =>
-        getAncestors(parentPath, relations(parentPath) :: accum)
-    }
-
-  private def getNumChildren(path: String): Int =
-    childMapping.get(path).map(_.length).getOrElse(0)
-
-  private def getNumDescendents(path: String): Int = {
-    @tailrec
-    def numDescendents(stack: List[String], accum: Int = 0): Int =
-      stack match {
-        case Nil => accum
-        case head :: tail =>
-          numDescendents(childMapping.getOrElse(head, Nil) ++ tail, 1 + accum)
-      }
-    numDescendents(childMapping.getOrElse(path, Nil))
-  }
+  private def getAncestors(path: String): List[Relation] =
+    paths.knownAncestorsOf(path).map(relations)
 
   private lazy val relations: Map[String, Relation] =
     works.map {
       case (path, work) =>
         path -> work.toRelation(
           depth = path.split("/").length - 1,
-          numChildren = getNumChildren(path),
-          numDescendents = getNumDescendents(path)
+          numChildren = paths.childrenOf(path).length,
+          numDescendents = paths.knownDescendentsOf(path).length
         )
     }
-
-  private lazy val parentMapping: Map[String, String] =
-    works
-      .map {
-        case (path, _) =>
-          val parent = tokenize(path).dropRight(1)
-          path -> Some(parent.mkString("/")).filter(works.contains)
-      }
-      .collect { case (path, Some(parentPath)) => path -> parentPath }
-
-  private lazy val childMapping: Map[String, List[String]] =
-    works.map {
-      case (path, _) =>
-        path -> CollectionPathSorter.sortPaths(
-          parentMapping.collect {
-            case (childPath, parentPath) if parentPath == path =>
-              childPath
-          }.toList
-        )
-    }
-
-  private def tokenize(path: String): List[String] =
-    path.split("/").toList
 }
 
 object ArchiveRelationsCache {

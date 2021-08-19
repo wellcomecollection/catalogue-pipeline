@@ -113,6 +113,40 @@ class ArchiveRelationsCacheTest
     )
   }
 
+  describe("gets the availabilities for a work") {
+    val workA = work("a")
+    val work1 = work("a/1")
+    val workB = work("a/1/b")
+    val workB1 = work("a/1/b/1")
+    val workB11 = work("a/1/b/1/1", isAvailableOnline = true)
+    val workC = work("a/1/c", isAvailableOnline = true)
+
+    it("finds the availability on direct descendents") {
+      val relationsCache = ArchiveRelationsCache(
+        Seq(workA, work1, workB, workC).map(toRelationWork)
+      )
+
+      relationsCache.getAvailabilities(workA) shouldBe Set(Availability.Online)
+      relationsCache.getAvailabilities(work1) shouldBe Set(Availability.Online)
+      relationsCache.getAvailabilities(workB) shouldBe empty
+      relationsCache.getAvailabilities(workC) shouldBe Set(Availability.Online)
+    }
+
+    it("skips the availability on indirect descendents") {
+      val cacheWithDirectDescendents = ArchiveRelationsCache(
+        Seq(workB, workB1, workB11).map(toRelationWork)
+      )
+
+      val cacheWithoutDirectDescendents = ArchiveRelationsCache(
+        Seq(workB, workB11).map(toRelationWork)
+      )
+
+      cacheWithDirectDescendents.getAvailabilities(workB) shouldBe Set(
+        Availability.Online)
+      cacheWithoutDirectDescendents.getAvailabilities(workB) shouldBe empty
+    }
+  }
+
   it("finds a work's availabilities") {
     val relationsCache = ArchiveRelationsCache(works)
 
