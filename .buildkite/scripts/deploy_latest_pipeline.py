@@ -46,6 +46,18 @@ def get_secret_value(sess, *, secret_id):
     return client.get_secret_value(SecretId=secret_id)["SecretValue"]
 
 
+def get_aws_session(*, role_arn):
+    assumed_role_object = sts_client.assume_role(
+        RoleArn=role_arn, RoleSessionName="AssumeRoleSession1"
+    )
+    credentials = assumed_role_object["Credentials"]
+    return boto3.Session(
+        aws_access_key_id=credentials["AccessKeyId"],
+        aws_secret_access_key=credentials["SecretAccessKey"],
+        aws_session_token=credentials["SessionToken"],
+    )
+
+
 if __name__ == "__main__":
     pipeline_date = get_current_pipeline_date()
     print(f"The current prod pipeline is {pipeline_date}")
@@ -53,5 +65,5 @@ if __name__ == "__main__":
     internal_model_version = get_internal_model_version()
     print(f"The current version of internal model is {internal_model_version}")
 
-    sess = boto3.Session()
+    sess = get_aws_session(role_arn="arn:aws:iam::760097843905:role/platform-ci")
     print(get_secret_value(sess, secret_id=f"elasticsearch/pipeline_storage_{pipeline_date}/read_only/es_username"))
