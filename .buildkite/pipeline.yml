@@ -1,6 +1,6 @@
 steps:
   - commands:
-      - pip3 install --user boto3
+      - pip3 install --user boto3 httpx
       - .buildkite/scripts/deploy_latest_pipeline.py
   # - command: .buildkite/scripts/run_autoformat.py
   #   label: "autoformat"

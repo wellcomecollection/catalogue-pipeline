@@ -5,6 +5,7 @@ import re
 import urllib.request
 
 import boto3
+import httpx
 
 
 def get_internal_model_version():
@@ -16,26 +17,13 @@ def get_internal_model_version():
         return internal_model_line.split()[-1].strip('"')
 
 
-def get_current_pipeline_date():
+def get_current_index_name():
     """
-    Uses the /_elasticConfig endpoint on the prod API to find out what
-    pipeline is currently feeding the API.
-
-    Returns the pipeline date, e.g. 2021-08-19
-
+    Returns index which is currently being served by the API.
     """
-    resp = json.load(
-        urllib.request.urlopen(
-            "https://api.wellcomecollection.org/catalogue/v2/_elasticConfig"
-        )
-    )
-
-    # The works index name is a string that looks something like
-    #
-    #     works-indexed-2021-08-19
-    #
-    index_regex = re.compile(r"^works-indexed-(?P<date>\d{4}-\d{2}-\d{2})$")
-    return index_regex.match(resp["worksIndex"]).group("date")
+    resp = httpx.get("https://api.wellcomecollection.org/catalogue/v2/_elasticConfig")
+    resp.raise_for_status()
+    return resp.json()["worksIndex"]
 
 
 def get_secret_value(sess, *, secret_id):
@@ -46,12 +34,44 @@ def get_secret_value(sess, *, secret_id):
     return client.get_secret_value(SecretId=secret_id)["SecretString"]
 
 
+def get_index_internal_model_versions(sess, *, pipeline_date, index_name):
+    """
+    Returns a list of internal_model versions supported by this index.
+    """
+    secret_prefix = f"elasticsearch/pipeline_storage_{pipeline_date}"
+
+    username = get_secret_value(sess, secret_id=f"{secret_prefix}/read_only/es_username")
+    password = get_secret_value(sess, secret_id=f"{secret_prefix}/read_only/es_password")
+    host = get_secret_value(sess, secret_id=f"{secret_prefix}/public_host")
+
+    resp = httpx.get(
+        f"https://{host}:9243/{index_name}",
+        auth=(username, password)
+    )
+    resp.raise_for_status()
+
+    return resp.json()[index_name]["mappings"]["_meta"]
+
+
 if __name__ == "__main__":
-    pipeline_date = get_current_pipeline_date()
+    index_name = get_current_index_name()
+    print(f"The current index name is {index_name}")
+
+    # The works index name is a string that looks something like
+    #
+    #     works-indexed-2021-08-19
+    #
+    index_regex = re.compile(r"^works-indexed-(?P<date>\d{4}-\d{2}-\d{2})$")
+    pipeline_date = index_regex.match(index_name).group("date")
     print(f"The current prod pipeline is {pipeline_date}")
 
     internal_model_version = get_internal_model_version()
     print(f"The current version of internal model is {internal_model_version}")
 
     sess = boto3.Session()
-    print(get_secret_value(sess, secret_id=f"elasticsearch/pipeline_storage_{pipeline_date}/read_only/es_username"))
+    index_versions = get_index_internal_model_versions(
+        sess, pipeline_date=pipeline_date, index_name=index_name
+    )
+    print(f"The current index supports the following internal models:")
+    for name, git_hash in sorted(index_versions.items()):
+        print(f" - {name.ljust(20)}: {git_hash}")
