@@ -109,7 +109,7 @@ if __name__ == "__main__":
             "--from-label", f"ref.{os.environ['BUILDKITE_COMMIT']}",
             "--environment-id", pipeline_date,
             "--description", os.environ["BUILDKITE_BUILD_URL"],
-            "--confirmation-wait-for", 3600
+            "--confirmation-wait-for", "3600"
         ])
     else:
         print("The following files in internal_model have changed:")
