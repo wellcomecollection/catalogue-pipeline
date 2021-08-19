@@ -5,7 +5,6 @@ import os
 import re
 import subprocess
 import sys
-import urllib.request
 
 import boto3
 import httpx
