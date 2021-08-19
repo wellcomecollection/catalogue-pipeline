@@ -95,7 +95,7 @@ if __name__ == "__main__":
     if not internal_model_paths:
         print("Nothing in internal_model has changed.  It is SAFE to deploy.")
 
-        root = subprocess.check_output(["git", "rev-parse", "--show-toplevel"]).decode("utf8")
+        root = subprocess.check_output(["git", "rev-parse", "--show-toplevel"]).decode("utf8").strip()
 
         subprocess.check_call([
             "docker",
