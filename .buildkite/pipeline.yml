@@ -2,6 +2,20 @@ steps:
   - commands:
       - pip3 install --user boto3 httpx
       - .buildkite/scripts/deploy_latest_pipeline.py
+
+  - label: trigger prod deploy
+    trigger: "catalogue-pipeline-deploy-prod"
+    async: true
+    build:
+      message: "${BUILDKITE_MESSAGE}"
+      commit: "${BUILDKITE_COMMIT}"
+      branch: "${BUILDKITE_BRANCH}"
+      env:
+        BUILDKITE_PULL_REQUEST: "${BUILDKITE_PULL_REQUEST}"
+        BUILDKITE_PULL_REQUEST_BASE_BRANCH: "${BUILDKITE_PULL_REQUEST_BASE_BRANCH}"
+        BUILDKITE_PULL_REQUEST_REPO: "${BUILDKITE_PULL_REQUEST_REPO}"
+
+
   # - command: .buildkite/scripts/run_autoformat.py
   #   label: "autoformat"
   # - wait
