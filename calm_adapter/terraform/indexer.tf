@@ -17,6 +17,9 @@ module "calm_indexer" {
 
   image = local.calm_indexer_image
 
+  min_capacity = 0
+  max_capacity = 1
+
   env_vars = {
     sqs_queue_url     = module.calm_indexer_queue.url
     es_index          = "calm_catalog"
