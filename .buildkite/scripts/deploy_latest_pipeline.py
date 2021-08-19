@@ -106,7 +106,7 @@ if __name__ == "__main__":
             "--project-id", "catalogue_pipeline",
             "--confirm",
             "release-deploy",
-            "--from-label", f"ref.{os.environ['BUILDKITE_COMMIT']}",
+            "--from-label", "latest",
             "--environment-id", pipeline_date,
             "--description", os.environ["BUILDKITE_BUILD_URL"],
             "--confirmation-wait-for", "3600"
