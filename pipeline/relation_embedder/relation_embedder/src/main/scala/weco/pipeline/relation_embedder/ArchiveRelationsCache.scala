@@ -72,7 +72,7 @@ class ArchiveRelationsCache(works: Map[String, RelationWork]) extends Logging {
         Set()
     }
 
-  def size = relations.size
+  def size: Int = works.size
 
   def numParents: Int = works.keySet.parentMapping.size
 
