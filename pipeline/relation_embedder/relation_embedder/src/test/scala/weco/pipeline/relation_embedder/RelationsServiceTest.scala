@@ -84,8 +84,8 @@ class RelationsServiceTest
         storeWorks(index)
         withActorSystem { implicit actorSystem =>
           val batch = Batch(rootPath = "A", List(Tree("A")))
-          whenReady(queryAffectedWorks(service(index), batch)) { result =>
-            result should contain theSameElementsAs works
+          whenReady(queryAffectedWorks(service(index), batch)) {
+            _ should contain theSameElementsAs works
           }
         }
       }
@@ -96,8 +96,8 @@ class RelationsServiceTest
         storeWorks(index)
         withActorSystem { implicit actorSystem =>
           val batch = Batch(rootPath = "A", List(Node("A/B")))
-          whenReady(queryAffectedWorks(service(index), batch)) { result =>
-            result should contain theSameElementsAs List(workB)
+          whenReady(queryAffectedWorks(service(index), batch)) {
+            _ should contain theSameElementsAs List(workB)
           }
         }
       }
@@ -108,8 +108,8 @@ class RelationsServiceTest
         storeWorks(index)
         withActorSystem { implicit actorSystem =>
           val batch = Batch(rootPath = "A", List(Children("A/C")))
-          whenReady(queryAffectedWorks(service(index), batch)) { result =>
-            result should contain theSameElementsAs List(workX, workY, workZ)
+          whenReady(queryAffectedWorks(service(index), batch)) {
+            _ should contain theSameElementsAs List(workX, workY, workZ)
           }
         }
       }
@@ -121,8 +121,8 @@ class RelationsServiceTest
         storeWorks(index)
         withActorSystem { implicit actorSystem =>
           val batch = Batch(rootPath = "A", List(Descendents("A/C")))
-          whenReady(queryAffectedWorks(service(index), batch)) { result =>
-            result should contain theSameElementsAs List(
+          whenReady(queryAffectedWorks(service(index), batch)) {
+            _ should contain theSameElementsAs List(
               workX,
               workY,
               workZ,
@@ -141,8 +141,8 @@ class RelationsServiceTest
           val batch = Batch(
             rootPath = "A",
             List(Node("A/E/2"), Descendents("A/C"), Children("A")))
-          whenReady(queryAffectedWorks(service(index), batch)) { result =>
-            result should contain theSameElementsAs List(
+          whenReady(queryAffectedWorks(service(index), batch)) {
+            _ should contain theSameElementsAs List(
               workB,
               workC,
               workE,
@@ -165,8 +165,8 @@ class RelationsServiceTest
           val batch = Batch(rootPath = "A", List(Tree("A")))
           whenReady(queryAffectedWorks(
             service(index, affectedWorksScroll = 3),
-            batch)) { result =>
-            result should contain theSameElementsAs works
+            batch)) {
+            _ should contain theSameElementsAs works
           }
         }
       }
@@ -180,8 +180,8 @@ class RelationsServiceTest
           val batch = Batch(
             rootPath = "A",
             List(Children("A/C/X"), Descendents("A/C/X"), Node("A/C/X/5")))
-          whenReady(queryAffectedWorks(service(index), batch)) { result =>
-            result should contain theSameElementsAs List(
+          whenReady(queryAffectedWorks(service(index), batch)) {
+            _ should contain theSameElementsAs List(
               work3,
               work4,
               invisibleWork)
@@ -206,9 +206,8 @@ class RelationsServiceTest
       withLocalMergedWorksIndex { index =>
         withActorSystem { implicit actorSystem =>
           storeWorks(index, works)
-          whenReady(queryRelationTree(service(index), batch)) { relationWorks =>
-            relationWorks should contain theSameElementsAs works.map(
-              toRelationWork)
+          whenReady(queryRelationTree(service(index), batch)) {
+            _ should contain theSameElementsAs works.map(toRelationWork)
           }
         }
       }
@@ -218,9 +217,8 @@ class RelationsServiceTest
       withLocalMergedWorksIndex { index =>
         withActorSystem { implicit actorSystem =>
           storeWorks(index, work("other/archive") :: works)
-          whenReady(queryRelationTree(service(index), batch)) { relationWorks =>
-            relationWorks should contain theSameElementsAs works.map(
-              toRelationWork)
+          whenReady(queryRelationTree(service(index), batch)) {
+            _ should contain theSameElementsAs works.map(toRelationWork)
           }
         }
       }
@@ -230,9 +228,8 @@ class RelationsServiceTest
       withLocalMergedWorksIndex { index =>
         withActorSystem { implicit actorSystem =>
           storeWorks(index, work("A/Invisible").invisible() :: works)
-          whenReady(queryRelationTree(service(index), batch)) { relationWorks =>
-            relationWorks should contain theSameElementsAs works.map(
-              toRelationWork)
+          whenReady(queryRelationTree(service(index), batch)) {
+            _ should contain theSameElementsAs works.map(toRelationWork)
           }
         }
       }
