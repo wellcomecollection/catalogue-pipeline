@@ -239,7 +239,7 @@ class RelationEmbedderWorkerServiceTest
       )
     )
 
-    withWorkerService(works) {
+    withWorkerService(works, visibilityTimeout = 30.seconds) {
       case (QueuePair(queue, dlq), _, msgSender) =>
         sendNotificationToSQS(queue = queue, message = batch)
 
@@ -253,14 +253,15 @@ class RelationEmbedderWorkerServiceTest
   }
 
   def withWorkerService[R](works: List[Work[Merged]] = works,
-                           fails: Boolean = false)(
+                           fails: Boolean = false,
+                           visibilityTimeout: Duration = 5.seconds)(
     testWith: TestWith[(QueuePair,
                         mutable.Map[String, Work[Denormalised]],
                         MemoryMessageSender),
                        R]): R =
     withLocalMergedWorksIndex { mergedIndex =>
       storeWorks(mergedIndex, works)
-      withLocalSqsQueuePair(visibilityTimeout = 30.seconds) { queuePair =>
+      withLocalSqsQueuePair(visibilityTimeout = visibilityTimeout) { queuePair =>
         withActorSystem { implicit actorSystem =>
           withSQSStream[NotificationMessage, R](queuePair.queue) { sqsStream =>
             val messageSender = new MemoryMessageSender
