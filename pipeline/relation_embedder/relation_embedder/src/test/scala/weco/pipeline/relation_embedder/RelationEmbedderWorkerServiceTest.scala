@@ -261,27 +261,32 @@ class RelationEmbedderWorkerServiceTest
                        R]): R =
     withLocalMergedWorksIndex { mergedIndex =>
       storeWorks(mergedIndex, works)
-      withLocalSqsQueuePair(visibilityTimeout = visibilityTimeout) { queuePair =>
-        withActorSystem { implicit actorSystem =>
-          withSQSStream[NotificationMessage, R](queuePair.queue) { sqsStream =>
-            val messageSender = new MemoryMessageSender
-            val denormalisedIndex =
-              mutable.Map.empty[String, Work[Denormalised]]
-            val relationsService =
-              if (fails) FailingRelationsService
-              else
-                new PathQueryRelationsService(elasticClient, mergedIndex, 10)
-            val workerService = new RelationEmbedderWorkerService[String](
-              sqsStream = sqsStream,
-              msgSender = messageSender,
-              workIndexer = new MemoryIndexer(denormalisedIndex),
-              relationsService = relationsService,
-              indexFlushInterval = 1 milliseconds,
-            )
-            workerService.run()
-            testWith((queuePair, denormalisedIndex, messageSender))
+      withLocalSqsQueuePair(visibilityTimeout = visibilityTimeout) {
+        queuePair =>
+          withActorSystem { implicit actorSystem =>
+            withSQSStream[NotificationMessage, R](queuePair.queue) {
+              sqsStream =>
+                val messageSender = new MemoryMessageSender
+                val denormalisedIndex =
+                  mutable.Map.empty[String, Work[Denormalised]]
+                val relationsService =
+                  if (fails) FailingRelationsService
+                  else
+                    new PathQueryRelationsService(
+                      elasticClient,
+                      mergedIndex,
+                      10)
+                val workerService = new RelationEmbedderWorkerService[String](
+                  sqsStream = sqsStream,
+                  msgSender = messageSender,
+                  workIndexer = new MemoryIndexer(denormalisedIndex),
+                  relationsService = relationsService,
+                  indexFlushInterval = 1 milliseconds,
+                )
+                workerService.run()
+                testWith((queuePair, denormalisedIndex, messageSender))
+            }
           }
-        }
       }
     }
 

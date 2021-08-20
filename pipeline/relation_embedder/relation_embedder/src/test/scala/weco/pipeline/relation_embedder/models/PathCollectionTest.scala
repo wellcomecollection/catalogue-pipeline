@@ -59,15 +59,16 @@ class PathCollectionTest extends AnyFunSpec with Matchers {
   }
 
   it("finds the siblings of a path") {
-    val paths = PathCollection(Set(
-      "A/B",
-      "A/B/1",
-      "A/B/2",
-      "A/B/2/2",
-      "A/B/3",
-      "A/B/3/1",
-      "A/B/4",
-      "A/B/4/1"))
+    val paths = PathCollection(
+      Set(
+        "A/B",
+        "A/B/1",
+        "A/B/2",
+        "A/B/2/2",
+        "A/B/3",
+        "A/B/3/1",
+        "A/B/4",
+        "A/B/4/1"))
 
     paths.siblingsOf("A/B/1") shouldBe (
       (
@@ -85,15 +86,16 @@ class PathCollectionTest extends AnyFunSpec with Matchers {
   }
 
   it("finds the children of a path") {
-    val paths = PathCollection(Set(
-      "A/B",
-      "A/B/1",
-      "A/B/2",
-      "A/B/2/2",
-      "A/B/3",
-      "A/B/3/1",
-      "A/B/4",
-      "A/B/4/1"))
+    val paths = PathCollection(
+      Set(
+        "A/B",
+        "A/B/1",
+        "A/B/2",
+        "A/B/2/2",
+        "A/B/3",
+        "A/B/3/1",
+        "A/B/4",
+        "A/B/4/1"))
 
     paths.childrenOf("A/B") shouldBe List("A/B/1", "A/B/2", "A/B/3", "A/B/4")
     paths.childrenOf("A/B/1") shouldBe empty
@@ -102,15 +104,16 @@ class PathCollectionTest extends AnyFunSpec with Matchers {
   }
 
   it("finds the known descendents of a path") {
-    val paths = PathCollection(Set(
-      "A",
-      "A/B",
-      "A/B/1",
-      "A/B/1/2/3",
-      "A/B/1/2/2",
-      "A/B/1/2/3/4",
-      "A/B/1/2/3/5",
-      "A/B/2"))
+    val paths = PathCollection(
+      Set(
+        "A",
+        "A/B",
+        "A/B/1",
+        "A/B/1/2/3",
+        "A/B/1/2/2",
+        "A/B/1/2/3/4",
+        "A/B/1/2/3/5",
+        "A/B/2"))
 
     paths.knownDescendentsOf("A") shouldBe List("A/B", "A/B/1", "A/B/2")
     paths.knownDescendentsOf("A/B") shouldBe List("A/B/1", "A/B/2")

@@ -178,7 +178,9 @@ class ArchiveRelationsCacheTest
       .resourceToString("/paths.txt", StandardCharsets.UTF_8)
       .split("\n")
 
-    val relations = paths.map { p => toRelationWork(work(p)) }
+    val relations = paths.map { p =>
+      toRelationWork(work(p))
+    }
 
     val cache = ArchiveRelationsCache(relations)
 
