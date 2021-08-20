@@ -13,7 +13,7 @@ object PathOps {
       * e.g. the parent of PP/CRI/J/2/3 is PP/CRI/J/2
       *
       */
-    def parent: String = {
+    lazy val parent: String = {
       val parts = path.split("/").toList
       val parentParts = parts.dropRight(1)
       parentParts.mkString("/")
@@ -47,7 +47,7 @@ object PathOps {
       * are not in the list of works.
       *
       */
-    def parentMapping: Map[String, String] =
+    lazy val parentMapping: Map[String, String] =
       paths
         .map { p =>
           p -> p.parent
@@ -83,7 +83,7 @@ object PathOps {
       * The children are sorted in CollectionPath order.
       *
       */
-    def childMapping: Map[String, List[String]] =
+    lazy val childMapping: Map[String, List[String]] =
       paths.map { p =>
         val childPaths = parentMapping.collect {
           case (childPath, parentPath) if parentPath == p =>

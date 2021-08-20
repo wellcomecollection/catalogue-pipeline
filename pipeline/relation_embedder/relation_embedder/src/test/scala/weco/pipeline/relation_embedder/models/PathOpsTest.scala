@@ -1,9 +1,16 @@
 package weco.pipeline.relation_embedder.models
 
+import org.apache.commons.io.IOUtils
+import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-class PathOpsTest extends AnyFunSpec with Matchers {
+import java.nio.charset.StandardCharsets
+import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{Await, Future}
+
+class PathOpsTest extends AnyFunSpec with Matchers with ScalaFutures {
   import PathOps._
 
   it("finds the parent of a path") {
@@ -31,6 +38,27 @@ class PathOpsTest extends AnyFunSpec with Matchers {
       "A/B/2/2" -> List(),
       "A/B/3/1" -> List()
     )
+  }
+
+  // This is a real set of nearly 7000 paths from SAFPA.  This test is less focused on
+  // the exact result, more that it returns in a reasonable time.
+  //
+  // Some refactoring of the relation embedder code accidentally made the childMapping
+  // explode in runtime, effectively breaking the relation embedder for large collections.
+  //
+  // The exact timeout on the Future isn't important and can be adjusted slightly if
+  // it's a bit slow on CI, as long as it's not ridiculous.
+  it("creates a child mapping in a fast time") {
+    val paths = IOUtils
+      .resourceToString("/paths.txt", StandardCharsets.UTF_8)
+      .split("\n")
+      .toSet
+
+    val future = Future {
+      paths.childMapping
+    }
+
+    Await.result(future, atMost = 5.seconds)
   }
 
   it("finds the siblings of a path") {
