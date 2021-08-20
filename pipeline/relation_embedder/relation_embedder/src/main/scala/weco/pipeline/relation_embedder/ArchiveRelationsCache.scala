@@ -3,6 +3,7 @@ package weco.pipeline.relation_embedder
 import grizzled.slf4j.Logging
 import weco.catalogue.internal_model.work.WorkState.Merged
 import weco.catalogue.internal_model.work._
+import weco.pipeline.relation_embedder.models.PathCollection
 
 class ArchiveRelationsCache(works: Map[String, RelationWork]) extends Logging {
 
@@ -31,9 +32,7 @@ class ArchiveRelationsCache(works: Map[String, RelationWork]) extends Logging {
         Relations.none
       }
 
-  import weco.pipeline.relation_embedder.models.PathOps._
-
-  private val paths: Set[String] = works.keySet
+  private val paths: PathCollection = PathCollection(works.keySet)
 
   /** Find the availabilities of this Work.
     *
@@ -74,7 +73,7 @@ class ArchiveRelationsCache(works: Map[String, RelationWork]) extends Logging {
 
   def size: Int = works.size
 
-  def numParents: Int = works.keySet.parentMapping.size
+  def numParents: Int = paths.parentMapping.size
 
   private def getChildren(path: String): List[Relation] =
     paths.childrenOf(path).map(relations)
