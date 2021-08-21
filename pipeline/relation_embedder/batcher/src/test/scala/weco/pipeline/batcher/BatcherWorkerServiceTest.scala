@@ -40,7 +40,7 @@ class BatcherWorkerServiceTest
     * D  X  Y  Z   1  2  3  4
     */
   it("processes incoming paths into batches") {
-    withWorkerService() {
+    withWorkerService(visibilityTimeout = 1 second) {
       case (QueuePair(queue, dlq), msgSender) =>
         sendNotificationToSQS(queue = queue, body = "A/B")
         sendNotificationToSQS(queue = queue, body = "A/E/1")
@@ -131,11 +131,12 @@ class BatcherWorkerServiceTest
   def batchWithRoot(rootPath: String, batches: Seq[Batch]): List[Selector] =
     batches.find(_.rootPath == rootPath).get.selectors
 
-  def withWorkerService[R](maxBatchSize: Int = 10,
+  def withWorkerService[R](visibilityTimeout: Duration = 5 seconds,
+                           maxBatchSize: Int = 10,
                            brokenPaths: Set[String] = Set.empty,
                            flushInterval: FiniteDuration = 100 milliseconds)(
     testWith: TestWith[(QueuePair, MemoryMessageSender), R]): R =
-    withLocalSqsQueuePair() { queuePair =>
+    withLocalSqsQueuePair(visibilityTimeout = visibilityTimeout) { queuePair =>
       withActorSystem { implicit actorSystem =>
         withSQSStream[NotificationMessage, R](queuePair.queue) { msgStream =>
           val msgSender = new MessageSender(brokenPaths)
