@@ -12,7 +12,8 @@ object CollectionPathSorter {
   type PathTokenPart = Either[Int, String]
 
   private def tokenizePath(path: String): TokenizedPath =
-    path.split("/")
+    path
+      .split("/")
       .map(parsePathToken)
       .toList
 
@@ -23,7 +24,9 @@ object CollectionPathSorter {
   // e.g. parsePathToken("ab1cd") = List(Right(ab), Left(1), Right(cd)
   //
   private def parsePathToken(s: String): PathToken =
-    """\d+|\D+""".r.findAllIn(s).toList
+    """\d+|\D+""".r
+      .findAllIn(s)
+      .toList
       .map { part =>
         Try(part.toInt) match {
           case Success(number) => Left(number)
@@ -45,9 +48,10 @@ object CollectionPathSorter {
         case (Right(strX), Right(strY))     => strX.compareTo(strY)
         case (Left(_), _)                   => -1
         case _                              => 1
-      }
+    }
 
-  def shorterPathsWinOrdering[T](perItemOrdering: Ordering[T]): Ordering[List[T]] =
+  def shorterPathsWinOrdering[T](
+    perItemOrdering: Ordering[T]): Ordering[List[T]] =
     new Ordering[List[T]] {
       @tailrec
       override def compare(x: List[T], y: List[T]): Int =
