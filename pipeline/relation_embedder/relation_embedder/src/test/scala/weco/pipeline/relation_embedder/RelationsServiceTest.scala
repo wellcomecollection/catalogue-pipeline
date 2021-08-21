@@ -3,7 +3,6 @@ package weco.pipeline.relation_embedder
 import akka.actor.ActorSystem
 import akka.stream.scaladsl.Sink
 import com.sksamuel.elastic4s.Index
-import org.scalatest.Assertion
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.akka.fixtures.Akka
@@ -29,9 +28,6 @@ class RelationsServiceTest
       completeTreeScroll = completeTreeScroll,
       affectedWorksScroll = affectedWorksScroll
     )
-
-  def storeWorks(index: Index, works: List[Work[Merged]] = works): Assertion =
-    insertIntoElasticsearch(index, works: _*)
 
   /** The following tests use works within this tree:
     *
@@ -81,11 +77,11 @@ class RelationsServiceTest
 
     it("Retrieves all affected works when batch consists of a complete tree") {
       withLocalMergedWorksIndex { index =>
-        storeWorks(index)
+        insertIntoElasticsearch(index, works: _*)
         withActorSystem { implicit actorSystem =>
           val batch = Batch(rootPath = "A", List(Tree("A")))
-          whenReady(queryAffectedWorks(service(index), batch)) { result =>
-            result should contain theSameElementsAs works
+          whenReady(queryAffectedWorks(service(index), batch)) {
+            _ should contain theSameElementsAs works
           }
         }
       }
@@ -93,11 +89,11 @@ class RelationsServiceTest
 
     it("Retrieves all affected works when batch consists of single node") {
       withLocalMergedWorksIndex { index =>
-        storeWorks(index)
+        insertIntoElasticsearch(index, works: _*)
         withActorSystem { implicit actorSystem =>
           val batch = Batch(rootPath = "A", List(Node("A/B")))
-          whenReady(queryAffectedWorks(service(index), batch)) { result =>
-            result should contain theSameElementsAs List(workB)
+          whenReady(queryAffectedWorks(service(index), batch)) {
+            _ should contain theSameElementsAs List(workB)
           }
         }
       }
@@ -105,11 +101,11 @@ class RelationsServiceTest
 
     it("Retrieves all affected works when batch consists of a nodes children") {
       withLocalMergedWorksIndex { index =>
-        storeWorks(index)
+        insertIntoElasticsearch(index, works: _*)
         withActorSystem { implicit actorSystem =>
           val batch = Batch(rootPath = "A", List(Children("A/C")))
-          whenReady(queryAffectedWorks(service(index), batch)) { result =>
-            result should contain theSameElementsAs List(workX, workY, workZ)
+          whenReady(queryAffectedWorks(service(index), batch)) {
+            _ should contain theSameElementsAs List(workX, workY, workZ)
           }
         }
       }
@@ -118,11 +114,11 @@ class RelationsServiceTest
     it(
       "Retrieves all affected works when batch consists of a nodes descendents") {
       withLocalMergedWorksIndex { index =>
-        storeWorks(index)
+        insertIntoElasticsearch(index, works: _*)
         withActorSystem { implicit actorSystem =>
           val batch = Batch(rootPath = "A", List(Descendents("A/C")))
-          whenReady(queryAffectedWorks(service(index), batch)) { result =>
-            result should contain theSameElementsAs List(
+          whenReady(queryAffectedWorks(service(index), batch)) {
+            _ should contain theSameElementsAs List(
               workX,
               workY,
               workZ,
@@ -136,13 +132,13 @@ class RelationsServiceTest
     it(
       "Retrieves all affected works when batch consists of a mixture of selectors") {
       withLocalMergedWorksIndex { index =>
-        storeWorks(index)
+        insertIntoElasticsearch(index, works: _*)
         withActorSystem { implicit actorSystem =>
           val batch = Batch(
             rootPath = "A",
             List(Node("A/E/2"), Descendents("A/C"), Children("A")))
-          whenReady(queryAffectedWorks(service(index), batch)) { result =>
-            result should contain theSameElementsAs List(
+          whenReady(queryAffectedWorks(service(index), batch)) {
+            _ should contain theSameElementsAs List(
               workB,
               workC,
               workE,
@@ -160,13 +156,13 @@ class RelationsServiceTest
 
     it("Retrieves all affected works across multiple scroll pages") {
       withLocalMergedWorksIndex { index =>
-        storeWorks(index)
+        insertIntoElasticsearch(index, works: _*)
         withActorSystem { implicit actorSystem =>
           val batch = Batch(rootPath = "A", List(Tree("A")))
           whenReady(queryAffectedWorks(
             service(index, affectedWorksScroll = 3),
-            batch)) { result =>
-            result should contain theSameElementsAs works
+            batch)) {
+            _ should contain theSameElementsAs works
           }
         }
       }
@@ -175,16 +171,13 @@ class RelationsServiceTest
     it("Returns invisible works") {
       withLocalMergedWorksIndex { index =>
         val invisibleWork = work("A/C/X/5").invisible()
-        storeWorks(index, invisibleWork :: works)
+        insertIntoElasticsearch(index, invisibleWork :: works: _*)
         withActorSystem { implicit actorSystem =>
           val batch = Batch(
             rootPath = "A",
             List(Children("A/C/X"), Descendents("A/C/X"), Node("A/C/X/5")))
-          whenReady(queryAffectedWorks(service(index), batch)) { result =>
-            result should contain theSameElementsAs List(
-              work3,
-              work4,
-              invisibleWork)
+          whenReady(queryAffectedWorks(service(index), batch)) {
+            _ should contain theSameElementsAs List(work3, work4, invisibleWork)
           }
         }
       }
@@ -205,10 +198,9 @@ class RelationsServiceTest
     it("Retrieves all works in archive") {
       withLocalMergedWorksIndex { index =>
         withActorSystem { implicit actorSystem =>
-          storeWorks(index, works)
-          whenReady(queryRelationTree(service(index), batch)) { relationWorks =>
-            relationWorks should contain theSameElementsAs works.map(
-              toRelationWork)
+          insertIntoElasticsearch(index, works: _*)
+          whenReady(queryRelationTree(service(index), batch)) {
+            _ should contain theSameElementsAs works.map(toRelationWork)
           }
         }
       }
@@ -217,10 +209,9 @@ class RelationsServiceTest
     it("Ignores works in other archvies") {
       withLocalMergedWorksIndex { index =>
         withActorSystem { implicit actorSystem =>
-          storeWorks(index, work("other/archive") :: works)
-          whenReady(queryRelationTree(service(index), batch)) { relationWorks =>
-            relationWorks should contain theSameElementsAs works.map(
-              toRelationWork)
+          insertIntoElasticsearch(index, work("other/archive") :: works: _*)
+          whenReady(queryRelationTree(service(index), batch)) {
+            _ should contain theSameElementsAs works.map(toRelationWork)
           }
         }
       }
@@ -229,10 +220,11 @@ class RelationsServiceTest
     it("Ignores invisible works") {
       withLocalMergedWorksIndex { index =>
         withActorSystem { implicit actorSystem =>
-          storeWorks(index, work("A/Invisible").invisible() :: works)
-          whenReady(queryRelationTree(service(index), batch)) { relationWorks =>
-            relationWorks should contain theSameElementsAs works.map(
-              toRelationWork)
+          insertIntoElasticsearch(
+            index,
+            work("A/Invisible").invisible() :: works: _*)
+          whenReady(queryRelationTree(service(index), batch)) {
+            _ should contain theSameElementsAs works.map(toRelationWork)
           }
         }
       }
