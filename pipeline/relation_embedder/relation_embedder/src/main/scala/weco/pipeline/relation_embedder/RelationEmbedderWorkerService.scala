@@ -46,7 +46,8 @@ class RelationEmbedderWorkerService[MsgDestination](
           .getRelationTree(batch)
           .runWith(Sink.seq)
           .map { relationWorks =>
-            info(s"Received ${relationWorks.size} relations for tree ${batch.rootPath}")
+            info(
+              s"Received ${relationWorks.size} relations for tree ${batch.rootPath}")
             ArchiveRelationsCache(relationWorks)
           }
           .flatMap { relationsCache =>

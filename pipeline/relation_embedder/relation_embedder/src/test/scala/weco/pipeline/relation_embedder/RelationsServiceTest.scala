@@ -177,10 +177,7 @@ class RelationsServiceTest
             rootPath = "A",
             List(Children("A/C/X"), Descendents("A/C/X"), Node("A/C/X/5")))
           whenReady(queryAffectedWorks(service(index), batch)) {
-            _ should contain theSameElementsAs List(
-              work3,
-              work4,
-              invisibleWork)
+            _ should contain theSameElementsAs List(work3, work4, invisibleWork)
           }
         }
       }
@@ -223,7 +220,9 @@ class RelationsServiceTest
     it("Ignores invisible works") {
       withLocalMergedWorksIndex { index =>
         withActorSystem { implicit actorSystem =>
-          insertIntoElasticsearch(index, work("A/Invisible").invisible() :: works: _*)
+          insertIntoElasticsearch(
+            index,
+            work("A/Invisible").invisible() :: works: _*)
           whenReady(queryRelationTree(service(index), batch)) {
             _ should contain theSameElementsAs works.map(toRelationWork)
           }
