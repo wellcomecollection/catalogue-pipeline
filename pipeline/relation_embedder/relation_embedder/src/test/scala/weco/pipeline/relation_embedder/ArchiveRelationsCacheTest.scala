@@ -1,10 +1,16 @@
 package weco.pipeline.relation_embedder
 
+import org.apache.commons.io.IOUtils
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.Inspectors
 import weco.catalogue.internal_model.work.{Availability, Relation, Relations}
 import weco.pipeline.relation_embedder.fixtures.RelationGenerators
+
+import java.nio.charset.StandardCharsets
+import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{Await, Future}
 
 class ArchiveRelationsCacheTest
     extends AnyFunSpec
@@ -157,5 +163,31 @@ class ArchiveRelationsCacheTest
     forEvery(List(workB, work2, workD, workE, workF, work3, work4)) { work =>
       relationsCache.getAvailabilities(work).size shouldBe 0
     }
+  }
+
+  // This is a real set of nearly 7000 paths from SAFPA.  This test is less focused on
+  // the exact result, more that it returns in a reasonable time.
+  //
+  // Some refactoring of the relation embedder code accidentally made the childMapping
+  // explode in runtime, effectively breaking the relation embedder for large collections.
+  //
+  // The exact timeout on the Future isn't important and can be adjusted slightly if
+  // it's a bit slow on CI, as long as it's not ridiculous.
+  it("finds the size in a reasonable time") {
+    val paths = IOUtils
+      .resourceToString("/paths.txt", StandardCharsets.UTF_8)
+      .split("\n")
+
+    val relations = paths.map { p =>
+      toRelationWork(work(p))
+    }
+
+    val cache = ArchiveRelationsCache(relations)
+
+    val future = Future {
+      cache.size
+    }
+
+    Await.result(future, atMost = 5.seconds)
   }
 }

@@ -21,4 +21,4 @@ docker build \
   "$PROJECT_DIRECTORY"
 
 mkdir -p "$ROOT/.releases"
-echo "$CURRENT_COMMIT" >> "$ROOT/.releases/$PROJECT"
+echo "$CURRENT_COMMIT" > "$ROOT/.releases/$PROJECT"

@@ -10,8 +10,10 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import akka.NotUsed
 import akka.stream.scaladsl.Source
+import org.apache.commons.io.IOUtils
 import weco.akka.fixtures.Akka
 import weco.fixtures.TestWith
+import weco.json.JsonUtil._
 import weco.messaging.fixtures.SQS
 import weco.messaging.fixtures.SQS.QueuePair
 import weco.messaging.memory.MemoryMessageSender
@@ -23,6 +25,8 @@ import weco.catalogue.internal_model.index.IndexFixtures
 import weco.catalogue.internal_model.work._
 import weco.pipeline.relation_embedder.fixtures.RelationGenerators
 import weco.pipeline_storage.memory.MemoryIndexer
+
+import java.nio.charset.StandardCharsets
 
 class RelationEmbedderWorkerServiceTest
     extends AnyFunSpec
@@ -213,35 +217,76 @@ class RelationEmbedderWorkerServiceTest
     }
   }
 
+  // This is a real set of nearly 7000 paths from SAFPA.  This test is less focused on
+  // the exact result, more that it returns in a reasonable time.
+  //
+  // In particular, the relation embedder has to handle large batches, but most of our
+  // other tests use small samples.  This helps us catch accidentally introduced
+  // complexity errors before we deploy new code.
+  it("handles a very large collection of works") {
+    val paths = IOUtils
+      .resourceToString("/paths.txt", StandardCharsets.UTF_8)
+      .split("\n")
+
+    val works = paths.map { work(_) }.toList
+
+    val batch = Batch(
+      rootPath = "SAFPA",
+      selectors = List(
+        Selector.Descendents("SAFPA/A/A14/1/48/2"),
+        Selector.Children("SAFPA/A/A14/1/48"),
+        Selector.Node("SAFPA/A/A14/1/48")
+      )
+    )
+
+    withWorkerService(works, visibilityTimeout = 30.seconds) {
+      case (QueuePair(queue, dlq), _, msgSender) =>
+        sendNotificationToSQS(queue = queue, message = batch)
+
+        eventually {
+          assertQueueEmpty(queue)
+          assertQueueEmpty(dlq)
+        }
+
+        msgSender.messages should have size 5
+    }
+  }
+
   def withWorkerService[R](works: List[Work[Merged]] = works,
-                           fails: Boolean = false)(
+                           fails: Boolean = false,
+                           visibilityTimeout: Duration = 5.seconds)(
     testWith: TestWith[(QueuePair,
                         mutable.Map[String, Work[Denormalised]],
                         MemoryMessageSender),
                        R]): R =
     withLocalMergedWorksIndex { mergedIndex =>
       storeWorks(mergedIndex, works)
-      withLocalSqsQueuePair() { queuePair =>
-        withActorSystem { implicit actorSystem =>
-          withSQSStream[NotificationMessage, R](queuePair.queue) { sqsStream =>
-            val messageSender = new MemoryMessageSender
-            val denormalisedIndex =
-              mutable.Map.empty[String, Work[Denormalised]]
-            val relationsService =
-              if (fails) FailingRelationsService
-              else
-                new PathQueryRelationsService(elasticClient, mergedIndex, 10)
-            val workerService = new RelationEmbedderWorkerService[String](
-              sqsStream = sqsStream,
-              msgSender = messageSender,
-              workIndexer = new MemoryIndexer(denormalisedIndex),
-              relationsService = relationsService,
-              indexFlushInterval = 1 milliseconds,
-            )
-            workerService.run()
-            testWith((queuePair, denormalisedIndex, messageSender))
+      withLocalSqsQueuePair(visibilityTimeout = visibilityTimeout) {
+        queuePair =>
+          withActorSystem { implicit actorSystem =>
+            withSQSStream[NotificationMessage, R](queuePair.queue) {
+              sqsStream =>
+                val messageSender = new MemoryMessageSender
+                val denormalisedIndex =
+                  mutable.Map.empty[String, Work[Denormalised]]
+                val relationsService =
+                  if (fails) FailingRelationsService
+                  else
+                    new PathQueryRelationsService(
+                      elasticClient,
+                      mergedIndex,
+                      10)
+                val workerService = new RelationEmbedderWorkerService[String](
+                  sqsStream = sqsStream,
+                  msgSender = messageSender,
+                  workIndexer = new MemoryIndexer(denormalisedIndex),
+                  relationsService = relationsService,
+                  indexFlushInterval = 1 milliseconds,
+                )
+                workerService.run()
+                testWith((queuePair, denormalisedIndex, messageSender))
+            }
           }
-        }
       }
     }
 
