@@ -84,7 +84,7 @@ class BatcherWorkerServiceTest
   }
 
   it("sends the whole tree when batch consists of too many selectors") {
-    withWorkerService(3) {
+    withWorkerService(maxBatchSize = 3) {
       case (QueuePair(queue, dlq), msgSender) =>
         sendNotificationToSQS(queue = queue, body = "A/B")
         sendNotificationToSQS(queue = queue, body = "A/E/1")
