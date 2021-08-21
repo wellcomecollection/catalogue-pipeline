@@ -1,7 +1,5 @@
 package weco.pipeline.relation_embedder.models
 
-import weco.pipeline.relation_embedder.CollectionPathSorter
-
 import scala.annotation.tailrec
 
 case class PathCollection(paths: Set[String]) {
@@ -73,7 +71,7 @@ case class PathCollection(paths: Set[String]) {
       val childPaths = parentMapping.collect {
         case (childPath, parentPath) if parentPath == p =>
           childPath
-      }.toList
+      }.toSet
 
       require(childPaths.forall(_.parent == p))
 
@@ -155,7 +153,7 @@ case class PathCollection(paths: Set[String]) {
     }
 
     CollectionPathSorter.sortPaths(
-      getKnownDescendents(childMapping.getOrElse(p, Nil))
+      getKnownDescendents(childMapping.getOrElse(p, Nil)).toSet
     )
   }
 
