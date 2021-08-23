@@ -267,8 +267,7 @@ object WorkFsm {
   import WorkState._
 
   sealed trait Transition[InState <: WorkState, OutState <: WorkState] {
-    def state(inWork: InState,
-              args: OutState#TransitionArgs): OutState
+    def state(inWork: InState, args: OutState#TransitionArgs): OutState
 
     def state(inWork: InState,
               data: WorkData[InState#WorkDataState],
@@ -286,7 +285,8 @@ object WorkFsm {
     def data(
       data: WorkData[InState#WorkDataState]): WorkData[OutState#WorkDataState]
 
-    def data(workData: Option[WorkData[InState#WorkDataState]]): Option[WorkData[OutState#WorkDataState]] =
+    def data(workData: Option[WorkData[InState#WorkDataState]])
+      : Option[WorkData[OutState#WorkDataState]] =
       workData.map(data)
 
     def redirect(redirect: InState#WorkDataState#Id): OutState#WorkDataState#Id
@@ -304,15 +304,16 @@ object WorkFsm {
         sourceModifiedTime = inWork.sourceModifiedTime
       )
 
-    override def state(
-      inWork: Identified,
-      data: WorkData[DataState.Identified],
-      mergedTime: Instant): Merged =
+    override def state(inWork: Identified,
+                       data: WorkData[DataState.Identified],
+                       mergedTime: Instant): Merged =
       state(inWork, mergedTime).copy(
         availabilities = Availabilities.forWorkData(data)
       )
 
-    def data(data: WorkData[DataState.Identified]): WorkData[DataState.Identified] = data
+    def data(
+      data: WorkData[DataState.Identified]): WorkData[DataState.Identified] =
+      data
 
     def redirect(redirect: IdState.Identified): IdState.Identified = redirect
   }
@@ -333,14 +334,15 @@ object WorkFsm {
             )
         }
 
-      def data(data: WorkData[DataState.Identified]): WorkData[DataState.Identified] = data
+      def data(
+        data: WorkData[DataState.Identified]): WorkData[DataState.Identified] =
+        data
 
       def redirect(redirect: IdState.Identified): IdState.Identified = redirect
     }
 
   implicit val denormalisedToIndexed = new Transition[Denormalised, Indexed] {
-    def state(inWork: Denormalised,
-              args: Unit): Indexed =
+    def state(inWork: Denormalised, args: Unit): Indexed =
       Indexed(
         sourceIdentifier = inWork.sourceIdentifier,
         canonicalId = inWork.canonicalId,
@@ -351,15 +353,16 @@ object WorkFsm {
         relations = inWork.relations
       )
 
-    override def state(
-      inWork: Denormalised,
-      data: WorkData[DataState.Identified],
-      args: Unit): Indexed =
+    override def state(inWork: Denormalised,
+                       data: WorkData[DataState.Identified],
+                       args: Unit): Indexed =
       state(inWork, args).copy(
         derivedData = DerivedWorkData(data)
       )
 
-    def data(data: WorkData[DataState.Identified]): WorkData[DataState.Identified] = data
+    def data(
+      data: WorkData[DataState.Identified]): WorkData[DataState.Identified] =
+      data
 
     def redirect(redirect: IdState.Identified): IdState.Identified = redirect
   }
