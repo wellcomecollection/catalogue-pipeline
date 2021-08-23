@@ -228,7 +228,14 @@ object PlatformMerger extends Merger {
               source = image.ParentWorks(
                 canonicalWork = work.toParentWork,
                 redirectedWork = sources
-                  .find { _.data.imageData.contains(imageData) }
+                  .find { w =>
+                    val imageDataOnWork =
+                      w.workData
+                        .map(_.imageData)
+                        .getOrElse(List())
+
+                    imageDataOnWork.contains(imageData)
+                  }
                   .map(_.toParentWork)
               )
             )

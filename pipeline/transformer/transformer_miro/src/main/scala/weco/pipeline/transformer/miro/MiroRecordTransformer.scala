@@ -144,7 +144,6 @@ class MiroRecordTransformer
           Work.Invisible[Source](
             state = state,
             version = version,
-            data = WorkData(),
             invisibilityReasons = List(
               UnableToTransform(s"Miro: ${e.getMessage}")
             )

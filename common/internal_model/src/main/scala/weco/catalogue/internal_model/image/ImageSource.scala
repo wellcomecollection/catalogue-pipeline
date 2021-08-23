@@ -19,7 +19,7 @@ case class ParentWorks(
 
 case class ParentWork(
   id: IdState.Identified,
-  data: WorkData[DataState.Identified],
+  data: Option[WorkData[DataState.Identified]],
   version: Int,
 )
 
@@ -33,12 +33,12 @@ object ParentWork {
   // On one work with a lot of images, the size of the JSON for a single image
   // in the images-initial index went from 3.3MB to 10KB.
 
-  implicit class MergedToParentWork(work: Work[WorkState.Merged]) {
+  implicit class MergedToParentWork(work: Work.Visible[WorkState.Merged]) {
     def toParentWork: ParentWork =
       ParentWork(
         id = IdState
           .Identified(work.state.canonicalId, work.state.sourceIdentifier),
-        data = work.data.copy(imageData = Nil),
+        data = Some(work.data.copy(imageData = Nil)),
         version = work.version
       )
   }
@@ -50,7 +50,7 @@ object ParentWork {
           sourceIdentifier = work.state.sourceIdentifier,
           canonicalId = work.state.canonicalId
         ),
-        data = work.data.copy(imageData = Nil),
+        data = work.workData.map(_.copy(imageData = Nil)),
         version = work.version
       )
   }

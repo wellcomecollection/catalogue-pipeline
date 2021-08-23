@@ -411,7 +411,6 @@ class MiroRecordTransformerTest
         sourceModifiedTime = Instant.EPOCH
       ),
       version = 1,
-      data = WorkData(),
       invisibilityReasons = invisibilityReasons
     )
   }

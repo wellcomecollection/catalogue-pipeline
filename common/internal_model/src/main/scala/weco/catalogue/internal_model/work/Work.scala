@@ -22,25 +22,24 @@ sealed trait Work[State <: WorkState] {
 
   val version: Int
   val state: State
-  val data: WorkData[State#WorkDataState]
+  val workData: Option[WorkData[State#WorkDataState]]
 
   def sourceIdentifier: SourceIdentifier = state.sourceIdentifier
 
   def id: String = state.id
 
   def identifiers: List[SourceIdentifier] =
-    sourceIdentifier :: data.otherIdentifiers
+    sourceIdentifier :: workData.map(_.otherIdentifiers).getOrElse(List())
 
   def transition[OutState <: WorkState](args: OutState#TransitionArgs = ())(
     implicit transition: WorkFsm.Transition[State, OutState])
     : Work[OutState] = {
-    val outState = transition.state(state, data, args)
-    val outData = transition.data(data)
+    val outState = transition.state(state, workData, args)
+    val outData = transition.data(workData)
     this match {
-      case Work.Visible(version, _, _, redirectSources) =>
-        Work.Visible(version, outData, outState, redirectSources.map {
-          transition.redirect
-        })
+      case Work.Visible(version, workData, _, redirectSources) =>
+        val sources = redirectSources.map { transition.redirect }
+        Work.Visible(version, transition.data(workData), outState, sources)
       case Work.Invisible(version, _, _, invisibilityReasons) =>
         Work.Invisible(version, outData, outState, invisibilityReasons)
       case Work.Deleted(version, _, deletedReason) =>
@@ -58,29 +57,34 @@ object Work {
     data: WorkData[State#WorkDataState],
     state: State,
     redirectSources: Seq[State#WorkDataState#Id] = Nil
-  ) extends Work[State]
+  ) extends Work[State] {
+    override val workData: Option[WorkData[State#WorkDataState]] =
+      Some(data)
+  }
 
   case class Redirected[State <: WorkState](
     version: Int,
     redirectTarget: State#WorkDataState#Id,
     state: State,
   ) extends Work[State] {
-    val data = WorkData[State#WorkDataState]()
+    val workData: Option[WorkData[State#WorkDataState]] = None
   }
 
   case class Invisible[State <: WorkState](
     version: Int,
-    data: WorkData[State#WorkDataState],
+    data: Option[WorkData[State#WorkDataState]] = None,
     state: State,
-    invisibilityReasons: List[InvisibilityReason] = Nil,
-  ) extends Work[State]
+    invisibilityReasons: List[InvisibilityReason],
+  ) extends Work[State] {
+    val workData: Option[WorkData[State#WorkDataState]] = data
+  }
 
   case class Deleted[State <: WorkState](
     version: Int,
     state: State,
     deletedReason: DeletedReason,
   ) extends Work[State] {
-    val data: WorkData[State#WorkDataState] = WorkData[State#WorkDataState]()
+    val workData: Option[WorkData[State#WorkDataState]] = None
   }
 }
 
@@ -271,8 +275,19 @@ object WorkFsm {
               args: OutState#TransitionArgs): OutState =
       state(inWork, args)
 
+    def state(inWork: InState,
+              data: Option[WorkData[InState#WorkDataState]],
+              args: OutState#TransitionArgs): OutState =
+      data match {
+        case Some(data) => state(inWork, data, args)
+        case None       => state(inWork, args)
+      }
+
     def data(
       data: WorkData[InState#WorkDataState]): WorkData[OutState#WorkDataState]
+
+    def data(workData: Option[WorkData[InState#WorkDataState]]): Option[WorkData[OutState#WorkDataState]] =
+      workData.map(data)
 
     def redirect(redirect: InState#WorkDataState#Id): OutState#WorkDataState#Id
   }
@@ -325,7 +340,7 @@ object WorkFsm {
 
   implicit val denormalisedToIndexed = new Transition[Denormalised, Indexed] {
     def state(inWork: Denormalised,
-              args: Unit = ()): Indexed =
+              args: Unit): Indexed =
       Indexed(
         sourceIdentifier = inWork.sourceIdentifier,
         canonicalId = inWork.canonicalId,
@@ -339,7 +354,7 @@ object WorkFsm {
     override def state(
       inWork: Denormalised,
       data: WorkData[DataState.Identified],
-      args: Unit = ()): Indexed =
+      args: Unit): Indexed =
       state(inWork, args).copy(
         derivedData = DerivedWorkData(data)
       )

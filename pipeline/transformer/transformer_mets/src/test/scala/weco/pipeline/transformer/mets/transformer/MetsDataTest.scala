@@ -48,16 +48,18 @@ class MetsDataTest
       .Invisible[Source](
         version = version,
         state = Source(expectedSourceIdentifier, createdDate),
-        data = WorkData[DataState.Unidentified](
-          items = List(unidentifiableItem),
-          mergeCandidates = List(
-            MergeCandidate(
-              identifier = SourceIdentifier(
-                identifierType = IdentifierType.SierraSystemNumber,
-                ontologyType = "Work",
-                value = bibNumber
-              ),
-              reason = "METS work"
+        data = Some(
+          WorkData[DataState.Unidentified](
+            items = List(unidentifiableItem),
+            mergeCandidates = List(
+              MergeCandidate(
+                identifier = SourceIdentifier(
+                  identifierType = IdentifierType.SierraSystemNumber,
+                  ontologyType = "Work",
+                  value = bibNumber
+                ),
+                reason = "METS work"
+              )
             )
           )
         ),
@@ -114,16 +116,18 @@ class MetsDataTest
       .Invisible[Source](
         version = version,
         state = Source(expectedSourceIdentifier, createdDate),
-        data = WorkData[DataState.Unidentified](
-          items = List(unidentifiableItem),
-          mergeCandidates = List(
-            MergeCandidate(
-              identifier = SourceIdentifier(
-                identifierType = IdentifierType.SierraSystemNumber,
-                ontologyType = "Work",
-                value = bibNumber
-              ),
-              reason = "METS work"
+        data = Some(
+          WorkData[DataState.Unidentified](
+            items = List(unidentifiableItem),
+            mergeCandidates = List(
+              MergeCandidate(
+                identifier = SourceIdentifier(
+                  identifierType = IdentifierType.SierraSystemNumber,
+                  ontologyType = "Work",
+                  value = bibNumber
+                ),
+                reason = "METS work"
+              )
             )
           )
         ),

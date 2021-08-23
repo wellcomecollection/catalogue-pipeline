@@ -95,7 +95,6 @@ object CalmTransformer
               Work.Invisible[Source](
                 state = Source(sourceIdentifier(record), record.retrievedAt),
                 version = version,
-                data = WorkData(),
                 invisibilityReasons =
                   List(knownErrToUntransformableReason(knownErr))
               )
@@ -108,7 +107,6 @@ object CalmTransformer
               Work.Invisible[Source](
                 state = Source(sourceIdentifier(record), record.retrievedAt),
                 version = version,
-                data = WorkData(),
                 invisibilityReasons =
                   List(InvalidValueInSourceField("Calm:AccessStatus"))
               )

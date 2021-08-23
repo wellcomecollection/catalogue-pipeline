@@ -59,12 +59,14 @@ case class MetsData(
           work = Work.Invisible[Source](
             version = version,
             state = Source(sourceIdentifier, modifiedTime),
-            data = WorkData[DataState.Unidentified](
-              items = List(item),
-              mergeCandidates = List(mergeCandidate),
-              thumbnail =
-                thumbnail(sourceIdentifier.value, license, accessStatus),
-              imageData = imageData(version, license, accessStatus, location)
+            data = Some(
+              WorkData[DataState.Unidentified](
+                items = List(item),
+                mergeCandidates = List(mergeCandidate),
+                thumbnail =
+                  thumbnail(sourceIdentifier.value, license, accessStatus),
+                imageData = imageData(version, license, accessStatus, location)
+              )
             ),
             invisibilityReasons = List(MetsWorksAreNotVisible)
           )

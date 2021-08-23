@@ -1352,7 +1352,6 @@ class SierraTransformerTest
         modifiedDate
       ),
       version = 1,
-      data = WorkData(),
       invisibilityReasons = invisibilityReasons
     )
   }
