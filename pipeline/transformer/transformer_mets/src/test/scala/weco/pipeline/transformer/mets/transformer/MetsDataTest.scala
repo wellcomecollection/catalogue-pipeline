@@ -11,19 +11,21 @@ import weco.catalogue.internal_model.work.DeletedReason.DeletedFromSource
 import weco.catalogue.internal_model.work.InvisibilityReason.MetsWorksAreNotVisible
 import weco.catalogue.internal_model.work._
 import weco.pipeline.transformer.mets.fixtures.MetsGenerators
+import weco.pipeline.transformer.mets.generators.MetsDataGenerators
 
 class MetsDataTest
     extends AnyFunSpec
-    with MetsGenerators
     with Matchers
     with EitherValues
-    with Inside {
+    with Inside
+    with MetsDataGenerators
+    with MetsGenerators {
 
   it("creates a invisible work with an item and a license") {
     val bibNumber = createBibNumber
     val metsData =
-      MetsData(
-        recordIdentifier = bibNumber,
+      createMetsDataWith(
+        bibNumber = bibNumber,
         accessConditionDz = Some("CC-BY-NC")
       )
     val version = 1
@@ -67,8 +69,7 @@ class MetsDataTest
 
   it("creates a deleted work") {
     val bibNumber = createBibNumber
-    val metsData =
-      MetsData(recordIdentifier = bibNumber, deleted = true)
+    val metsData = createDeletedMetsDataWith(bibNumber = bibNumber)
     val version = 1
     val expectedSourceIdentifier = SourceIdentifier(
       identifierType = IdentifierType.METS,
@@ -84,13 +85,14 @@ class MetsDataTest
         state = Source(expectedSourceIdentifier, createdDate),
         deletedReason = DeletedFromSource("Mets")
       )
-
   }
 
   it("creates a invisible work with an item and no license") {
     val bibNumber = createBibNumber
-    val metsData =
-      MetsData(recordIdentifier = bibNumber, accessConditionDz = None)
+    val metsData = createMetsDataWith(
+      bibNumber = bibNumber,
+      accessConditionDz = None
+    )
     val version = 1
     val expectedSourceIdentifier = SourceIdentifier(
       identifierType = IdentifierType.METS,
@@ -132,9 +134,7 @@ class MetsDataTest
   }
 
   it("fails creating a work if it cannot parse the license") {
-    val bibNumber = createBibNumber
-    val metsData =
-      MetsData(recordIdentifier = bibNumber, accessConditionDz = Some("blah"))
+    val metsData = createMetsDataWith(accessConditionDz = Some("blah"))
     val version = 1
 
     metsData.toWork(version, Instant.now()).left.get shouldBe a[Exception]
@@ -142,11 +142,9 @@ class MetsDataTest
   }
 
   it("can create a license if it matches the license label lowercase") {
-    val metsData =
-      MetsData(
-        recordIdentifier = createBibNumber,
-        accessConditionDz = Some("in copyright")
-      )
+    val metsData = createMetsDataWith(
+      accessConditionDz = Some("in copyright")
+    )
 
     inside(metsData.toWork(1, Instant.now()).right.get.data.items) {
       case List(
@@ -162,11 +160,9 @@ class MetsDataTest
   }
 
   it("can create a license if it matches the license label") {
-    val metsData =
-      MetsData(
-        recordIdentifier = createBibNumber,
-        accessConditionDz = Some("In copyright")
-      )
+    val metsData = createMetsDataWith(
+      accessConditionDz = Some("In copyright")
+    )
 
     inside(metsData.toWork(1, Instant.now()).right.get.data.items) {
       case List(
@@ -182,11 +178,9 @@ class MetsDataTest
   }
 
   it("can create a license if it matches the license url") {
-    val metsData =
-      MetsData(
-        recordIdentifier = createBibNumber,
-        accessConditionDz = Some(License.InCopyright.url)
-      )
+    val metsData = createMetsDataWith(
+      accessConditionDz = Some(License.InCopyright.url)
+    )
     inside(metsData.toWork(1, Instant.now()).right.get.data.items) {
       case List(
           Item(
@@ -201,8 +195,7 @@ class MetsDataTest
   }
 
   it("maps Copyright not cleared to In copyright") {
-    val metsData = MetsData(
-      recordIdentifier = createBibNumber,
+    val metsData = createMetsDataWith(
       accessConditionDz = Some("Copyright not cleared")
     )
     val result = metsData.toWork(1, Instant.now())
@@ -221,12 +214,10 @@ class MetsDataTest
   }
 
   it("can create a license for rightsstatements.org/page/InC/1.0/?language=en") {
-    val metsData =
-      MetsData(
-        recordIdentifier = createBibNumber,
-        accessConditionDz =
-          Some("rightsstatements.org/page/InC/1.0/?language=en")
-      )
+    val metsData = createMetsDataWith(
+      accessConditionDz =
+        Some("rightsstatements.org/page/InC/1.0/?language=en")
+    )
     val result = metsData.toWork(1, Instant.now())
 
     inside(result.right.get.data.items) {
@@ -243,11 +234,9 @@ class MetsDataTest
   }
 
   it("maps All Rights Reserved to In Copyright license") {
-    val metsData =
-      MetsData(
-        recordIdentifier = createBibNumber,
-        accessConditionDz = Some("All Rights Reserved")
-      )
+    val metsData = createMetsDataWith(
+      accessConditionDz = Some("All Rights Reserved")
+    )
     val result = metsData.toWork(1, Instant.now())
 
     inside(result.right.get.data.items) {
@@ -264,8 +253,7 @@ class MetsDataTest
   }
 
   it("creates a invisible work with a thumbnail location") {
-    val metsData = MetsData(
-      recordIdentifier = createBibNumber,
+    val metsData = createMetsDataWith(
       accessConditionDz = Some("CC-BY-NC"),
       fileReferencesMapping = List(
         "id" -> FileReference("l", "location.jp2", Some("image/jp2"))
@@ -284,8 +272,7 @@ class MetsDataTest
   }
 
   it("creates a invisible work with a title page thumbnail") {
-    val metsData = MetsData(
-      recordIdentifier = createBibNumber,
+    val metsData = createMetsDataWith(
       accessConditionDz = Some("CC-BY-NC"),
       fileReferencesMapping = List(
         "id" -> FileReference("l", "location.jp2", Some("image/jp2")),
@@ -306,8 +293,7 @@ class MetsDataTest
   }
 
   it("creates a invisible work without a thumbnail for restricted works") {
-    val metsData = MetsData(
-      recordIdentifier = createBibNumber,
+    val metsData = createMetsDataWith(
       accessConditionDz = Some("CC-BY-NC"),
       accessConditionStatus = Some("Restricted files"),
       fileReferencesMapping = List(
@@ -321,8 +307,8 @@ class MetsDataTest
 
   it("serves the thumbnail from wellcomelibrary for PDFs") {
     val bibNumber = createBibNumber
-    val metsData = MetsData(
-      recordIdentifier = bibNumber,
+    val metsData = createMetsDataWith(
+      bibNumber = bibNumber,
       accessConditionDz = Some("CC-BY-NC"),
       fileReferencesMapping = List(
         "id" -> FileReference("l", "location.pdf")
@@ -340,8 +326,7 @@ class MetsDataTest
   }
 
   it("does not add a thumbnail if the file is a video") {
-    val metsData = MetsData(
-      recordIdentifier = createBibNumber,
+    val metsData = createMetsDataWith(
       accessConditionDz = Some("CC-BY-NC"),
       fileReferencesMapping = List(
         "id" -> FileReference("v", "video.mpg", Some("video/mpeg"))
@@ -353,8 +338,7 @@ class MetsDataTest
   }
 
   it("does not add a thumbnail if the file is an audio") {
-    val metsData = MetsData(
-      recordIdentifier = createBibNumber,
+    val metsData = createMetsDataWith(
       accessConditionDz = Some("CC-BY-NC"),
       fileReferencesMapping = List(
         "id" -> FileReference("v", "video.mp3", Some("audio/x-mpeg-3"))
@@ -366,8 +350,7 @@ class MetsDataTest
   }
 
   it("uses both the IIIF manifest and image for imageData locations") {
-    val metsData = MetsData(
-      recordIdentifier = createBibNumber,
+    val metsData = createMetsDataWith(
       accessConditionDz = Some("CC-BY-NC"),
       fileReferencesMapping = List(
         "id" -> FileReference("l", "location.jp2", Some("image/jp2"))
@@ -392,10 +375,11 @@ class MetsDataTest
   }
 
   it("creates a work with a single accessCondition") {
-    val result = MetsData(
-      recordIdentifier = createBibNumber,
+    val metsData = createMetsDataWith(
       accessConditionStatus = Some("Requires registration")
-    ).toWork(1, Instant.now())
+    )
+
+    val result = metsData.toWork(1, Instant.now())
     result shouldBe a[Right[_, _]]
     inside(result.right.get.data.items.head.locations.head) {
       case DigitalLocation(_, _, _, _, _, accessConditions) =>
@@ -411,8 +395,8 @@ class MetsDataTest
 
   it("creates a work with all images") {
     val bibNumber = createBibNumber
-    val result = MetsData(
-      recordIdentifier = bibNumber,
+    val metsData = createMetsDataWith(
+      bibNumber = bibNumber,
       accessConditionDz = Some("CC-BY-NC"),
       fileReferencesMapping = List(
         "A" -> FileReference("A", "location1.jp2", Some("image/jp2")),
@@ -421,7 +405,9 @@ class MetsDataTest
         "D" -> FileReference("D", "location4.jp2", Some("application/pdf")),
         "E" -> FileReference("E", "location4.jp2", Some("video/mpeg"))
       )
-    ).toWork(1, Instant.now())
+    )
+
+    val result = metsData.toWork(1, Instant.now())
     result shouldBe a[Right[_, _]]
     val images = result.right.get.data.imageData
     images should have length 3
@@ -433,25 +419,25 @@ class MetsDataTest
   }
 
   it("creates a work without images for restricted access statuses") {
-    val result = MetsData(
-      recordIdentifier = createBibNumber,
+    val metsData = createMetsDataWith(
       accessConditionDz = Some("CC-BY-NC"),
       accessConditionStatus = Some("Restricted files"),
       fileReferencesMapping = List(
         "A" -> FileReference("A", "location1.jp2", Some("image/jp2")),
         "B" -> FileReference("B", "location2.jp2", Some("image/jp2"))
       )
-    ).toWork(1, Instant.now())
+    )
+    val result = metsData.toWork(1, Instant.now())
     result shouldBe a[Right[_, _]]
     result.right.get.data.imageData shouldBe empty
   }
 
   it("creates a work with a single accessCondition including usage terms") {
-    val result = MetsData(
-      recordIdentifier = createBibNumber,
+    val metsData = createMetsDataWith(
       accessConditionStatus = Some("Clinical images"),
       accessConditionUsage = Some("Please ask nicely")
-    ).toWork(1, Instant.now())
+    )
+    val result = metsData.toWork(1, Instant.now())
     result shouldBe a[Right[_, _]]
     inside(result.right.get.data.items.head.locations.head) {
       case DigitalLocation(_, _, _, _, _, accessConditions) =>
@@ -466,11 +452,11 @@ class MetsDataTest
   }
 
   it("does not add access condition if all fields are empty") {
-    val result = MetsData(
-      recordIdentifier = createBibNumber,
+    val metsData = createMetsDataWith(
       accessConditionStatus = None,
       accessConditionUsage = None
-    ).toWork(1, Instant.now())
+    )
+    val result = metsData.toWork(1, Instant.now())
     result shouldBe a[Right[_, _]]
     inside(result.right.get.data.items.head.locations.head) {
       case DigitalLocation(_, _, _, _, _, accessConditions) =>
@@ -479,10 +465,10 @@ class MetsDataTest
   }
 
   it("maps restricted files to Restricted AccessCondition") {
-    val result = MetsData(
-      recordIdentifier = createBibNumber,
+    val metsData = createMetsDataWith(
       accessConditionStatus = Some("Restricted files")
-    ).toWork(1, Instant.now())
+    )
+    val result = metsData.toWork(1, Instant.now())
     result shouldBe a[Right[_, _]]
     inside(result.right.get.data.items.head.locations.head) {
       case DigitalLocation(_, _, _, _, _, accessConditions) =>
@@ -497,19 +483,17 @@ class MetsDataTest
   }
 
   it("fails creating a work when unknown AccessStatus") {
-    val result = MetsData(
-      recordIdentifier = createBibNumber,
+    val metsData = createMetsDataWith(
       accessConditionStatus = Some("Kanye West")
-    ).toWork(1, Instant.now())
+    )
+    val result = metsData.toWork(1, Instant.now())
     result shouldBe a[Left[_, _]]
   }
 
   it("lowercases the b number") {
-    val data = MetsData(
-      recordIdentifier = "B12345678"
-    )
+    val metsData = createMetsDataWith(bibNumber = "B12345678")
 
-    val work = data.toWork(version = 1, modifiedTime = Instant.now()).value
+    val work = metsData.toWork(version = 1, modifiedTime = Instant.now()).value
 
     work.sourceIdentifier shouldBe SourceIdentifier(
       identifierType = IdentifierType.METS,
