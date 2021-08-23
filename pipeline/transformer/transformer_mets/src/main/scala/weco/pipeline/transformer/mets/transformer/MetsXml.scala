@@ -37,12 +37,38 @@ case class MetsXml(root: Elem) {
     */
   def recordIdentifier: Either[Exception, String] = {
     val identifierNodes =
-      (root \\ "dmdSec" \ "mdWrap" \\ "recordInfo" \ "recordIdentifier").toList
+      (root \\ "dmdSec" \ "mdWrap" \\ "recordInfo" \ "recordIdentifier").toList.distinct
     identifierNodes match {
-      case identifierNodes if identifierNodes.distinct.size == 1 =>
-        Right(identifierNodes.head.text)
+      case Seq(node) => Right(node.text)
       case _ =>
         Left(new Exception("Could not parse recordIdentifier from METS XML"))
+    }
+  }
+
+  /** The title is encoded in the METS.  For example:
+    *
+    * <mets:dmdSec ID="DMDLOG_0000">
+    *   <mets:mdWrap MDTYPE="MODS">
+    *     <mets:xmlData>
+    *       <mods:mods>
+    *         <mods:titleInfo>
+    *           <mods:title>Reduction and treatment of a fracture of the calcaneus</mods:title>
+    *         </mods:titleInfo>
+    *       </mods:mods>
+    *     </mets:xmlData>
+    *   </mets:mdWrap>
+    * </mets:dmdSec>
+    *
+    * The title is "Reduction and treatment of a fracture of the calcaneus"
+    */
+  def title: Either[Exception, String] = {
+    val titleNodes =
+      (root \\ "dmdSec" \ "mdWrap" \\ "titleInfo" \ "title").toList.distinct
+
+    titleNodes match {
+      case Seq(node) => Right(node.text)
+      case _ =>
+        Left(new Exception("Could not parse title from METS XML"))
     }
   }
 
