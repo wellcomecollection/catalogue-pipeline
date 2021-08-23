@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+import os
+import urllib.request
+
 import boto3
 import click
 import json
@@ -29,11 +32,41 @@ def get_aws_session(*, role_arn):
     )
 
 
+def add_miro_image(*, graph, canonical_id, miro_id):
+    """
+    If the --miro-images option is selected, include a thumbnail of
+    the Miro image in the visual graph.
+    """
+    out_path = os.path.join("_images", "miro", miro_id + ".jpg")
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    if not os.path.exists(out_path):
+        urllib.request.urlretrieve(
+            f"https://iiif.wellcomecollection.org/thumbs/{miro_id}/full/!100,100/0/default.jpg",
+            out_path,
+        )
+
+    # This draws a table with the image and the label.
+    # See https://stackoverflow.com/a/58833863
+    graph.node(
+        canonical_id,
+        label=f"""
+        <
+            <table cellspacing="0" border="0" cellborder="0">
+                <tr><td><img src="{out_path}"/></td></tr>
+                <tr><td>Miro<br/>{miro_id}</td></tr>
+            </table>
+        >
+        """.strip(),
+        _attributes={"shape": "box"}
+    )
+
+
 @click.command()
 @click.argument("index_date")
 @click.argument("work_id")
 @click.option("--emit-work-data", is_flag=True)
-def main(index_date, work_id, emit_work_data):
+@click.option("--miro-images/--no-miro-images", default=True)
+def main(index_date, work_id, emit_work_data, miro_images):
     session = get_aws_session(
         role_arn="arn:aws:iam::760097843905:role/platform-read_only"
     )
@@ -70,7 +103,12 @@ def main(index_date, work_id, emit_work_data):
         lambda x: x[0]["type"] != "Deleted", zip(nodes, valid_node_links)
     ):
         source = source_type_labels.get(node["source_id_type"], node["source_id_type"])
-        graph.node(node["id"], label=fr"{source}\n{node['source_id']}")
+
+        if source == "Miro" and miro_images:
+            add_miro_image(graph=graph, miro_id=node["source_id"], canonical_id=node["id"])
+        else:
+            graph.node(node["id"], label=fr"{source}\n{node['source_id']}")
+
         graph.edges([(node["id"], dest) for dest in links])
 
     print(graph.source)
