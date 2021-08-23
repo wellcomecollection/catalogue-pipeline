@@ -23,7 +23,7 @@ trait RelationGenerators extends WorkGenerators with ItemsGenerators {
         List(createDigitalItemWith(accessStatus = AccessStatus.Open))
       } else Nil)
 
-  def toRelationWork(work: Work[Merged]): RelationWork =
+  def toRelationWork(work: Work.Visible[Merged]): RelationWork =
     RelationWork(
       data = RelationWorkData(
         title = work.data.title,

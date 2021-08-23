@@ -15,7 +15,7 @@ class ParentWorkTest extends AnyFunSpec with Matchers with ImageGenerators {
             createImageData.toIdentified
           }.toList)
 
-      w.toParentWork.data.imageData shouldBe empty
+      w.toParentWork.data.get.imageData shouldBe empty
     }
 
     it("removes the imageData from an identified work") {
@@ -25,7 +25,7 @@ class ParentWorkTest extends AnyFunSpec with Matchers with ImageGenerators {
             createImageData.toIdentified
           }.toList)
 
-      w.toParentWork.data.imageData shouldBe empty
+      w.toParentWork.data.get.imageData shouldBe empty
     }
   }
 }

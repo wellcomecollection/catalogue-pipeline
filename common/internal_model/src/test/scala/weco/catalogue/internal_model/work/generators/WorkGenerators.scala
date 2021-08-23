@@ -140,7 +140,7 @@ trait WorkGenerators
       invisibilityReasons: List[InvisibilityReason] = Nil
     ): Work.Invisible[State] =
       Work.Invisible[State](
-        data = work.data,
+        data = Some(work.data),
         state = work.state,
         version = work.version,
         invisibilityReasons = invisibilityReasons
@@ -272,33 +272,6 @@ trait WorkGenerators
         implicitly[UpdateState[State]].apply(work.state, nextData)
       )
     }
-  }
-
-  implicit class IndexedWorkOps(work: Work.Visible[Indexed])(
-    implicit updateState: UpdateState[Indexed]
-  ) {
-
-    def ancestors(works: Work.Visible[Indexed]*): Work.Visible[Indexed] =
-      Work.Visible[Indexed](
-        work.version,
-        work.data,
-        updateState(
-          work.state.copy(
-            relations = work.state.relations.copy(
-              ancestors = works.toList.zipWithIndex.map {
-                case (work, idx) =>
-                  Relation(
-                    work = work,
-                    depth = idx + 1,
-                    numChildren = 1,
-                    numDescendents = works.length - idx
-                  )
-              }
-            )
-          ),
-          work.data
-        )
-      )
   }
 
   trait UpdateState[State <: WorkState] {

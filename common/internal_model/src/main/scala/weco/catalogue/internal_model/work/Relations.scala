@@ -1,7 +1,7 @@
 package weco.catalogue.internal_model.work
 
 import weco.catalogue.internal_model.identifiers.CanonicalId
-import weco.catalogue.internal_model.work.WorkState.{Indexed, Merged}
+import weco.catalogue.internal_model.work.WorkState.Merged
 
 /** Holds relations for a particular work.
   *
@@ -70,14 +70,11 @@ object Relation {
       numDescendents = numDescendents,
     )
 
-  def apply[State <: WorkState](work: Work[State],
+  def apply[State <: WorkState](work: Work.Visible[State],
                                 depth: Int,
                                 numChildren: Int,
                                 numDescendents: Int): Relation =
     work.state match {
-      case state: Indexed =>
-        apply(state.canonicalId, work.data, depth, numChildren, numDescendents)
-
       case state: Merged =>
         apply(state.canonicalId, work.data, depth, numChildren, numDescendents)
 
