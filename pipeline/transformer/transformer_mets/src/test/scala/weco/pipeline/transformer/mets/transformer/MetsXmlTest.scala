@@ -3,7 +3,8 @@ package weco.pipeline.transformer.mets.transformer
 import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.pipeline.transformer.mets.fixtures.{LocalResources, MetsGenerators}
+import weco.pipeline.transformer.mets.fixtures.LocalResources
+import weco.pipeline.transformer.mets.generators.MetsGenerators
 
 class MetsXmlTest
     extends AnyFunSpec

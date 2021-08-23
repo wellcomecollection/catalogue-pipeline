@@ -4,8 +4,10 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.locations.License
 import weco.catalogue.source_model.mets.{DeletedMetsFile, MetsFileWithImages}
-import weco.pipeline.transformer.mets.fixtures.{LocalResources, MetsGenerators}
+import weco.pipeline.transformer.mets.fixtures.LocalResources
+import weco.pipeline.transformer.mets.generators.MetsGenerators
 import weco.pipeline.transformer.result.Result
+import weco.sierra.generators.SierraIdentifierGenerators
 import weco.storage.s3.{S3ObjectLocation, S3ObjectLocationPrefix}
 import weco.storage.store.memory.MemoryStore
 
@@ -15,6 +17,7 @@ class MetsXmlTransformerTest
     extends AnyFunSpec
     with Matchers
     with MetsGenerators
+    with SierraIdentifierGenerators
     with LocalResources {
 
   it("transforms METS XML") {
@@ -114,7 +117,7 @@ class MetsXmlTransformerTest
       manifestations = manifestations) shouldBe a[Left[_, _]]
   }
 
-  def transform(id: String = randomAlphanumeric(),
+  def transform(id: String = createSierraBibNumber.withoutCheckDigit,
                 root: Option[String],
                 createdDate: Instant,
                 deleted: Boolean = false,

@@ -10,8 +10,7 @@ import weco.catalogue.internal_model.locations._
 import weco.catalogue.internal_model.work.DeletedReason.DeletedFromSource
 import weco.catalogue.internal_model.work.InvisibilityReason.MetsWorksAreNotVisible
 import weco.catalogue.internal_model.work._
-import weco.pipeline.transformer.mets.fixtures.MetsGenerators
-import weco.pipeline.transformer.mets.generators.MetsDataGenerators
+import weco.pipeline.transformer.mets.generators.{MetsDataGenerators, MetsGenerators}
 
 class MetsDataTest
     extends AnyFunSpec
@@ -22,7 +21,7 @@ class MetsDataTest
     with MetsGenerators {
 
   it("creates a invisible work with an item and a license") {
-    val bibNumber = createBibNumber
+    val bibNumber = createBibNumberString
     val metsData =
       createMetsDataWith(
         bibNumber = bibNumber,
@@ -68,7 +67,7 @@ class MetsDataTest
   }
 
   it("creates a deleted work") {
-    val bibNumber = createBibNumber
+    val bibNumber = createBibNumberString
     val metsData = createDeletedMetsDataWith(bibNumber = bibNumber)
     val version = 1
     val expectedSourceIdentifier = SourceIdentifier(
@@ -88,7 +87,7 @@ class MetsDataTest
   }
 
   it("creates a invisible work with an item and no license") {
-    val bibNumber = createBibNumber
+    val bibNumber = createBibNumberString
     val metsData = createMetsDataWith(
       bibNumber = bibNumber,
       accessConditionDz = None
@@ -306,7 +305,7 @@ class MetsDataTest
   }
 
   it("serves the thumbnail from wellcomelibrary for PDFs") {
-    val bibNumber = createBibNumber
+    val bibNumber = createBibNumberString
     val metsData = createMetsDataWith(
       bibNumber = bibNumber,
       accessConditionDz = Some("CC-BY-NC"),
@@ -394,7 +393,7 @@ class MetsDataTest
   }
 
   it("creates a work with all images") {
-    val bibNumber = createBibNumber
+    val bibNumber = createBibNumberString
     val metsData = createMetsDataWith(
       bibNumber = bibNumber,
       accessConditionDz = Some("CC-BY-NC"),
