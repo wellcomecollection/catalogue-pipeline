@@ -57,7 +57,7 @@ def add_miro_image(*, graph, canonical_id, miro_id):
             </table>
         >
         """.strip(),
-        _attributes={"shape": "box"}
+        _attributes={"shape": "box"},
     )
 
 
@@ -105,7 +105,9 @@ def main(index_date, work_id, emit_work_data, miro_images):
         source = source_type_labels.get(node["source_id_type"], node["source_id_type"])
 
         if source == "Miro" and miro_images:
-            add_miro_image(graph=graph, miro_id=node["source_id"], canonical_id=node["id"])
+            add_miro_image(
+                graph=graph, miro_id=node["source_id"], canonical_id=node["id"]
+            )
         else:
             graph.node(node["id"], label=fr"{source}\n{node['source_id']}")
 
