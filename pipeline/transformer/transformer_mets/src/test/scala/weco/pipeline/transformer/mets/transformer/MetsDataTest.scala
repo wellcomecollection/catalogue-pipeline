@@ -217,8 +217,7 @@ class MetsDataTest
 
   it("can create a license for rightsstatements.org/page/InC/1.0/?language=en") {
     val metsData = createMetsDataWith(
-      accessConditionDz =
-        Some("rightsstatements.org/page/InC/1.0/?language=en")
+      accessConditionDz = Some("rightsstatements.org/page/InC/1.0/?language=en")
     )
     val result = metsData.toWork(1, Instant.now())
 

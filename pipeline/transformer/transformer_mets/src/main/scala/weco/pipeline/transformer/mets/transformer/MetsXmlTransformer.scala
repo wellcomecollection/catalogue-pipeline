@@ -26,7 +26,8 @@ class MetsXmlTransformer(store: Readable[S3ObjectLocation, String])
       )
     } yield work
 
-  def transform(id: String, metsSourceData: MetsSourceData): Result[NewMetsData] =
+  def transform(id: String,
+                metsSourceData: MetsSourceData): Result[NewMetsData] =
     metsSourceData match {
       case DeletedMetsFile(_, _) =>
         Right(
@@ -44,7 +45,8 @@ class MetsXmlTransformer(store: Readable[S3ObjectLocation, String])
           }
     }
 
-  private def transformWithoutManifestations(root: MetsXml): Result[InvisibleMetsData] =
+  private def transformWithoutManifestations(
+    root: MetsXml): Result[InvisibleMetsData] =
     for {
       id <- root.recordIdentifier
       accessConditionDz <- root.accessConditionDz

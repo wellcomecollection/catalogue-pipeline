@@ -21,7 +21,8 @@ import weco.pipeline.transformer.mets.transformers.{
 sealed trait NewMetsData {
   val recordIdentifier: String
 
-  def toWork(version: Int, modifiedTime: Instant): Either[Throwable, Work[Source]]
+  def toWork(version: Int,
+             modifiedTime: Instant): Either[Throwable, Work[Source]]
 
   protected def sourceIdentifier: SourceIdentifier =
     SourceIdentifier(
@@ -36,7 +37,8 @@ sealed trait NewMetsData {
 }
 
 case class DeletedMetsData(recordIdentifier: String) extends NewMetsData {
-  override def toWork(version: Int, modifiedTime: Instant): Either[Throwable, Work[Source]] =
+  override def toWork(version: Int,
+                      modifiedTime: Instant): Either[Throwable, Work[Source]] =
     Right(
       Work.Deleted[Source](
         version = version,
@@ -79,8 +81,7 @@ case class InvisibleMetsData(
         data = WorkData[DataState.Unidentified](
           items = List(item),
           mergeCandidates = List(mergeCandidate),
-          thumbnail =
-            thumbnail(sourceIdentifier.value, license, accessStatus),
+          thumbnail = thumbnail(sourceIdentifier.value, license, accessStatus),
           imageData = imageData(version, license, accessStatus, location)
         ),
         invisibilityReasons = List(MetsWorksAreNotVisible)

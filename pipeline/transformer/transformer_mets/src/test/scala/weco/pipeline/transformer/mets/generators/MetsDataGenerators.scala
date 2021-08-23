@@ -1,6 +1,9 @@
 package weco.pipeline.transformer.mets.generators
 
-import weco.pipeline.transformer.mets.transformer.{FileReference, InvisibleMetsData}
+import weco.pipeline.transformer.mets.transformer.{
+  FileReference,
+  InvisibleMetsData
+}
 import weco.sierra.generators.SierraIdentifierGenerators
 
 trait MetsDataGenerators extends SierraIdentifierGenerators {
