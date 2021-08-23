@@ -50,6 +50,7 @@ case class DeletedMetsData(recordIdentifier: String) extends NewMetsData {
 
 case class InvisibleMetsData(
   recordIdentifier: String,
+  title: String,
   accessConditionDz: Option[String] = None,
   accessConditionStatus: Option[String] = None,
   accessConditionUsage: Option[String] = None,
@@ -79,6 +80,7 @@ case class InvisibleMetsData(
         version = version,
         state = Source(sourceIdentifier, modifiedTime),
         data = WorkData[DataState.Unidentified](
+          title = Some(title),
           items = List(item),
           mergeCandidates = List(mergeCandidate),
           thumbnail = thumbnail(sourceIdentifier.value, license, accessStatus),
