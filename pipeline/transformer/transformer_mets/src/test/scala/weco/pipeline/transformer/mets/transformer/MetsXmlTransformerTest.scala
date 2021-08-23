@@ -62,7 +62,8 @@ class MetsXmlTransformerTest
       manifestations = manifestations) shouldBe Right(
       InvisibleMetsData(
         recordIdentifier = "b22012692",
-        title = "Enciclopedia anatomica che comprende l'anatomia descrittiva, l'anatomia generale, l'anatomia patologica, la storia dello sviluppo e delle razze umane /",
+        title =
+          "Enciclopedia anatomica che comprende l'anatomia descrittiva, l'anatomia generale, l'anatomia patologica, la storia dello sviluppo e delle razze umane /",
         accessConditionDz = Some("PDM"),
         accessConditionStatus = Some("Open"),
         fileReferencesMapping = createFileReferences(2, "b22012692", Some(1)),
@@ -76,7 +77,8 @@ class MetsXmlTransformerTest
 
     val xml = xmlWithManifestations(
       title = title,
-      manifestations = List(("LOG_0001", "01", "first"), ("LOG_0002", "02", "second.xml"))
+      manifestations =
+        List(("LOG_0001", "01", "first"), ("LOG_0002", "02", "second.xml"))
     ).toString()
 
     val manifestations = Map(
@@ -88,9 +90,7 @@ class MetsXmlTransformerTest
           fileSec = fileSec("b30246039"),
           structMap = structMap)),
       "second.xml" -> Some(
-        metsXmlWith(
-          recordIdentifier = "b30246039",
-          title = title)),
+        metsXmlWith(recordIdentifier = "b30246039", title = title)),
     )
     transform(
       root = Some(xml),

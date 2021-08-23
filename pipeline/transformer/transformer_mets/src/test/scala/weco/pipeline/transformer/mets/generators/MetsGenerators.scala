@@ -31,7 +31,8 @@ trait MetsGenerators extends RandomGenerators {
       {structMap}
      </mets:mets>.toString()
 
-  def xmlWithManifestations(manifestations: List[(String, String, String)], title: String = randomAlphanumeric()) =
+  def xmlWithManifestations(manifestations: List[(String, String, String)],
+                            title: String = randomAlphanumeric()) =
     <mets:mets xmlns:mets="http://www.loc.gov/METS/" xmlns:mods="http://www.loc.gov/mods/v3" xmlns:xlink="http://www.w3.org/1999/xlink">
       {
       rootSection(
