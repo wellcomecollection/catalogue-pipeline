@@ -23,7 +23,7 @@ class MetsXmlTransformerTest
   it("transforms METS XML") {
     val xml = loadXmlFile("/b30246039.xml")
     transform(root = Some(xml), createdDate = Instant.now) shouldBe Right(
-      MetsData(
+      InvisibleMetsData(
         recordIdentifier = "b30246039",
         accessConditionDz = Some("CC-BY-NC"),
         accessConditionStatus = Some("Open"),
@@ -59,7 +59,7 @@ class MetsXmlTransformerTest
       root = Some(xml),
       createdDate = Instant.now,
       manifestations = manifestations) shouldBe Right(
-      MetsData(
+      InvisibleMetsData(
         recordIdentifier = "b22012692",
         accessConditionDz = Some("PDM"),
         accessConditionStatus = Some("Open"),
@@ -86,7 +86,7 @@ class MetsXmlTransformerTest
       root = Some(xml),
       createdDate = Instant.now,
       manifestations = manifestations) shouldBe Right(
-      MetsData(
+      InvisibleMetsData(
         recordIdentifier = "b30246039",
         accessConditionDz = Some("INC"),
         accessConditionStatus = None,

@@ -23,7 +23,7 @@ sealed trait NewMetsData {
 
   def toWork(version: Int, modifiedTime: Instant): Either[Throwable, Work[Source]]
 
-  protected def sourceIdentifier =
+  protected def sourceIdentifier: SourceIdentifier =
     SourceIdentifier(
       identifierType = IdentifierType.METS,
       ontologyType = "Work",
@@ -46,59 +46,46 @@ case class DeletedMetsData(recordIdentifier: String) extends NewMetsData {
     )
 }
 
-case class MetsData(
+case class InvisibleMetsData(
   recordIdentifier: String,
   accessConditionDz: Option[String] = None,
   accessConditionStatus: Option[String] = None,
   accessConditionUsage: Option[String] = None,
   fileReferencesMapping: List[(String, FileReference)] = Nil,
-  titlePageId: Option[String] = None,
-  deleted: Boolean = false
+  titlePageId: Option[String] = None
 ) extends NewMetsData {
 
   def toWork(
     version: Int,
     modifiedTime: Instant
-  ): Either[Throwable, Work[Source]] = {
-    deleted match {
-      case true =>
-        Right(
-          Work.Deleted[Source](
-            version = version,
-            state = Source(sourceIdentifier, modifiedTime),
-            deletedReason = DeletedFromSource("Mets")
-          )
-        )
-      case false =>
-        for {
-          license <- parseLicense
-          accessStatus <- MetsAccessStatus(accessConditionStatus)
-          location = MetsLocation(
-            recordIdentifier = recordIdentifier,
-            license = license,
-            accessStatus = accessStatus,
-            accessConditionUsage = accessConditionUsage
-          )
-          item = Item[IdState.Unminted](
-            id = IdState.Unidentifiable,
-            locations = List(location)
-          )
+  ): Either[Throwable, Work[Source]] =
+    for {
+      license <- parseLicense
+      accessStatus <- MetsAccessStatus(accessConditionStatus)
+      location = MetsLocation(
+        recordIdentifier = recordIdentifier,
+        license = license,
+        accessStatus = accessStatus,
+        accessConditionUsage = accessConditionUsage
+      )
+      item = Item[IdState.Unminted](
+        id = IdState.Unidentifiable,
+        locations = List(location)
+      )
 
-          work = Work.Invisible[Source](
-            version = version,
-            state = Source(sourceIdentifier, modifiedTime),
-            data = WorkData[DataState.Unidentified](
-              items = List(item),
-              mergeCandidates = List(mergeCandidate),
-              thumbnail =
-                thumbnail(sourceIdentifier.value, license, accessStatus),
-              imageData = imageData(version, license, accessStatus, location)
-            ),
-            invisibilityReasons = List(MetsWorksAreNotVisible)
-          )
-        } yield work
-    }
-  }
+      work = Work.Invisible[Source](
+        version = version,
+        state = Source(sourceIdentifier, modifiedTime),
+        data = WorkData[DataState.Unidentified](
+          items = List(item),
+          mergeCandidates = List(mergeCandidate),
+          thumbnail =
+            thumbnail(sourceIdentifier.value, license, accessStatus),
+          imageData = imageData(version, license, accessStatus, location)
+        ),
+        invisibilityReasons = List(MetsWorksAreNotVisible)
+      )
+    } yield work
 
   private lazy val fileReferences: List[FileReference] =
     fileReferencesMapping.map { case (_, fileReference) => fileReference }
@@ -209,5 +196,4 @@ case class MetsData(
           }
         }
     }
-
 }
