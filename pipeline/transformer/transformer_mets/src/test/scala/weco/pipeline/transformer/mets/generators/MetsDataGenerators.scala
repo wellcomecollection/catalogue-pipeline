@@ -21,10 +21,4 @@ trait MetsDataGenerators extends SierraIdentifierGenerators {
       fileReferencesMapping = fileReferencesMapping,
       titlePageId = titlePageId
     )
-
-  def createDeletedMetsDataWith(bibNumber: String): MetsData =
-    MetsData(
-      recordIdentifier = bibNumber,
-      deleted = true
-    )
 }

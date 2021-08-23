@@ -10,7 +10,10 @@ import weco.catalogue.internal_model.locations._
 import weco.catalogue.internal_model.work.DeletedReason.DeletedFromSource
 import weco.catalogue.internal_model.work.InvisibilityReason.MetsWorksAreNotVisible
 import weco.catalogue.internal_model.work._
-import weco.pipeline.transformer.mets.generators.{MetsDataGenerators, MetsGenerators}
+import weco.pipeline.transformer.mets.generators.{
+  MetsDataGenerators,
+  MetsGenerators
+}
 
 class MetsDataTest
     extends AnyFunSpec
@@ -68,7 +71,7 @@ class MetsDataTest
 
   it("creates a deleted work") {
     val bibNumber = createBibNumberString
-    val metsData = createDeletedMetsDataWith(bibNumber = bibNumber)
+    val metsData = DeletedMetsData(bibNumber)
     val version = 1
     val expectedSourceIdentifier = SourceIdentifier(
       identifierType = IdentifierType.METS,

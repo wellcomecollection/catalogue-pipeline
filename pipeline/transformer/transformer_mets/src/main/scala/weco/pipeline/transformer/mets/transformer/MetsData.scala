@@ -18,6 +18,34 @@ import weco.pipeline.transformer.mets.transformers.{
   MetsLocation
 }
 
+sealed trait NewMetsData {
+  val recordIdentifier: String
+
+  def toWork(version: Int, modifiedTime: Instant): Either[Throwable, Work[Source]]
+
+  protected def sourceIdentifier =
+    SourceIdentifier(
+      identifierType = IdentifierType.METS,
+      ontologyType = "Work",
+      // We lowercase the b number in the METS file so it matches the
+      // case used by Sierra.
+      // e.g. b20442233 has the identifier "B20442233" in the METS file,
+      //
+      value = recordIdentifier.toLowerCase
+    )
+}
+
+case class DeletedMetsData(recordIdentifier: String) extends NewMetsData {
+  override def toWork(version: Int, modifiedTime: Instant): Either[Throwable, Work[Source]] =
+    Right(
+      Work.Deleted[Source](
+        version = version,
+        state = Source(sourceIdentifier, modifiedTime),
+        deletedReason = DeletedFromSource("Mets")
+      )
+    )
+}
+
 case class MetsData(
   recordIdentifier: String,
   accessConditionDz: Option[String] = None,
@@ -26,7 +54,7 @@ case class MetsData(
   fileReferencesMapping: List[(String, FileReference)] = Nil,
   titlePageId: Option[String] = None,
   deleted: Boolean = false
-) {
+) extends NewMetsData {
 
   def toWork(
     version: Int,
@@ -123,17 +151,6 @@ case class MetsData(
             Left(new Exception(s"Couldn't match $accessCondition to a license"))
         }
     }.sequence
-
-  private def sourceIdentifier =
-    SourceIdentifier(
-      identifierType = IdentifierType.METS,
-      ontologyType = "Work",
-      // We lowercase the b number in the METS file so it matches the
-      // case used by Sierra.
-      // e.g. b20442233 has the identifier "B20442233" in the METS file,
-      //
-      value = recordIdentifier.toLowerCase
-    )
 
   private def titlePageFileReference: Option[FileReference] =
     titlePageId

@@ -42,17 +42,7 @@ class MetsXmlTransformerTest
       id = "b30246039",
       root = Some(str),
       createdDate = Instant.now,
-      deleted = true) shouldBe Right(
-      MetsData(
-        recordIdentifier = "b30246039",
-        accessConditionDz = None,
-        accessConditionStatus = None,
-        accessConditionUsage = None,
-        fileReferencesMapping = Nil,
-        titlePageId = None,
-        deleted = true
-      )
-    )
+      deleted = true) shouldBe Right(DeletedMetsData("b30246039"))
   }
 
   it("errors when the root XML doesn't exist in the store") {
@@ -122,7 +112,7 @@ class MetsXmlTransformerTest
                 createdDate: Instant,
                 deleted: Boolean = false,
                 manifestations: Map[String, Option[String]] = Map.empty)
-    : Result[MetsData] = {
+    : Result[NewMetsData] = {
 
     val metsSourceData = if (deleted) {
       DeletedMetsFile(
