@@ -133,29 +133,30 @@ class IdMinterFeatureTest
   it("continues if something fails processing a message") {
     val messageSender = new MemoryMessageSender()
 
-    withLocalSqsQueuePair(visibilityTimeout = 1.second) { case QueuePair(queue, dlq) =>
-      withIdentifiersTable { identifiersTableConfig =>
-        val work = sourceWork()
-        val inputIndex = createIndex(List(work))
-        val outputIndex = mutable.Map.empty[String, Work[Identified]]
-        withWorkerService(
-          messageSender,
-          queue,
-          identifiersTableConfig,
-          inputIndex,
-          outputIndex) { _ =>
-          sendInvalidJSONto(queue)
+    withLocalSqsQueuePair(visibilityTimeout = 1.second) {
+      case QueuePair(queue, dlq) =>
+        withIdentifiersTable { identifiersTableConfig =>
+          val work = sourceWork()
+          val inputIndex = createIndex(List(work))
+          val outputIndex = mutable.Map.empty[String, Work[Identified]]
+          withWorkerService(
+            messageSender,
+            queue,
+            identifiersTableConfig,
+            inputIndex,
+            outputIndex) { _ =>
+            sendInvalidJSONto(queue)
 
-          sendNotificationToSQS(queue = queue, body = work.id)
+            sendNotificationToSQS(queue = queue, body = work.id)
 
-          eventually {
-            messageSender.messages should not be empty
+            eventually {
+              messageSender.messages should not be empty
 
-            assertQueueEmpty(queue)
-            assertQueueHasSize(dlq, size = 1)
+              assertQueueEmpty(queue)
+              assertQueueHasSize(dlq, size = 1)
+            }
           }
         }
-      }
     }
   }
 }

@@ -112,8 +112,7 @@ class IngestorWorkerServiceTest
     assertWorksIndexedCorrectly(works: _*)
   }
 
-  private def assertWorksIndexedCorrectly(
-    works: Work[Denormalised]*): Unit =
+  private def assertWorksIndexedCorrectly(works: Work[Denormalised]*): Unit =
     withLocalWorksIndex { indexedIndex =>
       withLocalDenormalisedWorksIndex { denormalisedIndex =>
         insertIntoElasticsearch(denormalisedIndex, works: _*)
