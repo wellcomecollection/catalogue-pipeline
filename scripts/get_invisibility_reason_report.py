@@ -48,15 +48,19 @@ if __name__ == "__main__":
 
     invisibility_reasons = collections.defaultdict(list)
 
-    for line in open(f'invisible_works_{pipeline_date}.json'):
+    for line in open(f"invisible_works_{pipeline_date}.json"):
         work = json.loads(line)
 
         for reason in work["_source"]["invisibilityReasons"]:
-            invisibility_reasons[(reason["type"], reason.get("message"))].append(work["_source"])
+            invisibility_reasons[(reason["type"], reason.get("message"))].append(
+                work["_source"]
+            )
 
-    with open(f'invisibility_reasons_{pipeline_date}.html', 'w') as outfile:
+    with open(f"invisibility_reasons_{pipeline_date}.html", "w") as outfile:
         for (reason, message), works in invisibility_reasons.items():
-            if reason == "UnableToTransform" and message.startswith("Calm:Suppressed level -"):
+            if reason == "UnableToTransform" and message.startswith(
+                "Calm:Suppressed level -"
+            ):
                 continue
 
             if reason == "MetsWorksAreNotVisible":
@@ -65,7 +69,9 @@ if __name__ == "__main__":
             outfile.write(f"<h1>{reason} - {message}</h1>\n\n")
             outfile.write("<ul>\n")
             for w in works:
-                outfile.write(f"  <li>{w['state']['sourceIdentifier']['identifierType']}/{w['state']['sourceIdentifier']['value']}")
+                outfile.write(
+                    f"  <li>{w['state']['sourceIdentifier']['identifierType']}/{w['state']['sourceIdentifier']['value']}"
+                )
             outfile.write("</ul>\n\n")
 
     # with open("invisibility_reasons.json", "w") as of:
