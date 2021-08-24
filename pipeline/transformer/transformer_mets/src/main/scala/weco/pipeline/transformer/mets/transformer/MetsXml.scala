@@ -40,10 +40,9 @@ case class MetsXml(root: Elem) {
       (root \\ "dmdSec" \ "mdWrap" \\ "recordInfo" \ "recordIdentifier").toList
     identifierNodes match {
       case identifierNodes if identifierNodes.distinct.size == 1 =>
-        Right[Exception, String](identifierNodes.head.text)
+        Right(identifierNodes.head.text)
       case _ =>
-        Left[Exception, String](
-          new Exception("Could not parse recordIdentifier from METS XML"))
+        Left(new Exception("Could not parse recordIdentifier from METS XML"))
     }
   }
 

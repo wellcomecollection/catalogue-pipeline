@@ -4,8 +4,10 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.locations.License
 import weco.catalogue.source_model.mets.{DeletedMetsFile, MetsFileWithImages}
-import weco.pipeline.transformer.mets.fixtures.{LocalResources, MetsGenerators}
+import weco.pipeline.transformer.mets.fixtures.LocalResources
+import weco.pipeline.transformer.mets.generators.MetsGenerators
 import weco.pipeline.transformer.result.Result
+import weco.sierra.generators.SierraIdentifierGenerators
 import weco.storage.s3.{S3ObjectLocation, S3ObjectLocationPrefix}
 import weco.storage.store.memory.MemoryStore
 
@@ -15,12 +17,13 @@ class MetsXmlTransformerTest
     extends AnyFunSpec
     with Matchers
     with MetsGenerators
+    with SierraIdentifierGenerators
     with LocalResources {
 
   it("transforms METS XML") {
     val xml = loadXmlFile("/b30246039.xml")
     transform(root = Some(xml), createdDate = Instant.now) shouldBe Right(
-      MetsData(
+      InvisibleMetsData(
         recordIdentifier = "b30246039",
         accessConditionDz = Some("CC-BY-NC"),
         accessConditionStatus = Some("Open"),
@@ -39,17 +42,7 @@ class MetsXmlTransformerTest
       id = "b30246039",
       root = Some(str),
       createdDate = Instant.now,
-      deleted = true) shouldBe Right(
-      MetsData(
-        recordIdentifier = "b30246039",
-        accessConditionDz = None,
-        accessConditionStatus = None,
-        accessConditionUsage = None,
-        fileReferencesMapping = Nil,
-        titlePageId = None,
-        deleted = true
-      )
-    )
+      deleted = true) shouldBe Right(DeletedMetsData("b30246039"))
   }
 
   it("errors when the root XML doesn't exist in the store") {
@@ -66,7 +59,7 @@ class MetsXmlTransformerTest
       root = Some(xml),
       createdDate = Instant.now,
       manifestations = manifestations) shouldBe Right(
-      MetsData(
+      InvisibleMetsData(
         recordIdentifier = "b22012692",
         accessConditionDz = Some("PDM"),
         accessConditionStatus = Some("Open"),
@@ -93,7 +86,7 @@ class MetsXmlTransformerTest
       root = Some(xml),
       createdDate = Instant.now,
       manifestations = manifestations) shouldBe Right(
-      MetsData(
+      InvisibleMetsData(
         recordIdentifier = "b30246039",
         accessConditionDz = Some("INC"),
         accessConditionStatus = None,
@@ -114,12 +107,12 @@ class MetsXmlTransformerTest
       manifestations = manifestations) shouldBe a[Left[_, _]]
   }
 
-  def transform(id: String = randomAlphanumeric(),
+  def transform(id: String = createSierraBibNumber.withoutCheckDigit,
                 root: Option[String],
                 createdDate: Instant,
                 deleted: Boolean = false,
                 manifestations: Map[String, Option[String]] = Map.empty)
-    : Result[MetsData] = {
+    : Result[NewMetsData] = {
 
     val metsSourceData = if (deleted) {
       DeletedMetsFile(

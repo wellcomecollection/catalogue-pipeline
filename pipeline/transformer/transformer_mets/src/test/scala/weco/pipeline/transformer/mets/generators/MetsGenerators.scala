@@ -1,14 +1,10 @@
-package weco.pipeline.transformer.mets.fixtures
+package weco.pipeline.transformer.mets.generators
 
-import weco.fixtures.RandomGenerators
 import weco.catalogue.internal_model.locations.License
 
 import scala.xml.NodeSeq
 
-trait MetsGenerators extends RandomGenerators {
-  def createBibNumber: String =
-    s"b%08d".format(randomInt(from = 1, to = 99999999))
-
+trait MetsGenerators {
   def metsXmlWith(
     recordIdentifier: String,
     license: Option[License] = None,

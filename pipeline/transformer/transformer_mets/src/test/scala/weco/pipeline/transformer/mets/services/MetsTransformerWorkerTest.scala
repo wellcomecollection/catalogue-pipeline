@@ -12,9 +12,10 @@ import weco.catalogue.source_model.mets.{MetsFileWithImages, MetsSourceData}
 import weco.fixtures.TestWith
 import weco.json.JsonUtil._
 import weco.messaging.sns.NotificationMessage
+import weco.pipeline.transformer.mets.generators.MetsGenerators
 import weco.pipeline.transformer.{TransformerWorker, TransformerWorkerTestCases}
-import weco.pipeline.transformer.mets.fixtures.MetsGenerators
 import weco.pipeline_storage.{PipelineStorageStream, Retriever}
+import weco.sierra.generators.SierraIdentifierGenerators
 import weco.storage.generators.S3ObjectLocationGenerators
 import weco.storage.s3.{S3ObjectLocation, S3ObjectLocationPrefix}
 import weco.storage.store.memory.MemoryTypedStore
@@ -29,6 +30,7 @@ class MetsTransformerWorkerTest
       MetsSourceData]
     with MetsGenerators
     with MetsSourceDataGenerators
+    with SierraIdentifierGenerators
     with S3ObjectLocationGenerators
     with IntegrationPatience {
   override def withContext[R](
@@ -37,7 +39,7 @@ class MetsTransformerWorkerTest
       MemoryTypedStore[S3ObjectLocation, String]()
     )
 
-  override def createId: String = createBibNumber
+  override def createId: String = createSierraBibNumber.withCheckDigit
 
   override def createPayloadWith(id: String, version: Int)(
     implicit store: MemoryTypedStore[S3ObjectLocation, String])

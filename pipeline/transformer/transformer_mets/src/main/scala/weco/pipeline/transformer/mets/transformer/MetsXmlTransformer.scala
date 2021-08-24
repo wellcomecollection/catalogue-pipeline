@@ -26,11 +26,12 @@ class MetsXmlTransformer(store: Readable[S3ObjectLocation, String])
       )
     } yield work
 
-  def transform(id: String, metsSourceData: MetsSourceData): Result[MetsData] =
+  def transform(id: String,
+                metsSourceData: MetsSourceData): Result[NewMetsData] =
     metsSourceData match {
       case DeletedMetsFile(_, _) =>
         Right(
-          MetsData(recordIdentifier = id, deleted = true)
+          DeletedMetsData(recordIdentifier = id)
         )
 
       case metsFile @ MetsFileWithImages(_, _, manifestations, _, _) =>
@@ -44,14 +45,15 @@ class MetsXmlTransformer(store: Readable[S3ObjectLocation, String])
           }
     }
 
-  private def transformWithoutManifestations(root: MetsXml): Result[MetsData] =
+  private def transformWithoutManifestations(
+    root: MetsXml): Result[InvisibleMetsData] =
     for {
       id <- root.recordIdentifier
       accessConditionDz <- root.accessConditionDz
       accessConditionStatus <- root.accessConditionStatus
       accessConditionUsage <- root.accessConditionUsage
     } yield
-      MetsData(
+      InvisibleMetsData(
         recordIdentifier = id,
         accessConditionDz = accessConditionDz,
         accessConditionStatus = accessConditionStatus,
@@ -62,7 +64,7 @@ class MetsXmlTransformer(store: Readable[S3ObjectLocation, String])
 
   private def transformWithManifestations(
     root: MetsXml,
-    manifestations: List[S3ObjectLocation]): Result[MetsData] =
+    manifestations: List[S3ObjectLocation]): Result[InvisibleMetsData] =
     for {
       id <- root.recordIdentifier
       firstManifestation <- getFirstManifestation(root, manifestations)
@@ -70,7 +72,7 @@ class MetsXmlTransformer(store: Readable[S3ObjectLocation, String])
       accessConditionStatus <- firstManifestation.accessConditionStatus
       accessConditionUsage <- firstManifestation.accessConditionUsage
     } yield
-      MetsData(
+      InvisibleMetsData(
         recordIdentifier = id,
         accessConditionDz = accessConditionDz,
         accessConditionStatus = accessConditionStatus,
