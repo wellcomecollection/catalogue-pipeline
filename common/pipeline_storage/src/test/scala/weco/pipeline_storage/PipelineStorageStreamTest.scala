@@ -443,10 +443,12 @@ class PipelineStorageStreamTest
           sender = brokenSender) { pipelineStream =>
           sendNotificationToSQS(queue, document)
 
-          def runStream = () => pipelineStream.foreach(
-            "test stream",
-            _ => Future.successful(List(document))
-          )
+          def runStream =
+            () =>
+              pipelineStream.foreach(
+                "test stream",
+                _ => Future.successful(List(document))
+            )
 
           whenReady(runStream()) { _ =>
             whenReady(runStream()) { _ =>

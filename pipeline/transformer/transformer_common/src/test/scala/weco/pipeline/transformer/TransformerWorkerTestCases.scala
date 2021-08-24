@@ -12,7 +12,11 @@ import weco.messaging.memory.MemoryMessageSender
 import weco.messaging.sns.NotificationMessage
 import weco.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 import weco.pipeline_storage.memory.{MemoryIndexer, MemoryRetriever}
-import weco.pipeline_storage.{PipelineStorageStream, Retriever, RetrieverNotFoundException}
+import weco.pipeline_storage.{
+  PipelineStorageStream,
+  Retriever,
+  RetrieverNotFoundException
+}
 
 import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
