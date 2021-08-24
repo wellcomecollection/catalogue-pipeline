@@ -114,10 +114,15 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
 
     val isDefinedForSource: WorkPredicate = sierraWork
 
+    // TODO: What if we don't get any matching source work?  Then we'd blat the
+    // otherIdentifiers already on the target work.  I can't think of a scenario
+    // in which it would happen in practice, so I can't test it, but noting in
+    // case we see this in future.
     def rule(target: Work.Visible[Identified],
              sources: NonEmptyList[Work[Identified]]): FieldData =
       findFirstLinkedDigitisedSierraWorkFor(target, sources.toList)
-        .map(target.data.otherIdentifiers ++ _.identifiers)
+        .map { w =>
+          target.data.otherIdentifiers ++ w.identifiers }
         .getOrElse(Nil)
   }
 }

@@ -10,26 +10,48 @@ object Sources {
   def findFirstLinkedDigitisedSierraWorkFor(
     target: Work.Visible[Identified],
     sources: Seq[Work[Identified]]): Option[Work[Identified]] =
-    if (physicalSierra(target)
+    target match {
+      // Audiovisual works are catalogued as multiple bib records, one for the physical
+      // format and another for the digitised version, where available.
+      //
+      // These bibs routinely contain different data, and we can't consider one of
+      // them canonical, unlike other physical/digitised bib pairs.
+      //
+      // Longer term, this may change based if Collections Information change how
+      // they catalogue AV works.
+      //
+      // See https://github.com/wellcomecollection/platform/issues/4876
+      case t if isAudiovisual(t) =>
+        None
 
-        // Audiovisual works are catalogued as multiple bib records, one for the physical
-        // format and another for the digitised version, where available.
-        //
-        // These bibs routinely contain different data, and we can't consider one of
-        // them canonical, unlike other physical/digitised bib pairs.
-        //
-        // Longer term, this may change based if Collections Information change how
-        // they catalogue AV works.
-        //
-        // See https://github.com/wellcomecollection/platform/issues/4876
-        && !isAudiovisual(target)) {
-      val digitisedLinkedIds = target.data.mergeCandidates
-        .filter(_.reason.contains("Physical/digitised Sierra work"))
-        .map(_.id.canonicalId)
+      // We've seen Sierra bib/e-bib pairs that go in both directions, i.e.
+      //
+      //      bib { 776 $w -> e-bib}
+      //
+      // and
+      //
+      //      e-bib { 776 $w -> bib }
+      //
+      // We need to handle both cases.
+      //
+      case t if physicalSierra(t) && t.data.mergeCandidates.nonEmpty =>
+        val digitisedLinkedIds = target.data.mergeCandidates
+          .filter(_.reason.contains("Physical/digitised Sierra work"))
+          .map(_.id.canonicalId)
 
-      sources.find(source =>
-        digitisedLinkedIds.contains(source.state.canonicalId))
-    } else {
-      None
+        sources.find(source =>
+          digitisedLinkedIds.contains(source.state.canonicalId))
+
+      case t if physicalSierra(t) =>
+        sources
+          .filter { w => sierraWork(w) && allDigitalLocations(w) }
+          .find { w =>
+            w.data.mergeCandidates.exists { mc =>
+              mc.reason == "Physical/digitised Sierra work" &&
+                mc.id.canonicalId == target.state.canonicalId
+            }
+          }
+
+      case _ => None
     }
 }

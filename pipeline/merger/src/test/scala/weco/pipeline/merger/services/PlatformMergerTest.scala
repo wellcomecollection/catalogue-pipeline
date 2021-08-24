@@ -6,12 +6,7 @@ import org.scalatest.prop.TableDrivenPropertyChecks._
 import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.catalogue.internal_model.work.WorkFsm._
 import weco.catalogue.internal_model.image.ParentWork._
-import weco.catalogue.internal_model.identifiers.{
-  CanonicalId,
-  IdState,
-  IdentifierType,
-  SourceIdentifier
-}
+import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.image.ParentWorks
 import weco.catalogue.internal_model.locations.{
   AccessCondition,
@@ -19,8 +14,7 @@ import weco.catalogue.internal_model.locations.{
   AccessStatus,
   DigitalLocation,
   License,
-  LocationType,
-  PhysicalLocation
+  LocationType
 }
 import weco.catalogue.internal_model.work.generators.SourceWorkGenerators
 import weco.catalogue.internal_model.work.{
@@ -961,81 +955,24 @@ class PlatformMergerTest
     visibleWorks.head.data.items should contain(item)
   }
 
-  it("preserves the identifiers when it merges a Sierra bib, e-bib and METS work") {
+  it("preserves the identifiers when it merges a Sierra bib, e-bib and METS work and the e-bib has the link") {
     // This test case is based on a real issue, when identifiers weren't being copied
     // across correctly and we were losing identifiers in the merging process.
 
     val physicalWork =
-      identifiedWork(
-        sourceIdentifier = SourceIdentifier(
-          identifierType = IdentifierType.SierraSystemNumber,
-          value = "b13456143",
-          ontologyType = "Work"
-        ),
-        canonicalId = CanonicalId("ym7pjfz2"),
-      )
+      sierraIdentifiedWork()
         .otherIdentifiers(
-          List(
-            SourceIdentifier(
-              identifierType = IdentifierType.SierraIdentifier,
-              value = "1345614",
-              ontologyType = "Work"
-            )
-          )
+          List(createSierraIdentifierSourceIdentifier)
         )
         .format(Format.Books)
-        .items(
-          List(
-            Item(
-              id = IdState.Identified(
-                canonicalId = CanonicalId("drmvgk97"),
-                sourceIdentifier = SourceIdentifier(
-                  identifierType = IdentifierType.SierraSystemNumber,
-                  value = "i13702543",
-                  ontologyType = "Item"
-                ),
-                otherIdentifiers = List(
-                  SourceIdentifier(
-                    identifierType = IdentifierType.SierraIdentifier,
-                    value = "1370254",
-                    ontologyType = "Item"
-                  )
-                )
-              ),
-              title = Some("Copy 1"),
-              locations = List(
-                PhysicalLocation(
-                  locationType = LocationType.OpenShelves,
-                  label = "Medical Collection",
-                  shelfmark = Some("Wm600 1905E47s"),
-                  accessConditions = List(AccessCondition(method = AccessMethod.OpenShelves))
-                )
-              )
-            ),
-          )
-        )
+        .items(List(createIdentifiedPhysicalItem))
 
     val electronicWork =
-      identifiedWork(
-        sourceIdentifier = SourceIdentifier(
-          identifierType = IdentifierType.SierraSystemNumber,
-          value = "b20442129",
-          ontologyType = "Work"
-        ),
-        canonicalId = CanonicalId("vvdua7tw")
-      )
+      sierraIdentifiedWork()
         .otherIdentifiers(
           List(
-            SourceIdentifier(
-              identifierType = IdentifierType.SierraIdentifier,
-              value = "2044212",
-              ontologyType = "Work"
-            ),
-            SourceIdentifier(
-              identifierType = IdentifierType.WellcomeDigcode,
-              value = "digsexology",
-              ontologyType = "Work"
-            )
+            createSierraIdentifierSourceIdentifier,
+            createDigcodeIdentifier("digsexology")
           )
         )
         .format(Format.Books)
@@ -1052,14 +989,7 @@ class PlatformMergerTest
         )
 
     val metsWork =
-      identifiedWork(
-        sourceIdentifier = SourceIdentifier(
-          identifierType = IdentifierType.METS,
-          value = "b20442129",
-          ontologyType = "Work"
-        ),
-        canonicalId = CanonicalId("gj9r47pm")
-      )
+      metsIdentifiedWork()
         .mergeCandidates(
           List(
             MergeCandidate(
@@ -1071,26 +1001,7 @@ class PlatformMergerTest
             )
           )
         )
-        .items(
-          List(
-            Item(
-              title = None,
-              locations = List(
-                DigitalLocation(
-                  locationType = LocationType.IIIFPresentationAPI,
-                  url = "https://iiif.wellcomecollection.org/presentation/v2/b20442129",
-                  license = Some(License.InCopyright),
-                  accessConditions = List(
-                    AccessCondition(
-                      method = AccessMethod.ViewOnline,
-                      status = AccessStatus.Open
-                    )
-                  )
-                )
-              )
-            )
-          )
-        )
+        .items(List(createDigitalItem))
         .invisible(List(InvisibilityReason.MetsWorksAreNotVisible))
 
     val works = Seq(metsWork, electronicWork, physicalWork)
@@ -1101,11 +1012,6 @@ class PlatformMergerTest
       .get
 
     redirectedWork.state.canonicalId shouldBe physicalWork.state.canonicalId
-
-    redirectedWork.identifiers should contain allOf(
-      physicalWork.identifiers,
-      electronicWork.identifiers,
-      metsWork.identifiers
-    )
+    redirectedWork.identifiers should contain theSameElementsAs (physicalWork.identifiers ++ electronicWork.identifiers)
   }
 }

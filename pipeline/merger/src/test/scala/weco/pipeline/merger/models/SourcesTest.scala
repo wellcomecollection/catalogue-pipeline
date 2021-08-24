@@ -55,6 +55,32 @@ class SourcesTest
       result shouldBe Some(digitisedWork1)
     }
 
+    it("finds a matching work if the MergeCandidate is on the digitised work") {
+      // There are some bib/e-bib pairs where the 776 $w linking field is on the
+      // electronic bib, rather than the physical bib.  In this case, we still
+      // need to find to digitised work.
+      val physicalWork = sierraPhysicalIdentifiedWork()
+      val digitisedWork =
+        sierraDigitalIdentifiedWork()
+          .mergeCandidates(
+            List(
+              MergeCandidate(
+                id = IdState.Identified(
+                  sourceIdentifier = physicalWork.sourceIdentifier,
+                  canonicalId = physicalWork.state.canonicalId),
+                reason = "Physical/digitised Sierra work"
+              )
+            )
+          )
+
+      val result =
+        Sources.findFirstLinkedDigitisedSierraWorkFor(
+          physicalWork,
+          sources = Seq(digitisedWork))
+
+      result shouldBe Some(digitisedWork)
+    }
+
     it("skips a MergeCandidate with the right ID but wrong reason") {
       val digitisedWork = sierraDigitalIdentifiedWork()
 
