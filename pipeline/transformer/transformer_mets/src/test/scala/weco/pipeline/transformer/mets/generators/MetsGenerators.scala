@@ -1,12 +1,14 @@
 package weco.pipeline.transformer.mets.generators
 
 import weco.catalogue.internal_model.locations.License
+import weco.fixtures.RandomGenerators
 
 import scala.xml.NodeSeq
 
-trait MetsGenerators {
+trait MetsGenerators extends RandomGenerators {
   def metsXmlWith(
     recordIdentifier: String,
+    title: String = randomAlphanumeric(),
     license: Option[License] = None,
     accessConditionStatus: Option[String] = None,
     accessConditionUsage: Option[String] = None,
@@ -18,6 +20,7 @@ trait MetsGenerators {
       {
       rootSection(
         recordIdentifier = recordIdentifier,
+        title = title,
         license = license,
         accessConditionStatus = accessConditionStatus,
         accessConditionUsage = accessConditionUsage
@@ -28,11 +31,13 @@ trait MetsGenerators {
       {structMap}
      </mets:mets>.toString()
 
-  def xmlWithManifestations(manifestations: List[(String, String, String)]) =
+  def xmlWithManifestations(manifestations: List[(String, String, String)],
+                            title: String = randomAlphanumeric()) =
     <mets:mets xmlns:mets="http://www.loc.gov/METS/" xmlns:mods="http://www.loc.gov/mods/v3" xmlns:xlink="http://www.w3.org/1999/xlink">
       {
       rootSection(
         recordIdentifier = "b30246039",
+        title = title,
         license = None,
         accessConditionStatus = None,
         accessConditionUsage = None
@@ -54,6 +59,7 @@ trait MetsGenerators {
 
   def rootSection(
     recordIdentifier: String,
+    title: String,
     license: Option[License],
     accessConditionStatus: Option[String],
     accessConditionUsage: Option[String]
@@ -65,6 +71,9 @@ trait MetsGenerators {
             <mods:recordInfo>
               <mods:recordIdentifier source="gbv-ppn">{recordIdentifier}</mods:recordIdentifier>
             </mods:recordInfo>
+            <mods:titleInfo>
+              <mods:title>{title}</mods:title>
+            </mods:titleInfo>
             {
       license.fold(ifEmpty = NodeSeq.Empty) { l =>
         <mods:accessCondition type="dz">{l.id.toUpperCase}</mods:accessCondition>

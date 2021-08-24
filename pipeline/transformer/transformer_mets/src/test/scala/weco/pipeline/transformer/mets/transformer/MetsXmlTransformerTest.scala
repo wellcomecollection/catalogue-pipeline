@@ -25,6 +25,7 @@ class MetsXmlTransformerTest
     transform(root = Some(xml), createdDate = Instant.now) shouldBe Right(
       InvisibleMetsData(
         recordIdentifier = "b30246039",
+        title = "[Report 1942] /",
         accessConditionDz = Some("CC-BY-NC"),
         accessConditionStatus = Some("Open"),
         accessConditionUsage = Some("Some terms"),
@@ -61,6 +62,8 @@ class MetsXmlTransformerTest
       manifestations = manifestations) shouldBe Right(
       InvisibleMetsData(
         recordIdentifier = "b22012692",
+        title =
+          "Enciclopedia anatomica che comprende l'anatomia descrittiva, l'anatomia generale, l'anatomia patologica, la storia dello sviluppo e delle razze umane /",
         accessConditionDz = Some("PDM"),
         accessConditionStatus = Some("Open"),
         fileReferencesMapping = createFileReferences(2, "b22012692", Some(1)),
@@ -70,17 +73,24 @@ class MetsXmlTransformerTest
   }
 
   it("transforms METS XML with manifestations without .xml in the name") {
+    val title = "[Report 1942] /"
+
     val xml = xmlWithManifestations(
-      List(("LOG_0001", "01", "first"), ("LOG_0002", "02", "second.xml"))
+      title = title,
+      manifestations =
+        List(("LOG_0001", "01", "first"), ("LOG_0002", "02", "second.xml"))
     ).toString()
+
     val manifestations = Map(
       "first.xml" -> Some(
         metsXmlWith(
-          "b30246039",
+          recordIdentifier = "b30246039",
+          title = title,
           license = Some(License.InCopyright),
           fileSec = fileSec("b30246039"),
           structMap = structMap)),
-      "second.xml" -> Some(metsXmlWith("b30246039")),
+      "second.xml" -> Some(
+        metsXmlWith(recordIdentifier = "b30246039", title = title)),
     )
     transform(
       root = Some(xml),
@@ -88,6 +98,7 @@ class MetsXmlTransformerTest
       manifestations = manifestations) shouldBe Right(
       InvisibleMetsData(
         recordIdentifier = "b30246039",
+        title = title,
         accessConditionDz = Some("INC"),
         accessConditionStatus = None,
         fileReferencesMapping = createFileReferences(2, "b30246039"),

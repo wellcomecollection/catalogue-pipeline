@@ -11,6 +11,7 @@ trait MetsDataGenerators extends SierraIdentifierGenerators {
 
   def createMetsDataWith(
     bibNumber: String = createBibNumberString,
+    title: String = randomAlphanumeric(),
     accessConditionDz: Option[String] = None,
     accessConditionStatus: Option[String] = None,
     accessConditionUsage: Option[String] = None,
@@ -18,6 +19,7 @@ trait MetsDataGenerators extends SierraIdentifierGenerators {
     titlePageId: Option[String] = None): InvisibleMetsData =
     InvisibleMetsData(
       recordIdentifier = bibNumber,
+      title = title,
       accessConditionDz = accessConditionDz,
       accessConditionStatus = accessConditionStatus,
       accessConditionUsage = accessConditionUsage,

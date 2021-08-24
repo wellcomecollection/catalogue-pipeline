@@ -25,11 +25,15 @@ class MetsDataTest
 
   it("creates a invisible work with an item and a license") {
     val bibNumber = createBibNumberString
+    val title = randomAlphanumeric()
+
     val metsData =
       createMetsDataWith(
         bibNumber = bibNumber,
+        title = title,
         accessConditionDz = Some("CC-BY-NC")
       )
+
     val version = 1
     val expectedSourceIdentifier = SourceIdentifier(
       identifierType = IdentifierType.METS,
@@ -53,6 +57,7 @@ class MetsDataTest
         version = version,
         state = Source(expectedSourceIdentifier, createdDate),
         data = WorkData[DataState.Unidentified](
+          title = Some(title),
           items = List(unidentifiableItem),
           mergeCandidates = List(
             MergeCandidate(
@@ -91,8 +96,10 @@ class MetsDataTest
 
   it("creates a invisible work with an item and no license") {
     val bibNumber = createBibNumberString
+    val title = randomAlphanumeric()
     val metsData = createMetsDataWith(
       bibNumber = bibNumber,
+      title = title,
       accessConditionDz = None
     )
     val version = 1
@@ -119,6 +126,7 @@ class MetsDataTest
         version = version,
         state = Source(expectedSourceIdentifier, createdDate),
         data = WorkData[DataState.Unidentified](
+          title = Some(title),
           items = List(unidentifiableItem),
           mergeCandidates = List(
             MergeCandidate(

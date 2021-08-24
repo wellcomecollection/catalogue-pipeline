@@ -49,12 +49,14 @@ class MetsXmlTransformer(store: Readable[S3ObjectLocation, String])
     root: MetsXml): Result[InvisibleMetsData] =
     for {
       id <- root.recordIdentifier
+      title <- root.title
       accessConditionDz <- root.accessConditionDz
       accessConditionStatus <- root.accessConditionStatus
       accessConditionUsage <- root.accessConditionUsage
     } yield
       InvisibleMetsData(
         recordIdentifier = id,
+        title = title,
         accessConditionDz = accessConditionDz,
         accessConditionStatus = accessConditionStatus,
         accessConditionUsage = accessConditionUsage,
@@ -67,6 +69,7 @@ class MetsXmlTransformer(store: Readable[S3ObjectLocation, String])
     manifestations: List[S3ObjectLocation]): Result[InvisibleMetsData] =
     for {
       id <- root.recordIdentifier
+      title <- root.title
       firstManifestation <- getFirstManifestation(root, manifestations)
       accessConditionDz <- firstManifestation.accessConditionDz
       accessConditionStatus <- firstManifestation.accessConditionStatus
@@ -74,6 +77,7 @@ class MetsXmlTransformer(store: Readable[S3ObjectLocation, String])
     } yield
       InvisibleMetsData(
         recordIdentifier = id,
+        title = title,
         accessConditionDz = accessConditionDz,
         accessConditionStatus = accessConditionStatus,
         accessConditionUsage = accessConditionUsage,
