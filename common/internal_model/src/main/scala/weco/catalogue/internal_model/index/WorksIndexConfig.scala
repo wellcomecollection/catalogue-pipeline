@@ -174,7 +174,7 @@ object WorksIndexConfig extends IndexConfigFields {
         search,
         keywordField("type"),
         data.withDynamic("false"),
-        objectField("invisibilityReasons")
+        objectField("invisibilityReason")
           .fields(keywordField("type"))
           .withDynamic("false"),
         objectField("deletedReason")

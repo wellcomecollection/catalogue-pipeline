@@ -86,7 +86,7 @@ case class InvisibleMetsData(
           thumbnail = thumbnail(sourceIdentifier.value, license, accessStatus),
           imageData = imageData(version, license, accessStatus, location)
         ),
-        invisibilityReasons = List(MetsWorksAreNotVisible)
+        invisibilityReason = MetsWorksAreNotVisible
       )
     } yield work
 

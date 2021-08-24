@@ -912,7 +912,7 @@
         },
         "dynamic" : "false"
       },
-      "invisibilityReasons" : {
+      "invisibilityReason" : {
         "type" : "object",
         "properties" : {
           "type" : {

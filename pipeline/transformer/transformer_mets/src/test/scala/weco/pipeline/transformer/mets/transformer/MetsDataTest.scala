@@ -70,7 +70,7 @@ class MetsDataTest
             )
           )
         ),
-        invisibilityReasons = List(MetsWorksAreNotVisible)
+        invisibilityReason = MetsWorksAreNotVisible
       )
   }
 
@@ -139,7 +139,7 @@ class MetsDataTest
             )
           )
         ),
-        invisibilityReasons = List(MetsWorksAreNotVisible)
+        invisibilityReason = MetsWorksAreNotVisible
       )
   }
 

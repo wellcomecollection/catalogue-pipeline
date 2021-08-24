@@ -291,9 +291,8 @@ class MiroRecordTransformerTest
         createMiroRecordWith(
           useRestrictions = None
         ),
-        invisibilityReasons = List(
+        invisibilityReason =
           UnableToTransform("Miro: Nothing in the image_use_restrictions field")
-        )
       )
     }
   }
@@ -392,7 +391,7 @@ class MiroRecordTransformerTest
   private def assertTransformReturnsInvisibleWork(
     miroRecord: MiroRecord,
     miroMetadata: MiroMetadata = MiroMetadata(isClearedForCatalogueAPI = true),
-    invisibilityReasons: List[InvisibilityReason]
+    invisibilityReason: InvisibilityReason
   ): Assertion = {
     val triedMaybeWork = transformer.transform(
       miroRecord = miroRecord,
@@ -412,7 +411,7 @@ class MiroRecordTransformerTest
       ),
       version = 1,
       data = WorkData(),
-      invisibilityReasons = invisibilityReasons
+      invisibilityReason = invisibilityReason
     )
   }
 

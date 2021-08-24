@@ -136,14 +136,12 @@ trait WorkGenerators
     work: Work.Visible[State]
   ) {
 
-    def invisible(
-      invisibilityReasons: List[InvisibilityReason] = Nil
-    ): Work.Invisible[State] =
+    def invisible(): Work.Invisible[State] =
       Work.Invisible[State](
         data = work.data,
         state = work.state,
         version = work.version,
-        invisibilityReasons = invisibilityReasons
+        invisibilityReason = InvisibilityReason.UnableToTransform("tests")
       )
 
     def deleted(

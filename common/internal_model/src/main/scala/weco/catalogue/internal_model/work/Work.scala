@@ -41,8 +41,8 @@ sealed trait Work[State <: WorkState] {
         Work.Visible(version, outData, outState, redirectSources.map {
           transition.redirect
         })
-      case Work.Invisible(version, _, _, invisibilityReasons) =>
-        Work.Invisible(version, outData, outState, invisibilityReasons)
+      case Work.Invisible(version, _, _, invisibilityReason) =>
+        Work.Invisible(version, outData, outState, invisibilityReason)
       case Work.Deleted(version, _, deletedReason) =>
         Work.Deleted(version, outState, deletedReason)
       case Work.Redirected(version, redirectTarget, _) =>
@@ -72,7 +72,7 @@ object Work {
     version: Int,
     data: WorkData[State#WorkDataState],
     state: State,
-    invisibilityReasons: List[InvisibilityReason] = Nil,
+    invisibilityReason: InvisibilityReason,
   ) extends Work[State]
 
   case class Deleted[State <: WorkState](

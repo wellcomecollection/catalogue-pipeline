@@ -48,7 +48,7 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
             state = Source(sourceIdentifier, Instant.EPOCH),
             version = version,
             data = WorkData(),
-            invisibilityReasons = List(SourceFieldMissing("bibData"))
+            invisibilityReason = SourceFieldMissing("bibData")
           )
         )
       }
@@ -100,7 +100,7 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
             state = state,
             version = version,
             data = WorkData(),
-            invisibilityReasons = List(UnableToTransform(e.getMessage))
+            invisibilityReason = UnableToTransform(e.getMessage)
           )
       }
   }

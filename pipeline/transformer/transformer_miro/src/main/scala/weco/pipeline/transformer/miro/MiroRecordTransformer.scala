@@ -145,9 +145,7 @@ class MiroRecordTransformer
             state = state,
             version = version,
             data = WorkData(),
-            invisibilityReasons = List(
-              UnableToTransform(s"Miro: ${e.getMessage}")
-            )
+            invisibilityReason = UnableToTransform(s"Miro: ${e.getMessage}")
           )
       }
     }

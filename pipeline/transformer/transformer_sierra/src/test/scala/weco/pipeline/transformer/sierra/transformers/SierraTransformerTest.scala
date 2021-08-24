@@ -311,7 +311,7 @@ class SierraTransformerTest
     assertTransformReturnsInvisibleWork(
       maybeBibRecord = None,
       modifiedDate = Instant.EPOCH,
-      invisibilityReasons = List(SourceFieldMissing("bibData"))
+      invisibilityReasons = SourceFieldMissing("bibData")
     )
   }
 
@@ -320,7 +320,7 @@ class SierraTransformerTest
       maybeBibRecord = None,
       modifiedDate = Instant.EPOCH,
       itemRecords = List(createSierraItemRecord),
-      invisibilityReasons = List(SourceFieldMissing("bibData"))
+      invisibilityReasons = SourceFieldMissing("bibData")
     )
   }
 
@@ -958,7 +958,7 @@ class SierraTransformerTest
       maybeBibRecord = Some(bibRecord),
       modifiedDate = bibRecord.modifiedDate,
       invisibilityReasons =
-        List(UnableToTransform("Could not find field 245 to create title"))
+        UnableToTransform("Could not find field 245 to create title")
     )
   }
 
@@ -1331,7 +1331,7 @@ class SierraTransformerTest
     maybeBibRecord: Option[SierraBibRecord],
     modifiedDate: Instant,
     itemRecords: List[SierraItemRecord] = List(),
-    invisibilityReasons: List[InvisibilityReason]): Assertion = {
+    invisibilityReasons: InvisibilityReason): Assertion = {
     val id = createSierraBibNumber
 
     val sierraTransformable = createSierraTransformableWith(
@@ -1353,7 +1353,7 @@ class SierraTransformerTest
       ),
       version = 1,
       data = WorkData(),
-      invisibilityReasons = invisibilityReasons
+      invisibilityReason = invisibilityReason
     )
   }
 
