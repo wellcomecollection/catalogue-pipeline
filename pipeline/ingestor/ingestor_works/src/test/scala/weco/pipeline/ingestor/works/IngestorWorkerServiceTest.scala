@@ -1,6 +1,5 @@
 package weco.pipeline.ingestor.works
 
-import org.scalatest.Assertion
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.Implicits._

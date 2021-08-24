@@ -11,6 +11,7 @@ import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.generators.WorkGenerators
 import weco.pipeline.id_minter.fixtures.WorkerServiceFixture
 
+import scala.concurrent.duration._
 import scala.collection.mutable
 
 class IdMinterFeatureTest
@@ -132,7 +133,7 @@ class IdMinterFeatureTest
   it("continues if something fails processing a message") {
     val messageSender = new MemoryMessageSender()
 
-    withLocalSqsQueuePair() { case QueuePair(queue, dlq) =>
+    withLocalSqsQueuePair(visibilityTimeout = 1.second) { case QueuePair(queue, dlq) =>
       withIdentifiersTable { identifiersTableConfig =>
         val work = sourceWork()
         val inputIndex = createIndex(List(work))
