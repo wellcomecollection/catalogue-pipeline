@@ -81,7 +81,12 @@ object Work {
     data: WorkData[State#WorkDataState],
     state: State,
     invisibilityReasons: List[InvisibilityReason] = Nil,
-  ) extends Work[State]
+  ) extends Work[State] {
+    require(
+      invisibilityReasons.nonEmpty,
+      "We should always explain why a Work is invisible by supplying an InvisibilityReason."
+    )
+  }
 
   case class Deleted[State <: WorkState](
     version: Int,
