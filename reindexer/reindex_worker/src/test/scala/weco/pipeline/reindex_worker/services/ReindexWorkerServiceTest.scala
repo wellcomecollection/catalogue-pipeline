@@ -1,7 +1,6 @@
 package weco.pipeline.reindex_worker.services
 
 import io.circe.Decoder
-import org.scalatest.Assertion
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
