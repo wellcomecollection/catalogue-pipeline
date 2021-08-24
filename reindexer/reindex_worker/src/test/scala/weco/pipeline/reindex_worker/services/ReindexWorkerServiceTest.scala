@@ -425,7 +425,7 @@ class ReindexWorkerServiceTest
     def runTest[T <: SourcePayload](
       table: Table,
       source: ReindexSource,
-      expectedMessage: T)(implicit decoder: Decoder[T]): Assertion = {
+      expectedMessage: T)(implicit decoder: Decoder[T]): Unit = {
       val messageSender = new MemoryIndividualMessageSender()
       val destination = createDestination
 
