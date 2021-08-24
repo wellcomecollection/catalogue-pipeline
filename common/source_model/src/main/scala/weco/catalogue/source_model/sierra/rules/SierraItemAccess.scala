@@ -145,7 +145,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           Some(OpacMsg.OpenShelves),
           NotRequestable.OnOpenShelves(_),
           Some(LocationType.OpenShelves)) =>
-        AccessCondition(method = AccessMethod.NotRequestable)
+        AccessCondition(method = AccessMethod.OpenShelves)
 
       // There are some items that are labelled "bound in above" or "contained in above".
       //
