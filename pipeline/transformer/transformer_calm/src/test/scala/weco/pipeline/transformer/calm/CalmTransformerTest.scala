@@ -552,12 +552,12 @@ class CalmTransformerTest
       "CatalogueStatus" -> "Catalogued"
     )
     val result = CalmTransformer(record, version).right.get
-    result shouldBe a[Work.Invisible[_]]
+    result shouldBe a[Work.Deleted[_]]
     result
-      .asInstanceOf[Work.Invisible[_]]
-      .invisibilityReasons should contain only
-      InvisibilityReason.UnableToTransform(
-        "Calm:Suppressed level - group of pieces"
+      .asInstanceOf[Work.Deleted[_]]
+      .deletedReason shouldBe
+      DeletedReason.SuppressedFromSource(
+        "CALM level 'group of pieces' is suppressed"
       )
   }
 

@@ -95,6 +95,17 @@ object CalmTransformer
 
       case Left(err) =>
         err match {
+          case SuppressedLevel(level) =>
+            Right(
+              Work.Deleted[Source](
+                state = state,
+                version = version,
+                deletedReason = DeletedReason.SuppressedFromSource(
+                  s"CALM level '$level' is suppressed"
+                )
+              )
+            )
+
           case knownErr: CalmTransformerException =>
             Right(
               Work.Invisible[Source](
