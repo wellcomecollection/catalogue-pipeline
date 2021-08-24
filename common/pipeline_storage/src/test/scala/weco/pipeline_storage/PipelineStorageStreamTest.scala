@@ -450,12 +450,9 @@ class PipelineStorageStreamTest
 
           whenReady(runStream()) { _ =>
             whenReady(runStream()) { _ =>
-              whenReady(runStream()) { _ =>
-
-                eventually {
-                  assertQueueEmpty(queue)
-                  assertQueueHasSize(dlq, size = 1)
-                }
+              eventually {
+                assertQueueEmpty(queue)
+                assertQueueHasSize(dlq, size = 1)
               }
             }
           }
