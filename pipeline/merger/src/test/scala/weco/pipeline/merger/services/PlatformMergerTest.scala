@@ -17,7 +17,13 @@ import weco.catalogue.internal_model.locations.{
   LocationType
 }
 import weco.catalogue.internal_model.work.generators.SourceWorkGenerators
-import weco.catalogue.internal_model.work.{Format, Item, MergeCandidate, Work}
+import weco.catalogue.internal_model.work.{
+  Format,
+  InvisibilityReason,
+  Item,
+  MergeCandidate,
+  Work
+}
 
 class PlatformMergerTest
     extends AnyFunSpec
@@ -947,5 +953,67 @@ class PlatformMergerTest
     visibleWorks should have size 1
 
     visibleWorks.head.data.items should contain(item)
+  }
+
+  it(
+    "preserves the identifiers when it merges a Sierra bib, e-bib and METS work and the e-bib has the link") {
+    // This test case is based on a real issue, when identifiers weren't being copied
+    // across correctly and we were losing identifiers in the merging process.
+
+    val physicalWork =
+      sierraIdentifiedWork()
+        .otherIdentifiers(
+          List(createSierraIdentifierSourceIdentifier)
+        )
+        .format(Format.Books)
+        .items(List(createIdentifiedPhysicalItem))
+
+    val electronicWork =
+      sierraIdentifiedWork()
+        .otherIdentifiers(
+          List(
+            createSierraIdentifierSourceIdentifier,
+            createDigcodeIdentifier("digsexology")
+          )
+        )
+        .format(Format.Books)
+        .mergeCandidates(
+          List(
+            MergeCandidate(
+              id = IdState.Identified(
+                canonicalId = physicalWork.state.canonicalId,
+                sourceIdentifier = physicalWork.state.sourceIdentifier
+              ),
+              reason = "Physical/digitised Sierra work"
+            )
+          )
+        )
+
+    val metsWork =
+      metsIdentifiedWork()
+        .mergeCandidates(
+          List(
+            MergeCandidate(
+              id = IdState.Identified(
+                canonicalId = electronicWork.state.canonicalId,
+                sourceIdentifier = electronicWork.state.sourceIdentifier
+              ),
+              reason = "METS work"
+            )
+          )
+        )
+        .items(List(createDigitalItem))
+        .invisible(List(InvisibilityReason.MetsWorksAreNotVisible))
+
+    val works = Seq(metsWork, electronicWork, physicalWork)
+
+    val redirectedWork = merger
+      .merge(works)
+      .mergedWorksWithTime(now)
+      .collectFirst { case w: Work.Visible[Merged] => w }
+      .get
+
+    redirectedWork.state.canonicalId shouldBe physicalWork.state.canonicalId
+    redirectedWork.identifiers should contain theSameElementsAs (physicalWork.identifiers ++ electronicWork.identifiers)
   }
 }

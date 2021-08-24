@@ -123,7 +123,7 @@ object WorkPredicates {
       }
     }
 
-  private def allDigitalLocations(work: Work[Identified]): Boolean =
+  def allDigitalLocations(work: Work[Identified]): Boolean =
     work.data.items.forall { item =>
       item.locations.forall {
         case _: DigitalLocation => true
