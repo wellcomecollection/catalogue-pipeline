@@ -122,7 +122,8 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
              sources: NonEmptyList[Work[Identified]]): FieldData =
       findFirstLinkedDigitisedSierraWorkFor(target, sources.toList)
         .map { w =>
-          target.data.otherIdentifiers ++ w.identifiers }
+          target.data.otherIdentifiers ++ w.identifiers
+        }
         .getOrElse(Nil)
   }
 }

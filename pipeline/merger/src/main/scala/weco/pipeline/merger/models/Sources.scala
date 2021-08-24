@@ -44,11 +44,13 @@ object Sources {
 
       case t if physicalSierra(t) =>
         sources
-          .filter { w => sierraWork(w) && allDigitalLocations(w) }
+          .filter { w =>
+            sierraWork(w) && allDigitalLocations(w)
+          }
           .find { w =>
             w.data.mergeCandidates.exists { mc =>
               mc.reason == "Physical/digitised Sierra work" &&
-                mc.id.canonicalId == target.state.canonicalId
+              mc.id.canonicalId == target.state.canonicalId
             }
           }
 

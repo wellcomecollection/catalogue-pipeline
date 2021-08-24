@@ -955,7 +955,8 @@ class PlatformMergerTest
     visibleWorks.head.data.items should contain(item)
   }
 
-  it("preserves the identifiers when it merges a Sierra bib, e-bib and METS work and the e-bib has the link") {
+  it(
+    "preserves the identifiers when it merges a Sierra bib, e-bib and METS work and the e-bib has the link") {
     // This test case is based on a real issue, when identifiers weren't being copied
     // across correctly and we were losing identifiers in the merging process.
 
@@ -1006,7 +1007,8 @@ class PlatformMergerTest
 
     val works = Seq(metsWork, electronicWork, physicalWork)
 
-    val redirectedWork = merger.merge(works)
+    val redirectedWork = merger
+      .merge(works)
       .mergedWorksWithTime(now)
       .collectFirst { case w: Work.Visible[Merged] => w }
       .get
