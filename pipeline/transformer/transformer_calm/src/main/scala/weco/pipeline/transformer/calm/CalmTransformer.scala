@@ -51,41 +51,46 @@ object CalmTransformer
     id: String,
     sourceData: CalmSourceData,
     version: Int
-  ): Result[Work[Source]] = sourceData match {
-    case CalmSourceData(record, isDeleted) if isDeleted =>
-      Right(deletedWork(version, record, DeletedFromSource("Calm")))
-    case CalmSourceData(record, _) if shouldSuppress(record) =>
-      Right(deletedWork(version, record, SuppressedFromSource("Calm")))
-    case CalmSourceData(record, _) =>
-      tryParseValidWork(record, version)
+  ): Result[Work[Source]] = {
+    val state = Source(
+      sourceIdentifier = sourceIdentifier(sourceData.record),
+      sourceModifiedTime = sourceData.record.retrievedAt
+    )
+
+    sourceData match {
+      case CalmSourceData(record, isDeleted) if isDeleted =>
+        Right(
+          Work.Deleted[Source](
+            state = state,
+            version = version,
+            deletedReason = DeletedFromSource("Calm")
+          )
+        )
+      case CalmSourceData(record, _) if shouldSuppress(record) =>
+        Right(
+          Work.Deleted[Source](
+            state = state,
+            version = version,
+            deletedReason = SuppressedFromSource("Calm")
+          )
+        )
+      case CalmSourceData(record, _) =>
+        tryParseValidWork(state, record, version)
+    }
   }
 
   def apply(record: CalmRecord, version: Int): Result[Work[Source]] =
     CalmTransformer(record.id, CalmSourceData(record), version)
 
-  def deletedWork(
-    version: Int,
-    record: CalmRecord,
-    reason: DeletedReason
-  ): Work.Deleted[Source] =
-    Work.Deleted[Source](
-      state = Source(sourceIdentifier(record), record.retrievedAt),
-      version = version,
-      deletedReason = reason
-    )
-
   private def tryParseValidWork(
+    state: Source,
     record: CalmRecord,
     version: Int
   ): Either[Exception, Work[Source]] =
     workData(record) match {
       case Right(data) =>
         Right(
-          Work.Visible[Source](
-            state = Source(sourceIdentifier(record), record.retrievedAt),
-            version = version,
-            data = data
-          )
+          Work.Visible[Source](state = state, version = version, data = data)
         )
 
       case Left(err) =>
@@ -93,7 +98,7 @@ object CalmTransformer
           case knownErr: CalmTransformerException =>
             Right(
               Work.Invisible[Source](
-                state = Source(sourceIdentifier(record), record.retrievedAt),
+                state = state,
                 version = version,
                 data = WorkData(),
                 invisibilityReasons =
@@ -106,7 +111,7 @@ object CalmTransformer
             )
             Right(
               Work.Invisible[Source](
-                state = Source(sourceIdentifier(record), record.retrievedAt),
+                state = state,
                 version = version,
                 data = WorkData(),
                 invisibilityReasons =
