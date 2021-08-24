@@ -1,7 +1,7 @@
 package weco.pipeline.transformer
 
 import io.circe.Encoder
-import org.scalatest.concurrent.{Eventually, IntegrationPatience}
+import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.Source
@@ -12,11 +12,7 @@ import weco.messaging.memory.MemoryMessageSender
 import weco.messaging.sns.NotificationMessage
 import weco.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 import weco.pipeline_storage.memory.{MemoryIndexer, MemoryRetriever}
-import weco.pipeline_storage.{
-  PipelineStorageStream,
-  Retriever,
-  RetrieverNotFoundException
-}
+import weco.pipeline_storage.{PipelineStorageStream, Retriever, RetrieverNotFoundException}
 
 import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -28,6 +24,7 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
     extends AnyFunSpec
     with Eventually
     with IntegrationPatience
+    with ScalaFutures
     with PipelineStorageStreamFixtures {
 
   def withContext[R](testWith: TestWith[Context, R]): R
@@ -271,7 +268,7 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
     describe("sending failures to the DLQ") {
       it("if it can't parse the JSON on the queue") {
         withContext { implicit context =>
-          withLocalSqsQueuePair() {
+          withLocalSqsQueuePair(visibilityTimeout = 1.second) {
             case QueuePair(queue, dlq) =>
               withWorkerImpl(queue) { _ =>
                 sendInvalidJSONto(queue)
@@ -314,7 +311,7 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
             createBadPayload
           )
 
-          withLocalSqsQueuePair() {
+          withLocalSqsQueuePair(visibilityTimeout = 1.second) {
             case QueuePair(queue, dlq) =>
               withWorkerImpl(queue) { _ =>
                 payloads.foreach {
@@ -347,14 +344,16 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
               withWorkerImpl(
                 queue,
                 workIndexer = brokenIndexer,
-                workKeySender = workKeySender) { _ =>
+                workKeySender = workKeySender) { worker =>
                 sendNotificationToSQS(queue, payload)
 
-                eventually {
-                  assertQueueEmpty(queue)
-                  assertQueueHasSize(dlq, size = 1)
+                whenReady(worker.run()) { _ =>
+                  eventually {
+                    assertQueueEmpty(queue)
+                    assertQueueHasSize(dlq, size = 1)
 
-                  workKeySender.messages shouldBe empty
+                    workKeySender.messages shouldBe empty
+                  }
                 }
               }
           }
@@ -372,12 +371,14 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
 
           withLocalSqsQueuePair(visibilityTimeout = 1.second) {
             case QueuePair(queue, dlq) =>
-              withWorkerImpl(queue, workKeySender = brokenSender) { _ =>
+              withWorkerImpl(queue, workKeySender = brokenSender) { worker =>
                 sendNotificationToSQS(queue, payload)
 
-                eventually {
-                  assertQueueEmpty(queue)
-                  assertQueueHasSize(dlq, size = 1)
+                whenReady(worker.run()) { _ =>
+                  eventually {
+                    assertQueueEmpty(queue)
+                    assertQueueHasSize(dlq, size = 1)
+                  }
                 }
               }
           }
@@ -391,7 +392,7 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
     workIndexer: MemoryIndexer[Work[Source]] = new MemoryIndexer[Work[Source]](),
     workKeySender: MemoryMessageSender = new MemoryMessageSender()
   )(
-    testWith: TestWith[Unit, R]
+    testWith: TestWith[TransformerWorker[Payload, SourceData, String], R]
   )(
     implicit context: Context
   ): R =
@@ -410,7 +411,7 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
       withWorker(pipelineStream, retriever) { worker =>
         worker.run()
 
-        testWith(())
+        testWith(worker)
       }
     }
 }
