@@ -112,8 +112,7 @@ object CalmTransformer
                 state = state,
                 version = version,
                 data = WorkData(),
-                invisibilityReason =
-                  knownErrToUntransformableReason(knownErr)
+                invisibilityReason = knownErrToUntransformableReason(knownErr)
               )
             )
           case unknownStatus: UnknownAccessStatus =>
