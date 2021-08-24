@@ -68,6 +68,14 @@ object Work {
     val data = WorkData[State#WorkDataState]()
   }
 
+  // The list of reasons on this class is meant to explain why a record isn't visible,
+  // so we could e.g. report to Collections staff on why records are missing.  e.g.
+  //
+  //    - We're missing a field for the transformer
+  //    - There's an invalid field in the transformer
+  //
+  // A work might be invisible for multiple reasons, and you'd want to address all of them
+  // at once, rather than sequentially.
   case class Invisible[State <: WorkState](
     version: Int,
     data: WorkData[State#WorkDataState],
