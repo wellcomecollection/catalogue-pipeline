@@ -1073,7 +1073,6 @@ class SierraIndexerFeatureTest
       withLocalSqsQueuePair(visibilityTimeout = 1.second) {
         case QueuePair(queue, dlq) =>
           withWorker(queue, store, indexPrefix) { _ =>
-
             // Make the varfields index read-only, so any attempt to index data into
             // this index should fail.
             //
