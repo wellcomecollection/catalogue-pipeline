@@ -299,8 +299,8 @@ class MatcherWorkerServiceTest
 
           sendWork(workLinksAv1, retriever, queue)
           eventually {
-            noMessagesAreWaitingIn(queue)
-            noMessagesAreWaitingIn(dlq)
+            assertQueueEmpty(queue)
+            assertQueueEmpty(dlq)
 
             messageSender
               .getMessages[MatcherResult]

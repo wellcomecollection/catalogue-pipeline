@@ -130,8 +130,10 @@ class IngestorWorkerServiceTest
                 assertWorkIndexed(indexedIndex, _)
               }
 
-              assertQueueEmpty(queue)
-              assertQueueEmpty(dlq)
+              eventually {
+                assertQueueEmpty(queue)
+                assertQueueEmpty(dlq)
+              }
             }
         }
       }

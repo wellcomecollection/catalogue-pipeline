@@ -77,8 +77,11 @@ class CalmAdapterWorkerServiceTest
 
           retriever.previousQuery shouldBe Some(
             CalmQuery.ModifiedDate(queryDate))
-          assertQueueEmpty(queue)
-          assertQueueEmpty(dlq)
+
+          eventually {
+            assertQueueEmpty(queue)
+            assertQueueEmpty(dlq)
+          }
 
           val expectedVersions = List(
             Version("A", 0),
@@ -108,9 +111,10 @@ class CalmAdapterWorkerServiceTest
           queue,
           CalmQuery.ModifiedDate(queryDate))
 
-        Thread.sleep(1500)
-        assertQueueEmpty(queue)
-        assertQueueEmpty(dlq)
+        eventually {
+          assertQueueEmpty(queue)
+          assertQueueEmpty(dlq)
+        }
 
         messageSender.messages shouldBe empty
     }
@@ -145,9 +149,11 @@ class CalmAdapterWorkerServiceTest
         sendNotificationToSQS[CalmQuery](
           queue,
           CalmQuery.ModifiedDate(queryDate))
-        Thread.sleep(2000)
-        assertQueueEmpty(queue)
-        assertQueueHasSize(dlq, size = 1)
+
+        eventually {
+          assertQueueEmpty(queue)
+          assertQueueHasSize(dlq, size = 1)
+        }
     }
   }
 

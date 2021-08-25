@@ -237,7 +237,7 @@ class MetsAdapterWorkerServiceTest
 
         eventually {
           assertQueueEmpty(queue)
-          assertQueueHasSize(dlq, 1)
+          assertQueueHasSize(dlq, size = 1)
 
           messageSender.messages shouldBe empty
         }

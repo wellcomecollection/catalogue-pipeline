@@ -1064,38 +1064,7 @@ class SierraIndexerFeatureTest
 
       val bibId = createSierraBibNumber
 
-      val transformable = createSierraTransformableWith(
-        maybeBibRecord = Some(
-          createSierraBibRecordWith(
-            id = bibId,
-            data = s"""
-                 |{
-                 |  "id" : "$bibId",
-                 |  "updatedDate" : "2013-12-12T13:56:07Z",
-                 |  "deleted" : false,
-                 |  "varFields" : [
-                 |    {
-                 |      "fieldTag" : "b",
-                 |      "content" : "22501328220"
-                 |    },
-                 |    {
-                 |      "fieldTag" : "c",
-                 |      "marcTag" : "949",
-                 |      "ind1" : " ",
-                 |      "ind2" : " ",
-                 |      "subfields" : [
-                 |        {
-                 |          "tag" : "a",
-                 |          "content" : "/RHO"
-                 |        }
-                 |      ]
-                 |    }
-                 |  ]
-                 |}
-                 |""".stripMargin
-          )
-        )
-      )
+      val transformable = createSierraTransformableWith(sierraId = bibId)
 
       val store = MemoryTypedStore[S3ObjectLocation, SierraTransformable](
         initialEntries = Map(location -> transformable)
