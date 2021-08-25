@@ -1,6 +1,6 @@
 # catalogue-pipeline
 
-[![Build status](https://badge.buildkite.com/0ca819db1215b66ecb17019d8ee5331d8e537094d051141219.svg?branch=main)](https://buildkite.com/wellcomecollection/catalogue-pipeline)
+[![Build status](https://badge.buildkite.com/0ca819db1215b66ecb17019d8ee5331d8e537094d051141219.svg?branch=main)](https://buildkite.com/wellcomecollection/catalogue-pipeline) [![Deployment status](https://img.shields.io/buildkite/120d56989228052f1539823186545fd7e1665aaa2cb98d0c91/main.svg?label=deployment)](https://buildkite.com/wellcomecollection/catalogue-pipeline-deploy-prod)
 
 The catalogue pipeline creates the search index for our [unified collections search][search].
 It populates an Elasticsearch index with data which can then be read by our [catalogue API][api].
