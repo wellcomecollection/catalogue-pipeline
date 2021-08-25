@@ -1070,20 +1070,25 @@ class SierraIndexerFeatureTest
         initialEntries = Map(location -> transformable)
       )
 
-      // Make the varfields index read-only, so any attempt to index data into
-      // this index should fail.
-      elasticClient
-        .execute(
-          updateSettings(
-            Indexes(s"${indexPrefix}_varfields"),
-            settings = Map("blocks.read_only" -> "true")
-          )
-        )
-        .await
-
       withLocalSqsQueuePair(visibilityTimeout = 1.second) {
         case QueuePair(queue, dlq) =>
           withWorker(queue, store, indexPrefix) { _ =>
+
+            // Make the varfields index read-only, so any attempt to index data into
+            // this index should fail.
+            //
+            // We need to do this after the worker has started, or it won't be able
+            // to create the index mappings and will never fetch messages from the queue.
+            Thread.sleep(1000)
+            elasticClient
+              .execute(
+                updateSettings(
+                  Indexes(s"${indexPrefix}_varfields"),
+                  settings = Map("blocks.read_only" -> "true")
+                )
+              )
+              .await
+
             sendNotificationToSQS(
               queue,
               SierraSourcePayload(
