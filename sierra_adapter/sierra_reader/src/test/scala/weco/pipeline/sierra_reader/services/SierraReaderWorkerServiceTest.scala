@@ -9,6 +9,7 @@ import weco.pipeline.sierra_reader.exceptions.SierraReaderException
 import weco.storage.fixtures.S3Fixtures.Bucket
 import weco.storage.s3.S3ObjectLocation
 import weco.catalogue.source_model.sierra.SierraBibRecord
+import weco.messaging.sns.NotificationMessage
 import weco.pipeline.sierra_reader.fixtures.WorkerServiceFixture
 
 class SierraReaderWorkerServiceTest
@@ -249,7 +250,7 @@ class SierraReaderWorkerServiceTest
         |}
       """.stripMargin
 
-    val notificationMessage = createNotificationMessageWith(body = body)
+    val notificationMessage = NotificationMessage(body)
 
     val responses = Seq()
 
@@ -279,7 +280,7 @@ class SierraReaderWorkerServiceTest
 
     val responses = Seq()
 
-    val notificationMessage = createNotificationMessageWith(body = body)
+    val notificationMessage = NotificationMessage(body)
 
     withLocalS3Bucket { bucket =>
       withLocalSqsQueue() { queue =>

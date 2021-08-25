@@ -46,8 +46,11 @@ class ImagesIngestorFeatureTest
               assertElasticsearchEventuallyHasImage[Indexed](
                 index,
                 ImageTransformer.deriveData(image))
-              assertQueueEmpty(queue)
-              assertQueueEmpty(dlq)
+
+              eventually {
+                assertQueueEmpty(queue)
+                assertQueueEmpty(dlq)
+              }
             }
           }
         }

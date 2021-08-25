@@ -1,6 +1,5 @@
 package weco.pipeline.ingestor.works
 
-import org.scalatest.Assertion
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.Implicits._
@@ -113,8 +112,7 @@ class IngestorWorkerServiceTest
     assertWorksIndexedCorrectly(works: _*)
   }
 
-  private def assertWorksIndexedCorrectly(
-    works: Work[Denormalised]*): Assertion =
+  private def assertWorksIndexedCorrectly(works: Work[Denormalised]*): Unit =
     withLocalWorksIndex { indexedIndex =>
       withLocalDenormalisedWorksIndex { denormalisedIndex =>
         insertIntoElasticsearch(denormalisedIndex, works: _*)
@@ -132,8 +130,10 @@ class IngestorWorkerServiceTest
                 assertWorkIndexed(indexedIndex, _)
               }
 
-              assertQueueEmpty(queue)
-              assertQueueEmpty(dlq)
+              eventually {
+                assertQueueEmpty(queue)
+                assertQueueEmpty(dlq)
+              }
             }
         }
       }

@@ -11,6 +11,8 @@ import org.scalatest.matchers.should.Matchers
 import akka.NotUsed
 import akka.stream.scaladsl.Source
 import org.apache.commons.io.IOUtils
+import org.scalatest.concurrent.PatienceConfiguration.Timeout
+import org.scalatest.time.{Seconds, Span}
 import weco.akka.fixtures.Akka
 import weco.fixtures.TestWith
 import weco.json.JsonUtil._
@@ -243,7 +245,7 @@ class RelationEmbedderWorkerServiceTest
       case (QueuePair(queue, dlq), _, msgSender) =>
         sendNotificationToSQS(queue = queue, message = batch)
 
-        eventually {
+        eventually(Timeout(Span(45, Seconds))) {
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
         }

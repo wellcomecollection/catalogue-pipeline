@@ -137,8 +137,11 @@ class MetsAdapterWorkerServiceTest
     withWorkerService(bagRetriever, store) {
       case (_, QueuePair(queue, dlq), messageSender) =>
         sendNotificationToSQS(queue, notification)
-        assertQueueEmpty(queue)
-        assertQueueEmpty(dlq)
+
+        eventually {
+          assertQueueEmpty(queue)
+          assertQueueEmpty(dlq)
+        }
 
         messageSender.getMessages[Version[String, Int]]() shouldBe Seq(
           expectedVersion)
@@ -166,9 +169,11 @@ class MetsAdapterWorkerServiceTest
     withWorkerService(bagRetriever, store) {
       case (_, QueuePair(queue, dlq), messageSender) =>
         sendNotificationToSQS(queue, notification)
-        Thread.sleep(2000)
-        assertQueueEmpty(queue)
-        assertQueueHasSize(dlq, size = 1)
+
+        eventually {
+          assertQueueEmpty(queue)
+          assertQueueHasSize(dlq, size = 1)
+        }
 
         messageSender.messages shouldBe empty
 
@@ -196,9 +201,11 @@ class MetsAdapterWorkerServiceTest
     withWorkerService(brokenBagRetriever, store, brokenMessageSender) {
       case (_, QueuePair(queue, dlq), messageSender) =>
         sendNotificationToSQS(queue, notification)
-        Thread.sleep(2000)
-        assertQueueEmpty(queue)
-        assertQueueHasSize(dlq, size = 1)
+
+        eventually {
+          assertQueueEmpty(queue)
+          assertQueueHasSize(dlq, size = 1)
+        }
 
         messageSender.messages shouldBe empty
 
@@ -219,9 +226,11 @@ class MetsAdapterWorkerServiceTest
     withWorkerService(bagRetriever, store, brokenMessageSender) {
       case (_, QueuePair(queue, dlq), messageSender) =>
         sendNotificationToSQS(queue, notification)
-        Thread.sleep(2000)
-        assertQueueEmpty(queue)
-        assertQueueHasSize(dlq, size = 1)
+
+        eventually {
+          assertQueueEmpty(queue)
+          assertQueueHasSize(dlq, size = 1)
+        }
 
         messageSender.messages shouldBe empty
 
@@ -237,7 +246,7 @@ class MetsAdapterWorkerServiceTest
 
         eventually {
           assertQueueEmpty(queue)
-          assertQueueHasSize(dlq, 1)
+          assertQueueHasSize(dlq, size = 1)
 
           messageSender.messages shouldBe empty
         }

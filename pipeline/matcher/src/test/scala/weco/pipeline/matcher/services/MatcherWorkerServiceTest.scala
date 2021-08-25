@@ -19,6 +19,7 @@ import weco.pipeline.matcher.generators.WorkLinksGenerators
 import weco.pipeline.matcher.models.WorkLinks
 import weco.pipeline_storage.memory.MemoryRetriever
 
+import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class MatcherWorkerServiceTest
@@ -299,8 +300,8 @@ class MatcherWorkerServiceTest
 
           sendWork(workLinksAv1, retriever, queue)
           eventually {
-            noMessagesAreWaitingIn(queue)
-            noMessagesAreWaitingIn(dlq)
+            assertQueueEmpty(queue)
+            assertQueueEmpty(dlq)
 
             messageSender
               .getMessages[MatcherResult]
@@ -329,7 +330,7 @@ class MatcherWorkerServiceTest
       new MemoryRetriever[WorkLinks]()
     implicit val messageSender: MemoryMessageSender = new MemoryMessageSender()
 
-    withLocalSqsQueuePair() {
+    withLocalSqsQueuePair(visibilityTimeout = 1 second) {
       case QueuePair(queue, dlq) =>
         implicit val q: SQS.Queue = queue
 
@@ -347,7 +348,7 @@ class MatcherWorkerServiceTest
           sendWork(differentWorkLinksAv2, retriever, queue)
           eventually {
             assertQueueEmpty(queue)
-            assertQueueHasSize(dlq, 1)
+            assertQueueHasSize(dlq, size = 1)
           }
         }
     }

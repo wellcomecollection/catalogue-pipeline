@@ -22,6 +22,8 @@ import weco.pipeline.merger.fixtures.{
 }
 import weco.pipeline_storage.memory.MemoryRetriever
 
+import scala.concurrent.duration._
+
 class MergerWorkerServiceTest
     extends AnyFunSpec
     with Matchers
@@ -388,7 +390,7 @@ class MergerWorkerServiceTest
 
         eventually {
           assertQueueEmpty(queue)
-          assertQueueHasSize(dlq, 1)
+          assertQueueHasSize(dlq, size = 1)
           metrics.incrementedCounts.length shouldBe 3
           metrics.incrementedCounts.last should endWith("_recognisedFailure")
         }
@@ -431,7 +433,7 @@ class MergerWorkerServiceTest
                         MemoryMetrics,
                         mutable.Map[String, WorkOrImage]),
                        R]): R =
-    withLocalSqsQueuePair() {
+    withLocalSqsQueuePair(visibilityTimeout = 1 second) {
       case queuePair @ QueuePair(queue, _) =>
         val workSender = new MemoryMessageSender()
         val imageSender = new MemoryMessageSender()

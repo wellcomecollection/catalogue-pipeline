@@ -84,8 +84,8 @@ class MatcherFeatureTest
             sendWork(linksV1, retriever, queue)
 
             eventually {
-              noMessagesAreWaitingIn(queue)
-              noMessagesAreWaitingIn(dlq)
+              assertQueueEmpty(queue)
+              assertQueueEmpty(dlq)
             }
 
             messageSender.messages shouldBe empty

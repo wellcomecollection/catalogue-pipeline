@@ -327,6 +327,6 @@ trait WorkGenerators
 
   private def initData[State <: DataState]: WorkData[State] =
     WorkData(
-      title = Some(randomAlphanumeric(length = 10))
+      title = Some(s"title-${randomAlphanumeric(length = 10)}")
     )
 }

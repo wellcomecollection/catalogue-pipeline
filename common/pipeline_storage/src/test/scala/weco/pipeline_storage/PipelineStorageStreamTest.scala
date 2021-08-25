@@ -401,7 +401,7 @@ class PipelineStorageStreamTest
 
     val sender = new MemoryMessageSender
 
-    withLocalSqsQueuePair() {
+    withLocalSqsQueuePair(visibilityTimeout = 1.second) {
       case QueuePair(queue, dlq) =>
         withPipelineStream(queue = queue, indexer = indexer, sender = sender) {
           pipelineStream =>
@@ -443,14 +443,20 @@ class PipelineStorageStreamTest
           sender = brokenSender) { pipelineStream =>
           sendNotificationToSQS(queue, document)
 
-          pipelineStream.foreach(
-            "test stream",
-            _ => Future.successful(List(document))
-          )
+          def runStream =
+            () =>
+              pipelineStream.foreach(
+                "test stream",
+                _ => Future.successful(List(document))
+            )
 
-          eventually {
-            assertQueueEmpty(queue)
-            assertQueueHasSize(dlq, size = 1)
+          whenReady(runStream()) { _ =>
+            whenReady(runStream()) { _ =>
+              eventually {
+                assertQueueEmpty(queue)
+                assertQueueHasSize(dlq, size = 1)
+              }
+            }
           }
         }
     }

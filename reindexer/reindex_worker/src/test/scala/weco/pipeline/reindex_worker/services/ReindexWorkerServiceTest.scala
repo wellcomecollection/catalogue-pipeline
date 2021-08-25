@@ -1,7 +1,6 @@
 package weco.pipeline.reindex_worker.services
 
 import io.circe.Decoder
-import org.scalatest.Assertion
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
@@ -29,6 +28,7 @@ import java.time.Instant
 import java.util
 import java.util.UUID
 import scala.collection.JavaConverters._
+import scala.concurrent.duration._
 
 class ReindexWorkerServiceTest
     extends AnyFunSpec
@@ -425,7 +425,7 @@ class ReindexWorkerServiceTest
     def runTest[T <: SourcePayload](
       table: Table,
       source: ReindexSource,
-      expectedMessage: T)(implicit decoder: Decoder[T]): Assertion = {
+      expectedMessage: T)(implicit decoder: Decoder[T]): Unit = {
       val messageSender = new MemoryIndividualMessageSender()
       val destination = createDestination
 
@@ -460,7 +460,7 @@ class ReindexWorkerServiceTest
       val messageSender = new MemoryIndividualMessageSender()
       val destination = createDestination
 
-      withLocalSqsQueuePair() {
+      withLocalSqsQueuePair(visibilityTimeout = 1 second) {
         case QueuePair(queue, dlq) =>
           withWorkerService(messageSender, queue, table, destination) { _ =>
             sendNotificationToSQS(
@@ -470,7 +470,7 @@ class ReindexWorkerServiceTest
 
             eventually {
               assertQueueEmpty(queue)
-              assertQueueHasSize(dlq, 1)
+              assertQueueHasSize(dlq, size = 1)
             }
           }
       }
@@ -483,7 +483,7 @@ class ReindexWorkerServiceTest
     val messageSender = new MemoryIndividualMessageSender()
     val destination = createDestination
 
-    withLocalSqsQueuePair() {
+    withLocalSqsQueuePair(visibilityTimeout = 1 second) {
       case QueuePair(queue, dlq) =>
         withWorkerService(messageSender, queue, badTable, destination) { _ =>
           sendNotificationToSQS(queue = queue, message = createReindexRequest)
@@ -492,7 +492,7 @@ class ReindexWorkerServiceTest
             messageSender.messages shouldBe empty
 
             assertQueueEmpty(queue)
-            assertQueueHasSize(dlq, 1)
+            assertQueueHasSize(dlq, size = 1)
           }
         }
     }
@@ -504,7 +504,7 @@ class ReindexWorkerServiceTest
       val destination = createDestination
       val source = chooseReindexSource
 
-      withLocalSqsQueuePair() {
+      withLocalSqsQueuePair(visibilityTimeout = 1 second) {
         case QueuePair(queue, dlq) =>
           withWorkerService(
             messageSender,
@@ -519,7 +519,7 @@ class ReindexWorkerServiceTest
               messageSender.messages shouldBe empty
 
               assertQueueEmpty(queue)
-              assertQueueHasSize(dlq, 1)
+              assertQueueHasSize(dlq, size = 1)
             }
           }
       }
