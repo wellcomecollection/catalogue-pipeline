@@ -206,7 +206,7 @@ class RelationEmbedderWorkerServiceTest
   }
 
   it("puts failed messages onto the DLQ") {
-    withWorkerService(fails = true) {
+    withWorkerService(fails = true, visibilityTimeout = 1 second) {
       case (QueuePair(queue, dlq), _, msgSender) =>
         import Selector._
         val batch = Batch(rootPath = "a", selectors = List(Tree("a")))
