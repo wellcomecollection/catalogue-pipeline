@@ -39,7 +39,7 @@ class BatcherWorkerServiceTest
     * D  X  Y  Z   1  2  3  4
     */
   it("processes incoming paths into batches") {
-    withWorkerService(visibilityTimeout = 1 second) {
+    withWorkerService(visibilityTimeout = 2 seconds) {
       case (QueuePair(queue, dlq), msgSender) =>
         sendNotificationToSQS(queue = queue, body = "A/B")
         sendNotificationToSQS(queue = queue, body = "A/E/1")
