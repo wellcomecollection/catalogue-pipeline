@@ -29,12 +29,10 @@ import weco.sierra.models.data.SierraItemData
   */
 object SierraItemAccess extends SierraQueryOps with Logging {
   def apply(
-    bibStatus: Option[AccessStatus],
     location: Option[PhysicalLocationType],
     itemData: SierraItemData
   ): (AccessCondition, Option[String]) = {
     val accessCondition = createAccessCondition(
-      bibStatus = bibStatus,
       holdCount = itemData.holdCount,
       status = itemData.status,
       opacmsg = itemData.opacmsg,
@@ -66,7 +64,6 @@ object SierraItemAccess extends SierraQueryOps with Logging {
   }
 
   private def createAccessCondition(
-    bibStatus: Option[AccessStatus],
     holdCount: Option[Int],
     status: Option[String],
     opacmsg: Option[String],
@@ -74,44 +71,12 @@ object SierraItemAccess extends SierraQueryOps with Logging {
     location: Option[PhysicalLocationType],
     itemData: SierraItemData
   ): AccessCondition =
-    (bibStatus, holdCount, status, opacmsg, rulesForRequestingResult, location) match {
+    (holdCount, status, opacmsg, rulesForRequestingResult, location) match {
 
       // Items in the closed stores that are requestable get the "Online request" condition.
       //
       // Example: b18799966 / i17571170
       case (
-          bibStatus,
-          Some(0),
-          Some(Status.Available),
-          Some(OpacMsg.OnlineRequest),
-          Requestable,
-          Some(LocationType.ClosedStores))
-          if bibStatus.isEmpty || bibStatus.contains(AccessStatus.Open) || bibStatus
-            .contains(AccessStatus.OpenWithAdvisory) =>
-        AccessCondition(
-          method = AccessMethod.OnlineRequest,
-          status = bibStatus.getOrElse(AccessStatus.Open)
-        )
-
-      // Note: it is possible for individual items within a restricted bib to be available
-      // online, e.g. in archives.  The "restricted" on the bib applies to the archive as
-      // a whole, but individual files may be open.
-      //
-      // Consider an archive with three items:
-      //
-      //      Item 1 = Open
-      //      Item 2 = contains sensitive material, so restricted
-      //      Item 3 = Open
-      //
-      // Then the top-level bib status would be "certain restrictions apply" for the
-      // archive as a whole, referring to item 2 -- but items 1 and 3 would be open.
-      //
-      // This is distinct from the case above because we want to replace the bib-level
-      // status with "Open", rather than pass it through.
-      //
-      // Example: b1842941 / i17286803
-      case (
-          Some(AccessStatus.Restricted),
           Some(0),
           Some(Status.Available),
           Some(OpacMsg.OnlineRequest),
@@ -119,7 +84,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           Some(LocationType.ClosedStores)) =>
         AccessCondition(
           method = AccessMethod.OnlineRequest,
-          status = AccessStatus.Open,
+          status = AccessStatus.Open
         )
 
       // Items on the open shelves don't have any access conditions.
@@ -135,7 +100,6 @@ object SierraItemAccess extends SierraQueryOps with Logging {
       //
       // Example: b1659504x / i15894897
       case (
-          None,
           Some(0),
           Some(Status.Available),
           Some(OpacMsg.OpenShelves),
@@ -146,7 +110,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
       // There are some items that are labelled "bound in above" or "contained in above".
       //
       // These items aren't requestable on their own; you have to request the "primary" item.
-      case (None, _, _, _, NotRequestable.RequestTopItem(message), _) =>
+      case (_, _, _, NotRequestable.RequestTopItem(message), _) =>
         AccessCondition(
           method = AccessMethod.NotRequestable,
           note = Some(message)
@@ -156,7 +120,6 @@ object SierraItemAccess extends SierraQueryOps with Logging {
       //
       // Example: b32214832 / i19389383
       case (
-          None,
           Some(0),
           Some(Status.Available),
           Some(OpacMsg.ManualRequest),
@@ -186,7 +149,6 @@ object SierraItemAccess extends SierraQueryOps with Logging {
       //
       // Examples: b20657365 / i18576503, b1899457x / i17720734
       case (
-          Some(AccessStatus.Closed),
           _,
           Some(Status.Closed),
           Some(OpacMsg.Unavailable),
@@ -200,20 +162,16 @@ object SierraItemAccess extends SierraQueryOps with Logging {
 
       // Handle any cases where the item is explicitly unavailable.
       case (
-          status,
           _,
           Some(Status.Unavailable),
           Some(OpacMsg.Unavailable),
           NotRequestable.ItemUnavailable(_),
-          _)
-          if status.isEmpty || status.contains(
-            AccessStatus.TemporarilyUnavailable) =>
+          _) =>
         AccessCondition(
           method = AccessMethod.NotRequestable,
           status = AccessStatus.Unavailable)
 
       case (
-          None,
           _,
           Some(Status.Unavailable),
           Some(OpacMsg.AtDigitisation),
@@ -231,7 +189,6 @@ object SierraItemAccess extends SierraQueryOps with Logging {
       //
       // Example: b29459126 / i19023340
       case (
-          Some(AccessStatus.Restricted),
           Some(0),
           Some(Status.Restricted),
           Some(OpacMsg.OnlineRequest),
@@ -245,27 +202,21 @@ object SierraItemAccess extends SierraQueryOps with Logging {
       //
       // Examples: b32214832 / i19389383, b16576111 / 15862409
       case (
-          bibStatus,
           Some(0),
           Some(Status.PermissionRequired),
           Some(OpacMsg.ByAppointment),
           NotRequestable.NoPublicMessage(_),
-          Some(LocationType.ClosedStores))
-          if bibStatus.isEmpty || bibStatus.contains(AccessStatus.ByAppointment) || bibStatus
-            .contains(AccessStatus.PermissionRequired) =>
+          Some(LocationType.ClosedStores)) =>
         AccessCondition(
           method = AccessMethod.ManualRequest,
           status = AccessStatus.ByAppointment)
 
       case (
-          bibStatus,
           Some(0),
           Some(Status.PermissionRequired),
           Some(OpacMsg.DonorPermission),
           _: NotRequestable,
-          Some(LocationType.ClosedStores))
-          if bibStatus.isEmpty || bibStatus.contains(
-            AccessStatus.PermissionRequired) =>
+          Some(LocationType.ClosedStores)) =>
         AccessCondition(
           method = AccessMethod.ManualRequest,
           status = AccessStatus.PermissionRequired)
@@ -274,7 +225,6 @@ object SierraItemAccess extends SierraQueryOps with Logging {
       //
       // Example: b10379198 / i10443861
       case (
-          _,
           _,
           Some(Status.Missing),
           _,
@@ -287,7 +237,6 @@ object SierraItemAccess extends SierraQueryOps with Logging {
 
       // A withdrawn status also overrides all other values.
       case (
-          _,
           _,
           Some(Status.Withdrawn),
           _,
@@ -311,7 +260,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
       // It is possible for an item to have a non-zero hold count but still be available
       // for requesting, e.g. some of our long-lived test holds didn't get cleared properly.
       // If an item seems to be stuck on a non-zero hold count, ask somebody to check Sierra.
-      case (_, Some(holdCount), _, _, _, Some(LocationType.ClosedStores))
+      case (Some(holdCount), _, _, _, Some(LocationType.ClosedStores))
           if holdCount > 0 =>
         AccessCondition(
           method = AccessMethod.NotRequestable,
@@ -321,7 +270,6 @@ object SierraItemAccess extends SierraQueryOps with Logging {
         )
 
       case (
-          _,
           _,
           _,
           _,
@@ -339,10 +287,10 @@ object SierraItemAccess extends SierraQueryOps with Logging {
       //
       // TODO: We should work with the Collections team to better handle any records
       // that are hitting this branch.
-      case (bibStatus, holdCount, status, opacmsg, isRequestable, location) =>
+      case (holdCount, status, opacmsg, isRequestable, location) =>
         warn(
           s"Unable to assign access status for item ${itemData.id.withCheckDigit}: " +
-            s"bibStatus=$bibStatus, holdCount=$holdCount, status=$status, " +
+            s"holdCount=$holdCount, status=$status, " +
             s"opacmsg=$opacmsg, isRequestable=$isRequestable, location=$location"
         )
 

@@ -48,12 +48,11 @@ object SierraItems
 
     SierraPhysicalItemOrder(
       bibId,
-      items = getPhysicalItems(bibId, visibleItems, bibData)
+      items = getPhysicalItems(visibleItems, bibData)
     )
   }
 
   private def getPhysicalItems(
-    bibId: SierraBibNumber,
     itemDataEntries: Seq[SierraItemData],
     bibData: SierraBibData): List[Item[IdState.Identifiable]] = {
 
@@ -101,7 +100,6 @@ object SierraItems
 
     val items = itemDataEntries.map { itemData =>
       transformItemData(
-        bibId = bibId,
         itemData = itemData,
         bibData = bibData,
         fallbackLocation = fallbackLocation
@@ -116,7 +114,6 @@ object SierraItems
   private type HasAutomatedTitle = Boolean
 
   private def transformItemData(
-    bibId: SierraBibNumber,
     itemData: SierraItemData,
     bibData: SierraBibData,
     fallbackLocation: Option[(PhysicalLocationType, String)]
@@ -125,7 +122,6 @@ object SierraItems
 
     val location =
       getPhysicalLocation(
-        bibNumber = bibId,
         itemData = itemData,
         bibData = bibData,
         fallbackLocation = fallbackLocation
@@ -136,9 +132,7 @@ object SierraItems
     val item = Item(
       title = title,
       note = getItemNote(
-        bibId = bibId,
         itemData = itemData,
-        bibData = bibData,
         location = location
       ),
       locations = List(location).flatten,
@@ -251,13 +245,9 @@ object SierraItems
     * discard it.
     */
   private def getItemNote(
-    bibId: SierraBibNumber,
     itemData: SierraItemData,
-    bibData: SierraBibData,
     location: Option[PhysicalLocation]): Option[String] = {
     val (_, note) = SierraItemAccess(
-      bibId = bibId,
-      bibStatus = SierraAccessStatus.forBib(bibId, bibData),
       location = location.map(_.locationType),
       itemData = itemData
     )
