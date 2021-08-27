@@ -11,7 +11,6 @@ import weco.catalogue.internal_model.locations.{
 }
 import weco.sierra.generators.SierraDataGenerators
 import weco.sierra.models.data.SierraItemData
-import weco.sierra.models.identifiers.SierraBibNumber
 import weco.sierra.models.marc.{FixedField, VarField}
 
 class SierraItemAccessTest
@@ -1047,7 +1046,6 @@ class SierraItemAccessTest
   }
 
   it("handles the case where we can't map the access data") {
-    val bibId = createSierraBibNumber
     val itemData = createSierraItemDataWith(
       fixedFields = Map(
         "79" -> FixedField(
@@ -1063,7 +1061,6 @@ class SierraItemAccessTest
     )
 
     val (ac, _) = getItemAccess(
-      bibId = bibId,
       bibStatus = None,
       location = Some(LocationType.ClosedStores),
       itemData = itemData
@@ -1077,13 +1074,12 @@ class SierraItemAccessTest
   }
 
   private def getItemAccess(
-    bibId: SierraBibNumber = createSierraBibNumber,
     bibStatus: Option[AccessStatus],
     location: Option[PhysicalLocationType],
     itemData: SierraItemData
   ): (AccessCondition, Option[String]) =
     SierraItemAccess(
-      bibId = bibId,
+      bibId = createSierraBibNumber,
       bibStatus = bibStatus,
       location = location,
       itemData = itemData
