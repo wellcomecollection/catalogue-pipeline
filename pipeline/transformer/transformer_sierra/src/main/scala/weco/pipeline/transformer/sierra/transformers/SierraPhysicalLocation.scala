@@ -42,7 +42,6 @@ trait SierraPhysicalLocation {
       }
 
       (accessCondition, _) = SierraItemAccess(
-        bibId = bibNumber,
         bibStatus = SierraAccessStatus.forBib(bibNumber, bibData),
         location = Some(locationType),
         itemData = itemData

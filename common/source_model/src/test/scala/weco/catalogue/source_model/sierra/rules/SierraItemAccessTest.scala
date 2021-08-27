@@ -1079,7 +1079,6 @@ class SierraItemAccessTest
     itemData: SierraItemData
   ): (AccessCondition, Option[String]) =
     SierraItemAccess(
-      bibId = createSierraBibNumber,
       bibStatus = bibStatus,
       location = location,
       itemData = itemData

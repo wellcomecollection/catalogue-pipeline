@@ -11,7 +11,6 @@ import weco.catalogue.internal_model.locations.{
 import weco.catalogue.source_model.sierra.source.{OpacMsg, Status}
 import weco.sierra.models.SierraQueryOps
 import weco.sierra.models.data.SierraItemData
-import weco.sierra.models.identifiers.SierraBibNumber
 
 /** There are multiple sources of truth for item information in Sierra, and whether
   * a given item can be requested online.
@@ -30,13 +29,11 @@ import weco.sierra.models.identifiers.SierraBibNumber
   */
 object SierraItemAccess extends SierraQueryOps with Logging {
   def apply(
-    bibId: SierraBibNumber,
     bibStatus: Option[AccessStatus],
     location: Option[PhysicalLocationType],
     itemData: SierraItemData
   ): (AccessCondition, Option[String]) = {
     val accessCondition = createAccessCondition(
-      bibId = bibId,
       bibStatus = bibStatus,
       holdCount = itemData.holdCount,
       status = itemData.status,
@@ -69,7 +66,6 @@ object SierraItemAccess extends SierraQueryOps with Logging {
   }
 
   private def createAccessCondition(
-    bibId: SierraBibNumber,
     bibStatus: Option[AccessStatus],
     holdCount: Option[Int],
     status: Option[String],
@@ -342,11 +338,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
       // as unavailable for now.
       //
       // TODO: We should work with the Collections team to better handle any records
-      // that are hitting this branch.  Sending readers to Encore isn't a long-term
-      // solution.  Remove this link when Encore goes away.
-      //
-      // Note: once you remove the link, you can also remove the bibId passed into
-      // this apply() method.
+      // that are hitting this branch.
       case (bibStatus, holdCount, status, opacmsg, isRequestable, location) =>
         warn(
           s"Unable to assign access status for item ${itemData.id.withCheckDigit}: " +
