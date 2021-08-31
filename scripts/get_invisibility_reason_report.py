@@ -38,11 +38,14 @@ if __name__ == "__main__":
     scanner = scan(
         es,
         index=index_config["worksIndex"],
-        query={"query": {"bool": {"filter": [{"term": {"type": "Invisible"}}]}}, "_source": ["state", "invisibilityReasons"]},
-        scroll="1m"
+        query={
+            "query": {"bool": {"filter": [{"term": {"type": "Invisible"}}]}},
+            "_source": ["state", "invisibilityReasons"],
+        },
+        scroll="1m",
     )
 
-    with open(f'invisible_works_{pipeline_date}.json', 'w') as outfile:
+    with open(f"invisible_works_{pipeline_date}.json", "w") as outfile:
         for item in tqdm.tqdm(scanner):
             outfile.write(json.dumps(item) + "\n")
 
@@ -52,9 +55,9 @@ if __name__ == "__main__":
         work = json.loads(line)
 
         for reason in work["_source"]["invisibilityReasons"]:
-            invisibility_reasons[(reason["type"], reason.get("message", reason.get("info")))].append(
-                work["_source"]
-            )
+            invisibility_reasons[
+                (reason["type"], reason.get("message", reason.get("info")))
+            ].append(work["_source"])
 
     with open(f"invisibility_reasons_{pipeline_date}.html", "w") as outfile:
         for (reason, message), works in invisibility_reasons.items():
