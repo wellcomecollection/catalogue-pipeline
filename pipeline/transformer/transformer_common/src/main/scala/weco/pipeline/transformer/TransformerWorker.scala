@@ -32,8 +32,6 @@ case class TransformerError[SourceData, Key](t: Throwable,
   * - Runs it through a transformer and transforms the `SourceData` to `Work[Source]`
   * - Emits the message via `MessageSender` to SNS
   */
-class NewTransformerWorker
-
 trait TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest]
     extends Logging {
   type Result[T] = Either[TransformerWorkerError, T]
