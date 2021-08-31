@@ -6,11 +6,9 @@ import weco.catalogue.source_model.sierra.rules.{
   SierraPhysicalLocationType
 }
 import weco.sierra.models.data.{SierraBibData, SierraItemData}
-import weco.sierra.models.identifiers.SierraBibNumber
 
 trait SierraPhysicalLocation {
   def getPhysicalLocation(
-    bibNumber: SierraBibNumber,
     itemData: SierraItemData,
     bibData: SierraBibData,
     fallbackLocation: Option[(PhysicalLocationType, String)] = None)
@@ -42,8 +40,6 @@ trait SierraPhysicalLocation {
       }
 
       (accessCondition, _) = SierraItemAccess(
-        bibId = bibNumber,
-        bibStatus = SierraAccessStatus.forBib(bibNumber, bibData),
         location = Some(locationType),
         itemData = itemData
       )
