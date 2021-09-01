@@ -1,8 +1,11 @@
 #!/usr/bin/env python
+"""
+Creates an HTML report listing all the Works which are currently Invisible, grouped
+by their invisibility reason.
+"""
 
 import collections
 import json
-from pprint import pprint
 
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import scan
