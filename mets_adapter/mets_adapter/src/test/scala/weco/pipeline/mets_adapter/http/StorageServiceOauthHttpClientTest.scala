@@ -11,7 +11,7 @@ import org.scalatest.concurrent.IntegrationPatience
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.akka.fixtures.Akka
-import weco.http.client.{HttpGet, HttpPost, MemoryHttpClient}
+import weco.http.client.MemoryHttpClient
 import weco.http.fixtures.HttpFixtures
 
 import scala.concurrent.duration._
@@ -154,15 +154,11 @@ class StorageServiceOauthHttpClientTest
       )
     )
 
-    val underlying = new MemoryHttpClient(responses) with HttpGet
-    with HttpPost {
-      override val baseUri: Uri = Uri("http://storage:1234")
-    }
-
     withActorSystem { implicit actorSystem =>
       val authClient = new StorageServiceOauthHttpClient(
-        underlying,
+        underlying = new MemoryHttpClient(responses),
         credentials = credentials,
+        baseUri = Uri("http://storage:1234"),
         tokenUri = Uri("http://storage:1234/token")
       )
 
@@ -237,14 +233,10 @@ class StorageServiceOauthHttpClientTest
       )
     )
 
-    val underlying = new MemoryHttpClient(responses) with HttpGet
-    with HttpPost {
-      override val baseUri: Uri = Uri("http://storage:1234")
-    }
-
     withActorSystem { implicit actorSystem =>
       val authClient = new StorageServiceOauthHttpClient(
-        underlying,
+        underlying = new MemoryHttpClient(responses),
+        baseUri = Uri("http://storage:1234"),
         tokenUri = Uri("http://storage:1234/token"),
         credentials = credentials,
         expiryGracePeriod = 3.seconds

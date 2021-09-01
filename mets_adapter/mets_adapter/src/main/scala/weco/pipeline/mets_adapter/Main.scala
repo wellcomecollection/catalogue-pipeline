@@ -6,7 +6,7 @@ import akka.http.scaladsl.model.headers.BasicHttpCredentials
 import com.typesafe.config.Config
 import org.scanamo.generic.auto._
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import weco.http.client.{AkkaHttpClient, HttpGet, HttpPost}
+import weco.http.client.AkkaHttpClient
 import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import weco.pipeline.mets_adapter.http.StorageServiceOauthHttpClient
 import weco.pipeline.mets_adapter.services.{
@@ -33,12 +33,9 @@ object Main extends WellcomeTypesafeApp {
     implicit val dynamoClilent: DynamoDbClient =
       DynamoBuilder.buildDynamoClient
 
-    val client = new AkkaHttpClient() with HttpGet with HttpPost {
-      override val baseUri: Uri = Uri(config.requireString("bags.api.url"))
-    }
-
     val oauthClient = new StorageServiceOauthHttpClient(
-      underlying = client,
+      underlying = new AkkaHttpClient(),
+      baseUri = Uri(config.requireString("bags.api.url")),
       tokenUri = Uri(config.requireString("bags.oauth.url")),
       credentials = BasicHttpCredentials(
         config.requireString("bags.oauth.client_id"),
