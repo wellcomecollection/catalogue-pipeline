@@ -1,7 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 300">
   <style>
-    .cls-s3{fill:#E15344;}
-    .cls-azure{fill: #0079D8;}
     text {
       fill: black;
       font-size: 24px;
