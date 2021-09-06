@@ -13,7 +13,18 @@ case class SierraTransformable(
   itemRecords: Map[SierraItemNumber, SierraItemRecord] = Map(),
   holdingsRecords: Map[SierraHoldingsNumber, SierraHoldingsRecord] = Map(),
   orderRecords: Map[SierraOrderNumber, SierraOrderRecord] = Map()
-)
+) {
+  // Run some consistency checks on the identifiers.  If these identifiers don't match,
+  // it indicates some sort of programming error.
+  maybeBibRecord match {
+    case Some(bibRecord) => require(bibRecord.id == sierraId)
+    case _ => ()
+  }
+
+  itemRecords.foreach { case (id, record) => require(record.id == id) }
+  holdingsRecords.foreach { case (id, record) => require(record.id == id) }
+  orderRecords.foreach { case (id, record) => require(record.id == id) }
+}
 
 object SierraTransformable {
   def apply(bibRecord: SierraBibRecord): SierraTransformable =
