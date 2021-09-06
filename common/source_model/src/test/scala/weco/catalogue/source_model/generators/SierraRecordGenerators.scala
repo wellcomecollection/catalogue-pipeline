@@ -164,7 +164,7 @@ trait SierraRecordGenerators extends SierraIdentifierGenerators {
   ): SierraTransformable =
     SierraTransformable(
       sierraId = bibId,
-      maybeBibRecord = None,
+      maybeBibRecord = maybeBibRecord,
       itemRecords = itemRecords.map { record =>
         record.id -> record
       }.toMap,

@@ -48,7 +48,7 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
             state = Source(sourceIdentifier, Instant.EPOCH),
             version = version,
             data = WorkData(),
-            invisibilityReasons = List(SourceFieldMissing("bibData"))
+            invisibilityReasons = List(SourceFieldMissing("bibRecord"))
           )
         )
       }
