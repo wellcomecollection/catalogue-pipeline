@@ -22,10 +22,12 @@ class SierraTransformableTest
   }
 
   it("allows looking up items by ID") {
+    val bibId = createSierraBibNumber
     val itemRecords = (0 to 3).map { _ =>
-      createSierraItemRecord
+      createSierraItemRecordWith(bibIds = List(bibId))
     }
-    val transformable = createSierraTransformableWith(
+    val transformable = createSierraTransformableStubWith(
+      bibId = bibId,
       itemRecords = itemRecords
     )
 
