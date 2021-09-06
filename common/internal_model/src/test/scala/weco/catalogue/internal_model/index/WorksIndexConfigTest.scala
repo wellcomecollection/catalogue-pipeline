@@ -1,14 +1,15 @@
 package weco.catalogue.internal_model.index
 
+import com.sksamuel.elastic4s.ElasticDsl._
 import org.scalacheck.ScalacheckShapeless._
-import com.sksamuel.elastic4s.ElasticError
+import com.sksamuel.elastic4s.{ElasticClient, ElasticError, Index}
 import org.scalacheck.Shrink
-import org.scalatest.concurrent.{Eventually, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
-import io.circe.Encoder
+import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.deriveEncoder
+import org.scalatest.Assertion
 import weco.json.utils.JsonAssertions
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.generators.ImageGenerators
@@ -20,12 +21,11 @@ import weco.catalogue.internal_model.locations.{
 }
 import weco.catalogue.internal_model.work._
 import weco.catalogue.internal_model.work.generators.WorkGenerators
+import weco.json.JsonUtil._
 
 class WorksIndexConfigTest
     extends AnyFunSpec
     with IndexFixtures
-    with ScalaFutures
-    with Eventually
     with Matchers
     with JsonAssertions
     with ScalaCheckPropertyChecks
@@ -50,52 +50,41 @@ class WorksIndexConfigTest
 
   describe("indexing different works with every type of WorkState") {
     it("WorkState.Source") {
-      forAll { sourceWork: Work[WorkState.Source] =>
-        withLocalIndex(WorksIndexConfig.source) { index =>
-          println(sourceWork)
-          whenReady(indexObject(index, sourceWork)) { _ =>
-            assertObjectIndexed(index, sourceWork)
-          }
+      withLocalIndex(WorksIndexConfig.source) { implicit index =>
+        forAll { sourceWork: Work[WorkState.Source] =>
+          assertWorkCanBeIndexed(sourceWork)
         }
       }
     }
 
     it("WorkState.Identified") {
-      forAll { identifiedWork: Work[WorkState.Identified] =>
-        withLocalIndex(WorksIndexConfig.identified) { index =>
-          whenReady(indexObject(index, identifiedWork)) { _ =>
-            assertObjectIndexed(index, identifiedWork)
-          }
+      withLocalIndex(WorksIndexConfig.identified) { implicit index =>
+        forAll { identifiedWork: Work[WorkState.Identified] =>
+          assertWorkCanBeIndexed(identifiedWork)
         }
       }
     }
 
     it("WorkState.Merged") {
-      forAll { mergedWork: Work[WorkState.Merged] =>
-        withLocalIndex(WorksIndexConfig.merged) { index =>
-          whenReady(indexObject(index, mergedWork)) { _ =>
-            assertObjectIndexed(index, mergedWork)
-          }
+      withLocalIndex(WorksIndexConfig.merged) { implicit index =>
+        forAll { mergedWork: Work[WorkState.Merged] =>
+          assertWorkCanBeIndexed(mergedWork)
         }
       }
     }
 
     it("WorkState.Denormalised") {
-      forAll { denormalisedWork: Work[WorkState.Denormalised] =>
-        withLocalIndex(WorksIndexConfig.denormalised) { index =>
-          whenReady(indexObject(index, denormalisedWork)) { _ =>
-            assertObjectIndexed(index, denormalisedWork)
-          }
+      withLocalIndex(WorksIndexConfig.denormalised) { implicit index =>
+        forAll { denormalisedWork: Work[WorkState.Denormalised] =>
+          assertWorkCanBeIndexed(denormalisedWork)
         }
       }
     }
 
     it("WorkState.Indexed") {
-      forAll { indexedWork: Work[WorkState.Indexed] =>
-        withLocalIndex(WorksIndexConfig.ingested) { index =>
-          whenReady(indexObject(index, indexedWork)) { _ =>
-            assertObjectIndexed(index, indexedWork)
-          }
+      withLocalIndex(WorksIndexConfig.ingested) { implicit index =>
+        forAll { indexedWork: Work[WorkState.Indexed] =>
+          assertWorkCanBeIndexed(indexedWork)
         }
       }
     }
@@ -105,26 +94,25 @@ class WorksIndexConfigTest
   // a bug in the mapping related to person subjects wasn't caught by the above test.
   // So let's add a specific one
   it("puts a work with a person subject") {
-    withLocalWorksIndex { index =>
-      val sampleWork = identifiedWork().subjects(
-        List(
-          Subject(
-            id = IdState.Unidentifiable,
-            label = "Daredevil",
-            concepts = List(
-              Person(
-                id = IdState.Unidentifiable,
-                label = "Daredevil",
-                prefix = Some("Superhero"),
-                numeration = Some("I")
-              )
+    val workWithSubjects = identifiedWork().subjects(
+      List(
+        Subject(
+          id = IdState.Unidentifiable,
+          label = "Daredevil",
+          concepts = List(
+            Person(
+              id = IdState.Unidentifiable,
+              label = "Daredevil",
+              prefix = Some("Superhero"),
+              numeration = Some("I")
             )
           )
         )
       )
-      whenReady(indexObject(index, sampleWork)) { _ =>
-        assertObjectIndexed(index, sampleWork)
-      }
+    )
+
+    withLocalWorksIndex { implicit index =>
+      assertWorkCanBeIndexed(workWithSubjects)
     }
   }
 
@@ -135,14 +123,12 @@ class WorksIndexConfigTest
       method = AccessMethod.OnlineRequest,
       status = AccessStatus.Open)
 
-    withLocalWorksIndex { index =>
-      val sampleWork = identifiedWork().items(
-        List(
-          createIdentifiedItemWith(locations = List(createDigitalLocationWith(
-            accessConditions = List(accessCondition))))))
-      whenReady(indexObject(index, sampleWork)) { _ =>
-        assertObjectIndexed(index, sampleWork)
-      }
+    val workWithAccessConditions = identifiedWork().items(
+      List(createIdentifiedItemWith(locations = List(
+        createDigitalLocationWith(accessConditions = List(accessCondition))))))
+
+    withLocalWorksIndex { implicit index =>
+      assertWorkCanBeIndexed(workWithAccessConditions)
     }
   }
 
@@ -156,46 +142,74 @@ class WorksIndexConfigTest
       path = "PATH/FOR/THE/COLLECTION",
       label = Some("PATH/FOR/THE/COLLECTION")
     )
-    withLocalWorksIndex { index =>
-      val sampleWork = identifiedWork().collectionPath(collectionPath)
-      whenReady(indexObject(index, sampleWork)) { _ =>
-        assertObjectIndexed(index, sampleWork)
-      }
+
+    val work = identifiedWork().collectionPath(collectionPath)
+
+    withLocalWorksIndex { implicit index =>
+      assertWorkCanBeIndexed(work)
     }
   }
 
   it("can ingest a work with an image") {
-    withLocalWorksIndex { index =>
-      val sampleWork = identifiedWork().imageData(
-        List(createImageData.toIdentified)
-      )
-      whenReady(indexObject(index, sampleWork)) { _ =>
-        assertObjectIndexed(index, sampleWork)
-      }
+    val workWithImage = identifiedWork().imageData(
+      List(createImageData.toIdentified)
+    )
+
+    withLocalWorksIndex { implicit index =>
+      assertWorkCanBeIndexed(workWithImage)
     }
   }
 
   it("does not put an invalid work") {
-    withLocalWorksIndex { index =>
-      val badTestObject = BadTestObject(
+    withLocalWorksIndex { implicit index =>
+      val notAWork = BadTestObject(
         id = "id",
         weight = 5
       )
 
-      whenReady(indexObject(index, badTestObject)) { response =>
-        response.isError shouldBe true
-        response.error shouldBe a[ElasticError]
-      }
+      val response = indexWork(id = "id", work = notAWork)
+
+      response.isError shouldBe true
+      response.error shouldBe a[ElasticError]
     }
   }
 
   it("puts a valid work using compression") {
-    forAll { sampleWork: Work[WorkState.Identified] =>
-      withLocalWorksIndex { index =>
-        whenReady(indexObjectCompressed(index, sampleWork)) { _ =>
-          assertObjectIndexed(index, sampleWork)
-        }
+    withLocalWorksIndex { implicit index =>
+      forAll { identifiedWork: Work[WorkState.Identified] =>
+        assertWorkCanBeIndexed(
+          client = elasticClientWithCompression,
+          work = identifiedWork)
       }
     }
   }
+
+  private def assertWorkCanBeIndexed[W <: Work[_ <: WorkState]](
+    work: W,
+    client: ElasticClient = elasticClient)(implicit index: Index,
+                                           decoder: Decoder[W],
+                                           encoder: Encoder[W]): Assertion = {
+    indexWork(client, id = work.state.id, work = work)
+    assertWorkIsIndexed(client, id = work.state.id, work = work)
+  }
+
+  private def indexWork[W](
+    client: ElasticClient = elasticClient,
+    id: String,
+    work: W)(implicit index: Index, encoder: Encoder[W]) =
+    client.execute {
+      indexInto(index).doc(toJson(work).get).id(id)
+    }.await
+
+  private def assertWorkIsIndexed[W](
+    client: ElasticClient,
+    id: String,
+    work: W)(implicit index: Index, decoder: Decoder[W]) =
+    eventually {
+      whenReady(client.execute(get(index, id))) { getResponse =>
+        getResponse.result.exists shouldBe true
+
+        fromJson[W](getResponse.result.sourceAsString).get shouldBe work
+      }
+    }
 }
