@@ -91,14 +91,15 @@ class UpdaterTest
       modifiedDate = newerDate
     )
     val expectedTransformable = oldTransformable.copy(
-      itemRecords = Map(itemRecord.id -> newItemRecord)
+      itemRecords = Map(itemRecord.id -> newItemRecord),
+      modifiedTime = newerDate
     )
 
     val result = updater.update(newItemRecord)
 
     result shouldBe a[Right[_, _]]
-    result.right.get.map { _.id } should contain theSameElementsAs (List(
-      Version(bibId.withoutCheckDigit, 1)))
+    result.right.get.map { _.id } should contain theSameElementsAs List(
+      Version(bibId.withoutCheckDigit, 1))
 
     assertStored(
       expectedTransformable.sierraId,
@@ -139,7 +140,8 @@ class UpdaterTest
     )
 
     val expectedTransformable1 = sierraTransformable1.copy(
-      itemRecords = Map.empty
+      itemRecords = Map.empty,
+      modifiedTime = unlinkItemRecord.modifiedDate
     )
 
     val expectedItemRecords = Map(
@@ -150,7 +152,8 @@ class UpdaterTest
       )
     )
     val expectedTransformable2 = sierraTransformable2.copy(
-      itemRecords = expectedItemRecords
+      itemRecords = expectedItemRecords,
+      modifiedTime = unlinkItemRecord.modifiedDate
     )
 
     val result = updater.update(unlinkItemRecord)
@@ -201,13 +204,15 @@ class UpdaterTest
     )
 
     val expectedTransformable1 = sierraTransformable1.copy(
-      itemRecords = Map.empty
+      itemRecords = Map.empty,
+      modifiedTime = unlinkItemRecord.modifiedDate
     )
 
     // In this situation the item was already linked to sierraTransformable2
     // but the modified date is updated in line with the item update
     val expectedTransformable2 = sierraTransformable2.copy(
-      itemRecords = expectedItemData
+      itemRecords = expectedItemData,
+      modifiedTime = unlinkItemRecord.modifiedDate
     )
 
     val result = updater.update(unlinkItemRecord)

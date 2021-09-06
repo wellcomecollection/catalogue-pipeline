@@ -30,13 +30,25 @@ object TransformableOps {
       implicit
       ops: TransformableOps[Record]
     ): Option[SierraTransformable] =
-      ops.add(t, r)
+      ops
+        .add(t, r)
+        .map { transformable =>
+          transformable.copy(
+            modifiedTime = Seq(transformable.modifiedTime, r.modifiedDate).max
+          )
+        }
 
     def remove[Record <: AbstractSierraRecord[_]](r: Record)(
       implicit
       ops: TransformableOps[Record]
     ): Option[SierraTransformable] =
-      ops.remove(t, r)
+      ops
+        .remove(t, r)
+        .map { transformable =>
+          transformable.copy(
+            modifiedTime = Seq(transformable.modifiedTime, r.modifiedDate).max
+          )
+        }
   }
 
   implicit val bibTransformableOps = new TransformableOps[SierraBibRecord] {
@@ -86,7 +98,7 @@ object TransformableOps {
 
     override def create(sierraId: SierraBibNumber,
                         record: Record): SierraTransformable = {
-      val t = SierraTransformable(sierraId = sierraId)
+      val t = SierraTransformable(sierraId = sierraId, modifiedTime = record.modifiedDate)
       val newRecords = Map(record.id -> record)
 
       setRecords(t, newRecords)

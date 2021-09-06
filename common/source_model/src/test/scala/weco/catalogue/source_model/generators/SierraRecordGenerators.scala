@@ -173,7 +173,16 @@ trait SierraRecordGenerators extends SierraIdentifierGenerators {
       }.toMap,
       orderRecords = orderRecords.map { record =>
         record.id -> record
-      }.toMap
+      }.toMap,
+      modifiedTime = {
+        val times = (Seq(maybeBibRecord).flatten ++ itemRecords ++ holdingsRecords ++ orderRecords)
+          .map(_.modifiedDate)
+
+        times match {
+          case Nil => Instant.now()
+          case _   => times.max
+        }
+      }
     )
 
   def createSierraTransformableWith(

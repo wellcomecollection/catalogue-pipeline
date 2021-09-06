@@ -129,7 +129,8 @@ class TransformableOpsTest
         val result = sierraTransformable.add(newerRecord)
 
         result.get shouldBe sierraTransformable.copy(
-          itemRecords = Map(itemRecord.id -> newerRecord))
+          itemRecords = Map(itemRecord.id -> newerRecord),
+          modifiedTime = newerDate)
       }
 
       it("returns the record if you apply the same update more than once") {
@@ -230,7 +231,8 @@ class TransformableOpsTest
         )
 
         val expectedSierraTransformable = sierraTransformable.copy(
-          itemRecords = Map.empty
+          itemRecords = Map.empty,
+          modifiedTime = unlinkedItemRecord.modifiedDate
         )
 
         sierraTransformable
@@ -345,7 +347,8 @@ class TransformableOpsTest
         val result = sierraTransformable.add(newerRecord)
 
         result.get shouldBe sierraTransformable.copy(
-          holdingsRecords = Map(olderRecord.id -> newerRecord))
+          holdingsRecords = Map(olderRecord.id -> newerRecord),
+          modifiedTime = newerDate)
       }
 
       it("returns the same record if you apply the same update more than once") {
@@ -443,7 +446,8 @@ class TransformableOpsTest
         )
 
         val expectedSierraTransformable = sierraTransformable.copy(
-          holdingsRecords = Map.empty
+          holdingsRecords = Map.empty,
+          modifiedTime = unlinkedRecord.modifiedDate
         )
 
         sierraTransformable
@@ -558,7 +562,8 @@ class TransformableOpsTest
         val result = sierraTransformable.add(newerRecord)
 
         result.get shouldBe sierraTransformable.copy(
-          orderRecords = Map(olderRecord.id -> newerRecord))
+          orderRecords = Map(olderRecord.id -> newerRecord),
+          modifiedTime = newerDate)
       }
 
       it("returns the same record if you apply the same update more than once") {
@@ -656,7 +661,8 @@ class TransformableOpsTest
         )
 
         val expectedSierraTransformable = sierraTransformable.copy(
-          orderRecords = Map.empty
+          orderRecords = Map.empty,
+          modifiedTime = unlinkedRecord.modifiedDate
         )
 
         sierraTransformable
