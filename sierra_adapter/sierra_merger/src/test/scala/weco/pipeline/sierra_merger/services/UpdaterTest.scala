@@ -58,9 +58,8 @@ class UpdaterTest
       Version(bibId.withoutCheckDigit, 0))
 
     val expectedSierraTransformable =
-      createSierraTransformableWith(
-        sierraId = bibId,
-        maybeBibRecord = None,
+      createSierraTransformableStubWith(
+        bibId = bibId,
         itemRecords = List(newItemRecord)
       )
 
@@ -75,9 +74,8 @@ class UpdaterTest
       bibIds = List(bibId)
     )
 
-    val oldTransformable = createSierraTransformableWith(
-      sierraId = bibId,
-      maybeBibRecord = None,
+    val oldTransformable = createSierraTransformableStubWith(
+      bibId = bibId,
       itemRecords = List(itemRecord)
     )
 
@@ -117,15 +115,13 @@ class UpdaterTest
       bibIds = List(bibId1)
     )
 
-    val sierraTransformable1 = createSierraTransformableWith(
-      sierraId = bibId1,
-      maybeBibRecord = None,
+    val sierraTransformable1 = createSierraTransformableStubWith(
+      bibId = bibId1,
       itemRecords = List(itemRecord)
     )
 
-    val sierraTransformable2 = createSierraTransformableWith(
-      sierraId = bibId2,
-      maybeBibRecord = None
+    val sierraTransformable2 = createSierraTransformableStubWith(
+      bibId = bibId2
     )
 
     val sourceVHS = createSourceVHSWith(
@@ -173,18 +169,16 @@ class UpdaterTest
     val bibId2 = createSierraBibNumber
 
     val itemRecord = createSierraItemRecordWith(
-      bibIds = List(bibId1)
+      bibIds = List(bibId1, bibId2)
     )
 
-    val sierraTransformable1 = createSierraTransformableWith(
-      sierraId = bibId1,
-      maybeBibRecord = None,
+    val sierraTransformable1 = createSierraTransformableStubWith(
+      bibId = bibId1,
       itemRecords = List(itemRecord)
     )
 
-    val sierraTransformable2 = createSierraTransformableWith(
-      sierraId = bibId2,
-      maybeBibRecord = None,
+    val sierraTransformable2 = createSierraTransformableStubWith(
+      bibId = bibId2,
       itemRecords = List(itemRecord)
     )
 
@@ -235,12 +229,12 @@ class UpdaterTest
     )
 
     val sierraTransformable1 =
-      createSierraTransformableWith(
-        sierraId = bibId1,
+      createSierraTransformableStubWith(
+        bibId = bibId1,
         itemRecords = List(itemRecord))
 
     val sierraTransformable2 =
-      createSierraTransformableWith(sierraId = bibId2)
+      createSierraTransformableStubWith(bibId = bibId2)
 
     val sourceVHS = createSourceVHSWith(
       initialEntries = Map(
@@ -289,9 +283,8 @@ class UpdaterTest
       bibIds = List(bibId)
     )
 
-    val transformable = createSierraTransformableWith(
-      sierraId = bibId,
-      maybeBibRecord = None,
+    val transformable = createSierraTransformableStubWith(
+      bibId = bibId,
       itemRecords = List(itemRecord)
     )
 
@@ -336,10 +329,7 @@ class UpdaterTest
 
   it("adds an item to the record if the bibId exists but has no itemData") {
     val bibId = createSierraBibNumber
-    val transformable = createSierraTransformableWith(
-      sierraId = bibId,
-      maybeBibRecord = None
-    )
+    val transformable = createSierraTransformableStubWith(bibId = bibId)
 
     val sourceVHS = createSourceVHSWith(
       initialEntries = Map(
@@ -352,9 +342,8 @@ class UpdaterTest
       bibIds = List(bibId)
     )
 
-    val expectedTransformable = createSierraTransformableWith(
-      sierraId = bibId,
-      maybeBibRecord = None,
+    val expectedTransformable = createSierraTransformableStubWith(
+      bibId = bibId,
       itemRecords = List(itemRecord)
     )
 
