@@ -7,12 +7,15 @@ import weco.sierra.models.identifiers.{
   SierraOrderNumber
 }
 
+import java.time.Instant
+
 case class SierraTransformable(
   sierraId: SierraBibNumber,
   maybeBibRecord: Option[SierraBibRecord] = None,
   itemRecords: Map[SierraItemNumber, SierraItemRecord] = Map(),
   holdingsRecords: Map[SierraHoldingsNumber, SierraHoldingsRecord] = Map(),
-  orderRecords: Map[SierraOrderNumber, SierraOrderRecord] = Map()
+  orderRecords: Map[SierraOrderNumber, SierraOrderRecord] = Map(),
+  modifiedTime: Instant
 ) {
   // Run some consistency checks on the identifiers.  If these identifiers don't match,
   // it indicates some sort of programming error.
@@ -42,5 +45,7 @@ object SierraTransformable {
   def apply(bibRecord: SierraBibRecord): SierraTransformable =
     SierraTransformable(
       sierraId = bibRecord.id,
-      maybeBibRecord = Some(bibRecord))
+      maybeBibRecord = Some(bibRecord),
+      modifiedTime = bibRecord.modifiedDate
+    )
 }
