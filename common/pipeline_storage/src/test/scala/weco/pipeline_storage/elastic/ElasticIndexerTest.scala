@@ -4,11 +4,12 @@ import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.{Index, Response}
 import com.sksamuel.elastic4s.requests.get.GetResponse
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
+import com.sksamuel.elastic4s.requests.searches.SearchResponse
 import org.scalatest.{Assertion, EitherValues}
 import weco.elasticsearch.IndexConfig
 import weco.elasticsearch.test.fixtures.ElasticsearchFixtures
 import weco.fixtures.TestWith
-import weco.json.JsonUtil.toJson
+import weco.json.JsonUtil._
 import weco.catalogue.internal_model.index.{IndexConfigFields, WorksAnalysis}
 import weco.pipeline_storage.IndexerTestCases
 import weco.pipeline_storage.generators.SampleDocumentData
@@ -42,8 +43,16 @@ class ElasticIndexerTest
         }
       }
 
-      documents.foreach { doc =>
-        assertObjectIndexed(index, doc)
+      eventually {
+        val response: Response[SearchResponse] = elasticClient.execute {
+          search(index).matchAllQuery()
+        }.await
+
+        val storedDocuments = response.result.hits.hits
+          .map(_.sourceAsString)
+          .map(fromJson[SampleDocument](_).get)
+
+        storedDocuments should contain theSameElementsAs documents
       }
 
       testWith(index)
