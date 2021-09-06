@@ -69,7 +69,8 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
           throw e
       }
 
-  def workFromBibRecord(state: Source, bibRecord: SierraBibRecord): Try[Work[Source]] =
+  def workFromBibRecord(state: Source,
+                        bibRecord: SierraBibRecord): Try[Work[Source]] =
     fromJson[SierraBibData](bibRecord.data)
       .map { bibData =>
         if (bibData.deleted) {

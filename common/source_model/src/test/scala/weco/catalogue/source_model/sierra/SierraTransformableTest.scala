@@ -20,7 +20,9 @@ class SierraTransformableTest
     //
     // Then we'd have a SierraTransformable for b123 but no attached records.
     // Is that likely?  Hard to say, but we can handle it so we might as well.
-    SierraTransformable(sierraId = createSierraBibNumber, modifiedTime = Instant.now)
+    SierraTransformable(
+      sierraId = createSierraBibNumber,
+      modifiedTime = Instant.now)
   }
 
   it("allows creation from only a SierraBibRecord") {

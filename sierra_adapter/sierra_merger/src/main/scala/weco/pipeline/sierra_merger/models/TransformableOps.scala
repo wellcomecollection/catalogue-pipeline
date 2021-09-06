@@ -98,7 +98,9 @@ object TransformableOps {
 
     override def create(sierraId: SierraBibNumber,
                         record: Record): SierraTransformable = {
-      val t = SierraTransformable(sierraId = sierraId, modifiedTime = record.modifiedDate)
+      val t = SierraTransformable(
+        sierraId = sierraId,
+        modifiedTime = record.modifiedDate)
       val newRecords = Map(record.id -> record)
 
       setRecords(t, newRecords)
