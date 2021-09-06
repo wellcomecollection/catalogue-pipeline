@@ -1134,10 +1134,9 @@ class SierraTransformerTest
     val id = createSierraBibNumber
 
     val transformable = createSierraTransformableWith(
-      bibRecord =
-        createSierraBibRecordWith(
-          id = id,
-          data = s"""
+      bibRecord = createSierraBibRecordWith(
+        id = id,
+        data = s"""
                |{
                |  "id": "$id",
                |  "fixedFields": {
@@ -1145,7 +1144,7 @@ class SierraTransformerTest
                |  }
                |}
                |""".stripMargin
-        ),
+      ),
       orderRecords = List(createSierraOrderRecordWith(bibIds = List(id)))
     )
 
@@ -1191,11 +1190,10 @@ class SierraTransformerTest
          |""".stripMargin
 
     val transformable = createSierraTransformableWith(
-      bibRecord =
-        SierraBibRecord(
-          id = bibId,
-          data = bibData,
-          modifiedDate = Instant.now()),
+      bibRecord = SierraBibRecord(
+        id = bibId,
+        data = bibData,
+        modifiedDate = Instant.now()),
       itemRecords = List(
         SierraItemRecord(
           id = itemId,

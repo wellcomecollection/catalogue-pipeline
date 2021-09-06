@@ -46,10 +46,9 @@ class SierraIndexerFeatureTest
     }
 
     val transformable = createSierraTransformableWith(
-      bibRecord =
-        createSierraBibRecordWith(
-          id = bibId,
-          data = s"""
+      bibRecord = createSierraBibRecordWith(
+        id = bibId,
+        data = s"""
                |{
                |  "id" : "$bibId",
                |  "updatedDate" : "2013-12-12T13:56:07Z",
@@ -84,7 +83,7 @@ class SierraIndexerFeatureTest
                |  }
                |}
                |""".stripMargin
-        ),
+      ),
       itemRecords = itemIds.map { id =>
         createSierraItemRecordWith(id = id, bibIds = List(bibId))
       },
@@ -252,10 +251,9 @@ class SierraIndexerFeatureTest
     val bibId = createSierraBibNumber
 
     val transformable1 = createSierraTransformableWith(
-      bibRecord =
-        createSierraBibRecordWith(
-          id = bibId,
-          data = s"""
+      bibRecord = createSierraBibRecordWith(
+        id = bibId,
+        data = s"""
                     |{
                     |  "id" : "$bibId",
                     |  "updatedDate" : "2001-01-01T01:01:01Z",
@@ -274,16 +272,15 @@ class SierraIndexerFeatureTest
                     |  }
                     |}
                     |""".stripMargin
-        ),
+      ),
       itemRecords = List(),
       holdingsRecords = List(),
     )
 
     val transformable2 = createSierraTransformableWith(
-      bibRecord =
-        createSierraBibRecordWith(
-          id = bibId,
-          data = s"""
+      bibRecord = createSierraBibRecordWith(
+        id = bibId,
+        data = s"""
                     |{
                     |  "id" : "$bibId",
                     |  "updatedDate" : "2002-02-02T02:02:02Z",
@@ -302,7 +299,7 @@ class SierraIndexerFeatureTest
                     |  }
                     |}
                     |""".stripMargin
-        ),
+      ),
       itemRecords = List(),
       holdingsRecords = List(),
     )

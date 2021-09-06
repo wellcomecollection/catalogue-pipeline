@@ -102,7 +102,8 @@ class TransformableOpsTest
         )
 
         val sierraTransformable =
-          createSierraTransformableWith(bibRecord = createSierraBibRecordWith(id = bibId))
+          createSierraTransformableWith(
+            bibRecord = createSierraBibRecordWith(id = bibId))
         val result = sierraTransformable.add(record)
 
         result.get.itemRecords shouldBe Map(record.id -> record)
@@ -138,7 +139,8 @@ class TransformableOpsTest
         )
 
         val sierraTransformable =
-          createSierraTransformableWith(bibRecord = createSierraBibRecordWith(id = bibId))
+          createSierraTransformableWith(
+            bibRecord = createSierraBibRecordWith(id = bibId))
 
         val transformable1 = sierraTransformable.add(record)
         val transformable2 = transformable1.get.add(record)
@@ -176,7 +178,8 @@ class TransformableOpsTest
         )
 
         val sierraTransformable =
-          createSierraTransformableWith(bibRecord = createSierraBibRecordWith(id = bibId))
+          createSierraTransformableWith(
+            bibRecord = createSierraBibRecordWith(id = bibId))
         val result1 = sierraTransformable.add(record1)
         val result2 = result1.get.add(record2)
 
@@ -194,7 +197,8 @@ class TransformableOpsTest
         )
 
         val sierraTransformable =
-          createSierraTransformableWith(bibRecord = createSierraBibRecordWith(id = bibId))
+          createSierraTransformableWith(
+            bibRecord = createSierraBibRecordWith(id = bibId))
 
         val caught = intercept[RuntimeException] {
           sierraTransformable.add(record)

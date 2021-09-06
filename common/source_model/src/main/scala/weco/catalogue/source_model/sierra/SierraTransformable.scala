@@ -18,20 +18,23 @@ case class SierraTransformable(
   // it indicates some sort of programming error.
   maybeBibRecord match {
     case Some(bibRecord) => require(bibRecord.id == sierraId)
-    case _ => ()
+    case _               => ()
   }
 
-  itemRecords.foreach { case (id, record) =>
-    require(record.id == id)
-    require(record.bibIds.contains(sierraId))
+  itemRecords.foreach {
+    case (id, record) =>
+      require(record.id == id)
+      require(record.bibIds.contains(sierraId))
   }
-  holdingsRecords.foreach { case (id, record) =>
-    require(record.id == id)
-    require(record.bibIds.contains(sierraId))
+  holdingsRecords.foreach {
+    case (id, record) =>
+      require(record.id == id)
+      require(record.bibIds.contains(sierraId))
   }
-  orderRecords.foreach { case (id, record) =>
-    require(record.id == id)
-    require(record.bibIds.contains(sierraId))
+  orderRecords.foreach {
+    case (id, record) =>
+      require(record.id == id)
+      require(record.bibIds.contains(sierraId))
   }
 }
 

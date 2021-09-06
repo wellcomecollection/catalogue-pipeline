@@ -25,10 +25,9 @@ class WorkerTest
       val bibId = createSierraBibNumber
 
       val transformable = createSierraTransformableWith(
-        bibRecord =
-          createSierraBibRecordWith(
-            id = bibId,
-            data = s"""
+        bibRecord = createSierraBibRecordWith(
+          id = bibId,
+          data = s"""
                  |{
                  |  "id" : "$bibId",
                  |  "updatedDate" : "2013-12-12T13:56:07Z",
@@ -53,7 +52,7 @@ class WorkerTest
                  |  ]
                  |}
                  |""".stripMargin
-          )
+        )
       )
 
       val store = MemoryTypedStore[S3ObjectLocation, SierraTransformable](
@@ -105,10 +104,9 @@ class WorkerTest
       // that one of the fields was a date -- preventing any non-date data
       // being indexed in future updates.
       val transformable = createSierraTransformableWith(
-        bibRecord =
-          createSierraBibRecordWith(
-            id = bibId,
-            data = s"""
+        bibRecord = createSierraBibRecordWith(
+          id = bibId,
+          data = s"""
                  |{
                  |  "id" : "$bibId",
                  |  "updatedDate" : "2013-12-12T13:56:07Z",
@@ -125,7 +123,7 @@ class WorkerTest
                  |  ]
                  |}
                  |""".stripMargin
-          )
+        )
       )
 
       val store = MemoryTypedStore[S3ObjectLocation, SierraTransformable](
@@ -172,10 +170,9 @@ class WorkerTest
       // that one of the fields was a date -- preventing any non-date data
       // being indexed in future updates.
       val transformable = createSierraTransformableWith(
-        bibRecord =
-          createSierraBibRecordWith(
-            id = bibId,
-            data = s"""
+        bibRecord = createSierraBibRecordWith(
+          id = bibId,
+          data = s"""
                  |{
                  |  "id" : "$bibId",
                  |  "updatedDate" : "2013-12-12T13:56:07Z",
@@ -192,7 +189,7 @@ class WorkerTest
                  |  }
                  |}
                  |""".stripMargin
-          )
+        )
       )
 
       val store = MemoryTypedStore[S3ObjectLocation, SierraTransformable](
