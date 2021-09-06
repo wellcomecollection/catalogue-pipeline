@@ -14,7 +14,11 @@ import weco.json.utils.JsonAssertions
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.generators.ImageGenerators
 import weco.catalogue.internal_model.identifiers.IdState
-import weco.catalogue.internal_model.locations.{AccessCondition, AccessMethod, AccessStatus}
+import weco.catalogue.internal_model.locations.{
+  AccessCondition,
+  AccessMethod,
+  AccessStatus
+}
 import weco.catalogue.internal_model.work._
 import weco.catalogue.internal_model.work.generators.WorkGenerators
 import weco.json.JsonUtil._
@@ -120,9 +124,8 @@ class WorksIndexConfigTest
       status = AccessStatus.Open)
 
     val workWithAccessConditions = identifiedWork().items(
-      List(
-        createIdentifiedItemWith(locations = List(createDigitalLocationWith(
-          accessConditions = List(accessCondition))))))
+      List(createIdentifiedItemWith(locations = List(
+        createDigitalLocationWith(accessConditions = List(accessCondition))))))
 
     withLocalWorksIndex { implicit index =>
       assertWorkCanBeIndexed(workWithAccessConditions)
@@ -174,24 +177,34 @@ class WorksIndexConfigTest
   it("puts a valid work using compression") {
     withLocalWorksIndex { implicit index =>
       forAll { identifiedWork: Work[WorkState.Identified] =>
-        assertWorkCanBeIndexed(client = elasticClientWithCompression, work = identifiedWork)
+        assertWorkCanBeIndexed(
+          client = elasticClientWithCompression,
+          work = identifiedWork)
       }
     }
   }
 
-  private def assertWorkCanBeIndexed[W <: Work[_ <: WorkState]](work: W, client: ElasticClient = elasticClient)(implicit index: Index, decoder: Decoder[W], encoder: Encoder[W]): Assertion = {
+  private def assertWorkCanBeIndexed[W <: Work[_ <: WorkState]](
+    work: W,
+    client: ElasticClient = elasticClient)(implicit index: Index,
+                                           decoder: Decoder[W],
+                                           encoder: Encoder[W]): Assertion = {
     indexWork(client, id = work.state.id, work = work)
     assertWorkIsIndexed(client, id = work.state.id, work = work)
   }
 
-  private def indexWork[W](client: ElasticClient = elasticClient, id: String, work: W)(implicit index: Index, encoder: Encoder[W]) =
-    client
-      .execute {
-        indexInto(index).doc(toJson(work).get).id(id)
-      }
-      .await
+  private def indexWork[W](
+    client: ElasticClient = elasticClient,
+    id: String,
+    work: W)(implicit index: Index, encoder: Encoder[W]) =
+    client.execute {
+      indexInto(index).doc(toJson(work).get).id(id)
+    }.await
 
-  private def assertWorkIsIndexed[W](client: ElasticClient, id: String, work: W)(implicit index: Index, decoder: Decoder[W]) =
+  private def assertWorkIsIndexed[W](
+    client: ElasticClient,
+    id: String,
+    work: W)(implicit index: Index, decoder: Decoder[W]) =
     eventually {
       whenReady(client.execute(get(index, id))) { getResponse =>
         getResponse.result.exists shouldBe true

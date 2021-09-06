@@ -90,19 +90,23 @@ class ImagesIndexConfigTest
     }
   }
 
-  private def assertImageCanBeIndexed[I <: Image[_ <: ImageState]](image: I)(implicit index: Index, decoder: Decoder[I], encoder: Encoder[I]): Assertion = {
+  private def assertImageCanBeIndexed[I <: Image[_ <: ImageState]](image: I)(
+    implicit index: Index,
+    decoder: Decoder[I],
+    encoder: Encoder[I]): Assertion = {
     indexImage(id = image.id, image = image)
     assertWorkIsIndexed(id = image.id, image = image)
   }
 
-  private def indexImage[I](id: String, image: I)(implicit index: Index, encoder: Encoder[I]) =
-    elasticClient
-      .execute {
-        indexInto(index).doc(toJson(image).get).id(id)
-      }
-      .await
+  private def indexImage[I](id: String, image: I)(implicit index: Index,
+                                                  encoder: Encoder[I]) =
+    elasticClient.execute {
+      indexInto(index).doc(toJson(image).get).id(id)
+    }.await
 
-  private def assertWorkIsIndexed[I](id: String, image: I)(implicit index: Index, decoder: Decoder[I]) =
+  private def assertWorkIsIndexed[I](id: String, image: I)(
+    implicit index: Index,
+    decoder: Decoder[I]) =
     eventually {
       whenReady(elasticClient.execute(get(index, id))) { getResponse =>
         getResponse.result.exists shouldBe true
