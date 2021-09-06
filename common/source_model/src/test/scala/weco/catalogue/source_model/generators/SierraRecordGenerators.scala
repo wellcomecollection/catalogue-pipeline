@@ -175,8 +175,9 @@ trait SierraRecordGenerators extends SierraIdentifierGenerators {
         record.id -> record
       }.toMap,
       modifiedTime = {
-        val times = (Seq(maybeBibRecord).flatten ++ itemRecords ++ holdingsRecords ++ orderRecords)
-          .map(_.modifiedDate)
+        val times =
+          (Seq(maybeBibRecord).flatten ++ itemRecords ++ holdingsRecords ++ orderRecords)
+            .map(_.modifiedDate)
 
         times match {
           case Nil => Instant.now()
