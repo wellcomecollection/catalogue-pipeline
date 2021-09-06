@@ -185,6 +185,25 @@ class SierraNotesTest
     SierraNotes(bibData) should contain theSameElementsAs notes
   }
 
+  it("skips 591 subfield ǂ9 (barcode)") {
+    val varFields = List(
+      VarField(
+        marcTag = "591",
+        subfields = List(
+          Subfield(tag = "z", content = "Copy 1."),
+          Subfield(tag = "e", content = "Note: The author's presentation inscription on verso of 2nd leaf."),
+          Subfield(tag = "9", content = "X8253")
+        )
+      )
+    )
+
+    val bibData = createSierraBibDataWith(varFields = varFields)
+
+    SierraNotes(bibData) should contain theSameElementsAs List(
+      GeneralNote("Copy 1. Note: The author's presentation inscription on verso of 2nd leaf.")
+    )
+  }
+
   def bibData(contents: List[(String, Note)]): SierraBibData =
     bibData(contents.map { case (tag, note) => (tag, note.content) }: _*)
 

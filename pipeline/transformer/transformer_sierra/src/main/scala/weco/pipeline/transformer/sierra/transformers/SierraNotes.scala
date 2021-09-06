@@ -8,7 +8,7 @@ import weco.sierra.models.marc.VarField
 object SierraNotes extends SierraDataTransformer with SierraQueryOps {
 
   type Output = List[Note]
-  val suppressedSubfields = Set("5")
+  private val globallySuppressedSubfields = Set("5")
 
   val notesFields = Map(
     "500" -> createNoteFromContents(GeneralNote),
@@ -37,7 +37,10 @@ object SierraNotes extends SierraDataTransformer with SierraQueryOps {
     "581" -> createNoteFromContents(PublicationsNote),
     "585" -> createNoteFromContents(ExhibitionsNote),
     "586" -> createNoteFromContents(AwardsNote),
-    "591" -> createNoteFromContents(GeneralNote),
+
+    // 591 subfield ǂ9 contains barcodes that we don't want to show on /works.
+    "591" -> createNoteFromContents(GeneralNote, suppressedSubfields = Set("9")),
+
     "593" -> createNoteFromContents(CopyrightNote),
   )
 
@@ -61,11 +64,12 @@ object SierraNotes extends SierraDataTransformer with SierraQueryOps {
       }
 
   private def createNoteFromContents(
-    createNote: String => Note): VarField => Note =
+    createNote: String => Note,
+    suppressedSubfields: Set[String] = Set()): VarField => Note =
     (varField: VarField) => {
       val contents =
         varField
-          .subfieldsWithoutTags(suppressedSubfields.toSeq: _*)
+          .subfieldsWithoutTags((globallySuppressedSubfields ++ suppressedSubfields).toSeq: _*)
           .contents
           .mkString(" ")
 
