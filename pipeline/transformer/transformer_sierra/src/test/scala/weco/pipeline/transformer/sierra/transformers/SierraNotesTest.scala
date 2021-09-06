@@ -191,7 +191,10 @@ class SierraNotesTest
         marcTag = "591",
         subfields = List(
           Subfield(tag = "z", content = "Copy 1."),
-          Subfield(tag = "e", content = "Note: The author's presentation inscription on verso of 2nd leaf."),
+          Subfield(
+            tag = "e",
+            content =
+              "Note: The author's presentation inscription on verso of 2nd leaf."),
           Subfield(tag = "9", content = "X8253")
         )
       )
@@ -200,7 +203,8 @@ class SierraNotesTest
     val bibData = createSierraBibDataWith(varFields = varFields)
 
     SierraNotes(bibData) should contain theSameElementsAs List(
-      GeneralNote("Copy 1. Note: The author's presentation inscription on verso of 2nd leaf.")
+      GeneralNote(
+        "Copy 1. Note: The author's presentation inscription on verso of 2nd leaf.")
     )
   }
 

@@ -37,10 +37,10 @@ object SierraNotes extends SierraDataTransformer with SierraQueryOps {
     "581" -> createNoteFromContents(PublicationsNote),
     "585" -> createNoteFromContents(ExhibitionsNote),
     "586" -> createNoteFromContents(AwardsNote),
-
     // 591 subfield ǂ9 contains barcodes that we don't want to show on /works.
-    "591" -> createNoteFromContents(GeneralNote, suppressedSubfields = Set("9")),
-
+    "591" -> createNoteFromContents(
+      GeneralNote,
+      suppressedSubfields = Set("9")),
     "593" -> createNoteFromContents(CopyrightNote),
   )
 
@@ -69,7 +69,8 @@ object SierraNotes extends SierraDataTransformer with SierraQueryOps {
     (varField: VarField) => {
       val contents =
         varField
-          .subfieldsWithoutTags((globallySuppressedSubfields ++ suppressedSubfields).toSeq: _*)
+          .subfieldsWithoutTags(
+            (globallySuppressedSubfields ++ suppressedSubfields).toSeq: _*)
           .contents
           .mkString(" ")
 
