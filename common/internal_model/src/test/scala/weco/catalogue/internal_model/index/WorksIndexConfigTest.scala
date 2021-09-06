@@ -4,7 +4,6 @@ import com.sksamuel.elastic4s.ElasticDsl._
 import org.scalacheck.ScalacheckShapeless._
 import com.sksamuel.elastic4s.{ElasticClient, ElasticError, Index}
 import org.scalacheck.Shrink
-import org.scalatest.concurrent.{Eventually, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
@@ -23,8 +22,6 @@ import weco.json.JsonUtil._
 class WorksIndexConfigTest
     extends AnyFunSpec
     with IndexFixtures
-    with ScalaFutures
-    with Eventually
     with Matchers
     with JsonAssertions
     with ScalaCheckPropertyChecks
@@ -167,7 +164,7 @@ class WorksIndexConfigTest
         weight = 5
       )
 
-      val response = indexWork(index = index, id = "id", work = notAWork)
+      val response = indexWork(id = "id", work = notAWork)
 
       response.isError shouldBe true
       response.error shouldBe a[ElasticError]
@@ -183,18 +180,18 @@ class WorksIndexConfigTest
   }
 
   private def assertWorkCanBeIndexed[W <: Work[_ <: WorkState]](work: W, client: ElasticClient = elasticClient)(implicit index: Index, decoder: Decoder[W], encoder: Encoder[W]): Assertion = {
-    indexWork(client, index = index, id = work.state.id, work = work)
-    assertWorkIsIndexed(client, index = index, id = work.state.id, work = work)
+    indexWork(client, id = work.state.id, work = work)
+    assertWorkIsIndexed(client, id = work.state.id, work = work)
   }
 
-  private def indexWork[W](client: ElasticClient = elasticClient, index: Index, id: String, work: W)(implicit encoder: Encoder[W]) =
+  private def indexWork[W](client: ElasticClient = elasticClient, id: String, work: W)(implicit index: Index, encoder: Encoder[W]) =
     client
       .execute {
         indexInto(index).doc(toJson(work).get).id(id)
       }
       .await
 
-  private def assertWorkIsIndexed[W](client: ElasticClient, index: Index, id: String, work: W)(implicit decoder: Decoder[W]) =
+  private def assertWorkIsIndexed[W](client: ElasticClient, id: String, work: W)(implicit index: Index, decoder: Decoder[W]) =
     eventually {
       whenReady(client.execute(get(index, id))) { getResponse =>
         getResponse.result.exists shouldBe true

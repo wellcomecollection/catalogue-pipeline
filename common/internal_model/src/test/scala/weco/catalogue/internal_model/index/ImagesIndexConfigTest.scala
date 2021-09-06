@@ -1,45 +1,40 @@
 package weco.catalogue.internal_model.index
 
-import com.sksamuel.elastic4s.ElasticError
-import org.scalatest.concurrent.ScalaFutures
+import com.sksamuel.elastic4s.ElasticDsl._
+import com.sksamuel.elastic4s.{ElasticError, Index}
+import io.circe.{Decoder, Encoder}
+import org.scalatest.Assertion
 import org.scalatest.funspec.AnyFunSpec
 import weco.json.JsonUtil._
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.generators.ImageGenerators
-import weco.catalogue.internal_model.image.InferredData
+import weco.catalogue.internal_model.image.{Image, ImageState, InferredData}
 
 import scala.util.Random
 
 class ImagesIndexConfigTest
     extends AnyFunSpec
     with ImageGenerators
-    with IndexFixtures
-    with ScalaFutures {
+    with IndexFixtures {
 
-  it("can ingest an image with large image features vectors") {
-    withLocalImagesIndex { index =>
-      val image = createImageData.toAugmentedImage
-      whenReady(indexObject(index, image)) { response =>
-        response.isError shouldBe false
-        assertObjectIndexed(index, image)
-      }
-
+  it("indexes an image with large image features vectors") {
+    withLocalImagesIndex { implicit index =>
+      assertImageCanBeIndexed(
+        image = createImageData.toAugmentedImage
+      )
     }
   }
 
-  it("can ingest an image without feature vectors") {
-    withLocalImagesIndex { index =>
-      val image = createImageData.toAugmentedImageWith(inferredData = None)
-      whenReady(indexObject(index, image)) { response =>
-        response.isError shouldBe false
-        assertObjectIndexed(index, image)
-      }
-
+  it("indexes an image without feature vectors") {
+    withLocalImagesIndex { implicit index =>
+      assertImageCanBeIndexed(
+        image = createImageData.toAugmentedImageWith(inferredData = None)
+      )
     }
   }
 
-  it("cannot ingest an image with image vectors that are longer than 2048") {
-    withLocalImagesIndex { index =>
+  it("cannot index an image with image vectors that are longer than 2048") {
+    withLocalImagesIndex { implicit index =>
       val features1 = (0 until 3000).map(_ => Random.nextFloat() * 100).toList
       val features2 = (0 until 3000).map(_ => Random.nextFloat() * 100).toList
       val image = createImageData.toAugmentedImageWith(
@@ -55,15 +50,15 @@ class ImagesIndexConfigTest
           )
         )
       )
-      whenReady(indexObject(index, image)) { response =>
-        response.isError shouldBe true
-        response.error shouldBe a[ElasticError]
-      }
+
+      val response = indexImage(id = image.id, image = image)
+      response.isError shouldBe true
+      response.error shouldBe a[ElasticError]
     }
   }
 
-  it("cannot ingest an image with image vectors that are shorter than 2048") {
-    withLocalImagesIndex { index =>
+  it("cannot index an image with image vectors that are shorter than 2048") {
+    withLocalImagesIndex { implicit index =>
       val image = createImageData.toAugmentedImageWith(
         inferredData = Some(
           InferredData(
@@ -77,21 +72,42 @@ class ImagesIndexConfigTest
           )
         )
       )
-      whenReady(indexObject(index, image)) { response =>
-        response.isError shouldBe true
-        response.error shouldBe a[ElasticError]
-      }
+
+      val response = indexImage(id = image.id, image = image)
+      response.isError shouldBe true
+      response.error shouldBe a[ElasticError]
     }
   }
 
-  it("doesn't ingest something that it's not an image") {
+  it("doesn't index something that's not an image") {
     case class BadDocument(Something: String, somethingElse: Int)
-    val document = BadDocument(randomAlphanumeric(10), 10)
-    withLocalImagesIndex { index =>
-      whenReady(indexObject(index, document)) { response =>
-        response.isError shouldBe true
-        response.error shouldBe a[ElasticError]
-      }
+    val notAnImage = BadDocument(randomAlphanumeric(10), 10)
+
+    withLocalImagesIndex { implicit index =>
+      val response = indexImage(id = "1", image = notAnImage)
+      response.isError shouldBe true
+      response.error shouldBe a[ElasticError]
     }
   }
+
+  private def assertImageCanBeIndexed[I <: Image[_ <: ImageState]](image: I)(implicit index: Index, decoder: Decoder[I], encoder: Encoder[I]): Assertion = {
+    indexImage(id = image.id, image = image)
+    assertWorkIsIndexed(id = image.id, image = image)
+  }
+
+  private def indexImage[I](id: String, image: I)(implicit index: Index, encoder: Encoder[I]) =
+    elasticClient
+      .execute {
+        indexInto(index).doc(toJson(image).get).id(id)
+      }
+      .await
+
+  private def assertWorkIsIndexed[I](id: String, image: I)(implicit index: Index, decoder: Decoder[I]) =
+    eventually {
+      whenReady(elasticClient.execute(get(index, id))) { getResponse =>
+        getResponse.result.exists shouldBe true
+
+        fromJson[I](getResponse.result.sourceAsString).get shouldBe image
+      }
+    }
 }
