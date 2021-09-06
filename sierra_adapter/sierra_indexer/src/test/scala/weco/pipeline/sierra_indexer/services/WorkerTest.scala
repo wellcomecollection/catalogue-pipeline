@@ -25,7 +25,7 @@ class WorkerTest
       val bibId = createSierraBibNumber
 
       val transformable = createSierraTransformableWith(
-        maybeBibRecord = Some(
+        bibRecord =
           createSierraBibRecordWith(
             id = bibId,
             data = s"""
@@ -54,7 +54,6 @@ class WorkerTest
                  |}
                  |""".stripMargin
           )
-        )
       )
 
       val store = MemoryTypedStore[S3ObjectLocation, SierraTransformable](
@@ -72,6 +71,7 @@ class WorkerTest
         )
         .await
 
+      // TODO: This should be a regular queue, not a DLQ pair
       withLocalSqsQueuePair() {
         case QueuePair(queue, dlq) =>
           withWorker(queue, store, indexPrefix) { worker =>
@@ -105,7 +105,7 @@ class WorkerTest
       // that one of the fields was a date -- preventing any non-date data
       // being indexed in future updates.
       val transformable = createSierraTransformableWith(
-        maybeBibRecord = Some(
+        bibRecord =
           createSierraBibRecordWith(
             id = bibId,
             data = s"""
@@ -126,7 +126,6 @@ class WorkerTest
                  |}
                  |""".stripMargin
           )
-        )
       )
 
       val store = MemoryTypedStore[S3ObjectLocation, SierraTransformable](
@@ -173,7 +172,7 @@ class WorkerTest
       // that one of the fields was a date -- preventing any non-date data
       // being indexed in future updates.
       val transformable = createSierraTransformableWith(
-        maybeBibRecord = Some(
+        bibRecord =
           createSierraBibRecordWith(
             id = bibId,
             data = s"""
@@ -194,7 +193,6 @@ class WorkerTest
                  |}
                  |""".stripMargin
           )
-        )
       )
 
       val store = MemoryTypedStore[S3ObjectLocation, SierraTransformable](
