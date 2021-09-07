@@ -155,15 +155,15 @@ trait SierraRecordGenerators extends SierraIdentifierGenerators {
 
   def createSierraItemRecord: SierraItemRecord = createSierraItemRecordWith()
 
-  def createSierraTransformableWith(
-    sierraId: SierraBibNumber = createSierraBibNumber,
-    maybeBibRecord: Option[SierraBibRecord] = Some(createSierraBibRecord),
+  def createSierraTransformableStubWith(
+    bibId: SierraBibNumber,
+    maybeBibRecord: Option[SierraBibRecord] = None,
     itemRecords: Seq[SierraItemRecord] = List(),
     holdingsRecords: Seq[SierraHoldingsRecord] = List(),
     orderRecords: Seq[SierraOrderRecord] = List()
   ): SierraTransformable =
     SierraTransformable(
-      sierraId = sierraId,
+      sierraId = bibId,
       maybeBibRecord = maybeBibRecord,
       itemRecords = itemRecords.map { record =>
         record.id -> record
@@ -173,9 +173,33 @@ trait SierraRecordGenerators extends SierraIdentifierGenerators {
       }.toMap,
       orderRecords = orderRecords.map { record =>
         record.id -> record
-      }.toMap
+      }.toMap,
+      modifiedTime = {
+        val times =
+          (Seq(maybeBibRecord).flatten ++ itemRecords ++ holdingsRecords ++ orderRecords)
+            .map(_.modifiedDate)
+
+        times match {
+          case Nil => Instant.now()
+          case _   => times.max
+        }
+      }
+    )
+
+  def createSierraTransformableWith(
+    bibRecord: SierraBibRecord,
+    itemRecords: Seq[SierraItemRecord] = List(),
+    holdingsRecords: Seq[SierraHoldingsRecord] = List(),
+    orderRecords: Seq[SierraOrderRecord] = List()
+  ): SierraTransformable =
+    createSierraTransformableStubWith(
+      bibId = bibRecord.id,
+      maybeBibRecord = Some(bibRecord),
+      itemRecords = itemRecords,
+      holdingsRecords = holdingsRecords,
+      orderRecords = orderRecords
     )
 
   def createSierraTransformable: SierraTransformable =
-    createSierraTransformableWith()
+    createSierraTransformableWith(bibRecord = createSierraBibRecord)
 }

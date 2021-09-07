@@ -15,9 +15,11 @@ class TransformableOpsTest
     describe("add") {
       it("merges data from a bibRecord when empty") {
         val bibRecord = createSierraBibRecord
-        val transformable = createSierraTransformableWith(
-          sierraId = bibRecord.id,
-          maybeBibRecord = None
+        val transformable = createSierraTransformableStubWith(
+          bibId = bibRecord.id,
+          itemRecords = List(
+            createSierraItemRecordWith(bibIds = List(bibRecord.id))
+          )
         )
 
         val newTransformable = transformable.add(bibRecord)
@@ -100,7 +102,8 @@ class TransformableOpsTest
         )
 
         val sierraTransformable =
-          createSierraTransformableWith(sierraId = bibId)
+          createSierraTransformableWith(
+            bibRecord = createSierraBibRecordWith(id = bibId))
         val result = sierraTransformable.add(record)
 
         result.get.itemRecords shouldBe Map(record.id -> record)
@@ -113,8 +116,8 @@ class TransformableOpsTest
           bibIds = List(bibId)
         )
 
-        val sierraTransformable = createSierraTransformableWith(
-          sierraId = bibId,
+        val sierraTransformable = createSierraTransformableStubWith(
+          bibId = bibId,
           itemRecords = List(itemRecord)
         )
 
@@ -126,7 +129,8 @@ class TransformableOpsTest
         val result = sierraTransformable.add(newerRecord)
 
         result.get shouldBe sierraTransformable.copy(
-          itemRecords = Map(itemRecord.id -> newerRecord))
+          itemRecords = Map(itemRecord.id -> newerRecord),
+          modifiedTime = newerDate)
       }
 
       it("returns the record if you apply the same update more than once") {
@@ -136,7 +140,8 @@ class TransformableOpsTest
         )
 
         val sierraTransformable =
-          createSierraTransformableWith(sierraId = bibId)
+          createSierraTransformableWith(
+            bibRecord = createSierraBibRecordWith(id = bibId))
 
         val transformable1 = sierraTransformable.add(record)
         val transformable2 = transformable1.get.add(record)
@@ -152,7 +157,7 @@ class TransformableOpsTest
         )
 
         val sierraTransformable = createSierraTransformableWith(
-          sierraId = bibId,
+          bibRecord = createSierraBibRecordWith(id = bibId),
           itemRecords = List(itemRecord)
         )
 
@@ -174,7 +179,8 @@ class TransformableOpsTest
         )
 
         val sierraTransformable =
-          createSierraTransformableWith(sierraId = bibId)
+          createSierraTransformableWith(
+            bibRecord = createSierraBibRecordWith(id = bibId))
         val result1 = sierraTransformable.add(record1)
         val result2 = result1.get.add(record2)
 
@@ -192,7 +198,8 @@ class TransformableOpsTest
         )
 
         val sierraTransformable =
-          createSierraTransformableWith(sierraId = bibId)
+          createSierraTransformableWith(
+            bibRecord = createSierraBibRecordWith(id = bibId))
 
         val caught = intercept[RuntimeException] {
           sierraTransformable.add(record)
@@ -219,12 +226,13 @@ class TransformableOpsTest
         )
 
         val sierraTransformable = createSierraTransformableWith(
-          sierraId = bibId,
+          bibRecord = createSierraBibRecordWith(id = bibId),
           itemRecords = List(record)
         )
 
         val expectedSierraTransformable = sierraTransformable.copy(
-          itemRecords = Map.empty
+          itemRecords = Map.empty,
+          modifiedTime = unlinkedItemRecord.modifiedDate
         )
 
         sierraTransformable
@@ -245,8 +253,8 @@ class TransformableOpsTest
           unlinkedBibIds = List(bibId)
         )
 
-        val sierraTransformable = createSierraTransformableWith(
-          sierraId = bibId,
+        val sierraTransformable = createSierraTransformableStubWith(
+          bibId = bibId,
           itemRecords = List(record)
         )
 
@@ -268,8 +276,8 @@ class TransformableOpsTest
           unlinkedBibIds = List(bibId)
         )
 
-        val sierraTransformable = createSierraTransformableWith(
-          sierraId = bibId,
+        val sierraTransformable = createSierraTransformableStubWith(
+          bibId = bibId,
           itemRecords = List(record)
         )
 
@@ -290,8 +298,8 @@ class TransformableOpsTest
           unlinkedBibIds = List(unrelatedBibId)
         )
 
-        val sierraTransformable = createSierraTransformableWith(
-          sierraId = bibId,
+        val sierraTransformable = createSierraTransformableStubWith(
+          bibId = bibId,
           itemRecords = List(record)
         )
 
@@ -313,7 +321,7 @@ class TransformableOpsTest
         )
 
         val sierraTransformable =
-          createSierraTransformableWith(sierraId = bibId)
+          createSierraTransformableStubWith(bibId = bibId)
         val result = sierraTransformable.add(record)
 
         result.get.holdingsRecords shouldBe Map(record.id -> record)
@@ -326,8 +334,8 @@ class TransformableOpsTest
           bibIds = List(bibId)
         )
 
-        val sierraTransformable = createSierraTransformableWith(
-          sierraId = bibId,
+        val sierraTransformable = createSierraTransformableStubWith(
+          bibId = bibId,
           holdingsRecords = List(olderRecord)
         )
 
@@ -339,7 +347,8 @@ class TransformableOpsTest
         val result = sierraTransformable.add(newerRecord)
 
         result.get shouldBe sierraTransformable.copy(
-          holdingsRecords = Map(olderRecord.id -> newerRecord))
+          holdingsRecords = Map(olderRecord.id -> newerRecord),
+          modifiedTime = newerDate)
       }
 
       it("returns the same record if you apply the same update more than once") {
@@ -349,7 +358,7 @@ class TransformableOpsTest
         )
 
         val sierraTransformable =
-          createSierraTransformableWith(sierraId = bibId)
+          createSierraTransformableStubWith(bibId = bibId)
 
         val transformable1 = sierraTransformable.add(record)
         val transformable2 = transformable1.get.add(record)
@@ -364,8 +373,8 @@ class TransformableOpsTest
           bibIds = List(bibId)
         )
 
-        val sierraTransformable = createSierraTransformableWith(
-          sierraId = bibId,
+        val sierraTransformable = createSierraTransformableStubWith(
+          bibId = bibId,
           holdingsRecords = List(newerRecord)
         )
 
@@ -387,7 +396,7 @@ class TransformableOpsTest
         )
 
         val sierraTransformable =
-          createSierraTransformableWith(sierraId = bibId)
+          createSierraTransformableStubWith(bibId = bibId)
         val result1 = sierraTransformable.add(record1)
         val result2 = result1.get.add(record2)
 
@@ -405,7 +414,7 @@ class TransformableOpsTest
         )
 
         val sierraTransformable =
-          createSierraTransformableWith(sierraId = bibId)
+          createSierraTransformableStubWith(bibId = bibId)
 
         val caught = intercept[RuntimeException] {
           sierraTransformable.add(record)
@@ -431,13 +440,14 @@ class TransformableOpsTest
           unlinkedBibIds = List(bibId)
         )
 
-        val sierraTransformable = createSierraTransformableWith(
-          sierraId = bibId,
+        val sierraTransformable = createSierraTransformableStubWith(
+          bibId = bibId,
           holdingsRecords = List(record)
         )
 
         val expectedSierraTransformable = sierraTransformable.copy(
-          holdingsRecords = Map.empty
+          holdingsRecords = Map.empty,
+          modifiedTime = unlinkedRecord.modifiedDate
         )
 
         sierraTransformable
@@ -458,8 +468,8 @@ class TransformableOpsTest
           unlinkedBibIds = List(bibId)
         )
 
-        val sierraTransformable = createSierraTransformableWith(
-          sierraId = bibId,
+        val sierraTransformable = createSierraTransformableStubWith(
+          bibId = bibId,
           holdingsRecords = List(record)
         )
 
@@ -481,8 +491,8 @@ class TransformableOpsTest
           unlinkedBibIds = List(bibId)
         )
 
-        val sierraTransformable = createSierraTransformableWith(
-          sierraId = bibId,
+        val sierraTransformable = createSierraTransformableStubWith(
+          bibId = bibId,
           holdingsRecords = List(record)
         )
 
@@ -503,8 +513,8 @@ class TransformableOpsTest
           unlinkedBibIds = List(unrelatedBibId)
         )
 
-        val sierraTransformable = createSierraTransformableWith(
-          sierraId = bibId,
+        val sierraTransformable = createSierraTransformableStubWith(
+          bibId = bibId,
           holdingsRecords = List(record)
         )
 
@@ -526,7 +536,7 @@ class TransformableOpsTest
         )
 
         val sierraTransformable =
-          createSierraTransformableWith(sierraId = bibId)
+          createSierraTransformableStubWith(bibId = bibId)
         val result = sierraTransformable.add(record)
 
         result.get.orderRecords shouldBe Map(record.id -> record)
@@ -539,8 +549,8 @@ class TransformableOpsTest
           bibIds = List(bibId)
         )
 
-        val sierraTransformable = createSierraTransformableWith(
-          sierraId = bibId,
+        val sierraTransformable = createSierraTransformableStubWith(
+          bibId = bibId,
           orderRecords = List(olderRecord)
         )
 
@@ -552,7 +562,8 @@ class TransformableOpsTest
         val result = sierraTransformable.add(newerRecord)
 
         result.get shouldBe sierraTransformable.copy(
-          orderRecords = Map(olderRecord.id -> newerRecord))
+          orderRecords = Map(olderRecord.id -> newerRecord),
+          modifiedTime = newerDate)
       }
 
       it("returns the same record if you apply the same update more than once") {
@@ -562,7 +573,7 @@ class TransformableOpsTest
         )
 
         val sierraTransformable =
-          createSierraTransformableWith(sierraId = bibId)
+          createSierraTransformableStubWith(bibId = bibId)
 
         val transformable1 = sierraTransformable.add(record)
         val transformable2 = transformable1.get.add(record)
@@ -577,8 +588,8 @@ class TransformableOpsTest
           bibIds = List(bibId)
         )
 
-        val sierraTransformable = createSierraTransformableWith(
-          sierraId = bibId,
+        val sierraTransformable = createSierraTransformableStubWith(
+          bibId = bibId,
           orderRecords = List(newerRecord)
         )
 
@@ -600,7 +611,7 @@ class TransformableOpsTest
         )
 
         val sierraTransformable =
-          createSierraTransformableWith(sierraId = bibId)
+          createSierraTransformableStubWith(bibId = bibId)
         val result1 = sierraTransformable.add(record1)
         val result2 = result1.get.add(record2)
 
@@ -618,7 +629,7 @@ class TransformableOpsTest
         )
 
         val sierraTransformable =
-          createSierraTransformableWith(sierraId = bibId)
+          createSierraTransformableStubWith(bibId = bibId)
 
         val caught = intercept[RuntimeException] {
           sierraTransformable.add(record)
@@ -644,13 +655,14 @@ class TransformableOpsTest
           unlinkedBibIds = List(bibId)
         )
 
-        val sierraTransformable = createSierraTransformableWith(
-          sierraId = bibId,
+        val sierraTransformable = createSierraTransformableStubWith(
+          bibId = bibId,
           orderRecords = List(record)
         )
 
         val expectedSierraTransformable = sierraTransformable.copy(
-          orderRecords = Map.empty
+          orderRecords = Map.empty,
+          modifiedTime = unlinkedRecord.modifiedDate
         )
 
         sierraTransformable
@@ -671,8 +683,8 @@ class TransformableOpsTest
           unlinkedBibIds = List(bibId)
         )
 
-        val sierraTransformable = createSierraTransformableWith(
-          sierraId = bibId,
+        val sierraTransformable = createSierraTransformableStubWith(
+          bibId = bibId,
           orderRecords = List(record)
         )
 
@@ -694,8 +706,8 @@ class TransformableOpsTest
           unlinkedBibIds = List(bibId)
         )
 
-        val sierraTransformable = createSierraTransformableWith(
-          sierraId = bibId,
+        val sierraTransformable = createSierraTransformableStubWith(
+          bibId = bibId,
           orderRecords = List(record)
         )
 
@@ -716,8 +728,8 @@ class TransformableOpsTest
           unlinkedBibIds = List(unrelatedBibId)
         )
 
-        val sierraTransformable = createSierraTransformableWith(
-          sierraId = bibId,
+        val sierraTransformable = createSierraTransformableStubWith(
+          bibId = bibId,
           orderRecords = List(record)
         )
 

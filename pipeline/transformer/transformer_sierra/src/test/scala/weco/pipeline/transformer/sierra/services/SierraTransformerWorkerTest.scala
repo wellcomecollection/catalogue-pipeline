@@ -43,7 +43,8 @@ class SierraTransformerWorkerTest
     implicit store: MemoryTypedStore[S3ObjectLocation, SierraTransformable])
     : SierraSourcePayload = {
     val transformable = createSierraTransformableWith(
-      sierraId = SierraBibNumber(id))
+      bibRecord = createSierraBibRecordWith(id = SierraBibNumber(id))
+    )
     val location = createS3ObjectLocation
 
     store.put(location)(transformable) shouldBe a[Right[_, _]]
