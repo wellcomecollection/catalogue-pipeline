@@ -13,6 +13,8 @@ steps:
               "--environment-id", "prod",
               "--description", $BUILDKITE_BUILD_URL,
               "--confirmation-wait-for", 3600]
+    agents:
+      queue: nano
   - label: deploy METS adapter
     plugins:
       - docker#v3.5.0:
@@ -27,6 +29,8 @@ steps:
               "--environment-id", "prod",
               "--description", $BUILDKITE_BUILD_URL,
               "--confirmation-wait-for", 3600]
+    agents:
+      queue: nano
   - label: deploy Sierra adapter
     plugins:
       - docker#v3.5.0:
@@ -41,6 +45,8 @@ steps:
               "--environment-id", "prod",
               "--description", $BUILDKITE_BUILD_URL,
               "--confirmation-wait-for", 3600]
+    agents:
+      queue: nano
   - label: deploy TEI adapter
     plugins:
       - docker#v3.5.0:
@@ -55,6 +61,8 @@ steps:
               "--environment-id", "prod",
               "--description", $BUILDKITE_BUILD_URL,
               "--confirmation-wait-for", 3600]
+    agents:
+      queue: nano
   - label: deploy reindexer
     plugins:
       - docker#v3.5.0:
@@ -69,7 +77,11 @@ steps:
               "--environment-id", "prod",
               "--description", $BUILDKITE_BUILD_URL,
               "--confirmation-wait-for", 3600]
+    agents:
+      queue: nano
   - label: deploy pipeline
     commands:
       - pip3 install --user boto3 httpx
       - .buildkite/scripts/deploy_latest_pipeline.py
+    agents:
+      queue: nano

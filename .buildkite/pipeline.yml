@@ -101,3 +101,5 @@ steps:
   - wait
   - command: .buildkite/scripts/tag_commit_as_latest.py
     label: "tag commit as latest"
+    agents:
+      queue: nano
