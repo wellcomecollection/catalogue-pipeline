@@ -131,7 +131,10 @@ class DeletionCheckerWorkerServiceTest
     ) { apiClient =>
       withDynamoSourceVHS(storeRecords) {
         case (_, sourceTable, getRows) =>
-          withDeletionCheckerWorkerService(apiClient, sourceTable, visibilityTimeout = 1 second) {
+          withDeletionCheckerWorkerService(
+            apiClient,
+            sourceTable,
+            visibilityTimeout = 1 second) {
             case (QueuePair(queue, dlq), _) =>
               getRows().map(_.toPayload).foreach { payload =>
                 sendNotificationToSQS(queue, payload)
@@ -158,7 +161,10 @@ class DeletionCheckerWorkerServiceTest
     ) { apiClient =>
       withDynamoSourceVHS(storeRecords) {
         case (_, sourceTable, getRows) =>
-          withDeletionCheckerWorkerService(apiClient, sourceTable, visibilityTimeout = 1 second) {
+          withDeletionCheckerWorkerService(
+            apiClient,
+            sourceTable,
+            visibilityTimeout = 1 second) {
             case (QueuePair(queue, dlq), _) =>
               val storedPayloads = getRows().map(_.toPayload)
               val phantomPayloads = (1 to 3).map(_ => calmSourcePayload)
