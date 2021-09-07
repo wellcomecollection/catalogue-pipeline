@@ -48,7 +48,9 @@ case class SierraTransformable(
   // taken from the update that unlinked the record.
   private val records = Seq(maybeBibRecord).flatten ++ itemRecords.values ++ holdingsRecords.values ++ orderRecords.values
   require(
-    records.forall(_.modifiedDate.toEpochMilli <= modifiedTime.toEpochMilli))
+    records.forall(_.modifiedDate.toEpochMilli <= modifiedTime.toEpochMilli),
+    "modifiedTime should be at least as late as all linked records"
+  )
 }
 
 object SierraTransformable {

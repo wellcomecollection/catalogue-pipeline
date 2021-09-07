@@ -67,14 +67,20 @@ object TransformableOps {
       }
 
       val isNewerData = transformable.maybeBibRecord match {
-        case Some(bibData) =>
-          bibRecord.modifiedDate.isAfter(bibData.modifiedDate) ||
-            bibRecord.modifiedDate == bibData.modifiedDate
+        case Some(existingBibRecord) =>
+          bibRecord.modifiedDate.isAfter(existingBibRecord.modifiedDate) ||
+            bibRecord.modifiedDate == existingBibRecord.modifiedDate
         case None => true
       }
 
       if (isNewerData) {
-        Some(transformable.copy(maybeBibRecord = Some(bibRecord)))
+        val modifiedTime = Seq(bibRecord.modifiedDate, transformable.modifiedTime).max
+        Some(
+          transformable.copy(
+            maybeBibRecord = Some(bibRecord),
+            modifiedTime = modifiedTime
+          )
+        )
       } else {
         None
       }
@@ -178,8 +184,14 @@ object TransformableOps {
       override def setRecords(
         t: SierraTransformable,
         itemRecords: Map[SierraItemNumber, SierraItemRecord])
-        : SierraTransformable =
-        t.copy(itemRecords = itemRecords)
+        : SierraTransformable = {
+        val modifiedTime = (itemRecords.values.map(_.modifiedDate).toSeq :+ t.modifiedTime).max
+
+        t.copy(
+          itemRecords = itemRecords,
+          modifiedTime = modifiedTime
+        )
+      }
     }
 
   implicit val holdingsTransformableOps =
@@ -194,8 +206,14 @@ object TransformableOps {
       override def setRecords(
         t: SierraTransformable,
         holdingsRecords: Map[SierraHoldingsNumber, SierraHoldingsRecord])
-        : SierraTransformable =
-        t.copy(holdingsRecords = holdingsRecords)
+        : SierraTransformable = {
+        val modifiedTime = (holdingsRecords.values.map(_.modifiedDate).toSeq :+ t.modifiedTime).max
+
+        t.copy(
+          holdingsRecords = holdingsRecords,
+          modifiedTime = modifiedTime
+        )
+      }
     }
 
   implicit val orderTransformableOps =
@@ -210,7 +228,13 @@ object TransformableOps {
       override def setRecords(
         t: SierraTransformable,
         orderRecords: Map[SierraOrderNumber, SierraOrderRecord])
-        : SierraTransformable =
-        t.copy(orderRecords = orderRecords)
+        : SierraTransformable = {
+        val modifiedTime = (orderRecords.values.map(_.modifiedDate).toSeq :+ t.modifiedTime).max
+
+        t.copy(
+          orderRecords = orderRecords,
+          modifiedTime = modifiedTime
+        )
+      }
     }
 }
