@@ -16,7 +16,8 @@ import software.amazon.awssdk.services.dynamodb.model.{
   BatchGetItemRequest,
   BatchWriteItemRequest,
   ProvisionedThroughputExceededException,
-  QueryRequest
+  QueryRequest,
+  ScanRequest
 }
 import weco.catalogue.internal_model.matcher.WorkNode
 import weco.storage.dynamo.DynamoConfig
@@ -26,6 +27,7 @@ import weco.pipeline.matcher.exceptions.MatcherException
 import weco.pipeline.matcher.fixtures.MatcherFixtures
 
 import scala.language.higherKinds
+import scala.collection.JavaConverters._
 
 class WorkNodeDaoTest
     extends AnyFunSpec
@@ -230,6 +232,41 @@ class WorkNodeDaoTest
             val savedLinkedWork =
               get[WorkNode](dynamoClient, table.name)("id" === idA)
             savedLinkedWork shouldBe Some(Right(work))
+          }
+        }
+      }
+    }
+
+    it("puts lots of WorkNodes (>25 = a single BatchPutItem)") {
+      withWorkGraphTable { table =>
+        withWorkNodeDao(table) { workNodeDao =>
+          val works = (1 to 50).map { _ =>
+            val id = createCanonicalId
+            WorkNode(
+              id,
+              version = 1,
+              linkedIds = List(id),
+              componentId = ciHash(id))
+          }
+
+          val future = workNodeDao.put(works.toSet)
+
+          whenReady(future) { _ =>
+            val scanRequest =
+              ScanRequest.builder()
+                .tableName(table.name)
+                .build()
+
+            val storedItemCount =
+              dynamoClient
+                .scanPaginator(scanRequest)
+                .iterator()
+                .asScala
+                .toSeq
+                .map(_.items().size())
+                .sum
+
+            storedItemCount shouldBe works.size
           }
         }
       }
