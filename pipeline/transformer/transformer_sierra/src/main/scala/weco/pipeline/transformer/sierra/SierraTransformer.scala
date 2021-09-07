@@ -36,7 +36,12 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
     sierraTransformable.maybeBibRecord
       .map { bibRecord =>
         debug(s"Attempting to transform ${bibRecord.id.withCheckDigit}")
-        workFromBibRecord(bibRecord)
+
+        val state = Source(
+          sourceIdentifier = sourceIdentifier,
+          sourceModifiedTime = sierraTransformable.modifiedTime
+        )
+        workFromBibRecord(state, bibRecord)
       }
       .getOrElse {
         // A merged record can have both bibs and items.  If we only have
@@ -48,7 +53,7 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
             state = Source(sourceIdentifier, Instant.EPOCH),
             version = version,
             data = WorkData(),
-            invisibilityReasons = List(SourceFieldMissing("bibData"))
+            invisibilityReasons = List(SourceFieldMissing("bibRecord"))
           )
         )
       }
@@ -64,9 +69,8 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
           throw e
       }
 
-  def workFromBibRecord(bibRecord: SierraBibRecord): Try[Work[Source]] = {
-    val state = Source(sourceIdentifier, bibRecord.modifiedDate)
-
+  def workFromBibRecord(state: Source,
+                        bibRecord: SierraBibRecord): Try[Work[Source]] =
     fromJson[SierraBibData](bibRecord.data)
       .map { bibData =>
         if (bibData.deleted) {
@@ -103,7 +107,6 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
             invisibilityReasons = List(UnableToTransform(e.getMessage))
           )
       }
-  }
 
   def workDataFromBibData(bibId: SierraBibNumber, bibData: SierraBibData) =
     WorkData[DataState.Unidentified](

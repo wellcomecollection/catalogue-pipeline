@@ -1,7 +1,6 @@
 package weco.pipeline.matcher.models
 
-final case class VersionExpectedConflictException(
-  message: String = "Version conflict!")
+final case class VersionExpectedConflictException(message: String)
     extends Exception(message)
 
 case class VersionUnexpectedConflictException(e: Throwable)

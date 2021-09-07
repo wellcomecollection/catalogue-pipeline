@@ -46,10 +46,9 @@ class SierraIndexerFeatureTest
     }
 
     val transformable = createSierraTransformableWith(
-      maybeBibRecord = Some(
-        createSierraBibRecordWith(
-          id = bibId,
-          data = s"""
+      bibRecord = createSierraBibRecordWith(
+        id = bibId,
+        data = s"""
                |{
                |  "id" : "$bibId",
                |  "updatedDate" : "2013-12-12T13:56:07Z",
@@ -84,16 +83,15 @@ class SierraIndexerFeatureTest
                |  }
                |}
                |""".stripMargin
-        )
       ),
       itemRecords = itemIds.map { id =>
-        createSierraItemRecordWith(id = id)
+        createSierraItemRecordWith(id = id, bibIds = List(bibId))
       },
       holdingsRecords = holdingsIds.map { id =>
-        createSierraHoldingsRecordWith(id = id)
+        createSierraHoldingsRecordWith(id = id, bibIds = List(bibId))
       },
       orderRecords = orderIds.map { id =>
-        createSierraOrderRecordWith(id = id)
+        createSierraOrderRecordWith(id = id, bibIds = List(bibId))
       }
     )
 
@@ -253,10 +251,9 @@ class SierraIndexerFeatureTest
     val bibId = createSierraBibNumber
 
     val transformable1 = createSierraTransformableWith(
-      maybeBibRecord = Some(
-        createSierraBibRecordWith(
-          id = bibId,
-          data = s"""
+      bibRecord = createSierraBibRecordWith(
+        id = bibId,
+        data = s"""
                     |{
                     |  "id" : "$bibId",
                     |  "updatedDate" : "2001-01-01T01:01:01Z",
@@ -275,17 +272,15 @@ class SierraIndexerFeatureTest
                     |  }
                     |}
                     |""".stripMargin
-        )
       ),
       itemRecords = List(),
       holdingsRecords = List(),
     )
 
     val transformable2 = createSierraTransformableWith(
-      maybeBibRecord = Some(
-        createSierraBibRecordWith(
-          id = bibId,
-          data = s"""
+      bibRecord = createSierraBibRecordWith(
+        id = bibId,
+        data = s"""
                     |{
                     |  "id" : "$bibId",
                     |  "updatedDate" : "2002-02-02T02:02:02Z",
@@ -304,7 +299,6 @@ class SierraIndexerFeatureTest
                     |  }
                     |}
                     |""".stripMargin
-        )
       ),
       itemRecords = List(),
       holdingsRecords = List(),
@@ -472,10 +466,12 @@ class SierraIndexerFeatureTest
   it("indexes item records and their varFields/fixedFields") {
     val location = createS3ObjectLocation
 
+    val bibId = createSierraBibNumber
     val itemId1 = createSierraItemNumber
     val itemId2 = createSierraItemNumber
 
-    val transformable = createSierraTransformableWith(
+    val transformable = createSierraTransformableStubWith(
+      bibId = bibId,
       itemRecords = List(
         SierraItemRecord(
           id = itemId1,
@@ -499,7 +495,7 @@ class SierraIndexerFeatureTest
             |}
             |""".stripMargin,
           modifiedDate = Instant.now(),
-          bibIds = List()
+          bibIds = List(bibId)
         ),
         SierraItemRecord(
           id = itemId2,
@@ -532,7 +528,7 @@ class SierraIndexerFeatureTest
                     |}
                     |""".stripMargin,
           modifiedDate = Instant.now(),
-          bibIds = List()
+          bibIds = List(bibId)
         )
       )
     )
@@ -669,10 +665,12 @@ class SierraIndexerFeatureTest
   it("indexes holdings records and their varFields/fixedFields") {
     val location = createS3ObjectLocation
 
+    val bibId = createSierraBibNumber
     val holdingsId1 = createSierraHoldingsNumber
     val holdingsId2 = createSierraHoldingsNumber
 
-    val transformable = createSierraTransformableWith(
+    val transformable = createSierraTransformableStubWith(
+      bibId = bibId,
       holdingsRecords = List(
         SierraHoldingsRecord(
           id = holdingsId1,
@@ -696,7 +694,7 @@ class SierraIndexerFeatureTest
                     |}
                     |""".stripMargin,
           modifiedDate = Instant.now(),
-          bibIds = List()
+          bibIds = List(bibId)
         ),
         SierraHoldingsRecord(
           id = holdingsId2,
@@ -728,7 +726,7 @@ class SierraIndexerFeatureTest
                     |}
                     |""".stripMargin,
           modifiedDate = Instant.now(),
-          bibIds = List()
+          bibIds = List(bibId)
         )
       )
     )
@@ -865,10 +863,12 @@ class SierraIndexerFeatureTest
   it("indexes order records and their varFields/fixedFields") {
     val location = createS3ObjectLocation
 
+    val bibId = createSierraBibNumber
     val orderId1 = createSierraOrderNumber
     val orderId2 = createSierraOrderNumber
 
-    val transformable = createSierraTransformableWith(
+    val transformable = createSierraTransformableStubWith(
+      bibId = bibId,
       orderRecords = List(
         SierraOrderRecord(
           id = orderId1,
@@ -892,7 +892,7 @@ class SierraIndexerFeatureTest
                     |}
                     |""".stripMargin,
           modifiedDate = Instant.now(),
-          bibIds = List()
+          bibIds = List(bibId)
         ),
         SierraOrderRecord(
           id = orderId2,
@@ -924,7 +924,7 @@ class SierraIndexerFeatureTest
                     |}
                     |""".stripMargin,
           modifiedDate = Instant.now(),
-          bibIds = List()
+          bibIds = List(bibId)
         )
       )
     )
@@ -1062,9 +1062,7 @@ class SierraIndexerFeatureTest
     withIndices { indexPrefix =>
       val location = createS3ObjectLocation
 
-      val bibId = createSierraBibNumber
-
-      val transformable = createSierraTransformableWith(sierraId = bibId)
+      val transformable = createSierraTransformable
 
       val store = MemoryTypedStore[S3ObjectLocation, SierraTransformable](
         initialEntries = Map(location -> transformable)
@@ -1091,7 +1089,7 @@ class SierraIndexerFeatureTest
             sendNotificationToSQS(
               queue,
               SierraSourcePayload(
-                id = bibId.withoutCheckDigit,
+                id = transformable.sierraId.withoutCheckDigit,
                 location = location,
                 version = 1
               )

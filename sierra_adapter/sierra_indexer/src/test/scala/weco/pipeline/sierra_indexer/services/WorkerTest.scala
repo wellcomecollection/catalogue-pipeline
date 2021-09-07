@@ -25,10 +25,9 @@ class WorkerTest
       val bibId = createSierraBibNumber
 
       val transformable = createSierraTransformableWith(
-        maybeBibRecord = Some(
-          createSierraBibRecordWith(
-            id = bibId,
-            data = s"""
+        bibRecord = createSierraBibRecordWith(
+          id = bibId,
+          data = s"""
                  |{
                  |  "id" : "$bibId",
                  |  "updatedDate" : "2013-12-12T13:56:07Z",
@@ -53,7 +52,6 @@ class WorkerTest
                  |  ]
                  |}
                  |""".stripMargin
-          )
         )
       )
 
@@ -72,6 +70,7 @@ class WorkerTest
         )
         .await
 
+      // TODO: This should be a regular queue, not a DLQ pair
       withLocalSqsQueuePair() {
         case QueuePair(queue, dlq) =>
           withWorker(queue, store, indexPrefix) { worker =>
@@ -105,10 +104,9 @@ class WorkerTest
       // that one of the fields was a date -- preventing any non-date data
       // being indexed in future updates.
       val transformable = createSierraTransformableWith(
-        maybeBibRecord = Some(
-          createSierraBibRecordWith(
-            id = bibId,
-            data = s"""
+        bibRecord = createSierraBibRecordWith(
+          id = bibId,
+          data = s"""
                  |{
                  |  "id" : "$bibId",
                  |  "updatedDate" : "2013-12-12T13:56:07Z",
@@ -125,7 +123,6 @@ class WorkerTest
                  |  ]
                  |}
                  |""".stripMargin
-          )
         )
       )
 
@@ -173,10 +170,9 @@ class WorkerTest
       // that one of the fields was a date -- preventing any non-date data
       // being indexed in future updates.
       val transformable = createSierraTransformableWith(
-        maybeBibRecord = Some(
-          createSierraBibRecordWith(
-            id = bibId,
-            data = s"""
+        bibRecord = createSierraBibRecordWith(
+          id = bibId,
+          data = s"""
                  |{
                  |  "id" : "$bibId",
                  |  "updatedDate" : "2013-12-12T13:56:07Z",
@@ -193,7 +189,6 @@ class WorkerTest
                  |  }
                  |}
                  |""".stripMargin
-          )
         )
       )
 
