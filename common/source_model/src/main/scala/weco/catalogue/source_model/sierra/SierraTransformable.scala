@@ -47,7 +47,8 @@ case class SierraTransformable(
   // to this transformable, but was later unlinked, the modified time will be
   // taken from the update that unlinked the record.
   private val records = Seq(maybeBibRecord).flatten ++ itemRecords.values ++ holdingsRecords.values ++ orderRecords.values
-  require(records.forall(_.modifiedDate.toEpochMilli <= modifiedTime.toEpochMilli))
+  require(
+    records.forall(_.modifiedDate.toEpochMilli <= modifiedTime.toEpochMilli))
 }
 
 object SierraTransformable {
