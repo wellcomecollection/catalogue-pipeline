@@ -74,7 +74,8 @@ object TransformableOps {
       }
 
       if (isNewerData) {
-        val modifiedTime = Seq(bibRecord.modifiedDate, transformable.modifiedTime).max
+        val modifiedTime =
+          Seq(bibRecord.modifiedDate, transformable.modifiedTime).max
         Some(
           transformable.copy(
             maybeBibRecord = Some(bibRecord),
@@ -185,7 +186,8 @@ object TransformableOps {
         t: SierraTransformable,
         itemRecords: Map[SierraItemNumber, SierraItemRecord])
         : SierraTransformable = {
-        val modifiedTime = (itemRecords.values.map(_.modifiedDate).toSeq :+ t.modifiedTime).max
+        val modifiedTime =
+          (itemRecords.values.map(_.modifiedDate).toSeq :+ t.modifiedTime).max
 
         t.copy(
           itemRecords = itemRecords,
@@ -207,7 +209,9 @@ object TransformableOps {
         t: SierraTransformable,
         holdingsRecords: Map[SierraHoldingsNumber, SierraHoldingsRecord])
         : SierraTransformable = {
-        val modifiedTime = (holdingsRecords.values.map(_.modifiedDate).toSeq :+ t.modifiedTime).max
+        val modifiedTime = (holdingsRecords.values
+          .map(_.modifiedDate)
+          .toSeq :+ t.modifiedTime).max
 
         t.copy(
           holdingsRecords = holdingsRecords,
@@ -229,7 +233,8 @@ object TransformableOps {
         t: SierraTransformable,
         orderRecords: Map[SierraOrderNumber, SierraOrderRecord])
         : SierraTransformable = {
-        val modifiedTime = (orderRecords.values.map(_.modifiedDate).toSeq :+ t.modifiedTime).max
+        val modifiedTime =
+          (orderRecords.values.map(_.modifiedDate).toSeq :+ t.modifiedTime).max
 
         t.copy(
           orderRecords = orderRecords,
