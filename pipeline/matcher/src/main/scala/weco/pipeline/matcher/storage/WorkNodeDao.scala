@@ -9,7 +9,6 @@ import weco.catalogue.internal_model.matcher.WorkNode
 import weco.storage.dynamo.DynamoConfig
 import weco.catalogue.internal_model.identifiers.CanonicalId
 import weco.pipeline.matcher.exceptions.MatcherException
-import weco.pipeline.matcher.storage.dynamo.DynamoBatchWriter
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -22,13 +21,8 @@ class WorkNodeDao(dynamoClient: DynamoDbClient, dynamoConfig: DynamoConfig)(
   private val nodes = Table[WorkNode](dynamoConfig.tableName)
   private val index = nodes.index(dynamoConfig.indexName)
 
-  private val batchWriter = new DynamoBatchWriter[WorkNode](
-    dynamoConfig
-  )(ec, dynamoClient, format)
-
   def put(workNodes: Set[WorkNode]): Future[Unit] =
-    batchWriter
-      .batchWrite(workNodes.toSeq)
+    Future { scanamo.exec(nodes.putAll(workNodes)) }
       .recover {
         case exception: ProvisionedThroughputExceededException =>
           throw MatcherException(exception)
