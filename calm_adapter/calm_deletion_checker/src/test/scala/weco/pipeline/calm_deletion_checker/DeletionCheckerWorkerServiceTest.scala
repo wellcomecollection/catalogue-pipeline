@@ -131,7 +131,7 @@ class DeletionCheckerWorkerServiceTest
     ) { apiClient =>
       withDynamoSourceVHS(storeRecords) {
         case (_, sourceTable, getRows) =>
-          withDeletionCheckerWorkerService(apiClient, sourceTable) {
+          withDeletionCheckerWorkerService(apiClient, sourceTable, visibilityTimeout = 1 second) {
             case (QueuePair(queue, dlq), _) =>
               getRows().map(_.toPayload).foreach { payload =>
                 sendNotificationToSQS(queue, payload)
@@ -158,7 +158,7 @@ class DeletionCheckerWorkerServiceTest
     ) { apiClient =>
       withDynamoSourceVHS(storeRecords) {
         case (_, sourceTable, getRows) =>
-          withDeletionCheckerWorkerService(apiClient, sourceTable) {
+          withDeletionCheckerWorkerService(apiClient, sourceTable, visibilityTimeout = 1 second) {
             case (QueuePair(queue, dlq), _) =>
               val storedPayloads = getRows().map(_.toPayload)
               val phantomPayloads = (1 to 3).map(_ => calmSourcePayload)
@@ -185,10 +185,11 @@ class DeletionCheckerWorkerServiceTest
     apiClient: TestCalmApiClient,
     sourceTable: DynamoFixtures.Table,
     batchSize: Int = 10,
-    batchDuration: FiniteDuration = 100 milliseconds
+    batchDuration: FiniteDuration = 100 milliseconds,
+    visibilityTimeout: Duration = 5 seconds
   )(testWith: TestWith[(QueuePair, MemoryMessageSender), R]): R =
     withActorSystem { implicit actorSystem =>
-      withLocalSqsQueuePair() {
+      withLocalSqsQueuePair(visibilityTimeout = visibilityTimeout) {
         case queuePair @ QueuePair(queue, _) =>
           withSQSStream[NotificationMessage, R](queue) { stream =>
             implicit val ec: ExecutionContext = actorSystem.dispatcher
