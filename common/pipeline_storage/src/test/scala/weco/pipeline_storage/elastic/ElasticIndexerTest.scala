@@ -11,8 +11,7 @@ import weco.elasticsearch.test.fixtures.ElasticsearchFixtures
 import weco.fixtures.TestWith
 import weco.json.JsonUtil._
 import weco.catalogue.internal_model.index.{IndexConfigFields, WorksAnalysis}
-import weco.pipeline_storage.IndexerTestCases
-import weco.pipeline_storage.generators.SampleDocumentData
+import weco.json.utils.JsonAssertions
 import weco.pipeline_storage.generators.{
   SampleDocument,
   SampleDocumentData,
@@ -26,6 +25,7 @@ class ElasticIndexerTest
     extends IndexerTestCases[Index, SampleDocument]
     with ElasticsearchFixtures
     with EitherValues
+    with JsonAssertions
     with IndexConfigFields
     with SampleDocumentGenerators {
 
