@@ -9,12 +9,6 @@ import weco.sierra.models.identifiers.{
 
 import java.time.Instant
 
-/** @param modifiedTime Note: this parameter may not be the max of the modified
-  *                     times of all the included records.  In particular, if there's
-  *                     a record that used to be linked to this transformable, but was
-  *                     later unlinked, the modified time will be taken from the update
-  *                     that unlinked the record.
-  */
 case class SierraTransformable(
   sierraId: SierraBibNumber,
   maybeBibRecord: Option[SierraBibRecord] = None,
@@ -45,6 +39,15 @@ case class SierraTransformable(
       require(record.id == id)
       require(record.bibIds.contains(sierraId))
   }
+
+  // Check the modifiedTime makes sense.
+  //
+  // Note: this parameter may not be the max of the modified times of all the
+  // included records.  In particular, if there's a record that used to be linked
+  // to this transformable, but was later unlinked, the modified time will be
+  // taken from the update that unlinked the record.
+  private val records = Seq(maybeBibRecord).flatten ++ itemRecords.values ++ holdingsRecords.values ++ orderRecords.values
+  require(records.forall(_.modifiedDate.toEpochMilli <= modifiedTime.toEpochMilli))
 }
 
 object SierraTransformable {
