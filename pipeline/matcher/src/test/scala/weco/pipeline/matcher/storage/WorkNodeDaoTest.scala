@@ -253,7 +253,8 @@ class WorkNodeDaoTest
 
           whenReady(future) { _ =>
             val scanRequest =
-              ScanRequest.builder()
+              ScanRequest
+                .builder()
                 .tableName(table.name)
                 .build()
 
