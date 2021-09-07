@@ -170,6 +170,9 @@ module "image_inferrer" {
   #
   # Disabling the image inferrer in the "tei-on" pipeline is a hack
   # to fix the image inferrer in the publicly visible pipeline.
+  # The "tei-off" inferrer gets exclusive use of the EC2 instance and is
+  # able to start correctly.
+  #
   # At some point it'd be nice to come back and sort this out properly,
   # by understanding exactly how we've misconfigured ECS/EC2, but I don't
   # have time to do that right now.
