@@ -64,13 +64,13 @@ class RouterWorkerServiceTest
           pathsMessageSender.messages shouldBe empty
           indexer.index should contain(
             work.id -> work.transition[Denormalised](
-              (None, Set.empty)))
+              (Relations.none, Set.empty)))
         }
     }
   }
 
   it("a work with relations and collection path is error"){
-    val work = mergedWork(relations = Some(Relations(children = List(Relation(work = mergedWork(), depth = 1, numChildren = 0, numDescendents = 0))))).collectionPath(CollectionPath("a"))
+    val work = mergedWork(relations = Relations(children = List(Relation(work = mergedWork(), depth = 1, numChildren = 0, numDescendents = 0)))).collectionPath(CollectionPath("a"))
     val indexer = new MemoryIndexer[Work[Denormalised]]()
 
     val retriever = new MemoryRetriever[Work[Merged]](

@@ -172,7 +172,7 @@ object WorkState {
                          sourceIdentifier: SourceIdentifier,
                          canonicalId: CanonicalId,
                          sourceModifiedTime: Instant,
-                         internalWorks: List[Work[Identified]]
+                         internalWorks: List[Work.Visible[Identified]]
   ) extends WorkState {
 
     type WorkDataState = DataState.Identified

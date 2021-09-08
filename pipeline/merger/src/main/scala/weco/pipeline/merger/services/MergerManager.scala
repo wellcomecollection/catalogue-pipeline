@@ -19,7 +19,7 @@ trait MergerManager {
     val modifiedWorks = preMergeModify(works)
     if (works.size == maybeWorks.size) {
       val result = mergerRules.merge(modifiedWorks)
-      assert(result.resultWorks.size == modifiedWorks.size)
+      assert(result.resultWorks.size >= modifiedWorks.size)
       result
     } else
       MergerOutcome.passThrough(modifiedWorks)

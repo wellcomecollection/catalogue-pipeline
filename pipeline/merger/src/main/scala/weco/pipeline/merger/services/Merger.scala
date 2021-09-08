@@ -102,6 +102,7 @@ trait Merger extends MergerLogging {
           val remaining = sources.toSet -- redirectedSources
           val redirects = redirectedSources.map(redirectSourceToTarget(target))
           logResult(result, redirects.toList, remaining.toList)
+          val internalWorks = result.mergedTarget.state.internalWorks
 
           val redirectedIdentifiers =
             redirectedSources.map { s =>
@@ -117,7 +118,7 @@ trait Merger extends MergerLogging {
             )
 
           MergerOutcome(
-            resultWorks = redirects.toList ++ remaining ++ deleted :+ targetWork,
+            resultWorks = redirects.toList ++ remaining ++ deleted ++ internalWorks :+ targetWork,
             imagesWithSources = result.imageDataWithSources
           )
       }
@@ -130,9 +131,10 @@ trait Merger extends MergerLogging {
     Work.Redirected[Identified](
       version = source.version,
       state = Identified(
-        source.sourceIdentifier,
-        source.state.canonicalId,
-        source.state.sourceModifiedTime
+        sourceIdentifier = source.sourceIdentifier,
+        canonicalId = source.state.canonicalId,
+        sourceModifiedTime = source.state.sourceModifiedTime,
+        internalWorks = Nil
       ),
       redirectTarget =
         IdState.Identified(target.state.canonicalId, target.sourceIdentifier)
@@ -174,6 +176,10 @@ object Merger {
       f: WorkData[StateT#WorkDataState] => WorkData[StateT#WorkDataState]
     ): Work.Visible[StateT] =
       work.copy(data = f(work.data))
+    def mapState(
+      f: StateT => StateT
+    ): Work.Visible[StateT] =
+      work.copy(state = f(work.state))
   }
 }
 
@@ -211,29 +217,36 @@ object PlatformMerger extends Merger {
         thumbnail <- ThumbnailRule(target, sources).redirectSources
         otherIdentifiers <- OtherIdentifiersRule(target, sources).redirectSources
         sourceImageData <- ImageDataRule(target, sources).redirectSources
-        work = target.mapData { data =>
-          data.copy[DataState.Identified](
-            items = items,
-            thumbnail = thumbnail,
-            otherIdentifiers = otherIdentifiers,
-            imageData = sourceImageData
-          )
-        }
-      } yield
-        MergeResult(
-          mergedTarget = work,
-          imageDataWithSources = sourceImageData.map { imageData =>
-            ImageDataWithSource(
-              imageData = imageData,
-              source = image.ParentWorks(
-                canonicalWork = work.toParentWork,
-                redirectedWork = sources
-                  .find { _.data.imageData.contains(imageData) }
-                  .map(_.toParentWork)
-              )
+        work = target
+          .mapData { data =>
+            data.copy[DataState.Identified](
+              items = items,
+              thumbnail = thumbnail,
+              otherIdentifiers = otherIdentifiers,
+              imageData = sourceImageData
             )
           }
-        )
+          .mapState { state =>
+            state.copy(internalWorks = state.internalWorks.map { work =>
+              work.mapData { data =>
+                data.copy[DataState.Identified](items = items)
+              }
+            })
+          }
+      } yield MergeResult(
+        mergedTarget = work,
+        imageDataWithSources = sourceImageData.map { imageData =>
+          ImageDataWithSource(
+            imageData = imageData,
+            source = image.ParentWorks(
+              canonicalWork = work.toParentWork,
+              redirectedWork = sources
+                .find { _.data.imageData.contains(imageData) }
+                .map(_.toParentWork)
+            )
+          )
+        }
+      )
 
   private def standaloneImages(
     target: Work.Visible[Identified]
