@@ -24,6 +24,11 @@ trait IndexFixtures extends ElasticsearchFixtures { this: Suite =>
         testWith(index)
     }
 
+  def withLocalIdentifiedWorksIndex[R](testWith: TestWith[Index, R]): R =
+    withLocalElasticsearchIndex[R](config = WorksIndexConfig.identified) { index =>
+      testWith(index)
+    }
+
   def withLocalMergedWorksIndex[R](testWith: TestWith[Index, R]): R =
     withLocalElasticsearchIndex[R](config = WorksIndexConfig.merged) { index =>
       testWith(index)
