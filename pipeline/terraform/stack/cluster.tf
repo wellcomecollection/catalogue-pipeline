@@ -1,6 +1,6 @@
 resource "aws_ecs_cluster" "cluster" {
   name               = local.namespace_hyphen
-  capacity_providers = [module.inference_capacity_provider_tei_off.name,module.inference_capacity_provider_tei_on.name]
+  capacity_providers = [module.inference_capacity_provider_tei_off.name, module.inference_capacity_provider_tei_on.name]
 }
 
 module "inference_capacity_provider_tei_on" {
