@@ -279,7 +279,7 @@ class MetsAdapterWorkerServiceTest
   }
 
   def withWorkerService[R](bagRetriever: BagRetriever,
-                           store: VersionedStore[String, Int, MetsSourceData] =
+                           metsStore: VersionedStore[String, Int, MetsSourceData] =
                              MemoryVersionedStore[String, MetsSourceData](
                                initialEntries = Map.empty
                              ),
@@ -297,7 +297,7 @@ class MetsAdapterWorkerServiceTest
               msgStream = stream,
               msgSender = messageSender,
               bagRetriever = bagRetriever,
-              metsStore = new MetsStore(store)
+              metsStore = metsStore
             )
             workerService.run()
             testWith((workerService, QueuePair(queue, dlq), messageSender))
