@@ -42,22 +42,28 @@ object Main extends WellcomeTypesafeApp {
       namespace = "merged-works"
     )
 
-    val stream = PipelineStorageStreamBuilder.buildPipelineStorageStream(
-      SQSBuilder.buildSQSStream[NotificationMessage](config),
-      indexer = workIndexer,
+    val workSender =
       SNSBuilder
         .buildSNSMessageSender(
           config,
           namespace = "work-sender",
           subject = "Sent from the router")
-    )(config)
 
-    new RouterWorkerService(
-      pathsMsgSender = SNSBuilder
+    val pathSender =
+      SNSBuilder
         .buildSNSMessageSender(
           config,
           namespace = "path-sender",
-          subject = "Sent from the router"),
+          subject = "Sent from the router")
+
+    val stream = PipelineStorageStreamBuilder.buildPipelineStorageStream(
+      sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
+      indexer = workIndexer,
+      messageSender = workSender
+    )(config)
+
+    new RouterWorkerService(
+      pathsMsgSender = pathSender,
       workRetriever = workRetriever,
       pipelineStream = stream
     )
