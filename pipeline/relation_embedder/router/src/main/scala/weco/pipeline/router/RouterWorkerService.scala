@@ -28,7 +28,10 @@ class RouterWorkerService[MsgDestination](
       this.getClass.getSimpleName,
       Flow[(Message, NotificationMessage)]
         .via(batchRetrieveFlow(pipelineStream.config, workRetriever))
-        .via(processFlow(pipelineStream.config, work => Future.fromTry(processMessage(work))))
+        .via(
+          processFlow(
+            pipelineStream.config,
+            work => Future.fromTry(processMessage(work))))
     )
 
   private def processMessage(w: Work[Merged]): Try[List[Work[Denormalised]]] =
