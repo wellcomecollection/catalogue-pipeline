@@ -57,7 +57,7 @@ if __name__ == "__main__":
     #
     #     works-indexed-2021-08-19
     #
-    index_regex = re.compile(r"^works-indexed-(?P<date>\d{4}-\d{2}-\d{2})$")
+    index_regex = re.compile(r"^works-indexed-(?P<date>\d{4}-\d{2}-\d{2})[a-f]*$")
     pipeline_date = index_regex.match(index_name).group("date")
     print(f"The current prod pipeline is {pipeline_date}")
 
