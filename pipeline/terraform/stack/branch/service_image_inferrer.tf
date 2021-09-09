@@ -159,7 +159,27 @@ module "image_inferrer" {
   # the max capacity?
   min_capacity = var.min_capacity
 
-  max_capacity = min(6, var.max_capacity)
+  # Note: this slightly arcane construction essentially says: if the
+  # namespace contains "tei-on", disable the image inferrer.
+  #
+  # This is because of some sort of weird interaction between the image
+  # inferrers and the EC2 capacity provider.  When an image update
+  # arrives in the pipeline, both inferrer services get desiredCapacity=1,
+  # the EC2 capacity provider starts 1 instance, and neither task is
+  # able to start running successfully.
+  #
+  # Disabling the image inferrer in the "tei-on" pipeline is a hack
+  # to fix the image inferrer in the publicly visible pipeline.
+  # The "tei-off" inferrer gets exclusive use of the EC2 instance and is
+  # able to start correctly.
+  #
+  # At some point it'd be nice to come back and sort this out properly,
+  # by understanding exactly how we've misconfigured ECS/EC2, but I don't
+  # have time to do that right now.
+  #
+  # When we bin the split TEI on/off pipelines, delete everything
+  # before the colon.
+  max_capacity = length(regexall("tei-on", local.namespace)) > 0 ? 0 : min(6, var.max_capacity)
 
   scale_down_adjustment = var.scale_down_adjustment
   scale_up_adjustment   = min(1, var.scale_up_adjustment)
