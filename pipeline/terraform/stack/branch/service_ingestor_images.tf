@@ -79,10 +79,6 @@ module "ingestor_images" {
   deployment_service_env  = var.release_label
   deployment_service_name = "image-ingestor-${local.tei_suffix}"
 
-  depends_on = [
-    var.elasticsearch_users,
-  ]
-
   shared_logging_secrets = var.shared_logging_secrets
 }
 

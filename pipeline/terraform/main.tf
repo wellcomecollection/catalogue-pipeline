@@ -84,6 +84,8 @@ module "catalogue_pipeline_2021-08-16" {
 
   storage_bucket_name = local.storage_bucket
 
+  api_ec_version = local.api_ec_version
+
   providers = {
     aws.catalogue = aws.catalogue
   }

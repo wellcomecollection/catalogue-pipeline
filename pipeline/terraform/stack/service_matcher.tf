@@ -83,10 +83,6 @@ module "matcher" {
 
   queue_read_policy = module.matcher_input_queue.read_policy
 
-  depends_on = [
-    null_resource.elasticsearch_users,
-  ]
-
   deployment_service_env  = var.release_label
   deployment_service_name = "matcher"
   shared_logging_secrets  = var.shared_logging_secrets

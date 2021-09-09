@@ -38,13 +38,12 @@ module "tei_on_branch" {
   cluster_name                        = aws_ecs_cluster.cluster.name
   scale_down_adjustment               = local.scale_down_adjustment
   scale_up_adjustment                 = local.scale_up_adjustment
-  elasticsearch_users                 = null_resource.elasticsearch_users
   namespace_hyphen                    = local.namespace_hyphen
   pipeline_storage_es_service_secrets = local.pipeline_storage_es_service_secrets
   service_egress_security_group_id    = aws_security_group.service_egress.id
 
 
-  inference_capacity_provider_name = module.inference_capacity_provider.name
+  inference_capacity_provider_name = module.inference_capacity_provider_tei_on.name
 
   pipeline_date                 = var.pipeline_date
   pipeline_storage_port         = local.pipeline_storage_port

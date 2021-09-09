@@ -83,8 +83,7 @@ variable "dlq_alarm_arn" {}
 variable "release_label" {
   type = string
 }
-variable "elasticsearch_users" {
-}
+
 variable "es_works_merged_index" {
   type = string
 }
