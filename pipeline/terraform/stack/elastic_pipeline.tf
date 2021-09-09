@@ -3,7 +3,7 @@ data "ec_deployment" "logging" {
 }
 
 locals {
-  es_memory = var.is_reindexing ? "58g" : "15g"
+  es_memory = var.is_reindexing ? "58g" : "8g"
 
   # When we're reindexing, this cluster isn't depended on for anything.
   # It's ephemeral data (and at 58GB of memory, expensive).
