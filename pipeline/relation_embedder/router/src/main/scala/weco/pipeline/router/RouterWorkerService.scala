@@ -8,7 +8,6 @@ import weco.messaging.MessageSender
 import weco.messaging.sns.NotificationMessage
 import weco.catalogue.internal_model.work.WorkState.{Denormalised, Merged}
 import weco.pipeline_storage.PipelineStorageStream._
-import weco.pipeline_storage.PipelineStorageStream
 import weco.typesafe.Runnable
 import weco.catalogue.internal_model.work.{CollectionPath, Relations, Work}
 import weco.pipeline_storage.{Indexable, PipelineStorageStream, Retriever}
