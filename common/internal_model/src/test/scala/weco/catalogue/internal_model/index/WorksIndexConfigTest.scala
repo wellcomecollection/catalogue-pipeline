@@ -94,7 +94,7 @@ class WorksIndexConfigTest
   // a bug in the mapping related to person subjects wasn't caught by the above test.
   // So let's add a specific one
   it("puts a work with a person subject") {
-    val workWithSubjects = identifiedWork().subjects(
+    val workWithSubjects = indexedWork().subjects(
       List(
         Subject(
           id = IdState.Unidentifiable,
@@ -123,7 +123,7 @@ class WorksIndexConfigTest
       method = AccessMethod.OnlineRequest,
       status = AccessStatus.Open)
 
-    val workWithAccessConditions = identifiedWork().items(
+    val workWithAccessConditions = indexedWork().items(
       List(createIdentifiedItemWith(locations = List(
         createDigitalLocationWith(accessConditions = List(accessCondition))))))
 
@@ -143,7 +143,7 @@ class WorksIndexConfigTest
       label = Some("PATH/FOR/THE/COLLECTION")
     )
 
-    val work = identifiedWork().collectionPath(collectionPath)
+    val work = indexedWork().collectionPath(collectionPath)
 
     withLocalWorksIndex { implicit index =>
       assertWorkCanBeIndexed(work)
@@ -151,7 +151,7 @@ class WorksIndexConfigTest
   }
 
   it("can ingest a work with an image") {
-    val workWithImage = identifiedWork().imageData(
+    val workWithImage = indexedWork().imageData(
       List(createImageData.toIdentified)
     )
 
@@ -176,10 +176,10 @@ class WorksIndexConfigTest
 
   it("puts a valid work using compression") {
     withLocalWorksIndex { implicit index =>
-      forAll { identifiedWork: Work[WorkState.Identified] =>
+      forAll { indexedWork: Work[WorkState.Indexed] =>
         assertWorkCanBeIndexed(
           client = elasticClientWithCompression,
-          work = identifiedWork)
+          work = indexedWork)
       }
     }
   }
