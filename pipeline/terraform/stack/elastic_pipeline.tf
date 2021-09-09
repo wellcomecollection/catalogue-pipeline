@@ -1,8 +1,16 @@
 data "ec_deployment" "logging" {
   id = local.logging_cluster_id
 }
+
 locals {
   es_memory = var.is_reindexing ? "58g" : "15g"
+
+  # When we're reindexing, this cluster isn't depended on for anything.
+  # It's ephemeral data (and at 58GB of memory, expensive).
+  #
+  # Once we stop reindexing and make the pipeline live, we want it to be
+  # highly available, to avoid issues with cross-cluster replication.
+  es_node_count = var.is_reindexing ? 1 : 2
 }
 
 resource "ec_deployment" "pipeline" {
@@ -42,7 +50,7 @@ resource "ec_deployment" "pipeline" {
   elasticsearch {
     topology {
       id         = "hot_content"
-      zone_count = 1
+      zone_count = local.es_node_count
       size       = local.es_memory
     }
   }
