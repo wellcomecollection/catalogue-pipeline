@@ -201,7 +201,7 @@ class CalmStoreTest
       val calmStore = new CalmStore(sourceVHS)
 
       val err = calmStore.setRecordPublished(Version("A", 5), record).left.value
-      err.getMessage shouldBe "VersionAlreadyExistsError"
+      err.getMessage shouldBe "Tried to store A at version 6, but that version already exists"
 
       assertStored(id = "A", expectedVersion = 6, expectedRecord = record)
     }
