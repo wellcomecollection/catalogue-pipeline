@@ -23,17 +23,16 @@ class RouterWorkerService[MsgDestination](
   workRetriever: Retriever[Work[Merged]],
 )(implicit ec: ExecutionContext, indexable: Indexable[Work[Denormalised]])
     extends Runnable {
-  def run(): Future[Done] = {
+  def run(): Future[Done] =
     pipelineStream.run(
       this.getClass.getSimpleName,
       Flow[(Message, NotificationMessage)]
         .via(batchRetrieveFlow(pipelineStream.config, workRetriever))
-        .via(processFlow(pipelineStream.config, item => processMessage(item)))
+        .via(processFlow(pipelineStream.config, processMessage))
     )
-  }
 
   private def processMessage(
-    work: Work[Merged]): Future[List[Work[Denormalised]]] = {
+    work: Work[Merged]): Future[List[Work[Denormalised]]] =
     work.data.collectionPath
       .fold[Future[List[Work[Denormalised]]]](ifEmpty = {
         Future.successful(
@@ -41,6 +40,4 @@ class RouterWorkerService[MsgDestination](
       }) { path =>
         Future.fromTry(pathsMsgSender.send(path.path)).map(_ => Nil)
       }
-  }
-
 }
