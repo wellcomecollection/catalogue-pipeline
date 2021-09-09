@@ -134,7 +134,7 @@ class BatcherWorkerServiceTest
   def withWorkerService[R](visibilityTimeout: Duration = 5 seconds,
                            maxBatchSize: Int = 10,
                            brokenPaths: Set[String] = Set.empty,
-                           flushInterval: FiniteDuration = 100 milliseconds)(
+                           flushInterval: FiniteDuration = 250 milliseconds)(
     testWith: TestWith[(QueuePair, MemoryMessageSender), R]): R =
     withLocalSqsQueuePair(visibilityTimeout = visibilityTimeout) { queuePair =>
       withActorSystem { implicit actorSystem =>
