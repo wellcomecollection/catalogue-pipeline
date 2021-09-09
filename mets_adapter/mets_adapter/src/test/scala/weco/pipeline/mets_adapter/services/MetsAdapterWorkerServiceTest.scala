@@ -272,15 +272,17 @@ class MetsAdapterWorkerServiceTest
   private def createMetsStore: MemoryVersionedStore[String, MetsSourceData] =
     createMetsStoreWith(entries = Map())
 
-  private def createMetsStoreWith(entries: Map[Version[String, Int], MetsSourceData]): MemoryVersionedStore[String, MetsSourceData] =
+  private def createMetsStoreWith(
+    entries: Map[Version[String, Int], MetsSourceData])
+    : MemoryVersionedStore[String, MetsSourceData] =
     MemoryVersionedStore[String, MetsSourceData](
       initialEntries = entries
     )
 
-  def withWorkerService[R](bagRetriever: BagRetriever,
-                           metsStore: VersionedStore[String, Int, MetsSourceData] = createMetsStore,
-                           messageSender: MemoryMessageSender =
-                             new MemoryMessageSender())(
+  def withWorkerService[R](
+    bagRetriever: BagRetriever,
+    metsStore: VersionedStore[String, Int, MetsSourceData] = createMetsStore,
+    messageSender: MemoryMessageSender = new MemoryMessageSender())(
     testWith: TestWith[(MetsAdapterWorkerService[String],
                         QueuePair,
                         MemoryMessageSender),

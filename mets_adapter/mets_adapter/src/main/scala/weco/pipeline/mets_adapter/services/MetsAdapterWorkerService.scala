@@ -116,7 +116,8 @@ class MetsAdapterWorkerService[Destination](
           Future {
             metsStore
               .put(id)(sourceData)
-              .left.map(_.e)
+              .left
+              .map(_.e)
           }
       }
 
