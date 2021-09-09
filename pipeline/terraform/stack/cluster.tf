@@ -6,7 +6,7 @@ resource "aws_ecs_cluster" "cluster" {
 module "inference_capacity_provider_tei_on" {
   source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/ec2_capacity_provider?ref=v3.5.1"
 
-  name = "${local.namespace_hyphen}_inference_capacity_provider-tei-on"
+  name = "${local.namespace_hyphen}_inferrer-tei-on"
 
   // Setting this variable from aws_ecs_cluster.cluster.name creates a cycle
   // The cluster name is required for the instance user data script
@@ -27,7 +27,7 @@ module "inference_capacity_provider_tei_on" {
 module "inference_capacity_provider_tei_off" {
   source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/ec2_capacity_provider?ref=v3.5.1"
 
-  name = "${local.namespace_hyphen}_inference_capacity_provider-tei-off"
+  name = "${local.namespace_hyphen}_inferrer-tei-off"
 
   // Setting this variable from aws_ecs_cluster.cluster.name creates a cycle
   // The cluster name is required for the instance user data script
