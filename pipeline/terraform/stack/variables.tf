@@ -2,6 +2,10 @@ variable "pipeline_date" {
   type = string
 }
 
+variable "api_ec_version" {
+  type = string
+}
+
 variable "min_capacity" {
   type    = number
   default = 0
