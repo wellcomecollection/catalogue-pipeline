@@ -166,10 +166,6 @@ module "image_inferrer" {
 
   queue_read_policy = module.image_inferrer_queue.read_policy
 
-  depends_on = [
-    var.elasticsearch_users,
-  ]
-
   deployment_service_env  = var.release_label
   deployment_service_name = "image-inferrer-${local.tei_suffix}"
   shared_logging_secrets  = var.shared_logging_secrets

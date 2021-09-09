@@ -55,10 +55,6 @@ module "merger" {
 
   queue_read_policy = module.merger_queue.read_policy
 
-  depends_on = [
-    var.elasticsearch_users,
-  ]
-
   deployment_service_env  = var.release_label
   deployment_service_name = "merger-${local.tei_suffix}"
   shared_logging_secrets  = var.shared_logging_secrets

@@ -57,10 +57,6 @@ module "relation_embedder" {
 
   use_fargate_spot = true
 
-  depends_on = [
-    var.elasticsearch_users,
-  ]
-
   deployment_service_env  = var.release_label
   deployment_service_name = "work-relation-embedder-${local.tei_suffix}"
   shared_logging_secrets  = var.shared_logging_secrets
