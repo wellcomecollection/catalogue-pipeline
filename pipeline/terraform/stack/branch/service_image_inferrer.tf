@@ -9,14 +9,42 @@ locals {
   shared_storage_name      = "shared_storage"
   shared_storage_path      = "/data"
 
-  total_cpu           = 8192
-  total_memory        = 15463
-  manager_memory      = 2048
-  manager_cpu         = 1024
-  aspect_ratio_cpu    = 2048
-  aspect_ratio_memory = 2048
-  inferrer_cpu        = floor(0.5 * (local.total_cpu - local.manager_cpu - local.aspect_ratio_cpu))
-  inferrer_memory     = floor(0.5 * (local.total_memory - local.manager_memory - local.aspect_ratio_memory))
+  base_total_cpu           = 8192
+  base_total_memory        = 15463
+  base_manager_memory      = 2048
+  base_manager_cpu         = 1024
+  base_aspect_ratio_cpu    = 2048
+  base_aspect_ratio_memory = 2048
+
+  # When we're not reindexing, we halve the size of these tasks, because
+  # they won't be getting as many updates.
+  #
+  # Note: while we're running the TEI on/TEI off pipeline, we run c5.2xlarge
+  # instances when not reindexing, so we can run 2 tasks per instance.
+  # This avoids some weird issues we've seen where an instance starts
+  # but ECS is unable to place tasks anywhere.
+  #
+  # The problem:
+  #
+  #   - image update arrives
+  #   - both tei-on and tei-off want to start an inferrer = 2 tasks
+  #   - for some reason, the tasks consistently don't start
+  #
+  # We're hoping that using the same capacity provider and allowing
+  # 2 tasks per instance will fix this issue.
+  #
+  # Once we're no longer running a split TEI pipeline, we should be able
+  # to reduce the size of instances when we're not reindexing.
+  #
+  total_cpu           = var.is_reindexing ? local.base_total_cpu : floor(local.base_total_cpu / 2)
+  total_memory        = var.is_reindexing ? local.base_total_memory : floor(local.base_total_memory / 2)
+  manager_memory      = var.is_reindexing ? local.base_manager_memory : floor(local.base_manager_memory / 2)
+  manager_cpu         = var.is_reindexing ? local.base_manager_cpu : floor(local.base_manager_cpu / 2)
+  aspect_ratio_cpu    = var.is_reindexing ? local.base_aspect_ratio_cpu : floor(local.base_aspect_ratio_cpu / 2)
+  aspect_ratio_memory = var.is_reindexing ? local.base_aspect_ratio_memory : floor(local.base_aspect_ratio_memory / 2)
+
+  inferrer_cpu    = floor(0.5 * (local.total_cpu - local.manager_cpu - local.aspect_ratio_cpu))
+  inferrer_memory = floor(0.5 * (local.total_memory - local.manager_memory - local.aspect_ratio_memory))
 }
 
 module "image_inferrer_queue" {
