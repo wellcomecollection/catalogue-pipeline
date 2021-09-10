@@ -3,7 +3,7 @@ package weco.pipeline.router
 import akka.Done
 import akka.stream.scaladsl.Flow
 import software.amazon.awssdk.services.sqs.model.Message
-import weco.catalogue.internal_model.work.Work
+import weco.catalogue.internal_model.work.{Relations, Work}
 import weco.catalogue.internal_model.work.WorkState.{Denormalised, Merged}
 import weco.json.JsonUtil._
 import weco.messaging.MessageSender
@@ -47,7 +47,7 @@ class RouterWorkerService[MsgDestination](
       case (None, relations) =>
         Future.successful(
           List(work.transition[Denormalised]((relations, Set.empty))))
-      case (Some(CollectionPath(path, _)), None)  =>
+      case (Some(CollectionPath(path, _)), relations) if relations == Relations.none  =>
         Future.fromTry(pathsMsgSender.send(path)).map(_ => Nil)
       case (collectionPath, relations) => Future.failed(
         new RuntimeException(s"collectionPath: $collectionPath and relations: $relations are both populated in ${work.state.id}. This shouldn't be possible"))
