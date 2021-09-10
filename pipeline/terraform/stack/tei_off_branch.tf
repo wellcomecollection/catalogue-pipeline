@@ -43,8 +43,7 @@ module "tei_off_branch" {
   pipeline_storage_es_service_secrets = local.pipeline_storage_es_service_secrets
   service_egress_security_group_id    = aws_security_group.service_egress.id
 
-
-  inference_capacity_provider_name = module.inference_capacity_provider_tei_off.name
+  inference_capacity_provider_name = module.inference_capacity_provider.name
 
   pipeline_date                 = var.pipeline_date
   pipeline_storage_port         = local.pipeline_storage_port
