@@ -36,15 +36,15 @@ locals {
   # Once we're no longer running a split TEI pipeline, we should be able
   # to reduce the size of instances when we're not reindexing.
   #
-  total_cpu           = var.is_reindexing ? local.base_total_cpu           : floor(local.base_total_cpu / 2)
-  total_memory        = var.is_reindexing ? local.base_total_memory        : floor(local.base_total_memory / 2)
-  manager_memory      = var.is_reindexing ? local.base_manager_memory      : floor(local.base_manager_memory / 2)
-  manager_cpu         = var.is_reindexing ? local.base_manager_cpu         : floor(local.base_manager_cpu / 2)
-  aspect_ratio_cpu    = var.is_reindexing ? local.base_aspect_ratio_cpu    : floor(local.base_aspect_ratio_cpu / 2)
+  total_cpu           = var.is_reindexing ? local.base_total_cpu : floor(local.base_total_cpu / 2)
+  total_memory        = var.is_reindexing ? local.base_total_memory : floor(local.base_total_memory / 2)
+  manager_memory      = var.is_reindexing ? local.base_manager_memory : floor(local.base_manager_memory / 2)
+  manager_cpu         = var.is_reindexing ? local.base_manager_cpu : floor(local.base_manager_cpu / 2)
+  aspect_ratio_cpu    = var.is_reindexing ? local.base_aspect_ratio_cpu : floor(local.base_aspect_ratio_cpu / 2)
   aspect_ratio_memory = var.is_reindexing ? local.base_aspect_ratio_memory : floor(local.base_aspect_ratio_memory / 2)
 
-  inferrer_cpu        = floor(0.5 * (local.total_cpu - local.manager_cpu - local.aspect_ratio_cpu))
-  inferrer_memory     = floor(0.5 * (local.total_memory - local.manager_memory - local.aspect_ratio_memory))
+  inferrer_cpu    = floor(0.5 * (local.total_cpu - local.manager_cpu - local.aspect_ratio_cpu))
+  inferrer_memory = floor(0.5 * (local.total_memory - local.manager_memory - local.aspect_ratio_memory))
 }
 
 module "image_inferrer_queue" {
