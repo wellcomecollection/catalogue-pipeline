@@ -40,9 +40,11 @@ class TeiOffMergerScenarioTest
     val firstInternalWork = teiIdentifiedWork()
     val secondInternalWork = teiIdentifiedWork()
 
-    val teiWork = teiIdentifiedWork().title("A tei work").mapState(state => {
-      state.copy(internalWorks = List(firstInternalWork, secondInternalWork))
-    })
+    val teiWork = teiIdentifiedWork()
+      .title("A tei work")
+      .mapState(state => {
+        state.copy(internalWorks = List(firstInternalWork, secondInternalWork))
+      })
     When("the works are merged")
     val sierraWorks = List(digitalSierra, physicalSierra)
     val works = sierraWorks :+ teiWork
@@ -56,8 +58,10 @@ class TeiOffMergerScenarioTest
     outcome.isDeleted(teiWork) shouldBe true
 
     And("the internal tei works are missing")
-    outcome.resultWorks.exists(_.sourceIdentifier == firstInternalWork.sourceIdentifier) shouldBe false
-    outcome.resultWorks.exists(_.sourceIdentifier == secondInternalWork.sourceIdentifier) shouldBe false
+    outcome.resultWorks.exists(
+      _.sourceIdentifier == firstInternalWork.sourceIdentifier) shouldBe false
+    outcome.resultWorks.exists(
+      _.sourceIdentifier == secondInternalWork.sourceIdentifier) shouldBe false
   }
 
   Scenario("A Tei work becomes deleted") {

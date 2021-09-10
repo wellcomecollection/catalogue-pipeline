@@ -64,7 +64,9 @@ class MergerManagerTest extends AnyFunSpec with Matchers with WorkGenerators {
           state = Identified(
             sourceIdentifier = work.sourceIdentifier,
             canonicalId = work.state.canonicalId,
-            sourceModifiedTime = work.state.sourceModifiedTime, internalWorks = work.state.internalWorks),
+            sourceModifiedTime = work.state.sourceModifiedTime,
+            internalWorks = work.state.internalWorks
+          ),
           version = work.version,
           redirectTarget = IdState.Identified(
             works.head.state.canonicalId,

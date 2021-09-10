@@ -34,7 +34,10 @@ trait WorkGenerators
     sourceModifiedTime: Instant = instantInLast30Days
   ): Work.Visible[Source] =
     Work.Visible[Source](
-      state = Source(sourceIdentifier = sourceIdentifier, sourceModifiedTime = sourceModifiedTime, internalWorks = Nil),
+      state = Source(
+        sourceIdentifier = sourceIdentifier,
+        sourceModifiedTime = sourceModifiedTime,
+        internalWorks = Nil),
       data = initData,
       version = createVersion
     )

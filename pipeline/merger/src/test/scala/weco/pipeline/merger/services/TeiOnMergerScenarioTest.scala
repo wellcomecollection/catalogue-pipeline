@@ -54,15 +54,18 @@ class TeiOnMergerScenarioTest
       .filter(_.identifierType == IdentifierType.SierraIdentifier)
   }
 
-  Scenario("A Tei with internal works and a Sierra digital and a sierra physical work are merged") {
+  Scenario(
+    "A Tei with internal works and a Sierra digital and a sierra physical work are merged") {
     Given("a Tei, a Sierra physical record and a Sierra digital record")
     val (digitalSierra, physicalSierra) = sierraIdentifiedWorkPair()
     val firstInternalWork = teiIdentifiedWork()
     val secondInternalWork = teiIdentifiedWork()
 
-    val teiWork = teiIdentifiedWork().title("A tei work").mapState(state => {
-      state.copy(internalWorks = List(firstInternalWork, secondInternalWork))
-    })
+    val teiWork = teiIdentifiedWork()
+      .title("A tei work")
+      .mapState(state => {
+        state.copy(internalWorks = List(firstInternalWork, secondInternalWork))
+      })
 
     When("the works are merged")
     val sierraWorks = List(digitalSierra, physicalSierra)
@@ -96,15 +99,19 @@ class TeiOnMergerScenarioTest
       .filter(_.identifierType == IdentifierType.SierraIdentifier)
 
     And("the internal tei works are returned")
-      outcome.resultWorks contains firstInternalWork
-      outcome.resultWorks contains secondInternalWork
+    outcome.resultWorks contains firstInternalWork
+    outcome.resultWorks contains secondInternalWork
     outcome.getMerged(firstInternalWork) shouldNot beRedirectedTo(teiWork)
     outcome.getMerged(secondInternalWork) shouldNot beRedirectedTo(teiWork)
 
     And("the tei internal works contain the sierra item")
-    outcome.getMerged(firstInternalWork).data
+    outcome
+      .getMerged(firstInternalWork)
+      .data
       .items should contain allElementsOf physicalSierra.data.items
-    outcome.getMerged(secondInternalWork).data
+    outcome
+      .getMerged(secondInternalWork)
+      .data
       .items should contain allElementsOf physicalSierra.data.items
   }
 

@@ -154,9 +154,9 @@ sealed trait WorkState {
 object WorkState {
 
   case class Source(
-                     sourceIdentifier: SourceIdentifier,
-                     sourceModifiedTime: Instant,
-                     internalWorks: List[Work[Source]]
+    sourceIdentifier: SourceIdentifier,
+    sourceModifiedTime: Instant,
+    internalWorks: List[Work[Source]]
   ) extends WorkState {
 
     type WorkDataState = DataState.Unidentified
@@ -169,10 +169,10 @@ object WorkState {
   }
 
   case class Identified(
-                         sourceIdentifier: SourceIdentifier,
-                         canonicalId: CanonicalId,
-                         sourceModifiedTime: Instant,
-                         internalWorks: List[Work.Visible[Identified]]
+    sourceIdentifier: SourceIdentifier,
+    canonicalId: CanonicalId,
+    sourceModifiedTime: Instant,
+    internalWorks: List[Work.Visible[Identified]]
   ) extends WorkState {
 
     type WorkDataState = DataState.Identified
