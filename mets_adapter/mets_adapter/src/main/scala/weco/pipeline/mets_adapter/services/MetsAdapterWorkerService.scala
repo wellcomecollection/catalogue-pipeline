@@ -12,6 +12,7 @@ import weco.json.JsonUtil._
 import weco.messaging.MessageSender
 import weco.messaging.sns.NotificationMessage
 import weco.messaging.sqs.SQSStream
+import weco.storage.store.VersionedStore
 import weco.storage.{Identified, Version}
 import weco.typesafe.Runnable
 
@@ -31,7 +32,7 @@ class MetsAdapterWorkerService[Destination](
   msgStream: SQSStream[NotificationMessage],
   msgSender: MessageSender[Destination],
   bagRetriever: BagRetriever,
-  metsStore: MetsStore,
+  metsStore: VersionedStore[String, Int, MetsSourceData],
   concurrentHttpConnections: Int = 6,
   concurrentDynamoConnections: Int = 4)(implicit val ec: ExecutionContext)
     extends Runnable
@@ -109,9 +110,14 @@ class MetsAdapterWorkerService[Destination](
   def storeMetsSourceData =
     Flow[(Context, Option[MetsSourceData])]
       .mapWithContextAsync(concurrentDynamoConnections) {
-        case (ctx, data) =>
+        case (ctx, sourceData: MetsSourceData) =>
+          val id = Version(ctx.bagId, sourceData.version)
+
           Future {
-            metsStore.storeData(Version(ctx.bagId, data.version), data)
+            metsStore
+              .put(id)(sourceData)
+              .left
+              .map(_.e)
           }
       }
 

@@ -6,13 +6,13 @@ import akka.http.scaladsl.model.headers.BasicHttpCredentials
 import com.typesafe.config.Config
 import org.scanamo.generic.auto._
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
+import weco.catalogue.source_model.mets.MetsSourceData
 import weco.http.client.AkkaHttpClient
 import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import weco.pipeline.mets_adapter.http.StorageServiceOauthHttpClient
 import weco.pipeline.mets_adapter.services.{
   HttpBagRetriever,
-  MetsAdapterWorkerService,
-  MetsStore
+  MetsAdapterWorkerService
 }
 import weco.storage.store.dynamo.DynamoSingleVersionStore
 import weco.storage.typesafe.DynamoBuilder
@@ -42,21 +42,15 @@ object Main extends WellcomeTypesafeApp {
         config.requireString("bags.oauth.secret")
       )
     )
+    val metsStore = new DynamoSingleVersionStore[String, MetsSourceData](
+      DynamoBuilder.buildDynamoConfig(config, namespace = "mets")
+    )
 
     new MetsAdapterWorkerService(
       SQSBuilder.buildSQSStream(config),
       SNSBuilder.buildSNSMessageSender(config, subject = "METS adapter"),
       bagRetriever = new HttpBagRetriever(oauthClient),
-      buildMetsStore(config)
+      metsStore = metsStore
     )
   }
-
-  private def buildMetsStore(
-    config: Config
-  )(implicit dynamoClient: DynamoDbClient): MetsStore =
-    new MetsStore(
-      new DynamoSingleVersionStore(
-        DynamoBuilder.buildDynamoConfig(config, namespace = "mets")
-      )
-    )
 }
