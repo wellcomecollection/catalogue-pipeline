@@ -104,7 +104,16 @@ object Implicits {
   implicit val _dec46: Decoder[WorkData[DataState.Identified]] =
     deriveConfiguredDecoder
     
-  // TODO: WorkState decoders?
+  implicit val _decWorkStateSource: Decoder[WorkState.Source] =
+    deriveConfiguredDecoder
+  implicit val _decWorkStateMerged: Decoder[WorkState.Merged] =
+    deriveConfiguredDecoder
+  implicit val _decWorkStateDenormalised: Decoder[WorkState.Denormalised] =
+    deriveConfiguredDecoder
+  implicit val _decWorkStateIdentified: Decoder[WorkState.Identified] =
+    deriveConfiguredDecoder
+  implicit val _decWorkStateIndexed: Decoder[WorkState.Indexed] =
+    deriveConfiguredDecoder
   
   implicit val _decWorkVisibleSource: Decoder[Work.Visible[WorkState.Source]] =
     deriveConfiguredDecoder
@@ -250,6 +259,17 @@ object Implicits {
   implicit val _enc46: Encoder[WorkData[DataState.Identified]] =
     deriveConfiguredEncoder
 
+  implicit val _encWorkStateSource: Encoder[WorkState.Source] =
+    deriveConfiguredEncoder
+  implicit val _encWorkStateMerged: Encoder[WorkState.Merged] =
+    deriveConfiguredEncoder
+  implicit val _encWorkStateDenormalised: Encoder[WorkState.Denormalised] =
+    deriveConfiguredEncoder
+  implicit val _encWorkStateIdentified: Encoder[WorkState.Identified] =
+    deriveConfiguredEncoder
+  implicit val _encWorkStateIndexed: Encoder[WorkState.Indexed] =
+    deriveConfiguredEncoder
+  
   implicit val _encWorkVisibleSource: Encoder[Work.Visible[WorkState.Source]] =
     deriveConfiguredEncoder
   implicit val _encWorkVisibleMerged: Encoder[Work.Visible[WorkState.Merged]] =
