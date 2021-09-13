@@ -13,6 +13,13 @@ trait CalmRecordOps {
         .getOrElse(key, Nil)
         .map(_.trim)
         .filter(_.nonEmpty)
+        .filterNot(
+          // Some Calm records contain a single period in some fields.
+          // It affects ~50 records -- enough that I don't want to bother the
+          // Collections team fixing it manually.  Removing it here means we
+          // don't have to deal with it downstream.
+          _ == "."
+        )
         .map(fixEncoding)
 
     def getJoined(key: String, separator: String = " "): Option[String] =
