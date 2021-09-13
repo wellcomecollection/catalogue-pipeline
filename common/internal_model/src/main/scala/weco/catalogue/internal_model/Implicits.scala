@@ -7,10 +7,12 @@ import weco.catalogue.internal_model.image._
 import weco.catalogue.internal_model.locations.{
   AccessCondition,
   DigitalLocation,
+  DigitalLocationType,
   License,
   Location,
   LocationType,
-  PhysicalLocation
+  PhysicalLocation,
+  PhysicalLocationType
 }
 import weco.catalogue.internal_model.matcher.MatcherResult
 import weco.catalogue.internal_model.work._
@@ -32,6 +34,7 @@ object Implicits {
   implicit val _dec00: Decoder[AccessCondition] = deriveConfiguredDecoder
   implicit val _dec01: Decoder[Note] = deriveConfiguredDecoder
 
+  implicit val _decIdentifierType: Decoder[IdentifierType] = IdentifierType.identifierTypeDecoder
   implicit val _decSourceIdentifier: Decoder[SourceIdentifier] = deriveConfiguredDecoder
   implicit val _decCanonicalId: Decoder[CanonicalId] = deriveConfiguredDecoder
 
@@ -42,8 +45,10 @@ object Implicits {
 
   implicit val _dec05: Decoder[InstantRange] = deriveConfiguredDecoder
 
-  implicit val _decLicense: Decoder[License] = deriveConfiguredDecoder
-  implicit val _decLocationType: Decoder[LocationType] = deriveConfiguredDecoder
+  implicit val _decLicense: Decoder[License] = License.licenseDecoder
+  implicit val _decPhysicalLocationType: Decoder[PhysicalLocationType] = LocationType.physicalLocationTypeDecoder
+  implicit val _decDigitalLocationType: Decoder[DigitalLocationType] = LocationType.digitalLocationTypeDecoder
+  implicit val _decLocationType: Decoder[LocationType] = LocationType.locationTypeDecoder
   implicit val _decDigitalLocation: Decoder[DigitalLocation] =
     deriveConfiguredDecoder
   implicit val _decPhysicalLocation: Decoder[PhysicalLocation] =
@@ -109,9 +114,9 @@ object Implicits {
   implicit val _dec41: Decoder[Contributor[IdState.Minted]] =
     deriveConfiguredDecoder
 
-  implicit val _decFormat: Decoder[Format] = deriveConfiguredDecoder
+  implicit val _decFormat: Decoder[Format] = Format.formatDecoder
   implicit val _decHoldings: Decoder[Holdings] = deriveConfiguredDecoder
-  implicit val _decWorkType: Decoder[WorkType] = deriveConfiguredDecoder
+  implicit val _decWorkType: Decoder[WorkType] = WorkType.workTypeDecoder
   implicit val _decCollectionPath: Decoder[CollectionPath] =
     deriveConfiguredDecoder
   implicit val _decRelation: Decoder[Relation] = deriveConfiguredDecoder
@@ -138,6 +143,9 @@ object Implicits {
     deriveConfiguredDecoder
   implicit val _decDeletedReason: Decoder[DeletedReason] =
     deriveConfiguredDecoder
+
+  implicit val _decAvailability: Decoder[Availability] =
+    Availability.availabilityDecoder
 
   implicit val _decWorkStateSource: Decoder[WorkState.Source] =
     deriveConfiguredDecoder
@@ -219,6 +227,7 @@ object Implicits {
   implicit val _enc00: Encoder[AccessCondition] = deriveConfiguredEncoder
   implicit val _enc01: Encoder[Note] = deriveConfiguredEncoder
 
+  implicit val _encIdentifierType: Encoder[IdentifierType] = IdentifierType.identifierTypeEncoder
   implicit val _encSourceIdentifier: Encoder[SourceIdentifier] = deriveConfiguredEncoder
   implicit val _encCanonicalId: Encoder[CanonicalId] = deriveConfiguredEncoder
 
@@ -229,8 +238,10 @@ object Implicits {
 
   implicit val _enc05: Encoder[InstantRange] = deriveConfiguredEncoder
 
-  implicit val _encLicense: Encoder[License] = deriveConfiguredEncoder
-  implicit val _encLocationType: Encoder[LocationType] = deriveConfiguredEncoder
+  implicit val _encLicense: Encoder[License] = License.licenseEncoder
+  implicit val _encPhysicalLocationType: Encoder[PhysicalLocationType] = LocationType.physicalLocationTypeEncoder
+  implicit val _encDigitalLocationType: Encoder[DigitalLocationType] = LocationType.digitalLocationTypeEncoder
+  implicit val _encLocationType: Encoder[LocationType] = LocationType.locationTypeEncoder
   implicit val _encDigitalLocation: Encoder[DigitalLocation] =
     deriveConfiguredEncoder
   implicit val _encPhysicalLocation: Encoder[PhysicalLocation] =
@@ -297,9 +308,9 @@ object Implicits {
   implicit val _enc41: Encoder[Contributor[IdState.Minted]] =
     deriveConfiguredEncoder
 
-  implicit val _encFormat: Encoder[Format] = deriveConfiguredEncoder
+  implicit val _encFormat: Encoder[Format] = Format.formatEncoder
   implicit val _encHoldings: Encoder[Holdings] = deriveConfiguredEncoder
-  implicit val _encWorkType: Encoder[WorkType] = deriveConfiguredEncoder
+  implicit val _encWorkType: Encoder[WorkType] = WorkType.workTypeEncoder
   implicit val _encCollectionPath: Encoder[CollectionPath] =
     deriveConfiguredEncoder
   implicit val _encRelation: Encoder[Relation] = deriveConfiguredEncoder
@@ -326,6 +337,9 @@ object Implicits {
     deriveConfiguredEncoder
   implicit val _encDeletedReason: Encoder[DeletedReason] =
     deriveConfiguredEncoder
+
+  implicit val _envAvailability: Encoder[Availability] =
+    Availability.availabilityEncoder
 
   implicit val _encWorkStateSource: Encoder[WorkState.Source] =
     deriveConfiguredEncoder
