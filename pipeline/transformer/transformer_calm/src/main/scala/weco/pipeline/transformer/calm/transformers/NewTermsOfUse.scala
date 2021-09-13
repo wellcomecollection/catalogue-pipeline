@@ -14,7 +14,14 @@ object NewTermsOfUse {
     closedUntil: Option[LocalDate],
     restrictedUntil: Option[LocalDate]
   ): Option[TermsOfUse] =
-    throw new Throwable("Unhandled!")
+    (conditions, status, closedUntil, restrictedUntil) match {
+      case _ =>
+        println(s"conditions = $conditions")
+        println(s"status = $status")
+        println(s"closedUntil = $closedUntil")
+        println(s"restrictedUntil = $restrictedUntil")
+        throw new Throwable("Unhandled!")
+    }
 }
 
 object NewCalmTermsOfUse extends CalmRecordOps {
