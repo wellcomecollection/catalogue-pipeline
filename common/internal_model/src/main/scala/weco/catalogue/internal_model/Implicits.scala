@@ -37,8 +37,8 @@ object Implicits {
 
   implicit val _decIdentifierType: Decoder[IdentifierType] = IdentifierType.identifierTypeDecoder
   implicit val _decSourceIdentifier: Decoder[SourceIdentifier] = deriveConfiguredDecoder
-  implicit val _decCanonicalId: Decoder[CanonicalId] = deriveConfiguredDecoder
-  implicit val _decReferenceNumber: Decoder[ReferenceNumber] = deriveConfiguredDecoder
+  implicit val _decCanonicalId: Decoder[CanonicalId] = CanonicalId.decoder
+  implicit val _decReferenceNumber: Decoder[ReferenceNumber] = ReferenceNumber.decoder
 
   implicit val _decIdStateIdentified: Decoder[IdState.Identified] = deriveConfiguredDecoder
   implicit val _decIdStateIdentifiable: Decoder[IdState.Identifiable] = deriveConfiguredDecoder
@@ -237,8 +237,8 @@ object Implicits {
 
   implicit val _encIdentifierType: Encoder[IdentifierType] = IdentifierType.identifierTypeEncoder
   implicit val _encSourceIdentifier: Encoder[SourceIdentifier] = deriveConfiguredEncoder
-  implicit val _encCanonicalId: Encoder[CanonicalId] = deriveConfiguredEncoder
-  implicit val _envReferenceNumber: Encoder[ReferenceNumber] = deriveConfiguredEncoder
+  implicit val _encCanonicalId: Encoder[CanonicalId] = CanonicalId.encoder
+  implicit val _envReferenceNumber: Encoder[ReferenceNumber] = ReferenceNumber.encoder
 
   implicit val _encIdStateIdentified: Encoder[IdState.Identified] = deriveConfiguredEncoder
   implicit val _encIdStateIdentifiable: Encoder[IdState.Identifiable] = deriveConfiguredEncoder
