@@ -41,7 +41,7 @@ object Implicits {
   implicit val _decIdStateMinted: Decoder[IdState.Minted] = deriveConfiguredDecoder
 
   implicit val _dec05: Decoder[InstantRange] = deriveConfiguredDecoder
-  
+
   implicit val _decLicense: Decoder[License] = deriveConfiguredDecoder
   implicit val _decLocationType: Decoder[LocationType] = deriveConfiguredDecoder
   implicit val _decDigitalLocation: Decoder[DigitalLocation] =
@@ -75,7 +75,10 @@ object Implicits {
     deriveConfiguredDecoder
   implicit val _dec24: Decoder[Place[IdState.Unminted]] =
     deriveConfiguredDecoder
-  implicit val _dec25: Decoder[Period[IdState.Minted]] = deriveConfiguredDecoder
+
+  implicit val _decPeriodMinted: Decoder[Period[IdState.Minted]] = deriveConfiguredDecoder
+  implicit val _decPeriodUnminted: Decoder[Period[IdState.Unminted]] = deriveConfiguredDecoder
+
   implicit val _dec26: Decoder[Concept[IdState.Unminted]] =
     deriveConfiguredDecoder
   implicit val _dec27: Decoder[Concept[IdState.Minted]] =
@@ -130,12 +133,12 @@ object Implicits {
     deriveConfiguredDecoder
   implicit val _dec46: Decoder[WorkData[DataState.Identified]] =
     deriveConfiguredDecoder
-    
+
   implicit val _decInvisibilityReason: Decoder[InvisibilityReason] =
     deriveConfiguredDecoder
   implicit val _decDeletedReason: Decoder[DeletedReason] =
     deriveConfiguredDecoder
-    
+
   implicit val _decWorkStateSource: Decoder[WorkState.Source] =
     deriveConfiguredDecoder
   implicit val _decWorkStateMerged: Decoder[WorkState.Merged] =
@@ -146,7 +149,7 @@ object Implicits {
     deriveConfiguredDecoder
   implicit val _decWorkStateIndexed: Decoder[WorkState.Indexed] =
     deriveConfiguredDecoder
-  
+
   implicit val _decWorkVisibleSource: Decoder[Work.Visible[WorkState.Source]] =
     deriveConfiguredDecoder
   implicit val _decWorkVisibleMerged: Decoder[Work.Visible[WorkState.Merged]] =
@@ -157,7 +160,7 @@ object Implicits {
     deriveConfiguredDecoder
   implicit val _decWorkVisibleIndexed: Decoder[Work.Visible[WorkState.Indexed]] =
     deriveConfiguredDecoder
-  
+
   implicit val _decWorkInvisibleSource: Decoder[Work.Invisible[WorkState.Source]] =
     deriveConfiguredDecoder
   implicit val _decWorkInvisibleMerged: Decoder[Work.Invisible[WorkState.Merged]] =
@@ -168,7 +171,7 @@ object Implicits {
     deriveConfiguredDecoder
   implicit val _decWorkInvisibleIndexed: Decoder[Work.Invisible[WorkState.Indexed]] =
     deriveConfiguredDecoder
-  
+
   implicit val _decWorkRedirectedSource: Decoder[Work.Redirected[WorkState.Source]] =
     deriveConfiguredDecoder
   implicit val _decWorkRedirectedMerged: Decoder[Work.Redirected[WorkState.Merged]] =
@@ -190,7 +193,7 @@ object Implicits {
     deriveConfiguredDecoder
   implicit val _decWorkDeletedIndexed: Decoder[Work.Deleted[WorkState.Indexed]] =
     deriveConfiguredDecoder
-  
+
   implicit val _decWorkSource: Decoder[Work[WorkState.Source]] =
     deriveConfiguredDecoder
   implicit val _decWorkMerged: Decoder[Work[WorkState.Merged]] =
@@ -201,7 +204,7 @@ object Implicits {
     deriveConfiguredDecoder
   implicit val _decWorkIndexed: Decoder[Work[WorkState.Indexed]] =
     deriveConfiguredDecoder
-    
+
   implicit val _dec63: Decoder[ParentWorks] =
     deriveConfiguredDecoder
   implicit val _dec64: Decoder[ImageSource] =
@@ -223,7 +226,7 @@ object Implicits {
   implicit val _encIdStateIdentifiable: Encoder[IdState.Identifiable] = deriveConfiguredEncoder
   implicit val _encIdStateUnminted: Encoder[IdState.Unminted] = deriveConfiguredEncoder
   implicit val _encIdStateMinted: Encoder[IdState.Minted] = deriveConfiguredEncoder
-  
+
   implicit val _enc05: Encoder[InstantRange] = deriveConfiguredEncoder
 
   implicit val _encLicense: Encoder[License] = deriveConfiguredEncoder
@@ -233,7 +236,7 @@ object Implicits {
   implicit val _encPhysicalLocation: Encoder[PhysicalLocation] =
     deriveConfiguredEncoder
   implicit val _encLocation: Encoder[Location] = deriveConfiguredEncoder
-  
+
   implicit val _enc11
     : Encoder[MergeCandidate[ImageData[IdState.Identifiable]]] =
     deriveConfiguredEncoder
@@ -260,7 +263,10 @@ object Implicits {
     deriveConfiguredEncoder
   implicit val _enc24: Encoder[Place[IdState.Unminted]] =
     deriveConfiguredEncoder
-  implicit val _enc25: Encoder[Period[IdState.Minted]] = deriveConfiguredEncoder
+
+  implicit val _encPeriodMinted: Encoder[Period[IdState.Minted]] = deriveConfiguredEncoder
+  implicit val _encPeriodUnminted: Encoder[Period[IdState.Unminted]] = deriveConfiguredEncoder
+
   implicit val _enc26: Encoder[Concept[IdState.Unminted]] =
     deriveConfiguredEncoder
   implicit val _enc27: Encoder[Concept[IdState.Minted]] =
@@ -310,7 +316,7 @@ object Implicits {
     deriveConfiguredEncoder
   implicit val _envImageDataIdentified: Encoder[ImageData[IdState.Identified]] =
     deriveConfiguredEncoder
-  
+
   implicit val _enc45: Encoder[WorkData[DataState.Unidentified]] =
     deriveConfiguredEncoder
   implicit val _enc46: Encoder[WorkData[DataState.Identified]] =
@@ -320,7 +326,7 @@ object Implicits {
     deriveConfiguredEncoder
   implicit val _encDeletedReason: Encoder[DeletedReason] =
     deriveConfiguredEncoder
-  
+
   implicit val _encWorkStateSource: Encoder[WorkState.Source] =
     deriveConfiguredEncoder
   implicit val _encWorkStateMerged: Encoder[WorkState.Merged] =
@@ -331,7 +337,7 @@ object Implicits {
     deriveConfiguredEncoder
   implicit val _encWorkStateIndexed: Encoder[WorkState.Indexed] =
     deriveConfiguredEncoder
-  
+
   implicit val _encWorkVisibleSource: Encoder[Work.Visible[WorkState.Source]] =
     deriveConfiguredEncoder
   implicit val _encWorkVisibleMerged: Encoder[Work.Visible[WorkState.Merged]] =
@@ -386,7 +392,7 @@ object Implicits {
     deriveConfiguredEncoder
   implicit val _encWorkIndexed: Encoder[Work[WorkState.Indexed]] =
     deriveConfiguredEncoder
-  
+
   implicit val _enc63: Encoder[ParentWorks] =
     deriveConfiguredEncoder
   implicit val _enc64: Encoder[ImageSource] =
