@@ -4,6 +4,7 @@ import io.circe.generic.extras.semiauto._
 import io.circe._
 import weco.catalogue.internal_model.identifiers._
 import weco.catalogue.internal_model.image._
+import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.locations.{
   AccessCondition,
   DigitalLocation,
@@ -37,6 +38,7 @@ object Implicits {
   implicit val _decIdentifierType: Decoder[IdentifierType] = IdentifierType.identifierTypeDecoder
   implicit val _decSourceIdentifier: Decoder[SourceIdentifier] = deriveConfiguredDecoder
   implicit val _decCanonicalId: Decoder[CanonicalId] = deriveConfiguredDecoder
+  implicit val _decReferenceNumber: Decoder[ReferenceNumber] = deriveConfiguredDecoder
 
   implicit val _decIdStateIdentified: Decoder[IdState.Identified] = deriveConfiguredDecoder
   implicit val _decIdStateIdentifiable: Decoder[IdState.Identifiable] = deriveConfiguredDecoder
@@ -44,6 +46,8 @@ object Implicits {
   implicit val _decIdStateMinted: Decoder[IdState.Minted] = deriveConfiguredDecoder
 
   implicit val _dec05: Decoder[InstantRange] = deriveConfiguredDecoder
+
+  implicit val _decLanguage: Decoder[Language] = deriveConfiguredDecoder
 
   implicit val _decLicense: Decoder[License] = License.licenseDecoder
   implicit val _decPhysicalLocationType: Decoder[PhysicalLocationType] = LocationType.physicalLocationTypeDecoder
@@ -55,10 +59,11 @@ object Implicits {
     deriveConfiguredDecoder
   implicit val _decLocation: Decoder[Location] = deriveConfiguredDecoder
 
-  implicit val _dec11: Decoder[MergeCandidate[IdState.Identifiable]] =
+  implicit val _decMergeCandidateIdentifiable: Decoder[MergeCandidate[IdState.Identifiable]] =
     deriveConfiguredDecoder
-  implicit val _dec12: Decoder[MergeCandidate[IdState.Identified]] =
+  implicit val _decMergeCandidateIdentified: Decoder[MergeCandidate[IdState.Identified]] =
     deriveConfiguredDecoder
+
   implicit val _dec13: Decoder[MatcherResult] = deriveConfiguredDecoder
   implicit val _dec14: Decoder[Person[IdState.Unminted]] =
     deriveConfiguredDecoder
@@ -78,7 +83,10 @@ object Implicits {
     deriveConfiguredDecoder
   implicit val _dec23: Decoder[AbstractAgent[IdState.Minted]] =
     deriveConfiguredDecoder
-  implicit val _dec24: Decoder[Place[IdState.Unminted]] =
+
+  implicit val _decPlaceMinted: Decoder[Place[IdState.Minted]] =
+    deriveConfiguredDecoder
+  implicit val _decPlaceUnminted: Decoder[Place[IdState.Unminted]] =
     deriveConfiguredDecoder
 
   implicit val _decPeriodMinted: Decoder[Period[IdState.Minted]] = deriveConfiguredDecoder
@@ -230,6 +238,7 @@ object Implicits {
   implicit val _encIdentifierType: Encoder[IdentifierType] = IdentifierType.identifierTypeEncoder
   implicit val _encSourceIdentifier: Encoder[SourceIdentifier] = deriveConfiguredEncoder
   implicit val _encCanonicalId: Encoder[CanonicalId] = deriveConfiguredEncoder
+  implicit val _envReferenceNumber: Encoder[ReferenceNumber] = deriveConfiguredEncoder
 
   implicit val _encIdStateIdentified: Encoder[IdState.Identified] = deriveConfiguredEncoder
   implicit val _encIdStateIdentifiable: Encoder[IdState.Identifiable] = deriveConfiguredEncoder
@@ -237,6 +246,8 @@ object Implicits {
   implicit val _encIdStateMinted: Encoder[IdState.Minted] = deriveConfiguredEncoder
 
   implicit val _enc05: Encoder[InstantRange] = deriveConfiguredEncoder
+
+  implicit val _encLanguage: Encoder[Language] = deriveConfiguredEncoder
 
   implicit val _encLicense: Encoder[License] = License.licenseEncoder
   implicit val _encPhysicalLocationType: Encoder[PhysicalLocationType] = LocationType.physicalLocationTypeEncoder
@@ -248,11 +259,11 @@ object Implicits {
     deriveConfiguredEncoder
   implicit val _encLocation: Encoder[Location] = deriveConfiguredEncoder
 
-  implicit val _enc11
-    : Encoder[MergeCandidate[ImageData[IdState.Identifiable]]] =
+  implicit val _encMergeCandidateIdentifiable: Encoder[MergeCandidate[IdState.Identifiable]] =
     deriveConfiguredEncoder
-  implicit val _enc12: Encoder[MergeCandidate[ImageData[IdState.Identified]]] =
+  implicit val _encMergeCandidateIdentified: Encoder[MergeCandidate[IdState.Identified]] =
     deriveConfiguredEncoder
+  
   implicit val _enc13: Encoder[MatcherResult] = deriveConfiguredEncoder
   implicit val _enc14: Encoder[Person[IdState.Unminted]] =
     deriveConfiguredEncoder
@@ -272,7 +283,10 @@ object Implicits {
     deriveConfiguredEncoder
   implicit val _enc23: Encoder[AbstractAgent[IdState.Minted]] =
     deriveConfiguredEncoder
-  implicit val _enc24: Encoder[Place[IdState.Unminted]] =
+
+  implicit val _encPlaceMinted: Encoder[Place[IdState.Minted]] =
+    deriveConfiguredEncoder
+  implicit val _encPlaceUnminted: Encoder[Place[IdState.Unminted]] =
     deriveConfiguredEncoder
 
   implicit val _encPeriodMinted: Encoder[Period[IdState.Minted]] = deriveConfiguredEncoder
