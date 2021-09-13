@@ -100,11 +100,17 @@ object Implicits {
     deriveConfiguredDecoder
   implicit val _dec43: Decoder[ImageData[IdState.Identified]] =
     deriveConfiguredDecoder
-    
+
+  implicit val _decFormat: Decoder[Format] = deriveConfiguredDecoder
+  implicit val _decHoldings: Decoder[Holdings] = deriveConfiguredDecoder
   implicit val _decWorkType: Decoder[WorkType] = deriveConfiguredDecoder
   implicit val _decCollectionPath: Decoder[CollectionPath] =
     deriveConfiguredDecoder
-  implicit val _decRelation: Decoder[Relation] = deriveConfiguredDecoder  
+  implicit val _decRelation: Decoder[Relation] = deriveConfiguredDecoder
+  implicit val _decRelations: Decoder[Relations] = deriveConfiguredDecoder
+
+  implicit val _decDerivedWorkData: Decoder[DerivedWorkData] =
+    deriveConfiguredDecoder
   
   implicit val _dec45: Decoder[WorkData[DataState.Unidentified]] =
     deriveConfiguredDecoder
@@ -268,10 +274,16 @@ object Implicits {
   implicit val _enc43: Encoder[ImageData[IdState.Identified]] =
     deriveConfiguredEncoder
 
+  implicit val _encFormat: Encoder[Format] = deriveConfiguredEncoder
+  implicit val _encHoldings: Encoder[Holdings] = deriveConfiguredEncoder
   implicit val _encWorkType: Encoder[WorkType] = deriveConfiguredEncoder
   implicit val _encCollectionPath: Encoder[CollectionPath] =
     deriveConfiguredEncoder
   implicit val _encRelation: Encoder[Relation] = deriveConfiguredEncoder
+  implicit val _encRelations: Encoder[Relations] = deriveConfiguredEncoder
+
+  implicit val _encDerivedWorkData: Encoder[DerivedWorkData] =
+    deriveConfiguredEncoder
   
   implicit val _enc45: Encoder[WorkData[DataState.Unidentified]] =
     deriveConfiguredEncoder
