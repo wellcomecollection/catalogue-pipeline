@@ -29,7 +29,10 @@ object Implicits {
 
   implicit val _dec00: Decoder[AccessCondition] = deriveConfiguredDecoder
   implicit val _dec01: Decoder[Note] = deriveConfiguredDecoder
-  implicit val _dec02: Decoder[SourceIdentifier] = deriveConfiguredDecoder
+
+  implicit val _decSourceIdentifier: Decoder[SourceIdentifier] = deriveConfiguredDecoder
+  implicit val _decCanonicalId: Decoder[CanonicalId] = deriveConfiguredDecoder
+
   implicit val _dec03: Decoder[IdState.Unminted] = deriveConfiguredDecoder
   implicit val _dec04: Decoder[IdState.Minted] = deriveConfiguredDecoder
   implicit val _dec05: Decoder[InstantRange] = deriveConfiguredDecoder
@@ -183,7 +186,10 @@ object Implicits {
 
   implicit val _enc00: Encoder[AccessCondition] = deriveConfiguredEncoder
   implicit val _enc01: Encoder[Note] = deriveConfiguredEncoder
-  implicit val _enc02: Encoder[SourceIdentifier] = deriveConfiguredEncoder
+
+  implicit val _encSourceIdentifier: Encoder[SourceIdentifier] = deriveConfiguredEncoder
+  implicit val _encCanonicalId: Encoder[CanonicalId] = deriveConfiguredEncoder
+
   implicit val _enc03: Encoder[IdState.Unminted] = deriveConfiguredEncoder
   implicit val _enc04: Encoder[IdState.Minted] = deriveConfiguredEncoder
   implicit val _enc05: Encoder[InstantRange] = deriveConfiguredEncoder
