@@ -5,15 +5,10 @@ import weco.catalogue.internal_model.identifiers.{DataState, IdState}
 import weco.catalogue.internal_model.image
 import weco.catalogue.internal_model.image.{ImageData, ParentWorks}
 import weco.catalogue.internal_model.work.WorkState.Identified
-import weco.catalogue.internal_model.work.{Work, WorkData, WorkState}
+import weco.catalogue.internal_model.work.{Item, Work, WorkData, WorkState}
 import weco.pipeline.merger.logging.MergerLogging
 import weco.pipeline.merger.models
-import weco.pipeline.merger.models.{
-  FieldMergeResult,
-  ImageDataWithSource,
-  MergeResult,
-  MergerOutcome
-}
+import weco.pipeline.merger.models.{FieldMergeResult, ImageDataWithSource, MergeResult, MergerOutcome}
 import weco.pipeline.merger.rules._
 
 /*
@@ -226,16 +221,9 @@ object PlatformMerger extends Merger {
               imageData = sourceImageData
             )
           }
-          .mapState { state =>
-            state.copy(internalWorks = state.internalWorks.map { work =>
-              work.mapData { data =>
-                data.copy[DataState.Identified](items = items)
-              }
-            })
-          }
       } yield
         MergeResult(
-          mergedTarget = work,
+          mergedTarget = addItemsToInternalWorks(items, work),
           imageDataWithSources = sourceImageData.map { imageData =>
             ImageDataWithSource(
               imageData = imageData,
@@ -248,6 +236,20 @@ object PlatformMerger extends Merger {
             )
           }
         )
+
+  private def addItemsToInternalWorks(items: List[Item[IdState.Minted]], work: Work.Visible[Identified]) = {
+    // Inteernal works are in TEI works. If they are merged with Sierra, we want the Sierra
+    // items to be added to TEI internal works so that the user can request the item
+    // containing that work without having to find the wrapping work.
+    work
+      .mapState { state =>
+        state.copy(internalWorks = state.internalWorks.map { work =>
+          work.mapData { data =>
+            data.copy[DataState.Identified](items = items)
+          }
+        })
+      }
+  }
 
   private def standaloneImages(
     target: Work.Visible[Identified]
