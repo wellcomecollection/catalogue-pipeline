@@ -14,6 +14,9 @@ class NewTermsOfUseTest extends AnyFunSpec with Matchers with CalmRecordGenerato
   it("works") {
     val t = scala.io.Source.fromFile("//Users/alexwlchan/Desktop/tmp.ERstDSaz/unique_calm_list_items.json")
 
+    var handled = 0
+    var unhandled = 0
+
     t.getLines().foreach { line =>
       val data = fromJson[Map[String, List[String]]](line).get
       val record = CalmRecord(
@@ -22,9 +25,15 @@ class NewTermsOfUseTest extends AnyFunSpec with Matchers with CalmRecordGenerato
         retrievedAt = Instant.now()
       )
       Try { NewCalmTermsOfUse(record) } match {
-        case Success(value) => println(s"$GREEN${value}$RESET")
-        case _              => println(s"$RED$record$RESET")
+        case Success(value) =>
+          handled += 1
+          println(s"$GREEN${value}$RESET")
+        case _              =>
+          unhandled += 1
+          println(s"$RED$record$RESET")
       }
     }
+
+    println(s"*** total = ${handled + unhandled}, unhandled = $unhandled")
   }
 }
