@@ -7,7 +7,9 @@ import weco.catalogue.internal_model.image._
 import weco.catalogue.internal_model.locations.{
   AccessCondition,
   DigitalLocation,
+  License,
   Location,
+  LocationType,
   PhysicalLocation
 }
 import weco.catalogue.internal_model.matcher.MatcherResult
@@ -33,14 +35,21 @@ object Implicits {
   implicit val _decSourceIdentifier: Decoder[SourceIdentifier] = deriveConfiguredDecoder
   implicit val _decCanonicalId: Decoder[CanonicalId] = deriveConfiguredDecoder
 
-  implicit val _dec03: Decoder[IdState.Unminted] = deriveConfiguredDecoder
-  implicit val _dec04: Decoder[IdState.Minted] = deriveConfiguredDecoder
+  implicit val _decIdStateIdentified: Decoder[IdState.Identified] = deriveConfiguredDecoder
+  implicit val _decIdStateIdentifiable: Decoder[IdState.Identifiable] = deriveConfiguredDecoder
+  implicit val _decIdStateUnminted: Decoder[IdState.Unminted] = deriveConfiguredDecoder
+  implicit val _decIdStateMinted: Decoder[IdState.Minted] = deriveConfiguredDecoder
+
   implicit val _dec05: Decoder[InstantRange] = deriveConfiguredDecoder
-  implicit val _dec06: Decoder[DigitalLocation] =
+  
+  implicit val _decLicense: Decoder[License] = deriveConfiguredDecoder
+  implicit val _decLocationType: Decoder[LocationType] = deriveConfiguredDecoder
+  implicit val _decDigitalLocation: Decoder[DigitalLocation] =
     deriveConfiguredDecoder
-  implicit val _dec07: Decoder[PhysicalLocation] =
+  implicit val _decPhysicalLocation: Decoder[PhysicalLocation] =
     deriveConfiguredDecoder
-  implicit val _dec08: Decoder[Location] = deriveConfiguredDecoder
+  implicit val _decLocation: Decoder[Location] = deriveConfiguredDecoder
+
   implicit val _dec11: Decoder[MergeCandidate[IdState.Identifiable]] =
     deriveConfiguredDecoder
   implicit val _dec12: Decoder[MergeCandidate[IdState.Identified]] =
@@ -96,10 +105,6 @@ object Implicits {
     deriveConfiguredDecoder
   implicit val _dec41: Decoder[Contributor[IdState.Minted]] =
     deriveConfiguredDecoder
-  implicit val _dec42: Decoder[ImageData[IdState.Identifiable]] =
-    deriveConfiguredDecoder
-  implicit val _dec43: Decoder[ImageData[IdState.Identified]] =
-    deriveConfiguredDecoder
 
   implicit val _decFormat: Decoder[Format] = deriveConfiguredDecoder
   implicit val _decHoldings: Decoder[Holdings] = deriveConfiguredDecoder
@@ -111,7 +116,16 @@ object Implicits {
 
   implicit val _decDerivedWorkData: Decoder[DerivedWorkData] =
     deriveConfiguredDecoder
-  
+  implicit val _decInferredData: Decoder[InferredData] =
+    deriveConfiguredDecoder
+  implicit val _decDerivedImageData: Decoder[DerivedImageData] =
+    deriveConfiguredDecoder
+
+  implicit val _decImageDataIdentifiable: Decoder[ImageData[IdState.Identifiable]] =
+    deriveConfiguredDecoder
+  implicit val _decImageDataIdentified: Decoder[ImageData[IdState.Identified]] =
+    deriveConfiguredDecoder
+
   implicit val _dec45: Decoder[WorkData[DataState.Unidentified]] =
     deriveConfiguredDecoder
   implicit val _dec46: Decoder[WorkData[DataState.Identified]] =
@@ -205,14 +219,21 @@ object Implicits {
   implicit val _encSourceIdentifier: Encoder[SourceIdentifier] = deriveConfiguredEncoder
   implicit val _encCanonicalId: Encoder[CanonicalId] = deriveConfiguredEncoder
 
-  implicit val _enc03: Encoder[IdState.Unminted] = deriveConfiguredEncoder
-  implicit val _enc04: Encoder[IdState.Minted] = deriveConfiguredEncoder
+  implicit val _encIdStateIdentified: Encoder[IdState.Identified] = deriveConfiguredEncoder
+  implicit val _encIdStateIdentifiable: Encoder[IdState.Identifiable] = deriveConfiguredEncoder
+  implicit val _encIdStateUnminted: Encoder[IdState.Unminted] = deriveConfiguredEncoder
+  implicit val _encIdStateMinted: Encoder[IdState.Minted] = deriveConfiguredEncoder
+  
   implicit val _enc05: Encoder[InstantRange] = deriveConfiguredEncoder
-  implicit val _enc06: Encoder[DigitalLocation] =
+
+  implicit val _encLicense: Encoder[License] = deriveConfiguredEncoder
+  implicit val _encLocationType: Encoder[LocationType] = deriveConfiguredEncoder
+  implicit val _encDigitalLocation: Encoder[DigitalLocation] =
     deriveConfiguredEncoder
-  implicit val _enc07: Encoder[PhysicalLocation] =
+  implicit val _encPhysicalLocation: Encoder[PhysicalLocation] =
     deriveConfiguredEncoder
-  implicit val _enc08: Encoder[Location] = deriveConfiguredEncoder
+  implicit val _encLocation: Encoder[Location] = deriveConfiguredEncoder
+  
   implicit val _enc11
     : Encoder[MergeCandidate[ImageData[IdState.Identifiable]]] =
     deriveConfiguredEncoder
@@ -269,10 +290,6 @@ object Implicits {
     deriveConfiguredEncoder
   implicit val _enc41: Encoder[Contributor[IdState.Minted]] =
     deriveConfiguredEncoder
-  implicit val _enc42: Encoder[ImageData[IdState.Identifiable]] =
-    deriveConfiguredEncoder
-  implicit val _enc43: Encoder[ImageData[IdState.Identified]] =
-    deriveConfiguredEncoder
 
   implicit val _encFormat: Encoder[Format] = deriveConfiguredEncoder
   implicit val _encHoldings: Encoder[Holdings] = deriveConfiguredEncoder
@@ -282,7 +299,16 @@ object Implicits {
   implicit val _encRelation: Encoder[Relation] = deriveConfiguredEncoder
   implicit val _encRelations: Encoder[Relations] = deriveConfiguredEncoder
 
-  implicit val _encDerivedWorkData: Encoder[DerivedWorkData] =
+  implicit val _envDerivedWorkData: Encoder[DerivedWorkData] =
+    deriveConfiguredEncoder
+  implicit val _envInferredData: Encoder[InferredData] =
+    deriveConfiguredEncoder
+  implicit val _envDerivedImageData: Encoder[DerivedImageData] =
+    deriveConfiguredEncoder
+
+  implicit val _envImageDataIdentifiable: Encoder[ImageData[IdState.Identifiable]] =
+    deriveConfiguredEncoder
+  implicit val _envImageDataIdentified: Encoder[ImageData[IdState.Identified]] =
     deriveConfiguredEncoder
   
   implicit val _enc45: Encoder[WorkData[DataState.Unidentified]] =
