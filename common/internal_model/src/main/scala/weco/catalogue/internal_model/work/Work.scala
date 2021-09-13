@@ -156,7 +156,7 @@ object WorkState {
   case class Source(
     sourceIdentifier: SourceIdentifier,
     sourceModifiedTime: Instant,
-    internalWorks: List[Work[Source]]
+    internalWorks: List[Work.Visible[Source]] = Nil
   ) extends WorkState {
 
     type WorkDataState = DataState.Unidentified
@@ -172,7 +172,7 @@ object WorkState {
     sourceIdentifier: SourceIdentifier,
     canonicalId: CanonicalId,
     sourceModifiedTime: Instant,
-    internalWorks: List[Work.Visible[Identified]]
+    internalWorks: List[Work.Visible[Identified]] = Nil
   ) extends WorkState {
 
     type WorkDataState = DataState.Identified
