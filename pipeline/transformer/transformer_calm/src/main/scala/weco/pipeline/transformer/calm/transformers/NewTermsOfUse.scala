@@ -6,6 +6,7 @@ import weco.catalogue.source_model.calm.CalmRecord
 import weco.pipeline.transformer.calm.models.CalmRecordOps
 
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 object NewTermsOfUse {
   def apply(
@@ -13,10 +14,20 @@ object NewTermsOfUse {
     status: Option[AccessStatus],
     closedUntil: Option[LocalDate],
     restrictedUntil: Option[LocalDate]
-  ): Option[TermsOfUse] =
-    (conditions, status, closedUntil, restrictedUntil) match {
+  ): Option[TermsOfUse] = {
+    val text = (conditions, status, closedUntil, restrictedUntil) match {
       // There's no useful information to build the note.
       case (None, None, None, None) => None
+
+      // All we have is the free-form access condition text.
+      case (Some(conditions), None, None, None) =>
+        Some(conditions)
+
+      // All we have is a date.
+      case (None, None, Some(closedUntil), None) =>
+        Some(s"Closed until ${closedUntil.format(displayFormat)}.")
+      case (None, None, None, Some(restrictedUntil)) =>
+        Some(s"Restricted until ${restrictedUntil.format(displayFormat)}.")
 
       case _ =>
         println(s"conditions = $conditions")
@@ -25,6 +36,14 @@ object NewTermsOfUse {
         println(s"restrictedUntil = $restrictedUntil")
         throw new Throwable("Unhandled!")
     }
+
+    text.map(TermsOfUse)
+  }
+
+  // e.g. 1 January 2021
+  //
+  // This is the format used for dates on wellcomecollection.org.
+  private val displayFormat = DateTimeFormatter.ofPattern("d MMMM yyyy")
 }
 
 object NewCalmTermsOfUse extends CalmRecordOps {
@@ -32,7 +51,11 @@ object NewCalmTermsOfUse extends CalmRecordOps {
     NewTermsOfUse(
       conditions = calmRecord.get("AccessConditions"),
       status = CalmAccessStatus(calmRecord),
-      closedUntil = calmRecord.get("ClosedUntil").map(LocalDate.parse),
-      restrictedUntil = calmRecord.get("UserDate1").map(LocalDate.parse)
+      closedUntil = calmRecord.get("ClosedUntil").map(parseAsDate),
+      restrictedUntil = calmRecord.get("UserDate1").map(parseAsDate)
     )
+
+  // e.g. parsing dates "01/01/2039"
+  private def parseAsDate(s: String): LocalDate =
+    LocalDate.parse(s, DateTimeFormatter.ofPattern("d/M/yyyy"))
 }

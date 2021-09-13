@@ -2,11 +2,12 @@ package weco.pipeline.transformer.calm.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import weco.catalogue.internal_model.work.TermsOfUse
 import weco.catalogue.source_model.calm.CalmRecord
 import weco.catalogue.source_model.generators.CalmRecordGenerators
 import weco.json.JsonUtil._
 
-import java.time.Instant
+import java.time.{Instant, LocalDate}
 import scala.util.{Success, Try}
 import scala.io.AnsiColor._
 
@@ -36,10 +37,35 @@ class NewTermsOfUseTest extends AnyFunSpec with Matchers with CalmRecordGenerato
 
     println(s"*** total = ${handled + unhandled}, unhandled = $unhandled")
   }
-  
+
   it("returns nothing if there's no data to make a note") {
     val termsOfUse = NewTermsOfUse(conditions = None, status = None, closedUntil = None, restrictedUntil = None)
 
     termsOfUse shouldBe None
   }
+
+  it("returns the conditions if that's all we have") {
+    val termsOfUse = NewTermsOfUse(conditions = Some("RAMC/1218/1/2 is awaiting conservation treatment and is currently unfit for production."), status = None, closedUntil = None, restrictedUntil = None)
+
+    termsOfUse shouldBe Some(TermsOfUse("RAMC/1218/1/2 is awaiting conservation treatment and is currently unfit for production."))
+  }
+
+  it("returns the date if that's all we have") {
+    val closedTermsOfUse = NewTermsOfUse(conditions = None, status = None, closedUntil = Some(LocalDate.of(2001, 1, 1)), restrictedUntil = None)
+    closedTermsOfUse shouldBe Some(TermsOfUse("Closed until 1 January 2001."))
+
+    val restrictedTermsOfUse = NewTermsOfUse(conditions = None, status = None, closedUntil = None, restrictedUntil = Some(LocalDate.of(2002, 2, 2)))
+    restrictedTermsOfUse shouldBe Some(TermsOfUse("Restricted until 2 February 2002."))
+  }
+
+  describe("NewCalmTermsOfUse") {
+    it("parses the date in a Calm record") {
+      val record = createCalmRecordWith(
+        ("ClosedUntil", "01/01/2097")
+      )
+
+      NewCalmTermsOfUse(record) shouldBe Some(TermsOfUse("Closed until 1 January 2097."))
+    }
+  }
 }
+
