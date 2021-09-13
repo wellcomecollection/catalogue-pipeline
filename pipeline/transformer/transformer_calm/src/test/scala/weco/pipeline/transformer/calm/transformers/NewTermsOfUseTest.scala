@@ -36,4 +36,10 @@ class NewTermsOfUseTest extends AnyFunSpec with Matchers with CalmRecordGenerato
 
     println(s"*** total = ${handled + unhandled}, unhandled = $unhandled")
   }
+  
+  it("returns nothing if there's no data to make a note") {
+    val termsOfUse = NewTermsOfUse(conditions = None, status = None, closedUntil = None, restrictedUntil = None)
+
+    termsOfUse shouldBe None
+  }
 }

@@ -15,6 +15,9 @@ object NewTermsOfUse {
     restrictedUntil: Option[LocalDate]
   ): Option[TermsOfUse] =
     (conditions, status, closedUntil, restrictedUntil) match {
+      // There's no useful information to build the note.
+      case (None, None, None, None) => None
+
       case _ =>
         println(s"conditions = $conditions")
         println(s"status = $status")
