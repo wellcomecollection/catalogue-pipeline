@@ -31,13 +31,15 @@ object NewTermsOfUse {
 
       // If we have conditions and a status, we append the status if and only if the
       // status isn't repeated in the conditions.
-      case (Some(conditions), Some(status), None, None) if conditions.toLowerCase.contains(status.label.toLowerCase) =>
+      case (Some(conditions), Some(status), None, None)
+          if conditions.toLowerCase.contains(status.label.toLowerCase) =>
         Some(s"$conditions.")
       case (Some(conditions), Some(status), None, None) =>
         Some(s"$conditions. ${status.label}.")
 
       // Add the "closed until" date if it's not included in the free text.
-      case (Some(conditions), None, Some(closedUntil), None) if !conditions.toLowerCase.contains("closed until") =>
+      case (Some(conditions), None, Some(closedUntil), None)
+          if !conditions.toLowerCase.contains("closed until") =>
         Some(s"$conditions. Closed until ${closedUntil.format(displayFormat)}.")
 
       case _ =>

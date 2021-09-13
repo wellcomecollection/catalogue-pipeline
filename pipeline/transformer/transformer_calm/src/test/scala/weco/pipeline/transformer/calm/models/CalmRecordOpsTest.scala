@@ -4,7 +4,11 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.source_model.generators.CalmRecordGenerators
 
-class CalmRecordOpsTest extends AnyFunSpec with Matchers with CalmRecordGenerators with CalmRecordOps {
+class CalmRecordOpsTest
+    extends AnyFunSpec
+    with Matchers
+    with CalmRecordGenerators
+    with CalmRecordOps {
   it("skips values which are just whitespace") {
     val record = createCalmRecordWith(("AccessConditions", "  "))
 
