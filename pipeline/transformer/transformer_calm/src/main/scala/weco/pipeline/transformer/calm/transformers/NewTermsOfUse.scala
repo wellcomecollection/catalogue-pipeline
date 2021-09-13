@@ -29,6 +29,17 @@ object NewTermsOfUse {
       case (None, None, None, Some(restrictedUntil)) =>
         Some(s"Restricted until ${restrictedUntil.format(displayFormat)}.")
 
+      // If we have conditions and a status, we append the status if and only if the
+      // status isn't repeated in the conditions.
+      case (Some(conditions), Some(status), None, None) if conditions.toLowerCase.contains(status.label.toLowerCase) =>
+        Some(s"$conditions.")
+      case (Some(conditions), Some(status), None, None) =>
+        Some(s"$conditions. ${status.label}.")
+
+      // Add the "closed until" date if it's not included in the free text.
+      case (Some(conditions), None, Some(closedUntil), None) if !conditions.toLowerCase.contains("closed until") =>
+        Some(s"$conditions. Closed until ${closedUntil.format(displayFormat)}.")
+
       case _ =>
         println(s"conditions = $conditions")
         println(s"status = $status")
@@ -37,7 +48,12 @@ object NewTermsOfUse {
         throw new Throwable("Unhandled!")
     }
 
-    text.map(TermsOfUse)
+    text
+      .map(
+        // Replace any double full stops
+        _.replace("..", ".")
+      )
+      .map(TermsOfUse)
   }
 
   // e.g. 1 January 2021

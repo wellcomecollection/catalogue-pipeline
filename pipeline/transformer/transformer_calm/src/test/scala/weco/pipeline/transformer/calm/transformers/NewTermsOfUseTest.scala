@@ -2,6 +2,7 @@ package weco.pipeline.transformer.calm.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import weco.catalogue.internal_model.locations.AccessStatus
 import weco.catalogue.internal_model.work.TermsOfUse
 import weco.catalogue.source_model.calm.CalmRecord
 import weco.catalogue.source_model.generators.CalmRecordGenerators
@@ -56,6 +57,39 @@ class NewTermsOfUseTest extends AnyFunSpec with Matchers with CalmRecordGenerato
 
     val restrictedTermsOfUse = NewTermsOfUse(conditions = None, status = None, closedUntil = None, restrictedUntil = Some(LocalDate.of(2002, 2, 2)))
     restrictedTermsOfUse shouldBe Some(TermsOfUse("Restricted until 2 February 2002."))
+  }
+
+  it("appends the closed until date if it's not in the body of the condition") {
+    val termsOfUse = NewTermsOfUse(
+      conditions = Some("This item is closed and cannot be accessed."),
+      status = None,
+      closedUntil = Some(LocalDate.of(2071, 1, 1)),
+      restrictedUntil = None
+    )
+
+    termsOfUse shouldBe Some(TermsOfUse("This item is closed and cannot be accessed. Closed until 1 January 2071."))
+  }
+
+  it("combines the conditions and the status if the status doesn't contain the conditions") {
+    val termsOfUse = NewTermsOfUse(
+      conditions = Some("For preservation reasons this item cannot be produced to readers. Queries regarding access should be directed to the Archives and Manuscripts department"),
+      status = Some(AccessStatus.ByAppointment),
+      closedUntil = None,
+      restrictedUntil = None
+    )
+
+    termsOfUse shouldBe Some(TermsOfUse("For preservation reasons this item cannot be produced to readers. Queries regarding access should be directed to the Archives and Manuscripts department. By appointment."))
+  }
+
+  it("skips repeating the status if it's in the body of the conditions") {
+    val termsOfUse = NewTermsOfUse(
+      conditions = Some("Access to some of the material in this sub-series is restricted or closed. See the description of each item for further information."),
+      status = Some(AccessStatus.Restricted),
+      closedUntil = None,
+      restrictedUntil = None
+    )
+
+    termsOfUse shouldBe Some(TermsOfUse("Access to some of the material in this sub-series is restricted or closed. See the description of each item for further information."))
   }
 
   describe("NewCalmTermsOfUse") {
