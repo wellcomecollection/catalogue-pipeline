@@ -100,8 +100,12 @@ object Implicits {
     deriveConfiguredDecoder
   implicit val _dec43: Decoder[ImageData[IdState.Identified]] =
     deriveConfiguredDecoder
-  implicit val _dec44: Decoder[CollectionPath] =
+    
+  implicit val _decWorkType: Decoder[WorkType] = deriveConfiguredDecoder
+  implicit val _decCollectionPath: Decoder[CollectionPath] =
     deriveConfiguredDecoder
+  implicit val _decRelation: Decoder[Relation] = deriveConfiguredDecoder  
+  
   implicit val _dec45: Decoder[WorkData[DataState.Unidentified]] =
     deriveConfiguredDecoder
   implicit val _dec46: Decoder[WorkData[DataState.Identified]] =
@@ -258,8 +262,12 @@ object Implicits {
     deriveConfiguredEncoder
   implicit val _enc43: Encoder[ImageData[IdState.Identified]] =
     deriveConfiguredEncoder
-  implicit val _enc44: Encoder[CollectionPath] =
+
+  implicit val _encWorkType: Encoder[WorkType] = deriveConfiguredEncoder
+  implicit val _encCollectionPath: Encoder[CollectionPath] =
     deriveConfiguredEncoder
+  implicit val _encRelation: Encoder[Relation] = deriveConfiguredEncoder
+  
   implicit val _enc45: Encoder[WorkData[DataState.Unidentified]] =
     deriveConfiguredEncoder
   implicit val _enc46: Encoder[WorkData[DataState.Identified]] =
