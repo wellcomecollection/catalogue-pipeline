@@ -4,6 +4,8 @@ import io.circe.Encoder
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import org.scanamo.generic.auto._
+import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType
 import weco.akka.fixtures.Akka
 import weco.catalogue.source_model.MetsSourcePayload
 import weco.catalogue.source_model.generators.MetsSourceDataGenerators
@@ -15,7 +17,9 @@ import weco.messaging.fixtures.SQS.QueuePair
 import weco.messaging.memory.MemoryMessageSender
 import weco.messaging.sns.NotificationMessage
 import weco.pipeline.mets_adapter.models._
+import weco.storage.fixtures.DynamoFixtures
 import weco.storage.store.VersionedStore
+import weco.storage.store.dynamo.DynamoSingleVersionStore
 import weco.storage.store.memory.MemoryVersionedStore
 import weco.storage.{Identified, Version}
 
@@ -23,6 +27,7 @@ import java.time.Instant
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
+import scala.language.higherKinds
 import scala.util.{Failure, Try}
 
 class MetsAdapterWorkerServiceTest
@@ -32,7 +37,8 @@ class MetsAdapterWorkerServiceTest
     with SQS
     with Eventually
     with IntegrationPatience
-    with MetsSourceDataGenerators {
+    with MetsSourceDataGenerators
+    with DynamoFixtures {
 
   val bag = Bag(
     info = BagInfo("external-identifier"),
@@ -95,6 +101,64 @@ class MetsAdapterWorkerServiceTest
             Identified(expectedVersion, expectedData)
           )
         }
+    }
+  }
+
+  override def createTable(table: DynamoFixtures.Table): DynamoFixtures.Table =
+    createTableWithHashKey(table, keyName = "id", keyType = ScalarAttributeType.S)
+
+  it("can receive the same update twice") {
+    // DynamoDB can only handle second-level precision, so if we get a bag that has
+    // a millisecond-level timestamp, we need to handle the fact that the createdDate
+    // is going to be truncated.
+    val createdDate = Instant.parse("2001-01-01T01:01:01.123456Z")
+
+    val expectedDataWithMilliseconds: MetsSourceData =
+      expectedData.copy(createdDate = createdDate)
+
+    val bagRetrieverWithMilliseconds =
+      new BagRetriever {
+        def getBag(space: String, externalIdentifier: String): Future[Bag] =
+          Future.successful(bag.copy(createdDate = createdDate))
+      }
+
+    withLocalDynamoDbTable { table =>
+      val store = new DynamoSingleVersionStore[String, MetsSourceData](
+        createDynamoConfigWith(table)
+      )
+
+      withWorkerService(bagRetrieverWithMilliseconds, store) {
+        case (_, QueuePair(queue, dlq), messageSender) =>
+          sendNotificationToSQS(queue, notification)
+
+          eventually {
+            assertQueueEmpty(queue)
+            assertQueueEmpty(dlq)
+          }
+
+          sendNotificationToSQS(queue, notification)
+
+          eventually {
+            assertQueueEmpty(queue)
+            assertQueueEmpty(dlq)
+
+            messageSender.messages should have size 2
+
+            messageSender.getMessages[Version[String, Int]]().distinct shouldBe Seq(
+              expectedVersion)
+            messageSender.getMessages[MetsSourcePayload].distinct shouldBe Seq(
+              MetsSourcePayload(
+                id = expectedVersion.id,
+                version = expectedVersion.version,
+                sourceData = expectedDataWithMilliseconds
+              )
+            )
+
+            store.getLatest(id = externalIdentifier) shouldBe Right(
+              Identified(expectedVersion, expectedDataWithMilliseconds)
+            )
+          }
+      }
     }
   }
 
