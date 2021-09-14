@@ -69,7 +69,7 @@ class MetsAdapterWorkerServiceTest
 
   val expectedVersion = Version(externalIdentifier, version = 1)
 
-  val expectedData: MetsSourceData = createMetsSourceDataWith(
+  val expectedData = createMetsSourceDataWith(
     bucket = bag.location.bucket,
     path = bag.location.path,
     file = "mets.xml",
@@ -118,7 +118,7 @@ class MetsAdapterWorkerServiceTest
     // original timestamp.
     val createdDate = Instant.parse("2001-01-01T01:01:01.123456Z")
 
-    val expectedDataWithMilliseconds: MetsSourceData =
+    val expectedDataWithMilliseconds =
       expectedData.copy(createdDate = createdDate)
 
     val bagRetrieverWithMilliseconds =
