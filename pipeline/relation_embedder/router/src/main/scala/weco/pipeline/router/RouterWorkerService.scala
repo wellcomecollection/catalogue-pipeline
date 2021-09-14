@@ -43,12 +43,13 @@ class RouterWorkerService[MsgDestination](
       // to repopulate them in the relation embedder.
       // We don't expect TEI works to have a collectionPath field populated.
       case (None, relations) =>
-        Success(
-          List(work.transition[Denormalised]((relations, Set.empty))))
-      case (Some(CollectionPath(path, _)), relations) if relations == Relations.none  =>
+        Success(List(work.transition[Denormalised]((relations, Set.empty))))
+      case (Some(CollectionPath(path, _)), relations)
+          if relations == Relations.none =>
         pathsMsgSender.send(path).map(_ => Nil)
-      case (collectionPath, relations) => Failure(
-        new RuntimeException(s"collectionPath: $collectionPath and relations: $relations are both populated in ${work.state.id}. This shouldn't be possible"))
+      case (collectionPath, relations) =>
+        Failure(new RuntimeException(
+          s"collectionPath: $collectionPath and relations: $relations are both populated in ${work.state.id}. This shouldn't be possible"))
     }
   }
 

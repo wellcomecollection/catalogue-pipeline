@@ -8,7 +8,12 @@ import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.catalogue.internal_model.work.{Item, Work, WorkData, WorkState}
 import weco.pipeline.merger.logging.MergerLogging
 import weco.pipeline.merger.models
-import weco.pipeline.merger.models.{FieldMergeResult, ImageDataWithSource, MergeResult, MergerOutcome}
+import weco.pipeline.merger.models.{
+  FieldMergeResult,
+  ImageDataWithSource,
+  MergeResult,
+  MergerOutcome
+}
 import weco.pipeline.merger.rules._
 
 /*
@@ -237,7 +242,8 @@ object PlatformMerger extends Merger {
           }
         )
 
-  private def addItemsToInternalWorks(items: List[Item[IdState.Minted]], work: Work.Visible[Identified]) = {
+  private def addItemsToInternalWorks(items: List[Item[IdState.Minted]],
+                                      work: Work.Visible[Identified]) = {
     // Inteernal works are in TEI works. If they are merged with Sierra, we want the Sierra
     // items to be added to TEI internal works so that the user can request the item
     // containing that work without having to find the wrapping work.
