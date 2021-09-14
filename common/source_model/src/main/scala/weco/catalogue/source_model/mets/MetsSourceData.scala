@@ -28,12 +28,13 @@ case class MetsFileWithImages(
   // as equal if their createdDates are at the same second.
   override def equals(other: Any): Boolean =
     other match {
-      case m: MetsFileWithImages if
-        m.root == root &&
-        m.filename == filename &&
-        m.manifestations == manifestations &&
-        m.createdDate.getEpochSecond == createdDate.getEpochSecond &&
-        m.version == version => true
+      case m: MetsFileWithImages
+          if m.root == root &&
+            m.filename == filename &&
+            m.manifestations == manifestations &&
+            m.createdDate.getEpochSecond == createdDate.getEpochSecond &&
+            m.version == version =>
+        true
       case _ => false
     }
 }
@@ -48,9 +49,10 @@ case class DeletedMetsFile(
   // as equal if their createdDates are at the same second.
   override def equals(other: Any): Boolean =
     other match {
-      case d: DeletedMetsFile if
-        d.createdDate.getEpochSecond == createdDate.getEpochSecond &&
-        d.version == version => true
+      case d: DeletedMetsFile
+          if d.createdDate.getEpochSecond == createdDate.getEpochSecond &&
+            d.version == version =>
+        true
       case _ => false
     }
 }

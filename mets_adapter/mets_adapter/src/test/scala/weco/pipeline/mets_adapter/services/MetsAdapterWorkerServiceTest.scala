@@ -105,7 +105,10 @@ class MetsAdapterWorkerServiceTest
   }
 
   override def createTable(table: DynamoFixtures.Table): DynamoFixtures.Table =
-    createTableWithHashKey(table, keyName = "id", keyType = ScalarAttributeType.S)
+    createTableWithHashKey(
+      table,
+      keyName = "id",
+      keyType = ScalarAttributeType.S)
 
   it("can receive the same update twice") {
     // DynamoDB can only handle second-level precision, so if we get a bag that has
@@ -146,8 +149,9 @@ class MetsAdapterWorkerServiceTest
 
             messageSender.messages should have size 2
 
-            messageSender.getMessages[Version[String, Int]]().distinct shouldBe Seq(
-              expectedVersion)
+            messageSender
+              .getMessages[Version[String, Int]]()
+              .distinct shouldBe Seq(expectedVersion)
             messageSender.getMessages[MetsSourcePayload].distinct shouldBe Seq(
               MetsSourcePayload(
                 id = expectedVersion.id,
