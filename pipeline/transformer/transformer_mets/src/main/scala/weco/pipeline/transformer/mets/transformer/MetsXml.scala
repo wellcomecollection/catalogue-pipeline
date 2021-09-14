@@ -45,33 +45,6 @@ case class MetsXml(root: Elem) {
     }
   }
 
-  /** The title is encoded in the METS.  For example:
-    *
-    * <mets:dmdSec ID="DMDLOG_0000">
-    *   <mets:mdWrap MDTYPE="MODS">
-    *     <mets:xmlData>
-    *       <mods:mods>
-    *         <mods:titleInfo>
-    *           <mods:title>Reduction and treatment of a fracture of the calcaneus</mods:title>
-    *         </mods:titleInfo>
-    *       </mods:mods>
-    *     </mets:xmlData>
-    *   </mets:mdWrap>
-    * </mets:dmdSec>
-    *
-    * The title is "Reduction and treatment of a fracture of the calcaneus"
-    */
-  def title: Either[Exception, String] = {
-    val titleNodes =
-      (root \\ "dmdSec" \ "mdWrap" \\ "titleInfo" \ "title").toList.distinct
-
-    titleNodes match {
-      case Seq(node) => Right(node.text)
-      case _ =>
-        Left(new Exception("Could not parse title from METS XML"))
-    }
-  }
-
   /** For licenses we are interested with the access condition with type `dz`.
     *  For example:
     *
