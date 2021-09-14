@@ -91,6 +91,20 @@ class TeiDataParserTest
         description = None,
         languages = Nil))
   }
+  it("parses a tei xml and returns TeiData with bNumber") {
+
+    TeiDataParser.parse(
+      TeiXml(
+        id,
+        teiXml(id = id, identifiers = Some(sierraIdentifiers(bnumber)))
+          .toString()).right.get) shouldBe Right(
+      TeiData(
+        id = id,
+        title = "test title",
+        bNumber = Some(bnumber),
+        description = None,
+        languages = Nil))
+  }
   it("fails parsing if there's more than one bnumber node") {
 
     val xml = <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id={id}>

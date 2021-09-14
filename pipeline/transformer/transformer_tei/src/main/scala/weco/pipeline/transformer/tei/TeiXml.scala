@@ -5,11 +5,7 @@ import scala.xml.{Elem, Node, XML}
 import grizzled.slf4j.Logging
 
 class TeiXml(val xml: Elem) extends Logging {
-  val id: String = xml.attributes
-    .collectFirst {
-      case metadata if metadata.key == "id" => metadata.value.text.trim
-    }
-    .getOrElse(throw new RuntimeException(s"Could not find an id in XML!"))
+  val id: String = extractId(xml)
 
   /**
     * All the identifiers of the TEI file are in a `msIdentifier` bloc.
@@ -78,7 +74,7 @@ class TeiXml(val xml: Elem) extends Logging {
     val msItemNodes = (xml \\ "msDesc" \ "msContents" \ "msItem").toList
     msItemNodes match {
       case List(itemNode) if (itemNode \ "title").nonEmpty =>
-        getTitleFromSingleItem(itemNode).left.flatMap { ex =>
+        getTitleFromItem(itemNode).left.flatMap { ex =>
           warn("Not able to extract title from item", ex)
           getTitleFromTitleStmt
         }
@@ -86,6 +82,20 @@ class TeiXml(val xml: Elem) extends Logging {
         getTitleFromTitleStmt
     }
   }
+
+  def nestedTeiData:Either[Throwable, Seq[TeiData]] = Try((xml \\ "msDesc" \ "msContents" \ "msItem").map{ node =>
+      val title = (node \ "title").text
+    val itemId = extractId(node)
+    TeiData(id = itemId, title = title)
+    }).toEither
+
+
+
+  private def extractId(node: Node) = node.attributes
+    .collectFirst {
+      case metadata if metadata.key == "id" => metadata.value.text.trim
+    }
+    .getOrElse(throw new RuntimeException(s"Could not find an id in XML!"))
 
   /**
     * In an XML like this:
@@ -128,7 +138,7 @@ class TeiXml(val xml: Elem) extends Logging {
     *              <title xml:lang="ar-Latn-x-lc" key="work_3001">Al-Qānūn fī al-ṭibb</title>
     * extract the title from the msItem, so "Al-Qānūn fī al-ṭibb" in the example.
     */
-  private def getTitleFromSingleItem(itemNode: Node) = {
+  private def getTitleFromItem(itemNode: Node) = {
     val titleNodes = (itemNode \ "title").toList
     titleNodes match {
       case List(titleNode) => Right(titleNode.text)

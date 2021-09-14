@@ -30,9 +30,9 @@ object TeiDataParser {
 
 case class TeiData(id: String,
                    title: String,
-                   bNumber: Option[String],
-                   description: Option[String],
-                   languages: List[Language]) {
+                   bNumber: Option[String] = None,
+                   description: Option[String] = None,
+                   languages: List[Language] = Nil) {
   def toWork(time: Instant, version: Int): Work[Source] = {
     val maybeBnumber = bNumber
       .flatMap { id =>

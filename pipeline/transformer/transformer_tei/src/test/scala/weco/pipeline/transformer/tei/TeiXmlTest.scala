@@ -124,4 +124,24 @@ class TeiXmlTest extends AnyFunSpec with Matchers with TeiGenerators {
     result shouldBe a[Left[_, _]]
     result.left.get.getMessage should include("title")
   }
+
+  it("extracts internal works"){
+    val firstItemTitle = "this is first item title"
+    val secondItemTitle = "this is second item title"
+    val firstItemId = s"${id}_1"
+    val firstItem = msItem(firstItemId, List(originalItemTitle(firstItemTitle)))
+    val secondItemId = s"${id}_2"
+    val secondItem = msItem(secondItemId, List(originalItemTitle(secondItemTitle)))
+    val result = TeiXml(
+      id,
+      teiXml(
+        id = id,
+        items = List(firstItem, secondItem)
+      ).toString()
+    ).flatMap(_.nestedTeiData)
+
+    result shouldBe a[Right[_,_]]
+    result.right.get shouldBe Seq(TeiData(id = firstItemId, title= firstItemTitle), TeiData(id = secondItemId, title = secondItemTitle))
+  }
+
 }
