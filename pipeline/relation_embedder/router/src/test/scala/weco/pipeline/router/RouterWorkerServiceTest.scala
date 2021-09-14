@@ -15,6 +15,7 @@ import weco.pipeline_storage.memory.{MemoryIndexer, MemoryRetriever}
 import scala.collection.mutable
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
 
 class RouterWorkerServiceTest
     extends AnyFunSpec
@@ -123,7 +124,7 @@ class RouterWorkerServiceTest
                            retriever: Retriever[Work[Merged]])(
     testWith: TestWith[(QueuePair, MemoryMessageSender, MemoryMessageSender),
                        R]): R =
-    withLocalSqsQueuePair() {
+    withLocalSqsQueuePair(visibilityTimeout = 1 second) {
       case q @ QueuePair(queue, _) =>
         val worksMessageSender = new MemoryMessageSender
         val pathsMessageSender = new MemoryMessageSender
