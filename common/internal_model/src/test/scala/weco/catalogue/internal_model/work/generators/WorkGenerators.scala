@@ -34,7 +34,10 @@ trait WorkGenerators
     sourceModifiedTime: Instant = instantInLast30Days
   ): Work.Visible[Source] =
     Work.Visible[Source](
-      state = Source(sourceIdentifier, sourceModifiedTime),
+      state = Source(
+        sourceIdentifier = sourceIdentifier,
+        sourceModifiedTime = sourceModifiedTime,
+        internalWorks = Nil),
       data = initData,
       version = createVersion
     )
@@ -42,7 +45,8 @@ trait WorkGenerators
   def mergedWork(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     canonicalId: CanonicalId = createCanonicalId,
-    modifiedTime: Instant = instantInLast30Days
+    modifiedTime: Instant = instantInLast30Days,
+    relations: Relations = Relations.none
   ): Work.Visible[Merged] = {
     val data = initData[DataState.Identified]
     Work.Visible[Merged](
@@ -51,7 +55,8 @@ trait WorkGenerators
         canonicalId = canonicalId,
         mergedTime = modifiedTime,
         sourceModifiedTime = modifiedTime,
-        availabilities = Availabilities.forWorkData(data)
+        availabilities = Availabilities.forWorkData(data),
+        relations = relations
       ),
       data = data,
       version = createVersion
@@ -88,7 +93,8 @@ trait WorkGenerators
       state = Identified(
         sourceIdentifier = sourceIdentifier,
         canonicalId = canonicalId,
-        sourceModifiedTime = sourceModifiedTime
+        sourceModifiedTime = sourceModifiedTime,
+        internalWorks = Nil
       ),
       data = initData,
       version = createVersion
@@ -270,6 +276,17 @@ trait WorkGenerators
         work.version,
         nextData,
         implicitly[UpdateState[State]].apply(work.state, nextData)
+      )
+    }
+
+    def mapState(
+      f: State => State
+    ): Work.Visible[State] = {
+      val nextState = f(work.state)
+      Work.Visible[State](
+        work.version,
+        work.data,
+        nextState
       )
     }
   }

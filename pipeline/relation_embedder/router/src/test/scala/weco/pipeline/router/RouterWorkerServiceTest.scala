@@ -7,7 +7,7 @@ import weco.messaging.fixtures.SQS.QueuePair
 import weco.messaging.memory.MemoryMessageSender
 import weco.catalogue.internal_model.work.WorkState.{Denormalised, Merged}
 import weco.catalogue.internal_model.work.generators.WorkGenerators
-import weco.catalogue.internal_model.work.{CollectionPath, Relations, Work}
+import weco.catalogue.internal_model.work.{CollectionPath, Relation, Relations, Work}
 import weco.pipeline_storage.{Indexer, Retriever}
 import weco.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 import weco.pipeline_storage.memory.{MemoryIndexer, MemoryRetriever}
@@ -65,6 +65,28 @@ class RouterWorkerServiceTest
           indexer.index should contain(
             work.id -> work.transition[Denormalised](
               (Relations.none, Set.empty)))
+        }
+    }
+  }
+
+  it("a work with relations and collection path is error"){
+    val work = mergedWork(relations = Relations(children = List(Relation(work = mergedWork(), depth = 1, numChildren = 0, numDescendents = 0)))).collectionPath(CollectionPath("a"))
+    val indexer = new MemoryIndexer[Work[Denormalised]]()
+
+    val retriever = new MemoryRetriever[Work[Merged]](
+      index = mutable.Map(work.id -> work)
+    )
+
+    withWorkerService(indexer, retriever) {
+      case (QueuePair(queue, dlq), worksMessageSender, pathsMessageSender) =>
+        sendNotificationToSQS(queue = queue, body = work.id)
+
+        eventually {
+          assertQueueEmpty(queue)
+          assertQueueHasSize(dlq,1)
+          worksMessageSender.messages shouldBe empty
+          pathsMessageSender.messages shouldBe empty
+          indexer.index shouldBe empty
         }
     }
   }
