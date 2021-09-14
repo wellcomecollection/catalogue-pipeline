@@ -41,6 +41,12 @@ def get_index_internal_model_versions(sess, *, pipeline_date, index_name):
     )
     host = get_secret_value(sess, secret_id=f"{secret_prefix}/public_host")
 
+    # If the index has a suffix letter like 'works-indexed-2021-08-16a', remove
+    # that before querying the pipeline-storage cluster.
+    #
+    # Alternatively we could look at the API cluster, but that's more effort.
+    index_name = index_name.rstrip("abcde")
+
     resp = httpx.get(f"https://{host}:9243/{index_name}", auth=(username, password))
     resp.raise_for_status()
 
