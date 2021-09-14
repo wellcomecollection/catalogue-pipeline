@@ -28,7 +28,7 @@ object ExampleTransformer extends Transformer[ExampleData] with WorkGenerators {
       case ValidExampleData(id, title) =>
         Right(
           Work.Visible[Source](
-            state = Source(id, modifiedTime, List()),
+            state = Source(id, modifiedTime),
             data = WorkData(
               title = Some(s"ID: $id / title=$title")
             ),

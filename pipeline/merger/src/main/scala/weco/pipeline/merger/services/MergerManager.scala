@@ -19,6 +19,9 @@ trait MergerManager {
     val modifiedWorks = preMergeModify(works)
     if (works.size == maybeWorks.size) {
       val result = mergerRules.merge(modifiedWorks)
+      // TEI works can have internal works, which are added to
+      // resultWorks by the Merger, so the number of resulting works can be
+      // greater than modifiedWorks.size
       assert(result.resultWorks.size >= modifiedWorks.size)
       result
     } else
