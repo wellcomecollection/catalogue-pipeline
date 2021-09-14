@@ -7,6 +7,7 @@ import weco.catalogue.source_model.mets.{
   MetsSourceData
 }
 import weco.pipeline.transformer.Transformer
+import weco.pipeline.transformer.mets.transformers.MetsTitle
 import weco.pipeline.transformer.result.Result
 import weco.storage.Identified
 import weco.storage.s3.S3ObjectLocation
@@ -49,7 +50,7 @@ class MetsXmlTransformer(store: Readable[S3ObjectLocation, String])
     root: MetsXml): Result[InvisibleMetsData] =
     for {
       id <- root.recordIdentifier
-      title <- root.title
+      title <- MetsTitle(root.root)
       accessConditionDz <- root.accessConditionDz
       accessConditionStatus <- root.accessConditionStatus
       accessConditionUsage <- root.accessConditionUsage
@@ -69,7 +70,7 @@ class MetsXmlTransformer(store: Readable[S3ObjectLocation, String])
     manifestations: List[S3ObjectLocation]): Result[InvisibleMetsData] =
     for {
       id <- root.recordIdentifier
-      title <- root.title
+      title <- MetsTitle(root.root)
       firstManifestation <- getFirstManifestation(root, manifestations)
       accessConditionDz <- firstManifestation.accessConditionDz
       accessConditionStatus <- firstManifestation.accessConditionStatus

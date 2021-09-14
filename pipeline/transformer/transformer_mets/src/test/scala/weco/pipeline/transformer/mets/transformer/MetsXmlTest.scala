@@ -19,10 +19,6 @@ class MetsXmlTest
     MetsXml(xml).value.recordIdentifier shouldBe Right("b30246039")
   }
 
-  it("finds the title") {
-    MetsXml(xml).value.title shouldBe Right("[Report 1942] /")
-  }
-
   it("does not parse a mets if recordIdentifier is outside of dmdSec element") {
     MetsXml(xmlNodmdSec).recordIdentifier shouldBe a[Left[_, _]]
   }
