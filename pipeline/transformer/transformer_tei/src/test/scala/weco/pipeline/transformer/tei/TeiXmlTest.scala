@@ -8,7 +8,12 @@ import weco.sierra.generators.SierraIdentifierGenerators
 
 import scala.xml.Elem
 
-class TeiXmlTest extends AnyFunSpec with Matchers with EitherValues with SierraIdentifierGenerators with TeiGenerators {
+class TeiXmlTest
+    extends AnyFunSpec
+    with Matchers
+    with EitherValues
+    with SierraIdentifierGenerators
+    with TeiGenerators {
   val id = "manuscript_15651"
 
   it(
@@ -197,13 +202,14 @@ class TeiXmlTest extends AnyFunSpec with Matchers with EitherValues with SierraI
     }
   }
 
-  it("extracts internal works"){
+  it("extracts internal works") {
     val firstItemTitle = "this is first item title"
     val secondItemTitle = "this is second item title"
     val firstItemId = s"${id}_1"
     val firstItem = msItem(firstItemId, List(originalItemTitle(firstItemTitle)))
     val secondItemId = s"${id}_2"
-    val secondItem = msItem(secondItemId, List(originalItemTitle(secondItemTitle)))
+    val secondItem =
+      msItem(secondItemId, List(originalItemTitle(secondItemTitle)))
     val result = TeiXml(
       id,
       teiXml(
@@ -212,8 +218,10 @@ class TeiXmlTest extends AnyFunSpec with Matchers with EitherValues with SierraI
       ).toString()
     ).flatMap(_.nestedTeiData)
 
-    result shouldBe a[Right[_,_]]
-    result.right.get shouldBe Seq(TeiData(id = firstItemId, title= firstItemTitle), TeiData(id = secondItemId, title = secondItemTitle))
+    result shouldBe a[Right[_, _]]
+    result.right.get shouldBe Seq(
+      TeiData(id = firstItemId, title = firstItemTitle),
+      TeiData(id = secondItemId, title = secondItemTitle))
   }
 
 }

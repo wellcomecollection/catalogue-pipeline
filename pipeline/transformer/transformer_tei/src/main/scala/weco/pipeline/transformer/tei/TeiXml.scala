@@ -83,19 +83,19 @@ class TeiXml(val xml: Elem) extends Logging {
     }
   }
 
-  def nestedTeiData:Either[Throwable, Seq[TeiData]] = Try((xml \\ "msDesc" \ "msContents" \ "msItem").map{ node =>
+  def nestedTeiData: Either[Throwable, Seq[TeiData]] =
+    Try((xml \\ "msDesc" \ "msContents" \ "msItem").map { node =>
       val title = (node \ "title").text
-    val itemId = extractId(node)
-    TeiData(id = itemId, title = title)
+      val itemId = extractId(node)
+      TeiData(id = itemId, title = title)
     }).toEither
 
-
-
-  private def extractId(node: Node) = node.attributes
-    .collectFirst {
-      case metadata if metadata.key == "id" => metadata.value.text.trim
-    }
-    .getOrElse(throw new RuntimeException(s"Could not find an id in XML!"))
+  private def extractId(node: Node) =
+    node.attributes
+      .collectFirst {
+        case metadata if metadata.key == "id" => metadata.value.text.trim
+      }
+      .getOrElse(throw new RuntimeException(s"Could not find an id in XML!"))
 
   /**
     * In an XML like this:
