@@ -110,7 +110,9 @@ class MetsAdapterWorkerServiceTest
   it("can receive the same update twice") {
     // DynamoDB can only handle second-level precision, so if we get a bag that has
     // a millisecond-level timestamp, we need to handle the fact that the createdDate
-    // is going to be truncated.
+    // is going to be truncated.  In particular, we need to be able to double-send
+    // the message and not fail when the truncated timestamp is different from the
+    // original timestamp.
     val createdDate = Instant.parse("2001-01-01T01:01:01.123456Z")
 
     val expectedDataWithMilliseconds: MetsSourceData =
