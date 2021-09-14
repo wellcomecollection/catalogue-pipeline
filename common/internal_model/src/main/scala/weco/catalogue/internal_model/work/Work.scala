@@ -151,12 +151,26 @@ sealed trait WorkState {
   def id: String
 }
 
+object InternalWork {
+  // todo: explain why we don't just use Work[Source] because BOOM RECURSION
+  case class Source(
+    sourceIdentifier: SourceIdentifier,
+    workData: WorkData[DataState.Unidentified]
+  )
+
+  case class Identified(
+    sourceIdentifier: SourceIdentifier,
+    canonicalId: CanonicalId,
+    workData: WorkData[DataState.Identified]
+  )
+}
+
 object WorkState {
 
   case class Source(
     sourceIdentifier: SourceIdentifier,
     sourceModifiedTime: Instant,
-    internalWorks: List[Work.Visible[Source]] = Nil
+    internalWorkStubs: List[InternalWork.Source] = Nil
   ) extends WorkState {
 
     type WorkDataState = DataState.Unidentified
@@ -172,7 +186,7 @@ object WorkState {
     sourceIdentifier: SourceIdentifier,
     canonicalId: CanonicalId,
     sourceModifiedTime: Instant,
-    internalWorks: List[Work.Visible[Identified]] = Nil
+    internalWorkStubs: List[InternalWork.Identified] = Nil
   ) extends WorkState {
 
     type WorkDataState = DataState.Identified
@@ -182,6 +196,20 @@ object WorkState {
     val relations = Relations.none
 
     override val modifiedTime: Instant = sourceModifiedTime
+
+    def internalWorksWith(version: Int): List[Work.Visible[Identified]] =
+      internalWorkStubs.map {
+        case InternalWork.Identified(sourceIdentifier, canonicalId, data) =>
+          Work.Visible[Identified](
+            version = version,
+            data = data,
+            state = WorkState.Identified(
+              sourceIdentifier = sourceIdentifier,
+              canonicalId = canonicalId,
+              sourceModifiedTime = sourceModifiedTime
+            )
+          )
+      }
   }
 
   case class Merged(

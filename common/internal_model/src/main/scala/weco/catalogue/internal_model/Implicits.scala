@@ -201,6 +201,11 @@ object Implicits {
   implicit val _decAvailability: Decoder[Availability] =
     Availability.availabilityDecoder
 
+  implicit val _decInternalWorkSource: Decoder[InternalWork.Source] =
+    deriveConfiguredDecoder
+  implicit val _decInternalWorkIdentified: Decoder[InternalWork.Identified] =
+    deriveConfiguredDecoder
+
   implicit val _decWorkStateSource: Decoder[WorkState.Source] =
     deriveConfiguredDecoder
   implicit val _decWorkStateMerged: Decoder[WorkState.Merged] =
@@ -453,7 +458,7 @@ object Implicits {
   implicit val _encWorkDataUnidentified
     : Encoder[WorkData[DataState.Unidentified]] =
     deriveConfiguredEncoder
-  implicit val _envWorkDataIdentified: Encoder[WorkData[DataState.Identified]] =
+  implicit val _encWorkDataIdentified: Encoder[WorkData[DataState.Identified]] =
     deriveConfiguredEncoder
 
   implicit val _encInvisibilityReason: Encoder[InvisibilityReason] =
@@ -461,8 +466,13 @@ object Implicits {
   implicit val _encDeletedReason: Encoder[DeletedReason] =
     deriveConfiguredEncoder
 
-  implicit val _envAvailability: Encoder[Availability] =
+  implicit val _encAvailability: Encoder[Availability] =
     Availability.availabilityEncoder
+
+  implicit val _encInternalWorkSource: Encoder[InternalWork.Source] =
+    deriveConfiguredEncoder
+  implicit val _encInternalWorkIdentified: Encoder[InternalWork.Identified] =
+    deriveConfiguredEncoder
 
   implicit val _encWorkStateSource: Encoder[WorkState.Source] =
     deriveConfiguredEncoder

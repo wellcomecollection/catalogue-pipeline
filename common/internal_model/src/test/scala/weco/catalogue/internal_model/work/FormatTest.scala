@@ -3,7 +3,8 @@ package weco.catalogue.internal_model.work
 import enumeratum.scalacheck._
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
-import weco.json.JsonUtil._
+import weco.catalogue.internal_model.Implicits._
+import weco.json.JsonUtil.{fromJson, toJson}
 import weco.json.utils.JsonAssertions
 
 class FormatTest
