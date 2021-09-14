@@ -358,7 +358,7 @@ class MetsAdapterWorkerServiceTest
                         MemoryMessageSender),
                        R]): R =
     withActorSystem { implicit actorSystem =>
-      withLocalSqsQueuePair(visibilityTimeout = 1.second) {
+      withLocalSqsQueuePair(visibilityTimeout = 2 seconds) {
         case QueuePair(queue, dlq) =>
           withSQSStream[NotificationMessage, R](queue) { stream =>
             val workerService = new MetsAdapterWorkerService(
