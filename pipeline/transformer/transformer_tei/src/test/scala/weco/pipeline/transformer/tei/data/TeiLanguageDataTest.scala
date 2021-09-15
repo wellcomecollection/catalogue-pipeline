@@ -66,9 +66,9 @@ class TeiLanguageDataTest
     xmlPaths.foreach { p =>
       val xml = XML.load(new FileInputStream(p.toAbsolutePath.toString))
 
-      val textLangNodes = TeiLanguages.findNodes(xml) match {
-        case Success(nodes) => nodes
-        case Failure(err) =>
+      val textLangNodes = TeiLanguages.parseLanguages((xml)) match {
+        case Right(nodes) => nodes
+        case Left(err) =>
           println(s"$p: error while reading <textLang> nodes: $err")
           Seq[(String, String)]()
       }

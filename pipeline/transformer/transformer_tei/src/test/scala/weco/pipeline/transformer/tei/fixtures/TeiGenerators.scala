@@ -3,7 +3,7 @@ package weco.pipeline.transformer.tei.fixtures
 import org.scalatest.Suite
 import weco.fixtures.RandomGenerators
 
-import scala.xml.{Elem, NodeSeq, XML}
+import scala.xml.{Elem, NodeSeq}
 
 trait TeiGenerators extends RandomGenerators { this: Suite =>
   def sierraIdentifiers(bnumber: String) =
@@ -18,9 +18,15 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
   def itemTitle(str: String) = <title>{str}</title>
   def originalItemTitle(str: String) = <title type="original">{str}</title>
 
-  def msItem(id: String, titles: List[Elem] = Nil) =
+  def mainLanguage(id: String, label: String) =
+    <textLang mainLang={id} source="IANA">{label}</textLang>
+  def otherLanguage(id: String, label: String) =
+    <textLang otherLangs={id} source="IANA">{label}</textLang>
+
+  def msItem(id: String, titles: List[Elem] = Nil, languages: List[Elem] = Nil) =
     <msItem xml:id={id}>
       {titles}
+      {languages}
     </msItem>
 
   def teiXml(
@@ -28,7 +34,7 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
     title: Elem = titleElem("test title"),
     identifiers: Option[Elem] = None,
     summary: Option[Elem] = None,
-    languages: List[String] = Nil,
+    languages: List[Elem] = Nil,
     items: List[Elem] = Nil
   ): Elem =
     <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id={id}>
@@ -42,7 +48,7 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
               </msIdentifier>
               <msContents>
                 {summary.getOrElse(NodeSeq.Empty)}
-                {languages.map(XML.loadString)}
+                {languages}
                 {items}
               </msContents>
             </msDesc>

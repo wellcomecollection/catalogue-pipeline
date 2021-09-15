@@ -3,6 +3,7 @@ package weco.pipeline.transformer.tei
 import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import weco.catalogue.internal_model.languages.Language
 import weco.pipeline.transformer.tei.fixtures.TeiGenerators
 import weco.sierra.generators.SierraIdentifierGenerators
 
@@ -267,6 +268,19 @@ class TeiXmlTest
 
     result shouldBe a[Left[_, _]]
     result.left.value shouldBe a[RuntimeException]
+  }
+
+  it("can parse language in items"){
+    val id = "id1"
+    val firstItem = msItem(id, List(originalItemTitle("")), List(mainLanguage("sa", "Sanskrit")))
+    val result =for {
+      parsed <- TeiXml(id, teiXml(id = id, items = List(firstItem)).toString())
+      nestedData<- parsed.nestedTeiData
+    }yield nestedData.head.languages
+
+    result shouldBe a[Right[_, _]]
+    result.value shouldBe List(
+      Language(id = "san", label = "Sanskrit"))
   }
 
 }

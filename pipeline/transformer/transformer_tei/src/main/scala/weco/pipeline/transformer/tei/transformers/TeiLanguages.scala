@@ -2,30 +2,37 @@ package weco.pipeline.transformer.tei.transformers
 
 import weco.catalogue.internal_model.languages.Language
 import weco.pipeline.transformer.result.Result
-import weco.pipeline.transformer.tei.TeiXml
 import weco.pipeline.transformer.tei.data.TeiLanguageData
 
-import scala.util.{Failure, Success, Try}
-import scala.xml.Elem
+import scala.util.Try
+import scala.xml.{Elem, NodeSeq}
 
 object TeiLanguages {
 
+  def apply(xml: Elem): Result[List[Language]] = parseLanguages(xml \\ "msDesc" \ "msContents" ).map { languages =>
+
+    languages.map {
+      case (id, label) =>
+        TeiLanguageData(id = id, label = label).get
+    }.toList
+  }
+
   /** The languages of the TEI are in `textLang` nodes under `msContents`.
-    *
-    * <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id={id}>
-    *  <teiHeader>
-    *    <fileDesc>
-    *      <sourceDesc>
-    *        <msDesc xml:lang="en" xml:id="MS_Arabic_1">
-    *          <msContents>
-    *            <textLang mainLang={id} source="IANA">{label}</textLang>
-    *
-    * This function extracts all the nodes from a parsed XML and returns
-    * a list of (id, label) pairs.
-    */
-  def findNodes(xml: Elem): Try[Seq[(String, String)]] =
+   *
+   * <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id={id}>
+   * <teiHeader>
+   * <fileDesc>
+   * <sourceDesc>
+   * <msDesc xml:lang="en" xml:id="MS_Arabic_1">
+   * <msContents>
+   * <textLang mainLang={id} source="IANA">{label}</textLang>
+   *
+   * This function extracts all the nodes from a parsed XML and returns
+   * a list of (id, label) pairs.
+   */
+  def parseLanguages(value: NodeSeq): Either[Throwable, Seq[(String, String)]] =
     Try {
-      (xml \\ "msDesc" \ "msContents" \ "textLang").flatMap { n =>
+      (value \ "textLang").flatMap { n =>
         val label = n.text
 
         val mainLangId = (n \@ "mainLang").toLowerCase
@@ -42,24 +49,8 @@ object TeiLanguages {
 
         (langId, label) match {
           case (Some(id), label) if label.trim.nonEmpty => Some((id, label))
-          case _                                        => None
+          case _ => None
         }
       }
-    }
-
-  def apply(teiXml: TeiXml): Result[List[Language]] =
-    apply(teiXml.xml)
-
-  def apply(xml: Elem): Result[List[Language]] =
-    findNodes(xml) match {
-      case Success(languages) =>
-        Right(
-          languages.map {
-            case (id, label) =>
-              TeiLanguageData(id = id, label = label).get
-          }.toList
-        )
-
-      case Failure(err) => Left(err)
-    }
+    }.toEither
 }
