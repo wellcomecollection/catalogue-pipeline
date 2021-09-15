@@ -135,6 +135,16 @@ class TeiXmlTest
   }
 
   describe("bNumber") {
+    it("parses a tei xml and returns TeiData with bNumber") {
+      val bnumber = createSierraBibNumber.withCheckDigit
+
+
+        TeiXml(
+          id,
+          teiXml(id = id, identifiers = Some(sierraIdentifiers(bnumber)))
+            .toString()).value.bNumber.value shouldBe Some(bnumber)
+    }
+
     it("fails if there's more than one b-number in the XML") {
       val bnumber = createSierraBibNumber.withCheckDigit
 
@@ -173,7 +183,7 @@ class TeiXmlTest
           .toString()
       ).value
 
-      xml.summary.value shouldBe "a manuscript about stuff"
+      xml.summary.value shouldBe Some("a manuscript about stuff")
     }
 
     it("fails parsing if there's more than one summary node") {
