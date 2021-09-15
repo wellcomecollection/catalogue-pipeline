@@ -15,7 +15,6 @@ class SierraAccessStatusTest
 
   val testCases = Table(
     ("text", "expectedStatus"),
-    ("Unrestricted online access", AccessStatus.Open),
     ("Restricted", AccessStatus.Restricted),
     ("Restricted.", AccessStatus.Restricted),
     ("Restricted .", AccessStatus.Restricted),
