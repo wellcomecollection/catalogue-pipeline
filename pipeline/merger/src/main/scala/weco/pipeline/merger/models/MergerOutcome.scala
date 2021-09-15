@@ -28,7 +28,6 @@ case class MergerOutcome(resultWorks: Seq[Work[Identified]],
     imagesWithSources.map {
       case ImageDataWithSource(imageData, source) =>
         Image[Initial](
-          version = imageData.version,
           locations = imageData.locations,
           source = source,
           modifiedTime = modifiedTime,

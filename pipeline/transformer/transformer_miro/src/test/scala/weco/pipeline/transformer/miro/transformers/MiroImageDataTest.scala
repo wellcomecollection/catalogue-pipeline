@@ -28,8 +28,7 @@ class MiroImageDataTest
           useRestrictions = Some("CC-0"),
           sourceCode = Some("FDN")
         ),
-        overrides = MiroSourceOverrides.empty,
-        version = 1
+        overrides = MiroSourceOverrides.empty
       )
 
       imageData shouldBe ImageData[IdState.Identifiable](
@@ -40,7 +39,6 @@ class MiroImageDataTest
             value = "B0011308"
           )
         ),
-        version = 1,
         locations = List(
           DigitalLocation(
             url = "https://iiif.wellcomecollection.org/image/B0011308/info.json",
@@ -61,8 +59,7 @@ class MiroImageDataTest
 
       val imageData1 = transformer.getImageData(
         miroRecord = miroRecord,
-        overrides = MiroSourceOverrides.empty,
-        version = 1
+        overrides = MiroSourceOverrides.empty
       )
 
       imageData1.locations.head.license shouldBe Some(License.CC0)
@@ -71,8 +68,7 @@ class MiroImageDataTest
         miroRecord = miroRecord,
         overrides = MiroSourceOverrides(
           license = Some(License.InCopyright)
-        ),
-        version = 1
+        )
       )
 
       imageData2.locations.head.license shouldBe Some(License.InCopyright)
