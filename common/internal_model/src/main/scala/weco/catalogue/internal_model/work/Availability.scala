@@ -91,12 +91,12 @@ object Availabilities {
     // See https://github.com/wellcomecollection/platform/issues/5190
     def isInOtherLibrary: Boolean =
       n match {
-        case t: TermsOfUse => termsAreOtherInstitution(t)
-        case _             => false
+        case Note.TermsOfUse(termsOfUse) => termsAreOtherInstitution(termsOfUse)
+        case _                           => false
       }
 
-    def termsAreOtherInstitution(termsOfUse: TermsOfUse): Boolean =
-      termsOfUse.content match {
+    def termsAreOtherInstitution(termsOfUse: String): Boolean = {
+      termsOfUse match {
         case t if t.toLowerCase.contains("available at") => true
         case t if t.toLowerCase.contains("available by appointment at") =>
           true
@@ -113,6 +113,7 @@ object Availabilities {
 
         case _ => false
       }
+    }
   }
 
   private def when[T](condition: Boolean)(result: T): Option[T] =
