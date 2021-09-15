@@ -12,7 +12,7 @@ object ImagesIndexConfig extends IndexConfigFields {
   val initial = IndexConfig(emptyDynamicFalseMapping, analysis)
   val augmented = IndexConfig(emptyDynamicFalseMapping, analysis)
 
-  val ingested = IndexConfig(
+  val indexed = IndexConfig(
     {
       val inferredData = objectField("inferredData").fields(
         DenseVectorField("features1", dims = 2048),

@@ -28,7 +28,7 @@ class ImagesIndexerTest
         new ElasticIndexer[Image[ImageState.Augmented]](
           elasticClient,
           index,
-          ImagesIndexConfig.ingested)
+          ImagesIndexConfig.indexed)
       val image = createImageData.toAugmentedImage
       whenReady(imagesIndexer(List(image))) { r =>
         r.isRight shouldBe true
@@ -44,7 +44,7 @@ class ImagesIndexerTest
         new ElasticIndexer[Image[ImageState.Augmented]](
           elasticClient,
           index,
-          ImagesIndexConfig.ingested)
+          ImagesIndexConfig.indexed)
       val images = (1 to 5).map(_ => createImageData.toAugmentedImage)
       whenReady(imagesIndexer(images)) { r =>
         r.isRight shouldBe true
@@ -60,7 +60,7 @@ class ImagesIndexerTest
         new ElasticIndexer[Image[ImageState.Augmented]](
           elasticClient,
           index,
-          ImagesIndexConfig.ingested)
+          ImagesIndexConfig.indexed)
       val image = createImageData.toAugmentedImage
       val newerImage =
         image.copy(
@@ -84,7 +84,7 @@ class ImagesIndexerTest
         new ElasticIndexer[Image[ImageState.Augmented]](
           elasticClient,
           index,
-          ImagesIndexConfig.ingested)
+          ImagesIndexConfig.indexed)
       val image = createImageData.toAugmentedImage
       val olderImage =
         image.copy(

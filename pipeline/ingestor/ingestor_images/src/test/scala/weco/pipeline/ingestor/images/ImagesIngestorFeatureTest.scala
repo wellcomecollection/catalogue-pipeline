@@ -37,7 +37,7 @@ class ImagesIngestorFeatureTest
             val indexer = new ElasticIndexer[Image[Indexed]](
               elasticClient,
               index,
-              ImagesIndexConfig.ingested)
+              ImagesIndexConfig.indexed)
             withWorkerService(
               queue,
               retriever,
@@ -66,7 +66,7 @@ class ImagesIngestorFeatureTest
             val indexer = new ElasticIndexer[Image[Indexed]](
               elasticClient,
               index,
-              ImagesIndexConfig.ingested)
+              ImagesIndexConfig.indexed)
             val retriever = new ElasticSourceRetriever[Image[Augmented]](
               elasticClient,
               augmentedIndex
