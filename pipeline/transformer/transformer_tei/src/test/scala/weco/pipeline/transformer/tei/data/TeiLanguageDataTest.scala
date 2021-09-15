@@ -10,7 +10,6 @@ import java.io.FileInputStream
 import java.nio.file.{Files, Path, Paths}
 import java.util.stream.Collectors
 import scala.collection.JavaConverters._
-import scala.util.{Failure, Success}
 import scala.xml.XML
 
 class TeiLanguageDataTest
@@ -31,13 +30,13 @@ class TeiLanguageDataTest
   it("handles the test cases") {
     forAll(testCases) {
       case (id, label, expectedLanguage) =>
-        TeiLanguageData(id = id, label = label) shouldBe Success(
+        TeiLanguageData(id = id, label = label) shouldBe Right(
           expectedLanguage)
     }
   }
 
   it("fails if it sees an unexpected language") {
-    TeiLanguageData(id = "xyz", label = "???") shouldBe a[Failure[_]]
+    TeiLanguageData(id = "xyz", label = "???") shouldBe a[Left[_,_]]
   }
 
   /** This test is to help you find languages in the TEI files that aren't currently
@@ -66,22 +65,13 @@ class TeiLanguageDataTest
     xmlPaths.foreach { p =>
       val xml = XML.load(new FileInputStream(p.toAbsolutePath.toString))
 
-      val textLangNodes = TeiLanguages.parseLanguages((xml)) match {
+      TeiLanguages.parseLanguages((xml)) match {
         case Right(nodes) => nodes
         case Left(err) =>
           println(s"$p: error while reading <textLang> nodes: $err")
           Seq[(String, String)]()
       }
 
-      textLangNodes.foreach {
-        case (id, label) =>
-          TeiLanguageData(id = id, label = label) match {
-            case Success(_) => ()
-            case Failure(_) =>
-              println(
-                s"$p: Unable to map TEI <textLang> node id=$id label=$label")
-          }
-      }
     }
   }
 }

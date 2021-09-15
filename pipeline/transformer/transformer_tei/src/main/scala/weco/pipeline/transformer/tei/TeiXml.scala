@@ -5,6 +5,7 @@ import scala.xml.{Elem, Node, XML}
 import grizzled.slf4j.Logging
 import cats.syntax.traverse._
 import cats.instances.either._
+import weco.pipeline.transformer.tei.transformers.TeiLanguages
 class TeiXml(val xml: Elem) extends Logging {
   val id: String = getIdFrom(xml).getOrElse(throw new RuntimeException(s"Could not find an id in XML!"))
 
@@ -89,7 +90,8 @@ class TeiXml(val xml: Elem) extends Logging {
       for {
         title <- getTitleFromItem(node)
         id <- getIdFrom(node)
-      }yield TeiData(id = id, title = title)
+        languages <- TeiLanguages.parseLanguages(node)
+      }yield TeiData(id = id, title = title, languages = languages)
     }.toList.sequence
 
   private def getIdFrom(node: Node): Either[Throwable, String] =
