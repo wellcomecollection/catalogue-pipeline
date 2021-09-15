@@ -19,9 +19,8 @@ import weco.catalogue.internal_model.work.{Work, WorkState}
 trait IndexFixtures extends ElasticsearchFixtures { this: Suite =>
 
   def withLocalWorksIndex[R](testWith: TestWith[Index, R]): R =
-    withLocalElasticsearchIndex[R](config = WorksIndexConfig.ingested) {
-      index =>
-        testWith(index)
+    withLocalElasticsearchIndex[R](config = WorksIndexConfig.indexed) { index =>
+      testWith(index)
     }
 
   def withLocalIdentifiedWorksIndex[R](testWith: TestWith[Index, R]): R =
@@ -53,7 +52,7 @@ trait IndexFixtures extends ElasticsearchFixtures { this: Suite =>
     }
 
   def withLocalImagesIndex[R](testWith: TestWith[Index, R]): R =
-    withLocalElasticsearchIndex[R](config = ImagesIndexConfig.ingested) {
+    withLocalElasticsearchIndex[R](config = ImagesIndexConfig.indexed) {
       index =>
         testWith(index)
     }
@@ -124,7 +123,7 @@ trait IndexFixtures extends ElasticsearchFixtures { this: Suite =>
           val jsonDoc = toJson(image).get
 
           indexInto(index.name)
-            .version(image.version)
+            .version(image.modifiedTime.toEpochMilli)
             .versionType(ExternalGte)
             .id(image.id)
             .doc(jsonDoc)

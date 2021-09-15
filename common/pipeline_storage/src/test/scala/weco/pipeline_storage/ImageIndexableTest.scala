@@ -47,9 +47,9 @@ class ImageIndexableTest
           )
 
           whenReady(insertFuture) { result =>
-            assertIngestedImageIs(
+            assertIndexedImageIs(
               result = result,
-              ingestedImage = updatedModifiedTimeImage,
+              indexedImage = updatedModifiedTimeImage,
               index = index
             )
           }
@@ -69,9 +69,9 @@ class ImageIndexableTest
           )
 
           whenReady(insertFuture) { result =>
-            assertIngestedImageIs(
+            assertIndexedImageIs(
               result = result,
-              ingestedImage = originalImage,
+              indexedImage = originalImage,
               index = index
             )
           }
@@ -91,9 +91,9 @@ class ImageIndexableTest
           )
 
           whenReady(insertFuture) { result =>
-            assertIngestedImageIs(
+            assertIndexedImageIs(
               result = result,
-              ingestedImage = updatedLocationImage,
+              indexedImage = updatedLocationImage,
               index = index
             )
           }
@@ -101,13 +101,13 @@ class ImageIndexableTest
     }
   }
 
-  private def assertIngestedImageIs(
+  private def assertIndexedImageIs(
     result: Either[Seq[Image[ImageState.Indexed]],
                    Seq[Image[ImageState.Indexed]]],
-    ingestedImage: Image[ImageState.Indexed],
+    indexedImage: Image[ImageState.Indexed],
     index: Index): Seq[Assertion] = {
-    result.isRight shouldBe true
-    assertElasticsearchEventuallyHasImage(index, ingestedImage)
+    result shouldBe a[Right[_, _]]
+    assertElasticsearchEventuallyHasImage(index, indexedImage)
   }
 
   private def withImagesIndexAndIndexer[R](
@@ -116,7 +116,7 @@ class ImageIndexableTest
       val indexer = new ElasticIndexer[Image[ImageState.Indexed]](
         elasticClient,
         index,
-        ImagesIndexConfig.ingested)
+        ImagesIndexConfig.indexed)
       testWith((index, indexer))
     }
 }

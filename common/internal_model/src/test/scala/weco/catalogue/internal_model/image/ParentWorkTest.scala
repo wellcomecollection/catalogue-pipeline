@@ -5,7 +5,7 @@ import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.generators.ImageGenerators
 
 class ParentWorkTest extends AnyFunSpec with Matchers with ImageGenerators {
-  import ParentWork._
+  import ImageSource.ParentWork._
 
   describe("toParentWork") {
     it("removes the imageData from a merged work") {
