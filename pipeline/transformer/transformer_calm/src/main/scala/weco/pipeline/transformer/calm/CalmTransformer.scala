@@ -2,7 +2,6 @@ package weco.pipeline.transformer.calm
 
 import grizzled.slf4j.Logging
 import weco.catalogue.internal_model.identifiers._
-import weco.catalogue.internal_model.locations.UnknownAccessStatus
 import weco.catalogue.internal_model.parse.PeriodParser
 import weco.catalogue.internal_model.work.DeletedReason.{
   DeletedFromSource,
