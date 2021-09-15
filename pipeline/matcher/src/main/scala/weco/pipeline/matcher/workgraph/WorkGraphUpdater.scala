@@ -9,30 +9,30 @@ import weco.pipeline.matcher.models.{
   VersionExpectedConflictException,
   VersionUnexpectedConflictException,
   WorkGraph,
-  WorkLinks,
+  WorkStub,
   WorkNode
 }
 
 object WorkGraphUpdater extends Logging {
-  def update(links: WorkLinks, existingGraph: WorkGraph): WorkGraph = {
-    checkVersionConflicts(links, existingGraph)
-    doUpdate(links, existingGraph)
+  def update(work: WorkStub, existingGraph: WorkGraph): WorkGraph = {
+    checkVersionConflicts(work, existingGraph)
+    doUpdate(work, existingGraph)
   }
 
-  private def checkVersionConflicts(links: WorkLinks,
+  private def checkVersionConflicts(work: WorkStub,
                                     existingGraph: WorkGraph): Unit = {
-    val maybeExistingNode = existingGraph.nodes.find(_.id == links.workId)
+    val maybeExistingNode = existingGraph.nodes.find(_.id == work.id)
     maybeExistingNode match {
       case Some(WorkNode(_, Some(existingVersion), linkedIds, _)) =>
-        if (existingVersion > links.version) {
+        if (existingVersion > work.version) {
           val versionConflictMessage =
-            s"update failed, work:${links.workId} v${links.version} is not newer than existing work v$existingVersion"
+            s"update failed, work:${work.id} v${work.version} is not newer than existing work v$existingVersion"
           debug(versionConflictMessage)
           throw VersionExpectedConflictException(versionConflictMessage)
         }
-        if (existingVersion == links.version && links.referencedWorkIds != linkedIds.toSet) {
+        if (existingVersion == work.version && work.referencedWorkIds != linkedIds.toSet) {
           val versionConflictMessage =
-            s"update failed, work:${links.workId} v${links.version} already exists with different content! update-ids:${links.referencedWorkIds} != existing-ids:${linkedIds.toSet}"
+            s"update failed, work:${work.id} v${work.version} already exists with different content! update-ids:${work.referencedWorkIds} != existing-ids:${linkedIds.toSet}"
           debug(versionConflictMessage)
           throw VersionUnexpectedConflictException(versionConflictMessage)
         }
@@ -40,7 +40,7 @@ object WorkGraphUpdater extends Logging {
     }
   }
 
-  private def doUpdate(workLinks: WorkLinks,
+  private def doUpdate(work: WorkStub,
                        existingGraph: WorkGraph): WorkGraph = {
 
     // Find everything that's in the existing graph, but which isn't
@@ -55,7 +55,7 @@ object WorkGraphUpdater extends Logging {
     // If we're updating work B, then this list will be (A C D E).
     //
     val linkedWorks =
-      existingGraph.nodes.filterNot(_.id == workLinks.workId)
+      existingGraph.nodes.filterNot(_.id == work.id)
 
     // Create a map (work ID) -> (version) for every work in the graph.
     //
@@ -64,7 +64,7 @@ object WorkGraphUpdater extends Logging {
     val workVersions: Map[CanonicalId, Int] =
       linkedWorks.collect {
         case WorkNode(id, Some(version), _, _) => (id, version)
-      }.toMap + (workLinks.workId -> workLinks.version)
+      }.toMap + (work.id -> work.version)
 
     // Create a list of all the connections between works in the graph.
     //
@@ -78,8 +78,8 @@ object WorkGraphUpdater extends Logging {
     //    otherLinks  = (A → B, B → C, B → D)
     //
     val updateLinks =
-      workLinks.referencedWorkIds.map {
-        workLinks.workId ~> _
+      work.referencedWorkIds.map {
+        work.id ~> _
       }
 
     val otherLinks =
@@ -95,7 +95,7 @@ object WorkGraphUpdater extends Logging {
       existingGraph.nodes
         .flatMap { node =>
           node.id +: node.linkedIds
-        } + workLinks.workId
+        } + work.id
 
     val g = Graph.from(edges = links, nodes = workIds)
 

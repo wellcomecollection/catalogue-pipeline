@@ -13,13 +13,13 @@ import weco.storage.locking.memory.{MemoryLockDao, MemoryLockingService}
 import weco.fixtures.TimeAssertions
 import weco.pipeline.matcher.exceptions.MatcherException
 import weco.pipeline.matcher.fixtures.MatcherFixtures
-import weco.pipeline.matcher.generators.WorkLinksGenerators
+import weco.pipeline.matcher.generators.WorkStubGenerators
 import weco.pipeline.matcher.models.{
   MatchedIdentifiers,
   MatcherResult,
   WorkGraph,
   WorkIdentifier,
-  WorkLinks,
+  WorkStub,
   WorkNode
 }
 import weco.pipeline.matcher.storage.WorkGraphStore
@@ -35,7 +35,7 @@ class WorkMatcherTest
     with ScalaFutures
     with MockitoSugar
     with EitherValues
-    with WorkLinksGenerators
+    with WorkStubGenerators
     with TimeAssertions {
 
   private val identifierA = createIdentifier("AAAAAAAA")
@@ -47,25 +47,25 @@ class WorkMatcherTest
     withWorkGraphTable { graphTable =>
       withWorkGraphStore(graphTable) { workGraphStore =>
         withWorkMatcher(workGraphStore) { workMatcher =>
-          val links = createWorkLinksWith(id = identifierA)
+          val work = createWorkStubWith(id = identifierA)
 
-          whenReady(workMatcher.matchWork(links)) { matcherResult =>
+          whenReady(workMatcher.matchWork(work)) { matcherResult =>
             assertRecent(matcherResult.createdTime)
             matcherResult.works shouldBe
               Set(MatchedIdentifiers(
-                Set(WorkIdentifier(links.workId, links.version))))
+                Set(WorkIdentifier(work.id, work.version))))
 
             val savedLinkedWork =
               get[WorkNode](dynamoClient, graphTable.name)(
-                "id" === links.workId)
+                "id" === work.id)
                 .map(_.right.value)
 
             savedLinkedWork shouldBe Some(
               WorkNode(
-                id = links.workId,
-                version = links.version,
+                id = work.id,
+                version = work.version,
                 linkedIds = Nil,
-                componentId = ciHash(links.workId)
+                componentId = ciHash(work.id)
               )
             )
           }
@@ -79,18 +79,18 @@ class WorkMatcherTest
     withWorkGraphTable { graphTable =>
       withWorkGraphStore(graphTable) { workGraphStore =>
         withWorkMatcher(workGraphStore) { workMatcher =>
-          val links = createWorkLinksWith(
+          val work = createWorkStubWith(
             id = identifierA,
             referencedIds = Set(identifierB)
           )
 
-          whenReady(workMatcher.matchWork(links)) { matcherResult =>
+          whenReady(workMatcher.matchWork(work)) { matcherResult =>
             assertRecent(matcherResult.createdTime)
             matcherResult.works shouldBe
               Set(
                 MatchedIdentifiers(
                   Set(
-                    WorkIdentifier(identifierA.canonicalId, links.version),
+                    WorkIdentifier(identifierA.canonicalId, work.version),
                     WorkIdentifier(identifierB.canonicalId, None))))
 
             val savedWorkNodes = scan[WorkNode](dynamoClient, graphTable.name)
@@ -99,7 +99,7 @@ class WorkMatcherTest
             savedWorkNodes should contain theSameElementsAs List(
               WorkNode(
                 id = identifierA.canonicalId,
-                version = links.version,
+                version = work.version,
                 linkedIds = List(identifierB.canonicalId),
                 componentId =
                   ciHash(identifierA.canonicalId, identifierB.canonicalId)
@@ -147,13 +147,13 @@ class WorkMatcherTest
           put(dynamoClient, graphTable.name)(existingWorkB)
           put(dynamoClient, graphTable.name)(existingWorkC)
 
-          val links = createWorkLinksWith(
+          val work = createWorkStubWith(
             id = identifierB,
             version = 2,
             referencedIds = Set(identifierC)
           )
 
-          whenReady(workMatcher.matchWork(links)) { matcherResult =>
+          whenReady(workMatcher.matchWork(work)) { matcherResult =>
             assertRecent(matcherResult.createdTime)
             matcherResult.works shouldBe
               Set(
@@ -212,11 +212,11 @@ class WorkMatcherTest
 
     withWorkGraphTable { graphTable =>
       withWorkGraphStore(graphTable) { workGraphStore =>
-        val links = createWorkLinks
+        val work = createWorkStub
 
         val workMatcher = new WorkMatcher(workGraphStore, lockingService)
 
-        val result = workMatcher.matchWork(links)
+        val result = workMatcher.matchWork(work)
 
         whenReady(result.failed) {
           _ shouldBe a[MatcherException]
@@ -241,7 +241,7 @@ class WorkMatcherTest
           )))
 
         whenReady(future) { _ =>
-          val links = createWorkLinksWith(
+          val work = createWorkStubWith(
             id = identifierA,
             referencedIds = Set(identifierB)
           )
@@ -263,7 +263,7 @@ class WorkMatcherTest
 
           val workMatcher = new WorkMatcher(workGraphStore, lockingService)
 
-          val result = workMatcher.matchWork(links)
+          val result = workMatcher.matchWork(work)
 
           whenReady(result.failed) {
             _ shouldBe a[MatcherException]
@@ -273,18 +273,18 @@ class WorkMatcherTest
     }
   }
 
-  it("fails if saving the updated links fails") {
+  it("fails if saving the updated work fails") {
     val mockWorkGraphStore = mock[WorkGraphStore]
     withWorkMatcher(mockWorkGraphStore) { workMatcher =>
       val expectedException = new RuntimeException("Failed to put")
-      when(mockWorkGraphStore.findAffectedWorks(any[WorkLinks]))
+      when(mockWorkGraphStore.findAffectedWorks(any[WorkStub]))
         .thenReturn(Future.successful(WorkGraph(Set.empty)))
       when(mockWorkGraphStore.put(any[WorkGraph]))
         .thenThrow(expectedException)
 
-      val links = createWorkLinks
+      val work = createWorkStub
 
-      whenReady(workMatcher.matchWork(links).failed) { actualException =>
+      whenReady(workMatcher.matchWork(work).failed) { actualException =>
         actualException shouldBe MatcherException(expectedException)
       }
     }
@@ -295,26 +295,26 @@ class WorkMatcherTest
       withWorkGraphStore(graphTable) { workGraphStore =>
         val spyStore = spy(workGraphStore)
 
-        val links = createWorkLinks
+        val work = createWorkStub
 
         withWorkMatcher(spyStore) { workMatcher =>
-          // Try to match the links more than once.  We have to match in sequence,
+          // Try to match the work more than once.  We have to match in sequence,
           // not in parallel, or the locking will block all but one of them from
           // doing anything non-trivial.
           val futures =
             workMatcher
-              .matchWork(links)
+              .matchWork(work)
               .flatMap { _ =>
-                workMatcher.matchWork(links)
+                workMatcher.matchWork(work)
               }
               .flatMap { _ =>
-                workMatcher.matchWork(links)
+                workMatcher.matchWork(work)
               }
               .flatMap { _ =>
-                workMatcher.matchWork(links)
+                workMatcher.matchWork(work)
               }
               .flatMap { _ =>
-                workMatcher.matchWork(links)
+                workMatcher.matchWork(work)
               }
 
           whenReady(futures) { _ =>

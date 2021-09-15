@@ -5,7 +5,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.pipeline.matcher.exceptions.MatcherException
 import weco.pipeline.matcher.fixtures.MatcherFixtures
-import weco.pipeline.matcher.generators.WorkLinksGenerators
+import weco.pipeline.matcher.generators.WorkStubGenerators
 import weco.pipeline.matcher.models.MatcherResult
 import weco.storage.locking.memory.{MemoryLockDao, MemoryLockingService}
 
@@ -18,7 +18,7 @@ class WorkMatcherConcurrencyTest
     with Matchers
     with MatcherFixtures
     with ScalaFutures
-    with WorkLinksGenerators {
+    with WorkStubGenerators {
 
   it("processes one of two conflicting concurrent updates and locks the other") {
     implicit val lockDao: MemoryLockDao[String, UUID] =
@@ -32,12 +32,12 @@ class WorkMatcherConcurrencyTest
         val identifierA = createIdentifier(canonicalId = "AAAAAAAA")
         val identifierB = createIdentifier(canonicalId = "BBBBBBBB")
 
-        val linksA = createWorkLinksWith(
+        val linksA = createWorkStubWith(
           id = identifierA,
           referencedIds = Set(identifierB)
         )
 
-        val linksB = createWorkLinksWith(
+        val linksB = createWorkStubWith(
           id = identifierB
         )
 

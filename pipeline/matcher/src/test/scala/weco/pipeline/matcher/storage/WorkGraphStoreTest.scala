@@ -8,7 +8,7 @@ import org.scalatest.funspec.AnyFunSpec
 import weco.catalogue.internal_model.generators.IdentifiersGenerators
 import weco.catalogue.internal_model.identifiers.CanonicalId
 import weco.pipeline.matcher.fixtures.MatcherFixtures
-import weco.pipeline.matcher.models.{WorkGraph, WorkLinks, WorkNode}
+import weco.pipeline.matcher.models.{WorkGraph, WorkStub, WorkNode}
 
 class WorkGraphStoreTest
     extends AnyFunSpec
@@ -27,7 +27,7 @@ class WorkGraphStoreTest
         withWorkGraphStore(graphTable) { workGraphStore =>
           whenReady(
             workGraphStore.findAffectedWorks(
-              WorkLinks(
+              WorkStub(
                 createCanonicalId,
                 version = 0,
                 referencedWorkIds = Set.empty))) { workGraph =>
@@ -38,7 +38,7 @@ class WorkGraphStoreTest
     }
 
     it(
-      "returns a WorkNode if it has no links and it's the only node in the setId") {
+      "returns a WorkNode if it has no works and it's the only node in the setId") {
       withWorkGraphTable { graphTable =>
         withWorkGraphStore(graphTable) { workGraphStore =>
           val work =
@@ -50,7 +50,7 @@ class WorkGraphStoreTest
           put(dynamoClient, graphTable.name)(work)
 
           whenReady(
-            workGraphStore.findAffectedWorks(WorkLinks(idA, 0, Set.empty))) {
+            workGraphStore.findAffectedWorks(WorkStub(idA, 0, Set.empty))) {
             workGraph =>
               workGraph shouldBe WorkGraph(Set(work))
           }
@@ -58,7 +58,7 @@ class WorkGraphStoreTest
       }
     }
 
-    it("returns a WorkNode and the links in the workUpdate") {
+    it("returns a WorkNode and the works in the workUpdate") {
       withWorkGraphTable { graphTable =>
         withWorkGraphStore(graphTable) { workGraphStore =>
           val workA =
@@ -77,7 +77,7 @@ class WorkGraphStoreTest
           put(dynamoClient, graphTable.name)(workB)
 
           whenReady(
-            workGraphStore.findAffectedWorks(WorkLinks(idA, 0, Set(idB)))) {
+            workGraphStore.findAffectedWorks(WorkStub(idA, 0, Set(idB)))) {
             workGraph =>
               workGraph.nodes shouldBe Set(workA, workB)
           }
@@ -85,7 +85,7 @@ class WorkGraphStoreTest
       }
     }
 
-    it("returns a WorkNode and the links in the database") {
+    it("returns a WorkNode and the works in the database") {
       withWorkGraphTable { graphTable =>
         withWorkGraphStore(graphTable) { workGraphStore =>
           val workA =
@@ -106,7 +106,7 @@ class WorkGraphStoreTest
 
           whenReady(
             workGraphStore.findAffectedWorks(
-              WorkLinks(idA, version = 0, referencedWorkIds = Set.empty))) {
+              WorkStub(idA, version = 0, referencedWorkIds = Set.empty))) {
             workGraph =>
               workGraph.nodes shouldBe Set(workA, workB)
           }
@@ -115,7 +115,7 @@ class WorkGraphStoreTest
     }
 
     it(
-      "returns a WorkNode and the links in the database more than one level down") {
+      "returns a WorkNode and the works in the database more than one level down") {
       withWorkGraphTable { graphTable =>
         withWorkGraphStore(graphTable) { workGraphStore =>
           val workA =
@@ -141,7 +141,7 @@ class WorkGraphStoreTest
           put(dynamoClient, graphTable.name)(workC)
 
           whenReady(
-            workGraphStore.findAffectedWorks(WorkLinks(idA, 0, Set.empty))) {
+            workGraphStore.findAffectedWorks(WorkStub(idA, 0, Set.empty))) {
             workGraph =>
               workGraph.nodes shouldBe Set(workA, workB, workC)
           }
@@ -150,7 +150,7 @@ class WorkGraphStoreTest
     }
 
     it(
-      "returns a WorkNode and the links in the database where an update joins two sets of works") {
+      "returns a WorkNode and the works in the database where an update joins two sets of works") {
       withWorkGraphTable { graphTable =>
         withWorkGraphStore(graphTable) { workGraphStore =>
           val workA =
@@ -176,9 +176,9 @@ class WorkGraphStoreTest
           put(dynamoClient, graphTable.name)(workB)
           put(dynamoClient, graphTable.name)(workC)
 
-          val links = WorkLinks(idB, version = 0, referencedWorkIds = Set(idC))
+          val work = WorkStub(idB, version = 0, referencedWorkIds = Set(idC))
 
-          whenReady(workGraphStore.findAffectedWorks(links)) { workGraph =>
+          whenReady(workGraphStore.findAffectedWorks(work)) { workGraph =>
             workGraph.nodes shouldBe Set(workA, workB, workC)
           }
         }

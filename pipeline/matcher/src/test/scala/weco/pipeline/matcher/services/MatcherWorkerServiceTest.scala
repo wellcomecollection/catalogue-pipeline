@@ -10,12 +10,12 @@ import weco.messaging.fixtures.SQS.QueuePair
 import weco.messaging.memory.MemoryMessageSender
 import weco.fixtures.TimeAssertions
 import weco.pipeline.matcher.fixtures.MatcherFixtures
-import weco.pipeline.matcher.generators.WorkLinksGenerators
+import weco.pipeline.matcher.generators.WorkStubGenerators
 import weco.pipeline.matcher.models.{
   MatchedIdentifiers,
   MatcherResult,
   WorkIdentifier,
-  WorkLinks
+  WorkStub
 }
 import weco.pipeline_storage.memory.MemoryRetriever
 
@@ -28,7 +28,7 @@ class MatcherWorkerServiceTest
     with Eventually
     with IntegrationPatience
     with MatcherFixtures
-    with WorkLinksGenerators
+    with WorkStubGenerators
     with TimeAssertions {
 
   private val identifierA = createIdentifier("AAAAAAAA")
@@ -36,16 +36,16 @@ class MatcherWorkerServiceTest
   private val identifierC = createIdentifier("CCCCCCCC")
 
   it("matches a Work which doesn't reference any other Works") {
-    val workLinks = createWorkLinksWith(id = identifierA)
+    val workLinks = createWorkStubWith(id = identifierA)
     val expectedWorks =
       Set(
         MatchedIdentifiers(
           identifiers =
-            Set(WorkIdentifier(workLinks.workId, version = workLinks.version)))
+            Set(WorkIdentifier(workLinks.id, version = workLinks.version)))
       )
 
-    implicit val retriever: MemoryRetriever[WorkLinks] =
-      new MemoryRetriever[WorkLinks]()
+    implicit val retriever: MemoryRetriever[WorkStub] =
+      new MemoryRetriever[WorkStub]()
     implicit val messageSender: MemoryMessageSender = new MemoryMessageSender()
 
     withLocalSqsQueue() { implicit queue =>
@@ -57,7 +57,7 @@ class MatcherWorkerServiceTest
 
   it("matches a Work that points to one other Work") {
     // Work Av1
-    val workLinksAv1 = createWorkLinksWith(
+    val workLinksAv1 = createWorkStubWith(
       id = identifierA,
       version = 1,
       referencedIds = Set(identifierB)
@@ -76,8 +76,8 @@ class MatcherWorkerServiceTest
         )
       )
 
-    implicit val retriever: MemoryRetriever[WorkLinks] =
-      new MemoryRetriever[WorkLinks]()
+    implicit val retriever: MemoryRetriever[WorkStub] =
+      new MemoryRetriever[WorkStub]()
     implicit val messageSender: MemoryMessageSender = new MemoryMessageSender()
 
     withLocalSqsQueue() { implicit queue =>
@@ -91,7 +91,7 @@ class MatcherWorkerServiceTest
 
   it("matches Works together") {
     // Work Av1
-    val workLinksAv1 = createWorkLinksWith(
+    val workLinksAv1 = createWorkStubWith(
       id = identifierA,
       version = 1
     )
@@ -105,7 +105,7 @@ class MatcherWorkerServiceTest
       )
 
     // Work Bv1
-    val workLinksBv1 = createWorkLinksWith(
+    val workLinksBv1 = createWorkStubWith(
       id = identifierB,
       version = 1
     )
@@ -119,7 +119,7 @@ class MatcherWorkerServiceTest
       )
 
     // Work Av2 matched to B
-    val workLinksAv2 = createWorkLinksWith(
+    val workLinksAv2 = createWorkStubWith(
       id = identifierA,
       version = 2,
       referencedIds = Set(identifierB)
@@ -136,7 +136,7 @@ class MatcherWorkerServiceTest
       )
 
     // Work Cv1
-    val workLinksCv1 = createWorkLinksWith(
+    val workLinksCv1 = createWorkStubWith(
       id = identifierC,
       version = 1
     )
@@ -150,7 +150,7 @@ class MatcherWorkerServiceTest
       )
 
     // Work Bv2 matched to C
-    val workLinksBv2 = createWorkLinksWith(
+    val workLinksBv2 = createWorkStubWith(
       id = identifierB,
       version = 2,
       referencedIds = Set(identifierC)
@@ -167,8 +167,8 @@ class MatcherWorkerServiceTest
         )
       )
 
-    implicit val retriever: MemoryRetriever[WorkLinks] =
-      new MemoryRetriever[WorkLinks]()
+    implicit val retriever: MemoryRetriever[WorkStub] =
+      new MemoryRetriever[WorkStub]()
     implicit val messageSender: MemoryMessageSender = new MemoryMessageSender()
 
     withLocalSqsQueue() { implicit queue =>
@@ -184,7 +184,7 @@ class MatcherWorkerServiceTest
 
   it("breaks matched works into individual works") {
     // Work Av1
-    val workLinksAv1 = createWorkLinksWith(
+    val workLinksAv1 = createWorkStubWith(
       id = identifierA,
       version = 1
     )
@@ -198,7 +198,7 @@ class MatcherWorkerServiceTest
       )
 
     // Work Bv1
-    val workLinksBv1 = createWorkLinksWith(
+    val workLinksBv1 = createWorkStubWith(
       id = identifierB,
       version = 1
     )
@@ -213,7 +213,7 @@ class MatcherWorkerServiceTest
 
     // Match Work A to Work B
     val workLinksAv2MatchedToB =
-      createWorkLinksWith(
+      createWorkStubWith(
         id = identifierA,
         version = 2,
         referencedIds = Set(identifierB)
@@ -231,7 +231,7 @@ class MatcherWorkerServiceTest
 
     // A no longer matches B
     val workLinksAv3WithNoMatchingWorks =
-      createWorkLinksWith(
+      createWorkStubWith(
         id = identifierA,
         version = 3
       )
@@ -248,8 +248,8 @@ class MatcherWorkerServiceTest
         )
       )
 
-    implicit val retriever: MemoryRetriever[WorkLinks] =
-      new MemoryRetriever[WorkLinks]()
+    implicit val retriever: MemoryRetriever[WorkStub] =
+      new MemoryRetriever[WorkStub]()
     implicit val messageSender: MemoryMessageSender = new MemoryMessageSender()
 
     withLocalSqsQueue() { implicit queue =>
@@ -267,7 +267,7 @@ class MatcherWorkerServiceTest
   }
 
   it("does not match a lower version") {
-    val workLinksAv2 = createWorkLinksWith(
+    val workLinksAv2 = createWorkStubWith(
       id = identifierA,
       version = 2
     )
@@ -280,8 +280,8 @@ class MatcherWorkerServiceTest
         )
       )
 
-    implicit val retriever: MemoryRetriever[WorkLinks] =
-      new MemoryRetriever[WorkLinks]()
+    implicit val retriever: MemoryRetriever[WorkStub] =
+      new MemoryRetriever[WorkStub]()
     implicit val messageSender: MemoryMessageSender = new MemoryMessageSender()
 
     withLocalSqsQueuePair() {
@@ -293,7 +293,7 @@ class MatcherWorkerServiceTest
 
           // Work V1 is sent but not matched
           val workLinksAv1 =
-            createWorkLinksWith(
+            createWorkStubWith(
               id = identifierA,
               version = 1
             )
@@ -313,7 +313,7 @@ class MatcherWorkerServiceTest
   }
 
   it("does not match an existing version with different information") {
-    val workLinksAv2 = createWorkLinksWith(
+    val workLinksAv2 = createWorkStubWith(
       id = identifierA,
       version = 2
     )
@@ -326,8 +326,8 @@ class MatcherWorkerServiceTest
         )
       )
 
-    implicit val retriever: MemoryRetriever[WorkLinks] =
-      new MemoryRetriever[WorkLinks]()
+    implicit val retriever: MemoryRetriever[WorkStub] =
+      new MemoryRetriever[WorkStub]()
     implicit val messageSender: MemoryMessageSender = new MemoryMessageSender()
 
     withLocalSqsQueuePair(visibilityTimeout = 1 second) {
@@ -339,7 +339,7 @@ class MatcherWorkerServiceTest
 
           // Work V1 is sent but not matched
           val differentWorkLinksAv2 =
-            createWorkLinksWith(
+            createWorkStubWith(
               id = identifierA,
               version = 2,
               referencedIds = Set(identifierB)
@@ -355,12 +355,12 @@ class MatcherWorkerServiceTest
   }
 
   private def processAndAssertMatchedWorkIs(
-    links: WorkLinks,
-    expectedWorks: Set[MatchedIdentifiers])(
-    implicit
-    retriever: MemoryRetriever[WorkLinks],
-    queue: SQS.Queue,
-    messageSender: MemoryMessageSender
+                                             links: WorkStub,
+                                             expectedWorks: Set[MatchedIdentifiers])(
+                                             implicit
+                                             retriever: MemoryRetriever[WorkStub],
+                                             queue: SQS.Queue,
+                                             messageSender: MemoryMessageSender
   ): Assertion = {
     sendWork(links, retriever, queue)
     eventually {

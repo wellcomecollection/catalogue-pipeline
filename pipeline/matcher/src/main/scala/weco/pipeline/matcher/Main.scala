@@ -10,7 +10,7 @@ import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import weco.pipeline.matcher.matcher.WorkMatcher
 import weco.pipeline.matcher.models.MatcherResult
 import weco.pipeline.matcher.services.MatcherWorkerService
-import weco.pipeline.matcher.storage.elastic.ElasticWorkLinksRetriever
+import weco.pipeline.matcher.storage.elastic.ElasticWorkStubRetriever
 import weco.pipeline.matcher.storage.{WorkGraphStore, WorkNodeDao}
 import weco.pipeline_storage.typesafe.PipelineStorageStreamBuilder
 import weco.storage.typesafe.{DynamoBuilder, LockingBuilder}
@@ -47,14 +47,14 @@ object Main extends WellcomeTypesafeApp {
 
     val workMatcher = new WorkMatcher(workGraphStore, lockingService)
 
-    val workLinksRetriever =
-      new ElasticWorkLinksRetriever(
+    val workRetriever =
+      new ElasticWorkStubRetriever(
         esClient,
         index = Index(config.requireString("es.index")))
 
     new MatcherWorkerService(
       PipelineStorageStreamBuilder.buildPipelineStorageConfig(config),
-      workLinksRetriever = workLinksRetriever,
+      workRetriever = workRetriever,
       msgStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
       msgSender = SNSBuilder
         .buildSNSMessageSender(config, subject = "Sent from the matcher"),

@@ -9,7 +9,7 @@ import weco.pipeline.matcher.models.{
   MatcherResult,
   WorkGraph,
   WorkIdentifier,
-  WorkLinks
+  WorkStub
 }
 import weco.pipeline.matcher.storage.WorkGraphStore
 import weco.pipeline.matcher.workgraph.WorkGraphUpdater
@@ -30,14 +30,14 @@ class WorkMatcher(
   implicit ec: ExecutionContext)
     extends Logging {
 
-  def matchWork(links: WorkLinks): Future[MatcherResult] =
-    doMatch(links)
+  def matchWork(work: WorkStub): Future[MatcherResult] =
+    doMatch(work)
 
-  private def doMatch(links: WorkLinks): Future[MatcherResult] =
-    withLocks(links, links.ids.map(_.toString)) {
+  private def doMatch(work: WorkStub): Future[MatcherResult] =
+    withLocks(work, work.ids.map(_.toString)) {
       for {
-        beforeGraph <- workGraphStore.findAffectedWorks(links)
-        afterGraph = WorkGraphUpdater.update(links, beforeGraph)
+        beforeGraph <- workGraphStore.findAffectedWorks(work)
+        afterGraph = WorkGraphUpdater.update(work, beforeGraph)
 
         updatedNodes = afterGraph.nodes -- beforeGraph.nodes
 
@@ -61,7 +61,7 @@ class WorkMatcher(
             (beforeGraph.nodes ++ afterGraph.nodes)
               .map { _.componentId }
 
-          withLocks(links, ids = affectedComponentIds) {
+          withLocks(work, ids = affectedComponentIds) {
             workGraphStore
               .put(afterGraph)
               .map(
@@ -76,13 +76,13 @@ class WorkMatcher(
       }
     }
 
-  private def withLocks(links: WorkLinks, ids: Set[String])(
+  private def withLocks(work: WorkStub, ids: Set[String])(
     f: => Future[MatcherResult]): Future[MatcherResult] =
     lockingService
       .withLocks(ids)(f)
       .map {
         case Left(failure) =>
-          debug(s"Locking failed while matching work ${links.workId}: $failure")
+          debug(s"Locking failed while matching work ${work.id}: $failure")
           throw MatcherException(failureToException(failure))
         case Right(out) => out
       }
