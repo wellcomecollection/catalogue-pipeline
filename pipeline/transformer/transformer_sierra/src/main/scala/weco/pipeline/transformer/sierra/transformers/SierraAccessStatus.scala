@@ -37,7 +37,54 @@ object SierraAccessStatus extends SierraQueryOps {
       .filter { _.nonEmpty }
 
   private def statusFromTerms(terms: Option[String]): Option[AccessStatus] =
-    terms.flatMap { AccessStatus(_).toOption }
+    terms.flatMap { statusFromString }
+
+  // Given a string value, work out what the AccessStatus should be.
+  private def statusFromString(status: String): Option[AccessStatus] = {
+    val normalisedStatus = status.trim.stripSuffix(".").trim.toLowerCase()
+
+    normalisedStatus match {
+      case value if value == "open with advisory" =>
+        Some(AccessStatus.OpenWithAdvisory)
+
+      // This has to come after the "OpenWithAdvisory" branch so we don't
+      // match on the partial open.
+      case value
+        if value == "open" || value == "unrestricted" || value == "unrestricted / open" || value == "unrestricted (open)" || value == "open access" =>
+        Some(AccessStatus.Open)
+
+      case value
+        if value == "restricted" || value == "certain restrictions apply" || value
+          .startsWith("restricted access") =>
+        Some(AccessStatus.Restricted)
+
+      case value if value.startsWith("by appointment") =>
+        Some(AccessStatus.ByAppointment)
+
+      case value if value == "closed" =>
+        Some(AccessStatus.Closed)
+
+      case value
+        if value == "cannot be produced" || value == "missing" || value == "deaccessioned" =>
+        Some(AccessStatus.Unavailable)
+
+      case value if value == "temporarily unavailable" =>
+        Some(AccessStatus.TemporarilyUnavailable)
+
+      case value
+        if value == "donor permission" || value == "permission is required to view these item" || value == "permission is required to view this item" =>
+        Some(AccessStatus.PermissionRequired)
+
+      case _ =>
+        warn(s"Unable to map string to access status: $status")
+        None
+    }
+  }
+
+  implicit class StringOps(s: String) {
+    def startsWith(prefixes: String*): Boolean =
+      prefixes.exists { s.startsWith }
+  }
 
   // Get an AccessStatus that draws from our list of types.
   //
@@ -66,16 +113,7 @@ object SierraAccessStatus extends SierraQueryOps {
         .subfieldsWithTag("f")
         .contents
         .headOption
-        .flatMap { contents =>
-          AccessStatus(contents) match {
-            case Right(status) => Some(status)
-            case Left(err) =>
-              warn(
-                s"$bibId: Unable to parse access status from subfield ǂf: $contents ($err)"
-              )
-              None
-          }
-        }
+        .flatMap { statusFromString }
 
     // Finally, we look at all three fields together.  If the data is inconsistent
     // we should drop a warning and not set an access status, rather than set one that's

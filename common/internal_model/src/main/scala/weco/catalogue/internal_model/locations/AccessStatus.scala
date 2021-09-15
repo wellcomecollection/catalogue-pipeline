@@ -3,8 +3,6 @@ package weco.catalogue.internal_model.locations
 import enumeratum.{Enum, EnumEntry}
 import weco.catalogue.internal_model.locations.AccessStatus.LicensedResources
 
-class UnknownAccessStatus(status: String) extends Exception(status)
-
 sealed trait AccessStatus extends EnumEntry { this: AccessStatus =>
   def name: String = this.getClass.getSimpleName.stripSuffix("$")
 
@@ -107,50 +105,5 @@ object AccessStatus extends Enum[AccessStatus] {
   case object PermissionRequired extends AccessStatus {
     override val id: String = "permission-required"
     override val label: String = "Permission required"
-  }
-
-  def apply(status: String): Either[Exception, AccessStatus] = {
-    val normalisedStatus = status.trim.stripSuffix(".").trim.toLowerCase()
-
-    normalisedStatus match {
-      case value if value == "open with advisory" =>
-        Right(AccessStatus.OpenWithAdvisory)
-
-      // This has to come after the "OpenWithAdvisory" branch so we don't
-      // match on the partial open.
-      case value
-          if value == "open" || value == "unrestricted" || value == "unrestricted / open" || value == "unrestricted (open)" || value == "open access" =>
-        Right(AccessStatus.Open)
-
-      case value
-          if value == "restricted" || value == "certain restrictions apply" || value
-            .startsWith("restricted access") =>
-        Right(AccessStatus.Restricted)
-
-      case value if value.startsWith("by appointment") =>
-        Right(AccessStatus.ByAppointment)
-
-      case value if value == "closed" =>
-        Right(AccessStatus.Closed)
-
-      case value
-          if value == "cannot be produced" || value == "missing" || value == "deaccessioned" =>
-        Right(AccessStatus.Unavailable)
-
-      case value if value == "temporarily unavailable" =>
-        Right(AccessStatus.TemporarilyUnavailable)
-
-      case value
-          if value == "donor permission" || value == "permission is required to view these item" || value == "permission is required to view this item" =>
-        Right(AccessStatus.PermissionRequired)
-
-      case _ =>
-        Left(new UnknownAccessStatus(status))
-    }
-  }
-
-  implicit class StringOps(s: String) {
-    def startsWith(prefixes: String*): Boolean =
-      prefixes.exists { s.startsWith }
   }
 }
