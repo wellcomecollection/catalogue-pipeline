@@ -6,7 +6,7 @@ import com.sksamuel.elastic4s.requests.get.{GetRequest, GetResponse}
 import com.sksamuel.elastic4s.{ElasticClient, Index}
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.Identified
-import weco.json.JsonUtil._
+import weco.catalogue.internal_model.Implicits._
 import weco.pipeline.matcher.models.WorkLinks
 import weco.pipeline_storage.elastic.ElasticRetriever
 

@@ -4,11 +4,11 @@ import akka.actor.ActorSystem
 import com.sksamuel.elastic4s.Index
 import com.typesafe.config.Config
 import org.scanamo.generic.auto._
-import weco.catalogue.internal_model.matcher.MatcherResult
 import weco.elasticsearch.typesafe.ElasticBuilder
 import weco.messaging.sns.NotificationMessage
 import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import weco.pipeline.matcher.matcher.WorkMatcher
+import weco.pipeline.matcher.models.MatcherResult
 import weco.pipeline.matcher.services.MatcherWorkerService
 import weco.pipeline.matcher.storage.elastic.ElasticWorkLinksRetriever
 import weco.pipeline.matcher.storage.{WorkGraphStore, WorkNodeDao}

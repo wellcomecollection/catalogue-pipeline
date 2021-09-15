@@ -4,19 +4,19 @@ import org.scalatest.Assertion
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import weco.json.JsonUtil._
 import weco.messaging.fixtures.SQS
 import weco.messaging.fixtures.SQS.QueuePair
 import weco.messaging.memory.MemoryMessageSender
-import weco.catalogue.internal_model.matcher.{
-  MatchedIdentifiers,
-  MatcherResult,
-  WorkIdentifier
-}
-import weco.catalogue.internal_model.Implicits._
 import weco.fixtures.TimeAssertions
 import weco.pipeline.matcher.fixtures.MatcherFixtures
 import weco.pipeline.matcher.generators.WorkLinksGenerators
-import weco.pipeline.matcher.models.WorkLinks
+import weco.pipeline.matcher.models.{
+  MatchedIdentifiers,
+  MatcherResult,
+  WorkIdentifier,
+  WorkLinks
+}
 import weco.pipeline_storage.memory.MemoryRetriever
 
 import scala.concurrent.duration._

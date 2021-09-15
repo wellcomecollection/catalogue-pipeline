@@ -102,7 +102,8 @@ trait Merger extends MergerLogging {
           val remaining = sources.toSet -- redirectedSources
           val redirects = redirectedSources.map(redirectSourceToTarget(target))
           logResult(result, redirects.toList, remaining.toList)
-          val internalWorks = result.mergedTarget.state.internalWorks
+          val internalWorks = result.mergedTarget.state.internalWorksWith(
+            version = result.mergedTarget.version)
 
           val redirectedIdentifiers =
             redirectedSources.map { s =>
@@ -134,7 +135,7 @@ trait Merger extends MergerLogging {
         sourceIdentifier = source.sourceIdentifier,
         canonicalId = source.state.canonicalId,
         sourceModifiedTime = source.state.sourceModifiedTime,
-        internalWorks = Nil
+        internalWorkStubs = Nil
       ),
       redirectTarget =
         IdState.Identified(target.state.canonicalId, target.sourceIdentifier)
@@ -249,10 +250,10 @@ object PlatformMerger extends Merger {
     // containing that work without having to find the wrapping work.
     work
       .mapState { state =>
-        state.copy(internalWorks = state.internalWorks.map { work =>
-          work.mapData { data =>
-            data.copy[DataState.Identified](items = items)
-          }
+        state.copy(internalWorkStubs = state.internalWorkStubs.map { stub =>
+          stub.copy(
+            workData = stub.workData.copy[DataState.Identified](items = items)
+          )
         })
       }
   }

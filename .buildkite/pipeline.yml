@@ -76,16 +76,7 @@ steps:
     if: build.branch == "main"
     env:
       PROJECTS: internal_model
-    plugins:
-      - docker#v3.5.0:
-          image: "wellcome/sbt_wrapper"
-          mount-ssh-agent: true
-          volumes: ["/var/run/docker.sock:/var/run/docker.sock"]
-          network: "host"
-          always-pull: true
-          propagate-environment: true
-          entrypoint: "/usr/bin/python3"
-    command: "/workdir/.buildkite/scripts/publish.py"
+    command: .buildkite/scripts/publish.py
   - label: trigger service deployments
     if: build.branch == "main"
     trigger: "catalogue-pipeline-deploy-prod"

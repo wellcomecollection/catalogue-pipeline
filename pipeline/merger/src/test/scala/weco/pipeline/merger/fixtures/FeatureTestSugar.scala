@@ -20,9 +20,6 @@ trait FeatureTestSugar {
           w.sourceIdentifier == work.sourceIdentifier && w
             .isInstanceOf[Work.Deleted[Identified]])
 
-    def imageSourceIds: Seq[IdState.Identified] =
-      mergerOutcome.imagesWithSources.map(_.source.id)
-
     def imageData: Seq[ImageData[IdState.Identified]] =
       mergerOutcome.imagesWithSources.map(_.imageData)
   }

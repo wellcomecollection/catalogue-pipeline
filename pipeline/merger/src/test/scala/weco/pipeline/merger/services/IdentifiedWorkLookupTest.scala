@@ -3,10 +3,10 @@ package weco.pipeline.merger.services
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.matcher.WorkIdentifier
 import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.generators.WorkGenerators
+import weco.pipeline.matcher.models.WorkIdentifier
 import weco.pipeline_storage.memory.MemoryRetriever
 
 import scala.collection.mutable

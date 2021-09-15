@@ -19,12 +19,12 @@ import software.amazon.awssdk.services.dynamodb.model.{
   QueryRequest,
   ScanRequest
 }
-import weco.catalogue.internal_model.matcher.WorkNode
 import weco.storage.dynamo.DynamoConfig
 import weco.catalogue.internal_model.generators.IdentifiersGenerators
 import weco.catalogue.internal_model.identifiers.CanonicalId
 import weco.pipeline.matcher.exceptions.MatcherException
 import weco.pipeline.matcher.fixtures.MatcherFixtures
+import weco.pipeline.matcher.models.WorkNode
 
 import scala.language.higherKinds
 import scala.collection.JavaConverters._

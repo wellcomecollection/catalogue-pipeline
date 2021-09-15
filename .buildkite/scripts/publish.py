@@ -3,7 +3,7 @@
 import os
 import sys
 
-from commands import sbt
+from commands import run_build_script
 from run_job import should_run_sbt_project
 from git_utils import (
     local_current_head,
@@ -13,10 +13,6 @@ from git_utils import (
 )
 from provider import current_branch, is_default_branch
 from sbt_dependency_tree import Repository
-
-
-def publish(project_name):
-    sbt(f"project {project_name}", "publish")
 
 
 # This script takes environment variables as the "command" step
@@ -47,5 +43,7 @@ if __name__ == "__main__":
         print(f"Nothing in this patch affects {projects}, so stopping.")
         sys.exit(0)
 
-    for p in projects:
-        publish(p)
+    for project_name in projects:
+        run_build_script(
+            "run_sbt_task_in_docker.sh", f"project {project_name}", "publish"
+        )

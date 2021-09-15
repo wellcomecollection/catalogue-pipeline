@@ -1,4 +1,4 @@
-package weco.catalogue.internal_model.matcher
+package weco.pipeline.matcher.models
 
 // Represents a collection of identifiers that represent the same Work.i
 //

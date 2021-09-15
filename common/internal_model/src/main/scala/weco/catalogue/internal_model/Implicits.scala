@@ -15,7 +15,6 @@ import weco.catalogue.internal_model.locations.{
   PhysicalLocation,
   PhysicalLocationType
 }
-import weco.catalogue.internal_model.matcher.MatcherResult
 import weco.catalogue.internal_model.work._
 import weco.json.JsonUtil._
 
@@ -159,9 +158,6 @@ object Implicits {
   implicit val _decSubjectMinted: Decoder[Subject[IdState.Minted]] =
     deriveConfiguredDecoder
 
-  implicit val _decMergeCandidate: Decoder[MatcherResult] =
-    deriveConfiguredDecoder
-
   implicit val _decItemUnminted: Decoder[Item[IdState.Unminted]] =
     deriveConfiguredDecoder
   implicit val _decItemMinted: Decoder[Item[IdState.Minted]] =
@@ -200,6 +196,11 @@ object Implicits {
 
   implicit val _decAvailability: Decoder[Availability] =
     Availability.availabilityDecoder
+
+  implicit val _decInternalWorkSource: Decoder[InternalWork.Source] =
+    deriveConfiguredDecoder
+  implicit val _decInternalWorkIdentified: Decoder[InternalWork.Identified] =
+    deriveConfiguredDecoder
 
   implicit val _decWorkStateSource: Decoder[WorkState.Source] =
     deriveConfiguredDecoder
@@ -421,9 +422,6 @@ object Implicits {
   implicit val _encSubjectMinted: Encoder[Subject[IdState.Minted]] =
     deriveConfiguredEncoder
 
-  implicit val _encMergeCandidate: Encoder[MatcherResult] =
-    deriveConfiguredEncoder
-
   implicit val _encItemUnminted: Encoder[Item[IdState.Unminted]] =
     deriveConfiguredEncoder
   implicit val _encItemMinted: Encoder[Item[IdState.Minted]] =
@@ -453,7 +451,7 @@ object Implicits {
   implicit val _encWorkDataUnidentified
     : Encoder[WorkData[DataState.Unidentified]] =
     deriveConfiguredEncoder
-  implicit val _envWorkDataIdentified: Encoder[WorkData[DataState.Identified]] =
+  implicit val _encWorkDataIdentified: Encoder[WorkData[DataState.Identified]] =
     deriveConfiguredEncoder
 
   implicit val _encInvisibilityReason: Encoder[InvisibilityReason] =
@@ -461,8 +459,13 @@ object Implicits {
   implicit val _encDeletedReason: Encoder[DeletedReason] =
     deriveConfiguredEncoder
 
-  implicit val _envAvailability: Encoder[Availability] =
+  implicit val _encAvailability: Encoder[Availability] =
     Availability.availabilityEncoder
+
+  implicit val _encInternalWorkSource: Encoder[InternalWork.Source] =
+    deriveConfiguredEncoder
+  implicit val _encInternalWorkIdentified: Encoder[InternalWork.Identified] =
+    deriveConfiguredEncoder
 
   implicit val _encWorkStateSource: Encoder[WorkState.Source] =
     deriveConfiguredEncoder

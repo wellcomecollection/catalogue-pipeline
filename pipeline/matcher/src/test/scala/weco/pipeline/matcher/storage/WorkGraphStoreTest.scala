@@ -5,11 +5,10 @@ import scala.concurrent.Future
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
-import weco.catalogue.internal_model.matcher.WorkNode
 import weco.catalogue.internal_model.generators.IdentifiersGenerators
 import weco.catalogue.internal_model.identifiers.CanonicalId
 import weco.pipeline.matcher.fixtures.MatcherFixtures
-import weco.pipeline.matcher.models.{WorkGraph, WorkLinks}
+import weco.pipeline.matcher.models.{WorkGraph, WorkLinks, WorkNode}
 
 class WorkGraphStoreTest
     extends AnyFunSpec

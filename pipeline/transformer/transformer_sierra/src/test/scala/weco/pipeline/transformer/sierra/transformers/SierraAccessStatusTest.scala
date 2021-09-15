@@ -15,10 +15,11 @@ class SierraAccessStatusTest
 
   val testCases = Table(
     ("text", "expectedStatus"),
-    ("Unrestricted", AccessStatus.Open),
-    ("Unrestricted.", AccessStatus.Open),
     ("Restricted", AccessStatus.Restricted),
     ("Restricted.", AccessStatus.Restricted),
+    ("Restricted .", AccessStatus.Restricted),
+    ("Restricted access (Data Protection Act).", AccessStatus.Restricted),
+    ("Certain restrictions apply", AccessStatus.Restricted),
     ("Open with advisory.", AccessStatus.OpenWithAdvisory),
     ("Open with Advisory.", AccessStatus.OpenWithAdvisory),
     ("Open", AccessStatus.Open),
@@ -32,6 +33,10 @@ class SierraAccessStatusTest
     (
       "Permission is required to view this item.",
       AccessStatus.PermissionRequired),
+    ("Missing", AccessStatus.Unavailable),
+    ("Deaccessioned", AccessStatus.Unavailable),
+    ("By Appointment.", AccessStatus.ByAppointment),
+    ("Donor Permission", AccessStatus.PermissionRequired),
   )
 
   it("matches particular strings to an access status") {

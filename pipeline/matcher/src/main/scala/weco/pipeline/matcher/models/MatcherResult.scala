@@ -1,4 +1,4 @@
-package weco.catalogue.internal_model.matcher
+package weco.pipeline.matcher.models
 
 import java.time.Instant
 

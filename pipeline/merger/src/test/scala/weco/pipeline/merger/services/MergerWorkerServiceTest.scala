@@ -6,10 +6,11 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import weco.catalogue.internal_model.Implicits._
 import weco.fixtures.TestWith
+import weco.json.JsonUtil._
 import weco.messaging.fixtures.SQS.QueuePair
 import weco.messaging.memory.MemoryMessageSender
-import weco.catalogue.internal_model.Implicits._
 import weco.monitoring.memory.MemoryMetrics
 import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.catalogue.internal_model.work.WorkFsm._

@@ -2,7 +2,6 @@ package weco.pipeline.transformer.calm
 
 import grizzled.slf4j.Logging
 import weco.catalogue.internal_model.identifiers._
-import weco.catalogue.internal_model.locations.UnknownAccessStatus
 import weco.catalogue.internal_model.parse.PeriodParser
 import weco.catalogue.internal_model.work.DeletedReason.{
   DeletedFromSource,
@@ -98,19 +97,6 @@ object CalmTransformer
                 data = WorkData(),
                 invisibilityReasons =
                   List(knownErrToUntransformableReason(knownErr))
-              )
-            )
-          case unknownStatus: UnknownAccessStatus =>
-            warn(
-              s"${record.id}: unknown access status: ${unknownStatus.getMessage}"
-            )
-            Right(
-              Work.Invisible[Source](
-                state = Source(sourceIdentifier(record), record.retrievedAt),
-                version = version,
-                data = WorkData(),
-                invisibilityReasons =
-                  List(InvalidValueInSourceField("Calm:AccessStatus"))
               )
             )
           case err: Exception => Left(err)

@@ -1,4 +1,4 @@
-package weco.catalogue.internal_model.matcher
+package weco.pipeline.matcher.models
 
 import weco.catalogue.internal_model.identifiers.CanonicalId
 import weco.catalogue.internal_model.work.Work

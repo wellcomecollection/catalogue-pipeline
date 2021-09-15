@@ -1,6 +1,6 @@
 package weco.pipeline.matcher.storage
 
-import weco.catalogue.internal_model.matcher.WorkNode
+import weco.pipeline.matcher.models.WorkNode
 
 import scala.concurrent.{ExecutionContext, Future}
 import weco.pipeline.matcher.models.{WorkGraph, WorkLinks}

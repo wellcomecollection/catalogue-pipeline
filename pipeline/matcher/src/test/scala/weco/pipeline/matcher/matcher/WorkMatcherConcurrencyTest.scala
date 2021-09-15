@@ -3,10 +3,10 @@ package weco.pipeline.matcher.matcher
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.matcher.MatcherResult
 import weco.pipeline.matcher.exceptions.MatcherException
 import weco.pipeline.matcher.fixtures.MatcherFixtures
 import weco.pipeline.matcher.generators.WorkLinksGenerators
+import weco.pipeline.matcher.models.MatcherResult
 import weco.storage.locking.memory.{MemoryLockDao, MemoryLockingService}
 
 import java.util.UUID

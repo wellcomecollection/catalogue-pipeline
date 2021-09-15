@@ -2,14 +2,14 @@ package weco.pipeline.matcher.workgraph
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.matcher.WorkNode
 import weco.catalogue.internal_model.identifiers.CanonicalId
 import weco.pipeline.matcher.fixtures.MatcherFixtures
 import weco.pipeline.matcher.models.{
   VersionExpectedConflictException,
   VersionUnexpectedConflictException,
   WorkGraph,
-  WorkLinks
+  WorkLinks,
+  WorkNode
 }
 
 class WorkGraphUpdaterTest

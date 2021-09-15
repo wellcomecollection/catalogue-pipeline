@@ -1,9 +1,8 @@
 package weco.pipeline.merger.services
 
-import weco.catalogue.internal_model.matcher.WorkIdentifier
 import weco.catalogue.internal_model.work.WorkState.Identified
-import weco.pipeline_storage.RetrieverMultiResult
 import weco.catalogue.internal_model.work.Work
+import weco.pipeline.matcher.models.WorkIdentifier
 import weco.pipeline_storage.{Retriever, RetrieverMultiResult}
 
 import scala.concurrent.{ExecutionContext, Future}

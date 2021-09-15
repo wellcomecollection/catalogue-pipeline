@@ -36,8 +36,7 @@ trait WorkGenerators
     Work.Visible[Source](
       state = Source(
         sourceIdentifier = sourceIdentifier,
-        sourceModifiedTime = sourceModifiedTime,
-        internalWorks = Nil),
+        sourceModifiedTime = sourceModifiedTime),
       data = initData,
       version = createVersion
     )
@@ -93,8 +92,7 @@ trait WorkGenerators
       state = Identified(
         sourceIdentifier = sourceIdentifier,
         canonicalId = canonicalId,
-        sourceModifiedTime = sourceModifiedTime,
-        internalWorks = Nil
+        sourceModifiedTime = sourceModifiedTime
       ),
       data = initData,
       version = createVersion

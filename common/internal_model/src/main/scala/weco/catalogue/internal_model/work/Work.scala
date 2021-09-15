@@ -151,12 +151,34 @@ sealed trait WorkState {
   def id: String
 }
 
+object InternalWork {
+  // Originally we used a full instance of Work[Source] and Work[Identified] here,
+  // but for reasons we don't fully understand, that causes the compilation times of
+  // internal_model to explode.
+  //
+  // This is probably a sign that the entire Id/Data/WorkState hierarchy needs a rethink
+  // to make it less thorny and complicated, but doing that now would block the TEI work.
+  //
+  // TODO: Investigate the internal model compilation slowness further.
+  // See https://github.com/wellcomecollection/platform/issues/5298
+  case class Source(
+    sourceIdentifier: SourceIdentifier,
+    workData: WorkData[DataState.Unidentified]
+  )
+
+  case class Identified(
+    sourceIdentifier: SourceIdentifier,
+    canonicalId: CanonicalId,
+    workData: WorkData[DataState.Identified]
+  )
+}
+
 object WorkState {
 
   case class Source(
     sourceIdentifier: SourceIdentifier,
     sourceModifiedTime: Instant,
-    internalWorks: List[Work.Visible[Source]] = Nil
+    internalWorkStubs: List[InternalWork.Source] = Nil
   ) extends WorkState {
 
     type WorkDataState = DataState.Unidentified
@@ -172,7 +194,7 @@ object WorkState {
     sourceIdentifier: SourceIdentifier,
     canonicalId: CanonicalId,
     sourceModifiedTime: Instant,
-    internalWorks: List[Work.Visible[Identified]] = Nil
+    internalWorkStubs: List[InternalWork.Identified] = Nil
   ) extends WorkState {
 
     type WorkDataState = DataState.Identified
@@ -182,6 +204,20 @@ object WorkState {
     val relations = Relations.none
 
     override val modifiedTime: Instant = sourceModifiedTime
+
+    def internalWorksWith(version: Int): List[Work.Visible[Identified]] =
+      internalWorkStubs.map {
+        case InternalWork.Identified(sourceIdentifier, canonicalId, data) =>
+          Work.Visible[Identified](
+            version = version,
+            data = data,
+            state = WorkState.Identified(
+              sourceIdentifier = sourceIdentifier,
+              canonicalId = canonicalId,
+              sourceModifiedTime = sourceModifiedTime
+            )
+          )
+      }
   }
 
   case class Merged(

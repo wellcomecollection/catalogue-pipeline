@@ -5,17 +5,17 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.messaging.fixtures.SQS.QueuePair
 import weco.messaging.memory.MemoryMessageSender
-import weco.catalogue.internal_model.Implicits._
-import weco.catalogue.internal_model.matcher.{
+import weco.fixtures.TimeAssertions
+import weco.json.JsonUtil._
+import weco.pipeline.matcher.fixtures.MatcherFixtures
+import weco.pipeline.matcher.generators.WorkLinksGenerators
+import weco.pipeline.matcher.models.{
   MatchedIdentifiers,
   MatcherResult,
   WorkIdentifier,
+  WorkLinks,
   WorkNode
 }
-import weco.fixtures.TimeAssertions
-import weco.pipeline.matcher.fixtures.MatcherFixtures
-import weco.pipeline.matcher.generators.WorkLinksGenerators
-import weco.pipeline.matcher.models.WorkLinks
 import weco.pipeline_storage.memory.MemoryRetriever
 
 import scala.concurrent.ExecutionContext.Implicits.global
