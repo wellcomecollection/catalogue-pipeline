@@ -11,13 +11,12 @@ import org.scanamo.{
 }
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import weco.catalogue.internal_model.identifiers.CanonicalId
-import weco.catalogue.internal_model.matcher.{MatcherResult, WorkNode}
 import weco.fixtures.TestWith
 import weco.messaging.fixtures.SQS
 import weco.messaging.memory.MemoryMessageSender
 import weco.messaging.sns.NotificationMessage
 import weco.pipeline.matcher.matcher.WorkMatcher
-import weco.pipeline.matcher.models.WorkLinks
+import weco.pipeline.matcher.models.{MatcherResult, WorkLinks, WorkNode}
 import weco.pipeline.matcher.services.MatcherWorkerService
 import weco.pipeline.matcher.storage.{WorkGraphStore, WorkNodeDao}
 import weco.pipeline_storage.fixtures.PipelineStorageStreamFixtures

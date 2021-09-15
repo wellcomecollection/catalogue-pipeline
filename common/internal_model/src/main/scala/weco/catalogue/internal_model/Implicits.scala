@@ -15,7 +15,6 @@ import weco.catalogue.internal_model.locations.{
   PhysicalLocation,
   PhysicalLocationType
 }
-import weco.catalogue.internal_model.matcher.MatcherResult
 import weco.catalogue.internal_model.work._
 import weco.json.JsonUtil._
 
@@ -157,9 +156,6 @@ object Implicits {
   implicit val _decSubjectUnminted: Decoder[Subject[IdState.Unminted]] =
     deriveConfiguredDecoder
   implicit val _decSubjectMinted: Decoder[Subject[IdState.Minted]] =
-    deriveConfiguredDecoder
-
-  implicit val _decMergeCandidate: Decoder[MatcherResult] =
     deriveConfiguredDecoder
 
   implicit val _decItemUnminted: Decoder[Item[IdState.Unminted]] =
@@ -424,9 +420,6 @@ object Implicits {
   implicit val _encSubjectUnminted: Encoder[Subject[IdState.Unminted]] =
     deriveConfiguredEncoder
   implicit val _encSubjectMinted: Encoder[Subject[IdState.Minted]] =
-    deriveConfiguredEncoder
-
-  implicit val _encMergeCandidate: Encoder[MatcherResult] =
     deriveConfiguredEncoder
 
   implicit val _encItemUnminted: Encoder[Item[IdState.Unminted]] =

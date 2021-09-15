@@ -9,8 +9,6 @@ import software.amazon.awssdk.services.sqs.model.Message
 import weco.json.JsonUtil._
 import weco.messaging.MessageSender
 import weco.messaging.sns.NotificationMessage
-import weco.catalogue.internal_model.Implicits._
-import weco.catalogue.internal_model.matcher.MatcherResult
 import weco.messaging.sqs.SQSStream
 import weco.typesafe.Runnable
 import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
@@ -18,6 +16,7 @@ import weco.catalogue.internal_model.image.Image
 import weco.catalogue.internal_model.image.ImageState.Initial
 import weco.catalogue.internal_model.work.Work
 import weco.flows.FlowOps
+import weco.pipeline.matcher.models.MatcherResult
 import weco.pipeline_storage.{Indexer, PipelineStorageConfig}
 
 class MergerWorkerService[WorkDestination, ImageDestination](

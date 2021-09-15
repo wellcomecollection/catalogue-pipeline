@@ -1,6 +1,6 @@
 package weco.pipeline.matcher.models
 
-import weco.catalogue.internal_model.matcher.WorkNode
+import weco.pipeline.matcher.models.WorkNode
 
 // This holds a collection of nodes in our graph database.
 //

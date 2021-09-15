@@ -4,13 +4,13 @@ import grizzled.slf4j.Logging
 import org.apache.commons.codec.digest.DigestUtils
 import scalax.collection.Graph
 import scalax.collection.GraphPredef._
-import weco.catalogue.internal_model.matcher.WorkNode
 import weco.catalogue.internal_model.identifiers.CanonicalId
 import weco.pipeline.matcher.models.{
   VersionExpectedConflictException,
   VersionUnexpectedConflictException,
   WorkGraph,
-  WorkLinks
+  WorkLinks,
+  WorkNode
 }
 
 object WorkGraphUpdater extends Logging {

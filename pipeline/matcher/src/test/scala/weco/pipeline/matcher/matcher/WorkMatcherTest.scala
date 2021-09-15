@@ -8,19 +8,20 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 import org.scanamo.syntax._
-import weco.catalogue.internal_model.matcher.{
-  MatchedIdentifiers,
-  MatcherResult,
-  WorkIdentifier,
-  WorkNode
-}
 import weco.storage.locking.LockFailure
 import weco.storage.locking.memory.{MemoryLockDao, MemoryLockingService}
 import weco.fixtures.TimeAssertions
 import weco.pipeline.matcher.exceptions.MatcherException
 import weco.pipeline.matcher.fixtures.MatcherFixtures
 import weco.pipeline.matcher.generators.WorkLinksGenerators
-import weco.pipeline.matcher.models.{WorkGraph, WorkLinks}
+import weco.pipeline.matcher.models.{
+  MatchedIdentifiers,
+  MatcherResult,
+  WorkGraph,
+  WorkIdentifier,
+  WorkLinks,
+  WorkNode
+}
 import weco.pipeline.matcher.storage.WorkGraphStore
 
 import java.util.UUID
