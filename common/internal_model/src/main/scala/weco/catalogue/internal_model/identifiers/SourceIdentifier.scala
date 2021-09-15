@@ -17,8 +17,15 @@ case class SourceIdentifier(
 
 case object SourceIdentifier {
   implicit val encoder: Encoder[SourceIdentifier] =
-    Encoder.forProduct3[SourceIdentifier, IdentifierType, String, String]("identifierType", "ontologyType", "value")(id => (id.identifierType, id.ontologyType, id.value))
+    Encoder.forProduct3[SourceIdentifier, IdentifierType, String, String](
+      "identifierType",
+      "ontologyType",
+      "value")(id => (id.identifierType, id.ontologyType, id.value))
 
   implicit val decoder: Decoder[SourceIdentifier] =
-    Decoder.forProduct3[SourceIdentifier, IdentifierType, String, String]("identifierType", "ontologyType", "value")((identifierType, ontologyType, value) => SourceIdentifier(identifierType, ontologyType, value))
+    Decoder.forProduct3[SourceIdentifier, IdentifierType, String, String](
+      "identifierType",
+      "ontologyType",
+      "value")((identifierType, ontologyType, value) =>
+      SourceIdentifier(identifierType, ontologyType, value))
 }
