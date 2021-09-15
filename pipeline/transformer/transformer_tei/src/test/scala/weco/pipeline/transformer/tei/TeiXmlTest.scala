@@ -234,4 +234,39 @@ class TeiXmlTest
       TeiData(id = secondItemId, title = secondItemTitle))
   }
 
+  it("extracts the original title for internal items if there is more than one title") {
+    val firstItemTitle = "this is original item title"
+    val secondItemTitle = "this is second item title"
+    val itemId = s"${id}_1"
+    val firstItem = msItem(itemId, List(originalItemTitle(firstItemTitle), itemTitle(secondItemTitle)))
+    val result = TeiXml(
+      id,
+      teiXml(
+        id = id,
+        items = List(firstItem)
+      ).toString()
+    ).flatMap(_.nestedTeiData)
+
+    result shouldBe a[Right[_, _]]
+    result.value shouldBe Seq(
+      TeiData(id = itemId, title = firstItemTitle))
+  }
+
+  it ("fails extracting nested items if there are mukltiple titles and none is marked as original"){
+    val firstItemTitle = "this is first item title"
+    val secondItemTitle = "this is second item title"
+    val itemId = s"${id}_1"
+    val firstItem = msItem(itemId, List(itemTitle(firstItemTitle), itemTitle(secondItemTitle)))
+    val result = TeiXml(
+      id,
+      teiXml(
+        id = id,
+        items = List(firstItem)
+      ).toString()
+    ).flatMap(_.nestedTeiData)
+
+    result shouldBe a[Left[_, _]]
+    result.left.value shouldBe a[RuntimeException]
+  }
+
 }

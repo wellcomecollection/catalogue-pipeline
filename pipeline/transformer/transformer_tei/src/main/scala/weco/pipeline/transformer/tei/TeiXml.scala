@@ -3,9 +3,10 @@ package weco.pipeline.transformer.tei
 import scala.util.Try
 import scala.xml.{Elem, Node, XML}
 import grizzled.slf4j.Logging
-
+import cats.syntax.traverse._
+import cats.instances.either._
 class TeiXml(val xml: Elem) extends Logging {
-  val id: String = extractId(xml)
+  val id: String = getIdFrom(xml).getOrElse(throw new RuntimeException(s"Could not find an id in XML!"))
 
   /**
     * All the identifiers of the TEI file are in a `msIdentifier` bloc.
@@ -83,19 +84,20 @@ class TeiXml(val xml: Elem) extends Logging {
     }
   }
 
-  def nestedTeiData: Either[Throwable, Seq[TeiData]] =
-    Try((xml \\ "msDesc" \ "msContents" \ "msItem").map { node =>
-      val title = (node \ "title").text
-      val itemId = extractId(node)
-      TeiData(id = itemId, title = title)
-    }).toEither
+  def nestedTeiData: Either[Throwable, List[TeiData]] =
+    (xml \\ "msDesc" \ "msContents" \ "msItem").map { node =>
+      for {
+        title <- getTitleFromItem(node)
+        id <- getIdFrom(node)
+      }yield TeiData(id = id, title = title)
+    }.toList.sequence
 
-  private def extractId(node: Node) =
-    node.attributes
+  private def getIdFrom(node: Node): Either[Throwable, String] =
+    Try(node.attributes
       .collectFirst {
         case metadata if metadata.key == "id" => metadata.value.text.trim
       }
-      .getOrElse(throw new RuntimeException(s"Could not find an id in XML!"))
+      .getOrElse(throw new RuntimeException(s"Could not find an id in node!"))).toEither
 
   /**
     * In an XML like this:
@@ -138,7 +140,7 @@ class TeiXml(val xml: Elem) extends Logging {
     *              <title xml:lang="ar-Latn-x-lc" key="work_3001">Al-Qānūn fī al-ṭibb</title>
     * extract the title from the msItem, so "Al-Qānūn fī al-ṭibb" in the example.
     */
-  private def getTitleFromItem(itemNode: Node) = {
+  private def getTitleFromItem(itemNode: Node): Either[Throwable, String] = {
     val titleNodes = (itemNode \ "title").toList
     titleNodes match {
       case List(titleNode) => Right(titleNode.text)
