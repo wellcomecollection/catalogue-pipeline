@@ -61,7 +61,7 @@ class BatcherWorkerServiceTest
   }
 
   it("processes incoming paths into batches split per tree") {
-    withWorkerService(visibilityTimeout = 1 second) {
+    withWorkerService(visibilityTimeout = 2 seconds) {
       case (QueuePair(queue, dlq), msgSender) =>
         sendNotificationToSQS(queue = queue, body = "A")
         sendNotificationToSQS(queue = queue, body = "Other/Tree")
