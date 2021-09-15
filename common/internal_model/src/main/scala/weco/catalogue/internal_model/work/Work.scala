@@ -152,7 +152,15 @@ sealed trait WorkState {
 }
 
 object InternalWork {
-  // todo: explain why we don't just use Work[Source] because BOOM RECURSION
+  // Originally we used a full instance of Work[Source] and Work[Identified] here,
+  // but for reasons we don't fully understand, that causes the compilation times of
+  // internal_model to explode.
+  //
+  // This is probably a sign that the entire Id/Data/WorkState hierarchy needs a rethink
+  // to make it less thorny and complicated, but doing that now would block the TEI work.
+  //
+  // TODO: Investigate the internal model compilation slowness further.
+  // See https://github.com/wellcomecollection/platform/issues/5298
   case class Source(
     sourceIdentifier: SourceIdentifier,
     workData: WorkData[DataState.Unidentified]
