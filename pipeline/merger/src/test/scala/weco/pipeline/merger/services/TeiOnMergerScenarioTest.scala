@@ -4,6 +4,7 @@ import org.scalatest.GivenWhenThen
 import org.scalatest.featurespec.AnyFeatureSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.IdentifierType
+import weco.catalogue.internal_model.work.InternalWork
 import weco.catalogue.internal_model.work.generators.SourceWorkGenerators
 import weco.pipeline.merger.fixtures.FeatureTestSugar
 
@@ -64,7 +65,20 @@ class TeiOnMergerScenarioTest
     val teiWork = teiIdentifiedWork()
       .title("A tei work")
       .mapState(state => {
-        state.copy(internalWorks = List(firstInternalWork, secondInternalWork))
+        state.copy(
+          internalWorkStubs = List(
+            InternalWork.Identified(
+              sourceIdentifier = firstInternalWork.sourceIdentifier,
+              canonicalId = firstInternalWork.state.canonicalId,
+              workData = firstInternalWork.data
+            ),
+            InternalWork.Identified(
+              sourceIdentifier = secondInternalWork.sourceIdentifier,
+              canonicalId = secondInternalWork.state.canonicalId,
+              workData = secondInternalWork.data
+            )
+          )
+        )
       })
 
     When("the works are merged")
