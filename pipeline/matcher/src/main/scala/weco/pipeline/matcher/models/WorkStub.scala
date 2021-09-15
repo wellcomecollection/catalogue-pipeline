@@ -13,7 +13,7 @@ import java.time.Instant
   */
 case class WorkStub(id: CanonicalId,
                     modifiedTime: Instant,
-                    referencedWorkIds: Set[CanonicalId]) {
+                    referencedWorkIds: Set[CanonicalId] = Set()) {
   lazy val ids: Set[CanonicalId] = referencedWorkIds + id
 }
 

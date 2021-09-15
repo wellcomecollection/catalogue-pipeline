@@ -14,7 +14,6 @@ import weco.pipeline.matcher.generators.WorkStubGenerators
 import weco.pipeline.matcher.models.{
   MatchedIdentifiers,
   MatcherResult,
-  WorkIdentifier,
   WorkStub
 }
 import weco.pipeline_storage.memory.MemoryRetriever
@@ -39,9 +38,7 @@ class MatcherWorkerServiceTest
     val work = createWorkStubWith(id = identifierA)
     val expectedWorks =
       Set(
-        MatchedIdentifiers(
-          identifiers = Set(WorkIdentifier(work))
-        )
+        MatchedIdentifiers(workCollections = Set(work))
       )
 
     implicit val retriever: MemoryRetriever[WorkStub] =
@@ -69,9 +66,8 @@ class MatcherWorkerServiceTest
     val expectedWorks =
       Set(
         MatchedIdentifiers(
-          identifiers = Set(
-            WorkIdentifier(identifierA.canonicalId, modifiedTime = modifiedTime1),
-            WorkIdentifier(identifierB.canonicalId, modifiedTime = None)
+          workCollections = Set(
+            WorkStub(identifierA.canonicalId, modifiedTime = modifiedTime1)
           )
         )
       )
@@ -99,8 +95,8 @@ class MatcherWorkerServiceTest
     val expectedWorksAv1 =
       Set(
         MatchedIdentifiers(
-          identifiers =
-            Set(WorkIdentifier(identifierA.canonicalId, modifiedTime = modifiedTime1))
+          workCollections =
+            Set(WorkStub(identifierA.canonicalId, modifiedTime = modifiedTime1))
         )
       )
 
@@ -113,8 +109,8 @@ class MatcherWorkerServiceTest
     val expectedWorksBv1 =
       Set(
         MatchedIdentifiers(
-          identifiers =
-            Set(WorkIdentifier(identifierB.canonicalId, modifiedTime = modifiedTime1))
+          workCollections =
+            Set(WorkStub(identifierB.canonicalId, modifiedTime = modifiedTime1))
         )
       )
 
@@ -128,9 +124,9 @@ class MatcherWorkerServiceTest
     val expectedWorksAv2 =
       Set(
         MatchedIdentifiers(
-          identifiers = Set(
-            WorkIdentifier(identifierA.canonicalId, modifiedTime = modifiedTime2),
-            WorkIdentifier(identifierB.canonicalId, modifiedTime = modifiedTime1)
+          workCollections = Set(
+            WorkStub(identifierA.canonicalId, modifiedTime = modifiedTime2),
+            WorkStub(identifierB.canonicalId, modifiedTime = modifiedTime1)
           )
         )
       )
@@ -144,8 +140,8 @@ class MatcherWorkerServiceTest
     val expectedWorksCv1 =
       Set(
         MatchedIdentifiers(
-          identifiers =
-            Set(WorkIdentifier(identifierC.canonicalId, modifiedTime = modifiedTime1))
+          workCollections =
+            Set(WorkStub(identifierC.canonicalId, modifiedTime = modifiedTime1))
         )
       )
 
@@ -159,10 +155,10 @@ class MatcherWorkerServiceTest
     val expectedWorksBv2 =
       Set(
         MatchedIdentifiers(
-          identifiers = Set(
-            WorkIdentifier(identifierA.canonicalId, modifiedTime = modifiedTime2),
-            WorkIdentifier(identifierB.canonicalId, modifiedTime = modifiedTime2),
-            WorkIdentifier(identifierC.canonicalId, modifiedTime = modifiedTime1)
+          workCollections = Set(
+            WorkStub(identifierA.canonicalId, modifiedTime = modifiedTime2),
+            WorkStub(identifierB.canonicalId, modifiedTime = modifiedTime2),
+            WorkStub(identifierC.canonicalId, modifiedTime = modifiedTime1)
           )
         )
       )
@@ -192,8 +188,8 @@ class MatcherWorkerServiceTest
     val expectedWorksAv1 =
       Set(
         MatchedIdentifiers(
-          identifiers =
-            Set(WorkIdentifier(identifierA.canonicalId, modifiedTime = modifiedTime1))
+          workCollections =
+            Set(WorkStub(identifierA.canonicalId, modifiedTime = modifiedTime1))
         )
       )
 
@@ -206,8 +202,8 @@ class MatcherWorkerServiceTest
     val expectedWorksBv1 =
       Set(
         MatchedIdentifiers(
-          identifiers =
-            Set(WorkIdentifier(identifierB.canonicalId, modifiedTime = modifiedTime1))
+          workCollections =
+            Set(WorkStub(identifierB.canonicalId, modifiedTime = modifiedTime1))
         )
       )
 
@@ -222,9 +218,9 @@ class MatcherWorkerServiceTest
     val expectedWorksAv2MatchedToB =
       Set(
         MatchedIdentifiers(
-          identifiers = Set(
-            WorkIdentifier(identifierA.canonicalId, modifiedTime = modifiedTime2),
-            WorkIdentifier(identifierB.canonicalId, modifiedTime = modifiedTime1)
+          workCollections = Set(
+            WorkStub(identifierA.canonicalId, modifiedTime = modifiedTime2),
+            WorkStub(identifierB.canonicalId, modifiedTime = modifiedTime1)
           )
         )
       )
@@ -239,12 +235,12 @@ class MatcherWorkerServiceTest
     val expectedWorksAv3 =
       Set(
         MatchedIdentifiers(
-          identifiers =
-            Set(WorkIdentifier(identifierA.canonicalId, modifiedTime = modifiedTime3))
+          workCollections =
+            Set(WorkStub(identifierA.canonicalId, modifiedTime = modifiedTime3))
         ),
         MatchedIdentifiers(
-          identifiers =
-            Set(WorkIdentifier(identifierB.canonicalId, modifiedTime = modifiedTime1))
+          workCollections =
+            Set(WorkStub(identifierB.canonicalId, modifiedTime = modifiedTime1))
         )
       )
 
@@ -275,8 +271,8 @@ class MatcherWorkerServiceTest
     val expectedWorkAv2 =
       Set(
         MatchedIdentifiers(
-          identifiers =
-            Set(WorkIdentifier(identifierA.canonicalId, modifiedTime = modifiedTime2))
+          workCollections =
+            Set(WorkStub(identifierA.canonicalId, modifiedTime = modifiedTime2))
         )
       )
 
@@ -321,8 +317,8 @@ class MatcherWorkerServiceTest
     val expectedWorkAv2 =
       Set(
         MatchedIdentifiers(
-          identifiers =
-            Set(WorkIdentifier(identifierA.canonicalId, modifiedTime = modifiedTime2))
+          workCollections =
+            Set(WorkStub(identifierA.canonicalId, modifiedTime = modifiedTime2))
         )
       )
 

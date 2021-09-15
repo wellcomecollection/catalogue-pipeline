@@ -203,12 +203,12 @@ class WorkNodeDaoTest
         withWorkNodeDao(table) { workNodeDao =>
           case class BadRecord(id: CanonicalId,
                                componentId: String,
-                               version: String)
+                               modifiedTime: String)
           val badRecord: BadRecord =
             BadRecord(
               id = idA,
               componentId = ciHash(idA, idB),
-              version = "five")
+              modifiedTime = "five")
           put(dynamoClient, table.name)(badRecord)
 
           whenReady(workNodeDao.getByComponentIds(Set(ciHash(idA, idB))).failed) {
@@ -276,8 +276,8 @@ class WorkNodeDaoTest
     it("returns an error if Scanamo fails to put a record") {
       withWorkGraphTable { table =>
         withWorkNodeDao(table) { workNodeDao =>
-          case class BadRecord(id: CanonicalId, version: String)
-          val badRecord: BadRecord = BadRecord(id = idA, version = "six")
+          case class BadRecord(id: CanonicalId, modifiedTime: String)
+          val badRecord: BadRecord = BadRecord(id = idA, modifiedTime = "six")
           put(dynamoClient, table.name)(badRecord)
 
           whenReady(workNodeDao.get(Set(idA)).failed) {

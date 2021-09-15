@@ -7,4 +7,4 @@ package weco.pipeline.matcher.models
 // For example, if the matcher sends MatchedIdentifiers({A, B, C}), it
 // means the merger should combine these into a single work.
 //
-case class MatchedIdentifiers(identifiers: Set[WorkIdentifier])
+case class MatchedIdentifiers(workCollections: Set[WorkStub])

@@ -6,7 +6,7 @@ import weco.catalogue.internal_model.work.Work
 import weco.pipeline.matcher.models.{
   MatchedIdentifiers,
   MatcherResult,
-  WorkIdentifier
+  WorkStub
 }
 
 import java.time.Instant
@@ -17,7 +17,7 @@ trait MatcherResultFixture extends RandomGenerators {
     createdTime: Instant = randomInstant): MatcherResult =
     MatcherResult(
       works = matchedEntries.map { works =>
-        MatchedIdentifiers(works.map { WorkIdentifier(_) })
+        MatchedIdentifiers(works.map { WorkStub(_) })
       },
       createdTime = createdTime
     )

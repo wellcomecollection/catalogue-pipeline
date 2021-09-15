@@ -12,7 +12,6 @@ import weco.pipeline.matcher.generators.WorkStubGenerators
 import weco.pipeline.matcher.models.{
   MatchedIdentifiers,
   MatcherResult,
-  WorkIdentifier,
   WorkStub,
   WorkNode
 }
@@ -39,9 +38,7 @@ class MatcherFeatureTest
         val work = createWorkStubWith(referencedIds = Set.empty)
 
         val expectedWorks =
-          Set(
-            MatchedIdentifiers(identifiers = Set(WorkIdentifier(work)))
-          )
+          Set(MatchedIdentifiers(workCollections = Set(work)))
 
         sendWork(work, retriever, queue)
 

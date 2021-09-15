@@ -18,7 +18,6 @@ import weco.pipeline.matcher.models.{
   MatchedIdentifiers,
   MatcherResult,
   WorkGraph,
-  WorkIdentifier,
   WorkNode,
   WorkStub
 }
@@ -53,7 +52,7 @@ class WorkMatcherTest
             assertRecent(matcherResult.createdTime)
             matcherResult.works shouldBe
               Set(
-                MatchedIdentifiers(identifiers = Set(WorkIdentifier(work)))
+                MatchedIdentifiers(workCollections = Set(work))
               )
 
             val savedLinkedWork =
@@ -91,8 +90,10 @@ class WorkMatcherTest
               Set(
                 MatchedIdentifiers(
                   Set(
-                    WorkIdentifier(identifierA.canonicalId, modifiedTime = work.modifiedTime),
-                    WorkIdentifier(identifierB.canonicalId, modifiedTime = None))))
+                    WorkStub(identifierA.canonicalId, modifiedTime = work.modifiedTime)
+                  )
+                )
+              )
 
             val savedWorkNodes = scan[WorkNode](dynamoClient, graphTable.name)
               .map(_.right.value)
@@ -160,9 +161,9 @@ class WorkMatcherTest
               Set(
                 MatchedIdentifiers(
                   Set(
-                    WorkIdentifier(identifierA.canonicalId, modifiedTime = modifiedTime1),
-                    WorkIdentifier(identifierB.canonicalId, modifiedTime = modifiedTime2),
-                    WorkIdentifier(identifierC.canonicalId, modifiedTime = modifiedTime1))))
+                    WorkStub(identifierA.canonicalId, modifiedTime = modifiedTime1),
+                    WorkStub(identifierB.canonicalId, modifiedTime = modifiedTime2),
+                    WorkStub(identifierC.canonicalId, modifiedTime = modifiedTime1))))
 
             val savedNodes = scan[WorkNode](dynamoClient, graphTable.name)
               .map(_.right.value)

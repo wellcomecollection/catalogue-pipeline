@@ -8,7 +8,6 @@ import weco.pipeline.matcher.models.{
   MatchedIdentifiers,
   MatcherResult,
   WorkGraph,
-  WorkIdentifier,
   WorkNode,
   WorkStub
 }
@@ -100,7 +99,11 @@ class WorkMatcher(
       .groupBy { _.componentId }
       .map {
         case (_, workNodes: Set[WorkNode]) =>
-          MatchedIdentifiers(workNodes.map(WorkIdentifier(_)))
+          val works = workNodes.collect {
+            case WorkNode(id, Some(modifiedTime), _, _) =>
+              WorkStub(id = id, modifiedTime = modifiedTime)
+          }
+          MatchedIdentifiers(works)
       }
       .toSet
 }

@@ -6,7 +6,7 @@ import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.generators.WorkGenerators
-import weco.pipeline.matcher.models.WorkIdentifier
+import weco.pipeline.matcher.models.WorkStub
 import weco.pipeline_storage.memory.MemoryRetriever
 
 import scala.collection.mutable
@@ -41,25 +41,11 @@ class IdentifiedWorkLookupTest
     }
   }
 
-  it("returns None if asked to fetch a Work without a version") {
-    val work = identifiedWork().withVersion(0)
-    val workId = WorkIdentifier(work.state.canonicalId, modifiedTime = None)
-
-    val retriever = new MemoryRetriever[Work[Identified]](
-      index = mutable.Map(work.id -> work)
-    )
-
-    val identifiedWorkLookup = new IdentifiedWorkLookup(retriever)
-
-    whenReady(
-      identifiedWorkLookup.fetchAllWorks(workIdentifiers = List(workId))) {
-      _ shouldBe Seq(None)
-    }
-  }
-
   it("returns None if the stored version has a higher version") {
     val oldWork = identifiedWork()
-    val newWork = oldWork.withVersion(oldWork.version + 1)
+    val newWork = oldWork.mapState { state =>
+      state.copy(sourceModifiedTime = state.modifiedTime.plusSeconds(1L))
+    }
 
     val retriever = new MemoryRetriever[Work[Identified]](
       index = mutable.Map(newWork.id -> newWork)
@@ -74,7 +60,9 @@ class IdentifiedWorkLookupTest
     val unchangedWorks = identifiedWorks(count = 3)
     val outdatedWorks = identifiedWorks(count = 2)
     val updatedWorks = outdatedWorks.map { work =>
-      work.withVersion(work.version + 1)
+      work.mapState { state =>
+        state.copy(sourceModifiedTime = state.sourceModifiedTime.plusSeconds(1L))
+      }
     }
 
     val lookupWorks = unchangedWorks ++ outdatedWorks
@@ -101,11 +89,8 @@ class IdentifiedWorkLookupTest
     works: Work[Identified]*): Future[Seq[Option[Work[Identified]]]] = {
     val identifiedLookup = new IdentifiedWorkLookup(retriever)
 
-    val workIdentifiers = works
-      .map { w =>
-        WorkIdentifier(w)
-      }
-
-    identifiedLookup.fetchAllWorks(workIdentifiers)
+    identifiedLookup.fetchAllWorks(
+      works.map { WorkStub(_) }
+    )
   }
 }
