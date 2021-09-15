@@ -7,8 +7,8 @@ import weco.pipeline.matcher.exceptions.MatcherException
 import weco.pipeline.matcher.models.{
   MatchedIdentifiers,
   MatcherResult,
-  WorkIdentifier,
   WorkGraph,
+  WorkIdentifier,
   WorkLinks
 }
 import weco.pipeline.matcher.storage.WorkGraphStore

@@ -44,4 +44,6 @@ if __name__ == "__main__":
         sys.exit(0)
 
     for project_name in projects:
-        run_build_script("run_sbt_task_in_docker.sh", f"project {project_name}", "publish")
+        run_build_script(
+            "run_sbt_task_in_docker.sh", f"project {project_name}", "publish"
+        )

@@ -42,23 +42,22 @@ class TeiOffMergerScenarioTest
 
     val teiWork = teiIdentifiedWork()
       .title("A tei work")
-      .mapState(
-        state => {
-          state.copy(
-            internalWorkStubs = List(
-              InternalWork.Identified(
-                sourceIdentifier = firstInternalWork.sourceIdentifier,
-                canonicalId = firstInternalWork.state.canonicalId,
-                workData = firstInternalWork.data
-              ),
-              InternalWork.Identified(
-                sourceIdentifier = secondInternalWork.sourceIdentifier,
-                canonicalId = secondInternalWork.state.canonicalId,
-                workData = secondInternalWork.data
-              )
+      .mapState(state => {
+        state.copy(
+          internalWorkStubs = List(
+            InternalWork.Identified(
+              sourceIdentifier = firstInternalWork.sourceIdentifier,
+              canonicalId = firstInternalWork.state.canonicalId,
+              workData = firstInternalWork.data
+            ),
+            InternalWork.Identified(
+              sourceIdentifier = secondInternalWork.sourceIdentifier,
+              canonicalId = secondInternalWork.state.canonicalId,
+              workData = secondInternalWork.data
             )
           )
-        })
+        )
+      })
     When("the works are merged")
     val sierraWorks = List(digitalSierra, physicalSierra)
     val works = sierraWorks :+ teiWork

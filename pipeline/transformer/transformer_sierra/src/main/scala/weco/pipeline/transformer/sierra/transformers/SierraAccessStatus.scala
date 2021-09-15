@@ -50,12 +50,12 @@ object SierraAccessStatus extends SierraQueryOps {
       // This has to come after the "OpenWithAdvisory" branch so we don't
       // match on the partial open.
       case value
-        if value == "open" || value == "unrestricted" || value == "unrestricted / open" || value == "unrestricted (open)" || value == "open access" =>
+          if value == "open" || value == "unrestricted" || value == "unrestricted / open" || value == "unrestricted (open)" || value == "open access" =>
         Some(AccessStatus.Open)
 
       case value
-        if value == "restricted" || value == "certain restrictions apply" || value
-          .startsWith("restricted access") =>
+          if value == "restricted" || value == "certain restrictions apply" || value
+            .startsWith("restricted access") =>
         Some(AccessStatus.Restricted)
 
       case value if value.startsWith("by appointment") =>
@@ -65,14 +65,14 @@ object SierraAccessStatus extends SierraQueryOps {
         Some(AccessStatus.Closed)
 
       case value
-        if value == "cannot be produced" || value == "missing" || value == "deaccessioned" =>
+          if value == "cannot be produced" || value == "missing" || value == "deaccessioned" =>
         Some(AccessStatus.Unavailable)
 
       case value if value == "temporarily unavailable" =>
         Some(AccessStatus.TemporarilyUnavailable)
 
       case value
-        if value == "donor permission" || value == "permission is required to view these item" || value == "permission is required to view this item" =>
+          if value == "donor permission" || value == "permission is required to view these item" || value == "permission is required to view this item" =>
         Some(AccessStatus.PermissionRequired)
 
       case _ =>
