@@ -17,9 +17,15 @@ trait WorkStubGenerators extends IdentifiersGenerators {
   def createIdentifier(canonicalId: String): IdState.Identified =
     createIdentifier(canonicalId = CanonicalId(canonicalId))
 
+  // These tests use DynamoDB, which only support instants with second-level
+  // precision.  That's plenty good enough for our purposes, so truncate to
+  // the nearest second when creating random Instant values.
+  private def randomInstantSecond: Instant =
+    Instant.ofEpochSecond(randomInstant.getEpochSecond)
+
   def createWorkStubWith(
     id: IdState.Identified = createIdentifier(canonicalId = createCanonicalId),
-    modifiedTime: Instant = randomInstant,
+    modifiedTime: Instant = randomInstantSecond,
     referencedIds: Set[IdState.Identified] = Set.empty
   ): WorkStub =
     WorkStub(
