@@ -1,6 +1,6 @@
 package weco.pipeline.matcher.models
 
-// Represents a collection of identifiers that represent the same Work.i
+// Represents a collection of identifiers that represent the same Work.
 //
 // The identifiers in this set should be merged together.
 //

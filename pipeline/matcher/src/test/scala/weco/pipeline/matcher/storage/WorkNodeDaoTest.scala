@@ -57,13 +57,13 @@ class WorkNodeDaoTest
           val existingWorkA: WorkNode =
             WorkNode(
               idA,
-              version = 1,
+              modifiedTime = modifiedTime1,
               linkedIds = List(idB),
               componentId = ciHash(idA, idB))
           val existingWorkB: WorkNode =
             WorkNode(
               idB,
-              version = 0,
+              modifiedTime = modifiedTime0,
               linkedIds = Nil,
               componentId = ciHash(idA, idB))
 
@@ -136,13 +136,13 @@ class WorkNodeDaoTest
         withWorkNodeDao(table) { matcherGraphDao =>
           val existingWorkNodeA: WorkNode = WorkNode(
             idA,
-            version = 1,
+            modifiedTime = modifiedTime1,
             linkedIds = List(idB),
             componentId = ciHash(idA, idB))
           val existingWorkNodeB: WorkNode =
             WorkNode(
               idB,
-              version = 0,
+              modifiedTime = modifiedTime0,
               linkedIds = Nil,
               componentId = ciHash(idA, idB))
 
@@ -225,7 +225,7 @@ class WorkNodeDaoTest
         withWorkNodeDao(table) { workNodeDao =>
           val work = WorkNode(
             idA,
-            version = 1,
+            modifiedTime = modifiedTime1,
             linkedIds = List(idA),
             componentId = ciHash(idA, idB))
           whenReady(workNodeDao.put(Set(work))) { _ =>
@@ -244,7 +244,7 @@ class WorkNodeDaoTest
             val id = createCanonicalId
             WorkNode(
               id,
-              version = 1,
+              modifiedTime = modifiedTime1,
               linkedIds = List(id),
               componentId = ciHash(id))
           }
@@ -301,7 +301,7 @@ class WorkNodeDaoTest
         val workNode =
           WorkNode(
             idA,
-            version = 1,
+            modifiedTime = modifiedTime1,
             linkedIds = List(idB),
             componentId = ciHash(idA, idB))
 
@@ -328,7 +328,7 @@ class WorkNodeDaoTest
 
         val workNode = WorkNode(
           id = idA,
-          version = 1,
+          modifiedTime = modifiedTime1,
           linkedIds = List(idB),
           componentId = ciHash(idA, idB))
 

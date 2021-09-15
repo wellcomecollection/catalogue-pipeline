@@ -36,7 +36,7 @@ class IdentifiedWorkLookup(retriever: Retriever[Work[Identified]])(
             workIdentifiers
               .map {
                 case WorkIdentifier(_, None) => None
-                case WorkIdentifier(id, Some(version)) =>
+                case WorkIdentifier(id, Some(modifiedTime)) =>
                   val work = works(id.toString)
                   // We only want to get the exact versions of the works specified
                   // by the matcher.
@@ -45,7 +45,7 @@ class IdentifiedWorkLookup(retriever: Retriever[Work[Identified]])(
                   // in the retriever and find {Av2, Bv3}, we shouldn't merge
                   // these -- we should wait for the matcher to confirm we should
                   // still be merging these two works.
-                  if (work.version == version) Some(work) else None
+                  if (work.state.modifiedTime == modifiedTime) Some(work) else None
               }
           case RetrieverMultiResult(_, notFound) =>
             throw new RuntimeException(s"Works not found: $notFound")

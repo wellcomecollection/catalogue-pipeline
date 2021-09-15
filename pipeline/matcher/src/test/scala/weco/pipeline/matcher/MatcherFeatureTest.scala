@@ -40,10 +40,7 @@ class MatcherFeatureTest
 
         val expectedWorks =
           Set(
-            MatchedIdentifiers(
-              identifiers =
-                Set(WorkIdentifier(work.id, version = work.version))
-            )
+            MatchedIdentifiers(identifiers = Set(WorkIdentifier(work)))
           )
 
         sendWork(work, retriever, queue)
@@ -68,14 +65,14 @@ class MatcherFeatureTest
       case QueuePair(queue, dlq) =>
         withWorkGraphTable { graphTable =>
           withWorkerService(retriever, queue, messageSender, graphTable) { _ =>
-            val existingWorkVersion = 2
-            val updatedWorkVersion = 1
+            val existingWorkVersion = modifiedTime2
+            val updatedWorkVersion = modifiedTime1
 
-            val worksV1 = createWorkStubWith(version = updatedWorkVersion)
+            val worksV1 = createWorkStubWith(modifiedTime = updatedWorkVersion)
 
             val nodeV2 = WorkNode(
               id = worksV1.id,
-              version = Some(existingWorkVersion),
+              modifiedTime = Some(existingWorkVersion),
               linkedIds = Nil,
               componentId = ciHash(worksV1.id)
             )

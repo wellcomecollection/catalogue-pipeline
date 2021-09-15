@@ -4,6 +4,8 @@ import weco.catalogue.internal_model.generators.IdentifiersGenerators
 import weco.catalogue.internal_model.identifiers.{CanonicalId, IdState}
 import weco.pipeline.matcher.models.WorkStub
 
+import java.time.Instant
+
 trait WorkStubGenerators extends IdentifiersGenerators {
   def createIdentifier(canonicalId: CanonicalId): IdState.Identified =
     IdState.Identified(
@@ -17,12 +19,12 @@ trait WorkStubGenerators extends IdentifiersGenerators {
 
   def createWorkStubWith(
     id: IdState.Identified = createIdentifier(canonicalId = createCanonicalId),
-    version: Int = randomInt(from = 1, to = 10),
+    modifiedTime: Instant = randomInstant,
     referencedIds: Set[IdState.Identified] = Set.empty
   ): WorkStub =
     WorkStub(
       id = id.canonicalId,
-      version = version,
+      modifiedTime = modifiedTime,
       referencedWorkIds = referencedIds.map { _.canonicalId }
     )
 

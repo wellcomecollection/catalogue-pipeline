@@ -53,7 +53,7 @@ class ElasticWorkStubRetriever(val client: ElasticClient, val index: Index)(
 
       WorkStub(
         id = id,
-        version = work.version,
+        modifiedTime = work.state.modifiedTime,
         referencedWorkIds = referencedWorkIds
       )
     }

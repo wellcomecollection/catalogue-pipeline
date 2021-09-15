@@ -43,7 +43,7 @@ class IdentifiedWorkLookupTest
 
   it("returns None if asked to fetch a Work without a version") {
     val work = identifiedWork().withVersion(0)
-    val workId = WorkIdentifier(work.state.canonicalId, version = None)
+    val workId = WorkIdentifier(work.state.canonicalId, modifiedTime = None)
 
     val retriever = new MemoryRetriever[Work[Identified]](
       index = mutable.Map(work.id -> work)

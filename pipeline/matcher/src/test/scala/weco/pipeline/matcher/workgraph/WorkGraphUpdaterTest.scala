@@ -26,13 +26,13 @@ class WorkGraphUpdaterTest
     it("updating nothing with A gives A:A") {
       WorkGraphUpdater
         .update(
-          work = WorkStub(idA, version = 1, referencedWorkIds = Set.empty),
+          work = WorkStub(idA, modifiedTime = modifiedTime1, referencedWorkIds = Set.empty),
           existingGraph = WorkGraph(Set.empty)
         )
         .nodes shouldBe Set(
         WorkNode(
           idA,
-          version = 1,
+          modifiedTime = modifiedTime1,
           linkedIds = List(),
           componentId = ciHash(idA)))
     }
@@ -40,18 +40,18 @@ class WorkGraphUpdaterTest
     it("updating nothing with A->B gives A+B:A->B") {
       WorkGraphUpdater
         .update(
-          work = WorkStub(idA, version = 1, referencedWorkIds = Set(idB)),
+          work = WorkStub(idA, modifiedTime = modifiedTime1, referencedWorkIds = Set(idB)),
           existingGraph = WorkGraph(Set.empty)
         )
         .nodes shouldBe Set(
         WorkNode(
           idA,
-          version = 1,
+          modifiedTime = modifiedTime1,
           linkedIds = List(idB),
           componentId = ciHash(idA, idB)),
         WorkNode(
           idB,
-          version = None,
+          modifiedTime = None,
           linkedIds = List(),
           componentId = ciHash(idA, idB)))
     }
@@ -59,18 +59,18 @@ class WorkGraphUpdaterTest
     it("updating nothing with B->A gives A+B:B->A") {
       WorkGraphUpdater
         .update(
-          work = WorkStub(idB, version = 1, referencedWorkIds = Set(idA)),
+          work = WorkStub(idB, modifiedTime = modifiedTime1, referencedWorkIds = Set(idA)),
           existingGraph = WorkGraph(Set.empty)
         )
         .nodes shouldBe Set(
         WorkNode(
           idB,
-          version = 1,
+          modifiedTime = modifiedTime1,
           linkedIds = List(idA),
           componentId = ciHash(idA, idB)),
         WorkNode(
           idA,
-          version = None,
+          modifiedTime = None,
           linkedIds = List(),
           componentId = ciHash(idA, idB)))
     }
@@ -80,17 +80,17 @@ class WorkGraphUpdaterTest
     it("updating A, B with A->B gives A+B:(A->B, B)") {
       WorkGraphUpdater
         .update(
-          work = WorkStub(idA, version = 2, referencedWorkIds = Set(idB)),
+          work = WorkStub(idA, modifiedTime = modifiedTime2, referencedWorkIds = Set(idB)),
           existingGraph = WorkGraph(
             Set(
               WorkNode(
                 idA,
-                version = 1,
+                modifiedTime = modifiedTime1,
                 linkedIds = Nil,
                 componentId = ciHash(idA)),
               WorkNode(
                 idB,
-                version = 1,
+                modifiedTime = modifiedTime1,
                 linkedIds = Nil,
                 componentId = ciHash(idB))
             )
@@ -100,12 +100,12 @@ class WorkGraphUpdaterTest
         List(
           WorkNode(
             idA,
-            version = 2,
+            modifiedTime = modifiedTime2,
             linkedIds = List(idB),
             componentId = ciHash(idA, idB)),
           WorkNode(
             idB,
-            version = 1,
+            modifiedTime = modifiedTime1,
             linkedIds = List(),
             componentId = ciHash(idA, idB)))
     }
@@ -113,29 +113,29 @@ class WorkGraphUpdaterTest
     it("updating A->B with A->B gives A+B:(A->B, B)") {
       WorkGraphUpdater
         .update(
-          work = WorkStub(idA, version = 2, referencedWorkIds = Set(idB)),
+          work = WorkStub(idA, modifiedTime = modifiedTime2, referencedWorkIds = Set(idB)),
           existingGraph = WorkGraph(
             Set(
               WorkNode(
                 idA,
-                version = 1,
+                modifiedTime = modifiedTime1,
                 linkedIds = List(idB),
                 componentId = ciHash(idA, idB)),
               WorkNode(
                 idB,
-                version = 1,
+                modifiedTime = modifiedTime1,
                 linkedIds = Nil,
                 componentId = ciHash(idA, idB))))
         )
         .nodes shouldBe Set(
         WorkNode(
           idA,
-          version = 2,
+          modifiedTime = modifiedTime2,
           linkedIds = List(idB),
           componentId = ciHash(idA, idB)),
         WorkNode(
           idB,
-          version = 1,
+          modifiedTime = modifiedTime1,
           linkedIds = List(),
           componentId = ciHash(idA, idB))
       )
@@ -144,21 +144,21 @@ class WorkGraphUpdaterTest
     it("updating A->B, B, C with B->C gives A+B+C:(A->B, B->C, C)") {
       WorkGraphUpdater
         .update(
-          work = WorkStub(idB, version = 2, referencedWorkIds = Set(idC)),
+          work = WorkStub(idB, modifiedTime = modifiedTime2, referencedWorkIds = Set(idC)),
           existingGraph = WorkGraph(Set(
             WorkNode(
               idA,
-              version = 2,
+              modifiedTime = modifiedTime2,
               linkedIds = List(idB),
               componentId = "A+B"),
             WorkNode(
               idB,
-              version = 1,
+              modifiedTime = modifiedTime1,
               linkedIds = Nil,
               componentId = ciHash(idA, idB)),
             WorkNode(
               idC,
-              version = 1,
+              modifiedTime = modifiedTime1,
               linkedIds = Nil,
               componentId = ciHash(idC))
           ))
@@ -166,17 +166,17 @@ class WorkGraphUpdaterTest
         .nodes shouldBe Set(
         WorkNode(
           idA,
-          version = 2,
+          modifiedTime = modifiedTime2,
           linkedIds = List(idB),
           componentId = ciHash(idA, idB, idC)),
         WorkNode(
           idB,
-          version = 2,
+          modifiedTime = modifiedTime2,
           linkedIds = List(idC),
           componentId = ciHash(idA, idB, idC)),
         WorkNode(
           idC,
-          version = 1,
+          modifiedTime = modifiedTime1,
           linkedIds = List(),
           componentId = ciHash(idA, idB, idC))
       )
@@ -185,42 +185,42 @@ class WorkGraphUpdaterTest
     it("updating A->B, C->D with B->C gives A+B+C+D:(A->B, B->C, C->D, D)") {
       WorkGraphUpdater
         .update(
-          work = WorkStub(idB, version = 2, referencedWorkIds = Set(idC)),
+          work = WorkStub(idB, modifiedTime = modifiedTime2, referencedWorkIds = Set(idC)),
           existingGraph = WorkGraph(Set(
             WorkNode(
               idA,
-              version = 1,
+              modifiedTime = modifiedTime1,
               linkedIds = List(idB),
               componentId = "A+B"),
             WorkNode(
               idC,
-              version = 1,
+              modifiedTime = modifiedTime1,
               linkedIds = List(idD),
               componentId = "C+D"),
-            WorkNode(idB, version = 1, linkedIds = Nil, componentId = "A+B"),
-            WorkNode(idD, version = 1, linkedIds = Nil, componentId = "C+D")
+            WorkNode(idB, modifiedTime = modifiedTime1, linkedIds = Nil, componentId = "A+B"),
+            WorkNode(idD, modifiedTime = modifiedTime1, linkedIds = Nil, componentId = "C+D")
           ))
         )
         .nodes shouldBe
         Set(
           WorkNode(
             idA,
-            version = 1,
+            modifiedTime = modifiedTime1,
             linkedIds = List(idB),
             componentId = ciHash(idA, idB, idC, idD)),
           WorkNode(
             idB,
-            version = 2,
+            modifiedTime = modifiedTime2,
             linkedIds = List(idC),
             componentId = ciHash(idA, idB, idC, idD)),
           WorkNode(
             idC,
-            version = 1,
+            modifiedTime = modifiedTime1,
             linkedIds = List(idD),
             componentId = ciHash(idA, idB, idC, idD)),
           WorkNode(
             idD,
-            version = 1,
+            modifiedTime = modifiedTime1,
             linkedIds = List(),
             componentId = ciHash(idA, idB, idC, idD))
         )
@@ -229,26 +229,26 @@ class WorkGraphUpdaterTest
     it("updating A->B with B->[C,D] gives A+B+C+D:(A->B, B->C&D, C, D") {
       WorkGraphUpdater
         .update(
-          work = WorkStub(idB, version = 2, referencedWorkIds = Set(idC, idD)),
+          work = WorkStub(idB, modifiedTime = modifiedTime2, referencedWorkIds = Set(idC, idD)),
           existingGraph = WorkGraph(Set(
             WorkNode(
               idA,
-              version = 2,
+              modifiedTime = modifiedTime2,
               linkedIds = List(idB),
               componentId = "A+B"),
             WorkNode(
               idB,
-              version = 1,
+              modifiedTime = modifiedTime1,
               linkedIds = Nil,
               componentId = ciHash(idA, idB)),
             WorkNode(
               idC,
-              version = 1,
+              modifiedTime = modifiedTime1,
               linkedIds = Nil,
               componentId = ciHash(idC)),
             WorkNode(
               idD,
-              version = 1,
+              modifiedTime = modifiedTime1,
               linkedIds = Nil,
               componentId = ciHash(idD))
           ))
@@ -257,22 +257,22 @@ class WorkGraphUpdaterTest
         Set(
           WorkNode(
             idA,
-            version = 2,
+            modifiedTime = modifiedTime2,
             linkedIds = List(idB),
             componentId = ciHash(idA, idB, idC, idD)),
           WorkNode(
             idB,
-            version = 2,
+            modifiedTime = modifiedTime2,
             linkedIds = List(idC, idD),
             componentId = ciHash(idA, idB, idC, idD)),
           WorkNode(
             idC,
-            version = 1,
+            modifiedTime = modifiedTime1,
             linkedIds = List(),
             componentId = ciHash(idA, idB, idC, idD)),
           WorkNode(
             idD,
-            version = 1,
+            modifiedTime = modifiedTime1,
             linkedIds = List(),
             componentId = ciHash(idA, idB, idC, idD))
         )
@@ -281,35 +281,35 @@ class WorkGraphUpdaterTest
     it("updating A->B->C with A->C gives A+B+C:(A->B, B->C, C->A") {
       WorkGraphUpdater
         .update(
-          work = WorkStub(idC, version = 2, referencedWorkIds = Set(idA)),
+          work = WorkStub(idC, modifiedTime = modifiedTime2, referencedWorkIds = Set(idA)),
           existingGraph = WorkGraph(Set(
             WorkNode(
               idA,
-              version = 2,
+              modifiedTime = modifiedTime2,
               linkedIds = List(idB),
               componentId = "A+B+C"),
             WorkNode(
               idB,
-              version = 2,
+              modifiedTime = modifiedTime2,
               linkedIds = List(idC),
               componentId = "A+B+C"),
-            WorkNode(idC, version = 1, linkedIds = Nil, componentId = "A+B+C")
+            WorkNode(idC, modifiedTime = modifiedTime1, linkedIds = Nil, componentId = "A+B+C")
           ))
         )
         .nodes shouldBe Set(
         WorkNode(
           idA,
-          version = 2,
+          modifiedTime = modifiedTime2,
           linkedIds = List(idB),
           componentId = ciHash(idA, idB, idC)),
         WorkNode(
           idB,
-          version = 2,
+          modifiedTime = modifiedTime2,
           linkedIds = List(idC),
           componentId = ciHash(idA, idB, idC)),
         WorkNode(
           idC,
-          version = 2,
+          modifiedTime = modifiedTime2,
           linkedIds = List(idA),
           componentId = ciHash(idA, idB, idC))
       )
@@ -318,16 +318,16 @@ class WorkGraphUpdaterTest
 
   describe("Update version") {
     it("processes an update for a newer version") {
-      val existingVersion = 1
-      val updateVersion = 2
+      val existingModifiedTime = modifiedTime1
+      val updateModifiedTime = modifiedTime2
       WorkGraphUpdater
         .update(
-          work = WorkStub(idA, updateVersion, referencedWorkIds = Set(idB)),
+          work = WorkStub(idA, updateModifiedTime, referencedWorkIds = Set(idB)),
           existingGraph = WorkGraph(
             Set(
               WorkNode(
                 idA,
-                existingVersion,
+                existingModifiedTime,
                 linkedIds = Nil,
                 componentId = ciHash(idA))))
         )
@@ -335,29 +335,29 @@ class WorkGraphUpdaterTest
         List(
           WorkNode(
             idA,
-            updateVersion,
+            modifiedTime = updateModifiedTime,
             linkedIds = List(idB),
             componentId = ciHash(idA, idB)),
           WorkNode(
             idB,
-            version = None,
+            modifiedTime = None,
             linkedIds = List(),
             componentId = ciHash(idA, idB)))
     }
 
     it("doesn't process an update for a lower version") {
-      val existingVersion = 3
-      val updateVersion = 1
+      val existingModifiedTime = modifiedTime3
+      val updateModifiedTime = modifiedTime1
 
       val thrown = intercept[VersionExpectedConflictException] {
         WorkGraphUpdater
           .update(
-            work = WorkStub(idA, updateVersion, referencedWorkIds = Set(idB)),
+            work = WorkStub(idA, updateModifiedTime, referencedWorkIds = Set(idB)),
             existingGraph = WorkGraph(
               Set(
                 WorkNode(
                   idA,
-                  existingVersion,
+                  existingModifiedTime,
                   linkedIds = Nil,
                   componentId = ciHash(idA))))
           )
@@ -367,8 +367,8 @@ class WorkGraphUpdaterTest
 
     it(
       "processes an update for the same version if it's the same as the one stored") {
-      val existingVersion = 2
-      val updateVersion = 2
+      val existingVersion = modifiedTime2
+      val updateVersion = modifiedTime2
 
       WorkGraphUpdater
         .update(
@@ -382,7 +382,7 @@ class WorkGraphUpdaterTest
                 componentId = ciHash(idA, idB)),
               WorkNode(
                 idB,
-                version = 0,
+                modifiedTime = modifiedTime0,
                 linkedIds = List(),
                 componentId = ciHash(idA, idB))))
         )
@@ -395,30 +395,30 @@ class WorkGraphUpdaterTest
             componentId = ciHash(idA, idB)),
           WorkNode(
             idB,
-            version = 0,
+            modifiedTime = modifiedTime0,
             linkedIds = List(),
             componentId = ciHash(idA, idB)))
     }
 
     it(
       "doesn't process an update for the same version if the work is different from the one stored") {
-      val existingVersion = 2
-      val updateVersion = 2
+      val existingModifiedTime = modifiedTime2
+      val updateModifiedTime = modifiedTime2
 
       val thrown = intercept[VersionUnexpectedConflictException] {
         WorkGraphUpdater
           .update(
-            work = WorkStub(idA, updateVersion, referencedWorkIds = Set(idA)),
+            work = WorkStub(idA, updateModifiedTime, referencedWorkIds = Set(idA)),
             existingGraph = WorkGraph(
               Set(
                 WorkNode(
                   idA,
-                  existingVersion,
+                  existingModifiedTime,
                   linkedIds = List(idB),
                   componentId = ciHash(idA, idB)),
                 WorkNode(
                   idB,
-                  version = 0,
+                  modifiedTime = modifiedTime0,
                   linkedIds = List(),
                   componentId = ciHash(idA, idB))))
           )
@@ -431,29 +431,29 @@ class WorkGraphUpdaterTest
     it("updating  A->B with A gives A:A and B:B") {
       WorkGraphUpdater
         .update(
-          work = WorkStub(idA, version = 2, referencedWorkIds = Set.empty),
+          work = WorkStub(idA, modifiedTime = modifiedTime2, referencedWorkIds = Set.empty),
           existingGraph = WorkGraph(
             Set(
               WorkNode(
                 idA,
-                version = 1,
+                modifiedTime = modifiedTime1,
                 linkedIds = List(idB),
                 componentId = "A+B"),
               WorkNode(
                 idB,
-                version = 1,
+                modifiedTime = modifiedTime1,
                 linkedIds = List(),
                 componentId = "A+B")))
         )
         .nodes shouldBe Set(
         WorkNode(
           idA,
-          version = 2,
+          modifiedTime = modifiedTime2,
           linkedIds = List(),
           componentId = ciHash(idA)),
         WorkNode(
           idB,
-          version = 1,
+          modifiedTime = modifiedTime1,
           linkedIds = List(),
           componentId = ciHash(idB))
       )
@@ -462,21 +462,21 @@ class WorkGraphUpdaterTest
     it("updating A->B with A but NO B (*should* not occur) gives A:A and B:B") {
       WorkGraphUpdater
         .update(
-          work = WorkStub(idA, version = 2, referencedWorkIds = Set.empty),
+          work = WorkStub(idA, modifiedTime = modifiedTime2, referencedWorkIds = Set.empty),
           existingGraph = WorkGraph(
             Set(
               WorkNode(
                 idA,
-                version = 1,
+                modifiedTime = modifiedTime1,
                 linkedIds = List(idB),
                 componentId = "A+B")
             ))
         )
         .nodes shouldBe Set(
-        WorkNode(idA, version = 2, linkedIds = Nil, componentId = ciHash(idA)),
+        WorkNode(idA, modifiedTime = modifiedTime2, linkedIds = Nil, componentId = ciHash(idA)),
         WorkNode(
           idB,
-          version = None,
+          modifiedTime = None,
           linkedIds = Nil,
           componentId = ciHash(idB))
       )
@@ -485,68 +485,68 @@ class WorkGraphUpdaterTest
     it("updating A->B->C with B gives A+B:(A->B, B) and C:C") {
       WorkGraphUpdater
         .update(
-          work = WorkStub(idB, version = 3, referencedWorkIds = Set.empty),
+          work = WorkStub(idB, modifiedTime = modifiedTime3, referencedWorkIds = Set.empty),
           existingGraph = WorkGraph(Set(
             WorkNode(
               idA,
-              version = 2,
+              modifiedTime = modifiedTime2,
               linkedIds = List(idB),
               componentId = "A+B+C"),
             WorkNode(
               idB,
-              version = 2,
+              modifiedTime = modifiedTime2,
               linkedIds = List(idC),
               componentId = "A+B+C"),
-            WorkNode(idC, version = 1, linkedIds = Nil, componentId = "A+B+C")
+            WorkNode(idC, modifiedTime = modifiedTime1, linkedIds = Nil, componentId = "A+B+C")
           ))
         )
         .nodes shouldBe Set(
         WorkNode(
           idA,
-          version = 2,
+          modifiedTime = modifiedTime2,
           linkedIds = List(idB),
           componentId = ciHash(idA, idB)),
         WorkNode(
           idB,
-          version = 3,
+          modifiedTime = modifiedTime3,
           linkedIds = Nil,
           componentId = ciHash(idA, idB)),
-        WorkNode(idC, version = 1, linkedIds = Nil, componentId = ciHash(idC))
+        WorkNode(idC, modifiedTime = modifiedTime1, linkedIds = Nil, componentId = ciHash(idC))
       )
     }
 
     it("updating A<->B->C with B->C gives A+B+C:(A->B, B->C, C)") {
       WorkGraphUpdater
         .update(
-          work = WorkStub(idB, version = 3, referencedWorkIds = Set(idC)),
+          work = WorkStub(idB, modifiedTime = modifiedTime3, referencedWorkIds = Set(idC)),
           existingGraph = WorkGraph(Set(
             WorkNode(
               idA,
-              version = 2,
+              modifiedTime = modifiedTime2,
               linkedIds = List(idB),
               componentId = "A+B+C"),
             WorkNode(
               idB,
-              version = 2,
+              modifiedTime = modifiedTime2,
               linkedIds = List(idA, idC),
               componentId = "A+B+C"),
-            WorkNode(idC, version = 1, linkedIds = Nil, componentId = "A+B+C")
+            WorkNode(idC, modifiedTime = modifiedTime1, linkedIds = Nil, componentId = "A+B+C")
           ))
         )
         .nodes shouldBe Set(
         WorkNode(
           idA,
-          version = 2,
+          modifiedTime = modifiedTime2,
           linkedIds = List(idB),
           componentId = ciHash(idA, idB, idC)),
         WorkNode(
           idB,
-          version = 3,
+          modifiedTime = modifiedTime3,
           linkedIds = List(idC),
           componentId = ciHash(idA, idB, idC)),
         WorkNode(
           idC,
-          version = 1,
+          modifiedTime = modifiedTime1,
           linkedIds = Nil,
           componentId = ciHash(idA, idB, idC))
       )

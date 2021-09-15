@@ -44,15 +44,14 @@ class ElasticWorkStubRetrieverTest
 
   }
 
-  override def withContext[R](links: Seq[WorkStub])(
+  override def withContext[R](workStubs: Seq[WorkStub])(
     testWith: TestWith[Index, R]): R =
     withLocalElasticsearchIndex(config = WorksIndexConfig.identified) { index =>
       withElasticIndexer[Work[WorkState.Identified], R](index) { indexer =>
-        val works: Seq[Work[WorkState.Identified]] = links.map { lk =>
-          identifiedWork(canonicalId = lk.id)
-            .withVersion(lk.version)
+        val works: Seq[Work[WorkState.Identified]] = workStubs.map { w =>
+          identifiedWork(canonicalId = w.id, sourceModifiedTime = w.modifiedTime)
             .mergeCandidates(
-              lk.referencedWorkIds.map { id =>
+              w.referencedWorkIds.map { id =>
                 MergeCandidate(
                   id = IdState.Identified(
                     canonicalId = id,

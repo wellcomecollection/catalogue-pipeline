@@ -29,7 +29,7 @@ class WorkGraphStoreTest
             workGraphStore.findAffectedWorks(
               WorkStub(
                 createCanonicalId,
-                version = 0,
+                modifiedTime = modifiedTime0,
                 referencedWorkIds = Set.empty))) { workGraph =>
             workGraph shouldBe WorkGraph(Set.empty)
           }
@@ -44,13 +44,13 @@ class WorkGraphStoreTest
           val work =
             WorkNode(
               id = idA,
-              version = 0,
+              modifiedTime = modifiedTime0,
               linkedIds = Nil,
               componentId = ciHash(idA))
           put(dynamoClient, graphTable.name)(work)
 
           whenReady(
-            workGraphStore.findAffectedWorks(WorkStub(idA, 0, Set.empty))) {
+            workGraphStore.findAffectedWorks(WorkStub(id = idA, modifiedTime = modifiedTime0, referencedWorkIds = Set.empty))) {
             workGraph =>
               workGraph shouldBe WorkGraph(Set(work))
           }
@@ -64,20 +64,20 @@ class WorkGraphStoreTest
           val workA =
             WorkNode(
               id = idA,
-              version = 0,
+              modifiedTime = modifiedTime0,
               linkedIds = Nil,
               componentId = ciHash(idA))
           val workB =
             WorkNode(
               id = idB,
-              version = 0,
+              modifiedTime = modifiedTime0,
               linkedIds = Nil,
               componentId = ciHash(idB))
           put(dynamoClient, graphTable.name)(workA)
           put(dynamoClient, graphTable.name)(workB)
 
           whenReady(
-            workGraphStore.findAffectedWorks(WorkStub(idA, 0, Set(idB)))) {
+            workGraphStore.findAffectedWorks(WorkStub(id = idA, modifiedTime = modifiedTime0, referencedWorkIds = Set(idB)))) {
             workGraph =>
               workGraph.nodes shouldBe Set(workA, workB)
           }
@@ -91,13 +91,13 @@ class WorkGraphStoreTest
           val workA =
             WorkNode(
               id = idA,
-              version = 0,
+              modifiedTime = modifiedTime0,
               linkedIds = List(idB),
               componentId = ciHash(idA, idB))
           val workB =
             WorkNode(
               id = idB,
-              version = 0,
+              modifiedTime = modifiedTime0,
               linkedIds = Nil,
               componentId = ciHash(idA, idB))
 
@@ -106,7 +106,7 @@ class WorkGraphStoreTest
 
           whenReady(
             workGraphStore.findAffectedWorks(
-              WorkStub(idA, version = 0, referencedWorkIds = Set.empty))) {
+              WorkStub(idA, modifiedTime = modifiedTime0, referencedWorkIds = Set.empty))) {
             workGraph =>
               workGraph.nodes shouldBe Set(workA, workB)
           }
@@ -121,18 +121,18 @@ class WorkGraphStoreTest
           val workA =
             WorkNode(
               id = idA,
-              version = 0,
+              modifiedTime = modifiedTime0,
               linkedIds = List(idB),
               componentId = ciHash(idA, idB, idC))
           val workB =
             WorkNode(
               id = idB,
-              version = 0,
+              modifiedTime = modifiedTime0,
               linkedIds = List(idC),
               componentId = ciHash(idA, idB, idC))
           val workC = WorkNode(
             id = idC,
-            version = 0,
+            modifiedTime = modifiedTime0,
             linkedIds = Nil,
             componentId = ciHash(idA, idB, idC))
 
@@ -141,7 +141,7 @@ class WorkGraphStoreTest
           put(dynamoClient, graphTable.name)(workC)
 
           whenReady(
-            workGraphStore.findAffectedWorks(WorkStub(idA, 0, Set.empty))) {
+            workGraphStore.findAffectedWorks(WorkStub(id = idA, modifiedTime = modifiedTime0, referencedWorkIds = Set.empty))) {
             workGraph =>
               workGraph.nodes shouldBe Set(workA, workB, workC)
           }
@@ -156,19 +156,19 @@ class WorkGraphStoreTest
           val workA =
             WorkNode(
               id = idA,
-              version = 0,
+              modifiedTime = modifiedTime0,
               linkedIds = List(idB),
               componentId = ciHash(idA, idB))
           val workB =
             WorkNode(
               id = idB,
-              version = 0,
+              modifiedTime = modifiedTime0,
               linkedIds = Nil,
               componentId = ciHash(idA, idB))
           val workC =
             WorkNode(
               id = idC,
-              version = 0,
+              modifiedTime = modifiedTime0,
               linkedIds = Nil,
               componentId = ciHash(idC))
 
@@ -176,7 +176,7 @@ class WorkGraphStoreTest
           put(dynamoClient, graphTable.name)(workB)
           put(dynamoClient, graphTable.name)(workC)
 
-          val work = WorkStub(idB, version = 0, referencedWorkIds = Set(idC))
+          val work = WorkStub(idB, modifiedTime = modifiedTime0, referencedWorkIds = Set(idC))
 
           whenReady(workGraphStore.findAffectedWorks(work)) { workGraph =>
             workGraph.nodes shouldBe Set(workA, workB, workC)
@@ -192,12 +192,12 @@ class WorkGraphStoreTest
         withWorkGraphStore(graphTable) { workGraphStore =>
           val workNodeA = WorkNode(
             idA,
-            version = 0,
+            modifiedTime = modifiedTime0,
             linkedIds = List(idB),
             componentId = ciHash(idA, idB))
           val workNodeB = WorkNode(
             idB,
-            version = 0,
+            modifiedTime = modifiedTime0,
             linkedIds = Nil,
             componentId = ciHash(idA, idB))
 
@@ -229,7 +229,7 @@ class WorkGraphStoreTest
 
     val workNode = WorkNode(
       idA,
-      version = 0,
+      modifiedTime = modifiedTime0,
       linkedIds = Nil,
       componentId = ciHash(idA, idB))
 

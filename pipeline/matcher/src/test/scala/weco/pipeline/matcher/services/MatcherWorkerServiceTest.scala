@@ -36,12 +36,12 @@ class MatcherWorkerServiceTest
   private val identifierC = createIdentifier("CCCCCCCC")
 
   it("matches a Work which doesn't reference any other Works") {
-    val workLinks = createWorkStubWith(id = identifierA)
+    val work = createWorkStubWith(id = identifierA)
     val expectedWorks =
       Set(
         MatchedIdentifiers(
-          identifiers =
-            Set(WorkIdentifier(workLinks.id, version = workLinks.version)))
+          identifiers = Set(WorkIdentifier(work))
+        )
       )
 
     implicit val retriever: MemoryRetriever[WorkStub] =
@@ -50,7 +50,7 @@ class MatcherWorkerServiceTest
 
     withLocalSqsQueue() { implicit queue =>
       withWorkerService(retriever, queue, messageSender) { _ =>
-        processAndAssertMatchedWorkIs(workLinks, expectedWorks = expectedWorks)
+        processAndAssertMatchedWorkIs(work, expectedWorks = expectedWorks)
       }
     }
   }
@@ -59,7 +59,7 @@ class MatcherWorkerServiceTest
     // Work Av1
     val workLinksAv1 = createWorkStubWith(
       id = identifierA,
-      version = 1,
+      modifiedTime = modifiedTime1,
       referencedIds = Set(identifierB)
     )
 
@@ -70,8 +70,8 @@ class MatcherWorkerServiceTest
       Set(
         MatchedIdentifiers(
           identifiers = Set(
-            WorkIdentifier(identifierA.canonicalId, version = Some(1)),
-            WorkIdentifier(identifierB.canonicalId, version = None)
+            WorkIdentifier(identifierA.canonicalId, modifiedTime = modifiedTime1),
+            WorkIdentifier(identifierB.canonicalId, modifiedTime = None)
           )
         )
       )
@@ -93,35 +93,35 @@ class MatcherWorkerServiceTest
     // Work Av1
     val workLinksAv1 = createWorkStubWith(
       id = identifierA,
-      version = 1
+      modifiedTime = modifiedTime1
     )
 
     val expectedWorksAv1 =
       Set(
         MatchedIdentifiers(
           identifiers =
-            Set(WorkIdentifier(identifierA.canonicalId, version = 1))
+            Set(WorkIdentifier(identifierA.canonicalId, modifiedTime = modifiedTime1))
         )
       )
 
     // Work Bv1
     val workLinksBv1 = createWorkStubWith(
       id = identifierB,
-      version = 1
+      modifiedTime = modifiedTime1
     )
 
     val expectedWorksBv1 =
       Set(
         MatchedIdentifiers(
           identifiers =
-            Set(WorkIdentifier(identifierB.canonicalId, version = 1))
+            Set(WorkIdentifier(identifierB.canonicalId, modifiedTime = modifiedTime1))
         )
       )
 
     // Work Av2 matched to B
     val workLinksAv2 = createWorkStubWith(
       id = identifierA,
-      version = 2,
+      modifiedTime = modifiedTime2,
       referencedIds = Set(identifierB)
     )
 
@@ -129,8 +129,8 @@ class MatcherWorkerServiceTest
       Set(
         MatchedIdentifiers(
           identifiers = Set(
-            WorkIdentifier(identifierA.canonicalId, version = 2),
-            WorkIdentifier(identifierB.canonicalId, version = 1)
+            WorkIdentifier(identifierA.canonicalId, modifiedTime = modifiedTime2),
+            WorkIdentifier(identifierB.canonicalId, modifiedTime = modifiedTime1)
           )
         )
       )
@@ -138,21 +138,21 @@ class MatcherWorkerServiceTest
     // Work Cv1
     val workLinksCv1 = createWorkStubWith(
       id = identifierC,
-      version = 1
+      modifiedTime = modifiedTime1
     )
 
     val expectedWorksCv1 =
       Set(
         MatchedIdentifiers(
           identifiers =
-            Set(WorkIdentifier(identifierC.canonicalId, version = 1))
+            Set(WorkIdentifier(identifierC.canonicalId, modifiedTime = modifiedTime1))
         )
       )
 
     // Work Bv2 matched to C
     val workLinksBv2 = createWorkStubWith(
       id = identifierB,
-      version = 2,
+      modifiedTime = modifiedTime2,
       referencedIds = Set(identifierC)
     )
 
@@ -160,9 +160,9 @@ class MatcherWorkerServiceTest
       Set(
         MatchedIdentifiers(
           identifiers = Set(
-            WorkIdentifier(identifierA.canonicalId, version = 2),
-            WorkIdentifier(identifierB.canonicalId, version = 2),
-            WorkIdentifier(identifierC.canonicalId, version = 1)
+            WorkIdentifier(identifierA.canonicalId, modifiedTime = modifiedTime2),
+            WorkIdentifier(identifierB.canonicalId, modifiedTime = modifiedTime2),
+            WorkIdentifier(identifierC.canonicalId, modifiedTime = modifiedTime1)
           )
         )
       )
@@ -186,28 +186,28 @@ class MatcherWorkerServiceTest
     // Work Av1
     val workLinksAv1 = createWorkStubWith(
       id = identifierA,
-      version = 1
+      modifiedTime = modifiedTime1
     )
 
     val expectedWorksAv1 =
       Set(
         MatchedIdentifiers(
           identifiers =
-            Set(WorkIdentifier(identifierA.canonicalId, version = 1))
+            Set(WorkIdentifier(identifierA.canonicalId, modifiedTime = modifiedTime1))
         )
       )
 
     // Work Bv1
     val workLinksBv1 = createWorkStubWith(
       id = identifierB,
-      version = 1
+      modifiedTime = modifiedTime1
     )
 
     val expectedWorksBv1 =
       Set(
         MatchedIdentifiers(
           identifiers =
-            Set(WorkIdentifier(identifierB.canonicalId, version = 1))
+            Set(WorkIdentifier(identifierB.canonicalId, modifiedTime = modifiedTime1))
         )
       )
 
@@ -215,7 +215,7 @@ class MatcherWorkerServiceTest
     val workLinksAv2MatchedToB =
       createWorkStubWith(
         id = identifierA,
-        version = 2,
+        modifiedTime = modifiedTime2,
         referencedIds = Set(identifierB)
       )
 
@@ -223,8 +223,8 @@ class MatcherWorkerServiceTest
       Set(
         MatchedIdentifiers(
           identifiers = Set(
-            WorkIdentifier(identifierA.canonicalId, version = 2),
-            WorkIdentifier(identifierB.canonicalId, version = 1)
+            WorkIdentifier(identifierA.canonicalId, modifiedTime = modifiedTime2),
+            WorkIdentifier(identifierB.canonicalId, modifiedTime = modifiedTime1)
           )
         )
       )
@@ -233,18 +233,18 @@ class MatcherWorkerServiceTest
     val workLinksAv3WithNoMatchingWorks =
       createWorkStubWith(
         id = identifierA,
-        version = 3
+        modifiedTime = modifiedTime3
       )
 
     val expectedWorksAv3 =
       Set(
         MatchedIdentifiers(
           identifiers =
-            Set(WorkIdentifier(identifierA.canonicalId, version = 3))
+            Set(WorkIdentifier(identifierA.canonicalId, modifiedTime = modifiedTime3))
         ),
         MatchedIdentifiers(
           identifiers =
-            Set(WorkIdentifier(identifierB.canonicalId, version = 1))
+            Set(WorkIdentifier(identifierB.canonicalId, modifiedTime = modifiedTime1))
         )
       )
 
@@ -269,14 +269,14 @@ class MatcherWorkerServiceTest
   it("does not match a lower version") {
     val workLinksAv2 = createWorkStubWith(
       id = identifierA,
-      version = 2
+      modifiedTime = modifiedTime2
     )
 
     val expectedWorkAv2 =
       Set(
         MatchedIdentifiers(
           identifiers =
-            Set(WorkIdentifier(identifierA.canonicalId, version = 2))
+            Set(WorkIdentifier(identifierA.canonicalId, modifiedTime = modifiedTime2))
         )
       )
 
@@ -295,7 +295,7 @@ class MatcherWorkerServiceTest
           val workLinksAv1 =
             createWorkStubWith(
               id = identifierA,
-              version = 1
+              modifiedTime = modifiedTime1
             )
 
           sendWork(workLinksAv1, retriever, queue)
@@ -315,14 +315,14 @@ class MatcherWorkerServiceTest
   it("does not match an existing version with different information") {
     val workLinksAv2 = createWorkStubWith(
       id = identifierA,
-      version = 2
+      modifiedTime = modifiedTime2
     )
 
     val expectedWorkAv2 =
       Set(
         MatchedIdentifiers(
           identifiers =
-            Set(WorkIdentifier(identifierA.canonicalId, version = 2))
+            Set(WorkIdentifier(identifierA.canonicalId, modifiedTime = modifiedTime2))
         )
       )
 
@@ -341,7 +341,7 @@ class MatcherWorkerServiceTest
           val differentWorkLinksAv2 =
             createWorkStubWith(
               id = identifierA,
-              version = 2,
+              modifiedTime = modifiedTime2,
               referencedIds = Set(identifierB)
             )
 
@@ -355,14 +355,14 @@ class MatcherWorkerServiceTest
   }
 
   private def processAndAssertMatchedWorkIs(
-                                             links: WorkStub,
-                                             expectedWorks: Set[MatchedIdentifiers])(
-                                             implicit
-                                             retriever: MemoryRetriever[WorkStub],
-                                             queue: SQS.Queue,
-                                             messageSender: MemoryMessageSender
+    work: WorkStub,
+    expectedWorks: Set[MatchedIdentifiers])(
+    implicit
+    retriever: MemoryRetriever[WorkStub],
+    queue: SQS.Queue,
+    messageSender: MemoryMessageSender
   ): Assertion = {
-    sendWork(links, retriever, queue)
+    sendWork(work, retriever, queue)
     eventually {
       val result = messageSender.getMessages[MatcherResult].last
 

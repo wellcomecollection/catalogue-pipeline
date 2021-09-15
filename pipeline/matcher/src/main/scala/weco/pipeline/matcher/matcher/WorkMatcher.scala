@@ -9,6 +9,7 @@ import weco.pipeline.matcher.models.{
   MatcherResult,
   WorkGraph,
   WorkIdentifier,
+  WorkNode,
   WorkStub
 }
 import weco.pipeline.matcher.storage.WorkGraphStore
@@ -98,7 +99,7 @@ class WorkMatcher(
     g.nodes
       .groupBy { _.componentId }
       .map {
-        case (_, workNodes) =>
+        case (_, workNodes: Set[WorkNode]) =>
           MatchedIdentifiers(workNodes.map(WorkIdentifier(_)))
       }
       .toSet

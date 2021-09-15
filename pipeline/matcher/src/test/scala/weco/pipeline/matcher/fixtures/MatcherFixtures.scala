@@ -3,12 +3,7 @@ package weco.pipeline.matcher.fixtures
 import org.apache.commons.codec.digest.DigestUtils
 import org.scanamo.generic.semiauto.deriveDynamoFormat
 import org.scanamo.query.UniqueKey
-import org.scanamo.{
-  DynamoFormat,
-  DynamoReadError,
-  Scanamo,
-  Table => ScanamoTable
-}
+import org.scanamo.{DynamoFormat, DynamoReadError, Scanamo, Table => ScanamoTable}
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import weco.catalogue.internal_model.identifiers.CanonicalId
 import weco.fixtures.TestWith
@@ -16,7 +11,7 @@ import weco.messaging.fixtures.SQS
 import weco.messaging.memory.MemoryMessageSender
 import weco.messaging.sns.NotificationMessage
 import weco.pipeline.matcher.matcher.WorkMatcher
-import weco.pipeline.matcher.models.{MatcherResult, WorkStub, WorkNode}
+import weco.pipeline.matcher.models.{MatcherResult, WorkNode, WorkStub}
 import weco.pipeline.matcher.services.MatcherWorkerService
 import weco.pipeline.matcher.storage.{WorkGraphStore, WorkNodeDao}
 import weco.pipeline_storage.fixtures.PipelineStorageStreamFixtures
@@ -29,6 +24,7 @@ import weco.storage.locking.dynamo.{
 }
 import weco.storage.locking.memory.{MemoryLockDao, MemoryLockingService}
 
+import java.time.Instant
 import java.util.UUID
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -38,6 +34,11 @@ trait MatcherFixtures
     extends PipelineStorageStreamFixtures
     with DynamoLockDaoFixtures
     with LocalWorkGraphDynamoDb {
+
+  val modifiedTime0 = Instant.ofEpochSecond(0)
+  val modifiedTime1 = Instant.ofEpochSecond(1)
+  val modifiedTime2 = Instant.ofEpochSecond(2)
+  val modifiedTime3 = Instant.ofEpochSecond(3)
 
   implicit val workNodeFormat: DynamoFormat[WorkNode] = deriveDynamoFormat
   implicit val lockFormat: DynamoFormat[ExpiringLock] = deriveDynamoFormat

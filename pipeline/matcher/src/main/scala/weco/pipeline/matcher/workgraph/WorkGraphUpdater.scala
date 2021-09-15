@@ -9,9 +9,11 @@ import weco.pipeline.matcher.models.{
   VersionExpectedConflictException,
   VersionUnexpectedConflictException,
   WorkGraph,
-  WorkStub,
-  WorkNode
+  WorkNode,
+  WorkStub
 }
+
+import java.time.Instant
 
 object WorkGraphUpdater extends Logging {
   def update(work: WorkStub, existingGraph: WorkGraph): WorkGraph = {
@@ -23,16 +25,16 @@ object WorkGraphUpdater extends Logging {
                                     existingGraph: WorkGraph): Unit = {
     val maybeExistingNode = existingGraph.nodes.find(_.id == work.id)
     maybeExistingNode match {
-      case Some(WorkNode(_, Some(existingVersion), linkedIds, _)) =>
-        if (existingVersion > work.version) {
+      case Some(WorkNode(_, Some(existingModifiedTime), linkedIds, _)) =>
+        if (existingModifiedTime.isAfter(work.modifiedTime)) {
           val versionConflictMessage =
-            s"update failed, work:${work.id} v${work.version} is not newer than existing work v$existingVersion"
+            s"update failed, work:${work.id} (modified ${work.modifiedTime}) is not newer than existing work (modified $existingModifiedTime)"
           debug(versionConflictMessage)
           throw VersionExpectedConflictException(versionConflictMessage)
         }
-        if (existingVersion == work.version && work.referencedWorkIds != linkedIds.toSet) {
+        if (existingModifiedTime == work.modifiedTime && work.referencedWorkIds != linkedIds.toSet) {
           val versionConflictMessage =
-            s"update failed, work:${work.id} v${work.version} already exists with different content! update-ids:${work.referencedWorkIds} != existing-ids:${linkedIds.toSet}"
+            s"update failed, work:${work.id} (modified ${work.modifiedTime}) already exists with different content! update-ids:${work.referencedWorkIds} != existing-ids:${linkedIds.toSet}"
           debug(versionConflictMessage)
           throw VersionUnexpectedConflictException(versionConflictMessage)
         }
@@ -57,14 +59,14 @@ object WorkGraphUpdater extends Logging {
     val linkedWorks =
       existingGraph.nodes.filterNot(_.id == work.id)
 
-    // Create a map (work ID) -> (version) for every work in the graph.
+    // Create a map (work ID) -> (modified time) for every work in the graph.
     //
     // Every work in the existing graph will be in this list.
     //
-    val workVersions: Map[CanonicalId, Int] =
+    val workModifiedTimes: Map[CanonicalId, Instant] =
       linkedWorks.collect {
-        case WorkNode(id, Some(version), _, _) => (id, version)
-      }.toMap + (work.id -> work.version)
+        case WorkNode(id, Some(modifiedTime), _, _) => (id, modifiedTime)
+      }.toMap + (work.id -> work.modifiedTime)
 
     // Create a list of all the connections between works in the graph.
     //
@@ -126,7 +128,7 @@ object WorkGraphUpdater extends Logging {
           component.nodes.map(node => {
             WorkNode(
               id = node.value,
-              version = workVersions.get(node.value),
+              modifiedTime = workModifiedTimes.get(node.value),
               linkedIds = linkedWorkIds(node),
               componentId = componentIdentifier(nodeIds))
           })

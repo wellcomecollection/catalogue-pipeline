@@ -2,17 +2,19 @@ package weco.pipeline.matcher.models
 
 import weco.catalogue.internal_model.identifiers.CanonicalId
 
+import java.time.Instant
+
 case class WorkNode(
   id: CanonicalId,
-  version: Option[Int],
+  modifiedTime: Option[Instant],
   linkedIds: List[CanonicalId],
   componentId: String
 )
 
 object WorkNode {
   def apply(id: CanonicalId,
-            version: Int,
+            modifiedTime: Instant,
             linkedIds: List[CanonicalId],
             componentId: String): WorkNode =
-    WorkNode(id, Some(version), linkedIds, componentId)
+    WorkNode(id, Some(modifiedTime), linkedIds, componentId)
 }
