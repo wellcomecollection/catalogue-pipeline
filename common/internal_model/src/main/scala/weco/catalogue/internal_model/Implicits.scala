@@ -32,21 +32,21 @@ object Implicits {
   // dependencies (thus preventing duplicate work)
 
   implicit val _decAccessCondition: Decoder[AccessCondition] =
-    deriveConfiguredDecoder
+    AccessCondition.decoder
   implicit val _decNote: Decoder[Note] = deriveConfiguredDecoder
 
   implicit val _decIdentifierType: Decoder[IdentifierType] =
     IdentifierType.identifierTypeDecoder
   implicit val _decSourceIdentifier: Decoder[SourceIdentifier] =
-    deriveConfiguredDecoder
+    SourceIdentifier.decoder
   implicit val _decCanonicalId: Decoder[CanonicalId] = CanonicalId.decoder
   implicit val _decReferenceNumber: Decoder[ReferenceNumber] =
     ReferenceNumber.decoder
 
   implicit val _decIdStateIdentified: Decoder[IdState.Identified] =
-    deriveConfiguredDecoder
+    IdState.Identified.decoder
   implicit val _decIdStateIdentifiable: Decoder[IdState.Identifiable] =
-    deriveConfiguredDecoder
+    IdState.Identifiable.decoder
   implicit val _decIdStateUnminted: Decoder[IdState.Unminted] =
     deriveConfiguredDecoder
   implicit val _decIdStateMinted: Decoder[IdState.Minted] =
@@ -296,13 +296,13 @@ object Implicits {
     deriveConfiguredDecoder
 
   implicit val _encAccessCondition: Encoder[AccessCondition] =
-    deriveConfiguredEncoder
+    AccessCondition.encoder
   implicit val _encNote: Encoder[Note] = deriveConfiguredEncoder
 
   implicit val _encIdentifierType: Encoder[IdentifierType] =
     IdentifierType.identifierTypeEncoder
   implicit val _encSourceIdentifier: Encoder[SourceIdentifier] =
-    deriveConfiguredEncoder
+    SourceIdentifier.encoder
   implicit val _encCanonicalId: Encoder[CanonicalId] = CanonicalId.encoder
   implicit val _envReferenceNumber: Encoder[ReferenceNumber] =
     ReferenceNumber.encoder

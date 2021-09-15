@@ -1,5 +1,7 @@
 package weco.catalogue.internal_model.identifiers
 
+import io.circe.{Decoder, Encoder}
+
 /** Represents an ID that is attached to individual pieces of work data.
   *  The ID can be in 3 possible states:
   *
@@ -34,6 +36,14 @@ object IdState {
     def allSourceIdentifiers = sourceIdentifier +: otherIdentifiers
   }
 
+  case object Identified {
+    implicit val encoder: Encoder[Identified] =
+      Encoder.forProduct3[Identified, CanonicalId, SourceIdentifier, List[SourceIdentifier]]("canonicalId", "sourceIdentifier", "otherIdentifiers")((id: Identified) => (id.canonicalId, id.sourceIdentifier, id.otherIdentifiers))
+
+    implicit val decoder: Decoder[Identified] =
+      Decoder.forProduct3[Identified, CanonicalId, SourceIdentifier, List[SourceIdentifier]]("canonicalId", "sourceIdentifier", "otherIdentifiers")((canonicalId, sourceIdentifier, otherIdentifiers) => Identified(canonicalId, sourceIdentifier, otherIdentifiers))
+  }
+
   /** Represents an ID that has not yet been minted, but will have a canonicalId
     *  assigned later in the pipeline. */
   case class Identifiable(
@@ -43,6 +53,14 @@ object IdState {
   ) extends Unminted {
     def maybeCanonicalId = None
     def allSourceIdentifiers = sourceIdentifier +: otherIdentifiers
+  }
+
+  case object Identifiable {
+    implicit val encoder: Encoder[Identifiable] =
+      Encoder.forProduct3[Identifiable, SourceIdentifier, List[SourceIdentifier], String]("sourceIdentifier", "otherIdentifiers", "identifiedType")((id: Identifiable) => (id.sourceIdentifier, id.otherIdentifiers, id.identifiedType))
+
+    implicit val decoder: Decoder[Identifiable] =
+      Decoder.forProduct3[Identifiable, SourceIdentifier, List[SourceIdentifier], String]("sourceIdentifier", "otherIdentifiers", "identifiedType")((sourceIdentifier, otherIdentifiers, identifiedType) => Identifiable(sourceIdentifier, otherIdentifiers, identifiedType))
   }
 
   /** Represents an ID that has no sourceIdentifier and thus impossible to have a
