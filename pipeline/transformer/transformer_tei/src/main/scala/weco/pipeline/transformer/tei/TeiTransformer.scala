@@ -51,12 +51,14 @@ class TeiTransformer(store: Store[S3ObjectLocation, String])
     } yield teiData.toWork(time, version)
   }
 
-  private def parse(teiXml: TeiXml): Either[Throwable, TeiData] =
-    for {
+  private def parse(teiXml: TeiXml): Either[Throwable, TeiData] = {
+
+    val throwableOrData = for {
       summary <- teiXml.summary
       bNumber <- teiXml.bNumber
       title <- teiXml.title
       languages <- TeiLanguages(teiXml.xml)
-      nestedData <- teiXml.nestedTeiData
-    } yield TeiData(teiXml.id, title, bNumber, summary, languages, nestedData)
+    } yield TeiData(teiXml.id, title, bNumber, summary, languages, teiXml.nestedTeiData)
+    throwableOrData
+  }
 }

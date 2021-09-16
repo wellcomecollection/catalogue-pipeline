@@ -99,7 +99,7 @@ class TeiDataTest
       title = "This is the title",
       bNumber = Some("fjhsdg"),
       description = Some("This is the description"),
-      nestedTeiData = List(firstInnerTeiData, secondInnerTeiData)
+      nestedTeiData = Right(List(firstInnerTeiData, secondInnerTeiData))
     )
 
     val work = teiData.toWork(Instant.now(), 1)
@@ -130,6 +130,20 @@ class TeiDataTest
       secondInternalWorkStub)
   }
 
+  it("uses only toplevel data if it fails extracting nested data") {
+
+    val title = "This is the top-level title"
+    val teiData = TeiData(
+      id = "id",
+      title = title,
+      nestedTeiData = Left(new RuntimeException("Boom"))
+    )
+
+    val work = teiData.toWork(Instant.now(), 1)
+
+    work.state.internalWorkStubs shouldBe empty
+    work.data.title shouldBe Some(title)
+  }
   describe("if there's a single inner data") {
     it("uses the title of the item") {
       val innerTeiData = TeiData(
@@ -139,7 +153,7 @@ class TeiDataTest
       val teiData = TeiData(
         id = "id",
         title = "This is the top-level title",
-        nestedTeiData = List(innerTeiData)
+        nestedTeiData = Right(List(innerTeiData))
       )
 
       val work = teiData.toWork(Instant.now(), 1)
