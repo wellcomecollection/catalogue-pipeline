@@ -20,11 +20,15 @@ import java.time.Instant
   */
 sealed trait Work[State <: WorkState] {
 
-  val version: Int
   val state: State
   val data: WorkData[State#WorkDataState]
 
   def sourceIdentifier: SourceIdentifier = state.sourceIdentifier
+
+  // This version has no meaning in the pipeline -- it comes from the version
+  // in the adapter, so we can trace a Work back to the exact source record
+  // that was used to create it in the transformer.
+  val version: Int
 
   def id: String = state.id
 
