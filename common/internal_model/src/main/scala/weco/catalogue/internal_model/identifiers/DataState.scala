@@ -5,7 +5,6 @@ package weco.catalogue.internal_model.identifiers
   *
   * - Id (references an ID type, always with a source identifier)
   * - MaybeId (references an ID type, potentially with a source identifier)
-  * - WorkImage (references the type of the image inside the work data)
   */
 sealed trait DataState {
   type Id
