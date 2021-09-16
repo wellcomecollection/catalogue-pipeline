@@ -13,18 +13,18 @@ object TeiLanguages {
   def apply(xml: Elem): Result[List[Language]] = parseLanguages(xml \\ "msDesc" \ "msContents" )
 
   /** The languages of the TEI are in `textLang` nodes under `msContents`.
-   *
-   * <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id={id}>
-   * <teiHeader>
-   * <fileDesc>
-   * <sourceDesc>
-   * <msDesc xml:lang="en" xml:id="MS_Arabic_1">
-   * <msContents>
-   * <textLang mainLang={id} source="IANA">{label}</textLang>
-   *
-   * This function extracts all the nodes from a parsed XML and returns
-   * a list of (id, label) pairs.
-   */
+    *
+    * <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id={id}>
+    *   <teiHeader>
+    *     <fileDesc>
+    *       <sourceDesc>
+    *         <msDesc xml:lang="en" xml:id="MS_Arabic_1">
+    *           <msContents>
+    *             <textLang mainLang={id} source="IANA">{label}</textLang>
+    *
+    * This function extracts all the nodes from a parsed XML and returns
+    * a list of (id, label) pairs.
+    */
   def parseLanguages(value: NodeSeq): Either[Throwable, List[Language]] = (value \ "textLang").map { n =>
       val label = n.text
 
