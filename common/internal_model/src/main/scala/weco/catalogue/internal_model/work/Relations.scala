@@ -36,12 +36,6 @@ object Relations {
     )
 }
 
-/** A relation contains a particular related work
-  *
-  * @param data The work data
-  * @param id The ID
-  * @param depth The depth of the relation in the tree
-  */
 case class Relation(
   id: CanonicalId,
   title: Option[String],
