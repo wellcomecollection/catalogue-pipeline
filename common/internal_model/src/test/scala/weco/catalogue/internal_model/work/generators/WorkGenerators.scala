@@ -293,6 +293,11 @@ trait WorkGenerators
     implicit updateState: UpdateState[Indexed]
   ) {
 
+    // Note: this method is unused in the pipeline repo, but it's used to
+    // test the relation filters in the catalogue-api repo.
+    //
+    // See https://github.com/wellcomecollection/catalogue-api/blob/be1d4c3f4fca07c0f0ebcc45e600d27192a723ed/search/src/test/scala/weco/api/search/works/WorksFiltersTest.scala#L939-L980
+    //
     def ancestors(works: Work.Visible[Indexed]*): Work.Visible[Indexed] =
       Work.Visible[Indexed](
         work.version,
