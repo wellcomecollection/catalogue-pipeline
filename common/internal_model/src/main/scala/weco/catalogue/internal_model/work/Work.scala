@@ -25,9 +25,13 @@ sealed trait Work[State <: WorkState] {
 
   def sourceIdentifier: SourceIdentifier = state.sourceIdentifier
 
-  // This version has no meaning in the pipeline -- it comes from the version
-  // in the adapter, so we can trace a Work back to the exact source record
-  // that was used to create it in the transformer.
+  // This version comes from the version in the adapter, so we can trace
+  // a Work back to the exact source record that was used to create it
+  // in the transformer.
+  //
+  // It should only be trusted for ordering updates of an individual Work.
+  // You cannot compare the version between different Works -- use the
+  // modifiedTime instead.
   val version: Int
 
   def id: String = state.id
