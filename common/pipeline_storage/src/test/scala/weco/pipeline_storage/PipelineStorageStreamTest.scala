@@ -7,7 +7,6 @@ import com.sksamuel.elastic4s.requests.indexes.admin.IndexExistsResponse
 import com.sksamuel.elastic4s.{ElasticClient, Index, Response}
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.funspec.AnyFunSpec
-import org.scalatest.time.{Seconds, Span}
 import software.amazon.awssdk.services.sqs.model.Message
 import weco.catalogue.internal_model.index.IndexFixtures
 import weco.elasticsearch.{ElasticClientBuilder, IndexConfig}
@@ -267,7 +266,7 @@ class PipelineStorageStreamTest
 
     val sender = new MemoryMessageSender
 
-    withLocalSqsQueuePair() {
+    withLocalSqsQueuePair(visibilityTimeout = 1 second) {
       case QueuePair(queue, dlq) =>
         withPipelineStream(
           queue = queue,
@@ -281,10 +280,10 @@ class PipelineStorageStreamTest
             "test stream",
             _ => throw new Exception("Boom!"))
 
-          eventually(Timeout(Span(30, Seconds))) {
+          eventually {
             sender.messages.map(_.body) shouldBe empty
             assertQueueEmpty(queue)
-            assertQueueHasSize(dlq, 1)
+            assertQueueHasSize(dlq, size = 1)
           }
         }
     }

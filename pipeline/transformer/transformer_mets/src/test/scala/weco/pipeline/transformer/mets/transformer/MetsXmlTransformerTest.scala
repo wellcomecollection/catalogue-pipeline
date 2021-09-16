@@ -123,7 +123,7 @@ class MetsXmlTransformerTest
                 createdDate: Instant,
                 deleted: Boolean = false,
                 manifestations: Map[String, Option[String]] = Map.empty)
-    : Result[NewMetsData] = {
+    : Result[MetsData] = {
 
     val metsSourceData = if (deleted) {
       DeletedMetsFile(

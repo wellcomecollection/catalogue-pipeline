@@ -22,7 +22,7 @@ class ImagesIndexerTest
     with ScalaFutures
     with ImageGenerators {
 
-  it("ingests an image") {
+  it("indexes an image") {
     withLocalImagesIndex { index =>
       val imagesIndexer =
         new ElasticIndexer[Image[ImageState.Augmented]](
@@ -30,7 +30,7 @@ class ImagesIndexerTest
           index,
           ImagesIndexConfig.indexed)
       val image = createImageData.toAugmentedImage
-      whenReady(imagesIndexer(List(image))) { r =>
+      whenReady(imagesIndexer(image)) { r =>
         r.isRight shouldBe true
         r.right.get shouldBe List(image)
         assertElasticsearchEventuallyHas(index = index, image)
@@ -38,7 +38,7 @@ class ImagesIndexerTest
     }
   }
 
-  it("ingests a list of images") {
+  it("indexes a list of images") {
     withLocalImagesIndex { index =>
       val imagesIndexer =
         new ElasticIndexer[Image[ImageState.Augmented]](

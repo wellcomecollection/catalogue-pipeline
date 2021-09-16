@@ -28,7 +28,7 @@ class MetsXmlTransformer(store: Readable[S3ObjectLocation, String])
     } yield work
 
   def transform(id: String,
-                metsSourceData: MetsSourceData): Result[NewMetsData] =
+                metsSourceData: MetsSourceData): Result[MetsData] =
     metsSourceData match {
       case DeletedMetsFile(_, _) =>
         Right(
