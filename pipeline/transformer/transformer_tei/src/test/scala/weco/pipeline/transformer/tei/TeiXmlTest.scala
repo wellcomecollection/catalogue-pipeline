@@ -86,7 +86,7 @@ class TeiXmlTest
         title = titleElem("this is not the title")
       ).toString()
     )
-    
+
     val innerData = result.value.nestedTeiData.value.head
     innerData.title shouldBe titleString
   }

@@ -2,10 +2,19 @@ package weco.pipeline.transformer.tei
 
 import weco.catalogue.internal_model.identifiers.DataState.Unidentified
 import weco.catalogue.internal_model.identifiers.IdState.Identifiable
-import weco.catalogue.internal_model.identifiers.{IdentifierType, SourceIdentifier}
+import weco.catalogue.internal_model.identifiers.{
+  IdentifierType,
+  SourceIdentifier
+}
 import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.work.WorkState.Source
-import weco.catalogue.internal_model.work.{Format, InternalWork, MergeCandidate, Work, WorkData}
+import weco.catalogue.internal_model.work.{
+  Format,
+  InternalWork,
+  MergeCandidate,
+  Work,
+  WorkData
+}
 import weco.pipeline.transformer.identifiers.SourceIdentifierValidation._
 
 import java.time.Instant
@@ -15,12 +24,12 @@ case class TeiData(id: String,
                    bNumber: Option[String] = None,
                    description: Option[String] = None,
                    languages: List[Language] = Nil,
-                   internalTeiData: List[TeiData] = Nil) {
+                   nestedTeiData: List[TeiData] = Nil) {
   def toWork(time: Instant, version: Int): Work[Source] = {
     val topLevelData = toWorkData(mergeCandidates = mergeCandidates)
 
     val internalDataStubs =
-      internalTeiData.map { data =>
+      nestedTeiData.map { data =>
         InternalWork.Source(
           data.sourceIdentifier, data.toWorkData(mergeCandidates = Nil)
         )

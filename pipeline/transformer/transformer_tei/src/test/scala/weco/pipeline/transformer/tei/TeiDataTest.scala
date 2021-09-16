@@ -99,7 +99,7 @@ class TeiDataTest
       title = "This is the title",
       bNumber = Some("fjhsdg"),
       description = Some("This is the description"),
-      internalTeiData = List(firstInnerTeiData, secondInnerTeiData)
+      nestedTeiData = List(firstInnerTeiData, secondInnerTeiData)
     )
 
     val work = teiData.toWork(Instant.now(), 1)
@@ -137,7 +137,7 @@ class TeiDataTest
       val teiData = TeiData(
         id = "id",
         title = "This is the top-level title",
-        internalTeiData = List(innerTeiData)
+        nestedTeiData = List(innerTeiData)
       )
 
       val work = teiData.toWork(Instant.now(), 1)

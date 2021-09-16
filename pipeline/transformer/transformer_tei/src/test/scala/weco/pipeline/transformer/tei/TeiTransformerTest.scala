@@ -1,6 +1,7 @@
 package weco.pipeline.transformer.tei
 
 import org.apache.commons.io.IOUtils
+import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.DataState.Unidentified
@@ -27,6 +28,7 @@ import java.nio.charset.StandardCharsets
 class TeiTransformerTest
     extends AnyFunSpec
     with Matchers
+    with EitherValues
     with InstantGenerators
     with S3ObjectLocationGenerators {
   it("transforms into a Work") {
@@ -68,6 +70,21 @@ class TeiTransformerTest
     val id = "Wellcome_Javanese_4"
     transformer(id, TeiChangedMetadata(location, timeModified), 1).right.get.data.languages shouldBe List(
       Language(id = "jav", label = "Javanese"))
+  }
+
+  it("extracts inner Works") {
+    val teiXml =
+      IOUtils.resourceToString("/Batak_36801.xml", StandardCharsets.UTF_8)
+    val location = createS3ObjectLocation
+    val store =
+      new MemoryStore[S3ObjectLocation, String](Map(location -> teiXml))
+    val transformer = new TeiTransformer(store)
+    val timeModified = instantInLast30Days
+    val id = "Wellcome_Batak_36801"
+
+    val work = transformer(id, TeiChangedMetadata(location, timeModified), 1).value
+
+    work.state.internalWorkStubs should have size 12
   }
 
   it("handles delete messages") {
