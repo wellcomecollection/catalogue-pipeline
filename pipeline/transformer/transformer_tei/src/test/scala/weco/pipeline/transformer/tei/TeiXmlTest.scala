@@ -85,9 +85,10 @@ class TeiXmlTest
         items = List(msItem(s"${id}_1", List(title, originalTitle))),
         title = titleElem("this is not the title")
       ).toString()
-    ).flatMap(_.title)
-    result shouldBe a[Right[_, _]]
-    result.right.get shouldBe titleString
+    )
+    
+    val innerData = result.value.nestedTeiData.value.head
+    innerData.title shouldBe titleString
   }
 
   it(
