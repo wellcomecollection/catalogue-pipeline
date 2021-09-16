@@ -3,10 +3,19 @@ package weco.pipeline.transformer.tei
 import grizzled.slf4j.Logging
 import weco.catalogue.internal_model.identifiers.DataState.Unidentified
 import weco.catalogue.internal_model.identifiers.IdState.Identifiable
-import weco.catalogue.internal_model.identifiers.{IdentifierType, SourceIdentifier}
+import weco.catalogue.internal_model.identifiers.{
+  IdentifierType,
+  SourceIdentifier
+}
 import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.work.WorkState.Source
-import weco.catalogue.internal_model.work.{Format, InternalWork, MergeCandidate, Work, WorkData}
+import weco.catalogue.internal_model.work.{
+  Format,
+  InternalWork,
+  MergeCandidate,
+  Work,
+  WorkData
+}
 import weco.pipeline.transformer.identifiers.SourceIdentifierValidation._
 import weco.pipeline.transformer.result.Result
 
@@ -17,7 +26,8 @@ case class TeiData(id: String,
                    bNumber: Option[String] = None,
                    description: Option[String] = None,
                    languages: List[Language] = Nil,
-                   nestedTeiData: Result[List[TeiData]] = Right(Nil)) extends Logging{
+                   nestedTeiData: Result[List[TeiData]] = Right(Nil))
+    extends Logging {
   def toWork(time: Instant, version: Int): Work[Source] = {
     val topLevelData = toWorkData(mergeCandidates = mergeCandidates)
 
