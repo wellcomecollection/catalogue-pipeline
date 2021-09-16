@@ -61,7 +61,8 @@ class IdentifiedWorkLookupTest
     val outdatedWorks = identifiedWorks(count = 2)
     val updatedWorks = outdatedWorks.map { work =>
       work.mapState { state =>
-        state.copy(sourceModifiedTime = state.sourceModifiedTime.plusSeconds(1L))
+        state.copy(
+          sourceModifiedTime = state.sourceModifiedTime.plusSeconds(1L))
       }
     }
 

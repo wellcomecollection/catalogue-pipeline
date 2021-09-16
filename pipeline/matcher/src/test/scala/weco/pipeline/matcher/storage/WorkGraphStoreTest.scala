@@ -8,7 +8,7 @@ import org.scalatest.funspec.AnyFunSpec
 import weco.catalogue.internal_model.generators.IdentifiersGenerators
 import weco.catalogue.internal_model.identifiers.CanonicalId
 import weco.pipeline.matcher.fixtures.MatcherFixtures
-import weco.pipeline.matcher.models.{WorkGraph, WorkStub, WorkNode}
+import weco.pipeline.matcher.models.{WorkGraph, WorkNode, WorkStub}
 
 class WorkGraphStoreTest
     extends AnyFunSpec
@@ -50,9 +50,12 @@ class WorkGraphStoreTest
           put(dynamoClient, graphTable.name)(work)
 
           whenReady(
-            workGraphStore.findAffectedWorks(WorkStub(id = idA, modifiedTime = modifiedTime0, referencedWorkIds = Set.empty))) {
-            workGraph =>
-              workGraph shouldBe WorkGraph(Set(work))
+            workGraphStore.findAffectedWorks(
+              WorkStub(
+                id = idA,
+                modifiedTime = modifiedTime0,
+                referencedWorkIds = Set.empty))) { workGraph =>
+            workGraph shouldBe WorkGraph(Set(work))
           }
         }
       }
@@ -77,9 +80,12 @@ class WorkGraphStoreTest
           put(dynamoClient, graphTable.name)(workB)
 
           whenReady(
-            workGraphStore.findAffectedWorks(WorkStub(id = idA, modifiedTime = modifiedTime0, referencedWorkIds = Set(idB)))) {
-            workGraph =>
-              workGraph.nodes shouldBe Set(workA, workB)
+            workGraphStore.findAffectedWorks(
+              WorkStub(
+                id = idA,
+                modifiedTime = modifiedTime0,
+                referencedWorkIds = Set(idB)))) { workGraph =>
+            workGraph.nodes shouldBe Set(workA, workB)
           }
         }
       }
@@ -106,9 +112,11 @@ class WorkGraphStoreTest
 
           whenReady(
             workGraphStore.findAffectedWorks(
-              WorkStub(idA, modifiedTime = modifiedTime0, referencedWorkIds = Set.empty))) {
-            workGraph =>
-              workGraph.nodes shouldBe Set(workA, workB)
+              WorkStub(
+                idA,
+                modifiedTime = modifiedTime0,
+                referencedWorkIds = Set.empty))) { workGraph =>
+            workGraph.nodes shouldBe Set(workA, workB)
           }
         }
       }
@@ -141,9 +149,12 @@ class WorkGraphStoreTest
           put(dynamoClient, graphTable.name)(workC)
 
           whenReady(
-            workGraphStore.findAffectedWorks(WorkStub(id = idA, modifiedTime = modifiedTime0, referencedWorkIds = Set.empty))) {
-            workGraph =>
-              workGraph.nodes shouldBe Set(workA, workB, workC)
+            workGraphStore.findAffectedWorks(
+              WorkStub(
+                id = idA,
+                modifiedTime = modifiedTime0,
+                referencedWorkIds = Set.empty))) { workGraph =>
+            workGraph.nodes shouldBe Set(workA, workB, workC)
           }
         }
       }
@@ -176,7 +187,10 @@ class WorkGraphStoreTest
           put(dynamoClient, graphTable.name)(workB)
           put(dynamoClient, graphTable.name)(workC)
 
-          val work = WorkStub(idB, modifiedTime = modifiedTime0, referencedWorkIds = Set(idC))
+          val work = WorkStub(
+            idB,
+            modifiedTime = modifiedTime0,
+            referencedWorkIds = Set(idC))
 
           whenReady(workGraphStore.findAffectedWorks(work)) { workGraph =>
             workGraph.nodes shouldBe Set(workA, workB, workC)

@@ -49,7 +49,9 @@ class ElasticWorkStubRetrieverTest
     withLocalElasticsearchIndex(config = WorksIndexConfig.identified) { index =>
       withElasticIndexer[Work[WorkState.Identified], R](index) { indexer =>
         val works: Seq[Work[WorkState.Identified]] = workStubs.map { w =>
-          identifiedWork(canonicalId = w.id, sourceModifiedTime = w.modifiedTime)
+          identifiedWork(
+            canonicalId = w.id,
+            sourceModifiedTime = w.modifiedTime)
             .mergeCandidates(
               w.referencedWorkIds.map { id =>
                 MergeCandidate(

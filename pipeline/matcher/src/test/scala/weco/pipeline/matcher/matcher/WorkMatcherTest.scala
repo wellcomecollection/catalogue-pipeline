@@ -56,8 +56,7 @@ class WorkMatcherTest
               )
 
             val savedLinkedWork =
-              get[WorkNode](dynamoClient, graphTable.name)(
-                "id" === work.id)
+              get[WorkNode](dynamoClient, graphTable.name)("id" === work.id)
                 .map(_.right.value)
 
             savedLinkedWork shouldBe Some(
@@ -90,7 +89,9 @@ class WorkMatcherTest
               Set(
                 MatchedIdentifiers(
                   Set(
-                    WorkStub(identifierA.canonicalId, modifiedTime = work.modifiedTime)
+                    WorkStub(
+                      identifierA.canonicalId,
+                      modifiedTime = work.modifiedTime)
                   )
                 )
               )
@@ -158,12 +159,11 @@ class WorkMatcherTest
           whenReady(workMatcher.matchWork(work)) { matcherResult =>
             assertRecent(matcherResult.createdTime)
             matcherResult.works shouldBe
-              Set(
-                MatchedIdentifiers(
-                  Set(
-                    WorkStub(identifierA.canonicalId, modifiedTime = modifiedTime1),
-                    WorkStub(identifierB.canonicalId, modifiedTime = modifiedTime2),
-                    WorkStub(identifierC.canonicalId, modifiedTime = modifiedTime1))))
+              Set(MatchedIdentifiers(Set(
+                WorkStub(identifierA.canonicalId, modifiedTime = modifiedTime1),
+                WorkStub(identifierB.canonicalId, modifiedTime = modifiedTime2),
+                WorkStub(identifierC.canonicalId, modifiedTime = modifiedTime1)
+              )))
 
             val savedNodes = scan[WorkNode](dynamoClient, graphTable.name)
               .map(_.right.value)
@@ -194,7 +194,8 @@ class WorkMatcherTest
                 componentId = ciHash(
                   identifierA.canonicalId,
                   identifierB.canonicalId,
-                  identifierC.canonicalId))
+                  identifierC.canonicalId)
+              )
             )
           }
         }
@@ -237,9 +238,21 @@ class WorkMatcherTest
 
         val future = workGraphStore.put(
           WorkGraph(Set(
-            WorkNode(idA, modifiedTime = modifiedTime0, linkedIds = List(idB), componentId),
-            WorkNode(idB, modifiedTime = modifiedTime0, linkedIds = List(idC), componentId),
-            WorkNode(idC, modifiedTime = modifiedTime0, linkedIds = Nil, componentId),
+            WorkNode(
+              idA,
+              modifiedTime = modifiedTime0,
+              linkedIds = List(idB),
+              componentId),
+            WorkNode(
+              idB,
+              modifiedTime = modifiedTime0,
+              linkedIds = List(idC),
+              componentId),
+            WorkNode(
+              idC,
+              modifiedTime = modifiedTime0,
+              linkedIds = Nil,
+              componentId),
           )))
 
         whenReady(future) { _ =>

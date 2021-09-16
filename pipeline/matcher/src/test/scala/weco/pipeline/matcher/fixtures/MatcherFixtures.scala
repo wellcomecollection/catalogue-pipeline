@@ -3,7 +3,12 @@ package weco.pipeline.matcher.fixtures
 import org.apache.commons.codec.digest.DigestUtils
 import org.scanamo.generic.semiauto.deriveDynamoFormat
 import org.scanamo.query.UniqueKey
-import org.scanamo.{DynamoFormat, DynamoReadError, Scanamo, Table => ScanamoTable}
+import org.scanamo.{
+  DynamoFormat,
+  DynamoReadError,
+  Scanamo,
+  Table => ScanamoTable
+}
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import weco.catalogue.internal_model.identifiers.CanonicalId
 import weco.fixtures.TestWith

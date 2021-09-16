@@ -86,7 +86,8 @@ class MergerWorkerService[WorkDestination, ImageDestination](
   private def getWorkSets(matcherResult: MatcherResult): Future[List[WorkSet]] =
     Future.sequence {
       matcherResult.works.toList.map { matchedIdentifiers =>
-        sourceWorkLookup.fetchAllWorks(matchedIdentifiers.workCollections.toList)
+        sourceWorkLookup.fetchAllWorks(
+          matchedIdentifiers.workCollections.toList)
       }
     }
 

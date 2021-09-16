@@ -9,10 +9,7 @@ import weco.messaging.sqs.SQSStream
 import weco.pipeline_storage.PipelineStorageStream._
 import weco.pipeline.matcher.exceptions.MatcherException
 import weco.pipeline.matcher.matcher.WorkMatcher
-import weco.pipeline.matcher.models.{
-  VersionExpectedConflictException,
-  WorkStub
-}
+import weco.pipeline.matcher.models.{VersionExpectedConflictException, WorkStub}
 import weco.typesafe.Runnable
 import weco.pipeline_storage.{PipelineStorageConfig, Retriever}
 

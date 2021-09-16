@@ -42,8 +42,7 @@ object WorkGraphUpdater extends Logging {
     }
   }
 
-  private def doUpdate(work: WorkStub,
-                       existingGraph: WorkGraph): WorkGraph = {
+  private def doUpdate(work: WorkStub, existingGraph: WorkGraph): WorkGraph = {
 
     // Find everything that's in the existing graph, but which isn't
     // the node we're updating.

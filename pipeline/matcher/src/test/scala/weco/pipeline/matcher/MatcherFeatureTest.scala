@@ -12,8 +12,8 @@ import weco.pipeline.matcher.generators.WorkStubGenerators
 import weco.pipeline.matcher.models.{
   MatchedIdentifiers,
   MatcherResult,
-  WorkStub,
-  WorkNode
+  WorkNode,
+  WorkStub
 }
 import weco.pipeline_storage.memory.MemoryRetriever
 
@@ -53,7 +53,8 @@ class MatcherFeatureTest
     }
   }
 
-  it("skips a message if the graph store already has a more recently updated work") {
+  it(
+    "skips a message if the graph store already has a more recently updated work") {
     implicit val retriever: MemoryRetriever[WorkStub] =
       new MemoryRetriever[WorkStub]()
     val messageSender = new MemoryMessageSender()
