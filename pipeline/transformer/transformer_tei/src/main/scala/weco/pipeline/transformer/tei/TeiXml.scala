@@ -89,7 +89,7 @@ class TeiXml(val xml: Elem) extends Logging {
           case metadata if metadata.key == "id" => metadata.value.text.trim
         }
         .getOrElse(throw new RuntimeException(
-          s"Could not find an id in node!"))).toEither
+          "Could not find an id in node!"))).toEither
 
   /**
     * In an XML like this:
