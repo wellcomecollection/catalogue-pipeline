@@ -5,11 +5,19 @@ import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.DataState.Unidentified
-import weco.catalogue.internal_model.identifiers.{IdentifierType, SourceIdentifier}
+import weco.catalogue.internal_model.identifiers.{
+  IdentifierType,
+  SourceIdentifier
+}
 import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.internal_model.work.generators.InstantGenerators
-import weco.catalogue.internal_model.work.{DeletedReason, Format, Work, WorkData}
+import weco.catalogue.internal_model.work.{
+  DeletedReason,
+  Format,
+  Work,
+  WorkData
+}
 import weco.catalogue.source_model.tei.{TeiChangedMetadata, TeiDeletedMetadata}
 import weco.pipeline.transformer.result.Result
 import weco.storage.generators.S3ObjectLocationGenerators
@@ -58,7 +66,8 @@ class TeiTransformerTest
       id = "Wellcome_Javanese_4"
     )
 
-    work.value.data.languages shouldBe List(Language(id = "jav", label = "Javanese"))
+    work.value.data.languages shouldBe List(
+      Language(id = "jav", label = "Javanese"))
   }
 
   it("extracts inner Works") {
@@ -89,7 +98,9 @@ class TeiTransformerTest
     )
   }
 
-  private def transformToWork(filename: String)(id: String, modifiedTime: Instant = instantInLast30Days): Result[Work[Source]] = {
+  private def transformToWork(filename: String)(
+    id: String,
+    modifiedTime: Instant = instantInLast30Days): Result[Work[Source]] = {
     val teiXml = IOUtils.resourceToString(filename, StandardCharsets.UTF_8)
 
     val location = createS3ObjectLocation

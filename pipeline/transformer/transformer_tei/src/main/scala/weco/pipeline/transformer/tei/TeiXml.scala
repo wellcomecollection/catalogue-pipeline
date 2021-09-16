@@ -83,13 +83,11 @@ class TeiXml(val xml: Elem) extends Logging {
       .sequence
 
   private def getIdFrom(node: Node): Either[Throwable, String] =
-    Try(
-      node.attributes
-        .collectFirst {
-          case metadata if metadata.key == "id" => metadata.value.text.trim
-        }
-        .getOrElse(throw new RuntimeException(
-          "Could not find an id in node!"))).toEither
+    Try(node.attributes
+      .collectFirst {
+        case metadata if metadata.key == "id" => metadata.value.text.trim
+      }
+      .getOrElse(throw new RuntimeException("Could not find an id in node!"))).toEither
 
   /**
     * In an XML like this:
