@@ -41,7 +41,7 @@ class IdentifiedWorkLookupTest
     }
   }
 
-  it("returns None if the stored version has a higher version") {
+  it("returns None if the stored work was updated more recently") {
     val oldWork = identifiedWork()
     val newWork = oldWork.mapState { state =>
       state.copy(sourceModifiedTime = state.modifiedTime.plusSeconds(1L))

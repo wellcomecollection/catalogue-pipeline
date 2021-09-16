@@ -53,7 +53,7 @@ class MatcherFeatureTest
     }
   }
 
-  it("skips a message if the graph store already has a newer version") {
+  it("skips a message if the graph store already has a more recently updated work") {
     implicit val retriever: MemoryRetriever[WorkStub] =
       new MemoryRetriever[WorkStub]()
     val messageSender = new MemoryMessageSender()

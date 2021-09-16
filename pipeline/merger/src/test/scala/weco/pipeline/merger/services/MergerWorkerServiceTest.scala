@@ -133,7 +133,7 @@ class MergerWorkerServiceTest
     }
   }
 
-  it("always sends the highest version of a Work") {
+  it("always sends the most recent version of a Work") {
     withMergerWorkerServiceFixtures {
       case (retriever, QueuePair(queue, dlq), senders, _, index) =>
         val work = identifiedWork()
