@@ -26,7 +26,7 @@ object TeiLanguageData extends Logging {
     *
     * create a Language based on the MARC language code list.
     */
-  def apply(id: String, label: String): Either[Throwable ,Language] = {
+  def apply(id: String, label: String): Either[Throwable, Language] = {
     val result = (id, label) match {
 
       // Map languages where there's a 1:1 correspondence between the IANA language

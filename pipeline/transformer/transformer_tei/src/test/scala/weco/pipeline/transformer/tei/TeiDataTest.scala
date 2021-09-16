@@ -125,7 +125,9 @@ class TeiDataTest
         format = Some(ArchivesAndManuscripts)
       )
     )
-    work.state.internalWorkStubs shouldBe List(firstInternalWorkStub, secondInternalWorkStub)
+    work.state.internalWorkStubs shouldBe List(
+      firstInternalWorkStub,
+      secondInternalWorkStub)
   }
 
   describe("if there's a single inner data") {

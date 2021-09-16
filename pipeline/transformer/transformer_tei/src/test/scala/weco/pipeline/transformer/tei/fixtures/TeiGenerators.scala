@@ -23,7 +23,9 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
   def otherLanguage(id: String, label: String) =
     <textLang otherLangs={id} source="IANA">{label}</textLang>
 
-  def msItem(id: String, titles: List[Elem] = Nil, languages: List[Elem] = Nil) =
+  def msItem(id: String,
+             titles: List[Elem] = Nil,
+             languages: List[Elem] = Nil) =
     <msItem xml:id={id}>
       {titles}
       {languages}

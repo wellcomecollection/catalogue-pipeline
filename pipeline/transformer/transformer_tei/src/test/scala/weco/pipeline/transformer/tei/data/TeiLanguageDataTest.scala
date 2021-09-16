@@ -23,12 +23,11 @@ class TeiLanguageDataTest
   it("handles the test cases") {
     forAll(testCases) {
       case (id, label, expectedLanguage) =>
-        TeiLanguageData(id = id, label = label) shouldBe Right(
-          expectedLanguage)
+        TeiLanguageData(id = id, label = label) shouldBe Right(expectedLanguage)
     }
   }
 
   it("fails if it sees an unexpected language") {
-    TeiLanguageData(id = "xyz", label = "???") shouldBe a[Left[_,_]]
+    TeiLanguageData(id = "xyz", label = "???") shouldBe a[Left[_, _]]
   }
 }

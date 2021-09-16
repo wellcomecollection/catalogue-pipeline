@@ -31,7 +31,8 @@ case class TeiData(id: String,
     val internalDataStubs =
       nestedTeiData.map { data =>
         InternalWork.Source(
-          data.sourceIdentifier, data.toWorkData(mergeCandidates = Nil)
+          data.sourceIdentifier,
+          data.toWorkData(mergeCandidates = Nil)
         )
       }
 
@@ -49,7 +50,8 @@ case class TeiData(id: String,
     Work.Visible[Source](
       version = version,
       data = workData,
-      state = Source(sourceIdentifier, time, internalWorkStubs = internalWorkStubs),
+      state =
+        Source(sourceIdentifier, time, internalWorkStubs = internalWorkStubs),
       redirectSources = Nil
     )
   }
@@ -68,15 +70,17 @@ case class TeiData(id: String,
         identifierType = IdentifierType.SierraSystemNumber,
         ontologyType = "Work",
         value = id).validatedWithWarning
-    } yield MergeCandidate(
-      identifier = sourceIdentifier,
-      reason = "Bnumber present in TEI file"
-    )
+    } yield
+      MergeCandidate(
+        identifier = sourceIdentifier,
+        reason = "Bnumber present in TEI file"
+      )
 
     bNumberMergeCandidate.toList
   }
 
-  private def toWorkData(mergeCandidates: List[MergeCandidate[Identifiable]]): WorkData[Unidentified] =
+  private def toWorkData(mergeCandidates: List[MergeCandidate[Identifiable]])
+    : WorkData[Unidentified] =
     WorkData[Unidentified](
       title = Some(title),
       description = description,

@@ -8,7 +8,8 @@ import cats.instances.either._
 import weco.pipeline.transformer.result.Result
 import weco.pipeline.transformer.tei.transformers.TeiLanguages
 class TeiXml(val xml: Elem) extends Logging {
-  val id: String = getIdFrom(xml).getOrElse(throw new RuntimeException(s"Could not find an id in XML!"))
+  val id: String = getIdFrom(xml).getOrElse(
+    throw new RuntimeException(s"Could not find an id in XML!"))
 
   /**
     * All the identifiers of the TEI file are in a `msIdentifier` bloc.
@@ -70,20 +71,25 @@ class TeiXml(val xml: Elem) extends Logging {
   }
 
   def nestedTeiData: Either[Throwable, List[TeiData]] =
-    (xml \\ "msDesc" \ "msContents" \ "msItem").map { node =>
-      for {
-        title <- getTitleFromItem(node)
-        id <- getIdFrom(node)
-        languages <- TeiLanguages.parseLanguages(node)
-      }yield TeiData(id = id, title = title, languages = languages)
-    }.toList.sequence
+    (xml \\ "msDesc" \ "msContents" \ "msItem")
+      .map { node =>
+        for {
+          title <- getTitleFromItem(node)
+          id <- getIdFrom(node)
+          languages <- TeiLanguages.parseLanguages(node)
+        } yield TeiData(id = id, title = title, languages = languages)
+      }
+      .toList
+      .sequence
 
   private def getIdFrom(node: Node): Either[Throwable, String] =
-    Try(node.attributes
-      .collectFirst {
-        case metadata if metadata.key == "id" => metadata.value.text.trim
-      }
-      .getOrElse(throw new RuntimeException(s"Could not find an id in node!"))).toEither
+    Try(
+      node.attributes
+        .collectFirst {
+          case metadata if metadata.key == "id" => metadata.value.text.trim
+        }
+        .getOrElse(throw new RuntimeException(
+          s"Could not find an id in node!"))).toEither
 
   /**
     * In an XML like this:

@@ -142,11 +142,10 @@ class TeiXmlTest
     it("parses a tei xml and returns TeiData with bNumber") {
       val bnumber = createSierraBibNumber.withCheckDigit
 
-
-        TeiXml(
-          id,
-          teiXml(id = id, identifiers = Some(sierraIdentifiers(bnumber)))
-            .toString()).value.bNumber.value shouldBe Some(bnumber)
+      TeiXml(
+        id,
+        teiXml(id = id, identifiers = Some(sierraIdentifiers(bnumber)))
+          .toString()).value.bNumber.value shouldBe Some(bnumber)
     }
 
     it("fails if there's more than one b-number in the XML") {
@@ -238,11 +237,14 @@ class TeiXmlTest
       TeiData(id = secondItemId, title = secondItemTitle))
   }
 
-  it("extracts the original title for internal items if there is more than one title") {
+  it(
+    "extracts the original title for internal items if there is more than one title") {
     val firstItemTitle = "this is original item title"
     val secondItemTitle = "this is second item title"
     val itemId = s"${id}_1"
-    val firstItem = msItem(itemId, List(originalItemTitle(firstItemTitle), itemTitle(secondItemTitle)))
+    val firstItem = msItem(
+      itemId,
+      List(originalItemTitle(firstItemTitle), itemTitle(secondItemTitle)))
     val result = TeiXml(
       id,
       teiXml(
@@ -252,15 +254,17 @@ class TeiXmlTest
     ).flatMap(_.nestedTeiData)
 
     result shouldBe a[Right[_, _]]
-    result.value shouldBe Seq(
-      TeiData(id = itemId, title = firstItemTitle))
+    result.value shouldBe Seq(TeiData(id = itemId, title = firstItemTitle))
   }
 
-  it ("fails extracting nested items if there are mukltiple titles and none is marked as original"){
+  it(
+    "fails extracting nested items if there are mukltiple titles and none is marked as original") {
     val firstItemTitle = "this is first item title"
     val secondItemTitle = "this is second item title"
     val itemId = s"${id}_1"
-    val firstItem = msItem(itemId, List(itemTitle(firstItemTitle), itemTitle(secondItemTitle)))
+    val firstItem = msItem(
+      itemId,
+      List(itemTitle(firstItemTitle), itemTitle(secondItemTitle)))
     val result = TeiXml(
       id,
       teiXml(
@@ -273,17 +277,19 @@ class TeiXmlTest
     result.left.value shouldBe a[RuntimeException]
   }
 
-  it("can parse language in items"){
+  it("can parse language in items") {
     val id = "id1"
-    val firstItem = msItem(id, List(originalItemTitle("")), List(mainLanguage("sa", "Sanskrit")))
-    val result =for {
+    val firstItem = msItem(
+      id,
+      List(originalItemTitle("")),
+      List(mainLanguage("sa", "Sanskrit")))
+    val result = for {
       parsed <- TeiXml(id, teiXml(id = id, items = List(firstItem)).toString())
-      nestedData<- parsed.nestedTeiData
-    }yield nestedData.head.languages
+      nestedData <- parsed.nestedTeiData
+    } yield nestedData.head.languages
 
     result shouldBe a[Right[_, _]]
-    result.value shouldBe List(
-      Language(id = "san", label = "Sanskrit"))
+    result.value shouldBe List(Language(id = "san", label = "Sanskrit"))
   }
 
 }

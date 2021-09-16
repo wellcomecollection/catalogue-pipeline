@@ -10,7 +10,8 @@ import scala.xml.{Elem, NodeSeq}
 
 object TeiLanguages {
 
-  def apply(xml: Elem): Result[List[Language]] = parseLanguages(xml \\ "msDesc" \ "msContents" )
+  def apply(xml: Elem): Result[List[Language]] =
+    parseLanguages(xml \\ "msDesc" \ "msContents")
 
   /** The languages of the TEI are in `textLang` nodes under `msContents`.
     *
@@ -25,24 +26,29 @@ object TeiLanguages {
     * This function extracts all the nodes from a parsed XML and returns
     * a list of (id, label) pairs.
     */
-  def parseLanguages(value: NodeSeq): Either[Throwable, List[Language]] = (value \ "textLang").map { n =>
-      val label = n.text
+  def parseLanguages(value: NodeSeq): Either[Throwable, List[Language]] =
+    (value \ "textLang")
+      .map { n =>
+        val label = n.text
 
-      val mainLangId = (n \@ "mainLang").toLowerCase
-      val otherLangId = (n \@ "otherLangs").toLowerCase
+        val mainLangId = (n \@ "mainLang").toLowerCase
+        val otherLangId = (n \@ "otherLangs").toLowerCase
 
-      val langId = (mainLangId, otherLangId) match {
-        case (id1, id2) if id2.isEmpty && id1.nonEmpty => Right(id1)
-        case (id1, id2) if id1.isEmpty && id2.nonEmpty => Right(id2)
-        case (id1, id2) if id2.isEmpty && id1.isEmpty =>
-          Left(new RuntimeException(s"Cannot find a language ID in $n"))
-        case _ =>
-          Left(new RuntimeException(s"Multiple language IDs in $n"))
+        val langId = (mainLangId, otherLangId) match {
+          case (id1, id2) if id2.isEmpty && id1.nonEmpty => Right(id1)
+          case (id1, id2) if id1.isEmpty && id2.nonEmpty => Right(id2)
+          case (id1, id2) if id2.isEmpty && id1.isEmpty =>
+            Left(new RuntimeException(s"Cannot find a language ID in $n"))
+          case _ =>
+            Left(new RuntimeException(s"Multiple language IDs in $n"))
+        }
+
+        (langId, label) match {
+          case (Right(id), label) if label.trim.nonEmpty =>
+            TeiLanguageData(id, label)
+          case (Left(err), _) => Left(err)
+        }
       }
-
-      (langId, label) match {
-        case (Right(id), label) if label.trim.nonEmpty => TeiLanguageData(id, label)
-        case (Left(err), _) => Left(err)
-      }
-    }.toList.sequence
+      .toList
+      .sequence
 }

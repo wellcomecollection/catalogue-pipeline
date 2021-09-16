@@ -82,7 +82,8 @@ class TeiTransformerTest
     val timeModified = instantInLast30Days
     val id = "Wellcome_Batak_36801"
 
-    val work = transformer(id, TeiChangedMetadata(location, timeModified), 1).value
+    val work =
+      transformer(id, TeiChangedMetadata(location, timeModified), 1).value
 
     work.state.internalWorkStubs should have size 12
   }
