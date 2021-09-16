@@ -21,7 +21,8 @@ object IdState {
     otherIdentifiers: List[SourceIdentifier] = Nil,
   ) extends Minted {
     def maybeCanonicalId: Option[CanonicalId] = Some(canonicalId)
-    def allSourceIdentifiers: List[SourceIdentifier] = sourceIdentifier +: otherIdentifiers
+    def allSourceIdentifiers: List[SourceIdentifier] =
+      sourceIdentifier +: otherIdentifiers
   }
 
   /** Represents an ID that has not yet been minted, but will have a canonicalId
@@ -32,7 +33,8 @@ object IdState {
     identifiedType: String = classOf[Identified].getSimpleName,
   ) extends Unminted {
     def maybeCanonicalId: Option[CanonicalId] = None
-    def allSourceIdentifiers: List[SourceIdentifier] = sourceIdentifier +: otherIdentifiers
+    def allSourceIdentifiers: List[SourceIdentifier] =
+      sourceIdentifier +: otherIdentifiers
   }
 
   /** Represents an ID that has no sourceIdentifier and thus impossible to have a
