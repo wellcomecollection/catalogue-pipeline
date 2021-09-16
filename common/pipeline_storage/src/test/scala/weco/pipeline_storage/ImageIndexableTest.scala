@@ -8,14 +8,10 @@ import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.index.{ImagesIndexConfig, IndexFixtures}
 import weco.fixtures.TestWith
 import weco.catalogue.internal_model.Implicits._
-import weco.catalogue.internal_model.work.generators.WorkGenerators
 import Indexable.imageIndexable
 import weco.catalogue.internal_model.generators.ImageGenerators
 import weco.catalogue.internal_model.image.{Image, ImageState}
-import weco.catalogue.internal_model.work.generators.{
-  InstantGenerators,
-  WorkGenerators
-}
+import weco.catalogue.internal_model.work.generators.WorkGenerators
 import weco.pipeline_storage.elastic.ElasticIndexer
 import weco.pipeline_storage.fixtures.ElasticIndexerFixtures
 
@@ -24,13 +20,11 @@ import scala.concurrent.duration._
 
 class ImageIndexableTest
     extends AnyFunSpec
-    with ScalaFutures
     with Matchers
     with IndexFixtures
     with ElasticIndexerFixtures
     with ImageGenerators
-    with WorkGenerators
-    with InstantGenerators {
+    with WorkGenerators {
 
   describe("updating images with merged / redirected sources") {
     it("overrides an image if modifiedTime is higher") {
