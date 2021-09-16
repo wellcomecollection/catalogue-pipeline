@@ -43,17 +43,19 @@ class TeiXmlTest
   }
 
   it("gets the title from the msItem if there's only one item") {
-    val titleString = "This is the title"
+    val theItemTitle = "This is the item title"
+    val topLevelTitle = "This is the top-level title"
+
     val result = TeiXml(
       id,
       teiXml(
         id = id,
-        items = List(msItem(s"${id}_1", List(itemTitle(titleString)))),
-        title = titleElem("this is not the title")
+        items = List(msItem(s"${id}_1", List(itemTitle(theItemTitle)))),
+        title = titleElem(topLevelTitle)
       ).toString()
     ).flatMap(_.title)
-    result shouldBe a[Right[_, _]]
-    result.right.get shouldBe titleString
+
+    result.value shouldBe topLevelTitle
   }
 
   it("doesn't get the title from the item if there's more than one") {

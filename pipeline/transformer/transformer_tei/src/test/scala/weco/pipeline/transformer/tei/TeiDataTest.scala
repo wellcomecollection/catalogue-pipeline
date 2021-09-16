@@ -127,4 +127,23 @@ class TeiDataTest
     )
     work.state.internalWorkStubs shouldBe List(firstInternalWorkStub, secondInternalWorkStub)
   }
+
+  describe("if there's a single inner data") {
+    it("uses the title of the item") {
+      val innerTeiData = TeiData(
+        id = "id_1",
+        title = "This is the item title"
+      )
+      val teiData = TeiData(
+        id = "id",
+        title = "This is the top-level title",
+        internalTeiData = List(innerTeiData)
+      )
+
+      val work = teiData.toWork(Instant.now(), 1)
+
+      work.state.internalWorkStubs shouldBe empty
+      work.data.title shouldBe Some(innerTeiData.title)
+    }
+  }
 }

@@ -5,6 +5,7 @@ import scala.xml.{Elem, Node, XML}
 import grizzled.slf4j.Logging
 import cats.syntax.traverse._
 import cats.instances.either._
+import weco.pipeline.transformer.result.Result
 import weco.pipeline.transformer.tei.transformers.TeiLanguages
 class TeiXml(val xml: Elem) extends Logging {
   val id: String = getIdFrom(xml).getOrElse(throw new RuntimeException(s"Could not find an id in XML!"))
@@ -68,23 +69,6 @@ class TeiXml(val xml: Elem) extends Logging {
     }
   }
 
-  /**
-    * If the Tei has a single msItem node under msContents, we get the title from that
-    * Otherwise we get the title from the titleStmt
-    */
-  def title: Either[Throwable, String] = {
-    val msItemNodes = (xml \\ "msDesc" \ "msContents" \ "msItem").toList
-    msItemNodes match {
-      case List(itemNode) if (itemNode \ "title").nonEmpty =>
-        getTitleFromItem(itemNode).left.flatMap { ex =>
-          warn("Not able to extract title from item", ex)
-          getTitleFromTitleStmt
-        }
-      case _ =>
-        getTitleFromTitleStmt
-    }
-  }
-
   def nestedTeiData: Either[Throwable, List[TeiData]] =
     (xml \\ "msDesc" \ "msContents" \ "msItem").map { node =>
       for {
@@ -116,7 +100,7 @@ class TeiXml(val xml: Elem) extends Logging {
     *              <title xml:lang="ar-Latn-x-lc" key="work_3001">Al-Qānūn fī al-ṭibb</title>
     * extract the title from titleStmt, so "Wellcome Library" in the example.
     */
-  private def getTitleFromTitleStmt = {
+  def title: Result[String] = {
     val nodes =
       (xml \ "teiHeader" \ "fileDesc" \ "titleStmt" \ "title").toList
     val maybeTitles = nodes.filter(n => n.attributes.isEmpty)

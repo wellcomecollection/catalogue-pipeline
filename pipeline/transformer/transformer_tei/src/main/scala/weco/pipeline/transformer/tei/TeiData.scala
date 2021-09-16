@@ -17,31 +17,55 @@ case class TeiData(id: String,
                    languages: List[Language] = Nil,
                    internalTeiData: List[TeiData] = Nil) {
   def toWork(time: Instant, version: Int): Work[Source] = {
-    val maybeBnumber =
-      for {
-        id <-bNumber
-        sourceIdentifier <-  SourceIdentifier(IdentifierType.SierraSystemNumber, "Work", id).validatedWithWarning
-      }yield MergeCandidate(
-              identifier = sourceIdentifier,
-              reason = "Bnumber present in TEI file"
-      )
+    val topLevelData = toWorkData(mergeCandidates = mergeCandidates)
 
-    val internalWorkStubs =
+    val internalDataStubs =
       internalTeiData.map { data =>
         InternalWork.Source(
           data.sourceIdentifier, data.toWorkData(mergeCandidates = Nil)
         )
       }
 
+    // If there's only a single inner data, we move it to the top level
+    // and don't send any inner Works.
+    //
+    // TODO: check logic for copying languages from wrapping works to inner works
+    val (workData, internalWorkStubs) = internalDataStubs match {
+      case List(InternalWork.Source(_, singleItemData)) =>
+        (topLevelData.copy(title = singleItemData.title), List())
+
+      case _ => (topLevelData, internalDataStubs)
+    }
+
     Work.Visible[Source](
       version = version,
-      data = toWorkData(mergeCandidates = maybeBnumber.toList),
+      data = workData,
       state = Source(sourceIdentifier, time, internalWorkStubs = internalWorkStubs),
       redirectSources = Nil
     )
   }
 
-  private def sourceIdentifier = SourceIdentifier(IdentifierType.Tei, "Work", id)
+  private def sourceIdentifier =
+    SourceIdentifier(
+      identifierType = IdentifierType.Tei,
+      ontologyType = "Work",
+      value = id
+    )
+
+  private def mergeCandidates: List[MergeCandidate[Identifiable]] = {
+    val bNumberMergeCandidate = for {
+      id <- bNumber
+      sourceIdentifier <- SourceIdentifier(
+        identifierType = IdentifierType.SierraSystemNumber,
+        ontologyType = "Work",
+        value = id).validatedWithWarning
+    } yield MergeCandidate(
+      identifier = sourceIdentifier,
+      reason = "Bnumber present in TEI file"
+    )
+
+    bNumberMergeCandidate.toList
+  }
 
   private def toWorkData(mergeCandidates: List[MergeCandidate[Identifiable]]): WorkData[Unidentified] =
     WorkData[Unidentified](
