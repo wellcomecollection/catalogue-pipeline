@@ -67,4 +67,19 @@ class TeiLanguagesTest
     result shouldBe a[Left[_, _]]
     result.left.get.getMessage should include("language ID")
   }
+
+  it("skips languages without a label") {
+    val xml =
+      teiXml(
+        languages = List(
+          <textLang mainLang="he"></textLang>
+        )
+      )
+
+    val result = TeiLanguages(xml)
+
+    result shouldBe a[Left[_, _]]
+    result.left.get.getMessage should startWith(
+      "Missing label for language node")
+  }
 }
