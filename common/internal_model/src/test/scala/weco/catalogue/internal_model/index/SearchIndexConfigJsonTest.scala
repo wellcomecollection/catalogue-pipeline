@@ -5,8 +5,8 @@ import com.sksamuel.elastic4s.json.JacksonBuilder
 import com.sksamuel.elastic4s.requests.indexes.CreateIndexRequest
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import weco.fixtures.LocalResources
 
-import scala.io.Source
 import weco.json.utils.JsonAssertions
 
 /**
@@ -24,14 +24,11 @@ import weco.json.utils.JsonAssertions
 class SearchIndexConfigJsonTest
     extends AnyFunSpec
     with Matchers
+    with LocalResources
     with JsonAssertions {
 
   it("generates the correct works index config") {
-    val fileJson =
-      Source
-        .fromResource("WorksIndexConfig.json")
-        .getLines
-        .mkString
+    val fileJson = readResource("WorksIndexConfig.json")
 
     val indexJson = JacksonBuilder.writeAsString(
       CreateIndexContentBuilder(
@@ -46,11 +43,7 @@ class SearchIndexConfigJsonTest
   }
 
   it("generates the correct images index config") {
-    val fileJson =
-      Source
-        .fromResource("ImagesIndexConfig.json")
-        .getLines
-        .mkString
+    val fileJson = readResource("ImagesIndexConfig.json")
 
     val indexJson = JacksonBuilder.writeAsString(
       CreateIndexContentBuilder(

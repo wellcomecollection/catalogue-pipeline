@@ -4,7 +4,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.locations.License
 import weco.catalogue.source_model.mets.{DeletedMetsFile, MetsFileWithImages}
-import weco.pipeline.transformer.mets.fixtures.LocalResources
+import weco.fixtures.LocalResources
 import weco.pipeline.transformer.mets.generators.MetsGenerators
 import weco.pipeline.transformer.result.Result
 import weco.sierra.generators.SierraIdentifierGenerators
@@ -21,7 +21,7 @@ class MetsXmlTransformerTest
     with LocalResources {
 
   it("transforms METS XML") {
-    val xml = loadXmlFile("/b30246039.xml")
+    val xml = readResource("b30246039.xml")
     transform(root = Some(xml), createdDate = Instant.now) shouldBe Right(
       InvisibleMetsData(
         recordIdentifier = "b30246039",
@@ -51,10 +51,10 @@ class MetsXmlTransformerTest
   }
 
   it("transforms METS XML with manifestations") {
-    val xml = loadXmlFile("/b22012692.xml")
+    val xml = readResource("b22012692.xml")
     val manifestations = Map(
-      "b22012692_0003.xml" -> Some(loadXmlFile("/b22012692_0003.xml")),
-      "b22012692_0001.xml" -> Some(loadXmlFile("/b22012692_0001.xml")),
+      "b22012692_0003.xml" -> Some(readResource("b22012692_0003.xml")),
+      "b22012692_0001.xml" -> Some(readResource("b22012692_0001.xml")),
     )
     transform(
       root = Some(xml),
@@ -107,9 +107,9 @@ class MetsXmlTransformerTest
   }
 
   it("errors if first manifestation doesn't exist in store") {
-    val xml = loadXmlFile("/b22012692.xml")
+    val xml = readResource("b22012692.xml")
     val manifestations = Map(
-      "b22012692_0003.xml" -> Some(loadXmlFile("/b22012692_0003.xml")),
+      "b22012692_0003.xml" -> Some(readResource("b22012692_0003.xml")),
       "b22012692_0001.xml" -> None,
     )
     transform(

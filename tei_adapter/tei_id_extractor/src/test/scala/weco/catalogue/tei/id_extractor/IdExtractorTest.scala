@@ -2,14 +2,14 @@ package weco.catalogue.tei.id_extractor
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.tei.id_extractor.fixtures.LocalResources
+import weco.fixtures.LocalResources
 
 import scala.util.{Failure, Success}
 
 class IdExtractorTest extends AnyFunSpec with Matchers with LocalResources {
   val path = "Arabic/WMS_arabic.xml"
   it("extracts the id from a valid tei xml") {
-    val triedId = IdExtractor.extractId(readResource("/WMS_Arabic_1.xml"), path)
+    val triedId = IdExtractor.extractId(readResource("WMS_Arabic_1.xml"), path)
     triedId shouldBe a[Success[_]]
     triedId.get shouldBe "manuscript_15651"
   }

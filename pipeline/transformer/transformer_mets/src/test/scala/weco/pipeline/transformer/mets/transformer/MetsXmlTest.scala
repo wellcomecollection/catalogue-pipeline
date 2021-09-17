@@ -3,7 +3,7 @@ package weco.pipeline.transformer.mets.transformer
 import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.pipeline.transformer.mets.fixtures.LocalResources
+import weco.fixtures.LocalResources
 import weco.pipeline.transformer.mets.generators.MetsGenerators
 
 class MetsXmlTest
@@ -13,7 +13,7 @@ class MetsXmlTest
     with LocalResources
     with MetsGenerators {
 
-  val xml = loadXmlFile("/b30246039.xml")
+  val xml = readResource("b30246039.xml")
 
   it("parses recordIdentifier from XML") {
     MetsXml(xml).value.recordIdentifier shouldBe Right("b30246039")
