@@ -3,13 +3,13 @@ package weco.pipeline.transformer.tei
 import scala.util.Try
 import scala.xml.{Elem, Node, XML}
 import grizzled.slf4j.Logging
-
+import cats.syntax.traverse._
+import cats.instances.either._
+import weco.pipeline.transformer.result.Result
+import weco.pipeline.transformer.tei.transformers.TeiLanguages
 class TeiXml(val xml: Elem) extends Logging {
-  val id: String = xml.attributes
-    .collectFirst {
-      case metadata if metadata.key == "id" => metadata.value.text.trim
-    }
-    .getOrElse(throw new RuntimeException(s"Could not find an id in XML!"))
+  val id: String = getIdFrom(xml).getOrElse(
+    throw new RuntimeException(s"Could not find an id in XML!"))
 
   /**
     * All the identifiers of the TEI file are in a `msIdentifier` bloc.
@@ -70,22 +70,24 @@ class TeiXml(val xml: Elem) extends Logging {
     }
   }
 
-  /**
-    * If the Tei has a single msItem node under msContents, we get the title from that
-    * Otherwise we get the title from the titleStmt
-    */
-  def title: Either[Throwable, String] = {
-    val msItemNodes = (xml \\ "msDesc" \ "msContents" \ "msItem").toList
-    msItemNodes match {
-      case List(itemNode) if (itemNode \ "title").nonEmpty =>
-        getTitleFromSingleItem(itemNode).left.flatMap { ex =>
-          warn("Not able to extract title from item", ex)
-          getTitleFromTitleStmt
-        }
-      case _ =>
-        getTitleFromTitleStmt
-    }
-  }
+  def nestedTeiData: Either[Throwable, List[TeiData]] =
+    (xml \\ "msDesc" \ "msContents" \ "msItem")
+      .map { node =>
+        for {
+          title <- getTitleFromItem(node)
+          id <- getIdFrom(node)
+          languages <- TeiLanguages.parseLanguages(node)
+        } yield TeiData(id = id, title = title, languages = languages)
+      }
+      .toList
+      .sequence
+
+  private def getIdFrom(node: Node): Either[Throwable, String] =
+    Try(node.attributes
+      .collectFirst {
+        case metadata if metadata.key == "id" => metadata.value.text.trim
+      }
+      .getOrElse(throw new RuntimeException("Could not find an id in node!"))).toEither
 
   /**
     * In an XML like this:
@@ -102,7 +104,7 @@ class TeiXml(val xml: Elem) extends Logging {
     *              <title xml:lang="ar-Latn-x-lc" key="work_3001">Al-Qānūn fī al-ṭibb</title>
     * extract the title from titleStmt, so "Wellcome Library" in the example.
     */
-  private def getTitleFromTitleStmt = {
+  def title: Result[String] = {
     val nodes =
       (xml \ "teiHeader" \ "fileDesc" \ "titleStmt" \ "title").toList
     val maybeTitles = nodes.filter(n => n.attributes.isEmpty)
@@ -128,7 +130,7 @@ class TeiXml(val xml: Elem) extends Logging {
     *              <title xml:lang="ar-Latn-x-lc" key="work_3001">Al-Qānūn fī al-ṭibb</title>
     * extract the title from the msItem, so "Al-Qānūn fī al-ṭibb" in the example.
     */
-  private def getTitleFromSingleItem(itemNode: Node) = {
+  private def getTitleFromItem(itemNode: Node): Either[Throwable, String] = {
     val titleNodes = (itemNode \ "title").toList
     titleNodes match {
       case List(titleNode) => Right(titleNode.text)

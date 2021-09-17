@@ -1,6 +1,7 @@
 package weco.pipeline.transformer.tei
 
 import org.apache.commons.io.IOUtils
+import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.DataState.Unidentified
@@ -18,32 +19,36 @@ import weco.catalogue.internal_model.work.{
   WorkData
 }
 import weco.catalogue.source_model.tei.{TeiChangedMetadata, TeiDeletedMetadata}
+import weco.pipeline.transformer.result.Result
 import weco.storage.generators.S3ObjectLocationGenerators
 import weco.storage.s3.S3ObjectLocation
 import weco.storage.store.memory.MemoryStore
 
 import java.nio.charset.StandardCharsets
+import java.time.Instant
 
 class TeiTransformerTest
     extends AnyFunSpec
     with Matchers
+    with EitherValues
     with InstantGenerators
     with S3ObjectLocationGenerators {
+
   it("transforms into a Work") {
-    val teiXml =
-      IOUtils.resourceToString("/WMS_Arabic_1.xml", StandardCharsets.UTF_8)
-    val location = createS3ObjectLocation
-    val store =
-      new MemoryStore[S3ObjectLocation, String](Map(location -> teiXml))
-    val transformer = new TeiTransformer(store)
-    val timeModified = instantInLast30Days
-    val id = "manuscript_15651"
+    val modifiedTime = instantInLast30Days
+
+    val work = transformToWork(filename = "/WMS_Arabic_1.xml")(
+      id = "manuscript_15651",
+      modifiedTime = modifiedTime
+    )
+
     val sourceIdentifier = SourceIdentifier(
       identifierType = IdentifierType.Tei,
       ontologyType = "Work",
-      value = id
+      value = "manuscript_15651"
     )
-    transformer(id, TeiChangedMetadata(location, timeModified), 1) shouldBe Right(
+
+    work.value shouldBe
       Work.Visible[Source](
         version = 1,
         data = WorkData[Unidentified](
@@ -52,24 +57,26 @@ class TeiTransformerTest
             Some("1 copy of al-Qānūn fī al-ṭibb by Avicenna, 980-1037"),
           format = Some(Format.ArchivesAndManuscripts)
         ),
-        state = Source(sourceIdentifier, timeModified)
+        state = Source(sourceIdentifier, modifiedTime)
       )
-    )
   }
 
   it("extracts languages") {
-    val teiXml =
-      IOUtils.resourceToString("/Javanese_4.xml", StandardCharsets.UTF_8)
-    val location = createS3ObjectLocation
-    val store =
-      new MemoryStore[S3ObjectLocation, String](Map(location -> teiXml))
-    val transformer = new TeiTransformer(store)
-    val timeModified = instantInLast30Days
-    val id = "Wellcome_Javanese_4"
-    transformer(id, TeiChangedMetadata(location, timeModified), 1).right.get.data.languages shouldBe List(
+    val work = transformToWork(filename = "/Javanese_4.xml")(
+      id = "Wellcome_Javanese_4"
+    )
+
+    work.value.data.languages shouldBe List(
       Language(id = "jav", label = "Javanese"))
   }
 
+  it("extracts inner Works") {
+    val work = transformToWork(filename = "/Batak_36801.xml")(
+      id = "Wellcome_Batak_36801"
+    )
+
+    work.value.state.internalWorkStubs should have size 12
+  }
   it("handles delete messages") {
 
     val store =
@@ -89,5 +96,19 @@ class TeiTransformerTest
         deletedReason = DeletedReason.DeletedFromSource("Deleted by TEI source")
       )
     )
+  }
+
+  private def transformToWork(filename: String)(
+    id: String,
+    modifiedTime: Instant = instantInLast30Days): Result[Work[Source]] = {
+    val teiXml = IOUtils.resourceToString(filename, StandardCharsets.UTF_8)
+
+    val location = createS3ObjectLocation
+
+    val transformer = new TeiTransformer(
+      new MemoryStore[S3ObjectLocation, String](Map(location -> teiXml))
+    )
+
+    transformer(id, TeiChangedMetadata(location, modifiedTime), 1)
   }
 }

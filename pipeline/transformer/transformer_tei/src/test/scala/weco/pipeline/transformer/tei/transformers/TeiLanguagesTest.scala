@@ -17,9 +17,7 @@ class TeiLanguagesTest
     val xml: Elem =
       teiXml(
         languages = List(
-          s"""
-             |<textLang mainLang="sa" source="IANA">Sanskrit</textLang>
-             |""".stripMargin
+          mainLanguage("sa", "Sanskrit")
         )
       )
 
@@ -31,12 +29,8 @@ class TeiLanguagesTest
     val xml: Elem =
       teiXml(
         languages = List(
-          s"""
-             |<textLang mainLang="sa" source="IANA">Sanskrit</textLang>
-             |""".stripMargin,
-          s"""
-             |<textLang otherLangs="la" source="IANA">Latin</textLang>
-             |""".stripMargin
+          mainLanguage("sa", "Sanskrit"),
+          otherLanguage("la", "Latin")
         )
       )
 
@@ -50,7 +44,7 @@ class TeiLanguagesTest
     val xml =
       teiXml(
         languages = List(
-          """<textLang>Sanskrit</textLang>"""
+          <textLang>Sanskrit</textLang>
         )
       )
 
@@ -64,7 +58,7 @@ class TeiLanguagesTest
     val xml =
       teiXml(
         languages = List(
-          """<textLang mainLang="id1" otherLangs="id2">Sanskrit</textLang>"""
+          <textLang mainLang="id1" otherLangs="id2">Sanskrit</textLang>
         )
       )
 

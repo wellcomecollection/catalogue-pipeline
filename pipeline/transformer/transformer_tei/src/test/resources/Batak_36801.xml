@@ -1,0 +1,338 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="https://raw.githubusercontent.com/bodleian/consolidated-tei-schema/master/msdesc.rng" type="application/xml" schematypens="http://relaxng.org/ns/structure/1.0"?>
+
+<TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id="Wellcome_Batak_36801">
+
+    <teiHeader>
+    
+    <fileDesc>
+        
+        <titleStmt>
+            <title>MS Batak 36801</title>
+            <title type="collection">Wellcome Collection</title>
+            <respStmt xml:id="RV">
+                <resp when="1982">Cataloguer</resp>
+                <persName>Ricklefs and Voorhoeve</persName>
+            </respStmt>
+            <respStmt xml:id="AP">
+                <resp when="2020">TEI Encoder</resp>
+                <persName>Adrian Plau</persName>
+            </respStmt>
+        </titleStmt>
+        
+        <publicationStmt>
+            <publisher>Wellcome Collection</publisher>
+            <idno>UkLW</idno>
+            <address>
+                <orgName type="institution">Wellcome Collection</orgName>
+                <street>215 Euston Rd</street>
+                <settlement>London</settlement>
+                <postCode>NW1 2BE</postCode>
+            </address>
+            <distributor>
+                <email>library@wellcome.ac.uk</email>
+            </distributor>
+            <idno type="msID">MS Batak 36801</idno>
+            <idno type="catalogue">Ricklefs and Voorhoeve</idno>
+        </publicationStmt>
+        
+        <sourceDesc>
+            
+            <msDesc>
+                
+                <msIdentifier>
+                    <country>United Kingdom</country>
+                    <settlement>London</settlement>
+                    <institution>Wellcome Collection</institution>
+                    <repository>Wellcome Library</repository>
+                    <idno type="shelfmark">MS Batak 36801</idno>
+                    <altIdentifier type="Sierra">
+                        <idno>b30697323</idno>
+                    </altIdentifier>
+                    <altIdentifier type="accession">
+                        <idno>36801</idno>
+                    </altIdentifier>
+                </msIdentifier>
+                
+                <msContents>
+                  
+                    <summary>Toba-Batak pustaha with various texts on magic and medicine.</summary>
+                   
+                    <textLang mainLang="bbc">Toba-Batak</textLang>
+                    
+                    <msItem n="1" xml:id="Wellcome_Batak_36801_1">
+                        
+                        <title>Gorak-gorahan ni manuk sitoho-toho, divination from signs in the inside of a fowl.</title>
+                        
+                        <note>Southern form of ta.</note>
+                        
+                        <note>Chain of transmission: <persName>Guru Lawan Ni Aji </persName>- <persName>Guru Laling Ni Aji</persName> - Guru
+                            Bisa Mandoit (Aji) - <persName role="copyist">Datu Poduwon Ni Aji of the clan Simamora Debata Raja</persName>, the copyist - his brother-in-law Tuwan Sogar Ni Aji of
+                            the clan Sitorang Na Bolon in <settlement>Situnggung</settlement>.</note>
+                        
+                        <note>There is a village called Situnggung in the Simalungun principality of Dolog Silou, but as Sitorang is not a Simalungun clan it is improbable that this is meant here.</note>
+         
+                        <note> 
+                            <locusGrp>
+                            <locus>a 2-62, b 2-7. There is a lacuna between a 24 and 25.</locus>
+                        </locusGrp> 
+                        </note>
+                        
+                    </msItem>
+                    
+                    <msItem n="2" xml:id="Wellcome_Batak_36801_2">
+                        
+                        <title>Pagar, panabari and pandumpang, probably all protective magic.</title>
+                        
+                        <note>The same handwriting as the previous text. Four magical drawings.</note>
+                        
+                        <note>Chain of transmission: <persName>Guru Hasiyan Ni Aji</persName>- <persName>Guru So Dapotan Ni Aji</persName>-
+                        a man of the clan Simamora Debata Raja [ie <persName role="copyist">Datu Poduwon Ni Aji</persName>] - his brother-in-law of the clan
+                        Sitorang Na Bolon in <settlement>Situnggung</settlement></note>
+                        
+                        <note> 
+                            <locusGrp>
+                                <locus>b 8-22.</locus>
+                            </locusGrp> 
+                        </note>
+                        
+                    </msItem>
+                    
+                    <msItem n="3" xml:id="Wellcome_Batak_36801_3">
+                        
+                        <title>Aji ginjung or aji habonaran, magic against thieves, with a figure which should be drawn on a winnowing-basket.</title>
+                        
+                        <note>Another hand, which uses the northern ta.</note>
+                        
+                        <note> 
+                            <locusGrp>
+                                <locus>b 23-25.</locus>
+                            </locusGrp> 
+                        </note>
+                        
+                    </msItem>
+                    
+                    <msItem n="4" xml:id="Wellcome_Batak_36801_4">
+                        
+                        <title>Pagangubalang sigundur, aggressive magic.</title>
+                        
+                        <note>The title only, with a chain of transmission: a teacher of the clan Padang in Pakpak - a man whose clan is indicated as anak na di Turihon in Tongging -
+                            -his brother-in-law of the clan Sihotang.</note>
+                        
+                        <note>Cf. Voorhoeve, 1969, p. 166 f. for the expression anak na di Turihon.</note>
+                        
+                        <note><settlement>Tongging</settlement> is at the extreme north of <geogName>Lake Toba</geogName>.</note>
+                        
+                        <note> 
+                            <locusGrp>
+                                <locus>b 25-26.</locus>
+                            </locusGrp> 
+                        </note>
+                        
+                    </msItem>
+                    
+                    <msItem n="5" xml:id="Wellcome_Batak_36801_5">
+                        
+                        <title>Poda ni ari rojangta laho mangona ome tu juma.</title>
+                        
+                        <note>On choosing a propitious time for putting grains of rice into holes made with dibbles, but the subject of the text is not ari rojang (the lunar mansions,
+                        cf. Voorhoeve, 1969, p. 163), but rather the signs of the zodiac and the five periods of the day.</note>
+                        
+                        <note>At the end there are some tables for computing lucky days.</note>
+                        
+                        <note> 
+                            <locusGrp>
+                                <locus>b 26-31</locus>
+                            </locusGrp> 
+                        </note>
+                        
+                    </msItem>
+                    
+                    <msItem n="6" xml:id="Wellcome_Batak_36801_6">
+                        
+                        <title>Poda ni si padiampa ni taun.</title>
+                        
+                        <note>To predict whether there will be a good harvest, in connexion with the twelve months.</note>
+                        
+                        <note> 
+                            <locusGrp>
+                                <locus>b 31-36</locus>
+                            </locusGrp> 
+                        </note>
+                        
+                    </msItem>
+                    
+                    <msItem n="7" xml:id="Wellcome_Batak_36801_7">
+                        
+                        <title>Poda ni tulbasta di begu pane.</title>
+                        
+                        <note>On the treatment of typhoid fever. One method is pouring water with medicinal herbs over the patient.</note>
+                        
+                        <note> 
+                            <locusGrp>
+                                <locus>b 36-41</locus>
+                            </locusGrp> 
+                        </note>
+                        
+                    </msItem>
+                    
+                    <msItem n="8" xml:id="Wellcome_Batak_36801_8">
+                        
+                        <title>Poda ni tambarta di na rojanon</title>
+                        
+                        <note>On a medicine against dysentery</note>
+                        
+                        <note> 
+                            <locusGrp>
+                                <locus>b 42-44.</locus>
+                            </locusGrp> 
+                        </note>
+                        
+                    </msItem>
+                    
+                    <msItem n="9" xml:id="Wellcome_Batak_36801_9">
+                        
+                        <title>On pongpang bala saribu, 'stemming a thousand warriors'. <note>In this paragraph the pupil is addressed as 'my uncle' (tulangku).</note></title>
+                        
+                        <note> 
+                            <locusGrp>
+                                <locus>b 44-45.</locus>
+                            </locusGrp> 
+                        </note>
+                        
+                    </msItem>
+                    
+                    <msItem n="10" xml:id="Wellcome_Batak_36801_10">
+                        
+                        <title>Poda ni ari rojang, on the 30 days of the month in connexion with the lunar mansions</title>
+                        
+                        <note>Written for <persName>Guru Gina(n?)jangan Ni Aji</persName>.</note>
+                        
+                        <note> 
+                            <locusGrp>
+                                <locus>b 45-56</locus>
+                            </locusGrp> 
+                        </note>
+                        
+                    </msItem>
+                    
+                    <msItem n="11" xml:id="Wellcome_Batak_36801_11">
+                        
+                        <title>An incantation (tabas) for protectice magic (pagar).</title>
+                        
+                        <note> 
+                            <locusGrp>
+                                <locus>b 56-59</locus>
+                            </locusGrp> 
+                        </note>
+                        
+                    </msItem>
+                    
+                    <msItem n="12" xml:id="Wellcome_Batak_36801_12">
+                        
+                        <title>Some scribbles</title>
+                        
+                        <note> 
+                            <locusGrp>
+                                <locus>b 60 and 62.</locus>
+                            </locusGrp> 
+                        </note>
+                        
+                    </msItem>
+                    
+                </msContents>
+                
+                <physDesc>
+             
+                    <objectDesc form="other">
+                       
+                        <supportDesc material="other">
+                                                    
+                            <support>Two wooden covers, one rattan band. Kept in a wooden box with a padlock. The strip of bark is broken in several places and has been wrongly sewn.</support>
+                            <extent>62 leaves. 
+                                <dimensions unit="cm">
+                                    <height>23.5</height>
+                                    <width>12</width>
+                                    
+                                </dimensions>
+                                <note>An uneven number of leaves, almost certainly only one, is missing between <locus>a 24/25 (b 38/39)</locus>.</note>
+                            </extent>
+                                                                            
+                        </supportDesc>
+                        
+                                   
+                        
+                    </objectDesc>
+                    <handDesc>
+                        <handNote scope="minor" scribe="Scribe_A"> <locus target="#Wellcome_Batak_36801_1 #Wellcome_Batak_36801_2" >a 2-62, b 2-7; b 8-22</locus> Gorak-gorahan, etc. Southern form of ta.</handNote>
+                        <handNote scope="minor" scribe="Scribe_B"> <locus target="#Wellcome_Batak_36801_3">b 23-35</locus>Another hand, which uses the northern ta.</handNote>
+                        <handNote scope="minor" scribe="Scribe_C"> <locus target="#Wellcome_Batak_36801_9">b 44-45</locus>Another hand; careless writing, at first with northern ta, later southern ta.</handNote>
+                        <handNote scope="minor" scribe="Scribe_D"> <locus target="#Wellcome_Batak_36801_10">b 45-56</locus>A different handwriting, using the southern form of ta but not the peculiar form of ya which is found in the text written by <persName>Datu Poduwon</persName>.</handNote>
+                    </handDesc>
+                </physDesc>
+                
+                <history>
+                    <origin>
+                        <origPlace>
+                            <country><!-- insert --></country>,
+                            <region><!-- insert --></region>,
+                            <settlement><!-- insert --></settlement>,
+                            <orgName><!-- insert --></orgName>
+                        </origPlace>
+                        <origDate calendar=""><!-- insert --></origDate>
+                    </origin>
+                    <acquisition>Purchased at Stevens auctioneers, 9 November 1915.</acquisition>
+                </history>
+                
+                <additional>
+                    <adminInfo>
+                        <recordHist>
+                            <source>
+                                <bibl>
+                                    <title>'Catalogue of Batak manuscripts in the Wellcome Institute for the History of Medicine from 'Indonesian manuscripts
+                                    in Great Britain: Addenda et Corrigenda'', in Bulletin of the School of Oriental and African Studies, 45(2)</title>
+                                    <author>M.C. Ricklefs and P. Voorhoove</author>
+                                    <date>1982</date>
+                                    <note>pp. 303-305</note>
+                                </bibl>
+                            </source>
+                        </recordHist>
+                        <availability><p> <!-- Insert if relevant --></p></availability> 
+                    </adminInfo>
+                    <listBibl>
+                        <bibl>
+                            <title>Four Batak manuscripts in Princeton</title>
+                            <author>P. Voorhoeve</author>
+                            <date>1969</date>
+                            <note>P. 166; 163.</note>
+                        </bibl>
+                    </listBibl>
+                
+                </additional>
+            
+            </msDesc>
+        
+        </sourceDesc>
+    
+    </fileDesc>
+    
+        <revisionDesc>
+        <change when="2020" who="#AP">Created XML file, helped by the whole TEI team.</change>
+    
+        </revisionDesc>
+
+    </teiHeader>    
+
+    <facsimile>
+        <surface></surface>
+    </facsimile>    
+
+    <text>
+    <body>
+        <p></p>
+        <!-- For future full transcription -->
+    </body>
+
+    </text>    
+
+</TEI>
