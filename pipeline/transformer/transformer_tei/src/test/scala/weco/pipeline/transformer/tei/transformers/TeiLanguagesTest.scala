@@ -79,6 +79,7 @@ class TeiLanguagesTest
     val result = TeiLanguages(xml)
 
     result shouldBe a[Left[_, _]]
-    result.left.get.getMessage should startWith("Missing label for language node")
+    result.left.get.getMessage should startWith(
+      "Missing label for language node")
   }
 }
