@@ -18,7 +18,7 @@ import weco.pipeline.transformer.mets.transformers.{
   MetsLocation
 }
 
-sealed trait NewMetsData {
+sealed trait MetsData {
   val recordIdentifier: String
 
   def toWork(version: Int,
@@ -36,7 +36,7 @@ sealed trait NewMetsData {
     )
 }
 
-case class DeletedMetsData(recordIdentifier: String) extends NewMetsData {
+case class DeletedMetsData(recordIdentifier: String) extends MetsData {
   override def toWork(version: Int,
                       modifiedTime: Instant): Either[Throwable, Work[Source]] =
     Right(
@@ -56,7 +56,7 @@ case class InvisibleMetsData(
   accessConditionUsage: Option[String] = None,
   fileReferencesMapping: List[(String, FileReference)] = Nil,
   titlePageId: Option[String] = None
-) extends NewMetsData {
+) extends MetsData {
 
   def toWork(
     version: Int,
