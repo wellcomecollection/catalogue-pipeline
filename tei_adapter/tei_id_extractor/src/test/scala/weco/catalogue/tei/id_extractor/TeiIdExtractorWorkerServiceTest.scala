@@ -18,10 +18,7 @@ import weco.catalogue.source_model.tei.{
   TeiIdMessage
 }
 import weco.catalogue.tei.id_extractor.database.TableProvisioner
-import weco.catalogue.tei.id_extractor.fixtures.{
-  PathIdDatabase,
-  XmlAssertions
-}
+import weco.catalogue.tei.id_extractor.fixtures.{PathIdDatabase, XmlAssertions}
 import weco.fixtures.{LocalResources, TestWith}
 import weco.http.client.HttpClient
 import weco.json.JsonUtil._
