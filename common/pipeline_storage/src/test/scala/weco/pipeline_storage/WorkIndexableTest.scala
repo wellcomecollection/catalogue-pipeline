@@ -2,7 +2,6 @@ package weco.pipeline_storage
 
 import com.sksamuel.elastic4s.Index
 import org.scalatest.Assertion
-import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.index.{IndexFixtures, WorksIndexConfig}
