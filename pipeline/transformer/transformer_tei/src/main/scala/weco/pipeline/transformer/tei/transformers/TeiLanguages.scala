@@ -46,6 +46,8 @@ object TeiLanguages {
         (langId, label) match {
           case (Right(id), label) if label.trim.nonEmpty =>
             TeiLanguageData(id, label)
+          case (Right(id), _) =>
+            Left(new Throwable(s"Missing label for language node with id=$id"))
           case (Left(err), _) => Left(err)
         }
       }
