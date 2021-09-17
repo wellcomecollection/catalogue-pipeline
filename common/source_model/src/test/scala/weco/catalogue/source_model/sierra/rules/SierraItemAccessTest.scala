@@ -55,12 +55,12 @@ class SierraItemAccessTest
                 display = "Closed stores Arch. & MSS"),
               "88" -> FixedField(
                 label = "STATUS",
-                value = "6",
-                display = "Restricted"),
+                value = "-",
+                display = "Available"),
               "108" -> FixedField(
                 label = "OPACMSG",
-                value = "f",
-                display = "Online request"),
+                value = "c",
+                display = "Restricted"),
             )
           )
 
