@@ -5,7 +5,8 @@ import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.akka.fixtures.Akka
-import weco.catalogue.tei.id_extractor.fixtures.{LocalResources, XmlAssertions}
+import weco.catalogue.tei.id_extractor.fixtures.XmlAssertions
+import weco.fixtures.LocalResources
 import weco.http.client.MemoryHttpClient
 
 import java.net.URI
@@ -30,7 +31,7 @@ class GitHubBlobContentReaderTest
         HttpResponse(
           entity = HttpEntity(
             contentType = ContentTypes.`application/json`,
-            readResource("/github-blob-2e6b5fa.json")
+            readResource("github-blob-2e6b5fa.json")
           )
         )
       )
@@ -42,7 +43,7 @@ class GitHubBlobContentReaderTest
       val gitHubBlobReader = new GitHubBlobContentReader(httpClient)
 
       whenReady(gitHubBlobReader.getBlob(new URI(uri))) {
-        assertXmlStringsAreEqual(_, readResource("/WMS_Arabic_1.xml"))
+        assertXmlStringsAreEqual(_, readResource("WMS_Arabic_1.xml"))
       }
     }
   }
@@ -57,7 +58,7 @@ class GitHubBlobContentReaderTest
         HttpResponse(
           entity = HttpEntity(
             contentType = ContentTypes.`application/json`,
-            readResource("/github-blob-ddffeb7.json")
+            readResource("github-blob-ddffeb7.json")
           )
         )
       )
@@ -69,7 +70,7 @@ class GitHubBlobContentReaderTest
       val gitHubBlobReader = new GitHubBlobContentReader(httpClient)
 
       whenReady(gitHubBlobReader.getBlob(new URI(uri))) {
-        assertXmlStringsAreEqual(_, readResource("/Javanese_11.xml"))
+        assertXmlStringsAreEqual(_, readResource("Javanese_11.xml"))
       }
     }
   }

@@ -109,7 +109,7 @@ class MetsXmlTransformerTest
   it("errors if first manifestation doesn't exist in store") {
     val xml = readResource("b22012692.xml")
     val manifestations = Map(
-      "b22012692_0003.xml" -> Some(readResource("22012692_0003.xml")),
+      "b22012692_0003.xml" -> Some(readResource("b22012692_0003.xml")),
       "b22012692_0001.xml" -> None,
     )
     transform(

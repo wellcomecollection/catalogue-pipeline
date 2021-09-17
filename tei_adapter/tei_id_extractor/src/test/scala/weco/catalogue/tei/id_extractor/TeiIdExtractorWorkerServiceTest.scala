@@ -19,11 +19,10 @@ import weco.catalogue.source_model.tei.{
 }
 import weco.catalogue.tei.id_extractor.database.TableProvisioner
 import weco.catalogue.tei.id_extractor.fixtures.{
-  LocalResources,
   PathIdDatabase,
   XmlAssertions
 }
-import weco.fixtures.TestWith
+import weco.fixtures.{LocalResources, TestWith}
 import weco.http.client.HttpClient
 import weco.json.JsonUtil._
 import weco.messaging.fixtures.SQS
@@ -75,7 +74,7 @@ class TeiIdExtractorWorkerServiceTest
             store,
             bucket,
             modifiedTime,
-            filename = "/WMS_Arabic_1.xml")
+            filename = "WMS_Arabic_1.xml")
 
           messageSender
             .getMessages[TeiIdChangeMessage]() should contain only TeiIdChangeMessage(
@@ -260,7 +259,7 @@ class TeiIdExtractorWorkerServiceTest
             store,
             bucket,
             modifiedTime,
-            filename = "/WMS_Arabic_1.xml")
+            filename = "WMS_Arabic_1.xml")
 
           messageSender
             .getMessages[TeiIdChangeMessage]() should contain only TeiIdChangeMessage(
@@ -302,7 +301,7 @@ class TeiIdExtractorWorkerServiceTest
             store,
             bucket,
             movedTime,
-            filename = "/WMS_Arabic_1.xml")
+            filename = "WMS_Arabic_1.xml")
 
           val fileCreatedMessage = TeiIdChangeMessage(
             id = "manuscript_15651",
@@ -327,7 +326,7 @@ class TeiIdExtractorWorkerServiceTest
             HttpResponse(
               entity = HttpEntity(
                 contentType = ContentTypes.`application/json`,
-                readResource("/github-blob-2e6b5fa.json")
+                readResource("github-blob-2e6b5fa.json")
               )
             )
           )
@@ -337,7 +336,7 @@ class TeiIdExtractorWorkerServiceTest
             HttpResponse(
               entity = HttpEntity(
                 contentType = ContentTypes.`application/json`,
-                readResource("/github-blob-ddffeb7.json")
+                readResource("github-blob-ddffeb7.json")
               )
             )
           )
@@ -404,7 +403,7 @@ class TeiIdExtractorWorkerServiceTest
         store,
         bucket,
         modifiedTime,
-        filename = "/WMS_Arabic_1.xml")
+        filename = "WMS_Arabic_1.xml")
     }
     (modifiedTime, expectedS3Location)
   }
