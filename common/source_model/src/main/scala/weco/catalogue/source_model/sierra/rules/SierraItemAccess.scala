@@ -190,8 +190,8 @@ object SierraItemAccess extends SierraQueryOps with Logging {
       // Example: b29459126 / i19023340
       case (
           Some(0),
-          Some(Status.Restricted),
-          Some(OpacMsg.OnlineRequest),
+          Some(Status.Available),
+          Some(OpacMsg.Restricted),
           Requestable,
           Some(LocationType.ClosedStores)) =>
         AccessCondition(
