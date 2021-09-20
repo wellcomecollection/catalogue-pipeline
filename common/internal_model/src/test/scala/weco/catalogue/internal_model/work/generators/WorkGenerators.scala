@@ -36,7 +36,9 @@ trait WorkGenerators
     Work.Visible[Source](
       state = Source(
         sourceIdentifier = sourceIdentifier,
-        sourceModifiedTime = sourceModifiedTime),
+        sourceModifiedTime = sourceModifiedTime,
+        relationPath = None
+      ),
       data = initData,
       version = createVersion
     )
@@ -55,6 +57,7 @@ trait WorkGenerators
         mergedTime = modifiedTime,
         sourceModifiedTime = modifiedTime,
         availabilities = Availabilities.forWorkData(data),
+        relationPath = None,
         relations = relations
       ),
       data = data,
@@ -76,6 +79,7 @@ trait WorkGenerators
         mergedTime = modifiedTime,
         sourceModifiedTime = modifiedTime,
         availabilities = Availabilities.forWorkData(data),
+        relationPath = None,
         relations = relations
       ),
       data = data,
@@ -92,7 +96,8 @@ trait WorkGenerators
       state = Identified(
         sourceIdentifier = sourceIdentifier,
         canonicalId = canonicalId,
-        sourceModifiedTime = sourceModifiedTime
+        sourceModifiedTime = sourceModifiedTime,
+        relationPath = None
       ),
       data = initData,
       version = createVersion
@@ -114,6 +119,7 @@ trait WorkGenerators
         indexedTime = Instant.now(),
         availabilities = Availabilities.forWorkData(data),
         derivedData = DerivedWorkData(data),
+        relationPath = None,
         relations = relations
       ),
       data = data,

@@ -5,6 +5,7 @@ import weco.catalogue.internal_model.identifiers.{
   DataState,
   IdState,
   ReferenceNumber,
+  RelationPath,
   SourceIdentifier
 }
 import weco.catalogue.internal_model.image.ImageData
@@ -157,6 +158,8 @@ sealed trait WorkState {
   val modifiedTime: Instant
   val relations: Relations
   def id: String
+
+  val relationPath: Option[RelationPath]
 }
 
 object InternalWork {
@@ -171,13 +174,15 @@ object InternalWork {
   // See https://github.com/wellcomecollection/platform/issues/5298
   case class Source(
     sourceIdentifier: SourceIdentifier,
-    workData: WorkData[DataState.Unidentified]
+    workData: WorkData[DataState.Unidentified],
+    relationPath: Option[RelationPath]
   )
 
   case class Identified(
     sourceIdentifier: SourceIdentifier,
     canonicalId: CanonicalId,
-    workData: WorkData[DataState.Identified]
+    workData: WorkData[DataState.Identified],
+    relationPath: Option[RelationPath]
   )
 }
 
@@ -186,7 +191,8 @@ object WorkState {
   case class Source(
     sourceIdentifier: SourceIdentifier,
     sourceModifiedTime: Instant,
-    internalWorkStubs: List[InternalWork.Source] = Nil
+    internalWorkStubs: List[InternalWork.Source] = Nil,
+    relationPath: Option[RelationPath]
   ) extends WorkState {
 
     type WorkDataState = DataState.Unidentified
@@ -202,7 +208,8 @@ object WorkState {
     sourceIdentifier: SourceIdentifier,
     canonicalId: CanonicalId,
     sourceModifiedTime: Instant,
-    internalWorkStubs: List[InternalWork.Identified] = Nil
+    internalWorkStubs: List[InternalWork.Identified] = Nil,
+    relationPath: Option[RelationPath]
   ) extends WorkState {
 
     type WorkDataState = DataState.Identified
@@ -215,14 +222,24 @@ object WorkState {
 
     def internalWorksWith(version: Int): List[Work.Visible[Identified]] =
       internalWorkStubs.map {
-        case InternalWork.Identified(sourceIdentifier, canonicalId, data) =>
+        case InternalWork.Identified(sourceIdentifier, canonicalId, data, innerRelationPath) =>
+          val newRelationPath = (relationPath, innerRelationPath) match {
+            case (Some(parentPath), Some(childPath)) => Some(parentPath.join(childPath))
+            case (None, None)                        => None
+            case _ =>
+              throw new IllegalArgumentException(
+                s"Inner/outer works have different relation paths: $relationPath / $innerRelationPath"
+              )
+          }
+
           Work.Visible[Identified](
             version = version,
             data = data,
             state = WorkState.Identified(
               sourceIdentifier = sourceIdentifier,
               canonicalId = canonicalId,
-              sourceModifiedTime = sourceModifiedTime
+              sourceModifiedTime = sourceModifiedTime,
+              relationPath = newRelationPath
             )
           )
       }
@@ -234,6 +251,7 @@ object WorkState {
     mergedTime: Instant,
     sourceModifiedTime: Instant,
     availabilities: Set[Availability] = Set.empty,
+    relationPath: Option[RelationPath],
     relations: Relations = Relations.none
   ) extends WorkState {
 
@@ -253,6 +271,7 @@ object WorkState {
     mergedTime: Instant,
     sourceModifiedTime: Instant,
     availabilities: Set[Availability],
+    relationPath: Option[RelationPath],
     relations: Relations = Relations.none
   ) extends WorkState {
 
@@ -287,6 +306,7 @@ object WorkState {
     indexedTime: Instant,
     availabilities: Set[Availability],
     derivedData: DerivedWorkData,
+    relationPath: Option[RelationPath],
     relations: Relations = Relations.none
   ) extends WorkState {
 
@@ -330,6 +350,7 @@ object WorkFsm {
         mergedTime = mergedTime,
         sourceModifiedTime = state.sourceModifiedTime,
         availabilities = Availabilities.forWorkData(data),
+        relationPath = state.relationPath
       )
 
     def data(data: WorkData[DataState.Identified]) = data
@@ -350,6 +371,7 @@ object WorkFsm {
               mergedTime = state.mergedTime,
               sourceModifiedTime = state.sourceModifiedTime,
               availabilities = state.availabilities ++ relationAvailabilities,
+              relationPath = state.relationPath,
               relations = relations
             )
         }
@@ -371,6 +393,7 @@ object WorkFsm {
         indexedTime = Instant.now(),
         availabilities = state.availabilities,
         derivedData = DerivedWorkData(data),
+        relationPath = state.relationPath,
         relations = state.relations
       )
 

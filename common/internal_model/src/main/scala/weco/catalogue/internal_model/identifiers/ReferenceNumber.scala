@@ -6,7 +6,7 @@ import weco.json.{TypedString, TypedStringOps}
   *
   *     when [the identifier is] the reference we have written on the actual item, they
   *     should be the referenceNumber
-
+  *
   *     Ie there is a number written in pencil on the old piece of paper and it is XXXXX -
   *     that's the reference number, as it's what people will see when they have the
   *     object in their hands
