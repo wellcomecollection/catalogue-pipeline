@@ -13,7 +13,7 @@ module "service" {
   source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/service?ref=v3.11.0"
 
   task_definition_arn            = module.task_definition.arn
-  service_name                   = var.name
+  service_name                   = var.service_name == "" ? var.name : var.service_name
   cluster_arn                    = var.cluster_arn
   subnets                        = var.subnets
   service_discovery_namespace_id = var.namespace_id

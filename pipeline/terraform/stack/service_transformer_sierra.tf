@@ -7,7 +7,10 @@ module "sierra_transformer_queue" {
 
 module "sierra_transformer" {
   source          = "../modules/service"
-  service_name    = "${local.namespace_hyphen}_sierra_transformer"
+
+  namespace = local.namespace
+  name      = "sierra_transformer"
+
   container_image = local.transformer_sierra_image
   security_group_ids = [
     # TODO: Do we need the egress security group?

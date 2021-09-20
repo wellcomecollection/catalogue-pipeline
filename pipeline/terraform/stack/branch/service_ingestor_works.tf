@@ -4,7 +4,7 @@ locals {
 
 module "ingestor_works_queue" {
   source          = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
-  queue_name      = "${local.namespace}_ingestor_works"
+  queue_name      = "${var.namespace}_ingestor_works"
   topic_arns      = [module.router_work_output_topic.arn, module.relation_embedder_output_topic.arn]
   alarm_topic_arn = var.dlq_alarm_arn
 
@@ -17,7 +17,10 @@ module "ingestor_works_queue" {
 
 module "ingestor_works" {
   source          = "../../modules/service"
-  service_name    = "${local.namespace}_ingestor_works"
+
+  namespace = var.namespace
+  name      = "ingestor_works-${local.tei_suffix}"
+
   container_image = var.ingestor_works_image
   security_group_ids = [
     var.service_egress_security_group_id,
@@ -29,7 +32,7 @@ module "ingestor_works" {
   cluster_arn  = data.aws_ecs_cluster.cluster.id
 
   env_vars = {
-    metrics_namespace = "${local.namespace}_ingestor_works"
+    metrics_namespace = "${var.namespace}_ingestor_works"
     topic_arn         = module.work_ingestor_topic.arn
 
     es_works_index        = local.es_works_index
@@ -94,7 +97,7 @@ module "ingestor_works" {
 module "work_ingestor_topic" {
   source = "../../modules/topic"
 
-  name       = "${local.namespace}_work_ingestor"
+  name       = "${var.namespace}_work_ingestor"
   role_names = [module.ingestor_works.task_role_name]
 }
 

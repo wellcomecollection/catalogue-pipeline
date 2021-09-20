@@ -7,7 +7,10 @@ module "calm_transformer_queue" {
 
 module "calm_transformer" {
   source          = "../modules/service"
-  service_name    = "${local.namespace_hyphen}_calm_transformer"
+
+  namespace = local.namespace
+  name      = "calm_transformer"
+
   container_image = local.transformer_calm_image
   security_group_ids = [
     aws_security_group.service_egress.id,

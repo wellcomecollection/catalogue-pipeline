@@ -3,7 +3,7 @@ variable "is_reindexing" {
   description = "Are you reindexing through this pipeline right now?"
 }
 
-variable "namespace_hyphen" {
+variable "namespace" {
   type = string
 }
 

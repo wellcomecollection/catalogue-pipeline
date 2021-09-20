@@ -1,4 +1,10 @@
-variable "service_name" {}
+variable "name" {
+  type = string
+}
+variable "namespace" {
+  type = string
+}
+
 variable "cluster_arn" {}
 variable "cluster_name" {}
 variable "shared_logging_secrets" {

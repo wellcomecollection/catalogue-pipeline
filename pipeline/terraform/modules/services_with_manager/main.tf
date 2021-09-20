@@ -1,7 +1,8 @@
 module "worker" {
   source = "../../../../infrastructure/modules/workers_with_sidecar"
 
-  name = var.service_name
+  name         = "${var.namespace}_${var.name}"
+  service_name = var.name
 
   subnets = var.subnets
 

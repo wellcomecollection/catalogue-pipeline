@@ -1,6 +1,6 @@
 module "router_queue" {
   source          = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
-  queue_name      = "${local.namespace}_router"
+  queue_name      = "${var.namespace}_router"
   topic_arns      = [module.merger_works_topic.arn]
   alarm_topic_arn = var.dlq_alarm_arn
 
@@ -9,9 +9,11 @@ module "router_queue" {
 
 module "router" {
   source          = "../../modules/service"
-  service_name    = "${local.namespace}_router"
-  container_image = var.router_image
 
+  namespace = var.namespace
+  name      = "router-${local.tei_suffix}"
+
+  container_image = var.router_image
   security_group_ids = [
     # TODO: Do we need the egress security group?
     var.service_egress_security_group_id,
@@ -23,7 +25,7 @@ module "router" {
   cluster_arn  = data.aws_ecs_cluster.cluster.id
 
   env_vars = {
-    metrics_namespace = "${local.namespace}_router"
+    metrics_namespace = "${var.namespace}_router"
 
     queue_url         = module.router_queue.url
     queue_parallelism = 10
@@ -63,14 +65,14 @@ module "router" {
 module "router_path_output_topic" {
   source = "../../modules/topic"
 
-  name       = "${local.namespace}_router_path_output"
+  name       = "${var.namespace}_router_path_output"
   role_names = [module.router.task_role_name]
 }
 
 module "router_work_output_topic" {
   source = "../../modules/topic"
 
-  name       = "${local.namespace}_router_work_output"
+  name       = "${var.namespace}_router_work_output"
   role_names = [module.router.task_role_name]
 }
 

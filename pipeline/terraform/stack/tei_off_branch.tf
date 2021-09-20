@@ -39,7 +39,7 @@ module "tei_off_branch" {
   cluster_name                        = aws_ecs_cluster.cluster.name
   scale_down_adjustment               = local.scale_down_adjustment
   scale_up_adjustment                 = local.scale_up_adjustment
-  namespace_hyphen                    = local.namespace_hyphen
+  namespace                           = local.namespace
   pipeline_storage_es_service_secrets = local.pipeline_storage_es_service_secrets
   service_egress_security_group_id    = aws_security_group.service_egress.id
 

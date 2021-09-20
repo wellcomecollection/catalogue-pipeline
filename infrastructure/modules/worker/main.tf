@@ -1,13 +1,15 @@
 locals {
   # Override the default service name if requested
   deployment_service_name = var.deployment_service_name == "" ? var.name : var.deployment_service_name
+
+  service_name = var.service_name == "" ? var.name : var.service_name
 }
 
 module "service" {
   source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/service?ref=v3.11.0"
 
   task_definition_arn            = module.task_definition.arn
-  service_name                   = var.name
+  service_name                   = local.service_name
   cluster_arn                    = var.cluster_arn
   subnets                        = var.subnets
   service_discovery_namespace_id = var.namespace_id
@@ -80,7 +82,7 @@ module "app_permissions" {
 
 module "log_router_container" {
   source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/firelens?ref=v3.11.0"
-  namespace = var.name
+  namespace = local.service_name
 
   use_privatelink_endpoint = true
 }

@@ -14,7 +14,10 @@ module "id_minter_queue" {
 
 module "id_minter" {
   source          = "../modules/service"
-  service_name    = "${local.namespace_hyphen}_id_minter"
+
+  namespace = local.namespace
+  name      = "id_minter"
+
   container_image = local.id_minter_image
 
   security_group_ids = [
