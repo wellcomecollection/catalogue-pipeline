@@ -304,7 +304,7 @@ object Implicits {
   implicit val _encSourceIdentifier: Encoder[SourceIdentifier] =
     deriveConfiguredEncoder
   implicit val _encCanonicalId: Encoder[CanonicalId] = CanonicalId.encoder
-  implicit val _envReferenceNumber: Encoder[ReferenceNumber] =
+  implicit val _encReferenceNumber: Encoder[ReferenceNumber] =
     ReferenceNumber.encoder
 
   implicit val _encIdStateIdentified: Encoder[IdState.Identified] =
@@ -435,17 +435,17 @@ object Implicits {
   implicit val _encRelation: Encoder[Relation] = deriveConfiguredEncoder
   implicit val _encRelations: Encoder[Relations] = deriveConfiguredEncoder
 
-  implicit val _envDerivedWorkData: Encoder[DerivedWorkData] =
+  implicit val _encDerivedWorkData: Encoder[DerivedWorkData] =
     deriveConfiguredEncoder
-  implicit val _envInferredData: Encoder[InferredData] =
+  implicit val _encInferredData: Encoder[InferredData] =
     deriveConfiguredEncoder
-  implicit val _envDerivedImageData: Encoder[DerivedImageData] =
+  implicit val _encDerivedImageData: Encoder[DerivedImageData] =
     deriveConfiguredEncoder
 
-  implicit val _envImageDataIdentifiable
+  implicit val _encImageDataIdentifiable
     : Encoder[ImageData[IdState.Identifiable]] =
     deriveConfiguredEncoder
-  implicit val _envImageDataIdentified: Encoder[ImageData[IdState.Identified]] =
+  implicit val _encImageDataIdentified: Encoder[ImageData[IdState.Identified]] =
     deriveConfiguredEncoder
 
   implicit val _encWorkDataUnidentified
