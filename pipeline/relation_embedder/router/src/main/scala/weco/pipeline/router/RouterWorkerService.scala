@@ -44,7 +44,7 @@ class RouterWorkerService[MsgDestination](
       // We don't expect TEI works to have a collectionPath field populated.
       case (None, relations) =>
         Success(List(work.transition[Denormalised]((relations, Set.empty))))
-      case (Some(CollectionPath(path, _)), relations)
+      case (Some(CollectionPath(path)), relations)
           if relations == Relations.none =>
         pathsMsgSender.send(path).map(_ => Nil)
       case (collectionPath, relations) =>

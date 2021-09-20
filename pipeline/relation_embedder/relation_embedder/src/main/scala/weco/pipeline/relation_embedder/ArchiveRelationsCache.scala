@@ -10,7 +10,7 @@ class ArchiveRelationsCache(works: Map[String, RelationWork]) extends Logging {
   def apply(work: Work[Merged]): Relations =
     work.data.collectionPath
       .map {
-        case CollectionPath(path, _) =>
+        case CollectionPath(path) =>
           val (siblingsPreceding, siblingsSucceeding) = getSiblings(path)
           val ancestors = getAncestors(path)
           val children = getChildren(path)
@@ -50,7 +50,7 @@ class ArchiveRelationsCache(works: Map[String, RelationWork]) extends Logging {
     */
   def getAvailabilities(work: Work[Merged]): Set[Availability] =
     work.data.collectionPath match {
-      case Some(CollectionPath(workPath, _)) =>
+      case Some(CollectionPath(workPath)) =>
         val affectedPaths = paths.knownDescendentsOf(workPath) :+ workPath
 
         works
@@ -107,7 +107,7 @@ object ArchiveRelationsCache {
           work.data.collectionPath -> work
         }
         .collect {
-          case (Some(CollectionPath(path, _)), work) =>
+          case (Some(CollectionPath(path)), work) =>
             path -> work
         }
         .toMap
