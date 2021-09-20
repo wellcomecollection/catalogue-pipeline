@@ -4,12 +4,8 @@ import weco.catalogue.internal_model.identifiers.{
   CanonicalId,
   DataState,
   IdState,
-  ReferenceNumber,
   SourceIdentifier
 }
-import weco.catalogue.internal_model.image.ImageData
-import weco.catalogue.internal_model.languages.Language
-import weco.catalogue.internal_model.locations.Location
 
 import java.time.Instant
 
@@ -45,8 +41,8 @@ sealed trait Work[State <: WorkState] {
     val outState = transition.state(state, data, args)
     val outData = transition.data(data)
     this match {
-      case Work.Visible(version, _, _, redirectSources) =>
-        Work.Visible(version, outData, outState, redirectSources.map {
+      case Work.Visible(version, _, _, relationPath, redirectSources) =>
+        Work.Visible(version, outData, outState, relationPath, redirectSources.map {
           transition.redirect
         })
       case Work.Invisible(version, _, _, invisibilityReasons) =>
@@ -65,6 +61,8 @@ object Work {
     version: Int,
     data: WorkData[State#WorkDataState],
     state: State,
+    relationPath: Option[String],
+    // TODO: Index the redirectTarget
     redirectSources: Seq[State#WorkDataState#Id] = Nil
   ) extends Work[State]
 
@@ -91,36 +89,6 @@ object Work {
     val data: WorkData[State#WorkDataState] = WorkData[State#WorkDataState]()
   }
 }
-
-/** WorkData contains data common to all types of works that can exist at any
-  * stage of the pipeline.
-  */
-case class WorkData[State <: DataState](
-  title: Option[String] = None,
-  otherIdentifiers: List[SourceIdentifier] = Nil,
-  mergeCandidates: List[MergeCandidate[State#Id]] = Nil,
-  alternativeTitles: List[String] = Nil,
-  format: Option[Format] = None,
-  description: Option[String] = None,
-  physicalDescription: Option[String] = None,
-  lettering: Option[String] = None,
-  createdDate: Option[Period[State#MaybeId]] = None,
-  subjects: List[Subject[State#MaybeId]] = Nil,
-  genres: List[Genre[State#MaybeId]] = Nil,
-  contributors: List[Contributor[State#MaybeId]] = Nil,
-  thumbnail: Option[Location] = None,
-  production: List[ProductionEvent[State#MaybeId]] = Nil,
-  languages: List[Language] = Nil,
-  edition: Option[String] = None,
-  notes: List[Note] = Nil,
-  duration: Option[Int] = None,
-  items: List[Item[State#MaybeId]] = Nil,
-  holdings: List[Holdings] = Nil,
-  collectionPath: Option[CollectionPath] = None,
-  referenceNumber: Option[ReferenceNumber] = None,
-  imageData: List[ImageData[State#Id]] = Nil,
-  workType: WorkType = WorkType.Standard,
-)
 
 /** WorkState represents the state of the work in the pipeline, and contains
   * different data depending on what state it is. This allows us to consider the
@@ -171,13 +139,15 @@ object InternalWork {
   // See https://github.com/wellcomecollection/platform/issues/5298
   case class Source(
     sourceIdentifier: SourceIdentifier,
-    workData: WorkData[DataState.Unidentified]
+    workData: WorkData[DataState.Unidentified],
+    relationPath: Option[String]
   )
 
   case class Identified(
     sourceIdentifier: SourceIdentifier,
     canonicalId: CanonicalId,
-    workData: WorkData[DataState.Identified]
+    workData: WorkData[DataState.Identified],
+    relationPath: Option[String]
   )
 }
 
@@ -215,7 +185,7 @@ object WorkState {
 
     def internalWorksWith(version: Int): List[Work.Visible[Identified]] =
       internalWorkStubs.map {
-        case InternalWork.Identified(sourceIdentifier, canonicalId, data) =>
+        case InternalWork.Identified(sourceIdentifier, canonicalId, data, relationPath) =>
           Work.Visible[Identified](
             version = version,
             data = data,
@@ -223,7 +193,8 @@ object WorkState {
               sourceIdentifier = sourceIdentifier,
               canonicalId = canonicalId,
               sourceModifiedTime = sourceModifiedTime
-            )
+            ),
+            relationPath = relationPath
           )
       }
   }
@@ -329,7 +300,7 @@ object WorkFsm {
         canonicalId = state.canonicalId,
         mergedTime = mergedTime,
         sourceModifiedTime = state.sourceModifiedTime,
-        availabilities = Availabilities.forWorkData(data),
+        availabilities = Availabilities.forWorkData(data)
       )
 
     def data(data: WorkData[DataState.Identified]) = data

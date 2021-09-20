@@ -4,7 +4,7 @@ import akka.Done
 import akka.stream.scaladsl.Flow
 import software.amazon.awssdk.services.sqs.model.Message
 import weco.catalogue.internal_model.work.WorkState.{Denormalised, Merged}
-import weco.catalogue.internal_model.work.{CollectionPath, Relations, Work}
+import weco.catalogue.internal_model.work.{Relations, Work}
 import weco.json.JsonUtil._
 import weco.messaging.MessageSender
 import weco.messaging.sns.NotificationMessage

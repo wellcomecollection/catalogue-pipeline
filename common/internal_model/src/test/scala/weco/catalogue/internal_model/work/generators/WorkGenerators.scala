@@ -38,7 +38,8 @@ trait WorkGenerators
         sourceIdentifier = sourceIdentifier,
         sourceModifiedTime = sourceModifiedTime),
       data = initData,
-      version = createVersion
+      version = createVersion,
+      relationPath = None
     )
 
   def mergedWork(
@@ -58,7 +59,8 @@ trait WorkGenerators
         relations = relations
       ),
       data = data,
-      version = createVersion
+      version = createVersion,
+      relationPath = None
     )
   }
 
@@ -79,7 +81,8 @@ trait WorkGenerators
         relations = relations
       ),
       data = data,
-      version = createVersion
+      version = createVersion,
+      relationPath = None
     )
   }
 
@@ -95,7 +98,8 @@ trait WorkGenerators
         sourceModifiedTime = sourceModifiedTime
       ),
       data = initData,
-      version = createVersion
+      version = createVersion,
+      relationPath = None
     )
 
   def indexedWork(
@@ -117,7 +121,8 @@ trait WorkGenerators
         relations = relations
       ),
       data = data,
-      version = createVersion
+      version = createVersion,
+      relationPath = None
     )
   }
 
@@ -170,7 +175,7 @@ trait WorkGenerators
 
     def withVersion(version: Int): Work.Visible[State] =
       Work
-        .Visible[State](version = version, data = work.data, state = work.state)
+        .Visible[State](version = version, data = work.data, state = work.state, relationPath = None)
 
     def withRedirectSources(
       redirectSources: Seq[State#WorkDataState#Id]
@@ -179,7 +184,8 @@ trait WorkGenerators
         version = work.version,
         data = work.data,
         state = work.state,
-        redirectSources = redirectSources
+        redirectSources = redirectSources,
+        relationPath = None
       )
 
     def title(title: String): Work.Visible[State] =
@@ -249,8 +255,8 @@ trait WorkGenerators
     ): Work.Visible[State] =
       work.map(_.copy(items = items))
 
-    def collectionPath(collectionPath: CollectionPath): Work.Visible[State] =
-      work.map(_.copy(collectionPath = Some(collectionPath)))
+    def collectionLabel(collectionLabel: Option[String]): Work.Visible[State] =
+      work.map(_.copy(collectionLabel = collectionLabel))
 
     def imageData(
       imageData: List[ImageData[State#WorkDataState#Id]]
@@ -271,22 +277,20 @@ trait WorkGenerators
     ): Work.Visible[State] = {
       val nextData = f(work.data)
       Work.Visible[State](
-        work.version,
-        nextData,
-        implicitly[UpdateState[State]].apply(work.state, nextData)
+        version = work.version,
+        data = nextData,
+        state = implicitly[UpdateState[State]].apply(work.state, nextData),
+        relationPath = None
       )
     }
 
-    def mapState(
-      f: State => State
-    ): Work.Visible[State] = {
-      val nextState = f(work.state)
+    def mapState(f: State => State): Work.Visible[State] =
       Work.Visible[State](
-        work.version,
-        work.data,
-        nextState
+        version = work.version,
+        data = work.data,
+        state = f(work.state),
+        relationPath = None
       )
-    }
   }
 
   implicit class IndexedWorkOps(work: Work.Visible[Indexed])(
@@ -317,7 +321,8 @@ trait WorkGenerators
             )
           ),
           work.data
-        )
+        ),
+        relationPath = work.relationPath
       )
   }
 

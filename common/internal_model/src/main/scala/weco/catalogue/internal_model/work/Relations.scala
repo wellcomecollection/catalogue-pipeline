@@ -38,8 +38,9 @@ object Relations {
 
 case class Relation(
   id: CanonicalId,
+  relationPath: String,
   title: Option[String],
-  collectionPath: Option[CollectionPath],
+  collectionLabel: Option[String],
   workType: WorkType,
   depth: Int,
   numChildren: Int,
@@ -49,6 +50,7 @@ case class Relation(
 object Relation {
   private def apply(
     id: CanonicalId,
+    relationPath: String,
     data: WorkData[_],
     depth: Int,
     numChildren: Int,
@@ -56,24 +58,25 @@ object Relation {
   ): Relation =
     Relation(
       id = id,
+      relationPath = relationPath,
       title = data.title,
-      collectionPath = data.collectionPath,
+      collectionLabel = data.collectionLabel,
       workType = data.workType,
       depth = depth,
       numChildren = numChildren,
       numDescendents = numDescendents,
     )
 
-  def apply[State <: WorkState](work: Work[State],
+  def apply[State <: WorkState](work: Work.Visible[State],
                                 depth: Int,
                                 numChildren: Int,
                                 numDescendents: Int): Relation =
     work.state match {
       case state: Indexed =>
-        apply(state.canonicalId, work.data, depth, numChildren, numDescendents)
+        apply(state.canonicalId, work.relationPath.get, work.data, depth, numChildren, numDescendents)
 
       case state: Merged =>
-        apply(state.canonicalId, work.data, depth, numChildren, numDescendents)
+        apply(state.canonicalId, work.relationPath.get, work.data, depth, numChildren, numDescendents)
 
       case _ =>
         throw new IllegalArgumentException(s"Cannot create Relation from $work")

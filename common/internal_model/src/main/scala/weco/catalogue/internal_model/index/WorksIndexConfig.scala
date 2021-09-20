@@ -34,20 +34,30 @@ object WorksIndexConfig extends IndexConfigFields {
   }
 
   val source = WorksIndexConfig(Seq.empty)
+
   val merged = WorksIndexConfig(
     Seq(
       keywordField("type"),
-      objectField("data").fields(
-        objectField("collectionPath").fields(
-          textField("path")
-            .copyTo("data.collectionPath.depth")
-            .analyzer(pathAnalyzer.name)
-            .fields(lowercaseKeyword("keyword")),
-          TokenCountField("depth").withAnalyzer("standard")
-        )
-      )
+
+      // We copy the relationPath field to enable two types of query in the
+      // relation embedder:
+      //
+      //    - we can search for parts of a path
+      //      e.g. if we had the path "PP/CRI/1/2", we could find this work by
+      //      searching "PP/CRI" or "PP/CRI/1"
+      //
+      //    - we can search by the depth of a path
+      //      e.g. if we had the path "PP/CRI/1/2", we could find this work by
+      //      looking for works with relationPath.depth = 4
+      //
+      textField("relationPath")
+        .copyTo("relationPath.depth")
+        .analyzer(pathAnalyzer.name)
+        .fields(lowercaseKeyword("keyword")),
+      TokenCountField("relationPath.depth").withAnalyzer("standard")
     )
   )
+
   val identified = WorksIndexConfig(
     Seq(
       objectField("data").fields(
@@ -117,18 +127,23 @@ object WorksIndexConfig extends IndexConfigFields {
           textField("edition"),
           objectField("notes").fields(englishTextField("content")),
           intField("duration"),
-          collectionPath(copyPathTo = Some("data.collectionPath.depth")),
+          collectionPath(copyPathTo = List("data.collectionPath.depth") ++ relationsPath),
           objectField("imageData").fields(
             objectField("id").fields(canonicalId, sourceIdentifier)
           ),
           keywordField("workType")
         )
 
-      def collectionPath(copyPathTo: Option[String]) = {
+      // + PP/CRI
+      //   - PP/CRI/1
+      //     - PP/CRI/1/1
+      //     - PP/CRI/1/2 ~> PP CRI 1 2
+
+      def collectionPath(copyPathTo: List[String]) = {
         val path = textField("path")
           .analyzer(pathAnalyzer.name)
           .fields(keywordField("keyword"))
-          .copyTo(copyPathTo.toList ++ relationsPath)
+          .copyTo(copyPathTo)
 
         objectField("collectionPath").fields(
           label.copyTo(relationsPath),
@@ -153,7 +168,7 @@ object WorksIndexConfig extends IndexConfigFields {
                 intField("numChildren"),
                 intField("numDescendents"),
                 multilingualFieldWithKeyword("title").copyTo(relationsPath),
-                collectionPath(copyPathTo = None)
+                collectionPath(copyPathTo = relationsPath)
               )
             )
             .withDynamic("false"),
