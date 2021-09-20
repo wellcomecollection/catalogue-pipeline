@@ -7,9 +7,9 @@ import weco.pipeline.matcher.exceptions.MatcherException
 import weco.pipeline.matcher.models.{
   MatchedIdentifiers,
   MatcherResult,
-  WorkGraph,
   WorkIdentifier,
-  WorkLinks
+  WorkLinks,
+  WorkNode
 }
 import weco.pipeline.matcher.storage.WorkGraphStore
 import weco.pipeline.matcher.workgraph.WorkGraphUpdater
@@ -39,7 +39,7 @@ class WorkMatcher(
         beforeGraph <- workGraphStore.findAffectedWorks(links)
         afterGraph = WorkGraphUpdater.update(links, beforeGraph)
 
-        updatedNodes = afterGraph.nodes -- beforeGraph.nodes
+        updatedNodes = afterGraph -- beforeGraph
 
         // It's possible that the matcher graph hasn't changed -- for example, if
         // we received an update to a work that changes an attribute unrelated to
@@ -58,7 +58,7 @@ class WorkMatcher(
               createdTime = Instant.now()))
         } else {
           val affectedComponentIds =
-            (beforeGraph.nodes ++ afterGraph.nodes)
+            (beforeGraph ++ afterGraph)
               .map { _.componentId }
 
           withLocks(links, ids = affectedComponentIds) {
@@ -94,8 +94,8 @@ class WorkMatcher(
       case _                     => new RuntimeException(failure.toString)
     }
 
-  private def toMatchedIdentifiers(g: WorkGraph): Set[MatchedIdentifiers] =
-    g.nodes
+  private def toMatchedIdentifiers(nodes: Set[WorkNode]): Set[MatchedIdentifiers] =
+    nodes
       .groupBy { _.componentId }
       .map {
         case (_, workNodes) =>

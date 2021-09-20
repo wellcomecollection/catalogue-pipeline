@@ -8,20 +8,19 @@ import weco.catalogue.internal_model.identifiers.CanonicalId
 import weco.pipeline.matcher.models.{
   VersionExpectedConflictException,
   VersionUnexpectedConflictException,
-  WorkGraph,
   WorkLinks,
   WorkNode
 }
 
 object WorkGraphUpdater extends Logging {
-  def update(links: WorkLinks, existingGraph: WorkGraph): WorkGraph = {
+  def update(links: WorkLinks, existingGraph: Set[WorkNode]): Set[WorkNode] = {
     checkVersionConflicts(links, existingGraph)
     doUpdate(links, existingGraph)
   }
 
   private def checkVersionConflicts(links: WorkLinks,
-                                    existingGraph: WorkGraph): Unit = {
-    val maybeExistingNode = existingGraph.nodes.find(_.id == links.workId)
+                                    existingGraph: Set[WorkNode]): Unit = {
+    val maybeExistingNode = existingGraph.find(_.id == links.workId)
     maybeExistingNode match {
       case Some(WorkNode(_, Some(existingVersion), linkedIds, _)) =>
         if (existingVersion > links.version) {
@@ -41,7 +40,7 @@ object WorkGraphUpdater extends Logging {
   }
 
   private def doUpdate(workLinks: WorkLinks,
-                       existingGraph: WorkGraph): WorkGraph = {
+                       existingGraph: Set[WorkNode]): Set[WorkNode] = {
 
     // Find everything that's in the existing graph, but which isn't
     // the node we're updating.
@@ -55,7 +54,7 @@ object WorkGraphUpdater extends Logging {
     // If we're updating work B, then this list will be (A C D E).
     //
     val linkedWorks =
-      existingGraph.nodes.filterNot(_.id == workLinks.workId)
+      existingGraph.filterNot(_.id == workLinks.workId)
 
     // Create a map (work ID) -> (version) for every work in the graph.
     //
@@ -92,7 +91,7 @@ object WorkGraphUpdater extends Logging {
 
     // Get the IDs of all the works in this graph, and construct a Graph object.
     val workIds =
-      existingGraph.nodes
+      existingGraph
         .flatMap { node =>
           node.id +: node.linkedIds
         } + workLinks.workId
@@ -119,20 +118,18 @@ object WorkGraphUpdater extends Logging {
     //
     // Here there are two components: (A B C F G) and (D E H)
     //
-    WorkGraph(
-      g.componentTraverser()
-        .flatMap(component => {
-          val nodeIds = component.nodes.map(_.value).toList
-          component.nodes.map(node => {
-            WorkNode(
-              id = node.value,
-              version = workVersions.get(node.value),
-              linkedIds = linkedWorkIds(node),
-              componentId = componentIdentifier(nodeIds))
-          })
+    g.componentTraverser()
+      .flatMap(component => {
+        val nodeIds = component.nodes.map(_.value).toList
+        component.nodes.map(node => {
+          WorkNode(
+            id = node.value,
+            version = workVersions.get(node.value),
+            linkedIds = linkedWorkIds(node),
+            componentId = componentIdentifier(nodeIds))
         })
-        .toSet
-    )
+      })
+      .toSet
   }
 
   /** Create the "component identifier".

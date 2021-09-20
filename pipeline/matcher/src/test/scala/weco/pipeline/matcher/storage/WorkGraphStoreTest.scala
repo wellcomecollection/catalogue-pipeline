@@ -8,7 +8,7 @@ import org.scalatest.funspec.AnyFunSpec
 import weco.catalogue.internal_model.generators.IdentifiersGenerators
 import weco.catalogue.internal_model.identifiers.CanonicalId
 import weco.pipeline.matcher.fixtures.MatcherFixtures
-import weco.pipeline.matcher.models.{WorkGraph, WorkLinks, WorkNode}
+import weco.pipeline.matcher.models.{WorkLinks, WorkNode}
 
 class WorkGraphStoreTest
     extends AnyFunSpec
@@ -31,7 +31,7 @@ class WorkGraphStoreTest
                 createCanonicalId,
                 version = 0,
                 referencedWorkIds = Set.empty))) { workGraph =>
-            workGraph shouldBe WorkGraph(Set.empty)
+            workGraph shouldBe empty
           }
         }
       }
@@ -49,10 +49,10 @@ class WorkGraphStoreTest
               componentId = ciHash(idA))
           put(dynamoClient, graphTable.name)(work)
 
-          whenReady(
-            workGraphStore.findAffectedWorks(WorkLinks(idA, 0, Set.empty))) {
-            workGraph =>
-              workGraph shouldBe WorkGraph(Set(work))
+          val future = workGraphStore.findAffectedWorks(WorkLinks(idA, 0, Set.empty))
+
+          whenReady(future) {
+            _ shouldBe Set(work)
           }
         }
       }
@@ -76,10 +76,10 @@ class WorkGraphStoreTest
           put(dynamoClient, graphTable.name)(workA)
           put(dynamoClient, graphTable.name)(workB)
 
-          whenReady(
-            workGraphStore.findAffectedWorks(WorkLinks(idA, 0, Set(idB)))) {
-            workGraph =>
-              workGraph.nodes shouldBe Set(workA, workB)
+          val future = workGraphStore.findAffectedWorks(WorkLinks(idA, 0, Set(idB)))
+
+          whenReady(future) {
+            _ shouldBe Set(workA, workB)
           }
         }
       }
@@ -104,11 +104,12 @@ class WorkGraphStoreTest
           put(dynamoClient, graphTable.name)(workA)
           put(dynamoClient, graphTable.name)(workB)
 
-          whenReady(
+          val future =
             workGraphStore.findAffectedWorks(
-              WorkLinks(idA, version = 0, referencedWorkIds = Set.empty))) {
-            workGraph =>
-              workGraph.nodes shouldBe Set(workA, workB)
+              WorkLinks(idA, version = 0, referencedWorkIds = Set.empty))
+
+          whenReady(future) {
+            _ shouldBe Set(workA, workB)
           }
         }
       }
@@ -140,10 +141,10 @@ class WorkGraphStoreTest
           put(dynamoClient, graphTable.name)(workB)
           put(dynamoClient, graphTable.name)(workC)
 
-          whenReady(
-            workGraphStore.findAffectedWorks(WorkLinks(idA, 0, Set.empty))) {
-            workGraph =>
-              workGraph.nodes shouldBe Set(workA, workB, workC)
+          val future = workGraphStore.findAffectedWorks(WorkLinks(idA, 0, Set.empty))
+
+          whenReady(future) {
+            _ shouldBe Set(workA, workB, workC)
           }
         }
       }
@@ -178,8 +179,8 @@ class WorkGraphStoreTest
 
           val links = WorkLinks(idB, version = 0, referencedWorkIds = Set(idC))
 
-          whenReady(workGraphStore.findAffectedWorks(links)) { workGraph =>
-            workGraph.nodes shouldBe Set(workA, workB, workC)
+          whenReady(workGraphStore.findAffectedWorks(links)) {
+            _ shouldBe Set(workA, workB, workC)
           }
         }
       }
@@ -201,7 +202,7 @@ class WorkGraphStoreTest
             linkedIds = Nil,
             componentId = ciHash(idA, idB))
 
-          whenReady(workGraphStore.put(WorkGraph(Set(workNodeA, workNodeB)))) {
+          whenReady(workGraphStore.put(Set(workNodeA, workNodeB))) {
             _ =>
               val savedWorks = scan[WorkNode](dynamoClient, graphTable.name)
                 .map(_.right.get)
@@ -233,11 +234,8 @@ class WorkGraphStoreTest
       linkedIds = Nil,
       componentId = ciHash(idA, idB))
 
-    whenReady(
-      workGraphStore
-        .put(WorkGraph(Set(workNode)))
-        .failed) { failedException =>
-      failedException shouldBe expectedException
+    whenReady(workGraphStore.put(Set(workNode)).failed) {
+      _ shouldBe expectedException
     }
   }
 }
