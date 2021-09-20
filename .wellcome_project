@@ -81,12 +81,10 @@ reindexer:
 
 catalogue_pipeline:
   environments:
-    - id: prod
-      name: Production
-    - id: stage
-      name: Staging
     - id: "2021-08-16"
       name: "2021-08-16"
+    - id: "2021-09-20"
+      name: "2021-09-20"
   image_repositories:
     - id: id_minter
       services:
