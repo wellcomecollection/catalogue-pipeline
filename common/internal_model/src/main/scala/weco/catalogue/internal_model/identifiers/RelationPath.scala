@@ -1,6 +1,6 @@
 package weco.catalogue.internal_model.identifiers
 
- import weco.json.{TypedString, TypedStringOps}
+import weco.json.{TypedString, TypedStringOps}
 
 /** A relation path describes how a work is related to other works.
   *
@@ -19,7 +19,7 @@ package weco.catalogue.internal_model.identifiers
   *
   */
 class RelationPath(val underlying: String)
-  extends TypedString[ReferenceNumber] {
+    extends TypedString[ReferenceNumber] {
 
   def join(other: RelationPath): RelationPath =
     RelationPath(s"$underlying/${other.underlying}")

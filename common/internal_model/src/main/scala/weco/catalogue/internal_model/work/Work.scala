@@ -222,10 +222,15 @@ object WorkState {
 
     def internalWorksWith(version: Int): List[Work.Visible[Identified]] =
       internalWorkStubs.map {
-        case InternalWork.Identified(sourceIdentifier, canonicalId, data, innerRelationPath) =>
+        case InternalWork.Identified(
+            sourceIdentifier,
+            canonicalId,
+            data,
+            innerRelationPath) =>
           val newRelationPath = (relationPath, innerRelationPath) match {
-            case (Some(parentPath), Some(childPath)) => Some(parentPath.join(childPath))
-            case (None, None)                        => None
+            case (Some(parentPath), Some(childPath)) =>
+              Some(parentPath.join(childPath))
+            case (None, None) => None
             case _ =>
               throw new IllegalArgumentException(
                 s"Inner/outer works have different relation paths: $relationPath / $innerRelationPath"
