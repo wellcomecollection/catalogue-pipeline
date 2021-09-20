@@ -38,7 +38,6 @@ object WorksIndexConfig extends IndexConfigFields {
   val merged = WorksIndexConfig(
     Seq(
       keywordField("type"),
-
       // We copy the relationPath field to enable two types of query in the
       // relation embedder:
       //

@@ -189,7 +189,11 @@ object WorkState {
 
     def internalWorksWith(version: Int): List[Work.Visible[Identified]] =
       internalWorkStubs.map {
-        case InternalWork.Identified(sourceIdentifier, canonicalId, data, relationPath) =>
+        case InternalWork.Identified(
+            sourceIdentifier,
+            canonicalId,
+            data,
+            relationPath) =>
           Work.Visible[Identified](
             version = version,
             data = data,

@@ -175,7 +175,11 @@ trait WorkGenerators
 
     def withVersion(version: Int): Work.Visible[State] =
       Work
-        .Visible[State](version = version, data = work.data, state = work.state, relationPath = None)
+        .Visible[State](
+          version = version,
+          data = work.data,
+          state = work.state,
+          relationPath = None)
 
     def withRedirectSources(
       redirectSources: Seq[State#WorkDataState#Id]

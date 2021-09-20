@@ -1,6 +1,10 @@
 package weco.catalogue.internal_model.work
 
-import weco.catalogue.internal_model.identifiers.{DataState, ReferenceNumber, SourceIdentifier}
+import weco.catalogue.internal_model.identifiers.{
+  DataState,
+  ReferenceNumber,
+  SourceIdentifier
+}
 import weco.catalogue.internal_model.image.ImageData
 import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.locations.Location
