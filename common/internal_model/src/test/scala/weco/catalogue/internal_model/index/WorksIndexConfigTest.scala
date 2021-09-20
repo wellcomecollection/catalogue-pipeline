@@ -193,10 +193,11 @@ class WorksIndexConfigTest
     assertWorkIsIndexed(client, id = work.state.id, work = work)
   }
 
-  private def indexWork[W](
-    client: ElasticClient = elasticClient,
-    id: String,
-    work: W)(implicit index: Index, encoder: Encoder[W]): Response[IndexResponse] = {
+  private def indexWork[W](client: ElasticClient = elasticClient,
+                           id: String,
+                           work: W)(
+    implicit index: Index,
+    encoder: Encoder[W]): Response[IndexResponse] = {
     val future = client.execute {
       indexInto(index).doc(toJson(work).get).id(id)
     }
