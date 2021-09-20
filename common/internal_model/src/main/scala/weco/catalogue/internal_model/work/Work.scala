@@ -41,8 +41,8 @@ sealed trait Work[State <: WorkState] {
     val outState = transition.state(state, data, args)
     val outData = transition.data(data)
     this match {
-      case Work.Visible(version, _, _, relationPath, redirectSources) =>
-        Work.Visible(version, outData, outState, relationPath, redirectSources.map {
+      case Work.Visible(version, _, _, redirectSources) =>
+        Work.Visible(version, outData, outState, redirectSources.map {
           transition.redirect
         })
       case Work.Invisible(version, _, _, invisibilityReasons) =>
@@ -57,11 +57,12 @@ sealed trait Work[State <: WorkState] {
 
 object Work {
 
+  // TODO: Rename Visible/Invisible to Complete/Incomplete?  Discuss further.
+
   case class Visible[State <: WorkState](
     version: Int,
     data: WorkData[State#WorkDataState],
     state: State,
-    relationPath: Option[String],
     // TODO: Index the redirectTarget
     redirectSources: Seq[State#WorkDataState#Id] = Nil
   ) extends Work[State]
@@ -156,7 +157,8 @@ object WorkState {
   case class Source(
     sourceIdentifier: SourceIdentifier,
     sourceModifiedTime: Instant,
-    internalWorkStubs: List[InternalWork.Source] = Nil
+    internalWorkStubs: List[InternalWork.Source] = Nil,
+    relationPath: Option[String]
   ) extends WorkState {
 
     type WorkDataState = DataState.Unidentified
@@ -172,7 +174,8 @@ object WorkState {
     sourceIdentifier: SourceIdentifier,
     canonicalId: CanonicalId,
     sourceModifiedTime: Instant,
-    internalWorkStubs: List[InternalWork.Identified] = Nil
+    internalWorkStubs: List[InternalWork.Identified] = Nil,
+    relationPath: Option[String]
   ) extends WorkState {
 
     type WorkDataState = DataState.Identified
@@ -192,9 +195,9 @@ object WorkState {
             state = WorkState.Identified(
               sourceIdentifier = sourceIdentifier,
               canonicalId = canonicalId,
-              sourceModifiedTime = sourceModifiedTime
-            ),
-            relationPath = relationPath
+              sourceModifiedTime = sourceModifiedTime,
+              relationPath = relationPath
+            )
           )
       }
   }
@@ -205,7 +208,8 @@ object WorkState {
     mergedTime: Instant,
     sourceModifiedTime: Instant,
     availabilities: Set[Availability] = Set.empty,
-    relations: Relations = Relations.none
+    relations: Relations = Relations.none,
+    relationPath: Option[String]
   ) extends WorkState {
 
     type WorkDataState = DataState.Identified
@@ -224,7 +228,8 @@ object WorkState {
     mergedTime: Instant,
     sourceModifiedTime: Instant,
     availabilities: Set[Availability],
-    relations: Relations = Relations.none
+    relations: Relations = Relations.none,
+    relationPath: Option[String]
   ) extends WorkState {
 
     type WorkDataState = DataState.Identified
@@ -258,7 +263,8 @@ object WorkState {
     indexedTime: Instant,
     availabilities: Set[Availability],
     derivedData: DerivedWorkData,
-    relations: Relations = Relations.none
+    relations: Relations = Relations.none,
+    relationPath: Option[String]
   ) extends WorkState {
 
     type WorkDataState = DataState.Identified
@@ -300,7 +306,8 @@ object WorkFsm {
         canonicalId = state.canonicalId,
         mergedTime = mergedTime,
         sourceModifiedTime = state.sourceModifiedTime,
-        availabilities = Availabilities.forWorkData(data)
+        availabilities = Availabilities.forWorkData(data),
+        relationPath = state.relationPath
       )
 
     def data(data: WorkData[DataState.Identified]) = data
@@ -321,7 +328,8 @@ object WorkFsm {
               mergedTime = state.mergedTime,
               sourceModifiedTime = state.sourceModifiedTime,
               availabilities = state.availabilities ++ relationAvailabilities,
-              relations = relations
+              relations = relations,
+              relationPath = state.relationPath
             )
         }
 
@@ -342,7 +350,8 @@ object WorkFsm {
         indexedTime = Instant.now(),
         availabilities = state.availabilities,
         derivedData = DerivedWorkData(data),
-        relations = state.relations
+        relations = state.relations,
+        relationPath = state.relationPath
       )
 
     def data(data: WorkData[DataState.Identified]) = data

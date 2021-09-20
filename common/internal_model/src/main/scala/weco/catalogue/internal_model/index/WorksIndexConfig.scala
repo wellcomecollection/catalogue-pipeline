@@ -50,11 +50,11 @@ object WorksIndexConfig extends IndexConfigFields {
       //      e.g. if we had the path "PP/CRI/1/2", we could find this work by
       //      looking for works with relationPath.depth = 4
       //
-      textField("relationPath")
-        .copyTo("relationPath.depth")
+      textField("state.relationPath")
+        .copyTo("state.relationDepth")
         .analyzer(pathAnalyzer.name)
         .fields(lowercaseKeyword("keyword")),
-      TokenCountField("relationPath.depth").withAnalyzer("standard")
+      TokenCountField("state.relationDepth").withAnalyzer("standard")
     )
   )
 
@@ -127,7 +127,8 @@ object WorksIndexConfig extends IndexConfigFields {
           textField("edition"),
           objectField("notes").fields(englishTextField("content")),
           intField("duration"),
-          collectionPath(copyPathTo = List("data.collectionPath.depth") ++ relationsPath),
+          textField("collectionLabel"),
+//          collectionPath(copyPathTo = List("data.collectionPath.depth") ++ relationsPath),
           objectField("imageData").fields(
             objectField("id").fields(canonicalId, sourceIdentifier)
           ),

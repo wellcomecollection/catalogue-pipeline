@@ -73,10 +73,10 @@ object Relation {
                                 numDescendents: Int): Relation =
     work.state match {
       case state: Indexed =>
-        apply(state.canonicalId, work.relationPath.get, work.data, depth, numChildren, numDescendents)
+        apply(state.canonicalId, state.relationPath.get, work.data, depth, numChildren, numDescendents)
 
       case state: Merged =>
-        apply(state.canonicalId, work.relationPath.get, work.data, depth, numChildren, numDescendents)
+        apply(state.canonicalId, state.relationPath.get, work.data, depth, numChildren, numDescendents)
 
       case _ =>
         throw new IllegalArgumentException(s"Cannot create Relation from $work")
