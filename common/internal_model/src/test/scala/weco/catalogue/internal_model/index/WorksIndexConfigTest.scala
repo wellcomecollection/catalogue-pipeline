@@ -1,8 +1,9 @@
 package weco.catalogue.internal_model.index
 
 import com.sksamuel.elastic4s.ElasticDsl._
+import com.sksamuel.elastic4s.requests.indexes.IndexResponse
 import org.scalacheck.ScalacheckShapeless._
-import com.sksamuel.elastic4s.{ElasticClient, ElasticError, Index}
+import com.sksamuel.elastic4s.{ElasticClient, ElasticError, Index, Response}
 import org.scalacheck.Shrink
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
@@ -195,10 +196,19 @@ class WorksIndexConfigTest
   private def indexWork[W](
     client: ElasticClient = elasticClient,
     id: String,
-    work: W)(implicit index: Index, encoder: Encoder[W]) =
-    client.execute {
+    work: W)(implicit index: Index, encoder: Encoder[W]): Response[IndexResponse] = {
+    val future = client.execute {
       indexInto(index).doc(toJson(work).get).id(id)
-    }.await
+    }
+
+    whenReady(future) { resp =>
+      if (resp.isError) {
+        println(s"Indexing $id was an error: $resp")
+      }
+
+      resp
+    }
+  }
 
   private def assertWorkIsIndexed[W](
     client: ElasticClient,
