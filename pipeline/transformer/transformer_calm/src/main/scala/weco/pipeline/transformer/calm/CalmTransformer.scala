@@ -149,7 +149,7 @@ object CalmTransformer
         otherIdentifiers = otherIdentifiers(record),
         format = Some(Format.ArchivesAndManuscripts),
         collectionPath = Some(collectionPath),
-        referenceNumber = collectionPath.label.map(ReferenceNumber(_)),
+        referenceNumber = referenceNumber(record),
         subjects = subjects(record),
         languages = languages,
         mergeCandidates = CalmMergeCandidates(record),
@@ -193,14 +193,13 @@ object CalmTransformer
       .getOrElse(Left(TitleMissing))
 
   def collectionPath(record: CalmRecord): Result[CollectionPath] =
-    record
-      .get("RefNo")
-      .map { path =>
-        Right(
-          CollectionPath(path = path, label = record.get("AltRefNo"))
-        )
-      }
-      .getOrElse(Left(RefNoMissing))
+    record.get("RefNo") match {
+      case Some(path) => Right(CollectionPath(path = path))
+      case None       => Left(RefNoMissing)
+    }
+
+  def referenceNumber(record: CalmRecord): Option[ReferenceNumber] =
+    record.get("AltRefNo").map(ReferenceNumber(_))
 
   def workType(record: CalmRecord): Result[WorkType] =
     record
