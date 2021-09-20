@@ -4,7 +4,7 @@ case class Batch(rootPath: String, selectors: List[Selector])
 
 sealed trait Selector {
 
-  val path: String
+  val path: String // A/B/C
 
   lazy val depth: Int =
     path.split("/").length

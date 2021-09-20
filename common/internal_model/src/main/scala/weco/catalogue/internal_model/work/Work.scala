@@ -124,6 +124,7 @@ sealed trait WorkState {
 
   val sourceIdentifier: SourceIdentifier
   val modifiedTime: Instant
+  val relationPath: Option[String]
   val relations: Relations
   def id: String
 }

@@ -36,10 +36,10 @@ trait WorkGenerators
     Work.Visible[Source](
       state = Source(
         sourceIdentifier = sourceIdentifier,
-        sourceModifiedTime = sourceModifiedTime),
+        sourceModifiedTime = sourceModifiedTime,
+        relationPath = None),
       data = initData,
-      version = createVersion,
-      relationPath = None
+      version = createVersion
     )
 
   def mergedWork(
@@ -56,11 +56,11 @@ trait WorkGenerators
         mergedTime = modifiedTime,
         sourceModifiedTime = modifiedTime,
         availabilities = Availabilities.forWorkData(data),
-        relations = relations
+        relations = relations,
+        relationPath = None
       ),
       data = data,
-      version = createVersion,
-      relationPath = None
+      version = createVersion
     )
   }
 
@@ -78,11 +78,11 @@ trait WorkGenerators
         mergedTime = modifiedTime,
         sourceModifiedTime = modifiedTime,
         availabilities = Availabilities.forWorkData(data),
-        relations = relations
+        relations = relations,
+        relationPath = None
       ),
       data = data,
-      version = createVersion,
-      relationPath = None
+      version = createVersion
     )
   }
 
