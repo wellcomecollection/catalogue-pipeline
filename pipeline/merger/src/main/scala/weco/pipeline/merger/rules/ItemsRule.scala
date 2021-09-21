@@ -125,13 +125,13 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
   // we know that in some cases the duplication is such that we can treat the Miro source as having
   // been entirely subsumed into the target despite not having used any of its data.
   //
-  // At the moment, the only case of this is when we have a digaids work: we know that
+  // At the moment, the only case of this is when we have a (re)digitised Miro work: we know that
   // the Miro item is identical to the METS item.
   def knownDuplicateSources(
     target: Work.Visible[Identified],
     sources: Seq[Work[Identified]]
   ): Seq[Work[Identified]] =
-    if (sierraDigaids(target) && sources.exists(singleDigitalItemMetsWork)) {
+    if (sierraDigitisedMiro(target) && sources.exists(singleDigitalItemMetsWork)) {
       sources.filter(singleDigitalItemMiroWork)
     } else {
       Nil

@@ -96,10 +96,14 @@ object WorkPredicates {
         format(Format.Pictures)
     )
 
-  // In future this may be changed to `digmiro` for all works
-  // where we know that the Miro and METS images are identical
-  val sierraDigaids: WorkPredicate =
-    satisfiesAll(sierraWork, hasDigcode("digaids"))
+  val digaids: WorkPredicate = hasDigcode("digaids")
+  val digmiro: WorkPredicate = hasDigcode("digmiro")
+
+  // The AIDS posters (digaids) have all already been re-digitised
+  // and marked with `digaids`, whereas going forward Miro works
+  // that have been re-digitised will be marked as `digmiro`F
+  val sierraDigitisedMiro: WorkPredicate =
+    satisfiesAll(sierraWork, digaids or digmiro)
 
   val sierraElectronicVideo: WorkPredicate =
     satisfiesAll(

@@ -126,6 +126,24 @@ class ImageDataRuleTest
       ) should contain theSameElementsAs metsWork.data.imageData
         .map(_.locations)
     }
+
+    it(
+      "does not use Miro images when a METS image is present for a digmiro Sierra work"
+    ) {
+      val metsWork = createInvisibleMetsIdentifiedWorkWith(numImages = 1)
+      val miroWork = miroIdentifiedWork()
+      val sierraDigmiroWork = sierraIdentifiedWork()
+        .format(Format.Pictures)
+        .otherIdentifiers(List(createDigcodeIdentifier("digmiro")))
+      val result =
+        ImageDataRule.merge(sierraDigmiroWork, List(miroWork, metsWork)).data
+
+      result should have length 1
+      result.map(
+        _.locations
+      ) should contain theSameElementsAs metsWork.data.imageData
+        .map(_.locations)
+    }
   }
 
   describe("the flat image merging rule") {
