@@ -44,8 +44,7 @@ trait WorkGenerators
   def mergedWork(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     canonicalId: CanonicalId = createCanonicalId,
-    modifiedTime: Instant = instantInLast30Days,
-    relations: Relations = Relations.none
+    modifiedTime: Instant = instantInLast30Days
   ): Work.Visible[Merged] = {
     val data = initData[DataState.Identified]
     Work.Visible[Merged](
@@ -54,8 +53,7 @@ trait WorkGenerators
         canonicalId = canonicalId,
         mergedTime = modifiedTime,
         sourceModifiedTime = modifiedTime,
-        availabilities = Availabilities.forWorkData(data),
-        relations = relations
+        availabilities = Availabilities.forWorkData(data)
       ),
       data = data,
       version = createVersion
