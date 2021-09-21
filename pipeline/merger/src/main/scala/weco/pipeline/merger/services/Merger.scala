@@ -4,15 +4,10 @@ import cats.data.State
 import weco.catalogue.internal_model.identifiers.{DataState, IdState}
 import weco.catalogue.internal_model.image.ImageData
 import weco.catalogue.internal_model.work.WorkState.Identified
-import weco.catalogue.internal_model.work.{Item, Work, WorkData, WorkState}
+import weco.catalogue.internal_model.work._
 import weco.pipeline.merger.logging.MergerLogging
 import weco.pipeline.merger.models
-import weco.pipeline.merger.models.{
-  FieldMergeResult,
-  ImageDataWithSource,
-  MergeResult,
-  MergerOutcome
-}
+import weco.pipeline.merger.models.{FieldMergeResult, ImageDataWithSource, MergeResult, MergerOutcome}
 import weco.pipeline.merger.rules._
 
 /*
@@ -227,7 +222,7 @@ object PlatformMerger extends Merger {
           }
       } yield
         MergeResult(
-          mergedTarget = addItemsToInternalWorks(items, work),
+          mergedTarget = modifyInternalWorks(work, items, collectionPath),
           imageDataWithSources = sourceImageData.map { imageData =>
             ImageDataWithSource(
               imageData = imageData,
@@ -236,16 +231,22 @@ object PlatformMerger extends Merger {
           }
         )
 
-  private def addItemsToInternalWorks(items: List[Item[IdState.Minted]],
-                                      work: Work.Visible[Identified]) = {
-    // Inteernal works are in TEI works. If they are merged with Sierra, we want the Sierra
+  private def modifyInternalWorks(work: Work.Visible[Identified],items: List[Item[IdState.Minted]],
+                                      collectionPath: Option[CollectionPath]
+                                      ) = {
+    // Internal works are in TEI works. If they are merged with Sierra, we want the Sierra
     // items to be added to TEI internal works so that the user can request the item
     // containing that work without having to find the wrapping work.
     work
       .mapState { state =>
         state.copy(internalWorkStubs = state.internalWorkStubs.map { stub =>
+          val updatedCollectionPath = (collectionPath, stub.workData.collectionPath) match {
+            case (Some(CollectionPath(path)), Some(CollectionPath(innerPath))) => Some(CollectionPath(s"$path/$innerPath"))
+            case (None, Some(innerCollectionPath)) => Some(innerCollectionPath)
+            case _ => ???//None
+          }
           stub.copy(
-            workData = stub.workData.copy[DataState.Identified](items = items)
+            workData = stub.workData.copy[DataState.Identified](items = items, collectionPath = updatedCollectionPath)
           )
         })
       }

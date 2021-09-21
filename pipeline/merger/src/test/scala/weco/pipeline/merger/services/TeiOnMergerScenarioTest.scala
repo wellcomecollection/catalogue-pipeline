@@ -55,10 +55,30 @@ class TeiOnMergerScenarioTest
       .filter(_.identifierType == IdentifierType.SierraIdentifier)
   }
 
-  Scenario("A Tei and a Calm are merged") {
+  Scenario("A Tei with internal works and a Calm are merged") {
     Given("a Tei and a Calm record")
     val calmWork = calmIdentifiedWork().collectionPath(CollectionPath("a/b/c"))
-    val teiWork = teiIdentifiedWork().title("A tei work")
+    val firstInternalWork = teiIdentifiedWork().collectionPath(CollectionPath("1"))
+    val secondInternalWork = teiIdentifiedWork().collectionPath(CollectionPath("2"))
+
+    val teiWork = teiIdentifiedWork().collectionPath(CollectionPath("tei_id"))
+      .title("A tei work")
+      .mapState(state => {
+        state.copy(
+          internalWorkStubs = List(
+            InternalWork.Identified(
+              sourceIdentifier = firstInternalWork.sourceIdentifier,
+              canonicalId = firstInternalWork.state.canonicalId,
+              workData = firstInternalWork.data
+            ),
+            InternalWork.Identified(
+              sourceIdentifier = secondInternalWork.sourceIdentifier,
+              canonicalId = secondInternalWork.state.canonicalId,
+              workData = secondInternalWork.data
+            )
+          )
+        )
+      })
 
     When("the works are merged")
 
@@ -73,14 +93,18 @@ class TeiOnMergerScenarioTest
       .getMerged(teiWork)
       .data
       .collectionPath shouldBe calmWork.data.collectionPath
+
+    And("the tei inner works have the calm collectionPath prepended")
+    outcome.getMerged(firstInternalWork).data.collectionPath shouldBe Some(CollectionPath(s"${calmWork.data.collectionPath.get.path}/${firstInternalWork.data.collectionPath.get.path}"))
+    outcome.getMerged(secondInternalWork).data.collectionPath shouldBe Some(CollectionPath(s"${calmWork.data.collectionPath.get.path}/${secondInternalWork.data.collectionPath.get.path}"))
   }
 
   Scenario(
     "A Tei with internal works and a Sierra digital and a sierra physical work are merged") {
     Given("a Tei, a Sierra physical record and a Sierra digital record")
     val (digitalSierra, physicalSierra) = sierraIdentifiedWorkPair()
-    val firstInternalWork = teiIdentifiedWork()
-    val secondInternalWork = teiIdentifiedWork()
+    val firstInternalWork = teiIdentifiedWork().collectionPath(CollectionPath("1"))
+    val secondInternalWork = teiIdentifiedWork().collectionPath(CollectionPath("1"))
 
     val teiWork = teiIdentifiedWork()
       .title("A tei work")
@@ -147,6 +171,16 @@ class TeiOnMergerScenarioTest
       .getMerged(secondInternalWork)
       .data
       .items should contain allElementsOf physicalSierra.data.items
+
+    And("the tei internal works retain their collectionsPath")
+    outcome
+      .getMerged(firstInternalWork)
+      .data
+      .collectionPath shouldBe firstInternalWork.data.collectionPath
+    outcome
+      .getMerged(secondInternalWork)
+      .data
+      .collectionPath shouldBe secondInternalWork.data.collectionPath
   }
 
   Scenario("A Tei work passes through unchanged") {
