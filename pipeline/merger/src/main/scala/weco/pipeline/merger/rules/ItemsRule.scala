@@ -131,7 +131,8 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     target: Work.Visible[Identified],
     sources: Seq[Work[Identified]]
   ): Seq[Work[Identified]] =
-    if (sierraDigitisedMiro(target) && sources.exists(singleDigitalItemMetsWork)) {
+    if (sierraDigitisedMiro(target) && sources.exists(
+          singleDigitalItemMetsWork)) {
       sources.filter(singleDigitalItemMiroWork)
     } else {
       Nil
