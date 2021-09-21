@@ -37,6 +37,18 @@ object WorksIndexConfig extends IndexConfigFields {
   val merged = WorksIndexConfig(
     Seq(
       keywordField("type"),
+      //
+      // We copy the collectionPath field to enable two types of query in the
+      // relation embedder:
+      //
+      //    - we can search for parts of a path
+      //      e.g. if we had the path "PP/CRI/1/2", we could find this work by
+      //      searching "PP/CRI" or "PP/CRI/1"
+      //
+      //    - we can search by the depth of a path
+      //      e.g. if we had the path "PP/CRI/1/2", we could find this work by
+      //      looking for works with relationPath.depth = 4
+      //
       objectField("data").fields(
         objectField("collectionPath").fields(
           textField("path")
@@ -124,7 +136,22 @@ object WorksIndexConfig extends IndexConfigFields {
           keywordField("workType")
         )
 
-      def collectionPath(copyPathTo: Option[String]) = {
+      // We copy the collectionPath label and the tokenized fields into the
+      // search.relations field for two reasons:
+      //
+      //    - to enable searching for parts of a path
+      //      e.g. if we had the path "PP/CRI/1/2", we could find this work by
+      //      searching "PP/CRI" or "PP/CRI/1"
+      //
+      //    - so we can boost exact matches for the label
+      //      e.g. if a user searches for "SAFPA/1/2", we want to prioritise the
+      //      work where that appears as the referenceNumber, even if other works
+      //      mention this reference in other fields
+      //
+      // TODO: Do we need to copy the depth here?  We need this for the relation
+      // embedder, but it's not clear if it's used in the API.
+      //
+      def collectionPath(copyPathTo: Option[String]): ObjectField = {
         val path = textField("path")
           .analyzer(pathAnalyzer.name)
           .fields(keywordField("keyword"))
