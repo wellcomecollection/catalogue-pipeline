@@ -102,7 +102,9 @@ trait Merger extends MergerLogging {
           val redirects = redirectedSources.map(redirectSourceToTarget(target))
           logResult(result, redirects.toList, remaining.toList)
           val internalWorks = result.mergedTarget.state.internalWorksWith(
-            version = result.mergedTarget.version)
+            parentRelationPath = result.mergedTarget.data.relationPath,
+            version = result.mergedTarget.version
+          )
 
           val redirectedIdentifiers =
             redirectedSources.map { s =>
