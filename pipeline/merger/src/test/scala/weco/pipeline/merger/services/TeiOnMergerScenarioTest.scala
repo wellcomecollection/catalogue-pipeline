@@ -4,7 +4,7 @@ import org.scalatest.GivenWhenThen
 import org.scalatest.featurespec.AnyFeatureSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.IdentifierType
-import weco.catalogue.internal_model.work.InternalWork
+import weco.catalogue.internal_model.work.{CollectionPath, InternalWork}
 import weco.catalogue.internal_model.work.generators.SourceWorkGenerators
 import weco.pipeline.merger.fixtures.FeatureTestSugar
 
@@ -53,6 +53,26 @@ class TeiOnMergerScenarioTest
       .data
       .otherIdentifiers should contain allElementsOf digitalSierra.data.otherIdentifiers
       .filter(_.identifierType == IdentifierType.SierraIdentifier)
+  }
+
+  Scenario("A Tei and a Calm are merged") {
+    Given("a Tei and a Calm record")
+    val calmWork = calmIdentifiedWork().collectionPath(CollectionPath("a/b/c"))
+    val teiWork = teiIdentifiedWork().title("A tei work")
+
+    When("the works are merged")
+
+    val works = List(calmWork,teiWork)
+    val outcome = merger.applyMerge(works.map(Some(_)))
+
+    Then("the Cal work is redirected to the tei")
+    outcome.getMerged(calmWork) should beRedirectedTo(teiWork)
+
+    And("the tei work has the Calm work collectionPath")
+    outcome
+      .getMerged(teiWork)
+      .data
+      .collectionPath shouldBe calmWork.data.collectionPath
   }
 
   Scenario(

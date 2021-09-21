@@ -214,13 +214,15 @@ object PlatformMerger extends Merger {
         thumbnail <- ThumbnailRule(target, sources).redirectSources
         otherIdentifiers <- OtherIdentifiersRule(target, sources).redirectSources
         sourceImageData <- ImageDataRule(target, sources).redirectSources
+        collectionPath <- CollectionPathRule(target, sources).redirectSources
         work = target
           .mapData { data =>
             data.copy[DataState.Identified](
               items = items,
               thumbnail = thumbnail,
               otherIdentifiers = otherIdentifiers,
-              imageData = sourceImageData
+              imageData = sourceImageData,
+              collectionPath = collectionPath
             )
           }
       } yield
