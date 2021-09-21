@@ -49,7 +49,7 @@ class CalmTransformerTest
           relationPath = Some(
             RelationPath(
               path = "a/b/c",
-              label = Some("a.b.c")
+              label = "a.b.c"
             )
           ),
           referenceNumber = Some(ReferenceNumber("a.b.c")),

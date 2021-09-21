@@ -213,12 +213,26 @@ object WorkState {
 
     override val modifiedTime: Instant = sourceModifiedTime
 
-    def internalWorksWith(version: Int): List[Work.Visible[Identified]] =
+    def internalWorksWith(parentRelationPath: Option[RelationPath], version: Int): List[Work.Visible[Identified]] =
       internalWorkStubs.map {
         case InternalWork.Identified(sourceIdentifier, canonicalId, data) =>
+          // We concatenate the relationPath of the internal work to that of the
+          // parent work, so it slots into the relation hierarchy.
+          //
+          // e.g. if the parent has relation path PP/ABC/1 and the internal work has path
+          // inner/1, we'd create the overall path PP/ABC/1/inner/1
+          //
+          val newRelationPath =
+            data.relationPath.map { rp =>
+              RelationPath(
+                path = (List(parentRelationPath.map(_.path)).flatten ++ rp.path).mkString("/"),
+                label = rp.label
+              )
+            }
+
           Work.Visible[Identified](
             version = version,
-            data = data,
+            data = data.copy(relationPath = newRelationPath),
             state = WorkState.Identified(
               sourceIdentifier = sourceIdentifier,
               canonicalId = canonicalId,

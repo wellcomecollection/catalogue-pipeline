@@ -76,4 +76,45 @@ class WorkTest extends AnyFunSpec with Matchers with WorkGenerators {
       .asInstanceOf[Work.Visible[Merged]]
       .redirectSources shouldBe redirectSources
   }
+
+  it("concatenates the relation path when creating internal works") {
+    val internalWorks = (1 to 5).map { i =>
+      identifiedWork()
+        .relationPath(RelationPath(path = s"inner/$i", label = None))
+    } ++ (1 to 2).map { _ => identifiedWork() }
+
+    val w = identifiedWork()
+      .relationPath(
+        RelationPath(path = "PP/ABC/1", label = "PPABC/1")
+      )
+      .mapState { state =>
+        state.copy(internalWorkStubs = internalWorks.map { internalW =>
+          InternalWork.Identified(
+            sourceIdentifier = internalW.sourceIdentifier,
+            canonicalId = internalW.state.canonicalId,
+            workData = internalW.data
+          )
+        }.toList)
+      }
+
+    val expectedWorks = internalWorks.map { internalW =>
+      val newRelationPath =
+        internalW.data.relationPath.map { case RelationPath(path, label) =>
+          RelationPath(path = s"PP/ABC/1/$path", label = label)
+        }
+
+      val newData = newRelationPath match {
+        case Some(_) => internalW.data.copy(relationPath = newRelationPath)
+        case None    => internalW.data
+      }
+
+      internalW
+        .withVersion(version = 2)
+        .copy(data = newData)
+    }
+
+    val actualWorks = w.state.internalWorksWith(parentRelationPath = Some(RelationPath(path = "PP/ABC/1", label = "PPABC/1")), version = 2)
+
+    actualWorks shouldBe expectedWorks
+  }
 }

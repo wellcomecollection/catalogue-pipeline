@@ -20,3 +20,8 @@ case class RelationPath(
   path: String,
   label: Option[String] = None,
 )
+
+case object RelationPath {
+  def apply(path: String, label: String): RelationPath =
+    RelationPath(path = path, label = Some(label))
+}

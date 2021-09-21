@@ -140,7 +140,7 @@ class WorksIndexConfigTest
   it("puts a work with a collection") {
     val relationPath = RelationPath(
       path = "PATH/FOR/THE/COLLECTION",
-      label = Some("PATH/FOR/THE/COLLECTION")
+      label = "PATH/FOR/THE/COLLECTION"
     )
 
     val work = indexedWork().relationPath(relationPath)
