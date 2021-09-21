@@ -30,6 +30,6 @@ case class RelationWorkState(
 
 case class RelationWorkData(
   title: Option[String],
-  collectionPath: Option[CollectionPath],
+  collectionPath: Option[RelationPath],
   workType: WorkType
 )

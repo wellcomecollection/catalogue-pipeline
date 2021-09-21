@@ -37,13 +37,13 @@ object Relations {
 }
 
 case class Relation(
-  id: CanonicalId,
-  title: Option[String],
-  collectionPath: Option[CollectionPath],
-  workType: WorkType,
-  depth: Int,
-  numChildren: Int,
-  numDescendents: Int,
+                     id: CanonicalId,
+                     title: Option[String],
+                     collectionPath: Option[RelationPath],
+                     workType: WorkType,
+                     depth: Int,
+                     numChildren: Int,
+                     numDescendents: Int,
 )
 
 object Relation {

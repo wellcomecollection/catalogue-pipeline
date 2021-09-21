@@ -6,7 +6,7 @@ import weco.catalogue.internal_model.work.generators.{
   ItemsGenerators,
   WorkGenerators
 }
-import weco.catalogue.internal_model.work.{CollectionPath, Work}
+import weco.catalogue.internal_model.work.{RelationPath, Work}
 import weco.pipeline.relation_embedder.{
   RelationWork,
   RelationWorkData,
@@ -17,7 +17,7 @@ trait RelationGenerators extends WorkGenerators with ItemsGenerators {
   def work(path: String,
            isAvailableOnline: Boolean = false): Work.Visible[Merged] =
     mergedWork(createSourceIdentifierWith(value = path))
-      .collectionPath(CollectionPath(path = path))
+      .collectionPath(RelationPath(path = path))
       .title(path)
       .items(if (isAvailableOnline) {
         List(createDigitalItemWith(accessStatus = AccessStatus.Open))

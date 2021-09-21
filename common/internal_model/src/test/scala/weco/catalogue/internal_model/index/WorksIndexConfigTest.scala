@@ -138,7 +138,7 @@ class WorksIndexConfigTest
   // which would not work as the mapping is strict and `collection`
   // only exists at the `data.collectionPath` level
   it("puts a work with a collection") {
-    val collectionPath = CollectionPath(
+    val collectionPath = RelationPath(
       path = "PATH/FOR/THE/COLLECTION",
       label = Some("PATH/FOR/THE/COLLECTION")
     )

@@ -192,12 +192,12 @@ object CalmTransformer
       .map(Right(_))
       .getOrElse(Left(TitleMissing))
 
-  def collectionPath(record: CalmRecord): Result[CollectionPath] =
+  def collectionPath(record: CalmRecord): Result[RelationPath] =
     record
       .get("RefNo")
       .map { path =>
         Right(
-          CollectionPath(path = path, label = record.get("AltRefNo"))
+          RelationPath(path = path, label = record.get("AltRefNo"))
         )
       }
       .getOrElse(Left(RefNoMissing))

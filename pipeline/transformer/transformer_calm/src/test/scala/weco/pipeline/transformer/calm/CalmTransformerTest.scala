@@ -47,7 +47,7 @@ class CalmTransformerTest
           title = Some("abc"),
           format = Some(Format.ArchivesAndManuscripts),
           collectionPath = Some(
-            CollectionPath(
+            RelationPath(
               path = "a/b/c",
               label = Some("a.b.c")
             )

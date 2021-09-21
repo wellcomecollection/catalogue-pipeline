@@ -166,7 +166,7 @@ object Implicits {
   implicit val _decFormat: Decoder[Format] = Format.formatDecoder
   implicit val _decHoldings: Decoder[Holdings] = deriveConfiguredDecoder
   implicit val _decWorkType: Decoder[WorkType] = WorkType.workTypeDecoder
-  implicit val _decCollectionPath: Decoder[CollectionPath] =
+  implicit val _decRelationPath: Decoder[RelationPath] =
     deriveConfiguredDecoder
   implicit val _decRelation: Decoder[Relation] = deriveConfiguredDecoder
   implicit val _decRelations: Decoder[Relations] = deriveConfiguredDecoder
@@ -430,7 +430,7 @@ object Implicits {
   implicit val _encFormat: Encoder[Format] = Format.formatEncoder
   implicit val _encHoldings: Encoder[Holdings] = deriveConfiguredEncoder
   implicit val _encWorkType: Encoder[WorkType] = WorkType.workTypeEncoder
-  implicit val _encCollectionPath: Encoder[CollectionPath] =
+  implicit val _encRelationPath: Encoder[RelationPath] =
     deriveConfiguredEncoder
   implicit val _encRelation: Encoder[Relation] = deriveConfiguredEncoder
   implicit val _encRelations: Encoder[Relations] = deriveConfiguredEncoder

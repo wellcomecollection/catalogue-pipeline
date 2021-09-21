@@ -63,7 +63,7 @@ case class PathCollection(paths: Set[String]) {
     * Notice that although all of these are below A/B, it only lists A/B/1 and
     * A/B/2 because those are the immediate children.
     *
-    * The children are sorted in CollectionPath order.
+    * The children are sorted in RelationPath order.
     *
     */
   lazy val childMapping: Map[String, List[String]] =
@@ -75,7 +75,7 @@ case class PathCollection(paths: Set[String]) {
 
       require(childPaths.forall(_.parent == p))
 
-      p -> CollectionPathSorter.sortPaths(childPaths)
+      p -> RelationPathSorter.sortPaths(childPaths)
     }.toMap
 
   /** Returns the siblings of ``path``.
@@ -152,7 +152,7 @@ case class PathCollection(paths: Set[String]) {
       }
     }
 
-    CollectionPathSorter.sortPaths(
+    RelationPathSorter.sortPaths(
       getKnownDescendents(childMapping.getOrElse(p, Nil)).toSet
     )
   }

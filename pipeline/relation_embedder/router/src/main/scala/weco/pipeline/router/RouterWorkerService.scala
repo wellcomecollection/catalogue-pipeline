@@ -4,7 +4,7 @@ import akka.Done
 import akka.stream.scaladsl.Flow
 import software.amazon.awssdk.services.sqs.model.Message
 import weco.catalogue.internal_model.work.WorkState.{Denormalised, Merged}
-import weco.catalogue.internal_model.work.{CollectionPath, Relations, Work}
+import weco.catalogue.internal_model.work.{RelationPath, Relations, Work}
 import weco.json.JsonUtil._
 import weco.messaging.MessageSender
 import weco.messaging.sns.NotificationMessage
@@ -44,7 +44,7 @@ class RouterWorkerService[MsgDestination](
       // We don't expect TEI works to have a collectionPath field populated.
       case (None, relations) =>
         Success(List(work.transition[Denormalised]((relations, Set.empty))))
-      case (Some(CollectionPath(path, _)), relations)
+      case (Some(RelationPath(path, _)), relations)
           if relations == Relations.none =>
         pathsMsgSender.send(path).map(_ => Nil)
       case (collectionPath, relations) =>

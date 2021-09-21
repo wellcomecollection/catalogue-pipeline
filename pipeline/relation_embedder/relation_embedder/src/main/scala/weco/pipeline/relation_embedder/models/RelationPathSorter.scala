@@ -3,7 +3,7 @@ package weco.pipeline.relation_embedder.models
 import scala.annotation.tailrec
 import scala.util.{Success, Try}
 
-object CollectionPathSorter {
+object RelationPathSorter {
   def sortPaths(paths: Set[String]): List[String] =
     paths.toList.sortBy(tokenizePath)
 

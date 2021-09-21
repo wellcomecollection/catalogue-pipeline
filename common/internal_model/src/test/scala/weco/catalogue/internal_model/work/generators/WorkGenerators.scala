@@ -249,7 +249,7 @@ trait WorkGenerators
     ): Work.Visible[State] =
       work.map(_.copy(items = items))
 
-    def collectionPath(collectionPath: CollectionPath): Work.Visible[State] =
+    def collectionPath(collectionPath: RelationPath): Work.Visible[State] =
       work.map(_.copy(collectionPath = Some(collectionPath)))
 
     def imageData(

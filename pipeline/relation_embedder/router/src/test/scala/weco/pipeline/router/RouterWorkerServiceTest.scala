@@ -7,7 +7,7 @@ import weco.messaging.fixtures.SQS.QueuePair
 import weco.messaging.memory.MemoryMessageSender
 import weco.catalogue.internal_model.work.WorkState.{Denormalised, Merged}
 import weco.catalogue.internal_model.work.generators.WorkGenerators
-import weco.catalogue.internal_model.work.{CollectionPath, Relation, Relations, Work}
+import weco.catalogue.internal_model.work.{RelationPath, Relation, Relations, Work}
 import weco.pipeline_storage.{Indexer, Retriever}
 import weco.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 import weco.pipeline_storage.memory.{MemoryIndexer, MemoryRetriever}
@@ -25,7 +25,7 @@ class RouterWorkerServiceTest
     with IntegrationPatience {
 
   it("sends collectionPath to paths topic") {
-    val work = mergedWork().collectionPath(CollectionPath("a"))
+    val work = mergedWork().collectionPath(RelationPath("a"))
     val indexer = new MemoryIndexer[Work[Denormalised]]()
 
     val retriever = new MemoryRetriever[Work[Merged]](
@@ -70,7 +70,7 @@ class RouterWorkerServiceTest
   }
 
   it("a work with relations and collection path is error"){
-    val work = mergedWork(relations = Relations(children = List(Relation(work = mergedWork(), depth = 1, numChildren = 0, numDescendents = 0)))).collectionPath(CollectionPath("a"))
+    val work = mergedWork(relations = Relations(children = List(Relation(work = mergedWork(), depth = 1, numChildren = 0, numDescendents = 0)))).collectionPath(RelationPath("a"))
     val indexer = new MemoryIndexer[Work[Denormalised]]()
 
     val retriever = new MemoryRetriever[Work[Merged]](
@@ -93,7 +93,7 @@ class RouterWorkerServiceTest
 
   it("sends on an invisible work") {
     val work =
-      mergedWork().collectionPath(CollectionPath("a/2")).invisible()
+      mergedWork().collectionPath(RelationPath("a/2")).invisible()
 
     val indexer = new MemoryIndexer[Work[Denormalised]]()
 

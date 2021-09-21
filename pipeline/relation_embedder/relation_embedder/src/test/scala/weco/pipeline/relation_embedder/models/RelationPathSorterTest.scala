@@ -4,7 +4,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks
 
-class CollectionPathSorterTest
+class RelationPathSorterTest
     extends AnyFunSpec
     with Matchers
     with TableDrivenPropertyChecks {
@@ -30,7 +30,7 @@ class CollectionPathSorterTest
     forAll(testCases) { paths =>
       // Pass in the list as a set so they don't pick up any implicit ordering
       // from the test spec.
-      CollectionPathSorter.sortPaths(paths.toSet) shouldBe paths
+      RelationPathSorter.sortPaths(paths.toSet) shouldBe paths
     }
   }
 }
