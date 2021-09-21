@@ -15,7 +15,7 @@ case class RelationWork(
     Relation(
       id = state.canonicalId,
       title = data.title,
-      collectionPath = data.collectionPath,
+      relationPath = data.relationPath,
       workType = data.workType,
       depth = depth,
       numChildren = numChildren,
@@ -30,6 +30,6 @@ case class RelationWorkState(
 
 case class RelationWorkData(
   title: Option[String],
-  collectionPath: Option[RelationPath],
+  relationPath: Option[RelationPath],
   workType: WorkType
 )

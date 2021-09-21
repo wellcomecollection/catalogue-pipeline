@@ -142,14 +142,14 @@ object CalmTransformer
     for {
       title <- title(record)
       workType <- workType(record)
-      collectionPath <- collectionPath(record)
+      relationPath <- relationPath(record)
     } yield
       WorkData[DataState.Unidentified](
         title = Some(title),
         otherIdentifiers = otherIdentifiers(record),
         format = Some(Format.ArchivesAndManuscripts),
-        collectionPath = Some(collectionPath),
-        referenceNumber = collectionPath.label.map(ReferenceNumber(_)),
+        relationPath = Some(relationPath),
+        referenceNumber = relationPath.label.map(ReferenceNumber(_)),
         subjects = subjects(record),
         languages = languages,
         mergeCandidates = CalmMergeCandidates(record),
@@ -192,7 +192,7 @@ object CalmTransformer
       .map(Right(_))
       .getOrElse(Left(TitleMissing))
 
-  def collectionPath(record: CalmRecord): Result[RelationPath] =
+  def relationPath(record: CalmRecord): Result[RelationPath] =
     record
       .get("RefNo")
       .map { path =>

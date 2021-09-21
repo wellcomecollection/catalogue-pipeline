@@ -1207,7 +1207,7 @@ class SierraTransformerTest
     val work = transformToWork(transformable)
 
     work.data.referenceNumber shouldBe Some(ReferenceNumber("12345i"))
-    work.data.collectionPath shouldBe None
+    work.data.relationPath shouldBe None
 
     work.data.otherIdentifiers should contain(
       SourceIdentifier(

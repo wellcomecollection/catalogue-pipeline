@@ -17,7 +17,7 @@ trait RelationGenerators extends WorkGenerators with ItemsGenerators {
   def work(path: String,
            isAvailableOnline: Boolean = false): Work.Visible[Merged] =
     mergedWork(createSourceIdentifierWith(value = path))
-      .collectionPath(RelationPath(path = path))
+      .relationPath(RelationPath(path = path))
       .title(path)
       .items(if (isAvailableOnline) {
         List(createDigitalItemWith(accessStatus = AccessStatus.Open))
@@ -27,7 +27,7 @@ trait RelationGenerators extends WorkGenerators with ItemsGenerators {
     RelationWork(
       data = RelationWorkData(
         title = work.data.title,
-        collectionPath = work.data.collectionPath,
+        relationPath = work.data.relationPath,
         workType = work.data.workType,
       ),
       state = RelationWorkState(

@@ -14,8 +14,8 @@ case class RelationsRequestBuilder(index: Index,
     "state.canonicalId",
     "state.availabilities",
     "data.title",
-    "data.collectionPath.path",
-    "data.collectionPath.label",
+    "data.relationPath.path",
+    "data.relationPath.label",
     "data.workType",
   )
 
@@ -40,10 +40,10 @@ case class RelationsRequestBuilder(index: Index,
   private val visibleQuery = termQuery(field = "type", value = "Visible")
 
   private def pathQuery(path: String) =
-    termQuery(field = "data.collectionPath.path", value = path)
+    termQuery(field = "data.relationPath.path", value = path)
 
   private def depthQuery(depth: Int) =
-    termQuery(field = "data.collectionPath.depth", value = depth)
+    termQuery(field = "data.relationPath.depth", value = depth)
 
   implicit private class SelectorToQuery(selector: Selector) {
     import Selector._

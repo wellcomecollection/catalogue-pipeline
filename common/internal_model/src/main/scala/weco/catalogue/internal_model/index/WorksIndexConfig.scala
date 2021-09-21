@@ -38,9 +38,9 @@ object WorksIndexConfig extends IndexConfigFields {
     Seq(
       keywordField("type"),
       objectField("data").fields(
-        objectField("collectionPath").fields(
+        objectField("relationPath").fields(
           textField("path")
-            .copyTo("data.collectionPath.depth")
+            .copyTo("data.relationPath.depth")
             .analyzer(pathAnalyzer.name)
             .fields(lowercaseKeyword("keyword")),
           TokenCountField("depth").withAnalyzer("standard")
@@ -117,20 +117,20 @@ object WorksIndexConfig extends IndexConfigFields {
           textField("edition"),
           objectField("notes").fields(englishTextField("content")),
           intField("duration"),
-          collectionPath(copyPathTo = Some("data.collectionPath.depth")),
+          relationPath(copyPathTo = Some("data.relationPath.depth")),
           objectField("imageData").fields(
             objectField("id").fields(canonicalId, sourceIdentifier)
           ),
           keywordField("workType")
         )
 
-      def collectionPath(copyPathTo: Option[String]) = {
+      def relationPath(copyPathTo: Option[String]) = {
         val path = textField("path")
           .analyzer(pathAnalyzer.name)
           .fields(keywordField("keyword"))
           .copyTo(copyPathTo.toList ++ relationsPath)
 
-        objectField("collectionPath").fields(
+        objectField("relationPath").fields(
           label.copyTo(relationsPath),
           path,
           TokenCountField("depth").withAnalyzer("standard")
@@ -153,7 +153,7 @@ object WorksIndexConfig extends IndexConfigFields {
                 intField("numChildren"),
                 intField("numDescendents"),
                 multilingualFieldWithKeyword("title").copyTo(relationsPath),
-                collectionPath(copyPathTo = None)
+                relationPath(copyPathTo = None)
               )
             )
             .withDynamic("false"),

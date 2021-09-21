@@ -37,19 +37,19 @@ class RouterWorkerService[MsgDestination](
 
   private def processMessage(
     work: Work[Merged]): Try[List[Work[Denormalised]]] = {
-    (work.data.collectionPath, work.state.relations) match {
+    (work.data.relationPath, work.state.relations) match {
       // For TEI works relations are already populated based on
       // inner works extracted by the TEI transformer. We don't need
       // to repopulate them in the relation embedder.
-      // We don't expect TEI works to have a collectionPath field populated.
+      // We don't expect TEI works to have a relationPath field populated.
       case (None, relations) =>
         Success(List(work.transition[Denormalised]((relations, Set.empty))))
       case (Some(RelationPath(path, _)), relations)
           if relations == Relations.none =>
         pathsMsgSender.send(path).map(_ => Nil)
-      case (collectionPath, relations) =>
+      case (relationPath, relations) =>
         Failure(new RuntimeException(
-          s"collectionPath: $collectionPath and relations: $relations are both populated in ${work.state.id}. This shouldn't be possible"))
+          s"relationPath: $relationPath and relations: $relations are both populated in ${work.state.id}. This shouldn't be possible"))
     }
   }
 

@@ -264,7 +264,7 @@
                       }
                     }
                   },
-                  "collectionPath" : {
+                  "relationPath" : {
                     "type" : "object",
                     "properties" : {
                       "label" : {
@@ -844,7 +844,7 @@
           "duration" : {
             "type" : "integer"
           },
-          "collectionPath" : {
+          "relationPath" : {
             "type" : "object",
             "properties" : {
               "label" : {
@@ -867,7 +867,7 @@
                 "type" : "text",
                 "analyzer" : "path_hierarchy_analyzer",
                 "copy_to" : [
-                  "data.collectionPath.depth",
+                  "data.relationPath.depth",
                   "search.relations"
                 ],
                 "fields" : {

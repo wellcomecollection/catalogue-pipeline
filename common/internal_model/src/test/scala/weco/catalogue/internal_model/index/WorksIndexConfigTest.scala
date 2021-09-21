@@ -136,14 +136,14 @@ class WorksIndexConfigTest
   // the potentially fails at PUT index time, we urn this test
   // e.g. copy_to was previously set to `collection.depth`
   // which would not work as the mapping is strict and `collection`
-  // only exists at the `data.collectionPath` level
+  // only exists at the `data.relationPath` level
   it("puts a work with a collection") {
-    val collectionPath = RelationPath(
+    val relationPath = RelationPath(
       path = "PATH/FOR/THE/COLLECTION",
       label = Some("PATH/FOR/THE/COLLECTION")
     )
 
-    val work = indexedWork().collectionPath(collectionPath)
+    val work = indexedWork().relationPath(relationPath)
 
     withLocalWorksIndex { implicit index =>
       assertWorkCanBeIndexed(work)

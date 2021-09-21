@@ -599,7 +599,7 @@
                   }
                 }
               },
-              "collectionPath" : {
+              "relationPath" : {
                 "type" : "object",
                 "properties" : {
                   "label" : {

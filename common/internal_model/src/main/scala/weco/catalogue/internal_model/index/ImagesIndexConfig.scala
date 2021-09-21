@@ -57,7 +57,7 @@ object ImagesIndexConfig extends IndexConfigFields {
               ),
               textField("edition"),
               objectField("notes").fields(multilingualField("content")),
-              objectField("collectionPath").fields(label, textField("path"))
+              objectField("relationPath").fields(label, textField("path"))
             ),
             keywordField("type")
           )

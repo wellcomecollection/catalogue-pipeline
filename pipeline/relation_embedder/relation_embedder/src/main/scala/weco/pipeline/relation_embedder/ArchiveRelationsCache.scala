@@ -8,7 +8,7 @@ import weco.pipeline.relation_embedder.models.PathCollection
 class ArchiveRelationsCache(works: Map[String, RelationWork]) extends Logging {
 
   def apply(work: Work[Merged]): Relations =
-    work.data.collectionPath
+    work.data.relationPath
       .map {
         case RelationPath(path, _) =>
           val (siblingsPreceding, siblingsSucceeding) = getSiblings(path)
@@ -28,7 +28,7 @@ class ArchiveRelationsCache(works: Map[String, RelationWork]) extends Logging {
           relations
       }
       .getOrElse {
-        warn(s"Received work with empty collectionPath field: ${work.id}")
+        warn(s"Received work with empty relationPath field: ${work.id}")
         Relations.none
       }
 
@@ -49,7 +49,7 @@ class ArchiveRelationsCache(works: Map[String, RelationWork]) extends Logging {
     *
     */
   def getAvailabilities(work: Work[Merged]): Set[Availability] =
-    work.data.collectionPath match {
+    work.data.relationPath match {
       case Some(RelationPath(workPath, _)) =>
         val affectedPaths = paths.knownDescendentsOf(workPath) :+ workPath
 
@@ -60,13 +60,13 @@ class ArchiveRelationsCache(works: Map[String, RelationWork]) extends Logging {
           .flatMap { case (_, work) => work.state.availabilities }
           .toSet
 
-      // We shouldn't be dealing with any works without a collectionPath field in the
+      // We shouldn't be dealing with any works without a relationPath field in the
       // relation embedder; if we are then something has gone wrong.
       case _ =>
         assert(
           assertion = false,
           message =
-            s"Cannot get availabilities for work with empty collectionPath field: $work"
+            s"Cannot get availabilities for work with empty relationPath field: $work"
         )
         Set()
     }
@@ -104,7 +104,7 @@ object ArchiveRelationsCache {
     new ArchiveRelationsCache(
       works
         .map { work =>
-          work.data.collectionPath -> work
+          work.data.relationPath -> work
         }
         .collect {
           case (Some(RelationPath(path, _)), work) =>

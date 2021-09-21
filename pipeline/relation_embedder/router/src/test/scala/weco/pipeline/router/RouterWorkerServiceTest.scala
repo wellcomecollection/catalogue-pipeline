@@ -24,8 +24,8 @@ class RouterWorkerServiceTest
     with Eventually
     with IntegrationPatience {
 
-  it("sends collectionPath to paths topic") {
-    val work = mergedWork().collectionPath(RelationPath("a"))
+  it("sends relationPath to paths topic") {
+    val work = mergedWork().relationPath(RelationPath("a"))
     val indexer = new MemoryIndexer[Work[Denormalised]]()
 
     val retriever = new MemoryRetriever[Work[Merged]](
@@ -45,7 +45,7 @@ class RouterWorkerServiceTest
     }
   }
 
-  it("sends a work without collectionPath to works topic") {
+  it("sends a work without relationPath to works topic") {
     val work = mergedWork()
     val indexer = new MemoryIndexer[Work[Denormalised]]()
 
@@ -70,7 +70,7 @@ class RouterWorkerServiceTest
   }
 
   it("a work with relations and collection path is error"){
-    val work = mergedWork(relations = Relations(children = List(Relation(work = mergedWork(), depth = 1, numChildren = 0, numDescendents = 0)))).collectionPath(RelationPath("a"))
+    val work = mergedWork(relations = Relations(children = List(Relation(work = mergedWork(), depth = 1, numChildren = 0, numDescendents = 0)))).relationPath(RelationPath("a"))
     val indexer = new MemoryIndexer[Work[Denormalised]]()
 
     val retriever = new MemoryRetriever[Work[Merged]](
@@ -93,7 +93,7 @@ class RouterWorkerServiceTest
 
   it("sends on an invisible work") {
     val work =
-      mergedWork().collectionPath(RelationPath("a/2")).invisible()
+      mergedWork().relationPath(RelationPath("a/2")).invisible()
 
     val indexer = new MemoryIndexer[Work[Denormalised]]()
 

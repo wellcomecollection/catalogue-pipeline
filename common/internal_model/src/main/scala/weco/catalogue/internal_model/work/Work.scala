@@ -116,7 +116,7 @@ case class WorkData[State <: DataState](
                                          duration: Option[Int] = None,
                                          items: List[Item[State#MaybeId]] = Nil,
                                          holdings: List[Holdings] = Nil,
-                                         collectionPath: Option[RelationPath] = None,
+                                         relationPath: Option[RelationPath] = None,
                                          referenceNumber: Option[ReferenceNumber] = None,
                                          imageData: List[ImageData[State#Id]] = Nil,
                                          workType: WorkType = WorkType.Standard,
