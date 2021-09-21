@@ -94,7 +94,8 @@ class WorkMatcher(
       case _                     => new RuntimeException(failure.toString)
     }
 
-  private def toMatchedIdentifiers(nodes: Set[WorkNode]): Set[MatchedIdentifiers] =
+  private def toMatchedIdentifiers(
+    nodes: Set[WorkNode]): Set[MatchedIdentifiers] =
     nodes
       .groupBy { _.componentId }
       .map {
