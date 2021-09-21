@@ -96,30 +96,30 @@ object Work {
   * stage of the pipeline.
   */
 case class WorkData[State <: DataState](
-                                         title: Option[String] = None,
-                                         otherIdentifiers: List[SourceIdentifier] = Nil,
-                                         mergeCandidates: List[MergeCandidate[State#Id]] = Nil,
-                                         alternativeTitles: List[String] = Nil,
-                                         format: Option[Format] = None,
-                                         description: Option[String] = None,
-                                         physicalDescription: Option[String] = None,
-                                         lettering: Option[String] = None,
-                                         createdDate: Option[Period[State#MaybeId]] = None,
-                                         subjects: List[Subject[State#MaybeId]] = Nil,
-                                         genres: List[Genre[State#MaybeId]] = Nil,
-                                         contributors: List[Contributor[State#MaybeId]] = Nil,
-                                         thumbnail: Option[Location] = None,
-                                         production: List[ProductionEvent[State#MaybeId]] = Nil,
-                                         languages: List[Language] = Nil,
-                                         edition: Option[String] = None,
-                                         notes: List[Note] = Nil,
-                                         duration: Option[Int] = None,
-                                         items: List[Item[State#MaybeId]] = Nil,
-                                         holdings: List[Holdings] = Nil,
-                                         relationPath: Option[RelationPath] = None,
-                                         referenceNumber: Option[ReferenceNumber] = None,
-                                         imageData: List[ImageData[State#Id]] = Nil,
-                                         workType: WorkType = WorkType.Standard,
+  title: Option[String] = None,
+  otherIdentifiers: List[SourceIdentifier] = Nil,
+  mergeCandidates: List[MergeCandidate[State#Id]] = Nil,
+  alternativeTitles: List[String] = Nil,
+  format: Option[Format] = None,
+  description: Option[String] = None,
+  physicalDescription: Option[String] = None,
+  lettering: Option[String] = None,
+  createdDate: Option[Period[State#MaybeId]] = None,
+  subjects: List[Subject[State#MaybeId]] = Nil,
+  genres: List[Genre[State#MaybeId]] = Nil,
+  contributors: List[Contributor[State#MaybeId]] = Nil,
+  thumbnail: Option[Location] = None,
+  production: List[ProductionEvent[State#MaybeId]] = Nil,
+  languages: List[Language] = Nil,
+  edition: Option[String] = None,
+  notes: List[Note] = Nil,
+  duration: Option[Int] = None,
+  items: List[Item[State#MaybeId]] = Nil,
+  holdings: List[Holdings] = Nil,
+  relationPath: Option[RelationPath] = None,
+  referenceNumber: Option[ReferenceNumber] = None,
+  imageData: List[ImageData[State#Id]] = Nil,
+  workType: WorkType = WorkType.Standard,
 )
 
 /** WorkState represents the state of the work in the pipeline, and contains
@@ -213,7 +213,8 @@ object WorkState {
 
     override val modifiedTime: Instant = sourceModifiedTime
 
-    def internalWorksWith(parentRelationPath: Option[RelationPath], version: Int): List[Work.Visible[Identified]] =
+    def internalWorksWith(parentRelationPath: Option[RelationPath],
+                          version: Int): List[Work.Visible[Identified]] =
       internalWorkStubs.map {
         case InternalWork.Identified(sourceIdentifier, canonicalId, data) =>
           // We concatenate the relationPath of the internal work to that of the
@@ -225,7 +226,9 @@ object WorkState {
           val newRelationPath =
             data.relationPath.map { rp =>
               RelationPath(
-                path = (List(parentRelationPath.map(_.path), Some(rp.path)).flatten).mkString("/"),
+                path =
+                  (List(parentRelationPath.map(_.path), Some(rp.path)).flatten)
+                    .mkString("/"),
                 label = rp.label
               )
             }

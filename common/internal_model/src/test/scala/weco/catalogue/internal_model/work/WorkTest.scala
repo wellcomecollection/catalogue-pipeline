@@ -81,7 +81,9 @@ class WorkTest extends AnyFunSpec with Matchers with WorkGenerators {
     val internalWorks = (1 to 5).map { i =>
       identifiedWork()
         .relationPath(RelationPath(path = s"inner/$i", label = None))
-    } ++ (1 to 2).map { _ => identifiedWork() }
+    } ++ (1 to 2).map { _ =>
+      identifiedWork()
+    }
 
     val w = identifiedWork()
       .relationPath(
@@ -99,8 +101,9 @@ class WorkTest extends AnyFunSpec with Matchers with WorkGenerators {
 
     val expectedWorks = internalWorks.map { internalW =>
       val newRelationPath =
-        internalW.data.relationPath.map { case RelationPath(path, label) =>
-          RelationPath(path = s"PP/ABC/1/$path", label = label)
+        internalW.data.relationPath.map {
+          case RelationPath(path, label) =>
+            RelationPath(path = s"PP/ABC/1/$path", label = label)
         }
 
       val newData = newRelationPath match {
@@ -117,7 +120,8 @@ class WorkTest extends AnyFunSpec with Matchers with WorkGenerators {
     }
 
     // If we get a relationPath from the parent work
-    val actualWorks = w.state.internalWorksWith(parentRelationPath = w.data.relationPath, version = 2)
+    val actualWorks = w.state
+      .internalWorksWith(parentRelationPath = w.data.relationPath, version = 2)
 
     actualWorks shouldBe expectedWorks
 
