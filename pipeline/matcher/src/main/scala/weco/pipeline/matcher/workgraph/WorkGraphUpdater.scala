@@ -13,14 +13,14 @@ import weco.pipeline.matcher.models.{
 }
 
 object WorkGraphUpdater extends Logging {
-  def update(links: WorkLinks, existingGraph: Set[WorkNode]): Set[WorkNode] = {
-    checkVersionConflicts(links, existingGraph)
-    doUpdate(links, existingGraph)
+  def update(links: WorkLinks, existingNodes: Set[WorkNode]): Set[WorkNode] = {
+    checkVersionConflicts(links, existingNodes)
+    doUpdate(links, existingNodes)
   }
 
   private def checkVersionConflicts(links: WorkLinks,
-                                    existingGraph: Set[WorkNode]): Unit = {
-    val maybeExistingNode = existingGraph.find(_.id == links.workId)
+                                    existingNodes: Set[WorkNode]): Unit = {
+    val maybeExistingNode = existingNodes.find(_.id == links.workId)
     maybeExistingNode match {
       case Some(WorkNode(_, Some(existingVersion), linkedIds, _)) =>
         if (existingVersion > links.version) {
@@ -40,7 +40,7 @@ object WorkGraphUpdater extends Logging {
   }
 
   private def doUpdate(workLinks: WorkLinks,
-                       existingGraph: Set[WorkNode]): Set[WorkNode] = {
+                       existingNodes: Set[WorkNode]): Set[WorkNode] = {
 
     // Find everything that's in the existing graph, but which isn't
     // the node we're updating.
@@ -54,7 +54,7 @@ object WorkGraphUpdater extends Logging {
     // If we're updating work B, then this list will be (A C D E).
     //
     val linkedWorks =
-      existingGraph.filterNot(_.id == workLinks.workId)
+      existingNodes.filterNot(_.id == workLinks.workId)
 
     // Create a map (work ID) -> (version) for every work in the graph.
     //
@@ -91,7 +91,7 @@ object WorkGraphUpdater extends Logging {
 
     // Get the IDs of all the works in this graph, and construct a Graph object.
     val workIds =
-      existingGraph
+      existingNodes
         .flatMap { node =>
           node.id +: node.linkedIds
         } + workLinks.workId

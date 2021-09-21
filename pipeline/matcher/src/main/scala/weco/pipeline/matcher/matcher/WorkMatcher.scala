@@ -36,10 +36,10 @@ class WorkMatcher(
   private def doMatch(links: WorkLinks): Future[MatcherResult] =
     withLocks(links, links.ids.map(_.toString)) {
       for {
-        beforeGraph <- workGraphStore.findAffectedWorks(links)
-        afterGraph = WorkGraphUpdater.update(links, beforeGraph)
+        beforeNodes <- workGraphStore.findAffectedWorks(links)
+        afterNodes = WorkGraphUpdater.update(links, beforeNodes)
 
-        updatedNodes = afterGraph -- beforeGraph
+        updatedNodes = afterNodes -- beforeNodes
 
         // It's possible that the matcher graph hasn't changed -- for example, if
         // we received an update to a work that changes an attribute unrelated to
@@ -54,20 +54,20 @@ class WorkMatcher(
         matcherResult <- if (updatedNodes.isEmpty) {
           Future.successful(
             MatcherResult(
-              works = toMatchedIdentifiers(afterGraph),
+              works = toMatchedIdentifiers(afterNodes),
               createdTime = Instant.now()))
         } else {
           val affectedComponentIds =
-            (beforeGraph ++ afterGraph)
+            (beforeNodes ++ afterNodes)
               .map { _.componentId }
 
           withLocks(links, ids = affectedComponentIds) {
             workGraphStore
-              .put(afterGraph)
+              .put(afterNodes)
               .map(
                 _ =>
                   MatcherResult(
-                    works = toMatchedIdentifiers(afterGraph),
+                    works = toMatchedIdentifiers(afterNodes),
                     createdTime = Instant.now()))
           }
         }

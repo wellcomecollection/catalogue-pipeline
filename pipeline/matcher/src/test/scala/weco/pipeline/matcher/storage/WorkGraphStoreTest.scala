@@ -30,8 +30,8 @@ class WorkGraphStoreTest
               WorkLinks(
                 createCanonicalId,
                 version = 0,
-                referencedWorkIds = Set.empty))) { workGraph =>
-            workGraph shouldBe empty
+                referencedWorkIds = Set.empty))) {
+            _ shouldBe empty
           }
         }
       }

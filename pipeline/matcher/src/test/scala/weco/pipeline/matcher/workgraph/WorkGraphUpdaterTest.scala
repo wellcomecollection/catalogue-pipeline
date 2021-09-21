@@ -26,7 +26,7 @@ class WorkGraphUpdaterTest
       WorkGraphUpdater
         .update(
           links = WorkLinks(idA, version = 1, referencedWorkIds = Set.empty),
-          existingGraph = Set()
+          existingNodes = Set()
         ) shouldBe Set(
         WorkNode(
           idA,
@@ -39,7 +39,7 @@ class WorkGraphUpdaterTest
       WorkGraphUpdater
         .update(
           links = WorkLinks(idA, version = 1, referencedWorkIds = Set(idB)),
-          existingGraph = Set()
+          existingNodes = Set()
         ) shouldBe Set(
         WorkNode(
           idA,
@@ -57,7 +57,7 @@ class WorkGraphUpdaterTest
       WorkGraphUpdater
         .update(
           links = WorkLinks(idB, version = 1, referencedWorkIds = Set(idA)),
-          existingGraph = Set()
+          existingNodes = Set()
         ) shouldBe Set(
         WorkNode(
           idB,
@@ -77,7 +77,7 @@ class WorkGraphUpdaterTest
       WorkGraphUpdater
         .update(
           links = WorkLinks(idA, version = 2, referencedWorkIds = Set(idB)),
-          existingGraph =
+          existingNodes =
             Set(
               WorkNode(
                 idA,
@@ -108,7 +108,7 @@ class WorkGraphUpdaterTest
       WorkGraphUpdater
         .update(
           links = WorkLinks(idA, version = 2, referencedWorkIds = Set(idB)),
-          existingGraph =
+          existingNodes =
             Set(
               WorkNode(
                 idA,
@@ -138,7 +138,7 @@ class WorkGraphUpdaterTest
       WorkGraphUpdater
         .update(
           links = WorkLinks(idB, version = 2, referencedWorkIds = Set(idC)),
-          existingGraph = Set(
+          existingNodes = Set(
             WorkNode(
               idA,
               version = 2,
@@ -178,7 +178,7 @@ class WorkGraphUpdaterTest
       WorkGraphUpdater
         .update(
           links = WorkLinks(idB, version = 2, referencedWorkIds = Set(idC)),
-          existingGraph = Set(
+          existingNodes = Set(
             WorkNode(
               idA,
               version = 1,
@@ -221,7 +221,7 @@ class WorkGraphUpdaterTest
       WorkGraphUpdater
         .update(
           links = WorkLinks(idB, version = 2, referencedWorkIds = Set(idC, idD)),
-          existingGraph = Set(
+          existingNodes = Set(
             WorkNode(
               idA,
               version = 2,
@@ -272,7 +272,7 @@ class WorkGraphUpdaterTest
       WorkGraphUpdater
         .update(
           links = WorkLinks(idC, version = 2, referencedWorkIds = Set(idA)),
-          existingGraph = Set(
+          existingNodes = Set(
             WorkNode(
               idA,
               version = 2,
@@ -312,7 +312,7 @@ class WorkGraphUpdaterTest
       WorkGraphUpdater
         .update(
           links = WorkLinks(idA, updateVersion, referencedWorkIds = Set(idB)),
-          existingGraph =
+          existingNodes =
             Set(
               WorkNode(
                 idA,
@@ -341,7 +341,7 @@ class WorkGraphUpdaterTest
         WorkGraphUpdater
           .update(
             links = WorkLinks(idA, updateVersion, referencedWorkIds = Set(idB)),
-            existingGraph =
+            existingNodes =
               Set(
                 WorkNode(
                   idA,
@@ -361,7 +361,7 @@ class WorkGraphUpdaterTest
       WorkGraphUpdater
         .update(
           links = WorkLinks(idA, updateVersion, referencedWorkIds = Set(idB)),
-          existingGraph =
+          existingNodes =
             Set(
               WorkNode(
                 idA,
@@ -396,7 +396,7 @@ class WorkGraphUpdaterTest
         WorkGraphUpdater
           .update(
             links = WorkLinks(idA, updateVersion, referencedWorkIds = Set(idA)),
-            existingGraph =
+            existingNodes =
               Set(
                 WorkNode(
                   idA,
@@ -419,7 +419,7 @@ class WorkGraphUpdaterTest
       WorkGraphUpdater
         .update(
           links = WorkLinks(idA, version = 2, referencedWorkIds = Set.empty),
-          existingGraph =
+          existingNodes =
             Set(
               WorkNode(
                 idA,
@@ -449,7 +449,7 @@ class WorkGraphUpdaterTest
       WorkGraphUpdater
         .update(
           links = WorkLinks(idA, version = 2, referencedWorkIds = Set.empty),
-          existingGraph =
+          existingNodes =
             Set(
               WorkNode(
                 idA,
@@ -471,7 +471,7 @@ class WorkGraphUpdaterTest
       WorkGraphUpdater
         .update(
           links = WorkLinks(idB, version = 3, referencedWorkIds = Set.empty),
-          existingGraph = (Set(
+          existingNodes = (Set(
             WorkNode(
               idA,
               version = 2,
@@ -503,7 +503,7 @@ class WorkGraphUpdaterTest
       WorkGraphUpdater
         .update(
           links = WorkLinks(idB, version = 3, referencedWorkIds = Set(idC)),
-          existingGraph = Set(
+          existingNodes = Set(
             WorkNode(
               idA,
               version = 2,
