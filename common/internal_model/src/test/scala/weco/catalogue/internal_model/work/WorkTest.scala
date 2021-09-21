@@ -111,10 +111,24 @@ class WorkTest extends AnyFunSpec with Matchers with WorkGenerators {
       internalW
         .withVersion(version = 2)
         .copy(data = newData)
+        .mapState { state =>
+          state.copy(sourceModifiedTime = w.state.sourceModifiedTime)
+        }
     }
 
-    val actualWorks = w.state.internalWorksWith(parentRelationPath = Some(RelationPath(path = "PP/ABC/1", label = "PPABC/1")), version = 2)
+    // If we get a relationPath from the parent work
+    val actualWorks = w.state.internalWorksWith(parentRelationPath = w.data.relationPath, version = 2)
 
     actualWorks shouldBe expectedWorks
+
+    // If we don't get a relationPath from the parent work
+    w.state.internalWorksWith(parentRelationPath = None, version = 2) shouldBe
+      internalWorks.map { internalW =>
+        internalW
+          .withVersion(version = 2)
+          .mapState { state =>
+            state.copy(sourceModifiedTime = w.state.sourceModifiedTime)
+          }
+      }
   }
 }

@@ -225,7 +225,7 @@ object WorkState {
           val newRelationPath =
             data.relationPath.map { rp =>
               RelationPath(
-                path = (List(parentRelationPath.map(_.path)).flatten ++ rp.path).mkString("/"),
+                path = (List(parentRelationPath.map(_.path), Some(rp.path)).flatten).mkString("/"),
                 label = rp.label
               )
             }
