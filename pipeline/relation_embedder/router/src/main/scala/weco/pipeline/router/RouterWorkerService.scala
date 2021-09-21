@@ -36,7 +36,7 @@ class RouterWorkerService[MsgDestination](
   }
 
   private def processMessage(
-    work: Work[Merged]): Try[List[Work[Denormalised]]] = {
+    work: Work[Merged]): Try[List[Work[Denormalised]]] =
     (work.data.collectionPath, work.state.relations) match {
       // For TEI works relations are already populated based on
       // inner works extracted by the TEI transformer. We don't need
@@ -51,6 +51,4 @@ class RouterWorkerService[MsgDestination](
         Failure(new RuntimeException(
           s"collectionPath: $collectionPath and relations: $relations are both populated in ${work.state.id}. This shouldn't be possible"))
     }
-  }
-
 }

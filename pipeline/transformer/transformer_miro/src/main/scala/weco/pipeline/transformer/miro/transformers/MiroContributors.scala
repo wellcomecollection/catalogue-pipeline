@@ -25,7 +25,7 @@ trait MiroContributors extends MiroContributorCodes {
     }
 
     // We also add the contributor code for the non-historical images, but
-    // only if the contributor *isn't* Wellcome Collection.v
+    // only if the contributor *isn't* Wellcome Collection.
     val maybeContributorCreator = miroRecord.sourceCode match {
       case Some(code) =>
         lookupContributorCode(miroId = miroRecord.imageNumber, code = code) match {

@@ -131,5 +131,13 @@ case class InferredData(
 )
 
 object InferredData {
-  def empty: InferredData = InferredData(Nil, Nil, Nil, Nil, Nil, Nil, None)
+  def empty: InferredData = InferredData(
+    features1 = Nil,
+    features2 = Nil,
+    lshEncodedFeatures = Nil,
+    palette = Nil,
+    binSizes = Nil,
+    binMinima = Nil,
+    aspectRatio = None
+  )
 }
