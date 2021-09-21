@@ -10,6 +10,7 @@ import weco.catalogue.internal_model.identifiers.{
 import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.internal_model.work.{
+  CollectionPath,
   Format,
   InternalWork,
   MergeCandidate,
@@ -29,14 +30,15 @@ case class TeiData(id: String,
                    nestedTeiData: Result[List[TeiData]] = Right(Nil))
     extends Logging {
   def toWork(time: Instant, version: Int): Work[Source] = {
+
     val topLevelData = toWorkData(mergeCandidates = mergeCandidates)
 
-    val internalDataStubs =
+    val internalDataStubs: Result[List[InternalWork.Source]] =
       nestedTeiData.map { teiDatas =>
         teiDatas.map { data =>
           InternalWork.Source(
-            data.sourceIdentifier,
-            data.toWorkData(mergeCandidates = Nil)
+            sourceIdentifier = data.sourceIdentifier,
+            workData = data.toWorkData(mergeCandidates = Nil)
           )
         }
       }
@@ -93,6 +95,23 @@ case class TeiData(id: String,
       description = description,
       mergeCandidates = mergeCandidates,
       languages = languages,
-      format = Some(Format.ArchivesAndManuscripts)
+      format = Some(Format.ArchivesAndManuscripts),
+      //
+      // If a TEI work has multiple parts, we want to arrange it into a hierarchy
+      // like a CALM collection, e.g.
+      //
+      //    Collection of manuscripts bound together
+      //      ├── Individual manuscript #1
+      //      ├── Individual manuscript #2
+      //      └── Individual manuscript #3
+      //
+      // We use the IDs to construct the collection hierarchy, but we don't want to display
+      // them internally.
+      //
+      // The collectionPath on the internal works is a *relative* path to their parent --
+      // this will become an absolute path when the internal Works become full Works
+      // in the merger.
+      //
+      collectionPath = Some(CollectionPath(path = id))
     )
 }

@@ -8,6 +8,7 @@ import weco.catalogue.internal_model.identifiers.{
   SourceIdentifier
 }
 import weco.catalogue.internal_model.work.{
+  CollectionPath,
   Format,
   MergeCandidate,
   Work,
@@ -103,7 +104,8 @@ class TeiTransformerWorkerTest
           "Bnumber present in TEI file"
         )
       ),
-      format = Some(Format.ArchivesAndManuscripts)
+      format = Some(Format.ArchivesAndManuscripts),
+      collectionPath = Some(CollectionPath(path = p.id, label = None))
     )
   }
 
