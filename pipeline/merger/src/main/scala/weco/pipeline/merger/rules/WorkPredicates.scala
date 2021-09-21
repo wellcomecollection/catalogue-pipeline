@@ -101,7 +101,7 @@ object WorkPredicates {
 
   // The AIDS posters (digaids) have all already been re-digitised
   // and marked with `digaids`, whereas going forward Miro works
-  // that have been re-digitised will be marked as `digmiro`F
+  // that have been re-digitised will be marked as `digmiro`.
   val sierraDigitisedMiro: WorkPredicate =
     satisfiesAll(sierraWork, digaids or digmiro)
 
