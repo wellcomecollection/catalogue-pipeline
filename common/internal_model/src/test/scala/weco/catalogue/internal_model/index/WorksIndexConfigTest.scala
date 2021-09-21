@@ -139,7 +139,8 @@ class WorksIndexConfigTest
   // only exists at the `data.collectionPath` level
   it("puts a work with a collection") {
     val collectionPath = CollectionPath(
-      path = "PATH/FOR/THE/COLLECTION"
+      path = "PATH/FOR/THE/COLLECTION",
+      label = Some("PATH/FOR/THE/COLLECTION")
     )
 
     val work = indexedWork().collectionPath(collectionPath)
