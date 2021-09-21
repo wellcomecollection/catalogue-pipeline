@@ -116,7 +116,8 @@ class TeiDataTest
         languages = firstInnerTeiData.languages,
         description = firstInnerTeiData.description,
         format = Some(ArchivesAndManuscripts),
-        collectionPath = Some(CollectionPath(path = firstInnerTeiData.id, label = None))
+        collectionPath =
+          Some(CollectionPath(path = firstInnerTeiData.id, label = None))
       )
     )
 
@@ -128,7 +129,8 @@ class TeiDataTest
         languages = secondInnerTeiData.languages,
         description = secondInnerTeiData.description,
         format = Some(ArchivesAndManuscripts),
-        collectionPath = Some(CollectionPath(path = secondInnerTeiData.id, label = None))
+        collectionPath =
+          Some(CollectionPath(path = secondInnerTeiData.id, label = None))
       )
     )
     work.state.internalWorkStubs shouldBe List(
@@ -157,7 +159,8 @@ class TeiDataTest
 
       val work = teiData.toWork(time = Instant.now(), version = 1)
 
-      work.data.collectionPath shouldBe Some(CollectionPath(path = "WMS_Example_1", label = None))
+      work.data.collectionPath shouldBe Some(
+        CollectionPath(path = "WMS_Example_1", label = None))
     }
 
     it("uses the ID for a relative path on internal Works") {

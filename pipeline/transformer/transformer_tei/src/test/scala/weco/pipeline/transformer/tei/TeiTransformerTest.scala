@@ -57,7 +57,8 @@ class TeiTransformerTest
           description =
             Some("1 copy of al-Qānūn fī al-ṭibb by Avicenna, 980-1037"),
           format = Some(Format.ArchivesAndManuscripts),
-          collectionPath = Some(CollectionPath(path = "manuscript_15651", label = None))
+          collectionPath =
+            Some(CollectionPath(path = "manuscript_15651", label = None))
         ),
         state = Source(sourceIdentifier, modifiedTime)
       )
