@@ -43,7 +43,8 @@ class RouterWorkerService[MsgDestination](
       // to repopulate them in the relation embedder.
       // We don't expect TEI works to have a collectionPath field populated.
       case None =>
-        Success(List(work.transition[Denormalised]((Relations.none, Set.empty))))
+        Success(
+          List(work.transition[Denormalised]((Relations.none, Set.empty))))
       case Some(CollectionPath(path, _)) =>
         pathsMsgSender.send(path).map(_ => Nil)
 
