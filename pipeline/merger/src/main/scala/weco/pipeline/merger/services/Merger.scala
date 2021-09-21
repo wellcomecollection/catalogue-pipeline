@@ -241,7 +241,7 @@ object PlatformMerger extends Merger {
       .mapState { state =>
         state.copy(internalWorkStubs = state.internalWorkStubs.map { stub =>
           val updatedCollectionPath = (collectionPath, stub.workData.collectionPath) match {
-            case (Some(CollectionPath(path)), Some(CollectionPath(innerPath))) => Some(CollectionPath(s"$path/$innerPath"))
+            case (Some(CollectionPath(path,_)), Some(CollectionPath(innerPath,_))) => Some(CollectionPath(s"$path/$innerPath"))
             case (None, Some(innerCollectionPath)) => Some(innerCollectionPath)
             case _ => ???//None
           }
