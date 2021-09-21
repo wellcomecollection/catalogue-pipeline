@@ -1,8 +1,5 @@
 package weco.catalogue.internal_model.work
 
-/**
-  */
-
 /** Represents the position of an individual work in a hierarchy.
   *
   * @param path  The internal control field that describes the position of a
