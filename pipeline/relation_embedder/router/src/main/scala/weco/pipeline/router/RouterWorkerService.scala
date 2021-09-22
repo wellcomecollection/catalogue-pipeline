@@ -38,10 +38,6 @@ class RouterWorkerService[MsgDestination](
   private def processMessage(
     work: Work[Merged]): Try[List[Work[Denormalised]]] = {
     work.data.collectionPath match {
-      // For TEI works relations are already populated based on
-      // inner works extracted by the TEI transformer. We don't need
-      // to repopulate them in the relation embedder.
-      // We don't expect TEI works to have a collectionPath field populated.
       case None =>
         Success(
           List(work.transition[Denormalised]((Relations.none, Set.empty))))
