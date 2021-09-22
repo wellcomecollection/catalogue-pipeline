@@ -13,7 +13,7 @@ import weco.pipeline_storage.{Indexable, PipelineStorageStream, Retriever}
 import weco.typesafe.Runnable
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success, Try}
+import scala.util.{Success, Try}
 
 class RouterWorkerService[MsgDestination](
   pipelineStream: PipelineStorageStream[NotificationMessage,
@@ -36,19 +36,15 @@ class RouterWorkerService[MsgDestination](
   }
 
   private def processMessage(
-    work: Work[Merged]): Try[List[Work[Denormalised]]] =
-    (work.data.collectionPath, work.state.relations) match {
-      // For TEI works relations are already populated based on
-      // inner works extracted by the TEI transformer. We don't need
-      // to repopulate them in the relation embedder.
-      // We don't expect TEI works to have a collectionPath field populated.
-      case (None, relations) =>
-        Success(List(work.transition[Denormalised]((relations, Set.empty))))
-      case (Some(CollectionPath(path, _)), relations)
-          if relations == Relations.none =>
+    work: Work[Merged]): Try[List[Work[Denormalised]]] = {
+    work.data.collectionPath match {
+      case None =>
+        Success(
+          List(work.transition[Denormalised]((Relations.none, Set.empty))))
+      case Some(CollectionPath(path, _)) =>
         pathsMsgSender.send(path).map(_ => Nil)
-      case (collectionPath, relations) =>
-        Failure(new RuntimeException(
-          s"collectionPath: $collectionPath and relations: $relations are both populated in ${work.state.id}. This shouldn't be possible"))
+
     }
+  }
+
 }
