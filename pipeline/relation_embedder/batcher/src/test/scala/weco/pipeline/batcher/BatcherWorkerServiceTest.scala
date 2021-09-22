@@ -144,6 +144,7 @@ class BatcherWorkerServiceTest
             msgStream = msgStream,
             msgSender = msgSender,
             flushInterval = flushInterval,
+            maxProcessedPaths = 1000,
             maxBatchSize = maxBatchSize
           )
           workerService.run()

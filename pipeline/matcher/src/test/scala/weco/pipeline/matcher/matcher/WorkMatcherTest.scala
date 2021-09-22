@@ -17,7 +17,6 @@ import weco.pipeline.matcher.generators.WorkLinksGenerators
 import weco.pipeline.matcher.models.{
   MatchedIdentifiers,
   MatcherResult,
-  WorkGraph,
   WorkIdentifier,
   WorkLinks,
   WorkNode
@@ -234,11 +233,11 @@ class WorkMatcherTest
         val idC = identifierC.canonicalId
 
         val future = workGraphStore.put(
-          WorkGraph(Set(
+          Set(
             WorkNode(idA, version = 0, linkedIds = List(idB), componentId),
             WorkNode(idB, version = 0, linkedIds = List(idC), componentId),
             WorkNode(idC, version = 0, linkedIds = Nil, componentId),
-          )))
+          ))
 
         whenReady(future) { _ =>
           val links = createWorkLinksWith(
@@ -278,8 +277,8 @@ class WorkMatcherTest
     withWorkMatcher(mockWorkGraphStore) { workMatcher =>
       val expectedException = new RuntimeException("Failed to put")
       when(mockWorkGraphStore.findAffectedWorks(any[WorkLinks]))
-        .thenReturn(Future.successful(WorkGraph(Set.empty)))
-      when(mockWorkGraphStore.put(any[WorkGraph]))
+        .thenReturn(Future.successful(Set[WorkNode]()))
+      when(mockWorkGraphStore.put(any[Set[WorkNode]]))
         .thenThrow(expectedException)
 
       val links = createWorkLinks

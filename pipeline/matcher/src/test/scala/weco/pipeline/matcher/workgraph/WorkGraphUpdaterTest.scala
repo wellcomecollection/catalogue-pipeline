@@ -7,7 +7,6 @@ import weco.pipeline.matcher.fixtures.MatcherFixtures
 import weco.pipeline.matcher.models.{
   VersionExpectedConflictException,
   VersionUnexpectedConflictException,
-  WorkGraph,
   WorkLinks,
   WorkNode
 }
@@ -27,9 +26,8 @@ class WorkGraphUpdaterTest
       WorkGraphUpdater
         .update(
           links = WorkLinks(idA, version = 1, referencedWorkIds = Set.empty),
-          existingGraph = WorkGraph(Set.empty)
-        )
-        .nodes shouldBe Set(
+          existingNodes = Set()
+        ) shouldBe Set(
         WorkNode(
           idA,
           version = 1,
@@ -41,9 +39,8 @@ class WorkGraphUpdaterTest
       WorkGraphUpdater
         .update(
           links = WorkLinks(idA, version = 1, referencedWorkIds = Set(idB)),
-          existingGraph = WorkGraph(Set.empty)
-        )
-        .nodes shouldBe Set(
+          existingNodes = Set()
+        ) shouldBe Set(
         WorkNode(
           idA,
           version = 1,
@@ -60,9 +57,8 @@ class WorkGraphUpdaterTest
       WorkGraphUpdater
         .update(
           links = WorkLinks(idB, version = 1, referencedWorkIds = Set(idA)),
-          existingGraph = WorkGraph(Set.empty)
-        )
-        .nodes shouldBe Set(
+          existingNodes = Set()
+        ) shouldBe Set(
         WorkNode(
           idB,
           version = 1,
@@ -81,22 +77,19 @@ class WorkGraphUpdaterTest
       WorkGraphUpdater
         .update(
           links = WorkLinks(idA, version = 2, referencedWorkIds = Set(idB)),
-          existingGraph = WorkGraph(
-            Set(
-              WorkNode(
-                idA,
-                version = 1,
-                linkedIds = Nil,
-                componentId = ciHash(idA)),
-              WorkNode(
-                idB,
-                version = 1,
-                linkedIds = Nil,
-                componentId = ciHash(idB))
-            )
+          existingNodes = Set(
+            WorkNode(
+              idA,
+              version = 1,
+              linkedIds = Nil,
+              componentId = ciHash(idA)),
+            WorkNode(
+              idB,
+              version = 1,
+              linkedIds = Nil,
+              componentId = ciHash(idB))
           )
-        )
-        .nodes should contain theSameElementsAs
+        ) should contain theSameElementsAs
         List(
           WorkNode(
             idA,
@@ -114,20 +107,18 @@ class WorkGraphUpdaterTest
       WorkGraphUpdater
         .update(
           links = WorkLinks(idA, version = 2, referencedWorkIds = Set(idB)),
-          existingGraph = WorkGraph(
-            Set(
-              WorkNode(
-                idA,
-                version = 1,
-                linkedIds = List(idB),
-                componentId = ciHash(idA, idB)),
-              WorkNode(
-                idB,
-                version = 1,
-                linkedIds = Nil,
-                componentId = ciHash(idA, idB))))
-        )
-        .nodes shouldBe Set(
+          existingNodes = Set(
+            WorkNode(
+              idA,
+              version = 1,
+              linkedIds = List(idB),
+              componentId = ciHash(idA, idB)),
+            WorkNode(
+              idB,
+              version = 1,
+              linkedIds = Nil,
+              componentId = ciHash(idA, idB)))
+        ) shouldBe Set(
         WorkNode(
           idA,
           version = 2,
@@ -145,7 +136,7 @@ class WorkGraphUpdaterTest
       WorkGraphUpdater
         .update(
           links = WorkLinks(idB, version = 2, referencedWorkIds = Set(idC)),
-          existingGraph = WorkGraph(Set(
+          existingNodes = Set(
             WorkNode(
               idA,
               version = 2,
@@ -161,9 +152,8 @@ class WorkGraphUpdaterTest
               version = 1,
               linkedIds = Nil,
               componentId = ciHash(idC))
-          ))
-        )
-        .nodes shouldBe Set(
+          )
+        ) shouldBe Set(
         WorkNode(
           idA,
           version = 2,
@@ -186,7 +176,7 @@ class WorkGraphUpdaterTest
       WorkGraphUpdater
         .update(
           links = WorkLinks(idB, version = 2, referencedWorkIds = Set(idC)),
-          existingGraph = WorkGraph(Set(
+          existingNodes = Set(
             WorkNode(
               idA,
               version = 1,
@@ -199,9 +189,8 @@ class WorkGraphUpdaterTest
               componentId = "C+D"),
             WorkNode(idB, version = 1, linkedIds = Nil, componentId = "A+B"),
             WorkNode(idD, version = 1, linkedIds = Nil, componentId = "C+D")
-          ))
-        )
-        .nodes shouldBe
+          )
+        ) shouldBe
         Set(
           WorkNode(
             idA,
@@ -230,7 +219,7 @@ class WorkGraphUpdaterTest
       WorkGraphUpdater
         .update(
           links = WorkLinks(idB, version = 2, referencedWorkIds = Set(idC, idD)),
-          existingGraph = WorkGraph(Set(
+          existingNodes = Set(
             WorkNode(
               idA,
               version = 2,
@@ -251,9 +240,8 @@ class WorkGraphUpdaterTest
               version = 1,
               linkedIds = Nil,
               componentId = ciHash(idD))
-          ))
-        )
-        .nodes shouldBe
+          )
+        ) shouldBe
         Set(
           WorkNode(
             idA,
@@ -282,7 +270,7 @@ class WorkGraphUpdaterTest
       WorkGraphUpdater
         .update(
           links = WorkLinks(idC, version = 2, referencedWorkIds = Set(idA)),
-          existingGraph = WorkGraph(Set(
+          existingNodes = Set(
             WorkNode(
               idA,
               version = 2,
@@ -294,9 +282,8 @@ class WorkGraphUpdaterTest
               linkedIds = List(idC),
               componentId = "A+B+C"),
             WorkNode(idC, version = 1, linkedIds = Nil, componentId = "A+B+C")
-          ))
-        )
-        .nodes shouldBe Set(
+          )
+        ) shouldBe Set(
         WorkNode(
           idA,
           version = 2,
@@ -323,15 +310,13 @@ class WorkGraphUpdaterTest
       WorkGraphUpdater
         .update(
           links = WorkLinks(idA, updateVersion, referencedWorkIds = Set(idB)),
-          existingGraph = WorkGraph(
-            Set(
-              WorkNode(
-                idA,
-                existingVersion,
-                linkedIds = Nil,
-                componentId = ciHash(idA))))
-        )
-        .nodes should contain theSameElementsAs
+          existingNodes = Set(
+            WorkNode(
+              idA,
+              existingVersion,
+              linkedIds = Nil,
+              componentId = ciHash(idA)))
+        ) should contain theSameElementsAs
         List(
           WorkNode(
             idA,
@@ -353,13 +338,12 @@ class WorkGraphUpdaterTest
         WorkGraphUpdater
           .update(
             links = WorkLinks(idA, updateVersion, referencedWorkIds = Set(idB)),
-            existingGraph = WorkGraph(
-              Set(
-                WorkNode(
-                  idA,
-                  existingVersion,
-                  linkedIds = Nil,
-                  componentId = ciHash(idA))))
+            existingNodes = Set(
+              WorkNode(
+                idA,
+                existingVersion,
+                linkedIds = Nil,
+                componentId = ciHash(idA)))
           )
       }
       thrown.message shouldBe s"update failed, work:$idA v1 is not newer than existing work v3"
@@ -373,20 +357,18 @@ class WorkGraphUpdaterTest
       WorkGraphUpdater
         .update(
           links = WorkLinks(idA, updateVersion, referencedWorkIds = Set(idB)),
-          existingGraph = WorkGraph(
-            Set(
-              WorkNode(
-                idA,
-                existingVersion,
-                linkedIds = List(idB),
-                componentId = ciHash(idA, idB)),
-              WorkNode(
-                idB,
-                version = 0,
-                linkedIds = List(),
-                componentId = ciHash(idA, idB))))
-        )
-        .nodes should contain theSameElementsAs
+          existingNodes = Set(
+            WorkNode(
+              idA,
+              existingVersion,
+              linkedIds = List(idB),
+              componentId = ciHash(idA, idB)),
+            WorkNode(
+              idB,
+              version = 0,
+              linkedIds = List(),
+              componentId = ciHash(idA, idB)))
+        ) should contain theSameElementsAs
         List(
           WorkNode(
             idA,
@@ -409,18 +391,17 @@ class WorkGraphUpdaterTest
         WorkGraphUpdater
           .update(
             links = WorkLinks(idA, updateVersion, referencedWorkIds = Set(idA)),
-            existingGraph = WorkGraph(
-              Set(
-                WorkNode(
-                  idA,
-                  existingVersion,
-                  linkedIds = List(idB),
-                  componentId = ciHash(idA, idB)),
-                WorkNode(
-                  idB,
-                  version = 0,
-                  linkedIds = List(),
-                  componentId = ciHash(idA, idB))))
+            existingNodes = Set(
+              WorkNode(
+                idA,
+                existingVersion,
+                linkedIds = List(idB),
+                componentId = ciHash(idA, idB)),
+              WorkNode(
+                idB,
+                version = 0,
+                linkedIds = List(),
+                componentId = ciHash(idA, idB)))
           )
       }
       thrown.getMessage shouldBe s"update failed, work:$idA v2 already exists with different content! update-ids:Set($idA) != existing-ids:Set($idB)"
@@ -432,20 +413,14 @@ class WorkGraphUpdaterTest
       WorkGraphUpdater
         .update(
           links = WorkLinks(idA, version = 2, referencedWorkIds = Set.empty),
-          existingGraph = WorkGraph(
-            Set(
-              WorkNode(
-                idA,
-                version = 1,
-                linkedIds = List(idB),
-                componentId = "A+B"),
-              WorkNode(
-                idB,
-                version = 1,
-                linkedIds = List(),
-                componentId = "A+B")))
-        )
-        .nodes shouldBe Set(
+          existingNodes = Set(
+            WorkNode(
+              idA,
+              version = 1,
+              linkedIds = List(idB),
+              componentId = "A+B"),
+            WorkNode(idB, version = 1, linkedIds = List(), componentId = "A+B"))
+        ) shouldBe Set(
         WorkNode(
           idA,
           version = 2,
@@ -463,16 +438,14 @@ class WorkGraphUpdaterTest
       WorkGraphUpdater
         .update(
           links = WorkLinks(idA, version = 2, referencedWorkIds = Set.empty),
-          existingGraph = WorkGraph(
-            Set(
-              WorkNode(
-                idA,
-                version = 1,
-                linkedIds = List(idB),
-                componentId = "A+B")
-            ))
-        )
-        .nodes shouldBe Set(
+          existingNodes = Set(
+            WorkNode(
+              idA,
+              version = 1,
+              linkedIds = List(idB),
+              componentId = "A+B")
+          )
+        ) shouldBe Set(
         WorkNode(idA, version = 2, linkedIds = Nil, componentId = ciHash(idA)),
         WorkNode(
           idB,
@@ -486,21 +459,22 @@ class WorkGraphUpdaterTest
       WorkGraphUpdater
         .update(
           links = WorkLinks(idB, version = 3, referencedWorkIds = Set.empty),
-          existingGraph = WorkGraph(Set(
-            WorkNode(
-              idA,
-              version = 2,
-              linkedIds = List(idB),
-              componentId = "A+B+C"),
-            WorkNode(
-              idB,
-              version = 2,
-              linkedIds = List(idC),
-              componentId = "A+B+C"),
-            WorkNode(idC, version = 1, linkedIds = Nil, componentId = "A+B+C")
-          ))
-        )
-        .nodes shouldBe Set(
+          existingNodes = (
+            Set(
+              WorkNode(
+                idA,
+                version = 2,
+                linkedIds = List(idB),
+                componentId = "A+B+C"),
+              WorkNode(
+                idB,
+                version = 2,
+                linkedIds = List(idC),
+                componentId = "A+B+C"),
+              WorkNode(idC, version = 1, linkedIds = Nil, componentId = "A+B+C")
+            )
+          )
+        ) shouldBe Set(
         WorkNode(
           idA,
           version = 2,
@@ -519,7 +493,7 @@ class WorkGraphUpdaterTest
       WorkGraphUpdater
         .update(
           links = WorkLinks(idB, version = 3, referencedWorkIds = Set(idC)),
-          existingGraph = WorkGraph(Set(
+          existingNodes = Set(
             WorkNode(
               idA,
               version = 2,
@@ -531,9 +505,8 @@ class WorkGraphUpdaterTest
               linkedIds = List(idA, idC),
               componentId = "A+B+C"),
             WorkNode(idC, version = 1, linkedIds = Nil, componentId = "A+B+C")
-          ))
-        )
-        .nodes shouldBe Set(
+          )
+        ) shouldBe Set(
         WorkNode(
           idA,
           version = 2,

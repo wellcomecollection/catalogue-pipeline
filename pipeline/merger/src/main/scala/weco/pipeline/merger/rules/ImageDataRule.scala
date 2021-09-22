@@ -54,11 +54,9 @@ object ImageDataRule extends FieldMergeRule {
     val isDefinedForSource: WorkPredicate = singleDigitalItemMetsWork
   }
 
-  // In future we may change `digaids` to `digmiro` for all works
-  // where we know that the Miro and METS images are identical
   private lazy val getPairedMiroImages = new FlatImageMergeRule {
     val isDefinedForTarget: WorkPredicate =
-      sierraWork and not(sierraDigaids)
+      sierraWork and not(sierraDigitisedMiro)
     val isDefinedForSource: WorkPredicate = singleDigitalItemMiroWork
   }
 

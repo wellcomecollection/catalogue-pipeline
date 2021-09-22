@@ -1,10 +1,5 @@
 package weco.catalogue.internal_model.identifiers
 
-/** Container type for IdState types:
-  *
-  * - Id (references an ID type, always with a source identifier)
-  * - MaybeId (references an ID type, potentially with a source identifier)
-  */
 sealed trait DataState {
   type Id
   type MaybeId

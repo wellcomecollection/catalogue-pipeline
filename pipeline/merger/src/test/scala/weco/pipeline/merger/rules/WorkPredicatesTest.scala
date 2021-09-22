@@ -114,7 +114,7 @@ class WorkPredicatesTest
   }
 
   it("selects Sierra works with the `digaids` digcode") {
-    val filtered = works.filter(WorkPredicates.sierraDigaids)
+    val filtered = works.filter(WorkPredicates.sierraDigitisedMiro)
     filtered should not be empty
     forAll(filtered) { work =>
       work.data.otherIdentifiers.map(_.identifierType.id) should contain(

@@ -31,14 +31,13 @@ class TeiTransformer(store: Store[S3ObjectLocation, String])
         handleTeiDelete(id, version, time)
     }
 
-  private def handleTeiDelete(id: String, version: Int, time: Instant) = {
+  private def handleTeiDelete(id: String, version: Int, time: Instant) =
     Right(
       Work.Deleted[Source](
         version = version,
         state = Source(SourceIdentifier(IdentifierType.Tei, "Work", id), time),
         deletedReason = DeletedReason.DeletedFromSource("Deleted by TEI source")
       ))
-  }
 
   private def handleTeiChange(id: String,
                               version: Int,

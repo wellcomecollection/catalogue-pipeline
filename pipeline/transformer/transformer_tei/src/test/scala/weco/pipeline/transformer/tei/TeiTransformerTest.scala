@@ -13,6 +13,7 @@ import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.internal_model.work.generators.InstantGenerators
 import weco.catalogue.internal_model.work.{
+  CollectionPath,
   DeletedReason,
   Format,
   Work,
@@ -55,7 +56,9 @@ class TeiTransformerTest
           title = Some("Wellcome Library"),
           description =
             Some("1 copy of al-Qānūn fī al-ṭibb by Avicenna, 980-1037"),
-          format = Some(Format.ArchivesAndManuscripts)
+          format = Some(Format.ArchivesAndManuscripts),
+          collectionPath =
+            Some(CollectionPath(path = "manuscript_15651", label = None))
         ),
         state = Source(sourceIdentifier, modifiedTime)
       )

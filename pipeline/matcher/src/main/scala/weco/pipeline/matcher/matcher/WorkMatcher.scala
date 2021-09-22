@@ -7,9 +7,9 @@ import weco.pipeline.matcher.exceptions.MatcherException
 import weco.pipeline.matcher.models.{
   MatchedIdentifiers,
   MatcherResult,
-  WorkGraph,
   WorkIdentifier,
-  WorkLinks
+  WorkLinks,
+  WorkNode
 }
 import weco.pipeline.matcher.storage.WorkGraphStore
 import weco.pipeline.matcher.workgraph.WorkGraphUpdater
@@ -36,10 +36,10 @@ class WorkMatcher(
   private def doMatch(links: WorkLinks): Future[MatcherResult] =
     withLocks(links, links.ids.map(_.toString)) {
       for {
-        beforeGraph <- workGraphStore.findAffectedWorks(links)
-        afterGraph = WorkGraphUpdater.update(links, beforeGraph)
+        beforeNodes <- workGraphStore.findAffectedWorks(links)
+        afterNodes = WorkGraphUpdater.update(links, beforeNodes)
 
-        updatedNodes = afterGraph.nodes -- beforeGraph.nodes
+        updatedNodes = afterNodes -- beforeNodes
 
         // It's possible that the matcher graph hasn't changed -- for example, if
         // we received an update to a work that changes an attribute unrelated to
@@ -54,20 +54,20 @@ class WorkMatcher(
         matcherResult <- if (updatedNodes.isEmpty) {
           Future.successful(
             MatcherResult(
-              works = toMatchedIdentifiers(afterGraph),
+              works = toMatchedIdentifiers(afterNodes),
               createdTime = Instant.now()))
         } else {
           val affectedComponentIds =
-            (beforeGraph.nodes ++ afterGraph.nodes)
+            (beforeNodes ++ afterNodes)
               .map { _.componentId }
 
           withLocks(links, ids = affectedComponentIds) {
             workGraphStore
-              .put(afterGraph)
+              .put(afterNodes)
               .map(
                 _ =>
                   MatcherResult(
-                    works = toMatchedIdentifiers(afterGraph),
+                    works = toMatchedIdentifiers(afterNodes),
                     createdTime = Instant.now()))
           }
         }
@@ -94,8 +94,9 @@ class WorkMatcher(
       case _                     => new RuntimeException(failure.toString)
     }
 
-  private def toMatchedIdentifiers(g: WorkGraph): Set[MatchedIdentifiers] =
-    g.nodes
+  private def toMatchedIdentifiers(
+    nodes: Set[WorkNode]): Set[MatchedIdentifiers] =
+    nodes
       .groupBy { _.componentId }
       .map {
         case (_, workNodes) =>
