@@ -289,6 +289,21 @@ trait WorkGenerators
     }
   }
 
+  implicit class IdentifiedWorkOps(work: Work.Visible[Identified]){
+    def internalWorks(internalWorks: List[Work.Visible[Identified]]): Work.Visible[Identified] =
+      work.mapState(state => {
+        state.copy(
+          internalWorkStubs = internalWorks.map(internalWork => (
+            InternalWork.Identified(
+              sourceIdentifier = internalWork.sourceIdentifier,
+              canonicalId = internalWork.state.canonicalId,
+              workData = internalWork.data
+            ),
+            )))
+
+      })
+  }
+
   implicit class IndexedWorkOps(work: Work.Visible[Indexed])(
     implicit updateState: UpdateState[Indexed]
   ) {

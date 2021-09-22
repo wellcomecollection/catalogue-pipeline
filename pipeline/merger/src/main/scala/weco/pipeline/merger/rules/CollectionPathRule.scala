@@ -14,12 +14,12 @@ object CollectionPathRule extends FieldMergeRule with MergerLogging {
                       target: Work.Visible[WorkState.Identified],
                       sources: Seq[Work[WorkState.Identified]]
                     ): FieldMergeResult[FieldData] =
-    FieldMergeResult(data = getCollectionPath(target, sources), sources = sources)
+    FieldMergeResult(data = getCollectionPath(target, sources),sources =  getCalmCollectionPath.mergedSources(target, sources))
 
   def getCollectionPath(target: Work.Visible[Identified],
-                        sources: Seq[Work[Identified]]): Option[CollectionPath] = getCalmCollectionPath(target, sources).flatten
+                        sources: Seq[Work[Identified]]): Option[CollectionPath] = getCalmCollectionPath(target, sources).getOrElse(target.data.collectionPath)
 
-  val getCalmCollectionPath =
+  val getCalmCollectionPath: CollectionPathRule.PartialRule =
     new PartialRule {
       val isDefinedForTarget: WorkPredicate = teiWork
       val isDefinedForSource: WorkPredicate = singlePhysicalItemCalmWork

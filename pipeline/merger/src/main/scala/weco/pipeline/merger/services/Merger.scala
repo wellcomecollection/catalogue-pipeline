@@ -194,7 +194,7 @@ object PlatformMerger extends Merger {
     if (sources.isEmpty)
       State.pure(
         models.MergeResult(
-          mergedTarget = target,
+          mergedTarget = modifyInternalWorks(target, target.data.items, target.data.collectionPath),
           imageDataWithSources = standaloneImages(target).map { image =>
             ImageDataWithSource(
               imageData = image,
@@ -241,9 +241,13 @@ object PlatformMerger extends Merger {
       .mapState { state =>
         state.copy(internalWorkStubs = state.internalWorkStubs.map { stub =>
           val updatedCollectionPath = (collectionPath, stub.workData.collectionPath) match {
-            case (Some(CollectionPath(path,_)), Some(CollectionPath(innerPath,_))) => Some(CollectionPath(s"$path/$innerPath"))
+            case (Some(CollectionPath(rootPath,_)), Some(CollectionPath(innerPath,_))) => Some(CollectionPath(s"$rootPath/$innerPath"))
             case (None, Some(innerCollectionPath)) => Some(innerCollectionPath)
-            case _ => ???//None
+            // This case shouldn't be possible because we expect internal works to always have a
+            // collectionPath populated by the TEI transformer
+            case _ =>
+              warn(s"TEI work ${work.id} has an internal work without a collectionPath")
+              None
           }
           stub.copy(
             workData = stub.workData.copy[DataState.Identified](items = items, collectionPath = updatedCollectionPath)
