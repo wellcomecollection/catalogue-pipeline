@@ -240,11 +240,22 @@ object PlatformMerger extends Merger {
     work
       .mapState { state =>
         state.copy(internalWorkStubs = state.internalWorkStubs.map { stub =>
+          // We need to be able to link from the wrapper work to the inner work and viceversa.
+          // We use collectionPath to represent to hierarchy between the wrapper work and the inner ones.
+          // However, inner works are emitted from the transformer with just
+          // the relative path, not absolute to the root.
+          // This is because if the tei work is merged with a calm, its collectionPath will be replaced with
+          // the calm work collectionPath, so we don't know which collectionPath to use for
+          // the root of the hierarchy until after we've applied the merging rules.
+          // So here we prepend the wrapper work collectionPath to the innerworks
+          // collectionPath to make them absolute paths
           val updatedCollectionPath = (collectionPath, stub.workData.collectionPath) match {
             case (Some(CollectionPath(rootPath,_)), Some(CollectionPath(innerPath,_))) => Some(CollectionPath(s"$rootPath/$innerPath"))
-            case (None, Some(innerCollectionPath)) => Some(innerCollectionPath)
-            // This case shouldn't be possible because we expect internal works to always have a
+            // These cases shouldn't be possible because we expect internal works to always have a
             // collectionPath populated by the TEI transformer
+            case (None, Some(innerCollectionPath)) =>
+              warn(s"TEI work ${work.id} has no collectionPath")
+              Some(innerCollectionPath)
             case _ =>
               warn(s"TEI work ${work.id} has an internal work without a collectionPath")
               None

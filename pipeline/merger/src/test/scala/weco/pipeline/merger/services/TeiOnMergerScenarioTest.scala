@@ -164,7 +164,7 @@ class TeiOnMergerScenarioTest
     Then("the tei work should be a TEI work")
     outcome.getMerged(teiWork) shouldBe teiWork
 
-    And("the the tei inner works shou;ld be returned")
+    And("the the tei inner works should be returned")
     outcome.getMerged(internalWork1) shouldBe updateInternalWork(internalWork1, teiWork)
     outcome.getMerged(internalWork2) shouldBe updateInternalWork(internalWork2, teiWork)
   }
