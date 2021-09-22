@@ -11,12 +11,14 @@ import weco.catalogue.internal_model.identifiers.{
 import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.work.Format.ArchivesAndManuscripts
 import weco.catalogue.internal_model.work.{
+  CollectionPath,
   InternalWork,
   MergeCandidate,
   Work,
   WorkData
 }
 import weco.catalogue.internal_model.work.WorkState.Source
+import weco.pipeline.transformer.tei.generators.TeiDataGenerators
 import weco.sierra.generators.SierraIdentifierGenerators
 
 import java.time.Instant
@@ -25,7 +27,8 @@ class TeiDataTest
     extends AnyFunSpec
     with SierraIdentifierGenerators
     with Matchers
-    with IdentifiersGenerators {
+    with IdentifiersGenerators
+    with TeiDataGenerators {
   it("transforms into a work") {
     val title = "This is the title"
     val bnumber = createSierraBibNumber.withCheckDigit
@@ -63,7 +66,8 @@ class TeiDataTest
         mergeCandidates = List(mergeCandidate),
         description = description,
         languages = languages,
-        format = Some(ArchivesAndManuscripts)
+        format = Some(ArchivesAndManuscripts),
+        collectionPath = Some(CollectionPath(path = id, label = None))
       ),
       state = source
     )
@@ -111,7 +115,9 @@ class TeiDataTest
         title = Some(firstInnerTeiData.title),
         languages = firstInnerTeiData.languages,
         description = firstInnerTeiData.description,
-        format = Some(ArchivesAndManuscripts)
+        format = Some(ArchivesAndManuscripts),
+        collectionPath =
+          Some(CollectionPath(path = firstInnerTeiData.id, label = None))
       )
     )
 
@@ -122,7 +128,9 @@ class TeiDataTest
         title = Some(secondInnerTeiData.title),
         languages = secondInnerTeiData.languages,
         description = secondInnerTeiData.description,
-        format = Some(ArchivesAndManuscripts)
+        format = Some(ArchivesAndManuscripts),
+        collectionPath =
+          Some(CollectionPath(path = secondInnerTeiData.id, label = None))
       )
     )
     work.state.internalWorkStubs shouldBe List(
@@ -144,6 +152,39 @@ class TeiDataTest
     work.state.internalWorkStubs shouldBe empty
     work.data.title shouldBe Some(title)
   }
+
+  describe("setting the collectionPath") {
+    it("uses the ID on a top-level Work") {
+      val teiData = createTeiDataWith(id = "WMS_Example_1")
+
+      val work = teiData.toWork(time = Instant.now(), version = 1)
+
+      work.data.collectionPath shouldBe Some(
+        CollectionPath(path = "WMS_Example_1", label = None))
+    }
+
+    it("uses the ID for a relative path on internal Works") {
+      val teiData = createTeiDataWith(
+        id = "WMS_Example_2",
+        nestedTeiData = Right(
+          List(
+            createTeiDataWith(id = "Part_1"),
+            createTeiDataWith(id = "Part_2"),
+            createTeiDataWith(id = "Part_3"),
+          )
+        )
+      )
+
+      val work = teiData.toWork(time = Instant.now(), version = 1)
+
+      work.state.internalWorkStubs.map(_.workData.collectionPath) shouldBe List(
+        Some(CollectionPath(path = "Part_1", label = None)),
+        Some(CollectionPath(path = "Part_2", label = None)),
+        Some(CollectionPath(path = "Part_3", label = None)),
+      )
+    }
+  }
+
   describe("if there's a single inner data") {
     it("uses the title of the item") {
       val innerTeiData = TeiData(
