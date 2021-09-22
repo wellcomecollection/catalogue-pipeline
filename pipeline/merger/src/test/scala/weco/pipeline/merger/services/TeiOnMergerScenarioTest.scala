@@ -58,15 +58,19 @@ class TeiOnMergerScenarioTest
   Scenario("A Tei with internal works and a Calm are merged") {
     Given("a Tei and a Calm record")
     val calmWork = calmIdentifiedWork().collectionPath(CollectionPath("a/b/c"))
-    val firstInternalWork = teiIdentifiedWork().collectionPath(CollectionPath("1"))
-    val secondInternalWork = teiIdentifiedWork().collectionPath(CollectionPath("2"))
+    val firstInternalWork =
+      teiIdentifiedWork().collectionPath(CollectionPath("1"))
+    val secondInternalWork =
+      teiIdentifiedWork().collectionPath(CollectionPath("2"))
 
-    val teiWork = teiIdentifiedWork().collectionPath(CollectionPath("tei_id"))
-      .title("A tei work").internalWorks(List(firstInternalWork, secondInternalWork))
+    val teiWork = teiIdentifiedWork()
+      .collectionPath(CollectionPath("tei_id"))
+      .title("A tei work")
+      .internalWorks(List(firstInternalWork, secondInternalWork))
 
     When("the works are merged")
 
-    val works = List(calmWork,teiWork)
+    val works = List(calmWork, teiWork)
     val outcome = merger.applyMerge(works.map(Some(_)))
 
     Then("the Cal work is redirected to the tei")
@@ -79,20 +83,30 @@ class TeiOnMergerScenarioTest
       .collectionPath shouldBe calmWork.data.collectionPath
 
     And("the tei inner works have the calm collectionPath prepended")
-    outcome.getMerged(firstInternalWork).data.collectionPath shouldBe Some(CollectionPath(s"${calmWork.data.collectionPath.get.path}/${firstInternalWork.data.collectionPath.get.path}"))
-    outcome.getMerged(secondInternalWork).data.collectionPath shouldBe Some(CollectionPath(s"${calmWork.data.collectionPath.get.path}/${secondInternalWork.data.collectionPath.get.path}"))
+    outcome
+      .getMerged(firstInternalWork)
+      .data
+      .collectionPath shouldBe Some(CollectionPath(
+      s"${calmWork.data.collectionPath.get.path}/${firstInternalWork.data.collectionPath.get.path}"))
+    outcome
+      .getMerged(secondInternalWork)
+      .data
+      .collectionPath shouldBe Some(CollectionPath(
+      s"${calmWork.data.collectionPath.get.path}/${secondInternalWork.data.collectionPath.get.path}"))
   }
 
   Scenario(
     "A Tei with internal works and a Sierra digital and a sierra physical work are merged") {
     Given("a Tei, a Sierra physical record and a Sierra digital record")
     val (digitalSierra, physicalSierra) = sierraIdentifiedWorkPair()
-    val firstInternalWork = teiIdentifiedWork().collectionPath(CollectionPath("1"))
-    val secondInternalWork = teiIdentifiedWork().collectionPath(CollectionPath("2"))
+    val firstInternalWork =
+      teiIdentifiedWork().collectionPath(CollectionPath("1"))
+    val secondInternalWork =
+      teiIdentifiedWork().collectionPath(CollectionPath("2"))
 
     val teiWork = teiIdentifiedWork()
-      .title("A tei work").internalWorks(List(firstInternalWork, secondInternalWork))
-
+      .title("A tei work")
+      .internalWorks(List(firstInternalWork, secondInternalWork))
 
     When("the works are merged")
     val sierraWorks = List(digitalSierra, physicalSierra)
@@ -156,7 +170,9 @@ class TeiOnMergerScenarioTest
     Given("a Tei")
     val internalWork1 = teiIdentifiedWork()
     val internalWork2 = teiIdentifiedWork()
-    val teiWork = teiIdentifiedWork().title("A tei work").internalWorks(List(internalWork1,internalWork2))
+    val teiWork = teiIdentifiedWork()
+      .title("A tei work")
+      .internalWorks(List(internalWork1, internalWork2))
 
     When("the tei work is merged")
     val outcome = merger.applyMerge(List(Some(teiWork)))
@@ -165,29 +181,45 @@ class TeiOnMergerScenarioTest
     outcome.getMerged(teiWork) shouldBe teiWork
 
     And("the the tei inner works should be returned")
-    outcome.getMerged(internalWork1) shouldBe updateInternalWork(internalWork1, teiWork)
-    outcome.getMerged(internalWork2) shouldBe updateInternalWork(internalWork2, teiWork)
+    outcome.getMerged(internalWork1) shouldBe updateInternalWork(
+      internalWork1,
+      teiWork)
+    outcome.getMerged(internalWork2) shouldBe updateInternalWork(
+      internalWork2,
+      teiWork)
   }
 
-  Scenario("CollectionPath is prepended to internal tei works if the work is not merged") {
+  Scenario(
+    "CollectionPath is prepended to internal tei works if the work is not merged") {
     Given("a Tei")
     val internalWork1 = teiIdentifiedWork().collectionPath(CollectionPath("1"))
     val internalWork2 = teiIdentifiedWork().collectionPath(CollectionPath("2"))
-    val teiWork = teiIdentifiedWork().title("A tei work").internalWorks(List(internalWork1,internalWork2)).collectionPath(CollectionPath("id"))
+    val teiWork = teiIdentifiedWork()
+      .title("A tei work")
+      .internalWorks(List(internalWork1, internalWork2))
+      .collectionPath(CollectionPath("id"))
 
     When("the tei work is merged")
     val outcome = merger.applyMerge(List(Some(teiWork)))
 
     Then("the tei work should be a TEI work")
-    val expectedInternalWork1 = updateInternalWork(internalWork1, teiWork).collectionPath(CollectionPath("id/1"))
-    val expectedInternalWork2 = updateInternalWork(internalWork2, teiWork).collectionPath(CollectionPath("id/2"))
+    val expectedInternalWork1 = updateInternalWork(internalWork1, teiWork)
+      .collectionPath(CollectionPath("id/1"))
+    val expectedInternalWork2 = updateInternalWork(internalWork2, teiWork)
+      .collectionPath(CollectionPath("id/2"))
 
     outcome.getMerged(internalWork1) shouldBe expectedInternalWork1
     outcome.getMerged(internalWork2) shouldBe expectedInternalWork2
-    outcome.getMerged(teiWork) shouldBe teiWork.internalWorks(List(expectedInternalWork1, expectedInternalWork2))
+    outcome.getMerged(teiWork) shouldBe teiWork.internalWorks(
+      List(expectedInternalWork1, expectedInternalWork2))
   }
 
-  private def updateInternalWork(internalWork: Work.Visible[WorkState.Identified], teiWork: Work.Visible[WorkState.Identified]) = {
-    internalWork.copy(version = teiWork.version).mapState(state => state.copy(sourceModifiedTime = teiWork.state.sourceModifiedTime))
+  private def updateInternalWork(
+    internalWork: Work.Visible[WorkState.Identified],
+    teiWork: Work.Visible[WorkState.Identified]) = {
+    internalWork
+      .copy(version = teiWork.version)
+      .mapState(state =>
+        state.copy(sourceModifiedTime = teiWork.state.sourceModifiedTime))
   }
 }

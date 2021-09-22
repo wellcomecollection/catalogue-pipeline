@@ -11,13 +11,17 @@ object CollectionPathRule extends FieldMergeRule with MergerLogging {
   type FieldData = Option[CollectionPath]
 
   override def merge(
-                      target: Work.Visible[WorkState.Identified],
-                      sources: Seq[Work[WorkState.Identified]]
-                    ): FieldMergeResult[FieldData] =
-    FieldMergeResult(data = getCollectionPath(target, sources),sources =  getCalmCollectionPath.mergedSources(target, sources))
+    target: Work.Visible[WorkState.Identified],
+    sources: Seq[Work[WorkState.Identified]]
+  ): FieldMergeResult[FieldData] =
+    FieldMergeResult(
+      data = getCollectionPath(target, sources),
+      sources = getCalmCollectionPath.mergedSources(target, sources))
 
-  def getCollectionPath(target: Work.Visible[Identified],
-                        sources: Seq[Work[Identified]]): Option[CollectionPath] = getCalmCollectionPath(target, sources).getOrElse(target.data.collectionPath)
+  def getCollectionPath(
+    target: Work.Visible[Identified],
+    sources: Seq[Work[Identified]]): Option[CollectionPath] =
+    getCalmCollectionPath(target, sources).getOrElse(target.data.collectionPath)
 
   val getCalmCollectionPath: CollectionPathRule.PartialRule =
     new PartialRule {

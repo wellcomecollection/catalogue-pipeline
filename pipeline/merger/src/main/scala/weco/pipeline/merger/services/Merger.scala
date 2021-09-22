@@ -7,7 +7,12 @@ import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.catalogue.internal_model.work._
 import weco.pipeline.merger.logging.MergerLogging
 import weco.pipeline.merger.models
-import weco.pipeline.merger.models.{FieldMergeResult, ImageDataWithSource, MergeResult, MergerOutcome}
+import weco.pipeline.merger.models.{
+  FieldMergeResult,
+  ImageDataWithSource,
+  MergeResult,
+  MergerOutcome
+}
 import weco.pipeline.merger.rules._
 
 /*
@@ -194,7 +199,10 @@ object PlatformMerger extends Merger {
     if (sources.isEmpty)
       State.pure(
         models.MergeResult(
-          mergedTarget = modifyInternalWorks(target, target.data.items, target.data.collectionPath),
+          mergedTarget = modifyInternalWorks(
+            target,
+            target.data.items,
+            target.data.collectionPath),
           imageDataWithSources = standaloneImages(target).map { image =>
             ImageDataWithSource(
               imageData = image,
@@ -231,9 +239,9 @@ object PlatformMerger extends Merger {
           }
         )
 
-  private def modifyInternalWorks(work: Work.Visible[Identified],items: List[Item[IdState.Minted]],
-                                      collectionPath: Option[CollectionPath]
-                                      ) = {
+  private def modifyInternalWorks(work: Work.Visible[Identified],
+                                  items: List[Item[IdState.Minted]],
+                                  collectionPath: Option[CollectionPath]) = {
     // Internal works are in TEI works. If they are merged with Sierra, we want the Sierra
     // items to be added to TEI internal works so that the user can request the item
     // containing that work without having to find the wrapping work.
@@ -249,19 +257,26 @@ object PlatformMerger extends Merger {
           // the root of the hierarchy until after we've applied the merging rules.
           // So here we prepend the wrapper work collectionPath to the innerworks
           // collectionPath to make them absolute paths
-          val updatedCollectionPath = (collectionPath, stub.workData.collectionPath) match {
-            case (Some(CollectionPath(rootPath,_)), Some(CollectionPath(innerPath,_))) => Some(CollectionPath(s"$rootPath/$innerPath"))
-            // These cases shouldn't be possible because we expect internal works to always have a
-            // collectionPath populated by the TEI transformer
-            case (None, Some(innerCollectionPath)) =>
-              warn(s"TEI work ${work.id} has no collectionPath")
-              Some(innerCollectionPath)
-            case _ =>
-              warn(s"TEI work ${work.id} has an internal work without a collectionPath")
-              None
-          }
+          val updatedCollectionPath =
+            (collectionPath, stub.workData.collectionPath) match {
+              case (
+                  Some(CollectionPath(rootPath, _)),
+                  Some(CollectionPath(innerPath, _))) =>
+                Some(CollectionPath(s"$rootPath/$innerPath"))
+              // These cases shouldn't be possible because we expect internal works to always have a
+              // collectionPath populated by the TEI transformer
+              case (None, Some(innerCollectionPath)) =>
+                warn(s"TEI work ${work.id} has no collectionPath")
+                Some(innerCollectionPath)
+              case _ =>
+                warn(
+                  s"TEI work ${work.id} has an internal work without a collectionPath")
+                None
+            }
           stub.copy(
-            workData = stub.workData.copy[DataState.Identified](items = items, collectionPath = updatedCollectionPath)
+            workData = stub.workData.copy[DataState.Identified](
+              items = items,
+              collectionPath = updatedCollectionPath)
           )
         })
       }
