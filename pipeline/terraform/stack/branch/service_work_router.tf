@@ -1,6 +1,6 @@
 module "router_queue" {
   source          = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
-  queue_name      = "${var.namespace}_router"
+  queue_name      = "${var.namespace}_router-${local.tei_suffix}"
   topic_arns      = [module.merger_works_topic.arn]
   alarm_topic_arn = var.dlq_alarm_arn
 
@@ -72,7 +72,7 @@ module "router_path_output_topic" {
 module "router_work_output_topic" {
   source = "../../modules/topic"
 
-  name       = "${var.namespace}_router_work_output"
+  name       = "${var.namespace}_router_work_output-${local.tei_suffix}"
   role_names = [module.router.task_role_name]
 }
 

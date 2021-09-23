@@ -9,7 +9,7 @@ data "aws_ecs_cluster" "cluster" {
 
 module "batcher_queue" {
   source                     = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
-  queue_name                 = "${var.namespace}_batcher"
+  queue_name                 = "${var.namespace}_batcher-${local.tei_suffix}"
   topic_arns                 = [module.router_path_output_topic.arn]
   visibility_timeout_seconds = (local.wait_minutes + 5) * 60
   alarm_topic_arn            = var.dlq_alarm_arn
@@ -71,7 +71,7 @@ module "batcher" {
 module "batcher_output_topic" {
   source = "../../modules/topic"
 
-  name       = "${var.namespace}_batcher_output"
+  name       = "${var.namespace}_batcher_output-${local.tei_suffix}"
   role_names = [module.batcher.task_role_name]
 }
 

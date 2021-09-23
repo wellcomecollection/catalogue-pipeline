@@ -49,7 +49,7 @@ locals {
 
 module "image_inferrer_queue" {
   source                     = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
-  queue_name                 = "${var.namespace}_image_inferrer"
+  queue_name                 = "${var.namespace}_image_inferrer-${local.tei_suffix}"
   topic_arns                 = [module.merger_images_topic.arn]
   alarm_topic_arn            = var.dlq_alarm_arn
   visibility_timeout_seconds = local.queue_visibility_timeout
@@ -223,7 +223,7 @@ data "aws_iam_policy_document" "allow_inferrer_data_access" {
 module "image_inferrer_topic" {
   source = "../../modules/topic"
 
-  name       = "${var.namespace}_image_inferrer"
+  name       = "${var.namespace}_image_inferrer-${local.tei_suffix}"
   role_names = [module.image_inferrer.task_role_name]
 }
 

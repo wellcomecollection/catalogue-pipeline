@@ -1,6 +1,6 @@
 module "relation_embedder_queue" {
   source          = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
-  queue_name      = "${var.namespace}_relation_embedder"
+  queue_name      = "${var.namespace}_relation_embedder-${local.tei_suffix}"
   topic_arns      = [module.batcher_output_topic.arn]
   alarm_topic_arn = var.dlq_alarm_arn
 
@@ -70,7 +70,7 @@ module "relation_embedder" {
 module "relation_embedder_output_topic" {
   source = "../../modules/topic"
 
-  name       = "${var.namespace}_relation_embedder_output"
+  name       = "${var.namespace}_relation_embedder_output-${local.tei_suffix}"
   role_names = [module.relation_embedder.task_role_name]
 }
 

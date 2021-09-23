@@ -1,6 +1,6 @@
 module "merger_queue" {
   source          = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
-  queue_name      = "${var.namespace}_merger"
+  queue_name      = "${var.namespace}_merger-${local.tei_suffix}"
   topic_arns      = [var.matcher_topic_arn]
   alarm_topic_arn = var.dlq_alarm_arn
 
@@ -66,14 +66,14 @@ module "merger" {
 module "merger_works_topic" {
   source = "../../modules/topic"
 
-  name       = "${var.namespace}_merger_works"
+  name       = "${var.namespace}_merger_works-${local.tei_suffix}"
   role_names = [module.merger.task_role_name]
 }
 
 module "merger_images_topic" {
   source = "../../modules/topic"
 
-  name       = "${var.namespace}_merger_images"
+  name       = "${var.namespace}_merger_images-${local.tei_suffix}"
   role_names = [module.merger.task_role_name]
 }
 
