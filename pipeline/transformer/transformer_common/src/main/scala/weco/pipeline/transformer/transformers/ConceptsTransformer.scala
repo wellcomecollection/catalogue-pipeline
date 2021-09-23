@@ -1,6 +1,7 @@
 package weco.pipeline.transformer.transformers
 
-import weco.catalogue.internal_model.work.Genre
+import weco.catalogue.internal_model.text.TextNormalisation._
+import weco.catalogue.internal_model.work.{Genre, Meeting}
 
 trait ConceptsTransformer {
   implicit class GenreOps[State](g: Genre[State]) {
@@ -13,5 +14,10 @@ trait ConceptsTransformer {
 
       g.copy(label = normalisedLabel)
     }
+  }
+
+  implicit class MeetingOps[State](m: Meeting[State]) {
+    def normalised: Meeting[State] =
+      m.copy(label = m.label.trimTrailing(','))
   }
 }

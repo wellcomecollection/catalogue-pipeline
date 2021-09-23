@@ -1,15 +1,12 @@
 package weco.pipeline.transformer.sierra.transformers
 
-import weco.catalogue.internal_model.identifiers.{
-  IdState,
-  IdentifierType,
-  SourceIdentifier
-}
+import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, SourceIdentifier}
 import weco.catalogue.internal_model.work.{Meeting, Organisation, Person}
+import weco.pipeline.transformer.transformers.ConceptsTransformer
 import weco.sierra.models.SierraQueryOps
 import weco.sierra.models.marc.Subfield
 
-trait SierraAgents extends SierraQueryOps {
+trait SierraAgents extends SierraQueryOps with ConceptsTransformer {
   // This is used to construct a Person from MARc tags 100, 700 and 600.
   // For all these cases:
   //  - subfield $a populates the person label
@@ -54,7 +51,7 @@ trait SierraAgents extends SierraQueryOps {
 
   def getMeeting(subfields: List[Subfield]): Option[Meeting[IdState.Unminted]] =
     getLabel(subfields.withTags("a", "c", "d", "t"))
-      .map { Meeting.normalised }
+      .map { Meeting(_).normalised }
 
   /* Given an agent and the associated MARC subfields, look for instances of subfield $0,
    * which are used for identifiers.

@@ -124,11 +124,6 @@ case class Meeting[+State](
 ) extends AbstractAgent[State]
 
 object Meeting {
-  def apply[State >: IdState.Unidentifiable.type](
-    label: String): Meeting[State] =
-    Meeting(IdState.Unidentifiable, label)
-
-  def normalised[State >: IdState.Unidentifiable.type](
-    label: String): Meeting[State] =
-    Meeting(label.trimTrailing(','))
+  def apply(label: String): Meeting[IdState.Unidentifiable.type] =
+    Meeting(id = IdState.Unidentifiable, label = label)
 }
