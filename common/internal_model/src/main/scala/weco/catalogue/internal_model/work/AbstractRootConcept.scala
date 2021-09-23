@@ -1,7 +1,5 @@
 package weco.catalogue.internal_model.work
 
-import weco.catalogue.internal_model.parse.parsers.DateParser
-import weco.catalogue.internal_model.text.TextNormalisation._
 import weco.catalogue.internal_model.identifiers.{HasId, IdState}
 
 sealed trait AbstractRootConcept[+State] extends HasId[State] {
@@ -33,15 +31,6 @@ object Period {
       label = label,
       range = Some(range)
     )
-
-  def apply[State >: IdState.Unidentifiable.type](
-    label: String): Period[State] = {
-    val normalisedLabel = label.trimTrailingPeriod
-    Period(
-      IdState.Unidentifiable,
-      normalisedLabel,
-      InstantRange.parse(normalisedLabel))
-  }
 }
 
 case class Place[+State](

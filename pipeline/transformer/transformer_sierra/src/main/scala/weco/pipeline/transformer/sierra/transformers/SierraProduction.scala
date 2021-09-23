@@ -4,7 +4,10 @@ import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work._
 import weco.pipeline.transformer.sierra.exceptions.CataloguingException
 import weco.pipeline.transformer.sierra.transformers.parsers.Marc008Parser
-import weco.pipeline.transformer.transformers.ConceptsTransformer
+import weco.pipeline.transformer.transformers.{
+  ConceptsTransformer,
+  ParsedPeriod
+}
 import weco.sierra.models.SierraQueryOps
 import weco.sierra.models.data.SierraBibData
 import weco.sierra.models.identifiers.SierraBibNumber
@@ -297,5 +300,5 @@ object SierraProduction
     varfield
       .subfieldsWithTag(subfieldTag)
       .contents
-      .map(Period(_))
+      .map(ParsedPeriod(_))
 }

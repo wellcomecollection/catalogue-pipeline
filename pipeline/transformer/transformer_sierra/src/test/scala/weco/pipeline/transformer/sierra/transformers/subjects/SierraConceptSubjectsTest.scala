@@ -7,7 +7,8 @@ import weco.catalogue.internal_model.identifiers.{
   IdentifierType,
   SourceIdentifier
 }
-import weco.catalogue.internal_model.work.{Concept, Period, Place, Subject}
+import weco.catalogue.internal_model.work.{Concept, Place, Subject}
+import weco.pipeline.transformer.transformers.ParsedPeriod
 import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
 import weco.sierra.models.marc.{Subfield, VarField}
 
@@ -133,7 +134,7 @@ class SierraConceptSubjectsTest
         label = "A Content - Y Content",
         concepts = List(
           Concept(label = "A Content"),
-          Period(label = "Y Content")
+          ParsedPeriod(label = "Y Content")
         )
       )
     )
@@ -218,7 +219,7 @@ class SierraConceptSubjectsTest
       Subject(
         label = "A Content - X Content - V Content",
         concepts = List(
-          Period(label = "A Content"),
+          ParsedPeriod(label = "A Content"),
           Concept(label = "X Content"),
           Concept(label = "V Content")
         )

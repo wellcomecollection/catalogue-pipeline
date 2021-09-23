@@ -6,11 +6,11 @@ import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.{
   Agent,
   Concept,
-  Period,
   Place,
   ProductionEvent
 }
 import weco.pipeline.transformer.sierra.exceptions.CataloguingException
+import weco.pipeline.transformer.transformers.ParsedPeriod
 import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
 import weco.sierra.models.marc.{Subfield, VarField}
 
@@ -63,9 +63,9 @@ class SierraProductionTest
         ))
 
       production.dates shouldBe List(
-        Period(label = "1955"),
-        Period(label = "1984"),
-        Period(label = "1999")
+        ParsedPeriod(label = "1955"),
+        ParsedPeriod(label = "1984"),
+        ParsedPeriod(label = "1999")
       )
     }
 
@@ -123,9 +123,9 @@ class SierraProductionTest
         ))
 
       production.dates shouldBe List(
-        Period(label = "1981"),
-        Period(label = "April 15, 1977"),
-        Period(label = "1973 printing")
+        ParsedPeriod(label = "1981"),
+        ParsedPeriod(label = "April 15, 1977"),
+        ParsedPeriod(label = "1973 printing")
       )
 
       production.function shouldBe Some(Concept("Manufacture"))
@@ -170,7 +170,7 @@ class SierraProductionTest
             Agent("Arts Council of Great Britain"),
             Agent("CTD Printers")
           ),
-          dates = List(Period("1976;"), Period("1974")),
+          dates = List(ParsedPeriod("1976;"), ParsedPeriod("1974")),
           function = Some(Concept("Manufacture"))
         ),
         ProductionEvent(
@@ -182,7 +182,7 @@ class SierraProductionTest
               "Toxicology Information Program, National Library of Medicine [producer] ;"),
             Agent("National Technical Information Service [distributor]")
           ),
-          dates = List(Period("1974-")),
+          dates = List(ParsedPeriod("1974-")),
           function = None
         )
       )
@@ -205,8 +205,8 @@ class SierraProductionTest
       )
 
       production.dates shouldBe List(
-        Period(label = "1984"),
-        Period(label = "1999")
+        ParsedPeriod(label = "1984"),
+        ParsedPeriod(label = "1999")
       )
     }
   }
@@ -250,9 +250,9 @@ class SierraProductionTest
         ))
 
       production.dates shouldBe List(
-        Period(label = "2002"),
-        Period(label = "1983"),
-        Period(label = "copyright 2005")
+        ParsedPeriod(label = "2002"),
+        ParsedPeriod(label = "1983"),
+        ParsedPeriod(label = "copyright 2005")
       )
     }
 
@@ -396,14 +396,14 @@ class SierraProductionTest
           label = "Columbia, S.C. : H.W. Williams Co., 1982",
           places = List(Place("Columbia, S.C.")),
           agents = List(Agent("H.W. Williams Co.")),
-          dates = List(Period("1982")),
+          dates = List(ParsedPeriod("1982")),
           function = Some(Concept("Publication"))
         ),
         ProductionEvent(
           label = "Washington : U.S. G.P.O., 1981-",
           places = List(Place("Washington")),
           agents = List(Agent("U.S. G.P.O.")),
-          dates = List(Period("1981-")),
+          dates = List(ParsedPeriod("1981-")),
           function = Some(Concept("Distribution"))
         )
       )
@@ -432,9 +432,9 @@ class SierraProductionTest
         Agent(label = "Iverson Ltd.")
       )
       production.dates shouldBe List(
-        Period(label = "2002"),
-        Period(label = "1983"),
-        Period(label = "copyright 2005")
+        ParsedPeriod(label = "2002"),
+        ParsedPeriod(label = "1983"),
+        ParsedPeriod(label = "copyright 2005")
       )
     }
   }
@@ -493,7 +493,7 @@ class SierraProductionTest
           agents = List(
             Agent("Morgan Kaufmann Publishers")
           ),
-          dates = List(Period("2004")),
+          dates = List(ParsedPeriod("2004")),
           function = None
         )
       )
@@ -524,7 +524,7 @@ class SierraProductionTest
           label = "London : Wellcome Trust, 1992",
           places = List(Place("London")),
           agents = List(Agent("Wellcome Trust")),
-          dates = List(Period("1992")),
+          dates = List(ParsedPeriod("1992")),
           function = None
         )
       )
@@ -556,7 +556,7 @@ class SierraProductionTest
           label = "2019",
           places = List(),
           agents = List(),
-          dates = List(Period("2019")),
+          dates = List(ParsedPeriod("2019")),
           function = None
         )
       )
@@ -577,7 +577,7 @@ class SierraProductionTest
           label = "1757",
           places = List(Place("England")),
           agents = List(),
-          dates = List(Period("1757")),
+          dates = List(ParsedPeriod("1757")),
           function = None))
     }
 
@@ -597,7 +597,7 @@ class SierraProductionTest
           label = "2002 London",
           places = List(Place("London")),
           agents = List(),
-          dates = List(Period("2002")),
+          dates = List(ParsedPeriod("2002")),
           function = Some(Concept("Publication"))))
     }
 
@@ -617,7 +617,7 @@ class SierraProductionTest
           label = "2002 London",
           places = List(Place("London")),
           agents = List(),
-          dates = List(Period("2002")),
+          dates = List(ParsedPeriod("2002")),
           function = None))
     }
 
@@ -635,7 +635,7 @@ class SierraProductionTest
           label = "London",
           places = List(Place("London")),
           agents = List(),
-          dates = List(Period("1757")),
+          dates = List(ParsedPeriod("1757")),
           function = None))
     }
 
@@ -668,7 +668,7 @@ class SierraProductionTest
         places = List(Place("[Netherne, Surrey],")),
         agents = Nil,
         dates = List(
-          Period("1972").copy(
+          ParsedPeriod("1972").copy(
             label = "B̷A̴D̸ ̴U̶N̸P̵A̸R̸S̷E̷A̶B̵L̶E̸ ̵N̴O̴N̶S̵E̷N̷S̴E̴")),
         function = Some(Concept("Production"))
       )

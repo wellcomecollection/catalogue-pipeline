@@ -34,6 +34,7 @@ import weco.catalogue.source_model.generators.SierraRecordGenerators
 import weco.catalogue.source_model.sierra._
 import weco.pipeline.transformer.sierra.SierraTransformer
 import weco.pipeline.transformer.sierra.exceptions.SierraTransformerException
+import weco.pipeline.transformer.transformers.ParsedPeriod
 import weco.sierra.generators.MarcGenerators
 import weco.sierra.models.identifiers.{SierraBibNumber, SierraItemNumber}
 import weco.sierra.models.marc.{Subfield, VarField}
@@ -420,7 +421,7 @@ class SierraTransformerTest
             label = "Peaceful Poetry 1923",
             places = List(),
             agents = List(Agent(label = "Peaceful Poetry")),
-            dates = List(Period("1923")),
+            dates = List(ParsedPeriod("1923")),
             function = None
           )
         )

@@ -4,6 +4,7 @@ import weco.catalogue.internal_model.text.TextNormalisation._
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work._
 import weco.pipeline.transformer.sierra.transformers.SierraConcepts
+import weco.pipeline.transformer.transformers.ParsedPeriod
 import weco.sierra.models.identifiers.SierraBibNumber
 import weco.sierra.models.marc.{Subfield, VarField}
 
@@ -83,7 +84,7 @@ object SierraConceptSubjects
 
       varField.marcTag.get match {
         case "650" => Concept(label = label)
-        case "648" => Period(label = label)
+        case "648" => ParsedPeriod(label = label)
         case "651" => Place(label = label)
       }
     }

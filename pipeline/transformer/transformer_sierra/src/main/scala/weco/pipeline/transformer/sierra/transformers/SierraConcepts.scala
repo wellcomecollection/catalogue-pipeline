@@ -5,10 +5,12 @@ import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.{
   AbstractConcept,
   Concept,
-  Period,
   Place
 }
-import weco.pipeline.transformer.transformers.ConceptsTransformer
+import weco.pipeline.transformer.transformers.{
+  ConceptsTransformer,
+  ParsedPeriod
+}
 import weco.sierra.models.SierraQueryOps
 import weco.sierra.models.marc.{Subfield, VarField}
 
@@ -95,7 +97,7 @@ trait SierraConcepts extends SierraQueryOps with ConceptsTransformer {
     subdivisionSubfields.map { subfield =>
       subfield.tag match {
         case "v" | "x" => Concept(label = subfield.content).normalised
-        case "y"       => Period(label = subfield.content)
+        case "y"       => ParsedPeriod(label = subfield.content)
         case "z"       => Place(label = subfield.content).normalised
       }
     }

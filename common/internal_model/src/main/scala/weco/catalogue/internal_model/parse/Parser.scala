@@ -31,6 +31,5 @@ trait Parser[T] extends Logging {
   *  Parser implementations intended to be used as implicit parameters
   */
 package object parsers {
-
   implicit val DateParser: Parser[InstantRange] = PeriodParser
 }

@@ -13,7 +13,12 @@ trait ProductionEventGenerators extends RandomGenerators {
       label = randomAlphanumeric(25),
       places = List(Place(randomAlphanumeric(10))),
       agents = List(Person(randomAlphanumeric(10))),
-      dates = List(Period(dateLabel.getOrElse(randomAlphanumeric(5)))),
+      dates = List(
+        Period(
+          id = IdState.Unidentifiable,
+          label = dateLabel.getOrElse(randomAlphanumeric(5))
+        )
+      ),
       function = function
     )
 

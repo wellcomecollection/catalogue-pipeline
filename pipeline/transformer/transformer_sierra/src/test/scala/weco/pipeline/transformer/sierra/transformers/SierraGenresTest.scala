@@ -7,7 +7,8 @@ import weco.catalogue.internal_model.identifiers.{
   IdentifierType,
   SourceIdentifier
 }
-import weco.catalogue.internal_model.work.{Concept, Genre, Period, Place}
+import weco.catalogue.internal_model.work.{Concept, Genre, Place}
+import weco.pipeline.transformer.transformers.ParsedPeriod
 import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
 import weco.sierra.models.marc.{Subfield, VarField}
 
@@ -131,7 +132,7 @@ class SierraGenresTest
           label = "A Content - Y Content",
           concepts = List(
             Concept(label = "A Content"),
-            Period(label = "Y Content")
+            ParsedPeriod(label = "Y Content")
           )))
 
     val bibData = createSierraBibDataWith(
