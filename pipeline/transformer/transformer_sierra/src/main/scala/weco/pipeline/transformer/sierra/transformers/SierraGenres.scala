@@ -2,6 +2,7 @@ package weco.pipeline.transformer.sierra.transformers
 
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.{Concept, Genre}
+import weco.pipeline.transformer.transformers.ConceptsTransformer
 import weco.sierra.models.SierraQueryOps
 import weco.sierra.models.data.SierraBibData
 import weco.sierra.models.marc.{Subfield, VarField}
@@ -39,7 +40,8 @@ import weco.sierra.models.marc.{Subfield, VarField}
 object SierraGenres
     extends SierraDataTransformer
     with SierraQueryOps
-    with SierraConcepts {
+    with SierraConcepts
+    with ConceptsTransformer {
 
   type Output = List[Genre[IdState.Unminted]]
 
@@ -56,7 +58,7 @@ object SierraGenres
         val concepts = getPrimaryConcept(primarySubfields, varField = varField) ++ getSubdivisions(
           subdivisionSubfields)
 
-        Genre.normalised(label = label, concepts = concepts)
+        Genre(label = label, concepts = concepts).normalised
       }
       .distinct
 
