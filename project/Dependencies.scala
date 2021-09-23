@@ -176,7 +176,6 @@ object CatalogueDependencies {
       WellcomeDependencies.elasticsearchLibrary ++
       WellcomeDependencies.elasticsearchTypesafeLibrary ++
       WellcomeDependencies.jsonLibrary ++
-      ExternalDependencies.parseDependencies ++
       ExternalDependencies.scalacheckDependencies ++
       ExternalDependencies.enumeratumDependencies ++
       ExternalDependencies.scalaXmlDependencies ++
@@ -207,7 +206,8 @@ object CatalogueDependencies {
     WellcomeDependencies.typesafeLibrary
 
   val transformerCommonDependencies: Seq[ModuleID] =
-    WellcomeDependencies.storageLibrary
+    WellcomeDependencies.storageLibrary ++
+      ExternalDependencies.parseDependencies
 
   val idminterDependencies: Seq[ModuleID] =
     ExternalDependencies.mySqlDependencies ++

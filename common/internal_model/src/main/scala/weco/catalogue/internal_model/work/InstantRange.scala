@@ -1,7 +1,5 @@
 package weco.catalogue.internal_model.work
 
-import weco.catalogue.internal_model.parse.Parser
-
 import java.time.{Instant, LocalDate, LocalDateTime, ZoneOffset}
 
 // We're not extending this yet, as we don't actually want it to be part of
@@ -63,8 +61,4 @@ object InstantRange {
     to = end.to,
     label = end.label
   )
-
-  def parse(label: String)(
-    implicit parser: Parser[InstantRange]): Option[InstantRange] =
-    parser(label)
 }

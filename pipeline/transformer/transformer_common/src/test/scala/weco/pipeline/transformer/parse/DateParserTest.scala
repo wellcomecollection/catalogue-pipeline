@@ -1,11 +1,11 @@
-package weco.catalogue.internal_model.parse
+package weco.pipeline.transformer.parse
 
 import org.scalatest.matchers.should.Matchers
 import java.time.LocalDate
 
 import org.scalatest.funspec.AnyFunSpec
-import weco.catalogue.internal_model.parse.parsers.DateParser
 import weco.catalogue.internal_model.work.InstantRange
+import weco.pipeline.transformer.parse.parsers.DateParser
 
 class DateParserTest extends AnyFunSpec with Matchers {
 
