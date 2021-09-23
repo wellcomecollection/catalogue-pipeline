@@ -1,9 +1,14 @@
 package weco.pipeline.transformer.transformers
 
 import weco.catalogue.internal_model.text.TextNormalisation._
-import weco.catalogue.internal_model.work.{Genre, Meeting, Organisation, Person}
+import weco.catalogue.internal_model.work.{Agent, Genre, Meeting, Organisation, Person}
 
 trait ConceptsTransformer {
+  implicit class AgentOps[State](a: Agent[State]) {
+    def normalised: Agent[State] =
+      a.copy(label = a.label.trimTrailing(','))
+  }
+
   implicit class GenreOps[State](g: Genre[State]) {
     def normalised: Genre[State] = {
       val normalisedLabel =

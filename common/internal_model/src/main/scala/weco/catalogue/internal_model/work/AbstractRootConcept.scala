@@ -71,12 +71,8 @@ case class Agent[+State](
 ) extends AbstractAgent[State]
 
 object Agent {
-  def apply[State >: IdState.Unidentifiable.type](label: String): Agent[State] =
-    Agent(IdState.Unidentifiable, label)
-
-  def normalised[State >: IdState.Unidentifiable.type](
-    label: String): Agent[State] =
-    Agent(label.trimTrailing(','))
+  def apply(label: String): Agent[IdState.Unidentifiable.type] =
+    Agent(id = IdState.Unidentifiable, label = label)
 }
 
 case class Organisation[+State](
