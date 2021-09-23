@@ -20,7 +20,9 @@ object Marc008Parser extends Parser[ProductionEvent[IdState.Unminted]] {
           ProductionEvent(
             label = instantRange.label,
             agents = Nil,
-            dates = Period(instantRange.label, Some(instantRange)) :: Nil,
+            dates = List(
+              Period(label = instantRange.label, range = instantRange)
+            ),
             places = place.toList,
             function = None)
       }
