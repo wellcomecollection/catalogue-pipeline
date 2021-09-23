@@ -13,9 +13,11 @@ trait MiroGenres extends ConceptsTransformer {
     (miroRecord.physFormat.toList ++ miroRecord.lcGenre.toList).map { label =>
       val normalisedLabel = label.sentenceCase
 
+      val concept = Concept(label = normalisedLabel).normalised
+
       val genre = Genre(
         label = normalisedLabel,
-        concepts = List(Concept.normalised(label = normalisedLabel))
+        concepts = List(concept)
       )
 
       genre.normalised

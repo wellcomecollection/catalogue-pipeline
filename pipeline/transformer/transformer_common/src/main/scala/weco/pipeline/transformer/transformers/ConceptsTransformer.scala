@@ -3,6 +3,7 @@ package weco.pipeline.transformer.transformers
 import weco.catalogue.internal_model.text.TextNormalisation._
 import weco.catalogue.internal_model.work.{
   Agent,
+  Concept,
   Genre,
   Meeting,
   Organisation,
@@ -14,6 +15,11 @@ trait ConceptsTransformer {
   implicit class AgentOps[State](a: Agent[State]) {
     def normalised: Agent[State] =
       a.copy(label = a.label.trimTrailing(','))
+  }
+
+  implicit class ConceptOps[State](c: Concept[State]) {
+    def normalised: Concept[State] =
+      c.copy(label = c.label.trimTrailingPeriod)
   }
 
   implicit class GenreOps[State](g: Genre[State]) {

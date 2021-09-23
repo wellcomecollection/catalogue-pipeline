@@ -16,13 +16,8 @@ case class Concept[+State](
 ) extends AbstractConcept[State]
 
 object Concept {
-  def apply[State >: IdState.Unidentifiable.type](
-    label: String): Concept[State] =
-    Concept(IdState.Unidentifiable, label)
-
-  def normalised[State](id: State = IdState.Unidentifiable,
-                        label: String): Concept[State] =
-    Concept(id, label.trimTrailingPeriod)
+  def apply(label: String): Concept[IdState.Unidentifiable.type] =
+    Concept(id = IdState.Unidentifiable, label = label)
 }
 
 case class Period[+State](

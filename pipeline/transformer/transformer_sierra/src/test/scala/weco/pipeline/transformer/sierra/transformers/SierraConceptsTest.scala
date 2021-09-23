@@ -18,7 +18,7 @@ class SierraConceptsTest extends AnyFunSpec with Matchers with MarcGenerators {
       Concept(label = "Perservering puffins push past perspiration")
 
     val maybeIdentifiedConcept = transformer.identifyConcept(
-      concept = concept,
+      ontologyType = "Concept",
       varField = createVarFieldWith(
         marcTag = "CCC",
         indicator2 = "0",
@@ -42,7 +42,7 @@ class SierraConceptsTest extends AnyFunSpec with Matchers with MarcGenerators {
     val concept = Concept(label = "Metaphysical mice migrating to Mars")
 
     val maybeIdentifiedConcept = transformer.identifyConcept(
-      concept = concept,
+      ontologyType = "Concept",
       varField = createVarFieldWith(
         marcTag = "CCC",
         indicator2 = "0",
@@ -75,7 +75,7 @@ class SierraConceptsTest extends AnyFunSpec with Matchers with MarcGenerators {
     val concept = Concept(label = "Hitchhiking horses hurry home")
 
     val maybeIdentifiedConcept = transformer.identifyConcept(
-      concept = concept,
+      ontologyType = "Concept",
       varField = createVarFieldWith(
         marcTag = "CCC",
         subfields = List(

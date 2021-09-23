@@ -68,7 +68,12 @@ object SierraGenres
     primarySubfields: List[Subfield],
     varField: VarField): List[Concept[IdState.Unminted]] =
     primarySubfields.map { subfield =>
-      val concept = Concept.normalised(label = subfield.content)
-      concept.copy(id = identifyConcept(concept, varField))
+      Concept(
+        id = identifyConcept(
+          ontologyType = "Concept",
+          varField = varField
+        ),
+        label = subfield.content
+      ).normalised
     }
 }

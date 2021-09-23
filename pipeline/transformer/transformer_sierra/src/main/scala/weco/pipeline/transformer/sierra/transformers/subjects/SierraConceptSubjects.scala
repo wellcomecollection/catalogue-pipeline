@@ -67,12 +67,11 @@ object SierraConceptSubjects
         primarySubfields,
         varField = varfield) ++ getSubdivisions(subdivisionSubfields)
 
-      val subject = Subject(
+      Subject(
+        id = identifyConcept(ontologyType = "Subject", varfield),
         label = label,
         concepts = concepts
       )
-
-      subject.copy(id = identifyConcept(subject, varfield))
     }
   }
 
