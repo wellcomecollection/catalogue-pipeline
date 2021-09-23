@@ -46,7 +46,7 @@ trait SierraAgents extends SierraQueryOps with ConceptsTransformer {
   def getOrganisation(
     subfields: List[Subfield]): Option[Organisation[IdState.Unminted]] =
     getLabel(subfields.filterNot(_.tag == "n"))
-      .map { Organisation.normalised }
+      .map { Organisation(_).normalised }
 
   def getMeeting(subfields: List[Subfield]): Option[Meeting[IdState.Unminted]] =
     getLabel(subfields.withTags("a", "c", "d", "t"))
