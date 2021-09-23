@@ -17,24 +17,23 @@ trait SierraAgents extends SierraQueryOps with ConceptsTransformer {
     subfields: List[Subfield],
     normalisePerson: Boolean = false): Option[Person[IdState.Unminted]] =
     getLabel(subfields).map { label =>
-      // The rule is to only normalise the 'Person' label when a contributor.  Strictly a 'Person' within
-      // 'Subjects' (sourced from Marc 600) should not be normalised -- however, as these labels
-      // are not expected to have punctuation normalisation should not change the 'Person' label for 'Subjects'
-      // In which case normalisation is effectively a no-op and the test can be removed and Person.normalised
-      // always returned when confident in the data.
-      if (normalisePerson)
-        Person.normalised(
-          label = label,
-          prefix = None,
-          numeration = None
-        )
-      else
+      val person =
         Person(
           id = IdState.Unidentifiable,
           label = label,
           prefix = None,
           numeration = None
         )
+
+      // The rule is to only normalise the 'Person' label when a contributor.  Strictly a 'Person' within
+      // 'Subjects' (sourced from Marc 600) should not be normalised -- however, as these labels
+      // are not expected to have punctuation normalisation should not change the 'Person' label for 'Subjects'
+      // In which case normalisation is effectively a no-op and the test can be removed and Person.normalised
+      // always returned when confident in the data.
+      if (normalisePerson)
+        person.normalised
+      else
+        person
     }
 
   // This is used to construct an Organisation from MARC tags 110 and 710.
