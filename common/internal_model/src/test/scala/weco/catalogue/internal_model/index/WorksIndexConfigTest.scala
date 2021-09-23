@@ -50,7 +50,7 @@ class WorksIndexConfigTest
 
   describe("indexing different works with every type of WorkState") {
     it("WorkState.Source") {
-      withLocalIndex(WorksIndexConfig.source) { implicit index =>
+      withLocalElasticsearchIndex(config = WorksIndexConfig.source) { implicit index =>
         forAll { sourceWork: Work[WorkState.Source] =>
           assertWorkCanBeIndexed(sourceWork)
         }
@@ -58,7 +58,7 @@ class WorksIndexConfigTest
     }
 
     it("WorkState.Identified") {
-      withLocalIndex(WorksIndexConfig.identified) { implicit index =>
+      withLocalElasticsearchIndex(config = WorksIndexConfig.identified) { implicit index =>
         forAll { identifiedWork: Work[WorkState.Identified] =>
           assertWorkCanBeIndexed(identifiedWork)
         }
@@ -66,7 +66,7 @@ class WorksIndexConfigTest
     }
 
     it("WorkState.Merged") {
-      withLocalIndex(WorksIndexConfig.merged) { implicit index =>
+      withLocalElasticsearchIndex(config = WorksIndexConfig.merged) { implicit index =>
         forAll { mergedWork: Work[WorkState.Merged] =>
           assertWorkCanBeIndexed(mergedWork)
         }
@@ -74,7 +74,7 @@ class WorksIndexConfigTest
     }
 
     it("WorkState.Denormalised") {
-      withLocalIndex(WorksIndexConfig.denormalised) { implicit index =>
+      withLocalElasticsearchIndex(config = WorksIndexConfig.denormalised) { implicit index =>
         forAll { denormalisedWork: Work[WorkState.Denormalised] =>
           assertWorkCanBeIndexed(denormalisedWork)
         }
@@ -82,7 +82,7 @@ class WorksIndexConfigTest
     }
 
     it("WorkState.Indexed") {
-      withLocalIndex(WorksIndexConfig.indexed) { implicit index =>
+      withLocalElasticsearchIndex(config = WorksIndexConfig.indexed) { implicit index =>
         forAll { indexedWork: Work[WorkState.Indexed] =>
           assertWorkCanBeIndexed(indexedWork)
         }

@@ -57,11 +57,6 @@ trait IndexFixtures extends ElasticsearchFixtures { this: Suite =>
         testWith(index)
     }
 
-  def withLocalIndex[R](config: IndexConfig)(testWith: TestWith[Index, R]): R =
-    withLocalElasticsearchIndex[R](config) { index =>
-      testWith(index)
-    }
-
   def assertElasticsearchEventuallyHasWork[State <: WorkState](
     index: Index,
     works: Work[State]*
