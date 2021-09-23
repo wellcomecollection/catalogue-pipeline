@@ -154,7 +154,7 @@ locals {
 }
 
 module "pipeline_storage_secrets" {
-  source = "github.com/wellcomecollection/terraform-aws-secrets?ref=v1.0.1"
+  source = "github.com/wellcomecollection/terraform-aws-secrets?ref=v1.3.0"
 
   key_value_map = {
     (local.pipeline_storage_public_host) = "${local.pipeline_storage_elastic_id}.${local.pipeline_storage_elastic_region}.aws.found.io"
@@ -170,10 +170,12 @@ module "pipeline_storage_secrets" {
     # See https://www.elastic.co/guide/en/cloud/current/ec-traffic-filtering-vpc.html
     (local.pipeline_storage_private_host) = "${local.pipeline_storage_elastic_id}.vpce.${local.pipeline_storage_elastic_region}.aws.elastic-cloud.com"
   }
+
+  deletion_mode = "IMMEDIATE"
 }
 
 module "pipeline_storage_secrets_catalogue" {
-  source = "github.com/wellcomecollection/terraform-aws-secrets?ref=v1.0.1"
+  source = "github.com/wellcomecollection/terraform-aws-secrets?ref=v1.3.0"
 
   providers = {
     aws = aws.catalogue
@@ -193,6 +195,8 @@ module "pipeline_storage_secrets_catalogue" {
     # See https://www.elastic.co/guide/en/cloud/current/ec-traffic-filtering-vpc.html
     (local.pipeline_storage_private_host) = "${local.pipeline_storage_elastic_id}.vpce.${local.pipeline_storage_elastic_region}.aws.elastic-cloud.com"
   }
+
+  deletion_mode = "IMMEDIATE"
 }
 
 locals {
