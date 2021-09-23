@@ -25,6 +25,7 @@ module "matcher_graph_table_autoscaling" {
   count = var.is_reindexing ? 1 : 0
 
   table_name = aws_dynamodb_table.matcher_graph_table.name
+  index_name = "work-sets-index"
 
   max_read_capacity  = 600
   max_write_capacity = 1000
@@ -38,6 +39,7 @@ module "lock_table_autoscaling" {
   count = var.is_reindexing ? 1 : 0
 
   table_name = aws_dynamodb_table.matcher_lock_table.name
+  index_name = "context-ids-index"
 
   max_read_capacity  = 1500
   max_write_capacity = 2000
@@ -63,16 +65,16 @@ resource "aws_dynamodb_table" "matcher_graph_table" {
   }
 
   billing_mode   = local.graph_table_billing_mode
-  read_capacity  = 1
-  write_capacity = 1
+  read_capacity  = 60
+  write_capacity = 100
 
   global_secondary_index {
     name            = "work-sets-index"
     hash_key        = "componentId"
     projection_type = "ALL"
 
-    read_capacity  = 1
-    write_capacity = 1
+    read_capacity  = 60
+    write_capacity = 100
   }
 
   tags = {
@@ -125,8 +127,8 @@ resource "aws_dynamodb_table" "matcher_lock_table" {
   hash_key = "id"
 
   billing_mode   = local.lock_table_billing_mode
-  read_capacity  = 1
-  write_capacity = 1
+  read_capacity  = 150
+  write_capacity = 200
 
   attribute {
     name = "id"
@@ -143,8 +145,8 @@ resource "aws_dynamodb_table" "matcher_lock_table" {
     hash_key        = "contextId"
     projection_type = "ALL"
 
-    read_capacity  = 1
-    write_capacity = 1
+    read_capacity  = 150
+    write_capacity = 200
   }
 
   ttl {
