@@ -76,7 +76,9 @@ class AvailabilityTest
         .items(List(createIdentifiedPhysicalItem))
         .notes(
           List(
-            Note(contents = "Available at Churchill Archives Centre", noteType = NoteType.TermsOfUse)
+            Note(
+              contents = "Available at Churchill Archives Centre",
+              noteType = NoteType.TermsOfUse)
           )
         )
       val workAvailabilities = Availabilities.forWorkData(work.data)

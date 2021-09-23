@@ -425,7 +425,8 @@ class SierraTransformerTest
           )
         )
       )
-      .notes(List(Note(contents = "It's a note", noteType = NoteType.GeneralNote)))
+      .notes(List(
+        Note(contents = "It's a note", noteType = NoteType.GeneralNote)))
       .lettering(lettering)
       .languages(expectedLanguages)
   }

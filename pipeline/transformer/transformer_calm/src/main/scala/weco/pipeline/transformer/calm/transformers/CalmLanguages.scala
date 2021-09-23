@@ -18,8 +18,7 @@ object CalmLanguages {
   // languages we can, and keep the original sentence in a note.
   // e.g. "Mainly in German, smaller parts in English."
   //
-  def apply(
-    languageFieldValues: List[String]): (List[Language], List[Note]) =
+  def apply(languageFieldValues: List[String]): (List[Language], List[Note]) =
     languageFieldValues
       .foldLeft((List[Language](), List[Note]())) {
         case ((languages, notes), value) =>

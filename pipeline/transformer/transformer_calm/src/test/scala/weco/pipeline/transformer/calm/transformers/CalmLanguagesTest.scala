@@ -218,7 +218,9 @@ class CalmLanguagesTest
     )
 
     notes shouldBe List(
-      Note(contents = "French with a Polish translation", noteType = NoteType.LanguageNote),
+      Note(
+        contents = "French with a Polish translation",
+        noteType = NoteType.LanguageNote),
       Note(contents = "Chinese inscription", noteType = NoteType.LanguageNote)
     )
   }

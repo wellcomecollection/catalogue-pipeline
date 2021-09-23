@@ -84,7 +84,8 @@ object SierraNotes extends SierraDataTransformer with SierraQueryOps {
   //
   private def createLocationOfNote(vf: VarField): Note =
     vf.indicator1 match {
-      case Some("2") => createNoteFromContents(NoteType.LocationOfDuplicatesNote)(vf)
-      case _         => createNoteFromContents(NoteType.LocationOfOriginalNote)(vf)
+      case Some("2") =>
+        createNoteFromContents(NoteType.LocationOfDuplicatesNote)(vf)
+      case _ => createNoteFromContents(NoteType.LocationOfOriginalNote)(vf)
     }
 }
