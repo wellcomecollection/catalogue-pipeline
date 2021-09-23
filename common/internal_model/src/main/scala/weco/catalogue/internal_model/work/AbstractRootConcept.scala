@@ -53,12 +53,8 @@ case class Place[+State](
 ) extends AbstractConcept[State]
 
 object Place {
-  def apply[State >: IdState.Unidentifiable.type](label: String): Place[State] =
-    Place(IdState.Unidentifiable, label)
-
-  def normalised[State >: IdState.Unidentifiable.type](
-    label: String): Place[State] =
-    Place(label.trimTrailing(':'))
+  def apply(label: String): Place[IdState.Unidentifiable.type] =
+    Place(id = IdState.Unidentifiable, label = label)
 }
 
 sealed trait AbstractAgent[+State] extends AbstractRootConcept[State] {

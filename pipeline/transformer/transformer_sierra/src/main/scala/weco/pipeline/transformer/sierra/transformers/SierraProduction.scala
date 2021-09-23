@@ -281,7 +281,7 @@ object SierraProduction
     varfield
       .subfieldsWithTag(subfieldTag)
       .contents
-      .map(Place.normalised)
+      .map(Place(_).normalised)
 
   private def agentsFromSubfields(
     varfield: VarField,

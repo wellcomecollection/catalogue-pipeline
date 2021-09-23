@@ -8,10 +8,11 @@ import weco.catalogue.internal_model.work.{
   Period,
   Place
 }
+import weco.pipeline.transformer.transformers.ConceptsTransformer
 import weco.sierra.models.SierraQueryOps
 import weco.sierra.models.marc.{Subfield, VarField}
 
-trait SierraConcepts extends SierraQueryOps {
+trait SierraConcepts extends SierraQueryOps with ConceptsTransformer {
 
   // Get the label.  This is populated by the label of subfield $a, followed
   // by other subfields, in the order they come from MARC.  The labels are
@@ -95,7 +96,7 @@ trait SierraConcepts extends SierraQueryOps {
       subfield.tag match {
         case "v" | "x" => Concept.normalised(label = subfield.content)
         case "y"       => Period(label = subfield.content)
-        case "z"       => Place.normalised(label = subfield.content)
+        case "z"       => Place(label = subfield.content).normalised
       }
     }
 }
