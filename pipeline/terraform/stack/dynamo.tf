@@ -62,12 +62,17 @@ resource "aws_dynamodb_table" "matcher_graph_table" {
     type = "S"
   }
 
-  billing_mode = local.graph_table_billing_mode
+  billing_mode   = local.graph_table_billing_mode
+  read_capacity  = 1
+  write_capacity = 1
 
   global_secondary_index {
     name            = "work-sets-index"
     hash_key        = "componentId"
     projection_type = "ALL"
+
+    read_capacity  = 1
+    write_capacity = 1
   }
 
   tags = {
@@ -119,7 +124,9 @@ resource "aws_dynamodb_table" "matcher_lock_table" {
   name     = local.lock_table_name
   hash_key = "id"
 
-  billing_mode = local.lock_table_billing_mode
+  billing_mode   = local.lock_table_billing_mode
+  read_capacity  = 1
+  write_capacity = 1
 
   attribute {
     name = "id"
@@ -135,6 +142,9 @@ resource "aws_dynamodb_table" "matcher_lock_table" {
     name            = "context-ids-index"
     hash_key        = "contextId"
     projection_type = "ALL"
+
+    read_capacity  = 1
+    write_capacity = 1
   }
 
   ttl {
