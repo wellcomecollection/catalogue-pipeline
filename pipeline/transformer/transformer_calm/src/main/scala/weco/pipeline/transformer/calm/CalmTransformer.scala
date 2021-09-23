@@ -241,7 +241,7 @@ object CalmTransformer
       case dates =>
         List(
           ProductionEvent(
-            dates = dates.map(date => Period(date, PeriodParser(date))),
+            dates = dates.map(Period(_)),
             label = dates.mkString(" "),
             places = Nil,
             agents = Nil,
