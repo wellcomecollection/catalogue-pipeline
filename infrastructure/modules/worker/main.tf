@@ -1,7 +1,14 @@
 locals {
-  # Override the default service name if requested
+  # Allow overriding the deployment service name used by weco-deploy
   deployment_service_name = var.deployment_service_name == "" ? var.name : var.deployment_service_name
 
+  # Allow overriding the ECS service name
+  #
+  # This is used to set a service name that isn't prefixed by the namespace,
+  # e.g. "id_minter" instead of "catalogue-2021-09-23-id_minter".
+  #
+  # This makes it easier to identify services in contexts where the service
+  # name is truncated, like the logging cluster or the ECS console.
   service_name = var.service_name == "" ? var.name : var.service_name
 }
 
