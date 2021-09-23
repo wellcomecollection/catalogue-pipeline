@@ -83,7 +83,10 @@ class CalmTransformerTest
             Language(label = "Russian", id = "rus")
           ),
           notes = List(
-            LanguageNote("English, with Russian commentary")
+            Note(
+              contents = "English, with Russian commentary",
+              noteType = NoteType.LanguageNote
+            )
           )
         )
       )
@@ -172,7 +175,7 @@ class CalmTransformerTest
       "CatalogueStatus" -> "Catalogued"
     )
     val termsOfUse = CalmTransformer(record, version).right.get.data.notes
-      .collectFirst { case TermsOfUse(content) => content }
+      .collectFirst { case Note.TermsOfUse(contents) => contents }
 
     termsOfUse shouldBe Some("nope. nope. Restricted until 10 October 2050.")
   }
@@ -374,8 +377,8 @@ class CalmTransformerTest
       "CatalogueStatus" -> "Catalogued"
     )
     CalmTransformer(record, version).right.get.data.notes should contain theSameElementsAs List(
-      CopyrightNote("no copyright"),
-      ArrangementNote("meet at midnight")
+      Note(contents = "no copyright", noteType = NoteType.CopyrightNote),
+      Note(contents = "meet at midnight", noteType = NoteType.ArrangementNote)
     )
   }
 
@@ -575,7 +578,10 @@ class CalmTransformerTest
 
     workData.languages shouldBe empty
     workData.notes should contain(
-      LanguageNote("Some freeform discussion of the language")
+      Note(
+        contents = "Some freeform discussion of the language",
+        noteType = NoteType.LanguageNote
+      )
     )
   }
 
