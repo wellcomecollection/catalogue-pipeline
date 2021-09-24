@@ -25,7 +25,8 @@ case class Period[+State](
 ) extends AbstractConcept[State]
 
 object Period {
-  def apply(label: String, range: InstantRange): Period[IdState.Unidentifiable.type] =
+  def apply(label: String,
+            range: InstantRange): Period[IdState.Unidentifiable.type] =
     Period(
       id = IdState.Unidentifiable,
       label = label,

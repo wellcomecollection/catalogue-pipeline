@@ -2,11 +2,7 @@ package weco.pipeline.transformer.sierra.transformers
 
 import weco.catalogue.internal_model.text.TextNormalisation._
 import weco.catalogue.internal_model.identifiers.IdState
-import weco.catalogue.internal_model.work.{
-  AbstractConcept,
-  Concept,
-  Place
-}
+import weco.catalogue.internal_model.work.{AbstractConcept, Concept, Place}
 import weco.pipeline.transformer.transformers.{
   ConceptsTransformer,
   ParsedPeriod
@@ -64,7 +60,8 @@ trait SierraConcepts extends SierraQueryOps with ConceptsTransformer {
   //
   // Note that some identifiers have an identifier scheme in
   // indicator 2, but no ID.  In this case, we just ignore it.
-  def identifyConcept(ontologyType: String, varField: VarField): IdState.Unminted =
+  def identifyConcept(ontologyType: String,
+                      varField: VarField): IdState.Unminted =
     getIdentifierSubfieldContents(varField) match {
       case Seq(subfieldContent) =>
         maybeAddIdentifier(

@@ -23,7 +23,6 @@ object Marc008Parser extends Parser[ProductionEvent[IdState.Unminted]] {
             dates = List(
               Period(label = instantRange.label, range = instantRange)
             ),
-
             places = place.toList,
             function = None)
       }

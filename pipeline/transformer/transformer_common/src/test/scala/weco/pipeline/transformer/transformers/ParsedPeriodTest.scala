@@ -32,4 +32,3 @@ class ParsedPeriodTest extends AnyFunSpec with Matchers {
     }
   }
 }
-

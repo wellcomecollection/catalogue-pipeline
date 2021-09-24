@@ -223,8 +223,8 @@ class CalmTransformerTest
             Period(
               label = "c.1900 and 1914",
               range = InstantRange(
-                LocalDate of(1890, 1, 1),
-                LocalDate of(1914, 12, 31),
+                LocalDate of (1890, 1, 1),
+                LocalDate of (1914, 12, 31),
                 "c.1900 and 1914"
               )
             )
