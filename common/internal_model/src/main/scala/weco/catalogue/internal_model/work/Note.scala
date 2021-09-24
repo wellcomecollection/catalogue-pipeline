@@ -2,6 +2,18 @@ package weco.catalogue.internal_model.work
 
 case class NoteType(id: String, label: String)
 
+case class Note(noteType: NoteType, contents: String)
+
+// We used to have a sealed trait for Note, with a separate subclass for each
+// type of Note.  We moved away from that to a parametrised NoteType for
+// a few reasons:
+//
+//    - Having lots of subtypes means Circe has to create lots of implicit JSON
+//      encoders and decoders, which slows the build down
+//    - Every time we change the note types, we have to update the API code before
+//      we can use them
+//    - We don't actually care about NoteType being an enumerated type
+//
 case object NoteType {
   val GeneralNote = NoteType(id = "general-note", label = "Notes")
   val BibliographicalInformation =
@@ -47,8 +59,6 @@ case object NoteType {
   val ReferencesNote =
     NoteType(id = "references-note", label = "References note")
 }
-
-case class Note(noteType: NoteType, contents: String)
 
 case object Note {
   object TermsOfUse {
