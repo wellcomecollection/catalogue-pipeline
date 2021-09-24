@@ -200,7 +200,9 @@ def get_dlq_stats(sess, *, reindex_date):
     sqs_client = sess.client("sqs")
 
     dlq_responses = {
-        q_url: sqs_client.get_queue_attributes(QueueUrl=q_url, AttributeNames=["ApproximateNumberOfMessages"])
+        q_url: sqs_client.get_queue_attributes(
+            QueueUrl=q_url, AttributeNames=["ApproximateNumberOfMessages"]
+        )
         for q_url in dlq_urls
     }
 
