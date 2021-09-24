@@ -1,9 +1,9 @@
 package weco.pipeline.transformer.sierra.transformers.subjects
 
-import weco.catalogue.internal_model.text.TextNormalisation._
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work._
 import weco.pipeline.transformer.sierra.transformers.SierraConcepts
+import weco.pipeline.transformer.text.TextNormalisation._
 import weco.pipeline.transformer.transformers.ParsedPeriod
 import weco.sierra.models.identifiers.SierraBibNumber
 import weco.sierra.models.marc.{Subfield, VarField}

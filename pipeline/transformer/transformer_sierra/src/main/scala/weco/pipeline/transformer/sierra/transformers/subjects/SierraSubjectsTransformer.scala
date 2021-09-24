@@ -1,9 +1,9 @@
 package weco.pipeline.transformer.sierra.transformers.subjects
 
-import weco.catalogue.internal_model.text.TextNormalisation._
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.Subject
 import weco.pipeline.transformer.sierra.transformers.SierraIdentifiedDataTransformer
+import weco.pipeline.transformer.text.TextNormalisation._
 import weco.sierra.models.SierraQueryOps
 import weco.sierra.models.data.SierraBibData
 import weco.sierra.models.identifiers.SierraBibNumber

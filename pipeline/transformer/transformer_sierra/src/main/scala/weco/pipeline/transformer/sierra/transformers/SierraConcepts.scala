@@ -1,8 +1,8 @@
 package weco.pipeline.transformer.sierra.transformers
 
-import weco.catalogue.internal_model.text.TextNormalisation._
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.{AbstractConcept, Concept, Place}
+import weco.pipeline.transformer.text.TextNormalisation._
 import weco.pipeline.transformer.transformers.{
   ConceptsTransformer,
   ParsedPeriod

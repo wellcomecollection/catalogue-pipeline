@@ -1,9 +1,9 @@
 package weco.pipeline.transformer.miro.transformers
 
-import weco.catalogue.internal_model.text.TextNormalisation._
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.{Concept, Genre}
 import weco.pipeline.transformer.miro.source.MiroRecord
+import weco.pipeline.transformer.text.TextNormalisation._
 import weco.pipeline.transformer.transformers.ConceptsTransformer
 
 trait MiroGenres extends ConceptsTransformer {

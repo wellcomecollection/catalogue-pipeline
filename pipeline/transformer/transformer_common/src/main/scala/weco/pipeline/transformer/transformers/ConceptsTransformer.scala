@@ -1,15 +1,7 @@
 package weco.pipeline.transformer.transformers
 
-import weco.catalogue.internal_model.text.TextNormalisation._
-import weco.catalogue.internal_model.work.{
-  Agent,
-  Concept,
-  Genre,
-  Meeting,
-  Organisation,
-  Person,
-  Place
-}
+import weco.catalogue.internal_model.work._
+import weco.pipeline.transformer.text.TextNormalisation._
 
 trait ConceptsTransformer {
   implicit class AgentOps[State](a: Agent[State]) {
