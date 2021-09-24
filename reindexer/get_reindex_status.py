@@ -177,6 +177,39 @@ def get_images_index_stats(*, reindex_date):
     return result
 
 
+def list_queue_urls_in_account(sess):
+    """
+    Generates a list of all the queue URLs in an account.
+    """
+    sqs_client = sess.client("sqs")
+
+    for page in sqs_client.get_paginator("list_queues").paginate():
+        yield from page["QueueUrls"]
+
+
+def get_dlq_stats(sess, *, reindex_date):
+    """
+    Get the size of the DLQs associated with this pipeline.
+    """
+    dlq_urls = [
+        q_url
+        for q_url in list_queue_urls_in_account(sess)
+        if f"/catalogue-{reindex_date}_" in q_url and q_url.endswith("_dlq")
+    ]
+
+    sqs_client = sess.client("sqs")
+
+    dlq_responses = {
+        q_url: sqs_client.get_queue_attributes(QueueUrl=q_url, AttributeNames=["ApproximateNumberOfMessages"])
+        for q_url in dlq_urls
+    }
+
+    return {
+        q_url: int(resp["Attributes"]["ApproximateNumberOfMessages"])
+        for q_url, resp in dlq_responses.items()
+    }
+
+
 @click.command()
 @click.argument("reindex_date")
 def main(reindex_date):
@@ -239,6 +272,21 @@ def main(reindex_date):
     rows = [(name, humanize.intcomma(count), diff) for (name, count, diff) in rows]
 
     print(tabulate.tabulate(rows, tablefmt="plain", colalign=("left", "right")))
+
+    print("")
+
+    print("*** Queue stats ***")
+    dlq_stats = get_dlq_stats(session_read_only, reindex_date=reindex_date)
+    non_empty_dlqs = {q_url: size for q_url, size in dlq_stats.items() if size > 0}
+    if non_empty_dlqs:
+        print("The following DLQs have failed messages:")
+        rows = [
+            [q_url.split("/")[-1].replace(f"catalogue-{reindex_date}_", ""), size]
+            for q_url, size in sorted(non_empty_dlqs.items())
+        ]
+        print(tabulate.tabulate(rows, tablefmt="plain", colalign=("left", "right")))
+    else:
+        print("There are no messages on DLQs")
 
     print("")
 
