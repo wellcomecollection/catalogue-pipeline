@@ -10,7 +10,7 @@ module "relation_embedder_queue" {
 }
 
 module "relation_embedder" {
-  source          = "../../modules/service"
+  source = "../../modules/service"
 
   namespace = var.namespace
   name      = "relation_embedder-${local.tei_suffix}"

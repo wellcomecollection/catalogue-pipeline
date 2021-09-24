@@ -14,7 +14,7 @@ module "mets_transformer_queue" {
 }
 
 module "mets_transformer" {
-  source          = "../modules/service"
+  source = "../modules/service"
 
   namespace = local.namespace
   name      = "mets_transformer"

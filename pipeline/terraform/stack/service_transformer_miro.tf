@@ -6,7 +6,7 @@ module "miro_transformer_queue" {
 }
 
 module "miro_transformer" {
-  source          = "../modules/service"
+  source = "../modules/service"
 
   namespace = local.namespace
   name      = "miro_transformer"

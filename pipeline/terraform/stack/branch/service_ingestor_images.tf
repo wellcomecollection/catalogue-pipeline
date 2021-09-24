@@ -15,7 +15,7 @@ module "ingestor_images_queue" {
 
 
 module "ingestor_images" {
-  source          = "../../modules/service"
+  source = "../../modules/service"
 
   namespace = var.namespace
   name      = "ingestor_images-${local.tei_suffix}"

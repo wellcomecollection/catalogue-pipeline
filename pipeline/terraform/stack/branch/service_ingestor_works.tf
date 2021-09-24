@@ -16,7 +16,7 @@ module "ingestor_works_queue" {
 # Service
 
 module "ingestor_works" {
-  source          = "../../modules/service"
+  source = "../../modules/service"
 
   namespace = var.namespace
   name      = "ingestor_works-${local.tei_suffix}"

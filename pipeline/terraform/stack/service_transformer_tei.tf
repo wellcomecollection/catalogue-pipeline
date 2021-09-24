@@ -14,7 +14,7 @@ module "tei_transformer_queue" {
 }
 
 module "tei_transformer" {
-  source          = "../modules/service"
+  source = "../modules/service"
 
   namespace = local.namespace
   name      = "tei_transformer"

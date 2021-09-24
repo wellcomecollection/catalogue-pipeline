@@ -37,7 +37,7 @@ module "matcher_input_queue" {
 # Service
 
 module "matcher" {
-  source          = "../modules/service"
+  source = "../modules/service"
 
   namespace = local.namespace
   name      = "matcher"

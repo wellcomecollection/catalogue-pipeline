@@ -16,7 +16,7 @@ module "batcher_queue" {
 }
 
 module "batcher" {
-  source          = "../../modules/service"
+  source = "../../modules/service"
 
   namespace = var.namespace
   name      = "batcher-${local.tei_suffix}"

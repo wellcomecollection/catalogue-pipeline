@@ -10,7 +10,7 @@ module "merger_queue" {
   visibility_timeout_seconds = 20 * 60
 }
 module "merger" {
-  source          = "../../modules/service"
+  source = "../../modules/service"
 
   namespace = var.namespace
   name      = "merger-${local.tei_suffix}"

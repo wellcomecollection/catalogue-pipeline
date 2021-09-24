@@ -13,7 +13,7 @@ module "id_minter_queue" {
 }
 
 module "id_minter" {
-  source          = "../modules/service"
+  source = "../modules/service"
 
   namespace = local.namespace
   name      = "id_minter"

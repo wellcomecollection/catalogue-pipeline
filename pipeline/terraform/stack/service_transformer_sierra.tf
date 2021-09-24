@@ -6,7 +6,7 @@ module "sierra_transformer_queue" {
 }
 
 module "sierra_transformer" {
-  source          = "../modules/service"
+  source = "../modules/service"
 
   namespace = local.namespace
   name      = "sierra_transformer"

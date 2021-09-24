@@ -36,7 +36,7 @@ resource "aws_dynamodb_table" "matcher_graph_table" {
     type = "S"
   }
 
-  billing_mode   = local.graph_table_billing_mode
+  billing_mode = local.graph_table_billing_mode
 
   # These numbers were chosen by running a reindex and seeing when the
   # matcher started throttling.
@@ -101,7 +101,7 @@ resource "aws_dynamodb_table" "matcher_lock_table" {
   name     = local.lock_table_name
   hash_key = "id"
 
-  billing_mode   = local.lock_table_billing_mode
+  billing_mode = local.lock_table_billing_mode
 
   # These numbers were chosen by running a reindex and seeing when the
   # matcher started throttling.

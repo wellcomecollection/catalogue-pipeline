@@ -8,7 +8,7 @@ module "router_queue" {
 }
 
 module "router" {
-  source          = "../../modules/service"
+  source = "../../modules/service"
 
   namespace = var.namespace
   name      = "router-${local.tei_suffix}"
