@@ -93,11 +93,11 @@ module "catalogue_pipeline_2021-08-16" {
   logging_cluster_id = local.logging_cluster_id
 }
 
-module "catalogue_pipeline_2021-09-23" {
+module "catalogue_pipeline_2021-09-24" {
   source = "./stack"
 
-  pipeline_date = "2021-09-23"
-  release_label = "2021-09-23"
+  pipeline_date = "2021-09-24"
+  release_label = "2021-09-24"
 
   is_reindexing = true
 
