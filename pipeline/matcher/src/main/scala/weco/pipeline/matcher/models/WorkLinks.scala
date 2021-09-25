@@ -13,7 +13,7 @@ case class WorkLinks(workId: CanonicalId,
 case object WorkLinks {
   def apply(work: Work[Identified]): WorkLinks = {
     val id = work.state.canonicalId
-    val referencedWorkIds = work.data.mergeCandidates
+    val referencedWorkIds = work.state.mergeCandidates
       .map { mergeCandidate =>
         mergeCandidate.id.canonicalId
       }

@@ -78,11 +78,14 @@ case class InvisibleMetsData(
 
       work = Work.Invisible[Source](
         version = version,
-        state = Source(sourceIdentifier, modifiedTime),
+        state = Source(
+          sourceIdentifier = sourceIdentifier,
+          sourceModifiedTime = modifiedTime,
+          mergeCandidates = List(mergeCandidate)
+        ),
         data = WorkData[DataState.Unidentified](
           title = Some(title),
           items = List(item),
-          mergeCandidates = List(mergeCandidate),
           thumbnail = thumbnail(sourceIdentifier.value, license, accessStatus),
           imageData = imageData(license, accessStatus, location)
         ),

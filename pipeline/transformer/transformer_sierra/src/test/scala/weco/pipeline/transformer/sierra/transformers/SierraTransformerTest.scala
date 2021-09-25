@@ -892,7 +892,7 @@ class SierraTransformerTest
       """.stripMargin
 
     val work = transformDataToSourceWork(id = id, data = data)
-    work.data.mergeCandidates shouldBe List(
+    work.state.mergeCandidates shouldBe List(
       MergeCandidate(
         identifier = createSierraSystemSourceIdentifierWith(
           value = mergeCandidateBibNumber
@@ -928,7 +928,7 @@ class SierraTransformerTest
       """.stripMargin
 
     val work = transformDataToSourceWork(id = id, data = data)
-    work.data.mergeCandidates shouldBe List(
+    work.state.mergeCandidates shouldBe List(
       MergeCandidate(
         identifier = createMiroSourceIdentifierWith(value = miroId),
         reason = "Miro/Sierra work"

@@ -98,7 +98,6 @@ object Work {
 case class WorkData[State <: DataState](
   title: Option[String] = None,
   otherIdentifiers: List[SourceIdentifier] = Nil,
-  mergeCandidates: List[MergeCandidate[State#Id]] = Nil,
   alternativeTitles: List[String] = Nil,
   format: Option[Format] = None,
   description: Option[String] = None,
@@ -186,6 +185,7 @@ object WorkState {
   case class Source(
     sourceIdentifier: SourceIdentifier,
     sourceModifiedTime: Instant,
+    mergeCandidates: List[MergeCandidate[IdState.Identifiable]] = Nil,
     internalWorkStubs: List[InternalWork.Source] = Nil
   ) extends WorkState {
 
@@ -202,6 +202,7 @@ object WorkState {
     sourceIdentifier: SourceIdentifier,
     canonicalId: CanonicalId,
     sourceModifiedTime: Instant,
+    mergeCandidates: List[MergeCandidate[IdState.Identified]] = Nil,
     internalWorkStubs: List[InternalWork.Identified] = Nil
   ) extends WorkState {
 

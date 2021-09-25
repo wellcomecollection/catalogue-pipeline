@@ -37,11 +37,7 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
       .map { bibRecord =>
         debug(s"Attempting to transform ${bibRecord.id.withCheckDigit}")
 
-        val state = Source(
-          sourceIdentifier = sourceIdentifier,
-          sourceModifiedTime = sierraTransformable.modifiedTime
-        )
-        workFromBibRecord(state, bibRecord)
+        workFromBibRecord(bibRecord)
       }
       .getOrElse {
         // A merged record can have both bibs and items.  If we only have
@@ -69,10 +65,15 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
           throw e
       }
 
-  def workFromBibRecord(state: Source,
-                        bibRecord: SierraBibRecord): Try[Work[Source]] =
+  def workFromBibRecord(bibRecord: SierraBibRecord): Try[Work[Source]] =
     fromJson[SierraBibData](bibRecord.data)
       .map { bibData =>
+        val state = Source(
+          sourceIdentifier = sourceIdentifier,
+          sourceModifiedTime = sierraTransformable.modifiedTime,
+          mergeCandidates = SierraMergeCandidates(bibId, bibData)
+        )
+
         if (bibData.deleted) {
           Work.Deleted[Source](
             version = version,
@@ -100,6 +101,12 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
           )
         case e: ShouldNotTransformException =>
           debug(s"Should not transform $bibId: ${e.getMessage}")
+
+          val state = Source(
+            sourceIdentifier = sourceIdentifier,
+            sourceModifiedTime = sierraTransformable.modifiedTime
+          )
+
           Work.Invisible[Source](
             state = state,
             version = version,
@@ -111,7 +118,6 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
   def workDataFromBibData(bibId: SierraBibNumber, bibData: SierraBibData) =
     WorkData[DataState.Unidentified](
       otherIdentifiers = SierraIdentifiers(bibId, bibData),
-      mergeCandidates = SierraMergeCandidates(bibId, bibData),
       title = SierraTitle(bibData),
       alternativeTitles = SierraAlternativeTitles(bibData),
       format = SierraFormat(bibData),

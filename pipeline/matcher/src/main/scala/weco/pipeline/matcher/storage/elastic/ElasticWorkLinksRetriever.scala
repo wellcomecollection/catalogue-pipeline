@@ -32,7 +32,7 @@ class ElasticWorkLinksRetriever(val client: ElasticClient, val index: Index)(
         "state.sourceIdentifier.ontologyType",
         "state.sourceIdentifier.value",
         "state.sourceModifiedTime",
-        "data.mergeCandidates",
+        "state.mergeCandidates",
         "deletedReason.info",
         "deletedReason.type",
         "version",
@@ -42,7 +42,7 @@ class ElasticWorkLinksRetriever(val client: ElasticClient, val index: Index)(
   override def parseGetResponse(response: GetResponse): Try[WorkLinks] =
     response.safeTo[Work[Identified]].map { work =>
       val id = work.state.canonicalId
-      val referencedWorkIds = work.data.mergeCandidates
+      val referencedWorkIds = work.state.mergeCandidates
         .map { mergeCandidate =>
           mergeCandidate.id.canonicalId
         }

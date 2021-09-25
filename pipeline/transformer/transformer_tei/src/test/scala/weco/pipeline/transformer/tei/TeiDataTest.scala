@@ -57,13 +57,13 @@ class TeiDataTest
         ontologyType = "Work",
         value = id
       ),
-      sourceModifiedTime = modifiedTime
+      sourceModifiedTime = modifiedTime,
+      mergeCandidates = List(mergeCandidate)
     )
     work shouldBe Work.Visible[Source](
       version,
       WorkData[Unidentified](
         title = Some(title),
-        mergeCandidates = List(mergeCandidate),
         description = description,
         languages = languages,
         format = Some(ArchivesAndManuscripts),
@@ -72,6 +72,7 @@ class TeiDataTest
       state = source
     )
   }
+
   it("does not create mergeCandidates if the bnumber is invalid") {
     val teiData = TeiData(
       id = "id",
@@ -83,8 +84,9 @@ class TeiDataTest
 
     val work = teiData.toWork(Instant.now(), 1)
 
-    work.data.mergeCandidates shouldBe empty
+    work.state.mergeCandidates shouldBe empty
   }
+
   it("transforms multiple internal TeiData into internalWorks") {
     val firstInnerTeiData = TeiData(
       id = "id_1",

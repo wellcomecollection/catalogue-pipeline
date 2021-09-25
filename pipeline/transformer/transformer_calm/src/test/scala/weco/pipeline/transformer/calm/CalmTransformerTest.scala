@@ -130,7 +130,7 @@ class CalmTransformerTest
       "Wheels" -> "M0000002",
       "CatalogueStatus" -> "Catalogued"
     )
-    CalmTransformer(record, version).right.get.data.mergeCandidates shouldBe
+    CalmTransformer(record, version).right.get.state.mergeCandidates shouldBe
       List(
         MergeCandidate(
           identifier = SourceIdentifier(

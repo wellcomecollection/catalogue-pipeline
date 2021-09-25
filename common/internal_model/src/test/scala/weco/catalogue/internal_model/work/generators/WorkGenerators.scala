@@ -4,6 +4,7 @@ import weco.catalogue.internal_model.generators.IdentifiersGenerators
 import weco.catalogue.internal_model.identifiers.{
   CanonicalId,
   DataState,
+  IdState,
   SourceIdentifier
 }
 import weco.catalogue.internal_model.image.ImageData
@@ -188,11 +189,6 @@ trait WorkGenerators
     ): Work.Visible[State] =
       work.map(_.copy(otherIdentifiers = otherIdentifiers))
 
-    def mergeCandidates(
-      mergeCandidates: List[MergeCandidate[State#WorkDataState#Id]]
-    ): Work.Visible[State] =
-      work.map(_.copy(mergeCandidates = mergeCandidates))
-
     def format(format: Format): Work.Visible[State] =
       work.map(_.copy(format = Some(format)))
 
@@ -287,7 +283,14 @@ trait WorkGenerators
     }
   }
 
-  implicit class IdentifiedWorkOps(work: Work.Visible[Identified]){
+  implicit class IdentifiedWorkOps(work: Work.Visible[Identified]) {
+    def mergeCandidates(
+      mergeCandidates: List[MergeCandidate[IdState.Identified]]
+    ): Work.Visible[Identified] =
+      work.mapState {
+        _.copy(mergeCandidates = mergeCandidates)
+      }
+
     def internalWorks(internalWorks: List[Work.Visible[Identified]]): Work.Visible[Identified] =
       work.mapState(state => {
         state.copy(

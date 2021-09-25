@@ -55,10 +55,9 @@ class MetsDataTest
     metsData.toWork(version, createdDate).right.get shouldBe Work
       .Invisible[Source](
         version = version,
-        state = Source(expectedSourceIdentifier, createdDate),
-        data = WorkData[DataState.Unidentified](
-          title = Some(title),
-          items = List(unidentifiableItem),
+        state = Source(
+          sourceIdentifier = expectedSourceIdentifier,
+          sourceModifiedTime = createdDate,
           mergeCandidates = List(
             MergeCandidate(
               identifier = SourceIdentifier(
@@ -69,6 +68,10 @@ class MetsDataTest
               reason = "METS work"
             )
           )
+        ),
+        data = WorkData[DataState.Unidentified](
+          title = Some(title),
+          items = List(unidentifiableItem)
         ),
         invisibilityReasons = List(MetsWorksAreNotVisible)
       )
@@ -124,10 +127,9 @@ class MetsDataTest
     metsData.toWork(version, createdDate).right.get shouldBe Work
       .Invisible[Source](
         version = version,
-        state = Source(expectedSourceIdentifier, createdDate),
-        data = WorkData[DataState.Unidentified](
-          title = Some(title),
-          items = List(unidentifiableItem),
+        state = Source(
+          sourceIdentifier = expectedSourceIdentifier,
+          sourceModifiedTime = createdDate,
           mergeCandidates = List(
             MergeCandidate(
               identifier = SourceIdentifier(
@@ -138,6 +140,10 @@ class MetsDataTest
               reason = "METS work"
             )
           )
+        ),
+        data = WorkData[DataState.Unidentified](
+          title = Some(title),
+          items = List(unidentifiableItem)
         ),
         invisibilityReasons = List(MetsWorksAreNotVisible)
       )
@@ -510,7 +516,7 @@ class MetsDataTest
       value = "b12345678"
     )
 
-    val mergeCandidates = work.data.mergeCandidates
+    val mergeCandidates = work.state.mergeCandidates
     mergeCandidates should have size 1
 
     mergeCandidates.head.id.sourceIdentifier shouldBe

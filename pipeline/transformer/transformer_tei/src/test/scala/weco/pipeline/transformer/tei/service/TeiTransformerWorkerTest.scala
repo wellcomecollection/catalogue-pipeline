@@ -95,15 +95,15 @@ class TeiTransformerWorkerTest
       p.id
     )
     w.version shouldBe p.version
+    w.state.mergeCandidates shouldBe List(
+      MergeCandidate(
+        SourceIdentifier(IdentifierType.SierraSystemNumber, "Work", bnumber),
+        "Bnumber present in TEI file"
+      )
+    )
     w.data shouldBe WorkData[Unidentified](
       title = Some(title),
       description = Some(description),
-      mergeCandidates = List(
-        MergeCandidate(
-          SourceIdentifier(IdentifierType.SierraSystemNumber, "Work", bnumber),
-          "Bnumber present in TEI file"
-        )
-      ),
       format = Some(Format.ArchivesAndManuscripts),
       collectionPath = Some(CollectionPath(path = p.id, label = None))
     )

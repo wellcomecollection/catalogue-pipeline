@@ -68,7 +68,10 @@ object CalmTransformer
     reason: DeletedReason
   ): Work.Deleted[Source] =
     Work.Deleted[Source](
-      state = Source(sourceIdentifier(record), record.retrievedAt),
+      state = Source(
+        sourceIdentifier = sourceIdentifier(record),
+        sourceModifiedTime = record.retrievedAt
+      ),
       version = version,
       deletedReason = reason
     )
@@ -81,7 +84,11 @@ object CalmTransformer
       case Right(data) =>
         Right(
           Work.Visible[Source](
-            state = Source(sourceIdentifier(record), record.retrievedAt),
+            state = Source(
+              sourceIdentifier = sourceIdentifier(record),
+              sourceModifiedTime = record.retrievedAt,
+              mergeCandidates = CalmMergeCandidates(record)
+            ),
             version = version,
             data = data
           )
@@ -152,7 +159,6 @@ object CalmTransformer
         referenceNumber = collectionPath.label.map(ReferenceNumber(_)),
         subjects = subjects(record),
         languages = languages,
-        mergeCandidates = CalmMergeCandidates(record),
         items = CalmItems(record),
         contributors = contributors(record),
         description = description(record),
