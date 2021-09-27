@@ -18,7 +18,7 @@ import scala.util.Try
   *
   * This custom retriever fetches only the specific fields that the matcher needs, to
   * reduce the amount of data we have to get out of Elasticsearch (and pay to send through
-  * the AWS NAT Gateway).
+  * the VPC endpoint).
   */
 class ElasticWorkLinksRetriever(val client: ElasticClient, val index: Index)(
   implicit val ec: ExecutionContext
