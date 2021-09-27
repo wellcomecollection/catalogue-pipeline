@@ -11,7 +11,12 @@ import weco.messaging.memory.MemoryMessageSender
 import weco.fixtures.TimeAssertions
 import weco.pipeline.matcher.fixtures.MatcherFixtures
 import weco.pipeline.matcher.generators.WorkStubGenerators
-import weco.pipeline.matcher.models.{MatchedIdentifiers, MatcherResult, WorkIdentifier, WorkStub}
+import weco.pipeline.matcher.models.{
+  MatchedIdentifiers,
+  MatcherResult,
+  WorkIdentifier,
+  WorkStub
+}
 import weco.pipeline_storage.memory.MemoryRetriever
 
 import scala.concurrent.duration._
@@ -35,8 +40,7 @@ class MatcherWorkerServiceTest
     val expectedWorks =
       Set(
         MatchedIdentifiers(
-          identifiers =
-            Set(WorkIdentifier(work.id, version = work.version)))
+          identifiers = Set(WorkIdentifier(work.id, version = work.version)))
       )
 
     implicit val retriever: MemoryRetriever[WorkStub] =
@@ -77,9 +81,7 @@ class MatcherWorkerServiceTest
 
     withLocalSqsQueue() { implicit queue =>
       withWorkerService(retriever, queue, messageSender) { _ =>
-        processAndAssertMatchedWorkIs(
-          workAv1,
-          expectedWorks = expectedWorks)
+        processAndAssertMatchedWorkIs(workAv1, expectedWorks = expectedWorks)
       }
     }
   }

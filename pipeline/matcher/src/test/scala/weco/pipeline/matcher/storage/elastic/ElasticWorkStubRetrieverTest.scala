@@ -47,7 +47,9 @@ class ElasticWorkStubRetrieverTest
       withElasticIndexer[Work[WorkState.Identified], R](index) { indexer =>
         val works: Seq[Work[WorkState.Identified]] = stubs.map { w =>
           identifiedWork()
-            .mapState { _ => w.state }
+            .mapState { _ =>
+              w.state
+            }
             .withVersion(w.version)
         }
 

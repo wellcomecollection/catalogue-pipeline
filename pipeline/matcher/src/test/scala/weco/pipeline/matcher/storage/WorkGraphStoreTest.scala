@@ -180,7 +180,8 @@ class WorkGraphStoreTest
           put(dynamoClient, graphTable.name)(workB)
           put(dynamoClient, graphTable.name)(workC)
 
-          val work = createWorkWith(idB, version = 0, referencedWorkIds = Set(idC))
+          val work =
+            createWorkWith(idB, version = 0, referencedWorkIds = Set(idC))
 
           whenReady(workGraphStore.findAffectedWorks(work)) {
             _ shouldBe Set(workA, workB, workC)

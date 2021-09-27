@@ -42,7 +42,6 @@ trait WorkStubGenerators extends IdentifiersGenerators {
       version = version
     )
 
-
   def createWorkStub: WorkStub =
     createWorkStubWith(
       referencedIds = collectionOf(min = 0) {
@@ -50,7 +49,9 @@ trait WorkStubGenerators extends IdentifiersGenerators {
       }.toSet
     )
 
-  def createWorkWith(id: CanonicalId, version: Int, referencedWorkIds: Set[CanonicalId]): WorkStub =
+  def createWorkWith(id: CanonicalId,
+                     version: Int,
+                     referencedWorkIds: Set[CanonicalId]): WorkStub =
     createWorkStubWith(
       id = IdState.Identified(
         canonicalId = id,
@@ -58,7 +59,9 @@ trait WorkStubGenerators extends IdentifiersGenerators {
       ),
       version = version,
       referencedIds = referencedWorkIds.map { canonicalId =>
-        IdState.Identified(canonicalId = canonicalId, sourceIdentifier = createSourceIdentifier)
+        IdState.Identified(
+          canonicalId = canonicalId,
+          sourceIdentifier = createSourceIdentifier)
       }
     )
 

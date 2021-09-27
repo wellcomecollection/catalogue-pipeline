@@ -28,4 +28,3 @@ case object WorkStub {
   def apply(work: Work[Identified]): WorkStub =
     WorkStub(state = work.state, version = work.version)
 }
-

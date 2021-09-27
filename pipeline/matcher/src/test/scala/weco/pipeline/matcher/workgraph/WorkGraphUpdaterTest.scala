@@ -5,7 +5,11 @@ import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.CanonicalId
 import weco.pipeline.matcher.fixtures.MatcherFixtures
 import weco.pipeline.matcher.generators.WorkStubGenerators
-import weco.pipeline.matcher.models.{VersionExpectedConflictException, VersionUnexpectedConflictException, WorkNode}
+import weco.pipeline.matcher.models.{
+  VersionExpectedConflictException,
+  VersionUnexpectedConflictException,
+  WorkNode
+}
 
 class WorkGraphUpdaterTest
     extends AnyFunSpec
@@ -215,7 +219,8 @@ class WorkGraphUpdaterTest
     it("updating A->B with B->[C,D] gives A+B+C+D:(A->B, B->C&D, C, D") {
       WorkGraphUpdater
         .update(
-          work = createWorkWith(idB, version = 2, referencedWorkIds = Set(idC, idD)),
+          work =
+            createWorkWith(idB, version = 2, referencedWorkIds = Set(idC, idD)),
           existingNodes = Set(
             WorkNode(
               idA,
@@ -306,7 +311,8 @@ class WorkGraphUpdaterTest
       val updateVersion = 2
       WorkGraphUpdater
         .update(
-          work = createWorkWith(idA, updateVersion, referencedWorkIds = Set(idB)),
+          work =
+            createWorkWith(idA, updateVersion, referencedWorkIds = Set(idB)),
           existingNodes = Set(
             WorkNode(
               idA,
@@ -334,7 +340,8 @@ class WorkGraphUpdaterTest
       val thrown = intercept[VersionExpectedConflictException] {
         WorkGraphUpdater
           .update(
-            work = createWorkWith(idA, updateVersion, referencedWorkIds = Set(idB)),
+            work =
+              createWorkWith(idA, updateVersion, referencedWorkIds = Set(idB)),
             existingNodes = Set(
               WorkNode(
                 idA,
@@ -353,7 +360,8 @@ class WorkGraphUpdaterTest
 
       WorkGraphUpdater
         .update(
-          work = createWorkWith(idA, updateVersion, referencedWorkIds = Set(idB)),
+          work =
+            createWorkWith(idA, updateVersion, referencedWorkIds = Set(idB)),
           existingNodes = Set(
             WorkNode(
               idA,
@@ -387,7 +395,8 @@ class WorkGraphUpdaterTest
       val thrown = intercept[VersionUnexpectedConflictException] {
         WorkGraphUpdater
           .update(
-            work = createWorkWith(idA, updateVersion, referencedWorkIds = Set(idA)),
+            work =
+              createWorkWith(idA, updateVersion, referencedWorkIds = Set(idA)),
             existingNodes = Set(
               WorkNode(
                 idA,

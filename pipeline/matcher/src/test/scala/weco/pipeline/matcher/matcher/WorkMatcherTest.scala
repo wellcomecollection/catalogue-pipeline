@@ -14,7 +14,13 @@ import weco.fixtures.TimeAssertions
 import weco.pipeline.matcher.exceptions.MatcherException
 import weco.pipeline.matcher.fixtures.MatcherFixtures
 import weco.pipeline.matcher.generators.WorkStubGenerators
-import weco.pipeline.matcher.models.{MatchedIdentifiers, MatcherResult, WorkIdentifier, WorkNode, WorkStub}
+import weco.pipeline.matcher.models.{
+  MatchedIdentifiers,
+  MatcherResult,
+  WorkIdentifier,
+  WorkNode,
+  WorkStub
+}
 import weco.pipeline.matcher.storage.WorkGraphStore
 
 import java.util.UUID
@@ -45,12 +51,11 @@ class WorkMatcherTest
           whenReady(workMatcher.matchWork(work)) { matcherResult =>
             assertRecent(matcherResult.createdTime)
             matcherResult.works shouldBe
-              Set(MatchedIdentifiers(
-                Set(WorkIdentifier(work.id, work.version))))
+              Set(
+                MatchedIdentifiers(Set(WorkIdentifier(work.id, work.version))))
 
             val savedLinkedWork =
-              get[WorkNode](dynamoClient, graphTable.name)(
-                "id" === work.id)
+              get[WorkNode](dynamoClient, graphTable.name)("id" === work.id)
                 .map(_.right.value)
 
             savedLinkedWork shouldBe Some(

@@ -9,7 +9,13 @@ import weco.fixtures.TimeAssertions
 import weco.json.JsonUtil._
 import weco.pipeline.matcher.fixtures.MatcherFixtures
 import weco.pipeline.matcher.generators.WorkStubGenerators
-import weco.pipeline.matcher.models.{MatchedIdentifiers, MatcherResult, WorkIdentifier, WorkNode, WorkStub}
+import weco.pipeline.matcher.models.{
+  MatchedIdentifiers,
+  MatcherResult,
+  WorkIdentifier,
+  WorkNode,
+  WorkStub
+}
 import weco.pipeline_storage.memory.MemoryRetriever
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -35,8 +41,7 @@ class MatcherFeatureTest
         val expectedWorks =
           Set(
             MatchedIdentifiers(
-              identifiers =
-                Set(WorkIdentifier(work.id, version = work.version))
+              identifiers = Set(WorkIdentifier(work.id, version = work.version))
             )
           )
 
