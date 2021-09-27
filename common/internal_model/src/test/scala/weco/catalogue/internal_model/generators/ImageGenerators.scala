@@ -66,18 +66,17 @@ trait ImageGenerators
 
     def toAugmentedImageWith(
       inferredData: Option[InferredData] = createInferredData,
-      parentWork: Work[WorkState.Identified] = sierraIdentifiedWork())
-      : Image[ImageState.Augmented] =
+      parentWork: Work[WorkState.Identified] = sierraIdentifiedWork()): Image[ImageState.Augmented] =
       imageData.toIdentified
         .toAugmentedImageWith(
           inferredData = inferredData,
           parentWork = parentWork)
 
-    def toIndexedImageWith(canonicalId: CanonicalId = createCanonicalId,
-                           parentWork: Work[WorkState.Identified] =
-                             identifiedWork(),
-                           inferredData: Option[InferredData] =
-                             createInferredData): Image[ImageState.Indexed] =
+    def toIndexedImageWith(
+      canonicalId: CanonicalId = createCanonicalId,
+      parentWork: Work[WorkState.Identified] = identifiedWork(),
+      inferredData: Option[InferredData] = createInferredData)
+      : Image[ImageState.Indexed] =
       imageData
         .toIdentifiedWith(canonicalId = canonicalId)
         .toIndexedImageWith(
@@ -128,10 +127,10 @@ trait ImageGenerators
         .toInitialImageWith(parentWork = parentWork.toParentWork)
         .transition[ImageState.Augmented](inferredData)
 
-    def toIndexedImageWith(parentWork: Work[WorkState.Identified] =
-                             identifiedWork(),
-                           inferredData: Option[InferredData] =
-                             createInferredData): Image[ImageState.Indexed] =
+    def toIndexedImageWith(
+      parentWork: Work[WorkState.Identified] = identifiedWork(),
+      inferredData: Option[InferredData] = createInferredData)
+      : Image[ImageState.Indexed] =
       imageData
         .toAugmentedImageWith(
           parentWork = parentWork,
