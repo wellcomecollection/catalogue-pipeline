@@ -8,7 +8,6 @@ import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.time.{Seconds, Span}
 import org.scalatest.{Assertion, Suite}
 import weco.elasticsearch.model.IndexId
-import weco.elasticsearch.IndexConfig
 import weco.elasticsearch.test.fixtures.ElasticsearchFixtures
 import weco.fixtures.TestWith
 import weco.json.JsonUtil.toJson
@@ -56,11 +55,6 @@ trait IndexFixtures extends ElasticsearchFixtures { this: Suite =>
     withLocalElasticsearchIndex[R](config = ImagesIndexConfig.ingested) {
       index =>
         testWith(index)
-    }
-
-  def withLocalIndex[R](config: IndexConfig)(testWith: TestWith[Index, R]): R =
-    withLocalElasticsearchIndex[R](config) { index =>
-      testWith(index)
     }
 
   def assertElasticsearchEventuallyHasWork[State <: WorkState](
