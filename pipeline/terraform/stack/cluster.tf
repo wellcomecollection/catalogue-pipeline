@@ -14,7 +14,7 @@ module "inference_capacity_provider" {
   cluster_name = local.namespace_hyphen
 
   instance_type           = "c5.2xlarge"
-  max_instances           = var.is_reindexing ? 6 : 1
+  max_instances           = var.is_reindexing ? 12 : 1
   use_spot_purchasing     = true
   scaling_action_cooldown = 240
 
