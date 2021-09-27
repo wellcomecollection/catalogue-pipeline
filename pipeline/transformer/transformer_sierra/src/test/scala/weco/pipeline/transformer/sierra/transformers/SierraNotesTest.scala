@@ -15,42 +15,92 @@ class SierraNotesTest
 
   it("extracts notes from all fields") {
     val notes = List(
-      "500" -> GeneralNote("general note a"),
-      "501" -> GeneralNote("general note b"),
-      "502" -> DissertationNote("dissertation note"),
-      "504" -> BibliographicalInformation("bib info a"),
-      "505" -> ContentsNote("contents note"),
-      "506" -> TermsOfUse("typical terms of use"),
-      "508" -> CreditsNote("credits note a"),
-      "510" -> ReferencesNote("references a"),
-      "511" -> CreditsNote("credits note b"),
-      "514" -> LetteringNote("Completeness:"),
-      "518" -> TimeAndPlaceNote("time and place note"),
-      "524" -> CiteAsNote("cite as note"),
-      "533" -> ReproductionNote("reproduction a"),
-      "534" -> ReproductionNote("reproduction b"),
-      "535" -> LocationOfOriginalNote("location of original note"),
-      "536" -> FundingInformation("funding information"),
-      "540" -> TermsOfUse("terms of use"),
-      "542" -> CopyrightNote("copyright a"),
-      "545" -> BiographicalNote("bib info b"),
-      "546" -> LanguageNote("Marriage certificate: German; Fraktur."),
-      "547" -> GeneralNote("general note c"),
-      "562" -> GeneralNote("general note d"),
-      "563" -> BindingInformation("binding info note"),
-      "581" -> PublicationsNote("publications b"),
-      "585" -> ExhibitionsNote("exhibitions"),
-      "586" -> AwardsNote("awards"),
-      "591" -> GeneralNote("A general, unspecified note"),
-      "593" -> CopyrightNote("copyright b"),
+      "500" -> Note(
+        contents = "general note a",
+        noteType = NoteType.GeneralNote),
+      "501" -> Note(
+        contents = "general note b",
+        noteType = NoteType.GeneralNote),
+      "502" -> Note(
+        contents = "dissertation note",
+        noteType = NoteType.DissertationNote),
+      "504" -> Note(
+        contents = "bib info a",
+        noteType = NoteType.BibliographicalInformation),
+      "505" -> Note(
+        contents = "contents note",
+        noteType = NoteType.ContentsNote),
+      "506" -> Note(
+        contents = "typical terms of use",
+        noteType = NoteType.TermsOfUse),
+      "508" -> Note(
+        contents = "credits note a",
+        noteType = NoteType.CreditsNote),
+      "510" -> Note(
+        contents = "references a",
+        noteType = NoteType.ReferencesNote),
+      "511" -> Note(
+        contents = "credits note b",
+        noteType = NoteType.CreditsNote),
+      "514" -> Note(
+        contents = "Completeness:",
+        noteType = NoteType.LetteringNote),
+      "518" -> Note(
+        contents = "time and place note",
+        noteType = NoteType.TimeAndPlaceNote),
+      "524" -> Note(contents = "cite as note", noteType = NoteType.CiteAsNote),
+      "533" -> Note(
+        contents = "reproduction a",
+        noteType = NoteType.ReproductionNote),
+      "534" -> Note(
+        contents = "reproduction b",
+        noteType = NoteType.ReproductionNote),
+      "535" -> Note(
+        contents = "location of original note",
+        noteType = NoteType.LocationOfOriginalNote),
+      "536" -> Note(
+        contents = "funding information",
+        noteType = NoteType.FundingInformation),
+      "540" -> Note(contents = "terms of use", noteType = NoteType.TermsOfUse),
+      "542" -> Note(
+        contents = "copyright a",
+        noteType = NoteType.CopyrightNote),
+      "545" -> Note(
+        contents = "bib info b",
+        noteType = NoteType.BiographicalNote),
+      "546" -> Note(
+        contents = "Marriage certificate: German; Fraktur.",
+        noteType = NoteType.LanguageNote),
+      "547" -> Note(
+        contents = "general note c",
+        noteType = NoteType.GeneralNote),
+      "562" -> Note(
+        contents = "general note d",
+        noteType = NoteType.GeneralNote),
+      "563" -> Note(
+        contents = "binding info note",
+        noteType = NoteType.BindingInformation),
+      "581" -> Note(
+        contents = "publications b",
+        noteType = NoteType.PublicationsNote),
+      "585" -> Note(
+        contents = "exhibitions",
+        noteType = NoteType.ExhibitionsNote),
+      "586" -> Note(contents = "awards", noteType = NoteType.AwardsNote),
+      "591" -> Note(
+        contents = "A general, unspecified note",
+        noteType = NoteType.GeneralNote),
+      "593" -> Note(
+        contents = "copyright b",
+        noteType = NoteType.CopyrightNote),
     )
     SierraNotes(bibData(notes)) shouldBe notes.map(_._2)
   }
 
   it("extracts all notes when duplicate fields") {
     val notes = List(
-      "500" -> GeneralNote("note a"),
-      "500" -> GeneralNote("note b"),
+      "500" -> Note(contents = "note a", noteType = NoteType.GeneralNote),
+      "500" -> Note(contents = "note b", noteType = NoteType.GeneralNote),
     )
     SierraNotes(bibData(notes)) shouldBe notes.map(_._2)
   }
@@ -64,7 +114,8 @@ class SierraNotesTest
   }
 
   it("preserves HTML in notes fields") {
-    val notes = List("500" -> GeneralNote("<p>note</p>"))
+    val notes = List(
+      "500" -> Note(contents = "<p>note</p>", noteType = NoteType.GeneralNote))
     SierraNotes(bibData(notes)) shouldBe notes.map(_._2)
   }
 
@@ -82,14 +133,16 @@ class SierraNotesTest
       )
     )
     SierraNotes(bibData) shouldBe List(
-      GeneralNote("1st part. 2nd part. 3rd part.")
+      Note(
+        contents = "1st part. 2nd part. 3rd part.",
+        noteType = NoteType.GeneralNote)
     )
   }
 
   it("does not concatenate separate varfields") {
     val notes = List(
-      "500" -> GeneralNote("1st note."),
-      "500" -> GeneralNote("2nd note."),
+      "500" -> Note(contents = "1st note.", noteType = NoteType.GeneralNote),
+      "500" -> Note(contents = "2nd note.", noteType = NoteType.GeneralNote),
     )
     SierraNotes(bibData(notes)) shouldBe notes.map(_._2)
   }
@@ -113,8 +166,12 @@ class SierraNotesTest
     )
 
     SierraNotes(bibData) shouldBe List(
-      LocationOfOriginalNote("The originals are in Oman"),
-      LocationOfDuplicatesNote("The duplicates are in Denmark")
+      Note(
+        contents = "The originals are in Oman",
+        noteType = NoteType.LocationOfOriginalNote),
+      Note(
+        contents = "The duplicates are in Denmark",
+        noteType = NoteType.LocationOfDuplicatesNote),
     )
   }
 
@@ -151,7 +208,9 @@ class SierraNotesTest
       )
     )
     SierraNotes(bibData) shouldBe List(
-      OwnershipNote("Provenance: one plate in the set of plates")
+      Note(
+        contents = "Provenance: one plate in the set of plates",
+        noteType = NoteType.OwnershipNote)
     )
   }
 
@@ -203,13 +262,16 @@ class SierraNotesTest
     val bibData = createSierraBibDataWith(varFields = varFields)
 
     SierraNotes(bibData) should contain theSameElementsAs List(
-      GeneralNote(
-        "Copy 1. Note: The author's presentation inscription on verso of 2nd leaf.")
+      Note(
+        contents =
+          "Copy 1. Note: The author's presentation inscription on verso of 2nd leaf.",
+        noteType = NoteType.GeneralNote
+      )
     )
   }
 
   def bibData(contents: List[(String, Note)]): SierraBibData =
-    bibData(contents.map { case (tag, note) => (tag, note.content) }: _*)
+    bibData(contents.map { case (tag, note) => (tag, note.contents) }: _*)
 
   def bibData(contents: (String, String)*): SierraBibData =
     createSierraBibDataWith(

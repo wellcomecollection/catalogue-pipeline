@@ -2,7 +2,7 @@ package weco.pipeline.transformer.calm.transformers
 
 import grizzled.slf4j.Logging
 import weco.catalogue.internal_model.locations.AccessStatus
-import weco.catalogue.internal_model.work.TermsOfUse
+import weco.catalogue.internal_model.work.{Note, NoteType}
 import weco.catalogue.source_model.calm.CalmRecord
 import weco.pipeline.transformer.calm.models.CalmRecordOps
 
@@ -10,7 +10,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 object CalmTermsOfUse extends CalmRecordOps with Logging {
-  def apply(record: CalmRecord): List[TermsOfUse] = {
+  def apply(record: CalmRecord): List[Note] = {
     val accessConditions = getAccessConditions(record)
     val accessStatus = CalmAccessStatus(record)
 
@@ -102,7 +102,9 @@ object CalmTermsOfUse extends CalmRecordOps with Logging {
           if (parts.isEmpty) None else Some(parts.mkString(" "))
       }
 
-    terms.map(TermsOfUse).toList
+    terms
+      .map(contents => Note(contents = contents, noteType = NoteType.TermsOfUse))
+      .toList
   }
 
   // e.g. 1 January 2021

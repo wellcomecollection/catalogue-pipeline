@@ -26,17 +26,39 @@ class CalmNotesTest extends AnyFunSpec with Matchers with CalmRecordGenerators {
     // The ordering of the Notes field is arbitrary, because the underlying
     // Calm data is arbitrary.
     notes should contain theSameElementsAs List(
-      BiographicalNote("Administered by the Active Administrator"),
-      OwnershipNote("Collected by the Careful Custodian"),
-      AcquisitionNote("Acquired by the Academic Archivists"),
-      AppraisalNote("Appraised by the Affable Appraiser"),
-      AccrualsNote("Accrued by the Alliterative Acquirer"),
-      RelatedMaterial("Related to the Radiant Records"),
-      PublicationsNote("Published in the Public Pamphlet"),
-      FindingAids("Wrapped in the Worldly Words"),
-      CopyrightNote("Copyright the Creative Consortium"),
-      ArrangementNote("Arranged in an Adorable Alignment"),
-      LocationOfDuplicatesNote("A copy is contained in the Circular Church"),
+      Note(
+        contents = "Administered by the Active Administrator",
+        noteType = NoteType.BiographicalNote),
+      Note(
+        contents = "Collected by the Careful Custodian",
+        noteType = NoteType.OwnershipNote),
+      Note(
+        contents = "Acquired by the Academic Archivists",
+        noteType = NoteType.AcquisitionNote),
+      Note(
+        contents = "Appraised by the Affable Appraiser",
+        noteType = NoteType.AppraisalNote),
+      Note(
+        contents = "Accrued by the Alliterative Acquirer",
+        noteType = NoteType.AccrualsNote),
+      Note(
+        contents = "Related to the Radiant Records",
+        noteType = NoteType.RelatedMaterial),
+      Note(
+        contents = "Published in the Public Pamphlet",
+        noteType = NoteType.PublicationsNote),
+      Note(
+        contents = "Wrapped in the Worldly Words",
+        noteType = NoteType.FindingAids),
+      Note(
+        contents = "Copyright the Creative Consortium",
+        noteType = NoteType.CopyrightNote),
+      Note(
+        contents = "Arranged in an Adorable Alignment",
+        noteType = NoteType.ArrangementNote),
+      Note(
+        contents = "A copy is contained in the Circular Church",
+        noteType = NoteType.LocationOfDuplicatesNote),
     )
   }
 

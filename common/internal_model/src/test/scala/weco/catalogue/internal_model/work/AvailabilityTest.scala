@@ -75,7 +75,11 @@ class AvailabilityTest
       val work = denormalisedWork()
         .items(List(createIdentifiedPhysicalItem))
         .notes(
-          List(TermsOfUse("Available at Churchill Archives Centre"))
+          List(
+            Note(
+              contents = "Available at Churchill Archives Centre",
+              noteType = NoteType.TermsOfUse)
+          )
         )
       val workAvailabilities = Availabilities.forWorkData(work.data)
 

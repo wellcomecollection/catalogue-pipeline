@@ -5,7 +5,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.{TableDrivenPropertyChecks, TableFor2}
 import weco.catalogue.internal_model.languages.Language
-import weco.catalogue.internal_model.work.LanguageNote
+import weco.catalogue.internal_model.work.{Note, NoteType}
 
 class CalmLanguagesTest
     extends AnyFunSpec
@@ -172,7 +172,9 @@ class CalmLanguagesTest
       case (languageField, expectedLanguages) =>
         val (languages, languageNotes) = CalmLanguages(List(languageField))
         languages shouldBe expectedLanguages
-        languageNotes shouldBe List(LanguageNote(languageField))
+        languageNotes shouldBe List(
+          Note(contents = languageField, noteType = NoteType.LanguageNote)
+        )
     }
   }
 
@@ -188,10 +190,11 @@ class CalmLanguagesTest
 
     languages shouldBe List(Language(label = "English", id = "eng"))
     languageNotes shouldBe List(
-      LanguageNote(
-        "The majority of this collection is in English, however Kitzinger received " +
+      Note(
+        contents = "The majority of this collection is in English, however Kitzinger received " +
           "letters from around the world and travelled widely for conferences so some " +
-          "material is not."
+          "material is not.",
+        noteType = NoteType.LanguageNote
       ))
   }
 
@@ -215,8 +218,10 @@ class CalmLanguagesTest
     )
 
     notes shouldBe List(
-      LanguageNote("French with a Polish translation"),
-      LanguageNote("Chinese inscription")
+      Note(
+        contents = "French with a Polish translation",
+        noteType = NoteType.LanguageNote),
+      Note(contents = "Chinese inscription", noteType = NoteType.LanguageNote)
     )
   }
 
@@ -235,7 +240,7 @@ class CalmLanguagesTest
     )
 
     notes shouldBe List(
-      LanguageNote("Chinese inscription")
+      Note(contents = "Chinese inscription", noteType = NoteType.LanguageNote)
     )
   }
 
