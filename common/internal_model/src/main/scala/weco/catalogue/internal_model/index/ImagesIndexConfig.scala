@@ -63,7 +63,11 @@ object ImagesIndexConfig extends IndexConfigFields {
           )
           .withDynamic("false")
 
-      val source = sourceWork("source")
+      val source = objectField("source").fields(
+        sourceWork("canonicalWork"),
+        sourceWork("redirectedWork"),
+        keywordField("type")
+      )
 
       val state = objectField("state")
         .fields(
