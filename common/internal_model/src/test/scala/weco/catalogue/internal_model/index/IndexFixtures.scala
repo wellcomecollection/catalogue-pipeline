@@ -124,7 +124,7 @@ trait IndexFixtures extends ElasticsearchFixtures { this: Suite =>
           val jsonDoc = toJson(image).get
 
           indexInto(index.name)
-            .version(image.modifiedTime.toEpochMilli)
+            .version(image.version)
             .versionType(ExternalGte)
             .id(image.id)
             .doc(jsonDoc)

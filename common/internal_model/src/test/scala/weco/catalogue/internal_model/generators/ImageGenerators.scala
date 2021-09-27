@@ -31,6 +31,7 @@ trait ImageGenerators
 
   def createImageDataWith(
     locations: List[DigitalLocation] = List(createImageLocation),
+    version: Int = 1,
     identifierValue: String = randomAlphanumeric(10),
     identifierType: IdentifierType = IdentifierType.MiroImageNumber
   ): ImageData[IdState.Identifiable] =
@@ -41,6 +42,7 @@ trait ImageGenerators
           value = identifierValue
         )
       ),
+      version = version,
       locations = locations
     )
 
@@ -110,6 +112,7 @@ trait ImageGenerators
       modifiedTime: Instant = instantInLast30Days,
       parentWork: ImageSource.ParentWork = mergedWork().toParentWork
     ): Image[ImageState.Initial] = Image[ImageState.Initial](
+      version = imageData.version,
       locations = imageData.locations,
       modifiedTime = modifiedTime,
       source = parentWork,
