@@ -4,17 +4,18 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.CanonicalId
 import weco.pipeline.matcher.fixtures.MatcherFixtures
+import weco.pipeline.matcher.generators.WorkStubGenerators
 import weco.pipeline.matcher.models.{
   VersionExpectedConflictException,
   VersionUnexpectedConflictException,
-  WorkLinks,
   WorkNode
 }
 
 class WorkGraphUpdaterTest
     extends AnyFunSpec
     with Matchers
-    with MatcherFixtures {
+    with MatcherFixtures
+    with WorkStubGenerators {
 
   val idA = CanonicalId("AAAAAAAA")
   val idB = CanonicalId("BBBBBBBB")
@@ -25,7 +26,7 @@ class WorkGraphUpdaterTest
     it("updating nothing with A gives A:A") {
       WorkGraphUpdater
         .update(
-          links = WorkLinks(idA, version = 1, referencedWorkIds = Set.empty),
+          work = createWorkWith(idA, version = 1, referencedWorkIds = Set.empty),
           existingNodes = Set()
         ) shouldBe Set(
         WorkNode(
@@ -38,7 +39,7 @@ class WorkGraphUpdaterTest
     it("updating nothing with A->B gives A+B:A->B") {
       WorkGraphUpdater
         .update(
-          links = WorkLinks(idA, version = 1, referencedWorkIds = Set(idB)),
+          work = createWorkWith(idA, version = 1, referencedWorkIds = Set(idB)),
           existingNodes = Set()
         ) shouldBe Set(
         WorkNode(
@@ -56,7 +57,7 @@ class WorkGraphUpdaterTest
     it("updating nothing with B->A gives A+B:B->A") {
       WorkGraphUpdater
         .update(
-          links = WorkLinks(idB, version = 1, referencedWorkIds = Set(idA)),
+          work = createWorkWith(idB, version = 1, referencedWorkIds = Set(idA)),
           existingNodes = Set()
         ) shouldBe Set(
         WorkNode(
@@ -76,7 +77,7 @@ class WorkGraphUpdaterTest
     it("updating A, B with A->B gives A+B:(A->B, B)") {
       WorkGraphUpdater
         .update(
-          links = WorkLinks(idA, version = 2, referencedWorkIds = Set(idB)),
+          work = createWorkWith(idA, version = 2, referencedWorkIds = Set(idB)),
           existingNodes = Set(
             WorkNode(
               idA,
@@ -106,7 +107,7 @@ class WorkGraphUpdaterTest
     it("updating A->B with A->B gives A+B:(A->B, B)") {
       WorkGraphUpdater
         .update(
-          links = WorkLinks(idA, version = 2, referencedWorkIds = Set(idB)),
+          work = createWorkWith(idA, version = 2, referencedWorkIds = Set(idB)),
           existingNodes = Set(
             WorkNode(
               idA,
@@ -135,7 +136,7 @@ class WorkGraphUpdaterTest
     it("updating A->B, B, C with B->C gives A+B+C:(A->B, B->C, C)") {
       WorkGraphUpdater
         .update(
-          links = WorkLinks(idB, version = 2, referencedWorkIds = Set(idC)),
+          work = createWorkWith(idB, version = 2, referencedWorkIds = Set(idC)),
           existingNodes = Set(
             WorkNode(
               idA,
@@ -175,7 +176,7 @@ class WorkGraphUpdaterTest
     it("updating A->B, C->D with B->C gives A+B+C+D:(A->B, B->C, C->D, D)") {
       WorkGraphUpdater
         .update(
-          links = WorkLinks(idB, version = 2, referencedWorkIds = Set(idC)),
+          work = createWorkWith(idB, version = 2, referencedWorkIds = Set(idC)),
           existingNodes = Set(
             WorkNode(
               idA,
@@ -218,7 +219,8 @@ class WorkGraphUpdaterTest
     it("updating A->B with B->[C,D] gives A+B+C+D:(A->B, B->C&D, C, D") {
       WorkGraphUpdater
         .update(
-          links = WorkLinks(idB, version = 2, referencedWorkIds = Set(idC, idD)),
+          work =
+            createWorkWith(idB, version = 2, referencedWorkIds = Set(idC, idD)),
           existingNodes = Set(
             WorkNode(
               idA,
@@ -269,7 +271,7 @@ class WorkGraphUpdaterTest
     it("updating A->B->C with A->C gives A+B+C:(A->B, B->C, C->A") {
       WorkGraphUpdater
         .update(
-          links = WorkLinks(idC, version = 2, referencedWorkIds = Set(idA)),
+          work = createWorkWith(idC, version = 2, referencedWorkIds = Set(idA)),
           existingNodes = Set(
             WorkNode(
               idA,
@@ -309,7 +311,8 @@ class WorkGraphUpdaterTest
       val updateVersion = 2
       WorkGraphUpdater
         .update(
-          links = WorkLinks(idA, updateVersion, referencedWorkIds = Set(idB)),
+          work =
+            createWorkWith(idA, updateVersion, referencedWorkIds = Set(idB)),
           existingNodes = Set(
             WorkNode(
               idA,
@@ -337,7 +340,8 @@ class WorkGraphUpdaterTest
       val thrown = intercept[VersionExpectedConflictException] {
         WorkGraphUpdater
           .update(
-            links = WorkLinks(idA, updateVersion, referencedWorkIds = Set(idB)),
+            work =
+              createWorkWith(idA, updateVersion, referencedWorkIds = Set(idB)),
             existingNodes = Set(
               WorkNode(
                 idA,
@@ -356,7 +360,8 @@ class WorkGraphUpdaterTest
 
       WorkGraphUpdater
         .update(
-          links = WorkLinks(idA, updateVersion, referencedWorkIds = Set(idB)),
+          work =
+            createWorkWith(idA, updateVersion, referencedWorkIds = Set(idB)),
           existingNodes = Set(
             WorkNode(
               idA,
@@ -390,7 +395,8 @@ class WorkGraphUpdaterTest
       val thrown = intercept[VersionUnexpectedConflictException] {
         WorkGraphUpdater
           .update(
-            links = WorkLinks(idA, updateVersion, referencedWorkIds = Set(idA)),
+            work =
+              createWorkWith(idA, updateVersion, referencedWorkIds = Set(idC)),
             existingNodes = Set(
               WorkNode(
                 idA,
@@ -404,7 +410,7 @@ class WorkGraphUpdaterTest
                 componentId = ciHash(idA, idB)))
           )
       }
-      thrown.getMessage shouldBe s"update failed, work:$idA v2 already exists with different content! update-ids:Set($idA) != existing-ids:Set($idB)"
+      thrown.getMessage shouldBe s"update failed, work:$idA v2 already exists with different content! update-ids:Set($idC) != existing-ids:Set($idB)"
     }
   }
 
@@ -412,7 +418,7 @@ class WorkGraphUpdaterTest
     it("updating  A->B with A gives A:A and B:B") {
       WorkGraphUpdater
         .update(
-          links = WorkLinks(idA, version = 2, referencedWorkIds = Set.empty),
+          work = createWorkWith(idA, version = 2, referencedWorkIds = Set.empty),
           existingNodes = Set(
             WorkNode(
               idA,
@@ -437,7 +443,7 @@ class WorkGraphUpdaterTest
     it("updating A->B with A but NO B (*should* not occur) gives A:A and B:B") {
       WorkGraphUpdater
         .update(
-          links = WorkLinks(idA, version = 2, referencedWorkIds = Set.empty),
+          work = createWorkWith(idA, version = 2, referencedWorkIds = Set.empty),
           existingNodes = Set(
             WorkNode(
               idA,
@@ -458,7 +464,7 @@ class WorkGraphUpdaterTest
     it("updating A->B->C with B gives A+B:(A->B, B) and C:C") {
       WorkGraphUpdater
         .update(
-          links = WorkLinks(idB, version = 3, referencedWorkIds = Set.empty),
+          work = createWorkWith(idB, version = 3, referencedWorkIds = Set.empty),
           existingNodes = (
             Set(
               WorkNode(
@@ -492,7 +498,7 @@ class WorkGraphUpdaterTest
     it("updating A<->B->C with B->C gives A+B+C:(A->B, B->C, C)") {
       WorkGraphUpdater
         .update(
-          links = WorkLinks(idB, version = 3, referencedWorkIds = Set(idC)),
+          work = createWorkWith(idB, version = 3, referencedWorkIds = Set(idC)),
           existingNodes = Set(
             WorkNode(
               idA,

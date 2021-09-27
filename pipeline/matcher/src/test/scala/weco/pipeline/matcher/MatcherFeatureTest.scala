@@ -8,13 +8,13 @@ import weco.messaging.memory.MemoryMessageSender
 import weco.fixtures.TimeAssertions
 import weco.json.JsonUtil._
 import weco.pipeline.matcher.fixtures.MatcherFixtures
-import weco.pipeline.matcher.generators.WorkLinksGenerators
+import weco.pipeline.matcher.generators.WorkStubGenerators
 import weco.pipeline.matcher.models.{
   MatchedIdentifiers,
   MatcherResult,
   WorkIdentifier,
-  WorkLinks,
-  WorkNode
+  WorkNode,
+  WorkStub
 }
 import weco.pipeline_storage.memory.MemoryRetriever
 
@@ -26,27 +26,26 @@ class MatcherFeatureTest
     with Eventually
     with IntegrationPatience
     with MatcherFixtures
-    with WorkLinksGenerators
+    with WorkStubGenerators
     with TimeAssertions {
 
-  it("processes a message with a single WorkLinks with no linked works") {
-    implicit val retriever: MemoryRetriever[WorkLinks] =
-      new MemoryRetriever[WorkLinks]()
+  it("processes a single Work with nothing linked to it") {
+    implicit val retriever: MemoryRetriever[WorkStub] =
+      new MemoryRetriever[WorkStub]()
     val messageSender = new MemoryMessageSender()
 
     withLocalSqsQueue() { queue =>
       withWorkerService(retriever, queue, messageSender) { _ =>
-        val links = createWorkLinksWith(referencedIds = Set.empty)
+        val work = createWorkStubWith(referencedIds = Set.empty)
 
         val expectedWorks =
           Set(
             MatchedIdentifiers(
-              identifiers =
-                Set(WorkIdentifier(links.workId, version = links.version))
+              identifiers = Set(WorkIdentifier(work.id, version = work.version))
             )
           )
 
-        sendWork(links, retriever, queue)
+        sendWork(work, retriever, queue)
 
         eventually {
           messageSender.messages should have size 1
@@ -60,8 +59,8 @@ class MatcherFeatureTest
   }
 
   it("skips a message if the graph store already has a newer version") {
-    implicit val retriever: MemoryRetriever[WorkLinks] =
-      new MemoryRetriever[WorkLinks]()
+    implicit val retriever: MemoryRetriever[WorkStub] =
+      new MemoryRetriever[WorkStub]()
     val messageSender = new MemoryMessageSender()
 
     withLocalSqsQueuePair() {
@@ -71,17 +70,17 @@ class MatcherFeatureTest
             val existingWorkVersion = 2
             val updatedWorkVersion = 1
 
-            val linksV1 = createWorkLinksWith(version = updatedWorkVersion)
+            val workV1 = createWorkStubWith(version = updatedWorkVersion)
 
             val nodeV2 = WorkNode(
-              id = linksV1.workId,
+              id = workV1.id,
               version = Some(existingWorkVersion),
               linkedIds = Nil,
-              componentId = ciHash(linksV1.workId)
+              componentId = ciHash(workV1.id)
             )
             put(dynamoClient, graphTable.name)(nodeV2)
 
-            sendWork(linksV1, retriever, queue)
+            sendWork(workV1, retriever, queue)
 
             eventually {
               assertQueueEmpty(queue)

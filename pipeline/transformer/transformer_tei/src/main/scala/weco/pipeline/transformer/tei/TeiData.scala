@@ -30,15 +30,14 @@ case class TeiData(id: String,
                    nestedTeiData: Result[List[TeiData]] = Right(Nil))
     extends Logging {
   def toWork(time: Instant, version: Int): Work[Source] = {
-
-    val topLevelData = toWorkData(mergeCandidates = mergeCandidates)
+    val topLevelData = toWorkData
 
     val internalDataStubs: Result[List[InternalWork.Source]] =
       nestedTeiData.map { teiDatas =>
         teiDatas.map { data =>
           InternalWork.Source(
             sourceIdentifier = data.sourceIdentifier,
-            workData = data.toWorkData(mergeCandidates = Nil)
+            workData = data.toWorkData
           )
         }
       }
@@ -56,11 +55,17 @@ case class TeiData(id: String,
         (topLevelData, List())
     }
 
+    val state = Source(
+      sourceIdentifier = sourceIdentifier,
+      sourceModifiedTime = time,
+      internalWorkStubs = internalWorkStubs,
+      mergeCandidates = mergeCandidates
+    )
+
     Work.Visible[Source](
       version = version,
       data = workData,
-      state =
-        Source(sourceIdentifier, time, internalWorkStubs = internalWorkStubs),
+      state = state,
       redirectSources = Nil
     )
   }
@@ -88,12 +93,10 @@ case class TeiData(id: String,
     bNumberMergeCandidate.toList
   }
 
-  private def toWorkData(mergeCandidates: List[MergeCandidate[Identifiable]])
-    : WorkData[Unidentified] =
+  private def toWorkData: WorkData[Unidentified] =
     WorkData[Unidentified](
       title = Some(title),
       description = description,
-      mergeCandidates = mergeCandidates,
       languages = languages,
       format = Some(Format.ArchivesAndManuscripts),
       //

@@ -42,29 +42,27 @@ class TeiTransformer(store: Store[S3ObjectLocation, String])
   private def handleTeiChange(id: String,
                               version: Int,
                               s3Location: S3ObjectLocation,
-                              time: Instant) = {
+                              time: Instant): Result[Work[Source]] =
     for {
       xmlString <- store.get(s3Location).left.map(_.e)
       teiXml <- TeiXml(id, xmlString.identifiedT)
       teiData <- parse(teiXml)
     } yield teiData.toWork(time, version)
-  }
 
-  private def parse(teiXml: TeiXml): Either[Throwable, TeiData] = {
-
-    val throwableOrData = for {
+  def parse(teiXml: TeiXml): Result[TeiData] =
+    for {
       summary <- teiXml.summary
       bNumber <- teiXml.bNumber
       title <- teiXml.title
       languages <- TeiLanguages(teiXml.xml)
-    } yield
-      TeiData(
-        teiXml.id,
-        title,
-        bNumber,
-        summary,
-        languages,
-        teiXml.nestedTeiData)
-    throwableOrData
-  }
+
+      teiData = TeiData(
+        id = teiXml.id,
+        title = title,
+        bNumber = bNumber,
+        description = summary,
+        languages = languages,
+        nestedTeiData = teiXml.nestedTeiData
+      )
+    } yield teiData
 }

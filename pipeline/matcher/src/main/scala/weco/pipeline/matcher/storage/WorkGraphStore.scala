@@ -1,15 +1,14 @@
 package weco.pipeline.matcher.storage
 
-import weco.pipeline.matcher.models.WorkNode
+import weco.pipeline.matcher.models.{WorkNode, WorkStub}
 
 import scala.concurrent.{ExecutionContext, Future}
-import weco.pipeline.matcher.models.WorkLinks
 
 class WorkGraphStore(workNodeDao: WorkNodeDao)(implicit _ec: ExecutionContext) {
 
-  def findAffectedWorks(workLinks: WorkLinks): Future[Set[WorkNode]] =
+  def findAffectedWorks(w: WorkStub): Future[Set[WorkNode]] =
     for {
-      directlyAffectedWorks <- workNodeDao.get(workLinks.ids)
+      directlyAffectedWorks <- workNodeDao.get(w.ids)
       affectedComponentIds = directlyAffectedWorks.map(workNode =>
         workNode.componentId)
       affectedWorks <- workNodeDao.getByComponentIds(affectedComponentIds)

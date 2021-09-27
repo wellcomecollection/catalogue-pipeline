@@ -5,17 +5,17 @@ import scala.concurrent.Future
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
-import weco.catalogue.internal_model.generators.IdentifiersGenerators
 import weco.catalogue.internal_model.identifiers.CanonicalId
 import weco.pipeline.matcher.fixtures.MatcherFixtures
-import weco.pipeline.matcher.models.{WorkLinks, WorkNode}
+import weco.pipeline.matcher.generators.WorkStubGenerators
+import weco.pipeline.matcher.models.WorkNode
 
 class WorkGraphStoreTest
     extends AnyFunSpec
     with Matchers
     with ScalaFutures
     with MatcherFixtures
-    with IdentifiersGenerators {
+    with WorkStubGenerators {
 
   val idA = CanonicalId("AAAAAAAA")
   val idB = CanonicalId("BBBBBBBB")
@@ -27,8 +27,8 @@ class WorkGraphStoreTest
         withWorkGraphStore(graphTable) { workGraphStore =>
           whenReady(
             workGraphStore.findAffectedWorks(
-              WorkLinks(
-                createCanonicalId,
+              createWorkWith(
+                id = createCanonicalId,
                 version = 0,
                 referencedWorkIds = Set.empty))) {
             _ shouldBe empty
@@ -50,7 +50,7 @@ class WorkGraphStoreTest
           put(dynamoClient, graphTable.name)(work)
 
           val future =
-            workGraphStore.findAffectedWorks(WorkLinks(idA, 0, Set.empty))
+            workGraphStore.findAffectedWorks(createWorkWith(idA, 0, Set.empty))
 
           whenReady(future) {
             _ shouldBe Set(work)
@@ -78,7 +78,7 @@ class WorkGraphStoreTest
           put(dynamoClient, graphTable.name)(workB)
 
           val future =
-            workGraphStore.findAffectedWorks(WorkLinks(idA, 0, Set(idB)))
+            workGraphStore.findAffectedWorks(createWorkWith(idA, 0, Set(idB)))
 
           whenReady(future) {
             _ shouldBe Set(workA, workB)
@@ -108,7 +108,7 @@ class WorkGraphStoreTest
 
           val future =
             workGraphStore.findAffectedWorks(
-              WorkLinks(idA, version = 0, referencedWorkIds = Set.empty))
+              createWorkWith(idA, version = 0, referencedWorkIds = Set.empty))
 
           whenReady(future) {
             _ shouldBe Set(workA, workB)
@@ -144,7 +144,7 @@ class WorkGraphStoreTest
           put(dynamoClient, graphTable.name)(workC)
 
           val future =
-            workGraphStore.findAffectedWorks(WorkLinks(idA, 0, Set.empty))
+            workGraphStore.findAffectedWorks(createWorkWith(idA, 0, Set.empty))
 
           whenReady(future) {
             _ shouldBe Set(workA, workB, workC)
@@ -180,9 +180,10 @@ class WorkGraphStoreTest
           put(dynamoClient, graphTable.name)(workB)
           put(dynamoClient, graphTable.name)(workC)
 
-          val links = WorkLinks(idB, version = 0, referencedWorkIds = Set(idC))
+          val work =
+            createWorkWith(idB, version = 0, referencedWorkIds = Set(idC))
 
-          whenReady(workGraphStore.findAffectedWorks(links)) {
+          whenReady(workGraphStore.findAffectedWorks(work)) {
             _ shouldBe Set(workA, workB, workC)
           }
         }

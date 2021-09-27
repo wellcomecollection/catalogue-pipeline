@@ -34,8 +34,8 @@ object Sources {
       //
       // We need to handle both cases.
       //
-      case t if physicalSierra(t) && t.data.mergeCandidates.nonEmpty =>
-        val digitisedLinkedIds = target.data.mergeCandidates
+      case t if physicalSierra(t) && t.state.mergeCandidates.nonEmpty =>
+        val digitisedLinkedIds = target.state.mergeCandidates
           .filter(_.reason.contains("Physical/digitised Sierra work"))
           .map(_.id.canonicalId)
 
@@ -48,7 +48,7 @@ object Sources {
             sierraWork(w) && allDigitalLocations(w)
           }
           .find { w =>
-            w.data.mergeCandidates.exists { mc =>
+            w.state.mergeCandidates.exists { mc =>
               mc.reason == "Physical/digitised Sierra work" &&
               mc.id.canonicalId == target.state.canonicalId
             }
