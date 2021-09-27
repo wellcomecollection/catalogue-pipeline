@@ -93,13 +93,13 @@ module "catalogue_pipeline_2021-08-16" {
   logging_cluster_id = local.logging_cluster_id
 }
 
-module "catalogue_pipeline_2021-09-24" {
+module "catalogue_pipeline_2021-09-27" {
   source = "./stack"
 
-  pipeline_date = "2021-09-24"
-  release_label = "2021-09-24"
+  pipeline_date = "2021-09-27"
+  release_label = "2021-09-27"
 
-  is_reindexing = false
+  is_reindexing = true
 
   # Boilerplate that shouldn't change between pipelines.
 
