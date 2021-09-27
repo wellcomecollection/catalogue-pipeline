@@ -11,10 +11,12 @@ import java.time.Instant
 
 case class ImageData[+State](
   id: State,
+  version: Int,
   locations: List[DigitalLocation]
 ) extends HasId[State]
 
 case class Image[State <: ImageState](
+  version: Int,
   state: State,
   locations: List[DigitalLocation],
   source: ImageSource,
@@ -28,6 +30,7 @@ case class Image[State <: ImageState](
   ): Image[OutState] =
     Image[OutState](
       state = transition.state(this, args),
+      version = version,
       locations = locations,
       source = source,
       modifiedTime = modifiedTime
@@ -72,7 +75,7 @@ object ImageState {
   case class Augmented(
     sourceIdentifier: SourceIdentifier,
     canonicalId: CanonicalId,
-    inferredData: Option[InferredData]
+    inferredData: Option[InferredData] = None
   ) extends ImageState {
     type TransitionArgs = Option[InferredData]
   }
@@ -80,7 +83,7 @@ object ImageState {
   case class Indexed(
     sourceIdentifier: SourceIdentifier,
     canonicalId: CanonicalId,
-    inferredData: Option[InferredData],
+    inferredData: Option[InferredData] = None,
     derivedData: DerivedImageData
   ) extends ImageState {
     type TransitionArgs = Unit

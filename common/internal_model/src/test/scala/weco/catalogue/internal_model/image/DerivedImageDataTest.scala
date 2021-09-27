@@ -3,7 +3,7 @@ package weco.catalogue.internal_model.image
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.generators.ImageGenerators
-import weco.catalogue.internal_model.work.{Contributor, Organisation}
+import weco.catalogue.internal_model.work.{Contributor, Organisation, Person}
 
 class DerivedImageDataTest
     extends AnyFunSpec
@@ -33,6 +33,11 @@ class DerivedImageDataTest
     val image = createImageData.toAugmentedImageWith(
       parentWork = identifiedWork().contributors(
         List(Contributor(Organisation("Planet Express"), roles = Nil))
+      ),
+      redirectedWork = Some(
+        identifiedWork().contributors(
+          List(Contributor(Person("Zaphod Beeblebrox"), roles = Nil))
+        )
       )
     )
     val derivedImageData = DerivedImageData(image)

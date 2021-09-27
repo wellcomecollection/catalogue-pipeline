@@ -87,7 +87,7 @@ case class InvisibleMetsData(
           title = Some(title),
           items = List(item),
           thumbnail = thumbnail(sourceIdentifier.value, license, accessStatus),
-          imageData = imageData(license, accessStatus, location)
+          imageData = imageData(version, license, accessStatus, location)
         ),
         invisibilityReasons = List(MetsWorksAreNotVisible)
       )
@@ -171,6 +171,7 @@ case class InvisibleMetsData(
       )
 
   private def imageData(
+    version: Int,
     license: Option[License],
     accessStatus: Option[AccessStatus],
     manifestLocation: DigitalLocation
@@ -187,6 +188,7 @@ case class InvisibleMetsData(
                 sourceIdentifier = ImageUtils
                   .getImageSourceId(recordIdentifier, fileReference.id)
               ),
+              version = version,
               locations = List(
                 DigitalLocation(
                   url = url,

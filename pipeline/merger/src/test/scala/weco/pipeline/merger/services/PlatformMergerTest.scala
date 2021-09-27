@@ -3,10 +3,11 @@ package weco.pipeline.merger.services
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks._
-import weco.catalogue.internal_model.image.ImageSource.ParentWork._
 import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.catalogue.internal_model.work.WorkFsm._
+import weco.catalogue.internal_model.image.ParentWork._
 import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.image.ParentWorks
 import weco.catalogue.internal_model.locations.{
   AccessCondition,
   AccessMethod,
@@ -183,7 +184,10 @@ class PlatformMergerTest
     val expectedImage =
       miroWork.data.imageData.head.toInitialImageWith(
         modifiedTime = now,
-        parentWork = expectedMergedWork.toParentWork
+        parentWorks = ParentWorks(
+          canonicalWork = expectedMergedWork.toParentWork,
+          redirectedWork = Some(miroWork.toParentWork)
+        )
       )
     result.mergedWorksWithTime(now) should contain theSameElementsAs List(
       expectedMergedWork,
@@ -231,7 +235,10 @@ class PlatformMergerTest
     val expectedImage =
       miroWork.data.imageData.head.toInitialImageWith(
         modifiedTime = now,
-        parentWork = expectedMergedWork.toParentWork
+        parentWorks = ParentWorks(
+          canonicalWork = expectedMergedWork.toParentWork,
+          redirectedWork = Some(miroWork.toParentWork)
+        )
       )
 
     result.mergedWorksWithTime(now) should contain theSameElementsAs List(
@@ -288,7 +295,10 @@ class PlatformMergerTest
 
     val expectedImage = miroWork.data.imageData.head.toInitialImageWith(
       modifiedTime = now,
-      parentWork = expectedMergedWork.toParentWork
+      parentWorks = ParentWorks(
+        canonicalWork = expectedMergedWork.toParentWork,
+        redirectedWork = Some(miroWork.toParentWork)
+      )
     )
 
     result.mergedWorksWithTime(now) should contain theSameElementsAs List(
@@ -444,7 +454,10 @@ class PlatformMergerTest
     val expectedImage =
       metsWork.data.imageData.head.toInitialImageWith(
         modifiedTime = now,
-        parentWork = expectedMergedWork.toParentWork
+        parentWorks = ParentWorks(
+          canonicalWork = expectedMergedWork.toParentWork,
+          redirectedWork = Some(metsWork.toParentWork)
+        )
       )
 
     result.mergedWorksWithTime(now) should contain theSameElementsAs List(
@@ -534,7 +547,10 @@ class PlatformMergerTest
 
     val expectedImage = miroWork.data.imageData.head.toInitialImageWith(
       modifiedTime = now,
-      parentWork = expectedMergedWork.toParentWork
+      parentWorks = ParentWorks(
+        canonicalWork = expectedMergedWork.toParentWork,
+        redirectedWork = Some(miroWork.toParentWork)
+      )
     )
 
     result.mergedWorksWithTime(now) should contain theSameElementsAs List(
@@ -663,7 +679,10 @@ class PlatformMergerTest
     result.mergedImagesWithTime(now).head shouldBe miroWork.data.imageData.head
       .toInitialImageWith(
         modifiedTime = now,
-        parentWork = miroWork.toParentWork
+        parentWorks = ParentWorks(
+          canonicalWork = miroWork.toParentWork,
+          redirectedWork = None
+        )
       )
   }
 
