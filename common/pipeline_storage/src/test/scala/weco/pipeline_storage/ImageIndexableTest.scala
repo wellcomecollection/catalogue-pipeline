@@ -109,7 +109,7 @@ class ImageIndexableTest
       val indexer = new ElasticIndexer[Image[ImageState.Indexed]](
         elasticClient,
         index,
-        ImagesIndexConfig.ingested)
+        ImagesIndexConfig.indexed)
       testWith((index, indexer))
     }
 }

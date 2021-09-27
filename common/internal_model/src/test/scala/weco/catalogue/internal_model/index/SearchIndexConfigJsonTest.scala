@@ -34,8 +34,8 @@ class SearchIndexConfigJsonTest
       CreateIndexContentBuilder(
         CreateIndexRequest(
           "works",
-          analysis = Some(WorksIndexConfig.ingested.analysis),
-          mapping = Some(WorksIndexConfig.ingested.mapping.meta(Map()))
+          analysis = Some(WorksIndexConfig.indexed.analysis),
+          mapping = Some(WorksIndexConfig.indexed.mapping.meta(Map()))
         )
       ).value)
 
@@ -49,8 +49,8 @@ class SearchIndexConfigJsonTest
       CreateIndexContentBuilder(
         CreateIndexRequest(
           "images",
-          analysis = Some(ImagesIndexConfig.ingested.analysis),
-          mapping = Some(ImagesIndexConfig.ingested.mapping.meta(Map()))
+          analysis = Some(ImagesIndexConfig.indexed.analysis),
+          mapping = Some(ImagesIndexConfig.indexed.mapping.meta(Map()))
         )
       ).value)
 

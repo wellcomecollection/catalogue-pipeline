@@ -70,7 +70,7 @@ object WorksIndexConfig extends IndexConfigFields {
     )
   )
   val denormalised = WorksIndexConfig(Seq.empty)
-  val ingested = WorksIndexConfig(
+  val indexed = WorksIndexConfig(
     {
       val relationsPath = List("search.relations")
       val titlesAndContributorsPath = List("search.titlesAndContributors")

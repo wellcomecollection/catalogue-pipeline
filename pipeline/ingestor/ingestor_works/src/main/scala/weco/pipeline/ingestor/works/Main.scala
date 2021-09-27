@@ -44,7 +44,7 @@ object Main extends WellcomeTypesafeApp {
       client = client,
       namespace = "indexed-works",
       indexConfig =
-        WorksIndexConfig.ingested.withRefreshIntervalFromConfig(config)
+        WorksIndexConfig.indexed.withRefreshIntervalFromConfig(config)
     )
     val messageSender = SNSBuilder
       .buildSNSMessageSender(config, subject = "Sent from the ingestor-works")

@@ -52,7 +52,7 @@ trait IndexFixtures extends ElasticsearchFixtures { this: Suite =>
     }
 
   def withLocalImagesIndex[R](testWith: TestWith[Index, R]): R =
-    withLocalElasticsearchIndex[R](config = ImagesIndexConfig.ingested) {
+    withLocalElasticsearchIndex[R](config = ImagesIndexConfig.indexed) {
       index =>
         testWith(index)
     }
