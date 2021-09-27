@@ -43,7 +43,7 @@ object Main extends WellcomeTypesafeApp {
         config,
         client = client,
         namespace = "indexed-images",
-        indexConfig = ImagesIndexConfig.indexed
+        indexConfig = ImagesIndexConfig.ingested
       )
     val msgSender = SNSBuilder
       .buildSNSMessageSender(config, subject = "Sent from the ingestor-images")

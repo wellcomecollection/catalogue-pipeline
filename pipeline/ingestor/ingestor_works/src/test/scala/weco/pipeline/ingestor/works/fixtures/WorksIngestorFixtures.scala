@@ -70,7 +70,7 @@ trait WorksIngestorFixtures
     val indexer = new ElasticIndexer[Work[Indexed]](
       client = elasticClient,
       index = indexedIndex,
-      config = WorksIndexConfig.indexed
+      config = WorksIndexConfig.ingested
     )
 
     withWorkerService(

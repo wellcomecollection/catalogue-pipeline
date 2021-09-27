@@ -82,7 +82,7 @@ class WorksIndexConfigTest
     }
 
     it("WorkState.Indexed") {
-      withLocalIndex(WorksIndexConfig.indexed) { implicit index =>
+      withLocalIndex(WorksIndexConfig.ingested) { implicit index =>
         forAll { indexedWork: Work[WorkState.Indexed] =>
           assertWorkCanBeIndexed(indexedWork)
         }
