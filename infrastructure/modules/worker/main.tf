@@ -89,7 +89,7 @@ module "app_permissions" {
 
 module "log_router_container" {
   source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/firelens?ref=v3.11.0"
-  namespace = local.service_name
+  namespace = var.name
 
   use_privatelink_endpoint = true
 }
