@@ -134,13 +134,7 @@ module "catalogue_pipeline_2021-09-24" {
       ],
       reindex_topic = local.calm_reindexer_topic_arn,
     }
-    # we want to keep tei out of the prod pipeline for now,
-    # while me make sure that the data is good enough to present
-    # and while we extend the transformer to extract more of it.
-    #
-    # Note: we have to supply a real topic ARN here, not just 'null',
-    # or the module gets confused.  For now we just create a dummy topic
-    # that will never receive messages.
+
     tei = {
       topics = [
         local.tei_adapter_topic_arn,
