@@ -75,7 +75,7 @@ object ImageState {
   case class Augmented(
     sourceIdentifier: SourceIdentifier,
     canonicalId: CanonicalId,
-    inferredData: Option[InferredData]
+    inferredData: Option[InferredData] = None
   ) extends ImageState {
     type TransitionArgs = Option[InferredData]
   }
@@ -83,7 +83,7 @@ object ImageState {
   case class Indexed(
     sourceIdentifier: SourceIdentifier,
     canonicalId: CanonicalId,
-    inferredData: Option[InferredData],
+    inferredData: Option[InferredData] = None,
     derivedData: DerivedImageData
   ) extends ImageState {
     type TransitionArgs = Unit

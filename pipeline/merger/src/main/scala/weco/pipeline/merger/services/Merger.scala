@@ -2,7 +2,8 @@ package weco.pipeline.merger.services
 
 import cats.data.State
 import weco.catalogue.internal_model.identifiers.{DataState, IdState}
-import weco.catalogue.internal_model.image.ImageData
+import weco.catalogue.internal_model.image
+import weco.catalogue.internal_model.image.{ImageData, ParentWorks}
 import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.catalogue.internal_model.work._
 import weco.pipeline.merger.logging.MergerLogging
@@ -185,7 +186,7 @@ object Merger {
 
 object PlatformMerger extends Merger {
   import Merger.WorkMergingOps
-  import weco.catalogue.internal_model.image.ImageSource.ParentWork._
+  import weco.catalogue.internal_model.image.ParentWork._
 
   override def findTarget(
     works: Seq[Work[Identified]]
@@ -205,8 +206,11 @@ object PlatformMerger extends Merger {
             target.data.collectionPath),
           imageDataWithSources = standaloneImages(target).map { image =>
             ImageDataWithSource(
-              imageData = image,
-              source = target.toParentWork
+              image,
+              ParentWorks(
+                canonicalWork = target.toParentWork,
+                redirectedWork = None
+              )
             )
           }
         )
@@ -234,7 +238,12 @@ object PlatformMerger extends Merger {
           imageDataWithSources = sourceImageData.map { imageData =>
             ImageDataWithSource(
               imageData = imageData,
-              source = work.toParentWork
+              source = image.ParentWorks(
+                canonicalWork = work.toParentWork,
+                redirectedWork = sources
+                  .find { _.data.imageData.contains(imageData) }
+                  .map(_.toParentWork)
+              )
             )
           }
         )
