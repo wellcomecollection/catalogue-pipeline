@@ -396,7 +396,7 @@ class WorkGraphUpdaterTest
         WorkGraphUpdater
           .update(
             work =
-              createWorkWith(idA, updateVersion, referencedWorkIds = Set(idA)),
+              createWorkWith(idA, updateVersion, referencedWorkIds = Set(idC)),
             existingNodes = Set(
               WorkNode(
                 idA,
@@ -410,7 +410,7 @@ class WorkGraphUpdaterTest
                 componentId = ciHash(idA, idB)))
           )
       }
-      thrown.getMessage shouldBe s"update failed, work:$idA v2 already exists with different content! update-ids:Set($idA) != existing-ids:Set($idB)"
+      thrown.getMessage shouldBe s"update failed, work:$idA v2 already exists with different content! update-ids:Set($idC) != existing-ids:Set($idB)"
     }
   }
 
