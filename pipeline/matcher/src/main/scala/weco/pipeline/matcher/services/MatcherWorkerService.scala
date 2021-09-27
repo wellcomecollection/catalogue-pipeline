@@ -9,10 +9,7 @@ import weco.messaging.sqs.SQSStream
 import weco.pipeline_storage.PipelineStorageStream._
 import weco.pipeline.matcher.exceptions.MatcherException
 import weco.pipeline.matcher.matcher.WorkMatcher
-import weco.pipeline.matcher.models.{
-  VersionExpectedConflictException,
-  WorkLinks
-}
+import weco.pipeline.matcher.models.{VersionExpectedConflictException, WorkStub}
 import weco.typesafe.Runnable
 import weco.pipeline_storage.{PipelineStorageConfig, Retriever}
 
@@ -20,7 +17,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class MatcherWorkerService[MsgDestination](
   config: PipelineStorageConfig,
-  workLinksRetriever: Retriever[WorkLinks],
+  retriever: Retriever[WorkStub],
   msgStream: SQSStream[NotificationMessage],
   msgSender: MessageSender[MsgDestination],
   workMatcher: WorkMatcher)(implicit ec: ExecutionContext)
@@ -32,16 +29,16 @@ class MatcherWorkerService[MsgDestination](
       this.getClass.getSimpleName,
       source =>
         source
-          .via(batchRetrieveFlow(config, workLinksRetriever))
+          .via(batchRetrieveFlow(config, retriever))
           .mapAsync(config.parallelism) {
-            case (message, item) =>
-              processMessage(item).map(_ => message)
+            case (message, workStub) =>
+              processMessage(workStub).map(_ => message)
         }
     )
 
-  def processMessage(workLinks: WorkLinks): Future[Unit] = {
+  def processMessage(workStub: WorkStub): Future[Unit] = {
     (for {
-      identifiersList <- workMatcher.matchWork(workLinks)
+      identifiersList <- workMatcher.matchWork(workStub)
       _ <- Future.fromTry(msgSender.sendT(identifiersList))
     } yield ()).recover {
       case MatcherException(e: VersionExpectedConflictException) =>

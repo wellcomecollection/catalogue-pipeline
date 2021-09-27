@@ -4,9 +4,8 @@ import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.circe._
 import com.sksamuel.elastic4s.requests.get.{GetRequest, GetResponse}
 import com.sksamuel.elastic4s.{ElasticClient, Index}
-import weco.catalogue.internal_model.work.WorkState
 import weco.json.JsonUtil._
-import weco.pipeline.matcher.models.WorkLinks
+import weco.pipeline.matcher.models.WorkStub
 import weco.pipeline_storage.elastic.ElasticRetriever
 
 import scala.concurrent.ExecutionContext
@@ -19,27 +18,13 @@ import scala.util.Try
   * reduce the amount of data we have to get out of Elasticsearch (and pay to send through
   * the VPC endpoint).
   */
-class ElasticWorkLinksRetriever(val client: ElasticClient, val index: Index)(
+class ElasticWorkStubRetriever(val client: ElasticClient, val index: Index)(
   implicit val ec: ExecutionContext
-) extends ElasticRetriever[WorkLinks] {
+) extends ElasticRetriever[WorkStub] {
 
   override def createGetRequest(id: String): GetRequest =
     get(index, id).fetchSourceInclude("state", "version")
 
-  private case class InnerWorkStub(state: WorkState.Identified, version: Int)
-
-  override def parseGetResponse(response: GetResponse): Try[WorkLinks] =
-    response.safeTo[InnerWorkStub].map { work =>
-      val id = work.state.canonicalId
-      val referencedWorkIds = work.state.mergeCandidates
-        .map { mergeCandidate => mergeCandidate.id.canonicalId }
-        .filterNot { _ == id }
-        .toSet
-
-      WorkLinks(
-        workId = id,
-        version = work.version,
-        referencedWorkIds = referencedWorkIds
-      )
-    }
+  override def parseGetResponse(response: GetResponse): Try[WorkStub] =
+    response.safeTo[WorkStub]
 }

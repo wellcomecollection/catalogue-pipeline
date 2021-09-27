@@ -3,12 +3,7 @@ package weco.pipeline.matcher.fixtures
 import org.apache.commons.codec.digest.DigestUtils
 import org.scanamo.generic.semiauto.deriveDynamoFormat
 import org.scanamo.query.UniqueKey
-import org.scanamo.{
-  DynamoFormat,
-  DynamoReadError,
-  Scanamo,
-  Table => ScanamoTable
-}
+import org.scanamo.{DynamoFormat, DynamoReadError, Scanamo, Table => ScanamoTable}
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import weco.catalogue.internal_model.identifiers.CanonicalId
 import weco.fixtures.TestWith
@@ -16,17 +11,13 @@ import weco.messaging.fixtures.SQS
 import weco.messaging.memory.MemoryMessageSender
 import weco.messaging.sns.NotificationMessage
 import weco.pipeline.matcher.matcher.WorkMatcher
-import weco.pipeline.matcher.models.{MatcherResult, WorkLinks, WorkNode}
+import weco.pipeline.matcher.models.{MatcherResult, WorkNode, WorkStub}
 import weco.pipeline.matcher.services.MatcherWorkerService
 import weco.pipeline.matcher.storage.{WorkGraphStore, WorkNodeDao}
 import weco.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 import weco.pipeline_storage.memory.MemoryRetriever
 import weco.storage.fixtures.DynamoFixtures.Table
-import weco.storage.locking.dynamo.{
-  DynamoLockDaoFixtures,
-  DynamoLockingService,
-  ExpiringLock
-}
+import weco.storage.locking.dynamo.{DynamoLockDaoFixtures, DynamoLockingService, ExpiringLock}
 import weco.storage.locking.memory.{MemoryLockDao, MemoryLockingService}
 
 import java.util.UUID
@@ -48,7 +39,7 @@ trait MatcherFixtures
     }
 
   def withWorkerService[R](
-    workLinksRetriever: MemoryRetriever[WorkLinks],
+    retriever: MemoryRetriever[WorkStub],
     queue: SQS.Queue,
     messageSender: MemoryMessageSender,
     graphTable: Table)(testWith: TestWith[MatcherWorkerService[String], R]): R =
@@ -59,7 +50,7 @@ trait MatcherFixtures
             val workerService =
               new MatcherWorkerService(
                 pipelineStorageConfig,
-                workLinksRetriever = workLinksRetriever,
+                retriever = retriever,
                 msgStream,
                 messageSender,
                 workMatcher)
@@ -70,12 +61,12 @@ trait MatcherFixtures
       }
     }
 
-  def withWorkerService[R](workLinksRetriever: MemoryRetriever[WorkLinks],
+  def withWorkerService[R](retriever: MemoryRetriever[WorkStub],
                            queue: SQS.Queue,
                            messageSender: MemoryMessageSender)(
     testWith: TestWith[MatcherWorkerService[String], R]): R =
     withWorkGraphTable { graphTable =>
-      withWorkerService(workLinksRetriever, queue, messageSender, graphTable) {
+      withWorkerService(retriever, queue, messageSender, graphTable) {
         service =>
           testWith(service)
       }
@@ -121,12 +112,12 @@ trait MatcherFixtures
   }
 
   def sendWork(
-    links: WorkLinks,
-    retriever: MemoryRetriever[WorkLinks],
+    work: WorkStub,
+    retriever: MemoryRetriever[WorkStub],
     queue: SQS.Queue
-  ): Any = {
-    retriever.index ++= Map(links.workId.toString -> links)
-    sendNotificationToSQS(queue, body = links.workId.toString)
+  ): Unit = {
+    retriever.index ++= Map(work.id.toString -> work)
+    sendNotificationToSQS(queue, body = work.id.toString)
   }
 
   def ciHash(ids: CanonicalId*): String =
