@@ -4,6 +4,18 @@ steps:
   - wait
   - command: .buildkite/scripts/run_job.py internal_model
     label: "internal model"
+
+    # This will fail the build if internal model takes more than
+    # 13 minutes to build and test.  This is to make sure we know if
+    # the internal model compilation starts creeping again.
+    #
+    # We may increase this timeout, but we should do so intentionally.
+    # We should only increase it when we know what's causing the slowness,
+    # and we think it's an acceptable tradeoff.
+    #
+    # See https://buildkite.com/docs/pipelines/command-step
+    timeout_in_minutes: 13
+
   - command: .buildkite/scripts/run_job.py source_model
     label: "source model"
   - command: .buildkite/scripts/run_job.py pipeline_storage
