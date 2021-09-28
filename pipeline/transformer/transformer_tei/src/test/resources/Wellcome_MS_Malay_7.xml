@@ -1,0 +1,504 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="https://raw.githubusercontent.com/bodleian/consolidated-tei-schema/master/msdesc.rng" type="application/xml" schematypens="http://relaxng.org/ns/structure/1.0"?>
+
+<TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id="Wellcome_Malay_7">
+    <teiHeader>
+        <fileDesc>
+            <titleStmt>
+                <title></title>
+                <title type="collection">Wellcome Collection</title>
+                <respStmt xml:id="LXT">
+                    <resp when="2019">Cataloguer</resp>
+                    <persName>Li-Xuan Teo</persName>
+                </respStmt>
+                <respStmt xml:id="RV">
+                    <resp when="1982">Cataloguer</resp>
+                    <persName>M. C. Ricklefs and P. Voorhoeve</persName>
+                </respStmt>
+                <respStmt xml:id="EHM">
+                    <resp when="1981">Cataloguer</resp>
+                    <persName>R.F. Ellen, M.B. Hooker and A.C. Milner</persName>
+                </respStmt>
+                <respStmt xml:id="BLE">
+                    <resp when="2020">TEI Encoder</resp>
+                    <persName>Branwen Lloyd-Evans</persName>
+                </respStmt>
+                <respStmt xml:id="AP">
+                    <resp when="2020">TEI Encoder</resp>
+                    <persName>Adrian Plau</persName>
+                </respStmt>
+            </titleStmt>
+            <publicationStmt>
+                <publisher>Wellcome Collection</publisher>
+                <idno>UkLW</idno>
+                <address>
+                    <orgName type="institution">Wellcome Collection</orgName>
+                    <street>215 Euston Rd</street>
+                    <settlement>London</settlement>
+                    <postCode>NW1 2BE</postCode>
+                </address>
+                <distributor>
+                    <email>library@wellcome.ac.uk</email>
+                </distributor>
+                <idno type="msID">Wellcome Malay 7</idno>
+                <idno type="catalogue">The Hervey Malay Collection in the Wellcome Institute</idno>
+                <idno type="catalogue">Catalogue of Malay manuscripts in the Wellcome Institute for the History of Medicine</idno>
+            </publicationStmt>
+            <sourceDesc>
+                <msDesc>
+                    <msIdentifier>
+                        <country>United Kingdom</country>
+                        <settlement>London</settlement>
+                        <institution>Wellcome Collection</institution>
+                        <repository>Wellcome Library</repository>
+                        <idno type="shelfmark">Wellcome Malay 7</idno>
+                        <altIdentifier>
+                            <idno>.b30172603</idno>
+                        </altIdentifier>
+                    </msIdentifier>
+                    
+                    
+                    <msContents>
+                                                
+                        <summary>Catalogues of Malayan plants, fish, animals and snakes</summary>
+                        
+                        <textLang mainLang="ms">Malay</textLang>
+                                               
+                        
+                    </msContents>
+                    
+                    <physDesc>
+                                                
+                        <objectDesc form="other">
+                            
+                            <supportDesc material="paper">
+                                
+                                <support>Multiple manuscript parts collected in one volume.</support>
+
+                            </supportDesc>
+                        
+                         </objectDesc>
+                                      
+                    </physDesc>
+                    
+                    <history>
+                        <provenance>
+                            <p>Owned by D.F.A. Hervey</p>
+                        </provenance>
+                        <acquisition>
+                            <p>Sold at Hodgsons, <date>on 23 November 1934</date>, along with other Malay manuscripts in Wellcome Collection, for 12 guineas.</p>
+                        </acquisition>
+                    </history>
+                    
+                    <additional>
+                        <adminInfo>
+                            <recordHist>
+                                <source>
+                                    <p>This file is based on the information in the following two catalogues, as well as Li-Xiao Teo's unpublished cataloguing. Wellcome Collection also holds a print copy of Hervey’s volume on Malay games.</p>
+                                    <bibl>
+                                        <title>"The Hervey Malay Collection in the Wellcome Institute" in Journal of the Malayasian Branch of the Royal Asiatic Society 54 (1); 82-92.</title>
+                                        <author>Ellen RF, Hooker MB and AC Milner</author>
+                                        <date>1981</date>
+                                    </bibl>
+                                    <bibl>
+                                        <title>Catalogue of Malay manuscripts in the Wellcome Institute for the History of Medicine" from "Indonesian manuscripts in Great Britain : Addenda et Corrigenda," in Bulletin of the School of Oriental and African Studies 45 (2): 312-15</title>
+                                        <author>Ricklefs MC and Voorhoeve P</author>
+                                        <date>1982</date>
+                                    </bibl>
+                                    <bibl>
+                                        <title>Malay Games</title>
+                                        <author>D.F.A. Hervey</author>
+                                        <date>1903</date>
+                                        <publisher>Anthropological Institute of Great Britain and Ireland</publisher>
+                                        <note>Reprinted from the Journal of the Royal Anthropological Institute, Vol. 33, July - December, 1903.</note>
+                                        <ref target="https://wellcomelibrary.org/item/b30208993">Digitised version.</ref>
+                                    </bibl>
+                                    <bibl type="digital-facsimile">
+                                        <ref target="https://wellcomelibrary.org/item/b30172603">Digital manuscript facsimile.</ref>
+                                    </bibl>
+                                </source>
+                            </recordHist>
+                            <availability status="free">
+                                <p>Digitised in full.</p>
+                            </availability> 
+                        </adminInfo>
+
+                    </additional>
+                    
+                    
+                    <msPart n="1" xml:id="Wellcome_Malay_7_Part_1">
+                        <msIdentifier>
+                                <altIdentifier>
+                                    <idno>Wellcome Malay 7, A</idno>
+                                </altIdentifier>
+                         </msIdentifier>
+                        
+                        <msContents>
+                                                                                   
+                            <summary>Lists of plants, roots, woods, fibres, snakes, animals and insects.</summary>
+                             
+                            <msItem xml:id="Wellcome_Malay_7_Part_1_Item_1">
+                                
+                                <textLang mainLang="en">English</textLang>
+                                
+                                <locus>Note, pp. 1-3.</locus>
+                                
+                                <note>Folder with a note explaining the lists are related to exhibits at the Colonial Exhibition, <date>1886</date>.</note> 
+                                                                                               
+                            </msItem>
+                            
+                            <msItem xml:id="Wellcome_Malay_7_Part_1_Item_2">
+                                
+                                <textLang mainLang="ms">Malay</textLang>
+                                <textLang otherLangs="en">English</textLang>
+                                
+                                <locus>PP. 1-27.</locus>
+                                
+                                <note>Malay lists and names in Roman script; descriptions and explanations in English.</note>                                                             
+                            </msItem>
+                            
+                        </msContents>
+                        
+                        <physDesc>
+  
+                            <objectDesc>
+                                
+                                <supportDesc material="paper">
+                                
+                                    <extent>30 pages, divided into 3 pp. and 27 pp.
+                                          <dimensions unit="cm" type="leaf">
+                                            <height>41</height>
+                                            <width>34</width>
+                                        </dimensions>
+                                        <dimensions unit="cm" type="leaf">
+                                            <height>34</height>
+                                            <width>20.5</width>
+                                        </dimensions>
+                                    </extent>
+                                    
+                                                                        
+                                </supportDesc>
+                                                                                              
+                            </objectDesc>
+
+                            <handDesc>
+                                <handNote script="Roman">Roman script.</handNote>
+                            </handDesc>
+
+                        </physDesc>
+                                               
+                    </msPart>
+                    
+                    <msPart n="2" xml:id="Wellcome_Malay_7_Part_2">
+                        <msIdentifier>
+                            <altIdentifier>
+                                <idno>Wellcome Malay 7, B</idno>
+                            </altIdentifier>
+                        </msIdentifier>
+                        
+                        <msContents>
+                            
+                            <summary>Lists of plants (in Roman script) collected by Mr. <persName>Alvins</persName> in <date>November and December, 1887</date>. 
+                                A letter from <persName>V. Jackson</persName> is included, commending the men he worked with.</summary>
+                                                        
+                            <msItem xml:id="Wellcome_Malay_7_Part_2_Item_1">
+                                <textLang mainLang="ms">Malay</textLang>
+                                <textLang otherLangs="en">English</textLang>
+                                <note>Names of plants in Romanised Malay and other notes in English. Includes the date and time the plants were collected, and the number of men
+                                working with the researchers.</note>
+                                                                                            
+                            </msItem>
+                                                                                
+                        </msContents>
+                        
+                        <physDesc>
+                            
+                            <objectDesc>
+                                
+                                <supportDesc material="paper">
+                                    
+                                    <extent>16 pages.
+                                        <dimensions unit="cm" type="leaf">
+                                            <height>34</height>
+                                            <width>21</width>
+                                        </dimensions>
+                                    </extent>
+                                    
+                                </supportDesc>
+                                
+                            </objectDesc>
+                            
+                            <handDesc>
+                                <handNote script="Roman">Roman script.</handNote>
+                            </handDesc>
+
+                        </physDesc>
+                        
+                    </msPart>
+                    
+                    <msPart n="3" xml:id="Wellcome_Malay_7_Part_3">
+                        <msIdentifier>
+                            <altIdentifier>
+                                <idno>Wellcome Malay 7, C</idno>
+                            </altIdentifier>
+                        </msIdentifier>
+                        
+                        <msContents>
+                            
+                            <summary>Lists of collection of timber, roots, and seeds.</summary>
+                                                        
+                            
+                            <msItem xml:id="Wellcome_Malay_7_Part_3_Item_1">
+                                <textLang mainLang="ms">Malay</textLang>
+                                <textLang otherLangs="en">English</textLang>
+                                <note>Roman script.</note>
+                                <note>Names of specimens are in Malay, with English notes accompanying them. Includes two lists of medicinal roots, their names and uses, 
+                                    and a sublist of 9 specimens "worthy of particular attention".</note>
+                                                             
+                            </msItem>
+                            
+                        </msContents>
+                        
+                        <physDesc>
+                            
+                            <objectDesc>
+                                
+                                <supportDesc material="paper">
+                                  
+                                    <extent>18 pages.
+                                        <dimensions unit="cm" type="leaf">
+                                            <height>33</height>
+                                            <width>20.5</width>
+                                        </dimensions>
+                                    </extent>
+                               
+                                 </supportDesc>
+                                                                                              
+                            </objectDesc>
+                            
+                            <handDesc>
+                                <handNote script="Roman">Roman script.</handNote>
+                            </handDesc>
+                            
+                        </physDesc>
+                        
+                    </msPart>
+                    
+                    <msPart n="4" xml:id="Wellcome_Malay_7_Part_4">
+                        <msIdentifier>
+                            <altIdentifier>
+                                <idno>Wellcome Malay 7, D</idno>
+                            </altIdentifier>
+                        </msIdentifier>
+                        
+                        <msContents>
+                            
+                            <summary>List of timber sent to Singapore for <persName>S. S. Rumbow</persName>.</summary>
+                                                            
+                                                        
+                            <msItem xml:id="Wellcome_Malay_7_Part_4_Item_1">
+                                
+                                <textLang mainLang="ms">Malay</textLang>
+                                                                
+                                <note>List of 30 names in Malay in Roman script.</note>
+                                                                                                
+                            </msItem>
+                            
+                                                        
+                        </msContents>
+                        
+                        <physDesc>
+                            
+                            <objectDesc>
+                                
+                                <supportDesc material="paper">
+                                    
+                                    <extent>2 pages.
+                                        <dimensions unit="cm" type="leaf">
+                                            <height>33</height>
+                                            <width>20.5</width>
+                                        </dimensions>
+                                    </extent>
+                                    
+                                </supportDesc>
+                                                             
+                            </objectDesc>
+                            
+                            <handDesc>
+                                <handNote script="Roman">Roman script.</handNote>
+                            </handDesc>
+                                                                                    
+                        </physDesc>
+                        
+                    </msPart>
+                    
+                    <msPart n="5" xml:id="Wellcome_Malay_7_Part_5">
+                        <msIdentifier>
+                            <altIdentifier>
+                                <idno>Wellcome Malay 7, E</idno>
+                            </altIdentifier>
+                        </msIdentifier>
+                        
+                        <msContents>
+                            
+                            <summary>Names of fish, crabs, crayfish, shells.</summary>
+                            <textLang mainLang="ms">Malay</textLang>
+                                                                                                               
+                            <msItem xml:id="Wellcome_Malay_7_Part_5_Item_1">
+                                                                                    
+                             <note>Names in Romanised Malay</note>
+                                
+                            </msItem>
+                            
+                                                        
+                        </msContents>
+                        
+                        <physDesc>
+                            
+                            <objectDesc>
+                                
+                                <supportDesc material="paper">
+                                    
+                                    <extent>3 pages.
+                                        <dimensions unit="cm" type="leaf">
+                                            <height>33</height>
+                                            <width>20.5</width>
+                                        </dimensions>
+                                    </extent>
+                                    
+                                </supportDesc>
+                             
+                            
+                            </objectDesc>
+                            
+                            <handDesc>
+                             <handNote script="Roman">Roman script.</handNote>
+                              
+                            </handDesc>
+
+                        </physDesc>
+                        
+                    </msPart>
+                    
+                    <msPart n="6" xml:id="Wellcome_Malay_7_Part_6">
+                        <msIdentifier>
+                            <altIdentifier>
+                                <idno>Wellcome Malay 7, F</idno>
+                            </altIdentifier>
+                        </msIdentifier>
+                        
+                        <msContents>
+                            
+                            <summary>List of plant names</summary>
+                            <textLang mainLang="ms">Malay</textLang>
+                            
+                            <msItem xml:id="Wellcome_Malay_7_Part_6_Item_1">
+                                
+                                <note>Names in Arabic script and Romanised Malay</note>
+                                
+                            </msItem>
+                            
+                            
+                        </msContents>
+                        
+                        <physDesc>
+                            
+                            <objectDesc>
+                                
+                                <supportDesc material="paper">
+                                    
+                                    <extent>1 page.
+                                        <dimensions unit="cm" type="leaf">
+                                            <height>34</height>
+                                            <width>20.5</width>
+                                        </dimensions>
+                                    </extent>
+                                    
+                                </supportDesc>
+                                
+                                
+                            </objectDesc>
+                            
+                            <handDesc>
+                                <handNote>In Arabic and Roman scripts.</handNote>
+                                
+                            </handDesc>
+                            
+                        </physDesc>
+                        
+                    </msPart>     
+                    
+                    <msPart n="7" xml:id="Wellcome_Malay_7_Part_7">
+                        <msIdentifier>
+                            <altIdentifier>
+                                <idno>Wellcome Malay 7, G</idno>
+                            </altIdentifier>
+                            <altIdentifier>
+                                <idno>Wellcome Malay 7, F</idno>
+                            </altIdentifier>
+                        </msIdentifier>
+                        
+                        <msContents>
+                            
+                            <summary>Names of fish, shellfish, crabs etc</summary>
+                            <textLang mainLang="ms">Malay</textLang>
+                            
+                            <msItem xml:id="Wellcome_Malay_7_Part_7_Item_1">
+                                
+                                <note>Names in Romanised Malay</note>
+                                
+                                <note>Recorded as Wellcome MS Malay 7F in the manuscript.</note>
+                                
+                            </msItem>
+                            
+                            
+                        </msContents>
+                        
+                        <physDesc>
+                            
+                            <objectDesc>
+                                
+                                <supportDesc material="paper">
+                                    
+                                    <extent>3 pages.
+                                        <dimensions unit="cm" type="leaf">
+                                            <height>33</height>
+                                            <width>20.5</width>
+                                        </dimensions>
+                                    </extent>
+                                    
+                                </supportDesc>
+                                
+                                
+                            </objectDesc>
+                            
+                            <handDesc>
+                                <handNote script="Roman">Roman script.</handNote>
+                                
+                            </handDesc>
+                            
+                        </physDesc>
+                        
+                    </msPart>                
+                </msDesc>
+                
+            </sourceDesc>
+            
+        </fileDesc>        
+        
+        <revisionDesc>
+            <change when="2020-02-06" who="#AP">Added links to digitised version and Hervey’s volume on Malay games.</change>
+            <change when-custom="2020" who="AP">Split <ref  target="#Wellcome_Malay_7_Part_1">Wellcome Malay 7A</ref> into two items, added note and extra altIdentifier to <ref target="#Wellcome_Malay_7_Part_7">Wellcome Malay 7G</ref>.</change>
+            <change when-custom="2020" who="#BLE">Created XML file, collated information from three cataloguing sources.</change>
+        </revisionDesc>
+        
+    </teiHeader>   
+    <facsimile>
+        <!-- For future addition -->   
+    </facsimile>    
+    <text>
+        <body>
+            <!-- For future full transcription -->
+        </body>
+    </text>    
+</TEI>

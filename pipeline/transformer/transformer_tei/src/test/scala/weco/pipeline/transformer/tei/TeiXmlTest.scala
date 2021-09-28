@@ -186,7 +186,7 @@ class TeiXmlTest
           .toString()
       ).value
 
-      xml.summary.value shouldBe Some("a manuscript about stuff")
+      xml.summary().value shouldBe Some("a manuscript about stuff")
     }
 
     it("fails parsing if there's more than one summary node") {
@@ -209,7 +209,7 @@ class TeiXmlTest
         </TEI>
       )
 
-      val err = xml.summary
+      val err = xml.summary()
       err shouldBe a[Left[_, _]]
       err.left.value shouldBe a[RuntimeException]
     }
@@ -292,4 +292,17 @@ class TeiXmlTest
     result.value shouldBe List(Language(id = "san", label = "Sanskrit"))
   }
 
+  it("can extract nested data from msPart"){
+    val description = "this is the part description"
+    val wrapperTitle = "test title"
+    val number = 1
+    val xml = teiXml(id=id,title = titleElem(wrapperTitle), parts = List(msPart(id = "1", number = number,summary = Some(summary(description)),languages = List(mainLanguage("ar", "Arabic")) )))
+
+    val result = for {
+      parsed <- TeiXml(id, xml.toString())
+      nestedData <- parsed.nestedTeiData
+    } yield nestedData
+    result shouldBe a[Right[_, _]]
+    result.value shouldBe List(TeiData(id = "1", title = s"$wrapperTitle part $number",description = Some(description),languages = List(Language("ara", "Arabic"))))
+  }
 }

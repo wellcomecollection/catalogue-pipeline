@@ -1,7 +1,7 @@
 package weco.pipeline.transformer.tei
 
 import scala.util.Try
-import scala.xml.{Elem, Node, XML}
+import scala.xml.{Elem, Node, NodeSeq, XML}
 import grizzled.slf4j.Logging
 import cats.syntax.traverse._
 import cats.instances.either._
@@ -59,8 +59,8 @@ class TeiXml(val xml: Elem) extends Logging {
     *    </TEI>
     *
     */
-  def summary: Either[Throwable, Option[String]] = {
-    val nodes = (xml \\ "msDesc" \ "msContents" \ "summary").toList
+  def summary(nodeSeq: NodeSeq = (xml \\ "msDesc" \ "msContents" \ "summary")): Either[Throwable, Option[String]] = {
+    val nodes = nodeSeq.toList
     nodes match {
       case List(node) =>
         // some summary nodes can contain TEI specific xml tags, so we remove them
@@ -70,7 +70,22 @@ class TeiXml(val xml: Elem) extends Logging {
     }
   }
 
-  def nestedTeiData: Either[Throwable, List[TeiData]] =
+  def nestedTeiData = nestedTeiDataFromItems.flatMap{
+    case Nil => title.flatMap(nestedTeiDataFromParts)
+    case datas => Right(datas)
+  }
+
+  private def nestedTeiDataFromParts(wrapperTitle: String): Either[Throwable, List[TeiData]] = (xml \\ "msDesc" \ "msPart").map{node =>for {
+    id <- getIdFrom(node)
+    partNumber <- Try((node \@ "n").toInt).toEither
+    description <- summary(node \ "summary")
+    title = s"$wrapperTitle part $partNumber"
+    languages <- TeiLanguages.parseLanguages(node)
+  } yield TeiData(id = id, title = title, languages = languages, description =description) }
+    .toList
+    .sequence
+
+  private def nestedTeiDataFromItems: Either[Throwable, List[TeiData]] =
     (xml \\ "msDesc" \ "msContents" \ "msItem")
       .map { node =>
         for {
@@ -106,8 +121,8 @@ class TeiXml(val xml: Elem) extends Logging {
     */
   def title: Result[String] = {
     val nodes =
-      (xml \ "teiHeader" \ "fileDesc" \ "titleStmt" \ "title").toList
-    val maybeTitles = nodes.filter(n => n.attributes.isEmpty)
+      (xml \ "teiHeader" \ "fileDesc" \ "publicationStmt" \ "idno" ).toList
+    val maybeTitles = nodes.filter(n => (n \@ "type") == "msID")
     maybeTitles match {
       case List(titleNode) => Right(titleNode.text)
       case Nil             => Left(new RuntimeException("No title found!"))

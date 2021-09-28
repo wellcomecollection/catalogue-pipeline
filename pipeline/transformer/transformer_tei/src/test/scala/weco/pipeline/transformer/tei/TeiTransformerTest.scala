@@ -53,7 +53,7 @@ class TeiTransformerTest
       Work.Visible[Source](
         version = 1,
         data = WorkData[Unidentified](
-          title = Some("Wellcome Library"),
+          title = Some("MS_Arabic_1"),
           description =
             Some("1 copy of al-Qānūn fī al-ṭibb by Avicenna, 980-1037"),
           format = Some(Format.ArchivesAndManuscripts),
@@ -73,12 +73,20 @@ class TeiTransformerTest
       Language(id = "jav", label = "Javanese"))
   }
 
-  it("extracts inner Works") {
+  it("extracts msItem inner Works") {
     val work = transformToWork(filename = "/Batak_36801.xml")(
       id = "Wellcome_Batak_36801"
     )
 
     work.value.state.internalWorkStubs should have size 12
+  }
+
+  it("extracts msPart inner Works") {
+    val work = transformToWork(filename = "/Wellcome_MS_Malay_7.xml")(
+      id = "Wellcome_Malay_7"
+    )
+
+    work.value.state.internalWorkStubs should have size 7
   }
   it("handles delete messages") {
 
