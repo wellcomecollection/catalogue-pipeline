@@ -3,8 +3,20 @@ package weco.pipeline.merger.services
 import org.scalatest.GivenWhenThen
 import org.scalatest.featurespec.AnyFeatureSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.identifiers.{CanonicalId, IdState, IdentifierType, SourceIdentifier}
-import weco.catalogue.internal_model.work.{CollectionPath, InvisibilityReason, Item, MergeCandidate, Work, WorkState}
+import weco.catalogue.internal_model.identifiers.{
+  CanonicalId,
+  IdState,
+  IdentifierType,
+  SourceIdentifier
+}
+import weco.catalogue.internal_model.work.{
+  CollectionPath,
+  InvisibilityReason,
+  Item,
+  MergeCandidate,
+  Work,
+  WorkState
+}
 import weco.catalogue.internal_model.work.generators.SourceWorkGenerators
 import weco.pipeline.merger.fixtures.FeatureTestSugar
 
@@ -220,8 +232,10 @@ class TeiOnMergerScenarioTest
       calmIdentifiedWork()
         .otherIdentifiers(
           List(
-            createSourceIdentifierWith(identifierType = IdentifierType.CalmRefNo),
-            createSourceIdentifierWith(identifierType = IdentifierType.CalmAltRefNo),
+            createSourceIdentifierWith(
+              identifierType = IdentifierType.CalmRefNo),
+            createSourceIdentifierWith(
+              identifierType = IdentifierType.CalmAltRefNo),
           )
         )
         .items(List(createCalmItem))
@@ -231,8 +245,10 @@ class TeiOnMergerScenarioTest
       sierraIdentifiedWork()
         .otherIdentifiers(
           List(
-            createSourceIdentifierWith(identifierType = IdentifierType.SierraIdentifier),
-            createSourceIdentifierWith(identifierType = IdentifierType.WellcomeDigcode),
+            createSourceIdentifierWith(
+              identifierType = IdentifierType.SierraIdentifier),
+            createSourceIdentifierWith(
+              identifierType = IdentifierType.WellcomeDigcode),
           )
         )
         .items(List(createIdentifiedPhysicalItem))
@@ -245,10 +261,12 @@ class TeiOnMergerScenarioTest
       metsIdentifiedWork()
         .thumbnail(createDigitalLocation)
         .items(List(createDigitalItem))
-        .invisible(invisibilityReasons = List(InvisibilityReason.MetsWorksAreNotVisible))
+        .invisible(
+          invisibilityReasons = List(InvisibilityReason.MetsWorksAreNotVisible))
 
     When("they are merged together")
-    val outcome = merger.applyMerge(List(teiWork, sierraWork, metsWork, calmWork).map(Some(_)))
+    val outcome = merger.applyMerge(
+      List(teiWork, sierraWork, metsWork, calmWork).map(Some(_)))
 
     outcome.getMerged(sierraWork) should beRedirectedTo(teiWork)
     outcome.getMerged(metsWork) should beRedirectedTo(teiWork)
