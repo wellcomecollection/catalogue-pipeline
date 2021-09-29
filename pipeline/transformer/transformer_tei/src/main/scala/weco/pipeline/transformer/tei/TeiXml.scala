@@ -70,21 +70,39 @@ class TeiXml(val xml: Elem) extends Logging {
     }
   }
 
+  /**
+   * TEI works can be composed of other works.
+   * This function extracts the information about these nested works.
+   *
+   * Nested works can be specified in TEI as msItem or msPart depending
+   * if the manuscript is a single part manuscript or a multipart manuscript.
+   * check https://github.com/wellcomecollection/wellcome-collection-tei/blob/main/docs/TEI_Manual_2020_V1.pdf
+   * for more info.
+   */
   def nestedTeiData = nestedTeiDataFromItems.flatMap{
     case Nil => title.flatMap(nestedTeiDataFromParts)
-    case datas => Right(datas)
+    case teiDatas => Right(teiDatas)
   }
 
+  /**
+   * Extract information about inner works for multi part manuscripts.
+   * Multi part manuscripts have msPart elements containing information about inner works.
+   * msParts don't have a title so we construct the title concatenating the
+   * title of the wrapper work and the part number.
+   */
   private def nestedTeiDataFromParts(wrapperTitle: String): Either[Throwable, List[TeiData]] = (xml \\ "msDesc" \ "msPart").map{node =>for {
     id <- getIdFrom(node)
     partNumber <- Try((node \@ "n").toInt).toEither
     description <- summary(node \ "summary")
-    title = s"$wrapperTitle part $partNumber"
     languages <- TeiLanguages.parseLanguages(node)
-  } yield TeiData(id = id, title = title, languages = languages, description =description) }
+  } yield TeiData(id = id, title = s"$wrapperTitle part $partNumber", languages = languages, description =description) }
     .toList
     .sequence
 
+  /**
+   * Extract information about inner works for single part manuscripts.
+   * For single part manuscripts, inner works are described in msItem elements.
+   */
   private def nestedTeiDataFromItems: Either[Throwable, List[TeiData]] =
     (xml \\ "msDesc" \ "msContents" \ "msItem")
       .map { node =>
