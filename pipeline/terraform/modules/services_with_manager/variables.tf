@@ -1,3 +1,10 @@
+variable "name" {
+  type = string
+}
+variable "namespace" {
+  type = string
+}
+
 variable "subnets" {
   type = list(string)
 }
@@ -6,9 +13,6 @@ variable "cluster_name" {
 }
 
 variable "cluster_arn" {
-}
-
-variable "service_name" {
 }
 
 variable "security_group_ids" {

@@ -1,6 +1,6 @@
 module "merger_queue" {
   source          = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
-  queue_name      = "${local.namespace}_merger"
+  queue_name      = "${var.namespace}_merger-${local.tei_suffix}"
   topic_arns      = [var.matcher_topic_arn]
   alarm_topic_arn = var.dlq_alarm_arn
 
@@ -10,8 +10,11 @@ module "merger_queue" {
   visibility_timeout_seconds = 20 * 60
 }
 module "merger" {
-  source          = "../../modules/service"
-  service_name    = "${local.namespace}_merger"
+  source = "../../modules/service"
+
+  namespace = var.namespace
+  name      = "merger-${local.tei_suffix}"
+
   container_image = var.merger_image
   security_group_ids = [
     var.service_egress_security_group_id,
@@ -23,7 +26,7 @@ module "merger" {
   cluster_arn  = data.aws_ecs_cluster.cluster.arn
 
   env_vars = {
-    metrics_namespace       = "${local.namespace}_merger"
+    metrics_namespace       = "${var.namespace}_merger"
     merger_queue_id         = module.merger_queue.url
     merger_works_topic_arn  = module.merger_works_topic.arn
     merger_images_topic_arn = module.merger_images_topic.arn
@@ -63,14 +66,14 @@ module "merger" {
 module "merger_works_topic" {
   source = "../../modules/topic"
 
-  name       = "${local.namespace}_merger_works"
+  name       = "${var.namespace}_merger_works-${local.tei_suffix}"
   role_names = [module.merger.task_role_name]
 }
 
 module "merger_images_topic" {
   source = "../../modules/topic"
 
-  name       = "${local.namespace}_merger_images"
+  name       = "${var.namespace}_merger_images-${local.tei_suffix}"
   role_names = [module.merger.task_role_name]
 }
 

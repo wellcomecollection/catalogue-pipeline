@@ -37,8 +37,11 @@ module "matcher_input_queue" {
 # Service
 
 module "matcher" {
-  source          = "../modules/service"
-  service_name    = "${local.namespace_hyphen}_matcher"
+  source = "../modules/service"
+
+  namespace = local.namespace
+  name      = "matcher"
+
   container_image = local.matcher_image
   security_group_ids = [
     aws_security_group.service_egress.id,

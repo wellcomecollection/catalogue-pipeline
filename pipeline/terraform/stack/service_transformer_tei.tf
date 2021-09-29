@@ -14,8 +14,11 @@ module "tei_transformer_queue" {
 }
 
 module "tei_transformer" {
-  source          = "../modules/service"
-  service_name    = "${local.namespace_hyphen}_tei_transformer"
+  source = "../modules/service"
+
+  namespace = local.namespace
+  name      = "tei_transformer"
+
   container_image = local.transformer_tei_image
   security_group_ids = [
     aws_security_group.service_egress.id,

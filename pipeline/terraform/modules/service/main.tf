@@ -1,7 +1,9 @@
 module "worker" {
   source = "../../../../infrastructure/modules/worker"
 
-  name  = var.service_name
+  name         = "${var.namespace}_${var.name}"
+  service_name = var.name
+
   image = var.container_image
 
   env_vars        = var.env_vars

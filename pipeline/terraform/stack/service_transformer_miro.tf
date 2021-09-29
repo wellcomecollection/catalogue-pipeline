@@ -6,8 +6,11 @@ module "miro_transformer_queue" {
 }
 
 module "miro_transformer" {
-  source          = "../modules/service"
-  service_name    = "${local.namespace_hyphen}_miro_transformer"
+  source = "../modules/service"
+
+  namespace = local.namespace
+  name      = "miro_transformer"
+
   container_image = local.transformer_miro_image
   security_group_ids = [
     aws_security_group.service_egress.id,

@@ -14,8 +14,11 @@ module "mets_transformer_queue" {
 }
 
 module "mets_transformer" {
-  source          = "../modules/service"
-  service_name    = "${local.namespace_hyphen}_mets_transformer"
+  source = "../modules/service"
+
+  namespace = local.namespace
+  name      = "mets_transformer"
+
   container_image = local.transformer_mets_image
   security_group_ids = [
     aws_security_group.service_egress.id,

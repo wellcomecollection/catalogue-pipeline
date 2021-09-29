@@ -125,11 +125,6 @@ if __name__ == '__main__':
     newly_created_usernames = []
 
     for username, roles in SERVICES.items():
-        if not set(roles).issubset(newly_created_roles):
-            raise RuntimeError(
-                f"Unrecognised roles: {set(roles) - newly_created_roles}"
-            )
-
         newly_created_usernames.append(create_user(es, username=username, roles=roles))
         click.echo(f"Created user {click.style(username, 'green')}")
 

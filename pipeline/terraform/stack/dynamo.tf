@@ -17,32 +17,6 @@ locals {
   lock_table_billing_mode  = var.is_reindexing ? "PROVISIONED" : "PAY_PER_REQUEST"
 }
 
-# These numbers were chosen by running a reindex and seeing when the
-# matcher started throttling.
-module "matcher_graph_table_autoscaling" {
-  source = "../modules/dynamodb_autoscaling"
-
-  count = var.is_reindexing ? 1 : 0
-
-  table_name = aws_dynamodb_table.matcher_graph_table.name
-
-  max_read_capacity  = 600
-  max_write_capacity = 1000
-}
-
-# These numbers were chosen by running a reindex and seeing when the
-# matcher started throttling.
-module "lock_table_autoscaling" {
-  source = "../modules/dynamodb_autoscaling"
-
-  count = var.is_reindexing ? 1 : 0
-
-  table_name = aws_dynamodb_table.matcher_lock_table.name
-
-  max_read_capacity  = 1500
-  max_write_capacity = 2000
-}
-
 # Graph table
 locals {
   graph_table_name = "${local.namespace_hyphen}_works-graph"
@@ -64,10 +38,18 @@ resource "aws_dynamodb_table" "matcher_graph_table" {
 
   billing_mode = local.graph_table_billing_mode
 
+  # These numbers were chosen by running a reindex and seeing when the
+  # matcher started throttling.
+  read_capacity  = local.graph_table_billing_mode == "PROVISIONED" ? 600 : 1
+  write_capacity = local.graph_table_billing_mode == "PROVISIONED" ? 1000 : 1
+
   global_secondary_index {
     name            = "work-sets-index"
     hash_key        = "componentId"
     projection_type = "ALL"
+
+    read_capacity  = local.graph_table_billing_mode == "PROVISIONED" ? 600 : 1
+    write_capacity = local.graph_table_billing_mode == "PROVISIONED" ? 1000 : 1
   }
 
   tags = {
@@ -77,8 +59,8 @@ resource "aws_dynamodb_table" "matcher_graph_table" {
   lifecycle {
     ignore_changes = [
       global_secondary_index,
-      read_capacity,
-      write_capacity
+      /*read_capacity,*/
+      /*write_capacity*/
     ]
   }
 }
@@ -121,6 +103,11 @@ resource "aws_dynamodb_table" "matcher_lock_table" {
 
   billing_mode = local.lock_table_billing_mode
 
+  # These numbers were chosen by running a reindex and seeing when the
+  # matcher started throttling.
+  read_capacity  = local.lock_table_billing_mode == "PROVISIONED" ? 10 : 1
+  write_capacity = local.lock_table_billing_mode == "PROVISIONED" ? 2500 : 1
+
   attribute {
     name = "id"
     type = "S"
@@ -135,6 +122,9 @@ resource "aws_dynamodb_table" "matcher_lock_table" {
     name            = "context-ids-index"
     hash_key        = "contextId"
     projection_type = "ALL"
+
+    read_capacity  = local.lock_table_billing_mode == "PROVISIONED" ? 10 : 1
+    write_capacity = local.lock_table_billing_mode == "PROVISIONED" ? 2500 : 1
   }
 
   ttl {
@@ -149,8 +139,8 @@ resource "aws_dynamodb_table" "matcher_lock_table" {
   lifecycle {
     ignore_changes = [
       global_secondary_index,
-      read_capacity,
-      write_capacity
+      /*read_capacity,*/
+      /*write_capacity*/
     ]
   }
 }
