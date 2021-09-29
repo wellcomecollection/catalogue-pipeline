@@ -226,19 +226,9 @@ class TeiOnMergerScenarioTest
         )
         .items(List(createCalmItem))
 
+    // Merge candidates point to the Calm work through the Calm/Sierra harvest
     val sierraWork =
       sierraIdentifiedWork()
-        .mergeCandidates(
-          List(
-            MergeCandidate(
-              id = IdState.Identified(
-                canonicalId = calmWork.state.canonicalId,
-                sourceIdentifier = calmWork.state.sourceIdentifier
-              ),
-              reason = "Calm/Sierra harvest"
-            )
-          )
-        )
         .otherIdentifiers(
           List(
             createSourceIdentifierWith(identifierType = IdentifierType.SierraIdentifier),
@@ -247,33 +237,12 @@ class TeiOnMergerScenarioTest
         )
         .items(List(createIdentifiedPhysicalItem))
 
-    val teiWork =
-      teiIdentifiedWork()
-        .mergeCandidates(
-          List(
-            MergeCandidate(
-              id = IdState.Identified(
-                canonicalId = sierraWork.state.canonicalId,
-                sourceIdentifier = sierraWork.state.sourceIdentifier
-              ),
-              reason = "Bnumber present in TEI file"
-            )
-          )
-        )
+    // Merge candidates point to the Sierra bib
+    val teiWork = teiIdentifiedWork()
 
+    // Merge candidates point to the Sierra e-bib
     val metsWork =
       metsIdentifiedWork()
-        .mergeCandidates(
-          List(
-            MergeCandidate(
-              id = IdState.Identified(
-                canonicalId = sierraWork.state.canonicalId,
-                sourceIdentifier = sierraWork.state.sourceIdentifier
-              ),
-              reason = "Calm/Sierra harvest"
-            )
-          )
-        )
         .thumbnail(createDigitalLocation)
         .items(List(createDigitalItem))
         .invisible(invisibilityReasons = List(InvisibilityReason.MetsWorksAreNotVisible))
