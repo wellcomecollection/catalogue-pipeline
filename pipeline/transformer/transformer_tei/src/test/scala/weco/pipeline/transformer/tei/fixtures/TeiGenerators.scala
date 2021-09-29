@@ -13,7 +13,8 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
 
   def summary(str: String) = <summary>{str}</summary>
 
-  def titleElem(str: String) = <publicationStmt><idno type="msID">{str}</idno></publicationStmt>
+  def titleElem(str: String) =
+    <publicationStmt><idno type="msID">{str}</idno></publicationStmt>
 
   def itemTitle(str: String) = <title>{str}</title>
   def originalItemTitle(str: String) = <title type="original">{str}</title>
@@ -31,10 +32,9 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
       {languages}
     </msItem>
 
-  def msContents(
-                  summary: Option[Elem] = None,
-                  languages: List[Elem] = Nil,
-                  items: List[Elem] = Nil) =
+  def msContents(summary: Option[Elem] = None,
+                 languages: List[Elem] = Nil,
+                 items: List[Elem] = Nil) =
     <msContents>
       {summary.getOrElse(NodeSeq.Empty)}
       {languages}
@@ -43,7 +43,7 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
 
   def msPart(id: String,
              number: Int,
-             summary:  Option[Elem] = None,
+             summary: Option[Elem] = None,
              languages: List[Elem] = Nil) =
     <msPart xml:id={id} n={number.toString}>
       {summary.getOrElse(NodeSeq.Empty)}

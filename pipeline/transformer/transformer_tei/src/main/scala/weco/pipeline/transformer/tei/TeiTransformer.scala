@@ -50,7 +50,6 @@ class TeiTransformer(store: Store[S3ObjectLocation, String])
     } yield teiData.toWork(time, version)
 
   private def parse(teiXml: TeiXml): Result[TeiData] =
-
     for {
       summary <- teiXml.summary()
       bNumber <- teiXml.bNumber

@@ -292,17 +292,31 @@ class TeiXmlTest
     result.value shouldBe List(Language(id = "san", label = "Sanskrit"))
   }
 
-  it("can extract nested data from msPart"){
+  it("can extract nested data from msPart") {
     val description = "this is the part description"
     val wrapperTitle = "test title"
     val number = 1
-    val xml = teiXml(id=id,title = titleElem(wrapperTitle), parts = List(msPart(id = "1", number = number,summary = Some(summary(description)),languages = List(mainLanguage("ar", "Arabic")) )))
+    val xml = teiXml(
+      id = id,
+      title = titleElem(wrapperTitle),
+      parts = List(
+        msPart(
+          id = "1",
+          number = number,
+          summary = Some(summary(description)),
+          languages = List(mainLanguage("ar", "Arabic"))))
+    )
 
     val result = for {
       parsed <- TeiXml(id, xml.toString())
       nestedData <- parsed.nestedTeiData
     } yield nestedData
     result shouldBe a[Right[_, _]]
-    result.value shouldBe List(TeiData(id = "1", title = s"$wrapperTitle part $number",description = Some(description),languages = List(Language("ara", "Arabic"))))
+    result.value shouldBe List(
+      TeiData(
+        id = "1",
+        title = s"$wrapperTitle part $number",
+        description = Some(description),
+        languages = List(Language("ara", "Arabic"))))
   }
 }
