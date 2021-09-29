@@ -262,14 +262,7 @@ class TeiOnMergerScenarioTest
         )
 
     val metsWork =
-      identifiedWork(
-        canonicalId = CanonicalId("w7f24nn4"),
-        sourceIdentifier = SourceIdentifier(
-          identifierType = IdentifierType.METS,
-          value = sierraWork.sourceIdentifier.value,
-          ontologyType = "Work"
-        )
-      )
+      metsIdentifiedWork()
         .mergeCandidates(
           List(
             MergeCandidate(
