@@ -171,7 +171,6 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
   private val mergeIntoTeiTarget = new PartialRule {
     val isDefinedForTarget: WorkPredicate = teiWork
     val isDefinedForSource: WorkPredicate =
-      singlePhysicalItemCalmWork or
         singleDigitalItemMetsWork or
         singleDigitalItemMiroWork or
         sierraWork

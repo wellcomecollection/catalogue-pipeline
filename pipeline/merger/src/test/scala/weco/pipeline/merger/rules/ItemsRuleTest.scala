@@ -88,6 +88,15 @@ class ItemsRuleTest
     }
   }
 
+  it("When merging items from sierra and calm, it replaces the calm item with the sierra one") {
+    inside(ItemsRule.merge(tei, List(physicalPictureSierra, calmWork))) {
+      case FieldMergeResult(items, mergedSources) =>
+        items should have size 1
+        items.head shouldBe physicalPictureSierra.data.items.head
+        mergedSources should be(Seq(physicalPictureSierra))
+    }
+  }
+
   it("merges the item from METS works into zero-item Sierra works") {
     inside(ItemsRule.merge(zeroItemPhysicalSierra, List(metsWork))) {
       case FieldMergeResult(items, mergedSources) =>
