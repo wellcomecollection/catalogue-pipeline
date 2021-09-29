@@ -2,7 +2,6 @@ package weco.pipeline.transformer.calm
 
 import grizzled.slf4j.Logging
 import weco.catalogue.internal_model.identifiers._
-import weco.catalogue.internal_model.parse.PeriodParser
 import weco.catalogue.internal_model.work.DeletedReason.{
   DeletedFromSource,
   SuppressedFromSource
@@ -12,12 +11,7 @@ import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.internal_model.work._
 import weco.catalogue.source_model.calm.CalmRecord
 import weco.pipeline.transformer.Transformer
-import weco.pipeline.transformer.calm.models.CalmTransformerException.{
-  LevelMissing,
-  RefNoMissing,
-  TitleMissing,
-  _
-}
+import weco.pipeline.transformer.calm.models.CalmTransformerException._
 import weco.pipeline.transformer.calm.models.{
   CalmRecordOps,
   CalmSourceData,
@@ -25,6 +19,7 @@ import weco.pipeline.transformer.calm.models.{
 }
 import weco.pipeline.transformer.calm.transformers._
 import weco.pipeline.transformer.result.Result
+import weco.pipeline.transformer.transformers.ParsedPeriod
 
 object CalmTransformer
     extends Transformer[CalmSourceData]
@@ -252,7 +247,7 @@ object CalmTransformer
       case dates =>
         List(
           ProductionEvent(
-            dates = dates.map(date => Period(date, PeriodParser(date))),
+            dates = dates.map(ParsedPeriod(_)),
             label = dates.mkString(" "),
             places = Nil,
             agents = Nil,

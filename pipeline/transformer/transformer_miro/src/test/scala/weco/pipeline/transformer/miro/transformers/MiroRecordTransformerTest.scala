@@ -16,6 +16,7 @@ import weco.catalogue.source_model.miro.MiroSourceOverrides
 import weco.pipeline.transformer.miro.generators.MiroRecordGenerators
 import weco.pipeline.transformer.miro.models.MiroMetadata
 import weco.pipeline.transformer.miro.source.MiroRecord
+import weco.pipeline.transformer.transformers.ParsedPeriod
 
 class MiroRecordTransformerTest
     extends AnyFunSpec
@@ -188,7 +189,7 @@ class MiroRecordTransformerTest
         imageNumber = "V1234567"
       )
     )
-    work.data.createdDate shouldBe Some(Period(date))
+    work.data.createdDate shouldBe Some(ParsedPeriod(date))
   }
 
   it("does not pass through the value of the creation date on non-V records") {

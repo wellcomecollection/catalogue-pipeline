@@ -2,9 +2,9 @@ package weco.pipeline.transformer.sierra.transformers.parsers
 
 import fastparse._, NoWhitespace._
 
-import weco.catalogue.internal_model.parse.Parser
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.{Period, ProductionEvent}
+import weco.pipeline.transformer.parse.Parser
 
 /**
   *  Parses Marc 008 fields into ProductionEvent
@@ -20,7 +20,9 @@ object Marc008Parser extends Parser[ProductionEvent[IdState.Unminted]] {
           ProductionEvent(
             label = instantRange.label,
             agents = Nil,
-            dates = Period(instantRange.label, Some(instantRange)) :: Nil,
+            dates = List(
+              Period(label = instantRange.label, range = instantRange)
+            ),
             places = place.toList,
             function = None)
       }

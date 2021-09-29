@@ -1,10 +1,10 @@
-package weco.catalogue.internal_model.work
+package weco.pipeline.transformer.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import org.scalatest.matchers.should.Matchers
 
-class PeriodTest extends AnyFunSpec with Matchers {
+class ParsedPeriodTest extends AnyFunSpec with Matchers {
   it("should add a range to a when there id a parsable label") {
     forAll(
       Table(
@@ -12,7 +12,7 @@ class PeriodTest extends AnyFunSpec with Matchers {
         "1909",
         "[2123]",
       )) { label =>
-      Period(label).range shouldNot be(None)
+      ParsedPeriod(label).range shouldNot be(None)
     }
   }
 
@@ -28,7 +28,7 @@ class PeriodTest extends AnyFunSpec with Matchers {
         "[^216]",
         "[216]",
       )) { label =>
-      Period(label).range shouldBe None
+      ParsedPeriod(label).range shouldBe None
     }
   }
 }

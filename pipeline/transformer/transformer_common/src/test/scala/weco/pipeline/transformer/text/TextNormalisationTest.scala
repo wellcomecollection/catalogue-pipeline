@@ -1,4 +1,4 @@
-package weco.catalogue.internal_model.text
+package weco.pipeline.transformer.text
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.prop.TableDrivenPropertyChecks._

@@ -1,4 +1,4 @@
-package weco.catalogue.internal_model.parse
+package weco.pipeline.transformer.parse
 
 import java.time.LocalDate
 

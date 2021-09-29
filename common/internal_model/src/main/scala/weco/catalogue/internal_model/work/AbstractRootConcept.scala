@@ -1,7 +1,5 @@
 package weco.catalogue.internal_model.work
 
-import weco.catalogue.internal_model.parse.parsers.DateParser
-import weco.catalogue.internal_model.text.TextNormalisation._
 import weco.catalogue.internal_model.identifiers.{HasId, IdState}
 
 sealed trait AbstractRootConcept[+State] extends HasId[State] {
@@ -16,13 +14,8 @@ case class Concept[+State](
 ) extends AbstractConcept[State]
 
 object Concept {
-  def apply[State >: IdState.Unidentifiable.type](
-    label: String): Concept[State] =
-    Concept(IdState.Unidentifiable, label)
-
-  def normalised[State](id: State = IdState.Unidentifiable,
-                        label: String): Concept[State] =
-    Concept(id, label.trimTrailingPeriod)
+  def apply(label: String): Concept[IdState.Unidentifiable.type] =
+    Concept(id = IdState.Unidentifiable, label = label)
 }
 
 case class Period[+State](
@@ -32,19 +25,13 @@ case class Period[+State](
 ) extends AbstractConcept[State]
 
 object Period {
-  def apply[State >: IdState.Unidentifiable.type](
-    label: String,
-    range: Option[InstantRange]): Period[State] =
-    Period(IdState.Unidentifiable, label, range)
-
-  def apply[State >: IdState.Unidentifiable.type](
-    label: String): Period[State] = {
-    val normalisedLabel = label.trimTrailingPeriod
+  def apply(label: String,
+            range: InstantRange): Period[IdState.Unidentifiable.type] =
     Period(
-      IdState.Unidentifiable,
-      normalisedLabel,
-      InstantRange.parse(normalisedLabel))
-  }
+      id = IdState.Unidentifiable,
+      label = label,
+      range = Some(range)
+    )
 }
 
 case class Place[+State](
@@ -53,12 +40,8 @@ case class Place[+State](
 ) extends AbstractConcept[State]
 
 object Place {
-  def apply[State >: IdState.Unidentifiable.type](label: String): Place[State] =
-    Place(IdState.Unidentifiable, label)
-
-  def normalised[State >: IdState.Unidentifiable.type](
-    label: String): Place[State] =
-    Place(label.trimTrailing(':'))
+  def apply(label: String): Place[IdState.Unidentifiable.type] =
+    Place(id = IdState.Unidentifiable, label = label)
 }
 
 sealed trait AbstractAgent[+State] extends AbstractRootConcept[State] {
@@ -71,12 +54,8 @@ case class Agent[+State](
 ) extends AbstractAgent[State]
 
 object Agent {
-  def apply[State >: IdState.Unidentifiable.type](label: String): Agent[State] =
-    Agent(IdState.Unidentifiable, label)
-
-  def normalised[State >: IdState.Unidentifiable.type](
-    label: String): Agent[State] =
-    Agent(label.trimTrailing(','))
+  def apply(label: String): Agent[IdState.Unidentifiable.type] =
+    Agent(id = IdState.Unidentifiable, label = label)
 }
 
 case class Organisation[+State](
@@ -85,13 +64,8 @@ case class Organisation[+State](
 ) extends AbstractAgent[State]
 
 object Organisation {
-  def apply[State >: IdState.Unidentifiable.type](
-    label: String): Organisation[State] =
-    Organisation(IdState.Unidentifiable, label)
-
-  def normalised[State >: IdState.Unidentifiable.type](
-    label: String): Organisation[State] =
-    Organisation(label.trimTrailing(','))
+  def apply(label: String): Organisation[IdState.Unidentifiable.type] =
+    Organisation(id = IdState.Unidentifiable, label = label)
 }
 
 case class Person[+State](
@@ -102,20 +76,8 @@ case class Person[+State](
 ) extends AbstractAgent[State]
 
 object Person {
-  def apply[State >: IdState.Unidentifiable.type](
-    label: String): Person[State] =
-    Person(IdState.Unidentifiable, label)
-
-  def normalised[State >: IdState.Unidentifiable.type](
-    label: String,
-    prefix: Option[String] = None,
-    numeration: Option[String] = None
-  ): Person[State] =
-    Person(
-      id = IdState.Unidentifiable,
-      label = label.trimTrailing(','),
-      prefix = prefix,
-      numeration = numeration)
+  def apply(label: String): Person[IdState.Unidentifiable.type] =
+    Person(id = IdState.Unidentifiable, label = label)
 }
 
 case class Meeting[+State](
@@ -124,11 +86,6 @@ case class Meeting[+State](
 ) extends AbstractAgent[State]
 
 object Meeting {
-  def apply[State >: IdState.Unidentifiable.type](
-    label: String): Meeting[State] =
-    Meeting(IdState.Unidentifiable, label)
-
-  def normalised[State >: IdState.Unidentifiable.type](
-    label: String): Meeting[State] =
-    Meeting(label.trimTrailing(','))
+  def apply(label: String): Meeting[IdState.Unidentifiable.type] =
+    Meeting(id = IdState.Unidentifiable, label = label)
 }

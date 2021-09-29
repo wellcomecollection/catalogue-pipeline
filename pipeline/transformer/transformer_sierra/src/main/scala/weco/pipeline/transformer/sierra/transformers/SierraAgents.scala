@@ -6,10 +6,11 @@ import weco.catalogue.internal_model.identifiers.{
   SourceIdentifier
 }
 import weco.catalogue.internal_model.work.{Meeting, Organisation, Person}
+import weco.pipeline.transformer.transformers.ConceptsTransformer
 import weco.sierra.models.SierraQueryOps
 import weco.sierra.models.marc.Subfield
 
-trait SierraAgents extends SierraQueryOps {
+trait SierraAgents extends SierraQueryOps with ConceptsTransformer {
   // This is used to construct a Person from MARc tags 100, 700 and 600.
   // For all these cases:
   //  - subfield $a populates the person label
@@ -20,24 +21,23 @@ trait SierraAgents extends SierraQueryOps {
     subfields: List[Subfield],
     normalisePerson: Boolean = false): Option[Person[IdState.Unminted]] =
     getLabel(subfields).map { label =>
-      // The rule is to only normalise the 'Person' label when a contributor.  Strictly a 'Person' within
-      // 'Subjects' (sourced from Marc 600) should not be normalised -- however, as these labels
-      // are not expected to have punctuation normalisation should not change the 'Person' label for 'Subjects'
-      // In which case normalisation is effectively a no-op and the test can be removed and Person.normalised
-      // always returned when confident in the data.
-      if (normalisePerson)
-        Person.normalised(
-          label = label,
-          prefix = None,
-          numeration = None
-        )
-      else
+      val person =
         Person(
           id = IdState.Unidentifiable,
           label = label,
           prefix = None,
           numeration = None
         )
+
+      // The rule is to only normalise the 'Person' label when a contributor.  Strictly a 'Person' within
+      // 'Subjects' (sourced from Marc 600) should not be normalised -- however, as these labels
+      // are not expected to have punctuation normalisation should not change the 'Person' label for 'Subjects'
+      // In which case normalisation is effectively a no-op and the test can be removed and Person.normalised
+      // always returned when confident in the data.
+      if (normalisePerson)
+        person.normalised
+      else
+        person
     }
 
   // This is used to construct an Organisation from MARC tags 110 and 710.
@@ -50,11 +50,11 @@ trait SierraAgents extends SierraQueryOps {
   def getOrganisation(
     subfields: List[Subfield]): Option[Organisation[IdState.Unminted]] =
     getLabel(subfields.filterNot(_.tag == "n"))
-      .map { Organisation.normalised }
+      .map { Organisation(_).normalised }
 
   def getMeeting(subfields: List[Subfield]): Option[Meeting[IdState.Unminted]] =
     getLabel(subfields.withTags("a", "c", "d", "t"))
-      .map { Meeting.normalised }
+      .map { Meeting(_).normalised }
 
   /* Given an agent and the associated MARC subfields, look for instances of subfield $0,
    * which are used for identifiers.

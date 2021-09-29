@@ -7,18 +7,14 @@ import weco.catalogue.internal_model.identifiers.{
   IdentifierType,
   SourceIdentifier
 }
-import weco.catalogue.internal_model.work.Concept
 import weco.sierra.generators.MarcGenerators
 import weco.sierra.models.marc.Subfield
 
 class SierraConceptsTest extends AnyFunSpec with Matchers with MarcGenerators {
 
   it("extracts identifiers from subfield 0") {
-    val concept =
-      Concept(label = "Perservering puffins push past perspiration")
-
     val maybeIdentifiedConcept = transformer.identifyConcept(
-      concept = concept,
+      ontologyType = "Concept",
       varField = createVarFieldWith(
         marcTag = "CCC",
         indicator2 = "0",
@@ -39,10 +35,8 @@ class SierraConceptsTest extends AnyFunSpec with Matchers with MarcGenerators {
   }
 
   it("normalises and deduplicates identifiers in subfield 0") {
-    val concept = Concept(label = "Metaphysical mice migrating to Mars")
-
     val maybeIdentifiedConcept = transformer.identifyConcept(
-      concept = concept,
+      ontologyType = "Concept",
       varField = createVarFieldWith(
         marcTag = "CCC",
         indicator2 = "0",
@@ -72,10 +66,8 @@ class SierraConceptsTest extends AnyFunSpec with Matchers with MarcGenerators {
   }
 
   it("ignores multiple instances of subfield 0 in the otherIdentifiers") {
-    val concept = Concept(label = "Hitchhiking horses hurry home")
-
     val maybeIdentifiedConcept = transformer.identifyConcept(
-      concept = concept,
+      ontologyType = "Concept",
       varField = createVarFieldWith(
         marcTag = "CCC",
         subfields = List(

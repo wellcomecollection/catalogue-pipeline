@@ -1,4 +1,4 @@
-package weco.catalogue.internal_model.text
+package weco.pipeline.transformer.text
 
 import scala.util.matching.Regex
 

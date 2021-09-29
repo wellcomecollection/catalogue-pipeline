@@ -22,11 +22,10 @@ class Marc008ParserTest extends AnyFunSpec with Matchers {
           dates = List(
             Period(
               label = "1757",
-              range = Some(
-                InstantRange(
-                  LocalDate of (1757, 1, 1),
-                  LocalDate of (1757, 12, 31),
-                  "1757")))),
+              range = InstantRange(
+                LocalDate of (1757, 1, 1),
+                LocalDate of (1757, 12, 31),
+                "1757"))),
           places = List(Place("England")),
           function = None
         ))
@@ -41,11 +40,10 @@ class Marc008ParserTest extends AnyFunSpec with Matchers {
           dates = List(
             Period(
               label = "2003",
-              range = Some(
-                InstantRange(
-                  LocalDate of (2003, 1, 1),
-                  LocalDate of (2003, 12, 31),
-                  "2003")))),
+              range = InstantRange(
+                LocalDate of (2003, 1, 1),
+                LocalDate of (2003, 12, 31),
+                "2003"))),
           places = List(Place("England")),
           function = None
         ))
@@ -60,11 +58,10 @@ class Marc008ParserTest extends AnyFunSpec with Matchers {
           dates = List(
             Period(
               label = "1908/11/21",
-              range = Some(
-                InstantRange(
-                  LocalDate of (1908, 11, 21),
-                  LocalDate of (1908, 11, 21),
-                  "1908/11/21")))),
+              range = InstantRange(
+                LocalDate of (1908, 11, 21),
+                LocalDate of (1908, 11, 21),
+                "1908/11/21"))),
           places = List(Place("Egypt")),
           function = None
         ))
@@ -79,11 +76,10 @@ class Marc008ParserTest extends AnyFunSpec with Matchers {
           dates = List(
             Period(
               label = "1600-1699",
-              range = Some(
-                InstantRange(
-                  LocalDate of (1600, 1, 1),
-                  LocalDate of (1699, 12, 31),
-                  "1600-1699")))),
+              range = InstantRange(
+                LocalDate of (1600, 1, 1),
+                LocalDate of (1699, 12, 31),
+                "1600-1699"))),
           places = Nil,
           function = None
         ))

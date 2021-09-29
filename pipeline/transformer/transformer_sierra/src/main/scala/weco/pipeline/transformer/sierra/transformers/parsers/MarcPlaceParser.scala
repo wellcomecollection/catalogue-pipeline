@@ -2,9 +2,9 @@ package weco.pipeline.transformer.sierra.transformers.parsers
 
 import fastparse._, NoWhitespace._
 
-import weco.catalogue.internal_model.parse.Parser
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.Place
+import weco.pipeline.transformer.parse.Parser
 
 /**
   *  Parses Marc country information

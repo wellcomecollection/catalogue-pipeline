@@ -1,4 +1,4 @@
-package weco.catalogue.internal_model.parse
+package weco.pipeline.transformer.parse
 
 import fastparse._
 import grizzled.slf4j.Logging
@@ -31,6 +31,5 @@ trait Parser[T] extends Logging {
   *  Parser implementations intended to be used as implicit parameters
   */
 package object parsers {
-
   implicit val DateParser: Parser[InstantRange] = PeriodParser
 }
