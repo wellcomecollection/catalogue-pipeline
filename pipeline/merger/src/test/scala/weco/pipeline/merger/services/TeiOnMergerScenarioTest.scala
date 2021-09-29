@@ -3,8 +3,8 @@ package weco.pipeline.merger.services
 import org.scalatest.GivenWhenThen
 import org.scalatest.featurespec.AnyFeatureSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.identifiers.IdentifierType
-import weco.catalogue.internal_model.work.{CollectionPath, Work, WorkState}
+import weco.catalogue.internal_model.identifiers.{CanonicalId, IdState, IdentifierType, SourceIdentifier}
+import weco.catalogue.internal_model.work.{CollectionPath, InvisibilityReason, Item, MergeCandidate, Work, WorkState}
 import weco.catalogue.internal_model.work.generators.SourceWorkGenerators
 import weco.pipeline.merger.fixtures.FeatureTestSugar
 
@@ -216,743 +216,119 @@ class TeiOnMergerScenarioTest
 
   Scenario("A TEI work, a Calm work, a Sierra work and a METS work") {
     Given("a TEI work")
-    import weco.json.JsonUtil._
-    val teiWork = fromJson[Work.Visible[WorkState.Identified]](
-      """{
-        |    "version" : 0,
-        |    "data" : {
-        |      "title" : "Medical Epitome",
-        |      "otherIdentifiers" : [ ],
-        |      "alternativeTitles" : [ ],
-        |      "format" : {
-        |        "id" : "h",
-        |        "label" : "Archives and manuscripts"
-        |      },
-        |      "description" : "Paul of Aegina's Medical Epitome",
-        |      "subjects" : [ ],
-        |      "genres" : [ ],
-        |      "contributors" : [ ],
-        |      "production" : [ ],
-        |      "languages" : [
-        |        {
-        |          "id" : "grc",
-        |          "label" : "Greek, Ancient (to 1453)"
-        |        }
-        |      ],
-        |      "notes" : [ ],
-        |      "items" : [ ],
-        |      "holdings" : [ ],
-        |      "collectionPath" : {
-        |        "path" : "MS_MSL_114"
-        |      },
-        |      "imageData" : [ ],
-        |      "workType" : "Standard"
-        |    },
-        |    "state" : {
-        |      "sourceIdentifier" : {
-        |        "identifierType" : {
-        |          "id" : "tei-manuscript-id"
-        |        },
-        |        "ontologyType" : "Work",
-        |        "value" : "MS_MSL_114"
-        |      },
-        |      "canonicalId" : "ggge7hh2",
-        |      "sourceModifiedTime" : "2021-07-07T14:51:47Z",
-        |      "mergeCandidates" : [
-        |        {
-        |          "id" : {
-        |            "canonicalId" : "u94bmv2z",
-        |            "sourceIdentifier" : {
-        |              "identifierType" : {
-        |                "id" : "sierra-system-number"
-        |              },
-        |              "ontologyType" : "Work",
-        |              "value" : "b18764459"
-        |            },
-        |            "otherIdentifiers" : [ ]
-        |          },
-        |          "reason" : "Bnumber present in TEI file"
-        |        }
-        |      ],
-        |      "internalWorkStubs" : [ ]
-        |    },
-        |    "redirectSources" : [ ],
-        |    "type" : "Visible"
-        |  }""".stripMargin
-    ).get
+    val teiWork =
+      identifiedWork(
+        canonicalId = CanonicalId("ggge7hh2"),
+        sourceIdentifier = SourceIdentifier(
+          identifierType = IdentifierType.Tei,
+          value = "MS_MSL_114",
+          ontologyType = "Work"
+        )
+      )
+        .mergeCandidates(
+          List(
+            MergeCandidate(
+              id = IdState.Identified(
+                canonicalId = CanonicalId("u94bmv2z"),
+                sourceIdentifier = SourceIdentifier(
+                  identifierType = IdentifierType.SierraSystemNumber,
+                  value = "b18764459",
+                  ontologyType = "Work"
+                )
+              ),
+              reason = "Bnumber present in TEI file"
+            )
+          )
+        )
 
-    val sierraWork = fromJson[Work[WorkState.Identified]]("""{
-                                                  |    "version" : 692,
-                                                  |    "data" : {
-                                                  |      "title" : "The Works of Paulus Aegineta",
-                                                  |      "otherIdentifiers" : [
-                                                  |        {
-                                                  |          "identifierType" : {
-                                                  |            "id" : "sierra-identifier"
-                                                  |          },
-                                                  |          "ontologyType" : "Work",
-                                                  |          "value" : "1876445"
-                                                  |        },
-                                                  |        {
-                                                  |          "identifierType" : {
-                                                  |            "id" : "wellcome-digcode"
-                                                  |          },
-                                                  |          "ontologyType" : "Work",
-                                                  |          "value" : "digwms"
-                                                  |        },
-                                                  |        {
-                                                  |          "identifierType" : {
-                                                  |            "id" : "wellcome-digcode"
-                                                  |          },
-                                                  |          "ontologyType" : "Work",
-                                                  |          "value" : "diggreek"
-                                                  |        }
-                                                  |      ],
-                                                  |      "alternativeTitles" : [ ],
-                                                  |      "format" : {
-                                                  |        "id" : "h",
-                                                  |        "label" : "Archives and manuscripts"
-                                                  |      },
-                                                  |      "description" : "<p><p>This fine manuscript is in good condition throughout, except for some water-stains on the last 10 folios. It bears no title-page, nor is the copyist known. Folio 1 has a text in two columns that has no relation to the body of the manuscript, and there are some marginal notes on folios 195-197; otherwise the whole is the work of one writer. The manuscript contains the whole of the seven books of Paulus Aegineta, and it must be assigned to the first half of the fifteenth century. It is one of the most valuable Greek texts in the collection, but it does not appear to have been collated by previous editors.</p><p>1. ff. 1r-v. Untitled text not connected to body of manuscript. <p>2. ff. 2-19v. Book i., treating of hygiene generally, including pregnancy, diseases of children, baths, foods, regimen, sleep, etc.</p><p>3. ff. 19v-36. Book ii., treating of fevers.</p><p>4. ff. 36v-88. Book iii., Local affections dealt with in topical order titfrom the top of the head to the soles of the feet.</p><p>5. ff. 88v-108. Book iv., External affections not peculiar to any particular part of the body; intestinal worms.</p><p>6. ff. 108v-118. Book v., Wounds, bites of men and animals, hydrophobia, and poisons. In the manuscript, this book is erroneously called the sixth.</p><p>7. ff. 118v-151. Book vi., treating of surgery, fractures and dislocations. Note: one page has been missed out in foliation, between f.128v and f.129r. <p>8. ff. 151v-197v. Book vii., The properties of drugs and composition of medicines; weights and measures.</p> <p>9. ff.197v-198v. Untitled text in different hands.</p>",
-                                                  |      "physicalDescription" : "198 folios<br/>Folio. 30 × 23 cm. Tooled leather (18th cent.) binding, rebacked.",
-                                                  |      "subjects" : [
-                                                  |        {
-                                                  |          "id" : {
-                                                  |            "type" : "Unidentifiable"
-                                                  |          },
-                                                  |          "label" : "Pregnancy",
-                                                  |          "concepts" : [
-                                                  |            {
-                                                  |              "id" : {
-                                                  |                "type" : "Unidentifiable"
-                                                  |              },
-                                                  |              "label" : "Pregnancy",
-                                                  |              "type" : "Concept"
-                                                  |            }
-                                                  |          ]
-                                                  |        },
-                                                  |        {
-                                                  |          "id" : {
-                                                  |            "type" : "Unidentifiable"
-                                                  |          },
-                                                  |          "label" : "Child Welfare",
-                                                  |          "concepts" : [
-                                                  |            {
-                                                  |              "id" : {
-                                                  |                "type" : "Unidentifiable"
-                                                  |              },
-                                                  |              "label" : "Child Welfare",
-                                                  |              "type" : "Concept"
-                                                  |            }
-                                                  |          ]
-                                                  |        },
-                                                  |        {
-                                                  |          "id" : {
-                                                  |            "type" : "Unidentifiable"
-                                                  |          },
-                                                  |          "label" : "Hygiene",
-                                                  |          "concepts" : [
-                                                  |            {
-                                                  |              "id" : {
-                                                  |                "type" : "Unidentifiable"
-                                                  |              },
-                                                  |              "label" : "Hygiene",
-                                                  |              "type" : "Concept"
-                                                  |            }
-                                                  |          ]
-                                                  |        },
-                                                  |        {
-                                                  |          "id" : {
-                                                  |            "type" : "Unidentifiable"
-                                                  |          },
-                                                  |          "label" : "Sleep",
-                                                  |          "concepts" : [
-                                                  |            {
-                                                  |              "id" : {
-                                                  |                "type" : "Unidentifiable"
-                                                  |              },
-                                                  |              "label" : "Sleep",
-                                                  |              "type" : "Concept"
-                                                  |            }
-                                                  |          ]
-                                                  |        },
-                                                  |        {
-                                                  |          "id" : {
-                                                  |            "type" : "Unidentifiable"
-                                                  |          },
-                                                  |          "label" : "Diet",
-                                                  |          "concepts" : [
-                                                  |            {
-                                                  |              "id" : {
-                                                  |                "type" : "Unidentifiable"
-                                                  |              },
-                                                  |              "label" : "Diet",
-                                                  |              "type" : "Concept"
-                                                  |            }
-                                                  |          ]
-                                                  |        },
-                                                  |        {
-                                                  |          "id" : {
-                                                  |            "type" : "Unidentifiable"
-                                                  |          },
-                                                  |          "label" : "Fever",
-                                                  |          "concepts" : [
-                                                  |            {
-                                                  |              "id" : {
-                                                  |                "type" : "Unidentifiable"
-                                                  |              },
-                                                  |              "label" : "Fever",
-                                                  |              "type" : "Concept"
-                                                  |            }
-                                                  |          ]
-                                                  |        },
-                                                  |        {
-                                                  |          "id" : {
-                                                  |            "type" : "Unidentifiable"
-                                                  |          },
-                                                  |          "label" : "Parasites",
-                                                  |          "concepts" : [
-                                                  |            {
-                                                  |              "id" : {
-                                                  |                "type" : "Unidentifiable"
-                                                  |              },
-                                                  |              "label" : "Parasites",
-                                                  |              "type" : "Concept"
-                                                  |            }
-                                                  |          ]
-                                                  |        },
-                                                  |        {
-                                                  |          "id" : {
-                                                  |            "type" : "Unidentifiable"
-                                                  |          },
-                                                  |          "label" : "Disease",
-                                                  |          "concepts" : [
-                                                  |            {
-                                                  |              "id" : {
-                                                  |                "type" : "Unidentifiable"
-                                                  |              },
-                                                  |              "label" : "Disease",
-                                                  |              "type" : "Concept"
-                                                  |            }
-                                                  |          ]
-                                                  |        },
-                                                  |        {
-                                                  |          "id" : {
-                                                  |            "type" : "Unidentifiable"
-                                                  |          },
-                                                  |          "label" : "Wounds and Injuries",
-                                                  |          "concepts" : [
-                                                  |            {
-                                                  |              "id" : {
-                                                  |                "type" : "Unidentifiable"
-                                                  |              },
-                                                  |              "label" : "Wounds and Injuries",
-                                                  |              "type" : "Concept"
-                                                  |            }
-                                                  |          ]
-                                                  |        },
-                                                  |        {
-                                                  |          "id" : {
-                                                  |            "type" : "Unidentifiable"
-                                                  |          },
-                                                  |          "label" : "Bites and Stings",
-                                                  |          "concepts" : [
-                                                  |            {
-                                                  |              "id" : {
-                                                  |                "type" : "Unidentifiable"
-                                                  |              },
-                                                  |              "label" : "Bites and Stings",
-                                                  |              "type" : "Concept"
-                                                  |            }
-                                                  |          ]
-                                                  |        },
-                                                  |        {
-                                                  |          "id" : {
-                                                  |            "type" : "Unidentifiable"
-                                                  |          },
-                                                  |          "label" : "Poisons",
-                                                  |          "concepts" : [
-                                                  |            {
-                                                  |              "id" : {
-                                                  |                "type" : "Unidentifiable"
-                                                  |              },
-                                                  |              "label" : "Poisons",
-                                                  |              "type" : "Concept"
-                                                  |            }
-                                                  |          ]
-                                                  |        },
-                                                  |        {
-                                                  |          "id" : {
-                                                  |            "type" : "Unidentifiable"
-                                                  |          },
-                                                  |          "label" : "General Surgery",
-                                                  |          "concepts" : [
-                                                  |            {
-                                                  |              "id" : {
-                                                  |                "type" : "Unidentifiable"
-                                                  |              },
-                                                  |              "label" : "General Surgery",
-                                                  |              "type" : "Concept"
-                                                  |            }
-                                                  |          ]
-                                                  |        },
-                                                  |        {
-                                                  |          "id" : {
-                                                  |            "type" : "Unidentifiable"
-                                                  |          },
-                                                  |          "label" : "Fractures",
-                                                  |          "concepts" : [
-                                                  |            {
-                                                  |              "id" : {
-                                                  |                "type" : "Unidentifiable"
-                                                  |              },
-                                                  |              "label" : "Fractures",
-                                                  |              "type" : "Concept"
-                                                  |            }
-                                                  |          ]
-                                                  |        },
-                                                  |        {
-                                                  |          "id" : {
-                                                  |            "type" : "Unidentifiable"
-                                                  |          },
-                                                  |          "label" : "Joint Dislocations",
-                                                  |          "concepts" : [
-                                                  |            {
-                                                  |              "id" : {
-                                                  |                "type" : "Unidentifiable"
-                                                  |              },
-                                                  |              "label" : "Joint Dislocations",
-                                                  |              "type" : "Concept"
-                                                  |            }
-                                                  |          ]
-                                                  |        },
-                                                  |        {
-                                                  |          "id" : {
-                                                  |            "type" : "Unidentifiable"
-                                                  |          },
-                                                  |          "label" : "Pharmacology",
-                                                  |          "concepts" : [
-                                                  |            {
-                                                  |              "id" : {
-                                                  |                "type" : "Unidentifiable"
-                                                  |              },
-                                                  |              "label" : "Pharmacology",
-                                                  |              "type" : "Concept"
-                                                  |            }
-                                                  |          ]
-                                                  |        },
-                                                  |        {
-                                                  |          "id" : {
-                                                  |            "type" : "Unidentifiable"
-                                                  |          },
-                                                  |          "label" : "Pharmaceutical Preparations",
-                                                  |          "concepts" : [
-                                                  |            {
-                                                  |              "id" : {
-                                                  |                "type" : "Unidentifiable"
-                                                  |              },
-                                                  |              "label" : "Pharmaceutical Preparations",
-                                                  |              "type" : "Concept"
-                                                  |            }
-                                                  |          ]
-                                                  |        },
-                                                  |        {
-                                                  |          "id" : {
-                                                  |            "type" : "Unidentifiable"
-                                                  |          },
-                                                  |          "label" : "Weights and Measures",
-                                                  |          "concepts" : [
-                                                  |            {
-                                                  |              "id" : {
-                                                  |                "type" : "Unidentifiable"
-                                                  |              },
-                                                  |              "label" : "Weights and Measures",
-                                                  |              "type" : "Concept"
-                                                  |            }
-                                                  |          ]
-                                                  |        },
-                                                  |        {
-                                                  |          "id" : {
-                                                  |            "type" : "Unidentifiable"
-                                                  |          },
-                                                  |          "label" : "Life Style",
-                                                  |          "concepts" : [
-                                                  |            {
-                                                  |              "id" : {
-                                                  |                "type" : "Unidentifiable"
-                                                  |              },
-                                                  |              "label" : "Life Style",
-                                                  |              "type" : "Concept"
-                                                  |            }
-                                                  |          ]
-                                                  |        },
-                                                  |        {
-                                                  |          "id" : {
-                                                  |            "type" : "Unidentifiable"
-                                                  |          },
-                                                  |          "label" : "Manuscripts, Greek",
-                                                  |          "concepts" : [
-                                                  |            {
-                                                  |              "id" : {
-                                                  |                "type" : "Unidentifiable"
-                                                  |              },
-                                                  |              "label" : "Manuscripts, Greek",
-                                                  |              "type" : "Concept"
-                                                  |            }
-                                                  |          ]
-                                                  |        }
-                                                  |      ],
-                                                  |      "genres" : [
-                                                  |        {
-                                                  |          "label" : "Archives",
-                                                  |          "concepts" : [
-                                                  |            {
-                                                  |              "id" : {
-                                                  |                "type" : "Unidentifiable"
-                                                  |              },
-                                                  |              "label" : "Archives",
-                                                  |              "type" : "Concept"
-                                                  |            }
-                                                  |          ]
-                                                  |        }
-                                                  |      ],
-                                                  |      "contributors" : [ ],
-                                                  |      "production" : [
-                                                  |        {
-                                                  |          "label" : "Early 15th century",
-                                                  |          "places" : [ ],
-                                                  |          "agents" : [ ],
-                                                  |          "dates" : [
-                                                  |            {
-                                                  |              "id" : {
-                                                  |                "type" : "Unidentifiable"
-                                                  |              },
-                                                  |              "label" : "Early 15th century",
-                                                  |              "range" : {
-                                                  |                "from" : "1400-01-01T00:00:00Z",
-                                                  |                "to" : "1439-12-31T23:59:59.999999999Z",
-                                                  |                "label" : "Early 15th century"
-                                                  |              }
-                                                  |            }
-                                                  |          ]
-                                                  |        }
-                                                  |      ],
-                                                  |      "languages" : [
-                                                  |        {
-                                                  |          "id" : "eng",
-                                                  |          "label" : "English"
-                                                  |        }
-                                                  |      ],
-                                                  |      "notes" : [
-                                                  |        {
-                                                  |          "noteType" : {
-                                                  |            "id" : "location-of-original",
-                                                  |            "label" : "Location of original"
-                                                  |          },
-                                                  |          "contents" : "Wellcome Library; GB."
-                                                  |        },
-                                                  |        {
-                                                  |          "noteType" : {
-                                                  |            "id" : "ownership-note",
-                                                  |            "label" : "Ownership note"
-                                                  |          },
-                                                  |          "contents" : "On flyleaf: \"Ex Bibliotheca Askeviana. P. ii. Art. 404. J. SIMS.\""
-                                                  |        },
-                                                  |        {
-                                                  |          "noteType" : {
-                                                  |            "id" : "terms-of-use",
-                                                  |            "label" : "Terms of use"
-                                                  |          },
-                                                  |          "contents" : "Images are supplied for private research only at the Archivist's discretion. Please note that material may be unsuitable for copying on conservation grounds. Researchers who wish to publish material must seek copyright permission from the copyright owner."
-                                                  |        },
-                                                  |        {
-                                                  |          "noteType" : {
-                                                  |            "id" : "location-of-duplicates",
-                                                  |            "label" : "Location of duplicates"
-                                                  |          },
-                                                  |          "contents" : "This material has been digitised and can be freely accessed online through the Wellcome Library catalogue."
-                                                  |        },
-                                                  |        {
-                                                  |          "noteType" : {
-                                                  |            "id" : "publication-note",
-                                                  |            "label" : "Publications note"
-                                                  |          },
-                                                  |          "contents" : \"\"\"This manuscript is described in detail by Petros Bouras-Vallianatos in <a href="http://dx.doi.org/10.1017/mdh.2015.6" target="_blank"><i>Medical History</i> <b>59</b> (2015), pp.275-326</a>.\"\"\"
-                                                  |        }
-                                                  |      ],
-                                                  |      "items" : [
-                                                  |        {
-                                                  |          "id" : {
-                                                  |            "canonicalId" : "ne45wbr7",
-                                                  |            "sourceIdentifier" : {
-                                                  |              "identifierType" : {
-                                                  |                "id" : "sierra-system-number"
-                                                  |              },
-                                                  |              "ontologyType" : "Item",
-                                                  |              "value" : "i17540823"
-                                                  |            },
-                                                  |            "otherIdentifiers" : [
-                                                  |              {
-                                                  |                "identifierType" : {
-                                                  |                  "id" : "sierra-identifier"
-                                                  |                },
-                                                  |                "ontologyType" : "Item",
-                                                  |                "value" : "1754082"
-                                                  |              }
-                                                  |            ],
-                                                  |            "type" : "Identified"
-                                                  |          },
-                                                  |          "locations" : [
-                                                  |            {
-                                                  |              "locationType" : {
-                                                  |                "id" : "closed-stores"
-                                                  |              },
-                                                  |              "label" : "Closed stores",
-                                                  |              "accessConditions" : [
-                                                  |                {
-                                                  |                  "method" : {
-                                                  |                    "type" : "OnlineRequest"
-                                                  |                  },
-                                                  |                  "status" : {
-                                                  |                    "type" : "Open"
-                                                  |                  }
-                                                  |                }
-                                                  |              ],
-                                                  |              "type" : "PhysicalLocation"
-                                                  |            }
-                                                  |          ]
-                                                  |        }
-                                                  |      ],
-                                                  |      "holdings" : [ ],
-                                                  |      "imageData" : [ ],
-                                                  |      "workType" : "Standard"
-                                                  |    },
-                                                  |    "state" : {
-                                                  |      "sourceIdentifier" : {
-                                                  |        "identifierType" : {
-                                                  |          "id" : "sierra-system-number"
-                                                  |        },
-                                                  |        "ontologyType" : "Work",
-                                                  |        "value" : "b18764459"
-                                                  |      },
-                                                  |      "canonicalId" : "u94bmv2z",
-                                                  |      "sourceModifiedTime" : "2021-09-27T03:17:13Z",
-                                                  |      "mergeCandidates" : [
-                                                  |        {
-                                                  |          "id" : {
-                                                  |            "canonicalId" : "ej2bwuar",
-                                                  |            "sourceIdentifier" : {
-                                                  |              "identifierType" : {
-                                                  |                "id" : "calm-record-id"
-                                                  |              },
-                                                  |              "ontologyType" : "Work",
-                                                  |              "value" : "95216d9a-a7d2-44b5-ac35-87213ec720af"
-                                                  |            },
-                                                  |            "otherIdentifiers" : [ ]
-                                                  |          },
-                                                  |          "reason" : "Calm/Sierra harvest"
-                                                  |        }
-                                                  |      ],
-                                                  |      "internalWorkStubs" : [ ]
-                                                  |    },
-                                                  |    "redirectSources" : [ ],
-                                                  |    "type" : "Visible"
-                                                  |  }""".stripMargin).get
+    val sierraWork =
+      identifiedWork(
+        canonicalId = CanonicalId("u94bmv2z"),
+        sourceIdentifier = SourceIdentifier(
+          identifierType = IdentifierType.SierraSystemNumber,
+          value = "b18764459",
+          ontologyType = "Work"
+        )
+      )
+        .mergeCandidates(
+          List(
+            MergeCandidate(
+              id = IdState.Identified(
+                canonicalId = CanonicalId("ej2bwuar"),
+                sourceIdentifier = SourceIdentifier(
+                  identifierType = IdentifierType.CalmRecordIdentifier,
+                  value = "95216d9a-a7d2-44b5-ac35-87213ec720af",
+                  ontologyType = "Work"
+                )
+              ),
+              reason = "Calm/Sierra harvest"
+            )
+          )
+        )
+        .otherIdentifiers(
+          List(
+            SourceIdentifier(
+              identifierType = IdentifierType.SierraIdentifier,
+              value = "1876445",
+              ontologyType = "Work"
+            ),
+            SourceIdentifier(
+              identifierType = IdentifierType.WellcomeDigcode,
+              value = "diggreek",
+              ontologyType = "Work"
+            ),
+          )
+        )
+        .items(List(createIdentifiedPhysicalItem))
 
-    val metsWork = fromJson[Work[WorkState.Identified]]("""{
-                                                          |    "version" : 1,
-                                                          |    "data" : {
-                                                          |      "title" : "[The Works of Paulus Aegineta] Untitled text in two columns that bears no relation to the body of the manuscript. Book i., treating of hygiene generally, including pregnancy, diseases of children, baths, foods, regimen, sleep, etc. Book ii., treating of fevers. Book iii., Local affections dealt with in topical order from the top of the head to the soles of the feet. Book iv., External affections not peculiar to any particular part of the body; intestinal worms. Book v., Wounds, bites of men and animals, hydrophobia, and poisons. In the manuscript, this book is erroneously called the sixth. Book vi., treating of surgery, fractures and dislocations. Book vii., The properties of drugs and composition of medicines; weights and measures. Untitled text in different hands.",
-                                                          |      "otherIdentifiers" : [ ],
-                                                          |      "alternativeTitles" : [ ],
-                                                          |      "subjects" : [ ],
-                                                          |      "genres" : [ ],
-                                                          |      "contributors" : [ ],
-                                                          |      "thumbnail" : {
-                                                          |        "url" : "https://iiif.wellcomecollection.org/thumbs/b18764459_ms_114_0001.JP2/full/!200,200/0/default.jpg",
-                                                          |        "locationType" : {
-                                                          |          "id" : "thumbnail-image"
-                                                          |        },
-                                                          |        "license" : {
-                                                          |          "id" : "pdm"
-                                                          |        },
-                                                          |        "accessConditions" : [ ],
-                                                          |        "type" : "DigitalLocation"
-                                                          |      },
-                                                          |      "production" : [ ],
-                                                          |      "languages" : [ ],
-                                                          |      "notes" : [ ],
-                                                          |      "items" : [
-                                                          |        {
-                                                          |          "id" : {
-                                                          |            "type" : "Unidentifiable"
-                                                          |          },
-                                                          |          "locations" : [
-                                                          |            {
-                                                          |              "url" : "https://iiif.wellcomecollection.org/presentation/v2/b18764459",
-                                                          |              "locationType" : {
-                                                          |                "id" : "iiif-presentation"
-                                                          |              },
-                                                          |              "license" : {
-                                                          |                "id" : "pdm"
-                                                          |              },
-                                                          |              "accessConditions" : [
-                                                          |                {
-                                                          |                  "method" : {
-                                                          |                    "type" : "ViewOnline"
-                                                          |                  },
-                                                          |                  "status" : {
-                                                          |                    "type" : "Open"
-                                                          |                  }
-                                                          |                }
-                                                          |              ],
-                                                          |              "type" : "DigitalLocation"
-                                                          |            }
-                                                          |          ]
-                                                          |        }
-                                                          |      ],
-                                                          |      "holdings" : [ ],
-                                                          |      "imageData" : [],
-                                                          |      "workType" : "Standard"
-                                                          |    },
-                                                          |    "state" : {
-                                                          |      "sourceIdentifier" : {
-                                                          |        "identifierType" : {
-                                                          |          "id" : "mets"
-                                                          |        },
-                                                          |        "ontologyType" : "Work",
-                                                          |        "value" : "b18764459"
-                                                          |      },
-                                                          |      "canonicalId" : "w7f24nn4",
-                                                          |      "sourceModifiedTime" : "2019-09-14T07:32:01.211Z",
-                                                          |      "mergeCandidates" : [
-                                                          |        {
-                                                          |          "id" : {
-                                                          |            "canonicalId" : "u94bmv2z",
-                                                          |            "sourceIdentifier" : {
-                                                          |              "identifierType" : {
-                                                          |                "id" : "sierra-system-number"
-                                                          |              },
-                                                          |              "ontologyType" : "Work",
-                                                          |              "value" : "b18764459"
-                                                          |            },
-                                                          |            "otherIdentifiers" : [ ]
-                                                          |          },
-                                                          |          "reason" : "METS work"
-                                                          |        }
-                                                          |      ],
-                                                          |      "internalWorkStubs" : [ ]
-                                                          |    },
-                                                          |    "invisibilityReasons" : [
-                                                          |      {
-                                                          |        "type" : "MetsWorksAreNotVisible"
-                                                          |      }
-                                                          |    ],
-                                                          |    "type" : "Invisible"
-                                                          |  }""".stripMargin).get
+    val metsWork =
+      identifiedWork(
+        canonicalId = CanonicalId("w7f24nn4"),
+        sourceIdentifier = SourceIdentifier(
+          identifierType = IdentifierType.METS,
+          value = "b18764459",
+          ontologyType = "Work"
+        )
+      )
+        .mergeCandidates(
+          List(
+            MergeCandidate(
+              id = IdState.Identified(
+                canonicalId = sierraWork.state.canonicalId,
+                sourceIdentifier = sierraWork.state.sourceIdentifier
+              ),
+              reason = "Calm/Sierra harvest"
+            )
+          )
+        )
+        .thumbnail(createDigitalLocation)
+        .items(List(createDigitalItem))
+        .invisible(invisibilityReasons = List(InvisibilityReason.MetsWorksAreNotVisible))
 
-    val calmWork = fromJson[Work[WorkState.Identified]]("""{
-                                                          |    "version" : 5,
-                                                          |    "data" : {
-                                                          |      "title" : "The Works of Paulus Aegineta",
-                                                          |      "otherIdentifiers" : [
-                                                          |        {
-                                                          |          "identifierType" : {
-                                                          |            "id" : "calm-ref-no"
-                                                          |          },
-                                                          |          "ontologyType" : "Work",
-                                                          |          "value" : "MSMSL114"
-                                                          |        },
-                                                          |        {
-                                                          |          "identifierType" : {
-                                                          |            "id" : "calm-altref-no"
-                                                          |          },
-                                                          |          "ontologyType" : "Work",
-                                                          |          "value" : "MS.MSL.114"
-                                                          |        }
-                                                          |      ],
-                                                          |      "alternativeTitles" : [ ],
-                                                          |      "format" : {
-                                                          |        "id" : "h",
-                                                          |        "label" : "Archives and manuscripts"
-                                                          |      },
-                                                          |      "description" : \"\"\"<p>This fine manuscript is in good condition throughout, except for some water-stains on the last 10 folios. It bears no title-page, nor is the copyist known. Folio 1 has a text in two columns that has no relation to the body of the manuscript, and there are some marginal notes on folios 195-197; otherwise the whole is the work of one writer. The manuscript contains the whole of the seven books of Paulus Aegineta, and it must be assigned to the first half of the fifteenth century. It is one of the most valuable Greek texts in the collection, but it does not appear to have been collated by previous editors.</p>
-                                                          |
-                                                          |<p>1. ff. 1r-v. Untitled text not connected to body of manuscript.
-                                                          |
-                                                          |</p><p>2. ff. 2-19v. Book i., treating of hygiene generally, including pregnancy, diseases of children, baths, foods, regimen, sleep, etc.</p>
-                                                          |
-                                                          |<p>3. ff. 19v-36. Book ii., treating of fevers.</p>
-                                                          |
-                                                          |<p>4. ff. 36v-88. Book iii., Local affections dealt with in topical order titfrom the top of the head to the soles of the feet.</p>
-                                                          |
-                                                          |<p>5. ff. 88v-108. Book iv., External affections not peculiar to any particular part of the body; intestinal worms.</p>
-                                                          |
-                                                          |<p>6. ff. 108v-118. Book v., Wounds, bites of men and animals, hydrophobia, and poisons. In the manuscript, this book is erroneously called the sixth.</p>
-                                                          |
-                                                          |<p>7. ff. 118v-151. Book vi., treating of surgery, fractures and dislocations. Note: one page has been missed out in foliation, between f.128v and f.129r.
-                                                          |
-                                                          |</p><p>8. ff. 151v-197v. Book vii., The properties of drugs and composition of medicines; weights and measures.</p>
-                                                          |
-                                                          |<p>9. ff.197v-198v. Untitled text in different hands.</p>\"\"\",
-                                                          |      "physicalDescription" : "198 folios Folio. 30 × 23 cm. Tooled leather (18th cent.) binding, rebacked.",
-                                                          |      "subjects" : [],
-                                                          |      "genres" : [ ],
-                                                          |      "contributors" : [ ],
-                                                          |      "production" : [],
-                                                          |      "languages" : [ ],
-                                                          |      "notes" : [],
-                                                          |      "items" : [
-                                                          |        {
-                                                          |          "id" : {
-                                                          |            "type" : "Unidentifiable"
-                                                          |          },
-                                                          |          "locations" : [
-                                                          |            {
-                                                          |              "locationType" : {
-                                                          |                "id" : "closed-stores"
-                                                          |              },
-                                                          |              "label" : "Closed stores",
-                                                          |              "accessConditions" : [
-                                                          |                {
-                                                          |                  "method" : {
-                                                          |                    "type" : "NotRequestable"
-                                                          |                  },
-                                                          |                  "status" : {
-                                                          |                    "type" : "Open"
-                                                          |                  }
-                                                          |                }
-                                                          |              ],
-                                                          |              "type" : "PhysicalLocation"
-                                                          |            }
-                                                          |          ]
-                                                          |        }
-                                                          |      ],
-                                                          |      "holdings" : [ ],
-                                                          |      "collectionPath" : {
-                                                          |        "path" : "MSMSL114",
-                                                          |        "label" : "MS.MSL.114"
-                                                          |      },
-                                                          |      "referenceNumber" : "MS.MSL.114",
-                                                          |      "imageData" : [ ],
-                                                          |      "workType" : "Standard"
-                                                          |    },
-                                                          |    "state" : {
-                                                          |      "sourceIdentifier" : {
-                                                          |        "identifierType" : {
-                                                          |          "id" : "calm-record-id"
-                                                          |        },
-                                                          |        "ontologyType" : "Work",
-                                                          |        "value" : "95216d9a-a7d2-44b5-ac35-87213ec720af"
-                                                          |      },
-                                                          |      "canonicalId" : "ej2bwuar",
-                                                          |      "sourceModifiedTime" : "2021-03-02T13:38:19Z",
-                                                          |      "mergeCandidates" : [ ],
-                                                          |      "internalWorkStubs" : [ ]
-                                                          |    },
-                                                          |    "redirectSources" : [ ],
-                                                          |    "type" : "Visible"
-                                                          |  }""".stripMargin).get
+    val calmWork =
+      identifiedWork(
+        canonicalId = CanonicalId("ej2bwuar"),
+        sourceIdentifier = SourceIdentifier(
+          identifierType = IdentifierType.CalmRecordIdentifier,
+          value = "95216d9a-a7d2-44b5-ac35-87213ec720af",
+          ontologyType = "Work"
+        )
+      )
+        .otherIdentifiers(
+          List(
+            SourceIdentifier(
+              identifierType = IdentifierType.CalmRefNo,
+              value = "MSMSL114",
+              ontologyType = "Work"
+            ),
+            SourceIdentifier(
+              identifierType = IdentifierType.CalmAltRefNo,
+              value = "MS.MSL.114",
+              ontologyType = "Work"
+            ),
+          )
+        )
+        .items(List(createCalmItem))
 
     val outcome = merger.applyMerge(List(teiWork, sierraWork, metsWork, calmWork).map(Some(_)))
 
@@ -983,6 +359,9 @@ class TeiOnMergerScenarioTest
     teiItems should contain allElementsOf sierraWork.data.items
     teiItems should contain allElementsOf metsWork.data.items
     teiItems should contain noElementsOf calmWork.data.items
+
+    And("it gets the METS thumbnail")
+    outcome.getMerged(teiWork).data.thumbnail shouldBe metsWork.data.thumbnail
   }
 
   private def updateInternalWork(
