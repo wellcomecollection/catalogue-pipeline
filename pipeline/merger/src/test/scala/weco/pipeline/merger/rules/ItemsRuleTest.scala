@@ -88,7 +88,8 @@ class ItemsRuleTest
     }
   }
 
-  it("When merging items from sierra and calm, it replaces the calm item with the sierra one") {
+  it(
+    "When merging items from sierra and calm, it replaces the calm item with the sierra one") {
     inside(ItemsRule.merge(tei, List(physicalPictureSierra, calmWork))) {
       case FieldMergeResult(items, mergedSources) =>
         items should have size 1
