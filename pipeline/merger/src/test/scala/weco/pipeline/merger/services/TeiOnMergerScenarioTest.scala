@@ -3,21 +3,9 @@ package weco.pipeline.merger.services
 import org.scalatest.GivenWhenThen
 import org.scalatest.featurespec.AnyFeatureSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.identifiers.{
-  CanonicalId,
-  IdState,
-  IdentifierType,
-  SourceIdentifier
-}
-import weco.catalogue.internal_model.work.{
-  CollectionPath,
-  InvisibilityReason,
-  Item,
-  MergeCandidate,
-  Work,
-  WorkState
-}
+import weco.catalogue.internal_model.identifiers.IdentifierType
 import weco.catalogue.internal_model.work.generators.SourceWorkGenerators
+import weco.catalogue.internal_model.work.{CollectionPath, InvisibilityReason, Work, WorkState}
 import weco.pipeline.merger.fixtures.FeatureTestSugar
 
 // We'll eventually fold these tests into the base MergerScenarioTest

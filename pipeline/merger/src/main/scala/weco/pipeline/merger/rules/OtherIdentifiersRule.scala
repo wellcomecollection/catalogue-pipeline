@@ -31,7 +31,7 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
   //   Encore records onto Calm target works if they are merged, because
   //   digcode identifiers are used as a tagging/classification system.
   private val otherIdentifiersTypeAllowList =
-    Set(IdentifierType.WellcomeDigcode, IdentifierType.SierraIdentifier)
+    Set(IdentifierType.WellcomeDigcode, IdentifierType.SierraIdentifier, IdentifierType.CalmRefNo, IdentifierType.CalmAltRefNo)
 
   override def merge(
     target: Work.Visible[Identified],
@@ -84,7 +84,7 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
   private val mergeIntoTeiTarget = new PartialRule {
     val isDefinedForTarget: WorkPredicate = teiWork
     val isDefinedForSource: WorkPredicate =
-      singleDigitalItemMetsWork or sierraWork or singleDigitalItemMiroWork or singlePhysicalItemCalmWork
+      sierraWork or singleDigitalItemMiroWork or singlePhysicalItemCalmWork
 
     def rule(target: Work.Visible[Identified],
              sources: NonEmptyList[Work[Identified]]): FieldData =

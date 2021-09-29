@@ -3,18 +3,9 @@ package weco.pipeline.merger.rules
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.{Inside, Inspectors}
-import weco.catalogue.internal_model.identifiers.{
-  IdState,
-  IdentifierType,
-  SourceIdentifier
-}
+import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, SourceIdentifier}
 import weco.catalogue.internal_model.work.generators.SourceWorkGenerators
-import weco.catalogue.internal_model.work.{
-  Format,
-  MergeCandidate,
-  Work,
-  WorkState
-}
+import weco.catalogue.internal_model.work.{Format, MergeCandidate, Work, WorkState}
 import weco.pipeline.merger.models.FieldMergeResult
 
 class OtherIdentifiersRuleTest
@@ -57,7 +48,12 @@ class OtherIdentifiersRuleTest
         createIdentifiedPhysicalItem
       }.toList)
 
-  val calmWork: Work.Visible[WorkState.Identified] = calmIdentifiedWork()
+  val calmWork: Work.Visible[WorkState.Identified] = calmIdentifiedWork().otherIdentifiers(List(
+    createSourceIdentifierWith(
+      identifierType = IdentifierType.CalmRefNo),
+    createSourceIdentifierWith(
+      identifierType = IdentifierType.CalmAltRefNo),
+  ))
 
   val mergeCandidate: Work.Visible[WorkState.Identified] =
     sierraIdentifiedWork()
@@ -91,13 +87,12 @@ class OtherIdentifiersRuleTest
         calmWork :: physicalSierraWork :: nothingWork :: miroWork :: metsWorks)) {
       case FieldMergeResult(otherIdentifiers, mergedSources) =>
         otherIdentifiers should contain theSameElementsAs
-          List(physicalSierraWork.sourceIdentifier, miroWork.sourceIdentifier) ++
-            metsWorks.map(_.sourceIdentifier) ++ calmWork.data.otherIdentifiers :+ calmWork.sourceIdentifier :+
+          List(physicalSierraWork.sourceIdentifier, miroWork.sourceIdentifier) ++ calmWork.data.otherIdentifiers :+ calmWork.sourceIdentifier :+
             physicalSierraWork.data.otherIdentifiers
               .find(_.identifierType.id == IdentifierType.SierraIdentifier.id)
               .get
 
-        mergedSources should contain theSameElementsAs (physicalSierraWork :: miroWork :: calmWork :: metsWorks)
+        mergedSources should contain theSameElementsAs (List(physicalSierraWork, miroWork, calmWork))
     }
   }
 
