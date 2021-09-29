@@ -216,50 +216,24 @@ class TeiOnMergerScenarioTest
 
   Scenario("A TEI work, a Calm work, a Sierra work and a METS work") {
     Given("four works")
-    val teiWork =
-      identifiedWork(
-        canonicalId = CanonicalId("ggge7hh2"),
-        sourceIdentifier = SourceIdentifier(
-          identifierType = IdentifierType.Tei,
-          value = "MS_MSL_114",
-          ontologyType = "Work"
-        )
-      )
-        .mergeCandidates(
+    val calmWork =
+      calmIdentifiedWork()
+        .otherIdentifiers(
           List(
-            MergeCandidate(
-              id = IdState.Identified(
-                canonicalId = CanonicalId("u94bmv2z"),
-                sourceIdentifier = SourceIdentifier(
-                  identifierType = IdentifierType.SierraSystemNumber,
-                  value = "b18764459",
-                  ontologyType = "Work"
-                )
-              ),
-              reason = "Bnumber present in TEI file"
-            )
+            createSourceIdentifierWith(identifierType = IdentifierType.CalmRefNo),
+            createSourceIdentifierWith(identifierType = IdentifierType.CalmAltRefNo),
           )
         )
+        .items(List(createCalmItem))
 
     val sierraWork =
-      identifiedWork(
-        canonicalId = CanonicalId("u94bmv2z"),
-        sourceIdentifier = SourceIdentifier(
-          identifierType = IdentifierType.SierraSystemNumber,
-          value = "b18764459",
-          ontologyType = "Work"
-        )
-      )
+      sierraIdentifiedWork()
         .mergeCandidates(
           List(
             MergeCandidate(
               id = IdState.Identified(
-                canonicalId = CanonicalId("ej2bwuar"),
-                sourceIdentifier = SourceIdentifier(
-                  identifierType = IdentifierType.CalmRecordIdentifier,
-                  value = "95216d9a-a7d2-44b5-ac35-87213ec720af",
-                  ontologyType = "Work"
-                )
+                canonicalId = calmWork.state.canonicalId,
+                sourceIdentifier = calmWork.state.sourceIdentifier
               ),
               reason = "Calm/Sierra harvest"
             )
@@ -267,26 +241,32 @@ class TeiOnMergerScenarioTest
         )
         .otherIdentifiers(
           List(
-            SourceIdentifier(
-              identifierType = IdentifierType.SierraIdentifier,
-              value = "1876445",
-              ontologyType = "Work"
-            ),
-            SourceIdentifier(
-              identifierType = IdentifierType.WellcomeDigcode,
-              value = "diggreek",
-              ontologyType = "Work"
-            ),
+            createSourceIdentifierWith(identifierType = IdentifierType.SierraIdentifier),
+            createSourceIdentifierWith(identifierType = IdentifierType.WellcomeDigcode),
           )
         )
         .items(List(createIdentifiedPhysicalItem))
+
+    val teiWork =
+      teiIdentifiedWork()
+        .mergeCandidates(
+          List(
+            MergeCandidate(
+              id = IdState.Identified(
+                canonicalId = sierraWork.state.canonicalId,
+                sourceIdentifier = sierraWork.state.sourceIdentifier
+              ),
+              reason = "Bnumber present in TEI file"
+            )
+          )
+        )
 
     val metsWork =
       identifiedWork(
         canonicalId = CanonicalId("w7f24nn4"),
         sourceIdentifier = SourceIdentifier(
           identifierType = IdentifierType.METS,
-          value = "b18764459",
+          value = sierraWork.sourceIdentifier.value,
           ontologyType = "Work"
         )
       )
@@ -304,31 +284,6 @@ class TeiOnMergerScenarioTest
         .thumbnail(createDigitalLocation)
         .items(List(createDigitalItem))
         .invisible(invisibilityReasons = List(InvisibilityReason.MetsWorksAreNotVisible))
-
-    val calmWork =
-      identifiedWork(
-        canonicalId = CanonicalId("ej2bwuar"),
-        sourceIdentifier = SourceIdentifier(
-          identifierType = IdentifierType.CalmRecordIdentifier,
-          value = "95216d9a-a7d2-44b5-ac35-87213ec720af",
-          ontologyType = "Work"
-        )
-      )
-        .otherIdentifiers(
-          List(
-            SourceIdentifier(
-              identifierType = IdentifierType.CalmRefNo,
-              value = "MSMSL114",
-              ontologyType = "Work"
-            ),
-            SourceIdentifier(
-              identifierType = IdentifierType.CalmAltRefNo,
-              value = "MS.MSL.114",
-              ontologyType = "Work"
-            ),
-          )
-        )
-        .items(List(createCalmItem))
 
     When("they are merged together")
     val outcome = merger.applyMerge(List(teiWork, sierraWork, metsWork, calmWork).map(Some(_)))
