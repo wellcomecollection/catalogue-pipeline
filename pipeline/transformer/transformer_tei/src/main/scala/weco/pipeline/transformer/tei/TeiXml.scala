@@ -34,7 +34,7 @@ class TeiXml(val xml: Elem) extends Logging {
     * </TEI>
     *
     */
-  def bNumber: Either[Throwable, Option[String]] = {
+  def bNumber: Result[Option[String]] = {
     val identifiersNodes = xml \\ "msDesc" \ "msIdentifier" \ "altIdentifier"
     val seq = (identifiersNodes.filter(
       n => (n \@ "type").toLowerCase == "sierra"
@@ -59,9 +59,8 @@ class TeiXml(val xml: Elem) extends Logging {
     *    </TEI>
     *
     */
-  def summary(nodeSeq: NodeSeq = (xml \\ "msDesc" \ "msContents" \ "summary")): Either[Throwable, Option[String]] = {
-    val nodes = nodeSeq.toList
-    nodes match {
+  def summary(nodeSeq: NodeSeq = (xml \\ "msDesc" \ "msContents" \ "summary")): Result[Option[String]] = {
+    nodeSeq.toList match {
       case List(node) =>
         // some summary nodes can contain TEI specific xml tags, so we remove them
         Right(Some(node.text.trim.replaceAll("<.*?>", "")))
@@ -90,7 +89,7 @@ class TeiXml(val xml: Elem) extends Logging {
    * msParts don't have a title so we construct the title concatenating the
    * title of the wrapper work and the part number.
    */
-  private def nestedTeiDataFromParts(wrapperTitle: String): Either[Throwable, List[TeiData]] = (xml \\ "msDesc" \ "msPart").map{node =>for {
+  private def nestedTeiDataFromParts(wrapperTitle: String): Result[List[TeiData]] = (xml \\ "msDesc" \ "msPart").map{node =>for {
     id <- getIdFrom(node)
     partNumber <- Try((node \@ "n").toInt).toEither
     description <- summary(node \ "summary")
@@ -103,7 +102,7 @@ class TeiXml(val xml: Elem) extends Logging {
    * Extract information about inner works for single part manuscripts.
    * For single part manuscripts, inner works are described in msItem elements.
    */
-  private def nestedTeiDataFromItems: Either[Throwable, List[TeiData]] =
+  private def nestedTeiDataFromItems: Result[List[TeiData]] =
     (xml \\ "msDesc" \ "msContents" \ "msItem")
       .map { node =>
         for {
@@ -115,7 +114,7 @@ class TeiXml(val xml: Elem) extends Logging {
       .toList
       .sequence
 
-  private def getIdFrom(node: Node): Either[Throwable, String] =
+  private def getIdFrom(node: Node): Result[String] =
     Try(node.attributes
       .collectFirst {
         case metadata if metadata.key == "id" => metadata.value.text.trim
@@ -127,15 +126,10 @@ class TeiXml(val xml: Elem) extends Logging {
     * <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id="manuscript_15651">
     *  <teiHeader>
     *    <fileDesc>
-    *      <titleStmt>
-    *        <title>Wellcome Library</title>
-    *      </titleStmt>
-    *      <sourceDesc>
-    *        <msDesc xml:lang="en" xml:id="MS_Arabic_1">
-    *          <msContents>
-    *            <msItem xml:id="MS_Arabic_1-item1">
-    *              <title xml:lang="ar-Latn-x-lc" key="work_3001">Al-Qānūn fī al-ṭibb</title>
-    * extract the title from titleStmt, so "Wellcome Library" in the example.
+    *      <publicationStmt>
+    *        <idno type="msID">Well. Jav. 4</idno>
+    *       </publicationStmt>
+    * Extract "Well. Jav. 4" as the title
     */
   def title: Result[String] = {
     val nodes =
@@ -163,7 +157,7 @@ class TeiXml(val xml: Elem) extends Logging {
     *              <title xml:lang="ar-Latn-x-lc" key="work_3001">Al-Qānūn fī al-ṭibb</title>
     * extract the title from the msItem, so "Al-Qānūn fī al-ṭibb" in the example.
     */
-  private def getTitleFromItem(itemNode: Node): Either[Throwable, String] = {
+  private def getTitleFromItem(itemNode: Node): Result[String] = {
     val titleNodes = (itemNode \ "title").toList
     titleNodes match {
       case List(titleNode) => Right(titleNode.text)
@@ -184,7 +178,7 @@ class TeiXml(val xml: Elem) extends Logging {
 }
 
 object TeiXml {
-  def apply(id: String, xmlString: String): Either[Throwable, TeiXml] =
+  def apply(id: String, xmlString: String): Result[TeiXml] =
     for {
       xml <- Try(XML.loadString(xmlString)).toEither
       teiXml = new TeiXml(xml)
