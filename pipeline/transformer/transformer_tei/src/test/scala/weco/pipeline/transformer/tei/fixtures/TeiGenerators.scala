@@ -13,7 +13,8 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
 
   def summary(str: String) = <summary>{str}</summary>
 
-  def titleElem(str: String) = <titleStmt><title>{str}</title></titleStmt>
+  def titleElem(str: String) =
+    <publicationStmt><idno type="msID">{str}</idno></publicationStmt>
 
   def itemTitle(str: String) = <title>{str}</title>
   def originalItemTitle(str: String) = <title type="original">{str}</title>
@@ -31,13 +32,32 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
       {languages}
     </msItem>
 
+  def msContents(summary: Option[Elem] = None,
+                 languages: List[Elem] = Nil,
+                 items: List[Elem] = Nil) =
+    <msContents>
+      {summary.getOrElse(NodeSeq.Empty)}
+      {languages}
+      {items}
+    </msContents>
+
+  def msPart(id: String,
+             number: Int,
+             summary: Option[Elem] = None,
+             languages: List[Elem] = Nil) =
+    <msPart xml:id={id} n={number.toString}>
+      {summary.getOrElse(NodeSeq.Empty)}
+      {languages}
+    </msPart>
+
   def teiXml(
     id: String = randomAlphanumeric(),
     title: Elem = titleElem("test title"),
     identifiers: Option[Elem] = None,
     summary: Option[Elem] = None,
     languages: List[Elem] = Nil,
-    items: List[Elem] = Nil
+    items: List[Elem] = Nil,
+    parts: List[Elem] = Nil
   ): Elem =
     <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id={id}>
       <teiHeader>
@@ -48,11 +68,8 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
               <msIdentifier>
               {identifiers.getOrElse(NodeSeq.Empty)}
               </msIdentifier>
-              <msContents>
-                {summary.getOrElse(NodeSeq.Empty)}
-                {languages}
-                {items}
-              </msContents>
+              {msContents(summary, languages, items)}
+              {parts}
             </msDesc>
           </sourceDesc>
         </fileDesc>

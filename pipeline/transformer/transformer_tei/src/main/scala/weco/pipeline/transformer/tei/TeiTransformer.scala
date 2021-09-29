@@ -49,20 +49,19 @@ class TeiTransformer(store: Store[S3ObjectLocation, String])
       teiData <- parse(teiXml)
     } yield teiData.toWork(time, version)
 
-  def parse(teiXml: TeiXml): Result[TeiData] =
+  private def parse(teiXml: TeiXml): Result[TeiData] =
     for {
-      summary <- teiXml.summary
+      summary <- teiXml.summary()
       bNumber <- teiXml.bNumber
       title <- teiXml.title
       languages <- TeiLanguages(teiXml.xml)
-
-      teiData = TeiData(
+    } yield
+      TeiData(
         id = teiXml.id,
         title = title,
         bNumber = bNumber,
         description = summary,
         languages = languages,
-        nestedTeiData = teiXml.nestedTeiData
-      )
-    } yield teiData
+        nestedTeiData = teiXml.nestedTeiData)
+
 }
