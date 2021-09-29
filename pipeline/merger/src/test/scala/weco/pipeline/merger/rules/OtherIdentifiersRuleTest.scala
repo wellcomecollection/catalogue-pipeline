@@ -180,10 +180,10 @@ class OtherIdentifiersRuleTest
     inside(OtherIdentifiersRule.merge(calmWork, Seq(sierraWithDigcode))) {
       case FieldMergeResult(otherIdentifiers, _) =>
         otherIdentifiers should contain only (
-          sierraWithDigcode.sourceIdentifier,
-          sierraWithDigcode.data.otherIdentifiers
-            .find(_.identifierType.id == "wellcome-digcode")
-            .get
+          (calmWork.data.otherIdentifiers ++ sierraWithDigcode.data.otherIdentifiers
+            .find(_.identifierType.id == "wellcome-digcode").toList :+
+          sierraWithDigcode.sourceIdentifier) :_*
+
         )
     }
   }
