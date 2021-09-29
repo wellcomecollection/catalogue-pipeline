@@ -215,7 +215,7 @@ class TeiOnMergerScenarioTest
   }
 
   Scenario("A TEI work, a Calm work, a Sierra work and a METS work") {
-    Given("a TEI work")
+    Given("four works")
     val teiWork =
       identifiedWork(
         canonicalId = CanonicalId("ggge7hh2"),
@@ -330,19 +330,20 @@ class TeiOnMergerScenarioTest
         )
         .items(List(createCalmItem))
 
+    When("they are merged together")
     val outcome = merger.applyMerge(List(teiWork, sierraWork, metsWork, calmWork).map(Some(_)))
 
     outcome.getMerged(sierraWork) should beRedirectedTo(teiWork)
     outcome.getMerged(metsWork) should beRedirectedTo(teiWork)
     outcome.getMerged(calmWork) should beRedirectedTo(teiWork)
 
+    Then("the TEI work gets all the CALM and Sierra identifiers")
     val teiMergedIdentifiers =
       outcome
         .getMerged(teiWork)
         .data
         .otherIdentifiers
 
-    Then("the TEI work gets all the CALM and Sierra identifiers")
     teiMergedIdentifiers should contain allElementsOf calmWork.data.otherIdentifiers :+ calmWork.state.sourceIdentifier
     teiMergedIdentifiers should contain allElementsOf sierraWork.data.otherIdentifiers :+ sierraWork.state.sourceIdentifier
 
