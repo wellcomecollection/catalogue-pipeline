@@ -33,7 +33,7 @@ module "ingestor_images" {
   memory = 4096
 
   env_vars = {
-    metrics_namespace = "${var.namespace}_ingestor_images"
+    metrics_namespace = "${local.namespace}_ingestor_images"
     topic_arn         = module.image_ingestor_topic.arn
 
     es_images_index    = local.es_images_index

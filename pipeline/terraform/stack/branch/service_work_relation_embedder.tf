@@ -28,7 +28,7 @@ module "relation_embedder" {
   cluster_arn  = data.aws_ecs_cluster.cluster.id
 
   env_vars = {
-    metrics_namespace = "${var.namespace}_relation_embedder"
+    metrics_namespace = "${local.namespace}_relation_embedder"
 
     queue_url = module.relation_embedder_queue.url
     topic_arn = module.relation_embedder_output_topic.arn

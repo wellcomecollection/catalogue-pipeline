@@ -167,7 +167,7 @@ module "image_inferrer" {
     palette_inferrer_port      = local.palette_inferrer_port
     aspect_ratio_inferrer_host = "localhost"
     aspect_ratio_inferrer_port = local.aspect_ratio_inferrer_port
-    metrics_namespace          = "${var.namespace}_image_inferrer"
+    metrics_namespace          = "${local.namespace}_image_inferrer"
     topic_arn                  = module.image_inferrer_topic.arn
     queue_url                  = module.image_inferrer_queue.url
     images_root                = local.shared_storage_path
