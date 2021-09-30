@@ -33,7 +33,7 @@ module "batcher" {
   cluster_arn  = data.aws_ecs_cluster.cluster.id
 
   env_vars = {
-    metrics_namespace = "${var.namespace}_batcher"
+    metrics_namespace = "${local.namespace}_batcher"
 
     queue_url        = module.batcher_queue.url
     output_topic_arn = module.batcher_output_topic.arn

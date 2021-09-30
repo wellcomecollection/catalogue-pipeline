@@ -26,7 +26,7 @@ module "merger" {
   cluster_arn  = data.aws_ecs_cluster.cluster.arn
 
   env_vars = {
-    metrics_namespace       = "${var.namespace}_merger"
+    metrics_namespace       = "${local.namespace}_merger"
     merger_queue_id         = module.merger_queue.url
     merger_works_topic_arn  = module.merger_works_topic.arn
     merger_images_topic_arn = module.merger_images_topic.arn

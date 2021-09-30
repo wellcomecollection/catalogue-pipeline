@@ -25,7 +25,7 @@ module "router" {
   cluster_arn  = data.aws_ecs_cluster.cluster.id
 
   env_vars = {
-    metrics_namespace = "${var.namespace}_router"
+    metrics_namespace = "${local.namespace}_router"
 
     queue_url         = module.router_queue.url
     queue_parallelism = 10

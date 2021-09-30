@@ -32,7 +32,7 @@ module "ingestor_works" {
   cluster_arn  = data.aws_ecs_cluster.cluster.id
 
   env_vars = {
-    metrics_namespace = "${var.namespace}_ingestor_works"
+    metrics_namespace = "${local.namespace}_ingestor_works"
     topic_arn         = module.work_ingestor_topic.arn
 
     es_works_index        = local.es_works_index
