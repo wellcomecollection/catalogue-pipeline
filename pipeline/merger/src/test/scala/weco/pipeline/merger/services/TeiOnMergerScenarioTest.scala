@@ -4,8 +4,13 @@ import org.scalatest.GivenWhenThen
 import org.scalatest.featurespec.AnyFeatureSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.IdentifierType
-import weco.catalogue.internal_model.work.{CollectionPath, Work, WorkState}
 import weco.catalogue.internal_model.work.generators.SourceWorkGenerators
+import weco.catalogue.internal_model.work.{
+  CollectionPath,
+  InvisibilityReason,
+  Work,
+  WorkState
+}
 import weco.pipeline.merger.fixtures.FeatureTestSugar
 
 // We'll eventually fold these tests into the base MergerScenarioTest
@@ -214,12 +219,85 @@ class TeiOnMergerScenarioTest
       List(expectedInternalWork1, expectedInternalWork2))
   }
 
+  Scenario("A TEI work, a Calm work, a Sierra work and a METS work") {
+    Given("four works")
+    val calmWork =
+      calmIdentifiedWork()
+        .otherIdentifiers(
+          List(
+            createSourceIdentifierWith(
+              identifierType = IdentifierType.CalmRefNo),
+            createSourceIdentifierWith(
+              identifierType = IdentifierType.CalmAltRefNo),
+          )
+        )
+        .items(List(createCalmItem))
+
+    // Merge candidates point to the Calm work through the Calm/Sierra harvest
+    val sierraWork =
+      sierraIdentifiedWork()
+        .otherIdentifiers(
+          List(
+            createSourceIdentifierWith(
+              identifierType = IdentifierType.SierraIdentifier),
+            createSourceIdentifierWith(
+              identifierType = IdentifierType.WellcomeDigcode),
+          )
+        )
+        .items(List(createIdentifiedPhysicalItem))
+
+    // Merge candidates point to the Sierra bib
+    val teiWork = teiIdentifiedWork()
+
+    // Merge candidates point to the Sierra e-bib
+    val metsWork =
+      metsIdentifiedWork()
+        .thumbnail(createDigitalLocation)
+        .items(List(createDigitalItem))
+        .invisible(
+          invisibilityReasons = List(InvisibilityReason.MetsWorksAreNotVisible))
+
+    When("they are merged together")
+    val outcome = merger.applyMerge(
+      List(teiWork, sierraWork, metsWork, calmWork).map(Some(_)))
+
+    outcome.getMerged(sierraWork) should beRedirectedTo(teiWork)
+    outcome.getMerged(metsWork) should beRedirectedTo(teiWork)
+    outcome.getMerged(calmWork) should beRedirectedTo(teiWork)
+
+    Then("the TEI work gets all the CALM and Sierra identifiers")
+    val teiMergedIdentifiers =
+      outcome
+        .getMerged(teiWork)
+        .data
+        .otherIdentifiers
+
+    teiMergedIdentifiers should contain allElementsOf calmWork.data.otherIdentifiers :+ calmWork.state.sourceIdentifier
+    teiMergedIdentifiers should contain allElementsOf sierraWork.data.otherIdentifiers :+ sierraWork.state.sourceIdentifier
+
+    And("it has no METS identifier")
+    teiMergedIdentifiers.filter(_.identifierType == IdentifierType.METS) shouldBe empty
+
+    And("it only has two items (one physical, one digital)")
+    val teiItems =
+      outcome
+        .getMerged(teiWork)
+        .data
+        .items
+
+    teiItems should contain allElementsOf sierraWork.data.items
+    teiItems should contain allElementsOf metsWork.data.items
+    teiItems should contain noElementsOf calmWork.data.items
+
+    And("it gets the METS thumbnail")
+    outcome.getMerged(teiWork).data.thumbnail shouldBe metsWork.data.thumbnail
+  }
+
   private def updateInternalWork(
     internalWork: Work.Visible[WorkState.Identified],
-    teiWork: Work.Visible[WorkState.Identified]) = {
+    teiWork: Work.Visible[WorkState.Identified]) =
     internalWork
       .copy(version = teiWork.version)
       .mapState(state =>
         state.copy(sourceModifiedTime = teiWork.state.sourceModifiedTime))
-  }
 }
