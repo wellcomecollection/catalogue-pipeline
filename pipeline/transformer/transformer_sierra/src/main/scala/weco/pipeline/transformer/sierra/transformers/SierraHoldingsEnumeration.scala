@@ -147,7 +147,16 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
         case (label, value) => (label, value.split("-", 2).last)
       }
 
-      s"${concatenateParts(id, startParts)} - ${concatenateParts(id, endParts)}"
+      val startString = concatenateParts(id, startParts)
+      val endString = concatenateParts(id, endParts)
+
+      // It's possible the start/end of the range may be the same.  If so, collapse
+      // them into a single value to make them easier to read.
+      if (startString == endString) {
+        startString
+      } else {
+        s"$startString - $endString"
+      }
     } else {
       concatenateParts(id, parts)
     }

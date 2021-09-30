@@ -715,6 +715,34 @@ class SierraHoldingsEnumerationTest
     getEnumerations(varFields) shouldBe List("1 Jan. 2001")
   }
 
+  it("collapses a range which has the same start/finish") {
+    // This is based on the holdings record for The Lancet.  Ideally we'd fix
+    // this in the source data, but detecting this issue is somewhat fiddly
+    // and it's pretty easy for us to handle here.
+    val varFields = List(
+      VarField(
+        marcTag = "863",
+        subfields = List(
+          Subfield(tag = "8", content = "2.9"),
+          Subfield(tag = "a", content = "390"),
+          Subfield(tag = "b", content = "10116-10116"),
+          Subfield(tag = "i", content = "2018"),
+        )
+      ),
+      VarField(
+        marcTag = "853",
+        subfields = List(
+          Subfield(tag = "8", content = "2"),
+          Subfield(tag = "a", content = "v."),
+          Subfield(tag = "b", content = "no."),
+          Subfield(tag = "i", content = "(year)"),
+        )
+      )
+    )
+
+    getEnumerations(varFields) shouldBe List("v.390:no.10116 (2018)")
+  }
+
   describe("handles malformed MARC data") {
     it("skips a field 863 if it has a missing sequence number") {
       val varFields = List(
