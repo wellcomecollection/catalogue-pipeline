@@ -46,7 +46,8 @@ if __name__ == "__main__":
             tolines=json.dumps(tei_on_work, indent=2, sort_keys=True).splitlines(),
             fromdesc="pre-TEI work",
             todesc="work in the TEI pipeline",
-        ).replace(
+        )
+        .replace(
             '<style type="text/css">',
             """
         <style type="text/css">
@@ -60,7 +61,8 @@ if __name__ == "__main__":
                 max-width: 750px;
             }
         """,
-        ).replace('<td nowrap="nowrap">', '<td class="diff_content">')
+        )
+        .replace('<td nowrap="nowrap">', '<td class="diff_content">')
     )
 
     # print(tei_off_work)
