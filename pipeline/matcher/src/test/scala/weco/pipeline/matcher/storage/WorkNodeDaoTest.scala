@@ -8,7 +8,10 @@ import javax.naming.ConfigurationException
 import org.scalatest.funspec.AnyFunSpec
 import org.scanamo.syntax._
 import org.scanamo.generic.auto._
-import software.amazon.awssdk.services.dynamodb.model.{ResourceNotFoundException, ScanRequest}
+import software.amazon.awssdk.services.dynamodb.model.{
+  ResourceNotFoundException,
+  ScanRequest
+}
 import weco.storage.dynamo.DynamoConfig
 import weco.catalogue.internal_model.generators.IdentifiersGenerators
 import weco.catalogue.internal_model.identifiers.CanonicalId
