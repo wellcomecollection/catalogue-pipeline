@@ -28,7 +28,6 @@ steps:
     label: "Calm API client"
   - command: .buildkite/scripts/run_lambda_job.py lambda
     label: "Lambdas"
-  - wait
   - command: .buildkite/scripts/run_job.py reindex_worker
     label: "reindex worker"
   - command: .buildkite/scripts/run_job.py ingestor_works
@@ -83,12 +82,15 @@ steps:
     label: "palette inferrer"
   - command: .buildkite/scripts/run_job.py aspect_ratio_inferrer --changes-in pipeline/inferrer/aspect_ratio_inferrer
     label: "aspect ratio inferrer"
+
   - wait
+
   - label: publish internal model
     if: build.branch == "main"
     env:
       PROJECTS: internal_model
     command: .buildkite/scripts/publish.py
+
   - label: trigger adapter deployments
     if: build.branch == "main"
     trigger: "catalogue-pipeline-deploy-adapters"
@@ -114,7 +116,9 @@ steps:
         BUILDKITE_PULL_REQUEST: "${BUILDKITE_PULL_REQUEST}"
         BUILDKITE_PULL_REQUEST_BASE_BRANCH: "${BUILDKITE_PULL_REQUEST_BASE_BRANCH}"
         BUILDKITE_PULL_REQUEST_REPO: "${BUILDKITE_PULL_REQUEST_REPO}"
+
   - wait
+
   - command: .buildkite/scripts/tag_commit_as_latest.py
     if: build.branch == "main"
     label: "tag commit as latest"
