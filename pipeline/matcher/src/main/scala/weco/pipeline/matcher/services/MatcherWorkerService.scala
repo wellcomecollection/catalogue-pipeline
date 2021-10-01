@@ -36,7 +36,7 @@ class MatcherWorkerService[MsgDestination](
         }
     )
 
-  def processMessage(workStub: WorkStub): Future[Unit] = {
+  def processMessage(workStub: WorkStub): Future[Unit] =
     (for {
       identifiersList <- workMatcher.matchWork(workStub)
       _ <- Future.fromTry(msgSender.sendT(identifiersList))
@@ -45,5 +45,4 @@ class MatcherWorkerService[MsgDestination](
         debug(
           s"Not matching work due to version conflict exception: ${e.getMessage}")
     }
-  }
 }
