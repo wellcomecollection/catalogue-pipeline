@@ -270,6 +270,22 @@ class SierraNotesTest
     )
   }
 
+  it("skips notes which are just whitespace") {
+    val varFields =
+      List("\u00a0", "", "\t\n").map { content =>
+        VarField(
+          marcTag = "535",
+          subfields = List(
+            Subfield(tag = "a", content = content),
+          )
+        )
+      }
+
+    val bibData = createSierraBibDataWith(varFields = varFields)
+
+    SierraNotes(bibData) shouldBe empty
+  }
+
   def bibData(contents: List[(String, Note)]): SierraBibData =
     bibData(contents.map { case (tag, note) => (tag, note.contents) }: _*)
 

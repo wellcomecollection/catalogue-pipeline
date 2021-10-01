@@ -62,6 +62,14 @@ object SierraNotes extends SierraDataTransformer with SierraQueryOps {
       .collect {
         case Some((vf, Some(createNote))) => createNote(vf)
       }
+      .filterNot {
+        // There are notes fields where the contents is an empty string, or
+        // a whitespace value like a non-breaking space (\u00a0).
+        //
+        // Ideally we'd remove these values from the source data, but it's much
+        // quicker and easier to filter them here.
+        _.contents.trim.isEmpty
+      }
 
   private def createNoteFromContents(
     noteType: NoteType,
