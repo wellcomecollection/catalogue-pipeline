@@ -35,7 +35,7 @@ class RelationEmbedderWorkerService[MsgDestination](
     }
 
   def processMessage(message: NotificationMessage): Future[Unit] = {
-    val batch = fromJson[Batch](message.body);
+    val batch = fromJson[Batch](message.body)
     Future
       .fromTry(batch)
       .flatMap { batch =>
