@@ -55,15 +55,14 @@ class WorkNodeDao(dynamoClient: DynamoDbClient, dynamoConfig: DynamoConfig)(
       scanamo
         .exec { index.query("componentId" === componentId) }
         .map {
-          case Right(record) => { record }
-          case Left(scanamoError) => {
+          case Right(record) => record
+          case Left(scanamoError) =>
             val exception = new RuntimeException(scanamoError.toString)
             error(
               s"An error occurred while retrieving byComponentId=$componentId from DynamoDB",
               exception
             )
             throw exception
-          }
         }
     }.recover {
       case exception: ProvisionedThroughputExceededException =>
