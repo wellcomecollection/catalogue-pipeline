@@ -82,8 +82,7 @@ class WorkNodeDaoTest
       }
     }
 
-    it(
-      "returns a GracefulFailure if ProvisionedThroughputExceededException occurs during get from dynamo") {
+    it("fails if ProvisionedThroughputExceededException occurs during get from dynamo") {
       withWorkGraphTable { table =>
         val dynamoClient = mock[DynamoDbClient]
         when(dynamoClient.batchGetItem(any[BatchGetItemRequest]))
