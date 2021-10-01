@@ -19,9 +19,8 @@ object WorkGraphUpdater extends Logging {
   }
 
   private def checkVersionConflicts(work: WorkStub,
-                                    existingNodes: Set[WorkNode]): Unit = {
-    val maybeExistingNode = existingNodes.find(_.id == work.id)
-    maybeExistingNode match {
+                                    existingNodes: Set[WorkNode]): Unit =
+    existingNodes.find(_.id == work.id) match {
       case Some(WorkNode(_, Some(existingVersion), linkedIds, _)) =>
         if (existingVersion > work.version) {
           val versionConflictMessage =
@@ -37,7 +36,6 @@ object WorkGraphUpdater extends Logging {
         }
       case _ => ()
     }
-  }
 
   private def doUpdate(work: WorkStub,
                        existingNodes: Set[WorkNode]): Set[WorkNode] = {

@@ -6,6 +6,7 @@ import java.time.Instant
 import akka.{Done, NotUsed}
 import akka.stream.scaladsl.Flow
 import software.amazon.awssdk.services.sqs.model.Message
+import weco.catalogue.internal_model.identifiers.CanonicalId._
 import weco.json.JsonUtil._
 import weco.messaging.MessageSender
 import weco.messaging.sns.NotificationMessage

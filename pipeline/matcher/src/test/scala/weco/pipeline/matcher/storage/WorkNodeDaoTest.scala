@@ -2,27 +2,19 @@ package weco.pipeline.matcher.storage
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.matchers.should.Matchers
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
 
 import javax.naming.ConfigurationException
 import org.scalatest.funspec.AnyFunSpec
 import org.scanamo.syntax._
 import org.scanamo.generic.auto._
-import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.dynamodb.model.{
-  BatchGetItemRequest,
-  BatchWriteItemRequest,
-  ProvisionedThroughputExceededException,
-  QueryRequest,
+  ResourceNotFoundException,
   ScanRequest
 }
 import weco.storage.dynamo.DynamoConfig
 import weco.catalogue.internal_model.generators.IdentifiersGenerators
 import weco.catalogue.internal_model.identifiers.CanonicalId
-import weco.pipeline.matcher.exceptions.MatcherException
 import weco.pipeline.matcher.fixtures.MatcherFixtures
 import weco.pipeline.matcher.models.WorkNode
 
@@ -32,7 +24,7 @@ import scala.collection.JavaConverters._
 class WorkNodeDaoTest
     extends AnyFunSpec
     with Matchers
-    with MockitoSugar
+//    with MockitoSugar
     with ScalaFutures
     with MatcherFixtures
     with IdentifiersGenerators {
@@ -44,8 +36,8 @@ class WorkNodeDaoTest
     it("returns nothing if ids are not in dynamo") {
       withWorkGraphTable { table =>
         withWorkNodeDao(table) { workNodeDao =>
-          whenReady(workNodeDao.get(Set(createCanonicalId))) { workNodeSet =>
-            workNodeSet shouldBe Set.empty
+          whenReady(workNodeDao.get(Set(createCanonicalId))) {
+            _ shouldBe Set.empty
           }
         }
       }
@@ -70,50 +62,21 @@ class WorkNodeDaoTest
           put(dynamoClient, table.name)(existingWorkA)
           put(dynamoClient, table.name)(existingWorkB)
 
-          whenReady(workNodeDao.get(Set(idA, idB))) { work =>
-            work shouldBe Set(existingWorkA, existingWorkB)
+          whenReady(workNodeDao.get(Set(idA, idB))) {
+            _ shouldBe Set(existingWorkA, existingWorkB)
           }
         }
       }
     }
 
     it("returns an error if fetching from dynamo fails") {
-      withWorkGraphTable { table =>
-        val dynamoClient = mock[DynamoDbClient]
-        val expectedException = new RuntimeException("FAILED!")
+      val matcherGraphDao = new WorkNodeDao(
+        dynamoClient,
+        dynamoConfig = createDynamoConfigWith(nonExistentTable)
+      )
 
-        when(dynamoClient.batchGetItem(any[BatchGetItemRequest]))
-          .thenThrow(expectedException)
-
-        val matcherGraphDao = new WorkNodeDao(
-          dynamoClient,
-          DynamoConfig(table.name, table.index)
-        )
-
-        whenReady(matcherGraphDao.get(Set(idA)).failed) { failedException =>
-          failedException shouldBe expectedException
-        }
-      }
-    }
-
-    it(
-      "returns a GracefulFailure if ProvisionedThroughputExceededException occurs during get from dynamo") {
-      withWorkGraphTable { table =>
-        val dynamoClient = mock[DynamoDbClient]
-        when(dynamoClient.batchGetItem(any[BatchGetItemRequest]))
-          .thenThrow(
-            ProvisionedThroughputExceededException
-              .builder()
-              .message("BOOM!")
-              .build())
-        val workNodeDao = new WorkNodeDao(
-          dynamoClient,
-          DynamoConfig(table.name, table.index)
-        )
-
-        whenReady(workNodeDao.get(Set(idA)).failed) { failedException =>
-          failedException shouldBe a[MatcherException]
-        }
+      whenReady(matcherGraphDao.get(Set(idA)).failed) {
+        _ shouldBe a[ResourceNotFoundException]
       }
     }
   }
@@ -123,8 +86,7 @@ class WorkNodeDaoTest
       withWorkGraphTable { table =>
         withWorkNodeDao(table) { workNodeDao =>
           whenReady(workNodeDao.getByComponentIds(Set("Not-there"))) {
-            workNodeSet =>
-              workNodeSet shouldBe Set()
+            _ shouldBe Set()
           }
         }
       }
@@ -150,51 +112,20 @@ class WorkNodeDaoTest
           put(dynamoClient, table.name)(existingWorkNodeB)
 
           whenReady(matcherGraphDao.getByComponentIds(Set(ciHash(idA, idB)))) {
-            linkedWorks =>
-              linkedWorks shouldBe Set(existingWorkNodeA, existingWorkNodeB)
+            _ shouldBe Set(existingWorkNodeA, existingWorkNodeB)
           }
         }
       }
     }
 
-    it(
-      "returns an error if fetching from dynamo fails during a getByComponentIds") {
-      withWorkGraphTable { table =>
-        val dynamoClient = mock[DynamoDbClient]
-        val expectedException = new RuntimeException("FAILED")
-        when(dynamoClient.query(any[QueryRequest]))
-          .thenThrow(expectedException)
-        val workNodeDao = new WorkNodeDao(
-          dynamoClient,
-          DynamoConfig(table.name, table.index)
-        )
+    it("fails if fetching from dynamo fails during a getByComponentIds") {
+      val workNodeDao = new WorkNodeDao(
+        dynamoClient,
+        dynamoConfig = createDynamoConfigWith(nonExistentTable)
+      )
 
-        whenReady(workNodeDao.getByComponentIds(Set(ciHash(idA, idB))).failed) {
-          failedException =>
-            failedException shouldBe expectedException
-        }
-      }
-    }
-
-    it(
-      "returns a GracefulFailure if ProvisionedThroughputExceededException occurs during a getByComponentIds") {
-      withWorkGraphTable { table =>
-        val dynamoClient = mock[DynamoDbClient]
-        when(dynamoClient.query(any[QueryRequest]))
-          .thenThrow(
-            ProvisionedThroughputExceededException
-              .builder()
-              .message("BOOM!")
-              .build())
-        val workNodeDao = new WorkNodeDao(
-          dynamoClient,
-          DynamoConfig(table.name, table.index)
-        )
-
-        whenReady(workNodeDao.getByComponentIds(Set(ciHash(idA, idB))).failed) {
-          failedException =>
-            failedException shouldBe a[MatcherException]
-        }
+      whenReady(workNodeDao.getByComponentIds(Set(ciHash(idA, idB))).failed) {
+        _ shouldBe a[ResourceNotFoundException]
       }
     }
 
@@ -288,53 +219,20 @@ class WorkNodeDaoTest
     }
 
     it("returns an error if put to dynamo fails") {
-      withWorkGraphTable { table =>
-        val dynamoClient = mock[DynamoDbClient]
-        val expectedException = new RuntimeException("FAILED")
-        when(dynamoClient.batchWriteItem(any[BatchWriteItemRequest]))
-          .thenThrow(expectedException)
-        val workNodeDao = new WorkNodeDao(
-          dynamoClient,
-          DynamoConfig(table.name, table.index)
-        )
+      val workNodeDao = new WorkNodeDao(
+        dynamoClient,
+        dynamoConfig = createDynamoConfigWith(nonExistentTable)
+      )
 
-        val workNode =
-          WorkNode(
-            idA,
-            version = 1,
-            linkedIds = List(idB),
-            componentId = ciHash(idA, idB))
-
-        whenReady(workNodeDao.put(Set(workNode)).failed) {
-          _ shouldBe expectedException
-        }
-      }
-    }
-
-    it(
-      "returns a GracefulFailure if ProvisionedThroughputExceededException occurs during put to dynamo") {
-      withWorkGraphTable { table =>
-        val dynamoClient = mock[DynamoDbClient]
-        when(dynamoClient.batchWriteItem(any[BatchWriteItemRequest]))
-          .thenThrow(
-            ProvisionedThroughputExceededException
-              .builder()
-              .message("BOOM!")
-              .build())
-        val workNodeDao = new WorkNodeDao(
-          dynamoClient,
-          DynamoConfig(table.name, table.index)
-        )
-
-        val workNode = WorkNode(
-          id = idA,
+      val workNode =
+        WorkNode(
+          idA,
           version = 1,
           linkedIds = List(idB),
           componentId = ciHash(idA, idB))
 
-        whenReady(workNodeDao.put(Set(workNode)).failed) {
-          _ shouldBe a[MatcherException]
-        }
+      whenReady(workNodeDao.put(Set(workNode)).failed) {
+        _ shouldBe a[ResourceNotFoundException]
       }
     }
 

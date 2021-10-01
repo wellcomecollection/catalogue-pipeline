@@ -1,17 +1,13 @@
 package weco.pipeline.matcher.matcher
 
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{spy, times, verify, when}
 import org.scalatest.EitherValues
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import org.scalatestplus.mockito.MockitoSugar
 import org.scanamo.syntax._
 import weco.storage.locking.LockFailure
 import weco.storage.locking.memory.{MemoryLockDao, MemoryLockingService}
 import weco.fixtures.TimeAssertions
-import weco.pipeline.matcher.exceptions.MatcherException
 import weco.pipeline.matcher.fixtures.MatcherFixtures
 import weco.pipeline.matcher.generators.WorkStubGenerators
 import weco.pipeline.matcher.models.{
@@ -21,7 +17,7 @@ import weco.pipeline.matcher.models.{
   WorkNode,
   WorkStub
 }
-import weco.pipeline.matcher.storage.WorkGraphStore
+import weco.pipeline.matcher.storage.{WorkGraphStore, WorkNodeDao}
 
 import java.util.UUID
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -32,7 +28,6 @@ class WorkMatcherTest
     with Matchers
     with MatcherFixtures
     with ScalaFutures
-    with MockitoSugar
     with EitherValues
     with WorkStubGenerators
     with TimeAssertions {
@@ -198,11 +193,13 @@ class WorkMatcherTest
     }
   }
 
-  it("throws MatcherException if it fails to lock primary works") {
+  it("throws the locking error if it fails to lock primary works") {
+    val expectedException = new Throwable("BOOM!")
+
     implicit val lockDao: MemoryLockDao[String, UUID] =
       new MemoryLockDao[String, UUID] {
         override def lock(id: String, contextId: UUID): LockResult =
-          Left(LockFailure(id, e = new Throwable("BOOM!")))
+          Left(LockFailure(id, e = expectedException))
       }
 
     val lockingService =
@@ -217,13 +214,15 @@ class WorkMatcherTest
         val result = workMatcher.matchWork(work)
 
         whenReady(result.failed) {
-          _ shouldBe a[MatcherException]
+          _.getMessage should startWith("FailedLock(")
         }
       }
     }
   }
 
-  it("throws MatcherException if it fails to lock secondary works") {
+  it("throws the locking error if it fails to lock secondary works") {
+    val expectedException = new Throwable("BOOM!")
+
     withWorkGraphTable { graphTable =>
       withWorkGraphStore(graphTable) { workGraphStore =>
         val componentId = "ABC"
@@ -249,7 +248,7 @@ class WorkMatcherTest
               override def lock(id: String, contextId: UUID): LockResult =
                 synchronized {
                   if (id == componentId) {
-                    Left(LockFailure(id, e = new Throwable("BOOM!")))
+                    Left(LockFailure(id, e = expectedException))
                   } else {
                     super.lock(id, contextId)
                   }
@@ -264,7 +263,7 @@ class WorkMatcherTest
           val result = workMatcher.matchWork(work)
 
           whenReady(result.failed) {
-            _ shouldBe a[MatcherException]
+            _.getMessage should startWith("FailedLock(")
           }
         }
       }
@@ -272,26 +271,41 @@ class WorkMatcherTest
   }
 
   it("fails if saving the updated work fails") {
-    val mockWorkGraphStore = mock[WorkGraphStore]
-    withWorkMatcher(mockWorkGraphStore) { workMatcher =>
-      val expectedException = new RuntimeException("Failed to put")
-      when(mockWorkGraphStore.findAffectedWorks(any[WorkStub]))
-        .thenReturn(Future.successful(Set[WorkNode]()))
-      when(mockWorkGraphStore.put(any[Set[WorkNode]]))
-        .thenThrow(expectedException)
+    val workNodeDao = new WorkNodeDao(
+      dynamoClient = dynamoClient,
+      dynamoConfig = createDynamoConfigWith(nonExistentTable)
+    )
 
+    val expectedException = new RuntimeException("Failed to put")
+
+    val brokenStore = new WorkGraphStore(workNodeDao) {
+      override def findAffectedWorks(w: WorkStub): Future[Set[WorkNode]] =
+        Future.successful(Set[WorkNode]())
+
+      override def put(nodes: Set[WorkNode]): Future[Unit] =
+        Future.failed(expectedException)
+    }
+
+    withWorkMatcher(brokenStore) { workMatcher =>
       val work = createWorkStub
 
-      whenReady(workMatcher.matchWork(work).failed) { actualException =>
-        actualException shouldBe MatcherException(expectedException)
+      whenReady(workMatcher.matchWork(work).failed) {
+        _.getMessage shouldBe expectedException.getMessage
       }
     }
   }
 
   it("skips writing to the store if there are no changes") {
     withWorkGraphTable { graphTable =>
-      withWorkGraphStore(graphTable) { workGraphStore =>
-        val spyStore = spy(workGraphStore)
+      withWorkNodeDao(graphTable) { workNodeDao =>
+        var putCount = 0
+
+        val spyStore = new WorkGraphStore(workNodeDao) {
+          override def put(nodes: Set[WorkNode]): Future[Unit] = {
+            putCount += 1
+            super.put(nodes)
+          }
+        }
 
         val work = createWorkStub
 
@@ -316,7 +330,7 @@ class WorkMatcherTest
               }
 
           whenReady(futures) { _ =>
-            verify(spyStore, times(1)).put(any[Set[WorkNode]])
+            putCount shouldBe 1
           }
         }
       }

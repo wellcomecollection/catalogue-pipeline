@@ -96,10 +96,8 @@ object ExternalDependencies {
     val apacheCommons = "1.9"
     val circe = "0.13.0"
     val fastparse = "2.3.0"
-    val mockito = "1.9.5"
     val scalatest = "3.2.3"
     val scalatestplus = "3.1.2.0"
-    val scalatestplusMockitoArtifactId = "mockito-3-2"
     val scalacheckShapeless = "1.1.6"
     val scalacsv = "1.3.5"
     val scalaGraph = "1.12.5"
@@ -120,11 +118,6 @@ object ExternalDependencies {
 
   val circeOpticsDependencies = Seq(
     "io.circe" %% "circe-optics" % versions.circe
-  )
-
-  val mockitoDependencies: Seq[ModuleID] = Seq(
-    "org.mockito" % "mockito-core" % versions.mockito % "test",
-    "org.scalatestplus" %% versions.scalatestplusMockitoArtifactId % versions.scalatestplus % "test"
   )
 
   val mySqlDependencies = Seq(
@@ -171,8 +164,7 @@ object ExternalDependencies {
 
 object CatalogueDependencies {
   val internalModelDependencies: Seq[ModuleID] =
-    ExternalDependencies.scalacsvDependencies ++
-      WellcomeDependencies.fixturesLibrary ++
+    WellcomeDependencies.fixturesLibrary ++
       WellcomeDependencies.elasticsearchLibrary ++
       WellcomeDependencies.elasticsearchTypesafeLibrary ++
       WellcomeDependencies.jsonLibrary ++
@@ -214,8 +206,7 @@ object CatalogueDependencies {
       ExternalDependencies.circeOpticsDependencies
 
   val matcherDependencies: Seq[ModuleID] =
-    ExternalDependencies.mockitoDependencies ++
-      ExternalDependencies.scalaGraphDependencies ++
+    ExternalDependencies.scalaGraphDependencies ++
       WellcomeDependencies.storageTypesafeLibrary
 
   val mergerDependencies: Seq[ModuleID] = Nil
@@ -245,6 +236,7 @@ object CatalogueDependencies {
 
   val sierraTransformerDependencies: Seq[ModuleID] =
     ExternalDependencies.apacheCommonsDependencies ++
+      ExternalDependencies.scalacsvDependencies ++
       WellcomeDependencies.jsonLibrary
 
   val metsTransformerDependencies: Seq[ModuleID] =
