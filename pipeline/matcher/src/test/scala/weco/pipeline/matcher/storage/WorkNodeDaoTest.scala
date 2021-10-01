@@ -2,17 +2,13 @@ package weco.pipeline.matcher.storage
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.matchers.should.Matchers
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
 
 import javax.naming.ConfigurationException
 import org.scalatest.funspec.AnyFunSpec
 import org.scanamo.syntax._
 import org.scanamo.generic.auto._
-import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import software.amazon.awssdk.services.dynamodb.model.{BatchWriteItemRequest, QueryRequest, ResourceNotFoundException, ScanRequest}
+import software.amazon.awssdk.services.dynamodb.model.{ResourceNotFoundException, ScanRequest}
 import weco.storage.dynamo.DynamoConfig
 import weco.catalogue.internal_model.generators.IdentifiersGenerators
 import weco.catalogue.internal_model.identifiers.CanonicalId
@@ -25,7 +21,7 @@ import scala.collection.JavaConverters._
 class WorkNodeDaoTest
     extends AnyFunSpec
     with Matchers
-    with MockitoSugar
+//    with MockitoSugar
     with ScalaFutures
     with MatcherFixtures
     with IdentifiersGenerators {
@@ -119,21 +115,14 @@ class WorkNodeDaoTest
       }
     }
 
-    it(
-      "returns an error if fetching from dynamo fails during a getByComponentIds") {
-      withWorkGraphTable { table =>
-        val dynamoClient = mock[DynamoDbClient]
-        val expectedException = new RuntimeException("FAILED")
-        when(dynamoClient.query(any[QueryRequest]))
-          .thenThrow(expectedException)
-        val workNodeDao = new WorkNodeDao(
-          dynamoClient,
-          dynamoConfig = createDynamoConfigWith(table)
-        )
+    it("fails if fetching from dynamo fails during a getByComponentIds") {
+      val workNodeDao = new WorkNodeDao(
+        dynamoClient,
+        dynamoConfig = createDynamoConfigWith(nonExistentTable)
+      )
 
-        whenReady(workNodeDao.getByComponentIds(Set(ciHash(idA, idB))).failed) {
-          _ shouldBe expectedException
-        }
+      whenReady(workNodeDao.getByComponentIds(Set(ciHash(idA, idB))).failed) {
+        _ shouldBe a[ResourceNotFoundException]
       }
     }
 
@@ -227,26 +216,20 @@ class WorkNodeDaoTest
     }
 
     it("returns an error if put to dynamo fails") {
-      withWorkGraphTable { table =>
-        val dynamoClient = mock[DynamoDbClient]
-        val expectedException = new RuntimeException("FAILED")
-        when(dynamoClient.batchWriteItem(any[BatchWriteItemRequest]))
-          .thenThrow(expectedException)
-        val workNodeDao = new WorkNodeDao(
-          dynamoClient,
-          dynamoConfig = createDynamoConfigWith(table)
-        )
+      val workNodeDao = new WorkNodeDao(
+        dynamoClient,
+        dynamoConfig = createDynamoConfigWith(nonExistentTable)
+      )
 
-        val workNode =
-          WorkNode(
-            idA,
-            version = 1,
-            linkedIds = List(idB),
-            componentId = ciHash(idA, idB))
+      val workNode =
+        WorkNode(
+          idA,
+          version = 1,
+          linkedIds = List(idB),
+          componentId = ciHash(idA, idB))
 
-        whenReady(workNodeDao.put(Set(workNode)).failed) {
-          _ shouldBe expectedException
-        }
+      whenReady(workNodeDao.put(Set(workNode)).failed) {
+        _ shouldBe a[ResourceNotFoundException]
       }
     }
 
