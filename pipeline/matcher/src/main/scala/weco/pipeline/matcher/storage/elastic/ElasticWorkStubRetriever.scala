@@ -3,6 +3,7 @@ package weco.pipeline.matcher.storage.elastic
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.get.GetRequest
 import com.sksamuel.elastic4s.{ElasticClient, Index}
+import weco.catalogue.internal_model.Implicits._
 import weco.json.JsonUtil._
 import weco.pipeline.matcher.models.WorkStub
 import weco.pipeline_storage.elastic.ElasticSourceRetriever
