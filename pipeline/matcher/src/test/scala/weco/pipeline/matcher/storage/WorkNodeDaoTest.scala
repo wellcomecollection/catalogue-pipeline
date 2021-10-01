@@ -87,7 +87,7 @@ class WorkNodeDaoTest
 
         val matcherGraphDao = new WorkNodeDao(
           dynamoClient,
-          DynamoConfig(table.name, table.index)
+          dynamoConfig = createDynamoConfigWith(table)
         )
 
         whenReady(matcherGraphDao.get(Set(idA)).failed) {
@@ -108,7 +108,7 @@ class WorkNodeDaoTest
               .build())
         val workNodeDao = new WorkNodeDao(
           dynamoClient,
-          DynamoConfig(table.name, table.index)
+          dynamoConfig = createDynamoConfigWith(table)
         )
 
         whenReady(workNodeDao.get(Set(idA)).failed) {
@@ -164,7 +164,7 @@ class WorkNodeDaoTest
           .thenThrow(expectedException)
         val workNodeDao = new WorkNodeDao(
           dynamoClient,
-          DynamoConfig(table.name, table.index)
+          dynamoConfig = createDynamoConfigWith(table)
         )
 
         whenReady(workNodeDao.getByComponentIds(Set(ciHash(idA, idB))).failed) {
@@ -185,7 +185,7 @@ class WorkNodeDaoTest
               .build())
         val workNodeDao = new WorkNodeDao(
           dynamoClient,
-          DynamoConfig(table.name, table.index)
+          dynamoConfig = createDynamoConfigWith(table)
         )
 
         whenReady(workNodeDao.getByComponentIds(Set(ciHash(idA, idB))).failed) {
@@ -291,7 +291,7 @@ class WorkNodeDaoTest
           .thenThrow(expectedException)
         val workNodeDao = new WorkNodeDao(
           dynamoClient,
-          DynamoConfig(table.name, table.index)
+          dynamoConfig = createDynamoConfigWith(table)
         )
 
         val workNode =
@@ -319,7 +319,7 @@ class WorkNodeDaoTest
               .build())
         val workNodeDao = new WorkNodeDao(
           dynamoClient,
-          DynamoConfig(table.name, table.index)
+          dynamoConfig = createDynamoConfigWith(table)
         )
 
         val workNode = WorkNode(
