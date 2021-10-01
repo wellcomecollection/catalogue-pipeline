@@ -171,8 +171,7 @@ object ExternalDependencies {
 
 object CatalogueDependencies {
   val internalModelDependencies: Seq[ModuleID] =
-    ExternalDependencies.scalacsvDependencies ++
-      WellcomeDependencies.fixturesLibrary ++
+    WellcomeDependencies.fixturesLibrary ++
       WellcomeDependencies.elasticsearchLibrary ++
       WellcomeDependencies.elasticsearchTypesafeLibrary ++
       WellcomeDependencies.jsonLibrary ++
@@ -245,6 +244,7 @@ object CatalogueDependencies {
 
   val sierraTransformerDependencies: Seq[ModuleID] =
     ExternalDependencies.apacheCommonsDependencies ++
+      ExternalDependencies.scalacsvDependencies ++
       WellcomeDependencies.jsonLibrary
 
   val metsTransformerDependencies: Seq[ModuleID] =
