@@ -38,8 +38,8 @@ class MatcherWorkerService[MsgDestination](
 
   def processMessage(workStub: WorkStub): Future[Unit] =
     (for {
-      identifiersList <- workMatcher.matchWork(workStub)
-      _ <- Future.fromTry(msgSender.sendT(identifiersList))
+      matcherResult <- workMatcher.matchWork(workStub)
+      _ <- Future.fromTry(msgSender.sendT(matcherResult))
     } yield ()).recover {
       case MatcherException(e: VersionExpectedConflictException) =>
         debug(
