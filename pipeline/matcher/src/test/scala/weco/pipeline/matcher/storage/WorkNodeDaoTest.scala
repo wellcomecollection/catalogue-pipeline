@@ -44,8 +44,8 @@ class WorkNodeDaoTest
     it("returns nothing if ids are not in dynamo") {
       withWorkGraphTable { table =>
         withWorkNodeDao(table) { workNodeDao =>
-          whenReady(workNodeDao.get(Set(createCanonicalId))) { workNodeSet =>
-            workNodeSet shouldBe Set.empty
+          whenReady(workNodeDao.get(Set(createCanonicalId))) {
+            _ shouldBe Set.empty
           }
         }
       }
@@ -70,8 +70,8 @@ class WorkNodeDaoTest
           put(dynamoClient, table.name)(existingWorkA)
           put(dynamoClient, table.name)(existingWorkB)
 
-          whenReady(workNodeDao.get(Set(idA, idB))) { work =>
-            work shouldBe Set(existingWorkA, existingWorkB)
+          whenReady(workNodeDao.get(Set(idA, idB))) {
+            _ shouldBe Set(existingWorkA, existingWorkB)
           }
         }
       }
@@ -90,8 +90,8 @@ class WorkNodeDaoTest
           DynamoConfig(table.name, table.index)
         )
 
-        whenReady(matcherGraphDao.get(Set(idA)).failed) { failedException =>
-          failedException shouldBe expectedException
+        whenReady(matcherGraphDao.get(Set(idA)).failed) {
+          _ shouldBe expectedException
         }
       }
     }
@@ -111,8 +111,8 @@ class WorkNodeDaoTest
           DynamoConfig(table.name, table.index)
         )
 
-        whenReady(workNodeDao.get(Set(idA)).failed) { failedException =>
-          failedException shouldBe a[MatcherException]
+        whenReady(workNodeDao.get(Set(idA)).failed) {
+          _ shouldBe a[MatcherException]
         }
       }
     }
@@ -123,8 +123,7 @@ class WorkNodeDaoTest
       withWorkGraphTable { table =>
         withWorkNodeDao(table) { workNodeDao =>
           whenReady(workNodeDao.getByComponentIds(Set("Not-there"))) {
-            workNodeSet =>
-              workNodeSet shouldBe Set()
+            _ shouldBe Set()
           }
         }
       }
@@ -150,8 +149,7 @@ class WorkNodeDaoTest
           put(dynamoClient, table.name)(existingWorkNodeB)
 
           whenReady(matcherGraphDao.getByComponentIds(Set(ciHash(idA, idB)))) {
-            linkedWorks =>
-              linkedWorks shouldBe Set(existingWorkNodeA, existingWorkNodeB)
+            _ shouldBe Set(existingWorkNodeA, existingWorkNodeB)
           }
         }
       }
@@ -170,8 +168,7 @@ class WorkNodeDaoTest
         )
 
         whenReady(workNodeDao.getByComponentIds(Set(ciHash(idA, idB))).failed) {
-          failedException =>
-            failedException shouldBe expectedException
+          _ shouldBe expectedException
         }
       }
     }
@@ -192,8 +189,7 @@ class WorkNodeDaoTest
         )
 
         whenReady(workNodeDao.getByComponentIds(Set(ciHash(idA, idB))).failed) {
-          failedException =>
-            failedException shouldBe a[MatcherException]
+          _ shouldBe a[MatcherException]
         }
       }
     }

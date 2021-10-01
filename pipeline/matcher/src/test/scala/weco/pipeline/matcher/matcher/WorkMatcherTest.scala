@@ -280,8 +280,9 @@ class WorkMatcherTest
     withWorkMatcher(brokenStore) { workMatcher =>
       val work = createWorkStub
 
-      whenReady(workMatcher.matchWork(work).failed) {
-        _ shouldBe MatcherException(expectedException)
+      whenReady(workMatcher.matchWork(work).failed) { exc =>
+        exc shouldBe a[MatcherException]
+        exc.getMessage shouldBe expectedException.getMessage
       }
     }
   }
