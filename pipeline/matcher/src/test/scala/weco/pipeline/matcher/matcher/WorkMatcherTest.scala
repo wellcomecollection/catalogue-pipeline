@@ -1,12 +1,9 @@
 package weco.pipeline.matcher.matcher
 
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{spy, times, verify, when}
 import org.scalatest.EitherValues
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import org.scalatestplus.mockito.MockitoSugar
 import org.scanamo.syntax._
 import weco.storage.locking.LockFailure
 import weco.storage.locking.memory.{MemoryLockDao, MemoryLockingService}
@@ -14,14 +11,8 @@ import weco.fixtures.TimeAssertions
 import weco.pipeline.matcher.exceptions.MatcherException
 import weco.pipeline.matcher.fixtures.MatcherFixtures
 import weco.pipeline.matcher.generators.WorkStubGenerators
-import weco.pipeline.matcher.models.{
-  MatchedIdentifiers,
-  MatcherResult,
-  WorkIdentifier,
-  WorkNode,
-  WorkStub
-}
-import weco.pipeline.matcher.storage.WorkGraphStore
+import weco.pipeline.matcher.models.{MatchedIdentifiers, MatcherResult, WorkIdentifier, WorkNode, WorkStub}
+import weco.pipeline.matcher.storage.{WorkGraphStore, WorkNodeDao}
 
 import java.util.UUID
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -32,7 +23,6 @@ class WorkMatcherTest
     with Matchers
     with MatcherFixtures
     with ScalaFutures
-    with MockitoSugar
     with EitherValues
     with WorkStubGenerators
     with TimeAssertions {
@@ -272,26 +262,41 @@ class WorkMatcherTest
   }
 
   it("fails if saving the updated work fails") {
-    val mockWorkGraphStore = mock[WorkGraphStore]
-    withWorkMatcher(mockWorkGraphStore) { workMatcher =>
-      val expectedException = new RuntimeException("Failed to put")
-      when(mockWorkGraphStore.findAffectedWorks(any[WorkStub]))
-        .thenReturn(Future.successful(Set[WorkNode]()))
-      when(mockWorkGraphStore.put(any[Set[WorkNode]]))
-        .thenThrow(expectedException)
+    val workNodeDao = new WorkNodeDao(
+      dynamoClient = dynamoClient,
+      dynamoConfig = createDynamoConfigWith(nonExistentTable)
+    )
 
+    val expectedException = new RuntimeException("Failed to put")
+
+    val brokenStore = new WorkGraphStore(workNodeDao) {
+      override def findAffectedWorks(w: WorkStub): Future[Set[WorkNode]] =
+        Future.successful(Set[WorkNode]())
+
+      override def put(nodes: Set[WorkNode]): Future[Unit] =
+        Future.failed(expectedException)
+    }
+
+    withWorkMatcher(brokenStore) { workMatcher =>
       val work = createWorkStub
 
-      whenReady(workMatcher.matchWork(work).failed) { actualException =>
-        actualException shouldBe MatcherException(expectedException)
+      whenReady(workMatcher.matchWork(work).failed) {
+        _ shouldBe MatcherException(expectedException)
       }
     }
   }
 
   it("skips writing to the store if there are no changes") {
     withWorkGraphTable { graphTable =>
-      withWorkGraphStore(graphTable) { workGraphStore =>
-        val spyStore = spy(workGraphStore)
+      withWorkNodeDao(graphTable) { workNodeDao =>
+        var putCount = 0
+
+        val spyStore = new WorkGraphStore(workNodeDao) {
+          override def put(nodes: Set[WorkNode]): Future[Unit] = {
+            putCount += 1
+            super.put(nodes)
+          }
+        }
 
         val work = createWorkStub
 
@@ -316,7 +321,7 @@ class WorkMatcherTest
               }
 
           whenReady(futures) { _ =>
-            verify(spyStore, times(1)).put(any[Set[WorkNode]])
+            putCount shouldBe 1
           }
         }
       }
