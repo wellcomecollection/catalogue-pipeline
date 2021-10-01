@@ -1,6 +1,7 @@
 package weco.pipeline.transformer.calm.models
 
 import weco.catalogue.source_model.calm.CalmRecord
+import weco.pipeline.transformer.text.TextNormalisation._
 
 trait CalmRecordOps {
 
@@ -11,6 +12,7 @@ trait CalmRecordOps {
     def getList(key: String): List[String] =
       record.data
         .getOrElse(key, Nil)
+        .filterNot(_.isWhitespace)
         .map(_.trim)
         .filter(_.nonEmpty)
         .map(fixEncoding)
