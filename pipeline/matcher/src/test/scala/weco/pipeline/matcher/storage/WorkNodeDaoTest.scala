@@ -12,11 +12,10 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scanamo.syntax._
 import org.scanamo.generic.auto._
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import software.amazon.awssdk.services.dynamodb.model.{BatchGetItemRequest, BatchWriteItemRequest, ProvisionedThroughputExceededException, QueryRequest, ResourceNotFoundException, ScanRequest}
+import software.amazon.awssdk.services.dynamodb.model.{BatchWriteItemRequest, QueryRequest, ResourceNotFoundException, ScanRequest}
 import weco.storage.dynamo.DynamoConfig
 import weco.catalogue.internal_model.generators.IdentifiersGenerators
 import weco.catalogue.internal_model.identifiers.CanonicalId
-import weco.pipeline.matcher.exceptions.MatcherException
 import weco.pipeline.matcher.fixtures.MatcherFixtures
 import weco.pipeline.matcher.models.WorkNode
 
@@ -81,26 +80,6 @@ class WorkNodeDaoTest
         _ shouldBe a[ResourceNotFoundException]
       }
     }
-
-    it("fails if ProvisionedThroughputExceededException occurs during get from dynamo") {
-      withWorkGraphTable { table =>
-        val dynamoClient = mock[DynamoDbClient]
-        when(dynamoClient.batchGetItem(any[BatchGetItemRequest]))
-          .thenThrow(
-            ProvisionedThroughputExceededException
-              .builder()
-              .message("BOOM!")
-              .build())
-        val workNodeDao = new WorkNodeDao(
-          dynamoClient,
-          dynamoConfig = createDynamoConfigWith(table)
-        )
-
-        whenReady(workNodeDao.get(Set(idA)).failed) {
-          _ shouldBe a[MatcherException]
-        }
-      }
-    }
   }
 
   describe("Get by ComponentIds") {
@@ -154,27 +133,6 @@ class WorkNodeDaoTest
 
         whenReady(workNodeDao.getByComponentIds(Set(ciHash(idA, idB))).failed) {
           _ shouldBe expectedException
-        }
-      }
-    }
-
-    it(
-      "returns a GracefulFailure if ProvisionedThroughputExceededException occurs during a getByComponentIds") {
-      withWorkGraphTable { table =>
-        val dynamoClient = mock[DynamoDbClient]
-        when(dynamoClient.query(any[QueryRequest]))
-          .thenThrow(
-            ProvisionedThroughputExceededException
-              .builder()
-              .message("BOOM!")
-              .build())
-        val workNodeDao = new WorkNodeDao(
-          dynamoClient,
-          dynamoConfig = createDynamoConfigWith(table)
-        )
-
-        whenReady(workNodeDao.getByComponentIds(Set(ciHash(idA, idB))).failed) {
-          _ shouldBe a[MatcherException]
         }
       }
     }
@@ -288,33 +246,6 @@ class WorkNodeDaoTest
 
         whenReady(workNodeDao.put(Set(workNode)).failed) {
           _ shouldBe expectedException
-        }
-      }
-    }
-
-    it(
-      "returns a GracefulFailure if ProvisionedThroughputExceededException occurs during put to dynamo") {
-      withWorkGraphTable { table =>
-        val dynamoClient = mock[DynamoDbClient]
-        when(dynamoClient.batchWriteItem(any[BatchWriteItemRequest]))
-          .thenThrow(
-            ProvisionedThroughputExceededException
-              .builder()
-              .message("BOOM!")
-              .build())
-        val workNodeDao = new WorkNodeDao(
-          dynamoClient,
-          dynamoConfig = createDynamoConfigWith(table)
-        )
-
-        val workNode = WorkNode(
-          id = idA,
-          version = 1,
-          linkedIds = List(idB),
-          componentId = ciHash(idA, idB))
-
-        whenReady(workNodeDao.put(Set(workNode)).failed) {
-          _ shouldBe a[MatcherException]
         }
       }
     }

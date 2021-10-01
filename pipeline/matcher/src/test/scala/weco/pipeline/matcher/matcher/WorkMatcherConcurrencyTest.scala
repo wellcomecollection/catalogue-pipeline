@@ -3,7 +3,6 @@ package weco.pipeline.matcher.matcher
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.pipeline.matcher.exceptions.MatcherException
 import weco.pipeline.matcher.fixtures.MatcherFixtures
 import weco.pipeline.matcher.generators.WorkStubGenerators
 import weco.pipeline.matcher.models.MatcherResult
@@ -46,23 +45,23 @@ class WorkMatcherConcurrencyTest
 
         val eventualResults = for {
           resultA <- eventualResultA recoverWith {
-            case e: MatcherException =>
-              Future.successful(e)
+            case t: Throwable =>
+              Future.successful(t)
           }
           resultB <- eventualResultB recoverWith {
-            case e: MatcherException =>
-              Future.successful(e)
+            case t: Throwable =>
+              Future.successful(t)
           }
         } yield (resultA, resultB)
 
         whenReady(eventualResults) { results =>
           val resultsList = results.productIterator.toList
-          val failure = resultsList.collect({
-            case e: MatcherException => e
-          })
-          val result = resultsList.collect({
+          val failure = resultsList.collect {
+            case t: Throwable => t
+          }
+          val result = resultsList.collect {
             case r: MatcherResult => r
-          })
+          }
 
           failure.size shouldBe 1
           result.size shouldBe 1

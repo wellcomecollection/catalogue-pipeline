@@ -8,7 +8,6 @@ import weco.messaging.MessageSender
 import weco.messaging.sns.NotificationMessage
 import weco.messaging.sqs.SQSStream
 import weco.pipeline_storage.PipelineStorageStream._
-import weco.pipeline.matcher.exceptions.MatcherException
 import weco.pipeline.matcher.matcher.WorkMatcher
 import weco.pipeline.matcher.models.{VersionExpectedConflictException, WorkStub}
 import weco.typesafe.Runnable
@@ -42,7 +41,7 @@ class MatcherWorkerService[MsgDestination](
       matcherResult <- workMatcher.matchWork(workStub)
       _ <- Future.fromTry(msgSender.sendT(matcherResult))
     } yield ()).recover {
-      case MatcherException(e: VersionExpectedConflictException) =>
+      case e: VersionExpectedConflictException =>
         debug(
           s"Not matching work due to version conflict exception: ${e.getMessage}")
     }

@@ -4,10 +4,8 @@ import grizzled.slf4j.Logging
 import org.scanamo.{DynamoFormat, Scanamo, Table}
 import org.scanamo.syntax._
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import software.amazon.awssdk.services.dynamodb.model.ProvisionedThroughputExceededException
 import weco.catalogue.internal_model.identifiers.CanonicalId
 import weco.storage.dynamo.DynamoConfig
-import weco.pipeline.matcher.exceptions.MatcherException
 import weco.pipeline.matcher.models.WorkNode
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -23,10 +21,6 @@ class WorkNodeDao(dynamoClient: DynamoDbClient, dynamoConfig: DynamoConfig)(
 
   def put(workNodes: Set[WorkNode]): Future[Unit] =
     Future { scanamo.exec(nodes.putAll(workNodes)) }
-      .recover {
-        case exception: ProvisionedThroughputExceededException =>
-          throw MatcherException(exception)
-      }
 
   def get(ids: Set[CanonicalId]): Future[Set[WorkNode]] =
     Future {
@@ -42,9 +36,6 @@ class WorkNodeDao(dynamoClient: DynamoDbClient, dynamoConfig: DynamoConfig)(
             throw exception
           }
         }
-    }.recover {
-      case exception: ProvisionedThroughputExceededException =>
-        throw MatcherException(exception)
     }
 
   def getByComponentIds(setIds: Set[String]): Future[Set[WorkNode]] =
@@ -64,8 +55,5 @@ class WorkNodeDao(dynamoClient: DynamoDbClient, dynamoConfig: DynamoConfig)(
             )
             throw exception
         }
-    }.recover {
-      case exception: ProvisionedThroughputExceededException =>
-        throw MatcherException(exception)
     }
 }

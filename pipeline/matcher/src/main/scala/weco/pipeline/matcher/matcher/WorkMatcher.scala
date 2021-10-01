@@ -3,7 +3,6 @@ package weco.pipeline.matcher.matcher
 import scala.concurrent.{ExecutionContext, Future}
 import cats.implicits._
 import grizzled.slf4j.Logging
-import weco.pipeline.matcher.exceptions.MatcherException
 import weco.pipeline.matcher.models.{
   MatchedIdentifiers,
   MatcherResult,
@@ -81,7 +80,7 @@ class WorkMatcher(
       .map {
         case Left(failure) =>
           debug(s"Locking failed while matching work ${w.id}: $failure")
-          throw MatcherException(failureToException(failure))
+          throw failureToException(failure)
         case Right(out) => out
       }
 

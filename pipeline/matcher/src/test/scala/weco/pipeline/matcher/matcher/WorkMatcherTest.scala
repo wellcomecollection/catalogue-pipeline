@@ -8,7 +8,6 @@ import org.scanamo.syntax._
 import weco.storage.locking.LockFailure
 import weco.storage.locking.memory.{MemoryLockDao, MemoryLockingService}
 import weco.fixtures.TimeAssertions
-import weco.pipeline.matcher.exceptions.MatcherException
 import weco.pipeline.matcher.fixtures.MatcherFixtures
 import weco.pipeline.matcher.generators.WorkStubGenerators
 import weco.pipeline.matcher.models.{MatchedIdentifiers, MatcherResult, WorkIdentifier, WorkNode, WorkStub}
@@ -188,11 +187,13 @@ class WorkMatcherTest
     }
   }
 
-  it("throws MatcherException if it fails to lock primary works") {
+  it("throws the locking error if it fails to lock primary works") {
+    val expectedException = new Throwable("BOOM!")
+
     implicit val lockDao: MemoryLockDao[String, UUID] =
       new MemoryLockDao[String, UUID] {
         override def lock(id: String, contextId: UUID): LockResult =
-          Left(LockFailure(id, e = new Throwable("BOOM!")))
+          Left(LockFailure(id, e = expectedException))
       }
 
     val lockingService =
@@ -207,13 +208,15 @@ class WorkMatcherTest
         val result = workMatcher.matchWork(work)
 
         whenReady(result.failed) {
-          _ shouldBe a[MatcherException]
+          _.getMessage should startWith("FailedLock(")
         }
       }
     }
   }
 
-  it("throws MatcherException if it fails to lock secondary works") {
+  it("throws the locking error if it fails to lock secondary works") {
+    val expectedException = new Throwable("BOOM!")
+
     withWorkGraphTable { graphTable =>
       withWorkGraphStore(graphTable) { workGraphStore =>
         val componentId = "ABC"
@@ -239,7 +242,7 @@ class WorkMatcherTest
               override def lock(id: String, contextId: UUID): LockResult =
                 synchronized {
                   if (id == componentId) {
-                    Left(LockFailure(id, e = new Throwable("BOOM!")))
+                    Left(LockFailure(id, e = expectedException))
                   } else {
                     super.lock(id, contextId)
                   }
@@ -254,7 +257,7 @@ class WorkMatcherTest
           val result = workMatcher.matchWork(work)
 
           whenReady(result.failed) {
-            _ shouldBe a[MatcherException]
+            _.getMessage should startWith("FailedLock(")
           }
         }
       }
@@ -280,9 +283,8 @@ class WorkMatcherTest
     withWorkMatcher(brokenStore) { workMatcher =>
       val work = createWorkStub
 
-      whenReady(workMatcher.matchWork(work).failed) { exc =>
-        exc shouldBe a[MatcherException]
-        exc.getMessage shouldBe expectedException.getMessage
+      whenReady(workMatcher.matchWork(work).failed) {
+        _.getMessage shouldBe expectedException.getMessage
       }
     }
   }
