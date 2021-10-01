@@ -12,13 +12,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scanamo.syntax._
 import org.scanamo.generic.auto._
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import software.amazon.awssdk.services.dynamodb.model.{
-  BatchGetItemRequest,
-  BatchWriteItemRequest,
-  ProvisionedThroughputExceededException,
-  QueryRequest,
-  ScanRequest
-}
+import software.amazon.awssdk.services.dynamodb.model.{BatchGetItemRequest, BatchWriteItemRequest, ProvisionedThroughputExceededException, QueryRequest, ResourceNotFoundException, ScanRequest}
 import weco.storage.dynamo.DynamoConfig
 import weco.catalogue.internal_model.generators.IdentifiersGenerators
 import weco.catalogue.internal_model.identifiers.CanonicalId
@@ -78,21 +72,13 @@ class WorkNodeDaoTest
     }
 
     it("returns an error if fetching from dynamo fails") {
-      withWorkGraphTable { table =>
-        val dynamoClient = mock[DynamoDbClient]
-        val expectedException = new RuntimeException("FAILED!")
+      val matcherGraphDao = new WorkNodeDao(
+        dynamoClient,
+        dynamoConfig = createDynamoConfigWith(nonExistentTable)
+      )
 
-        when(dynamoClient.batchGetItem(any[BatchGetItemRequest]))
-          .thenThrow(expectedException)
-
-        val matcherGraphDao = new WorkNodeDao(
-          dynamoClient,
-          dynamoConfig = createDynamoConfigWith(table)
-        )
-
-        whenReady(matcherGraphDao.get(Set(idA)).failed) {
-          _ shouldBe expectedException
-        }
+      whenReady(matcherGraphDao.get(Set(idA)).failed) {
+        _ shouldBe a[ResourceNotFoundException]
       }
     }
 
