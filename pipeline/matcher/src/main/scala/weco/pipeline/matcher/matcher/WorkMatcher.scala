@@ -71,9 +71,7 @@ class WorkMatcher(
                     createdTime = Instant.now()))
           }
         }
-      } yield {
-        matcherResult
-      }
+      } yield matcherResult
     }
 
   private def withLocks(w: WorkStub, ids: Set[String])(
