@@ -89,9 +89,22 @@ steps:
     env:
       PROJECTS: internal_model
     command: .buildkite/scripts/publish.py
-  - label: trigger service deployments
+  - label: trigger adapter deployments
     if: build.branch == "main"
-    trigger: "catalogue-pipeline-deploy-prod"
+    trigger: "catalogue-pipeline-deploy-adapter"
+    async: true
+    build:
+      message: "${BUILDKITE_MESSAGE}"
+      commit: "${BUILDKITE_COMMIT}"
+      branch: "${BUILDKITE_BRANCH}"
+      env:
+        BUILDKITE_PULL_REQUEST: "${BUILDKITE_PULL_REQUEST}"
+        BUILDKITE_PULL_REQUEST_BASE_BRANCH: "${BUILDKITE_PULL_REQUEST_BASE_BRANCH}"
+        BUILDKITE_PULL_REQUEST_REPO: "${BUILDKITE_PULL_REQUEST_REPO}"
+
+  - label: trigger pipeline deployments
+    if: build.branch == "main"
+    trigger: "catalogue-pipeline-deploy-pipeline"
     async: true
     build:
       message: "${BUILDKITE_MESSAGE}"

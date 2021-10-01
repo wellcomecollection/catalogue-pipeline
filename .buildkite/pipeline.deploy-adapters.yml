@@ -79,9 +79,3 @@ steps:
               "--confirmation-wait-for", 3600]
     agents:
       queue: nano
-  - label: deploy pipeline
-    commands:
-      - pip3 install --user boto3 httpx
-      - .buildkite/scripts/deploy_latest_pipeline.py
-    agents:
-      queue: nano
