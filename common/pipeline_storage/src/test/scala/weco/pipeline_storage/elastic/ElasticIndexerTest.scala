@@ -249,7 +249,7 @@ class ElasticIndexerTest
     }
 
     it("fails to index a single big document") {
-      val title = randomAlphanumeric(length = 2000000)
+      val title = randomAlphanumeric(length = 2100000)
       val documents = Seq(createDocument.copy(title = title))
 
       withContext() { implicit index: Index =>
