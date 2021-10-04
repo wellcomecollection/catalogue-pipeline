@@ -59,9 +59,9 @@ class TeiXml(val xml: Elem) extends Logging {
     *    </TEI>
     *
     */
-  def summary(nodeSeq: NodeSeq = (xml \\ "msDesc" \ "msContents" \ "summary"))
+  def summary(nodeSeq: NodeSeq = (xml \\ "msDesc" ))
     : Result[Option[String]] = {
-    nodeSeq.toList match {
+    (nodeSeq \ "msContents"\ "summary").toList match {
       case List(node) =>
         // some summary nodes can contain TEI specific xml tags, so we remove them
         Right(Some(node.text.trim.replaceAll("<.*?>", "")))
@@ -97,8 +97,8 @@ class TeiXml(val xml: Elem) extends Logging {
         for {
           id <- getIdFrom(node)
           partNumber <- Try((node \@ "n").toInt).toEither
-          description <- summary(node \ "summary")
-          languages <- TeiLanguages.parseLanguages(node)
+          description <- summary(node)
+          languages <- TeiLanguages.parseLanguages(node \ "msContents")
         } yield
           TeiData(
             id = id,

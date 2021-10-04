@@ -46,8 +46,7 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
              summary: Option[Elem] = None,
              languages: List[Elem] = Nil) =
     <msPart xml:id={id} n={number.toString}>
-      {summary.getOrElse(NodeSeq.Empty)}
-      {languages}
+      {msContents(summary = summary, languages = languages)}
     </msPart>
 
   def teiXml(
