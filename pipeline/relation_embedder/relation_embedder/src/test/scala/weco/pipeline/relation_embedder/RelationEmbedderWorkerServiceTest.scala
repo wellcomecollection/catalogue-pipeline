@@ -5,7 +5,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import com.sksamuel.elastic4s.Index
 import org.scalatest.Assertion
-import org.scalatest.concurrent.Eventually
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import akka.NotUsed
@@ -34,7 +33,6 @@ class RelationEmbedderWorkerServiceTest
     with Matchers
     with SQS
     with Akka
-    with Eventually
     with IndexFixtures
     with RelationGenerators {
 

@@ -1,6 +1,5 @@
 package weco.pipeline.ingestor.images.services
 
-import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.index.{ImagesIndexConfig, IndexFixtures}
@@ -19,7 +18,6 @@ class ImagesIndexerTest
     with Matchers
     with IndexFixtures
     with ElasticIndexerFixtures
-    with ScalaFutures
     with ImageGenerators {
 
   it("indexes an image") {
