@@ -179,16 +179,6 @@ class WorksIndexConfigTest
     }
   }
 
-  it("puts a valid work using compression") {
-    withLocalWorksIndex { implicit index =>
-      forAll { indexedWork: Work[WorkState.Indexed] =>
-        assertWorkCanBeIndexed(
-          client = elasticClientWithCompression,
-          work = indexedWork)
-      }
-    }
-  }
-
   private def assertWorkCanBeIndexed[W <: Work[_ <: WorkState]](
     work: W,
     client: ElasticClient = elasticClient)(implicit index: Index,
