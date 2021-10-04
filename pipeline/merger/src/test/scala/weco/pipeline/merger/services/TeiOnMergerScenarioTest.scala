@@ -81,23 +81,11 @@ class TeiOnMergerScenarioTest
     Then("the Cal work is redirected to the tei")
     outcome.getMerged(calmWork) should beRedirectedTo(teiWork)
 
-    And("the tei work has the Calm work collectionPath")
+    And("the tei work retains its collectionPath")
     outcome
       .getMerged(teiWork)
       .data
-      .collectionPath shouldBe calmWork.data.collectionPath
-
-    And("the tei inner works have the calm collectionPath prepended")
-    outcome
-      .getMerged(firstInternalWork)
-      .data
-      .collectionPath shouldBe Some(CollectionPath(
-      s"${calmWork.data.collectionPath.get.path}/${firstInternalWork.data.collectionPath.get.path}"))
-    outcome
-      .getMerged(secondInternalWork)
-      .data
-      .collectionPath shouldBe Some(CollectionPath(
-      s"${calmWork.data.collectionPath.get.path}/${secondInternalWork.data.collectionPath.get.path}"))
+      .collectionPath shouldBe teiWork.data.collectionPath
   }
 
   Scenario(
@@ -197,8 +185,8 @@ class TeiOnMergerScenarioTest
   Scenario(
     "CollectionPath is prepended to internal tei works if the work is not merged") {
     Given("a Tei")
-    val internalWork1 = teiIdentifiedWork().collectionPath(CollectionPath("1"))
-    val internalWork2 = teiIdentifiedWork().collectionPath(CollectionPath("2"))
+    val internalWork1 = teiIdentifiedWork().collectionPath(CollectionPath("id/1"))
+    val internalWork2 = teiIdentifiedWork().collectionPath(CollectionPath("id/2"))
     val teiWork = teiIdentifiedWork()
       .title("A tei work")
       .internalWorks(List(internalWork1, internalWork2))
