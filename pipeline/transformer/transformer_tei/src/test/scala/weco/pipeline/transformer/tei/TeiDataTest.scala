@@ -212,11 +212,12 @@ class TeiDataTest
       val languages = List(Language(id = "tam", label = "Tamil"))
       val teiData = createTeiDataWith(
         languages = languages,
-        nestedTeiData = Right(List(
-          createTeiDataWith(languages = List()),
-          createTeiDataWith(languages = List()),
-          createTeiDataWith(languages = List()),
-        ))
+        nestedTeiData = Right(
+          List(
+            createTeiDataWith(languages = List()),
+            createTeiDataWith(languages = List()),
+            createTeiDataWith(languages = List()),
+          ))
       )
 
       val work = teiData.toWork(time = Instant.now(), version = 1)
@@ -226,7 +227,9 @@ class TeiDataTest
       }
 
       it("copies the languages to the internal Works") {
-        work.state.internalWorkStubs.foreach { _.workData.languages shouldBe languages }
+        work.state.internalWorkStubs.foreach {
+          _.workData.languages shouldBe languages
+        }
       }
     }
 
@@ -244,8 +247,8 @@ class TeiDataTest
       val teiData = createTeiDataWith(
         languages = List(),
         nestedTeiData = Right(
-          innerLanguages.map {
-            languages => createTeiDataWith(languages = languages)
+          innerLanguages.map { languages =>
+            createTeiDataWith(languages = languages)
           }
         )
       )
@@ -253,7 +256,8 @@ class TeiDataTest
       val work = teiData.toWork(time = Instant.now(), version = 1)
 
       it("preserves the languages on the internal Works") {
-        work.state.internalWorkStubs.map(_.workData.languages) shouldBe innerLanguages
+        work.state.internalWorkStubs
+          .map(_.workData.languages) shouldBe innerLanguages
       }
 
       // TODO: Would this be a useful thing to do?

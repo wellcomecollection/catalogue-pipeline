@@ -94,7 +94,8 @@ case class TeiData(id: String,
   }
 
   implicit class InternalWorkOps(internalWorks: List[InternalWork.Source]) {
-    def withLanguage(topLevel: WorkData[Unidentified]): List[InternalWork.Source] =
+    def withLanguage(
+      topLevel: WorkData[Unidentified]): List[InternalWork.Source] =
       // If all the individual items/parts all use the same language,
       // it's specified once at the top level but not on the individual
       // entries.  The individual entries will not have languages.
@@ -103,11 +104,12 @@ case class TeiData(id: String,
       // onto the individual items/parts, so they'll appear on the
       // corresponding Works.
       internalWorks.flatMap(_.workData.languages) match {
-        case Nil => internalWorks.map { w =>
-          w.copy(
-            workData = w.workData.copy(languages = topLevel.languages)
-          )
-        }
+        case Nil =>
+          internalWorks.map { w =>
+            w.copy(
+              workData = w.workData.copy(languages = topLevel.languages)
+            )
+          }
 
         case _ => internalWorks
       }
