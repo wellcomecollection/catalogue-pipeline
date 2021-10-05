@@ -200,9 +200,7 @@ object PlatformMerger extends Merger {
     if (sources.isEmpty)
       State.pure(
         models.MergeResult(
-          mergedTarget = modifyInternalWorks(
-            target,
-            target.data.items),
+          mergedTarget = modifyInternalWorks(target, target.data.items),
           imageDataWithSources = standaloneImages(target).map { image =>
             ImageDataWithSource(
               image,
@@ -254,8 +252,7 @@ object PlatformMerger extends Merger {
       .mapState { state =>
         state.copy(internalWorkStubs = state.internalWorkStubs.map { stub =>
           stub.copy(
-            workData = stub.workData.copy[DataState.Identified](
-              items = items)
+            workData = stub.workData.copy[DataState.Identified](items = items)
           )
         })
       }

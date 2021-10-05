@@ -185,8 +185,10 @@ class TeiOnMergerScenarioTest
   Scenario(
     "CollectionPath is prepended to internal tei works if the work is not merged") {
     Given("a Tei")
-    val internalWork1 = teiIdentifiedWork().collectionPath(CollectionPath("id/1"))
-    val internalWork2 = teiIdentifiedWork().collectionPath(CollectionPath("id/2"))
+    val internalWork1 =
+      teiIdentifiedWork().collectionPath(CollectionPath("id/1"))
+    val internalWork2 =
+      teiIdentifiedWork().collectionPath(CollectionPath("id/2"))
     val teiWork = teiIdentifiedWork()
       .title("A tei work")
       .internalWorks(List(internalWork1, internalWork2))

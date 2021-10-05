@@ -118,8 +118,10 @@ class TeiDataTest
         languages = firstInnerTeiData.languages,
         description = firstInnerTeiData.description,
         format = Some(ArchivesAndManuscripts),
-        collectionPath =
-          Some(CollectionPath(path = s"${teiData.id}/${firstInnerTeiData.id}", label = None))
+        collectionPath = Some(
+          CollectionPath(
+            path = s"${teiData.id}/${firstInnerTeiData.id}",
+            label = None))
       )
     )
 
@@ -131,8 +133,10 @@ class TeiDataTest
         languages = secondInnerTeiData.languages,
         description = secondInnerTeiData.description,
         format = Some(ArchivesAndManuscripts),
-        collectionPath =
-          Some(CollectionPath(path = s"${teiData.id}/${secondInnerTeiData.id}", label = None))
+        collectionPath = Some(
+          CollectionPath(
+            path = s"${teiData.id}/${secondInnerTeiData.id}",
+            label = None))
       )
     )
     work.state.internalWorkStubs shouldBe List(

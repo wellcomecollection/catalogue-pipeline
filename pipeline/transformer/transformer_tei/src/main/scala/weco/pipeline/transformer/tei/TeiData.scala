@@ -94,14 +94,14 @@ case class TeiData(id: String,
   }
   implicit class InternalWorkOps(internalWorks: List[InternalWork.Source]) {
     def withLanguage(
-                      topLevel: WorkData[Unidentified]): List[InternalWork.Source] =
-    // If all the individual items/parts all use the same language,
-    // it's specified once at the top level but not on the individual
-    // entries.  The individual entries will not have languages.
-    //
-    // In this case, we copy the languages from the top-level entry
-    // onto the individual items/parts, so they'll appear on the
-    // corresponding Works.
+      topLevel: WorkData[Unidentified]): List[InternalWork.Source] =
+      // If all the individual items/parts all use the same language,
+      // it's specified once at the top level but not on the individual
+      // entries.  The individual entries will not have languages.
+      //
+      // In this case, we copy the languages from the top-level entry
+      // onto the individual items/parts, so they'll appear on the
+      // corresponding Works.
       internalWorks.flatMap(_.workData.languages) match {
         case Nil =>
           internalWorks.map { w =>
@@ -113,7 +113,8 @@ case class TeiData(id: String,
         case _ => internalWorks
       }
   }
-  private def toWorkData(parentCollectionPath: Option[CollectionPath]= None): WorkData[Unidentified] =
+  private def toWorkData(parentCollectionPath: Option[CollectionPath] = None)
+    : WorkData[Unidentified] =
     WorkData[Unidentified](
       title = Some(title),
       description = description,
@@ -131,9 +132,9 @@ case class TeiData(id: String,
       // We use the IDs to construct the collection hierarchy, but we don't want to display
       // them internally.
       collectionPath = parentCollectionPath match {
-        case Some(CollectionPath(parentPath, _)) => Some(CollectionPath(path = s"$parentPath/$id"))
+        case Some(CollectionPath(parentPath, _)) =>
+          Some(CollectionPath(path = s"$parentPath/$id"))
         case None => Some(CollectionPath(path = id))
       }
-
     )
 }
