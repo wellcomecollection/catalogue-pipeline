@@ -118,8 +118,10 @@ class TeiDataTest
         languages = firstInnerTeiData.languages,
         description = firstInnerTeiData.description,
         format = Some(ArchivesAndManuscripts),
-        collectionPath =
-          Some(CollectionPath(path = firstInnerTeiData.id, label = None))
+        collectionPath = Some(
+          CollectionPath(
+            path = s"${teiData.id}/${firstInnerTeiData.id}",
+            label = None))
       )
     )
 
@@ -131,8 +133,10 @@ class TeiDataTest
         languages = secondInnerTeiData.languages,
         description = secondInnerTeiData.description,
         format = Some(ArchivesAndManuscripts),
-        collectionPath =
-          Some(CollectionPath(path = secondInnerTeiData.id, label = None))
+        collectionPath = Some(
+          CollectionPath(
+            path = s"${teiData.id}/${secondInnerTeiData.id}",
+            label = None))
       )
     )
     work.state.internalWorkStubs shouldBe List(
@@ -165,7 +169,7 @@ class TeiDataTest
         CollectionPath(path = "WMS_Example_1", label = None))
     }
 
-    it("uses the ID for a relative path on internal Works") {
+    it("uses the ID for an absolute path on internal Works") {
       val teiData = createTeiDataWith(
         id = "WMS_Example_2",
         nestedTeiData = Right(
@@ -180,9 +184,9 @@ class TeiDataTest
       val work = teiData.toWork(time = Instant.now(), version = 1)
 
       work.state.internalWorkStubs.map(_.workData.collectionPath) shouldBe List(
-        Some(CollectionPath(path = "Part_1", label = None)),
-        Some(CollectionPath(path = "Part_2", label = None)),
-        Some(CollectionPath(path = "Part_3", label = None)),
+        Some(CollectionPath(path = "WMS_Example_2/Part_1", label = None)),
+        Some(CollectionPath(path = "WMS_Example_2/Part_2", label = None)),
+        Some(CollectionPath(path = "WMS_Example_2/Part_3", label = None)),
       )
     }
   }
