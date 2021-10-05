@@ -296,8 +296,9 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           NotRequestable.InUseByAnotherReader(_),
           Some(LocationType.OpenShelves)) =>
         val noteText = itemData.dueDate match {
-          case Some(d) => s"This item is temporarily unavailable. It is due for return on ${d.format(displayFormat)}."
-          case _       => "This item is temporarily unavailable."
+          case Some(d) =>
+            s"This item is temporarily unavailable. It is due for return on ${d.format(displayFormat)}."
+          case _ => "This item is temporarily unavailable."
         }
 
         AccessCondition(
@@ -339,13 +340,16 @@ object SierraItemAccess extends SierraQueryOps with Logging {
     private val dueDateFormat = DateTimeFormatter.ofPattern("yyyy-M-d")
 
     def dueDate: Option[LocalDate] =
-      itemData.fixedFields.get("65")
+      itemData.fixedFields
+        .get("65")
         .map { _.value.trim }
         .map {
           // e.g. 2020-09-01T03:00:00Z
           _.split("T").head
         }
-        .flatMap { s => Try(LocalDate.parse(s, dueDateFormat)).toOption }
+        .flatMap { s =>
+          Try(LocalDate.parse(s, dueDateFormat)).toOption
+        }
   }
 
   // The display note field has been used for multiple purposes, in particular:
