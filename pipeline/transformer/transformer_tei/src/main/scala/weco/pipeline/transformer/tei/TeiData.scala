@@ -32,7 +32,7 @@ case class TeiData(id: String,
   def toWork(time: Instant, version: Int): Work[Source] = {
     val topLevelData = toWorkData
 
-    val internalDataStubs: Result[List[InternalWork.Source]] =
+    val internalWorks: Result[List[InternalWork.Source]] =
       nestedTeiData.map { teiDatas =>
         teiDatas.map { data =>
           InternalWork.Source(
@@ -46,7 +46,7 @@ case class TeiData(id: String,
     // and don't send any inner Works.
     //
     // TODO: check logic for copying languages from wrapping works to inner works
-    val (workData, internalWorkStubs) = internalDataStubs match {
+    val (workData, internalWorkStubs) = internalWorks match {
       case Right(List(InternalWork.Source(_, singleItemData))) =>
         (topLevelData.copy(title = singleItemData.title), List())
       case Right(data) => (topLevelData, data)
