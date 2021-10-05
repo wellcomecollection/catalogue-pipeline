@@ -44,12 +44,12 @@ case class TeiData(id: String,
 
     // If there's only a single inner data, we move it to the top level
     // and don't send any inner Works.
-    //
-    // TODO: check logic for copying languages from wrapping works to inner works
     val (workData, internalWorkStubs) = internalWorks match {
       case Right(List(InternalWork.Source(_, singleItemData))) =>
         (topLevelData.copy(title = singleItemData.title), List())
-      case Right(data) => (topLevelData, data)
+
+      case Right(data) => (topLevelData, data.withLanguage(topLevelData))
+
       case Left(err) =>
         warn("Error extracting internal works", err)
         (topLevelData, List())
@@ -91,6 +91,26 @@ case class TeiData(id: String,
       )
 
     bNumberMergeCandidate.toList
+  }
+
+  implicit class InternalWorkOps(internalWorks: List[InternalWork.Source]) {
+    def withLanguage(topLevel: WorkData[Unidentified]): List[InternalWork.Source] =
+      // If all the individual items/parts all use the same language,
+      // it's specified once at the top level but not on the individual
+      // entries.  The individual entries will not have languages.
+      //
+      // In this case, we copy the languages from the top-level entry
+      // onto the individual items/parts, so they'll appear on the
+      // corresponding Works.
+      internalWorks.flatMap(_.workData.languages) match {
+        case Nil => internalWorks.map { w =>
+          w.copy(
+            workData = w.workData.copy(languages = topLevel.languages)
+          )
+        }
+
+        case _ => internalWorks
+      }
   }
 
   private def toWorkData: WorkData[Unidentified] =
