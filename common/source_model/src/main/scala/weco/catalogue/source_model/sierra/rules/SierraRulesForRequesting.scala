@@ -125,7 +125,7 @@ object SierraRulesForRequesting {
           if i.fixedField("87").getOrElse("0") != "0" || i
             .fixedField("88")
             .contains("!") =>
-        NotRequestable.OnHold(
+        NotRequestable.InUseByAnotherReader(
           "Item is in use by another reader. Please ask at Enquiry Desk.")
 
       // These cases cover the lines:

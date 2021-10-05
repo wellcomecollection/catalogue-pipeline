@@ -12,6 +12,10 @@ import weco.catalogue.source_model.sierra.source.{OpacMsg, Status}
 import weco.sierra.models.SierraQueryOps
 import weco.sierra.models.data.SierraItemData
 
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import scala.util.Try
+
 /** There are multiple sources of truth for item information in Sierra, and whether
   * a given item can be requested online.
   *
@@ -273,13 +277,34 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           _,
           _,
           _,
-          NotRequestable.OnHold(_),
+          NotRequestable.InUseByAnotherReader(_),
           Some(LocationType.ClosedStores)) =>
         AccessCondition(
           method = AccessMethod.NotRequestable,
           status = Some(AccessStatus.TemporarilyUnavailable),
           note = Some(
             "Item is in use by another reader. Please ask at Enquiry Desk.")
+        )
+
+      // Note that items can borrowed even if they're on the open shelves, but this
+      // isn't something that's available to regular library members, so don't be
+      // specific about why the item is unavailable.
+      case (
+          _,
+          _,
+          _,
+          NotRequestable.InUseByAnotherReader(_),
+          Some(LocationType.OpenShelves)) =>
+        val noteText = itemData.dueDate match {
+          case Some(d) =>
+            s"This item is temporarily unavailable. It is due for return on ${d.format(displayFormat)}."
+          case _ => "This item is temporarily unavailable."
+        }
+
+        AccessCondition(
+          method = AccessMethod.OpenShelves,
+          status = Some(AccessStatus.TemporarilyUnavailable),
+          note = Some(noteText)
         )
 
       // If we can't work out how this item should be handled, then let's mark it
@@ -301,12 +326,30 @@ object SierraItemAccess extends SierraQueryOps with Logging {
         )
     }
 
+  // e.g. 1 January 2021
+  private val displayFormat = DateTimeFormatter.ofPattern("d MMMM yyyy")
+
   implicit class ItemDataAccessOps(itemData: SierraItemData) {
     def status: Option[String] =
       itemData.fixedFields.get("88").map { _.value.trim }
 
     def opacmsg: Option[String] =
       itemData.fixedFields.get("108").map { _.value.trim }
+
+    // e.g. 2020-09-01
+    private val dueDateFormat = DateTimeFormatter.ofPattern("yyyy-M-d")
+
+    def dueDate: Option[LocalDate] =
+      itemData.fixedFields
+        .get("65")
+        .map { _.value.trim }
+        .map {
+          // e.g. 2020-09-01T03:00:00Z
+          _.split("T").head
+        }
+        .flatMap { s =>
+          Try(LocalDate.parse(s, dueDateFormat)).toOption
+        }
   }
 
   // The display note field has been used for multiple purposes, in particular:

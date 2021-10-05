@@ -65,7 +65,7 @@ class SierraRulesForRequestingTest
       fixedFields = Map("87" -> FixedField(label = "LOANRULE", value = "1"))
     )
 
-    SierraRulesForRequesting(item) shouldBe NotRequestable.OnHold(
+    SierraRulesForRequesting(item) shouldBe NotRequestable.InUseByAnotherReader(
       "Item is in use by another reader. Please ask at Enquiry Desk.")
   }
 
@@ -74,7 +74,7 @@ class SierraRulesForRequestingTest
       fixedFields = Map("88" -> FixedField(label = "STATUS", value = "!"))
     )
 
-    SierraRulesForRequesting(item) shouldBe NotRequestable.OnHold(
+    SierraRulesForRequesting(item) shouldBe NotRequestable.InUseByAnotherReader(
       "Item is in use by another reader. Please ask at Enquiry Desk.")
   }
 

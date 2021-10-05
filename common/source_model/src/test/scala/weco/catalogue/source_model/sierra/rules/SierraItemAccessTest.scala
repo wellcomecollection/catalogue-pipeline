@@ -802,6 +802,49 @@ class SierraItemAccessTest
           note = Some("This item is missing.")
         )
     }
+
+    it("is not available if it has a due date") {
+      val itemData = createSierraItemDataWith(
+        fixedFields = Map(
+          "65" -> FixedField(
+            label = "DUE DATE",
+            value = "2020-09-01T03:00:00Z"
+          ),
+          "79" -> FixedField(
+            label = "LOCATION",
+            value = "wgpvm",
+            display = "History of Medicine"
+          ),
+          "87" -> FixedField(
+            label = "LOANRULE",
+            value = "14"
+          ),
+          "88" -> FixedField(
+            label = "STATUS",
+            value = "-",
+            display = "Available"
+          ),
+          "108" -> FixedField(
+            label = "OPACMSG",
+            value = "o",
+            display = "Open shelves"
+          )
+        )
+      )
+
+      val (ac, _) = SierraItemAccess(
+        location = Some(LocationType.OpenShelves),
+        itemData = itemData
+      )
+
+      ac shouldBe AccessCondition(
+        method = AccessMethod.OpenShelves,
+        status = Some(AccessStatus.TemporarilyUnavailable),
+        note = Some(
+          "This item is temporarily unavailable. It is due for return on 1 September 2020."
+        )
+      )
+    }
   }
 
   it("handles the case where we can't map the access data") {
