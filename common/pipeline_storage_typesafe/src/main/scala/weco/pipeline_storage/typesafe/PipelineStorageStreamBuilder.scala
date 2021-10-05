@@ -3,11 +3,6 @@ package weco.pipeline_storage.typesafe
 import com.typesafe.config.Config
 import weco.messaging.MessageSender
 import weco.messaging.sqs.SQSStream
-import weco.pipeline_storage.{
-  Indexer,
-  PipelineStorageConfig,
-  PipelineStorageStream
-}
 import weco.typesafe.config.builders.EnrichConfig._
 import weco.pipeline_storage.{
   Indexer,

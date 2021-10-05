@@ -5,9 +5,8 @@ import com.typesafe.config.Config
 import io.circe.Encoder
 import weco.elasticsearch.IndexConfig
 import weco.pipeline_storage.Indexable
-import weco.typesafe.config.builders.EnrichConfig._
-import weco.pipeline_storage.Indexable
 import weco.pipeline_storage.elastic.ElasticIndexer
+import weco.typesafe.config.builders.EnrichConfig._
 
 import scala.concurrent.ExecutionContext
 

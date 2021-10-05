@@ -1,7 +1,5 @@
 package weco.catalogue.internal_model.index
 
-import org.scalatest.concurrent.Eventually
-import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
@@ -31,8 +29,6 @@ object TestDoc {
 class IndexConfigFieldsTest
     extends AnyFunSpec
     with IndexFixtures
-    with ScalaFutures
-    with Eventually
     with Matchers
     with JsonAssertions
     with ScalaCheckPropertyChecks
