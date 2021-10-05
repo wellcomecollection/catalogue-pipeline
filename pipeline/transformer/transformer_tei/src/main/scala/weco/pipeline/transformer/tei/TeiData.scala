@@ -30,14 +30,14 @@ case class TeiData(id: String,
                    nestedTeiData: Result[List[TeiData]] = Right(Nil))
     extends Logging {
   def toWork(time: Instant, version: Int): Work[Source] = {
-    val topLevelData = toWorkData
+    val topLevelData = toWorkData()
 
     val internalWorks: Result[List[InternalWork.Source]] =
       nestedTeiData.map { teiDatas =>
         teiDatas.map { data =>
           InternalWork.Source(
             sourceIdentifier = data.sourceIdentifier,
-            workData = data.toWorkData
+            workData = data.toWorkData(topLevelData.collectionPath)
           )
         }
       }
@@ -92,17 +92,16 @@ case class TeiData(id: String,
 
     bNumberMergeCandidate.toList
   }
-
   implicit class InternalWorkOps(internalWorks: List[InternalWork.Source]) {
     def withLanguage(
-      topLevel: WorkData[Unidentified]): List[InternalWork.Source] =
-      // If all the individual items/parts all use the same language,
-      // it's specified once at the top level but not on the individual
-      // entries.  The individual entries will not have languages.
-      //
-      // In this case, we copy the languages from the top-level entry
-      // onto the individual items/parts, so they'll appear on the
-      // corresponding Works.
+                      topLevel: WorkData[Unidentified]): List[InternalWork.Source] =
+    // If all the individual items/parts all use the same language,
+    // it's specified once at the top level but not on the individual
+    // entries.  The individual entries will not have languages.
+    //
+    // In this case, we copy the languages from the top-level entry
+    // onto the individual items/parts, so they'll appear on the
+    // corresponding Works.
       internalWorks.flatMap(_.workData.languages) match {
         case Nil =>
           internalWorks.map { w =>
@@ -114,8 +113,7 @@ case class TeiData(id: String,
         case _ => internalWorks
       }
   }
-
-  private def toWorkData: WorkData[Unidentified] =
+  private def toWorkData(parentCollectionPath: Option[CollectionPath]= None): WorkData[Unidentified] =
     WorkData[Unidentified](
       title = Some(title),
       description = description,
@@ -132,11 +130,10 @@ case class TeiData(id: String,
       //
       // We use the IDs to construct the collection hierarchy, but we don't want to display
       // them internally.
-      //
-      // The collectionPath on the internal works is a *relative* path to their parent --
-      // this will become an absolute path when the internal Works become full Works
-      // in the merger.
-      //
-      collectionPath = Some(CollectionPath(path = id))
+      collectionPath = parentCollectionPath match {
+        case Some(CollectionPath(parentPath, _)) => Some(CollectionPath(path = s"$parentPath/$id"))
+        case None => Some(CollectionPath(path = id))
+      }
+
     )
 }
