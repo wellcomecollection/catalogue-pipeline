@@ -17,7 +17,7 @@ object NotRequestable {
 
   case class ContactUs(message: String) extends NotRequestable
 
-  case class OnHold(message: String) extends NotRequestable
+  case class InUseByAnotherReader(message: String) extends NotRequestable
 
   case class OnOpenShelves(message: String) extends NotRequestable
   case class OnExhibition(message: String) extends NotRequestable

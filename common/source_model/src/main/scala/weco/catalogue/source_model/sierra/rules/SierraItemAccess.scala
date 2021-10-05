@@ -273,7 +273,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           _,
           _,
           _,
-          NotRequestable.OnHold(_),
+          NotRequestable.InUseByAnotherReader(_),
           Some(LocationType.ClosedStores)) =>
         AccessCondition(
           method = AccessMethod.NotRequestable,
