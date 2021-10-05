@@ -55,13 +55,14 @@ class TeiTransformer(store: Store[S3ObjectLocation, String])
       bNumber <- teiXml.bNumber
       title <- teiXml.title
       languages <- TeiLanguages(teiXml.xml)
+      nestedData <- teiXml.nestedTeiData
     } yield
       TeiData(
         id = teiXml.id,
-        title = title,
+        title = Some(title),
         bNumber = bNumber,
         description = summary,
         languages = languages,
-        nestedTeiData = teiXml.nestedTeiData)
+        nestedTeiData = nestedData)
 
 }

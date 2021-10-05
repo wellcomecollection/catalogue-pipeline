@@ -18,53 +18,37 @@ import weco.catalogue.internal_model.work.{
   WorkData
 }
 import weco.pipeline.transformer.identifiers.SourceIdentifierValidation._
-import weco.pipeline.transformer.result.Result
 
 import java.time.Instant
 
 case class TeiData(id: String,
-                   title: String,
+                   title: Option[String],
                    bNumber: Option[String] = None,
                    description: Option[String] = None,
                    languages: List[Language] = Nil,
-                   nestedTeiData: Result[List[TeiData]] = Right(Nil))
+                   nestedTeiData: List[TeiData] =Nil)
     extends Logging {
   def toWork(time: Instant, version: Int): Work[Source] = {
     val topLevelData = toWorkData()
 
-    val internalWorks: Result[List[InternalWork.Source]] =
-      nestedTeiData.map { teiDatas =>
-        teiDatas.map { data =>
+    val internalWorks: List[InternalWork.Source] =
+      nestedTeiData.map{ data =>
           InternalWork.Source(
             sourceIdentifier = data.sourceIdentifier,
             workData = data.toWorkData(topLevelData.collectionPath)
           )
-        }
       }
-
-    // If there's only a single inner data, we move it to the top level
-    // and don't send any inner Works.
-    val (workData, internalWorkStubs) = internalWorks match {
-      case Right(List(InternalWork.Source(_, singleItemData))) =>
-        (topLevelData.copy(title = singleItemData.title), List())
-
-      case Right(data) => (topLevelData, data.withLanguage(topLevelData))
-
-      case Left(err) =>
-        warn("Error extracting internal works", err)
-        (topLevelData, List())
-    }
 
     val state = Source(
       sourceIdentifier = sourceIdentifier,
       sourceModifiedTime = time,
-      internalWorkStubs = internalWorkStubs,
+      internalWorkStubs = internalWorks.withLanguage(topLevelData),
       mergeCandidates = mergeCandidates
     )
 
     Work.Visible[Source](
       version = version,
-      data = workData,
+      data = topLevelData,
       state = state,
       redirectSources = Nil
     )
@@ -116,7 +100,7 @@ case class TeiData(id: String,
   private def toWorkData(parentCollectionPath: Option[CollectionPath] = None)
     : WorkData[Unidentified] =
     WorkData[Unidentified](
-      title = Some(title),
+      title = Some(title.getOrElse(id)),
       description = description,
       languages = languages,
       format = Some(Format.ArchivesAndManuscripts),

@@ -26,10 +26,12 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
 
   def msItem(id: String,
              titles: List[Elem] = Nil,
-             languages: List[Elem] = Nil) =
+             languages: List[Elem] = Nil,
+             items: List[Elem] = Nil) =
     <msItem xml:id={id}>
       {titles}
       {languages}
+      {items}
     </msItem>
 
   def msContents(summary: Option[Elem] = None,
@@ -44,9 +46,10 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
   def msPart(id: String,
              number: Int,
              summary: Option[Elem] = None,
-             languages: List[Elem] = Nil) =
+             languages: List[Elem] = Nil,
+             items: List[Elem] = Nil) =
     <msPart xml:id={id} n={number.toString}>
-      {msContents(summary = summary, languages = languages)}
+      {msContents(summary = summary, languages = languages, items = items)}
     </msPart>
 
   def teiXml(

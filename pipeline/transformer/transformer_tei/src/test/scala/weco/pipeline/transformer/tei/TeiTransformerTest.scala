@@ -16,6 +16,7 @@ import weco.catalogue.internal_model.work.{
   CollectionPath,
   DeletedReason,
   Format,
+  InternalWork,
   Work,
   WorkData
 }
@@ -60,7 +61,26 @@ class TeiTransformerTest
           collectionPath =
             Some(CollectionPath(path = "manuscript_15651", label = None))
         ),
-        state = Source(sourceIdentifier, modifiedTime)
+        state = Source(
+          sourceIdentifier,
+          modifiedTime,
+          internalWorkStubs = List(
+            InternalWork.Source(
+              sourceIdentifier = SourceIdentifier(
+                IdentifierType.Tei,
+                "Work",
+                "MS_Arabic_1-item1"
+              ),
+              workData = WorkData(
+                title = Some("MS_Arabic_1-item1"),
+                languages = List(Language("ara", "Arabic")),
+                collectionPath =
+                  Some(CollectionPath("manuscript_15651/MS_Arabic_1-item1")),
+                format = Some(Format.ArchivesAndManuscripts)
+              )
+            )
+          )
+        )
       )
   }
 
@@ -70,7 +90,8 @@ class TeiTransformerTest
     )
 
     work.value.data.languages shouldBe List(
-      Language(id = "jav", label = "Javanese"))
+      Language(id = "jav", label = "Javanese")
+    )
   }
 
   it("extracts msItem inner Works") {
@@ -89,7 +110,8 @@ class TeiTransformerTest
     val internalWorkStubs = work.value.state.internalWorkStubs
     internalWorkStubs should have size 7
     internalWorkStubs.head.workData.description shouldBe Some(
-      "Lists of plants, roots, woods, fibres, snakes, animals and insects.")
+      "Lists of plants, roots, woods, fibres, snakes, animals and insects."
+    )
   }
   it("handles delete messages") {
 
@@ -114,7 +136,8 @@ class TeiTransformerTest
 
   private def transformToWork(filename: String)(
     id: String,
-    modifiedTime: Instant = instantInLast30Days): Result[Work[Source]] = {
+    modifiedTime: Instant = instantInLast30Days
+  ): Result[Work[Source]] = {
     val teiXml = IOUtils.resourceToString(filename, StandardCharsets.UTF_8)
 
     val location = createS3ObjectLocation

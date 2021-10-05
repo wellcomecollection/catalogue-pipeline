@@ -78,7 +78,7 @@ class TeiXml(val xml: Elem) extends Logging {
     * check https://github.com/wellcomecollection/wellcome-collection-tei/blob/main/docs/TEI_Manual_2020_V1.pdf
     * for more info.
     */
-  def nestedTeiData = nestedTeiDataFromItems.flatMap {
+  def nestedTeiData = nestedTeiDataFromItems().flatMap {
     case Nil      => title.flatMap(nestedTeiDataFromParts)
     case teiDatas => Right(teiDatas)
   }
@@ -98,12 +98,14 @@ class TeiXml(val xml: Elem) extends Logging {
           partNumber <- Try((node \@ "n").toInt).toEither
           description <- summary(node)
           languages <- TeiLanguages.parseLanguages(node \ "msContents")
+          items <- nestedTeiDataFromItems(node)
         } yield
           TeiData(
             id = id,
-            title = s"$wrapperTitle part $partNumber",
+            title = Some(s"$wrapperTitle part $partNumber"),
             languages = languages,
-            description = description)
+            description = description,
+            nestedTeiData = items)
       }
       .toList
       .sequence
@@ -112,8 +114,8 @@ class TeiXml(val xml: Elem) extends Logging {
     * Extract information about inner works for single part manuscripts.
     * For single part manuscripts, inner works are described in msItem elements.
     */
-  private def nestedTeiDataFromItems: Result[List[TeiData]] =
-    (xml \\ "msDesc" \ "msContents" \ "msItem")
+  private def nestedTeiDataFromItems(nodeSeq: NodeSeq = xml \\ "msDesc"): Result[List[TeiData]] =
+    (nodeSeq \ "msContents" \ "msItem")
       .map { node =>
         for {
           title <- getTitleFromItem(node)
@@ -167,21 +169,21 @@ class TeiXml(val xml: Elem) extends Logging {
     *              <title xml:lang="ar-Latn-x-lc" key="work_3001">Al-Qānūn fī al-ṭibb</title>
     * extract the title from the msItem, so "Al-Qānūn fī al-ṭibb" in the example.
     */
-  private def getTitleFromItem(itemNode: Node): Result[String] = {
+  private def getTitleFromItem(itemNode: Node): Result[Option[String]] = {
     val titleNodes = (itemNode \ "title").toList
     titleNodes match {
-      case List(titleNode) => Right(titleNode.text)
+      case List(titleNode) => Right(Some(titleNode.text))
       case list =>
         list.filter(n => (n \@ "type").toLowerCase == "original") match {
-          case List(singleNode) => Right(singleNode.text)
+          case List(singleNode) => Right(Some(singleNode.text))
           case Nil =>
-            Left(
-              new RuntimeException(
-                s"Cannot find original title in msItem $titleNodes"))
+            warn(
+                s"Cannot find original title in msItem $titleNodes")
+            Right(None)
           case _ =>
-            Left(
-              new RuntimeException(
-                s"Multiple titles with type original msItem $titleNodes"))
+            warn(
+                s"Multiple titles with type original msItem $titleNodes")
+            Right(None)
         }
     }
   }

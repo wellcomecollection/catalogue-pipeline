@@ -88,7 +88,7 @@ class TeiXmlTest
     )
 
     val innerData = result.value.nestedTeiData.value.head
-    innerData.title shouldBe titleString
+    innerData.title shouldBe Some(titleString)
   }
 
   it(
@@ -233,8 +233,8 @@ class TeiXmlTest
 
     result shouldBe a[Right[_, _]]
     result.right.get shouldBe Seq(
-      TeiData(id = firstItemId, title = firstItemTitle),
-      TeiData(id = secondItemId, title = secondItemTitle))
+      TeiData(id = firstItemId, title = Some(firstItemTitle)),
+      TeiData(id = secondItemId, title = Some(secondItemTitle)))
   }
 
   it(
@@ -254,11 +254,11 @@ class TeiXmlTest
     ).flatMap(_.nestedTeiData)
 
     result shouldBe a[Right[_, _]]
-    result.value shouldBe Seq(TeiData(id = itemId, title = firstItemTitle))
+    result.value shouldBe Seq(TeiData(id = itemId, title = Some(firstItemTitle)))
   }
 
   it(
-    "fails extracting nested items if there are mukltiple titles and none is marked as original") {
+    "gets the id as title if there are multiple titles and none is marked as original") {
     val firstItemTitle = "this is first item title"
     val secondItemTitle = "this is second item title"
     val itemId = s"${id}_1"
@@ -273,8 +273,8 @@ class TeiXmlTest
       ).toString()
     ).flatMap(_.nestedTeiData)
 
-    result shouldBe a[Left[_, _]]
-    result.left.value shouldBe a[RuntimeException]
+    result shouldBe a[Right[_, _]]
+    result.value shouldBe Seq(TeiData(id = itemId, title = None))
   }
 
   it("can parse language in items") {
@@ -315,8 +315,48 @@ class TeiXmlTest
     result.value shouldBe List(
       TeiData(
         id = "1",
-        title = s"$wrapperTitle part $number",
+        title = Some(s"$wrapperTitle part $number"),
         description = Some(description),
         languages = List(Language("ara", "Arabic"))))
+  }
+
+  it("can extract items within a part"){
+    val description = "this is the part description"
+    val wrapperTitle = "test title"
+    val number = 1
+    val innerItem1Id = "part_1_item_1"
+    val innerItem1Title = "this is the first inner item title"
+    val firstInnerItem = msItem(innerItem1Id, titles = List(itemTitle(innerItem1Title)), languages = Nil, items = Nil)
+    val innerItem2Id = "part_1_item_2"
+    val innerItem2Title = "this is the second inner item title"
+    val secondInnerItem = msItem(innerItem2Id, titles = List(itemTitle(innerItem2Title)), languages = Nil, items = Nil)
+    val xml = teiXml(
+      id = id,
+      title = titleElem(wrapperTitle),
+      parts = List(
+        msPart(
+          id = "1",
+          number = number,
+          summary = Some(summary(description)),
+          languages = List(mainLanguage("ar", "Arabic")),
+          items = List(firstInnerItem, secondInnerItem)
+        ))
+    )
+
+    val result = for {
+      parsed <- TeiXml(id, xml.toString())
+      nestedData <- parsed.nestedTeiData
+    } yield nestedData
+    result shouldBe a[Right[_, _]]
+    result.value shouldBe List(
+      TeiData(
+        id = "1",
+        title = Some(s"$wrapperTitle part $number"),
+        description = Some(description),
+        languages = List(Language("ara", "Arabic")),
+        nestedTeiData = List(
+          TeiData(id = innerItem1Id, title = Some(innerItem1Title)),
+          TeiData(id = innerItem2Id, title = Some(innerItem2Title)))
+      ))
   }
 }
