@@ -205,4 +205,65 @@ class TeiDataTest
       work.data.title shouldBe Some(innerTeiData.title)
     }
   }
+
+  describe("setting the languages") {
+    describe("when the languages are only set on the top-level Work") {
+      // This is based loosely on Tamil_1
+      val languages = List(Language(id = "tam", label = "Tamil"))
+      val teiData = createTeiDataWith(
+        languages = languages,
+        nestedTeiData = Right(
+          List(
+            createTeiDataWith(languages = List()),
+            createTeiDataWith(languages = List()),
+            createTeiDataWith(languages = List()),
+          ))
+      )
+
+      val work = teiData.toWork(time = Instant.now(), version = 1)
+
+      it("keeps the languages on the top-level Work") {
+        work.data.languages shouldBe languages
+      }
+
+      it("copies the languages to the internal Works") {
+        work.state.internalWorkStubs.foreach {
+          _.workData.languages shouldBe languages
+        }
+      }
+    }
+
+    describe("when the languages are only set on the internal Works") {
+      // This is based loosely on MS_Malay_9
+      val malay = Language(id = "mal", label = "Malay")
+      val english = Language(id = "eng", label = "English")
+
+      val innerLanguages = List(
+        List(malay, english),
+        List(malay),
+        List(english)
+      )
+
+      val teiData = createTeiDataWith(
+        languages = List(),
+        nestedTeiData = Right(
+          innerLanguages.map { languages =>
+            createTeiDataWith(languages = languages)
+          }
+        )
+      )
+
+      val work = teiData.toWork(time = Instant.now(), version = 1)
+
+      it("preserves the languages on the internal Works") {
+        work.state.internalWorkStubs
+          .map(_.workData.languages) shouldBe innerLanguages
+      }
+
+      // TODO: Would this be a useful thing to do?
+      it("does not copy the union of the languages to the top-level Work") {
+        work.data.languages shouldBe Nil
+      }
+    }
+  }
 }
