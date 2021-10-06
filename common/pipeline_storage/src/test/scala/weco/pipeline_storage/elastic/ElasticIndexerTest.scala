@@ -15,7 +15,11 @@ import weco.fixtures.TestWith
 import weco.json.JsonUtil._
 import weco.catalogue.internal_model.index.{IndexConfigFields, WorksAnalysis}
 import weco.json.utils.JsonAssertions
-import weco.pipeline_storage.generators.{SampleDocument, SampleDocumentData, SampleDocumentGenerators}
+import weco.pipeline_storage.generators.{
+  SampleDocument,
+  SampleDocumentData,
+  SampleDocumentGenerators
+}
 import weco.pipeline_storage.{Indexer, IndexerTestCases}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -216,11 +220,13 @@ class ElasticIndexerTest
     //
     // To avoid flakiness, we disable compression for these tests and these tests only.
 
-    def withNoCompressionIndexer[R](testWith: TestWith[Indexer[SampleDocument], R])(
+    def withNoCompressionIndexer[R](
+      testWith: TestWith[Indexer[SampleDocument], R])(
       implicit index: Index): R = {
       val restClient = RestClient
         .builder(new HttpHost("localhost", 9200, "http"))
-        .setHttpClientConfigCallback(new ElasticCredentials("elastic", "changeme"))
+        .setHttpClientConfigCallback(
+          new ElasticCredentials("elastic", "changeme"))
         .build()
 
       val elasticClient = ElasticClient(JavaClient.fromRestClient(restClient))
