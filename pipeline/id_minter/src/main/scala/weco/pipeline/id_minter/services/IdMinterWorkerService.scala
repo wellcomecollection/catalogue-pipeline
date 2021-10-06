@@ -73,7 +73,8 @@ class IdMinterWorkerService[Destination](
         sourceIdentifiers)
 
       canonicalIdentifiers = mintedIdentifiers.map {
-        case (sourceIdentifier, identifier) => (sourceIdentifier, identifier.CanonicalId)
+        case (sourceIdentifier, identifier) =>
+          (sourceIdentifier, identifier.CanonicalId)
       }
 
       updatedJson <- SourceIdentifierEmbedder.update(json, canonicalIdentifiers)
