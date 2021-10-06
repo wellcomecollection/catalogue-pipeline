@@ -3,20 +3,10 @@ package weco.pipeline.transformer.tei
 import grizzled.slf4j.Logging
 import weco.catalogue.internal_model.identifiers.DataState.Unidentified
 import weco.catalogue.internal_model.identifiers.IdState.Identifiable
-import weco.catalogue.internal_model.identifiers.{
-  IdentifierType,
-  SourceIdentifier
-}
+import weco.catalogue.internal_model.identifiers.{IdentifierType, SourceIdentifier}
 import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.work.WorkState.Source
-import weco.catalogue.internal_model.work.{
-  CollectionPath,
-  Format,
-  InternalWork,
-  MergeCandidate,
-  Work,
-  WorkData
-}
+import weco.catalogue.internal_model.work.{CollectionPath, Format, InternalWork, MergeCandidate, Work, WorkData}
 import weco.pipeline.transformer.identifiers.SourceIdentifierValidation._
 
 import java.time.Instant
@@ -31,13 +21,16 @@ case class TeiData(id: String,
   def toWork(time: Instant, version: Int): Work[Source] = {
     val topLevelData = toWorkData()
 
-    val internalWorks: List[InternalWork.Source] =
-      nestedTeiData.map{ data =>
-          InternalWork.Source(
-            sourceIdentifier = data.sourceIdentifier,
-            workData = data.toWorkData(topLevelData.collectionPath)
-          )
-      }
+    def iterateNestedData(nestedTeiData: List[TeiData], topLevelData: WorkData[Unidentified]): List[InternalWork.Source] =
+      nestedTeiData.foldLeft(Nil: List[InternalWork.Source]) {case (l,data) =>
+        val upperLevelWorkData = data.toWorkData(topLevelData.collectionPath)
+        (l :+ InternalWork.Source(
+        sourceIdentifier = data.sourceIdentifier,
+        workData = upperLevelWorkData
+      )) ++ iterateNestedData(data.nestedTeiData, upperLevelWorkData)
+    }
+
+    val internalWorks: List[InternalWork.Source] = iterateNestedData(nestedTeiData, topLevelData)
 
     val state = Source(
       sourceIdentifier = sourceIdentifier,

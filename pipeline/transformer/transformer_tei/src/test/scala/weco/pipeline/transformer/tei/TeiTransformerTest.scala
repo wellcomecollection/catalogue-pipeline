@@ -108,11 +108,12 @@ class TeiTransformerTest
     )
 
     val internalWorkStubs = work.value.state.internalWorkStubs
-    internalWorkStubs should have size 7
+    internalWorkStubs should have size 15
     internalWorkStubs.head.workData.description shouldBe Some(
       "Lists of plants, roots, woods, fibres, snakes, animals and insects."
     )
   }
+
   it("handles delete messages") {
 
     val store =
