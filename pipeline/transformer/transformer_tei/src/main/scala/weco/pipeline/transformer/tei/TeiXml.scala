@@ -102,7 +102,7 @@ class TeiXml(val xml: Elem) extends Logging {
           description <- summary(node)
           languages <- TeiLanguages.parseLanguages(node \ "msContents")
           partTitle = s"$wrapperTitle part $partNumber"
-          items <- nestedTeiDataFromItems(wrapperTitle = partTitle,nodeSeq = node)
+          items <- nestedTeiDataFromItems(wrapperTitle = partTitle,nodeSeq = node \"msContents")
         } yield {
           TeiData(
             id = id,
@@ -119,14 +119,15 @@ class TeiXml(val xml: Elem) extends Logging {
     * Extract information about inner works for single part manuscripts.
     * For single part manuscripts, inner works are described in msItem elements.
     */
-  private def nestedTeiDataFromItems(wrapperTitle: String ,nodeSeq: NodeSeq = xml \\ "msDesc"): Result[List[TeiData]] =
-    (nodeSeq \ "msContents" \ "msItem").zipWithIndex.map{case (node, i) => (node, i+1)}
+  private def nestedTeiDataFromItems(wrapperTitle: String ,nodeSeq: NodeSeq = xml \\ "msDesc" \"msContents" ): Result[List[TeiData]] =
+    (nodeSeq \ "msItem").zipWithIndex.map{case (node, i) => (node, i+1)}
       .map { case (node, i) =>
         for {
           title <- getTitleForItem(node, wrapperTitle = wrapperTitle,itemNumber = i)
           id <- getIdFrom(node)
           languages <- TeiLanguages.parseLanguages(node)
-        } yield TeiData(id = id, title = title, languages = languages)
+          items <- nestedTeiDataFromItems(wrapperTitle = title, node)
+        } yield TeiData(id = id, title = title, languages = languages, nestedTeiData = items)
       }
       .toList
       .sequence

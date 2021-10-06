@@ -395,4 +395,33 @@ class TeiXmlTest
           TeiData(id = innerItem1Id, title = s"$wrapperTitle part $number item 1"))
       ))
   }
+
+  it("extracts msItems within msItems"){
+    val wrapperTitle = "test title"
+    val xml = teiXml(
+      id = id,
+      title = titleElem(wrapperTitle),
+      items = List(
+        msItem(
+          id = "1",
+          items = List(msItem(id= "11", titles = List(itemTitle("inner item title")), languages = List(mainLanguage("ar", "Arabic"))),
+            msItem(id = "12"))
+        ))
+    )
+
+    val result = for {
+      parsed <- TeiXml(id, xml.toString())
+      nestedData <- parsed.nestedTeiData
+    } yield nestedData
+    result shouldBe a[Right[_, _]]
+    result.value shouldBe List(
+      TeiData(
+        id = "1",
+        title = s"$wrapperTitle item 1",
+        nestedTeiData = List(
+          TeiData(id = "11", title = "inner item title", languages = List(Language("ara", "Arabic"))),
+          TeiData(id = "12", title = s"$wrapperTitle item 1 item 2")
+        )
+      ))
+  }
 }
