@@ -202,7 +202,7 @@ object PipelineStorageStream extends Logging {
     bundles.toList
       .unzip(bundle => bundle.message -> bundle.item)
 
-  def sendIndexable[T, Destination](messageSender: MessageSender[Destination])(
+  private def sendIndexable[T, Destination](messageSender: MessageSender[Destination])(
     item: T)(implicit indexable: Indexable[T]) =
     messageSender.send(indexable.id(item))
 }
