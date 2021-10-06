@@ -1,12 +1,15 @@
 package weco.pipeline_storage.elastic
 
 import com.sksamuel.elastic4s.ElasticDsl._
-import com.sksamuel.elastic4s.{Index, Response}
+import com.sksamuel.elastic4s.http.JavaClient
+import com.sksamuel.elastic4s.{ElasticClient, Index, Response}
 import com.sksamuel.elastic4s.requests.get.GetResponse
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
 import com.sksamuel.elastic4s.requests.searches.SearchResponse
+import org.apache.http.HttpHost
+import org.elasticsearch.client.RestClient
 import org.scalatest.{Assertion, EitherValues}
-import weco.elasticsearch.IndexConfig
+import weco.elasticsearch.{ElasticCredentials, IndexConfig}
 import weco.elasticsearch.test.fixtures.ElasticsearchFixtures
 import weco.fixtures.TestWith
 import weco.json.JsonUtil._
@@ -198,7 +201,6 @@ class ElasticIndexerTest
   }
 
   it("returns a failed future if indexing an empty list of ids") {
-
     withContext() { implicit context =>
       withIndexer { indexer =>
         val future = indexer(Seq())
@@ -211,6 +213,33 @@ class ElasticIndexerTest
   }
 
   describe("handles documents that are too big to index in one request") {
+
+    // These tests depend on the exact size of the document we send to Elasticsearch,
+    // and compression makes that non-deterministic -- how well a document compresses
+    // will vary between invocations.
+    //
+    // To avoid flakiness, we disable compression for these tests and these tests only.
+
+    def withNoCompressionIndexer[R](
+      testWith: TestWith[Indexer[SampleDocument], R])(
+      implicit index: Index): R = {
+      val restClient = RestClient
+        .builder(new HttpHost("localhost", 9200, "http"))
+        .setHttpClientConfigCallback(
+          new ElasticCredentials("elastic", "changeme"))
+        .build()
+
+      val elasticClient = ElasticClient(JavaClient.fromRestClient(restClient))
+
+      val indexer = new ElasticIndexer[SampleDocument](
+        client = elasticClient,
+        index = index,
+        config = IndexConfig.empty
+      )
+
+      testWith(indexer)
+    }
+
     it("indexes a lot of small documents that add up to something big") {
       // This collection has to exceed the ``http.max_content_length`` setting
       // in Elasticsearch.  If that happens, we get a 413 Request Too Large error.
@@ -225,7 +254,7 @@ class ElasticIndexerTest
         }
 
       withContext() { implicit index: Index =>
-        withIndexer { indexer =>
+        withNoCompressionIndexer { indexer =>
           val future = indexer(documents)
 
           whenReady(future) { resp =>
@@ -249,11 +278,11 @@ class ElasticIndexerTest
     }
 
     it("fails to index a single big document") {
-      val title = randomAlphanumeric(length = 2100000)
+      val title = randomAlphanumeric(length = 2000000)
       val documents = Seq(createDocument.copy(title = title))
 
       withContext() { implicit index: Index =>
-        withIndexer { indexer =>
+        withNoCompressionIndexer { indexer =>
           val future = indexer(documents)
 
           whenReady(future) {
@@ -271,7 +300,7 @@ class ElasticIndexerTest
       )
 
       withContext() { implicit index: Index =>
-        withIndexer { indexer =>
+        withNoCompressionIndexer { indexer =>
           val future = indexer(documents)
 
           whenReady(future) {
