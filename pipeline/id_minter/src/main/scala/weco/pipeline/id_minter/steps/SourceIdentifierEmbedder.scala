@@ -7,7 +7,6 @@ import io.circe.optics.JsonOptics._
 import monocle.function.Plated
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.identifiers.{CanonicalId, SourceIdentifier}
-import weco.pipeline.id_minter.models.Identifier
 
 import scala.annotation.tailrec
 import scala.util.{Failure, Success, Try}
@@ -70,7 +69,7 @@ object SourceIdentifierEmbedder extends Logging {
     *
     */
   def update(inputJson: Json,
-             identifiers: Map[SourceIdentifier, Identifier]): Try[Json] =
+             identifiers: Map[SourceIdentifier, CanonicalId]): Try[Json] =
     Try {
       val updateNode =
         (updateNodeType _) compose addCanonicalIdToNode(identifiers)
@@ -80,6 +79,7 @@ object SourceIdentifierEmbedder extends Logging {
       Plated.transform[Json](updateNode)(updatedRoot)
     }
 
+  /** Rename the "identifiedType" field to "type", and remove the old "type" field. */
   private def updateNodeType(node: Json): Json =
     root.identifiedType.json
       .getOption(node)
@@ -92,28 +92,22 @@ object SourceIdentifierEmbedder extends Logging {
       }
       .getOrElse(node)
 
+  /** Given a JSON object, add the canonical ID that corresponds to the source identifier
+    * (if specified).
+    *
+    */
   private def addCanonicalIdToNode(
-    identifiers: Map[SourceIdentifier, Identifier])(node: Json): Json =
+    identifiers: Map[SourceIdentifier, CanonicalId])(node: Json): Json =
     root.sourceIdentifier.json
       .getOption(node)
       .map(parseSourceIdentifier)
-      .map(getCanonicalId(identifiers))
+      .map(identifiers(_))
       .map { canonicalId =>
         root.obj.modify { obj =>
           ("canonicalId", Json.fromString(canonicalId.underlying)) +: obj
         }(node)
       }
       .getOrElse(node)
-
-  private def getCanonicalId(identifiers: Map[SourceIdentifier, Identifier])(
-    sourceIdentifier: SourceIdentifier): CanonicalId =
-    identifiers
-      .getOrElse(
-        sourceIdentifier,
-        throw new RuntimeException(
-          s"Could not find $sourceIdentifier in $identifiers")
-      )
-      .CanonicalId
 
   @tailrec
   private def iterate(
@@ -136,10 +130,8 @@ object SourceIdentifierEmbedder extends Logging {
       case Success(sourceIdentifier) => sourceIdentifier
       case Failure(exception) =>
         error(
-          s"Error parsing source identifier: ${sourceIdentifierJson.spaces2}")
+          s"Error parsing JSON as SourceIdentifier: ${sourceIdentifierJson.spaces2}")
         throw exception
     }
-
   }
-
 }

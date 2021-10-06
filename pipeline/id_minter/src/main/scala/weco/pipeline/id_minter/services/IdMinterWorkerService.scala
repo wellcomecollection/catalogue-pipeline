@@ -71,7 +71,12 @@ class IdMinterWorkerService[Destination](
       sourceIdentifiers <- SourceIdentifierEmbedder.scan(json)
       mintedIdentifiers <- identifierGenerator.retrieveOrGenerateCanonicalIds(
         sourceIdentifiers)
-      updatedJson <- SourceIdentifierEmbedder.update(json, mintedIdentifiers)
+
+      canonicalIdentifiers = mintedIdentifiers.map {
+        case (sourceIdentifier, identifier) => (sourceIdentifier, identifier.CanonicalId)
+      }
+
+      updatedJson <- SourceIdentifierEmbedder.update(json, canonicalIdentifiers)
     } yield updatedJson
 
   def decodeJson(json: Json)(
