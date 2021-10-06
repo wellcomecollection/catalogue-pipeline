@@ -7,6 +7,7 @@ import weco.pipeline.id_minter.models.{Identifier, IdentifiersTable}
 
 import java.sql.{BatchUpdateException, Statement}
 import scala.concurrent.blocking
+import scala.concurrent.duration._
 import scala.util.{Failure, Try}
 
 object IdentifiersDao {
@@ -39,7 +40,7 @@ class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
         }.toMap
 
       val foundIdentifiers =
-        withTimeWarning(thresholdMillis = 10000L, distinctIdentifiers) {
+        withTimeWarning(threshold = 10 seconds, distinctIdentifiers) {
           batchSourceIdentifiers(distinctIdentifiers)
             .flatMap { identifierBatch =>
               blocking {
@@ -226,14 +227,14 @@ class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
   }
 
   private def withTimeWarning[R](
-    thresholdMillis: Long,
+    threshold: Duration,
     identifiers: Seq[SourceIdentifier])(f: => R): R = {
     val start = System.currentTimeMillis()
     val result = f
     val end = System.currentTimeMillis()
 
     val duration = end - start
-    if (duration > thresholdMillis) {
+    if (duration > threshold.toMillis) {
       warn(
         s"Query for ${identifiers.size} identifiers (first: ${identifiers.head.value}) took $duration milliseconds",
       )
