@@ -55,7 +55,10 @@ class IdMinterWorkerService[Destination](
       this.getClass.getSimpleName,
       Flow[(Message, NotificationMessage)]
         .via(batchRetrieveFlow(pipelineStream.config, jsonRetriever))
-        .via(processFlow(pipelineStream.config, item => Future.fromTry(processMessage(item))))
+        .via(
+          processFlow(
+            pipelineStream.config,
+            item => Future.fromTry(processMessage(item))))
     )
   }
 
