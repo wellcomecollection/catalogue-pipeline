@@ -22,7 +22,7 @@ import weco.pipeline.transformer.identifiers.SourceIdentifierValidation._
 import java.time.Instant
 
 case class TeiData(id: String,
-                   title: Option[String],
+                   title: String,
                    bNumber: Option[String] = None,
                    description: Option[String] = None,
                    languages: List[Language] = Nil,
@@ -100,7 +100,7 @@ case class TeiData(id: String,
   private def toWorkData(parentCollectionPath: Option[CollectionPath] = None)
     : WorkData[Unidentified] =
     WorkData[Unidentified](
-      title = Some(title.getOrElse(id)),
+      title = Some(title),
       description = description,
       languages = languages,
       format = Some(Format.ArchivesAndManuscripts),

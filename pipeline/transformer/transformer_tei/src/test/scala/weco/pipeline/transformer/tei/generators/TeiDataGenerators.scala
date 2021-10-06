@@ -11,7 +11,7 @@ trait TeiDataGenerators extends RandomGenerators {
     nestedTeiData: List[TeiData] = Nil): TeiData =
     TeiData(
       id = id,
-      title = Some(s"title-${randomAlphanumeric()}"),
+      title = s"title-${randomAlphanumeric()}",
       languages = languages,
       nestedTeiData = nestedTeiData
     )

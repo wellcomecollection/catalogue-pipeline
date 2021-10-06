@@ -78,9 +78,12 @@ class TeiXml(val xml: Elem) extends Logging {
     * check https://github.com/wellcomecollection/wellcome-collection-tei/blob/main/docs/TEI_Manual_2020_V1.pdf
     * for more info.
     */
-  def nestedTeiData = nestedTeiDataFromItems().flatMap {
-    case Nil      => title.flatMap(nestedTeiDataFromParts)
-    case teiDatas => Right(teiDatas)
+  def nestedTeiData = title.flatMap{
+    wrapperTitle =>
+      nestedTeiDataFromItems(wrapperTitle = wrapperTitle).flatMap {
+        case Nil      => nestedTeiDataFromParts(wrapperTitle = wrapperTitle)
+        case teiDatas => Right(teiDatas)
+      }
   }
 
   /**
@@ -98,14 +101,16 @@ class TeiXml(val xml: Elem) extends Logging {
           partNumber <- Try((node \@ "n").toInt).toEither
           description <- summary(node)
           languages <- TeiLanguages.parseLanguages(node \ "msContents")
-          items <- nestedTeiDataFromItems(node)
-        } yield
+          partTitle = s"$wrapperTitle part $partNumber"
+          items <- nestedTeiDataFromItems(wrapperTitle = partTitle,nodeSeq = node)
+        } yield {
           TeiData(
             id = id,
-            title = Some(s"$wrapperTitle part $partNumber"),
+            title = partTitle,
             languages = languages,
             description = description,
             nestedTeiData = items)
+        }
       }
       .toList
       .sequence
@@ -114,11 +119,11 @@ class TeiXml(val xml: Elem) extends Logging {
     * Extract information about inner works for single part manuscripts.
     * For single part manuscripts, inner works are described in msItem elements.
     */
-  private def nestedTeiDataFromItems(nodeSeq: NodeSeq = xml \\ "msDesc"): Result[List[TeiData]] =
-    (nodeSeq \ "msContents" \ "msItem")
-      .map { node =>
+  private def nestedTeiDataFromItems(wrapperTitle: String ,nodeSeq: NodeSeq = xml \\ "msDesc"): Result[List[TeiData]] =
+    (nodeSeq \ "msContents" \ "msItem").zipWithIndex.map{case (node, i) => (node, i+1)}
+      .map { case (node, i) =>
         for {
-          title <- getTitleFromItem(node)
+          title <- getTitleForItem(node, wrapperTitle = wrapperTitle,itemNumber = i)
           id <- getIdFrom(node)
           languages <- TeiLanguages.parseLanguages(node)
         } yield TeiData(id = id, title = title, languages = languages)
@@ -154,6 +159,11 @@ class TeiXml(val xml: Elem) extends Logging {
     }
   }
 
+  private def getTitleForItem(itemNode: Node, wrapperTitle: String, itemNumber: Int): Result[String] = extractTitleFromItem(itemNode).flatMap {
+    case Some(title) => Right(title)
+    case None => constructTitleForItem(wrapperTitle, itemNumber)
+  }
+
   /**
     * In an XML like this:
     * <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id="manuscript_15651">
@@ -169,7 +179,7 @@ class TeiXml(val xml: Elem) extends Logging {
     *              <title xml:lang="ar-Latn-x-lc" key="work_3001">Al-Qānūn fī al-ṭibb</title>
     * extract the title from the msItem, so "Al-Qānūn fī al-ṭibb" in the example.
     */
-  private def getTitleFromItem(itemNode: Node): Result[Option[String]] = {
+  private def extractTitleFromItem(itemNode: Node): Result[Option[String]] = {
     val titleNodes = (itemNode \ "title").toList
     titleNodes match {
       case List(titleNode) => Right(Some(titleNode.text))
@@ -187,7 +197,10 @@ class TeiXml(val xml: Elem) extends Logging {
         }
     }
   }
+  private def constructTitleForItem(wrapperTitle: String, itemNumber: Int): Result[String] = Right(s"$wrapperTitle item $itemNumber")
+
 }
+
 
 object TeiXml {
   def apply(id: String, xmlString: String): Result[TeiXml] =

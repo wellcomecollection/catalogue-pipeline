@@ -59,7 +59,7 @@ class TeiTransformer(store: Store[S3ObjectLocation, String])
     } yield
       TeiData(
         id = teiXml.id,
-        title = Some(title),
+        title = title,
         bNumber = bNumber,
         description = summary,
         languages = languages,

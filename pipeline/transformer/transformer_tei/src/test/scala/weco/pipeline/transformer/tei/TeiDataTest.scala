@@ -37,7 +37,7 @@ class TeiDataTest
     val id = "id"
     val teiData = TeiData(
       id = id,
-      title = Some(title),
+      title = title,
       bNumber = Some(bnumber),
       description = description,
       languages = languages
@@ -76,7 +76,7 @@ class TeiDataTest
   it("does not create mergeCandidates if the bnumber is invalid") {
     val teiData = TeiData(
       id = "id",
-      title = Some("This is the title"),
+      title = "This is the title",
       bNumber = Some("fjhsdg"),
       description = Some("This is the description"),
       languages = List(Language("ara", "Arabic"))
@@ -90,19 +90,19 @@ class TeiDataTest
   it("transforms multiple internal TeiData into internalWorks") {
     val firstInnerTeiData = TeiData(
       id = "id_1",
-      title = Some("This is the first item title"),
+      title = "This is the first item title",
       description = Some("This is the first item description"),
       languages = List(Language("ara", "Arabic"))
     )
     val secondInnerTeiData = TeiData(
       id = "id_2",
-      title = Some("This is the second item title"),
+      title = "This is the second item title",
       description = Some("This is the second item description"),
       languages = List(Language("ara", "Arabic"))
     )
     val teiData = TeiData(
       id = "id",
-      title = Some("This is the title"),
+      title = "This is the title",
       bNumber = Some("fjhsdg"),
       description = Some("This is the description"),
       nestedTeiData = List(firstInnerTeiData, secondInnerTeiData)
@@ -114,7 +114,7 @@ class TeiDataTest
       sourceIdentifier =
         SourceIdentifier(IdentifierType.Tei, "Work", firstInnerTeiData.id),
       workData = WorkData(
-        title = firstInnerTeiData.title,
+        title = Some(firstInnerTeiData.title),
         languages = firstInnerTeiData.languages,
         description = firstInnerTeiData.description,
         format = Some(ArchivesAndManuscripts),
@@ -129,7 +129,7 @@ class TeiDataTest
       sourceIdentifier =
         SourceIdentifier(IdentifierType.Tei, "Work", secondInnerTeiData.id),
       workData = WorkData(
-        title = secondInnerTeiData.title,
+        title = Some(secondInnerTeiData.title),
         languages = secondInnerTeiData.languages,
         description = secondInnerTeiData.description,
         format = Some(ArchivesAndManuscripts),

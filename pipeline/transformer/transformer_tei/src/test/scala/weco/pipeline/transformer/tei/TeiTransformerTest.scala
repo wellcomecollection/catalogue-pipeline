@@ -72,7 +72,7 @@ class TeiTransformerTest
                 "MS_Arabic_1-item1"
               ),
               workData = WorkData(
-                title = Some("MS_Arabic_1-item1"),
+                title = Some("MS_Arabic_1 item 1"),
                 languages = List(Language("ara", "Arabic")),
                 collectionPath =
                   Some(CollectionPath("manuscript_15651/MS_Arabic_1-item1")),
