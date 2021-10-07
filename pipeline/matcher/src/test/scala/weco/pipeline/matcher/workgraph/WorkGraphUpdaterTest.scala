@@ -531,4 +531,41 @@ class WorkGraphUpdaterTest
       )
     }
   }
+
+  describe("handling suppressed works") {
+    it("A → B, but B is suppressed (updating A)") {
+      val result =
+        WorkGraphUpdater.update(
+          work = createWorkWith(idA, version = 1, referencedWorkIds = Set(idB)),
+          affectedNodes = Set(
+            WorkNode(id = idB, version = Some(1), linkedIds = List(), componentId = ciHash(idB), suppressed = true)
+          )
+        )
+
+      println(s"ciHash(idA) = ${ciHash(idA)}")
+      println(s"ciHash(idB) = ${ciHash(idB)}")
+      println(s"ciHash(idA, idB) = ${ciHash(idA, idB)}")
+
+      result shouldBe Set(
+        WorkNode(id = idA, version = 1, linkedIds = List(), componentId = ciHash(idA)),
+        WorkNode(id = idB, version = Some(1), linkedIds = List(), componentId = ciHash(idB), suppressed = true)
+      )
+    }
+
+    it("A → B, but B is suppressed (updating B)") {
+      val result =
+        WorkGraphUpdater.update(
+          work = createWorkWith(idB, version = 1, referencedWorkIds = Set(idB), workType = "Deleted"),
+          affectedNodes = Set(
+            WorkNode(id = idA, version = Some(1), linkedIds = List(idB), componentId = ciHash(idA, idB)),
+            WorkNode(id = idB, version = None, linkedIds = List(), componentId = ciHash(idA, idB))
+          )
+        )
+
+      result shouldBe Set(
+        WorkNode(id = idA, version = 1, linkedIds = List(), componentId = ciHash(idA)),
+        WorkNode(id = idB, version = Some(1), linkedIds = List(), componentId = ciHash(idB), suppressed = true)
+      )
+    }
+  }
 }

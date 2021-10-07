@@ -22,7 +22,8 @@ trait WorkStubGenerators extends IdentifiersGenerators {
   def createWorkStubWith(
     id: IdState.Identified = createIdentifier(canonicalId = createCanonicalId),
     version: Int = randomInt(from = 1, to = 10),
-    referencedIds: Set[IdState.Identified] = Set.empty
+    referencedIds: Set[IdState.Identified] = Set.empty,
+    workType: String = "Visible"
   ): WorkStub =
     WorkStub(
       state = WorkState.Identified(
@@ -40,7 +41,7 @@ trait WorkStubGenerators extends IdentifiersGenerators {
         sourceModifiedTime = Instant.now()
       ),
       version = version,
-      workType = "Visible"
+      workType = workType
     )
 
   def createWorkStub: WorkStub =
@@ -52,7 +53,8 @@ trait WorkStubGenerators extends IdentifiersGenerators {
 
   def createWorkWith(id: CanonicalId,
                      version: Int,
-                     referencedWorkIds: Set[CanonicalId]): WorkStub =
+                     referencedWorkIds: Set[CanonicalId],
+                     workType: String = "Visible"): WorkStub =
     createWorkStubWith(
       id = IdState.Identified(
         canonicalId = id,
@@ -63,7 +65,8 @@ trait WorkStubGenerators extends IdentifiersGenerators {
         IdState.Identified(
           canonicalId = canonicalId,
           sourceIdentifier = createSourceIdentifier)
-      }
+      },
+      workType = workType
     )
 
   implicit val indexId: IndexId[Work[WorkState.Identified]] =

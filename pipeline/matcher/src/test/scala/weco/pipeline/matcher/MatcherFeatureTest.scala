@@ -5,6 +5,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.index.IndexFixtures
+import weco.catalogue.internal_model.work.DeletedReason.SuppressedFromSource
 import weco.catalogue.internal_model.work.MergeCandidate
 import weco.catalogue.internal_model.work.generators.SourceWorkGenerators
 import weco.messaging.fixtures.SQS.QueuePair
@@ -116,6 +117,7 @@ class MatcherFeatureTest
     // through the digitised bib.
     //
     val sierraPhysicalBib = sierraPhysicalIdentifiedWork()
+
     val sierraDigitisedBib = sierraDigitalIdentifiedWork()
       .mergeCandidates(
         List(
@@ -128,6 +130,8 @@ class MatcherFeatureTest
           )
         )
       )
+      .deleted(SuppressedFromSource("Sierra"))
+
     val metsRecord = metsIdentifiedWork()
       .mergeCandidates(
         List(

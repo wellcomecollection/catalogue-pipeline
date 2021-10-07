@@ -23,6 +23,8 @@ case class WorkStub(state: WorkState.Identified, version: Int, @JsonKey("type") 
       .toSet
 
   lazy val ids: Set[CanonicalId] = referencedWorkIds + id
+
+  lazy val suppressed: Boolean = workType == "Deleted"
 }
 
 case object WorkStub {
