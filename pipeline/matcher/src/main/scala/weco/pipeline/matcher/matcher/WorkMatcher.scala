@@ -30,9 +30,6 @@ class WorkMatcher(
     extends Logging {
 
   def matchWork(work: WorkStub): Future[MatcherResult] =
-    doMatch(work)
-
-  private def doMatch(work: WorkStub): Future[MatcherResult] =
     withLocks(work, work.ids.map(_.toString)) {
       for {
         beforeNodes <- workGraphStore.findAffectedWorks(work)

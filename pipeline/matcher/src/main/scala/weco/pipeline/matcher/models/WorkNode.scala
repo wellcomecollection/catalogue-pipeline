@@ -6,7 +6,10 @@ case class WorkNode(
   id: CanonicalId,
   version: Option[Int],
   linkedIds: List[CanonicalId],
-  componentId: String
+  componentId: String,
+  // Records whether this work is suppressed in a source system -- if so,
+  // we shouldn't be using it to construct matcher graphs.
+  suppressed: Boolean = false
 )
 
 object WorkNode {
@@ -15,4 +18,11 @@ object WorkNode {
             linkedIds: List[CanonicalId],
             componentId: String): WorkNode =
     WorkNode(id, Some(version), linkedIds, componentId)
+
+  def apply(id: CanonicalId,
+            version: Int,
+            linkedIds: List[CanonicalId],
+            componentId: String,
+            suppressed: Boolean): WorkNode =
+    WorkNode(id, Some(version), linkedIds, componentId, suppressed)
 }

@@ -22,5 +22,5 @@ class ElasticWorkStubRetriever(client: ElasticClient, index: Index)(
 ) extends ElasticSourceRetriever[WorkStub](client, index) {
 
   override def createGetRequest(id: String): GetRequest =
-    get(index, id).fetchSourceInclude("state", "version")
+    get(index, id).fetchSourceInclude("state", "version", "type")
 }
