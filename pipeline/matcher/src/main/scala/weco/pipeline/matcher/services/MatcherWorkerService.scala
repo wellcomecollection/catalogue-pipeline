@@ -37,8 +37,11 @@ class MatcherWorkerService[MsgDestination](
     )
 
   def processMessage(workStub: WorkStub): Future[Unit] =
-    workMatcher.matchWork(workStub)
-      .flatMap { matcherResult => Future.fromTry(msgSender.sendT(matcherResult)) }
+    workMatcher
+      .matchWork(workStub)
+      .flatMap { matcherResult =>
+        Future.fromTry(msgSender.sendT(matcherResult))
+      }
       .recover {
         case e: VersionExpectedConflictException =>
           debug(

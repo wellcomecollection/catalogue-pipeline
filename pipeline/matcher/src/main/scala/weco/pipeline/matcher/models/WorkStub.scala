@@ -11,7 +11,9 @@ import weco.catalogue.internal_model.work.{Work, WorkState}
   * compile unmodified -- this just means we have to fetch less from Elasticsearch.
   *
   */
-case class WorkStub(state: WorkState.Identified, version: Int, @JsonKey("type") workType: String) {
+case class WorkStub(state: WorkState.Identified,
+                    version: Int,
+                    @JsonKey("type") workType: String) {
   lazy val id: CanonicalId = state.canonicalId
 
   lazy val referencedWorkIds: Set[CanonicalId] =

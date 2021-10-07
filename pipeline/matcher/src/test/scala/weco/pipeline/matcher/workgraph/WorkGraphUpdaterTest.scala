@@ -539,29 +539,64 @@ class WorkGraphUpdaterTest
         WorkGraphUpdater.update(
           work = createWorkWith(idA, version = 1, referencedWorkIds = Set(idB)),
           affectedNodes = Set(
-            WorkNode(id = idB, version = 1, linkedIds = List(), componentId = ciHash(idB), suppressed = true)
+            WorkNode(
+              id = idB,
+              version = 1,
+              linkedIds = List(),
+              componentId = ciHash(idB),
+              suppressed = true)
           )
         )
 
       result shouldBe Set(
-        WorkNode(id = idA, version = 1, linkedIds = List(idB), componentId = ciHash(idA)),
-        WorkNode(id = idB, version = 1, linkedIds = List(), componentId = ciHash(idB), suppressed = true)
+        WorkNode(
+          id = idA,
+          version = 1,
+          linkedIds = List(idB),
+          componentId = ciHash(idA)),
+        WorkNode(
+          id = idB,
+          version = 1,
+          linkedIds = List(),
+          componentId = ciHash(idB),
+          suppressed = true)
       )
     }
 
     it("A → B, but B is suppressed (updating B)") {
       val result =
         WorkGraphUpdater.update(
-          work = createWorkWith(idB, version = 1, referencedWorkIds = Set(idB), workType = "Deleted"),
+          work = createWorkWith(
+            idB,
+            version = 1,
+            referencedWorkIds = Set(idB),
+            workType = "Deleted"),
           affectedNodes = Set(
-            WorkNode(id = idA, version = 1, linkedIds = List(idB), componentId = ciHash(idA, idB)),
-            WorkNode(id = idB, version = None, linkedIds = List(), componentId = ciHash(idA, idB))
+            WorkNode(
+              id = idA,
+              version = 1,
+              linkedIds = List(idB),
+              componentId = ciHash(idA, idB)),
+            WorkNode(
+              id = idB,
+              version = None,
+              linkedIds = List(),
+              componentId = ciHash(idA, idB))
           )
         )
 
       result shouldBe Set(
-        WorkNode(id = idA, version = 1, linkedIds = List(idB), componentId = ciHash(idA)),
-        WorkNode(id = idB, version = 1, linkedIds = List(), componentId = ciHash(idB), suppressed = true)
+        WorkNode(
+          id = idA,
+          version = 1,
+          linkedIds = List(idB),
+          componentId = ciHash(idA)),
+        WorkNode(
+          id = idB,
+          version = 1,
+          linkedIds = List(),
+          componentId = ciHash(idB),
+          suppressed = true)
       )
     }
 
@@ -570,19 +605,57 @@ class WorkGraphUpdaterTest
         WorkGraphUpdater.update(
           work = createWorkWith(idA, version = 1, referencedWorkIds = Set(idB)),
           affectedNodes = Set(
-            WorkNode(id = idB, version = 1, linkedIds = List(idC), componentId = ciHash(idB)),
-            WorkNode(id = idC, version = 1, linkedIds = List(idD), componentId = ciHash(idC), suppressed = true),
-            WorkNode(id = idD, version = 1, linkedIds = List(idE), componentId = ciHash(idD, idE)),
-            WorkNode(id = idE, version = 1, linkedIds = List(), componentId = ciHash(idD, idE))
+            WorkNode(
+              id = idB,
+              version = 1,
+              linkedIds = List(idC),
+              componentId = ciHash(idB)),
+            WorkNode(
+              id = idC,
+              version = 1,
+              linkedIds = List(idD),
+              componentId = ciHash(idC),
+              suppressed = true),
+            WorkNode(
+              id = idD,
+              version = 1,
+              linkedIds = List(idE),
+              componentId = ciHash(idD, idE)),
+            WorkNode(
+              id = idE,
+              version = 1,
+              linkedIds = List(),
+              componentId = ciHash(idD, idE))
           )
         )
 
       result shouldBe Set(
-        WorkNode(id = idA, version = 1, linkedIds = List(idB), componentId = ciHash(idA, idB)),
-        WorkNode(id = idB, version = 1, linkedIds = List(idC), componentId = ciHash(idA, idB)),
-        WorkNode(id = idC, version = 1, linkedIds = List(idD), componentId = ciHash(idC), suppressed = true),
-        WorkNode(id = idD, version = 1, linkedIds = List(idE), componentId = ciHash(idD, idE)),
-        WorkNode(id = idE, version = 1, linkedIds = List(), componentId = ciHash(idD, idE))
+        WorkNode(
+          id = idA,
+          version = 1,
+          linkedIds = List(idB),
+          componentId = ciHash(idA, idB)),
+        WorkNode(
+          id = idB,
+          version = 1,
+          linkedIds = List(idC),
+          componentId = ciHash(idA, idB)),
+        WorkNode(
+          id = idC,
+          version = 1,
+          linkedIds = List(idD),
+          componentId = ciHash(idC),
+          suppressed = true),
+        WorkNode(
+          id = idD,
+          version = 1,
+          linkedIds = List(idE),
+          componentId = ciHash(idD, idE)),
+        WorkNode(
+          id = idE,
+          version = 1,
+          linkedIds = List(),
+          componentId = ciHash(idD, idE))
       )
     }
 
@@ -595,7 +668,11 @@ class WorkGraphUpdaterTest
 
       val graph2 =
         WorkGraphUpdater.update(
-          work = createWorkWith(idB, version = 1, referencedWorkIds = Set(idC), workType = "Deleted"),
+          work = createWorkWith(
+            idB,
+            version = 1,
+            referencedWorkIds = Set(idC),
+            workType = "Deleted"),
           affectedNodes = graph1
         )
 
@@ -613,7 +690,11 @@ class WorkGraphUpdaterTest
       // information for the matcher result.
       val result =
         WorkGraphUpdater.update(
-          work = createWorkWith(idB, version = 2, referencedWorkIds = Set(idC), workType = "Undeleted"),
+          work = createWorkWith(
+            idB,
+            version = 2,
+            referencedWorkIds = Set(idC),
+            workType = "Undeleted"),
           affectedNodes = graph3
         )
 
