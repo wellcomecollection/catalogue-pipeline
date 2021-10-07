@@ -13,15 +13,15 @@ import weco.pipeline.matcher.models.{
 }
 
 object WorkGraphUpdater extends Logging {
-  def update(work: WorkStub, existingNodes: Set[WorkNode]): Set[WorkNode] = {
-    checkVersionConflicts(work, existingNodes)
-    doUpdate(work, existingNodes)
+  def update(work: WorkStub, affectedNodes: Set[WorkNode]): Set[WorkNode] = {
+    checkVersionConflicts(work, affectedNodes)
+    doUpdate(work, affectedNodes)
   }
 
   private def checkVersionConflicts(work: WorkStub,
-                                    existingNodes: Set[WorkNode]): Unit =
-    existingNodes.find(_.id == work.id) match {
-      case Some(WorkNode(_, Some(existingVersion), linkedIds, _)) =>
+                                    affectedNodes: Set[WorkNode]): Unit =
+    affectedNodes.find(_.id == work.id) match {
+      case Some(WorkNode(_, Some(existingVersion), linkedIds, _, _)) =>
         if (existingVersion > work.version) {
           val versionConflictMessage =
             s"update failed, work:${work.id} v${work.version} is not newer than existing work v$existingVersion"
@@ -38,7 +38,7 @@ object WorkGraphUpdater extends Logging {
     }
 
   private def doUpdate(work: WorkStub,
-                       existingNodes: Set[WorkNode]): Set[WorkNode] = {
+                       affectedNodes: Set[WorkNode]): Set[WorkNode] = {
 
     // Find everything that's in the existing graph, but which isn't
     // the node we're updating.
@@ -52,7 +52,7 @@ object WorkGraphUpdater extends Logging {
     // If we're updating work B, then this list will be (A C D E).
     //
     val linkedWorks =
-      existingNodes.filterNot(_.id == work.id)
+      affectedNodes.filterNot(_.id == work.id)
 
     // Create a map (work ID) -> (version) for every work in the graph.
     //
@@ -60,7 +60,7 @@ object WorkGraphUpdater extends Logging {
     //
     val workVersions: Map[CanonicalId, Int] =
       linkedWorks.collect {
-        case WorkNode(id, Some(version), _, _) => (id, version)
+        case WorkNode(id, Some(version), _, _, _) => (id, version)
       }.toMap + (work.id -> work.version)
 
     // Create a list of all the connections between works in the graph.
@@ -89,7 +89,7 @@ object WorkGraphUpdater extends Logging {
 
     // Get the IDs of all the works in this graph, and construct a Graph object.
     val workIds =
-      existingNodes
+      affectedNodes
         .flatMap { node =>
           node.id +: node.linkedIds
         } + work.id
