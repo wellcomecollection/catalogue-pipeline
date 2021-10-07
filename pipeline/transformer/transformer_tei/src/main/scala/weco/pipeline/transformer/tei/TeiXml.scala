@@ -100,13 +100,17 @@ class TeiXml(val xml: Elem) extends Logging {
     * check https://github.com/wellcomecollection/wellcome-collection-tei/blob/main/docs/TEI_Manual_2020_V1.pdf
     * for more info.
     */
-  def nestedTeiData = title.flatMap{
-    wrapperTitle =>
-      nestedTeiDataFromItems(wrapperTitle = wrapperTitle).flatMap {
-        case Nil      => nestedTeiDataFromParts(wrapperTitle = wrapperTitle)
-        case teiDatas => Right(teiDatas)
-      }
-  }
+  def nestedTeiData =
+    for{
+      wrapperTitle <- title
+      catalogues <- getCatalogues
+      nestedItems <- nestedTeiDataFromItems(wrapperTitle = wrapperTitle, catalogues = catalogues)
+      nestedData <- nestedItems match {
+      case Nil      => nestedTeiDataFromParts(wrapperTitle = wrapperTitle, catalogues = catalogues)
+      case itemData => Right(itemData)
+    }
+    } yield nestedData
+
 
   /**
     * Extract information about inner works for multi part manuscripts.
@@ -115,7 +119,7 @@ class TeiXml(val xml: Elem) extends Logging {
     * title of the wrapper work and the part number.
     */
   private def nestedTeiDataFromParts(
-    wrapperTitle: String): Result[List[TeiData]] =
+    wrapperTitle: String, catalogues: List[String]): Result[List[TeiData]] =
     (xml \\ "msDesc" \ "msPart")
       .map { node =>
         for {
@@ -124,7 +128,7 @@ class TeiXml(val xml: Elem) extends Logging {
           description <- summary(node)
           languages <- TeiLanguages.parseLanguages(node \ "msContents")
           partTitle = s"$wrapperTitle part $partNumber"
-          items <- checkCatalogueAndExtractLowerLevelItems(partTitle, node \"msContents")
+          items <- checkCatalogueAndExtractLowerLevelItems(partTitle, node \"msContents", catalogues)
         } yield {
           TeiData(
             id = id,
@@ -141,14 +145,14 @@ class TeiXml(val xml: Elem) extends Logging {
     * Extract information about inner works for single part manuscripts.
     * For single part manuscripts, inner works are described in msItem elements.
     */
-  private def nestedTeiDataFromItems(wrapperTitle: String ,nodeSeq: NodeSeq = xml \\ "msDesc" \"msContents" ): Result[List[TeiData]] =
+  private def nestedTeiDataFromItems(wrapperTitle: String, catalogues: List[String] ,nodeSeq: NodeSeq = xml \\ "msDesc" \"msContents" ): Result[List[TeiData]] =
     (nodeSeq \ "msItem").zipWithIndex.map{case (node, i) => (node, i+1)}
       .map { case (node, i) =>
         for {
           title <- getTitleForItem(node, wrapperTitle = wrapperTitle,itemNumber = i)
           id <- getIdFrom(node)
           languages <- TeiLanguages.parseLanguages(node)
-          items <- checkCatalogueAndExtractLowerLevelItems(title, node)
+          items <- checkCatalogueAndExtractLowerLevelItems(title, node, catalogues)
         } yield TeiData(id = id, title = title, languages = languages, nestedTeiData = items)
       }
       .toList
@@ -160,14 +164,16 @@ class TeiXml(val xml: Elem) extends Logging {
    * They are difficult to update to make them more similar to other manuscripts so, for now,
    * we just don't extract lower level items for manuscripts in the Fihrist catalogue.
    */
-  private def checkCatalogueAndExtractLowerLevelItems(partTitle: String, nodes: NodeSeq): Either[Throwable, List[TeiData]] = getCatalogue.flatMap {
-    case catalogues if containsFihrist(catalogues) =>
-      Right(Nil)
-    case _ =>
-      nestedTeiDataFromItems(wrapperTitle = partTitle, nodeSeq = nodes)
-  }
+  private def checkCatalogueAndExtractLowerLevelItems(partTitle: String, nodes: NodeSeq, catalogues: List[String]): Either[Throwable, List[TeiData]] =
+    catalogues match {
+      case catalogues if containsFihrist(catalogues) =>
+        Right(Nil)
+      case _ =>
+        nestedTeiDataFromItems(wrapperTitle = partTitle, catalogues = catalogues, nodeSeq = nodes)
+    }
 
-  private def getCatalogue: Result[List[String]] = {
+
+  private def getCatalogues: Result[List[String]] = {
     val nodes =
       (xml \ "teiHeader" \ "fileDesc" \ "publicationStmt" \ "idno").toList
     val maybeCatalogues = nodes.filter(n => (n \@ "type") == "catalogue")
