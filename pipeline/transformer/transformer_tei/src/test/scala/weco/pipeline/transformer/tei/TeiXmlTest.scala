@@ -42,7 +42,7 @@ class TeiXmlTest
     result.right.get shouldBe titleString
   }
 
-  it("gets the title from the msItem if there's only one item") {
+  it("gets the top level title even if there's only one item") {
     val theItemTitle = "This is the item title"
     val topLevelTitle = "This is the top-level title"
 
@@ -58,80 +58,12 @@ class TeiXmlTest
     result.value shouldBe topLevelTitle
   }
 
-  it("doesn't get the title from the item if there's more than one") {
-    val titleString = "This is the title"
-    val item1 = msItem("id1", List(itemTitle("itemTitle1")))
-    val item2 = msItem("id2", List(itemTitle("itemTitle2")))
-    val result =
-      TeiXml(
-        id,
-        teiXml(
-          id = id,
-          title = titleElem(titleString),
-          items = List(item1, item2)).toString())
-        .flatMap(_.title)
-    result shouldBe a[Right[_, _]]
-    result.right.get shouldBe titleString
-  }
-
-  it("picks the title with type=original if there's more than one in the item") {
-    val titleString = "This is the title"
-    val title = itemTitle("this is not the title")
-    val originalTitle = originalItemTitle(titleString)
-    val result = TeiXml(
-      id,
-      teiXml(
-        id = id,
-        items = List(msItem(s"${id}_1", List(title, originalTitle))),
-        title = titleElem("this is not the title")
-      ).toString()
-    )
-
-    val innerData = result.value.nestedTeiData.value.head
-    innerData.title shouldBe titleString
-  }
-
-  it(
-    "falls back if there's more than one title in the item and none have type=original") {
-    val title = itemTitle("this is not the title")
-    val secondTitle = itemTitle("this is not the title either")
-    val titleString = "this is the title"
-    val result = TeiXml(
-      id,
-      teiXml(
-        id = id,
-        items = List(msItem(s"${id}_1", List(title, secondTitle))),
-        title = titleElem(titleString)
-      ).toString()
-    ).flatMap(_.title)
-    result shouldBe a[Right[_, _]]
-    result.right.get shouldBe titleString
-  }
-
-  it("falls back if there's more than one title with type=original") {
-    val firstItemTitle = originalItemTitle("this is not the title")
-    val secondItemTitle = originalItemTitle("this is not the title either")
-    val validTitle = "this is the title"
-    val result = TeiXml(
-      id,
-      teiXml(
-        id = id,
-        items = List(msItem(s"${id}_1", List(firstItemTitle, secondItemTitle))),
-        title = titleElem(validTitle)
-      ).toString()
-    ).flatMap(_.title)
-    result shouldBe a[Right[_, _]]
-    result.right.get shouldBe validTitle
-  }
-
   it("fails if there are more than one title node") {
     val titleString1 = "This is the first title"
     val titleString2 = "This is the second title"
     val titleStm =
-      <titleStmt>
-        <title>{titleString1}</title>
-        <title>{titleString2}</title>
-      </titleStmt>
+      {<idno type="msID">{titleString1}</idno>
+      <idno type="msID">{titleString2}</idno>}
     val result =
       TeiXml(id, teiXml(id = id, title = titleStm).toString()).flatMap(_.title)
     result shouldBe a[Left[_, _]]
@@ -425,7 +357,7 @@ class TeiXmlTest
       ))
   }
 
-  it("doesn't extract lower level nested data from items for mauscript in the Fihrist catalogue"){
+  it("doesn't extract lower level nested data from items for manuscripts in the Fihrist catalogue"){
     val wrapperTitle = "test title"
     val xml = teiXml(
       id = id,
@@ -451,7 +383,7 @@ class TeiXmlTest
       ))
   }
 
-  it("doesn't extract lower level nested data from parts for mauscript in the Fihrist catalogue"){
+  it("doesn't extract lower level nested data from parts for manuscripts in the Fihrist catalogue"){
     val wrapperTitle = "test title"
     val xml = teiXml(
       id = id,

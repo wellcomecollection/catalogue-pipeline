@@ -8,7 +8,7 @@ import scala.xml.{Elem, NodeSeq}
 trait TeiGenerators extends RandomGenerators { this: Suite =>
   def teiXml(
               id: String = randomAlphanumeric(),
-              title: Elem = titleElem("test title"),
+              title: NodeSeq = titleElem("test title"),
               identifiers: Option[Elem] = None,
               summary: Option[Elem] = None,
               languages: List[Elem] = Nil,
