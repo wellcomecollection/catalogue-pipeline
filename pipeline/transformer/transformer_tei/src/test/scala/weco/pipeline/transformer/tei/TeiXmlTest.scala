@@ -42,7 +42,7 @@ class TeiXmlTest
     result.right.get shouldBe titleString
   }
 
-  it("gets the title from the msItem if there's only one item") {
+  it("gets the top level title even if there's only one item") {
     val theItemTitle = "This is the item title"
     val topLevelTitle = "This is the top-level title"
 
@@ -58,80 +58,11 @@ class TeiXmlTest
     result.value shouldBe topLevelTitle
   }
 
-  it("doesn't get the title from the item if there's more than one") {
-    val titleString = "This is the title"
-    val item1 = msItem("id1", List(itemTitle("itemTitle1")))
-    val item2 = msItem("id2", List(itemTitle("itemTitle2")))
-    val result =
-      TeiXml(
-        id,
-        teiXml(
-          id = id,
-          title = titleElem(titleString),
-          items = List(item1, item2)).toString())
-        .flatMap(_.title)
-    result shouldBe a[Right[_, _]]
-    result.right.get shouldBe titleString
-  }
-
-  it("picks the title with type=original if there's more than one in the item") {
-    val titleString = "This is the title"
-    val title = itemTitle("this is not the title")
-    val originalTitle = originalItemTitle(titleString)
-    val result = TeiXml(
-      id,
-      teiXml(
-        id = id,
-        items = List(msItem(s"${id}_1", List(title, originalTitle))),
-        title = titleElem("this is not the title")
-      ).toString()
-    )
-
-    val innerData = result.value.nestedTeiData.value.head
-    innerData.title shouldBe titleString
-  }
-
-  it(
-    "falls back if there's more than one title in the item and none have type=original") {
-    val title = itemTitle("this is not the title")
-    val secondTitle = itemTitle("this is not the title either")
-    val titleString = "this is the title"
-    val result = TeiXml(
-      id,
-      teiXml(
-        id = id,
-        items = List(msItem(s"${id}_1", List(title, secondTitle))),
-        title = titleElem(titleString)
-      ).toString()
-    ).flatMap(_.title)
-    result shouldBe a[Right[_, _]]
-    result.right.get shouldBe titleString
-  }
-
-  it("falls back if there's more than one title with type=original") {
-    val firstItemTitle = originalItemTitle("this is not the title")
-    val secondItemTitle = originalItemTitle("this is not the title either")
-    val validTitle = "this is the title"
-    val result = TeiXml(
-      id,
-      teiXml(
-        id = id,
-        items = List(msItem(s"${id}_1", List(firstItemTitle, secondItemTitle))),
-        title = titleElem(validTitle)
-      ).toString()
-    ).flatMap(_.title)
-    result shouldBe a[Right[_, _]]
-    result.right.get shouldBe validTitle
-  }
-
   it("fails if there are more than one title node") {
     val titleString1 = "This is the first title"
     val titleString2 = "This is the second title"
-    val titleStm =
-      <titleStmt>
-        <title>{titleString1}</title>
-        <title>{titleString2}</title>
-      </titleStmt>
+    val titleStm = { <idno type="msID">{titleString1}</idno>
+      <idno type="msID">{titleString2}</idno> }
     val result =
       TeiXml(id, teiXml(id = id, title = titleStm).toString()).flatMap(_.title)
     result shouldBe a[Left[_, _]]
@@ -258,7 +189,7 @@ class TeiXmlTest
   }
 
   it(
-    "fails extracting nested items if there are mukltiple titles and none is marked as original") {
+    "constructs the title if there are multiple titles and none is marked as original") {
     val firstItemTitle = "this is first item title"
     val secondItemTitle = "this is second item title"
     val itemId = s"${id}_1"
@@ -269,12 +200,14 @@ class TeiXmlTest
       id,
       teiXml(
         id = id,
+        title = titleElem("Wrapper title"),
         items = List(firstItem)
       ).toString()
     ).flatMap(_.nestedTeiData)
 
-    result shouldBe a[Left[_, _]]
-    result.left.value shouldBe a[RuntimeException]
+    result shouldBe a[Right[_, _]]
+    result.value shouldBe Seq(
+      TeiData(id = itemId, title = "Wrapper title item 1"))
   }
 
   it("can parse language in items") {
@@ -318,5 +251,192 @@ class TeiXmlTest
         title = s"$wrapperTitle part $number",
         description = Some(description),
         languages = List(Language("ara", "Arabic"))))
+  }
+
+  it("can extract items within a part") {
+    val description = "this is the part description"
+    val wrapperTitle = "test title"
+    val number = 1
+    val innerItem1Id = "part_1_item_1"
+    val innerItem1Title = "this is the first inner item title"
+    val firstInnerItem = msItem(
+      innerItem1Id,
+      titles = List(itemTitle(innerItem1Title)),
+      languages = Nil,
+      items = Nil)
+    val innerItem2Id = "part_1_item_2"
+    val innerItem2Title = "this is the second inner item title"
+    val secondInnerItem = msItem(
+      innerItem2Id,
+      titles = List(itemTitle(innerItem2Title)),
+      languages = Nil,
+      items = Nil)
+    val xml = teiXml(
+      id = id,
+      title = titleElem(wrapperTitle),
+      parts = List(
+        msPart(
+          id = "1",
+          number = number,
+          summary = Some(summary(description)),
+          languages = List(mainLanguage("ar", "Arabic")),
+          items = List(firstInnerItem, secondInnerItem)
+        ))
+    )
+
+    val result = for {
+      parsed <- TeiXml(id, xml.toString())
+      nestedData <- parsed.nestedTeiData
+    } yield nestedData
+    result shouldBe a[Right[_, _]]
+    result.value shouldBe List(
+      TeiData(
+        id = "1",
+        title = s"$wrapperTitle part $number",
+        description = Some(description),
+        languages = List(Language("ara", "Arabic")),
+        nestedTeiData = List(
+          TeiData(id = innerItem1Id, title = innerItem1Title),
+          TeiData(id = innerItem2Id, title = innerItem2Title))
+      ))
+  }
+
+  it(
+    "builds the title for items within an msPart if they don't have an explicit one") {
+    val description = "this is the part description"
+    val wrapperTitle = "test title"
+    val number = 1
+    val innerItem1Id = "part_1_item_1"
+    val firstInnerItem = msItem(innerItem1Id, languages = Nil, items = Nil)
+    val xml = teiXml(
+      id = id,
+      title = titleElem(wrapperTitle),
+      parts = List(
+        msPart(
+          id = "1",
+          number = number,
+          summary = Some(summary(description)),
+          languages = List(mainLanguage("ar", "Arabic")),
+          items = List(firstInnerItem)
+        ))
+    )
+
+    val result = for {
+      parsed <- TeiXml(id, xml.toString())
+      nestedData <- parsed.nestedTeiData
+    } yield nestedData
+    result shouldBe a[Right[_, _]]
+    result.value shouldBe List(
+      TeiData(
+        id = "1",
+        title = s"$wrapperTitle part $number",
+        description = Some(description),
+        languages = List(Language("ara", "Arabic")),
+        nestedTeiData = List(
+          TeiData(
+            id = innerItem1Id,
+            title = s"$wrapperTitle part $number item 1"))
+      ))
+  }
+
+  it("extracts msItems within msItems") {
+    val wrapperTitle = "test title"
+    val xml = teiXml(
+      id = id,
+      title = titleElem(wrapperTitle),
+      items = List(
+        msItem(
+          id = "1",
+          items = List(
+            msItem(
+              id = "11",
+              titles = List(itemTitle("inner item title")),
+              languages = List(mainLanguage("ar", "Arabic"))),
+            msItem(id = "12"))
+        ))
+    )
+
+    val result = for {
+      parsed <- TeiXml(id, xml.toString())
+      nestedData <- parsed.nestedTeiData
+    } yield nestedData
+    result shouldBe a[Right[_, _]]
+    result.value shouldBe List(
+      TeiData(
+        id = "1",
+        title = s"$wrapperTitle item 1",
+        nestedTeiData = List(
+          TeiData(
+            id = "11",
+            title = "inner item title",
+            languages = List(Language("ara", "Arabic"))),
+          TeiData(id = "12", title = s"$wrapperTitle item 1 item 2")
+        )
+      ))
+  }
+
+  it(
+    "doesn't extract lower level nested data from items for manuscripts in the Fihrist catalogue") {
+    val wrapperTitle = "test title"
+    val xml = teiXml(
+      id = id,
+      title = titleElem(wrapperTitle),
+      items = List(
+        msItem(
+          id = "1",
+          items = List(
+            msItem(
+              id = "11",
+              titles = List(itemTitle("inner item title")),
+              languages = List(mainLanguage("ar", "Arabic"))),
+            msItem(id = "12"))
+        )),
+      catalogues =
+        List(catalogueElem("Fihrist"), catalogueElem("Another catalogue"))
+    )
+    val result = for {
+      parsed <- TeiXml(id, xml.toString())
+      nestedData <- parsed.nestedTeiData
+    } yield nestedData
+    result shouldBe a[Right[_, _]]
+    result.value shouldBe List(
+      TeiData(
+        id = "1",
+        title = s"$wrapperTitle item 1",
+        nestedTeiData = Nil
+      ))
+  }
+
+  it(
+    "doesn't extract lower level nested data from parts for manuscripts in the Fihrist catalogue") {
+    val wrapperTitle = "test title"
+    val xml = teiXml(
+      id = id,
+      title = titleElem(wrapperTitle),
+      parts = List(
+        msPart(
+          id = "1",
+          number = 1,
+          items = List(
+            msItem(
+              id = "11",
+              titles = List(itemTitle("inner item title")),
+              languages = List(mainLanguage("ar", "Arabic"))),
+            msItem(id = "12"))
+        )),
+      catalogues =
+        List(catalogueElem("Fihrist"), catalogueElem("Another catalogue"))
+    )
+    val result = for {
+      parsed <- TeiXml(id, xml.toString())
+      nestedData <- parsed.nestedTeiData
+    } yield nestedData
+    result shouldBe a[Right[_, _]]
+    result.value shouldBe List(
+      TeiData(
+        id = "1",
+        title = s"$wrapperTitle part 1",
+        nestedTeiData = Nil
+      ))
   }
 }

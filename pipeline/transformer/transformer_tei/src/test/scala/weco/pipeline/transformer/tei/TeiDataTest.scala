@@ -105,7 +105,7 @@ class TeiDataTest
       title = "This is the title",
       bNumber = Some("fjhsdg"),
       description = Some("This is the description"),
-      nestedTeiData = Right(List(firstInnerTeiData, secondInnerTeiData))
+      nestedTeiData = List(firstInnerTeiData, secondInnerTeiData)
     )
 
     val work = teiData.toWork(Instant.now(), 1)
@@ -121,7 +121,9 @@ class TeiDataTest
         collectionPath = Some(
           CollectionPath(
             path = s"${teiData.id}/${firstInnerTeiData.id}",
-            label = None))
+            label = None
+          )
+        )
       )
     )
 
@@ -136,27 +138,15 @@ class TeiDataTest
         collectionPath = Some(
           CollectionPath(
             path = s"${teiData.id}/${secondInnerTeiData.id}",
-            label = None))
+            label = None
+          )
+        )
       )
     )
     work.state.internalWorkStubs shouldBe List(
       firstInternalWorkStub,
-      secondInternalWorkStub)
-  }
-
-  it("uses only toplevel data if it fails extracting nested data") {
-
-    val title = "This is the top-level title"
-    val teiData = TeiData(
-      id = "id",
-      title = title,
-      nestedTeiData = Left(new RuntimeException("Boom"))
+      secondInternalWorkStub
     )
-
-    val work = teiData.toWork(Instant.now(), 1)
-
-    work.state.internalWorkStubs shouldBe empty
-    work.data.title shouldBe Some(title)
   }
 
   describe("setting the collectionPath") {
@@ -166,18 +156,17 @@ class TeiDataTest
       val work = teiData.toWork(time = Instant.now(), version = 1)
 
       work.data.collectionPath shouldBe Some(
-        CollectionPath(path = "WMS_Example_1", label = None))
+        CollectionPath(path = "WMS_Example_1", label = None)
+      )
     }
 
     it("uses the ID for an absolute path on internal Works") {
       val teiData = createTeiDataWith(
         id = "WMS_Example_2",
-        nestedTeiData = Right(
-          List(
-            createTeiDataWith(id = "Part_1"),
-            createTeiDataWith(id = "Part_2"),
-            createTeiDataWith(id = "Part_3"),
-          )
+        nestedTeiData = List(
+          createTeiDataWith(id = "Part_1"),
+          createTeiDataWith(id = "Part_2"),
+          createTeiDataWith(id = "Part_3")
         )
       )
 
@@ -186,28 +175,38 @@ class TeiDataTest
       work.state.internalWorkStubs.map(_.workData.collectionPath) shouldBe List(
         Some(CollectionPath(path = "WMS_Example_2/Part_1", label = None)),
         Some(CollectionPath(path = "WMS_Example_2/Part_2", label = None)),
-        Some(CollectionPath(path = "WMS_Example_2/Part_3", label = None)),
+        Some(CollectionPath(path = "WMS_Example_2/Part_3", label = None))
       )
     }
   }
 
-  describe("if there's a single inner data") {
-    it("uses the title of the item") {
-      val innerTeiData = TeiData(
-        id = "id_1",
-        title = "This is the item title"
+  it("flattens the nestedData into innerWorks") {
+    val teiData = createTeiDataWith(
+      id = "WMS_Example_2",
+      nestedTeiData = List(
+        createTeiDataWith(
+          id = "Part_1",
+          nestedTeiData = List(
+            createTeiDataWith(id = "Part_1_1"),
+            createTeiDataWith(
+              id = "Part_1_2",
+              nestedTeiData = List(createTeiDataWith(id = "Part_1_2_1"))
+            )
+          )
+        ),
+        createTeiDataWith(id = "Part_2")
       )
-      val teiData = TeiData(
-        id = "id",
-        title = "This is the top-level title",
-        nestedTeiData = Right(List(innerTeiData))
-      )
+    )
+    val work = teiData.toWork(time = Instant.now(), version = 1)
+    work.state.internalWorkStubs
+      .map(_.workData.collectionPath.get) should contain theSameElementsAs List(
+      CollectionPath("WMS_Example_2/Part_1"),
+      CollectionPath("WMS_Example_2/Part_1/Part_1_1"),
+      CollectionPath("WMS_Example_2/Part_1/Part_1_2"),
+      CollectionPath("WMS_Example_2/Part_1/Part_1_2/Part_1_2_1"),
+      CollectionPath("WMS_Example_2/Part_2")
+    )
 
-      val work = teiData.toWork(Instant.now(), 1)
-
-      work.state.internalWorkStubs shouldBe empty
-      work.data.title shouldBe Some(innerTeiData.title)
-    }
   }
 
   describe("setting the languages") {
@@ -216,12 +215,11 @@ class TeiDataTest
       val languages = List(Language(id = "tam", label = "Tamil"))
       val teiData = createTeiDataWith(
         languages = languages,
-        nestedTeiData = Right(
-          List(
-            createTeiDataWith(languages = List()),
-            createTeiDataWith(languages = List()),
-            createTeiDataWith(languages = List()),
-          ))
+        nestedTeiData = List(
+          createTeiDataWith(languages = List()),
+          createTeiDataWith(languages = List()),
+          createTeiDataWith(languages = List())
+        )
       )
 
       val work = teiData.toWork(time = Instant.now(), version = 1)
@@ -250,11 +248,9 @@ class TeiDataTest
 
       val teiData = createTeiDataWith(
         languages = List(),
-        nestedTeiData = Right(
-          innerLanguages.map { languages =>
-            createTeiDataWith(languages = languages)
-          }
-        )
+        nestedTeiData = innerLanguages.map { languages =>
+          createTeiDataWith(languages = languages)
+        }
       )
 
       val work = teiData.toWork(time = Instant.now(), version = 1)
