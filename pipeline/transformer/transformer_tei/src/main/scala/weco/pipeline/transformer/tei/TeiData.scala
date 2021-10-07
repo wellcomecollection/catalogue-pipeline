@@ -22,9 +22,9 @@ case class TeiData(id: String,
     val topLevelData = toWorkData()
 
     def iterateNestedData(nestedTeiData: List[TeiData], topLevelData: WorkData[Unidentified]): List[InternalWork.Source] =
-      nestedTeiData.foldLeft(Nil: List[InternalWork.Source]) {case (l,data) =>
+      nestedTeiData.foldLeft(Nil: List[InternalWork.Source]) {case (internalWorks,data) =>
         val upperLevelWorkData = data.toWorkData(topLevelData.collectionPath)
-        (l :+ InternalWork.Source(
+        (internalWorks :+ InternalWork.Source(
         sourceIdentifier = data.sourceIdentifier,
         workData = upperLevelWorkData
       )) ++ iterateNestedData(data.nestedTeiData, upperLevelWorkData)

@@ -128,7 +128,7 @@ class TeiXml(val xml: Elem) extends Logging {
           description <- summary(node)
           languages <- TeiLanguages.parseLanguages(node \ "msContents")
           partTitle = s"$wrapperTitle part $partNumber"
-          items <- checkCatalogueAndExtractLowerLevelItems(partTitle, node \"msContents", catalogues)
+          items <- extractLowerLevelItems(partTitle, node \"msContents", catalogues)
         } yield {
           TeiData(
             id = id,
@@ -146,13 +146,15 @@ class TeiXml(val xml: Elem) extends Logging {
     * For single part manuscripts, inner works are described in msItem elements.
     */
   private def nestedTeiDataFromItems(wrapperTitle: String, catalogues: List[String] ,nodeSeq: NodeSeq = xml \\ "msDesc" \"msContents" ): Result[List[TeiData]] =
-    (nodeSeq \ "msItem").zipWithIndex.map{case (node, i) => (node, i+1)}
+    (nodeSeq \ "msItem").zipWithIndex
+      // The indexing starts at zero but we want to count items from 1 so we add 1
+      .map{case (node, i) => (node, i+1)}
       .map { case (node, i) =>
         for {
           title <- getTitleForItem(node, wrapperTitle = wrapperTitle,itemNumber = i)
           id <- getIdFrom(node)
           languages <- TeiLanguages.parseLanguages(node)
-          items <- checkCatalogueAndExtractLowerLevelItems(title, node, catalogues)
+          items <- extractLowerLevelItems(title, node, catalogues)
         } yield TeiData(id = id, title = title, languages = languages, nestedTeiData = items)
       }
       .toList
@@ -164,7 +166,7 @@ class TeiXml(val xml: Elem) extends Logging {
    * They are difficult to update to make them more similar to other manuscripts so, for now,
    * we just don't extract lower level items for manuscripts in the Fihrist catalogue.
    */
-  private def checkCatalogueAndExtractLowerLevelItems(partTitle: String, nodes: NodeSeq, catalogues: List[String]): Either[Throwable, List[TeiData]] =
+  private def extractLowerLevelItems(partTitle: String, nodes: NodeSeq, catalogues: List[String]): Either[Throwable, List[TeiData]] =
     catalogues match {
       case catalogues if containsFihrist(catalogues) =>
         Right(Nil)
@@ -172,7 +174,18 @@ class TeiXml(val xml: Elem) extends Logging {
         nestedTeiDataFromItems(wrapperTitle = partTitle, catalogues = catalogues, nodeSeq = nodes)
     }
 
-
+  /**
+   * In an XML like this:
+   * <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id="manuscript_15651">
+   *  <teiHeader>
+   *    <fileDesc>
+   *      <publicationStmt>
+   *        <idno type="msID">Wellcome Malay 7</idno>
+   *        <idno type="catalogue">The Hervey Malay Collection in the Wellcome Institute</idno>
+   *        <idno type="catalogue">Catalogue of Malay manuscripts in the Wellcome Institute for the History of Medicine</idno>
+   *       </publicationStmt>
+   * Extracts the values of idno tags with type "catalogue"
+   */
   private def getCatalogues: Result[List[String]] = {
     val nodes =
       (xml \ "teiHeader" \ "fileDesc" \ "publicationStmt" \ "idno").toList
@@ -192,9 +205,9 @@ class TeiXml(val xml: Elem) extends Logging {
       }
       .getOrElse(throw new RuntimeException("Could not find an id in node!"))).toEither
 
-  private def getTitleForItem(itemNode: Node, wrapperTitle: String, itemNumber: Int): Result[String] = extractTitleFromItem(itemNode).flatMap {
+  private def getTitleForItem(itemNode: Node, wrapperTitle: String, itemNumber: Int): Result[String] = extractTitleFromItem(itemNode) match {
     case Some(title) => Right(title)
-    case None => constructTitleForItem(wrapperTitle, itemNumber)
+    case None => Right(constructTitleForItem(wrapperTitle, itemNumber))
   }
 
   /**
@@ -212,25 +225,25 @@ class TeiXml(val xml: Elem) extends Logging {
     *              <title xml:lang="ar-Latn-x-lc" key="work_3001">Al-Qānūn fī al-ṭibb</title>
     * extract the title from the msItem, so "Al-Qānūn fī al-ṭibb" in the example.
     */
-  private def extractTitleFromItem(itemNode: Node): Result[Option[String]] = {
+  private def extractTitleFromItem(itemNode: Node): Option[String] = {
     val titleNodes = (itemNode \ "title").toList
     titleNodes match {
-      case List(titleNode) => Right(Some(titleNode.text))
+      case List(titleNode) => Some(titleNode.text)
       case list =>
         list.filter(n => (n \@ "type").toLowerCase == "original") match {
-          case List(singleNode) => Right(Some(singleNode.text))
+          case List(singleNode) => Some(singleNode.text)
           case Nil =>
             warn(
                 s"Cannot find original title in msItem $titleNodes")
-            Right(None)
+            None
           case _ =>
             warn(
                 s"Multiple titles with type original msItem $titleNodes")
-            Right(None)
+            None
         }
     }
   }
-  private def constructTitleForItem(wrapperTitle: String, itemNumber: Int): Result[String] = Right(s"$wrapperTitle item $itemNumber")
+  private def constructTitleForItem(wrapperTitle: String, itemNumber: Int):String = s"$wrapperTitle item $itemNumber"
 
 }
 
