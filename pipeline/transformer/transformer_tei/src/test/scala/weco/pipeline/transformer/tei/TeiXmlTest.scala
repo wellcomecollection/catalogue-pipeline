@@ -61,9 +61,8 @@ class TeiXmlTest
   it("fails if there are more than one title node") {
     val titleString1 = "This is the first title"
     val titleString2 = "This is the second title"
-    val titleStm =
-      {<idno type="msID">{titleString1}</idno>
-      <idno type="msID">{titleString2}</idno>}
+    val titleStm = { <idno type="msID">{titleString1}</idno>
+      <idno type="msID">{titleString2}</idno> }
     val result =
       TeiXml(id, teiXml(id = id, title = titleStm).toString()).flatMap(_.title)
     result shouldBe a[Left[_, _]]
@@ -207,7 +206,8 @@ class TeiXmlTest
     ).flatMap(_.nestedTeiData)
 
     result shouldBe a[Right[_, _]]
-    result.value shouldBe Seq(TeiData(id = itemId, title = "Wrapper title item 1"))
+    result.value shouldBe Seq(
+      TeiData(id = itemId, title = "Wrapper title item 1"))
   }
 
   it("can parse language in items") {
@@ -253,16 +253,24 @@ class TeiXmlTest
         languages = List(Language("ara", "Arabic"))))
   }
 
-  it("can extract items within a part"){
+  it("can extract items within a part") {
     val description = "this is the part description"
     val wrapperTitle = "test title"
     val number = 1
     val innerItem1Id = "part_1_item_1"
     val innerItem1Title = "this is the first inner item title"
-    val firstInnerItem = msItem(innerItem1Id, titles = List(itemTitle(innerItem1Title)), languages = Nil, items = Nil)
+    val firstInnerItem = msItem(
+      innerItem1Id,
+      titles = List(itemTitle(innerItem1Title)),
+      languages = Nil,
+      items = Nil)
     val innerItem2Id = "part_1_item_2"
     val innerItem2Title = "this is the second inner item title"
-    val secondInnerItem = msItem(innerItem2Id, titles = List(itemTitle(innerItem2Title)), languages = Nil, items = Nil)
+    val secondInnerItem = msItem(
+      innerItem2Id,
+      titles = List(itemTitle(innerItem2Title)),
+      languages = Nil,
+      items = Nil)
     val xml = teiXml(
       id = id,
       title = titleElem(wrapperTitle),
@@ -289,16 +297,17 @@ class TeiXmlTest
         languages = List(Language("ara", "Arabic")),
         nestedTeiData = List(
           TeiData(id = innerItem1Id, title = innerItem1Title),
-          TeiData(id = innerItem2Id, title =innerItem2Title))
+          TeiData(id = innerItem2Id, title = innerItem2Title))
       ))
   }
 
-  it("builds the title for items within an msPart if they don't have an explicit one"){
+  it(
+    "builds the title for items within an msPart if they don't have an explicit one") {
     val description = "this is the part description"
     val wrapperTitle = "test title"
     val number = 1
     val innerItem1Id = "part_1_item_1"
-    val firstInnerItem = msItem(innerItem1Id,  languages = Nil, items = Nil)
+    val firstInnerItem = msItem(innerItem1Id, languages = Nil, items = Nil)
     val xml = teiXml(
       id = id,
       title = titleElem(wrapperTitle),
@@ -324,11 +333,13 @@ class TeiXmlTest
         description = Some(description),
         languages = List(Language("ara", "Arabic")),
         nestedTeiData = List(
-          TeiData(id = innerItem1Id, title = s"$wrapperTitle part $number item 1"))
+          TeiData(
+            id = innerItem1Id,
+            title = s"$wrapperTitle part $number item 1"))
       ))
   }
 
-  it("extracts msItems within msItems"){
+  it("extracts msItems within msItems") {
     val wrapperTitle = "test title"
     val xml = teiXml(
       id = id,
@@ -336,7 +347,11 @@ class TeiXmlTest
       items = List(
         msItem(
           id = "1",
-          items = List(msItem(id= "11", titles = List(itemTitle("inner item title")), languages = List(mainLanguage("ar", "Arabic"))),
+          items = List(
+            msItem(
+              id = "11",
+              titles = List(itemTitle("inner item title")),
+              languages = List(mainLanguage("ar", "Arabic"))),
             msItem(id = "12"))
         ))
     )
@@ -351,13 +366,17 @@ class TeiXmlTest
         id = "1",
         title = s"$wrapperTitle item 1",
         nestedTeiData = List(
-          TeiData(id = "11", title = "inner item title", languages = List(Language("ara", "Arabic"))),
+          TeiData(
+            id = "11",
+            title = "inner item title",
+            languages = List(Language("ara", "Arabic"))),
           TeiData(id = "12", title = s"$wrapperTitle item 1 item 2")
         )
       ))
   }
 
-  it("doesn't extract lower level nested data from items for manuscripts in the Fihrist catalogue"){
+  it(
+    "doesn't extract lower level nested data from items for manuscripts in the Fihrist catalogue") {
     val wrapperTitle = "test title"
     val xml = teiXml(
       id = id,
@@ -365,10 +384,15 @@ class TeiXmlTest
       items = List(
         msItem(
           id = "1",
-          items = List(msItem(id= "11", titles = List(itemTitle("inner item title")), languages = List(mainLanguage("ar", "Arabic"))),
+          items = List(
+            msItem(
+              id = "11",
+              titles = List(itemTitle("inner item title")),
+              languages = List(mainLanguage("ar", "Arabic"))),
             msItem(id = "12"))
         )),
-      catalogues = List(catalogueElem("Fihrist"),catalogueElem("Another catalogue"))
+      catalogues =
+        List(catalogueElem("Fihrist"), catalogueElem("Another catalogue"))
     )
     val result = for {
       parsed <- TeiXml(id, xml.toString())
@@ -383,7 +407,8 @@ class TeiXmlTest
       ))
   }
 
-  it("doesn't extract lower level nested data from parts for manuscripts in the Fihrist catalogue"){
+  it(
+    "doesn't extract lower level nested data from parts for manuscripts in the Fihrist catalogue") {
     val wrapperTitle = "test title"
     val xml = teiXml(
       id = id,
@@ -392,10 +417,15 @@ class TeiXmlTest
         msPart(
           id = "1",
           number = 1,
-          items = List(msItem(id= "11", titles = List(itemTitle("inner item title")), languages = List(mainLanguage("ar", "Arabic"))),
+          items = List(
+            msItem(
+              id = "11",
+              titles = List(itemTitle("inner item title")),
+              languages = List(mainLanguage("ar", "Arabic"))),
             msItem(id = "12"))
         )),
-      catalogues = List(catalogueElem("Fihrist"),catalogueElem("Another catalogue"))
+      catalogues =
+        List(catalogueElem("Fihrist"), catalogueElem("Another catalogue"))
     )
     val result = for {
       parsed <- TeiXml(id, xml.toString())

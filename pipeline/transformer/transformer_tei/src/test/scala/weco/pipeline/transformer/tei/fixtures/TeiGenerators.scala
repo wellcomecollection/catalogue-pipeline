@@ -7,15 +7,15 @@ import scala.xml.{Elem, NodeSeq}
 
 trait TeiGenerators extends RandomGenerators { this: Suite =>
   def teiXml(
-              id: String = randomAlphanumeric(),
-              title: NodeSeq = titleElem("test title"),
-              identifiers: Option[Elem] = None,
-              summary: Option[Elem] = None,
-              languages: List[Elem] = Nil,
-              items: List[Elem] = Nil,
-              parts: List[Elem] = Nil,
-              catalogues: List[Elem] = Nil
-            ): Elem =
+    id: String = randomAlphanumeric(),
+    title: NodeSeq = titleElem("test title"),
+    identifiers: Option[Elem] = None,
+    summary: Option[Elem] = None,
+    languages: List[Elem] = Nil,
+    items: List[Elem] = Nil,
+    parts: List[Elem] = Nil,
+    catalogues: List[Elem] = Nil
+  ): Elem =
     <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id={id}>
       <teiHeader>
         <fileDesc>

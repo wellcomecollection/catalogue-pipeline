@@ -198,11 +198,12 @@ class TeiDataTest
       )
     )
     val work = teiData.toWork(time = Instant.now(), version = 1)
-    work.state.internalWorkStubs.map(_.workData.collectionPath.get) should contain theSameElementsAs List(
-     CollectionPath("WMS_Example_2/Part_1"),
-     CollectionPath("WMS_Example_2/Part_1/Part_1_1"),
-     CollectionPath("WMS_Example_2/Part_1/Part_1_2"),
-     CollectionPath("WMS_Example_2/Part_1/Part_1_2/Part_1_2_1"),
+    work.state.internalWorkStubs
+      .map(_.workData.collectionPath.get) should contain theSameElementsAs List(
+      CollectionPath("WMS_Example_2/Part_1"),
+      CollectionPath("WMS_Example_2/Part_1/Part_1_1"),
+      CollectionPath("WMS_Example_2/Part_1/Part_1_2"),
+      CollectionPath("WMS_Example_2/Part_1/Part_1_2/Part_1_2_1"),
       CollectionPath("WMS_Example_2/Part_2")
     )
 
