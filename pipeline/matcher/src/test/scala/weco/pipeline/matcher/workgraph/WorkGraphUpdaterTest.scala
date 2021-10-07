@@ -5,7 +5,11 @@ import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.CanonicalId
 import weco.pipeline.matcher.fixtures.MatcherFixtures
 import weco.pipeline.matcher.generators.WorkStubGenerators
-import weco.pipeline.matcher.models.{VersionExpectedConflictException, VersionUnexpectedConflictException, WorkNode}
+import weco.pipeline.matcher.models.{
+  VersionExpectedConflictException,
+  VersionUnexpectedConflictException,
+  WorkNode
+}
 
 class WorkGraphUpdaterTest
     extends AnyFunSpec

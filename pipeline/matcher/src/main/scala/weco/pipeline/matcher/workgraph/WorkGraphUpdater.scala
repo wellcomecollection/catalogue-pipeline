@@ -66,8 +66,8 @@ object WorkGraphUpdater extends Logging {
     // Create a set of all Works that are suppressed at the source.  We shouldn't
     // include any of these in the final graph.
     val suppressedWorks: Set[CanonicalId] =
-      linkedWorks.filter { _.suppressed }.map(_.id) ++
-        List(if (work.suppressed) Some(work.id) else None).flatten
+      (linkedWorks.map(w => (w.id, w.suppressed)) ++ Set((work.id, work.suppressed)))
+        .collect { case (workId, true) => workId }
 
     // Create a list of all the connections between works in the graph.
     //
@@ -104,8 +104,8 @@ object WorkGraphUpdater extends Logging {
     //          D → E
     //
     // We record information about suppressions in the matcher database.
-    val rawLinks = updateLinks ++ otherLinks
-    val links = rawLinks
+    val allLinks = updateLinks ++ otherLinks
+    val unsuppressedLinks = allLinks
       .filterNot { lk => suppressedWorks.contains(lk.head) || suppressedWorks.contains(lk.to) }
 
     // Get the IDs of all the works in this graph, and construct a Graph object.
@@ -115,7 +115,7 @@ object WorkGraphUpdater extends Logging {
           node.id +: node.linkedIds
         } + work.id
 
-    val g = Graph.from(edges = links, nodes = workIds)
+    val g = Graph.from(edges = unsuppressedLinks, nodes = workIds)
 
     // Find all the works that this node links to.
     //
@@ -130,9 +130,8 @@ object WorkGraphUpdater extends Logging {
     // if work D was suppressed.
     //
     def linkedWorkIds(n: g.NodeT): List[CanonicalId] =
-      rawLinks
-        .filter { _.head == n.value }
-        .map(_.to)
+      allLinks
+        .collect { case link if link.head == n.value => link.to }
         .toList
         .sorted
 
