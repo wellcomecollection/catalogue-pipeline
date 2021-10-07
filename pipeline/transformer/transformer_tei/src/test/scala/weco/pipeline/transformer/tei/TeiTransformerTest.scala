@@ -114,6 +114,22 @@ class TeiTransformerTest
     )
   }
 
+  it("extracts msItems within msItems") {
+    val work = transformToWork(filename = "/MS_MSL_112.xml")(
+      id = "Greek_MS_MSL_112"
+    )
+
+    val internalWorkStubs = work.value.state.internalWorkStubs
+    internalWorkStubs should have size 5
+    internalWorkStubs.map(_.workData.title.get) should contain theSameElementsAs List(
+      " Medical Epitome - 3, first part of 6, 4, 5 ",
+      "Περὶ θεραπευτικ(ῶν) μεθόδ(ων) βιβλίον πρῶτον",
+      "Τοῦ αὐτοῦ περὶ θεραπείας παθῶν καὶ τῶν ἔξωθεν φαρμάκων",
+      "Τοῦ αὐτοῦ περὶ θεραπευτικῆς μεθόδου τῶν κατὰ μέρος παθῶν βιβλίον δεύτερον",
+      "Τοῦ αὐτοῦ περὶ συνθέσεως φαρμάκων λόγος Α ́"
+    )
+  }
+
   it("handles delete messages") {
 
     val store =

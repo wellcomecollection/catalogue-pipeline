@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="https://raw.githubusercontent.com/bodleian/consolidated-tei-schema/master/msdesc.rng" type="application/xml" schematypens="http://relaxng.org/ns/structure/1.0"?>
+
+<!-- Template updated 05.10.20 -->
+
+<TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id="Greek_MS_MSL_112">
+    <!-- Give xml:id in the  format  'Greek_[MS number]' -the file name should be identical -->
+
+    <teiHeader>
+    
+    <fileDesc>
+        
+        <titleStmt>
+            <title>Greek_MS_MSL_112</title>
+            <title type="collection">Wellcome Collection</title>
+            <respStmt xml:id="PBV">
+                <resp when="2015">Cataloguer</resp>
+                <persName>Petros Bouras-Vallianatos</persName>
+            </respStmt>
+            <respStmt xml:id="AP">
+                <resp when="2020-10-05">Template</resp>
+                <persName>Adrian Plau</persName>
+            </respStmt>
+            <respStmt xml:id="MK">
+                <resp when="2020-10-17">TEI Encoder</resp>
+                <persName>Miriam Keaveny</persName>
+            </respStmt>
+        </titleStmt>
+        
+        <publicationStmt>
+            <publisher>Wellcome Collection</publisher>
+            <idno>UkLW</idno>
+            <address>
+                <orgName type="institution">Wellcome Collection</orgName>
+                <street>215 Euston Rd</street>
+                <settlement>London</settlement>
+                <postCode>NW1 2BE</postCode>
+            </address>
+            <distributor>
+                <email>library@wellcomecollection.org</email>
+            </distributor>
+            <idno type="msID">MS.MSL.112</idno>
+            <idno type="catalogue">Greek Manuscripts at the Wellcome Library in London: A Descriptive Catalogue</idno>
+            <availability>
+                <licence><!-- Licensing statement to come in late-stage editing --></licence>
+            </availability>
+        </publicationStmt>
+        
+        <sourceDesc>
+            
+            <msDesc>
+                
+                <msIdentifier>
+                    <country>United Kingdom</country>
+                    <settlement>London</settlement>
+                    <institution>Wellcome Collection</institution>
+                    <repository>Wellcome Library</repository>
+                    <idno type="shelfmark"></idno>
+                    <altIdentifier type="Sierra">
+                        <idno>b18418429</idno>
+                    </altIdentifier>
+                    <altIdentifier type="deprecated">
+                        <idno>NN a 11</idno>
+                    </altIdentifier>
+                    <altIdentifier type="deprecated">
+                        <idno>Wf 8</idno>
+                    </altIdentifier>
+                </msIdentifier>
+                
+                <msContents>
+                  
+                    <summary>John Zacharias Aktouarios, Medical Epitome 63 3, first part of 6, 4, 5.</summary>
+                   
+                    <textLang mainLang="grc" source="IANA">Ancient Greek</textLang>
+                    
+                    
+                    <msItem n="1" xml:id="MS_MSL_112_1"> 
+                        <msItem xml:id="MS_MSL_112_1_1"> 
+                        <locus>1v - 32v</locus> 
+                            <title>Περὶ θεραπευτικ(ῶν) μεθόδ(ων) βιβλίον πρῶτον</title>
+                            <incipit> ̓Επειδὴ πᾶσα διδασκαλία καὶ μέθοδος</incipit>
+                            <explicit>τὸ πᾶν τοῦ λόγου μέτρον συμπεραντέον</explicit>
+                            <bibl type="text-relations"> Mathys, II.153.7-213.15 </bibl> 
+                        </msItem>
+                        
+                        <msItem xml:id="MS_MSL_112_1_2"> 
+                            <locus>32v - 78v</locus>
+                            <title>Τοῦ αὐτοῦ περὶ θεραπείας παθῶν καὶ τῶν ἔξωθεν φαρμάκων</title> 
+                            <incipit> ̓Εδόκει διὰ βράχεων πάντων ἐπιμνησθῆναι βεβουλημένῳ</incipit>
+                            <explicit>ὡς ἂν ἐν πᾶσι Θεοῦ διδόντος, ἄρτιος ὁ λόγος τελοίη</explicit>
+                            <bibl type="text-relations"> Mathys,II.433–526.10 </bibl> 
+                        </msItem>
+                        
+                        <msItem xml:id="MS_MSL_112_1_3"> 
+                            <locus>79v - 139v</locus>
+                            <title>Τοῦ αὐτοῦ περὶ θεραπευτικῆς μεθόδου τῶν κατὰ μέρος παθῶν βιβλίον δεύτερον</title> 
+                            <incipit> ̔Η μὲν παροιμία φησί, χελώνης κρέα, ἢ φαγεῖν, ἢ μὴ φαγεῖν</incipit>
+                            <explicit>προσῆκον ὠδὶ καὶ τοῦτον ἐνταῦθά πη συγκαταπαύειν</explicit>
+                            <bibl type="text-relations"> Mathys,II.213.16–316 </bibl> 
+                        </msItem>
+                        
+                        <msItem xml:id="MS_MSL_112_1_4"> 
+                            <locus>140v - 217v</locus>
+                            <title>Τοῦ αὐτοῦ περὶ συνθέσεως φαρμάκων λόγος Α ́</title> 
+                            <incipit>῎Ηδη σοι καὶ τὸν ἐπὶ τοῖς τέσσαρσι βιβλίοις ἐπιτίθεμεν λόγον</incipit>
+                            <explicit>τῶ μετὰ τοῦτον δὲ προσθήσομεν ὅσα δοκεῖ λείπειν πρὸς τὸ τῆς ὑποσχέσεως ἄρτιον</explicit>
+                            <note> handwritten label for <locus>166v</locus> reads ‘βιβλίου – φύλλα – 309 – φύλλου ἀριστερὸν – εἰς τὸ τέλος τοῦ φύλλου – (ζαδούαρ) δέν το ἔγραψα ἄκρυ ἀριστερά’. Last line of <locus> 308v</locus> in MS_MSL_52 relates to <locus> 116v</locus> in MS_MSL_112 </note>
+                            <bibl type="text-relations"> Mathys,II.317–432</bibl> 
+                        </msItem>
+                       
+                        <author key="100190357"> John Zacharias Aktouarios</author>
+                        <title> Medical Epitome - 3, first part of 6, 4, 5 </title>
+                        <filiation>MS copied directly from MS_MSL_52 <locus>203r - 332r</locus></filiation>
+                        <note>Labels bound among the pages of MS_MSL_112 include handwritten notes from the scribe correcting errors he made whilst copying from MS_MSL_52</note>
+                        
+                        </msItem>
+                        
+
+                </msContents>
+                
+                <physDesc>
+                    <!-- Insert and delete as needed -->
+                    <objectDesc form="codex">
+                       
+                        <supportDesc material="mixed">
+                                                    
+                            <support>Paper, folded in 2. 
+                                <watermark>Pro Patria watermarks with GR countermarks similar to <ref> Gaudriault 314.1–2.</ref> Paper bears the same marks as MS_MSL_111</watermark>
+                                <measure type="chainline">Chaindistance 25mm</measure>
+                            </support>
+                            <extent> 217ff( v + 217 + vii) 
+                                <dimensions unit="mm">
+                                    <dim type="height">320mm</dim>
+                                <dim type="width">195mm</dim>
+                                </dimensions>
+                            </extent>
+                            
+                             <foliation>
+                                 <note>foliated 1 - 217</note>
+                             </foliation>
+                           
+                        </supportDesc>
+                        
+                        <layoutDesc>
+                            
+                            <layout writtenLines="30"> 30 written lines 
+                                    <measure type="height" unit="mm">244</measure>
+                                    <measure type="length" unit="mm">141</measure>   
+                                <note> on the left side of the page only, framed in red rulings</note>
+                            </layout>
+                                                        
+                        </layoutDesc> 
+                         
+                    </objectDesc>
+                    
+                    <handDesc>
+                        <handNote scope="sole">Labels bound among the pages of MS_MSL_112 include handwritten notes from the scribe correcting errors he made whilst copying from MS_MSL_52</handNote>
+                    <handNote>neatly written text</handNote>
+                    </handDesc>
+                    
+                    <decoDesc>
+                        <decoNote>Head and tail pieces and capitals in red</decoNote>
+                    </decoDesc>
+                    
+                    <bindingDesc>
+                        <binding>
+                            <p>modern binding</p>
+                        </binding>
+                    </bindingDesc>
+                    
+                    
+                </physDesc>
+                
+                <history>
+                    <origin>
+                        <origPlace>
+                            <country>England</country>,
+                            <settlement>London</settlement>,
+                            <note>from watermarks</note>
+                        </origPlace>
+                        <origDate calendar="Gregorian">ca.1732-63AD
+                            <note>from watermarks</note></origDate>
+                       
+                    </origin>
+                    <provenance> Thought to have been newly excecuted when <persName> Anthony Askew</persName> acquired it</provenance>
+                    <provenance> Marks of ownership <locus>flyleaf IIr</locus>Ex Bibliotheca Askeviana / Part ii. Art. 541 / J. Sims</provenance>
+                    <acquisition> <persName>Anthony Askew</persName>(1722–74)<settlement>London</settlement>; his sale at G. Leigh and J. Sotheby <settlement> London </settlement> <date> 15 March 1785 </date>, lot 541. 
+                     Purchased by <persName> James Sims </persName>(1741–1820)<settlement>London</settlement>, in <date> 1785. </date> 
+                     Purchased by the <orgName> London Medical Society </orgName> in <date>1802.</date>
+                     Purchased by the <orgName> </orgName> Wellcome Library in <date>1984.</date> </acquisition>
+                </history>
+                
+                <additional>
+                    <adminInfo>
+                        <recordHist>
+                            <source>
+                                <bibl>
+                                    <title>'Greek Manuscripts at the Wellcome Library in London: A Descriptive Catalogue' in Medical History,  vol. 59 (2)</title>
+                                    <author>Petros Bouras-Vallianatos</author>
+                                    <date>2015</date>
+                                    <note>Pp. 275-326</note> 
+                                </bibl>
+                                    <bibl>
+                                    <title>Manuscripta Medica: A Descriptive Catalogue of the Manuscripts in the Library of the Medical Society of London</title>
+                                    <author>Warren Royal Dawson</author>
+                                    <date>1932</date>
+                                    <placeName>London</placeName>
+                                    <publisher>J. Bale, Sons and Danielsson</publisher>
+                                    <abbr>Dawson</abbr>
+                                    <note>p.122-123</note> 
+                                    </bibl>
+                                
+                                <!-- Might include link to catalogue source -->
+                                <!--<listBibl>
+                              <bibl> </bibl>
+                           </listBibl>-->
+                            </source>
+                        </recordHist>
+                        <availability status="free"><p>digitised in full</p>
+                        </availability> 
+                    </adminInfo>
+                    <!-- Enter bibliographical info, if needed -->
+                    <listBibl>
+                        <!-- a number of listBibl elements can be nested inside an outer listBibl if required -->
+                        <!-- The folloing records the bibliographical entries Allan's catalogue refers to - delete any that are not mentioned in the file -->
+                        <head>Bibliographical abbreviations</head>
+                        <bibl>
+                            <title>Bibliotheca Askeviana manu scripta, sive catalogus librorum manuscriptorum Antonii Askew</title>
+                            <date>1785</date>
+                            <placeName>London</placeName>
+                            <publisher>Leigh and Sotheby</publisher>
+                            <abbr>Bibl. Askev.</abbr>
+                        </bibl>
+                        <bibl>
+                            <title>A Catalogue of Books Contained in the Library of the Medical Society of London, Instituted AD 1773</title>
+                            <date>1803</date>
+                            <placeName>London</placeName>
+                            <publisher>Medical Society of London</publisher>
+                            <abbr>Cat. Med. Soc. 1803</abbr>
+                        </bibl>
+                        <bibl>
+                            <title>A Catalogue of Books Contained in the Library of the Medical Society of London, Instituted AD 1773</title>
+                            <date>1829</date>
+                            <placeName>London</placeName>
+                            <publisher>Medical Society of London</publisher>
+                            <abbr>Cat. Med. Soc. 1829</abbr>
+                        </bibl>
+                    
+                        <bibl>
+                            <title>Manuscripta Medica: A Descriptive Catalogue of the Manuscripts in the Library of the Medical Society of London</title>
+                            <author>Warren Royal Dawson</author>
+                            <date>1932</date>
+                            <placeName>London</placeName>
+                            <publisher>J. Bale, Sons and Danielsson</publisher>
+                            <abbr>Dawson</abbr>
+                        </bibl>
+                        <bibl>
+                            <title>Die Handschriften der antiken Ärzte, 3 vols</title>
+                            <author>Hermann Diels</author>
+                            <date>1905-8</date>
+                            <placeName>Berlin</placeName>
+                            <abbr>Diels</abbr>
+                        </bibl>
+                      
+                        <bibl>
+                            <title>‘Special Report on the Greek MSS in the Society’s Library’, Transactions of the Medical Society of London, 27, lii–lvii</title>
+                            <author>Joseph Baldwin Nias</author>
+                            <date>1905</date>
+                            <abbr>Nias</abbr>
+                        </bibl>
+                        <bibl>
+                            <title>‘The Legacy of Hippocrates: Greek Medicine int he Library of the Medical Society of London’, Transactions of the Medical Society of London, 103, 21–30</title>
+                            <author>Vivian Nutton</author>
+                            <date>1986-7</date>
+                            <abbr>Nutton</abbr>
+                        </bibl>
+                        <bibl>
+                            <title>‘A Wellcome Manuscript of a Medical Practitioner’, in Véronique Boudon-Millot et al. (eds), Storia della tradizione e edizione dei medici greci: Atti del VI Colloquio Internazionale, Paris 12–14 Aprile 2008, 259-70</title>
+                            <author>Vivian Nutton and Barbara Zipser</author>
+                            <date>2010</date>
+                            <placeName>Naples</placeName>
+                            <publisher>D'Auria</publisher>
+                            <abbr>Nutton and Zipster</abbr>
+                        </bibl>
+
+                        <bibl>
+                            <title>‘Byzantine Medical Manuscripts: Towards a New Catalogue, with a Specimen for an Annotated Checklist of Manuscripts Based on an Index of Diels’ Catalogue’, Byzantion, 79, 453–595</title>
+                            <author>Alain Touwaide</author>
+                            <date>2009</date>
+                            <abbr>Touwaide</abbr>
+                        </bibl>
+                        <bibl>
+                            <title> Actuarii Ioannis filii Zachariae Opera: De actionibus et spiritus animalis affectibus eiusque nutritione lib. II, De urinis lib. VII, Methodi medendi lib. V </title>
+                            <author> Corneille Henri Mathys (translator)</author>
+                            <date>1556</date>
+                            <placeName>Paris</placeName>
+                            <publisher>Bernardus Turrisanus</publisher>
+                            <abbr> Mathys </abbr>
+                        </bibl>
+                        
+                    </listBibl>
+                
+                </additional>
+            
+            </msDesc>
+        
+        </sourceDesc>
+    
+    </fileDesc>
+        
+        <!-- Use the following to record subject headings, if needed -->
+        <encodingDesc>
+            <classDecl>
+                <taxonomy xml:id="LCSH">
+                    <bibl>
+                        <ref target="http://id.loc.gov/authorities/about.html#lcsh">Library of Congress Subject Headings</ref>
+                    </bibl>
+                </taxonomy>
+            </classDecl>
+        </encodingDesc>
+        <profileDesc>
+            <textClass>
+                <keywords scheme="#LCSH">
+                    <list>
+                        <item facs="Greek_MS_MSL_112">
+                            <term ref="subject_"></term>
+                            <term ref="subject_"></term>
+                        </item>
+                    </list>
+                </keywords>
+            </textClass>
+        </profileDesc>    
+    
+        <revisionDesc>
+        <change when="2020-10-17" who="MK">Populated template</change> 
+        <change when="2020-05-19" who="#AP">Created template for Wellcome Greek MSS project.</change>
+        </revisionDesc>
+
+    </teiHeader>    
+
+    <facsimile>
+        <surface></surface>
+    </facsimile>    
+
+    <text>
+    <body>
+        <p></p>
+        <!-- For future full transcription -->
+    </body>
+
+    </text>    
+
+</TEI>
