@@ -94,14 +94,14 @@ object WorkGraphUpdater extends Logging {
     // Remove any links that come to/from works that are suppressed.
     // This means we won't match "through" these works.
     //
-    // e.g.     A → B → C → (S) → D
+    // e.g.     A → B → C → (S) → D → E
     //
     // If work S was suppressed, then the graph would be split into three disconnected
     // components:
     //
     //          A → B → C
     //          S
-    //          D
+    //          D → E
     //
     // We record information about suppressions in the matcher database.
     val links = (updateLinks ++ otherLinks)
