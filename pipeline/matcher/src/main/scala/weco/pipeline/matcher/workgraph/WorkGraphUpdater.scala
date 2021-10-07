@@ -103,8 +103,7 @@ object WorkGraphUpdater extends Logging {
     //          S
     //          D
     //
-    // We record information about suppressions in the matcher database, so
-    // we
+    // We record information about suppressions in the matcher database.
     val links = (updateLinks ++ otherLinks)
       .filterNot { lk => suppressedWorks.contains(lk.head) || suppressedWorks.contains(lk.to) }
 

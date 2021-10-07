@@ -114,7 +114,7 @@ class MatcherFeatureTest
     //
     // If the digitised bib is suppressed in Sierra, we won't be able to create a
     // IIIF Presentation manifest or display a digitised item.  We shouldn't match
-    // through the digitised bib.
+    // through the digitised bib.  They should be returned as three distinct works.
     //
     val sierraPhysicalBib = sierraPhysicalIdentifiedWork()
 
@@ -163,8 +163,16 @@ class MatcherFeatureTest
             }
 
             eventually {
-              val results = messageSender.getMessages[MatcherResult].map(_.works.flatMap(_.identifiers))
-              results should contain theSameElementsAs works.map(w => Set(WorkIdentifier(w)))
+              val results = messageSender.getMessages[MatcherResult]
+              results should have size 3
+
+              // Every collection of MatchedIdentifiers only has a single entry.
+              //
+              // This is a bit easier than matching directly on the result, which varies
+              // depending on the exact order the notifications are processed.
+              results.forall { matcherResult =>
+                matcherResult.works.forall(_.identifiers.size == 1)
+              }
 
               assertQueueEmpty(queue)
               assertQueueEmpty(dlq)
