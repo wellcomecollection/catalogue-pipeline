@@ -18,4 +18,11 @@ object WorkNode {
             linkedIds: List[CanonicalId],
             componentId: String): WorkNode =
     WorkNode(id, Some(version), linkedIds, componentId)
+
+  def apply(id: CanonicalId,
+            version: Int,
+            linkedIds: List[CanonicalId],
+            componentId: String,
+            suppressed: Boolean): WorkNode =
+    WorkNode(id, Some(version), linkedIds, componentId, suppressed)
 }

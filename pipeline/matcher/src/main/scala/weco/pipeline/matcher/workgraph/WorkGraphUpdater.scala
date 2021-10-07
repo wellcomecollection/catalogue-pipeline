@@ -104,7 +104,8 @@ object WorkGraphUpdater extends Logging {
     //          D → E
     //
     // We record information about suppressions in the matcher database.
-    val links = (updateLinks ++ otherLinks)
+    val rawLinks = updateLinks ++ otherLinks
+    val links = rawLinks
       .filterNot { lk => suppressedWorks.contains(lk.head) || suppressedWorks.contains(lk.to) }
 
     // Get the IDs of all the works in this graph, and construct a Graph object.
@@ -124,8 +125,16 @@ object WorkGraphUpdater extends Logging {
     //
     // In this example, linkedWorkIds(B) = {C, D}
     //
+    // Note: this includes all the links starting from this work, even links that aren't
+    // being used for the matcher result.  e.g. linkedWorkIds(B) would be the same even
+    // if work D was suppressed.
+    //
     def linkedWorkIds(n: g.NodeT): List[CanonicalId] =
-      n.diSuccessors.map(_.value).toList.sorted
+      rawLinks
+        .filter { _.head == n.value }
+        .map(_.to)
+        .toList
+        .sorted
 
     // Go through the components of the graph, and turn each of them into
     // a set of WorkNode instances.

@@ -5,11 +5,7 @@ import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.CanonicalId
 import weco.pipeline.matcher.fixtures.MatcherFixtures
 import weco.pipeline.matcher.generators.WorkStubGenerators
-import weco.pipeline.matcher.models.{
-  VersionExpectedConflictException,
-  VersionUnexpectedConflictException,
-  WorkNode
-}
+import weco.pipeline.matcher.models.{VersionExpectedConflictException, VersionUnexpectedConflictException, WorkNode}
 
 class WorkGraphUpdaterTest
     extends AnyFunSpec
@@ -21,6 +17,7 @@ class WorkGraphUpdaterTest
   val idB = CanonicalId("BBBBBBBB")
   val idC = CanonicalId("CCCCCCCC")
   val idD = CanonicalId("DDDDDDDD")
+  val idE = CanonicalId("EEEEEEEE")
 
   describe("Adding links without existing works") {
     it("updating nothing with A gives A:A") {
@@ -538,17 +535,13 @@ class WorkGraphUpdaterTest
         WorkGraphUpdater.update(
           work = createWorkWith(idA, version = 1, referencedWorkIds = Set(idB)),
           affectedNodes = Set(
-            WorkNode(id = idB, version = Some(1), linkedIds = List(), componentId = ciHash(idB), suppressed = true)
+            WorkNode(id = idB, version = 1, linkedIds = List(), componentId = ciHash(idB), suppressed = true)
           )
         )
 
-      println(s"ciHash(idA) = ${ciHash(idA)}")
-      println(s"ciHash(idB) = ${ciHash(idB)}")
-      println(s"ciHash(idA, idB) = ${ciHash(idA, idB)}")
-
       result shouldBe Set(
-        WorkNode(id = idA, version = 1, linkedIds = List(), componentId = ciHash(idA)),
-        WorkNode(id = idB, version = Some(1), linkedIds = List(), componentId = ciHash(idB), suppressed = true)
+        WorkNode(id = idA, version = 1, linkedIds = List(idB), componentId = ciHash(idA)),
+        WorkNode(id = idB, version = 1, linkedIds = List(), componentId = ciHash(idB), suppressed = true)
       )
     }
 
@@ -557,15 +550,70 @@ class WorkGraphUpdaterTest
         WorkGraphUpdater.update(
           work = createWorkWith(idB, version = 1, referencedWorkIds = Set(idB), workType = "Deleted"),
           affectedNodes = Set(
-            WorkNode(id = idA, version = Some(1), linkedIds = List(idB), componentId = ciHash(idA, idB)),
+            WorkNode(id = idA, version = 1, linkedIds = List(idB), componentId = ciHash(idA, idB)),
             WorkNode(id = idB, version = None, linkedIds = List(), componentId = ciHash(idA, idB))
           )
         )
 
       result shouldBe Set(
-        WorkNode(id = idA, version = 1, linkedIds = List(), componentId = ciHash(idA)),
-        WorkNode(id = idB, version = Some(1), linkedIds = List(), componentId = ciHash(idB), suppressed = true)
+        WorkNode(id = idA, version = 1, linkedIds = List(idB), componentId = ciHash(idA)),
+        WorkNode(id = idB, version = 1, linkedIds = List(), componentId = ciHash(idB), suppressed = true)
       )
+    }
+
+    it("A → B → C → D → E, but C is suppressed (updating A)") {
+      val result =
+        WorkGraphUpdater.update(
+          work = createWorkWith(idA, version = 1, referencedWorkIds = Set(idB)),
+          affectedNodes = Set(
+            WorkNode(id = idB, version = 1, linkedIds = List(idC), componentId = ciHash(idB)),
+            WorkNode(id = idC, version = 1, linkedIds = List(idD), componentId = ciHash(idC), suppressed = true),
+            WorkNode(id = idD, version = 1, linkedIds = List(idE), componentId = ciHash(idD, idE)),
+            WorkNode(id = idE, version = 1, linkedIds = List(), componentId = ciHash(idD, idE))
+          )
+        )
+
+      result shouldBe Set(
+        WorkNode(id = idA, version = 1, linkedIds = List(idB), componentId = ciHash(idA, idB)),
+        WorkNode(id = idB, version = 1, linkedIds = List(idC), componentId = ciHash(idA, idB)),
+        WorkNode(id = idC, version = 1, linkedIds = List(idD), componentId = ciHash(idC), suppressed = true),
+        WorkNode(id = idD, version = 1, linkedIds = List(idE), componentId = ciHash(idD, idE)),
+        WorkNode(id = idE, version = 1, linkedIds = List(), componentId = ciHash(idD, idE))
+      )
+    }
+
+    it("A → B → C, B is suppressed, then B is updated as unsuppressed") {
+      val graph1 =
+        WorkGraphUpdater.update(
+          work = createWorkWith(idA, version = 1, referencedWorkIds = Set(idB)),
+          affectedNodes = Set()
+        )
+
+      val graph2 =
+        WorkGraphUpdater.update(
+          work = createWorkWith(idB, version = 1, referencedWorkIds = Set(idC), workType = "Deleted"),
+          affectedNodes = graph1
+        )
+
+      val graph3 =
+        WorkGraphUpdater.update(
+          work = createWorkWith(idC, version = 1, referencedWorkIds = Set()),
+          affectedNodes = graph2
+        )
+
+      // At this point the graph database knows about all three of A/B/C, but it should
+      // be storing them as separate components.
+      //
+      // Now if we update B and B only, we should see the graphs be merged into a single component --
+      // that is, the graph remembers that A → B, even though it wasn't actively using that
+      // information for the matcher result.
+      val result =
+        WorkGraphUpdater.update(
+          work = createWorkWith(idB, version = 2, referencedWorkIds = Set(idC), workType = "Undeleted"),
+          affectedNodes = graph3
+        )
+
+      result.map(_.componentId) shouldBe Set(ciHash(idA, idB, idC))
     }
   }
 }
