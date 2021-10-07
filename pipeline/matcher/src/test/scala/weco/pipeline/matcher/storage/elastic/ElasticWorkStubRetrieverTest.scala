@@ -32,13 +32,16 @@ class ElasticWorkStubRetrieverTest
 
               withRetriever { retriever: Retriever[WorkStub] =>
                 whenReady(retriever(indexId.indexId(work))) {
-                  _ shouldBe work.asWorkStub
+                  _ shouldBe WorkStub(
+                    state = work.state,
+                    version = work.version,
+                    workType = "Deleted"
+                  )
                 }
               }
             }
         }
     }
-
   }
 
   override def withContext[R](stubs: Seq[WorkStub])(

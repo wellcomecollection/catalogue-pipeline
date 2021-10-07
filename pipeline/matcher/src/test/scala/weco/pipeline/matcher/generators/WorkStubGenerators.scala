@@ -39,7 +39,8 @@ trait WorkStubGenerators extends IdentifiersGenerators {
           .toList,
         sourceModifiedTime = Instant.now()
       ),
-      version = version
+      version = version,
+      workType = "Visible"
     )
 
   def createWorkStub: WorkStub =
@@ -67,9 +68,4 @@ trait WorkStubGenerators extends IdentifiersGenerators {
 
   implicit val indexId: IndexId[Work[WorkState.Identified]] =
     (w: Work[WorkState.Identified]) => w.id
-
-  implicit class WorkOps(w: Work[WorkState.Identified]) {
-    def asWorkStub: WorkStub =
-      WorkStub(state = w.state, version = w.version)
-  }
 }
