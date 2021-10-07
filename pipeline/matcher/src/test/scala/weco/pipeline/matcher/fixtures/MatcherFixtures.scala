@@ -19,6 +19,7 @@ import weco.pipeline.matcher.matcher.WorkMatcher
 import weco.pipeline.matcher.models.{MatcherResult, WorkNode, WorkStub}
 import weco.pipeline.matcher.services.MatcherWorkerService
 import weco.pipeline.matcher.storage.{WorkGraphStore, WorkNodeDao}
+import weco.pipeline_storage.Retriever
 import weco.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 import weco.pipeline_storage.memory.MemoryRetriever
 import weco.storage.fixtures.DynamoFixtures.Table
@@ -48,7 +49,7 @@ trait MatcherFixtures
     }
 
   def withWorkerService[R](
-    retriever: MemoryRetriever[WorkStub],
+    retriever: Retriever[WorkStub],
     queue: SQS.Queue,
     messageSender: MemoryMessageSender,
     graphTable: Table)(testWith: TestWith[MatcherWorkerService[String], R]): R =
@@ -70,7 +71,7 @@ trait MatcherFixtures
       }
     }
 
-  def withWorkerService[R](retriever: MemoryRetriever[WorkStub],
+  def withWorkerService[R](retriever: Retriever[WorkStub],
                            queue: SQS.Queue,
                            messageSender: MemoryMessageSender)(
     testWith: TestWith[MatcherWorkerService[String], R]): R =

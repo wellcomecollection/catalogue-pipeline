@@ -3,6 +3,10 @@ package weco.pipeline.matcher
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.index.IndexFixtures
+import weco.catalogue.internal_model.work.MergeCandidate
+import weco.catalogue.internal_model.work.generators.SourceWorkGenerators
 import weco.messaging.fixtures.SQS.QueuePair
 import weco.messaging.memory.MemoryMessageSender
 import weco.fixtures.TimeAssertions
@@ -16,6 +20,8 @@ import weco.pipeline.matcher.models.{
   WorkNode,
   WorkStub
 }
+import weco.pipeline.matcher.storage.elastic.ElasticWorkStubRetriever
+import weco.pipeline_storage.Retriever
 import weco.pipeline_storage.memory.MemoryRetriever
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -26,7 +32,9 @@ class MatcherFeatureTest
     with Eventually
     with IntegrationPatience
     with MatcherFixtures
+    with IndexFixtures
     with WorkStubGenerators
+    with SourceWorkGenerators
     with TimeAssertions {
 
   it("processes a single Work with nothing linked to it") {
@@ -90,6 +98,75 @@ class MatcherFeatureTest
             messageSender.messages shouldBe empty
           }
         }
+    }
+  }
+
+  it("doesn't match through a suppressed Sierra e-bib") {
+    // This test covers the case where we have three works which are notionally
+    // connected:
+    //
+    //    (Sierra physical bib)
+    //              |
+    //    (Sierra digitised bib)
+    //              |
+    //    (Digitised METS record)
+    //
+    // If the digitised bib is suppressed in Sierra, we won't be able to create a
+    // IIIF Presentation manifest or display a digitised item.  We shouldn't match
+    // through the digitised bib.
+    //
+    val sierraPhysicalBib = sierraPhysicalIdentifiedWork()
+    val sierraDigitisedBib = sierraDigitalIdentifiedWork()
+      .mergeCandidates(
+        List(
+          MergeCandidate(
+            id = IdState.Identified(
+              canonicalId = sierraPhysicalBib.state.canonicalId,
+              sourceIdentifier = sierraPhysicalBib.state.sourceIdentifier
+            ),
+            reason = "Sierra physical/digitised bib"
+          )
+        )
+      )
+    val metsRecord = metsIdentifiedWork()
+      .mergeCandidates(
+        List(
+          MergeCandidate(
+            id = IdState.Identified(
+              canonicalId = sierraDigitisedBib.state.canonicalId,
+              sourceIdentifier = sierraDigitisedBib.state.sourceIdentifier
+            ),
+            reason = "METS work"
+          )
+        )
+      )
+
+    val works = Seq(sierraPhysicalBib, sierraDigitisedBib, metsRecord)
+
+    withLocalIdentifiedWorksIndex { index =>
+      insertIntoElasticsearch(index, works: _*)
+
+      implicit val retriever: Retriever[WorkStub] =
+        new ElasticWorkStubRetriever(elasticClient, index)
+
+      val messageSender = new MemoryMessageSender()
+
+      withLocalSqsQueuePair() {
+        case QueuePair(queue, dlq) =>
+          withWorkerService(retriever, queue, messageSender) { _ =>
+            works.foreach { w =>
+              sendNotificationToSQS(queue, body = w.id)
+            }
+
+            eventually {
+              val results = messageSender.getMessages[MatcherResult].map(_.works.flatMap(_.identifiers))
+              results should contain theSameElementsAs works.map(w => Set(WorkIdentifier(w)))
+
+              assertQueueEmpty(queue)
+              assertQueueEmpty(dlq)
+            }
+          }
+      }
     }
   }
 }
