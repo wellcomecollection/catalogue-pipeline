@@ -69,6 +69,28 @@ class TeiXml(val xml: Elem) extends Logging {
     }
   }
 
+
+  /**
+   * In an XML like this:
+   * <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id="manuscript_15651">
+   *  <teiHeader>
+   *    <fileDesc>
+   *      <publicationStmt>
+   *        <idno type="msID">Well. Jav. 4</idno>
+   *       </publicationStmt>
+   * Extract "Well. Jav. 4" as the title
+   */
+  def title: Result[String] = {
+    val nodes =
+      (xml \ "teiHeader" \ "fileDesc" \ "publicationStmt" \ "idno").toList
+    val maybeTitles = nodes.filter(n => (n \@ "type") == "msID")
+    maybeTitles match {
+      case List(titleNode) => Right(titleNode.text)
+      case Nil             => Left(new RuntimeException("No title found!"))
+      case _               => Left(new RuntimeException("More than one title node!"))
+    }
+  }
+
   /**
     * TEI works can be composed of other works.
     * This function extracts the information about these nested works.
@@ -102,7 +124,7 @@ class TeiXml(val xml: Elem) extends Logging {
           description <- summary(node)
           languages <- TeiLanguages.parseLanguages(node \ "msContents")
           partTitle = s"$wrapperTitle part $partNumber"
-          items <- nestedTeiDataFromItems(wrapperTitle = partTitle,nodeSeq = node \"msContents")
+          items <- checkCatalogueAndExtractLowerLevelItems(partTitle, node \"msContents")
         } yield {
           TeiData(
             id = id,
@@ -126,11 +148,36 @@ class TeiXml(val xml: Elem) extends Logging {
           title <- getTitleForItem(node, wrapperTitle = wrapperTitle,itemNumber = i)
           id <- getIdFrom(node)
           languages <- TeiLanguages.parseLanguages(node)
-          items <- nestedTeiDataFromItems(wrapperTitle = title, node)
+          items <- checkCatalogueAndExtractLowerLevelItems(title, node)
         } yield TeiData(id = id, title = title, languages = languages, nestedTeiData = items)
       }
       .toList
       .sequence
+
+  /**
+   * Manuscripts in the Fihrist catalogue - the Arabic manuscripts - are
+   * catalogued to a higher level of granularity and it's not necessarily true in this case that a msItem is a work.
+   * They are difficult to update to make them more similar to other manuscripts so, for now,
+   * we just don't extract lower level items for manuscripts in the Fihrist catalogue.
+   */
+  private def checkCatalogueAndExtractLowerLevelItems(partTitle: String, nodes: NodeSeq): Either[Throwable, List[TeiData]] = getCatalogue.flatMap {
+    case catalogues if containsFihrist(catalogues) =>
+      Right(Nil)
+    case _ =>
+      nestedTeiDataFromItems(wrapperTitle = partTitle, nodeSeq = nodes)
+  }
+
+  private def getCatalogue: Result[List[String]] = {
+    val nodes =
+      (xml \ "teiHeader" \ "fileDesc" \ "publicationStmt" \ "idno").toList
+    val maybeCatalogues = nodes.filter(n => (n \@ "type") == "catalogue")
+    maybeCatalogues match {
+      case l @ _ :: _ => Right(l.map(_.text))
+      case Nil => Right(Nil)
+    }
+  }
+
+  private def containsFihrist(catalogues: List[String]): Boolean = catalogues.exists(_.trim.toLowerCase == "fihrist")
 
   private def getIdFrom(node: Node): Result[String] =
     Try(node.attributes
@@ -138,27 +185,6 @@ class TeiXml(val xml: Elem) extends Logging {
         case metadata if metadata.key == "id" => metadata.value.text.trim
       }
       .getOrElse(throw new RuntimeException("Could not find an id in node!"))).toEither
-
-  /**
-    * In an XML like this:
-    * <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id="manuscript_15651">
-    *  <teiHeader>
-    *    <fileDesc>
-    *      <publicationStmt>
-    *        <idno type="msID">Well. Jav. 4</idno>
-    *       </publicationStmt>
-    * Extract "Well. Jav. 4" as the title
-    */
-  def title: Result[String] = {
-    val nodes =
-      (xml \ "teiHeader" \ "fileDesc" \ "publicationStmt" \ "idno").toList
-    val maybeTitles = nodes.filter(n => (n \@ "type") == "msID")
-    maybeTitles match {
-      case List(titleNode) => Right(titleNode.text)
-      case Nil             => Left(new RuntimeException("No title found!"))
-      case _               => Left(new RuntimeException("More than one title node!"))
-    }
-  }
 
   private def getTitleForItem(itemNode: Node, wrapperTitle: String, itemNumber: Int): Result[String] = extractTitleFromItem(itemNode).flatMap {
     case Some(title) => Right(title)
