@@ -13,7 +13,7 @@ import weco.messaging.fixtures.SQS.QueuePair
 import weco.messaging.memory.MemoryMessageSender
 import weco.pipeline.transformer.TransformerWorker
 import weco.pipeline.transformer.tei.TeiTransformer
-import weco.pipeline.transformer.tei.fixtures.TeiGenerators
+import weco.pipeline.transformer.tei.generators.TeiGenerators
 import weco.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 import weco.pipeline_storage.memory.{MemoryIndexer, MemoryRetriever}
 import weco.storage.generators.S3ObjectLocationGenerators

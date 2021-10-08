@@ -4,7 +4,7 @@ import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.languages.Language
-import weco.pipeline.transformer.tei.fixtures.TeiGenerators
+import weco.pipeline.transformer.tei.generators.TeiGenerators
 
 import scala.xml.Elem
 

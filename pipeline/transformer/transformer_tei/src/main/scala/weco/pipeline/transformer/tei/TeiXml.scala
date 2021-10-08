@@ -124,14 +124,14 @@ class TeiXml(val xml: Elem) extends Logging {
   private def nestedTeiDataFromParts(
     wrapperTitle: String,
     catalogues: List[String]): Result[List[TeiData]] =
-    (xml \\ "msDesc" \ "msPart")
-      .map { node =>
+    (xml \\ "msDesc" \ "msPart").zipWithIndex
+      .map { case (node, i) => (node, i + 1) }
+      .map { case (node, i) =>
         for {
           id <- getIdFrom(node)
-          partNumber <- Try((node \@ "n").toInt).toEither
           description <- summary(node)
           languages <- TeiLanguages.parseLanguages(node \ "msContents")
-          partTitle = s"$wrapperTitle part $partNumber"
+          partTitle = s"$wrapperTitle part $i"
           items <- extractLowerLevelItems(
             partTitle,
             node \ "msContents",

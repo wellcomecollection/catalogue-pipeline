@@ -4,7 +4,7 @@ import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.languages.Language
-import weco.pipeline.transformer.tei.fixtures.TeiGenerators
+import weco.pipeline.transformer.tei.generators.TeiGenerators
 import weco.sierra.generators.SierraIdentifierGenerators
 
 import scala.xml.Elem
@@ -235,7 +235,6 @@ class TeiXmlTest
       parts = List(
         msPart(
           id = "1",
-          number = number,
           summary = Some(summary(description)),
           languages = List(mainLanguage("ar", "Arabic"))))
     )
@@ -277,7 +276,6 @@ class TeiXmlTest
       parts = List(
         msPart(
           id = "1",
-          number = number,
           summary = Some(summary(description)),
           languages = List(mainLanguage("ar", "Arabic")),
           items = List(firstInnerItem, secondInnerItem)
@@ -314,7 +312,6 @@ class TeiXmlTest
       parts = List(
         msPart(
           id = "1",
-          number = number,
           summary = Some(summary(description)),
           languages = List(mainLanguage("ar", "Arabic")),
           items = List(firstInnerItem)
@@ -416,7 +413,6 @@ class TeiXmlTest
       parts = List(
         msPart(
           id = "1",
-          number = 1,
           items = List(
             msItem(
               id = "11",
