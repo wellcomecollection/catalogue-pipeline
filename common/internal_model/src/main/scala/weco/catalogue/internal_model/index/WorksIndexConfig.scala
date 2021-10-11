@@ -127,7 +127,7 @@ object WorksIndexConfig extends IndexConfigFields {
           ),
           objectField("languages").fields(label, keywordField("id")),
           textField("edition"),
-          objectField("notes").fields(englishTextField("content")),
+          objectField("notes").fields(englishTextField("contents")),
           intField("duration"),
           collectionPath(copyPathTo = Some("data.collectionPath.depth")),
           objectField("imageData").fields(
