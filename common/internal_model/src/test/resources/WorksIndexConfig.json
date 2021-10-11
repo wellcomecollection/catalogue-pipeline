@@ -830,7 +830,7 @@
           "notes" : {
             "type" : "object",
             "properties" : {
-              "content" : {
+              "contents" : {
                 "type" : "text",
                 "fields" : {
                   "english" : {
