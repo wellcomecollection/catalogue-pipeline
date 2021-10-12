@@ -3,6 +3,7 @@ package weco.pipeline.transformer
 import akka.Done
 import grizzled.slf4j.Logging
 import io.circe.Decoder
+import io.circe.syntax._
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.source_model.SourcePayload
@@ -11,6 +12,8 @@ import weco.messaging.sns.NotificationMessage
 import weco.pipeline_storage.Indexable._
 import weco.pipeline_storage.{PipelineStorageStream, Retriever}
 import weco.storage.{Identified, ReadError, Version}
+import io.circe.optics.JsonPath._
+import weco.typesafe.Runnable
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
@@ -155,8 +158,7 @@ trait TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest]
     }
 
     // Different data is always worth sending along the pipeline.
-    else if (storedWork.data != transformedWork.data) {
-      assert(storedWork.version < transformedWork.version)
+    else if (!areEquivalent(transformedWork, storedWork)) {
       debug(
         s"${transformedWork.id}: transformed Work has different data to the stored Work")
       true
@@ -176,32 +178,17 @@ trait TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest]
     }
   }
 
-  def run(): Future[Done] =
-    pipelineStream.foreach(
-      name,
-      (notification: NotificationMessage) =>
-        process(notification).map {
-          case Left(err) =>
-            // We do some slightly nicer logging here to give context to the errors
-            err match {
-              case DecodePayloadError(_, notificationMsg) =>
-                error(s"$name: DecodePayloadError from $notificationMsg")
-              case StoreReadError(_, key) =>
-                error(s"$name: StoreReadError on $key")
-              case TransformerError(t, sourceData, key) =>
-                error(s"$name: TransformerError on $sourceData with $key ($t)")
-            }
+  private def areEquivalent(transformedWork: Work[Source], storedWork: Work[Source]): Boolean = {
+    // Sometimes we get updates from our sources even though the data hasn't necessarily changed.
+    // One example of that is the Sierra Calm sync script that triggers an update to
+    // every sierra catalogued in calm every night. It can be very expensive if we let
+    // those updates travel through the whole pipeline. So, if the only change is on
+    // 'version' or 'state.sourceModifiedTime' we consider the works equivalent
+    val versionRemove = root.obj.modify(_.remove("version"))
+    val sourceModifiedTimeRemove = root.state.obj.modify(_.remove("sourceModifiedTime"))
+    val modifiedTransformedWork = sourceModifiedTimeRemove(versionRemove(transformedWork.asJson))
+    val modifiedSourceWork = sourceModifiedTimeRemove(versionRemove(storedWork.asJson))
 
-            throw err
-
-          case Right(None) =>
-            debug(
-              s"$name: no transformed Work returned for $notification (this means the Work is already in the pipeline)")
-            Nil
-
-          case Right(Some((work, key))) =>
-            info(s"$name: from $key transformed work with id ${work.id}")
-            List(work)
-      }
-    )
+    modifiedTransformedWork == modifiedSourceWork
+  }
 }
