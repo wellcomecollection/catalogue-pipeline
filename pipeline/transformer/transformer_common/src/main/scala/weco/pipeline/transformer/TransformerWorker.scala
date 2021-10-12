@@ -28,6 +28,11 @@ case class TransformerError[SourceData, Key](t: Throwable,
                                              key: Key)
     extends TransformerWorkerError(t.getMessage)
 
+trait SourceDataRetriever[Payload, SourceData] {
+  def lookupSourceData(
+                        p: Payload): Either[ReadError, Identified[Version[String, Int], SourceData]]
+}
+
 /**
   * A TransformerWorker:
   * - Takes an SQS stream that emits VHS keys
@@ -35,26 +40,43 @@ case class TransformerError[SourceData, Key](t: Throwable,
   * - Runs it through a transformer and transforms the `SourceData` to `Work[Source]`
   * - Emits the message via `MessageSender` to SNS
   */
-trait TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest]
-    extends Logging {
+final class TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest](transformer: Transformer[SourceData], retriever: Retriever[Work[Source]], pipelineStream: PipelineStorageStream[NotificationMessage,
+  Work[Source],
+  SenderDest], sourceDataRetriever: SourceDataRetriever[Payload, SourceData])(implicit ec: ExecutionContext, decoder: Decoder[Payload])
+    extends Logging with Runnable {
   type Result[T] = Either[TransformerWorkerError, T]
   type StoreKey = Version[String, Int]
 
-  implicit val ec: ExecutionContext
-
   def name: String = this.getClass.getSimpleName
-  val transformer: Transformer[SourceData]
 
-  val retriever: Retriever[Work[Source]]
+  def run(): Future[Done] =
+    pipelineStream.foreach(
+      name,
+      (notification: NotificationMessage) =>
+        process(notification).map {
+          case Left(err) =>
+            // We do some slightly nicer logging here to give context to the errors
+            err match {
+              case DecodePayloadError(_, notificationMsg) =>
+                error(s"$name: DecodePayloadError from $notificationMsg")
+              case StoreReadError(_, key) =>
+                error(s"$name: StoreReadError on $key")
+              case TransformerError(t, sourceData, key) =>
+                error(s"$name: TransformerError on $sourceData with $key ($t)")
+            }
 
-  val pipelineStream: PipelineStorageStream[NotificationMessage,
-                                            Work[Source],
-                                            SenderDest]
+            throw err
 
-  def lookupSourceData(
-    p: Payload): Either[ReadError, Identified[Version[String, Int], SourceData]]
+          case Right(None) =>
+            debug(
+              s"$name: no transformed Work returned for $notification (this means the Work is already in the pipeline)")
+            Nil
 
-  implicit val decoder: Decoder[Payload]
+          case Right(Some((work, key))) =>
+            info(s"$name: from $key transformed work with id ${work.id}")
+            List(work)
+        }
+    )
 
   def process(message: NotificationMessage)
     : Future[Result[Option[(Work[Source], StoreKey)]]] =
@@ -73,39 +95,8 @@ trait TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest]
       } yield (newWork, key)
     }.flatMap { compareToStored }
 
-  private def work(sourceData: SourceData,
-                   version: Int,
-                   key: StoreKey): Result[Work[Source]] =
-    transformer(id = key.id, sourceData, version) match {
-      case Right(result) => Right(result)
-      case Left(err) =>
-        Left(TransformerError(err, sourceData, key))
-    }
-
-  private def decodePayload(message: NotificationMessage): Result[Payload] =
-    fromJson[Payload](message.body) match {
-      case Success(storeKey) => Right(storeKey)
-      case Failure(err)      => Left(DecodePayloadError(err, message))
-    }
-
-  private def getSourceData(p: Payload): Result[(SourceData, Int)] =
-    lookupSourceData(p)
-      .map {
-        case Identified(Version(storedId, storedVersion), sourceData) =>
-          if (storedId != p.id) {
-            warn(
-              s"Stored ID ($storedId) does not match ID from message (${p.id})")
-          }
-
-          (sourceData, storedVersion)
-      }
-      .left
-      .map { err =>
-        StoreReadError(err, p)
-      }
-
   private def compareToStored(workResult: Result[(Work[Source], StoreKey)])
-    : Future[Result[Option[(Work[Source], StoreKey)]]] =
+  : Future[Result[Option[(Work[Source], StoreKey)]]] =
     workResult match {
 
       // Once we've transformed the Work, we query forward -- is this a work we've
@@ -139,6 +130,37 @@ trait TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest]
 
       case Left(err) => Future.successful(Left(err))
     }
+
+  private def work(sourceData: SourceData,
+                   version: Int,
+                   key: StoreKey): Result[Work[Source]] =
+    transformer(id = key.id, sourceData, version) match {
+      case Right(result) => Right(result)
+      case Left(err) =>
+        Left(TransformerError(err, sourceData, key))
+    }
+
+  private def decodePayload(message: NotificationMessage): Result[Payload] =
+    fromJson[Payload](message.body) match {
+      case Success(storeKey) => Right(storeKey)
+      case Failure(err)      => Left(DecodePayloadError(err, message))
+    }
+
+  private def getSourceData(p: Payload): Result[(SourceData, Int)] =
+    sourceDataRetriever.lookupSourceData(p)
+      .map {
+        case Identified(Version(storedId, storedVersion), sourceData) =>
+          if (storedId != p.id) {
+            warn(
+              s"Stored ID ($storedId) does not match ID from message (${p.id})")
+          }
+
+          (sourceData, storedVersion)
+      }
+      .left
+      .map { err =>
+        StoreReadError(err, p)
+      }
 
   protected def shouldSend(transformedWork: Work[Source],
                            storedWork: Work[Source]): Boolean = {
