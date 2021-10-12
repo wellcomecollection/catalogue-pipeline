@@ -6,13 +6,14 @@ import org.scalatest.funspec.AnyFunSpec
 import weco.catalogue.internal_model.generators.IdentifiersGenerators
 import weco.catalogue.internal_model.identifiers.IdentifierType
 import weco.catalogue.internal_model.work.WorkState.Source
-import weco.catalogue.internal_model.work.{Work, WorkState}
+import weco.catalogue.internal_model.work.{MergeCandidate, Work, WorkData, WorkState}
 import weco.catalogue.source_model.CalmSourcePayload
 import weco.fixtures.TestWith
 import weco.json.JsonUtil._
 import weco.messaging.fixtures.SQS.{Queue, QueuePair}
 import weco.messaging.memory.MemoryMessageSender
 import weco.pipeline.transformer.example._
+import weco.pipeline.transformer.result.Result
 import weco.pipeline_storage.RetrieverNotFoundException
 import weco.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 import weco.pipeline_storage.memory.{MemoryIndexer, MemoryRetriever}
@@ -21,6 +22,7 @@ import weco.storage.generators.S3ObjectLocationGenerators
 import weco.storage.s3.S3ObjectLocation
 import weco.storage.store.memory.MemoryVersionedStore
 
+import java.time.Instant
 import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -191,6 +193,46 @@ class TransformerWorkerTest
           }
         }
       }
+      it("resends a work if it has different version and different info in state"){
+        withStore { implicit store =>
+        val id = createId
+          val modifiedTime = Instant.now()
+      val sourceIdentifier = createCalmSourceIdentifier
+        val workIndexer = new MemoryIndexer[Work[Source]]()
+        val workKeySender = new MemoryMessageSender()
+          val stateChangingTransformer = new Transformer[ExampleData] {
+            override def apply(id: String, sourceData: ExampleData, version: Int): Result[Work[Source]] = Right(Work.Visible[Source](
+              version = version,
+              data = WorkData(title = Some("kjhg")),
+              state = Source(sourceIdentifier = sourceIdentifier, sourceModifiedTime = modifiedTime,
+                // merge candidates have a different sourceIdentifier any time this method is called, so the state is always different.
+                List(MergeCandidate(identifier = createSourceIdentifier, reason = "")))
+            ))
+          }
+        withLocalSqsQueuePair() {
+          case QueuePair(queue, dlq) =>
+
+            withWorker(queue, workIndexer, workKeySender, transformer = stateChangingTransformer) { _ =>
+          val payload = createPayloadWith(id = id, version = 1)
+          sendNotificationToSQS(queue, payload)
+
+          eventually {
+            assertQueueEmpty(dlq)
+            assertQueueEmpty(queue)
+            workIndexer.index should have size 1
+            workKeySender.messages should have size 1
+          }
+
+          sendNotificationToSQS(queue, setPayloadVersion(payload, 2))
+
+          eventually {
+            assertQueueEmpty(dlq)
+            assertQueueEmpty(queue)
+            workIndexer.index should have size 1
+            workKeySender.messages should have size 2
+          }
+        }
+      }}}
 
       it("re-sends a Work if the stored Work has the same version and the same data") {
         withStore { implicit store =>
@@ -418,7 +460,8 @@ class TransformerWorkerTest
   def withWorker[R](
     queue: Queue,
     workIndexer: MemoryIndexer[Work[Source]] = new MemoryIndexer[Work[Source]](),
-    workKeySender: MemoryMessageSender = new MemoryMessageSender()
+    workKeySender: MemoryMessageSender = new MemoryMessageSender(),
+    transformer: Transformer[ExampleData] = new ExampleTransformer
   )(
     testWith: TestWith[TransformerWorker[CalmSourcePayload, ExampleData, String], R]
   )(
@@ -437,7 +480,7 @@ class TransformerWorkerTest
       }
 
       val worker = new TransformerWorker(
-        transformer = new ExampleTransformer,
+        transformer = transformer,
         pipelineStream = pipelineStream,
         retriever = retriever,
         sourceDataRetriever = new ExampleSourcePayloadLookup(sourceStore = store)
