@@ -1,4 +1,4 @@
-package weco.pipeline.transformer.tei.fixtures
+package weco.pipeline.transformer.tei.generators
 
 import org.scalatest.Suite
 import weco.fixtures.RandomGenerators
@@ -36,31 +36,36 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
       </teiHeader>
     </TEI>
 
-  def msContents(summary: Option[Elem] = None,
-                 languages: List[Elem] = Nil,
-                 items: List[Elem] = Nil) =
+  def msContents(
+    summary: Option[Elem] = None,
+    languages: List[Elem] = Nil,
+    items: List[Elem] = Nil
+  ) =
     <msContents>
       {summary.getOrElse(NodeSeq.Empty)}
       {languages}
       {items}
     </msContents>
 
-  def msItem(id: String,
-             titles: List[Elem] = Nil,
-             languages: List[Elem] = Nil,
-             items: List[Elem] = Nil) =
+  def msItem(
+    id: String,
+    titles: List[Elem] = Nil,
+    languages: List[Elem] = Nil,
+    items: List[Elem] = Nil
+  ) =
     <msItem xml:id={id}>
       {titles}
       {languages}
       {items}
     </msItem>
 
-  def msPart(id: String,
-             number: Int,
-             summary: Option[Elem] = None,
-             languages: List[Elem] = Nil,
-             items: List[Elem] = Nil) =
-    <msPart xml:id={id} n={number.toString}>
+  def msPart(
+    id: String,
+    summary: Option[Elem] = None,
+    languages: List[Elem] = Nil,
+    items: List[Elem] = Nil
+  ) =
+    <msPart xml:id={id}>
       {msContents(summary = summary, languages = languages, items = items)}
     </msPart>
 

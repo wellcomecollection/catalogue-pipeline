@@ -170,8 +170,8 @@ final class TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest](
         StoreReadError(err, p)
       }
 
-  protected def shouldSend(transformedWork: Work[Source],
-                           storedWork: Work[Source]): Boolean = {
+  private def shouldSend(transformedWork: Work[Source],
+                         storedWork: Work[Source]): Boolean = {
     if (transformedWork.version < storedWork.version) {
       debug(
         s"${transformedWork.id}: transformed Work is older than the stored Work")
