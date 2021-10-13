@@ -126,24 +126,25 @@ class TeiXml(val xml: Elem) extends Logging {
     catalogues: List[String]): Result[List[TeiData]] =
     (xml \\ "msDesc" \ "msPart").zipWithIndex
       .map { case (node, i) => (node, i + 1) }
-      .map { case (node, i) =>
-        for {
-          id <- getIdFrom(node)
-          description <- summary(node)
-          languages <- TeiLanguages.parseLanguages(node \ "msContents")
-          partTitle = s"$wrapperTitle part $i"
-          items <- extractLowerLevelItems(
-            partTitle,
-            node \ "msContents",
-            catalogues)
-        } yield {
-          TeiData(
-            id = id,
-            title = partTitle,
-            languages = languages,
-            description = description,
-            nestedTeiData = items)
-        }
+      .map {
+        case (node, i) =>
+          for {
+            id <- getIdFrom(node)
+            description <- summary(node)
+            languages <- TeiLanguages.parseLanguages(node \ "msContents")
+            partTitle = s"$wrapperTitle part $i"
+            items <- extractLowerLevelItems(
+              partTitle,
+              node \ "msContents",
+              catalogues)
+          } yield {
+            TeiData(
+              id = id,
+              title = partTitle,
+              languages = languages,
+              description = description,
+              nestedTeiData = items)
+          }
       }
       .toList
       .sequence
