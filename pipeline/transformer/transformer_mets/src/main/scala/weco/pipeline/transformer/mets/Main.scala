@@ -10,7 +10,9 @@ import weco.elasticsearch.typesafe.ElasticBuilder
 import weco.json.JsonUtil._
 import weco.messaging.sns.NotificationMessage
 import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
-import weco.pipeline.transformer.mets.services.MetsTransformerWorker
+import weco.pipeline.transformer.TransformerWorker
+import weco.pipeline.transformer.mets.services.MetsSourceDataRetriever
+import weco.pipeline.transformer.mets.transformer.MetsXmlTransformer
 import weco.pipeline_storage.typesafe.{
   ElasticIndexerBuilder,
   ElasticSourceRetrieverBuilder,
@@ -48,11 +50,12 @@ object Main extends WellcomeTypesafeApp {
             subject = "Sent from the METS transformer")
       )(config)
 
-    new MetsTransformerWorker(
+    new TransformerWorker(
+      transformer = new MetsXmlTransformer(S3TypedStore[String]),
       pipelineStream = pipelineStream,
-      metsXmlStore = S3TypedStore[String],
       retriever =
-        ElasticSourceRetrieverBuilder.apply[Work[Source]](config, esClient)
+        ElasticSourceRetrieverBuilder.apply[Work[Source]](config, esClient),
+      sourceDataRetriever = new MetsSourceDataRetriever
     )
   }
 }

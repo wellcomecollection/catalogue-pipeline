@@ -196,7 +196,7 @@ object CatalogueDependencies {
 
   val transformerCommonDependencies: Seq[ModuleID] =
     WellcomeDependencies.storageLibrary ++
-      ExternalDependencies.parseDependencies
+      ExternalDependencies.parseDependencies ++ ExternalDependencies.circeOpticsDependencies
 
   val idminterDependencies: Seq[ModuleID] =
     ExternalDependencies.mySqlDependencies ++
@@ -242,7 +242,6 @@ object CatalogueDependencies {
   val calmTransformerDependencies: Seq[ModuleID] =
     ExternalDependencies.jsoupDependencies ++
       ExternalDependencies.parseDependencies
-
   // METS adapter
 
   val metsAdapterDependencies: Seq[ModuleID] =

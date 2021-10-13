@@ -32,6 +32,11 @@ sealed trait Work[State <: WorkState] {
   // It should only be trusted for ordering updates of an individual Work.
   // You cannot compare the version between different Works -- use the
   // modifiedTime instead.
+
+  // NOTE: Beware of changing the name or position of this field. The transformer
+  // removes the version from the json when comparing two works to determine if they're equivalent.
+  // Renaming/moving this field will make the check fail silently and could cause unnecessary
+  // work to be performed by the pipeline
   val version: Int
 
   def id: String = state.id
@@ -184,6 +189,10 @@ object WorkState {
 
   case class Source(
     sourceIdentifier: SourceIdentifier,
+    // NOTE: Beware of changing the name or position of this field. The transformer
+    // removes the sourceModifiedTime from the json when comparing two works to determine if they're equivalent.
+    // Renaming/moving this field will make the check fail silently and could cause unnecessary
+    // work to be performed by the pipeline
     sourceModifiedTime: Instant,
     mergeCandidates: List[MergeCandidate[IdState.Identifiable]] = Nil,
     internalWorkStubs: List[InternalWork.Source] = Nil

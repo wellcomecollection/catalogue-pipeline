@@ -7,18 +7,19 @@ import weco.catalogue.internal_model.index.WorksIndexConfig
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.Source
 import weco.elasticsearch.typesafe.ElasticBuilder
-import weco.messaging.sns.{NotificationMessage, SNSConfig}
-import weco.pipeline.transformer.tei.service.TeiTransformerWorker
+import weco.json.JsonUtil._
+import weco.messaging.sns.NotificationMessage
+import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
+import weco.pipeline.transformer.TransformerWorker
+import weco.pipeline.transformer.tei.service.TeiSourceDataRetriever
 import weco.pipeline_storage.typesafe.{
   ElasticIndexerBuilder,
   ElasticSourceRetrieverBuilder,
   PipelineStorageStreamBuilder
 }
-import weco.typesafe.WellcomeTypesafeApp
-import weco.json.JsonUtil._
-import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import weco.storage.store.s3.S3TypedStore
 import weco.storage.typesafe.S3Builder
+import weco.typesafe.WellcomeTypesafeApp
 import weco.typesafe.config.builders.AkkaBuilder
 
 import scala.concurrent.ExecutionContext
@@ -48,9 +49,10 @@ object Main extends WellcomeTypesafeApp {
         ),
         messageSender = messageSender
       )(config)
-    new TeiTransformerWorker[SNSConfig](
+    new TransformerWorker(
       new TeiTransformer(store),
       retriever,
-      pipelineStream)
+      pipelineStream,
+      new TeiSourceDataRetriever)
   }
 }
