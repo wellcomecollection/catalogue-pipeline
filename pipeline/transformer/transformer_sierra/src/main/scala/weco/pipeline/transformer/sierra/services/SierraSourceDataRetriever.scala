@@ -11,7 +11,6 @@ class SierraSourceDataRetriever(
   sierraReadable: Readable[S3ObjectLocation, SierraTransformable],
 ) extends SourceDataRetriever[SierraSourcePayload, SierraTransformable] {
 
-
   override def lookupSourceData(p: SierraSourcePayload)
     : Either[ReadError, Identified[Version[String, Int], SierraTransformable]] =
     sierraReadable

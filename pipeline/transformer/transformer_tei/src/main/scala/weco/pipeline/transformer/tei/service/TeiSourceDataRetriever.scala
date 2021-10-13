@@ -6,7 +6,7 @@ import weco.pipeline.transformer.SourceDataRetriever
 import weco.storage.{Identified, ReadError, Version}
 
 class TeiSourceDataRetriever
-    extends SourceDataRetriever[TeiSourcePayload, TeiMetadata]{
+    extends SourceDataRetriever[TeiSourcePayload, TeiMetadata] {
 
   override def lookupSourceData(payload: TeiSourcePayload)
     : Either[ReadError, Identified[Version[String, Int], TeiMetadata]] =

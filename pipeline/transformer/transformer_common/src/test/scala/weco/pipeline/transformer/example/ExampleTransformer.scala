@@ -35,14 +35,15 @@ class ExampleTransformer extends Transformer[ExampleData] with WorkGenerators {
     }
 }
 
-class ExampleSourcePayloadLookup(sourceStore: VersionedStore[S3ObjectLocation, Int, ExampleData]) extends SourceDataRetriever[CalmSourcePayload, ExampleData]{
-override def lookupSourceData(p: CalmSourcePayload)
-: Either[ReadError, Identified[Version[String, Int], ExampleData]] =
-sourceStore
-.getLatest(p.location)
-.map {
-case Identified(Version(_, v), data) =>
-Identified(Version(p.id, v), data)
+class ExampleSourcePayloadLookup(
+  sourceStore: VersionedStore[S3ObjectLocation, Int, ExampleData])
+    extends SourceDataRetriever[CalmSourcePayload, ExampleData] {
+  override def lookupSourceData(p: CalmSourcePayload)
+    : Either[ReadError, Identified[Version[String, Int], ExampleData]] =
+    sourceStore
+      .getLatest(p.location)
+      .map {
+        case Identified(Version(_, v), data) =>
+          Identified(Version(p.id, v), data)
+      }
 }
-}
-

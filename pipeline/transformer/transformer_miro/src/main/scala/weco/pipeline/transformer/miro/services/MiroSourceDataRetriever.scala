@@ -9,8 +9,11 @@ import weco.storage.s3.S3ObjectLocation
 import weco.storage.store.Readable
 import weco.storage.{Identified, ReadError, Version}
 
-class MiroSourceDataRetriever(miroReadable: Readable[S3ObjectLocation, MiroRecord]) extends SourceDataRetriever[MiroSourcePayload, (MiroRecord, MiroSourceOverrides, MiroMetadata)] {
-
+class MiroSourceDataRetriever(
+  miroReadable: Readable[S3ObjectLocation, MiroRecord])
+    extends SourceDataRetriever[
+      MiroSourcePayload,
+      (MiroRecord, MiroSourceOverrides, MiroMetadata)] {
 
   override def lookupSourceData(p: MiroSourcePayload)
     : Either[ReadError,

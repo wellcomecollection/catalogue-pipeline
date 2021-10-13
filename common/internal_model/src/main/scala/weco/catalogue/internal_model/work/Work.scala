@@ -33,7 +33,6 @@ sealed trait Work[State <: WorkState] {
   // You cannot compare the version between different Works -- use the
   // modifiedTime instead.
 
-
   // NOTE: Beware of changing the name or position of this field. The transformer
   // removes the version from the json when comparing two works to determine if they're equivalent.
   // Renaming/moving this field will make the check fail silently and could cause unnecessary

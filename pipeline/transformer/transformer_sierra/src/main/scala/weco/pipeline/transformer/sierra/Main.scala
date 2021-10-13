@@ -13,7 +13,11 @@ import weco.messaging.sns.NotificationMessage
 import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import weco.pipeline.transformer.TransformerWorker
 import weco.pipeline.transformer.sierra.services.SierraSourceDataRetriever
-import weco.pipeline_storage.typesafe.{ElasticIndexerBuilder, ElasticSourceRetrieverBuilder, PipelineStorageStreamBuilder}
+import weco.pipeline_storage.typesafe.{
+  ElasticIndexerBuilder,
+  ElasticSourceRetrieverBuilder,
+  PipelineStorageStreamBuilder
+}
 import weco.storage.store.s3.S3TypedStore
 import weco.storage.typesafe.S3Builder
 import weco.typesafe.WellcomeTypesafeApp
@@ -47,12 +51,14 @@ object Main extends WellcomeTypesafeApp {
     implicit val s3Client: AmazonS3 = S3Builder.buildS3Client
 
     new TransformerWorker(
-      transformer = (id: String, transformable: SierraTransformable, version: Int) =>
-        SierraTransformer(transformable, version).toEither,
+      transformer =
+        (id: String, transformable: SierraTransformable, version: Int) =>
+          SierraTransformer(transformable, version).toEither,
       pipelineStream = pipelineStream,
       retriever =
         ElasticSourceRetrieverBuilder.apply[Work[Source]](config, esClient),
-      sourceDataRetriever = new SierraSourceDataRetriever(sierraReadable = S3TypedStore[SierraTransformable])
+      sourceDataRetriever = new SierraSourceDataRetriever(
+        sierraReadable = S3TypedStore[SierraTransformable])
     )
   }
 }

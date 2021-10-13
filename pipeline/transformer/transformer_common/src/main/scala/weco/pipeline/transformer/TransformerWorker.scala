@@ -30,7 +30,7 @@ case class TransformerError[SourceData, Key](t: Throwable,
 
 trait SourceDataRetriever[Payload, SourceData] {
   def lookupSourceData(
-                        p: Payload): Either[ReadError, Identified[Version[String, Int], SourceData]]
+    p: Payload): Either[ReadError, Identified[Version[String, Int], SourceData]]
 }
 
 /**
@@ -40,10 +40,17 @@ trait SourceDataRetriever[Payload, SourceData] {
   * - Runs it through a transformer and transforms the `SourceData` to `Work[Source]`
   * - Emits the message via `MessageSender` to SNS
   */
-final class TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest](transformer: Transformer[SourceData], retriever: Retriever[Work[Source]], pipelineStream: PipelineStorageStream[NotificationMessage,
-  Work[Source],
-  SenderDest], sourceDataRetriever: SourceDataRetriever[Payload, SourceData])(implicit ec: ExecutionContext, decoder: Decoder[Payload])
-    extends Logging with Runnable {
+final class TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest](
+  transformer: Transformer[SourceData],
+  retriever: Retriever[Work[Source]],
+  pipelineStream: PipelineStorageStream[NotificationMessage,
+                                        Work[Source],
+                                        SenderDest],
+  sourceDataRetriever: SourceDataRetriever[Payload, SourceData])(
+  implicit ec: ExecutionContext,
+  decoder: Decoder[Payload])
+    extends Logging
+    with Runnable {
   type Result[T] = Either[TransformerWorkerError, T]
   type StoreKey = Version[String, Int]
 
@@ -75,7 +82,7 @@ final class TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest](
           case Right(Some((work, key))) =>
             info(s"$name: from $key transformed work with id ${work.id}")
             List(work)
-        }
+      }
     )
 
   def process(message: NotificationMessage)
@@ -96,7 +103,7 @@ final class TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest](
     }.flatMap { compareToStored }
 
   private def compareToStored(workResult: Result[(Work[Source], StoreKey)])
-  : Future[Result[Option[(Work[Source], StoreKey)]]] =
+    : Future[Result[Option[(Work[Source], StoreKey)]]] =
     workResult match {
 
       // Once we've transformed the Work, we query forward -- is this a work we've
@@ -147,7 +154,8 @@ final class TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest](
     }
 
   private def getSourceData(p: Payload): Result[(SourceData, Int)] =
-    sourceDataRetriever.lookupSourceData(p)
+    sourceDataRetriever
+      .lookupSourceData(p)
       .map {
         case Identified(Version(storedId, storedVersion), sourceData) =>
           if (storedId != p.id) {
@@ -200,16 +208,20 @@ final class TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest](
     }
   }
 
-  private def areEquivalent(transformedWork: Work[Source], storedWork: Work[Source]): Boolean = {
+  private def areEquivalent(transformedWork: Work[Source],
+                            storedWork: Work[Source]): Boolean = {
     // Sometimes we get updates from our sources even though the data hasn't necessarily changed.
     // One example of that is the Sierra Calm sync script that triggers an update to
     // every sierra catalogued in calm every night. It can be very expensive if we let
     // those updates travel through the whole pipeline. So, if the only change is on
     // 'version' or 'state.sourceModifiedTime' we consider the works equivalent
     val versionRemove = root.obj.modify(_.remove("version"))
-    val sourceModifiedTimeRemove = root.state.obj.modify(_.remove("sourceModifiedTime"))
-    val modifiedTransformedWork = sourceModifiedTimeRemove(versionRemove(transformedWork.asJson))
-    val modifiedSourceWork = sourceModifiedTimeRemove(versionRemove(storedWork.asJson))
+    val sourceModifiedTimeRemove =
+      root.state.obj.modify(_.remove("sourceModifiedTime"))
+    val modifiedTransformedWork = sourceModifiedTimeRemove(
+      versionRemove(transformedWork.asJson))
+    val modifiedSourceWork = sourceModifiedTimeRemove(
+      versionRemove(storedWork.asJson))
 
     modifiedTransformedWork == modifiedSourceWork
   }
