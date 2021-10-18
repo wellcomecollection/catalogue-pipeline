@@ -16,7 +16,7 @@ import weco.catalogue.internal_model.work.WorkState.Denormalised
 import weco.typesafe.Runnable
 import weco.pipeline_storage.Indexable.workIndexable
 import weco.catalogue.internal_model.work.Work
-import weco.pipeline.relation_embedder.models.Batch
+import weco.pipeline.relation_embedder.models.{ArchiveRelationsCache, Batch}
 import weco.pipeline_storage.Indexer
 
 class RelationEmbedderWorkerService[MsgDestination](

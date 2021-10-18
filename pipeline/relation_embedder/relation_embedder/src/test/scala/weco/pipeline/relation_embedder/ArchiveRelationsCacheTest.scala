@@ -6,6 +6,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.Inspectors
 import weco.catalogue.internal_model.work.{Availability, Relation, Relations}
 import weco.pipeline.relation_embedder.fixtures.RelationGenerators
+import weco.pipeline.relation_embedder.models.ArchiveRelationsCache
 
 import java.nio.charset.StandardCharsets
 import scala.concurrent.duration._
