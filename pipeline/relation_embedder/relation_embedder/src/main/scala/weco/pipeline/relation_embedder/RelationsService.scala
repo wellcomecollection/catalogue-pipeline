@@ -14,21 +14,8 @@ import weco.catalogue.internal_model.work.WorkState.Merged
 import weco.catalogue.internal_model.work.Work
 
 trait RelationsService {
-
-  /** For a given work return all works in the same archive.
-    *
-    * @param path The archive path
-    * @return The works
-    */
   def getRelationTree(batch: Batch): Source[RelationWork, NotUsed]
 
-  /** Given some work, return the IDs of all other works which need to be
-    * denormalised. This should consist of the works siblings, its parent, and
-    * all its descendents.
-    *
-    * @param path The archive path
-    * @return The IDs of the other works to denormalise
-    */
   def getAffectedWorks(batch: Batch): Source[Work[Merged], NotUsed]
 }
 
