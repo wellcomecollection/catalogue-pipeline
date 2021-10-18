@@ -5,7 +5,7 @@ sealed trait Selector {
 
   val path: String
 
-  lazy val depth: Int = path.depth
+  lazy val depth: Int = path.depth + 1
 }
 
 object Selector {
