@@ -87,11 +87,13 @@ class ArchiveRelationsCache(works: Map[String, RelationWork]) extends Logging {
   private def getAncestors(path: String): List[Relation] =
     paths.knownAncestorsOf(path).map(relations)
 
+  import weco.pipeline.relation_embedder.models.PathOps._
+
   private lazy val relations: Map[String, Relation] =
     works.map {
       case (path, work) =>
         path -> work.toRelation(
-          depth = path.split("/").length - 1,
+          depth = path.depth,
           numChildren = paths.childrenOf(path).length,
           numDescendents = paths.knownDescendentsOf(path).length
         )

@@ -14,5 +14,13 @@ object PathOps {
       val parentParts = parts.dropRight(1)
       parentParts.mkString("/")
     }
+
+    /** Returns the depth of an archive path -- how far it is below the top level.
+      *
+      * e.g. the depth of PP/CRI/J/2/3 is 4
+      *
+      */
+    lazy val depth: Int =
+      path.split("/").length - 1
   }
 }
