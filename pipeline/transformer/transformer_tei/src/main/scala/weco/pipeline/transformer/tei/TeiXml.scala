@@ -1,12 +1,16 @@
 package weco.pipeline.transformer.tei
 
-import scala.util.Try
-import scala.xml.{Elem, Node, NodeSeq, XML}
-import grizzled.slf4j.Logging
 import cats.syntax.traverse._
 import cats.instances.either._
+import grizzled.slf4j.Logging
+import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.identifiers.IdState.Unidentifiable
+import weco.catalogue.internal_model.work.{ContributionRole, Contributor, Person}
 import weco.pipeline.transformer.result.Result
 import weco.pipeline.transformer.tei.transformers.TeiLanguages
+
+import scala.util.Try
+import scala.xml.{Elem, Node, NodeSeq, XML}
 class TeiXml(val xml: Elem) extends Logging {
   val id: String = getIdFrom(xml).getOrElse(
     throw new RuntimeException(s"Could not find an id in XML!"))
@@ -88,6 +92,13 @@ class TeiXml(val xml: Elem) extends Logging {
       case Nil             => Left(new RuntimeException("No title found!"))
       case _               => Left(new RuntimeException("More than one title node!"))
     }
+  }
+
+  def authors(node: Node): Result[List[Contributor[IdState.Unminted]]] = {
+    val seq:  List[Either[Throwable,Contributor[IdState.Unminted]]] = (node \ "author").map { n =>
+      Right(Contributor(Unidentifiable, Person(n.text), List(ContributionRole("author"))))
+    }.toList
+    seq.sequence
   }
 
   /**
@@ -173,13 +184,15 @@ class TeiXml(val xml: Elem) extends Logging {
             languageData <- TeiLanguages.parseLanguages(node)
             (languages, languageNotes) = languageData
             items <- extractLowerLevelItems(title, node, catalogues)
+            authors <- authors(node)
           } yield
             TeiData(
               id = id,
               title = title,
               languages = languages,
               languageNotes = languageNotes,
-              nestedTeiData = items)
+              nestedTeiData = items,
+              authors = authors)
       }
       .toList
       .sequence

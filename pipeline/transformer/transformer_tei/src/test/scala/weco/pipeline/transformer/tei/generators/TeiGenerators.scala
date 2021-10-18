@@ -14,7 +14,8 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
     languages: List[Elem] = Nil,
     items: List[Elem] = Nil,
     parts: List[Elem] = Nil,
-    catalogues: List[Elem] = Nil
+    catalogues: List[Elem] = Nil,
+    authors: List[Elem] = Nil
   ): Elem =
     <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id={id}>
       <teiHeader>
@@ -28,7 +29,7 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
               <msIdentifier>
                 {identifiers.getOrElse(NodeSeq.Empty)}
               </msIdentifier>
-              {msContents(summary, languages, items)}
+              {msContents(summary, languages, items, authors)}
               {parts}
             </msDesc>
           </sourceDesc>
@@ -39,40 +40,47 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
   def msContents(
     summary: Option[Elem] = None,
     languages: List[Elem] = Nil,
-    items: List[Elem] = Nil
+    items: List[Elem] = Nil,
+    authors: List[Elem] = Nil
   ) =
     <msContents>
       {summary.getOrElse(NodeSeq.Empty)}
       {languages}
       {items}
+      {authors}
     </msContents>
 
   def msItem(
     id: String,
     titles: List[Elem] = Nil,
     languages: List[Elem] = Nil,
-    items: List[Elem] = Nil
+    items: List[Elem] = Nil,
+    authors: List[Elem] = Nil
   ) =
     <msItem xml:id={id}>
       {titles}
       {languages}
       {items}
+      {authors}
     </msItem>
 
   def msPart(
     id: String,
     summary: Option[Elem] = None,
     languages: List[Elem] = Nil,
-    items: List[Elem] = Nil
+    items: List[Elem] = Nil,
+    authors: List[Elem] = Nil
   ) =
     <msPart xml:id={id}>
-      {msContents(summary = summary, languages = languages, items = items)}
+      {msContents(summary = summary, languages = languages, items = items, authors = authors)}
     </msPart>
 
   def sierraIdentifiers(bnumber: String) =
     <altIdentifier type="Sierra">
         <idno>{bnumber} </idno>
       </altIdentifier>
+
+  def author(label:String) = <author>{label}</author>
 
   def summary(str: String) = <summary>{str}</summary>
 
