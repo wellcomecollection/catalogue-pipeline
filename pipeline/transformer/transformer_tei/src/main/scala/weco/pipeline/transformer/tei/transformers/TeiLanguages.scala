@@ -31,10 +31,7 @@ object TeiLanguages extends Logging{
       .foldRight(Right((Nil,Nil)): Either[Throwable, (List[Language],List[Note])]) { case (n, Right((languageList, languageNoteList))) =>
         val label = n.text
 
-        val mainLangId = (n \@ "mainLang").toLowerCase
-        val otherLangId = (n \@ "otherLangs").toLowerCase
-
-        val langId = parseLanguageId(n, mainLangId, otherLangId)
+        val langId = parseLanguageId(n)
 
         (langId, label) match {
           case (Right(Some(id)), label) if label.trim.nonEmpty =>
@@ -49,7 +46,10 @@ object TeiLanguages extends Logging{
       case (_, Left(err)) => Left(err)
       }
 
-  private def parseLanguageId(n: Node, mainLangId: String, otherLangId: String) = (mainLangId, otherLangId) match {
+  private def parseLanguageId(n: Node) = {
+    val mainLangId = (n \@ "mainLang").toLowerCase
+    val otherLangId = (n \@ "otherLangs").toLowerCase
+    (mainLangId, otherLangId) match {
       case (id1, id2) if id2.isEmpty && id1.nonEmpty => Right(Some(id1))
       case (id1, id2) if id1.isEmpty && id2.nonEmpty => Right(Some(id2))
       case (id1, id2) if id2.isEmpty && id1.isEmpty =>
@@ -57,6 +57,7 @@ object TeiLanguages extends Logging{
       case _ =>
         Left(new RuntimeException(s"Multiple language IDs in $n"))
     }
+  }
 
   private def extractLanguageOrNote(languageList: List[Language], languageNoteList: List[Note], id: String, label: String) = TeiLanguageData(id, label).fold(err => {
       warn("Could not parse language", err)
