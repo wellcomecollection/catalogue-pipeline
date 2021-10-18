@@ -36,10 +36,10 @@ object TeiLanguages extends Logging{
         (langId, label) match {
           case (Right(Some(id)), label) if label.trim.nonEmpty =>
             extractLanguageOrNote(languageList, languageNoteList, id, label)
-          case (Right(Some(id)), _) =>
-            Left(new Throwable(s"Missing label for language node with id=$id"))
           case (Right(None), label) if label.trim.nonEmpty =>
             appendToLanguageNotes(languageList, languageNoteList, label)
+          case (Right(_), _) =>
+            Left(new Throwable(s"Missing label for language node $n"))
           case (Left(err), _) => Left(err)
         }
 
