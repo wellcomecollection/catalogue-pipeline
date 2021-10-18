@@ -4,10 +4,21 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.generators.IdentifiersGenerators
 import weco.catalogue.internal_model.identifiers.DataState.Unidentified
-import weco.catalogue.internal_model.identifiers.{IdentifierType, SourceIdentifier}
+import weco.catalogue.internal_model.identifiers.{
+  IdentifierType,
+  SourceIdentifier
+}
 import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.work.Format.ArchivesAndManuscripts
-import weco.catalogue.internal_model.work.{CollectionPath, InternalWork, MergeCandidate, Note, NoteType, Work, WorkData}
+import weco.catalogue.internal_model.work.{
+  CollectionPath,
+  InternalWork,
+  MergeCandidate,
+  Note,
+  NoteType,
+  Work,
+  WorkData
+}
 import weco.catalogue.internal_model.work.WorkState.Source
 import weco.pipeline.transformer.tei.generators.TeiDataGenerators
 import weco.sierra.generators.SierraIdentifierGenerators
@@ -25,7 +36,8 @@ class TeiDataTest
     val bnumber = createSierraBibNumber.withCheckDigit
     val description = Some("This is the description")
     val languages = List(Language("ara", "Arabic"))
-    val languageNotes = List(Note(NoteType.LanguageNote, "Arabic with one line in Sanskrit"))
+    val languageNotes =
+      List(Note(NoteType.LanguageNote, "Arabic with one line in Sanskrit"))
     val id = "id"
     val teiData = TeiData(
       id = id,

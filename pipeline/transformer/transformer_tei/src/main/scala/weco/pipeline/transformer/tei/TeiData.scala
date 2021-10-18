@@ -3,10 +3,21 @@ package weco.pipeline.transformer.tei
 import grizzled.slf4j.Logging
 import weco.catalogue.internal_model.identifiers.DataState.Unidentified
 import weco.catalogue.internal_model.identifiers.IdState.Identifiable
-import weco.catalogue.internal_model.identifiers.{IdentifierType, SourceIdentifier}
+import weco.catalogue.internal_model.identifiers.{
+  IdentifierType,
+  SourceIdentifier
+}
 import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.work.WorkState.Source
-import weco.catalogue.internal_model.work.{CollectionPath, Format, InternalWork, MergeCandidate, Note, Work, WorkData}
+import weco.catalogue.internal_model.work.{
+  CollectionPath,
+  Format,
+  InternalWork,
+  MergeCandidate,
+  Note,
+  Work,
+  WorkData
+}
 import weco.pipeline.transformer.identifiers.SourceIdentifierValidation._
 
 import java.time.Instant

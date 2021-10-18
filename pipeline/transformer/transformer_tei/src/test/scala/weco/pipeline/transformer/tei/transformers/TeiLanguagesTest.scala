@@ -22,8 +22,10 @@ class TeiLanguagesTest
         )
       )
 
-    TeiLanguages(xml).value shouldBe ((List(
-      Language(id = "san", label = "Sanskrit")), Nil))
+    TeiLanguages(xml).value shouldBe (
+      (
+        List(Language(id = "san", label = "Sanskrit")),
+        Nil))
   }
 
   it("gets multiple languages from TEI") {
@@ -35,10 +37,13 @@ class TeiLanguagesTest
         )
       )
 
-    TeiLanguages(xml).value shouldBe ((List(
-      Language(id = "san", label = "Sanskrit"),
-      Language(id = "lat", label = "Latin")
-    ), Nil))
+    TeiLanguages(xml).value shouldBe (
+      (
+        List(
+          Language(id = "san", label = "Sanskrit"),
+          Language(id = "lat", label = "Latin")
+        ),
+        Nil))
   }
 
   it("puts languages without an id in a language note") {
@@ -52,7 +57,7 @@ class TeiLanguagesTest
     val result = TeiLanguages(xml)
 
     result shouldBe a[Right[_, _]]
-    result.value shouldBe ((Nil,List(Note(NoteType.LanguageNote, "Sanskrit"))))
+    result.value shouldBe ((Nil, List(Note(NoteType.LanguageNote, "Sanskrit"))))
   }
 
   it("puts languages with a label it can't match in a language note") {
@@ -66,7 +71,10 @@ class TeiLanguagesTest
     val result = TeiLanguages(xml)
 
     result shouldBe a[Right[_, _]]
-    result.value shouldBe ((Nil,List(Note(NoteType.LanguageNote, "Sanskrit mainly"))))
+    result.value shouldBe (
+      (
+        Nil,
+        List(Note(NoteType.LanguageNote, "Sanskrit mainly"))))
   }
 
   it("errors on languages that have more than one lang attribute") {
