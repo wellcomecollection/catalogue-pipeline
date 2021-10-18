@@ -5,21 +5,11 @@ import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.DataState.Unidentified
-import weco.catalogue.internal_model.identifiers.{
-  IdentifierType,
-  SourceIdentifier
-}
+import weco.catalogue.internal_model.identifiers.{IdentifierType, SourceIdentifier}
 import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.internal_model.work.generators.InstantGenerators
-import weco.catalogue.internal_model.work.{
-  CollectionPath,
-  DeletedReason,
-  Format,
-  InternalWork,
-  Work,
-  WorkData
-}
+import weco.catalogue.internal_model.work.{CollectionPath, DeletedReason, Format, InternalWork, Note, NoteType, Work, WorkData}
 import weco.catalogue.source_model.tei.{TeiChangedMetadata, TeiDeletedMetadata}
 import weco.pipeline.transformer.result.Result
 import weco.storage.generators.S3ObjectLocationGenerators
@@ -92,6 +82,15 @@ class TeiTransformerTest
     work.value.data.languages shouldBe List(
       Language(id = "jav", label = "Javanese")
     )
+  }
+
+  it("extracts languageNotes if it canmnot parse the languages") {
+    val work = transformToWork(filename = "/Indic_Alpha_978.xml")(
+      id = "Wellcome_Alpha_978"
+    )
+
+    work.value.data.languages shouldBe Nil
+    work.value.data.notes shouldBe List(Note(NoteType.LanguageNote, "Sanskrit, with additional title entries in Persian script."))
   }
 
   it("extracts msItem inner Works") {
