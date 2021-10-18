@@ -1,13 +1,14 @@
 package weco.pipeline.transformer.tei.transformers
 
+import grizzled.slf4j.Logging
 import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.work.{Note, NoteType}
 import weco.pipeline.transformer.result.Result
 import weco.pipeline.transformer.tei.data.TeiLanguageData
 
-import scala.xml.{Elem, NodeSeq}
+import scala.xml.{Elem, Node, NodeSeq}
 
-object TeiLanguages {
+object TeiLanguages extends Logging{
 
   def apply(xml: Elem): Result[(List[Language], List[Note])] =
     parseLanguages(xml \\ "msDesc" \ "msContents")
@@ -33,25 +34,39 @@ object TeiLanguages {
         val mainLangId = (n \@ "mainLang").toLowerCase
         val otherLangId = (n \@ "otherLangs").toLowerCase
 
-        val langId = (mainLangId, otherLangId) match {
-          case (id1, id2) if id2.isEmpty && id1.nonEmpty => Right(Some(id1))
-          case (id1, id2) if id1.isEmpty && id2.nonEmpty => Right(Some(id2))
-          case (id1, id2) if id2.isEmpty && id1.isEmpty =>
-            Right(None)
-          case _ =>
-            Left(new RuntimeException(s"Multiple language IDs in $n"))
-        }
+        val langId = parseLanguageId(n, mainLangId, otherLangId)
 
         (langId, label) match {
           case (Right(Some(id)), label) if label.trim.nonEmpty =>
-            TeiLanguageData(id, label).map(l => (languageList :+ l, languageNoteList))
+            extractLanguageOrNote(languageList, languageNoteList, id, label)
           case (Right(Some(id)), _) =>
             Left(new Throwable(s"Missing label for language node with id=$id"))
           case (Right(None), label) if label.trim.nonEmpty =>
-            Right((languageList, languageNoteList :+ Note(NoteType.LanguageNote, label)))
+            appendToLanguageNotes(languageList, languageNoteList, label)
           case (Left(err), _) => Left(err)
         }
 
       case (_, Left(err)) => Left(err)
       }
+
+  private def parseLanguageId(n: Node, mainLangId: String, otherLangId: String) = (mainLangId, otherLangId) match {
+      case (id1, id2) if id2.isEmpty && id1.nonEmpty => Right(Some(id1))
+      case (id1, id2) if id1.isEmpty && id2.nonEmpty => Right(Some(id2))
+      case (id1, id2) if id2.isEmpty && id1.isEmpty =>
+        Right(None)
+      case _ =>
+        Left(new RuntimeException(s"Multiple language IDs in $n"))
+    }
+
+  private def extractLanguageOrNote(languageList: List[Language], languageNoteList: List[Note], id: String, label: String) = TeiLanguageData(id, label).fold(err => {
+      warn("Could not parse language", err)
+      appendToLanguageNotes(languageList, languageNoteList, label)
+    }
+      , appendToLanguages(languageList, languageNoteList, _))
+
+  private def appendToLanguages(languageList: List[Language], languageNoteList: List[Note], language: Language) = Right((language +: languageList, languageNoteList))
+
+  private def appendToLanguageNotes(languageList: List[Language], languageNoteList: List[Note], label: String) = Right((languageList, languageNoteFrom(label) +: languageNoteList))
+
+  private def languageNoteFrom(label: String) = Note(NoteType.LanguageNote, label)
 }

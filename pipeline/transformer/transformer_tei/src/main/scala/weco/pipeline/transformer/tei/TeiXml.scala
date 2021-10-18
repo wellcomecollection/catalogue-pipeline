@@ -131,8 +131,8 @@ class TeiXml(val xml: Elem) extends Logging {
           for {
             id <- getIdFrom(node)
             description <- summary(node)
-            b <- TeiLanguages.parseLanguages(node \ "msContents")
-            (languages, _) = b
+            languageData <- TeiLanguages.parseLanguages(node \ "msContents")
+            (languages, _) = languageData
             partTitle = s"$wrapperTitle part $i"
             items <- extractLowerLevelItems(
               partTitle,
@@ -169,8 +169,8 @@ class TeiXml(val xml: Elem) extends Logging {
               wrapperTitle = wrapperTitle,
               itemNumber = i)
             id <- getIdFrom(node)
-            b <- TeiLanguages.parseLanguages(node)
-            (languages, _) = b
+            languageData <- TeiLanguages.parseLanguages(node)
+            (languages, _) = languageData
             items <- extractLowerLevelItems(title, node, catalogues)
           } yield
             TeiData(
