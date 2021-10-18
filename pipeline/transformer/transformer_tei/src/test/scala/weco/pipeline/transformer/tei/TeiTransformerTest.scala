@@ -17,6 +17,8 @@ import weco.catalogue.internal_model.work.{
   DeletedReason,
   Format,
   InternalWork,
+  Note,
+  NoteType,
   Work,
   WorkData
 }
@@ -92,6 +94,18 @@ class TeiTransformerTest
     work.value.data.languages shouldBe List(
       Language(id = "jav", label = "Javanese")
     )
+  }
+
+  it("extracts languageNotes if it canmnot parse the languages") {
+    val work = transformToWork(filename = "/Indic_Alpha_978.xml")(
+      id = "Wellcome_Alpha_978"
+    )
+
+    work.value.data.languages shouldBe Nil
+    work.value.data.notes shouldBe List(
+      Note(
+        NoteType.LanguageNote,
+        "Sanskrit, with additional title entries in Persian script."))
   }
 
   it("extracts msItem inner Works") {

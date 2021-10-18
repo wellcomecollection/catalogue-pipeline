@@ -14,6 +14,8 @@ import weco.catalogue.internal_model.work.{
   CollectionPath,
   InternalWork,
   MergeCandidate,
+  Note,
+  NoteType,
   Work,
   WorkData
 }
@@ -34,13 +36,16 @@ class TeiDataTest
     val bnumber = createSierraBibNumber.withCheckDigit
     val description = Some("This is the description")
     val languages = List(Language("ara", "Arabic"))
+    val languageNotes =
+      List(Note(NoteType.LanguageNote, "Arabic with one line in Sanskrit"))
     val id = "id"
     val teiData = TeiData(
       id = id,
       title = title,
       bNumber = Some(bnumber),
       description = description,
-      languages = languages
+      languages = languages,
+      languageNotes = languageNotes
     )
 
     val version = 1
@@ -67,7 +72,8 @@ class TeiDataTest
         description = description,
         languages = languages,
         format = Some(ArchivesAndManuscripts),
-        collectionPath = Some(CollectionPath(path = id, label = None))
+        collectionPath = Some(CollectionPath(path = id, label = None)),
+        notes = languageNotes
       ),
       state = source
     )

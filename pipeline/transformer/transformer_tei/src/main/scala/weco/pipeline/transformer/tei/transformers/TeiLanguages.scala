@@ -1,16 +1,16 @@
 package weco.pipeline.transformer.tei.transformers
 
+import grizzled.slf4j.Logging
 import weco.catalogue.internal_model.languages.Language
+import weco.catalogue.internal_model.work.{Note, NoteType}
 import weco.pipeline.transformer.result.Result
 import weco.pipeline.transformer.tei.data.TeiLanguageData
-import cats.syntax.traverse._
-import cats.instances.either._
 
-import scala.xml.{Elem, NodeSeq}
+import scala.xml.{Elem, Node, NodeSeq}
 
-object TeiLanguages {
+object TeiLanguages extends Logging {
 
-  def apply(xml: Elem): Result[List[Language]] =
+  def apply(xml: Elem): Result[(List[Language], List[Note])] =
     parseLanguages(xml \\ "msDesc" \ "msContents")
 
   /** The languages of the TEI are in `textLang` nodes under `msContents`.
@@ -26,31 +26,64 @@ object TeiLanguages {
     * This function extracts all the nodes from a parsed XML and returns
     * a list of (id, label) pairs.
     */
-  def parseLanguages(value: NodeSeq): Either[Throwable, List[Language]] =
+  def parseLanguages(
+    value: NodeSeq): Either[Throwable, (List[Language], List[Note])] =
     (value \ "textLang")
-      .map { n =>
-        val label = n.text
+      .foldRight(
+        Right((Nil, Nil)): Either[Throwable, (List[Language], List[Note])]) {
+        case (n, Right((languageList, languageNoteList))) =>
+          val label = n.text
 
-        val mainLangId = (n \@ "mainLang").toLowerCase
-        val otherLangId = (n \@ "otherLangs").toLowerCase
+          val langId = parseLanguageId(n)
 
-        val langId = (mainLangId, otherLangId) match {
-          case (id1, id2) if id2.isEmpty && id1.nonEmpty => Right(id1)
-          case (id1, id2) if id1.isEmpty && id2.nonEmpty => Right(id2)
-          case (id1, id2) if id2.isEmpty && id1.isEmpty =>
-            Left(new RuntimeException(s"Cannot find a language ID in $n"))
-          case _ =>
-            Left(new RuntimeException(s"Multiple language IDs in $n"))
-        }
+          (langId, label) match {
+            case (Right(Some(id)), label) if label.trim.nonEmpty =>
+              extractLanguageOrNote(languageList, languageNoteList, id, label)
+            case (Right(None), label) if label.trim.nonEmpty =>
+              appendToLanguageNotes(languageList, languageNoteList, label)
+            case (Right(_), _) =>
+              Left(new Throwable(s"Missing label for language node $n"))
+            case (Left(err), _) => Left(err)
+          }
 
-        (langId, label) match {
-          case (Right(id), label) if label.trim.nonEmpty =>
-            TeiLanguageData(id, label)
-          case (Right(id), _) =>
-            Left(new Throwable(s"Missing label for language node with id=$id"))
-          case (Left(err), _) => Left(err)
-        }
+        case (_, Left(err)) => Left(err)
       }
-      .toList
-      .sequence
+
+  private def parseLanguageId(n: Node) = {
+    val mainLangId = (n \@ "mainLang").toLowerCase
+    val otherLangId = (n \@ "otherLangs").toLowerCase
+    (mainLangId, otherLangId) match {
+      case (id1, id2) if id2.isEmpty && id1.nonEmpty => Right(Some(id1))
+      case (id1, id2) if id1.isEmpty && id2.nonEmpty => Right(Some(id2))
+      case (id1, id2) if id2.isEmpty && id1.isEmpty =>
+        Right(None)
+      case _ =>
+        Left(new RuntimeException(s"Multiple language IDs in $n"))
+    }
+  }
+
+  private def extractLanguageOrNote(languageList: List[Language],
+                                    languageNoteList: List[Note],
+                                    id: String,
+                                    label: String) =
+    TeiLanguageData(id, label).fold(
+      err => {
+        warn("Could not parse language", err)
+        appendToLanguageNotes(languageList, languageNoteList, label)
+      },
+      appendToLanguages(languageList, languageNoteList, _)
+    )
+
+  private def appendToLanguages(languageList: List[Language],
+                                languageNoteList: List[Note],
+                                language: Language) =
+    Right((language +: languageList, languageNoteList))
+
+  private def appendToLanguageNotes(languageList: List[Language],
+                                    languageNoteList: List[Note],
+                                    label: String) =
+    Right((languageList, languageNoteFrom(label) +: languageNoteList))
+
+  private def languageNoteFrom(label: String) =
+    Note(NoteType.LanguageNote, label)
 }

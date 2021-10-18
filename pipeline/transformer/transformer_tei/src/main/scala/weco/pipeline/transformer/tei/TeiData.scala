@@ -14,6 +14,7 @@ import weco.catalogue.internal_model.work.{
   Format,
   InternalWork,
   MergeCandidate,
+  Note,
   Work,
   WorkData
 }
@@ -26,6 +27,7 @@ case class TeiData(id: String,
                    bNumber: Option[String] = None,
                    description: Option[String] = None,
                    languages: List[Language] = Nil,
+                   languageNotes: List[Note] = Nil,
                    nestedTeiData: List[TeiData] = Nil)
     extends Logging {
   def toWork(time: Instant, version: Int): Work[Source] = {
@@ -111,6 +113,7 @@ case class TeiData(id: String,
       description = description,
       languages = languages,
       format = Some(Format.ArchivesAndManuscripts),
+      notes = languageNotes,
       //
       // If a TEI work has multiple parts, we want to arrange it into a hierarchy
       // like a CALM collection, e.g.

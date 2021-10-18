@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="https://raw.githubusercontent.com/bodleian/consolidated-tei-schema/master/msdesc.rng" type="application/xml" schematypens="http://relaxng.org/ns/structure/1.0"?>
+<TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id="Wellcome_Alpha_978">
+    <teiHeader xml:lang="eng">
+        <fileDesc>
+            <titleStmt>
+                <title>MS Indic Alpha 978</title>
+                <title type="collection">Wellcome Collection</title>
+                <respStmt xml:id="DP">
+                    <resp when="1970">Cataloguing from microfilm</resp>
+                    <persName>David Pingree</persName>
+                </respStmt>
+                <respStmt xml:id="AP">
+                    <resp when="2019-05-23">XML encoding</resp>
+                    <persName>Adrian Plau</persName>
+                </respStmt>
+            </titleStmt>
+            <publicationStmt>
+                <publisher>Wellcome Collection</publisher>
+                <idno>UkLW</idno>
+                <address>
+                    <orgName type="institution">Wellcome Collection</orgName>
+                    <street>215 Euston Rd</street>
+                    <settlement>London</settlement>
+                    <postCode>NW1 2BE</postCode>
+                </address>
+                <distributor>
+                    <email>library@wellcome.ac.uk</email>
+                </distributor>
+                <availability>
+                    <licence>This TEI description is based on unpublished cataloguing notes by David E. Pingree kindly provided under a CC BY 4.0 license by the American Philosophical Society (APS), which holds the rights to Pingree’s unpublished materials. 
+                        The TEI file itself is made available under a CC BY 4.0 license by the Wellcome Collection, allowing researchers and audiences to continue to make use of and build on Pingree’s work.</licence>
+                </availability>
+                <idno type="msID">Alpha_978</idno>
+                <idno type="catalogue">David Pingree cataloguing</idno>
+            </publicationStmt>
+            <sourceDesc>
+                <msDesc>
+                    
+                    <msIdentifier>
+                        <country>United Kingdom</country>
+                        <settlement>London</settlement>
+                        <institution>Wellcome Collection</institution>
+                        <repository>Wellcome Library</repository>
+                        <idno type="shelfmark">MS Indic Alpha 978</idno>
+                        <idno type="Sierra">b14887873</idno>
+                        <altIdentifier type="former">
+                            <idno>A.9.</idno>
+                            <note>Further @idno provided under individual @msItems.</note>
+                        </altIdentifier>
+                    </msIdentifier>
+                    
+                    <msContents>
+                        
+                        <summary>A collection of stotras, all written by the same scribe and bound in a single volume. Each entre has a title on f. 1 in Persian script,
+                        as well as an illustration.</summary>
+                        <textLang mainLang="sa">Sanskrit, with additional title entries in Persian script.</textLang>
+
+                        <msItem xml:id="Alpha_978_1">
+                            <title>Gaṇeśastotra or Mahāgaṇapatistotra</title>
+                            <title type="alt">گنيش سو</title>
+                            <idno type="former">A.9.a.</idno>
+
+                            <incipit> <locus>F. 1v</locus>
+                                <!-- transcript -->
+                                oṃ namaḥ nārāyaṇāya ||
+                                oṃ namaḥ gaṇeśāya namaḥ || oṃ
+                                amā(r)gaṃ gataṃ karṇavakraṃ gaṇeśaṃ
+                                bhutākaṃkaṇaṃ dyodhitaṃ dhūmrakenaṃ (?)
+                                gale hāramuktāphalāśobhitvaritaṃ 
+                                na<locus>F. 2</locus>mo jñānarūpaṃ gaṇeśaṃ namas te || 1 ||
+                            </incipit>
+                            
+                            <explicit> <locus>F. 5</locus>
+                                <!-- transcript -->
+                                bhujaṃgaṃ pra<pb n="f. 5v"/>yāti paṭeyas tu muktyā (?)
+                                prabhāte paṭeś caiva ekāgracitraṃ ||
+                                jñeyaṃ (?) yāṃti vighnaṃ diśā śobhivaṃtaṃ ||
+                                namo vighanājyaṃ gaṇeśaṃ namas te || 9 ||
+                            </explicit>
+                            
+                            <colophon> <locus>F. 6</locus>
+                                <!-- transcript -->
+                                iti śrīmahāgaṇapat(i)(ye) stav(o)tra(ṃ) samāptaṃ || śubhaṃ
+                            </colophon>
+                            
+                        </msItem> 
+                        
+                        <msItem xml:id="Alpha_978_2">
+                            <title>Viṣṇupañjarastotra</title>
+                            <title type="alt">وشن پجر</title>
+                            <idno type="former">A.9.b.</idno>
+                            
+                            <incipit> <locus>F. 1v</locus>
+                                <!-- transcript -->
+                                oṃ namo nārāyaṇāya ||
+                                om (bra)hmapataye viṣṇupaṃjarastotramaṃtrasya nārada ṛṣi anuṣṭap chaṃdaḥ
+                                śrīviṣṇuparamātmā daivatā || ahaṃ bījaṃ || so 'haṃ śa<pb n="f. 2"/>ktiḥ ||
+                                aṃghrīṃ kīlakaṃ || mama sarvadeharakṣārthe jape viniyogaḥ || nāradaṛṣaye namaḥ śirasi ||
+                                anuṣṭupchaṃdas namaḥ mukhe || śrīkṛṣṇa(ḥ)para<pb n="f. 2v"/>mātmādevatāyai namaḥ
+                            </incipit>
+                            
+                            <explicit> <locus>F. 12v</locus>
+                                <!-- transcript -->
+                                śrīviṣṇupaṃjarastotraṃ samāptam || śubham ||
+                            </explicit> 
+                            
+                            <colophon> <locus>F. 12v</locus>
+                                <!-- transcript -->
+                                phalaṃ prāpnuti mānavaḥ ||
+                                <note>Added in later hand.</note>
+                            </colophon>
+                            
+                        </msItem>
+                        
+                        <msItem xml:id="Alpha_978_3">
+                            <title>Ekaślokīrāmāyaṇa</title>
+                            <title type="alt">راماين اک سلوکی</title>
+                            <idno type="former">A.9.c.</idno>
+                            
+                            <note>See NCC, vol. 3, p. 55.</note>
+                            
+                            <incipit> <locus>F. 1v</locus>
+                                <!-- transcript -->
+                                oṃ namaḥ nārāyaṇāya | 
+                                oṃ atha ekaślokīrāmāyaṇaṃ || oṃ
+                                    ādau rāmatapovanādigamaṇaṃ || hatvā mṛgaṃkāṃcano
+                                    vaidehyāharaṇaṃ jaṭāya maraṇaṃ || sugrī<pb n="f. 2"/>vasaṃ x m<gap reason="illegible"/>
+                                    vālīnirgrahaṇaṃ samudrataraṇaṃ laṃkāpurīdāhanaṃ ||
+                                    paścād rāvanakuṃbhakarṇadalanaṃ || etad dhi rāmāyaṇaṃ
+                            </incipit>
+                            
+                            <explicit> <locus>F. 2</locus>
+                                <!-- transcript -->
+                                iti rāmāyaṇaṃ samāptaṃ
+                            </explicit> 
+                            
+                        </msItem>
+                        
+                        <msItem xml:id="Alpha_978_4">
+                            <title>Ekaślokībhāgavata</title>
+                            <title type="alt">بهاگوت اک سلوکی</title>
+                            <idno type="former">A.9.c.</idno>
+                            
+                            <note>See NCC, vol. 3, p. 55.</note>
+                            
+                            <incipit> <locus>F. 2v</locus>
+                                <!-- transcript -->
+                                śrīkṛṣṇāya namaḥ || oṃ
+                                ādau devakidevadehajananaṃ || gopīgṛhaṃ vardhanaṃ ||
+                                māyāpūtanajīvitāpaharaṇaṃ || govardhanoddhāraṇaṃ ||
+                                kaṃsacchedanakau<pb n="f. 3"/>ravādiharaṇaṃ || kuṃtīsutaḥ pālanaṃ
+                                etad bhāvataṃ purānakathitaṃ || śrīkṛṣṇalīlāvṛtaṃ ||1||
+                            </incipit>
+                            
+                            <explicit> <locus>F. 9v</locus>
+                                <!-- transcript -->
+                                iti ekaśloke bhāgavataṃ samāptam ||
+                            </explicit> 
+                            
+                        </msItem>
+                        
+                        <msItem xml:id="Alpha_978_5">
+                            <title>Śanistotra</title>
+                            <title type="alt">شنی ستوتر</title>
+                            <idno type="former">A.9.d.</idno>
+                            
+                            <incipit> <locus>F. 1v</locus>
+                                <!-- transcript -->
+                                iti śanimaṃtraḥ śatro devī rabhyeṣṭāpe śrāpo bhavana pitaye śanyor abhya sarvan tu tān
+                                oṃ namaḥ śanaiścarāya namaḥ || oṃ
+                                sauraḥ śanaiścaro maṃḍo
+                                yamaḥ khaṃjo mahīruhaḥ ||
+                                x pāsutaśvaravittaḥ (?)
+                                pātaṃgiś caṃtake namaḥ ||1||
+                            </incipit>
+                            
+                            <explicit> <locus>F. 3v</locus>
+                                <!-- transcript  -->
+                                <note>It ends on f. 3v, which is missing from the microfilm</note>
+                            </explicit> 
+                            
+                        </msItem>
+                        
+                        <msItem xml:id="Alpha_978_6">
+                            <title>Mahimnaḥpārastotra</title>
+                            <title type="alt">مهمنان</title>
+                            <idno type="former">A.9.e.</idno>
+                            
+                            <note>The beginning is identical with that of the <title>Mahimnaḥstotra</title> of <persName key="person_128612988">Puṣpadanta</persName>; see B.11.t.</note>
+                            
+                            <incipit> <locus>F. 1v</locus>
+                                <!-- transcript -->
+                                oṃ namaḥ śivāya || oṃ mahimnaḥpārate paramavidvaṣoyadyasadṛśī ||
+                                stutir v(b)ramhādīnām api tadavasannās tv api giraḥ ||
+                                athāvācyaḥ sarvāḥ sumatipari <pb n="f. 2"/> ṇāmāvadhigṛṇan mamāpy eṣa stotre
+                                haranirapavādaḥ parakaraḥ || 1 ||
+                            </incipit>
+                            
+                            <explicit> <locus>F. 27</locus>
+                                <!-- transcript -->
+                                iti mahimnaḥpārastotraṃ samāptaṃ ||
+                            </explicit> 
+                            
+                        </msItem>
+                        
+                        <msItem xml:id="Alpha_978_7">
+                            <title>Śanināmāni</title>
+                            <title type="alt">گنئشا</title>
+                            <idno type="former">A.9.f.</idno>
+                            
+                            <note>The <title>Saptaślokīmālā</title> or <title>Saptaślokīgītā</title> in 8 verses, following mantras; the matras are found in <idno>G.iii.c.XIV</idno>.</note>
+                            
+                            <incipit> <locus>F. 1v</locus>
+                                <!-- transcript -->
+                                oṃ namo nārāyaṇāya || oṃ asya śrīsaptaslok<supplied reason="omitted">e</supplied> mālāmaṃtrasya śrībhagavān vedavyāsa ṛṣiḥ anuṣṭ(u)pchanda
+                                śrīkṛṣṇaḥ paramātmā devatā || oṃm ity ekākṣaraṃ v(b)rahma iti <pb n="f. 2"/> maṃtraḥ ||
+                            </incipit>
+                            
+                            <incipit> <note>The verses begin here.</note>
+                                <locus>F. 4v</locus>
+                                <!-- transcript -->
+                                śrībhagavān uvāca ||
+                                vyāharaṃ māme anusmaran ||
+                                yaḥ prayāti tyajaṃ(n)dehaṃ
+                                sa yāti paramāṃ gatiṃ ||1||
+                            </incipit>
+                            
+                            <explicit> <locus>F. 7v</locus>
+                                <!-- transcript -->
+                                iti śrīsaptaślokī<pb n="F. 8"/>gītā samāptaṃ ||
+                                śubhaṃ sarvajagatāṃ ||
+                            </explicit> 
+                            
+                        </msItem>
+                        
+                        <msItem xml:id="Alpha_978_8">
+                            <title>Viṣṇusahasranāma</title>
+                            <title type="alt">وشن سهسرنام</title>
+                            <idno type="former">A.9.g.</idno>
+                            
+                            <note>The <title>Viṣṇusahasranāma</title>, allegedly from the Janadharma in the Uttamānuśāsana of the Śāntiparvan of the <title key="work_181826247">Mahābhārata</title>.
+                            (I do not find it in the Śāntiparvan); 63 verses.</note>
+                            
+                            <incipit> <locus>F. 1v</locus>
+                                <!-- transcript -->
+                                oṃ namo nārāyaṇāya || oṃ
+                                yasya smaraṇame ātreṇa
+                                tatsamaṃ sārabaṃdhanāt ||
+                                vimucyate namas tasmai
+                                viṣṇave prabha viṣṇave ||
+                            </incipit>
+                            
+                            <explicit> <locus>F. 62</locus>
+                                <!-- transcript -->
+                                iti iti mahābhārate śāṃtiparvaṇi uttamānuśāsan ja(?)nadha<pb n="F. 62v"/>rme su(?)śrīviṣṇunāmasahasrasa(mā)m(pt)|
+                                śubhaṃ ||
+                            </explicit> 
+                            
+                        </msItem>
+                        
+                        
+                    </msContents>
+                    
+                    <physDesc>
+                        <objectDesc form="folio">
+                            <supportDesc material="paper">
+                                <extent>91 folios; Ff. 1-6; 1-12; 1-3; 1-27; 1-8; 1-62.</extent>
+                            </supportDesc>
+                            <layoutDesc>
+                                <layout writtenLines="8">4 lines, ca. 15/20 akṣaras.</layout>
+                            </layoutDesc> 
+                        </objectDesc>
+                        <handDesc>
+                            <handNote scope="major">  
+                                <persName role="scr">Anonymous</persName> 
+                            </handNote>
+                            <handNote scope="minor"> <locus>Alpha_978_2, f. 12v</locus>
+                                <persName role="scr">Anonymous</persName>
+                            </handNote>
+                        </handDesc>
+                    </physDesc> 
+                    
+                </msDesc>
+            </sourceDesc>
+        </fileDesc>
+        
+        <revisionDesc>
+            <change when="2021" who="#AP">Minor edits for front-end.</change>
+            <change when="2020-01-16" who="#AP">Added licensing statement.</change>
+            <change when="2019-06-07" who="#AP">Added mention of illustrations to @summary, after seeing manuscript.</change>
+            <change when="2019-05-23" who="#AP">Created XML file.</change>
+        </revisionDesc>
+    </teiHeader>
+    <facsimile>
+        <!-- For future addition -->
+    </facsimile>
+    <text>
+        <body>
+            <!-- For future full transcript -->  
+        </body>
+    </text>
+</TEI>
