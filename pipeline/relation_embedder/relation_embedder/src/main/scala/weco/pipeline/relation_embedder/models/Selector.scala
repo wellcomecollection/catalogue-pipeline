@@ -1,17 +1,14 @@
-package weco.pipeline.relation_embedder
-
-case class Batch(rootPath: String, selectors: List[Selector])
+package weco.pipeline.relation_embedder.models
 
 sealed trait Selector {
+  import weco.pipeline.relation_embedder.models.PathOps._
 
   val path: String
 
-  lazy val depth: Int =
-    path.split("/").length
+  lazy val depth: Int = path.depth
 }
 
 object Selector {
-
   case class Tree(path: String) extends Selector
 
   case class Node(path: String) extends Selector

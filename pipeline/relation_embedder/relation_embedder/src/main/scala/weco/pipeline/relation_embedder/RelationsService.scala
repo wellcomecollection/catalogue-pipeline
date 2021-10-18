@@ -12,6 +12,7 @@ import weco.json.JsonUtil._
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.work.WorkState.Merged
 import weco.catalogue.internal_model.work.Work
+import weco.pipeline.relation_embedder.models.Batch
 
 trait RelationsService {
   def getRelationTree(batch: Batch): Source[RelationWork, NotUsed]

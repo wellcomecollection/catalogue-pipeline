@@ -11,6 +11,7 @@ import weco.catalogue.internal_model.index.IndexFixtures
 import weco.catalogue.internal_model.work.WorkState.Merged
 import weco.catalogue.internal_model.work.Work
 import weco.pipeline.relation_embedder.fixtures.RelationGenerators
+import weco.pipeline.relation_embedder.models._
 
 class RelationsServiceTest
     extends AnyFunSpec
