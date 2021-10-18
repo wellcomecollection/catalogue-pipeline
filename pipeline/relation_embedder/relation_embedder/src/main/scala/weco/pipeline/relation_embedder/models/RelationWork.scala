@@ -1,4 +1,4 @@
-package weco.pipeline.relation_embedder
+package weco.pipeline.relation_embedder.models
 
 import weco.catalogue.internal_model.identifiers.CanonicalId
 import weco.catalogue.internal_model.work._
