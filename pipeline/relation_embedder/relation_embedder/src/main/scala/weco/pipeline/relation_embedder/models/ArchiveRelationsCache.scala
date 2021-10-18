@@ -1,9 +1,8 @@
-package weco.pipeline.relation_embedder
+package weco.pipeline.relation_embedder.models
 
 import grizzled.slf4j.Logging
 import weco.catalogue.internal_model.work.WorkState.Merged
 import weco.catalogue.internal_model.work._
-import weco.pipeline.relation_embedder.models.PathCollection
 
 class ArchiveRelationsCache(works: Map[String, RelationWork]) extends Logging {
 
@@ -87,11 +86,13 @@ class ArchiveRelationsCache(works: Map[String, RelationWork]) extends Logging {
   private def getAncestors(path: String): List[Relation] =
     paths.knownAncestorsOf(path).map(relations)
 
+  import weco.pipeline.relation_embedder.models.PathOps._
+
   private lazy val relations: Map[String, Relation] =
     works.map {
       case (path, work) =>
         path -> work.toRelation(
-          depth = path.split("/").length - 1,
+          depth = path.depth,
           numChildren = paths.childrenOf(path).length,
           numDescendents = paths.knownDescendentsOf(path).length
         )

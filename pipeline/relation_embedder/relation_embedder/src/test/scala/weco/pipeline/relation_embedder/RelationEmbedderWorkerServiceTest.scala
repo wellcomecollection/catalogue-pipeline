@@ -24,6 +24,7 @@ import weco.catalogue.internal_model.work.WorkState.{Denormalised, Merged}
 import weco.catalogue.internal_model.index.IndexFixtures
 import weco.catalogue.internal_model.work._
 import weco.pipeline.relation_embedder.fixtures.RelationGenerators
+import weco.pipeline.relation_embedder.models._
 import weco.pipeline_storage.memory.MemoryIndexer
 
 import java.nio.charset.StandardCharsets

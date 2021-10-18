@@ -4,6 +4,7 @@ import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.Index
 import com.sksamuel.elastic4s.requests.searches.SearchRequest
 import com.sksamuel.elastic4s.requests.searches.queries.Query
+import weco.pipeline.relation_embedder.models._
 
 case class RelationsRequestBuilder(index: Index,
                                    scrollKeepAlive: String = "2m") {

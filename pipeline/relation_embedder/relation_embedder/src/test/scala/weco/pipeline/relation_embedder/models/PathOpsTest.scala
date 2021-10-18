@@ -10,4 +10,8 @@ class PathOpsTest extends AnyFunSpec with Matchers with ScalaFutures {
   it("finds the parent of a path") {
     "PP/CRI/J/2/3".parent shouldBe "PP/CRI/J/2"
   }
+
+  it("finds the depth of a path") {
+    "PP/CRI/J/2/3".depth shouldBe 4
+  }
 }
