@@ -1,10 +1,10 @@
 package weco.pipeline.transformer.tei
 
-import cats.syntax.traverse._
 import cats.instances.either._
+import cats.syntax.traverse._
 import grizzled.slf4j.Logging
-import weco.catalogue.internal_model.identifiers.IdState
-import weco.catalogue.internal_model.identifiers.IdState.Unidentifiable
+import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, SourceIdentifier}
+import weco.catalogue.internal_model.identifiers.IdState.Identifiable
 import weco.catalogue.internal_model.work.{ContributionRole, Contributor, Person}
 import weco.pipeline.transformer.result.Result
 import weco.pipeline.transformer.tei.transformers.TeiLanguages
@@ -92,13 +92,6 @@ class TeiXml(val xml: Elem) extends Logging {
       case Nil             => Left(new RuntimeException("No title found!"))
       case _               => Left(new RuntimeException("More than one title node!"))
     }
-  }
-
-  def authors(node: Node): Result[List[Contributor[IdState.Unminted]]] = {
-    val seq:  List[Either[Throwable,Contributor[IdState.Unminted]]] = (node \ "author").map { n =>
-      Right(Contributor(Unidentifiable, Person(n.text), List(ContributionRole("author"))))
-    }.toList
-    seq.sequence
   }
 
   /**
@@ -237,6 +230,24 @@ class TeiXml(val xml: Elem) extends Logging {
       case l @ _ :: _ => Right(l.map(_.text))
       case Nil        => Right(Nil)
     }
+  }
+
+  private def authors(node: Node): Result[List[Contributor[IdState.Unminted]]] = {
+    val seq:  List[Either[Throwable,Contributor[IdState.Unminted]]] = (node \ "author").map { n =>
+      val (label, id)=(n \ "persName").toList match {
+        case Nil => (n.text.trim, (n \@ "key").trim)
+        case list =>
+          val personName = list.filter(_ \@ "type" == "original").head
+          (personName.text.trim,(personName \@ "key").trim)
+      }
+
+      (label, id) match {
+        case (l,_) if l.isEmpty => Left(new RuntimeException(s"The author label in node $n is empty!"))
+        case (l, id) if id.isEmpty => Right(Contributor(Person(l), List(ContributionRole("author"))))
+        case (l,id) => Right(Contributor(Person(label = l, id = Identifiable(SourceIdentifier(IdentifierType.VIAF, "Person", id))), List(ContributionRole("author"))))
+      }
+    }.toList
+    seq.sequence
   }
 
   private def containsFihrist(catalogues: List[String]): Boolean =

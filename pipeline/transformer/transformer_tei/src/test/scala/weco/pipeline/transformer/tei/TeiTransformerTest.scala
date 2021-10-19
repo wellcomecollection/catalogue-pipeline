@@ -5,23 +5,11 @@ import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.DataState.Unidentified
-import weco.catalogue.internal_model.identifiers.{
-  IdentifierType,
-  SourceIdentifier
-}
+import weco.catalogue.internal_model.identifiers.{IdentifierType, SourceIdentifier}
 import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.internal_model.work.generators.InstantGenerators
-import weco.catalogue.internal_model.work.{
-  CollectionPath,
-  DeletedReason,
-  Format,
-  InternalWork,
-  Note,
-  NoteType,
-  Work,
-  WorkData
-}
+import weco.catalogue.internal_model.work._
 import weco.catalogue.source_model.tei.{TeiChangedMetadata, TeiDeletedMetadata}
 import weco.pipeline.transformer.result.Result
 import weco.storage.generators.S3ObjectLocationGenerators
@@ -61,7 +49,8 @@ class TeiTransformerTest
             Some("1 copy of al-Qānūn fī al-ṭibb by Avicenna, 980-1037"),
           format = Some(Format.ArchivesAndManuscripts),
           collectionPath =
-            Some(CollectionPath(path = "manuscript_15651", label = None))
+            Some(CollectionPath(path = "manuscript_15651", label = None)),
+          contributors = List(Contributor(Person("ابو على الحسين ابن عبد الله ابن\n                  سينا"), roles = List(ContributionRole("author"))))
         ),
         state = Source(
           sourceIdentifier,

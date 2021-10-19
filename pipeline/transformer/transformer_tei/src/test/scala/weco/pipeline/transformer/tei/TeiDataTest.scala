@@ -4,12 +4,11 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.generators.IdentifiersGenerators
 import weco.catalogue.internal_model.identifiers.DataState.Unidentified
-import weco.catalogue.internal_model.identifiers.IdState.Unidentifiable
 import weco.catalogue.internal_model.identifiers.{IdentifierType, SourceIdentifier}
 import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.work.Format.ArchivesAndManuscripts
-import weco.catalogue.internal_model.work.{CollectionPath, ContributionRole, Contributor, InternalWork, MergeCandidate, Note, NoteType, Person, Work, WorkData}
 import weco.catalogue.internal_model.work.WorkState.Source
+import weco.catalogue.internal_model.work._
 import weco.pipeline.transformer.tei.generators.TeiDataGenerators
 import weco.sierra.generators.SierraIdentifierGenerators
 
@@ -85,7 +84,7 @@ class TeiDataTest
 
 
   it("transforms authors in nestedData") {
-    val contributors = List(Contributor(Unidentifiable, Person("John McClane"), List(ContributionRole("author"))))
+    val contributors = List(Contributor(Person("John McClane"), List(ContributionRole("author"))))
     val firstInnerTeiData = TeiData(
       id = "id_1", title = "item title",authors = contributors
     )

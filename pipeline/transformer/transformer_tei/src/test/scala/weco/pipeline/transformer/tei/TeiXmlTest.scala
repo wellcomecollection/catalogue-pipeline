@@ -3,7 +3,8 @@ package weco.pipeline.transformer.tei
 import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.identifiers.IdState.Unidentifiable
+import weco.catalogue.internal_model.identifiers.IdState.Identifiable
+import weco.catalogue.internal_model.identifiers.{IdentifierType, SourceIdentifier}
 import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.work.{ContributionRole, Contributor, Person}
 import weco.pipeline.transformer.tei.generators.TeiGenerators
@@ -443,11 +444,60 @@ class TeiXmlTest
       id,
       teiXml(
         id = id,
-        items = List(msItem(s"${id}_1", authors = List(author(label = "Terry Pratchett")))),
+        items = List(msItem(s"${id}_1", authors = List(author(label = "John Wick")))),
       ).toString()
     ).flatMap(_.nestedTeiData)
 
     result shouldBe a[Right[_, _]]
-    result.value.head.authors shouldBe List(Contributor(Unidentifiable, Person("Terry Pratchett"), List(ContributionRole("author"))))
+    result.value.head.authors shouldBe List(Contributor(Person("John Wick"), List(ContributionRole("author"))))
+  }
+
+  it("fails extracting authors if the label is empty"){
+    val result = TeiXml(
+      id,
+      teiXml(
+        id = id,
+        items = List(msItem(s"${id}_1", authors = List(author(label = "")))),
+      ).toString()
+    ).flatMap(_.nestedTeiData)
+
+    result shouldBe a[Left[_, _]]
+    result.left.get.getMessage should include ("label")
+  }
+  it("extracts ids for authors"){
+    val result = TeiXml(
+      id,
+      teiXml(
+        id = id,
+        items = List(msItem(s"${id}_1", authors = List(author(label = "Dominic Toretto", key = Some("12534"))))),
+      ).toString()
+    ).flatMap(_.nestedTeiData)
+
+    result shouldBe a[Right[_, _]]
+    result.value.head.authors shouldBe List(Contributor(Person(label = "Dominic Toretto", id = Identifiable(SourceIdentifier(IdentifierType.VIAF, "Person", "12534"))), List(ContributionRole("author"))))
+  }
+  it("if the id exists but it's an empty string, it extracts the author but doesn't add an id"){
+    val result = TeiXml(
+      id,
+      teiXml(
+        id = id,
+        items = List(msItem(s"${id}_1", authors = List(author(label = "Frank Martin", key = Some(""))))),
+      ).toString()
+    ).flatMap(_.nestedTeiData)
+
+    result shouldBe a[Right[_, _]]
+    result.value.head.authors shouldBe List(Contributor(Person("Frank Martin"), List(ContributionRole("author"))))
+  }
+  it("extracts persName with type=original"){
+    val result = TeiXml(
+      id,
+      teiXml(
+        id = id,
+        items = List(msItem(s"${id}_1", authors = List(author(persNames = List(persName(label = "John Connor", id = Some("12345"))))))),
+      ).toString()
+    ).flatMap(_.nestedTeiData)
+
+    result shouldBe a[Right[_, _]]
+    result.value.head.authors shouldBe List(Contributor(Person(label = "John Connor", id = Identifiable(SourceIdentifier(IdentifierType.VIAF, "Person", "12345"))), List(ContributionRole("author"))))
   }
 }

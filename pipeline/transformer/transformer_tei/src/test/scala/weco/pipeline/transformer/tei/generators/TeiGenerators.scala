@@ -80,7 +80,18 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
         <idno>{bnumber} </idno>
       </altIdentifier>
 
-  def author(label:String) = <author>{label}</author>
+  def author(label:String, key: Option[String] = None) = key match {
+    case Some(k) => <author key={k}>{label}</author>
+    case None => <author>{label}</author>
+  }
+
+  def author(persNames: List[Elem]) =
+    <author>{persNames}</author>
+
+  def persName(label: String, id: Option[String]) =  id match {
+    case Some(k) => <persName key={k} type="original">{label}</persName>
+    case None => <persName type="original">{label}</persName>
+  }
 
   def summary(str: String) = <summary>{str}</summary>
 
