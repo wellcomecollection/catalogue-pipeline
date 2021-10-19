@@ -96,7 +96,7 @@ class TeiTransformerTest
     )
   }
 
-  it("extracts languageNotes if it canmnot parse the languages") {
+  it("extracts languageNotes if it cannot parse the languages") {
     val work = transformToWork(filename = "/Indic_Alpha_978.xml")(
       id = "Wellcome_Alpha_978"
     )
