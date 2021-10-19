@@ -113,6 +113,7 @@ case class TeiData(id: String,
       languages = languages,
       format = Some(Format.ArchivesAndManuscripts),
       notes = languageNotes,
+      contributors = authors,
       //
       // If a TEI work has multiple parts, we want to arrange it into a hierarchy
       // like a CALM collection, e.g.
