@@ -1,12 +1,13 @@
 package weco.pipeline.transformer.tei
 
+import cats.instances.either._
+import cats.syntax.traverse._
+import grizzled.slf4j.Logging
+import weco.pipeline.transformer.result.Result
+import weco.pipeline.transformer.tei.transformers.{TeiAuthors, TeiLanguages}
+
 import scala.util.Try
 import scala.xml.{Elem, Node, NodeSeq, XML}
-import grizzled.slf4j.Logging
-import cats.syntax.traverse._
-import cats.instances.either._
-import weco.pipeline.transformer.result.Result
-import weco.pipeline.transformer.tei.transformers.TeiLanguages
 class TeiXml(val xml: Elem) extends Logging {
   val id: String = getIdFrom(xml).getOrElse(
     throw new RuntimeException(s"Could not find an id in XML!"))
@@ -173,13 +174,15 @@ class TeiXml(val xml: Elem) extends Logging {
             languageData <- TeiLanguages.parseLanguages(node)
             (languages, languageNotes) = languageData
             items <- extractLowerLevelItems(title, node, catalogues)
+            authors <- TeiAuthors.apply(node, containsFihrist(catalogues))
           } yield
             TeiData(
               id = id,
               title = title,
               languages = languages,
               languageNotes = languageNotes,
-              nestedTeiData = items)
+              nestedTeiData = items,
+              authors = authors)
       }
       .toList
       .sequence

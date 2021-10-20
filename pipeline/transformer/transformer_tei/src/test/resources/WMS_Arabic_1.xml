@@ -39,7 +39,7 @@
               <author key="person_97166546">
                 <persName xml:lang="en">Avicenna, d. 980-1037
                 </persName>
-                <persName xml:lang="ar">ابو على الحسين ابن عبد الله ابن
+                <persName xml:lang="ar" type="original">ابو على الحسين ابن عبد الله ابن
                   سينا</persName>
               </author>
               <title xml:lang="ar-Latn-x-lc" key="work_3001">Al-Qānūn fī al-ṭibb</title>

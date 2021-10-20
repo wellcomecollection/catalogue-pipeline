@@ -5,6 +5,10 @@ import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.DataState.Unidentified
+import weco.catalogue.internal_model.identifiers.IdState.{
+  Identifiable,
+  Unminted
+}
 import weco.catalogue.internal_model.identifiers.{
   IdentifierType,
   SourceIdentifier
@@ -12,16 +16,7 @@ import weco.catalogue.internal_model.identifiers.{
 import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.internal_model.work.generators.InstantGenerators
-import weco.catalogue.internal_model.work.{
-  CollectionPath,
-  DeletedReason,
-  Format,
-  InternalWork,
-  Note,
-  NoteType,
-  Work,
-  WorkData
-}
+import weco.catalogue.internal_model.work._
 import weco.catalogue.source_model.tei.{TeiChangedMetadata, TeiDeletedMetadata}
 import weco.pipeline.transformer.result.Result
 import weco.storage.generators.S3ObjectLocationGenerators
@@ -52,6 +47,19 @@ class TeiTransformerTest
       value = "manuscript_15651"
     )
 
+    val contributors: List[Contributor[Unminted]] = List(
+      Contributor(
+        Person(
+          label = """ابو على الحسين ابن عبد الله ابن
+                  سينا""",
+          id = Identifiable(
+            SourceIdentifier(
+              IdentifierType.Fihrist,
+              "Person",
+              "person_97166546"))
+        ),
+        roles = List(ContributionRole("author"))
+      ))
     work.value shouldBe
       Work.Visible[Source](
         version = 1,
@@ -73,12 +81,13 @@ class TeiTransformerTest
                 "Work",
                 "MS_Arabic_1-item1"
               ),
-              workData = WorkData(
+              workData = WorkData[Unidentified](
                 title = Some("MS_Arabic_1 item 1"),
                 languages = List(Language("ara", "Arabic")),
                 collectionPath =
                   Some(CollectionPath("manuscript_15651/MS_Arabic_1-item1")),
-                format = Some(Format.ArchivesAndManuscripts)
+                format = Some(Format.ArchivesAndManuscripts),
+                contributors = contributors
               )
             )
           )
@@ -96,7 +105,7 @@ class TeiTransformerTest
     )
   }
 
-  it("extracts languageNotes if it canmnot parse the languages") {
+  it("extracts languageNotes if it cannot parse the languages") {
     val work = transformToWork(filename = "/Indic_Alpha_978.xml")(
       id = "Wellcome_Alpha_978"
     )
@@ -142,6 +151,24 @@ class TeiTransformerTest
       "Τοῦ αὐτοῦ περὶ θεραπευτικῆς μεθόδου τῶν κατὰ μέρος παθῶν βιβλίον δεύτερον",
       "Τοῦ αὐτοῦ περὶ συνθέσεως φαρμάκων λόγος Α ́"
     )
+  }
+
+  it("extracts authors") {
+    val work = transformToWork(filename = "/MS_MSL_114.xml")(
+      id = "MS_MSL_114"
+    )
+
+    work.value.state.internalWorkStubs.head.workData.contributors shouldBe List(
+      Contributor(
+        Person(
+          label = "Paul of Aegina",
+          id = Identifiable(
+            SourceIdentifier(
+              IdentifierType.VIAF,
+              "Person",
+              "person_84812936"))),
+        roles = List(ContributionRole("author"))
+      ))
   }
 
   it("handles delete messages") {

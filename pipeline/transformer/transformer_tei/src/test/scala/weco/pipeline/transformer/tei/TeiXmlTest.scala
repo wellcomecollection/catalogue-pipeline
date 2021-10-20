@@ -3,7 +3,10 @@ package weco.pipeline.transformer.tei
 import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import weco.catalogue.internal_model.identifiers.IdState.Identifiable
+import weco.catalogue.internal_model.identifiers.{IdentifierType, SourceIdentifier}
 import weco.catalogue.internal_model.languages.Language
+import weco.catalogue.internal_model.work.{ContributionRole, Contributor, Person}
 import weco.pipeline.transformer.tei.generators.TeiGenerators
 import weco.sierra.generators.SierraIdentifierGenerators
 
@@ -434,5 +437,32 @@ class TeiXmlTest
         title = s"$wrapperTitle part 1",
         nestedTeiData = Nil
       ))
+  }
+  it("extracts author from msItem"){
+    val result = TeiXml(
+      id,
+      teiXml(
+        id = id,
+        items = List(msItem(s"${id}_1", authors = List(author(label = "John Wick")))),
+      ).toString()
+    ).flatMap(_.nestedTeiData)
+
+    result shouldBe a[Right[_, _]]
+    result.value.head.authors shouldBe List(Contributor(Person("John Wick"), List(ContributionRole("author"))))
+  }
+
+  it("if the manuscript is part of the Fihrist catalogue, it extracts authors ids as the fihrist identifier type"){
+    val result = TeiXml(
+      id,
+      teiXml(
+        id = id,
+        items = List(msItem(s"${id}_1", authors = List(author(persNames = List(
+          persName(label = "Sarah Connor",key = Some("12345"))), key = None)))),
+        catalogues = List(catalogueElem("Fihrist"))
+      ).toString()
+    ).flatMap(_.nestedTeiData)
+
+    result shouldBe a[Right[_, _]]
+    result.value.head.authors shouldBe List(Contributor(Person(label = "Sarah Connor", id = Identifiable(SourceIdentifier(IdentifierType.Fihrist, "Person", "12345"))), List(ContributionRole("author"))))
   }
 }

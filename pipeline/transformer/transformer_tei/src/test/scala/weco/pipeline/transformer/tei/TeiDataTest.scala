@@ -10,16 +10,8 @@ import weco.catalogue.internal_model.identifiers.{
 }
 import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.work.Format.ArchivesAndManuscripts
-import weco.catalogue.internal_model.work.{
-  CollectionPath,
-  InternalWork,
-  MergeCandidate,
-  Note,
-  NoteType,
-  Work,
-  WorkData
-}
 import weco.catalogue.internal_model.work.WorkState.Source
+import weco.catalogue.internal_model.work._
 import weco.pipeline.transformer.tei.generators.TeiDataGenerators
 import weco.sierra.generators.SierraIdentifierGenerators
 
@@ -91,6 +83,25 @@ class TeiDataTest
     val work = teiData.toWork(Instant.now(), 1)
 
     work.state.mergeCandidates shouldBe empty
+  }
+
+  it("transforms authors in nestedData") {
+    val contributors = List(
+      Contributor(Person("John McClane"), List(ContributionRole("author"))))
+    val firstInnerTeiData = TeiData(
+      id = "id_1",
+      title = "item title",
+      authors = contributors
+    )
+    val teiData = TeiData(
+      id = "id",
+      title = "work title",
+      nestedTeiData = List(firstInnerTeiData)
+    )
+
+    val work = teiData.toWork(Instant.now(), 1)
+
+    work.state.internalWorkStubs.head.workData.contributors shouldBe contributors
   }
 
   it("transforms multiple internal TeiData into internalWorks") {

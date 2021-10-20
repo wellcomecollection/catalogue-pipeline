@@ -115,4 +115,14 @@ object IdentifierType extends Enum[IdentifierType] {
     val id = "iconographic-number"
     val label = "Iconographic number"
   }
+
+  case object VIAF extends IdentifierType {
+    val id = "viaf"
+    val label = "VIAF: The Virtual International Authority File"
+  }
+
+  case object Fihrist extends IdentifierType {
+    val id = "fihrist"
+    val label = "Fihrist Authority"
+  }
 }

@@ -2,7 +2,10 @@ package weco.pipeline.transformer.tei
 
 import grizzled.slf4j.Logging
 import weco.catalogue.internal_model.identifiers.DataState.Unidentified
-import weco.catalogue.internal_model.identifiers.IdState.Identifiable
+import weco.catalogue.internal_model.identifiers.IdState.{
+  Identifiable,
+  Unminted
+}
 import weco.catalogue.internal_model.identifiers.{
   IdentifierType,
   SourceIdentifier
@@ -18,6 +21,15 @@ import weco.catalogue.internal_model.work.{
   Work,
   WorkData
 }
+import weco.catalogue.internal_model.work.{
+  CollectionPath,
+  Contributor,
+  Format,
+  InternalWork,
+  MergeCandidate,
+  Work,
+  WorkData
+}
 import weco.pipeline.transformer.identifiers.SourceIdentifierValidation._
 
 import java.time.Instant
@@ -28,7 +40,8 @@ case class TeiData(id: String,
                    description: Option[String] = None,
                    languages: List[Language] = Nil,
                    languageNotes: List[Note] = Nil,
-                   nestedTeiData: List[TeiData] = Nil)
+                   nestedTeiData: List[TeiData] = Nil,
+                   authors: List[Contributor[Unminted]] = Nil)
     extends Logging {
   def toWork(time: Instant, version: Int): Work[Source] = {
     val topLevelData = toWorkData()
@@ -114,6 +127,7 @@ case class TeiData(id: String,
       languages = languages,
       format = Some(Format.ArchivesAndManuscripts),
       notes = languageNotes,
+      contributors = authors,
       //
       // If a TEI work has multiple parts, we want to arrange it into a hierarchy
       // like a CALM collection, e.g.
