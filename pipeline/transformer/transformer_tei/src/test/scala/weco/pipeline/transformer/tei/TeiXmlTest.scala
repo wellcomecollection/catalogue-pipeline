@@ -451,7 +451,7 @@ class TeiXmlTest
     result.value.head.authors shouldBe List(Contributor(Person("John Wick"), List(ContributionRole("author"))))
   }
 
-  it("if the manuscript is part of the Fihrist catalogue, it extracts authors ids as the fihirist identifier type"){
+  it("if the manuscript is part of the Fihrist catalogue, it extracts authors ids as the fihrist identifier type"){
     val result = TeiXml(
       id,
       teiXml(
