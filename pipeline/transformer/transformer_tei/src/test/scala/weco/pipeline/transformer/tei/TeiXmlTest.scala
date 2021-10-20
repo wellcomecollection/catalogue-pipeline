@@ -438,7 +438,6 @@ class TeiXmlTest
         nestedTeiData = Nil
       ))
   }
-
   it("extracts author from msItem"){
     val result = TeiXml(
       id,
@@ -452,124 +451,7 @@ class TeiXmlTest
     result.value.head.authors shouldBe List(Contributor(Person("John Wick"), List(ContributionRole("author"))))
   }
 
-  it("fails extracting authors if the label is empty"){
-    val result = TeiXml(
-      id,
-      teiXml(
-        id = id,
-        items = List(msItem(s"${id}_1", authors = List(author(label = "")))),
-      ).toString()
-    ).flatMap(_.nestedTeiData)
-
-    result shouldBe a[Left[_, _]]
-    result.left.get.getMessage should include ("label")
-  }
-  it("extracts ids for authors"){
-    val result = TeiXml(
-      id,
-      teiXml(
-        id = id,
-        items = List(msItem(s"${id}_1", authors = List(author(label = "Dominic Toretto", key = Some("12534"))))),
-      ).toString()
-    ).flatMap(_.nestedTeiData)
-
-    result shouldBe a[Right[_, _]]
-    result.value.head.authors shouldBe List(Contributor(Person(label = "Dominic Toretto", id = Identifiable(SourceIdentifier(IdentifierType.VIAF, "Person", "12534"))), List(ContributionRole("author"))))
-  }
-  it("if the id exists but it's an empty string, it extracts the author but doesn't add an id"){
-    val result = TeiXml(
-      id,
-      teiXml(
-        id = id,
-        items = List(msItem(s"${id}_1", authors = List(author(label = "Frank Martin", key = Some(""))))),
-      ).toString()
-    ).flatMap(_.nestedTeiData)
-
-    result shouldBe a[Right[_, _]]
-    result.value.head.authors shouldBe List(Contributor(Person("Frank Martin"), List(ContributionRole("author"))))
-  }
-  it("extracts author from persName"){
-    val result = TeiXml(
-      id,
-      teiXml(
-        id = id,
-        items = List(msItem(s"${id}_1", authors = List(author(persNames = List(persName(label = "John Connor", key = Some("12345"))), key = None)))),
-      ).toString()
-    ).flatMap(_.nestedTeiData)
-
-    result shouldBe a[Right[_, _]]
-    result.value.head.authors shouldBe List(Contributor(Person(label = "John Connor", id = Identifiable(SourceIdentifier(IdentifierType.VIAF, "Person", "12345"))), List(ContributionRole("author"))))
-  }
-
-  it("extracts persName with type=original when there are multiple persName nodes"){
-    val result = TeiXml(
-      id,
-      teiXml(
-        id = id,
-        items = List(msItem(s"${id}_1", authors = List(author(persNames = List(
-          persName(label = "John Connor", key = Some("54321"), `type` = Some("something else")), persName(label = "Sarah Connor", key = Some("12345"), `type` = Some("original"))), key = None)))),
-      ).toString()
-    ).flatMap(_.nestedTeiData)
-
-    result shouldBe a[Right[_, _]]
-    result.value.head.authors shouldBe List(Contributor(Person(label = "Sarah Connor", id = Identifiable(SourceIdentifier(IdentifierType.VIAF, "Person", "12345"))), List(ContributionRole("author"))))
-  }
-
-  it("errors if there are multiple persName nodes and none have type=original"){
-    val result = TeiXml(
-      id,
-      teiXml(
-        id = id,
-        items = List(msItem(s"${id}_1", authors = List(author(persNames = List(
-          persName(label = "John Connor", key = Some("54321"), `type` = Some("something else")), persName(label = "Sarah Connor", key = Some("12345"))), key = None)))),
-      ).toString()
-    ).flatMap(_.nestedTeiData)
-
-    result shouldBe a[Left[_, _]]
-    result.left.get.getMessage should include ("persName")
-  }
-
-  it("errors if there are multiple persName nodes and more than one have type=original"){
-    val result = TeiXml(
-      id,
-      teiXml(
-        id = id,
-        items = List(msItem(s"${id}_1", authors = List(author(persNames = List(
-          persName(label = "John Connor", key = Some("54321"), `type` = Some("original")), persName(label = "Sarah Connor", key = Some("12345"), `type` = Some("original"))), key = None)))),
-      ).toString()
-    ).flatMap(_.nestedTeiData)
-
-    result shouldBe a[Left[_, _]]
-    result.left.get.getMessage should include ("persName")
-  }
-
-  it("gets the pesron id from the author node if it's not on persName node"){
-    val result = TeiXml(
-      id,
-      teiXml(
-        id = id,
-        items = List(msItem(s"${id}_1", authors = List(author(key = Some("12345"),persNames = List(
-          persName(label = "Ellen Ripley", `type` = Some("original"))))))),
-      ).toString()
-    ).flatMap(_.nestedTeiData)
-
-    result shouldBe a[Right[_, _]]
-    result.value.head.authors shouldBe List(Contributor(Person(label = "Ellen Ripley", id = Identifiable(SourceIdentifier(IdentifierType.VIAF, "Person", "12345"))), List(ContributionRole("author"))))
-  }
-  it("gets the pesron id from the author node if it's not on persName node -multiple persName nodes"){
-    val result = TeiXml(
-      id,
-      teiXml(
-        id = id,
-        items = List(msItem(s"${id}_1", authors = List(author(key = Some("12345"),persNames = List(
-          persName(label = "Sarah Connor", `type` = Some("original")),persName(label = "T 800")))))),
-      ).toString()
-    ).flatMap(_.nestedTeiData)
-
-    result shouldBe a[Right[_, _]]
-    result.value.head.authors shouldBe List(Contributor(Person(label = "Sarah Connor", id = Identifiable(SourceIdentifier(IdentifierType.VIAF, "Person", "12345"))), List(ContributionRole("author"))))
-  }
-  it("if the manuscript is part of the Fihrist catalogue, it extracts authors ids as a different identifier type"){
+  it("if the manuscript is part of the Fihrist catalogue, it extracts authors ids as the fihirist identifier type"){
     val result = TeiXml(
       id,
       teiXml(
