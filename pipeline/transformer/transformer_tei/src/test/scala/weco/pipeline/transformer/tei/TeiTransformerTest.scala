@@ -5,6 +5,7 @@ import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.DataState.Unidentified
+import weco.catalogue.internal_model.identifiers.IdState.{Identifiable, Unminted}
 import weco.catalogue.internal_model.identifiers.{IdentifierType, SourceIdentifier}
 import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.work.WorkState.Source
@@ -40,6 +41,9 @@ class TeiTransformerTest
       value = "manuscript_15651"
     )
 
+    val contributors: List[Contributor[Unminted]] = List(Contributor(Person(label =
+      """ابو على الحسين ابن عبد الله ابن
+                  سينا""", id = Identifiable(SourceIdentifier(IdentifierType.Fihrist, "Person", "person_97166546"))), roles = List(ContributionRole("author"))))
     work.value shouldBe
       Work.Visible[Source](
         version = 1,
@@ -49,8 +53,7 @@ class TeiTransformerTest
             Some("1 copy of al-Qānūn fī al-ṭibb by Avicenna, 980-1037"),
           format = Some(Format.ArchivesAndManuscripts),
           collectionPath =
-            Some(CollectionPath(path = "manuscript_15651", label = None)),
-          contributors = List(Contributor(Person("ابو على الحسين ابن عبد الله ابن\n                  سينا"), roles = List(ContributionRole("author"))))
+            Some(CollectionPath(path = "manuscript_15651", label = None))
         ),
         state = Source(
           sourceIdentifier,
@@ -62,12 +65,13 @@ class TeiTransformerTest
                 "Work",
                 "MS_Arabic_1-item1"
               ),
-              workData = WorkData(
+              workData = WorkData[Unidentified](
                 title = Some("MS_Arabic_1 item 1"),
                 languages = List(Language("ara", "Arabic")),
                 collectionPath =
                   Some(CollectionPath("manuscript_15651/MS_Arabic_1-item1")),
-                format = Some(Format.ArchivesAndManuscripts)
+                format = Some(Format.ArchivesAndManuscripts),
+                contributors = contributors
               )
             )
           )
