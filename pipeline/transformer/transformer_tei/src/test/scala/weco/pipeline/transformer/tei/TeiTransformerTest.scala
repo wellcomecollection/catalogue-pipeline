@@ -137,6 +137,14 @@ class TeiTransformerTest
     )
   }
 
+  it("extracts authors"){
+    val work = transformToWork(filename = "/MS_MSL_114.xml")(
+      id = "MS_MSL_114"
+    )
+
+    work.value.state.internalWorkStubs.head.workData.contributors shouldBe List(Contributor(Person(label = "Paul of Aegina", id = Identifiable(SourceIdentifier(IdentifierType.VIAF, "Person", "person_84812936"))), roles = List(ContributionRole("author"))))
+  }
+
   it("handles delete messages") {
 
     val store =
