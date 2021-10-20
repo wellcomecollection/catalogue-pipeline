@@ -26,8 +26,7 @@ object TeiLanguages extends Logging {
     * This function extracts all the nodes from a parsed XML and returns
     * a list of (id, label) pairs.
     */
-  def parseLanguages(
-    value: NodeSeq): Result[(List[Language], List[Note])] =
+  def parseLanguages(value: NodeSeq): Result[(List[Language], List[Note])] =
     (value \ "textLang")
       .foldRight(
         Right((Nil, Nil)): Either[Throwable, (List[Language], List[Note])]) {
@@ -63,9 +62,9 @@ object TeiLanguages extends Logging {
   }
 
   private def appendLanguageOrNote(languageList: List[Language],
-                                    languageNoteList: List[Note],
-                                    id: String,
-                                    label: String) =
+                                   languageNoteList: List[Note],
+                                   id: String,
+                                   label: String) =
     TeiLanguageData(id, label).fold(
       err => {
         warn("Could not parse language", err)
@@ -75,13 +74,13 @@ object TeiLanguages extends Logging {
     )
 
   private def appendLanguage(languageList: List[Language],
-                                languageNoteList: List[Note],
-                                language: Language) =
+                             languageNoteList: List[Note],
+                             language: Language) =
     Right((language +: languageList, languageNoteList))
 
   private def appendNote(languageList: List[Language],
-                                    languageNoteList: List[Note],
-                                    label: String) =
+                         languageNoteList: List[Note],
+                         label: String) =
     Right((languageList, languageNoteFrom(label) +: languageNoteList))
 
   private def languageNoteFrom(label: String) =

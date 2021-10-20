@@ -80,22 +80,24 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
         <idno>{bnumber} </idno>
       </altIdentifier>
 
-  def author(label:String, key: Option[String]=None) = key match {
+  def author(label: String, key: Option[String] = None) = key match {
     case Some(k) => <author key={k}>{label}</author>
-    case None => <author>{label}</author>
+    case None    => <author>{label}</author>
   }
 
   def author(persNames: List[Elem], key: Option[String]) =
     key match {
       case Some(k) => <author key={k}>{persNames}</author>
-      case None => <author>{persNames}</author>
+      case None    => <author>{persNames}</author>
     }
 
-  def persName(label: String, key: Option[String]= None, `type`: Option[String] = None) =  (key, `type`) match {
+  def persName(label: String,
+               key: Option[String] = None,
+               `type`: Option[String] = None) = (key, `type`) match {
     case (Some(k), Some(t)) => <persName key={k} type={t}>{label}</persName>
-    case (Some(k), None) => <persName key={k}>{label}</persName>
-    case (None, Some(t)) => <persName type={t}>{label}</persName>
-    case (None, None) => <persName>{label}</persName>
+    case (Some(k), None)    => <persName key={k}>{label}</persName>
+    case (None, Some(t))    => <persName type={t}>{label}</persName>
+    case (None, None)       => <persName>{label}</persName>
   }
 
   def summary(str: String) = <summary>{str}</summary>

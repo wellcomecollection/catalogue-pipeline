@@ -5,8 +5,14 @@ import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.DataState.Unidentified
-import weco.catalogue.internal_model.identifiers.IdState.{Identifiable, Unminted}
-import weco.catalogue.internal_model.identifiers.{IdentifierType, SourceIdentifier}
+import weco.catalogue.internal_model.identifiers.IdState.{
+  Identifiable,
+  Unminted
+}
+import weco.catalogue.internal_model.identifiers.{
+  IdentifierType,
+  SourceIdentifier
+}
 import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.internal_model.work.generators.InstantGenerators
@@ -41,9 +47,19 @@ class TeiTransformerTest
       value = "manuscript_15651"
     )
 
-    val contributors: List[Contributor[Unminted]] = List(Contributor(Person(label =
-      """ابو على الحسين ابن عبد الله ابن
-                  سينا""", id = Identifiable(SourceIdentifier(IdentifierType.Fihrist, "Person", "person_97166546"))), roles = List(ContributionRole("author"))))
+    val contributors: List[Contributor[Unminted]] = List(
+      Contributor(
+        Person(
+          label = """ابو على الحسين ابن عبد الله ابن
+                  سينا""",
+          id = Identifiable(
+            SourceIdentifier(
+              IdentifierType.Fihrist,
+              "Person",
+              "person_97166546"))
+        ),
+        roles = List(ContributionRole("author"))
+      ))
     work.value shouldBe
       Work.Visible[Source](
         version = 1,
@@ -137,12 +153,22 @@ class TeiTransformerTest
     )
   }
 
-  it("extracts authors"){
+  it("extracts authors") {
     val work = transformToWork(filename = "/MS_MSL_114.xml")(
       id = "MS_MSL_114"
     )
 
-    work.value.state.internalWorkStubs.head.workData.contributors shouldBe List(Contributor(Person(label = "Paul of Aegina", id = Identifiable(SourceIdentifier(IdentifierType.VIAF, "Person", "person_84812936"))), roles = List(ContributionRole("author"))))
+    work.value.state.internalWorkStubs.head.workData.contributors shouldBe List(
+      Contributor(
+        Person(
+          label = "Paul of Aegina",
+          id = Identifiable(
+            SourceIdentifier(
+              IdentifierType.VIAF,
+              "Person",
+              "person_84812936"))),
+        roles = List(ContributionRole("author"))
+      ))
   }
 
   it("handles delete messages") {
