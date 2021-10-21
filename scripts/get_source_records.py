@@ -32,10 +32,10 @@ SIERRA_ADAPTER_TABLE = "vhs-sierra-sierra-adapter-20200604"
 
 def get_current_works_index():
     resp = httpx.get(
-        "https://api.wellcomecollection.org/catalogue/v2/search-templates.json"
+        "https://api.wellcomecollection.org/catalogue/v2/_elasticConfig"
     )
 
-    return resp.json()["templates"][0]["index"]
+    return resp.json()["worksIndex"]
 
 
 def get_source_identifiers(session, *, work_id):
