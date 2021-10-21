@@ -6,8 +6,8 @@ import weco.pipeline.transformer.result.Result
 import scala.util.Try
 import scala.xml.{Elem, XML}
 class TeiXml(val xml: Elem) extends Logging {
-  val id: String = getId.getOrElse(
-    throw new RuntimeException(s"Could not find an id in XML!"))
+  val id: String =
+    getId.getOrElse(throw new RuntimeException(s"Could not find an id in XML!"))
 
   /**
     * All the identifiers of the TEI file are in a `msIdentifier` bloc.

@@ -8,17 +8,17 @@ import weco.pipeline.transformer.tei.{TeiData, TeiOps}
 
 import scala.xml.{Elem, Node, NodeSeq}
 
-object TeiNestedData extends Logging{
+object TeiNestedData extends Logging {
 
   /**
-   * TEI works can be composed of other works.
-   * This function extracts the information about these nested works.
-   *
-   * Nested works can be specified in TEI as msItem or msPart depending
-   * if the manuscript is a single part manuscript or a multipart manuscript.
-   * check https://github.com/wellcomecollection/wellcome-collection-tei/blob/main/docs/TEI_Manual_2020_V1.pdf
-   * for more info.
-   */
+    * TEI works can be composed of other works.
+    * This function extracts the information about these nested works.
+    *
+    * Nested works can be specified in TEI as msItem or msPart depending
+    * if the manuscript is a single part manuscript or a multipart manuscript.
+    * check https://github.com/wellcomecollection/wellcome-collection-tei/blob/main/docs/TEI_Manual_2020_V1.pdf
+    * for more info.
+    */
   def nestedTeiData(xml: Elem, wrapperTitle: String) =
     for {
       catalogues <- getCatalogues(xml)
@@ -37,14 +37,15 @@ object TeiNestedData extends Logging{
     } yield nestedData
 
   /**
-   * Extract information about inner works for multi part manuscripts.
-   * Multi part manuscripts have msPart elements containing information about inner works.
-   * msParts don't have a title so we construct the title concatenating the
-   * title of the wrapper work and the part number.
-   */
-  private def nestedTeiDataFromParts(xml: Elem,
-                                      wrapperTitle: String,
-                                      catalogues: List[String]): Result[List[TeiData]] =
+    * Extract information about inner works for multi part manuscripts.
+    * Multi part manuscripts have msPart elements containing information about inner works.
+    * msParts don't have a title so we construct the title concatenating the
+    * title of the wrapper work and the part number.
+    */
+  private def nestedTeiDataFromParts(
+    xml: Elem,
+    wrapperTitle: String,
+    catalogues: List[String]): Result[List[TeiData]] =
     (xml \\ "msDesc" \ "msPart").zipWithIndex
       .map { case (node, i) => (node, i + 1) }
       .map {
@@ -73,15 +74,14 @@ object TeiNestedData extends Logging{
       .sequence
 
   /**
-   * Extract information about inner works for single part manuscripts.
-   * For single part manuscripts, inner works are described in msItem elements.
-   */
-  private def nestedTeiDataFromItems(
-                                      wrapperTitle: String,
-                                      catalogues: List[String],
-                                      nodeSeq: NodeSeq): Result[List[TeiData]] =
+    * Extract information about inner works for single part manuscripts.
+    * For single part manuscripts, inner works are described in msItem elements.
+    */
+  private def nestedTeiDataFromItems(wrapperTitle: String,
+                                     catalogues: List[String],
+                                     nodeSeq: NodeSeq): Result[List[TeiData]] =
     (nodeSeq \ "msItem").zipWithIndex
-      // The indexing starts at zero but we want to count items from 1 so we add 1
+    // The indexing starts at zero but we want to count items from 1 so we add 1
       .map { case (node, i) => (node, i + 1) }
       .map {
         case (node, i) =>
@@ -108,15 +108,15 @@ object TeiNestedData extends Logging{
       .sequence
 
   /**
-   * Manuscripts in the Fihrist catalogue - the Arabic manuscripts - are
-   * catalogued to a higher level of granularity and it's not necessarily true in this case that a msItem is a work.
-   * They are difficult to update to make them more similar to other manuscripts so, for now,
-   * we just don't extract lower level items for manuscripts in the Fihrist catalogue.
-   */
+    * Manuscripts in the Fihrist catalogue - the Arabic manuscripts - are
+    * catalogued to a higher level of granularity and it's not necessarily true in this case that a msItem is a work.
+    * They are difficult to update to make them more similar to other manuscripts so, for now,
+    * we just don't extract lower level items for manuscripts in the Fihrist catalogue.
+    */
   private def extractLowerLevelItems(
-                                      partTitle: String,
-                                      nodes: NodeSeq,
-                                      catalogues: List[String]): Either[Throwable, List[TeiData]] =
+    partTitle: String,
+    nodes: NodeSeq,
+    catalogues: List[String]): Either[Throwable, List[TeiData]] =
     catalogues match {
       case catalogues if containsFihrist(catalogues) =>
         Right(Nil)
@@ -126,7 +126,6 @@ object TeiNestedData extends Logging{
           catalogues = catalogues,
           nodeSeq = nodes)
     }
-
 
   private def containsFihrist(catalogues: List[String]): Boolean =
     catalogues.exists(_.trim.toLowerCase == "fihrist")
@@ -140,17 +139,17 @@ object TeiNestedData extends Logging{
     }
 
   /**
-   * In an XML like this:
-   * <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id="manuscript_15651">
-   *  <teiHeader>
-   *    <fileDesc>
-   *      <publicationStmt>
-   *        <idno type="msID">Wellcome Malay 7</idno>
-   *        <idno type="catalogue">The Hervey Malay Collection in the Wellcome Institute</idno>
-   *        <idno type="catalogue">Catalogue of Malay manuscripts in the Wellcome Institute for the History of Medicine</idno>
-   *       </publicationStmt>
-   * Extracts the values of idno tags with type "catalogue"
-   */
+    * In an XML like this:
+    * <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id="manuscript_15651">
+    *  <teiHeader>
+    *    <fileDesc>
+    *      <publicationStmt>
+    *        <idno type="msID">Wellcome Malay 7</idno>
+    *        <idno type="catalogue">The Hervey Malay Collection in the Wellcome Institute</idno>
+    *        <idno type="catalogue">Catalogue of Malay manuscripts in the Wellcome Institute for the History of Medicine</idno>
+    *       </publicationStmt>
+    * Extracts the values of idno tags with type "catalogue"
+    */
   private def getCatalogues(xml: Elem): Result[List[String]] = {
     val nodes =
       (xml \ "teiHeader" \ "fileDesc" \ "publicationStmt" \ "idno").toList
@@ -162,20 +161,20 @@ object TeiNestedData extends Logging{
   }
 
   /**
-   * In an XML like this:
-   * <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id="manuscript_15651">
-   *  <teiHeader>
-   *    <fileDesc>
-   *      <titleStmt>
-   *        <title>Wellcome Library</title>
-   *      </titleStmt>
-   *      <sourceDesc>
-   *        <msDesc xml:lang="en" xml:id="MS_Arabic_1">
-   *          <msContents>
-   *            <msItem xml:id="MS_Arabic_1-item1">
-   *              <title xml:lang="ar-Latn-x-lc" key="work_3001">Al-Qānūn fī al-ṭibb</title>
-   * extract the title from the msItem, so "Al-Qānūn fī al-ṭibb" in the example.
-   */
+    * In an XML like this:
+    * <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id="manuscript_15651">
+    *  <teiHeader>
+    *    <fileDesc>
+    *      <titleStmt>
+    *        <title>Wellcome Library</title>
+    *      </titleStmt>
+    *      <sourceDesc>
+    *        <msDesc xml:lang="en" xml:id="MS_Arabic_1">
+    *          <msContents>
+    *            <msItem xml:id="MS_Arabic_1-item1">
+    *              <title xml:lang="ar-Latn-x-lc" key="work_3001">Al-Qānūn fī al-ṭibb</title>
+    * extract the title from the msItem, so "Al-Qānūn fī al-ṭibb" in the example.
+    */
   private def extractTitleFromItem(itemNode: Node): Option[String] = {
     val titleNodes = (itemNode \ "title").toList
     titleNodes match {
