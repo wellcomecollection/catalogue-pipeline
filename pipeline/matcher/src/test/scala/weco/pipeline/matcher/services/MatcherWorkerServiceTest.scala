@@ -4,6 +4,7 @@ import org.scalatest.Assertion
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import weco.catalogue.internal_model.Implicits._
 import weco.json.JsonUtil._
 import weco.messaging.fixtures.SQS
 import weco.messaging.fixtures.SQS.QueuePair
