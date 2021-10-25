@@ -18,7 +18,6 @@ import weco.pipeline_storage.memory.MemoryRetriever
 import weco.storage.fixtures.DynamoFixtures.Table
 import weco.storage.locking.dynamo.{
   DynamoLockDaoFixtures,
-  DynamoLockingService,
   ExpiringLock
 }
 import weco.storage.locking.memory.{MemoryLockDao, MemoryLockingService}
@@ -87,14 +86,6 @@ trait MatcherFixtures
       lockingService = lockingService
     )
 
-    testWith(workMatcher)
-  }
-
-  def withWorkMatcherAndLockingService[R](
-    workGraphStore: WorkGraphStore,
-    lockingService: DynamoLockingService[MatcherResult, Future])(
-    testWith: TestWith[WorkMatcher, R]): R = {
-    val workMatcher = new WorkMatcher(workGraphStore, lockingService)
     testWith(workMatcher)
   }
 
