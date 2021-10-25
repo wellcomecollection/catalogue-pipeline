@@ -8,6 +8,7 @@ import weco.catalogue.internal_model.index.IndexFixtures
 import weco.catalogue.internal_model.work.DeletedReason.SuppressedFromSource
 import weco.catalogue.internal_model.work.MergeCandidate
 import weco.catalogue.internal_model.work.generators.SourceWorkGenerators
+import weco.catalogue.internal_model.Implicits._
 import weco.messaging.fixtures.SQS.QueuePair
 import weco.messaging.memory.MemoryMessageSender
 import weco.fixtures.TimeAssertions
