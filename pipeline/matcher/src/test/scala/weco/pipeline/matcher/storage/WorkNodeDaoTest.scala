@@ -7,10 +7,7 @@ import org.scalatest.matchers.should.Matchers
 import javax.naming.ConfigurationException
 import org.scalatest.funspec.AnyFunSpec
 import org.scanamo.generic.auto._
-import software.amazon.awssdk.services.dynamodb.model.{
-  ResourceNotFoundException,
-  ScanRequest
-}
+import software.amazon.awssdk.services.dynamodb.model.ResourceNotFoundException
 import weco.storage.dynamo.DynamoConfig
 import weco.catalogue.internal_model.generators.IdentifiersGenerators
 import weco.catalogue.internal_model.identifiers.CanonicalId
@@ -18,7 +15,6 @@ import weco.pipeline.matcher.fixtures.MatcherFixtures
 import weco.pipeline.matcher.models.WorkNode
 
 import scala.language.higherKinds
-import scala.collection.JavaConverters._
 
 class WorkNodeDaoTest
     extends AnyFunSpec
@@ -178,22 +174,9 @@ class WorkNodeDaoTest
           val future = workNodeDao.put(works.toSet)
 
           whenReady(future) { _ =>
-            val scanRequest =
-              ScanRequest
-                .builder()
-                .tableName(table.name)
-                .build()
+            val storedWorks = scanTable[WorkNode](table).collect { case Right(w) => w }
 
-            val storedItemCount =
-              dynamoClient
-                .scanPaginator(scanRequest)
-                .iterator()
-                .asScala
-                .toSeq
-                .map(_.items().size())
-                .sum
-
-            storedItemCount shouldBe works.size
+            storedWorks should contain theSameElementsAs works
           }
         }
       }
