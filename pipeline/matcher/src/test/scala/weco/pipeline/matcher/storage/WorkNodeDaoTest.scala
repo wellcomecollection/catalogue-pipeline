@@ -23,7 +23,6 @@ import scala.collection.JavaConverters._
 class WorkNodeDaoTest
     extends AnyFunSpec
     with Matchers
-//    with MockitoSugar
     with ScalaFutures
     with MatcherFixtures
     with IdentifiersGenerators {
