@@ -49,7 +49,9 @@ class WorkNodeDaoTest
               linkedIds = Nil,
               componentId = ciHash(idA, idB))
 
-          putTableItems(items = Seq(existingWorkA, existingWorkB), table = table)
+          putTableItems(
+            items = Seq(existingWorkA, existingWorkB),
+            table = table)
 
           whenReady(workNodeDao.get(Set(idA, idB))) {
             _ shouldBe Set(existingWorkA, existingWorkB)
@@ -97,7 +99,9 @@ class WorkNodeDaoTest
               linkedIds = Nil,
               componentId = ciHash(idA, idB))
 
-          putTableItems(items = Seq(existingWorkNodeA, existingWorkNodeB), table = table)
+          putTableItems(
+            items = Seq(existingWorkNodeA, existingWorkNodeB),
+            table = table)
 
           whenReady(matcherGraphDao.getByComponentIds(Set(ciHash(idA, idB)))) {
             _ shouldBe Set(existingWorkNodeA, existingWorkNodeB)
@@ -149,7 +153,8 @@ class WorkNodeDaoTest
             linkedIds = List(idA),
             componentId = ciHash(idA, idB))
           whenReady(workNodeDao.put(Set(work))) { _ =>
-            getTableItem[WorkNode](idA.underlying, table) shouldBe Some(Right(work))
+            getTableItem[WorkNode](idA.underlying, table) shouldBe Some(
+              Right(work))
           }
         }
       }
@@ -170,7 +175,9 @@ class WorkNodeDaoTest
           val future = workNodeDao.put(works.toSet)
 
           whenReady(future) { _ =>
-            val storedWorks = scanTable[WorkNode](table).collect { case Right(w) => w }
+            val storedWorks = scanTable[WorkNode](table).collect {
+              case Right(w) => w
+            }
 
             storedWorks should contain theSameElementsAs works
           }

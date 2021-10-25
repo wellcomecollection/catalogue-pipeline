@@ -9,7 +9,13 @@ import weco.storage.locking.memory.{MemoryLockDao, MemoryLockingService}
 import weco.fixtures.TimeAssertions
 import weco.pipeline.matcher.fixtures.MatcherFixtures
 import weco.pipeline.matcher.generators.WorkStubGenerators
-import weco.pipeline.matcher.models.{MatchedIdentifiers, MatcherResult, WorkIdentifier, WorkNode, WorkStub}
+import weco.pipeline.matcher.models.{
+  MatchedIdentifiers,
+  MatcherResult,
+  WorkIdentifier,
+  WorkNode,
+  WorkStub
+}
 import weco.pipeline.matcher.storage.{WorkGraphStore, WorkNodeDao}
 
 import java.util.UUID

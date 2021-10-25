@@ -16,10 +16,7 @@ import weco.pipeline_storage.Retriever
 import weco.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 import weco.pipeline_storage.memory.MemoryRetriever
 import weco.storage.fixtures.DynamoFixtures.Table
-import weco.storage.locking.dynamo.{
-  DynamoLockDaoFixtures,
-  ExpiringLock
-}
+import weco.storage.locking.dynamo.{DynamoLockDaoFixtures, ExpiringLock}
 import weco.storage.locking.memory.{MemoryLockDao, MemoryLockingService}
 
 import java.util.UUID
