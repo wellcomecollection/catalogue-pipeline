@@ -12,9 +12,9 @@ import weco.catalogue.internal_model.Implicits._
 import weco.messaging.fixtures.SQS.QueuePair
 import weco.messaging.memory.MemoryMessageSender
 import weco.fixtures.TimeAssertions
-import weco.json.JsonUtil._
 import weco.pipeline.matcher.fixtures.MatcherFixtures
 import weco.pipeline.matcher.generators.WorkStubGenerators
+import weco.pipeline.matcher.models.MatcherResult._
 import weco.pipeline.matcher.models.{
   MatchedIdentifiers,
   MatcherResult,

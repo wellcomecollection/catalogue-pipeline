@@ -6,9 +6,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import weco.catalogue.internal_model.Implicits._
 import weco.fixtures.TestWith
-import weco.json.JsonUtil._
 import weco.messaging.fixtures.SQS.QueuePair
 import weco.messaging.memory.MemoryMessageSender
 import weco.monitoring.memory.MemoryMetrics
@@ -17,6 +15,7 @@ import weco.catalogue.internal_model.work.WorkFsm._
 import weco.catalogue.internal_model.identifiers.{CanonicalId, IdState}
 import weco.catalogue.internal_model.work.generators.MiroWorkGenerators
 import weco.catalogue.internal_model.work.{MergeCandidate, Work}
+import weco.pipeline.matcher.models.MatcherResult._
 import weco.pipeline.merger.fixtures.{
   MatcherResultFixture,
   WorkerServiceFixture
