@@ -5,7 +5,6 @@ import scala.concurrent.Future
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
-import weco.catalogue.internal_model.identifiers.CanonicalId
 import weco.pipeline.matcher.fixtures.MatcherFixtures
 import weco.pipeline.matcher.generators.WorkStubGenerators
 import weco.pipeline.matcher.models.WorkNode
@@ -17,20 +16,17 @@ class WorkGraphStoreTest
     with MatcherFixtures
     with WorkStubGenerators {
 
-  val idA = CanonicalId("AAAAAAAA")
-  val idB = CanonicalId("BBBBBBBB")
-  val idC = CanonicalId("CCCCCCCC")
-
   describe("Get graph of linked works") {
     it("returns nothing if there are no matching graphs") {
       withWorkGraphTable { graphTable =>
         withWorkGraphStore(graphTable) { workGraphStore =>
-          whenReady(
-            workGraphStore.findAffectedWorks(
-              createWorkWith(
-                id = createCanonicalId,
-                version = 0,
-                referencedWorkIds = Set.empty))) {
+          val future = workGraphStore.findAffectedWorks(
+            createWorkWith(
+              id = createCanonicalId,
+              version = 0,
+              referencedWorkIds = Set.empty))
+
+          whenReady(future) {
             _ shouldBe empty
           }
         }

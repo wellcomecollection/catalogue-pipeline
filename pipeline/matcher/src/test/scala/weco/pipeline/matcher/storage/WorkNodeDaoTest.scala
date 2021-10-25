@@ -1,19 +1,18 @@
 package weco.pipeline.matcher.storage
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.matchers.should.Matchers
-
-import javax.naming.ConfigurationException
 import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import org.scanamo.generic.auto._
 import software.amazon.awssdk.services.dynamodb.model.ResourceNotFoundException
-import weco.storage.dynamo.DynamoConfig
-import weco.catalogue.internal_model.generators.IdentifiersGenerators
 import weco.catalogue.internal_model.identifiers.CanonicalId
 import weco.pipeline.matcher.fixtures.MatcherFixtures
+import weco.pipeline.matcher.generators.WorkStubGenerators
 import weco.pipeline.matcher.models.WorkNode
+import weco.storage.dynamo.DynamoConfig
 
+import javax.naming.ConfigurationException
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.language.higherKinds
 
 class WorkNodeDaoTest
@@ -21,10 +20,7 @@ class WorkNodeDaoTest
     with Matchers
     with ScalaFutures
     with MatcherFixtures
-    with IdentifiersGenerators {
-
-  val idA = CanonicalId("AAAAAAAA")
-  val idB = CanonicalId("BBBBBBBB")
+    with WorkStubGenerators {
 
   describe("Get from dynamo") {
     it("returns nothing if ids are not in dynamo") {

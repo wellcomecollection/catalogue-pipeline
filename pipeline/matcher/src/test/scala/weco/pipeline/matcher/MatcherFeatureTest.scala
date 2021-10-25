@@ -45,7 +45,7 @@ class MatcherFeatureTest
 
     withLocalSqsQueue() { queue =>
       withWorkerService(retriever, queue, messageSender) { _ =>
-        val work = createWorkStubWith(referencedIds = Set.empty)
+        val work = createWorkWith(referencedWorkIds = Set.empty)
 
         val expectedWorks =
           Set(
@@ -79,7 +79,7 @@ class MatcherFeatureTest
             val existingWorkVersion = 2
             val updatedWorkVersion = 1
 
-            val workV1 = createWorkStubWith(version = updatedWorkVersion)
+            val workV1 = createWorkWith(version = updatedWorkVersion)
 
             val nodeV2 = WorkNode(
               id = workV1.id,

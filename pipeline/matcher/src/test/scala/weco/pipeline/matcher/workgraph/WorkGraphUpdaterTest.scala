@@ -2,7 +2,6 @@ package weco.pipeline.matcher.workgraph
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.identifiers.CanonicalId
 import weco.pipeline.matcher.fixtures.MatcherFixtures
 import weco.pipeline.matcher.generators.WorkStubGenerators
 import weco.pipeline.matcher.models.{
@@ -16,12 +15,6 @@ class WorkGraphUpdaterTest
     with Matchers
     with MatcherFixtures
     with WorkStubGenerators {
-
-  val idA = CanonicalId("AAAAAAAA")
-  val idB = CanonicalId("BBBBBBBB")
-  val idC = CanonicalId("CCCCCCCC")
-  val idD = CanonicalId("DDDDDDDD")
-  val idE = CanonicalId("EEEEEEEE")
 
   describe("Adding links without existing works") {
     it("updating nothing with A gives A:A") {

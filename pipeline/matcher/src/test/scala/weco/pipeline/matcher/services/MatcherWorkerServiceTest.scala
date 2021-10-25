@@ -31,12 +31,8 @@ class MatcherWorkerServiceTest
     with WorkStubGenerators
     with TimeAssertions {
 
-  private val identifierA = createIdentifier("AAAAAAAA")
-  private val identifierB = createIdentifier("BBBBBBBB")
-  private val identifierC = createIdentifier("CCCCCCCC")
-
   it("matches a Work which doesn't reference any other Works") {
-    val work = createWorkStubWith(id = identifierA)
+    val work = createWorkWith(id = idA)
     val expectedWorks =
       Set(
         MatchedIdentifiers(
@@ -56,10 +52,10 @@ class MatcherWorkerServiceTest
 
   it("matches a Work that points to one other Work") {
     // Work Av1
-    val workAv1 = createWorkStubWith(
-      id = identifierA,
+    val workAv1 = createWorkWith(
+      id = idA,
       version = 1,
-      referencedIds = Set(identifierB)
+      referencedWorkIds = Set(idB)
     )
 
     // Work Av1 matched to B (before B exists hence version is None)
@@ -69,8 +65,8 @@ class MatcherWorkerServiceTest
       Set(
         MatchedIdentifiers(
           identifiers = Set(
-            WorkIdentifier(identifierA.canonicalId, version = Some(1)),
-            WorkIdentifier(identifierB.canonicalId, version = None)
+            WorkIdentifier(idA, version = Some(1)),
+            WorkIdentifier(idB, version = None)
           )
         )
       )
@@ -88,78 +84,75 @@ class MatcherWorkerServiceTest
 
   it("matches Works together") {
     // Work Av1
-    val workAv1 = createWorkStubWith(
-      id = identifierA,
+    val workAv1 = createWorkWith(
+      id = idA,
       version = 1
     )
 
     val expectedWorksAv1 =
       Set(
         MatchedIdentifiers(
-          identifiers =
-            Set(WorkIdentifier(identifierA.canonicalId, version = 1))
+          identifiers = Set(WorkIdentifier(idA, version = 1))
         )
       )
 
     // Work Bv1
-    val workBv1 = createWorkStubWith(
-      id = identifierB,
+    val workBv1 = createWorkWith(
+      id = idB,
       version = 1
     )
 
     val expectedWorksBv1 =
       Set(
         MatchedIdentifiers(
-          identifiers =
-            Set(WorkIdentifier(identifierB.canonicalId, version = 1))
+          identifiers = Set(WorkIdentifier(idB, version = 1))
         )
       )
 
     // Work Av2 matched to B
-    val workAv2 = createWorkStubWith(
-      id = identifierA,
+    val workAv2 = createWorkWith(
+      id = idA,
       version = 2,
-      referencedIds = Set(identifierB)
+      referencedWorkIds = Set(idB)
     )
 
     val expectedWorksAv2 =
       Set(
         MatchedIdentifiers(
           identifiers = Set(
-            WorkIdentifier(identifierA.canonicalId, version = 2),
-            WorkIdentifier(identifierB.canonicalId, version = 1)
+            WorkIdentifier(idA, version = 2),
+            WorkIdentifier(idB, version = 1)
           )
         )
       )
 
     // Work Cv1
-    val workCv1 = createWorkStubWith(
-      id = identifierC,
+    val workCv1 = createWorkWith(
+      id = idC,
       version = 1
     )
 
     val expectedWorksCv1 =
       Set(
         MatchedIdentifiers(
-          identifiers =
-            Set(WorkIdentifier(identifierC.canonicalId, version = 1))
+          identifiers = Set(WorkIdentifier(idC, version = 1))
         )
       )
 
     // Work Bv2 matched to C
-    val workBv2 = createWorkStubWith(
-      id = identifierB,
+    val workBv2 = createWorkWith(
+      id = idB,
       version = 2,
-      referencedIds = Set(identifierC)
+      referencedWorkIds = Set(idC)
     )
 
     val expectedWorksBv2 =
       Set(
         MatchedIdentifiers(
           identifiers = Set(
-            WorkIdentifier(identifierA.canonicalId, version = 2),
-            WorkIdentifier(identifierB.canonicalId, version = 2),
-            WorkIdentifier(identifierC.canonicalId, version = 1)
+            WorkIdentifier(idA, version = 2),
+            WorkIdentifier(idB, version = 2),
+            WorkIdentifier(idC, version = 1)
           )
         )
       )
@@ -181,67 +174,63 @@ class MatcherWorkerServiceTest
 
   it("breaks matched works into individual works") {
     // Work Av1
-    val workAv1 = createWorkStubWith(
-      id = identifierA,
+    val workAv1 = createWorkWith(
+      id = idA,
       version = 1
     )
 
     val expectedWorksAv1 =
       Set(
         MatchedIdentifiers(
-          identifiers =
-            Set(WorkIdentifier(identifierA.canonicalId, version = 1))
+          identifiers = Set(WorkIdentifier(idA, version = 1))
         )
       )
 
     // Work Bv1
-    val workBv1 = createWorkStubWith(
-      id = identifierB,
+    val workBv1 = createWorkWith(
+      id = idB,
       version = 1
     )
 
     val expectedWorksBv1 =
       Set(
         MatchedIdentifiers(
-          identifiers =
-            Set(WorkIdentifier(identifierB.canonicalId, version = 1))
+          identifiers = Set(WorkIdentifier(idB, version = 1))
         )
       )
 
     // Match Work A to Work B
     val workAv2MatchedToB =
-      createWorkStubWith(
-        id = identifierA,
+      createWorkWith(
+        id = idA,
         version = 2,
-        referencedIds = Set(identifierB)
+        referencedWorkIds = Set(idB)
       )
 
     val expectedWorksAv2MatchedToB =
       Set(
         MatchedIdentifiers(
           identifiers = Set(
-            WorkIdentifier(identifierA.canonicalId, version = 2),
-            WorkIdentifier(identifierB.canonicalId, version = 1)
+            WorkIdentifier(idA, version = 2),
+            WorkIdentifier(idB, version = 1)
           )
         )
       )
 
     // A no longer matches B
     val workAv3WithNoMatchingWorks =
-      createWorkStubWith(
-        id = identifierA,
+      createWorkWith(
+        id = idA,
         version = 3
       )
 
     val expectedWorksAv3 =
       Set(
         MatchedIdentifiers(
-          identifiers =
-            Set(WorkIdentifier(identifierA.canonicalId, version = 3))
+          identifiers = Set(WorkIdentifier(idA, version = 3))
         ),
         MatchedIdentifiers(
-          identifiers =
-            Set(WorkIdentifier(identifierB.canonicalId, version = 1))
+          identifiers = Set(WorkIdentifier(idB, version = 1))
         )
       )
 
@@ -264,16 +253,15 @@ class MatcherWorkerServiceTest
   }
 
   it("does not match a lower version") {
-    val workAv2 = createWorkStubWith(
-      id = identifierA,
+    val workAv2 = createWorkWith(
+      id = idA,
       version = 2
     )
 
     val expectedWorkAv2 =
       Set(
         MatchedIdentifiers(
-          identifiers =
-            Set(WorkIdentifier(identifierA.canonicalId, version = 2))
+          identifiers = Set(WorkIdentifier(idA, version = 2))
         )
       )
 
@@ -290,8 +278,8 @@ class MatcherWorkerServiceTest
 
           // Work V1 is sent but not matched
           val workAv1 =
-            createWorkStubWith(
-              id = identifierA,
+            createWorkWith(
+              id = idA,
               version = 1
             )
 
@@ -310,16 +298,15 @@ class MatcherWorkerServiceTest
   }
 
   it("does not match an existing version with different information") {
-    val workAv2 = createWorkStubWith(
-      id = identifierA,
+    val workAv2 = createWorkWith(
+      id = idA,
       version = 2
     )
 
     val expectedWorkAv2 =
       Set(
         MatchedIdentifiers(
-          identifiers =
-            Set(WorkIdentifier(identifierA.canonicalId, version = 2))
+          identifiers = Set(WorkIdentifier(idA, version = 2))
         )
       )
 
@@ -336,10 +323,10 @@ class MatcherWorkerServiceTest
 
           // Work V1 is sent but not matched
           val differentWorkAv2 =
-            createWorkStubWith(
-              id = identifierA,
+            createWorkWith(
+              id = idA,
               version = 2,
-              referencedIds = Set(identifierB)
+              referencedWorkIds = Set(idB)
             )
 
           sendWork(differentWorkAv2, retriever, queue)
