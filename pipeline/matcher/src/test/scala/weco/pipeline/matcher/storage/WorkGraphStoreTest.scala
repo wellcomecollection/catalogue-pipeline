@@ -47,7 +47,8 @@ class WorkGraphStoreTest
               version = 0,
               linkedIds = Nil,
               componentId = ciHash(idA))
-          put(dynamoClient, graphTable.name)(work)
+
+          putTableItem(work, table = graphTable)
 
           val future =
             workGraphStore.findAffectedWorks(createWorkWith(idA, 0, Set.empty))
@@ -74,8 +75,8 @@ class WorkGraphStoreTest
               version = 0,
               linkedIds = Nil,
               componentId = ciHash(idB))
-          put(dynamoClient, graphTable.name)(workA)
-          put(dynamoClient, graphTable.name)(workB)
+
+          putTableItems(items = Seq(workA, workB), table = graphTable)
 
           val future =
             workGraphStore.findAffectedWorks(createWorkWith(idA, 0, Set(idB)))
@@ -103,8 +104,7 @@ class WorkGraphStoreTest
               linkedIds = Nil,
               componentId = ciHash(idA, idB))
 
-          put(dynamoClient, graphTable.name)(workA)
-          put(dynamoClient, graphTable.name)(workB)
+          putTableItems(items = Seq(workA, workB), table = graphTable)
 
           val future =
             workGraphStore.findAffectedWorks(
@@ -139,9 +139,7 @@ class WorkGraphStoreTest
             linkedIds = Nil,
             componentId = ciHash(idA, idB, idC))
 
-          put(dynamoClient, graphTable.name)(workA)
-          put(dynamoClient, graphTable.name)(workB)
-          put(dynamoClient, graphTable.name)(workC)
+          putTableItems(items = Seq(workA, workB, workC), table = graphTable)
 
           val future =
             workGraphStore.findAffectedWorks(createWorkWith(idA, 0, Set.empty))
@@ -176,9 +174,7 @@ class WorkGraphStoreTest
               linkedIds = Nil,
               componentId = ciHash(idC))
 
-          put(dynamoClient, graphTable.name)(workA)
-          put(dynamoClient, graphTable.name)(workB)
-          put(dynamoClient, graphTable.name)(workC)
+          putTableItems(items = Seq(workA, workB, workC), table = graphTable)
 
           val work =
             createWorkWith(idB, version = 0, referencedWorkIds = Set(idC))
@@ -207,7 +203,7 @@ class WorkGraphStoreTest
             componentId = ciHash(idA, idB))
 
           whenReady(workGraphStore.put(Set(workNodeA, workNodeB))) { _ =>
-            val savedWorks = scan[WorkNode](dynamoClient, graphTable.name)
+            val savedWorks = scanTable[WorkNode](graphTable)
               .map(_.right.get)
             savedWorks should contain theSameElementsAs List(
               workNodeA,

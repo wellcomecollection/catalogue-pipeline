@@ -4,7 +4,6 @@ import org.scalatest.EitherValues
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import org.scanamo.syntax._
 import weco.storage.locking.LockFailure
 import weco.storage.locking.memory.{MemoryLockDao, MemoryLockingService}
 import weco.fixtures.TimeAssertions
@@ -50,7 +49,7 @@ class WorkMatcherTest
                 MatchedIdentifiers(Set(WorkIdentifier(work.id, work.version))))
 
             val savedLinkedWork =
-              get[WorkNode](dynamoClient, graphTable.name)("id" === work.id)
+              getTableItem[WorkNode](work.id.underlying, graphTable)
                 .map(_.right.value)
 
             savedLinkedWork shouldBe Some(
@@ -86,7 +85,7 @@ class WorkMatcherTest
                     WorkIdentifier(identifierA.canonicalId, work.version),
                     WorkIdentifier(identifierB.canonicalId, None))))
 
-            val savedWorkNodes = scan[WorkNode](dynamoClient, graphTable.name)
+            val savedWorkNodes = scanTable[WorkNode](graphTable)
               .map(_.right.value)
 
             savedWorkNodes should contain theSameElementsAs List(
@@ -136,9 +135,11 @@ class WorkMatcherTest
             linkedIds = Nil,
             componentId = ciHash(identifierC.canonicalId)
           )
-          put(dynamoClient, graphTable.name)(existingWorkA)
-          put(dynamoClient, graphTable.name)(existingWorkB)
-          put(dynamoClient, graphTable.name)(existingWorkC)
+
+          putTableItems(
+            items = Seq(existingWorkA, existingWorkB, existingWorkC),
+            table = graphTable
+          )
 
           val work = createWorkStubWith(
             id = identifierB,
@@ -156,7 +157,7 @@ class WorkMatcherTest
                     WorkIdentifier(identifierB.canonicalId, 2),
                     WorkIdentifier(identifierC.canonicalId, 1))))
 
-            val savedNodes = scan[WorkNode](dynamoClient, graphTable.name)
+            val savedNodes = scanTable[WorkNode](graphTable)
               .map(_.right.value)
 
             savedNodes should contain theSameElementsAs List(

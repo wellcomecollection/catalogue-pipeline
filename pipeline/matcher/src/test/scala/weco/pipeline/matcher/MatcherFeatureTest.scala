@@ -87,7 +87,8 @@ class MatcherFeatureTest
               linkedIds = Nil,
               componentId = ciHash(workV1.id)
             )
-            put(dynamoClient, graphTable.name)(nodeV2)
+
+            putTableItem(nodeV2, table = graphTable)
 
             sendWork(workV1, retriever, queue)
 

@@ -6,7 +6,6 @@ import org.scalatest.matchers.should.Matchers
 
 import javax.naming.ConfigurationException
 import org.scalatest.funspec.AnyFunSpec
-import org.scanamo.syntax._
 import org.scanamo.generic.auto._
 import software.amazon.awssdk.services.dynamodb.model.{
   ResourceNotFoundException,
@@ -59,8 +58,7 @@ class WorkNodeDaoTest
               linkedIds = Nil,
               componentId = ciHash(idA, idB))
 
-          put(dynamoClient, table.name)(existingWorkA)
-          put(dynamoClient, table.name)(existingWorkB)
+          putTableItems(items = Seq(existingWorkA, existingWorkB), table = table)
 
           whenReady(workNodeDao.get(Set(idA, idB))) {
             _ shouldBe Set(existingWorkA, existingWorkB)
@@ -108,8 +106,7 @@ class WorkNodeDaoTest
               linkedIds = Nil,
               componentId = ciHash(idA, idB))
 
-          put(dynamoClient, table.name)(existingWorkNodeA)
-          put(dynamoClient, table.name)(existingWorkNodeB)
+          putTableItems(items = Seq(existingWorkNodeA, existingWorkNodeB), table = table)
 
           whenReady(matcherGraphDao.getByComponentIds(Set(ciHash(idA, idB)))) {
             _ shouldBe Set(existingWorkNodeA, existingWorkNodeB)
@@ -140,7 +137,8 @@ class WorkNodeDaoTest
               id = idA,
               componentId = ciHash(idA, idB),
               version = "five")
-          put(dynamoClient, table.name)(badRecord)
+
+          putTableItem(badRecord, table = table)
 
           whenReady(workNodeDao.getByComponentIds(Set(ciHash(idA, idB))).failed) {
             _ shouldBe a[RuntimeException]
@@ -160,9 +158,7 @@ class WorkNodeDaoTest
             linkedIds = List(idA),
             componentId = ciHash(idA, idB))
           whenReady(workNodeDao.put(Set(work))) { _ =>
-            val savedLinkedWork =
-              get[WorkNode](dynamoClient, table.name)("id" === idA)
-            savedLinkedWork shouldBe Some(Right(work))
+            getTableItem[WorkNode](idA.underlying, table) shouldBe Some(Right(work))
           }
         }
       }
@@ -209,7 +205,8 @@ class WorkNodeDaoTest
         withWorkNodeDao(table) { workNodeDao =>
           case class BadRecord(id: CanonicalId, version: String)
           val badRecord: BadRecord = BadRecord(id = idA, version = "six")
-          put(dynamoClient, table.name)(badRecord)
+
+          putTableItem(badRecord, table = table)
 
           whenReady(workNodeDao.get(Set(idA)).failed) {
             _ shouldBe a[RuntimeException]

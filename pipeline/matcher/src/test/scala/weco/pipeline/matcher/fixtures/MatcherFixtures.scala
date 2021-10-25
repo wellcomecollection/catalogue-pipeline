@@ -2,14 +2,7 @@ package weco.pipeline.matcher.fixtures
 
 import org.apache.commons.codec.digest.DigestUtils
 import org.scanamo.generic.semiauto.deriveDynamoFormat
-import org.scanamo.query.UniqueKey
-import org.scanamo.{
-  DynamoFormat,
-  DynamoReadError,
-  Scanamo,
-  Table => ScanamoTable
-}
-import software.amazon.awssdk.services.dynamodb.DynamoDbClient
+import org.scanamo.DynamoFormat
 import weco.catalogue.internal_model.identifiers.CanonicalId
 import weco.fixtures.TestWith
 import weco.messaging.fixtures.SQS
@@ -132,17 +125,4 @@ trait MatcherFixtures
 
   def ciHash(ids: CanonicalId*): String =
     DigestUtils.sha256Hex(ids.sorted.map(_.underlying).mkString("+"))
-
-  def get[T](dynamoClient: DynamoDbClient, tableName: String)(
-    key: UniqueKey[_])(
-    implicit format: DynamoFormat[T]): Option[Either[DynamoReadError, T]] =
-    Scanamo(dynamoClient).exec { ScanamoTable[T](tableName).get(key) }
-
-  def put[T](dynamoClient: DynamoDbClient, tableName: String)(obj: T)(
-    implicit format: DynamoFormat[T]) =
-    Scanamo(dynamoClient).exec { ScanamoTable[T](tableName).put(obj) }
-
-  def scan[T](dynamoClient: DynamoDbClient, tableName: String)(
-    implicit format: DynamoFormat[T]): List[Either[DynamoReadError, T]] =
-    Scanamo(dynamoClient).exec { ScanamoTable[T](tableName).scan() }
 }
