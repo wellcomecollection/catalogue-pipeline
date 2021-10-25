@@ -236,7 +236,7 @@ class WorkNodeDaoTest
       intercept[ConfigurationException] {
         new WorkNodeDao(
           dynamoClient,
-          DynamoConfig("something", None)
+          DynamoConfig("something", maybeIndexName = None)
         )
       }
     }
