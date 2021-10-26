@@ -1,6 +1,8 @@
 package weco.pipeline.transformer.tei
 
 import grizzled.slf4j.Logging
+import weco.catalogue.internal_model.identifiers.IdState.{Unidentifiable, Unminted}
+import weco.catalogue.internal_model.work.{ContributionRole, Contributor, Person}
 import weco.pipeline.transformer.result.Result
 
 import scala.util.Try
@@ -65,6 +67,15 @@ class TeiXml(val xml: Elem) extends Logging {
       case Nil             => Left(new RuntimeException("No title found!"))
       case _               => Left(new RuntimeException("More than one title node!"))
     }
+  }
+
+  def contributors: List[Contributor[Unminted]] = {
+    val nodes =
+      (xml \\ "handDesc" \ "handNote" \ "persName").filter(n => (n \@ "role") == "scr")
+      nodes.map{ node =>
+        Contributor(Unidentifiable,Person(node.text), List(ContributionRole("scribe")))
+      }.toList
+
   }
 
   private def getId: Result[String] = TeiOps.getIdFrom(xml)

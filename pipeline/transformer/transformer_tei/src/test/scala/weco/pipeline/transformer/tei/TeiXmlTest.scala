@@ -3,6 +3,7 @@ package weco.pipeline.transformer.tei
 import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import weco.catalogue.internal_model.work.{ContributionRole, Contributor, Person}
 import weco.pipeline.transformer.tei.generators.TeiGenerators
 import weco.sierra.generators.SierraIdentifierGenerators
 
@@ -144,4 +145,18 @@ class TeiXmlTest
       err.left.value shouldBe a[RuntimeException]
     }
   }
+
+  describe("scribe") {
+    it("extracts a single scribe from persName") {
+      val result = new TeiXml(teiXml(id, scribes = List(scribe("Tony Stark")))).contributors
+
+      result shouldBe List(Contributor(Person("Tony Stark"), List(ContributionRole("scribe"))))
+    }
+    it("extracts a list of scribes from persName") {
+      val result = new TeiXml(teiXml(id, scribes = List(scribe("Tony Stark"), scribe("Peter Parker"), scribe("Steve Rogers")))).contributors
+
+      result shouldBe List(Contributor(Person("Tony Stark"), List(ContributionRole("scribe"))),Contributor(Person("Peter Parker"), List(ContributionRole("scribe"))),Contributor(Person("Steve Rogers"), List(ContributionRole("scribe"))))
+    }
+  }
+
 }
