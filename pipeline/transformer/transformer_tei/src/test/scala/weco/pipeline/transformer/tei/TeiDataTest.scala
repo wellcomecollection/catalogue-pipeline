@@ -91,7 +91,7 @@ class TeiDataTest
     val firstInnerTeiData = TeiData(
       id = "id_1",
       title = "item title",
-      authors = contributors
+      contributors = contributors
     )
     val teiData = TeiData(
       id = "id",

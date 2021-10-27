@@ -16,7 +16,7 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
     parts: List[Elem] = Nil,
     catalogues: List[Elem] = Nil,
     authors: List[Elem] = Nil,
-    scribes: List[Elem] = Nil,
+    handNotes: List[Elem] = Nil,
   ): Elem =
     <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id={id}>
       <teiHeader>
@@ -34,9 +34,7 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
               {parts}
               <physDesc>
                 <handDesc>
-                  <handNote scope="sole">
-                    {scribes}
-                  </handNote>
+                  {handNotes}
                 </handDesc>
               </physDesc>
             </msDesc>
@@ -98,6 +96,18 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
       case Some(k) => <author key={k}>{persNames}</author>
       case None    => <author>{persNames}</author>
     }
+
+  def handNotes(label: String = "", persNames: List[Elem] = Nil, scribe: Option[String] = None, locus: Option[Elem] = None) = {
+    val scribeAttribute = scribe.map(s=>Attribute("scribe", Text(s), Null)).getOrElse(Null)
+    <handNote>
+      {locus.getOrElse(NodeSeq.Empty)}{label}{persNames}
+  </handNote> % scribeAttribute
+  }
+
+  def locus(label: String,target: Option[String] = None) = target match {
+case Some(t) => <locus target={t}>{label}</locus>
+    case None => <locus>{label}</locus>
+  }
 
   def scribe(name: String) = persName(label = name, role = Some("scr"))
 

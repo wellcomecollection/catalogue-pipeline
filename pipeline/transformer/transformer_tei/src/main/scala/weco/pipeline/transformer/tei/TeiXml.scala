@@ -69,14 +69,15 @@ class TeiXml(val xml: Elem) extends Logging {
     }
   }
 
-  def contributors: List[Contributor[Unminted]] = {
-    val nodes =
-      (xml \\ "handDesc" \ "handNote" \ "persName").filter(n => (n \@ "role") == "scr")
-      nodes.map{ node =>
-        Contributor(Unidentifiable,Person(node.text), List(ContributionRole("scribe")))
-      }.toList
-
-  }
+  def scribes: List[Contributor[Unminted]] = (xml \\"physDesc" \ "handDesc" \ "handNote").toList.flatMap { n =>
+        n.attribute("scribe") match {
+          case Some(_) => List(Contributor(Unidentifiable, Person(n.text.trim), List(ContributionRole("scribe"))))
+          case None => val nodes = (n \ "persName").filter(n => (n \@ "role") == "scr")
+            nodes.map{ node =>
+              Contributor(Unidentifiable,Person(node.text.trim), List(ContributionRole("scribe")))
+            }.toList
+        }
+      }
 
   private def getId: Result[String] = TeiOps.getIdFrom(xml)
 

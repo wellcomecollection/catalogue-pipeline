@@ -102,7 +102,7 @@ object TeiNestedData extends Logging {
               languages = languages,
               languageNotes = languageNotes,
               nestedTeiData = items,
-              authors = authors)
+              contributors = authors)
       }
       .toList
       .sequence
