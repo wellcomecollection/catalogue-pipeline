@@ -296,15 +296,6 @@ class TeiNestedDataTest extends AnyFunSpec with TeiGenerators with Matchers with
     result shouldBe a[Right[_, _]]
     result.value.head.contributors shouldBe List(Contributor(Person(label = "Sarah Connor", id = Identifiable(SourceIdentifier(IdentifierType.Fihrist, "Person", "12345"))), List(ContributionRole("author"))))
   }
-  it("assigns the scribe to the item if there is an item id"){
-    val itemId = s"#${id}_item1"
-    val result = TeiNestedData.nestedTeiData(teiXml(id,
-      handNotes = List(
-        handNotes(label = "Wanda Maximoff", scribe = Some("sole"), locus= Some(locus(label = "p 22-24", target =Some(itemId))))
-      ), items = List(msItem(id = itemId))),
-    wrapperTitle)
-
-    result.value.head.contributors shouldBe List(Contributor(Person("Steve Rogers"), List(ContributionRole("scribe"))),Contributor(Person("Bruce Banner"), List(ContributionRole("scribe"))))
-
-  }
+// test that we extract scribe for items
+  //test that we extract scribe for parts
 }

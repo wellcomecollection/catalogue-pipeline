@@ -1,10 +1,8 @@
 package weco.pipeline.transformer.tei
 
 import grizzled.slf4j.Logging
-import weco.catalogue.internal_model.identifiers.IdState.{Unidentifiable, Unminted}
-import weco.catalogue.internal_model.work.{ContributionRole, Contributor, Person}
 import weco.pipeline.transformer.result.Result
-import weco.pipeline.transformer.tei.transformers.{TeiLanguages, TeiNestedData}
+import weco.pipeline.transformer.tei.transformers.{TeiContributors, TeiLanguages, TeiNestedData}
 
 import scala.util.Try
 import scala.xml.{Elem, XML}
@@ -20,16 +18,16 @@ class TeiXml(val xml: Elem) extends Logging {
       languageData <- TeiLanguages(xml)
       (languages, languageNotes) = languageData
       nestedData <- TeiNestedData.nestedTeiData(xml, title)
-    } yield
-      TeiData(
-        id = id,
-        title = title,
-        bNumber = bNumber,
-        description = summary,
-        languages = languages,
-        languageNotes = languageNotes,
-        contributors = scribes,
-        nestedTeiData = nestedData)
+    } yield TeiData(
+      id = id,
+      title = title,
+      bNumber = bNumber,
+      description = summary,
+      languages = languages,
+      languageNotes = languageNotes,
+      contributors = TeiContributors.scribes(xml,target = None),
+      nestedTeiData = nestedData
+    )
 
   /**
     * All the identifiers of the TEI file are in a `msIdentifier` bloc.
@@ -88,16 +86,6 @@ class TeiXml(val xml: Elem) extends Logging {
       case _               => Left(new RuntimeException("More than one title node!"))
     }
   }
-
-  private def scribes: List[Contributor[Unminted]] = (xml \\"physDesc" \ "handDesc" \ "handNote").toList.flatMap { n =>
-        n.attribute("scribe") match {
-          case Some(_) => List(Contributor(Unidentifiable, Person(n.text.trim), List(ContributionRole("scribe"))))
-          case None => val nodes = (n \ "persName").filter(n => (n \@ "role") == "scr")
-            nodes.map{ node =>
-              Contributor(Unidentifiable,Person(node.text.trim), List(ContributionRole("scribe")))
-            }.toList
-        }
-      }
 
   private def getId: Result[String] = TeiOps.getIdFrom(xml)
 

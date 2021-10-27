@@ -2,28 +2,20 @@ package weco.pipeline.transformer.tei.transformers
 
 import cats.instances.either._
 import cats.syntax.traverse._
-import weco.catalogue.internal_model.identifiers.IdState.Identifiable
-import weco.catalogue.internal_model.identifiers.{
-  IdState,
-  IdentifierType,
-  SourceIdentifier
-}
-import weco.catalogue.internal_model.work.{
-  ContributionRole,
-  Contributor,
-  Person
-}
+import weco.catalogue.internal_model.identifiers.IdState.{Identifiable, Unidentifiable, Unminted}
+import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, SourceIdentifier}
+import weco.catalogue.internal_model.work.{ContributionRole, Contributor, Person}
 import weco.pipeline.transformer.result.Result
 
-import scala.xml.Node
+import scala.xml.{Elem, Node, Text, XML}
 
-object TeiAuthors {
+object TeiContributors {
 
   /**
     * author nodes appear only within msItem. They contain the name of the Author of the work and optionally the id of the Author.
     * The Id of the Author refers to two different authorities depending on whether the work is an Arabic manuscript or not
     */
-  def apply(node: Node,
+  def authors(node: Node,
             isFihrist: Boolean): Result[List[Contributor[IdState.Unminted]]] =
     (node \ "author")
       .map { n =>
@@ -39,6 +31,51 @@ object TeiAuthors {
       }
       .toList
       .sequence
+
+
+  def scribes(xml: Elem,target: Option[String]): List[Contributor[Unminted]] =
+    (xml \\ "physDesc" \ "handDesc" \ "handNote").toList.flatMap { n: Node =>
+      n.attribute("scribe") match {
+        case Some(_) =>
+      val nodeIds = (n \ "locus").map { locus => (locus \@ "target").trim.replaceAll("#", "").split(" ")}.toList.flatten
+
+      (nodeIds, target) match {
+        case (Nil, None) =>
+
+              List(
+                Contributor(
+                  Unidentifiable,
+                  Person(n.text.trim),
+                  List(ContributionRole("scribe"))
+                )
+              )
+
+
+        case (_::_, None) => println("bu");Nil
+        case (nodeIds, Some(targetId)) if nodeIds.contains(targetId) =>
+          val label = XML.loadString(n.toString()).child.collect {
+            case t: Text => t.text
+          }.mkString.trim
+          List(
+            Contributor(
+              Unidentifiable,
+              Person(label),
+              List(ContributionRole("scribe"))
+            )
+          )
+        case _ => ???
+      }
+      case None =>
+        val nodes = (n \ "persName").filter(n => (n \@ "role") == "scr")
+        nodes.map { node =>
+          Contributor(
+            Unidentifiable,
+            Person(node.text.trim),
+            List(ContributionRole("scribe"))
+          )
+        }.toList
+    }
+    }
 
   /**
     * Author nodes can be in 2 forms:

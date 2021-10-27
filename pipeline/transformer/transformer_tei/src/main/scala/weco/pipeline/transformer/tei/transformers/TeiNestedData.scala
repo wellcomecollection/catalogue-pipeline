@@ -4,6 +4,7 @@ import cats.instances.either._
 import cats.syntax.traverse._
 import grizzled.slf4j.Logging
 import weco.pipeline.transformer.result.Result
+import weco.pipeline.transformer.tei.transformers.TeiContributors.{authors, scribes}
 import weco.pipeline.transformer.tei.{TeiData, TeiOps}
 
 import scala.xml.{Elem, Node, NodeSeq}
@@ -23,6 +24,7 @@ object TeiNestedData extends Logging {
     for {
       catalogues <- getCatalogues(xml)
       nestedItems <- nestedTeiDataFromItems(
+        xml = xml,
         wrapperTitle = wrapperTitle,
         catalogues = catalogues,
         nodeSeq = xml \\ "msDesc" \ "msContents")
@@ -57,6 +59,7 @@ object TeiNestedData extends Logging {
             (languages, languageNotes) = languageData
             partTitle = s"$wrapperTitle part $i"
             items <- extractLowerLevelItems(
+              xml,
               partTitle,
               node \ "msContents",
               catalogues)
@@ -77,7 +80,8 @@ object TeiNestedData extends Logging {
     * Extract information about inner works for single part manuscripts.
     * For single part manuscripts, inner works are described in msItem elements.
     */
-  private def nestedTeiDataFromItems(wrapperTitle: String,
+  private def nestedTeiDataFromItems(xml: Elem,
+                                      wrapperTitle: String,
                                      catalogues: List[String],
                                      nodeSeq: NodeSeq): Result[List[TeiData]] =
     (nodeSeq \ "msItem").zipWithIndex
@@ -93,8 +97,8 @@ object TeiNestedData extends Logging {
             id <- TeiOps.getIdFrom(node)
             languageData <- TeiLanguages.parseLanguages(node)
             (languages, languageNotes) = languageData
-            items <- extractLowerLevelItems(title, node, catalogues)
-            authors <- TeiAuthors.apply(node, containsFihrist(catalogues))
+            items <- extractLowerLevelItems(xml, title, node, catalogues)
+            authors <- authors(node, containsFihrist(catalogues))
           } yield
             TeiData(
               id = id,
@@ -102,7 +106,7 @@ object TeiNestedData extends Logging {
               languages = languages,
               languageNotes = languageNotes,
               nestedTeiData = items,
-              contributors = authors)
+              contributors = authors ++ scribes(xml = xml, target = Some(id)))
       }
       .toList
       .sequence
@@ -114,6 +118,7 @@ object TeiNestedData extends Logging {
     * we just don't extract lower level items for manuscripts in the Fihrist catalogue.
     */
   private def extractLowerLevelItems(
+    xml: Elem,
     partTitle: String,
     nodes: NodeSeq,
     catalogues: List[String]): Either[Throwable, List[TeiData]] =
@@ -122,6 +127,7 @@ object TeiNestedData extends Logging {
         Right(Nil)
       case _ =>
         nestedTeiDataFromItems(
+          xml = xml,
           wrapperTitle = partTitle,
           catalogues = catalogues,
           nodeSeq = nodes)

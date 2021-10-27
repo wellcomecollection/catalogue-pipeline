@@ -145,28 +145,12 @@ class TeiXmlTest
     }
   }
 
-  describe("scribe") {
-    it("extracts a single scribe from handNote/persName") {
-      val result = new TeiXml(teiXml(id, handNotes = List(handNotes(persNames = List(scribe("Tony Stark")))))).parse
 
-      result.value.contributors shouldBe List(Contributor(Person("Tony Stark"), List(ContributionRole("scribe"))))
-    }
     it("extracts a list of scribes from handNote/persName") {
       val result = new TeiXml(teiXml(id, handNotes = List(handNotes(persNames = List(scribe("Tony Stark"), scribe("Peter Parker"), scribe("Steve Rogers")))))).parse
 
       result.value.contributors shouldBe List(Contributor(Person("Tony Stark"), List(ContributionRole("scribe"))),Contributor(Person("Peter Parker"), List(ContributionRole("scribe"))),Contributor(Person("Steve Rogers"), List(ContributionRole("scribe"))))
     }
-    it("doesn't extract a contributor from from handNote/persName if it doesn't have role=scr"){
-      val result = new TeiXml(teiXml(id, handNotes = List(handNotes(persNames = List(persName("Clark Kent")))))).parse
 
-      result.value.contributors shouldBe Nil
-    }
-    it("extracts scribes from handNote with scribe attribute"){
-      val result = new TeiXml(teiXml(id, handNotes = List(handNotes(label = "Steve Rogers", scribe = Some("sole")),handNotes(label = "Bruce Banner", scribe = Some("sole"))))).parse
-
-      result.value.contributors shouldBe List(Contributor(Person("Steve Rogers"), List(ContributionRole("scribe"))),Contributor(Person("Bruce Banner"), List(ContributionRole("scribe"))))
-    }
-
-  }
 
 }
