@@ -37,9 +37,9 @@ class TeiXmlTest
     val titleString = "This is the title"
     val result =
       TeiXml(id, teiXml(id = id, title = titleElem(titleString)).toString())
-        .flatMap(_.title)
+        .flatMap(_.parse)
     result shouldBe a[Right[_, _]]
-    result.right.get shouldBe titleString
+    result.value.title shouldBe titleString
   }
 
   it("gets the top level title even if there's only one item") {
@@ -53,9 +53,9 @@ class TeiXmlTest
         items = List(msItem(s"${id}_1", List(itemTitle(theItemTitle)))),
         title = titleElem(topLevelTitle)
       ).toString()
-    ).flatMap(_.title)
+    ).flatMap(_.parse)
 
-    result.value shouldBe topLevelTitle
+    result.value.title shouldBe topLevelTitle
   }
 
   it("fails if there are more than one title node") {
@@ -64,7 +64,7 @@ class TeiXmlTest
     val titleStm = { <idno type="msID">{titleString1}</idno>
       <idno type="msID">{titleString2}</idno> }
     val result =
-      TeiXml(id, teiXml(id = id, title = titleStm).toString()).flatMap(_.title)
+      TeiXml(id, teiXml(id = id, title = titleStm).toString()).flatMap(_.parse)
     result shouldBe a[Left[_, _]]
     result.left.get.getMessage should include("title")
   }
@@ -76,7 +76,7 @@ class TeiXmlTest
       TeiXml(
         id,
         teiXml(id = id, identifiers = Some(sierraIdentifiers(bnumber)))
-          .toString()).value.bNumber.value shouldBe Some(bnumber)
+          .toString()).flatMap(_.parse).value.bNumber shouldBe Some(bnumber)
     }
 
     it("fails if there's more than one b-number in the XML") {
@@ -101,7 +101,7 @@ class TeiXmlTest
 
       val xml = new TeiXml(xmlValue)
 
-      val err = xml.bNumber
+      val err = xml.parse
       err shouldBe a[Left[_, _]]
       err.left.value shouldBe a[RuntimeException]
     }
@@ -115,15 +115,15 @@ class TeiXmlTest
         id,
         teiXml(id = id, summary = Some(summary(description)))
           .toString()
-      ).value
+      ).flatMap(_.parse)
 
-      xml.summary.value shouldBe Some("a manuscript about stuff")
+      xml.value.description shouldBe Some("a manuscript about stuff")
     }
 
     it("fails parsing if there's more than one summary node") {
       val bnumber = createSierraBibNumber.withCheckDigit
 
-      val xml = new TeiXml(
+      val err = new TeiXml(
         <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id={id}>
           <teiHeader>
             <fileDesc>
@@ -138,9 +138,8 @@ class TeiXmlTest
             </fileDesc>
           </teiHeader>
         </TEI>
-      )
+      ).parse
 
-      val err = xml.summary
       err shouldBe a[Left[_, _]]
       err.left.value shouldBe a[RuntimeException]
     }
@@ -148,24 +147,24 @@ class TeiXmlTest
 
   describe("scribe") {
     it("extracts a single scribe from handNote/persName") {
-      val result = new TeiXml(teiXml(id, handNotes = List(handNotes(persNames = List(scribe("Tony Stark")))))).scribes
+      val result = new TeiXml(teiXml(id, handNotes = List(handNotes(persNames = List(scribe("Tony Stark")))))).parse
 
-      result shouldBe List(Contributor(Person("Tony Stark"), List(ContributionRole("scribe"))))
+      result.value.contributors shouldBe List(Contributor(Person("Tony Stark"), List(ContributionRole("scribe"))))
     }
     it("extracts a list of scribes from handNote/persName") {
-      val result = new TeiXml(teiXml(id, handNotes = List(handNotes(persNames = List(scribe("Tony Stark"), scribe("Peter Parker"), scribe("Steve Rogers")))))).scribes
+      val result = new TeiXml(teiXml(id, handNotes = List(handNotes(persNames = List(scribe("Tony Stark"), scribe("Peter Parker"), scribe("Steve Rogers")))))).parse
 
-      result shouldBe List(Contributor(Person("Tony Stark"), List(ContributionRole("scribe"))),Contributor(Person("Peter Parker"), List(ContributionRole("scribe"))),Contributor(Person("Steve Rogers"), List(ContributionRole("scribe"))))
+      result.value.contributors shouldBe List(Contributor(Person("Tony Stark"), List(ContributionRole("scribe"))),Contributor(Person("Peter Parker"), List(ContributionRole("scribe"))),Contributor(Person("Steve Rogers"), List(ContributionRole("scribe"))))
     }
     it("doesn't extract a contributor from from handNote/persName if it doesn't have role=scr"){
-      val result = new TeiXml(teiXml(id, handNotes = List(handNotes(persNames = List(persName("Clark Kent")))))).scribes
+      val result = new TeiXml(teiXml(id, handNotes = List(handNotes(persNames = List(persName("Clark Kent")))))).parse
 
-      result shouldBe Nil
+      result.value.contributors shouldBe Nil
     }
     it("extracts scribes from handNote with scribe attribute"){
-      val result = new TeiXml(teiXml(id, handNotes = List(handNotes(label = "Steve Rogers", scribe = Some("sole")),handNotes(label = "Bruce Banner", scribe = Some("sole"))))).scribes
+      val result = new TeiXml(teiXml(id, handNotes = List(handNotes(label = "Steve Rogers", scribe = Some("sole")),handNotes(label = "Bruce Banner", scribe = Some("sole"))))).parse
 
-      result shouldBe List(Contributor(Person("Steve Rogers"), List(ContributionRole("scribe"))),Contributor(Person("Bruce Banner"), List(ContributionRole("scribe"))))
+      result.value.contributors shouldBe List(Contributor(Person("Steve Rogers"), List(ContributionRole("scribe"))),Contributor(Person("Bruce Banner"), List(ContributionRole("scribe"))))
     }
 
   }

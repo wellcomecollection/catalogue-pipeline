@@ -4,12 +4,32 @@ import grizzled.slf4j.Logging
 import weco.catalogue.internal_model.identifiers.IdState.{Unidentifiable, Unminted}
 import weco.catalogue.internal_model.work.{ContributionRole, Contributor, Person}
 import weco.pipeline.transformer.result.Result
+import weco.pipeline.transformer.tei.transformers.{TeiLanguages, TeiNestedData}
 
 import scala.util.Try
 import scala.xml.{Elem, XML}
 class TeiXml(val xml: Elem) extends Logging {
   val id: String =
     getId.getOrElse(throw new RuntimeException(s"Could not find an id in XML!"))
+
+  def parse: Result[TeiData] =
+    for {
+      summary <- summary
+      bNumber <- bNumber
+      title <- title
+      languageData <- TeiLanguages(xml)
+      (languages, languageNotes) = languageData
+      nestedData <- TeiNestedData.nestedTeiData(xml, title)
+    } yield
+      TeiData(
+        id = id,
+        title = title,
+        bNumber = bNumber,
+        description = summary,
+        languages = languages,
+        languageNotes = languageNotes,
+        contributors = scribes,
+        nestedTeiData = nestedData)
 
   /**
     * All the identifiers of the TEI file are in a `msIdentifier` bloc.
@@ -34,7 +54,7 @@ class TeiXml(val xml: Elem) extends Logging {
     * </TEI>
     *
     */
-  def bNumber: Result[Option[String]] = {
+  private def bNumber: Result[Option[String]] = {
     val identifiersNodes = xml \\ "msDesc" \ "msIdentifier" \ "altIdentifier"
     val seq = (identifiersNodes.filter(
       n => (n \@ "type").toLowerCase == "sierra"
@@ -46,7 +66,7 @@ class TeiXml(val xml: Elem) extends Logging {
     }
   }
 
-  def summary: Result[Option[String]] = TeiOps.summary(xml \\ "msDesc")
+  private def summary: Result[Option[String]] = TeiOps.summary(xml \\ "msDesc")
 
   /**
     * In an XML like this:
@@ -58,7 +78,7 @@ class TeiXml(val xml: Elem) extends Logging {
     *       </publicationStmt>
     * Extract "Well. Jav. 4" as the title
     */
-  def title: Result[String] = {
+  private def title: Result[String] = {
     val nodes =
       (xml \ "teiHeader" \ "fileDesc" \ "publicationStmt" \ "idno").toList
     val maybeTitles = nodes.filter(n => (n \@ "type") == "msID")
@@ -69,7 +89,7 @@ class TeiXml(val xml: Elem) extends Logging {
     }
   }
 
-  def scribes: List[Contributor[Unminted]] = (xml \\"physDesc" \ "handDesc" \ "handNote").toList.flatMap { n =>
+  private def scribes: List[Contributor[Unminted]] = (xml \\"physDesc" \ "handDesc" \ "handNote").toList.flatMap { n =>
         n.attribute("scribe") match {
           case Some(_) => List(Contributor(Unidentifiable, Person(n.text.trim), List(ContributionRole("scribe"))))
           case None => val nodes = (n \ "persName").filter(n => (n \@ "role") == "scr")
