@@ -9,28 +9,33 @@ import weco.pipeline.matcher.models.WorkStub
 import java.time.Instant
 
 trait WorkStubGenerators extends IdentifiersGenerators {
-  def createIdentifier(canonicalId: CanonicalId): IdState.Identified =
-    IdState.Identified(
-      canonicalId = canonicalId,
-      sourceIdentifier =
-        createSourceIdentifierWith(value = canonicalId.toString)
+
+  val idA = CanonicalId("AAAAAAAA")
+  val idB = CanonicalId("BBBBBBBB")
+  val idC = CanonicalId("CCCCCCCC")
+  val idD = CanonicalId("DDDDDDDD")
+  val idE = CanonicalId("EEEEEEEE")
+
+  def createWorkStub: WorkStub =
+    createWorkWith(
+      referencedWorkIds = collectionOf(min = 0) { createCanonicalId }.toSet
     )
 
-  def createIdentifier(canonicalId: String): IdState.Identified =
-    createIdentifier(canonicalId = CanonicalId(canonicalId))
-
-  def createWorkStubWith(
-    id: IdState.Identified = createIdentifier(canonicalId = createCanonicalId),
-    version: Int = randomInt(from = 1, to = 10),
-    referencedIds: Set[IdState.Identified] = Set.empty,
-    workType: String = "Visible"
-  ): WorkStub =
+  def createWorkWith(id: CanonicalId = createCanonicalId,
+                     version: Int = randomInt(from = 1, to = 10),
+                     referencedWorkIds: Set[CanonicalId] = Set(),
+                     workType: String = "Visible"): WorkStub =
     WorkStub(
       state = WorkState.Identified(
-        sourceIdentifier = id.sourceIdentifier,
-        canonicalId = id.canonicalId,
-        mergeCandidates = referencedIds
+        sourceIdentifier = createSourceIdentifier,
+        canonicalId = id,
+        mergeCandidates = referencedWorkIds
           .filterNot { _ == id }
+          .map { canonicalId =>
+            IdState.Identified(
+              canonicalId = canonicalId,
+              sourceIdentifier = createSourceIdentifier)
+          }
           .map { id =>
             MergeCandidate(
               id = id,
@@ -41,31 +46,6 @@ trait WorkStubGenerators extends IdentifiersGenerators {
         sourceModifiedTime = Instant.now()
       ),
       version = version,
-      workType = workType
-    )
-
-  def createWorkStub: WorkStub =
-    createWorkStubWith(
-      referencedIds = collectionOf(min = 0) {
-        createIdentifier(canonicalId = createCanonicalId)
-      }.toSet
-    )
-
-  def createWorkWith(id: CanonicalId,
-                     version: Int,
-                     referencedWorkIds: Set[CanonicalId],
-                     workType: String = "Visible"): WorkStub =
-    createWorkStubWith(
-      id = IdState.Identified(
-        canonicalId = id,
-        sourceIdentifier = createSourceIdentifier
-      ),
-      version = version,
-      referencedIds = referencedWorkIds.map { canonicalId =>
-        IdState.Identified(
-          canonicalId = canonicalId,
-          sourceIdentifier = createSourceIdentifier)
-      },
       workType = workType
     )
 

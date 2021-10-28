@@ -4,9 +4,9 @@ import com.sksamuel.elastic4s.Index
 import weco.catalogue.internal_model.index.WorksIndexConfig
 import weco.catalogue.internal_model.work.generators.WorkGenerators
 import weco.catalogue.internal_model.work.{Work, WorkState}
+import weco.catalogue.internal_model.Implicits._
 import weco.elasticsearch.model.IndexId
 import weco.fixtures.TestWith
-import weco.json.JsonUtil._
 import weco.pipeline.matcher.generators.WorkStubGenerators
 import weco.pipeline.matcher.models.WorkStub
 import weco.pipeline_storage.elastic.ElasticIndexer

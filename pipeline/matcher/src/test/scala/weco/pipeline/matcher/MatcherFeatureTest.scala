@@ -8,12 +8,13 @@ import weco.catalogue.internal_model.index.IndexFixtures
 import weco.catalogue.internal_model.work.DeletedReason.SuppressedFromSource
 import weco.catalogue.internal_model.work.MergeCandidate
 import weco.catalogue.internal_model.work.generators.SourceWorkGenerators
+import weco.catalogue.internal_model.Implicits._
 import weco.messaging.fixtures.SQS.QueuePair
 import weco.messaging.memory.MemoryMessageSender
 import weco.fixtures.TimeAssertions
-import weco.json.JsonUtil._
 import weco.pipeline.matcher.fixtures.MatcherFixtures
 import weco.pipeline.matcher.generators.WorkStubGenerators
+import weco.pipeline.matcher.models.MatcherResult._
 import weco.pipeline.matcher.models.{
   MatchedIdentifiers,
   MatcherResult,
@@ -45,7 +46,7 @@ class MatcherFeatureTest
 
     withLocalSqsQueue() { queue =>
       withWorkerService(retriever, queue, messageSender) { _ =>
-        val work = createWorkStubWith(referencedIds = Set.empty)
+        val work = createWorkWith(referencedWorkIds = Set.empty)
 
         val expectedWorks =
           Set(
@@ -79,7 +80,7 @@ class MatcherFeatureTest
             val existingWorkVersion = 2
             val updatedWorkVersion = 1
 
-            val workV1 = createWorkStubWith(version = updatedWorkVersion)
+            val workV1 = createWorkWith(version = updatedWorkVersion)
 
             val nodeV2 = WorkNode(
               id = workV1.id,
@@ -87,7 +88,8 @@ class MatcherFeatureTest
               linkedIds = Nil,
               componentId = ciHash(workV1.id)
             )
-            put(dynamoClient, graphTable.name)(nodeV2)
+
+            putTableItem(nodeV2, table = graphTable)
 
             sendWork(workV1, retriever, queue)
 

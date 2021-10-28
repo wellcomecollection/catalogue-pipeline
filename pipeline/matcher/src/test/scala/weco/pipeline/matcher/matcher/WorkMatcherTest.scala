@@ -4,7 +4,6 @@ import org.scalatest.EitherValues
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import org.scanamo.syntax._
 import weco.storage.locking.LockFailure
 import weco.storage.locking.memory.{MemoryLockDao, MemoryLockingService}
 import weco.fixtures.TimeAssertions
@@ -32,16 +31,12 @@ class WorkMatcherTest
     with WorkStubGenerators
     with TimeAssertions {
 
-  private val identifierA = createIdentifier("AAAAAAAA")
-  private val identifierB = createIdentifier("BBBBBBBB")
-  private val identifierC = createIdentifier("CCCCCCCC")
-
   it(
     "matches a work with no linked identifiers to itself only A and saves the updated graph A") {
     withWorkGraphTable { graphTable =>
       withWorkGraphStore(graphTable) { workGraphStore =>
         withWorkMatcher(workGraphStore) { workMatcher =>
-          val work = createWorkStubWith(id = identifierA)
+          val work = createWorkWith(id = idA)
 
           whenReady(workMatcher.matchWork(work)) { matcherResult =>
             assertRecent(matcherResult.createdTime)
@@ -50,7 +45,7 @@ class WorkMatcherTest
                 MatchedIdentifiers(Set(WorkIdentifier(work.id, work.version))))
 
             val savedLinkedWork =
-              get[WorkNode](dynamoClient, graphTable.name)("id" === work.id)
+              getTableItem[WorkNode](work.id.underlying, graphTable)
                 .map(_.right.value)
 
             savedLinkedWork shouldBe Some(
@@ -72,9 +67,9 @@ class WorkMatcherTest
     withWorkGraphTable { graphTable =>
       withWorkGraphStore(graphTable) { workGraphStore =>
         withWorkMatcher(workGraphStore) { workMatcher =>
-          val work = createWorkStubWith(
-            id = identifierA,
-            referencedIds = Set(identifierB)
+          val work = createWorkWith(
+            id = idA,
+            referencedWorkIds = Set(idB)
           )
 
           whenReady(workMatcher.matchWork(work)) { matcherResult =>
@@ -83,26 +78,24 @@ class WorkMatcherTest
               Set(
                 MatchedIdentifiers(
                   Set(
-                    WorkIdentifier(identifierA.canonicalId, work.version),
-                    WorkIdentifier(identifierB.canonicalId, None))))
+                    WorkIdentifier(idA, work.version),
+                    WorkIdentifier(idB, None))))
 
-            val savedWorkNodes = scan[WorkNode](dynamoClient, graphTable.name)
+            val savedWorkNodes = scanTable[WorkNode](graphTable)
               .map(_.right.value)
 
             savedWorkNodes should contain theSameElementsAs List(
               WorkNode(
-                id = identifierA.canonicalId,
+                id = idA,
                 version = work.version,
-                linkedIds = List(identifierB.canonicalId),
-                componentId =
-                  ciHash(identifierA.canonicalId, identifierB.canonicalId)
+                linkedIds = List(idB),
+                componentId = ciHash(idA, idB)
               ),
               WorkNode(
-                id = identifierB.canonicalId,
+                id = idB,
                 version = None,
                 linkedIds = Nil,
-                componentId =
-                  ciHash(identifierA.canonicalId, identifierB.canonicalId)
+                componentId = ciHash(idA, idB)
               )
             )
           }
@@ -117,33 +110,33 @@ class WorkMatcherTest
       withWorkGraphStore(graphTable) { workGraphStore =>
         withWorkMatcher(workGraphStore) { workMatcher =>
           val existingWorkA = WorkNode(
-            id = identifierA.canonicalId,
+            id = idA,
             version = 1,
-            linkedIds = List(identifierB.canonicalId),
-            componentId =
-              ciHash(identifierA.canonicalId, identifierB.canonicalId)
+            linkedIds = List(idB),
+            componentId = ciHash(idA, idB)
           )
           val existingWorkB = WorkNode(
-            id = identifierB.canonicalId,
+            id = idB,
             version = 1,
             linkedIds = Nil,
-            componentId =
-              ciHash(identifierA.canonicalId, identifierB.canonicalId)
+            componentId = ciHash(idA, idB)
           )
           val existingWorkC = WorkNode(
-            id = identifierC.canonicalId,
+            id = idC,
             version = 1,
             linkedIds = Nil,
-            componentId = ciHash(identifierC.canonicalId)
+            componentId = ciHash(idC)
           )
-          put(dynamoClient, graphTable.name)(existingWorkA)
-          put(dynamoClient, graphTable.name)(existingWorkB)
-          put(dynamoClient, graphTable.name)(existingWorkC)
 
-          val work = createWorkStubWith(
-            id = identifierB,
+          putTableItems(
+            items = Seq(existingWorkA, existingWorkB, existingWorkC),
+            table = graphTable
+          )
+
+          val work = createWorkWith(
+            id = idB,
             version = 2,
-            referencedIds = Set(identifierC)
+            referencedWorkIds = Set(idC)
           )
 
           whenReady(workMatcher.matchWork(work)) { matcherResult =>
@@ -152,40 +145,31 @@ class WorkMatcherTest
               Set(
                 MatchedIdentifiers(
                   Set(
-                    WorkIdentifier(identifierA.canonicalId, 1),
-                    WorkIdentifier(identifierB.canonicalId, 2),
-                    WorkIdentifier(identifierC.canonicalId, 1))))
+                    WorkIdentifier(idA, 1),
+                    WorkIdentifier(idB, 2),
+                    WorkIdentifier(idC, 1))))
 
-            val savedNodes = scan[WorkNode](dynamoClient, graphTable.name)
+            val savedNodes = scanTable[WorkNode](graphTable)
               .map(_.right.value)
 
             savedNodes should contain theSameElementsAs List(
               WorkNode(
-                id = identifierA.canonicalId,
+                id = idA,
                 version = 1,
-                linkedIds = List(identifierB.canonicalId),
-                componentId = ciHash(
-                  identifierA.canonicalId,
-                  identifierB.canonicalId,
-                  identifierC.canonicalId)
+                linkedIds = List(idB),
+                componentId = ciHash(idA, idB, idC)
               ),
               WorkNode(
-                id = identifierB.canonicalId,
+                id = idB,
                 version = 2,
-                linkedIds = List(identifierC.canonicalId),
-                componentId = ciHash(
-                  identifierA.canonicalId,
-                  identifierB.canonicalId,
-                  identifierC.canonicalId)
+                linkedIds = List(idC),
+                componentId = ciHash(idA, idB, idC)
               ),
               WorkNode(
-                id = identifierC.canonicalId,
+                id = idC,
                 version = 1,
                 linkedIds = Nil,
-                componentId = ciHash(
-                  identifierA.canonicalId,
-                  identifierB.canonicalId,
-                  identifierC.canonicalId))
+                componentId = ciHash(idA, idB, idC))
             )
           }
         }
@@ -226,9 +210,6 @@ class WorkMatcherTest
     withWorkGraphTable { graphTable =>
       withWorkGraphStore(graphTable) { workGraphStore =>
         val componentId = "ABC"
-        val idA = identifierA.canonicalId
-        val idB = identifierB.canonicalId
-        val idC = identifierC.canonicalId
 
         val future = workGraphStore.put(
           Set(
@@ -238,9 +219,9 @@ class WorkMatcherTest
           ))
 
         whenReady(future) { _ =>
-          val work = createWorkStubWith(
-            id = identifierA,
-            referencedIds = Set(identifierB)
+          val work = createWorkWith(
+            id = idA,
+            referencedWorkIds = Set(idB)
           )
 
           implicit val lockDao: MemoryLockDao[String, UUID] =

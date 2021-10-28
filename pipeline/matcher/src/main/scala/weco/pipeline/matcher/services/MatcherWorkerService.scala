@@ -2,13 +2,13 @@ package weco.pipeline.matcher.services
 
 import akka.Done
 import grizzled.slf4j.Logging
-import weco.catalogue.internal_model.identifiers.CanonicalId._
 import weco.json.JsonUtil._
 import weco.messaging.MessageSender
 import weco.messaging.sns.NotificationMessage
 import weco.messaging.sqs.SQSStream
 import weco.pipeline_storage.PipelineStorageStream._
 import weco.pipeline.matcher.matcher.WorkMatcher
+import weco.pipeline.matcher.models.MatcherResult._
 import weco.pipeline.matcher.models.{VersionExpectedConflictException, WorkStub}
 import weco.typesafe.Runnable
 import weco.pipeline_storage.{PipelineStorageConfig, Retriever}
