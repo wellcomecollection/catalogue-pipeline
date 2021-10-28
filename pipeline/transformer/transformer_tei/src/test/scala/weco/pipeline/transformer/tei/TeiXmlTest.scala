@@ -147,7 +147,7 @@ class TeiXmlTest
 
 
     it("extracts a list of scribes from handNote/persName") {
-      val result = new TeiXml(teiXml(id, handNotes = List(handNotes(persNames = List(scribe("Tony Stark"), scribe("Peter Parker"), scribe("Steve Rogers")))))).parse
+      val result = new TeiXml(teiXml(id, handNotes = List(handNotes(persNames = List(scribe("Tony Stark"))), handNotes(persNames = List(scribe("Peter Parker"))), handNotes(persNames = List(scribe("Steve Rogers")))))).parse
 
       result.value.contributors shouldBe List(Contributor(Person("Tony Stark"), List(ContributionRole("scribe"))),Contributor(Person("Peter Parker"), List(ContributionRole("scribe"))),Contributor(Person("Steve Rogers"), List(ContributionRole("scribe"))))
     }

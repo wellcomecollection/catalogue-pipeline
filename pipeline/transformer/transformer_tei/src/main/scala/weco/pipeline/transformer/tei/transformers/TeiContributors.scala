@@ -35,45 +35,41 @@ object TeiContributors {
 
   def scribes(xml: Elem,target: Option[String]): List[Contributor[Unminted]] =
     (xml \\ "physDesc" \ "handDesc" \ "handNote").toList.flatMap { n: Node =>
-      n.attribute("scribe") match {
-        case Some(_) =>
-      val nodeIds = (n \ "locus").map { locus => (locus \@ "target").trim.replaceAll("#", "").split(" ")}.toList.flatten
-
+      val persNameNodes = (n \ "persName").filter(n => (n \@ "role") == "scr").toList
+      val nodeIds = (n \ "locus").map { locus =>
+        (locus \@ "target").trim.replaceAll("#", "").split(" ")
+      }.toList.flatten
+      val label = (n.attribute("scribe"), persNameNodes) match {
+        case (Some(_),Nil) => Some(XML.loadString(n.toString()).child.collect {
+          case t: Text => t.text
+        }.mkString.trim)
+        case (_, head :: _) => Some(head.text.trim)
+        case (None, Nil) => None
+      }
+      label match {
+        case Some(l) =>
       (nodeIds, target) match {
         case (Nil, None) =>
-
-              List(
+           List(
                 Contributor(
                   Unidentifiable,
-                  Person(n.text.trim),
+                  Person(l),
                   List(ContributionRole("scribe"))
                 )
               )
-
-
-        case (_::_, None) => println("bu");Nil
+        case (_::_, None) => Nil
         case (nodeIds, Some(targetId)) if nodeIds.contains(targetId) =>
-          val label = XML.loadString(n.toString()).child.collect {
-            case t: Text => t.text
-          }.mkString.trim
+
           List(
             Contributor(
               Unidentifiable,
-              Person(label),
+              Person(l),
               List(ContributionRole("scribe"))
             )
           )
-        case _ => ???
+        case _ => Nil
       }
-      case None =>
-        val nodes = (n \ "persName").filter(n => (n \@ "role") == "scr")
-        nodes.map { node =>
-          Contributor(
-            Unidentifiable,
-            Person(node.text.trim),
-            List(ContributionRole("scribe"))
-          )
-        }.toList
+      case None =>Nil
     }
     }
 

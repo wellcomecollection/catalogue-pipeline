@@ -96,7 +96,7 @@ with EitherValues{
       result shouldBe List(Contributor(Person("Tony Stark"), List(ContributionRole("scribe"))))
     }
     it("extracts a list of scribes from handNote/persName") {
-      val result = TeiContributors.scribes(teiXml(id, handNotes = List(handNotes(persNames = List(scribe("Tony Stark"), scribe("Peter Parker"), scribe("Steve Rogers"))))), None)
+      val result = TeiContributors.scribes(teiXml(id, handNotes = List(handNotes(persNames = List(scribe("Tony Stark"))), handNotes(persNames = List(scribe("Peter Parker"))), handNotes(persNames = List(scribe("Steve Rogers"))))), None)
 
       result shouldBe List(Contributor(Person("Tony Stark"), List(ContributionRole("scribe"))),Contributor(Person("Peter Parker"), List(ContributionRole("scribe"))),Contributor(Person("Steve Rogers"), List(ContributionRole("scribe"))))
     }
@@ -121,21 +121,25 @@ with EitherValues{
 
     }
     it("only returns scribes with that item id if a target is passed"){
-      val itemId = s"${id}_item1"
+      val itemId1 = s"${id}_item1"
+      val itemId2 = s"${id}_item2"
       val result = TeiContributors.scribes(xml = teiXml(id,
         handNotes = List(
-          handNotes(label = "Wanda Maximoff", scribe = Some("sole"), locus = Some(locus(label = "p 22-24", target = Some(s"#$itemId"))))
-        ), items = List(msItem(id = itemId))),
-        Some(itemId))
+          handNotes(label = "Wanda Maximoff", scribe = Some("sole"), locus = Some(locus(label = "p 22-24", target = Some(s"#$itemId1")))),
+          handNotes(label = "Natasha Romanoff", scribe = Some("sole"), locus = Some(locus(label = "p 22-24", target = Some(s"#$itemId2")))),
+          handNotes(label = "Carol Denvers", scribe = Some("sole")),
+          handNotes(persNames = List(scribe("Vision"))),
+          handNotes(persNames = List(scribe("Stephen Strange")), locus = Some(locus(label = "p 22-24", target = Some(s"#$itemId1"))))
+        ), items = List(msItem(id = itemId1),msItem(id = itemId2))),
+        Some(itemId1))
 
-      result shouldBe List(Contributor(Person("Wanda Maximoff"), List(ContributionRole("scribe"))))
+      result shouldBe List(
+        Contributor(Person("Wanda Maximoff"), List(ContributionRole("scribe"))),
+        Contributor(Person("Stephen Strange"), List(ContributionRole("scribe"))))
 
     }
 
     // test multiple locus tags in handNote
-    // test that items don't get scribes for other items
-    // test that items don't get scribes for the wrapperwork
-    // test that items don't get scribes in persName
     // test multiple ids in scribes ids
     // test multiple persNames
     // test multiple handNote tags
