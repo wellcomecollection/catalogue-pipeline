@@ -25,8 +25,7 @@ class TeiNestedDataTest extends AnyFunSpec with TeiGenerators with Matchers with
     val result = TeiNestedData.nestedTeiData(teiXml(
         id = id,
         items = List(firstItem, secondItem)
-      ),wrapperTitle)
-
+      ), wrapperTitle, Map.empty)
 
     result shouldBe a[Right[_, _]]
     result.right.get shouldBe Seq(
@@ -45,7 +44,7 @@ class TeiNestedDataTest extends AnyFunSpec with TeiGenerators with Matchers with
     val result = TeiNestedData.nestedTeiData(teiXml(
         id = id,
         items = List(firstItem)
-      ), wrapperTitle)
+      ), wrapperTitle, Map.empty)
 
     result shouldBe a[Right[_, _]]
     result.value shouldBe Seq(TeiData(id = itemId, title = firstItemTitle))
@@ -64,7 +63,7 @@ class TeiNestedDataTest extends AnyFunSpec with TeiGenerators with Matchers with
         id = id,
         title = titleElem(wrapperTitle),
         items = List(firstItem)
-    ), wrapperTitle)
+    ), wrapperTitle, Map.empty)
 
     result shouldBe a[Right[_, _]]
     result.value shouldBe Seq(
@@ -77,7 +76,7 @@ class TeiNestedDataTest extends AnyFunSpec with TeiGenerators with Matchers with
       id,
       List(originalItemTitle("")),
       List(mainLanguage("sa", "Sanskrit")))
-    val result = TeiNestedData.nestedTeiData(teiXml(id = id, items = List(firstItem)), wrapperTitle)
+    val result = TeiNestedData.nestedTeiData(teiXml(id = id, items = List(firstItem)), wrapperTitle, Map.empty)
 
     result shouldBe a[Right[_, _]]
     result.value.head.languages shouldBe List(Language(id = "san", label = "Sanskrit"))
@@ -97,7 +96,7 @@ class TeiNestedDataTest extends AnyFunSpec with TeiGenerators with Matchers with
           languages = List(mainLanguage("ar", "Arabic"))))
     )
 
-    val result =TeiNestedData.nestedTeiData(xml,wrapperTitle)
+    val result =TeiNestedData.nestedTeiData(xml,wrapperTitle, Map.empty)
     result shouldBe a[Right[_, _]]
     result.value shouldBe List(
       TeiData(
@@ -137,7 +136,7 @@ class TeiNestedDataTest extends AnyFunSpec with TeiGenerators with Matchers with
         ))
     )
 
-    val result =TeiNestedData.nestedTeiData(xml,wrapperTitle)
+    val result =TeiNestedData.nestedTeiData(xml,wrapperTitle, Map.empty)
     result shouldBe a[Right[_, _]]
     result.value shouldBe List(
       TeiData(
@@ -170,7 +169,7 @@ class TeiNestedDataTest extends AnyFunSpec with TeiGenerators with Matchers with
         ))
     )
 
-    val result =TeiNestedData.nestedTeiData(xml,wrapperTitle)
+    val result =TeiNestedData.nestedTeiData(xml,wrapperTitle, Map.empty)
     result shouldBe a[Right[_, _]]
     result.value shouldBe List(
       TeiData(
@@ -202,7 +201,7 @@ class TeiNestedDataTest extends AnyFunSpec with TeiGenerators with Matchers with
         ))
     )
 
-    val result =TeiNestedData.nestedTeiData(xml,wrapperTitle)
+    val result =TeiNestedData.nestedTeiData(xml,wrapperTitle, Map.empty)
     result shouldBe a[Right[_, _]]
     result.value shouldBe List(
       TeiData(
@@ -237,7 +236,7 @@ class TeiNestedDataTest extends AnyFunSpec with TeiGenerators with Matchers with
       catalogues =
         List(catalogueElem("Fihrist"), catalogueElem("Another catalogue"))
     )
-    val result =TeiNestedData.nestedTeiData(xml,wrapperTitle)
+    val result =TeiNestedData.nestedTeiData(xml,wrapperTitle, Map.empty)
     result shouldBe a[Right[_, _]]
     result.value shouldBe List(
       TeiData(
@@ -266,7 +265,7 @@ class TeiNestedDataTest extends AnyFunSpec with TeiGenerators with Matchers with
       catalogues =
         List(catalogueElem("Fihrist"), catalogueElem("Another catalogue"))
     )
-    val result =TeiNestedData.nestedTeiData(xml,wrapperTitle)
+    val result =TeiNestedData.nestedTeiData(xml,wrapperTitle, Map.empty)
     result shouldBe a[Right[_, _]]
     result.value shouldBe List(
       TeiData(
@@ -279,7 +278,7 @@ class TeiNestedDataTest extends AnyFunSpec with TeiGenerators with Matchers with
     val result = TeiNestedData.nestedTeiData(teiXml(
         id = id,
         items = List(msItem(s"${id}_1", authors = List(author(label = "John Wick")))),
-      ),wrapperTitle)
+      ),wrapperTitle, Map.empty)
 
     result shouldBe a[Right[_, _]]
     result.value.head.contributors shouldBe List(Contributor(Person("John Wick"), List(ContributionRole("author"))))
@@ -291,11 +290,28 @@ class TeiNestedDataTest extends AnyFunSpec with TeiGenerators with Matchers with
         items = List(msItem(s"${id}_1", authors = List(author(persNames = List(
           persName(label = "Sarah Connor",key = Some("12345"))), key = None)))),
         catalogues = List(catalogueElem("Fihrist"))
-      ), wrapperTitle)
+      ), wrapperTitle, Map.empty)
 
     result shouldBe a[Right[_, _]]
     result.value.head.contributors shouldBe List(Contributor(Person(label = "Sarah Connor", id = Identifiable(SourceIdentifier(IdentifierType.Fihrist, "Person", "12345"))), List(ContributionRole("author"))))
   }
-// test that we extract scribe for items
+
+  it("returns the scribes for each item"){
+    val itemId1 = s"${id}_item1"
+    val itemId2 = s"${id}_item2"
+    val expectedContributorsItem1 = List(
+      Contributor(Person("Wanda Maximoff"), List(ContributionRole("scribe"))),
+      Contributor(Person("Stephen Strange"), List(ContributionRole("scribe"))))
+    val expectedContributorsItem2 = List(
+      Contributor(Person("Natasha Romanoff"), List(ContributionRole("scribe"))))
+    val result = TeiNestedData.nestedTeiData(xml = teiXml(id,
+       items = List(msItem(id = itemId1),msItem(id = itemId2))), wrapperTitle, Map(itemId1 -> expectedContributorsItem1, itemId2 -> expectedContributorsItem2))
+
+    result shouldBe a[Right[_,_]]
+    result.value.head.id shouldBe itemId1
+    result.value.head.contributors shouldBe expectedContributorsItem1
+    result.value(1).id shouldBe itemId2
+    result.value(1).contributors shouldBe expectedContributorsItem2
+  }
   //test that we extract scribe for parts
 }

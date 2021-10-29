@@ -10,6 +10,8 @@ class TeiXml(val xml: Elem) extends Logging {
   val id: String =
     getId.getOrElse(throw new RuntimeException(s"Could not find an id in XML!"))
 
+  lazy val scribesMap = TeiContributors.scribes(xml, id)
+
   def parse: Result[TeiData] =
     for {
       summary <- summary
@@ -17,7 +19,7 @@ class TeiXml(val xml: Elem) extends Logging {
       title <- title
       languageData <- TeiLanguages(xml)
       (languages, languageNotes) = languageData
-      nestedData <- TeiNestedData.nestedTeiData(xml, title)
+      nestedData <- TeiNestedData.nestedTeiData(xml,title, scribesMap)
     } yield TeiData(
       id = id,
       title = title,
@@ -25,7 +27,7 @@ class TeiXml(val xml: Elem) extends Logging {
       description = summary,
       languages = languages,
       languageNotes = languageNotes,
-      contributors = TeiContributors.scribes(xml,target = None),
+      contributors = scribesMap.getOrElse(id, Nil),
       nestedTeiData = nestedData
     )
 

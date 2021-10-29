@@ -2,9 +2,21 @@ package weco.pipeline.transformer.tei.transformers
 
 import cats.instances.either._
 import cats.syntax.traverse._
-import weco.catalogue.internal_model.identifiers.IdState.{Identifiable, Unidentifiable, Unminted}
-import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, SourceIdentifier}
-import weco.catalogue.internal_model.work.{ContributionRole, Contributor, Person}
+import weco.catalogue.internal_model.identifiers.IdState.{
+  Identifiable,
+  Unidentifiable,
+  Unminted
+}
+import weco.catalogue.internal_model.identifiers.{
+  IdState,
+  IdentifierType,
+  SourceIdentifier
+}
+import weco.catalogue.internal_model.work.{
+  ContributionRole,
+  Contributor,
+  Person
+}
 import weco.pipeline.transformer.result.Result
 
 import scala.xml.{Elem, Node, Text, XML}
@@ -12,11 +24,13 @@ import scala.xml.{Elem, Node, Text, XML}
 object TeiContributors {
 
   /**
-    * author nodes appear only within msItem. They contain the name of the Author of the work and optionally the id of the Author.
-    * The Id of the Author refers to two different authorities depending on whether the work is an Arabic manuscript or not
-    */
-  def authors(node: Node,
-            isFihrist: Boolean): Result[List[Contributor[IdState.Unminted]]] =
+   * author nodes appear only within msItem. They contain the name of the Author of the work and optionally the id of the Author.
+   * The Id of the Author refers to two different authorities depending on whether the work is an Arabic manuscript or not
+   */
+  def authors(
+               node: Node,
+               isFihrist: Boolean
+             ): Result[List[Contributor[IdState.Unminted]]] =
     (node \ "author")
       .map { n =>
         for {
@@ -25,69 +39,29 @@ object TeiContributors {
           res <- createContributor(
             label = label,
             id = id,
-            isFihrist = isFihrist)
+            isFihrist = isFihrist
+          )
         } yield res
 
       }
       .toList
       .sequence
 
-
-  def scribes(xml: Elem,target: Option[String]): List[Contributor[Unminted]] =
-    (xml \\ "physDesc" \ "handDesc" \ "handNote").toList.flatMap { n: Node =>
-      val persNameNodes = (n \ "persName").filter(n => (n \@ "role") == "scr").toList
-      val nodeIds = (n \ "locus").map { locus =>
-        (locus \@ "target").trim.replaceAll("#", "").split(" ")
-      }.toList.flatten
-      val label = (n.attribute("scribe"), persNameNodes) match {
-        case (Some(_),Nil) => Some(XML.loadString(n.toString()).child.collect {
-          case t: Text => t.text
-        }.mkString.trim)
-        case (_, head :: _) => Some(head.text.trim)
-        case (None, Nil) => None
-      }
-      label match {
-        case Some(l) =>
-      (nodeIds, target) match {
-        case (Nil, None) =>
-           List(
-                Contributor(
-                  Unidentifiable,
-                  Person(l),
-                  List(ContributionRole("scribe"))
-                )
-              )
-        case (_::_, None) => Nil
-        case (nodeIds, Some(targetId)) if nodeIds.contains(targetId) =>
-
-          List(
-            Contributor(
-              Unidentifiable,
-              Person(l),
-              List(ContributionRole("scribe"))
-            )
-          )
-        case _ => Nil
-      }
-      case None =>Nil
-    }
-    }
-
   /**
-    * Author nodes can be in 2 forms:
-    * <msItem xml:id="MS_Arabic_1-item1">
-    *  <author key="person_97166546">
-    *    <persName xml:lang="en">Avicenna, d. 980-1037
-    *    </persName>
-    *    <persName xml:lang="ar" type="original">ابو على الحسين ابن عبد الله ابن
-    *    سينا</persName>
-    *  </author>
-    *  or
-    * <msItem n="1" xml:id="MS_MSL_114_1">
-    *  <author key="person_84812936">Paul of Aegina</author>
-    *  So we must check for the existence of the internal persName nodes to decide
-    *  where to get the label and id from
-    */
+   * Author nodes can be in 2 forms:
+   * <msItem xml:id="MS_Arabic_1-item1">
+   *  <author key="person_97166546">
+   *    <persName xml:lang="en">Avicenna, d. 980-1037
+   *    </persName>
+   *    <persName xml:lang="ar" type="original">ابو على الحسين ابن عبد الله ابن
+   *    سينا</persName>
+   *  </author>
+   *  or
+   * <msItem n="1" xml:id="MS_MSL_114_1">
+   *  <author key="person_84812936">Paul of Aegina</author>
+   *  So we must check for the existence of the internal persName nodes to decide
+   *  where to get the label and id from
+   */
   private def getLabelAndId(n: Node) = (n \ "persName").toList match {
     case Nil            => getFromAuthorNode(n)
     case List(persNode) => getFromPersNode(n, persNode)
@@ -106,11 +80,15 @@ object TeiContributors {
         // Otherwise they refer to the VIAF authority files: https://viaf.org/
         val identifierType =
           if (isFihrist) IdentifierType.Fihrist else IdentifierType.VIAF
-        Right(Contributor(
-          Person(
-            label = l,
-            id = Identifiable(SourceIdentifier(identifierType, "Person", id))),
-          List(ContributionRole("author"))))
+        Right(
+          Contributor(
+            Person(
+              label = l,
+              id = Identifiable(SourceIdentifier(identifierType, "Person", id))
+            ),
+            List(ContributionRole("author"))
+          )
+        )
     }
 
   private def getFromOriginalPersNode(n: Node, list: List[Node]) =
@@ -119,11 +97,15 @@ object TeiContributors {
       case Nil =>
         Left(
           new RuntimeException(
-            s"No persName nodes with type=original in author $n"))
+            s"No persName nodes with type=original in author $n"
+          )
+        )
       case _ =>
         Left(
           new RuntimeException(
-            s"Multiple persName nodes with type=original in author $n"))
+            s"Multiple persName nodes with type=original in author $n"
+          )
+        )
     }
 
   private def getFromPersNode(n: Node, persNode: Node) =
@@ -133,9 +115,9 @@ object TeiContributors {
     Right((n.text.trim, (n \@ "key").trim))
 
   /**
-    * Sometimes the id of the author is on the persName node
-    * and sometimes it is on the wrapping author node and we must deal with both cases.
-    */
+   * Sometimes the id of the author is on the persName node
+   * and sometimes it is on the wrapping author node and we must deal with both cases.
+   */
   private def getId(n: Node, persNode: Node) = {
     val persNodeId = (persNode \@ "key").trim
     if (persNodeId.isEmpty) {
@@ -144,4 +126,68 @@ object TeiContributors {
       persNodeId
     }
   }
+
+  def scribes(xml: Elem, workId: String)
+    : Map[String, List[Contributor[Unminted]]] =
+    (xml \\ "physDesc" \ "handDesc" \ "handNote").foldLeft(
+      Map.empty: Map[String, List[Contributor[Unminted]]]
+    ) {
+      case (scribesMap, n: Node) =>
+        val nodeIds = (n \ "locus")
+          .map { locus =>
+            (locus \@ "target").trim.replaceAll("#", "").split(" ")
+          }
+          .toList
+          .flatten
+        val persNameNodes =
+          (n \ "persName").filter(n => (n \@ "role") == "scr").toList
+
+        val label = (n.attribute("scribe"), persNameNodes) match {
+          case (Some(_), Nil) =>
+            Some(
+              XML
+                .loadString(n.toString())
+                .child
+                .collect {
+                  case t: Text => t.text
+                }
+                .mkString
+                .trim
+            )
+          case (_, head :: _) => Some(head.text.trim)
+          case (None, Nil)    => None
+        }
+        val maybeContributors = label.map{l => List(
+          Contributor(
+            Unidentifiable,
+            Person(l),
+            List(ContributionRole("scribe"))
+          ))}
+        maybeContributors match {
+          case Some(c) =>
+            nodeIds match {
+              case Nil =>
+                val bu = scribesMap.get(workId) match {
+                  case None =>
+                    (workId, c)
+                  case Some(list) => (workId, list ++ c)
+                }
+                scribesMap + bu
+              case nodeIds =>
+                scribesMap ++ nodeIds
+                  .map(
+                    id =>
+                      scribesMap.get(id) match {
+                        case None =>
+                          (id, c)
+                        case Some(list) => (id, list ++ c)
+                      }
+                  )
+                  .toMap
+
+            }
+          case None => scribesMap
+        }
+    }
+
 }

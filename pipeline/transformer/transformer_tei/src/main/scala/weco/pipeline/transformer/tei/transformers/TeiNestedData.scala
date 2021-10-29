@@ -3,8 +3,9 @@ package weco.pipeline.transformer.tei.transformers
 import cats.instances.either._
 import cats.syntax.traverse._
 import grizzled.slf4j.Logging
+import weco.catalogue.internal_model.identifiers.IdState.Unminted
+import weco.catalogue.internal_model.work.Contributor
 import weco.pipeline.transformer.result.Result
-import weco.pipeline.transformer.tei.transformers.TeiContributors.{authors, scribes}
 import weco.pipeline.transformer.tei.{TeiData, TeiOps}
 
 import scala.xml.{Elem, Node, NodeSeq}
@@ -20,20 +21,22 @@ object TeiNestedData extends Logging {
     * check https://github.com/wellcomecollection/wellcome-collection-tei/blob/main/docs/TEI_Manual_2020_V1.pdf
     * for more info.
     */
-  def nestedTeiData(xml: Elem, wrapperTitle: String) =
+  def nestedTeiData(xml: Elem, wrapperTitle: String, itemScribes: Map[String,List[Contributor[Unminted]]]) =
     for {
       catalogues <- getCatalogues(xml)
       nestedItems <- nestedTeiDataFromItems(
         xml = xml,
         wrapperTitle = wrapperTitle,
         catalogues = catalogues,
-        nodeSeq = xml \\ "msDesc" \ "msContents")
+        nodeSeq = xml \\ "msDesc" \ "msContents",
+        itemScribes = itemScribes)
       nestedData <- nestedItems match {
         case Nil =>
           nestedTeiDataFromParts(
             xml = xml,
             wrapperTitle = wrapperTitle,
-            catalogues = catalogues)
+            catalogues = catalogues,
+            itemScribes = itemScribes)
         case itemData => Right(itemData)
       }
     } yield nestedData
@@ -47,7 +50,7 @@ object TeiNestedData extends Logging {
   private def nestedTeiDataFromParts(
     xml: Elem,
     wrapperTitle: String,
-    catalogues: List[String]): Result[List[TeiData]] =
+    catalogues: List[String], itemScribes: Map[String,List[Contributor[Unminted]]]): Result[List[TeiData]] =
     (xml \\ "msDesc" \ "msPart").zipWithIndex
       .map { case (node, i) => (node, i + 1) }
       .map {
@@ -62,7 +65,7 @@ object TeiNestedData extends Logging {
               xml,
               partTitle,
               node \ "msContents",
-              catalogues)
+              catalogues, itemScribes)
           } yield {
             TeiData(
               id = id,
@@ -83,7 +86,8 @@ object TeiNestedData extends Logging {
   private def nestedTeiDataFromItems(xml: Elem,
                                       wrapperTitle: String,
                                      catalogues: List[String],
-                                     nodeSeq: NodeSeq): Result[List[TeiData]] =
+                                     nodeSeq: NodeSeq,
+                                     itemScribes: Map[String,List[Contributor[Unminted]]]): Result[List[TeiData]] =
     (nodeSeq \ "msItem").zipWithIndex
     // The indexing starts at zero but we want to count items from 1 so we add 1
       .map { case (node, i) => (node, i + 1) }
@@ -97,8 +101,8 @@ object TeiNestedData extends Logging {
             id <- TeiOps.getIdFrom(node)
             languageData <- TeiLanguages.parseLanguages(node)
             (languages, languageNotes) = languageData
-            items <- extractLowerLevelItems(xml, title, node, catalogues)
-            authors <- authors(node, containsFihrist(catalogues))
+            items <- extractLowerLevelItems(xml, title, node, catalogues, itemScribes)
+            authors <- TeiContributors.authors(node, containsFihrist(catalogues))
           } yield
             TeiData(
               id = id,
@@ -106,7 +110,7 @@ object TeiNestedData extends Logging {
               languages = languages,
               languageNotes = languageNotes,
               nestedTeiData = items,
-              contributors = authors ++ scribes(xml = xml, target = Some(id)))
+              contributors = authors ++ itemScribes.getOrElse(id, Nil))
       }
       .toList
       .sequence
@@ -121,7 +125,8 @@ object TeiNestedData extends Logging {
     xml: Elem,
     partTitle: String,
     nodes: NodeSeq,
-    catalogues: List[String]): Either[Throwable, List[TeiData]] =
+    catalogues: List[String],
+    itemScribes: Map[String,List[Contributor[Unminted]]]): Either[Throwable, List[TeiData]] =
     catalogues match {
       case catalogues if containsFihrist(catalogues) =>
         Right(Nil)
@@ -130,7 +135,8 @@ object TeiNestedData extends Logging {
           xml = xml,
           wrapperTitle = partTitle,
           catalogues = catalogues,
-          nodeSeq = nodes)
+          nodeSeq = nodes,
+          itemScribes = itemScribes)
     }
 
   private def containsFihrist(catalogues: List[String]): Boolean =
