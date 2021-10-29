@@ -2,21 +2,9 @@ package weco.pipeline.transformer.tei.transformers
 
 import cats.instances.either._
 import cats.syntax.traverse._
-import weco.catalogue.internal_model.identifiers.IdState.{
-  Identifiable,
-  Unidentifiable,
-  Unminted
-}
-import weco.catalogue.internal_model.identifiers.{
-  IdState,
-  IdentifierType,
-  SourceIdentifier
-}
-import weco.catalogue.internal_model.work.{
-  ContributionRole,
-  Contributor,
-  Person
-}
+import weco.catalogue.internal_model.identifiers.IdState.{Identifiable, Unminted}
+import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, SourceIdentifier}
+import weco.catalogue.internal_model.work.{ContributionRole, Contributor, Person}
 import weco.pipeline.transformer.result.Result
 
 import scala.xml.{Elem, Node, Text, XML}
@@ -36,16 +24,102 @@ object TeiContributors {
         for {
           authorInfo <- getLabelAndId(n)
           (label, id) = authorInfo
-          res <- createContributor(
-            label = label,
-            id = id,
-            isFihrist = isFihrist
-          )
+          res <- createContributor(label = label, id = id, isFihrist = isFihrist, ContributionRole("author"))
         } yield res
 
       }
       .toList
       .sequence
+
+  def scribes(xml: Elem, workId: String)
+  : Result[Map[String, List[Contributor[Unminted]]]] =
+    (xml \\ "physDesc" \ "handDesc" \ "handNote").foldLeft(
+      Right(Map.empty): Result[Map[String, List[Contributor[Unminted]]]]
+    ) {
+      case (Left(err), _) => Left(err)
+      case (Right(scribesMap), n: Node) =>
+        for {
+          contributor <- getScribeContributor(n)
+        } yield  mapContributorToWorkId(workId, n, contributor, scribesMap)
+    }
+
+
+  private def getScribeContributor(n: Node) = {
+    val persNameNodes =
+      (n \ "persName").filter(n => (n \@ "role") == "scr").toList
+
+    for{
+      maybeLabel <-parseScribeLabel(n, persNameNodes)
+      contributor <- maybeLabel.map { label =>
+        createContributor(label, ContributionRole("scribe"))
+      }.sequence
+    } yield contributor
+
+  }
+
+  private def parseScribeLabel(n: Node, persNameNodes: List[Node]) = {
+    (n.attribute("scribe"), persNameNodes) match {
+      case (Some(_), Nil) => parseLabelFrom(n)
+      case (_, List(persName)) => Right(Some(persName.text.trim))
+      case (_, list@_ :: _) => getFromOriginalPersNode(n, list).map { case (label, _) => Some(label) }
+      case (None, Nil) => Right(None)
+    }
+  }
+
+  private def mapContributorToWorkId(workId: String, n: Node, maybeContributor: Option[Contributor[Unminted]], scribesMap: Map[String,List[Contributor[Unminted]] ]) = {
+    maybeContributor match {
+      case None => scribesMap
+      case Some(c) =>
+        val workIds = extractNestedWorkIds(n)
+        workIds match {
+          case Nil =>
+            scribesMap + addIdToMap(workId, scribesMap, c)
+          case nodeIds =>
+            scribesMap ++ addIdsToMap(scribesMap, c, nodeIds)
+
+        }
+
+    }
+  }
+
+  private def parseLabelFrom(n: Node) = {
+    Right(Some(
+      XML
+        .loadString(n.toString())
+        .child
+        .collect {
+          case t: Text => t.text
+        }
+        .mkString
+        .trim
+    ))
+  }
+
+  private def addIdsToMap(scribesMap: Map[String, List[Contributor[Unminted]]], c: Contributor[Unminted], nodeIds: List[String]) = {
+    nodeIds
+      .map(
+        id =>
+          addIdToMap(id, scribesMap, c)
+      )
+      .toMap
+  }
+
+  private def addIdToMap(workId: String, scribesMap: Map[String, List[Contributor[Unminted]]], c: Contributor[Unminted]) = {
+    scribesMap.get(workId) match {
+      case None =>
+        (workId, List(c))
+      case Some(list) => (workId, list :+ c)
+    }
+  }
+
+  private def extractNestedWorkIds(n: Node) = {
+    (n \ "locus")
+      .map { locus =>
+        (locus \@ "target").trim.replaceAll("#", "").split(" ")
+      }
+      .toList
+      .flatten
+  }
 
   /**
    * Author nodes can be in 2 forms:
@@ -68,12 +142,15 @@ object TeiContributors {
     case list           => getFromOriginalPersNode(n, list)
   }
 
-  private def createContributor(label: String, id: String, isFihrist: Boolean) =
+  private def createContributor(label: String, role: ContributionRole): Result[Contributor[Unminted]] =
+    createContributor(label = label, id = "", isFihrist = false, role = role)
+
+  private def createContributor(label: String, id: String, isFihrist: Boolean, role: ContributionRole): Result[Contributor[Unminted]] =
     (label, id) match {
       case (l, _) if l.isEmpty =>
-        Left(new RuntimeException(s"The author label is empty!"))
+        Left(new RuntimeException(s"The contributor label is empty!"))
       case (l, id) if id.isEmpty =>
-        Right(Contributor(Person(l), List(ContributionRole("author"))))
+        Right(Contributor(Person(l), List(role)))
       case (l, id) =>
         // If the manuscript is part of the Fihrist catalogue,
         // the ids of authors refer to the Fihrist authority: https://github.com/fihristorg/fihrist-mss/tree/master/authority
@@ -86,7 +163,7 @@ object TeiContributors {
               label = l,
               id = Identifiable(SourceIdentifier(identifierType, "Person", id))
             ),
-            List(ContributionRole("author"))
+            List(role)
           )
         )
     }
@@ -127,76 +204,4 @@ object TeiContributors {
     }
   }
 
-  def scribes(xml: Elem, workId: String)
-    : Result[Map[String, List[Contributor[Unminted]]]] =
-    (xml \\ "physDesc" \ "handDesc" \ "handNote").foldLeft(
-      Right(Map.empty): Result[Map[String, List[Contributor[Unminted]]]]
-    ) {
-      case (Left(err), _) => Left(err)
-      case (Right(scribesMap), n: Node) =>
-        val nodeIds = (n \ "locus")
-          .map { locus =>
-            (locus \@ "target").trim.replaceAll("#", "").split(" ")
-          }
-          .toList
-          .flatten
-        val maybeContributor = getScribeContributor(n)
-        maybeContributor.map {
-          case None => scribesMap
-          case Some(c) =>
-              nodeIds match {
-                case Nil =>
-                  val bu = scribesMap.get(workId) match {
-                    case None =>
-                      (workId, List(c))
-                    case Some(list) => (workId, list :+ c)
-                  }
-                  scribesMap + bu
-                case nodeIds =>
-                  scribesMap ++ nodeIds
-                    .map(
-                      id =>
-                        scribesMap.get(id) match {
-                          case None =>
-                            (id, List(c))
-                          case Some(list) => (id, list :+ c)
-                        }
-                    )
-                    .toMap
-
-              }
-
-        }
-    }
-
-  private def getScribeContributor(n: Node) = {
-    val persNameNodes =
-      (n \ "persName").filter(n => (n \@ "role") == "scr").toList
-
-    val label = (n.attribute("scribe"), persNameNodes) match {
-      case (Some(_), Nil) =>
-        Right(Some(
-          XML
-            .loadString(n.toString())
-            .child
-            .collect {
-              case t: Text => t.text
-            }
-            .mkString
-            .trim
-        ))
-      case (_, List(persName)) => Right(Some(persName.text.trim))
-      case (_, list@_ :: _) => list.filter(p => (p \@ "type") == "original") match {
-        case List(persName) => Right(Some(persName.text.trim))
-        case _ => Left(new RuntimeException(s"Could not find a contributor name in ${n}"))
-      }
-      case (None, Nil) => Right(None)
-    }
-    label.map{l =>
-      l.map(ll => Contributor(
-        Unidentifiable,
-        Person(ll),
-        List(ContributionRole("scribe"))
-      ))}
-  }
 }
