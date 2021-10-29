@@ -313,5 +313,21 @@ class TeiNestedDataTest extends AnyFunSpec with TeiGenerators with Matchers with
     result.value(1).id shouldBe itemId2
     result.value(1).contributors shouldBe expectedContributorsItem2
   }
-  //test that we extract scribe for parts
+  it("returns the scribes for each part"){
+    val partId1 = s"${id}_part1"
+    val partId2 = s"${id}_part2"
+    val expectedContributorsPart1 = List(
+      Contributor(Person("Wanda Maximoff"), List(ContributionRole("scribe"))),
+      Contributor(Person("Stephen Strange"), List(ContributionRole("scribe"))))
+    val expectedContributorsPart2 = List(
+      Contributor(Person("Natasha Romanoff"), List(ContributionRole("scribe"))))
+    val result = TeiNestedData.nestedTeiData(xml = teiXml(id,
+       parts = List(msPart(id = partId1),msPart(id = partId2))), wrapperTitle, Map(partId1 -> expectedContributorsPart1, partId2 -> expectedContributorsPart2))
+
+    result shouldBe a[Right[_,_]]
+    result.value.head.id shouldBe partId1
+    result.value.head.contributors shouldBe expectedContributorsPart1
+    result.value(1).id shouldBe partId2
+    result.value(1).contributors shouldBe expectedContributorsPart2
+  }
 }

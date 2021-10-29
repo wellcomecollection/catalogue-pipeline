@@ -128,66 +128,75 @@ object TeiContributors {
   }
 
   def scribes(xml: Elem, workId: String)
-    : Map[String, List[Contributor[Unminted]]] =
+    : Result[Map[String, List[Contributor[Unminted]]]] =
     (xml \\ "physDesc" \ "handDesc" \ "handNote").foldLeft(
-      Map.empty: Map[String, List[Contributor[Unminted]]]
+      Right(Map.empty): Result[Map[String, List[Contributor[Unminted]]]]
     ) {
-      case (scribesMap, n: Node) =>
+      case (Left(err), _) => Left(err)
+      case (Right(scribesMap), n: Node) =>
         val nodeIds = (n \ "locus")
           .map { locus =>
             (locus \@ "target").trim.replaceAll("#", "").split(" ")
           }
           .toList
           .flatten
-        val persNameNodes =
-          (n \ "persName").filter(n => (n \@ "role") == "scr").toList
-
-        val label = (n.attribute("scribe"), persNameNodes) match {
-          case (Some(_), Nil) =>
-            Some(
-              XML
-                .loadString(n.toString())
-                .child
-                .collect {
-                  case t: Text => t.text
-                }
-                .mkString
-                .trim
-            )
-          case (_, head :: _) => Some(head.text.trim)
-          case (None, Nil)    => None
-        }
-        val maybeContributors = label.map{l => List(
-          Contributor(
-            Unidentifiable,
-            Person(l),
-            List(ContributionRole("scribe"))
-          ))}
-        maybeContributors match {
-          case Some(c) =>
-            nodeIds match {
-              case Nil =>
-                val bu = scribesMap.get(workId) match {
-                  case None =>
-                    (workId, c)
-                  case Some(list) => (workId, list ++ c)
-                }
-                scribesMap + bu
-              case nodeIds =>
-                scribesMap ++ nodeIds
-                  .map(
-                    id =>
-                      scribesMap.get(id) match {
-                        case None =>
-                          (id, c)
-                        case Some(list) => (id, list ++ c)
-                      }
-                  )
-                  .toMap
-
-            }
+        val maybeContributor = getScribeContributor(n)
+        maybeContributor.map {
           case None => scribesMap
+          case Some(c) =>
+              nodeIds match {
+                case Nil =>
+                  val bu = scribesMap.get(workId) match {
+                    case None =>
+                      (workId, List(c))
+                    case Some(list) => (workId, list :+ c)
+                  }
+                  scribesMap + bu
+                case nodeIds =>
+                  scribesMap ++ nodeIds
+                    .map(
+                      id =>
+                        scribesMap.get(id) match {
+                          case None =>
+                            (id, List(c))
+                          case Some(list) => (id, list :+ c)
+                        }
+                    )
+                    .toMap
+
+              }
+
         }
     }
 
+  private def getScribeContributor(n: Node) = {
+    val persNameNodes =
+      (n \ "persName").filter(n => (n \@ "role") == "scr").toList
+
+    val label = (n.attribute("scribe"), persNameNodes) match {
+      case (Some(_), Nil) =>
+        Right(Some(
+          XML
+            .loadString(n.toString())
+            .child
+            .collect {
+              case t: Text => t.text
+            }
+            .mkString
+            .trim
+        ))
+      case (_, List(persName)) => Right(Some(persName.text.trim))
+      case (_, list@_ :: _) => list.filter(p => (p \@ "type") == "original") match {
+        case List(persName) => Right(Some(persName.text.trim))
+        case _ => Left(new RuntimeException(s"Could not find a contributor name in ${n}"))
+      }
+      case (None, Nil) => Right(None)
+    }
+    label.map{l =>
+      l.map(ll => Contributor(
+        Unidentifiable,
+        Person(ll),
+        List(ContributionRole("scribe"))
+      ))}
+  }
 }

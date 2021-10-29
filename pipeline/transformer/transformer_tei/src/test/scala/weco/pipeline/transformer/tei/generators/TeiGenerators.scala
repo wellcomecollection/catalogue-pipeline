@@ -97,10 +97,10 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
       case None    => <author>{persNames}</author>
     }
 
-  def handNotes(label: String = "", persNames: List[Elem] = Nil, scribe: Option[String] = None, locus: Option[Elem] = None) = {
+  def handNotes(label: String = "", persNames: List[Elem] = Nil, scribe: Option[String] = None, locus: List[Elem] = Nil) = {
     val scribeAttribute = scribe.map(s=>Attribute("scribe", Text(s), Null)).getOrElse(Null)
     <handNote>
-      {locus.getOrElse(NodeSeq.Empty)}{label}{persNames}
+      {locus}{label}{persNames}
   </handNote> % scribeAttribute
   }
 
@@ -109,7 +109,7 @@ case Some(t) => <locus target={t}>{label}</locus>
     case None => <locus>{label}</locus>
   }
 
-  def scribe(name: String) = persName(label = name, role = Some("scr"))
+  def scribe(name: String, `type`: Option[String] = None) = persName(label = name, role = Some("scr"), `type` = `type`)
 
   def persName(label: String,
                key: Option[String] = None,

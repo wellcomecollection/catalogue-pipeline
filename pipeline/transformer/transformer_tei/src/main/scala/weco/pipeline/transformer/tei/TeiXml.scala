@@ -19,7 +19,8 @@ class TeiXml(val xml: Elem) extends Logging {
       title <- title
       languageData <- TeiLanguages(xml)
       (languages, languageNotes) = languageData
-      nestedData <- TeiNestedData.nestedTeiData(xml,title, scribesMap)
+      scribes <- scribesMap
+      nestedData <- TeiNestedData.nestedTeiData(xml,title, scribes)
     } yield TeiData(
       id = id,
       title = title,
@@ -27,7 +28,7 @@ class TeiXml(val xml: Elem) extends Logging {
       description = summary,
       languages = languages,
       languageNotes = languageNotes,
-      contributors = scribesMap.getOrElse(id, Nil),
+      contributors = scribes.getOrElse(id, Nil),
       nestedTeiData = nestedData
     )
 

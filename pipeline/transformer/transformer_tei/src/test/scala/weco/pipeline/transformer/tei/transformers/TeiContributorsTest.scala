@@ -304,7 +304,7 @@ class TeiContributorsTest
         ), id
       )
 
-      result shouldBe Map( id -> List(
+      result.value shouldBe Map( id -> List(
         Contributor(Person("Tony Stark"), List(ContributionRole("scribe")))
       ))
     }
@@ -320,7 +320,7 @@ class TeiContributorsTest
         ), id
       )
 
-      result shouldBe Map( id -> List(
+      result.value shouldBe Map( id -> List(
         Contributor(Person("Tony Stark"), List(ContributionRole("scribe"))),
         Contributor(Person("Peter Parker"), List(ContributionRole("scribe"))),
         Contributor(Person("Steve Rogers"), List(ContributionRole("scribe")))
@@ -336,7 +336,39 @@ class TeiContributorsTest
         ), id
       )
 
-      result shouldBe Map.empty
+      result.value shouldBe Map.empty
+    }
+    it("picks the persName with type=original if there are more than one") {
+      val result = TeiContributors.scribes(
+        teiXml(
+          id,
+          handNotes = List(handNotes(persNames = List(scribe("Tony Stark"),scribe("Bruce Banner", `type` = Some("original")))))
+        ), id
+      )
+
+      result.value shouldBe Map( id -> List(
+        Contributor(Person("Bruce Banner"), List(ContributionRole("scribe")))
+      ))
+    }
+    it("Errors if there are more than one persName node and none have type = original") {
+      val result = TeiContributors.scribes(
+        teiXml(
+          id,
+          handNotes = List(handNotes(persNames = List(scribe("Tony Stark"),scribe("Bruce Banner"))))
+        ), id
+      )
+
+      result shouldBe a[Left[_,_]]
+    }
+    it("Errors if there are more than one persName node with type = original") {
+      val result = TeiContributors.scribes(
+        teiXml(
+          id,
+          handNotes = List(handNotes(persNames = List(scribe("Tony Stark", `type` = Some("original")),scribe("Bruce Banner", `type` = Some("original")))))
+        ), id
+      )
+
+      result shouldBe a[Left[_,_]]
     }
     it("extracts scribes directly from handNote if it has scribe attribute") {
       val result = TeiContributors.scribes(
@@ -349,14 +381,26 @@ class TeiContributorsTest
         ), id
       )
 
-      result shouldBe Map( id -> List(
+      result.value shouldBe Map( id -> List(
         Contributor(Person("Steve Rogers"), List(ContributionRole("scribe"))),
         Contributor(Person("Bruce Banner"), List(ContributionRole("scribe")))
       ))
     }
+    it("ignores handNote if it has no scribe attribute") {
+      val result = TeiContributors.scribes(
+        teiXml(
+          id,
+          handNotes = List(
+            handNotes(label = "Steve Rogers")
+          )
+        ), id
+      )
+
+      result.value shouldBe Map.empty
+    }
 
     it(
-      "returns the scribe in the map with the itemId if the node has a target attribute"
+      "returns the scribes with the itemId if the node has a target attribute"
     ) {
       val itemId = s"${id}_item1"
       val result = TeiContributors.scribes(
@@ -366,14 +410,14 @@ class TeiContributorsTest
             handNotes(
               label = "Wanda Maximoff",
               scribe = Some("sole"),
-              locus = Some(locus(label = "p 22-24", target = Some(s"#$itemId")))
+              locus = List(locus(label = "p 22-24", target = Some(s"#$itemId")))
             )
           ),
           items = List(msItem(id = itemId))
         ), id
       )
 
-      result shouldBe Map(itemId -> List(
+      result.value shouldBe Map(itemId -> List(
         Contributor(Person("Wanda Maximoff"), List(ContributionRole("scribe")))))
 
     }
@@ -388,27 +432,27 @@ class TeiContributorsTest
               label = "Wanda Maximoff",
               scribe = Some("sole"),
               locus =
-                Some(locus(label = "p 22-24", target = Some(s"#$itemId1")))
+                List(locus(label = "p 22-24", target = Some(s"#$itemId1")))
             ),
             handNotes(
               label = "Natasha Romanoff",
               scribe = Some("sole"),
               locus =
-                Some(locus(label = "p 22-24", target = Some(s"#$itemId2")))
+                List(locus(label = "p 22-24", target = Some(s"#$itemId2")))
             ),
             handNotes(label = "Carol Denvers", scribe = Some("sole")),
             handNotes(persNames = List(scribe("Vision"))),
             handNotes(
               persNames = List(scribe("Stephen Strange")),
               locus =
-                Some(locus(label = "p 22-24", target = Some(s"#$itemId1")))
+                List(locus(label = "p 22-24", target = Some(s"#$itemId1")))
             )
           ),
           items = List(msItem(id = itemId1), msItem(id = itemId2))
         ), id
       )
 
-      result shouldBe Map(itemId1 -> List(
+      result.value shouldBe Map(itemId1 -> List(
         Contributor(Person("Wanda Maximoff"), List(ContributionRole("scribe"))),
         Contributor(Person("Stephen Strange"), List(ContributionRole("scribe")))
       ), itemId2 -> List(
@@ -422,9 +466,25 @@ class TeiContributorsTest
       )
       )
     }
-    // test doesn't extract from handNote directly if there is no persname and no scribe attribute
-    // test multiple locus tags in handNote => failure!
-    // test multiple ids in scribes ids
-    // test multiple persNames
+    it("deals with multiple ids in the locus target"){
+      val itemId1 = s"${id}_item1"
+      val itemId2 = s"${id}_item2"
+      val result = TeiContributors.scribes(
+        teiXml(
+          id,
+          handNotes = List(
+            handNotes(
+              label = "Wanda Maximoff",
+              scribe = Some("sole"),
+              locus = List(locus(label = "p 22-24", target = Some(s"#$itemId1 #$itemId2")))
+            )
+          ),
+          items = List(msItem(id = itemId1), msItem(id = itemId2))
+        ), id
+      )
+      result.value shouldBe Map(itemId1 -> List(
+        Contributor(Person("Wanda Maximoff"), List(ContributionRole("scribe")))),itemId2 -> List(
+        Contributor(Person("Wanda Maximoff"), List(ContributionRole("scribe")))))
+    }
   }
 }
