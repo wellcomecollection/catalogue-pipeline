@@ -31,58 +31,118 @@ object TeiContributors {
       .toList
       .sequence
 
+  /**
+   * Scribes appear in the physical description section of the manuscript and can appear
+   * within a handNote tag with attribute "scribe" as in this example
+   * <physDesc>
+   *     <handDesc>
+   *         <handNote scope="minor" scribe="Scribe_A"> <locus target="#Wellcome_Batak_36801_1 #Wellcome_Batak_36801_2" >a 2-62, b 2-7; b 8-22</locus> Gorak-gorahan, etc. Southern form of ta.</handNote>
+   *         <handNote scope="minor" scribe="Scribe_B"> <locus target="#Wellcome_Batak_36801_3">b 23-35</locus>Another hand, which uses the northern ta.</handNote>
+   *         <handNote scope="minor" scribe="Scribe_C"> <locus target="#Wellcome_Batak_36801_9">b 44-45</locus>Another hand; careless writing, at first with northern ta, later southern ta.</handNote>
+   *         <handNote scope="minor" scribe="Scribe_D"> <locus target="#Wellcome_Batak_36801_10">b 45-56</locus>A different handwriting, using the southern form of ta but not the peculiar form of ya which is found in the text written by <persName>Datu Poduwon</persName>.</handNote>
+   *     </handDesc>
+   * </physDesc>
+   *
+   * or within a persName tag with role=scr inside the handNote tag
+   * <physDesc>
+   *    <handDesc>
+   *        <handNote scope="sole">
+   *            <persName role="scr">Mahādeva Pāṇḍe</persName>
+   *        </handNote>
+   *    </handDesc>
+   *</physDesc>
+   * If the scribe refers to a part or item of the manuscript, the handNote tag will have a locus node with the item or part ids that it refers to
+   *
+   */
   def scribes(xml: Elem, workId: String)
   : Result[Map[String, List[Contributor[Unminted]]]] =
     (xml \\ "physDesc" \ "handDesc" \ "handNote").foldLeft(
       Right(Map.empty): Result[Map[String, List[Contributor[Unminted]]]]
     ) {
       case (Left(err), _) => Left(err)
-      case (Right(scribesMap), n: Node) =>
+      case (Right(scribesMap), node) =>
         for {
-          contributor <- getScribeContributor(n)
-        } yield  mapContributorToWorkId(workId, n, contributor, scribesMap)
+          contributor <- getScribeContributor(node)
+        } yield  mapContributorToWorkId(workId, node, contributor, scribesMap)
     }
 
 
-  private def getScribeContributor(n: Node) = {
-    val persNameNodes =
-      (n \ "persName").filter(n => (n \@ "role") == "scr").toList
+  /**
+   * Author nodes can be in 2 forms:
+   * <msItem xml:id="MS_Arabic_1-item1">
+   *  <author key="person_97166546">
+   *    <persName xml:lang="en">Avicenna, d. 980-1037
+   *    </persName>
+   *    <persName xml:lang="ar" type="original">ابو على الحسين ابن عبد الله ابن
+   *    سينا</persName>
+   *  </author>
+   *  or
+   * <msItem n="1" xml:id="MS_MSL_114_1">
+   *  <author key="person_84812936">Paul of Aegina</author>
+   *  So we must check for the existence of the internal persName nodes to decide
+   *  where to get the label and id from
+   */
+  private def getLabelAndId(n: Node) = (n \ "persName").toList match {
+    case Nil            => getFromAuthorNode(n)
+    case List(persNode) => getFromPersNode(n, persNode)
+    case list           => getFromOriginalPersNode(n, list)
+  }
 
-    for{
-      maybeLabel <-parseScribeLabel(n, persNameNodes)
+
+  private def getScribeContributor(n: Node) = for{
+      maybeLabel <-parseScribeLabel(n)
       contributor <- maybeLabel.map { label =>
         createContributor(label, ContributionRole("scribe"))
       }.sequence
     } yield contributor
 
-  }
-
-  private def parseScribeLabel(n: Node, persNameNodes: List[Node]) = {
-    (n.attribute("scribe"), persNameNodes) match {
-      case (Some(_), Nil) => parseLabelFrom(n)
-      case (_, List(persName)) => Right(Some(persName.text.trim))
-      case (_, list@_ :: _) => getFromOriginalPersNode(n, list).map { case (label, _) => Some(label) }
-      case (None, Nil) => Right(None)
-    }
-  }
-
+  /**
+   * If the scribe refers to a nested part or item, it will have a locus tag with a target attribute like:
+   * <handNote scope="minor" scribe="Scribe_A"> <locus target="#Wellcome_Batak_36801_1 #Wellcome_Batak_36801_2" >a 2-62, b 2-7; b 8-22</locus> Gorak-gorahan, etc. Southern form of ta.</handNote>
+   *
+   * If the scribe refers to the wrapper work then it has no locus tag.
+   * Here we extract the id of the work the scribe refers to and add it to a map workId -> contributors
+   */
   private def mapContributorToWorkId(workId: String, n: Node, maybeContributor: Option[Contributor[Unminted]], scribesMap: Map[String,List[Contributor[Unminted]] ]) = {
     maybeContributor match {
       case None => scribesMap
-      case Some(c) =>
+      case Some(contributor) =>
         val workIds = extractNestedWorkIds(n)
         workIds match {
           case Nil =>
-            scribesMap + addIdToMap(workId, scribesMap, c)
-          case nodeIds =>
-            scribesMap ++ addIdsToMap(scribesMap, c, nodeIds)
+            scribesMap + addIdToMap(workId, scribesMap, contributor)
+          case ids =>
+            scribesMap ++ addIdsToMap(scribesMap, contributor, ids)
 
         }
 
     }
   }
 
-  private def parseLabelFrom(n: Node) = {
+  /**
+   * The scribe name can be within the handNote tag directly or within a
+   * persName node with role="src" inside the handNote tag. If there is a persName tag,
+   * we pick that to construct the scribe name. Otherwise we use the text directly inside the handNote tag
+   */
+  private def parseScribeLabel(n: Node) = {
+    val persNameNodes =
+      (n \ "persName").filter(n => (n \@ "role") == "scr").toList
+    (n.attribute("scribe"), persNameNodes) match {
+      case (Some(_), Nil) => parseLabelFromHandNode(n)
+      case (_, List(persName)) => Right(Some(persName.text.trim))
+      case (_, list@_ :: _) => getFromOriginalPersNode(n, list).map { case (label, _) => Some(label) }
+      case (None, Nil) => Right(None)
+    }
+  }
+
+  /** Very annoingly if the scribe is in this form:
+   *  <handNote scope="minor" scribe="Scribe_A"> <locus target="#Wellcome_Batak_36801_1 #Wellcome_Batak_36801_2" >a 2-62, b 2-7; b 8-22</locus> Gorak-gorahan, etc. Southern form of ta.</handNote>
+   *  we have to get the text of the handNote node without getting the text of the locus node.
+   *  We do this by parsing only the direct children of handNote that are text nodes.
+   * For some reason that I can't understand, this only works if we load the handNode
+   * as a XML
+   */
+  private def parseLabelFromHandNode(n: Node) = {
     Right(Some(
       XML
         .loadString(n.toString())
@@ -121,26 +181,6 @@ object TeiContributors {
       .flatten
   }
 
-  /**
-   * Author nodes can be in 2 forms:
-   * <msItem xml:id="MS_Arabic_1-item1">
-   *  <author key="person_97166546">
-   *    <persName xml:lang="en">Avicenna, d. 980-1037
-   *    </persName>
-   *    <persName xml:lang="ar" type="original">ابو على الحسين ابن عبد الله ابن
-   *    سينا</persName>
-   *  </author>
-   *  or
-   * <msItem n="1" xml:id="MS_MSL_114_1">
-   *  <author key="person_84812936">Paul of Aegina</author>
-   *  So we must check for the existence of the internal persName nodes to decide
-   *  where to get the label and id from
-   */
-  private def getLabelAndId(n: Node) = (n \ "persName").toList match {
-    case Nil            => getFromAuthorNode(n)
-    case List(persNode) => getFromPersNode(n, persNode)
-    case list           => getFromOriginalPersNode(n, list)
-  }
 
   private def createContributor(label: String, role: ContributionRole): Result[Contributor[Unminted]] =
     createContributor(label = label, id = "", isFihrist = false, role = role)
