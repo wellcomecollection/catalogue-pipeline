@@ -3,7 +3,7 @@ package weco.pipeline.transformer.tei.generators
 import org.scalatest.Suite
 import weco.fixtures.RandomGenerators
 
-import scala.xml.{Elem, NodeSeq}
+import scala.xml._
 
 trait TeiGenerators extends RandomGenerators { this: Suite =>
   def teiXml(
@@ -15,7 +15,8 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
     items: List[Elem] = Nil,
     parts: List[Elem] = Nil,
     catalogues: List[Elem] = Nil,
-    authors: List[Elem] = Nil
+    authors: List[Elem] = Nil,
+    handNotes: List[Elem] = Nil,
   ): Elem =
     <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id={id}>
       <teiHeader>
@@ -31,6 +32,11 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
               </msIdentifier>
               {msContents(summary, languages, items, authors)}
               {parts}
+              <physDesc>
+                <handDesc>
+                  {handNotes}
+                </handDesc>
+              </physDesc>
             </msDesc>
           </sourceDesc>
         </fileDesc>
@@ -91,13 +97,36 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
       case None    => <author>{persNames}</author>
     }
 
+  def handNotes(label: String = "",
+                persNames: List[Elem] = Nil,
+                scribe: Option[String] = None,
+                locus: List[Elem] = Nil) = {
+    val scribeAttribute =
+      scribe.map(s => Attribute("scribe", Text(s), Null)).getOrElse(Null)
+    <handNote>
+      {locus}{label}{persNames}
+  </handNote> % scribeAttribute
+  }
+
+  def locus(label: String, target: Option[String] = None) = target match {
+    case Some(t) => <locus target={t}>{label}</locus>
+    case None    => <locus>{label}</locus>
+  }
+
+  def scribe(name: String, `type`: Option[String] = None) =
+    persName(label = name, role = Some("scr"), `type` = `type`)
+
   def persName(label: String,
                key: Option[String] = None,
-               `type`: Option[String] = None) = (key, `type`) match {
-    case (Some(k), Some(t)) => <persName key={k} type={t}>{label}</persName>
-    case (Some(k), None)    => <persName key={k}>{label}</persName>
-    case (None, Some(t))    => <persName type={t}>{label}</persName>
-    case (None, None)       => <persName>{label}</persName>
+               `type`: Option[String] = None,
+               role: Option[String] = None) = {
+    val attributes = Map("key" -> key, "type" -> `type`, "role" -> role)
+      .foldLeft(Null: MetaData) {
+        case (metadata, (name, Some(value))) =>
+          Attribute(name, Text(value), metadata)
+        case (metadata, (_, None)) => metadata
+      }
+    <persName>{label}</persName> % attributes
   }
 
   def summary(str: String) = <summary>{str}</summary>

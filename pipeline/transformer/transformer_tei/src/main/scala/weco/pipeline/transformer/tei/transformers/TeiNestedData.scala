@@ -3,6 +3,8 @@ package weco.pipeline.transformer.tei.transformers
 import cats.instances.either._
 import cats.syntax.traverse._
 import grizzled.slf4j.Logging
+import weco.catalogue.internal_model.identifiers.IdState.Unminted
+import weco.catalogue.internal_model.work.Contributor
 import weco.pipeline.transformer.result.Result
 import weco.pipeline.transformer.tei.{TeiData, TeiOps}
 
@@ -19,19 +21,24 @@ object TeiNestedData extends Logging {
     * check https://github.com/wellcomecollection/wellcome-collection-tei/blob/main/docs/TEI_Manual_2020_V1.pdf
     * for more info.
     */
-  def nestedTeiData(xml: Elem, wrapperTitle: String) =
+  def nestedTeiData(xml: Elem,
+                    wrapperTitle: String,
+                    scribesMap: Map[String, List[Contributor[Unminted]]]) =
     for {
       catalogues <- getCatalogues(xml)
       nestedItems <- nestedTeiDataFromItems(
+        xml = xml,
         wrapperTitle = wrapperTitle,
         catalogues = catalogues,
-        nodeSeq = xml \\ "msDesc" \ "msContents")
+        nodeSeq = xml \\ "msDesc" \ "msContents",
+        scribesMap = scribesMap)
       nestedData <- nestedItems match {
         case Nil =>
           nestedTeiDataFromParts(
             xml = xml,
             wrapperTitle = wrapperTitle,
-            catalogues = catalogues)
+            catalogues = catalogues,
+            scribesMap = scribesMap)
         case itemData => Right(itemData)
       }
     } yield nestedData
@@ -45,7 +52,9 @@ object TeiNestedData extends Logging {
   private def nestedTeiDataFromParts(
     xml: Elem,
     wrapperTitle: String,
-    catalogues: List[String]): Result[List[TeiData]] =
+    catalogues: List[String],
+    scribesMap: Map[String, List[Contributor[Unminted]]])
+    : Result[List[TeiData]] =
     (xml \\ "msDesc" \ "msPart").zipWithIndex
       .map { case (node, i) => (node, i + 1) }
       .map {
@@ -57,9 +66,11 @@ object TeiNestedData extends Logging {
             (languages, languageNotes) = languageData
             partTitle = s"$wrapperTitle part $i"
             items <- extractLowerLevelItems(
+              xml,
               partTitle,
               node \ "msContents",
-              catalogues)
+              catalogues,
+              scribesMap)
           } yield {
             TeiData(
               id = id,
@@ -67,7 +78,9 @@ object TeiNestedData extends Logging {
               languages = languages,
               languageNotes = languageNotes,
               description = description,
-              nestedTeiData = items)
+              nestedTeiData = items,
+              contributors = scribesMap.getOrElse(id, Nil)
+            )
           }
       }
       .toList
@@ -77,9 +90,13 @@ object TeiNestedData extends Logging {
     * Extract information about inner works for single part manuscripts.
     * For single part manuscripts, inner works are described in msItem elements.
     */
-  private def nestedTeiDataFromItems(wrapperTitle: String,
-                                     catalogues: List[String],
-                                     nodeSeq: NodeSeq): Result[List[TeiData]] =
+  private def nestedTeiDataFromItems(
+    xml: Elem,
+    wrapperTitle: String,
+    catalogues: List[String],
+    nodeSeq: NodeSeq,
+    scribesMap: Map[String, List[Contributor[Unminted]]])
+    : Result[List[TeiData]] =
     (nodeSeq \ "msItem").zipWithIndex
     // The indexing starts at zero but we want to count items from 1 so we add 1
       .map { case (node, i) => (node, i + 1) }
@@ -93,8 +110,15 @@ object TeiNestedData extends Logging {
             id <- TeiOps.getIdFrom(node)
             languageData <- TeiLanguages.parseLanguages(node)
             (languages, languageNotes) = languageData
-            items <- extractLowerLevelItems(title, node, catalogues)
-            authors <- TeiAuthors.apply(node, containsFihrist(catalogues))
+            items <- extractLowerLevelItems(
+              xml,
+              title,
+              node,
+              catalogues,
+              scribesMap)
+            authors <- TeiContributors.authors(
+              node,
+              containsFihrist(catalogues))
           } yield
             TeiData(
               id = id,
@@ -102,7 +126,7 @@ object TeiNestedData extends Logging {
               languages = languages,
               languageNotes = languageNotes,
               nestedTeiData = items,
-              authors = authors)
+              contributors = authors ++ scribesMap.getOrElse(id, Nil))
       }
       .toList
       .sequence
@@ -114,17 +138,22 @@ object TeiNestedData extends Logging {
     * we just don't extract lower level items for manuscripts in the Fihrist catalogue.
     */
   private def extractLowerLevelItems(
+    xml: Elem,
     partTitle: String,
     nodes: NodeSeq,
-    catalogues: List[String]): Either[Throwable, List[TeiData]] =
+    catalogues: List[String],
+    scribesMap: Map[String, List[Contributor[Unminted]]])
+    : Either[Throwable, List[TeiData]] =
     catalogues match {
       case catalogues if containsFihrist(catalogues) =>
         Right(Nil)
       case _ =>
         nestedTeiDataFromItems(
+          xml = xml,
           wrapperTitle = partTitle,
           catalogues = catalogues,
-          nodeSeq = nodes)
+          nodeSeq = nodes,
+          scribesMap = scribesMap)
     }
 
   private def containsFihrist(catalogues: List[String]): Boolean =

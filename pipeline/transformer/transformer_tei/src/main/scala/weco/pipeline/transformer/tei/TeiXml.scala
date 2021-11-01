@@ -2,12 +2,40 @@ package weco.pipeline.transformer.tei
 
 import grizzled.slf4j.Logging
 import weco.pipeline.transformer.result.Result
+import weco.pipeline.transformer.tei.transformers.{
+  TeiContributors,
+  TeiLanguages,
+  TeiNestedData
+}
 
 import scala.util.Try
 import scala.xml.{Elem, XML}
 class TeiXml(val xml: Elem) extends Logging {
   val id: String =
     getId.getOrElse(throw new RuntimeException(s"Could not find an id in XML!"))
+
+  lazy val scribesMap = TeiContributors.scribes(xml, id)
+
+  def parse: Result[TeiData] =
+    for {
+      title <- title
+      bNumber <- bNumber
+      summary <- summary
+      languageData <- TeiLanguages(xml)
+      (languages, languageNotes) = languageData
+      scribes <- scribesMap
+      nestedData <- TeiNestedData.nestedTeiData(xml, title, scribes)
+    } yield
+      TeiData(
+        id = id,
+        title = title,
+        bNumber = bNumber,
+        description = summary,
+        languages = languages,
+        languageNotes = languageNotes,
+        contributors = scribes.getOrElse(id, Nil),
+        nestedTeiData = nestedData
+      )
 
   /**
     * All the identifiers of the TEI file are in a `msIdentifier` bloc.
@@ -32,7 +60,7 @@ class TeiXml(val xml: Elem) extends Logging {
     * </TEI>
     *
     */
-  def bNumber: Result[Option[String]] = {
+  private def bNumber: Result[Option[String]] = {
     val identifiersNodes = xml \\ "msDesc" \ "msIdentifier" \ "altIdentifier"
     val seq = (identifiersNodes.filter(
       n => (n \@ "type").toLowerCase == "sierra"
@@ -44,7 +72,7 @@ class TeiXml(val xml: Elem) extends Logging {
     }
   }
 
-  def summary: Result[Option[String]] = TeiOps.summary(xml \\ "msDesc")
+  private def summary: Result[Option[String]] = TeiOps.summary(xml \\ "msDesc")
 
   /**
     * In an XML like this:
@@ -56,7 +84,7 @@ class TeiXml(val xml: Elem) extends Logging {
     *       </publicationStmt>
     * Extract "Well. Jav. 4" as the title
     */
-  def title: Result[String] = {
+  private def title: Result[String] = {
     val nodes =
       (xml \ "teiHeader" \ "fileDesc" \ "publicationStmt" \ "idno").toList
     val maybeTitles = nodes.filter(n => (n \@ "type") == "msID")

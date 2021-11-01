@@ -13,7 +13,6 @@ import weco.catalogue.source_model.tei.{
 }
 import weco.pipeline.transformer.Transformer
 import weco.pipeline.transformer.result.Result
-import weco.pipeline.transformer.tei.transformers.{TeiLanguages, TeiNestedData}
 import weco.storage.s3.S3ObjectLocation
 import weco.storage.store.Store
 
@@ -46,25 +45,7 @@ class TeiTransformer(store: Store[S3ObjectLocation, String])
     for {
       xmlString <- store.get(s3Location).left.map(_.e)
       teiXml <- TeiXml(id, xmlString.identifiedT)
-      teiData <- parse(teiXml)
+      teiData <- teiXml.parse
     } yield teiData.toWork(time, version)
-
-  private def parse(teiXml: TeiXml): Result[TeiData] =
-    for {
-      summary <- teiXml.summary
-      bNumber <- teiXml.bNumber
-      title <- teiXml.title
-      languageData <- TeiLanguages(teiXml.xml)
-      (languages, languageNotes) = languageData
-      nestedData <- TeiNestedData.nestedTeiData(teiXml.xml, title)
-    } yield
-      TeiData(
-        id = teiXml.id,
-        title = title,
-        bNumber = bNumber,
-        description = summary,
-        languages = languages,
-        languageNotes = languageNotes,
-        nestedTeiData = nestedData)
 
 }
