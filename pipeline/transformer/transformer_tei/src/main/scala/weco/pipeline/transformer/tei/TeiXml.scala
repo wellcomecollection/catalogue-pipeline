@@ -14,9 +14,9 @@ class TeiXml(val xml: Elem) extends Logging {
 
   def parse: Result[TeiData] =
     for {
-      summary <- summary
-      bNumber <- bNumber
       title <- title
+      bNumber <- bNumber
+      summary <- summary
       languageData <- TeiLanguages(xml)
       (languages, languageNotes) = languageData
       scribes <- scribesMap
