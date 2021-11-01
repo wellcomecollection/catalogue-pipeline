@@ -97,29 +97,35 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
       case None    => <author>{persNames}</author>
     }
 
-  def handNotes(label: String = "", persNames: List[Elem] = Nil, scribe: Option[String] = None, locus: List[Elem] = Nil) = {
-    val scribeAttribute = scribe.map(s=>Attribute("scribe", Text(s), Null)).getOrElse(Null)
+  def handNotes(label: String = "",
+                persNames: List[Elem] = Nil,
+                scribe: Option[String] = None,
+                locus: List[Elem] = Nil) = {
+    val scribeAttribute =
+      scribe.map(s => Attribute("scribe", Text(s), Null)).getOrElse(Null)
     <handNote>
       {locus}{label}{persNames}
   </handNote> % scribeAttribute
   }
 
-  def locus(label: String,target: Option[String] = None) = target match {
-case Some(t) => <locus target={t}>{label}</locus>
-    case None => <locus>{label}</locus>
+  def locus(label: String, target: Option[String] = None) = target match {
+    case Some(t) => <locus target={t}>{label}</locus>
+    case None    => <locus>{label}</locus>
   }
 
-  def scribe(name: String, `type`: Option[String] = None) = persName(label = name, role = Some("scr"), `type` = `type`)
+  def scribe(name: String, `type`: Option[String] = None) =
+    persName(label = name, role = Some("scr"), `type` = `type`)
 
   def persName(label: String,
                key: Option[String] = None,
                `type`: Option[String] = None,
                role: Option[String] = None) = {
-    val attributes = Map("key" ->key, "type" -> `type`, "role" -> role).foldLeft(Null: MetaData) {
-      case (metadata, (name, Some(value))) =>
-        Attribute(name, Text(value), metadata)
-      case (metadata, (_ ,None)) => metadata
-    }
+    val attributes = Map("key" -> key, "type" -> `type`, "role" -> role)
+      .foldLeft(Null: MetaData) {
+        case (metadata, (name, Some(value))) =>
+          Attribute(name, Text(value), metadata)
+        case (metadata, (_, None)) => metadata
+      }
     <persName>{label}</persName> % attributes
   }
 

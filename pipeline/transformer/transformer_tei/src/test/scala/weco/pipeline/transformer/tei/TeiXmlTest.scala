@@ -3,7 +3,11 @@ package weco.pipeline.transformer.tei
 import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.work.{ContributionRole, Contributor, Person}
+import weco.catalogue.internal_model.work.{
+  ContributionRole,
+  Contributor,
+  Person
+}
 import weco.pipeline.transformer.tei.generators.TeiGenerators
 import weco.sierra.generators.SierraIdentifierGenerators
 
@@ -145,12 +149,21 @@ class TeiXmlTest
     }
   }
 
+  it("extracts a list of scribes from handNote/persName") {
+    val result = new TeiXml(
+      teiXml(
+        id,
+        handNotes = List(
+          handNotes(persNames = List(scribe("Tony Stark"))),
+          handNotes(persNames = List(scribe("Peter Parker"))),
+          handNotes(persNames = List(scribe("Steve Rogers"))))
+      )).parse
 
-    it("extracts a list of scribes from handNote/persName") {
-      val result = new TeiXml(teiXml(id, handNotes = List(handNotes(persNames = List(scribe("Tony Stark"))), handNotes(persNames = List(scribe("Peter Parker"))), handNotes(persNames = List(scribe("Steve Rogers")))))).parse
-
-      result.value.contributors shouldBe List(Contributor(Person("Tony Stark"), List(ContributionRole("scribe"))),Contributor(Person("Peter Parker"), List(ContributionRole("scribe"))),Contributor(Person("Steve Rogers"), List(ContributionRole("scribe"))))
-    }
-
+    result.value.contributors shouldBe List(
+      Contributor(Person("Tony Stark"), List(ContributionRole("scribe"))),
+      Contributor(Person("Peter Parker"), List(ContributionRole("scribe"))),
+      Contributor(Person("Steve Rogers"), List(ContributionRole("scribe")))
+    )
+  }
 
 }

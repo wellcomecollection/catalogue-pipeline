@@ -2,7 +2,11 @@ package weco.pipeline.transformer.tei
 
 import grizzled.slf4j.Logging
 import weco.pipeline.transformer.result.Result
-import weco.pipeline.transformer.tei.transformers.{TeiContributors, TeiLanguages, TeiNestedData}
+import weco.pipeline.transformer.tei.transformers.{
+  TeiContributors,
+  TeiLanguages,
+  TeiNestedData
+}
 
 import scala.util.Try
 import scala.xml.{Elem, XML}
@@ -20,17 +24,18 @@ class TeiXml(val xml: Elem) extends Logging {
       languageData <- TeiLanguages(xml)
       (languages, languageNotes) = languageData
       scribes <- scribesMap
-      nestedData <- TeiNestedData.nestedTeiData(xml,title, scribes)
-    } yield TeiData(
-      id = id,
-      title = title,
-      bNumber = bNumber,
-      description = summary,
-      languages = languages,
-      languageNotes = languageNotes,
-      contributors = scribes.getOrElse(id, Nil),
-      nestedTeiData = nestedData
-    )
+      nestedData <- TeiNestedData.nestedTeiData(xml, title, scribes)
+    } yield
+      TeiData(
+        id = id,
+        title = title,
+        bNumber = bNumber,
+        description = summary,
+        languages = languages,
+        languageNotes = languageNotes,
+        contributors = scribes.getOrElse(id, Nil),
+        nestedTeiData = nestedData
+      )
 
   /**
     * All the identifiers of the TEI file are in a `msIdentifier` bloc.
