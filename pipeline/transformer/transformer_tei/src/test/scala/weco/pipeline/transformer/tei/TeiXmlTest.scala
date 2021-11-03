@@ -3,11 +3,7 @@ package weco.pipeline.transformer.tei
 import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.work.{
-  ContributionRole,
-  Contributor,
-  Person
-}
+import weco.catalogue.internal_model.work.{ContributionRole, Contributor, Person, Place, ProductionEvent}
 import weco.pipeline.transformer.tei.generators.TeiGenerators
 import weco.sierra.generators.SierraIdentifierGenerators
 
@@ -164,6 +160,16 @@ class TeiXmlTest
       Contributor(Person("Peter Parker"), List(ContributionRole("scribe"))),
       Contributor(Person("Steve Rogers"), List(ContributionRole("scribe")))
     )
+  }
+
+  it("extracts the origin place"){
+    val result = new TeiXml(
+      teiXml(
+        id,
+        origPlace = Some(origPlace(country = Some("India")))
+      )).parse
+
+    result.value.origin shouldBe List(ProductionEvent("India", places = List(Place("India")),  agents = Nil, dates = Nil))
   }
 
 }

@@ -1,12 +1,10 @@
 package weco.pipeline.transformer.tei
 
 import grizzled.slf4j.Logging
+import weco.catalogue.internal_model.identifiers.IdState.Unminted
+import weco.catalogue.internal_model.work.{Place, ProductionEvent}
 import weco.pipeline.transformer.result.Result
-import weco.pipeline.transformer.tei.transformers.{
-  TeiContributors,
-  TeiLanguages,
-  TeiNestedData
-}
+import weco.pipeline.transformer.tei.transformers.{TeiContributors, TeiLanguages, TeiNestedData}
 
 import scala.util.Try
 import scala.xml.{Elem, XML}
@@ -25,6 +23,7 @@ class TeiXml(val xml: Elem) extends Logging {
       (languages, languageNotes) = languageData
       scribes <- scribesMap
       nestedData <- TeiNestedData.nestedTeiData(xml, title, scribes)
+      origin <- origin
     } yield
       TeiData(
         id = id,
@@ -34,7 +33,8 @@ class TeiXml(val xml: Elem) extends Logging {
         languages = languages,
         languageNotes = languageNotes,
         contributors = scribes.getOrElse(id, Nil),
-        nestedTeiData = nestedData
+        nestedTeiData = nestedData,
+        origin = origin
       )
 
   /**
@@ -95,8 +95,16 @@ class TeiXml(val xml: Elem) extends Logging {
     }
   }
 
+  private def origin: Result[List[ProductionEvent[Unminted]]] = {
+    val text = (xml \\ "history" \ "origin" \ "origPlace").text.trim
+    Right(List(ProductionEvent(
+      label = text,
+      places = List(Place(text)),
+      agents = Nil,
+      dates = Nil,
+    )))
+  }
   private def getId: Result[String] = TeiOps.getIdFrom(xml)
-
 }
 
 object TeiXml {
