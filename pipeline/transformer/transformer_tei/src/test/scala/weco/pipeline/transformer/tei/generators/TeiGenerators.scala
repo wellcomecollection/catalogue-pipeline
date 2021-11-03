@@ -17,7 +17,8 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
               catalogues: List[Elem] = Nil,
               authors: List[Elem] = Nil,
               handNotes: List[Elem] = Nil,
-              origPlace: Option[Elem] = None
+              origPlace: Option[Elem] = None,
+              origDate: Option[Elem] = None,
   ): Elem =
     <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id={id}>
       <teiHeader>
@@ -154,9 +155,9 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
     
   def origPlace(country: Option[String]= None, settlement: Option[String]= None, region: Option[String]= None, orgName: Option[String] = None, label: Option[String]= None) =
     <origPlace>
-      <country>{country.getOrElse("")}</country>
-      <region>{region.getOrElse("")}</region>
-      <settlement>{settlement.getOrElse("")}</settlement>
+      <country>{country.getOrElse("")}</country>,
+      <region>{region.getOrElse("")}</region>,
+      <settlement>{settlement.getOrElse("")}</settlement>,
       <orgName>{orgName.getOrElse("")}</orgName>
       {label.getOrElse("")}
     </origPlace>

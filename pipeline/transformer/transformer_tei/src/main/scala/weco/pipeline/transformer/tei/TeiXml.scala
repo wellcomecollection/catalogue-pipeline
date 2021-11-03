@@ -2,7 +2,7 @@ package weco.pipeline.transformer.tei
 
 import grizzled.slf4j.Logging
 import weco.catalogue.internal_model.identifiers.IdState.Unminted
-import weco.catalogue.internal_model.work.{Place, ProductionEvent}
+import weco.catalogue.internal_model.work.{Organisation, Place, ProductionEvent}
 import weco.pipeline.transformer.result.Result
 import weco.pipeline.transformer.tei.transformers.{TeiContributors, TeiLanguages, TeiNestedData}
 
@@ -96,14 +96,26 @@ class TeiXml(val xml: Elem) extends Logging {
   }
 
   private def origin: Result[List[ProductionEvent[Unminted]]] = {
-    val text = (xml \\ "history" \ "origin" \ "origPlace").text.trim
+    val origPlace = xml \\ "history" \ "origin" \ "origPlace"
+    val country = (origPlace \ "country").text.trim
+    val region = (origPlace \ "region").text.trim
+    val settlement = (origPlace \ "settlement").text.trim
+    val organisation = (origPlace \ "orgName").text.trim
+
+    val label = List(country, region, settlement).filterNot(_.isEmpty).mkString(", ")
+    val agents = if(organisation.isEmpty){
+      Nil
+    }else {
+      List(Organisation(organisation))
+    }
     Right(List(ProductionEvent(
-      label = text,
-      places = List(Place(text)),
-      agents = Nil,
+      label = label,
+      places = List(Place(label)),
+      agents = agents,
       dates = Nil,
     )))
   }
+
   private def getId: Result[String] = TeiOps.getIdFrom(xml)
 }
 

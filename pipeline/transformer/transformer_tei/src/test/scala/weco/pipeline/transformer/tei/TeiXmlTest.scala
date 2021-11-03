@@ -3,7 +3,7 @@ package weco.pipeline.transformer.tei
 import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.work.{ContributionRole, Contributor, Person, Place, ProductionEvent}
+import weco.catalogue.internal_model.work.{ContributionRole, Contributor, Organisation, Person, Place, ProductionEvent}
 import weco.pipeline.transformer.tei.generators.TeiGenerators
 import weco.sierra.generators.SierraIdentifierGenerators
 
@@ -161,8 +161,8 @@ class TeiXmlTest
       Contributor(Person("Steve Rogers"), List(ContributionRole("scribe")))
     )
   }
-
-  it("extracts the origin place"){
+describe("origin"){
+  it("extracts the origin country"){
     val result = new TeiXml(
       teiXml(
         id,
@@ -172,4 +172,37 @@ class TeiXmlTest
     result.value.origin shouldBe List(ProductionEvent("India", places = List(Place("India")),  agents = Nil, dates = Nil))
   }
 
-}
+  it("extracts the origin - country region and settlement"){
+    val result = new TeiXml(
+      teiXml(
+        id,
+        origPlace = Some(origPlace(country = Some("United Kingdom"), region = Some("England"), settlement = Some("London")))
+      )).parse
+
+    val label = "United Kingdom, England, London"
+    result.value.origin shouldBe List(ProductionEvent(label, places = List(Place(label)),  agents = Nil, dates = Nil))
+  }
+
+  it("ignores text not in country region or settlement"){
+    val result = new TeiXml(
+      teiXml(
+        id,
+        origPlace = Some(origPlace(country = Some("United Kingdom"), region = Some("England"), settlement = Some("London"), label = Some("stuff")))
+      )).parse
+
+    val label = "United Kingdom, England, London"
+    result.value.origin shouldBe List(ProductionEvent(label, places = List(Place(label)),  agents = Nil, dates = Nil))
+  }
+
+  it("returns an agent if there is an orgName"){
+    val result = new TeiXml(
+      teiXml(
+        id,
+        origPlace = Some(origPlace(country = Some("Egypt"), settlement = Some("Wadi El Natrun"),orgName = Some("Monastery of St Macarius the Great")))
+      )).parse
+
+    val label = "Egypt, Wadi El Natrun"
+    result.value.origin shouldBe List(ProductionEvent(label, places = List(Place(label)),  agents = List(Organisation("Monastery of St Macarius the Great")), dates = Nil))
+  }
+
+}}
