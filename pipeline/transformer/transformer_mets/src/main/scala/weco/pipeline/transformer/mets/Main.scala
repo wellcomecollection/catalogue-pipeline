@@ -6,6 +6,7 @@ import com.typesafe.config.Config
 import weco.catalogue.internal_model.index.WorksIndexConfig
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.Source
+import weco.catalogue.internal_model.Implicits._
 import weco.elasticsearch.typesafe.ElasticBuilder
 import weco.json.JsonUtil._
 import weco.messaging.sns.NotificationMessage
