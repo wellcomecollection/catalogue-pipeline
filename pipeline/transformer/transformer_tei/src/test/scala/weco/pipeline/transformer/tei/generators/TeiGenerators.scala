@@ -18,7 +18,7 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
               authors: List[Elem] = Nil,
               handNotes: List[Elem] = Nil,
               origPlace: Option[Elem] = None,
-              origDate: Option[Elem] = None,
+              originDates: List[Elem] = Nil,
   ): Elem =
     <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id={id}>
       <teiHeader>
@@ -42,6 +42,7 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
               <history>
                 <origin>
                   {origPlace.getOrElse(NodeSeq.Empty)}
+                  {originDates}
                 </origin>
               </history>
             </msDesc>
@@ -161,4 +162,7 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
       <orgName>{orgName.getOrElse("")}</orgName>
       {label.getOrElse("")}
     </origPlace>
+
+  def originDate(calendar: String, label: String) = <origDate calendar={calendar}>{label}</origDate>
+
 }

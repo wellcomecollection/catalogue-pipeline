@@ -5,9 +5,10 @@ import weco.catalogue.internal_model.identifiers.IdState.Unminted
 import weco.catalogue.internal_model.work.{Organisation, Place, ProductionEvent}
 import weco.pipeline.transformer.result.Result
 import weco.pipeline.transformer.tei.transformers.{TeiContributors, TeiLanguages, TeiNestedData}
+import weco.pipeline.transformer.transformers.ParsedPeriod
 
 import scala.util.Try
-import scala.xml.{Elem, XML}
+import scala.xml.{Elem, Text, XML}
 class TeiXml(val xml: Elem) extends Logging {
   val id: String =
     getId.getOrElse(throw new RuntimeException(s"Could not find an id in XML!"))
@@ -96,24 +97,31 @@ class TeiXml(val xml: Elem) extends Logging {
   }
 
   private def origin: Result[List[ProductionEvent[Unminted]]] = {
-    val origPlace = xml \\ "history" \ "origin" \ "origPlace"
+    val origin = xml \\ "history" \ "origin"
+    val origPlace = origin \ "origPlace"
     val country = (origPlace \ "country").text.trim
     val region = (origPlace \ "region").text.trim
     val settlement = (origPlace \ "settlement").text.trim
     val organisation = (origPlace \ "orgName").text.trim
-
-    val label = List(country, region, settlement).filterNot(_.isEmpty).mkString(", ")
-    val agents = if(organisation.isEmpty){
-      Nil
-    }else {
-      List(Organisation(organisation))
+    val seq = (origin \ "origDate").filter(n => (n \@ "calendar").toLowerCase == "gregorian")
+    val date = if (seq.exists(_.child.size > 1))
+      seq.map(_.child).flatten.collect { case n: Text => n.text }.mkString.trim
+    else seq.text.trim
+    val place = List(country, region, settlement).filterNot(_.isEmpty).mkString(", ")
+    val agents = if(organisation.isEmpty) Nil else List(Organisation(organisation))
+    val places = if(place.isEmpty) Nil else List(Place(place))
+    val dates = if(date.isEmpty) Nil else List(ParsedPeriod(date))
+    val label = List(place, date).filterNot(_.isEmpty).mkString(", ")
+    (agents,places, dates) match {
+      case (Nil, Nil, Nil) => Right(Nil)
+      case _ => Right(List(ProductionEvent(
+        label = label,
+        places = places,
+        agents = agents,
+        dates = dates
+      )))
     }
-    Right(List(ProductionEvent(
-      label = label,
-      places = List(Place(label)),
-      agents = agents,
-      dates = Nil,
-    )))
+
   }
 
   private def getId: Result[String] = TeiOps.getIdFrom(xml)
