@@ -1,6 +1,6 @@
 # catalogue-pipeline
 
-[![Build status](https://badge.buildkite.com/0ca819db1215b66ecb17019d8ee5331d8e537094d051141219.svg?branch=main)](https://buildkite.com/wellcomecollection/catalogue-pipeline) [![Adapter deployment status](https://img.shields.io/buildkite/2fb18a042947b93fb2b05a8c7b48c5db0e7fd0f9210bb993d5/main.svg?label=adapter%20deployment)](https://buildkite.com/wellcomecollection/catalogue-pipeline-deploy-adapter) [![Pipeline deployment status](https://img.shields.io/buildkite/120d56989228052f1539823186545fd7e1665aaa2cb98d0c91/main.svg?label=pipeline%20deployment)](https://buildkite.com/wellcomecollection/catalogue-pipeline-deploy-pipeline)
+[![Build status](https://badge.buildkite.com/0ca819db1215b66ecb17019d8ee5331d8e537094d051141219.svg?branch=main)](https://buildkite.com/wellcomecollection/catalogue-pipeline) [![Adapter deployment status](https://img.shields.io/buildkite/2fb18a042947b93fb2b05a8c7b48c5db0e7fd0f9210bb993d5/main.svg?label=adapter%20deployment)](https://buildkite.com/wellcomecollection/catalogue-pipeline-deploy-adapters) [![Pipeline deployment status](https://img.shields.io/buildkite/120d56989228052f1539823186545fd7e1665aaa2cb98d0c91/main.svg?label=pipeline%20deployment)](https://buildkite.com/wellcomecollection/catalogue-pipeline-deploy-pipeline)
 
 The catalogue pipeline creates the search index for our [unified collections search][search].
 It populates an Elasticsearch index with data which can then be read by our [catalogue API][api].
