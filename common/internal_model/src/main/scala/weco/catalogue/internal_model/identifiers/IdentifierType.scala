@@ -125,4 +125,10 @@ object IdentifierType extends Enum[IdentifierType] {
     val id = "fihrist"
     val label = "Fihrist Authority"
   }
+
+  // http://estc.bl.uk/ / https://www.wikidata.org/wiki/Property:P3939
+  case object ESTC extends IdentifierType {
+    val id = "bl-estc-citation-no"
+    val label = "British Library English Short Title Catalogue"
+  }
 }
