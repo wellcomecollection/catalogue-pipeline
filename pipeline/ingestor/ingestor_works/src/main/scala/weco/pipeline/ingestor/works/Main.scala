@@ -1,7 +1,6 @@
 package weco.pipeline.ingestor.works
 
 import scala.concurrent.ExecutionContext
-import akka.actor.ActorSystem
 import com.sksamuel.elastic4s.Index
 import com.typesafe.config.Config
 import weco.typesafe.WellcomeTypesafeApp
@@ -20,8 +19,6 @@ import weco.typesafe.config.builders.EnrichConfig._
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
-    implicit val actorSystem: ActorSystem =
-      AkkaBuilder.buildActorSystem()
     implicit val executionContext: ExecutionContext =
       AkkaBuilder.buildExecutionContext()
 

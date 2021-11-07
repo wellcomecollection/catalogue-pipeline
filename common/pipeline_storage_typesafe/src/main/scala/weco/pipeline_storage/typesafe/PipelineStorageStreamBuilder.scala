@@ -11,6 +11,7 @@ import weco.pipeline_storage.{
   PipelineStorageConfig,
   PipelineStorageStream
 }
+import weco.typesafe.config.builders.AkkaBuilder
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.DurationInt
@@ -28,9 +29,10 @@ object PipelineStorageStreamBuilder {
   def buildPipelineStorageStream[Out, MsgDestination](
     indexer: Indexer[Out],
     messageSender: MessageSender[MsgDestination])(config: Config)(
-    implicit
-    actorSystem: ActorSystem,
-    ec: ExecutionContext): PipelineStorageStream[NotificationMessage, Out, MsgDestination] = {
+    implicit ec: ExecutionContext): PipelineStorageStream[NotificationMessage, Out, MsgDestination] = {
+    implicit val actorSystem: ActorSystem =
+      AkkaBuilder.buildActorSystem()
+
     val messageStream = SQSBuilder.buildSQSStream[NotificationMessage](config)
 
     new PipelineStorageStream[NotificationMessage, Out, MsgDestination](

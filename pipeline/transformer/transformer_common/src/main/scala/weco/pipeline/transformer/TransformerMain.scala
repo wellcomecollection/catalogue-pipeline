@@ -1,6 +1,5 @@
 package weco.pipeline.transformer
 
-import akka.actor.ActorSystem
 import com.amazonaws.services.s3.AmazonS3
 import com.sksamuel.elastic4s.Index
 import com.typesafe.config.Config
@@ -30,8 +29,6 @@ trait TransformerMain[Payload <: SourcePayload, SourceData] extends WellcomeType
   implicit val decoder: Decoder[Payload]
 
   runWithConfig { config: Config =>
-    implicit val actorSystem: ActorSystem =
-      AkkaBuilder.buildActorSystem()
     implicit val ec: ExecutionContext =
       AkkaBuilder.buildExecutionContext()
 
