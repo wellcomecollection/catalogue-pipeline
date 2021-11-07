@@ -20,7 +20,5 @@ object Main extends TransformerMain[SierraSourcePayload, SierraTransformable] {
       sierraReadable = S3TypedStore[SierraTransformable]
     )
 
-  runWithConfig { config =>
-    runTransformer(config)
-  }
+  runTransformer()
 }

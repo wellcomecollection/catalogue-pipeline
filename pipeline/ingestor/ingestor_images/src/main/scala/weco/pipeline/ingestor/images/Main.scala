@@ -18,7 +18,5 @@ object Main extends IngestorMain[Image[Augmented], Image[Indexed]] {
   override val transform: Image[Augmented] => Image[Indexed] =
     ImageTransformer.deriveData
 
-  runWithConfig { config =>
-    runIngestor(config)
-  }
+  runIngestor()
 }

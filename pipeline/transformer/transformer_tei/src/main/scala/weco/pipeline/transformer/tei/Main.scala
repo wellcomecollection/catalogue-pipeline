@@ -17,7 +17,5 @@ object Main extends TransformerMain[TeiSourcePayload, TeiMetadata] {
   override def createSourceDataRetriever(implicit s3Client: AmazonS3) =
     new TeiSourceDataRetriever
 
-  runWithConfig { config =>
-    runTransformer(config)
-  }
+  runTransformer()
 }

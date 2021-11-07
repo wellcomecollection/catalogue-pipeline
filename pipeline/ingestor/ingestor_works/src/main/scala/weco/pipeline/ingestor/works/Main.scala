@@ -17,7 +17,5 @@ object Main extends IngestorMain[Work[Denormalised], Work[Indexed]] {
 
   override val transform = WorkTransformer.deriveData
 
-  runWithConfig { config =>
-    runIngestor(config)
-  }
+  runIngestor()
 }

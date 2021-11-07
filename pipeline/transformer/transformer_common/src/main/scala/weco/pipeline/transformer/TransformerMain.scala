@@ -27,43 +27,44 @@ trait TransformerMain[Payload <: SourcePayload, SourceData] extends WellcomeType
   def createTransformer(implicit s3Client: AmazonS3): Transformer[SourceData]
   def createSourceDataRetriever(implicit s3Client: AmazonS3): SourceDataRetriever[Payload, SourceData]
 
-  def runTransformer(config: Config)(implicit decoder: Decoder[Payload]): TransformerWorker[Payload, SourceData, SNSConfig] = {
-    implicit val ec: ExecutionContext =
-      AkkaBuilder.buildExecutionContext()
+  def runTransformer()(implicit decoder: Decoder[Payload]): Unit =
+    runWithConfig { config =>
+      implicit val ec: ExecutionContext =
+        AkkaBuilder.buildExecutionContext()
 
-    val esClient = ElasticBuilder.buildElasticClient(config)
+      val esClient = ElasticBuilder.buildElasticClient(config)
 
-    val sourceWorkIndex = Index(config.requireString("es.index"))
+      val sourceWorkIndex = Index(config.requireString("es.index"))
 
-    val sourceWorkIndexer =
-      new ElasticIndexer[Work[Source]](
-        client = esClient,
-        index = sourceWorkIndex,
-        config = WorksIndexConfig.source
+      val sourceWorkIndexer =
+        new ElasticIndexer[Work[Source]](
+          client = esClient,
+          index = sourceWorkIndex,
+          config = WorksIndexConfig.source
+        )
+
+      val sourceWorkRetriever =
+        new ElasticSourceRetriever[Work[Source]](
+          client = esClient,
+          index = sourceWorkIndex
+        )
+
+      val messageSender =
+        SNSBuilder
+          .buildSNSMessageSender(
+            config,
+            subject = s"Sent from the $sourceName transformer")
+
+      val pipelineStream = PipelineStorageStreamBuilder
+        .buildPipelineStorageStream(sourceWorkIndexer, messageSender)(config)
+
+      implicit val s3Client: AmazonS3 = S3Builder.buildS3Client
+
+      new TransformerWorker(
+        transformer = createTransformer,
+        pipelineStream = pipelineStream,
+        retriever = sourceWorkRetriever,
+        sourceDataRetriever = createSourceDataRetriever
       )
-
-    val sourceWorkRetriever =
-      new ElasticSourceRetriever[Work[Source]](
-        client = esClient,
-        index = sourceWorkIndex
-      )
-
-    val messageSender =
-      SNSBuilder
-        .buildSNSMessageSender(
-          config,
-          subject = s"Sent from the $sourceName transformer")
-
-    val pipelineStream = PipelineStorageStreamBuilder
-      .buildPipelineStorageStream(sourceWorkIndexer, messageSender)(config)
-
-    implicit val s3Client: AmazonS3 = S3Builder.buildS3Client
-
-    new TransformerWorker(
-      transformer = createTransformer,
-      pipelineStream = pipelineStream,
-      retriever = sourceWorkRetriever,
-      sourceDataRetriever = createSourceDataRetriever
-    )
-  }
+    }
 }

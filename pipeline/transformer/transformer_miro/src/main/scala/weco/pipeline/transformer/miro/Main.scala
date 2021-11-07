@@ -21,7 +21,5 @@ object Main extends TransformerMain[MiroSourcePayload, (MiroRecord, MiroSourceOv
   override def createSourceDataRetriever(implicit s3Client: AmazonS3) =
     new MiroSourceDataRetriever(miroReadable = S3TypedStore[MiroRecord])
 
-  runWithConfig { config =>
-    runTransformer(config)
-  }
+  runTransformer()
 }

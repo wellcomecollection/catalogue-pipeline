@@ -18,7 +18,5 @@ object Main extends TransformerMain[MetsSourcePayload, MetsSourceData] {
   override def createSourceDataRetriever(implicit s3Client: AmazonS3) =
     new MetsSourceDataRetriever
 
-  runWithConfig { config =>
-    runTransformer(config)
-  }
+  runTransformer()
 }

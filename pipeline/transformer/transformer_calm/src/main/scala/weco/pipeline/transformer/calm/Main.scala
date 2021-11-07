@@ -18,7 +18,5 @@ object Main extends TransformerMain[CalmSourcePayload, CalmSourceData] {
   override def createSourceDataRetriever(implicit s3Client: AmazonS3) =
     new CalmSourceDataRetriever(recordReadable = S3TypedStore[CalmRecord])
 
-  runWithConfig { config =>
-    runTransformer(config)
-  }
+  runTransformer()
 }

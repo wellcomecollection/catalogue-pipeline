@@ -26,43 +26,44 @@ trait IngestorMain[In, Out] extends WellcomeTypesafeApp {
 
   val transform: In => Out
 
-  def runIngestor(config: Config)(
+  def runIngestor()(
     implicit
     decoder: Decoder[In],
     encoder: Encoder[Out],
     indexable: Indexable[Out]
-  ): IngestorWorkerService[SNSConfig, In, Out] = {
-    implicit val ec: ExecutionContext =
-      AkkaBuilder.buildExecutionContext()
+  ): Unit =
+    runWithConfig { config =>
+      implicit val ec: ExecutionContext =
+        AkkaBuilder.buildExecutionContext()
 
-    val client =
-      ElasticBuilder
-        .buildElasticClient(config, namespace = "pipeline_storage")
+      val client =
+        ElasticBuilder
+          .buildElasticClient(config, namespace = "pipeline_storage")
 
-    val retriever =
-      new ElasticSourceRetriever[In](
-        client = client,
-        index = Index(config.requireString(inputIndexField))
+      val retriever =
+        new ElasticSourceRetriever[In](
+          client = client,
+          index = Index(config.requireString(inputIndexField))
+        )
+
+      val indexer =
+        new ElasticIndexer[Out](
+          client = client,
+          index = Index(config.requireString(outputIndexField)),
+          config = indexConfig.withRefreshIntervalFromConfig(config)
+        )
+
+      val messageSender = SNSBuilder
+        .buildSNSMessageSender(config, subject = "Sent from the ingestor-works")
+
+      val pipelineStream =
+        PipelineStorageStreamBuilder
+          .buildPipelineStorageStream(indexer, messageSender)(config)
+
+      new IngestorWorkerService(
+        pipelineStream = pipelineStream,
+        retriever = retriever,
+        transform = transform
       )
-
-    val indexer =
-      new ElasticIndexer[Out](
-        client = client,
-        index = Index(config.requireString(outputIndexField)),
-        config = indexConfig.withRefreshIntervalFromConfig(config)
-      )
-
-    val messageSender = SNSBuilder
-      .buildSNSMessageSender(config, subject = "Sent from the ingestor-works")
-
-    val pipelineStream =
-      PipelineStorageStreamBuilder
-        .buildPipelineStorageStream(indexer, messageSender)(config)
-
-    new IngestorWorkerService(
-      pipelineStream = pipelineStream,
-      retriever = retriever,
-      transform = transform
-    )
-  }
+    }
 }
