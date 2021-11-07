@@ -1,8 +1,6 @@
 package weco.pipeline.transformer.sierra
 
 import com.amazonaws.services.s3.AmazonS3
-import io.circe.Decoder
-import io.circe.generic.extras.semiauto.deriveConfiguredDecoder
 import weco.catalogue.source_model.SierraSourcePayload
 import weco.catalogue.source_model.sierra.SierraTransformable
 import weco.json.JsonUtil._
@@ -22,6 +20,7 @@ object Main extends TransformerMain[SierraSourcePayload, SierraTransformable] {
       sierraReadable = S3TypedStore[SierraTransformable]
     )
 
-  override implicit val decoder: Decoder[SierraSourcePayload] =
-    deriveConfiguredDecoder
+  runWithConfig { config =>
+    runTransformer(config)
+  }
 }

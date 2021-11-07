@@ -1,8 +1,6 @@
 package weco.pipeline.transformer.calm
 
 import com.amazonaws.services.s3.AmazonS3
-import io.circe.Decoder
-import io.circe.generic.extras.semiauto.deriveConfiguredDecoder
 import weco.catalogue.source_model.CalmSourcePayload
 import weco.catalogue.source_model.calm.CalmRecord
 import weco.json.JsonUtil._
@@ -20,6 +18,7 @@ object Main extends TransformerMain[CalmSourcePayload, CalmSourceData] {
   override def createSourceDataRetriever(implicit s3Client: AmazonS3) =
     new CalmSourceDataRetriever(recordReadable = S3TypedStore[CalmRecord])
 
-  override implicit val decoder: Decoder[CalmSourcePayload] =
-    deriveConfiguredDecoder
+  runWithConfig { config =>
+    runTransformer(config)
+  }
 }

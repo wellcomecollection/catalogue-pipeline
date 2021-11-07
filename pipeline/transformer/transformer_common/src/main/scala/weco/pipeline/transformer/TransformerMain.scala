@@ -10,6 +10,7 @@ import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.source_model.SourcePayload
 import weco.elasticsearch.typesafe.ElasticBuilder
+import weco.messaging.sns.SNSConfig
 import weco.messaging.typesafe.SNSBuilder
 import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
 import weco.pipeline_storage.typesafe.PipelineStorageStreamBuilder
@@ -26,9 +27,7 @@ trait TransformerMain[Payload <: SourcePayload, SourceData] extends WellcomeType
   def createTransformer(implicit s3Client: AmazonS3): Transformer[SourceData]
   def createSourceDataRetriever(implicit s3Client: AmazonS3): SourceDataRetriever[Payload, SourceData]
 
-  implicit val decoder: Decoder[Payload]
-
-  runWithConfig { config: Config =>
+  def runTransformer(config: Config)(implicit decoder: Decoder[Payload]): TransformerWorker[Payload, SourceData, SNSConfig] = {
     implicit val ec: ExecutionContext =
       AkkaBuilder.buildExecutionContext()
 

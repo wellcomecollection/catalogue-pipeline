@@ -1,10 +1,9 @@
 package weco.pipeline.transformer.mets
 
 import com.amazonaws.services.s3.AmazonS3
-import io.circe.Decoder
-import io.circe.generic.extras.semiauto.deriveConfiguredDecoder
 import weco.catalogue.source_model.MetsSourcePayload
 import weco.catalogue.source_model.mets.MetsSourceData
+import weco.json.JsonUtil._
 import weco.pipeline.transformer.TransformerMain
 import weco.pipeline.transformer.mets.services.MetsSourceDataRetriever
 import weco.pipeline.transformer.mets.transformer.MetsXmlTransformer
@@ -19,6 +18,7 @@ object Main extends TransformerMain[MetsSourcePayload, MetsSourceData] {
   override def createSourceDataRetriever(implicit s3Client: AmazonS3) =
     new MetsSourceDataRetriever
 
-  override implicit val decoder: Decoder[MetsSourcePayload] =
-    deriveConfiguredDecoder
+  runWithConfig { config =>
+    runTransformer(config)
+  }
 }

@@ -1,8 +1,6 @@
 package weco.pipeline.transformer.miro
 
 import com.amazonaws.services.s3.AmazonS3
-import io.circe.Decoder
-import io.circe.generic.extras.semiauto.deriveConfiguredDecoder
 import weco.catalogue.source_model.MiroSourcePayload
 import weco.catalogue.source_model.miro.MiroSourceOverrides
 import weco.json.JsonUtil._
@@ -23,7 +21,7 @@ object Main extends TransformerMain[MiroSourcePayload, (MiroRecord, MiroSourceOv
   override def createSourceDataRetriever(implicit s3Client: AmazonS3) =
     new MiroSourceDataRetriever(miroReadable = S3TypedStore[MiroRecord])
 
-  override implicit val decoder: Decoder[MiroSourcePayload] =
-    deriveConfiguredDecoder
-
+  runWithConfig { config =>
+    runTransformer(config)
+  }
 }
