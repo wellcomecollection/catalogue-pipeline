@@ -1,11 +1,9 @@
 package weco.pipeline.ingestor.common
 
 import com.sksamuel.elastic4s.Index
-import com.typesafe.config.Config
 import io.circe.{Decoder, Encoder}
 import weco.elasticsearch.IndexConfig
 import weco.elasticsearch.typesafe.ElasticBuilder
-import weco.messaging.sns.SNSConfig
 import weco.messaging.typesafe.SNSBuilder
 import weco.pipeline_storage.Indexable
 import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}

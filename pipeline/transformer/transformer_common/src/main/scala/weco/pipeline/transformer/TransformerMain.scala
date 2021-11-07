@@ -2,7 +2,6 @@ package weco.pipeline.transformer
 
 import com.amazonaws.services.s3.AmazonS3
 import com.sksamuel.elastic4s.Index
-import com.typesafe.config.Config
 import io.circe.Decoder
 import weco.catalogue.internal_model.index.WorksIndexConfig
 import weco.catalogue.internal_model.work.Work
@@ -10,7 +9,6 @@ import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.source_model.SourcePayload
 import weco.elasticsearch.typesafe.ElasticBuilder
-import weco.messaging.sns.SNSConfig
 import weco.messaging.typesafe.SNSBuilder
 import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
 import weco.pipeline_storage.typesafe.PipelineStorageStreamBuilder
