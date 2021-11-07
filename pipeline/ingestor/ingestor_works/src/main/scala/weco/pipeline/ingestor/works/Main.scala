@@ -2,6 +2,7 @@ package weco.pipeline.ingestor.works
 
 import scala.concurrent.ExecutionContext
 import akka.actor.ActorSystem
+import com.sksamuel.elastic4s.Index
 import com.typesafe.config.Config
 import weco.typesafe.WellcomeTypesafeApp
 import weco.pipeline_storage.Indexable.workIndexable
@@ -14,11 +15,12 @@ import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.{Denormalised, Indexed}
 import weco.pipeline.ingestor.common.IngestorWorkerService
+import weco.pipeline_storage.elastic.ElasticIndexer
 import weco.pipeline_storage.typesafe.{
-  ElasticIndexerBuilder,
   ElasticSourceRetrieverBuilder,
   PipelineStorageStreamBuilder
 }
+import weco.typesafe.config.builders.EnrichConfig._
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
@@ -39,13 +41,14 @@ object Main extends WellcomeTypesafeApp {
       client = client,
       namespace = "denormalised-works")
 
-    val workIndexer = ElasticIndexerBuilder[Work[Indexed]](
-      config,
-      client = client,
-      namespace = "indexed-works",
-      indexConfig =
-        WorksIndexConfig.indexed.withRefreshIntervalFromConfig(config)
-    )
+    val workIndexer =
+      new ElasticIndexer[Work[Indexed]](
+        client = client,
+        index = Index(config.requireString("es.indexed-works.index")),
+        config =
+          WorksIndexConfig.indexed.withRefreshIntervalFromConfig(config)
+      )
+
     val messageSender = SNSBuilder
       .buildSNSMessageSender(config, subject = "Sent from the ingestor-works")
     val pipelineStream =

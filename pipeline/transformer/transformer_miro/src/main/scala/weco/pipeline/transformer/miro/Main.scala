@@ -2,6 +2,7 @@ package weco.pipeline.transformer.miro
 
 import akka.actor.ActorSystem
 import com.amazonaws.services.s3.AmazonS3
+import com.sksamuel.elastic4s.Index
 import com.typesafe.config.Config
 import weco.catalogue.internal_model.index.WorksIndexConfig
 import weco.catalogue.internal_model.work.Work
@@ -15,14 +16,15 @@ import weco.pipeline.transformer.TransformerWorker
 import weco.pipeline.transformer.miro.Implicits._
 import weco.pipeline.transformer.miro.services.MiroSourceDataRetriever
 import weco.pipeline.transformer.miro.source.MiroRecord
+import weco.pipeline_storage.elastic.ElasticIndexer
 import weco.pipeline_storage.typesafe.{
-  ElasticIndexerBuilder,
   ElasticSourceRetrieverBuilder,
   PipelineStorageStreamBuilder
 }
 import weco.storage.store.s3.S3TypedStore
 import weco.storage.streaming.Codec._
 import weco.storage.typesafe.S3Builder
+import weco.typesafe.config.builders.EnrichConfig._
 import weco.typesafe.WellcomeTypesafeApp
 import weco.typesafe.config.builders.AkkaBuilder
 
@@ -42,11 +44,12 @@ object Main extends WellcomeTypesafeApp {
     val pipelineStream = PipelineStorageStreamBuilder
       .buildPipelineStorageStream(
         sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
-        indexer = ElasticIndexerBuilder[Work[Source]](
-          config,
-          esClient,
-          indexConfig = WorksIndexConfig.source
-        ),
+        indexer =
+          new ElasticIndexer[Work[Source]](
+            client = esClient,
+            index = Index(config.requireString("es.index")),
+            config = WorksIndexConfig.source
+          ),
         messageSender = SNSBuilder
           .buildSNSMessageSender(
             config,

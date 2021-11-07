@@ -1,6 +1,7 @@
 package weco.pipeline.merger
 
 import akka.actor.ActorSystem
+import com.sksamuel.elastic4s.Index
 import com.typesafe.config.Config
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.image.Image
@@ -17,8 +18,8 @@ import weco.pipeline.merger.services.{
   MergerWorkerService
 }
 import weco.pipeline_storage.EitherIndexer
+import weco.pipeline_storage.elastic.ElasticIndexer
 import weco.pipeline_storage.typesafe.{
-  ElasticIndexerBuilder,
   ElasticSourceRetrieverBuilder,
   PipelineStorageStreamBuilder
 }
@@ -69,17 +70,15 @@ object Main extends WellcomeTypesafeApp {
 
     val workOrImageIndexer =
       new EitherIndexer[Work[Merged], Image[Initial]](
-        ElasticIndexerBuilder[Work[Merged]](
-          config,
-          esClient,
-          namespace = "merged-works",
-          indexConfig = WorksIndexConfig.merged
+        leftIndexer = new ElasticIndexer[Work[Merged]](
+          client = esClient,
+          index = Index(config.requireString("es.merged-works.index")),
+          config = WorksIndexConfig.merged
         ),
-        ElasticIndexerBuilder[Image[Initial]](
-          config,
-          esClient,
-          namespace = "initial-images",
-          indexConfig = ImagesIndexConfig.initial
+        rightIndexer = new ElasticIndexer[Image[Initial]](
+          client = esClient,
+          index = Index(config.requireString("es.initial-images.index")),
+          config = ImagesIndexConfig.initial
         )
       )
 

@@ -2,6 +2,7 @@ package weco.pipeline.id_minter
 
 import scala.concurrent.ExecutionContext
 import akka.actor.ActorSystem
+import com.sksamuel.elastic4s.Index
 import com.typesafe.config.Config
 import io.circe.Json
 import weco.typesafe.WellcomeTypesafeApp
@@ -21,11 +22,12 @@ import weco.pipeline.id_minter.database.IdentifiersDao
 import weco.pipeline.id_minter.models.IdentifiersTable
 import weco.pipeline.id_minter.services.IdMinterWorkerService
 import weco.pipeline.id_minter.steps.IdentifierGenerator
+import weco.pipeline_storage.elastic.ElasticIndexer
 import weco.pipeline_storage.typesafe.{
-  ElasticIndexerBuilder,
   ElasticSourceRetrieverBuilder,
   PipelineStorageStreamBuilder
 }
+import weco.typesafe.config.builders.EnrichConfig._
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
@@ -47,12 +49,12 @@ object Main extends WellcomeTypesafeApp {
 
     val esClient = ElasticBuilder.buildElasticClient(config)
 
-    val workIndexer = ElasticIndexerBuilder[Work[Identified]](
-      config,
-      esClient,
-      namespace = "identified-works",
-      indexConfig = WorksIndexConfig.identified
-    )
+    val workIndexer =
+      new ElasticIndexer[Work[Identified]](
+        client = esClient,
+        index = Index(config.requireString("es.identified-works.index")),
+        config = WorksIndexConfig.identified
+      )
 
     val messageStream = SQSBuilder.buildSQSStream[NotificationMessage](config)
     val messageSender = SNSBuilder

@@ -1,6 +1,7 @@
 package weco.pipeline.router
 
 import akka.actor.ActorSystem
+import com.sksamuel.elastic4s.Index
 import com.typesafe.config.Config
 import weco.catalogue.internal_model.index.WorksIndexConfig
 import weco.elasticsearch.typesafe.ElasticBuilder
@@ -11,11 +12,12 @@ import weco.catalogue.internal_model.work.WorkState.{Denormalised, Merged}
 import weco.typesafe.WellcomeTypesafeApp
 import weco.typesafe.config.builders.AkkaBuilder
 import weco.catalogue.internal_model.work.Work
+import weco.pipeline_storage.elastic.ElasticIndexer
 import weco.pipeline_storage.typesafe.{
-  ElasticIndexerBuilder,
   ElasticSourceRetrieverBuilder,
   PipelineStorageStreamBuilder
 }
+import weco.typesafe.config.builders.EnrichConfig._
 
 import scala.concurrent.ExecutionContext
 
@@ -28,12 +30,12 @@ object Main extends WellcomeTypesafeApp {
 
     val esClient = ElasticBuilder.buildElasticClient(config)
 
-    val workIndexer = ElasticIndexerBuilder[Work[Denormalised]](
-      config,
-      esClient,
-      namespace = "denormalised-works",
-      indexConfig = WorksIndexConfig.denormalised
-    )
+    val workIndexer =
+      new ElasticIndexer[Work[Denormalised]](
+        client = esClient,
+        index = Index(config.requireString(s"es.denormalised-works.index")),
+        config = WorksIndexConfig.denormalised
+      )
 
     val workRetriever = ElasticSourceRetrieverBuilder[Work[Merged]](
       config,
