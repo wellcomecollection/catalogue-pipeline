@@ -11,7 +11,8 @@ import weco.storage.store.s3.S3TypedStore
 object Main extends TransformerMain[SierraSourcePayload, SierraTransformable] {
   override val sourceName: String = "Sierra"
 
-  override def createTransformer(implicit s3Client: AmazonS3): Transformer[SierraTransformable] =
+  override def createTransformer(
+    implicit s3Client: AmazonS3): Transformer[SierraTransformable] =
     (id: String, transformable: SierraTransformable, version: Int) =>
       SierraTransformer(transformable, version).toEither
 

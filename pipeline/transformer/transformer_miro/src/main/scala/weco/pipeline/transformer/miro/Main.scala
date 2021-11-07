@@ -12,7 +12,10 @@ import weco.pipeline.transformer.miro.source.MiroRecord
 import weco.storage.store.s3.S3TypedStore
 import weco.storage.streaming.Codec._
 
-object Main extends TransformerMain[MiroSourcePayload, (MiroRecord, MiroSourceOverrides, MiroMetadata)] {
+object Main
+    extends TransformerMain[
+      MiroSourcePayload,
+      (MiroRecord, MiroSourceOverrides, MiroMetadata)] {
   override val sourceName: String = "Miro"
 
   override def createTransformer(implicit s3Client: AmazonS3) =

@@ -12,7 +12,8 @@ import weco.storage.store.s3.S3TypedStore
 object Main extends TransformerMain[CalmSourcePayload, CalmSourceData] {
   override val sourceName = "CALM"
 
-  override def createTransformer(implicit s3Client: AmazonS3): CalmTransformer.type =
+  override def createTransformer(
+    implicit s3Client: AmazonS3): CalmTransformer.type =
     CalmTransformer
 
   override def createSourceDataRetriever(implicit s3Client: AmazonS3) =

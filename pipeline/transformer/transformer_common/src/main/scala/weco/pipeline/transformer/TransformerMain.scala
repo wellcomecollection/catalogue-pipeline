@@ -21,11 +21,13 @@ import weco.typesafe.config.builders.EnrichConfig._
 
 import scala.concurrent.ExecutionContext
 
-trait TransformerMain[Payload <: SourcePayload, SourceData] extends WellcomeTypesafeApp {
+trait TransformerMain[Payload <: SourcePayload, SourceData]
+    extends WellcomeTypesafeApp {
   val sourceName: String
 
   def createTransformer(implicit s3Client: AmazonS3): Transformer[SourceData]
-  def createSourceDataRetriever(implicit s3Client: AmazonS3): SourceDataRetriever[Payload, SourceData]
+  def createSourceDataRetriever(
+    implicit s3Client: AmazonS3): SourceDataRetriever[Payload, SourceData]
 
   def runTransformer()(implicit decoder: Decoder[Payload]): Unit =
     runWithConfig { config =>
