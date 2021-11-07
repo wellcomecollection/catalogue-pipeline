@@ -3,6 +3,7 @@ package weco.pipeline.transformer.tei
 import com.amazonaws.services.s3.AmazonS3
 import weco.catalogue.source_model.TeiSourcePayload
 import weco.catalogue.source_model.tei.TeiMetadata
+import weco.json.JsonUtil._
 import weco.pipeline.transformer.TransformerMain
 import weco.pipeline.transformer.tei.service.TeiSourceDataRetriever
 import weco.storage.store.s3.S3TypedStore
