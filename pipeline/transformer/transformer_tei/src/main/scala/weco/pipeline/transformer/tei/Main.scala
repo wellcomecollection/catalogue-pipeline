@@ -12,9 +12,8 @@ import weco.storage.store.s3.S3TypedStore
 object Main extends TransformerMain[TeiSourcePayload, TeiMetadata] {
   override val sourceName: String = "TEI"
 
-  // TODO: This should take an instance of Readable
   override def createTransformer(implicit s3Client: AmazonS3) =
-    new TeiTransformer(store = S3TypedStore[String])
+    new TeiTransformer(teiReader = S3TypedStore[String])
 
   override def createSourceDataRetriever(implicit s3Client: AmazonS3) =
     new TeiSourceDataRetriever

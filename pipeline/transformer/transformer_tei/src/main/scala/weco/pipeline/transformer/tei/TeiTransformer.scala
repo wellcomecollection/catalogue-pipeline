@@ -14,11 +14,11 @@ import weco.catalogue.source_model.tei.{
 import weco.pipeline.transformer.Transformer
 import weco.pipeline.transformer.result.Result
 import weco.storage.s3.S3ObjectLocation
-import weco.storage.store.Store
+import weco.storage.store.Readable
 
 import java.time.Instant
 
-class TeiTransformer(store: Store[S3ObjectLocation, String])
+class TeiTransformer(teiReader: Readable[S3ObjectLocation, String])
     extends Transformer[TeiMetadata] {
   override def apply(id: String,
                      sourceData: TeiMetadata,
@@ -43,7 +43,7 @@ class TeiTransformer(store: Store[S3ObjectLocation, String])
                               s3Location: S3ObjectLocation,
                               time: Instant): Result[Work[Source]] =
     for {
-      xmlString <- store.get(s3Location).left.map(_.e)
+      xmlString <- teiReader.get(s3Location).left.map(_.e)
       teiXml <- TeiXml(id, xmlString.identifiedT)
       teiData <- teiXml.parse
     } yield teiData.toWork(time, version)
