@@ -22,11 +22,8 @@ import weco.pipeline.id_minter.database.IdentifiersDao
 import weco.pipeline.id_minter.models.IdentifiersTable
 import weco.pipeline.id_minter.services.IdMinterWorkerService
 import weco.pipeline.id_minter.steps.IdentifierGenerator
-import weco.pipeline_storage.elastic.ElasticIndexer
-import weco.pipeline_storage.typesafe.{
-  ElasticSourceRetrieverBuilder,
-  PipelineStorageStreamBuilder
-}
+import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
+import weco.pipeline_storage.typesafe.PipelineStorageStreamBuilder
 import weco.typesafe.config.builders.EnrichConfig._
 
 object Main extends WellcomeTypesafeApp {
@@ -64,12 +61,16 @@ object Main extends WellcomeTypesafeApp {
         messageStream,
         workIndexer,
         messageSender)(config)
+
+    val jsonRetriever =
+      new ElasticSourceRetriever[Json](
+        client = esClient,
+        index = Index(config.requireString("es.source-works.index"))
+      )
+
     new IdMinterWorkerService(
       identifierGenerator = identifierGenerator,
-      jsonRetriever = ElasticSourceRetrieverBuilder[Json](
-        config,
-        esClient,
-        namespace = "source-works"),
+      jsonRetriever = jsonRetriever,
       pipelineStream = pipelineStream,
       rdsClientConfig = RDSBuilder.buildRDSClientConfig(config),
       identifiersTableConfig = identifiersTableConfig

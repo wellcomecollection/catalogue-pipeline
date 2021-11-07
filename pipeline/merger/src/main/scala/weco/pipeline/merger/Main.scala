@@ -18,11 +18,8 @@ import weco.pipeline.merger.services.{
   MergerWorkerService
 }
 import weco.pipeline_storage.EitherIndexer
-import weco.pipeline_storage.elastic.ElasticIndexer
-import weco.pipeline_storage.typesafe.{
-  ElasticSourceRetrieverBuilder,
-  PipelineStorageStreamBuilder
-}
+import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
+import weco.pipeline_storage.typesafe.PipelineStorageStreamBuilder
 import weco.typesafe.WellcomeTypesafeApp
 import weco.typesafe.config.builders.AkkaBuilder
 import weco.typesafe.config.builders.EnrichConfig._
@@ -38,13 +35,13 @@ object Main extends WellcomeTypesafeApp {
 
     val esClient = ElasticBuilder.buildElasticClient(config)
 
-    val sourceWorkLookup = new IdentifiedWorkLookup(
-      retriever = ElasticSourceRetrieverBuilder.apply[Work[Identified]](
-        config,
-        esClient,
-        namespace = "identified-works"
+    val retriever =
+      new ElasticSourceRetriever[Work[Identified]](
+        client = esClient,
+        index = Index(config.requireString("es.identified-works.index"))
       )
-    )
+
+    val sourceWorkLookup = new IdentifiedWorkLookup(retriever)
 
     val toggleTeiOn =
       config.getBooleanOption("toggle.tei_on").getOrElse(false)

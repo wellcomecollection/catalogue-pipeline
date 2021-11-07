@@ -16,11 +16,8 @@ import weco.pipeline.transformer.TransformerWorker
 import weco.pipeline.transformer.miro.Implicits._
 import weco.pipeline.transformer.miro.services.MiroSourceDataRetriever
 import weco.pipeline.transformer.miro.source.MiroRecord
-import weco.pipeline_storage.elastic.ElasticIndexer
-import weco.pipeline_storage.typesafe.{
-  ElasticSourceRetrieverBuilder,
-  PipelineStorageStreamBuilder
-}
+import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
+import weco.pipeline_storage.typesafe.PipelineStorageStreamBuilder
 import weco.storage.store.s3.S3TypedStore
 import weco.storage.streaming.Codec._
 import weco.storage.typesafe.S3Builder
@@ -56,11 +53,16 @@ object Main extends WellcomeTypesafeApp {
             subject = "Sent from the Miro transformer")
       )(config)
 
+    val retriever =
+      new ElasticSourceRetriever[Work[Source]](
+        client = esClient,
+        index = Index(config.requireString("es.index"))
+      )
+
     new TransformerWorker(
       transformer = new MiroRecordTransformer,
       pipelineStream = pipelineStream,
-      retriever =
-        ElasticSourceRetrieverBuilder.apply[Work[Source]](config, esClient),
+      retriever = retriever,
       sourceDataRetriever =
         new MiroSourceDataRetriever(miroReadable = S3TypedStore[MiroRecord])
     )

@@ -15,11 +15,8 @@ import weco.messaging.sns.NotificationMessage
 import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import weco.pipeline.transformer.TransformerWorker
 import weco.pipeline.transformer.calm.services.CalmSourceDataRetriever
-import weco.pipeline_storage.elastic.ElasticIndexer
-import weco.pipeline_storage.typesafe.{
-  ElasticSourceRetrieverBuilder,
-  PipelineStorageStreamBuilder
-}
+import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
+import weco.pipeline_storage.typesafe.PipelineStorageStreamBuilder
 import weco.storage.store.s3.S3TypedStore
 import weco.storage.typesafe.S3Builder
 import weco.typesafe.config.builders.EnrichConfig._
@@ -53,11 +50,16 @@ object Main extends WellcomeTypesafeApp {
 
     implicit val s3Client: AmazonS3 = S3Builder.buildS3Client
 
+    val retriever =
+      new ElasticSourceRetriever[Work[Source]](
+        client = esClient,
+        index = Index(config.requireString("es.index"))
+      )
+
     new TransformerWorker(
       transformer = CalmTransformer,
       pipelineStream = pipelineStream,
-      retriever =
-        ElasticSourceRetrieverBuilder.apply[Work[Source]](config, esClient),
+      retriever = retriever,
       sourceDataRetriever =
         new CalmSourceDataRetriever(recordReadable = S3TypedStore[CalmRecord])
     )

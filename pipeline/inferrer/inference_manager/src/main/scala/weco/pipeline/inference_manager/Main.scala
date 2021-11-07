@@ -27,11 +27,8 @@ import weco.pipeline.inference_manager.services.{
   ImageDownloader,
   InferenceManagerWorkerService
 }
-import weco.pipeline_storage.elastic.ElasticIndexer
-import weco.pipeline_storage.typesafe.{
-  ElasticSourceRetrieverBuilder,
-  PipelineStorageStreamBuilder
-}
+import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
+import weco.pipeline_storage.typesafe.PipelineStorageStreamBuilder
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
@@ -63,11 +60,11 @@ object Main extends WellcomeTypesafeApp {
 
     val esClient = ElasticBuilder.buildElasticClient(config)
 
-    val imageRetriever = ElasticSourceRetrieverBuilder.apply[Image[Initial]](
-      config,
-      esClient,
-      namespace = "initial-images"
-    )
+    val imageRetriever =
+      new ElasticSourceRetriever[Image[Initial]](
+        client = esClient,
+        index = Index(config.requireString("es.initial-images.index"))
+      )
 
     val imageIndexer =
       new ElasticIndexer[Image[Augmented]](

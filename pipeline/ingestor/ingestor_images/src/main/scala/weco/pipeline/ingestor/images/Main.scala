@@ -14,11 +14,8 @@ import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.image.Image
 import weco.catalogue.internal_model.image.ImageState.{Augmented, Indexed}
 import weco.pipeline.ingestor.common.IngestorWorkerService
-import weco.pipeline_storage.elastic.ElasticIndexer
-import weco.pipeline_storage.typesafe.{
-  ElasticSourceRetrieverBuilder,
-  PipelineStorageStreamBuilder
-}
+import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
+import weco.pipeline_storage.typesafe.PipelineStorageStreamBuilder
 import weco.typesafe.config.builders.EnrichConfig._
 
 object Main extends WellcomeTypesafeApp {
@@ -35,10 +32,11 @@ object Main extends WellcomeTypesafeApp {
       ElasticBuilder
         .buildElasticClient(config, namespace = "pipeline_storage")
 
-    val imageRetriever = ElasticSourceRetrieverBuilder[Image[Augmented]](
-      config,
-      client = client,
-      namespace = "augmented-images")
+    val imageRetriever =
+      new ElasticSourceRetriever[Image[Augmented]](
+        client = client,
+        index = Index(config.requireString("es.augmented-images.index"))
+      )
 
     val imageIndexer =
       new ElasticIndexer[Image[Indexed]](

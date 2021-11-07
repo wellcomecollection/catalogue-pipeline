@@ -15,11 +15,8 @@ import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.{Denormalised, Indexed}
 import weco.pipeline.ingestor.common.IngestorWorkerService
-import weco.pipeline_storage.elastic.ElasticIndexer
-import weco.pipeline_storage.typesafe.{
-  ElasticSourceRetrieverBuilder,
-  PipelineStorageStreamBuilder
-}
+import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
+import weco.pipeline_storage.typesafe.PipelineStorageStreamBuilder
 import weco.typesafe.config.builders.EnrichConfig._
 
 object Main extends WellcomeTypesafeApp {
@@ -36,10 +33,11 @@ object Main extends WellcomeTypesafeApp {
       ElasticBuilder
         .buildElasticClient(config, namespace = "pipeline_storage")
 
-    val workRetriever = ElasticSourceRetrieverBuilder[Work[Denormalised]](
-      config,
-      client = client,
-      namespace = "denormalised-works")
+    val workRetriever =
+      new ElasticSourceRetriever[Work[Denormalised]](
+        client = client,
+        index = Index(config.requireString("es.denormalised-works.index"))
+      )
 
     val workIndexer =
       new ElasticIndexer[Work[Indexed]](

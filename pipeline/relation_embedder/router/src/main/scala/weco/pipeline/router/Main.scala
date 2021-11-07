@@ -12,11 +12,8 @@ import weco.catalogue.internal_model.work.WorkState.{Denormalised, Merged}
 import weco.typesafe.WellcomeTypesafeApp
 import weco.typesafe.config.builders.AkkaBuilder
 import weco.catalogue.internal_model.work.Work
-import weco.pipeline_storage.elastic.ElasticIndexer
-import weco.pipeline_storage.typesafe.{
-  ElasticSourceRetrieverBuilder,
-  PipelineStorageStreamBuilder
-}
+import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
+import weco.pipeline_storage.typesafe.PipelineStorageStreamBuilder
 import weco.typesafe.config.builders.EnrichConfig._
 
 import scala.concurrent.ExecutionContext
@@ -37,11 +34,11 @@ object Main extends WellcomeTypesafeApp {
         config = WorksIndexConfig.denormalised
       )
 
-    val workRetriever = ElasticSourceRetrieverBuilder[Work[Merged]](
-      config,
-      esClient,
-      namespace = "merged-works"
-    )
+    val workRetriever =
+      new ElasticSourceRetriever[Work[Merged]](
+        client = esClient,
+        index = Index(config.requireString("es.merged-works.index"))
+      )
 
     val workSender =
       SNSBuilder
