@@ -11,8 +11,7 @@ import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.source_model.SourcePayload
 import weco.elasticsearch.typesafe.ElasticBuilder
-import weco.messaging.sns.NotificationMessage
-import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
+import weco.messaging.typesafe.SNSBuilder
 import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
 import weco.pipeline_storage.typesafe.PipelineStorageStreamBuilder
 import weco.storage.typesafe.S3Builder
@@ -35,8 +34,6 @@ trait TransformerMain[Payload <: SourcePayload, SourceData] extends WellcomeType
       AkkaBuilder.buildActorSystem()
     implicit val ec: ExecutionContext =
       AkkaBuilder.buildExecutionContext()
-
-    val sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config)
 
     val esClient = ElasticBuilder.buildElasticClient(config)
 
@@ -62,7 +59,7 @@ trait TransformerMain[Payload <: SourcePayload, SourceData] extends WellcomeType
           subject = s"Sent from the $sourceName transformer")
 
     val pipelineStream = PipelineStorageStreamBuilder
-      .buildPipelineStorageStream(sqsStream, sourceWorkIndexer, messageSender)(config)
+      .buildPipelineStorageStream(sourceWorkIndexer, messageSender)(config)
 
     implicit val s3Client: AmazonS3 = S3Builder.buildS3Client
 

@@ -7,9 +7,8 @@ import com.typesafe.config.Config
 import weco.typesafe.WellcomeTypesafeApp
 import weco.typesafe.config.builders.AkkaBuilder
 import weco.elasticsearch.typesafe.ElasticBuilder
-import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
+import weco.messaging.typesafe.SNSBuilder
 import weco.catalogue.internal_model.index.ImagesIndexConfig
-import weco.messaging.sns.NotificationMessage
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.image.Image
 import weco.catalogue.internal_model.image.ImageState.{Augmented, Indexed}
@@ -24,9 +23,6 @@ object Main extends WellcomeTypesafeApp {
       AkkaBuilder.buildActorSystem()
     implicit val executionContext: ExecutionContext =
       AkkaBuilder.buildExecutionContext()
-
-    val msgStream =
-      SQSBuilder.buildSQSStream[NotificationMessage](config)
 
     val client =
       ElasticBuilder
@@ -49,10 +45,8 @@ object Main extends WellcomeTypesafeApp {
       .buildSNSMessageSender(config, subject = "Sent from the ingestor-images")
 
     val pipelineStream =
-      PipelineStorageStreamBuilder.buildPipelineStorageStream(
-        msgStream,
-        imageIndexer,
-        msgSender)(config)
+      PipelineStorageStreamBuilder
+        .buildPipelineStorageStream(imageIndexer, msgSender)(config)
 
     new IngestorWorkerService(
       pipelineStream = pipelineStream,

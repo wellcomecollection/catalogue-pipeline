@@ -7,8 +7,7 @@ import com.typesafe.config.Config
 import io.circe.Json
 import weco.typesafe.WellcomeTypesafeApp
 import weco.typesafe.config.builders.AkkaBuilder
-import weco.messaging.sns.NotificationMessage
-import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
+import weco.messaging.typesafe.SNSBuilder
 import weco.elasticsearch.typesafe.ElasticBuilder
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.index.WorksIndexConfig
@@ -53,14 +52,12 @@ object Main extends WellcomeTypesafeApp {
         config = WorksIndexConfig.identified
       )
 
-    val messageStream = SQSBuilder.buildSQSStream[NotificationMessage](config)
     val messageSender = SNSBuilder
       .buildSNSMessageSender(config, subject = "Sent from the id-minter")
+
     val pipelineStream =
-      PipelineStorageStreamBuilder.buildPipelineStorageStream(
-        messageStream,
-        workIndexer,
-        messageSender)(config)
+      PipelineStorageStreamBuilder
+        .buildPipelineStorageStream(workIndexer, messageSender)(config)
 
     val jsonRetriever =
       new ElasticSourceRetriever[Json](

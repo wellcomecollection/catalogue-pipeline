@@ -5,8 +5,7 @@ import com.sksamuel.elastic4s.Index
 import com.typesafe.config.Config
 import weco.catalogue.internal_model.index.WorksIndexConfig
 import weco.elasticsearch.typesafe.ElasticBuilder
-import weco.messaging.sns.NotificationMessage
-import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
+import weco.messaging.typesafe.SNSBuilder
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.work.WorkState.{Denormalised, Merged}
 import weco.typesafe.WellcomeTypesafeApp
@@ -54,16 +53,14 @@ object Main extends WellcomeTypesafeApp {
           namespace = "path-sender",
           subject = "Sent from the router")
 
-    val stream = PipelineStorageStreamBuilder.buildPipelineStorageStream(
-      sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
-      indexer = workIndexer,
-      messageSender = workSender
-    )(config)
+    val pipelineStream =
+      PipelineStorageStreamBuilder
+        .buildPipelineStorageStream(workIndexer, workSender)(config)
 
     new RouterWorkerService(
       pathsMsgSender = pathSender,
       workRetriever = workRetriever,
-      pipelineStream = stream
+      pipelineStream = pipelineStream
     )
   }
 }

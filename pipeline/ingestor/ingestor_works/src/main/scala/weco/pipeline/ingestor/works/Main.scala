@@ -8,9 +8,8 @@ import weco.typesafe.WellcomeTypesafeApp
 import weco.pipeline_storage.Indexable.workIndexable
 import weco.typesafe.config.builders.AkkaBuilder
 import weco.elasticsearch.typesafe.ElasticBuilder
-import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
+import weco.messaging.typesafe.SNSBuilder
 import weco.catalogue.internal_model.index.WorksIndexConfig
-import weco.messaging.sns.NotificationMessage
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.{Denormalised, Indexed}
@@ -25,9 +24,6 @@ object Main extends WellcomeTypesafeApp {
       AkkaBuilder.buildActorSystem()
     implicit val executionContext: ExecutionContext =
       AkkaBuilder.buildExecutionContext()
-
-    val denormalisedWorkStream =
-      SQSBuilder.buildSQSStream[NotificationMessage](config)
 
     val client =
       ElasticBuilder
@@ -49,11 +45,10 @@ object Main extends WellcomeTypesafeApp {
 
     val messageSender = SNSBuilder
       .buildSNSMessageSender(config, subject = "Sent from the ingestor-works")
+
     val pipelineStream =
-      PipelineStorageStreamBuilder.buildPipelineStorageStream(
-        denormalisedWorkStream,
-        workIndexer,
-        messageSender)(config)
+      PipelineStorageStreamBuilder
+        .buildPipelineStorageStream(workIndexer, messageSender)(config)
 
     new IngestorWorkerService(
       pipelineStream = pipelineStream,
