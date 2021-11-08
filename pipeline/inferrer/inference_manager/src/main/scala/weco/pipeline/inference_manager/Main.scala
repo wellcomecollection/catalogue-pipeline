@@ -3,6 +3,7 @@ package weco.pipeline.inference_manager
 import scala.concurrent.ExecutionContext
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
+import com.sksamuel.elastic4s.Index
 import com.typesafe.config.Config
 import software.amazon.awssdk.services.sqs.model.Message
 import weco.catalogue.internal_model.Implicits._
@@ -26,11 +27,8 @@ import weco.pipeline.inference_manager.services.{
   ImageDownloader,
   InferenceManagerWorkerService
 }
-import weco.pipeline_storage.typesafe.{
-  ElasticIndexerBuilder,
-  ElasticSourceRetrieverBuilder,
-  PipelineStorageStreamBuilder
-}
+import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
+import weco.pipeline_storage.typesafe.PipelineStorageStreamBuilder
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
@@ -62,18 +60,18 @@ object Main extends WellcomeTypesafeApp {
 
     val esClient = ElasticBuilder.buildElasticClient(config)
 
-    val imageRetriever = ElasticSourceRetrieverBuilder.apply[Image[Initial]](
-      config,
-      esClient,
-      namespace = "initial-images"
-    )
+    val imageRetriever =
+      new ElasticSourceRetriever[Image[Initial]](
+        client = esClient,
+        index = Index(config.requireString("es.initial-images.index"))
+      )
 
-    val imageIndexer = ElasticIndexerBuilder[Image[Augmented]](
-      config,
-      esClient,
-      namespace = "augmented-images",
-      indexConfig = ImagesIndexConfig.augmented
-    )
+    val imageIndexer =
+      new ElasticIndexer[Image[Augmented]](
+        client = esClient,
+        index = Index(config.requireString("es.augmented-images.index")),
+        config = ImagesIndexConfig.augmented
+      )
 
     val pipelineStorageConfig = PipelineStorageStreamBuilder
       .buildPipelineStorageConfig(config)

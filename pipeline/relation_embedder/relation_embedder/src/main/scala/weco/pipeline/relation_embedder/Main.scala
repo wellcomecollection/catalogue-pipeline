@@ -13,7 +13,7 @@ import weco.typesafe.WellcomeTypesafeApp
 import weco.typesafe.config.builders.AkkaBuilder
 import weco.typesafe.config.builders.EnrichConfig._
 import weco.catalogue.internal_model.work.Work
-import weco.pipeline_storage.typesafe.ElasticIndexerBuilder
+import weco.pipeline_storage.elastic.ElasticIndexer
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
@@ -30,12 +30,12 @@ object Main extends WellcomeTypesafeApp {
 
     val esClient = ElasticBuilder.buildElasticClient(config)
 
-    val workIndexer = ElasticIndexerBuilder[Work[Denormalised]](
-      config,
-      esClient,
-      namespace = "denormalised-works",
-      indexConfig = WorksIndexConfig.denormalised
-    )
+    val workIndexer =
+      new ElasticIndexer[Work[Denormalised]](
+        client = esClient,
+        index = Index(config.requireString(s"es.denormalised-works.index")),
+        config = WorksIndexConfig.denormalised
+      )
 
     new RelationEmbedderWorkerService(
       sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
