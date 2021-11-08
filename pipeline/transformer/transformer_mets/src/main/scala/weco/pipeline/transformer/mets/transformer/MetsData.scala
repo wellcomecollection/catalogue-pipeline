@@ -2,8 +2,6 @@ package weco.pipeline.transformer.mets.transformer
 
 import java.time.Instant
 import cats.syntax.traverse._
-import cats.instances.either._
-import cats.instances.option._
 import org.apache.commons.lang3.StringUtils.equalsIgnoreCase
 import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.internal_model.identifiers._
