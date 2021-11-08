@@ -8,7 +8,7 @@ import weco.pipeline.transformer.tei.transformers.{TeiContributors, TeiLanguages
 import weco.pipeline.transformer.transformers.ParsedPeriod
 
 import scala.util.Try
-import scala.xml.{Elem, Text, XML}
+import scala.xml.{Elem, NodeSeq, XML}
 class TeiXml(val xml: Elem) extends Logging {
   val id: String =
     getId.getOrElse(throw new RuntimeException(s"Could not find an id in XML!"))
@@ -96,6 +96,22 @@ class TeiXml(val xml: Elem) extends Logging {
     }
   }
 
+  /**
+   * The origin tag contains information about where and when
+   * the manuscript was written. This is an example:
+   *  <history>
+   *      <origin>
+   *          <origPlace>
+   *              <country><!-- insert --></country>,
+   *              <region><!-- insert --></region>,
+   *              <settlement><!-- insert --></settlement>,
+   *              <orgName><!-- insert --></orgName>
+   *          </origPlace>
+   *          <origDate calendar=""><!-- insert --></origDate>
+   *      </origin>
+   *  </history>
+   *
+   */
   private def origin: Result[List[ProductionEvent[Unminted]]] = {
     val origin = xml \\ "history" \ "origin"
     val origPlace = origin \ "origPlace"
@@ -103,10 +119,7 @@ class TeiXml(val xml: Elem) extends Logging {
     val region = (origPlace \ "region").text.trim
     val settlement = (origPlace \ "settlement").text.trim
     val organisation = (origPlace \ "orgName").text.trim
-    val seq = (origin \ "origDate").filter(n => (n \@ "calendar").toLowerCase == "gregorian")
-    val date = if (seq.exists(_.child.size > 1))
-      seq.map(_.child).flatten.collect { case n: Text => n.text }.mkString.trim
-    else seq.text.trim
+    val date = parseDate(origin)
     val place = List(country, region, settlement).filterNot(_.isEmpty).mkString(", ")
     val agents = if(organisation.isEmpty) Nil else List(Organisation(organisation))
     val places = if(place.isEmpty) Nil else List(Place(place))
@@ -122,6 +135,22 @@ class TeiXml(val xml: Elem) extends Logging {
       )))
     }
 
+  }
+
+  /**
+   * Dates are in a origDate tag and can be in different calendars,
+   * so we need to look for the one in the gregorian calendar.
+   * Also, sometimes the date can contain notes, as in this example, so we need to strip them:
+   * <origDate calendar="Gregorian">ca.1732-63AD
+   *  <note>from watermarks</note>
+   * </origDate>
+   */
+  private def parseDate(origin: NodeSeq) = {
+    val dateNodes = (origin \ "origDate").filter(n => (n \@ "calendar").toLowerCase == "gregorian")
+    val date = if (dateNodes.exists(_.child.size > 1))
+      dateNodes.map(_.child).flatten.collect { case node if node.label != "note" => node.text }.mkString.trim
+    else dateNodes.text.trim
+    date
   }
 
   private def getId: Result[String] = TeiOps.getIdFrom(xml)
