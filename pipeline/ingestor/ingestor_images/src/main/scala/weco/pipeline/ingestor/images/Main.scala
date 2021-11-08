@@ -1,22 +1,20 @@
 package weco.pipeline.ingestor.images
 
 import weco.catalogue.internal_model.Implicits._
-import weco.catalogue.internal_model.image.Image
-import weco.catalogue.internal_model.image.ImageState.{Augmented, Indexed}
 import weco.catalogue.internal_model.index.ImagesIndexConfig
-import weco.elasticsearch.IndexConfig
 import weco.pipeline.ingestor.common.IngestorMain
+import weco.typesafe.WellcomeTypesafeApp
 
-object Main extends IngestorMain[Image[Augmented], Image[Indexed]] {
-  override val name: String = "images"
+object Main extends WellcomeTypesafeApp {
+  val ingestor = new IngestorMain(
+    name = "images",
+    inputIndexField = "es.augmented-images.index",
+    outputIndexField = "es.indexed-images.index",
+    indexConfig = ImagesIndexConfig.indexed,
+    transform = ImageTransformer.deriveData
+  )
 
-  override val inputIndexField: String = "es.augmented-images.index"
-  override val outputIndexField: String = "es.indexed-images.index"
-
-  override val indexConfig: IndexConfig = ImagesIndexConfig.indexed
-
-  override val transform: Image[Augmented] => Image[Indexed] =
-    ImageTransformer.deriveData
-
-  runIngestor()
+  runWithConfig { config =>
+    ingestor.run(config)
+  }
 }
