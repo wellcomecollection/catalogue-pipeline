@@ -31,10 +31,7 @@ class IngestorMain[In, Out](
     implicit val ec: ExecutionContext =
       AkkaBuilder.buildExecutionContext()
 
-    // TODO: Do we need to namespace this client?
-    val client =
-      ElasticBuilder
-        .buildElasticClient(config, namespace = "pipeline_storage")
+    val client = ElasticBuilder.buildElasticClient(config)
 
     val retriever =
       new ElasticSourceRetriever[In](
