@@ -7,18 +7,18 @@ import scala.xml._
 
 trait TeiGenerators extends RandomGenerators { this: Suite =>
   def teiXml(
-              id: String = randomAlphanumeric(),
-              title: NodeSeq = titleElem("test title"),
-              identifiers: Option[Elem] = None,
-              summary: Option[Elem] = None,
-              languages: List[Elem] = Nil,
-              items: List[Elem] = Nil,
-              parts: List[Elem] = Nil,
-              catalogues: List[Elem] = Nil,
-              authors: List[Elem] = Nil,
-              handNotes: List[Elem] = Nil,
-              origPlace: Option[Elem] = None,
-              originDates: List[Elem] = Nil,
+    id: String = randomAlphanumeric(),
+    title: NodeSeq = titleElem("test title"),
+    identifiers: Option[Elem] = None,
+    summary: Option[Elem] = None,
+    languages: List[Elem] = Nil,
+    items: List[Elem] = Nil,
+    parts: List[Elem] = Nil,
+    catalogues: List[Elem] = Nil,
+    authors: List[Elem] = Nil,
+    handNotes: List[Elem] = Nil,
+    origPlace: Option[Elem] = None,
+    originDates: List[Elem] = Nil,
   ): Elem =
     <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id={id}>
       <teiHeader>
@@ -153,8 +153,12 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
 
   def otherLanguage(id: String, label: String) =
     <textLang otherLangs={id} source="IANA">{label}</textLang>
-    
-  def origPlace(country: Option[String]= None, settlement: Option[String]= None, region: Option[String]= None, orgName: Option[String] = None, label: Option[String]= None) =
+
+  def origPlace(country: Option[String] = None,
+                settlement: Option[String] = None,
+                region: Option[String] = None,
+                orgName: Option[String] = None,
+                label: Option[String] = None) =
     <origPlace>
       <country>{country.getOrElse("")}</country>,
       <region>{region.getOrElse("")}</region>,
@@ -163,6 +167,7 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
       {label.getOrElse("")}
     </origPlace>
 
-  def originDate(calendar: String, label: String) = <origDate calendar={calendar}>{label}</origDate>
+  def originDate(calendar: String, label: String) =
+    <origDate calendar={calendar}>{label}</origDate>
 
 }
