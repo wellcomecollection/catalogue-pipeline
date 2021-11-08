@@ -1,25 +1,32 @@
 package weco.pipeline.transformer.sierra
 
 import com.amazonaws.services.s3.AmazonS3
-import weco.catalogue.source_model.SierraSourcePayload
 import weco.catalogue.source_model.sierra.SierraTransformable
 import weco.json.JsonUtil._
 import weco.pipeline.transformer.sierra.services.SierraSourceDataRetriever
 import weco.pipeline.transformer.{Transformer, TransformerMain}
 import weco.storage.store.s3.S3TypedStore
+import weco.typesafe.WellcomeTypesafeApp
 
-object Main extends TransformerMain[SierraSourcePayload, SierraTransformable] {
-  override val sourceName: String = "Sierra"
-
-  override def createTransformer(
-    implicit s3Client: AmazonS3): Transformer[SierraTransformable] =
+object Main extends WellcomeTypesafeApp {
+  def createTransformer(s3Client: AmazonS3): Transformer[SierraTransformable] =
     (id: String, transformable: SierraTransformable, version: Int) =>
       SierraTransformer(transformable, version).toEither
 
-  override def createSourceDataRetriever(implicit s3Client: AmazonS3) =
+  def createSourceDataRetriever(s3Client: AmazonS3) = {
+    implicit val s: AmazonS3 = s3Client
     new SierraSourceDataRetriever(
       sierraReadable = S3TypedStore[SierraTransformable]
     )
+  }
 
-  runTransformer()
+  val transformer = new TransformerMain(
+    sourceName = "Sierra",
+    createTransformer = createTransformer,
+    createSourceDataRetriever = createSourceDataRetriever
+  )
+
+  runWithConfig { config =>
+    transformer.run(config)
+  }
 }
