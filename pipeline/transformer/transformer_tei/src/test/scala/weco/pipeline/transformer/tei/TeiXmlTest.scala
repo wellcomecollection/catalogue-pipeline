@@ -162,79 +162,122 @@ class TeiXmlTest
       Contributor(Person("Steve Rogers"), List(ContributionRole("scribe")))
     )
   }
-describe("origin"){
-  it("extracts the origin country"){
-    val result = new TeiXml(
-      teiXml(
-        id,
-        origPlace = Some(origPlace(country = Some("India")))
-      )).parse
+  describe("origin") {
+    it("extracts the origin country") {
+      val result = new TeiXml(
+        teiXml(
+          id,
+          origPlace = Some(origPlace(country = Some("India")))
+        )).parse
 
-    result.value.origin shouldBe List(ProductionEvent("India", places = List(Place("India")),  agents = Nil, dates = Nil))
-  }
+      result.value.origin shouldBe List(
+        ProductionEvent(
+          "India",
+          places = List(Place("India")),
+          agents = Nil,
+          dates = Nil))
+    }
 
-  it("extracts the origin - country region and settlement"){
-    val result = new TeiXml(
-      teiXml(
-        id,
-        origPlace = Some(origPlace(country = Some("United Kingdom"), region = Some("England"), settlement = Some("London")))
-      )).parse
+    it("extracts the origin - country region and settlement") {
+      val result = new TeiXml(
+        teiXml(
+          id,
+          origPlace = Some(
+            origPlace(
+              country = Some("United Kingdom"),
+              region = Some("England"),
+              settlement = Some("London")))
+        )).parse
 
-    val label = "United Kingdom, England, London"
-    result.value.origin shouldBe List(ProductionEvent(label, places = List(Place(label)),  agents = Nil, dates = Nil))
-  }
+      val label = "United Kingdom, England, London"
+      result.value.origin shouldBe List(
+        ProductionEvent(
+          label,
+          places = List(Place(label)),
+          agents = Nil,
+          dates = Nil))
+    }
 
-  it("ignores text not in country region or settlement"){
-    val result = new TeiXml(
-      teiXml(
-        id,
-        origPlace = Some(origPlace(country = Some("United Kingdom"), region = Some("England"), settlement = Some("London"), label = Some("stuff")))
-      )).parse
+    it("ignores text not in country region or settlement") {
+      val result = new TeiXml(
+        teiXml(
+          id,
+          origPlace = Some(
+            origPlace(
+              country = Some("United Kingdom"),
+              region = Some("England"),
+              settlement = Some("London"),
+              label = Some("stuff")))
+        )).parse
 
-    val label = "United Kingdom, England, London"
-    result.value.origin shouldBe List(ProductionEvent(label, places = List(Place(label)),  agents = Nil, dates = Nil))
-  }
+      val label = "United Kingdom, England, London"
+      result.value.origin shouldBe List(
+        ProductionEvent(
+          label,
+          places = List(Place(label)),
+          agents = Nil,
+          dates = Nil))
+    }
 
-  it("returns an agent if there is an orgName"){
-    val result = new TeiXml(
-      teiXml(
-        id,
-        origPlace = Some(origPlace(country = Some("Egypt"), settlement = Some("Wadi El Natrun"),orgName = Some("Monastery of St Macarius the Great")))
-      )).parse
+    it("returns an agent if there is an orgName") {
+      val result = new TeiXml(
+        teiXml(
+          id,
+          origPlace = Some(
+            origPlace(
+              country = Some("Egypt"),
+              settlement = Some("Wadi El Natrun"),
+              orgName = Some("Monastery of St Macarius the Great")))
+        )).parse
 
-    val label = "Egypt, Wadi El Natrun"
-    result.value.origin shouldBe List(ProductionEvent(label, places = List(Place(label)),  agents = List(Organisation("Monastery of St Macarius the Great")), dates = Nil))
-  }
+      val label = "Egypt, Wadi El Natrun"
+      result.value.origin shouldBe List(
+        ProductionEvent(
+          label,
+          places = List(Place(label)),
+          agents = List(Organisation("Monastery of St Macarius the Great")),
+          dates = Nil))
+    }
 
-  it("returns a date"){
-    val result = new TeiXml(teiXml(
-      id,
-      originDates = List(originDate("Gregorian", "1756"
-      ))
-    )).parse
+    it("returns a date") {
+      val result = new TeiXml(
+        teiXml(
+          id,
+          originDates = List(originDate("Gregorian", "1756"))
+        )).parse
 
-    result.value.origin shouldBe List(ProductionEvent(label = "1756", places = Nil, agents = Nil, dates = List(ParsedPeriod("1756"))))
-  }
+      result.value.origin shouldBe List(
+        ProductionEvent(
+          label = "1756",
+          places = Nil,
+          agents = Nil,
+          dates = List(ParsedPeriod("1756"))))
+    }
 
-  it("doesn't return a date if the calendar is not Gregorian"){
-    val result = new TeiXml(
-      teiXml(
-        id,
-        originDates = List(originDate("hijri","5 Ramaḍān 838 (part 1)"
-        ))
-      )).parse
+    it("doesn't return a date if the calendar is not Gregorian") {
+      val result = new TeiXml(
+        teiXml(
+          id,
+          originDates = List(originDate("hijri", "5 Ramaḍān 838 (part 1)"))
+        )).parse
 
-    result.value.origin shouldBe Nil
-  }
+      result.value.origin shouldBe Nil
+    }
 
-  it("ignores non text nodes in the label"){
-    val result = new TeiXml(
-      teiXml(
-        id,
-        originDates = List(<origDate calendar="gregorian">ca.1732-63AD
+    it("ignores non text nodes in the label") {
+      val result = new TeiXml(
+        teiXml(
+          id,
+          originDates = List(<origDate calendar="gregorian">ca.1732-63AD
           <note>from watermarks</note>
         </origDate>)
-      )).parse
-    result.value.origin shouldBe List(ProductionEvent(label = "ca.1732-63AD", places = Nil, agents = Nil, dates = List(ParsedPeriod("ca.1732-63AD"))))
+        )).parse
+      result.value.origin shouldBe List(
+        ProductionEvent(
+          label = "ca.1732-63AD",
+          places = Nil,
+          agents = Nil,
+          dates = List(ParsedPeriod("ca.1732-63AD"))))
+    }
   }
-}}
+}

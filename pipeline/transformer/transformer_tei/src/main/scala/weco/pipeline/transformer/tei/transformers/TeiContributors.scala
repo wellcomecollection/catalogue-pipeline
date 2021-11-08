@@ -34,17 +34,19 @@ object TeiContributors {
       .map { author =>
         for {
           authorInfo <- getLabelAndId(author)
-          contributor <- authorInfo.map { case (label, id) =>
-            createContributor(
-              label = label,
-              ContributionRole("author"),
-              isFihrist = isFihrist,
-              id = id)
+          contributor <- authorInfo.map {
+            case (label, id) =>
+              createContributor(
+                label = label,
+                ContributionRole("author"),
+                isFihrist = isFihrist,
+                id = id)
           }.sequence
         } yield contributor
       }
       .toList
-      .sequence.map(_.flatten)
+      .sequence
+      .map(_.flatten)
 
   /**
     * Scribes appear in the physical description section of the manuscript and can appear
@@ -110,13 +112,14 @@ object TeiContributors {
     */
   private def getLabelAndId(author: Node) = {
     val exceptionOrTuple = (author \ "persName").toList match {
-      case Nil => getFromAuthorNode(author)
+      case Nil            => getFromAuthorNode(author)
       case List(persName) => getFromPersNode(author, persName)
-      case list => getFromOriginalPersName(author, list)
+      case list           => getFromOriginalPersName(author, list)
     }
-    exceptionOrTuple.map { case (label, id) if label.isEmpty =>
-      None
-    case tuble => Some(tuble)
+    exceptionOrTuple.map {
+      case (label, id) if label.isEmpty =>
+        None
+      case tuble => Some(tuble)
     }
   }
 
