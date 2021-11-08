@@ -23,7 +23,8 @@ import scala.concurrent.ExecutionContext
 class TransformerMain[Payload <: SourcePayload, SourceData](
   sourceName: String,
   createTransformer: AmazonS3 => Transformer[SourceData],
-  createSourceDataRetriever: AmazonS3 => SourceDataRetriever[Payload, SourceData]
+  createSourceDataRetriever: AmazonS3 => SourceDataRetriever[Payload,
+                                                             SourceData]
 )(
   implicit decoder: Decoder[Payload]
 ) {
@@ -67,4 +68,3 @@ class TransformerMain[Payload <: SourcePayload, SourceData](
     )
   }
 }
-
