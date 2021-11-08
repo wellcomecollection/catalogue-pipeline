@@ -1,12 +1,12 @@
 package weco.pipeline.transformer.sierra.transformers
 
-import weco.catalogue.internal_model.identifiers.{
-  IdentifierType,
-  SourceIdentifier
-}
+import weco.catalogue.internal_model.identifiers.{IdentifierType, SourceIdentifier}
 import weco.sierra.models.SierraQueryOps
 import weco.sierra.models.data.SierraBibData
 import weco.sierra.models.identifiers.SierraBibNumber
+import weco.sierra.models.marc.Subfield
+
+import scala.util.matching.Regex
 
 object SierraIdentifiers
     extends SierraIdentifiedDataTransformer
@@ -20,7 +20,8 @@ object SierraIdentifiers
       getIsbnIdentifiers(bibData) ++
       getIssnIdentifiers(bibData) ++
       getDigcodes(bibData) ++
-      getIconographicNumbers(bibData)
+      getIconographicNumbers(bibData) ++
+      getEstcReferences(bibData)
 
   /** Create a seven-digit ID based on the internal ID.
     *
@@ -130,4 +131,40 @@ object SierraIdentifiers
         value = iconographicNumber
       )
     }.toList
+
+  /** Add the ESTC references from MARC 510 ǂc.
+    *
+    * These are also included in the notes field on a Work; we add them here
+    * so they're easily searchable.
+    */
+  private def getEstcReferences(bibData: SierraBibData): List[SourceIdentifier] =
+    bibData.varFields
+      .filter { vf => vf.marcTag.contains("510") }
+      .map { _.subfields }
+      .collect {
+        // We only care about the case where there are two subfields,
+        // and the contents of subfield ǂa is "ESTC".
+        //
+        // We ignore any other cases (e.g. different value in ǂa, repeated ǂc).
+        //
+        // The information will still be on the note, but it's not a reference
+        // number we should make searchable.
+        case Seq(Subfield("a", "ESTC"), Subfield("c", contents)) => contents
+      }
+      .collect {
+        // Only capture values that look like ESTC citations, e.g. T102669
+        //
+        // This regex was created by looking at all the values in MARC 510.
+        case estcRegex(identifier) => Some(identifier)
+      }
+      .flatten
+      .map { value =>
+        SourceIdentifier(
+          identifierType = IdentifierType.ESTC,
+          ontologyType = "Work",
+          value = value
+        )
+      }
+
+  private val estcRegex = new Regex("([TWRNPS][0-9]+)")
 }

@@ -341,4 +341,81 @@ class SierraIdentifiersTest
       )
     )
   }
+
+  describe("ESTC references in MARC 510 ǂc") {
+    it("extracts a valid ESTC reference") {
+      val bibData = createSierraBibDataWith(
+        varFields = List(
+          VarField(
+            marcTag = "510",
+            subfields = List(
+              Subfield(tag = "a", content = "ESTC"),
+              Subfield(tag = "c", content = "N16242")
+            )
+          )
+        )
+      )
+
+      val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
+      otherIdentifiers should contain(
+        SourceIdentifier(
+          identifierType = IdentifierType.ESTC,
+          value = "N16242",
+          ontologyType = "Work"
+        )
+      )
+    }
+
+    it("skips the identifier if ǂa is not 'ESTC'") {
+      val bibData = createSierraBibDataWith(
+        varFields = List(
+          VarField(
+            marcTag = "510",
+            subfields = List(
+              Subfield(tag = "a", content = "notESTC"),
+              Subfield(tag = "c", content = "N16242")
+            )
+          )
+        )
+      )
+
+      val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
+      otherIdentifiers.filter { _.identifierType == IdentifierType.ESTC } shouldBe empty
+    }
+
+    it("skips the identifier if ǂc doesn't look like an ESTC reference") {
+      val bibData = createSierraBibDataWith(
+        varFields = List(
+          VarField(
+            marcTag = "510",
+            subfields = List(
+              Subfield(tag = "a", content = "ESTC"),
+              Subfield(tag = "c", content = "cf. Teerink-Scouten 500")
+            )
+          )
+        )
+      )
+
+      val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
+      otherIdentifiers.filter { _.identifierType == IdentifierType.ESTC } shouldBe empty
+    }
+
+    it("skips the identifier if there are multiple values of subfield ǂc") {
+      val bibData = createSierraBibDataWith(
+        varFields = List(
+          VarField(
+            marcTag = "510",
+            subfields = List(
+              Subfield(tag = "a", content = "ESTC"),
+              Subfield(tag = "c", content = "NCBEL,"),
+              Subfield(tag = "c", content = "II:1306")
+            )
+          )
+        )
+      )
+
+      val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
+      otherIdentifiers.filter { _.identifierType == IdentifierType.ESTC } shouldBe empty
+    }
+  }
 }
