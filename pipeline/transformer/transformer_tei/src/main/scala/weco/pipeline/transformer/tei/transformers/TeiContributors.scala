@@ -34,17 +34,17 @@ object TeiContributors {
       .map { author =>
         for {
           authorInfo <- getLabelAndId(author)
-          (label, id) = authorInfo
-          res <- createContributor(
-            label = label,
-            ContributionRole("author"),
-            isFihrist = isFihrist,
-            id = id)
-        } yield res
-
+          contributor <- authorInfo.map { case (label, id) =>
+            createContributor(
+              label = label,
+              ContributionRole("author"),
+              isFihrist = isFihrist,
+              id = id)
+          }.sequence
+        } yield contributor
       }
       .toList
-      .sequence
+      .sequence.map(_.flatten)
 
   /**
     * Scribes appear in the physical description section of the manuscript and can appear
@@ -108,10 +108,16 @@ object TeiContributors {
     *  So we must check for the existence of the internal persName nodes to decide
     *  where to get the label and id from
     */
-  private def getLabelAndId(author: Node) = (author \ "persName").toList match {
-    case Nil            => getFromAuthorNode(author)
-    case List(persName) => getFromPersNode(author, persName)
-    case list           => getFromOriginalPersName(author, list)
+  private def getLabelAndId(author: Node) = {
+    val exceptionOrTuple = (author \ "persName").toList match {
+      case Nil => getFromAuthorNode(author)
+      case List(persName) => getFromPersNode(author, persName)
+      case list => getFromOriginalPersName(author, list)
+    }
+    exceptionOrTuple.map { case (label, id) if label.isEmpty =>
+      None
+    case tuble => Some(tuble)
+    }
   }
 
   private def getScribeContributor(n: Node) =

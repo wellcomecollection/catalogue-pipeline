@@ -33,14 +33,13 @@ class TeiContributorsTest
     )
   }
 
-  it("fails extracting authors if the label is empty") {
+  it("doesn't extract authors if the label is empty") {
     val result = TeiContributors.authors(
       node = msItem(s"${id}_1", authors = List(author(label = ""))),
       isFihrist = false
     )
 
-    result shouldBe a[Left[_, _]]
-    result.left.get.getMessage should include("label")
+    result.value shouldBe Nil
   }
 
   it("extracts ids for authors") {
