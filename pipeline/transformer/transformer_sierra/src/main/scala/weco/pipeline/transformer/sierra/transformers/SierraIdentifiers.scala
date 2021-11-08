@@ -1,6 +1,9 @@
 package weco.pipeline.transformer.sierra.transformers
 
-import weco.catalogue.internal_model.identifiers.{IdentifierType, SourceIdentifier}
+import weco.catalogue.internal_model.identifiers.{
+  IdentifierType,
+  SourceIdentifier
+}
 import weco.sierra.models.SierraQueryOps
 import weco.sierra.models.data.SierraBibData
 import weco.sierra.models.identifiers.SierraBibNumber
@@ -28,7 +31,8 @@ object SierraIdentifiers
     * We use the eight-digit ID with check digit as the sourceIdentifier on the Work.
     *
     */
-  private def createSierraIdentifier(bibId: SierraBibNumber): List[SourceIdentifier] =
+  private def createSierraIdentifier(
+    bibId: SierraBibNumber): List[SourceIdentifier] =
     List(
       SourceIdentifier(
         identifierType = IdentifierType.SierraIdentifier,
@@ -137,9 +141,12 @@ object SierraIdentifiers
     * These are also included in the notes field on a Work; we add them here
     * so they're easily searchable.
     */
-  private def getEstcReferences(bibData: SierraBibData): List[SourceIdentifier] =
+  private def getEstcReferences(
+    bibData: SierraBibData): List[SourceIdentifier] =
     bibData.varFields
-      .filter { vf => vf.marcTag.contains("510") }
+      .filter { vf =>
+        vf.marcTag.contains("510")
+      }
       .map { _.subfields }
       .collect {
         // We only care about the case where there are two subfields,
