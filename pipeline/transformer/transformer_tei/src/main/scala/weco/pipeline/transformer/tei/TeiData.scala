@@ -14,19 +14,12 @@ import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.internal_model.work.{
   CollectionPath,
-  Format,
-  InternalWork,
-  MergeCandidate,
-  Note,
-  Work,
-  WorkData
-}
-import weco.catalogue.internal_model.work.{
-  CollectionPath,
   Contributor,
   Format,
   InternalWork,
   MergeCandidate,
+  Note,
+  ProductionEvent,
   Work,
   WorkData
 }
@@ -41,7 +34,8 @@ case class TeiData(id: String,
                    languages: List[Language] = Nil,
                    languageNotes: List[Note] = Nil,
                    nestedTeiData: List[TeiData] = Nil,
-                   contributors: List[Contributor[Unminted]] = Nil)
+                   contributors: List[Contributor[Unminted]] = Nil,
+                   origin: List[ProductionEvent[Unminted]] = Nil)
     extends Logging {
   def toWork(time: Instant, version: Int): Work[Source] = {
     val topLevelData = toWorkData()

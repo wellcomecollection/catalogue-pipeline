@@ -17,6 +17,8 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
     catalogues: List[Elem] = Nil,
     authors: List[Elem] = Nil,
     handNotes: List[Elem] = Nil,
+    origPlace: Option[Elem] = None,
+    originDates: List[Elem] = Nil,
   ): Elem =
     <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id={id}>
       <teiHeader>
@@ -37,6 +39,12 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
                   {handNotes}
                 </handDesc>
               </physDesc>
+              <history>
+                <origin>
+                  {origPlace.getOrElse(NodeSeq.Empty)}
+                  {originDates}
+                </origin>
+              </history>
             </msDesc>
           </sourceDesc>
         </fileDesc>
@@ -142,7 +150,24 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
 
   def mainLanguage(id: String, label: String) =
     <textLang mainLang={id} source="IANA">{label}</textLang>
+
   def otherLanguage(id: String, label: String) =
     <textLang otherLangs={id} source="IANA">{label}</textLang>
+
+  def origPlace(country: Option[String] = None,
+                settlement: Option[String] = None,
+                region: Option[String] = None,
+                orgName: Option[String] = None,
+                label: Option[String] = None) =
+    <origPlace>
+      <country>{country.getOrElse("")}</country>,
+      <region>{region.getOrElse("")}</region>,
+      <settlement>{settlement.getOrElse("")}</settlement>,
+      <orgName>{orgName.getOrElse("")}</orgName>
+      {label.getOrElse("")}
+    </origPlace>
+
+  def originDate(calendar: String, label: String) =
+    <origDate calendar={calendar}>{label}</origDate>
 
 }
