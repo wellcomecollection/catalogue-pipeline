@@ -4,15 +4,13 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.generators.IdentifiersGenerators
 import weco.catalogue.internal_model.identifiers.DataState.Unidentified
-import weco.catalogue.internal_model.identifiers.{
-  IdentifierType,
-  SourceIdentifier
-}
+import weco.catalogue.internal_model.identifiers.{IdentifierType, SourceIdentifier}
 import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.work.Format.ArchivesAndManuscripts
 import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.internal_model.work._
 import weco.pipeline.transformer.tei.generators.TeiDataGenerators
+import weco.pipeline.transformer.transformers.ParsedPeriod
 import weco.sierra.generators.SierraIdentifierGenerators
 
 import java.time.Instant
@@ -224,6 +222,18 @@ class TeiDataTest
       CollectionPath("WMS_Example_2/Part_2")
     )
 
+  }
+
+  it("copies the origin field into the production field"){
+    val production = List(
+      ProductionEvent(
+        label = "ca.1732-63AD",
+        places = Nil,
+        agents = Nil,
+        dates = List(ParsedPeriod("ca.1732-63AD"))))
+    val data = TeiData(id = "id", title = "title", origin = production)
+
+    data.toWork(Instant.now, 1).data.production shouldBe production
   }
 
   describe("setting the languages") {
