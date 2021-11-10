@@ -299,7 +299,7 @@ class TeiContributorsTest
       val result = TeiContributors.scribes(
         teiXml(
           id,
-          handNotes = List(handNotes(persNames = List(scribe("Tony Stark"))))
+          physDesc = Some(physDesc(handNotes = List(handNotes(persNames = List(scribe("Tony Stark"))))))
         ),
         id
       )
@@ -313,10 +313,10 @@ class TeiContributorsTest
       val result = TeiContributors.scribes(
         teiXml(
           id,
-          handNotes = List(
+          physDesc = Some(physDesc(handNotes = List(
             handNotes(persNames = List(scribe("Tony Stark"))),
             handNotes(persNames = List(scribe("Peter Parker"))),
-            handNotes(persNames = List(scribe("Steve Rogers")))
+            handNotes(persNames = List(scribe("Steve Rogers")))))
           )
         ),
         id
@@ -335,7 +335,7 @@ class TeiContributorsTest
       val result = TeiContributors.scribes(
         teiXml(
           id,
-          handNotes = List(handNotes(persNames = List(persName("Clark Kent"))))
+          physDesc = Some(physDesc(handNotes = List(handNotes(persNames = List(persName("Clark Kent"))))))
         ),
         id
       )
@@ -346,11 +346,11 @@ class TeiContributorsTest
       val result = TeiContributors.scribes(
         teiXml(
           id,
-          handNotes = List(
+          physDesc = Some(physDesc(handNotes = List(
             handNotes(
               persNames = List(
                 scribe("Tony Stark"),
-                scribe("Bruce Banner", `type` = Some("original")))))
+                scribe("Bruce Banner", `type` = Some("original")))))))
         ),
         id
       )
@@ -365,9 +365,9 @@ class TeiContributorsTest
       val result = TeiContributors.scribes(
         teiXml(
           id,
-          handNotes = List(
+          physDesc = Some(physDesc(handNotes = List(
             handNotes(
-              persNames = List(scribe("Tony Stark"), scribe("Bruce Banner"))))
+              persNames = List(scribe("Tony Stark"), scribe("Bruce Banner"))))))
         ),
         id
       )
@@ -378,11 +378,11 @@ class TeiContributorsTest
       val result = TeiContributors.scribes(
         teiXml(
           id,
-          handNotes = List(
+          physDesc = Some(physDesc(handNotes = List(
             handNotes(
               persNames = List(
                 scribe("Tony Stark", `type` = Some("original")),
-                scribe("Bruce Banner", `type` = Some("original")))))
+                scribe("Bruce Banner", `type` = Some("original")))))))
         ),
         id
       )
@@ -393,9 +393,9 @@ class TeiContributorsTest
       val result = TeiContributors.scribes(
         teiXml(
           id,
-          handNotes = List(
+          physDesc = Some(physDesc(handNotes = List(
             handNotes(label = "Steve Rogers", scribe = Some("sole")),
-            handNotes(label = "Bruce Banner", scribe = Some("sole"))
+            handNotes(label = "Bruce Banner", scribe = Some("sole"))))
           )
         ),
         id
@@ -411,9 +411,9 @@ class TeiContributorsTest
       val result = TeiContributors.scribes(
         teiXml(
           id,
-          handNotes = List(
+          physDesc = Some(physDesc(handNotes = List(
             handNotes(label = "Steve Rogers")
-          )
+          )))
         ),
         id
       )
@@ -428,12 +428,12 @@ class TeiContributorsTest
       val result = TeiContributors.scribes(
         teiXml(
           id,
-          handNotes = List(
+          physDesc = Some(physDesc(handNotes = List(
             handNotes(
               label = "Wanda Maximoff",
               scribe = Some("sole"),
               locus = List(locus(label = "p 22-24", target = Some(s"#$itemId")))
-            )
+            )))
           ),
           items = List(msItem(id = itemId))
         ),
@@ -454,7 +454,7 @@ class TeiContributorsTest
       val result = TeiContributors.scribes(
         teiXml(
           id,
-          handNotes = List(
+          physDesc = Some(physDesc(handNotes = List(
             handNotes(
               label = "Wanda Maximoff",
               scribe = Some("sole"),
@@ -473,7 +473,7 @@ class TeiContributorsTest
               persNames = List(scribe("Stephen Strange")),
               locus =
                 List(locus(label = "p 22-24", target = Some(s"#$itemId1")))
-            )
+            )))
           ),
           items = List(msItem(id = itemId1), msItem(id = itemId2))
         ),
@@ -509,13 +509,13 @@ class TeiContributorsTest
       val result = TeiContributors.scribes(
         teiXml(
           id,
-          handNotes = List(
+          physDesc = Some(physDesc(handNotes = List(
             handNotes(
               label = "Wanda Maximoff",
               scribe = Some("sole"),
               locus = List(
                 locus(label = "p 22-24", target = Some(s"#$itemId1 #$itemId2")))
-            )
+            )))
           ),
           items = List(msItem(id = itemId1), msItem(id = itemId2))
         ),

@@ -16,7 +16,7 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
     parts: List[Elem] = Nil,
     catalogues: List[Elem] = Nil,
     authors: List[Elem] = Nil,
-    handNotes: List[Elem] = Nil,
+    physDesc: Option[Elem] = None,
     origPlace: Option[Elem] = None,
     originDates: List[Elem] = Nil,
   ): Elem =
@@ -34,11 +34,7 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
               </msIdentifier>
               {msContents(summary, languages, items, authors)}
               {parts}
-              <physDesc>
-                <handDesc>
-                  {handNotes}
-                </handDesc>
-              </physDesc>
+              {physDesc.getOrElse(NodeSeq.Empty)}
               <history>
                 <origin>
                   {origPlace.getOrElse(NodeSeq.Empty)}
@@ -105,6 +101,14 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
       case None    => <author>{persNames}</author>
     }
 
+  def physDesc(objectDesc: Option[Elem]= None, handNotes: List[Elem] = Nil) =
+    <physDesc>
+      {objectDesc.getOrElse(NodeSeq.Empty)}
+      <handDesc>
+        {handNotes}
+      </handDesc>
+    </physDesc>
+
   def handNotes(label: String = "",
                 persNames: List[Elem] = Nil,
                 scribe: Option[String] = None,
@@ -114,6 +118,16 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
     <handNote>
       {locus}{label}{persNames}
   </handNote> % scribeAttribute
+  }
+
+  def objectDesc(material: Option[String] = None, supportLabel: Option[String] = None) = {
+    val materialAttribute =
+      material.map(s => Attribute("material", Text(s), Null)).getOrElse(Null)
+    <objectDesc>
+      {<supportDesc>
+        {supportLabel.map{l => <support>{l}</support>}.getOrElse(NodeSeq.Empty)}
+      </supportDesc> % materialAttribute}
+    </objectDesc>
   }
 
   def locus(label: String, target: Option[String] = None) = target match {

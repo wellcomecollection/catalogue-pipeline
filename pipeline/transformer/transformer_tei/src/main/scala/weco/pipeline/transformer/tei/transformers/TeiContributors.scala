@@ -85,7 +85,7 @@ object TeiContributors {
   def scribes(
     xml: Elem,
     workId: String): Result[Map[String, List[Contributor[Unminted]]]] =
-    (xml \\ "physDesc" \ "handDesc" \ "handNote").foldLeft(
+    (xml \\"sourceDesc"\"msDesc"\ "physDesc" \ "handDesc" \ "handNote").foldLeft(
       Right(Map.empty): Result[Map[String, List[Contributor[Unminted]]]]
     ) {
       case (Left(err), _) => Left(err)
