@@ -4,7 +4,10 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.generators.IdentifiersGenerators
 import weco.catalogue.internal_model.identifiers.DataState.Unidentified
-import weco.catalogue.internal_model.identifiers.{IdentifierType, SourceIdentifier}
+import weco.catalogue.internal_model.identifiers.{
+  IdentifierType,
+  SourceIdentifier
+}
 import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.work.Format.ArchivesAndManuscripts
 import weco.catalogue.internal_model.work.WorkState.Source
@@ -224,7 +227,7 @@ class TeiDataTest
 
   }
 
-  it("copies the origin field into the production field"){
+  it("copies the origin field into the production field") {
     val production = List(
       ProductionEvent(
         label = "ca.1732-63AD",
