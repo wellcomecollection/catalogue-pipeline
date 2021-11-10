@@ -35,8 +35,8 @@ case class TeiData(id: String,
                    languageNotes: List[Note] = Nil,
                    nestedTeiData: List[TeiData] = Nil,
                    contributors: List[Contributor[Unminted]] = Nil,
-                   origin: List[ProductionEvent[Unminted]] = Nil)
-    extends Logging {
+                   origin: List[ProductionEvent[Unminted]] = Nil,
+) extends Logging {
   def toWork(time: Instant, version: Int): Work[Source] = {
     val topLevelData = toWorkData()
 
@@ -122,6 +122,7 @@ case class TeiData(id: String,
       format = Some(Format.ArchivesAndManuscripts),
       notes = languageNotes,
       contributors = contributors,
+      production = origin,
       //
       // If a TEI work has multiple parts, we want to arrange it into a hierarchy
       // like a CALM collection, e.g.
