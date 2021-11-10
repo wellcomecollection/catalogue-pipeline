@@ -39,7 +39,8 @@ class TeiXml(val xml: Elem) extends Logging {
         notes = languageNotes,
         contributors = scribes.getOrElse(id, Nil),
         nestedTeiData = nestedData,
-        origin = origin
+        origin = origin,
+        physicalDescription = physicalDescription
       )
 
   /**
@@ -99,6 +100,13 @@ class TeiXml(val xml: Elem) extends Logging {
       case _               => Left(new RuntimeException("More than one title node!"))
     }
   }
+
+  private def physicalDescription = (xml \\"sourceDesc"\"msDesc"\ "physDesc"\\"supportDesc").map{ supportDesc =>
+      val materialString = (supportDesc \@ "material").trim
+      val material = if(materialString.nonEmpty)s"Material: $materialString"else ""
+      val support = (supportDesc \ "support").text.trim
+      List(material, support).filterNot(_.isEmpty).mkString(", ")
+    }.headOption
 
   /**
     * The origin tag contains information about where and when
