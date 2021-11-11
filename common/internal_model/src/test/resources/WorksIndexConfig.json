@@ -172,14 +172,20 @@
         "properties" : {
           "canonicalId" : {
             "type" : "keyword",
-            "normalizer" : "lowercase_normalizer"
+            "normalizer" : "lowercase_normalizer",
+            "copy_to" : [
+              "search.identifiers"
+            ]
           },
           "sourceIdentifier" : {
             "type" : "object",
             "properties" : {
               "value" : {
                 "type" : "keyword",
-                "normalizer" : "lowercase_normalizer"
+                "normalizer" : "lowercase_normalizer",
+                "copy_to" : [
+                  "search.identifiers"
+                ]
               }
             },
             "dynamic" : "false"
@@ -372,15 +378,21 @@
       "data" : {
         "type" : "object",
         "properties" : {
-          "referenceNumber": {
-            "type" : "keyword"
+          "referenceNumber" : {
+            "type" : "keyword",
+            "copy_to" : [
+              "search.identifiers"
+            ]
           },
           "otherIdentifiers" : {
             "type" : "object",
             "properties" : {
               "value" : {
                 "type" : "keyword",
-                "normalizer" : "lowercase_normalizer"
+                "normalizer" : "lowercase_normalizer",
+                "copy_to" : [
+                  "search.identifiers"
+                ]
               }
             }
           },
@@ -490,7 +502,7 @@
                 "analyzer" : "english"
               }
             },
-            "copy_to": [
+            "copy_to" : [
               "search.relations"
             ]
           },
@@ -686,14 +698,20 @@
                 "properties" : {
                   "canonicalId" : {
                     "type" : "keyword",
-                    "normalizer" : "lowercase_normalizer"
+                    "normalizer" : "lowercase_normalizer",
+                    "copy_to" : [
+                      "search.identifiers"
+                    ]
                   },
                   "sourceIdentifier" : {
                     "type" : "object",
                     "properties" : {
                       "value" : {
                         "type" : "keyword",
-                        "normalizer" : "lowercase_normalizer"
+                        "normalizer" : "lowercase_normalizer",
+                        "copy_to" : [
+                          "search.identifiers"
+                        ]
                       }
                     },
                     "dynamic" : "false"
@@ -703,7 +721,10 @@
                     "properties" : {
                       "value" : {
                         "type" : "keyword",
-                        "normalizer" : "lowercase_normalizer"
+                        "normalizer" : "lowercase_normalizer",
+                        "copy_to" : [
+                          "search.identifiers"
+                        ]
                       }
                     }
                   }
@@ -896,14 +917,20 @@
                 "properties" : {
                   "canonicalId" : {
                     "type" : "keyword",
-                    "normalizer" : "lowercase_normalizer"
+                    "normalizer" : "lowercase_normalizer",
+                    "copy_to" : [
+                      "search.identifiers"
+                    ]
                   },
                   "sourceIdentifier" : {
                     "type" : "object",
                     "properties" : {
                       "value" : {
                         "type" : "keyword",
-                        "normalizer" : "lowercase_normalizer"
+                        "normalizer" : "lowercase_normalizer",
+                        "copy_to" : [
+                          "search.identifiers"
+                        ]
                       }
                     },
                     "dynamic" : "false"

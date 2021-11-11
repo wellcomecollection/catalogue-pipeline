@@ -73,6 +73,7 @@ object WorksIndexConfig extends IndexConfigFields {
   val indexed = WorksIndexConfig(
     {
       val relationsPath = List("search.relations")
+      val identifiersPath = List("search.identifiers")
       val titlesAndContributorsPath = List("search.titlesAndContributors")
 
       // Indexing lots of individual fields on Elasticsearch can be very CPU
@@ -80,7 +81,8 @@ object WorksIndexConfig extends IndexConfigFields {
       // API.
       def data: ObjectField =
         objectField("data").fields(
-          objectField("otherIdentifiers").fields(lowercaseKeyword("value")),
+          objectField("otherIdentifiers")
+            .fields(lowercaseKeyword("value").copy(copyTo = identifiersPath)),
           objectField("format").fields(keywordField("id")),
           multilingualFieldWithKeyword("title")
             .copyTo(relationsPath ++ titlesAndContributorsPath),
@@ -90,7 +92,8 @@ object WorksIndexConfig extends IndexConfigFields {
           englishTextKeywordField("physicalDescription"),
           multilingualField("lettering"),
           objectField("contributors").fields(
-            objectField("agent").fields(label.copyTo(titlesAndContributorsPath))
+            objectField("agent")
+              .fields(label.copyTo(titlesAndContributorsPath))
           ),
           objectField("subjects").fields(
             label,
@@ -110,9 +113,16 @@ object WorksIndexConfig extends IndexConfigFields {
               )
             ),
             objectField("id").fields(
-              canonicalId,
-              sourceIdentifier,
-              objectField("otherIdentifiers").fields(lowercaseKeyword("value"))
+              canonicalId.copy(copyTo = identifiersPath),
+              objectField("sourceIdentifier")
+                .fields(
+                  lowercaseKeyword("value").copy(copyTo = identifiersPath)
+                )
+                .withDynamic("false"),
+              objectField("otherIdentifiers")
+                .fields(
+                  lowercaseKeyword("value").copy(copyTo = identifiersPath)
+                )
             )
           ),
           objectField("production").fields(
@@ -131,10 +141,17 @@ object WorksIndexConfig extends IndexConfigFields {
           intField("duration"),
           collectionPath(copyPathTo = Some("data.collectionPath.depth")),
           objectField("imageData").fields(
-            objectField("id").fields(canonicalId, sourceIdentifier)
+            objectField("id").fields(
+              canonicalId.copy(copyTo = identifiersPath),
+              objectField("sourceIdentifier")
+                .fields(
+                  lowercaseKeyword("value").copy(copyTo = identifiersPath)
+                )
+                .withDynamic("false")
+            )
           ),
           keywordField("workType"),
-          keywordField("referenceNumber")
+          keywordField("referenceNumber").copy(copyTo = identifiersPath)
         )
 
       // We copy the collectionPath label and the tokenized fields into the
@@ -167,8 +184,12 @@ object WorksIndexConfig extends IndexConfigFields {
 
       val state = objectField("state")
         .fields(
-          canonicalId,
-          sourceIdentifier,
+          canonicalId.copy(copyTo = identifiersPath),
+          objectField("sourceIdentifier")
+            .fields(
+              lowercaseKeyword("value").copy(copyTo = identifiersPath)
+            )
+            .withDynamic("false"),
           dateField("sourceModifiedTime"),
           dateField("mergedTime"),
           dateField("indexedTime"),
