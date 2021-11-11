@@ -402,13 +402,15 @@ class TeiNestedDataTest extends AnyFunSpec with TeiGenerators with Matchers with
   }
 
   it("extracts physicalDescription for parts"){
+    val elem = teiXml(
+      id,
+      parts = List(msPart(id = "",
+        physDesc = Some(physDesc(objectDesc = Some(objectDesc(None,
+          support = Some(support("Multiple manuscript parts collected in one volume."))))))
+      )))
+    println(elem.toString())
     val result = TeiNestedData.nestedTeiData(
-      teiXml(
-        id,
-        parts = List(msPart(id = "",
-          physDesc = Some(physDesc(objectDesc = Some(objectDesc(None,
-            support = Some(support("Multiple manuscript parts collected in one volume."))))))
-        ))), wrapperTitle = "blih bluh", scribesMap = Map())
+      elem, wrapperTitle = "blih bluh", scribesMap = Map())
 
     result.value.head.physicalDescription shouldBe Some("Multiple manuscript parts collected in one volume.")
   }
