@@ -125,6 +125,7 @@ case class TeiData(id: String,
       notes = notes,
       contributors = contributors,
       production = origin,
+      physicalDescription = physicalDescription, 
       //
       // If a TEI work has multiple parts, we want to arrange it into a hierarchy
       // like a CALM collection, e.g.

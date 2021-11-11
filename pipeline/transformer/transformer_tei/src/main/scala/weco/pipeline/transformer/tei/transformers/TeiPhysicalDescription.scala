@@ -1,6 +1,8 @@
 package weco.pipeline.transformer.tei.transformers
 
 
+import weco.pipeline.transformer.tei.NormaliseText
+
 import scala.xml.{Elem, Node, NodeSeq}
 
 object TeiPhysicalDescription {
@@ -12,9 +14,9 @@ object TeiPhysicalDescription {
   private def physicalDescription(nodeSeq: NodeSeq) = (nodeSeq \ "physDesc"\\"supportDesc").map{ supportDesc =>
     val materialString = (supportDesc \@ "material").trim
     val material = if(materialString.nonEmpty)s"Material: $materialString"else ""
-    val support = parseSupport(supportDesc)
-    val extent = parseExtent(supportDesc)
-    List(support,material,extent).filterNot(_.isEmpty).mkString("; ")
+    val support = parseSupport(supportDesc).toList
+    val extent = parseExtent(supportDesc).toList
+    (support ++ List(material) ++ extent).filterNot(_.isEmpty).mkString("; ")
 
   }.headOption
 
@@ -27,7 +29,7 @@ object TeiPhysicalDescription {
       (extentLabel +: dimensions).filterNot(_.isEmpty).mkString("; ")
     }
     else extent.text.trim
-    extentStr
+    NormaliseText(extentStr)
   }
 
   private def parseSupport(supportDesc: Node) = {
@@ -38,7 +40,7 @@ object TeiPhysicalDescription {
         .collect { case node if node.label != "watermark" && node.label != "measure" => node.text.trim }.mkString(" ").trim
       List(supportLabel, if (watermarkStr.nonEmpty) s"Watermarks: $watermarkStr" else "").filterNot(_.isEmpty).mkString("; ")
     } else support.text.trim
-    supportStr
+    NormaliseText(supportStr)
   }
 
   private def parseDimensions(extent: NodeSeq) =
@@ -48,8 +50,10 @@ object TeiPhysicalDescription {
       val unit = (dimensions \@ "unit").trim
       val `type` = (dimensions \@ "type").trim
       val unitStr = if (unit.nonEmpty) unit else ""
-      val heightStr = if (height.nonEmpty) s"height $height $unitStr".trim else ""
-      val widthStr = if (width.nonEmpty) s"width $width $unitStr".trim else ""
-      s"${`type`} dimensions: ${List(widthStr, heightStr).mkString(", ")}"
+      val heightStr = if (height.nonEmpty) s"height $height".trim else ""
+      val widthStr = if (width.nonEmpty) s"width $width".trim else ""
+      s"${`type`} dimensions: ${List(appendUnit(widthStr, unitStr), appendUnit(heightStr, unitStr)).mkString(", ")}"
     }
+
+  private def appendUnit(str: String, unit: String) = if(str.trim.endsWith(unit)) str else s"$str $unit".trim
 }

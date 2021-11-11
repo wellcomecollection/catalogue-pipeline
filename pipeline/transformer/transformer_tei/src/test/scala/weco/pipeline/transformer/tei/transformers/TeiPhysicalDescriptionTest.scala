@@ -79,6 +79,5 @@ class TeiPhysicalDescriptionTest extends AnyFunSpec with TeiGenerators with Matc
         )))
     result shouldBe Some("Multiple manuscript parts collected in one volume.")
   }
-  // physical description in items?
 
 }
