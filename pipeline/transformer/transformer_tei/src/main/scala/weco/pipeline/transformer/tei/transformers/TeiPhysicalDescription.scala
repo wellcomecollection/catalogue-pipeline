@@ -28,13 +28,6 @@ object TeiPhysicalDescription {
    *                   </dimensions>
    *                 </extent>
    *               </supportDesc>
-   *             </objectDesc>
-   *           </physDesc>
-   *         </msDesc>
-   *       </sourceDesc>
-   *     </fileDesc>
-   *   </teiHeader>
-   * </TEI>
    *
    * or in msPart for an internal work as in:
    * <msPart xml:id="">
@@ -94,7 +87,8 @@ object TeiPhysicalDescription {
       val watermarkStr = (support \ "watermark").text.trim
       val supportLabel = support.flatMap(_.child)
         .collect { case node if node.label != "watermark" && node.label != "measure" => node.text.trim }.mkString(" ").trim
-      List(supportLabel, if (watermarkStr.nonEmpty) s"Watermarks: $watermarkStr" else "").filterNot(_.isEmpty).mkString("; ")
+      val parts = List(supportLabel, if (watermarkStr.nonEmpty) s"Watermarks: $watermarkStr" else "")
+      parts.filterNot(_.isEmpty).mkString("; ")
     } else support.text.trim
     NormaliseText(supportStr)
   }
@@ -115,7 +109,8 @@ object TeiPhysicalDescription {
       val unitStr = if (unit.nonEmpty) unit else ""
       val heightStr = if (height.nonEmpty) s"height $height".trim else ""
       val widthStr = if (width.nonEmpty) s"width $width".trim else ""
-      s"${`type`} dimensions: ${List(appendUnit(widthStr, unitStr), appendUnit(heightStr, unitStr)).mkString(", ")}"
+      val dimensionStr = List(appendUnit(widthStr, unitStr), appendUnit(heightStr, unitStr)).mkString(", ")
+      s"${`type`} dimensions: $dimensionStr"
     }
 
   // Sometimes the unit of measure is already appended in the width or height, so we check before appending
