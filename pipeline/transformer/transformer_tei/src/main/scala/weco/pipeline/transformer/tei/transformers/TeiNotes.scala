@@ -6,11 +6,11 @@ import weco.pipeline.transformer.tei.NormaliseText
 import scala.xml.{Elem, NodeSeq}
 
 object TeiNotes {
-  def apply(xml: Elem): List[Note] = {
-    val contents = xml \\ "msDesc" \ "msContents"
+  def apply(xml: Elem): List[Note] =
+    apply(xml \\ "msDesc" \ "msContents")
 
-    getColophon(contents).toList
-  }
+  def apply(node: NodeSeq): List[Note] =
+    getColophon(node).toList
 
   /** The colophon is in `colophon` nodes under `msContents` or `msItem`.
    *

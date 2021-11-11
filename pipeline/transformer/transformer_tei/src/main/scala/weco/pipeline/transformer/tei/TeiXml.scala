@@ -36,7 +36,7 @@ class TeiXml(val xml: Elem) extends Logging {
         bNumber = bNumber,
         description = summary,
         languages = languages,
-        languageNotes = languageNotes,
+        notes = languageNotes,
         contributors = scribes.getOrElse(id, Nil),
         nestedTeiData = nestedData,
         origin = origin
