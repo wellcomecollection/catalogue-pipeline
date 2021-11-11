@@ -150,10 +150,11 @@ class TeiXmlTest
     val result = new TeiXml(
       teiXml(
         id,
-        handNotes = List(
+        physDesc = Some(physDesc(handNotes = List(
           handNotes(persNames = List(scribe("Tony Stark"))),
           handNotes(persNames = List(scribe("Peter Parker"))),
-          handNotes(persNames = List(scribe("Steve Rogers"))))
+          handNotes(persNames = List(scribe("Steve Rogers"))))))
+
       )).parse
 
     result.value.contributors shouldBe List(
@@ -280,4 +281,18 @@ class TeiXmlTest
           dates = List(ParsedPeriod("ca.1732-63AD"))))
     }
   }
+
+  it("extracts material description for the wrapper work"){
+    val result = new TeiXml(
+      teiXml(
+        id,
+        physDesc = Some(physDesc(objectDesc = Some(objectDesc(None,
+          support = Some(support("Multiple manuscript parts collected in one volume."))))))
+      )).parse
+
+    result.value.physicalDescription shouldBe Some("Multiple manuscript parts collected in one volume.")
+  }
+
+
+
 }

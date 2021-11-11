@@ -16,7 +16,7 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
     parts: List[Elem] = Nil,
     catalogues: List[Elem] = Nil,
     authors: List[Elem] = Nil,
-    handNotes: List[Elem] = Nil,
+    physDesc: Option[Elem] = None,
     origPlace: Option[Elem] = None,
     originDates: List[Elem] = Nil,
   ): Elem =
@@ -34,11 +34,7 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
               </msIdentifier>
               {msContents(summary, languages, items, authors)}
               {parts}
-              <physDesc>
-                <handDesc>
-                  {handNotes}
-                </handDesc>
-              </physDesc>
+              {physDesc.getOrElse(NodeSeq.Empty)}
               <history>
                 <origin>
                   {origPlace.getOrElse(NodeSeq.Empty)}
@@ -80,13 +76,12 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
 
   def msPart(
     id: String,
-    summary: Option[Elem] = None,
-    languages: List[Elem] = Nil,
-    items: List[Elem] = Nil,
-    authors: List[Elem] = Nil
+    msContents: Option[Elem] = None,
+    physDesc: Option[Elem] = None
   ) =
     <msPart xml:id={id}>
-      {msContents(summary = summary, languages = languages, items = items, authors = authors)}
+      {msContents.getOrElse(NodeSeq.Empty)}
+      {physDesc.getOrElse(NodeSeq.Empty)}
     </msPart>
 
   def sierraIdentifiers(bnumber: String) =
@@ -105,6 +100,14 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
       case None    => <author>{persNames}</author>
     }
 
+  def physDesc(objectDesc: Option[Elem] = None, handNotes: List[Elem] = Nil) =
+    <physDesc>
+      {objectDesc.getOrElse(NodeSeq.Empty)}
+      <handDesc>
+        {handNotes}
+      </handDesc>
+    </physDesc>
+
   def handNotes(label: String = "",
                 persNames: List[Elem] = Nil,
                 scribe: Option[String] = None,
@@ -115,6 +118,43 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
       {locus}{label}{persNames}
   </handNote> % scribeAttribute
   }
+
+  def objectDesc(material: Option[String] = None,
+                 support: Option[Elem] = None,
+                 extent: Option[Elem] = None) = {
+    val materialAttribute =
+      material.map(s => Attribute("material", Text(s), Null)).getOrElse(Null)
+    <objectDesc>
+
+      {<supportDesc>
+      {extent.getOrElse(NodeSeq.Empty)}
+      {support.getOrElse(NodeSeq.Empty)}
+      </supportDesc> % materialAttribute}
+    </objectDesc>
+  }
+
+  def support(supportLabel: String,
+              watermarks: List[Elem] = Nil,
+              measures: List[Elem] = Nil) =
+    <support>
+      {supportLabel}
+      {watermarks}
+      {measures}
+    </support>
+
+  def watermark(label: String) = <watermark>{label}</watermark>
+
+  def extent(label: String, dimensions: List[Elem] = Nil) =
+    <extent>
+      {label}
+      {dimensions}
+    </extent>
+
+  def dimensions(unit: String, `type`: String, height: String, width: String) =
+    <dimensions unit={unit} type={`type`}>
+      <height>{height}</height>
+      <width>{width}</width>
+    </dimensions>
 
   def locus(label: String, target: Option[String] = None) = target match {
     case Some(t) => <locus target={t}>{label}</locus>

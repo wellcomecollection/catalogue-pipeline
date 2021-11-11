@@ -6,7 +6,7 @@ import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.IdState.Identifiable
 import weco.catalogue.internal_model.identifiers.{IdentifierType, SourceIdentifier}
 import weco.catalogue.internal_model.languages.Language
-import weco.catalogue.internal_model.work.{ContributionRole, Contributor, Note, NoteType, Person}
+import weco.catalogue.internal_model.work._
 import weco.pipeline.transformer.tei.TeiData
 import weco.pipeline.transformer.tei.generators.TeiGenerators
 
@@ -92,8 +92,9 @@ class TeiNestedDataTest extends AnyFunSpec with TeiGenerators with Matchers with
       parts = List(
         msPart(
           id = "1",
+          msContents = Some(msContents(
           summary = Some(summary(description)),
-          languages = List(mainLanguage("ar", "Arabic"))))
+          languages = List(mainLanguage("ar", "Arabic"))))))
     )
 
     val result =TeiNestedData.nestedTeiData(xml,wrapperTitle, Map.empty)
@@ -130,9 +131,9 @@ class TeiNestedDataTest extends AnyFunSpec with TeiGenerators with Matchers with
       parts = List(
         msPart(
           id = "1",
-          summary = Some(summary(description)),
+          msContents = Some(msContents(summary = Some(summary(description)),
           languages = List(mainLanguage("ar", "Arabic")),
-          items = List(firstInnerItem, secondInnerItem)
+          items = List(firstInnerItem, secondInnerItem)))
         ))
     )
 
@@ -163,9 +164,9 @@ class TeiNestedDataTest extends AnyFunSpec with TeiGenerators with Matchers with
       parts = List(
         msPart(
           id = "1",
-          summary = Some(summary(description)),
+          msContents = Some(msContents(summary = Some(summary(description)),
           languages = List(mainLanguage("ar", "Arabic")),
-          items = List(firstInnerItem)
+          items = List(firstInnerItem)))
         ))
     )
 
@@ -255,12 +256,12 @@ class TeiNestedDataTest extends AnyFunSpec with TeiGenerators with Matchers with
       parts = List(
         msPart(
           id = "1",
-          items = List(
+          msContents = Some(msContents(items = List(
             msItem(
               id = "11",
               titles = List(itemTitle("inner item title")),
               languages = List(mainLanguage("ar", "Arabic"))),
-            msItem(id = "12"))
+            msItem(id = "12"))))
         )),
       catalogues =
         List(catalogueElem("Fihrist"), catalogueElem("Another catalogue"))
@@ -398,5 +399,19 @@ class TeiNestedDataTest extends AnyFunSpec with TeiGenerators with Matchers with
         Note(contents = "F. 3r: ||12|| navagrahastotraṃ saṃpūraṇaṃ", noteType = NoteType.endsNote),
       ),
     )
+  }
+
+  it("extracts physicalDescription for parts"){
+    val elem = teiXml(
+      id,
+      parts = List(msPart(id = "",
+        physDesc = Some(physDesc(objectDesc = Some(objectDesc(None,
+          support = Some(support("Multiple manuscript parts collected in one volume."))))))
+      )))
+    println(elem.toString())
+    val result = TeiNestedData.nestedTeiData(
+      elem, wrapperTitle = "blih bluh", scribesMap = Map())
+
+    result.value.head.physicalDescription shouldBe Some("Multiple manuscript parts collected in one volume.")
   }
 }

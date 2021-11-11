@@ -296,4 +296,17 @@ class TeiDataTest
       }
     }
   }
+
+  it("passes physical description into workdata") {
+    val physicalDescription = Some("blah bluh")
+    val data = TeiData(
+      id = "id",
+      title = "title",
+      physicalDescription = physicalDescription)
+
+    data
+      .toWork(Instant.now, 1)
+      .data
+      .physicalDescription shouldBe physicalDescription
+  }
 }

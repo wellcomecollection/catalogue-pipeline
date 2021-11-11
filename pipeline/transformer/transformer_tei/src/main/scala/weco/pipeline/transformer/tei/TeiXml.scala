@@ -7,7 +7,8 @@ import weco.pipeline.transformer.result.Result
 import weco.pipeline.transformer.tei.transformers.{
   TeiContributors,
   TeiLanguages,
-  TeiNestedData
+  TeiNestedData,
+  TeiPhysicalDescription
 }
 import weco.pipeline.transformer.transformers.ParsedPeriod
 
@@ -39,7 +40,8 @@ class TeiXml(val xml: Elem) extends Logging {
         notes = languageNotes,
         contributors = scribes.getOrElse(id, Nil),
         nestedTeiData = nestedData,
-        origin = origin
+        origin = origin,
+        physicalDescription = TeiPhysicalDescription(xml)
       )
 
   /**
@@ -160,8 +162,7 @@ class TeiXml(val xml: Elem) extends Logging {
     val date =
       if (dateNodes.exists(_.child.size > 1))
         dateNodes
-          .map(_.child)
-          .flatten
+          .flatMap(_.child)
           .collect { case node if node.label != "note" => node.text }
           .mkString
           .trim
