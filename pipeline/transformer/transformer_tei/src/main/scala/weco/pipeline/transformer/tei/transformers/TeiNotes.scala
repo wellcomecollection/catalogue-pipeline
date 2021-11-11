@@ -72,7 +72,9 @@ object TeiNotes {
         (n.label, NormaliseText(contents))
       }
       .collect {
-        case ("incipit", Some(contents))  => Note(contents = contents, noteType = NoteType.Incipit)
-        case ("explicit", Some(contents)) => Note(contents = contents, noteType = NoteType.Explicit)
+        case ("incipit", Some(contents)) =>
+          Note(contents = contents, noteType = NoteType.Incipit)
+        case ("explicit", Some(contents)) =>
+          Note(contents = contents, noteType = NoteType.Explicit)
       }
 }

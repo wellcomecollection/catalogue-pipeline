@@ -109,8 +109,14 @@ class TeiNotesTest extends AnyFunSpec with Matchers {
         </TEI>
 
       TeiNotes(xml) shouldBe List(
-        Note(contents = "F. 1v: oṃ namaḥ japāpuṣyena saṃkāśaṃ kāśyapeyaṃ mahādyutiṃ tam ahaṃ sarvapāpaghnaṃ praṇato smi divākaraṃ sūryāya namaḥ", noteType = NoteType.Incipit),
-        Note(contents = "F. 3r: ||12|| navagrahastotraṃ saṃpūraṇaṃ", noteType = NoteType.Explicit),
+        Note(
+          contents =
+            "F. 1v: oṃ namaḥ japāpuṣyena saṃkāśaṃ kāśyapeyaṃ mahādyutiṃ tam ahaṃ sarvapāpaghnaṃ praṇato smi divākaraṃ sūryāya namaḥ",
+          noteType = NoteType.Incipit
+        ),
+        Note(
+          contents = "F. 3r: ||12|| navagrahastotraṃ saṃpūraṇaṃ",
+          noteType = NoteType.Explicit),
       )
     }
   }
