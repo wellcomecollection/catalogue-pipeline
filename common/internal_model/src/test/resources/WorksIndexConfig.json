@@ -320,6 +320,9 @@
       "search" : {
         "type" : "object",
         "properties" : {
+          "identifiers" : {
+            "type" : "keyword"
+          },
           "relations" : {
             "type" : "text",
             "analyzer" : "with_slashes_text_analyzer"
