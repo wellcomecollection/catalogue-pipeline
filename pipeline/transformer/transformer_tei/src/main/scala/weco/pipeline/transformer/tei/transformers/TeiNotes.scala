@@ -73,8 +73,8 @@ object TeiNotes {
       }
       .collect {
         case ("incipit", Some(contents)) =>
-          Note(contents = contents, noteType = NoteType.Incipit)
+          Note(contents = contents, noteType = NoteType.BeginsNote)
         case ("explicit", Some(contents)) =>
-          Note(contents = contents, noteType = NoteType.Explicit)
+          Note(contents = contents, noteType = NoteType.endsNote)
       }
 }

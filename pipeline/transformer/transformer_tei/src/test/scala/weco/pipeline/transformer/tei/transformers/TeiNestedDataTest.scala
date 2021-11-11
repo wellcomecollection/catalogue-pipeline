@@ -394,8 +394,8 @@ class TeiNestedDataTest extends AnyFunSpec with TeiGenerators with Matchers with
 
     result.value.map { data => data.notes } shouldBe List(
       List(
-        Note(contents = "F. 1v: oṃ namaḥ japāpuṣyena saṃkāśaṃ kāśyapeyaṃ mahādyutiṃ tam ahaṃ sarvapāpaghnaṃ praṇato smi divākaraṃ sūryāya namaḥ", noteType = NoteType.Incipit),
-        Note(contents = "F. 3r: ||12|| navagrahastotraṃ saṃpūraṇaṃ", noteType = NoteType.Explicit),
+        Note(contents = "F. 1v: oṃ namaḥ japāpuṣyena saṃkāśaṃ kāśyapeyaṃ mahādyutiṃ tam ahaṃ sarvapāpaghnaṃ praṇato smi divākaraṃ sūryāya namaḥ", noteType = NoteType.BeginsNote),
+        Note(contents = "F. 3r: ||12|| navagrahastotraṃ saṃpūraṇaṃ", noteType = NoteType.endsNote),
       ),
     )
   }

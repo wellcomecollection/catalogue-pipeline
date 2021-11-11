@@ -112,11 +112,11 @@ class TeiNotesTest extends AnyFunSpec with Matchers {
         Note(
           contents =
             "F. 1v: oṃ namaḥ japāpuṣyena saṃkāśaṃ kāśyapeyaṃ mahādyutiṃ tam ahaṃ sarvapāpaghnaṃ praṇato smi divākaraṃ sūryāya namaḥ",
-          noteType = NoteType.Incipit
+          noteType = NoteType.BeginsNote
         ),
         Note(
           contents = "F. 3r: ||12|| navagrahastotraṃ saṃpūraṇaṃ",
-          noteType = NoteType.Explicit),
+          noteType = NoteType.endsNote),
       )
     }
   }
