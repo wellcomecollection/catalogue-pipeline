@@ -100,7 +100,13 @@ class TeiXml(val xml: Elem) extends Logging {
   private def physicalDescription = (xml \\"sourceDesc"\"msDesc"\ "physDesc"\\"supportDesc").map{ supportDesc =>
       val materialString = (supportDesc \@ "material").trim
       val material = if(materialString.nonEmpty)s"Material: $materialString"else ""
-      val support = (supportDesc \ "support").text.trim
+      val support = (supportDesc \ "support")
+    val supportStr = if(support.exists(_.child.size >1)) {
+      val watermarkStr = (support \ "watermark").text.trim
+    val supportLabel = support.flatMap(_.child)
+      .collect { case node if node.label != "watermark" && node.label!="measure" => node.text.trim}.mkString(" ").trim
+      List(supportLabel, if(watermarkStr.nonEmpty) s"Watermarks: $watermarkStr" else "").filterNot(_.isEmpty).mkString("; ")
+  }else support.text.trim
     val extent = supportDesc \ "extent"
     val extentStr = if(extent.exists(_.child.size >1)) {
       val extentLabel= extent.flatMap(_.child)
@@ -109,7 +115,7 @@ class TeiXml(val xml: Elem) extends Logging {
       (extentLabel +: dimensions).filterNot(_.isEmpty).mkString("; ")
     }
     else extent.text.trim
-    List(support,material,extentStr).filterNot(_.isEmpty).mkString("; ")
+    List(supportStr,material,extentStr).filterNot(_.isEmpty).mkString("; ")
 
   }.headOption
 

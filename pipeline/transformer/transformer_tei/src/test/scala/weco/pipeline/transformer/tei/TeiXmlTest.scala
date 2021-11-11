@@ -296,10 +296,23 @@ class TeiXmlTest
     val result = new TeiXml(
       teiXml(
         id,
-        physDesc = Some(physDesc(objectDesc = Some(objectDesc(None, support = Some(support("Multiple manuscript parts collected in one volume."))))))
+        physDesc = Some(physDesc(objectDesc = Some(objectDesc(None,
+          support = Some(support("Multiple manuscript parts collected in one volume."))))))
       )).parse
 
     result.value.physicalDescription shouldBe Some("Multiple manuscript parts collected in one volume.")
+  }
+
+  it("extracts watermark"){
+    val result = new TeiXml(
+      teiXml(
+        id,
+        physDesc = Some(physDesc(objectDesc = Some(objectDesc(None,
+          support = Some(support(supportLabel = "Multiple manuscript parts collected in one volume.",
+            watermarks= List(watermark("Blih bluh blah")
+            )))))))
+      )).parse
+    result.value.physicalDescription shouldBe Some("Multiple manuscript parts collected in one volume.; Watermarks: Blih bluh blah")
   }
 
   it("extracts extent for the wrapper work"){
@@ -333,5 +346,8 @@ class TeiXmlTest
 
     result.value.physicalDescription shouldBe Some("3 pages; leaf dimensions: width 300 mm, height 100 mm; text dimensions: width 290 mm, height 90 mm")
   }
+  // watermark
+  // physical description in parts
+  // physical description in items?
 
 }

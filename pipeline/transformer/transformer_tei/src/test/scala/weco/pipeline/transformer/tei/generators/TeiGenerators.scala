@@ -132,7 +132,15 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
     </objectDesc>
   }
 
-  def support(supportLabel: String) = <support>{supportLabel}</support>
+  def support(supportLabel: String, watermarks: List[Elem] = Nil, measures: List[Elem] = Nil) =
+    <support>
+      {supportLabel}
+      {watermarks}
+      {measures}
+    </support>
+
+  def watermark(label: String) = <watermark>{label}</watermark>
+
 
   def extent(label: String, dimensions: List[Elem]= Nil) =
     <extent>
