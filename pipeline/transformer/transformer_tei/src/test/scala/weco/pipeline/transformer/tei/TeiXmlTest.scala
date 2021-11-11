@@ -282,16 +282,6 @@ class TeiXmlTest
     }
   }
 
-  it("extracts material from physical description for the wrapper work"){
-    val result = new TeiXml(
-      teiXml(
-        id,
-        physDesc = Some(physDesc(objectDesc = Some(objectDesc(Some("paper")))))
-      )).parse
-
-    result.value.physicalDescription shouldBe Some("Material: paper")
-  }
-
   it("extracts material description for the wrapper work"){
     val result = new TeiXml(
       teiXml(
@@ -303,51 +293,6 @@ class TeiXmlTest
     result.value.physicalDescription shouldBe Some("Multiple manuscript parts collected in one volume.")
   }
 
-  it("extracts watermark"){
-    val result = new TeiXml(
-      teiXml(
-        id,
-        physDesc = Some(physDesc(objectDesc = Some(objectDesc(None,
-          support = Some(support(supportLabel = "Multiple manuscript parts collected in one volume.",
-            watermarks= List(watermark("Blih bluh blah")
-            )))))))
-      )).parse
-    result.value.physicalDescription shouldBe Some("Multiple manuscript parts collected in one volume.; Watermarks: Blih bluh blah")
-  }
 
-  it("extracts extent for the wrapper work"){
-    val result = new TeiXml(
-      teiXml(
-        id,
-        physDesc = Some(physDesc(objectDesc = Some(objectDesc(
-          material = None,
-          support = None,
-          extent = Some(extent(
-            label = "3 pages",
-            dimensions = List(dimensions(unit = "mm", `type` = "leaf", height = "100", width = "300"))))))))
-      )).parse
-
-    result.value.physicalDescription shouldBe Some("3 pages; leaf dimensions: width 300 mm, height 100 mm")
-  }
-
-  it("supports multiple dimensions blocks within extent for the wrapper work"){
-    val result = new TeiXml(
-      teiXml(
-        id,
-        physDesc = Some(physDesc(objectDesc = Some(objectDesc(
-          material = None,
-          support = None,
-          extent = Some(extent(
-            label = "3 pages",
-            dimensions = List(
-              dimensions(unit = "mm", `type`= "leaf", height = "100", width = "300"),
-              dimensions(unit = "mm", `type` = "text", height = "90", width = "290"))))))))
-      )).parse
-
-    result.value.physicalDescription shouldBe Some("3 pages; leaf dimensions: width 300 mm, height 100 mm; text dimensions: width 290 mm, height 90 mm")
-  }
-  // watermark
-  // physical description in parts
-  // physical description in items?
 
 }

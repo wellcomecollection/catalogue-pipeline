@@ -76,13 +76,12 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
 
   def msPart(
     id: String,
-    summary: Option[Elem] = None,
-    languages: List[Elem] = Nil,
-    items: List[Elem] = Nil,
-    authors: List[Elem] = Nil
+    msContents: Option[Elem] = None,
+    physDesc: Option[Elem] = None
   ) =
     <msPart xml:id={id}>
-      {msContents(summary = summary, languages = languages, items = items, authors = authors)}
+      {msContents.getOrElse(NodeSeq.Empty)}
+      {physDesc.getOrElse(NodeSeq.Empty)}
     </msPart>
 
   def sierraIdentifiers(bnumber: String) =
