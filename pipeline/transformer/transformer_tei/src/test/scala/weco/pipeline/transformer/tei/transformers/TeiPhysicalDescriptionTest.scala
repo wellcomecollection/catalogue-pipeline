@@ -105,7 +105,6 @@ class TeiPhysicalDescriptionTest extends AnyFunSpec with TeiGenerators with Matc
           extent = Some(extent(
             label =
               """3 pages
-                |
                 |and 5 leaves
                 |""".stripMargin
             ))))))
@@ -123,7 +122,6 @@ class TeiPhysicalDescriptionTest extends AnyFunSpec with TeiGenerators with Matc
           support = Some(support(
             """Multiple manuscript
               |parts collected in
-              |
               |one volume.""".stripMargin))))))
       ))
 
