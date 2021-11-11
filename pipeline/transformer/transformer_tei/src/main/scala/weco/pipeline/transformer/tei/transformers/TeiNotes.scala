@@ -1,6 +1,7 @@
 package weco.pipeline.transformer.tei.transformers
 
 import weco.catalogue.internal_model.work.{Note, NoteType}
+import weco.pipeline.transformer.tei.NormaliseText
 
 import scala.xml.{Elem, NodeSeq}
 
@@ -25,5 +26,6 @@ object TeiNotes {
   private def getColophon(value: NodeSeq): Seq[Note] =
     (value \ "colophon")
       .map { n => n.text.trim }
+      .flatMap { NormaliseText(_) }
       .map { contents => Note(contents = contents, noteType = NoteType.ColophonNote) }
 }
