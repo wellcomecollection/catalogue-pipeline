@@ -60,6 +60,9 @@ case object NoteType {
     NoteType(id = "references-note", label = "References note")
   val ColophonNote =
     NoteType(id = "colophon", label = "Colophon note")
+
+  val BeginsNote: NoteType = NoteType(id = "begins-note", label = "Begins")
+  val endsNote: NoteType = NoteType(id = "ends-note", label = "Ends")
 }
 
 case object Note {

@@ -360,4 +360,43 @@ class TeiNestedDataTest extends AnyFunSpec with TeiGenerators with Matchers with
       List(Note(contents = "A, F. 12", noteType = NoteType.ColophonNote)),
     )
   }
+
+  it("gets the incipit/explicit note for individual items") {
+    val xml =
+      <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id="Wellcome_Alpha_932">
+        <teiHeader xml:lang="eng">
+          <fileDesc>
+            <sourceDesc>
+              <msDesc>
+                <msContents>
+                  <msItem xml:id="Alpha_932_1">
+                    <incipit> <locus>F. 1v</locus>
+                      <!-- transcript -->
+                      oṃ namaḥ
+                      japāpuṣyena saṃkāśaṃ kāśyapeyaṃ mahādyutiṃ
+                      tam ahaṃ sarvapāpaghnaṃ praṇato smi divākaraṃ
+                      sūryāya namaḥ
+                    </incipit>
+
+                    <explicit> <locus>F. 3r</locus>
+                      <!-- transcript -->
+                      ||12|| navagrahastotraṃ saṃpūraṇaṃ
+                    </explicit>
+                  </msItem>
+                </msContents>
+              </msDesc>
+            </sourceDesc>
+          </fileDesc>
+        </teiHeader>
+      </TEI>
+
+    val result = TeiNestedData.nestedTeiData(xml, wrapperTitle = "Wellcome_Alpha_932", scribesMap = Map())
+
+    result.value.map { data => data.notes } shouldBe List(
+      List(
+        Note(contents = "F. 1v: oṃ namaḥ japāpuṣyena saṃkāśaṃ kāśyapeyaṃ mahādyutiṃ tam ahaṃ sarvapāpaghnaṃ praṇato smi divākaraṃ sūryāya namaḥ", noteType = NoteType.BeginsNote),
+        Note(contents = "F. 3r: ||12|| navagrahastotraṃ saṃpūraṇaṃ", noteType = NoteType.endsNote),
+      ),
+    )
+  }
 }

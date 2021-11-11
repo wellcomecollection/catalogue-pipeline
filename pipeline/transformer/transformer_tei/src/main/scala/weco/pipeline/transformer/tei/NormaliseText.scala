@@ -2,8 +2,7 @@ package weco.pipeline.transformer.tei
 
 object NormaliseText {
   def apply(s: String): Option[String] = {
-    val result =
-      s.collapseNewlines
+    val result = s.collapseNewlines.trim
 
     if (result.nonEmpty) Some(result) else None
   }

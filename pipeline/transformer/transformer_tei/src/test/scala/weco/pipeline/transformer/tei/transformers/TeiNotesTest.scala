@@ -78,4 +78,46 @@ class TeiNotesTest extends AnyFunSpec with Matchers {
 
     TeiNotes(xml) shouldBe empty
   }
+
+  describe("implicit/explicit") {
+    it("extracts the implicit/explicit notes") {
+      // e.g. Indic/Indic_Alpha_932.xml
+      val xml: Elem =
+        <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id="Wellcome_Alpha_932">
+          <teiHeader xml:lang="eng">
+            <fileDesc>
+              <sourceDesc>
+                <msDesc>
+                  <msContents>
+                    <incipit> <locus>F. 1v</locus>
+                      <!-- transcript -->
+                      oṃ namaḥ
+                      japāpuṣyena saṃkāśaṃ kāśyapeyaṃ mahādyutiṃ
+                      tam ahaṃ sarvapāpaghnaṃ praṇato smi divākaraṃ
+                      sūryāya namaḥ
+                    </incipit>
+
+                    <explicit> <locus>F. 3r</locus>
+                      <!-- transcript -->
+                      ||12|| navagrahastotraṃ saṃpūraṇaṃ
+                    </explicit>
+                  </msContents>
+                </msDesc>
+              </sourceDesc>
+            </fileDesc>
+          </teiHeader>
+        </TEI>
+
+      TeiNotes(xml) shouldBe List(
+        Note(
+          contents =
+            "F. 1v: oṃ namaḥ japāpuṣyena saṃkāśaṃ kāśyapeyaṃ mahādyutiṃ tam ahaṃ sarvapāpaghnaṃ praṇato smi divākaraṃ sūryāya namaḥ",
+          noteType = NoteType.BeginsNote
+        ),
+        Note(
+          contents = "F. 3r: ||12|| navagrahastotraṃ saṃpūraṇaṃ",
+          noteType = NoteType.endsNote),
+      )
+    }
+  }
 }
