@@ -105,22 +105,24 @@ class TeiXml(val xml: Elem) extends Logging {
     val extentStr = if(extent.exists(_.child.size >1)) {
       val extentLabel= extent.flatMap(_.child)
         .collect { case node if node.label != "dimensions" => node.text.trim}.mkString(" ").trim
-      val (height, width) = parseDimensions(extent)
-      List(extentLabel, width, height).filterNot(_.isEmpty).mkString(", ")
+      val dimensions = parseDimensions(extent)
+      (extentLabel +: dimensions).filterNot(_.isEmpty).mkString("; ")
     }
     else extent.text.trim
-    List(material, support, extentStr).filterNot(_.isEmpty).mkString(", ")
+    List(support,material,extentStr).filterNot(_.isEmpty).mkString("; ")
 
   }.headOption
 
-  private def parseDimensions(extent: NodeSeq) = {
-    val height = (extent \ "dimensions" \ "height").text.trim
-    val width = (extent \ "dimensions" \ "width").text.trim
-    val unit = (extent \ "dimensions" \@ "unit").trim
+  private def parseDimensions(extent: NodeSeq) =
+    (extent \ "dimensions").map { dimensions =>
+    val height = (dimensions \ "height").text.trim
+    val width = (dimensions \ "width").text.trim
+    val unit = (dimensions \@ "unit").trim
+    val `type` = (dimensions \@ "type").trim
     val unitStr = if (unit.nonEmpty) unit else ""
-    val heightStr = if (height.nonEmpty) s"height: $height $unitStr".trim else ""
-    val widthStr = if (width.nonEmpty) s"width: $width $unitStr".trim else ""
-    (heightStr, widthStr)
+    val heightStr = if (height.nonEmpty) s"height $height $unitStr".trim else ""
+    val widthStr = if (width.nonEmpty) s"width $width $unitStr".trim else ""
+      s"${`type`} dimensions: ${List(widthStr, heightStr).mkString(", ")}"
   }
 
   /**

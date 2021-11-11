@@ -134,14 +134,14 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
 
   def support(supportLabel: String) = <support>{supportLabel}</support>
 
-  def extent(label: String, dimensions: Option[Elem]= None) =
+  def extent(label: String, dimensions: List[Elem]= Nil) =
     <extent>
       {label}
-      {dimensions.getOrElse(NodeSeq.Empty)}
+      {dimensions}
     </extent>
 
-  def dimensions(unit: String, height: String, width: String)=
-    <dimensions unit={unit} type="leaf">
+  def dimensions(unit: String, `type`: String, height: String, width: String)=
+    <dimensions unit={unit} type={`type`}>
       <height>{height}</height>
       <width>{width}</width>
     </dimensions>
