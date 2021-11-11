@@ -27,5 +27,6 @@ object TeiNotes {
     (value \ "colophon")
       .map { n => n.text.trim }
       .flatMap { NormaliseText(_) }
+      .filter { _.nonEmpty }
       .map { contents => Note(contents = contents, noteType = NoteType.ColophonNote) }
 }
