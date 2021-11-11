@@ -4,7 +4,11 @@ import grizzled.slf4j.Logging
 import weco.catalogue.internal_model.identifiers.IdState.Unminted
 import weco.catalogue.internal_model.work.{Organisation, Place, ProductionEvent}
 import weco.pipeline.transformer.result.Result
-import weco.pipeline.transformer.tei.transformers.{TeiContributors, TeiLanguages, TeiNestedData}
+import weco.pipeline.transformer.tei.transformers.{
+  TeiContributors,
+  TeiLanguages,
+  TeiNestedData
+}
 import weco.pipeline.transformer.transformers.ParsedPeriod
 
 import scala.util.Try
@@ -97,33 +101,41 @@ class TeiXml(val xml: Elem) extends Logging {
     }
   }
 
-  private def physicalDescription = (xml \\"sourceDesc"\"msDesc"\ "physDesc"\\"supportDesc").map{ supportDesc =>
-      val materialString = (supportDesc \@ "material").trim
-      val material = if(materialString.nonEmpty)s"Material: $materialString"else ""
-      val support = (supportDesc \ "support").text.trim
-    val extent = supportDesc \ "extent"
-    val extentStr = if(extent.exists(_.child.size >1)) {
-      val extentLabel= extent.flatMap(_.child)
-        .collect { case node if node.label != "dimensions" => node.text.trim}.mkString(" ").trim
-      val dimensions = parseDimensions(extent)
-      (extentLabel +: dimensions).filterNot(_.isEmpty).mkString("; ")
-    }
-    else extent.text.trim
-    List(support,material,extentStr).filterNot(_.isEmpty).mkString("; ")
+  private def physicalDescription =
+    (xml \\ "sourceDesc" \ "msDesc" \ "physDesc" \\ "supportDesc").map {
+      supportDesc =>
+        val materialString = (supportDesc \@ "material").trim
+        val material =
+          if (materialString.nonEmpty) s"Material: $materialString" else ""
+        val support = (supportDesc \ "support").text.trim
+        val extent = supportDesc \ "extent"
+        val extentStr = if (extent.exists(_.child.size > 1)) {
+          val extentLabel = extent
+            .flatMap(_.child)
+            .collect {
+              case node if node.label != "dimensions" => node.text.trim
+            }
+            .mkString(" ")
+            .trim
+          val dimensions = parseDimensions(extent)
+          (extentLabel +: dimensions).filterNot(_.isEmpty).mkString("; ")
+        } else extent.text.trim
+        List(support, material, extentStr).filterNot(_.isEmpty).mkString("; ")
 
-  }.headOption
+    }.headOption
 
   private def parseDimensions(extent: NodeSeq) =
     (extent \ "dimensions").map { dimensions =>
-    val height = (dimensions \ "height").text.trim
-    val width = (dimensions \ "width").text.trim
-    val unit = (dimensions \@ "unit").trim
-    val `type` = (dimensions \@ "type").trim
-    val unitStr = if (unit.nonEmpty) unit else ""
-    val heightStr = if (height.nonEmpty) s"height $height $unitStr".trim else ""
-    val widthStr = if (width.nonEmpty) s"width $width $unitStr".trim else ""
+      val height = (dimensions \ "height").text.trim
+      val width = (dimensions \ "width").text.trim
+      val unit = (dimensions \@ "unit").trim
+      val `type` = (dimensions \@ "type").trim
+      val unitStr = if (unit.nonEmpty) unit else ""
+      val heightStr =
+        if (height.nonEmpty) s"height $height $unitStr".trim else ""
+      val widthStr = if (width.nonEmpty) s"width $width $unitStr".trim else ""
       s"${`type`} dimensions: ${List(widthStr, heightStr).mkString(", ")}"
-  }
+    }
 
   /**
     * The origin tag contains information about where and when

@@ -101,7 +101,7 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
       case None    => <author>{persNames}</author>
     }
 
-  def physDesc(objectDesc: Option[Elem]= None, handNotes: List[Elem] = Nil) =
+  def physDesc(objectDesc: Option[Elem] = None, handNotes: List[Elem] = Nil) =
     <physDesc>
       {objectDesc.getOrElse(NodeSeq.Empty)}
       <handDesc>
@@ -120,7 +120,9 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
   </handNote> % scribeAttribute
   }
 
-  def objectDesc(material: Option[String] = None, support: Option[Elem] = None, extent: Option[Elem] = None) = {
+  def objectDesc(material: Option[String] = None,
+                 support: Option[Elem] = None,
+                 extent: Option[Elem] = None) = {
     val materialAttribute =
       material.map(s => Attribute("material", Text(s), Null)).getOrElse(Null)
     <objectDesc>
@@ -134,13 +136,13 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
 
   def support(supportLabel: String) = <support>{supportLabel}</support>
 
-  def extent(label: String, dimensions: List[Elem]= Nil) =
+  def extent(label: String, dimensions: List[Elem] = Nil) =
     <extent>
       {label}
       {dimensions}
     </extent>
 
-  def dimensions(unit: String, `type`: String, height: String, width: String)=
+  def dimensions(unit: String, `type`: String, height: String, width: String) =
     <dimensions unit={unit} type={`type`}>
       <height>{height}</height>
       <width>{width}</width>

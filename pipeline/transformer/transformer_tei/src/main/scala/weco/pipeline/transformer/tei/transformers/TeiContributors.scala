@@ -85,15 +85,16 @@ object TeiContributors {
   def scribes(
     xml: Elem,
     workId: String): Result[Map[String, List[Contributor[Unminted]]]] =
-    (xml \\"sourceDesc"\"msDesc"\ "physDesc" \ "handDesc" \ "handNote").foldLeft(
-      Right(Map.empty): Result[Map[String, List[Contributor[Unminted]]]]
-    ) {
-      case (Left(err), _) => Left(err)
-      case (Right(scribesMap), node) =>
-        for {
-          contributor <- getScribeContributor(node)
-        } yield mapContributorToWorkId(workId, node, contributor, scribesMap)
-    }
+    (xml \\ "sourceDesc" \ "msDesc" \ "physDesc" \ "handDesc" \ "handNote")
+      .foldLeft(
+        Right(Map.empty): Result[Map[String, List[Contributor[Unminted]]]]
+      ) {
+        case (Left(err), _) => Left(err)
+        case (Right(scribesMap), node) =>
+          for {
+            contributor <- getScribeContributor(node)
+          } yield mapContributorToWorkId(workId, node, contributor, scribesMap)
+      }
 
   /**
     * Author nodes can be in 2 forms:

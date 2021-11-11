@@ -36,8 +36,7 @@ case class TeiData(id: String,
                    nestedTeiData: List[TeiData] = Nil,
                    contributors: List[Contributor[Unminted]] = Nil,
                    origin: List[ProductionEvent[Unminted]] = Nil,
-                   physicalDescription: Option[String] = None
-                  )
+                   physicalDescription: Option[String] = None)
     extends Logging {
   def toWork(time: Instant, version: Int): Work[Source] = {
     val topLevelData = toWorkData()
