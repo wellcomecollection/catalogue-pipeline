@@ -89,7 +89,23 @@ class TeiTransformerTest
                     contents =
                       "فهذا اخر الكلام من الكتاب الثالث وقد استوفينا الكلام منه حسب ما يليق بذلك وعلينا ان نشرع الان فى الكتاب الرابع حامدين لله تعالى",
                     noteType = NoteType.ColophonNote,
-                  )
+                  ),
+                  Note(
+                    contents = "Fol. 2b.1: بسم اللّه الرحمن الرحيم وبه نستعين ونتوكل عليه",
+                    noteType = NoteType.Incipit
+                  ),
+                  Note(
+                    contents = "Fol. 2b.2: والحمد للّه حمدًا يستحقه بعلو شانه وشبوع احسانه",
+                    noteType = NoteType.Incipit
+                  ),
+                  Note(
+                    contents = "Fol. 2b.3: وبعد وقد التمس منى بعض خلص اخواني ومن يلزمنى اسعافه فيما يسح به وسعى ان اضف فى الطب كتابًا مشتملًا على قوانينه الكلية والجزئية اشتمالًا",
+                    noteType = NoteType.Incipit
+                  ),
+                  Note(
+                    contents = "Fol. 528a.12: فصل فى انتفاخ الاظفار والحكة فيها تعالج بما البحر غلسا دايما فيزول به وبطبيخ العدس والكرسنه او بطبيخ الخنثى ومن اضمدته البنبوس والزفت والتين الاصفر المطبوخ مجموعة وفرادى",
+                    noteType = NoteType.Explicit
+                  ),
                 ),
                 collectionPath =
                   Some(CollectionPath("manuscript_15651/MS_Arabic_1-item1")),
