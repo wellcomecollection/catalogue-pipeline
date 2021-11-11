@@ -369,6 +369,9 @@
       "data" : {
         "type" : "object",
         "properties" : {
+          "referenceNumber": {
+            "type" : "keyword"
+          },
           "otherIdentifiers" : {
             "type" : "object",
             "properties" : {

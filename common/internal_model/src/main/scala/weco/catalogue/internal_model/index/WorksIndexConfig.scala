@@ -133,7 +133,8 @@ object WorksIndexConfig extends IndexConfigFields {
           objectField("imageData").fields(
             objectField("id").fields(canonicalId, sourceIdentifier)
           ),
-          keywordField("workType")
+          keywordField("workType"),
+          keywordField("referenceNumber")
         )
 
       // We copy the collectionPath label and the tokenized fields into the
