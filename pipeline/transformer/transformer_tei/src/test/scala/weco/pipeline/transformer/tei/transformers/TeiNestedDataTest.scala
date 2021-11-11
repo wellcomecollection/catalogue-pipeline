@@ -6,7 +6,7 @@ import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.IdState.Identifiable
 import weco.catalogue.internal_model.identifiers.{IdentifierType, SourceIdentifier}
 import weco.catalogue.internal_model.languages.Language
-import weco.catalogue.internal_model.work.{ContributionRole, Contributor, Person}
+import weco.catalogue.internal_model.work.{ContributionRole, Contributor, Note, NoteType, Person}
 import weco.pipeline.transformer.tei.TeiData
 import weco.pipeline.transformer.tei.generators.TeiGenerators
 
@@ -329,5 +329,35 @@ class TeiNestedDataTest extends AnyFunSpec with TeiGenerators with Matchers with
     result.value.head.contributors shouldBe expectedContributorsPart1
     result.value(1).id shouldBe partId2
     result.value(1).contributors shouldBe expectedContributorsPart2
+  }
+
+  it("gets the colophon note for individual items") {
+    val xml =
+      <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id="Wellcome_Alpha_124">
+        <teiHeader xml:lang="eng">
+          <fileDesc>
+            <sourceDesc>
+              <msDesc>
+                <msContents>
+                  <msItem xml:id="Alpha_124_i">
+                    <colophon> <locus>A, F. 8v</locus></colophon>
+                  </msItem>
+
+                  <msItem xml:id="Alpha_124_iii">
+                    <colophon> <locus>A, F. 12</locus></colophon>
+                  </msItem>
+                </msContents>
+              </msDesc>
+            </sourceDesc>
+          </fileDesc>
+        </teiHeader>
+      </TEI>
+
+    val result = TeiNestedData.nestedTeiData(xml, wrapperTitle = "MS Colophon example", scribesMap = Map())
+
+    result.value.map { data => data.notes } shouldBe List(
+      List(Note(contents = "A, F. 8v", noteType = NoteType.ColophonNote)),
+      List(Note(contents = "A, F. 12", noteType = NoteType.ColophonNote)),
+    )
   }
 }

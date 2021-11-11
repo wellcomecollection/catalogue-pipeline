@@ -38,7 +38,7 @@ class TeiDataTest
       bNumber = Some(bnumber),
       description = description,
       languages = languages,
-      languageNotes = languageNotes
+      notes = languageNotes
     )
 
     val version = 1

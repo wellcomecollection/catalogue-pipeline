@@ -77,13 +77,20 @@ class TeiTransformerTest
           internalWorkStubs = List(
             InternalWork.Source(
               sourceIdentifier = SourceIdentifier(
-                IdentifierType.Tei,
-                "Work",
-                "MS_Arabic_1-item1"
+                identifierType = IdentifierType.Tei,
+                ontologyType = "Work",
+                value = "MS_Arabic_1-item1"
               ),
               workData = WorkData[Unidentified](
                 title = Some("MS_Arabic_1 item 1"),
                 languages = List(Language("ara", "Arabic")),
+                notes = List(
+                  Note(
+                    contents =
+                      "فهذا اخر الكلام من الكتاب الثالث وقد استوفينا الكلام منه حسب ما يليق بذلك وعلينا ان نشرع الان فى الكتاب الرابع حامدين لله تعالى",
+                    noteType = NoteType.ColophonNote,
+                  )
+                ),
                 collectionPath =
                   Some(CollectionPath("manuscript_15651/MS_Arabic_1-item1")),
                 format = Some(Format.ArchivesAndManuscripts),

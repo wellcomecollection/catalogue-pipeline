@@ -76,7 +76,7 @@ object TeiNestedData extends Logging {
               id = id,
               title = partTitle,
               languages = languages,
-              languageNotes = languageNotes,
+              notes = languageNotes,
               description = description,
               nestedTeiData = items,
               contributors = scribesMap.getOrElse(id, Nil)
@@ -110,6 +110,7 @@ object TeiNestedData extends Logging {
             id <- TeiOps.getIdFrom(node)
             languageData <- TeiLanguages.parseLanguages(node)
             (languages, languageNotes) = languageData
+            notes = TeiNotes(node)
             items <- extractLowerLevelItems(
               xml,
               title,
@@ -124,7 +125,7 @@ object TeiNestedData extends Logging {
               id = id,
               title = title,
               languages = languages,
-              languageNotes = languageNotes,
+              notes = languageNotes ++ notes,
               nestedTeiData = items,
               contributors = authors ++ scribesMap.getOrElse(id, Nil))
       }
