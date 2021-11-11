@@ -77,9 +77,9 @@ class TeiTransformerTest
           internalWorkStubs = List(
             InternalWork.Source(
               sourceIdentifier = SourceIdentifier(
-                IdentifierType.Tei,
-                "Work",
-                "MS_Arabic_1-item1"
+                identifierType = IdentifierType.Tei,
+                ontologyType = "Work",
+                value = "MS_Arabic_1-item1"
               ),
               workData = WorkData[Unidentified](
                 title = Some("MS_Arabic_1 item 1"),
