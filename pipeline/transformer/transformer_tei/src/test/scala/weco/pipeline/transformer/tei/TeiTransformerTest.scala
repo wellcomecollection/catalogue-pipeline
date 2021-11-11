@@ -86,7 +86,7 @@ class TeiTransformerTest
                 languages = List(Language("ara", "Arabic")),
                 notes = List(
                   Note(
-                    contents = "فهذا اخر الكلام من الكتاب الثالث وقد استوفينا الكلام منه حسب\n                ما يليق بذلك وعلينا ان نشرع الان فى الكتاب الرابع حامدين لله تعالى",
+                    contents = "فهذا اخر الكلام من الكتاب الثالث وقد استوفينا الكلام منه حسب ما يليق بذلك وعلينا ان نشرع الان فى الكتاب الرابع حامدين لله تعالى",
                     noteType = NoteType.ColophonNote,
                   )
                 ),
