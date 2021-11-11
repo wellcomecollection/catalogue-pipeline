@@ -71,6 +71,7 @@ class TeiPhysicalDescriptionTest extends AnyFunSpec with TeiGenerators with Matc
 
     result shouldBe Some("3 pages; leaf dimensions: width 300 mm, height 100 mm; text dimensions: width 290 mm, height 90 mm")
   }
+
   it("extracts physicalDescription for parts"){
     val result = TeiPhysicalDescription(
       List(msPart(id = "",
@@ -80,4 +81,52 @@ class TeiPhysicalDescriptionTest extends AnyFunSpec with TeiGenerators with Matc
     result shouldBe Some("Multiple manuscript parts collected in one volume.")
   }
 
+  it("doesn't add the unit if it's already in the dimension label"){
+    val result = TeiPhysicalDescription(
+      teiXml(
+        id,
+        physDesc = Some(physDesc(objectDesc = Some(objectDesc(
+          material = None,
+          support = None,
+          extent = Some(extent(
+            label = "3 pages",
+            dimensions = List(dimensions(unit = "mm", `type` = "leaf", height = "100mm", width = "300mm"))))))))
+      ))
+
+    result shouldBe Some("3 pages; leaf dimensions: width 300mm, height 100mm")
+  }
+
+  it("normalises the extent text"){
+    val result = TeiPhysicalDescription(
+      teiXml(
+        id,
+        physDesc = Some(physDesc(objectDesc = Some(objectDesc(
+          material = None,
+          extent = Some(extent(
+            label =
+              """3 pages
+                |
+                |and 5 leaves
+                |""".stripMargin
+            ))))))
+      ))
+
+    result shouldBe Some("3 pages and 5 leaves")
+  }
+
+  it("normalises the support text"){
+    val result = TeiPhysicalDescription(
+      teiXml(
+        id,
+        physDesc = Some(physDesc(objectDesc = Some(objectDesc(
+          material = None,
+          support = Some(support(
+            """Multiple manuscript
+              |parts collected in
+              |
+              |one volume.""".stripMargin))))))
+      ))
+
+    result shouldBe Some("Multiple manuscript parts collected in one volume.")
+  }
 }
