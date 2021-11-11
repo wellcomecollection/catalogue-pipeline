@@ -25,7 +25,9 @@ class TeiNotesTest extends AnyFunSpec with Matchers {
       </TEI>
 
     TeiNotes(xml) shouldBe List(
-      Note(contents = "f. 31v.21 وليكن هذا آخر الكلام والحمد لله على التمام", noteType = NoteType.ColophonNote)
+      Note(
+        contents = "f. 31v.21 وليكن هذا آخر الكلام والحمد لله على التمام",
+        noteType = NoteType.ColophonNote)
     )
   }
 
@@ -49,7 +51,9 @@ class TeiNotesTest extends AnyFunSpec with Matchers {
       </TEI>
 
     TeiNotes(xml) shouldBe List(
-      Note(contents = "F.8v iti śastraparikṣādhyayane ṣaṣṭamoddeśaḥ 6.", noteType = NoteType.ColophonNote)
+      Note(
+        contents = "F.8v iti śastraparikṣādhyayane ṣaṣṭamoddeśaḥ 6.",
+        noteType = NoteType.ColophonNote)
     )
   }
 

@@ -20,8 +20,7 @@ object NormaliseText {
     //
     // We should collapse these into a single line.
     def collapseNewlines: String =
-      s
-        .split("\n")
+      s.split("\n")
         .map(_.trim)
         .mkString(" ")
   }
