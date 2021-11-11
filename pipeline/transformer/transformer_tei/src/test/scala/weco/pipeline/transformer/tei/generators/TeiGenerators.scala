@@ -120,15 +120,31 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
   </handNote> % scribeAttribute
   }
 
-  def objectDesc(material: Option[String] = None, supportLabel: Option[String] = None) = {
+  def objectDesc(material: Option[String] = None, support: Option[Elem] = None, extent: Option[Elem] = None) = {
     val materialAttribute =
       material.map(s => Attribute("material", Text(s), Null)).getOrElse(Null)
     <objectDesc>
+
       {<supportDesc>
-        {supportLabel.map{l => <support>{l}</support>}.getOrElse(NodeSeq.Empty)}
+      {extent.getOrElse(NodeSeq.Empty)}
+      {support.getOrElse(NodeSeq.Empty)}
       </supportDesc> % materialAttribute}
     </objectDesc>
   }
+
+  def support(supportLabel: String) = <support>{supportLabel}</support>
+
+  def extent(label: String, dimensions: Option[Elem]= None) =
+    <extent>
+      {label}
+      {dimensions.getOrElse(NodeSeq.Empty)}
+    </extent>
+
+  def dimensions(unit: String, height: String, width: String)=
+    <dimensions unit={unit} type="leaf">
+      <height>{height}</height>
+      <width>{width}</width>
+    </dimensions>
 
   def locus(label: String, target: Option[String] = None) = target match {
     case Some(t) => <locus target={t}>{label}</locus>

@@ -296,10 +296,25 @@ class TeiXmlTest
     val result = new TeiXml(
       teiXml(
         id,
-        physDesc = Some(physDesc(objectDesc = Some(objectDesc(None, supportLabel = Some("Multiple manuscript parts collected in one volume.")))))
+        physDesc = Some(physDesc(objectDesc = Some(objectDesc(None, support = Some(support("Multiple manuscript parts collected in one volume."))))))
       )).parse
 
     result.value.physicalDescription shouldBe Some("Multiple manuscript parts collected in one volume.")
+  }
+
+  it("extracts extent for the wrapper work"){
+    val result = new TeiXml(
+      teiXml(
+        id,
+        physDesc = Some(physDesc(objectDesc = Some(objectDesc(
+          material = None,
+          support = None,
+          extent = Some(extent(
+            label = "3 pages",
+            dimensions = Some(dimensions(unit = "mm", height = "100", width = "300"))))))))
+      )).parse
+
+    result.value.physicalDescription shouldBe Some("3 pages, width: 300 mm, height: 100 mm")
   }
 
 }
