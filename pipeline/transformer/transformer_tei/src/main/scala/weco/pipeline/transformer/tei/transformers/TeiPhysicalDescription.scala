@@ -113,23 +113,56 @@ object TeiPhysicalDescription {
     */
   private def parseDimensions(extent: NodeSeq) =
     (extent \ "dimensions").map { dimensions =>
-      val height = (dimensions \ "height").text.trim
-      val width = (dimensions \ "width").text.trim
       val unit = (dimensions \@ "unit").trim
       val `type` = (dimensions \@ "type").trim
       val unitStr = if (unit.nonEmpty) unit else ""
-      val heightStr =
-        appendUnit(if (height.nonEmpty) s"height $height".trim else "", unitStr)
-      val widthStr =
-        appendUnit(if (width.nonEmpty) s"width $width".trim else "", unitStr)
-      val dimensionStr =
-        List(widthStr, heightStr)
-          .filterNot(_.isEmpty)
-          .mkString(", ")
+
+      val dimensionStr = (dimensions \ "dim").toList match {
+        case Nil  => parseWidthHeight(dimensions, unitStr)
+        case list => parseDim(unitStr, list)
+      }
       NormaliseText(
         if (dimensionStr.nonEmpty) s"${`type`} dimensions: $dimensionStr"
         else "")
     }
+
+  /**
+    * Dimensions can be expressed in 2 ways. This function parses
+    * dimensions expressed as height and width:
+    * <dimensions unit="mm" type="leaf">
+    *    <height>100mm</height>
+    *    <width>300mm</width>
+    *  </dimensions>
+    */
+  private def parseWidthHeight(dimensions: Node, unitStr: String) = {
+    val height = (dimensions \ "height").text.trim
+    val width = (dimensions \ "width").text.trim
+    val heightStr =
+      appendUnit(if (height.nonEmpty) s"height $height".trim else "", unitStr)
+    val widthStr =
+      appendUnit(if (width.nonEmpty) s"width $width".trim else "", unitStr)
+    List(widthStr, heightStr)
+      .filterNot(_.isEmpty)
+      .mkString(", ")
+  }
+
+  /** This function deals with an alternative way of expressing
+    * dimensions mainly used in Hebrew manuscripts:
+    * <dimensions unit="cm" >
+    *  <dim type="width">3213.5 cm</dim>
+    *  <dim type="length">49.5 cm</dim>
+    * </dimensions>
+    */
+  private def parseDim(unitStr: String, list: List[Node]) = {
+    list
+      .map { dim =>
+        val label = (dim \@ "type").trim
+        val str = dim.text.trim
+        appendUnit(s"$label $str".trim, unitStr)
+      }
+      .filterNot(_.isEmpty)
+      .mkString(", ")
+  }
 
   // Sometimes the unit of measure is already appended in the width or height, so we check before appending
   private def appendUnit(str: String, unit: String) =
