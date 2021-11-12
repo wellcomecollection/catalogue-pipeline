@@ -116,7 +116,7 @@ class TeiNotesTest extends AnyFunSpec with Matchers {
         ),
         Note(
           contents = "F. 3r: ||12|| navagrahastotraṃ saṃpūraṇaṃ",
-          noteType = NoteType.endsNote),
+          noteType = NoteType.EndsNote),
       )
     }
   }

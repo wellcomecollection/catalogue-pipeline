@@ -75,6 +75,6 @@ object TeiNotes {
         case ("incipit", Some(contents)) =>
           Note(contents = contents, noteType = NoteType.BeginsNote)
         case ("explicit", Some(contents)) =>
-          Note(contents = contents, noteType = NoteType.endsNote)
+          Note(contents = contents, noteType = NoteType.EndsNote)
       }
 }

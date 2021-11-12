@@ -110,7 +110,7 @@ class TeiTransformerTest
                   Note(
                     contents =
                       "Fol. 528a.12: فصل فى انتفاخ الاظفار والحكة فيها تعالج بما البحر غلسا دايما فيزول به وبطبيخ العدس والكرسنه او بطبيخ الخنثى ومن اضمدته البنبوس والزفت والتين الاصفر المطبوخ مجموعة وفرادى",
-                    noteType = NoteType.endsNote
+                    noteType = NoteType.EndsNote
                   ),
                 ),
                 collectionPath =
