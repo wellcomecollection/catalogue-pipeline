@@ -37,14 +37,14 @@ object TeiPhysicalDescription {
     *    </objectDesc>
     */
   private def physicalDescription(nodeSeq: NodeSeq) =
-    (nodeSeq \ "physDesc" \\ "supportDesc").map { supportDesc =>
+    (nodeSeq \ "physDesc" \\ "supportDesc").flatMap { supportDesc =>
       val materialString = (supportDesc \@ "material").trim
       val material =
-        if (materialString.nonEmpty) s"Material: $materialString" else ""
-      val support = parseSupport(supportDesc).toList
-      val extent = parseExtent(supportDesc).toList
-      (support ++ List(material) ++ extent).filterNot(_.isEmpty).mkString("; ")
-
+        NormaliseText(if (materialString.nonEmpty) s"Material: $materialString" else "")
+      val support = parseSupport(supportDesc)
+      val extent = parseExtent(supportDesc)
+      val physicalDescriptionStr = List(support, material, extent).flatten.mkString("; ")
+      NormaliseText(physicalDescriptionStr)
     }.headOption
 
   /**
@@ -64,7 +64,7 @@ object TeiPhysicalDescription {
         .collect { case node if node.label != "dimensions" => node.text.trim }
         .mkString(" ")
         .trim
-      val dimensions = parseDimensions(extent)
+      val dimensions = parseDimensions(extent).flatten
       (extentLabel +: dimensions).filterNot(_.isEmpty).mkString("; ")
     } else extent.text.trim
     NormaliseText(extentStr)
@@ -116,15 +116,15 @@ object TeiPhysicalDescription {
       val unit = (dimensions \@ "unit").trim
       val `type` = (dimensions \@ "type").trim
       val unitStr = if (unit.nonEmpty) unit else ""
-      val heightStr = if (height.nonEmpty) s"height $height".trim else ""
-      val widthStr = if (width.nonEmpty) s"width $width".trim else ""
+      val heightStr = appendUnit(if (height.nonEmpty) s"height $height".trim else "", unitStr)
+      val widthStr = appendUnit(if (width.nonEmpty) s"width $width".trim else "",unitStr)
       val dimensionStr =
-        List(appendUnit(widthStr, unitStr), appendUnit(heightStr, unitStr))
+        List(widthStr, heightStr).filterNot(_.isEmpty)
           .mkString(", ")
-      s"${`type`} dimensions: $dimensionStr"
+      NormaliseText(if(dimensionStr.nonEmpty)s"${`type`} dimensions: $dimensionStr" else "")
     }
 
   // Sometimes the unit of measure is already appended in the width or height, so we check before appending
   private def appendUnit(str: String, unit: String) =
-    if (str.trim.endsWith(unit)) str else s"$str $unit".trim
+    if (!str.trim.endsWith(unit) && str.trim.nonEmpty) s"$str $unit".trim else str.trim
 }
