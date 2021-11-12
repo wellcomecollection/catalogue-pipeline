@@ -67,7 +67,12 @@ object TeiNotes {
         // The <locus> tag in an incipit/explicit tells us where this extract comes from;
         // so this is clear in the display prefix it with a colon.
         val locus = (n \ "locus").text
-        val contents = n.text.replaceAll(s"$locus\\s*", s"$locus: ")
+
+        val contents = if (locus.isEmpty) {
+          n.text
+        } else {
+          n.text.replaceAll(s"$locus\\s*", s"$locus: ")
+        }
 
         (n.label, NormaliseText(contents))
       }

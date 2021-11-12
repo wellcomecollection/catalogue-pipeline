@@ -119,5 +119,33 @@ class TeiNotesTest extends AnyFunSpec with Matchers {
           noteType = NoteType.EndsNote),
       )
     }
+
+    it("handles an explicit note without a <locus>") {
+      // e.g. Egyptian/Egyptian_MS_4.xml
+      val xml: Elem =
+        <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id="Wellcome_Alpha_932">
+          <teiHeader xml:lang="eng">
+            <fileDesc>
+              <sourceDesc>
+                <msDesc>
+                  <msContents>
+                    <explicit> ink Mnw m prt. f
+                      <note> the last legible line is the 10th line from the top and the penulitmate line of the column. This corresponds to <ref> Lepsius</ref> 17, line 11 </note>
+                    </explicit>
+                  </msContents>
+                </msDesc>
+              </sourceDesc>
+            </fileDesc>
+          </teiHeader>
+        </TEI>
+
+      TeiNotes(xml) shouldBe List(
+        Note(
+          contents =
+            "ink Mnw m prt. f the last legible line is the 10th line from the top and the penulitmate line of the column. This corresponds to Lepsius 17, line 11",
+          noteType = NoteType.EndsNote
+        ),
+      )
+    }
   }
 }
