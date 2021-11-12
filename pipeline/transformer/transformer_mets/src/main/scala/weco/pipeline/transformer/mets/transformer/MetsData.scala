@@ -2,8 +2,6 @@ package weco.pipeline.transformer.mets.transformer
 
 import java.time.Instant
 import cats.syntax.traverse._
-import cats.instances.either._
-import cats.instances.option._
 import org.apache.commons.lang3.StringUtils.equalsIgnoreCase
 import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.internal_model.identifiers._
@@ -17,12 +15,12 @@ import weco.pipeline.transformer.mets.transformers.{
   MetsAccessStatus,
   MetsLocation
 }
+import weco.pipeline.transformer.result.Result
 
 sealed trait MetsData {
   val recordIdentifier: String
 
-  def toWork(version: Int,
-             modifiedTime: Instant): Either[Throwable, Work[Source]]
+  def toWork(version: Int, modifiedTime: Instant): Result[Work[Source]]
 
   protected def sourceIdentifier: SourceIdentifier =
     SourceIdentifier(
@@ -58,10 +56,7 @@ case class InvisibleMetsData(
   titlePageId: Option[String] = None
 ) extends MetsData {
 
-  def toWork(
-    version: Int,
-    modifiedTime: Instant
-  ): Either[Throwable, Work[Source]] =
+  def toWork(version: Int, modifiedTime: Instant): Result[Work[Source]] =
     for {
       license <- parseLicense
       accessStatus <- MetsAccessStatus(accessConditionStatus)
@@ -113,7 +108,7 @@ case class InvisibleMetsData(
     reason = "METS work"
   )
 
-  private def parseLicense: Either[Exception, Option[License]] =
+  private def parseLicense: Result[Option[License]] =
     accessConditionDz.map {
       // A lot of METS record have "Copyright not cleared"
       // or "rightsstatements.org/page/InC/1.0/?language=en" as dz access condition.
