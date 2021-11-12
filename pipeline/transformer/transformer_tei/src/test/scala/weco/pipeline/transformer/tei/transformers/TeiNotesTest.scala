@@ -3,10 +3,11 @@ package weco.pipeline.transformer.tei.transformers
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.work.{Note, NoteType}
+import weco.pipeline.transformer.tei.generators.TeiGenerators
 
 import scala.xml.Elem
 
-class TeiNotesTest extends AnyFunSpec with Matchers {
+class TeiNotesTest extends AnyFunSpec with Matchers with TeiGenerators {
   it("finds a single colophon note") {
     val xml: Elem =
       <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id="TeiNotes_Example_1">
