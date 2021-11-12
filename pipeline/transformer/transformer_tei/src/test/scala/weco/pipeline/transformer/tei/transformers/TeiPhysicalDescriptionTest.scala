@@ -127,4 +127,33 @@ class TeiPhysicalDescriptionTest extends AnyFunSpec with TeiGenerators with Matc
 
     result shouldBe Some("Multiple manuscript parts collected in one volume.")
   }
+
+  it("does not extract dimensions if they are empty"){
+    val result = TeiPhysicalDescription(
+      teiXml(
+        id,
+        physDesc = Some(physDesc(objectDesc = Some(objectDesc(
+          material = None,
+          support = None,
+          extent = Some(extent(
+            label = "3 pages",
+            dimensions = List(<dimensions>
+            </dimensions>)))))))
+      ))
+
+    result shouldBe Some("3 pages")
+  }
+
+  it("does not extract physical description if it's empty"){
+    val result = TeiPhysicalDescription(
+      teiXml(
+        id,
+        physDesc = Some(physDesc(objectDesc = Some(objectDesc(
+          material = None,
+          support = None,
+          extent = None))))
+      ))
+
+    result shouldBe None
+  }
 }
