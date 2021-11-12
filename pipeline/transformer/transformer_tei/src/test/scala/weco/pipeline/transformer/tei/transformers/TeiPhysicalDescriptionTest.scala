@@ -156,4 +156,22 @@ class TeiPhysicalDescriptionTest extends AnyFunSpec with TeiGenerators with Matc
 
     result shouldBe None
   }
+
+  it("can parse dimensions in the dim format"){
+    val result = TeiPhysicalDescription(
+      teiXml(
+        id,
+        physDesc = Some(physDesc(objectDesc = Some(objectDesc(
+          material = None,
+          support = None,
+          extent = Some(extent(
+            label = "",
+            dimensions = List(<dimensions unit="cm">
+              <dim type="width">35</dim>
+              <dim type="length">35</dim>
+            </dimensions>)))))))
+      ))
+
+    result shouldBe Some("dimensions: width 35 cm, length 35 cm")
+  }
 }
