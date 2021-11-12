@@ -40,10 +40,12 @@ object TeiPhysicalDescription {
     (nodeSeq \ "physDesc" \\ "supportDesc").flatMap { supportDesc =>
       val materialString = (supportDesc \@ "material").trim
       val material =
-        NormaliseText(if (materialString.nonEmpty) s"Material: $materialString" else "")
+        NormaliseText(
+          if (materialString.nonEmpty) s"Material: $materialString" else "")
       val support = parseSupport(supportDesc)
       val extent = parseExtent(supportDesc)
-      val physicalDescriptionStr = List(support, material, extent).flatten.mkString("; ")
+      val physicalDescriptionStr =
+        List(support, material, extent).flatten.mkString("; ")
       NormaliseText(physicalDescriptionStr)
     }.headOption
 
@@ -116,15 +118,21 @@ object TeiPhysicalDescription {
       val unit = (dimensions \@ "unit").trim
       val `type` = (dimensions \@ "type").trim
       val unitStr = if (unit.nonEmpty) unit else ""
-      val heightStr = appendUnit(if (height.nonEmpty) s"height $height".trim else "", unitStr)
-      val widthStr = appendUnit(if (width.nonEmpty) s"width $width".trim else "",unitStr)
+      val heightStr =
+        appendUnit(if (height.nonEmpty) s"height $height".trim else "", unitStr)
+      val widthStr =
+        appendUnit(if (width.nonEmpty) s"width $width".trim else "", unitStr)
       val dimensionStr =
-        List(widthStr, heightStr).filterNot(_.isEmpty)
+        List(widthStr, heightStr)
+          .filterNot(_.isEmpty)
           .mkString(", ")
-      NormaliseText(if(dimensionStr.nonEmpty)s"${`type`} dimensions: $dimensionStr" else "")
+      NormaliseText(
+        if (dimensionStr.nonEmpty) s"${`type`} dimensions: $dimensionStr"
+        else "")
     }
 
   // Sometimes the unit of measure is already appended in the width or height, so we check before appending
   private def appendUnit(str: String, unit: String) =
-    if (!str.trim.endsWith(unit) && str.trim.nonEmpty) s"$str $unit".trim else str.trim
+    if (!str.trim.endsWith(unit) && str.trim.nonEmpty) s"$str $unit".trim
+    else str.trim
 }
