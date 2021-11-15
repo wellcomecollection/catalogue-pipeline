@@ -10,7 +10,7 @@ object TeiNotes {
     apply(xml \\ "msDesc" \ "msContents")
 
   def apply(node: NodeSeq): List[Note] =
-    getColophon(node).toList ++ getIncipitAndExplicit(node) ++ getLocus(node)
+    getLocus(node) ++ getColophon(node).toList ++ getIncipitAndExplicit(node)
 
   /** The colophon is in `colophon` nodes under `msContents` or `msItem`.
     *
@@ -93,8 +93,8 @@ object TeiNotes {
     *  <locus>PP. 1-27.</locus>
     * </msItem>
     */
-  private def getLocus(nodeSeq: NodeSeq): Seq[Note] =
+  private def getLocus(nodeSeq: NodeSeq): List[Note] =
     (nodeSeq \ "locus").flatMap { locus =>
       NormaliseText(locus.text.trim).map(Note(NoteType.LocusNote, _))
-    }
+    }.toList
 }
