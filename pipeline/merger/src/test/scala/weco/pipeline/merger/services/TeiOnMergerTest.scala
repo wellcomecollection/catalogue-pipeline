@@ -5,7 +5,12 @@ import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.WorkState.Merged
 import weco.catalogue.internal_model.work.generators.SourceWorkGenerators
-import weco.catalogue.internal_model.work.{InternalWork, MergeCandidate, Work, WorkData}
+import weco.catalogue.internal_model.work.{
+  InternalWork,
+  MergeCandidate,
+  Work,
+  WorkData
+}
 
 // Tests here will eventually be folded into PlatformMergerTest.scala
 // This allows us to test using the TeiOnMerger until we make that the default merger

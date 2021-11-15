@@ -131,7 +131,8 @@ trait Merger extends MergerLogging {
   }
 
   private implicit class WorkOps(w: Work[Identified]) {
-    def internalWorksWith(thumbnail: Option[DigitalLocation], version: Int): List[Work.Visible[Identified]] =
+    def internalWorksWith(thumbnail: Option[DigitalLocation],
+                          version: Int): List[Work.Visible[Identified]] =
       w.state.internalWorkStubs.map {
         case InternalWork.Identified(sourceIdentifier, canonicalId, data) =>
           Work.Visible[Identified](
