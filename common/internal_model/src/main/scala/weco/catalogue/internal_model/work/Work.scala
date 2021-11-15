@@ -1,15 +1,9 @@
 package weco.catalogue.internal_model.work
 
-import weco.catalogue.internal_model.identifiers.{
-  CanonicalId,
-  DataState,
-  IdState,
-  ReferenceNumber,
-  SourceIdentifier
-}
+import weco.catalogue.internal_model.identifiers._
 import weco.catalogue.internal_model.image.ImageData
 import weco.catalogue.internal_model.languages.Language
-import weco.catalogue.internal_model.locations.Location
+import weco.catalogue.internal_model.locations.DigitalLocation
 
 import java.time.Instant
 
@@ -112,7 +106,7 @@ case class WorkData[State <: DataState](
   subjects: List[Subject[State#MaybeId]] = Nil,
   genres: List[Genre[State#MaybeId]] = Nil,
   contributors: List[Contributor[State#MaybeId]] = Nil,
-  thumbnail: Option[Location] = None,
+  thumbnail: Option[DigitalLocation] = None,
   production: List[ProductionEvent[State#MaybeId]] = Nil,
   languages: List[Language] = Nil,
   edition: Option[String] = None,
@@ -222,20 +216,6 @@ object WorkState {
     val relations = Relations.none
 
     override val modifiedTime: Instant = sourceModifiedTime
-
-    def internalWorksWith(version: Int): List[Work.Visible[Identified]] =
-      internalWorkStubs.map {
-        case InternalWork.Identified(sourceIdentifier, canonicalId, data) =>
-          Work.Visible[Identified](
-            version = version,
-            data = data,
-            state = WorkState.Identified(
-              sourceIdentifier = sourceIdentifier,
-              canonicalId = canonicalId,
-              sourceModifiedTime = sourceModifiedTime
-            )
-          )
-      }
   }
 
   case class Merged(

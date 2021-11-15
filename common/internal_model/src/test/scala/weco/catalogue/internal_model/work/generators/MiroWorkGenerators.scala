@@ -12,7 +12,7 @@ import weco.catalogue.internal_model.work.{Item, Work, WorkState}
 import scala.util.Random
 
 trait MiroWorkGenerators extends ImageGenerators {
-  def miroThumbnail() =
+  def miroThumbnail(): DigitalLocation =
     DigitalLocation(
       url =
         s"https://iiif.wellcomecollection.org/${randomAlphanumeric(length = 8)}.jpg",

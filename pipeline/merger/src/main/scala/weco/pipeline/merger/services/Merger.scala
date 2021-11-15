@@ -4,6 +4,7 @@ import cats.data.State
 import weco.catalogue.internal_model.identifiers.{DataState, IdState}
 import weco.catalogue.internal_model.image
 import weco.catalogue.internal_model.image.{ImageData, ParentWorks}
+import weco.catalogue.internal_model.locations.DigitalLocation
 import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.catalogue.internal_model.work._
 import weco.pipeline.merger.logging.MergerLogging
@@ -102,8 +103,11 @@ trait Merger extends MergerLogging {
           val remaining = sources.toSet -- redirectedSources
           val redirects = redirectedSources.map(redirectSourceToTarget(target))
           logResult(result, redirects.toList, remaining.toList)
-          val internalWorks = result.mergedTarget.state.internalWorksWith(
-            version = result.mergedTarget.version)
+
+          val internalWorks = result.mergedTarget.internalWorksWith(
+            thumbnail = result.mergedTarget.data.thumbnail,
+            version = result.mergedTarget.version
+          )
 
           val redirectedIdentifiers =
             redirectedSources.map { s =>
@@ -124,6 +128,23 @@ trait Merger extends MergerLogging {
           )
       }
       .getOrElse(MergerOutcome.passThrough(works))
+  }
+
+  private implicit class WorkOps(w: Work[Identified]) {
+    def internalWorksWith(thumbnail: Option[DigitalLocation],
+                          version: Int): List[Work.Visible[Identified]] =
+      w.state.internalWorkStubs.map {
+        case InternalWork.Identified(sourceIdentifier, canonicalId, data) =>
+          Work.Visible[Identified](
+            version = version,
+            data = data.copy(thumbnail = thumbnail),
+            state = WorkState.Identified(
+              sourceIdentifier = sourceIdentifier,
+              canonicalId = canonicalId,
+              sourceModifiedTime = w.state.sourceModifiedTime
+            )
+          )
+      }
   }
 
   private def redirectSourceToTarget(
