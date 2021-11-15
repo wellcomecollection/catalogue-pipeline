@@ -65,9 +65,11 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
     titles: List[Elem] = Nil,
     languages: List[Elem] = Nil,
     items: List[Elem] = Nil,
-    authors: List[Elem] = Nil
+    authors: List[Elem] = Nil,
+    locus: Option[Elem] = None
   ) =
     <msItem xml:id={id}>
+      {locus.getOrElse(NodeSeq.Empty)}
       {titles}
       {languages}
       {items}

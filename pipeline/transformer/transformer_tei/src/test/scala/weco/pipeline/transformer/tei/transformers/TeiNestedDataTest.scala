@@ -402,16 +402,61 @@ class TeiNestedDataTest extends AnyFunSpec with TeiGenerators with Matchers with
   }
 
   it("extracts physicalDescription for parts"){
-    val elem = teiXml(
-      id,
-      parts = List(msPart(id = "",
-        physDesc = Some(physDesc(objectDesc = Some(objectDesc(None,
-          support = Some(support("Multiple manuscript parts collected in one volume."))))))
-      )))
-    println(elem.toString())
     val result = TeiNestedData.nestedTeiData(
-      elem, wrapperTitle = "blih bluh", scribesMap = Map())
+      teiXml(
+        id,
+        parts = List(msPart(id = "",
+          physDesc = Some(physDesc(objectDesc = Some(objectDesc(None,
+            support = Some(support("Multiple manuscript parts collected in one volume."))))))
+        ))), wrapperTitle = "blih bluh", scribesMap = Map())
 
     result.value.head.physicalDescription shouldBe Some("Multiple manuscript parts collected in one volume.")
+  }
+
+  it("extracts locus for items"){
+    val itemTitle = s"$wrapperTitle item 1"
+    val itemId = s"${id}_1"
+    val item = msItem(id = itemId, locus = Some(<locus>PP. 1-27.</locus>))
+
+    val result = TeiNestedData.nestedTeiData(teiXml(
+      id = id,
+      items = List(item)
+    ), wrapperTitle, Map.empty)
+
+    result shouldBe a[Right[_, _]]
+    result.value shouldBe List(
+      TeiData(id = itemId, title = itemTitle, notes = List(Note(NoteType.LocusNote, "PP. 1-27."))))
+  }
+
+  it("doesn't extract locus if it's empty"){
+    val itemTitle = s"$wrapperTitle item 1"
+    val itemId = s"${id}_1"
+    val item = msItem(id = itemId, locus = Some(<locus></locus>))
+
+    val result = TeiNestedData.nestedTeiData(teiXml(
+      id = id,
+      items = List(item)
+    ), wrapperTitle, Map.empty)
+
+    result shouldBe a[Right[_, _]]
+    result.value shouldBe List(
+      TeiData(id = itemId, title = itemTitle, notes = Nil))
+  }
+
+  it("normalises spaces in a locus note"){
+    val itemTitle = s"$wrapperTitle item 1"
+    val itemId = s"${id}_1"
+    val item = msItem(id = itemId, locus = Some(<locus>pp11 -
+    28
+    </locus>))
+
+    val result = TeiNestedData.nestedTeiData(teiXml(
+      id = id,
+      items = List(item)
+    ), wrapperTitle, Map.empty)
+
+    result shouldBe a[Right[_, _]]
+    result.value shouldBe List(
+      TeiData(id = itemId, title = itemTitle, notes = List(Note(NoteType.LocusNote, "pp11 - 28"))))
   }
 }

@@ -292,7 +292,4 @@ class TeiXmlTest
 
     result.value.physicalDescription shouldBe Some("Multiple manuscript parts collected in one volume.")
   }
-
-
-
 }

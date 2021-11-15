@@ -10,7 +10,7 @@ object TeiNotes {
     apply(xml \\ "msDesc" \ "msContents")
 
   def apply(node: NodeSeq): List[Note] =
-    getColophon(node).toList ++ getIncipitAndExplicit(node)
+    getLocus(node) ++ getColophon(node).toList ++ getIncipitAndExplicit(node)
 
   /** The colophon is in `colophon` nodes under `msContents` or `msItem`.
     *
@@ -82,4 +82,19 @@ object TeiNotes {
         case ("explicit", Some(contents)) =>
           Note(contents = contents, noteType = NoteType.EndsNote)
       }
+
+  /**
+    * Locus tags directly within msItem are extracted as
+    * Locus notes and usually are used to tell what page the item begins on
+    * and on what page it ends. They aren't necessarily the same as page numbers
+    * in the locus tags in the incipit and explicit.
+    * The locus tags that we extract as Locus notes are _only_ the locus tags directly under msItem as in:
+    * <msItem xml:id="Wellcome_Malay_7_Part_1_Item_2">
+    *  <locus>PP. 1-27.</locus>
+    * </msItem>
+    */
+  private def getLocus(nodeSeq: NodeSeq): List[Note] =
+    (nodeSeq \ "locus").flatMap { locus =>
+      NormaliseText(locus.text.trim).map(Note(NoteType.LocusNote, _))
+    }.toList
 }
