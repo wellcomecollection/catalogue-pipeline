@@ -42,5 +42,6 @@ class TeiOnMergerTest
     redirectedWorks should have size 1
     visibleWorks should have size 1
 
+    visibleWorks.head.state.canonicalId shouldBe teiWork.state.canonicalId
   }
 }
