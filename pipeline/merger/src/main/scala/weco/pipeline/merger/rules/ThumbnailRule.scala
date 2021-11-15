@@ -4,7 +4,7 @@ import scala.util.Try
 import cats.data.NonEmptyList
 import weco.catalogue.internal_model.identifiers.IdentifierType
 import weco.catalogue.internal_model.work.WorkState.Identified
-import weco.catalogue.internal_model.locations.Location
+import weco.catalogue.internal_model.locations.DigitalLocation
 import weco.catalogue.internal_model.work.Work
 import weco.pipeline.merger.logging.MergerLogging
 import weco.pipeline.merger.models.FieldMergeResult
@@ -21,7 +21,7 @@ import weco.pipeline.merger.models.FieldMergeResult
 object ThumbnailRule extends FieldMergeRule with MergerLogging {
   import WorkPredicates._
 
-  type FieldData = Option[Location]
+  type FieldData = Option[DigitalLocation]
 
   override def merge(
     target: Work.Visible[Identified],
@@ -37,7 +37,7 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
     )
 
   def getThumbnail(target: Work.Visible[Identified],
-                   sources: Seq[Work[Identified]]): Option[Location] =
+                   sources: Seq[Work[Identified]]): Option[DigitalLocation] =
     if (shouldSuppressThumbnail(target, sources))
       None
     else

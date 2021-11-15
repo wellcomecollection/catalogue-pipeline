@@ -9,7 +9,7 @@ import weco.catalogue.internal_model.identifiers.{
 }
 import weco.catalogue.internal_model.image.ImageData
 import weco.catalogue.internal_model.languages.Language
-import weco.catalogue.internal_model.locations.Location
+import weco.catalogue.internal_model.locations.DigitalLocation
 import weco.catalogue.internal_model.work.DeletedReason.DeletedFromSource
 import weco.catalogue.internal_model.work.WorkState._
 import weco.catalogue.internal_model.work._
@@ -221,7 +221,7 @@ trait WorkGenerators
     ): Work.Visible[State] =
       work.map(_.copy(contributors = contributors))
 
-    def thumbnail(thumbnail: Location): Work.Visible[State] =
+    def thumbnail(thumbnail: DigitalLocation): Work.Visible[State] =
       work.map(_.copy(thumbnail = Some(thumbnail)))
 
     def production(
