@@ -20,6 +20,7 @@ import weco.catalogue.internal_model.work.{
   MergeCandidate,
   Note,
   ProductionEvent,
+  Subject,
   Work,
   WorkData
 }
@@ -36,7 +37,8 @@ case class TeiData(id: String,
                    nestedTeiData: List[TeiData] = Nil,
                    contributors: List[Contributor[Unminted]] = Nil,
                    origin: List[ProductionEvent[Unminted]] = Nil,
-                   physicalDescription: Option[String] = None)
+                   physicalDescription: Option[String] = None,
+                   subjects: List[Subject[Unminted]] = Nil)
     extends Logging {
   def toWork(time: Instant, version: Int): Work[Source] = {
     val topLevelData = toWorkData()
@@ -125,6 +127,7 @@ case class TeiData(id: String,
       contributors = contributors,
       production = origin,
       physicalDescription = physicalDescription,
+      subjects = subjects,
       //
       // If a TEI work has multiple parts, we want to arrange it into a hierarchy
       // like a CALM collection, e.g.

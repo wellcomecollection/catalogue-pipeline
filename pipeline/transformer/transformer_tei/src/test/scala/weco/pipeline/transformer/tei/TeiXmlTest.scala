@@ -292,4 +292,13 @@ class TeiXmlTest
 
     result.value.physicalDescription shouldBe Some("Multiple manuscript parts collected in one volume.")
   }
+
+  it("extracts subjects for the wrapper work"){
+    val result = new TeiXml(
+      teiXml(
+        id,
+        profileDesc = Some(profileDesc(keywords = List(keywords(subjects = List(subject("Botany"))))))      )).parse
+
+    result.value.subjects shouldBe List(Subject(label = "Botany", concepts = List(Concept(label ="Botany"))))
+  }
 }

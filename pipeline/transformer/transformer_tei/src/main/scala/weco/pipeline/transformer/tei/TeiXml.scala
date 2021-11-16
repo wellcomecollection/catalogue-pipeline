@@ -8,7 +8,8 @@ import weco.pipeline.transformer.tei.transformers.{
   TeiContributors,
   TeiLanguages,
   TeiNestedData,
-  TeiPhysicalDescription
+  TeiPhysicalDescription,
+  TeiSubjects
 }
 import weco.pipeline.transformer.transformers.ParsedPeriod
 
@@ -41,7 +42,8 @@ class TeiXml(val xml: Elem) extends Logging {
         contributors = scribes.getOrElse(id, Nil),
         nestedTeiData = nestedData,
         origin = origin,
-        physicalDescription = TeiPhysicalDescription(xml)
+        physicalDescription = TeiPhysicalDescription(xml),
+        subjects = TeiSubjects(xml)
       )
 
   /**
