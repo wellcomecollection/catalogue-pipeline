@@ -5,7 +5,10 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.ReferenceNumber
 
-class TeiReferenceNumberTest extends AnyFunSpec with Matchers with EitherValues {
+class TeiReferenceNumberTest
+    extends AnyFunSpec
+    with Matchers
+    with EitherValues {
   it("returns a Left[error] if it can't find a reference number") {
     val err = TeiReferenceNumber(
       <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id="manuscript_16046">
@@ -63,6 +66,7 @@ class TeiReferenceNumberTest extends AnyFunSpec with Matchers with EitherValues 
       </TEI>
     )
 
-    refNo.left.value.getMessage should startWith("Multiple instances of <idno type='msID'> found!")
+    refNo.left.value.getMessage should startWith(
+      "Multiple instances of <idno type='msID'> found!")
   }
 }

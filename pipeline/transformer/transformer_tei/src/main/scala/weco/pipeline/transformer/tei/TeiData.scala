@@ -119,8 +119,7 @@ case class TeiData(id: String,
   }
   private def toWorkData(
     parentCollectionPath: Option[CollectionPath] = None,
-    referenceNumber: Option[ReferenceNumber] = None)
-    : WorkData[Unidentified] =
+    referenceNumber: Option[ReferenceNumber] = None): WorkData[Unidentified] =
     WorkData[Unidentified](
       title = Some(title),
       description = description,
@@ -148,9 +147,10 @@ case class TeiData(id: String,
       collectionPath = parentCollectionPath match {
         case Some(CollectionPath(parentPath, _)) =>
           Some(CollectionPath(path = s"$parentPath/$id", label = None))
-        case None => Some(
-          CollectionPath(path = id, label = referenceNumber.map(_.underlying))
-        )
+        case None =>
+          Some(
+            CollectionPath(path = id, label = referenceNumber.map(_.underlying))
+          )
       }
     )
 }
