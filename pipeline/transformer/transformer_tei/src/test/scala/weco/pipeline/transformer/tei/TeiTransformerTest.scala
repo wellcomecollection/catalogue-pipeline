@@ -69,7 +69,13 @@ class TeiTransformerTest
             Some("1 copy of al-Qānūn fī al-ṭibb by Avicenna, 980-1037"),
           format = Some(Format.ArchivesAndManuscripts),
           collectionPath =
-            Some(CollectionPath(path = "manuscript_15651", label = None)),
+            Some(
+              CollectionPath(
+                path = "manuscript_15651",
+                label = Some("MS_Arabic_1")
+              )
+            )
+          ,
           physicalDescription = Some(
             "Oriental paper of two colours: 'beige' and 'biscuit' and thickness of 0.10 mm.; Material: chart; 529 ff.; leaf dimensions: width 215mm, height 336mm; written dimensions: width 125mm, height 220mm")
         ),
@@ -114,7 +120,7 @@ class TeiTransformerTest
                   ),
                 ),
                 collectionPath =
-                  Some(CollectionPath("manuscript_15651/MS_Arabic_1-item1")),
+                  Some(CollectionPath(path = "manuscript_15651/MS_Arabic_1-item1")),
                 format = Some(Format.ArchivesAndManuscripts),
                 contributors = contributors
               )

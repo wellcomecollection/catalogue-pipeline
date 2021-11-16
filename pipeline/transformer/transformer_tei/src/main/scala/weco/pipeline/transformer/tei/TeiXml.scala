@@ -8,7 +8,8 @@ import weco.pipeline.transformer.tei.transformers.{
   TeiContributors,
   TeiLanguages,
   TeiNestedData,
-  TeiPhysicalDescription
+  TeiPhysicalDescription,
+  TeiReferenceNumber
 }
 import weco.pipeline.transformer.transformers.ParsedPeriod
 
@@ -30,11 +31,13 @@ class TeiXml(val xml: Elem) extends Logging {
       scribes <- scribesMap
       nestedData <- TeiNestedData.nestedTeiData(xml, title, scribes)
       origin <- origin
+      referenceNumber = TeiReferenceNumber(xml)
     } yield
       TeiData(
         id = id,
         title = title,
         bNumber = bNumber,
+        referenceNumber = referenceNumber,
         description = summary,
         languages = languages,
         notes = languageNotes,

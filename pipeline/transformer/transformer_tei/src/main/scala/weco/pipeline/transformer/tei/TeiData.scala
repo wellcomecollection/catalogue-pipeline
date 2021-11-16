@@ -8,6 +8,7 @@ import weco.catalogue.internal_model.identifiers.IdState.{
 }
 import weco.catalogue.internal_model.identifiers.{
   IdentifierType,
+  ReferenceNumber,
   SourceIdentifier
 }
 import weco.catalogue.internal_model.languages.Language
@@ -24,12 +25,12 @@ import weco.catalogue.internal_model.work.{
   WorkData
 }
 import weco.pipeline.transformer.identifiers.SourceIdentifierValidation._
-
 import java.time.Instant
 
 case class TeiData(id: String,
                    title: String,
                    bNumber: Option[String] = None,
+                   referenceNumber: Option[ReferenceNumber] = None,
                    description: Option[String] = None,
                    languages: List[Language] = Nil,
                    notes: List[Note] = Nil,
@@ -39,14 +40,16 @@ case class TeiData(id: String,
                    physicalDescription: Option[String] = None)
     extends Logging {
   def toWork(time: Instant, version: Int): Work[Source] = {
-    val topLevelData = toWorkData()
+    val topLevelData = toWorkData(referenceNumber = referenceNumber)
 
     def iterateNestedData(
       nestedTeiData: List[TeiData],
       topLevelData: WorkData[Unidentified]): List[InternalWork.Source] =
       nestedTeiData.foldLeft(Nil: List[InternalWork.Source]) {
         case (internalWorks, data) =>
-          val upperLevelWorkData = data.toWorkData(topLevelData.collectionPath)
+          val upperLevelWorkData =
+            data.toWorkData(parentCollectionPath = topLevelData.collectionPath)
+
           (internalWorks :+ InternalWork.Source(
             sourceIdentifier = data.sourceIdentifier,
             workData = upperLevelWorkData
@@ -114,7 +117,9 @@ case class TeiData(id: String,
         case _ => internalWorks
       }
   }
-  private def toWorkData(parentCollectionPath: Option[CollectionPath] = None)
+  private def toWorkData(
+    parentCollectionPath: Option[CollectionPath] = None,
+    referenceNumber: Option[ReferenceNumber] = None)
     : WorkData[Unidentified] =
     WorkData[Unidentified](
       title = Some(title),
@@ -136,10 +141,19 @@ case class TeiData(id: String,
       //
       // We use the IDs to construct the collection hierarchy, but we don't want to display
       // them internally.
+      //
+      // We copy the reference number on to the top level work only; not down to
+      // the internal works.
+      //
       collectionPath = parentCollectionPath match {
         case Some(CollectionPath(parentPath, _)) =>
           Some(CollectionPath(path = s"$parentPath/$id"))
-        case None => Some(CollectionPath(path = id))
+        case None => Some(
+          CollectionPath(
+            path = id,
+            label = referenceNumber.map(_.underlying)
+          )
+        )
       }
     )
 }
