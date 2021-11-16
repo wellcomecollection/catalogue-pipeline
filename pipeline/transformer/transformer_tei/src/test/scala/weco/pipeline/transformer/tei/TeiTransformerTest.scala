@@ -68,8 +68,12 @@ class TeiTransformerTest
           description =
             Some("1 copy of al-Qānūn fī al-ṭibb by Avicenna, 980-1037"),
           format = Some(Format.ArchivesAndManuscripts),
-          collectionPath =
-            Some(CollectionPath(path = "manuscript_15651", label = None)),
+          collectionPath = Some(
+            CollectionPath(
+              path = "manuscript_15651",
+              label = Some("MS_Arabic_1")
+            )
+          ),
           subjects = List(
             Subject(
               id = Identifiable(
@@ -123,8 +127,8 @@ class TeiTransformerTest
                     noteType = NoteType.EndsNote
                   ),
                 ),
-                collectionPath =
-                  Some(CollectionPath("manuscript_15651/MS_Arabic_1-item1")),
+                collectionPath = Some(
+                  CollectionPath(path = "manuscript_15651/MS_Arabic_1-item1")),
                 format = Some(Format.ArchivesAndManuscripts),
                 contributors = contributors
               )

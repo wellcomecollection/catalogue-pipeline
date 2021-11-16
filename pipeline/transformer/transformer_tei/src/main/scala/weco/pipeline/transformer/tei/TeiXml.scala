@@ -9,6 +9,7 @@ import weco.pipeline.transformer.tei.transformers.{
   TeiLanguages,
   TeiNestedData,
   TeiPhysicalDescription,
+  TeiReferenceNumber,
   TeiSubjects
 }
 import weco.pipeline.transformer.transformers.ParsedPeriod
@@ -31,11 +32,13 @@ class TeiXml(val xml: Elem) extends Logging {
       scribes <- scribesMap
       nestedData <- TeiNestedData.nestedTeiData(xml, title, scribes)
       origin <- origin
+      referenceNumber <- TeiReferenceNumber(xml)
     } yield
       TeiData(
         id = id,
         title = title,
         bNumber = bNumber,
+        referenceNumber = Some(referenceNumber),
         description = summary,
         languages = languages,
         notes = languageNotes,
@@ -83,26 +86,14 @@ class TeiXml(val xml: Elem) extends Logging {
 
   private def summary: Result[Option[String]] = TeiOps.summary(xml \\ "msDesc")
 
-  /**
-    * In an XML like this:
-    * <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id="manuscript_15651">
-    *  <teiHeader>
-    *    <fileDesc>
-    *      <publicationStmt>
-    *        <idno type="msID">Well. Jav. 4</idno>
-    *       </publicationStmt>
-    * Extract "Well. Jav. 4" as the title
+  /** For now, we use the reference number as the title.  We don't use
+    * the <title> node because:
+    *
+    *    - On Arabic manuscripts, the <title> is just "Wellcome Library"
+    *    - On other manuscripts, it's the reference number repeated
     */
-  private def title: Result[String] = {
-    val nodes =
-      (xml \ "teiHeader" \ "fileDesc" \ "publicationStmt" \ "idno").toList
-    val maybeTitles = nodes.filter(n => (n \@ "type") == "msID")
-    maybeTitles match {
-      case List(titleNode) => Right(titleNode.text)
-      case Nil             => Left(new RuntimeException("No title found!"))
-      case _               => Left(new RuntimeException("More than one title node!"))
-    }
-  }
+  private def title: Result[String] =
+    TeiReferenceNumber(xml).map(_.underlying)
 
   /**
     * The origin tag contains information about where and when
