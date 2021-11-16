@@ -45,8 +45,9 @@ object TeiSubjects {
     // arabic manuscripts seem to have the subject id in the
     // attribute "key" instead of "ref" ¯\_(ツ)_/¯
     val idValue = if(referenceString.isEmpty)term\@"key" else referenceString
-    // some of the subject ids are prepended with "subject_sh" for lcsh or " subject" for mesh.
-    // So here we remove that to get the id
+    // some of the subject ids are prepended with "subject_sh" for lcsh or " subject_" for mesh.
+    // So here we remove the prepended "subject_".
+    // We also remove any spaces because sometimes some ids look like "sh 1234567"
     val parsedString = idValue.replaceAll("subject_", "").replaceAll(" ", "")
     NormaliseText(parsedString)
   }
