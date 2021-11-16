@@ -19,7 +19,7 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
     physDesc: Option[Elem] = None,
     origPlace: Option[Elem] = None,
     originDates: List[Elem] = Nil,
-    profileDesc: Option[Elem] =None
+    profileDesc: Option[Elem] = None
   ): Elem =
     <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id={id}>
       <teiHeader>
@@ -88,15 +88,18 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
       {physDesc.getOrElse(NodeSeq.Empty)}
     </msPart>
 
-  def profileDesc(keywords: List[Elem])= <profileDesc>
+  def profileDesc(keywords: List[Elem]) = <profileDesc>
       <textClass>
         {keywords}
       </textClass>
     </profileDesc>
 
-  def keywords(keywordsScheme:Option[String] = None, subjects: NodeSeq = Nil) = {
-    val schemeAttribute = keywordsScheme.map(s => Attribute("scheme", Text(s), Null)).getOrElse(Null)
-      <keywords>
+  def keywords(keywordsScheme: Option[String] = None,
+               subjects: NodeSeq = Nil) = {
+    val schemeAttribute = keywordsScheme
+      .map(s => Attribute("scheme", Text(s), Null))
+      .getOrElse(Null)
+    <keywords>
         <list>
           {subjects}
         </list>
@@ -104,11 +107,12 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
   }
 
   def subject(label: String, reference: Option[String] = None) = {
-        val referenceAttribute = reference.map(s => Attribute("ref", Text(s), Null)).getOrElse(Null)
-        <item>
+    val referenceAttribute =
+      reference.map(s => Attribute("ref", Text(s), Null)).getOrElse(Null)
+    <item>
           {<term>{label}</term> % referenceAttribute}
         </item>
-      }
+  }
 
   def sierraIdentifiers(bnumber: String) =
     <altIdentifier type="Sierra">

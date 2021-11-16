@@ -4,7 +4,13 @@ import grizzled.slf4j.Logging
 import weco.catalogue.internal_model.identifiers.IdState.Unminted
 import weco.catalogue.internal_model.work.{Organisation, Place, ProductionEvent}
 import weco.pipeline.transformer.result.Result
-import weco.pipeline.transformer.tei.transformers.{TeiContributors, TeiLanguages, TeiNestedData, TeiPhysicalDescription, TeiSubjects}
+import weco.pipeline.transformer.tei.transformers.{
+  TeiContributors,
+  TeiLanguages,
+  TeiNestedData,
+  TeiPhysicalDescription,
+  TeiSubjects
+}
 import weco.pipeline.transformer.transformers.ParsedPeriod
 
 import scala.util.Try

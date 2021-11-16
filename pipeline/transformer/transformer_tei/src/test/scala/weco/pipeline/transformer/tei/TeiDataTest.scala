@@ -310,12 +310,10 @@ class TeiDataTest
       .physicalDescription shouldBe physicalDescription
   }
 
-  it("passes subjects into workData"){
-    val subjects = List(Subject(label = "Botany", concepts = List(Concept(label = "Botany"))))
-    val data = TeiData(
-      id = "id",
-      title = "title",
-      subjects = subjects)
+  it("passes subjects into workData") {
+    val subjects = List(
+      Subject(label = "Botany", concepts = List(Concept(label = "Botany"))))
+    val data = TeiData(id = "id", title = "title", subjects = subjects)
     data
       .toWork(Instant.now, 1)
       .data
