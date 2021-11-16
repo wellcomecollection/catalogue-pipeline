@@ -4,12 +4,7 @@ import grizzled.slf4j.Logging
 import weco.catalogue.internal_model.identifiers.IdState.Unminted
 import weco.catalogue.internal_model.work.{Organisation, Place, ProductionEvent}
 import weco.pipeline.transformer.result.Result
-import weco.pipeline.transformer.tei.transformers.{
-  TeiContributors,
-  TeiLanguages,
-  TeiNestedData,
-  TeiPhysicalDescription
-}
+import weco.pipeline.transformer.tei.transformers.{TeiContributors, TeiLanguages, TeiNestedData, TeiPhysicalDescription, TeiSubjects}
 import weco.pipeline.transformer.transformers.ParsedPeriod
 
 import scala.util.Try
@@ -41,7 +36,8 @@ class TeiXml(val xml: Elem) extends Logging {
         contributors = scribes.getOrElse(id, Nil),
         nestedTeiData = nestedData,
         origin = origin,
-        physicalDescription = TeiPhysicalDescription(xml)
+        physicalDescription = TeiPhysicalDescription(xml),
+        subjects = TeiSubjects(xml)
       )
 
   /**

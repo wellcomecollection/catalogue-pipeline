@@ -70,6 +70,7 @@ class TeiTransformerTest
           format = Some(Format.ArchivesAndManuscripts),
           collectionPath =
             Some(CollectionPath(path = "manuscript_15651", label = None)),
+          subjects = List(Subject(id = Identifiable(SourceIdentifier(IdentifierType.LCSubjects, "Subject","sh85083116" )), label = "Medicine, Arab", concepts = List(Concept(label ="Medicine, Arab")))),
           physicalDescription = Some(
             "Oriental paper of two colours: 'beige' and 'biscuit' and thickness of 0.10 mm.; Material: chart; 529 ff.; leaf dimensions: width 215mm, height 336mm; written dimensions: width 125mm, height 220mm")
         ),
