@@ -147,12 +147,9 @@ case class TeiData(id: String,
       //
       collectionPath = parentCollectionPath match {
         case Some(CollectionPath(parentPath, _)) =>
-          Some(CollectionPath(path = s"$parentPath/$id"))
+          Some(CollectionPath(path = s"$parentPath/$id", label = None))
         case None => Some(
-          CollectionPath(
-            path = id,
-            label = referenceNumber.map(_.underlying)
-          )
+          CollectionPath(path = id, label = referenceNumber.map(_.underlying))
         )
       }
     )

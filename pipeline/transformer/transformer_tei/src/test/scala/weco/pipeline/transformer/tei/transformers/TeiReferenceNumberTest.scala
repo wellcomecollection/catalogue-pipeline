@@ -1,17 +1,18 @@
 package weco.pipeline.transformer.tei.transformers
 
+import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.ReferenceNumber
 
-class TeiReferenceNumberTest extends AnyFunSpec with Matchers {
-  it("returns None if it can't find a reference number") {
-    val refNo = TeiReferenceNumber(
+class TeiReferenceNumberTest extends AnyFunSpec with Matchers with EitherValues {
+  it("returns a Left[error] if it can't find a reference number") {
+    val err = TeiReferenceNumber(
       <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id="manuscript_16046">
       </TEI>
     )
 
-    refNo shouldBe None
+    err.left.value.getMessage shouldBe "No <idno type='msID'> found!"
   }
 
   it("finds a single reference number") {
@@ -29,7 +30,7 @@ class TeiReferenceNumberTest extends AnyFunSpec with Matchers {
       </TEI>
     )
 
-    refNo shouldBe Some(ReferenceNumber("WMS_Arabic_404"))
+    refNo.value shouldBe ReferenceNumber("WMS_Arabic_404")
   }
 
   it("removes whitespace from the reference numbers") {
@@ -45,10 +46,10 @@ class TeiReferenceNumberTest extends AnyFunSpec with Matchers {
       </TEI>
     )
 
-    refNo shouldBe Some(ReferenceNumber("WMS_Arabic_405"))
+    refNo.value shouldBe ReferenceNumber("WMS_Arabic_405")
   }
 
-  it("returns None if the reference number is ambiguous") {
+  it("fails if the reference number is ambiguous") {
     val refNo = TeiReferenceNumber(
       <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id="manuscript_16200">
         <teiHeader>
@@ -62,6 +63,6 @@ class TeiReferenceNumberTest extends AnyFunSpec with Matchers {
       </TEI>
     )
 
-    refNo shouldBe None
+    refNo.left.value.getMessage should startWith("Multiple instances of <idno type='msID'> found!")
   }
 }
