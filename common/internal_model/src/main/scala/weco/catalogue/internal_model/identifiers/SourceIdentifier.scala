@@ -8,7 +8,7 @@ case class SourceIdentifier(
 ) {
   require(
     value == value.trim,
-    s"SourceIdentifier value contains whitespaces: <$value>")
+    s"SourceIdentifier value has trailing/leading whitespace: <$value>")
 
-  override def toString = s"${identifierType.id}/$value"
+  override def toString = s"$ontologyType<${identifierType.id}/$value>"
 }
