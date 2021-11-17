@@ -11,10 +11,10 @@ class SourceIdentifierTest extends AnyFunSpec with Matchers {
       ontologyType = "Work"
     )
 
-    sourceIdentifier.toString shouldBe "miro-image-number/A0001234"
+    sourceIdentifier.toString shouldBe "Work<miro-image-number/A0001234>"
   }
 
-  it("fails creating a sourceIdentifier with extra spaces in the value") {
+  it("fails creating a sourceIdentifier with trailing spaces in the value") {
     intercept[IllegalArgumentException] {
       SourceIdentifier(
         identifierType = IdentifierType.SierraSystemNumber,
