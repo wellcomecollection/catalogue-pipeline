@@ -214,7 +214,7 @@ object WorksIndexConfig extends IndexConfigFields {
         )
 
       val search = objectField("search").fields(
-        keywordField("identifiers"),
+        textField("identifiers").analyzer("whitespace_analyzer"),
         textField("relations").analyzer("with_slashes_text_analyzer"),
         multilingualField("titlesAndContributors")
       )

@@ -327,7 +327,8 @@
         "type" : "object",
         "properties" : {
           "identifiers" : {
-            "type" : "keyword"
+            "type" : "text",
+            "analyzer" : "whitespace_analyzer"
           },
           "relations" : {
             "type" : "text",
