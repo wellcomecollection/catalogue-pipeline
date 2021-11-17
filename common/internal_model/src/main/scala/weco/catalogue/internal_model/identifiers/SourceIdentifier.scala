@@ -10,5 +10,5 @@ case class SourceIdentifier(
     value == value.trim,
     s"SourceIdentifier value contains whitespaces: <$value>")
 
-  override def toString = s"${identifierType.id}/$value"
+  override def toString = s"<$ontologyType>${identifierType.id}/$value"
 }
