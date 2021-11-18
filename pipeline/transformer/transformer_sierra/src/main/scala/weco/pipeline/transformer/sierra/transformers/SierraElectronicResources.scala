@@ -139,8 +139,7 @@ object SierraElectronicResources extends SierraQueryOps with Logging {
         None
 
       case other =>
-        warn(
-          s"${id.withCheckDigit} has a field 856 with repeated subfield ǂu")
+        warn(s"${id.withCheckDigit} has a field 856 with repeated subfield ǂu")
         None
     }
 
