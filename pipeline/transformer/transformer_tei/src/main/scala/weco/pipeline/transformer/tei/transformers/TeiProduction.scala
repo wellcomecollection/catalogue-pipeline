@@ -7,11 +7,16 @@ import weco.pipeline.transformer.transformers.ParsedPeriod
 import scala.xml.{Elem, NodeSeq}
 
 object TeiProduction {
-  def apply(xml: Elem): List[ProductionEvent[Unminted]] =
-    apply(xml \\ "msDesc" \ "history" \ "origin")
+  def apply(xml: Elem): List[ProductionEvent[Unminted]] = {
+    val seq = xml \\ "msDesc" \ "history" \ "origin"
+    println(seq.toString())
+    apply(seq)
+  }
 
-  def apply(node: NodeSeq): List[ProductionEvent[Unminted]] =
+  def apply(node: NodeSeq): List[ProductionEvent[Unminted]] = {
+    println(node)
     origin(node)
+  }
 
   /**
     * The origin tag contains information about where and when

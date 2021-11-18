@@ -149,4 +149,54 @@ class TeiNotesTest extends AnyFunSpec with Matchers with TeiGenerators {
       )
     }
   }
+
+  it("adds hand(?) notes"){
+    val id = ""
+    val result = TeiNotes(
+      teiXml(
+        id,
+        physDesc = Some(physDesc(handNotes = List(
+          handNotes(
+            label = "neatly written text"),handNotes(
+            label = "even more neatly written text")))
+        )
+      )
+    )
+
+    result shouldBe List(Note(NoteType.HandNote, "neatly written text"), Note(NoteType.HandNote, "even more neatly written text"))
+  }
+
+  it("ignores the handNote if it has a scribe attribute"){
+    val id = ""
+    val result = TeiNotes(
+      teiXml(
+        id,
+        physDesc = Some(physDesc(handNotes = List(
+          handNotes(
+            label = "Wanda Maximoff",
+            scribe = Some("sole"))))
+        )
+      )
+    )
+
+    result shouldBe Nil
+  }
+
+  it("ignores persName with role=scr in the note"){
+    val id = ""
+    val result = TeiNotes(
+      teiXml(
+        id,
+        physDesc= Some(physDesc(handNotes = List(
+          handNotes(
+            label = "In neat handwriting",
+            persNames = List(
+              scribe("Tony Stark", `type` = Some("original")),
+              )))))
+        )
+      )
+
+
+    result shouldBe List(Note(NoteType.HandNote, "In neat handwriting"))
+  }
 }

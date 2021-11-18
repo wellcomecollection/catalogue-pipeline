@@ -201,13 +201,11 @@ object TeiContributors {
 
   private def addIdsToMap(scribesMap: Map[String, List[Contributor[Unminted]]],
                           c: Contributor[Unminted],
-                          nodeIds: List[String]) = {
-    nodeIds
+                          nodeIds: List[String]) = nodeIds
       .map(
         id => addIdToMap(id, scribesMap, c)
       )
       .toMap
-  }
 
   private def addIdToMap(workId: String,
                          scribesMap: Map[String, List[Contributor[Unminted]]],

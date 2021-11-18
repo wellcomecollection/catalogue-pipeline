@@ -6,8 +6,9 @@ import weco.pipeline.transformer.tei.NormaliseText
 import scala.xml.{Elem, NodeSeq}
 
 object TeiNotes {
+
   def apply(xml: Elem): List[Note] =
-    apply(xml \\ "msDesc" \ "msContents")
+    apply(xml \\ "msDesc" \ "msContents") ++ getHandNotes(xml)
 
   def apply(node: NodeSeq): List[Note] =
     getLocus(node) ++ getColophon(node).toList ++ getIncipitAndExplicit(node)
@@ -97,4 +98,11 @@ object TeiNotes {
     (nodeSeq \ "locus").flatMap { locus =>
       NormaliseText(locus.text.trim).map(Note(NoteType.LocusNote, _))
     }.toList
+
+  def getHandNotes(xml: Elem): List[Note] = (xml \\ "sourceDesc" \ "msDesc" \ "physDesc" \ "handDesc" \ "handNote").flatMap { n =>
+    if((n \@ "scribe").isEmpty) {
+      val label = n.child.filterNot(n => n.label =="persName" && (n \@ "role") == "scr").text
+      NormaliseText(label).map(Note(NoteType.HandNote, _))
+    } else None
+  }.toList
 }
