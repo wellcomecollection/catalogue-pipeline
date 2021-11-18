@@ -1,6 +1,6 @@
 module "router_queue" {
   source          = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
-  queue_name      = "${var.namespace}_router-${local.tei_suffix}"
+  queue_name      = "${local.namespace}_router"
   topic_arns      = [module.merger_works_topic.arn]
   alarm_topic_arn = var.dlq_alarm_arn
 
@@ -8,20 +8,20 @@ module "router_queue" {
 }
 
 module "router" {
-  source = "../../modules/service"
+  source = "../modules/service"
 
-  namespace = var.namespace
-  name      = "router-${local.tei_suffix}"
+  namespace = local.namespace
+  name      = "router"
 
-  container_image = var.router_image
+  container_image = local.router_image
   security_group_ids = [
     # TODO: Do we need the egress security group?
-    var.service_egress_security_group_id,
+    aws_security_group.service_egress.id,
   ]
 
   elastic_cloud_vpce_sg_id = var.ec_privatelink_security_group_id
 
-  cluster_name = var.cluster_name
+  cluster_name = aws_ecs_cluster.cluster.name
   cluster_arn  = data.aws_ecs_cluster.cluster.id
 
   env_vars = {
@@ -39,7 +39,7 @@ module "router" {
     flush_interval_seconds = 30
   }
 
-  secret_env_vars = var.pipeline_storage_es_service_secrets["router"]
+  secret_env_vars = local.pipeline_storage_es_service_secrets["router"]
 
   shared_logging_secrets = var.shared_logging_secrets
 
@@ -48,8 +48,8 @@ module "router" {
   min_capacity = var.min_capacity
   max_capacity = min(10, var.max_capacity)
 
-  scale_down_adjustment = var.scale_down_adjustment
-  scale_up_adjustment   = var.scale_up_adjustment
+  scale_down_adjustment = local.scale_down_adjustment
+  scale_up_adjustment   = local.scale_up_adjustment
 
   queue_read_policy = module.router_queue.read_policy
 
@@ -59,20 +59,20 @@ module "router" {
   use_fargate_spot = true
 
   deployment_service_env  = var.release_label
-  deployment_service_name = "work-router-${local.tei_suffix}"
+  deployment_service_name = "work-router"
 }
 
 module "router_path_output_topic" {
-  source = "../../modules/topic"
+  source = "../modules/topic"
 
-  name       = "${var.namespace}_router_path_output"
+  name       = "${local.namespace}_router_path_output"
   role_names = [module.router.task_role_name]
 }
 
 module "router_work_output_topic" {
-  source = "../../modules/topic"
+  source = "../modules/topic"
 
-  name       = "${var.namespace}_router_work_output-${local.tei_suffix}"
+  name       = "${local.namespace}_router_work_output"
   role_names = [module.router.task_role_name]
 }
 

@@ -4,32 +4,32 @@ locals {
 }
 
 data "aws_ecs_cluster" "cluster" {
-  cluster_name = var.cluster_name
+  cluster_name = aws_ecs_cluster.cluster.name
 }
 
 module "batcher_queue" {
   source                     = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
-  queue_name                 = "${var.namespace}_batcher-${local.tei_suffix}"
+  queue_name                 = "${local.namespace}_batcher"
   topic_arns                 = [module.router_path_output_topic.arn]
   visibility_timeout_seconds = (local.wait_minutes + 5) * 60
   alarm_topic_arn            = var.dlq_alarm_arn
 }
 
 module "batcher" {
-  source = "../../modules/service"
+  source = "../modules/service"
 
-  namespace = var.namespace
-  name      = "batcher-${local.tei_suffix}"
+  namespace = local.namespace
+  name      = "batcher"
 
-  container_image = var.batcher_image
+  container_image = local.batcher_image
 
   security_group_ids = [
-    var.service_egress_security_group_id,
+    aws_security_group.service_egress.id,
   ]
 
   elastic_cloud_vpce_sg_id = var.ec_privatelink_security_group_id
 
-  cluster_name = var.cluster_name
+  cluster_name = aws_ecs_cluster.cluster.name
   cluster_arn  = data.aws_ecs_cluster.cluster.id
 
   env_vars = {
@@ -56,8 +56,8 @@ module "batcher" {
   min_capacity = var.min_capacity
   max_capacity = min(1, var.max_capacity)
 
-  scale_down_adjustment = var.scale_down_adjustment
-  scale_up_adjustment   = var.scale_up_adjustment
+  scale_down_adjustment = local.scale_down_adjustment
+  scale_up_adjustment   = local.scale_up_adjustment
 
   queue_read_policy = module.batcher_queue.read_policy
 
@@ -69,9 +69,9 @@ module "batcher" {
 }
 
 module "batcher_output_topic" {
-  source = "../../modules/topic"
+  source = "../modules/topic"
 
-  name       = "${var.namespace}_batcher_output-${local.tei_suffix}"
+  name       = "${local.namespace}_batcher_output"
   role_names = [module.batcher.task_role_name]
 }
 

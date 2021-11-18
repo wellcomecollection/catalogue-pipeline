@@ -49,29 +49,29 @@ locals {
 
 module "image_inferrer_queue" {
   source                     = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
-  queue_name                 = "${var.namespace}_image_inferrer-${local.tei_suffix}"
+  queue_name                 = "${local.namespace}_image_inferrer"
   topic_arns                 = [module.merger_images_topic.arn]
   alarm_topic_arn            = var.dlq_alarm_arn
   visibility_timeout_seconds = local.queue_visibility_timeout
 }
 module "image_inferrer" {
-  source = "../../modules/services_with_manager"
+  source = "../modules/services_with_manager"
 
-  namespace = var.namespace
-  name      = "image_inferrer-${local.tei_suffix}"
+  namespace = local.namespace
+  name      = "image_inferrer"
 
   security_group_ids = [
-    var.service_egress_security_group_id,
+    aws_security_group.service_egress.id,
   ]
 
   elastic_cloud_vpce_sg_id = var.ec_privatelink_security_group_id
 
-  cluster_name = var.cluster_name
+  cluster_name = aws_ecs_cluster.cluster.name
   cluster_arn  = data.aws_ecs_cluster.cluster.id
 
   launch_type = "EC2"
   capacity_provider_strategies = [{
-    capacity_provider = var.inference_capacity_provider_name
+    capacity_provider = module.inference_capacity_provider.name
     weight            = 1
   }]
   ordered_placement_strategies = [{
@@ -87,7 +87,7 @@ module "image_inferrer" {
   host_memory = null
 
   manager_container_name  = "inference_manager"
-  manager_container_image = var.inference_manager_image
+  manager_container_image = local.inference_manager_image
   manager_cpu             = local.manager_cpu
   manager_memory          = local.manager_memory
   manager_mount_points = [{
@@ -97,12 +97,12 @@ module "image_inferrer" {
 
   apps = {
     feature_inferrer = {
-      image  = var.feature_inferrer_image
+      image  = local.feature_inferrer_image
       cpu    = local.inferrer_cpu
       memory = local.inferrer_memory
       env_vars = {
         PORT              = local.feature_inferrer_port
-        MODEL_OBJECT_KEY  = var.inferrer_lsh_model_key_value
+        MODEL_OBJECT_KEY  = data.aws_ssm_parameter.inferrer_lsh_model_key.value
         MODEL_DATA_BUCKET = var.inferrer_model_data_bucket_name
       }
       secret_env_vars = {}
@@ -119,7 +119,7 @@ module "image_inferrer" {
       }
     }
     palette_inferrer = {
-      image  = var.palette_inferrer_image
+      image  = local.palette_inferrer_image
       cpu    = local.inferrer_cpu
       memory = local.inferrer_memory
       env_vars = {
@@ -139,7 +139,7 @@ module "image_inferrer" {
       }
     }
     aspect_ratio_inferrer = {
-      image  = var.aspect_ratio_inferrer_image
+      image  = local.aspect_ratio_inferrer_image
       cpu    = local.aspect_ratio_cpu
       memory = local.aspect_ratio_memory
       env_vars = {
@@ -167,7 +167,7 @@ module "image_inferrer" {
     palette_inferrer_port      = local.palette_inferrer_port
     aspect_ratio_inferrer_host = "localhost"
     aspect_ratio_inferrer_port = local.aspect_ratio_inferrer_port
-    metrics_namespace          = "${local.namespace}_image_inferrer"
+    metrics_namespace          = "image_inferrer"
     topic_arn                  = module.image_inferrer_topic.arn
     queue_url                  = module.image_inferrer_queue.url
     images_root                = local.shared_storage_path
@@ -180,7 +180,7 @@ module "image_inferrer" {
     batch_size = 25
   }
 
-  manager_secret_env_vars = var.pipeline_storage_es_service_secrets["inferrer"]
+  manager_secret_env_vars = local.pipeline_storage_es_service_secrets["inferrer"]
 
   subnets = var.subnets
 
@@ -191,13 +191,13 @@ module "image_inferrer" {
 
   max_capacity = min(10, var.max_capacity)
 
-  scale_down_adjustment = var.scale_down_adjustment
-  scale_up_adjustment   = min(1, var.scale_up_adjustment)
+  scale_down_adjustment = local.scale_down_adjustment
+  scale_up_adjustment   = min(1, local.scale_up_adjustment)
 
   queue_read_policy = module.image_inferrer_queue.read_policy
 
   deployment_service_env  = var.release_label
-  deployment_service_name = "image-inferrer-${local.tei_suffix}"
+  deployment_service_name = "image-inferrer"
   shared_logging_secrets  = var.shared_logging_secrets
 }
 
@@ -221,9 +221,9 @@ data "aws_iam_policy_document" "allow_inferrer_data_access" {
 }
 
 module "image_inferrer_topic" {
-  source = "../../modules/topic"
+  source = "../modules/topic"
 
-  name       = "${var.namespace}_image_inferrer-${local.tei_suffix}"
+  name       = "${local.namespace}_image_inferrer"
   role_names = [module.image_inferrer.task_role_name]
 }
 
