@@ -56,7 +56,7 @@ object SierraLanguages
         .map {
           case (_, Some(lang)) => Some(lang)
           case (code, None) =>
-            warn(s"$bibId: Unrecognised code in MARC 041 ǂa: $code")
+            warn(s"${bibId.withCheckDigit}: Unrecognised code in MARC 041 ǂa: $code")
             None
         }
 
@@ -78,7 +78,7 @@ object SierraLanguages
         None
 
       case _ =>
-        warn(s"$bibId: Unrecognised primary language: $lang")
+        warn(s"${bibId.withCheckDigit}: Unrecognised primary language: $lang")
         None
     }
 }
