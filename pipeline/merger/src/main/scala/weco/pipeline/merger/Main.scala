@@ -12,11 +12,7 @@ import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.elasticsearch.typesafe.ElasticBuilder
 import weco.messaging.sns.NotificationMessage
 import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
-import weco.pipeline.merger.services.{
-  IdentifiedWorkLookup,
-  MergerManager,
-  MergerWorkerService
-}
+import weco.pipeline.merger.services.{IdentifiedWorkLookup, MergerManager, MergerWorkerService, PlatformMerger}
 import weco.pipeline_storage.EitherIndexer
 import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
 import weco.pipeline_storage.typesafe.PipelineStorageStreamBuilder
@@ -43,13 +39,7 @@ object Main extends WellcomeTypesafeApp {
 
     val sourceWorkLookup = new IdentifiedWorkLookup(retriever)
 
-    val toggleTeiOn =
-      config.getBooleanOption("toggle.tei_on").getOrElse(false)
-
-    val mergerManager = toggleTeiOn match {
-      case true  => MergerManager.teiOnMergerManager
-      case false => MergerManager.teiOffMergerManager
-    }
+    val mergerManager = new MergerManager(PlatformMerger)
 
     val workMsgSender =
       SNSBuilder.buildSNSMessageSender(

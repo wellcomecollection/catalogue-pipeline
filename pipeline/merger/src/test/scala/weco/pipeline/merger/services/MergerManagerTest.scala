@@ -92,10 +92,6 @@ class MergerManagerTest extends AnyFunSpec with Matchers with WorkGenerators {
       )
   }
 
-  val mergerManager = new MergerManager {
-    override val mergerRules: Merger = merger
+  val mergerManager = new MergerManager(merger)
 
-    override protected def preMergeModify(
-      works: Seq[Work[Identified]]): Seq[Work[Identified]] = works
-  }
 }

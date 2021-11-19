@@ -14,7 +14,7 @@ import weco.catalogue.internal_model.work.{
 
 // Tests here will eventually be folded into PlatformMergerTest.scala
 // This allows us to test using the TeiOnMerger until we make that the default merger
-class TeiOnMergerTest
+class TeiMergerTest
     extends AnyFunSpec
     with SourceWorkGenerators
     with Matchers {
