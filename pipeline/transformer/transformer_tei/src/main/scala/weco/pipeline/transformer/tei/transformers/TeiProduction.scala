@@ -7,27 +7,28 @@ import weco.pipeline.transformer.transformers.ParsedPeriod
 import scala.xml.{Elem, NodeSeq}
 
 object TeiProduction {
-  def apply(xml: Elem): List[ProductionEvent[Unminted]] = apply(xml \\ "msDesc" \ "history" \ "origin")
+  def apply(xml: Elem): List[ProductionEvent[Unminted]] =
+    apply(xml \\ "msDesc" \ "history" \ "origin")
 
   def apply(node: NodeSeq): List[ProductionEvent[Unminted]] =
     origin(node)
 
   /**
-   * The origin tag contains information about where and when
-   * the manuscript was written. This is an example:
-   *  <history>
-   *      <origin>
-   *          <origPlace>
-   *              <country><!-- insert --></country>,
-   *              <region><!-- insert --></region>,
-   *              <settlement><!-- insert --></settlement>,
-   *              <orgName><!-- insert --></orgName>
-   *          </origPlace>
-   *          <origDate calendar=""><!-- insert --></origDate>
-   *      </origin>
-   *  </history>
-   *
-   */
+    * The origin tag contains information about where and when
+    * the manuscript was written. This is an example:
+    *  <history>
+    *      <origin>
+    *          <origPlace>
+    *              <country><!-- insert --></country>,
+    *              <region><!-- insert --></region>,
+    *              <settlement><!-- insert --></settlement>,
+    *              <orgName><!-- insert --></orgName>
+    *          </origPlace>
+    *          <origDate calendar=""><!-- insert --></origDate>
+    *      </origin>
+    *  </history>
+    *
+    */
   private def origin(origin: NodeSeq): List[ProductionEvent[Unminted]] = {
     val origPlace = origin \ "origPlace"
     val country = (origPlace \ "country").text.trim
@@ -45,26 +46,25 @@ object TeiProduction {
     (agents, places, dates) match {
       case (Nil, Nil, Nil) => Nil
       case _ =>
-
-          List(
-            ProductionEvent(
-              label = label,
-              places = places,
-              agents = agents,
-              dates = dates
-            ))
+        List(
+          ProductionEvent(
+            label = label,
+            places = places,
+            agents = agents,
+            dates = dates
+          ))
     }
 
   }
 
   /**
-   * Dates are in a origDate tag and can be in different calendars,
-   * so we need to look for the one in the gregorian calendar.
-   * Also, sometimes the date can contain notes, as in this example, so we need to strip them:
-   * <origDate calendar="Gregorian">ca.1732-63AD
-   *  <note>from watermarks</note>
-   * </origDate>
-   */
+    * Dates are in a origDate tag and can be in different calendars,
+    * so we need to look for the one in the gregorian calendar.
+    * Also, sometimes the date can contain notes, as in this example, so we need to strip them:
+    * <origDate calendar="Gregorian">ca.1732-63AD
+    *  <note>from watermarks</note>
+    * </origDate>
+    */
   private def parseDate(origin: NodeSeq) = {
     val dateNodes = (origin \ "origDate").filter(n =>
       (n \@ "calendar").toLowerCase == "gregorian")

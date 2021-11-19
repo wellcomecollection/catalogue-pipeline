@@ -84,8 +84,6 @@ class TeiXml(val xml: Elem) extends Logging {
   private def title: Result[String] =
     TeiReferenceNumber(xml).map(_.underlying)
 
-
-
   private def getId: Result[String] = TeiOps.getIdFrom(xml)
 }
 

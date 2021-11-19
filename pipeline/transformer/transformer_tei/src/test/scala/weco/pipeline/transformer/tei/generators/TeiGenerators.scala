@@ -84,9 +84,7 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
       {history.getOrElse(NodeSeq.Empty)}
     </msPart>
 
-  def history(
-               origPlace: Option[Elem] = None,
-               originDates: List[Elem] = Nil)=
+  def history(origPlace: Option[Elem] = None, originDates: List[Elem] = Nil) =
     <history>
       <origin>
         {origPlace.getOrElse(NodeSeq.Empty)}
