@@ -37,7 +37,7 @@ class TeiXmlTest
   it("gets the title from the TEI") {
     val titleString = "This is the title"
     val result =
-      TeiXml(id, teiXml(id = id, title = titleElem(titleString)).toString())
+      TeiXml(id, teiXml(id = id, refNo = idnoMsId(titleString)).toString())
         .flatMap(_.parse)
     result shouldBe a[Right[_, _]]
     result.value.title shouldBe titleString
@@ -52,7 +52,7 @@ class TeiXmlTest
       teiXml(
         id = id,
         items = List(msItem(s"${id}_1", List(itemTitle(theItemTitle)))),
-        title = titleElem(topLevelTitle)
+        refNo = idnoMsId(topLevelTitle)
       ).toString()
     ).flatMap(_.parse)
 
@@ -65,7 +65,7 @@ class TeiXmlTest
     val titleStm = { <idno type="msID">{titleString1}</idno>
       <idno type="msID">{titleString2}</idno> }
     val result =
-      TeiXml(id, teiXml(id = id, title = titleStm).toString()).flatMap(_.parse)
+      TeiXml(id, teiXml(id = id, refNo = titleStm).toString()).flatMap(_.parse)
     result shouldBe a[Left[_, _]]
     result.left.get.getMessage should include("title")
   }

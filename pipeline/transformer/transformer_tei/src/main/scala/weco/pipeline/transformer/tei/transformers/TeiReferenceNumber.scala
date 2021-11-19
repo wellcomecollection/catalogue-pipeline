@@ -3,6 +3,7 @@ package weco.pipeline.transformer.tei.transformers
 import grizzled.slf4j.Logging
 import weco.catalogue.internal_model.identifiers.ReferenceNumber
 import weco.pipeline.transformer.result.Result
+import weco.pipeline.transformer.tei.NormaliseText
 
 import scala.xml.Elem
 
@@ -26,11 +27,13 @@ object TeiReferenceNumber extends Logging {
     val ids =
       (xml \\ "idno")
         .map(n => (n \@ "type", n.text))
-        .collect { case ("msID", contents) => contents.trim }
+        .collect { case ("msID", contents) => NormaliseText(contents.trim) }
 
     ids match {
-      case Seq(refNo) => Right(ReferenceNumber(refNo))
-      case Nil        => Left(new RuntimeException("No <idno type='msID'> found!"))
+      case Seq(Some(refNo)) => Right(ReferenceNumber(refNo))
+      case Seq(None) =>
+        Left(new RuntimeException("Empty <idno type='msID'> found!"))
+      case Nil => Left(new RuntimeException("No <idno type='msID'> found!"))
       case other =>
         Left(
           new RuntimeException(

@@ -99,7 +99,7 @@ class TeiTransformerEndToEndTest
     store: MemoryTypedStore[S3ObjectLocation, String]): TeiSourcePayload = {
 
     val xmlString =
-      teiXml(id, title = titleElem(title))
+      teiXml(id, refNo = idnoMsId(title))
         .toString()
 
     val location = S3ObjectLocation(
