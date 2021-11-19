@@ -12,7 +12,12 @@ import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.elasticsearch.typesafe.ElasticBuilder
 import weco.messaging.sns.NotificationMessage
 import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
-import weco.pipeline.merger.services.{IdentifiedWorkLookup, MergerManager, MergerWorkerService, PlatformMerger}
+import weco.pipeline.merger.services.{
+  IdentifiedWorkLookup,
+  MergerManager,
+  MergerWorkerService,
+  PlatformMerger
+}
 import weco.pipeline_storage.EitherIndexer
 import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
 import weco.pipeline_storage.typesafe.PipelineStorageStreamBuilder
