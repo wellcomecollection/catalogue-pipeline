@@ -31,8 +31,9 @@ object TeiReferenceNumber extends Logging {
 
     ids match {
       case Seq(Some(refNo)) => Right(ReferenceNumber(refNo))
-      case Seq(None)        => Left(new RuntimeException("Empty <idno type='msID'> found!"))
-      case Nil        => Left(new RuntimeException("No <idno type='msID'> found!"))
+      case Seq(None) =>
+        Left(new RuntimeException("Empty <idno type='msID'> found!"))
+      case Nil => Left(new RuntimeException("No <idno type='msID'> found!"))
       case other =>
         Left(
           new RuntimeException(

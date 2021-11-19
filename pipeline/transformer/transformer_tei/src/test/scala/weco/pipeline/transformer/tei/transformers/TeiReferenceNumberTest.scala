@@ -9,7 +9,8 @@ import weco.pipeline.transformer.tei.generators.TeiGenerators
 class TeiReferenceNumberTest
     extends AnyFunSpec
     with Matchers
-    with EitherValues with TeiGenerators {
+    with EitherValues
+    with TeiGenerators {
   it("returns a Left[error] if it can't find a reference number") {
     val err = TeiReferenceNumber(
       <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id="manuscript_16046">

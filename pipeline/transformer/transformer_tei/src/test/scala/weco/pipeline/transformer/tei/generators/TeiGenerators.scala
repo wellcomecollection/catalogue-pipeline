@@ -7,19 +7,19 @@ import scala.xml._
 
 trait TeiGenerators extends RandomGenerators { this: Suite =>
   def teiXml(
-              id: String = randomAlphanumeric(),
-              refNo: NodeSeq = idnoMsId("test title"),
-              identifiers: Option[Elem] = None,
-              summary: Option[Elem] = None,
-              languages: List[Elem] = Nil,
-              items: List[Elem] = Nil,
-              parts: List[Elem] = Nil,
-              catalogues: List[Elem] = Nil,
-              authors: List[Elem] = Nil,
-              physDesc: Option[Elem] = None,
-              origPlace: Option[Elem] = None,
-              originDates: List[Elem] = Nil,
-              profileDesc: Option[Elem] = None
+    id: String = randomAlphanumeric(),
+    refNo: NodeSeq = idnoMsId("test title"),
+    identifiers: Option[Elem] = None,
+    summary: Option[Elem] = None,
+    languages: List[Elem] = Nil,
+    items: List[Elem] = Nil,
+    parts: List[Elem] = Nil,
+    catalogues: List[Elem] = Nil,
+    authors: List[Elem] = Nil,
+    physDesc: Option[Elem] = None,
+    origPlace: Option[Elem] = None,
+    originDates: List[Elem] = Nil,
+    profileDesc: Option[Elem] = None
   ): Elem =
     <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id={id}>
       <teiHeader>
