@@ -15,7 +15,8 @@ import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import weco.pipeline.merger.services.{
   IdentifiedWorkLookup,
   MergerManager,
-  MergerWorkerService
+  MergerWorkerService,
+  PlatformMerger
 }
 import weco.pipeline_storage.EitherIndexer
 import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
@@ -43,13 +44,7 @@ object Main extends WellcomeTypesafeApp {
 
     val sourceWorkLookup = new IdentifiedWorkLookup(retriever)
 
-    val toggleTeiOn =
-      config.getBooleanOption("toggle.tei_on").getOrElse(false)
-
-    val mergerManager = toggleTeiOn match {
-      case true  => MergerManager.teiOnMergerManager
-      case false => MergerManager.teiOffMergerManager
-    }
+    val mergerManager = new MergerManager(PlatformMerger)
 
     val workMsgSender =
       SNSBuilder.buildSNSMessageSender(

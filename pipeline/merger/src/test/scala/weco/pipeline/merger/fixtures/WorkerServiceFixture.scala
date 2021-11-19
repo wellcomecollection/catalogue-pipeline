@@ -12,9 +12,9 @@ import weco.monitoring.Metrics
 import weco.monitoring.memory.MemoryMetrics
 import weco.pipeline.merger.services.{
   IdentifiedWorkLookup,
+  MergerManager,
   MergerWorkerService,
-  PlatformMerger,
-  TeiOffMergerManager
+  PlatformMerger
 }
 import weco.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 import weco.pipeline_storage.memory.{MemoryIndexer, MemoryRetriever}
@@ -40,7 +40,7 @@ trait WorkerServiceFixture extends PipelineStorageStreamFixtures {
         val workerService = new MergerWorkerService(
           msgStream = msgStream,
           sourceWorkLookup = new IdentifiedWorkLookup(retriever),
-          mergerManager = new TeiOffMergerManager(PlatformMerger),
+          mergerManager = new MergerManager(PlatformMerger),
           workOrImageIndexer = new MemoryIndexer(index),
           workMsgSender = workSender,
           imageMsgSender = imageSender,
