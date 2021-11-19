@@ -1,6 +1,6 @@
 module "relation_embedder_queue" {
   source          = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
-  queue_name      = "${var.namespace}_relation_embedder-${local.tei_suffix}"
+  queue_name      = "${local.namespace}_relation_embedder"
   topic_arns      = [module.batcher_output_topic.arn]
   alarm_topic_arn = var.dlq_alarm_arn
 
@@ -10,21 +10,21 @@ module "relation_embedder_queue" {
 }
 
 module "relation_embedder" {
-  source = "../../modules/service"
+  source = "../modules/service"
 
-  namespace = var.namespace
-  name      = "relation_embedder-${local.tei_suffix}"
+  namespace = local.namespace
+  name      = "relation_embedder"
 
-  container_image = var.relation_embedder_image
+  container_image = local.relation_embedder_image
 
   security_group_ids = [
     # TODO: Do we need the egress security group?
-    var.service_egress_security_group_id,
+    aws_security_group.service_egress.id,
   ]
 
   elastic_cloud_vpce_sg_id = var.ec_privatelink_security_group_id
 
-  cluster_name = var.cluster_name
+  cluster_name = aws_ecs_cluster.cluster.name
   cluster_arn  = data.aws_ecs_cluster.cluster.id
 
   env_vars = {
@@ -43,14 +43,14 @@ module "relation_embedder" {
     index_flush_interval_seconds = 60
   }
 
-  secret_env_vars = var.pipeline_storage_es_service_secrets["relation_embedder"]
+  secret_env_vars = local.pipeline_storage_es_service_secrets["relation_embedder"]
 
   # NOTE: limit to avoid >500 concurrent scroll contexts
   min_capacity = var.min_capacity
   max_capacity = min(10, var.max_capacity)
 
-  scale_down_adjustment = var.scale_down_adjustment
-  scale_up_adjustment   = var.scale_up_adjustment
+  scale_down_adjustment = local.scale_down_adjustment
+  scale_up_adjustment   = local.scale_up_adjustment
 
   subnets           = var.subnets
   queue_read_policy = module.relation_embedder_queue.read_policy
@@ -61,16 +61,16 @@ module "relation_embedder" {
   use_fargate_spot = true
 
   deployment_service_env  = var.release_label
-  deployment_service_name = "work-relation-embedder-${local.tei_suffix}"
+  deployment_service_name = "work-relation-embedder"
   shared_logging_secrets  = var.shared_logging_secrets
 }
 
 # Output topic
 
 module "relation_embedder_output_topic" {
-  source = "../../modules/topic"
+  source = "../modules/topic"
 
-  name       = "${var.namespace}_relation_embedder_output-${local.tei_suffix}"
+  name       = "${local.namespace}_relation_embedder_output"
   role_names = [module.relation_embedder.task_role_name]
 }
 

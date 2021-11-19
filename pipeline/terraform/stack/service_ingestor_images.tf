@@ -4,7 +4,7 @@ locals {
 
 module "ingestor_images_queue" {
   source          = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
-  queue_name      = "${var.namespace}_ingestor_images-${local.tei_suffix}"
+  queue_name      = "${local.namespace}_ingestor_images"
   topic_arns      = [module.image_inferrer_topic.arn]
   alarm_topic_arn = var.dlq_alarm_arn
 
@@ -15,19 +15,19 @@ module "ingestor_images_queue" {
 
 
 module "ingestor_images" {
-  source = "../../modules/service"
+  source = "../modules/service"
 
-  namespace = var.namespace
-  name      = "ingestor_images-${local.tei_suffix}"
+  namespace = local.namespace
+  name      = "ingestor_images"
 
-  container_image = var.ingestor_images_image
+  container_image = local.ingestor_images_image
   security_group_ids = [
-    var.service_egress_security_group_id,
+    aws_security_group.service_egress.id,
   ]
 
   elastic_cloud_vpce_sg_id = var.ec_privatelink_security_group_id
 
-  cluster_name = var.cluster_name
+  cluster_name = aws_ecs_cluster.cluster.name
   cluster_arn  = data.aws_ecs_cluster.cluster.id
 
   memory = 4096
@@ -60,9 +60,9 @@ module "ingestor_images" {
   }
 
   secret_env_vars = {
-    es_host_pipeline_storage     = var.pipeline_storage_private_host
-    es_port_pipeline_storage     = var.pipeline_storage_port
-    es_protocol_pipeline_storage = var.pipeline_storage_protocol
+    es_host_pipeline_storage     = local.pipeline_storage_private_host
+    es_port_pipeline_storage     = local.pipeline_storage_port
+    es_protocol_pipeline_storage = local.pipeline_storage_protocol
     es_username_pipeline_storage = "elasticsearch/pipeline_storage_${var.pipeline_date}/image_ingestor/es_username"
     es_password_pipeline_storage = "elasticsearch/pipeline_storage_${var.pipeline_date}/image_ingestor/es_password"
   }
@@ -74,21 +74,21 @@ module "ingestor_images" {
   min_capacity = var.min_capacity
   max_capacity = var.max_capacity
 
-  scale_down_adjustment = var.scale_down_adjustment
-  scale_up_adjustment   = var.scale_up_adjustment
+  scale_down_adjustment = local.scale_down_adjustment
+  scale_up_adjustment   = local.scale_up_adjustment
 
   queue_read_policy = module.ingestor_images_queue.read_policy
 
   deployment_service_env  = var.release_label
-  deployment_service_name = "image-ingestor-${local.tei_suffix}"
+  deployment_service_name = "image-ingestor"
 
   shared_logging_secrets = var.shared_logging_secrets
 }
 
 module "image_ingestor_topic" {
-  source = "../../modules/topic"
+  source = "../modules/topic"
 
-  name       = "${var.namespace}_image_ingestor_output-${local.tei_suffix}"
+  name       = "${local.namespace}_image_ingestor_output"
   role_names = [module.ingestor_images.task_role_name]
 }
 

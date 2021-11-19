@@ -105,7 +105,7 @@ resource "aws_dynamodb_table" "matcher_lock_table" {
 
   # These numbers were chosen by running a reindex and seeing when the
   # matcher started throttling.
-  read_capacity  = local.lock_table_billing_mode == "PROVISIONED" ? 10 : 1
+  read_capacity  = local.lock_table_billing_mode == "PROVISIONED" ? 1000 : 1
   write_capacity = local.lock_table_billing_mode == "PROVISIONED" ? 2500 : 1
 
   attribute {
@@ -123,7 +123,7 @@ resource "aws_dynamodb_table" "matcher_lock_table" {
     hash_key        = "contextId"
     projection_type = "ALL"
 
-    read_capacity  = local.lock_table_billing_mode == "PROVISIONED" ? 10 : 1
+    read_capacity  = local.lock_table_billing_mode == "PROVISIONED" ? 1000 : 1
     write_capacity = local.lock_table_billing_mode == "PROVISIONED" ? 2500 : 1
   }
 
@@ -134,14 +134,6 @@ resource "aws_dynamodb_table" "matcher_lock_table" {
 
   tags = {
     Name = local.lock_table_name
-  }
-
-  lifecycle {
-    ignore_changes = [
-      global_secondary_index,
-      /*read_capacity,*/
-      /*write_capacity*/
-    ]
   }
 }
 
