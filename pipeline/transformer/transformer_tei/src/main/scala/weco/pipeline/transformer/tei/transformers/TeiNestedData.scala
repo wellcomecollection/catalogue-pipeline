@@ -80,6 +80,7 @@ object TeiNestedData extends Logging {
               description = description,
               nestedTeiData = items,
               contributors = scribesMap.getOrElse(id, Nil),
+              origin = TeiProduction(node \ "history" \ "origin"),
               physicalDescription = TeiPhysicalDescription(node)
             )
           }

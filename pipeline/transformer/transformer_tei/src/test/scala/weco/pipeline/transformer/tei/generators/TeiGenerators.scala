@@ -17,8 +17,7 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
     catalogues: List[Elem] = Nil,
     authors: List[Elem] = Nil,
     physDesc: Option[Elem] = None,
-    origPlace: Option[Elem] = None,
-    originDates: List[Elem] = Nil,
+    history: Option[Elem] = None,
     profileDesc: Option[Elem] = None
   ): Elem =
     <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id={id}>
@@ -36,12 +35,7 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
               {msContents(summary, languages, items, authors)}
               {parts}
               {physDesc.getOrElse(NodeSeq.Empty)}
-              <history>
-                <origin>
-                  {origPlace.getOrElse(NodeSeq.Empty)}
-                  {originDates}
-                </origin>
-              </history>
+              {history.getOrElse(NodeSeq.Empty)}
             </msDesc>
           </sourceDesc>
         </fileDesc>
@@ -81,12 +75,22 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
   def msPart(
     id: String,
     msContents: Option[Elem] = None,
-    physDesc: Option[Elem] = None
+    physDesc: Option[Elem] = None,
+    history: Option[Elem] = None
   ) =
     <msPart xml:id={id}>
       {msContents.getOrElse(NodeSeq.Empty)}
       {physDesc.getOrElse(NodeSeq.Empty)}
+      {history.getOrElse(NodeSeq.Empty)}
     </msPart>
+
+  def history(origPlace: Option[Elem] = None, originDates: List[Elem] = Nil) =
+    <history>
+      <origin>
+        {origPlace.getOrElse(NodeSeq.Empty)}
+        {originDates}
+      </origin>
+    </history>
 
   def profileDesc(keywords: List[Elem]) = <profileDesc>
       <textClass>

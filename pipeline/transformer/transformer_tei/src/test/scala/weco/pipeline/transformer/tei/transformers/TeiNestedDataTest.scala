@@ -459,4 +459,19 @@ class TeiNestedDataTest extends AnyFunSpec with TeiGenerators with Matchers with
     result.value shouldBe List(
       TeiData(id = itemId, title = itemTitle, notes = List(Note(NoteType.LocusNote, "pp11 - 28"))))
   }
+
+  it("extracts the origin for a part") {
+    val result = TeiNestedData.nestedTeiData(
+      teiXml(
+        id,
+        parts = List(msPart(id = "partId", history = Some(history(origPlace = Some(origPlace(country = Some("India")))))))
+      ), wrapperTitle, Map.empty)
+
+    result.value.head.origin shouldBe List(
+      ProductionEvent(
+        "India",
+        places = List(Place("India")),
+        agents = Nil,
+        dates = Nil))
+  }
 }
