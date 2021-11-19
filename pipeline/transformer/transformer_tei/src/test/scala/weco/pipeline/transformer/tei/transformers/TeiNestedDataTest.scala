@@ -61,7 +61,7 @@ class TeiNestedDataTest extends AnyFunSpec with TeiGenerators with Matchers with
     val wrapperTitle = "Wrapper title"
     val result = TeiNestedData.nestedTeiData(teiXml(
         id = id,
-        title = titleElem(wrapperTitle),
+        refNo = idnoMsId(wrapperTitle),
         items = List(firstItem)
     ), wrapperTitle, Map.empty)
 
@@ -88,7 +88,7 @@ class TeiNestedDataTest extends AnyFunSpec with TeiGenerators with Matchers with
     val number = 1
     val xml = teiXml(
       id = id,
-      title = titleElem(wrapperTitle),
+      refNo = idnoMsId(wrapperTitle),
       parts = List(
         msPart(
           id = "1",
@@ -127,7 +127,7 @@ class TeiNestedDataTest extends AnyFunSpec with TeiGenerators with Matchers with
       items = Nil)
     val xml = teiXml(
       id = id,
-      title = titleElem(wrapperTitle),
+      refNo = idnoMsId(wrapperTitle),
       parts = List(
         msPart(
           id = "1",
@@ -160,7 +160,7 @@ class TeiNestedDataTest extends AnyFunSpec with TeiGenerators with Matchers with
     val firstInnerItem = msItem(innerItem1Id, languages = Nil, items = Nil)
     val xml = teiXml(
       id = id,
-      title = titleElem(wrapperTitle),
+      refNo = idnoMsId(wrapperTitle),
       parts = List(
         msPart(
           id = "1",
@@ -189,7 +189,7 @@ class TeiNestedDataTest extends AnyFunSpec with TeiGenerators with Matchers with
     val wrapperTitle = "test title"
     val xml = teiXml(
       id = id,
-      title = titleElem(wrapperTitle),
+      refNo = idnoMsId(wrapperTitle),
       items = List(
         msItem(
           id = "1",
@@ -223,7 +223,7 @@ class TeiNestedDataTest extends AnyFunSpec with TeiGenerators with Matchers with
     val wrapperTitle = "test title"
     val xml = teiXml(
       id = id,
-      title = titleElem(wrapperTitle),
+      refNo = idnoMsId(wrapperTitle),
       items = List(
         msItem(
           id = "1",
@@ -252,7 +252,7 @@ class TeiNestedDataTest extends AnyFunSpec with TeiGenerators with Matchers with
     val wrapperTitle = "test title"
     val xml = teiXml(
       id = id,
-      title = titleElem(wrapperTitle),
+      refNo = idnoMsId(wrapperTitle),
       parts = List(
         msPart(
           id = "1",
