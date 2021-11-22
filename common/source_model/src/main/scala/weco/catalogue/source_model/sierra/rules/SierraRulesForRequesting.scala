@@ -33,6 +33,9 @@ import weco.sierra.models.data.SierraItemData
   *   -   Variable length fields on items
   *       https://documentation.iii.com/sierrahelp/Content/sril/sril_records_varfld_types_item.html
   *
+  * This is based on a copy of the Rules for Requesting as sent from LS&S
+  * on 19 November 2021.
+  *
   */
 object SierraRulesForRequesting {
   def apply(itemData: SierraItemData): RulesForRequestingResult =
@@ -275,10 +278,7 @@ object SierraRulesForRequesting {
       //    v|i||79||=|sgmoh||
       //    v|i||79||=|somet||
       //    v|i||79||=|somge||
-      //    v|i||79||=|somhe||
-      //    v|i||79||=|somhi||
       //    v|i||79||=|somja||
-      //    v|i||79||=|sompa||
       //    v|i||79||=|sompr||
       //    q|i||79||=|somsy||Please complete a manual request slip.  This item cannot be requested online.
       //
@@ -299,10 +299,7 @@ object SierraRulesForRequesting {
               "sgmoh",
               "somet",
               "somge",
-              "somhe",
-              "somhi",
               "somja",
-              "sompa",
               "sompr",
               "somsy") =>
         NotRequestable.NeedsManualRequest(
