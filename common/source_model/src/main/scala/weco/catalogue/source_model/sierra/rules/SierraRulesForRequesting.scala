@@ -299,10 +299,7 @@ object SierraRulesForRequesting {
               "sgmoh",
               "somet",
               "somge",
-              "somhe",
-              "somhi",
               "somja",
-              "sompa",
               "sompr",
               "somsy") =>
         NotRequestable.NeedsManualRequest(
