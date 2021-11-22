@@ -191,10 +191,7 @@ class SierraRulesForRequestingTest
         "sgmoh",
         "somet",
         "somge",
-        "somhe",
-        "somhi",
         "somja",
-        "sompa",
         "sompr",
         "somsy")
 
