@@ -14,7 +14,6 @@ class TeiProductionTest extends AnyFunSpec with TeiGenerators with Matchers {
       id,
       history = Some(history(origPlace = Some(origPlace(country = Some("India")))))
     )
-    println(elem.toString())
     val result = TeiProduction(
       elem)
 

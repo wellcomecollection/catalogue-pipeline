@@ -150,8 +150,8 @@ class TeiNotesTest extends AnyFunSpec with Matchers with TeiGenerators {
     }
   }
 
-  it("adds hand(?) notes"){
-    val id = ""
+  it("adds hand notes"){
+    val id = "id"
     val result = TeiNotes(
       teiXml(
         id,

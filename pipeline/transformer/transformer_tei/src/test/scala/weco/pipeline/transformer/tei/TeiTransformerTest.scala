@@ -84,6 +84,10 @@ class TeiTransformerTest
               label = "Medicine, Arab",
               concepts = List(Concept(label = "Medicine, Arab"))
             )),
+          notes= List(                  Note(
+            contents = "Script: Beautiful Naskh Ink: Black; headings and dividers highlighted in red",
+            noteType = NoteType.HandNote
+          )),
           physicalDescription = Some(
             "Oriental paper of two colours: 'beige' and 'biscuit' and thickness of 0.10 mm.; Material: chart; 529 ff.; leaf dimensions: width 215mm, height 336mm; written dimensions: width 125mm, height 220mm")
         ),
@@ -125,7 +129,7 @@ class TeiTransformerTest
                     contents =
                       "Fol. 528a.12: فصل فى انتفاخ الاظفار والحكة فيها تعالج بما البحر غلسا دايما فيزول به وبطبيخ العدس والكرسنه او بطبيخ الخنثى ومن اضمدته البنبوس والزفت والتين الاصفر المطبوخ مجموعة وفرادى",
                     noteType = NoteType.EndsNote
-                  ),
+                  )
                 ),
                 collectionPath = Some(
                   CollectionPath(path = "manuscript_15651/MS_Arabic_1-item1")),
@@ -154,7 +158,7 @@ class TeiTransformerTest
     )
 
     work.value.data.languages shouldBe Nil
-    work.value.data.notes shouldBe List(
+    work.value.data.notes should contain(
       Note(
         NoteType.LanguageNote,
         "Sanskrit, with additional title entries in Persian script."))
