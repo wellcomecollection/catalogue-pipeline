@@ -182,14 +182,14 @@ class TeiNotesTest extends AnyFunSpec with Matchers with TeiGenerators {
     result shouldBe Nil
   }
 
-  it("ignores persName with role=scr in the note"){
+  it("includes the persname in the note if there is a label"){
     val id = ""
     val result = TeiNotes(
       teiXml(
         id,
         physDesc= Some(physDesc(handNotes = List(
           handNotes(
-            label = "In neat handwriting",
+            label = "In neat handwriting by ",
             persNames = List(
               scribe("Tony Stark", `type` = Some("original")),
               )))))
@@ -197,6 +197,22 @@ class TeiNotesTest extends AnyFunSpec with Matchers with TeiGenerators {
       )
 
 
-    result shouldBe List(Note(NoteType.HandNote, "In neat handwriting"))
+    result shouldBe List(Note(NoteType.HandNote, "In neat handwriting by Tony Stark"))
+  }
+
+  it("does not include the persName in the note if there is not a label"){
+    val id = "id"
+    val result = TeiNotes(
+      teiXml(
+        id,
+        physDesc= Some(physDesc(handNotes = List(
+          handNotes(
+            persNames = List(
+              scribe("Tony Stark", `type` = Some("original")),
+              )))))
+        )
+      )
+
+    result shouldBe Nil
   }
 }

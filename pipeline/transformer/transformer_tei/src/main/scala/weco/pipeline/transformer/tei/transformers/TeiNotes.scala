@@ -101,8 +101,13 @@ object TeiNotes {
 
   def getHandNotes(xml: Elem): List[Note] = (xml \\ "sourceDesc" \ "msDesc" \ "physDesc" \ "handDesc" \ "handNote").flatMap { n =>
     if((n \@ "scribe").isEmpty) {
-      val label = n.child.filterNot(n => n.label =="persName" && (n \@ "role") == "scr").text
-      NormaliseText(label).map(Note(NoteType.HandNote, _))
+      val label = n.text
+      val labelNoScribes= n.child.filterNot(n => n.label =="persName" && (n \@ "role") == "scr").text.trim
+      if(labelNoScribes.nonEmpty) {
+        NormaliseText(label).map(Note(NoteType.HandNote, _))
+      }else {
+        None
+      }
     } else None
   }.toList
 }
