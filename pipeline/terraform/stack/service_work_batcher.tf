@@ -54,7 +54,7 @@ module "batcher" {
   subnets = var.subnets
 
   min_capacity = var.min_capacity
-  max_capacity = min(1, var.max_capacity)
+  max_capacity = min(1, local.max_capacity)
 
   scale_down_adjustment = local.scale_down_adjustment
   scale_up_adjustment   = local.scale_up_adjustment

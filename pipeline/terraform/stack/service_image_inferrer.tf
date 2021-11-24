@@ -189,7 +189,7 @@ module "image_inferrer" {
   # the max capacity?
   min_capacity = var.min_capacity
 
-  max_capacity = min(10, var.max_capacity)
+  max_capacity = min(10, local.max_capacity)
 
   scale_down_adjustment = local.scale_down_adjustment
   scale_up_adjustment   = min(1, local.scale_up_adjustment)
