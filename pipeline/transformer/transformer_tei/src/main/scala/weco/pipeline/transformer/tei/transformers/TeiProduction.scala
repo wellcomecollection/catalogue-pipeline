@@ -7,7 +7,8 @@ import weco.pipeline.transformer.transformers.ParsedPeriod
 import scala.xml.{Elem, NodeSeq}
 
 object TeiProduction {
-  def apply(xml: Elem): List[ProductionEvent[Unminted]] = apply(xml \\ "msDesc" \ "history" \ "origin")
+  def apply(xml: Elem): List[ProductionEvent[Unminted]] =
+    apply(xml \\ "msDesc" \ "history" \ "origin")
 
   def apply(node: NodeSeq): List[ProductionEvent[Unminted]] = origin(node)
 

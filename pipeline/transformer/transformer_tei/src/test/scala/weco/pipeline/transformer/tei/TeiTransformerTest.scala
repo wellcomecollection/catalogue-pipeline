@@ -84,10 +84,12 @@ class TeiTransformerTest
               label = "Medicine, Arab",
               concepts = List(Concept(label = "Medicine, Arab"))
             )),
-          notes= List(                  Note(
-            contents = "Script: Beautiful Naskh Ink: Black; headings and dividers highlighted in red",
-            noteType = NoteType.HandNote
-          )),
+          notes = List(
+            Note(
+              contents =
+                "Script: Beautiful Naskh Ink: Black; headings and dividers highlighted in red",
+              noteType = NoteType.HandNote
+            )),
           physicalDescription = Some(
             "Oriental paper of two colours: 'beige' and 'biscuit' and thickness of 0.10 mm.; Material: chart; 529 ff.; leaf dimensions: width 215mm, height 336mm; written dimensions: width 125mm, height 220mm")
         ),
