@@ -58,7 +58,7 @@ def add_miro_image(*, graph, canonical_id, miro_id, **kwargs):
         >
         """.strip(),
         _attributes={"shape": "box"},
-        **kwargs
+        **kwargs,
     )
 
 
@@ -118,10 +118,15 @@ def main(index_date, work_id, emit_work_data, miro_images):
 
         if node_is_work and source == "Miro" and miro_images:
             add_miro_image(
-                graph=graph, miro_id=node["source_id"], canonical_id=node["id"], style=node_style
+                graph=graph,
+                miro_id=node["source_id"],
+                canonical_id=node["id"],
+                style=node_style,
             )
         else:
-            graph.node(node["id"], label=fr"{source}\n{node['source_id']}", style=node_style)
+            graph.node(
+                node["id"], label=fr"{source}\n{node['source_id']}", style=node_style
+            )
 
         graph.edges([(node["id"], dest) for dest in links])
 
