@@ -197,4 +197,20 @@ class TeiXmlTest
 
     result.value.subjects shouldBe List(Subject(label = "Botany", concepts = List(Concept(label ="Botany"))))
   }
+
+  it("adds hand notes"){
+    val id = "id"
+    val result = new TeiXml(
+      teiXml(
+        id,
+        physDesc = Some(physDesc(handNotes = List(
+          handNotes(
+            label = "neatly written text"),handNotes(
+            label = "even more neatly written text")))
+        )
+      )
+    ).parse
+
+    result.value.notes shouldBe List(Note(NoteType.HandNote, "neatly written text"), Note(NoteType.HandNote, "even more neatly written text"))
+  }
 }

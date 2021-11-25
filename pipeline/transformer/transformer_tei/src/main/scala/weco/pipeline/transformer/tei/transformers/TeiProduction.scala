@@ -10,8 +10,7 @@ object TeiProduction {
   def apply(xml: Elem): List[ProductionEvent[Unminted]] =
     apply(xml \\ "msDesc" \ "history" \ "origin")
 
-  def apply(node: NodeSeq): List[ProductionEvent[Unminted]] =
-    origin(node)
+  def apply(node: NodeSeq): List[ProductionEvent[Unminted]] = origin(node)
 
   /**
     * The origin tag contains information about where and when

@@ -6,11 +6,13 @@ import weco.pipeline.transformer.tei.NormaliseText
 import scala.xml.{Elem, NodeSeq}
 
 object TeiNotes {
+
   def apply(xml: Elem): List[Note] =
-    apply(xml \\ "msDesc" \ "msContents")
+    apply(xml \\ "msDesc" \ "msContents") ++ getHandNotes(xml \\ "msDesc")
 
   def apply(node: NodeSeq): List[Note] =
-    getLocus(node) ++ getColophon(node).toList ++ getIncipitAndExplicit(node)
+    getLocus(node) ++ getColophon(node).toList ++ getIncipitAndExplicit(node) ++ getHandNotes(
+      node)
 
   /** The colophon is in `colophon` nodes under `msContents` or `msItem`.
     *
@@ -96,5 +98,55 @@ object TeiNotes {
   private def getLocus(nodeSeq: NodeSeq): List[Note] =
     (nodeSeq \ "locus").flatMap { locus =>
       NormaliseText(locus.text.trim).map(Note(NoteType.LocusNote, _))
+    }.toList
+
+  /**
+    * HandNotes contain information about how/who wrote the manuscript and are in the physical description node
+    * which can be in msDesc for the wrapper work like:
+    * <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id="Egyptian_MS_2">
+    *  <teiHeader>
+    *    <fileDesc>
+    *      <sourceDesc>
+    *        <msDesc>
+    *          <physDesc>
+    *            <handDesc>
+    *              <handNote>Written in similar hand to the letters edited by Jac Janssen.</handNote>
+    *            </handDesc>
+    *          </physDesc>
+    * or in msPart for a part:
+    *<TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id="Greek_14">
+    * <teiHeader>
+    *   <fileDesc>
+    *     <sourceDesc>
+    *       <msDesc>
+    *         <msPart n="1" xml:id="Greek_14_A">
+    *           <physDesc>
+    *             <handDesc>
+    *               <handNote scope="sole">identified by Agamemnon Tselikas as a fourteenth-century Cypriot hand.</handNote>
+    *               </handDesc>
+    *           </physDesc>
+    *         </msPart>
+    */
+  def getHandNotes(nodeSeq: NodeSeq): List[Note] =
+    (nodeSeq \ "physDesc" \ "handDesc" \ "handNote").flatMap { n =>
+      //if the handNote has a scribe attribute, then it's being extracted as a contributor. No need to extract it again as a note
+      if ((n \@ "scribe").isEmpty) {
+        val label = n.text
+        // scribes can also appear in handNote as <persName role="scr">someone</persName>.
+        // Sometimes the persName tags are the only thing in the handNote tag and in that case, and in that case because
+        // they are already extracted as contributors, there's no need to extract them again as notes.
+        // Sometimes however, the persName nodes appear as part of a wider text in handNote. In that case we do
+        // want to extract everything otherwise that text becomes unintelligible ie:
+        // <handNote>In  neat handwriting by <persName role="scr">someone</persName></handNote>
+        val labelNoScribes = n.child
+          .filterNot(n => n.label == "persName" && (n \@ "role") == "scr")
+          .text
+          .trim
+        if (labelNoScribes.nonEmpty) {
+          NormaliseText(label).map(Note(NoteType.HandNote, _))
+        } else {
+          None
+        }
+      } else None
     }.toList
 }
