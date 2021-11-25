@@ -474,4 +474,19 @@ class TeiNestedDataTest extends AnyFunSpec with TeiGenerators with Matchers with
         agents = Nil,
         dates = Nil))
   }
+
+  it("extracts the handNote from parts"){
+    val result =  TeiNestedData.nestedTeiData(
+      teiXml(
+        id,
+        parts = List(msPart(id = s"$id-part1",
+        physDesc = Some(physDesc(handNotes = List(
+          handNotes(
+            label = "neatly written text"))))
+        )
+      )), wrapperTitle, Map.empty )
+
+    result.value.head.notes shouldBe List(Note(NoteType.HandNote, "neatly written text"))
+
+  }
 }

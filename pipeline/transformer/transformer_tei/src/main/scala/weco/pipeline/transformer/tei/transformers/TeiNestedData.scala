@@ -76,7 +76,7 @@ object TeiNestedData extends Logging {
               id = id,
               title = partTitle,
               languages = languages,
-              notes = languageNotes,
+              notes = languageNotes ++ TeiNotes(node),
               description = description,
               nestedTeiData = items,
               contributors = scribesMap.getOrElse(id, Nil),
