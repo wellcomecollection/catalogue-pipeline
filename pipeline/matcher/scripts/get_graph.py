@@ -98,15 +98,14 @@ def main(index_date, work_id, emit_work_data, miro_images):
         es, index_date=index_date, work_ids=node_ids, fetch_complete_work=emit_work_data
     )
 
-    deleted_node_ids = {node["id"] for node in nodes if node["type"] == "Deleted"}
-    valid_node_links = [
-        [dest for dest in ids if dest not in deleted_node_ids] for ids in node_links
-    ]
-    for node, links in filter(
-        lambda x: x, zip(nodes, valid_node_links)
-    ):
+    for node, links in zip(nodes, node_links):
         source = source_type_labels.get(node["source_id_type"], node["source_id_type"])
 
+        # Highlight nodes which are in the matcher graph but which don't
+        # correspond to a Work processed by the matcher.
+        #
+        # If there are any of these Works in the result, the merger won't
+        # do any merging at all.
         if node_versions[node["id"]] is None:
             node_style = "dashed"
         else:
