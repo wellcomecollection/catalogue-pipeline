@@ -101,26 +101,27 @@ def main(index_date, work_id, emit_work_data, miro_images):
     for node, links in zip(nodes, node_links):
         source = source_type_labels.get(node["source_id_type"], node["source_id_type"])
 
+        node_is_work = node_versions[node["id"]] is not None
+
+        if node_is_work and node["type"] == "Deleted":
+            continue
+
         # Highlight nodes which are in the matcher graph but which don't
         # correspond to a Work processed by the matcher.
         #
         # If there are any of these Works in the result, the merger won't
         # do any merging at all.
-        if node_versions[node["id"]] is None:
+        if not node_is_work:
             node_style = "dashed"
         else:
             node_style = ""
 
-        if source == "Miro" and miro_images and node["type"] != "Deleted":
+        if node_is_work and source == "Miro" and miro_images:
             add_miro_image(
                 graph=graph, miro_id=node["source_id"], canonical_id=node["id"], style=node_style
             )
         else:
-            label = fr"{source}\n{node['source_id']}"
-            if node["type"] == "Deleted":
-                label += "\n(deleted)"
-
-            graph.node(node["id"], label=label, style=node_style)
+            graph.node(node["id"], label=fr"{source}\n{node['source_id']}", style=node_style)
 
         graph.edges([(node["id"], dest) for dest in links])
 
