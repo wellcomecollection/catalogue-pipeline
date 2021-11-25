@@ -32,7 +32,7 @@ def get_aws_session(*, role_arn):
     )
 
 
-def add_miro_image(*, graph, canonical_id, miro_id):
+def add_miro_image(*, graph, canonical_id, miro_id, **kwargs):
     """
     If the --miro-images option is selected, include a thumbnail of
     the Miro image in the visual graph.
@@ -58,6 +58,7 @@ def add_miro_image(*, graph, canonical_id, miro_id):
         >
         """.strip(),
         _attributes={"shape": "box"},
+        **kwargs,
     )
 
 
@@ -89,27 +90,43 @@ def main(index_date, work_id, emit_work_data, miro_images):
         session, index_date=index_date, component_id=component_id
     )
 
+    node_versions = {node["id"]: node.get("version") for node in graph_component}
+
     node_ids = [node["id"] for node in graph_component]
     node_links = [node["linkedIds"] for node in graph_component]
     nodes = get_nodes_properties(
         es, index_date=index_date, work_ids=node_ids, fetch_complete_work=emit_work_data
     )
 
-    deleted_node_ids = {node["id"] for node in nodes if node["type"] == "Deleted"}
-    valid_node_links = [
-        [dest for dest in ids if dest not in deleted_node_ids] for ids in node_links
-    ]
-    for node, links in filter(
-        lambda x: x[0]["type"] != "Deleted", zip(nodes, valid_node_links)
-    ):
+    for node, links in zip(nodes, node_links):
         source = source_type_labels.get(node["source_id_type"], node["source_id_type"])
 
-        if source == "Miro" and miro_images:
+        node_is_work = node_versions[node["id"]] is not None
+
+        if node_is_work and node["type"] == "Deleted":
+            continue
+
+        # Highlight nodes which are in the matcher graph but which don't
+        # correspond to a Work processed by the matcher.
+        #
+        # If there are any of these Works in the result, the merger won't
+        # do any merging at all.
+        if not node_is_work:
+            node_style = "dashed"
+        else:
+            node_style = ""
+
+        if node_is_work and source == "Miro" and miro_images:
             add_miro_image(
-                graph=graph, miro_id=node["source_id"], canonical_id=node["id"]
+                graph=graph,
+                miro_id=node["source_id"],
+                canonical_id=node["id"],
+                style=node_style,
             )
         else:
-            graph.node(node["id"], label=fr"{source}\n{node['source_id']}")
+            graph.node(
+                node["id"], label=fr"{source}\n{node['source_id']}", style=node_style
+            )
 
         graph.edges([(node["id"], dest) for dest in links])
 
