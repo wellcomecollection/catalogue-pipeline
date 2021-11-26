@@ -138,8 +138,6 @@ class MergerFeatureTest
           index(idD.underlying).left.value.data.title shouldBe Some(
             "I was updated at t = 4")
 
-          true shouldBe true
-
           // 4) Now suppose the updates to A and C get processed by the matcher
           // at time t = 6.
           //
