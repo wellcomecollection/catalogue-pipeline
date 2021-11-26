@@ -4,6 +4,7 @@ import org.scalatest.GivenWhenThen
 import org.scalatest.featurespec.AnyFeatureSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.IdentifierType
+import weco.catalogue.internal_model.work.DeletedReason.SuppressedFromSource
 import weco.catalogue.internal_model.work.{
   CollectionPath,
   Format,
@@ -638,6 +639,42 @@ class MergerIntegrationTest
 
       And("it gets the METS thumbnail")
       context.getMerged(teiWork).data.thumbnail shouldBe metsWork.data.thumbnail
+    }
+  }
+
+  Scenario("Miro, Calm and Sierra but the Miro is deleted") {
+    withContext { implicit context =>
+      // This is a regression test for a bug we saw in the following scenario:
+      //
+      //      Sierra --> Calm --> Miro
+      //
+      // where the Miro work was suppressed.
+      //
+      // Because the matcher graph doesn't include links for suppressed works,
+      // this graph would end up with two components (Sierra/Calm) and (Miro).
+      // If you later updated the Sierra work, which had no direct link to the Miro
+      // work, the matcher wouldn't find the Miro work in the matcher database
+      // (because it was in a different component) and the Miro work got blatted.
+      //
+      // See https://github.com/wellcomecollection/platform/issues/5375
+      //
+      Given("the works")
+      val miro = miroIdentifiedWork()
+        .deleted(SuppressedFromSource("miro: isClearedForCatalogueApi = false"))
+
+      val calm = calmIdentifiedWork()
+        .mergeCandidates(List(createCalmMiroMergeCandidateFor(miro)))
+
+      val sierra = sierraIdentifiedWork()
+        .mergeCandidates(List(createCalmMergeCandidateFor(calm)))
+
+      When("the works are processed by the matcher/merger")
+      // Note: the order is significant here.  The bug only reproduces under
+      // certain orderings.
+      processWorks(miro, calm, sierra)
+
+      Then("the Sierra work is redirected to the Calm work")
+      context.getMerged(sierra) should beRedirectedTo(calm)
     }
   }
 }
