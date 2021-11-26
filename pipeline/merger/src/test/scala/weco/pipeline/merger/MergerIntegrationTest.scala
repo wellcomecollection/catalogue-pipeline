@@ -74,4 +74,28 @@ class MergerIntegrationTest
       mergedImages should contain(miro3.singleImage)
     }
   }
+
+  Scenario("One Sierra and one Miro work are matched") {
+    withContext { implicit context =>
+      Given("a Sierra work and a Miro work")
+      val miro = miroIdentifiedWork()
+      val sierra = sierraPhysicalIdentifiedWork()
+        .mergeCandidates(List(createMiroMergeCandidateFor(miro)))
+
+      When("the works are merged")
+      processWorks(sierra, miro)
+
+      Then("the Miro work is redirected to the Sierra work")
+      context.getMerged(miro) should beRedirectedTo(sierra)
+
+      And("an image is created from the Miro work")
+      context.imageData should contain only miro.singleImage
+
+      And("the merged Sierra work contains the image")
+      context
+        .getMerged(sierra)
+        .data
+        .imageData should contain only miro.singleImage
+    }
+  }
 }
