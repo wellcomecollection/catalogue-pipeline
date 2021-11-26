@@ -1,13 +1,16 @@
 package weco.pipeline.matcher.storage
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{Await, Future}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
 import weco.pipeline.matcher.fixtures.MatcherFixtures
 import weco.pipeline.matcher.generators.WorkStubGenerators
 import weco.pipeline.matcher.models.WorkNode
+import weco.pipeline.matcher.workgraph.WorkGraphUpdater
+
+import scala.concurrent.duration._
 
 class WorkGraphStoreTest
     extends AnyFunSpec
@@ -177,6 +180,46 @@ class WorkGraphStoreTest
 
           whenReady(workGraphStore.findAffectedWorks(work)) {
             _ shouldBe Set(workA, workB, workC)
+          }
+        }
+      }
+    }
+
+    it("retrieves a suppressed node after it was written") {
+      // These works form the graph
+      //
+      //      A -> B -> C
+      //
+      // but C is suppressed.  We want to make sure updating A still allows
+      // us to retrieve C.
+      val workC = createWorkWith(id = idC, workType = "Deleted")
+      val workB = createWorkWith(id = idB, referencedWorkIds = Set(workC.id))
+      val workA = createWorkWith(id = idA, referencedWorkIds = Set(workB.id))
+
+      withWorkGraphTable { graphTable =>
+        withWorkGraphStore(graphTable) { workGraphStore =>
+
+          // First store C in the table
+          val nodesC = WorkGraphUpdater.update(workC, affectedNodes = Set())
+          nodesC.head.suppressed shouldBe true
+          Await.ready(workGraphStore.put(nodesC), atMost = 1 second)
+
+          // Then store B
+          whenReady(workGraphStore.findAffectedWorks(workB)) { affectedNodes =>
+            val updatedNodes = WorkGraphUpdater.update(workB, affectedNodes)
+            Await.ready(workGraphStore.put(updatedNodes), atMost = 1 second)
+          }
+
+          // Then store A
+          whenReady(workGraphStore.findAffectedWorks(workA)) { affectedNodes =>
+            val updatedNodes = WorkGraphUpdater.update(workA, affectedNodes)
+            Await.ready(workGraphStore.put(updatedNodes), atMost = 1 second)
+          }
+
+          getExistingTableItem[WorkNode](id = idC.underlying, graphTable).suppressed shouldBe true
+
+          whenReady(workGraphStore.findAffectedWorks(workA)) { affectedNodes =>
+            affectedNodes.map(_.id) should contain(workC.id)
           }
         }
       }
