@@ -9,12 +9,14 @@ import weco.catalogue.internal_model.work.generators.{
   SierraWorkGenerators
 }
 import weco.catalogue.internal_model.work.{Format, MergeCandidate}
+import weco.pipeline.matcher.generators.MergeCandidateGenerators
 
 class SourcesTest
     extends AnyFunSpec
     with Matchers
     with CalmWorkGenerators
-    with SierraWorkGenerators {
+    with SierraWorkGenerators
+    with MergeCandidateGenerators {
   describe("findFirstLinkedDigitisedSierraWorkFor") {
     it("returns None if there are no source Works") {
       val physicalWork = sierraPhysicalIdentifiedWork()
@@ -32,18 +34,8 @@ class SourcesTest
         sierraPhysicalIdentifiedWork()
           .mergeCandidates(
             List(
-              MergeCandidate(
-                id = IdState.Identified(
-                  sourceIdentifier = digitisedWork1.sourceIdentifier,
-                  canonicalId = digitisedWork1.state.canonicalId),
-                reason = "Physical/digitised Sierra work"
-              ),
-              MergeCandidate(
-                id = IdState.Identified(
-                  sourceIdentifier = digitisedWork2.sourceIdentifier,
-                  canonicalId = digitisedWork2.state.canonicalId),
-                reason = "Physical/digitised Sierra work"
-              )
+              createSierraPairMergeCandidateFor(digitisedWork1),
+              createSierraPairMergeCandidateFor(digitisedWork2),
             )
           )
 
@@ -63,14 +55,7 @@ class SourcesTest
       val digitisedWork =
         sierraDigitalIdentifiedWork()
           .mergeCandidates(
-            List(
-              MergeCandidate(
-                id = IdState.Identified(
-                  sourceIdentifier = physicalWork.sourceIdentifier,
-                  canonicalId = physicalWork.state.canonicalId),
-                reason = "Physical/digitised Sierra work"
-              )
-            )
+            List(createSierraPairMergeCandidateFor(physicalWork))
           )
 
       val result =
@@ -135,14 +120,7 @@ class SourcesTest
       val physicalWork =
         calmIdentifiedWork()
           .mergeCandidates(
-            List(
-              MergeCandidate(
-                id = IdState.Identified(
-                  sourceIdentifier = digitisedWork.sourceIdentifier,
-                  canonicalId = digitisedWork.state.canonicalId),
-                reason = "Physical/digitised Sierra work"
-              )
-            )
+            List(createSierraPairMergeCandidateFor(digitisedWork))
           )
 
       val result =
@@ -159,14 +137,7 @@ class SourcesTest
       val physicalWork =
         sierraDigitalIdentifiedWork()
           .mergeCandidates(
-            List(
-              MergeCandidate(
-                id = IdState.Identified(
-                  sourceIdentifier = digitisedWork.sourceIdentifier,
-                  canonicalId = digitisedWork.state.canonicalId),
-                reason = "Physical/digitised Sierra work"
-              )
-            )
+            List(createSierraPairMergeCandidateFor(digitisedWork))
           )
 
       val result =
@@ -184,14 +155,7 @@ class SourcesTest
         sierraPhysicalIdentifiedWork()
           .format(Format.Videos)
           .mergeCandidates(
-            List(
-              MergeCandidate(
-                id = IdState.Identified(
-                  sourceIdentifier = digitisedWork.sourceIdentifier,
-                  canonicalId = digitisedWork.state.canonicalId),
-                reason = "Physical/digitised Sierra work"
-              )
-            )
+            List(createSierraPairMergeCandidateFor(digitisedWork))
           )
 
       val result =

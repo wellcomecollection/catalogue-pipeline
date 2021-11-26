@@ -4,23 +4,19 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.{Inside, Inspectors}
 import weco.catalogue.internal_model.identifiers.{
-  IdState,
   IdentifierType,
   SourceIdentifier
 }
 import weco.catalogue.internal_model.work.generators.SourceWorkGenerators
-import weco.catalogue.internal_model.work.{
-  Format,
-  MergeCandidate,
-  Work,
-  WorkState
-}
+import weco.catalogue.internal_model.work.{Format, Work, WorkState}
+import weco.pipeline.matcher.generators.MergeCandidateGenerators
 import weco.pipeline.merger.models.FieldMergeResult
 
 class OtherIdentifiersRuleTest
     extends AnyFunSpec
     with Matchers
     with SourceWorkGenerators
+    with MergeCandidateGenerators
     with Inside
     with Inspectors {
   val nothingWork: Work.Visible[WorkState.Identified] = identifiedWork(
@@ -72,14 +68,7 @@ class OtherIdentifiersRuleTest
     sierraPhysicalIdentifiedWork()
       .format(Format.Pictures)
       .mergeCandidates(
-        List(
-          MergeCandidate(
-            id = IdState.Identified(
-              sourceIdentifier = mergeCandidate.sourceIdentifier,
-              canonicalId = mergeCandidate.state.canonicalId),
-            reason = "Physical/digitised Sierra work"
-          )
-        )
+        List(createSierraPairMergeCandidateFor(mergeCandidate))
       )
 
   val sierraWithDigcode: Work.Visible[WorkState.Identified] =

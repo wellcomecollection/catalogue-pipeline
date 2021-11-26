@@ -1,27 +1,24 @@
 package weco.pipeline.merger.services
 
-import scala.collection.mutable
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-
-import scala.concurrent.ExecutionContext.Implicits.global
+import weco.catalogue.internal_model.identifiers.{CanonicalId, IdState}
+import weco.catalogue.internal_model.work.Work
+import weco.catalogue.internal_model.work.WorkFsm._
+import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
+import weco.catalogue.internal_model.work.generators.MiroWorkGenerators
 import weco.fixtures.TestWith
 import weco.messaging.fixtures.SQS.QueuePair
 import weco.messaging.memory.MemoryMessageSender
 import weco.monitoring.memory.MemoryMetrics
-import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
-import weco.catalogue.internal_model.work.WorkFsm._
-import weco.catalogue.internal_model.identifiers.{CanonicalId, IdState}
-import weco.catalogue.internal_model.work.generators.MiroWorkGenerators
-import weco.catalogue.internal_model.work.{MergeCandidate, Work}
+import weco.pipeline.matcher.generators.MergeCandidateGenerators
 import weco.pipeline.matcher.models.MatcherResult._
-import weco.pipeline.merger.fixtures.{
-  MatcherResultFixture,
-  WorkerServiceFixture
-}
+import weco.pipeline.merger.fixtures.{MatcherResultFixture, MergerFixtures}
 import weco.pipeline_storage.memory.MemoryRetriever
 
+import scala.collection.mutable
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
 class MergerWorkerServiceTest
@@ -31,7 +28,8 @@ class MergerWorkerServiceTest
     with IntegrationPatience
     with MiroWorkGenerators
     with MatcherResultFixture
-    with WorkerServiceFixture {
+    with MergeCandidateGenerators
+    with MergerFixtures {
 
   it("reads matcher result messages, retrieves the works and sends on the IDs") {
     withMergerWorkerServiceFixtures {
@@ -338,17 +336,10 @@ class MergerWorkerServiceTest
   }
 
   it("passes through a deleted work unmodified") {
-    val deletedWork = identifiedWork().deleted()
+    val deletedWork = sierraDigitalIdentifiedWork().deleted()
     val visibleWork = sierraPhysicalIdentifiedWork()
       .mergeCandidates(
-        List(
-          MergeCandidate(
-            id = IdState.Identified(
-              canonicalId = deletedWork.state.canonicalId,
-              sourceIdentifier = deletedWork.sourceIdentifier),
-            reason = "Physical/digitised Sierra work"
-          )
-        )
+        List(createSierraPairMergeCandidateFor(deletedWork))
       )
 
     withMergerWorkerServiceFixtures {
@@ -443,7 +434,7 @@ class MergerWorkerServiceTest
         val metrics = new MemoryMetrics()
         val index = mutable.Map.empty[String, WorkOrImage]
 
-        withWorkerService(
+        withMergerService(
           retriever,
           queue,
           workSender,

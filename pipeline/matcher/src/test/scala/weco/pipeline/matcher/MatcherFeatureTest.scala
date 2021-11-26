@@ -3,25 +3,20 @@ package weco.pipeline.matcher
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.index.IndexFixtures
 import weco.catalogue.internal_model.work.DeletedReason.SuppressedFromSource
-import weco.catalogue.internal_model.work.MergeCandidate
 import weco.catalogue.internal_model.work.generators.SourceWorkGenerators
-import weco.catalogue.internal_model.Implicits._
+import weco.fixtures.TimeAssertions
 import weco.messaging.fixtures.SQS.QueuePair
 import weco.messaging.memory.MemoryMessageSender
-import weco.fixtures.TimeAssertions
 import weco.pipeline.matcher.fixtures.MatcherFixtures
-import weco.pipeline.matcher.generators.WorkStubGenerators
-import weco.pipeline.matcher.models.MatcherResult._
-import weco.pipeline.matcher.models.{
-  MatchedIdentifiers,
-  MatcherResult,
-  WorkIdentifier,
-  WorkNode,
-  WorkStub
+import weco.pipeline.matcher.generators.{
+  MergeCandidateGenerators,
+  WorkStubGenerators
 }
+import weco.pipeline.matcher.models.MatcherResult._
+import weco.pipeline.matcher.models._
 import weco.pipeline.matcher.storage.elastic.ElasticWorkStubRetriever
 import weco.pipeline_storage.Retriever
 import weco.pipeline_storage.memory.MemoryRetriever
@@ -37,6 +32,7 @@ class MatcherFeatureTest
     with IndexFixtures
     with WorkStubGenerators
     with SourceWorkGenerators
+    with MergeCandidateGenerators
     with TimeAssertions {
 
   it("processes a single Work with nothing linked to it") {
@@ -45,7 +41,7 @@ class MatcherFeatureTest
     val messageSender = new MemoryMessageSender()
 
     withLocalSqsQueue() { queue =>
-      withWorkerService(retriever, queue, messageSender) { _ =>
+      withMatcherService(retriever, queue, messageSender) { _ =>
         val work = createWorkWith(referencedWorkIds = Set.empty)
 
         val expectedWorks =
@@ -76,7 +72,7 @@ class MatcherFeatureTest
     withLocalSqsQueuePair() {
       case QueuePair(queue, dlq) =>
         withWorkGraphTable { graphTable =>
-          withWorkerService(retriever, queue, messageSender, graphTable) { _ =>
+          withMatcherService(retriever, queue, messageSender, graphTable) { _ =>
             val existingWorkVersion = 2
             val updatedWorkVersion = 1
 
@@ -122,30 +118,11 @@ class MatcherFeatureTest
 
     val sierraDigitisedBib = sierraDigitalIdentifiedWork()
       .mergeCandidates(
-        List(
-          MergeCandidate(
-            id = IdState.Identified(
-              canonicalId = sierraPhysicalBib.state.canonicalId,
-              sourceIdentifier = sierraPhysicalBib.state.sourceIdentifier
-            ),
-            reason = "Sierra physical/digitised bib"
-          )
-        )
-      )
+        List(createSierraPairMergeCandidateFor(sierraPhysicalBib)))
       .deleted(SuppressedFromSource("Sierra"))
 
     val metsRecord = metsIdentifiedWork()
-      .mergeCandidates(
-        List(
-          MergeCandidate(
-            id = IdState.Identified(
-              canonicalId = sierraDigitisedBib.state.canonicalId,
-              sourceIdentifier = sierraDigitisedBib.state.sourceIdentifier
-            ),
-            reason = "METS work"
-          )
-        )
-      )
+      .mergeCandidates(List(createMetsMergeCandidateFor(sierraDigitisedBib)))
 
     val works = Seq(sierraPhysicalBib, sierraDigitisedBib, metsRecord)
 
@@ -159,7 +136,7 @@ class MatcherFeatureTest
 
       withLocalSqsQueuePair() {
         case QueuePair(queue, dlq) =>
-          withWorkerService(retriever, queue, messageSender) { _ =>
+          withMatcherService(retriever, queue, messageSender) { _ =>
             works.foreach { w =>
               sendNotificationToSQS(queue, body = w.id)
             }

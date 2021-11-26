@@ -23,11 +23,11 @@ import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-trait WorkerServiceFixture extends PipelineStorageStreamFixtures {
+trait MergerFixtures extends PipelineStorageStreamFixtures {
 
   type WorkOrImage = Either[Work[Merged], Image[Initial]]
 
-  def withWorkerService[R](
+  def withMergerService[R](
     retriever: MemoryRetriever[Work[Identified]],
     queue: Queue,
     workSender: MemoryMessageSender,
@@ -50,18 +50,6 @@ trait WorkerServiceFixture extends PipelineStorageStreamFixtures {
         workerService.run()
 
         testWith(workerService)
-      }
-    }
-
-  def withWorkerService[R](retriever: MemoryRetriever[Work[Identified]])(
-    testWith: TestWith[MergerWorkerService[String, String], R]): R =
-    withLocalSqsQueue() { queue =>
-      val workSender = new MemoryMessageSender()
-      val imageSender = new MemoryMessageSender()
-
-      withWorkerService(retriever, queue, workSender, imageSender) {
-        workerService =>
-          testWith(workerService)
       }
     }
 
