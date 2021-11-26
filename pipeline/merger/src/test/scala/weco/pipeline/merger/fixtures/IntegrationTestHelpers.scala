@@ -6,6 +6,7 @@ import org.scalatest.matchers.{MatchResult, Matcher}
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.image.ImageData
 import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
+import weco.catalogue.internal_model.work.generators.WorkGenerators
 import weco.catalogue.internal_model.work.{Work, WorkState}
 import weco.fixtures.TestWith
 import weco.messaging.fixtures.SQS.QueuePair
@@ -24,7 +25,7 @@ import scala.util.Try
 
 // These are in a separate file to avoid cluttering up the integration tests
 // with code that doesn't tell us about the desired matcher/merger behaviour.
-trait IntegrationTestHelpers extends EitherValues with MatcherFixtures with MergerFixtures {
+trait IntegrationTestHelpers extends EitherValues with MatcherFixtures with MergerFixtures with WorkGenerators {
 
   type MergerIndex = mutable.Map[String, WorkOrImage]
   type Context = (MemoryRetriever[Work[WorkState.Identified]], QueuePair, QueuePair, MemoryMessageSender, MemoryMessageSender, MergerIndex)
@@ -120,6 +121,14 @@ trait IntegrationTestHelpers extends EitherValues with MatcherFixtures with Merg
   def processWork(work: Work[WorkState.Identified])(implicit context: Context): Unit =
     processWorks(work)
 
+  def updateInternalWork(
+    internalWork: Work.Visible[WorkState.Identified],
+    teiWork: Work.Visible[WorkState.Identified]) =
+    internalWork
+      .copy(version = teiWork.version)
+      .mapState(state =>
+        state.copy(sourceModifiedTime = teiWork.state.sourceModifiedTime))
+
   class StateMatcher(right: WorkState.Identified) extends Matcher[WorkState.Merged] {
     def apply(left: WorkState.Merged): MatchResult =
       MatchResult(
@@ -157,6 +166,15 @@ trait IntegrationTestHelpers extends EitherValues with MatcherFixtures with Merg
 
   def beRedirectedTo(expectedRedirectTo: Work.Visible[Identified]) =
     new RedirectMatcher(expectedRedirectTo)
+
+  def beVisible = new Matcher[Work[Merged]] {
+    override def apply(left: Work[Merged]): MatchResult =
+      MatchResult(
+        left.isInstanceOf[Work.Visible[Merged]],
+        s"${left.id} is not visible",
+        s"${left.id} is visible",
+      )
+  }
 
   implicit class VisibleWorkOps(val work: Work.Visible[Identified]) {
     def singleImage: ImageData[IdState.Identified] =
