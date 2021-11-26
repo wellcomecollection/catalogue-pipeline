@@ -128,7 +128,7 @@ class MatcherFeatureTest
               canonicalId = sierraPhysicalBib.state.canonicalId,
               sourceIdentifier = sierraPhysicalBib.state.sourceIdentifier
             ),
-            reason = "Sierra physical/digitised bib"
+            reason = "Physical/digitised Sierra work"
           )
         )
       )
