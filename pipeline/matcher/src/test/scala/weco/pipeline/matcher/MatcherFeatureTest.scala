@@ -117,7 +117,8 @@ class MatcherFeatureTest
     val sierraPhysicalBib = sierraPhysicalIdentifiedWork()
 
     val sierraDigitisedBib = sierraDigitalIdentifiedWork()
-      .mergeCandidates(List(createSierraPairMergeCandidateFor(sierraPhysicalBib)))
+      .mergeCandidates(
+        List(createSierraPairMergeCandidateFor(sierraPhysicalBib)))
       .deleted(SuppressedFromSource("Sierra"))
 
     val metsRecord = metsIdentifiedWork()

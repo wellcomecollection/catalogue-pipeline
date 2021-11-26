@@ -11,10 +11,7 @@ import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.catalogue.internal_model.work.generators.WorkGenerators
 import weco.pipeline.matcher.models.MatcherResult._
-import weco.pipeline.merger.fixtures.{
-  MatcherResultFixture,
-  MergerFixtures
-}
+import weco.pipeline.merger.fixtures.{MatcherResultFixture, MergerFixtures}
 import weco.pipeline_storage.memory.MemoryRetriever
 
 import java.time.Instant

@@ -14,10 +14,7 @@ import weco.messaging.memory.MemoryMessageSender
 import weco.monitoring.memory.MemoryMetrics
 import weco.pipeline.matcher.generators.MergeCandidateGenerators
 import weco.pipeline.matcher.models.MatcherResult._
-import weco.pipeline.merger.fixtures.{
-  MatcherResultFixture,
-  MergerFixtures
-}
+import weco.pipeline.merger.fixtures.{MatcherResultFixture, MergerFixtures}
 import weco.pipeline_storage.memory.MemoryRetriever
 
 import scala.collection.mutable

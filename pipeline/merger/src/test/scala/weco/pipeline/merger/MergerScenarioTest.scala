@@ -166,7 +166,8 @@ class MergerScenarioTest
       val physicalVideo =
         sierraPhysicalIdentifiedWork()
           .format(Format.Videos)
-          .mergeCandidates(List(createSierraPairMergeCandidateFor(digitisedVideo)))
+          .mergeCandidates(
+            List(createSierraPairMergeCandidateFor(digitisedVideo)))
 
       When("the works are merged")
       val outcome = merger.merge(Seq(physicalVideo, digitisedVideo))
@@ -287,7 +288,8 @@ class MergerScenarioTest
           .title("A work for an e-bib")
           .format(Format.Videos)
           .mergeCandidates(
-            List(createSierraPairMergeCandidateFor(workWithPhysicalVideoFormats))
+            List(
+              createSierraPairMergeCandidateFor(workWithPhysicalVideoFormats))
           )
 
       val workForMets =
@@ -351,7 +353,8 @@ class MergerScenarioTest
 
     Scenario("A Tei with internal works and a Calm are merged") {
       Given("a Tei and a Calm record")
-      val calmWork = calmIdentifiedWork().collectionPath(CollectionPath("a/b/c"))
+      val calmWork =
+        calmIdentifiedWork().collectionPath(CollectionPath("a/b/c"))
       val firstInternalWork =
         teiIdentifiedWork().collectionPath(CollectionPath("1"))
       val secondInternalWork =
@@ -533,8 +536,8 @@ class MergerScenarioTest
         metsIdentifiedWork()
           .thumbnail(createDigitalLocation)
           .items(List(createDigitalItem))
-          .invisible(
-            invisibilityReasons = List(InvisibilityReason.MetsWorksAreNotVisible))
+          .invisible(invisibilityReasons =
+            List(InvisibilityReason.MetsWorksAreNotVisible))
 
       When("they are merged together")
       val outcome = merger.merge(List(teiWork, sierraWork, metsWork, calmWork))
