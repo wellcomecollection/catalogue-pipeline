@@ -4,27 +4,17 @@ import org.scalatest.Inside
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.IdState
-import weco.catalogue.internal_model.locations.{
-  AccessCondition,
-  AccessMethod,
-  AccessStatus,
-  DigitalLocation,
-  LocationType
-}
+import weco.catalogue.internal_model.locations._
 import weco.catalogue.internal_model.work.generators.SourceWorkGenerators
-import weco.catalogue.internal_model.work.{
-  Format,
-  Item,
-  MergeCandidate,
-  Work,
-  WorkState
-}
+import weco.catalogue.internal_model.work.{Format, Item, Work, WorkState}
+import weco.pipeline.matcher.generators.MergeCandidateGenerators
 import weco.pipeline.merger.models.FieldMergeResult
 
 class ItemsRuleTest
     extends AnyFunSpec
     with Matchers
     with SourceWorkGenerators
+    with MergeCandidateGenerators
     with Inside {
   val tei: Work.Visible[WorkState.Identified] =
     teiIdentifiedWork()
@@ -129,15 +119,7 @@ class ItemsRuleTest
     val physicalWork =
       sierraIdentifiedWork()
         .mergeCandidates(
-          List(
-            MergeCandidate(
-              id = IdState.Identified(
-                canonicalId = digitisedWork.state.canonicalId,
-                sourceIdentifier = digitisedWork.state.sourceIdentifier
-              ),
-              reason = "Physical/digitised Sierra work"
-            )
-          )
+          List(createSierraPairMergeCandidateFor(digitisedWork))
         )
         .items(List(createIdentifiedPhysicalItem))
 

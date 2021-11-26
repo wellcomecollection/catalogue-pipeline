@@ -3,9 +3,9 @@ package weco.pipeline.merger
 import org.scalatest.GivenWhenThen
 import org.scalatest.featurespec.AnyFeatureSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.work.Format
 import weco.catalogue.internal_model.work.generators.SourceWorkGenerators
-import weco.catalogue.internal_model.work.{Format, MergeCandidate}
+import weco.pipeline.matcher.generators.MergeCandidateGenerators
 import weco.pipeline.merger.fixtures.FeatureTestSugar
 import weco.pipeline.merger.services.PlatformMerger
 
@@ -14,6 +14,7 @@ class MergerScenarioTest
     with GivenWhenThen
     with Matchers
     with FeatureTestSugar
+    with MergeCandidateGenerators
     with SourceWorkGenerators {
   val merger = PlatformMerger
 
@@ -158,17 +159,7 @@ class MergerScenarioTest
       val physicalVideo =
         sierraPhysicalIdentifiedWork()
           .format(Format.Videos)
-          .mergeCandidates(
-            List(
-              MergeCandidate(
-                id = IdState.Identified(
-                  sourceIdentifier = digitisedVideo.sourceIdentifier,
-                  canonicalId = digitisedVideo.state.canonicalId
-                ),
-                reason = "Physical/digitised Sierra work"
-              )
-            )
-          )
+          .mergeCandidates(List(createSierraPairMergeCandidateFor(digitisedVideo)))
 
       When("the works are merged")
       val outcome = merger.merge(Seq(physicalVideo, digitisedVideo))
@@ -289,32 +280,13 @@ class MergerScenarioTest
           .title("A work for an e-bib")
           .format(Format.Videos)
           .mergeCandidates(
-            List(
-              MergeCandidate(
-                id = IdState.Identified(
-                  canonicalId = workWithPhysicalVideoFormats.state.canonicalId,
-                  sourceIdentifier =
-                    workWithPhysicalVideoFormats.sourceIdentifier
-                ),
-                reason = "Physical/digitised Sierra work"
-              )
-            )
+            List(createSierraPairMergeCandidateFor(workWithPhysicalVideoFormats))
           )
 
       val workForMets =
         identifiedWork(sourceIdentifier = createMetsSourceIdentifier)
           .title("A METS work")
-          .mergeCandidates(
-            List(
-              MergeCandidate(
-                id = IdState.Identified(
-                  canonicalId = workForEbib.state.canonicalId,
-                  sourceIdentifier = workForEbib.sourceIdentifier
-                ),
-                reason = "METS work"
-              )
-            )
-          )
+          .mergeCandidates(List(createMetsMergeCandidateFor(workForEbib)))
           .items(List(createDigitalItem))
           .invisible()
 
