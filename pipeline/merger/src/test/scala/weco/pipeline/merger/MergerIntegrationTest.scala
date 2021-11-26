@@ -4,7 +4,11 @@ import org.scalatest.GivenWhenThen
 import org.scalatest.featurespec.AnyFeatureSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.IdentifierType
-import weco.catalogue.internal_model.work.{CollectionPath, Format, InvisibilityReason}
+import weco.catalogue.internal_model.work.{
+  CollectionPath,
+  Format,
+  InvisibilityReason
+}
 import weco.catalogue.internal_model.work.generators.SourceWorkGenerators
 import weco.fixtures.TimeAssertions
 import weco.pipeline.matcher.generators.MergeCandidateGenerators
@@ -23,7 +27,7 @@ import weco.pipeline.merger.fixtures.IntegrationTestHelpers
   *
   */
 class MergerIntegrationTest
-  extends AnyFeatureSpec
+    extends AnyFeatureSpec
     with GivenWhenThen
     with Matchers
     with SourceWorkGenerators
@@ -54,7 +58,8 @@ class MergerIntegrationTest
       val miro2 = miroIdentifiedWork()
       val miro3 = miroIdentifiedWork()
       val sierra = sierraPhysicalIdentifiedWork()
-        .mergeCandidates(List(miro1, miro2, miro3).map(createMiroSierraMergeCandidateFor))
+        .mergeCandidates(
+          List(miro1, miro2, miro3).map(createMiroSierraMergeCandidateFor))
 
       When("the works are processed by the matcher/merger")
       processWorks(sierra, miro1, miro2, miro3)
@@ -160,15 +165,16 @@ class MergerIntegrationTest
       )
       val miro = miroIdentifiedWork()
       val sierraDigaidsPicture = sierraIdentifiedWork()
-        // Multiple physical items would prevent a Miro redirect in any other case,
-        // but we still expect to see it for the digaids works as the Miro item is
-        // a known duplicate of the METS item.
+      // Multiple physical items would prevent a Miro redirect in any other case,
+      // but we still expect to see it for the digaids works as the Miro item is
+      // a known duplicate of the METS item.
         .items(List(createIdentifiedPhysicalItem, createIdentifiedPhysicalItem))
         .format(Format.Pictures)
         .otherIdentifiers(List(createDigcodeIdentifier("digaids")))
         .mergeCandidates(List(createMiroSierraMergeCandidateFor(miro)))
       val mets = metsIdentifiedWork()
-        .mergeCandidates(List(createMetsMergeCandidateFor(sierraDigaidsPicture)))
+        .mergeCandidates(
+          List(createMetsMergeCandidateFor(sierraDigaidsPicture)))
 
       When("the works are processed by the matcher/merger")
       processWorks(sierraDigaidsPicture, mets, miro)
@@ -377,8 +383,11 @@ class MergerIntegrationTest
       context.getMerged(workForEbib).data.items shouldBe workForMets.data.items
 
       And("the Sierra physical work is unaffected")
-      context.getMerged(workWithPhysicalVideoFormats).data shouldBe workWithPhysicalVideoFormats.data
-      context.getMerged(workWithPhysicalVideoFormats).state should beSimilarTo(workWithPhysicalVideoFormats.state)
+      context
+        .getMerged(workWithPhysicalVideoFormats)
+        .data shouldBe workWithPhysicalVideoFormats.data
+      context.getMerged(workWithPhysicalVideoFormats).state should beSimilarTo(
+        workWithPhysicalVideoFormats.state)
     }
   }
 
@@ -387,7 +396,8 @@ class MergerIntegrationTest
       Given("a Tei, a Sierra physical record and a Sierra digital record")
       val (digitalSierra, physicalSierra) = sierraIdentifiedWorkPair()
       val teiWork = teiIdentifiedWork()
-        .mergeCandidates(List(createTeiBnumberMergeCandidateFor(physicalSierra)))
+        .mergeCandidates(
+          List(createTeiBnumberMergeCandidateFor(physicalSierra)))
 
       When("the works are processed by the matcher/merger")
       processWorks(digitalSierra, physicalSierra, teiWork)
@@ -433,7 +443,8 @@ class MergerIntegrationTest
       val teiWork = teiIdentifiedWork()
         .title("A tei work")
         .internalWorks(List(firstInternalWork, secondInternalWork))
-        .mergeCandidates(List(createTeiBnumberMergeCandidateFor(physicalSierra)))
+        .mergeCandidates(
+          List(createTeiBnumberMergeCandidateFor(physicalSierra)))
 
       When("the works are processed by the matcher/merger")
       processWorks(digitalSierra, physicalSierra, teiWork)
@@ -540,12 +551,15 @@ class MergerIntegrationTest
         .collectionPath(CollectionPath("id/2"))
 
       context.getMerged(internalWork1).data shouldBe expectedInternalWork1.data
-      context.getMerged(internalWork1).state should beSimilarTo(expectedInternalWork1.state)
+      context.getMerged(internalWork1).state should beSimilarTo(
+        expectedInternalWork1.state)
 
       context.getMerged(internalWork2).data shouldBe expectedInternalWork2.data
-      context.getMerged(internalWork2).state should beSimilarTo(expectedInternalWork2.state)
+      context.getMerged(internalWork2).state should beSimilarTo(
+        expectedInternalWork2.state)
 
-      val expectedTeiWork = teiWork.internalWorks(List(expectedInternalWork1, expectedInternalWork2))
+      val expectedTeiWork = teiWork.internalWorks(
+        List(expectedInternalWork1, expectedInternalWork2))
       context.getMerged(teiWork).data shouldBe expectedTeiWork.data
       context.getMerged(teiWork).state should beSimilarTo(expectedTeiWork.state)
     }
