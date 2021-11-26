@@ -34,33 +34,6 @@ class MergerScenarioTest
    * behaviour which are most valuable as documentation of our intentions.
    */
   Feature("Top-level merging") {
-    Scenario("One Sierra and multiple Miro works are matched") {
-      Given("a Sierra work and 3 Miro works")
-      val sierra = sierraPhysicalIdentifiedWork()
-      val miro1 = miroIdentifiedWork()
-      val miro2 = miroIdentifiedWork()
-      val miro3 = miroIdentifiedWork()
-
-      When("the works are merged")
-      val outcome = merger.merge(Seq(sierra, miro1, miro2, miro3))
-
-      Then("the Miro works are redirected to the Sierra work")
-      outcome.getMerged(miro1) should beRedirectedTo(sierra)
-      outcome.getMerged(miro2) should beRedirectedTo(sierra)
-      outcome.getMerged(miro3) should beRedirectedTo(sierra)
-
-      And("images are created from the Miro works")
-      outcome.imageData should contain(miro1.singleImage)
-      outcome.imageData should contain(miro2.singleImage)
-      outcome.imageData should contain(miro3.singleImage)
-
-      And("the merged Sierra work's images contain all of the images")
-      val mergedImages = outcome.getMerged(sierra).data.imageData
-      mergedImages should contain(miro1.singleImage)
-      mergedImages should contain(miro2.singleImage)
-      mergedImages should contain(miro3.singleImage)
-    }
-
     Scenario("One Sierra and one Miro work are matched") {
       Given("a Sierra work and a Miro work")
       val sierra = sierraPhysicalIdentifiedWork()

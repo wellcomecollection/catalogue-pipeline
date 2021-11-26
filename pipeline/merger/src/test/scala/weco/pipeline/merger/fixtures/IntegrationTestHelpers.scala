@@ -3,6 +3,9 @@ package weco.pipeline.merger.fixtures
 import io.circe.Encoder
 import org.scalatest.EitherValues
 import org.scalatest.matchers.{MatchResult, Matcher}
+import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.image.ImageData
+import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.catalogue.internal_model.work.{Work, WorkState}
 import weco.fixtures.TestWith
 import weco.messaging.fixtures.SQS.QueuePair
@@ -27,10 +30,26 @@ trait IntegrationTestHelpers extends EitherValues with MatcherFixtures with Merg
   type Context = (MemoryRetriever[Work[WorkState.Identified]], QueuePair, QueuePair, MemoryMessageSender, MemoryMessageSender, MergerIndex)
 
   implicit class ContextOps(context: Context) {
-    def getMerged(originalWork: Work[WorkState.Identified]): Work[WorkState.Merged] = {
+    private val index = {
       val (_, _, _, _, _, mergedIndex) = context
-      mergedIndex(originalWork.state.canonicalId.underlying).left.value
+      mergedIndex
     }
+
+    def getMerged(originalWork: Work[WorkState.Identified]): Work[WorkState.Merged] =
+      index(originalWork.state.canonicalId.underlying).left.value
+
+    def imageData: Seq[ImageData[IdState.Identified]] =
+      index.values
+        .collect { case Right(im) =>
+          ImageData(id = IdState.Identified(
+            canonicalId = im.state.canonicalId,
+            sourceIdentifier = im.state.sourceIdentifier
+          ),
+            version = im.version,
+            locations = im.locations
+          )
+        }
+        .toSeq
   }
 
   def withContext[R](testWith: TestWith[Context, R]): R = {
@@ -71,7 +90,7 @@ trait IntegrationTestHelpers extends EitherValues with MatcherFixtures with Merg
     }
   }
 
-  def processWorks(works: Seq[Work[WorkState.Identified]])(implicit context: Context): Unit = {
+  def processWorks(works: Work[WorkState.Identified]*)(implicit context: Context): Unit = {
     val (retriever, matcherQueuePair, mergerQueuePair, workSender, imageSender, mergerIndex) = context
 
     works.foreach { w =>
@@ -99,7 +118,7 @@ trait IntegrationTestHelpers extends EitherValues with MatcherFixtures with Merg
   }
 
   def processWork(work: Work[WorkState.Identified])(implicit context: Context): Unit =
-    processWorks(Seq(work))
+    processWorks(work)
 
   class StateMatcher(right: WorkState.Identified) extends Matcher[WorkState.Merged] {
     def apply(left: WorkState.Merged): MatchResult =
@@ -114,6 +133,35 @@ trait IntegrationTestHelpers extends EitherValues with MatcherFixtures with Merg
 
   def beSimilarTo(expectedRedirectTo: WorkState.Identified) =
     new StateMatcher(expectedRedirectTo)
+
+  class RedirectMatcher(expectedRedirectTo: Work.Visible[Identified])
+    extends Matcher[Work[Merged]] {
+    def apply(left: Work[Merged]): MatchResult = {
+      left match {
+        case w: Work.Redirected[Merged] =>
+          MatchResult(
+            w.redirectTarget.sourceIdentifier == expectedRedirectTo.sourceIdentifier,
+            s"${left.sourceIdentifier} was redirected to ${w.redirectTarget.sourceIdentifier}, not ${expectedRedirectTo.sourceIdentifier}",
+            s"${left.sourceIdentifier} was redirected correctly"
+          )
+
+        case _ =>
+          MatchResult(
+            matches = false,
+            s"${left.sourceIdentifier} was not redirected at all",
+            s"${left.sourceIdentifier} was redirected correctly"
+          )
+      }
+    }
+  }
+
+  def beRedirectedTo(expectedRedirectTo: Work.Visible[Identified]) =
+    new RedirectMatcher(expectedRedirectTo)
+
+  implicit class VisibleWorkOps(val work: Work.Visible[Identified]) {
+    def singleImage: ImageData[IdState.Identified] =
+      work.data.imageData.head
+  }
 
   // TODO: Upstream this into scala-libs
   class InstantMatcher(within: Duration) extends Matcher[Instant] {

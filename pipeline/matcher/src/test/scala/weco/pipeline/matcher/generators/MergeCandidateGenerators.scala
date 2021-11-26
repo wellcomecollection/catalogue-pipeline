@@ -18,6 +18,19 @@ trait MergeCandidateGenerators {
     )
   }
 
+  def createMiroMergeCandidateFor(w: Work[WorkState.Identified]): MergeCandidate[IdState.Identified] = {
+    require(
+      w.state.sourceIdentifier.identifierType == IdentifierType.MiroImageNumber)
+
+    MergeCandidate(
+      id = IdState.Identified(
+        canonicalId = w.state.canonicalId,
+        sourceIdentifier = w.state.sourceIdentifier
+      ),
+      reason = "Miro/Sierra work"
+    )
+  }
+
   def createMetsMergeCandidateFor(
     w: Work[WorkState.Identified]): MergeCandidate[IdState.Identified] = {
     require(
