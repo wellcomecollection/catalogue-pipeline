@@ -53,18 +53,6 @@ trait WorkerServiceFixture extends PipelineStorageStreamFixtures {
       }
     }
 
-  def withWorkerService[R](retriever: MemoryRetriever[Work[Identified]])(
-    testWith: TestWith[MergerWorkerService[String, String], R]): R =
-    withLocalSqsQueue() { queue =>
-      val workSender = new MemoryMessageSender()
-      val imageSender = new MemoryMessageSender()
-
-      withWorkerService(retriever, queue, workSender, imageSender) {
-        workerService =>
-          testWith(workerService)
-      }
-    }
-
   def getWorksSent(workSender: MemoryMessageSender): Seq[String] =
     workSender.messages.map { _.body }
 
