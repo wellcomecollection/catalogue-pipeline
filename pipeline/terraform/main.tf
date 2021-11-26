@@ -1,8 +1,8 @@
-module "catalogue_pipeline_2021-09-27" {
+module "catalogue_pipeline_2021-11-17" {
   source = "./stack"
 
-  pipeline_date = "2021-09-27"
-  release_label = "2021-09-27"
+  pipeline_date = "2021-11-17"
+  release_label = "2021-11-17"
 
   is_reindexing = false
 
@@ -87,11 +87,11 @@ module "catalogue_pipeline_2021-09-27" {
   logging_cluster_id = local.logging_cluster_id
 }
 
-module "catalogue_pipeline_2021-11-17" {
+module "catalogue_pipeline_2021-11-25" {
   source = "./stack"
 
-  pipeline_date = "2021-11-17"
-  release_label = "2021-11-17"
+  pipeline_date = "2021-11-25"
+  release_label = "2021-11-25"
 
   is_reindexing = false
 
