@@ -37,7 +37,7 @@ trait MatcherFixtures
       testWith(table)
     }
 
-  def withWorkerService[R](
+  def withMatcherService[R](
     retriever: Retriever[WorkStub],
     queue: SQS.Queue,
     messageSender: MemoryMessageSender,
@@ -60,12 +60,12 @@ trait MatcherFixtures
       }
     }
 
-  def withWorkerService[R](retriever: Retriever[WorkStub],
-                           queue: SQS.Queue,
-                           messageSender: MemoryMessageSender)(
+  def withMatcherService[R](retriever: Retriever[WorkStub],
+                            queue: SQS.Queue,
+                            messageSender: MemoryMessageSender)(
     testWith: TestWith[MatcherWorkerService[String], R]): R =
     withWorkGraphTable { graphTable =>
-      withWorkerService(retriever, queue, messageSender, graphTable) {
+      withMatcherService(retriever, queue, messageSender, graphTable) {
         service =>
           testWith(service)
       }

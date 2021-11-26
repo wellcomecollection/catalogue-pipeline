@@ -16,7 +16,7 @@ import weco.pipeline.matcher.generators.MergeCandidateGenerators
 import weco.pipeline.matcher.models.MatcherResult._
 import weco.pipeline.merger.fixtures.{
   MatcherResultFixture,
-  WorkerServiceFixture
+  MergerFixtures
 }
 import weco.pipeline_storage.memory.MemoryRetriever
 
@@ -32,7 +32,7 @@ class MergerWorkerServiceTest
     with MiroWorkGenerators
     with MatcherResultFixture
     with MergeCandidateGenerators
-    with WorkerServiceFixture {
+    with MergerFixtures {
 
   it("reads matcher result messages, retrieves the works and sends on the IDs") {
     withMergerWorkerServiceFixtures {
@@ -437,7 +437,7 @@ class MergerWorkerServiceTest
         val metrics = new MemoryMetrics()
         val index = mutable.Map.empty[String, WorkOrImage]
 
-        withWorkerService(
+        withMergerService(
           retriever,
           queue,
           workSender,

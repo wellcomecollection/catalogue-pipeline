@@ -41,7 +41,7 @@ class MatcherFeatureTest
     val messageSender = new MemoryMessageSender()
 
     withLocalSqsQueue() { queue =>
-      withWorkerService(retriever, queue, messageSender) { _ =>
+      withMatcherService(retriever, queue, messageSender) { _ =>
         val work = createWorkWith(referencedWorkIds = Set.empty)
 
         val expectedWorks =
@@ -72,7 +72,7 @@ class MatcherFeatureTest
     withLocalSqsQueuePair() {
       case QueuePair(queue, dlq) =>
         withWorkGraphTable { graphTable =>
-          withWorkerService(retriever, queue, messageSender, graphTable) { _ =>
+          withMatcherService(retriever, queue, messageSender, graphTable) { _ =>
             val existingWorkVersion = 2
             val updatedWorkVersion = 1
 
@@ -135,7 +135,7 @@ class MatcherFeatureTest
 
       withLocalSqsQueuePair() {
         case QueuePair(queue, dlq) =>
-          withWorkerService(retriever, queue, messageSender) { _ =>
+          withMatcherService(retriever, queue, messageSender) { _ =>
             works.foreach { w =>
               sendNotificationToSQS(queue, body = w.id)
             }

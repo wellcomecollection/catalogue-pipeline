@@ -13,7 +13,7 @@ import weco.catalogue.internal_model.work.generators.WorkGenerators
 import weco.pipeline.matcher.models.MatcherResult._
 import weco.pipeline.merger.fixtures.{
   MatcherResultFixture,
-  WorkerServiceFixture
+  MergerFixtures
 }
 import weco.pipeline_storage.memory.MemoryRetriever
 
@@ -25,7 +25,7 @@ class MergerFeatureTest
     extends AnyFunSpec
     with Matchers
     with WorkGenerators
-    with WorkerServiceFixture
+    with MergerFixtures
     with MatcherResultFixture
     with Eventually
     with EitherValues
@@ -86,7 +86,7 @@ class MergerFeatureTest
 
     withLocalSqsQueuePair() {
       case QueuePair(queue, dlq) =>
-        withWorkerService(retriever, queue, workSender, index = index) { _ =>
+        withMergerService(retriever, queue, workSender, index = index) { _ =>
           // 2) Now we update all four works at times t=1, t=2, t=3 and t=4.
           // However, due to best-effort ordering, we don't process these updates
           // in the correct order.
