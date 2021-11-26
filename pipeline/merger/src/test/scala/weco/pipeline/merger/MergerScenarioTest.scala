@@ -34,39 +34,6 @@ class MergerScenarioTest
    * behaviour which are most valuable as documentation of our intentions.
    */
   Feature("Top-level merging") {
-    Scenario("A Sierra picture or ephemera work and METS work are matched") {
-      Given("a Sierra picture or ephemera work and a METS work")
-      val sierraPicture = sierraIdentifiedWork()
-        .items(List(createIdentifiedPhysicalItem))
-        .format(Format.Pictures)
-      val sierraEphemera = sierraIdentifiedWork()
-        .items(List(createIdentifiedPhysicalItem))
-        .format(Format.Ephemera)
-      val mets = metsIdentifiedWork()
-
-      When("the works are merged")
-      val pictureOutcome = merger.merge(Seq(sierraPicture, mets))
-      val ephemeraOutcome = merger.merge(Seq(sierraEphemera, mets))
-
-      Then("the METS work is redirected to the Sierra work")
-      pictureOutcome.getMerged(mets) should beRedirectedTo(sierraPicture)
-      ephemeraOutcome.getMerged(mets) should beRedirectedTo(sierraEphemera)
-
-      And("an image is created from the METS work")
-      pictureOutcome.imageData should contain only mets.singleImage
-      ephemeraOutcome.imageData should contain only mets.singleImage
-
-      And("the merged Sierra work contains the image")
-      pictureOutcome
-        .getMerged(sierraPicture)
-        .data
-        .imageData should contain only mets.singleImage
-      ephemeraOutcome
-        .getMerged(sierraEphemera)
-        .data
-        .imageData should contain only mets.singleImage
-    }
-
     Scenario("An AIDS poster Sierra picture, a METS and a Miro are matched") {
       Given(
         "a Sierra picture with digcode `digaids`, a METS work and a Miro work"

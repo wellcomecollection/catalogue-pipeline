@@ -3,6 +3,7 @@ package weco.pipeline.merger
 import org.scalatest.GivenWhenThen
 import org.scalatest.featurespec.AnyFeatureSpec
 import org.scalatest.matchers.should.Matchers
+import weco.catalogue.internal_model.work.Format
 import weco.catalogue.internal_model.work.generators.SourceWorkGenerators
 import weco.fixtures.TimeAssertions
 import weco.pipeline.matcher.generators.MergeCandidateGenerators
@@ -96,6 +97,58 @@ class MergerIntegrationTest
         .getMerged(sierra)
         .data
         .imageData should contain only miro.singleImage
+    }
+  }
+
+  Scenario("A Sierra picture and METS work are matched") {
+    withContext { implicit context =>
+      Given("a Sierra picture and a METS work")
+      val sierraPicture = sierraIdentifiedWork()
+        .items(List(createIdentifiedPhysicalItem))
+        .format(Format.Pictures)
+      val mets = metsIdentifiedWork()
+        .mergeCandidates(List(createMetsMergeCandidateFor(sierraPicture)))
+
+      When("the works are merged")
+      processWorks(sierraPicture, mets)
+
+      Then("the METS work is redirected to the Sierra work")
+      context.getMerged(mets) should beRedirectedTo(sierraPicture)
+
+      And("an image is created from the METS work")
+      context.imageData should contain only mets.singleImage
+
+      And("the merged Sierra work contains the image")
+      context
+        .getMerged(sierraPicture)
+        .data
+        .imageData should contain only mets.singleImage
+    }
+  }
+
+  Scenario("A Sierra ephemera work and METS work are matched") {
+    withContext { implicit context =>
+      Given("a Sierra ephemera work and a METS work")
+      val sierraEphemera = sierraIdentifiedWork()
+        .items(List(createIdentifiedPhysicalItem))
+        .format(Format.Ephemera)
+      val mets = metsIdentifiedWork()
+        .mergeCandidates(List(createMetsMergeCandidateFor(sierraEphemera)))
+
+      When("the works are merged")
+      processWorks(sierraEphemera, mets)
+
+      Then("the METS work is redirected to the Sierra work")
+      context.getMerged(mets) should beRedirectedTo(sierraEphemera)
+
+      And("an image is created from the METS work")
+      context.imageData should contain only mets.singleImage
+
+      And("the merged Sierra work contains the image")
+      context
+        .getMerged(sierraEphemera)
+        .data
+        .imageData should contain only mets.singleImage
     }
   }
 }
