@@ -198,7 +198,6 @@ class WorkGraphStoreTest
 
       withWorkGraphTable { graphTable =>
         withWorkGraphStore(graphTable) { workGraphStore =>
-
           // First store C in the table
           val nodesC = WorkGraphUpdater.update(workC, affectedNodes = Set())
           nodesC.head.suppressed shouldBe true

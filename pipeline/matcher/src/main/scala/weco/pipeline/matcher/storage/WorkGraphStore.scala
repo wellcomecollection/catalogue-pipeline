@@ -23,8 +23,10 @@ class WorkGraphStore(workNodeDao: WorkNodeDao)(implicit _ec: ExecutionContext) {
   //
   // Suppressed works should never be linking to other works, so we only need
   // to do this extra search pass once.
-  private def getSuppressedWorksLinkedFrom(affectedWorks: Set[WorkNode]): Future[Set[WorkNode]] = {
-    val missingIds = affectedWorks.flatMap(_.linkedIds) -- affectedWorks.map(_.id)
+  private def getSuppressedWorksLinkedFrom(
+    affectedWorks: Set[WorkNode]): Future[Set[WorkNode]] = {
+    val missingIds = affectedWorks.flatMap(_.linkedIds) -- affectedWorks.map(
+      _.id)
 
     if (missingIds.isEmpty) {
       Future.successful(Set())
