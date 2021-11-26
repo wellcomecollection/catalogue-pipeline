@@ -12,9 +12,11 @@ import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.catalogue.internal_model.work.generators.SourceWorkGenerators
 import weco.catalogue.internal_model.work.{
   Format,
+  InternalWork,
   InvisibilityReason,
   Item,
-  Work
+  Work,
+  WorkData
 }
 import weco.pipeline.matcher.generators.MergeCandidateGenerators
 
@@ -918,5 +920,62 @@ class PlatformMergerTest
 
     redirectedWork.state.canonicalId shouldBe physicalWork.state.canonicalId
     redirectedWork.identifiers should contain theSameElementsAs (physicalWork.identifiers ++ electronicWork.identifiers)
+  }
+
+  describe("merging TEI works") {
+    it("merges a physical sierra with a tei") {
+      val merger = PlatformMerger
+      val physicalWork =
+        sierraIdentifiedWork()
+          .items(List(createIdentifiedPhysicalItem))
+      val teiWork = teiIdentifiedWork()
+        .mergeCandidates(List(createSierraPairMergeCandidateFor(physicalWork)))
+
+      val result = merger
+        .merge(works = Seq(teiWork, physicalWork))
+        .mergedWorksWithTime(now)
+      val redirectedWorks = result.collect {
+        case w: Work.Redirected[Merged] => w
+      }
+      val visibleWorks = result.collect { case w: Work.Visible[Merged] => w }
+
+      redirectedWorks should have size 1
+      visibleWorks should have size 1
+
+      visibleWorks.head.state.canonicalId shouldBe teiWork.state.canonicalId
+    }
+
+    it("copies the thumbnail to the inner works") {
+      val teiWork = teiIdentifiedWork()
+        .mapState {
+          _.copy(
+            internalWorkStubs = List(
+              InternalWork.Identified(
+                sourceIdentifier = createTeiSourceIdentifier,
+                canonicalId = createCanonicalId,
+                workData = WorkData(
+                  title = Some(s"tei-inner-${randomAlphanumeric(length = 10)}")
+                )
+              )
+            )
+          )
+        }
+
+      val sierraWork = sierraPhysicalIdentifiedWork()
+
+      val metsWork = metsIdentifiedWork()
+        .thumbnail(createDigitalLocation)
+
+      val result =
+        PlatformMerger
+          .merge(works = Seq(teiWork, sierraWork, metsWork))
+          .mergedWorksWithTime(now)
+
+      val visibleWorks = result.collect { case w: Work.Visible[Merged] => w }
+
+      visibleWorks.foreach {
+        _.data.thumbnail shouldBe metsWork.data.thumbnail
+      }
+    }
   }
 }
