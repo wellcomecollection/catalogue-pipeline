@@ -1,7 +1,8 @@
 package weco.pipeline.merger.fixtures
 
 import io.circe.Encoder
-import org.scalatest.{Assertion, EitherValues}
+import org.scalatest.EitherValues
+import org.scalatest.matchers.{MatchResult, Matcher}
 import weco.catalogue.internal_model.work.{Work, WorkState}
 import weco.fixtures.TestWith
 import weco.messaging.fixtures.SQS.QueuePair
@@ -11,7 +12,9 @@ import weco.pipeline.matcher.models.WorkStub
 import weco.pipeline_storage.RetrieverMultiResult
 import weco.pipeline_storage.memory.MemoryRetriever
 
+import java.time.Instant
 import scala.collection.mutable
+import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.Try
@@ -98,9 +101,31 @@ trait IntegrationTestHelpers extends EitherValues with MatcherFixtures with Merg
   def processWork(work: Work[WorkState.Identified])(implicit context: Context): Unit =
     processWorks(Seq(work))
 
-  protected def assertSimilarState(mergedWork: Work[WorkState.Merged], originalWork: Work[WorkState.Identified]): Assertion = {
-    originalWork.state.sourceIdentifier shouldBe mergedWork.state.sourceIdentifier
-    originalWork.state.canonicalId shouldBe mergedWork.state.canonicalId
-    originalWork.state.sourceModifiedTime shouldBe mergedWork.state.sourceModifiedTime
+  class StateMatcher(right: WorkState.Identified) extends Matcher[WorkState.Merged] {
+    def apply(left: WorkState.Merged): MatchResult =
+      MatchResult(
+        left.sourceIdentifier == right.sourceIdentifier &&
+          left.canonicalId == right.canonicalId &&
+          left.sourceModifiedTime == right.sourceModifiedTime,
+        s"${left.canonicalId} has different state to ${right.canonicalId}",
+        s"${left.canonicalId} has similar state to ${right.canonicalId}"
+    )
   }
+
+  def beSimilarTo(expectedRedirectTo: WorkState.Identified) =
+    new StateMatcher(expectedRedirectTo)
+
+  // TODO: Upstream this into scala-libs
+  class InstantMatcher(within: Duration) extends Matcher[Instant] {
+    override def apply(left: Instant): MatchResult = {
+      MatchResult(
+        (Instant.now().toEpochMilli - left.toEpochMilli) < within.toMillis,
+        s"$left is not recent",
+        s"$left is recent"
+      )
+    }
+  }
+
+  def beRecent(within: Duration = 3 seconds) =
+    new InstantMatcher(within)
 }

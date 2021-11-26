@@ -38,8 +38,8 @@ class MergerIntegrationTest
       Then("the work is returned")
       val mergedWork = context.getMerged(work)
       mergedWork.data shouldBe work.data
-      assertSimilarState(mergedWork, work)
-      assertRecent(mergedWork.state.mergedTime)
+      mergedWork.state should beSimilarTo(work.state)
+      mergedWork.state.mergedTime should beRecent()
     }
   }
 }
