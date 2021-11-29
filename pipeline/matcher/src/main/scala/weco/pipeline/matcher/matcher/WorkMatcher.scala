@@ -101,10 +101,13 @@ class WorkMatcher(
           // We only send identifiers that correspond to real Works.
           val identifiers =
             workNodes
-              .collect { case WorkNode(id, Some(version), _, _, _) => WorkIdentifier(id, version) }
+              .collect {
+                case WorkNode(id, Some(version), _, _, _) =>
+                  WorkIdentifier(id, version)
+              }
 
           MatchedIdentifiers(identifiers)
       }
-      .filter { _.identifiers.nonEmpty}
+      .filter { _.identifiers.nonEmpty }
       .toSet
 }

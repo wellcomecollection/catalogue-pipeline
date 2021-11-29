@@ -683,15 +683,16 @@ class MergerIntegrationTest
     withContext { implicit context =>
       Given("the works")
       val calm = calmIdentifiedWork()
-        .mergeCandidates(List(
-          MergeCandidate(
-            id = IdState.Identified(
-              canonicalId = createCanonicalId,
-              sourceIdentifier = createMiroSourceIdentifier
-            ),
-            reason = "CALM/Miro work"
-          )
-        ))
+        .mergeCandidates(
+          List(
+            MergeCandidate(
+              id = IdState.Identified(
+                canonicalId = createCanonicalId,
+                sourceIdentifier = createMiroSourceIdentifier
+              ),
+              reason = "CALM/Miro work"
+            )
+          ))
 
       val sierra = sierraIdentifiedWork()
         .mergeCandidates(List(createCalmMergeCandidateFor(calm)))
