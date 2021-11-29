@@ -16,8 +16,8 @@ module "worker" {
 
   desired_task_count = var.desired_task_count
 
-  security_group_ids       = var.security_group_ids
-  elastic_cloud_vpce_sg_id = var.elastic_cloud_vpce_sg_id
+  security_group_ids       = concat(var.security_group_ids, [var.egress_security_group_id])
+  elastic_cloud_vpce_sg_id = var.elastic_cloud_vpce_security_group_id
 
   apps = var.apps
 
@@ -25,7 +25,13 @@ module "worker" {
   sidecar_name            = var.manager_container_name
   sidecar_cpu             = var.manager_cpu
   sidecar_memory          = var.manager_memory
-  sidecar_env_vars        = var.manager_env_vars
+  sidecar_env_vars        = merge(
+    {
+      metrics_namespace = "${var.namespace}_${var.name}",
+      queue_url         = module.input_queue.url,
+    },
+    var.manager_env_vars,
+  )
   sidecar_secret_env_vars = var.manager_secret_env_vars
   sidecar_mount_points    = var.manager_mount_points
 
@@ -39,7 +45,7 @@ module "worker" {
   scale_up_adjustment   = var.scale_up_adjustment
 
   deployment_service_env  = var.deployment_service_env
-  deployment_service_name = var.deployment_service_name
+  deployment_service_name = replace(var.name, "_", "-")
 
   shared_logging_secrets = var.shared_logging_secrets
 }

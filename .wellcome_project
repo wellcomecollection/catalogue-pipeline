@@ -91,20 +91,16 @@ catalogue_pipeline:
         - id: id-minter
     - id: inference_manager
       services:
-        - id: image-inferrer-tei-on
-        - id: image-inferrer-tei-off
+        - id: image-inferrer
     - id: feature_inferrer
       services:
-        - id: image-inferrer-tei-on
-        - id: image-inferrer-tei-off
+        - id: image-inferrer
     - id: palette_inferrer
       services:
-        - id: image-inferrer-tei-on
-        - id: image-inferrer-tei-off
+        - id: image-inferrer
     - id: aspect_ratio_inferrer
       services:
-        - id: image-inferrer-tei-on
-        - id: image-inferrer-tei-off
+        - id: image-inferrer
     - id: matcher
       services:
         - id: matcher
