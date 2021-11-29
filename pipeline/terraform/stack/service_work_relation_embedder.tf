@@ -24,7 +24,7 @@ module "relation_embedder" {
   elastic_cloud_vpce_sg_id = var.ec_privatelink_security_group_id
 
   cluster_name = aws_ecs_cluster.cluster.name
-  cluster_arn  = data.aws_ecs_cluster.cluster.id
+  cluster_arn  = aws_ecs_cluster.cluster.id
 
   env_vars = {
     metrics_namespace = "${local.namespace}_relation_embedder"
