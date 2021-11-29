@@ -1,5 +1,5 @@
 resource "aws_iam_role_policy" "cloudwatch_push_metrics" {
-  role   = module.worker.task_role_name
+  role   = module.task_definition.task_role_name
   policy = data.aws_iam_policy_document.allow_cloudwatch_push_metrics.json
 }
 
