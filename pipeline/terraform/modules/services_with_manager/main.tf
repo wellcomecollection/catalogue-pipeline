@@ -21,11 +21,11 @@ module "worker" {
 
   apps = var.apps
 
-  sidecar_image           = var.manager_container_image
-  sidecar_name            = var.manager_container_name
-  sidecar_cpu             = var.manager_cpu
-  sidecar_memory          = var.manager_memory
-  sidecar_env_vars        = merge(
+  sidecar_image  = var.manager_container_image
+  sidecar_name   = var.manager_container_name
+  sidecar_cpu    = var.manager_cpu
+  sidecar_memory = var.manager_memory
+  sidecar_env_vars = merge(
     {
       metrics_namespace = "${var.namespace}_${var.name}",
       queue_url         = module.input_queue.url,
