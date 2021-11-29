@@ -20,6 +20,6 @@ module "inference_capacity_provider" {
 
   subnets = var.subnets
   security_group_ids = [
-    aws_security_group.service_egress.id,
+    aws_security_group.egress.id,
   ]
 }

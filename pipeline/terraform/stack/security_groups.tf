@@ -1,6 +1,6 @@
-resource "aws_security_group" "service_egress" {
-  name        = "${local.namespace_hyphen}_service_egress"
-  description = "Allow egress traffic to service"
+resource "aws_security_group" "egress" {
+  name        = "${local.namespace}_egress"
+  description = "Allow egress traffic from the services"
   vpc_id      = var.vpc_id
 
   egress {
@@ -14,6 +14,6 @@ resource "aws_security_group" "service_egress" {
   }
 
   tags = {
-    Name = "${local.namespace_hyphen}_egress"
+    Name = "${local.namespace}_egress"
   }
 }

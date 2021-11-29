@@ -13,7 +13,7 @@ module "transformer_sierra" {
 
   container_image = local.transformer_sierra_image
   security_group_ids = [
-    aws_security_group.service_egress.id,
+    aws_security_group.egress.id,
   ]
 
   elastic_cloud_vpce_sg_id = var.ec_privatelink_security_group_id

@@ -59,7 +59,7 @@ module "id_minter" {
 
   # Below this line is boilerplate that should be the same across
   # all Fargate services.
-  egress_security_group_id             = aws_security_group.service_egress.id
+  egress_security_group_id             = aws_security_group.egress.id
   elastic_cloud_vpce_security_group_id = var.ec_privatelink_security_group_id
 
   cluster_name = aws_ecs_cluster.cluster.name
