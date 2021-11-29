@@ -7,7 +7,7 @@ module "matcher_input_queue" {
   queue_name = "${local.namespace}_matcher_input"
 
   topic_arns = [
-    module.id_minter_topic.arn
+    module.id_minter_output_topic.arn
   ]
 
   alarm_topic_arn = var.dlq_alarm_arn
