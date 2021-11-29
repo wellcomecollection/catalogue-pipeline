@@ -2,9 +2,9 @@ package weco.pipeline.matcher.workgraph
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.pipeline.matcher.fixtures.MatcherFixtures
 import weco.pipeline.matcher.generators.WorkStubGenerators
 import weco.pipeline.matcher.models.{
+  ComponentId,
   VersionExpectedConflictException,
   VersionUnexpectedConflictException,
   WorkNode
@@ -13,7 +13,6 @@ import weco.pipeline.matcher.models.{
 class WorkGraphUpdaterTest
     extends AnyFunSpec
     with Matchers
-    with MatcherFixtures
     with WorkStubGenerators {
 
   describe("Adding links without existing works") {
@@ -27,7 +26,7 @@ class WorkGraphUpdaterTest
           idA,
           version = 1,
           linkedIds = List(),
-          componentId = ciHash(idA)))
+          componentId = ComponentId(idA)))
     }
 
     it("updating nothing with A->B gives A+B:A->B") {
@@ -40,12 +39,13 @@ class WorkGraphUpdaterTest
           idA,
           version = 1,
           linkedIds = List(idB),
-          componentId = ciHash(idA, idB)),
+          componentId = ComponentId(idA, idB)),
         WorkNode(
           idB,
           version = None,
           linkedIds = List(),
-          componentId = ciHash(idA, idB)))
+          componentId = ComponentId(idA, idB))
+      )
     }
 
     it("updating nothing with B->A gives A+B:B->A") {
@@ -58,12 +58,13 @@ class WorkGraphUpdaterTest
           idB,
           version = 1,
           linkedIds = List(idA),
-          componentId = ciHash(idA, idB)),
+          componentId = ComponentId(idA, idB)),
         WorkNode(
           idA,
           version = None,
           linkedIds = List(),
-          componentId = ciHash(idA, idB)))
+          componentId = ComponentId(idA, idB))
+      )
     }
   }
 
@@ -77,12 +78,12 @@ class WorkGraphUpdaterTest
               idA,
               version = 1,
               linkedIds = Nil,
-              componentId = ciHash(idA)),
+              componentId = ComponentId(idA)),
             WorkNode(
               idB,
               version = 1,
               linkedIds = Nil,
-              componentId = ciHash(idB))
+              componentId = ComponentId(idB))
           )
         ) should contain theSameElementsAs
         List(
@@ -90,12 +91,13 @@ class WorkGraphUpdaterTest
             idA,
             version = 2,
             linkedIds = List(idB),
-            componentId = ciHash(idA, idB)),
+            componentId = ComponentId(idA, idB)),
           WorkNode(
             idB,
             version = 1,
             linkedIds = List(),
-            componentId = ciHash(idA, idB)))
+            componentId = ComponentId(idA, idB))
+        )
     }
 
     it("updating A->B with A->B gives A+B:(A->B, B)") {
@@ -107,23 +109,23 @@ class WorkGraphUpdaterTest
               idA,
               version = 1,
               linkedIds = List(idB),
-              componentId = ciHash(idA, idB)),
+              componentId = ComponentId(idA, idB)),
             WorkNode(
               idB,
               version = 1,
               linkedIds = Nil,
-              componentId = ciHash(idA, idB)))
+              componentId = ComponentId(idA, idB)))
         ) shouldBe Set(
         WorkNode(
           idA,
           version = 2,
           linkedIds = List(idB),
-          componentId = ciHash(idA, idB)),
+          componentId = ComponentId(idA, idB)),
         WorkNode(
           idB,
           version = 1,
           linkedIds = List(),
-          componentId = ciHash(idA, idB))
+          componentId = ComponentId(idA, idB))
       )
     }
 
@@ -141,29 +143,29 @@ class WorkGraphUpdaterTest
               idB,
               version = 1,
               linkedIds = Nil,
-              componentId = ciHash(idA, idB)),
+              componentId = ComponentId(idA, idB)),
             WorkNode(
               idC,
               version = 1,
               linkedIds = Nil,
-              componentId = ciHash(idC))
+              componentId = ComponentId(idC))
           )
         ) shouldBe Set(
         WorkNode(
           idA,
           version = 2,
           linkedIds = List(idB),
-          componentId = ciHash(idA, idB, idC)),
+          componentId = ComponentId(idA, idB, idC)),
         WorkNode(
           idB,
           version = 2,
           linkedIds = List(idC),
-          componentId = ciHash(idA, idB, idC)),
+          componentId = ComponentId(idA, idB, idC)),
         WorkNode(
           idC,
           version = 1,
           linkedIds = List(),
-          componentId = ciHash(idA, idB, idC))
+          componentId = ComponentId(idA, idB, idC))
       )
     }
 
@@ -191,22 +193,22 @@ class WorkGraphUpdaterTest
             idA,
             version = 1,
             linkedIds = List(idB),
-            componentId = ciHash(idA, idB, idC, idD)),
+            componentId = ComponentId(idA, idB, idC, idD)),
           WorkNode(
             idB,
             version = 2,
             linkedIds = List(idC),
-            componentId = ciHash(idA, idB, idC, idD)),
+            componentId = ComponentId(idA, idB, idC, idD)),
           WorkNode(
             idC,
             version = 1,
             linkedIds = List(idD),
-            componentId = ciHash(idA, idB, idC, idD)),
+            componentId = ComponentId(idA, idB, idC, idD)),
           WorkNode(
             idD,
             version = 1,
             linkedIds = List(),
-            componentId = ciHash(idA, idB, idC, idD))
+            componentId = ComponentId(idA, idB, idC, idD))
         )
     }
 
@@ -225,17 +227,17 @@ class WorkGraphUpdaterTest
               idB,
               version = 1,
               linkedIds = Nil,
-              componentId = ciHash(idA, idB)),
+              componentId = ComponentId(idA, idB)),
             WorkNode(
               idC,
               version = 1,
               linkedIds = Nil,
-              componentId = ciHash(idC)),
+              componentId = ComponentId(idC)),
             WorkNode(
               idD,
               version = 1,
               linkedIds = Nil,
-              componentId = ciHash(idD))
+              componentId = ComponentId(idD))
           )
         ) shouldBe
         Set(
@@ -243,22 +245,22 @@ class WorkGraphUpdaterTest
             idA,
             version = 2,
             linkedIds = List(idB),
-            componentId = ciHash(idA, idB, idC, idD)),
+            componentId = ComponentId(idA, idB, idC, idD)),
           WorkNode(
             idB,
             version = 2,
             linkedIds = List(idC, idD),
-            componentId = ciHash(idA, idB, idC, idD)),
+            componentId = ComponentId(idA, idB, idC, idD)),
           WorkNode(
             idC,
             version = 1,
             linkedIds = List(),
-            componentId = ciHash(idA, idB, idC, idD)),
+            componentId = ComponentId(idA, idB, idC, idD)),
           WorkNode(
             idD,
             version = 1,
             linkedIds = List(),
-            componentId = ciHash(idA, idB, idC, idD))
+            componentId = ComponentId(idA, idB, idC, idD))
         )
     }
 
@@ -284,17 +286,17 @@ class WorkGraphUpdaterTest
           idA,
           version = 2,
           linkedIds = List(idB),
-          componentId = ciHash(idA, idB, idC)),
+          componentId = ComponentId(idA, idB, idC)),
         WorkNode(
           idB,
           version = 2,
           linkedIds = List(idC),
-          componentId = ciHash(idA, idB, idC)),
+          componentId = ComponentId(idA, idB, idC)),
         WorkNode(
           idC,
           version = 2,
           linkedIds = List(idA),
-          componentId = ciHash(idA, idB, idC))
+          componentId = ComponentId(idA, idB, idC))
       )
     }
   }
@@ -312,19 +314,20 @@ class WorkGraphUpdaterTest
               idA,
               existingVersion,
               linkedIds = Nil,
-              componentId = ciHash(idA)))
+              componentId = ComponentId(idA)))
         ) should contain theSameElementsAs
         List(
           WorkNode(
             idA,
             updateVersion,
             linkedIds = List(idB),
-            componentId = ciHash(idA, idB)),
+            componentId = ComponentId(idA, idB)),
           WorkNode(
             idB,
             version = None,
             linkedIds = List(),
-            componentId = ciHash(idA, idB)))
+            componentId = ComponentId(idA, idB))
+        )
     }
 
     it("doesn't process an update for a lower version") {
@@ -341,7 +344,7 @@ class WorkGraphUpdaterTest
                 idA,
                 existingVersion,
                 linkedIds = Nil,
-                componentId = ciHash(idA)))
+                componentId = ComponentId(idA)))
           )
       }
       thrown.message shouldBe s"update failed, work:$idA v1 is not newer than existing work v3"
@@ -361,24 +364,26 @@ class WorkGraphUpdaterTest
               idA,
               existingVersion,
               linkedIds = List(idB),
-              componentId = ciHash(idA, idB)),
+              componentId = ComponentId(idA, idB)),
             WorkNode(
               idB,
               version = 0,
               linkedIds = List(),
-              componentId = ciHash(idA, idB)))
+              componentId = ComponentId(idA, idB))
+          )
         ) should contain theSameElementsAs
         List(
           WorkNode(
             idA,
             updateVersion,
             linkedIds = List(idB),
-            componentId = ciHash(idA, idB)),
+            componentId = ComponentId(idA, idB)),
           WorkNode(
             idB,
             version = 0,
             linkedIds = List(),
-            componentId = ciHash(idA, idB)))
+            componentId = ComponentId(idA, idB))
+        )
     }
 
     it(
@@ -396,12 +401,13 @@ class WorkGraphUpdaterTest
                 idA,
                 existingVersion,
                 linkedIds = List(idB),
-                componentId = ciHash(idA, idB)),
+                componentId = ComponentId(idA, idB)),
               WorkNode(
                 idB,
                 version = 0,
                 linkedIds = List(),
-                componentId = ciHash(idA, idB)))
+                componentId = ComponentId(idA, idB))
+            )
           )
       }
       thrown.getMessage shouldBe s"update failed, work:$idA v2 already exists with different content! update-ids:Set($idC) != existing-ids:Set($idB)"
@@ -425,12 +431,12 @@ class WorkGraphUpdaterTest
           idA,
           version = 2,
           linkedIds = List(),
-          componentId = ciHash(idA)),
+          componentId = ComponentId(idA)),
         WorkNode(
           idB,
           version = 1,
           linkedIds = List(),
-          componentId = ciHash(idB))
+          componentId = ComponentId(idB))
       )
     }
 
@@ -446,12 +452,16 @@ class WorkGraphUpdaterTest
               componentId = "A+B")
           )
         ) shouldBe Set(
-        WorkNode(idA, version = 2, linkedIds = Nil, componentId = ciHash(idA)),
+        WorkNode(
+          idA,
+          version = 2,
+          linkedIds = Nil,
+          componentId = ComponentId(idA)),
         WorkNode(
           idB,
           version = None,
           linkedIds = Nil,
-          componentId = ciHash(idB))
+          componentId = ComponentId(idB))
       )
     }
 
@@ -479,13 +489,17 @@ class WorkGraphUpdaterTest
           idA,
           version = 2,
           linkedIds = List(idB),
-          componentId = ciHash(idA, idB)),
+          componentId = ComponentId(idA, idB)),
         WorkNode(
           idB,
           version = 3,
           linkedIds = Nil,
-          componentId = ciHash(idA, idB)),
-        WorkNode(idC, version = 1, linkedIds = Nil, componentId = ciHash(idC))
+          componentId = ComponentId(idA, idB)),
+        WorkNode(
+          idC,
+          version = 1,
+          linkedIds = Nil,
+          componentId = ComponentId(idC))
       )
     }
 
@@ -511,17 +525,17 @@ class WorkGraphUpdaterTest
           idA,
           version = 2,
           linkedIds = List(idB),
-          componentId = ciHash(idA, idB, idC)),
+          componentId = ComponentId(idA, idB, idC)),
         WorkNode(
           idB,
           version = 3,
           linkedIds = List(idC),
-          componentId = ciHash(idA, idB, idC)),
+          componentId = ComponentId(idA, idB, idC)),
         WorkNode(
           idC,
           version = 1,
           linkedIds = Nil,
-          componentId = ciHash(idA, idB, idC))
+          componentId = ComponentId(idA, idB, idC))
       )
     }
   }
@@ -536,7 +550,7 @@ class WorkGraphUpdaterTest
               id = idB,
               version = 1,
               linkedIds = List(),
-              componentId = ciHash(idB),
+              componentId = ComponentId(idB),
               suppressed = true)
           )
         )
@@ -546,12 +560,12 @@ class WorkGraphUpdaterTest
           id = idA,
           version = 1,
           linkedIds = List(idB),
-          componentId = ciHash(idA)),
+          componentId = ComponentId(idA)),
         WorkNode(
           id = idB,
           version = 1,
           linkedIds = List(),
-          componentId = ciHash(idB),
+          componentId = ComponentId(idB),
           suppressed = true)
       )
     }
@@ -569,12 +583,12 @@ class WorkGraphUpdaterTest
               id = idA,
               version = 1,
               linkedIds = List(idB),
-              componentId = ciHash(idA, idB)),
+              componentId = ComponentId(idA, idB)),
             WorkNode(
               id = idB,
               version = None,
               linkedIds = List(),
-              componentId = ciHash(idA, idB))
+              componentId = ComponentId(idA, idB))
           )
         )
 
@@ -583,12 +597,12 @@ class WorkGraphUpdaterTest
           id = idA,
           version = 1,
           linkedIds = List(idB),
-          componentId = ciHash(idA)),
+          componentId = ComponentId(idA)),
         WorkNode(
           id = idB,
           version = 1,
           linkedIds = List(),
-          componentId = ciHash(idB),
+          componentId = ComponentId(idB),
           suppressed = true)
       )
     }
@@ -602,23 +616,23 @@ class WorkGraphUpdaterTest
               id = idB,
               version = 1,
               linkedIds = List(idC),
-              componentId = ciHash(idB)),
+              componentId = ComponentId(idB)),
             WorkNode(
               id = idC,
               version = 1,
               linkedIds = List(idD),
-              componentId = ciHash(idC),
+              componentId = ComponentId(idC),
               suppressed = true),
             WorkNode(
               id = idD,
               version = 1,
               linkedIds = List(idE),
-              componentId = ciHash(idD, idE)),
+              componentId = ComponentId(idD, idE)),
             WorkNode(
               id = idE,
               version = 1,
               linkedIds = List(),
-              componentId = ciHash(idD, idE))
+              componentId = ComponentId(idD, idE))
           )
         )
 
@@ -627,28 +641,28 @@ class WorkGraphUpdaterTest
           id = idA,
           version = 1,
           linkedIds = List(idB),
-          componentId = ciHash(idA, idB)),
+          componentId = ComponentId(idA, idB)),
         WorkNode(
           id = idB,
           version = 1,
           linkedIds = List(idC),
-          componentId = ciHash(idA, idB)),
+          componentId = ComponentId(idA, idB)),
         WorkNode(
           id = idC,
           version = 1,
           linkedIds = List(idD),
-          componentId = ciHash(idC),
+          componentId = ComponentId(idC),
           suppressed = true),
         WorkNode(
           id = idD,
           version = 1,
           linkedIds = List(idE),
-          componentId = ciHash(idD, idE)),
+          componentId = ComponentId(idD, idE)),
         WorkNode(
           id = idE,
           version = 1,
           linkedIds = List(),
-          componentId = ciHash(idD, idE))
+          componentId = ComponentId(idD, idE))
       )
     }
 
@@ -691,7 +705,7 @@ class WorkGraphUpdaterTest
           affectedNodes = graph3
         )
 
-      result.map(_.componentId) shouldBe Set(ciHash(idA, idB, idC))
+      result.map(_.componentId) shouldBe Set(ComponentId(idA, idB, idC))
     }
   }
 }

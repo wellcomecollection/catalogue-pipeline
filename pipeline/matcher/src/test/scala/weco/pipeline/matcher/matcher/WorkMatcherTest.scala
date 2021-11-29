@@ -10,6 +10,7 @@ import weco.fixtures.TimeAssertions
 import weco.pipeline.matcher.fixtures.MatcherFixtures
 import weco.pipeline.matcher.generators.WorkStubGenerators
 import weco.pipeline.matcher.models.{
+  ComponentId,
   MatchedIdentifiers,
   MatcherResult,
   WorkIdentifier,
@@ -53,7 +54,7 @@ class WorkMatcherTest
                 id = work.id,
                 version = work.version,
                 linkedIds = Nil,
-                componentId = ciHash(work.id)
+                componentId = ComponentId(work.id)
               )
             )
           }
@@ -85,13 +86,13 @@ class WorkMatcherTest
                 id = idA,
                 version = work.version,
                 linkedIds = List(idB),
-                componentId = ciHash(idA, idB)
+                componentId = ComponentId(idA, idB)
               ),
               WorkNode(
                 id = idB,
                 version = None,
                 linkedIds = Nil,
-                componentId = ciHash(idA, idB)
+                componentId = ComponentId(idA, idB)
               )
             )
           }
@@ -109,19 +110,19 @@ class WorkMatcherTest
             id = idA,
             version = 1,
             linkedIds = List(idB),
-            componentId = ciHash(idA, idB)
+            componentId = ComponentId(idA, idB)
           )
           val existingWorkB = WorkNode(
             id = idB,
             version = 1,
             linkedIds = Nil,
-            componentId = ciHash(idA, idB)
+            componentId = ComponentId(idA, idB)
           )
           val existingWorkC = WorkNode(
             id = idC,
             version = 1,
             linkedIds = Nil,
-            componentId = ciHash(idC)
+            componentId = ComponentId(idC)
           )
 
           putTableItems(
@@ -153,19 +154,19 @@ class WorkMatcherTest
                 id = idA,
                 version = 1,
                 linkedIds = List(idB),
-                componentId = ciHash(idA, idB, idC)
+                componentId = ComponentId(idA, idB, idC)
               ),
               WorkNode(
                 id = idB,
                 version = 2,
                 linkedIds = List(idC),
-                componentId = ciHash(idA, idB, idC)
+                componentId = ComponentId(idA, idB, idC)
               ),
               WorkNode(
                 id = idC,
                 version = 1,
                 linkedIds = Nil,
-                componentId = ciHash(idA, idB, idC))
+                componentId = ComponentId(idA, idB, idC))
             )
           }
         }

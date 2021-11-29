@@ -1,9 +1,7 @@
 package weco.pipeline.matcher.fixtures
 
-import org.apache.commons.codec.digest.DigestUtils
 import org.scanamo.generic.semiauto.deriveDynamoFormat
 import org.scanamo.DynamoFormat
-import weco.catalogue.internal_model.identifiers.CanonicalId
 import weco.fixtures.TestWith
 import weco.messaging.fixtures.SQS
 import weco.messaging.memory.MemoryMessageSender
@@ -110,7 +108,4 @@ trait MatcherFixtures
     retriever.index ++= Map(work.id.toString -> work)
     sendNotificationToSQS(queue, body = work.id.toString)
   }
-
-  def ciHash(ids: CanonicalId*): String =
-    DigestUtils.sha256Hex(ids.sorted.map(_.underlying).mkString("+"))
 }

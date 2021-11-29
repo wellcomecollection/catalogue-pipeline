@@ -82,7 +82,7 @@ class MatcherFeatureTest
               id = workV1.id,
               version = Some(existingWorkVersion),
               linkedIds = Nil,
-              componentId = ciHash(workV1.id)
+              componentId = ComponentId(workV1.id)
             )
 
             putTableItem(nodeV2, table = graphTable)
