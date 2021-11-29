@@ -38,7 +38,8 @@ variable "topic_arns" {
 }
 
 variable "queue_visibility_timeout_seconds" {
-  type = number
+  type    = number
+  default = 30
 }
 
 variable "max_receive_count" {
@@ -64,11 +65,13 @@ variable "elastic_cloud_vpce_security_group_id" {
 }
 
 variable "cpu" {
-  type = number
+  type    = number
+  default = 512
 }
 
 variable "memory" {
-  type = number
+  type    = number
+  default = 1024
 }
 
 variable "min_capacity" {
