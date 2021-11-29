@@ -131,18 +131,18 @@ catalogue_pipeline:
         - id: work-relation-embedder-tei-off
     - id: transformer_calm
       services:
-        - id: calm-transformer
+        - id: transformer-calm
     - id: transformer_mets
       services:
-        - id: mets-transformer
+        - id: transformer-mets
     - id: transformer_miro
       services:
-        - id: miro-transformer
+        - id: transformer-miro
     - id: transformer_sierra
       services:
-        - id: sierra-transformer
+        - id: transformer-sierra
     - id: transformer_tei
       services:
-        - id: tei-transformer
+        - id: transformer-tei
   name: Catalogue pipeline
   role_arn: arn:aws:iam::760097843905:role/platform-ci
