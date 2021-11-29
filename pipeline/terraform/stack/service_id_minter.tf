@@ -44,8 +44,8 @@ module "id_minter" {
     db_password          = "catalogue/id_minter/rds_password"
   }, local.pipeline_storage_es_service_secrets["id_minter"])
 
-  // The total number of connections to RDS across all tasks from all ID minter
-  // services must not exceed the maximum supported by the RDS instance.
+  # The total number of connections to RDS across all tasks from all ID minter
+  # services must not exceed the maximum supported by the RDS instance.
   min_capacity = var.min_capacity
   max_capacity = min(
     floor(
