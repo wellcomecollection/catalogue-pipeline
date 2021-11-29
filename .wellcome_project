@@ -110,8 +110,7 @@ catalogue_pipeline:
         - id: matcher
     - id: merger
       services:
-        - id: merger-tei-on
-        - id: merger-tei-off
+        - id: merger
     - id: ingestor_images
       services:
         - id: ingestor-images
