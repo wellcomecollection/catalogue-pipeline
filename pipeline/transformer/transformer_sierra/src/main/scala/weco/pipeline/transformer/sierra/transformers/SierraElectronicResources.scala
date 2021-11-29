@@ -131,16 +131,15 @@ object SierraElectronicResources extends SierraQueryOps with Logging {
 
       case Seq(Subfield(_, content)) =>
         warn(
-          s"Record ${id.withCheckDigit} has a value in 856 ǂu which isn't a URL: $content")
+          s"${id.withCheckDigit} has a value in 856 ǂu which isn't a URL: $content")
         None
 
       case Nil =>
-        warn(s"Record ${id.withCheckDigit} has a field 856 without any URLs")
+        warn(s"${id.withCheckDigit} has a field 856 without any URLs")
         None
 
       case other =>
-        warn(
-          s"Record ${id.withCheckDigit} has a field 856 with repeated subfield ǂu")
+        warn(s"${id.withCheckDigit} has a field 856 with repeated subfield ǂu")
         None
     }
 

@@ -66,7 +66,7 @@ object SierraDescription
           // best to handle it later.
           case Subfield("u", contents) =>
             warn(
-              s"Bib $bibId has MARC 520 ǂu which doesn't look like a URL: $contents")
+              s"${bibId.withCheckDigit} has MARC 520 ǂu which doesn't look like a URL: $contents")
             contents
 
           case Subfield(_, contents) => contents
