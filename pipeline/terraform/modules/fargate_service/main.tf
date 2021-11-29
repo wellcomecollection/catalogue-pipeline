@@ -40,7 +40,7 @@ module "worker" {
   scale_up_adjustment   = var.scale_up_adjustment
 
   deployment_service_env  = var.deployment_service_env
-  deployment_service_name = var.deployment_service_name
+  deployment_service_name = replace(var.name, "_", "-")
   shared_logging_secrets  = var.shared_logging_secrets
 
   use_fargate_spot = var.use_fargate_spot

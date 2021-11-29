@@ -11,8 +11,6 @@ module "id_minter" {
   name            = "id_minter"
   container_image = local.id_minter_image
 
-  deployment_service_name = "id-minter"
-
   security_group_ids = [
     var.rds_ids_access_security_group_id,
   ]
