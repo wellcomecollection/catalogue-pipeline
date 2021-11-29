@@ -6,7 +6,14 @@ module "worker" {
 
   image = var.container_image
 
-  env_vars        = var.env_vars
+  env_vars = merge(
+    {
+      metrics_namespace = "${var.namespace}_${var.name}",
+      queue_url         = module.input_queue.url,
+    },
+    var.env_vars,
+  )
+
   secret_env_vars = var.secret_env_vars
 
   subnets = var.subnets

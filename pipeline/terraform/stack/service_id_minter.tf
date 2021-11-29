@@ -28,9 +28,6 @@ module "id_minter" {
   queue_visibility_timeout_seconds = 120
 
   env_vars = {
-    metrics_namespace = "${local.namespace_hyphen}_id_minter"
-
-    queue_url                     = module.id_minter.queue_url
     topic_arn                     = module.id_minter_output_topic.arn
     max_connections               = local.id_minter_task_max_connections
     es_source_index               = local.es_works_source_index
