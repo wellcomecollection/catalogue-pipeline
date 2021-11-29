@@ -15,6 +15,7 @@ resource "aws_security_group" "egress_security_group" {
   }
 }
 
+# TODO: Can we get rid of this?
 resource "aws_security_group" "interservice_security_group" {
   name        = "${var.namespace}_interservice_security_group"
   description = "Allow traffic between services"
