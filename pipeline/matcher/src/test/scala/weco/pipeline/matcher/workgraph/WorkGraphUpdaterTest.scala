@@ -44,7 +44,8 @@ class WorkGraphUpdaterTest
           idB,
           version = None,
           linkedIds = List(),
-          componentId = ComponentId(idA, idB)))
+          componentId = ComponentId(idA, idB))
+      )
     }
 
     it("updating nothing with B->A gives A+B:B->A") {
@@ -62,7 +63,8 @@ class WorkGraphUpdaterTest
           idA,
           version = None,
           linkedIds = List(),
-          componentId = ComponentId(idA, idB)))
+          componentId = ComponentId(idA, idB))
+      )
     }
   }
 
@@ -94,7 +96,8 @@ class WorkGraphUpdaterTest
             idB,
             version = 1,
             linkedIds = List(),
-            componentId = ComponentId(idA, idB)))
+            componentId = ComponentId(idA, idB))
+        )
     }
 
     it("updating A->B with A->B gives A+B:(A->B, B)") {
@@ -323,7 +326,8 @@ class WorkGraphUpdaterTest
             idB,
             version = None,
             linkedIds = List(),
-            componentId = ComponentId(idA, idB)))
+            componentId = ComponentId(idA, idB))
+        )
     }
 
     it("doesn't process an update for a lower version") {
@@ -365,7 +369,8 @@ class WorkGraphUpdaterTest
               idB,
               version = 0,
               linkedIds = List(),
-              componentId = ComponentId(idA, idB)))
+              componentId = ComponentId(idA, idB))
+          )
         ) should contain theSameElementsAs
         List(
           WorkNode(
@@ -377,7 +382,8 @@ class WorkGraphUpdaterTest
             idB,
             version = 0,
             linkedIds = List(),
-            componentId = ComponentId(idA, idB)))
+            componentId = ComponentId(idA, idB))
+        )
     }
 
     it(
@@ -400,7 +406,8 @@ class WorkGraphUpdaterTest
                 idB,
                 version = 0,
                 linkedIds = List(),
-                componentId = ComponentId(idA, idB)))
+                componentId = ComponentId(idA, idB))
+            )
           )
       }
       thrown.getMessage shouldBe s"update failed, work:$idA v2 already exists with different content! update-ids:Set($idC) != existing-ids:Set($idB)"
@@ -445,7 +452,11 @@ class WorkGraphUpdaterTest
               componentId = "A+B")
           )
         ) shouldBe Set(
-        WorkNode(idA, version = 2, linkedIds = Nil, componentId = ComponentId(idA)),
+        WorkNode(
+          idA,
+          version = 2,
+          linkedIds = Nil,
+          componentId = ComponentId(idA)),
         WorkNode(
           idB,
           version = None,
@@ -484,7 +495,11 @@ class WorkGraphUpdaterTest
           version = 3,
           linkedIds = Nil,
           componentId = ComponentId(idA, idB)),
-        WorkNode(idC, version = 1, linkedIds = Nil, componentId = ComponentId(idC))
+        WorkNode(
+          idC,
+          version = 1,
+          linkedIds = Nil,
+          componentId = ComponentId(idC))
       )
     }
 

@@ -103,7 +103,8 @@ class WorkNodeDaoTest
             items = Seq(existingWorkNodeA, existingWorkNodeB),
             table = table)
 
-          whenReady(matcherGraphDao.getByComponentIds(Set(ComponentId(idA, idB)))) {
+          whenReady(
+            matcherGraphDao.getByComponentIds(Set(ComponentId(idA, idB)))) {
             _ shouldBe Set(existingWorkNodeA, existingWorkNodeB)
           }
         }
@@ -116,7 +117,8 @@ class WorkNodeDaoTest
         dynamoConfig = createDynamoConfigWith(nonExistentTable)
       )
 
-      whenReady(workNodeDao.getByComponentIds(Set(ComponentId(idA, idB))).failed) {
+      whenReady(
+        workNodeDao.getByComponentIds(Set(ComponentId(idA, idB))).failed) {
         _ shouldBe a[ResourceNotFoundException]
       }
     }
@@ -135,7 +137,8 @@ class WorkNodeDaoTest
 
           putTableItem(badRecord, table = table)
 
-          whenReady(workNodeDao.getByComponentIds(Set(ComponentId(idA, idB))).failed) {
+          whenReady(
+            workNodeDao.getByComponentIds(Set(ComponentId(idA, idB))).failed) {
             _ shouldBe a[RuntimeException]
           }
         }
