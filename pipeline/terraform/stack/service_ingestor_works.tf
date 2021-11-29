@@ -1,46 +1,35 @@
 locals {
-  work_ingestor_flush_interval_seconds = 60
+  ingestor_works_flush_interval_seconds = 60
 }
 
-module "ingestor_works_queue" {
-  source          = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
-  queue_name      = "${local.namespace}_ingestor_works_input"
-  topic_arns      = [module.router_work_output_topic.arn, module.relation_embedder_output_topic.arn]
-  alarm_topic_arn = var.dlq_alarm_arn
+module "ingestor_works_output_topic" {
+  source = "../modules/topic"
 
-  max_receive_count = 6
-
-  visibility_timeout_seconds = local.work_ingestor_flush_interval_seconds + 30
+  name       = "${local.namespace}_ingestor_works_output"
+  role_names = [module.ingestor_works.task_role_name]
 }
-
-# Service
 
 module "ingestor_works" {
-  source = "../modules/service"
+  source = "../modules/fargate_service"
 
-  namespace = local.namespace
-  name      = "ingestor_works"
-
+  name            = "ingestor_works"
   container_image = local.ingestor_works_image
-  security_group_ids = [
-    aws_security_group.egress.id,
+
+  topic_arns = [
+    module.router_work_output_topic.arn,
+    module.relation_embedder_output_topic.arn,
   ]
 
-  elastic_cloud_vpce_sg_id = var.ec_privatelink_security_group_id
-
-  cluster_name = aws_ecs_cluster.cluster.name
-  cluster_arn  = data.aws_ecs_cluster.cluster.id
+  queue_visibility_timeout_seconds = local.ingestor_works_flush_interval_seconds + 30
 
   env_vars = {
-    metrics_namespace = "${local.namespace}_ingestor_works"
-    topic_arn         = module.ingestor_works_output.arn
+    topic_arn = module.ingestor_works_output_topic.arn
 
     es_works_index        = local.es_works_index
     es_denormalised_index = local.es_works_denormalised_index
     es_is_reindexing      = var.is_reindexing
 
-    ingest_queue_id               = module.ingestor_works_queue.url
-    ingest_flush_interval_seconds = local.work_ingestor_flush_interval_seconds
+    ingest_flush_interval_seconds = local.ingestor_works_flush_interval_seconds
 
     # When an ingestor retrieves a batch from the denormalised index,
     # it might OutOfMemoryError when it deserialises the JSON into
@@ -64,47 +53,32 @@ module "ingestor_works" {
     ingest_batch_size = var.is_reindexing ? 100 : 10
   }
 
-  secret_env_vars = merge({
-    es_host_pipeline_storage     = local.pipeline_storage_private_host
-    es_port_pipeline_storage     = local.pipeline_storage_port
-    es_protocol_pipeline_storage = local.pipeline_storage_protocol
-    es_username_pipeline_storage = "elasticsearch/pipeline_storage_${var.pipeline_date}/work_ingestor/es_username"
-    es_password_pipeline_storage = "elasticsearch/pipeline_storage_${var.pipeline_date}/work_ingestor/es_password"
-  })
-
-  subnets = var.subnets
-
-  min_capacity = var.min_capacity
-  max_capacity = local.max_capacity
-
-  scale_down_adjustment = local.scale_down_adjustment
-  scale_up_adjustment   = local.scale_up_adjustment
-
-  queue_read_policy = module.ingestor_works_queue.read_policy
+  secret_env_vars = local.pipeline_storage_es_service_secrets["work_ingestor"]
 
   cpu    = 2048
   memory = 4096
 
-  use_fargate_spot = true
+  min_capacity = var.min_capacity
+  max_capacity = local.max_capacity
 
-  deployment_service_env  = var.release_label
-  deployment_service_name = "work-ingestor"
-  shared_logging_secrets  = var.shared_logging_secrets
-}
+  # Below this line is boilerplate that should be the same across
+  # all Fargate services.
+  egress_security_group_id             = aws_security_group.egress.id
+  elastic_cloud_vpce_security_group_id = var.ec_privatelink_security_group_id
 
-# Output topic
+  cluster_name = aws_ecs_cluster.cluster.name
+  cluster_arn  = aws_ecs_cluster.cluster.id
 
-module "ingestor_works_output" {
-  source = "../modules/topic"
+  scale_down_adjustment = local.scale_down_adjustment
+  scale_up_adjustment   = local.scale_up_adjustment
 
-  name       = "${local.namespace}_ingestor_works_output"
-  role_names = [module.ingestor_works.task_role_name]
-}
+  dlq_alarm_topic_arn = var.dlq_alarm_arn
 
-module "ingestor_works_scaling_alarm" {
-  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.2.1"
-  queue_name = module.ingestor_works_queue.name
+  subnets = var.subnets
 
-  queue_high_actions = [module.ingestor_works.scale_up_arn]
-  queue_low_actions  = [module.ingestor_works.scale_down_arn]
+  namespace = local.namespace
+
+  deployment_service_env = var.release_label
+
+  shared_logging_secrets = var.shared_logging_secrets
 }

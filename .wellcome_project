@@ -117,8 +117,7 @@ catalogue_pipeline:
         - id: ingestor-images
     - id: ingestor_works
       services:
-        - id: work-ingestor-tei-on
-        - id: work-ingestor-tei-off
+        - id: ingestor-works
     - id: router
       services:
         - id: work-router-tei-on
