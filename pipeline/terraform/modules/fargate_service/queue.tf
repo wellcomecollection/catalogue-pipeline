@@ -5,6 +5,7 @@ module "input_queue" {
 
   topic_arns                 = var.topic_arns
   visibility_timeout_seconds = var.queue_visibility_timeout_seconds
+  max_receive_count          = var.max_receive_count
 
   alarm_topic_arn = var.dlq_alarm_topic_arn
 }

@@ -41,6 +41,11 @@ variable "queue_visibility_timeout_seconds" {
   type = number
 }
 
+variable "max_receive_count" {
+  type    = number
+  default = 4
+}
+
 variable "dlq_alarm_topic_arn" {
   type = string
 }
