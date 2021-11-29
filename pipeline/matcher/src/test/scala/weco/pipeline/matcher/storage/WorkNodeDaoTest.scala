@@ -8,7 +8,7 @@ import software.amazon.awssdk.services.dynamodb.model.ResourceNotFoundException
 import weco.catalogue.internal_model.identifiers.CanonicalId
 import weco.pipeline.matcher.fixtures.MatcherFixtures
 import weco.pipeline.matcher.generators.WorkStubGenerators
-import weco.pipeline.matcher.models.WorkNode
+import weco.pipeline.matcher.models.{ComponentId, WorkNode}
 import weco.storage.dynamo.DynamoConfig
 
 import javax.naming.ConfigurationException
@@ -41,13 +41,13 @@ class WorkNodeDaoTest
               idA,
               version = 1,
               linkedIds = List(idB),
-              componentId = ciHash(idA, idB))
+              componentId = ComponentId(idA, idB))
           val existingWorkB: WorkNode =
             WorkNode(
               idB,
               version = 0,
               linkedIds = Nil,
-              componentId = ciHash(idA, idB))
+              componentId = ComponentId(idA, idB))
 
           putTableItems(
             items = Seq(existingWorkA, existingWorkB),
@@ -91,19 +91,19 @@ class WorkNodeDaoTest
             idA,
             version = 1,
             linkedIds = List(idB),
-            componentId = ciHash(idA, idB))
+            componentId = ComponentId(idA, idB))
           val existingWorkNodeB: WorkNode =
             WorkNode(
               idB,
               version = 0,
               linkedIds = Nil,
-              componentId = ciHash(idA, idB))
+              componentId = ComponentId(idA, idB))
 
           putTableItems(
             items = Seq(existingWorkNodeA, existingWorkNodeB),
             table = table)
 
-          whenReady(matcherGraphDao.getByComponentIds(Set(ciHash(idA, idB)))) {
+          whenReady(matcherGraphDao.getByComponentIds(Set(ComponentId(idA, idB)))) {
             _ shouldBe Set(existingWorkNodeA, existingWorkNodeB)
           }
         }
@@ -116,7 +116,7 @@ class WorkNodeDaoTest
         dynamoConfig = createDynamoConfigWith(nonExistentTable)
       )
 
-      whenReady(workNodeDao.getByComponentIds(Set(ciHash(idA, idB))).failed) {
+      whenReady(workNodeDao.getByComponentIds(Set(ComponentId(idA, idB))).failed) {
         _ shouldBe a[ResourceNotFoundException]
       }
     }
@@ -130,12 +130,12 @@ class WorkNodeDaoTest
           val badRecord: BadRecord =
             BadRecord(
               id = idA,
-              componentId = ciHash(idA, idB),
+              componentId = ComponentId(idA, idB),
               version = "five")
 
           putTableItem(badRecord, table = table)
 
-          whenReady(workNodeDao.getByComponentIds(Set(ciHash(idA, idB))).failed) {
+          whenReady(workNodeDao.getByComponentIds(Set(ComponentId(idA, idB))).failed) {
             _ shouldBe a[RuntimeException]
           }
         }
@@ -151,7 +151,7 @@ class WorkNodeDaoTest
             idA,
             version = 1,
             linkedIds = List(idA),
-            componentId = ciHash(idA, idB))
+            componentId = ComponentId(idA, idB))
           whenReady(workNodeDao.put(Set(work))) { _ =>
             getTableItem[WorkNode](idA.underlying, table) shouldBe Some(
               Right(work))
@@ -169,7 +169,7 @@ class WorkNodeDaoTest
               id,
               version = 1,
               linkedIds = List(id),
-              componentId = ciHash(id))
+              componentId = ComponentId(id))
           }
 
           val future = workNodeDao.put(works.toSet)
@@ -211,7 +211,7 @@ class WorkNodeDaoTest
           idA,
           version = 1,
           linkedIds = List(idB),
-          componentId = ciHash(idA, idB))
+          componentId = ComponentId(idA, idB))
 
       whenReady(workNodeDao.put(Set(workNode)).failed) {
         _ shouldBe a[ResourceNotFoundException]

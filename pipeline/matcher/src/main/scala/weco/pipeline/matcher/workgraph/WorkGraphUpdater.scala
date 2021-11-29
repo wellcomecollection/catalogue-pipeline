@@ -1,11 +1,11 @@
 package weco.pipeline.matcher.workgraph
 
 import grizzled.slf4j.Logging
-import org.apache.commons.codec.digest.DigestUtils
 import scalax.collection.Graph
 import scalax.collection.GraphPredef._
 import weco.catalogue.internal_model.identifiers.CanonicalId
 import weco.pipeline.matcher.models.{
+  ComponentId,
   VersionExpectedConflictException,
   VersionUnexpectedConflictException,
   WorkNode,
@@ -155,25 +155,11 @@ object WorkGraphUpdater extends Logging {
             id = node.value,
             version = workVersions.get(node.value),
             linkedIds = linkedWorkIds(node),
-            componentId = componentIdentifier(nodeIds),
+            componentId = ComponentId(nodeIds),
             suppressed = suppressedWorks.contains(node.value)
           )
         })
       })
       .toSet
   }
-
-  /** Create the "component identifier".
-    *
-    * This is shared by all the Works in the same component -- i.e., all the
-    * Works that are matched together.
-    *
-    * Note that this is based on the *unversioned* identifiers.  This means the
-    * component identifier is stable across different versions of a Work.
-    *
-    * TODO: Does this need to be a SHA-256 value?
-    * Could we just concatenate all the IDs?
-    */
-  private def componentIdentifier(nodeIds: List[CanonicalId]): String =
-    DigestUtils.sha256Hex(nodeIds.sorted.map(_.underlying).mkString("+"))
 }

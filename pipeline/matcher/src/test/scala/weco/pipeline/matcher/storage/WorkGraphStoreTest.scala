@@ -7,7 +7,7 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
 import weco.pipeline.matcher.fixtures.MatcherFixtures
 import weco.pipeline.matcher.generators.WorkStubGenerators
-import weco.pipeline.matcher.models.WorkNode
+import weco.pipeline.matcher.models.{ComponentId, WorkNode}
 import weco.pipeline.matcher.workgraph.WorkGraphUpdater
 
 import scala.concurrent.duration._
@@ -45,7 +45,7 @@ class WorkGraphStoreTest
               id = idA,
               version = 0,
               linkedIds = Nil,
-              componentId = ciHash(idA))
+              componentId = ComponentId(idA))
 
           putTableItem(work, table = graphTable)
 
@@ -67,13 +67,13 @@ class WorkGraphStoreTest
               id = idA,
               version = 0,
               linkedIds = Nil,
-              componentId = ciHash(idA))
+              componentId = ComponentId(idA))
           val workB =
             WorkNode(
               id = idB,
               version = 0,
               linkedIds = Nil,
-              componentId = ciHash(idB))
+              componentId = ComponentId(idB))
 
           putTableItems(items = Seq(workA, workB), table = graphTable)
 
@@ -95,13 +95,13 @@ class WorkGraphStoreTest
               id = idA,
               version = 0,
               linkedIds = List(idB),
-              componentId = ciHash(idA, idB))
+              componentId = ComponentId(idA, idB))
           val workB =
             WorkNode(
               id = idB,
               version = 0,
               linkedIds = Nil,
-              componentId = ciHash(idA, idB))
+              componentId = ComponentId(idA, idB))
 
           putTableItems(items = Seq(workA, workB), table = graphTable)
 
@@ -125,18 +125,18 @@ class WorkGraphStoreTest
               id = idA,
               version = 0,
               linkedIds = List(idB),
-              componentId = ciHash(idA, idB, idC))
+              componentId = ComponentId(idA, idB, idC))
           val workB =
             WorkNode(
               id = idB,
               version = 0,
               linkedIds = List(idC),
-              componentId = ciHash(idA, idB, idC))
+              componentId = ComponentId(idA, idB, idC))
           val workC = WorkNode(
             id = idC,
             version = 0,
             linkedIds = Nil,
-            componentId = ciHash(idA, idB, idC))
+            componentId = ComponentId(idA, idB, idC))
 
           putTableItems(items = Seq(workA, workB, workC), table = graphTable)
 
@@ -159,19 +159,19 @@ class WorkGraphStoreTest
               id = idA,
               version = 0,
               linkedIds = List(idB),
-              componentId = ciHash(idA, idB))
+              componentId = ComponentId(idA, idB))
           val workB =
             WorkNode(
               id = idB,
               version = 0,
               linkedIds = Nil,
-              componentId = ciHash(idA, idB))
+              componentId = ComponentId(idA, idB))
           val workC =
             WorkNode(
               id = idC,
               version = 0,
               linkedIds = Nil,
-              componentId = ciHash(idC))
+              componentId = ComponentId(idC))
 
           putTableItems(items = Seq(workA, workB, workC), table = graphTable)
 
@@ -233,12 +233,12 @@ class WorkGraphStoreTest
             idA,
             version = 0,
             linkedIds = List(idB),
-            componentId = ciHash(idA, idB))
+            componentId = ComponentId(idA, idB))
           val workNodeB = WorkNode(
             idB,
             version = 0,
             linkedIds = Nil,
-            componentId = ciHash(idA, idB))
+            componentId = ComponentId(idA, idB))
 
           whenReady(workGraphStore.put(Set(workNodeA, workNodeB))) { _ =>
             val savedWorks = scanTable[WorkNode](graphTable)
@@ -269,7 +269,7 @@ class WorkGraphStoreTest
       idA,
       version = 0,
       linkedIds = Nil,
-      componentId = ciHash(idA, idB))
+      componentId = ComponentId(idA, idB))
 
     whenReady(workGraphStore.put(Set(workNode)).failed) {
       _ shouldBe expectedException
