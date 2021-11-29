@@ -1,15 +1,15 @@
-module "calm_transformer_queue" {
+module "transformer_calm_input_queue" {
   source          = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
-  queue_name      = "${local.namespace}_calm_transformer"
+  queue_name      = "${local.namespace}_transformer_calm_input"
   topic_arns      = local.calm_adapter_topic_arns
   alarm_topic_arn = var.dlq_alarm_arn
 }
 
-module "calm_transformer" {
+module "transformer_calm" {
   source = "../modules/service"
 
   namespace = local.namespace
-  name      = "calm_transformer"
+  name      = "transformer_calm"
 
   container_image = local.transformer_calm_image
   security_group_ids = [
@@ -22,10 +22,10 @@ module "calm_transformer" {
   cluster_arn  = aws_ecs_cluster.cluster.arn
 
   env_vars = {
-    transformer_queue_id = module.calm_transformer_queue.url
-    metrics_namespace    = "${local.namespace_hyphen}_calm_transformer"
+    transformer_queue_id = module.transformer_calm_input_queue.url
+    metrics_namespace    = "${local.namespace_hyphen}_transformer_calm"
 
-    sns_topic_arn = module.calm_transformer_output_topic.arn
+    sns_topic_arn = module.transformer_calm_output_topic.arn
 
     es_index = local.es_works_source_index
 
@@ -45,7 +45,7 @@ module "calm_transformer" {
   scale_down_adjustment = local.scale_down_adjustment
   scale_up_adjustment   = local.scale_up_adjustment
 
-  queue_read_policy = module.calm_transformer_queue.read_policy
+  queue_read_policy = module.transformer_calm_input_queue.read_policy
 
   deployment_service_env  = var.release_label
   deployment_service_name = "calm-transformer"
@@ -53,25 +53,25 @@ module "calm_transformer" {
 }
 
 resource "aws_iam_role_policy" "calm_transformer_vhs_calm_adapter_read" {
-  role   = module.calm_transformer.task_role_name
+  role   = module.transformer_calm.task_role_name
   policy = var.vhs_calm_read_policy
 }
 
-module "calm_transformer_output_topic" {
+module "transformer_calm_output_topic" {
   source = "github.com/wellcomecollection/terraform-aws-sns-topic?ref=v1.0.1"
 
-  name = "${local.namespace}_calm_transformer_output"
+  name = "${local.namespace}_transformer_calm_output"
 }
 
 resource "aws_iam_role_policy" "allow_calm_transformer_sns_publish" {
-  role   = module.calm_transformer.task_role_name
-  policy = module.calm_transformer_output_topic.publish_policy
+  role   = module.transformer_calm.task_role_name
+  policy = module.transformer_calm_output_topic.publish_policy
 }
 
 module "calm_transformer_scaling_alarm" {
   source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.2.1"
-  queue_name = module.calm_transformer_queue.name
+  queue_name = module.transformer_calm_input_queue.name
 
-  queue_high_actions = [module.calm_transformer.scale_up_arn]
-  queue_low_actions  = [module.calm_transformer.scale_down_arn]
+  queue_high_actions = [module.transformer_calm.scale_up_arn]
+  queue_low_actions  = [module.transformer_calm.scale_down_arn]
 }

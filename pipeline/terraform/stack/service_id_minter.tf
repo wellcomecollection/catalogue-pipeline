@@ -1,12 +1,12 @@
 module "id_minter_queue" {
   source     = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
-  queue_name = "${local.namespace}_id_minter"
+  queue_name = "${local.namespace}_id_minter_input"
   topic_arns = [
-    module.calm_transformer_output_topic.arn,
-    module.mets_transformer_output_topic.arn,
-    module.miro_transformer_output_topic.arn,
-    module.sierra_transformer_output_topic.arn,
-    module.tei_transformer_output_topic.arn,
+    module.transformer_calm_output_topic.arn,
+    module.transformer_mets_output_topic.arn,
+    module.transformer_miro_output_topic.arn,
+    module.transformer_sierra_output_topic.arn,
+    module.transformer_tei_output_topic.arn,
   ]
   alarm_topic_arn            = var.dlq_alarm_arn
   visibility_timeout_seconds = 120

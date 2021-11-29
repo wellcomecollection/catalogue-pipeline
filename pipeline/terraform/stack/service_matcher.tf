@@ -60,7 +60,7 @@ module "matcher" {
   env_vars = {
     queue_url         = module.matcher_input_queue.url
     metrics_namespace = "${local.namespace_hyphen}_matcher"
-    topic_arn         = module.matcher_topic.arn
+    topic_arn         = module.matcher_output_topic.arn
 
     dynamo_table            = aws_dynamodb_table.matcher_graph_table.id
     dynamo_index            = "work-sets-index"
@@ -101,12 +101,10 @@ resource "aws_iam_role_policy" "matcher_lock_readwrite" {
   policy = data.aws_iam_policy_document.lock_table_readwrite.json
 }
 
-# Output topic
-
-module "matcher_topic" {
+module "matcher_output_topic" {
   source = "../modules/topic"
 
-  name       = "${local.namespace}_matcher"
+  name       = "${local.namespace}_matcher_output"
   role_names = [module.matcher.task_role_name]
 }
 

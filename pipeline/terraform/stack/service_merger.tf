@@ -1,7 +1,7 @@
-module "merger_queue" {
+module "merger_input_queue" {
   source          = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
-  queue_name      = "${local.namespace}_merger"
-  topic_arns      = [module.matcher_topic.arn]
+  queue_name      = "${local.namespace}_merger_input"
+  topic_arns      = [module.matcher_output_topic.arn]
   alarm_topic_arn = var.dlq_alarm_arn
 
   # This has to be longer than the `flush_interval_seconds` in the merger.
@@ -27,9 +27,9 @@ module "merger" {
 
   env_vars = {
     metrics_namespace       = "merger"
-    merger_queue_id         = module.merger_queue.url
-    merger_works_topic_arn  = module.merger_works_topic.arn
-    merger_images_topic_arn = module.merger_images_topic.arn
+    merger_queue_id         = module.merger_input_queue.url
+    merger_works_topic_arn  = module.merger_works_output_topic.arn
+    merger_images_topic_arn = module.merger_images_output_topic.arn
 
     es_identified_works_index = local.es_works_identified_index
     es_merged_works_index     = local.es_works_merged_index
@@ -54,30 +54,30 @@ module "merger" {
   scale_down_adjustment = local.scale_down_adjustment
   scale_up_adjustment   = local.scale_up_adjustment
 
-  queue_read_policy = module.merger_queue.read_policy
+  queue_read_policy = module.merger_input_queue.read_policy
 
   deployment_service_env  = var.release_label
   deployment_service_name = "merger"
   shared_logging_secrets  = var.shared_logging_secrets
 }
 
-module "merger_works_topic" {
+module "merger_works_output_topic" {
   source = "../modules/topic"
 
-  name       = "${local.namespace}_merger_works"
+  name       = "${local.namespace}_merger_works_output"
   role_names = [module.merger.task_role_name]
 }
 
-module "merger_images_topic" {
+module "merger_images_output_topic" {
   source = "../modules/topic"
 
-  name       = "${local.namespace}_merger_images"
+  name       = "${local.namespace}_merger_images_output"
   role_names = [module.merger.task_role_name]
 }
 
 module "merger_scaling_alarm" {
   source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.2.1"
-  queue_name = module.merger_queue.name
+  queue_name = module.merger_input_queue.name
 
   queue_high_actions = [module.merger.scale_up_arn]
   queue_low_actions  = [module.merger.scale_down_arn]

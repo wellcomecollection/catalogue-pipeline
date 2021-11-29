@@ -1,7 +1,7 @@
-module "router_queue" {
+module "router_input_queue" {
   source          = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
-  queue_name      = "${local.namespace}_router"
-  topic_arns      = [module.merger_works_topic.arn]
+  queue_name      = "${local.namespace}_router_input"
+  topic_arns      = [module.merger_works_output_topic.arn]
   alarm_topic_arn = var.dlq_alarm_arn
 
   visibility_timeout_seconds = 60
@@ -27,7 +27,7 @@ module "router" {
   env_vars = {
     metrics_namespace = "${local.namespace}_router"
 
-    queue_url         = module.router_queue.url
+    queue_url         = module.router_input_queue.url
     queue_parallelism = 10
 
     paths_topic_arn = module.router_path_output_topic.arn
@@ -51,7 +51,7 @@ module "router" {
   scale_down_adjustment = local.scale_down_adjustment
   scale_up_adjustment   = local.scale_up_adjustment
 
-  queue_read_policy = module.router_queue.read_policy
+  queue_read_policy = module.router_input_queue.read_policy
 
   cpu    = 1024
   memory = 2048
@@ -78,7 +78,7 @@ module "router_work_output_topic" {
 
 module "router_scaling_alarm" {
   source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.2.1"
-  queue_name = module.router_queue.name
+  queue_name = module.router_input_queue.name
 
   queue_high_actions = [module.router.scale_up_arn]
   queue_low_actions  = [module.router.scale_down_arn]

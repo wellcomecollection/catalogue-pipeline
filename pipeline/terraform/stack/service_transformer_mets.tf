@@ -1,6 +1,6 @@
-module "mets_transformer_queue" {
+module "transformer_mets_input_queue" {
   source          = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
-  queue_name      = "${local.namespace}_mets_transformer"
+  queue_name      = "${local.namespace}_transformer_mets_input"
   topic_arns      = local.mets_adapter_topic_arns
   alarm_topic_arn = var.dlq_alarm_arn
 
@@ -13,11 +13,11 @@ module "mets_transformer_queue" {
   visibility_timeout_seconds = 90
 }
 
-module "mets_transformer" {
+module "transformer_mets" {
   source = "../modules/service"
 
   namespace = local.namespace
-  name      = "mets_transformer"
+  name      = "transformer_mets"
 
   container_image = local.transformer_mets_image
   security_group_ids = [
@@ -30,10 +30,10 @@ module "mets_transformer" {
   cluster_arn  = aws_ecs_cluster.cluster.arn
 
   env_vars = {
-    transformer_queue_id = module.mets_transformer_queue.url
+    transformer_queue_id = module.transformer_mets_input_queue.url
     metrics_namespace    = "${local.namespace_hyphen}_mets_transformer"
 
-    sns_topic_arn = module.mets_transformer_output_topic.arn
+    sns_topic_arn = module.transformer_mets_output_topic.arn
 
     es_index = local.es_works_source_index
 
@@ -51,7 +51,7 @@ module "mets_transformer" {
   scale_down_adjustment = local.scale_down_adjustment
   scale_up_adjustment   = local.scale_up_adjustment
 
-  queue_read_policy = module.mets_transformer_queue.read_policy
+  queue_read_policy = module.transformer_mets_input_queue.read_policy
 
   # The METS transformer is quite CPU intensive, and if it doesn't have enough CPU,
   # the Akka scheduler gets resource-starved and the whole app stops doing anything.
@@ -65,23 +65,23 @@ module "mets_transformer" {
   shared_logging_secrets  = var.shared_logging_secrets
 }
 
-module "mets_transformer_output_topic" {
+module "transformer_mets_output_topic" {
   source = "github.com/wellcomecollection/terraform-aws-sns-topic?ref=v1.0.1"
 
-  name = "${local.namespace}_mets_transformer_output"
+  name = "${local.namespace}_transformer_mets_output"
 }
 
 resource "aws_iam_role_policy" "allow_mets_transformer_sns_publish" {
-  role   = module.mets_transformer.task_role_name
-  policy = module.mets_transformer_output_topic.publish_policy
+  role   = module.transformer_mets.task_role_name
+  policy = module.transformer_mets_output_topic.publish_policy
 }
 
 module "mets_transformer_scaling_alarm" {
   source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.2.1"
-  queue_name = module.mets_transformer_queue.name
+  queue_name = module.transformer_mets_input_queue.name
 
-  queue_high_actions = [module.mets_transformer.scale_up_arn]
-  queue_low_actions  = [module.mets_transformer.scale_down_arn]
+  queue_high_actions = [module.transformer_mets.scale_up_arn]
+  queue_low_actions  = [module.transformer_mets.scale_down_arn]
 }
 
 data "aws_iam_policy_document" "read_storage_bucket" {
@@ -99,6 +99,6 @@ data "aws_iam_policy_document" "read_storage_bucket" {
 }
 
 resource "aws_iam_role_policy" "read_storage_bucket" {
-  role   = module.mets_transformer.task_role_name
+  role   = module.transformer_mets.task_role_name
   policy = data.aws_iam_policy_document.read_storage_bucket.json
 }

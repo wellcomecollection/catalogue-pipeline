@@ -4,7 +4,7 @@ locals {
 
 module "ingestor_images_queue" {
   source          = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
-  queue_name      = "${local.namespace}_ingestor_images"
+  queue_name      = "${local.namespace}_ingestor_images_input"
   topic_arns      = [module.image_inferrer_topic.arn]
   alarm_topic_arn = var.dlq_alarm_arn
 
@@ -34,7 +34,7 @@ module "ingestor_images" {
 
   env_vars = {
     metrics_namespace = "${local.namespace}_ingestor_images"
-    topic_arn         = module.image_ingestor_topic.arn
+    topic_arn         = module.ingestor_images_output.arn
 
     es_images_index    = local.es_images_index
     es_augmented_index = local.es_images_augmented_index
@@ -85,10 +85,10 @@ module "ingestor_images" {
   shared_logging_secrets = var.shared_logging_secrets
 }
 
-module "image_ingestor_topic" {
+module "ingestor_images_output" {
   source = "../modules/topic"
 
-  name       = "${local.namespace}_image_ingestor_output"
+  name       = "${local.namespace}_ingestor_images_output"
   role_names = [module.ingestor_images.task_role_name]
 }
 

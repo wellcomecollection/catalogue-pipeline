@@ -7,9 +7,9 @@ data "aws_ecs_cluster" "cluster" {
   cluster_name = aws_ecs_cluster.cluster.name
 }
 
-module "batcher_queue" {
+module "batcher_input_queue" {
   source                     = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
-  queue_name                 = "${local.namespace}_batcher"
+  queue_name                 = "${local.namespace}_batcher_input"
   topic_arns                 = [module.router_path_output_topic.arn]
   visibility_timeout_seconds = (local.wait_minutes + 5) * 60
   alarm_topic_arn            = var.dlq_alarm_arn
@@ -35,7 +35,7 @@ module "batcher" {
   env_vars = {
     metrics_namespace = "${local.namespace}_batcher"
 
-    queue_url        = module.batcher_queue.url
+    queue_url        = module.batcher_input_queue.url
     output_topic_arn = module.batcher_output_topic.arn
 
     # NOTE: this needs to be less than visibility timeout
@@ -59,7 +59,7 @@ module "batcher" {
   scale_down_adjustment = local.scale_down_adjustment
   scale_up_adjustment   = local.scale_up_adjustment
 
-  queue_read_policy = module.batcher_queue.read_policy
+  queue_read_policy = module.batcher_input_queue.read_policy
 
   cpu    = 1024
   memory = 2048
@@ -77,7 +77,7 @@ module "batcher_output_topic" {
 
 module "batcher_scaling_alarm" {
   source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.2.1"
-  queue_name = module.batcher_queue.name
+  queue_name = module.batcher_input_queue.name
 
   queue_high_actions = [module.batcher.scale_up_arn]
   queue_low_actions  = [module.batcher.scale_down_arn]
