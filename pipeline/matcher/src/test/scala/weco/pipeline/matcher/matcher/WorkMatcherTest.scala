@@ -78,8 +78,7 @@ class WorkMatcherTest
               Set(
                 MatchedIdentifiers(
                   Set(
-                    WorkIdentifier(idA, work.version),
-                    WorkIdentifier(idB, None))))
+                    WorkIdentifier(idA, work.version))))
 
             val savedWorkNodes = scanTable[WorkNode](graphTable)
               .map(_.right.value)

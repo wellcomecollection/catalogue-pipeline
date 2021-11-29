@@ -65,8 +65,7 @@ class MatcherWorkerServiceTest
       Set(
         MatchedIdentifiers(
           identifiers = Set(
-            WorkIdentifier(idA, version = Some(1)),
-            WorkIdentifier(idB, version = None)
+            WorkIdentifier(idA, version = 1),
           )
         )
       )

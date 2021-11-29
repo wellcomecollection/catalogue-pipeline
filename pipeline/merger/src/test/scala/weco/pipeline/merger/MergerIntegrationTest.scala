@@ -703,7 +703,7 @@ class MergerIntegrationTest
 
       Then("the Sierra work is redirected to the Calm work")
       context.getMerged(sierra) should beRedirectedTo(calm)
-      context.getMerged(sierra) should beVisible
+      context.getMerged(calm) should beVisible
     }
   }
 }
