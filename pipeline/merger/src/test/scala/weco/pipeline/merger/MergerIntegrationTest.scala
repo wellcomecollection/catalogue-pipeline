@@ -3,12 +3,13 @@ package weco.pipeline.merger
 import org.scalatest.GivenWhenThen
 import org.scalatest.featurespec.AnyFeatureSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.identifiers.IdentifierType
+import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType}
 import weco.catalogue.internal_model.work.DeletedReason.SuppressedFromSource
 import weco.catalogue.internal_model.work.{
   CollectionPath,
   Format,
-  InvisibilityReason
+  InvisibilityReason,
+  MergeCandidate
 }
 import weco.catalogue.internal_model.work.generators.SourceWorkGenerators
 import weco.fixtures.TimeAssertions
@@ -675,6 +676,35 @@ class MergerIntegrationTest
 
       Then("the Sierra work is redirected to the Calm work")
       context.getMerged(sierra) should beRedirectedTo(calm)
+    }
+  }
+
+  Scenario("Miro, Calm and Sierra but the Miro is missing") {
+    withContext { implicit context =>
+      Given("the works")
+      val calm = calmIdentifiedWork()
+        .mergeCandidates(
+          List(
+            MergeCandidate(
+              id = IdState.Identified(
+                canonicalId = createCanonicalId,
+                sourceIdentifier = createMiroSourceIdentifier
+              ),
+              reason = "CALM/Miro work"
+            )
+          ))
+
+      val sierra = sierraIdentifiedWork()
+        .mergeCandidates(List(createCalmMergeCandidateFor(calm)))
+
+      When("the works are processed by the matcher/merger")
+      // Note: the order is significant here.  The bug only reproduces under
+      // certain orderings.
+      processWorks(calm, sierra)
+
+      Then("the Sierra work is redirected to the Calm work")
+      context.getMerged(sierra) should beRedirectedTo(calm)
+      context.getMerged(calm) should beVisible
     }
   }
 }

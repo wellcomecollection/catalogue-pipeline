@@ -75,11 +75,7 @@ class WorkMatcherTest
           whenReady(workMatcher.matchWork(work)) { matcherResult =>
             assertRecent(matcherResult.createdTime)
             matcherResult.works shouldBe
-              Set(
-                MatchedIdentifiers(
-                  Set(
-                    WorkIdentifier(idA, work.version),
-                    WorkIdentifier(idB, None))))
+              Set(MatchedIdentifiers(Set(WorkIdentifier(idA, work.version))))
 
             val savedWorkNodes = scanTable[WorkNode](graphTable)
               .map(_.right.value)
