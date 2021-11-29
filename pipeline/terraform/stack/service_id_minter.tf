@@ -13,22 +13,18 @@ module "id_minter_queue" {
 }
 
 module "id_minter" {
-  source = "../modules/service"
+  source = "../modules/fargate_service"
 
-  namespace = local.namespace
-  name      = "id_minter"
-
+  name            = "id_minter"
   container_image = local.id_minter_image
 
+  deployment_service_name = "id-minter"
+
   security_group_ids = [
-    aws_security_group.service_egress.id,
     var.rds_ids_access_security_group_id,
   ]
 
-  elastic_cloud_vpce_sg_id = var.ec_privatelink_security_group_id
-
-  cluster_name = aws_ecs_cluster.cluster.name
-  cluster_arn  = aws_ecs_cluster.cluster.id
+  queue_read_policy = module.id_minter_queue.read_policy
 
   env_vars = {
     metrics_namespace = "${local.namespace_hyphen}_id_minter"
@@ -60,20 +56,27 @@ module "id_minter" {
     local.max_capacity
   )
 
-  scale_down_adjustment = local.scale_down_adjustment
-  scale_up_adjustment   = local.scale_up_adjustment
-
-  subnets           = var.subnets
-  queue_read_policy = module.id_minter_queue.read_policy
-
   cpu    = 1024
   memory = 2048
 
-  use_fargate_spot = true
+  # Below this line is boilerplate that should be the same across
+  # all Fargate services.
+  egress_security_group_id             = aws_security_group.service_egress.id
+  elastic_cloud_vpce_security_group_id = var.ec_privatelink_security_group_id
 
-  deployment_service_env  = var.release_label
-  deployment_service_name = "id-minter"
-  shared_logging_secrets  = var.shared_logging_secrets
+  cluster_name = aws_ecs_cluster.cluster.name
+  cluster_arn  = aws_ecs_cluster.cluster.id
+
+  scale_down_adjustment = local.scale_down_adjustment
+  scale_up_adjustment   = local.scale_up_adjustment
+
+  subnets = var.subnets
+
+  namespace = local.namespace
+
+  deployment_service_env = var.release_label
+
+  shared_logging_secrets = var.shared_logging_secrets
 }
 
 # Output topic
