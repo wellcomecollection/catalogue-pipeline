@@ -42,6 +42,9 @@ module "id_minter" {
     db_password          = "catalogue/id_minter/rds_password"
   }, local.pipeline_storage_es_service_secrets["id_minter"])
 
+  cpu    = 1024
+  memory = 2048
+
   # The total number of connections to RDS across all tasks from all ID minter
   # services must not exceed the maximum supported by the RDS instance.
   min_capacity = var.min_capacity
@@ -51,9 +54,6 @@ module "id_minter" {
     ),
     local.max_capacity
   )
-
-  cpu    = 1024
-  memory = 2048
 
   # Below this line is boilerplate that should be the same across
   # all Fargate services.
