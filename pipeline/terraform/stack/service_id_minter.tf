@@ -1,15 +1,8 @@
-module "id_minter_queue" {
-  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
-  queue_name = "${local.namespace}_id_minter_input"
-  topic_arns = [
-    module.transformer_calm_output_topic.arn,
-    module.transformer_mets_output_topic.arn,
-    module.transformer_miro_output_topic.arn,
-    module.transformer_sierra_output_topic.arn,
-    module.transformer_tei_output_topic.arn,
-  ]
-  alarm_topic_arn            = var.dlq_alarm_arn
-  visibility_timeout_seconds = 120
+module "id_minter_topic" {
+  source = "../modules/topic"
+
+  name       = "${local.namespace}_id_minter_output"
+  role_names = [module.id_minter.task_role_name]
 }
 
 module "id_minter" {
@@ -24,12 +17,20 @@ module "id_minter" {
     var.rds_ids_access_security_group_id,
   ]
 
-  queue_read_policy = module.id_minter_queue.read_policy
+  topic_arns = [
+    module.transformer_calm_output_topic.arn,
+    module.transformer_mets_output_topic.arn,
+    module.transformer_miro_output_topic.arn,
+    module.transformer_sierra_output_topic.arn,
+    module.transformer_tei_output_topic.arn,
+  ]
+
+  queue_visibility_timeout_seconds = 120
 
   env_vars = {
     metrics_namespace = "${local.namespace_hyphen}_id_minter"
 
-    queue_url                     = module.id_minter_queue.url
+    queue_url                     = module.id_minter.queue_url
     topic_arn                     = module.id_minter_topic.arn
     max_connections               = local.id_minter_task_max_connections
     es_source_index               = local.es_works_source_index
@@ -70,6 +71,8 @@ module "id_minter" {
   scale_down_adjustment = local.scale_down_adjustment
   scale_up_adjustment   = local.scale_up_adjustment
 
+  dlq_alarm_topic_arn = var.dlq_alarm_arn
+
   subnets = var.subnets
 
   namespace = local.namespace
@@ -77,21 +80,4 @@ module "id_minter" {
   deployment_service_env = var.release_label
 
   shared_logging_secrets = var.shared_logging_secrets
-}
-
-# Output topic
-
-module "id_minter_topic" {
-  source = "../modules/topic"
-
-  name       = "${local.namespace}_id_minter_output"
-  role_names = [module.id_minter.task_role_name]
-}
-
-module "id_minter_scaling_alarm" {
-  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.2.1"
-  queue_name = module.id_minter_queue.name
-
-  queue_high_actions = [module.id_minter.scale_up_arn]
-  queue_low_actions  = [module.id_minter.scale_down_arn]
 }

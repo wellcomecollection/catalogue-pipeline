@@ -33,6 +33,18 @@ variable "env_vars" {
   type = map(string)
 }
 
+variable "topic_arns" {
+  type = list(string)
+}
+
+variable "queue_visibility_timeout_seconds" {
+  type = number
+}
+
+variable "dlq_alarm_topic_arn" {
+  type = string
+}
+
 variable "security_group_ids" {
   default = []
   type    = list(string)
@@ -43,10 +55,6 @@ variable "egress_security_group_id" {
 }
 
 variable "elastic_cloud_vpce_security_group_id" {
-  type = string
-}
-
-variable "queue_read_policy" {
   type = string
 }
 
