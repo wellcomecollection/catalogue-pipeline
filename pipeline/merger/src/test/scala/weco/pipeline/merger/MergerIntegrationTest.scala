@@ -7,118 +7,163 @@ import weco.catalogue.internal_model.identifiers.IdentifierType
 import weco.catalogue.internal_model.work.{
   CollectionPath,
   Format,
-  InvisibilityReason,
-  Work,
-  WorkState
+  InvisibilityReason
 }
 import weco.catalogue.internal_model.work.generators.SourceWorkGenerators
+import weco.fixtures.TimeAssertions
 import weco.pipeline.matcher.generators.MergeCandidateGenerators
-import weco.pipeline.merger.fixtures.FeatureTestSugar
-import weco.pipeline.merger.services.PlatformMerger
+import weco.pipeline.merger.fixtures.IntegrationTestHelpers
 
-class MergerScenarioTest
+/** Although the matcher and merger are separate applications, they work together
+  * as a single unit.
+  *
+  * These tests are "feature tests" for the matcher+merger together.  They only
+  * use the external interfaces, and don't rely on how the two apps talk to each other.
+  *
+  * They're meant:
+  *
+  *    - to check the inter-app messaging works correctly
+  *    - to act as documentation of our intentions.
+  *
+  */
+class MergerIntegrationTest
     extends AnyFeatureSpec
     with GivenWhenThen
     with Matchers
-    with FeatureTestSugar
+    with SourceWorkGenerators
     with MergeCandidateGenerators
-    with SourceWorkGenerators {
-  val merger = PlatformMerger
+    with TimeAssertions
+    with IntegrationTestHelpers {
 
-  /*
-   * We test field-level behaviour in the rule tests, and have to replicate it
-   * in the TeiOnPlatformMergerTest. This obscures the top-level merging behaviour
-   * which has led to confusion about intended/desired/actual behaviour.
-   *
-   * These feature tests are intended to be simple smoke tests of merging
-   * behaviour which are most valuable as documentation of our intentions.
-   */
-  Feature("Top-level merging") {
-    Scenario("One Sierra and multiple Miro works are matched") {
+  Scenario("A single work with nothing linked to it") {
+    withContext { implicit context =>
+      Given("A single work")
+      val work = identifiedWork()
+
+      When("the work is processed by the matcher/merger")
+      processWork(work)
+
+      Then("the work is returned")
+      val mergedWork = context.getMerged(work)
+      mergedWork.data shouldBe work.data
+      mergedWork.state should beSimilarTo(work.state)
+      mergedWork.state.mergedTime should beRecent()
+    }
+  }
+
+  Scenario("One Sierra and multiple Miro works are matched") {
+    withContext { implicit context =>
       Given("a Sierra work and 3 Miro works")
-      val sierra = sierraPhysicalIdentifiedWork()
       val miro1 = miroIdentifiedWork()
       val miro2 = miroIdentifiedWork()
       val miro3 = miroIdentifiedWork()
+      val sierra = sierraPhysicalIdentifiedWork()
+        .mergeCandidates(
+          List(miro1, miro2, miro3).map(createMiroSierraMergeCandidateFor))
 
-      When("the works are merged")
-      val outcome = merger.merge(Seq(sierra, miro1, miro2, miro3))
+      When("the works are processed by the matcher/merger")
+      processWorks(sierra, miro1, miro2, miro3)
 
       Then("the Miro works are redirected to the Sierra work")
-      outcome.getMerged(miro1) should beRedirectedTo(sierra)
-      outcome.getMerged(miro2) should beRedirectedTo(sierra)
-      outcome.getMerged(miro3) should beRedirectedTo(sierra)
+      context.getMerged(miro1) should beRedirectedTo(sierra)
+      context.getMerged(miro2) should beRedirectedTo(sierra)
+      context.getMerged(miro3) should beRedirectedTo(sierra)
 
       And("images are created from the Miro works")
-      outcome.imageData should contain(miro1.singleImage)
-      outcome.imageData should contain(miro2.singleImage)
-      outcome.imageData should contain(miro3.singleImage)
+      context.imageData should contain(miro1.singleImage)
+      context.imageData should contain(miro2.singleImage)
+      context.imageData should contain(miro3.singleImage)
 
       And("the merged Sierra work's images contain all of the images")
-      val mergedImages = outcome.getMerged(sierra).data.imageData
+      val mergedImages = context.getMerged(sierra).data.imageData
       mergedImages should contain(miro1.singleImage)
       mergedImages should contain(miro2.singleImage)
       mergedImages should contain(miro3.singleImage)
     }
+  }
 
-    Scenario("One Sierra and one Miro work are matched") {
+  Scenario("One Sierra and one Miro work are matched") {
+    withContext { implicit context =>
       Given("a Sierra work and a Miro work")
-      val sierra = sierraPhysicalIdentifiedWork()
       val miro = miroIdentifiedWork()
+      val sierra = sierraPhysicalIdentifiedWork()
+        .mergeCandidates(List(createMiroSierraMergeCandidateFor(miro)))
 
-      When("the works are merged")
-      val outcome = merger.merge(Seq(sierra, miro))
+      When("the works are processed by the matcher/merger")
+      processWorks(sierra, miro)
 
       Then("the Miro work is redirected to the Sierra work")
-      outcome.getMerged(miro) should beRedirectedTo(sierra)
+      context.getMerged(miro) should beRedirectedTo(sierra)
 
       And("an image is created from the Miro work")
-      outcome.imageData should contain only miro.singleImage
+      context.imageData should contain only miro.singleImage
 
       And("the merged Sierra work contains the image")
-      outcome
+      context
         .getMerged(sierra)
         .data
         .imageData should contain only miro.singleImage
     }
+  }
 
-    Scenario("A Sierra picture or ephemera work and METS work are matched") {
-      Given("a Sierra picture or ephemera work and a METS work")
+  Scenario("A Sierra picture and METS work are matched") {
+    withContext { implicit context =>
+      Given("a Sierra picture and a METS work")
       val sierraPicture = sierraIdentifiedWork()
         .items(List(createIdentifiedPhysicalItem))
         .format(Format.Pictures)
+      val mets = metsIdentifiedWork()
+        .mergeCandidates(List(createMetsMergeCandidateFor(sierraPicture)))
+
+      When("the works are processed by the matcher/merger")
+      processWorks(sierraPicture, mets)
+
+      Then("the METS work is redirected to the Sierra work")
+      context.getMerged(mets) should beRedirectedTo(sierraPicture)
+
+      And("an image is created from the METS work")
+      context.imageData should contain only mets.singleImage
+
+      And("the merged Sierra work contains the image")
+      context
+        .getMerged(sierraPicture)
+        .data
+        .imageData should contain only mets.singleImage
+    }
+  }
+
+  Scenario("A Sierra ephemera work and METS work are matched") {
+    withContext { implicit context =>
+      Given("a Sierra ephemera work and a METS work")
       val sierraEphemera = sierraIdentifiedWork()
         .items(List(createIdentifiedPhysicalItem))
         .format(Format.Ephemera)
       val mets = metsIdentifiedWork()
+        .mergeCandidates(List(createMetsMergeCandidateFor(sierraEphemera)))
 
-      When("the works are merged")
-      val pictureOutcome = merger.merge(Seq(sierraPicture, mets))
-      val ephemeraOutcome = merger.merge(Seq(sierraEphemera, mets))
+      When("the works are processed by the matcher/merger")
+      processWorks(sierraEphemera, mets)
 
       Then("the METS work is redirected to the Sierra work")
-      pictureOutcome.getMerged(mets) should beRedirectedTo(sierraPicture)
-      ephemeraOutcome.getMerged(mets) should beRedirectedTo(sierraEphemera)
+      context.getMerged(mets) should beRedirectedTo(sierraEphemera)
 
       And("an image is created from the METS work")
-      pictureOutcome.imageData should contain only mets.singleImage
-      ephemeraOutcome.imageData should contain only mets.singleImage
+      context.imageData should contain only mets.singleImage
 
       And("the merged Sierra work contains the image")
-      pictureOutcome
-        .getMerged(sierraPicture)
-        .data
-        .imageData should contain only mets.singleImage
-      ephemeraOutcome
+      context
         .getMerged(sierraEphemera)
         .data
         .imageData should contain only mets.singleImage
     }
+  }
 
-    Scenario("An AIDS poster Sierra picture, a METS and a Miro are matched") {
+  Scenario("An AIDS poster Sierra picture, a METS and a Miro are matched") {
+    withContext { implicit context =>
       Given(
         "a Sierra picture with digcode `digaids`, a METS work and a Miro work"
       )
+      val miro = miroIdentifiedWork()
       val sierraDigaidsPicture = sierraIdentifiedWork()
       // Multiple physical items would prevent a Miro redirect in any other case,
       // but we still expect to see it for the digaids works as the Miro item is
@@ -126,39 +171,45 @@ class MergerScenarioTest
         .items(List(createIdentifiedPhysicalItem, createIdentifiedPhysicalItem))
         .format(Format.Pictures)
         .otherIdentifiers(List(createDigcodeIdentifier("digaids")))
+        .mergeCandidates(List(createMiroSierraMergeCandidateFor(miro)))
       val mets = metsIdentifiedWork()
-      val miro = miroIdentifiedWork()
+        .mergeCandidates(
+          List(createMetsMergeCandidateFor(sierraDigaidsPicture)))
 
-      When("the works are merged")
-      val outcome = merger.merge(Seq(sierraDigaidsPicture, mets, miro))
+      When("the works are processed by the matcher/merger")
+      processWorks(sierraDigaidsPicture, mets, miro)
 
       Then("the METS work and the Miro work are redirected to the Sierra work")
-      outcome.getMerged(mets) should beRedirectedTo(sierraDigaidsPicture)
-      outcome.getMerged(miro) should beRedirectedTo(sierraDigaidsPicture)
+      context.getMerged(mets) should beRedirectedTo(sierraDigaidsPicture)
+      context.getMerged(miro) should beRedirectedTo(sierraDigaidsPicture)
 
       And("the Sierra work contains only the METS images")
-      outcome
+      context
         .getMerged(sierraDigaidsPicture)
         .data
         .imageData should contain only mets.singleImage
     }
+  }
 
-    Scenario("A physical and a digital Sierra work are matched") {
+  Scenario("A physical and a digital Sierra work are matched") {
+    withContext { implicit context =>
       Given("a pair of a physical Sierra work and a digital Sierra work")
       val (digitalSierra, physicalSierra) = sierraIdentifiedWorkPair()
 
-      When("the works are merged")
-      val outcome = merger.merge(Seq(physicalSierra, digitalSierra))
+      When("the works are processed by the matcher/merger")
+      processWorks(physicalSierra, digitalSierra)
 
       Then("the digital work is redirected to the physical work")
-      outcome.getMerged(digitalSierra) should beRedirectedTo(physicalSierra)
+      context.getMerged(digitalSierra) should beRedirectedTo(physicalSierra)
 
       And("the physical work contains the digitised work's identifiers")
-      val physicalIdentifiers = outcome.getMerged(physicalSierra).identifiers
+      val physicalIdentifiers = context.getMerged(physicalSierra).identifiers
       physicalIdentifiers should contain allElementsOf digitalSierra.identifiers
     }
+  }
 
-    Scenario("Audiovisual Sierra works are not merged") {
+  Scenario("Audiovisual Sierra works are not merged") {
+    withContext { implicit context =>
       Given("a physical Sierra AV work and its digitised counterpart")
       val digitisedVideo =
         sierraDigitalIdentifiedWork().format(Format.EVideos)
@@ -169,107 +220,130 @@ class MergerScenarioTest
           .mergeCandidates(
             List(createSierraPairMergeCandidateFor(digitisedVideo)))
 
-      When("the works are merged")
-      val outcome = merger.merge(Seq(physicalVideo, digitisedVideo))
+      When("the works are processed by the matcher/merger")
+      processWorks(physicalVideo, digitisedVideo)
 
-      Then("both original works are preserved")
-      outcome.resultWorks should contain theSameElementsAs Seq(
-        physicalVideo,
-        digitisedVideo
-      )
+      Then("both original works remain visible")
+      context.getMerged(physicalVideo) should beVisible
+      context.getMerged(digitisedVideo) should beVisible
     }
+  }
 
-    Scenario("A Calm work and a Sierra work are matched") {
+  Scenario("A Calm work and a Sierra work are matched") {
+    withContext { implicit context =>
       Given("a Sierra work and a Calm work")
-      val sierra = sierraPhysicalIdentifiedWork()
       val calm = calmIdentifiedWork()
+      val sierra = sierraPhysicalIdentifiedWork()
+        .mergeCandidates(List(createCalmMergeCandidateFor(calm)))
 
-      When("the works are merged")
-      val outcome = merger.merge(Seq(sierra, calm))
+      When("the works are processed by the matcher/merger")
+      processWorks(sierra, calm)
 
       Then("the Sierra work is redirected to the Calm work")
-      outcome.getMerged(sierra) should beRedirectedTo(calm)
+      context.getMerged(sierra) should beRedirectedTo(calm)
 
       And("the Calm work contains the Sierra item ID")
-      val calmItem = outcome.getMerged(calm).data.items.head
+      val calmItem = context.getMerged(calm).data.items.head
       calmItem.id shouldBe sierra.data.items.head.id
     }
+  }
 
-    Scenario("A Calm work, a Sierra work, and a Miro work are matched") {
+  Scenario("A Calm work, a Sierra work, and a Miro work are matched") {
+    withContext { implicit context =>
       Given("A Calm work, a Sierra work and a Miro work")
-      val sierra = sierraPhysicalIdentifiedWork()
       val calm = calmIdentifiedWork()
       val miro = miroIdentifiedWork()
+      val sierra = sierraPhysicalIdentifiedWork()
+        .mergeCandidates(
+          List(
+            createMiroSierraMergeCandidateFor(miro),
+            createCalmMergeCandidateFor(calm)
+          )
+        )
 
-      When("the works are merged")
-      val outcome = merger.merge(Seq(sierra, calm, miro))
+      When("the works are processed by the matcher/merger")
+      processWorks(sierra, calm, miro)
 
       Then("the Sierra work is redirected to the Calm work")
-      outcome.getMerged(sierra) should beRedirectedTo(calm)
+      context.getMerged(sierra) should beRedirectedTo(calm)
 
       And("the Miro work is redirected to the Calm work")
-      outcome.getMerged(miro) should beRedirectedTo(calm)
+      context.getMerged(miro) should beRedirectedTo(calm)
 
       And("the Calm work contains the Miro location")
-      outcome.getMerged(calm).data.items.flatMap(_.locations) should
+      context.getMerged(calm).data.items.flatMap(_.locations) should
         contain(miro.data.items.head.locations.head)
       And("the Calm work contains the Miro image")
-      outcome.getMerged(calm).data.imageData should contain(miro.singleImage)
+      context.getMerged(calm).data.imageData should contain(miro.singleImage)
     }
+  }
 
-    Scenario("A Calm work, a Sierra picture work, and a METS work are matched") {
+  Scenario("A Calm work, a Sierra picture work, and a METS work are matched") {
+    withContext { implicit context =>
       Given("A Calm work, a Sierra picture work and a METS work")
+      val calm = calmIdentifiedWork()
       val sierraPicture = sierraIdentifiedWork()
         .items(List(createIdentifiedPhysicalItem))
         .format(Format.Pictures)
-      val calm = calmIdentifiedWork()
+        .mergeCandidates(List(createCalmMergeCandidateFor(calm)))
       val mets = metsIdentifiedWork()
+        .mergeCandidates(List(createMetsMergeCandidateFor(sierraPicture)))
 
-      When("the works are merged")
-      val outcome = merger.merge(Seq(sierraPicture, calm, mets))
+      When("the works are processed by the matcher/merger")
+      processWorks(sierraPicture, calm, mets)
 
       Then("the Sierra work is redirected to the Calm work")
-      outcome.getMerged(sierraPicture) should beRedirectedTo(calm)
+      context.getMerged(sierraPicture) should beRedirectedTo(calm)
 
       And("the METS work is redirected to the Calm work")
-      outcome.getMerged(mets) should beRedirectedTo(calm)
+      context.getMerged(mets) should beRedirectedTo(calm)
 
       And("the Calm work contains the METS location")
-      outcome.getMerged(calm).data.items.flatMap(_.locations) should
+      context.getMerged(calm).data.items.flatMap(_.locations) should
         contain(mets.data.items.head.locations.head)
       And("the Calm work contains the METS image")
-      outcome.getMerged(calm).data.imageData should contain(mets.singleImage)
+      context.getMerged(calm).data.imageData should contain(mets.singleImage)
     }
+  }
 
-    Scenario("A Calm work and multiple Miro works are matched") {
+  Scenario("A Calm work and multiple Miro works are matched") {
+    withContext { implicit context =>
       Given("A Calm work and 2 Miro works")
-      val calm = calmIdentifiedWork()
       val miro1 = miroIdentifiedWork()
       val miro2 = miroIdentifiedWork()
+      val calm = calmIdentifiedWork()
+        .mergeCandidates(
+          List(
+            createCalmMiroMergeCandidateFor(miro1),
+            createCalmMiroMergeCandidateFor(miro2),
+          )
+        )
 
-      When("the works are merged")
-      val outcome = merger.merge(Seq(calm, miro1, miro2))
+      When("the works are processed by the matcher/merger")
+      processWorks(calm, miro1, miro2)
 
       Then("the Miro works are redirected to the Calm work")
-      outcome.getMerged(miro1) should beRedirectedTo(calm)
-      outcome.getMerged(miro2) should beRedirectedTo(calm)
+      context.getMerged(miro1) should beRedirectedTo(calm)
+      context.getMerged(miro2) should beRedirectedTo(calm)
 
       And("the Calm work contains the miro items")
-      outcome
+      context
         .getMerged(calm)
         .data
         .items should contain allElementsOf miro1.data.items
-      outcome
+      context
         .getMerged(calm)
         .data
         .items should contain allElementsOf miro2.data.items
 
       And("the Calm work contains the Miro images")
-      outcome.getMerged(calm).data.imageData should contain(miro1.singleImage)
-      outcome.getMerged(calm).data.imageData should contain(miro2.singleImage)
+      context.getMerged(calm).data.imageData should contain(miro1.singleImage)
+      context.getMerged(calm).data.imageData should contain(miro2.singleImage)
     }
+  }
 
-    Scenario("A digitised video with Sierra physical records and e-bibs") {
+  Scenario("A digitised video with Sierra physical records and e-bibs") {
+    withContext { implicit context =>
       // This test case is based on a real example of four related works that
       // were being merged incorrectly.  In particular, the METS work (and associated
       // IIIF manifest) was being merged into the physical video formats, not the
@@ -299,89 +373,66 @@ class MergerScenarioTest
           .items(List(createDigitalItem))
           .invisible()
 
-      When("the works are merged")
-      val sierraWorks = List(workWithPhysicalVideoFormats, workForEbib)
-      val works = sierraWorks :+ workForMets
-      val outcome = merger.merge(works)
+      When("the works are processed by the matcher/merger")
+      processWorks(workWithPhysicalVideoFormats, workForEbib, workForMets)
 
       Then("the METS work is redirected to the Sierra e-bib")
-      outcome.getMerged(workForMets) should beRedirectedTo(workForEbib)
+      context.getMerged(workForMets) should beRedirectedTo(workForEbib)
 
       And("the Sierra e-bib gets the items from the METS work")
-      outcome.getMerged(workForEbib).data.items shouldBe workForMets.data.items
+      context.getMerged(workForEbib).data.items shouldBe workForMets.data.items
 
       And("the Sierra physical work is unaffected")
-      outcome.getMerged(workWithPhysicalVideoFormats) shouldBe workWithPhysicalVideoFormats
+      context
+        .getMerged(workWithPhysicalVideoFormats)
+        .data shouldBe workWithPhysicalVideoFormats.data
+      context.getMerged(workWithPhysicalVideoFormats).state should beSimilarTo(
+        workWithPhysicalVideoFormats.state)
     }
+  }
 
-    Scenario("A Tei and a Sierra digital and a sierra physical work are merged") {
+  Scenario("A Tei and a Sierra digital and a sierra physical work are merged") {
+    withContext { implicit context =>
       Given("a Tei, a Sierra physical record and a Sierra digital record")
       val (digitalSierra, physicalSierra) = sierraIdentifiedWorkPair()
-      val teiWork = teiIdentifiedWork().title("A tei work")
+      val teiWork = teiIdentifiedWork()
+        .mergeCandidates(
+          List(createTeiBnumberMergeCandidateFor(physicalSierra)))
 
-      When("the works are merged")
-      val sierraWorks = List(digitalSierra, physicalSierra)
-      val works = sierraWorks :+ teiWork
-      val outcome = merger.merge(works)
+      When("the works are processed by the matcher/merger")
+      processWorks(digitalSierra, physicalSierra, teiWork)
 
       Then("the Sierra works are redirected to the tei")
-      outcome.getMerged(digitalSierra) should beRedirectedTo(teiWork)
-      outcome.getMerged(physicalSierra) should beRedirectedTo(teiWork)
+      context.getMerged(digitalSierra) should beRedirectedTo(teiWork)
+      context.getMerged(physicalSierra) should beRedirectedTo(teiWork)
 
       And("the tei work has the Sierra works' items")
-      outcome
+      context
         .getMerged(teiWork)
         .data
         .items should contain allElementsOf digitalSierra.data.items
-      outcome
+      context
         .getMerged(teiWork)
         .data
         .items should contain allElementsOf physicalSierra.data.items
 
       And("the tei work has the Sierra works' identifiers")
-      outcome
+      context
         .getMerged(teiWork)
         .data
         .otherIdentifiers should contain allElementsOf physicalSierra.data.otherIdentifiers
         .filter(_.identifierType == IdentifierType.SierraIdentifier)
-      outcome
+      context
         .getMerged(teiWork)
         .data
         .otherIdentifiers should contain allElementsOf digitalSierra.data.otherIdentifiers
         .filter(_.identifierType == IdentifierType.SierraIdentifier)
     }
+  }
 
-    Scenario("A Tei with internal works and a Calm are merged") {
-      Given("a Tei and a Calm record")
-      val calmWork =
-        calmIdentifiedWork().collectionPath(CollectionPath("a/b/c"))
-      val firstInternalWork =
-        teiIdentifiedWork().collectionPath(CollectionPath("1"))
-      val secondInternalWork =
-        teiIdentifiedWork().collectionPath(CollectionPath("2"))
-
-      val teiWork = teiIdentifiedWork()
-        .collectionPath(CollectionPath("tei_id"))
-        .title("A tei work")
-        .internalWorks(List(firstInternalWork, secondInternalWork))
-
-      When("the works are merged")
-
-      val works = List(calmWork, teiWork)
-      val outcome = merger.merge(works)
-
-      Then("the Cal work is redirected to the tei")
-      outcome.getMerged(calmWork) should beRedirectedTo(teiWork)
-
-      And("the tei work retains its collectionPath")
-      outcome
-        .getMerged(teiWork)
-        .data
-        .collectionPath shouldBe teiWork.data.collectionPath
-    }
-
-    Scenario(
-      "A Tei with internal works and a Sierra digital and a sierra physical work are merged") {
+  Scenario(
+    "A Tei with internal works and a Sierra digital and a sierra physical work are merged") {
+    withContext { implicit context =>
       Given("a Tei, a Sierra physical record and a Sierra digital record")
       val (digitalSierra, physicalSierra) = sierraIdentifiedWorkPair()
       val firstInternalWork =
@@ -392,66 +443,66 @@ class MergerScenarioTest
       val teiWork = teiIdentifiedWork()
         .title("A tei work")
         .internalWorks(List(firstInternalWork, secondInternalWork))
+        .mergeCandidates(
+          List(createTeiBnumberMergeCandidateFor(physicalSierra)))
 
-      When("the works are merged")
-      val sierraWorks = List(digitalSierra, physicalSierra)
-      val works = sierraWorks :+ teiWork
-      val outcome = merger.merge(works)
+      When("the works are processed by the matcher/merger")
+      processWorks(digitalSierra, physicalSierra, teiWork)
 
       Then("the Sierra works are redirected to the tei")
-      outcome.getMerged(digitalSierra) should beRedirectedTo(teiWork)
-      outcome.getMerged(physicalSierra) should beRedirectedTo(teiWork)
+      context.getMerged(digitalSierra) should beRedirectedTo(teiWork)
+      context.getMerged(physicalSierra) should beRedirectedTo(teiWork)
 
       And("the tei work has the Sierra works' items")
-      outcome
+      context
         .getMerged(teiWork)
         .data
         .items should contain allElementsOf digitalSierra.data.items
-      outcome
+      context
         .getMerged(teiWork)
         .data
         .items should contain allElementsOf physicalSierra.data.items
 
       And("the tei work has the Sierra works' identifiers")
-      outcome
+      context
         .getMerged(teiWork)
         .data
         .otherIdentifiers should contain allElementsOf physicalSierra.data.otherIdentifiers
         .filter(_.identifierType == IdentifierType.SierraIdentifier)
-      outcome
+      context
         .getMerged(teiWork)
         .data
         .otherIdentifiers should contain allElementsOf digitalSierra.data.otherIdentifiers
         .filter(_.identifierType == IdentifierType.SierraIdentifier)
 
       And("the internal tei works are returned")
-      outcome.resultWorks contains firstInternalWork
-      outcome.resultWorks contains secondInternalWork
-      outcome.getMerged(firstInternalWork) shouldNot beRedirectedTo(teiWork)
-      outcome.getMerged(secondInternalWork) shouldNot beRedirectedTo(teiWork)
+      context.getMerged(firstInternalWork) should beVisible
+      context.getMerged(secondInternalWork) should beVisible
 
       And("the tei internal works contain the sierra item")
-      outcome
+      context
         .getMerged(firstInternalWork)
         .data
         .items should contain allElementsOf physicalSierra.data.items
-      outcome
+      context
         .getMerged(secondInternalWork)
         .data
         .items should contain allElementsOf physicalSierra.data.items
 
       And("the tei internal works retain their collectionsPath")
-      outcome
+      context
         .getMerged(firstInternalWork)
         .data
         .collectionPath shouldBe firstInternalWork.data.collectionPath
-      outcome
+      context
         .getMerged(secondInternalWork)
         .data
         .collectionPath shouldBe secondInternalWork.data.collectionPath
     }
+  }
 
-    Scenario("A Tei work passes through unchanged") {
+  Scenario("A Tei work passes through unchanged") {
+    withContext { implicit context =>
       Given("a Tei")
       val internalWork1 = teiIdentifiedWork()
       val internalWork2 = teiIdentifiedWork()
@@ -460,22 +511,26 @@ class MergerScenarioTest
         .internalWorks(List(internalWork1, internalWork2))
 
       When("the tei work is merged")
-      val outcome = merger.merge(List(teiWork))
+      processWork(teiWork)
 
       Then("the tei work should be a TEI work")
-      outcome.getMerged(teiWork) shouldBe teiWork
+      val mergedWork = context.getMerged(teiWork)
+      mergedWork.data shouldBe teiWork.data
+      mergedWork.state should beSimilarTo(teiWork.state)
 
       And("the the tei inner works should be returned")
-      outcome.getMerged(internalWork1) shouldBe updateInternalWork(
-        internalWork1,
-        teiWork)
-      outcome.getMerged(internalWork2) shouldBe updateInternalWork(
-        internalWork2,
-        teiWork)
-    }
+      Seq(internalWork1, internalWork2).foreach { w =>
+        val expectedWork = updateInternalWork(w, teiWork)
 
-    Scenario(
-      "CollectionPath is prepended to internal tei works if the work is not merged") {
+        context.getMerged(w).data shouldBe expectedWork.data
+        context.getMerged(w).state should beSimilarTo(expectedWork.state)
+      }
+    }
+  }
+
+  Scenario(
+    "CollectionPath is prepended to internal tei works if the work is not merged") {
+    withContext { implicit context =>
       Given("a Tei")
       val internalWork1 =
         teiIdentifiedWork().collectionPath(CollectionPath("id/1"))
@@ -486,8 +541,8 @@ class MergerScenarioTest
         .internalWorks(List(internalWork1, internalWork2))
         .collectionPath(CollectionPath("id"))
 
-      When("the tei work is merged")
-      val outcome = merger.merge(List(teiWork))
+      When("the work is processed by the matcher/merger")
+      processWork(teiWork)
 
       Then("the tei work should be a TEI work")
       val expectedInternalWork1 = updateInternalWork(internalWork1, teiWork)
@@ -495,13 +550,23 @@ class MergerScenarioTest
       val expectedInternalWork2 = updateInternalWork(internalWork2, teiWork)
         .collectionPath(CollectionPath("id/2"))
 
-      outcome.getMerged(internalWork1) shouldBe expectedInternalWork1
-      outcome.getMerged(internalWork2) shouldBe expectedInternalWork2
-      outcome.getMerged(teiWork) shouldBe teiWork.internalWorks(
-        List(expectedInternalWork1, expectedInternalWork2))
-    }
+      context.getMerged(internalWork1).data shouldBe expectedInternalWork1.data
+      context.getMerged(internalWork1).state should beSimilarTo(
+        expectedInternalWork1.state)
 
-    Scenario("A TEI work, a Calm work, a Sierra work and a METS work") {
+      context.getMerged(internalWork2).data shouldBe expectedInternalWork2.data
+      context.getMerged(internalWork2).state should beSimilarTo(
+        expectedInternalWork2.state)
+
+      val expectedTeiWork = teiWork.internalWorks(
+        List(expectedInternalWork1, expectedInternalWork2))
+      context.getMerged(teiWork).data shouldBe expectedTeiWork.data
+      context.getMerged(teiWork).state should beSimilarTo(expectedTeiWork.state)
+    }
+  }
+
+  Scenario("A TEI work, a Calm work, a Sierra work and a METS work") {
+    withContext { implicit context =>
       Given("four works")
       val calmWork =
         calmIdentifiedWork()
@@ -515,7 +580,6 @@ class MergerScenarioTest
           )
           .items(List(createCalmItem))
 
-      // Merge candidates point to the Calm work through the Calm/Sierra harvest
       val sierraWork =
         sierraIdentifiedWork()
           .otherIdentifiers(
@@ -527,28 +591,30 @@ class MergerScenarioTest
             )
           )
           .items(List(createIdentifiedPhysicalItem))
+          .mergeCandidates(List(createCalmMergeCandidateFor(calmWork)))
 
-      // Merge candidates point to the Sierra bib
       val teiWork = teiIdentifiedWork()
+        .mergeCandidates(List(createTeiBnumberMergeCandidateFor(sierraWork)))
 
-      // Merge candidates point to the Sierra e-bib
       val metsWork =
         metsIdentifiedWork()
           .thumbnail(createDigitalLocation)
           .items(List(createDigitalItem))
+          .mergeCandidates(List(createMetsMergeCandidateFor(sierraWork)))
           .invisible(invisibilityReasons =
             List(InvisibilityReason.MetsWorksAreNotVisible))
 
-      When("they are merged together")
-      val outcome = merger.merge(List(teiWork, sierraWork, metsWork, calmWork))
+      When("the works are processed by the matcher/merger")
+      processWorks(teiWork, sierraWork, metsWork, calmWork)
 
-      outcome.getMerged(sierraWork) should beRedirectedTo(teiWork)
-      outcome.getMerged(metsWork) should beRedirectedTo(teiWork)
-      outcome.getMerged(calmWork) should beRedirectedTo(teiWork)
+      Then("Everything should be redirected to the TEI work")
+      context.getMerged(sierraWork) should beRedirectedTo(teiWork)
+      context.getMerged(metsWork) should beRedirectedTo(teiWork)
+      context.getMerged(calmWork) should beRedirectedTo(teiWork)
 
-      Then("the TEI work gets all the CALM and Sierra identifiers")
+      And("the TEI work gets all the CALM and Sierra identifiers")
       val teiMergedIdentifiers =
-        outcome
+        context
           .getMerged(teiWork)
           .data
           .otherIdentifiers
@@ -561,7 +627,7 @@ class MergerScenarioTest
 
       And("it only has two items (one physical, one digital)")
       val teiItems =
-        outcome
+        context
           .getMerged(teiWork)
           .data
           .items
@@ -571,15 +637,7 @@ class MergerScenarioTest
       teiItems should contain noElementsOf calmWork.data.items
 
       And("it gets the METS thumbnail")
-      outcome.getMerged(teiWork).data.thumbnail shouldBe metsWork.data.thumbnail
+      context.getMerged(teiWork).data.thumbnail shouldBe metsWork.data.thumbnail
     }
   }
-
-  private def updateInternalWork(
-    internalWork: Work.Visible[WorkState.Identified],
-    teiWork: Work.Visible[WorkState.Identified]) =
-    internalWork
-      .copy(version = teiWork.version)
-      .mapState(state =>
-        state.copy(sourceModifiedTime = teiWork.state.sourceModifiedTime))
 }
