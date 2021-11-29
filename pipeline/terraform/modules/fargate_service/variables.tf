@@ -26,7 +26,8 @@ variable "container_image" {
 }
 
 variable "secret_env_vars" {
-  type = map(string)
+  type    = map(string)
+  default = {}
 }
 
 variable "env_vars" {

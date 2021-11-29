@@ -119,16 +119,13 @@ catalogue_pipeline:
         - id: ingestor-works
     - id: router
       services:
-        - id: work-router-tei-on
-        - id: work-router-tei-off
+        - id: router
     - id: batcher
       services:
-        - id: work-batcher-tei-on
-        - id: work-batcher-tei-off
+        - id: batcher
     - id: relation_embedder
       services:
-        - id: work-relation-embedder-tei-on
-        - id: work-relation-embedder-tei-off
+        - id: relation-embedder
     - id: transformer_calm
       services:
         - id: transformer-calm
