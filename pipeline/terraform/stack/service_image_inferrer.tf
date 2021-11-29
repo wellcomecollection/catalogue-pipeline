@@ -168,7 +168,7 @@ module "image_inferrer" {
     aspect_ratio_inferrer_host = "localhost"
     aspect_ratio_inferrer_port = local.aspect_ratio_inferrer_port
     metrics_namespace          = "image_inferrer"
-    topic_arn                  = module.image_inferrer_topic.arn
+    topic_arn                  = module.image_inferrer_output_topic.arn
     queue_url                  = module.image_inferrer_queue.url
     images_root                = local.shared_storage_path
 
@@ -220,7 +220,7 @@ data "aws_iam_policy_document" "allow_inferrer_data_access" {
   }
 }
 
-module "image_inferrer_topic" {
+module "image_inferrer_output_topic" {
   source = "../modules/topic"
 
   name       = "${local.namespace}_image_inferrer_output"

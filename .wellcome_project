@@ -114,8 +114,7 @@ catalogue_pipeline:
         - id: merger-tei-off
     - id: ingestor_images
       services:
-        - id: image-ingestor-tei-on
-        - id: image-ingestor-tei-off
+        - id: ingestor-images
     - id: ingestor_works
       services:
         - id: work-ingestor-tei-on
