@@ -81,73 +81,61 @@ reindexer:
 
 catalogue_pipeline:
   environments:
-    - id: "2021-09-27"
-      name: "2021-09-27"
-    - id: "2021-11-17"
-      name: "2021-11-17"
     - id: "2021-11-25"
       name: "2021-11-25"
+    - id: "2021-11-29"
+      name: "2021-11-29"
   image_repositories:
     - id: id_minter
       services:
         - id: id-minter
     - id: inference_manager
       services:
-        - id: image-inferrer-tei-on
-        - id: image-inferrer-tei-off
+        - id: image-inferrer
     - id: feature_inferrer
       services:
-        - id: image-inferrer-tei-on
-        - id: image-inferrer-tei-off
+        - id: image-inferrer
     - id: palette_inferrer
       services:
-        - id: image-inferrer-tei-on
-        - id: image-inferrer-tei-off
+        - id: image-inferrer
     - id: aspect_ratio_inferrer
       services:
-        - id: image-inferrer-tei-on
-        - id: image-inferrer-tei-off
+        - id: image-inferrer
     - id: matcher
       services:
         - id: matcher
     - id: merger
       services:
-        - id: merger-tei-on
-        - id: merger-tei-off
+        - id: merger
     - id: ingestor_images
       services:
-        - id: image-ingestor-tei-on
-        - id: image-ingestor-tei-off
+        - id: ingestor-images
     - id: ingestor_works
       services:
-        - id: work-ingestor-tei-on
-        - id: work-ingestor-tei-off
+        - id: ingestor-works
     - id: router
       services:
-        - id: work-router-tei-on
-        - id: work-router-tei-off
+        - id: router
     - id: batcher
       services:
-        - id: work-batcher-tei-on
-        - id: work-batcher-tei-off
+        - id: batcher
     - id: relation_embedder
       services:
-        - id: work-relation-embedder-tei-on
-        - id: work-relation-embedder-tei-off
+        - id: relation-embedder
     - id: transformer_calm
       services:
-        - id: calm-transformer
+        - id: transformer-calm
     - id: transformer_mets
       services:
-        - id: mets-transformer
+        - id: transformer-mets
     - id: transformer_miro
       services:
-        - id: miro-transformer
+        - id: transformer-miro
     - id: transformer_sierra
       services:
-        - id: sierra-transformer
+        - id: transformer-sierra
     - id: transformer_tei
       services:
-        - id: tei-transformer
+        - id: transformer-tei
   name: Catalogue pipeline
   role_arn: arn:aws:iam::760097843905:role/platform-ci

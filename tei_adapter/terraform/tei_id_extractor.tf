@@ -63,23 +63,6 @@ resource "aws_iam_role_policy" "read_from_extractor_queue" {
   policy = module.tei_id_extractor_queue.read_policy
 }
 
-resource "aws_iam_role_policy" "cloudwatch_push_metrics_extractor" {
-  role   = module.tei_id_extractor.task_role_name
-  policy = data.aws_iam_policy_document.allow_cloudwatch_push_metrics.json
-}
-
-data "aws_iam_policy_document" "allow_cloudwatch_push_metrics" {
-  statement {
-    actions = [
-      "cloudwatch:PutMetricData",
-    ]
-
-    resources = [
-      "*",
-    ]
-  }
-}
-
 resource "aws_iam_role_policy" "tei_id_extractor_publish_policy" {
   role   = module.tei_id_extractor.task_role_name
   policy = module.tei_id_extractor_topic.publish_policy

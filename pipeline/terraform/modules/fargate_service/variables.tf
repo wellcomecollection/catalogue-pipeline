@@ -5,23 +5,51 @@ variable "namespace" {
   type = string
 }
 
-variable "cluster_arn" {}
-variable "cluster_name" {}
-variable "shared_logging_secrets" {
-  type = map(any)
+variable "cluster_arn" {
+  type = string
 }
+
+variable "cluster_name" {
+  type = string
+}
+
+variable "shared_logging_secrets" {
+  type = map(string)
+}
+
 variable "subnets" {
   type = list(string)
 }
 
-variable "container_image" {}
+variable "container_image" {
+  type = string
+}
 
 variable "secret_env_vars" {
-  type = map(string)
+  type    = map(string)
+  default = {}
 }
 
 variable "env_vars" {
   type = map(string)
+}
+
+variable "topic_arns" {
+  type = list(string)
+}
+
+variable "queue_visibility_timeout_seconds" {
+  type    = number
+  default = 30
+}
+
+variable "max_receive_count" {
+  type    = number
+  default = 4
+}
+
+variable "dlq_alarm_topic_arn" {
+  type = string
 }
 
 variable "security_group_ids" {
@@ -29,11 +57,13 @@ variable "security_group_ids" {
   type    = list(string)
 }
 
-variable "elastic_cloud_vpce_sg_id" {
+variable "egress_security_group_id" {
   type = string
 }
 
-variable "queue_read_policy" {}
+variable "elastic_cloud_vpce_security_group_id" {
+  type = string
+}
 
 variable "cpu" {
   type    = number
@@ -43,11 +73,6 @@ variable "cpu" {
 variable "memory" {
   type    = number
   default = 1024
-}
-
-variable "desired_task_count" {
-  type    = number
-  default = 1
 }
 
 variable "min_capacity" {
@@ -69,35 +94,11 @@ variable "scale_down_adjustment" {
   default = -1
 }
 
-variable "launch_type" {
-  type    = string
-  default = "FARGATE"
-}
-
-variable "capacity_provider_strategies" {
-  type = list(object({
-    capacity_provider = string
-    weight            = number
-  }))
-  default = []
-}
-
-variable "ordered_placement_strategies" {
-  type = list(object({
-    type  = string
-    field = string
-  }))
-  default = []
-}
-
 variable "deployment_service_env" {
-  type = string
-}
-variable "deployment_service_name" {
   type = string
 }
 
 variable "use_fargate_spot" {
   type    = bool
-  default = false
+  default = true
 }

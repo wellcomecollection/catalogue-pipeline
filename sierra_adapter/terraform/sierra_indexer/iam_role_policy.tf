@@ -7,8 +7,3 @@ resource "aws_iam_role_policy" "read_from_q" {
   role   = module.service.task_role_name
   policy = module.indexer_input_queue.read_policy
 }
-
-resource "aws_iam_role_policy" "push_cloudwatch_metrics" {
-  role   = module.service.task_role_name
-  policy = data.aws_iam_policy_document.push_cloudwatch_metrics.json
-}

@@ -53,23 +53,6 @@ resource "aws_iam_role_policy" "read_from_adapter_queue" {
   policy = module.calm_windows_queue.read_policy
 }
 
-resource "aws_iam_role_policy" "cloudwatch_push_metrics" {
-  role   = module.adapter_worker.task_role_name
-  policy = data.aws_iam_policy_document.allow_cloudwatch_push_metrics.json
-}
-
-data "aws_iam_policy_document" "allow_cloudwatch_push_metrics" {
-  statement {
-    actions = [
-      "cloudwatch:PutMetricData",
-    ]
-
-    resources = [
-      "*",
-    ]
-  }
-}
-
 module "adapter_scaling_alarm" {
   source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.2.1"
   queue_name = module.calm_windows_queue.name

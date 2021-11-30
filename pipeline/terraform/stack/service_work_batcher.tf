@@ -1,41 +1,27 @@
-
 locals {
   wait_minutes = var.is_reindexing ? 45 : 5
 }
 
-data "aws_ecs_cluster" "cluster" {
-  cluster_name = aws_ecs_cluster.cluster.name
-}
+module "batcher_output_topic" {
+  source = "../modules/topic"
 
-module "batcher_queue" {
-  source                     = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
-  queue_name                 = "${local.namespace}_batcher"
-  topic_arns                 = [module.router_path_output_topic.arn]
-  visibility_timeout_seconds = (local.wait_minutes + 5) * 60
-  alarm_topic_arn            = var.dlq_alarm_arn
+  name       = "${local.namespace}_batcher_output"
+  role_names = [module.batcher.task_role_name]
 }
 
 module "batcher" {
-  source = "../modules/service"
+  source = "../modules/fargate_service"
 
-  namespace = local.namespace
-  name      = "batcher"
-
+  name            = "batcher"
   container_image = local.batcher_image
 
-  security_group_ids = [
-    aws_security_group.service_egress.id,
+  topic_arns = [
+    module.router_path_output_topic.arn,
   ]
 
-  elastic_cloud_vpce_sg_id = var.ec_privatelink_security_group_id
-
-  cluster_name = aws_ecs_cluster.cluster.name
-  cluster_arn  = data.aws_ecs_cluster.cluster.id
+  queue_visibility_timeout_seconds = (local.wait_minutes + 5) * 60
 
   env_vars = {
-    metrics_namespace = "${local.namespace}_batcher"
-
-    queue_url        = module.batcher_queue.url
     output_topic_arn = module.batcher_output_topic.arn
 
     # NOTE: this needs to be less than visibility timeout
@@ -47,38 +33,34 @@ module "batcher" {
     max_batch_size = 40
   }
 
-  secret_env_vars = {}
-
-  shared_logging_secrets = var.shared_logging_secrets
-
-  subnets = var.subnets
+  cpu    = 1024
+  memory = 2048
 
   min_capacity = var.min_capacity
   max_capacity = min(1, local.max_capacity)
 
+  # Unlike all our other tasks, the batcher isn't really set up to cope
+  # with unexpected interruptions.
+  use_fargate_spot = false
+
+  # Below this line is boilerplate that should be the same across
+  # all Fargate services.
+  egress_security_group_id             = aws_security_group.egress.id
+  elastic_cloud_vpce_security_group_id = var.ec_privatelink_security_group_id
+
+  cluster_name = aws_ecs_cluster.cluster.name
+  cluster_arn  = aws_ecs_cluster.cluster.id
+
   scale_down_adjustment = local.scale_down_adjustment
   scale_up_adjustment   = local.scale_up_adjustment
 
-  queue_read_policy = module.batcher_queue.read_policy
+  dlq_alarm_topic_arn = var.dlq_alarm_arn
 
-  cpu    = 1024
-  memory = 2048
+  subnets = var.subnets
 
-  deployment_service_env  = var.release_label
-  deployment_service_name = "work-batcher"
-}
+  namespace = local.namespace
 
-module "batcher_output_topic" {
-  source = "../modules/topic"
+  deployment_service_env = var.release_label
 
-  name       = "${local.namespace}_batcher_output"
-  role_names = [module.batcher.task_role_name]
-}
-
-module "batcher_scaling_alarm" {
-  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.2.1"
-  queue_name = module.batcher_queue.name
-
-  queue_high_actions = [module.batcher.scale_up_arn]
-  queue_low_actions  = [module.batcher.scale_down_arn]
+  shared_logging_secrets = var.shared_logging_secrets
 }

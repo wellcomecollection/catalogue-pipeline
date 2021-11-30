@@ -47,27 +47,17 @@ locals {
   inferrer_memory = floor(0.5 * (local.total_memory - local.manager_memory - local.aspect_ratio_memory))
 }
 
-module "image_inferrer_queue" {
-  source                     = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
-  queue_name                 = "${local.namespace}_image_inferrer"
-  topic_arns                 = [module.merger_images_topic.arn]
-  alarm_topic_arn            = var.dlq_alarm_arn
-  visibility_timeout_seconds = local.queue_visibility_timeout
-}
 module "image_inferrer" {
   source = "../modules/services_with_manager"
 
-  namespace = local.namespace
-  name      = "image_inferrer"
 
-  security_group_ids = [
-    aws_security_group.service_egress.id,
+  name = "image_inferrer"
+
+  topic_arns = [
+    module.merger_images_output_topic.arn,
   ]
 
-  elastic_cloud_vpce_sg_id = var.ec_privatelink_security_group_id
-
-  cluster_name = aws_ecs_cluster.cluster.name
-  cluster_arn  = data.aws_ecs_cluster.cluster.id
+  queue_visibility_timeout_seconds = local.queue_visibility_timeout
 
   launch_type = "EC2"
   capacity_provider_strategies = [{
@@ -167,9 +157,7 @@ module "image_inferrer" {
     palette_inferrer_port      = local.palette_inferrer_port
     aspect_ratio_inferrer_host = "localhost"
     aspect_ratio_inferrer_port = local.aspect_ratio_inferrer_port
-    metrics_namespace          = "image_inferrer"
-    topic_arn                  = module.image_inferrer_topic.arn
-    queue_url                  = module.image_inferrer_queue.url
+    topic_arn                  = module.image_inferrer_output_topic.arn
     images_root                = local.shared_storage_path
 
     es_initial_images_index   = local.es_images_initial_index
@@ -182,23 +170,32 @@ module "image_inferrer" {
 
   manager_secret_env_vars = local.pipeline_storage_es_service_secrets["inferrer"]
 
-  subnets = var.subnets
-
   # Any higher than this currently causes latency spikes from Loris
   # TODO: Now these images are served by DLCS, not Loris, can we increase
   # the max capacity?
   min_capacity = var.min_capacity
-
   max_capacity = min(10, local.max_capacity)
 
+  # Below this line is boilerplate that should be the same across
+  # all services.
+  egress_security_group_id             = aws_security_group.egress.id
+  elastic_cloud_vpce_security_group_id = var.ec_privatelink_security_group_id
+
+  cluster_name = aws_ecs_cluster.cluster.name
+  cluster_arn  = aws_ecs_cluster.cluster.id
+
   scale_down_adjustment = local.scale_down_adjustment
-  scale_up_adjustment   = min(1, local.scale_up_adjustment)
+  scale_up_adjustment   = local.scale_up_adjustment
 
-  queue_read_policy = module.image_inferrer_queue.read_policy
+  dlq_alarm_topic_arn = var.dlq_alarm_arn
 
-  deployment_service_env  = var.release_label
-  deployment_service_name = "image-inferrer"
-  shared_logging_secrets  = var.shared_logging_secrets
+  subnets = var.subnets
+
+  namespace = local.namespace
+
+  deployment_service_env = var.release_label
+
+  shared_logging_secrets = var.shared_logging_secrets
 }
 
 resource "aws_iam_role_policy" "read_inferrer_data" {
@@ -220,17 +217,9 @@ data "aws_iam_policy_document" "allow_inferrer_data_access" {
   }
 }
 
-module "image_inferrer_topic" {
+module "image_inferrer_output_topic" {
   source = "../modules/topic"
 
-  name       = "${local.namespace}_image_inferrer"
+  name       = "${local.namespace}_image_inferrer_output"
   role_names = [module.image_inferrer.task_role_name]
-}
-
-module "image_inferrer_scaling_alarm" {
-  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.2.1"
-  queue_name = module.image_inferrer_queue.name
-
-  queue_high_actions = [module.image_inferrer.scale_up_arn]
-  queue_low_actions  = [module.image_inferrer.scale_down_arn]
 }
