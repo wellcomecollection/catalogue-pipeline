@@ -18,24 +18,6 @@ locals {
 
   # When we're not reindexing, we halve the size of these tasks, because
   # they won't be getting as many updates.
-  #
-  # Note: while we're running the TEI on/TEI off pipeline, we run c5.2xlarge
-  # instances when not reindexing, so we can run 2 tasks per instance.
-  # This avoids some weird issues we've seen where an instance starts
-  # but ECS is unable to place tasks anywhere.
-  #
-  # The problem:
-  #
-  #   - image update arrives
-  #   - both tei-on and tei-off want to start an inferrer = 2 tasks
-  #   - for some reason, the tasks consistently don't start
-  #
-  # We're hoping that using the same capacity provider and allowing
-  # 2 tasks per instance will fix this issue.
-  #
-  # Once we're no longer running a split TEI pipeline, we should be able
-  # to reduce the size of instances when we're not reindexing.
-  #
   total_cpu           = var.is_reindexing ? local.base_total_cpu : floor(local.base_total_cpu / 2)
   total_memory        = var.is_reindexing ? local.base_total_memory : floor(local.base_total_memory / 2)
   manager_memory      = var.is_reindexing ? local.base_manager_memory : floor(local.base_manager_memory / 2)
