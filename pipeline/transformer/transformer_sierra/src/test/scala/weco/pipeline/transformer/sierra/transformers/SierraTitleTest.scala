@@ -56,6 +56,17 @@ class SierraTitleTest
       ),
       "Quain's elements of anatomy. Vol. I, Part I, Embryology / edited by Edward Albert Schäfer and George Dancer Thane."
     ),
+    // This example is based on Sierra e-journal bib b25105814
+    (
+      List(
+        Subfield(tag = "a", content = "Ethics & medicine"),
+        Subfield(tag = "h", content = "[electronic resource] :"),
+        Subfield(
+          tag = "b",
+          content = "a Christian perspective on issues in bioethics.")
+      ),
+      "Ethics & medicine : a Christian perspective on issues in bioethics."
+    ),
   )
 
   it("constructs a title from MARC 245") {
