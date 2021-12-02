@@ -61,7 +61,9 @@ class SierraTitleTest
       List(
         Subfield(tag = "a", content = "Ethics & medicine"),
         Subfield(tag = "h", content = "[electronic resource] :"),
-        Subfield(tag = "b", content = "a Christian perspective on issues in bioethics.")
+        Subfield(
+          tag = "b",
+          content = "a Christian perspective on issues in bioethics.")
       ),
       "Ethics & medicine : a Christian perspective on issues in bioethics."
     ),

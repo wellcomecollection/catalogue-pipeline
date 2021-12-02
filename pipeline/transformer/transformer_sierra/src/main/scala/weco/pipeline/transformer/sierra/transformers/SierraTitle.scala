@@ -41,11 +41,12 @@ object SierraTitle extends SierraDataTransformer with SierraQueryOps {
           //
           //    "[electronic resource] :" ~> " :"
           //
-          case Subfield("h", content) => content
-            .replaceAll("\\[[^\\]]+\\]", "")
-            .trim
+          case Subfield("h", content) =>
+            content
+              .replaceAll("\\[[^\\]]+\\]", "")
+              .trim
 
-          case Subfield(_, content)   => content
+          case Subfield(_, content) => content
         }
 
     if (components.isEmpty) {
