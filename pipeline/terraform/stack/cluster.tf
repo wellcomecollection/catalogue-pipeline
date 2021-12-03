@@ -13,7 +13,9 @@ module "inference_capacity_provider" {
   // This is a known issue https://github.com/terraform-providers/terraform-provider-aws/issues/12739
   cluster_name = local.namespace_hyphen
 
-  instance_type           = "c5.2xlarge"
+  # When we're not reindexing, we halve the size of these instances and
+  # the corresponding tasks, because they won't be getting as many updates.
+  instance_type           = var.is_reindexing ? "c5.2xlarge" : "c5.xlarge"
   max_instances           = var.is_reindexing ? 12 : 1
   use_spot_purchasing     = true
   scaling_action_cooldown = 240
