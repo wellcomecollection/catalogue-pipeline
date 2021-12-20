@@ -19,7 +19,7 @@ class WorkGraphStoreTest
     with MatcherFixtures
     with WorkNodeGenerators {
 
-  describe("Get graph of linked works") {
+  describe("findAffectedWorks") {
     it("returns nothing if there are no matching graphs") {
       withWorkGraphTable { graphTable =>
         withWorkGraphStore(graphTable) { workGraphStore =>
@@ -32,8 +32,7 @@ class WorkGraphStoreTest
       }
     }
 
-    it(
-      "returns a WorkNode if it has no links and it's the only node in the setId") {
+    it("finds a work if it's the only one affected") {
       withWorkGraphTable { graphTable =>
         withWorkGraphStore(graphTable) { workGraphStore =>
           val work = createOneWork("A")
@@ -49,23 +48,7 @@ class WorkGraphStoreTest
       }
     }
 
-    it("returns a WorkNode and the links in the workUpdate") {
-      withWorkGraphTable { graphTable =>
-        withWorkGraphStore(graphTable) { workGraphStore =>
-          val (workA, workB) = createTwoWorks("A->B")
-
-          putTableItems(items = Seq(workA, workB), table = graphTable)
-
-          val future = workGraphStore.findAffectedWorks(ids = Set(workA.id))
-
-          whenReady(future) {
-            _ shouldBe Set(workA, workB)
-          }
-        }
-      }
-    }
-
-    it("returns a WorkNode and the links in the database") {
+    it("finds a work and the work that it links to") {
       withWorkGraphTable { graphTable =>
         withWorkGraphStore(graphTable) { workGraphStore =>
           val (workA, workB) = createTwoWorks("A->B")
@@ -143,7 +126,7 @@ class WorkGraphStoreTest
     }
   }
 
-  describe("Put graph of linked works") {
+  describe("put") {
     it("puts a simple graph") {
       withWorkGraphTable { graphTable =>
         withWorkGraphStore(graphTable) { workGraphStore =>
@@ -160,29 +143,29 @@ class WorkGraphStoreTest
         }
       }
     }
-  }
 
-  it("throws a RuntimeException if workGraphStore fails to put") {
-    val expectedException = new RuntimeException("FAILED")
+    it("throws a RuntimeException if workGraphStore fails to put") {
+      val expectedException = new RuntimeException("FAILED")
 
-    val brokenWorkNodeDao = new WorkNodeDao(
-      dynamoClient,
-      dynamoConfig = createDynamoConfigWith(nonExistentTable)
-    ) {
-      override def put(nodes: Set[WorkNode]): Future[Unit] =
-        Future.failed(expectedException)
-    }
+      val brokenWorkNodeDao = new WorkNodeDao(
+        dynamoClient,
+        dynamoConfig = createDynamoConfigWith(nonExistentTable)
+      ) {
+        override def put(nodes: Set[WorkNode]): Future[Unit] =
+          Future.failed(expectedException)
+      }
 
-    val workGraphStore = new WorkGraphStore(brokenWorkNodeDao)
+      val workGraphStore = new WorkGraphStore(brokenWorkNodeDao)
 
-    val workNode = WorkNode(
-      idA,
-      version = 0,
-      linkedIds = Nil,
-      componentId = ComponentId(idA, idB))
+      val workNode = WorkNode(
+        idA,
+        version = 0,
+        linkedIds = Nil,
+        componentId = ComponentId(idA, idB))
 
-    whenReady(workGraphStore.put(Set(workNode)).failed) {
-      _ shouldBe expectedException
+      whenReady(workGraphStore.put(Set(workNode)).failed) {
+        _ shouldBe expectedException
+      }
     }
   }
 }
