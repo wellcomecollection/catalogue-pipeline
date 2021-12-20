@@ -711,6 +711,7 @@ class MergerIntegrationTest
   Feature("Sierra e-bib/METS work merging is the same, regardless of order") {
     val sierraSuppressedEbib =
       sierraIdentifiedWork()
+        .withVersion(version = 1)
         .deleted(SuppressedFromSource("Sierra"))
 
     val metsIdentifier = sierraSuppressedEbib.sourceIdentifier.copy(
@@ -732,6 +733,7 @@ class MergerIntegrationTest
         canonicalId = sierraSuppressedEbib.state.canonicalId,
         sourceIdentifier = sierraSuppressedEbib.state.sourceIdentifier
       )
+        .withVersion(version = 2)
         .items(
           List(
             createUnidentifiableItemWith(locations = List(createDigitalLocation))
