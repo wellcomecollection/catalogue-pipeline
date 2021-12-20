@@ -4,19 +4,13 @@ import org.scalatest.EitherValues
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import weco.catalogue.internal_model.identifiers.CanonicalId
 import weco.storage.locking.LockFailure
 import weco.storage.locking.memory.{MemoryLockDao, MemoryLockingService}
 import weco.fixtures.TimeAssertions
 import weco.pipeline.matcher.fixtures.MatcherFixtures
 import weco.pipeline.matcher.generators.WorkStubGenerators
-import weco.pipeline.matcher.models.{
-  ComponentId,
-  MatchedIdentifiers,
-  MatcherResult,
-  WorkIdentifier,
-  WorkNode,
-  WorkStub
-}
+import weco.pipeline.matcher.models.{ComponentId, MatchedIdentifiers, MatcherResult, WorkIdentifier, WorkNode}
 import weco.pipeline.matcher.storage.{WorkGraphStore, WorkNodeDao}
 
 import java.util.UUID
@@ -257,7 +251,7 @@ class WorkMatcherTest
     val expectedException = new RuntimeException("Failed to put")
 
     val brokenStore = new WorkGraphStore(workNodeDao) {
-      override def findAffectedWorks(w: WorkStub): Future[Set[WorkNode]] =
+      override def findAffectedWorks(ids: Set[CanonicalId]): Future[Set[WorkNode]] =
         Future.successful(Set[WorkNode]())
 
       override def put(nodes: Set[WorkNode]): Future[Unit] =

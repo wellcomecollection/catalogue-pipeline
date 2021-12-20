@@ -7,7 +7,7 @@ import org.scanamo.generic.auto._
 import software.amazon.awssdk.services.dynamodb.model.ResourceNotFoundException
 import weco.catalogue.internal_model.identifiers.CanonicalId
 import weco.pipeline.matcher.fixtures.MatcherFixtures
-import weco.pipeline.matcher.generators.WorkStubGenerators
+import weco.pipeline.matcher.generators.WorkNodeGenerators
 import weco.pipeline.matcher.models.{ComponentId, WorkNode}
 import weco.storage.dynamo.DynamoConfig
 
@@ -20,7 +20,7 @@ class WorkNodeDaoTest
     with Matchers
     with ScalaFutures
     with MatcherFixtures
-    with WorkStubGenerators {
+    with WorkNodeGenerators {
 
   describe("Get from dynamo") {
     it("returns nothing if ids are not in dynamo") {
@@ -36,25 +36,12 @@ class WorkNodeDaoTest
     it("returns WorkNodes which are stored in DynamoDB") {
       withWorkGraphTable { table =>
         withWorkNodeDao(table) { workNodeDao =>
-          val existingWorkA: WorkNode =
-            WorkNode(
-              idA,
-              version = 1,
-              linkedIds = List(idB),
-              componentId = ComponentId(idA, idB))
-          val existingWorkB: WorkNode =
-            WorkNode(
-              idB,
-              version = 0,
-              linkedIds = Nil,
-              componentId = ComponentId(idA, idB))
+          val (workA, workB) = createTwoWorks("A->B")
 
-          putTableItems(
-            items = Seq(existingWorkA, existingWorkB),
-            table = table)
+          putTableItems(items = Seq(workA, workB), table = table)
 
           whenReady(workNodeDao.get(Set(idA, idB))) {
-            _ shouldBe Set(existingWorkA, existingWorkB)
+            _ shouldBe Set(workA, workB)
           }
         }
       }
@@ -87,25 +74,13 @@ class WorkNodeDaoTest
       "returns WorkNodes which are stored in DynamoDB for a given component id") {
       withWorkGraphTable { table =>
         withWorkNodeDao(table) { matcherGraphDao =>
-          val existingWorkNodeA: WorkNode = WorkNode(
-            idA,
-            version = 1,
-            linkedIds = List(idB),
-            componentId = ComponentId(idA, idB))
-          val existingWorkNodeB: WorkNode =
-            WorkNode(
-              idB,
-              version = 0,
-              linkedIds = Nil,
-              componentId = ComponentId(idA, idB))
+          val (workA, workB) = createTwoWorks("A->B")
 
-          putTableItems(
-            items = Seq(existingWorkNodeA, existingWorkNodeB),
-            table = table)
+          putTableItems(items = Seq(workA, workB), table = table)
 
           whenReady(
             matcherGraphDao.getByComponentIds(Set(ComponentId(idA, idB)))) {
-            _ shouldBe Set(existingWorkNodeA, existingWorkNodeB)
+            _ shouldBe Set(workA, workB)
           }
         }
       }
@@ -150,13 +125,10 @@ class WorkNodeDaoTest
     it("puts a WorkNode") {
       withWorkGraphTable { table =>
         withWorkNodeDao(table) { workNodeDao =>
-          val work = WorkNode(
-            idA,
-            version = 1,
-            linkedIds = List(idA),
-            componentId = ComponentId(idA, idB))
+          val work = createOneWork("A")
+
           whenReady(workNodeDao.put(Set(work))) { _ =>
-            getTableItem[WorkNode](idA.underlying, table) shouldBe Some(
+            getTableItem[WorkNode](work.id.underlying, table) shouldBe Some(
               Right(work))
           }
         }
@@ -209,14 +181,9 @@ class WorkNodeDaoTest
         dynamoConfig = createDynamoConfigWith(nonExistentTable)
       )
 
-      val workNode =
-        WorkNode(
-          idA,
-          version = 1,
-          linkedIds = List(idB),
-          componentId = ComponentId(idA, idB))
+      val work = createOneWork("A")
 
-      whenReady(workNodeDao.put(Set(workNode)).failed) {
+      whenReady(workNodeDao.put(Set(work)).failed) {
         _ shouldBe a[ResourceNotFoundException]
       }
     }

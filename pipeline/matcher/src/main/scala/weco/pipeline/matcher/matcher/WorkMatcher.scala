@@ -32,7 +32,7 @@ class WorkMatcher(
   def matchWork(work: WorkStub): Future[MatcherResult] =
     withLocks(work, work.ids.map(_.toString)) {
       for {
-        beforeNodes <- workGraphStore.findAffectedWorks(work)
+        beforeNodes <- workGraphStore.findAffectedWorks(work.ids)
         afterNodes = WorkGraphUpdater.update(work, beforeNodes)
 
         updatedNodes = afterNodes -- beforeNodes
