@@ -6,6 +6,11 @@ case class WorkNode(
   id: CanonicalId,
   version: Option[Int],
   linkedIds: List[CanonicalId],
+  // Note: this field really identifies all the works that should be retrieved
+  // together.  It's not a "component" ID in the strict graph sense of the word,
+  // it's used to group works that should be processed together.
+  //
+  // TODO: Check the name of this field to something like "group ID".
   componentId: String,
   // Records whether this work is suppressed in a source system -- if so,
   // we shouldn't be using it to construct matcher graphs.

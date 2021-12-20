@@ -13,7 +13,9 @@ import weco.pipeline.matcher.models.{
 }
 
 object WorkGraphUpdater extends Logging {
-  def update(work: WorkStub, affectedNodes: Set[WorkNode]): Set[WorkNode] = {
+  type GraphComponents = Set[Set[WorkNode]]
+
+  def update(work: WorkStub, affectedNodes: Set[WorkNode]): GraphComponents = {
     checkVersionConflicts(work, affectedNodes)
     doUpdate(work, affectedNodes)
   }
@@ -38,7 +40,7 @@ object WorkGraphUpdater extends Logging {
     }
 
   private def doUpdate(work: WorkStub,
-                       affectedNodes: Set[WorkNode]): Set[WorkNode] = {
+                       affectedNodes: Set[WorkNode]): GraphComponents = {
 
     // Find everything that's in the existing graph, but which isn't
     // the node we're updating.
@@ -147,15 +149,16 @@ object WorkGraphUpdater extends Logging {
     //
     // Here there are two components: (A B C F G) and (D E H)
     //
+    val componentId = ComponentId(g.nodes.map(_.value).toList)
+
     g.componentTraverser()
-      .flatMap(component => {
-        val nodeIds = component.nodes.map(_.value).toList
+      .map(component => {
         component.nodes.map(node => {
           WorkNode(
             id = node.value,
             version = workVersions.get(node.value),
             linkedIds = linkedWorkIds(node),
-            componentId = ComponentId(nodeIds),
+            componentId = componentId,
             suppressed = suppressedWorks.contains(node.value)
           )
         })

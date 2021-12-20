@@ -35,7 +35,7 @@ class WorkMatcher(
         beforeNodes <- workGraphStore.findAffectedWorks(work)
         afterNodes = WorkGraphUpdater.update(work, beforeNodes)
 
-        updatedNodes = afterNodes -- beforeNodes
+        updatedNodes = afterNodes.flatten -- beforeNodes
 
         // It's possible that the matcher graph hasn't changed -- for example, if
         // we received an update to a work that changes an attribute unrelated to
@@ -54,12 +54,12 @@ class WorkMatcher(
               createdTime = Instant.now()))
         } else {
           val affectedComponentIds =
-            (beforeNodes ++ afterNodes)
+            (beforeNodes ++ afterNodes.flatten)
               .map { _.componentId }
 
           withLocks(work, ids = affectedComponentIds) {
             workGraphStore
-              .put(afterNodes)
+              .put(afterNodes.flatten)
               .map(
                 _ =>
                   MatcherResult(
@@ -88,12 +88,12 @@ class WorkMatcher(
       case _                     => new RuntimeException(failure.toString)
     }
 
-  private def toMatchedIdentifiers(
-    nodes: Set[WorkNode]): Set[MatchedIdentifiers] =
-    nodes
-      .groupBy { _.componentId }
+  import WorkGraphUpdater.GraphComponents
+
+  private def toMatchedIdentifiers(components: GraphComponents): Set[MatchedIdentifiers] =
+    components
       .map {
-        case (_, workNodes) =>
+        workNodes =>
           // The matcher graph may include nodes for Works it hasn't seen yet, or which
           // don't exist.  These are placeholders, in case we see the Work later -- but we
           // shouldn't expose their existence to other services.
@@ -109,5 +109,4 @@ class WorkMatcher(
           MatchedIdentifiers(identifiers)
       }
       .filter { _.identifiers.nonEmpty }
-      .toSet
 }
