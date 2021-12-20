@@ -90,23 +90,23 @@ class WorkMatcher(
 
   import WorkGraphUpdater.GraphComponents
 
-  private def toMatchedIdentifiers(components: GraphComponents): Set[MatchedIdentifiers] =
+  private def toMatchedIdentifiers(
+    components: GraphComponents): Set[MatchedIdentifiers] =
     components
-      .map {
-        workNodes =>
-          // The matcher graph may include nodes for Works it hasn't seen yet, or which
-          // don't exist.  These are placeholders, in case we see the Work later -- but we
-          // shouldn't expose their existence to other services.
-          //
-          // We only send identifiers that correspond to real Works.
-          val identifiers =
-            workNodes
-              .collect {
-                case WorkNode(id, Some(version), _, _, _) =>
-                  WorkIdentifier(id, version)
-              }
+      .map { workNodes =>
+        // The matcher graph may include nodes for Works it hasn't seen yet, or which
+        // don't exist.  These are placeholders, in case we see the Work later -- but we
+        // shouldn't expose their existence to other services.
+        //
+        // We only send identifiers that correspond to real Works.
+        val identifiers =
+          workNodes
+            .collect {
+              case WorkNode(id, Some(version), _, _, _) =>
+                WorkIdentifier(id, version)
+            }
 
-          MatchedIdentifiers(identifiers)
+        MatchedIdentifiers(identifiers)
       }
       .filter { _.identifiers.nonEmpty }
 }

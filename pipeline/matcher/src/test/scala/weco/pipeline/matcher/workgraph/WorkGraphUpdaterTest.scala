@@ -20,17 +20,18 @@ class WorkGraphUpdaterTest
       val result =
         WorkGraphUpdater
           .update(
-            work = createWorkWith(idA, version = 1, referencedWorkIds = Set.empty),
+            work =
+              createWorkWith(idA, version = 1, referencedWorkIds = Set.empty),
             affectedNodes = Set()
           )
 
       result shouldBe Set(
         Set(
-        WorkNode(
-          idA,
-          version = 1,
-          linkedIds = List(),
-          componentId = ComponentId(idA)))
+          WorkNode(
+            idA,
+            version = 1,
+            linkedIds = List(),
+            componentId = ComponentId(idA)))
       )
     }
 
@@ -38,7 +39,8 @@ class WorkGraphUpdaterTest
       val result =
         WorkGraphUpdater
           .update(
-            work = createWorkWith(idA, version = 1, referencedWorkIds = Set(idB)),
+            work =
+              createWorkWith(idA, version = 1, referencedWorkIds = Set(idB)),
             affectedNodes = Set()
           )
 
@@ -62,7 +64,8 @@ class WorkGraphUpdaterTest
       val result =
         WorkGraphUpdater
           .update(
-            work = createWorkWith(idB, version = 1, referencedWorkIds = Set(idA)),
+            work =
+              createWorkWith(idB, version = 1, referencedWorkIds = Set(idA)),
             affectedNodes = Set()
           )
 
@@ -88,7 +91,8 @@ class WorkGraphUpdaterTest
       val result =
         WorkGraphUpdater
           .update(
-            work = createWorkWith(idA, version = 2, referencedWorkIds = Set(idB)),
+            work =
+              createWorkWith(idA, version = 2, referencedWorkIds = Set(idB)),
             affectedNodes = Set(
               WorkNode(
                 idA,
@@ -101,7 +105,7 @@ class WorkGraphUpdaterTest
                 linkedIds = Nil,
                 componentId = ComponentId(idB))
             )
-        )
+          )
 
       result shouldBe Set(
         Set(
@@ -123,7 +127,8 @@ class WorkGraphUpdaterTest
       val result =
         WorkGraphUpdater
           .update(
-            work = createWorkWith(idA, version = 2, referencedWorkIds = Set(idB)),
+            work =
+              createWorkWith(idA, version = 2, referencedWorkIds = Set(idB)),
             affectedNodes = Set(
               WorkNode(
                 idA,
@@ -157,7 +162,8 @@ class WorkGraphUpdaterTest
       val result =
         WorkGraphUpdater
           .update(
-            work = createWorkWith(idB, version = 2, referencedWorkIds = Set(idC)),
+            work =
+              createWorkWith(idB, version = 2, referencedWorkIds = Set(idC)),
             affectedNodes = Set(
               WorkNode(
                 idA,
@@ -202,7 +208,8 @@ class WorkGraphUpdaterTest
       val result =
         WorkGraphUpdater
           .update(
-            work = createWorkWith(idB, version = 2, referencedWorkIds = Set(idC)),
+            work =
+              createWorkWith(idB, version = 2, referencedWorkIds = Set(idC)),
             affectedNodes = Set(
               WorkNode(
                 idA,
@@ -249,8 +256,10 @@ class WorkGraphUpdaterTest
       val result =
         WorkGraphUpdater
           .update(
-            work =
-              createWorkWith(idB, version = 2, referencedWorkIds = Set(idC, idD)),
+            work = createWorkWith(
+              idB,
+              version = 2,
+              referencedWorkIds = Set(idC, idD)),
             affectedNodes = Set(
               WorkNode(
                 idA,
@@ -305,7 +314,8 @@ class WorkGraphUpdaterTest
       val result =
         WorkGraphUpdater
           .update(
-            work = createWorkWith(idC, version = 2, referencedWorkIds = Set(idA)),
+            work =
+              createWorkWith(idC, version = 2, referencedWorkIds = Set(idA)),
             affectedNodes = Set(
               WorkNode(
                 idA,
@@ -470,14 +480,19 @@ class WorkGraphUpdaterTest
       val result =
         WorkGraphUpdater
           .update(
-            work = createWorkWith(idA, version = 2, referencedWorkIds = Set.empty),
+            work =
+              createWorkWith(idA, version = 2, referencedWorkIds = Set.empty),
             affectedNodes = Set(
               WorkNode(
                 idA,
                 version = 1,
                 linkedIds = List(idB),
                 componentId = "A+B"),
-              WorkNode(idB, version = 1, linkedIds = List(), componentId = "A+B"))
+              WorkNode(
+                idB,
+                version = 1,
+                linkedIds = List(),
+                componentId = "A+B"))
           )
 
       result shouldBe Set(
@@ -502,7 +517,8 @@ class WorkGraphUpdaterTest
       val result =
         WorkGraphUpdater
           .update(
-            work = createWorkWith(idA, version = 2, referencedWorkIds = Set.empty),
+            work =
+              createWorkWith(idA, version = 2, referencedWorkIds = Set.empty),
             affectedNodes = Set(
               WorkNode(
                 idA,
@@ -534,7 +550,8 @@ class WorkGraphUpdaterTest
       val result =
         WorkGraphUpdater
           .update(
-            work = createWorkWith(idB, version = 3, referencedWorkIds = Set.empty),
+            work =
+              createWorkWith(idB, version = 3, referencedWorkIds = Set.empty),
             affectedNodes = (
               Set(
                 WorkNode(
@@ -547,7 +564,11 @@ class WorkGraphUpdaterTest
                   version = 2,
                   linkedIds = List(idC),
                   componentId = "A+B+C"),
-                WorkNode(idC, version = 1, linkedIds = Nil, componentId = "A+B+C")
+                WorkNode(
+                  idC,
+                  version = 1,
+                  linkedIds = Nil,
+                  componentId = "A+B+C")
               )
             )
           )
@@ -579,7 +600,8 @@ class WorkGraphUpdaterTest
       val result =
         WorkGraphUpdater
           .update(
-            work = createWorkWith(idB, version = 3, referencedWorkIds = Set(idC)),
+            work =
+              createWorkWith(idB, version = 3, referencedWorkIds = Set(idC)),
             affectedNodes = Set(
               WorkNode(
                 idA,

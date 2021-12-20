@@ -206,13 +206,17 @@ class WorkGraphStoreTest
           // Then store B
           whenReady(workGraphStore.findAffectedWorks(workB)) { affectedNodes =>
             val updatedNodes = WorkGraphUpdater.update(workB, affectedNodes)
-            Await.ready(workGraphStore.put(updatedNodes.flatten), atMost = 1 second)
+            Await.ready(
+              workGraphStore.put(updatedNodes.flatten),
+              atMost = 1 second)
           }
 
           // Then store A
           whenReady(workGraphStore.findAffectedWorks(workA)) { affectedNodes =>
             val updatedNodes = WorkGraphUpdater.update(workA, affectedNodes)
-            Await.ready(workGraphStore.put(updatedNodes.flatten), atMost = 1 second)
+            Await.ready(
+              workGraphStore.put(updatedNodes.flatten),
+              atMost = 1 second)
           }
 
           getExistingTableItem[WorkNode](id = idC.underlying, graphTable).suppressed shouldBe true

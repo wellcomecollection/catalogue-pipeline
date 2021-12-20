@@ -732,11 +732,11 @@ class MergerIntegrationTest
       identifiedWork(
         canonicalId = sierraSuppressedEbib.state.canonicalId,
         sourceIdentifier = sierraSuppressedEbib.state.sourceIdentifier
-      )
-        .withVersion(version = 2)
+      ).withVersion(version = 2)
         .items(
           List(
-            createUnidentifiableItemWith(locations = List(createDigitalLocation))
+            createUnidentifiableItemWith(
+              locations = List(createDigitalLocation))
           )
         )
 
@@ -746,7 +746,8 @@ class MergerIntegrationTest
         processWork(sierraSuppressedEbib)
         processWork(sierraUnsuppressedEbib)
 
-        context.getMerged(metsWork) should beRedirectedTo(sierraUnsuppressedEbib)
+        context.getMerged(metsWork) should beRedirectedTo(
+          sierraUnsuppressedEbib)
       }
     }
 
@@ -756,7 +757,8 @@ class MergerIntegrationTest
         processWork(metsWork)
         processWork(sierraUnsuppressedEbib)
 
-        context.getMerged(metsWork) should beRedirectedTo(sierraUnsuppressedEbib)
+        context.getMerged(metsWork) should beRedirectedTo(
+          sierraUnsuppressedEbib)
       }
     }
 
@@ -766,7 +768,8 @@ class MergerIntegrationTest
         processWork(sierraUnsuppressedEbib)
         processWork(metsWork)
 
-        context.getMerged(metsWork) should beRedirectedTo(sierraUnsuppressedEbib)
+        context.getMerged(metsWork) should beRedirectedTo(
+          sierraUnsuppressedEbib)
       }
     }
   }
