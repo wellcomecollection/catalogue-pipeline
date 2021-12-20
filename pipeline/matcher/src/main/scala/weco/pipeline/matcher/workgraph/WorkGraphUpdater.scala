@@ -14,7 +14,9 @@ import weco.pipeline.matcher.models.{
 
 object WorkGraphUpdater extends Logging {
   def update(work: WorkStub, affectedNodes: Set[WorkNode]): Set[WorkNode] = {
-    val affectedWorks = affectedNodes.map { n => n.id -> n }.toMap
+    val affectedWorks = affectedNodes.map { n =>
+      n.id -> n
+    }.toMap
 
     checkVersionConflicts(work, affectedWorks)
 
@@ -32,31 +34,35 @@ object WorkGraphUpdater extends Logging {
     newSubgraph.create
   }
 
-  private def checkVersionConflicts(work: WorkStub,
-                                    affectedWorks: Map[CanonicalId, WorkNode]): Unit =
+  private def checkVersionConflicts(
+    work: WorkStub,
+    affectedWorks: Map[CanonicalId, WorkNode]): Unit =
     affectedWorks.get(work.id) match {
-      case Some(WorkNode(_, Some(existingVersion), _, _, _)) if existingVersion > work.version =>
+      case Some(WorkNode(_, Some(existingVersion), _, _, _))
+          if existingVersion > work.version =>
         val versionConflictMessage =
           s"update failed, work:${work.id} v${work.version} is not newer than existing work v$existingVersion"
         debug(versionConflictMessage)
         throw VersionExpectedConflictException(versionConflictMessage)
 
       case Some(WorkNode(_, Some(existingVersion), linkedIds, _, _))
-        if existingVersion == work.version && work.referencedWorkIds != linkedIds.toSet =>
-          val versionConflictMessage =
-            s"update failed, work:${work.id} v${work.version} already exists with different content! update-ids:${work.referencedWorkIds} != existing-ids:${linkedIds.toSet}"
-          debug(versionConflictMessage)
-          throw VersionUnexpectedConflictException(versionConflictMessage)
+          if existingVersion == work.version && work.referencedWorkIds != linkedIds.toSet =>
+        val versionConflictMessage =
+          s"update failed, work:${work.id} v${work.version} already exists with different content! update-ids:${work.referencedWorkIds} != existing-ids:${linkedIds.toSet}"
+        debug(versionConflictMessage)
+        throw VersionUnexpectedConflictException(versionConflictMessage)
 
       case _ => ()
     }
 }
 
-private class WorkSubgraph(newWork: WorkNode, existingWorks: Map[CanonicalId, WorkNode]) {
+private class WorkSubgraph(newWork: WorkNode,
+                           existingWorks: Map[CanonicalId, WorkNode]) {
   require(!existingWorks.contains(newWork.id))
 
   // This is a lookup of all the works in this update
-  val allWorks: Map[CanonicalId, WorkNode] = existingWorks + (newWork.id -> newWork)
+  val allWorks
+    : Map[CanonicalId, WorkNode] = existingWorks + (newWork.id -> newWork)
 
   def create: Set[WorkNode] = {
     // Create a list of all the connections between works in the graph.
@@ -71,8 +77,9 @@ private class WorkSubgraph(newWork: WorkNode, existingWorks: Map[CanonicalId, Wo
     //    otherLinks  = (A → B, B → C, B → D)
     //
     val links =
-      allWorks.flatMap { case (id, work) =>
-        work.linkedIds.map { id ~> _ }
+      allWorks.flatMap {
+        case (id, work) =>
+          work.linkedIds.map { id ~> _ }
       }
 
     // Remove any links that come to/from works that are suppressed.
@@ -89,7 +96,9 @@ private class WorkSubgraph(newWork: WorkNode, existingWorks: Map[CanonicalId, Wo
     //
     // We record information about suppressions in the matcher database.
     val unsuppressedLinks = links
-      .filterNot { link => link.head.isSuppressed || link.to.isSuppressed }
+      .filterNot { link =>
+        link.head.isSuppressed || link.to.isSuppressed
+      }
 
     // Get the IDs of all the works in this graph, and construct a Graph object.
     val workIds =

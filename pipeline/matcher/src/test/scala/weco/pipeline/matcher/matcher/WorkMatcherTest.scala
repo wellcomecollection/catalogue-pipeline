@@ -10,7 +10,13 @@ import weco.storage.locking.memory.{MemoryLockDao, MemoryLockingService}
 import weco.fixtures.TimeAssertions
 import weco.pipeline.matcher.fixtures.MatcherFixtures
 import weco.pipeline.matcher.generators.WorkStubGenerators
-import weco.pipeline.matcher.models.{ComponentId, MatchedIdentifiers, MatcherResult, WorkIdentifier, WorkNode}
+import weco.pipeline.matcher.models.{
+  ComponentId,
+  MatchedIdentifiers,
+  MatcherResult,
+  WorkIdentifier,
+  WorkNode
+}
 import weco.pipeline.matcher.storage.{WorkGraphStore, WorkNodeDao}
 
 import java.util.UUID
@@ -251,7 +257,8 @@ class WorkMatcherTest
     val expectedException = new RuntimeException("Failed to put")
 
     val brokenStore = new WorkGraphStore(workNodeDao) {
-      override def findAffectedWorks(ids: Set[CanonicalId]): Future[Set[WorkNode]] =
+      override def findAffectedWorks(
+        ids: Set[CanonicalId]): Future[Set[WorkNode]] =
         Future.successful(Set[WorkNode]())
 
       override def put(nodes: Set[WorkNode]): Future[Unit] =

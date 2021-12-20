@@ -23,7 +23,8 @@ class WorkGraphStoreTest
     it("returns nothing if there are no matching graphs") {
       withWorkGraphTable { graphTable =>
         withWorkGraphStore(graphTable) { workGraphStore =>
-          val future = workGraphStore.findAffectedWorks(ids = Set(createCanonicalId))
+          val future =
+            workGraphStore.findAffectedWorks(ids = Set(createCanonicalId))
 
           whenReady(future) {
             _ shouldBe empty
@@ -105,21 +106,24 @@ class WorkGraphStoreTest
           Await.ready(workGraphStore.put(nodesC), atMost = 1 second)
 
           // Then store B
-          whenReady(workGraphStore.findAffectedWorks(ids = workB.ids)) { affectedNodes =>
-            val updatedNodes = WorkGraphUpdater.update(workB, affectedNodes)
-            Await.ready(workGraphStore.put(updatedNodes), atMost = 1 second)
+          whenReady(workGraphStore.findAffectedWorks(ids = workB.ids)) {
+            affectedNodes =>
+              val updatedNodes = WorkGraphUpdater.update(workB, affectedNodes)
+              Await.ready(workGraphStore.put(updatedNodes), atMost = 1 second)
           }
 
           // Then store A
-          whenReady(workGraphStore.findAffectedWorks(ids = workA.ids)) { affectedNodes =>
-            val updatedNodes = WorkGraphUpdater.update(workA, affectedNodes)
-            Await.ready(workGraphStore.put(updatedNodes), atMost = 1 second)
+          whenReady(workGraphStore.findAffectedWorks(ids = workA.ids)) {
+            affectedNodes =>
+              val updatedNodes = WorkGraphUpdater.update(workA, affectedNodes)
+              Await.ready(workGraphStore.put(updatedNodes), atMost = 1 second)
           }
 
           getExistingTableItem[WorkNode](id = idC.underlying, graphTable).suppressed shouldBe true
 
-          whenReady(workGraphStore.findAffectedWorks(ids = workA.ids)) { affectedNodes =>
-            affectedNodes.map(_.id) should contain(workC.id)
+          whenReady(workGraphStore.findAffectedWorks(ids = workA.ids)) {
+            affectedNodes =>
+              affectedNodes.map(_.id) should contain(workC.id)
           }
         }
       }
