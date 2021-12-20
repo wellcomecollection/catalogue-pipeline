@@ -14,26 +14,29 @@ import weco.pipeline.matcher.models.{
 
 object WorkGraphUpdater extends Logging {
   def update(work: WorkStub, affectedNodes: Set[WorkNode]): Set[WorkNode] = {
-    checkVersionConflicts(work, affectedNodes)
+    val affectedWorks = affectedNodes.map { n => n.id -> n }.toMap
+
+    checkVersionConflicts(work, affectedWorks)
     doUpdate(work, affectedNodes)
   }
 
   private def checkVersionConflicts(work: WorkStub,
-                                    affectedNodes: Set[WorkNode]): Unit =
-    affectedNodes.find(_.id == work.id) match {
-      case Some(WorkNode(_, Some(existingVersion), linkedIds, _, _)) =>
-        if (existingVersion > work.version) {
-          val versionConflictMessage =
-            s"update failed, work:${work.id} v${work.version} is not newer than existing work v$existingVersion"
-          debug(versionConflictMessage)
-          throw VersionExpectedConflictException(versionConflictMessage)
-        }
-        if (existingVersion == work.version && work.referencedWorkIds != linkedIds.toSet) {
+                                    affectedWorks: Map[CanonicalId, WorkNode]): Unit =
+    affectedWorks.get(work.id) match {
+      case Some(WorkNode(_, Some(existingVersion), _, _, _)) if existingVersion > work.version =>
+        val versionConflictMessage =
+          s"update failed, work:${work.id} v${work.version} is not newer than existing work v$existingVersion"
+        debug(versionConflictMessage)
+        throw VersionExpectedConflictException(versionConflictMessage)
+
+      case Some(WorkNode(_, Some(existingVersion), linkedIds, _, _))
+        if existingVersion == work.version && work.referencedWorkIds != linkedIds.toSet => {
           val versionConflictMessage =
             s"update failed, work:${work.id} v${work.version} already exists with different content! update-ids:${work.referencedWorkIds} != existing-ids:${linkedIds.toSet}"
           debug(versionConflictMessage)
           throw VersionUnexpectedConflictException(versionConflictMessage)
         }
+
       case _ => ()
     }
 
