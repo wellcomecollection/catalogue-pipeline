@@ -440,31 +440,6 @@ class WorkGraphUpdaterTest
       )
     }
 
-    it("updating A->B with A but NO B (*should* not occur) gives A:A and B:B") {
-      WorkGraphUpdater
-        .update(
-          work = createWorkWith(idA, version = 2, referencedWorkIds = Set.empty),
-          affectedNodes = Set(
-            WorkNode(
-              idA,
-              version = 1,
-              linkedIds = List(idB),
-              componentId = "A+B")
-          )
-        ) shouldBe Set(
-        WorkNode(
-          idA,
-          version = 2,
-          linkedIds = Nil,
-          componentId = ComponentId(idA)),
-        WorkNode(
-          idB,
-          version = None,
-          linkedIds = Nil,
-          componentId = ComponentId(idB))
-      )
-    }
-
     it("updating A->B->C with B gives A+B:(A->B, B) and C:C") {
       WorkGraphUpdater
         .update(
