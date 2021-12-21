@@ -20,6 +20,7 @@ module "catalogue_pipeline_2021-11-29" {
         local.sierra_merged_bibs_topic_arn,
         local.sierra_merged_items_topic_arn,
         local.sierra_merged_holdings_topic_arn,
+        local.sierra_merged_orders_topic_arn,
       ]
       reindex_topic = local.sierra_reindexer_topic_arn
     }
@@ -113,6 +114,7 @@ module "catalogue_pipeline_2021-12-21" {
         local.sierra_merged_bibs_topic_arn,
         local.sierra_merged_items_topic_arn,
         local.sierra_merged_holdings_topic_arn,
+        local.sierra_merged_orders_topic_arn,
       ]
       reindex_topic = local.sierra_reindexer_topic_arn
     }

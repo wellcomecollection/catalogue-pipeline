@@ -10,6 +10,7 @@ locals {
   sierra_merged_items_topic_arn    = data.terraform_remote_state.sierra_adapter.outputs.merged_items_topic_arn
   sierra_merged_bibs_topic_arn     = data.terraform_remote_state.sierra_adapter.outputs.merged_bibs_topic_arn
   sierra_merged_holdings_topic_arn = data.terraform_remote_state.sierra_adapter.outputs.merged_holdings_topic_arn
+  sierra_merged_orders_topic_arn   = data.terraform_remote_state.sierra_adapter.outputs.merged_orders_topic_arn
 
   # Mets adapter VHS
   mets_adapter_read_policy = data.terraform_remote_state.mets_adapter.outputs.mets_dynamo_read_policy
