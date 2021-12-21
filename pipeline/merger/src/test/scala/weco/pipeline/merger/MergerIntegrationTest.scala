@@ -167,9 +167,9 @@ class MergerIntegrationTest
       )
       val miro = miroIdentifiedWork()
       val sierraDigaidsPicture = sierraIdentifiedWork()
-      // Multiple physical items would prevent a Miro redirect in any other case,
-      // but we still expect to see it for the digaids works as the Miro item is
-      // a known duplicate of the METS item.
+        // Multiple physical items would prevent a Miro redirect in any other case,
+        // but we still expect to see it for the digaids works as the Miro item is
+        // a known duplicate of the METS item.
         .items(List(createIdentifiedPhysicalItem, createIdentifiedPhysicalItem))
         .format(Format.Pictures)
         .otherIdentifiers(List(createDigcodeIdentifier("digaids")))
@@ -705,6 +705,72 @@ class MergerIntegrationTest
       Then("the Sierra work is redirected to the Calm work")
       context.getMerged(sierra) should beRedirectedTo(calm)
       context.getMerged(calm) should beVisible
+    }
+  }
+
+  Feature("Sierra e-bib/METS work merging is the same, regardless of order") {
+    val sierraSuppressedEbib =
+      sierraIdentifiedWork()
+        .withVersion(version = 1)
+        .deleted(SuppressedFromSource("Sierra"))
+
+    val metsIdentifier = sierraSuppressedEbib.sourceIdentifier.copy(
+      identifierType = IdentifierType.METS
+    )
+
+    val metsWork =
+      identifiedWork(sourceIdentifier = metsIdentifier)
+        .items(List(createDigitalItem))
+        .imageData(List(createMetsImageData.toIdentified))
+        .mergeCandidates(
+          List(
+            createMetsMergeCandidateFor(sierraSuppressedEbib)
+          )
+        )
+
+    val sierraUnsuppressedEbib =
+      identifiedWork(
+        canonicalId = sierraSuppressedEbib.state.canonicalId,
+        sourceIdentifier = sierraSuppressedEbib.state.sourceIdentifier
+      ).withVersion(version = 2)
+        .items(
+          List(
+            createUnidentifiableItemWith(
+              locations = List(createDigitalLocation))
+          )
+        )
+
+    Scenario("The METS work is sent before the Sierra record is created") {
+      withContext { implicit context =>
+        processWork(metsWork)
+        processWork(sierraSuppressedEbib)
+        processWork(sierraUnsuppressedEbib)
+
+        context.getMerged(metsWork) should beRedirectedTo(
+          sierraUnsuppressedEbib)
+      }
+    }
+
+    Scenario("The METS work is sent while the e-bib is suppressed") {
+      withContext { implicit context =>
+        processWork(sierraSuppressedEbib)
+        processWork(metsWork)
+        processWork(sierraUnsuppressedEbib)
+
+        context.getMerged(metsWork) should beRedirectedTo(
+          sierraUnsuppressedEbib)
+      }
+    }
+
+    Scenario("The METS work is sent after the e-bib is unsuppressed") {
+      withContext { implicit context =>
+        processWork(sierraSuppressedEbib)
+        processWork(sierraUnsuppressedEbib)
+        processWork(metsWork)
+
+        context.getMerged(metsWork) should beRedirectedTo(
+          sierraUnsuppressedEbib)
+      }
     }
   }
 }
