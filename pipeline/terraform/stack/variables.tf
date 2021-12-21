@@ -9,7 +9,7 @@ variable "min_capacity" {
 
 variable "max_capacity" {
   type        = number
-  default     = 20
+  default     = 15
   description = "The max capacity of every ECS service will be less than or equal to this value"
 }
 

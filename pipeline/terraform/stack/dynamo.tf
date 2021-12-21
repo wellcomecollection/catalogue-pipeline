@@ -32,7 +32,7 @@ resource "aws_dynamodb_table" "matcher_graph_table" {
   }
 
   attribute {
-    name = "componentId"
+    name = "subgraphId"
     type = "S"
   }
 
@@ -45,7 +45,7 @@ resource "aws_dynamodb_table" "matcher_graph_table" {
 
   global_secondary_index {
     name            = "work-sets-index"
-    hash_key        = "componentId"
+    hash_key        = "subgraphId"
     projection_type = "ALL"
 
     read_capacity  = local.graph_table_billing_mode == "PROVISIONED" ? 600 : 1
@@ -58,9 +58,7 @@ resource "aws_dynamodb_table" "matcher_graph_table" {
 
   lifecycle {
     ignore_changes = [
-      global_secondary_index,
-      /*read_capacity,*/
-      /*write_capacity*/
+      /*global_secondary_index,*/
     ]
   }
 }

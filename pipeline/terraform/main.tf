@@ -99,11 +99,11 @@ module "catalogue_pipeline_2021-12-21" {
   release_label = "2021-12-21"
 
   reindexing_state = {
-    connect_reindex_topics   = true
-    scale_up_tasks           = true
-    scale_up_elastic_cluster = true
-    scale_up_id_minter_db    = true
-    scale_up_matcher_db      = true
+    connect_reindex_topics   = false
+    scale_up_tasks           = false
+    scale_up_elastic_cluster = false
+    scale_up_id_minter_db    = false
+    scale_up_matcher_db      = false
   }
 
   # Boilerplate that shouldn't change between pipelines.
@@ -185,5 +185,3 @@ module "catalogue_pipeline_2021-12-21" {
 
   logging_cluster_id = local.logging_cluster_id
 }
-
-
