@@ -4,7 +4,14 @@ import grizzled.slf4j.Logging
 import scalax.collection.Graph
 import scalax.collection.GraphPredef._
 import weco.catalogue.internal_model.identifiers.CanonicalId
-import weco.pipeline.matcher.models.{SubgraphId, SourceWorkData, VersionExpectedConflictException, VersionUnexpectedConflictException, WorkNode, WorkStub}
+import weco.pipeline.matcher.models.{
+  SourceWorkData,
+  SubgraphId,
+  VersionExpectedConflictException,
+  VersionUnexpectedConflictException,
+  WorkNode,
+  WorkStub
+}
 
 object WorkGraphUpdater extends Logging {
   def update(work: WorkStub, affectedNodes: Set[WorkNode]): Set[WorkNode] = {
@@ -45,7 +52,8 @@ object WorkGraphUpdater extends Logging {
         debug(versionConflictMessage)
         throw VersionExpectedConflictException(versionConflictMessage)
 
-      case Some(SourceWorkData(_, existingVersion, _, existingMergeCandidateIds))
+      case Some(
+          SourceWorkData(_, existingVersion, _, existingMergeCandidateIds))
           if existingVersion == work.version && work.mergeCandidateIds != existingMergeCandidateIds.toSet =>
         val versionConflictMessage =
           s"update failed, work:${work.id} v${work.version} already exists with different content! update-ids:${work.mergeCandidateIds} != existing-ids:${existingMergeCandidateIds.toSet}"
@@ -66,7 +74,9 @@ private class WorkSubgraph(newWork: WorkNode,
 
   lazy val sourceWorks: Map[CanonicalId, SourceWorkData] =
     allWorks
-      .collect { case (id, WorkNode(_, _, _, Some(sourceWork))) => id -> sourceWork }
+      .collect {
+        case (id, WorkNode(_, _, _, Some(sourceWork))) => id -> sourceWork
+      }
 
   def create: Set[WorkNode] = {
     // Create a list of all the connections between works in the graph.
@@ -107,9 +117,7 @@ private class WorkSubgraph(newWork: WorkNode,
 
     // Get the IDs of all the works in this graph, and construct a Graph object.
     val workIds =
-      sourceWorks
-        .flatMap { case (id, work) => id +: work.mergeCandidateIds }
-        .toSet
+      sourceWorks.flatMap { case (id, work) => id +: work.mergeCandidateIds }.toSet
 
     val g = Graph.from(edges = unsuppressedLinks, nodes = workIds)
 

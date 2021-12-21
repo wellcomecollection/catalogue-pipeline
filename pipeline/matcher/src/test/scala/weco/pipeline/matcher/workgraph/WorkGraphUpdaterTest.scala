@@ -3,7 +3,13 @@ package weco.pipeline.matcher.workgraph
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.pipeline.matcher.generators.WorkNodeGenerators
-import weco.pipeline.matcher.models.{SourceWorkData, SubgraphId, VersionExpectedConflictException, VersionUnexpectedConflictException, WorkNode}
+import weco.pipeline.matcher.models.{
+  SourceWorkData,
+  SubgraphId,
+  VersionExpectedConflictException,
+  VersionUnexpectedConflictException,
+  WorkNode
+}
 
 class WorkGraphUpdaterTest
     extends AnyFunSpec
@@ -24,7 +30,8 @@ class WorkGraphUpdaterTest
     }
 
     it("updating nothing with A->B gives A+B:A->B") {
-      val workStubA = createWorkWith(idA, version = 1, mergeCandidateIds = Set(idB))
+      val workStubA =
+        createWorkWith(idA, version = 1, mergeCandidateIds = Set(idB))
 
       val result = WorkGraphUpdater
         .update(
@@ -109,10 +116,12 @@ class WorkGraphUpdaterTest
           subgraphId = SubgraphId(idA, idB, idC),
           componentIds = List(idA, idB, idC),
         ),
-        workB.copy(
-          subgraphId = SubgraphId(idA, idB, idC),
-          componentIds = List(idA, idB, idC),
-        ).updateSourceWork(version = 2, mergeCandidateIds = Set(idC)),
+        workB
+          .copy(
+            subgraphId = SubgraphId(idA, idB, idC),
+            componentIds = List(idA, idB, idC),
+          )
+          .updateSourceWork(version = 2, mergeCandidateIds = Set(idC)),
         workC.copy(
           subgraphId = SubgraphId(idA, idB, idC),
           componentIds = List(idA, idB, idC),
@@ -136,10 +145,12 @@ class WorkGraphUpdaterTest
             subgraphId = SubgraphId(idA, idB, idC, idD),
             componentIds = List(idA, idB, idC, idD),
           ),
-          workB.copy(
-            subgraphId = SubgraphId(idA, idB, idC, idD),
-            componentIds = List(idA, idB, idC, idD),
-          ).updateSourceWork(version = 2, mergeCandidateIds = Set(idC)),
+          workB
+            .copy(
+              subgraphId = SubgraphId(idA, idB, idC, idD),
+              componentIds = List(idA, idB, idC, idD),
+            )
+            .updateSourceWork(version = 2, mergeCandidateIds = Set(idC)),
           workC.copy(
             subgraphId = SubgraphId(idA, idB, idC, idD),
             componentIds = List(idA, idB, idC, idD),
@@ -169,10 +180,12 @@ class WorkGraphUpdaterTest
             subgraphId = SubgraphId(idA, idB, idC, idD),
             componentIds = List(idA, idB, idC, idD),
           ),
-          workB.copy(
-            subgraphId = SubgraphId(idA, idB, idC, idD),
-            componentIds = List(idA, idB, idC, idD),
-          ).updateSourceWork(version = 2, mergeCandidateIds = Set(idC, idD)),
+          workB
+            .copy(
+              subgraphId = SubgraphId(idA, idB, idC, idD),
+              componentIds = List(idA, idB, idC, idD),
+            )
+            .updateSourceWork(version = 2, mergeCandidateIds = Set(idC, idD)),
           workC.copy(
             subgraphId = SubgraphId(idA, idB, idC, idD),
             componentIds = List(idA, idB, idC, idD),
@@ -222,7 +235,9 @@ class WorkGraphUpdaterTest
               subgraphId = SubgraphId(idA, idB),
               componentIds = List(idA, idB),
             )
-            .updateSourceWork(version = updateVersion, mergeCandidateIds = Set(idB)),
+            .updateSourceWork(
+              version = updateVersion,
+              mergeCandidateIds = Set(idB)),
           WorkNode(
             idB,
             subgraphId = SubgraphId(idA, idB),
@@ -256,7 +271,8 @@ class WorkGraphUpdaterTest
 
       val result = WorkGraphUpdater
         .update(
-          work = createWorkWith(idA, existingVersion, mergeCandidateIds = Set(idB)),
+          work =
+            createWorkWith(idA, existingVersion, mergeCandidateIds = Set(idB)),
           affectedNodes = Set(workA, workB)
         )
 
@@ -355,7 +371,10 @@ class WorkGraphUpdaterTest
           id = idA,
           subgraphId = SubgraphId(idA, idB),
           componentIds = List(idA),
-          sourceWork = SourceWorkData(id = workA.state.sourceIdentifier, version = 1, mergeCandidateIds = List(idB)),
+          sourceWork = SourceWorkData(
+            id = workA.state.sourceIdentifier,
+            version = 1,
+            mergeCandidateIds = List(idB)),
         ),
         workB.copy(
           subgraphId = SubgraphId(idA, idB),

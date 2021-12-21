@@ -77,8 +77,7 @@ class WorkNodeDaoTest
 
           putTableItems(items = Seq(workA, workB), table = table)
 
-          whenReady(
-            matcherGraphDao.getBySubgraphIds(Set(SubgraphId(idA, idB)))) {
+          whenReady(matcherGraphDao.getBySubgraphIds(Set(SubgraphId(idA, idB)))) {
             _ shouldBe Set(workA, workB)
           }
         }
@@ -91,8 +90,7 @@ class WorkNodeDaoTest
         dynamoConfig = createDynamoConfigWith(nonExistentTable)
       )
 
-      whenReady(
-        workNodeDao.getBySubgraphIds(Set(SubgraphId(idA, idB))).failed) {
+      whenReady(workNodeDao.getBySubgraphIds(Set(SubgraphId(idA, idB))).failed) {
         _ shouldBe a[ResourceNotFoundException]
       }
     }
@@ -104,11 +102,15 @@ class WorkNodeDaoTest
                                subgraphId: String,
                                componentIds: Int)
           val badRecord: BadRecord =
-            BadRecord(id = idA, subgraphId = SubgraphId(idA, idB), componentIds = 123)
+            BadRecord(
+              id = idA,
+              subgraphId = SubgraphId(idA, idB),
+              componentIds = 123)
 
           putTableItem(badRecord, table = table)
 
-          val future = workNodeDao.getBySubgraphIds(setIds = Set(SubgraphId(idA, idB)))
+          val future =
+            workNodeDao.getBySubgraphIds(setIds = Set(SubgraphId(idA, idB)))
 
           whenReady(future.failed) {
             _ shouldBe a[RuntimeException]
@@ -141,7 +143,8 @@ class WorkNodeDaoTest
               id = id,
               subgraphId = SubgraphId(id),
               componentIds = List(id),
-              sourceWork = SourceWorkData(id = createSourceIdentifier, version = 1)
+              sourceWork =
+                SourceWorkData(id = createSourceIdentifier, version = 1)
             )
           }
 
@@ -162,7 +165,8 @@ class WorkNodeDaoTest
       withWorkGraphTable { table =>
         withWorkNodeDao(table) { workNodeDao =>
           case class BadRecord(id: CanonicalId, componentIds: String)
-          val badRecord: BadRecord = BadRecord(id = idA, componentIds = "1, 2, 3")
+          val badRecord: BadRecord =
+            BadRecord(id = idA, componentIds = "1, 2, 3")
 
           putTableItem(badRecord, table = table)
 

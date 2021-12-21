@@ -1,7 +1,11 @@
 package weco.pipeline.matcher.generators
 
 import weco.catalogue.internal_model.generators.IdentifiersGenerators
-import weco.catalogue.internal_model.identifiers.{CanonicalId, IdState, SourceIdentifier}
+import weco.catalogue.internal_model.identifiers.{
+  CanonicalId,
+  IdState,
+  SourceIdentifier
+}
 import weco.catalogue.internal_model.work.{MergeCandidate, Work, WorkState}
 import weco.elasticsearch.model.IndexId
 import weco.pipeline.matcher.models.WorkStub

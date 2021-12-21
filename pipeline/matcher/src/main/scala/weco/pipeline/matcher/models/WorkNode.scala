@@ -12,8 +12,15 @@ case class WorkNode(
 }
 
 case object WorkNode {
-  def apply(id: CanonicalId, subgraphId: String, componentIds: List[CanonicalId], sourceWork: SourceWorkData): WorkNode =
-    WorkNode(id = id, subgraphId = subgraphId, componentIds = componentIds, sourceWork = Some(sourceWork))
+  def apply(id: CanonicalId,
+            subgraphId: String,
+            componentIds: List[CanonicalId],
+            sourceWork: SourceWorkData): WorkNode =
+    WorkNode(
+      id = id,
+      subgraphId = subgraphId,
+      componentIds = componentIds,
+      sourceWork = Some(sourceWork))
 }
 
 case class SourceWorkData(

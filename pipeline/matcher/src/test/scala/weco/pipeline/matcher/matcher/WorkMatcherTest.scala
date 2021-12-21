@@ -50,7 +50,9 @@ class WorkMatcherTest
                 id = work.id,
                 subgraphId = SubgraphId(work.id),
                 componentIds = List(work.id),
-                sourceWork = SourceWorkData(id = work.state.sourceIdentifier, version = work.version),
+                sourceWork = SourceWorkData(
+                  id = work.state.sourceIdentifier,
+                  version = work.version),
               )
             )
           }

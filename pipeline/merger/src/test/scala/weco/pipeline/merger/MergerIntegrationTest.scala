@@ -167,9 +167,9 @@ class MergerIntegrationTest
       )
       val miro = miroIdentifiedWork()
       val sierraDigaidsPicture = sierraIdentifiedWork()
-        // Multiple physical items would prevent a Miro redirect in any other case,
-        // but we still expect to see it for the digaids works as the Miro item is
-        // a known duplicate of the METS item.
+      // Multiple physical items would prevent a Miro redirect in any other case,
+      // but we still expect to see it for the digaids works as the Miro item is
+      // a known duplicate of the METS item.
         .items(List(createIdentifiedPhysicalItem, createIdentifiedPhysicalItem))
         .format(Format.Pictures)
         .otherIdentifiers(List(createDigcodeIdentifier("digaids")))
