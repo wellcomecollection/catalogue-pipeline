@@ -29,7 +29,7 @@ trait LocalWorkGraphDynamoDb extends DynamoFixtures with RandomGenerators {
             .build(),
           AttributeDefinition
             .builder()
-            .attributeName("componentId")
+            .attributeName("subgraphId")
             .attributeType("S")
             .build()
         )
@@ -46,7 +46,7 @@ trait LocalWorkGraphDynamoDb extends DynamoFixtures with RandomGenerators {
             .keySchema(
               KeySchemaElement
                 .builder()
-                .attributeName("componentId")
+                .attributeName("subgraphId")
                 .keyType(KeyType.HASH)
                 .build()
             )

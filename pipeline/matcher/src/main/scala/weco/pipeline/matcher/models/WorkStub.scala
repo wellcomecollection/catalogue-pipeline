@@ -16,15 +16,16 @@ case class WorkStub(state: WorkState.Identified,
                     @JsonKey("type") workType: String) {
   lazy val id: CanonicalId = state.canonicalId
 
-  lazy val referencedWorkIds: Set[CanonicalId] =
+  lazy val mergeCandidateIds: Set[CanonicalId] =
     state.mergeCandidates
       .map { mergeCandidate =>
         mergeCandidate.id.canonicalId
       }
+      // TODO: Do we need this filterNot?  Will a work ever refer to itself?
       .filterNot { _ == id }
       .toSet
 
-  lazy val ids: Set[CanonicalId] = referencedWorkIds + id
+  lazy val ids: Set[CanonicalId] = mergeCandidateIds + id
 
   lazy val suppressed: Boolean = workType == "Deleted"
 }

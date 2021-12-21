@@ -18,18 +18,18 @@ trait WorkStubGenerators extends IdentifiersGenerators {
 
   def createWorkStub: WorkStub =
     createWorkWith(
-      referencedWorkIds = collectionOf(min = 0) { createCanonicalId }.toSet
+      mergeCandidateIds = collectionOf(min = 0) { createCanonicalId }.toSet
     )
 
   def createWorkWith(id: CanonicalId = createCanonicalId,
                      version: Int = randomInt(from = 1, to = 10),
-                     referencedWorkIds: Set[CanonicalId] = Set(),
+                     mergeCandidateIds: Set[CanonicalId] = Set(),
                      workType: String = "Visible"): WorkStub =
     WorkStub(
       state = WorkState.Identified(
         sourceIdentifier = createSourceIdentifier,
         canonicalId = id,
-        mergeCandidates = referencedWorkIds
+        mergeCandidates = mergeCandidateIds
           .filterNot { _ == id }
           .map { canonicalId =>
             IdState.Identified(

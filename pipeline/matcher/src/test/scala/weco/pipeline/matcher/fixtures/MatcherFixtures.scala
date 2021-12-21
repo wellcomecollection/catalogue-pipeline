@@ -1,20 +1,19 @@
 package weco.pipeline.matcher.fixtures
 
-import org.scanamo.generic.semiauto.deriveDynamoFormat
-import org.scanamo.DynamoFormat
+import org.scanamo.generic.auto._
 import weco.fixtures.TestWith
 import weco.messaging.fixtures.SQS
 import weco.messaging.memory.MemoryMessageSender
 import weco.messaging.sns.NotificationMessage
 import weco.pipeline.matcher.matcher.WorkMatcher
-import weco.pipeline.matcher.models.{MatcherResult, WorkNode, WorkStub}
+import weco.pipeline.matcher.models.{MatcherResult, WorkStub}
 import weco.pipeline.matcher.services.MatcherWorkerService
 import weco.pipeline.matcher.storage.{WorkGraphStore, WorkNodeDao}
 import weco.pipeline_storage.Retriever
 import weco.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 import weco.pipeline_storage.memory.MemoryRetriever
 import weco.storage.fixtures.DynamoFixtures.Table
-import weco.storage.locking.dynamo.{DynamoLockDaoFixtures, ExpiringLock}
+import weco.storage.locking.dynamo.DynamoLockDaoFixtures
 import weco.storage.locking.memory.{MemoryLockDao, MemoryLockingService}
 
 import java.util.UUID
@@ -26,9 +25,6 @@ trait MatcherFixtures
     extends PipelineStorageStreamFixtures
     with DynamoLockDaoFixtures
     with LocalWorkGraphDynamoDb {
-
-  implicit val workNodeFormat: DynamoFormat[WorkNode] = deriveDynamoFormat
-  implicit val lockFormat: DynamoFormat[ExpiringLock] = deriveDynamoFormat
 
   def withWorkGraphTable[R](testWith: TestWith[Table, R]): R =
     withSpecifiedTable(createWorkGraphTable) { table =>

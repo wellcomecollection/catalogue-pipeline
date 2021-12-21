@@ -53,11 +53,11 @@ class WorkMatcher(
               works = toMatchedIdentifiers(afterNodes),
               createdTime = Instant.now()))
         } else {
-          val affectedComponentIds =
+          val affectedSubgraphIds =
             (beforeNodes ++ afterNodes)
-              .map { _.componentId }
+              .map { _.subgraphId }
 
-          withLocks(work, ids = affectedComponentIds) {
+          withLocks(work, ids = affectedSubgraphIds) {
             workGraphStore
               .put(afterNodes)
               .map(
@@ -91,7 +91,7 @@ class WorkMatcher(
   private def toMatchedIdentifiers(
     nodes: Set[WorkNode]): Set[MatchedIdentifiers] =
     nodes
-      .groupBy { _.componentId }
+      .groupBy { _.subgraphId }
       .map {
         case (_, workNodes) =>
           // The matcher graph may include nodes for Works it hasn't seen yet, or which
@@ -102,8 +102,8 @@ class WorkMatcher(
           val identifiers =
             workNodes
               .collect {
-                case WorkNode(id, Some(version), _, _, _) =>
-                  WorkIdentifier(id, version)
+                case WorkNode(id, _, _, Some(sourceWorkData)) =>
+                  WorkIdentifier(id, sourceWorkData.version)
               }
 
           MatchedIdentifiers(identifiers)

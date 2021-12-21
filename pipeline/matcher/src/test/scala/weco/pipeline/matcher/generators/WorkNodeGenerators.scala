@@ -1,6 +1,6 @@
 package weco.pipeline.matcher.generators
 
-import weco.pipeline.matcher.models.{ComponentId, WorkNode}
+import weco.pipeline.matcher.models.{SourceWorkData, SubgraphId, WorkNode}
 
 trait WorkNodeGenerators extends WorkStubGenerators {
   // These patterns are to make it easier to write simple tests.
@@ -14,30 +14,37 @@ trait WorkNodeGenerators extends WorkStubGenerators {
       case "A" =>
         WorkNode(
           id = idA,
-          version = 1,
-          linkedIds = Nil,
-          componentId = ComponentId(idA)
+          subgraphId = SubgraphId(idA),
+          componentIds = List(idA),
+          sourceWork = SourceWorkData(version = 1),
         )
       case "B" =>
         WorkNode(
           id = idB,
-          version = 1,
-          linkedIds = Nil,
-          componentId = ComponentId(idB)
+          subgraphId = SubgraphId(idB),
+          componentIds = List(idB),
+          sourceWork = SourceWorkData(version = 1),
+        )
+      case "B[suppressed]" =>
+        WorkNode(
+          id = idB,
+          subgraphId = SubgraphId(idB),
+          componentIds = List(idB),
+          sourceWork = SourceWorkData(version = 1, suppressed = true),
         )
       case "C" =>
         WorkNode(
           id = idC,
-          version = 1,
-          linkedIds = Nil,
-          componentId = ComponentId(idC)
+          subgraphId = SubgraphId(idC),
+          componentIds = List(idC),
+          sourceWork = SourceWorkData(version = 1),
         )
       case "D" =>
         WorkNode(
           id = idD,
-          version = 1,
-          linkedIds = Nil,
-          componentId = ComponentId(idD)
+          subgraphId = SubgraphId(idD),
+          componentIds = List(idD),
+          sourceWork = SourceWorkData(version = 1),
         )
     }
 
@@ -46,28 +53,32 @@ trait WorkNodeGenerators extends WorkStubGenerators {
       case "A->B" =>
         (
           WorkNode(
-            idA,
-            version = 1,
-            linkedIds = List(idB),
-            componentId = ComponentId(idA, idB)),
+            id = idA,
+            subgraphId = SubgraphId(idA, idB),
+            componentIds = List(idA, idB),
+            sourceWork = SourceWorkData(version = 1, mergeCandidateIds = List(idB)),
+          ),
           WorkNode(
-            idB,
-            version = 1,
-            linkedIds = Nil,
-            componentId = ComponentId(idA, idB))
+            id = idB,
+            subgraphId = SubgraphId(idA, idB),
+            componentIds = List(idA, idB),
+            sourceWork = SourceWorkData(version = 1),
+          ),
         )
       case "C->D" =>
         (
           WorkNode(
-            idC,
-            version = 1,
-            linkedIds = List(idD),
-            componentId = ComponentId(idC, idD)),
+            id = idC,
+            subgraphId = SubgraphId(idC, idD),
+            componentIds = List(idC, idD),
+            sourceWork = SourceWorkData(version = 1, mergeCandidateIds = List(idD)),
+          ),
           WorkNode(
-            idD,
-            version = 1,
-            linkedIds = Nil,
-            componentId = ComponentId(idC, idD))
+            id = idD,
+            subgraphId = SubgraphId(idC, idD),
+            componentIds = List(idC, idD),
+            sourceWork = SourceWorkData(version = 1),
+          ),
         )
     }
 
@@ -76,38 +87,81 @@ trait WorkNodeGenerators extends WorkStubGenerators {
       case "A->B->C" =>
         (
           WorkNode(
-            idA,
-            version = 1,
-            linkedIds = List(idB),
-            componentId = ComponentId(idA, idB, idC)),
+            id = idA,
+            subgraphId = SubgraphId(idA, idB, idC),
+            componentIds = List(idA, idB, idC),
+            sourceWork = SourceWorkData(version = 1, mergeCandidateIds = List(idB)),
+          ),
           WorkNode(
-            idB,
-            version = 1,
-            linkedIds = List(idC),
-            componentId = ComponentId(idA, idB, idC)),
+            id = idB,
+            subgraphId = SubgraphId(idA, idB, idC),
+            componentIds = List(idA, idB, idC),
+            sourceWork = SourceWorkData(version = 1, mergeCandidateIds = List(idC)),
+          ),
           WorkNode(
-            idC,
-            version = 1,
-            linkedIds = Nil,
-            componentId = ComponentId(idA, idB, idC)),
+            id = idC,
+            subgraphId = SubgraphId(idA, idB, idC),
+            componentIds = List(idA, idB, idC),
+            sourceWork = SourceWorkData(version = 1),
+          ),
         )
       case "A<->B->C" =>
         (
           WorkNode(
-            idA,
-            version = 1,
-            linkedIds = List(idB),
-            componentId = ComponentId(idA, idB, idC)),
+            id = idA,
+            subgraphId = SubgraphId(idA, idB, idC),
+            componentIds = List(idA, idB, idC),
+            sourceWork = SourceWorkData(version = 1, mergeCandidateIds = List(idB)),
+          ),
           WorkNode(
-            idB,
-            version = 1,
-            linkedIds = List(idA, idC),
-            componentId = ComponentId(idA, idB, idC)),
+            id = idB,
+            subgraphId = SubgraphId(idA, idB, idC),
+            componentIds = List(idA, idB, idC),
+            sourceWork = SourceWorkData(version = 1, mergeCandidateIds = List(idA, idC)),
+          ),
           WorkNode(
-            idC,
-            version = 1,
-            linkedIds = Nil,
-            componentId = ComponentId(idA, idB, idC)),
+            id = idC,
+            subgraphId = SubgraphId(idA, idB, idC),
+            componentIds = List(idA, idB, idC),
+            sourceWork = SourceWorkData(version = 1),
+          ),
+        )
+    }
+
+  def createFiveWorks(pattern: String): (WorkNode, WorkNode, WorkNode, WorkNode, WorkNode) =
+    pattern match {
+      case "A->B->C->D->E" =>
+        (
+          WorkNode(
+            id = idA,
+            subgraphId = SubgraphId(idA, idB, idC, idD, idE),
+            componentIds = List(idA, idB, idC, idD, idE),
+            sourceWork = SourceWorkData(version = 1, mergeCandidateIds = List(idB)),
+          ),
+          WorkNode(
+            id = idB,
+            subgraphId = SubgraphId(idA, idB, idC, idD, idE),
+            componentIds = List(idA, idB, idC, idD, idE),
+            sourceWork = SourceWorkData(version = 1, mergeCandidateIds = List(idC)),
+          ),
+          WorkNode(
+            id = idC,
+            subgraphId = SubgraphId(idA, idB, idC, idD, idE),
+            componentIds = List(idA, idB, idC, idD, idE),
+            sourceWork = SourceWorkData(version = 1, mergeCandidateIds = List(idD)),
+          ),
+          WorkNode(
+            id = idD,
+            subgraphId = SubgraphId(idA, idB, idC, idD, idE),
+            componentIds = List(idA, idB, idC, idD, idE),
+            sourceWork = SourceWorkData(version = 1, mergeCandidateIds = List(idE)),
+          ),
+          WorkNode(
+            id = idE,
+            subgraphId = SubgraphId(idA, idB, idC, idD, idE),
+            componentIds = List(idA, idB, idC, idD, idE),
+            sourceWork = SourceWorkData(version = 1),
+          ),
         )
     }
 }

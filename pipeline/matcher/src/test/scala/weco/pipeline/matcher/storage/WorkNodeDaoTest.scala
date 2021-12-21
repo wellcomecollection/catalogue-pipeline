@@ -8,7 +8,7 @@ import software.amazon.awssdk.services.dynamodb.model.ResourceNotFoundException
 import weco.catalogue.internal_model.identifiers.CanonicalId
 import weco.pipeline.matcher.fixtures.MatcherFixtures
 import weco.pipeline.matcher.generators.WorkNodeGenerators
-import weco.pipeline.matcher.models.{ComponentId, WorkNode}
+import weco.pipeline.matcher.models.{SourceWorkData, SubgraphId, WorkNode}
 import weco.storage.dynamo.DynamoConfig
 
 import javax.naming.ConfigurationException
@@ -59,19 +59,18 @@ class WorkNodeDaoTest
     }
   }
 
-  describe("Get by ComponentIds") {
-    it("returns empty set if componentIds are not in dynamo") {
+  describe("getBySubgraphIds") {
+    it("returns empty set if the subgraph ID isn't being used") {
       withWorkGraphTable { table =>
         withWorkNodeDao(table) { workNodeDao =>
-          whenReady(workNodeDao.getByComponentIds(Set("Not-there"))) {
+          whenReady(workNodeDao.getBySubgraphIds(Set("Not-there"))) {
             _ shouldBe Set()
           }
         }
       }
     }
 
-    it(
-      "returns WorkNodes which are stored in DynamoDB for a given component id") {
+    it("finds the matching works") {
       withWorkGraphTable { table =>
         withWorkNodeDao(table) { matcherGraphDao =>
           val (workA, workB) = createTwoWorks("A->B")
@@ -79,41 +78,38 @@ class WorkNodeDaoTest
           putTableItems(items = Seq(workA, workB), table = table)
 
           whenReady(
-            matcherGraphDao.getByComponentIds(Set(ComponentId(idA, idB)))) {
+            matcherGraphDao.getBySubgraphIds(Set(SubgraphId(idA, idB)))) {
             _ shouldBe Set(workA, workB)
           }
         }
       }
     }
 
-    it("fails if fetching from dynamo fails during a getByComponentIds") {
+    it("fails if fetching from DynamoDB fails") {
       val workNodeDao = new WorkNodeDao(
         dynamoClient,
         dynamoConfig = createDynamoConfigWith(nonExistentTable)
       )
 
       whenReady(
-        workNodeDao.getByComponentIds(Set(ComponentId(idA, idB))).failed) {
+        workNodeDao.getBySubgraphIds(Set(SubgraphId(idA, idB))).failed) {
         _ shouldBe a[ResourceNotFoundException]
       }
     }
 
-    it("returns an error if Scanamo fails during a getByComponentIds") {
+    it("fails if Scanamo can't deserialise the data in the table") {
       withWorkGraphTable { table =>
         withWorkNodeDao(table) { workNodeDao =>
           case class BadRecord(id: CanonicalId,
-                               componentId: String,
-                               version: String)
+                               componentIds: String)
           val badRecord: BadRecord =
-            BadRecord(
-              id = idA,
-              componentId = ComponentId(idA, idB),
-              version = "five")
+            BadRecord(id = idA, componentIds = "1, 2, 3")
 
           putTableItem(badRecord, table = table)
 
-          whenReady(
-            workNodeDao.getByComponentIds(Set(ComponentId(idA, idB))).failed) {
+          val future = workNodeDao.getBySubgraphIds(setIds = Set(SubgraphId(idA, idB)))
+
+          whenReady(future.failed) {
             _ shouldBe a[RuntimeException]
           }
         }
@@ -141,10 +137,11 @@ class WorkNodeDaoTest
           val works = (1 to 50).map { _ =>
             val id = createCanonicalId
             WorkNode(
-              id,
-              version = 1,
-              linkedIds = List(id),
-              componentId = ComponentId(id))
+              id = id,
+              subgraphId = SubgraphId(id),
+              componentIds = List(id),
+              sourceWork = SourceWorkData(version = 1)
+            )
           }
 
           val future = workNodeDao.put(works.toSet)
@@ -163,12 +160,12 @@ class WorkNodeDaoTest
     it("returns an error if Scanamo fails to put a record") {
       withWorkGraphTable { table =>
         withWorkNodeDao(table) { workNodeDao =>
-          case class BadRecord(id: CanonicalId, version: String)
-          val badRecord: BadRecord = BadRecord(id = idA, version = "six")
+          case class BadRecord(id: CanonicalId, componentIds: String)
+          val badRecord: BadRecord = BadRecord(id = idA, componentIds = "1, 2, 3")
 
           putTableItem(badRecord, table = table)
 
-          whenReady(workNodeDao.get(Set(idA)).failed) {
+          whenReady(workNodeDao.get(ids = Set(idA)).failed) {
             _ shouldBe a[RuntimeException]
           }
         }

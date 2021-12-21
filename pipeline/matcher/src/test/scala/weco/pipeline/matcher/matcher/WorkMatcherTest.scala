@@ -4,24 +4,20 @@ import org.scalatest.EitherValues
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import org.scanamo.generic.auto._
 import weco.catalogue.internal_model.identifiers.CanonicalId
-import weco.storage.locking.LockFailure
-import weco.storage.locking.memory.{MemoryLockDao, MemoryLockingService}
 import weco.fixtures.TimeAssertions
 import weco.pipeline.matcher.fixtures.MatcherFixtures
-import weco.pipeline.matcher.generators.WorkStubGenerators
-import weco.pipeline.matcher.models.{
-  ComponentId,
-  MatchedIdentifiers,
-  MatcherResult,
-  WorkIdentifier,
-  WorkNode
-}
+import weco.pipeline.matcher.generators.WorkNodeGenerators
+import weco.pipeline.matcher.models._
 import weco.pipeline.matcher.storage.{WorkGraphStore, WorkNodeDao}
+import weco.storage.locking.LockFailure
+import weco.storage.locking.memory.{MemoryLockDao, MemoryLockingService}
 
 import java.util.UUID
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.language.higherKinds
 
 class WorkMatcherTest
     extends AnyFunSpec
@@ -29,7 +25,7 @@ class WorkMatcherTest
     with MatcherFixtures
     with ScalaFutures
     with EitherValues
-    with WorkStubGenerators
+    with WorkNodeGenerators
     with TimeAssertions {
 
   it(
@@ -52,9 +48,9 @@ class WorkMatcherTest
             savedLinkedWork shouldBe Some(
               WorkNode(
                 id = work.id,
-                version = work.version,
-                linkedIds = Nil,
-                componentId = ComponentId(work.id)
+                subgraphId = SubgraphId(work.id),
+                componentIds = List(work.id),
+                sourceWork = SourceWorkData(version = work.version),
               )
             )
           }
@@ -70,7 +66,7 @@ class WorkMatcherTest
         withWorkMatcher(workGraphStore) { workMatcher =>
           val work = createWorkWith(
             id = idA,
-            referencedWorkIds = Set(idB)
+            mergeCandidateIds = Set(idB)
           )
 
           whenReady(workMatcher.matchWork(work)) { matcherResult =>
@@ -84,16 +80,15 @@ class WorkMatcherTest
             savedWorkNodes should contain theSameElementsAs List(
               WorkNode(
                 id = idA,
-                version = work.version,
-                linkedIds = List(idB),
-                componentId = ComponentId(idA, idB)
+                subgraphId = SubgraphId(idA, idB),
+                componentIds = List(idA, idB),
+                sourceWork = SourceWorkData(version = work.version, mergeCandidateIds = List(idB)),
               ),
               WorkNode(
                 id = idB,
-                version = None,
-                linkedIds = Nil,
-                componentId = ComponentId(idA, idB)
-              )
+                subgraphId = SubgraphId(idA, idB),
+                componentIds = List(idA, idB),
+              ),
             )
           }
         }
@@ -106,34 +101,18 @@ class WorkMatcherTest
     withWorkGraphTable { graphTable =>
       withWorkGraphStore(graphTable) { workGraphStore =>
         withWorkMatcher(workGraphStore) { workMatcher =>
-          val existingWorkA = WorkNode(
-            id = idA,
-            version = 1,
-            linkedIds = List(idB),
-            componentId = ComponentId(idA, idB)
-          )
-          val existingWorkB = WorkNode(
-            id = idB,
-            version = 1,
-            linkedIds = Nil,
-            componentId = ComponentId(idA, idB)
-          )
-          val existingWorkC = WorkNode(
-            id = idC,
-            version = 1,
-            linkedIds = Nil,
-            componentId = ComponentId(idC)
-          )
+          val (workA, workB) = createTwoWorks("A->B")
+          val workC = createOneWork("C")
 
           putTableItems(
-            items = Seq(existingWorkA, existingWorkB, existingWorkC),
+            items = Seq(workA, workB, workC),
             table = graphTable
           )
 
           val work = createWorkWith(
             id = idB,
             version = 2,
-            referencedWorkIds = Set(idC)
+            mergeCandidateIds = Set(idC)
           )
 
           whenReady(workMatcher.matchWork(work)) { matcherResult =>
@@ -142,31 +121,30 @@ class WorkMatcherTest
               Set(
                 MatchedIdentifiers(
                   Set(
-                    WorkIdentifier(idA, 1),
-                    WorkIdentifier(idB, 2),
-                    WorkIdentifier(idC, 1))))
+                    WorkIdentifier(idA, version = 1),
+                    WorkIdentifier(idB, version = 2),
+                    WorkIdentifier(idC, version = 1))
+                )
+              )
 
             val savedNodes = scanTable[WorkNode](graphTable)
               .map(_.right.value)
+              .toSet
 
-            savedNodes should contain theSameElementsAs List(
-              WorkNode(
-                id = idA,
-                version = 1,
-                linkedIds = List(idB),
-                componentId = ComponentId(idA, idB, idC)
+            savedNodes shouldBe Set(
+              workA.copy(
+                subgraphId = SubgraphId(idA, idB, idC),
+                componentIds = List(idA, idB, idC),
               ),
-              WorkNode(
-                id = idB,
-                version = 2,
-                linkedIds = List(idC),
-                componentId = ComponentId(idA, idB, idC)
+              workB.copy(
+                subgraphId = SubgraphId(idA, idB, idC),
+                componentIds = List(idA, idB, idC),
+                sourceWork = Some(SourceWorkData(version = 2, mergeCandidateIds = List(idC))),
               ),
-              WorkNode(
-                id = idC,
-                version = 1,
-                linkedIds = Nil,
-                componentId = ComponentId(idA, idB, idC))
+              workC.copy(
+                subgraphId = SubgraphId(idA, idB, idC),
+                componentIds = List(idA, idB, idC),
+              ),
             )
           }
         }
@@ -208,17 +186,15 @@ class WorkMatcherTest
       withWorkGraphStore(graphTable) { workGraphStore =>
         val componentId = "ABC"
 
-        val future = workGraphStore.put(
-          Set(
-            WorkNode(idA, version = 0, linkedIds = List(idB), componentId),
-            WorkNode(idB, version = 0, linkedIds = List(idC), componentId),
-            WorkNode(idC, version = 0, linkedIds = Nil, componentId),
-          ))
+        val (workA, workB, workC) = createThreeWorks("A->B->C")
+
+        val future = workGraphStore.put(Set(workA, workB, workC))
 
         whenReady(future) { _ =>
           val work = createWorkWith(
             id = idA,
-            referencedWorkIds = Set(idB)
+            mergeCandidateIds = Set(idB),
+            version = workA.sourceWork.get.version + 1
           )
 
           implicit val lockDao: MemoryLockDao[String, UUID] =
