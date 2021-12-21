@@ -5,7 +5,7 @@ import akka.stream.Materializer
 import akka.stream.scaladsl._
 import grizzled.slf4j.Logging
 import software.amazon.awssdk.services.sqs.model.{Message => SQSMessage}
-import weco.json.JsonUtil._
+import weco.json.JsonUtil.fromJson
 import weco.messaging.MessageSender
 import weco.messaging.sns.NotificationMessage
 import weco.messaging.sqs.SQSStream
@@ -14,6 +14,7 @@ import weco.storage.s3.S3ObjectLocation
 import weco.typesafe.Runnable
 import weco.catalogue.source_model.CalmSourcePayload
 import weco.catalogue.source_model.calm.CalmRecord
+import weco.catalogue.source_model.Implicits._
 import weco.flows.FlowOps
 import weco.pipeline.calm_api_client.CalmQuery
 

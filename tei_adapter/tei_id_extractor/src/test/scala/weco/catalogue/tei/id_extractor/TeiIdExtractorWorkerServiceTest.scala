@@ -17,11 +17,11 @@ import weco.catalogue.source_model.tei.{
   TeiIdDeletedMessage,
   TeiIdMessage
 }
+import weco.catalogue.source_model.Implicits._
 import weco.catalogue.tei.id_extractor.database.TableProvisioner
 import weco.catalogue.tei.id_extractor.fixtures.{PathIdDatabase, XmlAssertions}
 import weco.fixtures.{LocalResources, TestWith}
 import weco.http.client.HttpClient
-import weco.json.JsonUtil._
 import weco.messaging.fixtures.SQS
 import weco.messaging.fixtures.SQS.QueuePair
 import weco.messaging.memory.MemoryMessageSender

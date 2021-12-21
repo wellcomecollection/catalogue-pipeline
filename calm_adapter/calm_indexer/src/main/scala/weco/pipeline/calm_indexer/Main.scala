@@ -4,8 +4,8 @@ import akka.actor.ActorSystem
 import com.amazonaws.services.s3.AmazonS3
 import com.sksamuel.elastic4s.{ElasticClient, Index}
 import weco.catalogue.source_model.calm.CalmRecord
+import weco.catalogue.source_model.Implicits._
 import weco.elasticsearch.typesafe.ElasticBuilder
-import weco.json.JsonUtil._
 import weco.messaging.typesafe.SQSBuilder
 import weco.storage.store.s3.S3TypedStore
 import weco.storage.typesafe.S3Builder

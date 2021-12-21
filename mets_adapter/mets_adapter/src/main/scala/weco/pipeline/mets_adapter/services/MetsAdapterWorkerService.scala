@@ -7,6 +7,7 @@ import software.amazon.awssdk.services.sqs.model.{Message => SQSMessage}
 import weco.pipeline.mets_adapter.models._
 import weco.catalogue.source_model.MetsSourcePayload
 import weco.catalogue.source_model.mets.MetsSourceData
+import weco.catalogue.source_model.Implicits._
 import weco.flows.FlowOps
 import weco.json.JsonUtil._
 import weco.messaging.MessageSender

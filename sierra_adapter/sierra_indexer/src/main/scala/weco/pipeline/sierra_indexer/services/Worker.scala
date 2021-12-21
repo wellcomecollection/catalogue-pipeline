@@ -6,7 +6,7 @@ import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.bulk.BulkResponse
 import com.sksamuel.elastic4s.requests.delete.DeleteByQueryResponse
 import weco.elasticsearch.ElasticsearchIndexCreator
-import weco.json.JsonUtil._
+import weco.json.JsonUtil.fromJson
 import weco.messaging.sns.NotificationMessage
 import weco.messaging.sqs.SQSStream
 import weco.storage.Identified
@@ -15,6 +15,7 @@ import weco.storage.store.Readable
 import weco.typesafe.Runnable
 import weco.catalogue.source_model.SierraSourcePayload
 import weco.catalogue.source_model.sierra.SierraTransformable
+import weco.catalogue.source_model.Implicits._
 import weco.pipeline.sierra_indexer.index.SierraIndexConfig
 
 import scala.concurrent.{ExecutionContext, Future}

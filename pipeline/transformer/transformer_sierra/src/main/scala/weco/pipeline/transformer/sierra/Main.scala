@@ -2,7 +2,7 @@ package weco.pipeline.transformer.sierra
 
 import com.amazonaws.services.s3.AmazonS3
 import weco.catalogue.source_model.sierra.SierraTransformable
-import weco.json.JsonUtil._
+import weco.catalogue.source_model.Implicits._
 import weco.pipeline.transformer.sierra.services.SierraSourceDataRetriever
 import weco.pipeline.transformer.{Transformer, TransformerMain}
 import weco.storage.store.s3.S3TypedStore

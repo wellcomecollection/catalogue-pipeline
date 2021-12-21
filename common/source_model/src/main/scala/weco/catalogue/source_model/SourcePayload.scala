@@ -46,3 +46,4 @@ case class SierraSourcePayload(
 
 case class TeiSourcePayload(id: String, metadata: TeiMetadata, version: Int)
     extends SourcePayload
+]

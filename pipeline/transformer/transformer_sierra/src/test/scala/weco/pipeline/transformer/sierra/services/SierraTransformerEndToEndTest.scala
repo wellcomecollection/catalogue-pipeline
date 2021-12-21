@@ -8,8 +8,8 @@ import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.source_model.SierraSourcePayload
 import weco.catalogue.source_model.generators.SierraRecordGenerators
 import weco.catalogue.source_model.sierra.SierraTransformable
+import weco.catalogue.source_model.Implicits._
 import weco.fixtures.TestWith
-import weco.json.JsonUtil._
 import weco.messaging.fixtures.SQS.QueuePair
 import weco.messaging.memory.MemoryMessageSender
 import weco.pipeline.transformer.TransformerWorker

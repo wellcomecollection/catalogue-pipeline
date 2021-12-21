@@ -7,7 +7,6 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scanamo.generic.auto._
 import weco.fixtures.TestWith
-import weco.json.JsonUtil._
 import weco.messaging.fixtures.SQS
 import weco.messaging.fixtures.SQS.QueuePair
 import weco.messaging.memory.MemoryMessageSender
@@ -15,6 +14,7 @@ import weco.messaging.sns.NotificationMessage
 import weco.storage.fixtures.DynamoFixtures
 import weco.catalogue.source_model.CalmSourcePayload
 import weco.catalogue.source_model.generators.CalmRecordGenerators
+import weco.catalogue.source_model.Implicits._
 import weco.pipeline.calm_api_client.{CalmQuery, CalmSession, QueryNode}
 import weco.pipeline.calm_api_client.fixtures.CalmApiClientFixtures
 import weco.pipeline.calm_deletion_checker.fixtures.{

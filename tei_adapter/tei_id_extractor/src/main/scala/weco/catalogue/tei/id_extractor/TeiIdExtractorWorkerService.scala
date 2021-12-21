@@ -2,7 +2,7 @@ package weco.catalogue.tei.id_extractor
 
 import akka.stream.scaladsl.Flow
 import software.amazon.awssdk.services.sqs.model.{Message => SQSMessage}
-import weco.json.JsonUtil._
+import weco.json.JsonUtil.fromJson
 import weco.messaging.sns.NotificationMessage
 import weco.messaging.sqs.SQSStream
 import weco.typesafe.Runnable

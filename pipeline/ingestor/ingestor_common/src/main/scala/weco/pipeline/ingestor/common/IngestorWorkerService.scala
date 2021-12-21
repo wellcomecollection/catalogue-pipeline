@@ -4,13 +4,11 @@ import scala.concurrent.{ExecutionContext, Future}
 import akka.Done
 import akka.stream.scaladsl.Flow
 import software.amazon.awssdk.services.sqs.model.Message
-import weco.json.JsonUtil._
 import weco.messaging.sns.NotificationMessage
 import weco.pipeline_storage.PipelineStorageStream.{
   batchRetrieveFlow,
   processFlow
 }
-import weco.pipeline_storage.PipelineStorageStream
 import weco.typesafe.Runnable
 import weco.pipeline_storage.{Indexable, PipelineStorageStream, Retriever}
 

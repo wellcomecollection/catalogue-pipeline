@@ -1,7 +1,7 @@
 package weco.pipeline.transformer.miro
 
 import com.amazonaws.services.s3.AmazonS3
-import weco.json.JsonUtil._
+import weco.catalogue.source_model.Implicits._
 import weco.pipeline.transformer.TransformerMain
 import weco.pipeline.transformer.miro.Implicits._
 import weco.pipeline.transformer.miro.services.MiroSourceDataRetriever

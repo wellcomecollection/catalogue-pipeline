@@ -1,7 +1,7 @@
 package weco.pipeline.transformer.tei
 
 import com.amazonaws.services.s3.AmazonS3
-import weco.json.JsonUtil._
+import weco.catalogue.source_model.Implicits._
 import weco.pipeline.transformer.TransformerMain
 import weco.pipeline.transformer.tei.service.TeiSourceDataRetriever
 import weco.storage.store.s3.S3TypedStore

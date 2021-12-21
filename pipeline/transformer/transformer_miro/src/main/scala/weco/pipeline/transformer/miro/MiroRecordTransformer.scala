@@ -11,7 +11,7 @@ import weco.catalogue.internal_model.work.InvisibilityReason.UnableToTransform
 import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.internal_model.work.{Work, WorkData}
 import weco.catalogue.source_model.miro.MiroSourceOverrides
-import weco.json.JsonUtil._
+import weco.json.JsonUtil.toJson
 import weco.pipeline.transformer.Transformer
 import weco.pipeline.transformer.miro.exceptions.{
   ShouldNotTransformException,

@@ -2,7 +2,7 @@ package weco.pipeline.transformer.miro.source
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.json.JsonUtil._
+import weco.json.JsonUtil.fromJson
 import weco.pipeline.transformer.miro.Implicits._
 
 class MiroRecordTest extends AnyFunSpec with Matchers {

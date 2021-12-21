@@ -2,7 +2,6 @@ package weco.pipeline.sierra_merger.services
 
 import org.scalatest.{Assertion, EitherValues}
 import org.scalatest.funspec.AnyFunSpec
-import weco.json.JsonUtil._
 import weco.storage.maxima.Maxima
 import weco.storage.maxima.memory.MemoryMaxima
 import weco.storage.s3.S3ObjectLocation
@@ -21,6 +20,7 @@ import weco.catalogue.source_model.sierra.{
   SierraTransformable
 }
 import weco.catalogue.source_model.store.SourceVHS
+import weco.catalogue.source_model.Implicits._
 import weco.pipeline.sierra_merger.fixtures.RecordMergerFixtures
 import weco.sierra.models.identifiers.TypedSierraRecordNumber
 
@@ -159,9 +159,9 @@ class UpdaterTest
     val result = updater.update(unlinkItemRecord)
 
     result shouldBe a[Right[_, _]]
-    result.right.get.map { _.id } should contain theSameElementsAs (List(
+    result.right.get.map { _.id } should contain theSameElementsAs List(
       Version(bibId1.withoutCheckDigit, 1),
-      Version(bibId2.withoutCheckDigit, 1)))
+      Version(bibId2.withoutCheckDigit, 1))
 
     assertStored(bibId1, expectedTransformable1, sourceVHS)
     assertStored(bibId2, expectedTransformable2, sourceVHS)
@@ -217,9 +217,9 @@ class UpdaterTest
 
     val result = updater.update(unlinkItemRecord)
     result shouldBe a[Right[_, _]]
-    result.right.get.map { _.id } should contain theSameElementsAs (List(
+    result.right.get.map { _.id } should contain theSameElementsAs List(
       Version(bibId1.withoutCheckDigit, 1),
-      Version(bibId2.withoutCheckDigit, 1)))
+      Version(bibId2.withoutCheckDigit, 1))
 
     assertStored(bibId1, expectedTransformable1, sourceVHS)
     assertStored(bibId2, expectedTransformable2, sourceVHS)
@@ -354,8 +354,8 @@ class UpdaterTest
 
     val result = updater.update(itemRecord)
     result shouldBe a[Right[_, _]]
-    result.right.get.map { _.id } should contain theSameElementsAs (List(
-      Version(bibId.withoutCheckDigit, 1)))
+    result.right.get.map { _.id } should contain theSameElementsAs List(
+      Version(bibId.withoutCheckDigit, 1))
 
     assertStored(bibId, expectedTransformable, sourceVHS)
   }

@@ -5,7 +5,6 @@ import com.sksamuel.elastic4s.{Index, Indexes}
 import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.json.JsonUtil._
 import weco.messaging.fixtures.SQS.QueuePair
 import weco.storage.generators.S3ObjectLocationGenerators
 import weco.storage.s3.S3ObjectLocation
@@ -18,6 +17,7 @@ import weco.catalogue.source_model.sierra.{
   SierraOrderRecord,
   SierraTransformable
 }
+import weco.catalogue.source_model.Implicits._
 import weco.pipeline.sierra_indexer.fixtures.IndexerFixtures
 
 import java.time.Instant

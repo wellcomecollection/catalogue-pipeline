@@ -2,7 +2,7 @@ package weco.pipeline.transformer.miro.source
 
 import io.circe.generic.extras.JsonKey
 import org.apache.commons.text.StringEscapeUtils
-import weco.json.JsonUtil._
+import weco.json.JsonUtil.fromJson
 
 import scala.util.{Failure, Success}
 
