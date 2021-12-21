@@ -47,25 +47,6 @@ class WorkGraphUpdaterTest
           componentId = ComponentId(idA, idB))
       )
     }
-
-    it("updating nothing with B->A gives A+B:B->A") {
-      WorkGraphUpdater
-        .update(
-          work = createWorkWith(idB, version = 1, referencedWorkIds = Set(idA)),
-          affectedNodes = Set()
-        ) shouldBe Set(
-        WorkNode(
-          idB,
-          version = 1,
-          linkedIds = List(idA),
-          componentId = ComponentId(idA, idB)),
-        WorkNode(
-          idA,
-          version = None,
-          linkedIds = List(),
-          componentId = ComponentId(idA, idB))
-      )
-    }
   }
 
   describe("Adding links to existing works") {
