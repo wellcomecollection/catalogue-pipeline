@@ -55,6 +55,4 @@ locals {
   traffic_filter_public_internet_id = local.shared_infra["ec_public_internet_traffic_filter_id"]
 
   logging_cluster_id = data.terraform_remote_state.shared_infra.outputs.logging_cluster_id
-
-  api_ec_version = data.terraform_remote_state.catalogue_api.outputs.catalogue_api_ec_version
 }

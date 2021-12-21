@@ -84,8 +84,6 @@ module "catalogue_pipeline_2021-11-29" {
 
   storage_bucket_name = local.storage_bucket
 
-  api_ec_version = local.api_ec_version
-
   providers = {
     aws.catalogue = aws.catalogue
   }
@@ -178,8 +176,6 @@ module "catalogue_pipeline_2021-12-21" {
   shared_logging_secrets = data.terraform_remote_state.shared_infra.outputs.shared_secrets_logging
 
   storage_bucket_name = local.storage_bucket
-
-  api_ec_version = local.api_ec_version
 
   providers = {
     aws.catalogue = aws.catalogue

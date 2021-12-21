@@ -16,27 +16,7 @@ locals {
 resource "ec_deployment" "pipeline" {
   name = "pipeline-${var.pipeline_date}"
 
-  # Currently we do cross-cluster replication from the pipeline cluster
-  # to the API cluster.
-  #
-  # The Elasticsearch documentation is very clear [1]
-  #
-  #     The cluster containing follower indices must be running the same
-  #     or newer version of Elasticsearch as the remote cluster
-  #
-  # This even applies across patch versions, e.g. this configuration
-  # is no good:
-  #
-  #     pipeline = v7.14.1
-  #     api      = v7.14.0
-  #
-  # Using the same version as the API cluster means we'll never get CCR
-  # versioning in a muddle.  If you want a newer version, upgrade the
-  # API first.
-  #
-  # [1]: https://www.elastic.co/guide/en/elasticsearch/reference/current/xpack-ccr.html
-  #
-  version = var.api_ec_version
+  version = "7.16.2"
 
   region                 = "eu-west-1"
   deployment_template_id = "aws-io-optimized-v2"
