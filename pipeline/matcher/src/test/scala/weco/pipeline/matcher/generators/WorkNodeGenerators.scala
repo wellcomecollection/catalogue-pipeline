@@ -14,9 +14,30 @@ trait WorkNodeGenerators extends WorkStubGenerators {
       case "A" =>
         WorkNode(
           id = idA,
-          version = 0,
+          version = 1,
           linkedIds = Nil,
           componentId = ComponentId(idA)
+        )
+      case "B" =>
+        WorkNode(
+          id = idB,
+          version = 1,
+          linkedIds = Nil,
+          componentId = ComponentId(idB)
+        )
+      case "C" =>
+        WorkNode(
+          id = idC,
+          version = 1,
+          linkedIds = Nil,
+          componentId = ComponentId(idC)
+        )
+      case "D" =>
+        WorkNode(
+          id = idD,
+          version = 1,
+          linkedIds = Nil,
+          componentId = ComponentId(idD)
         )
     }
 
@@ -35,6 +56,19 @@ trait WorkNodeGenerators extends WorkStubGenerators {
             linkedIds = Nil,
             componentId = ComponentId(idA, idB))
         )
+      case "C->D" =>
+        (
+          WorkNode(
+            idC,
+            version = 1,
+            linkedIds = List(idD),
+            componentId = ComponentId(idC, idD)),
+          WorkNode(
+            idD,
+            version = 1,
+            linkedIds = Nil,
+            componentId = ComponentId(idC, idD))
+        )
     }
 
   def createThreeWorks(pattern: String): (WorkNode, WorkNode, WorkNode) =
@@ -50,6 +84,24 @@ trait WorkNodeGenerators extends WorkStubGenerators {
             idB,
             version = 1,
             linkedIds = List(idC),
+            componentId = ComponentId(idA, idB, idC)),
+          WorkNode(
+            idC,
+            version = 1,
+            linkedIds = Nil,
+            componentId = ComponentId(idA, idB, idC)),
+        )
+      case "A<->B->C" =>
+        (
+          WorkNode(
+            idA,
+            version = 1,
+            linkedIds = List(idB),
+            componentId = ComponentId(idA, idB, idC)),
+          WorkNode(
+            idB,
+            version = 1,
+            linkedIds = List(idA, idC),
             componentId = ComponentId(idA, idB, idC)),
           WorkNode(
             idC,
