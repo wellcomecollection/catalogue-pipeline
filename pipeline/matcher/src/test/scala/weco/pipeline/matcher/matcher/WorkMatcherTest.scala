@@ -184,7 +184,7 @@ class WorkMatcherTest
 
     withWorkGraphTable { graphTable =>
       withWorkGraphStore(graphTable) { workGraphStore =>
-        val componentId = "ABC"
+        val subgraphId = SubgraphId(idA, idB, idC)
 
         val (workA, workB, workC) = createThreeWorks("A->B->C")
 
@@ -201,7 +201,7 @@ class WorkMatcherTest
             new MemoryLockDao[String, UUID] {
               override def lock(id: String, contextId: UUID): LockResult =
                 synchronized {
-                  if (id == componentId) {
+                  if (id == subgraphId) {
                     Left(LockFailure(id, e = expectedException))
                   } else {
                     super.lock(id, contextId)

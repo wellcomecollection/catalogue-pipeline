@@ -91,7 +91,7 @@ class WorkMatcher(
   private def toMatchedIdentifiers(
     nodes: Set[WorkNode]): Set[MatchedIdentifiers] =
     nodes
-      .groupBy { _.subgraphId }
+      .groupBy { _.componentIds }
       .map {
         case (_, workNodes) =>
           // The matcher graph may include nodes for Works it hasn't seen yet, or which

@@ -107,7 +107,7 @@ class WorkGraphUpdaterTest
         workB.copy(
           subgraphId = SubgraphId(idA, idB, idC),
           componentIds = List(idA, idB, idC),
-          sourceWork = Some(SourceWorkData(version = 1, mergeCandidateIds = List(idC))),
+          sourceWork = Some(SourceWorkData(version = 2, mergeCandidateIds = List(idC))),
         ),
         workC.copy(
           subgraphId = SubgraphId(idA, idB, idC),
@@ -361,10 +361,13 @@ class WorkGraphUpdaterTest
         WorkNode(
           id = idA,
           subgraphId = SubgraphId(idA, idB),
-          componentIds = List(idA, idB),
+          componentIds = List(idA),
           sourceWork = SourceWorkData(version = 1, mergeCandidateIds = List(idB)),
         ),
-        workB,
+        workB.copy(
+          subgraphId = SubgraphId(idA, idB),
+          componentIds = List(idB),
+        ),
       )
     }
 
@@ -382,8 +385,11 @@ class WorkGraphUpdaterTest
         )
 
       result shouldBe Set(
-        workA,
+        workA.copy(
+          componentIds = List(idA),
+        ),
         workB.copy(
+          componentIds = List(idB),
           sourceWork = Some(SourceWorkData(version = 2, suppressed = true))
         ),
       )
@@ -403,12 +409,21 @@ class WorkGraphUpdaterTest
 
       result shouldBe Set(
         workA.copy(
+          componentIds = List(idA, idB),
           sourceWork = Some(SourceWorkData(version = 2, mergeCandidateIds = List(idB)))
         ),
-        workB,
-        suppressedWorkC,
-        workD,
-        workE,
+        workB.copy(
+          componentIds = List(idA, idB),
+        ),
+        suppressedWorkC.copy(
+          componentIds = List(idC),
+        ),
+        workD.copy(
+          componentIds = List(idD, idE),
+        ),
+        workE.copy(
+          componentIds = List(idD, idE),
+        ),
       )
     }
 

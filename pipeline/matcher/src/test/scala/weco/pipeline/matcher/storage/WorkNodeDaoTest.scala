@@ -101,9 +101,10 @@ class WorkNodeDaoTest
       withWorkGraphTable { table =>
         withWorkNodeDao(table) { workNodeDao =>
           case class BadRecord(id: CanonicalId,
-                               componentIds: String)
+                               subgraphId: String,
+                               componentIds: Int)
           val badRecord: BadRecord =
-            BadRecord(id = idA, componentIds = "1, 2, 3")
+            BadRecord(id = idA, subgraphId = SubgraphId(idA, idB), componentIds = 123)
 
           putTableItem(badRecord, table = table)
 

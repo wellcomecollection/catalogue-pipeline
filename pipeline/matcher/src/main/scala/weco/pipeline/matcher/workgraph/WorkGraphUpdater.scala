@@ -108,7 +108,7 @@ private class WorkSubgraph(newWork: WorkNode,
     val workIds =
       sourceWorks
         .flatMap { case (id, work) => id +: work.mergeCandidateIds }
-        .toList
+        .toSet
 
     val g = Graph.from(edges = unsuppressedLinks, nodes = workIds)
 

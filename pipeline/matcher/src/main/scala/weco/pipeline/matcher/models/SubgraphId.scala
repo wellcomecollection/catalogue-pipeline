@@ -11,8 +11,14 @@ object SubgraphId {
     * Note that this is based on the *unversioned* identifiers.  This means the
     * subgraph identifier is stable across different versions of a Work.
     */
-  def apply(ids: CanonicalId*): String =
-    DigestUtils.sha256Hex(ids.sorted.map(_.underlying).mkString("+"))
+  def apply(ids: CanonicalId*): String = {
+    require(
+      ids.toSet.size == ids.size,
+      s"Passed duplicate IDs in SubgraphId: $ids"
+    )
 
-  def apply(ids: List[CanonicalId]): String = apply(ids: _*)
+    DigestUtils.sha256Hex(ids.sorted.map(_.underlying).mkString("+"))
+  }
+
+  def apply(ids: Set[CanonicalId]): String = apply(ids.toList: _*)
 }
