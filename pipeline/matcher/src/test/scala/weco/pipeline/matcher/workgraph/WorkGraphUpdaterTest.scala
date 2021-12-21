@@ -3,7 +3,12 @@ package weco.pipeline.matcher.workgraph
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.pipeline.matcher.generators.WorkNodeGenerators
-import weco.pipeline.matcher.models.{ComponentId, VersionExpectedConflictException, VersionUnexpectedConflictException, WorkNode}
+import weco.pipeline.matcher.models.{
+  ComponentId,
+  VersionExpectedConflictException,
+  VersionUnexpectedConflictException,
+  WorkNode
+}
 
 class WorkGraphUpdaterTest
     extends AnyFunSpec
@@ -295,8 +300,10 @@ class WorkGraphUpdaterTest
       val thrown = intercept[VersionUnexpectedConflictException] {
         WorkGraphUpdater
           .update(
-            work =
-              createWorkWith(idA, existingVersion, referencedWorkIds = Set(idC)),
+            work = createWorkWith(
+              idA,
+              existingVersion,
+              referencedWorkIds = Set(idC)),
             affectedNodes = Set(workA, workB)
           )
       }
