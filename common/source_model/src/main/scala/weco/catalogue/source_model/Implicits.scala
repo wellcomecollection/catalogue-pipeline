@@ -8,6 +8,7 @@ import io.circe.generic.extras.semiauto.{
 import weco.catalogue.source_model.calm.CalmRecord
 import weco.catalogue.source_model.sierra._
 import weco.catalogue.source_model.tei._
+import weco.json.JsonUtil._
 import weco.sierra.models.data._
 
 object Implicits {
