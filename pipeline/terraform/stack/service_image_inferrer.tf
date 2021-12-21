@@ -22,12 +22,12 @@ locals {
 
   # When we're not reindexing, we halve the size of these tasks, because
   # they won't be getting as many updates.
-  total_cpu           = var.is_reindexing ? local.base_2x_total_cpu : local.base_1x_total_cpu
-  total_memory        = var.is_reindexing ? local.base_2x_total_memory : local.base_1x_total_memory
-  manager_memory      = var.is_reindexing ? local.base_manager_memory : floor(local.base_manager_memory / 2)
-  manager_cpu         = var.is_reindexing ? local.base_manager_cpu : floor(local.base_manager_cpu / 2)
-  aspect_ratio_cpu    = var.is_reindexing ? local.base_aspect_ratio_cpu : floor(local.base_aspect_ratio_cpu / 2)
-  aspect_ratio_memory = var.is_reindexing ? local.base_aspect_ratio_memory : floor(local.base_aspect_ratio_memory / 2)
+  total_cpu           = var.reindexing_state.scale_up_tasks ? local.base_2x_total_cpu : local.base_1x_total_cpu
+  total_memory        = var.reindexing_state.scale_up_tasks ? local.base_2x_total_memory : local.base_1x_total_memory
+  manager_memory      = var.reindexing_state.scale_up_tasks ? local.base_manager_memory : floor(local.base_manager_memory / 2)
+  manager_cpu         = var.reindexing_state.scale_up_tasks ? local.base_manager_cpu : floor(local.base_manager_cpu / 2)
+  aspect_ratio_cpu    = var.reindexing_state.scale_up_tasks ? local.base_aspect_ratio_cpu : floor(local.base_aspect_ratio_cpu / 2)
+  aspect_ratio_memory = var.reindexing_state.scale_up_tasks ? local.base_aspect_ratio_memory : floor(local.base_aspect_ratio_memory / 2)
 
   inferrer_cpu    = floor(0.5 * (local.total_cpu - local.manager_cpu - local.aspect_ratio_cpu))
   inferrer_memory = floor(0.5 * (local.total_memory - local.manager_memory - local.aspect_ratio_memory))

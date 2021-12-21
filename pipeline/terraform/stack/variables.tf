@@ -2,10 +2,6 @@ variable "pipeline_date" {
   type = string
 }
 
-variable "api_ec_version" {
-  type = string
-}
-
 variable "min_capacity" {
   type    = number
   default = 0
@@ -13,7 +9,7 @@ variable "min_capacity" {
 
 variable "max_capacity" {
   type        = number
-  default     = 20
+  default     = 15
   description = "The max capacity of every ECS service will be less than or equal to this value"
 }
 
@@ -35,9 +31,14 @@ variable "rds_subnet_group_name" {
   type = string
 }
 
-variable "is_reindexing" {
-  type        = bool
-  description = "Are you reindexing through this pipeline right now?"
+variable "reindexing_state" {
+  type = object({
+    connect_reindex_topics   = bool
+    scale_up_tasks           = bool
+    scale_up_elastic_cluster = bool
+    scale_up_id_minter_db    = bool
+    scale_up_matcher_db      = bool
+  })
 }
 
 variable "rds_ids_access_security_group_id" {}

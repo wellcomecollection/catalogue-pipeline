@@ -3,40 +3,20 @@ data "ec_deployment" "logging" {
 }
 
 locals {
-  es_memory = var.is_reindexing ? "58g" : "8g"
+  es_memory = var.reindexing_state.scale_up_elastic_cluster ? "58g" : "8g"
 
   # When we're reindexing, this cluster isn't depended on for anything.
   # It's ephemeral data (and at 58GB of memory, expensive).
   #
   # Once we stop reindexing and make the pipeline live, we want it to be
   # highly available, to avoid issues with cross-cluster replication.
-  es_node_count = var.is_reindexing ? 1 : 2
+  es_node_count = var.reindexing_state.scale_up_elastic_cluster ? 1 : 2
 }
 
 resource "ec_deployment" "pipeline" {
   name = "pipeline-${var.pipeline_date}"
 
-  # Currently we do cross-cluster replication from the pipeline cluster
-  # to the API cluster.
-  #
-  # The Elasticsearch documentation is very clear [1]
-  #
-  #     The cluster containing follower indices must be running the same
-  #     or newer version of Elasticsearch as the remote cluster
-  #
-  # This even applies across patch versions, e.g. this configuration
-  # is no good:
-  #
-  #     pipeline = v7.14.1
-  #     api      = v7.14.0
-  #
-  # Using the same version as the API cluster means we'll never get CCR
-  # versioning in a muddle.  If you want a newer version, upgrade the
-  # API first.
-  #
-  # [1]: https://www.elastic.co/guide/en/elasticsearch/reference/current/xpack-ccr.html
-  #
-  version = var.api_ec_version
+  version = "7.16.2"
 
   region                 = "eu-west-1"
   deployment_template_id = "aws-io-optimized-v2"

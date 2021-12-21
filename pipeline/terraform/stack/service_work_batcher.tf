@@ -1,5 +1,8 @@
 locals {
-  wait_minutes = var.is_reindexing ? 45 : 5
+  wait_minutes = var.reindexing_state.scale_up_tasks ? 45 : 1
+
+  # NOTE: SQS in flight limit is 120k
+  max_processed_paths = var.reindexing_state.scale_up_tasks ? 100000 : 5000
 }
 
 module "batcher_output_topic" {
@@ -19,16 +22,14 @@ module "batcher" {
     module.router_path_output_topic.arn,
   ]
 
+  # Note: this needs to be bigger than the flush_interval_minutes
   queue_visibility_timeout_seconds = (local.wait_minutes + 5) * 60
 
   env_vars = {
     output_topic_arn = module.batcher_output_topic.arn
 
-    # NOTE: this needs to be less than visibility timeout
     flush_interval_minutes = local.wait_minutes
-
-    # NOTE: SQS in flight limit is 120k
-    max_processed_paths = var.is_reindexing ? 100000 : 5000
+    max_processed_paths    = local.max_processed_paths
 
     max_batch_size = 40
   }

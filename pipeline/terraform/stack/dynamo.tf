@@ -13,13 +13,13 @@
 # https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/switching.capacitymode.html
 
 locals {
-  graph_table_billing_mode = var.is_reindexing ? "PROVISIONED" : "PAY_PER_REQUEST"
-  lock_table_billing_mode  = var.is_reindexing ? "PROVISIONED" : "PAY_PER_REQUEST"
+  graph_table_billing_mode = var.reindexing_state.scale_up_matcher_db ? "PROVISIONED" : "PAY_PER_REQUEST"
+  lock_table_billing_mode  = var.reindexing_state.scale_up_matcher_db ? "PROVISIONED" : "PAY_PER_REQUEST"
 }
 
 # Graph table
 locals {
-  graph_table_name = "${local.namespace_hyphen}_works-graph"
+  graph_table_name = "${local.namespace}_works-graph"
 }
 
 resource "aws_dynamodb_table" "matcher_graph_table" {
@@ -32,7 +32,7 @@ resource "aws_dynamodb_table" "matcher_graph_table" {
   }
 
   attribute {
-    name = "componentId"
+    name = "subgraphId"
     type = "S"
   }
 
@@ -45,7 +45,7 @@ resource "aws_dynamodb_table" "matcher_graph_table" {
 
   global_secondary_index {
     name            = "work-sets-index"
-    hash_key        = "componentId"
+    hash_key        = "subgraphId"
     projection_type = "ALL"
 
     read_capacity  = local.graph_table_billing_mode == "PROVISIONED" ? 600 : 1
@@ -58,9 +58,7 @@ resource "aws_dynamodb_table" "matcher_graph_table" {
 
   lifecycle {
     ignore_changes = [
-      global_secondary_index,
-      /*read_capacity,*/
-      /*write_capacity*/
+      /*global_secondary_index,*/
     ]
   }
 }
@@ -94,7 +92,7 @@ data "aws_iam_policy_document" "graph_table_readwrite" {
 # Lock table
 
 locals {
-  lock_table_name = "${local.namespace_hyphen}_matcher-lock-table"
+  lock_table_name = "${local.namespace}_matcher-lock-table"
 }
 
 resource "aws_dynamodb_table" "matcher_lock_table" {
