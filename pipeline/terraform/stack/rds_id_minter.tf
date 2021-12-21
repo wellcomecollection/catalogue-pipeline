@@ -1,5 +1,5 @@
 locals {
-  extra_rds_instances = var.is_reindexing ? 2 : 0
+  extra_rds_instances = var.reindexing_state.scale_up_id_minter_db ? 2 : 0
 }
 
 resource "aws_rds_cluster_instance" "extra_instances" {

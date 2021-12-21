@@ -26,7 +26,7 @@ module "ingestor_images" {
 
     es_images_index    = local.es_images_index
     es_augmented_index = local.es_images_augmented_index
-    es_is_reindexing   = var.is_reindexing
+    es_is_reindexing   = var.reindexing_state.scale_up_tasks
 
     ingest_flush_interval_seconds = local.ingestor_images_flush_interval_seconds
 

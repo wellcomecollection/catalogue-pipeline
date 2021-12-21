@@ -1,5 +1,5 @@
 locals {
-  name   = "${local.namespace_hyphen}_image_training"
+  name   = "${local.namespace}_image_training"
   cpu    = 4096
   memory = 8192
 

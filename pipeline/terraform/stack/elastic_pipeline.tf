@@ -3,14 +3,14 @@ data "ec_deployment" "logging" {
 }
 
 locals {
-  es_memory = var.is_reindexing ? "58g" : "8g"
+  es_memory = var.reindexing_state.scale_up_elastic_cluster ? "58g" : "8g"
 
   # When we're reindexing, this cluster isn't depended on for anything.
   # It's ephemeral data (and at 58GB of memory, expensive).
   #
   # Once we stop reindexing and make the pipeline live, we want it to be
   # highly available, to avoid issues with cross-cluster replication.
-  es_node_count = var.is_reindexing ? 1 : 2
+  es_node_count = var.reindexing_state.scale_up_elastic_cluster ? 1 : 2
 }
 
 resource "ec_deployment" "pipeline" {

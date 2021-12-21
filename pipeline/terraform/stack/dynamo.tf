@@ -13,13 +13,13 @@
 # https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/switching.capacitymode.html
 
 locals {
-  graph_table_billing_mode = var.is_reindexing ? "PROVISIONED" : "PAY_PER_REQUEST"
-  lock_table_billing_mode  = var.is_reindexing ? "PROVISIONED" : "PAY_PER_REQUEST"
+  graph_table_billing_mode = var.reindexing_state.scale_up_matcher_db ? "PROVISIONED" : "PAY_PER_REQUEST"
+  lock_table_billing_mode  = var.reindexing_state.scale_up_matcher_db ? "PROVISIONED" : "PAY_PER_REQUEST"
 }
 
 # Graph table
 locals {
-  graph_table_name = "${local.namespace_hyphen}_works-graph"
+  graph_table_name = "${local.namespace}_works-graph"
 }
 
 resource "aws_dynamodb_table" "matcher_graph_table" {
@@ -94,7 +94,7 @@ data "aws_iam_policy_document" "graph_table_readwrite" {
 # Lock table
 
 locals {
-  lock_table_name = "${local.namespace_hyphen}_matcher-lock-table"
+  lock_table_name = "${local.namespace}_matcher-lock-table"
 }
 
 resource "aws_dynamodb_table" "matcher_lock_table" {

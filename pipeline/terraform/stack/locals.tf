@@ -1,6 +1,5 @@
 locals {
-  namespace        = "catalogue-${var.pipeline_date}"
-  namespace_hyphen = replace(local.namespace, "_", "-")
+  namespace = "catalogue-${var.pipeline_date}"
 
   es_works_source_index       = "works-source-${var.pipeline_date}"
   es_works_merged_index       = "works-merged-${var.pipeline_date}"
@@ -34,7 +33,7 @@ locals {
   #
   # We also want to avoid running more ingestors when not reindexing
   # than when we are!
-  max_capacity = var.is_reindexing ? var.max_capacity : min(1, var.max_capacity)
+  max_capacity = var.reindexing_state.scale_up_tasks ? var.max_capacity : min(1, var.max_capacity)
 
   # If we're reindexing, our services will scale up to max capacity,
   # work through everything on the reindex queues, and then suddenly
@@ -47,8 +46,8 @@ locals {
   # Note: if the scale down adjustment is greater than the number of tasks,
   # ECS will just stop every task.  e.g. if scale_down_adjustment = -5 and
   # there are 3 tasks running, ECS will scale the tasks down to zero.
-  scale_down_adjustment = var.is_reindexing ? -5 : -1
-  scale_up_adjustment   = var.is_reindexing ? 5 : 1
+  scale_down_adjustment = var.reindexing_state.scale_up_tasks ? -5 : -1
+  scale_up_adjustment   = var.reindexing_state.scale_up_tasks ? 5 : 1
 
   services = [
     "ingestor_works",
@@ -71,11 +70,11 @@ locals {
     "transformer_calm",
   ]
 
-  sierra_adapter_topic_arns = var.is_reindexing ? concat(var.adapters["sierra"].topics, [var.adapters["sierra"].reindex_topic]) : var.adapters["sierra"].topics
-  miro_adapter_topic_arns   = var.is_reindexing ? concat(var.adapters["miro"].topics, [var.adapters["miro"].reindex_topic]) : var.adapters["miro"].topics
-  mets_adapter_topic_arns   = var.is_reindexing ? concat(var.adapters["mets"].topics, [var.adapters["mets"].reindex_topic]) : var.adapters["mets"].topics
-  tei_adapter_topic_arns    = var.is_reindexing ? concat(var.adapters["tei"].topics, [var.adapters["tei"].reindex_topic]) : var.adapters["tei"].topics
-  calm_adapter_topic_arns   = var.is_reindexing ? concat(var.adapters["calm"].topics, [var.adapters["calm"].reindex_topic]) : var.adapters["calm"].topics
+  sierra_adapter_topic_arns = var.reindexing_state.connect_reindex_topics ? concat(var.adapters["sierra"].topics, [var.adapters["sierra"].reindex_topic]) : var.adapters["sierra"].topics
+  miro_adapter_topic_arns   = var.reindexing_state.connect_reindex_topics ? concat(var.adapters["miro"].topics, [var.adapters["miro"].reindex_topic]) : var.adapters["miro"].topics
+  mets_adapter_topic_arns   = var.reindexing_state.connect_reindex_topics ? concat(var.adapters["mets"].topics, [var.adapters["mets"].reindex_topic]) : var.adapters["mets"].topics
+  tei_adapter_topic_arns    = var.reindexing_state.connect_reindex_topics ? concat(var.adapters["tei"].topics, [var.adapters["tei"].reindex_topic]) : var.adapters["tei"].topics
+  calm_adapter_topic_arns   = var.reindexing_state.connect_reindex_topics ? concat(var.adapters["calm"].topics, [var.adapters["calm"].reindex_topic]) : var.adapters["calm"].topics
 
   logging_cluster_id = var.logging_cluster_id
 }

@@ -27,7 +27,7 @@ module "ingestor_works" {
 
     es_works_index        = local.es_works_index
     es_denormalised_index = local.es_works_denormalised_index
-    es_is_reindexing      = var.is_reindexing
+    es_is_reindexing      = var.reindexing_state.scale_up_tasks
 
     ingest_flush_interval_seconds = local.ingestor_works_flush_interval_seconds
 
@@ -50,7 +50,7 @@ module "ingestor_works" {
     # To avoid this happening, we reduce the batch size when we're not
     # reindexing.  A smaller batch size is a bit less efficient, but
     # we don't process many messages when not reindexing so this is fine.
-    ingest_batch_size = var.is_reindexing ? 100 : 10
+    ingest_batch_size = var.reindexing_state.scale_up_tasks ? 100 : 10
   }
 
   secret_env_vars = local.pipeline_storage_es_service_secrets["work_ingestor"]

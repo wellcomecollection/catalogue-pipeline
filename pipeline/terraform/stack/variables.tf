@@ -35,9 +35,14 @@ variable "rds_subnet_group_name" {
   type = string
 }
 
-variable "is_reindexing" {
-  type        = bool
-  description = "Are you reindexing through this pipeline right now?"
+variable "reindexing_state" {
+  type = object({
+    connect_reindex_topics   = bool
+    scale_up_tasks           = bool
+    scale_up_elastic_cluster = bool
+    scale_up_id_minter_db    = bool
+    scale_up_matcher_db      = bool
+  })
 }
 
 variable "rds_ids_access_security_group_id" {}
