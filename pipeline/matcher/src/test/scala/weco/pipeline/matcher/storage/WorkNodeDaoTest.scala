@@ -141,7 +141,7 @@ class WorkNodeDaoTest
               id = id,
               subgraphId = SubgraphId(id),
               componentIds = List(id),
-              sourceWork = SourceWorkData(version = 1)
+              sourceWork = SourceWorkData(id = createSourceIdentifier, version = 1)
             )
           }
 

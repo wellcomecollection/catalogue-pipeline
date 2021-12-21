@@ -50,7 +50,7 @@ class WorkMatcherTest
                 id = work.id,
                 subgraphId = SubgraphId(work.id),
                 componentIds = List(work.id),
-                sourceWork = SourceWorkData(version = work.version),
+                sourceWork = SourceWorkData(id = work.state.sourceIdentifier, version = work.version),
               )
             )
           }
@@ -82,7 +82,11 @@ class WorkMatcherTest
                 id = idA,
                 subgraphId = SubgraphId(idA, idB),
                 componentIds = List(idA, idB),
-                sourceWork = SourceWorkData(version = work.version, mergeCandidateIds = List(idB)),
+                sourceWork = SourceWorkData(
+                  id = work.state.sourceIdentifier,
+                  version = work.version,
+                  mergeCandidateIds = List(idB)
+                ),
               ),
               WorkNode(
                 id = idB,
@@ -132,19 +136,22 @@ class WorkMatcherTest
               .toSet
 
             savedNodes shouldBe Set(
-              workA.copy(
-                subgraphId = SubgraphId(idA, idB, idC),
-                componentIds = List(idA, idB, idC),
-              ),
-              workB.copy(
-                subgraphId = SubgraphId(idA, idB, idC),
-                componentIds = List(idA, idB, idC),
-                sourceWork = Some(SourceWorkData(version = 2, mergeCandidateIds = List(idC))),
-              ),
-              workC.copy(
-                subgraphId = SubgraphId(idA, idB, idC),
-                componentIds = List(idA, idB, idC),
-              ),
+              workA
+                .copy(
+                  subgraphId = SubgraphId(idA, idB, idC),
+                  componentIds = List(idA, idB, idC),
+                ),
+              workB
+                .copy(
+                  subgraphId = SubgraphId(idA, idB, idC),
+                  componentIds = List(idA, idB, idC),
+                )
+                .updateSourceWork(version = 2, mergeCandidateIds = Set(idC)),
+              workC
+                .copy(
+                  subgraphId = SubgraphId(idA, idB, idC),
+                  componentIds = List(idA, idB, idC),
+                ),
             )
           }
         }

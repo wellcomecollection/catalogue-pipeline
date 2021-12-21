@@ -1,6 +1,6 @@
 package weco.pipeline.matcher.models
 
-import weco.catalogue.internal_model.identifiers.CanonicalId
+import weco.catalogue.internal_model.identifiers.{CanonicalId, SourceIdentifier}
 
 case class WorkNode(
   id: CanonicalId,
@@ -17,6 +17,7 @@ case object WorkNode {
 }
 
 case class SourceWorkData(
+  id: SourceIdentifier,
   version: Int,
   suppressed: Boolean = false,
   mergeCandidateIds: List[CanonicalId] = List(),

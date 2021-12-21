@@ -21,6 +21,7 @@ object WorkGraphUpdater extends Logging {
         componentIds = List(work.id),
         sourceWork = Some(
           SourceWorkData(
+            id = work.state.sourceIdentifier,
             version = work.version,
             suppressed = work.suppressed,
             mergeCandidateIds = work.mergeCandidateIds.toList.sorted
@@ -37,14 +38,14 @@ object WorkGraphUpdater extends Logging {
     work: WorkStub,
     affectedWorks: Map[CanonicalId, WorkNode]): Unit =
     affectedWorks.get(work.id).flatMap(_.sourceWork) match {
-      case Some(SourceWorkData(existingVersion, _, _))
+      case Some(SourceWorkData(_, existingVersion, _, _))
           if existingVersion > work.version =>
         val versionConflictMessage =
           s"update failed, work:${work.id} v${work.version} is not newer than existing work v$existingVersion"
         debug(versionConflictMessage)
         throw VersionExpectedConflictException(versionConflictMessage)
 
-      case Some(SourceWorkData(existingVersion, _, existingMergeCandidateIds))
+      case Some(SourceWorkData(_, existingVersion, _, existingMergeCandidateIds))
           if existingVersion == work.version && work.mergeCandidateIds != existingMergeCandidateIds.toSet =>
         val versionConflictMessage =
           s"update failed, work:${work.id} v${work.version} already exists with different content! update-ids:${work.mergeCandidateIds} != existing-ids:${existingMergeCandidateIds.toSet}"

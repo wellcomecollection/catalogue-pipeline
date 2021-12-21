@@ -84,7 +84,10 @@ class MatcherFeatureTest
               id = workV1.id,
               subgraphId = SubgraphId(workV1.id),
               componentIds = List(workV1.id),
-              sourceWork = SourceWorkData(version = existingWorkVersion),
+              sourceWork = SourceWorkData(
+                id = workV1.state.sourceIdentifier,
+                version = existingWorkVersion
+              ),
             )
 
             putTableItem[WorkNode](nodeV2, table = graphTable)
