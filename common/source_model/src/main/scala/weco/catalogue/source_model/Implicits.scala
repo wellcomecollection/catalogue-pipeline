@@ -1,7 +1,10 @@
 package weco.catalogue.source_model
 
 import io.circe.{Decoder, Encoder}
-import io.circe.generic.extras.semiauto.{deriveConfiguredDecoder, deriveConfiguredEncoder}
+import io.circe.generic.extras.semiauto.{
+  deriveConfiguredDecoder,
+  deriveConfiguredEncoder
+}
 import weco.catalogue.source_model.calm.CalmRecord
 import weco.catalogue.source_model.sierra._
 import weco.catalogue.source_model.tei._
@@ -16,9 +19,11 @@ object Implicits {
   implicit val _encCalmSourcePayload: Encoder[CalmSourcePayload] =
     deriveConfiguredEncoder
 
-  implicit val _decMiroInventorySourcePayload: Decoder[MiroInventorySourcePayload] =
+  implicit val _decMiroInventorySourcePayload
+    : Decoder[MiroInventorySourcePayload] =
     deriveConfiguredDecoder
-  implicit val _encMiroInventorySourcePayload: Encoder[MiroInventorySourcePayload] =
+  implicit val _encMiroInventorySourcePayload
+    : Encoder[MiroInventorySourcePayload] =
     deriveConfiguredEncoder
 
   implicit val _decMiroSourcePayload: Decoder[MiroSourcePayload] =
