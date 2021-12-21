@@ -6,7 +6,7 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
 import weco.pipeline.matcher.fixtures.MatcherFixtures
-import weco.pipeline.matcher.generators.WorkStubGenerators
+import weco.pipeline.matcher.generators.WorkNodeGenerators
 import weco.pipeline.matcher.models.{ComponentId, WorkNode}
 import weco.pipeline.matcher.workgraph.WorkGraphUpdater
 
@@ -17,17 +17,14 @@ class WorkGraphStoreTest
     with Matchers
     with ScalaFutures
     with MatcherFixtures
-    with WorkStubGenerators {
+    with WorkNodeGenerators {
 
-  describe("Get graph of linked works") {
+  describe("findAffectedWorks") {
     it("returns nothing if there are no matching graphs") {
       withWorkGraphTable { graphTable =>
         withWorkGraphStore(graphTable) { workGraphStore =>
-          val future = workGraphStore.findAffectedWorks(
-            createWorkWith(
-              id = createCanonicalId,
-              version = 0,
-              referencedWorkIds = Set.empty))
+          val future =
+            workGraphStore.findAffectedWorks(ids = Set(createCanonicalId))
 
           whenReady(future) {
             _ shouldBe empty
@@ -36,21 +33,14 @@ class WorkGraphStoreTest
       }
     }
 
-    it(
-      "returns a WorkNode if it has no links and it's the only node in the setId") {
+    it("finds a work if it's the only one affected") {
       withWorkGraphTable { graphTable =>
         withWorkGraphStore(graphTable) { workGraphStore =>
-          val work =
-            WorkNode(
-              id = idA,
-              version = 0,
-              linkedIds = Nil,
-              componentId = ComponentId(idA))
+          val work = createOneWork("A")
 
           putTableItem(work, table = graphTable)
 
-          val future =
-            workGraphStore.findAffectedWorks(createWorkWith(idA, 0, Set.empty))
+          val future = workGraphStore.findAffectedWorks(ids = Set(work.id))
 
           whenReady(future) {
             _ shouldBe Set(work)
@@ -59,26 +49,14 @@ class WorkGraphStoreTest
       }
     }
 
-    it("returns a WorkNode and the links in the workUpdate") {
+    it("finds a work and the work that it links to") {
       withWorkGraphTable { graphTable =>
         withWorkGraphStore(graphTable) { workGraphStore =>
-          val workA =
-            WorkNode(
-              id = idA,
-              version = 0,
-              linkedIds = Nil,
-              componentId = ComponentId(idA))
-          val workB =
-            WorkNode(
-              id = idB,
-              version = 0,
-              linkedIds = Nil,
-              componentId = ComponentId(idB))
+          val (workA, workB) = createTwoWorks("A->B")
 
           putTableItems(items = Seq(workA, workB), table = graphTable)
 
-          val future =
-            workGraphStore.findAffectedWorks(createWorkWith(idA, 0, Set(idB)))
+          val future = workGraphStore.findAffectedWorks(ids = Set(workA.id))
 
           whenReady(future) {
             _ shouldBe Set(workA, workB)
@@ -87,99 +65,23 @@ class WorkGraphStoreTest
       }
     }
 
-    it("returns a WorkNode and the links in the database") {
+    it("finds all the affected works, from anywhere in the component") {
       withWorkGraphTable { graphTable =>
         withWorkGraphStore(graphTable) { workGraphStore =>
-          val workA =
-            WorkNode(
-              id = idA,
-              version = 0,
-              linkedIds = List(idB),
-              componentId = ComponentId(idA, idB))
-          val workB =
-            WorkNode(
-              id = idB,
-              version = 0,
-              linkedIds = Nil,
-              componentId = ComponentId(idA, idB))
-
-          putTableItems(items = Seq(workA, workB), table = graphTable)
-
-          val future =
-            workGraphStore.findAffectedWorks(
-              createWorkWith(idA, version = 0, referencedWorkIds = Set.empty))
-
-          whenReady(future) {
-            _ shouldBe Set(workA, workB)
-          }
-        }
-      }
-    }
-
-    it(
-      "returns a WorkNode and the links in the database more than one level down") {
-      withWorkGraphTable { graphTable =>
-        withWorkGraphStore(graphTable) { workGraphStore =>
-          val workA =
-            WorkNode(
-              id = idA,
-              version = 0,
-              linkedIds = List(idB),
-              componentId = ComponentId(idA, idB, idC))
-          val workB =
-            WorkNode(
-              id = idB,
-              version = 0,
-              linkedIds = List(idC),
-              componentId = ComponentId(idA, idB, idC))
-          val workC = WorkNode(
-            id = idC,
-            version = 0,
-            linkedIds = Nil,
-            componentId = ComponentId(idA, idB, idC))
+          val (workA, workB, workC) = createThreeWorks("A->B->C")
 
           putTableItems(items = Seq(workA, workB, workC), table = graphTable)
 
-          val future =
-            workGraphStore.findAffectedWorks(createWorkWith(idA, 0, Set.empty))
+          val works = Set(workA, workB, workC)
 
-          whenReady(future) {
-            _ shouldBe Set(workA, workB, workC)
-          }
-        }
-      }
-    }
+          works.foreach { w =>
+            println(s"Finding affected works for ${w.id}")
 
-    it(
-      "returns a WorkNode and the links in the database where an update joins two sets of works") {
-      withWorkGraphTable { graphTable =>
-        withWorkGraphStore(graphTable) { workGraphStore =>
-          val workA =
-            WorkNode(
-              id = idA,
-              version = 0,
-              linkedIds = List(idB),
-              componentId = ComponentId(idA, idB))
-          val workB =
-            WorkNode(
-              id = idB,
-              version = 0,
-              linkedIds = Nil,
-              componentId = ComponentId(idA, idB))
-          val workC =
-            WorkNode(
-              id = idC,
-              version = 0,
-              linkedIds = Nil,
-              componentId = ComponentId(idC))
+            val future = workGraphStore.findAffectedWorks(ids = Set(w.id))
 
-          putTableItems(items = Seq(workA, workB, workC), table = graphTable)
-
-          val work =
-            createWorkWith(idB, version = 0, referencedWorkIds = Set(idC))
-
-          whenReady(workGraphStore.findAffectedWorks(work)) {
-            _ shouldBe Set(workA, workB, workC)
+            whenReady(future) {
+              _ shouldBe works
+            }
           }
         }
       }
@@ -204,75 +106,70 @@ class WorkGraphStoreTest
           Await.ready(workGraphStore.put(nodesC), atMost = 1 second)
 
           // Then store B
-          whenReady(workGraphStore.findAffectedWorks(workB)) { affectedNodes =>
-            val updatedNodes = WorkGraphUpdater.update(workB, affectedNodes)
-            Await.ready(workGraphStore.put(updatedNodes), atMost = 1 second)
+          whenReady(workGraphStore.findAffectedWorks(ids = workB.ids)) {
+            affectedNodes =>
+              val updatedNodes = WorkGraphUpdater.update(workB, affectedNodes)
+              Await.ready(workGraphStore.put(updatedNodes), atMost = 1 second)
           }
 
           // Then store A
-          whenReady(workGraphStore.findAffectedWorks(workA)) { affectedNodes =>
-            val updatedNodes = WorkGraphUpdater.update(workA, affectedNodes)
-            Await.ready(workGraphStore.put(updatedNodes), atMost = 1 second)
+          whenReady(workGraphStore.findAffectedWorks(ids = workA.ids)) {
+            affectedNodes =>
+              val updatedNodes = WorkGraphUpdater.update(workA, affectedNodes)
+              Await.ready(workGraphStore.put(updatedNodes), atMost = 1 second)
           }
 
           getExistingTableItem[WorkNode](id = idC.underlying, graphTable).suppressed shouldBe true
 
-          whenReady(workGraphStore.findAffectedWorks(workA)) { affectedNodes =>
-            affectedNodes.map(_.id) should contain(workC.id)
+          whenReady(workGraphStore.findAffectedWorks(ids = workA.ids)) {
+            affectedNodes =>
+              affectedNodes.map(_.id) should contain(workC.id)
           }
         }
       }
     }
   }
 
-  describe("Put graph of linked works") {
+  describe("put") {
     it("puts a simple graph") {
       withWorkGraphTable { graphTable =>
         withWorkGraphStore(graphTable) { workGraphStore =>
-          val workNodeA = WorkNode(
-            idA,
-            version = 0,
-            linkedIds = List(idB),
-            componentId = ComponentId(idA, idB))
-          val workNodeB = WorkNode(
-            idB,
-            version = 0,
-            linkedIds = Nil,
-            componentId = ComponentId(idA, idB))
+          val (workA, workB) = createTwoWorks("A->B")
+          val works = Set(workA, workB)
 
-          whenReady(workGraphStore.put(Set(workNodeA, workNodeB))) { _ =>
+          val future = workGraphStore.put(works)
+
+          whenReady(future) { _ =>
             val savedWorks = scanTable[WorkNode](graphTable)
               .map(_.right.get)
-            savedWorks should contain theSameElementsAs List(
-              workNodeA,
-              workNodeB)
+            savedWorks should contain theSameElementsAs works
           }
         }
       }
     }
-  }
 
-  it("throws a RuntimeException if workGraphStore fails to put") {
-    val expectedException = new RuntimeException("FAILED")
+    it("throws a RuntimeException if workGraphStore fails to put") {
+      val expectedException = new RuntimeException("FAILED")
 
-    val brokenWorkNodeDao = new WorkNodeDao(
-      dynamoClient,
-      dynamoConfig = createDynamoConfigWith(nonExistentTable)
-    ) {
-      override def put(nodes: Set[WorkNode]): Future[Unit] =
-        Future.failed(expectedException)
-    }
+      val brokenWorkNodeDao = new WorkNodeDao(
+        dynamoClient,
+        dynamoConfig = createDynamoConfigWith(nonExistentTable)
+      ) {
+        override def put(nodes: Set[WorkNode]): Future[Unit] =
+          Future.failed(expectedException)
+      }
 
-    val workGraphStore = new WorkGraphStore(brokenWorkNodeDao)
+      val workGraphStore = new WorkGraphStore(brokenWorkNodeDao)
 
-    val workNode = WorkNode(
-      idA,
-      version = 0,
-      linkedIds = Nil,
-      componentId = ComponentId(idA, idB))
+      val workNode = WorkNode(
+        idA,
+        version = 0,
+        linkedIds = Nil,
+        componentId = ComponentId(idA, idB))
 
-    whenReady(workGraphStore.put(Set(workNode)).failed) {
-      _ shouldBe expectedException
+      whenReady(workGraphStore.put(Set(workNode)).failed) {
+        _ shouldBe expectedException
+      }
     }
   }
 }
