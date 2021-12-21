@@ -31,7 +31,7 @@ class WorkMatcherConcurrencyTest
 
         val workA = createWorkWith(
           id = idA,
-          referencedWorkIds = Set(idB)
+          mergeCandidateIds = Set(idB)
         )
 
         val workB = createWorkWith(id = idB)

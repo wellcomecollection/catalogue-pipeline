@@ -70,7 +70,7 @@ class ElasticWorkStubRetrieverTest
       new ElasticWorkStubRetriever(elasticClient, index)
     )
 
-  override def createT: WorkStub = createWorkStub
+  override def createT: WorkStub = createWorkWith(id = createCanonicalId)
 
   override implicit val id: IndexId[WorkStub] =
     (work: WorkStub) => work.id.underlying

@@ -1,28 +1,33 @@
 package weco.pipeline.matcher.models
 
-import weco.catalogue.internal_model.identifiers.CanonicalId
+import weco.catalogue.internal_model.identifiers.{CanonicalId, SourceIdentifier}
 
 case class WorkNode(
   id: CanonicalId,
-  version: Option[Int],
-  linkedIds: List[CanonicalId],
-  componentId: String,
-  // Records whether this work is suppressed in a source system -- if so,
-  // we shouldn't be using it to construct matcher graphs.
-  suppressed: Boolean = false
-)
+  subgraphId: String,
+  componentIds: List[CanonicalId],
+  sourceWork: Option[SourceWorkData] = None,
+) {
+  require(componentIds.sorted == componentIds)
+}
 
-object WorkNode {
+case object WorkNode {
   def apply(id: CanonicalId,
-            version: Int,
-            linkedIds: List[CanonicalId],
-            componentId: String): WorkNode =
-    WorkNode(id, Some(version), linkedIds, componentId)
+            subgraphId: String,
+            componentIds: List[CanonicalId],
+            sourceWork: SourceWorkData): WorkNode =
+    WorkNode(
+      id = id,
+      subgraphId = subgraphId,
+      componentIds = componentIds,
+      sourceWork = Some(sourceWork))
+}
 
-  def apply(id: CanonicalId,
-            version: Int,
-            linkedIds: List[CanonicalId],
-            componentId: String,
-            suppressed: Boolean): WorkNode =
-    WorkNode(id, Some(version), linkedIds, componentId, suppressed)
+case class SourceWorkData(
+  id: SourceIdentifier,
+  version: Int,
+  suppressed: Boolean = false,
+  mergeCandidateIds: List[CanonicalId] = List(),
+) {
+  require(mergeCandidateIds.sorted == mergeCandidateIds)
 }

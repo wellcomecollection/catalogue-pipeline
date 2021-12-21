@@ -3,6 +3,7 @@ package weco.pipeline.matcher
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import org.scanamo.generic.auto._
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.index.IndexFixtures
 import weco.catalogue.internal_model.work.DeletedReason.SuppressedFromSource
@@ -22,6 +23,7 @@ import weco.pipeline_storage.Retriever
 import weco.pipeline_storage.memory.MemoryRetriever
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.language.higherKinds
 
 class MatcherFeatureTest
     extends AnyFunSpec
@@ -42,7 +44,7 @@ class MatcherFeatureTest
 
     withLocalSqsQueue() { queue =>
       withMatcherService(retriever, queue, messageSender) { _ =>
-        val work = createWorkWith(referencedWorkIds = Set.empty)
+        val work = createWorkWith(mergeCandidateIds = Set.empty)
 
         val expectedWorks =
           Set(
@@ -80,12 +82,15 @@ class MatcherFeatureTest
 
             val nodeV2 = WorkNode(
               id = workV1.id,
-              version = Some(existingWorkVersion),
-              linkedIds = Nil,
-              componentId = ComponentId(workV1.id)
+              subgraphId = SubgraphId(workV1.id),
+              componentIds = List(workV1.id),
+              sourceWork = SourceWorkData(
+                id = workV1.state.sourceIdentifier,
+                version = existingWorkVersion
+              ),
             )
 
-            putTableItem(nodeV2, table = graphTable)
+            putTableItem[WorkNode](nodeV2, table = graphTable)
 
             sendWork(workV1, retriever, queue)
 

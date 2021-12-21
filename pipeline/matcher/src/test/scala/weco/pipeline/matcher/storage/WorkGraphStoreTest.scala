@@ -1,16 +1,18 @@
 package weco.pipeline.matcher.storage
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{Await, Future}
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
+import org.scanamo.generic.auto._
 import weco.pipeline.matcher.fixtures.MatcherFixtures
 import weco.pipeline.matcher.generators.WorkNodeGenerators
-import weco.pipeline.matcher.models.{ComponentId, WorkNode}
+import weco.pipeline.matcher.models.WorkNode
 import weco.pipeline.matcher.workgraph.WorkGraphUpdater
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
+import scala.concurrent.{Await, Future}
+import scala.language.higherKinds
 
 class WorkGraphStoreTest
     extends AnyFunSpec
@@ -95,14 +97,14 @@ class WorkGraphStoreTest
       // but C is suppressed.  We want to make sure updating A still allows
       // us to retrieve C.
       val workC = createWorkWith(id = idC, workType = "Deleted")
-      val workB = createWorkWith(id = idB, referencedWorkIds = Set(workC.id))
-      val workA = createWorkWith(id = idA, referencedWorkIds = Set(workB.id))
+      val workB = createWorkWith(id = idB, mergeCandidateIds = Set(workC.id))
+      val workA = createWorkWith(id = idA, mergeCandidateIds = Set(workB.id))
 
       withWorkGraphTable { graphTable =>
         withWorkGraphStore(graphTable) { workGraphStore =>
           // First store C in the table
           val nodesC = WorkGraphUpdater.update(workC, affectedNodes = Set())
-          nodesC.head.suppressed shouldBe true
+          nodesC.head.sourceWork.get.suppressed shouldBe true
           Await.ready(workGraphStore.put(nodesC), atMost = 1 second)
 
           // Then store B
@@ -119,7 +121,7 @@ class WorkGraphStoreTest
               Await.ready(workGraphStore.put(updatedNodes), atMost = 1 second)
           }
 
-          getExistingTableItem[WorkNode](id = idC.underlying, graphTable).suppressed shouldBe true
+          getExistingTableItem[WorkNode](id = idC.underlying, graphTable).sourceWork.get.suppressed shouldBe true
 
           whenReady(workGraphStore.findAffectedWorks(ids = workA.ids)) {
             affectedNodes =>
@@ -161,11 +163,7 @@ class WorkGraphStoreTest
 
       val workGraphStore = new WorkGraphStore(brokenWorkNodeDao)
 
-      val workNode = WorkNode(
-        idA,
-        version = 0,
-        linkedIds = Nil,
-        componentId = ComponentId(idA, idB))
+      val workNode = createOneWork("A")
 
       whenReady(workGraphStore.put(Set(workNode)).failed) {
         _ shouldBe expectedException

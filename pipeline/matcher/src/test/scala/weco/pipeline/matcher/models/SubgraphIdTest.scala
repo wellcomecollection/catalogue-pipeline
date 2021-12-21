@@ -4,19 +4,19 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.pipeline.matcher.generators.WorkStubGenerators
 
-class ComponentIdTest extends AnyFunSpec with Matchers with WorkStubGenerators {
+class SubgraphIdTest extends AnyFunSpec with Matchers with WorkStubGenerators {
   it("creates a different component ID when the IDs change") {
-    ComponentId(idA) should not be ComponentId(idA, idB)
+    SubgraphId(idA) should not be SubgraphId(idA, idB)
   }
 
   it("gives the same component ID regardless of ordering") {
     val orderings = Set(
-      ComponentId(idA, idB, idC),
-      ComponentId(idA, idC, idB),
-      ComponentId(idB, idA, idC),
-      ComponentId(idB, idC, idA),
-      ComponentId(idC, idA, idB),
-      ComponentId(idC, idB, idA),
+      SubgraphId(idA, idB, idC),
+      SubgraphId(idA, idC, idB),
+      SubgraphId(idB, idA, idC),
+      SubgraphId(idB, idC, idA),
+      SubgraphId(idC, idA, idB),
+      SubgraphId(idC, idB, idA),
     )
 
     orderings should have size 1

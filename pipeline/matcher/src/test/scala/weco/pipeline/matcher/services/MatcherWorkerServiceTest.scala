@@ -55,7 +55,7 @@ class MatcherWorkerServiceTest
     val workAv1 = createWorkWith(
       id = idA,
       version = 1,
-      referencedWorkIds = Set(idB)
+      mergeCandidateIds = Set(idB)
     )
 
     // Work Av1 matched to B (before B exists hence version is None)
@@ -112,7 +112,7 @@ class MatcherWorkerServiceTest
     val workAv2 = createWorkWith(
       id = idA,
       version = 2,
-      referencedWorkIds = Set(idB)
+      mergeCandidateIds = Set(idB)
     )
 
     val expectedWorksAv2 =
@@ -142,7 +142,7 @@ class MatcherWorkerServiceTest
     val workBv2 = createWorkWith(
       id = idB,
       version = 2,
-      referencedWorkIds = Set(idC)
+      mergeCandidateIds = Set(idC)
     )
 
     val expectedWorksBv2 =
@@ -203,7 +203,7 @@ class MatcherWorkerServiceTest
       createWorkWith(
         id = idA,
         version = 2,
-        referencedWorkIds = Set(idB)
+        mergeCandidateIds = Set(idB)
       )
 
     val expectedWorksAv2MatchedToB =
@@ -325,7 +325,7 @@ class MatcherWorkerServiceTest
             createWorkWith(
               id = idA,
               version = 2,
-              referencedWorkIds = Set(idB)
+              mergeCandidateIds = Set(idB)
             )
 
           sendWork(differentWorkAv2, retriever, queue)
