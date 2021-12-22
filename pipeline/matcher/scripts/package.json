@@ -10,6 +10,7 @@
     "@types/yargs": "^17.0.5",
     "@weco/ts-aws": "^0.1.0",
     "node-fetch": "2",
+    "ts-graphviz": "^0.16.0",
     "ts-node": "^10.4.0",
     "typescript": "^4.4.4"
   },

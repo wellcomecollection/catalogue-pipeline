@@ -1,8 +1,12 @@
+import { writeFileSync } from 'fs';
 import fetch from 'node-fetch';
-import { DynamoDBClient, QueryCommand } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocument, GetCommand, QueryCommandInput } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { DynamoDBDocument, QueryCommandInput } from '@aws-sdk/lib-dynamodb';
 import { getCreds } from '@weco/ts-aws/sts';
-import { string } from 'yargs';
+import { digraph, INode, RootCluster, toDot } from 'ts-graphviz';
+import { exec } from 'child_process';
+import { SourceWork } from './models';
+import { getAttributes } from './graphAttributes';
 
 type UserInput = {
   canonicalId: string;
@@ -14,17 +18,6 @@ type ElasticConfig = {
   imagesIndex: string;
 }
 
-type SourceIdentifier = {
-  identifierType: string;
-  value: string;
-}
-
-type SourceWork = {
-  canonicalId: string;
-  mergeCandidateIds: string[];
-  suppressed: boolean;
-  sourceIdentifier: SourceIdentifier;
-}
 
 async function getInput(): Promise<UserInput> {
   let id: string;
@@ -35,7 +28,7 @@ async function getInput(): Promise<UserInput> {
     id = process.argv[2];
   }
 
-  const resp = await fetch('https://api.wellcomecollection.org/catalogue/v2/_elasticConfig').then();
+  const resp = await fetch('https://api.wellcomecollection.org/catalogue/v2/_elasticConfig');
 
   if (resp.status !== 200) {
     throw Error('Could not fetch ElasticConfig from API');
@@ -118,6 +111,31 @@ async function getRelevantWorks(client: DynamoDBDocument, input: UserInput): Pro
   });
 }
 
+async function createGraph(keyWorkId: string, works: SourceWork[]): Promise<RootCluster> {
+  const g = digraph('G');
+
+  const nodes: Record<string, INode> = {};
+
+  await Promise.all(works.map(async (w: SourceWork) => {
+    let attributes = await getAttributes(w);
+
+    const newNode = g.createNode(w.canonicalId, attributes);
+
+    nodes[w.canonicalId] = newNode;
+  }));
+
+  console.log(nodes);
+
+  return g;
+}
+
+// Takes the in-memory graph, renders it as a PDF and returns the filename.
+function createPdf(canonicalId: string, g: RootCluster): string {
+  writeFileSync(`${canonicalId}.dot`, toDot(g));
+  exec(`dot -Tpdf ${canonicalId}.dot -o ${canonicalId}.pdf`)
+  return `${canonicalId}.pdf`;
+}
+
 export default async function getGraph(): Promise<void> {
   const input = await getInput();
 
@@ -129,7 +147,12 @@ export default async function getGraph(): Promise<void> {
   const documentClient = DynamoDBDocument.from(dynamoDbClient);
 
   const works = await getRelevantWorks(documentClient, input);
-  console.log(works);
+
+  const g = await createGraph(input.canonicalId, works);
+  
+  const filename = createPdf(input.canonicalId, g);
+
+  console.log(filename);
 }
 
 getGraph()
