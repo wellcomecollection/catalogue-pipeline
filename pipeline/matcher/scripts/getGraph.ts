@@ -96,6 +96,7 @@ async function getRelevantWorks(client: DynamoDBDocument, input: UserInput): Pro
       canonicalId: item.id,
       mergeCandidateIds: item.sourceWork.mergeCandidateIds,
       suppressed: item.sourceWork.suppressed,
+      componentIds: item.componentIds,
       sourceIdentifier: {
         value: item.sourceWork.id.value,
 
@@ -111,20 +112,47 @@ async function getRelevantWorks(client: DynamoDBDocument, input: UserInput): Pro
   });
 }
 
-async function createGraph(keyWorkId: string, works: SourceWork[]): Promise<RootCluster> {
-  const g = digraph('G');
+async function createGraph(works: SourceWork[]): Promise<RootCluster> {
+  const g = digraph('G',
+    
+    // This tells Graphviz to lay out the nodes left-to-right, because we tend
+    // to have monitors that are wider than tall, so it's easier to lay things
+    // out this way.
+    // See https://graphviz.org/docs/attrs/rankdir/
+    { rankdir: 'LR' },
+  );
 
-  const nodes: Record<string, INode> = {};
-
+  // Create all the nodes
+  const nodes: Map<string, INode> = new Map();
   await Promise.all(works.map(async (w: SourceWork) => {
     let attributes = await getAttributes(w);
 
     const newNode = g.createNode(w.canonicalId, attributes);
 
-    nodes[w.canonicalId] = newNode;
+    nodes.set(w.canonicalId, newNode);
   }));
 
-  console.log(nodes);
+  // Add all the edges
+  works.map((w: SourceWork) => {
+    w.mergeCandidateIds.forEach((target: string) => {
+      
+      // Make sure this node is in the graph.  If it's not in the graph, it means
+      // this Work has a merge candidate that points to a Work the matcher hasn't
+      // seen.  Show it on the graph, but make it clear we don't know what it is.
+      if (!nodes.has(target)) {
+        nodes.set(target, g.createNode(target, { style: 'dotted' }));
+      }
+
+      // If A->B but they're in different components, it means one or both of them
+      // is suppressed.  Include the edge, but make it clear it's not used.
+      let attributes = {};
+      if (!w.componentIds.includes(target)) {
+        attributes['style'] = 'dotted';
+      }
+
+      g.createEdge([nodes.get(w.canonicalId), nodes.get(target)], attributes);
+    });
+  });
 
   return g;
 }
@@ -148,11 +176,12 @@ export default async function getGraph(): Promise<void> {
 
   const works = await getRelevantWorks(documentClient, input);
 
-  const g = await createGraph(input.canonicalId, works);
+  const g = await createGraph(works);
   
   const filename = createPdf(input.canonicalId, g);
 
   console.log(filename);
+  exec(`open ${filename}`);
 }
 
 getGraph()

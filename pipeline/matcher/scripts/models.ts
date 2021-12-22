@@ -6,6 +6,7 @@ export type SourceIdentifier = {
 export type SourceWork = {
   canonicalId: string;
   mergeCandidateIds: string[];
+  componentIds: string[];
   suppressed: boolean;
   sourceIdentifier: SourceIdentifier;
 }

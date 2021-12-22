@@ -67,9 +67,13 @@ async function getMetsThumbnail(bnumber: string): Promise<string | undefined> {
   return json.results.map(w => w.thumbnail?.url )?.[0];
 }
 
-export async function getAttributes(w: SourceWork): Promise<Record<string, string>> {
+async function getLabelAttributes(w: SourceWork): Promise<Record<string, string>> {
   if (w.sourceIdentifier.identifierType == 'SierraSystemNumber') {
     return {label: `Sierra\n${w.sourceIdentifier.value}`};
+  }
+
+  if (w.sourceIdentifier.identifierType == 'CalmRecordIdentifier') {
+    return {label: `CALM\n${w.sourceIdentifier.value}`}
   }
   
   if (w.sourceIdentifier.identifierType == 'MiroImageNumber') {
@@ -90,3 +94,15 @@ export async function getAttributes(w: SourceWork): Promise<Record<string, strin
   
   return {label: `${w.sourceIdentifier.identifierType}\n${w.sourceIdentifier.value}`}
 }
+
+export async function getAttributes(w: SourceWork): Promise<Record<string, string>> {
+  const labelAttributes = await getLabelAttributes(w);
+
+  const styleAttributes = w.suppressed ? {style: 'dashed'} : {};
+
+  return {
+    ...labelAttributes,
+    ...styleAttributes,
+  };
+}
+
