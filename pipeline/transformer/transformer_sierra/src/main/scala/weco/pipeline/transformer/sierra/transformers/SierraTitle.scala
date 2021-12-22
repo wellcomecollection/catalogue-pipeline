@@ -30,7 +30,6 @@ object SierraTitle extends SierraDataTransformer with SierraQueryOps {
           "Could not find field 245 to create title")
       )
 
-
     val selectedSubfields =
       marc245Field.subfields
         .filter { sf =>

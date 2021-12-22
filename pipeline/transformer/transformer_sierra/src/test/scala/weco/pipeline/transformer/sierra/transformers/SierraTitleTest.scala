@@ -70,7 +70,9 @@ class SierraTitleTest
     // This example is based on Sierra bib b29048758
     (
       List(
-        Subfield(tag = "a", content = "Nordic Journal of International Law, The"),
+        Subfield(
+          tag = "a",
+          content = "Nordic Journal of International Law, The"),
         Subfield(tag = "h", content = "[electronic resource]."),
       ),
       "Nordic Journal of International Law, The"
