@@ -67,6 +67,14 @@ class SierraTitleTest
       ),
       "Ethics & medicine : a Christian perspective on issues in bioethics."
     ),
+    // This example is based on Sierra bib b29048758
+    (
+      List(
+        Subfield(tag = "a", content = "Nordic Journal of International Law, The"),
+        Subfield(tag = "h", content = "[electronic resource]."),
+      ),
+      "Nordic Journal of International Law, The"
+    ),
   )
 
   it("constructs a title from MARC 245") {
