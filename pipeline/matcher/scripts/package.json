@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "getGraph": "ts-node getGraph"
+    "getMatcherGraph": "ts-node getMatcherGraph"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.44.0",
