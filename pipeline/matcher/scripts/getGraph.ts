@@ -1,4 +1,4 @@
-import { writeFileSync } from 'fs';
+import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import fetch from 'node-fetch';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocument, QueryCommandInput } from '@aws-sdk/lib-dynamodb';
@@ -159,9 +159,13 @@ async function createGraph(works: SourceWork[]): Promise<RootCluster> {
 
 // Takes the in-memory graph, renders it as a PDF and returns the filename.
 function createPdf(canonicalId: string, g: RootCluster): string {
-  writeFileSync(`${canonicalId}.dot`, toDot(g));
-  exec(`dot -Tpdf ${canonicalId}.dot -o ${canonicalId}.pdf`)
-  return `${canonicalId}.pdf`;
+  if (!existsSync('_graphs')) {
+    mkdirSync('_graphs');
+  }
+
+  writeFileSync(`_graphs/${canonicalId}.dot`, toDot(g));
+  exec(`dot -Tpdf _graphs/${canonicalId}.dot -o _graphs/${canonicalId}.pdf`)
+  return `_graphs/${canonicalId}.pdf`;
 }
 
 export default async function getGraph(): Promise<void> {
