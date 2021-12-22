@@ -1,4 +1,8 @@
 import fetch from 'node-fetch';
+import { DynamoDBClient, QueryCommand } from '@aws-sdk/client-dynamodb';
+import { DynamoDBDocument, GetCommand, QueryCommandInput } from '@aws-sdk/lib-dynamodb';
+import { getCreds } from '@weco/ts-aws/sts';
+import { string } from 'yargs';
 
 type UserInput = {
   canonicalId: string;
@@ -8,6 +12,18 @@ type UserInput = {
 type ElasticConfig = {
   worksIndex: string;
   imagesIndex: string;
+}
+
+type SourceIdentifier = {
+  identifierType: string;
+  value: string;
+}
+
+type SourceWork = {
+  canonicalId: string;
+  mergeCandidateIds: string[];
+  suppressed: boolean;
+  sourceIdentifier: SourceIdentifier;
 }
 
 async function getInput(): Promise<UserInput> {
@@ -34,9 +50,86 @@ async function getInput(): Promise<UserInput> {
   };
 }
 
+async function queryAllMatchingItems(client: DynamoDBDocument, query: QueryCommandInput): Promise<Array<Record<string, any>>> {
+  let allItems = [];
+
+  while (true) {
+    const result = await client.query(query);
+
+    if (!result.Items || result.Items.length == 0) {
+      break;
+    }
+
+    if (result.Items && result.Items.length > 0) {
+      allItems = [...allItems, ...result.Items]    
+    }
+
+    if (typeof result.LastEvaluatedKey === 'undefined') {
+      break;
+    }
+
+    query.ExclusiveStartKey = result.LastEvaluatedKey;
+  }
+
+  return allItems
+}
+
+async function getRelevantWorks(client: DynamoDBDocument, input: UserInput): Promise<SourceWork[]> {
+  const tableName = `catalogue-${input.pipelineDate}_works-graph`;
+
+  const output = await client.get({
+    TableName: tableName,
+    Key: { id: input.canonicalId }
+  });
+
+  if (typeof output.Item === 'undefined') {
+    throw new Error(`Could not find a matched work with ID ${input.canonicalId}`);
+  }
+
+  const subgraphId = output.Item!.subgraphId;
+
+  const query: QueryCommandInput = {
+    TableName: tableName,
+    IndexName: 'work-sets-index',
+    KeyConditionExpression: '#subgraphId = :subgraphId',
+    ExpressionAttributeNames: {'#subgraphId': 'subgraphId'},
+    ExpressionAttributeValues: {':subgraphId': subgraphId},
+  };
+
+  const worksInSubgraph: Array<Record<string, any>> = await queryAllMatchingItems(client, query);
+
+  return worksInSubgraph.map((item: Record<string, any>) => {
+    return {
+      canonicalId: item.id,
+      mergeCandidateIds: item.sourceWork.mergeCandidateIds,
+      suppressed: item.sourceWork.suppressed,
+      sourceIdentifier: {
+        value: item.sourceWork.id.value,
+
+        // This is an artefact of a slightly weird format in DynamoDB,
+        // where the identifierType is recorded as e.g.
+        //
+        //    {"identifierType": {"METS": "METS"}, ...}
+        //
+        // We might simplify this at some point.
+        identifierType: Object.keys(item.sourceWork.id.identifierType)[0],
+      }
+    };
+  });
+}
+
 export default async function getGraph(): Promise<void> {
   const input = await getInput();
-  console.log(input);
+
+  const credentials = await getCreds('platform', 'read_only');
+  const dynamoDbClient = new DynamoDBClient({
+    credentials,
+    region: 'eu-west-1'
+  });
+  const documentClient = DynamoDBDocument.from(dynamoDbClient);
+
+  const works = await getRelevantWorks(documentClient, input);
+  console.log(works);
 }
 
 getGraph()
