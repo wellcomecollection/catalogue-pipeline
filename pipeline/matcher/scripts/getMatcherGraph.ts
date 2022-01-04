@@ -139,7 +139,7 @@ async function createGraph(works: SourceWork[]): Promise<RootCluster> {
   );
 
   // Add all the edges
-  works.map((w: SourceWork) => {
+  works.forEach((w: SourceWork) => {
     w.mergeCandidateIds.forEach((target: string) => {
       // Make sure this node is in the graph.  If it's not in the graph, it means
       // this Work has a merge candidate that points to a Work the matcher hasn't
