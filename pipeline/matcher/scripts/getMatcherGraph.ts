@@ -21,7 +21,7 @@ type ElasticConfig = {
 
 async function getInput(): Promise<UserInput> {
   let id: string;
-  if (process.argv.length != 3) {
+  if (process.argv.length !== 3) {
     console.error('Usage: getGraph <WORK_ID>');
     process.exit(1);
   } else {
