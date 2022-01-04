@@ -67,7 +67,7 @@ class SierraTitleTest
       ),
       "Ethics & medicine : a Christian perspective on issues in bioethics."
     ),
-    // This example is based on Sierra bib b29048758
+    // This example is based on Sierra bib b25122083
     (
       List(
         Subfield(
