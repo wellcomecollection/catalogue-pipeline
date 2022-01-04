@@ -2,6 +2,7 @@ package weco.pipeline.matcher.models
 
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.extras.semiauto._
+import weco.json.JsonUtil._
 
 import java.time.Instant
 
