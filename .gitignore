@@ -17,6 +17,7 @@ shared_infra/.releases
 .Dockerfile
 .pytest-cache
 .pytest_cache
+node_modules
 
 # Files which could contain secrets we do not want in the repo
 secrets
