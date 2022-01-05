@@ -18,17 +18,9 @@ const sharedRules = {
 
 module.exports = {
   parser: 'babel-eslint',
-  plugins: [...sharedPlugins, 'flowtype'],
-  extends: [
-    ...sharedExtends,
-    'prettier/flowtype',
-    'plugin:flowtype/recommended',
-  ],
-  rules: {
-    ...sharedRules,
-    'flowtype/no-types-missing-file-annotation': 'off',
-    'flowtype/space-after-type-colon': [2, 'always', { allowLineBreak: true }],
-  },
+  plugins: sharedPlugins,
+  extends: sharedExtends,
+  rules: sharedRules,
   overrides: [
     {
       files: ['*.ts', '*.tsx'],
