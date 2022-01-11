@@ -43,6 +43,7 @@ object TeiLanguageData extends Logging {
       case ("eng", "English") => MarcLanguageCodeList.fromName("English")
       case ("en", "English")  => MarcLanguageCodeList.fromName("English")
       case ("hi", "Hindi")    => MarcLanguageCodeList.fromName("Hindi")
+      case ("ja", "Japanese") => MarcLanguageCodeList.fromName("Japanese")
       case ("jv", "Javanese") => MarcLanguageCodeList.fromName("Javanese")
       case ("pra", "Prakrit languages") =>
         MarcLanguageCodeList.fromName("Prakrit languages")
