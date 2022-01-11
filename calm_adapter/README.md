@@ -28,7 +28,9 @@ The CALM adapter fetches new records from CALM and keeps our copy of the CALM da
 
     The window generator runs as a Lambda on a fixed schedule, or it can be run locally if you want to do a one-off query.
 
-    TODO: Rename this to "query generator".
+    TODO: Should we rename this to "query generator"?
+
+    NOTE: The CALM adapter uses a different format to the TEI/Sierra adapters, which is why it doesn't use the shared window generator.
 
 *   When records are deleted from CALM, they disappear immediately.
     They no longer appear in the API.
