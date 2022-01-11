@@ -1,11 +1,11 @@
 module "calm_adapter_topic" {
   source = "github.com/wellcomecollection/terraform-aws-sns-topic.git?ref=v1.0.0"
-  name   = "calm-records"
+  name   = "calm_adapter_output"
 }
 
 module "calm_deletions_topic" {
   source = "github.com/wellcomecollection/terraform-aws-sns-topic.git?ref=v1.0.0"
-  name   = "calm-deletions"
+  name   = "calm_deletion_checker_output"
 }
 
 resource "aws_iam_role_policy" "adapter_policy" {
