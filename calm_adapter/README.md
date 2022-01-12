@@ -27,6 +27,7 @@ The CALM adapter fetches new records from CALM and keeps our copy of the CALM da
     The window generator can query based on created date, modified date, or the RefNo if you want to get updates for specific records.
 
     The window generator runs as a Lambda on a fixed schedule, or it can be run locally if you want to do a one-off query.
+    e.g. you can refetch all the records modified on a given day.
 
     TODO: Should we rename this to "query generator"?
 
