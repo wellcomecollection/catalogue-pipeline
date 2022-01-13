@@ -1,4 +1,3 @@
-# -*- encoding: utf-8 -*-
 """
 Publish a new Calm window to SNS.
 """
@@ -7,17 +6,13 @@ from datetime import date, datetime, timedelta
 import os
 import boto3
 
-from wellcome_aws_utils.lambda_utils import log_on_error
-
 from window_generator import WindowGenerator, CalmQuery, created_or_modified_date_range
 
 
-@log_on_error
 def main(event=None, _ctxt=None):
-    crossover_hours = os.environ.get("CROSSOVER_HOURS", 2)
     topic_arn = os.environ["TOPIC_ARN"]
 
-    start = (datetime.now() - timedelta(hours=crossover_hours)).date()
+    start = (datetime.now() - timedelta(hours=2)).date()
     end = date.today()
 
     queries = created_or_modified_date_range(start, end)

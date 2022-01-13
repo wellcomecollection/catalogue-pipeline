@@ -1,4 +1,3 @@
 boto3==1.12.3
 click==7.0
 tqdm==4.43.0
-wellcome_aws_utils==2.1.1
