@@ -270,7 +270,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           method = AccessMethod.NotRequestable,
           status = Some(AccessStatus.TemporarilyUnavailable),
           note = Some(
-            "Item is in use by another reader. Please ask at Enquiry Desk.")
+            "Item is in use by another reader. Please ask at Library Enquiry Desk.")
         )
 
       case (
@@ -283,7 +283,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           method = AccessMethod.NotRequestable,
           status = Some(AccessStatus.TemporarilyUnavailable),
           note = Some(
-            "Item is in use by another reader. Please ask at Enquiry Desk.")
+            "Item is in use by another reader. Please ask at Library Enquiry Desk.")
         )
 
       // Note that items can borrowed even if they're on the open shelves, but this
