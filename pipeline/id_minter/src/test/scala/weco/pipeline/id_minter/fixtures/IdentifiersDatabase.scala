@@ -23,11 +23,11 @@ trait IdentifiersDatabase
     with Matchers
     with TableNameGenerators {
 
-  val host = "localhost"
-  val port = 3307
-  val username = "root"
-  val password = "password"
-  val maxSize = 8
+  val rdsHost = "localhost"
+  val rdsPort = 3307
+  val rdsUsername = "root"
+  val rdsPassword = "password"
+  val rdsMaxPoolSize = 8
 
   def eventuallyTableExists(tableConfig: IdentifiersTableConfig): Assertion =
     eventually {
@@ -72,28 +72,28 @@ trait IdentifiersDatabase
     }
 
   val rdsClientConfig = RDSClientConfig(
-    primaryHost = host,
-    replicaHost = host,
-    port = port,
-    username = username,
-    password = password
+    primaryHost = rdsHost,
+    replicaHost = rdsHost,
+    port = rdsPort,
+    username = rdsUsername,
+    password = rdsPassword
   )
 
   def withIdentifiersTable[R](
     testWith: TestWith[IdentifiersTableConfig, R]): R = {
     ConnectionPool.add(
       'primary,
-      s"jdbc:mysql://$host:$port",
-      username,
-      password,
-      settings = ConnectionPoolSettings(maxSize = maxSize)
+      s"jdbc:mysql://$rdsHost:$rdsPort",
+      rdsUsername,
+      rdsPassword,
+      settings = ConnectionPoolSettings(maxSize = rdsMaxPoolSize)
     )
     ConnectionPool.add(
       'replica,
-      s"jdbc:mysql://$host:$port",
-      username,
-      password,
-      settings = ConnectionPoolSettings(maxSize = maxSize)
+      s"jdbc:mysql://$rdsHost:$rdsPort",
+      rdsUsername,
+      rdsPassword,
+      settings = ConnectionPoolSettings(maxSize = rdsMaxPoolSize)
     )
 
     implicit val session = NamedAutoSession('primary)
