@@ -447,7 +447,7 @@ class SierraItemAccessTest
             method = AccessMethod.NotRequestable,
             status = Some(AccessStatus.TemporarilyUnavailable),
             note = Some(
-              "Item is in use by another reader. Please ask at Enquiry Desk.")
+              "Item is in use by another reader. Please ask at Library Enquiry Desk.")
           )
       }
 
@@ -481,7 +481,7 @@ class SierraItemAccessTest
             method = AccessMethod.NotRequestable,
             status = Some(AccessStatus.TemporarilyUnavailable),
             note = Some(
-              "Item is in use by another reader. Please ask at Enquiry Desk.")
+              "Item is in use by another reader. Please ask at Library Enquiry Desk.")
           )
       }
 
@@ -518,7 +518,7 @@ class SierraItemAccessTest
             method = AccessMethod.NotRequestable,
             status = Some(AccessStatus.TemporarilyUnavailable),
             note = Some(
-              "Item is in use by another reader. Please ask at Enquiry Desk.")
+              "Item is in use by another reader. Please ask at Library Enquiry Desk.")
           )
       }
 
@@ -551,7 +551,7 @@ class SierraItemAccessTest
             method = AccessMethod.NotRequestable,
             status = Some(AccessStatus.TemporarilyUnavailable),
             note = Some(
-              "Item is in use by another reader. Please ask at Enquiry Desk.")
+              "Item is in use by another reader. Please ask at Library Enquiry Desk.")
           )
       }
     }
@@ -632,7 +632,7 @@ class SierraItemAccessTest
         )
 
         ac.note shouldBe Some(
-          "Item is in use by another reader. Please ask at Enquiry Desk.")
+          "Item is in use by another reader. Please ask at Library Enquiry Desk.")
         note shouldBe None
       }
 
