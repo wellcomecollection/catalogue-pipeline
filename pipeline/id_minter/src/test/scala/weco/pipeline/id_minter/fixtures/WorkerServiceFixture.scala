@@ -62,10 +62,10 @@ trait WorkerServiceFixture
     testWith: TestWith[IdMinterWorkerService[String], R]): R = {
     Class.forName("com.mysql.cj.jdbc.Driver")
     ConnectionPool.singleton(
-      s"jdbc:mysql://$host:$port",
-      username,
-      password,
-      settings = ConnectionPoolSettings(maxSize = maxSize)
+      s"jdbc:mysql://$rdsHost:$port",
+      rdsUsername,
+      rdsPassword,
+      settings = ConnectionPoolSettings(maxSize = rdsMaxPoolSize)
     )
 
     val identifiersDao = new IdentifiersDao(
