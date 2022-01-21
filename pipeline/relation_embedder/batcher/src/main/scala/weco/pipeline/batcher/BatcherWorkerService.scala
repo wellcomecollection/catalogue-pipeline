@@ -1,19 +1,18 @@
 package weco.pipeline.batcher
 
-import scala.concurrent.{ExecutionContext, Future}
-import scala.concurrent.duration._
-import scala.util.{Failure, Success}
-import akka.{Done, NotUsed}
-import akka.stream.scaladsl._
 import akka.stream.Materializer
-import software.amazon.awssdk.services.sqs.model.{Message => SQSMessage}
+import akka.stream.scaladsl._
+import akka.{Done, NotUsed}
 import grizzled.slf4j.Logging
-
+import software.amazon.awssdk.services.sqs.model.{Message => SQSMessage}
+import weco.json.JsonUtil._
 import weco.messaging.MessageSender
 import weco.messaging.sns.NotificationMessage
 import weco.messaging.sqs.SQSStream
 import weco.typesafe.Runnable
-import weco.json.JsonUtil._
+
+import scala.concurrent.duration._
+import scala.concurrent.{ExecutionContext, Future}
 
 case class Batch(rootPath: String, selectors: List[Selector])
 
@@ -58,8 +57,8 @@ class BatcherWorkerService[MsgDestination](
         case (batch, msgIndices) =>
           Future {
             msgSender.sendT(batch) match {
-              case Success(_) => None
-              case Failure(err) =>
+              case Right(_) => None
+              case Left(err) =>
                 error(s"Failed processing batch $batch with error: $err")
                 Some(msgIndices)
             }
