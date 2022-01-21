@@ -61,12 +61,12 @@ class PipelineStorageStream[In, Out, MsgDestination](
 }
 
 object PipelineStorageStream extends Logging {
-  def batchIndexAndSendFlow[T, MsgDestination](config: PipelineStorageConfig,
-                                               send: T => Either[MessageSenderError, Unit],
-                                               indexer: Indexer[T])(
-    implicit
-    ec: ExecutionContext,
-    indexable: Indexable[T]) = {
+  def batchIndexAndSendFlow[T, MsgDestination](
+    config: PipelineStorageConfig,
+    send: T => Either[MessageSenderError, Unit],
+    indexer: Indexer[T])(implicit
+                         ec: ExecutionContext,
+                         indexable: Indexable[T]) = {
     val maxSubStreams = Integer.MAX_VALUE
     Flow[(Message, List[T])]
       .collect {
