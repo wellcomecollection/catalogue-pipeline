@@ -12,7 +12,6 @@ import weco.flows.FlowOps
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future, TimeoutException}
-import scala.util.{Failure, Success, Try}
 
 case class PipelineStorageConfig(batchSize: Int,
                                  flushInterval: FiniteDuration,
