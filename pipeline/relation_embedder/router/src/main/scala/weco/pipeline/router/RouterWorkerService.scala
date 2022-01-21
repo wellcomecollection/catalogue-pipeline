@@ -13,7 +13,7 @@ import weco.pipeline_storage.{Indexable, PipelineStorageStream, Retriever}
 import weco.typesafe.Runnable
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Success, Try}
+import scala.util.{Failure, Success, Try}
 
 class RouterWorkerService[MsgDestination](
   pipelineStream: PipelineStorageStream[NotificationMessage,
@@ -36,15 +36,15 @@ class RouterWorkerService[MsgDestination](
   }
 
   private def processMessage(
-    work: Work[Merged]): Try[List[Work[Denormalised]]] = {
+    work: Work[Merged]): Try[List[Work[Denormalised]]] =
     work.data.collectionPath match {
       case None =>
         Success(
           List(work.transition[Denormalised]((Relations.none, Set.empty))))
       case Some(CollectionPath(path, _)) =>
-        pathsMsgSender.send(path).map(_ => Nil)
-
+        pathsMsgSender.send(path) match {
+          case Right(_)  => Success(Nil)
+          case Left(err) => Failure(err.e)
+        }
     }
-  }
-
 }

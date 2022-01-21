@@ -98,7 +98,7 @@ class MergerWorkerService[WorkDestination, ImageDestination](
       .applyMerge(maybeWorks = workSet)
       .mergedWorksAndImagesWithTime(matcherResultTime)
 
-  private def sendWorkOrImage(workOrImage: WorkOrImage): Try[Unit] =
+  private def sendWorkOrImage(workOrImage: WorkOrImage) =
     workOrImage match {
       case Left(work)   => workMsgSender.send(workIndexable.id(work))
       case Right(image) => imageMsgSender.send(imageIndexable.id(image))

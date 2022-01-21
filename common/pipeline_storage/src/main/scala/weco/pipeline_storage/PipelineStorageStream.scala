@@ -5,14 +5,14 @@ import akka.{Done, NotUsed}
 import grizzled.slf4j.Logging
 import io.circe.Decoder
 import software.amazon.awssdk.services.sqs.model.Message
-import weco.messaging.MessageSender
+import weco.messaging.{MessageSender, MessageSenderError}
 import weco.messaging.sns.NotificationMessage
 import weco.messaging.sqs.SQSStream
 import weco.flows.FlowOps
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future, TimeoutException}
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 case class PipelineStorageConfig(batchSize: Int,
                                  flushInterval: FiniteDuration,
@@ -63,7 +63,7 @@ class PipelineStorageStream[In, Out, MsgDestination](
 
 object PipelineStorageStream extends Logging {
   def batchIndexAndSendFlow[T, MsgDestination](config: PipelineStorageConfig,
-                                               send: T => Try[Unit],
+                                               send: T => Either[MessageSenderError, Unit],
                                                indexer: Indexer[T])(
     implicit
     ec: ExecutionContext,
@@ -81,7 +81,10 @@ object PipelineStorageStream extends Logging {
       .mapConcat(identity)
       .mapAsyncUnordered(config.parallelism) { bundle =>
         for {
-          _ <- Future.fromTry(send(bundle.item))
+          _ <- send(bundle.item) match {
+            case Right(_)  => Future.successful(())
+            case Left(err) => Future.failed(err.e)
+          }
         } yield bundle
       }
       .via(takeListsOfCompleteBundles[T](maxSubStreams, 5 minutes)

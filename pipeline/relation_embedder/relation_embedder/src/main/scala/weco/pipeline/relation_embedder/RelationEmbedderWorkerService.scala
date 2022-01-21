@@ -82,8 +82,8 @@ class RelationEmbedderWorkerService[MsgDestination](
               .mapConcat(_.map(_.id))
               .mapAsync(3) { id =>
                 Future(msgSender.send(id)).flatMap {
-                  case Success(_)   => Future.successful(())
-                  case Failure(err) => Future.failed(err)
+                  case Right(_)  => Future.successful(())
+                  case Left(err) => Future.failed(err.e)
                 }
               }
               .runWith(Sink.ignore)
