@@ -383,7 +383,7 @@ class MergerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueHasSize(dlq, size = 1)
           metrics.incrementedCounts.length shouldBe 3
-          metrics.incrementedCounts.last should endWith("_recognisedFailure")
+          metrics.incrementedCounts.last should endWith("_jsonDecodingFailure")
         }
     }
   }
