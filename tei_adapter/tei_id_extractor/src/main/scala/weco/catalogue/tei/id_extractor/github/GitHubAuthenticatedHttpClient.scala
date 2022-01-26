@@ -19,8 +19,8 @@ class GitHubAuthenticatedHttpClient(underlying: HttpClient, token: String)
     extends HttpClient {
   override def singleRequest(request: HttpRequest): Future[HttpResponse] =
     underlying.singleRequest(
-      request.copy(
-        headers = request.headers ++ List(
+      request.withHeaders(
+        request.headers ++ List(
           // Send the version of GitHub API we expect as per https://docs.github.com/en/rest/overview/media-types
           Accept(
             MediaType.applicationWithFixedCharset(
