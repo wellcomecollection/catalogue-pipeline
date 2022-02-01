@@ -310,11 +310,17 @@ object SierraItemAccess extends SierraQueryOps with Logging {
       // When an item is on display in an exhibition, it is not available for request.
       // In this case, the Reserves Note(s) should give some more detail.
       case (_, _, _, _, Some(LocationType.OnExhibition))
-          if itemData.varFields.withFieldTag("r").nonEmpty =>
+        if itemData.varFields.withFieldTag("r").nonEmpty =>
+        val sanitiseReservesNote = for (
+          source_str <- itemData.varFields.withFieldTag("r").contents
+        ) yield source_str.replaceFirst(
+          "^\\d\\d-\\d\\d-\\d\\d (ON|OFF) RESERVE FOR ", ""
+        ).replaceAll(" CIRCED \\d+ TIMES", "")
+
         AccessCondition(
           method = AccessMethod.NotRequestable,
           note = Some(
-            itemData.varFields.withFieldTag("r").contents.mkString("<br />"))
+            sanitiseReservesNote.mkString("<br />"))
         )
 
       // If we can't work out how this item should be handled, then let's mark it
