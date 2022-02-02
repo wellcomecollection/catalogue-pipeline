@@ -928,6 +928,7 @@ class SierraItemAccessTest
       //  - Something that is On Exhibition is not expected to have an off reserve entry.
       //  - Something that has both an on and an off reserve entry is not expected to be On Exhibition.
       // However, it is something that *could* happen.
+      // If these duplicate lines are encountered in real life, we should get the record corrected in Sierra.
       ac shouldBe AccessCondition(
         method = AccessMethod.NotRequestable,
         note = Some(
