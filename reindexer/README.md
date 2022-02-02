@@ -14,7 +14,7 @@ Normally, the transformation pipeline is triggered when we get an update from th
   you'll need to remove them to render the diagram.
 -->
 
-<img src="./adapter.svg">
+<img src="./adapter.svg" alt="A flow chart showing the source system pointing to the adapter, and the adapter pointing to the transformer.">
 
 The **reindexer** is a second trigger for the transformer: it lets us transform a record even when there hasn't been an update in the source system.
 
@@ -31,7 +31,7 @@ The **reindexer** is a second trigger for the transformer: it lets us transform 
   you'll need to remove them to render the diagram.
 -->
 
-<img src="./reindexer.svg">
+<img src="./reindexer.svg" alt="The same flow chart as before, now with the reindexer being a second input to the transformer.">
 
 This is useful if, say, we've modified the transformation logic and we want to reapply it to an existing record.
 
@@ -81,7 +81,7 @@ By default, transformers aren't connected to a reindexer.
 When we create a new, empty pipeline, we connect the reindexer so we can do a complete reindex and populate the pipeline.
 Once that reindex is done, we disconnect the pipeline.
 
-<img src="./pipelines.svg">
+<img src="./pipelines.svg" alt="A flow chart with a reindexer pointing to an existing pipeline/transformer, and a new pipeline/transformer. The arrow pointing to the existing transformer is dashed (disconnected), while the arrow to the new transformer is solid (connected).">
 
 This is so that when we create the next pipeline and do a complete reindex into that, we don't re-send every record in the already existing pipeline.
 This reduces unnecessary processing in that pipeline.
