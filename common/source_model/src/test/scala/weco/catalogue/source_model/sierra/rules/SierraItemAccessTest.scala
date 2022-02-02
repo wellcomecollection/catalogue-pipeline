@@ -912,8 +912,12 @@ class SierraItemAccessTest
             display = "On Exhibition")
         ),
         varFields = List(
-          VarField(fieldTag = "r", "25-12-22 ON RESERVE FOR Beware of the Leopard"),
-          VarField(fieldTag = "r", "25-12-22 OFF RESERVE FOR Beware of the Leopard CIRCED 2 TIMES"),
+          VarField(
+            fieldTag = "r",
+            "25-12-22 ON RESERVE FOR Beware of the Leopard"),
+          VarField(
+            fieldTag = "r",
+            "25-12-22 OFF RESERVE FOR Beware of the Leopard CIRCED 2 TIMES"),
           VarField(fieldTag = "r", "In a locked filing cabinet")
         )
       )
