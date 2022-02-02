@@ -924,7 +924,10 @@ class SierraItemAccessTest
       )
       // To avoid confusion for staff, and in the interest of completeness, notes that are identical
       // after removing the non-interesting content are preserved.
-      // This scenario *should* not be encountered.  Something that is
+      // This scenario *should* not be encountered.
+      //  - Something that is On Exhibition is not expected to have an off reserve entry.
+      //  - Something that has both an on and an off reserve entry is not expected to be On Exhibition.
+      // However, it is something that *could* happen.
       ac shouldBe AccessCondition(
         method = AccessMethod.NotRequestable,
         note = Some(

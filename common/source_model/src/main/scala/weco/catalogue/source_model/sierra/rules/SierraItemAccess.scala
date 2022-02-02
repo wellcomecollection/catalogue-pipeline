@@ -311,7 +311,13 @@ object SierraItemAccess extends SierraQueryOps with Logging {
       // In this case, the Reserves Note(s) should give some more detail.
       case (_, _, _, _, Some(LocationType.OnExhibition))
         if itemData.varFields.withFieldTag("r").nonEmpty =>
-        val sanitiseReservesNote = for (
+
+        // Reserves Notes normally contain text at either end that is not
+        // relevant for end users wishing to understand how to access the item.
+        // (https://documentation.iii.com/sierrahelp/Content/sgcir/sgcir_course_updaterecs.html)
+        // These include the date it went on/off reserve, and the number of times it circulated
+        // Remove that text before storing the remainder as an access condition note.
+        val sanitisedReservesNotes = for (
           source_str <- itemData.varFields.withFieldTag("r").contents
         ) yield source_str.replaceFirst(
           "^\\d\\d-\\d\\d-\\d\\d (ON|OFF) RESERVE FOR ", ""
@@ -320,7 +326,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
         AccessCondition(
           method = AccessMethod.NotRequestable,
           note = Some(
-            sanitiseReservesNote.mkString("<br />"))
+            sanitisedReservesNotes.mkString("<br />"))
         )
 
       // If we can't work out how this item should be handled, then let's mark it
