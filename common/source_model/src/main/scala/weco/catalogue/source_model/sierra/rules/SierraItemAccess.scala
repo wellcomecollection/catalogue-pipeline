@@ -307,6 +307,30 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           note = Some(noteText)
         )
 
+      // When an item is on display in an exhibition, it is not available for request.
+      // In this case, the Reserves Note(s) should give some more detail.
+      case (_, _, _, _, Some(LocationType.OnExhibition))
+          if itemData.varFields.withFieldTag("r").nonEmpty =>
+        // Reserves Notes normally contain text at either end that is not
+        // relevant for end users wishing to understand how to access the item.
+        // (https://documentation.iii.com/sierrahelp/Content/sgcir/sgcir_course_updaterecs.html)
+        // These include the date it went on/off reserve, and the number of times it circulated
+        // Remove that text before storing the remainder as an access condition note.
+        val sanitisedReservesNotes =
+          for (source_str <- itemData.varFields.withFieldTag("r").contents)
+            yield
+              source_str
+                .replaceFirst(
+                  "^\\d\\d-\\d\\d-\\d\\d (ON|OFF) RESERVE FOR ",
+                  ""
+                )
+                .replaceAll(" CIRCED \\d+ TIMES", "")
+
+        AccessCondition(
+          method = AccessMethod.NotRequestable,
+          note = Some(sanitisedReservesNotes.mkString("<br />"))
+        )
+
       // If we can't work out how this item should be handled, then let's mark it
       // as unavailable for now.
       //

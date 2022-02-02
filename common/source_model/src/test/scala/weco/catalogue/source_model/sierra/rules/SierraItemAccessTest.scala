@@ -846,7 +846,128 @@ class SierraItemAccessTest
       )
     }
   }
+  describe("an item on exhibition") {
+    it("has a note based on its Reserves Note") {
+      val displayreservation =
+        "Locked filing cabinet, disused lavatory with a sign saying 'Beware of The Leopard'"
+      val itemData = createSierraItemDataWith(
+        fixedFields = Map(
+          "79" -> FixedField(
+            label = "LOCATION",
+            value = "exres",
+            display = "On Exhibition")
+        ),
+        varFields = List(
+          VarField(fieldTag = "r", displayreservation)
+        )
+      )
 
+      val (ac, _) = SierraItemAccess(
+        location = Some(LocationType.OnExhibition),
+        itemData = itemData
+      )
+
+      ac shouldBe AccessCondition(
+        method = AccessMethod.NotRequestable,
+        note = Some(displayreservation)
+      )
+    }
+    it("can show multiple Reserves Notes") {
+      val itemData = createSierraItemDataWith(
+        fixedFields = Map(
+          "79" -> FixedField(
+            label = "LOCATION",
+            value = "exres",
+            display = "On Exhibition")
+        ),
+        varFields = List(
+          VarField(fieldTag = "r", "in the bottom of a locked filing cabinet"),
+          VarField(fieldTag = "r", "stuck in a disused lavatory"),
+          VarField(
+            fieldTag = "r",
+            "with a sign on the door saying 'Beware of The Leopard'")
+        ),
+      )
+
+      val (ac, _) = SierraItemAccess(
+        location = Some(LocationType.OnExhibition),
+        itemData = itemData
+      )
+
+      ac shouldBe AccessCondition(
+        method = AccessMethod.NotRequestable,
+        note = Some(
+          "in the bottom of a locked filing cabinet<br />" +
+            "stuck in a disused lavatory<br />" +
+            "with a sign on the door saying 'Beware of The Leopard'"
+        )
+      )
+    }
+    it("Only shows substantive content from Reserves Notes") {
+      val itemData = createSierraItemDataWith(
+        fixedFields = Map(
+          "79" -> FixedField(
+            label = "LOCATION",
+            value = "exres",
+            display = "On Exhibition")
+        ),
+        varFields = List(
+          VarField(
+            fieldTag = "r",
+            "25-12-22 ON RESERVE FOR Beware of the Leopard"),
+          VarField(
+            fieldTag = "r",
+            "25-12-22 OFF RESERVE FOR Beware of the Leopard CIRCED 2 TIMES"),
+          VarField(fieldTag = "r", "In a locked filing cabinet")
+        )
+      )
+
+      val (ac, _) = SierraItemAccess(
+        location = Some(LocationType.OnExhibition),
+        itemData = itemData
+      )
+      // To avoid confusion for staff, and in the interest of completeness, notes that are identical
+      // after removing the non-interesting content are preserved.
+      // This scenario *should* not be encountered.
+      //  - Something that is On Exhibition is not expected to have an off reserve entry.
+      //  - Something that has both an on and an off reserve entry is not expected to be On Exhibition.
+      // However, it is something that *could* happen.
+      // If these duplicate lines are encountered in real life, we should get the record corrected in Sierra.
+      ac shouldBe AccessCondition(
+        method = AccessMethod.NotRequestable,
+        note = Some(
+          "Beware of the Leopard<br />" +
+            "Beware of the Leopard<br />" +
+            "In a locked filing cabinet"
+        )
+      )
+    }
+    it(
+      "has the default 'contact the library' note if there are no Reserves Notes") {
+      val itemData = createSierraItemDataWith(
+        fixedFields = Map(
+          "79" -> FixedField(
+            label = "LOCATION",
+            value = "exres",
+            display = "On Exhibition")
+        ),
+        varFields = List(
+          VarField(fieldTag = "p", "GBP850")
+        )
+      )
+
+      val (ac, _) = SierraItemAccess(
+        location = Some(LocationType.OnExhibition),
+        itemData = itemData
+      )
+
+      ac shouldBe AccessCondition(
+        method = AccessMethod.NotRequestable,
+        note = Some(
+          s"""This item cannot be requested online. Please contact <a href="mailto:library@wellcomecollection.org">library@wellcomecollection.org</a> for more information.""")
+      )
+    }
+  }
   it("handles the case where we can't map the access data") {
     val itemData = createSierraItemDataWith(
       fixedFields = Map(
