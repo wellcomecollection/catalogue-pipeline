@@ -31,4 +31,4 @@ docker run --tty --rm \
   --workdir "$ROOT" \
   --env "BUILDKITE_BUILD_NUMBER" \
   --env "ROOT" \
-  "$ECR_REGISTRY/wellcome/sbt_wrapper" "$@"
+  "$ECR_REGISTRY/wellcome/sbt_wrapper:special-runtime" "$@"
