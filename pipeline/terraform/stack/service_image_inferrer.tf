@@ -38,7 +38,6 @@ locals {
 module "image_inferrer" {
   source = "../modules/services_with_manager"
 
-
   name = "image_inferrer"
 
   topic_arns = [
