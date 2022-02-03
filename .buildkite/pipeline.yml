@@ -18,66 +18,159 @@ steps:
 
   - command: .buildkite/scripts/run_job.py source_model
     label: "source model"
+    agents:
+      queue: "scala"
+
   - command: .buildkite/scripts/run_job.py pipeline_storage
     label: "pipeline storage"
+    agents:
+      queue: "scala"
+
   - command: .buildkite/scripts/run_job.py ingestor_common
     label: "ingestor common"
+    agents:
+      queue: "scala"
+
   - command: .buildkite/scripts/run_job.py transformer_common
     label: "transformer common"
+    agents:
+      queue: "scala"
+
   - command: .buildkite/scripts/run_job.py calm_api_client
     label: "Calm API client"
+    agents:
+      queue: "scala"
+
   - command: .buildkite/scripts/run_lambda_job.py lambda
     label: "Lambdas"
+    agents:
+      queue: "scala"
+
   - command: .buildkite/scripts/run_job.py reindex_worker
     label: "reindex worker"
+    agents:
+      queue: "scala"
+
   - command: .buildkite/scripts/run_job.py ingestor_works
     label: "ingestor (works)"
+    agents:
+      queue: "scala"
+
   - command: .buildkite/scripts/run_job.py ingestor_images
     label: "ingestor (images)"
+    agents:
+      queue: "scala"
+
   - command: .buildkite/scripts/run_job.py id_minter
     label: "ID minter"
+    agents:
+      queue: "scala"
+
   - command: .buildkite/scripts/run_job.py relation_embedder
     label: "relation embedder"
+    agents:
+      queue: "scala"
+
   - command: .buildkite/scripts/run_job.py router
     label: "router"
+    agents:
+      queue: "scala"
+
   - command: .buildkite/scripts/run_job.py batcher
     label: "batcher"
+    agents:
+      queue: "scala"
+
   - command: .buildkite/scripts/run_job.py matcher
     label: "matcher"
+    agents:
+      queue: "scala"
+
   - command: .buildkite/scripts/run_job.py merger
     label: "merger"
+    agents:
+      queue: "scala"
+
   - command: .buildkite/scripts/run_job.py transformer_miro
     label: "transformer (Miro)"
+    agents:
+      queue: "scala"
+
   - command: .buildkite/scripts/run_job.py transformer_sierra
     label: "transformer (Sierra)"
+    agents:
+      queue: "scala"
+
   - command: .buildkite/scripts/run_job.py transformer_mets
     label: "transformer (METS)"
+    agents:
+      queue: "scala"
+
   - command: .buildkite/scripts/run_job.py transformer_calm
     label: "transformer (Calm)"
+    agents:
+      queue: "scala"
+
   - command: .buildkite/scripts/run_job.py transformer_tei
     label: "transformer (Tei)"
+    agents:
+      queue: "scala"
+
   - command: .buildkite/scripts/run_job.py sierra_reader
     label: "Sierra reader"
+    agents:
+      queue: "scala"
+
   - command: .buildkite/scripts/run_job.py sierra_merger
     label: "Sierra merger"
+    agents:
+      queue: "scala"
+
   - command: .buildkite/scripts/run_job.py sierra_linker
     label: "Sierra linker"
+    agents:
+      queue: "scala"
+
   - command: .buildkite/scripts/run_job.py sierra_indexer
     label: "Sierra indexer"
+    agents:
+      queue: "scala"
+
   - command: .buildkite/scripts/run_job.py mets_adapter
     label: "METS adapter"
+    agents:
+      queue: "scala"
+
   - command: .buildkite/scripts/run_job.py calm_adapter
     label: "Calm adapter"
+    agents:
+      queue: "scala"
+
   - command: .buildkite/scripts/run_job.py calm_deletion_checker
     label: "Calm deletion checker"
+    agents:
+      queue: "scala"
+
   - command: .buildkite/scripts/run_job.py calm_indexer
     label: "Calm indexer"
+    agents:
+      queue: "scala"
+
   - command: .buildkite/scripts/run_job.py inference_manager
     label: "inference manager"
+    agents:
+      queue: "scala"
+
   - command: .buildkite/scripts/run_job.py tei_id_extractor
     label: "Tei id extractor"
+    agents:
+      queue: "scala"
+
   - command: .buildkite/scripts/run_job.py tei_adapter
     label: "Tei adapter"
+    agents:
+      queue: "scala"
+
   - command: .buildkite/scripts/run_job.py feature_inferrer --changes-in pipeline/inferrer/feature_inferrer
     label: "feature inferrer"
   - command: .buildkite/scripts/run_job.py palette_inferrer --changes-in pipeline/inferrer/palette_inferrer
