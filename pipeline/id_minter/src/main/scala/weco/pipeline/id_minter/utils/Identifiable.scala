@@ -4,6 +4,17 @@ import weco.catalogue.internal_model.identifiers.CanonicalId
 
 import scala.util.Random
 
+/**
+ * Generate an easily shareable unique id
+ *
+ * The id is intended to be easily shareable in verbal or handwritten form, passing the "Post-it note test"
+ * The generator is based on the following criteria:
+ *
+ * - There is no scope for ambiguity between handwritten characters (e.g. 0 vs o).
+ * - It is short enough to read aloud or write down.
+ * - The space is large enough that we don't have to worry about running out.
+ * - It doesn't look like other kinds of ids, someone won't try to look it up in the wrong catalogue.
+ */
 object Identifiable {
   private val identifierLength = 8
 
