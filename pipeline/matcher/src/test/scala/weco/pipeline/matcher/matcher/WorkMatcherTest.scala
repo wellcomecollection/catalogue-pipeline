@@ -11,13 +11,16 @@ import weco.pipeline.matcher.fixtures.MatcherFixtures
 import weco.pipeline.matcher.generators.WorkNodeGenerators
 import weco.pipeline.matcher.models._
 import weco.pipeline.matcher.storage.{WorkGraphStore, WorkNodeDao}
+import weco.storage.fixtures.DynamoFixtures.Table
 import weco.storage.locking.LockFailure
 import weco.storage.locking.memory.{MemoryLockDao, MemoryLockingService}
 
 import java.util.UUID
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{Await, Future}
+import scala.concurrent.duration._
 import scala.language.higherKinds
+import scala.util.{Failure, Success, Try}
 
 class WorkMatcherTest
     extends AnyFunSpec
@@ -41,11 +44,9 @@ class WorkMatcherTest
               Set(
                 MatchedIdentifiers(Set(WorkIdentifier(work.id, work.version))))
 
-            val savedLinkedWork =
-              getTableItem[WorkNode](work.id.underlying, graphTable)
-                .map(_.right.value)
+            val savedLinkedWork = getWorkNode(work.id, graphTable)
 
-            savedLinkedWork shouldBe Some(
+            savedLinkedWork shouldBe
               WorkNode(
                 id = work.id,
                 subgraphId = SubgraphId(work.id),
@@ -54,7 +55,6 @@ class WorkMatcherTest
                   id = work.state.sourceIdentifier,
                   version = work.version),
               )
-            )
           }
         }
       }
@@ -300,4 +300,76 @@ class WorkMatcherTest
       }
     }
   }
+
+  // This is a regression test for the failure mode where we only lock over
+  // the IDs we can see in the initial update, and not over IDs we discover
+  // we need to lock after inspecting the graph store.
+  //
+  // This is best explained by the example below.
+  it("locks over all the works affected in an update") {
+    withWorkGraphTable { graphTable =>
+      withWorkGraphStore(graphTable) { workGraphStore =>
+        withWorkMatcher(workGraphStore) { workMatcher =>
+
+          // We have three works:
+          // (A) is standalone
+          // (B) points to A
+          // (C) points to B
+          val workA = createWorkWith(id = idA)
+          val workB = createWorkWith(id = idB, mergeCandidateIds = Set(idA))
+          val workC = createWorkWith(id = idC, mergeCandidateIds = Set(idB))
+
+          // First store work B in the graph.
+          //
+          // This will put two nodes in the graph: a node for B, and a stub for C.
+          Await.result(workMatcher.matchWork(workB), atMost = 3 seconds)
+
+          // Now try to store works A and C simultaneously.
+          //
+          // Here's how this can go wrong: when we get work C, we know we need
+          // to lock at least {B, C}.  It's only when we inspect the existing graph
+          // that we discover that we also need to link in A, so we should lock
+          // that ID as well.  If we don't lock over A, we can blat the update
+          // coming in work A.
+          val futureA = workMatcher.matchWork(workA)
+          val futureC = workMatcher.matchWork(workC)
+
+          val resultA = Try { Await.result(futureA, atMost = 3 seconds) }
+          val resultC = Try { Await.result(futureC, atMost = 3 seconds) }
+
+          (resultA, resultC) match {
+            // If one result succeeds and the other fails, that's fine -- the failed
+            // result won't have written any data to the graph store, and will be
+            // retried later.  We'll get consistent results.
+            case (Success(_), Failure(e)) if e.getMessage.startsWith("FailedLock") => ()
+            case (Failure(e), Success(_)) if e.getMessage.startsWith("FailedLock") => ()
+
+            // It's possible for both updates to fail, depending on the exact timing.
+            // Consider the following sequence:
+            //
+            //    1. matchWork(workA) locks 'A'
+            //    2. matchWork(workC) locks 'C', 'B'
+            //    3. matchWork(workA) tries to lock 'B', fails
+            //    4. matchWork(workC) tries to lock 'A', fails
+            //
+            // Both updates would be retried later; the graph store remains consistent.
+            case (Failure(e1), Failure(e2)) if e1.getMessage.startsWith("FailedLock") && e2.getMessage.startsWith("FailedLock") =>
+              println(s"resultA = $resultA")
+              println(s"resultC = $resultC")
+              ()
+
+            // If we get an unexpected failure or two successes, we might have inconsistent
+            // data in the graph store.  Fail!
+            case _ =>
+              println(s"resultA = $resultA")
+              println(s"resultC = $resultC")
+              throw new RuntimeException("Both updates succeeded (or failed unexpectedly). This could lead to inconsistent data!")
+          }
+        }
+      }
+    }
+  }
+
+  private def getWorkNode(id: CanonicalId, graphTable: Table): WorkNode =
+    getTableItem[WorkNode](id.underlying, graphTable).map(_.right.value).get
 }

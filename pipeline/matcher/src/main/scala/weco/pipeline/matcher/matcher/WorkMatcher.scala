@@ -29,8 +29,12 @@ class WorkMatcher(
   implicit ec: ExecutionContext)
     extends Logging {
 
-  def matchWork(work: WorkStub): Future[MatcherResult] =
-    withLocks(work, work.ids.map(_.toString)) {
+  def matchWork(work: WorkStub): Future[MatcherResult] = {
+    // We start by locking over all the IDs we know are affected by this
+    // particular Work, to stop another matcher process interfering.
+    val initialLockIds = work.ids.map(_.toString)
+
+    withLocks(work, initialLockIds) {
       for {
         beforeNodes <- workGraphStore.findAffectedWorks(work.ids)
         afterNodes = WorkGraphUpdater.update(work, beforeNodes)
@@ -53,11 +57,29 @@ class WorkMatcher(
               works = toMatchedIdentifiers(afterNodes),
               createdTime = Instant.now()))
         } else {
+
+          // Now we expand our lock to cover all the subgraphs we're modifying,
+          // and all the work IDs we haven't already locked.
+          //
+          // This is useful if, when calling findAffectedWorks() we discover
+          // a work that isn't referenced in the WorkStub we received but we still
+          // want to update, e.g. if we have a graph
+          //
+          //      C -> B -> A
+          //
+          // and we're doing an update on C.  We still want to lock over A, even though
+          // it's not referenced in C itself.
+          //
           val affectedSubgraphIds =
             (beforeNodes ++ afterNodes)
               .map { _.subgraphId }
 
-          withLocks(work, ids = affectedSubgraphIds) {
+          val affectedWorkIds =
+            (beforeNodes ++ afterNodes).map { _.id.underlying }
+
+          val expandedLockIds = affectedSubgraphIds ++ affectedWorkIds -- initialLockIds
+
+          withLocks(work, ids = expandedLockIds) {
             workGraphStore
               .put(afterNodes)
               .map(
@@ -69,6 +91,7 @@ class WorkMatcher(
         }
       } yield matcherResult
     }
+  }
 
   private def withLocks(w: WorkStub, ids: Set[String])(
     f: => Future[MatcherResult]): Future[MatcherResult] =
