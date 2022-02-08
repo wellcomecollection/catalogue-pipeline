@@ -4,7 +4,7 @@ This stage takes JSON objects containing diverse source ids and
 associates those ids with a canonical id in a common scheme.
 
 The canonical ids created by this stage are stored in a database, 
-associated with the original source identifer. When the same identifier
+associated with the original source id. When the same identifier
 is encountered again, the canonical id from the database is returned.
 
 When a novel source id is encountered, a new canonical id is 
