@@ -97,20 +97,23 @@ async function getRelevantWorks(
   return worksInSubgraph.map((item: Record<string, any>) => {
     return {
       canonicalId: item.id,
-      mergeCandidateIds: item.sourceWork.mergeCandidateIds,
-      suppressed: item.sourceWork.suppressed,
+      mergeCandidateIds: item.sourceWork?.mergeCandidateIds,
+      suppressed: item.sourceWork?.suppressed,
       componentIds: item.componentIds,
-      sourceIdentifier: {
-        value: item.sourceWork.id.value,
+      sourceIdentifier:
+        item.sourceWork
+          ? {
+              value: item.sourceWork.id.value,
 
-        // This is an artefact of a slightly weird format in DynamoDB,
-        // where the identifierType is recorded as e.g.
-        //
-        //    {"identifierType": {"METS": "METS"}, ...}
-        //
-        // We might simplify this at some point.
-        identifierType: Object.keys(item.sourceWork.id.identifierType)[0],
-      },
+              // This is an artefact of a slightly weird format in DynamoDB,
+              // where the identifierType is recorded as e.g.
+              //
+              //    {"identifierType": {"METS": "METS"}, ...}
+              //
+              // We might simplify this at some point.
+              identifierType: Object.keys(item.sourceWork.id.identifierType)[0],
+            }
+          : undefined,
     };
   });
 }
@@ -140,7 +143,7 @@ async function createGraph(works: SourceWork[]): Promise<RootCluster> {
 
   // Add all the edges
   works.forEach((w: SourceWork) => {
-    w.mergeCandidateIds.forEach((target: string) => {
+    (w.mergeCandidateIds ?? []).forEach((target: string) => {
       // Make sure this node is in the graph.  If it's not in the graph, it means
       // this Work has a merge candidate that points to a Work the matcher hasn't
       // seen.  Show it on the graph, but make it clear we don't know what it is.

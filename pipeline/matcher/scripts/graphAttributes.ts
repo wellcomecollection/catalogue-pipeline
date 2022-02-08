@@ -37,7 +37,7 @@ async function getImageAttributes(
       label: `<
         <table cellspacing="0" border="0" cellborder="0">
           <tr><td><img src="${outPath}"/></td></tr>
-          <tr><td>${label.replace('\n', '<br/>')}</td></tr>
+          <tr><td>${label.replaceAll('\n', '<br/>')}</td></tr>
         </table>
       >`,
     };
@@ -75,17 +75,17 @@ async function getMetsThumbnail(bnumber: string): Promise<string | undefined> {
 function getLabelAttributes(
   w: SourceWork
 ): Record<string, string> | Promise<Record<string, string>> {
-  switch (w.sourceIdentifier.identifierType) {
+  switch (w.sourceIdentifier?.identifierType) {
     case 'SierraSystemNumber':
-      return { label: `Sierra\n${w.sourceIdentifier.value}` };
+      return { label: `Sierra\n${w.sourceIdentifier.value}\n(${w.canonicalId})` };
 
     case 'CalmRecordIdentifier':
-      return { label: `CALM\n${w.sourceIdentifier.value}` };
+      return { label: `CALM\n${w.sourceIdentifier.value}\n(${w.canonicalId})` };
 
     case 'MiroImageNumber':
       return getImageAttributes(
         w.sourceIdentifier,
-        `Miro\n${w.sourceIdentifier.value}`,
+        `Miro\n${w.sourceIdentifier.value}\n(${w.canonicalId})`,
         async () =>
           `https://iiif.wellcomecollection.org/thumbs/${w.sourceIdentifier.value}/full/!100,100/0/default.jpg`
       );
@@ -93,13 +93,18 @@ function getLabelAttributes(
     case 'METS':
       return getImageAttributes(
         w.sourceIdentifier,
-        `METS\n${w.sourceIdentifier.value}`,
+        `METS\n${w.sourceIdentifier.value}\n(${w.canonicalId})`,
         async () => getMetsThumbnail(w.sourceIdentifier.value)
       );
 
+    case undefined:
+      return {
+        label: `(${w.canonicalId})`,
+      };
+
     default:
       return {
-        label: `${w.sourceIdentifier.identifierType}\n${w.sourceIdentifier.value}`,
+        label: `${w.sourceIdentifier.identifierType}\n${w.sourceIdentifier.value}\n(${w.canonicalId})`,
       };
   }
 }
