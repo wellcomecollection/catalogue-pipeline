@@ -321,7 +321,7 @@ class WorkMatcherTest
 
           // First store work B in the graph.
           //
-          // This will put two nodes in the graph: a node for B, and a stub for C.
+          // This will put two nodes in the graph: a node for B, and a stub for A.
           Await.result(workMatcher.matchWork(workB), atMost = 3 seconds)
 
           // Now try to store works A and C simultaneously.
@@ -329,8 +329,10 @@ class WorkMatcherTest
           // Here's how this can go wrong: when we get work C, we know we need
           // to lock at least {B, C}.  It's only when we inspect the existing graph
           // that we discover that we also need to link in A, so we should lock
-          // that ID as well.  If we don't lock over A, we can blat the update
+          // that ID as well.  If we don't lock over A, we might blat the update
           // coming in work A.
+          //
+          // We need the locking to ensure we don't try to apply both updates at once.
           val futureA = workMatcher.matchWork(workA)
           val futureC = workMatcher.matchWork(workC)
 
