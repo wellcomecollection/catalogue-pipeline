@@ -31,7 +31,7 @@ import weco.catalogue.internal_model.work._
 import weco.catalogue.internal_model.work.generators.WorkGenerators
 import weco.catalogue.source_model.generators.SierraRecordGenerators
 import weco.catalogue.source_model.sierra._
-import weco.json.JsonUtil.toJson
+import weco.json.JsonUtil._
 import weco.pipeline.transformer.sierra.SierraTransformer
 import weco.pipeline.transformer.sierra.exceptions.SierraTransformerException
 import weco.pipeline.transformer.transformers.ParsedPeriod

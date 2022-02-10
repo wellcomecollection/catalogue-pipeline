@@ -5,7 +5,7 @@ import akka.stream.Materializer
 import akka.stream.scaladsl._
 import grizzled.slf4j.Logging
 import software.amazon.awssdk.services.sqs.model.{Message => SQSMessage}
-import weco.json.JsonUtil.fromJson
+import weco.json.JsonUtil._
 import weco.messaging.MessageSender
 import weco.messaging.sns.NotificationMessage
 import weco.messaging.sqs.SQSStream
