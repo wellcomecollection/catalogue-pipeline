@@ -11,13 +11,16 @@ import weco.pipeline.matcher.fixtures.MatcherFixtures
 import weco.pipeline.matcher.generators.WorkNodeGenerators
 import weco.pipeline.matcher.models._
 import weco.pipeline.matcher.storage.{WorkGraphStore, WorkNodeDao}
+import weco.storage.fixtures.DynamoFixtures.Table
 import weco.storage.locking.LockFailure
 import weco.storage.locking.memory.{MemoryLockDao, MemoryLockingService}
 
 import java.util.UUID
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.duration._
+import scala.concurrent.{Await, Future}
 import scala.language.higherKinds
+import scala.util.{Failure, Success, Try}
 
 class WorkMatcherTest
     extends AnyFunSpec
@@ -41,11 +44,9 @@ class WorkMatcherTest
               Set(
                 MatchedIdentifiers(Set(WorkIdentifier(work.id, work.version))))
 
-            val savedLinkedWork =
-              getTableItem[WorkNode](work.id.underlying, graphTable)
-                .map(_.right.value)
+            val savedLinkedWork = getWorkNode(work.id, graphTable)
 
-            savedLinkedWork shouldBe Some(
+            savedLinkedWork shouldBe
               WorkNode(
                 id = work.id,
                 subgraphId = SubgraphId(work.id),
@@ -54,7 +55,6 @@ class WorkMatcherTest
                   id = work.state.sourceIdentifier,
                   version = work.version),
               )
-            )
           }
         }
       }
@@ -300,4 +300,128 @@ class WorkMatcherTest
       }
     }
   }
+
+  // This is a regression test for the failure mode where we only lock over
+  // the IDs we can see in the initial update, and not over IDs we discover
+  // we need to lock after inspecting the graph store.
+  //
+  // This is difficult to explain in the abstract, and is easiest to understand
+  // with an example.  Consider the following three works:
+  //
+  //      C -> B -> A
+  //
+  // We send them to the matcher in the following order:
+  //
+  // B, wait, then
+  // A, C simultaneously.
+  //
+  // We're trying to catch a very particular race condition where the update to C
+  // gets a stale value from A from the store, and blats the update to A.
+  //
+  it("locks over all the works affected in an update") {
+    withWorkGraphTable { graphTable =>
+      withWorkNodeDao(graphTable) { workNodeDao =>
+        // We take control of the lock dao here to ensure a very precise
+        // sequence of events:
+        //
+        //    1.  The matcher starts processing the update to A.
+        //    2.  It prepares what it's going to write to the graph store,
+        //        but it doesn't take an expanded lock. (*)
+        //    3.  The matcher starts processing the update to A.
+        //        It reads the old value of A/B from the store.
+        //    4.  Now we allow the update to 'A' to write the new values
+        //        to the store.
+        //    5.  The matcher prepares to write the new value of C, but doesn't
+        //        do so until the update to 'A' is finished. (**)
+        //
+        var createdLocksHistory: List[String] = List()
+        var findAffectedWorksHistory: List[Set[CanonicalId]] = List()
+
+        val workGraphStore = new WorkGraphStore(workNodeDao) {
+          override def findAffectedWorks(
+            ids: Set[CanonicalId]): Future[Set[WorkNode]] = {
+            findAffectedWorksHistory = findAffectedWorksHistory :+ ids
+            super.findAffectedWorks(ids)
+          }
+        }
+
+        implicit val lockDao: MemoryLockDao[String, UUID] =
+          new MemoryLockDao[String, UUID] {
+            override def lock(id: String, contextId: UUID): LockResult = {
+              // (*) We don't let the update to 'A' start writing graph updates until
+              // we know the update to 'C' has read the old state of the graph
+              if (id == SubgraphId(idA, idB) && createdLocksHistory.count(
+                    _ == SubgraphId(idA, idB)) == 1) {
+                while (!findAffectedWorksHistory.contains(Set(idB, idC))) {}
+              }
+
+              // (**) We don't let the update to 'C' start writing graph updates until
+              // we know the update to 'A' is finished
+              if ((id == SubgraphId(idA, idB) || id == SubgraphId(
+                    idA,
+                    idB,
+                    idC)) &&
+                  createdLocksHistory.count(_ == SubgraphId(idA, idB)) == 2) {
+                while (locks.contains(idA.underlying)) {}
+              }
+
+              createdLocksHistory = createdLocksHistory :+ id
+              super.lock(id, contextId)
+            }
+          }
+
+        val workMatcher = new WorkMatcher(
+          workGraphStore = workGraphStore,
+          lockingService = new MemoryLockingService[MatcherResult, Future]()
+        )
+
+        // We have three works:
+        // (A) is standalone
+        // (B) points to A
+        // (C) points to B
+        val workA = createWorkWith(id = idA)
+        val workB = createWorkWith(id = idB, mergeCandidateIds = Set(idA))
+        val workC = createWorkWith(id = idC, mergeCandidateIds = Set(idB))
+
+        // First store work B in the graph.
+        //
+        // This will put two nodes in the graph: a node for B, and a stub for A.
+        Await.result(workMatcher.matchWork(workB), atMost = 3 seconds)
+
+        // Now try to store works A and C simultaneously.
+        //
+        // Here's how this can go wrong: when we get work C, we know we need
+        // to lock at least {B, C}.  It's only when we inspect the existing graph
+        // that we discover that we also need to link in A, so we should lock
+        // that ID as well.  If we don't lock over A, we might blat the update
+        // coming in work A.
+        //
+        // We need the locking to ensure we don't try to apply both updates at once.
+        val futureA = workMatcher.matchWork(workA)
+        val futureC = workMatcher.matchWork(workC)
+
+        val resultA = Try {
+          Await.result(futureA, atMost = 3 seconds)
+        }
+        val resultC = Try {
+          Await.result(futureC, atMost = 3 seconds)
+        }
+
+        // The update to A should have succeeded; the update to B should have failed
+        // because of inconsistent data.
+        resultA shouldBe a[Success[_]]
+
+        resultC shouldBe a[Failure[_]]
+        resultC.asInstanceOf[Failure[_]].exception.getMessage should include(
+          "graph store contents changed during matching")
+
+        // If the update to A was successful, we should see the 'sourceWork' field
+        // for A is populated.  If not, this will fail.
+        getWorkNode(idA, graphTable).sourceWork shouldBe defined
+      }
+    }
+  }
+
+  private def getWorkNode(id: CanonicalId, graphTable: Table): WorkNode =
+    getTableItem[WorkNode](id.underlying, graphTable).map(_.right.value).get
 }
