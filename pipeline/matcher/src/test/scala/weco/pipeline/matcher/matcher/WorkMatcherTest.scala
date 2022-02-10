@@ -321,7 +321,6 @@ class WorkMatcherTest
   it("locks over all the works affected in an update") {
     withWorkGraphTable { graphTable =>
       withWorkNodeDao(graphTable) { workNodeDao =>
-
         // We take control of the lock dao here to ensure a very precise
         // sequence of events:
         //
@@ -339,7 +338,8 @@ class WorkMatcherTest
         var findAffectedWorksHistory: List[Set[CanonicalId]] = List()
 
         val workGraphStore = new WorkGraphStore(workNodeDao) {
-          override def findAffectedWorks(ids: Set[CanonicalId]): Future[Set[WorkNode]] = {
+          override def findAffectedWorks(
+            ids: Set[CanonicalId]): Future[Set[WorkNode]] = {
             findAffectedWorksHistory = findAffectedWorksHistory :+ ids
             super.findAffectedWorks(ids)
           }
@@ -350,15 +350,18 @@ class WorkMatcherTest
             override def lock(id: String, contextId: UUID): LockResult = {
               // (*) We don't let the update to 'A' start writing graph updates until
               // we know the update to 'C' has read the old state of the graph
-              if (id == SubgraphId(idA, idB) && createdLocksHistory.count(_ == SubgraphId(idA, idB)) == 1) {
+              if (id == SubgraphId(idA, idB) && createdLocksHistory.count(
+                    _ == SubgraphId(idA, idB)) == 1) {
                 while (!findAffectedWorksHistory.contains(Set(idB, idC))) {}
               }
 
               // (**) We don't let the update to 'C' start writing graph updates until
               // we know the update to 'A' is finished
-              if ((id == SubgraphId(idA, idB) || id == SubgraphId(idA, idB, idC)) &&
-                createdLocksHistory.count(_ == SubgraphId(idA, idB)) == 2
-              ) {
+              if ((id == SubgraphId(idA, idB) || id == SubgraphId(
+                    idA,
+                    idB,
+                    idC)) &&
+                  createdLocksHistory.count(_ == SubgraphId(idA, idB)) == 2) {
                 while (locks.contains(idA.underlying)) {}
               }
 
@@ -409,7 +412,8 @@ class WorkMatcherTest
         resultA shouldBe a[Success[_]]
 
         resultC shouldBe a[Failure[_]]
-        resultC.asInstanceOf[Failure[_]].exception.getMessage should include("graph store contents changed during matching")
+        resultC.asInstanceOf[Failure[_]].exception.getMessage should include(
+          "graph store contents changed during matching")
 
         // If the update to A was successful, we should see the 'sourceWork' field
         // for A is populated.  If not, this will fail.

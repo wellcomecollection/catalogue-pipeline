@@ -66,10 +66,9 @@ class WorkMatcher(
     }
   }
 
-  private def writeUpdate(
-    work: WorkStub,
-    beforeNodes: Set[WorkNode],
-    afterNodes: Set[WorkNode]): Future[MatcherResult] = {
+  private def writeUpdate(work: WorkStub,
+                          beforeNodes: Set[WorkNode],
+                          afterNodes: Set[WorkNode]): Future[MatcherResult] = {
 
     // We lock over all the subgraphs we're modifying.
     //
@@ -77,8 +76,8 @@ class WorkMatcher(
     // lot of writes to the lock table -- the subgraph IDs should be sufficient.
     //
     val affectedSubgraphIds =
-    (beforeNodes ++ afterNodes)
-      .map { _.subgraphId }
+      (beforeNodes ++ afterNodes)
+        .map { _.subgraphId }
 
     withLocks(work, ids = affectedSubgraphIds) {
       for {
