@@ -36,7 +36,14 @@ SERVICES = {
     "image_ingestor": ["images-augmented_read", "images-indexed_write"],
     "snapshot_generator": ["works-indexed_read"],
     "stacks_api": ["works-indexed_read"],
-    "catalogue_api": ["works-indexed_read", "images-indexed_read"],
+    "catalogue_api": [
+        "works-indexed_read", "images-indexed_read",
+
+        # This role allows the API to fetch index mappings, which it uses
+        # to check internal model compatibility.
+        # See https://github.com/wellcomecollection/catalogue-api/tree/main/internal_model_tool
+        "viewer",
+    ],
     # This role isn't used by applications, but instead provided to give developer scripts
     # read-only access to the pipeline_storage cluster.
     "read_only": [f"works-{index}_read" for index in WORK_INDICES] + [f"images-{index}_read" for index in IMAGE_INDICES] + ["viewer"],
