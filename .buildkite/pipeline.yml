@@ -1,6 +1,8 @@
 steps:
   - command: .buildkite/scripts/run_autoformat.py
     label: "autoformat"
+    agents:
+      queue: "scala"
 
   - command: .buildkite/scripts/run_job.py internal_model
     label: "internal model"
@@ -15,6 +17,8 @@ steps:
     #
     # See https://buildkite.com/docs/pipelines/command-step
     timeout_in_minutes: 13
+    agents:
+      queue: "scala"
 
   - command: .buildkite/scripts/run_job.py source_model
     label: "source model"
