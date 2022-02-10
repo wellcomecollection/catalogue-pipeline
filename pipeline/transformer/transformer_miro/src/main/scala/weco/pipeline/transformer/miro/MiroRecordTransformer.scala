@@ -21,6 +21,7 @@ import weco.pipeline.transformer.miro.models.MiroMetadata
 import weco.pipeline.transformer.miro.source.MiroRecord
 import weco.pipeline.transformer.miro.transformers._
 import weco.pipeline.transformer.result.Result
+import Implicits._
 
 import java.time.Instant
 import scala.util.{Success, Try}
