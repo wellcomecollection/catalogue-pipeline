@@ -52,44 +52,60 @@ class WorkMatcher(
         // hard-to-debug consistency error if another process updates the graph
         // between us reading it and writing it.
         matcherResult <- if (updatedNodes.isEmpty) {
-          Future.successful(
-            MatcherResult(
-              works = toMatchedIdentifiers(afterNodes),
-              createdTime = Instant.now()))
+          val result = MatcherResult(
+            works = toMatchedIdentifiers(afterNodes),
+            createdTime = Instant.now()
+          )
+
+          Future.successful(result)
         } else {
-
-          // Now we expand our lock to cover all the subgraphs we're modifying,
-          // and all the work IDs we haven't already locked.
-          //
-          // This is useful if, when calling findAffectedWorks() we discover
-          // a work that isn't referenced in the WorkStub we received but we still
-          // want to update, e.g. if we have a graph
-          //
-          //      C -> B -> A
-          //
-          // and we're doing an update on C.  We still want to lock over A, even though
-          // it's not referenced in C itself.
-          //
-          val affectedSubgraphIds =
-            (beforeNodes ++ afterNodes)
-              .map { _.subgraphId }
-
-          val affectedWorkIds =
-            (beforeNodes ++ afterNodes).map { _.id.underlying }
-
-          val expandedLockIds = affectedSubgraphIds ++ affectedWorkIds -- initialLockIds
-
-          withLocks(work, ids = expandedLockIds) {
-            workGraphStore
-              .put(afterNodes)
-              .map(
-                _ =>
-                  MatcherResult(
-                    works = toMatchedIdentifiers(afterNodes),
-                    createdTime = Instant.now()))
-          }
+          writeUpdate(work, beforeNodes, afterNodes)
         }
+
       } yield matcherResult
+    }
+  }
+
+  private def writeUpdate(
+    work: WorkStub,
+    beforeNodes: Set[WorkNode],
+    afterNodes: Set[WorkNode]): Future[MatcherResult] = {
+
+    // We lock over all the subgraphs we're modifying.
+    //
+    // We don't lock over the individual work IDs, because this can cause a
+    // lot of writes to the lock table -- the subgraph IDs should be sufficient.
+    //
+    val affectedSubgraphIds =
+    (beforeNodes ++ afterNodes)
+      .map { _.subgraphId }
+
+    withLocks(work, ids = affectedSubgraphIds) {
+      for {
+
+        // It's possible that another process has updated a node in a part of the
+        // graph we didn't initially lock over.
+        //
+        // e.g. if we have a graph C->B->A and we're processing C, we wouldn't
+        // get a lock on A -- and another process could have updated it since.
+        //
+        // Check our graph store data is still correct -- if it's stale, we should
+        // bail out and wait for the SQS logic to retry us rather than recover.
+        refreshedBeforeNodes <- workGraphStore.findAffectedWorks(work.ids)
+        _ <- if (refreshedBeforeNodes == beforeNodes) {
+          workGraphStore.put(afterNodes)
+        } else {
+          val t = new RuntimeException(
+            s"Error processing ${work.id}: graph store contents changed during matching"
+          )
+          Future.failed(t)
+        }
+
+        result = MatcherResult(
+          works = toMatchedIdentifiers(afterNodes),
+          createdTime = Instant.now()
+        )
+      } yield result
     }
   }
 
