@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    // This is for path
+    "esModuleInterop": true,
+    "lib": [
+      "ES2021.String"
+    ]
+  },
+  // This is for https://github.com/wellcomecollection/ts-aws
+  "ts-node": {
+    "skipIgnore": true
+  }
+}
