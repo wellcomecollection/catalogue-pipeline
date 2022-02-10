@@ -70,6 +70,8 @@ steps:
     label: "Calm adapter"
   - command: .buildkite/scripts/run_job.py calm_deletion_checker
     label: "Calm deletion checker"
+  - command: .buildkite/scripts/run_job.py calm_indexer
+    label: "Calm indexer"
   - command: .buildkite/scripts/run_job.py inference_manager
     label: "inference manager"
   - command: .buildkite/scripts/run_job.py tei_id_extractor

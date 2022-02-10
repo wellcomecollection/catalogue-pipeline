@@ -24,7 +24,7 @@ object Main extends WellcomeTypesafeApp {
     implicit val elasticClient: ElasticClient =
       ElasticBuilder.buildElasticClient(config)
 
-    implicit val s3Client: AmazonS3 = S3Builder.buildS3Client(config)
+    implicit val s3Client: AmazonS3 = S3Builder.buildS3Client
 
     new Worker(
       sqsStream = SQSBuilder.buildSQSStream(config),
