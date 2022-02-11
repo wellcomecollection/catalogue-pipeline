@@ -3,7 +3,7 @@ package weco.tei.adapter
 import akka.{Done, NotUsed}
 import akka.stream.scaladsl.{Flow, Source}
 import software.amazon.awssdk.services.sqs.model.Message
-import weco.json.JsonUtil._
+import weco.json.JsonUtil.fromJson
 import weco.messaging.MessageSender
 import weco.messaging.sns.NotificationMessage
 import weco.messaging.sqs.SQSStream
@@ -17,6 +17,7 @@ import weco.catalogue.source_model.tei.{
   TeiIdMessage,
   TeiMetadata
 }
+import weco.catalogue.source_model.Implicits._
 import weco.flows.FlowOps
 import weco.typesafe.Runnable
 

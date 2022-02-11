@@ -11,7 +11,7 @@ import weco.catalogue.source_model.sierra.{
   SierraItemRecord,
   SierraOrderRecord
 }
-import weco.json.JsonUtil._
+import weco.catalogue.source_model.Implicits._
 import weco.messaging.sns.NotificationMessage
 import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import weco.pipeline.sierra_linker.dynamo.Implicits._

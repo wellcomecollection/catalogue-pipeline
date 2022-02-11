@@ -7,7 +7,8 @@ import weco.catalogue.internal_model.work.InvisibilityReason._
 import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.internal_model.work.{Work, WorkData}
 import weco.catalogue.source_model.sierra._
-import weco.json.JsonUtil._
+import weco.catalogue.source_model.Implicits._
+import weco.json.JsonUtil.fromJson
 import weco.json.exceptions.JsonDecodingError
 import weco.pipeline.transformer.sierra.exceptions.{
   ShouldNotTransformException,

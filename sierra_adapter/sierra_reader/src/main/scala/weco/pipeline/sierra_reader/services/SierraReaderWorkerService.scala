@@ -7,8 +7,8 @@ import grizzled.slf4j.Logging
 import io.circe.Json
 import io.circe.syntax._
 import weco.catalogue.source_model.sierra._
+import weco.catalogue.source_model.Implicits._
 import weco.http.client.HttpGet
-import weco.json.JsonUtil._
 import weco.messaging.sns.NotificationMessage
 import weco.messaging.sqs._
 import weco.pipeline.sierra_reader.config.models.ReaderConfig

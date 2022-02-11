@@ -25,6 +25,7 @@ import weco.catalogue.source_model.CalmSourcePayload
 import weco.catalogue.source_model.calm.CalmRecord
 import weco.catalogue.source_model.fixtures.SourceVHSFixture
 import weco.catalogue.source_model.store.SourceVHS
+import weco.catalogue.source_model.Implicits._
 import weco.pipeline.calm_api_client.CalmQuery
 
 import scala.concurrent.ExecutionContext.Implicits.global

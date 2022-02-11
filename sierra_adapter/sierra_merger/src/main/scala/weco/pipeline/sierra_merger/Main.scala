@@ -4,7 +4,7 @@ import akka.actor.ActorSystem
 import com.typesafe.config.Config
 import weco.catalogue.source_model.config.SourceVHSBuilder
 import weco.catalogue.source_model.sierra._
-import weco.json.JsonUtil._
+import weco.catalogue.source_model.Implicits._
 import weco.messaging.sns.NotificationMessage
 import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import weco.pipeline.sierra_merger.services.{Updater, Worker}

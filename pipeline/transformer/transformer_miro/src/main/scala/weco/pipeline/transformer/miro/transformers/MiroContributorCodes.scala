@@ -1,6 +1,6 @@
 package weco.pipeline.transformer.miro.transformers
 
-import weco.json.JsonUtil._
+import weco.json.JsonUtil.toMap
 import weco.pipeline.transformer.miro.exceptions.ShouldSuppressException
 
 import java.io.InputStream

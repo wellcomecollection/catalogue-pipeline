@@ -13,6 +13,7 @@ case class TeiPathChangedMessage(path: String, uri: URI, timeModified: Instant)
     extends TeiPathMessage
 case class TeiPathDeletedMessage(path: String, timeDeleted: Instant)
     extends TeiPathMessage
+
 object TeiPathMessage {
   implicit val decoder: Decoder[TeiPathMessage] = Decoder[TeiPathChangedMessage]
     .map[TeiPathMessage](identity)

@@ -7,7 +7,8 @@ import io.circe.syntax._
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.source_model.SourcePayload
-import weco.json.JsonUtil._
+import weco.catalogue.internal_model.Implicits._
+import weco.json.JsonUtil.fromJson
 import weco.messaging.sns.NotificationMessage
 import weco.pipeline_storage.Indexable._
 import weco.pipeline_storage.{PipelineStorageStream, Retriever}

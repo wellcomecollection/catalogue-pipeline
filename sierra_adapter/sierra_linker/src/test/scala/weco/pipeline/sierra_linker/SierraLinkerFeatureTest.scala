@@ -4,11 +4,11 @@ import org.scalatest.EitherValues
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.json.JsonUtil._
 import weco.messaging.memory.MemoryMessageSender
 import weco.storage.store.memory.MemoryVersionedStore
 import weco.catalogue.source_model.generators.SierraRecordGenerators
 import weco.catalogue.source_model.sierra._
+import weco.catalogue.source_model.Implicits._
 import weco.pipeline.sierra_linker.fixtures.WorkerFixture
 import weco.pipeline.sierra_linker.models.Link
 import weco.sierra.models.identifiers.{

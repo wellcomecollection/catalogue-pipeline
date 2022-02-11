@@ -8,6 +8,7 @@ import weco.catalogue.internal_model.identifiers.IdentifierType
 import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.internal_model.work.{MergeCandidate, Work, WorkData}
 import weco.catalogue.source_model.CalmSourcePayload
+import weco.catalogue.source_model.Implicits._
 import weco.fixtures.TestWith
 import weco.json.JsonUtil._
 import weco.messaging.fixtures.SQS.QueuePair

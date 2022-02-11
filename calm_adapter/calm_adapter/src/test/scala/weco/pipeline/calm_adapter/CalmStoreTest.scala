@@ -3,12 +3,12 @@ package weco.pipeline.calm_adapter
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.{Assertion, EitherValues}
-import weco.json.JsonUtil._
 import weco.storage.s3.S3ObjectLocation
 import weco.storage.{Identified, Version}
 import weco.catalogue.source_model.calm.CalmRecord
 import weco.catalogue.source_model.fixtures.SourceVHSFixture
 import weco.catalogue.source_model.store.SourceVHS
+import weco.catalogue.source_model.Implicits._
 import java.time.Instant
 
 class CalmStoreTest

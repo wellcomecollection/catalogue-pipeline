@@ -6,9 +6,9 @@ import weco.typesafe.WellcomeTypesafeApp
 import weco.typesafe.config.builders.AkkaBuilder
 import weco.typesafe.config.builders.EnrichConfig._
 import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
-import weco.json.JsonUtil._
 import weco.catalogue.source_model.calm.CalmRecord
 import weco.catalogue.source_model.config.SourceVHSBuilder
+import weco.catalogue.source_model.Implicits._
 import weco.pipeline.calm_api_client.AkkaHttpCalmApiClient
 
 object Main extends WellcomeTypesafeApp {

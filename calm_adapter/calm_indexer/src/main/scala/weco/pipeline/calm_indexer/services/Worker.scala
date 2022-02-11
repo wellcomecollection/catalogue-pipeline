@@ -5,8 +5,9 @@ import com.sksamuel.elastic4s.{ElasticClient, Index}
 import io.circe.Json
 import weco.catalogue.source_model.CalmSourcePayload
 import weco.catalogue.source_model.calm.CalmRecord
+import weco.catalogue.source_model.Implicits._
 import weco.elasticsearch.ElasticsearchIndexCreator
-import weco.json.JsonUtil._
+import weco.json.JsonUtil.fromJson
 import weco.messaging.sns.NotificationMessage
 import weco.messaging.sqs.SQSStream
 import weco.pipeline.calm_indexer.index.CalmIndexConfig

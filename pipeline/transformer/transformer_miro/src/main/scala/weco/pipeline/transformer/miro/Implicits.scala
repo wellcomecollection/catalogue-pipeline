@@ -6,7 +6,6 @@ import weco.json.JsonUtil._
 import weco.pipeline.transformer.miro.source.MiroRecord
 
 object Implicits {
-
   implicit val encoder: Encoder[MiroRecord] = deriveConfiguredEncoder
   implicit val decoder: Decoder[MiroRecord] = deriveConfiguredDecoder
 }

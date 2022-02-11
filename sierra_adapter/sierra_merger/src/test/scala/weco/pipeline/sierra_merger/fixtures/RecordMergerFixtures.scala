@@ -8,8 +8,8 @@ import weco.catalogue.source_model.sierra.{
   SierraTransformable
 }
 import weco.catalogue.source_model.store.SourceVHS
+import weco.catalogue.source_model.Implicits._
 import weco.fixtures.TestWith
-import weco.json.JsonUtil._
 import weco.messaging.fixtures.SQS
 import weco.messaging.fixtures.SQS.Queue
 import weco.messaging.memory.MemoryMessageSender

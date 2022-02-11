@@ -11,7 +11,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.akka.fixtures.Akka
 import weco.fixtures.TestWith
-import weco.json.JsonUtil._
+import weco.json.JsonUtil.toJson
 import weco.json.utils.JsonAssertions
 import weco.catalogue.source_model.generators.SierraRecordGenerators
 import weco.catalogue.source_model.sierra.{

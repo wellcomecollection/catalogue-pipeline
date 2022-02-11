@@ -3,7 +3,7 @@ package weco.pipeline.sierra_merger.services
 import akka.Done
 import grizzled.slf4j.Logging
 import io.circe.Decoder
-import weco.json.JsonUtil._
+import weco.json.JsonUtil.fromJson
 import weco.messaging.MessageSender
 import weco.messaging.sns.NotificationMessage
 import weco.messaging.sqs.SQSStream
@@ -12,6 +12,7 @@ import weco.storage.{Identified, Version}
 import weco.typesafe.Runnable
 import weco.catalogue.source_model.SierraSourcePayload
 import weco.catalogue.source_model.sierra.AbstractSierraRecord
+import weco.catalogue.source_model.Implicits._
 
 import scala.concurrent.{ExecutionContext, Future}
 

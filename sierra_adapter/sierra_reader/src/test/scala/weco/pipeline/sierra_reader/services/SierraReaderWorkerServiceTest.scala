@@ -4,11 +4,11 @@ import akka.http.scaladsl.model._
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.json.JsonUtil._
 import weco.pipeline.sierra_reader.exceptions.SierraReaderException
 import weco.storage.fixtures.S3Fixtures.Bucket
 import weco.storage.s3.S3ObjectLocation
 import weco.catalogue.source_model.sierra.SierraBibRecord
+import weco.catalogue.source_model.Implicits._
 import weco.messaging.sns.NotificationMessage
 import weco.pipeline.sierra_reader.fixtures.WorkerServiceFixture
 

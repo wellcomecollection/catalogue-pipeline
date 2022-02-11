@@ -6,7 +6,7 @@ import com.sksamuel.elastic4s.requests.get.GetResponse
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.scalatest.{Assertion, Suite}
-import weco.json.JsonUtil._
+import weco.json.JsonUtil.fromJson
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.index.{IndexFixtures, WorksIndexConfig}
 import weco.catalogue.internal_model.work.WorkState.{Denormalised, Indexed}

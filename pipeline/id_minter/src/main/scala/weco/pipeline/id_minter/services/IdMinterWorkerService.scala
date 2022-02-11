@@ -5,7 +5,7 @@ import akka.stream.scaladsl.Flow
 import grizzled.slf4j.Logging
 import io.circe.Json
 import software.amazon.awssdk.services.sqs.model.Message
-import weco.json.JsonUtil._
+import weco.json.JsonUtil.fromJson
 import weco.messaging.sns.NotificationMessage
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.work.WorkState.Identified

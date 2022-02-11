@@ -6,8 +6,8 @@ import org.scalatest.matchers.should.Matchers
 import weco.catalogue.source_model.CalmSourcePayload
 import weco.catalogue.source_model.calm.CalmRecord
 import weco.catalogue.source_model.generators.CalmRecordGenerators
+import weco.catalogue.source_model.Implicits._
 import weco.elasticsearch.IndexConfig
-import weco.json.JsonUtil._
 import weco.pipeline.calm_indexer.fixtures.IndexerFixtures
 import weco.storage.generators.S3ObjectLocationGenerators
 import weco.storage.s3.S3ObjectLocation

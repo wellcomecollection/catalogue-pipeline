@@ -14,6 +14,7 @@ import weco.storage.s3.S3ObjectLocation
 import weco.typesafe.Runnable
 import weco.catalogue.source_model.CalmSourcePayload
 import weco.catalogue.source_model.calm.CalmRecord
+import weco.catalogue.source_model.Implicits._
 import weco.flows.FlowOps
 import weco.pipeline.calm_api_client.CalmQuery
 

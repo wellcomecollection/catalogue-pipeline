@@ -3,7 +3,6 @@ package weco.pipeline.sierra_linker.fixtures
 import io.circe.{Decoder, Encoder}
 import weco.akka.fixtures.Akka
 import weco.fixtures.TestWith
-import weco.json.JsonUtil._
 import weco.messaging.fixtures.SQS
 import weco.messaging.fixtures.SQS.Queue
 import weco.messaging.memory.MemoryMessageSender
@@ -17,6 +16,7 @@ import weco.catalogue.source_model.sierra.{
   SierraItemRecord,
   SierraOrderRecord
 }
+import weco.catalogue.source_model.Implicits._
 import weco.pipeline.sierra_linker.models.{Link, LinkOps}
 import weco.pipeline.sierra_linker.services.{LinkStore, SierraLinkerWorker}
 import weco.sierra.models.identifiers.{
