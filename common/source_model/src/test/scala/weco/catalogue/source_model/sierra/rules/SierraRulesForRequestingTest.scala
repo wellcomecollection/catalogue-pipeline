@@ -12,23 +12,6 @@ class SierraRulesForRequestingTest
     with Matchers
     with SierraDataGenerators
     with TableDrivenPropertyChecks {
-  it("blocks an item from the strong room") {
-    val item = createSierraItemDataWith(
-      fixedFields = Map("97" -> FixedField(label = "IMESSAGE", value = "x"))
-    )
-
-    SierraRulesForRequesting(item) shouldBe NotRequestable.BelongsInStrongroom(
-      "This item belongs in the Strongroom")
-  }
-
-  it("blocks an item with fixed field 97 (imessage) = j") {
-    val item = createSierraItemDataWith(
-      fixedFields = Map("97" -> FixedField(label = "IMESSAGE", value = "j"))
-    )
-
-    SierraRulesForRequesting(item) shouldBe a[NotRequestable.NoPublicMessage]
-  }
-
   it("blocks an item based on the status") {
     val testCases = Table(
       ("status", "expectedMessage"),

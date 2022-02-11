@@ -28,8 +28,6 @@ object NotRequestable {
 
   case class RequestTopItem(message: String) extends NotRequestable
 
-  case class BelongsInStrongroom(message: String) extends NotRequestable
-
   // This is used for items that are prevented from requesting, and the rule
   // doesn't include a message to display to users.
   //

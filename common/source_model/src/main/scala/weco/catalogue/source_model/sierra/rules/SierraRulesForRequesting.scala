@@ -33,22 +33,13 @@ import weco.sierra.models.data.SierraItemData
   *   -   Variable length fields on items
   *       https://documentation.iii.com/sierrahelp/Content/sril/sril_records_varfld_types_item.html
   *
-  * This is based on a copy of the Rules for Requesting as sent from LS&S
-  * on 19 November 2021.
+  * This was last checked against Sierra based on a set of rules sent from
+  * Liz Richens on 31 January 2022.
   *
   */
 object SierraRulesForRequesting {
   def apply(itemData: SierraItemData): RulesForRequestingResult =
     itemData match {
-
-      // This is the line:
-      //
-      //    q|i||97||=|x||This item belongs in the Strongroom
-      //
-      // This rule means "if fixed field 97 on the item has the value 'x'".
-      case i if i.fixedField("97").contains("x") =>
-        NotRequestable.BelongsInStrongroom(
-          "This item belongs in the Strongroom")
 
       // These cases cover the lines:
       //
@@ -385,13 +376,6 @@ object SierraRulesForRequesting {
       case i if i.fixedField("79").containsAnyOf("rm001", "rmdda") =>
         NotRequestable.NoPublicMessage(
           s"fixed field 79 = ${i.fixedField("79").get}")
-
-      // This case covers the line:
-      //
-      //    q|i||97||=|j||
-      //
-      case i if i.fixedField("97").contains("j") =>
-        NotRequestable.NoPublicMessage("fixed field 97 = j")
 
       case _ => Requestable
     }
