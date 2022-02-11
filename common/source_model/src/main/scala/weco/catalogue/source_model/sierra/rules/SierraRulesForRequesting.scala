@@ -33,8 +33,8 @@ import weco.sierra.models.data.SierraItemData
   *   -   Variable length fields on items
   *       https://documentation.iii.com/sierrahelp/Content/sril/sril_records_varfld_types_item.html
   *
-  * This is based on a copy of the Rules for Requesting as sent from LS&S
-  * on 19 November 2021.
+  * This was last checked against Sierra based on a set of rules sent from
+  * Liz Richens on 31 January 2022.
   *
   */
 object SierraRulesForRequesting {
