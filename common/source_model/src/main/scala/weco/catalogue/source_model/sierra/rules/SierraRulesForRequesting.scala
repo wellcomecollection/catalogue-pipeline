@@ -41,15 +41,6 @@ object SierraRulesForRequesting {
   def apply(itemData: SierraItemData): RulesForRequestingResult =
     itemData match {
 
-      // This is the line:
-      //
-      //    q|i||97||=|x||This item belongs in the Strongroom
-      //
-      // This rule means "if fixed field 97 on the item has the value 'x'".
-      case i if i.fixedField("97").contains("x") =>
-        NotRequestable.BelongsInStrongroom(
-          "This item belongs in the Strongroom")
-
       // These cases cover the lines:
       //
       //    q|i||88||=|m||This item is missing.
@@ -385,13 +376,6 @@ object SierraRulesForRequesting {
       case i if i.fixedField("79").containsAnyOf("rm001", "rmdda") =>
         NotRequestable.NoPublicMessage(
           s"fixed field 79 = ${i.fixedField("79").get}")
-
-      // This case covers the line:
-      //
-      //    q|i||97||=|j||
-      //
-      case i if i.fixedField("97").contains("j") =>
-        NotRequestable.NoPublicMessage("fixed field 97 = j")
 
       case _ => Requestable
     }
