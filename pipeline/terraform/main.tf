@@ -1,8 +1,8 @@
-module "catalogue_pipeline_2022-02-03" {
+module "catalogue_pipeline_2022-02-17" {
   source = "./stack"
 
-  pipeline_date = "2022-02-03"
-  release_label = "2022-02-03"
+  pipeline_date = "2022-02-17"
+  release_label = "2022-02-17"
 
   reindexing_state = {
     connect_reindex_topics   = false
@@ -91,11 +91,11 @@ module "catalogue_pipeline_2022-02-03" {
   logging_cluster_id = local.logging_cluster_id
 }
 
-module "catalogue_pipeline_2021-12-21" {
+module "catalogue_pipeline_2022-02-03" {
   source = "./stack"
 
-  pipeline_date = "2021-12-21"
-  release_label = "2021-12-21"
+  pipeline_date = "2022-02-03"
+  release_label = "2022-02-03"
 
   reindexing_state = {
     connect_reindex_topics   = false

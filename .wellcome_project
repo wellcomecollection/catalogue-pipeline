@@ -81,10 +81,10 @@ reindexer:
 
 catalogue_pipeline:
   environments:
-    - id: "2021-12-21"
-      name: "2021-12-21"
     - id: "2022-02-03"
       name: "2022-02-03"
+    - id: "2022-02-17"
+      name: "2022-02-17"
   image_repositories:
     - id: id_minter
       services:
