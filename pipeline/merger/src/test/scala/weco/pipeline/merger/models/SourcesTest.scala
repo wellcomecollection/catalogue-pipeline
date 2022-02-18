@@ -2,8 +2,12 @@ package weco.pipeline.merger.models
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.work.generators.{CalmWorkGenerators, MiroWorkGenerators, SierraWorkGenerators}
+import weco.catalogue.internal_model.work.generators.SierraWorkGenerators
 import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.work.generators.{
+  CalmWorkGenerators,
+  SierraWorkGenerators
+}
 import weco.catalogue.internal_model.work.{Format, MergeCandidate}
 import weco.pipeline.matcher.generators.MergeCandidateGenerators
 
@@ -11,7 +15,6 @@ class SourcesTest
     extends AnyFunSpec
     with Matchers
     with CalmWorkGenerators
-    with MiroWorkGenerators
     with SierraWorkGenerators
     with MergeCandidateGenerators {
   describe("findFirstLinkedDigitisedSierraWorkFor") {
@@ -161,28 +164,6 @@ class SourcesTest
           sources = Seq(digitisedWork))
 
       result shouldBe None
-    }
-
-    it("finds a merge candidate if the MC is on the e-bib, and the physical bib has an unrelated MC") {
-      val miroWork = miroIdentifiedWork()
-      val physicalWork =
-        sierraPhysicalIdentifiedWork()
-          .format(Format.Books)
-          .mergeCandidates(
-            List(createMiroSierraMergeCandidateFor(miroWork))
-          )
-
-      val digitisedWork =
-        sierraDigitalIdentifiedWork()
-          .mergeCandidates(
-            List(createSierraPairMergeCandidateFor(physicalWork))
-          )
-
-      val result = Sources.findFirstLinkedDigitisedSierraWorkFor(
-        physicalWork,
-        sources = Seq(digitisedWork, miroWork))
-
-      result shouldBe Some(digitisedWork)
     }
   }
 }
