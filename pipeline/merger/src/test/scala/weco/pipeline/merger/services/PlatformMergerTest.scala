@@ -922,7 +922,8 @@ class PlatformMergerTest
     redirectedWork.identifiers should contain theSameElementsAs (physicalWork.identifiers ++ electronicWork.identifiers)
   }
 
-  it("handles a Sierra physical/digitised pair where there's an irrelevant Miro work in the mix") {
+  it(
+    "handles a Sierra physical/digitised pair where there's an irrelevant Miro work in the mix") {
     // This is a regression test for an issue we saw where the identifiers were
     // being dropped from a set of works where:
     //
@@ -951,7 +952,8 @@ class PlatformMergerTest
           List(createSierraPairMergeCandidateFor(physicalWork))
         )
 
-    val result = merger.merge(works = Seq(miroWork, physicalWork, digitisedWork))
+    val result =
+      merger.merge(works = Seq(miroWork, physicalWork, digitisedWork))
 
     val mergedWork =
       result
@@ -959,7 +961,7 @@ class PlatformMergerTest
         .collectFirst { case w: Work.Visible[Merged] => w }
         .get
 
-    mergedWork.identifiers should contain theSameElementsAs(
+    mergedWork.identifiers should contain theSameElementsAs (
       physicalWork.identifiers ++ digitisedWork.identifiers
     )
   }

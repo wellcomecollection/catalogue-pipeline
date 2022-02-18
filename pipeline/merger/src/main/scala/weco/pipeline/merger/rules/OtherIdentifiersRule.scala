@@ -122,9 +122,11 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
              sources: NonEmptyList[Work[Identified]]): FieldData = {
       val sourceIdentifiers =
         findFirstLinkedDigitisedSierraWorkFor(target, sources.toList) match {
-          case Some(digitisedWork) => target.data.otherIdentifiers ++ digitisedWork.identifiers
+          case Some(digitisedWork) =>
+            target.data.otherIdentifiers ++ digitisedWork.identifiers
           case None =>
-            warn(s"Unable to find other digitised Sierra identifiers for target work ${target.id}")
+            warn(
+              s"Unable to find other digitised Sierra identifiers for target work ${target.id}")
             List()
         }
 

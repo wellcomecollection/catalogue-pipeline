@@ -2,7 +2,11 @@ package weco.pipeline.merger.models
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.work.generators.{CalmWorkGenerators, MiroWorkGenerators, SierraWorkGenerators}
+import weco.catalogue.internal_model.work.generators.{
+  CalmWorkGenerators,
+  MiroWorkGenerators,
+  SierraWorkGenerators
+}
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.{Format, MergeCandidate}
 import weco.pipeline.matcher.generators.MergeCandidateGenerators
@@ -163,7 +167,8 @@ class SourcesTest
       result shouldBe None
     }
 
-    it("finds a merge candidate if the MC is on the e-bib, and the physical bib has an unrelated MC") {
+    it(
+      "finds a merge candidate if the MC is on the e-bib, and the physical bib has an unrelated MC") {
       val miroWork = miroIdentifiedWork()
       val physicalWork =
         sierraPhysicalIdentifiedWork()
