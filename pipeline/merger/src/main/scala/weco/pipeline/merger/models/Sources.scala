@@ -24,17 +24,11 @@ object Sources {
       case t if isAudiovisual(t) =>
         None
 
-      // We've seen Sierra bib/e-bib pairs that go in both directions, i.e.
+      // Handle the case where the physical bib links to the e-bib.
       //
-      //      bib { 776 $w -> e-bib}
-      //
-      // and
-      //
-      //      e-bib { 776 $w -> bib }
-      //
-      // We need to handle both cases.
-      //
-      case t if physicalSierra(t) && t.state.mergeCandidates.nonEmpty =>
+      // Note: the physical bib may have merge candidates to other works, so
+      // we need to make sure we don't match this branch if that's the case.
+      case t if physicalSierra(t) && hasPhysicalDigitalMergeCandidate(t) =>
         val digitisedLinkedIds = target.state.mergeCandidates
           .filter(_.reason.contains("Physical/digitised Sierra work"))
           .map(_.id.canonicalId)
@@ -42,6 +36,8 @@ object Sources {
         sources.find(source =>
           digitisedLinkedIds.contains(source.state.canonicalId))
 
+      // Handle the case where the e-bib links to the physical bib, but not
+      // the other way round.
       case t if physicalSierra(t) =>
         sources
           .filter { w =>

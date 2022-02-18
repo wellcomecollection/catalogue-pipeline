@@ -4,7 +4,11 @@ import { dirname } from 'path';
 import { SourceIdentifier, SourceWork } from './models';
 
 // https://stackoverflow.com/a/51302466
-const downloadFile = async (url: string, path: string) => {
+const downloadFile = async (url: string | undefined, path: string) => {
+  if (typeof url === 'undefined') {
+    return;
+  }
+
   // Ensure the directory exists.  Theoretically can throw an error if the dir
   // pops into existence before we call mkdirSync(), but unlikely.
   if (!existsSync(dirname(path))) {
