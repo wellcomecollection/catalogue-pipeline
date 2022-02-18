@@ -28,7 +28,7 @@ object Sources {
       //
       // Note: the physical bib may have merge candidates to other works, so
       // we need to make sure we don't match this branch if that's the case.
-      case t if physicalSierra(t) && t.hasPhysicalDigitalMergeCandidate =>
+      case t if physicalSierra(t) && hasPhysicalDigitalMergeCandidate(t) =>
         val digitisedLinkedIds = target.state.mergeCandidates
           .filter(_.reason.contains("Physical/digitised Sierra work"))
           .map(_.id.canonicalId)
@@ -52,9 +52,4 @@ object Sources {
 
       case _ => None
     }
-
-  private implicit class TargetOps(target: Work.Visible[Identified]) {
-    def hasPhysicalDigitalMergeCandidate: Boolean =
-      target.state.mergeCandidates.exists(_.reason.contains("Physical/digitised Sierra work"))
-  }
 }

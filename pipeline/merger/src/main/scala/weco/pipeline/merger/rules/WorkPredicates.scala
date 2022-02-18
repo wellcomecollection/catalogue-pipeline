@@ -167,6 +167,9 @@ object WorkPredicates {
       case _                                             => false
     }
 
+  def hasPhysicalDigitalMergeCandidate(work: Work[Identified]): Boolean =
+    work.state.mergeCandidates.exists(_.reason.contains("Physical/digitised Sierra work"))
+
   private def satisfiesAll(predicates: (Work[Identified] => Boolean)*)(
     work: Work[Identified]
   ): Boolean = predicates.forall(_(work))
