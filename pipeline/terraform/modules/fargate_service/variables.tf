@@ -102,3 +102,8 @@ variable "use_fargate_spot" {
   type    = bool
   default = true
 }
+
+variable "cooldown_period" {
+  type    = string
+  default = "1m"
+}
