@@ -37,7 +37,7 @@ object Relations {
 }
 
 case class Relation(
-  id: CanonicalId,
+  id: Option[CanonicalId],
   title: Option[String],
   collectionPath: Option[CollectionPath],
   workType: WorkType,
@@ -55,7 +55,7 @@ object Relation {
     numDescendents: Int
   ): Relation =
     Relation(
-      id = id,
+      id = Option(id),
       title = data.title,
       collectionPath = data.collectionPath,
       workType = data.workType,
