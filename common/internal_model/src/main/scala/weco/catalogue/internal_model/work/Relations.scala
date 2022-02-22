@@ -55,7 +55,7 @@ object Relation {
     numDescendents: Int
   ): Relation =
     Relation(
-      id = Option(id),
+      id = Some(id),
       title = data.title,
       collectionPath = data.collectionPath,
       workType = data.workType,
