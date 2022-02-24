@@ -69,7 +69,7 @@ object Relation {
     * A Series is not an entity in its own right, so does not have an id of its own.
     *
     * Practically, a Series does not exist in a hierarchy, so does not have depth or
-    * children or descendents, even though (obviously) there are objects that are "partOf"
+    * children or descendants, even though (obviously) there are objects that are "partOf"
     * the series.
     */
   def apply(series: String): Relation =
