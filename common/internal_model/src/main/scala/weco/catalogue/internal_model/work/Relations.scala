@@ -64,6 +64,17 @@ object Relation {
       numDescendents = numDescendents,
     )
 
+  /**
+   * A Relation created with just a String is a Series.  The string is the title.
+   * A Series is not an entity in its own right, so does not have an id of its own.
+   *
+   * Practically, a Series does not exist in a hierarchy, so does not have depth or
+   * children or descendents, even though (obviously) there are objects that are "partOf"
+   * the series.
+   */
+  def apply(series: String): Relation =
+    new Relation(None, Some(series), None, WorkType.Series, 0, 0, 0)
+
   def apply[State <: WorkState](work: Work[State],
                                 depth: Int,
                                 numChildren: Int,
