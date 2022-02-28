@@ -18,7 +18,8 @@ class RelationsTest extends AnyFunSpec with Matchers {
     ).size shouldBe 5
   }
 
-  it("Shows the total number of known relations even when not all relation lists are populated") {
+  it(
+    "Shows the total number of known relations even when not all relation lists are populated") {
     Relations(
       List(Relation("Granny"), Relation("Grandpa"), Relation("Mum")),
       List(Relation("Baby")),
