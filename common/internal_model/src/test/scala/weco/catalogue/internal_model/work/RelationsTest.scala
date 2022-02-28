@@ -19,9 +19,7 @@ class RelationsTest extends AnyFunSpec with Matchers {
   }
 }
 
-class RelationTest extends AnyFunSpec
-  with Matchers
-  with WorkGenerators {
+class RelationTest extends AnyFunSpec with Matchers with WorkGenerators {
 
   it("Creates a Relation by extracting relevant properties from a Work") {
     val work = indexedWork()
