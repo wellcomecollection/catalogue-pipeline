@@ -73,7 +73,7 @@ object Relation {
     * the series.
     */
   def apply(series: String): Relation =
-    new Relation(None, Some(series), None, WorkType.Series, 0, 0, 0)
+    Relation(None, Some(series), None, WorkType.Series, 0, 0, 0)
 
   def apply[State <: WorkState](work: Work[State],
                                 depth: Int,
