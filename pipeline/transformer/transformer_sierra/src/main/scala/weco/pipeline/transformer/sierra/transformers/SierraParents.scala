@@ -32,7 +32,7 @@ object SierraParents extends SierraQueryOps {
 
   /**
    *  Convert the parent link MARC fields into Relation objects.
-   *  
+   *
    *  Links to a parent are found in four different MARC fields
    *  These are all to result in a Series Relation with the title
    *  taken from the MARC field.
