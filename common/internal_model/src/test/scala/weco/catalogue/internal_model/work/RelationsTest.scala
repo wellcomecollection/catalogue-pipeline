@@ -5,7 +5,7 @@ import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.work.generators.WorkGenerators
 
 class RelationsTest extends AnyFunSpec with Matchers {
-  it("Has zero size when empty") {
+  it("has zero size when empty") {
     Relations.none.size shouldBe 0
   }
 
