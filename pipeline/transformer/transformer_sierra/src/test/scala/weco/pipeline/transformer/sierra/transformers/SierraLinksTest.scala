@@ -6,9 +6,10 @@ import weco.catalogue.internal_model.work.Relation
 import weco.sierra.generators.SierraDataGenerators
 import weco.sierra.models.marc.{Subfield, VarField}
 
-class SierraLinksTest extends AnyFunSpec
-with Matchers
-with SierraDataGenerators  {
+class SierraLinksTest
+    extends AnyFunSpec
+    with Matchers
+    with SierraDataGenerators {
 
   it("returns an empty list if there are no relevant MARC tags") {
     val varFields = List(
@@ -20,7 +21,8 @@ with SierraDataGenerators  {
     getLinks(varFields) shouldBe Nil
   }
 
-  it("returns a Series relation for a 440 - Series Statement/Added Entry-Title field") {
+  it(
+    "returns a Series relation for a 440 - Series Statement/Added Entry-Title field") {
     val varFields = List(
       VarField(
         marcTag = Some("440"),
@@ -53,7 +55,8 @@ with SierraDataGenerators  {
     getLinks(varFields) shouldBe List(Relation("A Series"))
   }
 
-  it("returns a Series relation for an 830 - Series Added Entry-Uniform Title field") {
+  it(
+    "returns a Series relation for an 830 - Series Added Entry-Uniform Title field") {
     val varFields = List(
       VarField(
         marcTag = Some("830"),
@@ -63,7 +66,8 @@ with SierraDataGenerators  {
     getLinks(varFields) shouldBe List(Relation("A Series"))
   }
 
-  it("returns a list of series relations when multiple relevant MARC fields are present") {
+  it(
+    "returns a list of series relations when multiple relevant MARC fields are present") {
     val varFields = List(
       VarField(
         marcTag = Some("440"),
@@ -160,7 +164,8 @@ with SierraDataGenerators  {
       VarField(
         marcTag = Some("830"),
         subfields = List(Subfield(tag = "v", content = "no. 149.")),
-        content = Some("Published papers (Wellcome Chemical Research Laboratories) ;")
+        content =
+          Some("Published papers (Wellcome Chemical Research Laboratories) ;")
       ),
       VarField(
         marcTag = Some("830"),
