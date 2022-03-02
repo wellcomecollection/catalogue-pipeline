@@ -37,7 +37,7 @@ object Relations {
 }
 
 case class Relation(
-  id: CanonicalId,
+  id: Option[CanonicalId],
   title: Option[String],
   collectionPath: Option[CollectionPath],
   workType: WorkType,
@@ -45,6 +45,27 @@ case class Relation(
   numChildren: Int,
   numDescendents: Int,
 )
+
+/**
+  * A Relation can be created with just a String representing the title of a Series.
+  * A Series is not an entity in its own right, so does not have an id of its own.
+  *
+  * Practically, a Series does not exist in a hierarchy, so does not have depth or
+  * children or descendants, nor does it have a collectionPath, even though (obviously)
+  * there are objects that are "partOf" the series.
+  */
+object SeriesRelation {
+  def apply(series: String): Relation =
+    Relation(
+      id = None,
+      title = Some(series),
+      collectionPath = None,
+      workType = WorkType.Series,
+      depth = 0,
+      numChildren = 0,
+      numDescendents = 0
+    )
+}
 
 object Relation {
   private def apply(
@@ -55,7 +76,7 @@ object Relation {
     numDescendents: Int
   ): Relation =
     Relation(
-      id = id,
+      id = Some(id),
       title = data.title,
       collectionPath = data.collectionPath,
       workType = data.workType,

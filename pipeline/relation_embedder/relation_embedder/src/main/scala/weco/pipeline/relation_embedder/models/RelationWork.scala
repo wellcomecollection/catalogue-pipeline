@@ -13,7 +13,7 @@ case class RelationWork(
 
   def toRelation(depth: Int, numChildren: Int, numDescendents: Int) =
     Relation(
-      id = state.canonicalId,
+      id = Some(state.canonicalId),
       title = data.title,
       collectionPath = data.collectionPath,
       workType = data.workType,
