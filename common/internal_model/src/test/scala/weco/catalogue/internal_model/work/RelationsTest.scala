@@ -11,20 +11,20 @@ class RelationsTest extends AnyFunSpec with Matchers {
 
   it("Shows the total number of known relations when populated") {
     Relations(
-      List(Relation("Granny"), Relation("Grandpa")),
-      List(Relation("Baby")),
-      List(Relation("Big Sister")),
-      List(Relation("Little Brother"))
+      ancestors = List(SeriesRelation("Granny"), SeriesRelation("Grandpa")),
+      children = List(SeriesRelation("Baby")),
+      siblingsPreceding = List(SeriesRelation("Big Sister")),
+      siblingsSucceeding = List(SeriesRelation("Little Brother"))
     ).size shouldBe 5
   }
 
   it(
     "Shows the total number of known relations even when not all relation lists are populated") {
     Relations(
-      List(Relation("Granny"), Relation("Grandpa"), Relation("Mum")),
-      List(Relation("Baby")),
-      Nil,
-      List(Relation("Little Brother"), Relation("Little Sister"))
+      ancestors = List(SeriesRelation("Granny"), SeriesRelation("Grandpa"), SeriesRelation("Mum")),
+      children = List(SeriesRelation("Baby")),
+      siblingsPreceding = Nil,
+      siblingsSucceeding = List(SeriesRelation("Little Brother"), SeriesRelation("Little Sister"))
     ).size shouldBe 6
   }
 }
@@ -33,7 +33,7 @@ class RelationTest extends AnyFunSpec with Matchers with WorkGenerators {
 
   it("Creates a Relation by extracting relevant properties from a Work") {
     val work = indexedWork()
-    val relation = Relation(work, 1, 2, 3)
+    val relation = Relation(work = work, depth = 1, numChildren = 2, numDescendents = 3)
     relation.id.get shouldBe work.state.canonicalId
     relation.title shouldBe work.data.title
     relation.collectionPath shouldBe work.data.collectionPath
@@ -43,7 +43,7 @@ class RelationTest extends AnyFunSpec with Matchers with WorkGenerators {
   }
 
   it("Creates a Series Relation from a title") {
-    val relation = Relation("hello")
+    val relation = SeriesRelation("hello")
     relation.title.get shouldBe "hello"
     relation.workType shouldBe WorkType.Series
 
