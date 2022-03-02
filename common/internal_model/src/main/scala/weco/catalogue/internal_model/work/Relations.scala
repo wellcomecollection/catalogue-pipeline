@@ -47,14 +47,14 @@ case class Relation(
 )
 
 /**
- * A Relation can be created with just a String representing the title of a Series.
- * A Series is not an entity in its own right, so does not have an id of its own.
- *
- * Practically, a Series does not exist in a hierarchy, so does not have depth or
- * children or descendants, nor does it have a collectionPath, even though (obviously)
- * there are objects that are "partOf" the series.
- */
-object SeriesRelation{
+  * A Relation can be created with just a String representing the title of a Series.
+  * A Series is not an entity in its own right, so does not have an id of its own.
+  *
+  * Practically, a Series does not exist in a hierarchy, so does not have depth or
+  * children or descendants, nor does it have a collectionPath, even though (obviously)
+  * there are objects that are "partOf" the series.
+  */
+object SeriesRelation {
   def apply(series: String): Relation =
     Relation(
       id = None,
@@ -66,7 +66,6 @@ object SeriesRelation{
       numDescendents = 0
     )
 }
-
 
 object Relation {
   private def apply(
