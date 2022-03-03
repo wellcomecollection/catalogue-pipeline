@@ -175,7 +175,8 @@ class SierraLinksTest
     )
 
     getLinks(varFields) shouldBe List(
-      SeriesRelation("Published papers (Wellcome Chemical Research Laboratories)"),
+      SeriesRelation(
+        "Published papers (Wellcome Chemical Research Laboratories)"),
       SeriesRelation("A Series; but with a space after the separator")
     )
   }
