@@ -1254,7 +1254,6 @@ class SierraTransformerTest
     work.data.format shouldBe None
   }
 
-
   it("extracts parent Series Relations") {
     val id = createSierraBibNumber
     val data =
@@ -1291,7 +1290,6 @@ class SierraTransformerTest
       )
     )
   }
-
 
   describe("throws a TransformerException when passed invalid data") {
     it("an item record") {
