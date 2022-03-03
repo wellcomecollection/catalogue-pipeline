@@ -1,6 +1,6 @@
 package weco.pipeline.transformer.sierra.transformers
 
-import weco.catalogue.internal_model.work.Relation
+import weco.catalogue.internal_model.work.{Relation, SeriesRelation}
 import weco.sierra.models.SierraQueryOps
 import weco.sierra.models.data.SierraBibData
 
@@ -49,6 +49,6 @@ object SierraParents extends SierraQueryOps {
       .filter(_.nonEmpty)
       .distinct
       .map(
-        Relation(_)
+        SeriesRelation(_)
       )
 }

@@ -2,7 +2,7 @@ package weco.pipeline.transformer.sierra.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.work.Relation
+import weco.catalogue.internal_model.work.{Relation, SeriesRelation}
 import weco.sierra.generators.SierraDataGenerators
 import weco.sierra.models.marc.{Subfield, VarField}
 
@@ -29,7 +29,7 @@ class SierraLinksTest
         content = Some("A Series")
       )
     )
-    getLinks(varFields) shouldBe List(Relation("A Series"))
+    getLinks(varFields) shouldBe List(SeriesRelation("A Series"))
   }
 
   it("returns a Series relation for a 490 - Series Statement field") {
@@ -39,7 +39,7 @@ class SierraLinksTest
         content = Some("A Series")
       )
     )
-    getLinks(varFields) shouldBe List(Relation("A Series"))
+    getLinks(varFields) shouldBe List(SeriesRelation("A Series"))
   }
 
   it("returns a Series relation for an 773 - Host Item Entry field") {
@@ -52,7 +52,7 @@ class SierraLinksTest
         content = Some("A Series")
       )
     )
-    getLinks(varFields) shouldBe List(Relation("A Series"))
+    getLinks(varFields) shouldBe List(SeriesRelation("A Series"))
   }
 
   it(
@@ -63,7 +63,7 @@ class SierraLinksTest
         content = Some("A Series")
       )
     )
-    getLinks(varFields) shouldBe List(Relation("A Series"))
+    getLinks(varFields) shouldBe List(SeriesRelation("A Series"))
   }
 
   it(
@@ -87,10 +87,10 @@ class SierraLinksTest
       )
     )
     getLinks(varFields) shouldBe List(
-      Relation("A Series"),
-      Relation("Another Series"),
-      Relation("A Host"),
-      Relation("Yet Another Series"),
+      SeriesRelation("A Series"),
+      SeriesRelation("Another Series"),
+      SeriesRelation("A Host"),
+      SeriesRelation("Yet Another Series"),
     )
   }
 
@@ -110,8 +110,8 @@ class SierraLinksTest
       )
     )
     getLinks(varFields) shouldBe List(
-      Relation("A Series"),
-      Relation("Another Series"),
+      SeriesRelation("A Series"),
+      SeriesRelation("Another Series"),
     )
   }
 
@@ -140,8 +140,8 @@ class SierraLinksTest
       )
     )
     getLinks(varFields) shouldBe List(
-      Relation("A Series"),
-      Relation("Another Series"),
+      SeriesRelation("A Series"),
+      SeriesRelation("Another Series"),
     )
   }
 
@@ -155,7 +155,7 @@ class SierraLinksTest
         content = Some("A Host")
       )
     )
-    getLinks(varFields) shouldBe List(Relation("A Host"))
+    getLinks(varFields) shouldBe List(SeriesRelation("A Host"))
   }
 
   it("trims known separators between field and subfield") {
@@ -175,8 +175,8 @@ class SierraLinksTest
     )
 
     getLinks(varFields) shouldBe List(
-      Relation("Published papers (Wellcome Chemical Research Laboratories)"),
-      Relation("A Series; but with a space after the separator")
+      SeriesRelation("Published papers (Wellcome Chemical Research Laboratories)"),
+      SeriesRelation("A Series; but with a space after the separator")
     )
   }
 
