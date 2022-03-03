@@ -189,14 +189,14 @@ object WorkState {
     // work to be performed by the pipeline
     sourceModifiedTime: Instant,
     mergeCandidates: List[MergeCandidate[IdState.Identifiable]] = Nil,
-    internalWorkStubs: List[InternalWork.Source] = Nil
+    internalWorkStubs: List[InternalWork.Source] = Nil,
+    relations: Relations = Relations.none
   ) extends WorkState {
 
     type WorkDataState = DataState.Unidentified
     type TransitionArgs = Unit
 
     def id = sourceIdentifier.toString
-    val relations = Relations.none
 
     override val modifiedTime: Instant = sourceModifiedTime
   }

@@ -1254,6 +1254,45 @@ class SierraTransformerTest
     work.data.format shouldBe None
   }
 
+
+  it("extracts parent Series Relations") {
+    val id = createSierraBibNumber
+    val data =
+      s"""{
+         |  "id": "$id",
+         |  "varFields": [
+         |  ${createTitleVarfield()},
+         |    {
+         |      "marcTag": "440",
+         |      "content": "Series via 440"
+         |    },
+         |    {
+         |      "marcTag": "490",
+         |      "content": "Series via 490"
+         |    },
+         |    {
+         |      "marcTag": "773",
+         |      "content": "Series via 773"
+         |    },
+         |    {
+         |      "marcTag": "830",
+         |      "content": "Series via 830"
+         |    }
+         |  ]
+         |}""".stripMargin
+
+    val work = transformDataToSourceWork(id = id, data = data)
+    work.state.relations shouldBe Relations(
+      ancestors = List(
+        SeriesRelation("Series via 440"),
+        SeriesRelation("Series via 490"),
+        SeriesRelation("Series via 773"),
+        SeriesRelation("Series via 830")
+      )
+    )
+  }
+
+
   describe("throws a TransformerException when passed invalid data") {
     it("an item record") {
       val bibRecord = createSierraBibRecord
