@@ -42,7 +42,7 @@ class SierraLinksTest
     getLinks(varFields) shouldBe List(SeriesRelation("A Series"))
   }
 
-  it("returns a Series relation for an 773 - Host Item Entry field") {
+  it("returns a Series relation for a 773 - Host Item Entry field") {
     // In phase one, all relations from parent to child are treated as
     // Series links.
     // This is subject to change in a later phase.
