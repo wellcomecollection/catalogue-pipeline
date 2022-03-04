@@ -25,6 +25,12 @@ module "id_minter" {
 
   queue_visibility_timeout_seconds = 120
 
+  # We've seen issues where the ID minter is failing messages for
+  # no discernable reason; given the visibility timeout is greater than
+  # the default cooldown period, it's possible it's being scaled away
+  # too quickly when it has works with lots of identifiers.
+  cooldown_period = "15m"
+
   env_vars = {
     topic_arn                     = module.id_minter_output_topic.arn
     max_connections               = local.id_minter_task_max_connections

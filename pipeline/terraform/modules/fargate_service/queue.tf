@@ -16,10 +16,12 @@ resource "aws_iam_role_policy" "read_from_q" {
 }
 
 module "scaling_alarm" {
-  source = "github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.2.1"
+  source = "github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.3.0"
 
   queue_name = module.input_queue.name
 
   queue_high_actions = [module.worker.scale_up_arn]
   queue_low_actions  = [module.worker.scale_down_arn]
+
+  cooldown_period = var.cooldown_period
 }
