@@ -23,6 +23,15 @@ case class Relations(
       siblingsPreceding,
       siblingsSucceeding
     ).map(_.size).sum
+
+  def + (that: Relations): Relations = {
+    Relations(
+      ancestors = this.ancestors + that.ancestors,
+      children = this.children + that.children,
+      siblingsPreceding = this.siblingsPreceding + that.siblingsPreceding,
+      siblingsSucceeding = this.siblingsSucceeding + that.siblingsSucceeding
+    )
+  }
 }
 
 object Relations {

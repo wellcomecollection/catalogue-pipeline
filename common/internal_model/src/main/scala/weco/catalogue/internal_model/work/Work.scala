@@ -206,14 +206,14 @@ object WorkState {
     canonicalId: CanonicalId,
     sourceModifiedTime: Instant,
     mergeCandidates: List[MergeCandidate[IdState.Identified]] = Nil,
-    internalWorkStubs: List[InternalWork.Identified] = Nil
+    internalWorkStubs: List[InternalWork.Identified] = Nil,
+    relations: Relations = Relations.none
   ) extends WorkState {
 
     type WorkDataState = DataState.Identified
     type TransitionArgs = Unit
 
     def id = canonicalId.toString
-    val relations = Relations.none
 
     override val modifiedTime: Instant = sourceModifiedTime
   }
@@ -223,7 +223,8 @@ object WorkState {
     canonicalId: CanonicalId,
     mergedTime: Instant,
     sourceModifiedTime: Instant,
-    availabilities: Set[Availability] = Set.empty
+    availabilities: Set[Availability] = Set.empty,
+    relations: Relations = Relations.none
   ) extends WorkState {
 
     type WorkDataState = DataState.Identified
@@ -231,7 +232,6 @@ object WorkState {
 
     def id: String = canonicalId.toString
 
-    override val relations: Relations = Relations.none
     // This is used to order updates in pipeline-storage.
     // See https://github.com/wellcomecollection/docs/tree/main/rfcs/038-matcher-versioning
     override val modifiedTime: Instant = mergedTime
@@ -320,6 +320,7 @@ object WorkFsm {
         mergedTime = mergedTime,
         sourceModifiedTime = state.sourceModifiedTime,
         availabilities = Availabilities.forWorkData(data),
+        relations = state.relations
       )
 
     def data(data: WorkData[DataState.Identified]) = data
@@ -340,7 +341,7 @@ object WorkFsm {
               mergedTime = state.mergedTime,
               sourceModifiedTime = state.sourceModifiedTime,
               availabilities = state.availabilities ++ relationAvailabilities,
-              relations = relations
+              relations = state.relations + relations
             )
         }
 
