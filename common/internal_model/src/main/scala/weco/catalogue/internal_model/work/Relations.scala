@@ -24,7 +24,7 @@ case class Relations(
       siblingsSucceeding
     ).map(_.size).sum
 
-  def + (that: Relations): Relations = {
+  def +(that: Relations): Relations = {
     Relations(
       ancestors = this.ancestors + that.ancestors,
       children = this.children + that.children,
