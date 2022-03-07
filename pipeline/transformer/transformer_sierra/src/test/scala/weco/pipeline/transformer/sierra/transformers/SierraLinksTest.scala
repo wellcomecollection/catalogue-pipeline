@@ -199,7 +199,6 @@ class SierraLinksTest
     )
   }
 
-  private def getLinks(varFields: List[VarField]): List[Relation] = {
+  private def getLinks(varFields: List[VarField]): List[Relation] =
     SierraParents(createSierraBibDataWith(varFields = varFields))
-  }
 }
