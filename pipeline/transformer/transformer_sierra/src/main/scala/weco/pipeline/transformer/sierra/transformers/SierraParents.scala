@@ -6,8 +6,6 @@ import weco.sierra.models.SierraQueryOps
 import weco.sierra.models.data.SierraBibData
 import weco.sierra.models.marc.VarField
 
-import scala.util.matching.Regex
-
 /*
  * Implementation of Parent links in Sierra records.
  *
@@ -21,15 +19,6 @@ import scala.util.matching.Regex
  * */
 
 object SierraParents extends SierraQueryOps with Logging {
-
-  // MARC fields are designed to be output by concatenating the whole field
-  // (i.e. the content and subfields) in document order.
-  // As such, they may contain punctuation (and spacing)
-  // intended to presented in that context specifically.
-  // In this usage, we are separating the main content from the subfield
-  // so this punctuation is not wanted.
-  // Expand this regex as more separators are discovered
-  val TailSeparator: Regex = "[;]\\s?$".r
 
   /**
     *  Convert the parent link MARC fields into Relation objects.
@@ -45,9 +34,18 @@ object SierraParents extends SierraQueryOps with Logging {
     *
     *  All Series Relations resulting from this:
     *  - Have a non-empty title
-    *  - Are stripped of subfield separators
+    *  - Are stripped of subfield separators (see below)
     *  - Are unique
+    *
+    *  MARC fields are designed to be output by concatenating the whole field
+    *  (i.e. the content and subfields) in document order.
+    *  As such, they may contain punctuation (and spacing)
+    *  intended to presented in that context specifically.
+    *  In this usage, we are separating the main content from the subfield
+    *  so this punctuation is not wanted.
     */
+
+
   def apply(bibData: SierraBibData): List[Relation] = {
     bibData
       .varfieldsWithTags("440", "490", "773", "830")
@@ -60,15 +58,24 @@ object SierraParents extends SierraQueryOps with Logging {
       )
   }
 
+  /**
+   * Return the title of the parent object represented by the given VarField
+   * The part of the field that represents the title varies by which MARC tag is in use.
+   * 773 fields have no main field content, the title is in the 'title' subfield
+   * 440, 490 and 830 fields normally keep it in the main field content
+   */
   private def titleFromVarField(field: VarField): Option[String] = {
     (field.marcTag.get, field.subfieldsWithTag("t")) match {
-      case ("773", Nil) => {
+      case ("773", Nil) =>
         warn(
           s"A 773 field is expected to contain a title subfield, there was none: $field")
         field.content
-      }
       case ("773", subfields) => Some(subfields.head.content)
-      case _                  => field.content
+      case marcTag =>
+        if(field.content.exists(_.nonEmpty)){
+          warn(s"A $marcTag field is expected to have a title in the field content, there was none: $field")
+        }
+        field.content
     }
   }
 }
