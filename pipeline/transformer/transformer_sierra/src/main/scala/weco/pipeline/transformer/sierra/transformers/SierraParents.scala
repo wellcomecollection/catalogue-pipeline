@@ -61,13 +61,14 @@ object SierraParents extends SierraQueryOps with Logging {
   }
 
   private def titleFromVarField(field: VarField): Option[String] = {
-    (field.marcTag.get, field.subfieldsWithTag("t"))  match {
-      case ("773", Nil) =>  {
-        warn(s"A 773 field is expected to contain a title subfield, there was none: $field")
+    (field.marcTag.get, field.subfieldsWithTag("t")) match {
+      case ("773", Nil) => {
+        warn(
+          s"A 773 field is expected to contain a title subfield, there was none: $field")
         field.content
       }
       case ("773", subfields) => Some(subfields.head.content)
-      case _ => field.content
+      case _                  => field.content
     }
   }
 }

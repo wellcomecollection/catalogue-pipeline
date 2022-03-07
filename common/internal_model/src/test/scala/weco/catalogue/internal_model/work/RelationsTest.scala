@@ -48,8 +48,10 @@ class RelationsTest extends AnyFunSpec with Matchers {
     r1 + r2 shouldBe Relations(
       ancestors = List(SeriesRelation("Granny"), SeriesRelation("Grandpa")),
       children = List(SeriesRelation("Daughter"), SeriesRelation("Son")),
-      siblingsPreceding = List(SeriesRelation("Big Sister"), SeriesRelation("Big Brother")),
-      siblingsSucceeding = List(SeriesRelation("Little Sister"), SeriesRelation("Little Brother"))
+      siblingsPreceding =
+        List(SeriesRelation("Big Sister"), SeriesRelation("Big Brother")),
+      siblingsSucceeding =
+        List(SeriesRelation("Little Sister"), SeriesRelation("Little Brother"))
     )
   }
 }

@@ -174,7 +174,7 @@ class SierraLinksTest
         subfields = List(
           Subfield(tag = "v", content = "vol. 2")
         )
-    )
+      )
     )
     getLinks(varFields) shouldBe List(
       SeriesRelation("A Host"),
