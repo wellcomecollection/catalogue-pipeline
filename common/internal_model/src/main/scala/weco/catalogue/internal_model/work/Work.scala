@@ -198,7 +198,7 @@ object WorkState {
 
     def id = sourceIdentifier.toString
 
-    override val modifiedTime: Instant = sourceModifiedTime
+    val modifiedTime: Instant = sourceModifiedTime
   }
 
   case class Identified(
@@ -215,7 +215,7 @@ object WorkState {
 
     def id = canonicalId.toString
 
-    override val modifiedTime: Instant = sourceModifiedTime
+    val modifiedTime: Instant = sourceModifiedTime
   }
 
   case class Merged(
@@ -234,7 +234,7 @@ object WorkState {
 
     // This is used to order updates in pipeline-storage.
     // See https://github.com/wellcomecollection/docs/tree/main/rfcs/038-matcher-versioning
-    override val modifiedTime: Instant = mergedTime
+    val modifiedTime: Instant = mergedTime
   }
 
   case class Denormalised(
@@ -253,7 +253,7 @@ object WorkState {
 
     // This is used to order updates in pipeline-storage.
     // See https://github.com/wellcomecollection/docs/tree/main/rfcs/038-matcher-versioning
-    override val modifiedTime: Instant = mergedTime
+    val modifiedTime: Instant = mergedTime
   }
 
   /** Why are there three *Time parameters?
@@ -285,7 +285,7 @@ object WorkState {
 
     def id = canonicalId.toString
 
-    override val modifiedTime: Instant = mergedTime
+    val modifiedTime: Instant = mergedTime
   }
 }
 
