@@ -1,5 +1,9 @@
 package weco.catalogue.internal_model.work
-import weco.catalogue.internal_model.work.WorkState.{Denormalised, Identified, Merged}
+import weco.catalogue.internal_model.work.WorkState.{
+  Denormalised,
+  Identified,
+  Merged
+}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks
@@ -8,9 +12,12 @@ import weco.catalogue.internal_model.identifiers.{CanonicalId, SourceIdentifier}
 
 import java.time.Instant
 
-
-class StateTest extends AnyFunSpec with Matchers with TableDrivenPropertyChecks {
-  private val sourceIdentifier = SourceIdentifier(SierraIdentifier, "otype", "id")
+class StateTest
+    extends AnyFunSpec
+    with Matchers
+    with TableDrivenPropertyChecks {
+  private val sourceIdentifier =
+    SourceIdentifier(SierraIdentifier, "otype", "id")
   private val workData = WorkData(title = Some("My Title"))
   private val canonicalId = CanonicalId("baadf00d")
   private val merged = Work.Visible[Identified](
@@ -38,13 +45,16 @@ class StateTest extends AnyFunSpec with Matchers with TableDrivenPropertyChecks 
     it("preserves existing state members") {
       val preservedMembers = Table(
         ("preservedMember", "expectedValue"),
-        (identified.state.relations, Relations(ancestors = List(SeriesRelation("Mum")))),
+        (
+          identified.state.relations,
+          Relations(ancestors = List(SeriesRelation("Mum")))),
         (identified.state.sourceIdentifier, sourceIdentifier),
         (identified.state.canonicalId, canonicalId),
         (identified.state.sourceModifiedTime, Instant.MIN)
       )
       forAll(preservedMembers) {
-        case (preservedMember, expectedValue) => preservedMember shouldBe expectedValue
+        case (preservedMember, expectedValue) =>
+          preservedMember shouldBe expectedValue
       }
     }
   }
@@ -64,7 +74,7 @@ class StateTest extends AnyFunSpec with Matchers with TableDrivenPropertyChecks 
       denormalised.data shouldBe workData
     }
 
-    it("merges existing relations with newly provided relations"){
+    it("merges existing relations with newly provided relations") {
       denormalised.state.relations shouldBe Relations(
         ancestors = List(SeriesRelation("Mum"), SeriesRelation("Dad")),
         siblingsPreceding = List(SeriesRelation("Big Brother"))
@@ -79,7 +89,8 @@ class StateTest extends AnyFunSpec with Matchers with TableDrivenPropertyChecks 
         (denormalised.state.sourceModifiedTime, Instant.MIN)
       )
       forAll(preservedMembers) {
-        case (preservedMember, expectedValue) => preservedMember shouldBe expectedValue
+        case (preservedMember, expectedValue) =>
+          preservedMember shouldBe expectedValue
       }
     }
   }
