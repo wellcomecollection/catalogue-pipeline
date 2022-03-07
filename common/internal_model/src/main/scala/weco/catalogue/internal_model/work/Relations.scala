@@ -26,10 +26,10 @@ case class Relations(
 
   def +(that: Relations): Relations = {
     Relations(
-      ancestors = this.ancestors + that.ancestors,
-      children = this.children + that.children,
-      siblingsPreceding = this.siblingsPreceding + that.siblingsPreceding,
-      siblingsSucceeding = this.siblingsSucceeding + that.siblingsSucceeding
+      ancestors = this.ancestors ++ that.ancestors,
+      children = this.children ++ that.children,
+      siblingsPreceding = this.siblingsPreceding ++ that.siblingsPreceding,
+      siblingsSucceeding = this.siblingsSucceeding ++ that.siblingsSucceeding
     )
   }
 }
