@@ -46,6 +46,18 @@ class SierraLinksTest
     // In phase one, all relations from parent to child are treated as
     // Series links.
     // This is subject to change in a later phase.
+    // 773 fields differ from the others in that the title is in a subfield
+    val varFields = List(
+      VarField(
+        marcTag = "773",
+        subfields = List(Subfield(tag = "t", content = "A Series"))
+      )
+    )
+    getLinks(varFields) shouldBe List(SeriesRelation("A Series"))
+  }
+
+  it("Extracts the title from the body of a 773 field, if title is absent") {
+    // This is not a scenario we expect to encounter, but
     val varFields = List(
       VarField(
         marcTag = Some("773"),
@@ -79,7 +91,7 @@ class SierraLinksTest
       ),
       VarField(
         marcTag = Some("773"),
-        content = Some("A Host")
+        subfields = List(Subfield(tag = "t", content = "A Host"))
       ),
       VarField(
         marcTag = Some("830"),
@@ -102,7 +114,7 @@ class SierraLinksTest
       ),
       VarField(
         marcTag = Some("773"),
-        content = Some("A Series")
+        subfields = List(Subfield(tag = "t", content = "A Series"))
       ),
       VarField(
         marcTag = Some("830"),
@@ -129,7 +141,7 @@ class SierraLinksTest
         marcTag = Some("490"),
         // This should be filtered by the subfield separator removal logic,
         // resulting in an empty string, so is to be ignored.
-        content = Some(" ; ")
+        content = Some(" ;")
       ),
       VarField(
         marcTag = Some("830")
@@ -145,17 +157,29 @@ class SierraLinksTest
     )
   }
 
-  it("ignores subfields") {
+  it("ignores subfields that indicate a part name or number") {
     // In phase one, the partName is simply to be ignored.
     // This is subject to change in a later phase.
     val varFields = List(
       VarField(
         marcTag = Some("773"),
-        subfields = List(Subfield(tag = "w", content = "page 2")),
-        content = Some("A Host")
-      )
+        subfields = List(
+          Subfield(tag = "t", content = "A Host"),
+          Subfield(tag = "w", content = "page 2")
+        )
+      ),
+      VarField(
+        marcTag = Some("830"),
+        content = Some("A Big Series"),
+        subfields = List(
+          Subfield(tag = "v", content = "vol. 2")
+        )
     )
-    getLinks(varFields) shouldBe List(SeriesRelation("A Host"))
+    )
+    getLinks(varFields) shouldBe List(
+      SeriesRelation("A Host"),
+      SeriesRelation("A Big Series")
+    )
   }
 
   it("trims known separators between field and subfield") {
@@ -165,19 +189,13 @@ class SierraLinksTest
         marcTag = Some("830"),
         subfields = List(Subfield(tag = "v", content = "no. 149.")),
         content =
-          Some("Published papers (Wellcome Chemical Research Laboratories) ;")
-      ),
-      VarField(
-        marcTag = Some("830"),
-        subfields = List(Subfield(tag = "v", content = "no. 149.")),
-        content = Some("A Series; but with a space after the separator ; ")
+          Some("Published papers; (Wellcome Chemical Research Laboratories) ;")
       )
     )
 
     getLinks(varFields) shouldBe List(
       SeriesRelation(
-        "Published papers (Wellcome Chemical Research Laboratories)"),
-      SeriesRelation("A Series; but with a space after the separator")
+        "Published papers; (Wellcome Chemical Research Laboratories)")
     )
   }
 
