@@ -44,8 +44,6 @@ object SierraParents extends SierraQueryOps with Logging {
     *  In this usage, we are separating the main content from the subfield
     *  so this punctuation is not wanted.
     */
-
-
   def apply(bibData: SierraBibData): List[Relation] = {
     bibData
       .varfieldsWithTags("440", "490", "773", "830")
@@ -59,11 +57,11 @@ object SierraParents extends SierraQueryOps with Logging {
   }
 
   /**
-   * Return the title of the parent object represented by the given VarField
-   * The part of the field that represents the title varies by which MARC tag is in use.
-   * 773 fields have no main field content, the title is in the 'title' subfield
-   * 440, 490 and 830 fields normally keep it in the main field content
-   */
+    * Return the title of the parent object represented by the given VarField
+    * The part of the field that represents the title varies by which MARC tag is in use.
+    * 773 fields have no main field content, the title is in the 'title' subfield
+    * 440, 490 and 830 fields normally keep it in the main field content
+    */
   private def titleFromVarField(field: VarField): Option[String] = {
     (field.marcTag.get, field.subfieldsWithTag("t")) match {
       case ("773", Nil) =>
@@ -72,8 +70,9 @@ object SierraParents extends SierraQueryOps with Logging {
         field.content
       case ("773", subfields) => Some(subfields.head.content)
       case marcTag =>
-        if(field.content.exists(_.nonEmpty)){
-          warn(s"A $marcTag field is expected to have a title in the field content, there was none: $field")
+        if (field.content.exists(_.nonEmpty)) {
+          warn(
+            s"A $marcTag field is expected to have a title in the field content, there was none: $field")
         }
         field.content
     }
