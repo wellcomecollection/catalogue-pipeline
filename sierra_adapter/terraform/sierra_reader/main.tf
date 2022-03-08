@@ -41,4 +41,6 @@ module "sierra_reader_service" {
   elastic_cloud_vpce_sg_id = var.elastic_cloud_vpce_sg_id
 
   shared_logging_secrets = var.shared_logging_secrets
+
+  use_fargate_spot = true
 }
