@@ -57,7 +57,8 @@ class SierraLinksTest
   }
 
   it("Extracts the title from the body of a 773 field, if title is absent") {
-    // This is not a scenario we expect to encounter, but
+    // This is not a scenario we expect to encounter, but applying
+    // Postel's Law and logging a warning is better than discarding it
     val varFields = List(
       VarField(
         marcTag = Some("773"),
