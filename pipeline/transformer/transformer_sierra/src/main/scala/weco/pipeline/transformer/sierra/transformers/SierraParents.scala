@@ -70,7 +70,7 @@ object SierraParents extends SierraQueryOps with Logging {
         field.content
       case ("773", subfields) => Some(subfields.head.content)
       case marcTag =>
-        if(!field.content.exists(_.nonEmpty)){
+        if (!field.content.exists(_.nonEmpty)) {
           warn(
             s"A $marcTag field is expected to have a title in the field content, there was none: $field")
         }
