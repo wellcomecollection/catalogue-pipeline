@@ -16,7 +16,7 @@ locals {
 resource "ec_deployment" "pipeline" {
   name = "pipeline-${var.pipeline_date}"
 
-  version = "7.17.0"
+  version = "7.17.1"
 
   region                 = "eu-west-1"
   deployment_template_id = "aws-io-optimized-v2"
