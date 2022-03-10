@@ -2,6 +2,7 @@ package weco.pipeline.transformer.sierra.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.prop.TableDrivenPropertyChecks
 import weco.catalogue.internal_model.work.{Relation, SeriesRelation}
 import weco.sierra.generators.SierraDataGenerators
 import weco.sierra.models.marc.{Subfield, VarField}
@@ -9,7 +10,8 @@ import weco.sierra.models.marc.{Subfield, VarField}
 class SierraLinksTest
     extends AnyFunSpec
     with Matchers
-    with SierraDataGenerators {
+    with SierraDataGenerators
+    with TableDrivenPropertyChecks{
 
   it("returns an empty list if there are no relevant MARC tags") {
     val varFields = List(
@@ -77,6 +79,24 @@ class SierraLinksTest
       )
     )
     getLinks(varFields) shouldBe List(SeriesRelation("A Series"))
+  }
+
+  it("Extracts the title from the 'a' subfield") {
+    forAll(
+      Table(
+        "marcTag",
+        "440", "490", "773", "830"
+      )) { (marcTag) =>
+
+        val varFields = List(
+          VarField(
+            marcTag = Some(marcTag),
+            subfields = List(Subfield(tag = "a", content = "A Series"))
+          )
+        )
+        getLinks(varFields) shouldBe List(SeriesRelation("A Series"))
+      }
+
   }
 
   it(
