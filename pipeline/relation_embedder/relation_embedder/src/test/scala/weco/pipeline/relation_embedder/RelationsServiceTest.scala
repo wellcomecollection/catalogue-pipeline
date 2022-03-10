@@ -207,7 +207,7 @@ class RelationsServiceTest
       }
     }
 
-    it("Ignores works in other archvies") {
+    it("Ignores works in other archives") {
       withLocalMergedWorksIndex { index =>
         withActorSystem { implicit actorSystem =>
           insertIntoElasticsearch(index, work("other/archive") :: works: _*)

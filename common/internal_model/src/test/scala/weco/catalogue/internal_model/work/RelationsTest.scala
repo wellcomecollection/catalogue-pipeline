@@ -31,6 +31,29 @@ class RelationsTest extends AnyFunSpec with Matchers {
         List(SeriesRelation("Little Brother"), SeriesRelation("Little Sister"))
     ).size shouldBe 6
   }
+
+  it("concatenates each relation list when added together") {
+    val r1 = Relations(
+      ancestors = List(SeriesRelation("Granny")),
+      children = List(SeriesRelation("Daughter")),
+      siblingsPreceding = List(SeriesRelation("Big Sister")),
+      siblingsSucceeding = List(SeriesRelation("Little Sister"))
+    )
+    val r2 = Relations(
+      ancestors = List(SeriesRelation("Grandpa")),
+      children = List(SeriesRelation("Son")),
+      siblingsPreceding = List(SeriesRelation("Big Brother")),
+      siblingsSucceeding = List(SeriesRelation("Little Brother"))
+    )
+    r1 + r2 shouldBe Relations(
+      ancestors = List(SeriesRelation("Granny"), SeriesRelation("Grandpa")),
+      children = List(SeriesRelation("Daughter"), SeriesRelation("Son")),
+      siblingsPreceding =
+        List(SeriesRelation("Big Sister"), SeriesRelation("Big Brother")),
+      siblingsSucceeding =
+        List(SeriesRelation("Little Sister"), SeriesRelation("Little Brother"))
+    )
+  }
 }
 
 class RelationTest extends AnyFunSpec with Matchers with WorkGenerators {

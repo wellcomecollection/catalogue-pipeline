@@ -5,7 +5,7 @@ import weco.catalogue.internal_model.identifiers._
 import weco.catalogue.internal_model.work.DeletedReason._
 import weco.catalogue.internal_model.work.InvisibilityReason._
 import weco.catalogue.internal_model.work.WorkState.Source
-import weco.catalogue.internal_model.work.{Work, WorkData}
+import weco.catalogue.internal_model.work.{Relations, Work, WorkData}
 import weco.catalogue.source_model.sierra._
 import weco.catalogue.source_model.Implicits._
 import weco.json.JsonUtil.fromJson
@@ -72,7 +72,8 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
         val state = Source(
           sourceIdentifier = sourceIdentifier,
           sourceModifiedTime = sierraTransformable.modifiedTime,
-          mergeCandidates = SierraMergeCandidates(bibId, bibData)
+          mergeCandidates = SierraMergeCandidates(bibId, bibData),
+          relations = Relations(ancestors = SierraParents(bibData))
         )
 
         if (bibData.deleted) {
