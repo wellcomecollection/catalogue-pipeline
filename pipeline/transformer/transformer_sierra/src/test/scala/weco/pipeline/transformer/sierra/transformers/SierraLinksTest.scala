@@ -11,7 +11,7 @@ class SierraLinksTest
     extends AnyFunSpec
     with Matchers
     with SierraDataGenerators
-    with TableDrivenPropertyChecks{
+    with TableDrivenPropertyChecks {
 
   it("returns an empty list if there are no relevant MARC tags") {
     val varFields = List(
@@ -85,17 +85,19 @@ class SierraLinksTest
     forAll(
       Table(
         "marcTag",
-        "440", "490", "773", "830"
+        "440",
+        "490",
+        "773",
+        "830"
       )) { (marcTag) =>
-
-        val varFields = List(
-          VarField(
-            marcTag = Some(marcTag),
-            subfields = List(Subfield(tag = "a", content = "A Series"))
-          )
+      val varFields = List(
+        VarField(
+          marcTag = Some(marcTag),
+          subfields = List(Subfield(tag = "a", content = "A Series"))
         )
-        getLinks(varFields) shouldBe List(SeriesRelation("A Series"))
-      }
+      )
+      getLinks(varFields) shouldBe List(SeriesRelation("A Series"))
+    }
 
   }
 
