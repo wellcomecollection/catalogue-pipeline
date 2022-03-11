@@ -129,7 +129,8 @@ class SierraLinksTest
     )
   }
 
-  it("returns a list of series relations when the same relevant MARC field is present multiple times") {
+  it(
+    "returns a list of series relations when the same relevant MARC field is present multiple times") {
     forAll(
       Table(
         "marcTag",
