@@ -89,22 +89,24 @@ class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
                         value = "^B".r.replaceAllIn(sourceIdentifier.value, "b")
                       )
 
-                      val errorMessage = if (distinctIdentifiers.contains(similarIdentifier)) {
-                        s"""
+                      val errorMessage =
+                        if (distinctIdentifiers.contains(similarIdentifier)) {
+                          s"""
                            |The query returned a source identifier ($sourceIdentifier) which we weren't looking for,
                            |but it did return a similar identifier ($similarIdentifier).
                            |If this is a METS identifier, may have fixed the case of the b number in the source file;
                            |if so, you'll need to update the associated records in the ID minter database.
                            |See https://github.com/wellcomecollection/catalogue-pipeline/blob/main/pipeline/id_minter/connect_to_the_database.md
                            |""".stripMargin
-                      } else {
-                        s"""
+                        } else {
+                          s"""
                            |The query returned a sourceIdentifier ($sourceIdentifier) which we weren't looking for
                            |($distinctIdentifiers)
                            |""".stripMargin
-                      }
+                        }
 
-                      throw new RuntimeException(errorMessage.replace("\n", " "))
+                      throw new RuntimeException(
+                        errorMessage.replace("\n", " "))
                     }
                   })
                   .list
