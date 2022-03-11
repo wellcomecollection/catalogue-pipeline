@@ -129,6 +129,44 @@ class SierraLinksTest
     )
   }
 
+  it(
+    "returns a list of series relations when the same relevant MARC field is present multiple times") {
+    forAll(
+      Table(
+        "marcTag",
+        "440",
+        "490",
+        "773",
+        "830"
+      )) { (marcTag) =>
+      val varFields = List(
+        VarField(
+          marcTag = Some(marcTag),
+          content = Some("A Series")
+        ),
+        VarField(
+          marcTag = Some(marcTag),
+          content = Some("Another Series")
+        ),
+        VarField(
+          marcTag = Some(marcTag),
+          subfields = List(Subfield(tag = "t", content = "A Host"))
+        ),
+        VarField(
+          marcTag = Some(marcTag),
+          content = Some("Yet Another Series")
+        )
+      )
+
+      getLinks(varFields) shouldBe List(
+        SeriesRelation("A Series"),
+        SeriesRelation("Another Series"),
+        SeriesRelation("A Host"),
+        SeriesRelation("Yet Another Series"),
+      )
+    }
+  }
+
   it("returns only unique values if there are duplicates") {
     val varFields = List(
       VarField(
