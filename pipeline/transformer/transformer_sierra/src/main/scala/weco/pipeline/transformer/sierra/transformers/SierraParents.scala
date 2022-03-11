@@ -48,7 +48,7 @@ object SierraParents extends SierraQueryOps with Logging {
     bibData
       .varfieldsWithTags("440", "490", "773", "830")
       .flatMap(titleFromVarField)
-      .map(title => title.stripSuffix(" ;").trim)
+      .map(title => title.stripSuffix(";").stripSuffix(",").trim)
       .filter(_.nonEmpty)
       .distinct
       .map(

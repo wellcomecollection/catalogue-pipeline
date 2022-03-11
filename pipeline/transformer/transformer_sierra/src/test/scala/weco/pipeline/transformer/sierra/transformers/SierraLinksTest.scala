@@ -207,19 +207,26 @@ class SierraLinksTest
 
   it("trims known separators between field and subfield") {
     // Expand this test as more of these separators are discovered.
-    val varFields = List(
-      VarField(
-        marcTag = Some("830"),
-        subfields = List(Subfield(tag = "v", content = "no. 149.")),
-        content =
-          Some("Published papers; (Wellcome Chemical Research Laboratories) ;")
+    forAll(
+      Table(
+        "suffix",
+        ";",
+        ","
+      )) { (suffix) =>
+      val varFields = List(
+        VarField(
+          marcTag = Some("830"),
+          subfields = List(Subfield(tag = "v", content = "no. 149.")),
+          content =
+            Some(s"Published papers${suffix} (Wellcome Chemical Research Laboratories) ${suffix}")
+        )
       )
-    )
 
-    getLinks(varFields) shouldBe List(
-      SeriesRelation(
-        "Published papers; (Wellcome Chemical Research Laboratories)")
-    )
+      getLinks(varFields) shouldBe List(
+        SeriesRelation(
+          s"Published papers${suffix} (Wellcome Chemical Research Laboratories)")
+      )
+    }
   }
 
   private def getLinks(varFields: List[VarField]): List[Relation] =
