@@ -217,8 +217,8 @@ class SierraLinksTest
         VarField(
           marcTag = Some("830"),
           subfields = List(Subfield(tag = "v", content = "no. 149.")),
-          content =
-            Some(s"Published papers${suffix} (Wellcome Chemical Research Laboratories) ${suffix}")
+          content = Some(
+            s"Published papers${suffix} (Wellcome Chemical Research Laboratories) ${suffix}")
         )
       )
 
