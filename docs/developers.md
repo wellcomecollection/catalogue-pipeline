@@ -12,16 +12,16 @@ We deploy catalogue-pipeline services using the [weco-deploy](https://github.com
 
 #### Reindexing
 
-If the [internal_model](./common/internal_model) has been changed you will want to update the information stored by the pipeline to match that model.
+If the [internal_model](../common/internal_model) has been changed you will want to update the information stored by the pipeline to match that model.
 
-A reindex operation runs the source data from the [adapters](docs/adapters/README.md) through the pipeline causing it to be re-transformed / matched & merged as appropriate.
+A reindex operation runs the source data from the [adapters](adapters/README.md) through the pipeline causing it to be re-transformed / matched & merged as appropriate.
 
-If you want to perform a reindex, follow the instructions in [REINDEX.md](REINDEX.md).
+If you want to perform a reindex, follow the instructions in [REINDEXING.md](../REINDEXING.md).
 
 #### Scripts
 
 Generally small things you might want to do irregularly involving the
-API & data are in [./scripts](./scripts)
+API & data are in [/scripts](../scripts)
 
 ### Problems you might have
 
