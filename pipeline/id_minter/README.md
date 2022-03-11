@@ -66,3 +66,7 @@ Then, it adds a `canonicalId` field with the ID to the JSON:
 ```
 
 It updates all SourceIdentifier objects in the JSON, even if they're deeply nested; e.g. it also adds canonical IDs to items and subjects.
+
+## Connecting to the ID minter database
+
+If you need to connect to the ID minter database, there are [some notes on how to do so](./connect-to-the-database.md).
