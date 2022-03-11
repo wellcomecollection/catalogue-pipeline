@@ -63,18 +63,19 @@ object SierraParents extends SierraQueryOps with Logging {
     * 440, 490 and 830 fields normally keep it in the main field content
     */
   private def titleFromVarField(field: VarField): Option[String] = {
-    (field.marcTag.get, field.subfieldsWithTag("t")) match {
-      case ("773", Nil) =>
-        warn(
-          s"A 773 field is expected to contain a title subfield, there was none: $field")
-        field.content
-      case ("773", subfields) => Some(subfields.head.content)
-      case marcTag =>
+    (field.marcTag.get, field.subfieldsWithTags("t", "a")) match {
+      case (marcTag, Nil) =>
         if (!field.content.exists(_.nonEmpty)) {
           warn(
-            s"A $marcTag field is expected to have a title in the field content, there was none: $field")
+            s"A $marcTag field is expected to have a title in the field content or one of the title subfields (t or a), there was none: $field")
         }
         field.content
+      case (marcTag, subfields) =>
+        if (subfields.tail.nonEmpty || field.content.exists(_.nonEmpty)) {
+          warn(
+            s"Ambiguous $marcTag Series relationship, only one of t, a or the field content is expected to be populated $field")
+        }
+        Some(subfields.head.content)
     }
   }
 }
