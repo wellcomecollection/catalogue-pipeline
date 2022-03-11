@@ -91,9 +91,9 @@ class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
 
                       val errorMessage = if (distinctIdentifiers.contains(similarIdentifier)) {
                         s"""
-                           |The query returned a METS sourceIdentifier ($sourceIdentifier) which we weren't looking for,
+                           |The query returned a source identifier ($sourceIdentifier) which we weren't looking for,
                            |but it did return a similar identifier ($similarIdentifier).
-                           |Somebody may have fixed the case of the b number in the source METS file;
+                           |If this is a METS identifier, may have fixed the case of the b number in the source file;
                            |if so, you'll need to update the associated records in the ID minter database.
                            |See https://github.com/wellcomecollection/catalogue-pipeline/blob/main/pipeline/id_minter/connect_to_the_database.md
                            |""".stripMargin
