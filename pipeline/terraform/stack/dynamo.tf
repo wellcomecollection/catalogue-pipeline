@@ -40,16 +40,16 @@ resource "aws_dynamodb_table" "matcher_graph_table" {
 
   # These numbers were chosen by running a reindex and seeing when the
   # matcher started throttling.
-  read_capacity  = local.graph_table_billing_mode == "PROVISIONED" ? 600 : 1
-  write_capacity = local.graph_table_billing_mode == "PROVISIONED" ? 1000 : 1
+  read_capacity  = local.graph_table_billing_mode == "PROVISIONED" ? 600 : 0
+  write_capacity = local.graph_table_billing_mode == "PROVISIONED" ? 1000 : 0
 
   global_secondary_index {
     name            = "work-sets-index"
     hash_key        = "subgraphId"
     projection_type = "ALL"
 
-    read_capacity  = local.graph_table_billing_mode == "PROVISIONED" ? 600 : 1
-    write_capacity = local.graph_table_billing_mode == "PROVISIONED" ? 1000 : 1
+    read_capacity  = local.graph_table_billing_mode == "PROVISIONED" ? 600 : 0
+    write_capacity = local.graph_table_billing_mode == "PROVISIONED" ? 1000 : 0
   }
 
   tags = {
@@ -103,8 +103,8 @@ resource "aws_dynamodb_table" "matcher_lock_table" {
 
   # These numbers were chosen by running a reindex and seeing when the
   # matcher started throttling.
-  read_capacity  = local.lock_table_billing_mode == "PROVISIONED" ? 1000 : 1
-  write_capacity = local.lock_table_billing_mode == "PROVISIONED" ? 2500 : 1
+  read_capacity  = local.lock_table_billing_mode == "PROVISIONED" ? 1000 : 0
+  write_capacity = local.lock_table_billing_mode == "PROVISIONED" ? 2500 : 0
 
   attribute {
     name = "id"
@@ -121,8 +121,8 @@ resource "aws_dynamodb_table" "matcher_lock_table" {
     hash_key        = "contextId"
     projection_type = "ALL"
 
-    read_capacity  = local.lock_table_billing_mode == "PROVISIONED" ? 1000 : 1
-    write_capacity = local.lock_table_billing_mode == "PROVISIONED" ? 2500 : 1
+    read_capacity  = local.lock_table_billing_mode == "PROVISIONED" ? 1000 : 0
+    write_capacity = local.lock_table_billing_mode == "PROVISIONED" ? 2500 : 0
   }
 
   ttl {
