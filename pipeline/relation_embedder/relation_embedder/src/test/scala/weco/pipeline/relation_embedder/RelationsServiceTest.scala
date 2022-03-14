@@ -233,9 +233,9 @@ class RelationsServiceTest
 
     it("handles gaps in a tree") {
       /*
-      * If a path is specified where not all nodes correspond to a record,
-      * A tree containing all the existing records should still be created.
-      * */
+       * If a path is specified where not all nodes correspond to a record,
+       * A tree containing all the existing records should still be created.
+       * */
       val works = List(
         work("x"),
         work("x/y/z")

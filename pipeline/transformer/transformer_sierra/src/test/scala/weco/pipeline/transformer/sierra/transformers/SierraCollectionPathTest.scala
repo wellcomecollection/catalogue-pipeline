@@ -9,12 +9,12 @@ import weco.sierra.models.marc
 import weco.sierra.models.marc.{Subfield, VarField}
 
 class SierraCollectionPathTest
-  extends AnyFunSpec
+    extends AnyFunSpec
     with Matchers
     with SierraDataGenerators
     with TableDrivenPropertyChecks {
 
-  it("returns None, if there are no 773 or 774 fields"){
+  it("returns None, if there are no 773 or 774 fields") {
     val varFields = List(
       VarField(
         marcTag = Some("999"),
@@ -24,7 +24,7 @@ class SierraCollectionPathTest
     getCollectionPath(varFields) shouldBe None
   }
 
-  it("returns None, if a relevant field does not have the $w subfield"){
+  it("returns None, if a relevant field does not have the $w subfield") {
     forAll(
       Table(
         "marcTag",
@@ -41,7 +41,7 @@ class SierraCollectionPathTest
     }
   }
 
-  it("returns the document's own id for a 774 field"){
+  it("returns the document's own id for a 774 field") {
     val varFields = List(
       VarField(
         marcTag = Some("001"),
@@ -55,10 +55,11 @@ class SierraCollectionPathTest
         )
       )
     )
-    getCollectionPath(varFields) shouldBe CollectionPath(path="12345i")
+    getCollectionPath(varFields) shouldBe CollectionPath(path = "12345i")
   }
 
-  it("constructs a value from a 773 field, consisting of $w, $g and the document's own id"){
+  it(
+    "constructs a value from a 773 field, consisting of $w, $g and the document's own id") {
     val varFields = List(
       VarField(
         marcTag = Some("001"),
@@ -73,7 +74,8 @@ class SierraCollectionPathTest
         )
       )
     )
-    getCollectionPath(varFields) shouldBe CollectionPath(path="12345i/page4_56789i")
+    getCollectionPath(varFields) shouldBe CollectionPath(
+      path = "12345i/page4_56789i")
     // CollectionPath is path (ids) and label (concat the $g and title?),
     // In CALM records, they match,
     // In TEI records, the path object does not necessarily have a label
@@ -85,7 +87,7 @@ class SierraCollectionPathTest
     // label: Basil Hood. Photograph album/page 5.
   }
 
-  it("constructs a value from a 773 field, without a $g"){
+  it("constructs a value from a 773 field, without a $g") {
     val varFields = List(
       VarField(
         marcTag = Some("001"),
@@ -99,13 +101,14 @@ class SierraCollectionPathTest
         )
       )
     )
-    getCollectionPath(varFields) shouldBe CollectionPath(path="12345i/56789i")
+    getCollectionPath(varFields) shouldBe CollectionPath(path = "12345i/56789i")
   }
 
-  it("removes field-final punctuation from the $t subfield"){
+  it("removes field-final punctuation from the $t subfield") {
     fail()
   }
 
-  private def getCollectionPath(varFields: List[VarField]): Option[CollectionPath] =
+  private def getCollectionPath(
+    varFields: List[VarField]): Option[CollectionPath] =
     SierraCollectionPath(createSierraBibDataWith(varFields = varFields))
 }
