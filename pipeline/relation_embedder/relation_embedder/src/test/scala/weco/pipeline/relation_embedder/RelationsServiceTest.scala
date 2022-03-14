@@ -231,6 +231,29 @@ class RelationsServiceTest
       }
     }
 
+    it("handles gaps in a tree") {
+      /*
+      * If a path is specified where not all nodes correspond to a record,
+      * A tree containing all the existing records should still be created.
+      * */
+      val works = List(
+        work("x"),
+        work("x/y/z")
+      )
+      val batch = Batch(
+        rootPath = "x",
+        selectors = List(Tree("x"))
+      )
+      val expected = works.map(toRelationWork)
+      withLocalMergedWorksIndex { index =>
+        withActorSystem { implicit actorSystem =>
+          insertIntoElasticsearch(index, works: _*)
+          whenReady(queryRelationTree(service(index), batch)) {
+            _ should contain theSameElementsAs expected
+          }
+        }
+      }
+    }
     def queryRelationTree(service: RelationsService,
                           batch: Batch)(implicit as: ActorSystem) =
       service.getRelationTree(batch).runWith(Sink.seq[RelationWork])
