@@ -5,7 +5,6 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks
 import weco.catalogue.internal_model.work.CollectionPath
 import weco.sierra.generators.SierraDataGenerators
-import weco.sierra.models.marc
 import weco.sierra.models.marc.{Subfield, VarField}
 
 class SierraCollectionPathTest
@@ -55,7 +54,7 @@ class SierraCollectionPathTest
         )
       )
     )
-    getCollectionPath(varFields) shouldBe CollectionPath(path = "12345i")
+    getCollectionPath(varFields).get shouldBe CollectionPath(path = "12345i")
   }
 
   it(
