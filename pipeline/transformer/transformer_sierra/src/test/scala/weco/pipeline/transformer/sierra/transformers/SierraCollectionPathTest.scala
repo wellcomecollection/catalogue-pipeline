@@ -52,7 +52,10 @@ class SierraCollectionPathTest
           marcTag = Some(marcTag),
           subfields = List(
             Subfield(tag = "t", content = "A Constituent"),
-            Subfield(tag = "w", content = "This value does not matter, it just matters that it exists")
+            Subfield(
+              tag = "w",
+              content =
+                "This value does not matter, it just matters that it exists")
           )
         )
       )
@@ -70,14 +73,18 @@ class SierraCollectionPathTest
         marcTag = Some("774"),
         subfields = List(
           Subfield(tag = "t", content = "A Constituent"),
-          Subfield(tag = "w", content = "This value does not matter, it just matters that it exists")
+          Subfield(
+            tag = "w",
+            content =
+              "This value does not matter, it just matters that it exists")
         )
       )
     )
     getCollectionPath(varFields).get shouldBe CollectionPath(path = "12345i")
   }
 
-  it("constructs a value from a 773 field, consisting of $w and the document's own id") {
+  it(
+    "constructs a value from a 773 field, consisting of $w and the document's own id") {
     val varFields = List(
       VarField(
         marcTag = Some("001"),
@@ -91,7 +98,8 @@ class SierraCollectionPathTest
         )
       )
     )
-    getCollectionPath(varFields).get shouldBe CollectionPath(path = "12345i/56789i")
+    getCollectionPath(varFields).get shouldBe CollectionPath(
+      path = "12345i/56789i")
   }
 
   it("constructs a value from a 773 field, including $g if present") {
@@ -113,8 +121,8 @@ class SierraCollectionPathTest
       path = "12345i/page_4_56789i")
   }
 
-
-  it("constructs a value from the correct 773 field, even when there are multiple") {
+  it(
+    "constructs a value from the correct 773 field, even when there are multiple") {
     val varFields = List(
       VarField(
         marcTag = Some("001"),
@@ -141,9 +149,9 @@ class SierraCollectionPathTest
           Subfield(tag = "g", content = "vol. 4")
         )
       )
-
     )
-    getCollectionPath(varFields).get shouldBe CollectionPath(path = "12345i/vol_4_56789i")
+    getCollectionPath(varFields).get shouldBe CollectionPath(
+      path = "12345i/vol_4_56789i")
   }
 
   private def getCollectionPath(
