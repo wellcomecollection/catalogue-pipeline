@@ -63,7 +63,7 @@ class SierraCollectionPathTest
     }
   }
 
-  it("returns the document's own id for a 774 field") {
+  it("returns the document's own id when a 774 field is found") {
     val varFields = List(
       VarField(
         marcTag = Some("001"),
@@ -94,7 +94,7 @@ class SierraCollectionPathTest
         marcTag = Some("773"),
         subfields = List(
           Subfield(tag = "t", content = "A Host"),
-          Subfield(tag = "w", content = "(Wcat)12345i")
+          Subfield(tag = "w", content = "12345i")
         )
       )
     )
@@ -102,6 +102,24 @@ class SierraCollectionPathTest
       path = "12345i/56789i")
   }
 
+  it(
+    "removes the (Wcat) prefix, from the $w subfield, if present") {
+    val varFields = List(
+      VarField(
+        marcTag = Some("001"),
+        content = Some("56789i")
+      ),
+      VarField(
+        marcTag = Some("773"),
+        subfields = List(
+          Subfield(tag = "t", content = "A Host"),
+          Subfield(tag = "w", content = "(Wcat)12345i")
+        )
+      )
+    )
+    getCollectionPath(varFields).get shouldBe CollectionPath(
+      path = "12345i/56789i")
+  }
   it("constructs a value from a 773 field, including $g if present") {
     val varFields = List(
       VarField(

@@ -39,16 +39,19 @@ import scala.util.matching.Regex
   *
   * Notable challenges in the data include:
   *  - punctuation must be stripped ("Page 5 :" should match "page 5.")
-  *  - case must be normalised ("Page 5" should match "page 5")
   *  - the (Wcat) prefix must be stripped ("(Wcat)9175i" should match "9175i")
   *  - the value must be turned into something the relation embedder expects
   *    (evidence points to this being underscores for spaces).
   *
   * The hierarchy of Sierra-based data is flatter than other systems. A node is expected to *either* be a host or a
-  * constituent. It is possible for record that is a "host" to also be part of a series, but that relationship
-  * would not contain the $w subfield, so is to be ignored here.
+  * constituent.  It is possible for record that is a "host" to also be part of a series,
+  * but that relationship would not contain the $w subfield, so is to be ignored here.
+  * Such series relationships are handled in SierraParents
   *
-  * A constituent has exactly one host
+  * A constituent has exactly one host.  It is possible to have multiple 773 entries, but, as with a host being
+  * part of a series, entries without $w are handled in SierraParents and signify membership of a Series, not
+  * a hierarchical collection.
+  *
   * A host may have many constituents, but for the purpose of defining a CollectionPath, it only matters that one
   * exists, not how many there are.
   * */
@@ -59,6 +62,9 @@ object SierraCollectionPath extends SierraQueryOps with Logging {
       None
     else {
       (getControlNumber(bibData), bibData.varfieldsWithTag("774")) match {
+        case(None, _) =>
+          warn(f"Attempt to create CollectionPath for Sierra document without a control number field ${bibData}")
+          None
         case (Some(bibId), Nil) =>
           HostEntryFieldCollectionPath(bibData, bibId)
         case (Some(bibId), _) =>
@@ -87,12 +93,12 @@ object SierraCollectionPath extends SierraQueryOps with Logging {
   * but at most, only one of them is expected to result in a CollectionPath.
   * This will be the one with a $w tag
   *
-  * It is possible, but unlikely that a bib would have a mixture of both
+  * It is possible, but unlikely, that a bib would have a mixture of both
   * The more common scenario is that it would have either exactly one 773
   * field, and that field has a $w subtag, or it would have multiple 773 fields,
   * and none of them have a $w subtag.
   */
-object HostEntryFieldCollectionPath extends SierraQueryOps with Logging {
+private object HostEntryFieldCollectionPath extends SierraQueryOps with Logging {
   val nonTokenCharacters = new Regex("[^0-9a-zA-Z_]")
 
   def apply(bibData: SierraBibData, bibId: String): Option[CollectionPath] = {
@@ -101,13 +107,17 @@ object HostEntryFieldCollectionPath extends SierraQueryOps with Logging {
     val hostEntryField: Option[VarField] =
       bibData.varfieldsWithTag("773").find(_.subfieldsWithTag("w").nonEmpty)
 
-    if (hostEntryField.nonEmpty && bibId.nonEmpty)
+    if (hostEntryField.isDefined && bibId.nonEmpty)
       Some(
         CollectionPath(
           path = collectionPathString(hostEntryField.get, bibId),
           label = None))
-    else
+    else {
+      // Should not be possible to reach this point, SierraCollectionPath.apply will have
+      // ensured that an appropriate 773 entry exists somewhere in the document.
+      warn(f"Could not find a varfield suitable for making a collectionPath ${bibData.varfieldsWithTag("773")}")
       None
+    }
   }
 
   /**
