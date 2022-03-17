@@ -68,9 +68,9 @@ object SierraCollectionPath extends SierraQueryOps with Logging {
   }
 
   /**
-   * Return the String value of the control number field, if present
-   * https://www.loc.gov/marc/bibliographic/bd001.html
-   */
+    * Return the String value of the control number field, if present
+    * https://www.loc.gov/marc/bibliographic/bd001.html
+    */
   private def getControlNumber(bibData: SierraBibData): Option[String] = {
     bibData.varfieldsWithTag("001").headOption.flatMap(_.content)
   }
