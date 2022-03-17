@@ -58,7 +58,7 @@ object SierraCollectionPath extends SierraQueryOps with Logging {
     if (bibData.subfieldsWithTags(("773", "w"), ("774", "w")).isEmpty)
       None
     else {
-      (getOwnId(bibData), bibData.varfieldsWithTag("774")) match {
+      (getControlNumber(bibData), bibData.varfieldsWithTag("774")) match {
         case (Some(bibId), Nil) =>
           HostEntryFieldCollectionPath(bibData, bibId)
         case (Some(bibId), _) =>
@@ -67,7 +67,11 @@ object SierraCollectionPath extends SierraQueryOps with Logging {
     }
   }
 
-  private def getOwnId(bibData: SierraBibData): Option[String] = {
+  /**
+   * Return the String value of the control number field, if present
+   * https://www.loc.gov/marc/bibliographic/bd001.html
+   */
+  private def getControlNumber(bibData: SierraBibData): Option[String] = {
     bibData.varfieldsWithTag("001").headOption.flatMap(_.content)
   }
 }
