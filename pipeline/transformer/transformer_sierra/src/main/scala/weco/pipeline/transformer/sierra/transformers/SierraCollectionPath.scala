@@ -62,8 +62,9 @@ object SierraCollectionPath extends SierraQueryOps with Logging {
       None
     else {
       (getControlNumber(bibData), bibData.varfieldsWithTag("774")) match {
-        case(None, _) =>
-          warn(f"Attempt to create CollectionPath for Sierra document without a control number field ${bibData}")
+        case (None, _) =>
+          warn(
+            f"Attempt to create CollectionPath for Sierra document without a control number field ${bibData}")
           None
         case (Some(bibId), Nil) =>
           HostEntryFieldCollectionPath(bibData, bibId)
@@ -98,7 +99,9 @@ object SierraCollectionPath extends SierraQueryOps with Logging {
   * field, and that field has a $w subtag, or it would have multiple 773 fields,
   * and none of them have a $w subtag.
   */
-private object HostEntryFieldCollectionPath extends SierraQueryOps with Logging {
+private object HostEntryFieldCollectionPath
+    extends SierraQueryOps
+    with Logging {
   val nonTokenCharacters = new Regex("[^0-9a-zA-Z_]")
 
   def apply(bibData: SierraBibData, bibId: String): Option[CollectionPath] = {
@@ -115,7 +118,9 @@ private object HostEntryFieldCollectionPath extends SierraQueryOps with Logging 
     else {
       // Should not be possible to reach this point, SierraCollectionPath.apply will have
       // ensured that an appropriate 773 entry exists somewhere in the document.
-      warn(f"Could not find a varfield suitable for making a collectionPath ${bibData.varfieldsWithTag("773")}")
+      warn(
+        f"Could not find a varfield suitable for making a collectionPath ${bibData
+          .varfieldsWithTag("773")}")
       None
     }
   }

@@ -102,8 +102,7 @@ class SierraCollectionPathTest
       path = "12345i/56789i")
   }
 
-  it(
-    "removes the (Wcat) prefix, from the $w subfield, if present") {
+  it("removes the (Wcat) prefix, from the $w subfield, if present") {
     val varFields = List(
       VarField(
         marcTag = Some("001"),
