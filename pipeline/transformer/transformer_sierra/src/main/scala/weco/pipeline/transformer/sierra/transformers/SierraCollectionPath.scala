@@ -118,7 +118,8 @@ private object HostEntryFieldCollectionPath
     else {
       // Should not be possible to reach this point, SierraCollectionPath.apply will have
       // ensured that an appropriate 773 entry exists somewhere in the document.
-      warn(f"Could not find a varfield suitable for making a collectionPath ${bibData}")
+      warn(
+        f"Could not find a varfield suitable for making a collectionPath ${bibData}")
       None
     }
   }
