@@ -158,7 +158,7 @@ private object HostEntryFieldCollectionPath
       case Nil => ""
       case _ =>
         nonTokenCharacters.replaceAllIn(
-          gFields.head.content.replaceAll(" ", "_"),
+          gFields.head.content.replace(' ', '_'),
           "") + "_"
     }
   }
