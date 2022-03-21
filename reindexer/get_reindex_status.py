@@ -117,7 +117,7 @@ def count_documents_in_index(es_client, *, index_name):
     Returns the number of documents in an Elasticsearch index.
     """
     try:
-        count_resp = es_client.cat.count(index_name, format="json")
+        count_resp = es_client.cat.count(index=index_name, format="json")
     except NotFoundError:
         return 0
     else:
