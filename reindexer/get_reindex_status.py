@@ -8,7 +8,7 @@ import functools
 import boto3
 import click
 from elasticsearch import Elasticsearch
-from elasticsearch.exceptions import NotFoundError
+from elasticsearch.exceptions import NotFoundError, TransportError
 import humanize
 import tabulate
 from tenacity import retry, stop_after_attempt, wait_exponential
@@ -118,7 +118,8 @@ def count_documents_in_index(es_client, *, index_name):
     """
     try:
         count_resp = es_client.cat.count(index=index_name, format="json")
-    except NotFoundError:
+    except (NotFoundError, TransportError) as err:
+        print(index_name, err)
         return 0
     else:
         assert len(count_resp) == 1, (index_name, count_resp)
@@ -145,12 +146,10 @@ def get_works_index_stats(*, reindex_date):
         )
         for idx in indexes
     }
-
     api_client = get_api_es_client()
     result["API"] = count_documents_in_index(
         api_client, index_name=f"works-indexed-{reindex_date}"
     )
-
     return result
 
 
