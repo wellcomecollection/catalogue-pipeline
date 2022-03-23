@@ -81,7 +81,8 @@ class StateTest
       )
     }
 
-    it("overwrites relations if they match by name, otherwise concatenating the relation lists in the normal manner") {
+    it(
+      "overwrites relations if they match by name, otherwise concatenating the relation lists in the normal manner") {
       val merged = Work.Visible[Merged](
         version = 0,
         state = Merged(
@@ -90,7 +91,8 @@ class StateTest
           sourceModifiedTime = Instant.MIN,
           mergedTime = Instant.MIN,
           availabilities = Set(),
-          relations = Relations(ancestors = List(SeriesRelation("Mum"), SeriesRelation("Dad")))
+          relations = Relations(
+            ancestors = List(SeriesRelation("Mum"), SeriesRelation("Dad")))
         ),
         data = WorkData(title = Some("My Title"))
       )
@@ -99,13 +101,21 @@ class StateTest
         id = Some(CanonicalId("deadbeef")),
         title = Some("Mum"),
         collectionPath = Some(CollectionPath("cafed00d/deadbeef")),
-        workType = WorkType.Standard, depth = 0, numChildren = 1, numDescendents = 1)
+        workType = WorkType.Standard,
+        depth = 0,
+        numChildren = 1,
+        numDescendents = 1
+      )
 
       val granny = new Relation(
         id = Some(CanonicalId("baadf00d")),
         title = Some("granny"),
         collectionPath = Some(CollectionPath("cafed00d/deadbeef/baadf00d")),
-        workType = WorkType.Standard, depth = 0, numChildren = 1, numDescendents = 1)
+        workType = WorkType.Standard,
+        depth = 0,
+        numChildren = 1,
+        numDescendents = 1
+      )
 
       val denormalised = merged.transition[Denormalised](
         (
