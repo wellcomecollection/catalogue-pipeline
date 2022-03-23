@@ -31,7 +31,7 @@ module "router" {
     es_merged_index        = local.es_works_merged_index
     es_denormalised_index  = local.es_works_denormalised_index
     batch_size             = 100
-    flush_interval_seconds = 30
+    flush_interval_seconds = 20
   }
 
   secret_env_vars = local.pipeline_storage_es_service_secrets["router"]
