@@ -26,11 +26,40 @@ case class Relations(
 
   def +(that: Relations): Relations = {
     Relations(
-      ancestors = this.ancestors ::: that.ancestors,
-      children = this.children ::: that.children,
-      siblingsPreceding = this.siblingsPreceding ::: that.siblingsPreceding,
-      siblingsSucceeding = this.siblingsSucceeding ::: that.siblingsSucceeding
+      ancestors = RelationSet(this.ancestors ::: that.ancestors),
+      children = RelationSet(this.children ::: that.children),
+      siblingsPreceding = RelationSet(this.siblingsPreceding ::: that.siblingsPreceding),
+      siblingsSucceeding = RelationSet(this.siblingsSucceeding ::: that.siblingsSucceeding)
     )
+  }
+}
+
+/**
+ * Lists of Relations are unique by title, with identified relations taking
+ * priority over unidentified ones.
+ *
+ * The situation can arise where an early stage sets up some relations
+ * but only knows the title of a given relation, but a later stage then
+ * then finds that same relation using an identifier.
+ * In that case, the newer, identifier-based one supersedes
+ * the older name-only one.
+ *
+ * Sometimes, that early name-only relation is not identified, so should
+ * be preserved.
+ *
+ * A concrete example of this is where a Sierra document contains a 773
+ * field.  During transformation, we do not know whether this will result
+ * in it becoming a member of a Series or a Hierarchy, because that distinction
+ * is driven by the presence of a reciprocal 774 relationship on the parent.
+ *
+ * So, during the transformer phase, a candidate Series ancestor is created.
+ * If, during the relation embedder phase, the other end is found, then the
+ * Series ancestor is to be discarded.
+ */
+
+object RelationSet {
+  def apply(relations: List[Relation]): List[Relation] = {
+    relations.groupBy(_.title).values.map(_.maxBy(_.id)).toList
   }
 }
 
