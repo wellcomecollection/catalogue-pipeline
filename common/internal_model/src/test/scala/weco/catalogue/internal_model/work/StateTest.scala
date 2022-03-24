@@ -20,7 +20,7 @@ class StateTest
     SourceIdentifier(SierraIdentifier, "otype", "id")
   private val workData = WorkData(title = Some("My Title"))
   private val canonicalId = CanonicalId("baadf00d")
-  private val merged = Work.Visible[Identified](
+  private val identified = Work.Visible[Identified](
     version = 0,
     state = Identified(
       sourceIdentifier = sourceIdentifier,
@@ -30,27 +30,27 @@ class StateTest
     ),
     data = WorkData(title = Some("My Title"))
   )
-  private val identified = merged.transition[Merged](Instant.MAX)
+  private val merged = identified.transition[Merged](Instant.MAX)
 
   describe("transition from identified to merged") {
 
     it("preserves the Work data as-is") {
-      identified.data shouldBe workData
+      merged.data shouldBe workData
     }
 
     it("assigns a new mergedTime") {
-      identified.state.mergedTime shouldBe Instant.MAX
+      merged.state.mergedTime shouldBe Instant.MAX
     }
 
     it("preserves existing state members") {
       val preservedMembers = Table(
         ("preservedMember", "expectedValue"),
         (
-          identified.state.relations,
+          merged.state.relations,
           Relations(ancestors = List(SeriesRelation("Mum")))),
-        (identified.state.sourceIdentifier, sourceIdentifier),
-        (identified.state.canonicalId, canonicalId),
-        (identified.state.sourceModifiedTime, Instant.MIN)
+        (merged.state.sourceIdentifier, sourceIdentifier),
+        (merged.state.canonicalId, canonicalId),
+        (merged.state.sourceModifiedTime, Instant.MIN)
       )
       forAll(preservedMembers) {
         case (preservedMember, expectedValue) =>
@@ -59,7 +59,7 @@ class StateTest
     }
   }
 
-  private val denormalised = identified.transition[Denormalised](
+  private val denormalised = merged.transition[Denormalised](
     (
       Relations(
         ancestors = List(SeriesRelation("Dad")),
@@ -79,6 +79,57 @@ class StateTest
         ancestors = List(SeriesRelation("Mum"), SeriesRelation("Dad")),
         siblingsPreceding = List(SeriesRelation("Big Brother"))
       )
+    }
+
+    it(
+      "overwrites relations if they match by name, otherwise concatenating the relation lists in the normal manner") {
+      val merged = Work.Visible[Merged](
+        version = 0,
+        state = Merged(
+          sourceIdentifier = sourceIdentifier,
+          canonicalId = canonicalId,
+          sourceModifiedTime = Instant.MIN,
+          mergedTime = Instant.MIN,
+          availabilities = Set(),
+          relations = Relations(
+            ancestors = List(SeriesRelation("Mum"), SeriesRelation("Dad")))
+        ),
+        data = WorkData(title = Some("My Title"))
+      )
+
+      val newMum = new Relation(
+        id = Some(CanonicalId("deadbeef")),
+        title = Some("Mum"),
+        collectionPath = Some(CollectionPath("cafed00d/deadbeef")),
+        workType = WorkType.Standard,
+        depth = 0,
+        numChildren = 1,
+        numDescendents = 1
+      )
+
+      val granny = new Relation(
+        id = Some(CanonicalId("baadf00d")),
+        title = Some("granny"),
+        collectionPath = Some(CollectionPath("cafed00d/deadbeef/baadf00d")),
+        workType = WorkType.Standard,
+        depth = 0,
+        numChildren = 1,
+        numDescendents = 1
+      )
+
+      val denormalised = merged.transition[Denormalised](
+        (
+          Relations(
+            //Mum is already in the list, granny is new
+            ancestors = List(newMum, granny)
+          ),
+          Set()
+        )
+      )
+      denormalised.state.relations.ancestors shouldBe List(
+        newMum,
+        SeriesRelation("Dad"),
+        granny)
     }
 
     it("preserves existing state members") {
