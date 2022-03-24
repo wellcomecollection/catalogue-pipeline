@@ -120,12 +120,15 @@ class StateTest
       val denormalised = merged.transition[Denormalised](
         (
           Relations(
+            //Mum is already in the list, granny is new
             ancestors = List(newMum, granny)
           ),
           Set()
         )
       )
       denormalised.state.relations shouldBe Relations(
+        // Only one Mum, the original has been dropped.
+        // Dad is preserved, Granny is added.
         ancestors = List(newMum, SeriesRelation("Dad"), granny)
       )
     }
