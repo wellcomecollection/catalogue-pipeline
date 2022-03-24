@@ -27,7 +27,7 @@ import scala.util.Try
   * ==Setting batchSize and flushInterval==
   *
   * The numbers for batchSize and flushInterval should be chosen based on how responsive
-  * you want the service to be and how many message the service can realistically handle
+  * you want the service to be and how many messages the service can realistically handle
   * in one go, as well as the expected frequency with which messages are likely to be received.
   *
   * In normal running, where this activity is triggered by a few real humans manually modifying
