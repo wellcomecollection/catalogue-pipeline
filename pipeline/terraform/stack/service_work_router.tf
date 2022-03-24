@@ -28,10 +28,15 @@ module "router" {
     paths_topic_arn = module.router_path_output_topic.arn
     works_topic_arn = module.router_work_output_topic.arn
 
-    es_merged_index        = local.es_works_merged_index
-    es_denormalised_index  = local.es_works_denormalised_index
-    batch_size             = 100
-    flush_interval_seconds = 30
+    es_merged_index       = local.es_works_merged_index
+    es_denormalised_index = local.es_works_denormalised_index
+    batch_size            = 100
+    # The flush interval must be sufficiently lower than the message timeout
+    # to allow the messages to be processed after the flush inteval but before
+    # they expire.  The upstream queue timeout is not set by us, leaving it
+    # at the default 30 seconds.
+    # See https://github.com/wellcomecollection/platform/issues/5463
+    flush_interval_seconds = 20
   }
 
   secret_env_vars = local.pipeline_storage_es_service_secrets["router"]
