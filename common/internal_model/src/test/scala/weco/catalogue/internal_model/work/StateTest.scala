@@ -126,11 +126,7 @@ class StateTest
           Set()
         )
       )
-      denormalised.state.relations shouldBe Relations(
-        // Only one Mum, the original has been dropped.
-        // Dad is preserved, Granny is added.
-        ancestors = List(newMum, SeriesRelation("Dad"), granny)
-      )
+      denormalised.state.relations.ancestors shouldBe List(newMum, SeriesRelation("Dad"), granny)
     }
 
     it("preserves existing state members") {
