@@ -65,7 +65,12 @@ object RelationSet {
     // For hierarches, this could be determined by depth, but in the case of Series links,
     // the order is determined by the order in the source data.
     val indexMap = relations.map(_.title).distinct.zipWithIndex.toMap
-    relations.groupBy(_.title).values.map(_.maxBy(_.id)).toList.sortBy(relation => indexMap(relation.title))
+    relations
+      .groupBy(_.title)
+      .values
+      .map(_.maxBy(_.id))
+      .toList
+      .sortBy(relation => indexMap(relation.title))
   }
 }
 

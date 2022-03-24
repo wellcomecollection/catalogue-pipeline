@@ -126,7 +126,10 @@ class StateTest
           Set()
         )
       )
-      denormalised.state.relations.ancestors shouldBe List(newMum, SeriesRelation("Dad"), granny)
+      denormalised.state.relations.ancestors shouldBe List(
+        newMum,
+        SeriesRelation("Dad"),
+        granny)
     }
 
     it("preserves existing state members") {
