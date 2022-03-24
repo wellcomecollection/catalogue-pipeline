@@ -37,5 +37,8 @@ sequenceDiagram
 Unlike other pipeline stages, the relation embedder does not operate on the document currently 
 passing through the pipeline, but on *all* documents with which that document has a relationship.
 
-Because of this, the message sent to the embedder is the *content of the collectionPath*, rather 
+This is an expensive process, so it is best to bypass the relation embedder entirely if it is not
+needed for a given record.
+
+Because of these, the message sent to the embedder is the *content of the collectionPath*, rather 
 than a way to identify the document in question.

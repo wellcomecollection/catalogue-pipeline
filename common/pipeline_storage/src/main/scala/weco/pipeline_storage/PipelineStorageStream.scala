@@ -14,6 +14,39 @@ import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future, TimeoutException}
 import scala.util.Try
 
+/**
+ * Configuration for the processing of messages in batches.
+ *
+ * Messages will be processed when either batchSize or flushInterval are reached.
+ *
+ * The intended use for this is where it can be significantly more efficient to process
+ * multiple messages together, rather than one at a time.  For example where
+ * downloading all the data to service a bundle of messages incurs less overhead than
+ * making individual requests for the data to service each message.
+ *
+ * ==Setting batchSize and flushInterval==
+ *
+ * The numbers for batchSize and flushInterval should be chosen based on how responsive
+ * you want the service to be and how many message the service can realistically handle
+ * in one go, as well as the expected frequency with which messages are likely to be received.
+ *
+ * In normal running, where this activity is triggered by a few real humans manually modifying
+ * a few records at a time, you might expect the flush interval to be reached most of the time.
+ *
+ * On the other hand, when this activity is triggered by some kind of computer-initiated batch
+ * update, you might expect the batch size to be the threshold that normally triggers processing.
+
+ * @note The values for batchSize and flushInterval are related to the duration set externally
+ * for the expiry of the messages being consumed (visibility timeout in SQS).
+ *
+ * `((Message Expiry) - (Flush Interval))` must be long enough to allow
+ * `(Batch Size - 1)` messages to be processed, otherwise those messages will
+ * expire and either be re-queued or fail completely.
+ *
+ * @param batchSize The maximum number of messages to process in one batch.
+ * @param flushInterval The maximum duration to wait before processing messages.
+ * @param parallelism
+ */
 case class PipelineStorageConfig(batchSize: Int,
                                  flushInterval: FiniteDuration,
                                  parallelism: Int)
