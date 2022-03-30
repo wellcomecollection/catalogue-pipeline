@@ -62,7 +62,7 @@ case class Relations(
 object RelationSet {
   def apply(existingRelations: List[Relation],
             newRelations: List[Relation]): List[Relation] = {
-    val newTitles = newRelations.map(_.title).distinct
+    val newTitles = newRelations.map(_.title)
     existingRelations.filter(r =>
       r.id.isDefined || !newTitles.contains(r.title)) ++ newRelations
   }
