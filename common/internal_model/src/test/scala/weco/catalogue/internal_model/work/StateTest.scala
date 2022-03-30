@@ -131,8 +131,7 @@ class StateTest
         newMum,
         granny)
     }
-    it(
-      "Only overwrites unidentified relations from a previous stage.") {
+    it("Only overwrites unidentified relations from a previous stage.") {
       val mum1 = new Relation(
         id = Some(CanonicalId("cafef00d")),
         title = Some("Mum"),
@@ -151,11 +150,11 @@ class StateTest
           mergedTime = Instant.MIN,
           availabilities = Set(),
           relations = Relations(
-            ancestors = List(SeriesRelation("Granny"), SeriesRelation("Dad"), mum1))
+            ancestors =
+              List(SeriesRelation("Granny"), SeriesRelation("Dad"), mum1))
         ),
         data = WorkData(title = Some("My Title"))
       )
-
 
       val mum2 = new Relation(
         id = Some(CanonicalId("f00dcafe")),

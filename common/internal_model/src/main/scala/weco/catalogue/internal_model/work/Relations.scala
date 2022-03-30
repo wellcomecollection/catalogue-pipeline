@@ -60,9 +60,11 @@ case class Relations(
   * Series ancestor is to be discarded.
   */
 object RelationSet {
-  def apply(existingRelations: List[Relation], newRelations: List[Relation]): List[Relation] = {
+  def apply(existingRelations: List[Relation],
+            newRelations: List[Relation]): List[Relation] = {
     val newTitles = newRelations.map(_.title).distinct
-    existingRelations.filter(r => r.id.isDefined || !newTitles.contains(r.title)) ++ newRelations
+    existingRelations.filter(r =>
+      r.id.isDefined || !newTitles.contains(r.title)) ++ newRelations
   }
 }
 
