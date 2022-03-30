@@ -26,19 +26,20 @@ case class Relations(
 
   def +(that: Relations): Relations = {
     Relations(
-      ancestors = RelationSet(this.ancestors ::: that.ancestors),
-      children = RelationSet(this.children ::: that.children),
+      ancestors = RelationSet(this.ancestors, that.ancestors),
+      children = RelationSet(this.children, that.children),
       siblingsPreceding =
-        RelationSet(this.siblingsPreceding ::: that.siblingsPreceding),
+        RelationSet(this.siblingsPreceding, that.siblingsPreceding),
       siblingsSucceeding =
-        RelationSet(this.siblingsSucceeding ::: that.siblingsSucceeding)
+        RelationSet(this.siblingsSucceeding, that.siblingsSucceeding)
     )
   }
 }
 
 /**
-  * Lists of Relations are unique by title, with identified relations taking
-  * priority over unidentified ones.
+  * When merging lists of relations, all identified relations are preserved,
+  * but relations without identifiers are subject to being overwritten by
+  * a later relation with the same title.
   *
   * The situation can arise where an early stage sets up some relations
   * but only knows the title of a given relation, but a later stage then
@@ -46,7 +47,7 @@ case class Relations(
   * In that case, the newer, identifier-based one supersedes
   * the older name-only one.
   *
-  * Sometimes, that early name-only relation is not identified, so should
+  * Sometimes, that early name-only relation is not identified later, so should
   * be preserved.
   *
   * A concrete example of this is where a Sierra document contains a 773
@@ -59,18 +60,9 @@ case class Relations(
   * Series ancestor is to be discarded.
   */
 object RelationSet {
-  def apply(relations: List[Relation]): List[Relation] = {
-    // Store the original first positions, in order to preserve order.
-    // Order is significant in RelationSets, e.g. in a hierarchy, ancestors = parent,grandparent,great grandparent etc.
-    // For hierarches, this could be determined by depth, but in the case of Series links,
-    // the order is determined by the order in the source data.
-    val indexMap = relations.map(_.title).distinct.zipWithIndex.toMap
-    relations
-      .groupBy(_.title)
-      .values
-      .map(_.maxBy(_.id))
-      .toList
-      .sortBy(relation => indexMap(relation.title))
+  def apply(existingRelations: List[Relation], newRelations: List[Relation]): List[Relation] = {
+    val newTitles = newRelations.map(_.title).distinct
+    existingRelations.filter(r => r.id.isDefined || !newTitles.contains(r.title)) ++ newRelations
   }
 }
 
