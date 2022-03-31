@@ -1,15 +1,15 @@
-module "catalogue_pipeline_2022-03-30" {
+module "catalogue_pipeline_2022-03-31a" {
   source = "./stack"
 
-  pipeline_date = "2022-03-30"
-  release_label = "2022-03-30"
+  pipeline_date = "2022-03-31"
+  release_label = "2022-03-31a"
 
   reindexing_state = {
-    connect_reindex_topics   = true
-    scale_up_tasks           = true
-    scale_up_elastic_cluster = true
-    scale_up_id_minter_db    = true
-    scale_up_matcher_db      = true
+    connect_reindex_topics   = false
+    scale_up_tasks           = false
+    scale_up_elastic_cluster = false
+    scale_up_id_minter_db    = false
+    scale_up_matcher_db      = false
   }
 
   # Boilerplate that shouldn't change between pipelines.
