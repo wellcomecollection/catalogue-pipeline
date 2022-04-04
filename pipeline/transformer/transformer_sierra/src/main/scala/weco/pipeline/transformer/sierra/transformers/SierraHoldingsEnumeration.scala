@@ -39,7 +39,8 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
   //
   // See https://documentation.iii.com/sierrahelp/Content/sril/sril_records_varfld_types_holdings.html
   //
-  private def getHumanWrittenEnumeration(varFields: List[VarField]): List[String] =
+  private def getHumanWrittenEnumeration(
+    varFields: List[VarField]): List[String] =
     varFields
       .filter(vf => vf.fieldTag.contains("h"))
       .filterNot(vf => vf.marcTag.isDefined)
@@ -48,7 +49,9 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
   val labelTag = "853"
   val valueTag = "863"
 
-  private def getAutomaticallyPopulatedEnumeration(id: TypedSierraRecordNumber, varFields: List[VarField]): List[String] = {
+  private def getAutomaticallyPopulatedEnumeration(
+    id: TypedSierraRecordNumber,
+    varFields: List[VarField]): List[String] = {
 
     // The 85X and 86X pairs are associated based on the contents of subfield 8.
     //
