@@ -4,7 +4,10 @@ import weco.catalogue.internal_model.work._
 import weco.pipeline.transformer.text.TextNormalisation._
 import weco.sierra.models.SierraQueryOps
 import weco.sierra.models.data.SierraBibData
-import weco.sierra.models.marc.VarField
+import weco.sierra.models.marc.{Subfield, VarField}
+
+import java.net.URL
+import scala.util.Try
 
 object SierraNotes extends SierraDataTransformer with SierraQueryOps {
 
@@ -73,7 +76,17 @@ object SierraNotes extends SierraDataTransformer with SierraQueryOps {
         varField
           .subfieldsWithoutTags(
             (globallySuppressedSubfields ++ suppressedSubfields).toSeq: _*)
-          .contents
+          .map {
+            // We want to make ǂu into a clickable link, but only if it's a URL --
+            // we don't want to make non-URLs into clickable objects.
+            case Subfield("u", contents) if isUrl(contents) =>
+              s"""<a href="$contents">$contents</a>"""
+            case Subfield("u", contents) =>
+              warn(s"Subfield ǂu which doesn't look like a URL: $contents")
+              contents
+
+            case Subfield(_, contents) => contents
+          }
           .mkString(" ")
 
       Note(contents = contents, noteType = noteType)
@@ -90,4 +103,8 @@ object SierraNotes extends SierraDataTransformer with SierraQueryOps {
         createNoteFromContents(NoteType.LocationOfDuplicatesNote)(vf)
       case _ => createNoteFromContents(NoteType.LocationOfOriginalNote)(vf)
     }
+
+  private def isUrl(s: String): Boolean =
+    Try { new URL(s) }.isSuccess
+
 }

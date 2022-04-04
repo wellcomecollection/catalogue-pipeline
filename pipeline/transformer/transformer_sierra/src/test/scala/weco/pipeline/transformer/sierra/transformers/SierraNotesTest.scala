@@ -286,6 +286,52 @@ class SierraNotesTest
     SierraNotes(bibData) shouldBe empty
   }
 
+  it("creates a clickable link for subfield ǂu") {
+    // This example is taken from b30173140
+    val varFields = List(
+      VarField(
+        marcTag = "540",
+        subfields = List(
+          Subfield(
+            tag = "a",
+            content =
+              "The National Library of Medicine believes this item to be in the public domain."),
+          Subfield(
+            tag = "u",
+            content = "https://creativecommons.org/publicdomain/mark/1.0/"),
+          Subfield(tag = "5", content = "DNLM")
+        )
+      )
+    )
+
+    val bibData = createSierraBibDataWith(varFields = varFields)
+
+    SierraNotes(bibData).map(_.contents) shouldBe List(
+      "The National Library of Medicine believes this item to be in the public domain. <a href=\"https://creativecommons.org/publicdomain/mark/1.0/\">https://creativecommons.org/publicdomain/mark/1.0/</a>"
+    )
+  }
+
+  it("doesn't create a clickable link if subfield ǂu doesn't look like a URL") {
+    val varFields = List(
+      VarField(
+        marcTag = "540",
+        subfields = List(
+          Subfield(
+            tag = "a",
+            content =
+              "The National Library of Medicine believes this item to be in the public domain."),
+          Subfield(tag = "u", content = "CC-0 license"),
+        )
+      )
+    )
+
+    val bibData = createSierraBibDataWith(varFields = varFields)
+
+    SierraNotes(bibData).map(_.contents) shouldBe List(
+      "The National Library of Medicine believes this item to be in the public domain. CC-0 license"
+    )
+  }
+
   def bibData(contents: List[(String, Note)]): SierraBibData =
     bibData(contents.map { case (tag, note) => (tag, note.contents) }: _*)
 
