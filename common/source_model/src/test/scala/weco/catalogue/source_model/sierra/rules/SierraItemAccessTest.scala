@@ -221,7 +221,8 @@ class SierraItemAccessTest
           ac shouldBe
             AccessCondition(
               method = AccessMethod.NotRequestable,
-              status = AccessStatus.Unavailable)
+              status = Some(AccessStatus.TemporarilyUnavailable),
+              note = Some("This item is undergoing internal assessment or conservation work."))
         }
 
         it("if the item is at digitisation") {
