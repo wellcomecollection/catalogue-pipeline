@@ -923,6 +923,10 @@ class SierraHoldingsEnumerationTest
       VarField(
         fieldTag = "h",
         content = "Vol. 1 (1908-1914)"
+      ),
+      VarField(
+        fieldTag = "x",
+        content = "Some internal information"
       )
     )
 

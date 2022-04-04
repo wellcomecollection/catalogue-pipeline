@@ -41,6 +41,7 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
   //
   private def getHumanWrittenEnumeration(varFields: List[VarField]): List[String] =
     varFields
+      .filter(vf => vf.fieldTag.contains("h"))
       .filterNot(vf => vf.marcTag.isDefined)
       .flatMap(vf => vf.content)
 
