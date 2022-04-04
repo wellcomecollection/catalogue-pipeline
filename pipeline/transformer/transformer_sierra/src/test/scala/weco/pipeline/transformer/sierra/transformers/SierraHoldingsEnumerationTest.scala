@@ -918,6 +918,17 @@ class SierraHoldingsEnumerationTest
     }
   }
 
+  it("finds a human-written description in field tag h") {
+    val varFields = List(
+      VarField(
+        fieldTag = "h",
+        content = "Vol. 1 (1908-1914)"
+      )
+    )
+
+    getEnumerations(varFields) shouldBe List("Vol. 1 (1908-1914)")
+  }
+
   def getEnumerations(varFields: List[VarField]): List[String] =
     SierraHoldingsEnumeration(createSierraHoldingsNumber, varFields)
 }
