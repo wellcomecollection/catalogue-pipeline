@@ -178,7 +178,8 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           // Asked for by Victoria Sloyan in an email to Alex dated 17 Jan 2022.
           note = Some(
             "This item is undergoing internal assessment or conservation work."
-          ))
+          )
+        )
 
       case (
           _,
