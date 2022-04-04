@@ -959,7 +959,9 @@ class SierraHoldingsEnumerationTest
       ),
     )
 
-    getEnumerations(varFields) shouldBe List("Vol. 1 (1908-1914)", "v.1:no.1 (1984) - v.35:no.2 (2018)")
+    getEnumerations(varFields) shouldBe List(
+      "Vol. 1 (1908-1914)",
+      "v.1:no.1 (1984) - v.35:no.2 (2018)")
   }
 
   def getEnumerations(varFields: List[VarField]): List[String] =
