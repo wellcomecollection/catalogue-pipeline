@@ -82,7 +82,7 @@ object SierraNotes extends SierraDataTransformer with SierraQueryOps {
             case Subfield("u", contents) if isUrl(contents) =>
               s"""<a href="$contents">$contents</a>"""
             case Subfield("u", contents) =>
-              warn(s"MARC 520 ǂu which doesn't look like a URL: $contents")
+              warn(s"Subfield ǂu which doesn't look like a URL: $contents")
               contents
 
             case Subfield(_, contents) => contents
