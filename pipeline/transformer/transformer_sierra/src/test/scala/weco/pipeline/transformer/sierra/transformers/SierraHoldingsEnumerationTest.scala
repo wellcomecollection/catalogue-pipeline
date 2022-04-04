@@ -918,6 +918,52 @@ class SierraHoldingsEnumerationTest
     }
   }
 
+  it("finds a human-written description in field tag h") {
+    val varFields = List(
+      VarField(
+        fieldTag = "h",
+        content = "Vol. 1 (1908-1914)"
+      ),
+      VarField(
+        fieldTag = "x",
+        content = "Some internal information"
+      )
+    )
+
+    getEnumerations(varFields) shouldBe List("Vol. 1 (1908-1914)")
+  }
+
+  it("puts human-written descriptions before automatic enumerations") {
+    val varFields = List(
+      VarField(
+        fieldTag = "h",
+        content = "Vol. 1 (1908-1914)"
+      ),
+      VarField(
+        marcTag = "863",
+        subfields = List(
+          Subfield(tag = "8", content = "1.1"),
+          Subfield(tag = "a", content = "1-35"),
+          Subfield(tag = "b", content = "1-2"),
+          Subfield(tag = "i", content = "1984-2018"),
+        )
+      ),
+      VarField(
+        marcTag = "853",
+        subfields = List(
+          Subfield(tag = "8", content = "1"),
+          Subfield(tag = "a", content = "v."),
+          Subfield(tag = "b", content = "no."),
+          Subfield(tag = "i", content = "(year)"),
+        )
+      ),
+    )
+
+    getEnumerations(varFields) shouldBe List(
+      "Vol. 1 (1908-1914)",
+      "v.1:no.1 (1984) - v.35:no.2 (2018)")
+  }
+
   def getEnumerations(varFields: List[VarField]): List[String] =
     SierraHoldingsEnumeration(createSierraHoldingsNumber, varFields)
 }

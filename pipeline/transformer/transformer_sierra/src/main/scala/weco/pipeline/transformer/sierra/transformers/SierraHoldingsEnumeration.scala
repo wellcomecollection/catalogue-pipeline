@@ -26,11 +26,32 @@ import scala.util.{Failure, Success, Try}
 // written in a generic way that would allow supporting them if we wanted to later.
 //
 object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
+
+  def apply(id: TypedSierraRecordNumber,
+            varFields: List[VarField]): List[String] =
+    getHumanWrittenEnumeration(varFields) ++
+      getAutomaticallyPopulatedEnumeration(id, varFields)
+
+  // Field tag h is used by librarians to describe the contents of our holdings
+  // when they wrote the description themselves.  Note that 853/863 will also
+  // have field tag h, so we want to filter to cases where it's just an h and
+  // a textual description.
+  //
+  // See https://documentation.iii.com/sierrahelp/Content/sril/sril_records_varfld_types_holdings.html
+  //
+  private def getHumanWrittenEnumeration(
+    varFields: List[VarField]): List[String] =
+    varFields
+      .filter(vf => vf.fieldTag.contains("h"))
+      .filterNot(vf => vf.marcTag.isDefined)
+      .flatMap(vf => vf.content)
+
   val labelTag = "853"
   val valueTag = "863"
 
-  def apply(id: TypedSierraRecordNumber,
-            varFields: List[VarField]): List[String] = {
+  private def getAutomaticallyPopulatedEnumeration(
+    id: TypedSierraRecordNumber,
+    varFields: List[VarField]): List[String] = {
 
     // The 85X and 86X pairs are associated based on the contents of subfield 8.
     //
