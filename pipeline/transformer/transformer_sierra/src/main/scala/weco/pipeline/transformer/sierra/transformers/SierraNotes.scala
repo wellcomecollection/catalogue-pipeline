@@ -77,15 +77,10 @@ object SierraNotes extends SierraDataTransformer with SierraQueryOps {
           .subfieldsWithoutTags(
             (globallySuppressedSubfields ++ suppressedSubfields).toSeq: _*)
           .map {
+            // We want to make ǂu into a clickable link, but only if it's a URL --
+            // we don't want to make non-URLs into clickable objects.
             case Subfield("u", contents) if isUrl(contents) =>
               s"""<a href="$contents">$contents</a>"""
-
-            // The spec says that MARC 520 ǂu is "Uniform Resource Identifier", which
-            // isn't the same as being a URL.  We don't want to make non-URL text
-            // clickable; we're also not sure what the data that isn't a URL looks like.
-            //
-            // For now, log the value and don't make it clickable -- we can decide how
-            // best to handle it later.
             case Subfield("u", contents) =>
               warn(s"MARC 520 ǂu which doesn't look like a URL: $contents")
               contents
