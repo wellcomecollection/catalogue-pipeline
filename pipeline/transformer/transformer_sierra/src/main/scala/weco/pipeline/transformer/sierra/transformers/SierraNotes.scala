@@ -4,7 +4,10 @@ import weco.catalogue.internal_model.work._
 import weco.pipeline.transformer.text.TextNormalisation._
 import weco.sierra.models.SierraQueryOps
 import weco.sierra.models.data.SierraBibData
-import weco.sierra.models.marc.VarField
+import weco.sierra.models.marc.{Subfield, VarField}
+
+import java.net.URL
+import scala.util.Try
 
 object SierraNotes extends SierraDataTransformer with SierraQueryOps {
 
@@ -73,7 +76,22 @@ object SierraNotes extends SierraDataTransformer with SierraQueryOps {
         varField
           .subfieldsWithoutTags(
             (globallySuppressedSubfields ++ suppressedSubfields).toSeq: _*)
-          .contents
+          .map {
+            case Subfield("u", contents) if isUrl(contents) =>
+              s"""<a href="$contents">$contents</a>"""
+
+            // The spec says that MARC 520 ǂu is "Uniform Resource Identifier", which
+            // isn't the same as being a URL.  We don't want to make non-URL text
+            // clickable; we're also not sure what the data that isn't a URL looks like.
+            //
+            // For now, log the value and don't make it clickable -- we can decide how
+            // best to handle it later.
+            case Subfield("u", contents) =>
+              warn(s"MARC 520 ǂu which doesn't look like a URL: $contents")
+              contents
+
+            case Subfield(_, contents) => contents
+          }
           .mkString(" ")
 
       Note(contents = contents, noteType = noteType)
@@ -90,4 +108,8 @@ object SierraNotes extends SierraDataTransformer with SierraQueryOps {
         createNoteFromContents(NoteType.LocationOfDuplicatesNote)(vf)
       case _ => createNoteFromContents(NoteType.LocationOfOriginalNote)(vf)
     }
+
+  private def isUrl(s: String): Boolean =
+    Try { new URL(s) }.isSuccess
+
 }
