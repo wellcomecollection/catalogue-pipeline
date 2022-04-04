@@ -292,8 +292,13 @@ class SierraNotesTest
       VarField(
         marcTag = "540",
         subfields = List(
-          Subfield(tag = "a", content = "The National Library of Medicine believes this item to be in the public domain."),
-          Subfield(tag = "u", content = "https://creativecommons.org/publicdomain/mark/1.0/"),
+          Subfield(
+            tag = "a",
+            content =
+              "The National Library of Medicine believes this item to be in the public domain."),
+          Subfield(
+            tag = "u",
+            content = "https://creativecommons.org/publicdomain/mark/1.0/"),
           Subfield(tag = "5", content = "DNLM")
         )
       )
@@ -311,7 +316,10 @@ class SierraNotesTest
       VarField(
         marcTag = "540",
         subfields = List(
-          Subfield(tag = "a", content = "The National Library of Medicine believes this item to be in the public domain."),
+          Subfield(
+            tag = "a",
+            content =
+              "The National Library of Medicine believes this item to be in the public domain."),
           Subfield(tag = "u", content = "CC-0 license"),
         )
       )
