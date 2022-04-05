@@ -16,7 +16,7 @@ locals {
 resource "ec_deployment" "pipeline" {
   name = "pipeline-${var.pipeline_date}"
 
-  version = "7.17.1"
+  version = "7.17.2"
 
   region                 = "eu-west-1"
   deployment_template_id = "aws-io-optimized-v2"
@@ -190,6 +190,8 @@ locals {
     "inferrer",
     "work_ingestor",
     "image_ingestor",
+    "stacks_api",
+    "catalogue_api",
   ]
 
   pipeline_storage_es_service_secrets = zipmap(local.pipeline_storage_service_list, [
