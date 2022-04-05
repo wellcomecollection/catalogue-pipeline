@@ -4,7 +4,7 @@ module "catalogue_pipeline_2022-04-05" {
   pipeline_date = "2022-04-05"
   release_label = "2022-04-05"
 
-  min_capacity = 1
+  min_capacity = 0
 
   reindexing_state = {
     connect_reindex_topics   = true
