@@ -16,7 +16,7 @@ locals {
 resource "ec_deployment" "pipeline" {
   name = "pipeline-${var.pipeline_date}"
 
-  version = "7.17.1"
+  version = "7.17.2"
 
   region                 = "eu-west-1"
   deployment_template_id = "aws-io-optimized-v2"
@@ -75,7 +75,11 @@ resource "aws_secretsmanager_secret" "es_password" {
 resource "aws_secretsmanager_secret" "es_username_catalogue" {
   provider = aws.catalogue
 
-  for_each = toset(["snapshot_generator"])
+  for_each = toset([
+    "snapshot_generator",
+    "stacks_api",
+    "catalogue_api",
+  ])
 
   name = "elasticsearch/pipeline_storage_${var.pipeline_date}/${each.key}/es_username"
 
@@ -85,7 +89,11 @@ resource "aws_secretsmanager_secret" "es_username_catalogue" {
 resource "aws_secretsmanager_secret" "es_password_catalogue" {
   provider = aws.catalogue
 
-  for_each = toset(["snapshot_generator"])
+  for_each = toset([
+    "snapshot_generator",
+    "stacks_api",
+    "catalogue_api",
+  ])
 
   name = "elasticsearch/pipeline_storage_${var.pipeline_date}/${each.key}/es_password"
 

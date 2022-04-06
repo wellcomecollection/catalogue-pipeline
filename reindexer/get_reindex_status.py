@@ -87,30 +87,6 @@ def get_pipeline_storage_es_client(reindex_date):
     return Elasticsearch(f"{protocol}://{username}:{password}@{host}:{port}")
 
 
-@functools.lru_cache()
-def get_api_es_client():
-    """
-    Returns an Elasticsearch client for the catalogue cluster.
-    """
-    session = get_session_with_role(
-        "arn:aws:iam::756629837203:role/catalogue-developer"
-    )
-
-    secret_prefix = f"elasticsearch/catalogue_api"
-
-    host = get_secret_string(session, secret_id=f"{secret_prefix}/public_host")
-    port = get_secret_string(session, secret_id=f"{secret_prefix}/port")
-    protocol = get_secret_string(session, secret_id=f"{secret_prefix}/protocol")
-    username = get_secret_string(
-        session, secret_id=f"{secret_prefix}/diff_tool/username"
-    )
-    password = get_secret_string(
-        session, secret_id=f"{secret_prefix}/diff_tool/password"
-    )
-
-    return Elasticsearch(f"{protocol}://{username}:{password}@{host}:{port}")
-
-
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=1, max=10))
 def count_documents_in_index(es_client, *, index_name):
     """
@@ -146,11 +122,6 @@ def get_works_index_stats(*, reindex_date):
         for idx in indexes
     }
 
-    api_client = get_api_es_client()
-    result["API"] = count_documents_in_index(
-        api_client, index_name=f"works-indexed-{reindex_date}"
-    )
-
     return result
 
 
@@ -168,11 +139,6 @@ def get_images_index_stats(*, reindex_date):
         )
         for idx in indexes
     }
-
-    api_client = get_api_es_client()
-    result["API"] = count_documents_in_index(
-        api_client, index_name=f"images-indexed-{reindex_date}"
-    )
 
     return result
 
@@ -292,7 +258,7 @@ def main(reindex_date):
 
     print("")
 
-    proportion = work_index_stats["API"] / source_counts["TOTAL"] * 100
+    proportion = work_index_stats["works-indexed"] / source_counts["TOTAL"] * 100
     if proportion < 99:
         print(
             click.style(
