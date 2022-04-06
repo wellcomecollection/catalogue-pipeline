@@ -5,7 +5,7 @@ module "catalogue_pipeline_" {
   release_label = "2022-04-04"
 
   reindexing_state = {
-    connect_reindex_topics   = true
+    connect_reindex_topics   = false
     scale_up_tasks           = false
     scale_up_elastic_cluster = false
     scale_up_id_minter_db    = false
