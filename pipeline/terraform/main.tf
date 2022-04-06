@@ -4,8 +4,6 @@ module "catalogue_pipeline_" {
   pipeline_date = "2022-04-04"
   release_label = "2022-04-04"
 
-  min_capacity = 1
-
   reindexing_state = {
     connect_reindex_topics   = true
     scale_up_tasks           = false
