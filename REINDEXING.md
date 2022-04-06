@@ -11,7 +11,6 @@ To run a reindex follow these steps:
 3. [Deploy a release](#deploy-a-release)
 4. [Terraform a new pipeline](#terraform-a-new-pipeline)
 5. [Run the reindex script](#run-the-reindex-script)
-6. [Connect the Catalogue API](#connect-the-catalogue-api)
 
 ### Update the catalogue-pipeline environments
 
@@ -38,7 +37,7 @@ You will need to use the environment id when terraforming a new pipeline.
 
 ### Prepare a release
 
-Prepare a release following the example below. 
+Prepare a release following the example below.
 
 You may want to choose a specific git ref as a label and _not_ `latest`.
 
@@ -103,7 +102,7 @@ Deployed release eeb9482f-0a6a-4211-8de9-27cee7567134 to YYYY-MM-DD (Environment
 Deployment of eeb9482f-0a6a-4211-8de9-27cee7567134 to YYYY-MM-DD successful
 ```
 
-This operation **only tags ECR images with the new environment** it does not deploy any services. 
+This operation **only tags ECR images with the new environment** it does not deploy any services.
 
 This will be done when you terraform a new pipeline.
 
@@ -114,7 +113,7 @@ You will now need to create a new pipeline module in [./pipeline/terraform/main.
 Copy and paste an existing pipeline making sure to update the fields:
 
 - `pipeline_date`: References secrets required to access ES and to sets internal infrastructure labels.
-- `release_label`: Sets the ECR label to use on the service deployment images, created in the above deployment process. 
+- `release_label`: Sets the ECR label to use on the service deployment images, created in the above deployment process.
 - `is_reindexing`: Sets ES cluster/service scaling limits while reindexing, and connects reindexing topics. Enabling this will incur above normal costs for a pipeline.
 
 See the following example:
@@ -209,47 +208,9 @@ API               144,981
 Approximately 99% of records have been reindexed successfully (counts may not be exact)
 ```
 
-A reindex should take less than a working day to complete. 
+A reindex should take a few hours to complete.
 
-### Connect the Catalogue API
-
-Every pipeline has a dedicated Elasticsearch cluster, and this cluster contains indexes for different stages of the reindex.
-
-The two indexes of interest are `works-indexed-{PIPELINE_DATE}` and `images-indexed-{PIPELINE_DATE}`, these contain documents suitable for the API to use.
-
-When these indexes have been fully populated, we want to replicate them into the `catalogue-api` cluster.
-
-This diagram intends to provide an overview of how the pipeline and API connect:
-
-![Catalogue pipeline visualisation](.gitbook/assets/wc_pipeline_viz.png)
-
-#### Following an index
-
-We replicate indexes between the pipeline and catalogue-api clusters using [Elasticsearch CCR](https://www.elastic.co/guide/en/elasticsearch/reference/current/xpack-ccr.html).
-
-To follow an index using the console:
-
-- You can sign into Elastic Cloud here: https://cloud.elastic.co/home
-
-  Your cluster will be created in Elastic Cloud with a name patterned after : `pipeline-YYYY-MM-DD`.
-
-  ![Example Elastic Cloud dashboard](.gitbook/assets/es_dash_example.png)
-
-- The catalogue-api cluster [stack-management CCR options](https://catalogue-api.kb.eu-west-1.aws.found.io:9243/app/management/data/cross_cluster_replication/follower_indices) are available via Kibana for that cluster.
-
-  You will be able to [create a follower index](https://catalogue-api.kb.eu-west-1.aws.found.io:9243/app/management/data/cross_cluster_replication/follower_indices/add)
-
-  ![Create follower index](.gitbook/assets/create_follower_es.png)
-
-  - Pick the remote cluster created by terraform above.
-  - Create the follower indexes using the naming pattern:
-  
-    - `works-indexed-YYYY-MM-DD`
-    - `images-indexed-YYYY-MM-DD`
-  
-  Be sure to create follower indexes for both images & works indexes. You should name the follower indexes the same as their leader. 
-  
-#### Updating configuration 
+#### Updating configuration
 
 When you have a complete successful reindex you will want to present it via the Catalogue API.
 
@@ -271,7 +232,7 @@ object ElasticConfig {
 }
 ```
 
-You will want to PR & deploy this change through the API stage environment and allow CI to perform the usual API checks. 
+You will want to PR & deploy this change through the API stage environment and allow CI to perform the usual API checks.
 
 Be sure to check the [diff_tool](https://github.com/wellcomecollection/catalogue-api/tree/main/diff_tool) output in CI in before deploying to production (you can also run this manually).
 
