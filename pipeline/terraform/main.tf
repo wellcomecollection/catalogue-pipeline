@@ -1,10 +1,10 @@
-module "catalogue_pipeline_2022-04-05" {
+module "catalogue_pipeline_" {
   source = "./stack"
 
-  pipeline_date = "2022-04-05"
-  release_label = "2022-04-05"
+  pipeline_date = "2022-04-04"
+  release_label = "2022-04-04"
 
-  min_capacity = 0
+  min_capacity = 1
 
   reindexing_state = {
     connect_reindex_topics   = true

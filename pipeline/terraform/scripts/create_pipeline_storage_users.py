@@ -140,7 +140,7 @@ if __name__ == '__main__':
     print("")
 
     for username, password in newly_created_usernames:
-        if username == "snapshot_generator":
+        if username in {"snapshot_generator", "stacks_api", "catalogue_api"}:
             session = catalogue_session
         else:
             session = platform_session

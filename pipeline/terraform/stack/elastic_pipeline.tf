@@ -75,7 +75,11 @@ resource "aws_secretsmanager_secret" "es_password" {
 resource "aws_secretsmanager_secret" "es_username_catalogue" {
   provider = aws.catalogue
 
-  for_each = toset(["snapshot_generator"])
+  for_each = toset([
+    "snapshot_generator",
+    "stacks_api",
+    "catalogue_api",
+  ])
 
   name = "elasticsearch/pipeline_storage_${var.pipeline_date}/${each.key}/es_username"
 
@@ -85,7 +89,11 @@ resource "aws_secretsmanager_secret" "es_username_catalogue" {
 resource "aws_secretsmanager_secret" "es_password_catalogue" {
   provider = aws.catalogue
 
-  for_each = toset(["snapshot_generator"])
+  for_each = toset([
+    "snapshot_generator",
+    "stacks_api",
+    "catalogue_api",
+  ])
 
   name = "elasticsearch/pipeline_storage_${var.pipeline_date}/${each.key}/es_password"
 
@@ -190,8 +198,6 @@ locals {
     "inferrer",
     "work_ingestor",
     "image_ingestor",
-    "stacks_api",
-    "catalogue_api",
   ]
 
   pipeline_storage_es_service_secrets = zipmap(local.pipeline_storage_service_list, [
