@@ -131,6 +131,7 @@ class StateTest
         newMum,
         granny)
     }
+
     it("Only overwrites unidentified relations from a previous stage.") {
       val mum1 = new Relation(
         id = Some(CanonicalId("cafef00d")),
@@ -202,6 +203,46 @@ class StateTest
         dadsMum,
         mum2
       )
+    }
+
+    it("matches relations ignoring trailing terminal punctuation") {
+      val merged = Work.Visible[Merged](
+        version = 0,
+        state = Merged(
+          sourceIdentifier = sourceIdentifier,
+          canonicalId = canonicalId,
+          sourceModifiedTime = Instant.MIN,
+          mergedTime = Instant.MIN,
+          availabilities = Set(),
+          // Unnecessary trailing punctuation is expected to have
+          // been removed in the creation of a SeriesRelation.
+          relations = Relations(
+            ancestors = List(SeriesRelation("Basil Hood. Photograph Album"))
+          )
+        ),
+        data = WorkData(title = Some("My Title"))
+      )
+
+      val newAlbum = new Relation(
+        id = Some(CanonicalId("deadbeef")),
+        // The title is the same as the one already there, but with a trailing '.'
+        title = Some("Basil Hood. Photograph Album."),
+        collectionPath = Some(CollectionPath("cafed00d/deadbeef")),
+        workType = WorkType.Standard,
+        depth = 0,
+        numChildren = 1,
+        numDescendents = 1
+      )
+
+      val denormalised = merged.transition[Denormalised](
+        (
+          Relations(
+            ancestors = List(newAlbum)
+          ),
+          Set()
+        )
+      )
+      denormalised.state.relations.ancestors shouldBe List(newAlbum)
     }
 
     it("preserves existing state members") {
