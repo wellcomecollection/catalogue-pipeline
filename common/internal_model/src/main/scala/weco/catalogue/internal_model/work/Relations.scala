@@ -87,9 +87,8 @@ object RelationSet {
     * Where more specific punctuation exists - e.g. ? or !, it is likely to be present in both, so does not
     * need to be disguised.
     */
-  private def removeTerminalPunctuation(title: Option[String]): String = {
+  private def removeTerminalPunctuation(title: Option[String]): String =
     title.getOrElse("").stripSuffix(".").trim
-  }
 }
 
 object Relations {
