@@ -62,10 +62,37 @@ case class Relations(
 object RelationSet {
   def apply(existingRelations: List[Relation],
             newRelations: List[Relation]): List[Relation] = {
-    val newTitles = newRelations.map(_.title)
-    existingRelations.filter(r =>
-      r.id.isDefined || !newTitles.contains(r.title)) ++ newRelations
+    val newTitles =
+      newRelations.map(relation => removeTerminalPunctuation(relation.title))
+
+    // duplicated if it shares a title, but not if it already has an identifier.
+    def isRelationDuplicated(relation: Relation): Boolean =
+      relation.id.isEmpty && newTitles.contains(relation.title.getOrElse(""))
+
+    val relationsToKeep =
+      existingRelations.filter(r => !isRelationDuplicated(r))
+    relationsToKeep ++ newRelations
   }
+
+  /**
+    * The title used in a relation may come from one of two places:
+    * 1. The title of the related document
+    * 2. The title of the link to the document
+    *
+    * Unfortunately, these may be subject to different conventions in trailing punctuation,
+    * e.g. the title in the link might be intended to be followed by a page or volume number, separated
+    * by something like a colon or comma,
+    * whereas the title of the related document is complete and may finish with a full stop.
+    *
+    * Where the title only differs by this form of trailing punctuation, they should be treated as matching.
+    * At this point, the trailing punctuation is expected to already have been removed from unidentified link titles,
+    * so we only need to remove it from the Work titles for comparison.
+    *
+    * Where more specific punctuation exists - e.g. ? or !, it is likely to be present in both, so does not
+    * need to be disguised.
+    */
+  private def removeTerminalPunctuation(title: Option[String]): String =
+    title.getOrElse("").stripSuffix(".").trim
 }
 
 object Relations {
