@@ -35,7 +35,6 @@ SERVICES = {
     "inferrer": ["images-initial_read", "images-augmented_write"],
     "image_ingestor": ["images-augmented_read", "images-indexed_write"],
     "snapshot_generator": ["works-indexed_read"],
-    "stacks_api": ["works-indexed_read"],
     "catalogue_api": [
         "works-indexed_read", "images-indexed_read",
 
@@ -140,7 +139,7 @@ if __name__ == '__main__':
     print("")
 
     for username, password in newly_created_usernames:
-        if username in {"snapshot_generator", "stacks_api", "catalogue_api"}:
+        if username in {"snapshot_generator", "stacks_api"}:
             session = catalogue_session
         else:
             session = platform_session
