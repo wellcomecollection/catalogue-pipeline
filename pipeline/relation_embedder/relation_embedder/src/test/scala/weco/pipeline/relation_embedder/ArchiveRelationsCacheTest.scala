@@ -4,7 +4,7 @@ import org.apache.commons.io.IOUtils
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.Inspectors
-import weco.catalogue.internal_model.work.{Availability, Relation, Relations}
+import weco.catalogue.internal_model.work.{Relation, Relations}
 import weco.pipeline.relation_embedder.fixtures.RelationGenerators
 import weco.pipeline.relation_embedder.models.ArchiveRelationsCache
 
@@ -46,7 +46,8 @@ class ArchiveRelationsCacheTest
       .map(toRelationWork)
 
   it(
-    "Retrieves relations for the given path with children and siblings sorted correctly") {
+    "Retrieves relations for the given path with children and siblings sorted correctly"
+  ) {
     val relationsCache = ArchiveRelationsCache(works)
     relationsCache(work2) shouldBe Relations(
       ancestors = List(relA),
@@ -118,52 +119,6 @@ class ArchiveRelationsCacheTest
       siblingsPreceding = Nil,
       siblingsSucceeding = Nil
     )
-  }
-
-  describe("gets the availabilities for a work") {
-    val workA = work("a")
-    val work1 = work("a/1")
-    val workB = work("a/1/b")
-    val workB1 = work("a/1/b/1")
-    val workB11 = work("a/1/b/1/1", isAvailableOnline = true)
-    val workC = work("a/1/c", isAvailableOnline = true)
-
-    it("finds the availability on direct descendents") {
-      val relationsCache = ArchiveRelationsCache(
-        Seq(workA, work1, workB, workC).map(toRelationWork)
-      )
-
-      relationsCache.getAvailabilities(workA) shouldBe Set(Availability.Online)
-      relationsCache.getAvailabilities(work1) shouldBe Set(Availability.Online)
-      relationsCache.getAvailabilities(workB) shouldBe empty
-      relationsCache.getAvailabilities(workC) shouldBe Set(Availability.Online)
-    }
-
-    it("skips the availability on indirect descendents") {
-      val cacheWithDirectDescendents = ArchiveRelationsCache(
-        Seq(workB, workB1, workB11).map(toRelationWork)
-      )
-
-      val cacheWithoutDirectDescendents = ArchiveRelationsCache(
-        Seq(workB, workB11).map(toRelationWork)
-      )
-
-      cacheWithDirectDescendents.getAvailabilities(workB) shouldBe Set(
-        Availability.Online)
-      cacheWithoutDirectDescendents.getAvailabilities(workB) shouldBe empty
-    }
-  }
-
-  it("finds a work's availabilities") {
-    val relationsCache = ArchiveRelationsCache(works)
-
-    relationsCache.getAvailabilities(workA) should contain only Availability.Online
-    relationsCache.getAvailabilities(work1) should contain only Availability.Online
-    relationsCache.getAvailabilities(workC) should contain only Availability.Online
-
-    forEvery(List(workB, work2, workD, workE, workF, work3, work4)) { work =>
-      relationsCache.getAvailabilities(work).size shouldBe 0
-    }
   }
 
   // This is a real set of nearly 7000 paths from SAFPA.  This test is less focused on
