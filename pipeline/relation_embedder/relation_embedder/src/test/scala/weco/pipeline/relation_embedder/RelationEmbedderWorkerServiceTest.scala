@@ -81,24 +81,28 @@ class RelationEmbedderWorkerServiceTest
   val relations2 = Relations(
     ancestors = List(relA),
     children = List(relC, relD),
-    siblingsPreceding = List(rel1))
+    siblingsPreceding = List(rel1)
+  )
   val relationsC =
     Relations(ancestors = List(relA, rel2), siblingsSucceeding = List(relD))
   val relationsD = Relations(
     ancestors = List(relA, rel2),
     children = List(relE),
-    siblingsPreceding = List(relC))
+    siblingsPreceding = List(relC)
+  )
   val relationsE = Relations(ancestors = List(relA, rel2, relD))
 
   val works =
     List(workA, workB, workC, workD, workE, work2, work1)
 
   def relations(
-    index: mutable.Map[String, Work[Denormalised]]): Map[String, Relations] =
+    index: mutable.Map[String, Work[Denormalised]]
+  ): Map[String, Relations] =
     index.map { case (key, work) => key -> work.state.relations }.toMap
 
-  def availabilities(index: mutable.Map[String, Work[Denormalised]])
-    : Map[String, Set[Availability]] =
+  def availabilities(
+    index: mutable.Map[String, Work[Denormalised]]
+  ): Map[String, Set[Availability]] =
     index.map { case (key, work) => key -> work.state.availabilities }.toMap
 
   it("denormalises a batch containing a list of selectors") {
@@ -107,7 +111,8 @@ class RelationEmbedderWorkerServiceTest
         import Selector._
         val batch = Batch(
           rootPath = "a",
-          selectors = List(Node("a/2"), Descendents("a/2")))
+          selectors = List(Node("a/2"), Descendents("a/2"))
+        )
         sendNotificationToSQS(queue = queue, message = batch)
         eventually {
           assertQueueEmpty(queue)
@@ -123,10 +128,10 @@ class RelationEmbedderWorkerServiceTest
           work2.id -> relations2,
           workC.id -> relationsC,
           workD.id -> relationsD,
-          workE.id -> relationsE,
+          workE.id -> relationsE
         )
         availabilities(index) shouldBe Map(
-          work2.id -> Set(Availability.Online),
+          work2.id -> Set.empty,
           workC.id -> Set.empty,
           workD.id -> Set(Availability.Online),
           workE.id -> Set.empty
@@ -152,16 +157,16 @@ class RelationEmbedderWorkerServiceTest
           work2.id -> relations2,
           workC.id -> relationsC,
           workD.id -> relationsD,
-          workE.id -> relationsE,
+          workE.id -> relationsE
         )
         availabilities(index) shouldBe Map(
-          workA.id -> Set(Availability.Online),
+          workA.id -> Set.empty,
           work1.id -> Set.empty,
           workB.id -> Set.empty,
-          work2.id -> Set(Availability.Online),
+          work2.id -> Set.empty,
           workC.id -> Set.empty,
           workD.id -> Set(Availability.Online),
-          workE.id -> Set.empty,
+          workE.id -> Set.empty
         )
     }
   }
@@ -191,10 +196,10 @@ class RelationEmbedderWorkerServiceTest
           invisibleWork.id -> Relations.none
         )
         availabilities(index) shouldBe Map(
-          workA.id -> Set(Availability.Online),
+          workA.id -> Set.empty,
           work1.id -> Set.empty,
           workB.id -> Set.empty,
-          work2.id -> Set(Availability.Online),
+          work2.id -> Set.empty,
           workC.id -> Set.empty,
           workD.id -> Set(Availability.Online),
           workE.id -> Set.empty,
@@ -252,13 +257,16 @@ class RelationEmbedderWorkerServiceTest
     }
   }
 
-  def withWorkerService[R](works: List[Work[Merged]] = works,
-                           fails: Boolean = false,
-                           visibilityTimeout: Duration = 5.seconds)(
-    testWith: TestWith[(QueuePair,
-                        mutable.Map[String, Work[Denormalised]],
-                        MemoryMessageSender),
-                       R]): R =
+  def withWorkerService[R](
+    works: List[Work[Merged]] = works,
+    fails: Boolean = false,
+    visibilityTimeout: Duration = 5.seconds
+  )(
+    testWith: TestWith[
+      (QueuePair, mutable.Map[String, Work[Denormalised]], MemoryMessageSender),
+      R
+    ]
+  ): R =
     withLocalMergedWorksIndex { mergedIndex =>
       storeWorks(mergedIndex, works)
       withLocalSqsQueuePair(visibilityTimeout = visibilityTimeout) {
@@ -275,13 +283,14 @@ class RelationEmbedderWorkerServiceTest
                     new PathQueryRelationsService(
                       elasticClient,
                       mergedIndex,
-                      10)
+                      10
+                    )
                 val workerService = new RelationEmbedderWorkerService[String](
                   sqsStream = sqsStream,
                   msgSender = messageSender,
                   workIndexer = new MemoryIndexer(denormalisedIndex),
                   relationsService = relationsService,
-                  indexFlushInterval = 1 milliseconds,
+                  indexFlushInterval = 1 milliseconds
                 )
                 workerService.run()
                 testWith((queuePair, denormalisedIndex, messageSender))
