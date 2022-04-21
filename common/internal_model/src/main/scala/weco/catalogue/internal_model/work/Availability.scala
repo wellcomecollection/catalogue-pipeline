@@ -34,49 +34,34 @@ object Availability extends Enum[Availability] {
     val label = "Online"
   }
 
-  case object InLibrary extends Availability {
-    val id = "in-library"
-    val label = "In the library"
+  case object ClosedStores extends Availability {
+    val id = "closed-stores"
+    val label = "Closed stores"
+  }
+
+  case object OpenShelves extends Availability {
+    val id = "open-shelves"
+    val label = "Open shelves"
   }
 }
 
 object Availabilities {
-  def forWorkData(data: WorkData[_]): Set[Availability] = {
-    val locations =
-      data.items.flatMap { _.locations } ++
-        data.holdings.flatMap { _.location }
-
-    Set(
-      when(
-        locations.exists(_.isAvailableInLibrary) && !data.notes.exists(
-          _.isInOtherLibrary)) {
-        Availability.InLibrary
-      },
-      when(locations.exists(_.isAvailableOnline)) {
-        Availability.Online
-      },
-    ).flatten
-  }
+  def forWorkData(data: WorkData[_]): Set[Availability] =
+    (data.items.flatMap(_.locations) ++ data.holdings.flatMap(_.location))
+      .flatMap(_.availability(data.notes))
+      .toSet
 
   private implicit class LocationOps(loc: Location) {
-    def isAvailableInLibrary: Boolean =
+    def availability(notes: Seq[Note]): Option[Availability] =
       loc match {
-        // The availability filter is meant to show people things they
-        // can actually see, so we don't include items that have been ordered
-        // but aren't available to view yet.
-        case physicalLoc: PhysicalLocation
-            if physicalLoc.locationType == LocationType.OnOrder =>
-          false
-
-        case _: PhysicalLocation => true
-
-        case _ => false
-      }
-
-    def isAvailableOnline: Boolean =
-      loc match {
-        case digitalLoc: DigitalLocation if digitalLoc.isAvailable => true
-        case _                                                     => false
+        case PhysicalLocation(LocationType.OpenShelves, _, _, _, _) =>
+          Some(Availability.OpenShelves)
+        case PhysicalLocation(LocationType.ClosedStores, _, _, _, _)
+            if !notes.exists(_.isInOtherLibrary) =>
+          Some(Availability.ClosedStores)
+        case digitalLocation: DigitalLocation if digitalLocation.isAvailable =>
+          Some(Availability.Online)
+        case _ => None
       }
   }
 
@@ -114,7 +99,4 @@ object Availabilities {
         case _ => false
       }
   }
-
-  private def when[T](condition: Boolean)(result: T): Option[T] =
-    if (condition) Some(result) else { None }
 }
