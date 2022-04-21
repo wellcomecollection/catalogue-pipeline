@@ -1,5 +1,7 @@
 package weco.pipeline.ingestor.works.models
 
+import java.time.Instant
+
 import weco.catalogue.internal_model.identifiers.{IdState, SourceIdentifier}
 import weco.catalogue.internal_model.work.{DeletedReason, InvisibilityReason}
 
@@ -8,32 +10,45 @@ import weco.catalogue.internal_model.work.{DeletedReason, InvisibilityReason}
  * want to display in public API responses.
  *
  */
+
+case class SourceWorkDebugInformation(
+  identifier: SourceIdentifier,
+  version: Int,
+  modifiedTime: Instant
+)
+
 sealed trait DebugInformation {
-  val sourceIdentifier: SourceIdentifier
-  val sourceVersion: Int
+  val source: SourceWorkDebugInformation
+
+  val mergedTime: Instant
+  val indexedTime: Instant
 }
 
 object DebugInformation {
   case class Visible(
-    sourceIdentifier: SourceIdentifier,
-    sourceVersion: Int,
+    source: SourceWorkDebugInformation,
+    mergedTime: Instant,
+    indexedTime: Instant,
     redirectSources: Seq[IdState.Identified]
   ) extends DebugInformation
 
   case class Invisible(
-    sourceIdentifier: SourceIdentifier,
-    sourceVersion: Int,
+    source: SourceWorkDebugInformation,
+    mergedTime: Instant,
+    indexedTime: Instant,
     invisibilityReasons: List[InvisibilityReason]
   ) extends DebugInformation
 
   case class Redirected(
-    sourceIdentifier: SourceIdentifier,
-    sourceVersion: Int
+    source: SourceWorkDebugInformation,
+    mergedTime: Instant,
+    indexedTime: Instant,
   ) extends DebugInformation
 
   case class Deleted(
-    sourceIdentifier: SourceIdentifier,
-    sourceVersion: Int,
+    source: SourceWorkDebugInformation,
+    mergedTime: Instant,
+    indexedTime: Instant,
     deletedReason: DeletedReason
   ) extends DebugInformation
 }
