@@ -27,7 +27,7 @@ class DisplayItemTest extends AnyFunSpec with Matchers with ItemsGenerators {
 
     displayItem shouldBe DisplayItem(
       id = None,
-      identifiers = None,
+      identifiers = List(),
       locations = List(DisplayLocation(item.locations.head))
     )
   }

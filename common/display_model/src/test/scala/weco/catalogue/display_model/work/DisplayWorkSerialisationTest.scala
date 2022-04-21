@@ -2,7 +2,6 @@ package weco.catalogue.display_model.work
 
 import org.scalatest.funspec.AnyFunSpec
 import weco.catalogue.display_model.DisplaySerialisationTestBase
-import weco.catalogue.display_model.Implicits._
 import weco.catalogue.display_model.test.util.JsonMapperTestUtil
 import weco.catalogue.internal_model.generators.ImageGenerators
 import weco.catalogue.internal_model.locations._
@@ -40,10 +39,10 @@ class DisplayWorkSerialisationTest
       |}
     """.stripMargin
 
-    assertObjectMapsToJson(DisplayWork(work), expectedJson = expectedJson)
+    assertWorkMapsToJson(work, expectedJson)
   }
 
-  it("renders an item if the items include is present") {
+  it("includes the items") {
     val work = indexedWork()
       .items(createIdentifiedItems(count = 1) :+ createUnidentifiableItem)
 
@@ -58,13 +57,10 @@ class DisplayWorkSerialisationTest
       |}
     """.stripMargin
 
-    assertObjectMapsToJson(
-      DisplayWork(work, includes = WorksIncludes(WorkInclude.Items)),
-      expectedJson = expectedJson
-    )
+    assertWorkMapsToJson(work, expectedJson)
   }
 
-  it("includes 'items' if the items include is present, even with no items") {
+  it("includes 'items', even if there aren't any") {
     val work = indexedWork().items(Nil)
 
     val expectedJson = s"""
@@ -78,13 +74,10 @@ class DisplayWorkSerialisationTest
       |}
     """.stripMargin
 
-    assertObjectMapsToJson(
-      DisplayWork(work, includes = WorksIncludes(WorkInclude.Items)),
-      expectedJson = expectedJson
-    )
+    assertWorkMapsToJson(work, expectedJson)
   }
 
-  it("includes credit information in DisplayWork serialisation") {
+  it("includes credit information") {
     val location = DigitalLocation(
       locationType = LocationType.OnlineResource,
       url = "",
@@ -123,18 +116,10 @@ class DisplayWorkSerialisationTest
       |}
     """.stripMargin
 
-    assertObjectMapsToJson(
-      DisplayWork(
-        workWithCopyright,
-        includes = WorksIncludes(WorkInclude.Items)
-      ),
-      expectedJson = expectedJson
-    )
+    assertWorkMapsToJson(workWithCopyright, expectedJson)
   }
 
-  it(
-    "includes subject information in DisplayWork serialisation with the subjects include"
-  ) {
+  it("includes subject information") {
     val workWithSubjects = indexedWork().subjects(
       (1 to 3).map(_ => createSubject).toList
     )
@@ -152,18 +137,10 @@ class DisplayWorkSerialisationTest
       |}
     """.stripMargin
 
-    assertObjectMapsToJson(
-      DisplayWork(
-        workWithSubjects,
-        includes = WorksIncludes(WorkInclude.Subjects)
-      ),
-      expectedJson = expectedJson
-    )
+    assertWorkMapsToJson(workWithSubjects, expectedJson)
   }
 
-  it(
-    "includes production information in DisplayWork serialisation with the production include"
-  ) {
+  it("includes production information") {
     val workWithProduction = indexedWork().production(
       createProductionEventList(count = 3)
     )
@@ -182,18 +159,10 @@ class DisplayWorkSerialisationTest
       |}
     """.stripMargin
 
-    assertObjectMapsToJson(
-      DisplayWork(
-        workWithProduction,
-        includes = WorksIncludes(WorkInclude.Production)
-      ),
-      expectedJson = expectedJson
-    )
+    assertWorkMapsToJson(workWithProduction, expectedJson)
   }
 
-  it(
-    "includes the contributors in DisplayWork serialisation with the contribuotrs include"
-  ) {
+  it("includes the contributors") {
     val work = indexedWork()
       .format(Format.EBooks)
       .description(randomAlphanumeric(100))
@@ -220,15 +189,10 @@ class DisplayWorkSerialisationTest
       |}
     """.stripMargin
 
-    assertObjectMapsToJson(
-      DisplayWork(work, includes = WorksIncludes(WorkInclude.Contributors)),
-      expectedJson = expectedJson
-    )
+    assertWorkMapsToJson(work, expectedJson)
   }
 
-  it(
-    "includes genre information in DisplayWork serialisation with the genres include"
-  ) {
+  it("includes genres") {
     val work = indexedWork().genres(
       List(
         Genre(
@@ -249,15 +213,10 @@ class DisplayWorkSerialisationTest
       |}
     """.stripMargin
 
-    assertObjectMapsToJson(
-      DisplayWork(work, includes = WorksIncludes(WorkInclude.Genres)),
-      expectedJson = expectedJson
-    )
+    assertWorkMapsToJson(work, expectedJson)
   }
 
-  it(
-    "includes 'notes' if the notes include is present, with similar notes grouped together"
-  ) {
+  it("includes 'notes', with similar notes grouped together") {
     val work = indexedWork().notes(
       List(
         Note(contents = "A", noteType = NoteType.GeneralNote),
@@ -296,13 +255,10 @@ class DisplayWorkSerialisationTest
       |}
     """.stripMargin
 
-    assertObjectMapsToJson(
-      DisplayWork(work, includes = WorksIncludes(WorkInclude.Notes)),
-      expectedJson = expectedJson
-    )
+    assertWorkMapsToJson(work, expectedJson)
   }
 
-  it("includes a list of identifiers on DisplayWork") {
+  it("includes a list of identifiers") {
     val otherIdentifier = createSourceIdentifier
     val work = indexedWork().otherIdentifiers(List(otherIdentifier))
 
@@ -320,13 +276,10 @@ class DisplayWorkSerialisationTest
       |}
     """.stripMargin
 
-    assertObjectMapsToJson(
-      DisplayWork(work, includes = WorksIncludes(WorkInclude.Identifiers)),
-      expectedJson = expectedJson
-    )
+    assertWorkMapsToJson(work, expectedJson)
   }
 
-  it("always includes 'identifiers' with the identifiers include") {
+  it("always includes 'identifiers', even if otherIdentifiers is empty") {
     val work = indexedWork().otherIdentifiers(Nil)
 
     val expectedJson = s"""
@@ -340,13 +293,10 @@ class DisplayWorkSerialisationTest
       |}
     """.stripMargin
 
-    assertObjectMapsToJson(
-      DisplayWork(work, includes = WorksIncludes(WorkInclude.Identifiers)),
-      expectedJson = expectedJson
-    )
+    assertWorkMapsToJson(work, expectedJson)
   }
 
-  it("includes image stubs with the images include") {
+  it("includes image stubs") {
     val work = indexedWork().imageData(
       (1 to 3).map(_ => createImageData.toIdentified).toList
     )
@@ -362,10 +312,7 @@ class DisplayWorkSerialisationTest
       |}
     """.stripMargin
 
-    assertObjectMapsToJson(
-      DisplayWork(work, includes = WorksIncludes(WorkInclude.Images)),
-      expectedJson
-    )
+    assertWorkMapsToJson(work, expectedJson)
   }
 
   it("shows the thumbnail field if available") {
@@ -388,9 +335,6 @@ class DisplayWorkSerialisationTest
       |}
     """.stripMargin
 
-    assertObjectMapsToJson(
-      DisplayWork(work, includes = WorksIncludes.none),
-      expectedJson = expectedJson
-    )
+    assertWorkMapsToJson(work, expectedJson)
   }
 }

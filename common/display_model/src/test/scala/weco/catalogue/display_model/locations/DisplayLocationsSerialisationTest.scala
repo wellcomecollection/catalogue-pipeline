@@ -1,12 +1,10 @@
 package weco.catalogue.display_model.locations
 
-import org.scalatest.Assertion
 import org.scalatest.funspec.AnyFunSpec
 import weco.catalogue.display_model.DisplaySerialisationTestBase
 import weco.catalogue.display_model.test.util.JsonMapperTestUtil
 import weco.catalogue.internal_model.locations._
 import weco.catalogue.internal_model.work.generators._
-import weco.catalogue.internal_model.work.{Work, WorkState}
 
 class DisplayLocationsSerialisationTest
     extends AnyFunSpec
@@ -36,7 +34,7 @@ class DisplayLocationsSerialisationTest
       |}
     """.stripMargin
 
-    assertWorkMapsToJson(work, expectedJson = expectedJson)
+    assertWorkMapsToJson(work, expectedJson)
   }
 
   it("serialises a digital location") {
@@ -60,7 +58,7 @@ class DisplayLocationsSerialisationTest
       |}
     """.stripMargin
 
-    assertWorkMapsToJson(work, expectedJson = expectedJson)
+    assertWorkMapsToJson(work, expectedJson)
   }
 
   it("serialises a digital location with a license") {
@@ -85,7 +83,7 @@ class DisplayLocationsSerialisationTest
       |}
     """.stripMargin
 
-    assertWorkMapsToJson(work, expectedJson = expectedJson)
+    assertWorkMapsToJson(work, expectedJson)
   }
 
   it("serialises a digital location with an access condition") {
@@ -116,15 +114,6 @@ class DisplayLocationsSerialisationTest
       |}
     """.stripMargin
 
-    assertWorkMapsToJson(work, expectedJson = expectedJson)
+    assertWorkMapsToJson(work, expectedJson)
   }
-
-  private def assertWorkMapsToJson(
-    work: Work.Visible[WorkState.Indexed],
-    expectedJson: String
-  ): Assertion =
-    assertObjectMapsToJson(
-      DisplayWork(work, includes = WorksIncludes(WorkInclude.Items)),
-      expectedJson = expectedJson
-    )
 }

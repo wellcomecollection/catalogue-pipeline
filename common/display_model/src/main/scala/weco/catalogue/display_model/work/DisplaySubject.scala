@@ -21,7 +21,7 @@ object DisplaySubject extends GetIdentifiers {
       case Subject(id, label, concepts) =>
         DisplaySubject(
           id = id.maybeCanonicalId.map { _.underlying },
-          identifiers = getIdentifiers(id, includesIdentifiers = true),
+          identifiers = getIdentifiers(id),
           label = label,
           concepts =
             concepts.map(DisplayAbstractRootConcept(_, includesIdentifiers = true))

@@ -2,16 +2,12 @@ package weco.catalogue.display_model
 
 import io.circe.Json
 import org.scalatest.Suite
-import weco.catalogue.internal_model.identifiers.{
-  HasId,
-  IdState,
-  SourceIdentifier
-}
+import weco.catalogue.display_model.locations.{DisplayAccessMethod, DisplayAccessStatus}
+import weco.catalogue.internal_model.identifiers.{HasId, IdState, SourceIdentifier}
 import weco.catalogue.internal_model.image.ImageData
-import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.locations._
 import weco.catalogue.internal_model.work._
-import weco.json.JsonUtil.{fromJson, toJson}
+import weco.json.JsonUtil._
 
 import scala.util.{Failure, Success}
 
@@ -42,10 +38,10 @@ trait DisplaySerialisationTestBase {
       Json.fromString(s).noSpaces
   }
 
-  def items(items: List[Item[IdState.Minted]]) =
+  def items(items: List[Item[IdState.Minted]]): String =
     items.map(item).mkString(",")
 
-  def item(item: Item[IdState.Minted]): String =
+  private def item(item: Item[IdState.Minted]): String =
     s"""
      {
        ${identifiers(item)}
@@ -55,16 +51,16 @@ trait DisplaySerialisationTestBase {
      }
     """.tidy
 
-  def locations(locations: List[Location]) =
+  private def locations(locations: List[Location]) =
     locations.map(location).mkString(",")
 
-  def location(loc: Location) =
+  def location(loc: Location): String =
     loc match {
       case l: DigitalLocation  => digitalLocation(l)
       case l: PhysicalLocation => physicalLocation(l)
     }
 
-  def digitalLocation(loc: DigitalLocation): String =
+  private def digitalLocation(loc: DigitalLocation): String =
     s"""{
       "type": "DigitalLocation",
       "locationType": ${locationType(loc.locationType)},
@@ -75,7 +71,7 @@ trait DisplaySerialisationTestBase {
       "accessConditions": ${accessConditions(loc.accessConditions)}
     }""".tidy
 
-  def physicalLocation(loc: PhysicalLocation): String =
+  private def physicalLocation(loc: PhysicalLocation): String =
     s"""
        {
         "type": "PhysicalLocation",
@@ -87,10 +83,10 @@ trait DisplaySerialisationTestBase {
        }
      """.tidy
 
-  def accessConditions(conds: List[AccessCondition]) =
+  private def accessConditions(conds: List[AccessCondition]) =
     s"[${conds.map(accessCondition).mkString(",")}]"
 
-  def accessCondition(cond: AccessCondition): String =
+  private def accessCondition(cond: AccessCondition): String =
     s"""
       {
         "method": {
@@ -104,7 +100,7 @@ trait DisplaySerialisationTestBase {
       }
     """.tidy
 
-  def accessStatus(status: AccessStatus): String =
+  private def accessStatus(status: AccessStatus): String =
     s"""{
        |  "type": "AccessStatus",
        |  "id": ${DisplayAccessStatus(status).id.toJson},
@@ -112,7 +108,7 @@ trait DisplaySerialisationTestBase {
        |}
        |""".stripMargin.tidy
 
-  def identifiers(obj: HasId[IdState.Minted]) =
+  private def identifiers(obj: HasId[IdState.Minted]) =
     obj.id match {
       case IdState.Identified(canonicalId, _, _) => s"""
         "id": "$canonicalId",
@@ -120,7 +116,7 @@ trait DisplaySerialisationTestBase {
       case IdState.Unidentifiable                => ""
     }
 
-  def abstractAgent(ag: AbstractAgent[IdState.Minted]) =
+  private def abstractAgent(ag: AbstractAgent[IdState.Minted]): String =
     ag match {
       case a: Agent[IdState.Minted]        => agent(a)
       case o: Organisation[IdState.Minted] => organisation(o)
@@ -128,7 +124,7 @@ trait DisplaySerialisationTestBase {
       case m: Meeting[IdState.Minted]      => meeting(m)
     }
 
-  def person(person: Person[IdState.Minted]): String =
+  private def person(person: Person[IdState.Minted]): String =
     s"""
        |{
        |  ${identifiers(person)}
@@ -139,21 +135,21 @@ trait DisplaySerialisationTestBase {
        |}
        |""".stripMargin.tidy
 
-  def organisation(organisation: Organisation[IdState.Minted]) =
+  private def organisation(organisation: Organisation[IdState.Minted]) =
     s"""{
        ${identifiers(organisation)}
         "type": "Organisation",
         "label": "${organisation.label}"
       }"""
 
-  def meeting(meeting: Meeting[IdState.Minted]) =
+  private def meeting(meeting: Meeting[IdState.Minted]) =
     s"""{
        ${identifiers(meeting)}
         "type": "Meeting",
         "label": "${meeting.label}"
       }"""
 
-  def agent(agent: Agent[IdState.Minted]) =
+  private def agent(agent: Agent[IdState.Minted]) =
     s"""{
        ${identifiers(agent)}
         "type": "Agent",
@@ -167,21 +163,21 @@ trait DisplaySerialisationTestBase {
       "label": "${period.label}"
     }"""
 
-  def place(place: Place[IdState.Minted]) =
+  private def place(place: Place[IdState.Minted]) =
     s"""{
        ${identifiers(place)}
       "type": "Place",
       "label": "${place.label}"
     }"""
 
-  def concept(concept: Concept[IdState.Minted]) =
+  private def concept(concept: Concept[IdState.Minted]) =
     s"""{
        ${identifiers(concept)}
       "type": "Concept",
       "label": "${concept.label}"
     }"""
 
-  def abstractRootConcept(
+  private def abstractRootConcept(
     abstractRootConcept: AbstractRootConcept[IdState.Minted]
   ) =
     abstractRootConcept match {
@@ -194,10 +190,10 @@ trait DisplaySerialisationTestBase {
       case m: Meeting[IdState.Minted]      => meeting(m)
     }
 
-  def concepts(concepts: List[AbstractRootConcept[IdState.Minted]]) =
+  private def concepts(concepts: List[AbstractRootConcept[IdState.Minted]]) =
     concepts.map(abstractRootConcept).mkString(",")
 
-  def subject(
+  private def subject(
     s: Subject[IdState.Minted],
     showConcepts: Boolean = true
   ): String =
@@ -212,7 +208,7 @@ trait DisplaySerialisationTestBase {
   def subjects(subjects: List[Subject[IdState.Minted]]): String =
     subjects.map(subject(_)).mkString(",")
 
-  def genre(genre: Genre[IdState.Minted]) =
+  private def genre(genre: Genre[IdState.Minted]): String =
     s"""
     {
       "label": "${genre.label}",
@@ -221,7 +217,7 @@ trait DisplaySerialisationTestBase {
     }
     """
 
-  def genres(genres: List[Genre[IdState.Minted]]) =
+  def genres(genres: List[Genre[IdState.Minted]]): String =
     genres.map(genre).mkString(",")
 
   def contributor(contributor: Contributor[IdState.Minted]) =
@@ -233,40 +229,11 @@ trait DisplaySerialisationTestBase {
         "type": "Contributor"
       }
     """
+//
+//  def contributors(contributors: List[Contributor[IdState.Minted]]) =
+//    contributors.map(contributor).mkString(",")
 
-  def contributors(contributors: List[Contributor[IdState.Minted]]) =
-    contributors.map(contributor).mkString(",")
-
-  def production(production: List[ProductionEvent[IdState.Minted]]) =
-    production.map(productionEvent).mkString(",")
-
-  def availabilities(availabilities: Set[Availability]) =
-    availabilities.map(availability).mkString(",")
-
-  def languages(ls: List[Language]): String =
-    ls.map(language).mkString(",")
-
-  def workImageInclude(image: ImageData[IdState.Identified]) =
-    s"""
-       |{
-       |  "id": "${image.id.canonicalId}",
-       |  "type": "Image"
-       |}
-       |""".stripMargin
-
-  def workImageIncludes(images: List[ImageData[IdState.Identified]]) =
-    images.map(workImageInclude).mkString(",")
-
-  def availability(availability: Availability): String =
-    s"""
-       |{
-       |  "id": "${availability.id}",
-       |  "label": "${availability.label}",
-       |  "type": "Availability"
-       |}
-       |""".stripMargin
-
-  def productionEvent(event: ProductionEvent[IdState.Minted]): String =
+  private def productionEvent(event: ProductionEvent[IdState.Minted]): String =
     s"""
        |{
        |  "label": "${event.label}",
@@ -277,6 +244,35 @@ trait DisplaySerialisationTestBase {
        |}
        |""".stripMargin.tidy
 
+  def production(production: List[ProductionEvent[IdState.Minted]]): String =
+    production.map(productionEvent).mkString(",")
+
+  def availabilities(availabilities: Set[Availability]): String =
+    availabilities.map(availability).mkString(",")
+
+    private def availability(availability: Availability): String =
+      s"""
+         |{
+         |  "id": "${availability.id}",
+         |  "label": "${availability.label}",
+         |  "type": "Availability"
+         |}
+         |""".stripMargin
+
+//  def languages(ls: List[Language]): String =
+//    ls.map(language).mkString(",")
+//
+  private def workImageInclude(image: ImageData[IdState.Identified]) =
+    s"""
+       |{
+       |  "id": "${image.id.canonicalId}",
+       |  "type": "Image"
+       |}
+       |""".stripMargin
+
+  def workImageIncludes(images: List[ImageData[IdState.Identified]]) =
+    images.map(workImageInclude).mkString(",")
+
   def format(fmt: Format): String =
     s"""
        |{
@@ -286,15 +282,15 @@ trait DisplaySerialisationTestBase {
        |}
        |""".stripMargin.tidy
 
-  def language(lang: Language): String =
-    s"""
-       {
-         "id": "${lang.id}",
-         "label": "${lang.label}",
-         "type": "Language"
-       }
-     """
-
+//  def language(lang: Language): String =
+//    s"""
+//       {
+//         "id": "${lang.id}",
+//         "label": "${lang.label}",
+//         "type": "Language"
+//       }
+//     """
+//
   def license(license: License): String =
     s"""{
       "id": "${license.id}",
@@ -316,25 +312,25 @@ trait DisplaySerialisationTestBase {
 
   def locationType(locType: LocationType): String =
     s"""{
-         "id": "${DisplayLocationType(locType).id}",
-         "label": "${DisplayLocationType(locType).label}",
+         "id": "${locType.id}",
+         "label": "${locType.label}",
          "type": "LocationType"
        }
      """ stripMargin
-
-  def singleHoldings(h: Holdings): String = {
-    val enumerations = h.enumeration.map(_.toJson)
-
-    s"""
-       |{
-       |  "note": ${h.note.map(_.toJson)},
-       |  "enumeration": [${enumerations.mkString(",")}],
-       |  "location": ${h.location.map(location)},
-       |  "type": "Holdings"
-       |}
-       |""".stripMargin.tidy
-  }
-
-  def listOfHoldings(hs: List[Holdings]): String =
-    hs.map { singleHoldings }.mkString(",")
+//
+//  def singleHoldings(h: Holdings): String = {
+//    val enumerations = h.enumeration.map(_.toJson)
+//
+//    s"""
+//       |{
+//       |  "note": ${h.note.map(_.toJson)},
+//       |  "enumeration": [${enumerations.mkString(",")}],
+//       |  "location": ${h.location.map(location)},
+//       |  "type": "Holdings"
+//       |}
+//       |""".stripMargin.tidy
+//  }
+//
+//  def listOfHoldings(hs: List[Holdings]): String =
+//    hs.map { singleHoldings }.mkString(",")
 }

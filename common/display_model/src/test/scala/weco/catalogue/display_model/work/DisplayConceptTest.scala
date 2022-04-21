@@ -2,6 +2,7 @@ package weco.catalogue.display_model.work
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import weco.catalogue.display_model.identifiers.DisplayIdentifier
 import weco.catalogue.internal_model.generators.IdentifiersGenerators
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work._
