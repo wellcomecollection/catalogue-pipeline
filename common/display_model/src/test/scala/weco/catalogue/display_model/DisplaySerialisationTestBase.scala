@@ -45,6 +45,7 @@ trait DisplaySerialisationTestBase {
     s"""
      {
        ${identifiers(item)}
+       "identifiers": ${sourceIdentifiers(item.id.allSourceIdentifiers)},
        "type": "Item",
        "title": ${item.title.map(_.toJson)},
        "locations": [${locations(item.locations)}]
@@ -298,6 +299,9 @@ trait DisplaySerialisationTestBase {
       "url": "${license.url}",
       "type": "License"
     }""".tidy
+
+  def sourceIdentifiers(identifiers: Seq[SourceIdentifier]): String =
+    s"[${identifiers.map(identifier).mkString(",")}]"
 
   def identifier(identifier: SourceIdentifier) =
     s"""{

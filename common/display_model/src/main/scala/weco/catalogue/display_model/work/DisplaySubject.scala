@@ -7,7 +7,7 @@ import weco.catalogue.internal_model.work.Subject
 
 case class DisplaySubject(
   id: Option[String] = None,
-  identifiers: List[DisplayIdentifier] = Nil,
+  identifiers: Option[List[DisplayIdentifier]] = None,
   label: String,
   concepts: List[DisplayAbstractRootConcept],
   @JsonKey("type") ontologyType: String = "Subject"
@@ -21,7 +21,7 @@ object DisplaySubject extends GetIdentifiers {
       case Subject(id, label, concepts) =>
         DisplaySubject(
           id = id.maybeCanonicalId.map { _.underlying },
-          identifiers = getIdentifiers(id),
+          identifiers = getIdentifiers(id, includesIdentifiers = true),
           label = label,
           concepts =
             concepts.map(DisplayAbstractRootConcept(_, includesIdentifiers = true))

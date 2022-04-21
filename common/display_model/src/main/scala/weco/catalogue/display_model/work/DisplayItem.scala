@@ -17,7 +17,6 @@ case class DisplayItem(
 )
 
 object DisplayItem extends GetIdentifiers {
-
   def apply(item: Item[IdState.Minted]): DisplayItem =
     item match {
       case Item(id, title, note, locations) =>

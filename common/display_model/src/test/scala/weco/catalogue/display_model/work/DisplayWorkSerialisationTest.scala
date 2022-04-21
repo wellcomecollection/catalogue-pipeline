@@ -33,9 +33,23 @@ class DisplayWorkSerialisationTest
       | "description": "${work.data.description.get}",
       | "workType" : ${format(work.data.format.get)},
       | "lettering": "${work.data.lettering.get}",
-      | "alternativeTitles": [],
       | "createdDate": ${period(work.data.createdDate.get)},
-      | "availabilities": [${availabilities(work.state.availabilities)}]
+      | "availabilities": [${availabilities(work.state.availabilities)}],
+      | "identifiers": ${sourceIdentifiers(work.identifiers)},
+      | "alternativeTitles": [],
+      | "contributors": [],
+      | "genres": [],
+      | "holdings": [],
+      | "images": [],
+      | "items": [],
+      | "languages": [],
+      | "notes": [],
+      | "parts": [],
+      | "partOf": [],
+      | "precededBy": [],
+      | "production": [],
+      | "subjects": [],
+      | "succeededBy": []
       |}
     """.stripMargin
 
@@ -51,9 +65,22 @@ class DisplayWorkSerialisationTest
       | "type": "Work",
       | "id": "${work.state.canonicalId}",
       | "title": "${work.data.title.get}",
-      | "alternativeTitles": [],
       | "items": [ ${items(work.data.items)} ],
-      | "availabilities": [${availabilities(work.state.availabilities)}]
+      | "availabilities": [${availabilities(work.state.availabilities)}],
+      | "identifiers": ${sourceIdentifiers(work.identifiers)},
+      | "alternativeTitles": [],
+      | "contributors": [],
+      | "genres": [],
+      | "holdings": [],
+      | "images": [],
+      | "languages": [],
+      | "notes": [],
+      | "parts": [],
+      | "partOf": [],
+      | "precededBy": [],
+      | "production": [],
+      | "subjects": [],
+      | "succeededBy": []
       |}
     """.stripMargin
 
@@ -68,9 +95,23 @@ class DisplayWorkSerialisationTest
       | "type": "Work",
       | "id": "${work.state.canonicalId}",
       | "title": "${work.data.title.get}",
-      | "alternativeTitles": [],
       | "items": [ ],
-      | "availabilities": [${availabilities(work.state.availabilities)}]
+      | "availabilities": [${availabilities(work.state.availabilities)}],
+      | "identifiers": ${sourceIdentifiers(work.identifiers)},
+      | "alternativeTitles": [],
+      | "contributors": [],
+      | "genres": [],
+      | "holdings": [],
+      | "images": [],
+      | "items": [],
+      | "languages": [],
+      | "notes": [],
+      | "parts": [],
+      | "partOf": [],
+      | "precededBy": [],
+      | "production": [],
+      | "subjects": [],
+      | "succeededBy": []
       |}
     """.stripMargin
 
@@ -93,11 +134,11 @@ class DisplayWorkSerialisationTest
       | "type": "Work",
       | "id": "${workWithCopyright.state.canonicalId}",
       | "title": "${workWithCopyright.data.title.get}",
-      | "alternativeTitles": [],
       | "items": [
       |   {
       |     "id": "${item.id.canonicalId}",
       |     "type": "Item",
+      |     "identifiers": ${sourceIdentifiers(item.id.allSourceIdentifiers)},
       |     "locations": [
       |       {
       |         "type": "DigitalLocation",
@@ -112,7 +153,21 @@ class DisplayWorkSerialisationTest
       | ],
       | "availabilities": [${availabilities(
            workWithCopyright.state.availabilities
-         )}]
+         )}],
+      | "identifiers": ${sourceIdentifiers(workWithCopyright.identifiers)},
+      | "alternativeTitles": [],
+      | "contributors": [],
+      | "genres": [],
+      | "holdings": [],
+      | "images": [],
+      | "languages": [],
+      | "notes": [],
+      | "parts": [],
+      | "partOf": [],
+      | "precededBy": [],
+      | "production": [],
+      | "subjects": [],
+      | "succeededBy": []
       |}
     """.stripMargin
 
@@ -129,13 +184,28 @@ class DisplayWorkSerialisationTest
       | "type": "Work",
       | "id": "${workWithSubjects.state.canonicalId}",
       | "title": "${workWithSubjects.data.title.get}",
-      | "alternativeTitles": [],
       | "subjects": [${subjects(workWithSubjects.data.subjects)}],
       | "availabilities": [${availabilities(
                             workWithSubjects.state.availabilities
-                          )}]
+                          )}],
+      | "identifiers": ${sourceIdentifiers(workWithSubjects.identifiers)},
+      | "alternativeTitles": [],
+      | "contributors": [],
+      | "genres": [],
+      | "holdings": [],
+      | "images": [],
+      | "items": [],
+      | "languages": [],
+      | "notes": [],
+      | "parts": [],
+      | "partOf": [],
+      | "precededBy": [],
+      | "production": [],
+      | "succeededBy": []
       |}
     """.stripMargin
+
+    println(expectedJson)
 
     assertWorkMapsToJson(workWithSubjects, expectedJson)
   }
@@ -151,11 +221,24 @@ class DisplayWorkSerialisationTest
       | "type": "Work",
       | "id": "${workWithProduction.state.canonicalId}",
       | "title": "${workWithProduction.data.title.get}",
-      | "alternativeTitles": [],
       | "production": [${production(workWithProduction.data.production)}],
       | "availabilities": [${availabilities(
            workWithProduction.state.availabilities
-         )}]
+         )}],
+      | "identifiers": ${sourceIdentifiers(workWithProduction.identifiers)},
+      | "alternativeTitles": [],
+      | "contributors": [],
+      | "genres": [],
+      | "holdings": [],
+      | "images": [],
+      | "items": [],
+      | "languages": [],
+      | "notes": [],
+      | "parts": [],
+      | "partOf": [],
+      | "precededBy": [],
+      | "subjects": [],
+      | "succeededBy": []
       |}
     """.stripMargin
 
@@ -180,12 +263,25 @@ class DisplayWorkSerialisationTest
       | "id": "${work.state.canonicalId}",
       | "title": "${work.data.title.get}",
       | "description": "${work.data.description.get}",
-      | "alternativeTitles": [],
       | "workType" : ${format(work.data.format.get)},
       | "lettering": "${work.data.lettering.get}",
       | "createdDate": ${period(work.data.createdDate.get)},
       | "contributors": [${contributor(work.data.contributors.head)}],
-      | "availabilities": [${availabilities(work.state.availabilities)}]
+      | "availabilities": [${availabilities(work.state.availabilities)}],
+      | "identifiers": ${sourceIdentifiers(work.identifiers)},
+      | "alternativeTitles": [],
+      | "genres": [],
+      | "holdings": [],
+      | "images": [],
+      | "items": [],
+      | "languages": [],
+      | "notes": [],
+      | "parts": [],
+      | "partOf": [],
+      | "precededBy": [],
+      | "production": [],
+      | "subjects": [],
+      | "succeededBy": []
       |}
     """.stripMargin
 
@@ -207,9 +303,22 @@ class DisplayWorkSerialisationTest
       | "type": "Work",
       | "id": "${work.state.canonicalId}",
       | "title": "${work.data.title.get}",
-      | "alternativeTitles": [],
       | "genres": [ ${genres(work.data.genres)} ],
-      | "availabilities": [${availabilities(work.state.availabilities)}]
+      | "availabilities": [${availabilities(work.state.availabilities)}],
+      | "identifiers": ${sourceIdentifiers(work.identifiers)},
+      | "alternativeTitles": [],
+      | "contributors": [],
+      | "holdings": [],
+      | "images": [],
+      | "items": [],
+      | "languages": [],
+      | "notes": [],
+      | "parts": [],
+      | "partOf": [],
+      | "precededBy": [],
+      | "production": [],
+      | "subjects": [],
+      | "succeededBy": []
       |}
     """.stripMargin
 
@@ -230,7 +339,6 @@ class DisplayWorkSerialisationTest
       | "type": "Work",
       | "id": "${work.state.canonicalId}",
       | "title": "${work.data.title.get}",
-      | "alternativeTitles": [],
       | "notes": [
       |   {
       |     "noteType": {
@@ -251,7 +359,21 @@ class DisplayWorkSerialisationTest
       |     "type": "Note"
       |   }
       | ],
-      | "availabilities": [${availabilities(work.state.availabilities)}]
+      | "availabilities": [${availabilities(work.state.availabilities)}],
+      | "identifiers": ${sourceIdentifiers(work.identifiers)},
+      | "alternativeTitles": [],
+      | "contributors": [],
+      | "genres": [],
+      | "holdings": [],
+      | "images": [],
+      | "items": [],
+      | "languages": [],
+      | "parts": [],
+      | "partOf": [],
+      | "precededBy": [],
+      | "production": [],
+      | "subjects": [],
+      | "succeededBy": []
       |}
     """.stripMargin
 
@@ -267,12 +389,25 @@ class DisplayWorkSerialisationTest
       | "type": "Work",
       | "id": "${work.state.canonicalId}",
       | "title": "${work.data.title.get}",
-      | "alternativeTitles": [],
       | "identifiers": [
       |   ${identifier(work.sourceIdentifier)},
       |   ${identifier(otherIdentifier)}
       | ],
-      | "availabilities": [${availabilities(work.state.availabilities)}]
+      | "availabilities": [${availabilities(work.state.availabilities)}],
+      | "alternativeTitles": [],
+      | "contributors": [],
+      | "genres": [],
+      | "holdings": [],
+      | "images": [],
+      | "items": [],
+      | "languages": [],
+      | "notes": [],
+      | "parts": [],
+      | "partOf": [],
+      | "precededBy": [],
+      | "production": [],
+      | "subjects": [],
+      | "succeededBy": []
       |}
     """.stripMargin
 
@@ -287,9 +422,22 @@ class DisplayWorkSerialisationTest
       | "type": "Work",
       | "id": "${work.state.canonicalId}",
       | "title": "${work.data.title.get}",
-      | "alternativeTitles": [],
       | "identifiers": [ ${identifier(work.sourceIdentifier)} ],
-      | "availabilities": [${availabilities(work.state.availabilities)}]
+      | "availabilities": [${availabilities(work.state.availabilities)}],
+      | "alternativeTitles": [],
+      | "contributors": [],
+      | "genres": [],
+      | "holdings": [],
+      | "images": [],
+      | "items": [],
+      | "languages": [],
+      | "notes": [],
+      | "parts": [],
+      | "partOf": [],
+      | "precededBy": [],
+      | "production": [],
+      | "subjects": [],
+      | "succeededBy": []
       |}
     """.stripMargin
 
@@ -306,9 +454,22 @@ class DisplayWorkSerialisationTest
       | "type": "Work",
       | "id": "${work.state.canonicalId}",
       | "title": "${work.data.title.get}",
-      | "alternativeTitles": [],
       | "images": [${workImageIncludes(work.data.imageData)}],
-      | "availabilities": [${availabilities(work.state.availabilities)}]
+      | "availabilities": [${availabilities(work.state.availabilities)}],
+      | "identifiers": ${sourceIdentifiers(work.identifiers)},
+      | "alternativeTitles": [],
+      | "contributors": [],
+      | "genres": [],
+      | "holdings": [],
+      | "items": [],
+      | "languages": [],
+      | "notes": [],
+      | "parts": [],
+      | "partOf": [],
+      | "precededBy": [],
+      | "production": [],
+      | "subjects": [],
+      | "succeededBy": []
       |}
     """.stripMargin
 
@@ -329,9 +490,23 @@ class DisplayWorkSerialisationTest
       | "type": "Work",
       | "id": "${work.state.canonicalId}",
       | "title": "${work.data.title.get}",
-      | "alternativeTitles": [],
       | "thumbnail": ${location(work.data.thumbnail.get)},
-      | "availabilities": [${availabilities(work.state.availabilities)}]
+      | "availabilities": [${availabilities(work.state.availabilities)}],
+      | "identifiers": ${sourceIdentifiers(work.identifiers)},
+      | "alternativeTitles": [],
+      | "contributors": [],
+      | "genres": [],
+      | "holdings": [],
+      | "images": [],
+      | "items": [],
+      | "languages": [],
+      | "notes": [],
+      | "parts": [],
+      | "partOf": [],
+      | "precededBy": [],
+      | "production": [],
+      | "subjects": [],
+      | "succeededBy": []
       |}
     """.stripMargin
 

@@ -23,7 +23,7 @@ class DisplayWorkTest
     val work = indexedWork().items(Nil)
 
     val displayWork = DisplayWork(work)
-    displayWork.items shouldBe Some(List())
+    displayWork.items shouldBe List()
   }
 
   it("parses identified items on a work") {
@@ -297,7 +297,7 @@ class DisplayWorkTest
         contributorOrganisationSourceIdentifier,
         contributorPersonSourceIdentifier
       ).map { identifier =>
-        List(DisplayIdentifier(identifier))
+        Some(List(DisplayIdentifier(identifier)))
       }
 
       val agents: List[DisplayAbstractAgent] =
@@ -309,9 +309,7 @@ class DisplayWorkTest
       val item: DisplayItem = displayWork.items.head
       val identifiedItem =
         work.data.items.head.asInstanceOf[Item[IdState.Identified]]
-      item.identifiers shouldBe Some(
-        List(DisplayIdentifier(identifiedItem.id.sourceIdentifier))
-      )
+      item.identifiers shouldBe List(DisplayIdentifier(identifiedItem.id.sourceIdentifier))
     }
 
     it("subjects") {
@@ -330,7 +328,7 @@ class DisplayWorkTest
         }
 
       val subject = displayWork.subjects.head
-      subject.identifiers shouldBe List(DisplayIdentifier(subjectSourceIdentifier))
+      subject.identifiers shouldBe Some(List(DisplayIdentifier(subjectSourceIdentifier)))
 
       val concepts = subject.concepts
       concepts.map {
@@ -339,7 +337,7 @@ class DisplayWorkTest
     }
 
     it("genres") {
-      displayWork.genres.head.concepts.head.identifiers shouldBe List(DisplayIdentifier(conceptSourceIdentifier))
+      displayWork.genres.head.concepts.head.identifiers shouldBe Some(List(DisplayIdentifier(conceptSourceIdentifier)))
     }
 
     it("images") {
@@ -362,8 +360,8 @@ class DisplayWorkTest
       )
       val displayWork = DisplayWork(work)
 
-      displayWork.partOf.map(_.id) shouldBe List()
-      displayWork.partOf.map(_.title) shouldBe List("Series A")
+      displayWork.partOf.flatMap(_.id) shouldBe List()
+      displayWork.partOf.flatMap(_.title) shouldBe List("Series A")
     }
 
     it("can include multiple series") {
@@ -378,9 +376,9 @@ class DisplayWorkTest
       )
       val displayWork = DisplayWork(work)
 
-      displayWork.partOf.map(_.title) shouldBe List("Series B", "Series A")
+      displayWork.partOf.flatMap(_.title) shouldBe List("Series B", "Series A")
       // series partOfs have no id.
-      displayWork.partOf.map(_.id) shouldBe List()
+      displayWork.partOf.flatMap(_.id) shouldBe List()
     }
 
     it("includes both series and related works if both are present") {
@@ -409,8 +407,8 @@ class DisplayWorkTest
       val displayWork = DisplayWork(work)
       displayWork.partOf.isEmpty shouldBe false
 
-      displayWork.partOf.map(_.id) shouldBe List(workB.id)
-      displayWork.partOf.map(_.title) shouldBe List(
+      displayWork.partOf.flatMap(_.id) shouldBe List(workB.id)
+      displayWork.partOf.flatMap(_.title) shouldBe List(
         workB.data.title.get,
         "Series B",
         "Series A"
@@ -451,8 +449,8 @@ class DisplayWorkTest
       val displayWork = DisplayWork(work)
 
       val partOf = displayWork.partOf
-      partOf.map(_.id) shouldBe List(workB.state.canonicalId.underlying)
-      partOf.head.partOf shouldBe List(DisplayRelation(relationA))
+      partOf.flatMap(_.id) shouldBe List(workB.state.canonicalId.underlying)
+      partOf.head.partOf shouldBe Some(List(DisplayRelation(relationA)))
     }
 
     it("includes parts") {

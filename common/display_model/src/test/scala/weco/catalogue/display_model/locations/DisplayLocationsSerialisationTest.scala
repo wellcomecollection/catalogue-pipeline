@@ -2,7 +2,9 @@ package weco.catalogue.display_model.locations
 
 import org.scalatest.funspec.AnyFunSpec
 import weco.catalogue.display_model.DisplaySerialisationTestBase
+import weco.catalogue.display_model.Implicits._
 import weco.catalogue.display_model.test.util.JsonMapperTestUtil
+import weco.catalogue.display_model.work.DisplayWork
 import weco.catalogue.internal_model.locations._
 import weco.catalogue.internal_model.work.generators._
 
@@ -19,22 +21,12 @@ class DisplayLocationsSerialisationTest
       label = LocationType.ClosedStores.label
     )
 
-    val work = indexedWork().items(
-      List(createIdentifiedItemWith(locations = List(physicalLocation)))
-    )
+    val item = createIdentifiedItemWith(locations = List(physicalLocation))
+    val work = indexedWork().items(List(item))
 
-    val expectedJson = s"""
-      |{
-      | "type": "Work",
-      | "id": "${work.state.canonicalId}",
-      | "title": "${work.data.title.get}",
-      | "alternativeTitles": [],
-      | "items": [ ${items(work.data.items)} ],
-      | "availabilities": [${availabilities(work.state.availabilities)}]
-      |}
-    """.stripMargin
+    val expectedJson = s"""[ ${items(work.data.items)} ]"""
 
-    assertWorkMapsToJson(work, expectedJson)
+    assertObjectMapsToJson(DisplayWork(work).items, expectedJson)
   }
 
   it("serialises a digital location") {
@@ -47,18 +39,9 @@ class DisplayLocationsSerialisationTest
       List(createIdentifiedItemWith(locations = List(digitalLocation)))
     )
 
-    val expectedJson = s"""
-      |{
-      | "type": "Work",
-      | "id": "${work.state.canonicalId}",
-      | "title": "${work.data.title.get}",
-      | "alternativeTitles": [],
-      | "items": [ ${items(work.data.items)} ],
-      | "availabilities": [${availabilities(work.state.availabilities)}]
-      |}
-    """.stripMargin
+    val expectedJson = s"""[ ${items(work.data.items)} ]"""
 
-    assertWorkMapsToJson(work, expectedJson)
+    assertObjectMapsToJson(DisplayWork(work).items, expectedJson)
   }
 
   it("serialises a digital location with a license") {
@@ -72,18 +55,9 @@ class DisplayLocationsSerialisationTest
       List(createIdentifiedItemWith(locations = List(digitalLocation)))
     )
 
-    val expectedJson = s"""
-      |{
-      | "type": "Work",
-      | "id": "${work.state.canonicalId}",
-      | "title": "${work.data.title.get}",
-      | "alternativeTitles": [],
-      | "items": [ ${items(work.data.items)} ],
-      | "availabilities": [${availabilities(work.state.availabilities)}]
-      |}
-    """.stripMargin
+    val expectedJson = s"""[ ${items(work.data.items)} ]"""
 
-    assertWorkMapsToJson(work, expectedJson)
+    assertObjectMapsToJson(DisplayWork(work).items, expectedJson)
   }
 
   it("serialises a digital location with an access condition") {
@@ -103,17 +77,8 @@ class DisplayLocationsSerialisationTest
       List(createIdentifiedItemWith(locations = List(digitalLocation)))
     )
 
-    val expectedJson = s"""
-      |{
-      | "type": "Work",
-      | "id": "${work.state.canonicalId}",
-      | "title": "${work.data.title.get}",
-      | "alternativeTitles": [],
-      | "items": [ ${items(work.data.items)} ],
-      | "availabilities": [${availabilities(work.state.availabilities)}]
-      |}
-    """.stripMargin
+    val expectedJson = s"""[ ${items(work.data.items)} ]"""
 
-    assertWorkMapsToJson(work, expectedJson)
+    assertObjectMapsToJson(DisplayWork(work).items, expectedJson)
   }
 }
