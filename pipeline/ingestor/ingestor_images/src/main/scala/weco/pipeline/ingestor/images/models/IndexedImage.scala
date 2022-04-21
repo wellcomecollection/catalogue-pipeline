@@ -11,6 +11,5 @@ case class IndexedImage(
   locations: List[DigitalLocation],
   source: ImageSource,
   modifiedTime: Instant,
-
   display: DisplayImage
 )
