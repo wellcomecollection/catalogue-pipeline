@@ -2,15 +2,11 @@ package weco.pipeline.ingestor.works
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.Denormalised
 import weco.catalogue.internal_model.work.generators.WorkGenerators
-import weco.messaging.fixtures.SQS.QueuePair
 import weco.pipeline.ingestor.works.fixtures.WorksIngestorFixtures
-
-import scala.concurrent.duration._
 
 class IngestorWorkerServiceTest
     extends AnyFunSpec
@@ -113,28 +109,14 @@ class IngestorWorkerServiceTest
   }
 
   private def assertWorksIndexedCorrectly(works: Work[Denormalised]*): Unit =
-    withLocalWorksIndex { indexedIndex =>
-      withLocalDenormalisedWorksIndex { denormalisedIndex =>
-        insertIntoElasticsearch(denormalisedIndex, works: _*)
-        withLocalSqsQueuePair(visibilityTimeout = 10.seconds) {
-          case QueuePair(queue, dlq) =>
-            withWorkIngestorWorkerService(
-              queue,
-              denormalisedIndex,
-              indexedIndex) { _ =>
-              works.map { work =>
-                sendNotificationToSQS(queue = queue, body = work.id)
-              }
+    withLocalSqsQueue() { queue =>
+      withWorksIngestor(queue, existingWorks = works) { index =>
+        works.map { work =>
+          sendNotificationToSQS(queue = queue, body = work.id)
+        }
 
-              works.foreach {
-                assertWorkIndexed(indexedIndex, _)
-              }
-
-              eventually {
-                assertQueueEmpty(queue)
-                assertQueueEmpty(dlq)
-              }
-            }
+        works.foreach {
+          assertWorkIndexed(index, _)
         }
       }
     }

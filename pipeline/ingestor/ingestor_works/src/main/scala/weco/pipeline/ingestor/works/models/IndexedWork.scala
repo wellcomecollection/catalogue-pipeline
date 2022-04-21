@@ -3,8 +3,12 @@ package weco.pipeline.ingestor.works.models
 import io.circe.Json
 import weco.catalogue.internal_model.identifiers.{DataState, IdState}
 import weco.catalogue.internal_model.work.{WorkData, WorkState}
+import weco.pipeline_storage.Indexable
 
-sealed trait IndexedWork
+sealed trait IndexedWork {
+  val debug: DebugInformation
+  val state: WorkState.Indexed
+}
 
 object IndexedWork {
   case class Visible(
@@ -30,4 +34,11 @@ object IndexedWork {
     debug: DebugInformation.Deleted,
     state: WorkState.Indexed
   ) extends IndexedWork
+
+  implicit val indexable: Indexable[IndexedWork] =
+    new Indexable[IndexedWork] {
+      override def id(work: IndexedWork): String = work.state.canonicalId.underlying
+
+      override def version(work: IndexedWork): Long = work.state.modifiedTime.toEpochMilli
+    }
 }
