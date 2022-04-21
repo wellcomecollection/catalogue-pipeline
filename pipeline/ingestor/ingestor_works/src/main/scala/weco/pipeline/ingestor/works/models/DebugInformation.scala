@@ -13,26 +13,26 @@ sealed trait DebugInformation {
   // Note: this is the version of the source record in the adapter; we
   // include it for tracing a Work back to the source, but because of
   // merging in the pipeline we can't rely on it for ordering.
-  val version: Int
+  val sourceVersion: Int
 }
 
 object DebugInformation {
   case class Visible(
-    version: Int,
+    sourceVersion: Int,
     redirectSources: Seq[IdState.Identified]
   ) extends DebugInformation
 
   case class Invisible(
-    version: Int,
+    sourceVersion: Int,
     invisibilityReasons: List[InvisibilityReason]
   ) extends DebugInformation
 
   case class Redirected(
-    version: Int
+    sourceVersion: Int
   ) extends DebugInformation
 
   case class Deleted(
-    version: Int,
+    sourceVersion: Int,
     deletedReason: DeletedReason
   ) extends DebugInformation
 }
