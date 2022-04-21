@@ -1,7 +1,7 @@
 package weco.pipeline.ingestor.images.models
 
 import java.time.Instant
-
+import weco.catalogue.display_model.image.DisplayImage
 import weco.catalogue.internal_model.image.{ImageSource, ImageState}
 import weco.catalogue.internal_model.locations.DigitalLocation
 

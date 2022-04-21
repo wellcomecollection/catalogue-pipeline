@@ -3,6 +3,7 @@ package weco.catalogue.display_model.models
 import io.circe.generic.extras.semiauto._
 import io.circe.{Decoder, Encoder, HCursor}
 import io.circe.syntax._
+import weco.catalogue.display_model.image.DisplayImage
 import weco.http.json.DisplayJsonUtil._
 
 object Implicits {
