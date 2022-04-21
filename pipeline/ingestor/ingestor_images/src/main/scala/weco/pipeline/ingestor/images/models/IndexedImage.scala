@@ -18,8 +18,10 @@ case class IndexedImage(
 case object IndexedImage {
   implicit val indexable: Indexable[IndexedImage] =
     new Indexable[IndexedImage] {
-      override def id(image: IndexedImage): String = image.state.canonicalId.underlying
+      override def id(image: IndexedImage): String =
+        image.state.canonicalId.underlying
 
-      override def version(image: IndexedImage): Long = image.modifiedTime.toEpochMilli
+      override def version(image: IndexedImage): Long =
+        image.modifiedTime.toEpochMilli
     }
 }

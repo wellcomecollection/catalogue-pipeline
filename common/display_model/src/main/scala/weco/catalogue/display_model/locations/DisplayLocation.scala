@@ -1,7 +1,11 @@
 package weco.catalogue.display_model.locations
 
 import io.circe.generic.extras.JsonKey
-import weco.catalogue.internal_model.locations.{DigitalLocation, Location, PhysicalLocation}
+import weco.catalogue.internal_model.locations.{
+  DigitalLocation,
+  Location,
+  PhysicalLocation
+}
 
 sealed trait DisplayLocation
 

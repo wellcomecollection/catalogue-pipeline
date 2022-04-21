@@ -2,8 +2,15 @@ package weco.catalogue.display_model
 
 import io.circe.Json
 import org.scalatest.Suite
-import weco.catalogue.display_model.locations.{DisplayAccessMethod, DisplayAccessStatus}
-import weco.catalogue.internal_model.identifiers.{HasId, IdState, SourceIdentifier}
+import weco.catalogue.display_model.locations.{
+  DisplayAccessMethod,
+  DisplayAccessStatus
+}
+import weco.catalogue.internal_model.identifiers.{
+  HasId,
+  IdState,
+  SourceIdentifier
+}
 import weco.catalogue.internal_model.image.ImageData
 import weco.catalogue.internal_model.locations._
 import weco.catalogue.internal_model.work._
@@ -251,8 +258,8 @@ trait DisplaySerialisationTestBase {
   def availabilities(availabilities: Set[Availability]): String =
     availabilities.map(availability).mkString(",")
 
-    private def availability(availability: Availability): String =
-      s"""
+  private def availability(availability: Availability): String =
+    s"""
          |{
          |  "id": "${availability.id}",
          |  "label": "${availability.label}",

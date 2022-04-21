@@ -15,7 +15,8 @@ trait JsonMapperTestUtil extends JsonAssertions {
   ): Assertion =
     assertJsonStringsAreEqual(DisplayJsonUtil.toJson(value), expectedJson)
 
-  def assertWorkMapsToJson(work: Work.Visible[WorkState.Indexed], expectedJson: String): Assertion =
+  def assertWorkMapsToJson(work: Work.Visible[WorkState.Indexed],
+                           expectedJson: String): Assertion =
     assertObjectMapsToJson(
       DisplayWork(work),
       expectedJson = expectedJson

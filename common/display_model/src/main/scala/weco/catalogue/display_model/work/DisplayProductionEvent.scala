@@ -14,7 +14,8 @@ case class DisplayProductionEvent(
 )
 
 object DisplayProductionEvent {
-  def apply(productionEvent: ProductionEvent[IdState.Minted]): DisplayProductionEvent =
+  def apply(
+    productionEvent: ProductionEvent[IdState.Minted]): DisplayProductionEvent =
     DisplayProductionEvent(
       label = productionEvent.label,
       places = productionEvent.places.map { DisplayPlace(_) },

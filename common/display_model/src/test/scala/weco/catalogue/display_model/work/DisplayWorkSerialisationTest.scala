@@ -6,7 +6,10 @@ import weco.catalogue.display_model.test.util.JsonMapperTestUtil
 import weco.catalogue.internal_model.generators.ImageGenerators
 import weco.catalogue.internal_model.locations._
 import weco.catalogue.internal_model.work._
-import weco.catalogue.internal_model.work.generators.{ProductionEventGenerators, SubjectGenerators}
+import weco.catalogue.internal_model.work.generators.{
+  ProductionEventGenerators,
+  SubjectGenerators
+}
 
 import java.time.Instant
 

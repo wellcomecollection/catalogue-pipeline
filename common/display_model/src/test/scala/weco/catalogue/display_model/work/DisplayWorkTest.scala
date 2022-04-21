@@ -10,7 +10,10 @@ import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.locations._
 import weco.catalogue.internal_model.work._
-import weco.catalogue.internal_model.work.generators.{ProductionEventGenerators, WorkGenerators}
+import weco.catalogue.internal_model.work.generators.{
+  ProductionEventGenerators,
+  WorkGenerators
+}
 
 class DisplayWorkTest
     extends AnyFunSpec
@@ -65,7 +68,8 @@ class DisplayWorkTest
 
     val displayWork = DisplayWork(work)
 
-    displayWork.identifiers shouldBe List(DisplayIdentifier(work.sourceIdentifier))
+    displayWork.identifiers shouldBe List(
+      DisplayIdentifier(work.sourceIdentifier))
   }
 
   it("gets the physicalDescription from a Work") {
@@ -171,7 +175,8 @@ class DisplayWorkTest
     val work = indexedWork().production(List(productionEvent))
 
     val displayWork = DisplayWork(work)
-    displayWork.production shouldBe List(DisplayProductionEvent(productionEvent))
+    displayWork.production shouldBe List(
+      DisplayProductionEvent(productionEvent))
   }
 
   describe("extracts identifiers") {
@@ -288,7 +293,8 @@ class DisplayWorkTest
     val displayWork = DisplayWork(work)
 
     it("on the top-level Work") {
-      displayWork.identifiers shouldBe List(DisplayIdentifier(work.sourceIdentifier))
+      displayWork.identifiers shouldBe List(
+        DisplayIdentifier(work.sourceIdentifier))
     }
 
     it("contributors") {
@@ -309,7 +315,8 @@ class DisplayWorkTest
       val item: DisplayItem = displayWork.items.head
       val identifiedItem =
         work.data.items.head.asInstanceOf[Item[IdState.Identified]]
-      item.identifiers shouldBe List(DisplayIdentifier(identifiedItem.id.sourceIdentifier))
+      item.identifiers shouldBe List(
+        DisplayIdentifier(identifiedItem.id.sourceIdentifier))
     }
 
     it("subjects") {
@@ -318,8 +325,8 @@ class DisplayWorkTest
         periodSourceIdentifier,
         placeSourceIdentifier
       ).map {
-        DisplayIdentifier(_)
-      }
+          DisplayIdentifier(_)
+        }
         .map {
           List(_)
         }
@@ -328,7 +335,8 @@ class DisplayWorkTest
         }
 
       val subject = displayWork.subjects.head
-      subject.identifiers shouldBe Some(List(DisplayIdentifier(subjectSourceIdentifier)))
+      subject.identifiers shouldBe Some(
+        List(DisplayIdentifier(subjectSourceIdentifier)))
 
       val concepts = subject.concepts
       concepts.map {
@@ -337,7 +345,8 @@ class DisplayWorkTest
     }
 
     it("genres") {
-      displayWork.genres.head.concepts.head.identifiers shouldBe Some(List(DisplayIdentifier(conceptSourceIdentifier)))
+      displayWork.genres.head.concepts.head.identifiers shouldBe Some(
+        List(DisplayIdentifier(conceptSourceIdentifier)))
     }
 
     it("images") {
