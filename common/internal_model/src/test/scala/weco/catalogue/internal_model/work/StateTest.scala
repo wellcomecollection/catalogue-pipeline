@@ -47,7 +47,8 @@ class StateTest
         ("preservedMember", "expectedValue"),
         (
           merged.state.relations,
-          Relations(ancestors = List(SeriesRelation("Mum")))),
+          Relations(ancestors = List(SeriesRelation("Mum")))
+        ),
         (merged.state.sourceIdentifier, sourceIdentifier),
         (merged.state.canonicalId, canonicalId),
         (merged.state.sourceModifiedTime, Instant.MIN)
@@ -60,12 +61,9 @@ class StateTest
   }
 
   private val denormalised = merged.transition[Denormalised](
-    (
-      Relations(
-        ancestors = List(SeriesRelation("Dad")),
-        siblingsPreceding = List(SeriesRelation("Big Brother"))
-      ),
-      Set()
+    Relations(
+      ancestors = List(SeriesRelation("Dad")),
+      siblingsPreceding = List(SeriesRelation("Big Brother"))
     )
   )
 
@@ -82,7 +80,8 @@ class StateTest
     }
 
     it(
-      "overwrites relations if they match by name, otherwise concatenating the relation lists in the normal manner") {
+      "overwrites relations if they match by name, otherwise concatenating the relation lists in the normal manner"
+    ) {
       val merged = Work.Visible[Merged](
         version = 0,
         state = Merged(
@@ -92,7 +91,8 @@ class StateTest
           mergedTime = Instant.MIN,
           availabilities = Set(),
           relations = Relations(
-            ancestors = List(SeriesRelation("Mum"), SeriesRelation("Dad")))
+            ancestors = List(SeriesRelation("Mum"), SeriesRelation("Dad"))
+          )
         ),
         data = WorkData(title = Some("My Title"))
       )
@@ -118,18 +118,16 @@ class StateTest
       )
 
       val denormalised = merged.transition[Denormalised](
-        (
-          Relations(
-            //Mum is already in the list, granny is new
-            ancestors = List(newMum, granny)
-          ),
-          Set()
+        Relations(
+          //Mum is already in the list, granny is new
+          ancestors = List(newMum, granny)
         )
       )
       denormalised.state.relations.ancestors shouldBe List(
         SeriesRelation("Dad"),
         newMum,
-        granny)
+        granny
+      )
     }
 
     it("Only overwrites unidentified relations from a previous stage.") {
@@ -152,7 +150,8 @@ class StateTest
           availabilities = Set(),
           relations = Relations(
             ancestors =
-              List(SeriesRelation("Granny"), SeriesRelation("Dad"), mum1))
+              List(SeriesRelation("Granny"), SeriesRelation("Dad"), mum1)
+          )
         ),
         data = WorkData(title = Some("My Title"))
       )
@@ -188,12 +187,9 @@ class StateTest
       )
 
       val denormalised = merged.transition[Denormalised](
-        (
-          Relations(
-            //Mum is already in the list, granny is new
-            ancestors = List(mumsMum, dadsMum, mum2)
-          ),
-          Set()
+        Relations(
+          //Mum is already in the list, granny is new
+          ancestors = List(mumsMum, dadsMum, mum2)
         )
       )
       denormalised.state.relations.ancestors shouldBe List(
@@ -235,11 +231,8 @@ class StateTest
       )
 
       val denormalised = merged.transition[Denormalised](
-        (
-          Relations(
-            ancestors = List(newAlbum)
-          ),
-          Set()
+        Relations(
+          ancestors = List(newAlbum)
         )
       )
       denormalised.state.relations.ancestors shouldBe List(newAlbum)

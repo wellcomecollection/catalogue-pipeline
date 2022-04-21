@@ -63,8 +63,8 @@ class RouterWorkerServiceTest
           worksMessageSender.messages.map(_.body) should contain(work.id)
           pathsMessageSender.messages shouldBe empty
           indexer.index should contain(
-            work.id -> work.transition[Denormalised](
-              (Relations.none, Set.empty)))
+            work.id -> work.transition[Denormalised](Relations.none)
+          )
         }
     }
   }
@@ -94,12 +94,14 @@ class RouterWorkerServiceTest
   }
 
   it(
-    "sends the message to the dlq and doesn't send anything on if indexing fails") {
+    "sends the message to the dlq and doesn't send anything on if indexing fails"
+  ) {
     val work = mergedWork()
     val failingIndexer = new Indexer[Work[Denormalised]] {
       override def init(): Future[Unit] = Future.successful(())
-      override def apply(documents: Seq[Work[Denormalised]])
-        : Future[Either[Seq[Work[Denormalised]], Seq[Work[Denormalised]]]] =
+      override def apply(
+        documents: Seq[Work[Denormalised]]
+      ): Future[Either[Seq[Work[Denormalised]], Seq[Work[Denormalised]]]] =
         Future.successful(Left(documents))
     }
 
@@ -120,10 +122,12 @@ class RouterWorkerServiceTest
     }
   }
 
-  def withWorkerService[R](indexer: Indexer[Work[Denormalised]],
-                           retriever: Retriever[Work[Merged]])(
-    testWith: TestWith[(QueuePair, MemoryMessageSender, MemoryMessageSender),
-                       R]): R =
+  def withWorkerService[R](
+    indexer: Indexer[Work[Denormalised]],
+    retriever: Retriever[Work[Merged]]
+  )(
+    testWith: TestWith[(QueuePair, MemoryMessageSender, MemoryMessageSender), R]
+  ): R =
     withLocalSqsQueuePair(visibilityTimeout = 1 second) {
       case q @ QueuePair(queue, _) =>
         val worksMessageSender = new MemoryMessageSender

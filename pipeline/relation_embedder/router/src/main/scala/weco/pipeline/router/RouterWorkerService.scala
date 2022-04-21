@@ -19,7 +19,7 @@ class RouterWorkerService[MsgDestination](
                                         Work[Denormalised],
                                         MsgDestination],
   pathsMsgSender: MessageSender[MsgDestination],
-  workRetriever: Retriever[Work[Merged]],
+  workRetriever: Retriever[Work[Merged]]
 )(implicit ec: ExecutionContext, indexable: Indexable[Work[Denormalised]])
     extends Runnable {
   def run(): Future[Done] = {
@@ -30,16 +30,18 @@ class RouterWorkerService[MsgDestination](
         .via(
           processFlow(
             pipelineStream.config,
-            work => Future.fromTry(processMessage(work))))
+            work => Future.fromTry(processMessage(work))
+          )
+        )
     )
   }
 
   private def processMessage(
-    work: Work[Merged]): Try[List[Work[Denormalised]]] = {
+    work: Work[Merged]
+  ): Try[List[Work[Denormalised]]] = {
     work.data.collectionPath match {
       case None =>
-        Success(
-          List(work.transition[Denormalised]((Relations.none, Set.empty))))
+        Success(List(work.transition[Denormalised](Relations.none)))
       case Some(CollectionPath(path, _)) =>
         pathsMsgSender.send(path).map(_ => Nil)
 
