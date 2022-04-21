@@ -1,7 +1,8 @@
 package weco.catalogue.display_model.image
 
 import io.circe.generic.extras.JsonKey
-import weco.catalogue.display_model.models.{DisplayDigitalLocation, ImageIncludes}
+import weco.catalogue.display_model.locations.DisplayDigitalLocation
+import weco.catalogue.display_model.models.ImageIncludes
 import weco.catalogue.internal_model.image.{Image, ImageState}
 
 case class DisplayImage(
