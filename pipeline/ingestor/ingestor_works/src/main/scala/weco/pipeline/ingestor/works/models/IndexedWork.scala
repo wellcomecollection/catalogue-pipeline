@@ -7,30 +7,26 @@ sealed trait IndexedWork
 
 object IndexedWork {
   case class Visible(
-    data: WorkData[DataState.Identified],
-    state: WorkState.Indexed,
-
     debug: DebugInformation.Visible,
+    state: WorkState.Indexed,
+    data: WorkData[DataState.Identified],
     display: DisplayWork
   ) extends IndexedWork
 
   case class Redirected(
-    redirectTarget: IdState.Identified,
+    debug: DebugInformation.Redirected,
     state: WorkState.Indexed,
-
-    debug: DebugInformation.Redirected
+    redirectTarget: IdState.Identified
   ) extends IndexedWork
 
   case class Invisible(
-    data: WorkData[DataState.Identified],
+    debug: DebugInformation.Invisible,
     state: WorkState.Indexed,
-
-    debug: DebugInformation.Invisible
+    data: WorkData[DataState.Identified]
   ) extends IndexedWork
 
   case class Deleted(
-    state: WorkState.Indexed,
-
-    debug: DebugInformation.Deleted
+    debug: DebugInformation.Deleted,
+    state: WorkState.Indexed
   ) extends IndexedWork
 }
