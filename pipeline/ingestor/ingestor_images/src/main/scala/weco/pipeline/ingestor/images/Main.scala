@@ -1,7 +1,9 @@
 package weco.pipeline.ingestor.images
 
+import weco.catalogue.display_model.Implicits._
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.index.ImagesIndexConfig
+import weco.json.JsonUtil._
 import weco.pipeline.ingestor.common.IngestorMain
 import weco.typesafe.WellcomeTypesafeApp
 
