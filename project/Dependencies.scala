@@ -173,6 +173,9 @@ object CatalogueDependencies {
       ExternalDependencies.scalaXmlDependencies ++
       WellcomeDependencies.storageLibrary
 
+  val displayModelDependencies: Seq[ModuleID] =
+    WellcomeDependencies.httpLibrary
+
   val flowDependencies: Seq[ModuleID] =
     WellcomeDependencies.typesafeLibrary
 

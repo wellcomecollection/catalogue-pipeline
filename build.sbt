@@ -36,6 +36,13 @@ lazy val internal_model = setupProject(
   .enablePlugins(BuildInfoPlugin)
   .settings(Publish.sharedLibrarySettings: _*)
 
+lazy val display_model = setupProject(
+  project,
+  folder = "common/display_model",
+  localDependencies = Seq(internal_model),
+  externalDependencies = CatalogueDependencies.displayModelDependencies
+)
+
 lazy val flows = setupProject(
   project,
   "common/flows",
