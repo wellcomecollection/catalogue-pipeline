@@ -20,6 +20,11 @@ steps:
     agents:
       queue: "scala"
 
+  - command: .buildkite/scripts/run_job.py display_model
+    label: "display model"
+    agents:
+      queue: "scala"
+
   - command: .buildkite/scripts/run_job.py source_model
     label: "source model"
     agents:
