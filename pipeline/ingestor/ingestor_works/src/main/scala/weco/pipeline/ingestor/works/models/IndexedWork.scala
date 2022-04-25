@@ -1,5 +1,6 @@
 package weco.pipeline.ingestor.works.models
 
+import io.circe.Json
 import weco.catalogue.internal_model.identifiers.{DataState, IdState}
 import weco.catalogue.internal_model.work.{WorkData, WorkState}
 
@@ -10,7 +11,7 @@ object IndexedWork {
     debug: DebugInformation.Visible,
     state: WorkState.Indexed,
     data: WorkData[DataState.Identified],
-    display: DisplayWork
+    display: Json
   ) extends IndexedWork
 
   case class Redirected(
