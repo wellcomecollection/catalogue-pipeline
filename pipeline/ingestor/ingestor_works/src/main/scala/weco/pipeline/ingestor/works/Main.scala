@@ -6,7 +6,6 @@ import weco.catalogue.internal_model.work.{Work, WorkState}
 import weco.pipeline.ingestor.common.IngestorMain
 import weco.pipeline.ingestor.works.models.IndexedWork
 import weco.typesafe.WellcomeTypesafeApp
-import weco.catalogue.display_model.Implicits._
 import weco.json.JsonUtil._
 
 object Main extends WellcomeTypesafeApp {

@@ -6,6 +6,7 @@ import com.sksamuel.elastic4s.requests.get.GetResponse
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.scalatest.{Assertion, Suite}
+import weco.catalogue.display_model.work.DisplayWork
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.index.{IndexFixtures, WorksIndexConfig}
 import weco.catalogue.internal_model.work.WorkState.Denormalised

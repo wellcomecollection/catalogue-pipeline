@@ -50,7 +50,11 @@ class ImagesIngestorFeatureTest
             storedImage.locations shouldBe image.locations
             storedImage.source shouldBe image.source
             storedImage.modifiedTime shouldBe image.modifiedTime
-            storedImage.display shouldBe DisplayImage(image.transition[ImageState.Indexed]())
+
+            val storedJson = storedImage.display.as[DisplayImage].right.get
+            val expectedJson = DisplayImage(image.transition[ImageState.Indexed]())
+
+            storedJson shouldBe expectedJson
           }
 
           eventually {
