@@ -61,7 +61,9 @@ trait WorksIngestorFixtures
       assertRecent(storedWork.state.indexedTime)
     }
 
-  def withWorksIngestor[R](queue: Queue, existingWorks: Seq[Work[WorkState.Denormalised]])(testWith: TestWith[Index, R]): R =
+  def withWorksIngestor[R](queue: Queue,
+                           existingWorks: Seq[Work[WorkState.Denormalised]])(
+    testWith: TestWith[Index, R]): R =
     withLocalWorksIndex { index =>
       withLocalDenormalisedWorksIndex { denormalisedIndex =>
         insertIntoElasticsearch(denormalisedIndex, existingWorks: _*)

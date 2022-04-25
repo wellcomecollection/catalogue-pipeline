@@ -43,7 +43,8 @@ class ImagesIngestorFeatureTest
 
             val getResponse = response.result
 
-            val storedImage = fromJson[IndexedImage](getResponse.sourceAsString).get
+            val storedImage =
+              fromJson[IndexedImage](getResponse.sourceAsString).get
 
             storedImage.version shouldBe image.version
             storedImage.state.sourceIdentifier shouldBe image.state.sourceIdentifier
@@ -52,7 +53,8 @@ class ImagesIngestorFeatureTest
             storedImage.modifiedTime shouldBe image.modifiedTime
 
             val storedJson = storedImage.display.as[DisplayImage].right.get
-            val expectedJson = DisplayImage(image.transition[ImageState.Indexed]())
+            val expectedJson =
+              DisplayImage(image.transition[ImageState.Indexed]())
 
             storedJson shouldBe expectedJson
           }
@@ -80,7 +82,9 @@ class ImagesIngestorFeatureTest
     }
   }
 
-  def withImagesIngestor[R](queue: Queue, existingImages: Seq[Image[ImageState.Augmented]])(testWith: TestWith[Index, R]): R =
+  def withImagesIngestor[R](queue: Queue,
+                            existingImages: Seq[Image[ImageState.Augmented]])(
+    testWith: TestWith[Index, R]): R =
     withLocalImagesIndex { index =>
       withLocalAugmentedImageIndex { augmentedIndex =>
         insertImagesIntoElasticsearch(augmentedIndex, existingImages: _*)

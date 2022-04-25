@@ -4,10 +4,19 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.generators.ImageGenerators
 import weco.catalogue.internal_model.identifiers.IdState
-import weco.catalogue.internal_model.locations.{AccessCondition, AccessMethod, AccessStatus}
+import weco.catalogue.internal_model.locations.{
+  AccessCondition,
+  AccessMethod,
+  AccessStatus
+}
 import weco.catalogue.internal_model.work.WorkState.Denormalised
 import weco.catalogue.internal_model.work.generators.WorkGenerators
-import weco.catalogue.internal_model.work.{CollectionPath, Person, Subject, Work}
+import weco.catalogue.internal_model.work.{
+  CollectionPath,
+  Person,
+  Subject,
+  Work
+}
 import weco.messaging.fixtures.SQS.QueuePair
 import weco.pipeline.ingestor.works.fixtures.WorksIngestorFixtures
 
@@ -180,20 +189,21 @@ class IngestorWorkerServiceTest
   }
 
   private def assertWorksIndexedCorrectly(works: Work[Denormalised]*): Unit =
-    withLocalSqsQueuePair() { case QueuePair(queue, dlq) =>
-      withWorksIngestor(queue, existingWorks = works) { index =>
-        works.map { work =>
-          sendNotificationToSQS(queue = queue, body = work.id)
-        }
+    withLocalSqsQueuePair() {
+      case QueuePair(queue, dlq) =>
+        withWorksIngestor(queue, existingWorks = works) { index =>
+          works.map { work =>
+            sendNotificationToSQS(queue = queue, body = work.id)
+          }
 
-        works.foreach {
-          assertWorkIndexed(index, _)
-        }
+          works.foreach {
+            assertWorkIndexed(index, _)
+          }
 
-        eventually {
-          assertQueueEmpty(queue)
-          assertQueueEmpty(dlq)
+          eventually {
+            assertQueueEmpty(queue)
+            assertQueueEmpty(dlq)
+          }
         }
-      }
     }
 }

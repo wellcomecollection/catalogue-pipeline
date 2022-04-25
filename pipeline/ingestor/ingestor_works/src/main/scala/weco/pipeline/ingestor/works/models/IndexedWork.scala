@@ -37,8 +37,10 @@ object IndexedWork {
 
   implicit val indexable: Indexable[IndexedWork] =
     new Indexable[IndexedWork] {
-      override def id(work: IndexedWork): String = work.state.canonicalId.underlying
+      override def id(work: IndexedWork): String =
+        work.state.canonicalId.underlying
 
-      override def version(work: IndexedWork): Long = work.state.modifiedTime.toEpochMilli
+      override def version(work: IndexedWork): Long =
+        work.state.modifiedTime.toEpochMilli
     }
 }

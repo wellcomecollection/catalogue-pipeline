@@ -4,7 +4,11 @@ import io.circe.syntax._
 import weco.catalogue.display_model.work.DisplayWork
 import weco.catalogue.internal_model.work.WorkState.{Denormalised, Indexed}
 import weco.catalogue.internal_model.work.Work
-import weco.pipeline.ingestor.works.models.{DebugInformation, IndexedWork, SourceWorkDebugInformation}
+import weco.pipeline.ingestor.works.models.{
+  DebugInformation,
+  IndexedWork,
+  SourceWorkDebugInformation
+}
 import weco.catalogue.display_model.Implicits._
 
 object WorkTransformer {
