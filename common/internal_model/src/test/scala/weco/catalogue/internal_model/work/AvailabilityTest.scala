@@ -16,14 +16,21 @@ class AvailabilityTest
     with ItemsGenerators {
   describe("Availabilities.forWorkData") {
     it(
-      "adds Availability.Online if there is a digital location with an Open, OpenWithAdvisory or LicensedResources access status") {
+      "adds Availability.Online if there is a digital location with an Open, OpenWithAdvisory or LicensedResources access status"
+    ) {
       val openWork = denormalisedWork().items(
-        List(createDigitalItemWith(accessStatus = AccessStatus.Open)))
+        List(createDigitalItemWith(accessStatus = AccessStatus.Open))
+      )
       val openWithAdvisoryWork = denormalisedWork().items(
         List(
-          createDigitalItemWith(accessStatus = AccessStatus.OpenWithAdvisory)))
-      val licensedResourcesWork = denormalisedWork().items(List(
-        createDigitalItemWith(accessStatus = AccessStatus.LicensedResources())))
+          createDigitalItemWith(accessStatus = AccessStatus.OpenWithAdvisory)
+        )
+      )
+      val licensedResourcesWork = denormalisedWork().items(
+        List(
+          createDigitalItemWith(accessStatus = AccessStatus.LicensedResources())
+        )
+      )
       val availabilities =
         List(openWork, openWithAdvisoryWork, licensedResourcesWork)
           .map(work => Availabilities.forWorkData(work.data))
@@ -32,15 +39,17 @@ class AvailabilityTest
     }
 
     it(
-      "adds Availability.InLibrary if there is an item with a physical location") {
-      val work = denormalisedWork().items(List(createIdentifiedPhysicalItem))
+      "adds Availability.ClosedStores if there is an item with a closed stores physical location"
+    ) {
+      val work = denormalisedWork().items(List(createClosedStoresItem))
       val workAvailabilities = Availabilities.forWorkData(work.data)
 
-      workAvailabilities should contain only Availability.InLibrary
+      workAvailabilities should contain only Availability.ClosedStores
     }
 
     it(
-      "doesn't add Availability.Online if the only digital location is a related resource") {
+      "doesn't add Availability.Online if the only digital location is a related resource"
+    ) {
       val items =
         List(
           createDigitalItemWith(
@@ -54,7 +63,7 @@ class AvailabilityTest
       Availabilities.forWorkData(work.data) shouldBe empty
     }
 
-    it("does not add Availability.InLibrary if the only location is OnOrder") {
+    it("does not add an availability if the only location is OnOrder") {
       val work = denormalisedWork()
         .items(
           List(
@@ -63,7 +72,8 @@ class AvailabilityTest
                 createPhysicalLocationWith(
                   locationType = LocationType.OnOrder
                 )
-              ))
+              )
+            )
           )
         )
       val workAvailabilities = Availabilities.forWorkData(work.data)
@@ -71,14 +81,15 @@ class AvailabilityTest
       workAvailabilities shouldBe empty
     }
 
-    it("does not add Availability.InLibrary if the location is offsite") {
+    it("does not add Availability.ClosedStores if the location is offsite") {
       val work = denormalisedWork()
-        .items(List(createIdentifiedPhysicalItem))
+        .items(List(createClosedStoresItem))
         .notes(
           List(
             Note(
               contents = "Available at Churchill Archives Centre",
-              noteType = NoteType.TermsOfUse)
+              noteType = NoteType.TermsOfUse
+            )
           )
         )
       val workAvailabilities = Availabilities.forWorkData(work.data)
@@ -86,7 +97,7 @@ class AvailabilityTest
       workAvailabilities shouldBe empty
     }
 
-    it("adds Availability.InLibrary if there are locations other than OnOrder") {
+    it("adds an availability if there are locations other than OnOrder") {
       val work = denormalisedWork()
         .items(
           List(
@@ -98,12 +109,13 @@ class AvailabilityTest
                 createPhysicalLocationWith(
                   locationType = LocationType.OpenShelves
                 )
-              ))
+              )
+            )
           )
         )
       val workAvailabilities = Availabilities.forWorkData(work.data)
 
-      workAvailabilities should contain only Availability.InLibrary
+      workAvailabilities should contain only Availability.OpenShelves
     }
 
     describe("if there is a holdings") {
@@ -123,37 +135,45 @@ class AvailabilityTest
         workAvailabilities shouldBe empty
       }
 
-      it("with a physical location, then it adds Availability.InLibrary") {
+      it("with an available physical location, then it adds an availability") {
         val work = denormalisedWork()
           .holdings(
             List(
               Holdings(
                 note = Some("A holdings in the closed stores"),
                 enumeration = Nil,
-                location = Some(createPhysicalLocation)
+                location = Some(
+                  createPhysicalLocationWith(
+                    locationType = LocationType.ClosedStores
+                  )
+                )
               )
             )
           )
         val workAvailabilities = Availabilities.forWorkData(work.data)
 
-        workAvailabilities shouldBe Set(Availability.InLibrary)
+        workAvailabilities shouldBe Set(Availability.ClosedStores)
       }
     }
 
     it(
-      "adds Availability.Online and Availability.InLibrary if the conditions for both are satisfied") {
+      "adds Availability.Online and an in-library availability if the conditions for both are satisfied"
+    ) {
       val work = denormalisedWork().items(
         List(
-          createIdentifiedPhysicalItem,
-          createDigitalItemWith(accessStatus = AccessStatus.Open)))
+          createClosedStoresItem,
+          createDigitalItemWith(accessStatus = AccessStatus.Open)
+        )
+      )
       val workAvailabilities = Availabilities.forWorkData(work.data)
 
-      workAvailabilities should contain allOf (Availability.InLibrary, Availability.Online)
+      workAvailabilities should contain allOf (Availability.ClosedStores, Availability.Online)
     }
 
     it("does not add either availability if no conditions are satisfied") {
       val work = denormalisedWork().items(
-        List(createDigitalItemWith(accessStatus = AccessStatus.Closed)))
+        List(createDigitalItemWith(accessStatus = AccessStatus.Closed))
+      )
       val workAvailabilities = Availabilities.forWorkData(work.data)
 
       workAvailabilities.size shouldBe 0

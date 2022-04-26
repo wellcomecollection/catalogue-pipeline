@@ -13,10 +13,15 @@ locals {
   es_node_count = var.reindexing_state.scale_up_elastic_cluster ? 1 : 2
 }
 
+data "ec_stack" "latest_patch" {
+  version_regex = "7.17.?"
+  region        = "eu-west-1"
+}
+
 resource "ec_deployment" "pipeline" {
   name = "pipeline-${var.pipeline_date}"
 
-  version = "7.17.2"
+  version = data.ec_stack.latest_patch.version
 
   region                 = "eu-west-1"
   deployment_template_id = "aws-io-optimized-v2"
@@ -77,7 +82,6 @@ resource "aws_secretsmanager_secret" "es_username_catalogue" {
 
   for_each = toset([
     "snapshot_generator",
-    "stacks_api",
     "catalogue_api",
   ])
 
@@ -91,7 +95,6 @@ resource "aws_secretsmanager_secret" "es_password_catalogue" {
 
   for_each = toset([
     "snapshot_generator",
-    "stacks_api",
     "catalogue_api",
   ])
 

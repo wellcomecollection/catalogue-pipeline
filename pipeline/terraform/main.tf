@@ -1,4 +1,4 @@
-module "catalogue_pipeline_" {
+module "catalogue_pipeline_2022-04-04" {
   source = "./stack"
 
   pipeline_date = "2022-04-04"
@@ -91,12 +91,11 @@ module "catalogue_pipeline_" {
   logging_cluster_id = local.logging_cluster_id
 }
 
-
-module "catalogue_pipeline_2022-03-31a" {
+module "catalogue_pipeline_2022-04-21" {
   source = "./stack"
 
-  pipeline_date = "2022-03-31"
-  release_label = "2022-03-31a"
+  pipeline_date = "2022-04-21"
+  release_label = "2022-04-21"
 
   reindexing_state = {
     connect_reindex_topics   = false

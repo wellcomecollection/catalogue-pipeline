@@ -23,7 +23,8 @@ class ArchiveRelationsCache(works: Map[String, RelationWork]) extends Logging {
             info(s"Found no relations for work with path $path")
           else
             info(
-              s"Found relations for work with path $path: ${ancestors.size} ancestors, ${children.size} children, and ${siblingsPreceding.size + siblingsSucceeding.size} siblings")
+              s"Found relations for work with path $path: ${ancestors.size} ancestors, ${children.size} children, and ${siblingsPreceding.size + siblingsSucceeding.size} siblings"
+            )
           relations
       }
       .getOrElse {
@@ -32,43 +33,6 @@ class ArchiveRelationsCache(works: Map[String, RelationWork]) extends Logging {
       }
 
   private val paths: PathCollection = PathCollection(works.keySet)
-
-  /** Find the availabilities of this Work.
-    *
-    * The availabilities of an archive's Relations are the union of all the
-    * availabilities of its descendents, as well as its own.
-    *
-    * Note that this only covers *known* descendents.  e.g. if the works have
-    * paths (A, A/B/1), then A will not inherit availabilities from A/B/1 --
-    * the intermediate path A/B is missing.
-    *
-    * This preserves the original behaviour of the relation embedder, but it's
-    * not clear if it's intentional -- it was a side effect of the implementation,
-    * not something that was explicitly tested.
-    *
-    */
-  def getAvailabilities(work: Work[Merged]): Set[Availability] =
-    work.data.collectionPath match {
-      case Some(CollectionPath(workPath, _)) =>
-        val affectedPaths = paths.knownDescendentsOf(workPath) :+ workPath
-
-        works
-          .filter {
-            case (path, _) => affectedPaths.contains(path)
-          }
-          .flatMap { case (_, work) => work.state.availabilities }
-          .toSet
-
-      // We shouldn't be dealing with any works without a collectionPath field in the
-      // relation embedder; if we are then something has gone wrong.
-      case _ =>
-        assert(
-          assertion = false,
-          message =
-            s"Cannot get availabilities for work with empty collectionPath field: $work"
-        )
-        Set()
-    }
 
   def size: Int = works.size
 

@@ -49,6 +49,20 @@ trait ItemsGenerators extends IdentifiersGenerators with LocationGenerators {
   def createIdentifiedPhysicalItem: Item[IdState.Identified] =
     createIdentifiedItemWith(locations = List(createPhysicalLocation))
 
+  def createClosedStoresItem: Item[IdState.Identified] =
+    createIdentifiedItemWith(
+      locations = List(
+        createPhysicalLocationWith(locationType = LocationType.ClosedStores)
+      )
+    )
+
+  def createOpenShelvesItem: Item[IdState.Identified] =
+    createIdentifiedItemWith(
+      locations = List(
+        createPhysicalLocationWith(locationType = LocationType.OpenShelves)
+      )
+    )
+
   def createDigitalItem: Item[IdState.Unidentifiable.type] =
     createUnidentifiableItemWith(locations = List(createDigitalLocation))
 
@@ -62,7 +76,8 @@ trait ItemsGenerators extends IdentifiersGenerators with LocationGenerators {
             AccessCondition(
               method = AccessMethod.NotRequestable,
               status = accessStatus
-            ))
+            )
+          )
         )
       )
     )
