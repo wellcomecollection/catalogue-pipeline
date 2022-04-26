@@ -65,12 +65,11 @@ class ArchiveRelationsCache(works: Map[String, RelationWork]) extends Logging {
 
 object ArchiveRelationsCache {
 
-  def apply(works: Seq[RelationWork]): ArchiveRelationsCache = {
+  def apply(works: Seq[RelationWork]): ArchiveRelationsCache =
     new ArchiveRelationsCache(
       works.collect {
         case work if (work.data.collectionPath.isDefined) =>
           work.data.collectionPath.get.path -> work
       }.toMap
     )
-  }
 }

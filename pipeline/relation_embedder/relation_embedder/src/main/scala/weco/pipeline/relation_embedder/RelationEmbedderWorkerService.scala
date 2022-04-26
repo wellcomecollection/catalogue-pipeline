@@ -60,8 +60,7 @@ class RelationEmbedderWorkerService[MsgDestination](
       }
   }
 
-  private def fetchRelations(batch: Batch): Future[ArchiveRelationsCache] = {
-
+  private def fetchRelations(batch: Batch): Future[ArchiveRelationsCache] =
     relationsService
       .getRelationTree(batch)
       .runWith(Sink.seq)
@@ -70,21 +69,19 @@ class RelationEmbedderWorkerService[MsgDestination](
           s"Received ${relationWorks.size} relations for tree ${batch.rootPath}")
         ArchiveRelationsCache(relationWorks)
       }
-  }
 
   private def denormaliseAll(batch: Batch,
                              relationsCache: ArchiveRelationsCache)
-    : Source[Work[Denormalised], NotUsed] = {
+    : Source[Work[Denormalised], NotUsed] =
     relationsService
-      .getAffectedWorks(batch)
-      .map { work =>
-        val relations = relationsCache(work)
-        work.transition[Denormalised](relations)
-      }
-  }
+    .getAffectedWorks(batch)
+    .map { work =>
+      val relations = relationsCache(work)
+      work.transition[Denormalised](relations)
+    }
 
   private def indexWorks(
-    denormalisedWorks: Source[Work[Denormalised], NotUsed]) = {
+    denormalisedWorks: Source[Work[Denormalised], NotUsed]) =
     denormalisedWorks
       .groupedWeightedWithin(
         indexBatchSize,
@@ -108,5 +105,4 @@ class RelationEmbedderWorkerService[MsgDestination](
       }
       .runWith(Sink.ignore)
       .map(_ => ())
-  }
 }
