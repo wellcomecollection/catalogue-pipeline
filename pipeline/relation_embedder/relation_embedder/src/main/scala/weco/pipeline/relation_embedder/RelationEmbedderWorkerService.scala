@@ -43,7 +43,7 @@ class RelationEmbedderWorkerService[MsgDestination](
         info(
           s"Received batch for tree ${batch.rootPath} containing ${batch.selectors.size} selectors: ${batch.selectors
             .mkString(", ")}")
-          fetchRelations(batch)
+        fetchRelations(batch)
           .flatMap { relationsCache =>
             info(
               s"Built cache for tree ${batch.rootPath}, containing ${relationsCache.size} relations (${relationsCache.numParents} works map to parent works).")
@@ -59,7 +59,7 @@ class RelationEmbedderWorkerService[MsgDestination](
       }
   }
 
-  private def fetchRelations(batch:Batch): Future[ArchiveRelationsCache] = {
+  private def fetchRelations(batch: Batch): Future[ArchiveRelationsCache] = {
     relationsService
       .getRelationTree(batch)
       .runWith(Sink.seq)
@@ -70,7 +70,9 @@ class RelationEmbedderWorkerService[MsgDestination](
       }
   }
 
-  private def denormaliseAll(batch: Batch, relationsCache: ArchiveRelationsCache): Source[Work[Denormalised], NotUsed] = {
+  private def denormaliseAll(batch: Batch,
+                             relationsCache: ArchiveRelationsCache)
+    : Source[Work[Denormalised], NotUsed] = {
     relationsService
       .getAffectedWorks(batch)
       .map { work =>
@@ -83,7 +85,8 @@ class RelationEmbedderWorkerService[MsgDestination](
       }
   }
 
-  private def indexWorks(denormalisedWorks: Source[Work[Denormalised], NotUsed]) = {
+  private def indexWorks(
+    denormalisedWorks: Source[Work[Denormalised], NotUsed]) = {
     denormalisedWorks
       .groupedWeightedWithin(
         indexBatchSize,
@@ -101,10 +104,11 @@ class RelationEmbedderWorkerService[MsgDestination](
       .mapConcat(_.map(_.id))
       .mapAsync(3) { id =>
         Future(msgSender.send(id)).flatMap {
-          case Success(_) => Future.successful(())
+          case Success(_)   => Future.successful(())
           case Failure(err) => Future.failed(err)
         }
       }
       .runWith(Sink.ignore)
       .map(_ => ())
-  }}
+  }
+}

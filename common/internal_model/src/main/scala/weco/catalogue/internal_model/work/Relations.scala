@@ -62,15 +62,18 @@ case class Relations(
 object RelationSet {
   def apply(existingRelations: List[Relation],
             newRelations: List[Relation]): List[Relation] = {
-    val newTitles = newRelations.map(relation => removeTerminalPunctuation(relation.title))
+    val newTitles =
+      newRelations.map(relation => removeTerminalPunctuation(relation.title))
 
     // duplicated if it shares a title, but not if it already has an identifier.
     def isRelationDuplicated(relation: Relation): Boolean =
       relation.id.isEmpty && newTitles.contains(relation.title.getOrElse(""))
 
-    val relationsToKeep = existingRelations.filter(r => !isRelationDuplicated(r))
+    val relationsToKeep =
+      existingRelations.filter(r => !isRelationDuplicated(r))
     relationsToKeep ++ newRelations
   }
+
   /**
     * The title used in a relation may come from one of two places:
     * 1. The title of the related document
