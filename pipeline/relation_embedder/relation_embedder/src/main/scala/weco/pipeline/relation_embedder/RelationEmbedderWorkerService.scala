@@ -74,11 +74,11 @@ class RelationEmbedderWorkerService[MsgDestination](
                              relationsCache: ArchiveRelationsCache)
     : Source[Work[Denormalised], NotUsed] =
     relationsService
-    .getAffectedWorks(batch)
-    .map { work =>
-      val relations = relationsCache(work)
-      work.transition[Denormalised](relations)
-    }
+      .getAffectedWorks(batch)
+      .map { work =>
+        val relations = relationsCache(work)
+        work.transition[Denormalised](relations)
+      }
 
   private def indexWorks(
     denormalisedWorks: Source[Work[Denormalised], NotUsed]) =
