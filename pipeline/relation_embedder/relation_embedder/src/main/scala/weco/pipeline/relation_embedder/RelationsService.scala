@@ -39,11 +39,6 @@ class PathQueryRelationsService(
       .map(searchHit => searchHit.safeTo[Work[Merged]].get)
   }
 
-  /**
-    * Given a root path, return an Akka Source that generates RelationWork objects for every Work within that path.
-    * @param batch
-    * @return
-    */
   def getRelationTree(batch: Batch): Source[RelationWork, NotUsed] = {
     val request = requestBuilder.completeTree(batch, completeTreeScroll)
     debug(
