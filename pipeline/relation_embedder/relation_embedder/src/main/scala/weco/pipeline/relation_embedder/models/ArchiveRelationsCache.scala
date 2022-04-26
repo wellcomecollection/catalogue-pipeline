@@ -4,6 +4,7 @@ import grizzled.slf4j.Logging
 import weco.catalogue.internal_model.work.WorkState.Merged
 import weco.catalogue.internal_model.work._
 
+
 class ArchiveRelationsCache(works: Map[String, RelationWork]) extends Logging {
 
   def apply(work: Work[Merged]): Relations =
@@ -101,16 +102,12 @@ class ArchiveRelationsCache(works: Map[String, RelationWork]) extends Logging {
 
 object ArchiveRelationsCache {
 
-  def apply(works: Seq[RelationWork]): ArchiveRelationsCache =
-    new ArchiveRelationsCache(
-      works
-        .map { work =>
-          work.data.collectionPath -> work
-        }
-        .collect {
-          case (Some(CollectionPath(path, _)), work) =>
-            path -> work
-        }
-        .toMap
+  def apply(works: Seq[RelationWork]): ArchiveRelationsCache = {
+     new ArchiveRelationsCache(
+      works.collect{
+        case work if(work.data.collectionPath.isDefined) =>
+          work.data.collectionPath.get.path -> work
+      }.toMap
     )
+  }
 }
