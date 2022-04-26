@@ -41,7 +41,8 @@ class RelationEmbedderWorkerService[MsgDestination](
       .fromTry(batch)
       .flatMap { batch =>
         info(
-          s"Received batch for tree ${batch.rootPath} containing ${batch.selectors.size} selectors: ${batch.selectors.mkString(", ")}")
+          s"Received batch for tree ${batch.rootPath} containing ${batch.selectors.size} selectors: ${batch.selectors
+            .mkString(", ")}")
         fetchRelations(batch)
           .flatMap { relationsCache =>
             info(
@@ -75,11 +76,11 @@ class RelationEmbedderWorkerService[MsgDestination](
                              relationsCache: ArchiveRelationsCache)
     : Source[Work[Denormalised], NotUsed] = {
     relationsService
-    .getAffectedWorks(batch)
-    .map { work =>
-      val relations = relationsCache(work)
-      work.transition[Denormalised](relations)
-    }
+      .getAffectedWorks(batch)
+      .map { work =>
+        val relations = relationsCache(work)
+        work.transition[Denormalised](relations)
+      }
   }
 
   private def indexWorks(
