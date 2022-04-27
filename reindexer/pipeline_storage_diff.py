@@ -10,10 +10,8 @@ import click
 from elasticsearch.helpers import scan
 from tqdm import tqdm
 
-from get_reindex_status import (
-    get_pipeline_storage_es_client,
-    count_documents_in_index,
-)
+from get_reindex_status import get_pipeline_storage_es_client, count_documents_in_index
+
 
 @click.command()
 @click.argument("reindex_date")
