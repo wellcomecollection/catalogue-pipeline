@@ -5,14 +5,11 @@ import org.scalatest.funspec.AnyFunSpec
 import weco.catalogue.internal_model.work.CollectionPath
 import weco.catalogue.internal_model.work.generators.WorkGenerators
 
-class ChildWorkTest
-  extends AnyFunSpec
-  with WorkGenerators
-  with Matchers
-{
-  describe("Concatenating collectionPaths"){
+class ChildWorkTest extends AnyFunSpec with WorkGenerators with Matchers {
+  describe("Concatenating collectionPaths") {
 
-    it("replaces the head of the child's path with the whole of the parent's path") {
+    it(
+      "replaces the head of the child's path with the whole of the parent's path") {
       val newChild = ChildWork(
         mergedWork().collectionPath(CollectionPath("a/b")),
         mergedWork().collectionPath(CollectionPath("b/c"))
@@ -44,15 +41,19 @@ class ChildWorkTest
       newChild.data.collectionPath.get.path shouldBe "hello/world/cup"
     }
 
-    it("does nothing if the collectionPath of the parent consists of a single node") {
+    it(
+      "does nothing if the collectionPath of the parent consists of a single node") {
       // When the parent is the root of the hierarchy,
       // that's fine, but there is nothing to do.
       val originalChild = mergedWork().collectionPath(CollectionPath("a/b"))
-      val newChild = ChildWork(mergedWork().collectionPath(CollectionPath("a")), originalChild)
+      val newChild = ChildWork(
+        mergedWork().collectionPath(CollectionPath("a")),
+        originalChild)
       newChild should be theSameInstanceAs originalChild
     }
 
-    it("throws an exception if the end of the parent does not match the head of the child") {
+    it(
+      "throws an exception if the end of the parent does not match the head of the child") {
       assertThrows[IllegalArgumentException] {
         ChildWork(
           mergedWork().collectionPath(CollectionPath("b/z")),
