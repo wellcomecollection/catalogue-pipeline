@@ -225,7 +225,6 @@ object WorksIndexConfig extends IndexConfigFields {
         keywordField("type"),
         data.withDynamic("false"),
         objectField("redirectTarget").withDynamic("false"),
-        objectField("redirectSources").withDynamic("false"),
         // These fields contain debugging information and the display document used by
         // the API, but wwe don't want to index them -- they're just arbitrary JSON.
         ObjectField("debug").withEnabled(false),

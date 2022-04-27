@@ -968,12 +968,13 @@
         "type" : "object",
         "dynamic" : "false"
       },
-      "redirectSources" : {
+      "debug" : {
         "type" : "object",
-        "dynamic" : "false"
+        "enabled": "false"
       },
-      "version" : {
-        "type" : "integer"
+      "display" : {
+        "type" : "object",
+        "enabled": "false"
       }
     }
   }
