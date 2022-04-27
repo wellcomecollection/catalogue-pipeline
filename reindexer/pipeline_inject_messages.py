@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 
+"""
+Injects a list of IDs as messages on a pipeline topic
+
+See the section of the README "fixing leaks" for more info.
+"""
 import click
 from tqdm import tqdm
 from get_reindex_status import get_session_with_role

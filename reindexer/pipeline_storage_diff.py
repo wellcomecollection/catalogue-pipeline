@@ -1,15 +1,19 @@
 #!/usr/bin/env python3
 
+"""
+Finds documents that don't appear in _both_ of 2 given pipeline indices.
+
+See the section of the README "fixing leaks" for more info.
+"""
+
 import click
 from elasticsearch.helpers import scan
 from tqdm import tqdm
 
 from get_reindex_status import (
     get_pipeline_storage_es_client,
-    get_session_with_role,
     count_documents_in_index,
 )
-
 
 @click.command()
 @click.argument("reindex_date")
@@ -17,10 +21,7 @@ from get_reindex_status import (
 @click.option("--to", "to_index", required=True)
 @click.argument("out_file_path")
 def main(reindex_date, from_index, to_index, out_file_path):
-    session_dev = get_session_with_role(
-        "arn:aws:iam::760097843905:role/platform-developer"
-    )
-    es = get_pipeline_storage_es_client(session_dev, reindex_date=reindex_date)
+    es = get_pipeline_storage_es_client(reindex_date)
     indices = [f"{from_index}-{reindex_date}", f"{to_index}-{reindex_date}"]
     counts = [count_documents_in_index(es, index_name=index) for index in indices]
 
