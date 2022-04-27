@@ -4,20 +4,21 @@ import weco.catalogue.internal_model.work.{CollectionPath, Work}
 import weco.catalogue.internal_model.work.WorkState.Merged
 
 object ChildWork {
+
   /**
-   * Return the childWork, having prepended the collectionpath from parentWork.
-   * The collectionPath of a work contains its own path from its parent to itself,
-   * so if its parent is not root, it needs to replace the parent node in its own path
-   * with the parent node's path.
-   *
-   * e.g. grandparent/parent + parent/self -> grandparent/parent/self.
-   *
-   * Because of the iterative nature of this stage, it may be that a collectionpath
-   * contains more than just parent/self when this is executed.
-   * i.e. because it has already been executed once to resolve the grandparent/parent
-   * part (and possibly again to add great-grandparent etc.)
-   *
-   */
+    * Return the childWork, having prepended the collectionpath from parentWork.
+    * The collectionPath of a work contains its own path from its parent to itself,
+    * so if its parent is not root, it needs to replace the parent node in its own path
+    * with the parent node's path.
+    *
+    * e.g. grandparent/parent + parent/self -> grandparent/parent/self.
+    *
+    * Because of the iterative nature of this stage, it may be that a collectionpath
+    * contains more than just parent/self when this is executed.
+    * i.e. because it has already been executed once to resolve the grandparent/parent
+    * part (and possibly again to add great-grandparent etc.)
+    *
+    */
   def apply(parentWork: Work.Visible[Merged],
             childWork: Work.Visible[Merged]): Work.Visible[Merged] = {
     (parentWork.data.collectionPath, childWork.data.collectionPath) match {
@@ -35,7 +36,7 @@ object ChildWork {
           s"Cannot prepend the path from '${parentWork.state.canonicalId}', it does not have a collectionPath")
     }
   }
-  
+
   private def firstNode(path: String): String =
     path.splitAt(path.indexOf("/"))._1
 
