@@ -952,11 +952,11 @@
       },
       "debug" : {
         "type" : "object",
-        "enabled": "false"
+        "enabled": false
       },
       "display" : {
         "type" : "object",
-        "enabled": "false"
+        "enabled": false
       }
     }
   }

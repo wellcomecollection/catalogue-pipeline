@@ -1162,6 +1162,10 @@
           }
         },
         "dynamic" : "false"
+      },
+      "display" : {
+        "type" : "object",
+        "enabled": false
       }
     }
   }
