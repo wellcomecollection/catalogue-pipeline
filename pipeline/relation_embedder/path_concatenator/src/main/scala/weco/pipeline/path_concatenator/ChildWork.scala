@@ -35,6 +35,7 @@ object ChildWork {
           s"Cannot prepend the path from '${parentWork.state.canonicalId}', it does not have a collectionPath")
     }
   }
+  
   private def firstNode(path: String): String =
     path.splitAt(path.indexOf("/"))._1
 
