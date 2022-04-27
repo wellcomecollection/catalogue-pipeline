@@ -946,24 +946,6 @@
         },
         "dynamic" : "false"
       },
-      "invisibilityReasons" : {
-        "type" : "object",
-        "properties" : {
-          "type" : {
-            "type" : "keyword"
-          }
-        },
-        "dynamic" : "false"
-      },
-      "deletedReason" : {
-        "type" : "object",
-        "properties" : {
-          "type" : {
-            "type" : "keyword"
-          }
-        },
-        "dynamic" : "false"
-      },
       "redirectTarget" : {
         "type" : "object",
         "dynamic" : "false"
