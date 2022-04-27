@@ -228,10 +228,8 @@ object WorksIndexConfig extends IndexConfigFields {
         objectField("redirectSources").withDynamic("false"),
         // These fields contain debugging information and the display document used by
         // the API, but wwe don't want to index them -- they're just arbitrary JSON.
-        ObjectField("debug", enabled = Some(false))
-          .withDynamic("true"),
-        ObjectField("display", enabled = Some(false))
-          .withDynamic("true")
+        ObjectField("debug").withEnabled(false),
+        ObjectField("display").withEnabled(false)
       )
     },
     DynamicMapping.Strict,
