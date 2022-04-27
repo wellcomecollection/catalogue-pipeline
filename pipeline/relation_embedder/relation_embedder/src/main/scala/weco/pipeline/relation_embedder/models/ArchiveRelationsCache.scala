@@ -67,14 +67,9 @@ object ArchiveRelationsCache {
 
   def apply(works: Seq[RelationWork]): ArchiveRelationsCache =
     new ArchiveRelationsCache(
-      works
-        .map { work =>
-          work.data.collectionPath -> work
-        }
-        .collect {
-          case (Some(CollectionPath(path, _)), work) =>
-            path -> work
-        }
-        .toMap
+      works.collect {
+        case work if (work.data.collectionPath.isDefined) =>
+          work.data.collectionPath.get.path -> work
+      }.toMap
     )
 }

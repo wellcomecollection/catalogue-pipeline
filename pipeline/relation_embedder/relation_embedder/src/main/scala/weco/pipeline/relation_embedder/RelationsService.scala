@@ -28,7 +28,7 @@ class PathQueryRelationsService(
     extends RelationsService
     with Logging {
 
-  val requestBuilder = RelationsRequestBuilder(index)
+  private val requestBuilder = RelationsRequestBuilder(index)
 
   def getAffectedWorks(batch: Batch): Source[Work[Merged], NotUsed] = {
     val request = requestBuilder.affectedWorks(batch, affectedWorksScroll)
