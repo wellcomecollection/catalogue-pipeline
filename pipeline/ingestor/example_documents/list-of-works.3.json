@@ -1,6 +1,6 @@
 {
   "description" : "an arbitrary list of works",
-  "createdAt" : "2022-04-28T15:53:47.682Z",
+  "createdAt" : "2022-04-28T15:56:09.506Z",
   "id" : "v1ndph7s",
   "document" : {
     "debug" : {
@@ -31,7 +31,7 @@
       "canonicalId" : "v1ndph7s",
       "mergedTime" : "2020-10-15T15:51:00Z",
       "sourceModifiedTime" : "2020-10-15T15:51:00Z",
-      "indexedTime" : "2022-04-28T15:53:47.677Z",
+      "indexedTime" : "2020-10-15T15:51:00Z",
       "availabilities" : [
       ],
       "derivedData" : {

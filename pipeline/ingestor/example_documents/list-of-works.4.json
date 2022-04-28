@@ -1,6 +1,6 @@
 {
   "description" : "an arbitrary list of works",
-  "createdAt" : "2022-04-28T15:53:47.686Z",
+  "createdAt" : "2022-04-28T15:56:09.509Z",
   "id" : "1tpb2two",
   "document" : {
     "debug" : {
@@ -31,7 +31,7 @@
       "canonicalId" : "1tpb2two",
       "mergedTime" : "2020-10-15T15:51:00Z",
       "sourceModifiedTime" : "2020-10-15T15:51:00Z",
-      "indexedTime" : "2022-04-28T15:53:47.682Z",
+      "indexedTime" : "2020-10-15T15:51:00Z",
       "availabilities" : [
       ],
       "derivedData" : {
