@@ -1,18 +1,18 @@
 {
-  "description" : "a work with optional top-level fields",
-  "createdAt" : "2022-04-28T16:21:22.794Z",
-  "id" : "xckp7yni",
+  "description" : "a work with a production event in 1900",
+  "createdAt" : "2022-04-28T16:21:22.862Z",
+  "id" : "3twsgdza",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "OJccsHbIrE"
+          "value" : "7cwkk8dzsQ"
         },
-        "version" : 68,
+        "version" : 60,
         "modifiedTime" : "2020-10-15T15:51:00Z"
       },
       "mergedTime" : "2020-10-15T15:51:00Z",
@@ -23,12 +23,12 @@
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "calm-record-id"
+          "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "OJccsHbIrE"
+        "value" : "7cwkk8dzsQ"
       },
-      "canonicalId" : "xckp7yni",
+      "canonicalId" : "3twsgdza",
       "mergedTime" : "2020-10-15T15:51:00Z",
       "sourceModifiedTime" : "2020-10-15T15:51:00Z",
       "indexedTime" : "2020-10-15T15:51:00Z",
@@ -50,7 +50,7 @@
       }
     },
     "data" : {
-      "title" : "title-35xO0fGSrU",
+      "title" : "Production event in 1900",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -68,13 +68,34 @@
       ],
       "thumbnail" : null,
       "production" : [
+        {
+          "label" : "NRO6WXcgefffVVjhTygu6TgtW",
+          "places" : [
+          ],
+          "agents" : [
+          ],
+          "dates" : [
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "1900",
+              "range" : {
+                "from" : "1900-01-01T00:00:00Z",
+                "to" : "1900-12-31T23:59:59.999999999Z",
+                "label" : "1900"
+              }
+            }
+          ],
+          "function" : null
+        }
       ],
       "languages" : [
       ],
-      "edition" : "Special edition",
+      "edition" : null,
       "notes" : [
       ],
-      "duration" : 3600,
+      "duration" : null,
       "items" : [
       ],
       "holdings" : [
@@ -86,8 +107,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "xckp7yni",
-      "title" : "title-35xO0fGSrU",
+      "id" : "3twsgdza",
+      "title" : "Production event in 1900",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -95,11 +116,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "OJccsHbIrE",
+          "value" : "7cwkk8dzsQ",
           "type" : "Identifier"
         }
       ],
@@ -114,13 +135,25 @@
       "availabilities" : [
       ],
       "production" : [
+        {
+          "label" : "NRO6WXcgefffVVjhTygu6TgtW",
+          "places" : [
+          ],
+          "agents" : [
+          ],
+          "dates" : [
+            {
+              "label" : "1900",
+              "type" : "Period"
+            }
+          ],
+          "type" : "ProductionEvent"
+        }
       ],
       "languages" : [
       ],
-      "edition" : "Special edition",
       "notes" : [
       ],
-      "duration" : 3600,
       "images" : [
       ],
       "parts" : [

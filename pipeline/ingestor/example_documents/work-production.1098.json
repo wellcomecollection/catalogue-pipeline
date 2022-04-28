@@ -1,7 +1,7 @@
 {
-  "description" : "an arbitrary list of works",
-  "createdAt" : "2022-04-28T15:56:09.504Z",
-  "id" : "ihraob2r",
+  "description" : "a work with a production event in 1098",
+  "createdAt" : "2022-04-28T16:21:22.870Z",
+  "id" : "rz9qpj8a",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,9 +10,9 @@
             "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "89wyJzS2Su"
+          "value" : "MinUSJLhD6"
         },
-        "version" : 42,
+        "version" : 100,
         "modifiedTime" : "2020-10-15T15:51:00Z"
       },
       "mergedTime" : "2020-10-15T15:51:00Z",
@@ -26,9 +26,9 @@
           "id" : "calm-record-id"
         },
         "ontologyType" : "Work",
-        "value" : "89wyJzS2Su"
+        "value" : "MinUSJLhD6"
       },
-      "canonicalId" : "ihraob2r",
+      "canonicalId" : "rz9qpj8a",
       "mergedTime" : "2020-10-15T15:51:00Z",
       "sourceModifiedTime" : "2020-10-15T15:51:00Z",
       "indexedTime" : "2020-10-15T15:51:00Z",
@@ -50,7 +50,7 @@
       }
     },
     "data" : {
-      "title" : "title-uvBbFbQPNB",
+      "title" : "Production event in 1098",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -68,6 +68,27 @@
       ],
       "thumbnail" : null,
       "production" : [
+        {
+          "label" : "XnGuaV7CHYoIIwLFtyKtjbO5N",
+          "places" : [
+          ],
+          "agents" : [
+          ],
+          "dates" : [
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "1098",
+              "range" : {
+                "from" : "1098-01-01T00:00:00Z",
+                "to" : "1098-12-31T23:59:59.999999999Z",
+                "label" : "1098"
+              }
+            }
+          ],
+          "function" : null
+        }
       ],
       "languages" : [
       ],
@@ -86,8 +107,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "ihraob2r",
-      "title" : "title-uvBbFbQPNB",
+      "id" : "rz9qpj8a",
+      "title" : "Production event in 1098",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -99,7 +120,7 @@
             "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "89wyJzS2Su",
+          "value" : "MinUSJLhD6",
           "type" : "Identifier"
         }
       ],
@@ -114,6 +135,20 @@
       "availabilities" : [
       ],
       "production" : [
+        {
+          "label" : "XnGuaV7CHYoIIwLFtyKtjbO5N",
+          "places" : [
+          ],
+          "agents" : [
+          ],
+          "dates" : [
+            {
+              "label" : "1098",
+              "type" : "Period"
+            }
+          ],
+          "type" : "ProductionEvent"
+        }
       ],
       "languages" : [
       ],

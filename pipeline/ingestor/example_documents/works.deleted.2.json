@@ -1,0 +1,56 @@
+{
+  "description" : "an arbitrary list of deleted works",
+  "createdAt" : "2022-04-28T16:21:22.789Z",
+  "id" : "yqpvk4zv",
+  "document" : {
+    "debug" : {
+      "source" : {
+        "identifier" : {
+          "identifierType" : {
+            "id" : "sierra-system-number"
+          },
+          "ontologyType" : "Work",
+          "value" : "aX2ZTpN55z"
+        },
+        "version" : 59,
+        "modifiedTime" : "2020-10-15T15:51:00Z"
+      },
+      "mergedTime" : "2020-10-15T15:51:00Z",
+      "indexedTime" : "2020-10-15T15:51:00Z",
+      "deletedReason" : {
+        "info" : "tests",
+        "type" : "DeletedFromSource"
+      }
+    },
+    "state" : {
+      "sourceIdentifier" : {
+        "identifierType" : {
+          "id" : "sierra-system-number"
+        },
+        "ontologyType" : "Work",
+        "value" : "aX2ZTpN55z"
+      },
+      "canonicalId" : "yqpvk4zv",
+      "mergedTime" : "2020-10-15T15:51:00Z",
+      "sourceModifiedTime" : "2020-10-15T15:51:00Z",
+      "indexedTime" : "2020-10-15T15:51:00Z",
+      "availabilities" : [
+      ],
+      "derivedData" : {
+        "contributorAgents" : [
+        ]
+      },
+      "relations" : {
+        "ancestors" : [
+        ],
+        "children" : [
+        ],
+        "siblingsPreceding" : [
+        ],
+        "siblingsSucceeding" : [
+        ]
+      }
+    },
+    "type" : "Deleted"
+  }
+}

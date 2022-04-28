@@ -1,18 +1,18 @@
 {
-  "description" : "an arbitrary list of works",
-  "createdAt" : "2022-04-28T15:56:09.509Z",
-  "id" : "1tpb2two",
+  "description" : "a work with 'mouse' in the title",
+  "createdAt" : "2022-04-28T16:21:22.799Z",
+  "id" : "b2tsq547",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "c8BAUaequ8"
+          "value" : "luHLLSfnjH"
         },
-        "version" : 42,
+        "version" : 11,
         "modifiedTime" : "2020-10-15T15:51:00Z"
       },
       "mergedTime" : "2020-10-15T15:51:00Z",
@@ -23,12 +23,12 @@
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "miro-image-number"
+          "id" : "calm-record-id"
         },
         "ontologyType" : "Work",
-        "value" : "c8BAUaequ8"
+        "value" : "luHLLSfnjH"
       },
-      "canonicalId" : "1tpb2two",
+      "canonicalId" : "b2tsq547",
       "mergedTime" : "2020-10-15T15:51:00Z",
       "sourceModifiedTime" : "2020-10-15T15:51:00Z",
       "indexedTime" : "2020-10-15T15:51:00Z",
@@ -50,7 +50,7 @@
       }
     },
     "data" : {
-      "title" : "title-PFt15vaMzx",
+      "title" : "A mezzotint of a mouse",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -86,8 +86,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "1tpb2two",
-      "title" : "title-PFt15vaMzx",
+      "id" : "b2tsq547",
+      "title" : "A mezzotint of a mouse",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -95,11 +95,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "c8BAUaequ8",
+          "value" : "luHLLSfnjH",
           "type" : "Identifier"
         }
       ],

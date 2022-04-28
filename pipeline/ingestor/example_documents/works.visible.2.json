@@ -1,7 +1,7 @@
 {
-  "description" : "a work with optional top-level fields",
-  "createdAt" : "2022-04-28T16:21:22.794Z",
-  "id" : "xckp7yni",
+  "description" : "an arbitrary list of visible works",
+  "createdAt" : "2022-04-28T16:21:22.741Z",
+  "id" : "ihraob2r",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,9 +10,9 @@
             "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "OJccsHbIrE"
+          "value" : "89wyJzS2Su"
         },
-        "version" : 68,
+        "version" : 42,
         "modifiedTime" : "2020-10-15T15:51:00Z"
       },
       "mergedTime" : "2020-10-15T15:51:00Z",
@@ -26,9 +26,9 @@
           "id" : "calm-record-id"
         },
         "ontologyType" : "Work",
-        "value" : "OJccsHbIrE"
+        "value" : "89wyJzS2Su"
       },
-      "canonicalId" : "xckp7yni",
+      "canonicalId" : "ihraob2r",
       "mergedTime" : "2020-10-15T15:51:00Z",
       "sourceModifiedTime" : "2020-10-15T15:51:00Z",
       "indexedTime" : "2020-10-15T15:51:00Z",
@@ -50,7 +50,7 @@
       }
     },
     "data" : {
-      "title" : "title-35xO0fGSrU",
+      "title" : "title-uvBbFbQPNB",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -71,10 +71,10 @@
       ],
       "languages" : [
       ],
-      "edition" : "Special edition",
+      "edition" : null,
       "notes" : [
       ],
-      "duration" : 3600,
+      "duration" : null,
       "items" : [
       ],
       "holdings" : [
@@ -86,8 +86,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "xckp7yni",
-      "title" : "title-35xO0fGSrU",
+      "id" : "ihraob2r",
+      "title" : "title-uvBbFbQPNB",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -99,7 +99,7 @@
             "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "OJccsHbIrE",
+          "value" : "89wyJzS2Su",
           "type" : "Identifier"
         }
       ],
@@ -117,10 +117,8 @@
       ],
       "languages" : [
       ],
-      "edition" : "Special edition",
       "notes" : [
       ],
-      "duration" : 3600,
       "images" : [
       ],
       "parts" : [

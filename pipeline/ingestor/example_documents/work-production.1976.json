@@ -1,7 +1,7 @@
 {
-  "description" : "a work with optional top-level fields",
-  "createdAt" : "2022-04-28T16:21:22.794Z",
-  "id" : "xckp7yni",
+  "description" : "a work with a production event in 1976",
+  "createdAt" : "2022-04-28T16:21:22.864Z",
+  "id" : "yzum5kot",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,9 +10,9 @@
             "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "OJccsHbIrE"
+          "value" : "Ne2izyk21m"
         },
-        "version" : 68,
+        "version" : 32,
         "modifiedTime" : "2020-10-15T15:51:00Z"
       },
       "mergedTime" : "2020-10-15T15:51:00Z",
@@ -26,9 +26,9 @@
           "id" : "calm-record-id"
         },
         "ontologyType" : "Work",
-        "value" : "OJccsHbIrE"
+        "value" : "Ne2izyk21m"
       },
-      "canonicalId" : "xckp7yni",
+      "canonicalId" : "yzum5kot",
       "mergedTime" : "2020-10-15T15:51:00Z",
       "sourceModifiedTime" : "2020-10-15T15:51:00Z",
       "indexedTime" : "2020-10-15T15:51:00Z",
@@ -50,7 +50,7 @@
       }
     },
     "data" : {
-      "title" : "title-35xO0fGSrU",
+      "title" : "Production event in 1976",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -68,13 +68,34 @@
       ],
       "thumbnail" : null,
       "production" : [
+        {
+          "label" : "vJGhUpyx4i0G1GVno9IboNJsc",
+          "places" : [
+          ],
+          "agents" : [
+          ],
+          "dates" : [
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "1976",
+              "range" : {
+                "from" : "1976-01-01T00:00:00Z",
+                "to" : "1976-12-31T23:59:59.999999999Z",
+                "label" : "1976"
+              }
+            }
+          ],
+          "function" : null
+        }
       ],
       "languages" : [
       ],
-      "edition" : "Special edition",
+      "edition" : null,
       "notes" : [
       ],
-      "duration" : 3600,
+      "duration" : null,
       "items" : [
       ],
       "holdings" : [
@@ -86,8 +107,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "xckp7yni",
-      "title" : "title-35xO0fGSrU",
+      "id" : "yzum5kot",
+      "title" : "Production event in 1976",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -99,7 +120,7 @@
             "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "OJccsHbIrE",
+          "value" : "Ne2izyk21m",
           "type" : "Identifier"
         }
       ],
@@ -114,13 +135,25 @@
       "availabilities" : [
       ],
       "production" : [
+        {
+          "label" : "vJGhUpyx4i0G1GVno9IboNJsc",
+          "places" : [
+          ],
+          "agents" : [
+          ],
+          "dates" : [
+            {
+              "label" : "1976",
+              "type" : "Period"
+            }
+          ],
+          "type" : "ProductionEvent"
+        }
       ],
       "languages" : [
       ],
-      "edition" : "Special edition",
       "notes" : [
       ],
-      "duration" : 3600,
       "images" : [
       ],
       "parts" : [

@@ -1,0 +1,64 @@
+{
+  "description" : "an arbitrary list of redirected works",
+  "createdAt" : "2022-04-28T16:21:22.776Z",
+  "id" : "iyop2wz6",
+  "document" : {
+    "debug" : {
+      "source" : {
+        "identifier" : {
+          "identifierType" : {
+            "id" : "sierra-system-number"
+          },
+          "ontologyType" : "Work",
+          "value" : "KN0hZKzaPc"
+        },
+        "version" : 75,
+        "modifiedTime" : "2020-10-15T15:51:00Z"
+      },
+      "mergedTime" : "2020-10-15T15:51:00Z",
+      "indexedTime" : "2020-10-15T15:51:00Z"
+    },
+    "state" : {
+      "sourceIdentifier" : {
+        "identifierType" : {
+          "id" : "sierra-system-number"
+        },
+        "ontologyType" : "Work",
+        "value" : "KN0hZKzaPc"
+      },
+      "canonicalId" : "iyop2wz6",
+      "mergedTime" : "2020-10-15T15:51:00Z",
+      "sourceModifiedTime" : "2020-10-15T15:51:00Z",
+      "indexedTime" : "2020-10-15T15:51:00Z",
+      "availabilities" : [
+      ],
+      "derivedData" : {
+        "contributorAgents" : [
+        ]
+      },
+      "relations" : {
+        "ancestors" : [
+        ],
+        "children" : [
+        ],
+        "siblingsPreceding" : [
+        ],
+        "siblingsSucceeding" : [
+        ]
+      }
+    },
+    "redirectTarget" : {
+      "canonicalId" : "d0v8n5yz",
+      "sourceIdentifier" : {
+        "identifierType" : {
+          "id" : "miro-image-number"
+        },
+        "ontologyType" : "Work",
+        "value" : "MV6kIx0Ngq"
+      },
+      "otherIdentifiers" : [
+      ]
+    },
+    "type" : "Redirected"
+  }
+}

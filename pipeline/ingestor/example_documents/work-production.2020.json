@@ -1,18 +1,18 @@
 {
-  "description" : "an arbitrary list of works",
-  "createdAt" : "2022-04-28T15:56:09.497Z",
-  "id" : "vbi1ii19",
+  "description" : "a work with a production event in 2020",
+  "createdAt" : "2022-04-28T16:21:22.868Z",
+  "id" : "pr8zhydf",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "CzLNHBFHuR"
+          "value" : "9ELdlCtGqZ"
         },
-        "version" : 24,
+        "version" : 83,
         "modifiedTime" : "2020-10-15T15:51:00Z"
       },
       "mergedTime" : "2020-10-15T15:51:00Z",
@@ -23,12 +23,12 @@
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "miro-image-number"
+          "id" : "sierra-system-number"
         },
         "ontologyType" : "Work",
-        "value" : "CzLNHBFHuR"
+        "value" : "9ELdlCtGqZ"
       },
-      "canonicalId" : "vbi1ii19",
+      "canonicalId" : "pr8zhydf",
       "mergedTime" : "2020-10-15T15:51:00Z",
       "sourceModifiedTime" : "2020-10-15T15:51:00Z",
       "indexedTime" : "2020-10-15T15:51:00Z",
@@ -50,7 +50,7 @@
       }
     },
     "data" : {
-      "title" : "title-WjGGR8UNWu",
+      "title" : "Production event in 2020",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -68,6 +68,27 @@
       ],
       "thumbnail" : null,
       "production" : [
+        {
+          "label" : "Z0fUcriyrGi17wLXPxOIfqX1o",
+          "places" : [
+          ],
+          "agents" : [
+          ],
+          "dates" : [
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "2020",
+              "range" : {
+                "from" : "2020-01-01T00:00:00Z",
+                "to" : "2020-12-31T23:59:59.999999999Z",
+                "label" : "2020"
+              }
+            }
+          ],
+          "function" : null
+        }
       ],
       "languages" : [
       ],
@@ -86,8 +107,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "vbi1ii19",
-      "title" : "title-WjGGR8UNWu",
+      "id" : "pr8zhydf",
+      "title" : "Production event in 2020",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -95,11 +116,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "CzLNHBFHuR",
+          "value" : "9ELdlCtGqZ",
           "type" : "Identifier"
         }
       ],
@@ -114,6 +135,20 @@
       "availabilities" : [
       ],
       "production" : [
+        {
+          "label" : "Z0fUcriyrGi17wLXPxOIfqX1o",
+          "places" : [
+          ],
+          "agents" : [
+          ],
+          "dates" : [
+            {
+              "label" : "2020",
+              "type" : "Period"
+            }
+          ],
+          "type" : "ProductionEvent"
+        }
       ],
       "languages" : [
       ],

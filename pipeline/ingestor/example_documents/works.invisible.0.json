@@ -1,34 +1,34 @@
 {
-  "description" : "a work with optional top-level fields",
-  "createdAt" : "2022-04-28T16:21:22.794Z",
-  "id" : "xckp7yni",
+  "description" : "an arbitrary list of invisible works",
+  "createdAt" : "2022-04-28T16:21:22.764Z",
+  "id" : "fixxlrcz",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "OJccsHbIrE"
+          "value" : "prf0oY4unj"
         },
-        "version" : 68,
+        "version" : 82,
         "modifiedTime" : "2020-10-15T15:51:00Z"
       },
       "mergedTime" : "2020-10-15T15:51:00Z",
       "indexedTime" : "2020-10-15T15:51:00Z",
-      "redirectSources" : [
+      "invisibilityReasons" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "calm-record-id"
+          "id" : "sierra-system-number"
         },
         "ontologyType" : "Work",
-        "value" : "OJccsHbIrE"
+        "value" : "prf0oY4unj"
       },
-      "canonicalId" : "xckp7yni",
+      "canonicalId" : "fixxlrcz",
       "mergedTime" : "2020-10-15T15:51:00Z",
       "sourceModifiedTime" : "2020-10-15T15:51:00Z",
       "indexedTime" : "2020-10-15T15:51:00Z",
@@ -50,7 +50,7 @@
       }
     },
     "data" : {
-      "title" : "title-35xO0fGSrU",
+      "title" : "title-EKoCX5hLVI",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -71,10 +71,10 @@
       ],
       "languages" : [
       ],
-      "edition" : "Special edition",
+      "edition" : null,
       "notes" : [
       ],
-      "duration" : 3600,
+      "duration" : null,
       "items" : [
       ],
       "holdings" : [
@@ -85,54 +85,6 @@
       ],
       "workType" : "Standard"
     },
-    "display" : {
-      "id" : "xckp7yni",
-      "title" : "title-35xO0fGSrU",
-      "alternativeTitles" : [
-      ],
-      "contributors" : [
-      ],
-      "identifiers" : [
-        {
-          "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
-            "type" : "IdentifierType"
-          },
-          "value" : "OJccsHbIrE",
-          "type" : "Identifier"
-        }
-      ],
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "availabilities" : [
-      ],
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : "Special edition",
-      "notes" : [
-      ],
-      "duration" : 3600,
-      "images" : [
-      ],
-      "parts" : [
-      ],
-      "partOf" : [
-      ],
-      "precededBy" : [
-      ],
-      "succeededBy" : [
-      ],
-      "type" : "Work"
-    },
-    "type" : "Visible"
+    "type" : "Invisible"
   }
 }
