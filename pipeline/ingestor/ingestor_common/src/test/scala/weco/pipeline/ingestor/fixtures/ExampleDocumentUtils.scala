@@ -10,7 +10,7 @@ import java.time.Instant
 import scala.util.Random
 
 trait ExampleDocumentUtils extends RandomGenerators {
-  case class SyntheticDocument(description: String, createdAt: Instant = Instant.now(), id: String, document: Json)
+  case class ExampleDocument(description: String, createdAt: Instant = Instant.now(), id: String, document: Json)
 
   override protected lazy val random: Random =
     new Random(0)
@@ -34,7 +34,7 @@ trait ExampleDocumentUtils extends RandomGenerators {
 
   writeReadme()
 
-  def saveDocuments(fixtures: List[(String, SyntheticDocument)]): Unit =
+  def saveDocuments(fixtures: Seq[(String, ExampleDocument)]): Unit =
     fixtures.foreach { case (id, fixture) =>
       val file = new File(s"pipeline/ingestor/example_documents/$id.json")
       val pw = new PrintWriter(file)
