@@ -1,7 +1,7 @@
 {
   "description" : "an arbitrary list of works",
-  "createdAt" : "2022-04-28T15:50:54.544Z",
-  "id" : "7sjip63h",
+  "createdAt" : "2022-04-28T15:52:53.712Z",
+  "id" : "v1ndph7s",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,12 +10,12 @@
             "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "ejTwv1NdpH"
+          "value" : "uKSWpBejTw"
         },
-        "version" : 63,
-        "modifiedTime" : "2022-04-05T03:07:12Z"
+        "version" : 52,
+        "modifiedTime" : "2020-10-15T15:51:00Z"
       },
-      "mergedTime" : "2022-04-05T03:07:12Z",
+      "mergedTime" : "2020-10-15T15:51:00Z",
       "indexedTime" : "2020-10-15T15:51:00Z",
       "redirectSources" : [
       ]
@@ -26,12 +26,12 @@
           "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "ejTwv1NdpH"
+        "value" : "uKSWpBejTw"
       },
-      "canonicalId" : "7sjip63h",
-      "mergedTime" : "2022-04-05T03:07:12Z",
-      "sourceModifiedTime" : "2022-04-05T03:07:12Z",
-      "indexedTime" : "2022-04-28T15:50:54.540Z",
+      "canonicalId" : "v1ndph7s",
+      "mergedTime" : "2020-10-15T15:51:00Z",
+      "sourceModifiedTime" : "2020-10-15T15:51:00Z",
+      "indexedTime" : "2022-04-28T15:52:53.709Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -50,7 +50,7 @@
       }
     },
     "data" : {
-      "title" : "title-dgZfc8BAUa",
+      "title" : "title-jiP63hvGdg",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -86,8 +86,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "7sjip63h",
-      "title" : "title-dgZfc8BAUa",
+      "id" : "v1ndph7s",
+      "title" : "title-jiP63hvGdg",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -99,7 +99,7 @@
             "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "ejTwv1NdpH",
+          "value" : "uKSWpBejTw",
           "type" : "Identifier"
         }
       ],

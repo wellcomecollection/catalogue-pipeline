@@ -1,21 +1,21 @@
 {
   "description" : "an arbitrary list of works",
-  "createdAt" : "2022-04-28T15:50:54.540Z",
-  "id" : "ob2ruvbb",
+  "createdAt" : "2022-04-28T15:52:53.709Z",
+  "id" : "ihraob2r",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "JzS2SuiHrA"
+          "value" : "89wyJzS2Su"
         },
-        "version" : 24,
-        "modifiedTime" : "2022-05-28T08:33:30Z"
+        "version" : 42,
+        "modifiedTime" : "2020-10-15T15:51:00Z"
       },
-      "mergedTime" : "2022-05-28T08:33:30Z",
+      "mergedTime" : "2020-10-15T15:51:00Z",
       "indexedTime" : "2020-10-15T15:51:00Z",
       "redirectSources" : [
       ]
@@ -23,15 +23,15 @@
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "miro-image-number"
+          "id" : "calm-record-id"
         },
         "ontologyType" : "Work",
-        "value" : "JzS2SuiHrA"
+        "value" : "89wyJzS2Su"
       },
-      "canonicalId" : "ob2ruvbb",
-      "mergedTime" : "2022-05-28T08:33:30Z",
-      "sourceModifiedTime" : "2022-05-28T08:33:30Z",
-      "indexedTime" : "2022-04-28T15:50:54.536Z",
+      "canonicalId" : "ihraob2r",
+      "mergedTime" : "2020-10-15T15:51:00Z",
+      "sourceModifiedTime" : "2020-10-15T15:51:00Z",
+      "indexedTime" : "2022-04-28T15:52:53.706Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -50,7 +50,7 @@
       }
     },
     "data" : {
-      "title" : "title-QPNB7ZuKSW",
+      "title" : "title-uvBbFbQPNB",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -86,8 +86,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "ob2ruvbb",
-      "title" : "title-QPNB7ZuKSW",
+      "id" : "ihraob2r",
+      "title" : "title-uvBbFbQPNB",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -95,11 +95,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "JzS2SuiHrA",
+          "value" : "89wyJzS2Su",
           "type" : "Identifier"
         }
       ],

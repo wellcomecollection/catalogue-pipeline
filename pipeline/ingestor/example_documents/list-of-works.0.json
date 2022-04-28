@@ -1,6 +1,6 @@
 {
   "description" : "an arbitrary list of works",
-  "createdAt" : "2022-04-28T15:50:54.531Z",
+  "createdAt" : "2022-04-28T15:52:53.702Z",
   "id" : "vbi1ii19",
   "document" : {
     "debug" : {
@@ -12,10 +12,10 @@
           "ontologyType" : "Work",
           "value" : "CzLNHBFHuR"
         },
-        "version" : 46,
-        "modifiedTime" : "2022-04-18T21:40:30Z"
+        "version" : 24,
+        "modifiedTime" : "2020-10-15T15:51:00Z"
       },
-      "mergedTime" : "2022-04-18T21:40:30Z",
+      "mergedTime" : "2020-10-15T15:51:00Z",
       "indexedTime" : "2020-10-15T15:51:00Z",
       "redirectSources" : [
       ]
@@ -29,9 +29,9 @@
         "value" : "CzLNHBFHuR"
       },
       "canonicalId" : "vbi1ii19",
-      "mergedTime" : "2022-04-18T21:40:30Z",
-      "sourceModifiedTime" : "2022-04-18T21:40:30Z",
-      "indexedTime" : "2022-04-28T15:50:53.878Z",
+      "mergedTime" : "2020-10-15T15:51:00Z",
+      "sourceModifiedTime" : "2020-10-15T15:51:00Z",
+      "indexedTime" : "2022-04-28T15:52:53.169Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -50,7 +50,7 @@
       }
     },
     "data" : {
-      "title" : "title-GGR8UNWutF",
+      "title" : "title-WjGGR8UNWu",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -87,7 +87,7 @@
     },
     "display" : {
       "id" : "vbi1ii19",
-      "title" : "title-GGR8UNWutF",
+      "title" : "title-WjGGR8UNWu",
       "alternativeTitles" : [
       ],
       "contributors" : [
