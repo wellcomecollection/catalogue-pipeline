@@ -4,22 +4,22 @@ import io.circe.syntax._
 import weco.catalogue.display_model.work.DisplayWork
 import weco.catalogue.internal_model.work.WorkState.{Denormalised, Indexed}
 import weco.catalogue.internal_model.work.Work
-import weco.pipeline.ingestor.works.models.{
-  DebugInformation,
-  IndexedWork,
-  SourceWorkDebugInformation
-}
+import weco.pipeline.ingestor.works.models.{DebugInformation, IndexedWork, SourceWorkDebugInformation}
 import weco.catalogue.display_model.Implicits._
 
-object WorkTransformer {
+import java.time.Instant
+
+trait WorkTransformer {
   val deriveData: Work[Denormalised] => IndexedWork =
     work => {
+      val mergedTime = work.state.mergedTime
+      val indexedTime = getIndexedTime
       val indexedWork = work.transition[Indexed]()
 
       val source = SourceWorkDebugInformation(
-        identifier = indexedWork.state.sourceIdentifier,
-        version = indexedWork.version,
-        modifiedTime = indexedWork.state.sourceModifiedTime
+        identifier = work.state.sourceIdentifier,
+        version = work.version,
+        modifiedTime = work.state.sourceModifiedTime
       )
 
       indexedWork match {
@@ -27,8 +27,8 @@ object WorkTransformer {
           IndexedWork.Visible(
             debug = DebugInformation.Visible(
               source = source,
-              mergedTime = indexedWork.state.mergedTime,
-              indexedTime = indexedWork.state.indexedTime,
+              mergedTime = mergedTime,
+              indexedTime = indexedTime,
               redirectSources = redirectSources
             ),
             state = state,
@@ -40,8 +40,8 @@ object WorkTransformer {
           IndexedWork.Invisible(
             debug = DebugInformation.Invisible(
               source = source,
-              mergedTime = indexedWork.state.mergedTime,
-              indexedTime = indexedWork.state.indexedTime,
+              mergedTime = mergedTime,
+              indexedTime = indexedTime,
               invisibilityReasons = invisibilityReasons
             ),
             state = state,
@@ -52,8 +52,8 @@ object WorkTransformer {
           IndexedWork.Redirected(
             debug = DebugInformation.Redirected(
               source = source,
-              mergedTime = indexedWork.state.mergedTime,
-              indexedTime = indexedWork.state.indexedTime,
+              mergedTime = mergedTime,
+              indexedTime = indexedTime,
             ),
             state = state,
             redirectTarget = redirectTarget
@@ -63,12 +63,20 @@ object WorkTransformer {
           IndexedWork.Deleted(
             debug = DebugInformation.Deleted(
               source = source,
-              mergedTime = indexedWork.state.mergedTime,
-              indexedTime = indexedWork.state.indexedTime,
+              mergedTime = mergedTime,
+              indexedTime = indexedTime,
               deletedReason = deletedReason
             ),
             state = state
           )
       }
     }
+
+  // This is a def rather than an inline call so we can override it in the
+  // tests; in particular we want it to be deterministic when we're creating
+  // example documents to send to the API repo.
+  protected def getIndexedTime: Instant =
+    Instant.now()
 }
+
+object WorkTransformer extends WorkTransformer
