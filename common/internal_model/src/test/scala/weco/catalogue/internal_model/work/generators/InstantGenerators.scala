@@ -1,15 +1,15 @@
 package weco.catalogue.internal_model.work.generators
 
 import weco.catalogue.internal_model.work.InstantRange
-import java.time.{Instant, LocalDateTime}
 
+import java.time.{Instant, LocalDateTime}
 import org.scalacheck.Arbitrary
 import org.scalacheck.Gen.chooseNum
+import weco.fixtures.RandomGenerators
 
 import scala.concurrent.duration._
-import scala.util.Random
 
-trait InstantGenerators {
+trait InstantGenerators extends RandomGenerators {
 
   // We use this for the scalacheck of the java.time.Instant type
   // We could just import the library, but I might wait until we need more
@@ -41,7 +41,7 @@ trait InstantGenerators {
   )
 
   def randomInstantBefore(max: Instant, maxBefore: FiniteDuration) =
-    max - ((Random.nextLong() % maxBefore.toSeconds) seconds)
+    max - ((random.nextLong() % maxBefore.toSeconds) seconds)
 
   def instantInLast30Days = randomInstantBefore(now, 30 days)
 
