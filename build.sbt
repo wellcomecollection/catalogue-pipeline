@@ -96,13 +96,13 @@ lazy val ingestor_common = setupProject(
 lazy val ingestor_works = setupProject(
   project,
   "pipeline/ingestor/ingestor_works",
-  localDependencies = Seq(ingestor_common)
+  localDependencies = Seq(ingestor_common, display_model)
 )
 
 lazy val ingestor_images = setupProject(
   project,
   "pipeline/ingestor/ingestor_images",
-  localDependencies = Seq(ingestor_common)
+  localDependencies = Seq(ingestor_common, display_model)
 )
 
 lazy val matcher = setupProject(

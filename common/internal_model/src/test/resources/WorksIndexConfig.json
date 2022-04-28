@@ -946,34 +946,17 @@
         },
         "dynamic" : "false"
       },
-      "invisibilityReasons" : {
-        "type" : "object",
-        "properties" : {
-          "type" : {
-            "type" : "keyword"
-          }
-        },
-        "dynamic" : "false"
-      },
-      "deletedReason" : {
-        "type" : "object",
-        "properties" : {
-          "type" : {
-            "type" : "keyword"
-          }
-        },
-        "dynamic" : "false"
-      },
       "redirectTarget" : {
         "type" : "object",
         "dynamic" : "false"
       },
-      "redirectSources" : {
+      "debug" : {
         "type" : "object",
-        "dynamic" : "false"
+        "enabled": false
       },
-      "version" : {
-        "type" : "integer"
+      "display" : {
+        "type" : "object",
+        "enabled": false
       }
     }
   }

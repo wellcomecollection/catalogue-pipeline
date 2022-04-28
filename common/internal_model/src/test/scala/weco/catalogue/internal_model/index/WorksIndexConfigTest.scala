@@ -13,12 +13,6 @@ import org.scalatest.Assertion
 import weco.json.utils.JsonAssertions
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.generators.ImageGenerators
-import weco.catalogue.internal_model.identifiers.IdState
-import weco.catalogue.internal_model.locations.{
-  AccessCondition,
-  AccessMethod,
-  AccessStatus
-}
 import weco.catalogue.internal_model.work._
 import weco.catalogue.internal_model.work.generators.WorkGenerators
 import weco.json.JsonUtil._
@@ -44,7 +38,6 @@ class WorksIndexConfigTest
   implicit val noShrinkDenormalised =
     Shrink.shrinkAny[Work[WorkState.Denormalised]]
   implicit val noShrinkIdentified = Shrink.shrinkAny[Work[WorkState.Identified]]
-  implicit val noShrinkIndexed = Shrink.shrinkAny[Work[WorkState.Indexed]]
 
   implicit val badObjectEncoder: Encoder[BadTestObject] = deriveEncoder
 
@@ -84,85 +77,6 @@ class WorksIndexConfigTest
           }
       }
     }
-
-    it("WorkState.Indexed") {
-      withLocalElasticsearchIndex(config = WorksIndexConfig.indexed) {
-        implicit index =>
-          forAll { indexedWork: Work[WorkState.Indexed] =>
-            assertWorkCanBeIndexed(indexedWork)
-          }
-      }
-    }
-  }
-
-  // Possibly because the number of variations in the work model is too big,
-  // a bug in the mapping related to person subjects wasn't caught by the above test.
-  // So let's add a specific one
-  it("puts a work with a person subject") {
-    val workWithSubjects = indexedWork().subjects(
-      List(
-        Subject(
-          id = IdState.Unidentifiable,
-          label = "Daredevil",
-          concepts = List(
-            Person(
-              id = IdState.Unidentifiable,
-              label = "Daredevil",
-              prefix = Some("Superhero"),
-              numeration = Some("I")
-            )
-          )
-        )
-      )
-    )
-
-    withLocalWorksIndex { implicit index =>
-      assertWorkCanBeIndexed(workWithSubjects)
-    }
-  }
-
-  // Possibly because the number of variations in the work model is too big,
-  // a bug in the mapping related to accessConditions wasn't caught by the catch-all test above.
-  it("puts a work with a access condition") {
-    val accessCondition: AccessCondition = AccessCondition(
-      method = AccessMethod.OnlineRequest,
-      status = AccessStatus.Open)
-
-    val workWithAccessConditions = indexedWork().items(
-      List(createIdentifiedItemWith(locations = List(
-        createDigitalLocationWith(accessConditions = List(accessCondition))))))
-
-    withLocalWorksIndex { implicit index =>
-      assertWorkCanBeIndexed(workWithAccessConditions)
-    }
-  }
-
-  // Because we use copy_to and some other index functionality
-  // the potentially fails at PUT index time, we urn this test
-  // e.g. copy_to was previously set to `collection.depth`
-  // which would not work as the mapping is strict and `collection`
-  // only exists at the `data.collectionPath` level
-  it("puts a work with a collection") {
-    val collectionPath = CollectionPath(
-      path = "PATH/FOR/THE/COLLECTION",
-      label = Some("PATH/FOR/THE/COLLECTION")
-    )
-
-    val work = indexedWork().collectionPath(collectionPath)
-
-    withLocalWorksIndex { implicit index =>
-      assertWorkCanBeIndexed(work)
-    }
-  }
-
-  it("can ingest a work with an image") {
-    val workWithImage = indexedWork().imageData(
-      List(createImageData.toIdentified)
-    )
-
-    withLocalWorksIndex { implicit index =>
-      assertWorkCanBeIndexed(workWithImage)
-    }
   }
 
   it("does not put an invalid work") {
@@ -184,7 +98,12 @@ class WorksIndexConfigTest
     client: ElasticClient = elasticClient)(implicit index: Index,
                                            decoder: Decoder[W],
                                            encoder: Encoder[W]): Assertion = {
-    indexWork(client, id = work.state.id, work = work)
+    val response = indexWork(client, id = work.state.id, work = work)
+
+    if (response.isError) {
+      println(s"Error indexing work ${work.state.id}: ${response.error}")
+    }
+
     assertWorkIsIndexed(client, id = work.state.id, work = work)
   }
 
