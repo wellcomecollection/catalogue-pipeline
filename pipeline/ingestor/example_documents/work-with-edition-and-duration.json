@@ -1,6 +1,6 @@
 {
   "description" : "a work with optional top-level fields",
-  "createdAt" : "2022-04-28T15:52:53.763Z",
+  "createdAt" : "2022-04-28T15:53:47.748Z",
   "id" : "fixxlrcz",
   "document" : {
     "debug" : {
@@ -31,7 +31,7 @@
       "canonicalId" : "fixxlrcz",
       "mergedTime" : "2020-10-15T15:51:00Z",
       "sourceModifiedTime" : "2020-10-15T15:51:00Z",
-      "indexedTime" : "2022-04-28T15:52:53.760Z",
+      "indexedTime" : "2022-04-28T15:53:47.745Z",
       "availabilities" : [
       ],
       "derivedData" : {
