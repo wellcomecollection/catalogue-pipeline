@@ -15,7 +15,6 @@ import weco.catalogue.internal_model.work.WorkState._
 import weco.catalogue.internal_model.work._
 
 import java.time.Instant
-import scala.util.Random
 
 trait WorkGenerators
     extends IdentifiersGenerators
@@ -23,7 +22,7 @@ trait WorkGenerators
     with LanguageGenerators {
 
   private def createVersion: Int =
-    Random.nextInt(100) + 1
+    random.nextInt(100) + 1
 
   // To avoid having to specify a created date, it's handy having a default used in tests.
   // We can't use `Instant.now` as a default because that introduces all sorts of flakyness and race conditions.
@@ -110,7 +109,7 @@ trait WorkGenerators
         canonicalId = canonicalId,
         mergedTime = mergedTime,
         sourceModifiedTime = mergedTime,
-        indexedTime = Instant.now(),
+        indexedTime = randomInstant,
         availabilities = Availabilities.forWorkData(data),
         derivedData = DerivedWorkData(data),
         relations = relations
