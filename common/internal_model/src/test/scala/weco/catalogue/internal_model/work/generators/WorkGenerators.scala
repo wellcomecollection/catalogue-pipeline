@@ -109,7 +109,7 @@ trait WorkGenerators
         canonicalId = canonicalId,
         mergedTime = mergedTime,
         sourceModifiedTime = mergedTime,
-        indexedTime = Instant.now(),
+        indexedTime = randomInstant,
         availabilities = Availabilities.forWorkData(data),
         derivedData = DerivedWorkData(data),
         relations = relations
