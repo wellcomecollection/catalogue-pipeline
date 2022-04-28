@@ -1,7 +1,7 @@
 {
   "description" : "an arbitrary list of works",
-  "createdAt" : "2022-04-28T15:34:39.911Z",
-  "id" : "suihraob",
+  "createdAt" : "2022-04-28T15:42:31.124Z",
+  "id" : "ob2ruvbb",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,13 +10,13 @@
             "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "r589wyJzS2"
+          "value" : "JzS2SuiHrA"
         },
-        "version" : 35,
-        "modifiedTime" : "2022-05-17T12:31:39Z"
+        "version" : 24,
+        "modifiedTime" : "2022-05-28T08:25:07Z"
       },
-      "mergedTime" : "2022-05-17T12:31:39Z",
-      "indexedTime" : "2022-04-28T15:34:39.908Z",
+      "mergedTime" : "2022-05-28T08:25:07Z",
+      "indexedTime" : "2022-04-28T15:42:31.121Z",
       "redirectSources" : [
       ]
     },
@@ -26,12 +26,12 @@
           "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "r589wyJzS2"
+        "value" : "JzS2SuiHrA"
       },
-      "canonicalId" : "suihraob",
-      "mergedTime" : "2022-05-17T12:31:39Z",
-      "sourceModifiedTime" : "2022-05-17T12:31:39Z",
-      "indexedTime" : "2022-04-28T15:34:39.908Z",
+      "canonicalId" : "ob2ruvbb",
+      "mergedTime" : "2022-05-28T08:25:07Z",
+      "sourceModifiedTime" : "2022-05-28T08:25:07Z",
+      "indexedTime" : "2022-04-28T15:42:31.121Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -50,7 +50,7 @@
       }
     },
     "data" : {
-      "title" : "title-2RuvBbFbQP",
+      "title" : "title-QPNB7ZuKSW",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -86,8 +86,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "suihraob",
-      "title" : "title-2RuvBbFbQP",
+      "id" : "ob2ruvbb",
+      "title" : "title-QPNB7ZuKSW",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -99,7 +99,7 @@
             "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "r589wyJzS2",
+          "value" : "JzS2SuiHrA",
           "type" : "Identifier"
         }
       ],
