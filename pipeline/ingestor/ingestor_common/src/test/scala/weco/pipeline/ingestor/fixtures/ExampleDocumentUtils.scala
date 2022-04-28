@@ -11,7 +11,10 @@ import java.time.Instant
 import scala.util.{Random, Success}
 
 trait ExampleDocumentUtils extends InstantGenerators {
-  case class ExampleDocument(description: String, createdAt: Instant = Instant.now(), id: String, document: Json)
+  case class ExampleDocument(description: String,
+                             createdAt: Instant = Instant.now(),
+                             id: String,
+                             document: Json)
 
   override protected lazy val random: Random =
     new Random(0)
@@ -41,27 +44,33 @@ trait ExampleDocumentUtils extends InstantGenerators {
   writeReadme()
 
   def saveDocuments(documents: Seq[(String, ExampleDocument)]): Unit =
-    documents.foreach { case (id, doc) =>
-      val file = new File(s"pipeline/ingestor/example_documents/$id.json")
+    documents.foreach {
+      case (id, doc) =>
+        val file = new File(s"pipeline/ingestor/example_documents/$id.json")
 
-      val isAlreadyUpToDate =
-        if (file.exists()) {
-          val existingContents = FileUtils.readFileToString(file, "UTF-8")
+        val isAlreadyUpToDate =
+          if (file.exists()) {
+            val existingContents = FileUtils.readFileToString(file, "UTF-8")
 
-          fromJson[ExampleDocument](existingContents) match {
-            case Success(ExampleDocument(existingDescription, _, existingId, existingDocument)) =>
-              existingDescription == doc.description && existingId == doc.id && existingDocument == doc.document
+            fromJson[ExampleDocument](existingContents) match {
+              case Success(
+                  ExampleDocument(
+                    existingDescription,
+                    _,
+                    existingId,
+                    existingDocument)) =>
+                existingDescription == doc.description && existingId == doc.id && existingDocument == doc.document
 
-            case _ => false
+              case _ => false
+            }
+          } else {
+            false
           }
-        } else {
-          false
-        }
 
-      if (!isAlreadyUpToDate) {
-        val pw = new PrintWriter(file)
-        pw.write(doc.asJson.spaces2)
-        pw.close()
-      }
+        if (!isAlreadyUpToDate) {
+          val pw = new PrintWriter(file)
+          pw.write(doc.asJson.spaces2)
+          pw.close()
+        }
     }
 }

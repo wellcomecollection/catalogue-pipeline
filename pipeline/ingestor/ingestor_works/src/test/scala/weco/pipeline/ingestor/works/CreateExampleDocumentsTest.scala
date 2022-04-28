@@ -5,8 +5,17 @@ import io.circe.syntax._
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.IdState
-import weco.catalogue.internal_model.work.{InstantRange, Period, ProductionEvent, Work, WorkState}
-import weco.catalogue.internal_model.work.generators.{ItemsGenerators, WorkGenerators}
+import weco.catalogue.internal_model.work.{
+  InstantRange,
+  Period,
+  ProductionEvent,
+  Work,
+  WorkState
+}
+import weco.catalogue.internal_model.work.generators.{
+  ItemsGenerators,
+  WorkGenerators
+}
 import weco.json.JsonUtil._
 import weco.pipeline.ingestor.fixtures.ExampleDocumentUtils
 
@@ -33,7 +42,13 @@ trait PeriodGenerators {
   * regenerating existing examples and causing unnecessary churn in the API tests
   * when values change, I suggest adding new examples at the bottom of this file.
   */
-class CreateExampleDocumentsTest extends AnyFunSpec with Matchers with WorkGenerators with ItemsGenerators with PeriodGenerators with ExampleDocumentUtils {
+class CreateExampleDocumentsTest
+    extends AnyFunSpec
+    with Matchers
+    with WorkGenerators
+    with ItemsGenerators
+    with PeriodGenerators
+    with ExampleDocumentUtils {
   it("creates the example documents") {
     saveWorks(
       works = (1 to 5).map(_ => denormalisedWork()),
@@ -46,12 +61,14 @@ class CreateExampleDocumentsTest extends AnyFunSpec with Matchers with WorkGener
       id = "works.invisible"
     )
     saveWorks(
-      works = (1 to 2).map(_ => denormalisedWork().redirected(
-        redirectTarget = IdState.Identified(
-          canonicalId = createCanonicalId,
-          sourceIdentifier = createSourceIdentifier
-        )
-      )),
+      works = (1 to 2).map(
+        _ =>
+          denormalisedWork().redirected(
+            redirectTarget = IdState.Identified(
+              canonicalId = createCanonicalId,
+              sourceIdentifier = createSourceIdentifier
+            )
+        )),
       description = "an arbitrary list of redirected works",
       id = "works.redirected"
     )
@@ -129,14 +146,14 @@ class CreateExampleDocumentsTest extends AnyFunSpec with Matchers with WorkGener
         )
       )
     } else {
-      works
-        .zipWithIndex
-        .map { case (work, index) =>
-          s"$id.$index" -> ExampleDocument(
-            description,
-            id = work.id,
-            document = work.toDocument
-          )
+      works.zipWithIndex
+        .map {
+          case (work, index) =>
+            s"$id.$index" -> ExampleDocument(
+              description,
+              id = work.id,
+              document = work.toDocument
+            )
         }
     }
 
