@@ -16,10 +16,13 @@ object WorkTransformer {
     work => {
       val indexedWork = work.transition[Indexed]()
 
+      val mergedTime = work.state.mergedTime
+      val indexedTime = indexedWork.state.indexedTime
+
       val source = SourceWorkDebugInformation(
-        identifier = indexedWork.state.sourceIdentifier,
-        version = indexedWork.version,
-        modifiedTime = indexedWork.state.sourceModifiedTime
+        identifier = work.state.sourceIdentifier,
+        version = work.version,
+        modifiedTime = work.state.sourceModifiedTime
       )
 
       indexedWork match {
@@ -27,8 +30,8 @@ object WorkTransformer {
           IndexedWork.Visible(
             debug = DebugInformation.Visible(
               source = source,
-              mergedTime = indexedWork.state.mergedTime,
-              indexedTime = indexedWork.state.indexedTime,
+              mergedTime = mergedTime,
+              indexedTime = indexedTime,
               redirectSources = redirectSources
             ),
             state = state,
@@ -40,8 +43,8 @@ object WorkTransformer {
           IndexedWork.Invisible(
             debug = DebugInformation.Invisible(
               source = source,
-              mergedTime = indexedWork.state.mergedTime,
-              indexedTime = indexedWork.state.indexedTime,
+              mergedTime = mergedTime,
+              indexedTime = indexedTime,
               invisibilityReasons = invisibilityReasons
             ),
             state = state,
@@ -52,8 +55,8 @@ object WorkTransformer {
           IndexedWork.Redirected(
             debug = DebugInformation.Redirected(
               source = source,
-              mergedTime = indexedWork.state.mergedTime,
-              indexedTime = indexedWork.state.indexedTime,
+              mergedTime = mergedTime,
+              indexedTime = indexedTime,
             ),
             state = state,
             redirectTarget = redirectTarget
@@ -63,8 +66,8 @@ object WorkTransformer {
           IndexedWork.Deleted(
             debug = DebugInformation.Deleted(
               source = source,
-              mergedTime = indexedWork.state.mergedTime,
-              indexedTime = indexedWork.state.indexedTime,
+              mergedTime = mergedTime,
+              indexedTime = indexedTime,
               deletedReason = deletedReason
             ),
             state = state
