@@ -1,6 +1,6 @@
 {
-  "description" : "one of a list of works",
-  "createdAt" : "2022-04-28T15:24:30.120Z",
+  "description" : "an arbitrary list of works",
+  "createdAt" : "2022-04-28T15:34:39.916Z",
   "id" : "equ81tpb",
   "document" : {
     "debug" : {
@@ -12,11 +12,11 @@
           "ontologyType" : "Work",
           "value" : "dgZfc8BAUa"
         },
-        "version" : 95,
-        "modifiedTime" : "2022-05-11T21:42:35Z"
+        "version" : 1,
+        "modifiedTime" : "2022-05-08T06:22:52Z"
       },
-      "mergedTime" : "2022-05-11T21:42:35Z",
-      "indexedTime" : "2022-04-28T15:24:30.117Z",
+      "mergedTime" : "2022-05-08T06:22:52Z",
+      "indexedTime" : "2022-04-28T15:34:39.913Z",
       "redirectSources" : [
       ]
     },
@@ -29,9 +29,9 @@
         "value" : "dgZfc8BAUa"
       },
       "canonicalId" : "equ81tpb",
-      "mergedTime" : "2022-05-11T21:42:35Z",
-      "sourceModifiedTime" : "2022-05-11T21:42:35Z",
-      "indexedTime" : "2022-04-28T15:24:30.117Z",
+      "mergedTime" : "2022-05-08T06:22:52Z",
+      "sourceModifiedTime" : "2022-05-08T06:22:52Z",
+      "indexedTime" : "2022-04-28T15:34:39.913Z",
       "availabilities" : [
       ],
       "derivedData" : {

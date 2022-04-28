@@ -1,37 +1,37 @@
 {
-  "description" : "an arbitrary list of works",
-  "createdAt" : "2022-04-28T15:34:39.908Z",
-  "id" : "whfyqts0",
+  "description" : "a work with optional top-level fields",
+  "createdAt" : "2022-04-28T15:34:39.979Z",
+  "id" : "y4unjfix",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "FRZvWebpA5"
+          "value" : "Mzxd8prf0o"
         },
-        "version" : 35,
-        "modifiedTime" : "2022-04-15T05:42:07Z"
+        "version" : 72,
+        "modifiedTime" : "2022-05-08T05:43:34Z"
       },
-      "mergedTime" : "2022-04-15T05:42:07Z",
-      "indexedTime" : "2022-04-28T15:34:39.905Z",
+      "mergedTime" : "2022-05-08T05:43:34Z",
+      "indexedTime" : "2022-04-28T15:34:39.931Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "calm-record-id"
+          "id" : "sierra-system-number"
         },
         "ontologyType" : "Work",
-        "value" : "FRZvWebpA5"
+        "value" : "Mzxd8prf0o"
       },
-      "canonicalId" : "whfyqts0",
-      "mergedTime" : "2022-04-15T05:42:07Z",
-      "sourceModifiedTime" : "2022-04-15T05:42:07Z",
-      "indexedTime" : "2022-04-28T15:34:39.905Z",
+      "canonicalId" : "y4unjfix",
+      "mergedTime" : "2022-05-08T05:43:34Z",
+      "sourceModifiedTime" : "2022-05-08T05:43:34Z",
+      "indexedTime" : "2022-04-28T15:34:39.931Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -50,7 +50,7 @@
       }
     },
     "data" : {
-      "title" : "title-coJXQqPyux",
+      "title" : "title-xlrCzEKoCX",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -71,10 +71,10 @@
       ],
       "languages" : [
       ],
-      "edition" : null,
+      "edition" : "Special edition",
       "notes" : [
       ],
-      "duration" : null,
+      "duration" : 3600,
       "items" : [
       ],
       "holdings" : [
@@ -86,8 +86,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "whfyqts0",
-      "title" : "title-coJXQqPyux",
+      "id" : "y4unjfix",
+      "title" : "title-xlrCzEKoCX",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -95,11 +95,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "FRZvWebpA5",
+          "value" : "Mzxd8prf0o",
           "type" : "Identifier"
         }
       ],
@@ -117,8 +117,10 @@
       ],
       "languages" : [
       ],
+      "edition" : "Special edition",
       "notes" : [
       ],
+      "duration" : 3600,
       "images" : [
       ],
       "parts" : [
