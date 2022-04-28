@@ -1,6 +1,6 @@
 {
   "description" : "a work with optional top-level fields",
-  "createdAt" : "2022-04-28T15:45:30.640Z",
+  "createdAt" : "2022-04-28T15:50:54.612Z",
   "id" : "ocx5hlvi",
   "document" : {
     "debug" : {
@@ -13,10 +13,10 @@
           "value" : "FIXxlrCzEK"
         },
         "version" : 16,
-        "modifiedTime" : "2022-04-24T19:38:39Z"
+        "modifiedTime" : "2022-04-24T19:44:03Z"
       },
-      "mergedTime" : "2022-04-24T19:38:39Z",
-      "indexedTime" : "2022-04-28T15:45:30.593Z",
+      "mergedTime" : "2022-04-24T19:44:03Z",
+      "indexedTime" : "2020-10-15T15:51:00Z",
       "redirectSources" : [
       ]
     },
@@ -29,9 +29,9 @@
         "value" : "FIXxlrCzEK"
       },
       "canonicalId" : "ocx5hlvi",
-      "mergedTime" : "2022-04-24T19:38:39Z",
-      "sourceModifiedTime" : "2022-04-24T19:38:39Z",
-      "indexedTime" : "2022-04-28T15:45:30.593Z",
+      "mergedTime" : "2022-04-24T19:44:03Z",
+      "sourceModifiedTime" : "2022-04-24T19:44:03Z",
+      "indexedTime" : "2022-04-28T15:50:54.610Z",
       "availabilities" : [
       ],
       "derivedData" : {
