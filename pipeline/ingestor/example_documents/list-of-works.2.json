@@ -1,6 +1,6 @@
 {
   "description" : "an arbitrary list of works",
-  "createdAt" : "2022-04-28T15:42:31.124Z",
+  "createdAt" : "2022-04-28T15:45:30.544Z",
   "id" : "ob2ruvbb",
   "document" : {
     "debug" : {
@@ -13,10 +13,10 @@
           "value" : "JzS2SuiHrA"
         },
         "version" : 24,
-        "modifiedTime" : "2022-05-28T08:25:07Z"
+        "modifiedTime" : "2022-05-28T08:28:06Z"
       },
-      "mergedTime" : "2022-05-28T08:25:07Z",
-      "indexedTime" : "2022-04-28T15:42:31.121Z",
+      "mergedTime" : "2022-05-28T08:28:06Z",
+      "indexedTime" : "2022-04-28T15:45:30.542Z",
       "redirectSources" : [
       ]
     },
@@ -29,9 +29,9 @@
         "value" : "JzS2SuiHrA"
       },
       "canonicalId" : "ob2ruvbb",
-      "mergedTime" : "2022-05-28T08:25:07Z",
-      "sourceModifiedTime" : "2022-05-28T08:25:07Z",
-      "indexedTime" : "2022-04-28T15:42:31.121Z",
+      "mergedTime" : "2022-05-28T08:28:06Z",
+      "sourceModifiedTime" : "2022-05-28T08:28:06Z",
+      "indexedTime" : "2022-04-28T15:45:30.542Z",
       "availabilities" : [
       ],
       "derivedData" : {

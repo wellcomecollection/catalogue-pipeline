@@ -1,6 +1,6 @@
 {
   "description" : "an arbitrary list of works",
-  "createdAt" : "2022-04-28T15:42:31.127Z",
+  "createdAt" : "2022-04-28T15:45:30.547Z",
   "id" : "7sjip63h",
   "document" : {
     "debug" : {
@@ -13,10 +13,10 @@
           "value" : "ejTwv1NdpH"
         },
         "version" : 63,
-        "modifiedTime" : "2022-04-05T02:58:49Z"
+        "modifiedTime" : "2022-04-05T03:01:48Z"
       },
-      "mergedTime" : "2022-04-05T02:58:49Z",
-      "indexedTime" : "2022-04-28T15:42:31.124Z",
+      "mergedTime" : "2022-04-05T03:01:48Z",
+      "indexedTime" : "2022-04-28T15:45:30.544Z",
       "redirectSources" : [
       ]
     },
@@ -29,9 +29,9 @@
         "value" : "ejTwv1NdpH"
       },
       "canonicalId" : "7sjip63h",
-      "mergedTime" : "2022-04-05T02:58:49Z",
-      "sourceModifiedTime" : "2022-04-05T02:58:49Z",
-      "indexedTime" : "2022-04-28T15:42:31.124Z",
+      "mergedTime" : "2022-04-05T03:01:48Z",
+      "sourceModifiedTime" : "2022-04-05T03:01:48Z",
+      "indexedTime" : "2022-04-28T15:45:30.544Z",
       "availabilities" : [
       ],
       "derivedData" : {
