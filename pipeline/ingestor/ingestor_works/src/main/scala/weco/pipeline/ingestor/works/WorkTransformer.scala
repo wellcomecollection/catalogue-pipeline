@@ -25,8 +25,10 @@ object WorkTransformer {
         modifiedTime = work.state.sourceModifiedTime
       )
 
+      val state = indexedWork.state
+
       indexedWork match {
-        case w @ Work.Visible(_, data, state, redirectSources) =>
+        case w @ Work.Visible(_, data, _, redirectSources) =>
           IndexedWork.Visible(
             debug = DebugInformation.Visible(
               source = source,
@@ -39,7 +41,7 @@ object WorkTransformer {
             display = DisplayWork(w).asJson.deepDropNullValues
           )
 
-        case Work.Invisible(_, data, state, invisibilityReasons) =>
+        case Work.Invisible(_, data, _, invisibilityReasons) =>
           IndexedWork.Invisible(
             debug = DebugInformation.Invisible(
               source = source,
@@ -51,7 +53,7 @@ object WorkTransformer {
             data = data
           )
 
-        case Work.Redirected(_, redirectTarget, state) =>
+        case Work.Redirected(_, redirectTarget, _) =>
           IndexedWork.Redirected(
             debug = DebugInformation.Redirected(
               source = source,
@@ -62,7 +64,7 @@ object WorkTransformer {
             redirectTarget = redirectTarget
           )
 
-        case Work.Deleted(_, state, deletedReason) =>
+        case Work.Deleted(_, _, deletedReason) =>
           IndexedWork.Deleted(
             debug = DebugInformation.Deleted(
               source = source,
