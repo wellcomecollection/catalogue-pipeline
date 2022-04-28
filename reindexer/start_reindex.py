@@ -266,20 +266,13 @@ def start_reindexer_tasks(sess):
     """
     ecs_client = sess.client("ecs")
 
-    resp = ecs_client.describe_services(
-        cluster='reindexer',
-        services=['reindexer']
-    )
-    service = resp['services'][0]
+    resp = ecs_client.describe_services(cluster="reindexer", services=["reindexer"])
+    service = resp["services"][0]
 
-    if service['desiredCount'] >= 3:
+    if service["desiredCount"] >= 3:
         return
 
-    ecs_client.update_service(
-        cluster='reindexer',
-        service='reindexer',
-        desiredCount=3
-    )
+    ecs_client.update_service(cluster="reindexer", service="reindexer", desiredCount=3)
 
 
 if __name__ == "__main__":
