@@ -15,7 +15,22 @@ class CreateExampleDocumentsTest extends AnyFunSpec with Matchers with WorkGener
       description = "an arbitrary list of works",
       id = "list-of-works"
     )
+
+    saveWork(
+      work = denormalisedWork()
+        .edition("Special edition")
+        .duration(3600),
+      description = "a work with optional top-level fields",
+      id = "work-with-edition-and-duration"
+    )
   }
+
+  private def saveWork(
+    work: Work[WorkState.Denormalised],
+    description: String,
+    id: String
+  ): Unit =
+    saveWorks(works = List(work), description, id)
 
   private def saveWorks(
     works: List[Work[WorkState.Denormalised]],
