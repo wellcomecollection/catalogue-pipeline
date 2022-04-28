@@ -1,5 +1,6 @@
 package weco.pipeline.ingestor.works
 
+import io.circe.Json
 import io.circe.syntax._
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
@@ -7,6 +8,8 @@ import weco.catalogue.internal_model.work.{Work, WorkState}
 import weco.catalogue.internal_model.work.generators.WorkGenerators
 import weco.json.JsonUtil._
 import weco.pipeline.ingestor.fixtures.ExampleDocumentUtils
+
+import java.time.Instant
 
 class CreateExampleDocumentsTest extends AnyFunSpec with Matchers with WorkGenerators with ExampleDocumentUtils {
   it("creates the example documents") {
@@ -38,11 +41,13 @@ class CreateExampleDocumentsTest extends AnyFunSpec with Matchers with WorkGener
     id: String
   ): Unit = {
     val documents = if (works.length == 1) {
+      val work = works.head
+
       Seq(
         id -> ExampleDocument(
           description,
-          id = works.head.id,
-          document = WorkTransformer.deriveData(works.head).asJson
+          id = work.id,
+          document = work.toDocument
         )
       )
     } else {
@@ -52,11 +57,26 @@ class CreateExampleDocumentsTest extends AnyFunSpec with Matchers with WorkGener
           s"$id.$index" -> ExampleDocument(
             description,
             id = work.id,
-            document = WorkTransformer.deriveData(work).asJson
+            document = work.toDocument
           )
         }
     }
 
     saveDocuments(documents)
+  }
+
+  implicit class WorkOps(work: Work[WorkState.Denormalised]) {
+    def toDocument: Json = {
+      // This is a fixed date so we get consistent values in the indexedTime
+      // field in the generated documents.
+      val transformer = new WorkTransformer {
+        override protected def getIndexedTime: Instant = {
+          println(s"@@AWLC calling my getIndexedTime")
+          Instant.parse("2020-10-15T15:51:00.00Z")
+        }
+      }
+
+      transformer.deriveData(work).asJson
+    }
   }
 }

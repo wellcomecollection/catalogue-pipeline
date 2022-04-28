@@ -3,18 +3,23 @@ package weco.pipeline.ingestor.fixtures
 import io.circe.Json
 import io.circe.syntax._
 import org.apache.commons.io.FileUtils
-import weco.fixtures.RandomGenerators
+import weco.catalogue.internal_model.work.generators.InstantGenerators
 import weco.json.JsonUtil._
 
 import java.io.{File, PrintWriter}
 import java.time.Instant
 import scala.util.{Random, Success}
 
-trait ExampleDocumentUtils extends RandomGenerators {
+trait ExampleDocumentUtils extends InstantGenerators {
   case class ExampleDocument(description: String, createdAt: Instant = Instant.now(), id: String, document: Json)
 
   override protected lazy val random: Random =
     new Random(0)
+
+  // For the tests in which we'll be using these documents, we don't care about
+  // the actual value of these Instants; we just care that they're deterministic.
+  override def instantInLast30Days: Instant =
+    Instant.parse("2020-10-15T15:51:00.00Z")
 
   private def writeReadme(): Unit = {
     val file = new File("pipeline/ingestor/example_documents/README.md")
