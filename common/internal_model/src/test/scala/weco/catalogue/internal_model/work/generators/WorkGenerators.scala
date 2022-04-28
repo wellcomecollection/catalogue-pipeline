@@ -25,7 +25,7 @@ trait WorkGenerators
     random.nextInt(100) + 1
 
   // To avoid having to specify a created date, it's handy having a default used in tests.
-  // We can't use `Instant.now` as a default because that introduces all sorts of flakyness and race conditions.
+  // We can't use `Instant.now` as a default because that introduces all sorts of flakiness and race conditions.
   // So, we are introducing an arbitrary date here for convenience.
   val modifiedTime = Instant.parse("2020-10-15T15:51:00.00Z")
 
@@ -109,7 +109,7 @@ trait WorkGenerators
         canonicalId = canonicalId,
         mergedTime = mergedTime,
         sourceModifiedTime = mergedTime,
-        indexedTime = Instant.now(),
+        indexedTime = instantInLast30Days,
         availabilities = Availabilities.forWorkData(data),
         derivedData = DerivedWorkData(data),
         relations = relations
