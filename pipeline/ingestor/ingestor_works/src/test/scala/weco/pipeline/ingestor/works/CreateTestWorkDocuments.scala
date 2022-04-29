@@ -309,26 +309,27 @@ class CreateTestWorkDocuments extends AnyFunSpec with Matchers with WorkGenerato
     description: String,
     id: String
   ): Unit = {
-    val documents = if (works.length == 1) {
-      val work = works.head
 
-      Seq(
-        id -> ExampleDocument(
-          description,
-          id = work.id,
-          document = work.toDocument
-        )
-      )
-    } else {
-      works
-        .zipWithIndex
-        .map { case (work, index) =>
-          s"$id.$index" -> ExampleDocument(
+    val documents = works match {
+      case Seq(work) =>
+        Seq(
+          id -> ExampleDocument(
             description,
             id = work.id,
             document = work.toDocument
           )
-        }
+        )
+
+      case _ =>
+        works
+          .zipWithIndex
+          .map { case (work, index) =>
+            s"$id.$index" -> ExampleDocument(
+              description,
+              id = work.id,
+              document = work.toDocument
+            )
+          }
     }
 
     saveDocuments(documents)
@@ -340,7 +341,7 @@ class CreateTestWorkDocuments extends AnyFunSpec with Matchers with WorkGenerato
       // field in the generated documents.
       val transformer = new WorkTransformer {
         override protected def getIndexedTime: Instant =
-          Instant.parse("2020-10-15T15:51:00.00Z")
+          Instant.parse("2001-01-01T01:01:01.00Z")
       }
 
       transformer.deriveData(work).asJson
