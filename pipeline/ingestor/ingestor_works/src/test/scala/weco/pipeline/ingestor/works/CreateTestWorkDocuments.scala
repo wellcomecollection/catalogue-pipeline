@@ -304,7 +304,7 @@ class CreateTestWorkDocuments extends AnyFunSpec with Matchers with WorkGenerato
     val documents = works match {
       case Seq(work) =>
         Seq(
-          id -> ExampleDocument(
+          id -> TestDocument(
             description,
             id = work.id,
             document = work.toDocument
@@ -315,7 +315,7 @@ class CreateTestWorkDocuments extends AnyFunSpec with Matchers with WorkGenerato
         works
           .zipWithIndex
           .map { case (work, index) =>
-            s"$id.$index" -> ExampleDocument(
+            s"$id.$index" -> TestDocument(
               description,
               id = work.id,
               document = work.toDocument

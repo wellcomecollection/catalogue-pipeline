@@ -12,7 +12,7 @@ import java.time.Instant
 import scala.util.{Random, Success}
 
 trait TestDocumentUtils extends InstantGenerators with RandomGenerators {
-  case class ExampleDocument(description: String, createdAt: Instant = Instant.now(), id: String, document: Json)
+  case class TestDocument(description: String, createdAt: Instant = Instant.now(), id: String, document: Json)
 
   override protected lazy val random: Random =
     new Random(0)
@@ -41,7 +41,7 @@ trait TestDocumentUtils extends InstantGenerators with RandomGenerators {
 
   writeReadme()
 
-  def saveDocuments(documents: Seq[(String, ExampleDocument)]): Unit =
+  def saveDocuments(documents: Seq[(String, TestDocument)]): Unit =
     documents.foreach { case (id, doc) =>
       val file = new File(s"$testDocumentsRoot/$id.json")
 
@@ -53,8 +53,8 @@ trait TestDocumentUtils extends InstantGenerators with RandomGenerators {
         if (file.exists()) {
           val existingContents = FileUtils.readFileToString(file, "UTF-8")
 
-          fromJson[ExampleDocument](existingContents) match {
-            case Success(ExampleDocument(existingDescription, _, existingId, existingDocument)) =>
+          fromJson[TestDocument](existingContents) match {
+            case Success(TestDocument(existingDescription, _, existingId, existingDocument)) =>
               existingDescription == doc.description && existingId == doc.id && existingDocument == doc.document
 
             case _ => false
