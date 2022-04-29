@@ -12,7 +12,10 @@ import java.time.Instant
 import scala.util.{Random, Success}
 
 trait TestDocumentUtils extends InstantGenerators with RandomGenerators {
-  case class TestDocument(description: String, createdAt: Instant = Instant.now(), id: String, document: Json)
+  case class TestDocument(description: String,
+                          createdAt: Instant = Instant.now(),
+                          id: String,
+                          document: Json)
 
   override protected lazy val random: Random =
     new Random(0)
@@ -42,31 +45,37 @@ trait TestDocumentUtils extends InstantGenerators with RandomGenerators {
   writeReadme()
 
   def saveDocuments(documents: Seq[(String, TestDocument)]): Unit =
-    documents.foreach { case (id, doc) =>
-      val file = new File(s"$testDocumentsRoot/$id.json")
+    documents.foreach {
+      case (id, doc) =>
+        val file = new File(s"$testDocumentsRoot/$id.json")
 
-      // To avoid endless churn, check if an existing test document already exists.
-      //
-      // If it does, and the only difference is the date it was created, we don't need to
-      // recreate it here -- skip writing a new file.
-      val isAlreadyUpToDate =
-        if (file.exists()) {
-          val existingContents = FileUtils.readFileToString(file, "UTF-8")
+        // To avoid endless churn, check if an existing test document already exists.
+        //
+        // If it does, and the only difference is the date it was created, we don't need to
+        // recreate it here -- skip writing a new file.
+        val isAlreadyUpToDate =
+          if (file.exists()) {
+            val existingContents = FileUtils.readFileToString(file, "UTF-8")
 
-          fromJson[TestDocument](existingContents) match {
-            case Success(TestDocument(existingDescription, _, existingId, existingDocument)) =>
-              existingDescription == doc.description && existingId == doc.id && existingDocument == doc.document
+            fromJson[TestDocument](existingContents) match {
+              case Success(
+                  TestDocument(
+                    existingDescription,
+                    _,
+                    existingId,
+                    existingDocument)) =>
+                existingDescription == doc.description && existingId == doc.id && existingDocument == doc.document
 
-            case _ => false
+              case _ => false
+            }
+          } else {
+            false
           }
-        } else {
-          false
-        }
 
-      if (!isAlreadyUpToDate) {
-        val pw = new PrintWriter(file)
-        pw.write(doc.asJson.spaces2)
-        pw.close()
-      }
+        if (!isAlreadyUpToDate) {
+          val pw = new PrintWriter(file)
+          pw.write(doc.asJson.spaces2)
+          pw.close()
+        }
     }
 }

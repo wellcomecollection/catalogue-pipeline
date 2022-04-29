@@ -16,16 +16,29 @@ import weco.pipeline.ingestor.fixtures.TestDocumentUtils
 import java.time.Instant
 
 /** Creates the example documents we use in the API tests.
- *
- * These tests use a seeded RNG to ensure deterministic results; to prevent
- * regenerating existing examples and causing unnecessary churn in the API tests
- * when values change, I suggest adding new examples at the bottom of this file.
- *
- * Also, be careful removing or editing existing examples.  It may be easier to
- * add a new example than remove an old one, to prevent regenerating some of the
- * examples you aren't editing.
- */
-class CreateTestWorkDocuments extends AnyFunSpec with Matchers with WorkGenerators with ItemsGenerators with PeriodGenerators with TestDocumentUtils with SubjectGenerators with GenreGenerators with ContributorGenerators with ProductionEventGenerators with LanguageGenerators with ImageGenerators with HoldingsGenerators {
+  *
+  * These tests use a seeded RNG to ensure deterministic results; to prevent
+  * regenerating existing examples and causing unnecessary churn in the API tests
+  * when values change, I suggest adding new examples at the bottom of this file.
+  *
+  * Also, be careful removing or editing existing examples.  It may be easier to
+  * add a new example than remove an old one, to prevent regenerating some of the
+  * examples you aren't editing.
+  */
+class CreateTestWorkDocuments
+    extends AnyFunSpec
+    with Matchers
+    with WorkGenerators
+    with ItemsGenerators
+    with PeriodGenerators
+    with TestDocumentUtils
+    with SubjectGenerators
+    with GenreGenerators
+    with ContributorGenerators
+    with ProductionEventGenerators
+    with LanguageGenerators
+    with ImageGenerators
+    with HoldingsGenerators {
   it("creates works of different types") {
     saveWorks(
       works = (1 to 5).map(_ => denormalisedWork()).sortBy(_.state.canonicalId),
@@ -38,12 +51,14 @@ class CreateTestWorkDocuments extends AnyFunSpec with Matchers with WorkGenerato
       id = "works.invisible"
     )
     saveWorks(
-      works = (1 to 2).map(_ => denormalisedWork().redirected(
-        redirectTarget = IdState.Identified(
-          canonicalId = createCanonicalId,
-          sourceIdentifier = createSourceIdentifier
-        )
-      )),
+      works = (1 to 2).map(
+        _ =>
+          denormalisedWork().redirected(
+            redirectTarget = IdState.Identified(
+              canonicalId = createCanonicalId,
+              sourceIdentifier = createSourceIdentifier
+            )
+        )),
       description = "an arbitrary list of redirected works",
       id = "works.redirected"
     )
@@ -74,8 +89,7 @@ class CreateTestWorkDocuments extends AnyFunSpec with Matchers with WorkGenerato
     saveWork(
       work = denormalisedWork()
         .title("A drawing of a dodo")
-        .lettering("A line of legible ligatures")
-      ,
+        .lettering("A line of legible ligatures"),
       description = "a work with 'dodo' in the title",
       id = "work-title-dodo"
     )
@@ -109,7 +123,9 @@ class CreateTestWorkDocuments extends AnyFunSpec with Matchers with WorkGenerato
     }
 
     saveWork(
-      work = denormalisedWork().title("An invisible mezzotint of a mouse").invisible(),
+      work = denormalisedWork()
+        .title("An invisible mezzotint of a mouse")
+        .invisible(),
       description = "an invisible work with 'mouse' in the title",
       id = "work.invisible.title-mouse"
     )
@@ -117,48 +133,66 @@ class CreateTestWorkDocuments extends AnyFunSpec with Matchers with WorkGenerato
 
   it("creates works that populate all the include-able fields") {
     saveWorks(
-      works = (1 to 3).map(_ =>
-        denormalisedWork(
-          relations = Relations(
-            ancestors = List(
-              Relation(mergedWork(), 0, 1, 5),
-              Relation(mergedWork(), 1, 3, 4)
-            ),
-            children = List(Relation(mergedWork(), 3, 0, 0)),
-            siblingsPreceding = List(Relation(mergedWork(), 2, 0, 0)),
-            siblingsSucceeding = List(Relation(mergedWork(), 2, 0, 0))
-          )
-        )
-          .title("A work with all the include-able fields")
-          .otherIdentifiers(List(createSourceIdentifier))
-          .subjects((1 to 2).map(_ => createSubject).toList)
-          .genres((1 to 2).map(_ => createGenre).toList)
-          .contributors((1 to 2).map(_ => createPersonContributorWith(label = s"person-${randomAlphanumeric()}")).toList)
-          .production((1 to 2).map(_ => createProductionEvent).toList)
-          .languages((1 to 3).map(_ => createLanguage).toList)
-          .notes((1 to 4).map(_ =>
-            Note(contents = randomAlphanumeric(), noteType = chooseFrom(NoteType.GeneralNote, NoteType.FundingInformation, NoteType.LocationOfDuplicatesNote)),
-          ).toList)
-          .imageData((1 to 2).map(_ => createImageData.toIdentified).toList)
-          .holdings(createHoldings(3))
-          .items((1 to 2).map(_ => createIdentifiedItem).toList :+ createUnidentifiableItem)
-      ),
+      works = (1 to 3).map(
+        _ =>
+          denormalisedWork(
+            relations = Relations(
+              ancestors = List(
+                Relation(mergedWork(), 0, 1, 5),
+                Relation(mergedWork(), 1, 3, 4)
+              ),
+              children = List(Relation(mergedWork(), 3, 0, 0)),
+              siblingsPreceding = List(Relation(mergedWork(), 2, 0, 0)),
+              siblingsSucceeding = List(Relation(mergedWork(), 2, 0, 0))
+            )
+          ).title("A work with all the include-able fields")
+            .otherIdentifiers(List(createSourceIdentifier))
+            .subjects((1 to 2).map(_ => createSubject).toList)
+            .genres((1 to 2).map(_ => createGenre).toList)
+            .contributors((1 to 2)
+              .map(_ =>
+                createPersonContributorWith(label =
+                  s"person-${randomAlphanumeric()}"))
+              .toList)
+            .production((1 to 2).map(_ => createProductionEvent).toList)
+            .languages((1 to 3).map(_ => createLanguage).toList)
+            .notes(
+              (1 to 4)
+                .map(
+                  _ =>
+                    Note(
+                      contents = randomAlphanumeric(),
+                      noteType = chooseFrom(
+                        NoteType.GeneralNote,
+                        NoteType.FundingInformation,
+                        NoteType.LocationOfDuplicatesNote)), )
+                .toList)
+            .imageData((1 to 2).map(_ => createImageData.toIdentified).toList)
+            .holdings(createHoldings(3))
+            .items((1 to 2)
+              .map(_ => createIdentifiedItem)
+              .toList :+ createUnidentifiableItem)),
       description = "a list of work with all the include-able fields",
       id = "work.visible.everything"
     )
 
     // Create some examples to use in the format filter and aggregation tests
-    val formats = (1 to 4).map(_ => Format.Books) ++ (1 to 3).map(_ => Format.Journals) ++ (1 to 2).map(_ => Format.Audio) :+ Format.Pictures
-    formats.zipWithIndex.foreach { case (format, i) =>
-      saveWork(
-        work = denormalisedWork().format(format).title(s"A work with format $format"),
-        description = "one of a list of works with a variety of formats",
-        id = s"works.formats.$i.$format"
-      )
+    val formats = (1 to 4).map(_ => Format.Books) ++ (1 to 3).map(_ =>
+      Format.Journals) ++ (1 to 2).map(_ => Format.Audio) :+ Format.Pictures
+    formats.zipWithIndex.foreach {
+      case (format, i) =>
+        saveWork(
+          work = denormalisedWork()
+            .format(format)
+            .title(s"A work with format $format"),
+          description = "one of a list of works with a variety of formats",
+          id = s"works.formats.$i.$format"
+        )
     }
 
     saveWork(
-      work = denormalisedWork().title("+a -title | with (all the simple) query~4 syntax operators in it*"),
+      work = denormalisedWork().title(
+        "+a -title | with (all the simple) query~4 syntax operators in it*"),
       description = "a work whose title has lots of ES query syntax operators",
       id = "works.title-query-syntax"
     )
@@ -182,15 +216,18 @@ class CreateTestWorkDocuments extends AnyFunSpec with Matchers with WorkGenerato
       List(swedish),
       List(turkish),
     )
-    languageCombos.zipWithIndex.foreach { case (languages, i) =>
-      val label = languages.map(_.label).mkString(", ")
-      val id = languages.map(_.id).mkString("+")
+    languageCombos.zipWithIndex.foreach {
+      case (languages, i) =>
+        val label = languages.map(_.label).mkString(", ")
+        val id = languages.map(_.id).mkString("+")
 
-      saveWork(
-        work = denormalisedWork().languages(languages).title(s"A work with languages $label"),
-        description = "one of a list of works with a variety of languages",
-        id = s"works.languages.$i.$id"
-      )
+        saveWork(
+          work = denormalisedWork()
+            .languages(languages)
+            .title(s"A work with languages $label"),
+          description = "one of a list of works with a variety of languages",
+          id = s"works.languages.$i.$id"
+        )
     }
   }
 
@@ -236,7 +273,9 @@ class CreateTestWorkDocuments extends AnyFunSpec with Matchers with WorkGenerato
     )
 
     saveWork(
-      work = denormalisedWork().title("A work with different concepts in the genre").genres(List(genre)),
+      work = denormalisedWork()
+        .title("A work with different concepts in the genre")
+        .genres(List(genre)),
       description = "a work with different concepts in the genre",
       id = "works.genres"
     )
@@ -312,14 +351,14 @@ class CreateTestWorkDocuments extends AnyFunSpec with Matchers with WorkGenerato
         )
 
       case _ =>
-        works
-          .zipWithIndex
-          .map { case (work, index) =>
-            s"$id.$index" -> TestDocument(
-              description,
-              id = work.id,
-              document = work.toDocument
-            )
+        works.zipWithIndex
+          .map {
+            case (work, index) =>
+              s"$id.$index" -> TestDocument(
+                description,
+                id = work.id,
+                document = work.toDocument
+              )
           }
     }
 
