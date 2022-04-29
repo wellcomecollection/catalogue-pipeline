@@ -11,7 +11,9 @@ import weco.pipeline.ingestor.works.models.{
 }
 import weco.catalogue.display_model.Implicits._
 
-object WorkTransformer {
+import java.time.Instant
+
+trait WorkTransformer {
   val deriveData: Work[Denormalised] => IndexedWork =
     work => {
       val indexedWork = work.transition[Indexed]()
@@ -76,4 +78,11 @@ object WorkTransformer {
           )
       }
     }
+
+  // This is a def rather than an inline call so we can override it in the
+  // tests; in particular we want it to be deterministic when we're creating
+  // example documents to send to the API repo.
+  protected def getIndexedTime: Instant = Instant.now()
 }
+
+object WorkTransformer extends WorkTransformer
