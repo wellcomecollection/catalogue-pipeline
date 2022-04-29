@@ -4,12 +4,14 @@ import io.circe.Json
 import io.circe.syntax._
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.generators.ImageGenerators
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.languages.Language
-import weco.catalogue.internal_model.locations.License
+import weco.catalogue.internal_model.locations.{AccessCondition, AccessMethod, AccessStatus, License, LocationType}
 import weco.catalogue.internal_model.work._
 import weco.catalogue.internal_model.work.generators._
+import weco.catalogue.internal_model.locations.AccessStatus.LicensedResources
 import weco.json.JsonUtil._
 import weco.pipeline.ingestor.fixtures.TestDocumentUtils
 
@@ -327,6 +329,86 @@ class CreateTestWorkDocuments
       works = works,
       description = "works with different contributor",
       id = "works.contributor"
+    )
+  }
+
+  it("creates examples of works with different location types") {
+    val locationCombos = List(
+      List(createDigitalLocationWith(locationType = LocationType.IIIFPresentationAPI)),
+      List(createDigitalLocationWith(locationType = LocationType.IIIFImageAPI)),
+      List(
+        createDigitalLocationWith(locationType = LocationType.IIIFPresentationAPI),
+        createDigitalLocationWith(locationType = LocationType.IIIFImageAPI)
+      ),
+      List(createPhysicalLocationWith(locationType = LocationType.OpenShelves)),
+      List(
+        createPhysicalLocationWith(locationType = LocationType.OpenShelves),
+        createPhysicalLocationWith(locationType = LocationType.ClosedStores)
+      ),
+    )
+
+    val works = locationCombos.map { locations =>
+      val items = List(createIdentifiedItemWith(locations = locations))
+      denormalisedWork().items(items)
+    }
+
+    saveWorks(
+      works = works,
+      description = "works with different location types",
+      id = "works.locations"
+    )
+  }
+
+  it("creates examples of works with different work types") {
+    val workTypes = (1 to 3).map(_ => WorkType.Collection) ++ (1 to 2).map(_ => WorkType.Series) ++ (1 to 4).map(_ => WorkType.Section)
+
+    val works = workTypes.map {
+      denormalisedWork().workType(_)
+    }
+
+    saveWorks(
+      works = works,
+      description = "works with different work types",
+      id = "works.workType"
+    )
+  }
+
+  it("creates examples of works with different access statuses") {
+    val statuses = List(
+      AccessStatus.Restricted,
+      AccessStatus.Restricted,
+      AccessStatus.Closed,
+      AccessStatus.Open,
+      AccessStatus.OpenWithAdvisory,
+      AccessStatus.LicensedResources(relationship = LicensedResources.Resource),
+      AccessStatus
+        .LicensedResources(relationship = LicensedResources.RelatedResource)
+    )
+
+    val works = statuses.map { status =>
+      denormalisedWork()
+        .items(
+          List(
+            createIdentifiedItemWith(
+              locations = List(
+                createDigitalLocationWith(
+                  accessConditions = List(
+                    AccessCondition(
+                      method = AccessMethod.ManualRequest,
+                      status = Some(status)
+                    )
+                  )
+                )
+              )
+            )
+          )
+        )
+    }
+
+    saveWorks(
+      works = works,
+      description = "works with different access statuses",
+      id = "works.accessStatus"
     )
   }
 
