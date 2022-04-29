@@ -165,7 +165,10 @@ class CreateTestWorkDocuments
                       noteType = chooseFrom(
                         NoteType.GeneralNote,
                         NoteType.FundingInformation,
-                        NoteType.LocationOfDuplicatesNote)), )
+                        NoteType.LocationOfDuplicatesNote
+                      )
+                    )
+                )
                 .toList)
             .imageData((1 to 2).map(_ => createImageData.toIdentified).toList)
             .holdings(createHoldings(3))
