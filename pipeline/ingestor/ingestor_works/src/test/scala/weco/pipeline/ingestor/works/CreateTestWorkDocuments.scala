@@ -6,6 +6,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.generators.ImageGenerators
 import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.index.WorksIndexConfig
 import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.locations.License
 import weco.catalogue.internal_model.work._
@@ -13,6 +14,7 @@ import weco.catalogue.internal_model.work.generators._
 import weco.json.JsonUtil._
 import weco.pipeline.ingestor.fixtures.TestDocumentUtils
 
+import java.io.{File, PrintWriter}
 import java.time.Instant
 
 /** Creates the example documents we use in the API tests.
@@ -26,6 +28,13 @@ import java.time.Instant
  * examples you aren't editing.
  */
 class CreateTestWorkDocuments extends AnyFunSpec with Matchers with WorkGenerators with ItemsGenerators with PeriodGenerators with TestDocumentUtils with SubjectGenerators with GenreGenerators with ContributorGenerators with ProductionEventGenerators with LanguageGenerators with ImageGenerators with HoldingsGenerators {
+  it("saves the WorksIndexConfig") {
+    val file = new File(s"$testDocumentsRoot/WorksIndexConfig.json")
+    val pw = new PrintWriter(file)
+    pw.write(WorksIndexConfig.indexed.asJson.spaces2)
+    pw.close()
+  }
+
   it("creates works of different types") {
     saveWorks(
       works = (1 to 5).map(_ => denormalisedWork()).sortBy(_.state.canonicalId),

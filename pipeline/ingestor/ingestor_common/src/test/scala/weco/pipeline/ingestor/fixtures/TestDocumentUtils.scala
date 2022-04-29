@@ -17,8 +17,10 @@ trait TestDocumentUtils extends InstantGenerators with RandomGenerators {
   override protected lazy val random: Random =
     new Random(0)
 
+  val testDocumentsRoot = "pipeline/ingestor/test_documents"
+
   private def writeReadme(): Unit = {
-    val file = new File("pipeline/ingestor/test_documents/README.md")
+    val file = new File(s"$testDocumentsRoot/README.md")
     val pw = new PrintWriter(file)
     pw.write(
       """
@@ -41,7 +43,7 @@ trait TestDocumentUtils extends InstantGenerators with RandomGenerators {
 
   def saveDocuments(documents: Seq[(String, ExampleDocument)]): Unit =
     documents.foreach { case (id, doc) =>
-      val file = new File(s"pipeline/ingestor/test_documents/$id.json")
+      val file = new File(s"$testDocumentsRoot/$id.json")
 
       // To avoid endless churn, check if an existing test document already exists.
       //
