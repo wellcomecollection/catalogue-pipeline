@@ -167,7 +167,7 @@ class CreateTestWorkDocuments
                         NoteType.FundingInformation,
                         NoteType.LocationOfDuplicatesNote
                       )
-                    )
+                  )
                 )
                 .toList)
             .imageData((1 to 2).map(_ => createImageData.toIdentified).toList)
