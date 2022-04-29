@@ -8,7 +8,13 @@ import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.generators.ImageGenerators
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.languages.Language
-import weco.catalogue.internal_model.locations.{AccessCondition, AccessMethod, AccessStatus, License, LocationType}
+import weco.catalogue.internal_model.locations.{
+  AccessCondition,
+  AccessMethod,
+  AccessStatus,
+  License,
+  LocationType
+}
 import weco.catalogue.internal_model.work._
 import weco.catalogue.internal_model.work.generators._
 import weco.catalogue.internal_model.locations.AccessStatus.LicensedResources
@@ -169,7 +175,7 @@ class CreateTestWorkDocuments
                         NoteType.FundingInformation,
                         NoteType.LocationOfDuplicatesNote
                       )
-                    )
+                  )
                 )
                 .toList)
             .imageData((1 to 2).map(_ => createImageData.toIdentified).toList)
@@ -334,10 +340,13 @@ class CreateTestWorkDocuments
 
   it("creates examples of works with different location types") {
     val locationCombos = List(
-      List(createDigitalLocationWith(locationType = LocationType.IIIFPresentationAPI)),
+      List(
+        createDigitalLocationWith(
+          locationType = LocationType.IIIFPresentationAPI)),
       List(createDigitalLocationWith(locationType = LocationType.IIIFImageAPI)),
       List(
-        createDigitalLocationWith(locationType = LocationType.IIIFPresentationAPI),
+        createDigitalLocationWith(
+          locationType = LocationType.IIIFPresentationAPI),
         createDigitalLocationWith(locationType = LocationType.IIIFImageAPI)
       ),
       List(createPhysicalLocationWith(locationType = LocationType.OpenShelves)),
@@ -360,7 +369,8 @@ class CreateTestWorkDocuments
   }
 
   it("creates examples of works with different work types") {
-    val workTypes = (1 to 3).map(_ => WorkType.Collection) ++ (1 to 2).map(_ => WorkType.Series) ++ (1 to 4).map(_ => WorkType.Section)
+    val workTypes = (1 to 3).map(_ => WorkType.Collection) ++ (1 to 2).map(_ =>
+      WorkType.Series) ++ (1 to 4).map(_ => WorkType.Section)
 
     val works = workTypes.map {
       denormalisedWork().workType(_)
