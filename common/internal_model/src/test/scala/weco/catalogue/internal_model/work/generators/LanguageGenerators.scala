@@ -8,9 +8,12 @@ trait LanguageGenerators extends RandomGenerators {
   // We have a rule that says language codes should be exactly 3 characters long
   implicit val arbitraryLanguage: Arbitrary[Language] =
     Arbitrary {
-      Language(
-        id = randomAlphanumeric(length = 3),
-        label = randomAlphanumeric()
-      )
+      createLanguage
     }
+
+  def createLanguage: Language =
+    Language(
+      id = randomAlphanumeric(length = 3),
+      label = randomAlphanumeric()
+    )
 }
