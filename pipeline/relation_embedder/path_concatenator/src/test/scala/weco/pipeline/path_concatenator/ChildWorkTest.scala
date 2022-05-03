@@ -45,7 +45,7 @@ class ChildWorkTest extends AnyFunSpec with WorkGenerators with Matchers {
       val newChild = ChildWork(
         mergedWork().collectionPath(CollectionPath("600/610")),
         mergedWork().collectionPath(
-          CollectionPath(path="610/616", label=Some("Diseases"))
+          CollectionPath(path = "610/616", label = Some("Diseases"))
         )
       )
       newChild.data.collectionPath.get.label.get shouldBe "Diseases"
