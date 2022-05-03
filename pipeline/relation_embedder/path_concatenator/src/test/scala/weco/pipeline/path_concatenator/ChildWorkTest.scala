@@ -41,6 +41,16 @@ class ChildWorkTest extends AnyFunSpec with WorkGenerators with Matchers {
       newChild.data.collectionPath.get.path shouldBe "hello/world/cup"
     }
 
+    it("preserves the label of the child work's collectionPath") {
+      val newChild = ChildWork(
+        mergedWork().collectionPath(CollectionPath("600/610")),
+        mergedWork().collectionPath(
+          CollectionPath(path="610/616", label=Some("Diseases"))
+        )
+      )
+      newChild.data.collectionPath.get.label.get shouldBe "Diseases"
+    }
+
     it(
       "does nothing if the collectionPath of the parent consists of a single node") {
       // When the parent is the root of the hierarchy,
