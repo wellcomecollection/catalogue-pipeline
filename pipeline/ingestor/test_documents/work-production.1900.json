@@ -1,0 +1,263 @@
+{
+  "description" : "a work with a production event in 1900",
+  "createdAt" : "2022-05-04T07:15:02.861Z",
+  "id" : "6tgtwwne",
+  "document" : {
+    "debug" : {
+      "source" : {
+        "identifier" : {
+          "identifierType" : {
+            "id" : "calm-record-id"
+          },
+          "ontologyType" : "Work",
+          "value" : "ffVVjhTygu"
+        },
+        "version" : 36,
+        "modifiedTime" : "2022-04-21T05:01:33Z"
+      },
+      "mergedTime" : "2022-04-21T05:01:33Z",
+      "indexedTime" : "2022-05-04T07:15:02.842Z",
+      "redirectSources" : [
+      ]
+    },
+    "state" : {
+      "sourceIdentifier" : {
+        "identifierType" : {
+          "id" : "calm-record-id"
+        },
+        "ontologyType" : "Work",
+        "value" : "ffVVjhTygu"
+      },
+      "canonicalId" : "6tgtwwne",
+      "mergedTime" : "2022-04-21T05:01:33Z",
+      "sourceModifiedTime" : "2022-04-21T05:01:33Z",
+      "indexedTime" : "2022-05-04T07:15:02.842Z",
+      "availabilities" : [
+      ],
+      "derivedData" : {
+        "contributorAgents" : [
+        ]
+      },
+      "relations" : {
+        "ancestors" : [
+        ],
+        "children" : [
+        ],
+        "siblingsPreceding" : [
+        ],
+        "siblingsSucceeding" : [
+        ]
+      }
+    },
+    "data" : {
+      "title" : "Production event in 1900",
+      "otherIdentifiers" : [
+      ],
+      "alternativeTitles" : [
+      ],
+      "format" : null,
+      "description" : null,
+      "physicalDescription" : null,
+      "lettering" : null,
+      "createdDate" : null,
+      "subjects" : [
+      ],
+      "genres" : [
+      ],
+      "contributors" : [
+      ],
+      "thumbnail" : null,
+      "production" : [
+        {
+          "label" : "koTxrdlOL8J495vJGhUpyx4i0",
+          "places" : [
+          ],
+          "agents" : [
+          ],
+          "dates" : [
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "1900",
+              "range" : {
+                "from" : "1900-01-01T00:00:00Z",
+                "to" : "1900-12-31T23:59:59.999999999Z",
+                "label" : "1900"
+              }
+            }
+          ],
+          "function" : null
+        }
+      ],
+      "languages" : [
+      ],
+      "edition" : null,
+      "notes" : [
+      ],
+      "duration" : null,
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "collectionPath" : null,
+      "referenceNumber" : null,
+      "imageData" : [
+      ],
+      "workType" : "Standard"
+    },
+    "display" : {
+      "id" : "6tgtwwne",
+      "title" : "Production event in 1900",
+      "alternativeTitles" : [
+      ],
+      "contributors" : [
+      ],
+      "identifiers" : [
+        {
+          "identifierType" : {
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
+            "type" : "IdentifierType"
+          },
+          "value" : "ffVVjhTygu",
+          "type" : "Identifier"
+        }
+      ],
+      "subjects" : [
+      ],
+      "genres" : [
+      ],
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "availabilities" : [
+      ],
+      "production" : [
+        {
+          "label" : "koTxrdlOL8J495vJGhUpyx4i0",
+          "places" : [
+          ],
+          "agents" : [
+          ],
+          "dates" : [
+            {
+              "label" : "1900",
+              "type" : "Period"
+            }
+          ],
+          "type" : "ProductionEvent"
+        }
+      ],
+      "languages" : [
+      ],
+      "notes" : [
+      ],
+      "images" : [
+      ],
+      "parts" : [
+      ],
+      "partOf" : [
+      ],
+      "precededBy" : [
+      ],
+      "succeededBy" : [
+      ],
+      "type" : "Work"
+    },
+    "type" : "Visible"
+  },
+  "work" : {
+    "version" : 36,
+    "data" : {
+      "title" : "Production event in 1900",
+      "otherIdentifiers" : [
+      ],
+      "alternativeTitles" : [
+      ],
+      "format" : null,
+      "description" : null,
+      "physicalDescription" : null,
+      "lettering" : null,
+      "createdDate" : null,
+      "subjects" : [
+      ],
+      "genres" : [
+      ],
+      "contributors" : [
+      ],
+      "thumbnail" : null,
+      "production" : [
+        {
+          "label" : "koTxrdlOL8J495vJGhUpyx4i0",
+          "places" : [
+          ],
+          "agents" : [
+          ],
+          "dates" : [
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "1900",
+              "range" : {
+                "from" : "1900-01-01T00:00:00Z",
+                "to" : "1900-12-31T23:59:59.999999999Z",
+                "label" : "1900"
+              }
+            }
+          ],
+          "function" : null
+        }
+      ],
+      "languages" : [
+      ],
+      "edition" : null,
+      "notes" : [
+      ],
+      "duration" : null,
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "collectionPath" : null,
+      "referenceNumber" : null,
+      "imageData" : [
+      ],
+      "workType" : "Standard"
+    },
+    "state" : {
+      "sourceIdentifier" : {
+        "identifierType" : {
+          "id" : "calm-record-id"
+        },
+        "ontologyType" : "Work",
+        "value" : "ffVVjhTygu"
+      },
+      "canonicalId" : "6tgtwwne",
+      "mergedTime" : "2022-04-21T05:01:33Z",
+      "sourceModifiedTime" : "2022-04-21T05:01:33Z",
+      "indexedTime" : "2022-05-04T07:15:02.861Z",
+      "availabilities" : [
+      ],
+      "derivedData" : {
+        "contributorAgents" : [
+        ]
+      },
+      "relations" : {
+        "ancestors" : [
+        ],
+        "children" : [
+        ],
+        "siblingsPreceding" : [
+        ],
+        "siblingsSucceeding" : [
+        ]
+      }
+    },
+    "redirectSources" : [
+    ],
+    "type" : "Visible"
+  }
+}

@@ -1,0 +1,285 @@
+{
+  "description" : "works with different contributor",
+  "createdAt" : "2022-05-04T07:15:03.079Z",
+  "id" : "hutjlml0",
+  "document" : {
+    "debug" : {
+      "source" : {
+        "identifier" : {
+          "identifierType" : {
+            "id" : "calm-record-id"
+          },
+          "ontologyType" : "Work",
+          "value" : "Wh4OVfDtEV"
+        },
+        "version" : 27,
+        "modifiedTime" : "2022-05-26T12:29:00Z"
+      },
+      "mergedTime" : "2022-05-26T12:29:00Z",
+      "indexedTime" : "2022-05-04T07:15:03.078Z",
+      "redirectSources" : [
+      ]
+    },
+    "state" : {
+      "sourceIdentifier" : {
+        "identifierType" : {
+          "id" : "calm-record-id"
+        },
+        "ontologyType" : "Work",
+        "value" : "Wh4OVfDtEV"
+      },
+      "canonicalId" : "hutjlml0",
+      "mergedTime" : "2022-05-26T12:29:00Z",
+      "sourceModifiedTime" : "2022-05-26T12:29:00Z",
+      "indexedTime" : "2022-05-04T07:15:03.078Z",
+      "availabilities" : [
+      ],
+      "derivedData" : {
+        "contributorAgents" : [
+          "Organisation:MI5",
+          "Organisation:GCHQ"
+        ]
+      },
+      "relations" : {
+        "ancestors" : [
+        ],
+        "children" : [
+        ],
+        "siblingsPreceding" : [
+        ],
+        "siblingsSucceeding" : [
+        ]
+      }
+    },
+    "data" : {
+      "title" : "title-H1Bj9evx0c",
+      "otherIdentifiers" : [
+      ],
+      "alternativeTitles" : [
+      ],
+      "format" : null,
+      "description" : null,
+      "physicalDescription" : null,
+      "lettering" : null,
+      "createdDate" : null,
+      "subjects" : [
+      ],
+      "genres" : [
+      ],
+      "contributors" : [
+        {
+          "id" : {
+            "type" : "Unidentifiable"
+          },
+          "agent" : {
+            "id" : {
+              "type" : "Unidentifiable"
+            },
+            "label" : "MI5",
+            "type" : "Organisation"
+          },
+          "roles" : [
+          ]
+        },
+        {
+          "id" : {
+            "type" : "Unidentifiable"
+          },
+          "agent" : {
+            "id" : {
+              "type" : "Unidentifiable"
+            },
+            "label" : "GCHQ",
+            "type" : "Organisation"
+          },
+          "roles" : [
+          ]
+        }
+      ],
+      "thumbnail" : null,
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "edition" : null,
+      "notes" : [
+      ],
+      "duration" : null,
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "collectionPath" : null,
+      "referenceNumber" : null,
+      "imageData" : [
+      ],
+      "workType" : "Standard"
+    },
+    "display" : {
+      "id" : "hutjlml0",
+      "title" : "title-H1Bj9evx0c",
+      "alternativeTitles" : [
+      ],
+      "contributors" : [
+        {
+          "agent" : {
+            "label" : "MI5",
+            "type" : "Organisation"
+          },
+          "roles" : [
+          ],
+          "type" : "Contributor"
+        },
+        {
+          "agent" : {
+            "label" : "GCHQ",
+            "type" : "Organisation"
+          },
+          "roles" : [
+          ],
+          "type" : "Contributor"
+        }
+      ],
+      "identifiers" : [
+        {
+          "identifierType" : {
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
+            "type" : "IdentifierType"
+          },
+          "value" : "Wh4OVfDtEV",
+          "type" : "Identifier"
+        }
+      ],
+      "subjects" : [
+      ],
+      "genres" : [
+      ],
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "availabilities" : [
+      ],
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "notes" : [
+      ],
+      "images" : [
+      ],
+      "parts" : [
+      ],
+      "partOf" : [
+      ],
+      "precededBy" : [
+      ],
+      "succeededBy" : [
+      ],
+      "type" : "Work"
+    },
+    "type" : "Visible"
+  },
+  "work" : {
+    "version" : 27,
+    "data" : {
+      "title" : "title-H1Bj9evx0c",
+      "otherIdentifiers" : [
+      ],
+      "alternativeTitles" : [
+      ],
+      "format" : null,
+      "description" : null,
+      "physicalDescription" : null,
+      "lettering" : null,
+      "createdDate" : null,
+      "subjects" : [
+      ],
+      "genres" : [
+      ],
+      "contributors" : [
+        {
+          "id" : {
+            "type" : "Unidentifiable"
+          },
+          "agent" : {
+            "id" : {
+              "type" : "Unidentifiable"
+            },
+            "label" : "MI5",
+            "type" : "Organisation"
+          },
+          "roles" : [
+          ]
+        },
+        {
+          "id" : {
+            "type" : "Unidentifiable"
+          },
+          "agent" : {
+            "id" : {
+              "type" : "Unidentifiable"
+            },
+            "label" : "GCHQ",
+            "type" : "Organisation"
+          },
+          "roles" : [
+          ]
+        }
+      ],
+      "thumbnail" : null,
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "edition" : null,
+      "notes" : [
+      ],
+      "duration" : null,
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "collectionPath" : null,
+      "referenceNumber" : null,
+      "imageData" : [
+      ],
+      "workType" : "Standard"
+    },
+    "state" : {
+      "sourceIdentifier" : {
+        "identifierType" : {
+          "id" : "calm-record-id"
+        },
+        "ontologyType" : "Work",
+        "value" : "Wh4OVfDtEV"
+      },
+      "canonicalId" : "hutjlml0",
+      "mergedTime" : "2022-05-26T12:29:00Z",
+      "sourceModifiedTime" : "2022-05-26T12:29:00Z",
+      "indexedTime" : "2022-05-04T07:15:03.079Z",
+      "availabilities" : [
+      ],
+      "derivedData" : {
+        "contributorAgents" : [
+          "Organisation:MI5",
+          "Organisation:GCHQ"
+        ]
+      },
+      "relations" : {
+        "ancestors" : [
+        ],
+        "children" : [
+        ],
+        "siblingsPreceding" : [
+        ],
+        "siblingsSucceeding" : [
+        ]
+      }
+    },
+    "redirectSources" : [
+    ],
+    "type" : "Visible"
+  }
+}

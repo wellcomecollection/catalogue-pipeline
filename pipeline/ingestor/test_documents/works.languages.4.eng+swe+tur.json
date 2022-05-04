@@ -1,0 +1,246 @@
+{
+  "description" : "one of a list of works with a variety of languages",
+  "createdAt" : "2022-05-04T07:15:03.037Z",
+  "id" : "xqjkrlx5",
+  "document" : {
+    "debug" : {
+      "source" : {
+        "identifier" : {
+          "identifierType" : {
+            "id" : "calm-record-id"
+          },
+          "ontologyType" : "Work",
+          "value" : "TTwRQn97GV"
+        },
+        "version" : 45,
+        "modifiedTime" : "2022-04-29T18:35:00Z"
+      },
+      "mergedTime" : "2022-04-29T18:35:00Z",
+      "indexedTime" : "2022-05-04T07:15:03.037Z",
+      "redirectSources" : [
+      ]
+    },
+    "state" : {
+      "sourceIdentifier" : {
+        "identifierType" : {
+          "id" : "calm-record-id"
+        },
+        "ontologyType" : "Work",
+        "value" : "TTwRQn97GV"
+      },
+      "canonicalId" : "xqjkrlx5",
+      "mergedTime" : "2022-04-29T18:35:00Z",
+      "sourceModifiedTime" : "2022-04-29T18:35:00Z",
+      "indexedTime" : "2022-05-04T07:15:03.037Z",
+      "availabilities" : [
+      ],
+      "derivedData" : {
+        "contributorAgents" : [
+        ]
+      },
+      "relations" : {
+        "ancestors" : [
+        ],
+        "children" : [
+        ],
+        "siblingsPreceding" : [
+        ],
+        "siblingsSucceeding" : [
+        ]
+      }
+    },
+    "data" : {
+      "title" : "A work with languages English, Swedish, Turkish",
+      "otherIdentifiers" : [
+      ],
+      "alternativeTitles" : [
+      ],
+      "format" : null,
+      "description" : null,
+      "physicalDescription" : null,
+      "lettering" : null,
+      "createdDate" : null,
+      "subjects" : [
+      ],
+      "genres" : [
+      ],
+      "contributors" : [
+      ],
+      "thumbnail" : null,
+      "production" : [
+      ],
+      "languages" : [
+        {
+          "id" : "eng",
+          "label" : "English"
+        },
+        {
+          "id" : "swe",
+          "label" : "Swedish"
+        },
+        {
+          "id" : "tur",
+          "label" : "Turkish"
+        }
+      ],
+      "edition" : null,
+      "notes" : [
+      ],
+      "duration" : null,
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "collectionPath" : null,
+      "referenceNumber" : null,
+      "imageData" : [
+      ],
+      "workType" : "Standard"
+    },
+    "display" : {
+      "id" : "xqjkrlx5",
+      "title" : "A work with languages English, Swedish, Turkish",
+      "alternativeTitles" : [
+      ],
+      "contributors" : [
+      ],
+      "identifiers" : [
+        {
+          "identifierType" : {
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
+            "type" : "IdentifierType"
+          },
+          "value" : "TTwRQn97GV",
+          "type" : "Identifier"
+        }
+      ],
+      "subjects" : [
+      ],
+      "genres" : [
+      ],
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "availabilities" : [
+      ],
+      "production" : [
+      ],
+      "languages" : [
+        {
+          "id" : "eng",
+          "label" : "English",
+          "type" : "Language"
+        },
+        {
+          "id" : "swe",
+          "label" : "Swedish",
+          "type" : "Language"
+        },
+        {
+          "id" : "tur",
+          "label" : "Turkish",
+          "type" : "Language"
+        }
+      ],
+      "notes" : [
+      ],
+      "images" : [
+      ],
+      "parts" : [
+      ],
+      "partOf" : [
+      ],
+      "precededBy" : [
+      ],
+      "succeededBy" : [
+      ],
+      "type" : "Work"
+    },
+    "type" : "Visible"
+  },
+  "work" : {
+    "version" : 45,
+    "data" : {
+      "title" : "A work with languages English, Swedish, Turkish",
+      "otherIdentifiers" : [
+      ],
+      "alternativeTitles" : [
+      ],
+      "format" : null,
+      "description" : null,
+      "physicalDescription" : null,
+      "lettering" : null,
+      "createdDate" : null,
+      "subjects" : [
+      ],
+      "genres" : [
+      ],
+      "contributors" : [
+      ],
+      "thumbnail" : null,
+      "production" : [
+      ],
+      "languages" : [
+        {
+          "id" : "eng",
+          "label" : "English"
+        },
+        {
+          "id" : "swe",
+          "label" : "Swedish"
+        },
+        {
+          "id" : "tur",
+          "label" : "Turkish"
+        }
+      ],
+      "edition" : null,
+      "notes" : [
+      ],
+      "duration" : null,
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "collectionPath" : null,
+      "referenceNumber" : null,
+      "imageData" : [
+      ],
+      "workType" : "Standard"
+    },
+    "state" : {
+      "sourceIdentifier" : {
+        "identifierType" : {
+          "id" : "calm-record-id"
+        },
+        "ontologyType" : "Work",
+        "value" : "TTwRQn97GV"
+      },
+      "canonicalId" : "xqjkrlx5",
+      "mergedTime" : "2022-04-29T18:35:00Z",
+      "sourceModifiedTime" : "2022-04-29T18:35:00Z",
+      "indexedTime" : "2022-05-04T07:15:03.037Z",
+      "availabilities" : [
+      ],
+      "derivedData" : {
+        "contributorAgents" : [
+        ]
+      },
+      "relations" : {
+        "ancestors" : [
+        ],
+        "children" : [
+        ],
+        "siblingsPreceding" : [
+        ],
+        "siblingsSucceeding" : [
+        ]
+      }
+    },
+    "redirectSources" : [
+    ],
+    "type" : "Visible"
+  }
+}

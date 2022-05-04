@@ -1,0 +1,109 @@
+{
+  "description" : "an arbitrary list of redirected works",
+  "createdAt" : "2022-05-04T07:15:02.740Z",
+  "id" : "yemd0v8n",
+  "document" : {
+    "debug" : {
+      "source" : {
+        "identifier" : {
+          "identifierType" : {
+            "id" : "sierra-system-number"
+          },
+          "ontologyType" : "Work",
+          "value" : "z64nwkPrDT"
+        },
+        "version" : 81,
+        "modifiedTime" : "2022-04-23T11:19:49Z"
+      },
+      "mergedTime" : "2022-04-23T11:19:49Z",
+      "indexedTime" : "2022-05-04T07:15:02.735Z"
+    },
+    "state" : {
+      "sourceIdentifier" : {
+        "identifierType" : {
+          "id" : "sierra-system-number"
+        },
+        "ontologyType" : "Work",
+        "value" : "z64nwkPrDT"
+      },
+      "canonicalId" : "yemd0v8n",
+      "mergedTime" : "2022-04-23T11:19:49Z",
+      "sourceModifiedTime" : "2022-04-23T11:19:49Z",
+      "indexedTime" : "2022-05-04T07:15:02.735Z",
+      "availabilities" : [
+      ],
+      "derivedData" : {
+        "contributorAgents" : [
+        ]
+      },
+      "relations" : {
+        "ancestors" : [
+        ],
+        "children" : [
+        ],
+        "siblingsPreceding" : [
+        ],
+        "siblingsSucceeding" : [
+        ]
+      }
+    },
+    "redirectTarget" : {
+      "canonicalId" : "qklbwm3u",
+      "sourceIdentifier" : {
+        "identifierType" : {
+          "id" : "miro-image-number"
+        },
+        "ontologyType" : "Work",
+        "value" : "6DWDU051A4"
+      },
+      "otherIdentifiers" : [
+      ]
+    },
+    "type" : "Redirected"
+  },
+  "work" : {
+    "version" : 81,
+    "redirectTarget" : {
+      "canonicalId" : "qklbwm3u",
+      "sourceIdentifier" : {
+        "identifierType" : {
+          "id" : "miro-image-number"
+        },
+        "ontologyType" : "Work",
+        "value" : "6DWDU051A4"
+      },
+      "otherIdentifiers" : [
+      ]
+    },
+    "state" : {
+      "sourceIdentifier" : {
+        "identifierType" : {
+          "id" : "sierra-system-number"
+        },
+        "ontologyType" : "Work",
+        "value" : "z64nwkPrDT"
+      },
+      "canonicalId" : "yemd0v8n",
+      "mergedTime" : "2022-04-23T11:19:49Z",
+      "sourceModifiedTime" : "2022-04-23T11:19:49Z",
+      "indexedTime" : "2022-05-04T07:15:02.740Z",
+      "availabilities" : [
+      ],
+      "derivedData" : {
+        "contributorAgents" : [
+        ]
+      },
+      "relations" : {
+        "ancestors" : [
+        ],
+        "children" : [
+        ],
+        "siblingsPreceding" : [
+        ],
+        "siblingsSucceeding" : [
+        ]
+      }
+    },
+    "type" : "Redirected"
+  }
+}
