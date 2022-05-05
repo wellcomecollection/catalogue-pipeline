@@ -4,6 +4,7 @@ import weco.catalogue.internal_model.work.{CollectionPath, Work}
 import weco.catalogue.internal_model.work.WorkState.Merged
 
 object ChildWork {
+  import PathOps._
 
   /**
     * Return the childWork, having prepended the collectionPath from parentWork.
@@ -50,16 +51,14 @@ object ChildWork {
 
   private def mergePaths(childPath: CollectionPath,
                          parentPath: CollectionPath): CollectionPath = {
-    val childRoot = firstNode(childPath.path)
-    val parentLeaf = lastNode(parentPath.path)
+    val childRoot = childPath.path.firstNode
+    val parentLeaf = parentPath.path.lastNode
 
     if (childRoot != parentLeaf) {
       throw new IllegalArgumentException(
         s"$parentPath is not the parent of $childRoot")
     } else {
-      val fullPath =
-        pathJoin(parentPath.path +: childPath.path.split("/").tail)
-      childPath.copy(path = fullPath)
+      childPath.copy(path = pathJoin(parentPath.path +: childPath.path.split("/").tail))
     }
   }
 
@@ -67,12 +66,4 @@ object ChildWork {
                           newPath: CollectionPath): Work.Visible[Merged] =
     work.copy(data = work.data.copy(collectionPath = Some(newPath)))
 
-  private def firstNode(path: String): String =
-    path.splitAt(path.indexOf("/"))._1
-
-  private def lastNode(path: String): String =
-    path.splitAt(path.lastIndexOf("/") + 1)._2
-
-  private def pathJoin(nodes: Seq[String]): String =
-    nodes.mkString("/")
 }

@@ -34,15 +34,21 @@ for more detail.
 This is a deliberately ordered list of steps, so that the current record *first* gets its own path embellished, *then*
 goes on to embellish the paths of its children with that new path.
 
+When writing to the database, pay attention to version.  If it is not what is expected,
+abort.
+
 ### Shortcuts
 
 If the path of a parent does not contain `/`, step 3, above, can be skipped.
 If the path of the current record at step 4, above does not contain `/`, skip to step 7.
 
-package weco.pipeline.path_concatenator
+## Scale
 
-import weco.catalogue.internal_model.work
+This is expected to run only on...
 
-class ChildWork {
-def apply(childWork: Work[WorkState.Merged], parentWork: Work[WorkState.Merged]): Unit
-}
+* those Sierra records that generate a collectionPath,
+* of those, it will only be triggered when the path has a `/`
+* of those, it will only change records when both a parent and a child have a path with `/`
+
+As such, it is unlikely to run on many records at once, when it does, it is unlikely to 
+modify many records at all.
