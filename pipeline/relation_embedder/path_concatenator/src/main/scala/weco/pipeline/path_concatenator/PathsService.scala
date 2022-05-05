@@ -13,17 +13,15 @@ import com.sksamuel.elastic4s.requests.searches.SearchRequest
 import weco.catalogue.internal_model.work.CollectionPath
 import weco.json.JsonUtil.exportDecoder
 
-
 case class ParentPathData(collectionPath: CollectionPath);
 case class ParentPathState();
 case class PathHit(
-                    data: ParentPathData
-  )
+  data: ParentPathData
+)
 
-
-class PathsService(elasticClient: ElasticClient,
-   index: Index
-)(implicit as: ActorSystem) extends Logging {
+class PathsService(elasticClient: ElasticClient, index: Index)(
+  implicit as: ActorSystem)
+    extends Logging {
   private val requestBuilder = new PathConcatenatorRequestBuilder(index)
 
   def getParentPath(path: String): Source[String, NotUsed] = {

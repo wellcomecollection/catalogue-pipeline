@@ -15,14 +15,13 @@ import scala.collection.immutable
 import scala.concurrent.Future
 import weco.catalogue.internal_model.work.generators.WorkGenerators
 
-
-class PathsServiceTest  extends AnyFunSpec
-  with Matchers
-  with IndexFixtures
-  with ElasticsearchFixtures
-  with Akka
-  with WorkGenerators {
-
+class PathsServiceTest
+    extends AnyFunSpec
+    with Matchers
+    with IndexFixtures
+    with ElasticsearchFixtures
+    with Akka
+    with WorkGenerators {
 
   private def work(path: String): Work.Visible[Merged] =
     mergedWork(createSourceIdentifierWith(value = path))
@@ -94,7 +93,9 @@ class PathsServiceTest  extends AnyFunSpec
         insertIntoElasticsearch(index, works: _*)
         withActorSystem { implicit actorSystem =>
           whenReady(queryParentPath(service(index), childPath = "parent/child")) {
-            _ should contain theSameElementsAs  Vector("grandmother/parent", "grandfather/parent")
+            _ should contain theSameElementsAs Vector(
+              "grandmother/parent",
+              "grandfather/parent")
           }
         }
       }
@@ -102,7 +103,8 @@ class PathsServiceTest  extends AnyFunSpec
 
   }
 
-  def queryParentPath(service: PathsService, childPath: String)(implicit as: ActorSystem): Future[immutable.Seq[String]] =
+  def queryParentPath(service: PathsService, childPath: String)(
+    implicit as: ActorSystem): Future[immutable.Seq[String]] =
     service.getParentPath(childPath).runWith(Sink.seq[String])
 
 }

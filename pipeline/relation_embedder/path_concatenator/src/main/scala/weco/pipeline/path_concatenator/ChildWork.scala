@@ -58,7 +58,8 @@ object ChildWork {
       throw new IllegalArgumentException(
         s"$parentPath is not the parent of $childRoot")
     } else {
-      childPath.copy(path = pathJoin(parentPath.path +: childPath.path.split("/").tail))
+      childPath.copy(
+        path = pathJoin(parentPath.path +: childPath.path.split("/").tail))
     }
   }
 
