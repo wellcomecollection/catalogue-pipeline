@@ -52,5 +52,4 @@ class PathsService(elasticClient: ElasticClient, index: Index)(
       .map(searchHit => searchHit.safeTo[Work[Merged]].get)
   }
 
-
 }
