@@ -1,0 +1,1660 @@
+{
+  "description" : "a list of work with all the include-able fields",
+  "createdAt" : "2022-05-04T07:15:02.975Z",
+  "id" : "wchkoofm",
+  "document" : {
+    "debug" : {
+      "source" : {
+        "identifier" : {
+          "identifierType" : {
+            "id" : "calm-record-id"
+          },
+          "ontologyType" : "Work",
+          "value" : "mGMGKNlQnl"
+        },
+        "version" : 7,
+        "modifiedTime" : "2022-05-12T20:16:35Z"
+      },
+      "mergedTime" : "2022-05-12T20:16:35Z",
+      "indexedTime" : "2022-05-04T07:15:02.970Z",
+      "redirectSources" : [
+      ]
+    },
+    "state" : {
+      "sourceIdentifier" : {
+        "identifierType" : {
+          "id" : "calm-record-id"
+        },
+        "ontologyType" : "Work",
+        "value" : "mGMGKNlQnl"
+      },
+      "canonicalId" : "wchkoofm",
+      "mergedTime" : "2022-05-12T20:16:35Z",
+      "sourceModifiedTime" : "2022-05-12T20:16:35Z",
+      "indexedTime" : "2022-05-04T07:15:02.970Z",
+      "availabilities" : [
+        {
+          "id" : "closed-stores"
+        }
+      ],
+      "derivedData" : {
+        "contributorAgents" : [
+          "Person:person-Lu2Xsa",
+          "Person:person-m0dL6XAj"
+        ]
+      },
+      "relations" : {
+        "ancestors" : [
+          {
+            "id" : "jlsj0le6",
+            "title" : "title-6xTX4FOSl2",
+            "collectionPath" : null,
+            "workType" : "Standard",
+            "depth" : 0,
+            "numChildren" : 1,
+            "numDescendents" : 5
+          },
+          {
+            "id" : "foju3ifj",
+            "title" : "title-7i7vw7IwA2",
+            "collectionPath" : null,
+            "workType" : "Standard",
+            "depth" : 1,
+            "numChildren" : 3,
+            "numDescendents" : 4
+          }
+        ],
+        "children" : [
+          {
+            "id" : "0vc5ahxh",
+            "title" : "title-7ARDhjePka",
+            "collectionPath" : null,
+            "workType" : "Standard",
+            "depth" : 3,
+            "numChildren" : 0,
+            "numDescendents" : 0
+          }
+        ],
+        "siblingsPreceding" : [
+          {
+            "id" : "8njamxnt",
+            "title" : "title-q1cemmaiXr",
+            "collectionPath" : null,
+            "workType" : "Standard",
+            "depth" : 2,
+            "numChildren" : 0,
+            "numDescendents" : 0
+          }
+        ],
+        "siblingsSucceeding" : [
+          {
+            "id" : "3juhm6om",
+            "title" : "title-vZsK5XCjfc",
+            "collectionPath" : null,
+            "workType" : "Standard",
+            "depth" : 2,
+            "numChildren" : 0,
+            "numDescendents" : 0
+          }
+        ]
+      }
+    },
+    "data" : {
+      "title" : "A work with all the include-able fields",
+      "otherIdentifiers" : [
+        {
+          "identifierType" : {
+            "id" : "miro-image-number"
+          },
+          "ontologyType" : "Work",
+          "value" : "eG0HzUX6yZ"
+        }
+      ],
+      "alternativeTitles" : [
+      ],
+      "format" : null,
+      "description" : null,
+      "physicalDescription" : null,
+      "lettering" : null,
+      "createdDate" : null,
+      "subjects" : [
+        {
+          "id" : {
+            "type" : "Unidentifiable"
+          },
+          "label" : "5LLMVvWxgX",
+          "concepts" : [
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "RSdhZCyeulPkNaP",
+              "type" : "Concept"
+            },
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "0ClgfwapmD7jxio",
+              "type" : "Concept"
+            },
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "pplRbppKZMbAm0v",
+              "type" : "Concept"
+            }
+          ]
+        },
+        {
+          "id" : {
+            "type" : "Unidentifiable"
+          },
+          "label" : "PSF4EIy1m2",
+          "concepts" : [
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "2EMkmWOjlKvfRGK",
+              "type" : "Concept"
+            },
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "p22pTPNg1Fb7hLZ",
+              "type" : "Concept"
+            },
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "CWP2ToHCa1SqaQC",
+              "type" : "Concept"
+            }
+          ]
+        }
+      ],
+      "genres" : [
+        {
+          "label" : "D06AWAxFOW",
+          "concepts" : [
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "2wBgqY0L1ZF1PYZ",
+              "type" : "Concept"
+            },
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "IWOP5xioqrw7Ohi",
+              "type" : "Concept"
+            },
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "AUBgzynPVyy1Bmo",
+              "type" : "Concept"
+            }
+          ]
+        },
+        {
+          "label" : "iqJbe6G99a",
+          "concepts" : [
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "HcLRRBkyn24xZvM",
+              "type" : "Concept"
+            },
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "lY5yFST4hzY1cKo",
+              "type" : "Concept"
+            },
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "WGXrGHlOd9kGPDW",
+              "type" : "Concept"
+            }
+          ]
+        }
+      ],
+      "contributors" : [
+        {
+          "id" : {
+            "type" : "Unidentifiable"
+          },
+          "agent" : {
+            "id" : {
+              "type" : "Unidentifiable"
+            },
+            "label" : "person-Lu2Xsa",
+            "prefix" : null,
+            "numeration" : null,
+            "type" : "Person"
+          },
+          "roles" : [
+          ]
+        },
+        {
+          "id" : {
+            "type" : "Unidentifiable"
+          },
+          "agent" : {
+            "id" : {
+              "type" : "Unidentifiable"
+            },
+            "label" : "person-m0dL6XAj",
+            "prefix" : null,
+            "numeration" : null,
+            "type" : "Person"
+          },
+          "roles" : [
+          ]
+        }
+      ],
+      "thumbnail" : null,
+      "production" : [
+        {
+          "label" : "dGFZw7o2IL5cpTq2szbf8JXFR",
+          "places" : [
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "L51HaiqMvP"
+            }
+          ],
+          "agents" : [
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "e7X4srn7yL",
+              "prefix" : null,
+              "numeration" : null,
+              "type" : "Person"
+            }
+          ],
+          "dates" : [
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "EuJLA",
+              "range" : null
+            }
+          ],
+          "function" : null
+        },
+        {
+          "label" : "gnoMEDJADyhgl97NLnSGT3Ooi",
+          "places" : [
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "RibBOUDMpI"
+            }
+          ],
+          "agents" : [
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "THk4Fal6yy",
+              "prefix" : null,
+              "numeration" : null,
+              "type" : "Person"
+            }
+          ],
+          "dates" : [
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "c6PAy",
+              "range" : null
+            }
+          ],
+          "function" : null
+        }
+      ],
+      "languages" : [
+        {
+          "id" : "dCh",
+          "label" : "shi6cu"
+        },
+        {
+          "id" : "x20",
+          "label" : "O7GkIFx8"
+        },
+        {
+          "id" : "vXQ",
+          "label" : "PLHOqPv"
+        }
+      ],
+      "edition" : null,
+      "notes" : [
+        {
+          "noteType" : {
+            "id" : "location-of-duplicates",
+            "label" : "Location of duplicates"
+          },
+          "contents" : "CsB8YxC3"
+        },
+        {
+          "noteType" : {
+            "id" : "location-of-duplicates",
+            "label" : "Location of duplicates"
+          },
+          "contents" : "Isn6KqXfd"
+        },
+        {
+          "noteType" : {
+            "id" : "funding-info",
+            "label" : "Funding information"
+          },
+          "contents" : "n6NMM9"
+        },
+        {
+          "noteType" : {
+            "id" : "general-note",
+            "label" : "Notes"
+          },
+          "contents" : "3Au9wn3b"
+        }
+      ],
+      "duration" : null,
+      "items" : [
+        {
+          "id" : {
+            "canonicalId" : "kdcpazds",
+            "sourceIdentifier" : {
+              "identifierType" : {
+                "id" : "calm-record-id"
+              },
+              "ontologyType" : "Work",
+              "value" : "CnNOdtzVPO"
+            },
+            "otherIdentifiers" : [
+            ],
+            "type" : "Identified"
+          },
+          "title" : null,
+          "note" : null,
+          "locations" : [
+            {
+              "url" : "https://iiif.wellcomecollection.org/image/kLM.jpg/info.json",
+              "locationType" : {
+                "id" : "iiif-presentation"
+              },
+              "license" : {
+                "id" : "cc-by"
+              },
+              "credit" : null,
+              "linkText" : null,
+              "accessConditions" : [
+              ],
+              "type" : "DigitalLocation"
+            }
+          ]
+        },
+        {
+          "id" : {
+            "canonicalId" : "ujmsjqoe",
+            "sourceIdentifier" : {
+              "identifierType" : {
+                "id" : "calm-record-id"
+              },
+              "ontologyType" : "Work",
+              "value" : "ezIlsnnb0Z"
+            },
+            "otherIdentifiers" : [
+            ],
+            "type" : "Identified"
+          },
+          "title" : null,
+          "note" : null,
+          "locations" : [
+            {
+              "url" : "https://iiif.wellcomecollection.org/image/mrK.jpg/info.json",
+              "locationType" : {
+                "id" : "iiif-presentation"
+              },
+              "license" : {
+                "id" : "cc-by"
+              },
+              "credit" : null,
+              "linkText" : null,
+              "accessConditions" : [
+              ],
+              "type" : "DigitalLocation"
+            }
+          ]
+        },
+        {
+          "id" : {
+            "type" : "Unidentifiable"
+          },
+          "title" : null,
+          "note" : null,
+          "locations" : [
+            {
+              "url" : "https://iiif.wellcomecollection.org/image/gdc.jpg/info.json",
+              "locationType" : {
+                "id" : "iiif-presentation"
+              },
+              "license" : {
+                "id" : "cc-by"
+              },
+              "credit" : null,
+              "linkText" : "Link text: WLHpAvI",
+              "accessConditions" : [
+              ],
+              "type" : "DigitalLocation"
+            }
+          ]
+        }
+      ],
+      "holdings" : [
+        {
+          "note" : null,
+          "enumeration" : [
+            "UNX23BmQh",
+            "YWQPxyMQ",
+            "7dlsrFBR8Q",
+            "LIBD4V4eC",
+            "5soceYhE",
+            "Xco4CAZl",
+            "NX6YfF9ung",
+            "68x12CqOH",
+            "tD46Q9sHcs"
+          ],
+          "location" : null
+        },
+        {
+          "note" : "TmY1as",
+          "enumeration" : [
+            "nsuXoz",
+            "RLuAZL",
+            "a0DogXkz2",
+            "M4S3tuy",
+            "RUMGx0",
+            "x6rK1BxL",
+            "cV6Wb9Wq"
+          ],
+          "location" : {
+            "locationType" : {
+              "id" : "closed-stores"
+            },
+            "label" : "locationLabel",
+            "license" : {
+              "id" : "ogl"
+            },
+            "shelfmark" : null,
+            "accessConditions" : [
+            ],
+            "type" : "PhysicalLocation"
+          }
+        },
+        {
+          "note" : "Bu2SeMYa",
+          "enumeration" : [
+            "LrUlQ4SYJ",
+            "p3ABwY",
+            "lV04E1A9I2",
+            "3fXDCODR4",
+            "FZmdTEa6",
+            "UlrveN",
+            "yaDKbXVDr",
+            "ZWmlAid",
+            "7LBYp6y",
+            "0xMucBp"
+          ],
+          "location" : {
+            "locationType" : {
+              "id" : "closed-stores"
+            },
+            "label" : "locationLabel",
+            "license" : {
+              "id" : "pdm"
+            },
+            "shelfmark" : "Shelfmark: GLGn78mfcQ",
+            "accessConditions" : [
+            ],
+            "type" : "PhysicalLocation"
+          }
+        }
+      ],
+      "collectionPath" : null,
+      "referenceNumber" : null,
+      "imageData" : [
+        {
+          "id" : {
+            "canonicalId" : "jo80nlaw",
+            "sourceIdentifier" : {
+              "identifierType" : {
+                "id" : "miro-image-number"
+              },
+              "ontologyType" : "Work",
+              "value" : "QVeBY8dO1D"
+            },
+            "otherIdentifiers" : [
+            ]
+          },
+          "version" : 1,
+          "locations" : [
+            {
+              "url" : "https://iiif.wellcomecollection.org/image/0uQ.jpg/info.json",
+              "locationType" : {
+                "id" : "iiif-image"
+              },
+              "license" : {
+                "id" : "cc-by"
+              },
+              "credit" : null,
+              "linkText" : "Link text: iwlz0oy",
+              "accessConditions" : [
+              ]
+            }
+          ]
+        },
+        {
+          "id" : {
+            "canonicalId" : "gbgygwvo",
+            "sourceIdentifier" : {
+              "identifierType" : {
+                "id" : "miro-image-number"
+              },
+              "ontologyType" : "Work",
+              "value" : "MnVGMJB4Cu"
+            },
+            "otherIdentifiers" : [
+            ]
+          },
+          "version" : 1,
+          "locations" : [
+            {
+              "url" : "https://iiif.wellcomecollection.org/image/Sy9.jpg/info.json",
+              "locationType" : {
+                "id" : "iiif-image"
+              },
+              "license" : {
+                "id" : "cc-by"
+              },
+              "credit" : "Credit line: 3e17RLNSL",
+              "linkText" : "Link text: ReQprYo",
+              "accessConditions" : [
+              ]
+            }
+          ]
+        }
+      ],
+      "workType" : "Standard"
+    },
+    "display" : {
+      "id" : "wchkoofm",
+      "title" : "A work with all the include-able fields",
+      "alternativeTitles" : [
+      ],
+      "contributors" : [
+        {
+          "agent" : {
+            "label" : "person-Lu2Xsa",
+            "type" : "Person"
+          },
+          "roles" : [
+          ],
+          "type" : "Contributor"
+        },
+        {
+          "agent" : {
+            "label" : "person-m0dL6XAj",
+            "type" : "Person"
+          },
+          "roles" : [
+          ],
+          "type" : "Contributor"
+        }
+      ],
+      "identifiers" : [
+        {
+          "identifierType" : {
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
+            "type" : "IdentifierType"
+          },
+          "value" : "mGMGKNlQnl",
+          "type" : "Identifier"
+        },
+        {
+          "identifierType" : {
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
+            "type" : "IdentifierType"
+          },
+          "value" : "eG0HzUX6yZ",
+          "type" : "Identifier"
+        }
+      ],
+      "subjects" : [
+        {
+          "label" : "5LLMVvWxgX",
+          "concepts" : [
+            {
+              "label" : "RSdhZCyeulPkNaP",
+              "type" : "Concept"
+            },
+            {
+              "label" : "0ClgfwapmD7jxio",
+              "type" : "Concept"
+            },
+            {
+              "label" : "pplRbppKZMbAm0v",
+              "type" : "Concept"
+            }
+          ],
+          "type" : "Subject"
+        },
+        {
+          "label" : "PSF4EIy1m2",
+          "concepts" : [
+            {
+              "label" : "2EMkmWOjlKvfRGK",
+              "type" : "Concept"
+            },
+            {
+              "label" : "p22pTPNg1Fb7hLZ",
+              "type" : "Concept"
+            },
+            {
+              "label" : "CWP2ToHCa1SqaQC",
+              "type" : "Concept"
+            }
+          ],
+          "type" : "Subject"
+        }
+      ],
+      "genres" : [
+        {
+          "label" : "D06AWAxFOW",
+          "concepts" : [
+            {
+              "label" : "2wBgqY0L1ZF1PYZ",
+              "type" : "Concept"
+            },
+            {
+              "label" : "IWOP5xioqrw7Ohi",
+              "type" : "Concept"
+            },
+            {
+              "label" : "AUBgzynPVyy1Bmo",
+              "type" : "Concept"
+            }
+          ],
+          "type" : "Genre"
+        },
+        {
+          "label" : "iqJbe6G99a",
+          "concepts" : [
+            {
+              "label" : "HcLRRBkyn24xZvM",
+              "type" : "Concept"
+            },
+            {
+              "label" : "lY5yFST4hzY1cKo",
+              "type" : "Concept"
+            },
+            {
+              "label" : "WGXrGHlOd9kGPDW",
+              "type" : "Concept"
+            }
+          ],
+          "type" : "Genre"
+        }
+      ],
+      "items" : [
+        {
+          "id" : "kdcpazds",
+          "identifiers" : [
+            {
+              "identifierType" : {
+                "id" : "calm-record-id",
+                "label" : "Calm RecordIdentifier",
+                "type" : "IdentifierType"
+              },
+              "value" : "CnNOdtzVPO",
+              "type" : "Identifier"
+            }
+          ],
+          "locations" : [
+            {
+              "locationType" : {
+                "id" : "iiif-presentation",
+                "label" : "IIIF Presentation API",
+                "type" : "LocationType"
+              },
+              "url" : "https://iiif.wellcomecollection.org/image/kLM.jpg/info.json",
+              "license" : {
+                "id" : "cc-by",
+                "label" : "Attribution 4.0 International (CC BY 4.0)",
+                "url" : "http://creativecommons.org/licenses/by/4.0/",
+                "type" : "License"
+              },
+              "accessConditions" : [
+              ],
+              "type" : "DigitalLocation"
+            }
+          ],
+          "type" : "Item"
+        },
+        {
+          "id" : "ujmsjqoe",
+          "identifiers" : [
+            {
+              "identifierType" : {
+                "id" : "calm-record-id",
+                "label" : "Calm RecordIdentifier",
+                "type" : "IdentifierType"
+              },
+              "value" : "ezIlsnnb0Z",
+              "type" : "Identifier"
+            }
+          ],
+          "locations" : [
+            {
+              "locationType" : {
+                "id" : "iiif-presentation",
+                "label" : "IIIF Presentation API",
+                "type" : "LocationType"
+              },
+              "url" : "https://iiif.wellcomecollection.org/image/mrK.jpg/info.json",
+              "license" : {
+                "id" : "cc-by",
+                "label" : "Attribution 4.0 International (CC BY 4.0)",
+                "url" : "http://creativecommons.org/licenses/by/4.0/",
+                "type" : "License"
+              },
+              "accessConditions" : [
+              ],
+              "type" : "DigitalLocation"
+            }
+          ],
+          "type" : "Item"
+        },
+        {
+          "identifiers" : [
+          ],
+          "locations" : [
+            {
+              "locationType" : {
+                "id" : "iiif-presentation",
+                "label" : "IIIF Presentation API",
+                "type" : "LocationType"
+              },
+              "url" : "https://iiif.wellcomecollection.org/image/gdc.jpg/info.json",
+              "linkText" : "Link text: WLHpAvI",
+              "license" : {
+                "id" : "cc-by",
+                "label" : "Attribution 4.0 International (CC BY 4.0)",
+                "url" : "http://creativecommons.org/licenses/by/4.0/",
+                "type" : "License"
+              },
+              "accessConditions" : [
+              ],
+              "type" : "DigitalLocation"
+            }
+          ],
+          "type" : "Item"
+        }
+      ],
+      "holdings" : [
+        {
+          "enumeration" : [
+            "UNX23BmQh",
+            "YWQPxyMQ",
+            "7dlsrFBR8Q",
+            "LIBD4V4eC",
+            "5soceYhE",
+            "Xco4CAZl",
+            "NX6YfF9ung",
+            "68x12CqOH",
+            "tD46Q9sHcs"
+          ],
+          "type" : "Holdings"
+        },
+        {
+          "note" : "TmY1as",
+          "enumeration" : [
+            "nsuXoz",
+            "RLuAZL",
+            "a0DogXkz2",
+            "M4S3tuy",
+            "RUMGx0",
+            "x6rK1BxL",
+            "cV6Wb9Wq"
+          ],
+          "location" : {
+            "locationType" : {
+              "id" : "closed-stores",
+              "label" : "Closed stores",
+              "type" : "LocationType"
+            },
+            "label" : "locationLabel",
+            "license" : {
+              "id" : "ogl",
+              "label" : "Open Government Licence",
+              "url" : "http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+              "type" : "License"
+            },
+            "accessConditions" : [
+            ],
+            "type" : "PhysicalLocation"
+          },
+          "type" : "Holdings"
+        },
+        {
+          "note" : "Bu2SeMYa",
+          "enumeration" : [
+            "LrUlQ4SYJ",
+            "p3ABwY",
+            "lV04E1A9I2",
+            "3fXDCODR4",
+            "FZmdTEa6",
+            "UlrveN",
+            "yaDKbXVDr",
+            "ZWmlAid",
+            "7LBYp6y",
+            "0xMucBp"
+          ],
+          "location" : {
+            "locationType" : {
+              "id" : "closed-stores",
+              "label" : "Closed stores",
+              "type" : "LocationType"
+            },
+            "label" : "locationLabel",
+            "license" : {
+              "id" : "pdm",
+              "label" : "Public Domain Mark",
+              "url" : "https://creativecommons.org/share-your-work/public-domain/pdm/",
+              "type" : "License"
+            },
+            "shelfmark" : "Shelfmark: GLGn78mfcQ",
+            "accessConditions" : [
+            ],
+            "type" : "PhysicalLocation"
+          },
+          "type" : "Holdings"
+        }
+      ],
+      "availabilities" : [
+        {
+          "id" : "closed-stores",
+          "label" : "Closed stores",
+          "type" : "Availability"
+        }
+      ],
+      "production" : [
+        {
+          "label" : "dGFZw7o2IL5cpTq2szbf8JXFR",
+          "places" : [
+            {
+              "label" : "L51HaiqMvP",
+              "type" : "Place"
+            }
+          ],
+          "agents" : [
+            {
+              "label" : "e7X4srn7yL",
+              "type" : "Person"
+            }
+          ],
+          "dates" : [
+            {
+              "label" : "EuJLA",
+              "type" : "Period"
+            }
+          ],
+          "type" : "ProductionEvent"
+        },
+        {
+          "label" : "gnoMEDJADyhgl97NLnSGT3Ooi",
+          "places" : [
+            {
+              "label" : "RibBOUDMpI",
+              "type" : "Place"
+            }
+          ],
+          "agents" : [
+            {
+              "label" : "THk4Fal6yy",
+              "type" : "Person"
+            }
+          ],
+          "dates" : [
+            {
+              "label" : "c6PAy",
+              "type" : "Period"
+            }
+          ],
+          "type" : "ProductionEvent"
+        }
+      ],
+      "languages" : [
+        {
+          "id" : "dCh",
+          "label" : "shi6cu",
+          "type" : "Language"
+        },
+        {
+          "id" : "x20",
+          "label" : "O7GkIFx8",
+          "type" : "Language"
+        },
+        {
+          "id" : "vXQ",
+          "label" : "PLHOqPv",
+          "type" : "Language"
+        }
+      ],
+      "notes" : [
+        {
+          "contents" : [
+            "CsB8YxC3",
+            "Isn6KqXfd"
+          ],
+          "noteType" : {
+            "id" : "location-of-duplicates",
+            "label" : "Location of duplicates",
+            "type" : "NoteType"
+          },
+          "type" : "Note"
+        },
+        {
+          "contents" : [
+            "n6NMM9"
+          ],
+          "noteType" : {
+            "id" : "funding-info",
+            "label" : "Funding information",
+            "type" : "NoteType"
+          },
+          "type" : "Note"
+        },
+        {
+          "contents" : [
+            "3Au9wn3b"
+          ],
+          "noteType" : {
+            "id" : "general-note",
+            "label" : "Notes",
+            "type" : "NoteType"
+          },
+          "type" : "Note"
+        }
+      ],
+      "images" : [
+        {
+          "id" : "jo80nlaw",
+          "type" : "Image"
+        },
+        {
+          "id" : "gbgygwvo",
+          "type" : "Image"
+        }
+      ],
+      "parts" : [
+        {
+          "id" : "0vc5ahxh",
+          "title" : "title-7ARDhjePka",
+          "totalParts" : 0,
+          "totalDescendentParts" : 0,
+          "type" : "Work"
+        }
+      ],
+      "partOf" : [
+        {
+          "id" : "foju3ifj",
+          "title" : "title-7i7vw7IwA2",
+          "partOf" : [
+            {
+              "id" : "jlsj0le6",
+              "title" : "title-6xTX4FOSl2",
+              "totalParts" : 1,
+              "totalDescendentParts" : 5,
+              "type" : "Work"
+            }
+          ],
+          "totalParts" : 3,
+          "totalDescendentParts" : 4,
+          "type" : "Work"
+        }
+      ],
+      "precededBy" : [
+        {
+          "id" : "8njamxnt",
+          "title" : "title-q1cemmaiXr",
+          "totalParts" : 0,
+          "totalDescendentParts" : 0,
+          "type" : "Work"
+        }
+      ],
+      "succeededBy" : [
+        {
+          "id" : "3juhm6om",
+          "title" : "title-vZsK5XCjfc",
+          "totalParts" : 0,
+          "totalDescendentParts" : 0,
+          "type" : "Work"
+        }
+      ],
+      "type" : "Work"
+    },
+    "type" : "Visible"
+  },
+  "work" : {
+    "version" : 7,
+    "data" : {
+      "title" : "A work with all the include-able fields",
+      "otherIdentifiers" : [
+        {
+          "identifierType" : {
+            "id" : "miro-image-number"
+          },
+          "ontologyType" : "Work",
+          "value" : "eG0HzUX6yZ"
+        }
+      ],
+      "alternativeTitles" : [
+      ],
+      "format" : null,
+      "description" : null,
+      "physicalDescription" : null,
+      "lettering" : null,
+      "createdDate" : null,
+      "subjects" : [
+        {
+          "id" : {
+            "type" : "Unidentifiable"
+          },
+          "label" : "5LLMVvWxgX",
+          "concepts" : [
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "RSdhZCyeulPkNaP",
+              "type" : "Concept"
+            },
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "0ClgfwapmD7jxio",
+              "type" : "Concept"
+            },
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "pplRbppKZMbAm0v",
+              "type" : "Concept"
+            }
+          ]
+        },
+        {
+          "id" : {
+            "type" : "Unidentifiable"
+          },
+          "label" : "PSF4EIy1m2",
+          "concepts" : [
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "2EMkmWOjlKvfRGK",
+              "type" : "Concept"
+            },
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "p22pTPNg1Fb7hLZ",
+              "type" : "Concept"
+            },
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "CWP2ToHCa1SqaQC",
+              "type" : "Concept"
+            }
+          ]
+        }
+      ],
+      "genres" : [
+        {
+          "label" : "D06AWAxFOW",
+          "concepts" : [
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "2wBgqY0L1ZF1PYZ",
+              "type" : "Concept"
+            },
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "IWOP5xioqrw7Ohi",
+              "type" : "Concept"
+            },
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "AUBgzynPVyy1Bmo",
+              "type" : "Concept"
+            }
+          ]
+        },
+        {
+          "label" : "iqJbe6G99a",
+          "concepts" : [
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "HcLRRBkyn24xZvM",
+              "type" : "Concept"
+            },
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "lY5yFST4hzY1cKo",
+              "type" : "Concept"
+            },
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "WGXrGHlOd9kGPDW",
+              "type" : "Concept"
+            }
+          ]
+        }
+      ],
+      "contributors" : [
+        {
+          "id" : {
+            "type" : "Unidentifiable"
+          },
+          "agent" : {
+            "id" : {
+              "type" : "Unidentifiable"
+            },
+            "label" : "person-Lu2Xsa",
+            "prefix" : null,
+            "numeration" : null,
+            "type" : "Person"
+          },
+          "roles" : [
+          ]
+        },
+        {
+          "id" : {
+            "type" : "Unidentifiable"
+          },
+          "agent" : {
+            "id" : {
+              "type" : "Unidentifiable"
+            },
+            "label" : "person-m0dL6XAj",
+            "prefix" : null,
+            "numeration" : null,
+            "type" : "Person"
+          },
+          "roles" : [
+          ]
+        }
+      ],
+      "thumbnail" : null,
+      "production" : [
+        {
+          "label" : "dGFZw7o2IL5cpTq2szbf8JXFR",
+          "places" : [
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "L51HaiqMvP"
+            }
+          ],
+          "agents" : [
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "e7X4srn7yL",
+              "prefix" : null,
+              "numeration" : null,
+              "type" : "Person"
+            }
+          ],
+          "dates" : [
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "EuJLA",
+              "range" : null
+            }
+          ],
+          "function" : null
+        },
+        {
+          "label" : "gnoMEDJADyhgl97NLnSGT3Ooi",
+          "places" : [
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "RibBOUDMpI"
+            }
+          ],
+          "agents" : [
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "THk4Fal6yy",
+              "prefix" : null,
+              "numeration" : null,
+              "type" : "Person"
+            }
+          ],
+          "dates" : [
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "c6PAy",
+              "range" : null
+            }
+          ],
+          "function" : null
+        }
+      ],
+      "languages" : [
+        {
+          "id" : "dCh",
+          "label" : "shi6cu"
+        },
+        {
+          "id" : "x20",
+          "label" : "O7GkIFx8"
+        },
+        {
+          "id" : "vXQ",
+          "label" : "PLHOqPv"
+        }
+      ],
+      "edition" : null,
+      "notes" : [
+        {
+          "noteType" : {
+            "id" : "location-of-duplicates",
+            "label" : "Location of duplicates"
+          },
+          "contents" : "CsB8YxC3"
+        },
+        {
+          "noteType" : {
+            "id" : "location-of-duplicates",
+            "label" : "Location of duplicates"
+          },
+          "contents" : "Isn6KqXfd"
+        },
+        {
+          "noteType" : {
+            "id" : "funding-info",
+            "label" : "Funding information"
+          },
+          "contents" : "n6NMM9"
+        },
+        {
+          "noteType" : {
+            "id" : "general-note",
+            "label" : "Notes"
+          },
+          "contents" : "3Au9wn3b"
+        }
+      ],
+      "duration" : null,
+      "items" : [
+        {
+          "id" : {
+            "canonicalId" : "kdcpazds",
+            "sourceIdentifier" : {
+              "identifierType" : {
+                "id" : "calm-record-id"
+              },
+              "ontologyType" : "Work",
+              "value" : "CnNOdtzVPO"
+            },
+            "otherIdentifiers" : [
+            ],
+            "type" : "Identified"
+          },
+          "title" : null,
+          "note" : null,
+          "locations" : [
+            {
+              "url" : "https://iiif.wellcomecollection.org/image/kLM.jpg/info.json",
+              "locationType" : {
+                "id" : "iiif-presentation"
+              },
+              "license" : {
+                "id" : "cc-by"
+              },
+              "credit" : null,
+              "linkText" : null,
+              "accessConditions" : [
+              ],
+              "type" : "DigitalLocation"
+            }
+          ]
+        },
+        {
+          "id" : {
+            "canonicalId" : "ujmsjqoe",
+            "sourceIdentifier" : {
+              "identifierType" : {
+                "id" : "calm-record-id"
+              },
+              "ontologyType" : "Work",
+              "value" : "ezIlsnnb0Z"
+            },
+            "otherIdentifiers" : [
+            ],
+            "type" : "Identified"
+          },
+          "title" : null,
+          "note" : null,
+          "locations" : [
+            {
+              "url" : "https://iiif.wellcomecollection.org/image/mrK.jpg/info.json",
+              "locationType" : {
+                "id" : "iiif-presentation"
+              },
+              "license" : {
+                "id" : "cc-by"
+              },
+              "credit" : null,
+              "linkText" : null,
+              "accessConditions" : [
+              ],
+              "type" : "DigitalLocation"
+            }
+          ]
+        },
+        {
+          "id" : {
+            "type" : "Unidentifiable"
+          },
+          "title" : null,
+          "note" : null,
+          "locations" : [
+            {
+              "url" : "https://iiif.wellcomecollection.org/image/gdc.jpg/info.json",
+              "locationType" : {
+                "id" : "iiif-presentation"
+              },
+              "license" : {
+                "id" : "cc-by"
+              },
+              "credit" : null,
+              "linkText" : "Link text: WLHpAvI",
+              "accessConditions" : [
+              ],
+              "type" : "DigitalLocation"
+            }
+          ]
+        }
+      ],
+      "holdings" : [
+        {
+          "note" : null,
+          "enumeration" : [
+            "UNX23BmQh",
+            "YWQPxyMQ",
+            "7dlsrFBR8Q",
+            "LIBD4V4eC",
+            "5soceYhE",
+            "Xco4CAZl",
+            "NX6YfF9ung",
+            "68x12CqOH",
+            "tD46Q9sHcs"
+          ],
+          "location" : null
+        },
+        {
+          "note" : "TmY1as",
+          "enumeration" : [
+            "nsuXoz",
+            "RLuAZL",
+            "a0DogXkz2",
+            "M4S3tuy",
+            "RUMGx0",
+            "x6rK1BxL",
+            "cV6Wb9Wq"
+          ],
+          "location" : {
+            "locationType" : {
+              "id" : "closed-stores"
+            },
+            "label" : "locationLabel",
+            "license" : {
+              "id" : "ogl"
+            },
+            "shelfmark" : null,
+            "accessConditions" : [
+            ],
+            "type" : "PhysicalLocation"
+          }
+        },
+        {
+          "note" : "Bu2SeMYa",
+          "enumeration" : [
+            "LrUlQ4SYJ",
+            "p3ABwY",
+            "lV04E1A9I2",
+            "3fXDCODR4",
+            "FZmdTEa6",
+            "UlrveN",
+            "yaDKbXVDr",
+            "ZWmlAid",
+            "7LBYp6y",
+            "0xMucBp"
+          ],
+          "location" : {
+            "locationType" : {
+              "id" : "closed-stores"
+            },
+            "label" : "locationLabel",
+            "license" : {
+              "id" : "pdm"
+            },
+            "shelfmark" : "Shelfmark: GLGn78mfcQ",
+            "accessConditions" : [
+            ],
+            "type" : "PhysicalLocation"
+          }
+        }
+      ],
+      "collectionPath" : null,
+      "referenceNumber" : null,
+      "imageData" : [
+        {
+          "id" : {
+            "canonicalId" : "jo80nlaw",
+            "sourceIdentifier" : {
+              "identifierType" : {
+                "id" : "miro-image-number"
+              },
+              "ontologyType" : "Work",
+              "value" : "QVeBY8dO1D"
+            },
+            "otherIdentifiers" : [
+            ]
+          },
+          "version" : 1,
+          "locations" : [
+            {
+              "url" : "https://iiif.wellcomecollection.org/image/0uQ.jpg/info.json",
+              "locationType" : {
+                "id" : "iiif-image"
+              },
+              "license" : {
+                "id" : "cc-by"
+              },
+              "credit" : null,
+              "linkText" : "Link text: iwlz0oy",
+              "accessConditions" : [
+              ]
+            }
+          ]
+        },
+        {
+          "id" : {
+            "canonicalId" : "gbgygwvo",
+            "sourceIdentifier" : {
+              "identifierType" : {
+                "id" : "miro-image-number"
+              },
+              "ontologyType" : "Work",
+              "value" : "MnVGMJB4Cu"
+            },
+            "otherIdentifiers" : [
+            ]
+          },
+          "version" : 1,
+          "locations" : [
+            {
+              "url" : "https://iiif.wellcomecollection.org/image/Sy9.jpg/info.json",
+              "locationType" : {
+                "id" : "iiif-image"
+              },
+              "license" : {
+                "id" : "cc-by"
+              },
+              "credit" : "Credit line: 3e17RLNSL",
+              "linkText" : "Link text: ReQprYo",
+              "accessConditions" : [
+              ]
+            }
+          ]
+        }
+      ],
+      "workType" : "Standard"
+    },
+    "state" : {
+      "sourceIdentifier" : {
+        "identifierType" : {
+          "id" : "calm-record-id"
+        },
+        "ontologyType" : "Work",
+        "value" : "mGMGKNlQnl"
+      },
+      "canonicalId" : "wchkoofm",
+      "mergedTime" : "2022-05-12T20:16:35Z",
+      "sourceModifiedTime" : "2022-05-12T20:16:35Z",
+      "indexedTime" : "2022-05-04T07:15:02.975Z",
+      "availabilities" : [
+        {
+          "id" : "closed-stores"
+        }
+      ],
+      "derivedData" : {
+        "contributorAgents" : [
+          "Person:person-Lu2Xsa",
+          "Person:person-m0dL6XAj"
+        ]
+      },
+      "relations" : {
+        "ancestors" : [
+          {
+            "id" : "jlsj0le6",
+            "title" : "title-6xTX4FOSl2",
+            "collectionPath" : null,
+            "workType" : "Standard",
+            "depth" : 0,
+            "numChildren" : 1,
+            "numDescendents" : 5
+          },
+          {
+            "id" : "foju3ifj",
+            "title" : "title-7i7vw7IwA2",
+            "collectionPath" : null,
+            "workType" : "Standard",
+            "depth" : 1,
+            "numChildren" : 3,
+            "numDescendents" : 4
+          }
+        ],
+        "children" : [
+          {
+            "id" : "0vc5ahxh",
+            "title" : "title-7ARDhjePka",
+            "collectionPath" : null,
+            "workType" : "Standard",
+            "depth" : 3,
+            "numChildren" : 0,
+            "numDescendents" : 0
+          }
+        ],
+        "siblingsPreceding" : [
+          {
+            "id" : "8njamxnt",
+            "title" : "title-q1cemmaiXr",
+            "collectionPath" : null,
+            "workType" : "Standard",
+            "depth" : 2,
+            "numChildren" : 0,
+            "numDescendents" : 0
+          }
+        ],
+        "siblingsSucceeding" : [
+          {
+            "id" : "3juhm6om",
+            "title" : "title-vZsK5XCjfc",
+            "collectionPath" : null,
+            "workType" : "Standard",
+            "depth" : 2,
+            "numChildren" : 0,
+            "numDescendents" : 0
+          }
+        ]
+      }
+    },
+    "redirectSources" : [
+    ],
+    "type" : "Visible"
+  }
+}

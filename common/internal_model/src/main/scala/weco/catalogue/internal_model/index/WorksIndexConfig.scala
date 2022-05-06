@@ -224,15 +224,11 @@ object WorksIndexConfig extends IndexConfigFields {
         search,
         keywordField("type"),
         data.withDynamic("false"),
-        objectField("invisibilityReasons")
-          .fields(keywordField("type"))
-          .withDynamic("false"),
-        objectField("deletedReason")
-          .fields(keywordField("type"))
-          .withDynamic("false"),
         objectField("redirectTarget").withDynamic("false"),
-        objectField("redirectSources").withDynamic("false"),
-        version
+        // These fields contain debugging information and the display document used by
+        // the API, but wwe don't want to index them -- they're just arbitrary JSON.
+        ObjectField("debug").withEnabled(false),
+        ObjectField("display").withEnabled(false)
       )
     },
     DynamicMapping.Strict,

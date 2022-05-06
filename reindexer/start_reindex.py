@@ -249,6 +249,31 @@ def start_reindex(ctx, src, dst, mode):
         parameters=parameters,
     )
 
+    start_reindexer_tasks(session)
+
+
+def start_reindexer_tasks(sess):
+    """
+    To make the reindex start immediately, update the desired count of
+    the reindexer service.
+
+    If we wait for the reindexer to start based on our regular autoscaling,
+    we have to wait up to 15 minutes for the queue to move out of the
+    inactive state.  This is mildly annoying.
+
+    See https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-monitoring-using-cloudwatch.html
+
+    """
+    ecs_client = sess.client("ecs")
+
+    resp = ecs_client.describe_services(cluster="reindexer", services=["reindexer"])
+    service = resp["services"][0]
+
+    if service["desiredCount"] >= 3:
+        return
+
+    ecs_client.update_service(cluster="reindexer", service="reindexer", desiredCount=3)
+
 
 if __name__ == "__main__":
     sts = boto3.client("sts")
@@ -262,4 +287,5 @@ if __name__ == "__main__":
         aws_session_token=response["Credentials"]["SessionToken"],
         region_name="eu-west-1",
     )
+
     start_reindex()

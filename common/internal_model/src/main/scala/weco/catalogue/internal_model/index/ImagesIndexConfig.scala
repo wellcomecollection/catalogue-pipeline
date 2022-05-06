@@ -90,7 +90,10 @@ object ImagesIndexConfig extends IndexConfigFields {
           .fields(
             objectField("license").fields(keywordField("id"))
           )
-          .withDynamic("false")
+          .withDynamic("false"),
+        // This field contains the display document used by the API, but we don't want
+        // to index it -- it's just an arbitrary blob of JSON.
+        ObjectField("display").withEnabled(false)
       )
 
       // Here we set dynamic strict to be sure the object vaguely looks like an

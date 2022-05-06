@@ -1,0 +1,311 @@
+{
+  "description" : "a work with different concepts in the genre",
+  "createdAt" : "2022-05-04T07:15:03.057Z",
+  "id" : "lhrstrzi",
+  "document" : {
+    "debug" : {
+      "source" : {
+        "identifier" : {
+          "identifierType" : {
+            "id" : "sierra-system-number"
+          },
+          "ontologyType" : "Work",
+          "value" : "agAbkJTEEo"
+        },
+        "version" : 100,
+        "modifiedTime" : "2022-04-08T13:14:18Z"
+      },
+      "mergedTime" : "2022-04-08T13:14:18Z",
+      "indexedTime" : "2022-05-04T07:15:03.053Z",
+      "redirectSources" : [
+      ]
+    },
+    "state" : {
+      "sourceIdentifier" : {
+        "identifierType" : {
+          "id" : "sierra-system-number"
+        },
+        "ontologyType" : "Work",
+        "value" : "agAbkJTEEo"
+      },
+      "canonicalId" : "lhrstrzi",
+      "mergedTime" : "2022-04-08T13:14:18Z",
+      "sourceModifiedTime" : "2022-04-08T13:14:18Z",
+      "indexedTime" : "2022-05-04T07:15:03.053Z",
+      "availabilities" : [
+      ],
+      "derivedData" : {
+        "contributorAgents" : [
+        ]
+      },
+      "relations" : {
+        "ancestors" : [
+        ],
+        "children" : [
+        ],
+        "siblingsPreceding" : [
+        ],
+        "siblingsSucceeding" : [
+        ]
+      }
+    },
+    "data" : {
+      "title" : "A work with different concepts in the genre",
+      "otherIdentifiers" : [
+      ],
+      "alternativeTitles" : [
+      ],
+      "format" : null,
+      "description" : null,
+      "physicalDescription" : null,
+      "lettering" : null,
+      "createdDate" : null,
+      "subjects" : [
+      ],
+      "genres" : [
+        {
+          "label" : "Electronic books",
+          "concepts" : [
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "Conceptual Conversations",
+              "type" : "Concept"
+            },
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "Pleasant Paris",
+              "type" : "Place"
+            },
+            {
+              "id" : {
+                "canonicalId" : "gougtipk",
+                "sourceIdentifier" : {
+                  "identifierType" : {
+                    "id" : "calm-record-id"
+                  },
+                  "ontologyType" : "Period",
+                  "value" : "XpEBp6sf3W"
+                },
+                "otherIdentifiers" : [
+                ],
+                "type" : "Identified"
+              },
+              "label" : "Past Prehistory",
+              "range" : null,
+              "type" : "Period"
+            }
+          ]
+        }
+      ],
+      "contributors" : [
+      ],
+      "thumbnail" : null,
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "edition" : null,
+      "notes" : [
+      ],
+      "duration" : null,
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "collectionPath" : null,
+      "referenceNumber" : null,
+      "imageData" : [
+      ],
+      "workType" : "Standard"
+    },
+    "display" : {
+      "id" : "lhrstrzi",
+      "title" : "A work with different concepts in the genre",
+      "alternativeTitles" : [
+      ],
+      "contributors" : [
+      ],
+      "identifiers" : [
+        {
+          "identifierType" : {
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
+            "type" : "IdentifierType"
+          },
+          "value" : "agAbkJTEEo",
+          "type" : "Identifier"
+        }
+      ],
+      "subjects" : [
+      ],
+      "genres" : [
+        {
+          "label" : "Electronic books",
+          "concepts" : [
+            {
+              "label" : "Conceptual Conversations",
+              "type" : "Concept"
+            },
+            {
+              "label" : "Pleasant Paris",
+              "type" : "Place"
+            },
+            {
+              "id" : "gougtipk",
+              "identifiers" : [
+                {
+                  "identifierType" : {
+                    "id" : "calm-record-id",
+                    "label" : "Calm RecordIdentifier",
+                    "type" : "IdentifierType"
+                  },
+                  "value" : "XpEBp6sf3W",
+                  "type" : "Identifier"
+                }
+              ],
+              "label" : "Past Prehistory",
+              "type" : "Period"
+            }
+          ],
+          "type" : "Genre"
+        }
+      ],
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "availabilities" : [
+      ],
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "notes" : [
+      ],
+      "images" : [
+      ],
+      "parts" : [
+      ],
+      "partOf" : [
+      ],
+      "precededBy" : [
+      ],
+      "succeededBy" : [
+      ],
+      "type" : "Work"
+    },
+    "type" : "Visible"
+  },
+  "work" : {
+    "version" : 100,
+    "data" : {
+      "title" : "A work with different concepts in the genre",
+      "otherIdentifiers" : [
+      ],
+      "alternativeTitles" : [
+      ],
+      "format" : null,
+      "description" : null,
+      "physicalDescription" : null,
+      "lettering" : null,
+      "createdDate" : null,
+      "subjects" : [
+      ],
+      "genres" : [
+        {
+          "label" : "Electronic books",
+          "concepts" : [
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "Conceptual Conversations",
+              "type" : "Concept"
+            },
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "Pleasant Paris",
+              "type" : "Place"
+            },
+            {
+              "id" : {
+                "canonicalId" : "gougtipk",
+                "sourceIdentifier" : {
+                  "identifierType" : {
+                    "id" : "calm-record-id"
+                  },
+                  "ontologyType" : "Period",
+                  "value" : "XpEBp6sf3W"
+                },
+                "otherIdentifiers" : [
+                ],
+                "type" : "Identified"
+              },
+              "label" : "Past Prehistory",
+              "range" : null,
+              "type" : "Period"
+            }
+          ]
+        }
+      ],
+      "contributors" : [
+      ],
+      "thumbnail" : null,
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "edition" : null,
+      "notes" : [
+      ],
+      "duration" : null,
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "collectionPath" : null,
+      "referenceNumber" : null,
+      "imageData" : [
+      ],
+      "workType" : "Standard"
+    },
+    "state" : {
+      "sourceIdentifier" : {
+        "identifierType" : {
+          "id" : "sierra-system-number"
+        },
+        "ontologyType" : "Work",
+        "value" : "agAbkJTEEo"
+      },
+      "canonicalId" : "lhrstrzi",
+      "mergedTime" : "2022-04-08T13:14:18Z",
+      "sourceModifiedTime" : "2022-04-08T13:14:18Z",
+      "indexedTime" : "2022-05-04T07:15:03.057Z",
+      "availabilities" : [
+      ],
+      "derivedData" : {
+        "contributorAgents" : [
+        ]
+      },
+      "relations" : {
+        "ancestors" : [
+        ],
+        "children" : [
+        ],
+        "siblingsPreceding" : [
+        ],
+        "siblingsSucceeding" : [
+        ]
+      }
+    },
+    "redirectSources" : [
+    ],
+    "type" : "Visible"
+  }
+}
