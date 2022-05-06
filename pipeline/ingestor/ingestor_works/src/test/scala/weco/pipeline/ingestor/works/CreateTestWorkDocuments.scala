@@ -365,6 +365,18 @@ class CreateTestWorkDocuments
     )
   }
 
+  it("creates examples of every format") {
+    val works = Format.values.map { format =>
+      denormalisedWork().format(format)
+    }
+
+    saveWorks(
+      works = works,
+      description = "works with every format",
+      id = "works.every-format"
+    )
+  }
+
   private def saveWork(
     work: Work[WorkState.Denormalised],
     description: String,
