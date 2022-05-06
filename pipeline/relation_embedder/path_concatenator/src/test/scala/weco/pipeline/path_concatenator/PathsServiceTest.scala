@@ -15,13 +15,20 @@ import scala.collection.immutable
 import scala.concurrent.Future
 import weco.catalogue.internal_model.work.generators.WorkGenerators
 
-class PathsServiceTest
-    extends AnyFunSpec
-    with Matchers
-    with IndexFixtures
-    with ElasticsearchFixtures
-    with Akka
-    with WorkGenerators {
+/**
+ * Tests covering the PathsService, which fetches data from Elasticsearch
+ * in order to support the PathConcatenator.
+ *
+ * These tests require a running ElasticSearch Instance.
+ */
+
+class PathsServiceTest  extends AnyFunSpec
+  with Matchers
+  with IndexFixtures
+  with ElasticsearchFixtures
+  with Akka
+  with WorkGenerators {
+
 
   private def work(path: String): Work.Visible[Merged] =
     mergedWork(createSourceIdentifierWith(value = path))
@@ -100,11 +107,56 @@ class PathsServiceTest
         }
       }
     }
-
   }
+
+  describe("The PathService exactPath getter") {
+    it("only fetches the work with that exact path, not its children") {
+      val expectedWork = work(path = "parent/child")
+      val works: List[Work[Merged]] = List(
+        work(path = "parent"),
+        expectedWork,
+        work(path = "parent/child/grandchild")
+      )
+      withLocalMergedWorksIndex { index =>
+        insertIntoElasticsearch(index, works: _*)
+        withActorSystem { implicit actorSystem =>
+          whenReady(queryWorkWithPath(service(index), path = "parent/child")) {
+            _ should contain theSameElementsAs List(expectedWork)
+          }
+        }
+      }
+    }
+  }
+    describe("The PathService childPath getter") {
+      it("Fetches works whose paths start with the end of this path") {
+        val works: List[Work[Merged]] = List(
+          work(path = "grandparent"),
+          work(path = "grandparent/parent"),
+          work(path = "parent/child/grandchild1"),
+          work(path = "parent/child/grandchild2"),
+          work(path = "grandparent/parent/child/grandchild3"), // ignored - it has already been resolved up to grandparent
+          work(path = "child/grandchild3") // ignored - could be child of a different parent
+        )
+        withLocalMergedWorksIndex { index =>
+          insertIntoElasticsearch(index, works: _*)
+          withActorSystem { implicit actorSystem =>
+            whenReady(queryChildWorks(service(index), path = "grandparent/parent")) {
+              _ should contain theSameElementsAs List(works(2), works(3))
+            }
+          }
+        }
+      }
+    }
+
 
   def queryParentPath(service: PathsService, childPath: String)(
     implicit as: ActorSystem): Future[immutable.Seq[String]] =
     service.getParentPath(childPath).runWith(Sink.seq[String])
+
+  def queryWorkWithPath(service: PathsService, path: String)(implicit as: ActorSystem): Future[immutable.Seq[Work[Merged]]] =
+    service.getWorkWithPath(path).runWith(Sink.seq[Work[Merged]])
+
+  def queryChildWorks(service: PathsService, path: String)(implicit as: ActorSystem): Future[immutable.Seq[Work[Merged]]] =
+    service.getChildWorks(path).runWith(Sink.seq[Work[Merged]])
 
 }

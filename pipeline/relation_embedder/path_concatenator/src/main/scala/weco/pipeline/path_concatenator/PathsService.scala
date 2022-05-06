@@ -10,7 +10,8 @@ import grizzled.slf4j.Logging
 import weco.json.JsonUtil._
 import akka.actor.ActorSystem
 import com.sksamuel.elastic4s.requests.searches.SearchRequest
-import weco.catalogue.internal_model.work.CollectionPath
+import weco.catalogue.internal_model.work.WorkState.Merged
+import weco.catalogue.internal_model.work.{CollectionPath, Work}
 import weco.json.JsonUtil.exportDecoder
 
 case class ParentPathData(collectionPath: CollectionPath);
@@ -32,4 +33,24 @@ class PathsService(elasticClient: ElasticClient, index: Index)(
       .fromPublisher(elasticClient.publisher(request.scroll(keepAlive = "1ms")))
       .map(searchHit => searchHit.safeTo[PathHit].get.data.collectionPath.path)
   }
+
+  def getWorkWithPath(path: String): Source[Work[Merged], NotUsed] = {
+    val request: SearchRequest = requestBuilder.workWithPath(path)
+    debug(
+      s"Querying for work with path with ES request: ${elasticClient.show(request)}")
+    Source
+      .fromPublisher(elasticClient.publisher(request.scroll(keepAlive = "1ms")))
+      .map(searchHit => searchHit.safeTo[Work[Merged]].get)
+  }
+
+  def getChildWorks(path: String): Source[Work[Merged], NotUsed] = {
+    val request: SearchRequest = requestBuilder.childWorks(path)
+    debug(
+      s"Querying for child works of path with ES request: ${elasticClient.show(request)}")
+    Source
+      .fromPublisher(elasticClient.publisher(request.scroll(keepAlive = "1ms")))
+      .map(searchHit => searchHit.safeTo[Work[Merged]].get)
+  }
+
+
 }
