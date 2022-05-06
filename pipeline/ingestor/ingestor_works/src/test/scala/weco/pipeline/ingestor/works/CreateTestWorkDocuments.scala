@@ -377,6 +377,30 @@ class CreateTestWorkDocuments
     )
   }
 
+  it("creates examples to use in the period filter/aggregation tests") {
+    val periods = List(
+      createPeriodForYear(year = "1850"),
+      createPeriodForYearRange(startYear = "1850", endYear = "2000"),
+      createPeriodForYearRange(startYear = "1860", endYear = "1960"),
+      createPeriodForYear(year = "1960"),
+      createPeriodForYearRange(startYear = "1960", endYear = "1964"),
+      createPeriodForYear(year = "1962")
+    )
+
+    val works = periods.map { p =>
+      denormalisedWork()
+        .production(
+          List(createProductionEvent.copy(dates = List(p)))
+        )
+    }
+
+    saveWorks(
+      works = works,
+      description = "works with multi-year production ranges",
+      id = "works.production.multi-year"
+    )
+  }
+
   private def saveWork(
     work: Work[WorkState.Denormalised],
     description: String,
