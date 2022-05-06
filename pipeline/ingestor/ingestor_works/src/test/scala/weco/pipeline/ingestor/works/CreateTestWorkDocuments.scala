@@ -330,6 +330,25 @@ class CreateTestWorkDocuments
     )
   }
 
+  it("creates items with multiple source identifiers") {
+    val works = (1 to 5).map { _ =>
+      denormalisedWork()
+        .items(
+          List(
+            createIdentifiedItemWith(
+              otherIdentifiers = List(createSourceIdentifier)
+            )
+          )
+        )
+    }
+
+    saveWorks(
+      works = works,
+      description = "works with items with other identifiers",
+      id = "works.items-with-other-identifiers"
+    )
+  }
+
   private def saveWork(
     work: Work[WorkState.Denormalised],
     description: String,
