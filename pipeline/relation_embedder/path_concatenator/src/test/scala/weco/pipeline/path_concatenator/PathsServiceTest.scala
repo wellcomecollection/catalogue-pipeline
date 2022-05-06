@@ -109,6 +109,7 @@ class PathsServiceTest
   }
 
   describe("The PathService exactPath getter") {
+    //TODO: Decide what to do if more than one result is returned
     it("only fetches the work with that exact path, not its children") {
       val expectedWork = work(path = "parent/child")
       val works: List[Work[Merged]] = List(
