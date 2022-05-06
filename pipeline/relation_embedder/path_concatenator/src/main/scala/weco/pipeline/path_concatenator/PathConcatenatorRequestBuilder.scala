@@ -13,33 +13,35 @@ class PathConcatenatorRequestBuilder(index: Index) {
   import PathOps._
 
   /**
-   * A query that returns the collectionPath from the parent Work (if any)
-   * of the given path.
-   *
-   * The parent work is the one with a path whose leaf node matches
-   * the root node of the given path.
-   * e.g.
-   * a/b/c is the parent of c/d/e
-   *
-   * There _should_, at most, be one record that matches this query,
-   * and callers should act accordingly.
-   *
-   * However, because there is a possibility that errors in the data might
-   * cause this query to yield more than one result, this request leaves
-   * the size constraint set at the default (10), in order to allow the caller
-   * to examine the number of results returned and take appropriate action.
-   */
+    * A query that returns the collectionPath from the parent Work (if any)
+    * of the given path.
+    *
+    * The parent work is the one with a path whose leaf node matches
+    * the root node of the given path.
+    * e.g.
+    * a/b/c is the parent of c/d/e
+    *
+    * There _should_, at most, be one record that matches this query,
+    * and callers should act accordingly.
+    *
+    * However, because there is a possibility that errors in the data might
+    * cause this query to yield more than one result, this request leaves
+    * the size constraint set at the default (10), in order to allow the caller
+    * to examine the number of results returned and take appropriate action.
+    */
   def parentPath(path: String): SearchRequest =
     search(index)
-      .query(constantScoreQuery(wildPathQuery(pathJoin(List("*", path.firstNode)))))
+      .query(
+        constantScoreQuery(wildPathQuery(pathJoin(List("*", path.firstNode)))))
       .sourceInclude(("data.collectionPath.path"))
 
-  def workWithPath(path:String): SearchRequest =
+  def workWithPath(path: String): SearchRequest =
     search(index).query(constantScoreQuery(exactPathQuery(path)))
 
-  def childWorks(path:String): SearchRequest =
+  def childWorks(path: String): SearchRequest =
     search(index)
-      .query(constantScoreQuery(wildPathQuery(pathJoin(List(path.lastNode, "*")))))
+      .query(
+        constantScoreQuery(wildPathQuery(pathJoin(List(path.lastNode, "*")))))
 
   private def wildPathQuery(path: String): WildcardQuery =
     wildcardQuery(field = "data.collectionPath.path", value = path)
