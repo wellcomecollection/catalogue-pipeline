@@ -1,7 +1,7 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2022-05-06T14:21:32.415Z",
-  "id" : "j1gugwgk",
+  "createdAt" : "2022-05-06T14:32:35.286Z",
+  "id" : "q4njkixz",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,13 +10,13 @@
             "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "GRUgE73gNJ"
+          "value" : "TBApNW5yJ4"
         },
-        "version" : 72,
-        "modifiedTime" : "2022-05-13T02:46:42Z"
+        "version" : 1,
+        "modifiedTime" : "2022-05-13T11:34:33Z"
       },
-      "mergedTime" : "2022-05-13T02:46:42Z",
-      "indexedTime" : "2022-05-06T14:21:32.414Z",
+      "mergedTime" : "2022-05-13T11:34:33Z",
+      "indexedTime" : "2022-05-06T14:32:35.285Z",
       "redirectSources" : [
       ]
     },
@@ -26,12 +26,12 @@
           "id" : "calm-record-id"
         },
         "ontologyType" : "Work",
-        "value" : "GRUgE73gNJ"
+        "value" : "TBApNW5yJ4"
       },
-      "canonicalId" : "j1gugwgk",
-      "mergedTime" : "2022-05-13T02:46:42Z",
-      "sourceModifiedTime" : "2022-05-13T02:46:42Z",
-      "indexedTime" : "2022-05-06T14:21:32.414Z",
+      "canonicalId" : "q4njkixz",
+      "mergedTime" : "2022-05-13T11:34:33Z",
+      "sourceModifiedTime" : "2022-05-13T11:34:33Z",
+      "indexedTime" : "2022-05-06T14:32:35.285Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -50,7 +50,7 @@
       }
     },
     "data" : {
-      "title" : "title-jnWIqBsTm4",
+      "title" : "title-6YygLZHy7Z",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -89,8 +89,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "j1gugwgk",
-      "title" : "title-jnWIqBsTm4",
+      "id" : "q4njkixz",
+      "title" : "title-6YygLZHy7Z",
       "alternativeTitles" : [
       ],
       "workType" : {
@@ -107,7 +107,7 @@
             "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "GRUgE73gNJ",
+          "value" : "TBApNW5yJ4",
           "type" : "Identifier"
         }
       ],
@@ -142,9 +142,9 @@
     "type" : "Visible"
   },
   "work" : {
-    "version" : 72,
+    "version" : 1,
     "data" : {
-      "title" : "title-jnWIqBsTm4",
+      "title" : "title-6YygLZHy7Z",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -188,12 +188,12 @@
           "id" : "calm-record-id"
         },
         "ontologyType" : "Work",
-        "value" : "GRUgE73gNJ"
+        "value" : "TBApNW5yJ4"
       },
-      "canonicalId" : "j1gugwgk",
-      "mergedTime" : "2022-05-13T02:46:42Z",
-      "sourceModifiedTime" : "2022-05-13T02:46:42Z",
-      "indexedTime" : "2022-05-06T14:21:32.415Z",
+      "canonicalId" : "q4njkixz",
+      "mergedTime" : "2022-05-13T11:34:33Z",
+      "sourceModifiedTime" : "2022-05-13T11:34:33Z",
+      "indexedTime" : "2022-05-06T14:32:35.286Z",
       "availabilities" : [
       ],
       "derivedData" : {

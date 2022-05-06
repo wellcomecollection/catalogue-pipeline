@@ -1,7 +1,7 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2022-05-06T14:21:32.416Z",
-  "id" : "upnnbfxw",
+  "createdAt" : "2022-05-06T14:32:35.286Z",
+  "id" : "uwvinlnj",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,13 +10,13 @@
             "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "vB01pfIxAP"
+          "value" : "0wEIb4rPRF"
         },
-        "version" : 29,
-        "modifiedTime" : "2022-05-05T01:44:37Z"
+        "version" : 3,
+        "modifiedTime" : "2022-05-21T01:16:23Z"
       },
-      "mergedTime" : "2022-05-05T01:44:37Z",
-      "indexedTime" : "2022-05-06T14:21:32.415Z",
+      "mergedTime" : "2022-05-21T01:16:23Z",
+      "indexedTime" : "2022-05-06T14:32:35.286Z",
       "redirectSources" : [
       ]
     },
@@ -26,12 +26,12 @@
           "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "vB01pfIxAP"
+        "value" : "0wEIb4rPRF"
       },
-      "canonicalId" : "upnnbfxw",
-      "mergedTime" : "2022-05-05T01:44:37Z",
-      "sourceModifiedTime" : "2022-05-05T01:44:37Z",
-      "indexedTime" : "2022-05-06T14:21:32.415Z",
+      "canonicalId" : "uwvinlnj",
+      "mergedTime" : "2022-05-21T01:16:23Z",
+      "sourceModifiedTime" : "2022-05-21T01:16:23Z",
+      "indexedTime" : "2022-05-06T14:32:35.286Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -50,7 +50,7 @@
       }
     },
     "data" : {
-      "title" : "title-xQUQw2ospe",
+      "title" : "title-jlZQFqGfpX",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -89,8 +89,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "upnnbfxw",
-      "title" : "title-xQUQw2ospe",
+      "id" : "uwvinlnj",
+      "title" : "title-jlZQFqGfpX",
       "alternativeTitles" : [
       ],
       "workType" : {
@@ -107,7 +107,7 @@
             "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "vB01pfIxAP",
+          "value" : "0wEIb4rPRF",
           "type" : "Identifier"
         }
       ],
@@ -142,9 +142,9 @@
     "type" : "Visible"
   },
   "work" : {
-    "version" : 29,
+    "version" : 3,
     "data" : {
-      "title" : "title-xQUQw2ospe",
+      "title" : "title-jlZQFqGfpX",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -188,12 +188,12 @@
           "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "vB01pfIxAP"
+        "value" : "0wEIb4rPRF"
       },
-      "canonicalId" : "upnnbfxw",
-      "mergedTime" : "2022-05-05T01:44:37Z",
-      "sourceModifiedTime" : "2022-05-05T01:44:37Z",
-      "indexedTime" : "2022-05-06T14:21:32.416Z",
+      "canonicalId" : "uwvinlnj",
+      "mergedTime" : "2022-05-21T01:16:23Z",
+      "sourceModifiedTime" : "2022-05-21T01:16:23Z",
+      "indexedTime" : "2022-05-06T14:32:35.286Z",
       "availabilities" : [
       ],
       "derivedData" : {
