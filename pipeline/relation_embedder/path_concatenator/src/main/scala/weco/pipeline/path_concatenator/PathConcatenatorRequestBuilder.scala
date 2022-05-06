@@ -1,14 +1,10 @@
 package weco.pipeline.path_concatenator
 
-<<<<<<< HEAD
 import com.sksamuel.elastic4s.ElasticDsl.{
   constantScoreQuery,
   search,
   wildcardQuery
 }
-=======
-import com.sksamuel.elastic4s.ElasticDsl.{constantScoreQuery, search, termQuery, wildcardQuery}
->>>>>>> 37e553612 (Full set of ES queries in)
 import com.sksamuel.elastic4s.Index
 import com.sksamuel.elastic4s.requests.searches.SearchRequest
 import com.sksamuel.elastic4s.requests.searches.term.{TermQuery, WildcardQuery}
