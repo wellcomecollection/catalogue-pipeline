@@ -26,18 +26,18 @@ class PathsService(elasticClient: ElasticClient, index: Index)(
   private val requestBuilder = new PathConcatenatorRequestBuilder(index)
 
   /**
-   * Add a scroll to the given request and return an Elasticsearch Publisher
-   * 
-   * The requests made by this service are expected to yield very few results
-   * getParentPath and getWorkWithPath should only ever return one result each.
-   *
-   * Setting up scroll context in Elasticsearch would appear to be an unnecessary
-   * overhead for this process, However, the Akka Source/publisher way of loading
-   * things requires a scroll query.
-   *
-   * Consistency is preferred here over pure performance, but a very short keepalive
-   * is specified to release resources on ES as soon as possible.
-   */
+    * Add a scroll to the given request and return an Elasticsearch Publisher
+    *
+    * The requests made by this service are expected to yield very few results
+    * getParentPath and getWorkWithPath should only ever return one result each.
+    *
+    * Setting up scroll context in Elasticsearch would appear to be an unnecessary
+    * overhead for this process, However, the Akka Source/publisher way of loading
+    * things requires a scroll query.
+    *
+    * Consistency is preferred here over pure performance, but a very short keepalive
+    * is specified to release resources on ES as soon as possible.
+    */
   private def queryPublisher(request: SearchRequest) =
     elasticClient.publisher(request.scroll(keepAlive = "1ms"))
 
