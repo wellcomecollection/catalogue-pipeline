@@ -349,6 +349,22 @@ class CreateTestWorkDocuments
     )
   }
 
+  it("creates a work with a collection path") {
+    saveWork(
+      work = denormalisedWork()
+        .collectionPath(CollectionPath(path = "PPCRI", label = Some("PP/CRI"))),
+      description = "a work with a collection path",
+      id = "works.collection-path.PPCRI"
+    )
+
+    saveWork(
+      work = denormalisedWork()
+        .collectionPath(CollectionPath("NUFFINK", label = Some("NUF/FINK"))),
+      description = "a work with a collection path",
+      id = "works.collection-path.NUFFINK"
+    )
+  }
+
   private def saveWork(
     work: Work[WorkState.Denormalised],
     description: String,
