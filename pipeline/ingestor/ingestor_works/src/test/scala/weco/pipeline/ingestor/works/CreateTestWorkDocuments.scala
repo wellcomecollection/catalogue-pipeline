@@ -431,6 +431,23 @@ class CreateTestWorkDocuments
     )
   }
 
+  it("creates examples for the aggregation-with-filters tests") {
+    val formats = Format.values
+    val subjects = (0 to 5).map(_ => createSubject)
+    val works = formats.zipWithIndex.map {
+      case (format, i) =>
+        denormalisedWork()
+          .format(format)
+          .subjects(List(subjects(i / subjects.size)))
+    }
+
+    saveWorks(
+      works,
+      description = "examples for the aggregation-with-filters tests",
+      id = "works.examples.aggregation-with-filters-tests"
+    )
+  }
+
   private def saveWork(
     work: Work[WorkState.Denormalised],
     description: String,
