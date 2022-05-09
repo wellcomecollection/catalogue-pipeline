@@ -7,7 +7,7 @@ import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.generators.ImageGenerators
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.languages.Language
-import weco.catalogue.internal_model.locations.License
+import weco.catalogue.internal_model.locations.{DigitalLocationType, License, LocationType, PhysicalLocationType}
 import weco.catalogue.internal_model.work._
 import weco.catalogue.internal_model.work.generators._
 import weco.json.JsonUtil._
@@ -398,6 +398,36 @@ class CreateTestWorkDocuments
       works = works,
       description = "works with multi-year production ranges",
       id = "works.production.multi-year"
+    )
+  }
+
+  it("creates items with different location types") {
+    val locationTypes = Seq(
+      List(LocationType.IIIFImageAPI),
+      List(LocationType.IIIFImageAPI, LocationType.IIIFPresentationAPI),
+      List(LocationType.ClosedStores)
+    )
+
+    val locations = locationTypes.map {
+      _.map {
+        case physicalLocationType: PhysicalLocationType =>
+          createPhysicalLocationWith(locationType = physicalLocationType)
+
+        case digitalLocationType: DigitalLocationType =>
+          createDigitalLocationWith(locationType = digitalLocationType)
+      }
+    }
+
+    val items = locations.map { locations =>
+      createIdentifiedItemWith(locations = locations)
+    }
+
+    val works = items.map { item => denormalisedWork().items(List(item)) }
+
+    saveWorks(
+      works,
+      description = "items with different location types",
+      id = "work.items-with-location-types"
     )
   }
 
