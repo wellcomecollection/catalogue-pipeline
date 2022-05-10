@@ -4,6 +4,7 @@ import io.circe.Json
 import io.circe.syntax._
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.generators.ImageGenerators
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.languages.Language
@@ -446,6 +447,20 @@ class CreateTestWorkDocuments
       description = "examples for the aggregation-with-filters tests",
       id = "works.examples.aggregation-with-filters-tests"
     )
+  }
+
+  it("creates examples for works of different types") {
+    Seq(
+      WorkType.Section,
+      WorkType.Collection,
+      WorkType.Series,
+    ).map { workType =>
+      saveWork(
+        work = denormalisedWork().title("rats").workType(workType),
+        description = "examples of works with different types",
+        id = s"works.examples.different-work-types.$workType"
+      )
+    }
   }
 
   private def saveWork(
