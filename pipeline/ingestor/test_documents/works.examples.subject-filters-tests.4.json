@@ -1,0 +1,435 @@
+{
+  "description" : "examples for the subject filter tests",
+  "createdAt" : "2022-05-10T09:08:11.348Z",
+  "id" : "opjdaxfg",
+  "document" : {
+    "debug" : {
+      "source" : {
+        "identifier" : {
+          "identifierType" : {
+            "id" : "sierra-system-number"
+          },
+          "ontologyType" : "Work",
+          "value" : "Kke6NacQ8Q"
+        },
+        "version" : 36,
+        "modifiedTime" : "2022-05-31T22:47:47Z"
+      },
+      "mergedTime" : "2022-05-31T22:47:47Z",
+      "indexedTime" : "2022-05-10T09:08:11.348Z",
+      "redirectSources" : [
+      ]
+    },
+    "state" : {
+      "sourceIdentifier" : {
+        "identifierType" : {
+          "id" : "sierra-system-number"
+        },
+        "ontologyType" : "Work",
+        "value" : "Kke6NacQ8Q"
+      },
+      "canonicalId" : "opjdaxfg",
+      "mergedTime" : "2022-05-31T22:47:47Z",
+      "sourceModifiedTime" : "2022-05-31T22:47:47Z",
+      "indexedTime" : "2022-05-10T09:08:11.348Z",
+      "availabilities" : [
+      ],
+      "derivedData" : {
+        "contributorAgents" : [
+        ]
+      },
+      "relations" : {
+        "ancestors" : [
+        ],
+        "children" : [
+        ],
+        "siblingsPreceding" : [
+        ],
+        "siblingsSucceeding" : [
+        ]
+      }
+    },
+    "data" : {
+      "title" : "title-C1ICZOvNWb",
+      "otherIdentifiers" : [
+      ],
+      "alternativeTitles" : [
+      ],
+      "format" : null,
+      "description" : null,
+      "physicalDescription" : null,
+      "lettering" : null,
+      "createdDate" : null,
+      "subjects" : [
+        {
+          "id" : {
+            "type" : "Unidentifiable"
+          },
+          "label" : "London (England)",
+          "concepts" : [
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "u7hZZtHlWPIpZYu",
+              "type" : "Concept"
+            },
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "m1qUlCcjglMPaKQ",
+              "type" : "Concept"
+            },
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "Z55SIuLPMgIG177",
+              "type" : "Concept"
+            }
+          ]
+        },
+        {
+          "id" : {
+            "type" : "Unidentifiable"
+          },
+          "label" : "Psychology, Pathological",
+          "concepts" : [
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "tcCDpKgb0Wdy2nM",
+              "type" : "Concept"
+            },
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "uMcZq1JcxukacPW",
+              "type" : "Concept"
+            },
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "KUROxBsQ4CK8DrD",
+              "type" : "Concept"
+            }
+          ]
+        },
+        {
+          "id" : {
+            "type" : "Unidentifiable"
+          },
+          "label" : "Darwin \"Jones\", Charles",
+          "concepts" : [
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "sk2kCAGURhx40zJ",
+              "type" : "Concept"
+            },
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "bSlLwDNn2Etp5zf",
+              "type" : "Concept"
+            },
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "ssscK3StYS1KOlZ",
+              "type" : "Concept"
+            }
+          ]
+        }
+      ],
+      "genres" : [
+      ],
+      "contributors" : [
+      ],
+      "thumbnail" : null,
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "edition" : null,
+      "notes" : [
+      ],
+      "duration" : null,
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "collectionPath" : null,
+      "referenceNumber" : null,
+      "imageData" : [
+      ],
+      "workType" : "Standard"
+    },
+    "display" : {
+      "id" : "opjdaxfg",
+      "title" : "title-C1ICZOvNWb",
+      "alternativeTitles" : [
+      ],
+      "contributors" : [
+      ],
+      "identifiers" : [
+        {
+          "identifierType" : {
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
+            "type" : "IdentifierType"
+          },
+          "value" : "Kke6NacQ8Q",
+          "type" : "Identifier"
+        }
+      ],
+      "subjects" : [
+        {
+          "label" : "London (England)",
+          "concepts" : [
+            {
+              "label" : "u7hZZtHlWPIpZYu",
+              "type" : "Concept"
+            },
+            {
+              "label" : "m1qUlCcjglMPaKQ",
+              "type" : "Concept"
+            },
+            {
+              "label" : "Z55SIuLPMgIG177",
+              "type" : "Concept"
+            }
+          ],
+          "type" : "Subject"
+        },
+        {
+          "label" : "Psychology, Pathological",
+          "concepts" : [
+            {
+              "label" : "tcCDpKgb0Wdy2nM",
+              "type" : "Concept"
+            },
+            {
+              "label" : "uMcZq1JcxukacPW",
+              "type" : "Concept"
+            },
+            {
+              "label" : "KUROxBsQ4CK8DrD",
+              "type" : "Concept"
+            }
+          ],
+          "type" : "Subject"
+        },
+        {
+          "label" : "Darwin \"Jones\", Charles",
+          "concepts" : [
+            {
+              "label" : "sk2kCAGURhx40zJ",
+              "type" : "Concept"
+            },
+            {
+              "label" : "bSlLwDNn2Etp5zf",
+              "type" : "Concept"
+            },
+            {
+              "label" : "ssscK3StYS1KOlZ",
+              "type" : "Concept"
+            }
+          ],
+          "type" : "Subject"
+        }
+      ],
+      "genres" : [
+      ],
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "availabilities" : [
+      ],
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "notes" : [
+      ],
+      "images" : [
+      ],
+      "parts" : [
+      ],
+      "partOf" : [
+      ],
+      "precededBy" : [
+      ],
+      "succeededBy" : [
+      ],
+      "type" : "Work"
+    },
+    "type" : "Visible"
+  },
+  "work" : {
+    "version" : 36,
+    "data" : {
+      "title" : "title-C1ICZOvNWb",
+      "otherIdentifiers" : [
+      ],
+      "alternativeTitles" : [
+      ],
+      "format" : null,
+      "description" : null,
+      "physicalDescription" : null,
+      "lettering" : null,
+      "createdDate" : null,
+      "subjects" : [
+        {
+          "id" : {
+            "type" : "Unidentifiable"
+          },
+          "label" : "London (England)",
+          "concepts" : [
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "u7hZZtHlWPIpZYu",
+              "type" : "Concept"
+            },
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "m1qUlCcjglMPaKQ",
+              "type" : "Concept"
+            },
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "Z55SIuLPMgIG177",
+              "type" : "Concept"
+            }
+          ]
+        },
+        {
+          "id" : {
+            "type" : "Unidentifiable"
+          },
+          "label" : "Psychology, Pathological",
+          "concepts" : [
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "tcCDpKgb0Wdy2nM",
+              "type" : "Concept"
+            },
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "uMcZq1JcxukacPW",
+              "type" : "Concept"
+            },
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "KUROxBsQ4CK8DrD",
+              "type" : "Concept"
+            }
+          ]
+        },
+        {
+          "id" : {
+            "type" : "Unidentifiable"
+          },
+          "label" : "Darwin \"Jones\", Charles",
+          "concepts" : [
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "sk2kCAGURhx40zJ",
+              "type" : "Concept"
+            },
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "bSlLwDNn2Etp5zf",
+              "type" : "Concept"
+            },
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "ssscK3StYS1KOlZ",
+              "type" : "Concept"
+            }
+          ]
+        }
+      ],
+      "genres" : [
+      ],
+      "contributors" : [
+      ],
+      "thumbnail" : null,
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "edition" : null,
+      "notes" : [
+      ],
+      "duration" : null,
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "collectionPath" : null,
+      "referenceNumber" : null,
+      "imageData" : [
+      ],
+      "workType" : "Standard"
+    },
+    "state" : {
+      "sourceIdentifier" : {
+        "identifierType" : {
+          "id" : "sierra-system-number"
+        },
+        "ontologyType" : "Work",
+        "value" : "Kke6NacQ8Q"
+      },
+      "canonicalId" : "opjdaxfg",
+      "mergedTime" : "2022-05-31T22:47:47Z",
+      "sourceModifiedTime" : "2022-05-31T22:47:47Z",
+      "indexedTime" : "2022-05-10T09:08:11.348Z",
+      "availabilities" : [
+      ],
+      "derivedData" : {
+        "contributorAgents" : [
+        ]
+      },
+      "relations" : {
+        "ancestors" : [
+        ],
+        "children" : [
+        ],
+        "siblingsPreceding" : [
+        ],
+        "siblingsSucceeding" : [
+        ]
+      }
+    },
+    "redirectSources" : [
+    ],
+    "type" : "Visible"
+  }
+}

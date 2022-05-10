@@ -495,6 +495,38 @@ class CreateTestWorkDocuments
     )
   }
 
+  it("creates examples for the subject filter tests") {
+    val sanitation = createSubjectWith("Sanitation.")
+    val london = createSubjectWith("London (England)")
+    val psychology = createSubjectWith("Psychology, Pathological")
+    val darwin = createSubjectWith("Darwin \"Jones\", Charles")
+
+    val sanitationWork = denormalisedWork().subjects(List(sanitation))
+    val londonWork = denormalisedWork().subjects(List(london))
+    val psychologyWork = denormalisedWork().subjects(List(psychology))
+    val darwinWork =
+      denormalisedWork().subjects(List(darwin))
+    val mostThingsWork =
+      denormalisedWork().subjects(List(london, psychology, darwin))
+    val nothingWork = denormalisedWork()
+
+    val works =
+      List(
+        sanitationWork,
+        londonWork,
+        psychologyWork,
+        darwinWork,
+        mostThingsWork,
+        nothingWork
+      )
+
+    saveWorks(
+      works,
+      description = "examples for the subject filter tests",
+      id = s"works.examples.subject-filters-tests"
+    )
+  }
+
   private def saveWork(
     work: Work[WorkState.Denormalised],
     description: String,
