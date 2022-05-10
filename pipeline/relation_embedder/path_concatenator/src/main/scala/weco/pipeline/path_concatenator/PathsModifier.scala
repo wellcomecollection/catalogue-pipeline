@@ -1,7 +1,12 @@
 package weco.pipeline.path_concatenator
 
-//import weco.catalogue.internal_model.work.Work
-//import weco.catalogue.internal_model.work.WorkState.Merged
+import akka.stream.Materializer
+import akka.stream.scaladsl.Sink
+import weco.catalogue.internal_model.work.Work
+import weco.catalogue.internal_model.work.WorkState.Merged
+import grizzled.slf4j.Logging
+
+import scala.concurrent.{ExecutionContext, Future}
 
 /**
   *  Given a path, Fetch and modify the relevant Works (if necessary)
@@ -23,9 +28,68 @@ package weco.pipeline.path_concatenator
   *  - change b/c to a/b/c
   *  - change c/d and c/e to a/b/c/d and a/b/c/e, respectively,
   */
-object PathsModifier {
-//
-//  def apply(path: String): Work.Visible[Merged] = {
-//
-//  }
+case class PathsModifier(pathsService: PathsService)
+                   (implicit ec: ExecutionContext, materializer: Materializer)
+  extends Logging {
+
+  def modifyPaths(path: String): Future[Seq[Work.Visible[Merged]]] = {
+    modifyCurrentPath(path) flatMap {
+      case None => modifyChildPaths(path)
+      case Some(modifiedWork) =>
+        //val newPath: String = modifiedWork.data.collectionPath.get.path
+        modifyChildPaths(modifiedWork.data.collectionPath.get.path) flatMap {
+          childWorks: Seq[Work.Visible[Merged]] => Future(childWorks :+ modifiedWork)
+        }
+    }
+  //TODO save the changes (in the caller?)
+  }
+
+  def modifyCurrentPath(path:String):  Future[Option[Work.Visible[Merged]]] =
+    getParentPath(path) flatMap {
+      case Some(parentPath) =>
+        getWorkWithPath(path) flatMap {
+          case Some(work) => Future(Some(ChildWork(parentPath, work)))
+          case _ => Future.successful(None) //TODO: This is unexpected, should probably throw in getWorkWithPath
+        }
+      case _ => Future.successful(None) // This is expected, if parent is root
+
+    }
+
+  def modifyChildPaths(path:String): Future[Seq[Work.Visible[Merged]]] =
+    getWorksUnderPath(path) flatMap { works: Seq[Work.Visible[Merged]] =>
+      Future(updatePaths(path, works))
+    }
+
+  def updatePaths(parentPath: String, works: Seq[Work.Visible[Merged]]): Seq[Work.Visible[Merged]] =
+    works map {
+      work: Work.Visible[Merged] => ChildWork(parentPath, work)
+    }
+
+  def getParentPath(path: String): Future[Option[String]] = {
+    pathsService.getParentPath(path)
+      .runWith(Sink.seq[String])
+      .map { parentPaths =>
+        info(s"Received ${parentPaths.size} parents")
+        parentPaths.headOption
+      }
+  }
+
+  def getWorkWithPath(path: String): Future[Option[Work.Visible[Merged]]] = {
+    pathsService.getWorkWithPath(path)
+      .runWith(Sink.seq[Work.Visible[Merged]])
+      .map { currentWork =>
+        info(s"Received ${currentWork.size} parents")
+        currentWork.headOption
+      }
+  }
+
+  def getWorksUnderPath(path: String): Future[Seq[Work.Visible[Merged]]] = {
+    pathsService.getChildWorks(path)
+      .runWith(Sink.seq[Work.Visible[Merged]])
+      .map { childWorks =>
+        info(s"Received ${childWorks.size} children")
+        childWorks
+      }
+  }
+
 }

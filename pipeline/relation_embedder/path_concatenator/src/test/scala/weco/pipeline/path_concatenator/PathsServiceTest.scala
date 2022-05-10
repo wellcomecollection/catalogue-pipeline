@@ -5,7 +5,7 @@ import akka.stream.scaladsl.Sink
 import com.sksamuel.elastic4s.Index
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.index.{IndexFixtures}
+import weco.catalogue.internal_model.index.IndexFixtures
 import weco.catalogue.internal_model.work.{CollectionPath, Work}
 import weco.catalogue.internal_model.work.WorkState.Merged
 import weco.catalogue.internal_model.Implicits._
@@ -89,7 +89,7 @@ class PathsServiceTest
     it("returns multiple matching parent paths") {
       // This represents a data error, but the pathService is not the
       // arbiter of what to do in this scenario, so it returns more than
-      // one parent (TBC, it might be better to throw at this point)
+      // one parent (TODO, it might be better to throw at this point)
       val works: List[Work[Merged]] = List(
         work(path = "grandmother/parent"),
         work(path = "grandfather/parent"),

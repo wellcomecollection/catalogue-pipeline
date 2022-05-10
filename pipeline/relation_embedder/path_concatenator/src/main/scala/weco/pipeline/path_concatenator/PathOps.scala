@@ -8,8 +8,8 @@ object PathOps {
 
     lazy val lastNode: String =
       path.splitAt(path.lastIndexOf("/") + 1)._2
-
   }
+
   def pathJoin(nodes: Seq[String]): String =
     nodes.mkString("/")
 }

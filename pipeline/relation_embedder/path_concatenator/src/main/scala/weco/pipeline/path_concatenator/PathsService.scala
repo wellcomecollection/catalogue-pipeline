@@ -50,22 +50,22 @@ class PathsService(elasticClient: ElasticClient, index: Index)(
       .map(searchHit => searchHit.safeTo[PathHit].get.data.collectionPath.path)
   }
 
-  def getWorkWithPath(path: String): Source[Work[Merged], NotUsed] = {
+  def getWorkWithPath(path: String): Source[Work.Visible[Merged], NotUsed] = {
     val request: SearchRequest = requestBuilder.workWithPath(path)
     debug(
       s"Querying for work with path with ES request: ${elasticClient.show(request)}")
     Source
       .fromPublisher(queryPublisher(request))
-      .map(searchHit => searchHit.safeTo[Work[Merged]].get)
+      .map(searchHit => searchHit.safeTo[Work.Visible[Merged]].get)
   }
 
-  def getChildWorks(path: String): Source[Work[Merged], NotUsed] = {
+  def getChildWorks(path: String): Source[Work.Visible[Merged], NotUsed] = {
     val request: SearchRequest = requestBuilder.childWorks(path)
     debug(
       s"Querying for child works of path with ES request: ${elasticClient.show(request)}")
     Source
       .fromPublisher(queryPublisher(request))
-      .map(searchHit => searchHit.safeTo[Work[Merged]].get)
+      .map(searchHit => searchHit.safeTo[Work.Visible[Merged]].get)
   }
 
 }

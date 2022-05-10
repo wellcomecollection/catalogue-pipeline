@@ -30,17 +30,14 @@ object ChildWork {
     * -> great-grandparent/grandparent/parent/self.
     *
     */
-  def apply(parentWork: Work.Visible[Merged],
+  def apply(parentPath: String,
             childWork: Work.Visible[Merged]): Work.Visible[Merged] = {
-    (parentWork.data.collectionPath, childWork.data.collectionPath) match {
-      case (_, None) =>
+    childWork.data.collectionPath match {
+      case  None =>
         throw new IllegalArgumentException(
           s"Cannot prepend a parent path to '${childWork.state.canonicalId}', it does not have a collectionPath")
-      case (None, _) =>
-        throw new IllegalArgumentException(
-          s"Cannot prepend the path from '${parentWork.state.canonicalId}', it does not have a collectionPath")
-      case (Some(parentPath), Some(childPath)) =>
-        val newChildPath = mergePaths(childPath, parentPath)
+      case Some(childPath) =>
+        val newChildPath = mergePaths(parentPath, childPath)
         // The path will be unchanged if parentPath is the root.
         // In this case, just return the childWork as-is
         if (newChildPath != childPath)
@@ -49,17 +46,16 @@ object ChildWork {
     }
   }
 
-  private def mergePaths(childPath: CollectionPath,
-                         parentPath: CollectionPath): CollectionPath = {
+  private def mergePaths(parentPath: String, childPath: CollectionPath): CollectionPath = {
     val childRoot = childPath.path.firstNode
-    val parentLeaf = parentPath.path.lastNode
+    val parentLeaf = parentPath.lastNode
 
     if (childRoot != parentLeaf) {
       throw new IllegalArgumentException(
         s"$parentPath is not the parent of $childRoot")
     } else {
       childPath.copy(
-        path = pathJoin(parentPath.path +: childPath.path.split("/").tail))
+        path = pathJoin(parentPath +: childPath.path.split("/").tail))
     }
   }
 
