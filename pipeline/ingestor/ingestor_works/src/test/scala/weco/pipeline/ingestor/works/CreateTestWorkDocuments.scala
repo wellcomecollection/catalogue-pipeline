@@ -9,8 +9,21 @@ import weco.catalogue.internal_model.generators.ImageGenerators
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.locations.AccessStatus.LicensedResources
-import weco.catalogue.internal_model.locations.{AccessCondition, AccessMethod, AccessStatus, DigitalLocationType, License, LocationType, PhysicalLocationType}
-import weco.catalogue.internal_model.work.Format.{Audio, Books, Journals, Pictures}
+import weco.catalogue.internal_model.locations.{
+  AccessCondition,
+  AccessMethod,
+  AccessStatus,
+  DigitalLocationType,
+  License,
+  LocationType,
+  PhysicalLocationType
+}
+import weco.catalogue.internal_model.work.Format.{
+  Audio,
+  Books,
+  Journals,
+  Pictures
+}
 import weco.catalogue.internal_model.work._
 import weco.catalogue.internal_model.work.generators._
 import weco.json.JsonUtil._
@@ -425,7 +438,9 @@ class CreateTestWorkDocuments
       createIdentifiedItemWith(locations = locations)
     }
 
-    val works = items.map { item => denormalisedWork().items(List(item)) }
+    val works = items.map { item =>
+      denormalisedWork().items(List(item))
+    }
 
     saveWorks(
       works,
