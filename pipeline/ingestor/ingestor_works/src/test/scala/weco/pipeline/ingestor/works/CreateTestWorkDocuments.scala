@@ -463,6 +463,38 @@ class CreateTestWorkDocuments
     }
   }
 
+  it("creates examples for the genre filter tests") {
+    val annualReports = createGenreWith("Annual reports.")
+    val pamphlets = createGenreWith("Pamphlets.")
+    val psychology = createGenreWith("Psychology, Pathological")
+    val darwin = createGenreWith("Darwin \"Jones\", Charles")
+
+    val annualReportsWork = denormalisedWork().genres(List(annualReports))
+    val pamphletsWork = denormalisedWork().genres(List(pamphlets))
+    val psychologyWork = denormalisedWork().genres(List(psychology))
+    val darwinWork =
+      denormalisedWork().genres(List(darwin))
+    val mostThingsWork =
+      denormalisedWork().genres(List(pamphlets, psychology, darwin))
+    val nothingWork = denormalisedWork()
+
+    val works =
+      List(
+        annualReportsWork,
+        pamphletsWork,
+        psychologyWork,
+        darwinWork,
+        mostThingsWork,
+        nothingWork
+      )
+
+    saveWorks(
+      works,
+      description = "examples for the genre tests",
+      id = s"works.examples.genre-filters-tests"
+    )
+  }
+
   private def saveWork(
     work: Work[WorkState.Denormalised],
     description: String,
