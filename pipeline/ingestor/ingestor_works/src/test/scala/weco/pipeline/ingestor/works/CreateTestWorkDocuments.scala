@@ -10,6 +10,7 @@ import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.locations.AccessStatus.LicensedResources
 import weco.catalogue.internal_model.locations.{AccessCondition, AccessMethod, AccessStatus, DigitalLocationType, License, LocationType, PhysicalLocationType}
+import weco.catalogue.internal_model.work.Format.{Audio, Books, Journals, Pictures}
 import weco.catalogue.internal_model.work._
 import weco.catalogue.internal_model.work.generators._
 import weco.json.JsonUtil._
@@ -600,6 +601,54 @@ class CreateTestWorkDocuments
       works,
       description = "examples for the access status tests",
       id = s"works.examples.access-status-filters-tests"
+    )
+  }
+
+  it("creates examples for the works with filtered aggregations tests") {
+    val bashkir = Language(label = "Bashkir", id = "bak")
+    val marathi = Language(label = "Marathi", id = "mar")
+    val quechua = Language(label = "Quechua", id = "que")
+    val chechen = Language(label = "Chechen", id = "che")
+
+    /*
+     * | workType     | count |
+     * |--------------|-------|
+     * | a / Books    | 4     |
+     * | d / Journals | 3     |
+     * | i / Audio    | 2     |
+     * | k / Pictures | 1     |
+     *
+     * | language      | count |
+     * |---------------|-------|
+     * | bak / Bashkir | 4     |
+     * | que / Quechua | 3     |
+     * | mar / Marathi  | 2     |
+     * | che / Chechen | 1     |
+     *
+     */
+    val aggregatedWorks: List[Work.Visible[WorkState.Denormalised]] = List(
+      (Books, bashkir, "rats"), // a
+      (Journals, marathi, "capybara"), // d
+      (Pictures, quechua, "tapirs"), // k
+      (Audio, bashkir, "rats"), // i
+      (Books, bashkir, "capybara"), // a
+      (Books, bashkir, "tapirs"), // a
+      (Journals, quechua, "rats"), // d
+      (Books, marathi, "capybara"), // a
+      (Journals, quechua, "tapirs"), // d
+      (Audio, chechen, "rats") // i
+    ).map {
+      case (format, language, title) =>
+        denormalisedWork()
+          .title(title)
+          .format(format)
+          .languages(List(language))
+    }
+
+    saveWorks(
+      aggregatedWorks,
+      description = "examples for the works filtered aggregations tests",
+      id = s"works.examples.filtered-aggregations-tests"
     )
   }
 

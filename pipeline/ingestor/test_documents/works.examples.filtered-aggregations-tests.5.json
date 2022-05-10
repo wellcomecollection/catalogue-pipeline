@@ -1,0 +1,231 @@
+{
+  "description" : "examples for the works filtered aggregations tests",
+  "createdAt" : "2022-05-10T09:25:20.140Z",
+  "id" : "69xyhqdq",
+  "document" : {
+    "debug" : {
+      "source" : {
+        "identifier" : {
+          "identifierType" : {
+            "id" : "sierra-system-number"
+          },
+          "ontologyType" : "Work",
+          "value" : "LX5AiO63s6"
+        },
+        "version" : 32,
+        "modifiedTime" : "2022-05-20T09:20:02Z"
+      },
+      "mergedTime" : "2022-05-20T09:20:02Z",
+      "indexedTime" : "2022-05-10T09:25:20.139Z",
+      "redirectSources" : [
+      ]
+    },
+    "state" : {
+      "sourceIdentifier" : {
+        "identifierType" : {
+          "id" : "sierra-system-number"
+        },
+        "ontologyType" : "Work",
+        "value" : "LX5AiO63s6"
+      },
+      "canonicalId" : "69xyhqdq",
+      "mergedTime" : "2022-05-20T09:20:02Z",
+      "sourceModifiedTime" : "2022-05-20T09:20:02Z",
+      "indexedTime" : "2022-05-10T09:25:20.139Z",
+      "availabilities" : [
+      ],
+      "derivedData" : {
+        "contributorAgents" : [
+        ]
+      },
+      "relations" : {
+        "ancestors" : [
+        ],
+        "children" : [
+        ],
+        "siblingsPreceding" : [
+        ],
+        "siblingsSucceeding" : [
+        ]
+      }
+    },
+    "data" : {
+      "title" : "tapirs",
+      "otherIdentifiers" : [
+      ],
+      "alternativeTitles" : [
+      ],
+      "format" : {
+        "id" : "a",
+        "label" : "Books"
+      },
+      "description" : null,
+      "physicalDescription" : null,
+      "lettering" : null,
+      "createdDate" : null,
+      "subjects" : [
+      ],
+      "genres" : [
+      ],
+      "contributors" : [
+      ],
+      "thumbnail" : null,
+      "production" : [
+      ],
+      "languages" : [
+        {
+          "id" : "bak",
+          "label" : "Bashkir"
+        }
+      ],
+      "edition" : null,
+      "notes" : [
+      ],
+      "duration" : null,
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "collectionPath" : null,
+      "referenceNumber" : null,
+      "imageData" : [
+      ],
+      "workType" : "Standard"
+    },
+    "display" : {
+      "id" : "69xyhqdq",
+      "title" : "tapirs",
+      "alternativeTitles" : [
+      ],
+      "workType" : {
+        "id" : "a",
+        "label" : "Books",
+        "type" : "Format"
+      },
+      "contributors" : [
+      ],
+      "identifiers" : [
+        {
+          "identifierType" : {
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
+            "type" : "IdentifierType"
+          },
+          "value" : "LX5AiO63s6",
+          "type" : "Identifier"
+        }
+      ],
+      "subjects" : [
+      ],
+      "genres" : [
+      ],
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "availabilities" : [
+      ],
+      "production" : [
+      ],
+      "languages" : [
+        {
+          "id" : "bak",
+          "label" : "Bashkir",
+          "type" : "Language"
+        }
+      ],
+      "notes" : [
+      ],
+      "images" : [
+      ],
+      "parts" : [
+      ],
+      "partOf" : [
+      ],
+      "precededBy" : [
+      ],
+      "succeededBy" : [
+      ],
+      "type" : "Work"
+    },
+    "type" : "Visible"
+  },
+  "work" : {
+    "version" : 32,
+    "data" : {
+      "title" : "tapirs",
+      "otherIdentifiers" : [
+      ],
+      "alternativeTitles" : [
+      ],
+      "format" : {
+        "id" : "a",
+        "label" : "Books"
+      },
+      "description" : null,
+      "physicalDescription" : null,
+      "lettering" : null,
+      "createdDate" : null,
+      "subjects" : [
+      ],
+      "genres" : [
+      ],
+      "contributors" : [
+      ],
+      "thumbnail" : null,
+      "production" : [
+      ],
+      "languages" : [
+        {
+          "id" : "bak",
+          "label" : "Bashkir"
+        }
+      ],
+      "edition" : null,
+      "notes" : [
+      ],
+      "duration" : null,
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "collectionPath" : null,
+      "referenceNumber" : null,
+      "imageData" : [
+      ],
+      "workType" : "Standard"
+    },
+    "state" : {
+      "sourceIdentifier" : {
+        "identifierType" : {
+          "id" : "sierra-system-number"
+        },
+        "ontologyType" : "Work",
+        "value" : "LX5AiO63s6"
+      },
+      "canonicalId" : "69xyhqdq",
+      "mergedTime" : "2022-05-20T09:20:02Z",
+      "sourceModifiedTime" : "2022-05-20T09:20:02Z",
+      "indexedTime" : "2022-05-10T09:25:20.140Z",
+      "availabilities" : [
+      ],
+      "derivedData" : {
+        "contributorAgents" : [
+        ]
+      },
+      "relations" : {
+        "ancestors" : [
+        ],
+        "children" : [
+        ],
+        "siblingsPreceding" : [
+        ],
+        "siblingsSucceeding" : [
+        ]
+      }
+    },
+    "redirectSources" : [
+    ],
+    "type" : "Visible"
+  }
+}
