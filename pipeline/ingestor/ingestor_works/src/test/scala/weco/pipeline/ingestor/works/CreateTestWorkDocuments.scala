@@ -8,7 +8,8 @@ import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.generators.ImageGenerators
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.languages.Language
-import weco.catalogue.internal_model.locations.{DigitalLocationType, License, LocationType, PhysicalLocationType}
+import weco.catalogue.internal_model.locations.AccessStatus.LicensedResources
+import weco.catalogue.internal_model.locations.{AccessCondition, AccessMethod, AccessStatus, DigitalLocationType, License, LocationType, PhysicalLocationType}
 import weco.catalogue.internal_model.work._
 import weco.catalogue.internal_model.work.generators._
 import weco.json.JsonUtil._
@@ -557,6 +558,48 @@ class CreateTestWorkDocuments
       works,
       description = "examples for the contributor filter tests",
       id = s"works.examples.contributor-filters-tests"
+    )
+  }
+
+  it("creates examples for the access status filter tests") {
+    def work(status: AccessStatus): Work.Visible[WorkState.Denormalised] =
+      denormalisedWork()
+        .items(
+          List(
+            createIdentifiedItemWith(
+              locations = List(
+                createDigitalLocationWith(
+                  accessConditions = List(
+                    AccessCondition(
+                      method = AccessMethod.ManualRequest,
+                      status = Some(status)
+                    )
+                  )
+                )
+              )
+            )
+          )
+        )
+
+    val workA = work(AccessStatus.Restricted)
+    val workB = work(AccessStatus.Restricted)
+    val workC = work(AccessStatus.Closed)
+    val workD = work(AccessStatus.Open)
+    val workE = work(AccessStatus.OpenWithAdvisory)
+    val workF = work(
+      AccessStatus.LicensedResources(relationship = LicensedResources.Resource)
+    )
+    val workG = work(
+      AccessStatus
+        .LicensedResources(relationship = LicensedResources.RelatedResource)
+    )
+
+    val works = Seq(workA, workB, workC, workD, workE, workF, workG)
+
+    saveWorks(
+      works,
+      description = "examples for the access status tests",
+      id = s"works.examples.access-status-filters-tests"
     )
   }
 
