@@ -47,9 +47,8 @@ case class PathsModifier(pathsService: PathsService)
   def modifyCurrentPath(path:String):  Future[Option[Work.Visible[Merged]]] =
     getParentPath(path) flatMap {
       case Some(parentPath) =>
-        getWorkWithPath(path) flatMap {
-          case Some(work) => Future(Some(ChildWork(parentPath, work)))
-          case _ => Future.successful(None) //TODO: This is unexpected, should probably throw in getWorkWithPath
+        getWorkWithPath(path) flatMap { work =>
+          Future(Some(ChildWork(parentPath, work)))
         }
       case _ => Future.successful(None) // This is expected, if parent is root
 
@@ -70,16 +69,20 @@ case class PathsModifier(pathsService: PathsService)
       .runWith(Sink.seq[String])
       .map { parentPaths =>
         info(s"Received ${parentPaths.size} parents")
-        parentPaths.headOption
+        // Only return the head if the list has exactly one path in it.
+        // If there are more, then there is a data error.
+        if (parentPaths.size <= 1) parentPaths.headOption else throw new RuntimeException(s"More than one Work exists with the path $path")
       }
   }
 
-  def getWorkWithPath(path: String): Future[Option[Work.Visible[Merged]]] = {
+  def getWorkWithPath(path: String): Future[Work.Visible[Merged]] = {
     pathsService.getWorkWithPath(path)
       .runWith(Sink.seq[Work.Visible[Merged]])
       .map { currentWork =>
-        info(s"Received ${currentWork.size} parents")
-        currentWork.headOption
+        info(s"Received ${currentWork.size} works")
+        // Only return the head if the list has exactly one path in it.
+        // If there are more, then there is a data error.
+        if (currentWork.size == 1) currentWork.head else throw new RuntimeException(s"More than one Work exists with the path $path")
       }
   }
 
