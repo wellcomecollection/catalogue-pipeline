@@ -527,6 +527,39 @@ class CreateTestWorkDocuments
     )
   }
 
+  it("creates examples for the contributor filter tests") {
+    val patricia = Contributor(agent = Person("Bath, Patricia"), roles = Nil)
+    val karlMarx = Contributor(agent = Person("Karl Marx"), roles = Nil)
+    val jakePaul = Contributor(agent = Person("Jake Paul"), roles = Nil)
+    val darwin =
+      Contributor(agent = Person("Darwin \"Jones\", Charles"), roles = Nil)
+
+    val patriciaWork = denormalisedWork().contributors(List(patricia))
+    val karlMarxWork =
+      denormalisedWork().contributors(List(karlMarx))
+    val jakePaulWork =
+      denormalisedWork().contributors(List(jakePaul))
+    val darwinWork = denormalisedWork().contributors(List(darwin))
+    val patriciaDarwinWork = denormalisedWork()
+      .contributors(List(patricia, darwin))
+    val noContributorsWork = denormalisedWork().contributors(Nil)
+
+    val works = List(
+      patriciaWork,
+      karlMarxWork,
+      jakePaulWork,
+      darwinWork,
+      patriciaDarwinWork,
+      noContributorsWork
+    )
+
+    saveWorks(
+      works,
+      description = "examples for the contributor filter tests",
+      id = s"works.examples.contributor-filters-tests"
+    )
+  }
+
   private def saveWork(
     work: Work[WorkState.Denormalised],
     description: String,
