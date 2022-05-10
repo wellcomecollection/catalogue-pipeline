@@ -1,7 +1,11 @@
 package weco.pipeline.path_concatenator
 
 import com.sksamuel.elastic4s.ElasticApi.termQuery
-import com.sksamuel.elastic4s.ElasticDsl.{constantScoreQuery, search, wildcardQuery}
+import com.sksamuel.elastic4s.ElasticDsl.{
+  constantScoreQuery,
+  search,
+  wildcardQuery
+}
 import com.sksamuel.elastic4s.Index
 import com.sksamuel.elastic4s.requests.searches.SearchRequest
 import com.sksamuel.elastic4s.requests.searches.term.{TermQuery, WildcardQuery}

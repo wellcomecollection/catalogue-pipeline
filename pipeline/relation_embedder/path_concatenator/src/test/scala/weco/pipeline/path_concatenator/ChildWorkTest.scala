@@ -56,9 +56,7 @@ class ChildWorkTest extends AnyFunSpec with WorkGenerators with Matchers {
       // When the parent is the root of the hierarchy,
       // that's fine, but there is nothing to do.
       val originalChild = mergedWork().collectionPath(CollectionPath("a/b"))
-      val newChild = ChildWork(
-        "a",
-        originalChild)
+      val newChild = ChildWork("a", originalChild)
       newChild should be theSameInstanceAs originalChild
     }
 

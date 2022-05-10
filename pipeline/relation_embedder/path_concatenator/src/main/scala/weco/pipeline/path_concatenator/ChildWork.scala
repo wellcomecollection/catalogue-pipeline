@@ -33,7 +33,7 @@ object ChildWork {
   def apply(parentPath: String,
             childWork: Work.Visible[Merged]): Work.Visible[Merged] = {
     childWork.data.collectionPath match {
-      case  None =>
+      case None =>
         throw new IllegalArgumentException(
           s"Cannot prepend a parent path to '${childWork.state.canonicalId}', it does not have a collectionPath")
       case Some(childPath) =>
@@ -46,7 +46,8 @@ object ChildWork {
     }
   }
 
-  private def mergePaths(parentPath: String, childPath: CollectionPath): CollectionPath = {
+  private def mergePaths(parentPath: String,
+                         childPath: CollectionPath): CollectionPath = {
     val childRoot = childPath.path.firstNode
     val parentLeaf = parentPath.lastNode
 

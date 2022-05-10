@@ -28,23 +28,25 @@ import scala.concurrent.{ExecutionContext, Future}
   *  - change b/c to a/b/c
   *  - change c/d and c/e to a/b/c/d and a/b/c/e, respectively,
   */
-case class PathsModifier(pathsService: PathsService)
-                   (implicit ec: ExecutionContext, materializer: Materializer)
-  extends Logging {
+case class PathsModifier(pathsService: PathsService)(
+  implicit ec: ExecutionContext,
+  materializer: Materializer)
+    extends Logging {
 
   def modifyPaths(path: String): Future[Seq[Work.Visible[Merged]]] = {
     modifyCurrentPath(path) flatMap {
-      case None => modifyChildPaths(path)
+      case None               => modifyChildPaths(path)
       case Some(modifiedWork) =>
         //val newPath: String = modifiedWork.data.collectionPath.get.path
         modifyChildPaths(modifiedWork.data.collectionPath.get.path) flatMap {
-          childWorks: Seq[Work.Visible[Merged]] => Future(childWorks :+ modifiedWork)
+          childWorks: Seq[Work.Visible[Merged]] =>
+            Future(childWorks :+ modifiedWork)
         }
     }
-  //TODO save the changes (in the caller?)
+    //TODO save the changes (in the caller?)
   }
 
-  def modifyCurrentPath(path:String):  Future[Option[Work.Visible[Merged]]] =
+  def modifyCurrentPath(path: String): Future[Option[Work.Visible[Merged]]] =
     getParentPath(path) flatMap {
       case Some(parentPath) =>
         getWorkWithPath(path) flatMap { work =>
@@ -54,40 +56,50 @@ case class PathsModifier(pathsService: PathsService)
 
     }
 
-  def modifyChildPaths(path:String): Future[Seq[Work.Visible[Merged]]] =
+  def modifyChildPaths(path: String): Future[Seq[Work.Visible[Merged]]] =
     getWorksUnderPath(path) flatMap { works: Seq[Work.Visible[Merged]] =>
       Future(updatePaths(path, works))
     }
 
-  def updatePaths(parentPath: String, works: Seq[Work.Visible[Merged]]): Seq[Work.Visible[Merged]] =
-    works map {
-      work: Work.Visible[Merged] => ChildWork(parentPath, work)
+  def updatePaths(parentPath: String,
+                  works: Seq[Work.Visible[Merged]]): Seq[Work.Visible[Merged]] =
+    works map { work: Work.Visible[Merged] =>
+      ChildWork(parentPath, work)
     }
 
   def getParentPath(path: String): Future[Option[String]] = {
-    pathsService.getParentPath(path)
+    pathsService
+      .getParentPath(path)
       .runWith(Sink.seq[String])
       .map { parentPaths =>
         info(s"Received ${parentPaths.size} parents")
         // Only return the head if the list has exactly one path in it.
         // If there are more, then there is a data error.
-        if (parentPaths.size <= 1) parentPaths.headOption else throw new RuntimeException(s"More than one Work exists with the path $path")
+        if (parentPaths.size <= 1) parentPaths.headOption
+        else
+          throw new RuntimeException(
+            s"More than one Work exists with the path $path")
       }
   }
 
   def getWorkWithPath(path: String): Future[Work.Visible[Merged]] = {
-    pathsService.getWorkWithPath(path)
+    pathsService
+      .getWorkWithPath(path)
       .runWith(Sink.seq[Work.Visible[Merged]])
       .map { currentWork =>
         info(s"Received ${currentWork.size} works")
         // Only return the head if the list has exactly one path in it.
         // If there are more, then there is a data error.
-        if (currentWork.size == 1) currentWork.head else throw new RuntimeException(s"More than one Work exists with the path $path")
+        if (currentWork.size == 1) currentWork.head
+        else
+          throw new RuntimeException(
+            s"More than one Work exists with the path $path")
       }
   }
 
   def getWorksUnderPath(path: String): Future[Seq[Work.Visible[Merged]]] = {
-    pathsService.getChildWorks(path)
+    pathsService
+      .getChildWorks(path)
       .runWith(Sink.seq[Work.Visible[Merged]])
       .map { childWorks =>
         info(s"Received ${childWorks.size} children")
