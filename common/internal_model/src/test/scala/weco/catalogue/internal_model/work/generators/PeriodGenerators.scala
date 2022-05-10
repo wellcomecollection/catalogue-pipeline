@@ -18,4 +18,20 @@ trait PeriodGenerators {
         )
       )
     )
+
+  def createPeriodForYearRange(
+    startYear: String,
+    endYear: String
+  ): Period[IdState.Minted] =
+    Period(
+      id = IdState.Unidentifiable,
+      label = s"$startYear-$endYear",
+      range = Some(
+        InstantRange(
+          from = LocalDate.of(startYear.toInt, Month.JANUARY, 1),
+          to = LocalDate.of(endYear.toInt, Month.DECEMBER, 31),
+          label = s"$startYear-$endYear"
+        )
+      )
+    )
 }

@@ -4,10 +4,26 @@ import io.circe.Json
 import io.circe.syntax._
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.generators.ImageGenerators
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.languages.Language
-import weco.catalogue.internal_model.locations.License
+import weco.catalogue.internal_model.locations.AccessStatus.LicensedResources
+import weco.catalogue.internal_model.locations.{
+  AccessCondition,
+  AccessMethod,
+  AccessStatus,
+  DigitalLocationType,
+  License,
+  LocationType,
+  PhysicalLocationType
+}
+import weco.catalogue.internal_model.work.Format.{
+  Audio,
+  Books,
+  Journals,
+  Pictures
+}
 import weco.catalogue.internal_model.work._
 import weco.catalogue.internal_model.work.generators._
 import weco.json.JsonUtil._
@@ -327,6 +343,327 @@ class CreateTestWorkDocuments
       works = works,
       description = "works with different contributor",
       id = "works.contributor"
+    )
+  }
+
+  it("creates items with multiple source identifiers") {
+    val works = (1 to 5).map { _ =>
+      denormalisedWork()
+        .items(
+          List(
+            createIdentifiedItemWith(
+              otherIdentifiers = List(createSourceIdentifier)
+            )
+          )
+        )
+    }
+
+    saveWorks(
+      works = works,
+      description = "works with items with other identifiers",
+      id = "works.items-with-other-identifiers"
+    )
+  }
+
+  it("creates a work with a collection path") {
+    saveWork(
+      work = denormalisedWork()
+        .collectionPath(CollectionPath(path = "PPCRI", label = Some("PP/CRI"))),
+      description = "a work with a collection path",
+      id = "works.collection-path.PPCRI"
+    )
+
+    saveWork(
+      work = denormalisedWork()
+        .collectionPath(CollectionPath("NUFFINK", label = Some("NUF/FINK"))),
+      description = "a work with a collection path",
+      id = "works.collection-path.NUFFINK"
+    )
+  }
+
+  it("creates examples of every format") {
+    val works = Format.values.map { format =>
+      denormalisedWork().format(format)
+    }
+
+    saveWorks(
+      works = works,
+      description = "works with every format",
+      id = "works.every-format"
+    )
+  }
+
+  it("creates examples to use in the period filter/aggregation tests") {
+    val periods = List(
+      createPeriodForYear(year = "1850"),
+      createPeriodForYearRange(startYear = "1850", endYear = "2000"),
+      createPeriodForYearRange(startYear = "1860", endYear = "1960"),
+      createPeriodForYear(year = "1960"),
+      createPeriodForYearRange(startYear = "1960", endYear = "1964"),
+      createPeriodForYear(year = "1962")
+    )
+
+    val works = periods.map { p =>
+      denormalisedWork()
+        .production(
+          List(createProductionEvent.copy(dates = List(p)))
+        )
+    }
+
+    saveWorks(
+      works = works,
+      description = "works with multi-year production ranges",
+      id = "works.production.multi-year"
+    )
+  }
+
+  it("creates items with different location types") {
+    val locationTypes = Seq(
+      List(LocationType.IIIFImageAPI),
+      List(LocationType.IIIFImageAPI, LocationType.IIIFPresentationAPI),
+      List(LocationType.ClosedStores)
+    )
+
+    val locations = locationTypes.map {
+      _.map {
+        case physicalLocationType: PhysicalLocationType =>
+          createPhysicalLocationWith(locationType = physicalLocationType)
+
+        case digitalLocationType: DigitalLocationType =>
+          createDigitalLocationWith(locationType = digitalLocationType)
+      }
+    }
+
+    val items = locations.map { locations =>
+      createIdentifiedItemWith(locations = locations)
+    }
+
+    val works = items.map { item =>
+      denormalisedWork().items(List(item))
+    }
+
+    saveWorks(
+      works,
+      description = "items with different location types",
+      id = "work.items-with-location-types"
+    )
+  }
+
+  it("creates examples for the aggregation-with-filters tests") {
+    val formats = Format.values
+    val subjects = (0 to 5).map(_ => createSubject)
+    val works = formats.zipWithIndex.map {
+      case (format, i) =>
+        denormalisedWork()
+          .format(format)
+          .subjects(List(subjects(i / subjects.size)))
+    }
+
+    saveWorks(
+      works,
+      description = "examples for the aggregation-with-filters tests",
+      id = "works.examples.aggregation-with-filters-tests"
+    )
+  }
+
+  it("creates examples for works of different types") {
+    Seq(
+      WorkType.Section,
+      WorkType.Collection,
+      WorkType.Series,
+    ).map { workType =>
+      saveWork(
+        work = denormalisedWork().title("rats").workType(workType),
+        description = "examples of works with different types",
+        id = s"works.examples.different-work-types.$workType"
+      )
+    }
+  }
+
+  it("creates examples for the genre filter tests") {
+    val annualReports = createGenreWith("Annual reports.")
+    val pamphlets = createGenreWith("Pamphlets.")
+    val psychology = createGenreWith("Psychology, Pathological")
+    val darwin = createGenreWith("Darwin \"Jones\", Charles")
+
+    val annualReportsWork = denormalisedWork().genres(List(annualReports))
+    val pamphletsWork = denormalisedWork().genres(List(pamphlets))
+    val psychologyWork = denormalisedWork().genres(List(psychology))
+    val darwinWork =
+      denormalisedWork().genres(List(darwin))
+    val mostThingsWork =
+      denormalisedWork().genres(List(pamphlets, psychology, darwin))
+    val nothingWork = denormalisedWork()
+
+    val works =
+      List(
+        annualReportsWork,
+        pamphletsWork,
+        psychologyWork,
+        darwinWork,
+        mostThingsWork,
+        nothingWork
+      )
+
+    saveWorks(
+      works,
+      description = "examples for the genre tests",
+      id = s"works.examples.genre-filters-tests"
+    )
+  }
+
+  it("creates examples for the subject filter tests") {
+    val sanitation = createSubjectWith("Sanitation.")
+    val london = createSubjectWith("London (England)")
+    val psychology = createSubjectWith("Psychology, Pathological")
+    val darwin = createSubjectWith("Darwin \"Jones\", Charles")
+
+    val sanitationWork = denormalisedWork().subjects(List(sanitation))
+    val londonWork = denormalisedWork().subjects(List(london))
+    val psychologyWork = denormalisedWork().subjects(List(psychology))
+    val darwinWork =
+      denormalisedWork().subjects(List(darwin))
+    val mostThingsWork =
+      denormalisedWork().subjects(List(london, psychology, darwin))
+    val nothingWork = denormalisedWork()
+
+    val works =
+      List(
+        sanitationWork,
+        londonWork,
+        psychologyWork,
+        darwinWork,
+        mostThingsWork,
+        nothingWork
+      )
+
+    saveWorks(
+      works,
+      description = "examples for the subject filter tests",
+      id = s"works.examples.subject-filters-tests"
+    )
+  }
+
+  it("creates examples for the contributor filter tests") {
+    val patricia = Contributor(agent = Person("Bath, Patricia"), roles = Nil)
+    val karlMarx = Contributor(agent = Person("Karl Marx"), roles = Nil)
+    val jakePaul = Contributor(agent = Person("Jake Paul"), roles = Nil)
+    val darwin =
+      Contributor(agent = Person("Darwin \"Jones\", Charles"), roles = Nil)
+
+    val patriciaWork = denormalisedWork().contributors(List(patricia))
+    val karlMarxWork =
+      denormalisedWork().contributors(List(karlMarx))
+    val jakePaulWork =
+      denormalisedWork().contributors(List(jakePaul))
+    val darwinWork = denormalisedWork().contributors(List(darwin))
+    val patriciaDarwinWork = denormalisedWork()
+      .contributors(List(patricia, darwin))
+    val noContributorsWork = denormalisedWork().contributors(Nil)
+
+    val works = List(
+      patriciaWork,
+      karlMarxWork,
+      jakePaulWork,
+      darwinWork,
+      patriciaDarwinWork,
+      noContributorsWork
+    )
+
+    saveWorks(
+      works,
+      description = "examples for the contributor filter tests",
+      id = s"works.examples.contributor-filters-tests"
+    )
+  }
+
+  it("creates examples for the access status filter tests") {
+    def work(status: AccessStatus): Work.Visible[WorkState.Denormalised] =
+      denormalisedWork()
+        .items(
+          List(
+            createIdentifiedItemWith(
+              locations = List(
+                createDigitalLocationWith(
+                  accessConditions = List(
+                    AccessCondition(
+                      method = AccessMethod.ManualRequest,
+                      status = Some(status)
+                    )
+                  )
+                )
+              )
+            )
+          )
+        )
+
+    val workA = work(AccessStatus.Restricted)
+    val workB = work(AccessStatus.Restricted)
+    val workC = work(AccessStatus.Closed)
+    val workD = work(AccessStatus.Open)
+    val workE = work(AccessStatus.OpenWithAdvisory)
+    val workF = work(
+      AccessStatus.LicensedResources(relationship = LicensedResources.Resource)
+    )
+    val workG = work(
+      AccessStatus
+        .LicensedResources(relationship = LicensedResources.RelatedResource)
+    )
+
+    val works = Seq(workA, workB, workC, workD, workE, workF, workG)
+
+    saveWorks(
+      works,
+      description = "examples for the access status tests",
+      id = s"works.examples.access-status-filters-tests"
+    )
+  }
+
+  it("creates examples for the works with filtered aggregations tests") {
+    val bashkir = Language(label = "Bashkir", id = "bak")
+    val marathi = Language(label = "Marathi", id = "mar")
+    val quechua = Language(label = "Quechua", id = "que")
+    val chechen = Language(label = "Chechen", id = "che")
+
+    /*
+     * | workType     | count |
+     * |--------------|-------|
+     * | a / Books    | 4     |
+     * | d / Journals | 3     |
+     * | i / Audio    | 2     |
+     * | k / Pictures | 1     |
+     *
+     * | language      | count |
+     * |---------------|-------|
+     * | bak / Bashkir | 4     |
+     * | que / Quechua | 3     |
+     * | mar / Marathi  | 2     |
+     * | che / Chechen | 1     |
+     *
+     */
+    val aggregatedWorks: List[Work.Visible[WorkState.Denormalised]] = List(
+      (Books, bashkir, "rats"), // a
+      (Journals, marathi, "capybara"), // d
+      (Pictures, quechua, "tapirs"), // k
+      (Audio, bashkir, "rats"), // i
+      (Books, bashkir, "capybara"), // a
+      (Books, bashkir, "tapirs"), // a
+      (Journals, quechua, "rats"), // d
+      (Books, marathi, "capybara"), // a
+      (Journals, quechua, "tapirs"), // d
+      (Audio, chechen, "rats") // i
+    ).map {
+      case (format, language, title) =>
+        denormalisedWork()
+          .title(title)
+          .format(format)
+          .languages(List(language))
+    }
+
+    saveWorks(
+      aggregatedWorks,
+      description = "examples for the works filtered aggregations tests",
+      id = s"works.examples.filtered-aggregations-tests"
     )
   }
 
