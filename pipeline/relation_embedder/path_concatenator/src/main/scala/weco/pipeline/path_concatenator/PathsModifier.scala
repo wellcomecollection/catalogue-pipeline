@@ -71,14 +71,13 @@ case class PathsModifier(pathsService: PathsService)(
     pathsService
       .getParentPath(path)
       .runWith(Sink.seq[String])
-      .map { parentPaths =>
-        info(s"Received ${parentPaths.size} parents of $path")
+      .map {
         // Only return the head if the list has exactly one path in it.
         // If there are more, then there is a data error.
-        if (parentPaths.size <= 1) parentPaths.headOption
-        else
-          throw new RuntimeException(
-            s"More than one Work exists with the path $path")
+        case Nil => None
+        case Seq(parentPath) => Some(parentPath)
+        case multiplePaths =>
+        throw new RuntimeException( s"$path has more than one possible parents: $multiplePaths" )
       }
   }
 
@@ -86,14 +85,11 @@ case class PathsModifier(pathsService: PathsService)(
     pathsService
       .getWorkWithPath(path)
       .runWith(Sink.seq[Work.Visible[Merged]])
-      .map { currentWork =>
-        info(s"Received ${currentWork.size} works")
-        // Only return the head if the list has exactly one path in it.
-        // If there are more, then there is a data error.
-        if (currentWork.size == 1) currentWork.head
-        else
-          throw new RuntimeException(
-            s"More than one Work exists with the path $path")
+      .map {
+        case Nil => throw new RuntimeException( s"No work found with path: $path")
+        case Seq(currentWork) => currentWork
+        case multipleWorks =>
+          throw new RuntimeException( s"$path has more than one possible works: $multipleWorks" )
       }
   }
 

@@ -23,9 +23,8 @@ object ChildWork {
     * i.e. because it has already been executed once to resolve the grandparent/parent
     * part (and possibly again to add great-grandparent etc.)
     *
-    * In that case it will still merge the paths as expected,
+    * In that case it will still merge the paths as expected - e.g.
     *
-    * e.g.
     * great-grandparent/grandparent + grandparent/parent/self
     * -> great-grandparent/grandparent/parent/self.
     *

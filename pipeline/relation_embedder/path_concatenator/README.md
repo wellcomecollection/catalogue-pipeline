@@ -32,7 +32,8 @@ for more detail.
 7. Notify downstream (batcher) of the current path if it is unchanged.
 
 This is a deliberately ordered list of steps, so that the current record *first* gets its own path embellished, *then*
-goes on to embellish the paths of its children with that new path.
+goes on to embellish the paths of its children with that new path.  Updating the child paths with the current record's
+path _before_ updating the current record's path would result in the child records having incomplete paths.
 
 When writing to the database, pay attention to version.  If it is not what is expected,
 abort.
