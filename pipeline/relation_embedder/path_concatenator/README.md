@@ -2,7 +2,7 @@
 
 ## What?
 
-Unlike records from other systems each store their full path to the root of their hierarchy,
+Unlike records from other systems which each store their full path to the root of their hierarchy,
 records from Sierra only know their immediately adjacent parent/child relations.
 
 This makes it impossible to construct a full hierarchical path just from the data in a single record (unless that
