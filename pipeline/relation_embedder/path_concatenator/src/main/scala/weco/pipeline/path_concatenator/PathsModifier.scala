@@ -72,7 +72,7 @@ case class PathsModifier(pathsService: PathsService)(
       .getParentPath(path)
       .runWith(Sink.seq[String])
       .map { parentPaths =>
-        info(s"Received ${parentPaths.size} parents")
+        info(s"Received ${parentPaths.size} parents of $path")
         // Only return the head if the list has exactly one path in it.
         // If there are more, then there is a data error.
         if (parentPaths.size <= 1) parentPaths.headOption
