@@ -3,7 +3,7 @@ package weco.pipeline.ingestor.fixtures
 import io.circe.Json
 import io.circe.syntax._
 import org.apache.commons.io.FileUtils
-import weco.catalogue.internal_model.work.{Work, WorkState}
+import weco.catalogue.internal_model.image.{Image, ImageState}
 import weco.catalogue.internal_model.work.generators.InstantGenerators
 import weco.fixtures.RandomGenerators
 import weco.json.JsonUtil._
@@ -21,7 +21,7 @@ trait TestDocumentUtils extends InstantGenerators with RandomGenerators {
     // TODO: This field is only here as a stopgap while we change the way the
     // index data is structured.
     // See https://github.com/wellcomecollection/platform/issues/5449
-    work: Work[WorkState.Indexed]
+    image: Image[ImageState.Augmented]
   )
 
   override protected lazy val random: Random =

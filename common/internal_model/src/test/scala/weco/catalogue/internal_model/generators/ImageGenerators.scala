@@ -190,13 +190,13 @@ trait ImageGenerators
     )
   }
 
-  def createLicensedImage(license: License): Image[Indexed] =
+  def createLicensedImage(license: License): Image[ImageState.Augmented] =
     createImageDataWith(
       locations = List(
         createDigitalLocationWith(
           license = Some(license),
           locationType = LocationType.IIIFImageAPI))
-    ).toIndexedImage
+    ).toAugmentedImage
 
   //   Create a set of images with intersecting LSH lists to ensure
   //   that similarity queries will return something. Returns them in order

@@ -686,8 +686,7 @@ class CreateTestWorkDocuments
           id -> TestDocument(
             description,
             id = work.id,
-            document = work.toDocument,
-            work = work.transition[WorkState.Indexed]()
+            document = work.toDocument
           )
         )
 
@@ -698,8 +697,7 @@ class CreateTestWorkDocuments
               s"$id.$index" -> TestDocument(
                 description,
                 id = work.id,
-                document = work.toDocument,
-                work = work.transition[WorkState.Indexed]()
+                document = work.toDocument
               )
           }
     }
