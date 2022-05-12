@@ -8,8 +8,6 @@ import weco.catalogue.internal_model.identifiers.{
   SourceIdentifier
 }
 
-import scala.util.Random
-
 trait IdentifiersGenerators extends RandomGenerators {
   implicit val arbitraryCanonicalId: Arbitrary[CanonicalId] =
     Arbitrary {
@@ -86,7 +84,7 @@ trait IdentifiersGenerators extends RandomGenerators {
                    length: Int = 8): String =
     s"%c%0${length - 1}d".format(
       prefix,
-      Random.nextInt(math.pow(10, length - 1).toInt)
+      random.nextInt(math.pow(10, length - 1).toInt)
     )
 
   def createMiroSourceIdentifierWith(

@@ -1,8 +1,8 @@
 package weco.catalogue.internal_model.generators
 
-import scala.util.Random
+import weco.fixtures.RandomGenerators
 
-trait VectorGenerators {
+trait VectorGenerators extends RandomGenerators {
   import VectorOps._
 
   private val defaultSimilarity = math.cos(Math.PI / 64).toFloat
@@ -14,7 +14,7 @@ trait VectorGenerators {
     val first = randomHash(d)
     (0 until n).map { i =>
       first.zipWithIndex.map {
-        case (_, j) if j < i => f"${Random.nextInt(1000)}%03d"
+        case (_, j) if j < i => f"${random.nextInt(1000)}%03d"
         case (x, _)          => x
       }
     }
@@ -27,7 +27,7 @@ trait VectorGenerators {
       case (bins, binIndex) =>
         List.fill(nTokens / binSizes.size) {
           val maxIndex = bins(1) + (bins(0) * bins(1) * bins(2))
-          val c = Random.nextInt(maxIndex)
+          val c = random.nextInt(maxIndex)
           s"$c/$binIndex"
         }
     }
@@ -40,11 +40,11 @@ trait VectorGenerators {
       case (bins, binIndex) =>
         val maxIndex = bins(1) + (bins(0) * bins(1) * bins(2))
         Seq.fill(nTokens / binSizes.size)(
-          (Random.nextInt(maxIndex), maxIndex, binIndex))
+          (random.nextInt(maxIndex), maxIndex, binIndex))
     }
     (0 until n)
       .map { i =>
-        Random.shuffle(Seq.fill(nTokens - i)(0).padTo(nTokens, 1))
+        random.shuffle(Seq.fill(nTokens - i)(0).padTo(nTokens, 1))
       }
       .map { offsets =>
         (baseIndices zip offsets).map {
@@ -56,7 +56,7 @@ trait VectorGenerators {
 
   def randomVector(d: Int, maxR: Float = 1.0f): Vec = {
     val rand = normalize(randomNormal(d))
-    val r = maxR * math.pow(Random.nextFloat(), 1.0 / d).toFloat
+    val r = maxR * math.pow(random.nextFloat(), 1.0 / d).toFloat
     scalarMultiply(r, rand)
   }
 
@@ -88,6 +88,8 @@ trait VectorGenerators {
     }
     baseVec +: otherVecs
   }
+
+  private def randomNormal(d: Int): Vec = Seq.fill(d)(random.nextGaussian().toFloat)
 }
 
 object VectorOps {
@@ -121,10 +123,6 @@ object VectorOps {
 
   def dot(a: Vec, b: Vec): Float =
     (a zip b).map(Function.tupled(_ * _)).sum
-
-  def randomNormal(d: Int): Vec = Seq.fill(d)(Random.nextGaussian().toFloat)
-
-  def randomUniform(d: Int): Vec = Seq.fill(d)(Random.nextFloat)
 
   def proj(a: Vec, b: Vec): Vec =
     scalarMultiply(dot(a, b) / dot(a, a), a)
