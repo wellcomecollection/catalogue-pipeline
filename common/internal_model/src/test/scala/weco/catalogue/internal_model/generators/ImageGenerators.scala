@@ -7,7 +7,7 @@ import weco.catalogue.internal_model.identifiers.{
 }
 import weco.catalogue.internal_model.image
 import weco.catalogue.internal_model.image.ParentWork._
-import weco.catalogue.internal_model.image.ImageState.{Indexed, Initial}
+import weco.catalogue.internal_model.image.ImageState.Initial
 import weco.catalogue.internal_model.image._
 import weco.catalogue.internal_model.locations.{
   DigitalLocation,
@@ -203,7 +203,7 @@ trait ImageGenerators
   //   of similarity.
   def createSimilarImages(n: Int,
                           similarFeatures: Boolean,
-                          similarPalette: Boolean): Seq[Image[Indexed]] = {
+                          similarPalette: Boolean): Seq[Image[ImageState.Augmented]] = {
     val features = if (similarFeatures) {
       similarVectors(4096, n)
     } else { (1 to n).map(_ => randomVector(4096, maxR = 10.0f)) }
@@ -219,7 +219,7 @@ trait ImageGenerators
     }
     (features, lshFeatures, palettes).zipped.map {
       case (f, l, p) =>
-        createImageData.toIndexedImageWith(
+        createImageData.toAugmentedImageWith(
           inferredData = Some(
             InferredData(
               features1 = f.slice(0, 2048).toList,

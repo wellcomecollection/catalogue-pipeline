@@ -121,6 +121,51 @@ class CreateTestImageDocuments
     )
   }
 
+  it("creates images with similar features and palettes") {
+    val images =
+      createSimilarImages(
+        n = 6,
+        similarFeatures = true,
+        similarPalette = true
+      )
+
+    saveImages(
+      images,
+      description = "images with similar features and palettes",
+      id = "images.similar-features-and-palettes"
+    )
+  }
+
+  it("creates images with similar features") {
+    val images =
+      createSimilarImages(
+        n = 6,
+        similarFeatures = true,
+        similarPalette = false
+      )
+
+    saveImages(
+      images,
+      description = "images with similar features",
+      id = "images.similar-features"
+    )
+  }
+
+  it("creates images with similar palettes") {
+    val images =
+      createSimilarImages(
+        n = 6,
+        similarFeatures = false,
+        similarPalette = true
+      )
+
+    saveImages(
+      images,
+      description = "images with similar palettes",
+      id = "images.similar-palettes"
+    )
+  }
+
   def saveImage(
     image: Image[ImageState.Augmented],
     description: String,
