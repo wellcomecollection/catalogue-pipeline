@@ -14,6 +14,8 @@ import weco.catalogue.internal_model.work.{Agent, Contributor, Meeting, Organisa
 import weco.json.JsonUtil._
 import weco.pipeline.ingestor.fixtures.TestDocumentUtils
 
+import java.time.Instant
+
 /** Creates the example documents we use in the API tests.
  *
  * These tests use a seeded RNG to ensure deterministic results; to prevent
@@ -31,6 +33,9 @@ class CreateTestImageDocuments
     with ContributorGenerators
     with GenreGenerators
     with ImageGenerators {
+
+  override def randomInstant: Instant =
+    Instant.parse("2001-01-01T01:01:01Z").plusSeconds(random.nextInt())
 
   it("creates images with different licenses") {
     val ccByImages = (1 to 5).map { _ =>

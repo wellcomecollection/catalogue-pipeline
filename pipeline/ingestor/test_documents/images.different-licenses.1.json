@@ -1,6 +1,6 @@
 {
   "description" : "images with different licenses",
-  "createdAt" : "2022-05-12T09:58:50.875Z",
+  "createdAt" : "2022-05-12T10:03:16.107Z",
   "id" : "kfx7qfdt",
   "document" : {
     "version" : 1,
@@ -4275,15 +4275,15 @@
       },
       "derivedData" : {
         "thumbnail" : {
-          "url" : "https://iiif.wellcomecollection.org/image/nJ3.jpg/info.json",
+          "url" : "https://iiif.wellcomecollection.org/image/0nJ.jpg/info.json",
           "locationType" : {
             "id" : "iiif-image"
           },
           "license" : {
             "id" : "cc-by"
           },
-          "credit" : "Credit line: uZQUd4A611",
-          "linkText" : "Link text: UIgSWmx",
+          "credit" : null,
+          "linkText" : "Link text: 9UIgSWmx",
           "accessConditions" : [
           ]
         },
@@ -4293,15 +4293,15 @@
     },
     "locations" : [
       {
-        "url" : "https://iiif.wellcomecollection.org/image/nJ3.jpg/info.json",
+        "url" : "https://iiif.wellcomecollection.org/image/0nJ.jpg/info.json",
         "locationType" : {
           "id" : "iiif-image"
         },
         "license" : {
           "id" : "cc-by"
         },
-        "credit" : "Credit line: uZQUd4A611",
-        "linkText" : "Link text: UIgSWmx",
+        "credit" : null,
+        "linkText" : "Link text: 9UIgSWmx",
         "accessConditions" : [
         ]
       }
@@ -4439,7 +4439,7 @@
       },
       "type" : "ParentWorks"
     },
-    "modifiedTime" : "2022-05-25T22:59:52Z",
+    "modifiedTime" : "1965-03-07T16:21:32Z",
     "display" : {
       "id" : "kfx7qfdt",
       "thumbnail" : {
@@ -4448,9 +4448,8 @@
           "label" : "IIIF Image API",
           "type" : "LocationType"
         },
-        "url" : "https://iiif.wellcomecollection.org/image/nJ3.jpg/info.json",
-        "credit" : "Credit line: uZQUd4A611",
-        "linkText" : "Link text: UIgSWmx",
+        "url" : "https://iiif.wellcomecollection.org/image/0nJ.jpg/info.json",
+        "linkText" : "Link text: 9UIgSWmx",
         "license" : {
           "id" : "cc-by",
           "label" : "Attribution 4.0 International (CC BY 4.0)",
@@ -4468,9 +4467,8 @@
             "label" : "IIIF Image API",
             "type" : "LocationType"
           },
-          "url" : "https://iiif.wellcomecollection.org/image/nJ3.jpg/info.json",
-          "credit" : "Credit line: uZQUd4A611",
-          "linkText" : "Link text: UIgSWmx",
+          "url" : "https://iiif.wellcomecollection.org/image/0nJ.jpg/info.json",
+          "linkText" : "Link text: 9UIgSWmx",
           "license" : {
             "id" : "cc-by",
             "label" : "Attribution 4.0 International (CC BY 4.0)",
@@ -8770,15 +8768,15 @@
     },
     "locations" : [
       {
-        "url" : "https://iiif.wellcomecollection.org/image/nJ3.jpg/info.json",
+        "url" : "https://iiif.wellcomecollection.org/image/0nJ.jpg/info.json",
         "locationType" : {
           "id" : "iiif-image"
         },
         "license" : {
           "id" : "cc-by"
         },
-        "credit" : "Credit line: uZQUd4A611",
-        "linkText" : "Link text: UIgSWmx",
+        "credit" : null,
+        "linkText" : "Link text: 9UIgSWmx",
         "accessConditions" : [
         ]
       }
@@ -8916,6 +8914,6 @@
       },
       "type" : "ParentWorks"
     },
-    "modifiedTime" : "2022-05-25T22:59:52Z"
+    "modifiedTime" : "1965-03-07T16:21:32Z"
   }
 }

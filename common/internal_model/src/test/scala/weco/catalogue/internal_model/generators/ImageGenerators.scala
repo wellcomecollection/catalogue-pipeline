@@ -114,7 +114,7 @@ trait ImageGenerators
   implicit class IdentifiedImageDataOps(
     imageData: ImageData[IdState.Identified]) {
     def toInitialImageWith(
-      modifiedTime: Instant = instantInLast30Days,
+      modifiedTime: Instant = randomInstant,
       parentWorks: ParentWorks = ParentWorks(
         canonicalWork = mergedWork().toParentWork,
         redirectedWork = None
