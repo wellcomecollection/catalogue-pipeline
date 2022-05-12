@@ -253,6 +253,86 @@ class CreateTestImageDocuments
     )
   }
 
+  it("creates examples for the color filter tests") {
+    val redImage = createImageData.toAugmentedImageWith(
+      inferredData = createInferredData.map(
+        _.copy(
+          palette = List(
+            "7/0",
+            "7/0",
+            "7/0",
+            "71/1",
+            "71/1",
+            "71/1",
+            "268/2",
+            "268/2",
+            "268/2"
+          )
+        )
+      )
+    )
+    val blueImage = createImageData.toAugmentedImageWith(
+      inferredData = createInferredData.map(
+        _.copy(
+          palette = List(
+            "9/0",
+            "9/0",
+            "9/0",
+            "5/0",
+            "74/1",
+            "74/1",
+            "74/1",
+            "35/1",
+            "50/1",
+            "29/1",
+            "38/1",
+            "273/2",
+            "273/2",
+            "273/2",
+            "187/2",
+            "165/2",
+            "115/2",
+            "129/2"
+          )
+        )
+      )
+    )
+    val slightlyLessRedImage = createImageData.toAugmentedImageWith(
+      inferredData = createInferredData.map(
+        _.copy(
+          palette = List(
+            "7/0",
+            "71/1",
+            "71/1",
+            "71/1"
+          )
+        )
+      )
+    )
+    val evenLessRedImage = createImageData.toAugmentedImageWith(
+      inferredData = createInferredData.map(
+        _.copy(
+          palette = List(
+            "7/0",
+            "7/0",
+            "7/0"
+          )
+        )
+      )
+    )
+
+    val images = Seq(redImage,
+      slightlyLessRedImage,
+      evenLessRedImage,
+      blueImage)
+
+    saveImages(
+      images,
+      description = "examples for the color filter tests",
+      id = "images.examples.color-filter-tests"
+    )
+  }
+
   def saveImage(
     image: Image[ImageState.Augmented],
     description: String,
