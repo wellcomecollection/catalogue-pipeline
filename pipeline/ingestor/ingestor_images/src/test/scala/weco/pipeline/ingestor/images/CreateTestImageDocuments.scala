@@ -421,6 +421,11 @@ class CreateTestImageDocuments
       )
     )
 
+    val mantouImage = createImageData.toAugmentedImageWith(
+      parentWork = identifiedWork()
+        .title("Mantou is a steamed bread associated with Northern China")
+    )
+
     saveImage(
       baguetteImage,
       description = "an example of images with work metadata for the API tests",
@@ -437,6 +442,12 @@ class CreateTestImageDocuments
       schiacciataImage,
       description = "an example of images with work metadata for the API tests",
       id = "images.examples.bread-schiacciata",
+    )
+
+    saveImage(
+      mantouImage,
+      description = "an example of images with work metadata for the API tests",
+      id = "images.examples.bread-mantou",
     )
   }
 
