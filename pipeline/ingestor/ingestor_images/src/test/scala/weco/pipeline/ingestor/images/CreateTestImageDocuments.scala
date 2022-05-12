@@ -166,6 +166,33 @@ class CreateTestImageDocuments
     )
   }
 
+  it("creates an image without any inferred data") {
+    val image = createImageData.toAugmentedImageWith(inferredData = None)
+
+    saveImage(
+      image,
+      description = "an image without any inferred data",
+      id = "images.inferred-data.none"
+    )
+  }
+
+  it("creates an image with inferred data in the wrong format") {
+    val image = createImageData.toAugmentedImageWith(
+      inferredData = createInferredData.map(
+        _.copy(
+          binMinima = List(1f),
+          binSizes = List(List(1))
+        )
+      )
+    )
+
+    saveImage(
+      image,
+      description = "an image with inferred data in the wrong format",
+      id = "images.inferred-data.wrong-format"
+    )
+  }
+  
   def saveImage(
     image: Image[ImageState.Augmented],
     description: String,
