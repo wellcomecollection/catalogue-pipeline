@@ -1,37 +1,37 @@
 {
   "description" : "one of a list of works with a variety of languages",
-  "createdAt" : "2022-05-04T07:15:03.032Z",
-  "id" : "m6ne7xwr",
+  "createdAt" : "2022-05-12T16:38:37.469Z",
+  "id" : "i8zcsj78",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "zpe3bQyhsY"
+          "value" : "ZquhBnzQPW"
         },
-        "version" : 48,
-        "modifiedTime" : "2022-04-29T12:04:36Z"
+        "version" : 30,
+        "modifiedTime" : "2044-10-23T19:22:08Z"
       },
-      "mergedTime" : "2022-04-29T12:04:36Z",
-      "indexedTime" : "2022-05-04T07:15:03.031Z",
+      "mergedTime" : "2044-10-23T19:22:08Z",
+      "indexedTime" : "2022-05-12T16:38:37.468Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "miro-image-number"
+          "id" : "sierra-system-number"
         },
         "ontologyType" : "Work",
-        "value" : "zpe3bQyhsY"
+        "value" : "ZquhBnzQPW"
       },
-      "canonicalId" : "m6ne7xwr",
-      "mergedTime" : "2022-04-29T12:04:36Z",
-      "sourceModifiedTime" : "2022-04-29T12:04:36Z",
-      "indexedTime" : "2022-05-04T07:15:03.031Z",
+      "canonicalId" : "i8zcsj78",
+      "mergedTime" : "2044-10-23T19:22:08Z",
+      "sourceModifiedTime" : "2044-10-23T19:22:08Z",
+      "indexedTime" : "2022-05-12T16:38:37.468Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -90,7 +90,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "m6ne7xwr",
+      "id" : "i8zcsj78",
       "title" : "A work with languages English",
       "alternativeTitles" : [
       ],
@@ -99,11 +99,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "zpe3bQyhsY",
+          "value" : "ZquhBnzQPW",
           "type" : "Identifier"
         }
       ],
@@ -140,81 +140,6 @@
       ],
       "type" : "Work"
     },
-    "type" : "Visible"
-  },
-  "work" : {
-    "version" : 48,
-    "data" : {
-      "title" : "A work with languages English",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-        {
-          "id" : "eng",
-          "label" : "English"
-        }
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "miro-image-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "zpe3bQyhsY"
-      },
-      "canonicalId" : "m6ne7xwr",
-      "mergedTime" : "2022-04-29T12:04:36Z",
-      "sourceModifiedTime" : "2022-04-29T12:04:36Z",
-      "indexedTime" : "2022-05-04T07:15:03.032Z",
-      "availabilities" : [
-      ],
-      "derivedData" : {
-        "contributorAgents" : [
-        ]
-      },
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "redirectSources" : [
-    ],
     "type" : "Visible"
   }
 }

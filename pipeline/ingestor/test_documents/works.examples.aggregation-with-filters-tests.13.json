@@ -1,7 +1,7 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2022-05-09T13:57:05.337Z",
-  "id" : "yitytywp",
+  "createdAt" : "2022-05-12T16:38:37.579Z",
+  "id" : "66bwuadw",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,13 +10,13 @@
             "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "33KTr4gSW8"
+          "value" : "t9Z95L7cLo"
         },
-        "version" : 98,
-        "modifiedTime" : "2022-04-18T06:56:56Z"
+        "version" : 87,
+        "modifiedTime" : "1965-01-04T22:54:26Z"
       },
-      "mergedTime" : "2022-04-18T06:56:56Z",
-      "indexedTime" : "2022-05-09T13:57:05.336Z",
+      "mergedTime" : "1965-01-04T22:54:26Z",
+      "indexedTime" : "2022-05-12T16:38:37.578Z",
       "redirectSources" : [
       ]
     },
@@ -26,12 +26,12 @@
           "id" : "calm-record-id"
         },
         "ontologyType" : "Work",
-        "value" : "33KTr4gSW8"
+        "value" : "t9Z95L7cLo"
       },
-      "canonicalId" : "yitytywp",
-      "mergedTime" : "2022-04-18T06:56:56Z",
-      "sourceModifiedTime" : "2022-04-18T06:56:56Z",
-      "indexedTime" : "2022-05-09T13:57:05.336Z",
+      "canonicalId" : "66bwuadw",
+      "mergedTime" : "1965-01-04T22:54:26Z",
+      "sourceModifiedTime" : "1965-01-04T22:54:26Z",
+      "indexedTime" : "2022-05-12T16:38:37.578Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -50,7 +50,7 @@
       }
     },
     "data" : {
-      "title" : "title-92KVUKZD4h",
+      "title" : "title-2M9CVkukQI",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -68,27 +68,27 @@
           "id" : {
             "type" : "Unidentifiable"
           },
-          "label" : "eIKIFN34Lc",
+          "label" : "v4BHmwGTZr",
           "concepts" : [
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "QUShs8ZXp5KHLKO",
+              "label" : "0FUCKKVOQZLwA6u",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "iPPIvUnhx12Z5Ks",
+              "label" : "WTQlXaTo6WyiCaL",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "7r7v4BHmwGTZr0F",
+              "label" : "acffLiQzk2sxFZY",
               "type" : "Concept"
             }
           ]
@@ -118,8 +118,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "yitytywp",
-      "title" : "title-92KVUKZD4h",
+      "id" : "66bwuadw",
+      "title" : "title-2M9CVkukQI",
       "alternativeTitles" : [
       ],
       "workType" : {
@@ -136,24 +136,24 @@
             "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "33KTr4gSW8",
+          "value" : "t9Z95L7cLo",
           "type" : "Identifier"
         }
       ],
       "subjects" : [
         {
-          "label" : "eIKIFN34Lc",
+          "label" : "v4BHmwGTZr",
           "concepts" : [
             {
-              "label" : "QUShs8ZXp5KHLKO",
+              "label" : "0FUCKKVOQZLwA6u",
               "type" : "Concept"
             },
             {
-              "label" : "iPPIvUnhx12Z5Ks",
+              "label" : "WTQlXaTo6WyiCaL",
               "type" : "Concept"
             },
             {
-              "label" : "7r7v4BHmwGTZr0F",
+              "label" : "acffLiQzk2sxFZY",
               "type" : "Concept"
             }
           ],
@@ -186,109 +186,6 @@
       ],
       "type" : "Work"
     },
-    "type" : "Visible"
-  },
-  "work" : {
-    "version" : 98,
-    "data" : {
-      "title" : "title-92KVUKZD4h",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : {
-        "id" : "n",
-        "label" : "Film"
-      },
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-        {
-          "id" : {
-            "type" : "Unidentifiable"
-          },
-          "label" : "eIKIFN34Lc",
-          "concepts" : [
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "QUShs8ZXp5KHLKO",
-              "type" : "Concept"
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "iPPIvUnhx12Z5Ks",
-              "type" : "Concept"
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "7r7v4BHmwGTZr0F",
-              "type" : "Concept"
-            }
-          ]
-        }
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "calm-record-id"
-        },
-        "ontologyType" : "Work",
-        "value" : "33KTr4gSW8"
-      },
-      "canonicalId" : "yitytywp",
-      "mergedTime" : "2022-04-18T06:56:56Z",
-      "sourceModifiedTime" : "2022-04-18T06:56:56Z",
-      "indexedTime" : "2022-05-09T13:57:05.337Z",
-      "availabilities" : [
-      ],
-      "derivedData" : {
-        "contributorAgents" : [
-        ]
-      },
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "redirectSources" : [
-    ],
     "type" : "Visible"
   }
 }

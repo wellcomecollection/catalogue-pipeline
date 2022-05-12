@@ -1,37 +1,37 @@
 {
   "description" : "works with different subjects",
-  "createdAt" : "2022-05-04T07:15:03.061Z",
-  "id" : "u7atgijp",
+  "createdAt" : "2022-05-12T16:38:37.495Z",
+  "id" : "6uwysojy",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "kosWvAmEQc"
+          "value" : "pzLgxSR5EK"
         },
-        "version" : 47,
-        "modifiedTime" : "2022-04-13T14:43:22Z"
+        "version" : 77,
+        "modifiedTime" : "2005-10-29T13:02:10Z"
       },
-      "mergedTime" : "2022-04-13T14:43:22Z",
-      "indexedTime" : "2022-05-04T07:15:03.060Z",
+      "mergedTime" : "2005-10-29T13:02:10Z",
+      "indexedTime" : "2022-05-12T16:38:37.495Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "miro-image-number"
+          "id" : "calm-record-id"
         },
         "ontologyType" : "Work",
-        "value" : "kosWvAmEQc"
+        "value" : "pzLgxSR5EK"
       },
-      "canonicalId" : "u7atgijp",
-      "mergedTime" : "2022-04-13T14:43:22Z",
-      "sourceModifiedTime" : "2022-04-13T14:43:22Z",
-      "indexedTime" : "2022-05-04T07:15:03.060Z",
+      "canonicalId" : "6uwysojy",
+      "mergedTime" : "2005-10-29T13:02:10Z",
+      "sourceModifiedTime" : "2005-10-29T13:02:10Z",
+      "indexedTime" : "2022-05-12T16:38:37.495Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -50,7 +50,7 @@
       }
     },
     "data" : {
-      "title" : "title-v2pMEZn8L2",
+      "title" : "title-Dtaaw5YmCW",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -71,21 +71,21 @@
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "a2FIC2DNd6NAvWG",
+              "label" : "qbmTfcJnlkosWvA",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "1cJ2yUYmmH4BoIs",
+              "label" : "mEQcU7atgIJPhTv",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "wjSVmALe83XqBJ6",
+              "label" : "2pMEZn8L2YCE8E9",
               "type" : "Concept"
             }
           ]
@@ -115,8 +115,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "u7atgijp",
-      "title" : "title-v2pMEZn8L2",
+      "id" : "6uwysojy",
+      "title" : "title-Dtaaw5YmCW",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -124,11 +124,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "kosWvAmEQc",
+          "value" : "pzLgxSR5EK",
           "type" : "Identifier"
         }
       ],
@@ -137,15 +137,15 @@
           "label" : "paleoNeuroBiology",
           "concepts" : [
             {
-              "label" : "a2FIC2DNd6NAvWG",
+              "label" : "qbmTfcJnlkosWvA",
               "type" : "Concept"
             },
             {
-              "label" : "1cJ2yUYmmH4BoIs",
+              "label" : "mEQcU7atgIJPhTv",
               "type" : "Concept"
             },
             {
-              "label" : "wjSVmALe83XqBJ6",
+              "label" : "2pMEZn8L2YCE8E9",
               "type" : "Concept"
             }
           ],
@@ -178,106 +178,6 @@
       ],
       "type" : "Work"
     },
-    "type" : "Visible"
-  },
-  "work" : {
-    "version" : 47,
-    "data" : {
-      "title" : "title-v2pMEZn8L2",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-        {
-          "id" : {
-            "type" : "Unidentifiable"
-          },
-          "label" : "paleoNeuroBiology",
-          "concepts" : [
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "a2FIC2DNd6NAvWG",
-              "type" : "Concept"
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "1cJ2yUYmmH4BoIs",
-              "type" : "Concept"
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "wjSVmALe83XqBJ6",
-              "type" : "Concept"
-            }
-          ]
-        }
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "miro-image-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "kosWvAmEQc"
-      },
-      "canonicalId" : "u7atgijp",
-      "mergedTime" : "2022-04-13T14:43:22Z",
-      "sourceModifiedTime" : "2022-04-13T14:43:22Z",
-      "indexedTime" : "2022-05-04T07:15:03.061Z",
-      "availabilities" : [
-      ],
-      "derivedData" : {
-        "contributorAgents" : [
-        ]
-      },
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "redirectSources" : [
-    ],
     "type" : "Visible"
   }
 }

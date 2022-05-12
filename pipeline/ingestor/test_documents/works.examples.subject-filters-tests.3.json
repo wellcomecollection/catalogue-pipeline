@@ -1,37 +1,37 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2022-05-10T09:08:11.348Z",
-  "id" : "h18d0cbf",
+  "createdAt" : "2022-05-12T16:38:37.609Z",
+  "id" : "b1r485o0",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "490Vab5q4z"
+          "value" : "4zh18D0cbF"
         },
-        "version" : 70,
-        "modifiedTime" : "2022-05-12T11:21:42Z"
+        "version" : 43,
+        "modifiedTime" : "1986-02-15T03:35:37Z"
       },
-      "mergedTime" : "2022-05-12T11:21:42Z",
-      "indexedTime" : "2022-05-10T09:08:11.347Z",
+      "mergedTime" : "1986-02-15T03:35:37Z",
+      "indexedTime" : "2022-05-12T16:38:37.609Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "sierra-system-number"
+          "id" : "calm-record-id"
         },
         "ontologyType" : "Work",
-        "value" : "490Vab5q4z"
+        "value" : "4zh18D0cbF"
       },
-      "canonicalId" : "h18d0cbf",
-      "mergedTime" : "2022-05-12T11:21:42Z",
-      "sourceModifiedTime" : "2022-05-12T11:21:42Z",
-      "indexedTime" : "2022-05-10T09:08:11.347Z",
+      "canonicalId" : "b1r485o0",
+      "mergedTime" : "1986-02-15T03:35:37Z",
+      "sourceModifiedTime" : "1986-02-15T03:35:37Z",
+      "indexedTime" : "2022-05-12T16:38:37.609Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -50,7 +50,7 @@
       }
     },
     "data" : {
-      "title" : "title-R485o02DxP",
+      "title" : "title-DxPLXKke6N",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -71,21 +71,21 @@
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "sk2kCAGURhx40zJ",
+              "label" : "40zJbSlLwDNn2Et",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "bSlLwDNn2Etp5zf",
+              "label" : "p5zfssscK3StYS1",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "ssscK3StYS1KOlZ",
+              "label" : "KOlZmZXOWd5kJ1F",
               "type" : "Concept"
             }
           ]
@@ -115,8 +115,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "h18d0cbf",
-      "title" : "title-R485o02DxP",
+      "id" : "b1r485o0",
+      "title" : "title-DxPLXKke6N",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -124,11 +124,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "490Vab5q4z",
+          "value" : "4zh18D0cbF",
           "type" : "Identifier"
         }
       ],
@@ -137,15 +137,15 @@
           "label" : "Darwin \"Jones\", Charles",
           "concepts" : [
             {
-              "label" : "sk2kCAGURhx40zJ",
+              "label" : "40zJbSlLwDNn2Et",
               "type" : "Concept"
             },
             {
-              "label" : "bSlLwDNn2Etp5zf",
+              "label" : "p5zfssscK3StYS1",
               "type" : "Concept"
             },
             {
-              "label" : "ssscK3StYS1KOlZ",
+              "label" : "KOlZmZXOWd5kJ1F",
               "type" : "Concept"
             }
           ],
@@ -178,106 +178,6 @@
       ],
       "type" : "Work"
     },
-    "type" : "Visible"
-  },
-  "work" : {
-    "version" : 70,
-    "data" : {
-      "title" : "title-R485o02DxP",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-        {
-          "id" : {
-            "type" : "Unidentifiable"
-          },
-          "label" : "Darwin \"Jones\", Charles",
-          "concepts" : [
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "sk2kCAGURhx40zJ",
-              "type" : "Concept"
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "bSlLwDNn2Etp5zf",
-              "type" : "Concept"
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "ssscK3StYS1KOlZ",
-              "type" : "Concept"
-            }
-          ]
-        }
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "sierra-system-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "490Vab5q4z"
-      },
-      "canonicalId" : "h18d0cbf",
-      "mergedTime" : "2022-05-12T11:21:42Z",
-      "sourceModifiedTime" : "2022-05-12T11:21:42Z",
-      "indexedTime" : "2022-05-10T09:08:11.348Z",
-      "availabilities" : [
-      ],
-      "derivedData" : {
-        "contributorAgents" : [
-        ]
-      },
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "redirectSources" : [
-    ],
     "type" : "Visible"
   }
 }

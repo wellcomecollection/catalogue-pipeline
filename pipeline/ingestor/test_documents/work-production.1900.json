@@ -1,37 +1,37 @@
 {
   "description" : "a work with a production event in 1900",
-  "createdAt" : "2022-05-04T07:15:02.861Z",
-  "id" : "6tgtwwne",
+  "createdAt" : "2022-05-12T16:38:37.339Z",
+  "id" : "rbnro6wx",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "ffVVjhTygu"
+          "value" : "akaUmx5H3i"
         },
-        "version" : 36,
-        "modifiedTime" : "2022-04-21T05:01:33Z"
+        "version" : 53,
+        "modifiedTime" : "1935-04-27T19:39:17Z"
       },
-      "mergedTime" : "2022-04-21T05:01:33Z",
-      "indexedTime" : "2022-05-04T07:15:02.842Z",
+      "mergedTime" : "1935-04-27T19:39:17Z",
+      "indexedTime" : "2022-05-12T16:38:37.296Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "calm-record-id"
+          "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "ffVVjhTygu"
+        "value" : "akaUmx5H3i"
       },
-      "canonicalId" : "6tgtwwne",
-      "mergedTime" : "2022-04-21T05:01:33Z",
-      "sourceModifiedTime" : "2022-04-21T05:01:33Z",
-      "indexedTime" : "2022-05-04T07:15:02.842Z",
+      "canonicalId" : "rbnro6wx",
+      "mergedTime" : "1935-04-27T19:39:17Z",
+      "sourceModifiedTime" : "1935-04-27T19:39:17Z",
+      "indexedTime" : "2022-05-12T16:38:37.296Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -69,7 +69,7 @@
       "thumbnail" : null,
       "production" : [
         {
-          "label" : "koTxrdlOL8J495vJGhUpyx4i0",
+          "label" : "gu6TgtWwNe2izyk21myzum5ko",
           "places" : [
           ],
           "agents" : [
@@ -107,7 +107,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "6tgtwwne",
+      "id" : "rbnro6wx",
       "title" : "Production event in 1900",
       "alternativeTitles" : [
       ],
@@ -116,11 +116,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "ffVVjhTygu",
+          "value" : "akaUmx5H3i",
           "type" : "Identifier"
         }
       ],
@@ -136,7 +136,7 @@
       ],
       "production" : [
         {
-          "label" : "koTxrdlOL8J495vJGhUpyx4i0",
+          "label" : "gu6TgtWwNe2izyk21myzum5ko",
           "places" : [
           ],
           "agents" : [
@@ -166,98 +166,6 @@
       ],
       "type" : "Work"
     },
-    "type" : "Visible"
-  },
-  "work" : {
-    "version" : 36,
-    "data" : {
-      "title" : "Production event in 1900",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-        {
-          "label" : "koTxrdlOL8J495vJGhUpyx4i0",
-          "places" : [
-          ],
-          "agents" : [
-          ],
-          "dates" : [
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "1900",
-              "range" : {
-                "from" : "1900-01-01T00:00:00Z",
-                "to" : "1900-12-31T23:59:59.999999999Z",
-                "label" : "1900"
-              }
-            }
-          ],
-          "function" : null
-        }
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "calm-record-id"
-        },
-        "ontologyType" : "Work",
-        "value" : "ffVVjhTygu"
-      },
-      "canonicalId" : "6tgtwwne",
-      "mergedTime" : "2022-04-21T05:01:33Z",
-      "sourceModifiedTime" : "2022-04-21T05:01:33Z",
-      "indexedTime" : "2022-05-04T07:15:02.861Z",
-      "availabilities" : [
-      ],
-      "derivedData" : {
-        "contributorAgents" : [
-        ]
-      },
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "redirectSources" : [
-    ],
     "type" : "Visible"
   }
 }

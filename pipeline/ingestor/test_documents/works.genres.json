@@ -1,37 +1,37 @@
 {
   "description" : "a work with different concepts in the genre",
-  "createdAt" : "2022-05-04T07:15:03.057Z",
-  "id" : "lhrstrzi",
+  "createdAt" : "2022-05-12T16:38:37.492Z",
+  "id" : "2zo588up",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "agAbkJTEEo"
+          "value" : "rVoekomuzt"
         },
-        "version" : 100,
-        "modifiedTime" : "2022-04-08T13:14:18Z"
+        "version" : 49,
+        "modifiedTime" : "2054-02-13T07:35:27Z"
       },
-      "mergedTime" : "2022-04-08T13:14:18Z",
-      "indexedTime" : "2022-05-04T07:15:03.053Z",
+      "mergedTime" : "2054-02-13T07:35:27Z",
+      "indexedTime" : "2022-05-12T16:38:37.487Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "sierra-system-number"
+          "id" : "calm-record-id"
         },
         "ontologyType" : "Work",
-        "value" : "agAbkJTEEo"
+        "value" : "rVoekomuzt"
       },
-      "canonicalId" : "lhrstrzi",
-      "mergedTime" : "2022-04-08T13:14:18Z",
-      "sourceModifiedTime" : "2022-04-08T13:14:18Z",
-      "indexedTime" : "2022-05-04T07:15:03.053Z",
+      "canonicalId" : "2zo588up",
+      "mergedTime" : "2054-02-13T07:35:27Z",
+      "sourceModifiedTime" : "2054-02-13T07:35:27Z",
+      "indexedTime" : "2022-05-12T16:38:37.487Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -82,13 +82,13 @@
             },
             {
               "id" : {
-                "canonicalId" : "gougtipk",
+                "canonicalId" : "svmale83",
                 "sourceIdentifier" : {
                   "identifierType" : {
-                    "id" : "calm-record-id"
+                    "id" : "miro-image-number"
                   },
                   "ontologyType" : "Period",
-                  "value" : "XpEBp6sf3W"
+                  "value" : "qBJ6dy5rBO"
                 },
                 "otherIdentifiers" : [
                 ],
@@ -123,7 +123,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "lhrstrzi",
+      "id" : "2zo588up",
       "title" : "A work with different concepts in the genre",
       "alternativeTitles" : [
       ],
@@ -132,11 +132,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "agAbkJTEEo",
+          "value" : "rVoekomuzt",
           "type" : "Identifier"
         }
       ],
@@ -155,15 +155,15 @@
               "type" : "Place"
             },
             {
-              "id" : "gougtipk",
+              "id" : "svmale83",
               "identifiers" : [
                 {
                   "identifierType" : {
-                    "id" : "calm-record-id",
-                    "label" : "Calm RecordIdentifier",
+                    "id" : "miro-image-number",
+                    "label" : "Miro image number",
                     "type" : "IdentifierType"
                   },
-                  "value" : "XpEBp6sf3W",
+                  "value" : "qBJ6dy5rBO",
                   "type" : "Identifier"
                 }
               ],
@@ -198,114 +198,6 @@
       ],
       "type" : "Work"
     },
-    "type" : "Visible"
-  },
-  "work" : {
-    "version" : 100,
-    "data" : {
-      "title" : "A work with different concepts in the genre",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-        {
-          "label" : "Electronic books",
-          "concepts" : [
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "Conceptual Conversations",
-              "type" : "Concept"
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "Pleasant Paris",
-              "type" : "Place"
-            },
-            {
-              "id" : {
-                "canonicalId" : "gougtipk",
-                "sourceIdentifier" : {
-                  "identifierType" : {
-                    "id" : "calm-record-id"
-                  },
-                  "ontologyType" : "Period",
-                  "value" : "XpEBp6sf3W"
-                },
-                "otherIdentifiers" : [
-                ],
-                "type" : "Identified"
-              },
-              "label" : "Past Prehistory",
-              "range" : null,
-              "type" : "Period"
-            }
-          ]
-        }
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "sierra-system-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "agAbkJTEEo"
-      },
-      "canonicalId" : "lhrstrzi",
-      "mergedTime" : "2022-04-08T13:14:18Z",
-      "sourceModifiedTime" : "2022-04-08T13:14:18Z",
-      "indexedTime" : "2022-05-04T07:15:03.057Z",
-      "availabilities" : [
-      ],
-      "derivedData" : {
-        "contributorAgents" : [
-        ]
-      },
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "redirectSources" : [
-    ],
     "type" : "Visible"
   }
 }

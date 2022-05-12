@@ -1,37 +1,37 @@
 {
   "description" : "works with different contributor",
-  "createdAt" : "2022-05-04T07:15:03.079Z",
-  "id" : "hutjlml0",
+  "createdAt" : "2022-05-12T16:38:37.518Z",
+  "id" : "gtfjchvo",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "Wh4OVfDtEV"
+          "value" : "xKXAvquihJ"
         },
-        "version" : 27,
-        "modifiedTime" : "2022-05-26T12:29:00Z"
+        "version" : 71,
+        "modifiedTime" : "2026-06-18T13:10:44Z"
       },
-      "mergedTime" : "2022-05-26T12:29:00Z",
-      "indexedTime" : "2022-05-04T07:15:03.078Z",
+      "mergedTime" : "2026-06-18T13:10:44Z",
+      "indexedTime" : "2022-05-12T16:38:37.518Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "calm-record-id"
+          "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "Wh4OVfDtEV"
+        "value" : "xKXAvquihJ"
       },
-      "canonicalId" : "hutjlml0",
-      "mergedTime" : "2022-05-26T12:29:00Z",
-      "sourceModifiedTime" : "2022-05-26T12:29:00Z",
-      "indexedTime" : "2022-05-04T07:15:03.078Z",
+      "canonicalId" : "gtfjchvo",
+      "mergedTime" : "2026-06-18T13:10:44Z",
+      "sourceModifiedTime" : "2026-06-18T13:10:44Z",
+      "indexedTime" : "2022-05-12T16:38:37.518Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -52,7 +52,7 @@
       }
     },
     "data" : {
-      "title" : "title-H1Bj9evx0c",
+      "title" : "title-AJeGRUgE73",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -116,8 +116,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "hutjlml0",
-      "title" : "title-H1Bj9evx0c",
+      "id" : "gtfjchvo",
+      "title" : "title-AJeGRUgE73",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -143,11 +143,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "Wh4OVfDtEV",
+          "value" : "xKXAvquihJ",
           "type" : "Identifier"
         }
       ],
@@ -179,107 +179,6 @@
       ],
       "type" : "Work"
     },
-    "type" : "Visible"
-  },
-  "work" : {
-    "version" : 27,
-    "data" : {
-      "title" : "title-H1Bj9evx0c",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-        {
-          "id" : {
-            "type" : "Unidentifiable"
-          },
-          "agent" : {
-            "id" : {
-              "type" : "Unidentifiable"
-            },
-            "label" : "MI5",
-            "type" : "Organisation"
-          },
-          "roles" : [
-          ]
-        },
-        {
-          "id" : {
-            "type" : "Unidentifiable"
-          },
-          "agent" : {
-            "id" : {
-              "type" : "Unidentifiable"
-            },
-            "label" : "GCHQ",
-            "type" : "Organisation"
-          },
-          "roles" : [
-          ]
-        }
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "calm-record-id"
-        },
-        "ontologyType" : "Work",
-        "value" : "Wh4OVfDtEV"
-      },
-      "canonicalId" : "hutjlml0",
-      "mergedTime" : "2022-05-26T12:29:00Z",
-      "sourceModifiedTime" : "2022-05-26T12:29:00Z",
-      "indexedTime" : "2022-05-04T07:15:03.079Z",
-      "availabilities" : [
-      ],
-      "derivedData" : {
-        "contributorAgents" : [
-          "Organisation:MI5",
-          "Organisation:GCHQ"
-        ]
-      },
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "redirectSources" : [
-    ],
     "type" : "Visible"
   }
 }

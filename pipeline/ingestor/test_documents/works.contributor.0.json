@@ -1,7 +1,7 @@
 {
   "description" : "works with different contributor",
-  "createdAt" : "2022-05-04T07:15:03.074Z",
-  "id" : "pkf3m7xe",
+  "createdAt" : "2022-05-12T16:38:37.511Z",
+  "id" : "gvkz3vff",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,13 +10,13 @@
             "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "2i8sNTcYSK"
+          "value" : "5CJlp05MGl"
         },
-        "version" : 2,
-        "modifiedTime" : "2022-04-20T13:21:07Z"
+        "version" : 32,
+        "modifiedTime" : "2020-10-22T16:00:54Z"
       },
-      "mergedTime" : "2022-04-20T13:21:07Z",
-      "indexedTime" : "2022-05-04T07:15:03.070Z",
+      "mergedTime" : "2020-10-22T16:00:54Z",
+      "indexedTime" : "2022-05-12T16:38:37.505Z",
       "redirectSources" : [
       ]
     },
@@ -26,12 +26,12 @@
           "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "2i8sNTcYSK"
+        "value" : "5CJlp05MGl"
       },
-      "canonicalId" : "pkf3m7xe",
-      "mergedTime" : "2022-04-20T13:21:07Z",
-      "sourceModifiedTime" : "2022-04-20T13:21:07Z",
-      "indexedTime" : "2022-05-04T07:15:03.070Z",
+      "canonicalId" : "gvkz3vff",
+      "mergedTime" : "2020-10-22T16:00:54Z",
+      "sourceModifiedTime" : "2020-10-22T16:00:54Z",
+      "indexedTime" : "2022-05-12T16:38:37.505Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -51,7 +51,7 @@
       }
     },
     "data" : {
-      "title" : "title-xv45oXcssa",
+      "title" : "title-Wh4OVfDtEV",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -101,8 +101,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "pkf3m7xe",
-      "title" : "title-xv45oXcssa",
+      "id" : "gvkz3vff",
+      "title" : "title-Wh4OVfDtEV",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -123,7 +123,7 @@
             "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "2i8sNTcYSK",
+          "value" : "5CJlp05MGl",
           "type" : "Identifier"
         }
       ],
@@ -155,92 +155,6 @@
       ],
       "type" : "Work"
     },
-    "type" : "Visible"
-  },
-  "work" : {
-    "version" : 2,
-    "data" : {
-      "title" : "title-xv45oXcssa",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-        {
-          "id" : {
-            "type" : "Unidentifiable"
-          },
-          "agent" : {
-            "id" : {
-              "type" : "Unidentifiable"
-            },
-            "label" : "47",
-            "type" : "Agent"
-          },
-          "roles" : [
-          ]
-        }
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "miro-image-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "2i8sNTcYSK"
-      },
-      "canonicalId" : "pkf3m7xe",
-      "mergedTime" : "2022-04-20T13:21:07Z",
-      "sourceModifiedTime" : "2022-04-20T13:21:07Z",
-      "indexedTime" : "2022-05-04T07:15:03.074Z",
-      "availabilities" : [
-      ],
-      "derivedData" : {
-        "contributorAgents" : [
-          "Agent:47"
-        ]
-      },
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "redirectSources" : [
-    ],
     "type" : "Visible"
   }
 }

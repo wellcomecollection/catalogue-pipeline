@@ -1,7 +1,7 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2022-05-10T09:08:11.347Z",
-  "id" : "fjor9vqa",
+  "createdAt" : "2022-05-12T16:38:37.609Z",
+  "id" : "mazaizfa",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,13 +10,13 @@
             "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "VuGQD3ShRQ"
+          "value" : "QFJOR9VqAE"
         },
-        "version" : 16,
-        "modifiedTime" : "2022-05-30T14:57:12Z"
+        "version" : 44,
+        "modifiedTime" : "1986-01-27T17:06:16Z"
       },
-      "mergedTime" : "2022-05-30T14:57:12Z",
-      "indexedTime" : "2022-05-10T09:08:11.347Z",
+      "mergedTime" : "1986-01-27T17:06:16Z",
+      "indexedTime" : "2022-05-12T16:38:37.609Z",
       "redirectSources" : [
       ]
     },
@@ -26,12 +26,12 @@
           "id" : "calm-record-id"
         },
         "ontologyType" : "Work",
-        "value" : "VuGQD3ShRQ"
+        "value" : "QFJOR9VqAE"
       },
-      "canonicalId" : "fjor9vqa",
-      "mergedTime" : "2022-05-30T14:57:12Z",
-      "sourceModifiedTime" : "2022-05-30T14:57:12Z",
-      "indexedTime" : "2022-05-10T09:08:11.347Z",
+      "canonicalId" : "mazaizfa",
+      "mergedTime" : "1986-01-27T17:06:16Z",
+      "sourceModifiedTime" : "1986-01-27T17:06:16Z",
+      "indexedTime" : "2022-05-12T16:38:37.609Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -50,7 +50,7 @@
       }
     },
     "data" : {
-      "title" : "title-AzAiZFAZvT",
+      "title" : "title-vTVR490Vab",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -71,21 +71,21 @@
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "tcCDpKgb0Wdy2nM",
+              "label" : "y2nMuMcZq1Jcxuk",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "uMcZq1JcxukacPW",
+              "label" : "acPWKUROxBsQ4CK",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "KUROxBsQ4CK8DrD",
+              "label" : "8DrDsk2kCAGURhx",
               "type" : "Concept"
             }
           ]
@@ -115,8 +115,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "fjor9vqa",
-      "title" : "title-AzAiZFAZvT",
+      "id" : "mazaizfa",
+      "title" : "title-vTVR490Vab",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -128,7 +128,7 @@
             "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "VuGQD3ShRQ",
+          "value" : "QFJOR9VqAE",
           "type" : "Identifier"
         }
       ],
@@ -137,15 +137,15 @@
           "label" : "Psychology, Pathological",
           "concepts" : [
             {
-              "label" : "tcCDpKgb0Wdy2nM",
+              "label" : "y2nMuMcZq1Jcxuk",
               "type" : "Concept"
             },
             {
-              "label" : "uMcZq1JcxukacPW",
+              "label" : "acPWKUROxBsQ4CK",
               "type" : "Concept"
             },
             {
-              "label" : "KUROxBsQ4CK8DrD",
+              "label" : "8DrDsk2kCAGURhx",
               "type" : "Concept"
             }
           ],
@@ -178,106 +178,6 @@
       ],
       "type" : "Work"
     },
-    "type" : "Visible"
-  },
-  "work" : {
-    "version" : 16,
-    "data" : {
-      "title" : "title-AzAiZFAZvT",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-        {
-          "id" : {
-            "type" : "Unidentifiable"
-          },
-          "label" : "Psychology, Pathological",
-          "concepts" : [
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "tcCDpKgb0Wdy2nM",
-              "type" : "Concept"
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "uMcZq1JcxukacPW",
-              "type" : "Concept"
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "KUROxBsQ4CK8DrD",
-              "type" : "Concept"
-            }
-          ]
-        }
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "calm-record-id"
-        },
-        "ontologyType" : "Work",
-        "value" : "VuGQD3ShRQ"
-      },
-      "canonicalId" : "fjor9vqa",
-      "mergedTime" : "2022-05-30T14:57:12Z",
-      "sourceModifiedTime" : "2022-05-30T14:57:12Z",
-      "indexedTime" : "2022-05-10T09:08:11.347Z",
-      "availabilities" : [
-      ],
-      "derivedData" : {
-        "contributorAgents" : [
-        ]
-      },
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "redirectSources" : [
-    ],
     "type" : "Visible"
   }
 }

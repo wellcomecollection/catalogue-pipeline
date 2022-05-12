@@ -1,7 +1,7 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2022-05-06T14:32:35.289Z",
-  "id" : "sklfl8cz",
+  "createdAt" : "2022-05-12T16:38:37.544Z",
+  "id" : "tlc5rq9a",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,13 +10,13 @@
             "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "QS25hnkuQB"
+          "value" : "mz25207khU"
         },
-        "version" : 25,
-        "modifiedTime" : "2022-04-25T14:01:18Z"
+        "version" : 11,
+        "modifiedTime" : "1934-03-12T06:54:31Z"
       },
-      "mergedTime" : "2022-04-25T14:01:18Z",
-      "indexedTime" : "2022-05-06T14:32:35.289Z",
+      "mergedTime" : "1934-03-12T06:54:31Z",
+      "indexedTime" : "2022-05-12T16:38:37.544Z",
       "redirectSources" : [
       ]
     },
@@ -26,12 +26,12 @@
           "id" : "sierra-system-number"
         },
         "ontologyType" : "Work",
-        "value" : "QS25hnkuQB"
+        "value" : "mz25207khU"
       },
-      "canonicalId" : "sklfl8cz",
-      "mergedTime" : "2022-04-25T14:01:18Z",
-      "sourceModifiedTime" : "2022-04-25T14:01:18Z",
-      "indexedTime" : "2022-05-06T14:32:35.289Z",
+      "canonicalId" : "tlc5rq9a",
+      "mergedTime" : "1934-03-12T06:54:31Z",
+      "sourceModifiedTime" : "1934-03-12T06:54:31Z",
+      "indexedTime" : "2022-05-12T16:38:37.544Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -50,7 +50,7 @@
       }
     },
     "data" : {
-      "title" : "title-CpWDX84If1",
+      "title" : "title-jNr737MdPw",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -89,8 +89,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "sklfl8cz",
-      "title" : "title-CpWDX84If1",
+      "id" : "tlc5rq9a",
+      "title" : "title-jNr737MdPw",
       "alternativeTitles" : [
       ],
       "workType" : {
@@ -107,7 +107,7 @@
             "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "QS25hnkuQB",
+          "value" : "mz25207khU",
           "type" : "Identifier"
         }
       ],
@@ -139,80 +139,6 @@
       ],
       "type" : "Work"
     },
-    "type" : "Visible"
-  },
-  "work" : {
-    "version" : 25,
-    "data" : {
-      "title" : "title-CpWDX84If1",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : {
-        "id" : "c",
-        "label" : "Music"
-      },
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "sierra-system-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "QS25hnkuQB"
-      },
-      "canonicalId" : "sklfl8cz",
-      "mergedTime" : "2022-04-25T14:01:18Z",
-      "sourceModifiedTime" : "2022-04-25T14:01:18Z",
-      "indexedTime" : "2022-05-06T14:32:35.289Z",
-      "availabilities" : [
-      ],
-      "derivedData" : {
-        "contributorAgents" : [
-        ]
-      },
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "redirectSources" : [
-    ],
     "type" : "Visible"
   }
 }

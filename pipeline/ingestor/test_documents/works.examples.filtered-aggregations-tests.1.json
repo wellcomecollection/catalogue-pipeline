@@ -1,7 +1,7 @@
 {
   "description" : "examples for the works filtered aggregations tests",
-  "createdAt" : "2022-05-10T09:25:20.139Z",
-  "id" : "hvvxa3dc",
+  "createdAt" : "2022-05-12T16:38:37.669Z",
+  "id" : "580nnpfa",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,13 +10,13 @@
             "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "580nNPfAWz"
+          "value" : "wz2OkOJHcs"
         },
-        "version" : 59,
-        "modifiedTime" : "2022-04-16T10:01:21Z"
+        "version" : 86,
+        "modifiedTime" : "2015-07-21T11:19:34Z"
       },
-      "mergedTime" : "2022-04-16T10:01:21Z",
-      "indexedTime" : "2022-05-10T09:25:20.138Z",
+      "mergedTime" : "2015-07-21T11:19:34Z",
+      "indexedTime" : "2022-05-12T16:38:37.668Z",
       "redirectSources" : [
       ]
     },
@@ -26,12 +26,12 @@
           "id" : "sierra-system-number"
         },
         "ontologyType" : "Work",
-        "value" : "580nNPfAWz"
+        "value" : "wz2OkOJHcs"
       },
-      "canonicalId" : "hvvxa3dc",
-      "mergedTime" : "2022-04-16T10:01:21Z",
-      "sourceModifiedTime" : "2022-04-16T10:01:21Z",
-      "indexedTime" : "2022-05-10T09:25:20.138Z",
+      "canonicalId" : "580nnpfa",
+      "mergedTime" : "2015-07-21T11:19:34Z",
+      "sourceModifiedTime" : "2015-07-21T11:19:34Z",
+      "indexedTime" : "2022-05-12T16:38:37.668Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -93,7 +93,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "hvvxa3dc",
+      "id" : "580nnpfa",
       "title" : "capybara",
       "alternativeTitles" : [
       ],
@@ -111,7 +111,7 @@
             "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "580nNPfAWz",
+          "value" : "wz2OkOJHcs",
           "type" : "Identifier"
         }
       ],
@@ -148,84 +148,6 @@
       ],
       "type" : "Work"
     },
-    "type" : "Visible"
-  },
-  "work" : {
-    "version" : 59,
-    "data" : {
-      "title" : "capybara",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : {
-        "id" : "d",
-        "label" : "Journals"
-      },
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-        {
-          "id" : "mar",
-          "label" : "Marathi"
-        }
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "sierra-system-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "580nNPfAWz"
-      },
-      "canonicalId" : "hvvxa3dc",
-      "mergedTime" : "2022-04-16T10:01:21Z",
-      "sourceModifiedTime" : "2022-04-16T10:01:21Z",
-      "indexedTime" : "2022-05-10T09:25:20.139Z",
-      "availabilities" : [
-      ],
-      "derivedData" : {
-        "contributorAgents" : [
-        ]
-      },
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "redirectSources" : [
-    ],
     "type" : "Visible"
   }
 }

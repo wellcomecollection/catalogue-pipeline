@@ -475,8 +475,7 @@ class CreateTestImageDocuments
           id -> TestDocument(
             description,
             id = image.id,
-            document = image.toDocument,
-            image = image
+            document = image.toDocument
           )
         )
 
@@ -487,8 +486,7 @@ class CreateTestImageDocuments
               s"$id.$index" -> TestDocument(
                 description,
                 id = image.id,
-                document = image.toDocument,
-                image = image
+                document = image.toDocument
               )
           }
     }
