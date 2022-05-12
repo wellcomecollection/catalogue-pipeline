@@ -21,7 +21,6 @@ import weco.catalogue.internal_model.work.generators.{
 import weco.catalogue.internal_model.work.{Work, WorkState}
 
 import java.time.Instant
-import scala.util.Random
 
 trait ImageGenerators
     extends IdentifiersGenerators
@@ -166,11 +165,11 @@ trait ImageGenerators
   }
 
   lazy private val inferredDataBinSizes =
-    List.fill(9)(Random.nextInt(10)).grouped(3).toList
+    List.fill(9)(random.nextInt(10)).grouped(3).toList
 
-  lazy private val inferredDataBinMinima = List.fill(3)(Random.nextFloat)
+  lazy private val inferredDataBinMinima = List.fill(3)(random.nextFloat)
 
-  lazy private val inferredDataAspectRatio = Some(Random.nextFloat())
+  lazy private val inferredDataAspectRatio = Some(random.nextFloat())
 
   def createInferredData = {
     val features = randomVector(4096)
