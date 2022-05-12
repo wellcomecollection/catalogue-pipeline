@@ -401,6 +401,45 @@ class CreateTestImageDocuments
     )
   }
 
+  it("creates bread-based examples for the API tests") {
+    val baguetteImage = createImageData.toAugmentedImageWith(
+      parentWork = identifiedWork()
+        .title(
+          "Baguette is a French style of bread; it's a long, thin bread; other countries also make this bread"
+        )
+    )
+    val focacciaImage = createImageData.toAugmentedImageWith(
+      parentWork = identifiedWork()
+        .title("A Ligurian style of bread, Focaccia is a flat Italian bread")
+    )
+
+    val schiacciataImage = createImageData.toAugmentedImageWith(
+      parentWork = identifiedWork()
+        .title("Schiacciata is a Tuscan focaccia"),
+      redirectedWork = Some(
+        identifiedWork().title("A Tusdan bread")
+      )
+    )
+
+    saveImage(
+      baguetteImage,
+      description = "an example of images with work metadata for the API tests",
+      id = "images.examples.bread-baguette",
+    )
+
+    saveImage(
+      focacciaImage,
+      description = "an example of images with work metadata for the API tests",
+      id = "images.examples.bread-focaccia",
+    )
+
+    saveImage(
+      schiacciataImage,
+      description = "an example of images with work metadata for the API tests",
+      id = "images.examples.bread-schiacciata",
+    )
+  }
+
   def saveImage(
     image: Image[ImageState.Augmented],
     description: String,
