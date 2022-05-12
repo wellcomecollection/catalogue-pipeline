@@ -7,8 +7,9 @@ import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.generators.ImageGenerators
 import weco.catalogue.internal_model.image.{Image, ImageState}
 import weco.catalogue.internal_model.Implicits._
+import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.locations.License
-import weco.catalogue.internal_model.work.generators.GenreGenerators
+import weco.catalogue.internal_model.work.generators.{ContributorGenerators, GenreGenerators}
 import weco.catalogue.internal_model.work.{Agent, Contributor, Meeting, Organisation, Person}
 import weco.json.JsonUtil._
 import weco.pipeline.ingestor.fixtures.TestDocumentUtils
@@ -27,6 +28,7 @@ class CreateTestImageDocuments
   extends AnyFunSpec
     with Matchers
     with TestDocumentUtils
+    with ContributorGenerators
     with GenreGenerators
     with ImageGenerators {
 
@@ -343,6 +345,36 @@ class CreateTestImageDocuments
       blueImage,
       description = "example for the color filter tests",
       id = "images.examples.color-filter-tests.blue"
+    )
+  }
+
+  it("creates examples of an image with every include") {
+    val source = identifiedWork()
+      .title("Apple agitator")
+      .languages(
+        List(
+          Language(label = "English", id = "eng"),
+          Language(label = "Turkish", id = "tur")
+        )
+      )
+      .contributors(
+        List(
+          createPersonContributorWith("Adrian Aardvark"),
+          createPersonContributorWith("Beatrice Buffalo")
+        )
+      )
+      .genres(
+        List(
+          createGenreWith("Crumbly cabbages"),
+          createGenreWith("Deadly durians")
+        )
+      )
+    val image = createImageData.toAugmentedImageWith(parentWork = source)
+
+    saveImage(
+      image,
+      description = "an image with every include",
+      id = "images.everything"
     )
   }
 
