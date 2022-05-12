@@ -192,7 +192,36 @@ class CreateTestImageDocuments
       id = "images.inferred-data.wrong-format"
     )
   }
-  
+
+  it("creates examples for the contributor filter tests") {
+    val machiavelli =
+      Contributor(agent = Person("Machiavelli, Niccolo"), roles = Nil)
+    val hypatia = Contributor(agent = Person("Hypatia"), roles = Nil)
+    val said = Contributor(agent = Person("Edward Said"), roles = Nil)
+
+    val canonicalMachiavelliImage = createImageData.toAugmentedImageWith(
+      parentWork = identifiedWork().contributors(List(machiavelli))
+    )
+    val canonicalSaidImage = createImageData.toAugmentedImageWith(
+      parentWork = identifiedWork().contributors(List(said))
+    )
+    val redirectedHypatiaImage = createImageData.toAugmentedImageWith(
+      redirectedWork = Some(identifiedWork().contributors(List(hypatia)))
+    )
+
+    val images = List(
+      canonicalMachiavelliImage,
+      canonicalSaidImage,
+      redirectedHypatiaImage
+    )
+
+    saveImages(
+      images,
+      description = "examples for the contributor filter tests",
+      id = "images.examples.contributor-filter-tests"
+    )
+  }
+
   def saveImage(
     image: Image[ImageState.Augmented],
     description: String,
