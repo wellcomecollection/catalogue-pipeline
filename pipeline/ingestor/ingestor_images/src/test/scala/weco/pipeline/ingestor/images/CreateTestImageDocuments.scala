@@ -321,15 +321,28 @@ class CreateTestImageDocuments
       )
     )
 
-    val images = Seq(redImage,
-      slightlyLessRedImage,
-      evenLessRedImage,
-      blueImage)
+    saveImage(
+      redImage,
+      description = "example for the color filter tests",
+      id = "images.examples.color-filter-tests.red"
+    )
 
-    saveImages(
-      images,
-      description = "examples for the color filter tests",
-      id = "images.examples.color-filter-tests"
+    saveImage(
+      slightlyLessRedImage,
+      description = "example for the color filter tests",
+      id = "images.examples.color-filter-tests.slightly-less-red"
+    )
+
+    saveImage(
+      evenLessRedImage,
+      description = "example for the color filter tests",
+      id = "images.examples.color-filter-tests.even-less-red"
+    )
+
+    saveImage(
+      blueImage,
+      description = "example for the color filter tests",
+      id = "images.examples.color-filter-tests.blue"
     )
   }
 
