@@ -222,6 +222,37 @@ class CreateTestImageDocuments
     )
   }
 
+  it("creates examples for the genre filter tests") {
+    val carrotCounselling = createGenreWith("Carrot counselling")
+    val dodoDivination = createGenreWith("Dodo divination")
+    val emuEntrepreneurship = createGenreWith("Emu entrepreneurship")
+    val falconFinances = createGenreWith("Falcon finances")
+
+    val carrotCounsellingImage = createImageData.toAugmentedImageWith(
+      parentWork = identifiedWork().genres(List(carrotCounselling))
+    )
+    val redirectedDodoDivinationImage = createImageData.toAugmentedImageWith(
+      redirectedWork = Some(identifiedWork().genres(List(dodoDivination)))
+    )
+    val emuEntrepreneurShipAndFalconFinancesImage =
+      createImageData.toAugmentedImageWith(
+        parentWork =
+          identifiedWork().genres(List(emuEntrepreneurship, falconFinances))
+      )
+
+    val images = List(
+      carrotCounsellingImage,
+      redirectedDodoDivinationImage,
+      emuEntrepreneurShipAndFalconFinancesImage
+    )
+
+    saveImages(
+      images,
+      description = "examples for the genre filter tests",
+      id = "images.examples.genre-filter-tests"
+    )
+  }
+
   def saveImage(
     image: Image[ImageState.Augmented],
     description: String,
