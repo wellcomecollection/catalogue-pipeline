@@ -378,6 +378,29 @@ class CreateTestImageDocuments
     )
   }
 
+  it("creates multiple images associated with the same work") {
+    val parentWork = sierraIdentifiedWork()
+    val workImages =
+      (0 to 3)
+        .map(
+          _ => createImageData.toAugmentedImageWith(parentWork = parentWork)
+        )
+        .toList
+    val otherImage = createImageData.toAugmentedImage
+
+    saveImages(
+      workImages,
+      description = "images linked with the same work",
+      id = "images.examples.linked-with-the-same-work"
+    )
+
+    saveImage(
+      otherImage,
+      description = "images linked with another work",
+      id = "images.examples.linked-with-another-work"
+    )
+  }
+
   def saveImage(
     image: Image[ImageState.Augmented],
     description: String,
