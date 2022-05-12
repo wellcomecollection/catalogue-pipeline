@@ -417,7 +417,7 @@ class CreateTestImageDocuments
       parentWork = identifiedWork()
         .title("Schiacciata is a Tuscan focaccia"),
       redirectedWork = Some(
-        identifiedWork().title("A Tusdan bread")
+        identifiedWork().title("A Tuscan bread")
       )
     )
 

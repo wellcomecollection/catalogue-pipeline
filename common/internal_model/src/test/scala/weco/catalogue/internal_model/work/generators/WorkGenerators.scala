@@ -31,7 +31,7 @@ trait WorkGenerators
 
   def sourceWork(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
-    sourceModifiedTime: Instant = instantInLast30Days
+    sourceModifiedTime: Instant = randomInstant
   ): Work.Visible[Source] =
     Work.Visible[Source](
       state = Source(
@@ -44,7 +44,7 @@ trait WorkGenerators
   def mergedWork(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     canonicalId: CanonicalId = createCanonicalId,
-    modifiedTime: Instant = instantInLast30Days
+    modifiedTime: Instant = randomInstant
   ): Work.Visible[Merged] = {
     val data = initData[DataState.Identified]
     Work.Visible[Merged](
@@ -63,7 +63,7 @@ trait WorkGenerators
   def denormalisedWork(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     canonicalId: CanonicalId = createCanonicalId,
-    modifiedTime: Instant = instantInLast30Days,
+    modifiedTime: Instant = randomInstant,
     relations: Relations = Relations.none
   ): Work.Visible[Denormalised] = {
     val data = initData[DataState.Identified]
@@ -84,7 +84,7 @@ trait WorkGenerators
   def identifiedWork(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     canonicalId: CanonicalId = createCanonicalId,
-    sourceModifiedTime: Instant = instantInLast30Days
+    sourceModifiedTime: Instant = randomInstant
   ): Work.Visible[Identified] =
     Work.Visible[Identified](
       state = Identified(
@@ -99,7 +99,7 @@ trait WorkGenerators
   def indexedWork(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     canonicalId: CanonicalId = createCanonicalId,
-    mergedTime: Instant = instantInLast30Days,
+    mergedTime: Instant = randomInstant,
     relations: Relations = Relations.none
   ): Work.Visible[Indexed] = {
     val data = initData[DataState.Identified]
