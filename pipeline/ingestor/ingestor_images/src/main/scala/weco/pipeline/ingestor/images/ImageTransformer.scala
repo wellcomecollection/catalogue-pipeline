@@ -18,7 +18,7 @@ object ImageTransformer {
         locations = indexedImage.locations,
         source = indexedImage.source,
         modifiedTime = indexedImage.modifiedTime,
-        display = DisplayImage(indexedImage).asJson.dropNullValues
+        display = DisplayImage(indexedImage).asJson.deepDropNullValues
       )
     }
 }
