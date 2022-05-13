@@ -40,7 +40,8 @@ case object ImageAggregatableValues {
 
     val genres: List[String] =
       workData.genres
-        .map(DisplayGenre(_, includesIdentifiers = false).asJson.deepDropNullValues)
+        .map(
+          DisplayGenre(_, includesIdentifiers = false).asJson.deepDropNullValues)
         .map(_.noSpaces)
 
     ImageAggregatableValues(licenses, contributors, genres)

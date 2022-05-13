@@ -7,9 +7,21 @@ import weco.catalogue.internal_model.identifiers.{DataState, IdState}
 import weco.catalogue.internal_model.image.{ParentWork, ParentWorks}
 import weco.catalogue.internal_model.locations.License
 import weco.catalogue.internal_model.work.generators.ItemsGenerators
-import weco.catalogue.internal_model.work.{ContributionRole, Contributor, Genre, Meeting, Organisation, Person, WorkData}
+import weco.catalogue.internal_model.work.{
+  ContributionRole,
+  Contributor,
+  Genre,
+  Meeting,
+  Organisation,
+  Person,
+  WorkData
+}
 
-class ImageAggregatableValuesTest extends AnyFunSpec with Matchers with IdentifiersGenerators with ItemsGenerators {
+class ImageAggregatableValuesTest
+    extends AnyFunSpec
+    with Matchers
+    with IdentifiersGenerators
+    with ItemsGenerators {
   it("creates aggregatable values from a source work") {
     val w = ParentWorks(
       ParentWork(
