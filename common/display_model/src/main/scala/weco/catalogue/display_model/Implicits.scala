@@ -78,6 +78,8 @@ object Implicits {
   implicit val _enc11: Encoder[DisplayWork] = deriveConfiguredEncoder
   implicit val _enc12: Encoder[DisplayImage] = deriveConfiguredEncoder
 
+  implicit val _encDisplayLicense: Encoder[DisplayLicense] = deriveConfiguredEncoder
+
   implicit val _dec00: Decoder[DisplayAccessCondition] = deriveConfiguredDecoder
   implicit val _dec01: Decoder[DisplayLanguage] = deriveConfiguredDecoder
   implicit val _dec02: Decoder[DisplayFormat] = deriveConfiguredDecoder

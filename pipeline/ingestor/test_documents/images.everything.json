@@ -1,6 +1,6 @@
 {
   "description" : "an image with every include",
-  "createdAt" : "2022-05-12T16:37:23.205Z",
+  "createdAt" : "2022-05-13T12:28:05.535Z",
   "id" : "bxhr6bpl",
   "document" : {
     "version" : 1,
@@ -4636,6 +4636,18 @@
         "type" : "Work"
       },
       "type" : "Image"
+    },
+    "aggregatableValues" : {
+      "locations.license" : [
+      ],
+      "source.contributors.agent.label" : [
+        "{\"label\":\"Adrian Aardvark\",\"type\":\"Person\"}",
+        "{\"label\":\"Beatrice Buffalo\",\"type\":\"Person\"}"
+      ],
+      "source.genres.label" : [
+        "{\"label\":\"Crumbly cabbages\",\"concepts\":[{\"label\":\"lrQdGUX91lzZqSr\",\"type\":\"Concept\"},{\"label\":\"JdAXa0FyygrusEV\",\"type\":\"Concept\"},{\"label\":\"bFJCCvr0nlwF8Ld\",\"type\":\"Concept\"}],\"type\":\"Genre\"}",
+        "{\"label\":\"Deadly durians\",\"concepts\":[{\"label\":\"6RvbXUcYlGHV3L4\",\"type\":\"Concept\"},{\"label\":\"C0hBloZM6wK7r01\",\"type\":\"Concept\"},{\"label\":\"lJtB7BE1snEVdQh\",\"type\":\"Concept\"}],\"type\":\"Genre\"}"
+      ]
     }
   }
 }

@@ -1,6 +1,6 @@
 {
   "description" : "images with different licenses",
-  "createdAt" : "2022-05-12T16:37:22.934Z",
+  "createdAt" : "2022-05-13T12:28:05.147Z",
   "id" : "xsvtiopg",
   "document" : {
     "version" : 1,
@@ -4490,6 +4490,14 @@
         "type" : "Work"
       },
       "type" : "Image"
+    },
+    "aggregatableValues" : {
+      "locations.license" : [
+      ],
+      "source.contributors.agent.label" : [
+      ],
+      "source.genres.label" : [
+      ]
     }
   }
 }

@@ -1,6 +1,6 @@
 {
   "description" : "an example of images with work metadata for the API tests",
-  "createdAt" : "2022-05-12T16:37:23.233Z",
+  "createdAt" : "2022-05-13T12:28:05.572Z",
   "id" : "rnftsohq",
   "document" : {
     "version" : 1,
@@ -4478,6 +4478,14 @@
         "type" : "Work"
       },
       "type" : "Image"
+    },
+    "aggregatableValues" : {
+      "locations.license" : [
+      ],
+      "source.contributors.agent.label" : [
+      ],
+      "source.genres.label" : [
+      ]
     }
   }
 }

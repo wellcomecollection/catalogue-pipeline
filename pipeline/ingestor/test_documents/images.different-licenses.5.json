@@ -1,6 +1,6 @@
 {
   "description" : "images with different licenses",
-  "createdAt" : "2022-05-12T16:37:22.943Z",
+  "createdAt" : "2022-05-13T12:28:05.155Z",
   "id" : "cplykac0",
   "document" : {
     "version" : 1,
@@ -4492,6 +4492,14 @@
         "type" : "Work"
       },
       "type" : "Image"
+    },
+    "aggregatableValues" : {
+      "locations.license" : [
+      ],
+      "source.contributors.agent.label" : [
+      ],
+      "source.genres.label" : [
+      ]
     }
   }
 }

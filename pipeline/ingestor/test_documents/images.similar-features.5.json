@@ -1,6 +1,6 @@
 {
   "description" : "images with similar features",
-  "createdAt" : "2022-05-12T16:37:23.111Z",
+  "createdAt" : "2022-05-13T12:28:05.406Z",
   "id" : "u03mx13i",
   "document" : {
     "version" : 1,
@@ -4490,6 +4490,14 @@
         "type" : "Work"
       },
       "type" : "Image"
+    },
+    "aggregatableValues" : {
+      "locations.license" : [
+      ],
+      "source.contributors.agent.label" : [
+      ],
+      "source.genres.label" : [
+      ]
     }
   }
 }

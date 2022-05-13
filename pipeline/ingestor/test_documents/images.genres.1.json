@@ -1,6 +1,6 @@
 {
   "description" : "images with different genres",
-  "createdAt" : "2022-05-12T16:37:23.043Z",
+  "createdAt" : "2022-05-13T12:28:05.318Z",
   "id" : "7zx3rirw",
   "document" : {
     "version" : 1,
@@ -4483,6 +4483,14 @@
         "type" : "Work"
       },
       "type" : "Image"
+    },
+    "aggregatableValues" : {
+      "locations.license" : [
+      ],
+      "source.contributors.agent.label" : [
+      ],
+      "source.genres.label" : [
+      ]
     }
   }
 }

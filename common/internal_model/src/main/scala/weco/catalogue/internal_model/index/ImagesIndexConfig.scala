@@ -81,6 +81,24 @@ object ImagesIndexConfig extends IndexConfigFields {
             .withDynamic("false")
         )
 
+      // This field contains the display document used by the API, but we don't want
+      // to index it -- it's just an arbitrary blob of JSON.
+      val display = objectField("display").withEnabled(false)
+
+      // This field contains the display documents used by aggregations.
+      //
+      // The values are JSON documents that can be included in an AggregationBucket from
+      // the API, but those documents are then encoded as JSON strings so they can be
+      // returned as single values from an Elasticsearch terms aggregation.
+      //
+      // See https://github.com/wellcomecollection/docs/tree/main/rfcs/049-catalogue-api-aggregations-modelling
+      val aggregatableValues = objectField("aggregatableValues")
+        .fields(
+          keywordField("locations.license"),
+          keywordField("source.contributors.agent.label"),
+          keywordField("source.genres.label")
+        )
+
       val fields = Seq(
         version,
         dateField("modifiedTime"),
@@ -91,9 +109,8 @@ object ImagesIndexConfig extends IndexConfigFields {
             objectField("license").fields(keywordField("id"))
           )
           .withDynamic("false"),
-        // This field contains the display document used by the API, but we don't want
-        // to index it -- it's just an arbitrary blob of JSON.
-        ObjectField("display").withEnabled(false)
+        display,
+        aggregatableValues
       )
 
       // Here we set dynamic strict to be sure the object vaguely looks like an

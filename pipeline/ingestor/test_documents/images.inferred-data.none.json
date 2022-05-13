@@ -1,6 +1,6 @@
 {
   "description" : "an image without any inferred data",
-  "createdAt" : "2022-05-12T16:37:23.144Z",
+  "createdAt" : "2022-05-13T12:28:05.452Z",
   "id" : "0msokmog",
   "document" : {
     "version" : 1,
@@ -235,6 +235,14 @@
         "type" : "Work"
       },
       "type" : "Image"
+    },
+    "aggregatableValues" : {
+      "locations.license" : [
+      ],
+      "source.contributors.agent.label" : [
+      ],
+      "source.genres.label" : [
+      ]
     }
   }
 }

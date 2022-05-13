@@ -1,6 +1,6 @@
 {
   "description" : "images linked with the same work",
-  "createdAt" : "2022-05-12T16:37:23.217Z",
+  "createdAt" : "2022-05-13T12:28:05.545Z",
   "id" : "xgzjih7i",
   "document" : {
     "version" : 1,
@@ -4490,6 +4490,14 @@
         "type" : "Work"
       },
       "type" : "Image"
+    },
+    "aggregatableValues" : {
+      "locations.license" : [
+      ],
+      "source.contributors.agent.label" : [
+      ],
+      "source.genres.label" : [
+      ]
     }
   }
 }

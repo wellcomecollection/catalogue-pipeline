@@ -13,7 +13,8 @@ case class IndexedImage(
   locations: List[DigitalLocation],
   source: ImageSource,
   modifiedTime: Instant,
-  display: Json
+  display: Json,
+  aggregatableValues: ImageAggregatableValues,
 )
 
 case object IndexedImage {
