@@ -200,9 +200,10 @@ trait ImageGenerators
   //   Create a set of images with intersecting LSH lists to ensure
   //   that similarity queries will return something. Returns them in order
   //   of similarity.
-  def createSimilarImages(n: Int,
-                          similarFeatures: Boolean,
-                          similarPalette: Boolean): Seq[Image[ImageState.Augmented]] = {
+  def createSimilarImages(
+    n: Int,
+    similarFeatures: Boolean,
+    similarPalette: Boolean): Seq[Image[ImageState.Augmented]] = {
     val features = if (similarFeatures) {
       similarVectors(4096, n)
     } else { (1 to n).map(_ => randomVector(4096, maxR = 10.0f)) }

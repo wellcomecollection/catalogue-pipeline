@@ -89,7 +89,8 @@ trait VectorGenerators extends RandomGenerators {
     baseVec +: otherVecs
   }
 
-  private def randomNormal(d: Int): Vec = Seq.fill(d)(random.nextGaussian().toFloat)
+  private def randomNormal(d: Int): Vec =
+    Seq.fill(d)(random.nextGaussian().toFloat)
 }
 
 object VectorOps {

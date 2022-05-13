@@ -9,25 +9,34 @@ import weco.catalogue.internal_model.image.{Image, ImageState}
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.locations.License
-import weco.catalogue.internal_model.work.generators.{ContributorGenerators, GenreGenerators}
-import weco.catalogue.internal_model.work.{Agent, Contributor, Meeting, Organisation, Person}
+import weco.catalogue.internal_model.work.generators.{
+  ContributorGenerators,
+  GenreGenerators
+}
+import weco.catalogue.internal_model.work.{
+  Agent,
+  Contributor,
+  Meeting,
+  Organisation,
+  Person
+}
 import weco.json.JsonUtil._
 import weco.pipeline.ingestor.fixtures.TestDocumentUtils
 
 import java.time.Instant
 
 /** Creates the example documents we use in the API tests.
- *
- * These tests use a seeded RNG to ensure deterministic results; to prevent
- * regenerating existing examples and causing unnecessary churn in the API tests
- * when values change, I suggest adding new examples at the bottom of this file.
- *
- * Also, be careful removing or editing existing examples.  It may be easier to
- * add a new example than remove an old one, to prevent regenerating some of the
- * examples you aren't editing.
- */
+  *
+  * These tests use a seeded RNG to ensure deterministic results; to prevent
+  * regenerating existing examples and causing unnecessary churn in the API tests
+  * when values change, I suggest adding new examples at the bottom of this file.
+  *
+  * Also, be careful removing or editing existing examples.  It may be easier to
+  * add a new example than remove an old one, to prevent regenerating some of the
+  * examples you aren't editing.
+  */
 class CreateTestImageDocuments
-  extends AnyFunSpec
+    extends AnyFunSpec
     with Matchers
     with TestDocumentUtils
     with ContributorGenerators
