@@ -35,7 +35,7 @@ case class PathsModifier(pathsService: PathsService)(
 
   def modifyPaths(path: String): Future[Seq[Work.Visible[Merged]]] = {
     modifyCurrentPath(path) flatMap {
-      case None               => modifyChildPaths(path)
+      case None => modifyChildPaths(path)
       case Some(modifiedWork) =>
         modifyChildPaths(modifiedWork.data.collectionPath.get.path) flatMap {
           childWorks: Seq[Work.Visible[Merged]] =>
