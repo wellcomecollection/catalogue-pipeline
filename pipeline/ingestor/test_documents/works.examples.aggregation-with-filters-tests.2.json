@@ -1,7 +1,7 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2022-05-09T13:57:05.330Z",
-  "id" : "mxtt1dna",
+  "createdAt" : "2022-05-12T16:38:37.575Z",
+  "id" : "vpkqafpg",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,13 +10,13 @@
             "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "QleJkqVbD7"
+          "value" : "dPAcgpfIbf"
         },
-        "version" : 90,
-        "modifiedTime" : "2022-05-02T16:51:44Z"
+        "version" : 41,
+        "modifiedTime" : "2047-01-14T15:40:08Z"
       },
-      "mergedTime" : "2022-05-02T16:51:44Z",
-      "indexedTime" : "2022-05-09T13:57:05.330Z",
+      "mergedTime" : "2047-01-14T15:40:08Z",
+      "indexedTime" : "2022-05-12T16:38:37.574Z",
       "redirectSources" : [
       ]
     },
@@ -26,12 +26,12 @@
           "id" : "sierra-system-number"
         },
         "ontologyType" : "Work",
-        "value" : "QleJkqVbD7"
+        "value" : "dPAcgpfIbf"
       },
-      "canonicalId" : "mxtt1dna",
-      "mergedTime" : "2022-05-02T16:51:44Z",
-      "sourceModifiedTime" : "2022-05-02T16:51:44Z",
-      "indexedTime" : "2022-05-09T13:57:05.330Z",
+      "canonicalId" : "vpkqafpg",
+      "mergedTime" : "2047-01-14T15:40:08Z",
+      "sourceModifiedTime" : "2047-01-14T15:40:08Z",
+      "indexedTime" : "2022-05-12T16:38:37.574Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -50,7 +50,7 @@
       }
     },
     "data" : {
-      "title" : "title-SceRNaTElZ",
+      "title" : "title-z7am59I9Cw",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -68,27 +68,27 @@
           "id" : {
             "type" : "Unidentifiable"
           },
-          "label" : "pGkJTZWwn4",
+          "label" : "6IZ2DrUzFk",
           "concepts" : [
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "AhFD31AdK5EfQwt",
+              "label" : "vgSyVfmtHDyMDGo",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "6PClbspe4jqB3DB",
+              "label" : "2rBCSPBNfFmnJIE",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "kIu6IZ2DrUzFkvg",
+              "label" : "pzyMJLtI2pjU6xn",
               "type" : "Concept"
             }
           ]
@@ -118,8 +118,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "mxtt1dna",
-      "title" : "title-SceRNaTElZ",
+      "id" : "vpkqafpg",
+      "title" : "title-z7am59I9Cw",
       "alternativeTitles" : [
       ],
       "workType" : {
@@ -136,24 +136,24 @@
             "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "QleJkqVbD7",
+          "value" : "dPAcgpfIbf",
           "type" : "Identifier"
         }
       ],
       "subjects" : [
         {
-          "label" : "pGkJTZWwn4",
+          "label" : "6IZ2DrUzFk",
           "concepts" : [
             {
-              "label" : "AhFD31AdK5EfQwt",
+              "label" : "vgSyVfmtHDyMDGo",
               "type" : "Concept"
             },
             {
-              "label" : "6PClbspe4jqB3DB",
+              "label" : "2rBCSPBNfFmnJIE",
               "type" : "Concept"
             },
             {
-              "label" : "kIu6IZ2DrUzFkvg",
+              "label" : "pzyMJLtI2pjU6xn",
               "type" : "Concept"
             }
           ],
@@ -186,109 +186,6 @@
       ],
       "type" : "Work"
     },
-    "type" : "Visible"
-  },
-  "work" : {
-    "version" : 90,
-    "data" : {
-      "title" : "title-SceRNaTElZ",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : {
-        "id" : "l",
-        "label" : "Ephemera"
-      },
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-        {
-          "id" : {
-            "type" : "Unidentifiable"
-          },
-          "label" : "pGkJTZWwn4",
-          "concepts" : [
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "AhFD31AdK5EfQwt",
-              "type" : "Concept"
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "6PClbspe4jqB3DB",
-              "type" : "Concept"
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "kIu6IZ2DrUzFkvg",
-              "type" : "Concept"
-            }
-          ]
-        }
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "sierra-system-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "QleJkqVbD7"
-      },
-      "canonicalId" : "mxtt1dna",
-      "mergedTime" : "2022-05-02T16:51:44Z",
-      "sourceModifiedTime" : "2022-05-02T16:51:44Z",
-      "indexedTime" : "2022-05-09T13:57:05.330Z",
-      "availabilities" : [
-      ],
-      "derivedData" : {
-        "contributorAgents" : [
-        ]
-      },
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "redirectSources" : [
-    ],
     "type" : "Visible"
   }
 }

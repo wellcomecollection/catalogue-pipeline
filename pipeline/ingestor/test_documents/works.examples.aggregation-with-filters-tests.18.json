@@ -1,37 +1,37 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2022-05-09T13:57:05.340Z",
-  "id" : "smyanuuq",
+  "createdAt" : "2022-05-12T16:38:37.581Z",
+  "id" : "s4ry14qu",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "bzqMIzLCv3"
+          "value" : "Ue8m3HVuer"
         },
-        "version" : 40,
-        "modifiedTime" : "2022-05-27T02:16:23Z"
+        "version" : 67,
+        "modifiedTime" : "2021-09-17T18:49:36Z"
       },
-      "mergedTime" : "2022-05-27T02:16:23Z",
-      "indexedTime" : "2022-05-09T13:57:05.340Z",
+      "mergedTime" : "2021-09-17T18:49:36Z",
+      "indexedTime" : "2022-05-12T16:38:37.580Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "sierra-system-number"
+          "id" : "calm-record-id"
         },
         "ontologyType" : "Work",
-        "value" : "bzqMIzLCv3"
+        "value" : "Ue8m3HVuer"
       },
-      "canonicalId" : "smyanuuq",
-      "mergedTime" : "2022-05-27T02:16:23Z",
-      "sourceModifiedTime" : "2022-05-27T02:16:23Z",
-      "indexedTime" : "2022-05-09T13:57:05.340Z",
+      "canonicalId" : "s4ry14qu",
+      "mergedTime" : "2021-09-17T18:49:36Z",
+      "sourceModifiedTime" : "2021-09-17T18:49:36Z",
+      "indexedTime" : "2022-05-12T16:38:37.580Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -50,7 +50,7 @@
       }
     },
     "data" : {
-      "title" : "title-cRgJ5Ue8m3",
+      "title" : "title-XX1muoI8Tp",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -68,27 +68,27 @@
           "id" : {
             "type" : "Unidentifiable"
           },
-          "label" : "UCKKVOQZLw",
+          "label" : "9hdRJC6PIO",
           "concepts" : [
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "A6uWTQlXaTo6Wyi",
+              "label" : "bmiPTNnwYSoEYyd",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "CaLacffLiQzk2sx",
+              "label" : "ewbq2T7lfxMM8Gf",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "FZY9hdRJC6PIObm",
+              "label" : "uD4zaFerI8P7W1W",
               "type" : "Concept"
             }
           ]
@@ -118,8 +118,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "smyanuuq",
-      "title" : "title-cRgJ5Ue8m3",
+      "id" : "s4ry14qu",
+      "title" : "title-XX1muoI8Tp",
       "alternativeTitles" : [
       ],
       "workType" : {
@@ -132,28 +132,28 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "bzqMIzLCv3",
+          "value" : "Ue8m3HVuer",
           "type" : "Identifier"
         }
       ],
       "subjects" : [
         {
-          "label" : "UCKKVOQZLw",
+          "label" : "9hdRJC6PIO",
           "concepts" : [
             {
-              "label" : "A6uWTQlXaTo6Wyi",
+              "label" : "bmiPTNnwYSoEYyd",
               "type" : "Concept"
             },
             {
-              "label" : "CaLacffLiQzk2sx",
+              "label" : "ewbq2T7lfxMM8Gf",
               "type" : "Concept"
             },
             {
-              "label" : "FZY9hdRJC6PIObm",
+              "label" : "uD4zaFerI8P7W1W",
               "type" : "Concept"
             }
           ],
@@ -186,109 +186,6 @@
       ],
       "type" : "Work"
     },
-    "type" : "Visible"
-  },
-  "work" : {
-    "version" : 40,
-    "data" : {
-      "title" : "title-cRgJ5Ue8m3",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : {
-        "id" : "v",
-        "label" : "E-books"
-      },
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-        {
-          "id" : {
-            "type" : "Unidentifiable"
-          },
-          "label" : "UCKKVOQZLw",
-          "concepts" : [
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "A6uWTQlXaTo6Wyi",
-              "type" : "Concept"
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "CaLacffLiQzk2sx",
-              "type" : "Concept"
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "FZY9hdRJC6PIObm",
-              "type" : "Concept"
-            }
-          ]
-        }
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "sierra-system-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "bzqMIzLCv3"
-      },
-      "canonicalId" : "smyanuuq",
-      "mergedTime" : "2022-05-27T02:16:23Z",
-      "sourceModifiedTime" : "2022-05-27T02:16:23Z",
-      "indexedTime" : "2022-05-09T13:57:05.340Z",
-      "availabilities" : [
-      ],
-      "derivedData" : {
-        "contributorAgents" : [
-        ]
-      },
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "redirectSources" : [
-    ],
     "type" : "Visible"
   }
 }

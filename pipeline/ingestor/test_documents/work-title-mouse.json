@@ -1,37 +1,37 @@
 {
   "description" : "a work with 'mouse' in the title",
-  "createdAt" : "2022-05-04T07:15:02.837Z",
-  "id" : "akaumx5h",
+  "createdAt" : "2022-05-12T16:38:37.292Z",
+  "id" : "lnn17cwk",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "zsQ3tWSGdZ"
+          "value" : "EhPpSB8mq7"
         },
-        "version" : 9,
-        "modifiedTime" : "2022-04-22T13:06:28Z"
+        "version" : 64,
+        "modifiedTime" : "2003-09-07T11:20:18Z"
       },
-      "mergedTime" : "2022-04-22T13:06:28Z",
-      "indexedTime" : "2022-05-04T07:15:02.836Z",
+      "mergedTime" : "2003-09-07T11:20:18Z",
+      "indexedTime" : "2022-05-12T16:38:37.291Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "calm-record-id"
+          "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "zsQ3tWSGdZ"
+        "value" : "EhPpSB8mq7"
       },
-      "canonicalId" : "akaumx5h",
-      "mergedTime" : "2022-04-22T13:06:28Z",
-      "sourceModifiedTime" : "2022-04-22T13:06:28Z",
-      "indexedTime" : "2022-05-04T07:15:02.836Z",
+      "canonicalId" : "lnn17cwk",
+      "mergedTime" : "2003-09-07T11:20:18Z",
+      "sourceModifiedTime" : "2003-09-07T11:20:18Z",
+      "indexedTime" : "2022-05-12T16:38:37.291Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -86,7 +86,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "akaumx5h",
+      "id" : "lnn17cwk",
       "title" : "A mezzotint of a mouse",
       "alternativeTitles" : [
       ],
@@ -96,11 +96,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "zsQ3tWSGdZ",
+          "value" : "EhPpSB8mq7",
           "type" : "Identifier"
         }
       ],
@@ -132,77 +132,6 @@
       ],
       "type" : "Work"
     },
-    "type" : "Visible"
-  },
-  "work" : {
-    "version" : 9,
-    "data" : {
-      "title" : "A mezzotint of a mouse",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : "A print of proportional penmanship",
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "calm-record-id"
-        },
-        "ontologyType" : "Work",
-        "value" : "zsQ3tWSGdZ"
-      },
-      "canonicalId" : "akaumx5h",
-      "mergedTime" : "2022-04-22T13:06:28Z",
-      "sourceModifiedTime" : "2022-04-22T13:06:28Z",
-      "indexedTime" : "2022-05-04T07:15:02.837Z",
-      "availabilities" : [
-      ],
-      "derivedData" : {
-        "contributorAgents" : [
-        ]
-      },
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "redirectSources" : [
-    ],
     "type" : "Visible"
   }
 }

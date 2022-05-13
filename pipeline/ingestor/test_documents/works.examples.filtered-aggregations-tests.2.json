@@ -1,37 +1,37 @@
 {
   "description" : "examples for the works filtered aggregations tests",
-  "createdAt" : "2022-05-10T09:25:20.139Z",
-  "id" : "v6hxtq4m",
+  "createdAt" : "2022-05-12T16:38:37.669Z",
+  "id" : "jfnymrg2",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "fnYmrG23dz"
+          "value" : "zrSaF1p8IU"
         },
-        "version" : 82,
-        "modifiedTime" : "2022-04-19T17:15:20Z"
+        "version" : 94,
+        "modifiedTime" : "2048-08-14T13:58:19Z"
       },
-      "mergedTime" : "2022-04-19T17:15:20Z",
-      "indexedTime" : "2022-05-10T09:25:20.139Z",
+      "mergedTime" : "2048-08-14T13:58:19Z",
+      "indexedTime" : "2022-05-12T16:38:37.669Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "miro-image-number"
+          "id" : "sierra-system-number"
         },
         "ontologyType" : "Work",
-        "value" : "fnYmrG23dz"
+        "value" : "zrSaF1p8IU"
       },
-      "canonicalId" : "v6hxtq4m",
-      "mergedTime" : "2022-04-19T17:15:20Z",
-      "sourceModifiedTime" : "2022-04-19T17:15:20Z",
-      "indexedTime" : "2022-05-10T09:25:20.139Z",
+      "canonicalId" : "jfnymrg2",
+      "mergedTime" : "2048-08-14T13:58:19Z",
+      "sourceModifiedTime" : "2048-08-14T13:58:19Z",
+      "indexedTime" : "2022-05-12T16:38:37.669Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -93,7 +93,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "v6hxtq4m",
+      "id" : "jfnymrg2",
       "title" : "tapirs",
       "alternativeTitles" : [
       ],
@@ -107,11 +107,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "fnYmrG23dz",
+          "value" : "zrSaF1p8IU",
           "type" : "Identifier"
         }
       ],
@@ -148,84 +148,6 @@
       ],
       "type" : "Work"
     },
-    "type" : "Visible"
-  },
-  "work" : {
-    "version" : 82,
-    "data" : {
-      "title" : "tapirs",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : {
-        "id" : "k",
-        "label" : "Pictures"
-      },
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-        {
-          "id" : "que",
-          "label" : "Quechua"
-        }
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "miro-image-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "fnYmrG23dz"
-      },
-      "canonicalId" : "v6hxtq4m",
-      "mergedTime" : "2022-04-19T17:15:20Z",
-      "sourceModifiedTime" : "2022-04-19T17:15:20Z",
-      "indexedTime" : "2022-05-10T09:25:20.139Z",
-      "availabilities" : [
-      ],
-      "derivedData" : {
-        "contributorAgents" : [
-        ]
-      },
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "redirectSources" : [
-    ],
     "type" : "Visible"
   }
 }

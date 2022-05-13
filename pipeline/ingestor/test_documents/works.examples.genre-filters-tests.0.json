@@ -1,37 +1,37 @@
 {
   "description" : "examples for the genre tests",
-  "createdAt" : "2022-05-10T09:03:13.093Z",
-  "id" : "lrfnqpfl",
+  "createdAt" : "2022-05-12T16:38:37.601Z",
+  "id" : "jywtq4xg",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "vsJ0y4QwQT"
+          "value" : "LgGFRAV0Zs"
         },
-        "version" : 18,
-        "modifiedTime" : "2022-05-23T15:35:52Z"
+        "version" : 85,
+        "modifiedTime" : "1934-09-04T19:55:55Z"
       },
-      "mergedTime" : "2022-05-23T15:35:52Z",
-      "indexedTime" : "2022-05-10T09:03:13.093Z",
+      "mergedTime" : "1934-09-04T19:55:55Z",
+      "indexedTime" : "2022-05-12T16:38:37.600Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "miro-image-number"
+          "id" : "calm-record-id"
         },
         "ontologyType" : "Work",
-        "value" : "vsJ0y4QwQT"
+        "value" : "LgGFRAV0Zs"
       },
-      "canonicalId" : "lrfnqpfl",
-      "mergedTime" : "2022-05-23T15:35:52Z",
-      "sourceModifiedTime" : "2022-05-23T15:35:52Z",
-      "indexedTime" : "2022-05-10T09:03:13.093Z",
+      "canonicalId" : "jywtq4xg",
+      "mergedTime" : "1934-09-04T19:55:55Z",
+      "sourceModifiedTime" : "1934-09-04T19:55:55Z",
+      "indexedTime" : "2022-05-12T16:38:37.600Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -50,7 +50,7 @@
       }
     },
     "data" : {
-      "title" : "title-FRAV0ZsJyw",
+      "title" : "title-ZEnp6i2y6i",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -70,21 +70,21 @@
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "KxMxs7kIOR3Tm3c",
+              "label" : "qp5RA4f5gWVIptl",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "NOqp5RA4f5gWVIp",
+              "label" : "xE0qlBbPiSihnTe",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "tlxE0qlBbPiSihn",
+              "label" : "JBs3eSemcGNQXd8",
               "type" : "Concept"
             }
           ]
@@ -112,8 +112,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "lrfnqpfl",
-      "title" : "title-FRAV0ZsJyw",
+      "id" : "jywtq4xg",
+      "title" : "title-ZEnp6i2y6i",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -121,11 +121,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "vsJ0y4QwQT",
+          "value" : "LgGFRAV0Zs",
           "type" : "Identifier"
         }
       ],
@@ -136,15 +136,15 @@
           "label" : "Annual reports.",
           "concepts" : [
             {
-              "label" : "KxMxs7kIOR3Tm3c",
+              "label" : "qp5RA4f5gWVIptl",
               "type" : "Concept"
             },
             {
-              "label" : "NOqp5RA4f5gWVIp",
+              "label" : "xE0qlBbPiSihnTe",
               "type" : "Concept"
             },
             {
-              "label" : "tlxE0qlBbPiSihn",
+              "label" : "JBs3eSemcGNQXd8",
               "type" : "Concept"
             }
           ],
@@ -175,103 +175,6 @@
       ],
       "type" : "Work"
     },
-    "type" : "Visible"
-  },
-  "work" : {
-    "version" : 18,
-    "data" : {
-      "title" : "title-FRAV0ZsJyw",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-        {
-          "label" : "Annual reports.",
-          "concepts" : [
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "KxMxs7kIOR3Tm3c",
-              "type" : "Concept"
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "NOqp5RA4f5gWVIp",
-              "type" : "Concept"
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "tlxE0qlBbPiSihn",
-              "type" : "Concept"
-            }
-          ]
-        }
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "miro-image-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "vsJ0y4QwQT"
-      },
-      "canonicalId" : "lrfnqpfl",
-      "mergedTime" : "2022-05-23T15:35:52Z",
-      "sourceModifiedTime" : "2022-05-23T15:35:52Z",
-      "indexedTime" : "2022-05-10T09:03:13.093Z",
-      "availabilities" : [
-      ],
-      "derivedData" : {
-        "contributorAgents" : [
-        ]
-      },
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "redirectSources" : [
-    ],
     "type" : "Visible"
   }
 }

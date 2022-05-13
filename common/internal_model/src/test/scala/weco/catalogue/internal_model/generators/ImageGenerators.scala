@@ -7,7 +7,7 @@ import weco.catalogue.internal_model.identifiers.{
 }
 import weco.catalogue.internal_model.image
 import weco.catalogue.internal_model.image.ParentWork._
-import weco.catalogue.internal_model.image.ImageState.{Indexed, Initial}
+import weco.catalogue.internal_model.image.ImageState.Initial
 import weco.catalogue.internal_model.image._
 import weco.catalogue.internal_model.locations.{
   DigitalLocation,
@@ -21,7 +21,6 @@ import weco.catalogue.internal_model.work.generators.{
 import weco.catalogue.internal_model.work.{Work, WorkState}
 
 import java.time.Instant
-import scala.util.Random
 
 trait ImageGenerators
     extends IdentifiersGenerators
@@ -115,7 +114,7 @@ trait ImageGenerators
   implicit class IdentifiedImageDataOps(
     imageData: ImageData[IdState.Identified]) {
     def toInitialImageWith(
-      modifiedTime: Instant = instantInLast30Days,
+      modifiedTime: Instant = randomInstant,
       parentWorks: ParentWorks = ParentWorks(
         canonicalWork = mergedWork().toParentWork,
         redirectedWork = None
@@ -166,11 +165,11 @@ trait ImageGenerators
   }
 
   lazy private val inferredDataBinSizes =
-    List.fill(9)(Random.nextInt(10)).grouped(3).toList
+    List.fill(9)(random.nextInt(10)).grouped(3).toList
 
-  lazy private val inferredDataBinMinima = List.fill(3)(Random.nextFloat)
+  lazy private val inferredDataBinMinima = List.fill(3)(random.nextFloat)
 
-  lazy private val inferredDataAspectRatio = Some(Random.nextFloat())
+  lazy private val inferredDataAspectRatio = Some(random.nextFloat())
 
   def createInferredData = {
     val features = randomVector(4096)
@@ -190,20 +189,21 @@ trait ImageGenerators
     )
   }
 
-  def createLicensedImage(license: License): Image[Indexed] =
+  def createLicensedImage(license: License): Image[ImageState.Augmented] =
     createImageDataWith(
       locations = List(
         createDigitalLocationWith(
           license = Some(license),
           locationType = LocationType.IIIFImageAPI))
-    ).toIndexedImage
+    ).toAugmentedImage
 
   //   Create a set of images with intersecting LSH lists to ensure
   //   that similarity queries will return something. Returns them in order
   //   of similarity.
-  def createSimilarImages(n: Int,
-                          similarFeatures: Boolean,
-                          similarPalette: Boolean): Seq[Image[Indexed]] = {
+  def createSimilarImages(
+    n: Int,
+    similarFeatures: Boolean,
+    similarPalette: Boolean): Seq[Image[ImageState.Augmented]] = {
     val features = if (similarFeatures) {
       similarVectors(4096, n)
     } else { (1 to n).map(_ => randomVector(4096, maxR = 10.0f)) }
@@ -219,7 +219,7 @@ trait ImageGenerators
     }
     (features, lshFeatures, palettes).zipped.map {
       case (f, l, p) =>
-        createImageData.toIndexedImageWith(
+        createImageData.toAugmentedImageWith(
           inferredData = Some(
             InferredData(
               features1 = f.slice(0, 2048).toList,

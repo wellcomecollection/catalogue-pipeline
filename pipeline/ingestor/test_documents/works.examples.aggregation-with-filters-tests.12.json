@@ -1,37 +1,37 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2022-05-09T13:57:05.336Z",
-  "id" : "4elqjncu",
+  "createdAt" : "2022-05-12T16:38:37.578Z",
+  "id" : "8yitytyw",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "WyiVFCEDYI"
+          "value" : "a33KTr4gSW"
         },
-        "version" : 26,
-        "modifiedTime" : "2022-05-26T02:52:21Z"
+        "version" : 49,
+        "modifiedTime" : "1969-12-16T16:24:23Z"
       },
-      "mergedTime" : "2022-05-26T02:52:21Z",
-      "indexedTime" : "2022-05-09T13:57:05.336Z",
+      "mergedTime" : "1969-12-16T16:24:23Z",
+      "indexedTime" : "2022-05-12T16:38:37.578Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "sierra-system-number"
+          "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "WyiVFCEDYI"
+        "value" : "a33KTr4gSW"
       },
-      "canonicalId" : "4elqjncu",
-      "mergedTime" : "2022-05-26T02:52:21Z",
-      "sourceModifiedTime" : "2022-05-26T02:52:21Z",
-      "indexedTime" : "2022-05-09T13:57:05.336Z",
+      "canonicalId" : "8yitytyw",
+      "mergedTime" : "1969-12-16T16:24:23Z",
+      "sourceModifiedTime" : "1969-12-16T16:24:23Z",
+      "indexedTime" : "2022-05-12T16:38:37.578Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -50,7 +50,7 @@
       }
     },
     "data" : {
-      "title" : "title-ZH75AXbZov",
+      "title" : "title-3z92KVUKZD",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -68,27 +68,27 @@
           "id" : {
             "type" : "Unidentifiable"
           },
-          "label" : "eIKIFN34Lc",
+          "label" : "v4BHmwGTZr",
           "concepts" : [
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "QUShs8ZXp5KHLKO",
+              "label" : "0FUCKKVOQZLwA6u",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "iPPIvUnhx12Z5Ks",
+              "label" : "WTQlXaTo6WyiCaL",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "7r7v4BHmwGTZr0F",
+              "label" : "acffLiQzk2sxFZY",
               "type" : "Concept"
             }
           ]
@@ -118,8 +118,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "4elqjncu",
-      "title" : "title-ZH75AXbZov",
+      "id" : "8yitytyw",
+      "title" : "title-3z92KVUKZD",
       "alternativeTitles" : [
       ],
       "workType" : {
@@ -132,28 +132,28 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "WyiVFCEDYI",
+          "value" : "a33KTr4gSW",
           "type" : "Identifier"
         }
       ],
       "subjects" : [
         {
-          "label" : "eIKIFN34Lc",
+          "label" : "v4BHmwGTZr",
           "concepts" : [
             {
-              "label" : "QUShs8ZXp5KHLKO",
+              "label" : "0FUCKKVOQZLwA6u",
               "type" : "Concept"
             },
             {
-              "label" : "iPPIvUnhx12Z5Ks",
+              "label" : "WTQlXaTo6WyiCaL",
               "type" : "Concept"
             },
             {
-              "label" : "7r7v4BHmwGTZr0F",
+              "label" : "acffLiQzk2sxFZY",
               "type" : "Concept"
             }
           ],
@@ -186,109 +186,6 @@
       ],
       "type" : "Work"
     },
-    "type" : "Visible"
-  },
-  "work" : {
-    "version" : 26,
-    "data" : {
-      "title" : "title-ZH75AXbZov",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : {
-        "id" : "h",
-        "label" : "Archives and manuscripts"
-      },
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-        {
-          "id" : {
-            "type" : "Unidentifiable"
-          },
-          "label" : "eIKIFN34Lc",
-          "concepts" : [
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "QUShs8ZXp5KHLKO",
-              "type" : "Concept"
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "iPPIvUnhx12Z5Ks",
-              "type" : "Concept"
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "7r7v4BHmwGTZr0F",
-              "type" : "Concept"
-            }
-          ]
-        }
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "sierra-system-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "WyiVFCEDYI"
-      },
-      "canonicalId" : "4elqjncu",
-      "mergedTime" : "2022-05-26T02:52:21Z",
-      "sourceModifiedTime" : "2022-05-26T02:52:21Z",
-      "indexedTime" : "2022-05-09T13:57:05.336Z",
-      "availabilities" : [
-      ],
-      "derivedData" : {
-        "contributorAgents" : [
-        ]
-      },
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "redirectSources" : [
-    ],
     "type" : "Visible"
   }
 }

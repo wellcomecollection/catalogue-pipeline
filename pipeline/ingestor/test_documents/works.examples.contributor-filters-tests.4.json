@@ -1,37 +1,37 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2022-05-10T09:10:37.798Z",
-  "id" : "fcpwnrkd",
+  "createdAt" : "2022-05-12T16:38:37.616Z",
+  "id" : "cpwnrkdo",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "3FqozNGJ9P"
+          "value" : "FqozNGJ9Pf"
         },
         "version" : 52,
-        "modifiedTime" : "2022-06-01T17:28:43Z"
+        "modifiedTime" : "1990-04-28T07:06:53Z"
       },
-      "mergedTime" : "2022-06-01T17:28:43Z",
-      "indexedTime" : "2022-05-10T09:10:37.798Z",
+      "mergedTime" : "1990-04-28T07:06:53Z",
+      "indexedTime" : "2022-05-12T16:38:37.616Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "sierra-system-number"
+          "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "3FqozNGJ9P"
+        "value" : "FqozNGJ9Pf"
       },
-      "canonicalId" : "fcpwnrkd",
-      "mergedTime" : "2022-06-01T17:28:43Z",
-      "sourceModifiedTime" : "2022-06-01T17:28:43Z",
-      "indexedTime" : "2022-05-10T09:10:37.798Z",
+      "canonicalId" : "cpwnrkdo",
+      "mergedTime" : "1990-04-28T07:06:53Z",
+      "sourceModifiedTime" : "1990-04-28T07:06:53Z",
+      "indexedTime" : "2022-05-12T16:38:37.616Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -120,7 +120,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "fcpwnrkd",
+      "id" : "cpwnrkdo",
       "title" : "title-Vp3bULWghZ",
       "alternativeTitles" : [
       ],
@@ -147,11 +147,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "3FqozNGJ9P",
+          "value" : "FqozNGJ9Pf",
           "type" : "Identifier"
         }
       ],
@@ -183,111 +183,6 @@
       ],
       "type" : "Work"
     },
-    "type" : "Visible"
-  },
-  "work" : {
-    "version" : 52,
-    "data" : {
-      "title" : "title-Vp3bULWghZ",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-        {
-          "id" : {
-            "type" : "Unidentifiable"
-          },
-          "agent" : {
-            "id" : {
-              "type" : "Unidentifiable"
-            },
-            "label" : "Bath, Patricia",
-            "prefix" : null,
-            "numeration" : null,
-            "type" : "Person"
-          },
-          "roles" : [
-          ]
-        },
-        {
-          "id" : {
-            "type" : "Unidentifiable"
-          },
-          "agent" : {
-            "id" : {
-              "type" : "Unidentifiable"
-            },
-            "label" : "Darwin \"Jones\", Charles",
-            "prefix" : null,
-            "numeration" : null,
-            "type" : "Person"
-          },
-          "roles" : [
-          ]
-        }
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "sierra-system-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "3FqozNGJ9P"
-      },
-      "canonicalId" : "fcpwnrkd",
-      "mergedTime" : "2022-06-01T17:28:43Z",
-      "sourceModifiedTime" : "2022-06-01T17:28:43Z",
-      "indexedTime" : "2022-05-10T09:10:37.798Z",
-      "availabilities" : [
-      ],
-      "derivedData" : {
-        "contributorAgents" : [
-          "Person:Bath, Patricia",
-          "Person:Darwin \"Jones\", Charles"
-        ]
-      },
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "redirectSources" : [
-    ],
     "type" : "Visible"
   }
 }

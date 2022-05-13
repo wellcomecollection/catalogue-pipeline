@@ -1,7 +1,7 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2022-05-09T13:57:05.335Z",
-  "id" : "hwmopzrq",
+  "createdAt" : "2022-05-12T16:38:37.578Z",
+  "id" : "sw2fzgit",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,13 +10,13 @@
             "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "QcDIXUuyd8"
+          "value" : "6gzFFn0MzM"
         },
-        "version" : 52,
-        "modifiedTime" : "2022-04-20T23:53:42Z"
+        "version" : 66,
+        "modifiedTime" : "2035-04-11T11:43:28Z"
       },
-      "mergedTime" : "2022-04-20T23:53:42Z",
-      "indexedTime" : "2022-05-09T13:57:05.335Z",
+      "mergedTime" : "2035-04-11T11:43:28Z",
+      "indexedTime" : "2022-05-12T16:38:37.577Z",
       "redirectSources" : [
       ]
     },
@@ -26,12 +26,12 @@
           "id" : "sierra-system-number"
         },
         "ontologyType" : "Work",
-        "value" : "QcDIXUuyd8"
+        "value" : "6gzFFn0MzM"
       },
-      "canonicalId" : "hwmopzrq",
-      "mergedTime" : "2022-04-20T23:53:42Z",
-      "sourceModifiedTime" : "2022-04-20T23:53:42Z",
-      "indexedTime" : "2022-05-09T13:57:05.335Z",
+      "canonicalId" : "sw2fzgit",
+      "mergedTime" : "2035-04-11T11:43:28Z",
+      "sourceModifiedTime" : "2035-04-11T11:43:28Z",
+      "indexedTime" : "2022-05-12T16:38:37.577Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -50,7 +50,7 @@
       }
     },
     "data" : {
-      "title" : "title-gpVU0ULWN0",
+      "title" : "title-5K9RmsgKYJ",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -68,27 +68,27 @@
           "id" : {
             "type" : "Unidentifiable"
           },
-          "label" : "SyVfmtHDyM",
+          "label" : "Vo8KntFwFf",
           "concepts" : [
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "DGo2rBCSPBNfFmn",
+              "label" : "n6eIKIFN34LcQUS",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "JIEpzyMJLtI2pjU",
+              "label" : "hs8ZXp5KHLKOiPP",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "6xnVo8KntFwFfn6",
+              "label" : "IvUnhx12Z5Ks7r7",
               "type" : "Concept"
             }
           ]
@@ -118,8 +118,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "hwmopzrq",
-      "title" : "title-gpVU0ULWN0",
+      "id" : "sw2fzgit",
+      "title" : "title-5K9RmsgKYJ",
       "alternativeTitles" : [
       ],
       "workType" : {
@@ -136,24 +136,24 @@
             "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "QcDIXUuyd8",
+          "value" : "6gzFFn0MzM",
           "type" : "Identifier"
         }
       ],
       "subjects" : [
         {
-          "label" : "SyVfmtHDyM",
+          "label" : "Vo8KntFwFf",
           "concepts" : [
             {
-              "label" : "DGo2rBCSPBNfFmn",
+              "label" : "n6eIKIFN34LcQUS",
               "type" : "Concept"
             },
             {
-              "label" : "JIEpzyMJLtI2pjU",
+              "label" : "hs8ZXp5KHLKOiPP",
               "type" : "Concept"
             },
             {
-              "label" : "6xnVo8KntFwFfn6",
+              "label" : "IvUnhx12Z5Ks7r7",
               "type" : "Concept"
             }
           ],
@@ -186,109 +186,6 @@
       ],
       "type" : "Work"
     },
-    "type" : "Visible"
-  },
-  "work" : {
-    "version" : 52,
-    "data" : {
-      "title" : "title-gpVU0ULWN0",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : {
-        "id" : "i",
-        "label" : "Audio"
-      },
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-        {
-          "id" : {
-            "type" : "Unidentifiable"
-          },
-          "label" : "SyVfmtHDyM",
-          "concepts" : [
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "DGo2rBCSPBNfFmn",
-              "type" : "Concept"
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "JIEpzyMJLtI2pjU",
-              "type" : "Concept"
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "6xnVo8KntFwFfn6",
-              "type" : "Concept"
-            }
-          ]
-        }
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "sierra-system-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "QcDIXUuyd8"
-      },
-      "canonicalId" : "hwmopzrq",
-      "mergedTime" : "2022-04-20T23:53:42Z",
-      "sourceModifiedTime" : "2022-04-20T23:53:42Z",
-      "indexedTime" : "2022-05-09T13:57:05.335Z",
-      "availabilities" : [
-      ],
-      "derivedData" : {
-        "contributorAgents" : [
-        ]
-      },
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "redirectSources" : [
-    ],
     "type" : "Visible"
   }
 }

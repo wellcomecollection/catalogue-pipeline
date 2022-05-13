@@ -55,6 +55,9 @@ class CreateTestWorkDocuments
     with LanguageGenerators
     with ImageGenerators
     with HoldingsGenerators {
+  override def randomInstant: Instant =
+    Instant.parse("2001-01-01T01:01:01Z").plusSeconds(random.nextInt())
+
   it("creates works of different types") {
     saveWorks(
       works = (1 to 5).map(_ => denormalisedWork()).sortBy(_.state.canonicalId),
@@ -679,15 +682,13 @@ class CreateTestWorkDocuments
     description: String,
     id: String
   ): Unit = {
-
     val documents = works match {
       case Seq(work) =>
         Seq(
           id -> TestDocument(
             description,
             id = work.id,
-            document = work.toDocument,
-            work = work.transition[WorkState.Indexed]()
+            document = work.toDocument
           )
         )
 
@@ -698,8 +699,7 @@ class CreateTestWorkDocuments
               s"$id.$index" -> TestDocument(
                 description,
                 id = work.id,
-                document = work.toDocument,
-                work = work.transition[WorkState.Indexed]()
+                document = work.toDocument
               )
           }
     }

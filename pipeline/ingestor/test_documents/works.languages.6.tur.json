@@ -1,37 +1,37 @@
 {
   "description" : "one of a list of works with a variety of languages",
-  "createdAt" : "2022-05-04T07:15:03.040Z",
-  "id" : "xmkstgwq",
+  "createdAt" : "2022-05-12T16:38:37.476Z",
+  "id" : "yblbdpjf",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "smIOQwEtuT"
+          "value" : "vcw0LP9LzQ"
         },
-        "version" : 67,
-        "modifiedTime" : "2022-05-25T05:16:43Z"
+        "version" : 98,
+        "modifiedTime" : "1950-07-07T08:46:09Z"
       },
-      "mergedTime" : "2022-05-25T05:16:43Z",
-      "indexedTime" : "2022-05-04T07:15:03.040Z",
+      "mergedTime" : "1950-07-07T08:46:09Z",
+      "indexedTime" : "2022-05-12T16:38:37.476Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "calm-record-id"
+          "id" : "sierra-system-number"
         },
         "ontologyType" : "Work",
-        "value" : "smIOQwEtuT"
+        "value" : "vcw0LP9LzQ"
       },
-      "canonicalId" : "xmkstgwq",
-      "mergedTime" : "2022-05-25T05:16:43Z",
-      "sourceModifiedTime" : "2022-05-25T05:16:43Z",
-      "indexedTime" : "2022-05-04T07:15:03.040Z",
+      "canonicalId" : "yblbdpjf",
+      "mergedTime" : "1950-07-07T08:46:09Z",
+      "sourceModifiedTime" : "1950-07-07T08:46:09Z",
+      "indexedTime" : "2022-05-12T16:38:37.476Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -90,7 +90,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "xmkstgwq",
+      "id" : "yblbdpjf",
       "title" : "A work with languages Turkish",
       "alternativeTitles" : [
       ],
@@ -99,11 +99,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "smIOQwEtuT",
+          "value" : "vcw0LP9LzQ",
           "type" : "Identifier"
         }
       ],
@@ -140,81 +140,6 @@
       ],
       "type" : "Work"
     },
-    "type" : "Visible"
-  },
-  "work" : {
-    "version" : 67,
-    "data" : {
-      "title" : "A work with languages Turkish",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-        {
-          "id" : "tur",
-          "label" : "Turkish"
-        }
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "calm-record-id"
-        },
-        "ontologyType" : "Work",
-        "value" : "smIOQwEtuT"
-      },
-      "canonicalId" : "xmkstgwq",
-      "mergedTime" : "2022-05-25T05:16:43Z",
-      "sourceModifiedTime" : "2022-05-25T05:16:43Z",
-      "indexedTime" : "2022-05-04T07:15:03.040Z",
-      "availabilities" : [
-      ],
-      "derivedData" : {
-        "contributorAgents" : [
-        ]
-      },
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "redirectSources" : [
-    ],
     "type" : "Visible"
   }
 }

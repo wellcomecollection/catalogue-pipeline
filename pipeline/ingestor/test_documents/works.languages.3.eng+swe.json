@@ -1,37 +1,37 @@
 {
   "description" : "one of a list of works with a variety of languages",
-  "createdAt" : "2022-05-04T07:15:03.036Z",
-  "id" : "j78ps149",
+  "createdAt" : "2022-05-12T16:38:37.472Z",
+  "id" : "ioqwetut",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "nzQPWi8zCS"
+          "value" : "5WuJppwWsm"
         },
-        "version" : 70,
-        "modifiedTime" : "2022-05-10T20:16:30Z"
+        "version" : 94,
+        "modifiedTime" : "1976-09-22T07:55:28Z"
       },
-      "mergedTime" : "2022-05-10T20:16:30Z",
-      "indexedTime" : "2022-05-04T07:15:03.035Z",
+      "mergedTime" : "1976-09-22T07:55:28Z",
+      "indexedTime" : "2022-05-12T16:38:37.472Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "sierra-system-number"
+          "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "nzQPWi8zCS"
+        "value" : "5WuJppwWsm"
       },
-      "canonicalId" : "j78ps149",
-      "mergedTime" : "2022-05-10T20:16:30Z",
-      "sourceModifiedTime" : "2022-05-10T20:16:30Z",
-      "indexedTime" : "2022-05-04T07:15:03.035Z",
+      "canonicalId" : "ioqwetut",
+      "mergedTime" : "1976-09-22T07:55:28Z",
+      "sourceModifiedTime" : "1976-09-22T07:55:28Z",
+      "indexedTime" : "2022-05-12T16:38:37.472Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -94,7 +94,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "j78ps149",
+      "id" : "ioqwetut",
       "title" : "A work with languages English, Swedish",
       "alternativeTitles" : [
       ],
@@ -103,11 +103,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "nzQPWi8zCS",
+          "value" : "5WuJppwWsm",
           "type" : "Identifier"
         }
       ],
@@ -149,85 +149,6 @@
       ],
       "type" : "Work"
     },
-    "type" : "Visible"
-  },
-  "work" : {
-    "version" : 70,
-    "data" : {
-      "title" : "A work with languages English, Swedish",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-        {
-          "id" : "eng",
-          "label" : "English"
-        },
-        {
-          "id" : "swe",
-          "label" : "Swedish"
-        }
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "sierra-system-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "nzQPWi8zCS"
-      },
-      "canonicalId" : "j78ps149",
-      "mergedTime" : "2022-05-10T20:16:30Z",
-      "sourceModifiedTime" : "2022-05-10T20:16:30Z",
-      "indexedTime" : "2022-05-04T07:15:03.036Z",
-      "availabilities" : [
-      ],
-      "derivedData" : {
-        "contributorAgents" : [
-        ]
-      },
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "redirectSources" : [
-    ],
     "type" : "Visible"
   }
 }

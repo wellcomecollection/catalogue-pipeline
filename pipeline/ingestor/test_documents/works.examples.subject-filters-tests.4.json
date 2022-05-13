@@ -1,37 +1,37 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2022-05-10T09:08:11.348Z",
-  "id" : "opjdaxfg",
+  "createdAt" : "2022-05-12T16:38:37.610Z",
+  "id" : "gmzc1icz",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "Kke6NacQ8Q"
+          "value" : "Q8QOPJdAXF"
         },
-        "version" : 36,
-        "modifiedTime" : "2022-05-31T22:47:47Z"
+        "version" : 2,
+        "modifiedTime" : "1983-04-17T04:26:34Z"
       },
-      "mergedTime" : "2022-05-31T22:47:47Z",
-      "indexedTime" : "2022-05-10T09:08:11.348Z",
+      "mergedTime" : "1983-04-17T04:26:34Z",
+      "indexedTime" : "2022-05-12T16:38:37.609Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "sierra-system-number"
+          "id" : "calm-record-id"
         },
         "ontologyType" : "Work",
-        "value" : "Kke6NacQ8Q"
+        "value" : "Q8QOPJdAXF"
       },
-      "canonicalId" : "opjdaxfg",
-      "mergedTime" : "2022-05-31T22:47:47Z",
-      "sourceModifiedTime" : "2022-05-31T22:47:47Z",
-      "indexedTime" : "2022-05-10T09:08:11.348Z",
+      "canonicalId" : "gmzc1icz",
+      "mergedTime" : "1983-04-17T04:26:34Z",
+      "sourceModifiedTime" : "1983-04-17T04:26:34Z",
+      "indexedTime" : "2022-05-12T16:38:37.609Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -50,7 +50,7 @@
       }
     },
     "data" : {
-      "title" : "title-C1ICZOvNWb",
+      "title" : "title-vNWbRfsAZ5",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -71,21 +71,21 @@
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "u7hZZtHlWPIpZYu",
+              "label" : "pZYum1qUlCcjglM",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "m1qUlCcjglMPaKQ",
+              "label" : "PaKQZ55SIuLPMgI",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "Z55SIuLPMgIG177",
+              "label" : "G177tcCDpKgb0Wd",
               "type" : "Concept"
             }
           ]
@@ -100,21 +100,21 @@
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "tcCDpKgb0Wdy2nM",
+              "label" : "y2nMuMcZq1Jcxuk",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "uMcZq1JcxukacPW",
+              "label" : "acPWKUROxBsQ4CK",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "KUROxBsQ4CK8DrD",
+              "label" : "8DrDsk2kCAGURhx",
               "type" : "Concept"
             }
           ]
@@ -129,21 +129,21 @@
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "sk2kCAGURhx40zJ",
+              "label" : "40zJbSlLwDNn2Et",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "bSlLwDNn2Etp5zf",
+              "label" : "p5zfssscK3StYS1",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "ssscK3StYS1KOlZ",
+              "label" : "KOlZmZXOWd5kJ1F",
               "type" : "Concept"
             }
           ]
@@ -173,8 +173,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "opjdaxfg",
-      "title" : "title-C1ICZOvNWb",
+      "id" : "gmzc1icz",
+      "title" : "title-vNWbRfsAZ5",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -182,11 +182,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "Kke6NacQ8Q",
+          "value" : "Q8QOPJdAXF",
           "type" : "Identifier"
         }
       ],
@@ -195,15 +195,15 @@
           "label" : "London (England)",
           "concepts" : [
             {
-              "label" : "u7hZZtHlWPIpZYu",
+              "label" : "pZYum1qUlCcjglM",
               "type" : "Concept"
             },
             {
-              "label" : "m1qUlCcjglMPaKQ",
+              "label" : "PaKQZ55SIuLPMgI",
               "type" : "Concept"
             },
             {
-              "label" : "Z55SIuLPMgIG177",
+              "label" : "G177tcCDpKgb0Wd",
               "type" : "Concept"
             }
           ],
@@ -213,15 +213,15 @@
           "label" : "Psychology, Pathological",
           "concepts" : [
             {
-              "label" : "tcCDpKgb0Wdy2nM",
+              "label" : "y2nMuMcZq1Jcxuk",
               "type" : "Concept"
             },
             {
-              "label" : "uMcZq1JcxukacPW",
+              "label" : "acPWKUROxBsQ4CK",
               "type" : "Concept"
             },
             {
-              "label" : "KUROxBsQ4CK8DrD",
+              "label" : "8DrDsk2kCAGURhx",
               "type" : "Concept"
             }
           ],
@@ -231,15 +231,15 @@
           "label" : "Darwin \"Jones\", Charles",
           "concepts" : [
             {
-              "label" : "sk2kCAGURhx40zJ",
+              "label" : "40zJbSlLwDNn2Et",
               "type" : "Concept"
             },
             {
-              "label" : "bSlLwDNn2Etp5zf",
+              "label" : "p5zfssscK3StYS1",
               "type" : "Concept"
             },
             {
-              "label" : "ssscK3StYS1KOlZ",
+              "label" : "KOlZmZXOWd5kJ1F",
               "type" : "Concept"
             }
           ],
@@ -272,164 +272,6 @@
       ],
       "type" : "Work"
     },
-    "type" : "Visible"
-  },
-  "work" : {
-    "version" : 36,
-    "data" : {
-      "title" : "title-C1ICZOvNWb",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-        {
-          "id" : {
-            "type" : "Unidentifiable"
-          },
-          "label" : "London (England)",
-          "concepts" : [
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "u7hZZtHlWPIpZYu",
-              "type" : "Concept"
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "m1qUlCcjglMPaKQ",
-              "type" : "Concept"
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "Z55SIuLPMgIG177",
-              "type" : "Concept"
-            }
-          ]
-        },
-        {
-          "id" : {
-            "type" : "Unidentifiable"
-          },
-          "label" : "Psychology, Pathological",
-          "concepts" : [
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "tcCDpKgb0Wdy2nM",
-              "type" : "Concept"
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "uMcZq1JcxukacPW",
-              "type" : "Concept"
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "KUROxBsQ4CK8DrD",
-              "type" : "Concept"
-            }
-          ]
-        },
-        {
-          "id" : {
-            "type" : "Unidentifiable"
-          },
-          "label" : "Darwin \"Jones\", Charles",
-          "concepts" : [
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "sk2kCAGURhx40zJ",
-              "type" : "Concept"
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "bSlLwDNn2Etp5zf",
-              "type" : "Concept"
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "ssscK3StYS1KOlZ",
-              "type" : "Concept"
-            }
-          ]
-        }
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "sierra-system-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "Kke6NacQ8Q"
-      },
-      "canonicalId" : "opjdaxfg",
-      "mergedTime" : "2022-05-31T22:47:47Z",
-      "sourceModifiedTime" : "2022-05-31T22:47:47Z",
-      "indexedTime" : "2022-05-10T09:08:11.348Z",
-      "availabilities" : [
-      ],
-      "derivedData" : {
-        "contributorAgents" : [
-        ]
-      },
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "redirectSources" : [
-    ],
     "type" : "Visible"
   }
 }

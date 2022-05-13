@@ -24,6 +24,14 @@ trait WorkGenerators
   private def createVersion: Int =
     random.nextInt(100) + 1
 
+  override def randomInstant: Instant =
+    if (random.nextBoolean()) {
+      Instant.now().plusSeconds(random.nextInt(1000))
+    } else {
+      Instant.now().minusSeconds(random.nextInt(1000))
+    }
+
+
   // To avoid having to specify a created date, it's handy having a default used in tests.
   // We can't use `Instant.now` as a default because that introduces all sorts of flakyness and race conditions.
   // So, we are introducing an arbitrary date here for convenience.
@@ -31,7 +39,7 @@ trait WorkGenerators
 
   def sourceWork(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
-    sourceModifiedTime: Instant = instantInLast30Days
+    sourceModifiedTime: Instant = randomInstant
   ): Work.Visible[Source] =
     Work.Visible[Source](
       state = Source(
@@ -44,7 +52,7 @@ trait WorkGenerators
   def mergedWork(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     canonicalId: CanonicalId = createCanonicalId,
-    modifiedTime: Instant = instantInLast30Days
+    modifiedTime: Instant = randomInstant
   ): Work.Visible[Merged] = {
     val data = initData[DataState.Identified]
     Work.Visible[Merged](
@@ -63,7 +71,7 @@ trait WorkGenerators
   def denormalisedWork(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     canonicalId: CanonicalId = createCanonicalId,
-    modifiedTime: Instant = instantInLast30Days,
+    modifiedTime: Instant = randomInstant,
     relations: Relations = Relations.none
   ): Work.Visible[Denormalised] = {
     val data = initData[DataState.Identified]
@@ -84,7 +92,7 @@ trait WorkGenerators
   def identifiedWork(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     canonicalId: CanonicalId = createCanonicalId,
-    sourceModifiedTime: Instant = instantInLast30Days
+    sourceModifiedTime: Instant = randomInstant
   ): Work.Visible[Identified] =
     Work.Visible[Identified](
       state = Identified(
@@ -99,7 +107,7 @@ trait WorkGenerators
   def indexedWork(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     canonicalId: CanonicalId = createCanonicalId,
-    mergedTime: Instant = instantInLast30Days,
+    mergedTime: Instant = randomInstant,
     relations: Relations = Relations.none
   ): Work.Visible[Indexed] = {
     val data = initData[DataState.Identified]

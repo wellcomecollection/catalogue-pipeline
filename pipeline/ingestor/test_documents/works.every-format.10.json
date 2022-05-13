@@ -1,7 +1,7 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2022-05-06T14:32:35.288Z",
-  "id" : "lauuzlr8",
+  "createdAt" : "2022-05-12T16:38:37.543Z",
+  "id" : "4wwgkp4h",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,13 +10,13 @@
             "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "4b24fkr6m6"
+          "value" : "miNkeZ17CI"
         },
-        "version" : 35,
-        "modifiedTime" : "2022-05-21T04:31:06Z"
+        "version" : 31,
+        "modifiedTime" : "2004-07-24T22:00:16Z"
       },
-      "mergedTime" : "2022-05-21T04:31:06Z",
-      "indexedTime" : "2022-05-06T14:32:35.287Z",
+      "mergedTime" : "2004-07-24T22:00:16Z",
+      "indexedTime" : "2022-05-12T16:38:37.543Z",
       "redirectSources" : [
       ]
     },
@@ -26,12 +26,12 @@
           "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "4b24fkr6m6"
+        "value" : "miNkeZ17CI"
       },
-      "canonicalId" : "lauuzlr8",
-      "mergedTime" : "2022-05-21T04:31:06Z",
-      "sourceModifiedTime" : "2022-05-21T04:31:06Z",
-      "indexedTime" : "2022-05-06T14:32:35.287Z",
+      "canonicalId" : "4wwgkp4h",
+      "mergedTime" : "2004-07-24T22:00:16Z",
+      "sourceModifiedTime" : "2004-07-24T22:00:16Z",
+      "indexedTime" : "2022-05-12T16:38:37.543Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -50,7 +50,7 @@
       }
     },
     "data" : {
-      "title" : "title-kfdw2Ap82c",
+      "title" : "title-uALANM5eCQ",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -89,8 +89,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "lauuzlr8",
-      "title" : "title-kfdw2Ap82c",
+      "id" : "4wwgkp4h",
+      "title" : "title-uALANM5eCQ",
       "alternativeTitles" : [
       ],
       "workType" : {
@@ -107,7 +107,7 @@
             "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "4b24fkr6m6",
+          "value" : "miNkeZ17CI",
           "type" : "Identifier"
         }
       ],
@@ -139,80 +139,6 @@
       ],
       "type" : "Work"
     },
-    "type" : "Visible"
-  },
-  "work" : {
-    "version" : 35,
-    "data" : {
-      "title" : "title-kfdw2Ap82c",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : {
-        "id" : "i",
-        "label" : "Audio"
-      },
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "miro-image-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "4b24fkr6m6"
-      },
-      "canonicalId" : "lauuzlr8",
-      "mergedTime" : "2022-05-21T04:31:06Z",
-      "sourceModifiedTime" : "2022-05-21T04:31:06Z",
-      "indexedTime" : "2022-05-06T14:32:35.288Z",
-      "availabilities" : [
-      ],
-      "derivedData" : {
-        "contributorAgents" : [
-        ]
-      },
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "redirectSources" : [
-    ],
     "type" : "Visible"
   }
 }

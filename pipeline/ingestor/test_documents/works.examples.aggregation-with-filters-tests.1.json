@@ -1,37 +1,37 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2022-05-09T13:57:05.330Z",
-  "id" : "9eszhkoh",
+  "createdAt" : "2022-05-12T16:38:37.574Z",
+  "id" : "scernate",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "Dr9iToVJbp"
+          "value" : "mxTT1Dnad9"
         },
-        "version" : 56,
-        "modifiedTime" : "2022-05-13T11:07:01Z"
+        "version" : 88,
+        "modifiedTime" : "2002-07-21T00:49:27Z"
       },
-      "mergedTime" : "2022-05-13T11:07:01Z",
-      "indexedTime" : "2022-05-09T13:57:05.329Z",
+      "mergedTime" : "2002-07-21T00:49:27Z",
+      "indexedTime" : "2022-05-12T16:38:37.574Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "miro-image-number"
+          "id" : "sierra-system-number"
         },
         "ontologyType" : "Work",
-        "value" : "Dr9iToVJbp"
+        "value" : "mxTT1Dnad9"
       },
-      "canonicalId" : "9eszhkoh",
-      "mergedTime" : "2022-05-13T11:07:01Z",
-      "sourceModifiedTime" : "2022-05-13T11:07:01Z",
-      "indexedTime" : "2022-05-09T13:57:05.329Z",
+      "canonicalId" : "scernate",
+      "mergedTime" : "2002-07-21T00:49:27Z",
+      "sourceModifiedTime" : "2002-07-21T00:49:27Z",
+      "indexedTime" : "2022-05-12T16:38:37.574Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -50,7 +50,7 @@
       }
     },
     "data" : {
-      "title" : "title-qVqYS4hioT",
+      "title" : "title-ZtfG4qEc4M",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -68,27 +68,27 @@
           "id" : {
             "type" : "Unidentifiable"
           },
-          "label" : "pGkJTZWwn4",
+          "label" : "6IZ2DrUzFk",
           "concepts" : [
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "AhFD31AdK5EfQwt",
+              "label" : "vgSyVfmtHDyMDGo",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "6PClbspe4jqB3DB",
+              "label" : "2rBCSPBNfFmnJIE",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "kIu6IZ2DrUzFkvg",
+              "label" : "pzyMJLtI2pjU6xn",
               "type" : "Concept"
             }
           ]
@@ -118,8 +118,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "9eszhkoh",
-      "title" : "title-qVqYS4hioT",
+      "id" : "scernate",
+      "title" : "title-ZtfG4qEc4M",
       "alternativeTitles" : [
       ],
       "workType" : {
@@ -132,28 +132,28 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "Dr9iToVJbp",
+          "value" : "mxTT1Dnad9",
           "type" : "Identifier"
         }
       ],
       "subjects" : [
         {
-          "label" : "pGkJTZWwn4",
+          "label" : "6IZ2DrUzFk",
           "concepts" : [
             {
-              "label" : "AhFD31AdK5EfQwt",
+              "label" : "vgSyVfmtHDyMDGo",
               "type" : "Concept"
             },
             {
-              "label" : "6PClbspe4jqB3DB",
+              "label" : "2rBCSPBNfFmnJIE",
               "type" : "Concept"
             },
             {
-              "label" : "kIu6IZ2DrUzFkvg",
+              "label" : "pzyMJLtI2pjU6xn",
               "type" : "Concept"
             }
           ],
@@ -186,109 +186,6 @@
       ],
       "type" : "Work"
     },
-    "type" : "Visible"
-  },
-  "work" : {
-    "version" : 56,
-    "data" : {
-      "title" : "title-qVqYS4hioT",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : {
-        "id" : "q",
-        "label" : "Digital Images"
-      },
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-        {
-          "id" : {
-            "type" : "Unidentifiable"
-          },
-          "label" : "pGkJTZWwn4",
-          "concepts" : [
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "AhFD31AdK5EfQwt",
-              "type" : "Concept"
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "6PClbspe4jqB3DB",
-              "type" : "Concept"
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "kIu6IZ2DrUzFkvg",
-              "type" : "Concept"
-            }
-          ]
-        }
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "miro-image-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "Dr9iToVJbp"
-      },
-      "canonicalId" : "9eszhkoh",
-      "mergedTime" : "2022-05-13T11:07:01Z",
-      "sourceModifiedTime" : "2022-05-13T11:07:01Z",
-      "indexedTime" : "2022-05-09T13:57:05.330Z",
-      "availabilities" : [
-      ],
-      "derivedData" : {
-        "contributorAgents" : [
-        ]
-      },
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "redirectSources" : [
-    ],
     "type" : "Visible"
   }
 }

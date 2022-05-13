@@ -1,37 +1,37 @@
 {
   "description" : "one of a list of works with a variety of formats",
-  "createdAt" : "2022-05-04T07:15:03.022Z",
-  "id" : "sna2xj27",
+  "createdAt" : "2022-05-12T16:38:37.456Z",
+  "id" : "plmmmkup",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "iv0NQvyeIt"
+          "value" : "X7kBc19InD"
         },
-        "version" : 9,
-        "modifiedTime" : "2022-05-06T11:39:36Z"
+        "version" : 52,
+        "modifiedTime" : "1952-04-02T02:27:37Z"
       },
-      "mergedTime" : "2022-05-06T11:39:36Z",
-      "indexedTime" : "2022-05-04T07:15:03.021Z",
+      "mergedTime" : "1952-04-02T02:27:37Z",
+      "indexedTime" : "2022-05-12T16:38:37.455Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "calm-record-id"
+          "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "iv0NQvyeIt"
+        "value" : "X7kBc19InD"
       },
-      "canonicalId" : "sna2xj27",
-      "mergedTime" : "2022-05-06T11:39:36Z",
-      "sourceModifiedTime" : "2022-05-06T11:39:36Z",
-      "indexedTime" : "2022-05-04T07:15:03.021Z",
+      "canonicalId" : "plmmmkup",
+      "mergedTime" : "1952-04-02T02:27:37Z",
+      "sourceModifiedTime" : "1952-04-02T02:27:37Z",
+      "indexedTime" : "2022-05-12T16:38:37.455Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -89,7 +89,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "sna2xj27",
+      "id" : "plmmmkup",
       "title" : "A work with format Journals",
       "alternativeTitles" : [
       ],
@@ -103,11 +103,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "iv0NQvyeIt",
+          "value" : "X7kBc19InD",
           "type" : "Identifier"
         }
       ],
@@ -139,80 +139,6 @@
       ],
       "type" : "Work"
     },
-    "type" : "Visible"
-  },
-  "work" : {
-    "version" : 9,
-    "data" : {
-      "title" : "A work with format Journals",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : {
-        "id" : "d",
-        "label" : "Journals"
-      },
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "calm-record-id"
-        },
-        "ontologyType" : "Work",
-        "value" : "iv0NQvyeIt"
-      },
-      "canonicalId" : "sna2xj27",
-      "mergedTime" : "2022-05-06T11:39:36Z",
-      "sourceModifiedTime" : "2022-05-06T11:39:36Z",
-      "indexedTime" : "2022-05-04T07:15:03.022Z",
-      "availabilities" : [
-      ],
-      "derivedData" : {
-        "contributorAgents" : [
-        ]
-      },
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "redirectSources" : [
-    ],
     "type" : "Visible"
   }
 }

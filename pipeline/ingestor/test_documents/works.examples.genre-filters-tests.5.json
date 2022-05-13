@@ -1,37 +1,37 @@
 {
   "description" : "examples for the genre tests",
-  "createdAt" : "2022-05-10T09:03:13.095Z",
-  "id" : "fvt9fhsw",
+  "createdAt" : "2022-05-12T16:38:37.603Z",
+  "id" : "oo0o5odf",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "iLGpm85YYF"
+          "value" : "T9fhswtSuP"
         },
-        "version" : 72,
-        "modifiedTime" : "2022-05-19T23:55:00Z"
+        "version" : 31,
+        "modifiedTime" : "1992-02-01T01:05:08Z"
       },
-      "mergedTime" : "2022-05-19T23:55:00Z",
-      "indexedTime" : "2022-05-10T09:03:13.095Z",
+      "mergedTime" : "1992-02-01T01:05:08Z",
+      "indexedTime" : "2022-05-12T16:38:37.603Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "calm-record-id"
+          "id" : "sierra-system-number"
         },
         "ontologyType" : "Work",
-        "value" : "iLGpm85YYF"
+        "value" : "T9fhswtSuP"
       },
-      "canonicalId" : "fvt9fhsw",
-      "mergedTime" : "2022-05-19T23:55:00Z",
-      "sourceModifiedTime" : "2022-05-19T23:55:00Z",
-      "indexedTime" : "2022-05-10T09:03:13.095Z",
+      "canonicalId" : "oo0o5odf",
+      "mergedTime" : "1992-02-01T01:05:08Z",
+      "sourceModifiedTime" : "1992-02-01T01:05:08Z",
+      "indexedTime" : "2022-05-12T16:38:37.603Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -50,7 +50,7 @@
       }
     },
     "data" : {
-      "title" : "title-uPOo0o5Odf",
+      "title" : "title-odercwIWKJ",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -86,8 +86,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "fvt9fhsw",
-      "title" : "title-uPOo0o5Odf",
+      "id" : "oo0o5odf",
+      "title" : "title-odercwIWKJ",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -95,11 +95,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "iLGpm85YYF",
+          "value" : "T9fhswtSuP",
           "type" : "Identifier"
         }
       ],
@@ -131,77 +131,6 @@
       ],
       "type" : "Work"
     },
-    "type" : "Visible"
-  },
-  "work" : {
-    "version" : 72,
-    "data" : {
-      "title" : "title-uPOo0o5Odf",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "calm-record-id"
-        },
-        "ontologyType" : "Work",
-        "value" : "iLGpm85YYF"
-      },
-      "canonicalId" : "fvt9fhsw",
-      "mergedTime" : "2022-05-19T23:55:00Z",
-      "sourceModifiedTime" : "2022-05-19T23:55:00Z",
-      "indexedTime" : "2022-05-10T09:03:13.095Z",
-      "availabilities" : [
-      ],
-      "derivedData" : {
-        "contributorAgents" : [
-        ]
-      },
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "redirectSources" : [
-    ],
     "type" : "Visible"
   }
 }

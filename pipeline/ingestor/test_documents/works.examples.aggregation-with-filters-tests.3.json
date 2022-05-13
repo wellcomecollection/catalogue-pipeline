@@ -1,7 +1,7 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2022-05-09T13:57:05.331Z",
-  "id" : "pacgpfib",
+  "createdAt" : "2022-05-12T16:38:37.575Z",
+  "id" : "ivw1mq40",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,13 +10,13 @@
             "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "G4qEc4MTvd"
+          "value" : "zoIhNdLDgG"
         },
-        "version" : 39,
-        "modifiedTime" : "2022-06-01T21:07:17Z"
+        "version" : 73,
+        "modifiedTime" : "1994-06-01T17:42:00Z"
       },
-      "mergedTime" : "2022-06-01T21:07:17Z",
-      "indexedTime" : "2022-05-09T13:57:05.330Z",
+      "mergedTime" : "1994-06-01T17:42:00Z",
+      "indexedTime" : "2022-05-12T16:38:37.575Z",
       "redirectSources" : [
       ]
     },
@@ -26,12 +26,12 @@
           "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "G4qEc4MTvd"
+        "value" : "zoIhNdLDgG"
       },
-      "canonicalId" : "pacgpfib",
-      "mergedTime" : "2022-06-01T21:07:17Z",
-      "sourceModifiedTime" : "2022-06-01T21:07:17Z",
-      "indexedTime" : "2022-05-09T13:57:05.330Z",
+      "canonicalId" : "ivw1mq40",
+      "mergedTime" : "1994-06-01T17:42:00Z",
+      "sourceModifiedTime" : "1994-06-01T17:42:00Z",
+      "indexedTime" : "2022-05-12T16:38:37.575Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -50,7 +50,7 @@
       }
     },
     "data" : {
-      "title" : "title-PkqafPgpz7",
+      "title" : "title-gbiIgGzgYB",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -68,27 +68,27 @@
           "id" : {
             "type" : "Unidentifiable"
           },
-          "label" : "pGkJTZWwn4",
+          "label" : "6IZ2DrUzFk",
           "concepts" : [
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "AhFD31AdK5EfQwt",
+              "label" : "vgSyVfmtHDyMDGo",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "6PClbspe4jqB3DB",
+              "label" : "2rBCSPBNfFmnJIE",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "kIu6IZ2DrUzFkvg",
+              "label" : "pzyMJLtI2pjU6xn",
               "type" : "Concept"
             }
           ]
@@ -118,8 +118,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "pacgpfib",
-      "title" : "title-PkqafPgpz7",
+      "id" : "ivw1mq40",
+      "title" : "title-gbiIgGzgYB",
       "alternativeTitles" : [
       ],
       "workType" : {
@@ -136,24 +136,24 @@
             "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "G4qEc4MTvd",
+          "value" : "zoIhNdLDgG",
           "type" : "Identifier"
         }
       ],
       "subjects" : [
         {
-          "label" : "pGkJTZWwn4",
+          "label" : "6IZ2DrUzFk",
           "concepts" : [
             {
-              "label" : "AhFD31AdK5EfQwt",
+              "label" : "vgSyVfmtHDyMDGo",
               "type" : "Concept"
             },
             {
-              "label" : "6PClbspe4jqB3DB",
+              "label" : "2rBCSPBNfFmnJIE",
               "type" : "Concept"
             },
             {
-              "label" : "kIu6IZ2DrUzFkvg",
+              "label" : "pzyMJLtI2pjU6xn",
               "type" : "Concept"
             }
           ],
@@ -186,109 +186,6 @@
       ],
       "type" : "Work"
     },
-    "type" : "Visible"
-  },
-  "work" : {
-    "version" : 39,
-    "data" : {
-      "title" : "title-PkqafPgpz7",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : {
-        "id" : "e",
-        "label" : "Maps"
-      },
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-        {
-          "id" : {
-            "type" : "Unidentifiable"
-          },
-          "label" : "pGkJTZWwn4",
-          "concepts" : [
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "AhFD31AdK5EfQwt",
-              "type" : "Concept"
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "6PClbspe4jqB3DB",
-              "type" : "Concept"
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "kIu6IZ2DrUzFkvg",
-              "type" : "Concept"
-            }
-          ]
-        }
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "miro-image-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "G4qEc4MTvd"
-      },
-      "canonicalId" : "pacgpfib",
-      "mergedTime" : "2022-06-01T21:07:17Z",
-      "sourceModifiedTime" : "2022-06-01T21:07:17Z",
-      "indexedTime" : "2022-05-09T13:57:05.331Z",
-      "availabilities" : [
-      ],
-      "derivedData" : {
-        "contributorAgents" : [
-        ]
-      },
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "redirectSources" : [
-    ],
     "type" : "Visible"
   }
 }
