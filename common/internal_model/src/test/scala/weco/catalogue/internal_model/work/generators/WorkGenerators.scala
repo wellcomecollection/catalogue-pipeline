@@ -24,6 +24,14 @@ trait WorkGenerators
   private def createVersion: Int =
     random.nextInt(100) + 1
 
+  override def randomInstant: Instant =
+    if (random.nextBoolean()) {
+      Instant.now().plusSeconds(random.nextInt(1000))
+    } else {
+      Instant.now().minusSeconds(random.nextInt(1000))
+    }
+
+
   // To avoid having to specify a created date, it's handy having a default used in tests.
   // We can't use `Instant.now` as a default because that introduces all sorts of flakyness and race conditions.
   // So, we are introducing an arbitrary date here for convenience.
