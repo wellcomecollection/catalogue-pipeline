@@ -53,3 +53,46 @@ This is expected to run only on...
 
 As such, it is unlikely to run on many records at once, when it does, it is unlikely to 
 modify many records at all.
+
+## In Pictures
+How this fits into the pipeline.
+
+### When all the steps above cause changes
+
+```mermaid
+sequenceDiagram
+    participant Upstream Stage
+    participant Upstream Database
+    participant Path Concatenator
+    participant Downstream Stage
+    Upstream Stage->>Path Concatenator: Here is a path
+    Path Concatenator->>Path Concatenator: Update works at and below that path
+    Path Concatenator->>Upstream Database: Save Merged Work
+    Path Concatenator->>Downstream Stage: Here are the paths I changed
+```
+
+### When none of the steps above cause changes
+
+```mermaid
+sequenceDiagram
+    participant Upstream Stage
+    participant Upstream Database
+    participant Path Concatenator
+    participant Downstream Stage
+    Upstream Stage->>Path Concatenator: Here is a path
+    Path Concatenator->>Path Concatenator: Nothing to do
+    Path Concatenator->>Downstream Stage: Here is the path I got
+```
+
+### When the given path remains the same, but its children change
+
+```mermaid
+sequenceDiagram
+    participant Upstream Stage
+    participant Upstream Database
+    participant Path Concatenator
+    participant Downstream Stage
+    Upstream Stage->>Path Concatenator: Here is a path
+    Path Concatenator->>Path Concatenator: Update work below that path
+    Path Concatenator->>Downstream Stage: Here is the path I got and all its child paths
+```
