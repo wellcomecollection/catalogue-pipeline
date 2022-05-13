@@ -35,6 +35,10 @@ trait WorksIngestorFixtures
 
       val getResponse = response.result
 
+      if (!getResponse.exists) {
+        println(s"getResponse = $getResponse")
+      }
+
       getResponse.exists shouldBe true
 
       val storedWork =

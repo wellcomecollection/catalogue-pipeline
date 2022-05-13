@@ -12,7 +12,7 @@
 
   <root level="DEBUG">
     <!-- Use the CATALOGUE_TEST_LOGGING env var to set which logger to use -->
-    <appender-ref ref="${CATALOGUE_TEST_LOGGING:-silent}"/>
+    <appender-ref ref="${CATALOGUE_TEST_LOGGING:-standard}"/>
   </root>
 
   <!-- Edit these to change the log levels for external libraries -->

@@ -189,13 +189,20 @@ trait ImageGenerators
     )
   }
 
-  def createLicensedImage(license: License): Image[ImageState.Augmented] =
-    createImageDataWith(
-      locations = List(
-        createDigitalLocationWith(
-          license = Some(license),
-          locationType = LocationType.IIIFImageAPI))
-    ).toAugmentedImage
+  def createLicensedImage(license: License): Image[ImageState.Augmented] = {
+    val location = createDigitalLocationWith(
+      license = Some(license),
+      locationType = LocationType.IIIFImageAPI
+    )
+
+    createImageDataWith(locations = List(location))
+      .toAugmentedImageWith(
+        parentWork = sierraIdentifiedWork()
+          .items(
+            List(createDigitalItemWith(locations = List(location)))
+          )
+      )
+  }
 
   //   Create a set of images with intersecting LSH lists to ensure
   //   that similarity queries will return something. Returns them in order

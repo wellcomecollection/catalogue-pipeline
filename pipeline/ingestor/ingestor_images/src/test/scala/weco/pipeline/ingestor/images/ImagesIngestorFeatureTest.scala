@@ -43,6 +43,10 @@ class ImagesIngestorFeatureTest
 
             val getResponse = response.result
 
+            if (getResponse.sourceAsString == null) {
+              warn("Got null when trying to fetch image from Elasticsearch")
+            }
+
             val storedImage =
               fromJson[IndexedImage](getResponse.sourceAsString).get
 
