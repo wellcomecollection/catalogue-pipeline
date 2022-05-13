@@ -99,7 +99,7 @@ class ImageIndexableTest
                    Seq[Image[ImageState.Indexed]]],
     ingestedImage: Image[ImageState.Indexed],
     index: Index): Seq[Assertion] = {
-    result.isRight shouldBe true
+    result shouldBe a[Right[_, _]]
     assertElasticsearchEventuallyHasImage(index, ingestedImage)
   }
 
