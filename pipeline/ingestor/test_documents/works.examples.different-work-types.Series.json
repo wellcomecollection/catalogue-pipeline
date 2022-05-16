@@ -1,7 +1,7 @@
 {
   "description" : "examples of works with different types",
-  "createdAt" : "2022-05-16T10:00:07.668Z",
-  "id" : "fndkxmxs",
+  "createdAt" : "2022-05-10T08:55:33.908Z",
+  "id" : "iautlnkw",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,13 +10,13 @@
             "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "yW6CgVzwIJ"
+          "value" : "CcLh1PJlWp"
         },
-        "version" : 23,
-        "modifiedTime" : "1994-04-16T05:30:11Z"
+        "version" : 72,
+        "modifiedTime" : "2022-06-04T22:54:34Z"
       },
-      "mergedTime" : "1994-04-16T05:30:11Z",
-      "indexedTime" : "2022-05-16T10:00:07.668Z",
+      "mergedTime" : "2022-06-04T22:54:34Z",
+      "indexedTime" : "2022-05-10T08:55:33.907Z",
       "redirectSources" : [
       ]
     },
@@ -26,12 +26,12 @@
           "id" : "sierra-system-number"
         },
         "ontologyType" : "Work",
-        "value" : "yW6CgVzwIJ"
+        "value" : "CcLh1PJlWp"
       },
-      "canonicalId" : "fndkxmxs",
-      "mergedTime" : "1994-04-16T05:30:11Z",
-      "sourceModifiedTime" : "1994-04-16T05:30:11Z",
-      "indexedTime" : "2022-05-16T10:00:07.668Z",
+      "canonicalId" : "iautlnkw",
+      "mergedTime" : "2022-06-04T22:54:34Z",
+      "sourceModifiedTime" : "2022-06-04T22:54:34Z",
+      "indexedTime" : "2022-05-10T08:55:33.907Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -86,7 +86,7 @@
       "workType" : "Series"
     },
     "display" : {
-      "id" : "fndkxmxs",
+      "id" : "iautlnkw",
       "title" : "rats",
       "alternativeTitles" : [
       ],
@@ -99,7 +99,7 @@
             "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "yW6CgVzwIJ",
+          "value" : "CcLh1PJlWp",
           "type" : "Identifier"
         }
       ],
@@ -131,24 +131,77 @@
       ],
       "type" : "Series"
     },
-    "aggregatableValues" : {
-      "workType" : [
+    "type" : "Visible"
+  },
+  "work" : {
+    "version" : 72,
+    "data" : {
+      "title" : "rats",
+      "otherIdentifiers" : [
       ],
-      "genres.label" : [
+      "alternativeTitles" : [
       ],
-      "production.dates" : [
+      "format" : null,
+      "description" : null,
+      "physicalDescription" : null,
+      "lettering" : null,
+      "createdDate" : null,
+      "subjects" : [
       ],
-      "subjects.label" : [
+      "genres" : [
+      ],
+      "contributors" : [
+      ],
+      "thumbnail" : null,
+      "production" : [
       ],
       "languages" : [
       ],
-      "contributors.agent.label" : [
+      "edition" : null,
+      "notes" : [
       ],
-      "items.locations.license" : [
+      "duration" : null,
+      "items" : [
       ],
-      "availabilities" : [
-      ]
+      "holdings" : [
+      ],
+      "collectionPath" : null,
+      "referenceNumber" : null,
+      "imageData" : [
+      ],
+      "workType" : "Series"
     },
+    "state" : {
+      "sourceIdentifier" : {
+        "identifierType" : {
+          "id" : "sierra-system-number"
+        },
+        "ontologyType" : "Work",
+        "value" : "CcLh1PJlWp"
+      },
+      "canonicalId" : "iautlnkw",
+      "mergedTime" : "2022-06-04T22:54:34Z",
+      "sourceModifiedTime" : "2022-06-04T22:54:34Z",
+      "indexedTime" : "2022-05-10T08:55:33.908Z",
+      "availabilities" : [
+      ],
+      "derivedData" : {
+        "contributorAgents" : [
+        ]
+      },
+      "relations" : {
+        "ancestors" : [
+        ],
+        "children" : [
+        ],
+        "siblingsPreceding" : [
+        ],
+        "siblingsSucceeding" : [
+        ]
+      }
+    },
+    "redirectSources" : [
+    ],
     "type" : "Visible"
   }
 }

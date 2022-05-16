@@ -1,37 +1,37 @@
 {
   "description" : "a work with a collection path",
-  "createdAt" : "2022-05-16T10:00:07.595Z",
-  "id" : "dtqmc0yn",
+  "createdAt" : "2022-05-06T12:25:46.175Z",
+  "id" : "tnygzkvo",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "Lq95TrUx7A"
+          "value" : "AtB8mhIMFL"
         },
-        "version" : 18,
-        "modifiedTime" : "1972-05-12T18:12:24Z"
+        "version" : 58,
+        "modifiedTime" : "2022-06-01T06:26:12Z"
       },
-      "mergedTime" : "1972-05-12T18:12:24Z",
-      "indexedTime" : "2022-05-16T10:00:07.595Z",
+      "mergedTime" : "2022-06-01T06:26:12Z",
+      "indexedTime" : "2022-05-06T12:25:46.174Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "calm-record-id"
+          "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "Lq95TrUx7A"
+        "value" : "AtB8mhIMFL"
       },
-      "canonicalId" : "dtqmc0yn",
-      "mergedTime" : "1972-05-12T18:12:24Z",
-      "sourceModifiedTime" : "1972-05-12T18:12:24Z",
-      "indexedTime" : "2022-05-16T10:00:07.595Z",
+      "canonicalId" : "tnygzkvo",
+      "mergedTime" : "2022-06-01T06:26:12Z",
+      "sourceModifiedTime" : "2022-06-01T06:26:12Z",
+      "indexedTime" : "2022-05-06T12:25:46.174Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -50,7 +50,7 @@
       }
     },
     "data" : {
-      "title" : "title-boqbXNAi3a",
+      "title" : "title-qpCuC2LzFk",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -89,8 +89,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "dtqmc0yn",
-      "title" : "title-boqbXNAi3a",
+      "id" : "tnygzkvo",
+      "title" : "title-qpCuC2LzFk",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -98,11 +98,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "Lq95TrUx7A",
+          "value" : "AtB8mhIMFL",
           "type" : "Identifier"
         }
       ],
@@ -134,24 +134,80 @@
       ],
       "type" : "Work"
     },
-    "aggregatableValues" : {
-      "workType" : [
+    "type" : "Visible"
+  },
+  "work" : {
+    "version" : 58,
+    "data" : {
+      "title" : "title-qpCuC2LzFk",
+      "otherIdentifiers" : [
       ],
-      "genres.label" : [
+      "alternativeTitles" : [
       ],
-      "production.dates" : [
+      "format" : null,
+      "description" : null,
+      "physicalDescription" : null,
+      "lettering" : null,
+      "createdDate" : null,
+      "subjects" : [
       ],
-      "subjects.label" : [
+      "genres" : [
+      ],
+      "contributors" : [
+      ],
+      "thumbnail" : null,
+      "production" : [
       ],
       "languages" : [
       ],
-      "contributors.agent.label" : [
+      "edition" : null,
+      "notes" : [
       ],
-      "items.locations.license" : [
+      "duration" : null,
+      "items" : [
       ],
-      "availabilities" : [
-      ]
+      "holdings" : [
+      ],
+      "collectionPath" : {
+        "path" : "NUFFINK",
+        "label" : "NUF/FINK"
+      },
+      "referenceNumber" : null,
+      "imageData" : [
+      ],
+      "workType" : "Standard"
     },
+    "state" : {
+      "sourceIdentifier" : {
+        "identifierType" : {
+          "id" : "miro-image-number"
+        },
+        "ontologyType" : "Work",
+        "value" : "AtB8mhIMFL"
+      },
+      "canonicalId" : "tnygzkvo",
+      "mergedTime" : "2022-06-01T06:26:12Z",
+      "sourceModifiedTime" : "2022-06-01T06:26:12Z",
+      "indexedTime" : "2022-05-06T12:25:46.175Z",
+      "availabilities" : [
+      ],
+      "derivedData" : {
+        "contributorAgents" : [
+        ]
+      },
+      "relations" : {
+        "ancestors" : [
+        ],
+        "children" : [
+        ],
+        "siblingsPreceding" : [
+        ],
+        "siblingsSucceeding" : [
+        ]
+      }
+    },
+    "redirectSources" : [
+    ],
     "type" : "Visible"
   }
 }

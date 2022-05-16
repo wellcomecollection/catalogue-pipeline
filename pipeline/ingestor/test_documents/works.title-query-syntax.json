@@ -1,37 +1,37 @@
 {
   "description" : "a work whose title has lots of ES query syntax operators",
-  "createdAt" : "2022-05-16T10:00:07.509Z",
-  "id" : "hjjs3mu3",
+  "createdAt" : "2022-05-04T07:15:03.028Z",
+  "id" : "t3q2ufnz",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "Z3LIdvnOPk"
+          "value" : "nNHPpdWbrm"
         },
-        "version" : 88,
-        "modifiedTime" : "2060-06-24T09:00:48Z"
+        "version" : 99,
+        "modifiedTime" : "2022-04-26T08:28:43Z"
       },
-      "mergedTime" : "2060-06-24T09:00:48Z",
-      "indexedTime" : "2022-05-16T10:00:07.508Z",
+      "mergedTime" : "2022-04-26T08:28:43Z",
+      "indexedTime" : "2022-05-04T07:15:03.027Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "miro-image-number"
+          "id" : "calm-record-id"
         },
         "ontologyType" : "Work",
-        "value" : "Z3LIdvnOPk"
+        "value" : "nNHPpdWbrm"
       },
-      "canonicalId" : "hjjs3mu3",
-      "mergedTime" : "2060-06-24T09:00:48Z",
-      "sourceModifiedTime" : "2060-06-24T09:00:48Z",
-      "indexedTime" : "2022-05-16T10:00:07.508Z",
+      "canonicalId" : "t3q2ufnz",
+      "mergedTime" : "2022-04-26T08:28:43Z",
+      "sourceModifiedTime" : "2022-04-26T08:28:43Z",
+      "indexedTime" : "2022-05-04T07:15:03.027Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -86,7 +86,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "hjjs3mu3",
+      "id" : "t3q2ufnz",
       "title" : "+a -title | with (all the simple) query~4 syntax operators in it*",
       "alternativeTitles" : [
       ],
@@ -95,11 +95,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "Z3LIdvnOPk",
+          "value" : "nNHPpdWbrm",
           "type" : "Identifier"
         }
       ],
@@ -131,24 +131,77 @@
       ],
       "type" : "Work"
     },
-    "aggregatableValues" : {
-      "workType" : [
+    "type" : "Visible"
+  },
+  "work" : {
+    "version" : 99,
+    "data" : {
+      "title" : "+a -title | with (all the simple) query~4 syntax operators in it*",
+      "otherIdentifiers" : [
       ],
-      "genres.label" : [
+      "alternativeTitles" : [
       ],
-      "production.dates" : [
+      "format" : null,
+      "description" : null,
+      "physicalDescription" : null,
+      "lettering" : null,
+      "createdDate" : null,
+      "subjects" : [
       ],
-      "subjects.label" : [
+      "genres" : [
+      ],
+      "contributors" : [
+      ],
+      "thumbnail" : null,
+      "production" : [
       ],
       "languages" : [
       ],
-      "contributors.agent.label" : [
+      "edition" : null,
+      "notes" : [
       ],
-      "items.locations.license" : [
+      "duration" : null,
+      "items" : [
       ],
-      "availabilities" : [
-      ]
+      "holdings" : [
+      ],
+      "collectionPath" : null,
+      "referenceNumber" : null,
+      "imageData" : [
+      ],
+      "workType" : "Standard"
     },
+    "state" : {
+      "sourceIdentifier" : {
+        "identifierType" : {
+          "id" : "calm-record-id"
+        },
+        "ontologyType" : "Work",
+        "value" : "nNHPpdWbrm"
+      },
+      "canonicalId" : "t3q2ufnz",
+      "mergedTime" : "2022-04-26T08:28:43Z",
+      "sourceModifiedTime" : "2022-04-26T08:28:43Z",
+      "indexedTime" : "2022-05-04T07:15:03.028Z",
+      "availabilities" : [
+      ],
+      "derivedData" : {
+        "contributorAgents" : [
+        ]
+      },
+      "relations" : {
+        "ancestors" : [
+        ],
+        "children" : [
+        ],
+        "siblingsPreceding" : [
+        ],
+        "siblingsSucceeding" : [
+        ]
+      }
+    },
+    "redirectSources" : [
+    ],
     "type" : "Visible"
   }
 }

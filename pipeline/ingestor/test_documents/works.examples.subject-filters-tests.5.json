@@ -1,37 +1,37 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2022-05-16T10:00:07.682Z",
-  "id" : "rbao66qq",
+  "createdAt" : "2022-05-10T09:08:11.348Z",
+  "id" : "h5zhfqrb",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "5hoUH5ZhFq"
+          "value" : "sAZ5Ju5hoU"
         },
-        "version" : 22,
-        "modifiedTime" : "1971-06-27T05:46:31Z"
+        "version" : 74,
+        "modifiedTime" : "2022-05-08T03:03:37Z"
       },
-      "mergedTime" : "1971-06-27T05:46:31Z",
-      "indexedTime" : "2022-05-16T10:00:07.682Z",
+      "mergedTime" : "2022-05-08T03:03:37Z",
+      "indexedTime" : "2022-05-10T09:08:11.348Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "sierra-system-number"
+          "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "5hoUH5ZhFq"
+        "value" : "sAZ5Ju5hoU"
       },
-      "canonicalId" : "rbao66qq",
-      "mergedTime" : "1971-06-27T05:46:31Z",
-      "sourceModifiedTime" : "1971-06-27T05:46:31Z",
-      "indexedTime" : "2022-05-16T10:00:07.682Z",
+      "canonicalId" : "h5zhfqrb",
+      "mergedTime" : "2022-05-08T03:03:37Z",
+      "sourceModifiedTime" : "2022-05-08T03:03:37Z",
+      "indexedTime" : "2022-05-10T09:08:11.348Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -50,7 +50,7 @@
       }
     },
     "data" : {
-      "title" : "title-bcmHn7act9",
+      "title" : "title-66qqlbcmHn",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -86,8 +86,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "rbao66qq",
-      "title" : "title-bcmHn7act9",
+      "id" : "h5zhfqrb",
+      "title" : "title-66qqlbcmHn",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -95,11 +95,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "5hoUH5ZhFq",
+          "value" : "sAZ5Ju5hoU",
           "type" : "Identifier"
         }
       ],
@@ -131,24 +131,77 @@
       ],
       "type" : "Work"
     },
-    "aggregatableValues" : {
-      "workType" : [
+    "type" : "Visible"
+  },
+  "work" : {
+    "version" : 74,
+    "data" : {
+      "title" : "title-66qqlbcmHn",
+      "otherIdentifiers" : [
       ],
-      "genres.label" : [
+      "alternativeTitles" : [
       ],
-      "production.dates" : [
+      "format" : null,
+      "description" : null,
+      "physicalDescription" : null,
+      "lettering" : null,
+      "createdDate" : null,
+      "subjects" : [
       ],
-      "subjects.label" : [
+      "genres" : [
+      ],
+      "contributors" : [
+      ],
+      "thumbnail" : null,
+      "production" : [
       ],
       "languages" : [
       ],
-      "contributors.agent.label" : [
+      "edition" : null,
+      "notes" : [
       ],
-      "items.locations.license" : [
+      "duration" : null,
+      "items" : [
       ],
-      "availabilities" : [
-      ]
+      "holdings" : [
+      ],
+      "collectionPath" : null,
+      "referenceNumber" : null,
+      "imageData" : [
+      ],
+      "workType" : "Standard"
     },
+    "state" : {
+      "sourceIdentifier" : {
+        "identifierType" : {
+          "id" : "miro-image-number"
+        },
+        "ontologyType" : "Work",
+        "value" : "sAZ5Ju5hoU"
+      },
+      "canonicalId" : "h5zhfqrb",
+      "mergedTime" : "2022-05-08T03:03:37Z",
+      "sourceModifiedTime" : "2022-05-08T03:03:37Z",
+      "indexedTime" : "2022-05-10T09:08:11.348Z",
+      "availabilities" : [
+      ],
+      "derivedData" : {
+        "contributorAgents" : [
+        ]
+      },
+      "relations" : {
+        "ancestors" : [
+        ],
+        "children" : [
+        ],
+        "siblingsPreceding" : [
+        ],
+        "siblingsSucceeding" : [
+        ]
+      }
+    },
+    "redirectSources" : [
+    ],
     "type" : "Visible"
   }
 }

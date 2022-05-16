@@ -1,37 +1,37 @@
 {
   "description" : "a work with 'mouse' in the title",
-  "createdAt" : "2022-05-16T10:00:07.291Z",
-  "id" : "lnn17cwk",
+  "createdAt" : "2022-05-04T07:15:02.837Z",
+  "id" : "akaumx5h",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "EhPpSB8mq7"
+          "value" : "zsQ3tWSGdZ"
         },
-        "version" : 64,
-        "modifiedTime" : "2003-09-07T11:20:18Z"
+        "version" : 9,
+        "modifiedTime" : "2022-04-22T13:06:28Z"
       },
-      "mergedTime" : "2003-09-07T11:20:18Z",
-      "indexedTime" : "2022-05-16T10:00:07.289Z",
+      "mergedTime" : "2022-04-22T13:06:28Z",
+      "indexedTime" : "2022-05-04T07:15:02.836Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "miro-image-number"
+          "id" : "calm-record-id"
         },
         "ontologyType" : "Work",
-        "value" : "EhPpSB8mq7"
+        "value" : "zsQ3tWSGdZ"
       },
-      "canonicalId" : "lnn17cwk",
-      "mergedTime" : "2003-09-07T11:20:18Z",
-      "sourceModifiedTime" : "2003-09-07T11:20:18Z",
-      "indexedTime" : "2022-05-16T10:00:07.289Z",
+      "canonicalId" : "akaumx5h",
+      "mergedTime" : "2022-04-22T13:06:28Z",
+      "sourceModifiedTime" : "2022-04-22T13:06:28Z",
+      "indexedTime" : "2022-05-04T07:15:02.836Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -86,7 +86,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "lnn17cwk",
+      "id" : "akaumx5h",
       "title" : "A mezzotint of a mouse",
       "alternativeTitles" : [
       ],
@@ -96,11 +96,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "EhPpSB8mq7",
+          "value" : "zsQ3tWSGdZ",
           "type" : "Identifier"
         }
       ],
@@ -132,24 +132,77 @@
       ],
       "type" : "Work"
     },
-    "aggregatableValues" : {
-      "workType" : [
+    "type" : "Visible"
+  },
+  "work" : {
+    "version" : 9,
+    "data" : {
+      "title" : "A mezzotint of a mouse",
+      "otherIdentifiers" : [
       ],
-      "genres.label" : [
+      "alternativeTitles" : [
       ],
-      "production.dates" : [
+      "format" : null,
+      "description" : null,
+      "physicalDescription" : null,
+      "lettering" : "A print of proportional penmanship",
+      "createdDate" : null,
+      "subjects" : [
       ],
-      "subjects.label" : [
+      "genres" : [
+      ],
+      "contributors" : [
+      ],
+      "thumbnail" : null,
+      "production" : [
       ],
       "languages" : [
       ],
-      "contributors.agent.label" : [
+      "edition" : null,
+      "notes" : [
       ],
-      "items.locations.license" : [
+      "duration" : null,
+      "items" : [
       ],
-      "availabilities" : [
-      ]
+      "holdings" : [
+      ],
+      "collectionPath" : null,
+      "referenceNumber" : null,
+      "imageData" : [
+      ],
+      "workType" : "Standard"
     },
+    "state" : {
+      "sourceIdentifier" : {
+        "identifierType" : {
+          "id" : "calm-record-id"
+        },
+        "ontologyType" : "Work",
+        "value" : "zsQ3tWSGdZ"
+      },
+      "canonicalId" : "akaumx5h",
+      "mergedTime" : "2022-04-22T13:06:28Z",
+      "sourceModifiedTime" : "2022-04-22T13:06:28Z",
+      "indexedTime" : "2022-05-04T07:15:02.837Z",
+      "availabilities" : [
+      ],
+      "derivedData" : {
+        "contributorAgents" : [
+        ]
+      },
+      "relations" : {
+        "ancestors" : [
+        ],
+        "children" : [
+        ],
+        "siblingsPreceding" : [
+        ],
+        "siblingsSucceeding" : [
+        ]
+      }
+    },
+    "redirectSources" : [
+    ],
     "type" : "Visible"
   }
 }

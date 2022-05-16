@@ -1,37 +1,37 @@
 {
   "description" : "a work with optional top-level fields",
-  "createdAt" : "2022-05-16T10:00:07.271Z",
-  "id" : "gsruvqwf",
+  "createdAt" : "2022-05-04T07:15:02.774Z",
+  "id" : "kgxrtrir",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "7YNi35xO0f"
+          "value" : "vqWFp4pIj0"
         },
-        "version" : 54,
-        "modifiedTime" : "1967-09-14T08:19:27Z"
+        "version" : 11,
+        "modifiedTime" : "2022-05-04T10:13:03Z"
       },
-      "mergedTime" : "1967-09-14T08:19:27Z",
-      "indexedTime" : "2022-05-16T10:00:07.270Z",
+      "mergedTime" : "2022-05-04T10:13:03Z",
+      "indexedTime" : "2022-05-04T07:15:02.772Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "miro-image-number"
+          "id" : "calm-record-id"
         },
         "ontologyType" : "Work",
-        "value" : "7YNi35xO0f"
+        "value" : "vqWFp4pIj0"
       },
-      "canonicalId" : "gsruvqwf",
-      "mergedTime" : "1967-09-14T08:19:27Z",
-      "sourceModifiedTime" : "1967-09-14T08:19:27Z",
-      "indexedTime" : "2022-05-16T10:00:07.270Z",
+      "canonicalId" : "kgxrtrir",
+      "mergedTime" : "2022-05-04T10:13:03Z",
+      "sourceModifiedTime" : "2022-05-04T10:13:03Z",
+      "indexedTime" : "2022-05-04T07:15:02.772Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -50,7 +50,7 @@
       }
     },
     "data" : {
-      "title" : "title-4pIj0kgXrt",
+      "title" : "title-YGQYiF7SAh",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -86,8 +86,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "gsruvqwf",
-      "title" : "title-4pIj0kgXrt",
+      "id" : "kgxrtrir",
+      "title" : "title-YGQYiF7SAh",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -95,11 +95,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "7YNi35xO0f",
+          "value" : "vqWFp4pIj0",
           "type" : "Identifier"
         }
       ],
@@ -133,24 +133,77 @@
       ],
       "type" : "Work"
     },
-    "aggregatableValues" : {
-      "workType" : [
+    "type" : "Visible"
+  },
+  "work" : {
+    "version" : 11,
+    "data" : {
+      "title" : "title-YGQYiF7SAh",
+      "otherIdentifiers" : [
       ],
-      "genres.label" : [
+      "alternativeTitles" : [
       ],
-      "production.dates" : [
+      "format" : null,
+      "description" : null,
+      "physicalDescription" : null,
+      "lettering" : null,
+      "createdDate" : null,
+      "subjects" : [
       ],
-      "subjects.label" : [
+      "genres" : [
+      ],
+      "contributors" : [
+      ],
+      "thumbnail" : null,
+      "production" : [
       ],
       "languages" : [
       ],
-      "contributors.agent.label" : [
+      "edition" : "Special edition",
+      "notes" : [
       ],
-      "items.locations.license" : [
+      "duration" : 3600,
+      "items" : [
       ],
-      "availabilities" : [
-      ]
+      "holdings" : [
+      ],
+      "collectionPath" : null,
+      "referenceNumber" : null,
+      "imageData" : [
+      ],
+      "workType" : "Standard"
     },
+    "state" : {
+      "sourceIdentifier" : {
+        "identifierType" : {
+          "id" : "calm-record-id"
+        },
+        "ontologyType" : "Work",
+        "value" : "vqWFp4pIj0"
+      },
+      "canonicalId" : "kgxrtrir",
+      "mergedTime" : "2022-05-04T10:13:03Z",
+      "sourceModifiedTime" : "2022-05-04T10:13:03Z",
+      "indexedTime" : "2022-05-04T07:15:02.774Z",
+      "availabilities" : [
+      ],
+      "derivedData" : {
+        "contributorAgents" : [
+        ]
+      },
+      "relations" : {
+        "ancestors" : [
+        ],
+        "children" : [
+        ],
+        "siblingsPreceding" : [
+        ],
+        "siblingsSucceeding" : [
+        ]
+      }
+    },
+    "redirectSources" : [
+    ],
     "type" : "Visible"
   }
 }
