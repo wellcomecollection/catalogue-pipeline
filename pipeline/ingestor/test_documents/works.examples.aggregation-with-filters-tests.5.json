@@ -1,0 +1,211 @@
+{
+  "description" : "examples for the aggregation-with-filters tests",
+  "createdAt" : "2022-05-16T10:00:07.642Z",
+  "id" : "pi8hxmce",
+  "document" : {
+    "debug" : {
+      "source" : {
+        "identifier" : {
+          "identifierType" : {
+            "id" : "calm-record-id"
+          },
+          "ontologyType" : "Work",
+          "value" : "tXxMtg7dko"
+        },
+        "version" : 99,
+        "modifiedTime" : "2008-02-09T15:10:42Z"
+      },
+      "mergedTime" : "2008-02-09T15:10:42Z",
+      "indexedTime" : "2022-05-16T10:00:07.641Z",
+      "redirectSources" : [
+      ]
+    },
+    "state" : {
+      "sourceIdentifier" : {
+        "identifierType" : {
+          "id" : "calm-record-id"
+        },
+        "ontologyType" : "Work",
+        "value" : "tXxMtg7dko"
+      },
+      "canonicalId" : "pi8hxmce",
+      "mergedTime" : "2008-02-09T15:10:42Z",
+      "sourceModifiedTime" : "2008-02-09T15:10:42Z",
+      "indexedTime" : "2022-05-16T10:00:07.641Z",
+      "availabilities" : [
+      ],
+      "derivedData" : {
+        "contributorAgents" : [
+        ]
+      },
+      "relations" : {
+        "ancestors" : [
+        ],
+        "children" : [
+        ],
+        "siblingsPreceding" : [
+        ],
+        "siblingsSucceeding" : [
+        ]
+      }
+    },
+    "data" : {
+      "title" : "title-jABF1suXYC",
+      "otherIdentifiers" : [
+      ],
+      "alternativeTitles" : [
+      ],
+      "format" : {
+        "id" : "w",
+        "label" : "Student dissertations"
+      },
+      "description" : null,
+      "physicalDescription" : null,
+      "lettering" : null,
+      "createdDate" : null,
+      "subjects" : [
+        {
+          "id" : {
+            "type" : "Unidentifiable"
+          },
+          "label" : "6IZ2DrUzFk",
+          "concepts" : [
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "vgSyVfmtHDyMDGo",
+              "type" : "Concept"
+            },
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "2rBCSPBNfFmnJIE",
+              "type" : "Concept"
+            },
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "pzyMJLtI2pjU6xn",
+              "type" : "Concept"
+            }
+          ]
+        }
+      ],
+      "genres" : [
+      ],
+      "contributors" : [
+      ],
+      "thumbnail" : null,
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "edition" : null,
+      "notes" : [
+      ],
+      "duration" : null,
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "collectionPath" : null,
+      "referenceNumber" : null,
+      "imageData" : [
+      ],
+      "workType" : "Standard"
+    },
+    "display" : {
+      "id" : "pi8hxmce",
+      "title" : "title-jABF1suXYC",
+      "alternativeTitles" : [
+      ],
+      "workType" : {
+        "id" : "w",
+        "label" : "Student dissertations",
+        "type" : "Format"
+      },
+      "contributors" : [
+      ],
+      "identifiers" : [
+        {
+          "identifierType" : {
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
+            "type" : "IdentifierType"
+          },
+          "value" : "tXxMtg7dko",
+          "type" : "Identifier"
+        }
+      ],
+      "subjects" : [
+        {
+          "label" : "6IZ2DrUzFk",
+          "concepts" : [
+            {
+              "label" : "vgSyVfmtHDyMDGo",
+              "type" : "Concept"
+            },
+            {
+              "label" : "2rBCSPBNfFmnJIE",
+              "type" : "Concept"
+            },
+            {
+              "label" : "pzyMJLtI2pjU6xn",
+              "type" : "Concept"
+            }
+          ],
+          "type" : "Subject"
+        }
+      ],
+      "genres" : [
+      ],
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "availabilities" : [
+      ],
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "notes" : [
+      ],
+      "images" : [
+      ],
+      "parts" : [
+      ],
+      "partOf" : [
+      ],
+      "precededBy" : [
+      ],
+      "succeededBy" : [
+      ],
+      "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+        "{\"id\":\"w\",\"label\":\"Student dissertations\",\"type\":\"Format\"}"
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+        "{\"label\":\"6IZ2DrUzFk\",\"concepts\":[],\"type\":\"Subject\"}"
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
+    },
+    "type" : "Visible"
+  }
+}

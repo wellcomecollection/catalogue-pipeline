@@ -1,0 +1,202 @@
+{
+  "description" : "examples for the subject filter tests",
+  "createdAt" : "2022-05-16T10:00:07.680Z",
+  "id" : "tayys6jp",
+  "document" : {
+    "debug" : {
+      "source" : {
+        "identifier" : {
+          "identifierType" : {
+            "id" : "miro-image-number"
+          },
+          "ontologyType" : "Work",
+          "value" : "3OfWNE6m5y"
+        },
+        "version" : 7,
+        "modifiedTime" : "2009-01-17T02:57:31Z"
+      },
+      "mergedTime" : "2009-01-17T02:57:31Z",
+      "indexedTime" : "2022-05-16T10:00:07.679Z",
+      "redirectSources" : [
+      ]
+    },
+    "state" : {
+      "sourceIdentifier" : {
+        "identifierType" : {
+          "id" : "miro-image-number"
+        },
+        "ontologyType" : "Work",
+        "value" : "3OfWNE6m5y"
+      },
+      "canonicalId" : "tayys6jp",
+      "mergedTime" : "2009-01-17T02:57:31Z",
+      "sourceModifiedTime" : "2009-01-17T02:57:31Z",
+      "indexedTime" : "2022-05-16T10:00:07.679Z",
+      "availabilities" : [
+      ],
+      "derivedData" : {
+        "contributorAgents" : [
+        ]
+      },
+      "relations" : {
+        "ancestors" : [
+        ],
+        "children" : [
+        ],
+        "siblingsPreceding" : [
+        ],
+        "siblingsSucceeding" : [
+        ]
+      }
+    },
+    "data" : {
+      "title" : "title-JiYzJ9DWDL",
+      "otherIdentifiers" : [
+      ],
+      "alternativeTitles" : [
+      ],
+      "format" : null,
+      "description" : null,
+      "physicalDescription" : null,
+      "lettering" : null,
+      "createdDate" : null,
+      "subjects" : [
+        {
+          "id" : {
+            "type" : "Unidentifiable"
+          },
+          "label" : "Sanitation.",
+          "concepts" : [
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "bCBtOF9X3cVR8q4",
+              "type" : "Concept"
+            },
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "GIgcsJhdmKTFidD",
+              "type" : "Concept"
+            },
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "lsqnu7hZZtHlWPI",
+              "type" : "Concept"
+            }
+          ]
+        }
+      ],
+      "genres" : [
+      ],
+      "contributors" : [
+      ],
+      "thumbnail" : null,
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "edition" : null,
+      "notes" : [
+      ],
+      "duration" : null,
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "collectionPath" : null,
+      "referenceNumber" : null,
+      "imageData" : [
+      ],
+      "workType" : "Standard"
+    },
+    "display" : {
+      "id" : "tayys6jp",
+      "title" : "title-JiYzJ9DWDL",
+      "alternativeTitles" : [
+      ],
+      "contributors" : [
+      ],
+      "identifiers" : [
+        {
+          "identifierType" : {
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
+            "type" : "IdentifierType"
+          },
+          "value" : "3OfWNE6m5y",
+          "type" : "Identifier"
+        }
+      ],
+      "subjects" : [
+        {
+          "label" : "Sanitation.",
+          "concepts" : [
+            {
+              "label" : "bCBtOF9X3cVR8q4",
+              "type" : "Concept"
+            },
+            {
+              "label" : "GIgcsJhdmKTFidD",
+              "type" : "Concept"
+            },
+            {
+              "label" : "lsqnu7hZZtHlWPI",
+              "type" : "Concept"
+            }
+          ],
+          "type" : "Subject"
+        }
+      ],
+      "genres" : [
+      ],
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "availabilities" : [
+      ],
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "notes" : [
+      ],
+      "images" : [
+      ],
+      "parts" : [
+      ],
+      "partOf" : [
+      ],
+      "precededBy" : [
+      ],
+      "succeededBy" : [
+      ],
+      "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+        "{\"label\":\"Sanitation.\",\"concepts\":[],\"type\":\"Subject\"}"
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
+    },
+    "type" : "Visible"
+  }
+}

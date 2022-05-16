@@ -1,0 +1,222 @@
+{
+  "description" : "items with different location types",
+  "createdAt" : "2022-05-16T10:00:07.632Z",
+  "id" : "kdwct2lf",
+  "document" : {
+    "debug" : {
+      "source" : {
+        "identifier" : {
+          "identifierType" : {
+            "id" : "calm-record-id"
+          },
+          "ontologyType" : "Work",
+          "value" : "vUprsjrX3O"
+        },
+        "version" : 80,
+        "modifiedTime" : "1948-05-26T19:41:23Z"
+      },
+      "mergedTime" : "1948-05-26T19:41:23Z",
+      "indexedTime" : "2022-05-16T10:00:07.631Z",
+      "redirectSources" : [
+      ]
+    },
+    "state" : {
+      "sourceIdentifier" : {
+        "identifierType" : {
+          "id" : "calm-record-id"
+        },
+        "ontologyType" : "Work",
+        "value" : "vUprsjrX3O"
+      },
+      "canonicalId" : "kdwct2lf",
+      "mergedTime" : "1948-05-26T19:41:23Z",
+      "sourceModifiedTime" : "1948-05-26T19:41:23Z",
+      "indexedTime" : "2022-05-16T10:00:07.631Z",
+      "availabilities" : [
+      ],
+      "derivedData" : {
+        "contributorAgents" : [
+        ]
+      },
+      "relations" : {
+        "ancestors" : [
+        ],
+        "children" : [
+        ],
+        "siblingsPreceding" : [
+        ],
+        "siblingsSucceeding" : [
+        ]
+      }
+    },
+    "data" : {
+      "title" : "title-sLaubb73X6",
+      "otherIdentifiers" : [
+      ],
+      "alternativeTitles" : [
+      ],
+      "format" : null,
+      "description" : null,
+      "physicalDescription" : null,
+      "lettering" : null,
+      "createdDate" : null,
+      "subjects" : [
+      ],
+      "genres" : [
+      ],
+      "contributors" : [
+      ],
+      "thumbnail" : null,
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "edition" : null,
+      "notes" : [
+      ],
+      "duration" : null,
+      "items" : [
+        {
+          "id" : {
+            "canonicalId" : "hhcrbqav",
+            "sourceIdentifier" : {
+              "identifierType" : {
+                "id" : "miro-image-number"
+              },
+              "ontologyType" : "Work",
+              "value" : "LIHkQjFHQR"
+            },
+            "otherIdentifiers" : [
+            ],
+            "type" : "Identified"
+          },
+          "title" : null,
+          "note" : null,
+          "locations" : [
+            {
+              "url" : "https://iiif.wellcomecollection.org/image/Dxe.jpg/info.json",
+              "locationType" : {
+                "id" : "iiif-image"
+              },
+              "license" : {
+                "id" : "cc-by"
+              },
+              "credit" : null,
+              "linkText" : null,
+              "accessConditions" : [
+              ],
+              "type" : "DigitalLocation"
+            }
+          ]
+        }
+      ],
+      "holdings" : [
+      ],
+      "collectionPath" : null,
+      "referenceNumber" : null,
+      "imageData" : [
+      ],
+      "workType" : "Standard"
+    },
+    "display" : {
+      "id" : "kdwct2lf",
+      "title" : "title-sLaubb73X6",
+      "alternativeTitles" : [
+      ],
+      "contributors" : [
+      ],
+      "identifiers" : [
+        {
+          "identifierType" : {
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
+            "type" : "IdentifierType"
+          },
+          "value" : "vUprsjrX3O",
+          "type" : "Identifier"
+        }
+      ],
+      "subjects" : [
+      ],
+      "genres" : [
+      ],
+      "items" : [
+        {
+          "id" : "hhcrbqav",
+          "identifiers" : [
+            {
+              "identifierType" : {
+                "id" : "miro-image-number",
+                "label" : "Miro image number",
+                "type" : "IdentifierType"
+              },
+              "value" : "LIHkQjFHQR",
+              "type" : "Identifier"
+            }
+          ],
+          "locations" : [
+            {
+              "locationType" : {
+                "id" : "iiif-image",
+                "label" : "IIIF Image API",
+                "type" : "LocationType"
+              },
+              "url" : "https://iiif.wellcomecollection.org/image/Dxe.jpg/info.json",
+              "license" : {
+                "id" : "cc-by",
+                "label" : "Attribution 4.0 International (CC BY 4.0)",
+                "url" : "http://creativecommons.org/licenses/by/4.0/",
+                "type" : "License"
+              },
+              "accessConditions" : [
+              ],
+              "type" : "DigitalLocation"
+            }
+          ],
+          "type" : "Item"
+        }
+      ],
+      "holdings" : [
+      ],
+      "availabilities" : [
+      ],
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "notes" : [
+      ],
+      "images" : [
+      ],
+      "parts" : [
+      ],
+      "partOf" : [
+      ],
+      "precededBy" : [
+      ],
+      "succeededBy" : [
+      ],
+      "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+        "{\"id\":\"cc-by\",\"label\":\"Attribution 4.0 International (CC BY 4.0)\",\"url\":\"http://creativecommons.org/licenses/by/4.0/\",\"type\":\"License\"}"
+      ],
+      "availabilities" : [
+      ]
+    },
+    "type" : "Visible"
+  }
+}

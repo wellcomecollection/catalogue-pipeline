@@ -1,37 +1,37 @@
 {
   "description" : "works with different contributor",
-  "createdAt" : "2022-05-04T07:15:03.078Z",
-  "id" : "hui5cjlp",
+  "createdAt" : "2022-05-16T10:00:07.575Z",
+  "id" : "z08k6cnn",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "X9al0iIjga"
+          "value" : "juTufKU2Ye"
         },
-        "version" : 22,
-        "modifiedTime" : "2022-04-27T04:29:42Z"
+        "version" : 2,
+        "modifiedTime" : "1951-04-18T00:55:53Z"
       },
-      "mergedTime" : "2022-04-27T04:29:42Z",
-      "indexedTime" : "2022-05-04T07:15:03.075Z",
+      "mergedTime" : "1951-04-18T00:55:53Z",
+      "indexedTime" : "2022-05-16T10:00:07.570Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "sierra-system-number"
+          "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "X9al0iIjga"
+        "value" : "juTufKU2Ye"
       },
-      "canonicalId" : "hui5cjlp",
-      "mergedTime" : "2022-04-27T04:29:42Z",
-      "sourceModifiedTime" : "2022-04-27T04:29:42Z",
-      "indexedTime" : "2022-05-04T07:15:03.075Z",
+      "canonicalId" : "z08k6cnn",
+      "mergedTime" : "1951-04-18T00:55:53Z",
+      "sourceModifiedTime" : "1951-04-18T00:55:53Z",
+      "indexedTime" : "2022-05-16T10:00:07.570Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -52,7 +52,7 @@
       }
     },
     "data" : {
-      "title" : "title-MGlgVkz3Vf",
+      "title" : "title-UVMdWdPx74",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -116,8 +116,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "hui5cjlp",
-      "title" : "title-MGlgVkz3Vf",
+      "id" : "z08k6cnn",
+      "title" : "title-UVMdWdPx74",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -143,11 +143,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "X9al0iIjga",
+          "value" : "juTufKU2Ye",
           "type" : "Identifier"
         }
       ],
@@ -179,107 +179,26 @@
       ],
       "type" : "Work"
     },
-    "type" : "Visible"
-  },
-  "work" : {
-    "version" : 22,
-    "data" : {
-      "title" : "title-MGlgVkz3Vf",
-      "otherIdentifiers" : [
+    "aggregatableValues" : {
+      "workType" : [
       ],
-      "alternativeTitles" : [
+      "genres.label" : [
       ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
+      "production.dates" : [
       ],
-      "genres" : [
-      ],
-      "contributors" : [
-        {
-          "id" : {
-            "type" : "Unidentifiable"
-          },
-          "agent" : {
-            "id" : {
-              "type" : "Unidentifiable"
-            },
-            "label" : "007",
-            "type" : "Agent"
-          },
-          "roles" : [
-          ]
-        },
-        {
-          "id" : {
-            "type" : "Unidentifiable"
-          },
-          "agent" : {
-            "id" : {
-              "type" : "Unidentifiable"
-            },
-            "label" : "MI5",
-            "type" : "Organisation"
-          },
-          "roles" : [
-          ]
-        }
-      ],
-      "thumbnail" : null,
-      "production" : [
+      "subjects.label" : [
       ],
       "languages" : [
       ],
-      "edition" : null,
-      "notes" : [
+      "contributors.agent.label" : [
+        "{\"label\":\"007\",\"type\":\"Agent\"}",
+        "{\"label\":\"MI5\",\"type\":\"Organisation\"}"
       ],
-      "duration" : null,
-      "items" : [
+      "items.locations.license" : [
       ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "sierra-system-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "X9al0iIjga"
-      },
-      "canonicalId" : "hui5cjlp",
-      "mergedTime" : "2022-04-27T04:29:42Z",
-      "sourceModifiedTime" : "2022-04-27T04:29:42Z",
-      "indexedTime" : "2022-05-04T07:15:03.078Z",
       "availabilities" : [
-      ],
-      "derivedData" : {
-        "contributorAgents" : [
-          "Agent:007",
-          "Organisation:MI5"
-        ]
-      },
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
+      ]
     },
-    "redirectSources" : [
-    ],
     "type" : "Visible"
   }
 }

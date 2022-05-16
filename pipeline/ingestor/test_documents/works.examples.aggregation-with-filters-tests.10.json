@@ -1,0 +1,211 @@
+{
+  "description" : "examples for the aggregation-with-filters tests",
+  "createdAt" : "2022-05-16T10:00:07.645Z",
+  "id" : "sw2fzgit",
+  "document" : {
+    "debug" : {
+      "source" : {
+        "identifier" : {
+          "identifierType" : {
+            "id" : "sierra-system-number"
+          },
+          "ontologyType" : "Work",
+          "value" : "6gzFFn0MzM"
+        },
+        "version" : 66,
+        "modifiedTime" : "2035-04-11T11:43:28Z"
+      },
+      "mergedTime" : "2035-04-11T11:43:28Z",
+      "indexedTime" : "2022-05-16T10:00:07.644Z",
+      "redirectSources" : [
+      ]
+    },
+    "state" : {
+      "sourceIdentifier" : {
+        "identifierType" : {
+          "id" : "sierra-system-number"
+        },
+        "ontologyType" : "Work",
+        "value" : "6gzFFn0MzM"
+      },
+      "canonicalId" : "sw2fzgit",
+      "mergedTime" : "2035-04-11T11:43:28Z",
+      "sourceModifiedTime" : "2035-04-11T11:43:28Z",
+      "indexedTime" : "2022-05-16T10:00:07.644Z",
+      "availabilities" : [
+      ],
+      "derivedData" : {
+        "contributorAgents" : [
+        ]
+      },
+      "relations" : {
+        "ancestors" : [
+        ],
+        "children" : [
+        ],
+        "siblingsPreceding" : [
+        ],
+        "siblingsSucceeding" : [
+        ]
+      }
+    },
+    "data" : {
+      "title" : "title-5K9RmsgKYJ",
+      "otherIdentifiers" : [
+      ],
+      "alternativeTitles" : [
+      ],
+      "format" : {
+        "id" : "i",
+        "label" : "Audio"
+      },
+      "description" : null,
+      "physicalDescription" : null,
+      "lettering" : null,
+      "createdDate" : null,
+      "subjects" : [
+        {
+          "id" : {
+            "type" : "Unidentifiable"
+          },
+          "label" : "Vo8KntFwFf",
+          "concepts" : [
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "n6eIKIFN34LcQUS",
+              "type" : "Concept"
+            },
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "hs8ZXp5KHLKOiPP",
+              "type" : "Concept"
+            },
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "IvUnhx12Z5Ks7r7",
+              "type" : "Concept"
+            }
+          ]
+        }
+      ],
+      "genres" : [
+      ],
+      "contributors" : [
+      ],
+      "thumbnail" : null,
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "edition" : null,
+      "notes" : [
+      ],
+      "duration" : null,
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "collectionPath" : null,
+      "referenceNumber" : null,
+      "imageData" : [
+      ],
+      "workType" : "Standard"
+    },
+    "display" : {
+      "id" : "sw2fzgit",
+      "title" : "title-5K9RmsgKYJ",
+      "alternativeTitles" : [
+      ],
+      "workType" : {
+        "id" : "i",
+        "label" : "Audio",
+        "type" : "Format"
+      },
+      "contributors" : [
+      ],
+      "identifiers" : [
+        {
+          "identifierType" : {
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
+            "type" : "IdentifierType"
+          },
+          "value" : "6gzFFn0MzM",
+          "type" : "Identifier"
+        }
+      ],
+      "subjects" : [
+        {
+          "label" : "Vo8KntFwFf",
+          "concepts" : [
+            {
+              "label" : "n6eIKIFN34LcQUS",
+              "type" : "Concept"
+            },
+            {
+              "label" : "hs8ZXp5KHLKOiPP",
+              "type" : "Concept"
+            },
+            {
+              "label" : "IvUnhx12Z5Ks7r7",
+              "type" : "Concept"
+            }
+          ],
+          "type" : "Subject"
+        }
+      ],
+      "genres" : [
+      ],
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "availabilities" : [
+      ],
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "notes" : [
+      ],
+      "images" : [
+      ],
+      "parts" : [
+      ],
+      "partOf" : [
+      ],
+      "precededBy" : [
+      ],
+      "succeededBy" : [
+      ],
+      "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+        "{\"id\":\"i\",\"label\":\"Audio\",\"type\":\"Format\"}"
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+        "{\"label\":\"Vo8KntFwFf\",\"concepts\":[],\"type\":\"Subject\"}"
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
+    },
+    "type" : "Visible"
+  }
+}

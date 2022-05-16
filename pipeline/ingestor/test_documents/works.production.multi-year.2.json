@@ -1,0 +1,213 @@
+{
+  "description" : "works with multi-year production ranges",
+  "createdAt" : "2022-05-16T10:00:07.624Z",
+  "id" : "wg3kq4ux",
+  "document" : {
+    "debug" : {
+      "source" : {
+        "identifier" : {
+          "identifierType" : {
+            "id" : "calm-record-id"
+          },
+          "ontologyType" : "Work",
+          "value" : "lfq9upMxJZ"
+        },
+        "version" : 14,
+        "modifiedTime" : "1992-12-28T05:24:03Z"
+      },
+      "mergedTime" : "1992-12-28T05:24:03Z",
+      "indexedTime" : "2022-05-16T10:00:07.624Z",
+      "redirectSources" : [
+      ]
+    },
+    "state" : {
+      "sourceIdentifier" : {
+        "identifierType" : {
+          "id" : "calm-record-id"
+        },
+        "ontologyType" : "Work",
+        "value" : "lfq9upMxJZ"
+      },
+      "canonicalId" : "wg3kq4ux",
+      "mergedTime" : "1992-12-28T05:24:03Z",
+      "sourceModifiedTime" : "1992-12-28T05:24:03Z",
+      "indexedTime" : "2022-05-16T10:00:07.624Z",
+      "availabilities" : [
+      ],
+      "derivedData" : {
+        "contributorAgents" : [
+        ]
+      },
+      "relations" : {
+        "ancestors" : [
+        ],
+        "children" : [
+        ],
+        "siblingsPreceding" : [
+        ],
+        "siblingsSucceeding" : [
+        ]
+      }
+    },
+    "data" : {
+      "title" : "title-oirzqph7Io",
+      "otherIdentifiers" : [
+      ],
+      "alternativeTitles" : [
+      ],
+      "format" : null,
+      "description" : null,
+      "physicalDescription" : null,
+      "lettering" : null,
+      "createdDate" : null,
+      "subjects" : [
+      ],
+      "genres" : [
+      ],
+      "contributors" : [
+      ],
+      "thumbnail" : null,
+      "production" : [
+        {
+          "label" : "Y3QKMnIgomTs82bfnk23YGkB1",
+          "places" : [
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "YdIXqL6hBi"
+            }
+          ],
+          "agents" : [
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "4EVx0a62zj",
+              "prefix" : null,
+              "numeration" : null,
+              "type" : "Person"
+            }
+          ],
+          "dates" : [
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "1860-1960",
+              "range" : {
+                "from" : "1860-01-01T00:00:00Z",
+                "to" : "1960-12-31T23:59:59.999999999Z",
+                "label" : "1860-1960"
+              }
+            }
+          ],
+          "function" : null
+        }
+      ],
+      "languages" : [
+      ],
+      "edition" : null,
+      "notes" : [
+      ],
+      "duration" : null,
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "collectionPath" : null,
+      "referenceNumber" : null,
+      "imageData" : [
+      ],
+      "workType" : "Standard"
+    },
+    "display" : {
+      "id" : "wg3kq4ux",
+      "title" : "title-oirzqph7Io",
+      "alternativeTitles" : [
+      ],
+      "contributors" : [
+      ],
+      "identifiers" : [
+        {
+          "identifierType" : {
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
+            "type" : "IdentifierType"
+          },
+          "value" : "lfq9upMxJZ",
+          "type" : "Identifier"
+        }
+      ],
+      "subjects" : [
+      ],
+      "genres" : [
+      ],
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "availabilities" : [
+      ],
+      "production" : [
+        {
+          "label" : "Y3QKMnIgomTs82bfnk23YGkB1",
+          "places" : [
+            {
+              "label" : "YdIXqL6hBi",
+              "type" : "Place"
+            }
+          ],
+          "agents" : [
+            {
+              "label" : "4EVx0a62zj",
+              "type" : "Person"
+            }
+          ],
+          "dates" : [
+            {
+              "label" : "1860-1960",
+              "type" : "Period"
+            }
+          ],
+          "type" : "ProductionEvent"
+        }
+      ],
+      "languages" : [
+      ],
+      "notes" : [
+      ],
+      "images" : [
+      ],
+      "parts" : [
+      ],
+      "partOf" : [
+      ],
+      "precededBy" : [
+      ],
+      "succeededBy" : [
+      ],
+      "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+        "{\"label\":\"1860\",\"type\":\"Period\"}"
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
+    },
+    "type" : "Visible"
+  }
+}

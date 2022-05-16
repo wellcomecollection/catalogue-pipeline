@@ -1,37 +1,37 @@
 {
   "description" : "one of a list of works with a variety of languages",
-  "createdAt" : "2022-05-04T07:15:03.037Z",
-  "id" : "xqjkrlx5",
+  "createdAt" : "2022-05-16T10:00:07.522Z",
+  "id" : "edfiesed",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "TTwRQn97GV"
+          "value" : "tQZYPmQieO"
         },
-        "version" : 45,
-        "modifiedTime" : "2022-04-29T18:35:00Z"
+        "version" : 9,
+        "modifiedTime" : "1938-07-07T08:02:52Z"
       },
-      "mergedTime" : "2022-04-29T18:35:00Z",
-      "indexedTime" : "2022-05-04T07:15:03.037Z",
+      "mergedTime" : "1938-07-07T08:02:52Z",
+      "indexedTime" : "2022-05-16T10:00:07.521Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "calm-record-id"
+          "id" : "sierra-system-number"
         },
         "ontologyType" : "Work",
-        "value" : "TTwRQn97GV"
+        "value" : "tQZYPmQieO"
       },
-      "canonicalId" : "xqjkrlx5",
-      "mergedTime" : "2022-04-29T18:35:00Z",
-      "sourceModifiedTime" : "2022-04-29T18:35:00Z",
-      "indexedTime" : "2022-05-04T07:15:03.037Z",
+      "canonicalId" : "edfiesed",
+      "mergedTime" : "1938-07-07T08:02:52Z",
+      "sourceModifiedTime" : "1938-07-07T08:02:52Z",
+      "indexedTime" : "2022-05-16T10:00:07.521Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -98,7 +98,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "xqjkrlx5",
+      "id" : "edfiesed",
       "title" : "A work with languages English, Swedish, Turkish",
       "alternativeTitles" : [
       ],
@@ -107,11 +107,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "TTwRQn97GV",
+          "value" : "tQZYPmQieO",
           "type" : "Identifier"
         }
       ],
@@ -158,89 +158,27 @@
       ],
       "type" : "Work"
     },
-    "type" : "Visible"
-  },
-  "work" : {
-    "version" : 45,
-    "data" : {
-      "title" : "A work with languages English, Swedish, Turkish",
-      "otherIdentifiers" : [
+    "aggregatableValues" : {
+      "workType" : [
       ],
-      "alternativeTitles" : [
+      "genres.label" : [
       ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
+      "production.dates" : [
       ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
+      "subjects.label" : [
       ],
       "languages" : [
-        {
-          "id" : "eng",
-          "label" : "English"
-        },
-        {
-          "id" : "swe",
-          "label" : "Swedish"
-        },
-        {
-          "id" : "tur",
-          "label" : "Turkish"
-        }
+        "{\"id\":\"eng\",\"label\":\"English\",\"type\":\"Language\"}",
+        "{\"id\":\"swe\",\"label\":\"Swedish\",\"type\":\"Language\"}",
+        "{\"id\":\"tur\",\"label\":\"Turkish\",\"type\":\"Language\"}"
       ],
-      "edition" : null,
-      "notes" : [
+      "contributors.agent.label" : [
       ],
-      "duration" : null,
-      "items" : [
+      "items.locations.license" : [
       ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "calm-record-id"
-        },
-        "ontologyType" : "Work",
-        "value" : "TTwRQn97GV"
-      },
-      "canonicalId" : "xqjkrlx5",
-      "mergedTime" : "2022-04-29T18:35:00Z",
-      "sourceModifiedTime" : "2022-04-29T18:35:00Z",
-      "indexedTime" : "2022-05-04T07:15:03.037Z",
       "availabilities" : [
-      ],
-      "derivedData" : {
-        "contributorAgents" : [
-        ]
-      },
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
+      ]
     },
-    "redirectSources" : [
-    ],
     "type" : "Visible"
   }
 }

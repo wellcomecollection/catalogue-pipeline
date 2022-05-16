@@ -1,0 +1,163 @@
+{
+  "description" : "works with every format",
+  "createdAt" : "2022-05-16T10:00:07.607Z",
+  "id" : "jyum0yf1",
+  "document" : {
+    "debug" : {
+      "source" : {
+        "identifier" : {
+          "identifierType" : {
+            "id" : "calm-record-id"
+          },
+          "ontologyType" : "Work",
+          "value" : "KzDNfalpwO"
+        },
+        "version" : 90,
+        "modifiedTime" : "2002-11-16T02:23:53Z"
+      },
+      "mergedTime" : "2002-11-16T02:23:53Z",
+      "indexedTime" : "2022-05-16T10:00:07.606Z",
+      "redirectSources" : [
+      ]
+    },
+    "state" : {
+      "sourceIdentifier" : {
+        "identifierType" : {
+          "id" : "calm-record-id"
+        },
+        "ontologyType" : "Work",
+        "value" : "KzDNfalpwO"
+      },
+      "canonicalId" : "jyum0yf1",
+      "mergedTime" : "2002-11-16T02:23:53Z",
+      "sourceModifiedTime" : "2002-11-16T02:23:53Z",
+      "indexedTime" : "2022-05-16T10:00:07.606Z",
+      "availabilities" : [
+      ],
+      "derivedData" : {
+        "contributorAgents" : [
+        ]
+      },
+      "relations" : {
+        "ancestors" : [
+        ],
+        "children" : [
+        ],
+        "siblingsPreceding" : [
+        ],
+        "siblingsSucceeding" : [
+        ]
+      }
+    },
+    "data" : {
+      "title" : "title-ImZeIhkjzt",
+      "otherIdentifiers" : [
+      ],
+      "alternativeTitles" : [
+      ],
+      "format" : {
+        "id" : "j",
+        "label" : "E-journals"
+      },
+      "description" : null,
+      "physicalDescription" : null,
+      "lettering" : null,
+      "createdDate" : null,
+      "subjects" : [
+      ],
+      "genres" : [
+      ],
+      "contributors" : [
+      ],
+      "thumbnail" : null,
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "edition" : null,
+      "notes" : [
+      ],
+      "duration" : null,
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "collectionPath" : null,
+      "referenceNumber" : null,
+      "imageData" : [
+      ],
+      "workType" : "Standard"
+    },
+    "display" : {
+      "id" : "jyum0yf1",
+      "title" : "title-ImZeIhkjzt",
+      "alternativeTitles" : [
+      ],
+      "workType" : {
+        "id" : "j",
+        "label" : "E-journals",
+        "type" : "Format"
+      },
+      "contributors" : [
+      ],
+      "identifiers" : [
+        {
+          "identifierType" : {
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
+            "type" : "IdentifierType"
+          },
+          "value" : "KzDNfalpwO",
+          "type" : "Identifier"
+        }
+      ],
+      "subjects" : [
+      ],
+      "genres" : [
+      ],
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "availabilities" : [
+      ],
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "notes" : [
+      ],
+      "images" : [
+      ],
+      "parts" : [
+      ],
+      "partOf" : [
+      ],
+      "precededBy" : [
+      ],
+      "succeededBy" : [
+      ],
+      "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+        "{\"id\":\"j\",\"label\":\"E-journals\",\"type\":\"Format\"}"
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
+    },
+    "type" : "Visible"
+  }
+}

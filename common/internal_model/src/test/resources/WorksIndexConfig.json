@@ -957,6 +957,35 @@
       "display" : {
         "type" : "object",
         "enabled": false
+      },
+      "aggregatableValues" : {
+        "type" : "object",
+        "properties" : {
+          "workType" : {
+            "type" : "keyword"
+          },
+          "genres.label" : {
+            "type" : "keyword"
+          },
+          "production.dates" : {
+            "type" : "keyword"
+          },
+          "subjects.label" : {
+            "type" : "keyword"
+          },
+          "languages" : {
+            "type" : "keyword"
+          },
+          "contributors.agent.label" : {
+            "type" : "keyword"
+          },
+          "items.locations.license" : {
+            "type" : "keyword"
+          },
+          "availabilities" : {
+            "type" : "keyword"
+          }
+        }
       }
     }
   }

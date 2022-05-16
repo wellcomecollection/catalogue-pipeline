@@ -1,7 +1,7 @@
 {
   "description" : "one of a list of works with a variety of languages",
-  "createdAt" : "2022-05-04T07:15:03.033Z",
-  "id" : "s3mu3txt",
+  "createdAt" : "2022-05-16T10:00:07.514Z",
+  "id" : "qn97gvxq",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,13 +10,13 @@
             "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "IdvnOPkhJJ"
+          "value" : "BbZQhYTTwR"
         },
         "version" : 48,
-        "modifiedTime" : "2022-04-16T20:34:30Z"
+        "modifiedTime" : "2047-12-31T21:26:48Z"
       },
-      "mergedTime" : "2022-04-16T20:34:30Z",
-      "indexedTime" : "2022-05-04T07:15:03.033Z",
+      "mergedTime" : "2047-12-31T21:26:48Z",
+      "indexedTime" : "2022-05-16T10:00:07.514Z",
       "redirectSources" : [
       ]
     },
@@ -26,12 +26,12 @@
           "id" : "sierra-system-number"
         },
         "ontologyType" : "Work",
-        "value" : "IdvnOPkhJJ"
+        "value" : "BbZQhYTTwR"
       },
-      "canonicalId" : "s3mu3txt",
-      "mergedTime" : "2022-04-16T20:34:30Z",
-      "sourceModifiedTime" : "2022-04-16T20:34:30Z",
-      "indexedTime" : "2022-05-04T07:15:03.033Z",
+      "canonicalId" : "qn97gvxq",
+      "mergedTime" : "2047-12-31T21:26:48Z",
+      "sourceModifiedTime" : "2047-12-31T21:26:48Z",
+      "indexedTime" : "2022-05-16T10:00:07.514Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -90,7 +90,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "s3mu3txt",
+      "id" : "qn97gvxq",
       "title" : "A work with languages English",
       "alternativeTitles" : [
       ],
@@ -103,7 +103,7 @@
             "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "IdvnOPkhJJ",
+          "value" : "BbZQhYTTwR",
           "type" : "Identifier"
         }
       ],
@@ -140,81 +140,25 @@
       ],
       "type" : "Work"
     },
-    "type" : "Visible"
-  },
-  "work" : {
-    "version" : 48,
-    "data" : {
-      "title" : "A work with languages English",
-      "otherIdentifiers" : [
+    "aggregatableValues" : {
+      "workType" : [
       ],
-      "alternativeTitles" : [
+      "genres.label" : [
       ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
+      "production.dates" : [
       ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
+      "subjects.label" : [
       ],
       "languages" : [
-        {
-          "id" : "eng",
-          "label" : "English"
-        }
+        "{\"id\":\"eng\",\"label\":\"English\",\"type\":\"Language\"}"
       ],
-      "edition" : null,
-      "notes" : [
+      "contributors.agent.label" : [
       ],
-      "duration" : null,
-      "items" : [
+      "items.locations.license" : [
       ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "sierra-system-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "IdvnOPkhJJ"
-      },
-      "canonicalId" : "s3mu3txt",
-      "mergedTime" : "2022-04-16T20:34:30Z",
-      "sourceModifiedTime" : "2022-04-16T20:34:30Z",
-      "indexedTime" : "2022-05-04T07:15:03.033Z",
       "availabilities" : [
-      ],
-      "derivedData" : {
-        "contributorAgents" : [
-        ]
-      },
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
+      ]
     },
-    "redirectSources" : [
-    ],
     "type" : "Visible"
   }
 }

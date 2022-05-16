@@ -1,0 +1,173 @@
+{
+  "description" : "examples for the works filtered aggregations tests",
+  "createdAt" : "2022-05-16T10:00:07.750Z",
+  "id" : "lpoz1fy9",
+  "document" : {
+    "debug" : {
+      "source" : {
+        "identifier" : {
+          "identifierType" : {
+            "id" : "calm-record-id"
+          },
+          "ontologyType" : "Work",
+          "value" : "FGpPdnmb6i"
+        },
+        "version" : 5,
+        "modifiedTime" : "1957-11-02T06:45:45Z"
+      },
+      "mergedTime" : "1957-11-02T06:45:45Z",
+      "indexedTime" : "2022-05-16T10:00:07.749Z",
+      "redirectSources" : [
+      ]
+    },
+    "state" : {
+      "sourceIdentifier" : {
+        "identifierType" : {
+          "id" : "calm-record-id"
+        },
+        "ontologyType" : "Work",
+        "value" : "FGpPdnmb6i"
+      },
+      "canonicalId" : "lpoz1fy9",
+      "mergedTime" : "1957-11-02T06:45:45Z",
+      "sourceModifiedTime" : "1957-11-02T06:45:45Z",
+      "indexedTime" : "2022-05-16T10:00:07.749Z",
+      "availabilities" : [
+      ],
+      "derivedData" : {
+        "contributorAgents" : [
+        ]
+      },
+      "relations" : {
+        "ancestors" : [
+        ],
+        "children" : [
+        ],
+        "siblingsPreceding" : [
+        ],
+        "siblingsSucceeding" : [
+        ]
+      }
+    },
+    "data" : {
+      "title" : "rats",
+      "otherIdentifiers" : [
+      ],
+      "alternativeTitles" : [
+      ],
+      "format" : {
+        "id" : "i",
+        "label" : "Audio"
+      },
+      "description" : null,
+      "physicalDescription" : null,
+      "lettering" : null,
+      "createdDate" : null,
+      "subjects" : [
+      ],
+      "genres" : [
+      ],
+      "contributors" : [
+      ],
+      "thumbnail" : null,
+      "production" : [
+      ],
+      "languages" : [
+        {
+          "id" : "bak",
+          "label" : "Bashkir"
+        }
+      ],
+      "edition" : null,
+      "notes" : [
+      ],
+      "duration" : null,
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "collectionPath" : null,
+      "referenceNumber" : null,
+      "imageData" : [
+      ],
+      "workType" : "Standard"
+    },
+    "display" : {
+      "id" : "lpoz1fy9",
+      "title" : "rats",
+      "alternativeTitles" : [
+      ],
+      "workType" : {
+        "id" : "i",
+        "label" : "Audio",
+        "type" : "Format"
+      },
+      "contributors" : [
+      ],
+      "identifiers" : [
+        {
+          "identifierType" : {
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
+            "type" : "IdentifierType"
+          },
+          "value" : "FGpPdnmb6i",
+          "type" : "Identifier"
+        }
+      ],
+      "subjects" : [
+      ],
+      "genres" : [
+      ],
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "availabilities" : [
+      ],
+      "production" : [
+      ],
+      "languages" : [
+        {
+          "id" : "bak",
+          "label" : "Bashkir",
+          "type" : "Language"
+        }
+      ],
+      "notes" : [
+      ],
+      "images" : [
+      ],
+      "parts" : [
+      ],
+      "partOf" : [
+      ],
+      "precededBy" : [
+      ],
+      "succeededBy" : [
+      ],
+      "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+        "{\"id\":\"i\",\"label\":\"Audio\",\"type\":\"Format\"}"
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+        "{\"id\":\"bak\",\"label\":\"Bashkir\",\"type\":\"Language\"}"
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
+    },
+    "type" : "Visible"
+  }
+}

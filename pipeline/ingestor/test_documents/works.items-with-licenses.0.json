@@ -1,7 +1,7 @@
 {
   "description" : "a work with licensed digital items",
-  "createdAt" : "2022-05-04T07:15:03.044Z",
-  "id" : "tbgvrpdz",
+  "createdAt" : "2022-05-16T10:00:07.529Z",
+  "id" : "yodfctxx",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,13 +10,13 @@
             "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "iG1sXjUpdc"
+          "value" : "HfU454vgiI"
         },
-        "version" : 63,
-        "modifiedTime" : "2022-04-23T08:19:10Z"
+        "version" : 94,
+        "modifiedTime" : "2058-09-04T15:38:34Z"
       },
-      "mergedTime" : "2022-04-23T08:19:10Z",
-      "indexedTime" : "2022-05-04T07:15:03.043Z",
+      "mergedTime" : "2058-09-04T15:38:34Z",
+      "indexedTime" : "2022-05-16T10:00:07.528Z",
       "redirectSources" : [
       ]
     },
@@ -26,12 +26,12 @@
           "id" : "calm-record-id"
         },
         "ontologyType" : "Work",
-        "value" : "iG1sXjUpdc"
+        "value" : "HfU454vgiI"
       },
-      "canonicalId" : "tbgvrpdz",
-      "mergedTime" : "2022-04-23T08:19:10Z",
-      "sourceModifiedTime" : "2022-04-23T08:19:10Z",
-      "indexedTime" : "2022-05-04T07:15:03.043Z",
+      "canonicalId" : "yodfctxx",
+      "mergedTime" : "2058-09-04T15:38:34Z",
+      "sourceModifiedTime" : "2058-09-04T15:38:34Z",
+      "indexedTime" : "2022-05-16T10:00:07.528Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -50,7 +50,7 @@
       }
     },
     "data" : {
-      "title" : "title-zGimVHoe2r",
+      "title" : "title-AIpgBtHAhx",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -84,14 +84,14 @@
           "note" : null,
           "locations" : [
             {
-              "url" : "https://iiif.wellcomecollection.org/image/eOe.jpg/info.json",
+              "url" : "https://iiif.wellcomecollection.org/image/mDG.jpg/info.json",
               "locationType" : {
                 "id" : "iiif-presentation"
               },
               "license" : {
                 "id" : "cc-by"
               },
-              "credit" : "Credit line: fIesEd",
+              "credit" : null,
               "linkText" : null,
               "accessConditions" : [
               ],
@@ -109,8 +109,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "tbgvrpdz",
-      "title" : "title-zGimVHoe2r",
+      "id" : "yodfctxx",
+      "title" : "title-AIpgBtHAhx",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -122,7 +122,7 @@
             "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "iG1sXjUpdc",
+          "value" : "HfU454vgiI",
           "type" : "Identifier"
         }
       ],
@@ -141,8 +141,7 @@
                 "label" : "IIIF Presentation API",
                 "type" : "LocationType"
               },
-              "url" : "https://iiif.wellcomecollection.org/image/eOe.jpg/info.json",
-              "credit" : "Credit line: fIesEd",
+              "url" : "https://iiif.wellcomecollection.org/image/mDG.jpg/info.json",
               "license" : {
                 "id" : "cc-by",
                 "label" : "Attribution 4.0 International (CC BY 4.0)",
@@ -179,100 +178,25 @@
       ],
       "type" : "Work"
     },
-    "type" : "Visible"
-  },
-  "work" : {
-    "version" : 63,
-    "data" : {
-      "title" : "title-zGimVHoe2r",
-      "otherIdentifiers" : [
+    "aggregatableValues" : {
+      "workType" : [
       ],
-      "alternativeTitles" : [
+      "genres.label" : [
       ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
+      "production.dates" : [
       ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
+      "subjects.label" : [
       ],
       "languages" : [
       ],
-      "edition" : null,
-      "notes" : [
+      "contributors.agent.label" : [
       ],
-      "duration" : null,
-      "items" : [
-        {
-          "id" : {
-            "type" : "Unidentifiable"
-          },
-          "title" : null,
-          "note" : null,
-          "locations" : [
-            {
-              "url" : "https://iiif.wellcomecollection.org/image/eOe.jpg/info.json",
-              "locationType" : {
-                "id" : "iiif-presentation"
-              },
-              "license" : {
-                "id" : "cc-by"
-              },
-              "credit" : "Credit line: fIesEd",
-              "linkText" : null,
-              "accessConditions" : [
-              ],
-              "type" : "DigitalLocation"
-            }
-          ]
-        }
+      "items.locations.license" : [
+        "{\"id\":\"cc-by\",\"label\":\"Attribution 4.0 International (CC BY 4.0)\",\"url\":\"http://creativecommons.org/licenses/by/4.0/\",\"type\":\"License\"}"
       ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "calm-record-id"
-        },
-        "ontologyType" : "Work",
-        "value" : "iG1sXjUpdc"
-      },
-      "canonicalId" : "tbgvrpdz",
-      "mergedTime" : "2022-04-23T08:19:10Z",
-      "sourceModifiedTime" : "2022-04-23T08:19:10Z",
-      "indexedTime" : "2022-05-04T07:15:03.044Z",
       "availabilities" : [
-      ],
-      "derivedData" : {
-        "contributorAgents" : [
-        ]
-      },
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
+      ]
     },
-    "redirectSources" : [
-    ],
     "type" : "Visible"
   }
 }

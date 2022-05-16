@@ -29,5 +29,4 @@ class IngestorWorkerService[Destination, In, Out](
 
   private def processMessage(item: In): Future[List[Out]] =
     Future.successful(List(transform(item)))
-
 }

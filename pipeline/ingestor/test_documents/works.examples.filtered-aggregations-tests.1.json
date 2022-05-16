@@ -1,0 +1,173 @@
+{
+  "description" : "examples for the works filtered aggregations tests",
+  "createdAt" : "2022-05-16T10:00:07.749Z",
+  "id" : "580nnpfa",
+  "document" : {
+    "debug" : {
+      "source" : {
+        "identifier" : {
+          "identifierType" : {
+            "id" : "sierra-system-number"
+          },
+          "ontologyType" : "Work",
+          "value" : "wz2OkOJHcs"
+        },
+        "version" : 86,
+        "modifiedTime" : "2015-07-21T11:19:34Z"
+      },
+      "mergedTime" : "2015-07-21T11:19:34Z",
+      "indexedTime" : "2022-05-16T10:00:07.748Z",
+      "redirectSources" : [
+      ]
+    },
+    "state" : {
+      "sourceIdentifier" : {
+        "identifierType" : {
+          "id" : "sierra-system-number"
+        },
+        "ontologyType" : "Work",
+        "value" : "wz2OkOJHcs"
+      },
+      "canonicalId" : "580nnpfa",
+      "mergedTime" : "2015-07-21T11:19:34Z",
+      "sourceModifiedTime" : "2015-07-21T11:19:34Z",
+      "indexedTime" : "2022-05-16T10:00:07.748Z",
+      "availabilities" : [
+      ],
+      "derivedData" : {
+        "contributorAgents" : [
+        ]
+      },
+      "relations" : {
+        "ancestors" : [
+        ],
+        "children" : [
+        ],
+        "siblingsPreceding" : [
+        ],
+        "siblingsSucceeding" : [
+        ]
+      }
+    },
+    "data" : {
+      "title" : "capybara",
+      "otherIdentifiers" : [
+      ],
+      "alternativeTitles" : [
+      ],
+      "format" : {
+        "id" : "d",
+        "label" : "Journals"
+      },
+      "description" : null,
+      "physicalDescription" : null,
+      "lettering" : null,
+      "createdDate" : null,
+      "subjects" : [
+      ],
+      "genres" : [
+      ],
+      "contributors" : [
+      ],
+      "thumbnail" : null,
+      "production" : [
+      ],
+      "languages" : [
+        {
+          "id" : "mar",
+          "label" : "Marathi"
+        }
+      ],
+      "edition" : null,
+      "notes" : [
+      ],
+      "duration" : null,
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "collectionPath" : null,
+      "referenceNumber" : null,
+      "imageData" : [
+      ],
+      "workType" : "Standard"
+    },
+    "display" : {
+      "id" : "580nnpfa",
+      "title" : "capybara",
+      "alternativeTitles" : [
+      ],
+      "workType" : {
+        "id" : "d",
+        "label" : "Journals",
+        "type" : "Format"
+      },
+      "contributors" : [
+      ],
+      "identifiers" : [
+        {
+          "identifierType" : {
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
+            "type" : "IdentifierType"
+          },
+          "value" : "wz2OkOJHcs",
+          "type" : "Identifier"
+        }
+      ],
+      "subjects" : [
+      ],
+      "genres" : [
+      ],
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "availabilities" : [
+      ],
+      "production" : [
+      ],
+      "languages" : [
+        {
+          "id" : "mar",
+          "label" : "Marathi",
+          "type" : "Language"
+        }
+      ],
+      "notes" : [
+      ],
+      "images" : [
+      ],
+      "parts" : [
+      ],
+      "partOf" : [
+      ],
+      "precededBy" : [
+      ],
+      "succeededBy" : [
+      ],
+      "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+        "{\"id\":\"d\",\"label\":\"Journals\",\"type\":\"Format\"}"
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+        "{\"id\":\"mar\",\"label\":\"Marathi\",\"type\":\"Language\"}"
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
+    },
+    "type" : "Visible"
+  }
+}

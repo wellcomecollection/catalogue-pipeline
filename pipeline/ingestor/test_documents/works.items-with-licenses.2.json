@@ -1,37 +1,37 @@
 {
   "description" : "a work with licensed digital items",
-  "createdAt" : "2022-05-04T07:15:03.045Z",
-  "id" : "pak011dv",
+  "createdAt" : "2022-05-16T10:00:07.531Z",
+  "id" : "ougtipki",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "mye6nSw6AS"
+          "value" : "fbITZO5oAg"
         },
-        "version" : 48,
-        "modifiedTime" : "2022-05-13T11:39:58Z"
+        "version" : 37,
+        "modifiedTime" : "2063-06-30T11:46:39Z"
       },
-      "mergedTime" : "2022-05-13T11:39:58Z",
-      "indexedTime" : "2022-05-04T07:15:03.045Z",
+      "mergedTime" : "2063-06-30T11:46:39Z",
+      "indexedTime" : "2022-05-16T10:00:07.530Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "miro-image-number"
+          "id" : "sierra-system-number"
         },
         "ontologyType" : "Work",
-        "value" : "mye6nSw6AS"
+        "value" : "fbITZO5oAg"
       },
-      "canonicalId" : "pak011dv",
-      "mergedTime" : "2022-05-13T11:39:58Z",
-      "sourceModifiedTime" : "2022-05-13T11:39:58Z",
-      "indexedTime" : "2022-05-04T07:15:03.045Z",
+      "canonicalId" : "ougtipki",
+      "mergedTime" : "2063-06-30T11:46:39Z",
+      "sourceModifiedTime" : "2063-06-30T11:46:39Z",
+      "indexedTime" : "2022-05-16T10:00:07.530Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -50,7 +50,7 @@
       }
     },
     "data" : {
-      "title" : "title-n9x0HfU454",
+      "title" : "title-pEBp6sf3WU",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -84,15 +84,15 @@
           "note" : null,
           "locations" : [
             {
-              "url" : "https://iiif.wellcomecollection.org/image/h2C.jpg/info.json",
+              "url" : "https://iiif.wellcomecollection.org/image/65z.jpg/info.json",
               "locationType" : {
                 "id" : "iiif-presentation"
               },
               "license" : {
                 "id" : "cc-by-nc"
               },
-              "credit" : "Credit line: 3B2FRNwvc",
-              "linkText" : "Link text: LP9LzQY",
+              "credit" : null,
+              "linkText" : null,
               "accessConditions" : [
               ],
               "type" : "DigitalLocation"
@@ -109,8 +109,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "pak011dv",
-      "title" : "title-n9x0HfU454",
+      "id" : "ougtipki",
+      "title" : "title-pEBp6sf3WU",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -118,11 +118,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "mye6nSw6AS",
+          "value" : "fbITZO5oAg",
           "type" : "Identifier"
         }
       ],
@@ -141,9 +141,7 @@
                 "label" : "IIIF Presentation API",
                 "type" : "LocationType"
               },
-              "url" : "https://iiif.wellcomecollection.org/image/h2C.jpg/info.json",
-              "credit" : "Credit line: 3B2FRNwvc",
-              "linkText" : "Link text: LP9LzQY",
+              "url" : "https://iiif.wellcomecollection.org/image/65z.jpg/info.json",
               "license" : {
                 "id" : "cc-by-nc",
                 "label" : "Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)",
@@ -180,100 +178,25 @@
       ],
       "type" : "Work"
     },
-    "type" : "Visible"
-  },
-  "work" : {
-    "version" : 48,
-    "data" : {
-      "title" : "title-n9x0HfU454",
-      "otherIdentifiers" : [
+    "aggregatableValues" : {
+      "workType" : [
       ],
-      "alternativeTitles" : [
+      "genres.label" : [
       ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
+      "production.dates" : [
       ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
+      "subjects.label" : [
       ],
       "languages" : [
       ],
-      "edition" : null,
-      "notes" : [
+      "contributors.agent.label" : [
       ],
-      "duration" : null,
-      "items" : [
-        {
-          "id" : {
-            "type" : "Unidentifiable"
-          },
-          "title" : null,
-          "note" : null,
-          "locations" : [
-            {
-              "url" : "https://iiif.wellcomecollection.org/image/h2C.jpg/info.json",
-              "locationType" : {
-                "id" : "iiif-presentation"
-              },
-              "license" : {
-                "id" : "cc-by-nc"
-              },
-              "credit" : "Credit line: 3B2FRNwvc",
-              "linkText" : "Link text: LP9LzQY",
-              "accessConditions" : [
-              ],
-              "type" : "DigitalLocation"
-            }
-          ]
-        }
+      "items.locations.license" : [
+        "{\"id\":\"cc-by-nc\",\"label\":\"Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)\",\"url\":\"https://creativecommons.org/licenses/by-nc/4.0/\",\"type\":\"License\"}"
       ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "miro-image-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "mye6nSw6AS"
-      },
-      "canonicalId" : "pak011dv",
-      "mergedTime" : "2022-05-13T11:39:58Z",
-      "sourceModifiedTime" : "2022-05-13T11:39:58Z",
-      "indexedTime" : "2022-05-04T07:15:03.045Z",
       "availabilities" : [
-      ],
-      "derivedData" : {
-        "contributorAgents" : [
-        ]
-      },
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
+      ]
     },
-    "redirectSources" : [
-    ],
     "type" : "Visible"
   }
 }

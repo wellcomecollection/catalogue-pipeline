@@ -14,7 +14,7 @@ import weco.fixtures.{TestWith, TimeAssertions}
 import weco.messaging.fixtures.SQS.Queue
 import weco.pipeline.ingestor.fixtures.IngestorFixtures
 import weco.pipeline.ingestor.works.WorkTransformer
-import weco.pipeline.ingestor.works.models.IndexedWork
+import weco.pipeline.ingestor.works.models.{IndexedWork, WorkAggregatableValues}
 import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
 import weco.json.JsonUtil._
 
@@ -35,6 +35,10 @@ trait WorksIngestorFixtures
 
       val getResponse = response.result
 
+      if (!getResponse.exists) {
+        println(s"getResponse = $getResponse")
+      }
+
       getResponse.exists shouldBe true
 
       val storedWork =
@@ -42,8 +46,11 @@ trait WorksIngestorFixtures
       val expectedWork = WorkTransformer.deriveData(work)
 
       storedWork match {
-        case w @ IndexedWork.Visible(_, _, _, _) =>
+        case w @ IndexedWork.Visible(_, _, _, _, _) =>
           w.data shouldBe expectedWork.asInstanceOf[IndexedWork.Visible].data
+          w.aggregatableValues shouldBe WorkAggregatableValues(
+            work.data,
+            work.state.availabilities)
         case _ => ()
       }
 

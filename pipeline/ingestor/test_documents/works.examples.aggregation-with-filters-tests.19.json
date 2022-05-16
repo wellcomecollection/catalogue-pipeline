@@ -1,0 +1,211 @@
+{
+  "description" : "examples for the aggregation-with-filters tests",
+  "createdAt" : "2022-05-16T10:00:07.650Z",
+  "id" : "svr3x3ca",
+  "document" : {
+    "debug" : {
+      "source" : {
+        "identifier" : {
+          "identifierType" : {
+            "id" : "miro-image-number"
+          },
+          "ontologyType" : "Work",
+          "value" : "FRfKD3vr5o"
+        },
+        "version" : 64,
+        "modifiedTime" : "1979-04-26T12:16:29Z"
+      },
+      "mergedTime" : "1979-04-26T12:16:29Z",
+      "indexedTime" : "2022-05-16T10:00:07.649Z",
+      "redirectSources" : [
+      ]
+    },
+    "state" : {
+      "sourceIdentifier" : {
+        "identifierType" : {
+          "id" : "miro-image-number"
+        },
+        "ontologyType" : "Work",
+        "value" : "FRfKD3vr5o"
+      },
+      "canonicalId" : "svr3x3ca",
+      "mergedTime" : "1979-04-26T12:16:29Z",
+      "sourceModifiedTime" : "1979-04-26T12:16:29Z",
+      "indexedTime" : "2022-05-16T10:00:07.649Z",
+      "availabilities" : [
+      ],
+      "derivedData" : {
+        "contributorAgents" : [
+        ]
+      },
+      "relations" : {
+        "ancestors" : [
+        ],
+        "children" : [
+        ],
+        "siblingsPreceding" : [
+        ],
+        "siblingsSucceeding" : [
+        ]
+      }
+    },
+    "data" : {
+      "title" : "title-lluSXGQIID",
+      "otherIdentifiers" : [
+      ],
+      "alternativeTitles" : [
+      ],
+      "format" : {
+        "id" : "s",
+        "label" : "E-sound"
+      },
+      "description" : null,
+      "physicalDescription" : null,
+      "lettering" : null,
+      "createdDate" : null,
+      "subjects" : [
+        {
+          "id" : {
+            "type" : "Unidentifiable"
+          },
+          "label" : "9hdRJC6PIO",
+          "concepts" : [
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "bmiPTNnwYSoEYyd",
+              "type" : "Concept"
+            },
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "ewbq2T7lfxMM8Gf",
+              "type" : "Concept"
+            },
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "uD4zaFerI8P7W1W",
+              "type" : "Concept"
+            }
+          ]
+        }
+      ],
+      "genres" : [
+      ],
+      "contributors" : [
+      ],
+      "thumbnail" : null,
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "edition" : null,
+      "notes" : [
+      ],
+      "duration" : null,
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "collectionPath" : null,
+      "referenceNumber" : null,
+      "imageData" : [
+      ],
+      "workType" : "Standard"
+    },
+    "display" : {
+      "id" : "svr3x3ca",
+      "title" : "title-lluSXGQIID",
+      "alternativeTitles" : [
+      ],
+      "workType" : {
+        "id" : "s",
+        "label" : "E-sound",
+        "type" : "Format"
+      },
+      "contributors" : [
+      ],
+      "identifiers" : [
+        {
+          "identifierType" : {
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
+            "type" : "IdentifierType"
+          },
+          "value" : "FRfKD3vr5o",
+          "type" : "Identifier"
+        }
+      ],
+      "subjects" : [
+        {
+          "label" : "9hdRJC6PIO",
+          "concepts" : [
+            {
+              "label" : "bmiPTNnwYSoEYyd",
+              "type" : "Concept"
+            },
+            {
+              "label" : "ewbq2T7lfxMM8Gf",
+              "type" : "Concept"
+            },
+            {
+              "label" : "uD4zaFerI8P7W1W",
+              "type" : "Concept"
+            }
+          ],
+          "type" : "Subject"
+        }
+      ],
+      "genres" : [
+      ],
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "availabilities" : [
+      ],
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "notes" : [
+      ],
+      "images" : [
+      ],
+      "parts" : [
+      ],
+      "partOf" : [
+      ],
+      "precededBy" : [
+      ],
+      "succeededBy" : [
+      ],
+      "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+        "{\"id\":\"s\",\"label\":\"E-sound\",\"type\":\"Format\"}"
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+        "{\"label\":\"9hdRJC6PIO\",\"concepts\":[],\"type\":\"Subject\"}"
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
+    },
+    "type" : "Visible"
+  }
+}

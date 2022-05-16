@@ -1,0 +1,173 @@
+{
+  "description" : "examples for the works filtered aggregations tests",
+  "createdAt" : "2022-05-16T10:00:07.748Z",
+  "id" : "phodmv5g",
+  "document" : {
+    "debug" : {
+      "source" : {
+        "identifier" : {
+          "identifierType" : {
+            "id" : "calm-record-id"
+          },
+          "ontologyType" : "Work",
+          "value" : "kSl7z2IaIy"
+        },
+        "version" : 2,
+        "modifiedTime" : "2040-01-22T01:35:50Z"
+      },
+      "mergedTime" : "2040-01-22T01:35:50Z",
+      "indexedTime" : "2022-05-16T10:00:07.748Z",
+      "redirectSources" : [
+      ]
+    },
+    "state" : {
+      "sourceIdentifier" : {
+        "identifierType" : {
+          "id" : "calm-record-id"
+        },
+        "ontologyType" : "Work",
+        "value" : "kSl7z2IaIy"
+      },
+      "canonicalId" : "phodmv5g",
+      "mergedTime" : "2040-01-22T01:35:50Z",
+      "sourceModifiedTime" : "2040-01-22T01:35:50Z",
+      "indexedTime" : "2022-05-16T10:00:07.748Z",
+      "availabilities" : [
+      ],
+      "derivedData" : {
+        "contributorAgents" : [
+        ]
+      },
+      "relations" : {
+        "ancestors" : [
+        ],
+        "children" : [
+        ],
+        "siblingsPreceding" : [
+        ],
+        "siblingsSucceeding" : [
+        ]
+      }
+    },
+    "data" : {
+      "title" : "rats",
+      "otherIdentifiers" : [
+      ],
+      "alternativeTitles" : [
+      ],
+      "format" : {
+        "id" : "a",
+        "label" : "Books"
+      },
+      "description" : null,
+      "physicalDescription" : null,
+      "lettering" : null,
+      "createdDate" : null,
+      "subjects" : [
+      ],
+      "genres" : [
+      ],
+      "contributors" : [
+      ],
+      "thumbnail" : null,
+      "production" : [
+      ],
+      "languages" : [
+        {
+          "id" : "bak",
+          "label" : "Bashkir"
+        }
+      ],
+      "edition" : null,
+      "notes" : [
+      ],
+      "duration" : null,
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "collectionPath" : null,
+      "referenceNumber" : null,
+      "imageData" : [
+      ],
+      "workType" : "Standard"
+    },
+    "display" : {
+      "id" : "phodmv5g",
+      "title" : "rats",
+      "alternativeTitles" : [
+      ],
+      "workType" : {
+        "id" : "a",
+        "label" : "Books",
+        "type" : "Format"
+      },
+      "contributors" : [
+      ],
+      "identifiers" : [
+        {
+          "identifierType" : {
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
+            "type" : "IdentifierType"
+          },
+          "value" : "kSl7z2IaIy",
+          "type" : "Identifier"
+        }
+      ],
+      "subjects" : [
+      ],
+      "genres" : [
+      ],
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "availabilities" : [
+      ],
+      "production" : [
+      ],
+      "languages" : [
+        {
+          "id" : "bak",
+          "label" : "Bashkir",
+          "type" : "Language"
+        }
+      ],
+      "notes" : [
+      ],
+      "images" : [
+      ],
+      "parts" : [
+      ],
+      "partOf" : [
+      ],
+      "precededBy" : [
+      ],
+      "succeededBy" : [
+      ],
+      "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+        "{\"id\":\"a\",\"label\":\"Books\",\"type\":\"Format\"}"
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+        "{\"id\":\"bak\",\"label\":\"Bashkir\",\"type\":\"Language\"}"
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
+    },
+    "type" : "Visible"
+  }
+}

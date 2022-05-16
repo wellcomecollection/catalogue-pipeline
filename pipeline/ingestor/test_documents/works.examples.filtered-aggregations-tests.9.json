@@ -1,0 +1,173 @@
+{
+  "description" : "examples for the works filtered aggregations tests",
+  "createdAt" : "2022-05-16T10:00:07.752Z",
+  "id" : "lkq8nygj",
+  "document" : {
+    "debug" : {
+      "source" : {
+        "identifier" : {
+          "identifierType" : {
+            "id" : "sierra-system-number"
+          },
+          "ontologyType" : "Work",
+          "value" : "UBhh45MMdu"
+        },
+        "version" : 68,
+        "modifiedTime" : "1980-11-27T00:49:23Z"
+      },
+      "mergedTime" : "1980-11-27T00:49:23Z",
+      "indexedTime" : "2022-05-16T10:00:07.751Z",
+      "redirectSources" : [
+      ]
+    },
+    "state" : {
+      "sourceIdentifier" : {
+        "identifierType" : {
+          "id" : "sierra-system-number"
+        },
+        "ontologyType" : "Work",
+        "value" : "UBhh45MMdu"
+      },
+      "canonicalId" : "lkq8nygj",
+      "mergedTime" : "1980-11-27T00:49:23Z",
+      "sourceModifiedTime" : "1980-11-27T00:49:23Z",
+      "indexedTime" : "2022-05-16T10:00:07.751Z",
+      "availabilities" : [
+      ],
+      "derivedData" : {
+        "contributorAgents" : [
+        ]
+      },
+      "relations" : {
+        "ancestors" : [
+        ],
+        "children" : [
+        ],
+        "siblingsPreceding" : [
+        ],
+        "siblingsSucceeding" : [
+        ]
+      }
+    },
+    "data" : {
+      "title" : "rats",
+      "otherIdentifiers" : [
+      ],
+      "alternativeTitles" : [
+      ],
+      "format" : {
+        "id" : "i",
+        "label" : "Audio"
+      },
+      "description" : null,
+      "physicalDescription" : null,
+      "lettering" : null,
+      "createdDate" : null,
+      "subjects" : [
+      ],
+      "genres" : [
+      ],
+      "contributors" : [
+      ],
+      "thumbnail" : null,
+      "production" : [
+      ],
+      "languages" : [
+        {
+          "id" : "che",
+          "label" : "Chechen"
+        }
+      ],
+      "edition" : null,
+      "notes" : [
+      ],
+      "duration" : null,
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "collectionPath" : null,
+      "referenceNumber" : null,
+      "imageData" : [
+      ],
+      "workType" : "Standard"
+    },
+    "display" : {
+      "id" : "lkq8nygj",
+      "title" : "rats",
+      "alternativeTitles" : [
+      ],
+      "workType" : {
+        "id" : "i",
+        "label" : "Audio",
+        "type" : "Format"
+      },
+      "contributors" : [
+      ],
+      "identifiers" : [
+        {
+          "identifierType" : {
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
+            "type" : "IdentifierType"
+          },
+          "value" : "UBhh45MMdu",
+          "type" : "Identifier"
+        }
+      ],
+      "subjects" : [
+      ],
+      "genres" : [
+      ],
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "availabilities" : [
+      ],
+      "production" : [
+      ],
+      "languages" : [
+        {
+          "id" : "che",
+          "label" : "Chechen",
+          "type" : "Language"
+        }
+      ],
+      "notes" : [
+      ],
+      "images" : [
+      ],
+      "parts" : [
+      ],
+      "partOf" : [
+      ],
+      "precededBy" : [
+      ],
+      "succeededBy" : [
+      ],
+      "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+        "{\"id\":\"i\",\"label\":\"Audio\",\"type\":\"Format\"}"
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+        "{\"id\":\"che\",\"label\":\"Chechen\",\"type\":\"Language\"}"
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
+    },
+    "type" : "Visible"
+  }
+}

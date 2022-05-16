@@ -1,0 +1,163 @@
+{
+  "description" : "works with every format",
+  "createdAt" : "2022-05-16T10:00:07.603Z",
+  "id" : "e2zva5mj",
+  "document" : {
+    "debug" : {
+      "source" : {
+        "identifier" : {
+          "identifierType" : {
+            "id" : "miro-image-number"
+          },
+          "ontologyType" : "Work",
+          "value" : "2Ap82csHfk"
+        },
+        "version" : 57,
+        "modifiedTime" : "1954-10-17T05:25:10Z"
+      },
+      "mergedTime" : "1954-10-17T05:25:10Z",
+      "indexedTime" : "2022-05-16T10:00:07.603Z",
+      "redirectSources" : [
+      ]
+    },
+    "state" : {
+      "sourceIdentifier" : {
+        "identifierType" : {
+          "id" : "miro-image-number"
+        },
+        "ontologyType" : "Work",
+        "value" : "2Ap82csHfk"
+      },
+      "canonicalId" : "e2zva5mj",
+      "mergedTime" : "1954-10-17T05:25:10Z",
+      "sourceModifiedTime" : "1954-10-17T05:25:10Z",
+      "indexedTime" : "2022-05-16T10:00:07.603Z",
+      "availabilities" : [
+      ],
+      "derivedData" : {
+        "contributorAgents" : [
+        ]
+      },
+      "relations" : {
+        "ancestors" : [
+        ],
+        "children" : [
+        ],
+        "siblingsPreceding" : [
+        ],
+        "siblingsSucceeding" : [
+        ]
+      }
+    },
+    "data" : {
+      "title" : "title-AcxE29kiXI",
+      "otherIdentifiers" : [
+      ],
+      "alternativeTitles" : [
+      ],
+      "format" : {
+        "id" : "p",
+        "label" : "Mixed materials"
+      },
+      "description" : null,
+      "physicalDescription" : null,
+      "lettering" : null,
+      "createdDate" : null,
+      "subjects" : [
+      ],
+      "genres" : [
+      ],
+      "contributors" : [
+      ],
+      "thumbnail" : null,
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "edition" : null,
+      "notes" : [
+      ],
+      "duration" : null,
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "collectionPath" : null,
+      "referenceNumber" : null,
+      "imageData" : [
+      ],
+      "workType" : "Standard"
+    },
+    "display" : {
+      "id" : "e2zva5mj",
+      "title" : "title-AcxE29kiXI",
+      "alternativeTitles" : [
+      ],
+      "workType" : {
+        "id" : "p",
+        "label" : "Mixed materials",
+        "type" : "Format"
+      },
+      "contributors" : [
+      ],
+      "identifiers" : [
+        {
+          "identifierType" : {
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
+            "type" : "IdentifierType"
+          },
+          "value" : "2Ap82csHfk",
+          "type" : "Identifier"
+        }
+      ],
+      "subjects" : [
+      ],
+      "genres" : [
+      ],
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "availabilities" : [
+      ],
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "notes" : [
+      ],
+      "images" : [
+      ],
+      "parts" : [
+      ],
+      "partOf" : [
+      ],
+      "precededBy" : [
+      ],
+      "succeededBy" : [
+      ],
+      "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+        "{\"id\":\"p\",\"label\":\"Mixed materials\",\"type\":\"Format\"}"
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
+    },
+    "type" : "Visible"
+  }
+}

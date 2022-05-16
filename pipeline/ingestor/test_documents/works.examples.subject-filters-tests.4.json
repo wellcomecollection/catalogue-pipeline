@@ -1,0 +1,298 @@
+{
+  "description" : "examples for the subject filter tests",
+  "createdAt" : "2022-05-16T10:00:07.682Z",
+  "id" : "gmzc1icz",
+  "document" : {
+    "debug" : {
+      "source" : {
+        "identifier" : {
+          "identifierType" : {
+            "id" : "calm-record-id"
+          },
+          "ontologyType" : "Work",
+          "value" : "Q8QOPJdAXF"
+        },
+        "version" : 2,
+        "modifiedTime" : "1983-04-17T04:26:34Z"
+      },
+      "mergedTime" : "1983-04-17T04:26:34Z",
+      "indexedTime" : "2022-05-16T10:00:07.681Z",
+      "redirectSources" : [
+      ]
+    },
+    "state" : {
+      "sourceIdentifier" : {
+        "identifierType" : {
+          "id" : "calm-record-id"
+        },
+        "ontologyType" : "Work",
+        "value" : "Q8QOPJdAXF"
+      },
+      "canonicalId" : "gmzc1icz",
+      "mergedTime" : "1983-04-17T04:26:34Z",
+      "sourceModifiedTime" : "1983-04-17T04:26:34Z",
+      "indexedTime" : "2022-05-16T10:00:07.681Z",
+      "availabilities" : [
+      ],
+      "derivedData" : {
+        "contributorAgents" : [
+        ]
+      },
+      "relations" : {
+        "ancestors" : [
+        ],
+        "children" : [
+        ],
+        "siblingsPreceding" : [
+        ],
+        "siblingsSucceeding" : [
+        ]
+      }
+    },
+    "data" : {
+      "title" : "title-vNWbRfsAZ5",
+      "otherIdentifiers" : [
+      ],
+      "alternativeTitles" : [
+      ],
+      "format" : null,
+      "description" : null,
+      "physicalDescription" : null,
+      "lettering" : null,
+      "createdDate" : null,
+      "subjects" : [
+        {
+          "id" : {
+            "type" : "Unidentifiable"
+          },
+          "label" : "London (England)",
+          "concepts" : [
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "pZYum1qUlCcjglM",
+              "type" : "Concept"
+            },
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "PaKQZ55SIuLPMgI",
+              "type" : "Concept"
+            },
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "G177tcCDpKgb0Wd",
+              "type" : "Concept"
+            }
+          ]
+        },
+        {
+          "id" : {
+            "type" : "Unidentifiable"
+          },
+          "label" : "Psychology, Pathological",
+          "concepts" : [
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "y2nMuMcZq1Jcxuk",
+              "type" : "Concept"
+            },
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "acPWKUROxBsQ4CK",
+              "type" : "Concept"
+            },
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "8DrDsk2kCAGURhx",
+              "type" : "Concept"
+            }
+          ]
+        },
+        {
+          "id" : {
+            "type" : "Unidentifiable"
+          },
+          "label" : "Darwin \"Jones\", Charles",
+          "concepts" : [
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "40zJbSlLwDNn2Et",
+              "type" : "Concept"
+            },
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "p5zfssscK3StYS1",
+              "type" : "Concept"
+            },
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "KOlZmZXOWd5kJ1F",
+              "type" : "Concept"
+            }
+          ]
+        }
+      ],
+      "genres" : [
+      ],
+      "contributors" : [
+      ],
+      "thumbnail" : null,
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "edition" : null,
+      "notes" : [
+      ],
+      "duration" : null,
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "collectionPath" : null,
+      "referenceNumber" : null,
+      "imageData" : [
+      ],
+      "workType" : "Standard"
+    },
+    "display" : {
+      "id" : "gmzc1icz",
+      "title" : "title-vNWbRfsAZ5",
+      "alternativeTitles" : [
+      ],
+      "contributors" : [
+      ],
+      "identifiers" : [
+        {
+          "identifierType" : {
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
+            "type" : "IdentifierType"
+          },
+          "value" : "Q8QOPJdAXF",
+          "type" : "Identifier"
+        }
+      ],
+      "subjects" : [
+        {
+          "label" : "London (England)",
+          "concepts" : [
+            {
+              "label" : "pZYum1qUlCcjglM",
+              "type" : "Concept"
+            },
+            {
+              "label" : "PaKQZ55SIuLPMgI",
+              "type" : "Concept"
+            },
+            {
+              "label" : "G177tcCDpKgb0Wd",
+              "type" : "Concept"
+            }
+          ],
+          "type" : "Subject"
+        },
+        {
+          "label" : "Psychology, Pathological",
+          "concepts" : [
+            {
+              "label" : "y2nMuMcZq1Jcxuk",
+              "type" : "Concept"
+            },
+            {
+              "label" : "acPWKUROxBsQ4CK",
+              "type" : "Concept"
+            },
+            {
+              "label" : "8DrDsk2kCAGURhx",
+              "type" : "Concept"
+            }
+          ],
+          "type" : "Subject"
+        },
+        {
+          "label" : "Darwin \"Jones\", Charles",
+          "concepts" : [
+            {
+              "label" : "40zJbSlLwDNn2Et",
+              "type" : "Concept"
+            },
+            {
+              "label" : "p5zfssscK3StYS1",
+              "type" : "Concept"
+            },
+            {
+              "label" : "KOlZmZXOWd5kJ1F",
+              "type" : "Concept"
+            }
+          ],
+          "type" : "Subject"
+        }
+      ],
+      "genres" : [
+      ],
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "availabilities" : [
+      ],
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "notes" : [
+      ],
+      "images" : [
+      ],
+      "parts" : [
+      ],
+      "partOf" : [
+      ],
+      "precededBy" : [
+      ],
+      "succeededBy" : [
+      ],
+      "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+        "{\"label\":\"London (England)\",\"concepts\":[],\"type\":\"Subject\"}",
+        "{\"label\":\"Psychology, Pathological\",\"concepts\":[],\"type\":\"Subject\"}",
+        "{\"label\":\"Darwin \\\"Jones\\\", Charles\",\"concepts\":[],\"type\":\"Subject\"}"
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
+    },
+    "type" : "Visible"
+  }
+}

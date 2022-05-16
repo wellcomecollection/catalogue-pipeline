@@ -1,0 +1,208 @@
+{
+  "description" : "examples for the contributor filter tests",
+  "createdAt" : "2022-05-16T10:00:07.690Z",
+  "id" : "cpwnrkdo",
+  "document" : {
+    "debug" : {
+      "source" : {
+        "identifier" : {
+          "identifierType" : {
+            "id" : "miro-image-number"
+          },
+          "ontologyType" : "Work",
+          "value" : "FqozNGJ9Pf"
+        },
+        "version" : 52,
+        "modifiedTime" : "1990-04-28T07:06:53Z"
+      },
+      "mergedTime" : "1990-04-28T07:06:53Z",
+      "indexedTime" : "2022-05-16T10:00:07.689Z",
+      "redirectSources" : [
+      ]
+    },
+    "state" : {
+      "sourceIdentifier" : {
+        "identifierType" : {
+          "id" : "miro-image-number"
+        },
+        "ontologyType" : "Work",
+        "value" : "FqozNGJ9Pf"
+      },
+      "canonicalId" : "cpwnrkdo",
+      "mergedTime" : "1990-04-28T07:06:53Z",
+      "sourceModifiedTime" : "1990-04-28T07:06:53Z",
+      "indexedTime" : "2022-05-16T10:00:07.689Z",
+      "availabilities" : [
+      ],
+      "derivedData" : {
+        "contributorAgents" : [
+          "Person:Bath, Patricia",
+          "Person:Darwin \"Jones\", Charles"
+        ]
+      },
+      "relations" : {
+        "ancestors" : [
+        ],
+        "children" : [
+        ],
+        "siblingsPreceding" : [
+        ],
+        "siblingsSucceeding" : [
+        ]
+      }
+    },
+    "data" : {
+      "title" : "title-Vp3bULWghZ",
+      "otherIdentifiers" : [
+      ],
+      "alternativeTitles" : [
+      ],
+      "format" : null,
+      "description" : null,
+      "physicalDescription" : null,
+      "lettering" : null,
+      "createdDate" : null,
+      "subjects" : [
+      ],
+      "genres" : [
+      ],
+      "contributors" : [
+        {
+          "id" : {
+            "type" : "Unidentifiable"
+          },
+          "agent" : {
+            "id" : {
+              "type" : "Unidentifiable"
+            },
+            "label" : "Bath, Patricia",
+            "prefix" : null,
+            "numeration" : null,
+            "type" : "Person"
+          },
+          "roles" : [
+          ]
+        },
+        {
+          "id" : {
+            "type" : "Unidentifiable"
+          },
+          "agent" : {
+            "id" : {
+              "type" : "Unidentifiable"
+            },
+            "label" : "Darwin \"Jones\", Charles",
+            "prefix" : null,
+            "numeration" : null,
+            "type" : "Person"
+          },
+          "roles" : [
+          ]
+        }
+      ],
+      "thumbnail" : null,
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "edition" : null,
+      "notes" : [
+      ],
+      "duration" : null,
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "collectionPath" : null,
+      "referenceNumber" : null,
+      "imageData" : [
+      ],
+      "workType" : "Standard"
+    },
+    "display" : {
+      "id" : "cpwnrkdo",
+      "title" : "title-Vp3bULWghZ",
+      "alternativeTitles" : [
+      ],
+      "contributors" : [
+        {
+          "agent" : {
+            "label" : "Bath, Patricia",
+            "type" : "Person"
+          },
+          "roles" : [
+          ],
+          "type" : "Contributor"
+        },
+        {
+          "agent" : {
+            "label" : "Darwin \"Jones\", Charles",
+            "type" : "Person"
+          },
+          "roles" : [
+          ],
+          "type" : "Contributor"
+        }
+      ],
+      "identifiers" : [
+        {
+          "identifierType" : {
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
+            "type" : "IdentifierType"
+          },
+          "value" : "FqozNGJ9Pf",
+          "type" : "Identifier"
+        }
+      ],
+      "subjects" : [
+      ],
+      "genres" : [
+      ],
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "availabilities" : [
+      ],
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "notes" : [
+      ],
+      "images" : [
+      ],
+      "parts" : [
+      ],
+      "partOf" : [
+      ],
+      "precededBy" : [
+      ],
+      "succeededBy" : [
+      ],
+      "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+        "{\"label\":\"Bath, Patricia\",\"type\":\"Person\"}",
+        "{\"label\":\"Darwin \\\"Jones\\\", Charles\",\"type\":\"Person\"}"
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
+    },
+    "type" : "Visible"
+  }
+}

@@ -1,0 +1,239 @@
+{
+  "description" : "works with items with other identifiers",
+  "createdAt" : "2022-05-16T10:00:07.584Z",
+  "id" : "zbejhda8",
+  "document" : {
+    "debug" : {
+      "source" : {
+        "identifier" : {
+          "identifierType" : {
+            "id" : "calm-record-id"
+          },
+          "ontologyType" : "Work",
+          "value" : "l7ykrmHfSg"
+        },
+        "version" : 73,
+        "modifiedTime" : "2029-09-20T10:31:53Z"
+      },
+      "mergedTime" : "2029-09-20T10:31:53Z",
+      "indexedTime" : "2022-05-16T10:00:07.583Z",
+      "redirectSources" : [
+      ]
+    },
+    "state" : {
+      "sourceIdentifier" : {
+        "identifierType" : {
+          "id" : "calm-record-id"
+        },
+        "ontologyType" : "Work",
+        "value" : "l7ykrmHfSg"
+      },
+      "canonicalId" : "zbejhda8",
+      "mergedTime" : "2029-09-20T10:31:53Z",
+      "sourceModifiedTime" : "2029-09-20T10:31:53Z",
+      "indexedTime" : "2022-05-16T10:00:07.583Z",
+      "availabilities" : [
+      ],
+      "derivedData" : {
+        "contributorAgents" : [
+        ]
+      },
+      "relations" : {
+        "ancestors" : [
+        ],
+        "children" : [
+        ],
+        "siblingsPreceding" : [
+        ],
+        "siblingsSucceeding" : [
+        ]
+      }
+    },
+    "data" : {
+      "title" : "title-yvIxyfRHMd",
+      "otherIdentifiers" : [
+      ],
+      "alternativeTitles" : [
+      ],
+      "format" : null,
+      "description" : null,
+      "physicalDescription" : null,
+      "lettering" : null,
+      "createdDate" : null,
+      "subjects" : [
+      ],
+      "genres" : [
+      ],
+      "contributors" : [
+      ],
+      "thumbnail" : null,
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "edition" : null,
+      "notes" : [
+      ],
+      "duration" : null,
+      "items" : [
+        {
+          "id" : {
+            "canonicalId" : "vmff3ito",
+            "sourceIdentifier" : {
+              "identifierType" : {
+                "id" : "sierra-system-number"
+              },
+              "ontologyType" : "Work",
+              "value" : "Px23iBj3EH"
+            },
+            "otherIdentifiers" : [
+              {
+                "identifierType" : {
+                  "id" : "sierra-system-number"
+                },
+                "ontologyType" : "Work",
+                "value" : "QCHJJ4MhQv"
+              }
+            ],
+            "type" : "Identified"
+          },
+          "title" : null,
+          "note" : null,
+          "locations" : [
+            {
+              "url" : "https://iiif.wellcomecollection.org/image/n02.jpg/info.json",
+              "locationType" : {
+                "id" : "iiif-presentation"
+              },
+              "license" : {
+                "id" : "cc-by"
+              },
+              "credit" : null,
+              "linkText" : "Link text: yjzmuDCH",
+              "accessConditions" : [
+              ],
+              "type" : "DigitalLocation"
+            }
+          ]
+        }
+      ],
+      "holdings" : [
+      ],
+      "collectionPath" : null,
+      "referenceNumber" : null,
+      "imageData" : [
+      ],
+      "workType" : "Standard"
+    },
+    "display" : {
+      "id" : "zbejhda8",
+      "title" : "title-yvIxyfRHMd",
+      "alternativeTitles" : [
+      ],
+      "contributors" : [
+      ],
+      "identifiers" : [
+        {
+          "identifierType" : {
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
+            "type" : "IdentifierType"
+          },
+          "value" : "l7ykrmHfSg",
+          "type" : "Identifier"
+        }
+      ],
+      "subjects" : [
+      ],
+      "genres" : [
+      ],
+      "items" : [
+        {
+          "id" : "vmff3ito",
+          "identifiers" : [
+            {
+              "identifierType" : {
+                "id" : "sierra-system-number",
+                "label" : "Sierra system number",
+                "type" : "IdentifierType"
+              },
+              "value" : "Px23iBj3EH",
+              "type" : "Identifier"
+            },
+            {
+              "identifierType" : {
+                "id" : "sierra-system-number",
+                "label" : "Sierra system number",
+                "type" : "IdentifierType"
+              },
+              "value" : "QCHJJ4MhQv",
+              "type" : "Identifier"
+            }
+          ],
+          "locations" : [
+            {
+              "locationType" : {
+                "id" : "iiif-presentation",
+                "label" : "IIIF Presentation API",
+                "type" : "LocationType"
+              },
+              "url" : "https://iiif.wellcomecollection.org/image/n02.jpg/info.json",
+              "linkText" : "Link text: yjzmuDCH",
+              "license" : {
+                "id" : "cc-by",
+                "label" : "Attribution 4.0 International (CC BY 4.0)",
+                "url" : "http://creativecommons.org/licenses/by/4.0/",
+                "type" : "License"
+              },
+              "accessConditions" : [
+              ],
+              "type" : "DigitalLocation"
+            }
+          ],
+          "type" : "Item"
+        }
+      ],
+      "holdings" : [
+      ],
+      "availabilities" : [
+      ],
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "notes" : [
+      ],
+      "images" : [
+      ],
+      "parts" : [
+      ],
+      "partOf" : [
+      ],
+      "precededBy" : [
+      ],
+      "succeededBy" : [
+      ],
+      "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+        "{\"id\":\"cc-by\",\"label\":\"Attribution 4.0 International (CC BY 4.0)\",\"url\":\"http://creativecommons.org/licenses/by/4.0/\",\"type\":\"License\"}"
+      ],
+      "availabilities" : [
+      ]
+    },
+    "type" : "Visible"
+  }
+}

@@ -1,0 +1,199 @@
+{
+  "description" : "examples for the genre tests",
+  "createdAt" : "2022-05-16T10:00:07.671Z",
+  "id" : "jywtq4xg",
+  "document" : {
+    "debug" : {
+      "source" : {
+        "identifier" : {
+          "identifierType" : {
+            "id" : "calm-record-id"
+          },
+          "ontologyType" : "Work",
+          "value" : "LgGFRAV0Zs"
+        },
+        "version" : 85,
+        "modifiedTime" : "1934-09-04T19:55:55Z"
+      },
+      "mergedTime" : "1934-09-04T19:55:55Z",
+      "indexedTime" : "2022-05-16T10:00:07.670Z",
+      "redirectSources" : [
+      ]
+    },
+    "state" : {
+      "sourceIdentifier" : {
+        "identifierType" : {
+          "id" : "calm-record-id"
+        },
+        "ontologyType" : "Work",
+        "value" : "LgGFRAV0Zs"
+      },
+      "canonicalId" : "jywtq4xg",
+      "mergedTime" : "1934-09-04T19:55:55Z",
+      "sourceModifiedTime" : "1934-09-04T19:55:55Z",
+      "indexedTime" : "2022-05-16T10:00:07.670Z",
+      "availabilities" : [
+      ],
+      "derivedData" : {
+        "contributorAgents" : [
+        ]
+      },
+      "relations" : {
+        "ancestors" : [
+        ],
+        "children" : [
+        ],
+        "siblingsPreceding" : [
+        ],
+        "siblingsSucceeding" : [
+        ]
+      }
+    },
+    "data" : {
+      "title" : "title-ZEnp6i2y6i",
+      "otherIdentifiers" : [
+      ],
+      "alternativeTitles" : [
+      ],
+      "format" : null,
+      "description" : null,
+      "physicalDescription" : null,
+      "lettering" : null,
+      "createdDate" : null,
+      "subjects" : [
+      ],
+      "genres" : [
+        {
+          "label" : "Annual reports.",
+          "concepts" : [
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "qp5RA4f5gWVIptl",
+              "type" : "Concept"
+            },
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "xE0qlBbPiSihnTe",
+              "type" : "Concept"
+            },
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "JBs3eSemcGNQXd8",
+              "type" : "Concept"
+            }
+          ]
+        }
+      ],
+      "contributors" : [
+      ],
+      "thumbnail" : null,
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "edition" : null,
+      "notes" : [
+      ],
+      "duration" : null,
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "collectionPath" : null,
+      "referenceNumber" : null,
+      "imageData" : [
+      ],
+      "workType" : "Standard"
+    },
+    "display" : {
+      "id" : "jywtq4xg",
+      "title" : "title-ZEnp6i2y6i",
+      "alternativeTitles" : [
+      ],
+      "contributors" : [
+      ],
+      "identifiers" : [
+        {
+          "identifierType" : {
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
+            "type" : "IdentifierType"
+          },
+          "value" : "LgGFRAV0Zs",
+          "type" : "Identifier"
+        }
+      ],
+      "subjects" : [
+      ],
+      "genres" : [
+        {
+          "label" : "Annual reports.",
+          "concepts" : [
+            {
+              "label" : "qp5RA4f5gWVIptl",
+              "type" : "Concept"
+            },
+            {
+              "label" : "xE0qlBbPiSihnTe",
+              "type" : "Concept"
+            },
+            {
+              "label" : "JBs3eSemcGNQXd8",
+              "type" : "Concept"
+            }
+          ],
+          "type" : "Genre"
+        }
+      ],
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "availabilities" : [
+      ],
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "notes" : [
+      ],
+      "images" : [
+      ],
+      "parts" : [
+      ],
+      "partOf" : [
+      ],
+      "precededBy" : [
+      ],
+      "succeededBy" : [
+      ],
+      "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+        "{\"label\":\"Annual reports.\",\"concepts\":[],\"type\":\"Genre\"}"
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
+    },
+    "type" : "Visible"
+  }
+}

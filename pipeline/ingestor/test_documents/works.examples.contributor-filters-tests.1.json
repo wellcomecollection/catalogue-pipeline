@@ -1,0 +1,181 @@
+{
+  "description" : "examples for the contributor filter tests",
+  "createdAt" : "2022-05-16T10:00:07.688Z",
+  "id" : "gnuj1it3",
+  "document" : {
+    "debug" : {
+      "source" : {
+        "identifier" : {
+          "identifierType" : {
+            "id" : "sierra-system-number"
+          },
+          "ontologyType" : "Work",
+          "value" : "Og3KGy7Mz5"
+        },
+        "version" : 57,
+        "modifiedTime" : "1987-11-24T07:59:41Z"
+      },
+      "mergedTime" : "1987-11-24T07:59:41Z",
+      "indexedTime" : "2022-05-16T10:00:07.688Z",
+      "redirectSources" : [
+      ]
+    },
+    "state" : {
+      "sourceIdentifier" : {
+        "identifierType" : {
+          "id" : "sierra-system-number"
+        },
+        "ontologyType" : "Work",
+        "value" : "Og3KGy7Mz5"
+      },
+      "canonicalId" : "gnuj1it3",
+      "mergedTime" : "1987-11-24T07:59:41Z",
+      "sourceModifiedTime" : "1987-11-24T07:59:41Z",
+      "indexedTime" : "2022-05-16T10:00:07.688Z",
+      "availabilities" : [
+      ],
+      "derivedData" : {
+        "contributorAgents" : [
+          "Person:Karl Marx"
+        ]
+      },
+      "relations" : {
+        "ancestors" : [
+        ],
+        "children" : [
+        ],
+        "siblingsPreceding" : [
+        ],
+        "siblingsSucceeding" : [
+        ]
+      }
+    },
+    "data" : {
+      "title" : "title-c4OR9LzJV7",
+      "otherIdentifiers" : [
+      ],
+      "alternativeTitles" : [
+      ],
+      "format" : null,
+      "description" : null,
+      "physicalDescription" : null,
+      "lettering" : null,
+      "createdDate" : null,
+      "subjects" : [
+      ],
+      "genres" : [
+      ],
+      "contributors" : [
+        {
+          "id" : {
+            "type" : "Unidentifiable"
+          },
+          "agent" : {
+            "id" : {
+              "type" : "Unidentifiable"
+            },
+            "label" : "Karl Marx",
+            "prefix" : null,
+            "numeration" : null,
+            "type" : "Person"
+          },
+          "roles" : [
+          ]
+        }
+      ],
+      "thumbnail" : null,
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "edition" : null,
+      "notes" : [
+      ],
+      "duration" : null,
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "collectionPath" : null,
+      "referenceNumber" : null,
+      "imageData" : [
+      ],
+      "workType" : "Standard"
+    },
+    "display" : {
+      "id" : "gnuj1it3",
+      "title" : "title-c4OR9LzJV7",
+      "alternativeTitles" : [
+      ],
+      "contributors" : [
+        {
+          "agent" : {
+            "label" : "Karl Marx",
+            "type" : "Person"
+          },
+          "roles" : [
+          ],
+          "type" : "Contributor"
+        }
+      ],
+      "identifiers" : [
+        {
+          "identifierType" : {
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
+            "type" : "IdentifierType"
+          },
+          "value" : "Og3KGy7Mz5",
+          "type" : "Identifier"
+        }
+      ],
+      "subjects" : [
+      ],
+      "genres" : [
+      ],
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "availabilities" : [
+      ],
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "notes" : [
+      ],
+      "images" : [
+      ],
+      "parts" : [
+      ],
+      "partOf" : [
+      ],
+      "precededBy" : [
+      ],
+      "succeededBy" : [
+      ],
+      "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+        "{\"label\":\"Karl Marx\",\"type\":\"Person\"}"
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
+    },
+    "type" : "Visible"
+  }
+}

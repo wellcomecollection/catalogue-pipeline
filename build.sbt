@@ -89,20 +89,20 @@ lazy val id_minter = setupProject(
 lazy val ingestor_common = setupProject(
   project,
   "pipeline/ingestor/ingestor_common",
-  localDependencies = Seq(pipeline_storage_typesafe),
+  localDependencies = Seq(pipeline_storage_typesafe, display_model),
   externalDependencies = WellcomeDependencies.elasticsearchTypesafeLibrary
 )
 
 lazy val ingestor_works = setupProject(
   project,
   "pipeline/ingestor/ingestor_works",
-  localDependencies = Seq(ingestor_common, display_model)
+  localDependencies = Seq(ingestor_common)
 )
 
 lazy val ingestor_images = setupProject(
   project,
   "pipeline/ingestor/ingestor_images",
-  localDependencies = Seq(ingestor_common, display_model)
+  localDependencies = Seq(ingestor_common)
 )
 
 lazy val matcher = setupProject(

@@ -1,7 +1,7 @@
 {
   "description" : "one of a list of works with a variety of formats",
-  "createdAt" : "2022-05-04T07:15:03.025Z",
-  "id" : "ndplmmmk",
+  "createdAt" : "2022-05-16T10:00:07.505Z",
+  "id" : "elrgwjtd",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,13 +10,13 @@
             "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "V7X7kBc19I"
+          "value" : "RMKkkMWH2B"
         },
-        "version" : 25,
-        "modifiedTime" : "2022-05-30T12:40:27Z"
+        "version" : 64,
+        "modifiedTime" : "1981-07-01T07:44:00Z"
       },
-      "mergedTime" : "2022-05-30T12:40:27Z",
-      "indexedTime" : "2022-05-04T07:15:03.025Z",
+      "mergedTime" : "1981-07-01T07:44:00Z",
+      "indexedTime" : "2022-05-16T10:00:07.505Z",
       "redirectSources" : [
       ]
     },
@@ -26,12 +26,12 @@
           "id" : "calm-record-id"
         },
         "ontologyType" : "Work",
-        "value" : "V7X7kBc19I"
+        "value" : "RMKkkMWH2B"
       },
-      "canonicalId" : "ndplmmmk",
-      "mergedTime" : "2022-05-30T12:40:27Z",
-      "sourceModifiedTime" : "2022-05-30T12:40:27Z",
-      "indexedTime" : "2022-05-04T07:15:03.025Z",
+      "canonicalId" : "elrgwjtd",
+      "mergedTime" : "1981-07-01T07:44:00Z",
+      "sourceModifiedTime" : "1981-07-01T07:44:00Z",
+      "indexedTime" : "2022-05-16T10:00:07.505Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -89,7 +89,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "ndplmmmk",
+      "id" : "elrgwjtd",
       "title" : "A work with format Audio",
       "alternativeTitles" : [
       ],
@@ -107,7 +107,7 @@
             "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "V7X7kBc19I",
+          "value" : "RMKkkMWH2B",
           "type" : "Identifier"
         }
       ],
@@ -139,80 +139,25 @@
       ],
       "type" : "Work"
     },
-    "type" : "Visible"
-  },
-  "work" : {
-    "version" : 25,
-    "data" : {
-      "title" : "A work with format Audio",
-      "otherIdentifiers" : [
+    "aggregatableValues" : {
+      "workType" : [
+        "{\"id\":\"i\",\"label\":\"Audio\",\"type\":\"Format\"}"
       ],
-      "alternativeTitles" : [
+      "genres.label" : [
       ],
-      "format" : {
-        "id" : "i",
-        "label" : "Audio"
-      },
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
+      "production.dates" : [
       ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
+      "subjects.label" : [
       ],
       "languages" : [
       ],
-      "edition" : null,
-      "notes" : [
+      "contributors.agent.label" : [
       ],
-      "duration" : null,
-      "items" : [
+      "items.locations.license" : [
       ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "calm-record-id"
-        },
-        "ontologyType" : "Work",
-        "value" : "V7X7kBc19I"
-      },
-      "canonicalId" : "ndplmmmk",
-      "mergedTime" : "2022-05-30T12:40:27Z",
-      "sourceModifiedTime" : "2022-05-30T12:40:27Z",
-      "indexedTime" : "2022-05-04T07:15:03.025Z",
       "availabilities" : [
-      ],
-      "derivedData" : {
-        "contributorAgents" : [
-        ]
-      },
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
+      ]
     },
-    "redirectSources" : [
-    ],
     "type" : "Visible"
   }
 }

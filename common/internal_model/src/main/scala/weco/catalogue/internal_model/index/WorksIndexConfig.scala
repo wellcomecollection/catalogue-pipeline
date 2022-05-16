@@ -219,16 +219,42 @@ object WorksIndexConfig extends IndexConfigFields {
         multilingualField("titlesAndContributors")
       )
 
+      // This field contains debugging information which we don't want to index, which
+      // is just used by developers debugging the pipeline.
+      val debug = objectField("debug").withEnabled(false)
+
+      // This field contains the display document used by the API, but we don't want
+      // to index it -- it's just an arbitrary blob of JSON.
+      val display = objectField("display").withEnabled(false)
+
+      // This field contains the display documents used by aggregations.
+      //
+      // The values are JSON documents that can be included in an AggregationBucket from
+      // the API, but those documents are then encoded as JSON strings so they can be
+      // returned as single values from an Elasticsearch terms aggregation.
+      //
+      // See https://github.com/wellcomecollection/docs/tree/main/rfcs/049-catalogue-api-aggregations-modelling
+      val aggregatableValues = objectField("aggregatableValues")
+        .fields(
+          keywordField("workType"),
+          keywordField("genres.label"),
+          keywordField("production.dates"),
+          keywordField("subjects.label"),
+          keywordField("languages"),
+          keywordField("contributors.agent.label"),
+          keywordField("items.locations.license"),
+          keywordField("availabilities"),
+        )
+
       Seq(
         state,
         search,
         keywordField("type"),
         data.withDynamic("false"),
         objectField("redirectTarget").withDynamic("false"),
-        // These fields contain debugging information and the display document used by
-        // the API, but wwe don't want to index them -- they're just arbitrary JSON.
-        ObjectField("debug").withEnabled(false),
-        ObjectField("display").withEnabled(false)
+        debug,
+        display,
+        aggregatableValues
       )
     },
     DynamicMapping.Strict,

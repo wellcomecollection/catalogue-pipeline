@@ -1,0 +1,255 @@
+{
+  "description" : "examples for the access status tests",
+  "createdAt" : "2022-05-16T10:00:07.734Z",
+  "id" : "wys5lz5r",
+  "document" : {
+    "debug" : {
+      "source" : {
+        "identifier" : {
+          "identifierType" : {
+            "id" : "calm-record-id"
+          },
+          "ontologyType" : "Work",
+          "value" : "GWT6gTiZ6K"
+        },
+        "version" : 39,
+        "modifiedTime" : "1952-04-21T12:12:37Z"
+      },
+      "mergedTime" : "1952-04-21T12:12:37Z",
+      "indexedTime" : "2022-05-16T10:00:07.734Z",
+      "redirectSources" : [
+      ]
+    },
+    "state" : {
+      "sourceIdentifier" : {
+        "identifierType" : {
+          "id" : "calm-record-id"
+        },
+        "ontologyType" : "Work",
+        "value" : "GWT6gTiZ6K"
+      },
+      "canonicalId" : "wys5lz5r",
+      "mergedTime" : "1952-04-21T12:12:37Z",
+      "sourceModifiedTime" : "1952-04-21T12:12:37Z",
+      "indexedTime" : "2022-05-16T10:00:07.734Z",
+      "availabilities" : [
+        {
+          "id" : "online"
+        }
+      ],
+      "derivedData" : {
+        "contributorAgents" : [
+        ]
+      },
+      "relations" : {
+        "ancestors" : [
+        ],
+        "children" : [
+        ],
+        "siblingsPreceding" : [
+        ],
+        "siblingsSucceeding" : [
+        ]
+      }
+    },
+    "data" : {
+      "title" : "title-MofTOW5bCv",
+      "otherIdentifiers" : [
+      ],
+      "alternativeTitles" : [
+      ],
+      "format" : null,
+      "description" : null,
+      "physicalDescription" : null,
+      "lettering" : null,
+      "createdDate" : null,
+      "subjects" : [
+      ],
+      "genres" : [
+      ],
+      "contributors" : [
+      ],
+      "thumbnail" : null,
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "edition" : null,
+      "notes" : [
+      ],
+      "duration" : null,
+      "items" : [
+        {
+          "id" : {
+            "canonicalId" : "6joq4ujd",
+            "sourceIdentifier" : {
+              "identifierType" : {
+                "id" : "calm-record-id"
+              },
+              "ontologyType" : "Work",
+              "value" : "zf5rF0XzQw"
+            },
+            "otherIdentifiers" : [
+            ],
+            "type" : "Identified"
+          },
+          "title" : null,
+          "note" : null,
+          "locations" : [
+            {
+              "url" : "https://iiif.wellcomecollection.org/image/TmP.jpg/info.json",
+              "locationType" : {
+                "id" : "iiif-presentation"
+              },
+              "license" : {
+                "id" : "cc-by"
+              },
+              "credit" : null,
+              "linkText" : "Link text: lxBF816TR",
+              "accessConditions" : [
+                {
+                  "method" : {
+                    "type" : "ManualRequest"
+                  },
+                  "status" : {
+                    "type" : "Open"
+                  },
+                  "note" : null,
+                  "terms" : null
+                }
+              ],
+              "type" : "DigitalLocation"
+            }
+          ]
+        }
+      ],
+      "holdings" : [
+      ],
+      "collectionPath" : null,
+      "referenceNumber" : null,
+      "imageData" : [
+      ],
+      "workType" : "Standard"
+    },
+    "display" : {
+      "id" : "wys5lz5r",
+      "title" : "title-MofTOW5bCv",
+      "alternativeTitles" : [
+      ],
+      "contributors" : [
+      ],
+      "identifiers" : [
+        {
+          "identifierType" : {
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
+            "type" : "IdentifierType"
+          },
+          "value" : "GWT6gTiZ6K",
+          "type" : "Identifier"
+        }
+      ],
+      "subjects" : [
+      ],
+      "genres" : [
+      ],
+      "items" : [
+        {
+          "id" : "6joq4ujd",
+          "identifiers" : [
+            {
+              "identifierType" : {
+                "id" : "calm-record-id",
+                "label" : "Calm RecordIdentifier",
+                "type" : "IdentifierType"
+              },
+              "value" : "zf5rF0XzQw",
+              "type" : "Identifier"
+            }
+          ],
+          "locations" : [
+            {
+              "locationType" : {
+                "id" : "iiif-presentation",
+                "label" : "IIIF Presentation API",
+                "type" : "LocationType"
+              },
+              "url" : "https://iiif.wellcomecollection.org/image/TmP.jpg/info.json",
+              "linkText" : "Link text: lxBF816TR",
+              "license" : {
+                "id" : "cc-by",
+                "label" : "Attribution 4.0 International (CC BY 4.0)",
+                "url" : "http://creativecommons.org/licenses/by/4.0/",
+                "type" : "License"
+              },
+              "accessConditions" : [
+                {
+                  "method" : {
+                    "id" : "manual-request",
+                    "label" : "Manual request",
+                    "type" : "AccessMethod"
+                  },
+                  "status" : {
+                    "id" : "open",
+                    "label" : "Open",
+                    "type" : "AccessStatus"
+                  },
+                  "type" : "AccessCondition"
+                }
+              ],
+              "type" : "DigitalLocation"
+            }
+          ],
+          "type" : "Item"
+        }
+      ],
+      "holdings" : [
+      ],
+      "availabilities" : [
+        {
+          "id" : "online",
+          "label" : "Online",
+          "type" : "Availability"
+        }
+      ],
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "notes" : [
+      ],
+      "images" : [
+      ],
+      "parts" : [
+      ],
+      "partOf" : [
+      ],
+      "precededBy" : [
+      ],
+      "succeededBy" : [
+      ],
+      "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+        "{\"id\":\"cc-by\",\"label\":\"Attribution 4.0 International (CC BY 4.0)\",\"url\":\"http://creativecommons.org/licenses/by/4.0/\",\"type\":\"License\"}"
+      ],
+      "availabilities" : [
+        "{\"id\":\"online\",\"label\":\"Online\",\"type\":\"Availability\"}"
+      ]
+    },
+    "type" : "Visible"
+  }
+}

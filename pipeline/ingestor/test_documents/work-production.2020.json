@@ -1,37 +1,37 @@
 {
   "description" : "a work with a production event in 2020",
-  "createdAt" : "2022-05-04T07:15:02.878Z",
-  "id" : "minusjlh",
+  "createdAt" : "2022-05-16T10:00:07.321Z",
+  "id" : "0fucriyr",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "PxOIfqX1oa"
+          "value" : "KgSH5dUX0Z"
         },
-        "version" : 83,
-        "modifiedTime" : "2022-04-20T20:10:32Z"
+        "version" : 14,
+        "modifiedTime" : "1936-06-08T14:59:50Z"
       },
-      "mergedTime" : "2022-04-20T20:10:32Z",
-      "indexedTime" : "2022-05-04T07:15:02.877Z",
+      "mergedTime" : "1936-06-08T14:59:50Z",
+      "indexedTime" : "2022-05-16T10:00:07.319Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "sierra-system-number"
+          "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "PxOIfqX1oa"
+        "value" : "KgSH5dUX0Z"
       },
-      "canonicalId" : "minusjlh",
-      "mergedTime" : "2022-04-20T20:10:32Z",
-      "sourceModifiedTime" : "2022-04-20T20:10:32Z",
-      "indexedTime" : "2022-05-04T07:15:02.877Z",
+      "canonicalId" : "0fucriyr",
+      "mergedTime" : "1936-06-08T14:59:50Z",
+      "sourceModifiedTime" : "1936-06-08T14:59:50Z",
+      "indexedTime" : "2022-05-16T10:00:07.319Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -69,7 +69,7 @@
       "thumbnail" : null,
       "production" : [
         {
-          "label" : "W9fptfa5XnGuaV7CHYoIIwLFt",
+          "label" : "qX1oaMinUSJLhD6RZ9qpj8A8L",
           "places" : [
           ],
           "agents" : [
@@ -107,7 +107,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "minusjlh",
+      "id" : "0fucriyr",
       "title" : "Production event in 2020",
       "alternativeTitles" : [
       ],
@@ -116,11 +116,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "PxOIfqX1oa",
+          "value" : "KgSH5dUX0Z",
           "type" : "Identifier"
         }
       ],
@@ -136,7 +136,7 @@
       ],
       "production" : [
         {
-          "label" : "W9fptfa5XnGuaV7CHYoIIwLFt",
+          "label" : "qX1oaMinUSJLhD6RZ9qpj8A8L",
           "places" : [
           ],
           "agents" : [
@@ -166,98 +166,25 @@
       ],
       "type" : "Work"
     },
-    "type" : "Visible"
-  },
-  "work" : {
-    "version" : 83,
-    "data" : {
-      "title" : "Production event in 2020",
-      "otherIdentifiers" : [
+    "aggregatableValues" : {
+      "workType" : [
       ],
-      "alternativeTitles" : [
+      "genres.label" : [
       ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
+      "production.dates" : [
+        "{\"label\":\"2020\",\"type\":\"Period\"}"
       ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-        {
-          "label" : "W9fptfa5XnGuaV7CHYoIIwLFt",
-          "places" : [
-          ],
-          "agents" : [
-          ],
-          "dates" : [
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "2020",
-              "range" : {
-                "from" : "2020-01-01T00:00:00Z",
-                "to" : "2020-12-31T23:59:59.999999999Z",
-                "label" : "2020"
-              }
-            }
-          ],
-          "function" : null
-        }
+      "subjects.label" : [
       ],
       "languages" : [
       ],
-      "edition" : null,
-      "notes" : [
+      "contributors.agent.label" : [
       ],
-      "duration" : null,
-      "items" : [
+      "items.locations.license" : [
       ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "sierra-system-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "PxOIfqX1oa"
-      },
-      "canonicalId" : "minusjlh",
-      "mergedTime" : "2022-04-20T20:10:32Z",
-      "sourceModifiedTime" : "2022-04-20T20:10:32Z",
-      "indexedTime" : "2022-05-04T07:15:02.878Z",
       "availabilities" : [
-      ],
-      "derivedData" : {
-        "contributorAgents" : [
-        ]
-      },
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
+      ]
     },
-    "redirectSources" : [
-    ],
     "type" : "Visible"
   }
 }

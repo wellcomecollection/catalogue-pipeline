@@ -1166,6 +1166,20 @@
       "display" : {
         "type" : "object",
         "enabled": false
+      },
+      "aggregatableValues" : {
+        "type" : "object",
+        "properties" : {
+          "locations.license" : {
+            "type" : "keyword"
+          },
+          "source.contributors.agent.label" : {
+            "type" : "keyword"
+          },
+          "source.genres.label" : {
+            "type" : "keyword"
+          }
+        }
       }
     }
   }

@@ -1,0 +1,254 @@
+{
+  "description" : "examples for the access status tests",
+  "createdAt" : "2022-05-16T10:00:07.735Z",
+  "id" : "iqani2su",
+  "document" : {
+    "debug" : {
+      "source" : {
+        "identifier" : {
+          "identifierType" : {
+            "id" : "sierra-system-number"
+          },
+          "ontologyType" : "Work",
+          "value" : "jYpuBxuni2"
+        },
+        "version" : 71,
+        "modifiedTime" : "2029-03-03T16:26:17Z"
+      },
+      "mergedTime" : "2029-03-03T16:26:17Z",
+      "indexedTime" : "2022-05-16T10:00:07.734Z",
+      "redirectSources" : [
+      ]
+    },
+    "state" : {
+      "sourceIdentifier" : {
+        "identifierType" : {
+          "id" : "sierra-system-number"
+        },
+        "ontologyType" : "Work",
+        "value" : "jYpuBxuni2"
+      },
+      "canonicalId" : "iqani2su",
+      "mergedTime" : "2029-03-03T16:26:17Z",
+      "sourceModifiedTime" : "2029-03-03T16:26:17Z",
+      "indexedTime" : "2022-05-16T10:00:07.734Z",
+      "availabilities" : [
+        {
+          "id" : "online"
+        }
+      ],
+      "derivedData" : {
+        "contributorAgents" : [
+        ]
+      },
+      "relations" : {
+        "ancestors" : [
+        ],
+        "children" : [
+        ],
+        "siblingsPreceding" : [
+        ],
+        "siblingsSucceeding" : [
+        ]
+      }
+    },
+    "data" : {
+      "title" : "title-7p7NJFW4Dx",
+      "otherIdentifiers" : [
+      ],
+      "alternativeTitles" : [
+      ],
+      "format" : null,
+      "description" : null,
+      "physicalDescription" : null,
+      "lettering" : null,
+      "createdDate" : null,
+      "subjects" : [
+      ],
+      "genres" : [
+      ],
+      "contributors" : [
+      ],
+      "thumbnail" : null,
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "edition" : null,
+      "notes" : [
+      ],
+      "duration" : null,
+      "items" : [
+        {
+          "id" : {
+            "canonicalId" : "wbli95ga",
+            "sourceIdentifier" : {
+              "identifierType" : {
+                "id" : "calm-record-id"
+              },
+              "ontologyType" : "Work",
+              "value" : "clr9E9aLfx"
+            },
+            "otherIdentifiers" : [
+            ],
+            "type" : "Identified"
+          },
+          "title" : null,
+          "note" : null,
+          "locations" : [
+            {
+              "url" : "https://iiif.wellcomecollection.org/image/6NT.jpg/info.json",
+              "locationType" : {
+                "id" : "iiif-presentation"
+              },
+              "license" : {
+                "id" : "cc-by"
+              },
+              "credit" : null,
+              "linkText" : null,
+              "accessConditions" : [
+                {
+                  "method" : {
+                    "type" : "ManualRequest"
+                  },
+                  "status" : {
+                    "type" : "OpenWithAdvisory"
+                  },
+                  "note" : null,
+                  "terms" : null
+                }
+              ],
+              "type" : "DigitalLocation"
+            }
+          ]
+        }
+      ],
+      "holdings" : [
+      ],
+      "collectionPath" : null,
+      "referenceNumber" : null,
+      "imageData" : [
+      ],
+      "workType" : "Standard"
+    },
+    "display" : {
+      "id" : "iqani2su",
+      "title" : "title-7p7NJFW4Dx",
+      "alternativeTitles" : [
+      ],
+      "contributors" : [
+      ],
+      "identifiers" : [
+        {
+          "identifierType" : {
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
+            "type" : "IdentifierType"
+          },
+          "value" : "jYpuBxuni2",
+          "type" : "Identifier"
+        }
+      ],
+      "subjects" : [
+      ],
+      "genres" : [
+      ],
+      "items" : [
+        {
+          "id" : "wbli95ga",
+          "identifiers" : [
+            {
+              "identifierType" : {
+                "id" : "calm-record-id",
+                "label" : "Calm RecordIdentifier",
+                "type" : "IdentifierType"
+              },
+              "value" : "clr9E9aLfx",
+              "type" : "Identifier"
+            }
+          ],
+          "locations" : [
+            {
+              "locationType" : {
+                "id" : "iiif-presentation",
+                "label" : "IIIF Presentation API",
+                "type" : "LocationType"
+              },
+              "url" : "https://iiif.wellcomecollection.org/image/6NT.jpg/info.json",
+              "license" : {
+                "id" : "cc-by",
+                "label" : "Attribution 4.0 International (CC BY 4.0)",
+                "url" : "http://creativecommons.org/licenses/by/4.0/",
+                "type" : "License"
+              },
+              "accessConditions" : [
+                {
+                  "method" : {
+                    "id" : "manual-request",
+                    "label" : "Manual request",
+                    "type" : "AccessMethod"
+                  },
+                  "status" : {
+                    "id" : "open-with-advisory",
+                    "label" : "Open with advisory",
+                    "type" : "AccessStatus"
+                  },
+                  "type" : "AccessCondition"
+                }
+              ],
+              "type" : "DigitalLocation"
+            }
+          ],
+          "type" : "Item"
+        }
+      ],
+      "holdings" : [
+      ],
+      "availabilities" : [
+        {
+          "id" : "online",
+          "label" : "Online",
+          "type" : "Availability"
+        }
+      ],
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "notes" : [
+      ],
+      "images" : [
+      ],
+      "parts" : [
+      ],
+      "partOf" : [
+      ],
+      "precededBy" : [
+      ],
+      "succeededBy" : [
+      ],
+      "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+        "{\"id\":\"cc-by\",\"label\":\"Attribution 4.0 International (CC BY 4.0)\",\"url\":\"http://creativecommons.org/licenses/by/4.0/\",\"type\":\"License\"}"
+      ],
+      "availabilities" : [
+        "{\"id\":\"online\",\"label\":\"Online\",\"type\":\"Availability\"}"
+      ]
+    },
+    "type" : "Visible"
+  }
+}

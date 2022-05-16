@@ -1,0 +1,231 @@
+{
+  "description" : "items with different location types",
+  "createdAt" : "2022-05-16T10:00:07.633Z",
+  "id" : "wt6pclbs",
+  "document" : {
+    "debug" : {
+      "source" : {
+        "identifier" : {
+          "identifierType" : {
+            "id" : "calm-record-id"
+          },
+          "ontologyType" : "Work",
+          "value" : "D31AdK5EfQ"
+        },
+        "version" : 5,
+        "modifiedTime" : "2051-01-28T15:07:11Z"
+      },
+      "mergedTime" : "2051-01-28T15:07:11Z",
+      "indexedTime" : "2022-05-16T10:00:07.632Z",
+      "redirectSources" : [
+      ]
+    },
+    "state" : {
+      "sourceIdentifier" : {
+        "identifierType" : {
+          "id" : "calm-record-id"
+        },
+        "ontologyType" : "Work",
+        "value" : "D31AdK5EfQ"
+      },
+      "canonicalId" : "wt6pclbs",
+      "mergedTime" : "2051-01-28T15:07:11Z",
+      "sourceModifiedTime" : "2051-01-28T15:07:11Z",
+      "indexedTime" : "2022-05-16T10:00:07.632Z",
+      "availabilities" : [
+        {
+          "id" : "closed-stores"
+        }
+      ],
+      "derivedData" : {
+        "contributorAgents" : [
+        ]
+      },
+      "relations" : {
+        "ancestors" : [
+        ],
+        "children" : [
+        ],
+        "siblingsPreceding" : [
+        ],
+        "siblingsSucceeding" : [
+        ]
+      }
+    },
+    "data" : {
+      "title" : "title-e4jqB3DBkI",
+      "otherIdentifiers" : [
+      ],
+      "alternativeTitles" : [
+      ],
+      "format" : null,
+      "description" : null,
+      "physicalDescription" : null,
+      "lettering" : null,
+      "createdDate" : null,
+      "subjects" : [
+      ],
+      "genres" : [
+      ],
+      "contributors" : [
+      ],
+      "thumbnail" : null,
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "edition" : null,
+      "notes" : [
+      ],
+      "duration" : null,
+      "items" : [
+        {
+          "id" : {
+            "canonicalId" : "bhyswopl",
+            "sourceIdentifier" : {
+              "identifierType" : {
+                "id" : "calm-record-id"
+              },
+              "ontologyType" : "Work",
+              "value" : "G3f7j0ub0t"
+            },
+            "otherIdentifiers" : [
+            ],
+            "type" : "Identified"
+          },
+          "title" : null,
+          "note" : null,
+          "locations" : [
+            {
+              "locationType" : {
+                "id" : "closed-stores"
+              },
+              "label" : "locationLabel",
+              "license" : {
+                "id" : "pdm"
+              },
+              "shelfmark" : "Shelfmark: dZTQ6alxf",
+              "accessConditions" : [
+              ],
+              "type" : "PhysicalLocation"
+            }
+          ]
+        }
+      ],
+      "holdings" : [
+      ],
+      "collectionPath" : null,
+      "referenceNumber" : null,
+      "imageData" : [
+      ],
+      "workType" : "Standard"
+    },
+    "display" : {
+      "id" : "wt6pclbs",
+      "title" : "title-e4jqB3DBkI",
+      "alternativeTitles" : [
+      ],
+      "contributors" : [
+      ],
+      "identifiers" : [
+        {
+          "identifierType" : {
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
+            "type" : "IdentifierType"
+          },
+          "value" : "D31AdK5EfQ",
+          "type" : "Identifier"
+        }
+      ],
+      "subjects" : [
+      ],
+      "genres" : [
+      ],
+      "items" : [
+        {
+          "id" : "bhyswopl",
+          "identifiers" : [
+            {
+              "identifierType" : {
+                "id" : "calm-record-id",
+                "label" : "Calm RecordIdentifier",
+                "type" : "IdentifierType"
+              },
+              "value" : "G3f7j0ub0t",
+              "type" : "Identifier"
+            }
+          ],
+          "locations" : [
+            {
+              "locationType" : {
+                "id" : "closed-stores",
+                "label" : "Closed stores",
+                "type" : "LocationType"
+              },
+              "label" : "locationLabel",
+              "license" : {
+                "id" : "pdm",
+                "label" : "Public Domain Mark",
+                "url" : "https://creativecommons.org/share-your-work/public-domain/pdm/",
+                "type" : "License"
+              },
+              "shelfmark" : "Shelfmark: dZTQ6alxf",
+              "accessConditions" : [
+              ],
+              "type" : "PhysicalLocation"
+            }
+          ],
+          "type" : "Item"
+        }
+      ],
+      "holdings" : [
+      ],
+      "availabilities" : [
+        {
+          "id" : "closed-stores",
+          "label" : "Closed stores",
+          "type" : "Availability"
+        }
+      ],
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "notes" : [
+      ],
+      "images" : [
+      ],
+      "parts" : [
+      ],
+      "partOf" : [
+      ],
+      "precededBy" : [
+      ],
+      "succeededBy" : [
+      ],
+      "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+        "{\"id\":\"pdm\",\"label\":\"Public Domain Mark\",\"url\":\"https://creativecommons.org/share-your-work/public-domain/pdm/\",\"type\":\"License\"}"
+      ],
+      "availabilities" : [
+        "{\"id\":\"closed-stores\",\"label\":\"Closed stores\",\"type\":\"Availability\"}"
+      ]
+    },
+    "type" : "Visible"
+  }
+}

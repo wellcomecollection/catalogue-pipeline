@@ -1,7 +1,7 @@
 {
   "description" : "an invisible work with 'mouse' in the title",
-  "createdAt" : "2022-05-04T07:15:02.881Z",
-  "id" : "ee7q0cs6",
+  "createdAt" : "2022-05-16T10:00:07.327Z",
+  "id" : "ehd2s7ek",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,13 +10,13 @@
             "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "UUo6BR4gNO"
+          "value" : "QAH5ZlILHM"
         },
-        "version" : 76,
-        "modifiedTime" : "2022-04-09T18:11:20Z"
+        "version" : 47,
+        "modifiedTime" : "2006-12-05T07:13:26Z"
       },
-      "mergedTime" : "2022-04-09T18:11:20Z",
-      "indexedTime" : "2022-05-04T07:15:02.880Z",
+      "mergedTime" : "2006-12-05T07:13:26Z",
+      "indexedTime" : "2022-05-16T10:00:07.327Z",
       "invisibilityReasons" : [
       ]
     },
@@ -26,12 +26,12 @@
           "id" : "calm-record-id"
         },
         "ontologyType" : "Work",
-        "value" : "UUo6BR4gNO"
+        "value" : "QAH5ZlILHM"
       },
-      "canonicalId" : "ee7q0cs6",
-      "mergedTime" : "2022-04-09T18:11:20Z",
-      "sourceModifiedTime" : "2022-04-09T18:11:20Z",
-      "indexedTime" : "2022-05-04T07:15:02.880Z",
+      "canonicalId" : "ehd2s7ek",
+      "mergedTime" : "2006-12-05T07:13:26Z",
+      "sourceModifiedTime" : "2006-12-05T07:13:26Z",
+      "indexedTime" : "2022-05-16T10:00:07.327Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -85,77 +85,6 @@
       ],
       "workType" : "Standard"
     },
-    "type" : "Invisible"
-  },
-  "work" : {
-    "version" : 76,
-    "data" : {
-      "title" : "An invisible mezzotint of a mouse",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "calm-record-id"
-        },
-        "ontologyType" : "Work",
-        "value" : "UUo6BR4gNO"
-      },
-      "canonicalId" : "ee7q0cs6",
-      "mergedTime" : "2022-04-09T18:11:20Z",
-      "sourceModifiedTime" : "2022-04-09T18:11:20Z",
-      "indexedTime" : "2022-05-04T07:15:02.881Z",
-      "availabilities" : [
-      ],
-      "derivedData" : {
-        "contributorAgents" : [
-        ]
-      },
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "invisibilityReasons" : [
-    ],
     "type" : "Invisible"
   }
 }

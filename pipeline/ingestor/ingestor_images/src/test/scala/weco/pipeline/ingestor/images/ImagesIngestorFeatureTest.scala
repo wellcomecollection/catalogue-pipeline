@@ -16,7 +16,10 @@ import weco.fixtures.TestWith
 import weco.json.JsonUtil._
 import weco.messaging.fixtures.SQS.{Queue, QueuePair}
 import weco.pipeline.ingestor.fixtures.IngestorFixtures
-import weco.pipeline.ingestor.images.models.IndexedImage
+import weco.pipeline.ingestor.images.models.{
+  ImageAggregatableValues,
+  IndexedImage
+}
 import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -43,6 +46,10 @@ class ImagesIngestorFeatureTest
 
             val getResponse = response.result
 
+            if (getResponse.sourceAsString == null) {
+              warn("Got null when trying to fetch image from Elasticsearch")
+            }
+
             val storedImage =
               fromJson[IndexedImage](getResponse.sourceAsString).get
 
@@ -55,6 +62,9 @@ class ImagesIngestorFeatureTest
             val storedJson = storedImage.display.as[DisplayImage].right.get
             val expectedJson =
               DisplayImage(image.transition[ImageState.Indexed]())
+
+            storedImage.aggregatableValues shouldBe ImageAggregatableValues(
+              image.source)
 
             storedJson shouldBe expectedJson
           }

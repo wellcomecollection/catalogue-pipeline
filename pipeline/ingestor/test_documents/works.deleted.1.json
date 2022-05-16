@@ -1,22 +1,22 @@
 {
   "description" : "an arbitrary list of deleted works",
-  "createdAt" : "2022-05-04T07:15:02.755Z",
-  "id" : "2ztpn55z",
+  "createdAt" : "2022-05-16T10:00:07.259Z",
+  "id" : "drwubxen",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "rWUBXEnuaX"
+          "value" : "id6G7vla4o"
         },
-        "version" : 84,
-        "modifiedTime" : "2022-04-20T13:31:33Z"
+        "version" : 29,
+        "modifiedTime" : "1966-04-26T05:44:05Z"
       },
-      "mergedTime" : "2022-04-20T13:31:33Z",
-      "indexedTime" : "2022-05-04T07:15:02.754Z",
+      "mergedTime" : "1966-04-26T05:44:05Z",
+      "indexedTime" : "2022-05-16T10:00:07.259Z",
       "deletedReason" : {
         "info" : "tests",
         "type" : "DeletedFromSource"
@@ -25,15 +25,15 @@
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "miro-image-number"
+          "id" : "calm-record-id"
         },
         "ontologyType" : "Work",
-        "value" : "rWUBXEnuaX"
+        "value" : "id6G7vla4o"
       },
-      "canonicalId" : "2ztpn55z",
-      "mergedTime" : "2022-04-20T13:31:33Z",
-      "sourceModifiedTime" : "2022-04-20T13:31:33Z",
-      "indexedTime" : "2022-05-04T07:15:02.754Z",
+      "canonicalId" : "drwubxen",
+      "mergedTime" : "1966-04-26T05:44:05Z",
+      "sourceModifiedTime" : "1966-04-26T05:44:05Z",
+      "indexedTime" : "2022-05-16T10:00:07.259Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -50,43 +50,6 @@
         "siblingsSucceeding" : [
         ]
       }
-    },
-    "type" : "Deleted"
-  },
-  "work" : {
-    "version" : 84,
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "miro-image-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "rWUBXEnuaX"
-      },
-      "canonicalId" : "2ztpn55z",
-      "mergedTime" : "2022-04-20T13:31:33Z",
-      "sourceModifiedTime" : "2022-04-20T13:31:33Z",
-      "indexedTime" : "2022-05-04T07:15:02.755Z",
-      "availabilities" : [
-      ],
-      "derivedData" : {
-        "contributorAgents" : [
-        ]
-      },
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "deletedReason" : {
-      "info" : "tests",
-      "type" : "DeletedFromSource"
     },
     "type" : "Deleted"
   }

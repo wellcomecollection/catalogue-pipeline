@@ -1,0 +1,213 @@
+{
+  "description" : "works with multi-year production ranges",
+  "createdAt" : "2022-05-16T10:00:07.626Z",
+  "id" : "wmzcsqaf",
+  "document" : {
+    "debug" : {
+      "source" : {
+        "identifier" : {
+          "identifierType" : {
+            "id" : "calm-record-id"
+          },
+          "ontologyType" : "Work",
+          "value" : "Kwytcvu6mF"
+        },
+        "version" : 10,
+        "modifiedTime" : "1939-03-21T12:48:35Z"
+      },
+      "mergedTime" : "1939-03-21T12:48:35Z",
+      "indexedTime" : "2022-05-16T10:00:07.625Z",
+      "redirectSources" : [
+      ]
+    },
+    "state" : {
+      "sourceIdentifier" : {
+        "identifierType" : {
+          "id" : "calm-record-id"
+        },
+        "ontologyType" : "Work",
+        "value" : "Kwytcvu6mF"
+      },
+      "canonicalId" : "wmzcsqaf",
+      "mergedTime" : "1939-03-21T12:48:35Z",
+      "sourceModifiedTime" : "1939-03-21T12:48:35Z",
+      "indexedTime" : "2022-05-16T10:00:07.625Z",
+      "availabilities" : [
+      ],
+      "derivedData" : {
+        "contributorAgents" : [
+        ]
+      },
+      "relations" : {
+        "ancestors" : [
+        ],
+        "children" : [
+        ],
+        "siblingsPreceding" : [
+        ],
+        "siblingsSucceeding" : [
+        ]
+      }
+    },
+    "data" : {
+      "title" : "title-tBeNhpR5aF",
+      "otherIdentifiers" : [
+      ],
+      "alternativeTitles" : [
+      ],
+      "format" : null,
+      "description" : null,
+      "physicalDescription" : null,
+      "lettering" : null,
+      "createdDate" : null,
+      "subjects" : [
+      ],
+      "genres" : [
+      ],
+      "contributors" : [
+      ],
+      "thumbnail" : null,
+      "production" : [
+        {
+          "label" : "Mse28ReU0tOIr878hfcCYXKeD",
+          "places" : [
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "QMh6zvv2Jj"
+            }
+          ],
+          "agents" : [
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "5pKO9kAlfI",
+              "prefix" : null,
+              "numeration" : null,
+              "type" : "Person"
+            }
+          ],
+          "dates" : [
+            {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "1962",
+              "range" : {
+                "from" : "1962-01-01T00:00:00Z",
+                "to" : "1962-12-31T23:59:59.999999999Z",
+                "label" : "1962"
+              }
+            }
+          ],
+          "function" : null
+        }
+      ],
+      "languages" : [
+      ],
+      "edition" : null,
+      "notes" : [
+      ],
+      "duration" : null,
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "collectionPath" : null,
+      "referenceNumber" : null,
+      "imageData" : [
+      ],
+      "workType" : "Standard"
+    },
+    "display" : {
+      "id" : "wmzcsqaf",
+      "title" : "title-tBeNhpR5aF",
+      "alternativeTitles" : [
+      ],
+      "contributors" : [
+      ],
+      "identifiers" : [
+        {
+          "identifierType" : {
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
+            "type" : "IdentifierType"
+          },
+          "value" : "Kwytcvu6mF",
+          "type" : "Identifier"
+        }
+      ],
+      "subjects" : [
+      ],
+      "genres" : [
+      ],
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "availabilities" : [
+      ],
+      "production" : [
+        {
+          "label" : "Mse28ReU0tOIr878hfcCYXKeD",
+          "places" : [
+            {
+              "label" : "QMh6zvv2Jj",
+              "type" : "Place"
+            }
+          ],
+          "agents" : [
+            {
+              "label" : "5pKO9kAlfI",
+              "type" : "Person"
+            }
+          ],
+          "dates" : [
+            {
+              "label" : "1962",
+              "type" : "Period"
+            }
+          ],
+          "type" : "ProductionEvent"
+        }
+      ],
+      "languages" : [
+      ],
+      "notes" : [
+      ],
+      "images" : [
+      ],
+      "parts" : [
+      ],
+      "partOf" : [
+      ],
+      "precededBy" : [
+      ],
+      "succeededBy" : [
+      ],
+      "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+        "{\"label\":\"1962\",\"type\":\"Period\"}"
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
+    },
+    "type" : "Visible"
+  }
+}
