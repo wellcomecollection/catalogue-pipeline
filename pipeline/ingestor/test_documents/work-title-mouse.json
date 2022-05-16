@@ -1,6 +1,6 @@
 {
   "description" : "a work with 'mouse' in the title",
-  "createdAt" : "2022-05-12T16:38:37.292Z",
+  "createdAt" : "2022-05-16T10:00:07.291Z",
   "id" : "lnn17cwk",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "2003-09-07T11:20:18Z"
       },
       "mergedTime" : "2003-09-07T11:20:18Z",
-      "indexedTime" : "2022-05-12T16:38:37.291Z",
+      "indexedTime" : "2022-05-16T10:00:07.289Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "lnn17cwk",
       "mergedTime" : "2003-09-07T11:20:18Z",
       "sourceModifiedTime" : "2003-09-07T11:20:18Z",
-      "indexedTime" : "2022-05-12T16:38:37.291Z",
+      "indexedTime" : "2022-05-16T10:00:07.289Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -131,6 +131,24 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }

@@ -1,6 +1,6 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2022-05-12T16:38:37.575Z",
+  "createdAt" : "2022-05-16T10:00:07.641Z",
   "id" : "ivw1mq40",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "1994-06-01T17:42:00Z"
       },
       "mergedTime" : "1994-06-01T17:42:00Z",
-      "indexedTime" : "2022-05-12T16:38:37.575Z",
+      "indexedTime" : "2022-05-16T10:00:07.640Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "ivw1mq40",
       "mergedTime" : "1994-06-01T17:42:00Z",
       "sourceModifiedTime" : "1994-06-01T17:42:00Z",
-      "indexedTime" : "2022-05-12T16:38:37.575Z",
+      "indexedTime" : "2022-05-16T10:00:07.640Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -185,6 +185,26 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+        "{\"id\":\"e\",\"label\":\"Maps\",\"type\":\"Format\"}"
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+        "{\"label\":\"6IZ2DrUzFk\",\"concepts\":[],\"type\":\"Subject\"}"
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }

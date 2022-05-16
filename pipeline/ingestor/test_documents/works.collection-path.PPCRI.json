@@ -1,6 +1,6 @@
 {
   "description" : "a work with a collection path",
-  "createdAt" : "2022-05-12T16:38:37.534Z",
+  "createdAt" : "2022-05-16T10:00:07.594Z",
   "id" : "mlqs2qbd",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "1978-12-10T03:28:38Z"
       },
       "mergedTime" : "1978-12-10T03:28:38Z",
-      "indexedTime" : "2022-05-12T16:38:37.532Z",
+      "indexedTime" : "2022-05-16T10:00:07.592Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "mlqs2qbd",
       "mergedTime" : "1978-12-10T03:28:38Z",
       "sourceModifiedTime" : "1978-12-10T03:28:38Z",
-      "indexedTime" : "2022-05-12T16:38:37.532Z",
+      "indexedTime" : "2022-05-16T10:00:07.592Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -133,6 +133,24 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }

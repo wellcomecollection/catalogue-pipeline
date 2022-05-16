@@ -1,6 +1,6 @@
 {
   "description" : "an arbitrary list of visible works",
-  "createdAt" : "2022-05-12T16:38:37.177Z",
+  "createdAt" : "2022-05-16T10:00:07.182Z",
   "id" : "fyqts0co",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "1979-01-28T05:43:24Z"
       },
       "mergedTime" : "1979-01-28T05:43:24Z",
-      "indexedTime" : "2022-05-12T16:38:37.176Z",
+      "indexedTime" : "2022-05-16T10:00:07.181Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "fyqts0co",
       "mergedTime" : "1979-01-28T05:43:24Z",
       "sourceModifiedTime" : "1979-01-28T05:43:24Z",
-      "indexedTime" : "2022-05-12T16:38:37.176Z",
+      "indexedTime" : "2022-05-16T10:00:07.181Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -130,6 +130,24 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }

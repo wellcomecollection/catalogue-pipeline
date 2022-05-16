@@ -1,6 +1,6 @@
 {
   "description" : "examples for the works filtered aggregations tests",
-  "createdAt" : "2022-05-12T16:38:37.670Z",
+  "createdAt" : "2022-05-16T10:00:07.751Z",
   "id" : "k57syong",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "1943-06-02T04:26:11Z"
       },
       "mergedTime" : "1943-06-02T04:26:11Z",
-      "indexedTime" : "2022-05-12T16:38:37.670Z",
+      "indexedTime" : "2022-05-16T10:00:07.751Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "k57syong",
       "mergedTime" : "1943-06-02T04:26:11Z",
       "sourceModifiedTime" : "1943-06-02T04:26:11Z",
-      "indexedTime" : "2022-05-12T16:38:37.670Z",
+      "indexedTime" : "2022-05-16T10:00:07.751Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -147,6 +147,26 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+        "{\"id\":\"d\",\"label\":\"Journals\",\"type\":\"Format\"}"
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+        "{\"id\":\"que\",\"label\":\"Quechua\",\"type\":\"Language\"}"
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }

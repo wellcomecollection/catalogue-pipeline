@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2022-05-12T16:38:37.616Z",
+  "createdAt" : "2022-05-16T10:00:07.689Z",
   "id" : "6q7wkowr",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "2013-02-12T12:43:10Z"
       },
       "mergedTime" : "2013-02-12T12:43:10Z",
-      "indexedTime" : "2022-05-12T16:38:37.616Z",
+      "indexedTime" : "2022-05-16T10:00:07.689Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "6q7wkowr",
       "mergedTime" : "2013-02-12T12:43:10Z",
       "sourceModifiedTime" : "2013-02-12T12:43:10Z",
-      "indexedTime" : "2022-05-12T16:38:37.616Z",
+      "indexedTime" : "2022-05-16T10:00:07.689Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -156,6 +156,25 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+        "{\"label\":\"Darwin \\\"Jones\\\", Charles\",\"type\":\"Person\"}"
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }

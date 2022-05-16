@@ -1,6 +1,6 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2022-05-12T16:38:37.576Z",
+  "createdAt" : "2022-05-16T10:00:07.643Z",
   "id" : "lwt2ohte",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "2026-11-06T07:42:08Z"
       },
       "mergedTime" : "2026-11-06T07:42:08Z",
-      "indexedTime" : "2022-05-12T16:38:37.576Z",
+      "indexedTime" : "2022-05-16T10:00:07.642Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "lwt2ohte",
       "mergedTime" : "2026-11-06T07:42:08Z",
       "sourceModifiedTime" : "2026-11-06T07:42:08Z",
-      "indexedTime" : "2022-05-12T16:38:37.576Z",
+      "indexedTime" : "2022-05-16T10:00:07.642Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -185,6 +185,26 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+        "{\"id\":\"r\",\"label\":\"3-D Objects\",\"type\":\"Format\"}"
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+        "{\"label\":\"Vo8KntFwFf\",\"concepts\":[],\"type\":\"Subject\"}"
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }

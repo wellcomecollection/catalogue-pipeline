@@ -1,6 +1,6 @@
 {
   "description" : "examples of works with different types",
-  "createdAt" : "2022-05-12T16:38:37.598Z",
+  "createdAt" : "2022-05-16T10:00:07.668Z",
   "id" : "fndkxmxs",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "1994-04-16T05:30:11Z"
       },
       "mergedTime" : "1994-04-16T05:30:11Z",
-      "indexedTime" : "2022-05-12T16:38:37.598Z",
+      "indexedTime" : "2022-05-16T10:00:07.668Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "fndkxmxs",
       "mergedTime" : "1994-04-16T05:30:11Z",
       "sourceModifiedTime" : "1994-04-16T05:30:11Z",
-      "indexedTime" : "2022-05-12T16:38:37.598Z",
+      "indexedTime" : "2022-05-16T10:00:07.668Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -130,6 +130,24 @@
       "succeededBy" : [
       ],
       "type" : "Series"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }

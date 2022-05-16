@@ -1,6 +1,6 @@
 {
   "description" : "one of a list of works with a variety of formats",
-  "createdAt" : "2022-05-12T16:38:37.463Z",
+  "createdAt" : "2022-05-16T10:00:07.507Z",
   "id" : "sym6ne7x",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "2051-09-16T11:43:09Z"
       },
       "mergedTime" : "2051-09-16T11:43:09Z",
-      "indexedTime" : "2022-05-12T16:38:37.462Z",
+      "indexedTime" : "2022-05-16T10:00:07.506Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "sym6ne7x",
       "mergedTime" : "2051-09-16T11:43:09Z",
       "sourceModifiedTime" : "2051-09-16T11:43:09Z",
-      "indexedTime" : "2022-05-12T16:38:37.462Z",
+      "indexedTime" : "2022-05-16T10:00:07.506Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -138,6 +138,25 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+        "{\"id\":\"k\",\"label\":\"Pictures\",\"type\":\"Format\"}"
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }

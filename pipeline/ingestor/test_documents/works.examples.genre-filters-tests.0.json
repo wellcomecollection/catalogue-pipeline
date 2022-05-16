@@ -1,6 +1,6 @@
 {
   "description" : "examples for the genre tests",
-  "createdAt" : "2022-05-12T16:38:37.601Z",
+  "createdAt" : "2022-05-16T10:00:07.671Z",
   "id" : "jywtq4xg",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "1934-09-04T19:55:55Z"
       },
       "mergedTime" : "1934-09-04T19:55:55Z",
-      "indexedTime" : "2022-05-12T16:38:37.600Z",
+      "indexedTime" : "2022-05-16T10:00:07.670Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "jywtq4xg",
       "mergedTime" : "1934-09-04T19:55:55Z",
       "sourceModifiedTime" : "1934-09-04T19:55:55Z",
-      "indexedTime" : "2022-05-12T16:38:37.600Z",
+      "indexedTime" : "2022-05-16T10:00:07.670Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -174,6 +174,25 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+        "{\"label\":\"Annual reports.\",\"concepts\":[],\"type\":\"Genre\"}"
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }

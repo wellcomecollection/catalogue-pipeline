@@ -1,6 +1,6 @@
 {
   "description" : "one of a list of works with a variety of formats",
-  "createdAt" : "2022-05-12T16:38:37.457Z",
+  "createdAt" : "2022-05-16T10:00:07.503Z",
   "id" : "xc5d7pc4",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "1968-03-09T02:46:38Z"
       },
       "mergedTime" : "1968-03-09T02:46:38Z",
-      "indexedTime" : "2022-05-12T16:38:37.457Z",
+      "indexedTime" : "2022-05-16T10:00:07.502Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "xc5d7pc4",
       "mergedTime" : "1968-03-09T02:46:38Z",
       "sourceModifiedTime" : "1968-03-09T02:46:38Z",
-      "indexedTime" : "2022-05-12T16:38:37.457Z",
+      "indexedTime" : "2022-05-16T10:00:07.502Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -138,6 +138,25 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+        "{\"id\":\"d\",\"label\":\"Journals\",\"type\":\"Format\"}"
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }

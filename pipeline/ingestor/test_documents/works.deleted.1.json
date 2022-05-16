@@ -1,6 +1,6 @@
 {
   "description" : "an arbitrary list of deleted works",
-  "createdAt" : "2022-05-12T16:38:37.258Z",
+  "createdAt" : "2022-05-16T10:00:07.259Z",
   "id" : "drwubxen",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "1966-04-26T05:44:05Z"
       },
       "mergedTime" : "1966-04-26T05:44:05Z",
-      "indexedTime" : "2022-05-12T16:38:37.257Z",
+      "indexedTime" : "2022-05-16T10:00:07.259Z",
       "deletedReason" : {
         "info" : "tests",
         "type" : "DeletedFromSource"
@@ -33,7 +33,7 @@
       "canonicalId" : "drwubxen",
       "mergedTime" : "1966-04-26T05:44:05Z",
       "sourceModifiedTime" : "1966-04-26T05:44:05Z",
-      "indexedTime" : "2022-05-12T16:38:37.257Z",
+      "indexedTime" : "2022-05-16T10:00:07.259Z",
       "availabilities" : [
       ],
       "derivedData" : {

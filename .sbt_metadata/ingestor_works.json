@@ -2,7 +2,6 @@
   "id" : "ingestor_works",
   "folder" : "pipeline/ingestor/ingestor_works",
   "dependencyIds" : [
-    "ingestor_common",
-    "display_model"
+    "ingestor_common"
   ]
 }

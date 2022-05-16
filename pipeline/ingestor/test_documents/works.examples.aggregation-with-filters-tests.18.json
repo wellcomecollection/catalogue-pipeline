@@ -1,6 +1,6 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2022-05-12T16:38:37.581Z",
+  "createdAt" : "2022-05-16T10:00:07.649Z",
   "id" : "s4ry14qu",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "2021-09-17T18:49:36Z"
       },
       "mergedTime" : "2021-09-17T18:49:36Z",
-      "indexedTime" : "2022-05-12T16:38:37.580Z",
+      "indexedTime" : "2022-05-16T10:00:07.649Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "s4ry14qu",
       "mergedTime" : "2021-09-17T18:49:36Z",
       "sourceModifiedTime" : "2021-09-17T18:49:36Z",
-      "indexedTime" : "2022-05-12T16:38:37.580Z",
+      "indexedTime" : "2022-05-16T10:00:07.649Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -185,6 +185,26 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+        "{\"id\":\"v\",\"label\":\"E-books\",\"type\":\"Format\"}"
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+        "{\"label\":\"9hdRJC6PIO\",\"concepts\":[],\"type\":\"Subject\"}"
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }

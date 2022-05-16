@@ -1,6 +1,6 @@
 {
   "description" : "items with different location types",
-  "createdAt" : "2022-05-12T16:38:37.568Z",
+  "createdAt" : "2022-05-16T10:00:07.633Z",
   "id" : "wt6pclbs",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "2051-01-28T15:07:11Z"
       },
       "mergedTime" : "2051-01-28T15:07:11Z",
-      "indexedTime" : "2022-05-12T16:38:37.568Z",
+      "indexedTime" : "2022-05-16T10:00:07.632Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "wt6pclbs",
       "mergedTime" : "2051-01-28T15:07:11Z",
       "sourceModifiedTime" : "2051-01-28T15:07:11Z",
-      "indexedTime" : "2022-05-12T16:38:37.568Z",
+      "indexedTime" : "2022-05-16T10:00:07.632Z",
       "availabilities" : [
         {
           "id" : "closed-stores"
@@ -205,6 +205,26 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+        "{\"id\":\"pdm\",\"label\":\"Public Domain Mark\",\"url\":\"https://creativecommons.org/share-your-work/public-domain/pdm/\",\"type\":\"License\"}"
+      ],
+      "availabilities" : [
+        "{\"id\":\"closed-stores\",\"label\":\"Closed stores\",\"type\":\"Availability\"}"
+      ]
     },
     "type" : "Visible"
   }

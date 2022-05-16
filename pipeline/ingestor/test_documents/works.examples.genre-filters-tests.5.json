@@ -1,6 +1,6 @@
 {
   "description" : "examples for the genre tests",
-  "createdAt" : "2022-05-12T16:38:37.603Z",
+  "createdAt" : "2022-05-16T10:00:07.674Z",
   "id" : "oo0o5odf",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "1992-02-01T01:05:08Z"
       },
       "mergedTime" : "1992-02-01T01:05:08Z",
-      "indexedTime" : "2022-05-12T16:38:37.603Z",
+      "indexedTime" : "2022-05-16T10:00:07.674Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "oo0o5odf",
       "mergedTime" : "1992-02-01T01:05:08Z",
       "sourceModifiedTime" : "1992-02-01T01:05:08Z",
-      "indexedTime" : "2022-05-12T16:38:37.603Z",
+      "indexedTime" : "2022-05-16T10:00:07.674Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -130,6 +130,24 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }

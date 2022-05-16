@@ -1,6 +1,6 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2022-05-12T16:38:37.544Z",
+  "createdAt" : "2022-05-16T10:00:07.604Z",
   "id" : "rdqs25hn",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "1988-08-26T10:27:10Z"
       },
       "mergedTime" : "1988-08-26T10:27:10Z",
-      "indexedTime" : "2022-05-12T16:38:37.544Z",
+      "indexedTime" : "2022-05-16T10:00:07.604Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "rdqs25hn",
       "mergedTime" : "1988-08-26T10:27:10Z",
       "sourceModifiedTime" : "1988-08-26T10:27:10Z",
-      "indexedTime" : "2022-05-12T16:38:37.544Z",
+      "indexedTime" : "2022-05-16T10:00:07.604Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -138,6 +138,25 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+        "{\"id\":\"n\",\"label\":\"Film\",\"type\":\"Format\"}"
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }

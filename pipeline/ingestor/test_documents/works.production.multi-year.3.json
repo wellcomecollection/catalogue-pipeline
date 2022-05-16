@@ -1,6 +1,6 @@
 {
   "description" : "works with multi-year production ranges",
-  "createdAt" : "2022-05-12T16:38:37.560Z",
+  "createdAt" : "2022-05-16T10:00:07.625Z",
   "id" : "q4abgj9v",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "2033-02-19T17:04:42Z"
       },
       "mergedTime" : "2033-02-19T17:04:42Z",
-      "indexedTime" : "2022-05-12T16:38:37.560Z",
+      "indexedTime" : "2022-05-16T10:00:07.624Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "q4abgj9v",
       "mergedTime" : "2033-02-19T17:04:42Z",
       "sourceModifiedTime" : "2033-02-19T17:04:42Z",
-      "indexedTime" : "2022-05-12T16:38:37.560Z",
+      "indexedTime" : "2022-05-16T10:00:07.624Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -69,13 +69,13 @@
       "thumbnail" : null,
       "production" : [
         {
-          "label" : "azvpRCgfghm8mPoOAv5vdS0YG",
+          "label" : "Cgfghm8mPoOAv5vdS0YG4JWZR",
           "places" : [
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "4JWZRaIg4B"
+              "label" : "aIg4BPWRHb"
             }
           ],
           "agents" : [
@@ -83,7 +83,7 @@
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "PWRHbuSqTD",
+              "label" : "uSqTDzUOjO",
               "prefix" : null,
               "numeration" : null,
               "type" : "Person"
@@ -151,16 +151,16 @@
       ],
       "production" : [
         {
-          "label" : "azvpRCgfghm8mPoOAv5vdS0YG",
+          "label" : "Cgfghm8mPoOAv5vdS0YG4JWZR",
           "places" : [
             {
-              "label" : "4JWZRaIg4B",
+              "label" : "aIg4BPWRHb",
               "type" : "Place"
             }
           ],
           "agents" : [
             {
-              "label" : "PWRHbuSqTD",
+              "label" : "uSqTDzUOjO",
               "type" : "Person"
             }
           ],
@@ -188,6 +188,25 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+        "{\"label\":\"1960\",\"type\":\"Period\"}"
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }

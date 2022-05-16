@@ -1,6 +1,6 @@
 {
   "description" : "one of a list of works with a variety of formats",
-  "createdAt" : "2022-05-12T16:38:37.455Z",
+  "createdAt" : "2022-05-16T10:00:07.500Z",
   "id" : "wqcumcet",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "2048-04-08T22:43:49Z"
       },
       "mergedTime" : "2048-04-08T22:43:49Z",
-      "indexedTime" : "2022-05-12T16:38:37.454Z",
+      "indexedTime" : "2022-05-16T10:00:07.499Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "wqcumcet",
       "mergedTime" : "2048-04-08T22:43:49Z",
       "sourceModifiedTime" : "2048-04-08T22:43:49Z",
-      "indexedTime" : "2022-05-12T16:38:37.454Z",
+      "indexedTime" : "2022-05-16T10:00:07.499Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -138,6 +138,25 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+        "{\"id\":\"d\",\"label\":\"Journals\",\"type\":\"Format\"}"
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }

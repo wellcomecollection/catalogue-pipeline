@@ -1,6 +1,6 @@
 {
   "description" : "an arbitrary list of redirected works",
-  "createdAt" : "2022-05-12T16:38:37.246Z",
+  "createdAt" : "2022-05-16T10:00:07.246Z",
   "id" : "4nwkprdt",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "2044-05-21T11:37:26Z"
       },
       "mergedTime" : "2044-05-21T11:37:26Z",
-      "indexedTime" : "2022-05-12T16:38:37.242Z"
+      "indexedTime" : "2022-05-16T10:00:07.242Z"
     },
     "state" : {
       "sourceIdentifier" : {
@@ -29,7 +29,7 @@
       "canonicalId" : "4nwkprdt",
       "mergedTime" : "2044-05-21T11:37:26Z",
       "sourceModifiedTime" : "2044-05-21T11:37:26Z",
-      "indexedTime" : "2022-05-12T16:38:37.242Z",
+      "indexedTime" : "2022-05-16T10:00:07.242Z",
       "availabilities" : [
       ],
       "derivedData" : {

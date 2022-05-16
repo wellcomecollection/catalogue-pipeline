@@ -1,6 +1,6 @@
 {
   "description" : "a work with different concepts in the genre",
-  "createdAt" : "2022-05-12T16:38:37.492Z",
+  "createdAt" : "2022-05-16T10:00:07.545Z",
   "id" : "2zo588up",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "2054-02-13T07:35:27Z"
       },
       "mergedTime" : "2054-02-13T07:35:27Z",
-      "indexedTime" : "2022-05-12T16:38:37.487Z",
+      "indexedTime" : "2022-05-16T10:00:07.539Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "2zo588up",
       "mergedTime" : "2054-02-13T07:35:27Z",
       "sourceModifiedTime" : "2054-02-13T07:35:27Z",
-      "indexedTime" : "2022-05-12T16:38:37.487Z",
+      "indexedTime" : "2022-05-16T10:00:07.539Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -197,6 +197,25 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+        "{\"label\":\"Electronic books\",\"concepts\":[],\"type\":\"Genre\"}"
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }

@@ -1,6 +1,6 @@
 {
   "description" : "items with different location types",
-  "createdAt" : "2022-05-12T16:38:37.568Z",
+  "createdAt" : "2022-05-16T10:00:07.632Z",
   "id" : "sgatphra",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "2007-10-12T00:47:39Z"
       },
       "mergedTime" : "2007-10-12T00:47:39Z",
-      "indexedTime" : "2022-05-12T16:38:37.567Z",
+      "indexedTime" : "2022-05-16T10:00:07.632Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "sgatphra",
       "mergedTime" : "2007-10-12T00:47:39Z",
       "sourceModifiedTime" : "2007-10-12T00:47:39Z",
-      "indexedTime" : "2022-05-12T16:38:37.567Z",
+      "indexedTime" : "2022-05-16T10:00:07.632Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -229,6 +229,26 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+        "{\"id\":\"cc-by\",\"label\":\"Attribution 4.0 International (CC BY 4.0)\",\"url\":\"http://creativecommons.org/licenses/by/4.0/\",\"type\":\"License\"}",
+        "{\"id\":\"cc-by\",\"label\":\"Attribution 4.0 International (CC BY 4.0)\",\"url\":\"http://creativecommons.org/licenses/by/4.0/\",\"type\":\"License\"}"
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }

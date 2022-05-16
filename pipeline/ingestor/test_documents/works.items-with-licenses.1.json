@@ -1,6 +1,6 @@
 {
   "description" : "a work with licensed digital items",
-  "createdAt" : "2022-05-12T16:38:37.480Z",
+  "createdAt" : "2022-05-16T10:00:07.530Z",
   "id" : "runiusy8",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "2062-01-08T01:49:39Z"
       },
       "mergedTime" : "2062-01-08T01:49:39Z",
-      "indexedTime" : "2022-05-12T16:38:37.480Z",
+      "indexedTime" : "2022-05-16T10:00:07.529Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "runiusy8",
       "mergedTime" : "2062-01-08T01:49:39Z",
       "sourceModifiedTime" : "2062-01-08T01:49:39Z",
-      "indexedTime" : "2022-05-12T16:38:37.480Z",
+      "indexedTime" : "2022-05-16T10:00:07.529Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -179,6 +179,25 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+        "{\"id\":\"cc-by\",\"label\":\"Attribution 4.0 International (CC BY 4.0)\",\"url\":\"http://creativecommons.org/licenses/by/4.0/\",\"type\":\"License\"}"
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }

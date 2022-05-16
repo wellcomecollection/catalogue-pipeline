@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2022-05-12T16:38:37.616Z",
+  "createdAt" : "2022-05-16T10:00:07.690Z",
   "id" : "cpwnrkdo",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "1990-04-28T07:06:53Z"
       },
       "mergedTime" : "1990-04-28T07:06:53Z",
-      "indexedTime" : "2022-05-12T16:38:37.616Z",
+      "indexedTime" : "2022-05-16T10:00:07.689Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "cpwnrkdo",
       "mergedTime" : "1990-04-28T07:06:53Z",
       "sourceModifiedTime" : "1990-04-28T07:06:53Z",
-      "indexedTime" : "2022-05-12T16:38:37.616Z",
+      "indexedTime" : "2022-05-16T10:00:07.689Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -182,6 +182,26 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+        "{\"label\":\"Bath, Patricia\",\"type\":\"Person\"}",
+        "{\"label\":\"Darwin \\\"Jones\\\", Charles\",\"type\":\"Person\"}"
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }

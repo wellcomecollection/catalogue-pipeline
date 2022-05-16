@@ -4,11 +4,7 @@ import io.circe.syntax._
 import weco.catalogue.display_model.work.DisplayWork
 import weco.catalogue.internal_model.work.WorkState.{Denormalised, Indexed}
 import weco.catalogue.internal_model.work.Work
-import weco.pipeline.ingestor.works.models.{
-  DebugInformation,
-  IndexedWork,
-  SourceWorkDebugInformation
-}
+import weco.pipeline.ingestor.works.models.{DebugInformation, IndexedWork, SourceWorkDebugInformation, WorkAggregatableValues}
 import weco.catalogue.display_model.Implicits._
 
 import java.time.Instant
@@ -40,7 +36,8 @@ trait WorkTransformer {
             ),
             state = state,
             data = data,
-            display = DisplayWork(w).asJson.deepDropNullValues
+            display = DisplayWork(w).asJson.deepDropNullValues,
+            aggregatableValues = WorkAggregatableValues(w.data, availabilities = state.availabilities)
           )
 
         case Work.Invisible(_, data, _, invisibilityReasons) =>

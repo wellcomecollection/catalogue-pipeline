@@ -1,6 +1,6 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2022-05-12T16:38:37.610Z",
+  "createdAt" : "2022-05-16T10:00:07.682Z",
   "id" : "rbao66qq",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "1971-06-27T05:46:31Z"
       },
       "mergedTime" : "1971-06-27T05:46:31Z",
-      "indexedTime" : "2022-05-12T16:38:37.610Z",
+      "indexedTime" : "2022-05-16T10:00:07.682Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "rbao66qq",
       "mergedTime" : "1971-06-27T05:46:31Z",
       "sourceModifiedTime" : "1971-06-27T05:46:31Z",
-      "indexedTime" : "2022-05-12T16:38:37.610Z",
+      "indexedTime" : "2022-05-16T10:00:07.682Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -130,6 +130,24 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }

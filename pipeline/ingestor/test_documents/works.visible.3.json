@@ -1,6 +1,6 @@
 {
   "description" : "an arbitrary list of visible works",
-  "createdAt" : "2022-05-12T16:38:37.178Z",
+  "createdAt" : "2022-05-16T10:00:07.183Z",
   "id" : "raob2ruv",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "1966-03-23T00:51:51Z"
       },
       "mergedTime" : "1966-03-23T00:51:51Z",
-      "indexedTime" : "2022-05-12T16:38:37.177Z",
+      "indexedTime" : "2022-05-16T10:00:07.182Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "raob2ruv",
       "mergedTime" : "1966-03-23T00:51:51Z",
       "sourceModifiedTime" : "1966-03-23T00:51:51Z",
-      "indexedTime" : "2022-05-12T16:38:37.177Z",
+      "indexedTime" : "2022-05-16T10:00:07.182Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -130,6 +130,24 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }

@@ -1,6 +1,6 @@
 {
   "description" : "works with items with other identifiers",
-  "createdAt" : "2022-05-12T16:38:37.526Z",
+  "createdAt" : "2022-05-16T10:00:07.583Z",
   "id" : "upm4bal7",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "1940-10-02T05:59:00Z"
       },
       "mergedTime" : "1940-10-02T05:59:00Z",
-      "indexedTime" : "2022-05-12T16:38:37.525Z",
+      "indexedTime" : "2022-05-16T10:00:07.583Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "upm4bal7",
       "mergedTime" : "1940-10-02T05:59:00Z",
       "sourceModifiedTime" : "1940-10-02T05:59:00Z",
-      "indexedTime" : "2022-05-12T16:38:37.525Z",
+      "indexedTime" : "2022-05-16T10:00:07.583Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -214,6 +214,25 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+        "{\"id\":\"cc-by\",\"label\":\"Attribution 4.0 International (CC BY 4.0)\",\"url\":\"http://creativecommons.org/licenses/by/4.0/\",\"type\":\"License\"}"
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }

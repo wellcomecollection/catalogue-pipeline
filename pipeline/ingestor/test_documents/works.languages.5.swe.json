@@ -1,6 +1,6 @@
 {
   "description" : "one of a list of works with a variety of languages",
-  "createdAt" : "2022-05-12T16:38:37.475Z",
+  "createdAt" : "2022-05-16T10:00:07.524Z",
   "id" : "qfscz1rj",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "2036-09-06T23:29:13Z"
       },
       "mergedTime" : "2036-09-06T23:29:13Z",
-      "indexedTime" : "2022-05-12T16:38:37.475Z",
+      "indexedTime" : "2022-05-16T10:00:07.523Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "qfscz1rj",
       "mergedTime" : "2036-09-06T23:29:13Z",
       "sourceModifiedTime" : "2036-09-06T23:29:13Z",
-      "indexedTime" : "2022-05-12T16:38:37.475Z",
+      "indexedTime" : "2022-05-16T10:00:07.523Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -139,6 +139,25 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+        "{\"id\":\"swe\",\"label\":\"Swedish\",\"type\":\"Language\"}"
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }

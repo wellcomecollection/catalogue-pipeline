@@ -1,6 +1,6 @@
 {
   "description" : "one of a list of works with a variety of languages",
-  "createdAt" : "2022-05-12T16:38:37.476Z",
+  "createdAt" : "2022-05-16T10:00:07.525Z",
   "id" : "yblbdpjf",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "1950-07-07T08:46:09Z"
       },
       "mergedTime" : "1950-07-07T08:46:09Z",
-      "indexedTime" : "2022-05-12T16:38:37.476Z",
+      "indexedTime" : "2022-05-16T10:00:07.525Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "yblbdpjf",
       "mergedTime" : "1950-07-07T08:46:09Z",
       "sourceModifiedTime" : "1950-07-07T08:46:09Z",
-      "indexedTime" : "2022-05-12T16:38:37.476Z",
+      "indexedTime" : "2022-05-16T10:00:07.525Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -139,6 +139,25 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+        "{\"id\":\"tur\",\"label\":\"Turkish\",\"type\":\"Language\"}"
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }

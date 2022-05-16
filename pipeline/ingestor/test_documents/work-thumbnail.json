@@ -1,6 +1,6 @@
 {
   "description" : "a work with a thumbnail",
-  "createdAt" : "2022-05-12T16:38:37.285Z",
+  "createdAt" : "2022-05-16T10:00:07.284Z",
   "id" : "sahqcluh",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "2052-06-26T19:25:07Z"
       },
       "mergedTime" : "2052-06-26T19:25:07Z",
-      "indexedTime" : "2022-05-12T16:38:37.272Z",
+      "indexedTime" : "2022-05-16T10:00:07.274Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "sahqcluh",
       "mergedTime" : "2052-06-26T19:25:07Z",
       "sourceModifiedTime" : "2052-06-26T19:25:07Z",
-      "indexedTime" : "2022-05-12T16:38:37.272Z",
+      "indexedTime" : "2022-05-16T10:00:07.274Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -159,6 +159,24 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }

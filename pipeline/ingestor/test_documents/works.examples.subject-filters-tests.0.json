@@ -1,6 +1,6 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2022-05-12T16:38:37.608Z",
+  "createdAt" : "2022-05-16T10:00:07.680Z",
   "id" : "tayys6jp",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "2009-01-17T02:57:31Z"
       },
       "mergedTime" : "2009-01-17T02:57:31Z",
-      "indexedTime" : "2022-05-12T16:38:37.608Z",
+      "indexedTime" : "2022-05-16T10:00:07.679Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "tayys6jp",
       "mergedTime" : "2009-01-17T02:57:31Z",
       "sourceModifiedTime" : "2009-01-17T02:57:31Z",
-      "indexedTime" : "2022-05-12T16:38:37.608Z",
+      "indexedTime" : "2022-05-16T10:00:07.679Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -177,6 +177,25 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+        "{\"label\":\"Sanitation.\",\"concepts\":[],\"type\":\"Subject\"}"
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }

@@ -1,6 +1,6 @@
 {
   "description" : "one of a list of works with a variety of languages",
-  "createdAt" : "2022-05-12T16:38:37.471Z",
+  "createdAt" : "2022-05-16T10:00:07.517Z",
   "id" : "yhrq0rmr",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "2058-11-12T20:11:18Z"
       },
       "mergedTime" : "2058-11-12T20:11:18Z",
-      "indexedTime" : "2022-05-12T16:38:37.471Z",
+      "indexedTime" : "2022-05-16T10:00:07.516Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "yhrq0rmr",
       "mergedTime" : "2058-11-12T20:11:18Z",
       "sourceModifiedTime" : "2058-11-12T20:11:18Z",
-      "indexedTime" : "2022-05-12T16:38:37.471Z",
+      "indexedTime" : "2022-05-16T10:00:07.516Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -139,6 +139,25 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+        "{\"id\":\"eng\",\"label\":\"English\",\"type\":\"Language\"}"
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }

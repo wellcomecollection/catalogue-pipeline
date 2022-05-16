@@ -1,6 +1,6 @@
 {
   "description" : "works with different contributor",
-  "createdAt" : "2022-05-12T16:38:37.517Z",
+  "createdAt" : "2022-05-16T10:00:07.575Z",
   "id" : "z08k6cnn",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "1951-04-18T00:55:53Z"
       },
       "mergedTime" : "1951-04-18T00:55:53Z",
-      "indexedTime" : "2022-05-12T16:38:37.512Z",
+      "indexedTime" : "2022-05-16T10:00:07.570Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "z08k6cnn",
       "mergedTime" : "1951-04-18T00:55:53Z",
       "sourceModifiedTime" : "1951-04-18T00:55:53Z",
-      "indexedTime" : "2022-05-12T16:38:37.512Z",
+      "indexedTime" : "2022-05-16T10:00:07.570Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -178,6 +178,26 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+        "{\"label\":\"007\",\"type\":\"Agent\"}",
+        "{\"label\":\"MI5\",\"type\":\"Organisation\"}"
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }

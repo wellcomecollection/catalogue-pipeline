@@ -1,6 +1,6 @@
 {
   "description" : "examples for the access status tests",
-  "createdAt" : "2022-05-12T16:38:37.658Z",
+  "createdAt" : "2022-05-16T10:00:07.735Z",
   "id" : "iqani2su",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "2029-03-03T16:26:17Z"
       },
       "mergedTime" : "2029-03-03T16:26:17Z",
-      "indexedTime" : "2022-05-12T16:38:37.657Z",
+      "indexedTime" : "2022-05-16T10:00:07.734Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "iqani2su",
       "mergedTime" : "2029-03-03T16:26:17Z",
       "sourceModifiedTime" : "2029-03-03T16:26:17Z",
-      "indexedTime" : "2022-05-12T16:38:37.657Z",
+      "indexedTime" : "2022-05-16T10:00:07.734Z",
       "availabilities" : [
         {
           "id" : "online"
@@ -228,6 +228,26 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+        "{\"id\":\"cc-by\",\"label\":\"Attribution 4.0 International (CC BY 4.0)\",\"url\":\"http://creativecommons.org/licenses/by/4.0/\",\"type\":\"License\"}"
+      ],
+      "availabilities" : [
+        "{\"id\":\"online\",\"label\":\"Online\",\"type\":\"Availability\"}"
+      ]
     },
     "type" : "Visible"
   }
