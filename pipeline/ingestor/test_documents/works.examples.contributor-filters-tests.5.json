@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2022-05-12T16:38:37.616Z",
+  "createdAt" : "2022-05-16T10:00:07.690Z",
   "id" : "bexh6kx6",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "2067-03-29T22:14:53Z"
       },
       "mergedTime" : "2067-03-29T22:14:53Z",
-      "indexedTime" : "2022-05-12T16:38:37.616Z",
+      "indexedTime" : "2022-05-16T10:00:07.690Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "bexh6kx6",
       "mergedTime" : "2067-03-29T22:14:53Z",
       "sourceModifiedTime" : "2067-03-29T22:14:53Z",
-      "indexedTime" : "2022-05-12T16:38:37.616Z",
+      "indexedTime" : "2022-05-16T10:00:07.690Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -130,6 +130,24 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }

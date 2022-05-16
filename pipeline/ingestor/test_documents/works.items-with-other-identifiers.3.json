@@ -1,6 +1,6 @@
 {
   "description" : "works with items with other identifiers",
-  "createdAt" : "2022-05-12T16:38:37.527Z",
+  "createdAt" : "2022-05-16T10:00:07.585Z",
   "id" : "pex9vogp",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "1962-06-05T19:31:57Z"
       },
       "mergedTime" : "1962-06-05T19:31:57Z",
-      "indexedTime" : "2022-05-12T16:38:37.527Z",
+      "indexedTime" : "2022-05-16T10:00:07.584Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "pex9vogp",
       "mergedTime" : "1962-06-05T19:31:57Z",
       "sourceModifiedTime" : "1962-06-05T19:31:57Z",
-      "indexedTime" : "2022-05-12T16:38:37.527Z",
+      "indexedTime" : "2022-05-16T10:00:07.584Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -215,6 +215,25 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+        "{\"id\":\"cc-by\",\"label\":\"Attribution 4.0 International (CC BY 4.0)\",\"url\":\"http://creativecommons.org/licenses/by/4.0/\",\"type\":\"License\"}"
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }

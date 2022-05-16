@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2022-05-12T16:38:37.615Z",
+  "createdAt" : "2022-05-16T10:00:07.688Z",
   "id" : "gnuj1it3",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "1987-11-24T07:59:41Z"
       },
       "mergedTime" : "1987-11-24T07:59:41Z",
-      "indexedTime" : "2022-05-12T16:38:37.615Z",
+      "indexedTime" : "2022-05-16T10:00:07.688Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "gnuj1it3",
       "mergedTime" : "1987-11-24T07:59:41Z",
       "sourceModifiedTime" : "1987-11-24T07:59:41Z",
-      "indexedTime" : "2022-05-12T16:38:37.615Z",
+      "indexedTime" : "2022-05-16T10:00:07.688Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -156,6 +156,25 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+        "{\"label\":\"Karl Marx\",\"type\":\"Person\"}"
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }

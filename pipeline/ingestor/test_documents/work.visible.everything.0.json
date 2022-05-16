@@ -1,6 +1,6 @@
 {
   "description" : "a list of work with all the include-able fields",
-  "createdAt" : "2022-05-12T16:38:37.418Z",
+  "createdAt" : "2022-05-16T10:00:07.403Z",
   "id" : "tmdfbk5k",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "2033-04-23T09:14:15Z"
       },
       "mergedTime" : "2033-04-23T09:14:15Z",
-      "indexedTime" : "2022-05-12T16:38:37.373Z",
+      "indexedTime" : "2022-05-16T10:00:07.354Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "tmdfbk5k",
       "mergedTime" : "2033-04-23T09:14:15Z",
       "sourceModifiedTime" : "2033-04-23T09:14:15Z",
-      "indexedTime" : "2022-05-12T16:38:37.373Z",
+      "indexedTime" : "2022-05-16T10:00:07.354Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -265,13 +265,13 @@
       "thumbnail" : null,
       "production" : [
         {
-          "label" : "8ssuRzRpFAch6oMgo8xazsI6a",
+          "label" : "zRpFAch6oMgo8xazsI6am8fhY",
           "places" : [
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "m8fhYNr11C"
+              "label" : "Nr11C9xxYE"
             }
           ],
           "agents" : [
@@ -279,7 +279,7 @@
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "9xxYEdUXSL",
+              "label" : "dUXSLHjmev",
               "prefix" : null,
               "numeration" : null,
               "type" : "Person"
@@ -290,20 +290,20 @@
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "Hjmev",
+              "label" : "8ssuR",
               "range" : null
             }
           ],
           "function" : null
         },
         {
-          "label" : "7aEhJ0QNRzQw5sJ896lVoGuWX",
+          "label" : "0QNRzQw5sJ896lVoGuWXqO9eq",
           "places" : [
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "qO9eqzvroF"
+              "label" : "zvroF4g2k9"
             }
           ],
           "agents" : [
@@ -311,7 +311,7 @@
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "4g2k9frr0x",
+              "label" : "frr0xAeKZI",
               "prefix" : null,
               "numeration" : null,
               "type" : "Person"
@@ -322,7 +322,7 @@
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "AeKZI",
+              "label" : "7aEhJ",
               "range" : null
             }
           ],
@@ -841,44 +841,44 @@
       ],
       "production" : [
         {
-          "label" : "8ssuRzRpFAch6oMgo8xazsI6a",
+          "label" : "zRpFAch6oMgo8xazsI6am8fhY",
           "places" : [
             {
-              "label" : "m8fhYNr11C",
+              "label" : "Nr11C9xxYE",
               "type" : "Place"
             }
           ],
           "agents" : [
             {
-              "label" : "9xxYEdUXSL",
+              "label" : "dUXSLHjmev",
               "type" : "Person"
             }
           ],
           "dates" : [
             {
-              "label" : "Hjmev",
+              "label" : "8ssuR",
               "type" : "Period"
             }
           ],
           "type" : "ProductionEvent"
         },
         {
-          "label" : "7aEhJ0QNRzQw5sJ896lVoGuWX",
+          "label" : "0QNRzQw5sJ896lVoGuWXqO9eq",
           "places" : [
             {
-              "label" : "qO9eqzvroF",
+              "label" : "zvroF4g2k9",
               "type" : "Place"
             }
           ],
           "agents" : [
             {
-              "label" : "4g2k9frr0x",
+              "label" : "frr0xAeKZI",
               "type" : "Person"
             }
           ],
           "dates" : [
             {
-              "label" : "AeKZI",
+              "label" : "7aEhJ",
               "type" : "Period"
             }
           ],
@@ -994,6 +994,36 @@
         }
       ],
       "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+        "{\"label\":\"Uw1LvlTE5c\",\"concepts\":[],\"type\":\"Genre\"}",
+        "{\"label\":\"YMZquffyNP\",\"concepts\":[],\"type\":\"Genre\"}"
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+        "{\"label\":\"RGOo9Fg6ic\",\"concepts\":[],\"type\":\"Subject\"}",
+        "{\"label\":\"k1WGWfqE6x\",\"concepts\":[],\"type\":\"Subject\"}"
+      ],
+      "languages" : [
+        "{\"id\":\"qbV\",\"label\":\"83c9SMhIH\",\"type\":\"Language\"}",
+        "{\"id\":\"2DH\",\"label\":\"Ap8e8Su\",\"type\":\"Language\"}",
+        "{\"id\":\"yMV\",\"label\":\"QTT2Ir\",\"type\":\"Language\"}"
+      ],
+      "contributors.agent.label" : [
+        "{\"label\":\"person-W9SVIX0fEg\",\"type\":\"Person\"}",
+        "{\"label\":\"person-IWtB2H6\",\"type\":\"Person\"}"
+      ],
+      "items.locations.license" : [
+        "{\"id\":\"cc-by\",\"label\":\"Attribution 4.0 International (CC BY 4.0)\",\"url\":\"http://creativecommons.org/licenses/by/4.0/\",\"type\":\"License\"}",
+        "{\"id\":\"cc-by\",\"label\":\"Attribution 4.0 International (CC BY 4.0)\",\"url\":\"http://creativecommons.org/licenses/by/4.0/\",\"type\":\"License\"}",
+        "{\"id\":\"cc-by\",\"label\":\"Attribution 4.0 International (CC BY 4.0)\",\"url\":\"http://creativecommons.org/licenses/by/4.0/\",\"type\":\"License\"}"
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }

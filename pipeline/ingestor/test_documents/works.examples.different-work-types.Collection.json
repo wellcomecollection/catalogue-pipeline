@@ -1,6 +1,6 @@
 {
   "description" : "examples of works with different types",
-  "createdAt" : "2022-05-12T16:38:37.598Z",
+  "createdAt" : "2022-05-16T10:00:07.667Z",
   "id" : "2tqcclh1",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "1933-08-10T09:08:15Z"
       },
       "mergedTime" : "1933-08-10T09:08:15Z",
-      "indexedTime" : "2022-05-12T16:38:37.597Z",
+      "indexedTime" : "2022-05-16T10:00:07.666Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "2tqcclh1",
       "mergedTime" : "1933-08-10T09:08:15Z",
       "sourceModifiedTime" : "1933-08-10T09:08:15Z",
-      "indexedTime" : "2022-05-12T16:38:37.597Z",
+      "indexedTime" : "2022-05-16T10:00:07.666Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -130,6 +130,24 @@
       "succeededBy" : [
       ],
       "type" : "Collection"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }

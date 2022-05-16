@@ -1,6 +1,6 @@
 {
   "description" : "works with different subjects",
-  "createdAt" : "2022-05-12T16:38:37.496Z",
+  "createdAt" : "2022-05-16T10:00:07.551Z",
   "id" : "mihwfxry",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "1993-11-26T03:07:07Z"
       },
       "mergedTime" : "1993-11-26T03:07:07Z",
-      "indexedTime" : "2022-05-12T16:38:37.496Z",
+      "indexedTime" : "2022-05-16T10:00:07.550Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "mihwfxry",
       "mergedTime" : "1993-11-26T03:07:07Z",
       "sourceModifiedTime" : "1993-11-26T03:07:07Z",
-      "indexedTime" : "2022-05-12T16:38:37.496Z",
+      "indexedTime" : "2022-05-16T10:00:07.550Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -177,6 +177,25 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+        "{\"label\":\"realAnalysis\",\"concepts\":[],\"type\":\"Subject\"}"
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }

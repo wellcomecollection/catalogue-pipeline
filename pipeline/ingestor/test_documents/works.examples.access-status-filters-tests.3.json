@@ -1,6 +1,6 @@
 {
   "description" : "examples for the access status tests",
-  "createdAt" : "2022-05-12T16:38:37.657Z",
+  "createdAt" : "2022-05-16T10:00:07.734Z",
   "id" : "wys5lz5r",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "1952-04-21T12:12:37Z"
       },
       "mergedTime" : "1952-04-21T12:12:37Z",
-      "indexedTime" : "2022-05-12T16:38:37.657Z",
+      "indexedTime" : "2022-05-16T10:00:07.734Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "wys5lz5r",
       "mergedTime" : "1952-04-21T12:12:37Z",
       "sourceModifiedTime" : "1952-04-21T12:12:37Z",
-      "indexedTime" : "2022-05-12T16:38:37.657Z",
+      "indexedTime" : "2022-05-16T10:00:07.734Z",
       "availabilities" : [
         {
           "id" : "online"
@@ -229,6 +229,26 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+        "{\"id\":\"cc-by\",\"label\":\"Attribution 4.0 International (CC BY 4.0)\",\"url\":\"http://creativecommons.org/licenses/by/4.0/\",\"type\":\"License\"}"
+      ],
+      "availabilities" : [
+        "{\"id\":\"online\",\"label\":\"Online\",\"type\":\"Availability\"}"
+      ]
     },
     "type" : "Visible"
   }

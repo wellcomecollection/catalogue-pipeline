@@ -1,6 +1,6 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2022-05-12T16:38:37.610Z",
+  "createdAt" : "2022-05-16T10:00:07.682Z",
   "id" : "gmzc1icz",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "1983-04-17T04:26:34Z"
       },
       "mergedTime" : "1983-04-17T04:26:34Z",
-      "indexedTime" : "2022-05-12T16:38:37.609Z",
+      "indexedTime" : "2022-05-16T10:00:07.681Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "gmzc1icz",
       "mergedTime" : "1983-04-17T04:26:34Z",
       "sourceModifiedTime" : "1983-04-17T04:26:34Z",
-      "indexedTime" : "2022-05-12T16:38:37.609Z",
+      "indexedTime" : "2022-05-16T10:00:07.681Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -271,6 +271,27 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+        "{\"label\":\"London (England)\",\"concepts\":[],\"type\":\"Subject\"}",
+        "{\"label\":\"Psychology, Pathological\",\"concepts\":[],\"type\":\"Subject\"}",
+        "{\"label\":\"Darwin \\\"Jones\\\", Charles\",\"concepts\":[],\"type\":\"Subject\"}"
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }

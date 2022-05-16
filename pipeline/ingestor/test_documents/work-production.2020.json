@@ -1,6 +1,6 @@
 {
   "description" : "a work with a production event in 2020",
-  "createdAt" : "2022-05-12T16:38:37.346Z",
+  "createdAt" : "2022-05-16T10:00:07.321Z",
   "id" : "0fucriyr",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "1936-06-08T14:59:50Z"
       },
       "mergedTime" : "1936-06-08T14:59:50Z",
-      "indexedTime" : "2022-05-12T16:38:37.345Z",
+      "indexedTime" : "2022-05-16T10:00:07.319Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "0fucriyr",
       "mergedTime" : "1936-06-08T14:59:50Z",
       "sourceModifiedTime" : "1936-06-08T14:59:50Z",
-      "indexedTime" : "2022-05-12T16:38:37.345Z",
+      "indexedTime" : "2022-05-16T10:00:07.319Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -165,6 +165,25 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+        "{\"label\":\"2020\",\"type\":\"Period\"}"
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }

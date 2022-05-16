@@ -1,6 +1,6 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2022-05-12T16:38:37.575Z",
+  "createdAt" : "2022-05-16T10:00:07.640Z",
   "id" : "vpkqafpg",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "2047-01-14T15:40:08Z"
       },
       "mergedTime" : "2047-01-14T15:40:08Z",
-      "indexedTime" : "2022-05-12T16:38:37.574Z",
+      "indexedTime" : "2022-05-16T10:00:07.639Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "vpkqafpg",
       "mergedTime" : "2047-01-14T15:40:08Z",
       "sourceModifiedTime" : "2047-01-14T15:40:08Z",
-      "indexedTime" : "2022-05-12T16:38:37.574Z",
+      "indexedTime" : "2022-05-16T10:00:07.639Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -185,6 +185,26 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+        "{\"id\":\"l\",\"label\":\"Ephemera\",\"type\":\"Format\"}"
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+        "{\"label\":\"6IZ2DrUzFk\",\"concepts\":[],\"type\":\"Subject\"}"
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }

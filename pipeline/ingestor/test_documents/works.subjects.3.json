@@ -1,6 +1,6 @@
 {
   "description" : "works with different subjects",
-  "createdAt" : "2022-05-12T16:38:37.497Z",
+  "createdAt" : "2022-05-16T10:00:07.554Z",
   "id" : "xcssabt1",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "2018-09-21T04:30:20Z"
       },
       "mergedTime" : "2018-09-21T04:30:20Z",
-      "indexedTime" : "2022-05-12T16:38:37.497Z",
+      "indexedTime" : "2022-05-16T10:00:07.552Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "xcssabt1",
       "mergedTime" : "2018-09-21T04:30:20Z",
       "sourceModifiedTime" : "2018-09-21T04:30:20Z",
-      "indexedTime" : "2022-05-12T16:38:37.497Z",
+      "indexedTime" : "2022-05-16T10:00:07.552Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -224,6 +224,26 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+        "{\"label\":\"paleoNeuroBiology\",\"concepts\":[],\"type\":\"Subject\"}",
+        "{\"label\":\"realAnalysis\",\"concepts\":[],\"type\":\"Subject\"}"
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }

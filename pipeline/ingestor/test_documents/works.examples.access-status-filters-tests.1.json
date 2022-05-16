@@ -1,6 +1,6 @@
 {
   "description" : "examples for the access status tests",
-  "createdAt" : "2022-05-12T16:38:37.656Z",
+  "createdAt" : "2022-05-16T10:00:07.733Z",
   "id" : "jwvfegzn",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "2011-12-02T02:25:25Z"
       },
       "mergedTime" : "2011-12-02T02:25:25Z",
-      "indexedTime" : "2022-05-12T16:38:37.656Z",
+      "indexedTime" : "2022-05-16T10:00:07.733Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "jwvfegzn",
       "mergedTime" : "2011-12-02T02:25:25Z",
       "sourceModifiedTime" : "2011-12-02T02:25:25Z",
-      "indexedTime" : "2022-05-12T16:38:37.656Z",
+      "indexedTime" : "2022-05-16T10:00:07.733Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -220,6 +220,25 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+        "{\"id\":\"cc-by\",\"label\":\"Attribution 4.0 International (CC BY 4.0)\",\"url\":\"http://creativecommons.org/licenses/by/4.0/\",\"type\":\"License\"}"
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }

@@ -1,6 +1,6 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2022-05-12T16:38:37.579Z",
+  "createdAt" : "2022-05-16T10:00:07.647Z",
   "id" : "66bwuadw",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "1965-01-04T22:54:26Z"
       },
       "mergedTime" : "1965-01-04T22:54:26Z",
-      "indexedTime" : "2022-05-12T16:38:37.578Z",
+      "indexedTime" : "2022-05-16T10:00:07.646Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "66bwuadw",
       "mergedTime" : "1965-01-04T22:54:26Z",
       "sourceModifiedTime" : "1965-01-04T22:54:26Z",
-      "indexedTime" : "2022-05-12T16:38:37.578Z",
+      "indexedTime" : "2022-05-16T10:00:07.646Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -185,6 +185,26 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+        "{\"id\":\"n\",\"label\":\"Film\",\"type\":\"Format\"}"
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+        "{\"label\":\"v4BHmwGTZr\",\"concepts\":[],\"type\":\"Subject\"}"
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }

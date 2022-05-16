@@ -15,7 +15,8 @@ object IndexedWork {
     debug: DebugInformation.Visible,
     state: WorkState.Indexed,
     data: WorkData[DataState.Identified],
-    display: Json
+    display: Json,
+    aggregatableValues: WorkAggregatableValues
   ) extends IndexedWork
 
   case class Redirected(

@@ -1,6 +1,6 @@
 {
   "description" : "one of a list of works with a variety of formats",
-  "createdAt" : "2022-05-12T16:38:37.461Z",
+  "createdAt" : "2022-05-16T10:00:07.505Z",
   "id" : "elrgwjtd",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "1981-07-01T07:44:00Z"
       },
       "mergedTime" : "1981-07-01T07:44:00Z",
-      "indexedTime" : "2022-05-12T16:38:37.460Z",
+      "indexedTime" : "2022-05-16T10:00:07.505Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "elrgwjtd",
       "mergedTime" : "1981-07-01T07:44:00Z",
       "sourceModifiedTime" : "1981-07-01T07:44:00Z",
-      "indexedTime" : "2022-05-12T16:38:37.460Z",
+      "indexedTime" : "2022-05-16T10:00:07.505Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -138,6 +138,25 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+        "{\"id\":\"i\",\"label\":\"Audio\",\"type\":\"Format\"}"
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }

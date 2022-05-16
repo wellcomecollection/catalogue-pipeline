@@ -1,6 +1,6 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2022-05-12T16:38:37.609Z",
+  "createdAt" : "2022-05-16T10:00:07.681Z",
   "id" : "b1r485o0",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "1986-02-15T03:35:37Z"
       },
       "mergedTime" : "1986-02-15T03:35:37Z",
-      "indexedTime" : "2022-05-12T16:38:37.609Z",
+      "indexedTime" : "2022-05-16T10:00:07.681Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "b1r485o0",
       "mergedTime" : "1986-02-15T03:35:37Z",
       "sourceModifiedTime" : "1986-02-15T03:35:37Z",
-      "indexedTime" : "2022-05-12T16:38:37.609Z",
+      "indexedTime" : "2022-05-16T10:00:07.681Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -177,6 +177,25 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+        "{\"label\":\"Darwin \\\"Jones\\\", Charles\",\"concepts\":[],\"type\":\"Subject\"}"
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }

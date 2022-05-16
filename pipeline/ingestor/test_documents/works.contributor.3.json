@@ -1,6 +1,6 @@
 {
   "description" : "works with different contributor",
-  "createdAt" : "2022-05-12T16:38:37.518Z",
+  "createdAt" : "2022-05-16T10:00:07.576Z",
   "id" : "gtfjchvo",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "2026-06-18T13:10:44Z"
       },
       "mergedTime" : "2026-06-18T13:10:44Z",
-      "indexedTime" : "2022-05-12T16:38:37.518Z",
+      "indexedTime" : "2022-05-16T10:00:07.575Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "gtfjchvo",
       "mergedTime" : "2026-06-18T13:10:44Z",
       "sourceModifiedTime" : "2026-06-18T13:10:44Z",
-      "indexedTime" : "2022-05-12T16:38:37.518Z",
+      "indexedTime" : "2022-05-16T10:00:07.575Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -178,6 +178,26 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+        "{\"label\":\"MI5\",\"type\":\"Organisation\"}",
+        "{\"label\":\"GCHQ\",\"type\":\"Organisation\"}"
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }

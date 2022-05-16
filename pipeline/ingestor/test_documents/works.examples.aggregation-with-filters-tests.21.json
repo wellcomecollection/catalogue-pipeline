@@ -1,6 +1,6 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2022-05-12T16:38:37.582Z",
+  "createdAt" : "2022-05-16T10:00:07.651Z",
   "id" : "5hlmpzzh",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "2007-01-26T01:16:40Z"
       },
       "mergedTime" : "2007-01-26T01:16:40Z",
-      "indexedTime" : "2022-05-12T16:38:37.581Z",
+      "indexedTime" : "2022-05-16T10:00:07.650Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "5hlmpzzh",
       "mergedTime" : "2007-01-26T01:16:40Z",
       "sourceModifiedTime" : "2007-01-26T01:16:40Z",
-      "indexedTime" : "2022-05-12T16:38:37.581Z",
+      "indexedTime" : "2022-05-16T10:00:07.650Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -185,6 +185,26 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+        "{\"id\":\"f\",\"label\":\"E-videos\",\"type\":\"Format\"}"
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+        "{\"label\":\"9hdRJC6PIO\",\"concepts\":[],\"type\":\"Subject\"}"
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }

@@ -1,24 +1,24 @@
 package weco.catalogue.internal_model.work.generators
 
-import weco.fixtures.RandomGenerators
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work._
+import weco.fixtures.RandomGenerators
 
 trait ProductionEventGenerators extends RandomGenerators {
   def createProductionEventWith(
     function: Option[Concept[IdState.Minted]] = None,
-    dateLabel: Option[String] = None
+    dates: List[Period[IdState.Minted]] = List(
+      Period(
+        id = IdState.Unidentifiable,
+        label = randomAlphanumeric(5)
+      )
+    )
   ): ProductionEvent[IdState.Minted] =
     ProductionEvent(
       label = randomAlphanumeric(25),
       places = List(Place(randomAlphanumeric(10))),
       agents = List(Person(randomAlphanumeric(10))),
-      dates = List(
-        Period(
-          id = IdState.Unidentifiable,
-          label = dateLabel.getOrElse(randomAlphanumeric(5))
-        )
-      ),
+      dates = dates,
       function = function
     )
 

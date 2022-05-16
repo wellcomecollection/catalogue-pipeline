@@ -7,7 +7,8 @@ import weco.catalogue.internal_model.work.Work
 import weco.pipeline.ingestor.works.models.{
   DebugInformation,
   IndexedWork,
-  SourceWorkDebugInformation
+  SourceWorkDebugInformation,
+  WorkAggregatableValues
 }
 import weco.catalogue.display_model.Implicits._
 
@@ -40,7 +41,10 @@ trait WorkTransformer {
             ),
             state = state,
             data = data,
-            display = DisplayWork(w).asJson.deepDropNullValues
+            display = DisplayWork(w).asJson.deepDropNullValues,
+            aggregatableValues = WorkAggregatableValues(
+              w.data,
+              availabilities = state.availabilities)
           )
 
         case Work.Invisible(_, data, _, invisibilityReasons) =>

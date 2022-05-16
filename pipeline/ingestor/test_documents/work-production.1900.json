@@ -1,6 +1,6 @@
 {
   "description" : "a work with a production event in 1900",
-  "createdAt" : "2022-05-12T16:38:37.339Z",
+  "createdAt" : "2022-05-16T10:00:07.312Z",
   "id" : "rbnro6wx",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "1935-04-27T19:39:17Z"
       },
       "mergedTime" : "1935-04-27T19:39:17Z",
-      "indexedTime" : "2022-05-12T16:38:37.296Z",
+      "indexedTime" : "2022-05-16T10:00:07.295Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "rbnro6wx",
       "mergedTime" : "1935-04-27T19:39:17Z",
       "sourceModifiedTime" : "1935-04-27T19:39:17Z",
-      "indexedTime" : "2022-05-12T16:38:37.296Z",
+      "indexedTime" : "2022-05-16T10:00:07.295Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -165,6 +165,25 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+        "{\"label\":\"1900\",\"type\":\"Period\"}"
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }

@@ -1,6 +1,6 @@
 {
   "description" : "examples for the works filtered aggregations tests",
-  "createdAt" : "2022-05-12T16:38:37.669Z",
+  "createdAt" : "2022-05-16T10:00:07.749Z",
   "id" : "580nnpfa",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "2015-07-21T11:19:34Z"
       },
       "mergedTime" : "2015-07-21T11:19:34Z",
-      "indexedTime" : "2022-05-12T16:38:37.668Z",
+      "indexedTime" : "2022-05-16T10:00:07.748Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "580nnpfa",
       "mergedTime" : "2015-07-21T11:19:34Z",
       "sourceModifiedTime" : "2015-07-21T11:19:34Z",
-      "indexedTime" : "2022-05-12T16:38:37.668Z",
+      "indexedTime" : "2022-05-16T10:00:07.748Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -147,6 +147,26 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+        "{\"id\":\"d\",\"label\":\"Journals\",\"type\":\"Format\"}"
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+        "{\"id\":\"mar\",\"label\":\"Marathi\",\"type\":\"Language\"}"
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }

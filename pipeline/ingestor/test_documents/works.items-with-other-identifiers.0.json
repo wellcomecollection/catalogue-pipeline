@@ -1,6 +1,6 @@
 {
   "description" : "works with items with other identifiers",
-  "createdAt" : "2022-05-12T16:38:37.525Z",
+  "createdAt" : "2022-05-16T10:00:07.583Z",
   "id" : "qjnwiqbs",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "2042-05-19T11:22:55Z"
       },
       "mergedTime" : "2042-05-19T11:22:55Z",
-      "indexedTime" : "2022-05-12T16:38:37.524Z",
+      "indexedTime" : "2022-05-16T10:00:07.582Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "qjnwiqbs",
       "mergedTime" : "2042-05-19T11:22:55Z",
       "sourceModifiedTime" : "2042-05-19T11:22:55Z",
-      "indexedTime" : "2022-05-12T16:38:37.524Z",
+      "indexedTime" : "2022-05-16T10:00:07.582Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -213,6 +213,25 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+        "{\"id\":\"cc-by\",\"label\":\"Attribution 4.0 International (CC BY 4.0)\",\"url\":\"http://creativecommons.org/licenses/by/4.0/\",\"type\":\"License\"}"
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }

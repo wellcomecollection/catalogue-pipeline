@@ -1,6 +1,6 @@
 {
   "description" : "one of a list of works with a variety of languages",
-  "createdAt" : "2022-05-12T16:38:37.472Z",
+  "createdAt" : "2022-05-16T10:00:07.519Z",
   "id" : "ioqwetut",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "1976-09-22T07:55:28Z"
       },
       "mergedTime" : "1976-09-22T07:55:28Z",
-      "indexedTime" : "2022-05-12T16:38:37.472Z",
+      "indexedTime" : "2022-05-16T10:00:07.518Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "ioqwetut",
       "mergedTime" : "1976-09-22T07:55:28Z",
       "sourceModifiedTime" : "1976-09-22T07:55:28Z",
-      "indexedTime" : "2022-05-12T16:38:37.472Z",
+      "indexedTime" : "2022-05-16T10:00:07.518Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -148,6 +148,26 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+        "{\"id\":\"eng\",\"label\":\"English\",\"type\":\"Language\"}",
+        "{\"id\":\"swe\",\"label\":\"Swedish\",\"type\":\"Language\"}"
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }

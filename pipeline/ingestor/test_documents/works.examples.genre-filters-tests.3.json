@@ -1,6 +1,6 @@
 {
   "description" : "examples for the genre tests",
-  "createdAt" : "2022-05-12T16:38:37.602Z",
+  "createdAt" : "2022-05-16T10:00:07.673Z",
   "id" : "1mqutqzm",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "2025-06-24T11:15:30Z"
       },
       "mergedTime" : "2025-06-24T11:15:30Z",
-      "indexedTime" : "2022-05-12T16:38:37.602Z",
+      "indexedTime" : "2022-05-16T10:00:07.673Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "1mqutqzm",
       "mergedTime" : "2025-06-24T11:15:30Z",
       "sourceModifiedTime" : "2025-06-24T11:15:30Z",
-      "indexedTime" : "2022-05-12T16:38:37.602Z",
+      "indexedTime" : "2022-05-16T10:00:07.673Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -174,6 +174,25 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+        "{\"label\":\"Darwin \\\"Jones\\\", Charles\",\"concepts\":[],\"type\":\"Genre\"}"
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }

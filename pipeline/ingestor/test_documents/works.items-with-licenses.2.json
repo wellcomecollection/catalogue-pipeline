@@ -1,6 +1,6 @@
 {
   "description" : "a work with licensed digital items",
-  "createdAt" : "2022-05-12T16:38:37.481Z",
+  "createdAt" : "2022-05-16T10:00:07.531Z",
   "id" : "ougtipki",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "2063-06-30T11:46:39Z"
       },
       "mergedTime" : "2063-06-30T11:46:39Z",
-      "indexedTime" : "2022-05-12T16:38:37.480Z",
+      "indexedTime" : "2022-05-16T10:00:07.530Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "ougtipki",
       "mergedTime" : "2063-06-30T11:46:39Z",
       "sourceModifiedTime" : "2063-06-30T11:46:39Z",
-      "indexedTime" : "2022-05-12T16:38:37.480Z",
+      "indexedTime" : "2022-05-16T10:00:07.530Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -177,6 +177,25 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+        "{\"id\":\"cc-by-nc\",\"label\":\"Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)\",\"url\":\"https://creativecommons.org/licenses/by-nc/4.0/\",\"type\":\"License\"}"
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }
