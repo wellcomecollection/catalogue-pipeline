@@ -59,6 +59,9 @@ class PathsService(elasticClient: ElasticClient, index: Index)(
   }
 
   def getChildWorks(path: String): Future[Seq[Work.Visible[Merged]]] = {
+    //TODO: Warn if totalHits is too big.
+    // It is highly unlikely to reach the ES maximum of 10,000
+    // but if totalhits is greater than size, a warning should be logged.
     val request: SearchRequest = requestBuilder.childWorks(path)
     debug(
       s"Querying for child works of path with ES request: ${elasticClient.show(request)}")
