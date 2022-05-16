@@ -66,7 +66,8 @@ trait AggregatableValues {
       workData.production
         .flatMap(_.dates)
         .flatMap(_.range)
-        .map(range => LocalDateTime.ofInstant(range.from, ZoneId.systemDefault()).getYear)
+        .map(range =>
+          LocalDateTime.ofInstant(range.from, ZoneId.systemDefault()).getYear)
         .map(startYear => DisplayPeriod(label = startYear.toString))
         .asJson()
   }
@@ -78,8 +79,7 @@ trait AggregatableValues {
 
   implicit class JsonStringOps[T](t: List[T])(implicit encoder: Encoder[T]) {
     def asJson(transform: Json => Json = identity[Json]): List[String] =
-      t
-        .map(_.asJson.deepDropNullValues)
+      t.map(_.asJson.deepDropNullValues)
         .map(transform(_))
         .map(_.noSpaces)
   }
@@ -98,13 +98,17 @@ trait AggregatableValues {
     // Note: this is meant to preserve the order of keys in the original object.
     //
     def update(key: String, value: Json): Json =
-      json.mapObject(jsonObj =>
-        Json.fromFields(
-          jsonObj.toIterable
-            .map { case (k, v) =>
-              if (k == key) (key, value) else (k, v)
-            }
-        ).asObject.get
-      )
+      json.mapObject(
+        jsonObj =>
+          Json
+            .fromFields(
+              jsonObj.toIterable
+                .map {
+                  case (k, v) =>
+                    if (k == key) (key, value) else (k, v)
+                }
+            )
+            .asObject
+            .get)
   }
 }

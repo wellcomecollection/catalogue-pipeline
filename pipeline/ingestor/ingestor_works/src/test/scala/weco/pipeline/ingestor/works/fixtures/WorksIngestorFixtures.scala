@@ -48,7 +48,9 @@ trait WorksIngestorFixtures
       storedWork match {
         case w @ IndexedWork.Visible(_, _, _, _, _) =>
           w.data shouldBe expectedWork.asInstanceOf[IndexedWork.Visible].data
-          w.aggregatableValues shouldBe WorkAggregatableValues(work.data, work.state.availabilities)
+          w.aggregatableValues shouldBe WorkAggregatableValues(
+            work.data,
+            work.state.availabilities)
         case _ => ()
       }
 

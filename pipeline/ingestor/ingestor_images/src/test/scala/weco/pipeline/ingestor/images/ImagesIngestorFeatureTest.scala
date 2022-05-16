@@ -16,7 +16,10 @@ import weco.fixtures.TestWith
 import weco.json.JsonUtil._
 import weco.messaging.fixtures.SQS.{Queue, QueuePair}
 import weco.pipeline.ingestor.fixtures.IngestorFixtures
-import weco.pipeline.ingestor.images.models.{ImageAggregatableValues, IndexedImage}
+import weco.pipeline.ingestor.images.models.{
+  ImageAggregatableValues,
+  IndexedImage
+}
 import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -60,7 +63,8 @@ class ImagesIngestorFeatureTest
             val expectedJson =
               DisplayImage(image.transition[ImageState.Indexed]())
 
-            storedImage.aggregatableValues shouldBe ImageAggregatableValues(image.source)
+            storedImage.aggregatableValues shouldBe ImageAggregatableValues(
+              image.source)
 
             storedJson shouldBe expectedJson
           }

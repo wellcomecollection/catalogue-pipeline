@@ -2,7 +2,11 @@ package weco.catalogue.internal_model.index
 
 import buildinfo.BuildInfo
 import com.sksamuel.elastic4s.ElasticDsl._
-import com.sksamuel.elastic4s.fields.{ElasticField, ObjectField, TokenCountField}
+import com.sksamuel.elastic4s.fields.{
+  ElasticField,
+  ObjectField,
+  TokenCountField
+}
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
 import weco.elasticsearch.{IndexConfig, RefreshInterval}
 

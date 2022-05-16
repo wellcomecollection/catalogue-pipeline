@@ -18,7 +18,8 @@ case object ImageAggregatableValues extends AggregatableValues {
       case ParentWorks(canonicalWork, _) => fromWorkData(canonicalWork.data)
     }
 
-  private def fromWorkData(workData: WorkData[DataState.Identified]): ImageAggregatableValues =
+  private def fromWorkData(
+    workData: WorkData[DataState.Identified]): ImageAggregatableValues =
     ImageAggregatableValues(
       licenses = workData.licenseAggregatableValues,
       contributors = workData.contributorAggregatableValues,

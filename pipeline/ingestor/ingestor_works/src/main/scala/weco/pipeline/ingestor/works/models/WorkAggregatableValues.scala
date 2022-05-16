@@ -17,7 +17,8 @@ case class WorkAggregatableValues(
 )
 
 case object WorkAggregatableValues extends AggregatableValues {
-  def apply(workData: WorkData[DataState.Identified], availabilities: Set[Availability]): WorkAggregatableValues =
+  def apply(workData: WorkData[DataState.Identified],
+            availabilities: Set[Availability]): WorkAggregatableValues =
     WorkAggregatableValues(
       workTypes = workData.workTypeAggregatableValues,
       genres = workData.genreAggregatableValues,

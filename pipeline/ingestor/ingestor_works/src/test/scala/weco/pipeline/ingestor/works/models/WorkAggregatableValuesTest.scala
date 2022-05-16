@@ -5,10 +5,19 @@ import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.{DataState, IdState}
 import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.locations.{License, LocationType}
-import weco.catalogue.internal_model.work.generators.{ItemsGenerators, PeriodGenerators, ProductionEventGenerators}
+import weco.catalogue.internal_model.work.generators.{
+  ItemsGenerators,
+  PeriodGenerators,
+  ProductionEventGenerators
+}
 import weco.catalogue.internal_model.work._
 
-class WorkAggregatableValuesTest extends AnyFunSpec with Matchers with ItemsGenerators with ProductionEventGenerators with PeriodGenerators {
+class WorkAggregatableValuesTest
+    extends AnyFunSpec
+    with Matchers
+    with ItemsGenerators
+    with ProductionEventGenerators
+    with PeriodGenerators {
   it("creates aggregatable values") {
     val data = WorkData[DataState.Identified](
       title = Some("a work used in the ImageAggregatableValues tests"),
@@ -18,8 +27,12 @@ class WorkAggregatableValuesTest extends AnyFunSpec with Matchers with ItemsGene
         Genre(label = "grouchy groundhogs")
       ),
       subjects = List(
-        Subject(label = "salty sandwiches", concepts = List(Concept("taste"), Concept("foodstuffs"))),
-        Subject(label = "silly sausages", concepts = List(Concept("foodstuffs"))),
+        Subject(
+          label = "salty sandwiches",
+          concepts = List(Concept("taste"), Concept("foodstuffs"))),
+        Subject(
+          label = "silly sausages",
+          concepts = List(Concept("foodstuffs"))),
         Subject(label = "secret spies", concepts = List(Concept("espionage"))),
       ),
       contributors = List(
@@ -46,7 +59,11 @@ class WorkAggregatableValuesTest extends AnyFunSpec with Matchers with ItemsGene
         createDigitalItemWith(license = None),
         createDigitalItemWith(license = Some(License.PDM)),
         createDigitalItemWith(license = Some(License.CCBY)),
-        createIdentifiedItemWith(locations = List(createPhysicalLocationWith(locationType = LocationType.ClosedStores, license = None)))
+        createIdentifiedItemWith(
+          locations = List(
+            createPhysicalLocationWith(
+              locationType = LocationType.ClosedStores,
+              license = None)))
       ),
       languages = List(
         Language(id = "eng", label = "English"),
