@@ -1,22 +1,22 @@
 {
   "description" : "an arbitrary list of deleted works",
-  "createdAt" : "2022-05-16T10:00:07.259Z",
-  "id" : "pnwuzuig",
+  "createdAt" : "2022-05-04T07:15:02.754Z",
+  "id" : "batmoife",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "h0Og1ZYVOG"
+          "value" : "pNwuZuiGR2"
         },
-        "version" : 15,
-        "modifiedTime" : "1980-07-10T02:15:52Z"
+        "version" : 99,
+        "modifiedTime" : "2022-04-15T05:18:00Z"
       },
-      "mergedTime" : "1980-07-10T02:15:52Z",
-      "indexedTime" : "2022-05-16T10:00:07.250Z",
+      "mergedTime" : "2022-04-15T05:18:00Z",
+      "indexedTime" : "2022-05-04T07:15:02.745Z",
       "deletedReason" : {
         "info" : "tests",
         "type" : "DeletedFromSource"
@@ -25,15 +25,15 @@
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "miro-image-number"
+          "id" : "calm-record-id"
         },
         "ontologyType" : "Work",
-        "value" : "h0Og1ZYVOG"
+        "value" : "pNwuZuiGR2"
       },
-      "canonicalId" : "pnwuzuig",
-      "mergedTime" : "1980-07-10T02:15:52Z",
-      "sourceModifiedTime" : "1980-07-10T02:15:52Z",
-      "indexedTime" : "2022-05-16T10:00:07.250Z",
+      "canonicalId" : "batmoife",
+      "mergedTime" : "2022-04-15T05:18:00Z",
+      "sourceModifiedTime" : "2022-04-15T05:18:00Z",
+      "indexedTime" : "2022-05-04T07:15:02.745Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -50,6 +50,43 @@
         "siblingsSucceeding" : [
         ]
       }
+    },
+    "type" : "Deleted"
+  },
+  "work" : {
+    "version" : 99,
+    "state" : {
+      "sourceIdentifier" : {
+        "identifierType" : {
+          "id" : "calm-record-id"
+        },
+        "ontologyType" : "Work",
+        "value" : "pNwuZuiGR2"
+      },
+      "canonicalId" : "batmoife",
+      "mergedTime" : "2022-04-15T05:18:00Z",
+      "sourceModifiedTime" : "2022-04-15T05:18:00Z",
+      "indexedTime" : "2022-05-04T07:15:02.754Z",
+      "availabilities" : [
+      ],
+      "derivedData" : {
+        "contributorAgents" : [
+        ]
+      },
+      "relations" : {
+        "ancestors" : [
+        ],
+        "children" : [
+        ],
+        "siblingsPreceding" : [
+        ],
+        "siblingsSucceeding" : [
+        ]
+      }
+    },
+    "deletedReason" : {
+      "info" : "tests",
+      "type" : "DeletedFromSource"
     },
     "type" : "Deleted"
   }

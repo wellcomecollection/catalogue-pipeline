@@ -1,37 +1,37 @@
 {
   "description" : "a work with licensed digital items",
-  "createdAt" : "2022-05-16T10:00:07.531Z",
-  "id" : "ougtipki",
+  "createdAt" : "2022-05-04T07:15:03.045Z",
+  "id" : "pak011dv",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "fbITZO5oAg"
+          "value" : "mye6nSw6AS"
         },
-        "version" : 37,
-        "modifiedTime" : "2063-06-30T11:46:39Z"
+        "version" : 48,
+        "modifiedTime" : "2022-05-13T11:39:58Z"
       },
-      "mergedTime" : "2063-06-30T11:46:39Z",
-      "indexedTime" : "2022-05-16T10:00:07.530Z",
+      "mergedTime" : "2022-05-13T11:39:58Z",
+      "indexedTime" : "2022-05-04T07:15:03.045Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "sierra-system-number"
+          "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "fbITZO5oAg"
+        "value" : "mye6nSw6AS"
       },
-      "canonicalId" : "ougtipki",
-      "mergedTime" : "2063-06-30T11:46:39Z",
-      "sourceModifiedTime" : "2063-06-30T11:46:39Z",
-      "indexedTime" : "2022-05-16T10:00:07.530Z",
+      "canonicalId" : "pak011dv",
+      "mergedTime" : "2022-05-13T11:39:58Z",
+      "sourceModifiedTime" : "2022-05-13T11:39:58Z",
+      "indexedTime" : "2022-05-04T07:15:03.045Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -50,7 +50,7 @@
       }
     },
     "data" : {
-      "title" : "title-pEBp6sf3WU",
+      "title" : "title-n9x0HfU454",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -84,15 +84,15 @@
           "note" : null,
           "locations" : [
             {
-              "url" : "https://iiif.wellcomecollection.org/image/65z.jpg/info.json",
+              "url" : "https://iiif.wellcomecollection.org/image/h2C.jpg/info.json",
               "locationType" : {
                 "id" : "iiif-presentation"
               },
               "license" : {
                 "id" : "cc-by-nc"
               },
-              "credit" : null,
-              "linkText" : null,
+              "credit" : "Credit line: 3B2FRNwvc",
+              "linkText" : "Link text: LP9LzQY",
               "accessConditions" : [
               ],
               "type" : "DigitalLocation"
@@ -109,8 +109,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "ougtipki",
-      "title" : "title-pEBp6sf3WU",
+      "id" : "pak011dv",
+      "title" : "title-n9x0HfU454",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -118,11 +118,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "fbITZO5oAg",
+          "value" : "mye6nSw6AS",
           "type" : "Identifier"
         }
       ],
@@ -141,7 +141,9 @@
                 "label" : "IIIF Presentation API",
                 "type" : "LocationType"
               },
-              "url" : "https://iiif.wellcomecollection.org/image/65z.jpg/info.json",
+              "url" : "https://iiif.wellcomecollection.org/image/h2C.jpg/info.json",
+              "credit" : "Credit line: 3B2FRNwvc",
+              "linkText" : "Link text: LP9LzQY",
               "license" : {
                 "id" : "cc-by-nc",
                 "label" : "Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)",

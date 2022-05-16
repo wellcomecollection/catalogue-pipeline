@@ -1,37 +1,37 @@
 {
   "description" : "examples for the access status tests",
-  "createdAt" : "2022-05-16T10:00:07.734Z",
-  "id" : "glagakd2",
+  "createdAt" : "2022-05-10T09:15:17.790Z",
+  "id" : "agakd2kz",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "aCHuXzrv8P"
+          "value" : "HuXzrv8Pgl"
         },
-        "version" : 53,
-        "modifiedTime" : "2012-05-12T17:53:46Z"
+        "version" : 88,
+        "modifiedTime" : "2022-05-27T15:34:08Z"
       },
-      "mergedTime" : "2012-05-12T17:53:46Z",
-      "indexedTime" : "2022-05-16T10:00:07.733Z",
+      "mergedTime" : "2022-05-27T15:34:08Z",
+      "indexedTime" : "2022-05-10T09:15:17.790Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "miro-image-number"
+          "id" : "calm-record-id"
         },
         "ontologyType" : "Work",
-        "value" : "aCHuXzrv8P"
+        "value" : "HuXzrv8Pgl"
       },
-      "canonicalId" : "glagakd2",
-      "mergedTime" : "2012-05-12T17:53:46Z",
-      "sourceModifiedTime" : "2012-05-12T17:53:46Z",
-      "indexedTime" : "2022-05-16T10:00:07.733Z",
+      "canonicalId" : "agakd2kz",
+      "mergedTime" : "2022-05-27T15:34:08Z",
+      "sourceModifiedTime" : "2022-05-27T15:34:08Z",
+      "indexedTime" : "2022-05-10T09:15:17.790Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -50,7 +50,7 @@
       }
     },
     "data" : {
-      "title" : "title-zPZAnMiJNW",
+      "title" : "title-AnMiJNWmVU",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -78,13 +78,13 @@
       "items" : [
         {
           "id" : {
-            "canonicalId" : "i3ppimzv",
+            "canonicalId" : "vcba0kh0",
             "sourceIdentifier" : {
               "identifierType" : {
-                "id" : "miro-image-number"
+                "id" : "calm-record-id"
               },
               "ontologyType" : "Work",
-              "value" : "Cba0kh0iB2"
+              "value" : "B2aGWT6gTi"
             },
             "otherIdentifiers" : [
             ],
@@ -94,14 +94,14 @@
           "note" : null,
           "locations" : [
             {
-              "url" : "https://iiif.wellcomecollection.org/image/VUp.jpg/info.json",
+              "url" : "https://iiif.wellcomecollection.org/image/PuM.jpg/info.json",
               "locationType" : {
                 "id" : "iiif-presentation"
               },
               "license" : {
                 "id" : "cc-by"
               },
-              "credit" : null,
+              "credit" : "Credit line: ql7LBhP7N",
               "linkText" : null,
               "accessConditions" : [
                 {
@@ -129,8 +129,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "glagakd2",
-      "title" : "title-zPZAnMiJNW",
+      "id" : "agakd2kz",
+      "title" : "title-AnMiJNWmVU",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -138,11 +138,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "aCHuXzrv8P",
+          "value" : "HuXzrv8Pgl",
           "type" : "Identifier"
         }
       ],
@@ -152,15 +152,15 @@
       ],
       "items" : [
         {
-          "id" : "i3ppimzv",
+          "id" : "vcba0kh0",
           "identifiers" : [
             {
               "identifierType" : {
-                "id" : "miro-image-number",
-                "label" : "Miro image number",
+                "id" : "calm-record-id",
+                "label" : "Calm RecordIdentifier",
                 "type" : "IdentifierType"
               },
-              "value" : "Cba0kh0iB2",
+              "value" : "B2aGWT6gTi",
               "type" : "Identifier"
             }
           ],
@@ -171,7 +171,8 @@
                 "label" : "IIIF Presentation API",
                 "type" : "LocationType"
               },
-              "url" : "https://iiif.wellcomecollection.org/image/VUp.jpg/info.json",
+              "url" : "https://iiif.wellcomecollection.org/image/PuM.jpg/info.json",
+              "credit" : "Credit line: ql7LBhP7N",
               "license" : {
                 "id" : "cc-by",
                 "label" : "Attribution 4.0 International (CC BY 4.0)",

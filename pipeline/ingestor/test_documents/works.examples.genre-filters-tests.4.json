@@ -1,37 +1,37 @@
 {
   "description" : "examples for the genre tests",
-  "createdAt" : "2022-05-16T10:00:07.674Z",
-  "id" : "4btprmwn",
+  "createdAt" : "2022-05-10T09:03:13.095Z",
+  "id" : "eanc7xce",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "C7XCeymDdf"
+          "value" : "mbPJWDqmpb"
         },
-        "version" : 54,
-        "modifiedTime" : "1953-03-04T04:51:01Z"
+        "version" : 74,
+        "modifiedTime" : "2022-05-18T00:41:45Z"
       },
-      "mergedTime" : "1953-03-04T04:51:01Z",
-      "indexedTime" : "2022-05-16T10:00:07.673Z",
+      "mergedTime" : "2022-05-18T00:41:45Z",
+      "indexedTime" : "2022-05-10T09:03:13.094Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "sierra-system-number"
+          "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "C7XCeymDdf"
+        "value" : "mbPJWDqmpb"
       },
-      "canonicalId" : "4btprmwn",
-      "mergedTime" : "1953-03-04T04:51:01Z",
-      "sourceModifiedTime" : "1953-03-04T04:51:01Z",
-      "indexedTime" : "2022-05-16T10:00:07.673Z",
+      "canonicalId" : "eanc7xce",
+      "mergedTime" : "2022-05-18T00:41:45Z",
+      "sourceModifiedTime" : "2022-05-18T00:41:45Z",
+      "indexedTime" : "2022-05-10T09:03:13.094Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -50,7 +50,7 @@
       }
     },
     "data" : {
-      "title" : "title-iLGpm85YYF",
+      "title" : "title-Ddf4bTPrmW",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -70,21 +70,21 @@
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "7ZYKrzxgMS4HDJM",
+              "label" : "TeJBs3eSemcGNQX",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "nToBweq2UFKJPlz",
+              "label" : "d87ZYKrzxgMS4HD",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "YfNgtG1SKw3klDA",
+              "label" : "JMnToBweq2UFKJP",
               "type" : "Concept"
             }
           ]
@@ -96,21 +96,21 @@
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "uK4GKNsXvX3NJfI",
+              "label" : "lzYfNgtG1SKw3kl",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "XCFVccBcFLmxtr1",
+              "label" : "DAuK4GKNsXvX3NJ",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "wn4mlLNPr0YHU0g",
+              "label" : "fIXCFVccBcFLmxt",
               "type" : "Concept"
             }
           ]
@@ -122,21 +122,21 @@
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "7V2pOSQnJOeXjVu",
+              "label" : "r1wn4mlLNPr0YHU",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "ylz3BDWIViYo3qv",
+              "label" : "0g7V2pOSQnJOeXj",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "sJ0y4QwQTlrFnQP",
+              "label" : "Vuylz3BDWIViYo3",
               "type" : "Concept"
             }
           ]
@@ -164,8 +164,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "4btprmwn",
-      "title" : "title-iLGpm85YYF",
+      "id" : "eanc7xce",
+      "title" : "title-Ddf4bTPrmW",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -173,11 +173,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "C7XCeymDdf",
+          "value" : "mbPJWDqmpb",
           "type" : "Identifier"
         }
       ],
@@ -188,15 +188,15 @@
           "label" : "Pamphlets.",
           "concepts" : [
             {
-              "label" : "7ZYKrzxgMS4HDJM",
+              "label" : "TeJBs3eSemcGNQX",
               "type" : "Concept"
             },
             {
-              "label" : "nToBweq2UFKJPlz",
+              "label" : "d87ZYKrzxgMS4HD",
               "type" : "Concept"
             },
             {
-              "label" : "YfNgtG1SKw3klDA",
+              "label" : "JMnToBweq2UFKJP",
               "type" : "Concept"
             }
           ],
@@ -206,15 +206,15 @@
           "label" : "Psychology, Pathological",
           "concepts" : [
             {
-              "label" : "uK4GKNsXvX3NJfI",
+              "label" : "lzYfNgtG1SKw3kl",
               "type" : "Concept"
             },
             {
-              "label" : "XCFVccBcFLmxtr1",
+              "label" : "DAuK4GKNsXvX3NJ",
               "type" : "Concept"
             },
             {
-              "label" : "wn4mlLNPr0YHU0g",
+              "label" : "fIXCFVccBcFLmxt",
               "type" : "Concept"
             }
           ],
@@ -224,15 +224,15 @@
           "label" : "Darwin \"Jones\", Charles",
           "concepts" : [
             {
-              "label" : "7V2pOSQnJOeXjVu",
+              "label" : "r1wn4mlLNPr0YHU",
               "type" : "Concept"
             },
             {
-              "label" : "ylz3BDWIViYo3qv",
+              "label" : "0g7V2pOSQnJOeXj",
               "type" : "Concept"
             },
             {
-              "label" : "sJ0y4QwQTlrFnQP",
+              "label" : "Vuylz3BDWIViYo3",
               "type" : "Concept"
             }
           ],

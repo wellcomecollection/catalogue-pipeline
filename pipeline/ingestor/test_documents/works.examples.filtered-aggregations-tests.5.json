@@ -1,37 +1,37 @@
 {
   "description" : "examples for the works filtered aggregations tests",
-  "createdAt" : "2022-05-16T10:00:07.750Z",
-  "id" : "wkzjlx5a",
+  "createdAt" : "2022-05-10T09:25:20.140Z",
+  "id" : "69xyhqdq",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "SKphDnojLC"
+          "value" : "LX5AiO63s6"
         },
-        "version" : 23,
-        "modifiedTime" : "1974-05-03T18:39:30Z"
+        "version" : 32,
+        "modifiedTime" : "2022-05-20T09:20:02Z"
       },
-      "mergedTime" : "1974-05-03T18:39:30Z",
-      "indexedTime" : "2022-05-16T10:00:07.750Z",
+      "mergedTime" : "2022-05-20T09:20:02Z",
+      "indexedTime" : "2022-05-10T09:25:20.139Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "calm-record-id"
+          "id" : "sierra-system-number"
         },
         "ontologyType" : "Work",
-        "value" : "SKphDnojLC"
+        "value" : "LX5AiO63s6"
       },
-      "canonicalId" : "wkzjlx5a",
-      "mergedTime" : "1974-05-03T18:39:30Z",
-      "sourceModifiedTime" : "1974-05-03T18:39:30Z",
-      "indexedTime" : "2022-05-16T10:00:07.750Z",
+      "canonicalId" : "69xyhqdq",
+      "mergedTime" : "2022-05-20T09:20:02Z",
+      "sourceModifiedTime" : "2022-05-20T09:20:02Z",
+      "indexedTime" : "2022-05-10T09:25:20.139Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -93,7 +93,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "wkzjlx5a",
+      "id" : "69xyhqdq",
       "title" : "tapirs",
       "alternativeTitles" : [
       ],
@@ -107,11 +107,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "SKphDnojLC",
+          "value" : "LX5AiO63s6",
           "type" : "Identifier"
         }
       ],

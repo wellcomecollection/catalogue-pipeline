@@ -1,7 +1,7 @@
 {
   "description" : "examples for the works filtered aggregations tests",
-  "createdAt" : "2022-05-16T10:00:07.748Z",
-  "id" : "phodmv5g",
+  "createdAt" : "2022-05-10T09:25:20.138Z",
+  "id" : "m6hdh9ay",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,13 +10,13 @@
             "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "kSl7z2IaIy"
+          "value" : "yPhOdmV5Gs"
         },
-        "version" : 2,
-        "modifiedTime" : "2040-01-22T01:35:50Z"
+        "version" : 51,
+        "modifiedTime" : "2022-05-03T22:07:02Z"
       },
-      "mergedTime" : "2040-01-22T01:35:50Z",
-      "indexedTime" : "2022-05-16T10:00:07.748Z",
+      "mergedTime" : "2022-05-03T22:07:02Z",
+      "indexedTime" : "2022-05-10T09:25:20.138Z",
       "redirectSources" : [
       ]
     },
@@ -26,12 +26,12 @@
           "id" : "calm-record-id"
         },
         "ontologyType" : "Work",
-        "value" : "kSl7z2IaIy"
+        "value" : "yPhOdmV5Gs"
       },
-      "canonicalId" : "phodmv5g",
-      "mergedTime" : "2040-01-22T01:35:50Z",
-      "sourceModifiedTime" : "2040-01-22T01:35:50Z",
-      "indexedTime" : "2022-05-16T10:00:07.748Z",
+      "canonicalId" : "m6hdh9ay",
+      "mergedTime" : "2022-05-03T22:07:02Z",
+      "sourceModifiedTime" : "2022-05-03T22:07:02Z",
+      "indexedTime" : "2022-05-10T09:25:20.138Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -93,7 +93,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "phodmv5g",
+      "id" : "m6hdh9ay",
       "title" : "rats",
       "alternativeTitles" : [
       ],
@@ -111,7 +111,7 @@
             "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "kSl7z2IaIy",
+          "value" : "yPhOdmV5Gs",
           "type" : "Identifier"
         }
       ],

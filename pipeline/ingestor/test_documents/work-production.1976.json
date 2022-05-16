@@ -1,7 +1,7 @@
 {
   "description" : "a work with a production event in 1976",
-  "createdAt" : "2022-05-16T10:00:07.315Z",
-  "id" : "5vjghupy",
+  "createdAt" : "2022-05-04T07:15:02.873Z",
+  "id" : "jsc3aajx",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,13 +10,13 @@
             "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "xrdlOL8J49"
+          "value" : "1GVno9IboN"
         },
-        "version" : 83,
-        "modifiedTime" : "1970-01-23T23:11:47Z"
+        "version" : 5,
+        "modifiedTime" : "2022-05-28T11:11:05Z"
       },
-      "mergedTime" : "1970-01-23T23:11:47Z",
-      "indexedTime" : "2022-05-16T10:00:07.314Z",
+      "mergedTime" : "2022-05-28T11:11:05Z",
+      "indexedTime" : "2022-05-04T07:15:02.872Z",
       "redirectSources" : [
       ]
     },
@@ -26,12 +26,12 @@
           "id" : "sierra-system-number"
         },
         "ontologyType" : "Work",
-        "value" : "xrdlOL8J49"
+        "value" : "1GVno9IboN"
       },
-      "canonicalId" : "5vjghupy",
-      "mergedTime" : "1970-01-23T23:11:47Z",
-      "sourceModifiedTime" : "1970-01-23T23:11:47Z",
-      "indexedTime" : "2022-05-16T10:00:07.314Z",
+      "canonicalId" : "jsc3aajx",
+      "mergedTime" : "2022-05-28T11:11:05Z",
+      "sourceModifiedTime" : "2022-05-28T11:11:05Z",
+      "indexedTime" : "2022-05-04T07:15:02.872Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -69,7 +69,7 @@
       "thumbnail" : null,
       "production" : [
         {
-          "label" : "boNJsc3AAjxHM3WnjuDFIT1sH",
+          "label" : "HUh0QyLvGt20AIV95SWJownjA",
           "places" : [
           ],
           "agents" : [
@@ -107,7 +107,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "5vjghupy",
+      "id" : "jsc3aajx",
       "title" : "Production event in 1976",
       "alternativeTitles" : [
       ],
@@ -120,7 +120,7 @@
             "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "xrdlOL8J49",
+          "value" : "1GVno9IboN",
           "type" : "Identifier"
         }
       ],
@@ -136,7 +136,7 @@
       ],
       "production" : [
         {
-          "label" : "boNJsc3AAjxHM3WnjuDFIT1sH",
+          "label" : "HUh0QyLvGt20AIV95SWJownjA",
           "places" : [
           ],
           "agents" : [

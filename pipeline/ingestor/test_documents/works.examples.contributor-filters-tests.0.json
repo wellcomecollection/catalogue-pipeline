@@ -1,7 +1,7 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2022-05-16T10:00:07.688Z",
-  "id" : "h5zn9bqm",
+  "createdAt" : "2022-05-10T09:10:37.797Z",
+  "id" : "rkv6qh5z",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,13 +10,13 @@
             "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "OQ6G6Rkv6Q"
+          "value" : "ct97zOQ6G6"
         },
-        "version" : 74,
-        "modifiedTime" : "1934-08-02T20:29:45Z"
+        "version" : 36,
+        "modifiedTime" : "2022-04-14T03:25:05Z"
       },
-      "mergedTime" : "1934-08-02T20:29:45Z",
-      "indexedTime" : "2022-05-16T10:00:07.688Z",
+      "mergedTime" : "2022-04-14T03:25:05Z",
+      "indexedTime" : "2022-05-10T09:10:37.796Z",
       "redirectSources" : [
       ]
     },
@@ -26,12 +26,12 @@
           "id" : "sierra-system-number"
         },
         "ontologyType" : "Work",
-        "value" : "OQ6G6Rkv6Q"
+        "value" : "ct97zOQ6G6"
       },
-      "canonicalId" : "h5zn9bqm",
-      "mergedTime" : "1934-08-02T20:29:45Z",
-      "sourceModifiedTime" : "1934-08-02T20:29:45Z",
-      "indexedTime" : "2022-05-16T10:00:07.688Z",
+      "canonicalId" : "rkv6qh5z",
+      "mergedTime" : "2022-04-14T03:25:05Z",
+      "sourceModifiedTime" : "2022-04-14T03:25:05Z",
+      "indexedTime" : "2022-05-10T09:10:37.796Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -51,7 +51,7 @@
       }
     },
     "data" : {
-      "title" : "title-6Obq6lxZzG",
+      "title" : "title-bqmY6Obq6l",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -103,8 +103,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "h5zn9bqm",
-      "title" : "title-6Obq6lxZzG",
+      "id" : "rkv6qh5z",
+      "title" : "title-bqmY6Obq6l",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -125,7 +125,7 @@
             "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "OQ6G6Rkv6Q",
+          "value" : "ct97zOQ6G6",
           "type" : "Identifier"
         }
       ],

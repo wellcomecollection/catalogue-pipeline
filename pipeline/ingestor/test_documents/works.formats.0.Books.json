@@ -1,7 +1,7 @@
 {
   "description" : "one of a list of works with a variety of formats",
-  "createdAt" : "2022-05-16T10:00:07.493Z",
-  "id" : "gfw8fs9l",
+  "createdAt" : "2022-05-04T07:15:03.015Z",
+  "id" : "lemvhali",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,13 +10,13 @@
             "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "wayOhJ3Mha"
+          "value" : "gSkyZiBA49"
         },
-        "version" : 73,
-        "modifiedTime" : "1943-07-01T04:18:01Z"
+        "version" : 2,
+        "modifiedTime" : "2022-05-07T17:24:14Z"
       },
-      "mergedTime" : "1943-07-01T04:18:01Z",
-      "indexedTime" : "2022-05-16T10:00:07.492Z",
+      "mergedTime" : "2022-05-07T17:24:14Z",
+      "indexedTime" : "2022-05-04T07:15:03.013Z",
       "redirectSources" : [
       ]
     },
@@ -26,12 +26,12 @@
           "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "wayOhJ3Mha"
+        "value" : "gSkyZiBA49"
       },
-      "canonicalId" : "gfw8fs9l",
-      "mergedTime" : "1943-07-01T04:18:01Z",
-      "sourceModifiedTime" : "1943-07-01T04:18:01Z",
-      "indexedTime" : "2022-05-16T10:00:07.492Z",
+      "canonicalId" : "lemvhali",
+      "mergedTime" : "2022-05-07T17:24:14Z",
+      "sourceModifiedTime" : "2022-05-07T17:24:14Z",
+      "indexedTime" : "2022-05-04T07:15:03.013Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -89,7 +89,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "gfw8fs9l",
+      "id" : "lemvhali",
       "title" : "A work with format Books",
       "alternativeTitles" : [
       ],
@@ -107,7 +107,7 @@
             "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "wayOhJ3Mha",
+          "value" : "gSkyZiBA49",
           "type" : "Identifier"
         }
       ],

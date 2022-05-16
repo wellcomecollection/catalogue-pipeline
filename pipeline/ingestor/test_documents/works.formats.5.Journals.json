@@ -1,37 +1,37 @@
 {
   "description" : "one of a list of works with a variety of formats",
-  "createdAt" : "2022-05-16T10:00:07.501Z",
-  "id" : "plmmmkup",
+  "createdAt" : "2022-05-04T07:15:03.022Z",
+  "id" : "sna2xj27",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "X7kBc19InD"
+          "value" : "iv0NQvyeIt"
         },
-        "version" : 52,
-        "modifiedTime" : "1952-04-02T02:27:37Z"
+        "version" : 9,
+        "modifiedTime" : "2022-05-06T11:39:36Z"
       },
-      "mergedTime" : "1952-04-02T02:27:37Z",
-      "indexedTime" : "2022-05-16T10:00:07.501Z",
+      "mergedTime" : "2022-05-06T11:39:36Z",
+      "indexedTime" : "2022-05-04T07:15:03.021Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "miro-image-number"
+          "id" : "calm-record-id"
         },
         "ontologyType" : "Work",
-        "value" : "X7kBc19InD"
+        "value" : "iv0NQvyeIt"
       },
-      "canonicalId" : "plmmmkup",
-      "mergedTime" : "1952-04-02T02:27:37Z",
-      "sourceModifiedTime" : "1952-04-02T02:27:37Z",
-      "indexedTime" : "2022-05-16T10:00:07.501Z",
+      "canonicalId" : "sna2xj27",
+      "mergedTime" : "2022-05-06T11:39:36Z",
+      "sourceModifiedTime" : "2022-05-06T11:39:36Z",
+      "indexedTime" : "2022-05-04T07:15:03.021Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -89,7 +89,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "plmmmkup",
+      "id" : "sna2xj27",
       "title" : "A work with format Journals",
       "alternativeTitles" : [
       ],
@@ -103,11 +103,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "X7kBc19InD",
+          "value" : "iv0NQvyeIt",
           "type" : "Identifier"
         }
       ],

@@ -1,37 +1,37 @@
 {
   "description" : "examples for the works filtered aggregations tests",
-  "createdAt" : "2022-05-16T10:00:07.750Z",
-  "id" : "in2u7aru",
+  "createdAt" : "2022-05-10T09:25:20.139Z",
+  "id" : "s5auwvxu",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "OHrklHuS07"
+          "value" : "u7aRU7LCiT"
         },
-        "version" : 38,
-        "modifiedTime" : "1941-11-20T02:22:15Z"
+        "version" : 8,
+        "modifiedTime" : "2022-06-02T10:28:40Z"
       },
-      "mergedTime" : "1941-11-20T02:22:15Z",
-      "indexedTime" : "2022-05-16T10:00:07.750Z",
+      "mergedTime" : "2022-06-02T10:28:40Z",
+      "indexedTime" : "2022-05-10T09:25:20.139Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "calm-record-id"
+          "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "OHrklHuS07"
+        "value" : "u7aRU7LCiT"
       },
-      "canonicalId" : "in2u7aru",
-      "mergedTime" : "1941-11-20T02:22:15Z",
-      "sourceModifiedTime" : "1941-11-20T02:22:15Z",
-      "indexedTime" : "2022-05-16T10:00:07.750Z",
+      "canonicalId" : "s5auwvxu",
+      "mergedTime" : "2022-06-02T10:28:40Z",
+      "sourceModifiedTime" : "2022-06-02T10:28:40Z",
+      "indexedTime" : "2022-05-10T09:25:20.139Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -93,7 +93,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "in2u7aru",
+      "id" : "s5auwvxu",
       "title" : "capybara",
       "alternativeTitles" : [
       ],
@@ -107,11 +107,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "OHrklHuS07",
+          "value" : "u7aRU7LCiT",
           "type" : "Identifier"
         }
       ],

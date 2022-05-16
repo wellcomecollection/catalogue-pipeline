@@ -1,37 +1,37 @@
 {
   "description" : "one of a list of works with a variety of formats",
-  "createdAt" : "2022-05-16T10:00:07.498Z",
-  "id" : "bujceq4p",
+  "createdAt" : "2022-05-04T07:15:03.019Z",
+  "id" : "ohj3mhag",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "HuLHN83UU0"
+          "value" : "jd3YYXiway"
         },
-        "version" : 25,
-        "modifiedTime" : "2026-06-29T23:47:01Z"
+        "version" : 94,
+        "modifiedTime" : "2022-05-28T07:46:25Z"
       },
-      "mergedTime" : "2026-06-29T23:47:01Z",
-      "indexedTime" : "2022-05-16T10:00:07.497Z",
+      "mergedTime" : "2022-05-28T07:46:25Z",
+      "indexedTime" : "2022-05-04T07:15:03.019Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "miro-image-number"
+          "id" : "sierra-system-number"
         },
         "ontologyType" : "Work",
-        "value" : "HuLHN83UU0"
+        "value" : "jd3YYXiway"
       },
-      "canonicalId" : "bujceq4p",
-      "mergedTime" : "2026-06-29T23:47:01Z",
-      "sourceModifiedTime" : "2026-06-29T23:47:01Z",
-      "indexedTime" : "2022-05-16T10:00:07.497Z",
+      "canonicalId" : "ohj3mhag",
+      "mergedTime" : "2022-05-28T07:46:25Z",
+      "sourceModifiedTime" : "2022-05-28T07:46:25Z",
+      "indexedTime" : "2022-05-04T07:15:03.019Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -89,7 +89,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "bujceq4p",
+      "id" : "ohj3mhag",
       "title" : "A work with format Books",
       "alternativeTitles" : [
       ],
@@ -103,11 +103,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "HuLHN83UU0",
+          "value" : "jd3YYXiway",
           "type" : "Identifier"
         }
       ],

@@ -1,37 +1,37 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2022-05-16T10:00:07.690Z",
-  "id" : "cpwnrkdo",
+  "createdAt" : "2022-05-10T09:10:37.798Z",
+  "id" : "fcpwnrkd",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "FqozNGJ9Pf"
+          "value" : "3FqozNGJ9P"
         },
         "version" : 52,
-        "modifiedTime" : "1990-04-28T07:06:53Z"
+        "modifiedTime" : "2022-06-01T17:28:43Z"
       },
-      "mergedTime" : "1990-04-28T07:06:53Z",
-      "indexedTime" : "2022-05-16T10:00:07.689Z",
+      "mergedTime" : "2022-06-01T17:28:43Z",
+      "indexedTime" : "2022-05-10T09:10:37.798Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "miro-image-number"
+          "id" : "sierra-system-number"
         },
         "ontologyType" : "Work",
-        "value" : "FqozNGJ9Pf"
+        "value" : "3FqozNGJ9P"
       },
-      "canonicalId" : "cpwnrkdo",
-      "mergedTime" : "1990-04-28T07:06:53Z",
-      "sourceModifiedTime" : "1990-04-28T07:06:53Z",
-      "indexedTime" : "2022-05-16T10:00:07.689Z",
+      "canonicalId" : "fcpwnrkd",
+      "mergedTime" : "2022-06-01T17:28:43Z",
+      "sourceModifiedTime" : "2022-06-01T17:28:43Z",
+      "indexedTime" : "2022-05-10T09:10:37.798Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -120,7 +120,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "cpwnrkdo",
+      "id" : "fcpwnrkd",
       "title" : "title-Vp3bULWghZ",
       "alternativeTitles" : [
       ],
@@ -147,11 +147,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "FqozNGJ9Pf",
+          "value" : "3FqozNGJ9P",
           "type" : "Identifier"
         }
       ],
