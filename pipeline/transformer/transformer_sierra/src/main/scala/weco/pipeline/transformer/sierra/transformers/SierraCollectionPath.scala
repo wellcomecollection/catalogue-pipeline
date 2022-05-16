@@ -43,8 +43,9 @@ import scala.util.matching.Regex
   *  - the value must be turned into something the relation embedder expects
   *    (evidence points to this being underscores for spaces).
   *
-  * The hierarchy of Sierra-based data is flatter than other systems. A node is expected to *either* be a host or a
-  * constituent.  It is possible for record that is a "host" to also be part of a series,
+  * The hierarchy of Sierra-based data is flatter than other systems. A node is normally only a host or a
+  * constituent, but three-level hierarchies are possible.
+  * It is possible for record that is a "host" to also be part of a series,
   * but that relationship would not contain the $w subfield, so is to be ignored here.
   * Such series relationships are handled in SierraParents
   *
@@ -66,10 +67,16 @@ object SierraCollectionPath extends SierraQueryOps with Logging {
           warn(
             f"Attempt to create CollectionPath for Sierra document without a control number field ${bibData}")
           None
-        case (Some(bibId), Nil) =>
-          HostEntryFieldCollectionPath(bibData, bibId)
-        case (Some(bibId), _) =>
-          Some(CollectionPath(path = bibId, label = None))
+        case (Some(bibId), constituentUnits) =>
+          // This document does not contain any constituent unit entries
+          // Optionally construct a `parent/this`
+          // collectionPath from an appropriate 773 host entry field if available.
+          val maybeHostPath = HostEntryFieldCollectionPath(bibData, bibId)
+          (maybeHostPath, constituentUnits) match {
+            case (_, Nil) => maybeHostPath
+            case (None, _) => Some(CollectionPath(path = bibId, label = None))
+            case (Some(hostPath), _) => Some(CollectionPath(path = hostPath.path, label = None))
+          }
       }
     }
   }

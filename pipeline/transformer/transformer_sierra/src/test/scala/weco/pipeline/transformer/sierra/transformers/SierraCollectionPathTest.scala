@@ -84,6 +84,34 @@ class SierraCollectionPathTest
   }
 
   it(
+    "constructs a value from a 773 field, when both 773 and 774 are present") {
+    val varFields = List(
+      VarField(
+        marcTag = Some("001"),
+        content = Some("56789i")
+      ),
+      VarField(
+        marcTag = Some("773"),
+        subfields = List(
+          Subfield(tag = "t", content = "A Host"),
+          Subfield(tag = "w", content = "12345i")
+        )
+      ),
+      VarField(
+        marcTag = Some("774"),
+        subfields = List(
+          Subfield(tag = "t", content = "A Constituent"),
+          Subfield(
+            tag = "w",
+            content =
+              "This value does not matter, it just matters that it exists")
+        )
+      )    )
+    getCollectionPath(varFields).get shouldBe CollectionPath(
+      path = "12345i/56789i")
+  }
+
+  it(
     "constructs a value from a 773 field, consisting of $w and the document's own id") {
     val varFields = List(
       VarField(
