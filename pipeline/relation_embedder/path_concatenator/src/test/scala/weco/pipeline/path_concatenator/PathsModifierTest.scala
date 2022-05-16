@@ -1,6 +1,5 @@
 package weco.pipeline.path_concatenator
 
-import akka.actor.ActorSystem
 import com.sksamuel.elastic4s.Index
 import org.scalatest.Assertion
 import org.scalatest.concurrent.ScalaFutures
@@ -26,7 +25,7 @@ class PathsModifierTest
     with Akka
     with WorkGenerators {
 
-  private def modifier(index: Index)(implicit as: ActorSystem) =
+  private def modifier(index: Index) =
     PathsModifier(
       new PathsService(
         elasticClient = elasticClient,
@@ -42,9 +41,7 @@ class PathsModifierTest
                           testFunction: PathsModifier => Assertion): Assertion =
     withLocalMergedWorksIndex { index =>
       insertIntoElasticsearch(index, works: _*)
-      withActorSystem { implicit actorSystem =>
         testFunction(modifier(index))
-      }
     }
 
   private def assertDoesNothing(worksInDB: List[Work[Merged]],

@@ -67,6 +67,25 @@ class PathConcatenatorWorkerServiceTest
         }
     }
   }
+
+  it("sends the input path to the downstream queue when there is nothing to do") {
+    val works = List(
+      work("a/b"),
+      work("c/d"),
+    )
+
+    withWorkerService(works) {
+      case (QueuePair(queue, dlq), index, downstreamMessageSender) =>
+        sendNotificationToSQS(queue = queue, body = "c/d")
+        eventually {
+          assertQueueEmpty(queue)
+          assertQueueEmpty(dlq)
+          index shouldBe empty
+          assertQueueContainsPaths(downstreamMessageSender, List("c/d"))
+        }
+    }
+  }
+
   private def work(path: String): Work.Visible[Merged] =
     mergedWork(createSourceIdentifierWith(value = path))
       .collectionPath(CollectionPath(path = path))

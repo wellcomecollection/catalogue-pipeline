@@ -1,7 +1,5 @@
 package weco.pipeline.path_concatenator
 
-import akka.actor.ActorSystem
-import akka.stream.scaladsl.Sink
 import com.sksamuel.elastic4s.Index
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
@@ -11,9 +9,10 @@ import weco.catalogue.internal_model.work.WorkState.Merged
 import weco.catalogue.internal_model.Implicits._
 import weco.elasticsearch.test.fixtures.ElasticsearchFixtures
 import weco.akka.fixtures.Akka
-import scala.collection.immutable
+
 import scala.concurrent.Future
 import weco.catalogue.internal_model.work.generators.WorkGenerators
+import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
   * Tests covering the PathsService, which fetches data from Elasticsearch
@@ -22,7 +21,7 @@ import weco.catalogue.internal_model.work.generators.WorkGenerators
   * These tests require a running ElasticSearch Instance.
   */
 class PathsServiceTest
-    extends AnyFunSpec
+extends AnyFunSpec
     with Matchers
     with IndexFixtures
     with ElasticsearchFixtures
@@ -34,7 +33,7 @@ class PathsServiceTest
       .collectionPath(CollectionPath(path = path))
       .title(path)
 
-  private def service(index: Index)(implicit as: ActorSystem) =
+  private def service(index: Index)=
     new PathsService(
       elasticClient = elasticClient,
       index = index,
@@ -48,10 +47,8 @@ class PathsServiceTest
       )
       withLocalMergedWorksIndex { index =>
         insertIntoElasticsearch(index, works: _*)
-        withActorSystem { implicit actorSystem =>
-          whenReady(queryParentPath(service(index), childPath = "parent/child")) {
-            _ shouldBe Vector("grandparent/parent")
-          }
+        whenReady(queryParentPath(service(index), childPath = "parent/child")) {
+          _ shouldBe Some("grandparent/parent")
         }
       }
     }
@@ -63,10 +60,8 @@ class PathsServiceTest
       )
       withLocalMergedWorksIndex { index =>
         insertIntoElasticsearch(index, works: _*)
-        withActorSystem { implicit actorSystem =>
-          whenReady(queryParentPath(service(index), childPath = "parent/child")) {
-            _ shouldBe empty
-          }
+        whenReady(queryParentPath(service(index), childPath = "parent/child")) {
+          _ shouldBe empty
         }
       }
     }
@@ -78,18 +73,13 @@ class PathsServiceTest
       )
       withLocalMergedWorksIndex { index =>
         insertIntoElasticsearch(index, works: _*)
-        withActorSystem { implicit actorSystem =>
-          whenReady(queryParentPath(service(index), childPath = "e/f/g/h/i")) {
-            _ shouldBe Vector("a/b/c/d/e")
-          }
+        whenReady(queryParentPath(service(index), childPath = "e/f/g/h/i")) {
+          _ shouldBe Some("a/b/c/d/e")
         }
       }
     }
 
-    it("returns multiple matching parent paths") {
-      // This represents a data error, but the pathService is not the
-      // arbiter of what to do in this scenario, so it returns more than
-      // one parent (TODO, it might be better to throw at this point)
+    it("throws an exception if there are multiple matching parent paths") {
       val works: List[Work[Merged]] = List(
         work(path = "grandmother/parent"),
         work(path = "grandfather/parent"),
@@ -97,19 +87,14 @@ class PathsServiceTest
       )
       withLocalMergedWorksIndex { index =>
         insertIntoElasticsearch(index, works: _*)
-        withActorSystem { implicit actorSystem =>
-          whenReady(queryParentPath(service(index), childPath = "parent/child")) {
-            _ should contain theSameElementsAs Vector(
-              "grandmother/parent",
-              "grandfather/parent")
-          }
-        }
+
+        queryParentPath(service(index), childPath = "parent/child").failed
+          .futureValue shouldBe a[RuntimeException]
       }
     }
   }
 
   describe("The PathService exactPath getter") {
-    //TODO: Decide what to do if more than one result is returned
     it("only fetches the work with that exact path, not its children") {
       val expectedWork = work(path = "parent/child")
       val works: List[Work[Merged]] = List(
@@ -119,10 +104,8 @@ class PathsServiceTest
       )
       withLocalMergedWorksIndex { index =>
         insertIntoElasticsearch(index, works: _*)
-        withActorSystem { implicit actorSystem =>
-          whenReady(queryWorkWithPath(service(index), path = "parent/child")) {
-            _ should contain theSameElementsAs List(expectedWork)
-          }
+        whenReady(queryWorkWithPath(service(index), path = "parent/child")) {
+          _ shouldBe expectedWork
         }
       }
     }
@@ -139,26 +122,21 @@ class PathsServiceTest
       )
       withLocalMergedWorksIndex { index =>
         insertIntoElasticsearch(index, works: _*)
-        withActorSystem { implicit actorSystem =>
-          whenReady(
-            queryChildWorks(service(index), path = "grandparent/parent")) {
-            _ should contain theSameElementsAs List(works(2), works(3))
-          }
+        whenReady(
+          queryChildWorks(service(index), path = "grandparent/parent")) {
+          _ should contain theSameElementsAs List(works(2), works(3))
         }
       }
     }
   }
 
-  def queryParentPath(service: PathsService, childPath: String)(
-    implicit as: ActorSystem): Future[immutable.Seq[String]] =
-    service.getParentPath(childPath).runWith(Sink.seq[String])
+  def queryParentPath(service: PathsService, childPath: String): Future[Option[String]] =
+    service.getParentPath(childPath)
 
-  def queryWorkWithPath(service: PathsService, path: String)(
-    implicit as: ActorSystem): Future[immutable.Seq[Work[Merged]]] =
-    service.getWorkWithPath(path).runWith(Sink.seq[Work[Merged]])
+  def queryWorkWithPath(service: PathsService, path: String)(): Future[Work[Merged]] =
+    service.getWorkWithPath(path)
 
-  def queryChildWorks(service: PathsService, path: String)(
-    implicit as: ActorSystem): Future[immutable.Seq[Work[Merged]]] =
-    service.getChildWorks(path).runWith(Sink.seq[Work[Merged]])
+  def queryChildWorks(service: PathsService, path: String): Future[Seq[Work[Merged]]] =
+    service.getChildWorks(path) // TODO: Add a test to show this works for more than 10 children
 
 }

@@ -42,7 +42,7 @@ class PathConcatenatorRequestBuilder(index: Index) {
   def childWorks(path: String): SearchRequest =
     search(index)
       .query(
-        constantScoreQuery(wildPathQuery(pathJoin(List(path.lastNode, "*")))))
+        constantScoreQuery(wildPathQuery(pathJoin(List(path.lastNode, "*"))))).size(10000)
 
   private def wildPathQuery(path: String): WildcardQuery =
     wildcardQuery(field = "data.collectionPath.path", value = path)
