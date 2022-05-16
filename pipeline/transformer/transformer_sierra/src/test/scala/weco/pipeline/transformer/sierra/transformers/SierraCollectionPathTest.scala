@@ -83,8 +83,7 @@ class SierraCollectionPathTest
     getCollectionPath(varFields).get shouldBe CollectionPath(path = "12345i")
   }
 
-  it(
-    "constructs a value from a 773 field, when both 773 and 774 are present") {
+  it("constructs a value from a 773 field, when both 773 and 774 are present") {
     val varFields = List(
       VarField(
         marcTag = Some("001"),
@@ -106,7 +105,8 @@ class SierraCollectionPathTest
             content =
               "This value does not matter, it just matters that it exists")
         )
-      )    )
+      )
+    )
     getCollectionPath(varFields).get shouldBe CollectionPath(
       path = "12345i/56789i")
   }

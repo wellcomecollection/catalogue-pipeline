@@ -21,7 +21,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
   * These tests require a running ElasticSearch Instance.
   */
 class PathsServiceTest
-extends AnyFunSpec
+    extends AnyFunSpec
     with Matchers
     with IndexFixtures
     with ElasticsearchFixtures
@@ -33,7 +33,7 @@ extends AnyFunSpec
       .collectionPath(CollectionPath(path = path))
       .title(path)
 
-  private def service(index: Index)=
+  private def service(index: Index) =
     new PathsService(
       elasticClient = elasticClient,
       index = index,
@@ -88,8 +88,8 @@ extends AnyFunSpec
       withLocalMergedWorksIndex { index =>
         insertIntoElasticsearch(index, works: _*)
 
-        queryParentPath(service(index), childPath = "parent/child").failed
-          .futureValue shouldBe a[RuntimeException]
+        queryParentPath(service(index), childPath = "parent/child").failed.futureValue shouldBe a[
+          RuntimeException]
       }
     }
   }
@@ -122,21 +122,23 @@ extends AnyFunSpec
       )
       withLocalMergedWorksIndex { index =>
         insertIntoElasticsearch(index, works: _*)
-        whenReady(
-          queryChildWorks(service(index), path = "grandparent/parent")) {
+        whenReady(queryChildWorks(service(index), path = "grandparent/parent")) {
           _ should contain theSameElementsAs List(works(2), works(3))
         }
       }
     }
   }
 
-  def queryParentPath(service: PathsService, childPath: String): Future[Option[String]] =
+  def queryParentPath(service: PathsService,
+                      childPath: String): Future[Option[String]] =
     service.getParentPath(childPath)
 
-  def queryWorkWithPath(service: PathsService, path: String)(): Future[Work[Merged]] =
+  def queryWorkWithPath(service: PathsService,
+                        path: String)(): Future[Work[Merged]] =
     service.getWorkWithPath(path)
 
-  def queryChildWorks(service: PathsService, path: String): Future[Seq[Work[Merged]]] =
+  def queryChildWorks(service: PathsService,
+                      path: String): Future[Seq[Work[Merged]]] =
     service.getChildWorks(path) // TODO: Add a test to show this works for more than 10 children
 
 }

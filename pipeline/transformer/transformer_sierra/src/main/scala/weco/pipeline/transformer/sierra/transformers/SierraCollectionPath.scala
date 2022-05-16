@@ -73,9 +73,10 @@ object SierraCollectionPath extends SierraQueryOps with Logging {
           // collectionPath from an appropriate 773 host entry field if available.
           val maybeHostPath = HostEntryFieldCollectionPath(bibData, bibId)
           (maybeHostPath, constituentUnits) match {
-            case (_, Nil) => maybeHostPath
+            case (_, Nil)  => maybeHostPath
             case (None, _) => Some(CollectionPath(path = bibId, label = None))
-            case (Some(hostPath), _) => Some(CollectionPath(path = hostPath.path, label = None))
+            case (Some(hostPath), _) =>
+              Some(CollectionPath(path = hostPath.path, label = None))
           }
       }
     }

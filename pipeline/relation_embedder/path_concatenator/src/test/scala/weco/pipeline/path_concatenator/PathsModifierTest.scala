@@ -41,7 +41,7 @@ class PathsModifierTest
                           testFunction: PathsModifier => Assertion): Assertion =
     withLocalMergedWorksIndex { index =>
       insertIntoElasticsearch(index, works: _*)
-        testFunction(modifier(index))
+      testFunction(modifier(index))
     }
 
   private def assertDoesNothing(worksInDB: List[Work[Merged]],

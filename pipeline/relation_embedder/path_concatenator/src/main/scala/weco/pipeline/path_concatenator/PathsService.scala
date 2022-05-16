@@ -25,29 +25,34 @@ class PathsService(elasticClient: ElasticClient, index: Index)(
 
   def getParentPath(path: String): Future[Option[String]] = {
     val request: SearchRequest = requestBuilder.parentPath(path)
-    elasticClient.execute(request).map {
-      response => {
+    elasticClient.execute(request).map { response =>
+      {
         val searchResponse = response.result
         searchResponse.totalHits match {
           case 0 => None
-          case 1 => Some(searchResponse.hits.hits(0).to[PathHit].data.collectionPath.path)
-          case n => throw new RuntimeException(
-            s"$path has $n possible parents, including ${searchResponse.ids}, at most one is expected")
+          case 1 =>
+            Some(
+              searchResponse.hits.hits(0).to[PathHit].data.collectionPath.path)
+          case n =>
+            throw new RuntimeException(
+              s"$path has $n possible parents, including ${searchResponse.ids}, at most one is expected")
         }
       }
     }
   }
 
-  def getWorkWithPath(path: String): Future[Work.Visible[Merged]]  = {
+  def getWorkWithPath(path: String): Future[Work.Visible[Merged]] = {
     val request: SearchRequest = requestBuilder.workWithPath(path)
-    elasticClient.execute(request).map {
-      response => {
+    elasticClient.execute(request).map { response =>
+      {
         val searchResponse = response.result
         searchResponse.totalHits match {
-          case 0 => throw new RuntimeException(s"No work found with path: $path")
+          case 0 =>
+            throw new RuntimeException(s"No work found with path: $path")
           case 1 => searchResponse.hits.hits(0).to[Work.Visible[Merged]]
-          case n => throw new RuntimeException(
-            s"$path corresponds to $n possible works, including ${searchResponse.ids}, exactly one is expected")
+          case n =>
+            throw new RuntimeException(
+              s"$path corresponds to $n possible works, including ${searchResponse.ids}, exactly one is expected")
         }
       }
     }
@@ -57,8 +62,8 @@ class PathsService(elasticClient: ElasticClient, index: Index)(
     val request: SearchRequest = requestBuilder.childWorks(path)
     debug(
       s"Querying for child works of path with ES request: ${elasticClient.show(request)}")
-    elasticClient.execute(request).map {
-      response => {
+    elasticClient.execute(request).map { response =>
+      {
         response.result.to[Work.Visible[Merged]]
       }
     }

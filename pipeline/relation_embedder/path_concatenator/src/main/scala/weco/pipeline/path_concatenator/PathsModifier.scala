@@ -71,7 +71,8 @@ case class PathsModifier(pathsService: PathsService)(
   }
 
   def getWorksUnderPath(path: String): Future[Seq[Work.Visible[Merged]]] = {
-    pathsService.getChildWorks(path)
+    pathsService
+      .getChildWorks(path)
       .map { childWorks =>
         info(s"Received ${childWorks.size} children")
         childWorks
