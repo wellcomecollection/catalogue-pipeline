@@ -32,9 +32,9 @@ module "router" {
   env_vars = {
     queue_parallelism = 10
 
-    paths_topic_arn = module.router_path_output_topic.arn
+    paths_topic_arn             = module.router_path_output_topic.arn
     path_concatenator_topic_arn = module.router_path_concatenator_output_topic.arn
-    works_topic_arn = module.router_work_output_topic.arn
+    works_topic_arn             = module.router_work_output_topic.arn
 
     es_merged_index       = local.es_works_merged_index
     es_denormalised_index = local.es_works_denormalised_index

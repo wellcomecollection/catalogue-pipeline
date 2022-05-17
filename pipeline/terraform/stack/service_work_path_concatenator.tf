@@ -21,7 +21,7 @@ module "path_concatenator" {
 
     downstream_topic_arn = module.path_concatenator_output_topic.arn
 
-    es_merged_index       = local.es_works_merged_index
+    es_merged_index = local.es_works_merged_index
   }
 
   secret_env_vars = local.pipeline_storage_es_service_secrets["path_concatenator"]

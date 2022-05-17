@@ -28,8 +28,9 @@ object ChildWork {
     * -> great-grandparent/grandparent/parent/self.
     *
     */
-  def apply[State <: WorkState](parentPath: String,
-            childWork: Work.Visible[State]): Work.Visible[State] = {
+  def apply[State <: WorkState](
+    parentPath: String,
+    childWork: Work.Visible[State]): Work.Visible[State] = {
     childWork.data.collectionPath match {
       case None =>
         throw new IllegalArgumentException(
@@ -58,8 +59,9 @@ object ChildWork {
     }
   }
 
-  private def withNewPath[State<: WorkState](work: Work.Visible[State],
-                          newPath: CollectionPath): Work.Visible[State] =
+  private def withNewPath[State <: WorkState](
+    work: Work.Visible[State],
+    newPath: CollectionPath): Work.Visible[State] =
     work.copy(data = work.data.copy(collectionPath = Some(newPath)))
 
 }
