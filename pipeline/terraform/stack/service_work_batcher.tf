@@ -20,6 +20,7 @@ module "batcher" {
 
   topic_arns = [
     module.router_path_output_topic.arn,
+    module.path_concatenator_output_topic.arn,
   ]
 
   # Note: this needs to be bigger than the flush_interval_minutes

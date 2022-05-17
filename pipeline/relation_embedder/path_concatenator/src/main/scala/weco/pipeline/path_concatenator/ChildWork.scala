@@ -1,7 +1,6 @@
 package weco.pipeline.path_concatenator
 
-import weco.catalogue.internal_model.work.{CollectionPath, Work}
-import weco.catalogue.internal_model.work.WorkState.Merged
+import weco.catalogue.internal_model.work.{CollectionPath, Work, WorkState}
 
 object ChildWork {
   import PathOps._
@@ -29,12 +28,12 @@ object ChildWork {
     * -> great-grandparent/grandparent/parent/self.
     *
     */
-  def apply(parentPath: String,
-            childWork: Work.Visible[Merged]): Work.Visible[Merged] = {
+  def apply[State <: WorkState](parentPath: String,
+            childWork: Work.Visible[State]): Work.Visible[State] = {
     childWork.data.collectionPath match {
       case None =>
         throw new IllegalArgumentException(
-          s"Cannot prepend a parent path to '${childWork.state.canonicalId}', it does not have a collectionPath")
+          s"Cannot prepend a parent path to '${childWork}', it does not have a collectionPath")
       case Some(childPath) =>
         val newChildPath = mergePaths(parentPath, childPath)
         // The path will be unchanged if parentPath is the root.
@@ -59,8 +58,8 @@ object ChildWork {
     }
   }
 
-  private def withNewPath(work: Work.Visible[Merged],
-                          newPath: CollectionPath): Work.Visible[Merged] =
+  private def withNewPath[State<: WorkState](work: Work.Visible[State],
+                          newPath: CollectionPath): Work.Visible[State] =
     work.copy(data = work.data.copy(collectionPath = Some(newPath)))
 
 }

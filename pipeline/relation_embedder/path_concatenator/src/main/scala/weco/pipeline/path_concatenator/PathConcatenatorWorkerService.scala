@@ -2,8 +2,8 @@ package weco.pipeline.path_concatenator
 
 import akka.Done
 import grizzled.slf4j.Logging
-import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.Merged
+import weco.catalogue.internal_model.work.Work
 import weco.messaging.MessageSender
 import weco.messaging.sns.NotificationMessage
 import weco.messaging.sqs.SQSStream

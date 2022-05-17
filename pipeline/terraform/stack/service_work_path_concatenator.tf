@@ -1,3 +1,11 @@
+
+module "path_concatenator_output_topic" {
+  source = "../modules/topic"
+
+  name       = "${local.namespace}_path_concatenator_output_topic"
+  role_names = [module.path_concatenator.task_role_name]
+}
+
 module "path_concatenator" {
   source = "../modules/fargate_service"
 
@@ -11,8 +19,7 @@ module "path_concatenator" {
   env_vars = {
     queue_parallelism = 10
 
-    upstream_topic_arn = module.router_path_concatenator_output_topic.arn
-    downstream_topic_arn = module.router_path_output_topic.arn
+    downstream_topic_arn = module.path_concatenator_output_topic.arn
 
     es_merged_index       = local.es_works_merged_index
   }
