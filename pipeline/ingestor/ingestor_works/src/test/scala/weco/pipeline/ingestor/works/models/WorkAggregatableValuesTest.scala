@@ -127,4 +127,18 @@ class WorkAggregatableValuesTest
       ),
     )
   }
+
+  it("normalises language values") {
+    val data = WorkData[DataState.Identified](
+      title = Some("a work with different variants of Chinese"),
+      languages = List(
+        Language(id = "chi", label = "Chinese"),
+        Language(id = "chi", label = "Mandarin"),
+      )
+    )
+
+    WorkAggregatableValues(data, availabilities = Set()).languages shouldBe List(
+      """{"id":"chi","label":"Chinese","type":"Language"}""",
+    )
+  }
 }
