@@ -13,8 +13,8 @@ import weco.json.JsonUtil.exportDecoder
 import scala.concurrent.{ExecutionContext, Future}
 
 /**
- * Data classes used to store only the relevant data from parent path queries.
- */
+  * Data classes used to store only the relevant data from parent path queries.
+  */
 case class ParentPathData(collectionPath: CollectionPath);
 case class PathHit(
   data: ParentPathData
@@ -66,8 +66,9 @@ class PathsService(elasticClient: ElasticClient, index: Index)(
       s"Querying for child works of path with ES request: ${elasticClient.show(request)}")
     elasticClient.execute(request).map { response =>
       {
-        if(response.result.totalHits > requestBuilder.maxResponseSize)
-          warn(msg=s"getChildWorks matched ${response.result.totalHits} works, which is more than the maximum response size ${requestBuilder.maxResponseSize}. Some works will not have their paths correctly updated")
+        if (response.result.totalHits > requestBuilder.maxResponseSize)
+          warn(msg =
+            s"getChildWorks matched ${response.result.totalHits} works, which is more than the maximum response size ${requestBuilder.maxResponseSize}. Some works will not have their paths correctly updated")
         response.result.to[Work.Visible[Merged]]
       }
     }

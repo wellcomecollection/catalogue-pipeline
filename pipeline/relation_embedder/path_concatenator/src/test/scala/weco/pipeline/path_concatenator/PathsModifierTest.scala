@@ -140,14 +140,17 @@ class PathsModifierTest
     it("modifies many children of the work with the given path") {
       // The Elasticsearch built-in default size for a query response is 10.
       // This test ensures that many more than 10 records are returned and modified.
-      val works = work(path = "grandparent/parent") +: (0 to 100).map(i => work(path=s"parent/$i")).toList
+      val works = work(path = "grandparent/parent") +: (0 to 100)
+        .map(i => work(path = s"parent/$i"))
+        .toList
       withContext(
         works, { pathsModifier =>
           whenReady(pathsModifier.modifyPaths("grandparent/parent")) {
             resultWorks =>
-            resultWorks map { resultWork =>
-              resultWork.data.collectionPath.get.path
-            } should contain theSameElementsAs (0 to 100).map(i => s"grandparent/parent/$i")
+              resultWorks map { resultWork =>
+                resultWork.data.collectionPath.get.path
+              } should contain theSameElementsAs (0 to 100).map(i =>
+                s"grandparent/parent/$i")
           }
         }
       )

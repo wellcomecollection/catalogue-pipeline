@@ -89,7 +89,8 @@ class PathsServiceTest
         insertIntoElasticsearch(index, works: _*)
 
         queryParentPath(
-          service(index), childPath = "parent/child"
+          service(index),
+          childPath = "parent/child"
         ).failed.futureValue shouldBe a[RuntimeException]
       }
     }
@@ -120,7 +121,8 @@ class PathsServiceTest
         insertIntoElasticsearch(index, works: _*)
 
         queryWorkWithPath(
-          service(index), path = "parent/child"
+          service(index),
+          path = "parent/child"
         ).failed.futureValue shouldBe a[RuntimeException]
       }
     }
