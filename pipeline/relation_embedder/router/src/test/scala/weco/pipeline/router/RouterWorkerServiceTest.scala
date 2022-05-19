@@ -27,7 +27,8 @@ class RouterWorkerServiceTest
 
   it("sends collectionPath to paths topic") {
     val work = mergedWork(
-      sourceIdentifier = createSourceIdentifierWith(IdentifierType.CalmRecordIdentifier)
+      sourceIdentifier =
+        createSourceIdentifierWith(IdentifierType.CalmRecordIdentifier)
     ).collectionPath(CollectionPath("a"))
     val indexer = new MemoryIndexer[Work[Denormalised]]()
 
@@ -36,7 +37,11 @@ class RouterWorkerServiceTest
     )
 
     withWorkerService(indexer, retriever) {
-      case (QueuePair(queue, dlq), worksMessageSender, pathsMessageSender, pathConcatenatorSender) =>
+      case (
+          QueuePair(queue, dlq),
+          worksMessageSender,
+          pathsMessageSender,
+          pathConcatenatorSender) =>
         sendNotificationToSQS(queue = queue, body = work.id)
         eventually {
           assertQueueEmpty(queue)
@@ -50,7 +55,8 @@ class RouterWorkerServiceTest
   }
   it("sends collectionPath to path concatenator topic for sierra works") {
     val work = mergedWork(
-      sourceIdentifier = createSourceIdentifierWith(IdentifierType.SierraSystemNumber)
+      sourceIdentifier =
+        createSourceIdentifierWith(IdentifierType.SierraSystemNumber)
     ).collectionPath(CollectionPath("a"))
     val indexer = new MemoryIndexer[Work[Denormalised]]()
 
@@ -59,7 +65,11 @@ class RouterWorkerServiceTest
     )
 
     withWorkerService(indexer, retriever) {
-      case (QueuePair(queue, dlq), worksMessageSender, pathsMessageSender, pathConcatenatorSender) =>
+      case (
+          QueuePair(queue, dlq),
+          worksMessageSender,
+          pathsMessageSender,
+          pathConcatenatorSender) =>
         sendNotificationToSQS(queue = queue, body = work.id)
         eventually {
           assertQueueEmpty(queue)
@@ -81,7 +91,11 @@ class RouterWorkerServiceTest
     )
 
     withWorkerService(indexer, retriever) {
-      case (QueuePair(queue, dlq), worksMessageSender, pathsMessageSender, pathConcatenatorSender) =>
+      case (
+          QueuePair(queue, dlq),
+          worksMessageSender,
+          pathsMessageSender,
+          pathConcatenatorSender) =>
         sendNotificationToSQS(queue = queue, body = work.id)
 
         eventually {
@@ -100,7 +114,8 @@ class RouterWorkerServiceTest
   it("sends on an invisible work") {
     val work =
       mergedWork(
-        sourceIdentifier = createSourceIdentifierWith(IdentifierType.CalmRecordIdentifier)
+        sourceIdentifier =
+          createSourceIdentifierWith(IdentifierType.CalmRecordIdentifier)
       ).collectionPath(CollectionPath("a/2")).invisible()
 
     val indexer = new MemoryIndexer[Work[Denormalised]]()
@@ -110,7 +125,11 @@ class RouterWorkerServiceTest
     )
 
     withWorkerService(indexer, retriever) {
-      case (QueuePair(queue, dlq), worksMessageSender, pathsMessageSender, pathConcatenatorSender) =>
+      case (
+          QueuePair(queue, dlq),
+          worksMessageSender,
+          pathsMessageSender,
+          pathConcatenatorSender) =>
         sendNotificationToSQS(queue = queue, body = work.id)
 
         eventually {
@@ -141,7 +160,11 @@ class RouterWorkerServiceTest
     )
 
     withWorkerService(failingIndexer, retriever) {
-      case (QueuePair(queue, dlq), worksMessageSender, pathsMessageSender, pathConcatenatorSender) =>
+      case (
+          QueuePair(queue, dlq),
+          worksMessageSender,
+          pathsMessageSender,
+          pathConcatenatorSender) =>
         sendNotificationToSQS(queue = queue, body = work.id)
 
         eventually {
@@ -158,7 +181,11 @@ class RouterWorkerServiceTest
     indexer: Indexer[Work[Denormalised]],
     retriever: Retriever[Work[Merged]]
   )(
-    testWith: TestWith[(QueuePair, MemoryMessageSender, MemoryMessageSender, MemoryMessageSender), R]
+    testWith: TestWith[(QueuePair,
+                        MemoryMessageSender,
+                        MemoryMessageSender,
+                        MemoryMessageSender),
+                       R]
   ): R =
     withLocalSqsQueuePair(visibilityTimeout = 1 second) {
       case q @ QueuePair(queue, _) =>
@@ -178,7 +205,8 @@ class RouterWorkerServiceTest
               pathConcatenatorMsgSender = pathConcatenatorSender
             )
           service.run()
-          testWith((q, worksMessageSender, pathsMessageSender, pathConcatenatorSender))
+          testWith(
+            (q, worksMessageSender, pathsMessageSender, pathConcatenatorSender))
         }
     }
 }
