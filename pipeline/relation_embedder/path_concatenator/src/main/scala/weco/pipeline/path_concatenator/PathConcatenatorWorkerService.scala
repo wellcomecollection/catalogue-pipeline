@@ -64,7 +64,7 @@ class PathConcatenatorWorkerService[MsgDestination](
         // the originally requested path should be forwarded downstream.
         // This will allow the Work in question to be indexed, even if its
         // position in a path hierarchy is not correctly resolved.
-        error(msg=exception.getMessage)
+        error(msg = exception.getMessage)
         notifyPaths(Seq(path))
         Future(())
       }
