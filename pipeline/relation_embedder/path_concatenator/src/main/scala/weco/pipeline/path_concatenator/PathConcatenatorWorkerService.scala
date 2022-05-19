@@ -14,27 +14,27 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
 /**
- * Worker service that responds to SQS messages and updates
- * Works with the relevant paths.
- *
- * The service
- *
- * 1. takes messages from sqsStream
- *
- * 2. Uses pathsModifier to retrieve and modify relevant Works
- *
- * 3. Saves the modified Works using workIndexer
- *
- * 4. notifies the downstream service using msgSender
- *
- */
+  * Worker service that responds to SQS messages and updates
+  * Works with the relevant paths.
+  *
+  * The service
+  *
+  * 1. takes messages from sqsStream
+  *
+  * 2. Uses pathsModifier to retrieve and modify relevant Works
+  *
+  * 3. Saves the modified Works using workIndexer
+  *
+  * 4. notifies the downstream service using msgSender
+  *
+  */
 class PathConcatenatorWorkerService[MsgDestination](
-                                                     sqsStream: SQSStream[NotificationMessage],
-                                                     pathsModifier: PathsModifier,
-                                                     workIndexer: Indexer[Work[Merged]],
-                                                     msgSender: MessageSender[MsgDestination]
-                                                   )(implicit ec: ExecutionContext)
-  extends Runnable
+  sqsStream: SQSStream[NotificationMessage],
+  pathsModifier: PathsModifier,
+  workIndexer: Indexer[Work[Merged]],
+  msgSender: MessageSender[MsgDestination]
+)(implicit ec: ExecutionContext)
+    extends Runnable
     with Logging {
 
   def run(): Future[Done] = {
@@ -46,16 +46,17 @@ class PathConcatenatorWorkerService[MsgDestination](
     processPath(message.body)
 
   private def processPath(
-                           path: String,
-                         ): Future[Unit] = {
+    path: String,
+  ): Future[Unit] = {
     val changedWorks = pathsModifier.modifyPaths(path)
-    changedWorks flatMap { works => {
-      workIndexer(works)
-    }.map {
-      case Right(works) => notifyPaths(pathsToNotify(path, works))
-      case Left(_) => notifyPaths(Seq(path))
-    }
-      .map(_ => ())
+    changedWorks flatMap { works =>
+      {
+        workIndexer(works)
+      }.map {
+          case Right(works) => notifyPaths(pathsToNotify(path, works))
+          case Left(_)      => notifyPaths(Seq(path))
+        }
+        .map(_ => ())
     }
   }
 
@@ -69,7 +70,7 @@ class PathConcatenatorWorkerService[MsgDestination](
   private def notifyPaths(paths: Seq[String]): Seq[Future[Unit]] =
     paths map { path =>
       Future(msgSender.send(path)).flatMap {
-        case Success(_) => Future.successful(())
+        case Success(_)   => Future.successful(())
         case Failure(err) => Future.failed(err)
       }
     }
