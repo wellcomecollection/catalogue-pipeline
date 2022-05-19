@@ -49,15 +49,25 @@ class PathConcatenatorWorkerService[MsgDestination](
   private def processPath(
     path: String,
   ): Future[Unit] = {
+    // TODO: modifyPaths can throw excdeptions. If this happens, log it and notify with the input path.
     val changedWorks = pathsModifier.modifyPaths(path)
-    changedWorks flatMap { works =>
-      {
+    changedWorks transformWith {
+      case Success(works) => {
         workIndexer(works)
       }.map {
           case Right(works) => notifyPaths(pathsToNotify(path, works))
           case Left(_)      => notifyPaths(Seq(path))
         }
         .map(_ => ())
+      case Failure(exception) => {
+        // Even if a data error has prevented this stage working,
+        // the originally requested path should be forwarded downstream.
+        // This will allow the Work in question to be indexed, even if its
+        // position in a path hierarchy is not correctly resolved.
+        error(msg=exception.getMessage)
+        notifyPaths(Seq(path))
+        Future(())
+      }
     }
   }
 

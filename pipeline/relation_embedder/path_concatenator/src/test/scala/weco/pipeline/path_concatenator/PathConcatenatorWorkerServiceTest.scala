@@ -86,6 +86,25 @@ class PathConcatenatorWorkerServiceTest
     }
   }
 
+  it("sends the input path to the downstream queue if there are data errors") {
+    val works = List(
+      work("a/b"),
+      work("b/b"),
+      work("b/c"),
+    )
+
+    withWorkerService(works) {
+      case (QueuePair(queue, dlq), index, downstreamMessageSender) =>
+        sendNotificationToSQS(queue = queue, body = "b/c")
+        eventually {
+          assertQueueEmpty(queue)
+          assertQueueEmpty(dlq)
+          index shouldBe empty
+          assertQueueContainsPaths(downstreamMessageSender, List("b/c"))
+        }
+    }
+  }
+
   private def work(path: String): Work.Visible[Merged] =
     mergedWork(createSourceIdentifierWith(value = path))
       .collectionPath(CollectionPath(path = path))
