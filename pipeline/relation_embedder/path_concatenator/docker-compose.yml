@@ -4,3 +4,14 @@ localstack:
     - SERVICES=sqs
   ports:
     - "4566:4566"
+elasticsearch:
+  image: "docker.elastic.co/elasticsearch/elasticsearch:7.9.0"
+  ports:
+    - "9200:9200"
+    - "9300:9300"
+  environment:
+    - "http.host=0.0.0.0"
+    - "transport.host=0.0.0.0"
+    - "cluster.name=wellcome"
+    - "logger.level=DEBUG"
+    - "discovery.type=single-node"
