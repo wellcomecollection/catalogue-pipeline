@@ -14,20 +14,21 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
 /**
-  * Worker service that responds to SQS messages and updates
-  * Works with the relevant paths.
-  *
-  * The service
-  *
-  * 1. takes messages from sqsStream
-  *
-  * 2. Uses pathsModifier to retrieve and modify relevant Works
-  *
-  * 3. Saves the modified Works using workIndexer
-  *
-  * 4. notifies the downstream service using msgSender
-  *
-  */
+ * Worker service that responds to SQS messages and updates
+ * Works with the relevant paths.
+ *
+ * The service:
+ *
+ *  - takes messages from sqsStream
+ *    - The messages are expected to contain path strings corresponding to collectionPath.path values.
+ *  - uses pathsModifier to retrieve and modify relevant Works
+ *  - saves the modified Works using workIndexer
+ *  - notifies the downstream service using msgSender
+ *    - The messages contain path strings corresponding to collectionPath.path values.
+ *    - There will be a message for the input path retrieved from sqsStream
+ *    - There will be a message containing any new paths created/changed by this service
+ *
+ */
 class PathConcatenatorWorkerService[MsgDestination](
   sqsStream: SQSStream[NotificationMessage],
   pathsModifier: PathsModifier,
