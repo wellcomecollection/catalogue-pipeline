@@ -48,17 +48,17 @@ trait AggregatableValues {
 
     def languageAggregatableValues: List[String] =
       workData.languages
-        .map(lang =>
-          // There are cases where two languages may have the same ID but different
-          // labels, e.g. Chinese and Mandarin are two names for the same language
-          // which has MARC language code "chi".  The distinct names may be important
-          // for display on individual works pages, but for filtering/aggregating
-          // we want to use the canonical labels.
-          MarcLanguageCodeList.fromCode(lang.id) match {
-            case Some(canonicalLang) => canonicalLang
-            case None                => lang
-          }
-        )
+        .map(
+          lang =>
+            // There are cases where two languages may have the same ID but different
+            // labels, e.g. Chinese and Mandarin are two names for the same language
+            // which has MARC language code "chi".  The distinct names may be important
+            // for display on individual works pages, but for filtering/aggregating
+            // we want to use the canonical labels.
+            MarcLanguageCodeList.fromCode(lang.id) match {
+              case Some(canonicalLang) => canonicalLang
+              case None                => lang
+          })
         .distinct
         .map(DisplayLanguage(_))
         .asJson()
