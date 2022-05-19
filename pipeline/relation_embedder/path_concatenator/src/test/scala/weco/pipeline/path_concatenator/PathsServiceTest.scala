@@ -41,6 +41,7 @@ class PathsServiceTest
 
   describe("The PathService parentPath getter") {
     it("retrieves the parent path corresponding to a child path") {
+      // The parent of a path is one whose leaf node matches the root of the child
       val works: List[Work[Merged]] = List(
         work(path = "grandparent/parent"),
         work(path = "parent/child")
@@ -54,6 +55,10 @@ class PathsServiceTest
     }
 
     it("only fetches a complex parentPath, simple parents are ignored") {
+      // When the parent path consists of a single node, there is nothing to do,
+      // because the point of this is to expand the "root" of the child with
+      // the path to that node from the actual root. In this case, they would be
+      // the same node.
       val works: List[Work[Merged]] = List(
         work(path = "parent"),
         work(path = "parent/child")
@@ -126,6 +131,20 @@ class PathsServiceTest
         ).failed.futureValue shouldBe a[RuntimeException]
       }
     }
+
+    it("throws an exception if no work can be found") {
+      val works: List[Work[Merged]] = List(
+        work(path = "hello/world")
+      )
+      withLocalMergedWorksIndex { index =>
+        insertIntoElasticsearch(index, works: _*)
+
+        queryWorkWithPath(
+          service(index),
+          path = "parent/child"
+        ).failed.futureValue shouldBe a[RuntimeException]
+      }
+    }
   }
 
   describe("The PathService childPath getter") {
@@ -142,6 +161,18 @@ class PathsServiceTest
         insertIntoElasticsearch(index, works: _*)
         whenReady(queryChildWorks(service(index), path = "grandparent/parent")) {
           _ should contain theSameElementsAs List(works(2), works(3))
+        }
+      }
+    }
+    it("Returns an empty list if there are no children") {
+      val works: List[Work[Merged]] = List(
+        work(path = "grandparent"),
+        work(path = "grandparent/parent")
+      )
+      withLocalMergedWorksIndex { index =>
+        insertIntoElasticsearch(index, works: _*)
+        whenReady(queryChildWorks(service(index), path = "grandparent/parent")) {
+          _ shouldBe empty
         }
       }
     }
