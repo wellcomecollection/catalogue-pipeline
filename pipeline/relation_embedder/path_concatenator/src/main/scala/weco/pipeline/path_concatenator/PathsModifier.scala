@@ -41,36 +41,28 @@ case class PathsModifier(pathsService: PathsService)(
     }
   }
 
-  def modifyCurrentPath(path: String): Future[Option[Work.Visible[Merged]]] =
-    getParentPath(path) flatMap {
+  private def modifyCurrentPath(path: String): Future[Option[Work.Visible[Merged]]] =
+    pathsService.getParentPath(path) flatMap {
       case Some(parentPath) =>
-        getWorkWithPath(path) flatMap { work: Work.Visible[Merged] =>
+        pathsService.getWorkWithPath(path) flatMap { work: Work.Visible[Merged] =>
           Future(Some(ChildWork(parentPath, work)))
         }
       case _ => Future.successful(None) // This is expected, if parent is root
 
     }
 
-  def modifyChildPaths(path: String): Future[Seq[Work.Visible[Merged]]] =
-    getWorksUnderPath(path) flatMap { works: Seq[Work.Visible[Merged]] =>
-      Future(updatePaths(path, works))
+  private def modifyChildPaths(path: String): Future[Seq[Work.Visible[Merged]]] =
+    getWorksUnderPath(path) map { works: Seq[Work.Visible[Merged]] =>
+      updatePaths(path, works)
     }
 
-  def updatePaths(parentPath: String,
+  private def updatePaths(parentPath: String,
                   works: Seq[Work.Visible[Merged]]): Seq[Work.Visible[Merged]] =
     works map { work: Work.Visible[Merged] =>
       ChildWork(parentPath, work)
     }
 
-  def getParentPath(path: String): Future[Option[String]] = {
-    pathsService.getParentPath(path)
-  }
-
-  def getWorkWithPath(path: String): Future[Work.Visible[Merged]] = {
-    pathsService.getWorkWithPath(path)
-  }
-
-  def getWorksUnderPath(path: String): Future[Seq[Work.Visible[Merged]]] = {
+  private def getWorksUnderPath(path: String): Future[Seq[Work.Visible[Merged]]] = {
     pathsService
       .getChildWorks(path)
       .map { childWorks =>

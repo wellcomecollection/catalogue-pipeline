@@ -88,8 +88,9 @@ class PathsServiceTest
       withLocalMergedWorksIndex { index =>
         insertIntoElasticsearch(index, works: _*)
 
-        queryParentPath(service(index), childPath = "parent/child").failed.futureValue shouldBe a[
-          RuntimeException]
+        queryParentPath(
+          service(index), childPath = "parent/child"
+        ).failed.futureValue shouldBe a[RuntimeException]
       }
     }
   }
@@ -109,7 +110,22 @@ class PathsServiceTest
         }
       }
     }
+
+    it("throws an exception if there are multiple matching exact paths") {
+      val works: List[Work[Merged]] = List(
+        work(path = "parent/child"),
+        work(path = "parent/child")
+      )
+      withLocalMergedWorksIndex { index =>
+        insertIntoElasticsearch(index, works: _*)
+
+        queryWorkWithPath(
+          service(index), path = "parent/child"
+        ).failed.futureValue shouldBe a[RuntimeException]
+      }
+    }
   }
+
   describe("The PathService childPath getter") {
     it("Fetches works whose paths start with the end of this path") {
       val works: List[Work[Merged]] = List(
