@@ -31,38 +31,35 @@ class PathConcatenatorRequestBuilder(index: Index) {
   val maxResponseSize: Int = 10000
 
   /**
-    * A query that returns the collectionPath from the parent Work (if any)
-    * of the given path.
+    * A query that returns the collectionPaths from any works whose path ends
+    * with the first part of this path.
     *
-    * The parent work is the one with a path whose leaf node matches
-    * the root node of the given path.
-    * e.g.
-    * a/b/c is the parent of c/d/e
+    * e.g. if the path is leaf/blade/tip, then root/branch/leaf will be returned
     *
-    * There _should_, at most, be one record that matches this query,
-    * and callers should act accordingly.
+    * There _should_, at most, be one record that matches this query.
     *
     * However, because there is a possibility that errors in the data might
     * cause this query to yield more than one result, this request leaves
     * the size constraint set at the default (10), in order to allow the caller
-    * to examine the number of results returned and take appropriate action.
+    * to log any excess results returned to help diagnose the problem
     */
   def parentPath(path: String): SearchRequest =
     search(index)
       .query(
-        constantScoreQuery(wildPathQuery(pathJoin(List("*", path.firstNode)))))
+        constantScoreQuery(wildPathQuery(s"*/${path.firstNode}")))
       .sourceInclude(("data.collectionPath.path"))
 
   /**
     * A query that returns the Work that has the exact path given in `path`
+   * As with parentPath, the query is expected to return one record, but the
+   * default size constraint allows more records to be returned to help with debugging.
     */
   def workWithPath(path: String): SearchRequest =
     search(index).query(constantScoreQuery(exactPathQuery(path)))
 
   /**
-    * A query that returns all works with a path that starts at the end of the given path.
-    * e.g. given works in the index with paths b/c, b/d and b/e/f,
-    * executing the childWorks("a/b") query will return all of those works.
+    * A query that returns all works whose collectionPath starts with the final part of this path.
+    * e.g. if the path is root/branch/leaf, this finds the works whose path ends with /leaf
     *
     * The query includes a large size setting. By default, Elasticsearch will only return 10 results
     * and it is likely that there will be more than 10 to return in any given run through the concatenator.
@@ -70,7 +67,7 @@ class PathConcatenatorRequestBuilder(index: Index) {
   def childWorks(path: String): SearchRequest =
     search(index)
       .query(
-        constantScoreQuery(wildPathQuery(pathJoin(List(path.lastNode, "*")))))
+        constantScoreQuery(wildPathQuery(s"${path.lastNode}/*")))
       .size(maxResponseSize)
 
   private def wildPathQuery(path: String): WildcardQuery =

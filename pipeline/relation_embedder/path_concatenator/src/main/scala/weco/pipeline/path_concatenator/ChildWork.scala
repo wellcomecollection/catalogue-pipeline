@@ -34,7 +34,7 @@ object ChildWork {
     childWork.data.collectionPath match {
       case None =>
         throw new IllegalArgumentException(
-          s"Cannot prepend a parent path to '${childWork}', it does not have a collectionPath")
+          s"Cannot prepend a parent path to '${childWork.id}', it does not have a collectionPath")
       case Some(childPath) =>
         val newChildPath = mergePaths(parentPath, childPath)
         // The path will be unchanged if parentPath is the root.
