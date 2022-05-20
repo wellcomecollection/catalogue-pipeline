@@ -5,10 +5,10 @@ module "router_path_output_topic" {
   role_names = [module.router.task_role_name]
 }
 
-module "router_path_concatenator_output_topic" {
+module "router_candidate_incomplete_paths_output_topic" {
   source = "../modules/topic"
 
-  name       = "${local.namespace}_router_path_concatenator_output"
+  name       = "${local.namespace}_router_candidate_incomplete_paths_output"
   role_names = [module.router.task_role_name]
 }
 
