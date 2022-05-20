@@ -16,7 +16,7 @@ for more detail.
 
 ## How?
 
-1. Take the first and last segments of the path
+1. Given a record we've been asked to process, the first and last segments of the path
     * e.g. given a path, `root/branch/leaf` - it will use `root`, and `leaf`.
 2. Run a wildcard search for records whose last segment matches the first segment of this record.
     * e.g. `*/root`
