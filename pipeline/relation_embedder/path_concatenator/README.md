@@ -33,11 +33,6 @@ This is a deliberately ordered list of steps, so that the current record *first*
 goes on to embellish the paths of its children with that new path.  Updating the child paths with the current record's
 path _before_ updating the current record's path would result in the child records having incomplete paths.
 
-### Shortcuts
-
-If the path of a parent does not contain `/`, step 3, above, can be skipped.
-If the path of the current record at step 4, above does not contain `/`, skip to step 7.
-
 ## Scale
 
 This is expected to run only on...
