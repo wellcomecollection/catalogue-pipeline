@@ -85,23 +85,8 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant Upstream Stage
-    participant Upstream Database
     participant Path Concatenator
     participant Downstream Stage
     Upstream Stage->>Path Concatenator: Here is a path
     Path Concatenator->>Path Concatenator: Nothing to do
     Path Concatenator->>Downstream Stage: Here is the path I got
-```
-
-### When the given path remains the same, but its children change
-
-```mermaid
-sequenceDiagram
-    participant Upstream Stage
-    participant Upstream Database
-    participant Path Concatenator
-    participant Downstream Stage
-    Upstream Stage->>Path Concatenator: Here is a path
-    Path Concatenator->>Path Concatenator: Update work below that path
-    Path Concatenator->>Downstream Stage: Here is the path I got and all its child paths
-```
