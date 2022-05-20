@@ -52,13 +52,13 @@ class PathConcatenatorWorkerService[MsgDestination](
     // TODO: modifyPaths can throw excdeptions. If this happens, log it and notify with the input path.
     val changedWorks = pathsModifier.modifyPaths(path)
     changedWorks transformWith {
-      case Success(works) => {
+      case Success(works) =>
         workIndexer(works)
-      }.map {
-          case Right(works) => notifyPaths(pathsToNotify(path, works))
-          case Left(_)      => notifyPaths(Seq(path))
-        }
-        .map(_ => ())
+          .map {
+            case Right(works) => notifyPaths(pathsToNotify(path, works))
+            case Left(_)      => notifyPaths(Seq(path))
+          }
+          .map(_ => ())
       case Failure(exception) => {
         // Even if a data error has prevented this stage working,
         // the originally requested path should be forwarded downstream.
