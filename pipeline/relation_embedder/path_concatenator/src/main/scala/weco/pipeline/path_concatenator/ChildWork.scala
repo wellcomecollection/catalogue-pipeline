@@ -36,26 +36,12 @@ object ChildWork {
         throw new IllegalArgumentException(
           s"Cannot prepend a parent path to '${childWork.id}', it does not have a collectionPath")
       case Some(childPath) =>
-        val newChildPath = mergePaths(parentPath, childPath)
+        val newChildPath = concatenatePaths(parentPath, childPath)
         // The path will be unchanged if parentPath is the root.
         // In this case, just return the childWork as-is
         if (newChildPath != childPath)
           withNewPath(childWork, newChildPath)
         else childWork
-    }
-  }
-
-  private def mergePaths(parentPath: String,
-                         childPath: CollectionPath): CollectionPath = {
-    val childRoot = childPath.path.firstNode
-    val parentLeaf = parentPath.lastNode
-
-    if (childRoot != parentLeaf) {
-      throw new IllegalArgumentException(
-        s"$parentPath is not the parent of $childRoot")
-    } else {
-      childPath.copy(
-        path = pathJoin(parentPath +: childPath.path.split("/").tail))
     }
   }
 
