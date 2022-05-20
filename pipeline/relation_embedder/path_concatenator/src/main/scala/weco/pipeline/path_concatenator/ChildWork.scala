@@ -36,10 +36,12 @@ object ChildWork {
         throw new IllegalArgumentException(
           s"Cannot prepend a parent path to '${childWork.id}', it does not have a collectionPath")
       case Some(childPath) =>
-        val newChildPath = childPath.copy(concatenatePaths(parentPath, childPath.path))
+        val newChildPath =
+          childPath.copy(concatenatePaths(parentPath, childPath.path))
         // The path will be unchanged if parentPath is the root.
         // In this case, just return the childWork as-is
-        childWork.copy(data = childWork.data.copy(collectionPath = Some(newChildPath)))
+        childWork.copy(
+          data = childWork.data.copy(collectionPath = Some(newChildPath)))
     }
   }
 }
