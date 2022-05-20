@@ -49,7 +49,6 @@ class PathConcatenatorWorkerService[MsgDestination](
   private def processPath(
     path: String,
   ): Future[Unit] = {
-    // TODO: modifyPaths can throw excdeptions. If this happens, log it and notify with the input path.
     val changedWorks = pathsModifier.modifyPaths(path)
     changedWorks transformWith {
       case Success(works) =>
@@ -62,9 +61,10 @@ class PathConcatenatorWorkerService[MsgDestination](
       case Failure(exception) => {
         // Even if a data error has prevented this stage working,
         // the originally requested path should be forwarded downstream.
-        // This will allow the Work in question to be indexed, even if its
-        // position in a path hierarchy is not correctly resolved.
-        error(msg = exception.getMessage)
+        // This will allow the Work in question to progress through the pipeline
+        // and eventually be indexed for presenting to the API,
+        // even if its position in a path hierarchy is not correctly resolved.
+        error(msg = s"Unable to update collectionPaths relating to $path", exception)
         notifyPaths(Seq(path))
         Future(())
       }
