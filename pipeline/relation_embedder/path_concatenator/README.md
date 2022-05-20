@@ -49,6 +49,20 @@ This is expected to run only on...
 As such, it is unlikely to run on many records at once, when it does, it is unlikely to 
 modify many records at all.
 
+At time of writing, this is only expected to modify records in the Fallaize Collection.
+There are 1313 records that match a free-text search for Fallaize.  There are 3920 records
+that may trigger this process (Sierra Works with `/` in the collectionPath)
+
+Middle records in the Fallaize collection tend to be parents of around 10 child records.
+e.g. https://wellcomecollection.org/works/u63yc4fs (aka `3303244i/3288731i`)
+
+The largest subcollection contains 57 children
+https://wellcomecollection.org/works/wzde8hdw (aka `3303244i/529472i`).
+
+The largest set of children this can be expected to run on, given current data, is 57.
+That is only if all of the children of `wzde8hdw` have been processed _before_ that record itself.
+
+
 ## In Pictures
 How this fits into the pipeline.
 
