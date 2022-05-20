@@ -45,14 +45,13 @@ class PathConcatenatorRequestBuilder(index: Index) {
     */
   def parentPath(path: String): SearchRequest =
     search(index)
-      .query(
-        constantScoreQuery(wildPathQuery(s"*/${path.firstNode}")))
+      .query(constantScoreQuery(wildPathQuery(s"*/${path.firstNode}")))
       .sourceInclude(("data.collectionPath.path"))
 
   /**
     * A query that returns the Work that has the exact path given in `path`
-   * As with parentPath, the query is expected to return one record, but the
-   * default size constraint allows more records to be returned to help with debugging.
+    * As with parentPath, the query is expected to return one record, but the
+    * default size constraint allows more records to be returned to help with debugging.
     */
   def workWithPath(path: String): SearchRequest =
     search(index).query(constantScoreQuery(exactPathQuery(path)))
@@ -66,8 +65,7 @@ class PathConcatenatorRequestBuilder(index: Index) {
     */
   def childWorks(path: String): SearchRequest =
     search(index)
-      .query(
-        constantScoreQuery(wildPathQuery(s"${path.lastNode}/*")))
+      .query(constantScoreQuery(wildPathQuery(s"${path.lastNode}/*")))
       .size(maxResponseSize)
 
   private def wildPathQuery(path: String): WildcardQuery =
