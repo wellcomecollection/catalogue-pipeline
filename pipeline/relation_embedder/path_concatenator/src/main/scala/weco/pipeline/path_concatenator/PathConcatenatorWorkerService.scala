@@ -64,7 +64,9 @@ class PathConcatenatorWorkerService[MsgDestination](
         // This will allow the Work in question to progress through the pipeline
         // and eventually be indexed for presenting to the API,
         // even if its position in a path hierarchy is not correctly resolved.
-        error(msg = s"Unable to update collectionPaths relating to $path", exception)
+        error(
+          msg = s"Unable to update collectionPaths relating to $path",
+          exception)
         notifyPaths(Seq(path))
         Future(())
       }
