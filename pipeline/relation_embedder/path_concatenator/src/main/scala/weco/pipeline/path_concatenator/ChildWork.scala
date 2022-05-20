@@ -1,6 +1,6 @@
 package weco.pipeline.path_concatenator
 
-import weco.catalogue.internal_model.work.{CollectionPath, Work, WorkState}
+import weco.catalogue.internal_model.work.{Work, WorkState}
 
 object ChildWork {
   import PathOps._
@@ -36,18 +36,10 @@ object ChildWork {
         throw new IllegalArgumentException(
           s"Cannot prepend a parent path to '${childWork.id}', it does not have a collectionPath")
       case Some(childPath) =>
-        val newChildPath = concatenatePaths(parentPath, childPath)
+        val newChildPath = childPath.copy(concatenatePaths(parentPath, childPath.path))
         // The path will be unchanged if parentPath is the root.
         // In this case, just return the childWork as-is
-        if (newChildPath != childPath)
-          withNewPath(childWork, newChildPath)
-        else childWork
+        childWork.copy(data = childWork.data.copy(collectionPath = Some(newChildPath)))
     }
   }
-
-  private def withNewPath[State <: WorkState](
-    work: Work.Visible[State],
-    newPath: CollectionPath): Work.Visible[State] =
-    work.copy(data = work.data.copy(collectionPath = Some(newPath)))
-
 }

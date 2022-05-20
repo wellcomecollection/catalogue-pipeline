@@ -57,7 +57,7 @@ class ChildWorkTest extends AnyFunSpec with WorkGenerators with Matchers {
       // that's fine, but there is nothing to do.
       val originalChild = mergedWork().collectionPath(CollectionPath("a/b"))
       val newChild = ChildWork("a", originalChild)
-      newChild should be theSameInstanceAs originalChild
+      newChild shouldEqual originalChild
     }
 
     it(
