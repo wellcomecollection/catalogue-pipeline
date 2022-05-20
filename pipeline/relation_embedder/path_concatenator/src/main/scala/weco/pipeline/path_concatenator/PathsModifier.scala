@@ -62,8 +62,8 @@ case class PathsModifier(pathsService: PathsService)(
   private def updatePaths(
     parentPath: String,
     works: Seq[Work.Visible[Merged]]): Seq[Work.Visible[Merged]] =
-    works map { work: Work.Visible[Merged] =>
-      ChildWork(parentPath, work)
+    works map {
+      ChildWork(parentPath, _)
     }
 
   private def getWorksUnderPath(
