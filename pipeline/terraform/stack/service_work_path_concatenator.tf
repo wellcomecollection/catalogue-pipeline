@@ -10,7 +10,7 @@ module "path_concatenator" {
   source = "../modules/fargate_service"
 
   name            = "path_concatenator"
-  container_image = local.router_image
+  container_image = local.path_concatenator_image
 
   topic_arns = [
     module.router_path_concatenator_output_topic.arn,
