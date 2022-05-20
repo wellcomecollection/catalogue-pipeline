@@ -22,7 +22,7 @@ for more detail.
     * e.g. `*/root`
     * This should only match, at most, one record, if there are more, log an error and do nothing.
     * If it does not match any records, continue.
-3. Replace the first segment in this record with the collectionPath of that record.
+3. Replace the first segment in the record from step 1 with the collectionPath of the record in step 2.
     * e.g. this record is `d/e/f`, there exists `b/c/d`, the collectionPath for this record becomes `b/c/d/e/f`
 4. Run a term search for records with a collectionPath matching the last segment
     * collectionPath is a path_hierarchy, so in the example above, this will match any records with a path that start with `leaf`
