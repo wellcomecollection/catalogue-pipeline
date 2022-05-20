@@ -18,15 +18,13 @@ for more detail.
 
 1. Given a record we've been asked to process, the first and last segments of the path
     * e.g. given a path, `root/branch/leaf` - it will use `root`, and `leaf`.
-2. Run a wildcard search for records whose last segment matches the first segment of this record.
-    * e.g. `*/root`
-    * This should only match, at most, one record, if there are more, log an error and do nothing.
-    * If it does not match any records, continue.
+2. Search for records whose last segment matches the first segment of this record. This should match exactly one record; if not, do nothing.
+    * e.g. search for records matching `*/root`
 3. Replace the first segment in the record from step 1 with the collectionPath of the record in step 2.
     * e.g. this record is `d/e/f`, there exists `b/c/d`, the collectionPath for this record becomes `b/c/d/e/f`
-4. Run a term search for records with a collectionPath matching the last segment
-    * collectionPath is a path_hierarchy, so in the example above, this will match any records with a path that start with `leaf`
-5. Replace the first segment in those collectionPath, with this record's collectionPath
+4. Search for records whose first segment matches the last segment of this record.
+    * search for records matching `leaf/*`
+5. Replace the first segment in the records from step 4 with the collectionPath of the record we're updating
     * e.g. a path `leaf/1/2` would become `root/branch/leaf/1/2`
 6. Notify downstream (batcher) of all changed paths.
 7. Notify downstream (batcher) of the current path if it is unchanged.
