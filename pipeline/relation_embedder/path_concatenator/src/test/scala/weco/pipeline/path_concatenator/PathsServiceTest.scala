@@ -189,6 +189,6 @@ class PathsServiceTest
 
   def queryChildWorks(service: PathsService,
                       path: String): Future[Seq[Work[Merged]]] =
-    service.getChildWorks(path) // TODO: Add a test to show this works for more than 10 children
+    service.getChildWorks(path)
 
 }
