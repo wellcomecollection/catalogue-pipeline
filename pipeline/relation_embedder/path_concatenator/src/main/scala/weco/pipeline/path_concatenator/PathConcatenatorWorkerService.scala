@@ -80,11 +80,11 @@ class PathConcatenatorWorkerService[MsgDestination](
                             works: Seq[Work[Merged]]): Seq[String] =
     path +: works.map(work => work.data.collectionPath.get.path)
 
-  private def notifyPaths(paths: Seq[String]): Seq[Future[Unit]] =
-    paths map { path =>
+  private def notifyPaths(paths: Seq[String]): Future[Seq[Unit]] =
+    Future.sequence(paths map { path =>
       Future(msgSender.send(path)).flatMap {
         case Success(_)   => Future.successful(())
         case Failure(err) => Future.failed(err)
       }
-    }
+    })
 }
