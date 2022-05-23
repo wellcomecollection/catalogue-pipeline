@@ -47,8 +47,8 @@ class PathsModifierTest
   private def assertDoesNothing(worksInDB: List[Work[Merged]],
                                 path: String): Assertion =
     withContext(worksInDB, { pathsModifier =>
-      whenReady(pathsModifier.modifyPaths(path)) { resultWorks =>
-        resultWorks shouldBe empty
+      whenReady(pathsModifier.modifyPaths(path)) {
+        _ shouldBe empty
       }
     })
 
