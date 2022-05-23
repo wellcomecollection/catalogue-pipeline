@@ -57,7 +57,6 @@ class PathConcatenatorWorkerService[MsgDestination](
             case Right(works) => notifyPaths(pathsToNotify(path, works))
             case Left(_)      => notifyPaths(Seq(path))
           }
-          .map(_ => ())
       case Failure(exception) => {
         // Even if a data error has prevented this stage working,
         // the originally requested path should be forwarded downstream.
@@ -68,8 +67,8 @@ class PathConcatenatorWorkerService[MsgDestination](
           msg = s"Unable to update collectionPaths relating to $path",
           exception)
         notifyPaths(Seq(path))
-        Future(())
       }
+      Future(())
     }
   }
 
