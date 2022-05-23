@@ -45,9 +45,8 @@ case class PathsModifier(pathsService: PathsService)(
     path: String): Future[Option[Work.Visible[Merged]]] =
     pathsService.getParentPath(path) flatMap {
       case Some(parentPath) =>
-        pathsService.getWorkWithPath(path) map {
-          work: Work.Visible[Merged] =>
-            Some(ChildWork(parentPath, work))
+        pathsService.getWorkWithPath(path) map { work: Work.Visible[Merged] =>
+          Some(ChildWork(parentPath, work))
         }
       case _ => Future.successful(None) // This is expected, if parent is root
 
