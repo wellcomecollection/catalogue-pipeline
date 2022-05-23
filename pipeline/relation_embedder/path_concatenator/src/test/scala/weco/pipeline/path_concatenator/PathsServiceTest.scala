@@ -94,7 +94,7 @@ class PathsServiceTest
         insertIntoElasticsearch(index, works: _*)
 
         val future = queryParentPath(service(index), childPath = "parent/child")
-        
+
         whenReady(future.failed) {
           _ shouldBe a[RuntimeException]
         }
