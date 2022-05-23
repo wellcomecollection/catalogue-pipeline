@@ -15,16 +15,16 @@ import scala.concurrent.{ExecutionContext, Future}
   *  the first node in this path.
   *
   *  So, given records with paths:
-  *  - a
-  *  - a/b
-  *  - c/d
-  *  - c/e
-  *  - b/c
+  *  - root
+  *  - root/branch
+  *  - leaf/blade
+  *  - leaf/tip
+  *  - branch/leaf
   *
-  *  When RecordModifier encounters b/c, it will
-  *  - fetch the path a/b
-  *  - change b/c to a/b/c
-  *  - change c/d and c/e to a/b/c/d and a/b/c/e, respectively,
+  *  When RecordModifier encounters branch/leaf, it will
+  *  - fetch the path root/branch
+  *  - change branch/leaf to root/branch/leaf
+  *  - change leaf/blade and leaf/tip to root/branch/leaf/blade and root/branch/leaf/tip, respectively.
   */
 case class PathsModifier(pathsService: PathsService)(
   implicit ec: ExecutionContext)
