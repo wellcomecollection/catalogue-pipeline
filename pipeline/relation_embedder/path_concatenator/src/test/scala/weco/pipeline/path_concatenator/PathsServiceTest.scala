@@ -93,10 +93,11 @@ class PathsServiceTest
       withLocalMergedWorksIndex { index =>
         insertIntoElasticsearch(index, works: _*)
 
-        queryParentPath(
-          service(index),
-          childPath = "parent/child"
-        ).failed.futureValue shouldBe a[RuntimeException]
+        val future = queryParentPath(service(index), childPath = "parent/child")
+        
+        whenReady(future.failed) {
+          _ shouldBe a[RuntimeException]
+        }
       }
     }
   }
