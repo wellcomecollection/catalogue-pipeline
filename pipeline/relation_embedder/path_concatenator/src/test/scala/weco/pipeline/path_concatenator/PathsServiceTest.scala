@@ -125,8 +125,10 @@ class PathsServiceTest
       withLocalMergedWorksIndex { index =>
         insertIntoElasticsearch(index, works: _*)
 
-        service(index).getWorkWithPath("parent/child"
-        ).failed.futureValue shouldBe a[RuntimeException]
+        service(index)
+          .getWorkWithPath("parent/child")
+          .failed
+          .futureValue shouldBe a[RuntimeException]
       }
     }
 
@@ -137,8 +139,10 @@ class PathsServiceTest
       withLocalMergedWorksIndex { index =>
         insertIntoElasticsearch(index, works: _*)
 
-        service(index).getWorkWithPath("parent/child"
-        ).failed.futureValue shouldBe a[RuntimeException]
+        service(index)
+          .getWorkWithPath("parent/child")
+          .failed
+          .futureValue shouldBe a[RuntimeException]
       }
     }
   }

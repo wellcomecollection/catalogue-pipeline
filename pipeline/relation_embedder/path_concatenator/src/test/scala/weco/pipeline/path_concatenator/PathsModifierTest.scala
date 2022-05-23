@@ -24,13 +24,13 @@ class PathsModifierTest
     with Akka
     with WorkGenerators {
 
-
   private def work(path: String): Work.Visible[Merged] =
     mergedWork(createSourceIdentifierWith(value = path))
       .collectionPath(CollectionPath(path = path))
       .title(path)
 
-  private def withContext[R](works: List[Work[Merged]])(testWith: TestWith[PathsModifier, R]): R =
+  private def withContext[R](works: List[Work[Merged]])(
+    testWith: TestWith[PathsModifier, R]): R =
     withLocalMergedWorksIndex { index =>
       insertIntoElasticsearch(index, works: _*)
       val pathModifier = PathsModifier(
@@ -43,11 +43,10 @@ class PathsModifierTest
 
   private def assertDoesNothing(worksInDB: List[Work[Merged]],
                                 path: String): Assertion =
-    withContext(worksInDB) {
-      pathsModifier =>
-        whenReady(pathsModifier.modifyPaths(path)) {
-          _ shouldBe empty
-        }
+    withContext(worksInDB) { pathsModifier =>
+      whenReady(pathsModifier.modifyPaths(path)) {
+        _ shouldBe empty
+      }
     }
 
   private def assertFails(worksInDB: List[Work[Merged]],
@@ -110,11 +109,11 @@ class PathsModifierTest
         work(path = "parent/child")
       )
       withContext(works) { pathsModifier =>
-          whenReady(pathsModifier.modifyPaths("parent/child")) { resultWorks =>
-            resultWorks.head.data.collectionPath.get.path shouldBe "grandparent/parent/child"
-            resultWorks.length shouldBe 1
-          }
+        whenReady(pathsModifier.modifyPaths("parent/child")) { resultWorks =>
+          resultWorks.head.data.collectionPath.get.path shouldBe "grandparent/parent/child"
+          resultWorks.length shouldBe 1
         }
+      }
     }
 
     it("modifies the children of the work with the given path") {
@@ -123,12 +122,12 @@ class PathsModifierTest
         work(path = "parent/child")
       )
       withContext(works) { pathsModifier =>
-          whenReady(pathsModifier.modifyPaths("grandparent/parent")) {
-            resultWorks =>
-              resultWorks.head.data.collectionPath.get.path shouldBe "grandparent/parent/child"
-              resultWorks.length shouldBe 1
-          }
+        whenReady(pathsModifier.modifyPaths("grandparent/parent")) {
+          resultWorks =>
+            resultWorks.head.data.collectionPath.get.path shouldBe "grandparent/parent/child"
+            resultWorks.length shouldBe 1
         }
+      }
     }
 
     it("modifies many children of the work with the given path") {
@@ -138,14 +137,14 @@ class PathsModifierTest
         .map(i => work(path = s"parent/$i"))
         .toList
       withContext(works) { pathsModifier =>
-          whenReady(pathsModifier.modifyPaths("grandparent/parent")) {
-            resultWorks =>
-              resultWorks map { resultWork =>
-                resultWork.data.collectionPath.get.path
-              } should contain theSameElementsAs (0 to 100).map(i =>
-                s"grandparent/parent/$i")
-          }
+        whenReady(pathsModifier.modifyPaths("grandparent/parent")) {
+          resultWorks =>
+            resultWorks map { resultWork =>
+              resultWork.data.collectionPath.get.path
+            } should contain theSameElementsAs (0 to 100).map(i =>
+              s"grandparent/parent/$i")
         }
+      }
     }
 
     it("modifies both the work itself and its children") {
@@ -155,15 +154,15 @@ class PathsModifierTest
         work(path = "child/grandchild")
       )
       withContext(works) { pathsModifier =>
-          whenReady(pathsModifier.modifyPaths("parent/child")) { resultWorks =>
-            resultWorks map { resultWork =>
-              resultWork.data.collectionPath.get.path
-            } should contain theSameElementsAs List(
-              "grandparent/parent/child",
-              "grandparent/parent/child/grandchild"
-            )
-          }
+        whenReady(pathsModifier.modifyPaths("parent/child")) { resultWorks =>
+          resultWorks map { resultWork =>
+            resultWork.data.collectionPath.get.path
+          } should contain theSameElementsAs List(
+            "grandparent/parent/child",
+            "grandparent/parent/child/grandchild"
+          )
         }
+      }
     }
   }
 }
