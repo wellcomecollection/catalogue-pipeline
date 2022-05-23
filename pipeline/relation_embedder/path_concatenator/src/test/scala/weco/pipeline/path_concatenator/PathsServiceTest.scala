@@ -10,7 +10,6 @@ import weco.catalogue.internal_model.Implicits._
 import weco.elasticsearch.test.fixtures.ElasticsearchFixtures
 import weco.akka.fixtures.Akka
 
-import scala.concurrent.Future
 import weco.catalogue.internal_model.work.generators.WorkGenerators
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -48,7 +47,7 @@ class PathsServiceTest
       )
       withLocalMergedWorksIndex { index =>
         insertIntoElasticsearch(index, works: _*)
-        whenReady(queryParentPath(service(index), childPath = "parent/child")) {
+        whenReady(service(index).getParentPath("parent/child")) {
           _ shouldBe Some("grandparent/parent")
         }
       }
@@ -65,7 +64,7 @@ class PathsServiceTest
       )
       withLocalMergedWorksIndex { index =>
         insertIntoElasticsearch(index, works: _*)
-        whenReady(queryParentPath(service(index), childPath = "parent/child")) {
+        whenReady(service(index).getParentPath("parent/child")) {
           _ shouldBe empty
         }
       }
@@ -78,7 +77,7 @@ class PathsServiceTest
       )
       withLocalMergedWorksIndex { index =>
         insertIntoElasticsearch(index, works: _*)
-        whenReady(queryParentPath(service(index), childPath = "e/f/g/h/i")) {
+        whenReady(service(index).getParentPath("e/f/g/h/i")) {
           _ shouldBe Some("a/b/c/d/e")
         }
       }
@@ -93,7 +92,7 @@ class PathsServiceTest
       withLocalMergedWorksIndex { index =>
         insertIntoElasticsearch(index, works: _*)
 
-        val future = queryParentPath(service(index), childPath = "parent/child")
+        val future = service(index).getParentPath("parent/child")
 
         whenReady(future.failed) {
           _ shouldBe a[RuntimeException]
@@ -112,7 +111,7 @@ class PathsServiceTest
       )
       withLocalMergedWorksIndex { index =>
         insertIntoElasticsearch(index, works: _*)
-        whenReady(queryWorkWithPath(service(index), path = "parent/child")) {
+        whenReady(service(index).getWorkWithPath("parent/child")) {
           _ shouldBe expectedWork
         }
       }
@@ -126,9 +125,7 @@ class PathsServiceTest
       withLocalMergedWorksIndex { index =>
         insertIntoElasticsearch(index, works: _*)
 
-        queryWorkWithPath(
-          service(index),
-          path = "parent/child"
+        service(index).getWorkWithPath("parent/child"
         ).failed.futureValue shouldBe a[RuntimeException]
       }
     }
@@ -140,9 +137,7 @@ class PathsServiceTest
       withLocalMergedWorksIndex { index =>
         insertIntoElasticsearch(index, works: _*)
 
-        queryWorkWithPath(
-          service(index),
-          path = "parent/child"
+        service(index).getWorkWithPath("parent/child"
         ).failed.futureValue shouldBe a[RuntimeException]
       }
     }
@@ -160,7 +155,7 @@ class PathsServiceTest
       )
       withLocalMergedWorksIndex { index =>
         insertIntoElasticsearch(index, works: _*)
-        whenReady(queryChildWorks(service(index), path = "grandparent/parent")) {
+        whenReady(service(index).getChildWorks("grandparent/parent")) {
           _ should contain theSameElementsAs List(works(2), works(3))
         }
       }
@@ -172,23 +167,10 @@ class PathsServiceTest
       )
       withLocalMergedWorksIndex { index =>
         insertIntoElasticsearch(index, works: _*)
-        whenReady(queryChildWorks(service(index), path = "grandparent/parent")) {
+        whenReady(service(index).getChildWorks("grandparent/parent")) {
           _ shouldBe empty
         }
       }
     }
   }
-
-  def queryParentPath(service: PathsService,
-                      childPath: String): Future[Option[String]] =
-    service.getParentPath(childPath)
-
-  def queryWorkWithPath(service: PathsService,
-                        path: String)(): Future[Work[Merged]] =
-    service.getWorkWithPath(path)
-
-  def queryChildWorks(service: PathsService,
-                      path: String): Future[Seq[Work[Merged]]] =
-    service.getChildWorks(path)
-
 }
