@@ -4,7 +4,8 @@ import io.circe.generic.extras.JsonKey
 import weco.catalogue.display_model.identifiers.DisplayIdentifier
 import weco.catalogue.display_model.languages.DisplayLanguage
 import weco.catalogue.display_model.locations.DisplayLocation
-import weco.catalogue.internal_model.work.{Work, WorkState, WorkType}
+import weco.catalogue.internal_model.identifiers.{CanonicalId, DataState}
+import weco.catalogue.internal_model.work.{Work, WorkData, WorkState, WorkType}
 
 case class DisplayWork(
   id: String,
@@ -41,44 +42,52 @@ object DisplayWork {
 
   def apply(work: Work.Visible[WorkState.Indexed]): DisplayWork =
     DisplayWork(
-      id = work.state.canonicalId.underlying,
-      title = work.data.title,
-      alternativeTitles = work.data.alternativeTitles,
-      referenceNumber = work.data.referenceNumber.map { _.underlying },
-      description = work.data.description,
-      physicalDescription = work.data.physicalDescription,
-      workType = work.data.format.map { DisplayFormat(_) },
-      lettering = work.data.lettering,
-      createdDate = work.data.createdDate.map { DisplayPeriod(_) },
-      contributors = work.data.contributors.map {
+      id = work.state.canonicalId,
+      workData = workData
+    )
+  
+  def apply(
+    id: CanonicalId,
+    workData: WorkData[DataState.Identified]): DisplayWork =
+    DisplayWork(
+      id = id.underlying,
+      title = workData.title,
+      alternativeTitles = workData.alternativeTitles,
+      referenceNumber = workData.referenceNumber.map { _.underlying },
+      description = workData.description,
+      physicalDescription = workData.physicalDescription,
+      workType = workData.format.map { DisplayFormat(_) },
+      lettering = workData.lettering,
+      createdDate = workData.createdDate.map { DisplayPeriod(_) },
+      contributors = workData.contributors.map {
         DisplayContributor(_, includesIdentifiers = true)
       },
       identifiers = work.identifiers.map { DisplayIdentifier(_) },
-      subjects = work.data.subjects.map {
+      subjects = workData.subjects.map {
         DisplaySubject(_, includesIdentifiers = true)
       },
-      genres = work.data.genres.map {
+      genres = workData.genres.map {
         DisplayGenre(_, includesIdentifiers = true)
       },
-      thumbnail = work.data.thumbnail.map { DisplayLocation(_) },
-      items = work.data.items.map { DisplayItem(_) },
-      holdings = work.data.holdings.map { DisplayHoldings(_) },
+      thumbnail = workData.thumbnail.map { DisplayLocation(_) },
+      items = workData.items.map { DisplayItem(_) },
+      holdings = workData.holdings.map { DisplayHoldings(_) },
       availabilities = work.state.availabilities.toList.map {
         DisplayAvailability(_)
       },
-      production = work.data.production.map { DisplayProductionEvent(_) },
-      languages = work.data.languages.map { DisplayLanguage(_) },
-      edition = work.data.edition,
-      notes = DisplayNote.merge(work.data.notes.map(DisplayNote(_))),
-      duration = work.data.duration,
-      images = work.data.imageData.map(DisplayWorkImageInclude(_)),
+      production = workData.production.map { DisplayProductionEvent(_) },
+      languages = workData.languages.map { DisplayLanguage(_) },
+      edition = workData.edition,
+      notes = DisplayNote.merge(workData.notes.map(DisplayNote(_))),
+      duration = workData.duration,
+      images = workData.imageData.map(DisplayWorkImageInclude(_)),
       partOf = DisplayPartOf(work.state.relations.ancestors),
       parts = work.state.relations.children.map(DisplayRelation(_)),
       precededBy =
         work.state.relations.siblingsPreceding.map(DisplayRelation(_)),
       succeededBy =
         work.state.relations.siblingsSucceeding.map(DisplayRelation(_)),
-      ontologyType = displayWorkType(work.data.workType)
+      ontologyType = displayWorkType(workData.workType)
     )
 
   def displayWorkType(workType: WorkType): String = workType match {
