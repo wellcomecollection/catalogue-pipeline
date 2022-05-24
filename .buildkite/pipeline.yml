@@ -195,12 +195,6 @@ steps:
 
   - wait
 
-  - label: publish internal model
-    if: build.branch == "main"
-    env:
-      PROJECTS: internal_model
-    command: .buildkite/scripts/publish.py
-
   - label: trigger adapter deployments
     if: build.branch == "main"
     trigger: "catalogue-pipeline-deploy-adapters"
