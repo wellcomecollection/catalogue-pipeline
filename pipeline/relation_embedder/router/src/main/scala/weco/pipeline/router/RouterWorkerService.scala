@@ -45,12 +45,12 @@ class RouterWorkerService[MsgDestination](
       case None =>
         Success(List(work.transition[Denormalised](Relations.none)))
       case Some(CollectionPath(path, _)) =>
-val sender = work.sourceIdentifier.identifierType match {
-  case SierraSystemNumber => pathConcatenatorMsgSender
-  case _ => pathsMsgSender
-}
+        val sender = work.sourceIdentifier.identifierType match {
+          case SierraSystemNumber => pathConcatenatorMsgSender
+          case _                  => pathsMsgSender
+        }
 
-sender.send(path).map(_ => Nil)
+        sender.send(path).map(_ => Nil)
 
     }
   }
