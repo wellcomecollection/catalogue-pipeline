@@ -40,54 +40,54 @@ case class DisplayWork(
 
 object DisplayWork {
 
-  def apply(work: Work.Visible[WorkState.Indexed]): DisplayWork =
+  def apply(work: Work.Visible[WorkState.Denormalised]): DisplayWork =
     DisplayWork(
       id = work.state.canonicalId,
-      workData = workData
+      data = work.data
     )
   
   def apply(
     id: CanonicalId,
-    workData: WorkData[DataState.Identified]): DisplayWork =
+    data: WorkData[DataState.Identified]): DisplayWork =
     DisplayWork(
       id = id.underlying,
-      title = workData.title,
-      alternativeTitles = workData.alternativeTitles,
-      referenceNumber = workData.referenceNumber.map { _.underlying },
-      description = workData.description,
-      physicalDescription = workData.physicalDescription,
-      workType = workData.format.map { DisplayFormat(_) },
-      lettering = workData.lettering,
-      createdDate = workData.createdDate.map { DisplayPeriod(_) },
-      contributors = workData.contributors.map {
+      title = data.title,
+      alternativeTitles = data.alternativeTitles,
+      referenceNumber = data.referenceNumber.map { _.underlying },
+      description = data.description,
+      physicalDescription = data.physicalDescription,
+      workType = data.format.map { DisplayFormat(_) },
+      lettering = data.lettering,
+      createdDate = data.createdDate.map { DisplayPeriod(_) },
+      contributors = data.contributors.map {
         DisplayContributor(_, includesIdentifiers = true)
       },
       identifiers = work.identifiers.map { DisplayIdentifier(_) },
-      subjects = workData.subjects.map {
+      subjects = data.subjects.map {
         DisplaySubject(_, includesIdentifiers = true)
       },
-      genres = workData.genres.map {
+      genres = data.genres.map {
         DisplayGenre(_, includesIdentifiers = true)
       },
-      thumbnail = workData.thumbnail.map { DisplayLocation(_) },
-      items = workData.items.map { DisplayItem(_) },
-      holdings = workData.holdings.map { DisplayHoldings(_) },
+      thumbnail = data.thumbnail.map { DisplayLocation(_) },
+      items = data.items.map { DisplayItem(_) },
+      holdings = data.holdings.map { DisplayHoldings(_) },
       availabilities = work.state.availabilities.toList.map {
         DisplayAvailability(_)
       },
-      production = workData.production.map { DisplayProductionEvent(_) },
-      languages = workData.languages.map { DisplayLanguage(_) },
-      edition = workData.edition,
-      notes = DisplayNote.merge(workData.notes.map(DisplayNote(_))),
-      duration = workData.duration,
-      images = workData.imageData.map(DisplayWorkImageInclude(_)),
+      production = data.production.map { DisplayProductionEvent(_) },
+      languages = data.languages.map { DisplayLanguage(_) },
+      edition = data.edition,
+      notes = DisplayNote.merge(data.notes.map(DisplayNote(_))),
+      duration = data.duration,
+      images = data.imageData.map(DisplayWorkImageInclude(_)),
       partOf = DisplayPartOf(work.state.relations.ancestors),
       parts = work.state.relations.children.map(DisplayRelation(_)),
       precededBy =
         work.state.relations.siblingsPreceding.map(DisplayRelation(_)),
       succeededBy =
         work.state.relations.siblingsSucceeding.map(DisplayRelation(_)),
-      ontologyType = displayWorkType(workData.workType)
+      ontologyType = displayWorkType(data.workType)
     )
 
   def displayWorkType(workType: WorkType): String = workType match {

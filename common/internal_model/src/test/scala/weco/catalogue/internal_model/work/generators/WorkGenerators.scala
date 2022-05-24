@@ -103,29 +103,6 @@ trait WorkGenerators
       version = createVersion
     )
 
-  def indexedWork(
-    sourceIdentifier: SourceIdentifier = createSourceIdentifier,
-    canonicalId: CanonicalId = createCanonicalId,
-    mergedTime: Instant = randomInstant,
-    relations: Relations = Relations.none
-  ): Work.Visible[Indexed] = {
-    val data = initData[DataState.Identified]
-    Work.Visible[Indexed](
-      state = Indexed(
-        sourceIdentifier = sourceIdentifier,
-        canonicalId = canonicalId,
-        mergedTime = mergedTime,
-        sourceModifiedTime = mergedTime,
-        indexedTime = randomInstant,
-        availabilities = Availabilities.forWorkData(data),
-        derivedData = DerivedWorkData(data),
-        relations = relations
-      ),
-      data = data,
-      version = createVersion
-    )
-  }
-
   def sourceWorks(count: Int): List[Work.Visible[Source]] =
     (1 to count).map(_ => sourceWork()).toList
 
@@ -137,9 +114,6 @@ trait WorkGenerators
 
   def identifiedWorks(count: Int): List[Work.Visible[Identified]] =
     (1 to count).map(_ => identifiedWork()).toList
-
-  def indexedWorks(count: Int): List[Work.Visible[Indexed]] =
-    (1 to count).map(_ => indexedWork()).toList
 
   implicit class WorkOps[State <: WorkState: UpdateState](
     work: Work.Visible[State]

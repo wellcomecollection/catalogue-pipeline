@@ -160,7 +160,7 @@ object Relation {
                                 numChildren: Int,
                                 numDescendents: Int): Relation =
     work.state match {
-      case state: Indexed =>
+      case state: WorkState.Denormalised =>
         apply(state.canonicalId, work.data, depth, numChildren, numDescendents)
 
       case state: Merged =>
