@@ -1,7 +1,7 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2022-05-16T10:00:07.688Z",
-  "id" : "gnuj1it3",
+  "createdAt" : "2022-05-10T09:10:37.797Z",
+  "id" : "7mz5gnuj",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,13 +10,13 @@
             "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "Og3KGy7Mz5"
+          "value" : "zGryOg3KGy"
         },
-        "version" : 57,
-        "modifiedTime" : "1987-11-24T07:59:41Z"
+        "version" : 74,
+        "modifiedTime" : "2022-04-12T05:45:03Z"
       },
-      "mergedTime" : "1987-11-24T07:59:41Z",
-      "indexedTime" : "2022-05-16T10:00:07.688Z",
+      "mergedTime" : "2022-04-12T05:45:03Z",
+      "indexedTime" : "2022-05-10T09:10:37.797Z",
       "redirectSources" : [
       ]
     },
@@ -26,12 +26,12 @@
           "id" : "sierra-system-number"
         },
         "ontologyType" : "Work",
-        "value" : "Og3KGy7Mz5"
+        "value" : "zGryOg3KGy"
       },
-      "canonicalId" : "gnuj1it3",
-      "mergedTime" : "1987-11-24T07:59:41Z",
-      "sourceModifiedTime" : "1987-11-24T07:59:41Z",
-      "indexedTime" : "2022-05-16T10:00:07.688Z",
+      "canonicalId" : "7mz5gnuj",
+      "mergedTime" : "2022-04-12T05:45:03Z",
+      "sourceModifiedTime" : "2022-04-12T05:45:03Z",
+      "indexedTime" : "2022-05-10T09:10:37.797Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -51,7 +51,7 @@
       }
     },
     "data" : {
-      "title" : "title-c4OR9LzJV7",
+      "title" : "title-t3ic4OR9Lz",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -103,8 +103,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "gnuj1it3",
-      "title" : "title-c4OR9LzJV7",
+      "id" : "7mz5gnuj",
+      "title" : "title-t3ic4OR9Lz",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -125,7 +125,7 @@
             "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "Og3KGy7Mz5",
+          "value" : "zGryOg3KGy",
           "type" : "Identifier"
         }
       ],

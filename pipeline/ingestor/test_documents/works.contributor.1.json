@@ -1,37 +1,37 @@
 {
   "description" : "works with different contributor",
-  "createdAt" : "2022-05-16T10:00:07.570Z",
-  "id" : "bj9evx0c",
+  "createdAt" : "2022-05-04T07:15:03.075Z",
+  "id" : "xilf8imb",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "TjLML0MOH1"
+          "value" : "11p2sZlO6W"
         },
-        "version" : 40,
-        "modifiedTime" : "1954-02-14T04:36:57Z"
+        "version" : 35,
+        "modifiedTime" : "2022-05-05T07:57:47Z"
       },
-      "mergedTime" : "1954-02-14T04:36:57Z",
-      "indexedTime" : "2022-05-16T10:00:07.569Z",
+      "mergedTime" : "2022-05-05T07:57:47Z",
+      "indexedTime" : "2022-05-04T07:15:03.074Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "calm-record-id"
+          "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "TjLML0MOH1"
+        "value" : "11p2sZlO6W"
       },
-      "canonicalId" : "bj9evx0c",
-      "mergedTime" : "1954-02-14T04:36:57Z",
-      "sourceModifiedTime" : "1954-02-14T04:36:57Z",
-      "indexedTime" : "2022-05-16T10:00:07.569Z",
+      "canonicalId" : "xilf8imb",
+      "mergedTime" : "2022-05-05T07:57:47Z",
+      "sourceModifiedTime" : "2022-05-05T07:57:47Z",
+      "indexedTime" : "2022-05-04T07:15:03.074Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -51,7 +51,7 @@
       }
     },
     "data" : {
-      "title" : "title-h70mKj49k3",
+      "title" : "title-PHmut9nJ8z",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -101,8 +101,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "bj9evx0c",
-      "title" : "title-h70mKj49k3",
+      "id" : "xilf8imb",
+      "title" : "title-PHmut9nJ8z",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -119,11 +119,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "TjLML0MOH1",
+          "value" : "11p2sZlO6W",
           "type" : "Identifier"
         }
       ],

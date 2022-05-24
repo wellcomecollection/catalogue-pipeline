@@ -1,37 +1,37 @@
 {
   "description" : "an arbitrary list of invisible works",
-  "createdAt" : "2022-05-16T10:00:07.235Z",
-  "id" : "rczekocx",
+  "createdAt" : "2022-05-04T07:15:02.725Z",
+  "id" : "ocx5hlvi",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "Y4unjFIXxl"
+          "value" : "FIXxlrCzEK"
         },
-        "version" : 64,
-        "modifiedTime" : "2001-07-02T19:43:15Z"
+        "version" : 16,
+        "modifiedTime" : "2022-04-30T11:08:11Z"
       },
-      "mergedTime" : "2001-07-02T19:43:15Z",
-      "indexedTime" : "2022-05-16T10:00:07.232Z",
+      "mergedTime" : "2022-04-30T11:08:11Z",
+      "indexedTime" : "2022-05-04T07:15:02.718Z",
       "invisibilityReasons" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "miro-image-number"
+          "id" : "calm-record-id"
         },
         "ontologyType" : "Work",
-        "value" : "Y4unjFIXxl"
+        "value" : "FIXxlrCzEK"
       },
-      "canonicalId" : "rczekocx",
-      "mergedTime" : "2001-07-02T19:43:15Z",
-      "sourceModifiedTime" : "2001-07-02T19:43:15Z",
-      "indexedTime" : "2022-05-16T10:00:07.232Z",
+      "canonicalId" : "ocx5hlvi",
+      "mergedTime" : "2022-04-30T11:08:11Z",
+      "sourceModifiedTime" : "2022-04-30T11:08:11Z",
+      "indexedTime" : "2022-05-04T07:15:02.718Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -50,7 +50,7 @@
       }
     },
     "data" : {
-      "title" : "title-hLVIpJ1Ef6",
+      "title" : "title-1Ef6zVm0zE",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -85,6 +85,77 @@
       ],
       "workType" : "Standard"
     },
+    "type" : "Invisible"
+  },
+  "work" : {
+    "version" : 16,
+    "data" : {
+      "title" : "title-1Ef6zVm0zE",
+      "otherIdentifiers" : [
+      ],
+      "alternativeTitles" : [
+      ],
+      "format" : null,
+      "description" : null,
+      "physicalDescription" : null,
+      "lettering" : null,
+      "createdDate" : null,
+      "subjects" : [
+      ],
+      "genres" : [
+      ],
+      "contributors" : [
+      ],
+      "thumbnail" : null,
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "edition" : null,
+      "notes" : [
+      ],
+      "duration" : null,
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "collectionPath" : null,
+      "referenceNumber" : null,
+      "imageData" : [
+      ],
+      "workType" : "Standard"
+    },
+    "state" : {
+      "sourceIdentifier" : {
+        "identifierType" : {
+          "id" : "calm-record-id"
+        },
+        "ontologyType" : "Work",
+        "value" : "FIXxlrCzEK"
+      },
+      "canonicalId" : "ocx5hlvi",
+      "mergedTime" : "2022-04-30T11:08:11Z",
+      "sourceModifiedTime" : "2022-04-30T11:08:11Z",
+      "indexedTime" : "2022-05-04T07:15:02.725Z",
+      "availabilities" : [
+      ],
+      "derivedData" : {
+        "contributorAgents" : [
+        ]
+      },
+      "relations" : {
+        "ancestors" : [
+        ],
+        "children" : [
+        ],
+        "siblingsPreceding" : [
+        ],
+        "siblingsSucceeding" : [
+        ]
+      }
+    },
+    "invisibilityReasons" : [
+    ],
     "type" : "Invisible"
   }
 }

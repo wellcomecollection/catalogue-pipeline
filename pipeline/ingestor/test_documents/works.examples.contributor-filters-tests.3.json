@@ -1,37 +1,37 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2022-05-16T10:00:07.689Z",
-  "id" : "6q7wkowr",
+  "createdAt" : "2022-05-10T09:10:37.798Z",
+  "id" : "bh6q7wko",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "AgxJAjEybh"
+          "value" : "4DAgxJAjEy"
         },
-        "version" : 30,
-        "modifiedTime" : "2013-02-12T12:43:10Z"
+        "version" : 46,
+        "modifiedTime" : "2022-05-02T06:06:28Z"
       },
-      "mergedTime" : "2013-02-12T12:43:10Z",
-      "indexedTime" : "2022-05-16T10:00:07.689Z",
+      "mergedTime" : "2022-05-02T06:06:28Z",
+      "indexedTime" : "2022-05-10T09:10:37.798Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "sierra-system-number"
+          "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "AgxJAjEybh"
+        "value" : "4DAgxJAjEy"
       },
-      "canonicalId" : "6q7wkowr",
-      "mergedTime" : "2013-02-12T12:43:10Z",
-      "sourceModifiedTime" : "2013-02-12T12:43:10Z",
-      "indexedTime" : "2022-05-16T10:00:07.689Z",
+      "canonicalId" : "bh6q7wko",
+      "mergedTime" : "2022-05-02T06:06:28Z",
+      "sourceModifiedTime" : "2022-05-02T06:06:28Z",
+      "indexedTime" : "2022-05-10T09:10:37.798Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -51,7 +51,7 @@
       }
     },
     "data" : {
-      "title" : "title-NOoLbpS5jR",
+      "title" : "title-iNOoLbpS5j",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -103,8 +103,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "6q7wkowr",
-      "title" : "title-NOoLbpS5jR",
+      "id" : "bh6q7wko",
+      "title" : "title-iNOoLbpS5j",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -121,11 +121,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "AgxJAjEybh",
+          "value" : "4DAgxJAjEy",
           "type" : "Identifier"
         }
       ],

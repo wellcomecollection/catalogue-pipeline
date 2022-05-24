@@ -1,37 +1,37 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2022-05-16T10:00:07.680Z",
-  "id" : "tayys6jp",
+  "createdAt" : "2022-05-10T09:08:11.347Z",
+  "id" : "x3ofwne6",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "3OfWNE6m5y"
+          "value" : "ZXOWd5kJ1F"
         },
-        "version" : 7,
-        "modifiedTime" : "2009-01-17T02:57:31Z"
+        "version" : 64,
+        "modifiedTime" : "2022-04-27T19:45:34Z"
       },
-      "mergedTime" : "2009-01-17T02:57:31Z",
-      "indexedTime" : "2022-05-16T10:00:07.679Z",
+      "mergedTime" : "2022-04-27T19:45:34Z",
+      "indexedTime" : "2022-05-10T09:08:11.346Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "miro-image-number"
+          "id" : "calm-record-id"
         },
         "ontologyType" : "Work",
-        "value" : "3OfWNE6m5y"
+        "value" : "ZXOWd5kJ1F"
       },
-      "canonicalId" : "tayys6jp",
-      "mergedTime" : "2009-01-17T02:57:31Z",
-      "sourceModifiedTime" : "2009-01-17T02:57:31Z",
-      "indexedTime" : "2022-05-16T10:00:07.679Z",
+      "canonicalId" : "x3ofwne6",
+      "mergedTime" : "2022-04-27T19:45:34Z",
+      "sourceModifiedTime" : "2022-04-27T19:45:34Z",
+      "indexedTime" : "2022-05-10T09:08:11.346Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -50,7 +50,7 @@
       }
     },
     "data" : {
-      "title" : "title-JiYzJ9DWDL",
+      "title" : "title-ytAYys6jP7",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -71,21 +71,21 @@
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "bCBtOF9X3cVR8q4",
+              "label" : "odercwIWKJQbCBt",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "GIgcsJhdmKTFidD",
+              "label" : "OF9X3cVR8q4GIgc",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "lsqnu7hZZtHlWPI",
+              "label" : "sJhdmKTFidDlsqn",
               "type" : "Concept"
             }
           ]
@@ -115,8 +115,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "tayys6jp",
-      "title" : "title-JiYzJ9DWDL",
+      "id" : "x3ofwne6",
+      "title" : "title-ytAYys6jP7",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -124,11 +124,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "3OfWNE6m5y",
+          "value" : "ZXOWd5kJ1F",
           "type" : "Identifier"
         }
       ],
@@ -137,15 +137,15 @@
           "label" : "Sanitation.",
           "concepts" : [
             {
-              "label" : "bCBtOF9X3cVR8q4",
+              "label" : "odercwIWKJQbCBt",
               "type" : "Concept"
             },
             {
-              "label" : "GIgcsJhdmKTFidD",
+              "label" : "OF9X3cVR8q4GIgc",
               "type" : "Concept"
             },
             {
-              "label" : "lsqnu7hZZtHlWPI",
+              "label" : "sJhdmKTFidDlsqn",
               "type" : "Concept"
             }
           ],

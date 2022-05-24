@@ -1,37 +1,37 @@
 {
   "description" : "examples for the genre tests",
-  "createdAt" : "2022-05-16T10:00:07.673Z",
-  "id" : "yhjhxcof",
+  "createdAt" : "2022-05-10T09:03:13.094Z",
+  "id" : "48vvelyd",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "lydjDVoexx"
+          "value" : "eiJRew3RmJ"
         },
-        "version" : 68,
-        "modifiedTime" : "2037-12-19T21:38:57Z"
+        "version" : 47,
+        "modifiedTime" : "2022-05-19T05:03:10Z"
       },
-      "mergedTime" : "2037-12-19T21:38:57Z",
-      "indexedTime" : "2022-05-16T10:00:07.672Z",
+      "mergedTime" : "2022-05-19T05:03:10Z",
+      "indexedTime" : "2022-05-10T09:03:13.094Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "calm-record-id"
+          "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "lydjDVoexx"
+        "value" : "eiJRew3RmJ"
       },
-      "canonicalId" : "yhjhxcof",
-      "mergedTime" : "2037-12-19T21:38:57Z",
-      "sourceModifiedTime" : "2037-12-19T21:38:57Z",
-      "indexedTime" : "2022-05-16T10:00:07.672Z",
+      "canonicalId" : "48vvelyd",
+      "mergedTime" : "2022-05-19T05:03:10Z",
+      "sourceModifiedTime" : "2022-05-19T05:03:10Z",
+      "indexedTime" : "2022-05-10T09:03:13.094Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -50,7 +50,7 @@
       }
     },
     "data" : {
-      "title" : "title-wsvmZKLOsI",
+      "title" : "title-VoexxyHJhX",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -70,21 +70,21 @@
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "uK4GKNsXvX3NJfI",
+              "label" : "lzYfNgtG1SKw3kl",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "XCFVccBcFLmxtr1",
+              "label" : "DAuK4GKNsXvX3NJ",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "wn4mlLNPr0YHU0g",
+              "label" : "fIXCFVccBcFLmxt",
               "type" : "Concept"
             }
           ]
@@ -112,8 +112,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "yhjhxcof",
-      "title" : "title-wsvmZKLOsI",
+      "id" : "48vvelyd",
+      "title" : "title-VoexxyHJhX",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -121,11 +121,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "lydjDVoexx",
+          "value" : "eiJRew3RmJ",
           "type" : "Identifier"
         }
       ],
@@ -136,15 +136,15 @@
           "label" : "Psychology, Pathological",
           "concepts" : [
             {
-              "label" : "uK4GKNsXvX3NJfI",
+              "label" : "lzYfNgtG1SKw3kl",
               "type" : "Concept"
             },
             {
-              "label" : "XCFVccBcFLmxtr1",
+              "label" : "DAuK4GKNsXvX3NJ",
               "type" : "Concept"
             },
             {
-              "label" : "wn4mlLNPr0YHU0g",
+              "label" : "fIXCFVccBcFLmxt",
               "type" : "Concept"
             }
           ],

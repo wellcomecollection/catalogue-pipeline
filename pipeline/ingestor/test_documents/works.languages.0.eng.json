@@ -1,37 +1,37 @@
 {
   "description" : "one of a list of works with a variety of languages",
-  "createdAt" : "2022-05-16T10:00:07.513Z",
-  "id" : "i8zcsj78",
+  "createdAt" : "2022-05-04T07:15:03.032Z",
+  "id" : "m6ne7xwr",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "ZquhBnzQPW"
+          "value" : "zpe3bQyhsY"
         },
-        "version" : 30,
-        "modifiedTime" : "2044-10-23T19:22:08Z"
+        "version" : 48,
+        "modifiedTime" : "2022-04-29T12:04:36Z"
       },
-      "mergedTime" : "2044-10-23T19:22:08Z",
-      "indexedTime" : "2022-05-16T10:00:07.512Z",
+      "mergedTime" : "2022-04-29T12:04:36Z",
+      "indexedTime" : "2022-05-04T07:15:03.031Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "sierra-system-number"
+          "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "ZquhBnzQPW"
+        "value" : "zpe3bQyhsY"
       },
-      "canonicalId" : "i8zcsj78",
-      "mergedTime" : "2044-10-23T19:22:08Z",
-      "sourceModifiedTime" : "2044-10-23T19:22:08Z",
-      "indexedTime" : "2022-05-16T10:00:07.512Z",
+      "canonicalId" : "m6ne7xwr",
+      "mergedTime" : "2022-04-29T12:04:36Z",
+      "sourceModifiedTime" : "2022-04-29T12:04:36Z",
+      "indexedTime" : "2022-05-04T07:15:03.031Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -90,7 +90,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "i8zcsj78",
+      "id" : "m6ne7xwr",
       "title" : "A work with languages English",
       "alternativeTitles" : [
       ],
@@ -99,11 +99,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "ZquhBnzQPW",
+          "value" : "zpe3bQyhsY",
           "type" : "Identifier"
         }
       ],

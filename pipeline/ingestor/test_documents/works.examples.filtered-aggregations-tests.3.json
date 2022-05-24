@@ -1,37 +1,37 @@
 {
   "description" : "examples for the works filtered aggregations tests",
-  "createdAt" : "2022-05-16T10:00:07.750Z",
-  "id" : "lpoz1fy9",
+  "createdAt" : "2022-05-10T09:25:20.139Z",
+  "id" : "lthdeniu",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "FGpPdnmb6i"
+          "value" : "Oz1fY94Zzr"
         },
-        "version" : 5,
-        "modifiedTime" : "1957-11-02T06:45:45Z"
+        "version" : 6,
+        "modifiedTime" : "2022-04-21T14:22:27Z"
       },
-      "mergedTime" : "1957-11-02T06:45:45Z",
-      "indexedTime" : "2022-05-16T10:00:07.749Z",
+      "mergedTime" : "2022-04-21T14:22:27Z",
+      "indexedTime" : "2022-05-10T09:25:20.139Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "calm-record-id"
+          "id" : "sierra-system-number"
         },
         "ontologyType" : "Work",
-        "value" : "FGpPdnmb6i"
+        "value" : "Oz1fY94Zzr"
       },
-      "canonicalId" : "lpoz1fy9",
-      "mergedTime" : "1957-11-02T06:45:45Z",
-      "sourceModifiedTime" : "1957-11-02T06:45:45Z",
-      "indexedTime" : "2022-05-16T10:00:07.749Z",
+      "canonicalId" : "lthdeniu",
+      "mergedTime" : "2022-04-21T14:22:27Z",
+      "sourceModifiedTime" : "2022-04-21T14:22:27Z",
+      "indexedTime" : "2022-05-10T09:25:20.139Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -93,7 +93,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "lpoz1fy9",
+      "id" : "lthdeniu",
       "title" : "rats",
       "alternativeTitles" : [
       ],
@@ -107,11 +107,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "FGpPdnmb6i",
+          "value" : "Oz1fY94Zzr",
           "type" : "Identifier"
         }
       ],

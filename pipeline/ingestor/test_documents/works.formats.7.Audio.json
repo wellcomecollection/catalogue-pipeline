@@ -1,37 +1,37 @@
 {
   "description" : "one of a list of works with a variety of formats",
-  "createdAt" : "2022-05-16T10:00:07.504Z",
-  "id" : "t3q2ufnz",
+  "createdAt" : "2022-05-04T07:15:03.024Z",
+  "id" : "u9fwqcum",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "nNHPpdWbrm"
+          "value" : "66avc628Sg"
         },
-        "version" : 37,
-        "modifiedTime" : "2001-08-22T14:48:34Z"
+        "version" : 13,
+        "modifiedTime" : "2022-04-06T08:46:17Z"
       },
-      "mergedTime" : "2001-08-22T14:48:34Z",
-      "indexedTime" : "2022-05-16T10:00:07.503Z",
+      "mergedTime" : "2022-04-06T08:46:17Z",
+      "indexedTime" : "2022-05-04T07:15:03.024Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "calm-record-id"
+          "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "nNHPpdWbrm"
+        "value" : "66avc628Sg"
       },
-      "canonicalId" : "t3q2ufnz",
-      "mergedTime" : "2001-08-22T14:48:34Z",
-      "sourceModifiedTime" : "2001-08-22T14:48:34Z",
-      "indexedTime" : "2022-05-16T10:00:07.503Z",
+      "canonicalId" : "u9fwqcum",
+      "mergedTime" : "2022-04-06T08:46:17Z",
+      "sourceModifiedTime" : "2022-04-06T08:46:17Z",
+      "indexedTime" : "2022-05-04T07:15:03.024Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -89,7 +89,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "t3q2ufnz",
+      "id" : "u9fwqcum",
       "title" : "A work with format Audio",
       "alternativeTitles" : [
       ],
@@ -103,11 +103,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "nNHPpdWbrm",
+          "value" : "66avc628Sg",
           "type" : "Identifier"
         }
       ],

@@ -1,7 +1,7 @@
 {
   "description" : "an arbitrary list of deleted works",
-  "createdAt" : "2022-05-16T10:00:07.259Z",
-  "id" : "93ber84x",
+  "createdAt" : "2022-05-04T07:15:02.755Z",
+  "id" : "fbpuu3eq",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,13 +10,13 @@
             "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "pvk4zvFJHh"
+          "value" : "BER84XHwKz"
         },
-        "version" : 33,
-        "modifiedTime" : "2034-04-23T21:47:19Z"
+        "version" : 14,
+        "modifiedTime" : "2022-05-10T01:28:27Z"
       },
-      "mergedTime" : "2034-04-23T21:47:19Z",
-      "indexedTime" : "2022-05-16T10:00:07.259Z",
+      "mergedTime" : "2022-05-10T01:28:27Z",
+      "indexedTime" : "2022-05-04T07:15:02.755Z",
       "deletedReason" : {
         "info" : "tests",
         "type" : "DeletedFromSource"
@@ -28,12 +28,12 @@
           "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "pvk4zvFJHh"
+        "value" : "BER84XHwKz"
       },
-      "canonicalId" : "93ber84x",
-      "mergedTime" : "2034-04-23T21:47:19Z",
-      "sourceModifiedTime" : "2034-04-23T21:47:19Z",
-      "indexedTime" : "2022-05-16T10:00:07.259Z",
+      "canonicalId" : "fbpuu3eq",
+      "mergedTime" : "2022-05-10T01:28:27Z",
+      "sourceModifiedTime" : "2022-05-10T01:28:27Z",
+      "indexedTime" : "2022-05-04T07:15:02.755Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -50,6 +50,43 @@
         "siblingsSucceeding" : [
         ]
       }
+    },
+    "type" : "Deleted"
+  },
+  "work" : {
+    "version" : 14,
+    "state" : {
+      "sourceIdentifier" : {
+        "identifierType" : {
+          "id" : "miro-image-number"
+        },
+        "ontologyType" : "Work",
+        "value" : "BER84XHwKz"
+      },
+      "canonicalId" : "fbpuu3eq",
+      "mergedTime" : "2022-05-10T01:28:27Z",
+      "sourceModifiedTime" : "2022-05-10T01:28:27Z",
+      "indexedTime" : "2022-05-04T07:15:02.755Z",
+      "availabilities" : [
+      ],
+      "derivedData" : {
+        "contributorAgents" : [
+        ]
+      },
+      "relations" : {
+        "ancestors" : [
+        ],
+        "children" : [
+        ],
+        "siblingsPreceding" : [
+        ],
+        "siblingsSucceeding" : [
+        ]
+      }
+    },
+    "deletedReason" : {
+      "info" : "tests",
+      "type" : "DeletedFromSource"
     },
     "type" : "Deleted"
   }

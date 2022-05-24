@@ -7,6 +7,7 @@ import weco.catalogue.display_model.languages.DisplayLanguage
 import weco.catalogue.display_model.locations.DisplayLicense
 import weco.catalogue.display_model.work._
 import weco.catalogue.internal_model.identifiers.DataState
+import weco.catalogue.internal_model.languages.MarcLanguageCodeList
 import weco.catalogue.internal_model.work.{Availability, WorkData}
 
 import java.time.{LocalDateTime, ZoneId}
@@ -47,6 +48,18 @@ trait AggregatableValues {
 
     def languageAggregatableValues: List[String] =
       workData.languages
+        .map(
+          lang =>
+            // There are cases where two languages may have the same ID but different
+            // labels, e.g. Chinese and Mandarin are two names for the same language
+            // which has MARC language code "chi".  The distinct names may be important
+            // for display on individual works pages, but for filtering/aggregating
+            // we want to use the canonical labels.
+            MarcLanguageCodeList.fromCode(lang.id) match {
+              case Some(canonicalLang) => canonicalLang
+              case None                => lang
+          })
+        .distinct
         .map(DisplayLanguage(_))
         .asJson()
 

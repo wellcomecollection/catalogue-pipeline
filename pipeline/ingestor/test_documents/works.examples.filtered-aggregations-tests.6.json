@@ -1,7 +1,7 @@
 {
   "description" : "examples for the works filtered aggregations tests",
-  "createdAt" : "2022-05-16T10:00:07.751Z",
-  "id" : "iykrudzs",
+  "createdAt" : "2022-05-10T09:25:20.140Z",
+  "id" : "ezcyfqlb",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,13 +10,13 @@
             "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "QnjXRANbEF"
+          "value" : "DZSkVVbac8"
         },
-        "version" : 80,
-        "modifiedTime" : "1987-08-26T16:27:30Z"
+        "version" : 70,
+        "modifiedTime" : "2022-05-14T21:42:46Z"
       },
-      "mergedTime" : "1987-08-26T16:27:30Z",
-      "indexedTime" : "2022-05-16T10:00:07.750Z",
+      "mergedTime" : "2022-05-14T21:42:46Z",
+      "indexedTime" : "2022-05-10T09:25:20.140Z",
       "redirectSources" : [
       ]
     },
@@ -26,12 +26,12 @@
           "id" : "calm-record-id"
         },
         "ontologyType" : "Work",
-        "value" : "QnjXRANbEF"
+        "value" : "DZSkVVbac8"
       },
-      "canonicalId" : "iykrudzs",
-      "mergedTime" : "1987-08-26T16:27:30Z",
-      "sourceModifiedTime" : "1987-08-26T16:27:30Z",
-      "indexedTime" : "2022-05-16T10:00:07.750Z",
+      "canonicalId" : "ezcyfqlb",
+      "mergedTime" : "2022-05-14T21:42:46Z",
+      "sourceModifiedTime" : "2022-05-14T21:42:46Z",
+      "indexedTime" : "2022-05-10T09:25:20.140Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -93,7 +93,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "iykrudzs",
+      "id" : "ezcyfqlb",
       "title" : "rats",
       "alternativeTitles" : [
       ],
@@ -111,7 +111,7 @@
             "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "QnjXRANbEF",
+          "value" : "DZSkVVbac8",
           "type" : "Identifier"
         }
       ],

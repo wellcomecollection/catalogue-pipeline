@@ -1,37 +1,37 @@
 {
   "description" : "one of a list of works with a variety of formats",
-  "createdAt" : "2022-05-16T10:00:07.507Z",
-  "id" : "sym6ne7x",
+  "createdAt" : "2022-05-04T07:15:03.026Z",
+  "id" : "4xc5d7pc",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "FRzpe3bQyh"
+          "value" : "wHXsUYY6dN"
         },
-        "version" : 87,
-        "modifiedTime" : "2051-09-16T11:43:09Z"
+        "version" : 67,
+        "modifiedTime" : "2022-05-07T14:37:40Z"
       },
-      "mergedTime" : "2051-09-16T11:43:09Z",
-      "indexedTime" : "2022-05-16T10:00:07.506Z",
+      "mergedTime" : "2022-05-07T14:37:40Z",
+      "indexedTime" : "2022-05-04T07:15:03.026Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "sierra-system-number"
+          "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "FRzpe3bQyh"
+        "value" : "wHXsUYY6dN"
       },
-      "canonicalId" : "sym6ne7x",
-      "mergedTime" : "2051-09-16T11:43:09Z",
-      "sourceModifiedTime" : "2051-09-16T11:43:09Z",
-      "indexedTime" : "2022-05-16T10:00:07.506Z",
+      "canonicalId" : "4xc5d7pc",
+      "mergedTime" : "2022-05-07T14:37:40Z",
+      "sourceModifiedTime" : "2022-05-07T14:37:40Z",
+      "indexedTime" : "2022-05-04T07:15:03.026Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -89,7 +89,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "sym6ne7x",
+      "id" : "4xc5d7pc",
       "title" : "A work with format Pictures",
       "alternativeTitles" : [
       ],
@@ -103,11 +103,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "FRzpe3bQyh",
+          "value" : "wHXsUYY6dN",
           "type" : "Identifier"
         }
       ],

@@ -1,37 +1,37 @@
 {
   "description" : "works with different subjects",
-  "createdAt" : "2022-05-16T10:00:07.550Z",
-  "id" : "6uwysojy",
+  "createdAt" : "2022-05-04T07:15:03.061Z",
+  "id" : "u7atgijp",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "pzLgxSR5EK"
+          "value" : "kosWvAmEQc"
         },
-        "version" : 77,
-        "modifiedTime" : "2005-10-29T13:02:10Z"
+        "version" : 47,
+        "modifiedTime" : "2022-04-13T14:43:22Z"
       },
-      "mergedTime" : "2005-10-29T13:02:10Z",
-      "indexedTime" : "2022-05-16T10:00:07.549Z",
+      "mergedTime" : "2022-04-13T14:43:22Z",
+      "indexedTime" : "2022-05-04T07:15:03.060Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "calm-record-id"
+          "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "pzLgxSR5EK"
+        "value" : "kosWvAmEQc"
       },
-      "canonicalId" : "6uwysojy",
-      "mergedTime" : "2005-10-29T13:02:10Z",
-      "sourceModifiedTime" : "2005-10-29T13:02:10Z",
-      "indexedTime" : "2022-05-16T10:00:07.549Z",
+      "canonicalId" : "u7atgijp",
+      "mergedTime" : "2022-04-13T14:43:22Z",
+      "sourceModifiedTime" : "2022-04-13T14:43:22Z",
+      "indexedTime" : "2022-05-04T07:15:03.060Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -50,7 +50,7 @@
       }
     },
     "data" : {
-      "title" : "title-Dtaaw5YmCW",
+      "title" : "title-v2pMEZn8L2",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -71,21 +71,21 @@
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "qbmTfcJnlkosWvA",
+              "label" : "a2FIC2DNd6NAvWG",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "mEQcU7atgIJPhTv",
+              "label" : "1cJ2yUYmmH4BoIs",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "2pMEZn8L2YCE8E9",
+              "label" : "wjSVmALe83XqBJ6",
               "type" : "Concept"
             }
           ]
@@ -115,8 +115,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "6uwysojy",
-      "title" : "title-Dtaaw5YmCW",
+      "id" : "u7atgijp",
+      "title" : "title-v2pMEZn8L2",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -124,11 +124,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "pzLgxSR5EK",
+          "value" : "kosWvAmEQc",
           "type" : "Identifier"
         }
       ],
@@ -137,15 +137,15 @@
           "label" : "paleoNeuroBiology",
           "concepts" : [
             {
-              "label" : "qbmTfcJnlkosWvA",
+              "label" : "a2FIC2DNd6NAvWG",
               "type" : "Concept"
             },
             {
-              "label" : "mEQcU7atgIJPhTv",
+              "label" : "1cJ2yUYmmH4BoIs",
               "type" : "Concept"
             },
             {
-              "label" : "2pMEZn8L2YCE8E9",
+              "label" : "wjSVmALe83XqBJ6",
               "type" : "Concept"
             }
           ],

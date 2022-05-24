@@ -1,37 +1,37 @@
 {
   "description" : "one of a list of works with a variety of languages",
-  "createdAt" : "2022-05-16T10:00:07.524Z",
-  "id" : "qfscz1rj",
+  "createdAt" : "2022-05-04T07:15:03.039Z",
+  "id" : "ry03jkbp",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "Gk6juMbOeK"
+          "value" : "tcJYhrQ0RM"
         },
-        "version" : 98,
-        "modifiedTime" : "2036-09-06T23:29:13Z"
+        "version" : 39,
+        "modifiedTime" : "2022-05-03T18:28:48Z"
       },
-      "mergedTime" : "2036-09-06T23:29:13Z",
-      "indexedTime" : "2022-05-16T10:00:07.523Z",
+      "mergedTime" : "2022-05-03T18:28:48Z",
+      "indexedTime" : "2022-05-04T07:15:03.038Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "calm-record-id"
+          "id" : "sierra-system-number"
         },
         "ontologyType" : "Work",
-        "value" : "Gk6juMbOeK"
+        "value" : "tcJYhrQ0RM"
       },
-      "canonicalId" : "qfscz1rj",
-      "mergedTime" : "2036-09-06T23:29:13Z",
-      "sourceModifiedTime" : "2036-09-06T23:29:13Z",
-      "indexedTime" : "2022-05-16T10:00:07.523Z",
+      "canonicalId" : "ry03jkbp",
+      "mergedTime" : "2022-05-03T18:28:48Z",
+      "sourceModifiedTime" : "2022-05-03T18:28:48Z",
+      "indexedTime" : "2022-05-04T07:15:03.038Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -90,7 +90,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "qfscz1rj",
+      "id" : "ry03jkbp",
       "title" : "A work with languages Swedish",
       "alternativeTitles" : [
       ],
@@ -99,11 +99,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "Gk6juMbOeK",
+          "value" : "tcJYhrQ0RM",
           "type" : "Identifier"
         }
       ],

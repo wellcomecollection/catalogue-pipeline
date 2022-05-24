@@ -1,37 +1,37 @@
 {
   "description" : "a work with a production event in 2020",
-  "createdAt" : "2022-05-16T10:00:07.321Z",
-  "id" : "0fucriyr",
+  "createdAt" : "2022-05-04T07:15:02.878Z",
+  "id" : "minusjlh",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "KgSH5dUX0Z"
+          "value" : "PxOIfqX1oa"
         },
-        "version" : 14,
-        "modifiedTime" : "1936-06-08T14:59:50Z"
+        "version" : 83,
+        "modifiedTime" : "2022-04-20T20:10:32Z"
       },
-      "mergedTime" : "1936-06-08T14:59:50Z",
-      "indexedTime" : "2022-05-16T10:00:07.319Z",
+      "mergedTime" : "2022-04-20T20:10:32Z",
+      "indexedTime" : "2022-05-04T07:15:02.877Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "miro-image-number"
+          "id" : "sierra-system-number"
         },
         "ontologyType" : "Work",
-        "value" : "KgSH5dUX0Z"
+        "value" : "PxOIfqX1oa"
       },
-      "canonicalId" : "0fucriyr",
-      "mergedTime" : "1936-06-08T14:59:50Z",
-      "sourceModifiedTime" : "1936-06-08T14:59:50Z",
-      "indexedTime" : "2022-05-16T10:00:07.319Z",
+      "canonicalId" : "minusjlh",
+      "mergedTime" : "2022-04-20T20:10:32Z",
+      "sourceModifiedTime" : "2022-04-20T20:10:32Z",
+      "indexedTime" : "2022-05-04T07:15:02.877Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -69,7 +69,7 @@
       "thumbnail" : null,
       "production" : [
         {
-          "label" : "qX1oaMinUSJLhD6RZ9qpj8A8L",
+          "label" : "W9fptfa5XnGuaV7CHYoIIwLFt",
           "places" : [
           ],
           "agents" : [
@@ -107,7 +107,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "0fucriyr",
+      "id" : "minusjlh",
       "title" : "Production event in 2020",
       "alternativeTitles" : [
       ],
@@ -116,11 +116,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "KgSH5dUX0Z",
+          "value" : "PxOIfqX1oa",
           "type" : "Identifier"
         }
       ],
@@ -136,7 +136,7 @@
       ],
       "production" : [
         {
-          "label" : "qX1oaMinUSJLhD6RZ9qpj8A8L",
+          "label" : "W9fptfa5XnGuaV7CHYoIIwLFt",
           "places" : [
           ],
           "agents" : [

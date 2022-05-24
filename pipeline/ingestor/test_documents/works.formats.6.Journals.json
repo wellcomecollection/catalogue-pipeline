@@ -1,7 +1,7 @@
 {
   "description" : "one of a list of works with a variety of formats",
-  "createdAt" : "2022-05-16T10:00:07.503Z",
-  "id" : "xc5d7pc4",
+  "createdAt" : "2022-05-04T07:15:03.023Z",
+  "id" : "3uu0bujc",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,13 +10,13 @@
             "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "HXsUYY6dN4"
+          "value" : "LL1QHuLHN8"
         },
-        "version" : 67,
-        "modifiedTime" : "1968-03-09T02:46:38Z"
+        "version" : 72,
+        "modifiedTime" : "2022-04-15T18:38:13Z"
       },
-      "mergedTime" : "1968-03-09T02:46:38Z",
-      "indexedTime" : "2022-05-16T10:00:07.502Z",
+      "mergedTime" : "2022-04-15T18:38:13Z",
+      "indexedTime" : "2022-05-04T07:15:03.023Z",
       "redirectSources" : [
       ]
     },
@@ -26,12 +26,12 @@
           "id" : "sierra-system-number"
         },
         "ontologyType" : "Work",
-        "value" : "HXsUYY6dN4"
+        "value" : "LL1QHuLHN8"
       },
-      "canonicalId" : "xc5d7pc4",
-      "mergedTime" : "1968-03-09T02:46:38Z",
-      "sourceModifiedTime" : "1968-03-09T02:46:38Z",
-      "indexedTime" : "2022-05-16T10:00:07.502Z",
+      "canonicalId" : "3uu0bujc",
+      "mergedTime" : "2022-04-15T18:38:13Z",
+      "sourceModifiedTime" : "2022-04-15T18:38:13Z",
+      "indexedTime" : "2022-05-04T07:15:03.023Z",
       "availabilities" : [
       ],
       "derivedData" : {
@@ -89,7 +89,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "xc5d7pc4",
+      "id" : "3uu0bujc",
       "title" : "A work with format Journals",
       "alternativeTitles" : [
       ],
@@ -107,7 +107,7 @@
             "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "HXsUYY6dN4",
+          "value" : "LL1QHuLHN8",
           "type" : "Identifier"
         }
       ],
