@@ -153,14 +153,15 @@ class PathsModifierTest
         work(path = "parent/child"),
         work(path = "child/grandchild")
       )
+      val expectedPaths = List(
+        "grandparent/parent/child",
+        "grandparent/parent/child/grandchild"
+      )
       withContext(works) { pathsModifier =>
         whenReady(pathsModifier.modifyPaths("parent/child")) { resultWorks =>
           resultWorks map { resultWork =>
             resultWork.data.collectionPath.get.path
-          } should contain theSameElementsAs List(
-            "grandparent/parent/child",
-            "grandparent/parent/child/grandchild"
-          )
+          } should contain theSameElementsAs expectedPaths
         }
       }
     }
