@@ -49,15 +49,23 @@ object Implicits {
   // Cache these here to improve compilation times (otherwise they are
   // re-derived every time they are required).
 
-  implicit val _encDisplayAccessCondition: Encoder[DisplayAccessCondition] = deriveConfiguredEncoder
-  implicit val _encDisplayLanguage: Encoder[DisplayLanguage] = deriveConfiguredEncoder
-  implicit val _encDisplayFormat: Encoder[DisplayFormat] = deriveConfiguredEncoder
-  implicit val _encDisplayPeriod: Encoder[DisplayPeriod] = deriveConfiguredEncoder
-  implicit val _encDisplayContributor: Encoder[DisplayContributor] = deriveConfiguredEncoder
-  implicit val _encDisplayIdentifier: Encoder[DisplayIdentifier] = deriveConfiguredEncoder
-  implicit val _encDisplaySubject: Encoder[DisplaySubject] = deriveConfiguredEncoder
+  implicit val _encDisplayAccessCondition: Encoder[DisplayAccessCondition] =
+    deriveConfiguredEncoder
+  implicit val _encDisplayLanguage: Encoder[DisplayLanguage] =
+    deriveConfiguredEncoder
+  implicit val _encDisplayFormat: Encoder[DisplayFormat] =
+    deriveConfiguredEncoder
+  implicit val _encDisplayPeriod: Encoder[DisplayPeriod] =
+    deriveConfiguredEncoder
+  implicit val _encDisplayContributor: Encoder[DisplayContributor] =
+    deriveConfiguredEncoder
+  implicit val _encDisplayIdentifier: Encoder[DisplayIdentifier] =
+    deriveConfiguredEncoder
+  implicit val _encDisplaySubject: Encoder[DisplaySubject] =
+    deriveConfiguredEncoder
   implicit val _encDisplayGenre: Encoder[DisplayGenre] = deriveConfiguredEncoder
-  implicit val _encDisplayProductionEvent: Encoder[DisplayProductionEvent] = deriveConfiguredEncoder
+  implicit val _encDisplayProductionEvent: Encoder[DisplayProductionEvent] =
+    deriveConfiguredEncoder
   implicit val _encDisplayItem: Encoder[DisplayItem] = deriveConfiguredEncoder
   implicit val _encDisplayNote: Encoder[DisplayNote] = deriveConfiguredEncoder
   implicit val _encDisplayWork: Encoder[DisplayWork] = deriveConfiguredEncoder
