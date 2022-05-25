@@ -4,8 +4,7 @@ import io.circe.generic.extras.JsonKey
 import weco.catalogue.display_model.identifiers.DisplayIdentifier
 import weco.catalogue.display_model.languages.DisplayLanguage
 import weco.catalogue.display_model.locations.DisplayLocation
-import weco.catalogue.internal_model.identifiers.{CanonicalId, DataState, SourceIdentifier}
-import weco.catalogue.internal_model.work.{Work, WorkData, WorkState, WorkType}
+import weco.catalogue.internal_model.work.{Work, WorkState, WorkType}
 
 case class DisplayWork(
   id: String,
@@ -72,7 +71,7 @@ object DisplayWork {
       edition = work.data.edition,
       notes = DisplayNote.merge(work.data.notes.map(DisplayNote(_))),
       duration = work.data.duration,
-      images = work.data.imageData.data.map(DisplayWorkImageInclude(_)),
+      images = work.data.imageData.map(DisplayWorkImageInclude(_)),
       partOf = DisplayPartOf(work.state.relations.ancestors),
       parts = work.state.relations.children.map(DisplayRelation(_)),
       precededBy =
