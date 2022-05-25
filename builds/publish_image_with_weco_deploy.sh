@@ -34,7 +34,7 @@ case "$IMAGE_ID" in
     PROJECT_ID="reindexer"
     ;;
 
-  "id_minter" | "inference_manager" | "feature_inferrer" | "palette_inferrer" | "aspect_ratio_inferrer" | "matcher" | "merger" | "ingestor_images" | "ingestor_works" | "router" | "batcher" | "relation_embedder" | "transformer_calm" | "transformer_mets" | "transformer_miro" | "transformer_sierra" | "transformer_tei")
+   "id_minter" | "inference_manager" | "feature_inferrer" | "palette_inferrer" | "aspect_ratio_inferrer" | "matcher" | "merger" | "ingestor_images" | "ingestor_works" | "router" | "path_concatenator" | "batcher" | "relation_embedder" | "transformer_calm" | "transformer_mets" | "transformer_miro" | "transformer_sierra" | "transformer_tei")
     PROJECT_ID="catalogue_pipeline"
     ;;
 esac

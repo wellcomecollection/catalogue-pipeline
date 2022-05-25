@@ -30,6 +30,7 @@ SERVICES = {
     "matcher": ["works-identified_read"],
     "merger": ["works-identified_read", "works-merged_write", "images-initial_write"],
     "router": ["works-merged_read", "works-denormalised_write"],
+    "path_concatenator": ["works-merged_read", "works-merged_write"],
     "relation_embedder": ["works-merged_read", "works-denormalised_write"],
     "work_ingestor": ["works-denormalised_read", "works-indexed_write"],
     "inferrer": ["images-initial_read", "images-augmented_write"],
