@@ -1,7 +1,7 @@
 package weco.catalogue.internal_model.work
 
 import weco.catalogue.internal_model.identifiers.CanonicalId
-import weco.catalogue.internal_model.work.WorkState.{Indexed, Merged}
+import weco.catalogue.internal_model.work.WorkState.Merged
 
 /** Holds relations for a particular work.
   *
