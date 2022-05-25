@@ -30,11 +30,9 @@ trait WorkTransformer {
 
       val state = indexedWork.state
 
-      indexedWork match {
+      work match {
         case w @ Work.Visible(_, data, _, redirectSources) => {
-          val display = DisplayWork(
-            id = state.canonicalId,
-            data = w.data).asJson.deepDropNullValues
+          val display = DisplayWork(w).asJson.deepDropNullValues
 
           IndexedWork.Visible(
             debug = DebugInformation.Visible(
