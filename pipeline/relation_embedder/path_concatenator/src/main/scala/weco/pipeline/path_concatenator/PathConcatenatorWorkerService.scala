@@ -44,18 +44,20 @@ class PathConcatenatorWorkerService[MsgDestination](
   }
 
   private def processMessage(message: NotificationMessage): Future[Unit] =
-    processPath(message.body)
+    processPath(message.body).map(_=>())
 
   private def processPath(
     path: String,
-  ): Future[Unit] = {
+  ): Future[Seq[Unit]] = {
     val changedWorks = pathsModifier.modifyPaths(path)
-    changedWorks transformWith {
-      case Success(works) =>
+    val futurePaths: Future[Seq[String]] = changedWorks transformWith {
+      // workIndexer doesn't like empty lists
+      case Success(Nil) => Future(Seq(path))
+      case Success(works: Seq[Work[Merged]]) =>
         workIndexer(works)
           .map {
-            case Right(works) => notifyPaths(pathsToNotify(path, works))
-            case Left(_)      => notifyPaths(Seq(path))
+            case Right(works) => pathsToNotify(path, works)
+            case Left(_)      => Seq(path)
           }
       case Failure(exception) => {
         // Even if a data error has prevented this stage working,
@@ -66,11 +68,14 @@ class PathConcatenatorWorkerService[MsgDestination](
         error(
           msg = s"Unable to update collectionPaths relating to $path",
           exception)
-        notifyPaths(Seq(path))
+        Future(Seq(path))
       }
-      Future(())
+    }
+    futurePaths flatMap { paths: Seq[String] =>
+      notifyPaths(paths)
     }
   }
+
 
   // always send the original path from the incoming message.
   // batcher/relation embedder don't mind if paths don't resolve
