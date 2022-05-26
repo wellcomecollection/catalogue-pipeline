@@ -32,9 +32,7 @@ lazy val internal_model = setupProject(
   project,
   "common/internal_model",
   externalDependencies = CatalogueDependencies.internalModelDependencies)
-  .enablePlugins(GitVersioning)
   .enablePlugins(BuildInfoPlugin)
-  .settings(Publish.sharedLibrarySettings: _*)
 
 lazy val display_model = setupProject(
   project,
@@ -53,9 +51,6 @@ lazy val source_model = setupProject(
   folder = "common/source_model",
   localDependencies = Seq(internal_model),
   externalDependencies = CatalogueDependencies.sourceModelDependencies)
-  .enablePlugins(GitVersioning)
-  .enablePlugins(BuildInfoPlugin)
-  .settings(Publish.sharedLibrarySettings: _*)
 
 lazy val source_model_typesafe = setupProject(
   project,

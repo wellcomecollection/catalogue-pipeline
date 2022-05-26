@@ -23,7 +23,7 @@ class DisplayWorkTest
     with ImageGenerators {
 
   it("parses a Work without any items") {
-    val work = indexedWork().items(Nil)
+    val work = denormalisedWork().items(Nil)
 
     val displayWork = DisplayWork(work)
     displayWork.items shouldBe List()
@@ -31,7 +31,7 @@ class DisplayWorkTest
 
   it("parses identified items on a work") {
     val items = createIdentifiedItems(count = 1)
-    val work = indexedWork().items(items)
+    val work = denormalisedWork().items(items)
 
     val displayWork = DisplayWork(work)
 
@@ -42,7 +42,7 @@ class DisplayWorkTest
   it("parses unidentified items on a work") {
     val item = createUnidentifiableItem
     val location = item.locations.head.asInstanceOf[DigitalLocation]
-    val work = indexedWork().items(List(item))
+    val work = denormalisedWork().items(List(item))
 
     val displayWork = DisplayWork(work)
 
@@ -65,7 +65,7 @@ class DisplayWorkTest
   }
 
   it("parses a work without any extra identifiers") {
-    val work = indexedWork().otherIdentifiers(Nil)
+    val work = denormalisedWork().otherIdentifiers(Nil)
 
     val displayWork = DisplayWork(work)
 
@@ -77,7 +77,7 @@ class DisplayWorkTest
   it("gets the physicalDescription from a Work") {
     val physicalDescription = "A magnificent mural of magpies"
 
-    val work = indexedWork().physicalDescription(physicalDescription)
+    val work = denormalisedWork().physicalDescription(physicalDescription)
 
     val displayWork = DisplayWork(work)
     displayWork.physicalDescription shouldBe Some(physicalDescription)
@@ -91,14 +91,14 @@ class DisplayWorkTest
       label = format.label
     )
 
-    val work = indexedWork().format(format)
+    val work = denormalisedWork().format(format)
 
     val displayWork = DisplayWork(work)
     displayWork.workType shouldBe Some(expectedDisplayWork)
   }
 
   it("gets the ontologyType from a Work") {
-    val work = indexedWork().workType(WorkType.Section)
+    val work = denormalisedWork().workType(WorkType.Section)
     val displayWork = DisplayWork(work)
 
     displayWork.ontologyType shouldBe "Section"
@@ -110,7 +110,7 @@ class DisplayWorkTest
       Language(id = "ger", label = "German")
     )
 
-    val work = indexedWork().languages(languages)
+    val work = denormalisedWork().languages(languages)
 
     val displayWork = DisplayWork(work)
 
@@ -126,7 +126,7 @@ class DisplayWorkTest
       ontologyType = "Person"
     )
 
-    val work = indexedWork().contributors(
+    val work = denormalisedWork().contributors(
       List(
         Contributor(
           agent = Person(
@@ -174,7 +174,7 @@ class DisplayWorkTest
   it("extracts production events from a work") {
     val productionEvent = createProductionEvent
 
-    val work = indexedWork().production(List(productionEvent))
+    val work = denormalisedWork().production(List(productionEvent))
 
     val displayWork = DisplayWork(work)
     displayWork.production shouldBe List(
@@ -211,7 +211,7 @@ class DisplayWorkTest
       ontologyType = "Concept"
     )
 
-    val work = indexedWork()
+    val work = denormalisedWork()
       .contributors(
         List(
           Contributor(
@@ -357,7 +357,7 @@ class DisplayWorkTest
 
   describe("works in a series") {
     it("includes a series in partOf") {
-      val work = indexedWork(
+      val work = denormalisedWork(
         relations = Relations(
           ancestors = List(SeriesRelation("Series A")),
           children = List(),
@@ -375,7 +375,7 @@ class DisplayWorkTest
     }
 
     it("can include multiple series") {
-      val work = indexedWork(
+      val work = denormalisedWork(
         relations = Relations(
           ancestors =
             List(SeriesRelation("Series A"), SeriesRelation("Series B")),
@@ -395,11 +395,11 @@ class DisplayWorkTest
     }
 
     it("includes both series and related works if both are present") {
-      val workA = indexedWork()
-      val workB = indexedWork()
+      val workA = denormalisedWork()
+      val workB = denormalisedWork()
       val relationA: Relation =
         Relation(work = workA, depth = 2, numChildren = 0, numDescendents = 0)
-      val work = indexedWork(
+      val work = denormalisedWork(
         relations = Relations(
           ancestors = List(
             SeriesRelation("Series A"),
@@ -436,12 +436,12 @@ class DisplayWorkTest
   }
 
   describe("related works") {
-    val workA = indexedWork()
-    val workB = indexedWork()
-    val workC = indexedWork()
-    val workD = indexedWork()
-    val workE = indexedWork()
-    val workF = indexedWork()
+    val workA = denormalisedWork()
+    val workB = denormalisedWork()
+    val workC = denormalisedWork()
+    val workD = denormalisedWork()
+    val workE = denormalisedWork()
+    val workF = denormalisedWork()
 
     val relationA = Relation(workA, 0, 1, 5)
     val relationB = Relation(workB, 1, 3, 4)
@@ -450,7 +450,7 @@ class DisplayWorkTest
     val relationE = Relation(workE, 2, 0, 0)
     val relationF = Relation(workF, 2, 0, 0)
 
-    val work = indexedWork(
+    val work = denormalisedWork(
       relations = Relations(
         ancestors = List(relationA, relationB),
         children = List(relationE, relationF),

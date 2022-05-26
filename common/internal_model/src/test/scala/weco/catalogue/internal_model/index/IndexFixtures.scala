@@ -11,7 +11,6 @@ import weco.elasticsearch.model.IndexId
 import weco.elasticsearch.test.fixtures.ElasticsearchFixtures
 import weco.fixtures.TestWith
 import weco.json.JsonUtil.toJson
-import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.catalogue.internal_model.image.{Image, ImageState}
 import weco.catalogue.internal_model.work.{Work, WorkState}
 
@@ -72,15 +71,6 @@ trait IndexFixtures extends ElasticsearchFixtures { this: Suite =>
     implicit val id: IndexId[Image[State]] =
       (image: Image[State]) => image.id
     assertElasticsearchEventuallyHas(index, images: _*)
-  }
-
-  def assertElasticsearchNeverHasWork(
-    index: Index,
-    works: Work[Identified]*
-  ): Unit = {
-    implicit val id: IndexId[Work[Identified]] =
-      (work: Work[Identified]) => work.state.canonicalId.toString
-    assertElasticsearchNeverHas(index, works: _*)
   }
 
   def insertIntoElasticsearch[State <: WorkState](

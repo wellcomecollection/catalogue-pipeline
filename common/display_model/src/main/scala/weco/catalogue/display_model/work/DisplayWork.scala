@@ -39,7 +39,7 @@ case class DisplayWork(
 
 object DisplayWork {
 
-  def apply(work: Work.Visible[WorkState.Indexed]): DisplayWork =
+  def apply(work: Work.Visible[WorkState.Denormalised]): DisplayWork =
     DisplayWork(
       id = work.state.canonicalId.underlying,
       title = work.data.title,

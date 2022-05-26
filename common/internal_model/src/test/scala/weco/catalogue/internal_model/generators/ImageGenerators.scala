@@ -160,8 +160,6 @@ trait ImageGenerators
     def toInitialImage = toInitialImageWith()
 
     def toAugmentedImage = toAugmentedImageWith()
-
-    def toIndexedImage = toIndexedImageWith()
   }
 
   lazy private val inferredDataBinSizes =

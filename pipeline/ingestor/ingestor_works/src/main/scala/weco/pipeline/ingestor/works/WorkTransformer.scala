@@ -30,8 +30,10 @@ trait WorkTransformer {
 
       val state = indexedWork.state
 
-      indexedWork match {
-        case w @ Work.Visible(_, data, _, redirectSources) =>
+      work match {
+        case w @ Work.Visible(_, data, _, redirectSources) => {
+          val display = DisplayWork(w).asJson.deepDropNullValues
+
           IndexedWork.Visible(
             debug = DebugInformation.Visible(
               source = source,
@@ -41,11 +43,12 @@ trait WorkTransformer {
             ),
             state = state,
             data = data,
-            display = DisplayWork(w).asJson.deepDropNullValues,
+            display = display,
             aggregatableValues = WorkAggregatableValues(
               w.data,
               availabilities = state.availabilities)
           )
+        }
 
         case Work.Invisible(_, data, _, invisibilityReasons) =>
           IndexedWork.Invisible(

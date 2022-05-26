@@ -59,7 +59,7 @@ class RelationsTest extends AnyFunSpec with Matchers {
 class RelationTest extends AnyFunSpec with Matchers with WorkGenerators {
 
   it("Creates a Relation by extracting relevant properties from a Work") {
-    val work = indexedWork()
+    val work = denormalisedWork()
     val relation =
       Relation(work = work, depth = 1, numChildren = 2, numDescendents = 3)
     relation.id.get shouldBe work.state.canonicalId
