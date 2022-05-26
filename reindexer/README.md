@@ -88,3 +88,17 @@ This reduces unnecessary processing in that pipeline.
 
 You can connect a pipeline to a reindexer, by modifying the [pipeline Terraform config](https://github.com/wellcomecollection/catalogue-pipeline/tree/main/pipeline/terraform).
 Specifically, you set `reindexing_state.connect_reindex_topics = true` on the pipeline that you want the reindexer to update.
+
+## Fixing leaks
+
+Sometimes you might find that works go missing in between pipeline stages - there end up being fewer documents in the index after a stage than in the one before it. We have a couple of scripts to help fix this:
+
+- Use `pipeline_storage_diff.py <pipeline_date> --from <from_index> --to <to_index> <output_file>` to get a list of IDs in the `<pipeline_date>` pipeline that are not in both `<from_index>` and `<to_index>`, and write the list to `<out_file>`.
+- Then use `pipeline_inject_messages.py <pipeline_date> <destination_name> <ids_file>` to use the `<ids_file>` output by the previous command and inject those IDs into the _topic_ named `<destination_name>` in the `<pipeline_date>` pipeline.
+
+So for example, if in the `2022-02-22` pipeline you had messages go missing in the relation embedder, you might do the following:
+
+```
+./pipeline_storage_diff.py 2022-02-22 --from works-merged --to works-denormalised ./missing-ids.csv
+./pipeline_inject_messages.py 2022-02-22 merger_works_output ./missing-ids.csv
+```

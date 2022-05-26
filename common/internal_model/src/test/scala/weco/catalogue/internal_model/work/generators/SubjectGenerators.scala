@@ -19,15 +19,6 @@ trait SubjectGenerators extends RandomGenerators {
       concepts = concepts
     )
 
-  def createSubjectWithMatchingConcept(
-    label: String = randomAlphanumeric(10)
-  ): Subject[IdState.Minted] =
-    Subject(
-      id = IdState.Unidentifiable,
-      label = label,
-      concepts = createConcepts(List(label))
-    )
-
   def createSubject: Subject[IdState.Minted] =
     createSubjectWith()
 

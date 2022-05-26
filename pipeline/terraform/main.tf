@@ -91,6 +91,7 @@ module "catalogue_pipeline_2022-05-25" {
   logging_cluster_id = local.logging_cluster_id
 }
 
+
 module "catalogue_pipeline_2022-04-28" {
   source = "./stack"
 

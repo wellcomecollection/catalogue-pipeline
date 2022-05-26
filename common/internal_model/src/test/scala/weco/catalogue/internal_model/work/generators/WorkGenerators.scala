@@ -31,7 +31,6 @@ trait WorkGenerators
       Instant.now().minusSeconds(random.nextInt(1000))
     }
 
-
   // To avoid having to specify a created date, it's handy having a default used in tests.
   // We can't use `Instant.now` as a default because that introduces all sorts of flakyness and race conditions.
   // So, we are introducing an arbitrary date here for convenience.
@@ -104,29 +103,6 @@ trait WorkGenerators
       version = createVersion
     )
 
-  def indexedWork(
-    sourceIdentifier: SourceIdentifier = createSourceIdentifier,
-    canonicalId: CanonicalId = createCanonicalId,
-    mergedTime: Instant = randomInstant,
-    relations: Relations = Relations.none
-  ): Work.Visible[Indexed] = {
-    val data = initData[DataState.Identified]
-    Work.Visible[Indexed](
-      state = Indexed(
-        sourceIdentifier = sourceIdentifier,
-        canonicalId = canonicalId,
-        mergedTime = mergedTime,
-        sourceModifiedTime = mergedTime,
-        indexedTime = randomInstant,
-        availabilities = Availabilities.forWorkData(data),
-        derivedData = DerivedWorkData(data),
-        relations = relations
-      ),
-      data = data,
-      version = createVersion
-    )
-  }
-
   def sourceWorks(count: Int): List[Work.Visible[Source]] =
     (1 to count).map(_ => sourceWork()).toList
 
@@ -138,9 +114,6 @@ trait WorkGenerators
 
   def identifiedWorks(count: Int): List[Work.Visible[Identified]] =
     (1 to count).map(_ => identifiedWork()).toList
-
-  def indexedWorks(count: Int): List[Work.Visible[Indexed]] =
-    (1 to count).map(_ => indexedWork()).toList
 
   implicit class WorkOps[State <: WorkState: UpdateState](
     work: Work.Visible[State]
@@ -310,38 +283,6 @@ trait WorkGenerators
             )))
 
       })
-  }
-
-  implicit class IndexedWorkOps(work: Work.Visible[Indexed])(
-    implicit updateState: UpdateState[Indexed]
-  ) {
-
-    // Note: this method is unused in the pipeline repo, but it's used to
-    // test the relation filters in the catalogue-api repo.
-    //
-    // See https://github.com/wellcomecollection/catalogue-api/blob/be1d4c3f4fca07c0f0ebcc45e600d27192a723ed/search/src/test/scala/weco/api/search/works/WorksFiltersTest.scala#L939-L980
-    //
-    def ancestors(works: Work.Visible[Indexed]*): Work.Visible[Indexed] =
-      Work.Visible[Indexed](
-        work.version,
-        work.data,
-        updateState(
-          work.state.copy(
-            relations = work.state.relations.copy(
-              ancestors = works.toList.zipWithIndex.map {
-                case (work, idx) =>
-                  Relation(
-                    work = work,
-                    depth = idx + 1,
-                    numChildren = 1,
-                    numDescendents = works.length - idx
-                  )
-              }
-            )
-          ),
-          work.data
-        )
-      )
   }
 
   trait UpdateState[State <: WorkState] {
