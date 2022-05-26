@@ -44,7 +44,7 @@ class PathConcatenatorWorkerService[MsgDestination](
   }
 
   private def processMessage(message: NotificationMessage): Future[Unit] =
-    processPath(message.body).map(_=>())
+    processPath(message.body).map(_ => ())
 
   private def processPath(
     path: String,
@@ -75,7 +75,6 @@ class PathConcatenatorWorkerService[MsgDestination](
       notifyPaths(paths)
     }
   }
-
 
   // always send the original path from the incoming message.
   // batcher/relation embedder don't mind if paths don't resolve
