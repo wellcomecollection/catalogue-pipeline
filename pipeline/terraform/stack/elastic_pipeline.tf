@@ -196,6 +196,7 @@ locals {
     "matcher",
     "merger",
     "transformer",
+    "path_concatenator",
     "relation_embedder",
     "router",
     "inferrer",

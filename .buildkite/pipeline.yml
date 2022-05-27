@@ -75,6 +75,11 @@ steps:
     agents:
       queue: "scala"
 
+  - command: .buildkite/scripts/run_job.py path_concatenator
+    label: "path concatenator"
+    agents:
+      queue: "scala"
+
   - command: .buildkite/scripts/run_job.py router
     label: "router"
     agents:

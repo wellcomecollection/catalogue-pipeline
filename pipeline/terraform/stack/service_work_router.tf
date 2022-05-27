@@ -5,6 +5,13 @@ module "router_path_output_topic" {
   role_names = [module.router.task_role_name]
 }
 
+module "router_candidate_incomplete_paths_output_topic" {
+  source = "../modules/topic"
+
+  name       = "${local.namespace}_router_candidate_incomplete_paths_output"
+  role_names = [module.router.task_role_name]
+}
+
 module "router_work_output_topic" {
   source = "../modules/topic"
 
@@ -25,8 +32,9 @@ module "router" {
   env_vars = {
     queue_parallelism = 10
 
-    paths_topic_arn = module.router_path_output_topic.arn
-    works_topic_arn = module.router_work_output_topic.arn
+    paths_topic_arn             = module.router_path_output_topic.arn
+    path_concatenator_topic_arn = module.router_candidate_incomplete_paths_output_topic.arn
+    works_topic_arn             = module.router_work_output_topic.arn
 
     es_merged_index       = local.es_works_merged_index
     es_denormalised_index = local.es_works_denormalised_index

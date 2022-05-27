@@ -3,6 +3,7 @@ package weco.pipeline.router
 import akka.Done
 import akka.stream.scaladsl.Flow
 import software.amazon.awssdk.services.sqs.model.Message
+import weco.catalogue.internal_model.identifiers.IdentifierType.SierraSystemNumber
 import weco.catalogue.internal_model.work.WorkState.{Denormalised, Merged}
 import weco.catalogue.internal_model.work.{CollectionPath, Relations, Work}
 import weco.messaging.MessageSender
@@ -19,6 +20,7 @@ class RouterWorkerService[MsgDestination](
                                         Work[Denormalised],
                                         MsgDestination],
   pathsMsgSender: MessageSender[MsgDestination],
+  pathConcatenatorMsgSender: MessageSender[MsgDestination],
   workRetriever: Retriever[Work[Merged]]
 )(implicit ec: ExecutionContext, indexable: Indexable[Work[Denormalised]])
     extends Runnable {
@@ -43,7 +45,12 @@ class RouterWorkerService[MsgDestination](
       case None =>
         Success(List(work.transition[Denormalised](Relations.none)))
       case Some(CollectionPath(path, _)) =>
-        pathsMsgSender.send(path).map(_ => Nil)
+        val sender = work.sourceIdentifier.identifierType match {
+          case SierraSystemNumber => pathConcatenatorMsgSender
+          case _                  => pathsMsgSender
+        }
+
+        sender.send(path).map(_ => Nil)
 
     }
   }

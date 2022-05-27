@@ -16,6 +16,7 @@ locals {
   palette_inferrer_image      = local.image_ids["palette_inferrer"]
   aspect_ratio_inferrer_image = local.image_ids["aspect_ratio_inferrer"]
   router_image                = local.image_ids["router"]
+  path_concatenator_image     = local.image_ids["path_concatenator"]
   batcher_image               = local.image_ids["batcher"]
   relation_embedder_image     = local.image_ids["relation_embedder"]
   ingestor_works_image        = local.image_ids["ingestor_works"]

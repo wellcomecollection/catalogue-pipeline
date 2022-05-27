@@ -50,12 +50,20 @@ object Main extends WellcomeTypesafeApp {
           namespace = "path-sender",
           subject = "Sent from the router")
 
+    val pathConcatenatorSender =
+      SNSBuilder
+        .buildSNSMessageSender(
+          config,
+          namespace = "path-concatenator-sender",
+          subject = "Sent from the router")
+
     val pipelineStream =
       PipelineStorageStreamBuilder
         .buildPipelineStorageStream(workIndexer, workSender)(config)
 
     new RouterWorkerService(
       pathsMsgSender = pathSender,
+      pathConcatenatorMsgSender = pathConcatenatorSender,
       workRetriever = workRetriever,
       pipelineStream = pipelineStream
     )

@@ -114,6 +114,14 @@ lazy val merger = setupProject(
   externalDependencies = CatalogueDependencies.mergerDependencies
 )
 
+lazy val path_concatenator = setupProject(
+  project,
+  "pipeline/relation_embedder/path_concatenator",
+  localDependencies =
+    Seq(internal_model, pipeline_storage_typesafe),
+  externalDependencies = CatalogueDependencies.pathConcatenatorDependencies
+)
+
 lazy val relation_embedder = setupProject(
   project,
   "pipeline/relation_embedder/relation_embedder",
