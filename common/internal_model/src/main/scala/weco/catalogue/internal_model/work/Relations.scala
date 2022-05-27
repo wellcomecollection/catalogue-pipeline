@@ -67,7 +67,7 @@ object RelationSet {
 
     // duplicated if it shares a title, but not if it already has an identifier.
     def isRelationDuplicated(relation: Relation): Boolean =
-      relation.id.isEmpty && newTitles.contains(relation.title)
+      relation.id.isEmpty && newTitles.contains(relation.title.getOrElse(""))
 
     val relationsToKeep =
       existingRelations.filter(r => !isRelationDuplicated(r))
