@@ -70,7 +70,7 @@ case class PathsModifier(pathsService: PathsService)(
     pathsService
       .getChildWorks(path)
       .map { childWorks =>
-        info(s"Received ${childWorks.size} children")
+        info(s"Received ${childWorks.size} children under $path")
         childWorks
       }
   }
