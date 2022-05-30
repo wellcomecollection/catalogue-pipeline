@@ -16,6 +16,7 @@ object IndexedWork {
     state: WorkState.Indexed,
     data: WorkData[DataState.Identified],
     display: Json,
+    query: WorkQueryableValues,
     aggregatableValues: WorkAggregatableValues
   ) extends IndexedWork
 
