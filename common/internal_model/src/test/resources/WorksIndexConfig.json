@@ -958,6 +958,20 @@
         "type" : "object",
         "enabled": false
       },
+      "query": {
+        "type": "object",
+        "properties": {
+          "subjects.id": {
+            "type": "keyword"
+          },
+          "subjects.identifiers.value": {
+            "type": "keyword"
+          },
+          "subjects.label": {
+            "type": "keyword"
+          }
+        }
+      },
       "aggregatableValues" : {
         "type" : "object",
         "properties" : {

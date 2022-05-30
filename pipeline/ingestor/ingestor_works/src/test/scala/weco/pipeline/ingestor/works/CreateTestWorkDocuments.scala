@@ -6,7 +6,12 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.generators.ImageGenerators
-import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.identifiers.{
+  CanonicalId,
+  IdState,
+  IdentifierType,
+  SourceIdentifier
+}
 import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.locations.AccessStatus.LicensedResources
 import weco.catalogue.internal_model.locations.{
@@ -516,10 +521,43 @@ class CreateTestWorkDocuments
   }
 
   it("creates examples for the subject filter tests") {
-    val sanitation = createSubjectWith("Sanitation.")
+    val sanitation =
+      Subject(
+        id = IdState.Identified(
+          canonicalId = CanonicalId("sanitati"),
+          sourceIdentifier = SourceIdentifier(
+            identifierType = IdentifierType.LCSubjects,
+            value = "lcsh-sanitation",
+            ontologyType = "Subject"
+          ),
+          otherIdentifiers = List(
+            SourceIdentifier(
+              identifierType = IdentifierType.MESH,
+              value = "mesh-sanitation",
+              ontologyType = "Subject"
+            )
+          )
+        ),
+        label = "Sanitation.",
+        concepts = createConcepts()
+      )
+
     val london = createSubjectWith("London (England)")
     val psychology = createSubjectWith("Psychology, Pathological")
-    val darwin = createSubjectWith("Darwin \"Jones\", Charles")
+
+    val darwin =
+      Subject(
+        id = IdState.Identified(
+          canonicalId = CanonicalId("darwin01"),
+          sourceIdentifier = SourceIdentifier(
+            identifierType = IdentifierType.LCNames,
+            value = "lcnames-darwin",
+            ontologyType = "Subject"
+          )
+        ),
+        label = "Darwin \"Jones\", Charles",
+        concepts = createConcepts()
+      )
 
     val sanitationWork = denormalisedWork().subjects(List(sanitation))
     val londonWork = denormalisedWork().subjects(List(london))

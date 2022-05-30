@@ -186,6 +186,11 @@
       ],
       "type" : "Work"
     },
+    "query": {
+      "subjects.id": [],
+      "subjects.identifiers": [],
+      "subjects.label": ["v4BHmwGTZr"]
+    },
     "aggregatableValues" : {
       "workType" : [
         "{\"id\":\"n\",\"label\":\"Film\",\"type\":\"Format\"}"

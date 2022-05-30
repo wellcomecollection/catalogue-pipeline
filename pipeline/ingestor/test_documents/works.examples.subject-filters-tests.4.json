@@ -121,7 +121,17 @@
         },
         {
           "id" : {
-            "type" : "Unidentifiable"
+            "canonicalId" : "darwin01",
+            "sourceIdentifier" : {
+              "identifierType" : {
+                "id" : "lc-names"
+              },
+              "ontologyType" : "Subject",
+              "value" : "lcnames-darwin"
+            },
+            "otherIdentifiers" : [
+            ],
+            "type" : "Identified"
           },
           "label" : "Darwin \"Jones\", Charles",
           "concepts" : [
@@ -272,6 +282,19 @@
       ],
       "type" : "Work"
     },
+    "query" : {
+      "subjects.id" : [
+        "darwin01"
+      ],
+      "subjects.identifiers.value" : [
+        "lcnames-darwin"
+      ],
+      "subjects.label" : [
+        "London (England)",
+        "Psychology, Pathological",
+        "Darwin \"Jones\", Charles"
+      ]
+    },
     "aggregatableValues" : {
       "workType" : [
       ],
@@ -282,7 +305,7 @@
       "subjects.label" : [
         "{\"label\":\"London (England)\",\"concepts\":[],\"type\":\"Subject\"}",
         "{\"label\":\"Psychology, Pathological\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"Darwin \\\"Jones\\\", Charles\",\"concepts\":[],\"type\":\"Subject\"}"
+        "{\"id\":\"darwin01\",\"label\":\"Darwin \\\"Jones\\\", Charles\",\"concepts\":[],\"type\":\"Subject\"}"
       ],
       "languages" : [
       ],

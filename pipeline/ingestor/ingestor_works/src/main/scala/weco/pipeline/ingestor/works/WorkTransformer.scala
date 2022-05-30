@@ -8,7 +8,8 @@ import weco.pipeline.ingestor.works.models.{
   DebugInformation,
   IndexedWork,
   SourceWorkDebugInformation,
-  WorkAggregatableValues
+  WorkAggregatableValues,
+  WorkQueryableValues
 }
 import weco.catalogue.display_model.Implicits._
 
@@ -44,6 +45,7 @@ trait WorkTransformer {
             state = state,
             data = data,
             display = display,
+            query = WorkQueryableValues(w.data),
             aggregatableValues = WorkAggregatableValues(
               w.data,
               availabilities = state.availabilities)

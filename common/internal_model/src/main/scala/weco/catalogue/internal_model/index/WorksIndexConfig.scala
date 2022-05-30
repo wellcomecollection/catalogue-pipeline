@@ -227,6 +227,14 @@ object WorksIndexConfig extends IndexConfigFields {
       // to index it -- it's just an arbitrary blob of JSON.
       val display = objectField("display").withEnabled(false)
 
+      // This field contains the values we're actually going to query in search.
+      val query = objectField("query")
+        .fields(
+          keywordField("subjects.id"),
+          keywordField("subjects.identifiers.value"),
+          keywordField("subjects.label")
+        )
+
       // This field contains the display documents used by aggregations.
       //
       // The values are JSON documents that can be included in an AggregationBucket from
@@ -254,6 +262,7 @@ object WorksIndexConfig extends IndexConfigFields {
         objectField("redirectTarget").withDynamic("false"),
         debug,
         display,
+        query,
         aggregatableValues
       )
     },

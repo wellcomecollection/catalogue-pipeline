@@ -1,7 +1,7 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2022-05-10T09:08:11.348Z",
   "id" : "h18d0cbf",
+  "createdAt" : "2022-05-30T11:06:49.177Z",
   "document" : {
     "debug" : {
       "source" : {
@@ -63,7 +63,17 @@
       "subjects" : [
         {
           "id" : {
-            "type" : "Unidentifiable"
+            "canonicalId" : "darwin01",
+            "sourceIdentifier" : {
+              "identifierType" : {
+                "id" : "lc-names"
+              },
+              "ontologyType" : "Subject",
+              "value" : "lcnames-darwin"
+            },
+            "otherIdentifiers" : [
+            ],
+            "type" : "Identified"
           },
           "label" : "Darwin \"Jones\", Charles",
           "concepts" : [
@@ -134,6 +144,18 @@
       ],
       "subjects" : [
         {
+          "id" : "darwin01",
+          "identifiers" : [
+            {
+              "identifierType" : {
+                "id" : "lc-names",
+                "label" : "Library of Congress Name authority records",
+                "type" : "IdentifierType"
+              },
+              "value" : "lcnames-darwin",
+              "type" : "Identifier"
+            }
+          ],
           "label" : "Darwin \"Jones\", Charles",
           "concepts" : [
             {
@@ -178,6 +200,17 @@
       ],
       "type" : "Work"
     },
+    "query" : {
+      "subjects.id" : [
+        "darwin01"
+      ],
+      "subjects.identifiers.value" : [
+        "lcnames-darwin"
+      ],
+      "subjects.label" : [
+        "Darwin \"Jones\", Charles"
+      ]
+    },
     "aggregatableValues" : {
       "workType" : [
       ],
@@ -186,7 +219,7 @@
       "production.dates" : [
       ],
       "subjects.label" : [
-        "{\"label\":\"Darwin \\\"Jones\\\", Charles\",\"concepts\":[],\"type\":\"Subject\"}"
+        "{\"id\":\"darwin01\",\"label\":\"Darwin \\\"Jones\\\", Charles\",\"concepts\":[],\"type\":\"Subject\"}"
       ],
       "languages" : [
       ],
