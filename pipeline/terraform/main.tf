@@ -98,11 +98,11 @@ module "catalogue_pipeline_2022-05-30" {
   release_label = "2022-05-30"
 
   reindexing_state = {
-    connect_reindex_topics   = true
-    scale_up_tasks           = true
-    scale_up_elastic_cluster = true
-    scale_up_id_minter_db    = true
-    scale_up_matcher_db      = true
+    connect_reindex_topics   = false
+    scale_up_tasks           = false
+    scale_up_elastic_cluster = false
+    scale_up_id_minter_db    = false
+    scale_up_matcher_db      = false
   }
 
   # Boilerplate that shouldn't change between pipelines.
