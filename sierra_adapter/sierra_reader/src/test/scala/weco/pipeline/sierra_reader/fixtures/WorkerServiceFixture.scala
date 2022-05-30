@@ -1,6 +1,7 @@
 package weco.pipeline.sierra_reader.fixtures
 
 import akka.http.scaladsl.model.{HttpRequest, HttpResponse, Uri}
+import com.amazonaws.services.s3.AmazonS3
 import weco.akka.fixtures.Akka
 import weco.fixtures.TestWith
 import weco.messaging.fixtures.SQS
@@ -16,8 +17,12 @@ import weco.sierra.models.identifiers.SierraRecordTypes
 import scala.concurrent.ExecutionContext.Implicits.global
 
 trait WorkerServiceFixture extends Akka with SQS with S3Fixtures {
+  override val s3Port: Int = 4566
 
   val sierraUri = "http://sierra:1234"
+
+  override implicit val s3Client: AmazonS3 =
+    createS3ClientWithEndpoint(s"http://localhost:$s3Port")
 
   def createClient(responses: Seq[(HttpRequest, HttpResponse)]): HttpGet =
     new MemoryHttpClient(responses) with HttpGet {
