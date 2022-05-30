@@ -33,4 +33,3 @@ case object WorkQueryableValues {
         .toList
   }
 }
-

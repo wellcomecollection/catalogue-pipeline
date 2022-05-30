@@ -50,7 +50,13 @@ trait WorksIngestorFixtures
       val expectedWork = WorkTransformer.deriveData(work)
 
       storedWork match {
-        case w @ IndexedWork.Visible(_, _, _, _, storedQuery, storedAggregations) =>
+        case w @ IndexedWork.Visible(
+              _,
+              _,
+              _,
+              _,
+              storedQuery,
+              storedAggregations) =>
           w.data shouldBe expectedWork.asInstanceOf[IndexedWork.Visible].data
           storedQuery shouldBe WorkQueryableValues(work.data)
           storedAggregations shouldBe WorkAggregatableValues(

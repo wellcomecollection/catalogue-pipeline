@@ -15,7 +15,11 @@ import weco.catalogue.internal_model.work.generators.{
   WorkGenerators
 }
 
-class WorkQueryableValuesTest extends AnyFunSpec with Matchers with SubjectGenerators with WorkGenerators {
+class WorkQueryableValuesTest
+    extends AnyFunSpec
+    with Matchers
+    with SubjectGenerators
+    with WorkGenerators {
   it("populates subjects correctly") {
     val data = WorkData[DataState.Identified](
       title = Some(s"title-${randomAlphanumeric(length = 10)}"),
@@ -66,6 +70,10 @@ class WorkQueryableValuesTest extends AnyFunSpec with Matchers with SubjectGener
 
     q.subjectIds shouldBe List("ssssssss", "SSSSSSSS")
     q.subjectIdentifiers shouldBe List("lcs-soggy", "mesh-soggy", "lcs-simon")
-    q.subjectLabels shouldBe List("Silly sausages", "Straight scythes", "Soggy sponges", "Sam Smithington")
+    q.subjectLabels shouldBe List(
+      "Silly sausages",
+      "Straight scythes",
+      "Soggy sponges",
+      "Sam Smithington")
   }
 }
