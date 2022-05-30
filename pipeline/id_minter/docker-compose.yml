@@ -1,6 +1,6 @@
 services:
   mysql:
-    image: "760097843905.dkr.ecr.eu-west-1.amazonaws.com/library/mysql:5.6"
+    image: "public.ecr.aws/docker/library/mysql:5.6"
     ports:
       - "3307:3306"
     environment:
