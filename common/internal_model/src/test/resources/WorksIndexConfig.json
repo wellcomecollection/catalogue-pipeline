@@ -952,6 +952,19 @@
       },
       "debug" : {
         "type" : "object",
+        "fields": {
+          "source": {
+            "type": "object",
+            "fields": {
+              "modifiedTime": {
+                "type": "date"
+              }
+            }
+          },
+          "indexedTime": {
+            "type": "date"
+          }
+        },
         "enabled": false
       },
       "display" : {

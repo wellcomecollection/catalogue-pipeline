@@ -221,7 +221,18 @@ object WorksIndexConfig extends IndexConfigFields {
 
       // This field contains debugging information which we don't want to index, which
       // is just used by developers debugging the pipeline.
-      val debug = objectField("debug").withEnabled(false)
+      //
+      // We index the source modified/indexing times because we sometimes want to query
+      // these values to find works updated in a particular interval.
+      val sourceDebugInfo = objectField("source")
+        .fields(dateField("sourceModifiedTime"))
+
+      val debug = objectField("debug")
+        .fields(
+          sourceDebugInfo,
+          dateField("indexedTime")
+        )
+        .withEnabled(false)
 
       // This field contains the display document used by the API, but we don't want
       // to index it -- it's just an arbitrary blob of JSON.
