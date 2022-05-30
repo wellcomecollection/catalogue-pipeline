@@ -1,7 +1,7 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2022-05-10T09:08:11.347Z",
   "id" : "fjor9vqa",
+  "createdAt" : "2022-05-30T11:06:49.177Z",
   "document" : {
     "debug" : {
       "source" : {
@@ -177,6 +177,15 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "query" : {
+      "subjects.id" : [
+      ],
+      "subjects.identifiers.value" : [
+      ],
+      "subjects.label" : [
+        "Psychology, Pathological"
+      ]
     },
     "aggregatableValues" : {
       "workType" : [

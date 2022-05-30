@@ -22,7 +22,7 @@ trait SubjectGenerators extends RandomGenerators {
   def createSubject: Subject[IdState.Minted] =
     createSubjectWith()
 
-  private def createConcepts(
+  protected def createConcepts(
     conceptStrings: List[String] = List.fill(3)(randomAlphanumeric(15))
   ): List[AbstractRootConcept[IdState.Minted]] =
     conceptStrings.map(Concept(_))
