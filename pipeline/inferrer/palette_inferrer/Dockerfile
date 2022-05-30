@@ -1,4 +1,4 @@
-FROM 760097843905.dkr.ecr.eu-west-1.amazonaws.com/python:3.7-slim
+FROM public.ecr.aws/docker/library/python:3.7-slim
 
 RUN apt-get update && apt-get -y install gcc g++ libffi-dev curl
 
