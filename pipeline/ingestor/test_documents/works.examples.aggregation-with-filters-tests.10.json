@@ -186,6 +186,11 @@
       ],
       "type" : "Work"
     },
+    "query": {
+      "subjects.id": [],
+      "subjects.identifiers": [],
+      "subjects.label": ["Vo8KntFwFf"]
+    },
     "aggregatableValues" : {
       "workType" : [
         "{\"id\":\"i\",\"label\":\"Audio\",\"type\":\"Format\"}"

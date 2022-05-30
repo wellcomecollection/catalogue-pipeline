@@ -1064,6 +1064,11 @@
       ],
       "type" : "Work"
     },
+    "query": {
+      "subjects.id": [],
+      "subjects.identifiers": [],
+      "subjects.label": ["5LLMVvWxgX", "PSF4EIy1m2"]
+    },
     "aggregatableValues" : {
       "workType" : [
       ],

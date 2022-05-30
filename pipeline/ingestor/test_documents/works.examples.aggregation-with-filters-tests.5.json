@@ -186,6 +186,11 @@
       ],
       "type" : "Work"
     },
+    "query": {
+      "subjects.id": [],
+      "subjects.identifiers": [],
+      "subjects.label": ["6IZ2DrUzFk"]
+    },
     "aggregatableValues" : {
       "workType" : [
         "{\"id\":\"w\",\"label\":\"Student dissertations\",\"type\":\"Format\"}"
