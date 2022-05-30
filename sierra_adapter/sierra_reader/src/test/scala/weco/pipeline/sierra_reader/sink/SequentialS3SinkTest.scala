@@ -2,6 +2,7 @@ package weco.pipeline.sierra_reader.sink
 
 import akka.Done
 import akka.stream.scaladsl.{Sink, Source}
+import com.amazonaws.services.s3.AmazonS3
 import io.circe.Json
 import io.circe.parser._
 import org.scalatest.BeforeAndAfterAll
@@ -26,6 +27,13 @@ class SequentialS3SinkTest
     with BeforeAndAfterAll
     with ScalaFutures
     with IntegrationPatience {
+
+  // TODO: We're overriding these values while scala-libs is still tied to scality/s3server,
+  // but when we update it to use localstack, we can remove these.
+  // See https://github.com/wellcomecollection/platform/issues/5547
+  override val s3Port: Int = 4566
+  override implicit val s3Client: AmazonS3 =
+    createS3ClientWithEndpoint(s"http://localhost:$s3Port")
 
   private def withSink(bucket: Bucket, keyPrefix: String, offset: Int = 0)(
     testWith: TestWith[Sink[(Json, Long), Future[Done]], Assertion]) = {

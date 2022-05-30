@@ -1,5 +1,6 @@
 package weco.pipeline.sierra_reader.services
 
+import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.model.AmazonS3Exception
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
@@ -21,6 +22,13 @@ class WindowManagerTest
     with ScalaFutures
     with IntegrationPatience
     with SierraRecordGenerators {
+
+  // TODO: We're overriding these values while scala-libs is still tied to scality/s3server,
+  // but when we update it to use localstack, we can remove these.
+  // See https://github.com/wellcomecollection/platform/issues/5547
+  override val s3Port: Int = 4566
+  override implicit val s3Client: AmazonS3 =
+    createS3ClientWithEndpoint(s"http://localhost:$s3Port")
 
   private def withWindowManager[R](bucket: Bucket)(
     testWith: TestWith[WindowManager, R]) = {

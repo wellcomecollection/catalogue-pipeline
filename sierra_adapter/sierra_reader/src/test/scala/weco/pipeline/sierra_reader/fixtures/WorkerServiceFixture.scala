@@ -17,10 +17,12 @@ import weco.sierra.models.identifiers.SierraRecordTypes
 import scala.concurrent.ExecutionContext.Implicits.global
 
 trait WorkerServiceFixture extends Akka with SQS with S3Fixtures {
-  override val s3Port: Int = 4566
-
   val sierraUri = "http://sierra:1234"
 
+  // TODO: We're overriding these values while scala-libs is still tied to scality/s3server,
+  // but when we update it to use localstack, we can remove these.
+  // See https://github.com/wellcomecollection/platform/issues/5547
+  override val s3Port: Int = 4566
   override implicit val s3Client: AmazonS3 =
     createS3ClientWithEndpoint(s"http://localhost:$s3Port")
 
