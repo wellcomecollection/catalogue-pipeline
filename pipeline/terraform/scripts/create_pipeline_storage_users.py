@@ -44,10 +44,15 @@ SERVICES = {
         # See https://github.com/wellcomecollection/catalogue-api/tree/main/internal_model_tool
         "viewer",
     ],
+    "concepts_api": [
+         "works-indexed_read"
+    ],
     # This role isn't used by applications, but instead provided to give developer scripts
     # read-only access to the pipeline_storage cluster.
     "read_only": [f"works-{index}_read" for index in WORK_INDICES] + [f"images-{index}_read" for index in IMAGE_INDICES] + ["viewer"],
 }
+
+CATALOGUE_SERVICES = {"catalogue_api", "concepts_api", "snapshot_generator"}
 
 
 def store_secret(session, *, secret_id, secret_value, description):
@@ -140,7 +145,7 @@ if __name__ == '__main__':
     print("")
 
     for username, password in newly_created_usernames:
-        if username in {"catalogue_api", "snapshot_generator"}:
+        if username in CATALOGUE_SERVICES:
             session = catalogue_session
         else:
             session = platform_session
