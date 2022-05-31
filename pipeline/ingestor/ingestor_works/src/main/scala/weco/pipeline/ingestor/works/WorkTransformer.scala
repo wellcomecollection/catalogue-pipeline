@@ -50,7 +50,9 @@ trait WorkTransformer {
             query = WorkQueryableValues(
               id = w.state.canonicalId,
               sourceIdentifier = w.state.sourceIdentifier,
-              workData = w.data
+              workData = w.data,
+              relations = w.state.relations,
+              availabilities = w.state.availabilities
             ),
             aggregatableValues = WorkAggregatableValues(
               w.data,

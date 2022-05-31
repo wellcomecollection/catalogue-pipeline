@@ -61,7 +61,9 @@ trait WorksIngestorFixtures
           storedQuery shouldBe WorkQueryableValues(
             id = work.state.canonicalId,
             sourceIdentifier = work.state.sourceIdentifier,
-            workData = work.data
+            workData = work.data,
+            relations = work.state.relations,
+            availabilities = work.state.availabilities
           )
           storedAggregations shouldBe WorkAggregatableValues(
             work.data,
