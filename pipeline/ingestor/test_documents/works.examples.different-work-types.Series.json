@@ -1,7 +1,7 @@
 {
   "description" : "examples of works with different types",
-  "createdAt" : "2022-05-10T08:55:33.908Z",
-  "id" : "iautlnkw",
+  "createdAt" : "2022-05-31T18:31:58.218463Z",
+  "id" : "fndkxmxs",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,13 +10,13 @@
             "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "CcLh1PJlWp"
+          "value" : "yW6CgVzwIJ"
         },
-        "version" : 72,
-        "modifiedTime" : "2022-06-04T22:54:34Z"
+        "version" : 23,
+        "modifiedTime" : "1994-04-16T05:30:11Z"
       },
-      "mergedTime" : "2022-06-04T22:54:34Z",
-      "indexedTime" : "2022-05-10T08:55:33.907Z",
+      "mergedTime" : "1994-04-16T05:30:11Z",
+      "indexedTime" : "2022-05-31T18:31:58.217551Z",
       "redirectSources" : [
       ]
     },
@@ -26,12 +26,12 @@
           "id" : "sierra-system-number"
         },
         "ontologyType" : "Work",
-        "value" : "CcLh1PJlWp"
+        "value" : "yW6CgVzwIJ"
       },
-      "canonicalId" : "iautlnkw",
-      "mergedTime" : "2022-06-04T22:54:34Z",
-      "sourceModifiedTime" : "2022-06-04T22:54:34Z",
-      "indexedTime" : "2022-05-10T08:55:33.907Z",
+      "canonicalId" : "fndkxmxs",
+      "mergedTime" : "1994-04-16T05:30:11Z",
+      "sourceModifiedTime" : "1994-04-16T05:30:11Z",
+      "indexedTime" : "2022-05-31T18:31:58.217551Z",
       "availabilities" : [
       ],
       "relations" : {
@@ -82,7 +82,7 @@
       "workType" : "Series"
     },
     "display" : {
-      "id" : "iautlnkw",
+      "id" : "fndkxmxs",
       "title" : "rats",
       "alternativeTitles" : [
       ],
@@ -95,7 +95,7 @@
             "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "CcLh1PJlWp",
+          "value" : "yW6CgVzwIJ",
           "type" : "Identifier"
         }
       ],
@@ -126,6 +126,32 @@
       "succeededBy" : [
       ],
       "type" : "Series"
+    },
+    "query" : {
+      "subjects.id" : [
+      ],
+      "subjects.identifiers.value" : [
+      ],
+      "subjects.label" : [
+      ]
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }

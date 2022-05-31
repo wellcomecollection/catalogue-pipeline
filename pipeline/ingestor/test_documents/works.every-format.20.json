@@ -1,6 +1,6 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2022-05-16T10:00:07.607Z",
+  "createdAt" : "2022-05-31T18:31:58.051528Z",
   "id" : "jyum0yf1",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "2002-11-16T02:23:53Z"
       },
       "mergedTime" : "2002-11-16T02:23:53Z",
-      "indexedTime" : "2022-05-16T10:00:07.606Z",
+      "indexedTime" : "2022-05-31T18:31:58.050582Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "jyum0yf1",
       "mergedTime" : "2002-11-16T02:23:53Z",
       "sourceModifiedTime" : "2002-11-16T02:23:53Z",
-      "indexedTime" : "2022-05-16T10:00:07.606Z",
+      "indexedTime" : "2022-05-31T18:31:58.050582Z",
       "availabilities" : [
       ],
       "relations" : {
@@ -134,6 +134,14 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "query" : {
+      "subjects.id" : [
+      ],
+      "subjects.identifiers.value" : [
+      ],
+      "subjects.label" : [
+      ]
     },
     "aggregatableValues" : {
       "workType" : [

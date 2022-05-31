@@ -1,7 +1,7 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2022-05-10T09:10:37.797Z",
-  "id" : "7mz5gnuj",
+  "createdAt" : "2022-05-31T18:31:58.270661Z",
+  "id" : "gnuj1it3",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,13 +10,13 @@
             "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "zGryOg3KGy"
+          "value" : "Og3KGy7Mz5"
         },
-        "version" : 74,
-        "modifiedTime" : "2022-04-12T05:45:03Z"
+        "version" : 57,
+        "modifiedTime" : "1987-11-24T07:59:41Z"
       },
-      "mergedTime" : "2022-04-12T05:45:03Z",
-      "indexedTime" : "2022-05-10T09:10:37.797Z",
+      "mergedTime" : "1987-11-24T07:59:41Z",
+      "indexedTime" : "2022-05-31T18:31:58.268752Z",
       "redirectSources" : [
       ]
     },
@@ -26,12 +26,12 @@
           "id" : "sierra-system-number"
         },
         "ontologyType" : "Work",
-        "value" : "zGryOg3KGy"
+        "value" : "Og3KGy7Mz5"
       },
-      "canonicalId" : "7mz5gnuj",
-      "mergedTime" : "2022-04-12T05:45:03Z",
-      "sourceModifiedTime" : "2022-04-12T05:45:03Z",
-      "indexedTime" : "2022-05-10T09:10:37.797Z",
+      "canonicalId" : "gnuj1it3",
+      "mergedTime" : "1987-11-24T07:59:41Z",
+      "sourceModifiedTime" : "1987-11-24T07:59:41Z",
+      "indexedTime" : "2022-05-31T18:31:58.268752Z",
       "availabilities" : [
       ],
       "relations" : {
@@ -46,7 +46,7 @@
       }
     },
     "data" : {
-      "title" : "title-t3ic4OR9Lz",
+      "title" : "title-c4OR9LzJV7",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -98,8 +98,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "7mz5gnuj",
-      "title" : "title-t3ic4OR9Lz",
+      "id" : "gnuj1it3",
+      "title" : "title-c4OR9LzJV7",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -120,7 +120,7 @@
             "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "zGryOg3KGy",
+          "value" : "Og3KGy7Mz5",
           "type" : "Identifier"
         }
       ],
@@ -151,6 +151,14 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "query" : {
+      "subjects.id" : [
+      ],
+      "subjects.identifiers.value" : [
+      ],
+      "subjects.label" : [
+      ]
     },
     "aggregatableValues" : {
       "workType" : [

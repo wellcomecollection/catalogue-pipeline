@@ -1,37 +1,37 @@
 {
   "description" : "works with different subjects",
-  "createdAt" : "2022-05-04T07:15:03.062Z",
-  "id" : "wrkxloww",
+  "createdAt" : "2022-05-31T18:31:57.941322Z",
+  "id" : "mihwfxry",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "E8E9W7WKCB"
+          "value" : "HypKD9r1zH"
         },
-        "version" : 59,
-        "modifiedTime" : "2022-04-21T12:07:57Z"
+        "version" : 67,
+        "modifiedTime" : "1993-11-26T03:07:07Z"
       },
-      "mergedTime" : "2022-04-21T12:07:57Z",
-      "indexedTime" : "2022-05-04T07:15:03.061Z",
+      "mergedTime" : "1993-11-26T03:07:07Z",
+      "indexedTime" : "2022-05-31T18:31:57.938646Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "miro-image-number"
+          "id" : "sierra-system-number"
         },
         "ontologyType" : "Work",
-        "value" : "E8E9W7WKCB"
+        "value" : "HypKD9r1zH"
       },
-      "canonicalId" : "wrkxloww",
-      "mergedTime" : "2022-04-21T12:07:57Z",
-      "sourceModifiedTime" : "2022-04-21T12:07:57Z",
-      "indexedTime" : "2022-05-04T07:15:03.061Z",
+      "canonicalId" : "mihwfxry",
+      "mergedTime" : "1993-11-26T03:07:07Z",
+      "sourceModifiedTime" : "1993-11-26T03:07:07Z",
+      "indexedTime" : "2022-05-31T18:31:57.938646Z",
       "availabilities" : [
       ],
       "relations" : {
@@ -46,7 +46,7 @@
       }
     },
     "data" : {
-      "title" : "title-bkm5UMJEwT",
+      "title" : "title-miZHgL6jXR",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -67,21 +67,21 @@
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "dy5rBObrVoekomu",
+              "label" : "W7WKCBWrkxlOWWB",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "zt2ZO588uP9XuZD",
+              "label" : "Kbkm5UMJEwTIE8u",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "AITl22EqbmTfcJn",
+              "label" : "H8GnKqkwP9ugIes",
               "type" : "Concept"
             }
           ]
@@ -111,8 +111,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "wrkxloww",
-      "title" : "title-bkm5UMJEwT",
+      "id" : "mihwfxry",
+      "title" : "title-miZHgL6jXR",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -120,11 +120,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "E8E9W7WKCB",
+          "value" : "HypKD9r1zH",
           "type" : "Identifier"
         }
       ],
@@ -133,15 +133,15 @@
           "label" : "realAnalysis",
           "concepts" : [
             {
-              "label" : "dy5rBObrVoekomu",
+              "label" : "W7WKCBWrkxlOWWB",
               "type" : "Concept"
             },
             {
-              "label" : "zt2ZO588uP9XuZD",
+              "label" : "Kbkm5UMJEwTIE8u",
               "type" : "Concept"
             },
             {
-              "label" : "AITl22EqbmTfcJn",
+              "label" : "H8GnKqkwP9ugIes",
               "type" : "Concept"
             }
           ],
@@ -173,6 +173,15 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "query" : {
+      "subjects.id" : [
+      ],
+      "subjects.identifiers.value" : [
+      ],
+      "subjects.label" : [
+        "realAnalysis"
+      ]
     },
     "aggregatableValues" : {
       "workType" : [

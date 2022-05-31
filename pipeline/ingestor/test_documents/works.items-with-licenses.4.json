@@ -1,7 +1,7 @@
 {
   "description" : "a work with licensed digital items",
-  "createdAt" : "2022-05-04T07:15:03.047Z",
-  "id" : "wjvsf3c3",
+  "createdAt" : "2022-05-31T18:31:57.883694Z",
+  "id" : "vwg1cj2y",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,13 +10,13 @@
             "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "qruNiUsY89"
+          "value" : "FIC2DNd6NA"
         },
-        "version" : 19,
-        "modifiedTime" : "2022-04-28T15:08:24Z"
+        "version" : 54,
+        "modifiedTime" : "1971-03-03T04:45:38Z"
       },
-      "mergedTime" : "2022-04-28T15:08:24Z",
-      "indexedTime" : "2022-05-04T07:15:03.046Z",
+      "mergedTime" : "1971-03-03T04:45:38Z",
+      "indexedTime" : "2022-05-31T18:31:57.880056Z",
       "redirectSources" : [
       ]
     },
@@ -26,12 +26,12 @@
           "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "qruNiUsY89"
+        "value" : "FIC2DNd6NA"
       },
-      "canonicalId" : "wjvsf3c3",
-      "mergedTime" : "2022-04-28T15:08:24Z",
-      "sourceModifiedTime" : "2022-04-28T15:08:24Z",
-      "indexedTime" : "2022-05-04T07:15:03.046Z",
+      "canonicalId" : "vwg1cj2y",
+      "mergedTime" : "1971-03-03T04:45:38Z",
+      "sourceModifiedTime" : "1971-03-03T04:45:38Z",
+      "indexedTime" : "2022-05-31T18:31:57.880056Z",
       "availabilities" : [
       ],
       "relations" : {
@@ -46,7 +46,7 @@
       }
     },
     "data" : {
-      "title" : "title-67fbITZO5o",
+      "title" : "title-YmmH4BoIsw",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -82,8 +82,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "wjvsf3c3",
-      "title" : "title-67fbITZO5o",
+      "id" : "vwg1cj2y",
+      "title" : "title-YmmH4BoIsw",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -95,7 +95,7 @@
             "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "qruNiUsY89",
+          "value" : "FIC2DNd6NA",
           "type" : "Identifier"
         }
       ],
@@ -126,6 +126,32 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "query" : {
+      "subjects.id" : [
+      ],
+      "subjects.identifiers.value" : [
+      ],
+      "subjects.label" : [
+      ]
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }

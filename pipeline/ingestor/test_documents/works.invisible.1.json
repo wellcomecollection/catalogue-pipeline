@@ -1,7 +1,7 @@
 {
   "description" : "an arbitrary list of invisible works",
-  "createdAt" : "2022-05-04T07:15:02.726Z",
-  "id" : "sqsmkp0m",
+  "createdAt" : "2022-05-31T18:31:57.217424Z",
+  "id" : "60edujsq",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,13 +10,13 @@
             "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "Z50Y60eDuJ"
+          "value" : "m0zER7Z50Y"
         },
-        "version" : 51,
-        "modifiedTime" : "2022-05-30T00:00:41Z"
+        "version" : 60,
+        "modifiedTime" : "2030-05-24T10:04:01Z"
       },
-      "mergedTime" : "2022-05-30T00:00:41Z",
-      "indexedTime" : "2022-05-04T07:15:02.725Z",
+      "mergedTime" : "2030-05-24T10:04:01Z",
+      "indexedTime" : "2022-05-31T18:31:57.216657Z",
       "invisibilityReasons" : [
       ]
     },
@@ -26,12 +26,12 @@
           "id" : "sierra-system-number"
         },
         "ontologyType" : "Work",
-        "value" : "Z50Y60eDuJ"
+        "value" : "m0zER7Z50Y"
       },
-      "canonicalId" : "sqsmkp0m",
-      "mergedTime" : "2022-05-30T00:00:41Z",
-      "sourceModifiedTime" : "2022-05-30T00:00:41Z",
-      "indexedTime" : "2022-05-04T07:15:02.725Z",
+      "canonicalId" : "60edujsq",
+      "mergedTime" : "2030-05-24T10:04:01Z",
+      "sourceModifiedTime" : "2030-05-24T10:04:01Z",
+      "indexedTime" : "2022-05-31T18:31:57.216657Z",
       "availabilities" : [
       ],
       "relations" : {
@@ -46,7 +46,7 @@
       }
     },
     "data" : {
-      "title" : "title-uvgbCx2TEr",
+      "title" : "title-Mkp0m2Suvg",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [

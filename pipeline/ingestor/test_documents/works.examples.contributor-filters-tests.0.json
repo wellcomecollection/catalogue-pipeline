@@ -1,7 +1,7 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2022-05-10T09:10:37.797Z",
-  "id" : "rkv6qh5z",
+  "createdAt" : "2022-05-31T18:31:58.268721Z",
+  "id" : "h5zn9bqm",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,13 +10,13 @@
             "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "ct97zOQ6G6"
+          "value" : "OQ6G6Rkv6Q"
         },
-        "version" : 36,
-        "modifiedTime" : "2022-04-14T03:25:05Z"
+        "version" : 74,
+        "modifiedTime" : "1934-08-02T20:29:45Z"
       },
-      "mergedTime" : "2022-04-14T03:25:05Z",
-      "indexedTime" : "2022-05-10T09:10:37.796Z",
+      "mergedTime" : "1934-08-02T20:29:45Z",
+      "indexedTime" : "2022-05-31T18:31:58.267398Z",
       "redirectSources" : [
       ]
     },
@@ -26,12 +26,12 @@
           "id" : "sierra-system-number"
         },
         "ontologyType" : "Work",
-        "value" : "ct97zOQ6G6"
+        "value" : "OQ6G6Rkv6Q"
       },
-      "canonicalId" : "rkv6qh5z",
-      "mergedTime" : "2022-04-14T03:25:05Z",
-      "sourceModifiedTime" : "2022-04-14T03:25:05Z",
-      "indexedTime" : "2022-05-10T09:10:37.796Z",
+      "canonicalId" : "h5zn9bqm",
+      "mergedTime" : "1934-08-02T20:29:45Z",
+      "sourceModifiedTime" : "1934-08-02T20:29:45Z",
+      "indexedTime" : "2022-05-31T18:31:58.267398Z",
       "availabilities" : [
       ],
       "relations" : {
@@ -46,7 +46,7 @@
       }
     },
     "data" : {
-      "title" : "title-bqmY6Obq6l",
+      "title" : "title-6Obq6lxZzG",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -98,8 +98,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "rkv6qh5z",
-      "title" : "title-bqmY6Obq6l",
+      "id" : "h5zn9bqm",
+      "title" : "title-6Obq6lxZzG",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -120,7 +120,7 @@
             "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "ct97zOQ6G6",
+          "value" : "OQ6G6Rkv6Q",
           "type" : "Identifier"
         }
       ],
@@ -151,6 +151,14 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "query" : {
+      "subjects.id" : [
+      ],
+      "subjects.identifiers.value" : [
+      ],
+      "subjects.label" : [
+      ]
     },
     "aggregatableValues" : {
       "workType" : [

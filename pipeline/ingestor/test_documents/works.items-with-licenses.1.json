@@ -1,37 +1,37 @@
 {
   "description" : "a work with licensed digital items",
-  "createdAt" : "2022-05-04T07:15:03.045Z",
-  "id" : "fx49bqty",
+  "createdAt" : "2022-05-31T18:31:57.858270Z",
+  "id" : "runiusy8",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "k9pon81Hb2"
+          "value" : "ZGWEGMyTaq"
         },
-        "version" : 89,
-        "modifiedTime" : "2022-04-14T05:54:01Z"
+        "version" : 9,
+        "modifiedTime" : "2062-01-08T01:49:39Z"
       },
-      "mergedTime" : "2022-04-14T05:54:01Z",
-      "indexedTime" : "2022-05-04T07:15:03.044Z",
+      "mergedTime" : "2062-01-08T01:49:39Z",
+      "indexedTime" : "2022-05-31T18:31:57.856227Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "miro-image-number"
+          "id" : "sierra-system-number"
         },
         "ontologyType" : "Work",
-        "value" : "k9pon81Hb2"
+        "value" : "ZGWEGMyTaq"
       },
-      "canonicalId" : "fx49bqty",
-      "mergedTime" : "2022-04-14T05:54:01Z",
-      "sourceModifiedTime" : "2022-04-14T05:54:01Z",
-      "indexedTime" : "2022-05-04T07:15:03.044Z",
+      "canonicalId" : "runiusy8",
+      "mergedTime" : "2062-01-08T01:49:39Z",
+      "sourceModifiedTime" : "2062-01-08T01:49:39Z",
+      "indexedTime" : "2022-05-31T18:31:57.856227Z",
       "availabilities" : [
       ],
       "relations" : {
@@ -46,7 +46,7 @@
       }
     },
     "data" : {
-      "title" : "title-WIjswjHR3o",
+      "title" : "title-wjvsf3c3yc",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -80,15 +80,15 @@
           "note" : null,
           "locations" : [
             {
-              "url" : "https://iiif.wellcomecollection.org/image/zoq.jpg/info.json",
+              "url" : "https://iiif.wellcomecollection.org/image/V0W.jpg/info.json",
               "locationType" : {
                 "id" : "iiif-presentation"
               },
               "license" : {
                 "id" : "cc-by"
               },
-              "credit" : "Credit line: k6juMbOeKQ",
-              "linkText" : null,
+              "credit" : "Credit line: LiG1sX",
+              "linkText" : "Link text: pdcTBgVrpD",
               "accessConditions" : [
               ],
               "type" : "DigitalLocation"
@@ -105,8 +105,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "fx49bqty",
-      "title" : "title-WIjswjHR3o",
+      "id" : "runiusy8",
+      "title" : "title-wjvsf3c3yc",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -114,11 +114,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "k9pon81Hb2",
+          "value" : "ZGWEGMyTaq",
           "type" : "Identifier"
         }
       ],
@@ -137,8 +137,9 @@
                 "label" : "IIIF Presentation API",
                 "type" : "LocationType"
               },
-              "url" : "https://iiif.wellcomecollection.org/image/zoq.jpg/info.json",
-              "credit" : "Credit line: k6juMbOeKQ",
+              "url" : "https://iiif.wellcomecollection.org/image/V0W.jpg/info.json",
+              "credit" : "Credit line: LiG1sX",
+              "linkText" : "Link text: pdcTBgVrpD",
               "license" : {
                 "id" : "cc-by",
                 "label" : "Attribution 4.0 International (CC BY 4.0)",
@@ -174,6 +175,14 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "query" : {
+      "subjects.id" : [
+      ],
+      "subjects.identifiers.value" : [
+      ],
+      "subjects.label" : [
+      ]
     },
     "aggregatableValues" : {
       "workType" : [

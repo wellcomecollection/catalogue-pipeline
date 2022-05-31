@@ -1,37 +1,37 @@
 {
   "description" : "examples for the genre tests",
-  "createdAt" : "2022-05-10T09:03:13.094Z",
-  "id" : "2y6iujg4",
+  "createdAt" : "2022-05-31T18:31:58.225761Z",
+  "id" : "ahr8n4ei",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "4xGjZEnp6i"
+          "value" : "g4JnCRDZnk"
         },
-        "version" : 42,
-        "modifiedTime" : "2022-05-11T04:08:14Z"
+        "version" : 50,
+        "modifiedTime" : "1961-08-08T05:16:19Z"
       },
-      "mergedTime" : "2022-05-11T04:08:14Z",
-      "indexedTime" : "2022-05-10T09:03:13.093Z",
+      "mergedTime" : "1961-08-08T05:16:19Z",
+      "indexedTime" : "2022-05-31T18:31:58.224010Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "miro-image-number"
+          "id" : "sierra-system-number"
         },
         "ontologyType" : "Work",
-        "value" : "4xGjZEnp6i"
+        "value" : "g4JnCRDZnk"
       },
-      "canonicalId" : "2y6iujg4",
-      "mergedTime" : "2022-05-11T04:08:14Z",
-      "sourceModifiedTime" : "2022-05-11T04:08:14Z",
-      "indexedTime" : "2022-05-10T09:03:13.093Z",
+      "canonicalId" : "ahr8n4ei",
+      "mergedTime" : "1961-08-08T05:16:19Z",
+      "sourceModifiedTime" : "1961-08-08T05:16:19Z",
+      "indexedTime" : "2022-05-31T18:31:58.224010Z",
       "availabilities" : [
       ],
       "relations" : {
@@ -46,7 +46,7 @@
       }
     },
     "data" : {
-      "title" : "title-CRDZnkaHR8",
+      "title" : "title-Rew3RmJ48v",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -66,21 +66,21 @@
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "TeJBs3eSemcGNQX",
+              "label" : "7ZYKrzxgMS4HDJM",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "d87ZYKrzxgMS4HD",
+              "label" : "nToBweq2UFKJPlz",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "JMnToBweq2UFKJP",
+              "label" : "YfNgtG1SKw3klDA",
               "type" : "Concept"
             }
           ]
@@ -108,8 +108,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "2y6iujg4",
-      "title" : "title-CRDZnkaHR8",
+      "id" : "ahr8n4ei",
+      "title" : "title-Rew3RmJ48v",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -117,11 +117,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "4xGjZEnp6i",
+          "value" : "g4JnCRDZnk",
           "type" : "Identifier"
         }
       ],
@@ -132,15 +132,15 @@
           "label" : "Pamphlets.",
           "concepts" : [
             {
-              "label" : "TeJBs3eSemcGNQX",
+              "label" : "7ZYKrzxgMS4HDJM",
               "type" : "Concept"
             },
             {
-              "label" : "d87ZYKrzxgMS4HD",
+              "label" : "nToBweq2UFKJPlz",
               "type" : "Concept"
             },
             {
-              "label" : "JMnToBweq2UFKJP",
+              "label" : "YfNgtG1SKw3klDA",
               "type" : "Concept"
             }
           ],
@@ -170,6 +170,14 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "query" : {
+      "subjects.id" : [
+      ],
+      "subjects.identifiers.value" : [
+      ],
+      "subjects.label" : [
+      ]
     },
     "aggregatableValues" : {
       "workType" : [

@@ -1,37 +1,37 @@
 {
   "description" : "examples for the works filtered aggregations tests",
-  "createdAt" : "2022-05-10T09:25:20.139Z",
-  "id" : "lthdeniu",
+  "createdAt" : "2022-05-31T18:31:58.394499Z",
+  "id" : "lpoz1fy9",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "Oz1fY94Zzr"
+          "value" : "FGpPdnmb6i"
         },
-        "version" : 6,
-        "modifiedTime" : "2022-04-21T14:22:27Z"
+        "version" : 5,
+        "modifiedTime" : "1957-11-02T06:45:45Z"
       },
-      "mergedTime" : "2022-04-21T14:22:27Z",
-      "indexedTime" : "2022-05-10T09:25:20.139Z",
+      "mergedTime" : "1957-11-02T06:45:45Z",
+      "indexedTime" : "2022-05-31T18:31:58.393128Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "sierra-system-number"
+          "id" : "calm-record-id"
         },
         "ontologyType" : "Work",
-        "value" : "Oz1fY94Zzr"
+        "value" : "FGpPdnmb6i"
       },
-      "canonicalId" : "lthdeniu",
-      "mergedTime" : "2022-04-21T14:22:27Z",
-      "sourceModifiedTime" : "2022-04-21T14:22:27Z",
-      "indexedTime" : "2022-05-10T09:25:20.139Z",
+      "canonicalId" : "lpoz1fy9",
+      "mergedTime" : "1957-11-02T06:45:45Z",
+      "sourceModifiedTime" : "1957-11-02T06:45:45Z",
+      "indexedTime" : "2022-05-31T18:31:58.393128Z",
       "availabilities" : [
       ],
       "relations" : {
@@ -89,7 +89,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "lthdeniu",
+      "id" : "lpoz1fy9",
       "title" : "rats",
       "alternativeTitles" : [
       ],
@@ -103,11 +103,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "Oz1fY94Zzr",
+          "value" : "FGpPdnmb6i",
           "type" : "Identifier"
         }
       ],
@@ -143,6 +143,14 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "query" : {
+      "subjects.id" : [
+      ],
+      "subjects.identifiers.value" : [
+      ],
+      "subjects.label" : [
+      ]
     },
     "aggregatableValues" : {
       "workType" : [

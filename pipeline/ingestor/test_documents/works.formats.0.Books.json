@@ -1,7 +1,7 @@
 {
   "description" : "one of a list of works with a variety of formats",
-  "createdAt" : "2022-05-04T07:15:03.015Z",
-  "id" : "lemvhali",
+  "createdAt" : "2022-05-31T18:31:57.779262Z",
+  "id" : "gfw8fs9l",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,13 +10,13 @@
             "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "gSkyZiBA49"
+          "value" : "wayOhJ3Mha"
         },
-        "version" : 2,
-        "modifiedTime" : "2022-05-07T17:24:14Z"
+        "version" : 73,
+        "modifiedTime" : "1943-07-01T04:18:01Z"
       },
-      "mergedTime" : "2022-05-07T17:24:14Z",
-      "indexedTime" : "2022-05-04T07:15:03.013Z",
+      "mergedTime" : "1943-07-01T04:18:01Z",
+      "indexedTime" : "2022-05-31T18:31:57.774888Z",
       "redirectSources" : [
       ]
     },
@@ -26,12 +26,12 @@
           "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "gSkyZiBA49"
+        "value" : "wayOhJ3Mha"
       },
-      "canonicalId" : "lemvhali",
-      "mergedTime" : "2022-05-07T17:24:14Z",
-      "sourceModifiedTime" : "2022-05-07T17:24:14Z",
-      "indexedTime" : "2022-05-04T07:15:03.013Z",
+      "canonicalId" : "gfw8fs9l",
+      "mergedTime" : "1943-07-01T04:18:01Z",
+      "sourceModifiedTime" : "1943-07-01T04:18:01Z",
+      "indexedTime" : "2022-05-31T18:31:57.774888Z",
       "availabilities" : [
       ],
       "relations" : {
@@ -85,7 +85,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "lemvhali",
+      "id" : "gfw8fs9l",
       "title" : "A work with format Books",
       "alternativeTitles" : [
       ],
@@ -103,7 +103,7 @@
             "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "gSkyZiBA49",
+          "value" : "wayOhJ3Mha",
           "type" : "Identifier"
         }
       ],
@@ -134,6 +134,14 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "query" : {
+      "subjects.id" : [
+      ],
+      "subjects.identifiers.value" : [
+      ],
+      "subjects.label" : [
+      ]
     },
     "aggregatableValues" : {
       "workType" : [

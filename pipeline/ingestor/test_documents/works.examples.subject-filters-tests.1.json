@@ -1,7 +1,7 @@
 {
   "description" : "examples for the subject filter tests",
-  "id" : "rdbnpfc2",
-  "createdAt" : "2022-05-30T11:06:49.176Z",
+  "createdAt" : "2022-05-31T18:31:58.250791Z",
+  "id" : "zwggainv",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,13 +10,13 @@
             "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "YzJ9DWDLO2"
+          "value" : "RdbNpFC2P5"
         },
-        "version" : 38,
-        "modifiedTime" : "2022-05-09T21:25:23Z"
+        "version" : 60,
+        "modifiedTime" : "2019-06-03T10:02:53Z"
       },
-      "mergedTime" : "2022-05-09T21:25:23Z",
-      "indexedTime" : "2022-05-10T09:08:11.347Z",
+      "mergedTime" : "2019-06-03T10:02:53Z",
+      "indexedTime" : "2022-05-31T18:31:58.248203Z",
       "redirectSources" : [
       ]
     },
@@ -26,12 +26,12 @@
           "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "YzJ9DWDLO2"
+        "value" : "RdbNpFC2P5"
       },
-      "canonicalId" : "rdbnpfc2",
-      "mergedTime" : "2022-05-09T21:25:23Z",
-      "sourceModifiedTime" : "2022-05-09T21:25:23Z",
-      "indexedTime" : "2022-05-10T09:08:11.347Z",
+      "canonicalId" : "zwggainv",
+      "mergedTime" : "2019-06-03T10:02:53Z",
+      "sourceModifiedTime" : "2019-06-03T10:02:53Z",
+      "indexedTime" : "2022-05-31T18:31:58.248203Z",
       "availabilities" : [
       ],
       "relations" : {
@@ -46,7 +46,7 @@
       }
     },
     "data" : {
-      "title" : "title-ZWGGaiNvMk",
+      "title" : "title-k5aVuGQD3S",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -67,21 +67,21 @@
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "u7hZZtHlWPIpZYu",
+              "label" : "pZYum1qUlCcjglM",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "m1qUlCcjglMPaKQ",
+              "label" : "PaKQZ55SIuLPMgI",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "Z55SIuLPMgIG177",
+              "label" : "G177tcCDpKgb0Wd",
               "type" : "Concept"
             }
           ]
@@ -111,8 +111,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "rdbnpfc2",
-      "title" : "title-ZWGGaiNvMk",
+      "id" : "zwggainv",
+      "title" : "title-k5aVuGQD3S",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -124,7 +124,7 @@
             "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "YzJ9DWDLO2",
+          "value" : "RdbNpFC2P5",
           "type" : "Identifier"
         }
       ],
@@ -133,15 +133,15 @@
           "label" : "London (England)",
           "concepts" : [
             {
-              "label" : "u7hZZtHlWPIpZYu",
+              "label" : "pZYum1qUlCcjglM",
               "type" : "Concept"
             },
             {
-              "label" : "m1qUlCcjglMPaKQ",
+              "label" : "PaKQZ55SIuLPMgI",
               "type" : "Concept"
             },
             {
-              "label" : "Z55SIuLPMgIG177",
+              "label" : "G177tcCDpKgb0Wd",
               "type" : "Concept"
             }
           ],

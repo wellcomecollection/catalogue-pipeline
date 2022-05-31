@@ -1,37 +1,37 @@
 {
   "description" : "examples for the genre tests",
-  "createdAt" : "2022-05-10T09:03:13.094Z",
-  "id" : "48vvelyd",
+  "createdAt" : "2022-05-31T18:31:58.228810Z",
+  "id" : "yhjhxcof",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "eiJRew3RmJ"
+          "value" : "lydjDVoexx"
         },
-        "version" : 47,
-        "modifiedTime" : "2022-05-19T05:03:10Z"
+        "version" : 68,
+        "modifiedTime" : "2037-12-19T21:38:57Z"
       },
-      "mergedTime" : "2022-05-19T05:03:10Z",
-      "indexedTime" : "2022-05-10T09:03:13.094Z",
+      "mergedTime" : "2037-12-19T21:38:57Z",
+      "indexedTime" : "2022-05-31T18:31:58.225792Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "miro-image-number"
+          "id" : "calm-record-id"
         },
         "ontologyType" : "Work",
-        "value" : "eiJRew3RmJ"
+        "value" : "lydjDVoexx"
       },
-      "canonicalId" : "48vvelyd",
-      "mergedTime" : "2022-05-19T05:03:10Z",
-      "sourceModifiedTime" : "2022-05-19T05:03:10Z",
-      "indexedTime" : "2022-05-10T09:03:13.094Z",
+      "canonicalId" : "yhjhxcof",
+      "mergedTime" : "2037-12-19T21:38:57Z",
+      "sourceModifiedTime" : "2037-12-19T21:38:57Z",
+      "indexedTime" : "2022-05-31T18:31:58.225792Z",
       "availabilities" : [
       ],
       "relations" : {
@@ -46,7 +46,7 @@
       }
     },
     "data" : {
-      "title" : "title-VoexxyHJhX",
+      "title" : "title-wsvmZKLOsI",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -66,21 +66,21 @@
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "lzYfNgtG1SKw3kl",
+              "label" : "uK4GKNsXvX3NJfI",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "DAuK4GKNsXvX3NJ",
+              "label" : "XCFVccBcFLmxtr1",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "fIXCFVccBcFLmxt",
+              "label" : "wn4mlLNPr0YHU0g",
               "type" : "Concept"
             }
           ]
@@ -108,8 +108,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "48vvelyd",
-      "title" : "title-VoexxyHJhX",
+      "id" : "yhjhxcof",
+      "title" : "title-wsvmZKLOsI",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -117,11 +117,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "eiJRew3RmJ",
+          "value" : "lydjDVoexx",
           "type" : "Identifier"
         }
       ],
@@ -132,15 +132,15 @@
           "label" : "Psychology, Pathological",
           "concepts" : [
             {
-              "label" : "lzYfNgtG1SKw3kl",
+              "label" : "uK4GKNsXvX3NJfI",
               "type" : "Concept"
             },
             {
-              "label" : "DAuK4GKNsXvX3NJ",
+              "label" : "XCFVccBcFLmxtr1",
               "type" : "Concept"
             },
             {
-              "label" : "fIXCFVccBcFLmxt",
+              "label" : "wn4mlLNPr0YHU0g",
               "type" : "Concept"
             }
           ],
@@ -170,6 +170,14 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "query" : {
+      "subjects.id" : [
+      ],
+      "subjects.identifiers.value" : [
+      ],
+      "subjects.label" : [
+      ]
     },
     "aggregatableValues" : {
       "workType" : [

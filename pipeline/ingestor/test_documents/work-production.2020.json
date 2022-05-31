@@ -1,37 +1,37 @@
 {
   "description" : "a work with a production event in 2020",
-  "createdAt" : "2022-05-04T07:15:02.878Z",
-  "id" : "minusjlh",
+  "createdAt" : "2022-05-31T18:31:57.353196Z",
+  "id" : "0fucriyr",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "PxOIfqX1oa"
+          "value" : "KgSH5dUX0Z"
         },
-        "version" : 83,
-        "modifiedTime" : "2022-04-20T20:10:32Z"
+        "version" : 14,
+        "modifiedTime" : "1936-06-08T14:59:50Z"
       },
-      "mergedTime" : "2022-04-20T20:10:32Z",
-      "indexedTime" : "2022-05-04T07:15:02.877Z",
+      "mergedTime" : "1936-06-08T14:59:50Z",
+      "indexedTime" : "2022-05-31T18:31:57.351109Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "sierra-system-number"
+          "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "PxOIfqX1oa"
+        "value" : "KgSH5dUX0Z"
       },
-      "canonicalId" : "minusjlh",
-      "mergedTime" : "2022-04-20T20:10:32Z",
-      "sourceModifiedTime" : "2022-04-20T20:10:32Z",
-      "indexedTime" : "2022-05-04T07:15:02.877Z",
+      "canonicalId" : "0fucriyr",
+      "mergedTime" : "1936-06-08T14:59:50Z",
+      "sourceModifiedTime" : "1936-06-08T14:59:50Z",
+      "indexedTime" : "2022-05-31T18:31:57.351109Z",
       "availabilities" : [
       ],
       "relations" : {
@@ -65,7 +65,7 @@
       "thumbnail" : null,
       "production" : [
         {
-          "label" : "W9fptfa5XnGuaV7CHYoIIwLFt",
+          "label" : "qX1oaMinUSJLhD6RZ9qpj8A8L",
           "places" : [
           ],
           "agents" : [
@@ -103,7 +103,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "minusjlh",
+      "id" : "0fucriyr",
       "title" : "Production event in 2020",
       "alternativeTitles" : [
       ],
@@ -112,11 +112,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "PxOIfqX1oa",
+          "value" : "KgSH5dUX0Z",
           "type" : "Identifier"
         }
       ],
@@ -132,7 +132,7 @@
       ],
       "production" : [
         {
-          "label" : "W9fptfa5XnGuaV7CHYoIIwLFt",
+          "label" : "qX1oaMinUSJLhD6RZ9qpj8A8L",
           "places" : [
           ],
           "agents" : [
@@ -161,6 +161,14 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "query" : {
+      "subjects.id" : [
+      ],
+      "subjects.identifiers.value" : [
+      ],
+      "subjects.label" : [
+      ]
     },
     "aggregatableValues" : {
       "workType" : [

@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2022-05-10T09:10:37.798Z",
+  "createdAt" : "2022-05-31T18:31:58.278539Z",
   "id" : "bexh6kx6",
   "document" : {
     "debug" : {
@@ -12,11 +12,11 @@
           "ontologyType" : "Work",
           "value" : "5q2ktKEnxz"
         },
-        "version" : 10,
-        "modifiedTime" : "2022-04-26T00:10:18Z"
+        "version" : 45,
+        "modifiedTime" : "2067-03-29T22:14:53Z"
       },
-      "mergedTime" : "2022-04-26T00:10:18Z",
-      "indexedTime" : "2022-05-10T09:10:37.798Z",
+      "mergedTime" : "2067-03-29T22:14:53Z",
+      "indexedTime" : "2022-05-31T18:31:58.277921Z",
       "redirectSources" : [
       ]
     },
@@ -29,9 +29,9 @@
         "value" : "5q2ktKEnxz"
       },
       "canonicalId" : "bexh6kx6",
-      "mergedTime" : "2022-04-26T00:10:18Z",
-      "sourceModifiedTime" : "2022-04-26T00:10:18Z",
-      "indexedTime" : "2022-05-10T09:10:37.798Z",
+      "mergedTime" : "2067-03-29T22:14:53Z",
+      "sourceModifiedTime" : "2067-03-29T22:14:53Z",
+      "indexedTime" : "2022-05-31T18:31:58.277921Z",
       "availabilities" : [
       ],
       "relations" : {
@@ -46,7 +46,7 @@
       }
     },
     "data" : {
-      "title" : "title-RuJHArEMdS",
+      "title" : "title-ERuJHArEMd",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -83,7 +83,7 @@
     },
     "display" : {
       "id" : "bexh6kx6",
-      "title" : "title-RuJHArEMdS",
+      "title" : "title-ERuJHArEMd",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -126,6 +126,32 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "query" : {
+      "subjects.id" : [
+      ],
+      "subjects.identifiers.value" : [
+      ],
+      "subjects.label" : [
+      ]
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
     },
     "type" : "Visible"
   }

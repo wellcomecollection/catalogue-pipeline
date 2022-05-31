@@ -1,37 +1,37 @@
 {
   "description" : "items with different location types",
-  "createdAt" : "2022-05-09T11:41:20.623Z",
-  "id" : "6hqgsidz",
+  "createdAt" : "2022-05-31T18:31:58.126407Z",
+  "id" : "wt6pclbs",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "jsLaubb73X"
+          "value" : "D31AdK5EfQ"
         },
-        "version" : 13,
-        "modifiedTime" : "2022-04-22T23:10:15Z"
+        "version" : 5,
+        "modifiedTime" : "2051-01-28T15:07:11Z"
       },
-      "mergedTime" : "2022-04-22T23:10:15Z",
-      "indexedTime" : "2022-05-09T11:41:20.623Z",
+      "mergedTime" : "2051-01-28T15:07:11Z",
+      "indexedTime" : "2022-05-31T18:31:58.124840Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "sierra-system-number"
+          "id" : "calm-record-id"
         },
         "ontologyType" : "Work",
-        "value" : "jsLaubb73X"
+        "value" : "D31AdK5EfQ"
       },
-      "canonicalId" : "6hqgsidz",
-      "mergedTime" : "2022-04-22T23:10:15Z",
-      "sourceModifiedTime" : "2022-04-22T23:10:15Z",
-      "indexedTime" : "2022-05-09T11:41:20.623Z",
+      "canonicalId" : "wt6pclbs",
+      "mergedTime" : "2051-01-28T15:07:11Z",
+      "sourceModifiedTime" : "2051-01-28T15:07:11Z",
+      "indexedTime" : "2022-05-31T18:31:58.124840Z",
       "availabilities" : [
         {
           "id" : "closed-stores"
@@ -49,7 +49,7 @@
       }
     },
     "data" : {
-      "title" : "title-GYBSGAtphR",
+      "title" : "title-e4jqB3DBkI",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -77,13 +77,13 @@
       "items" : [
         {
           "id" : {
-            "canonicalId" : "tq6alxfh",
+            "canonicalId" : "bhyswopl",
             "sourceIdentifier" : {
               "identifierType" : {
                 "id" : "calm-record-id"
               },
               "ontologyType" : "Work",
-              "value" : "HcRBQaVlLI"
+              "value" : "G3f7j0ub0t"
             },
             "otherIdentifiers" : [
             ],
@@ -98,9 +98,9 @@
               },
               "label" : "locationLabel",
               "license" : {
-                "id" : "ogl"
+                "id" : "pdm"
               },
-              "shelfmark" : null,
+              "shelfmark" : "Shelfmark: dZTQ6alxf",
               "accessConditions" : [
               ],
               "type" : "PhysicalLocation"
@@ -117,8 +117,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "6hqgsidz",
-      "title" : "title-GYBSGAtphR",
+      "id" : "wt6pclbs",
+      "title" : "title-e4jqB3DBkI",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -126,11 +126,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "jsLaubb73X",
+          "value" : "D31AdK5EfQ",
           "type" : "Identifier"
         }
       ],
@@ -140,7 +140,7 @@
       ],
       "items" : [
         {
-          "id" : "tq6alxfh",
+          "id" : "bhyswopl",
           "identifiers" : [
             {
               "identifierType" : {
@@ -148,7 +148,7 @@
                 "label" : "Calm RecordIdentifier",
                 "type" : "IdentifierType"
               },
-              "value" : "HcRBQaVlLI",
+              "value" : "G3f7j0ub0t",
               "type" : "Identifier"
             }
           ],
@@ -161,11 +161,12 @@
               },
               "label" : "locationLabel",
               "license" : {
-                "id" : "ogl",
-                "label" : "Open Government Licence",
-                "url" : "http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+                "id" : "pdm",
+                "label" : "Public Domain Mark",
+                "url" : "https://creativecommons.org/share-your-work/public-domain/pdm/",
                 "type" : "License"
               },
+              "shelfmark" : "Shelfmark: dZTQ6alxf",
               "accessConditions" : [
               ],
               "type" : "PhysicalLocation"
@@ -200,6 +201,14 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "query" : {
+      "subjects.id" : [
+      ],
+      "subjects.identifiers.value" : [
+      ],
+      "subjects.label" : [
+      ]
     },
     "aggregatableValues" : {
       "workType" : [
