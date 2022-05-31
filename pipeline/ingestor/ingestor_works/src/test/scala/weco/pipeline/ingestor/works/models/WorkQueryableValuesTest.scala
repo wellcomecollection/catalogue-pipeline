@@ -66,7 +66,11 @@ class WorkQueryableValuesTest
       )
     )
 
-    val q = WorkQueryableValues(data)
+    val q = WorkQueryableValues(
+      id = createCanonicalId,
+      sourceIdentifier = createSourceIdentifier,
+      workData = data
+    )
 
     q.subjectIds shouldBe List("ssssssss", "SSSSSSSS")
     q.subjectIdentifiers shouldBe List("lcs-soggy", "mesh-soggy", "lcs-simon")

@@ -47,7 +47,11 @@ trait WorkTransformer {
             state = state,
             data = data,
             display = display,
-            query = WorkQueryableValues(w.data),
+            query = WorkQueryableValues(
+              id = w.state.canonicalId,
+              sourceIdentifier = w.state.sourceIdentifier,
+              workData = w.data
+            ),
             aggregatableValues = WorkAggregatableValues(
               w.data,
               availabilities = state.availabilities)
