@@ -72,7 +72,6 @@ trait WorksIngestorFixtures
       storedWork.state.mergedTime shouldBe expectedWork.state.mergedTime
       storedWork.state.sourceModifiedTime shouldBe expectedWork.state.sourceModifiedTime
       storedWork.state.availabilities shouldBe expectedWork.state.availabilities
-      storedWork.state.derivedData shouldBe expectedWork.state.derivedData
       storedWork.state.relations shouldBe expectedWork.state.relations
 
       assertRecent(storedWork.state.indexedTime)

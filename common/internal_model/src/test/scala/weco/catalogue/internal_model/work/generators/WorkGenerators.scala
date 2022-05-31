@@ -296,7 +296,6 @@ trait WorkGenerators
     implicit val updateIndexedState: UpdateState[Indexed] =
       (state: Indexed, data: WorkData[DataState.Identified]) =>
         state.copy(
-          derivedData = DerivedWorkData(data),
           availabilities = Availabilities.forWorkData(data)
       )
     implicit val updateIdentifiedState: UpdateState[Identified] = identity
