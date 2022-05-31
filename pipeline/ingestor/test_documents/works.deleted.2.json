@@ -48,38 +48,5 @@
       }
     },
     "type" : "Deleted"
-  },
-  "work" : {
-    "version" : 14,
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "miro-image-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "BER84XHwKz"
-      },
-      "canonicalId" : "fbpuu3eq",
-      "mergedTime" : "2022-05-10T01:28:27Z",
-      "sourceModifiedTime" : "2022-05-10T01:28:27Z",
-      "indexedTime" : "2022-05-04T07:15:02.755Z",
-      "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "deletedReason" : {
-      "info" : "tests",
-      "type" : "DeletedFromSource"
-    },
-    "type" : "Deleted"
   }
 }

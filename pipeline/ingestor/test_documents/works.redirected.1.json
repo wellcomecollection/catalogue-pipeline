@@ -56,46 +56,5 @@
       ]
     },
     "type" : "Redirected"
-  },
-  "work" : {
-    "version" : 53,
-    "redirectTarget" : {
-      "canonicalId" : "k07hsfha",
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "miro-image-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "ih0Og1ZYVO"
-      },
-      "otherIdentifiers" : [
-      ]
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "sierra-system-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "R6Yu7udsfX"
-      },
-      "canonicalId" : "2bnrjeuw",
-      "mergedTime" : "2022-04-08T05:38:15Z",
-      "sourceModifiedTime" : "2022-04-08T05:38:15Z",
-      "indexedTime" : "2022-05-04T07:15:02.741Z",
-      "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "type" : "Redirected"
   }
 }

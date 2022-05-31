@@ -48,38 +48,5 @@
       }
     },
     "type" : "Deleted"
-  },
-  "work" : {
-    "version" : 99,
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "calm-record-id"
-        },
-        "ontologyType" : "Work",
-        "value" : "pNwuZuiGR2"
-      },
-      "canonicalId" : "batmoife",
-      "mergedTime" : "2022-04-15T05:18:00Z",
-      "sourceModifiedTime" : "2022-04-15T05:18:00Z",
-      "indexedTime" : "2022-05-04T07:15:02.754Z",
-      "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "deletedReason" : {
-      "info" : "tests",
-      "type" : "DeletedFromSource"
-    },
-    "type" : "Deleted"
   }
 }

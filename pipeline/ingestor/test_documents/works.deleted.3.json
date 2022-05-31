@@ -48,38 +48,5 @@
       }
     },
     "type" : "Deleted"
-  },
-  "work" : {
-    "version" : 2,
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "sierra-system-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "kVzgOJccsH"
-      },
-      "canonicalId" : "birexckp",
-      "mergedTime" : "2022-04-27T23:32:33Z",
-      "sourceModifiedTime" : "2022-04-27T23:32:33Z",
-      "indexedTime" : "2022-05-04T07:15:02.756Z",
-      "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "deletedReason" : {
-      "info" : "tests",
-      "type" : "DeletedFromSource"
-    },
-    "type" : "Deleted"
   }
 }
