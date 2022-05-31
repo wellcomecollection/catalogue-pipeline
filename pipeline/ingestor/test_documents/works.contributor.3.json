@@ -34,12 +34,6 @@
       "indexedTime" : "2022-05-04T07:15:03.078Z",
       "availabilities" : [
       ],
-      "derivedData" : {
-        "contributorAgents" : [
-          "Organisation:MI5",
-          "Organisation:GCHQ"
-        ]
-      },
       "relations" : {
         "ancestors" : [
         ],

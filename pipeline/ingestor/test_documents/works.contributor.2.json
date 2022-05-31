@@ -34,12 +34,6 @@
       "indexedTime" : "2022-05-04T07:15:03.075Z",
       "availabilities" : [
       ],
-      "derivedData" : {
-        "contributorAgents" : [
-          "Agent:007",
-          "Organisation:MI5"
-        ]
-      },
       "relations" : {
         "ancestors" : [
         ],

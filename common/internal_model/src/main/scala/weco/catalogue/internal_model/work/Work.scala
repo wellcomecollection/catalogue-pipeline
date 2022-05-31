@@ -276,7 +276,6 @@ object WorkState {
     sourceModifiedTime: Instant,
     indexedTime: Instant,
     availabilities: Set[Availability],
-    derivedData: DerivedWorkData,
     relations: Relations = Relations.none
   ) extends WorkState {
 
@@ -367,7 +366,6 @@ object WorkFsm {
         sourceModifiedTime = state.sourceModifiedTime,
         indexedTime = Instant.now(),
         availabilities = state.availabilities,
-        derivedData = DerivedWorkData(data),
         relations = state.relations
       )
 

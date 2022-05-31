@@ -205,11 +205,6 @@ object WorksIndexConfig extends IndexConfigFields {
                 collectionPath(copyPathTo = None)
               )
             )
-            .withDynamic("false"),
-          objectField("derivedData")
-            .fields(
-              keywordField("contributorAgents")
-            )
             .withDynamic("false")
         )
 

@@ -171,8 +171,6 @@ object Implicits {
   implicit val _decRelation: Decoder[Relation] = deriveConfiguredDecoder
   implicit val _decRelations: Decoder[Relations] = deriveConfiguredDecoder
 
-  implicit val _decDerivedWorkData: Decoder[DerivedWorkData] =
-    deriveConfiguredDecoder
   implicit val _decInferredData: Decoder[InferredData] =
     deriveConfiguredDecoder
   implicit val _decDerivedImageData: Decoder[DerivedImageData] =
@@ -435,8 +433,6 @@ object Implicits {
   implicit val _encRelation: Encoder[Relation] = deriveConfiguredEncoder
   implicit val _encRelations: Encoder[Relations] = deriveConfiguredEncoder
 
-  implicit val _encDerivedWorkData: Encoder[DerivedWorkData] =
-    deriveConfiguredEncoder
   implicit val _encInferredData: Encoder[InferredData] =
     deriveConfiguredEncoder
   implicit val _encDerivedImageData: Encoder[DerivedImageData] =

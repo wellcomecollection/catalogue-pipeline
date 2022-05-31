@@ -37,10 +37,6 @@
           "id" : "online"
         }
       ],
-      "derivedData" : {
-        "contributorAgents" : [
-        ]
-      },
       "relations" : {
         "ancestors" : [
         ],

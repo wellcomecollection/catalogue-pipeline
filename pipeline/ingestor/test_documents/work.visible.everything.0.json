@@ -37,12 +37,6 @@
           "id" : "closed-stores"
         }
       ],
-      "derivedData" : {
-        "contributorAgents" : [
-          "Person:person-o8xazs",
-          "Person:person-6am8fhYNr"
-        ]
-      },
       "relations" : {
         "ancestors" : [
           {
