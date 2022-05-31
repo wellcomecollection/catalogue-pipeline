@@ -1,6 +1,6 @@
 {
   "description" : "a work with licensed digital items",
-  "createdAt" : "2022-05-31T18:31:57.858270Z",
+  "createdAt" : "2022-05-31T18:33:51.161591Z",
   "id" : "runiusy8",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "2062-01-08T01:49:39Z"
       },
       "mergedTime" : "2062-01-08T01:49:39Z",
-      "indexedTime" : "2022-05-31T18:31:57.856227Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "runiusy8",
       "mergedTime" : "2062-01-08T01:49:39Z",
       "sourceModifiedTime" : "2062-01-08T01:49:39Z",
-      "indexedTime" : "2022-05-31T18:31:57.856227Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {

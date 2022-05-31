@@ -1,6 +1,6 @@
 {
   "description" : "examples for the access status tests",
-  "createdAt" : "2022-05-31T18:31:58.364302Z",
+  "createdAt" : "2022-05-31T18:33:51.665162Z",
   "id" : "iqani2su",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "2029-03-03T16:26:17Z"
       },
       "mergedTime" : "2029-03-03T16:26:17Z",
-      "indexedTime" : "2022-05-31T18:31:58.363309Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "iqani2su",
       "mergedTime" : "2029-03-03T16:26:17Z",
       "sourceModifiedTime" : "2029-03-03T16:26:17Z",
-      "indexedTime" : "2022-05-31T18:31:58.363309Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
         {
           "id" : "online"

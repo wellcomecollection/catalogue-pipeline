@@ -1,6 +1,6 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2022-05-31T18:31:58.161257Z",
+  "createdAt" : "2022-05-31T18:33:51.469916Z",
   "id" : "66bwuadw",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "1965-01-04T22:54:26Z"
       },
       "mergedTime" : "1965-01-04T22:54:26Z",
-      "indexedTime" : "2022-05-31T18:31:58.160156Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "66bwuadw",
       "mergedTime" : "1965-01-04T22:54:26Z",
       "sourceModifiedTime" : "1965-01-04T22:54:26Z",
-      "indexedTime" : "2022-05-31T18:31:58.160156Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {

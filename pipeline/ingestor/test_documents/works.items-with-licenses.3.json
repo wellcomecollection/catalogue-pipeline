@@ -1,6 +1,6 @@
 {
   "description" : "a work with licensed digital items",
-  "createdAt" : "2022-05-31T18:31:57.879992Z",
+  "createdAt" : "2022-05-31T18:33:51.165775Z",
   "id" : "rstrzip9",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "2021-05-09T10:48:54Z"
       },
       "mergedTime" : "2021-05-09T10:48:54Z",
-      "indexedTime" : "2022-05-31T18:31:57.873878Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "rstrzip9",
       "mergedTime" : "2021-05-09T10:48:54Z",
       "sourceModifiedTime" : "2021-05-09T10:48:54Z",
-      "indexedTime" : "2022-05-31T18:31:57.873878Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {

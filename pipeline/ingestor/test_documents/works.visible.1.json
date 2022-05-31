@@ -1,6 +1,6 @@
 {
   "description" : "an arbitrary list of visible works",
-  "createdAt" : "2022-05-31T18:31:57.157679Z",
+  "createdAt" : "2022-05-31T18:33:50.413039Z",
   "id" : "dph7sjip",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "1971-11-19T03:42:42Z"
       },
       "mergedTime" : "1971-11-19T03:42:42Z",
-      "indexedTime" : "2022-05-31T18:31:57.155555Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "dph7sjip",
       "mergedTime" : "1971-11-19T03:42:42Z",
       "sourceModifiedTime" : "1971-11-19T03:42:42Z",
-      "indexedTime" : "2022-05-31T18:31:57.155555Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {

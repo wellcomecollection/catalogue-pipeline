@@ -1,6 +1,6 @@
 {
   "description" : "a work with a production event in 1098",
-  "createdAt" : "2022-05-31T18:31:57.357964Z",
+  "createdAt" : "2022-05-31T18:33:50.632872Z",
   "id" : "guav7chy",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "1947-04-11T10:50:49Z"
       },
       "mergedTime" : "1947-04-11T10:50:49Z",
-      "indexedTime" : "2022-05-31T18:31:57.356099Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "guav7chy",
       "mergedTime" : "1947-04-11T10:50:49Z",
       "sourceModifiedTime" : "1947-04-11T10:50:49Z",
-      "indexedTime" : "2022-05-31T18:31:57.356099Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {

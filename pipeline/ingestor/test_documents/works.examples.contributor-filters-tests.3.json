@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2022-05-31T18:31:58.275461Z",
+  "createdAt" : "2022-05-31T18:33:51.583612Z",
   "id" : "6q7wkowr",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "2013-02-12T12:43:10Z"
       },
       "mergedTime" : "2013-02-12T12:43:10Z",
-      "indexedTime" : "2022-05-31T18:31:58.271956Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "6q7wkowr",
       "mergedTime" : "2013-02-12T12:43:10Z",
       "sourceModifiedTime" : "2013-02-12T12:43:10Z",
-      "indexedTime" : "2022-05-31T18:31:58.271956Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {

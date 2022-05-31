@@ -1,6 +1,6 @@
 {
   "description" : "an arbitrary list of deleted works",
-  "createdAt" : "2022-05-31T18:31:57.253491Z",
+  "createdAt" : "2022-05-31T18:33:50.522740Z",
   "id" : "0tkkvzgo",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "2009-09-05T08:49:35Z"
       },
       "mergedTime" : "2009-09-05T08:49:35Z",
-      "indexedTime" : "2022-05-31T18:31:57.252940Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "deletedReason" : {
         "info" : "tests",
         "type" : "DeletedFromSource"
@@ -33,7 +33,7 @@
       "canonicalId" : "0tkkvzgo",
       "mergedTime" : "2009-09-05T08:49:35Z",
       "sourceModifiedTime" : "2009-09-05T08:49:35Z",
-      "indexedTime" : "2022-05-31T18:31:57.252940Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {

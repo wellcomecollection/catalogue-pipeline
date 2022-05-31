@@ -1,6 +1,6 @@
 {
   "description" : "examples for the works filtered aggregations tests",
-  "createdAt" : "2022-05-31T18:31:58.397244Z",
+  "createdAt" : "2022-05-31T18:33:51.702475Z",
   "id" : "wkzjlx5a",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "1974-05-03T18:39:30Z"
       },
       "mergedTime" : "1974-05-03T18:39:30Z",
-      "indexedTime" : "2022-05-31T18:31:58.396422Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "wkzjlx5a",
       "mergedTime" : "1974-05-03T18:39:30Z",
       "sourceModifiedTime" : "1974-05-03T18:39:30Z",
-      "indexedTime" : "2022-05-31T18:31:58.396422Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {

@@ -1,6 +1,6 @@
 {
   "description" : "works with multi-year production ranges",
-  "createdAt" : "2022-05-31T18:31:58.104672Z",
+  "createdAt" : "2022-05-31T18:33:51.411576Z",
   "id" : "cuh8ak2g",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "2002-08-30T13:56:42Z"
       },
       "mergedTime" : "2002-08-30T13:56:42Z",
-      "indexedTime" : "2022-05-31T18:31:58.103737Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "cuh8ak2g",
       "mergedTime" : "2002-08-30T13:56:42Z",
       "sourceModifiedTime" : "2002-08-30T13:56:42Z",
-      "indexedTime" : "2022-05-31T18:31:58.103737Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {

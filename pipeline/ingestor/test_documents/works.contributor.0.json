@@ -1,6 +1,6 @@
 {
   "description" : "works with different contributor",
-  "createdAt" : "2022-05-31T18:31:57.968666Z",
+  "createdAt" : "2022-05-31T18:33:51.259875Z",
   "id" : "gvkz3vff",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "2020-10-22T16:00:54Z"
       },
       "mergedTime" : "2020-10-22T16:00:54Z",
-      "indexedTime" : "2022-05-31T18:31:57.958473Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "gvkz3vff",
       "mergedTime" : "2020-10-22T16:00:54Z",
       "sourceModifiedTime" : "2020-10-22T16:00:54Z",
-      "indexedTime" : "2022-05-31T18:31:57.958473Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {

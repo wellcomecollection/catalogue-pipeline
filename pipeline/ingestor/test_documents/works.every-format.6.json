@@ -1,6 +1,6 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2022-05-31T18:31:58.037512Z",
+  "createdAt" : "2022-05-31T18:33:51.343754Z",
   "id" : "aftvp1wz",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "2034-11-25T17:40:29Z"
       },
       "mergedTime" : "2034-11-25T17:40:29Z",
-      "indexedTime" : "2022-05-31T18:31:58.036492Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "aftvp1wz",
       "mergedTime" : "2034-11-25T17:40:29Z",
       "sourceModifiedTime" : "2034-11-25T17:40:29Z",
-      "indexedTime" : "2022-05-31T18:31:58.036492Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {

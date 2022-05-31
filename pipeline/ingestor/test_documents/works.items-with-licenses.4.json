@@ -1,6 +1,6 @@
 {
   "description" : "a work with licensed digital items",
-  "createdAt" : "2022-05-31T18:31:57.883694Z",
+  "createdAt" : "2022-05-31T18:33:51.166608Z",
   "id" : "vwg1cj2y",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "1971-03-03T04:45:38Z"
       },
       "mergedTime" : "1971-03-03T04:45:38Z",
-      "indexedTime" : "2022-05-31T18:31:57.880056Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "vwg1cj2y",
       "mergedTime" : "1971-03-03T04:45:38Z",
       "sourceModifiedTime" : "1971-03-03T04:45:38Z",
-      "indexedTime" : "2022-05-31T18:31:57.880056Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {

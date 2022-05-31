@@ -1,6 +1,6 @@
 {
   "description" : "a work with a thumbnail",
-  "createdAt" : "2022-05-31T18:31:57.294190Z",
+  "createdAt" : "2022-05-31T18:33:50.558042Z",
   "id" : "sahqcluh",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "2052-06-26T19:25:07Z"
       },
       "mergedTime" : "2052-06-26T19:25:07Z",
-      "indexedTime" : "2022-05-31T18:31:57.273388Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "sahqcluh",
       "mergedTime" : "2052-06-26T19:25:07Z",
       "sourceModifiedTime" : "2052-06-26T19:25:07Z",
-      "indexedTime" : "2022-05-31T18:31:57.273388Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {

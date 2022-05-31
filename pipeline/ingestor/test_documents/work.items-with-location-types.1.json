@@ -1,6 +1,6 @@
 {
   "description" : "items with different location types",
-  "createdAt" : "2022-05-31T18:31:58.124812Z",
+  "createdAt" : "2022-05-31T18:33:51.428831Z",
   "id" : "sgatphra",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "2007-10-12T00:47:39Z"
       },
       "mergedTime" : "2007-10-12T00:47:39Z",
-      "indexedTime" : "2022-05-31T18:31:58.122889Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "sgatphra",
       "mergedTime" : "2007-10-12T00:47:39Z",
       "sourceModifiedTime" : "2007-10-12T00:47:39Z",
-      "indexedTime" : "2022-05-31T18:31:58.122889Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {

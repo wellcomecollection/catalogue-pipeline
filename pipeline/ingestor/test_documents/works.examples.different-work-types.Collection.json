@@ -1,6 +1,6 @@
 {
   "description" : "examples of works with different types",
-  "createdAt" : "2022-05-31T18:31:58.214423Z",
+  "createdAt" : "2022-05-31T18:33:51.520283Z",
   "id" : "2tqcclh1",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "1933-08-10T09:08:15Z"
       },
       "mergedTime" : "1933-08-10T09:08:15Z",
-      "indexedTime" : "2022-05-31T18:31:58.213487Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "2tqcclh1",
       "mergedTime" : "1933-08-10T09:08:15Z",
       "sourceModifiedTime" : "1933-08-10T09:08:15Z",
-      "indexedTime" : "2022-05-31T18:31:58.213487Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {

@@ -1,6 +1,6 @@
 {
   "description" : "works with items with other identifiers",
-  "createdAt" : "2022-05-31T18:31:58.001237Z",
+  "createdAt" : "2022-05-31T18:33:51.300345Z",
   "id" : "pex9vogp",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "1962-06-05T19:31:57Z"
       },
       "mergedTime" : "1962-06-05T19:31:57Z",
-      "indexedTime" : "2022-05-31T18:31:57.998503Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "pex9vogp",
       "mergedTime" : "1962-06-05T19:31:57Z",
       "sourceModifiedTime" : "1962-06-05T19:31:57Z",
-      "indexedTime" : "2022-05-31T18:31:57.998503Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {

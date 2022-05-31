@@ -1,6 +1,6 @@
 {
   "description" : "an arbitrary list of invisible works",
-  "createdAt" : "2022-05-31T18:31:57.216628Z",
+  "createdAt" : "2022-05-31T18:33:50.481862Z",
   "id" : "rczekocx",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "2001-07-02T19:43:15Z"
       },
       "mergedTime" : "2001-07-02T19:43:15Z",
-      "indexedTime" : "2022-05-31T18:31:57.211400Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "invisibilityReasons" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "rczekocx",
       "mergedTime" : "2001-07-02T19:43:15Z",
       "sourceModifiedTime" : "2001-07-02T19:43:15Z",
-      "indexedTime" : "2022-05-31T18:31:57.211400Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {

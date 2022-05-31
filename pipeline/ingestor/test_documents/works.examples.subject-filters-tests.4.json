@@ -1,6 +1,6 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2022-05-31T18:31:58.255758Z",
+  "createdAt" : "2022-05-31T18:33:51.566356Z",
   "id" : "gmzc1icz",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "1983-04-17T04:26:34Z"
       },
       "mergedTime" : "1983-04-17T04:26:34Z",
-      "indexedTime" : "2022-05-31T18:31:58.254045Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "gmzc1icz",
       "mergedTime" : "1983-04-17T04:26:34Z",
       "sourceModifiedTime" : "1983-04-17T04:26:34Z",
-      "indexedTime" : "2022-05-31T18:31:58.254045Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {

@@ -1,6 +1,6 @@
 {
   "description" : "a work with optional top-level fields",
-  "createdAt" : "2022-05-31T18:31:57.268180Z",
+  "createdAt" : "2022-05-31T18:33:50.540543Z",
   "id" : "gsruvqwf",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "1967-09-14T08:19:27Z"
       },
       "mergedTime" : "1967-09-14T08:19:27Z",
-      "indexedTime" : "2022-05-31T18:31:57.266152Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "gsruvqwf",
       "mergedTime" : "1967-09-14T08:19:27Z",
       "sourceModifiedTime" : "1967-09-14T08:19:27Z",
-      "indexedTime" : "2022-05-31T18:31:57.266152Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {

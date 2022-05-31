@@ -1,6 +1,6 @@
 {
   "description" : "works with items with other identifiers",
-  "createdAt" : "2022-05-31T18:31:57.995439Z",
+  "createdAt" : "2022-05-31T18:33:51.296607Z",
   "id" : "upm4bal7",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "1940-10-02T05:59:00Z"
       },
       "mergedTime" : "1940-10-02T05:59:00Z",
-      "indexedTime" : "2022-05-31T18:31:57.993596Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "upm4bal7",
       "mergedTime" : "1940-10-02T05:59:00Z",
       "sourceModifiedTime" : "1940-10-02T05:59:00Z",
-      "indexedTime" : "2022-05-31T18:31:57.993596Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {

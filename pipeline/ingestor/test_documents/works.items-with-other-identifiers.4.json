@@ -1,6 +1,6 @@
 {
   "description" : "works with items with other identifiers",
-  "createdAt" : "2022-05-31T18:31:58.002071Z",
+  "createdAt" : "2022-05-31T18:33:51.301900Z",
   "id" : "c5xw2xfj",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "1937-12-14T11:58:33Z"
       },
       "mergedTime" : "1937-12-14T11:58:33Z",
-      "indexedTime" : "2022-05-31T18:31:58.001258Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "c5xw2xfj",
       "mergedTime" : "1937-12-14T11:58:33Z",
       "sourceModifiedTime" : "1937-12-14T11:58:33Z",
-      "indexedTime" : "2022-05-31T18:31:58.001258Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {

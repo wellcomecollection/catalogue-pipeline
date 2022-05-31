@@ -1,6 +1,6 @@
 {
   "description" : "an arbitrary list of visible works",
-  "createdAt" : "2022-05-31T18:31:57.160761Z",
+  "createdAt" : "2022-05-31T18:33:50.417982Z",
   "id" : "raob2ruv",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "1966-03-23T00:51:51Z"
       },
       "mergedTime" : "1966-03-23T00:51:51Z",
-      "indexedTime" : "2022-05-31T18:31:57.159272Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "raob2ruv",
       "mergedTime" : "1966-03-23T00:51:51Z",
       "sourceModifiedTime" : "1966-03-23T00:51:51Z",
-      "indexedTime" : "2022-05-31T18:31:57.159272Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {

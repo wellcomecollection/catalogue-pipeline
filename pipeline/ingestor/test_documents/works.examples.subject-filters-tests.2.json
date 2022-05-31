@@ -1,6 +1,6 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2022-05-31T18:31:58.253056Z",
+  "createdAt" : "2022-05-31T18:33:51.561049Z",
   "id" : "mazaizfa",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "1986-01-27T17:06:16Z"
       },
       "mergedTime" : "1986-01-27T17:06:16Z",
-      "indexedTime" : "2022-05-31T18:31:58.250813Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "mazaizfa",
       "mergedTime" : "1986-01-27T17:06:16Z",
       "sourceModifiedTime" : "1986-01-27T17:06:16Z",
-      "indexedTime" : "2022-05-31T18:31:58.250813Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {

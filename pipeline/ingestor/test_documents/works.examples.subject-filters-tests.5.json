@@ -1,6 +1,6 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2022-05-31T18:31:58.256474Z",
+  "createdAt" : "2022-05-31T18:33:51.567651Z",
   "id" : "rbao66qq",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "1971-06-27T05:46:31Z"
       },
       "mergedTime" : "1971-06-27T05:46:31Z",
-      "indexedTime" : "2022-05-31T18:31:58.255785Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "rbao66qq",
       "mergedTime" : "1971-06-27T05:46:31Z",
       "sourceModifiedTime" : "1971-06-27T05:46:31Z",
-      "indexedTime" : "2022-05-31T18:31:58.255785Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {

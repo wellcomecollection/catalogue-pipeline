@@ -1,6 +1,6 @@
 {
   "description" : "works with different subjects",
-  "createdAt" : "2022-05-31T18:31:57.941322Z",
+  "createdAt" : "2022-05-31T18:33:51.220146Z",
   "id" : "mihwfxry",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "1993-11-26T03:07:07Z"
       },
       "mergedTime" : "1993-11-26T03:07:07Z",
-      "indexedTime" : "2022-05-31T18:31:57.938646Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "mihwfxry",
       "mergedTime" : "1993-11-26T03:07:07Z",
       "sourceModifiedTime" : "1993-11-26T03:07:07Z",
-      "indexedTime" : "2022-05-31T18:31:57.938646Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {

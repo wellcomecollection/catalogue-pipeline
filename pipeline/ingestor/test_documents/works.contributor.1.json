@@ -1,6 +1,6 @@
 {
   "description" : "works with different contributor",
-  "createdAt" : "2022-05-31T18:31:57.969928Z",
+  "createdAt" : "2022-05-31T18:33:51.261283Z",
   "id" : "bj9evx0c",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "1954-02-14T04:36:57Z"
       },
       "mergedTime" : "1954-02-14T04:36:57Z",
-      "indexedTime" : "2022-05-31T18:31:57.968702Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "bj9evx0c",
       "mergedTime" : "1954-02-14T04:36:57Z",
       "sourceModifiedTime" : "1954-02-14T04:36:57Z",
-      "indexedTime" : "2022-05-31T18:31:57.968702Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {

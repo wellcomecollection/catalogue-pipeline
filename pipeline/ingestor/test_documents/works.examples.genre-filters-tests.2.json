@@ -1,6 +1,6 @@
 {
   "description" : "examples for the genre tests",
-  "createdAt" : "2022-05-31T18:31:58.228810Z",
+  "createdAt" : "2022-05-31T18:33:51.543672Z",
   "id" : "yhjhxcof",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "2037-12-19T21:38:57Z"
       },
       "mergedTime" : "2037-12-19T21:38:57Z",
-      "indexedTime" : "2022-05-31T18:31:58.225792Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "yhjhxcof",
       "mergedTime" : "2037-12-19T21:38:57Z",
       "sourceModifiedTime" : "2037-12-19T21:38:57Z",
-      "indexedTime" : "2022-05-31T18:31:58.225792Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {

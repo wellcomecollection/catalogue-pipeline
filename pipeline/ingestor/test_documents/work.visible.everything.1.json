@@ -1,6 +1,6 @@
 {
   "description" : "a list of work with all the include-able fields",
-  "createdAt" : "2022-05-31T18:31:57.745945Z",
+  "createdAt" : "2022-05-31T18:33:51.039435Z",
   "id" : "nlqnlwch",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "2061-09-15T03:25:10Z"
       },
       "mergedTime" : "2061-09-15T03:25:10Z",
-      "indexedTime" : "2022-05-31T18:31:57.727204Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "nlqnlwch",
       "mergedTime" : "2061-09-15T03:25:10Z",
       "sourceModifiedTime" : "2061-09-15T03:25:10Z",
-      "indexedTime" : "2022-05-31T18:31:57.727204Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
         {
           "id" : "closed-stores"

@@ -1,6 +1,6 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2022-05-31T18:31:58.039944Z",
+  "createdAt" : "2022-05-31T18:33:51.346936Z",
   "id" : "4fkr6m6l",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "2061-02-18T22:05:25Z"
       },
       "mergedTime" : "2061-02-18T22:05:25Z",
-      "indexedTime" : "2022-05-31T18:31:58.038504Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "4fkr6m6l",
       "mergedTime" : "2061-02-18T22:05:25Z",
       "sourceModifiedTime" : "2061-02-18T22:05:25Z",
-      "indexedTime" : "2022-05-31T18:31:58.038504Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {

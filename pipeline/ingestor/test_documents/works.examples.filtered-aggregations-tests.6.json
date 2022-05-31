@@ -1,6 +1,6 @@
 {
   "description" : "examples for the works filtered aggregations tests",
-  "createdAt" : "2022-05-31T18:31:58.398006Z",
+  "createdAt" : "2022-05-31T18:33:51.703423Z",
   "id" : "iykrudzs",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "1987-08-26T16:27:30Z"
       },
       "mergedTime" : "1987-08-26T16:27:30Z",
-      "indexedTime" : "2022-05-31T18:31:58.397272Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "iykrudzs",
       "mergedTime" : "1987-08-26T16:27:30Z",
       "sourceModifiedTime" : "1987-08-26T16:27:30Z",
-      "indexedTime" : "2022-05-31T18:31:58.397272Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {

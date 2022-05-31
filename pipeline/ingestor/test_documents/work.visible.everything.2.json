@@ -1,6 +1,6 @@
 {
   "description" : "a list of work with all the include-able fields",
-  "createdAt" : "2022-05-31T18:31:57.755070Z",
+  "createdAt" : "2022-05-31T18:33:51.049632Z",
   "id" : "jfzz4ou9",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "1944-05-20T13:47:07Z"
       },
       "mergedTime" : "1944-05-20T13:47:07Z",
-      "indexedTime" : "2022-05-31T18:31:57.745971Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "jfzz4ou9",
       "mergedTime" : "1944-05-20T13:47:07Z",
       "sourceModifiedTime" : "1944-05-20T13:47:07Z",
-      "indexedTime" : "2022-05-31T18:31:57.745971Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
         {
           "id" : "open-shelves"

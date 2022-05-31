@@ -1,6 +1,6 @@
 {
   "description" : "items with different location types",
-  "createdAt" : "2022-05-31T18:31:58.122797Z",
+  "createdAt" : "2022-05-31T18:33:51.426898Z",
   "id" : "kdwct2lf",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "1948-05-26T19:41:23Z"
       },
       "mergedTime" : "1948-05-26T19:41:23Z",
-      "indexedTime" : "2022-05-31T18:31:58.120058Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "kdwct2lf",
       "mergedTime" : "1948-05-26T19:41:23Z",
       "sourceModifiedTime" : "1948-05-26T19:41:23Z",
-      "indexedTime" : "2022-05-31T18:31:58.120058Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {

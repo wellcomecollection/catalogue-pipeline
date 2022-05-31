@@ -1,6 +1,6 @@
 {
   "description" : "an arbitrary list of visible works",
-  "createdAt" : "2022-05-31T18:31:57.162220Z",
+  "createdAt" : "2022-05-31T18:33:50.420316Z",
   "id" : "vbi1ii19",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "2024-12-13T21:31:42Z"
       },
       "mergedTime" : "2024-12-13T21:31:42Z",
-      "indexedTime" : "2022-05-31T18:31:57.160775Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "vbi1ii19",
       "mergedTime" : "2024-12-13T21:31:42Z",
       "sourceModifiedTime" : "2024-12-13T21:31:42Z",
-      "indexedTime" : "2022-05-31T18:31:57.160775Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {
