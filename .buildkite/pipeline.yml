@@ -121,7 +121,7 @@ steps:
       queue: "scala"
 
   - command: .buildkite/scripts/run_job.py transformer_tei
-    label: "transformer (Tei)"
+    label: "transformer (TEI)"
     agents:
       queue: "scala"
 
