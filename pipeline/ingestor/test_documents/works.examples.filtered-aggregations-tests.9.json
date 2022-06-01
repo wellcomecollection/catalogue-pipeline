@@ -1,37 +1,37 @@
 {
   "description" : "examples for the works filtered aggregations tests",
-  "createdAt" : "2022-05-10T09:25:20.140Z",
-  "id" : "wtgio1hu",
+  "createdAt" : "2022-05-31T18:33:51.706433Z",
+  "id" : "lkq8nygj",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "zx3mO0u9h1"
+          "value" : "UBhh45MMdu"
         },
-        "version" : 62,
-        "modifiedTime" : "2022-05-09T14:29:29Z"
+        "version" : 68,
+        "modifiedTime" : "1980-11-27T00:49:23Z"
       },
-      "mergedTime" : "2022-05-09T14:29:29Z",
-      "indexedTime" : "2022-05-10T09:25:20.140Z",
+      "mergedTime" : "1980-11-27T00:49:23Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "calm-record-id"
+          "id" : "sierra-system-number"
         },
         "ontologyType" : "Work",
-        "value" : "zx3mO0u9h1"
+        "value" : "UBhh45MMdu"
       },
-      "canonicalId" : "wtgio1hu",
-      "mergedTime" : "2022-05-09T14:29:29Z",
-      "sourceModifiedTime" : "2022-05-09T14:29:29Z",
-      "indexedTime" : "2022-05-10T09:25:20.140Z",
+      "canonicalId" : "lkq8nygj",
+      "mergedTime" : "1980-11-27T00:49:23Z",
+      "sourceModifiedTime" : "1980-11-27T00:49:23Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {
@@ -89,7 +89,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "wtgio1hu",
+      "id" : "lkq8nygj",
       "title" : "rats",
       "alternativeTitles" : [
       ],
@@ -103,11 +103,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "zx3mO0u9h1",
+          "value" : "UBhh45MMdu",
           "type" : "Identifier"
         }
       ],
@@ -143,6 +143,14 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "query" : {
+      "subjects.id" : [
+      ],
+      "subjects.identifiers.value" : [
+      ],
+      "subjects.label" : [
+      ]
     },
     "aggregatableValues" : {
       "workType" : [

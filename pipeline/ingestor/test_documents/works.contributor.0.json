@@ -1,7 +1,7 @@
 {
   "description" : "works with different contributor",
-  "createdAt" : "2022-05-04T07:15:03.074Z",
-  "id" : "pkf3m7xe",
+  "createdAt" : "2022-05-31T18:33:51.259875Z",
+  "id" : "gvkz3vff",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,13 +10,13 @@
             "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "2i8sNTcYSK"
+          "value" : "5CJlp05MGl"
         },
-        "version" : 2,
-        "modifiedTime" : "2022-04-20T13:21:07Z"
+        "version" : 32,
+        "modifiedTime" : "2020-10-22T16:00:54Z"
       },
-      "mergedTime" : "2022-04-20T13:21:07Z",
-      "indexedTime" : "2022-05-04T07:15:03.070Z",
+      "mergedTime" : "2020-10-22T16:00:54Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
@@ -26,12 +26,12 @@
           "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "2i8sNTcYSK"
+        "value" : "5CJlp05MGl"
       },
-      "canonicalId" : "pkf3m7xe",
-      "mergedTime" : "2022-04-20T13:21:07Z",
-      "sourceModifiedTime" : "2022-04-20T13:21:07Z",
-      "indexedTime" : "2022-05-04T07:15:03.070Z",
+      "canonicalId" : "gvkz3vff",
+      "mergedTime" : "2020-10-22T16:00:54Z",
+      "sourceModifiedTime" : "2020-10-22T16:00:54Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {
@@ -46,7 +46,7 @@
       }
     },
     "data" : {
-      "title" : "title-xv45oXcssa",
+      "title" : "title-Wh4OVfDtEV",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -96,8 +96,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "pkf3m7xe",
-      "title" : "title-xv45oXcssa",
+      "id" : "gvkz3vff",
+      "title" : "title-Wh4OVfDtEV",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -118,7 +118,7 @@
             "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "2i8sNTcYSK",
+          "value" : "5CJlp05MGl",
           "type" : "Identifier"
         }
       ],
@@ -149,6 +149,14 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "query" : {
+      "subjects.id" : [
+      ],
+      "subjects.identifiers.value" : [
+      ],
+      "subjects.label" : [
+      ]
     },
     "aggregatableValues" : {
       "workType" : [

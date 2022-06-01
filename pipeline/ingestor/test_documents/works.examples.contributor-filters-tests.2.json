@@ -1,7 +1,7 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2022-05-10T09:10:37.798Z",
-  "id" : "ol7e1k1l",
+  "createdAt" : "2022-05-31T18:33:51.581354Z",
+  "id" : "e1k1l8xu",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,13 +10,13 @@
             "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "7M3Kvqw9fG"
+          "value" : "Kvqw9fGol7"
         },
-        "version" : 8,
-        "modifiedTime" : "2022-04-27T02:05:17Z"
+        "version" : 33,
+        "modifiedTime" : "1988-06-28T12:49:00Z"
       },
-      "mergedTime" : "2022-04-27T02:05:17Z",
-      "indexedTime" : "2022-05-10T09:10:37.797Z",
+      "mergedTime" : "1988-06-28T12:49:00Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
@@ -26,12 +26,12 @@
           "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "7M3Kvqw9fG"
+        "value" : "Kvqw9fGol7"
       },
-      "canonicalId" : "ol7e1k1l",
-      "mergedTime" : "2022-04-27T02:05:17Z",
-      "sourceModifiedTime" : "2022-04-27T02:05:17Z",
-      "indexedTime" : "2022-05-10T09:10:37.797Z",
+      "canonicalId" : "e1k1l8xu",
+      "mergedTime" : "1988-06-28T12:49:00Z",
+      "sourceModifiedTime" : "1988-06-28T12:49:00Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {
@@ -46,7 +46,7 @@
       }
     },
     "data" : {
-      "title" : "title-UhcLZhc35m",
+      "title" : "title-cLZhc35m9C",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -98,8 +98,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "ol7e1k1l",
-      "title" : "title-UhcLZhc35m",
+      "id" : "e1k1l8xu",
+      "title" : "title-cLZhc35m9C",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -120,7 +120,7 @@
             "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "7M3Kvqw9fG",
+          "value" : "Kvqw9fGol7",
           "type" : "Identifier"
         }
       ],
@@ -151,6 +151,14 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "query" : {
+      "subjects.id" : [
+      ],
+      "subjects.identifiers.value" : [
+      ],
+      "subjects.label" : [
+      ]
     },
     "aggregatableValues" : {
       "workType" : [

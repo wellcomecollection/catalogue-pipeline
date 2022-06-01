@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2022-05-10T09:10:37.798Z",
+  "createdAt" : "2022-05-31T18:33:51.586646Z",
   "id" : "bexh6kx6",
   "document" : {
     "debug" : {
@@ -12,11 +12,11 @@
           "ontologyType" : "Work",
           "value" : "5q2ktKEnxz"
         },
-        "version" : 10,
-        "modifiedTime" : "2022-04-26T00:10:18Z"
+        "version" : 45,
+        "modifiedTime" : "2067-03-29T22:14:53Z"
       },
-      "mergedTime" : "2022-04-26T00:10:18Z",
-      "indexedTime" : "2022-05-10T09:10:37.798Z",
+      "mergedTime" : "2067-03-29T22:14:53Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
@@ -29,9 +29,9 @@
         "value" : "5q2ktKEnxz"
       },
       "canonicalId" : "bexh6kx6",
-      "mergedTime" : "2022-04-26T00:10:18Z",
-      "sourceModifiedTime" : "2022-04-26T00:10:18Z",
-      "indexedTime" : "2022-05-10T09:10:37.798Z",
+      "mergedTime" : "2067-03-29T22:14:53Z",
+      "sourceModifiedTime" : "2067-03-29T22:14:53Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {
@@ -46,7 +46,7 @@
       }
     },
     "data" : {
-      "title" : "title-RuJHArEMdS",
+      "title" : "title-ERuJHArEMd",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -83,7 +83,7 @@
     },
     "display" : {
       "id" : "bexh6kx6",
-      "title" : "title-RuJHArEMdS",
+      "title" : "title-ERuJHArEMd",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -127,73 +127,32 @@
       ],
       "type" : "Work"
     },
-    "type" : "Visible"
-  },
-  "work" : {
-    "version" : 10,
-    "data" : {
-      "title" : "title-RuJHArEMdS",
-      "otherIdentifiers" : [
+    "query" : {
+      "subjects.id" : [
       ],
-      "alternativeTitles" : [
+      "subjects.identifiers.value" : [
       ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
+      "subjects.label" : [
+      ]
+    },
+    "aggregatableValues" : {
+      "workType" : [
       ],
-      "genres" : [
+      "genres.label" : [
       ],
-      "contributors" : [
+      "production.dates" : [
       ],
-      "thumbnail" : null,
-      "production" : [
+      "subjects.label" : [
       ],
       "languages" : [
       ],
-      "edition" : null,
-      "notes" : [
+      "contributors.agent.label" : [
       ],
-      "duration" : null,
-      "items" : [
+      "items.locations.license" : [
       ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "calm-record-id"
-        },
-        "ontologyType" : "Work",
-        "value" : "5q2ktKEnxz"
-      },
-      "canonicalId" : "bexh6kx6",
-      "mergedTime" : "2022-04-26T00:10:18Z",
-      "sourceModifiedTime" : "2022-04-26T00:10:18Z",
-      "indexedTime" : "2022-05-10T09:10:37.798Z",
       "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
+      ]
     },
-    "redirectSources" : [
-    ],
     "type" : "Visible"
   }
 }

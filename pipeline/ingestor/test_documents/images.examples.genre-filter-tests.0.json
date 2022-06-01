@@ -1,6 +1,6 @@
 {
   "description" : "examples for the genre filter tests",
-  "createdAt" : "2022-05-13T12:41:39.998Z",
+  "createdAt" : "2022-05-31T18:34:40.329313Z",
   "id" : "3yemwm1r",
   "document" : {
     "version" : 1,
@@ -4527,7 +4527,7 @@
       "source.contributors.agent.label" : [
       ],
       "source.genres.label" : [
-        "{\"label\":\"Carrot counselling\",\"concepts\":[{\"label\":\"ea5UpWtdr8nwDiK\",\"type\":\"Concept\"},{\"label\":\"4kAuMEb4s4uH6iq\",\"type\":\"Concept\"},{\"label\":\"btUlOrD0NLgMOTW\",\"type\":\"Concept\"}],\"type\":\"Genre\"}"
+        "{\"label\":\"Carrot counselling\",\"concepts\":[],\"type\":\"Genre\"}"
       ]
     }
   }

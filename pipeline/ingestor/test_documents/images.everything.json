@@ -1,6 +1,6 @@
 {
   "description" : "an image with every include",
-  "createdAt" : "2022-05-13T12:41:40.043Z",
+  "createdAt" : "2022-05-31T18:34:40.454840Z",
   "id" : "qpvx7gyp",
   "document" : {
     "version" : 1,
@@ -4645,8 +4645,8 @@
         "{\"label\":\"Beatrice Buffalo\",\"type\":\"Person\"}"
       ],
       "source.genres.label" : [
-        "{\"label\":\"Crumbly cabbages\",\"concepts\":[{\"label\":\"VTMxwlsU4ID8FJO\",\"type\":\"Concept\"},{\"label\":\"smLVneLxGixuwYM\",\"type\":\"Concept\"},{\"label\":\"WEKRGOyVEETAXu2\",\"type\":\"Concept\"}],\"type\":\"Genre\"}",
-        "{\"label\":\"Deadly durians\",\"concepts\":[{\"label\":\"wVgSyRdeyNrYD8Z\",\"type\":\"Concept\"},{\"label\":\"5K6TPbywqiK3tTT\",\"type\":\"Concept\"},{\"label\":\"s2UdfxnodZzKVgW\",\"type\":\"Concept\"}],\"type\":\"Genre\"}"
+        "{\"label\":\"Crumbly cabbages\",\"concepts\":[],\"type\":\"Genre\"}",
+        "{\"label\":\"Deadly durians\",\"concepts\":[],\"type\":\"Genre\"}"
       ]
     }
   }

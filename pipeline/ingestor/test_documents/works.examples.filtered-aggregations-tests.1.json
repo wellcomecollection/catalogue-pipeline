@@ -1,7 +1,7 @@
 {
   "description" : "examples for the works filtered aggregations tests",
-  "createdAt" : "2022-05-10T09:25:20.139Z",
-  "id" : "hvvxa3dc",
+  "createdAt" : "2022-05-31T18:33:51.696663Z",
+  "id" : "580nnpfa",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,13 +10,13 @@
             "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "580nNPfAWz"
+          "value" : "wz2OkOJHcs"
         },
-        "version" : 59,
-        "modifiedTime" : "2022-04-16T10:01:21Z"
+        "version" : 86,
+        "modifiedTime" : "2015-07-21T11:19:34Z"
       },
-      "mergedTime" : "2022-04-16T10:01:21Z",
-      "indexedTime" : "2022-05-10T09:25:20.138Z",
+      "mergedTime" : "2015-07-21T11:19:34Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
@@ -26,12 +26,12 @@
           "id" : "sierra-system-number"
         },
         "ontologyType" : "Work",
-        "value" : "580nNPfAWz"
+        "value" : "wz2OkOJHcs"
       },
-      "canonicalId" : "hvvxa3dc",
-      "mergedTime" : "2022-04-16T10:01:21Z",
-      "sourceModifiedTime" : "2022-04-16T10:01:21Z",
-      "indexedTime" : "2022-05-10T09:25:20.138Z",
+      "canonicalId" : "580nnpfa",
+      "mergedTime" : "2015-07-21T11:19:34Z",
+      "sourceModifiedTime" : "2015-07-21T11:19:34Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {
@@ -89,7 +89,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "hvvxa3dc",
+      "id" : "580nnpfa",
       "title" : "capybara",
       "alternativeTitles" : [
       ],
@@ -107,7 +107,7 @@
             "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "580nNPfAWz",
+          "value" : "wz2OkOJHcs",
           "type" : "Identifier"
         }
       ],
@@ -143,6 +143,14 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "query" : {
+      "subjects.id" : [
+      ],
+      "subjects.identifiers.value" : [
+      ],
+      "subjects.label" : [
+      ]
     },
     "aggregatableValues" : {
       "workType" : [

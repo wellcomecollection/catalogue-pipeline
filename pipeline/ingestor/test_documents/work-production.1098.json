@@ -1,37 +1,37 @@
 {
   "description" : "a work with a production event in 1098",
-  "createdAt" : "2022-05-04T07:15:02.879Z",
-  "id" : "mxme7pvj",
+  "createdAt" : "2022-06-01T06:45:07.701290Z",
+  "id" : "guav7chy",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "KtjbO5NI3f"
+          "value" : "W9fptfa5Xn"
         },
-        "version" : 87,
-        "modifiedTime" : "2022-04-06T19:52:05Z"
+        "version" : 36,
+        "modifiedTime" : "1947-04-11T10:50:49Z"
       },
-      "mergedTime" : "2022-04-06T19:52:05Z",
-      "indexedTime" : "2022-05-04T07:15:02.879Z",
+      "mergedTime" : "1947-04-11T10:50:49Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "calm-record-id"
+          "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "KtjbO5NI3f"
+        "value" : "W9fptfa5Xn"
       },
-      "canonicalId" : "mxme7pvj",
-      "mergedTime" : "2022-04-06T19:52:05Z",
-      "sourceModifiedTime" : "2022-04-06T19:52:05Z",
-      "indexedTime" : "2022-05-04T07:15:02.879Z",
+      "canonicalId" : "guav7chy",
+      "mergedTime" : "1947-04-11T10:50:49Z",
+      "sourceModifiedTime" : "1947-04-11T10:50:49Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {
@@ -65,7 +65,7 @@
       "thumbnail" : null,
       "production" : [
         {
-          "label" : "AH5ZlILHMEHd2S7eki5C8ouWi",
+          "label" : "O5NI3fmxMe7PvjOSdUDvO1WIV",
           "places" : [
           ],
           "agents" : [
@@ -103,7 +103,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "mxme7pvj",
+      "id" : "guav7chy",
       "title" : "Production event in 1098",
       "alternativeTitles" : [
       ],
@@ -112,11 +112,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "KtjbO5NI3f",
+          "value" : "W9fptfa5Xn",
           "type" : "Identifier"
         }
       ],
@@ -132,7 +132,7 @@
       ],
       "production" : [
         {
-          "label" : "AH5ZlILHMEHd2S7eki5C8ouWi",
+          "label" : "O5NI3fmxMe7PvjOSdUDvO1WIV",
           "places" : [
           ],
           "agents" : [
@@ -162,13 +162,21 @@
       ],
       "type" : "Work"
     },
+    "query" : {
+      "subjects.id" : [
+      ],
+      "subjects.identifiers.value" : [
+      ],
+      "subjects.label" : [
+      ]
+    },
     "aggregatableValues" : {
       "workType" : [
       ],
       "genres.label" : [
       ],
       "production.dates" : [
-        "{\"label\":\"1097\",\"type\":\"Period\"}"
+        "{\"label\":\"1098\",\"type\":\"Period\"}"
       ],
       "subjects.label" : [
       ],

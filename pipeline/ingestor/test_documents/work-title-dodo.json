@@ -1,37 +1,37 @@
 {
   "description" : "a work with 'dodo' in the title",
-  "createdAt" : "2022-05-04T07:15:02.833Z",
-  "id" : "xehppsb8",
+  "createdAt" : "2022-05-31T18:33:50.566528Z",
+  "id" : "ezagik4b",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "Tn8DDWbicV"
+          "value" : "xg9OuzGali"
         },
-        "version" : 79,
-        "modifiedTime" : "2022-04-30T12:52:17Z"
+        "version" : 84,
+        "modifiedTime" : "1965-10-11T02:36:15Z"
       },
-      "mergedTime" : "2022-04-30T12:52:17Z",
-      "indexedTime" : "2022-05-04T07:15:02.832Z",
+      "mergedTime" : "1965-10-11T02:36:15Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "miro-image-number"
+          "id" : "sierra-system-number"
         },
         "ontologyType" : "Work",
-        "value" : "Tn8DDWbicV"
+        "value" : "xg9OuzGali"
       },
-      "canonicalId" : "xehppsb8",
-      "mergedTime" : "2022-04-30T12:52:17Z",
-      "sourceModifiedTime" : "2022-04-30T12:52:17Z",
-      "indexedTime" : "2022-05-04T07:15:02.832Z",
+      "canonicalId" : "ezagik4b",
+      "mergedTime" : "1965-10-11T02:36:15Z",
+      "sourceModifiedTime" : "1965-10-11T02:36:15Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {
@@ -82,7 +82,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "xehppsb8",
+      "id" : "ezagik4b",
       "title" : "A drawing of a dodo",
       "alternativeTitles" : [
       ],
@@ -92,11 +92,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "Tn8DDWbicV",
+          "value" : "xg9OuzGali",
           "type" : "Identifier"
         }
       ],
@@ -128,73 +128,32 @@
       ],
       "type" : "Work"
     },
-    "type" : "Visible"
-  },
-  "work" : {
-    "version" : 79,
-    "data" : {
-      "title" : "A drawing of a dodo",
-      "otherIdentifiers" : [
+    "query" : {
+      "subjects.id" : [
       ],
-      "alternativeTitles" : [
+      "subjects.identifiers.value" : [
       ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : "A line of legible ligatures",
-      "createdDate" : null,
-      "subjects" : [
+      "subjects.label" : [
+      ]
+    },
+    "aggregatableValues" : {
+      "workType" : [
       ],
-      "genres" : [
+      "genres.label" : [
       ],
-      "contributors" : [
+      "production.dates" : [
       ],
-      "thumbnail" : null,
-      "production" : [
+      "subjects.label" : [
       ],
       "languages" : [
       ],
-      "edition" : null,
-      "notes" : [
+      "contributors.agent.label" : [
       ],
-      "duration" : null,
-      "items" : [
+      "items.locations.license" : [
       ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "miro-image-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "Tn8DDWbicV"
-      },
-      "canonicalId" : "xehppsb8",
-      "mergedTime" : "2022-04-30T12:52:17Z",
-      "sourceModifiedTime" : "2022-04-30T12:52:17Z",
-      "indexedTime" : "2022-05-04T07:15:02.833Z",
       "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
+      ]
     },
-    "redirectSources" : [
-    ],
     "type" : "Visible"
   }
 }

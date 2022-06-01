@@ -1,22 +1,22 @@
 {
   "description" : "an arbitrary list of deleted works",
-  "createdAt" : "2022-05-04T07:15:02.756Z",
-  "id" : "birexckp",
+  "createdAt" : "2022-05-31T18:33:50.522740Z",
+  "id" : "0tkkvzgo",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "kVzgOJccsH"
+          "value" : "ROtwcbnYKN"
         },
-        "version" : 2,
-        "modifiedTime" : "2022-04-27T23:32:33Z"
+        "version" : 97,
+        "modifiedTime" : "2009-09-05T08:49:35Z"
       },
-      "mergedTime" : "2022-04-27T23:32:33Z",
-      "indexedTime" : "2022-05-04T07:15:02.755Z",
+      "mergedTime" : "2009-09-05T08:49:35Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "deletedReason" : {
         "info" : "tests",
         "type" : "DeletedFromSource"
@@ -25,15 +25,15 @@
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "sierra-system-number"
+          "id" : "calm-record-id"
         },
         "ontologyType" : "Work",
-        "value" : "kVzgOJccsH"
+        "value" : "ROtwcbnYKN"
       },
-      "canonicalId" : "birexckp",
-      "mergedTime" : "2022-04-27T23:32:33Z",
-      "sourceModifiedTime" : "2022-04-27T23:32:33Z",
-      "indexedTime" : "2022-05-04T07:15:02.755Z",
+      "canonicalId" : "0tkkvzgo",
+      "mergedTime" : "2009-09-05T08:49:35Z",
+      "sourceModifiedTime" : "2009-09-05T08:49:35Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {
@@ -46,39 +46,6 @@
         "siblingsSucceeding" : [
         ]
       }
-    },
-    "type" : "Deleted"
-  },
-  "work" : {
-    "version" : 2,
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "sierra-system-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "kVzgOJccsH"
-      },
-      "canonicalId" : "birexckp",
-      "mergedTime" : "2022-04-27T23:32:33Z",
-      "sourceModifiedTime" : "2022-04-27T23:32:33Z",
-      "indexedTime" : "2022-05-04T07:15:02.756Z",
-      "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "deletedReason" : {
-      "info" : "tests",
-      "type" : "DeletedFromSource"
     },
     "type" : "Deleted"
   }

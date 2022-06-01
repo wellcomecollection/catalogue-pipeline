@@ -1,37 +1,37 @@
 {
   "description" : "a work with different concepts in the genre",
-  "createdAt" : "2022-05-04T07:15:03.057Z",
-  "id" : "lhrstrzi",
+  "createdAt" : "2022-05-31T18:33:51.201994Z",
+  "id" : "2zo588up",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "agAbkJTEEo"
+          "value" : "rVoekomuzt"
         },
-        "version" : 100,
-        "modifiedTime" : "2022-04-08T13:14:18Z"
+        "version" : 49,
+        "modifiedTime" : "2054-02-13T07:35:27Z"
       },
-      "mergedTime" : "2022-04-08T13:14:18Z",
-      "indexedTime" : "2022-05-04T07:15:03.053Z",
+      "mergedTime" : "2054-02-13T07:35:27Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "sierra-system-number"
+          "id" : "calm-record-id"
         },
         "ontologyType" : "Work",
-        "value" : "agAbkJTEEo"
+        "value" : "rVoekomuzt"
       },
-      "canonicalId" : "lhrstrzi",
-      "mergedTime" : "2022-04-08T13:14:18Z",
-      "sourceModifiedTime" : "2022-04-08T13:14:18Z",
-      "indexedTime" : "2022-05-04T07:15:03.053Z",
+      "canonicalId" : "2zo588up",
+      "mergedTime" : "2054-02-13T07:35:27Z",
+      "sourceModifiedTime" : "2054-02-13T07:35:27Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {
@@ -78,13 +78,13 @@
             },
             {
               "id" : {
-                "canonicalId" : "gougtipk",
+                "canonicalId" : "svmale83",
                 "sourceIdentifier" : {
                   "identifierType" : {
-                    "id" : "calm-record-id"
+                    "id" : "miro-image-number"
                   },
                   "ontologyType" : "Period",
-                  "value" : "XpEBp6sf3W"
+                  "value" : "qBJ6dy5rBO"
                 },
                 "otherIdentifiers" : [
                 ],
@@ -119,7 +119,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "lhrstrzi",
+      "id" : "2zo588up",
       "title" : "A work with different concepts in the genre",
       "alternativeTitles" : [
       ],
@@ -128,11 +128,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "agAbkJTEEo",
+          "value" : "rVoekomuzt",
           "type" : "Identifier"
         }
       ],
@@ -151,15 +151,15 @@
               "type" : "Place"
             },
             {
-              "id" : "gougtipk",
+              "id" : "svmale83",
               "identifiers" : [
                 {
                   "identifierType" : {
-                    "id" : "calm-record-id",
-                    "label" : "Calm RecordIdentifier",
+                    "id" : "miro-image-number",
+                    "label" : "Miro image number",
                     "type" : "IdentifierType"
                   },
-                  "value" : "XpEBp6sf3W",
+                  "value" : "qBJ6dy5rBO",
                   "type" : "Identifier"
                 }
               ],
@@ -193,6 +193,14 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "query" : {
+      "subjects.id" : [
+      ],
+      "subjects.identifiers.value" : [
+      ],
+      "subjects.label" : [
+      ]
     },
     "aggregatableValues" : {
       "workType" : [

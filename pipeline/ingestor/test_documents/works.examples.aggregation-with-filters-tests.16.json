@@ -1,6 +1,6 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2022-05-16T10:00:07.648Z",
+  "createdAt" : "2022-05-31T18:33:51.474776Z",
   "id" : "pyub9jxo",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "1982-06-16T20:36:59Z"
       },
       "mergedTime" : "1982-06-16T20:36:59Z",
-      "indexedTime" : "2022-05-16T10:00:07.648Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "pyub9jxo",
       "mergedTime" : "1982-06-16T20:36:59Z",
       "sourceModifiedTime" : "1982-06-16T20:36:59Z",
-      "indexedTime" : "2022-05-16T10:00:07.648Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {
@@ -182,10 +182,14 @@
       ],
       "type" : "Work"
     },
-    "query": {
-      "subjects.id": [],
-      "subjects.identifiers": [],
-      "subjects.label": ["v4BHmwGTZr"]
+    "query" : {
+      "subjects.id" : [
+      ],
+      "subjects.identifiers.value" : [
+      ],
+      "subjects.label" : [
+        "v4BHmwGTZr"
+      ]
     },
     "aggregatableValues" : {
       "workType" : [

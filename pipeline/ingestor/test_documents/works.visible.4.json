@@ -1,37 +1,37 @@
 {
   "description" : "an arbitrary list of visible works",
-  "createdAt" : "2022-05-04T07:15:02.629Z",
-  "id" : "yqts0coj",
+  "createdAt" : "2022-05-31T18:33:50.420316Z",
+  "id" : "vbi1ii19",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "vWebpA5WHf"
+          "value" : "CzLNHBFHuR"
         },
-        "version" : 59,
-        "modifiedTime" : "2022-04-04T22:14:44Z"
+        "version" : 46,
+        "modifiedTime" : "2024-12-13T21:31:42Z"
       },
-      "mergedTime" : "2022-04-04T22:14:44Z",
-      "indexedTime" : "2022-05-04T07:15:02.627Z",
+      "mergedTime" : "2024-12-13T21:31:42Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "calm-record-id"
+          "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "vWebpA5WHf"
+        "value" : "CzLNHBFHuR"
       },
-      "canonicalId" : "yqts0coj",
-      "mergedTime" : "2022-04-04T22:14:44Z",
-      "sourceModifiedTime" : "2022-04-04T22:14:44Z",
-      "indexedTime" : "2022-05-04T07:15:02.627Z",
+      "canonicalId" : "vbi1ii19",
+      "mergedTime" : "2024-12-13T21:31:42Z",
+      "sourceModifiedTime" : "2024-12-13T21:31:42Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {
@@ -46,7 +46,7 @@
       }
     },
     "data" : {
-      "title" : "title-qPyuxbr589",
+      "title" : "title-jGGR8UNWut",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -82,8 +82,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "yqts0coj",
-      "title" : "title-qPyuxbr589",
+      "id" : "vbi1ii19",
+      "title" : "title-jGGR8UNWut",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -91,11 +91,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "vWebpA5WHf",
+          "value" : "CzLNHBFHuR",
           "type" : "Identifier"
         }
       ],
@@ -127,73 +127,32 @@
       ],
       "type" : "Work"
     },
-    "type" : "Visible"
-  },
-  "work" : {
-    "version" : 59,
-    "data" : {
-      "title" : "title-qPyuxbr589",
-      "otherIdentifiers" : [
+    "query" : {
+      "subjects.id" : [
       ],
-      "alternativeTitles" : [
+      "subjects.identifiers.value" : [
       ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
+      "subjects.label" : [
+      ]
+    },
+    "aggregatableValues" : {
+      "workType" : [
       ],
-      "genres" : [
+      "genres.label" : [
       ],
-      "contributors" : [
+      "production.dates" : [
       ],
-      "thumbnail" : null,
-      "production" : [
+      "subjects.label" : [
       ],
       "languages" : [
       ],
-      "edition" : null,
-      "notes" : [
+      "contributors.agent.label" : [
       ],
-      "duration" : null,
-      "items" : [
+      "items.locations.license" : [
       ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "calm-record-id"
-        },
-        "ontologyType" : "Work",
-        "value" : "vWebpA5WHf"
-      },
-      "canonicalId" : "yqts0coj",
-      "mergedTime" : "2022-04-04T22:14:44Z",
-      "sourceModifiedTime" : "2022-04-04T22:14:44Z",
-      "indexedTime" : "2022-05-04T07:15:02.629Z",
       "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
+      ]
     },
-    "redirectSources" : [
-    ],
     "type" : "Visible"
   }
 }
