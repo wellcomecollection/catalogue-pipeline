@@ -1,6 +1,6 @@
 {
   "description" : "a work with a production event in 1098",
-  "createdAt" : "2022-05-31T18:33:50.632872Z",
+  "createdAt" : "2022-06-01T06:45:07.701290Z",
   "id" : "guav7chy",
   "document" : {
     "debug" : {
@@ -176,7 +176,7 @@
       "genres.label" : [
       ],
       "production.dates" : [
-        "{\"label\":\"1097\",\"type\":\"Period\"}"
+        "{\"label\":\"1098\",\"type\":\"Period\"}"
       ],
       "subjects.label" : [
       ],

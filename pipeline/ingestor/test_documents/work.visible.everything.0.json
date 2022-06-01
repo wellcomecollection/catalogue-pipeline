@@ -1,6 +1,6 @@
 {
   "description" : "a list of work with all the include-able fields",
-  "createdAt" : "2022-05-31T18:33:51.010821Z",
+  "createdAt" : "2022-06-01T06:45:08.447824Z",
   "id" : "tmdfbk5k",
   "document" : {
     "debug" : {
@@ -910,23 +910,23 @@
         },
         {
           "contents" : [
-            "KLQFKzgro",
-            "PkIHAHMj"
+            "FaY5fj9BpO"
           ],
           "noteType" : {
-            "id" : "funding-info",
-            "label" : "Funding information",
+            "id" : "location-of-duplicates",
+            "label" : "Location of duplicates",
             "type" : "NoteType"
           },
           "type" : "Note"
         },
         {
           "contents" : [
-            "FaY5fj9BpO"
+            "KLQFKzgro",
+            "PkIHAHMj"
           ],
           "noteType" : {
-            "id" : "location-of-duplicates",
-            "label" : "Location of duplicates",
+            "id" : "funding-info",
+            "label" : "Funding information",
             "type" : "NoteType"
           },
           "type" : "Note"
