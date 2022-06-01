@@ -1,6 +1,6 @@
 {
   "description" : "examples of works with different types",
-  "createdAt" : "2022-05-31T18:33:51.523975Z",
+  "createdAt" : "2022-06-01T09:53:17.107562Z",
   "id" : "fndkxmxs",
   "document" : {
     "debug" : {
@@ -128,11 +128,21 @@
       "type" : "Series"
     },
     "query" : {
+      "id" : "fndkxmxs",
+      "identifiers.value" : [
+        "yW6CgVzwIJ"
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
       ]
     },
     "aggregatableValues" : {

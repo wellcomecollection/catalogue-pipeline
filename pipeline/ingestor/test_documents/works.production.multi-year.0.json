@@ -1,6 +1,6 @@
 {
   "description" : "works with multi-year production ranges",
-  "createdAt" : "2022-05-31T18:33:51.404542Z",
+  "createdAt" : "2022-06-01T09:53:16.660780Z",
   "id" : "31spt9st",
   "document" : {
     "debug" : {
@@ -186,11 +186,21 @@
       "type" : "Work"
     },
     "query" : {
+      "id" : "31spt9st",
+      "identifiers.value" : [
+        "WzsZA7OUAa"
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
       ]
     },
     "aggregatableValues" : {

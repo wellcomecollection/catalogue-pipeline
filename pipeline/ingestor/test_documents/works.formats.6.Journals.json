@@ -1,6 +1,6 @@
 {
   "description" : "one of a list of works with a variety of formats",
-  "createdAt" : "2022-05-31T18:33:51.096585Z",
+  "createdAt" : "2022-06-01T09:53:15.845332Z",
   "id" : "xc5d7pc4",
   "document" : {
     "debug" : {
@@ -136,11 +136,21 @@
       "type" : "Work"
     },
     "query" : {
+      "id" : "xc5d7pc4",
+      "identifiers.value" : [
+        "HXsUYY6dN4"
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
       ]
     },
     "aggregatableValues" : {

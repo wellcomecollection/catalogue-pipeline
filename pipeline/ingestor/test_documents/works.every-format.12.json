@@ -1,6 +1,6 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2022-05-31T18:33:51.353423Z",
+  "createdAt" : "2022-06-01T09:53:16.439116Z",
   "id" : "ilrp0gol",
   "document" : {
     "debug" : {
@@ -136,11 +136,21 @@
       "type" : "Work"
     },
     "query" : {
+      "id" : "ilrp0gol",
+      "identifiers.value" : [
+        "TRLxjc4Dv7"
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
       ]
     },
     "aggregatableValues" : {

@@ -1,6 +1,6 @@
 {
   "description" : "items with different location types",
-  "createdAt" : "2022-05-31T18:33:51.426898Z",
+  "createdAt" : "2022-06-01T09:53:16.751359Z",
   "id" : "kdwct2lf",
   "document" : {
     "debug" : {
@@ -195,11 +195,21 @@
       "type" : "Work"
     },
     "query" : {
+      "id" : "kdwct2lf",
+      "identifiers.value" : [
+        "vUprsjrX3O"
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
       ]
     },
     "aggregatableValues" : {

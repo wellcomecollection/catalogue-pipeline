@@ -1,6 +1,6 @@
 {
   "description" : "examples for the genre tests",
-  "createdAt" : "2022-05-31T18:33:51.546865Z",
+  "createdAt" : "2022-06-01T09:53:17.124380Z",
   "id" : "4btprmwn",
   "document" : {
     "debug" : {
@@ -260,11 +260,21 @@
       "type" : "Work"
     },
     "query" : {
+      "id" : "4btprmwn",
+      "identifiers.value" : [
+        "C7XCeymDdf"
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
       ]
     },
     "aggregatableValues" : {

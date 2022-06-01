@@ -1,6 +1,6 @@
 {
   "description" : "a work with a thumbnail",
-  "createdAt" : "2022-05-31T18:33:50.558042Z",
+  "createdAt" : "2022-06-01T09:53:14.858288Z",
   "id" : "sahqcluh",
   "document" : {
     "debug" : {
@@ -157,11 +157,21 @@
       "type" : "Work"
     },
     "query" : {
+      "id" : "sahqcluh",
+      "identifiers.value" : [
+        "rRRYGQYiF7"
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
       ]
     },
     "aggregatableValues" : {

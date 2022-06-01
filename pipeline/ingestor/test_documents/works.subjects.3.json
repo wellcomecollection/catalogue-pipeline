@@ -1,6 +1,6 @@
 {
   "description" : "works with different subjects",
-  "createdAt" : "2022-05-31T18:33:51.230960Z",
+  "createdAt" : "2022-06-01T09:53:16.146379Z",
   "id" : "xcssabt1",
   "document" : {
     "debug" : {
@@ -222,6 +222,10 @@
       "type" : "Work"
     },
     "query" : {
+      "id" : "xcssabt1",
+      "identifiers.value" : [
+        "7XE0Jxv45o"
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
@@ -229,6 +233,12 @@
       "subjects.label" : [
         "paleoNeuroBiology",
         "realAnalysis"
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
       ]
     },
     "aggregatableValues" : {

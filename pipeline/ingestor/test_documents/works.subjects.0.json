@@ -1,6 +1,6 @@
 {
   "description" : "works with different subjects",
-  "createdAt" : "2022-05-31T18:33:51.217793Z",
+  "createdAt" : "2022-06-01T09:53:16.140071Z",
   "id" : "6uwysojy",
   "document" : {
     "debug" : {
@@ -175,12 +175,22 @@
       "type" : "Work"
     },
     "query" : {
+      "id" : "6uwysojy",
+      "identifiers.value" : [
+        "pzLgxSR5EK"
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
         "paleoNeuroBiology"
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
       ]
     },
     "aggregatableValues" : {

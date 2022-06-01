@@ -1,6 +1,6 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2022-05-31T18:33:51.361352Z",
+  "createdAt" : "2022-06-01T09:53:16.444585Z",
   "id" : "cwippax3",
   "document" : {
     "debug" : {
@@ -136,11 +136,21 @@
       "type" : "Work"
     },
     "query" : {
+      "id" : "cwippax3",
+      "identifiers.value" : [
+        "2PauY4Py8G"
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
       ]
     },
     "aggregatableValues" : {

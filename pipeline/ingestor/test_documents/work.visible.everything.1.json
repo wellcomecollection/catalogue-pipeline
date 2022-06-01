@@ -1,6 +1,6 @@
 {
   "description" : "a list of work with all the include-able fields",
-  "createdAt" : "2022-06-01T06:45:08.605231Z",
+  "createdAt" : "2022-06-01T09:53:15.708261Z",
   "id" : "nlqnlwch",
   "document" : {
     "debug" : {
@@ -1059,6 +1059,11 @@
       "type" : "Work"
     },
     "query" : {
+      "id" : "nlqnlwch",
+      "identifiers.value" : [
+        "jfcicmGMGK",
+        "aGKxAEeG0H"
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
@@ -1066,6 +1071,17 @@
       "subjects.label" : [
         "zUX6yZ5LLM",
         "MbAm0vPSF4"
+      ],
+      "partOf.id" : [
+        "jlsj0le6",
+        "qfoju3if"
+      ],
+      "partOf.title" : [
+        "title-m6xTX4FOSl",
+        "title-e07i7vw7Iw"
+      ],
+      "availabilities.id" : [
+        "closed-stores"
       ]
     },
     "aggregatableValues" : {

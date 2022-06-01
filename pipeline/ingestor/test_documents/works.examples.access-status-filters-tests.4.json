@@ -1,6 +1,6 @@
 {
   "description" : "examples for the access status tests",
-  "createdAt" : "2022-05-31T18:33:51.665162Z",
+  "createdAt" : "2022-06-01T09:53:17.848968Z",
   "id" : "iqani2su",
   "document" : {
     "debug" : {
@@ -226,11 +226,22 @@
       "type" : "Work"
     },
     "query" : {
+      "id" : "iqani2su",
+      "identifiers.value" : [
+        "jYpuBxuni2"
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
+        "online"
       ]
     },
     "aggregatableValues" : {

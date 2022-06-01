@@ -1,6 +1,6 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2022-05-31T18:33:51.356254Z",
+  "createdAt" : "2022-06-01T09:53:16.441255Z",
   "id" : "sdb22mdv",
   "document" : {
     "debug" : {
@@ -136,11 +136,21 @@
       "type" : "Work"
     },
     "query" : {
+      "id" : "sdb22mdv",
+      "identifiers.value" : [
+        "qjgnqBCXUR"
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
       ]
     },
     "aggregatableValues" : {

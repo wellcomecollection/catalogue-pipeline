@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2022-05-31T18:33:51.579035Z",
+  "createdAt" : "2022-06-01T09:53:17.303991Z",
   "id" : "gnuj1it3",
   "document" : {
     "debug" : {
@@ -153,11 +153,21 @@
       "type" : "Work"
     },
     "query" : {
+      "id" : "gnuj1it3",
+      "identifiers.value" : [
+        "Og3KGy7Mz5"
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
       ]
     },
     "aggregatableValues" : {

@@ -1,6 +1,6 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2022-05-31T18:33:51.341040Z",
+  "createdAt" : "2022-06-01T09:53:16.430337Z",
   "id" : "xgsosrhr",
   "document" : {
     "debug" : {
@@ -136,11 +136,21 @@
       "type" : "Work"
     },
     "query" : {
+      "id" : "xgsosrhr",
+      "identifiers.value" : [
+        "L5s2axrzcV"
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
       ]
     },
     "aggregatableValues" : {

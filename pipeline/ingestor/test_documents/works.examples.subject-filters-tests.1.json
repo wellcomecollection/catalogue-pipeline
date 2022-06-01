@@ -1,6 +1,6 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2022-05-31T18:33:51.559772Z",
+  "createdAt" : "2022-06-01T09:53:17.228010Z",
   "id" : "zwggainv",
   "document" : {
     "debug" : {
@@ -175,12 +175,22 @@
       "type" : "Work"
     },
     "query" : {
+      "id" : "zwggainv",
+      "identifiers.value" : [
+        "RdbNpFC2P5"
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
         "London (England)"
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
       ]
     },
     "aggregatableValues" : {

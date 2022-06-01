@@ -1,6 +1,6 @@
 {
   "description" : "examples for the works filtered aggregations tests",
-  "createdAt" : "2022-05-31T18:33:51.700153Z",
+  "createdAt" : "2022-06-01T09:53:17.992846Z",
   "id" : "lpoz1fy9",
   "document" : {
     "debug" : {
@@ -145,11 +145,21 @@
       "type" : "Work"
     },
     "query" : {
+      "id" : "lpoz1fy9",
+      "identifiers.value" : [
+        "FGpPdnmb6i"
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
       ]
     },
     "aggregatableValues" : {

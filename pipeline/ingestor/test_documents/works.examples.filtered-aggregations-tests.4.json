@@ -1,6 +1,6 @@
 {
   "description" : "examples for the works filtered aggregations tests",
-  "createdAt" : "2022-05-31T18:33:51.701507Z",
+  "createdAt" : "2022-06-01T09:53:17.993510Z",
   "id" : "in2u7aru",
   "document" : {
     "debug" : {
@@ -145,11 +145,21 @@
       "type" : "Work"
     },
     "query" : {
+      "id" : "in2u7aru",
+      "identifiers.value" : [
+        "OHrklHuS07"
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
       ]
     },
     "aggregatableValues" : {

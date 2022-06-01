@@ -1,6 +1,6 @@
 {
   "description" : "items with different location types",
-  "createdAt" : "2022-05-31T18:33:51.431509Z",
+  "createdAt" : "2022-06-01T09:53:16.754190Z",
   "id" : "wt6pclbs",
   "document" : {
     "debug" : {
@@ -203,11 +203,22 @@
       "type" : "Work"
     },
     "query" : {
+      "id" : "wt6pclbs",
+      "identifiers.value" : [
+        "D31AdK5EfQ"
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
+        "closed-stores"
       ]
     },
     "aggregatableValues" : {

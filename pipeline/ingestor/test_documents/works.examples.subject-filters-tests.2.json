@@ -1,6 +1,6 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2022-05-31T18:33:51.561049Z",
+  "createdAt" : "2022-06-01T09:53:17.230006Z",
   "id" : "mazaizfa",
   "document" : {
     "debug" : {
@@ -175,12 +175,22 @@
       "type" : "Work"
     },
     "query" : {
+      "id" : "mazaizfa",
+      "identifiers.value" : [
+        "QFJOR9VqAE"
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
         "Psychology, Pathological"
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
       ]
     },
     "aggregatableValues" : {

@@ -1,6 +1,6 @@
 {
   "description" : "works with different subjects",
-  "createdAt" : "2022-05-31T18:33:51.225417Z",
+  "createdAt" : "2022-06-01T09:53:16.144639Z",
   "id" : "evraub2i",
   "document" : {
     "debug" : {
@@ -175,12 +175,22 @@
       "type" : "Work"
     },
     "query" : {
+      "id" : "evraub2i",
+      "identifiers.value" : [
+        "E3Fqby26w1"
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
         "realAnalysis"
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
       ]
     },
     "aggregatableValues" : {

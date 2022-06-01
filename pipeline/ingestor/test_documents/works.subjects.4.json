@@ -1,6 +1,6 @@
 {
   "description" : "works with different subjects",
-  "createdAt" : "2022-05-31T18:33:51.233199Z",
+  "createdAt" : "2022-06-01T09:53:16.147462Z",
   "id" : "t9nj8zse",
   "document" : {
     "debug" : {
@@ -128,11 +128,21 @@
       "type" : "Work"
     },
     "query" : {
+      "id" : "t9nj8zse",
+      "identifiers.value" : [
+        "8imBUVPHmu"
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
       ]
     },
     "aggregatableValues" : {

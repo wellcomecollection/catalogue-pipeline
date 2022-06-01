@@ -1,6 +1,6 @@
 {
   "description" : "items with different location types",
-  "createdAt" : "2022-05-31T18:33:51.428831Z",
+  "createdAt" : "2022-06-01T09:53:16.752706Z",
   "id" : "sgatphra",
   "document" : {
     "debug" : {
@@ -227,11 +227,21 @@
       "type" : "Work"
     },
     "query" : {
+      "id" : "sgatphra",
+      "identifiers.value" : [
+        "GsIdzZyGYB"
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
       ]
     },
     "aggregatableValues" : {

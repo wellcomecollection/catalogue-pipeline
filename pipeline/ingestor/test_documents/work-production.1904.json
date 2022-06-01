@@ -1,6 +1,6 @@
 {
   "description" : "a work with a production event in 1904",
-  "createdAt" : "2022-05-31T18:33:50.620982Z",
+  "createdAt" : "2022-06-01T09:53:15.078216Z",
   "id" : "aiv95swj",
   "document" : {
     "debug" : {
@@ -163,11 +163,21 @@
       "type" : "Work"
     },
     "query" : {
+      "id" : "aiv95swj",
+      "identifiers.value" : [
+        "h0QyLvGt20"
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
       ]
     },
     "aggregatableValues" : {

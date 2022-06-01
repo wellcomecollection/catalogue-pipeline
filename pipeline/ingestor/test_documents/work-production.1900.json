@@ -1,6 +1,6 @@
 {
   "description" : "a work with a production event in 1900",
-  "createdAt" : "2022-05-31T18:33:50.609358Z",
+  "createdAt" : "2022-06-01T09:53:15.046864Z",
   "id" : "rbnro6wx",
   "document" : {
     "debug" : {
@@ -163,11 +163,21 @@
       "type" : "Work"
     },
     "query" : {
+      "id" : "rbnro6wx",
+      "identifiers.value" : [
+        "akaUmx5H3i"
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
       ]
     },
     "aggregatableValues" : {

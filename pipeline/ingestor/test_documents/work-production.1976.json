@@ -1,6 +1,6 @@
 {
   "description" : "a work with a production event in 1976",
-  "createdAt" : "2022-05-31T18:33:50.615324Z",
+  "createdAt" : "2022-06-01T09:53:15.062732Z",
   "id" : "5vjghupy",
   "document" : {
     "debug" : {
@@ -163,11 +163,21 @@
       "type" : "Work"
     },
     "query" : {
+      "id" : "5vjghupy",
+      "identifiers.value" : [
+        "xrdlOL8J49"
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
       ]
     },
     "aggregatableValues" : {
