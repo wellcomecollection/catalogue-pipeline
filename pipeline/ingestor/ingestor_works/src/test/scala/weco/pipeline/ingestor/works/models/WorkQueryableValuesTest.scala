@@ -17,9 +17,9 @@ class WorkQueryableValuesTest
   it("sets identifiers") {
     val id = CanonicalId("iiiiiiii")
     val sourceIdentifier = createSourceIdentifierWith(value = "b12345678")
-    val otherIdentifiers = List("V0000001", "PP/CRI/1", "lcsh-fish").map(value =>
-      createSourceIdentifierWith(value = value)
-    )
+    val otherIdentifiers =
+      List("V0000001", "PP/CRI/1", "lcsh-fish").map(value =>
+        createSourceIdentifierWith(value = value))
     val workData = WorkData[DataState.Identified](
       title = Some(s"title-${randomAlphanumeric(length = 10)}"),
       otherIdentifiers = otherIdentifiers
@@ -34,7 +34,11 @@ class WorkQueryableValuesTest
     )
 
     q.id shouldBe "iiiiiiii"
-    q.workIdentifiers shouldBe List("b12345678", "V0000001", "PP/CRI/1", "lcsh-fish")
+    q.workIdentifiers shouldBe List(
+      "b12345678",
+      "V0000001",
+      "PP/CRI/1",
+      "lcsh-fish")
   }
 
   it("sets subjects") {
@@ -113,7 +117,7 @@ class WorkQueryableValuesTest
     val q = WorkQueryableValues(
       id = createCanonicalId,
       sourceIdentifier = createSourceIdentifier,
-      workData =  WorkData[DataState.Identified](
+      workData = WorkData[DataState.Identified](
         title = Some(s"title-${randomAlphanumeric(length = 10)}")
       ),
       relations = relations,
@@ -121,14 +125,17 @@ class WorkQueryableValuesTest
     )
 
     q.partOfIds shouldBe List("partOf11", "partOf33", "partOf44")
-    q.partOfTitles shouldBe List("The first relation", "The second relation", "The fourth relation")
+    q.partOfTitles shouldBe List(
+      "The first relation",
+      "The second relation",
+      "The fourth relation")
   }
 
   it("adds availabilities") {
     val q = WorkQueryableValues(
       id = createCanonicalId,
       sourceIdentifier = createSourceIdentifier,
-      workData =  WorkData[DataState.Identified](
+      workData = WorkData[DataState.Identified](
         title = Some(s"title-${randomAlphanumeric(length = 10)}")
       ),
       relations = Relations(),
@@ -142,7 +149,10 @@ class WorkQueryableValuesTest
   }
 
   private def relation(id: Option[String], title: Option[String]): Relation =
-    Relation(id = id.map(CanonicalId(_)), title = title,   collectionPath = None,
+    Relation(
+      id = id.map(CanonicalId(_)),
+      title = title,
+      collectionPath = None,
       workType = WorkType.Standard,
       depth = 1,
       numChildren = 0,

@@ -28,7 +28,8 @@ case object WorkQueryableValues {
             availabilities: Set[Availability]): WorkQueryableValues =
     WorkQueryableValues(
       id = id.underlying,
-      workIdentifiers = (sourceIdentifier +: workData.otherIdentifiers).map(_.value),
+      workIdentifiers =
+        (sourceIdentifier +: workData.otherIdentifiers).map(_.value),
       subjectIds = workData.subjects.map(_.id).canonicalIds,
       subjectIdentifiers = workData.subjects.map(_.id).sourceIdentifiers,
       subjectLabels = workData.subjects.map(_.label),
