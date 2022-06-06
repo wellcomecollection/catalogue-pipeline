@@ -2,17 +2,19 @@ package weco.pipeline.ingestor.works.models
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import weco.catalogue.internal_model.generators.ImageGenerators
 import weco.catalogue.internal_model.identifiers._
+import weco.catalogue.internal_model.work._
 import weco.catalogue.internal_model.work.generators.{
-  SubjectGenerators,
+  ItemsGenerators,
   WorkGenerators
 }
-import weco.catalogue.internal_model.work._
 
 class WorkQueryableValuesTest
     extends AnyFunSpec
     with Matchers
-    with SubjectGenerators
+    with ItemsGenerators
+    with ImageGenerators
     with WorkGenerators {
   it("sets identifiers") {
     val id = CanonicalId("iiiiiiii")
@@ -41,7 +43,7 @@ class WorkQueryableValuesTest
       "lcsh-fish")
   }
 
-  it("sets subjects") {
+  it("adds subjects") {
     val data = WorkData[DataState.Identified](
       title = Some(s"title-${randomAlphanumeric(length = 10)}"),
       subjects = List(
@@ -102,6 +104,90 @@ class WorkQueryableValuesTest
       "Straight scythes",
       "Soggy sponges",
       "Sam Smithington")
+    q.subjectConceptLabels shouldBe List("silliness", "cylinders", "tools")
+  }
+
+  it("adds genres") {
+    val data = WorkData[DataState.Identified](
+      title = Some(s"title-${randomAlphanumeric(length = 10)}"),
+      genres = List(
+        Genre(
+          label = "Green gerbils",
+          concepts = List(Concept("generosity"), Concept("greebles"))
+        ),
+        Genre(
+          label = "Grim giants",
+          concepts = List(Concept("greatness"))
+        ),
+      )
+    )
+
+    val q = WorkQueryableValues(
+      id = createCanonicalId,
+      sourceIdentifier = createSourceIdentifier,
+      workData = data,
+      relations = Relations(),
+      availabilities = Set()
+    )
+
+    q.genreConceptLabels shouldBe List("generosity", "greebles", "greatness")
+  }
+
+  it("adds items") {
+    val data = WorkData[DataState.Identified](
+      title = Some(s"title-${randomAlphanumeric(length = 10)}"),
+      items = List(
+        createUnidentifiableItem,
+        createIdentifiedItemWith(
+          canonicalId = CanonicalId("item1111"),
+          sourceIdentifier = createSourceIdentifierWith(value = "sourceItem1"),
+          otherIdentifiers = List(),
+        ),
+        createIdentifiedItemWith(
+          canonicalId = CanonicalId("item2222"),
+          sourceIdentifier = createSourceIdentifierWith(value = "sourceItem2"),
+          otherIdentifiers = List(
+            createSourceIdentifierWith(value = "otherItem2")
+          ),
+        )
+      )
+    )
+
+    val q = WorkQueryableValues(
+      id = createCanonicalId,
+      sourceIdentifier = createSourceIdentifier,
+      workData = data,
+      relations = Relations(),
+      availabilities = Set()
+    )
+
+    q.itemIds shouldBe List("item1111", "item2222")
+    q.itemIdentifiers shouldBe List("sourceItem1", "sourceItem2", "otherItem2")
+  }
+
+  it("adds images") {
+    val data = WorkData[DataState.Identified](
+      title = Some(s"title-${randomAlphanumeric(length = 10)}"),
+      imageData = List(
+        createImageDataWith(identifierValue = "sourceImage1")
+          .toIdentifiedWith(canonicalId = CanonicalId("image111")),
+        createImageDataWith(
+          identifierValue = "sourceImage2",
+          otherIdentifiers = List(createSourceIdentifierWith(value = "otherImage2")))
+          .toIdentifiedWith(canonicalId = CanonicalId("image222"))
+      )
+    )
+
+    val q = WorkQueryableValues(
+      id = createCanonicalId,
+      sourceIdentifier = createSourceIdentifier,
+      workData = data,
+      relations = Relations(),
+      availabilities = Set()
+    )
+
+    q.imageIds shouldBe List("image111", "image222")
+    q.imageIdentifiers shouldBe List("sourceImage1", "sourceImage2", "otherImage2")
   }
 
   it("sets partOf") {
