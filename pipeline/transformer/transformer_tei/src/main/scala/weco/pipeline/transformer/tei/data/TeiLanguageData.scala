@@ -85,7 +85,6 @@ object TeiLanguageData extends Logging {
       // This means we'll display the most accurate label on the individual work pages,
       // but these works will filter/aggregate alongside the "parent" language.
       //
-
       case ("ar", "Arabic [Karshuni]") =>
         customLanguage("Arabic", overrideLabel = "Arabic [Karshuni]")
       case ("egy", "Ancient Egyptian") =>
