@@ -55,6 +55,7 @@ object SierraParents extends SierraQueryOps with Logging {
         SeriesRelation(_)
       )
   }
+
   /**
     * Return the title of the parent object represented by the given VarField
     * The part of the field that represents the title varies by which MARC tag is in use.

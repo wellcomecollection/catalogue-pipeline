@@ -43,15 +43,15 @@ class SierraLinksTest
     )
     getLinks(varFields) shouldBe List(SeriesRelation("A Series"))
   }
-  it("returns a Series relation for a 773 - Host Item Entry field with the title from a subfield") {
+  it(
+    "returns a Series relation for a 773 - Host Item Entry field with the title from a subfield") {
     forAll(
       Table(
         "tag",
         "t",
         "a",
         "s"
-      )) {
-      (tag) =>
+      )) { (tag) =>
       val varFields = List(
         VarField(
           marcTag = "773",
