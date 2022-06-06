@@ -39,7 +39,8 @@ case object WorkQueryableValues {
       imageIds = workData.imageData.map(_.id).canonicalIds,
       imageIdentifiers = workData.imageData.map(_.id).sourceIdentifiers,
       itemIds = workData.items.flatMap(_.id.maybeCanonicalId).map(_.underlying),
-      itemIdentifiers = workData.items.flatMap(_.id.allSourceIdentifiers).map(_.value),
+      itemIdentifiers =
+        workData.items.flatMap(_.id.allSourceIdentifiers).map(_.value),
       subjectIds = workData.subjects.map(_.id).canonicalIds,
       subjectIdentifiers = workData.subjects.map(_.id).sourceIdentifiers,
       subjectLabels = workData.subjects.map(_.label),

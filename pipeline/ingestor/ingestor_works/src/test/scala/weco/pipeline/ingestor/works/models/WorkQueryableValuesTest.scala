@@ -173,7 +173,8 @@ class WorkQueryableValuesTest
           .toIdentifiedWith(canonicalId = CanonicalId("image111")),
         createImageDataWith(
           identifierValue = "sourceImage2",
-          otherIdentifiers = List(createSourceIdentifierWith(value = "otherImage2")))
+          otherIdentifiers =
+            List(createSourceIdentifierWith(value = "otherImage2")))
           .toIdentifiedWith(canonicalId = CanonicalId("image222"))
       )
     )
@@ -187,7 +188,10 @@ class WorkQueryableValuesTest
     )
 
     q.imageIds shouldBe List("image111", "image222")
-    q.imageIdentifiers shouldBe List("sourceImage1", "sourceImage2", "otherImage2")
+    q.imageIdentifiers shouldBe List(
+      "sourceImage1",
+      "sourceImage2",
+      "otherImage2")
   }
 
   it("sets partOf") {

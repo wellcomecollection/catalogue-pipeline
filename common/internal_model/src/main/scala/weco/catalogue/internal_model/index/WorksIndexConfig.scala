@@ -284,6 +284,8 @@ object WorksIndexConfig extends IndexConfigFields {
     RefreshInterval.On(30.seconds)
   )
 
-  private def canonicalIdField(name: String): KeywordField = lowercaseKeyword(name)
-  private def sourceIdentifierField(name: String): KeywordField = lowercaseKeyword(name)
+  private def canonicalIdField(name: String): KeywordField =
+    lowercaseKeyword(name)
+  private def sourceIdentifierField(name: String): KeywordField =
+    lowercaseKeyword(name)
 }
