@@ -77,7 +77,7 @@ class SierraLinksTest
     getLinks(varFields) shouldBe List(SeriesRelation("The Series"))
   }
 
-  it("Extracts the title from the body of a 773 field, if title is absent") {
+  it("extracts the title from the body of a 773 field, if title is absent") {
     // This is not a scenario we expect to encounter, but applying
     // Postel's Law and logging a warning is better than discarding it
     val varFields = List(
@@ -100,7 +100,7 @@ class SierraLinksTest
     getLinks(varFields) shouldBe List(SeriesRelation("A Series"))
   }
 
-  it("Extracts the title from the 'a' subfield") {
+  it("extracts the title from the 'a' subfield") {
     forAll(
       Table(
         "marcTag",
@@ -118,6 +118,39 @@ class SierraLinksTest
       getLinks(varFields) shouldBe List(SeriesRelation("A Series"))
     }
 
+  }
+
+  it("prefers titles from a subfield over field content") {
+    forAll(
+      Table(
+        "marcTag",
+        "440",
+        "490",
+        "773",
+        "830"
+      )) { (marcTag) =>
+      val varFields = List(
+        VarField(
+          marcTag = Some(marcTag),
+          subfields = List(Subfield(tag = "a", content = "A Series")),
+          content = Some("Ignore me, I'm not here")
+        )
+      )
+      getLinks(varFields) shouldBe List(SeriesRelation("A Series"))
+    }
+  }
+
+  it("does not extract the title from the 830 $s subfield") {
+    // $s means Version in an 830 field,
+    // so should not be looked at as a potential "title"
+      val varFields = List(
+        VarField(
+          marcTag = Some("830"),
+          subfields = List(Subfield(tag = "s", content = "A Version")),
+          content = Some("A Series")
+        )
+      )
+      getLinks(varFields) shouldBe List(SeriesRelation("A Series"))
   }
 
   it(
@@ -169,7 +202,7 @@ class SierraLinksTest
         ),
         VarField(
           marcTag = Some(marcTag),
-          subfields = List(Subfield(tag = "t", content = "A Host"))
+          subfields = List(Subfield(tag = "a", content = "A Host"))
         ),
         VarField(
           marcTag = Some(marcTag),
