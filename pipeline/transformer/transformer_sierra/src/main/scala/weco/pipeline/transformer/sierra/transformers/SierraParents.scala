@@ -55,7 +55,6 @@ object SierraParents extends SierraQueryOps with Logging {
         SeriesRelation(_)
       )
   }
-
   /**
     * Return the title of the parent object represented by the given VarField
     * The part of the field that represents the title varies by which MARC tag is in use.
@@ -63,17 +62,17 @@ object SierraParents extends SierraQueryOps with Logging {
     * 440, 490 and 830 fields normally keep it in the main field content
     */
   private def titleFromVarField(field: VarField): Option[String] = {
-    (field.marcTag.get, field.subfieldsWithTags("t", "a")) match {
+    (field.marcTag.get, field.subfieldsWithTags("t", "a", "s")) match {
       case (marcTag, Nil) =>
         if (!field.content.exists(_.nonEmpty)) {
           warn(
-            s"A $marcTag field is expected to have a title in the field content or one of the title subfields (t or a), there was none: $field")
+            s"A $marcTag field is expected to have a title in the field content or one of the title subfields (t/a/s), there was none: $field")
         }
         field.content
       case (marcTag, subfields) =>
         if (subfields.tail.nonEmpty || field.content.exists(_.nonEmpty)) {
           warn(
-            s"Ambiguous $marcTag Series relationship, only one of t, a or the field content is expected to be populated $field")
+            s"Ambiguous $marcTag Series relationship, only one of t, a, s or the field content is expected to be populated $field")
         }
         Some(subfields.head.content)
     }
