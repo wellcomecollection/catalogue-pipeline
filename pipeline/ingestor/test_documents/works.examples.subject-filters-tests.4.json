@@ -1,6 +1,6 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2022-06-01T09:53:17.233055Z",
+  "createdAt" : "2022-06-06T11:16:21.747406Z",
   "id" : "gmzc1icz",
   "document" : {
     "debug" : {
@@ -295,6 +295,14 @@
       "identifiers.value" : [
         "Q8QOPJdAXF"
       ],
+      "images.id" : [
+      ],
+      "images.identifiers.value" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
       "subjects.id" : [
         "darwin01"
       ],
@@ -305,6 +313,10 @@
         "London (England)",
         "Psychology, Pathological",
         "Darwin \"Jones\", Charles"
+      ],
+      "subjects.concepts.label" : [
+      ],
+      "genres.concepts.label" : [
       ],
       "partOf.id" : [
       ],

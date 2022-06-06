@@ -1,6 +1,6 @@
 {
   "description" : "a work with a production event in 1098",
-  "createdAt" : "2022-06-01T09:53:15.104845Z",
+  "createdAt" : "2022-06-06T11:16:20.610345Z",
   "id" : "guav7chy",
   "document" : {
     "debug" : {
@@ -167,11 +167,23 @@
       "identifiers.value" : [
         "W9fptfa5Xn"
       ],
+      "images.id" : [
+      ],
+      "images.identifiers.value" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "subjects.concepts.label" : [
+      ],
+      "genres.concepts.label" : [
       ],
       "partOf.id" : [
       ],

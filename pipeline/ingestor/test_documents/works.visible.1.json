@@ -1,6 +1,6 @@
 {
   "description" : "an arbitrary list of visible works",
-  "createdAt" : "2022-06-01T09:53:13.357867Z",
+  "createdAt" : "2022-06-06T11:16:19.702679Z",
   "id" : "dph7sjip",
   "document" : {
     "debug" : {
@@ -132,11 +132,23 @@
       "identifiers.value" : [
         "WpBejTwv1N"
       ],
+      "images.id" : [
+      ],
+      "images.identifiers.value" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "subjects.concepts.label" : [
+      ],
+      "genres.concepts.label" : [
       ],
       "partOf.id" : [
       ],

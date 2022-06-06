@@ -1,6 +1,6 @@
 {
   "description" : "works with multi-year production ranges",
-  "createdAt" : "2022-06-01T09:53:16.664549Z",
+  "createdAt" : "2022-06-06T11:16:21.510769Z",
   "id" : "q4abgj9v",
   "document" : {
     "debug" : {
@@ -190,11 +190,23 @@
       "identifiers.value" : [
         "09dkccFCHG"
       ],
+      "images.id" : [
+      ],
+      "images.identifiers.value" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "subjects.concepts.label" : [
+      ],
+      "genres.concepts.label" : [
       ],
       "partOf.id" : [
       ],

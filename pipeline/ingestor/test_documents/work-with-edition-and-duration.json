@@ -1,6 +1,6 @@
 {
   "description" : "a work with optional top-level fields",
-  "createdAt" : "2022-06-01T09:53:14.700120Z",
+  "createdAt" : "2022-06-06T11:16:20.403453Z",
   "id" : "gsruvqwf",
   "document" : {
     "debug" : {
@@ -134,11 +134,23 @@
       "identifiers.value" : [
         "7YNi35xO0f"
       ],
+      "images.id" : [
+      ],
+      "images.identifiers.value" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "subjects.concepts.label" : [
+      ],
+      "genres.concepts.label" : [
       ],
       "partOf.id" : [
       ],

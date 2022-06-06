@@ -1,6 +1,6 @@
 {
   "description" : "a list of work with all the include-able fields",
-  "createdAt" : "2022-06-01T09:53:15.708261Z",
+  "createdAt" : "2022-06-06T11:16:20.983950Z",
   "id" : "nlqnlwch",
   "document" : {
     "debug" : {
@@ -1064,6 +1064,14 @@
         "jfcicmGMGK",
         "aGKxAEeG0H"
       ],
+      "images.id" : [
+      ],
+      "images.identifiers.value" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
@@ -1071,6 +1079,10 @@
       "subjects.label" : [
         "zUX6yZ5LLM",
         "MbAm0vPSF4"
+      ],
+      "subjects.concepts.label" : [
+      ],
+      "genres.concepts.label" : [
       ],
       "partOf.id" : [
         "jlsj0le6",
