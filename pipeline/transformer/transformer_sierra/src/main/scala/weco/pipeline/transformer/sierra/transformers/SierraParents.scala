@@ -71,7 +71,6 @@ object SierraParents extends SierraQueryOps with Logging {
     *  be there on 4XX.
     *  However, 830 $s means Version, so must not be included in the lookup for 830 fields.
     */
-
   private val subFieldTags = Map[String, List[String]](
     "440" -> List("a"),
     "490" -> List("a"),
@@ -86,13 +85,15 @@ object SierraParents extends SierraQueryOps with Logging {
       case Nil =>
         if (!field.content.exists(_.nonEmpty)) {
           warn(
-            s"A $marcTag field is expected to have a title in the field content or one of the title subfields (${subfieldTagsForField.mkString(", ")}), there was none: $field")
+            s"A $marcTag field is expected to have a title in the field content or one of the title subfields (${subfieldTagsForField
+              .mkString(", ")}), there was none: $field")
         }
         field.content
       case subfields =>
         if (subfields.tail.nonEmpty || field.content.exists(_.nonEmpty)) {
           warn(
-            s"Ambiguous $marcTag Series relationship, only one of ${subfieldTagsForField.mkString(", ")} or the field content is expected to be populated $field")
+            s"Ambiguous $marcTag Series relationship, only one of ${subfieldTagsForField.mkString(
+              ", ")} or the field content is expected to be populated $field")
         }
         Some(subfields.head.content)
     }

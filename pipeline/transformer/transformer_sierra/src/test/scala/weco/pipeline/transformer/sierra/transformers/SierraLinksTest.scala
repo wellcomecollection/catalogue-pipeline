@@ -143,14 +143,14 @@ class SierraLinksTest
   it("does not extract the title from the 830 $s subfield") {
     // $s means Version in an 830 field,
     // so should not be looked at as a potential "title"
-      val varFields = List(
-        VarField(
-          marcTag = Some("830"),
-          subfields = List(Subfield(tag = "s", content = "A Version")),
-          content = Some("A Series")
-        )
+    val varFields = List(
+      VarField(
+        marcTag = Some("830"),
+        subfields = List(Subfield(tag = "s", content = "A Version")),
+        content = Some("A Series")
       )
-      getLinks(varFields) shouldBe List(SeriesRelation("A Series"))
+    )
+    getLinks(varFields) shouldBe List(SeriesRelation("A Series"))
   }
 
   it(
