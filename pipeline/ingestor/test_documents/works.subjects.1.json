@@ -1,6 +1,6 @@
 {
   "description" : "works with different subjects",
-  "createdAt" : "2022-05-31T18:33:51.220146Z",
+  "createdAt" : "2022-06-01T09:53:16.141854Z",
   "id" : "mihwfxry",
   "document" : {
     "debug" : {
@@ -175,12 +175,22 @@
       "type" : "Work"
     },
     "query" : {
+      "id" : "mihwfxry",
+      "identifiers.value" : [
+        "HypKD9r1zH"
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
         "realAnalysis"
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
       ]
     },
     "aggregatableValues" : {

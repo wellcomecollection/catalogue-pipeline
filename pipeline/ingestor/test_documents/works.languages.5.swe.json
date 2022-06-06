@@ -1,6 +1,6 @@
 {
   "description" : "one of a list of works with a variety of languages",
-  "createdAt" : "2022-05-31T18:33:51.138068Z",
+  "createdAt" : "2022-06-01T09:53:15.977711Z",
   "id" : "qfscz1rj",
   "document" : {
     "debug" : {
@@ -137,11 +137,21 @@
       "type" : "Work"
     },
     "query" : {
+      "id" : "qfscz1rj",
+      "identifiers.value" : [
+        "Gk6juMbOeK"
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
       ]
     },
     "aggregatableValues" : {

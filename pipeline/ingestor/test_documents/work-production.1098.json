@@ -1,6 +1,6 @@
 {
   "description" : "a work with a production event in 1098",
-  "createdAt" : "2022-06-01T06:45:07.701290Z",
+  "createdAt" : "2022-06-01T09:53:15.104845Z",
   "id" : "guav7chy",
   "document" : {
     "debug" : {
@@ -163,11 +163,21 @@
       "type" : "Work"
     },
     "query" : {
+      "id" : "guav7chy",
+      "identifiers.value" : [
+        "W9fptfa5Xn"
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
       ]
     },
     "aggregatableValues" : {

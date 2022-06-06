@@ -1,6 +1,6 @@
 {
   "description" : "a work with a collection path",
-  "createdAt" : "2022-05-31T18:33:51.320371Z",
+  "createdAt" : "2022-06-01T09:53:16.405638Z",
   "id" : "dtqmc0yn",
   "document" : {
     "debug" : {
@@ -131,11 +131,21 @@
       "type" : "Work"
     },
     "query" : {
+      "id" : "dtqmc0yn",
+      "identifiers.value" : [
+        "Lq95TrUx7A"
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
       ]
     },
     "aggregatableValues" : {

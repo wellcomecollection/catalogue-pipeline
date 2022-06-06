@@ -1,6 +1,6 @@
 {
   "description" : "works with different contributor",
-  "createdAt" : "2022-05-31T18:33:51.273431Z",
+  "createdAt" : "2022-06-01T09:53:16.282846Z",
   "id" : "gtfjchvo",
   "document" : {
     "debug" : {
@@ -174,11 +174,21 @@
       "type" : "Work"
     },
     "query" : {
+      "id" : "gtfjchvo",
+      "identifiers.value" : [
+        "xKXAvquihJ"
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
       ]
     },
     "aggregatableValues" : {

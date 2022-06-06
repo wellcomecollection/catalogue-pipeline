@@ -1,6 +1,6 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2022-05-31T18:33:51.558865Z",
+  "createdAt" : "2022-06-01T09:53:17.226536Z",
   "id" : "tayys6jp",
   "document" : {
     "debug" : {
@@ -213,6 +213,10 @@
       "type" : "Work"
     },
     "query" : {
+      "id" : "tayys6jp",
+      "identifiers.value" : [
+        "3OfWNE6m5y"
+      ],
       "subjects.id" : [
         "sanitati"
       ],
@@ -222,6 +226,12 @@
       ],
       "subjects.label" : [
         "Sanitation."
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
       ]
     },
     "aggregatableValues" : {

@@ -1,6 +1,6 @@
 {
   "description" : "examples of works with different types",
-  "createdAt" : "2022-05-31T18:33:51.520283Z",
+  "createdAt" : "2022-06-01T09:53:17.099709Z",
   "id" : "2tqcclh1",
   "document" : {
     "debug" : {
@@ -128,11 +128,21 @@
       "type" : "Collection"
     },
     "query" : {
+      "id" : "2tqcclh1",
+      "identifiers.value" : [
+        "ZiS5MlN0hQ"
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
       ]
     },
     "aggregatableValues" : {

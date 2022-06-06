@@ -1,6 +1,6 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2022-05-31T18:33:51.567651Z",
+  "createdAt" : "2022-06-01T09:53:17.235797Z",
   "id" : "rbao66qq",
   "document" : {
     "debug" : {
@@ -128,11 +128,21 @@
       "type" : "Work"
     },
     "query" : {
+      "id" : "rbao66qq",
+      "identifiers.value" : [
+        "5hoUH5ZhFq"
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
       ]
     },
     "aggregatableValues" : {

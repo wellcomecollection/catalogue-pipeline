@@ -1,6 +1,6 @@
 {
   "description" : "a list of work with all the include-able fields",
-  "createdAt" : "2022-06-01T06:45:08.614949Z",
+  "createdAt" : "2022-06-01T09:53:15.714036Z",
   "id" : "jfzz4ou9",
   "document" : {
     "debug" : {
@@ -1068,6 +1068,11 @@
       "type" : "Work"
     },
     "query" : {
+      "id" : "jfzz4ou9",
+      "identifiers.value" : [
+        "Is1ajgcgP8",
+        "FhqVjVef8B"
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
@@ -1075,6 +1080,18 @@
       "subjects.label" : [
         "dXe1K5osW8",
         "t4fspOh5tl"
+      ],
+      "partOf.id" : [
+        "k4gltrjv",
+        "0le4q0ih"
+      ],
+      "partOf.title" : [
+        "title-raPvkrZaQn",
+        "title-Z1N6BwQR6H"
+      ],
+      "availabilities.id" : [
+        "open-shelves",
+        "closed-stores"
       ]
     },
     "aggregatableValues" : {

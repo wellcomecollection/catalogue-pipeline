@@ -1,6 +1,6 @@
 {
   "description" : "works with different contributor",
-  "createdAt" : "2022-05-31T18:33:51.259875Z",
+  "createdAt" : "2022-06-01T09:53:16.268721Z",
   "id" : "gvkz3vff",
   "document" : {
     "debug" : {
@@ -151,11 +151,21 @@
       "type" : "Work"
     },
     "query" : {
+      "id" : "gvkz3vff",
+      "identifiers.value" : [
+        "5CJlp05MGl"
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
       ]
     },
     "aggregatableValues" : {

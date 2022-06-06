@@ -1,6 +1,6 @@
 {
   "description" : "works with different contributor",
-  "createdAt" : "2022-05-31T18:33:51.270306Z",
+  "createdAt" : "2022-06-01T09:53:16.280918Z",
   "id" : "z08k6cnn",
   "document" : {
     "debug" : {
@@ -174,11 +174,21 @@
       "type" : "Work"
     },
     "query" : {
+      "id" : "z08k6cnn",
+      "identifiers.value" : [
+        "juTufKU2Ye"
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
       ]
     },
     "aggregatableValues" : {

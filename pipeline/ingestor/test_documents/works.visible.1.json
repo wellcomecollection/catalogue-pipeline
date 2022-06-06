@@ -1,6 +1,6 @@
 {
   "description" : "an arbitrary list of visible works",
-  "createdAt" : "2022-05-31T18:33:50.413039Z",
+  "createdAt" : "2022-06-01T09:53:13.357867Z",
   "id" : "dph7sjip",
   "document" : {
     "debug" : {
@@ -128,11 +128,21 @@
       "type" : "Work"
     },
     "query" : {
+      "id" : "dph7sjip",
+      "identifiers.value" : [
+        "WpBejTwv1N"
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
       ]
     },
     "aggregatableValues" : {

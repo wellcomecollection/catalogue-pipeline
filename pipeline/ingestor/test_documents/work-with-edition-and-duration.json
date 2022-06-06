@@ -1,6 +1,6 @@
 {
   "description" : "a work with optional top-level fields",
-  "createdAt" : "2022-05-31T18:33:50.540543Z",
+  "createdAt" : "2022-06-01T09:53:14.700120Z",
   "id" : "gsruvqwf",
   "document" : {
     "debug" : {
@@ -130,11 +130,21 @@
       "type" : "Work"
     },
     "query" : {
+      "id" : "gsruvqwf",
+      "identifiers.value" : [
+        "7YNi35xO0f"
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
       ]
     },
     "aggregatableValues" : {

@@ -1,6 +1,6 @@
 {
   "description" : "examples for the access status tests",
-  "createdAt" : "2022-05-31T18:33:51.677105Z",
+  "createdAt" : "2022-06-01T09:53:17.914633Z",
   "id" : "yh6sk7pv",
   "document" : {
     "debug" : {
@@ -230,11 +230,22 @@
       "type" : "Work"
     },
     "query" : {
+      "id" : "yh6sk7pv",
+      "identifiers.value" : [
+        "5tbPGXaLqw"
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
+        "online"
       ]
     },
     "aggregatableValues" : {

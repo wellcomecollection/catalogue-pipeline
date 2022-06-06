@@ -1,6 +1,6 @@
 {
   "description" : "works with items with other identifiers",
-  "createdAt" : "2022-05-31T18:33:51.294681Z",
+  "createdAt" : "2022-06-01T09:53:16.325356Z",
   "id" : "qjnwiqbs",
   "document" : {
     "debug" : {
@@ -211,11 +211,21 @@
       "type" : "Work"
     },
     "query" : {
+      "id" : "qjnwiqbs",
+      "identifiers.value" : [
+        "Jj1GugWgka"
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
       ]
     },
     "aggregatableValues" : {

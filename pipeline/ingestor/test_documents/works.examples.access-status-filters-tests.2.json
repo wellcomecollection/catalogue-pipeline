@@ -1,6 +1,6 @@
 {
   "description" : "examples for the access status tests",
-  "createdAt" : "2022-05-31T18:33:51.662511Z",
+  "createdAt" : "2022-06-01T09:53:17.847734Z",
   "id" : "glagakd2",
   "document" : {
     "debug" : {
@@ -218,11 +218,21 @@
       "type" : "Work"
     },
     "query" : {
+      "id" : "glagakd2",
+      "identifiers.value" : [
+        "aCHuXzrv8P"
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
       ]
     },
     "aggregatableValues" : {

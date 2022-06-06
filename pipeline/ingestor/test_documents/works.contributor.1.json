@@ -1,6 +1,6 @@
 {
   "description" : "works with different contributor",
-  "createdAt" : "2022-05-31T18:33:51.261283Z",
+  "createdAt" : "2022-06-01T09:53:16.270365Z",
   "id" : "bj9evx0c",
   "document" : {
     "debug" : {
@@ -151,11 +151,21 @@
       "type" : "Work"
     },
     "query" : {
+      "id" : "bj9evx0c",
+      "identifiers.value" : [
+        "TjLML0MOH1"
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
       ]
     },
     "aggregatableValues" : {

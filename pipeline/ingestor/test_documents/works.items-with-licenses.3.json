@@ -1,6 +1,6 @@
 {
   "description" : "a work with licensed digital items",
-  "createdAt" : "2022-05-31T18:33:51.165775Z",
+  "createdAt" : "2022-06-01T09:53:16.011834Z",
   "id" : "rstrzip9",
   "document" : {
     "debug" : {
@@ -226,11 +226,21 @@
       "type" : "Work"
     },
     "query" : {
+      "id" : "rstrzip9",
+      "identifiers.value" : [
+        "AbkJTEEoLH"
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
       ]
     },
     "aggregatableValues" : {

@@ -225,9 +225,14 @@ object WorksIndexConfig extends IndexConfigFields {
       // This field contains the values we're actually going to query in search.
       val query = objectField("query")
         .fields(
+          lowercaseKeyword("id"),
+          lowercaseKeyword("identifiers.value"),
           keywordField("subjects.id"),
           keywordField("subjects.identifiers.value"),
-          keywordField("subjects.label")
+          keywordField("subjects.label"),
+          lowercaseKeyword("partOf.id"),
+          multilingualFieldWithKeyword("partOf.title"),
+          keywordField("availabilities.id")
         )
 
       // This field contains the display documents used by aggregations.

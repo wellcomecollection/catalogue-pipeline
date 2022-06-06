@@ -1,6 +1,6 @@
 {
   "description" : "a work with licensed digital items",
-  "createdAt" : "2022-05-31T18:33:51.158646Z",
+  "createdAt" : "2022-06-01T09:53:16.007356Z",
   "id" : "yodfctxx",
   "document" : {
     "debug" : {
@@ -175,11 +175,21 @@
       "type" : "Work"
     },
     "query" : {
+      "id" : "yodfctxx",
+      "identifiers.value" : [
+        "HfU454vgiI"
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
       ]
     },
     "aggregatableValues" : {

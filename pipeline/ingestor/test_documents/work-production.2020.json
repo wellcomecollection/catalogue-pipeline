@@ -1,6 +1,6 @@
 {
   "description" : "a work with a production event in 2020",
-  "createdAt" : "2022-05-31T18:33:50.628064Z",
+  "createdAt" : "2022-06-01T09:53:15.091432Z",
   "id" : "0fucriyr",
   "document" : {
     "debug" : {
@@ -163,11 +163,21 @@
       "type" : "Work"
     },
     "query" : {
+      "id" : "0fucriyr",
+      "identifiers.value" : [
+        "KgSH5dUX0Z"
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
       ]
     },
     "aggregatableValues" : {

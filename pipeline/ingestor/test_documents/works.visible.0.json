@@ -1,6 +1,6 @@
 {
   "description" : "an arbitrary list of visible works",
-  "createdAt" : "2022-05-31T18:33:50.410053Z",
+  "createdAt" : "2022-06-01T09:53:13.344185Z",
   "id" : "2twopft1",
   "document" : {
     "debug" : {
@@ -128,11 +128,21 @@
       "type" : "Work"
     },
     "query" : {
+      "id" : "2twopft1",
+      "identifiers.value" : [
+        "Uaequ81tpB"
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
       ]
     },
     "aggregatableValues" : {
