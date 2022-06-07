@@ -235,7 +235,9 @@ object TeiNestedData extends Logging {
       // A document with multiple titles *should* have one original title and at least one
       // title with other types (normalised, standard, no attribute).
       case list =>
-        list.filter(n => (n \@ "type").toLowerCase != "original").map(_.text.trim)
+        list
+          .filter(n => (n \@ "type").toLowerCase != "original")
+          .map(_.text.trim)
     }
   }
 
