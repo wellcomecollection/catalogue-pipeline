@@ -17,9 +17,12 @@ import weco.pipeline.merger.models.FieldMergeResult
  * Miro. If there are multiple Miro sources, the one with the lexicographically
  * minimal ID is chosen.
  *
- * If any of the locations forming the work from any source are marked as
+ * If any of the digital locations forming the work from any source are marked as
  * restricted or closed, we suppress the thumbnail to be sure we are not
  * displaying something we are not meant to.
+ *
+ * Physical location restrictions are ignored, as they are to do with the physical
+ * item (e.g. because of fragility), rather than content.
  */
 object ThumbnailRule extends FieldMergeRule with MergerLogging {
   import WorkPredicates._
