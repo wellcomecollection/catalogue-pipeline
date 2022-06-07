@@ -4,7 +4,14 @@ import org.scalatest.Inside
 import org.scalatest.Inspectors.forAll
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.locations.{AccessCondition, AccessMethod, AccessStatus, DigitalLocation, License, LocationType}
+import weco.catalogue.internal_model.locations.{
+  AccessCondition,
+  AccessMethod,
+  AccessStatus,
+  DigitalLocation,
+  License,
+  LocationType
+}
 import weco.catalogue.internal_model.work.generators.SourceWorkGenerators
 import weco.pipeline.merger.models.FieldMergeResult
 
@@ -182,21 +189,26 @@ class ThumbnailRuleTest
     }
   }
 
-  it("suppresses thumbnails when a restriction is present on a digital location") {
-    forAll(List(restrictedDigitalWork, multiLocationWorkWithDigitalRestriction)) { work =>
-      inside(ThumbnailRule.merge(work, miroWorks :+ metsWork)) {
-        case FieldMergeResult(thumbnail, _) =>
-          thumbnail shouldBe None
-      }
+  it(
+    "suppresses thumbnails when a restriction is present on a digital location") {
+    forAll(List(restrictedDigitalWork, multiLocationWorkWithDigitalRestriction)) {
+      work =>
+        inside(ThumbnailRule.merge(work, miroWorks :+ metsWork)) {
+          case FieldMergeResult(thumbnail, _) =>
+            thumbnail shouldBe None
+        }
     }
   }
 
-  it("does not suppress thumbnails when a restriction is only present on a physical location") {
-    forAll(List(restrictedPhysicalWork, multiLocationWorkWithPhysicalRestriction)) { work =>
-      inside(ThumbnailRule.merge(work, miroWorks :+ metsWork)) {
-        case FieldMergeResult(thumbnail, _) =>
-          thumbnail shouldBe defined
-      }
+  it(
+    "does not suppress thumbnails when a restriction is only present on a physical location") {
+    forAll(
+      List(restrictedPhysicalWork, multiLocationWorkWithPhysicalRestriction)) {
+      work =>
+        inside(ThumbnailRule.merge(work, miroWorks :+ metsWork)) {
+          case FieldMergeResult(thumbnail, _) =>
+            thumbnail shouldBe defined
+        }
     }
   }
 
