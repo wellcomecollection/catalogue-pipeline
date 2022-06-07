@@ -18,7 +18,7 @@ import weco.pipeline.merger.models.FieldMergeResult
  * minimal ID is chosen.
  *
  * If any of the locations forming the work from any source are marked as
- * restricted or closed, we supress the thumbnail to be sure we are not
+ * restricted or closed, we suppress the thumbnail to be sure we are not
  * displaying something we are not meant to.
  */
 object ThumbnailRule extends FieldMergeRule with MergerLogging {
