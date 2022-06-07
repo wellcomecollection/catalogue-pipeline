@@ -39,7 +39,8 @@ case class TeiData(id: String,
                    contributors: List[Contributor[Unminted]] = Nil,
                    origin: List[ProductionEvent[Unminted]] = Nil,
                    physicalDescription: Option[String] = None,
-                   subjects: List[Subject[Unminted]] = Nil)
+                   subjects: List[Subject[Unminted]] = Nil,
+                   alternativeTitles: List[String] = Nil)
     extends Logging {
   def toWork(time: Instant, version: Int): Work[Source] = {
     val topLevelData = toWorkData(referenceNumber = referenceNumber)
@@ -124,6 +125,7 @@ case class TeiData(id: String,
     referenceNumber: Option[ReferenceNumber] = None): WorkData[Unidentified] =
     WorkData[Unidentified](
       title = Some(title),
+      alternativeTitles = alternativeTitles,
       description = description,
       languages = languages,
       format = Some(Format.ArchivesAndManuscripts),

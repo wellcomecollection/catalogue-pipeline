@@ -105,6 +105,7 @@ class TeiTransformerTest
               ),
               workData = WorkData[Unidentified](
                 title = Some("MS_Arabic_1 item 1"),
+                alternativeTitles = List("Al-Qānūn fī al-ṭibb", "كتاب القانون في الطبّ"),
                 languages = List(Language("ara", "Arabic")),
                 notes = List(
                   Note(

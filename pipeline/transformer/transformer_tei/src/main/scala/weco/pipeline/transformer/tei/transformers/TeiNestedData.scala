@@ -129,7 +129,9 @@ object TeiNestedData extends Logging {
               languages = languages,
               notes = languageNotes ++ notes,
               nestedTeiData = items,
-              contributors = authors ++ scribesMap.getOrElse(id, Nil))
+              contributors = authors ++ scribesMap.getOrElse(id, Nil),
+              alternativeTitles = extractAlternativeTitles(node)
+            )
       }
       .toList
       .sequence
@@ -223,6 +225,20 @@ object TeiNestedData extends Logging {
         }
     }
   }
+
+  private def extractAlternativeTitles(itemNode: Node): List[String] = {
+    val titleNodes = (itemNode \ "title").toList
+    titleNodes match {
+      // If a document only has a single title, then that title is deemed "original" regardless
+      // of its type attribute, exclude it from the list of alternative titles.
+      case List(_) => Nil
+      // A document with multiple titles *should* have one original title and at least one
+      // title with other types (normalised, standard, no attribute).
+      case list =>
+        list.filter(n => (n \@ "type").toLowerCase != "original").map(_.text.trim)
+    }
+  }
+
   private def constructTitleForItem(wrapperTitle: String,
                                     itemNumber: Int): String =
     s"$wrapperTitle item $itemNumber"
