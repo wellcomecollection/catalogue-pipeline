@@ -94,8 +94,7 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
       work.data.items.exists { item =>
         item.locations.exists(
           location =>
-            location.hasRestrictions && location
-              .isInstanceOf[DigitalLocation])
+            location.hasRestrictions && location.isInstanceOf[DigitalLocation])
       }
     }
 }
