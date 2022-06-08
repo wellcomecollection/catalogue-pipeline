@@ -39,7 +39,7 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
       }.distinct
     )
 
-  def getThumbnail(target: Work.Visible[Identified],
+  private def getThumbnail(target: Work.Visible[Identified],
                    sources: Seq[Work[Identified]]): Option[DigitalLocation] =
     if (shouldSuppressThumbnail(target, sources))
       None
@@ -48,7 +48,7 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
         .orElse(getMinMiroThumbnail(target, sources))
         .getOrElse(target.data.thumbnail)
 
-  val getMetsThumbnail =
+  private val getMetsThumbnail =
     new PartialRule {
       val isDefinedForTarget: WorkPredicate =
         sierraWork or singlePhysicalItemCalmWork or teiWork
@@ -61,7 +61,7 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
       }
     }
 
-  val getMinMiroThumbnail =
+  private val getMinMiroThumbnail =
     new PartialRule {
       val isDefinedForTarget: WorkPredicate =
         singleItemSierra or zeroItemSierra or singlePhysicalItemCalmWork or teiWork
@@ -88,7 +88,8 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
       }
     }
 
-  def shouldSuppressThumbnail(target: Work.Visible[Identified],
+
+  private def shouldSuppressThumbnail(target: Work.Visible[Identified],
                               sources: Seq[Work[Identified]]): Boolean =
     (target :: sources.toList).exists { work =>
       work.data.items.exists { item =>
