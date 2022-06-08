@@ -21,14 +21,14 @@ class ThumbnailRuleTest
     with SourceWorkGenerators
     with Inside {
 
-  val physicalSierraWork = sierraPhysicalIdentifiedWork()
+  private val physicalSierraWork = sierraPhysicalIdentifiedWork()
 
-  val digitalSierraWork = sierraDigitalIdentifiedWork()
+  private val digitalSierraWork = sierraDigitalIdentifiedWork()
 
-  val calmWork = calmIdentifiedWork()
-  val teiWork = teiIdentifiedWork()
+  private val calmWork = calmIdentifiedWork()
+  private val teiWork = teiIdentifiedWork()
 
-  val metsWork = metsIdentifiedWork()
+  private val metsWork = metsIdentifiedWork()
     .thumbnail(
       DigitalLocation(
         url = "mets.com/thumbnail.jpg",
@@ -37,7 +37,7 @@ class ThumbnailRuleTest
       )
     )
 
-  val miroWorks = (0 to 3).map(_ => miroIdentifiedWork())
+  private val miroWorks = (0 to 3).map(_ => miroIdentifiedWork())
 
   private val restrictedPhysicalWork =
     sierraIdentifiedWork().items(
@@ -82,6 +82,7 @@ class ThumbnailRuleTest
         )
       )
     )
+
   private val multiLocationWorkWithDigitalRestriction =
     sierraIdentifiedWork().items(
       List(
