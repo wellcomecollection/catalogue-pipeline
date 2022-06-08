@@ -39,8 +39,9 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
       }.distinct
     )
 
-  private def getThumbnail(target: Work.Visible[Identified],
-                   sources: Seq[Work[Identified]]): Option[DigitalLocation] =
+  private def getThumbnail(
+    target: Work.Visible[Identified],
+    sources: Seq[Work[Identified]]): Option[DigitalLocation] =
     if (shouldSuppressThumbnail(target, sources))
       None
     else
@@ -88,9 +89,8 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
       }
     }
 
-
   private def shouldSuppressThumbnail(target: Work.Visible[Identified],
-                              sources: Seq[Work[Identified]]): Boolean =
+                                      sources: Seq[Work[Identified]]): Boolean =
     (target :: sources.toList).exists { work =>
       work.data.items.exists { item =>
         item.locations.exists(location =>
