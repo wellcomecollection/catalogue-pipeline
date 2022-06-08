@@ -4,10 +4,7 @@ import scala.util.Try
 import cats.data.NonEmptyList
 import weco.catalogue.internal_model.identifiers.IdentifierType
 import weco.catalogue.internal_model.work.WorkState.Identified
-import weco.catalogue.internal_model.locations.{
-  DigitalLocation,
-  DigitalLocationType
-}
+import weco.catalogue.internal_model.locations.DigitalLocation
 import weco.catalogue.internal_model.work.Work
 import weco.pipeline.merger.logging.MergerLogging
 import weco.pipeline.merger.models.FieldMergeResult
@@ -97,8 +94,8 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
       work.data.items.exists { item =>
         item.locations.exists(
           location =>
-            location.hasRestrictions && location.locationType
-              .isInstanceOf[DigitalLocationType])
+            location.hasRestrictions && location
+              .isInstanceOf[DigitalLocation])
       }
     }
 }
