@@ -1,7 +1,7 @@
 {
   "description" : "examples for the works filtered aggregations tests",
-  "createdAt" : "2022-06-06T11:16:22.173494Z",
-  "id" : "580nnpfa",
+  "createdAt" : "2022-06-09T09:05:52.438300Z",
+  "id" : "2sum7p7n",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,12 +10,12 @@
             "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "wz2OkOJHcs"
+          "value" : "xuni2iqanI"
         },
-        "version" : 86,
-        "modifiedTime" : "2015-07-21T11:19:34Z"
+        "version" : 32,
+        "modifiedTime" : "1992-06-23T13:00:08Z"
       },
-      "mergedTime" : "2015-07-21T11:19:34Z",
+      "mergedTime" : "1992-06-23T13:00:08Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
@@ -26,11 +26,11 @@
           "id" : "sierra-system-number"
         },
         "ontologyType" : "Work",
-        "value" : "wz2OkOJHcs"
+        "value" : "xuni2iqanI"
       },
-      "canonicalId" : "580nnpfa",
-      "mergedTime" : "2015-07-21T11:19:34Z",
-      "sourceModifiedTime" : "2015-07-21T11:19:34Z",
+      "canonicalId" : "2sum7p7n",
+      "mergedTime" : "1992-06-23T13:00:08Z",
+      "sourceModifiedTime" : "1992-06-23T13:00:08Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
@@ -89,7 +89,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "580nnpfa",
+      "id" : "2sum7p7n",
       "title" : "capybara",
       "alternativeTitles" : [
       ],
@@ -107,7 +107,7 @@
             "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "wz2OkOJHcs",
+          "value" : "xuni2iqanI",
           "type" : "Identifier"
         }
       ],
@@ -145,9 +145,9 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "580nnpfa",
+      "id" : "2sum7p7n",
       "identifiers.value" : [
-        "wz2OkOJHcs"
+        "xuni2iqanI"
       ],
       "images.id" : [
       ],

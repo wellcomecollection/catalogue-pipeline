@@ -1,7 +1,7 @@
 {
   "description" : "examples for the access status tests",
-  "createdAt" : "2022-06-06T11:16:22.095950Z",
-  "id" : "iqani2su",
+  "createdAt" : "2022-06-09T09:05:52.365533Z",
+  "id" : "hmnzshrf",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,12 +10,12 @@
             "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "jYpuBxuni2"
+          "value" : "LcgxEadt8H"
         },
-        "version" : 71,
-        "modifiedTime" : "2029-03-03T16:26:17Z"
+        "version" : 45,
+        "modifiedTime" : "2030-11-10T05:46:34Z"
       },
-      "mergedTime" : "2029-03-03T16:26:17Z",
+      "mergedTime" : "2030-11-10T05:46:34Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
@@ -26,11 +26,11 @@
           "id" : "sierra-system-number"
         },
         "ontologyType" : "Work",
-        "value" : "jYpuBxuni2"
+        "value" : "LcgxEadt8H"
       },
-      "canonicalId" : "iqani2su",
-      "mergedTime" : "2029-03-03T16:26:17Z",
-      "sourceModifiedTime" : "2029-03-03T16:26:17Z",
+      "canonicalId" : "hmnzshrf",
+      "mergedTime" : "2030-11-10T05:46:34Z",
+      "sourceModifiedTime" : "2030-11-10T05:46:34Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
         {
@@ -49,7 +49,7 @@
       }
     },
     "data" : {
-      "title" : "title-7p7NJFW4Dx",
+      "title" : "title-sVBNn8SqD7",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -77,13 +77,13 @@
       "items" : [
         {
           "id" : {
-            "canonicalId" : "wbli95ga",
+            "canonicalId" : "1iqv3o0g",
             "sourceIdentifier" : {
               "identifierType" : {
                 "id" : "calm-record-id"
               },
               "ontologyType" : "Work",
-              "value" : "clr9E9aLfx"
+              "value" : "LKeJCppCDk"
             },
             "otherIdentifiers" : [
             ],
@@ -93,15 +93,15 @@
           "note" : null,
           "locations" : [
             {
-              "url" : "https://iiif.wellcomecollection.org/image/6NT.jpg/info.json",
+              "url" : "https://iiif.wellcomecollection.org/image/cFv.jpg/info.json",
               "locationType" : {
                 "id" : "iiif-presentation"
               },
               "license" : {
                 "id" : "cc-by"
               },
-              "credit" : null,
-              "linkText" : null,
+              "credit" : "Credit line: Y3kDPeOJ",
+              "linkText" : "Link text: FeGzni8",
               "accessConditions" : [
                 {
                   "method" : {
@@ -128,8 +128,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "iqani2su",
-      "title" : "title-7p7NJFW4Dx",
+      "id" : "hmnzshrf",
+      "title" : "title-sVBNn8SqD7",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -141,7 +141,7 @@
             "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "jYpuBxuni2",
+          "value" : "LcgxEadt8H",
           "type" : "Identifier"
         }
       ],
@@ -151,7 +151,7 @@
       ],
       "items" : [
         {
-          "id" : "wbli95ga",
+          "id" : "1iqv3o0g",
           "identifiers" : [
             {
               "identifierType" : {
@@ -159,7 +159,7 @@
                 "label" : "Calm RecordIdentifier",
                 "type" : "IdentifierType"
               },
-              "value" : "clr9E9aLfx",
+              "value" : "LKeJCppCDk",
               "type" : "Identifier"
             }
           ],
@@ -170,7 +170,9 @@
                 "label" : "IIIF Presentation API",
                 "type" : "LocationType"
               },
-              "url" : "https://iiif.wellcomecollection.org/image/6NT.jpg/info.json",
+              "url" : "https://iiif.wellcomecollection.org/image/cFv.jpg/info.json",
+              "credit" : "Credit line: Y3kDPeOJ",
+              "linkText" : "Link text: FeGzni8",
               "license" : {
                 "id" : "cc-by",
                 "label" : "Attribution 4.0 International (CC BY 4.0)",
@@ -226,17 +228,19 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "iqani2su",
+      "id" : "hmnzshrf",
       "identifiers.value" : [
-        "jYpuBxuni2"
+        "LcgxEadt8H"
       ],
       "images.id" : [
       ],
       "images.identifiers.value" : [
       ],
       "items.id" : [
+        "1iqv3o0g"
       ],
       "items.identifiers.value" : [
+        "LKeJCppCDk"
       ],
       "subjects.id" : [
       ],

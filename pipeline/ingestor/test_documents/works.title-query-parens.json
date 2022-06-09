@@ -1,21 +1,21 @@
 {
   "description" : "a work whose title has parens meant to trip up ES",
-  "createdAt" : "2022-06-06T11:16:21.118876Z",
-  "id" : "omok5a37",
+  "createdAt" : "2022-06-09T09:05:51.189467Z",
+  "id" : "1qhulhn8",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "y59nY1Nuok"
+          "value" : "8y3h9IEuLL"
         },
-        "version" : 12,
-        "modifiedTime" : "2019-11-29T09:02:16Z"
+        "version" : 60,
+        "modifiedTime" : "1991-01-02T04:42:36Z"
       },
-      "mergedTime" : "2019-11-29T09:02:16Z",
+      "mergedTime" : "1991-01-02T04:42:36Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
@@ -23,14 +23,14 @@
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "miro-image-number"
+          "id" : "sierra-system-number"
         },
         "ontologyType" : "Work",
-        "value" : "y59nY1Nuok"
+        "value" : "8y3h9IEuLL"
       },
-      "canonicalId" : "omok5a37",
-      "mergedTime" : "2019-11-29T09:02:16Z",
-      "sourceModifiedTime" : "2019-11-29T09:02:16Z",
+      "canonicalId" : "1qhulhn8",
+      "mergedTime" : "1991-01-02T04:42:36Z",
+      "sourceModifiedTime" : "1991-01-02T04:42:36Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
@@ -82,7 +82,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "omok5a37",
+      "id" : "1qhulhn8",
       "title" : "(a b c d e) h",
       "alternativeTitles" : [
       ],
@@ -91,11 +91,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "y59nY1Nuok",
+          "value" : "8y3h9IEuLL",
           "type" : "Identifier"
         }
       ],
@@ -128,9 +128,9 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "omok5a37",
+      "id" : "1qhulhn8",
       "identifiers.value" : [
-        "y59nY1Nuok"
+        "8y3h9IEuLL"
       ],
       "images.id" : [
       ],

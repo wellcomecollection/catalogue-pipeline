@@ -1,7 +1,7 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2022-06-06T11:16:21.397317Z",
-  "id" : "cwippax3",
+  "createdAt" : "2022-06-09T09:05:51.529863Z",
+  "id" : "t4ifz9za",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,12 +10,12 @@
             "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "2PauY4Py8G"
+          "value" : "y5MZkkqME2"
         },
-        "version" : 75,
-        "modifiedTime" : "2055-05-06T10:33:09Z"
+        "version" : 34,
+        "modifiedTime" : "2058-02-21T05:53:44Z"
       },
-      "mergedTime" : "2055-05-06T10:33:09Z",
+      "mergedTime" : "2058-02-21T05:53:44Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
@@ -26,11 +26,11 @@
           "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "2PauY4Py8G"
+        "value" : "y5MZkkqME2"
       },
-      "canonicalId" : "cwippax3",
-      "mergedTime" : "2055-05-06T10:33:09Z",
-      "sourceModifiedTime" : "2055-05-06T10:33:09Z",
+      "canonicalId" : "t4ifz9za",
+      "mergedTime" : "2058-02-21T05:53:44Z",
+      "sourceModifiedTime" : "2058-02-21T05:53:44Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
@@ -46,7 +46,7 @@
       }
     },
     "data" : {
-      "title" : "title-5qt38YgNxO",
+      "title" : "title-FnzprDQS25",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -85,8 +85,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "cwippax3",
-      "title" : "title-5qt38YgNxO",
+      "id" : "t4ifz9za",
+      "title" : "title-FnzprDQS25",
       "alternativeTitles" : [
       ],
       "workType" : {
@@ -103,7 +103,7 @@
             "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "2PauY4Py8G",
+          "value" : "y5MZkkqME2",
           "type" : "Identifier"
         }
       ],
@@ -136,9 +136,9 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "cwippax3",
+      "id" : "t4ifz9za",
       "identifiers.value" : [
-        "2PauY4Py8G"
+        "y5MZkkqME2"
       ],
       "images.id" : [
       ],

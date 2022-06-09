@@ -1,21 +1,21 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2022-06-06T11:16:21.392562Z",
-  "id" : "kkcl3dhq",
+  "createdAt" : "2022-06-09T09:05:51.520953Z",
+  "id" : "fpxszklt",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "INEpZD4veL"
+          "value" : "j8ljlZQFqG"
         },
-        "version" : 82,
-        "modifiedTime" : "2053-10-12T12:36:20Z"
+        "version" : 50,
+        "modifiedTime" : "2040-06-28T04:35:43Z"
       },
-      "mergedTime" : "2053-10-12T12:36:20Z",
+      "mergedTime" : "2040-06-28T04:35:43Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
@@ -23,14 +23,14 @@
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "sierra-system-number"
+          "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "INEpZD4veL"
+        "value" : "j8ljlZQFqG"
       },
-      "canonicalId" : "kkcl3dhq",
-      "mergedTime" : "2053-10-12T12:36:20Z",
-      "sourceModifiedTime" : "2053-10-12T12:36:20Z",
+      "canonicalId" : "fpxszklt",
+      "mergedTime" : "2040-06-28T04:35:43Z",
+      "sourceModifiedTime" : "2040-06-28T04:35:43Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
@@ -46,7 +46,7 @@
       }
     },
     "data" : {
-      "title" : "title-ooZVNybADY",
+      "title" : "title-ZVRNi77XK8",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -85,8 +85,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "kkcl3dhq",
-      "title" : "title-ooZVNybADY",
+      "id" : "fpxszklt",
+      "title" : "title-ZVRNi77XK8",
       "alternativeTitles" : [
       ],
       "workType" : {
@@ -99,11 +99,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "INEpZD4veL",
+          "value" : "j8ljlZQFqG",
           "type" : "Identifier"
         }
       ],
@@ -136,9 +136,9 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "kkcl3dhq",
+      "id" : "fpxszklt",
       "identifiers.value" : [
-        "INEpZD4veL"
+        "j8ljlZQFqG"
       ],
       "images.id" : [
       ],

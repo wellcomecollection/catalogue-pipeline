@@ -1,21 +1,21 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2022-06-06T11:16:21.745745Z",
-  "id" : "mazaizfa",
+  "createdAt" : "2022-06-09T09:05:51.963442Z",
+  "id" : "kjqbcbto",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "QFJOR9VqAE"
+          "value" : "fdodercwIW"
         },
-        "version" : 44,
-        "modifiedTime" : "1986-01-27T17:06:16Z"
+        "version" : 93,
+        "modifiedTime" : "1962-09-24T14:44:35Z"
       },
-      "mergedTime" : "1986-01-27T17:06:16Z",
+      "mergedTime" : "1962-09-24T14:44:35Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
@@ -23,14 +23,14 @@
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "calm-record-id"
+          "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "QFJOR9VqAE"
+        "value" : "fdodercwIW"
       },
-      "canonicalId" : "mazaizfa",
-      "mergedTime" : "1986-01-27T17:06:16Z",
-      "sourceModifiedTime" : "1986-01-27T17:06:16Z",
+      "canonicalId" : "kjqbcbto",
+      "mergedTime" : "1962-09-24T14:44:35Z",
+      "sourceModifiedTime" : "1962-09-24T14:44:35Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
@@ -46,7 +46,7 @@
       }
     },
     "data" : {
-      "title" : "title-vTVR490Vab",
+      "title" : "title-9X3cVR8q4G",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -67,21 +67,21 @@
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "y2nMuMcZq1Jcxuk",
+              "label" : "ZEnp6i2y6iUJg4J",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "acPWKUROxBsQ4CK",
+              "label" : "nCRDZnkaHR8N4ei",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "8DrDsk2kCAGURhx",
+              "label" : "JRew3RmJ48vvEly",
               "type" : "Concept"
             }
           ]
@@ -111,8 +111,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "mazaizfa",
-      "title" : "title-vTVR490Vab",
+      "id" : "kjqbcbto",
+      "title" : "title-9X3cVR8q4G",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -120,11 +120,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "QFJOR9VqAE",
+          "value" : "fdodercwIW",
           "type" : "Identifier"
         }
       ],
@@ -133,15 +133,15 @@
           "label" : "Psychology, Pathological",
           "concepts" : [
             {
-              "label" : "y2nMuMcZq1Jcxuk",
+              "label" : "ZEnp6i2y6iUJg4J",
               "type" : "Concept"
             },
             {
-              "label" : "acPWKUROxBsQ4CK",
+              "label" : "nCRDZnkaHR8N4ei",
               "type" : "Concept"
             },
             {
-              "label" : "8DrDsk2kCAGURhx",
+              "label" : "JRew3RmJ48vvEly",
               "type" : "Concept"
             }
           ],
@@ -175,9 +175,9 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "mazaizfa",
+      "id" : "kjqbcbto",
       "identifiers.value" : [
-        "QFJOR9VqAE"
+        "fdodercwIW"
       ],
       "images.id" : [
       ],
@@ -195,6 +195,9 @@
         "Psychology, Pathological"
       ],
       "subjects.concepts.label" : [
+        "ZEnp6i2y6iUJg4J",
+        "nCRDZnkaHR8N4ei",
+        "JRew3RmJ48vvEly"
       ],
       "genres.concepts.label" : [
       ],

@@ -1,21 +1,21 @@
 {
   "description" : "one of a list of works with a variety of languages",
-  "createdAt" : "2022-06-06T11:16:21.154590Z",
-  "id" : "qfscz1rj",
+  "createdAt" : "2022-06-09T09:05:51.236725Z",
+  "id" : "9cfrzpe3",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "Gk6juMbOeK"
+          "value" : "vyPjPNkcxB"
         },
-        "version" : 98,
-        "modifiedTime" : "2036-09-06T23:29:13Z"
+        "version" : 76,
+        "modifiedTime" : "1962-03-28T10:44:16Z"
       },
-      "mergedTime" : "2036-09-06T23:29:13Z",
+      "mergedTime" : "1962-03-28T10:44:16Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
@@ -23,14 +23,14 @@
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "calm-record-id"
+          "id" : "sierra-system-number"
         },
         "ontologyType" : "Work",
-        "value" : "Gk6juMbOeK"
+        "value" : "vyPjPNkcxB"
       },
-      "canonicalId" : "qfscz1rj",
-      "mergedTime" : "2036-09-06T23:29:13Z",
-      "sourceModifiedTime" : "2036-09-06T23:29:13Z",
+      "canonicalId" : "9cfrzpe3",
+      "mergedTime" : "1962-03-28T10:44:16Z",
+      "sourceModifiedTime" : "1962-03-28T10:44:16Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
@@ -86,7 +86,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "qfscz1rj",
+      "id" : "9cfrzpe3",
       "title" : "A work with languages Swedish",
       "alternativeTitles" : [
       ],
@@ -95,11 +95,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "Gk6juMbOeK",
+          "value" : "vyPjPNkcxB",
           "type" : "Identifier"
         }
       ],
@@ -137,9 +137,9 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "qfscz1rj",
+      "id" : "9cfrzpe3",
       "identifiers.value" : [
-        "Gk6juMbOeK"
+        "vyPjPNkcxB"
       ],
       "images.id" : [
       ],

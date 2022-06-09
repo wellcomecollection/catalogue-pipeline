@@ -1,21 +1,21 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2022-06-06T11:16:21.398005Z",
-  "id" : "9rgmu63i",
+  "createdAt" : "2022-06-09T09:05:51.530690Z",
+  "id" : "czxlcpwd",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "3tyy1ghzsQ"
+          "value" : "kuQBSkLFL8"
         },
-        "version" : 48,
-        "modifiedTime" : "2023-12-01T00:27:32Z"
+        "version" : 17,
+        "modifiedTime" : "2045-09-05T00:59:08Z"
       },
-      "mergedTime" : "2023-12-01T00:27:32Z",
+      "mergedTime" : "2045-09-05T00:59:08Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
@@ -23,14 +23,14 @@
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "calm-record-id"
+          "id" : "sierra-system-number"
         },
         "ontologyType" : "Work",
-        "value" : "3tyy1ghzsQ"
+        "value" : "kuQBSkLFL8"
       },
-      "canonicalId" : "9rgmu63i",
-      "mergedTime" : "2023-12-01T00:27:32Z",
-      "sourceModifiedTime" : "2023-12-01T00:27:32Z",
+      "canonicalId" : "czxlcpwd",
+      "mergedTime" : "2045-09-05T00:59:08Z",
+      "sourceModifiedTime" : "2045-09-05T00:59:08Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
@@ -46,7 +46,7 @@
       }
     },
     "data" : {
-      "title" : "title-sDHZ5kGsC2",
+      "title" : "title-84If124qX5",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -85,8 +85,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "9rgmu63i",
-      "title" : "title-sDHZ5kGsC2",
+      "id" : "czxlcpwd",
+      "title" : "title-84If124qX5",
       "alternativeTitles" : [
       ],
       "workType" : {
@@ -99,11 +99,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "3tyy1ghzsQ",
+          "value" : "kuQBSkLFL8",
           "type" : "Identifier"
         }
       ],
@@ -136,9 +136,9 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "9rgmu63i",
+      "id" : "czxlcpwd",
       "identifiers.value" : [
-        "3tyy1ghzsQ"
+        "kuQBSkLFL8"
       ],
       "images.id" : [
       ],

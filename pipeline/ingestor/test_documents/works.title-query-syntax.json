@@ -1,21 +1,21 @@
 {
   "description" : "a work whose title has lots of ES query syntax operators",
-  "createdAt" : "2022-06-06T11:16:21.113433Z",
-  "id" : "hjjs3mu3",
+  "createdAt" : "2022-06-09T09:05:51.182856Z",
+  "id" : "nqvyeits",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "Z3LIdvnOPk"
+          "value" : "Qm30wpOiv0"
         },
-        "version" : 88,
-        "modifiedTime" : "2060-06-24T09:00:48Z"
+        "version" : 28,
+        "modifiedTime" : "2030-10-14T16:39:12Z"
       },
-      "mergedTime" : "2060-06-24T09:00:48Z",
+      "mergedTime" : "2030-10-14T16:39:12Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
@@ -23,14 +23,14 @@
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "miro-image-number"
+          "id" : "sierra-system-number"
         },
         "ontologyType" : "Work",
-        "value" : "Z3LIdvnOPk"
+        "value" : "Qm30wpOiv0"
       },
-      "canonicalId" : "hjjs3mu3",
-      "mergedTime" : "2060-06-24T09:00:48Z",
-      "sourceModifiedTime" : "2060-06-24T09:00:48Z",
+      "canonicalId" : "nqvyeits",
+      "mergedTime" : "2030-10-14T16:39:12Z",
+      "sourceModifiedTime" : "2030-10-14T16:39:12Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
@@ -82,7 +82,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "hjjs3mu3",
+      "id" : "nqvyeits",
       "title" : "+a -title | with (all the simple) query~4 syntax operators in it*",
       "alternativeTitles" : [
       ],
@@ -91,11 +91,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "Z3LIdvnOPk",
+          "value" : "Qm30wpOiv0",
           "type" : "Identifier"
         }
       ],
@@ -128,9 +128,9 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "hjjs3mu3",
+      "id" : "nqvyeits",
       "identifiers.value" : [
-        "Z3LIdvnOPk"
+        "Qm30wpOiv0"
       ],
       "images.id" : [
       ],

@@ -1,7 +1,7 @@
 {
   "description" : "examples for the works filtered aggregations tests",
-  "createdAt" : "2022-06-06T11:16:22.175337Z",
-  "id" : "iykrudzs",
+  "createdAt" : "2022-06-09T09:05:52.440268Z",
+  "id" : "96lvqxd7",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,12 +10,12 @@
             "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "QnjXRANbEF"
+          "value" : "hxoxVFqtU4"
         },
-        "version" : 80,
-        "modifiedTime" : "1987-08-26T16:27:30Z"
+        "version" : 25,
+        "modifiedTime" : "1941-04-27T11:15:41Z"
       },
-      "mergedTime" : "1987-08-26T16:27:30Z",
+      "mergedTime" : "1941-04-27T11:15:41Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
@@ -26,11 +26,11 @@
           "id" : "calm-record-id"
         },
         "ontologyType" : "Work",
-        "value" : "QnjXRANbEF"
+        "value" : "hxoxVFqtU4"
       },
-      "canonicalId" : "iykrudzs",
-      "mergedTime" : "1987-08-26T16:27:30Z",
-      "sourceModifiedTime" : "1987-08-26T16:27:30Z",
+      "canonicalId" : "96lvqxd7",
+      "mergedTime" : "1941-04-27T11:15:41Z",
+      "sourceModifiedTime" : "1941-04-27T11:15:41Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
@@ -89,7 +89,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "iykrudzs",
+      "id" : "96lvqxd7",
       "title" : "rats",
       "alternativeTitles" : [
       ],
@@ -107,7 +107,7 @@
             "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "QnjXRANbEF",
+          "value" : "hxoxVFqtU4",
           "type" : "Identifier"
         }
       ],
@@ -145,9 +145,9 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "iykrudzs",
+      "id" : "96lvqxd7",
       "identifiers.value" : [
-        "QnjXRANbEF"
+        "hxoxVFqtU4"
       ],
       "images.id" : [
       ],

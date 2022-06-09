@@ -1,21 +1,21 @@
 {
   "description" : "one of a list of works with a variety of formats",
-  "createdAt" : "2022-06-06T11:16:21.107725Z",
-  "id" : "sym6ne7x",
+  "createdAt" : "2022-06-09T09:05:51.173929Z",
+  "id" : "aeesu6j0",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "FRzpe3bQyh"
+          "value" : "qavjz8rXQZ"
         },
-        "version" : 87,
-        "modifiedTime" : "2051-09-16T11:43:09Z"
+        "version" : 12,
+        "modifiedTime" : "1940-01-28T16:39:58Z"
       },
-      "mergedTime" : "2051-09-16T11:43:09Z",
+      "mergedTime" : "1940-01-28T16:39:58Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
@@ -23,14 +23,14 @@
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "sierra-system-number"
+          "id" : "calm-record-id"
         },
         "ontologyType" : "Work",
-        "value" : "FRzpe3bQyh"
+        "value" : "qavjz8rXQZ"
       },
-      "canonicalId" : "sym6ne7x",
-      "mergedTime" : "2051-09-16T11:43:09Z",
-      "sourceModifiedTime" : "2051-09-16T11:43:09Z",
+      "canonicalId" : "aeesu6j0",
+      "mergedTime" : "1940-01-28T16:39:58Z",
+      "sourceModifiedTime" : "1940-01-28T16:39:58Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
@@ -85,7 +85,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "sym6ne7x",
+      "id" : "aeesu6j0",
       "title" : "A work with format Pictures",
       "alternativeTitles" : [
       ],
@@ -99,11 +99,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "FRzpe3bQyh",
+          "value" : "qavjz8rXQZ",
           "type" : "Identifier"
         }
       ],
@@ -136,9 +136,9 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "sym6ne7x",
+      "id" : "aeesu6j0",
       "identifiers.value" : [
-        "FRzpe3bQyh"
+        "qavjz8rXQZ"
       ],
       "images.id" : [
       ],

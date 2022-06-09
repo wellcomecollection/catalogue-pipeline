@@ -1,21 +1,21 @@
 {
   "description" : "one of a list of works with a variety of formats",
-  "createdAt" : "2022-06-06T11:16:21.040541Z",
-  "id" : "bujceq4p",
+  "createdAt" : "2022-06-09T09:05:51.127096Z",
+  "id" : "6fuh8tqe",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "HuLHN83UU0"
+          "value" : "1RAcTOrmRe"
         },
-        "version" : 25,
-        "modifiedTime" : "2026-06-29T23:47:01Z"
+        "version" : 34,
+        "modifiedTime" : "1938-05-06T11:14:50Z"
       },
-      "mergedTime" : "2026-06-29T23:47:01Z",
+      "mergedTime" : "1938-05-06T11:14:50Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
@@ -23,14 +23,14 @@
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "miro-image-number"
+          "id" : "calm-record-id"
         },
         "ontologyType" : "Work",
-        "value" : "HuLHN83UU0"
+        "value" : "1RAcTOrmRe"
       },
-      "canonicalId" : "bujceq4p",
-      "mergedTime" : "2026-06-29T23:47:01Z",
-      "sourceModifiedTime" : "2026-06-29T23:47:01Z",
+      "canonicalId" : "6fuh8tqe",
+      "mergedTime" : "1938-05-06T11:14:50Z",
+      "sourceModifiedTime" : "1938-05-06T11:14:50Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
@@ -85,7 +85,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "bujceq4p",
+      "id" : "6fuh8tqe",
       "title" : "A work with format Books",
       "alternativeTitles" : [
       ],
@@ -99,11 +99,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "HuLHN83UU0",
+          "value" : "1RAcTOrmRe",
           "type" : "Identifier"
         }
       ],
@@ -136,9 +136,9 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "bujceq4p",
+      "id" : "6fuh8tqe",
       "identifiers.value" : [
-        "HuLHN83UU0"
+        "1RAcTOrmRe"
       ],
       "images.id" : [
       ],

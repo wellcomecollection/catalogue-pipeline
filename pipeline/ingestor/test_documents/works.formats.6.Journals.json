@@ -1,21 +1,21 @@
 {
   "description" : "one of a list of works with a variety of formats",
-  "createdAt" : "2022-06-06T11:16:21.079380Z",
-  "id" : "xc5d7pc4",
+  "createdAt" : "2022-06-09T09:05:51.151353Z",
+  "id" : "f50hqzlq",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "HXsUYY6dN4"
+          "value" : "RLFueyZOrD"
         },
-        "version" : 67,
-        "modifiedTime" : "1968-03-09T02:46:38Z"
+        "version" : 59,
+        "modifiedTime" : "2068-12-22T07:43:05Z"
       },
-      "mergedTime" : "1968-03-09T02:46:38Z",
+      "mergedTime" : "2068-12-22T07:43:05Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
@@ -23,14 +23,14 @@
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "sierra-system-number"
+          "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "HXsUYY6dN4"
+        "value" : "RLFueyZOrD"
       },
-      "canonicalId" : "xc5d7pc4",
-      "mergedTime" : "1968-03-09T02:46:38Z",
-      "sourceModifiedTime" : "1968-03-09T02:46:38Z",
+      "canonicalId" : "f50hqzlq",
+      "mergedTime" : "2068-12-22T07:43:05Z",
+      "sourceModifiedTime" : "2068-12-22T07:43:05Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
@@ -85,7 +85,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "xc5d7pc4",
+      "id" : "f50hqzlq",
       "title" : "A work with format Journals",
       "alternativeTitles" : [
       ],
@@ -99,11 +99,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "HXsUYY6dN4",
+          "value" : "RLFueyZOrD",
           "type" : "Identifier"
         }
       ],
@@ -136,9 +136,9 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "xc5d7pc4",
+      "id" : "f50hqzlq",
       "identifiers.value" : [
-        "HXsUYY6dN4"
+        "RLFueyZOrD"
       ],
       "images.id" : [
       ],

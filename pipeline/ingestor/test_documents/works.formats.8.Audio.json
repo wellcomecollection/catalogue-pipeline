@@ -1,21 +1,21 @@
 {
   "description" : "one of a list of works with a variety of formats",
-  "createdAt" : "2022-06-06T11:16:21.100825Z",
-  "id" : "elrgwjtd",
+  "createdAt" : "2022-06-09T09:05:51.166321Z",
+  "id" : "xiwayohj",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "RMKkkMWH2B"
+          "value" : "N5U1Ljd3YY"
         },
-        "version" : 64,
-        "modifiedTime" : "1981-07-01T07:44:00Z"
+        "version" : 40,
+        "modifiedTime" : "1934-12-30T19:07:52Z"
       },
-      "mergedTime" : "1981-07-01T07:44:00Z",
+      "mergedTime" : "1934-12-30T19:07:52Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
@@ -23,14 +23,14 @@
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "calm-record-id"
+          "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "RMKkkMWH2B"
+        "value" : "N5U1Ljd3YY"
       },
-      "canonicalId" : "elrgwjtd",
-      "mergedTime" : "1981-07-01T07:44:00Z",
-      "sourceModifiedTime" : "1981-07-01T07:44:00Z",
+      "canonicalId" : "xiwayohj",
+      "mergedTime" : "1934-12-30T19:07:52Z",
+      "sourceModifiedTime" : "1934-12-30T19:07:52Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
@@ -85,7 +85,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "elrgwjtd",
+      "id" : "xiwayohj",
       "title" : "A work with format Audio",
       "alternativeTitles" : [
       ],
@@ -99,11 +99,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "RMKkkMWH2B",
+          "value" : "N5U1Ljd3YY",
           "type" : "Identifier"
         }
       ],
@@ -136,9 +136,9 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "elrgwjtd",
+      "id" : "xiwayohj",
       "identifiers.value" : [
-        "RMKkkMWH2B"
+        "N5U1Ljd3YY"
       ],
       "images.id" : [
       ],

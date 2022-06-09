@@ -1,7 +1,7 @@
 {
   "description" : "one of a list of works with a variety of formats",
-  "createdAt" : "2022-06-06T11:16:21.029318Z",
-  "id" : "ciweswu5",
+  "createdAt" : "2022-06-09T09:05:51.111913Z",
+  "id" : "ibf5yswx",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,12 +10,12 @@
             "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "ESu6j0cajz"
+          "value" : "o8l1009JSe"
         },
-        "version" : 38,
-        "modifiedTime" : "2020-01-23T16:33:57Z"
+        "version" : 57,
+        "modifiedTime" : "1991-04-14T02:13:17Z"
       },
-      "mergedTime" : "2020-01-23T16:33:57Z",
+      "mergedTime" : "1991-04-14T02:13:17Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
@@ -26,11 +26,11 @@
           "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "ESu6j0cajz"
+        "value" : "o8l1009JSe"
       },
-      "canonicalId" : "ciweswu5",
-      "mergedTime" : "2020-01-23T16:33:57Z",
-      "sourceModifiedTime" : "2020-01-23T16:33:57Z",
+      "canonicalId" : "ibf5yswx",
+      "mergedTime" : "1991-04-14T02:13:17Z",
+      "sourceModifiedTime" : "1991-04-14T02:13:17Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
@@ -85,7 +85,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "ciweswu5",
+      "id" : "ibf5yswx",
       "title" : "A work with format Books",
       "alternativeTitles" : [
       ],
@@ -103,7 +103,7 @@
             "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "ESu6j0cajz",
+          "value" : "o8l1009JSe",
           "type" : "Identifier"
         }
       ],
@@ -136,9 +136,9 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "ciweswu5",
+      "id" : "ibf5yswx",
       "identifiers.value" : [
-        "ESu6j0cajz"
+        "o8l1009JSe"
       ],
       "images.id" : [
       ],

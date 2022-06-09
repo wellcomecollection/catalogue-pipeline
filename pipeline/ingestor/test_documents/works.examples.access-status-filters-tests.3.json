@@ -1,7 +1,7 @@
 {
   "description" : "examples for the access status tests",
-  "createdAt" : "2022-06-06T11:16:22.095383Z",
-  "id" : "wys5lz5r",
+  "createdAt" : "2022-06-09T09:05:52.364865Z",
+  "id" : "bexh6kx6",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,12 +10,12 @@
             "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "GWT6gTiZ6K"
+          "value" : "5q2ktKEnxz"
         },
-        "version" : 39,
-        "modifiedTime" : "1952-04-21T12:12:37Z"
+        "version" : 45,
+        "modifiedTime" : "2067-03-29T22:14:53Z"
       },
-      "mergedTime" : "1952-04-21T12:12:37Z",
+      "mergedTime" : "2067-03-29T22:14:53Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
@@ -26,11 +26,11 @@
           "id" : "calm-record-id"
         },
         "ontologyType" : "Work",
-        "value" : "GWT6gTiZ6K"
+        "value" : "5q2ktKEnxz"
       },
-      "canonicalId" : "wys5lz5r",
-      "mergedTime" : "1952-04-21T12:12:37Z",
-      "sourceModifiedTime" : "1952-04-21T12:12:37Z",
+      "canonicalId" : "bexh6kx6",
+      "mergedTime" : "2067-03-29T22:14:53Z",
+      "sourceModifiedTime" : "2067-03-29T22:14:53Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
         {
@@ -49,7 +49,7 @@
       }
     },
     "data" : {
-      "title" : "title-MofTOW5bCv",
+      "title" : "title-ERuJHArEMd",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -77,13 +77,13 @@
       "items" : [
         {
           "id" : {
-            "canonicalId" : "6joq4ujd",
+            "canonicalId" : "yxylnwwo",
             "sourceIdentifier" : {
               "identifierType" : {
-                "id" : "calm-record-id"
+                "id" : "miro-image-number"
               },
               "ontologyType" : "Work",
-              "value" : "zf5rF0XzQw"
+              "value" : "dI3v8SSg7e"
             },
             "otherIdentifiers" : [
             ],
@@ -93,7 +93,7 @@
           "note" : null,
           "locations" : [
             {
-              "url" : "https://iiif.wellcomecollection.org/image/TmP.jpg/info.json",
+              "url" : "https://iiif.wellcomecollection.org/image/JPD.jpg/info.json",
               "locationType" : {
                 "id" : "iiif-presentation"
               },
@@ -101,7 +101,7 @@
                 "id" : "cc-by"
               },
               "credit" : null,
-              "linkText" : "Link text: lxBF816TR",
+              "linkText" : "Link text: 385ViGL",
               "accessConditions" : [
                 {
                   "method" : {
@@ -128,8 +128,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "wys5lz5r",
-      "title" : "title-MofTOW5bCv",
+      "id" : "bexh6kx6",
+      "title" : "title-ERuJHArEMd",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -141,7 +141,7 @@
             "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "GWT6gTiZ6K",
+          "value" : "5q2ktKEnxz",
           "type" : "Identifier"
         }
       ],
@@ -151,15 +151,15 @@
       ],
       "items" : [
         {
-          "id" : "6joq4ujd",
+          "id" : "yxylnwwo",
           "identifiers" : [
             {
               "identifierType" : {
-                "id" : "calm-record-id",
-                "label" : "Calm RecordIdentifier",
+                "id" : "miro-image-number",
+                "label" : "Miro image number",
                 "type" : "IdentifierType"
               },
-              "value" : "zf5rF0XzQw",
+              "value" : "dI3v8SSg7e",
               "type" : "Identifier"
             }
           ],
@@ -170,8 +170,8 @@
                 "label" : "IIIF Presentation API",
                 "type" : "LocationType"
               },
-              "url" : "https://iiif.wellcomecollection.org/image/TmP.jpg/info.json",
-              "linkText" : "Link text: lxBF816TR",
+              "url" : "https://iiif.wellcomecollection.org/image/JPD.jpg/info.json",
+              "linkText" : "Link text: 385ViGL",
               "license" : {
                 "id" : "cc-by",
                 "label" : "Attribution 4.0 International (CC BY 4.0)",
@@ -227,17 +227,19 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "wys5lz5r",
+      "id" : "bexh6kx6",
       "identifiers.value" : [
-        "GWT6gTiZ6K"
+        "5q2ktKEnxz"
       ],
       "images.id" : [
       ],
       "images.identifiers.value" : [
       ],
       "items.id" : [
+        "yxylnwwo"
       ],
       "items.identifiers.value" : [
+        "dI3v8SSg7e"
       ],
       "subjects.id" : [
       ],

@@ -1,7 +1,7 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2022-06-06T11:16:21.747406Z",
-  "id" : "gmzc1icz",
+  "createdAt" : "2022-06-09T09:05:51.965570Z",
+  "id" : "mpakqz55",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,12 +10,12 @@
             "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "Q8QOPJdAXF"
+          "value" : "m1qUlCcjgl"
         },
-        "version" : 2,
-        "modifiedTime" : "1983-04-17T04:26:34Z"
+        "version" : 50,
+        "modifiedTime" : "1983-12-29T21:04:29Z"
       },
-      "mergedTime" : "1983-04-17T04:26:34Z",
+      "mergedTime" : "1983-12-29T21:04:29Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
@@ -26,11 +26,11 @@
           "id" : "calm-record-id"
         },
         "ontologyType" : "Work",
-        "value" : "Q8QOPJdAXF"
+        "value" : "m1qUlCcjgl"
       },
-      "canonicalId" : "gmzc1icz",
-      "mergedTime" : "1983-04-17T04:26:34Z",
-      "sourceModifiedTime" : "1983-04-17T04:26:34Z",
+      "canonicalId" : "mpakqz55",
+      "mergedTime" : "1983-12-29T21:04:29Z",
+      "sourceModifiedTime" : "1983-12-29T21:04:29Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
@@ -46,7 +46,7 @@
       }
     },
     "data" : {
-      "title" : "title-vNWbRfsAZ5",
+      "title" : "title-IuLPMgIG17",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -67,21 +67,21 @@
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "pZYum1qUlCcjglM",
+              "label" : "DWIViYo3qvsJ0y4",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "PaKQZ55SIuLPMgI",
+              "label" : "QwQTlrFnQPfLgGF",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "G177tcCDpKgb0Wd",
+              "label" : "RAV0ZsJywtq4xGj",
               "type" : "Concept"
             }
           ]
@@ -96,21 +96,21 @@
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "y2nMuMcZq1Jcxuk",
+              "label" : "ZEnp6i2y6iUJg4J",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "acPWKUROxBsQ4CK",
+              "label" : "nCRDZnkaHR8N4ei",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "8DrDsk2kCAGURhx",
+              "label" : "JRew3RmJ48vvEly",
               "type" : "Concept"
             }
           ]
@@ -135,21 +135,21 @@
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "40zJbSlLwDNn2Et",
+              "label" : "djDVoexxyHJhXco",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "p5zfssscK3StYS1",
+              "label" : "FYwsvmZKLOsIneE",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "KOlZmZXOWd5kJ1F",
+              "label" : "mqhmRoJyr1MqUtq",
               "type" : "Concept"
             }
           ]
@@ -179,8 +179,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "gmzc1icz",
-      "title" : "title-vNWbRfsAZ5",
+      "id" : "mpakqz55",
+      "title" : "title-IuLPMgIG17",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -192,7 +192,7 @@
             "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "Q8QOPJdAXF",
+          "value" : "m1qUlCcjgl",
           "type" : "Identifier"
         }
       ],
@@ -201,15 +201,15 @@
           "label" : "London (England)",
           "concepts" : [
             {
-              "label" : "pZYum1qUlCcjglM",
+              "label" : "DWIViYo3qvsJ0y4",
               "type" : "Concept"
             },
             {
-              "label" : "PaKQZ55SIuLPMgI",
+              "label" : "QwQTlrFnQPfLgGF",
               "type" : "Concept"
             },
             {
-              "label" : "G177tcCDpKgb0Wd",
+              "label" : "RAV0ZsJywtq4xGj",
               "type" : "Concept"
             }
           ],
@@ -219,15 +219,15 @@
           "label" : "Psychology, Pathological",
           "concepts" : [
             {
-              "label" : "y2nMuMcZq1Jcxuk",
+              "label" : "ZEnp6i2y6iUJg4J",
               "type" : "Concept"
             },
             {
-              "label" : "acPWKUROxBsQ4CK",
+              "label" : "nCRDZnkaHR8N4ei",
               "type" : "Concept"
             },
             {
-              "label" : "8DrDsk2kCAGURhx",
+              "label" : "JRew3RmJ48vvEly",
               "type" : "Concept"
             }
           ],
@@ -249,15 +249,15 @@
           "label" : "Darwin \"Jones\", Charles",
           "concepts" : [
             {
-              "label" : "40zJbSlLwDNn2Et",
+              "label" : "djDVoexxyHJhXco",
               "type" : "Concept"
             },
             {
-              "label" : "p5zfssscK3StYS1",
+              "label" : "FYwsvmZKLOsIneE",
               "type" : "Concept"
             },
             {
-              "label" : "KOlZmZXOWd5kJ1F",
+              "label" : "mqhmRoJyr1MqUtq",
               "type" : "Concept"
             }
           ],
@@ -291,9 +291,9 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "gmzc1icz",
+      "id" : "mpakqz55",
       "identifiers.value" : [
-        "Q8QOPJdAXF"
+        "m1qUlCcjgl"
       ],
       "images.id" : [
       ],
@@ -315,6 +315,15 @@
         "Darwin \"Jones\", Charles"
       ],
       "subjects.concepts.label" : [
+        "DWIViYo3qvsJ0y4",
+        "QwQTlrFnQPfLgGF",
+        "RAV0ZsJywtq4xGj",
+        "ZEnp6i2y6iUJg4J",
+        "nCRDZnkaHR8N4ei",
+        "JRew3RmJ48vvEly",
+        "djDVoexxyHJhXco",
+        "FYwsvmZKLOsIneE",
+        "mqhmRoJyr1MqUtq"
       ],
       "genres.concepts.label" : [
       ],

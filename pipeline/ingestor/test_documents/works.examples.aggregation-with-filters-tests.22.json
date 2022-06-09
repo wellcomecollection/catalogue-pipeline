@@ -1,7 +1,7 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2022-06-06T11:16:21.580141Z",
-  "id" : "b5lylqvq",
+  "createdAt" : "2022-06-09T09:05:51.770431Z",
+  "id" : "lpwaxi4y",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,12 +10,12 @@
             "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "DIlUXQf0x4"
+          "value" : "VkukQIogxZ"
         },
-        "version" : 22,
-        "modifiedTime" : "2004-01-11T22:06:32Z"
+        "version" : 9,
+        "modifiedTime" : "1981-10-01T23:00:44Z"
       },
-      "mergedTime" : "2004-01-11T22:06:32Z",
+      "mergedTime" : "1981-10-01T23:00:44Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
@@ -26,11 +26,11 @@
           "id" : "sierra-system-number"
         },
         "ontologyType" : "Work",
-        "value" : "DIlUXQf0x4"
+        "value" : "VkukQIogxZ"
       },
-      "canonicalId" : "b5lylqvq",
-      "mergedTime" : "2004-01-11T22:06:32Z",
-      "sourceModifiedTime" : "2004-01-11T22:06:32Z",
+      "canonicalId" : "lpwaxi4y",
+      "mergedTime" : "1981-10-01T23:00:44Z",
+      "sourceModifiedTime" : "1981-10-01T23:00:44Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
@@ -46,7 +46,7 @@
       }
     },
     "data" : {
-      "title" : "title-SQr2rDSofx",
+      "title" : "title-BoRzqlD5LN",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -64,27 +64,27 @@
           "id" : {
             "type" : "Unidentifiable"
           },
-          "label" : "9hdRJC6PIO",
+          "label" : "UprsjrX3OK",
           "concepts" : [
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "bmiPTNnwYSoEYyd",
+              "label" : "DwcT2lfjsLaubb7",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "ewbq2T7lfxMM8Gf",
+              "label" : "3X6HqGsIdzZyGYB",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "uD4zaFerI8P7W1W",
+              "label" : "SGAtphRApGkJTZW",
               "type" : "Concept"
             }
           ]
@@ -114,8 +114,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "b5lylqvq",
-      "title" : "title-SQr2rDSofx",
+      "id" : "lpwaxi4y",
+      "title" : "title-BoRzqlD5LN",
       "alternativeTitles" : [
       ],
       "workType" : {
@@ -132,24 +132,24 @@
             "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "DIlUXQf0x4",
+          "value" : "VkukQIogxZ",
           "type" : "Identifier"
         }
       ],
       "subjects" : [
         {
-          "label" : "9hdRJC6PIO",
+          "label" : "UprsjrX3OK",
           "concepts" : [
             {
-              "label" : "bmiPTNnwYSoEYyd",
+              "label" : "DwcT2lfjsLaubb7",
               "type" : "Concept"
             },
             {
-              "label" : "ewbq2T7lfxMM8Gf",
+              "label" : "3X6HqGsIdzZyGYB",
               "type" : "Concept"
             },
             {
-              "label" : "uD4zaFerI8P7W1W",
+              "label" : "SGAtphRApGkJTZW",
               "type" : "Concept"
             }
           ],
@@ -183,9 +183,9 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "b5lylqvq",
+      "id" : "lpwaxi4y",
       "identifiers.value" : [
-        "DIlUXQf0x4"
+        "VkukQIogxZ"
       ],
       "images.id" : [
       ],
@@ -200,9 +200,12 @@
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
-        "9hdRJC6PIO"
+        "UprsjrX3OK"
       ],
       "subjects.concepts.label" : [
+        "DwcT2lfjsLaubb7",
+        "3X6HqGsIdzZyGYB",
+        "SGAtphRApGkJTZW"
       ],
       "genres.concepts.label" : [
       ],
@@ -222,7 +225,7 @@
       "production.dates" : [
       ],
       "subjects.label" : [
-        "{\"label\":\"9hdRJC6PIO\",\"concepts\":[],\"type\":\"Subject\"}"
+        "{\"label\":\"UprsjrX3OK\",\"concepts\":[],\"type\":\"Subject\"}"
       ],
       "languages" : [
       ],

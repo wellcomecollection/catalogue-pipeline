@@ -1,21 +1,21 @@
 {
   "description" : "one of a list of works with a variety of languages",
-  "createdAt" : "2022-06-06T11:16:21.131859Z",
-  "id" : "qn97gvxq",
+  "createdAt" : "2022-06-09T09:05:51.205171Z",
+  "id" : "v7x7kbc1",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "BbZQhYTTwR"
+          "value" : "t4hBURiCSC"
         },
-        "version" : 48,
-        "modifiedTime" : "2047-12-31T21:26:48Z"
+        "version" : 10,
+        "modifiedTime" : "2054-05-08T05:16:55Z"
       },
-      "mergedTime" : "2047-12-31T21:26:48Z",
+      "mergedTime" : "2054-05-08T05:16:55Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
@@ -23,14 +23,14 @@
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "sierra-system-number"
+          "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "BbZQhYTTwR"
+        "value" : "t4hBURiCSC"
       },
-      "canonicalId" : "qn97gvxq",
-      "mergedTime" : "2047-12-31T21:26:48Z",
-      "sourceModifiedTime" : "2047-12-31T21:26:48Z",
+      "canonicalId" : "v7x7kbc1",
+      "mergedTime" : "2054-05-08T05:16:55Z",
+      "sourceModifiedTime" : "2054-05-08T05:16:55Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
@@ -86,7 +86,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "qn97gvxq",
+      "id" : "v7x7kbc1",
       "title" : "A work with languages English",
       "alternativeTitles" : [
       ],
@@ -95,11 +95,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "BbZQhYTTwR",
+          "value" : "t4hBURiCSC",
           "type" : "Identifier"
         }
       ],
@@ -137,9 +137,9 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "qn97gvxq",
+      "id" : "v7x7kbc1",
       "identifiers.value" : [
-        "BbZQhYTTwR"
+        "t4hBURiCSC"
       ],
       "images.id" : [
       ],

@@ -1,21 +1,21 @@
 {
   "description" : "examples for the works filtered aggregations tests",
-  "createdAt" : "2022-06-06T11:16:22.174962Z",
-  "id" : "wkzjlx5a",
+  "createdAt" : "2022-06-09T09:05:52.439915Z",
+  "id" : "ixmya3fc",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "SKphDnojLC"
+          "value" : "42KTE1hWM7"
         },
         "version" : 23,
-        "modifiedTime" : "1974-05-03T18:39:30Z"
+        "modifiedTime" : "2034-05-02T12:57:22Z"
       },
-      "mergedTime" : "1974-05-03T18:39:30Z",
+      "mergedTime" : "2034-05-02T12:57:22Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
@@ -23,14 +23,14 @@
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "calm-record-id"
+          "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "SKphDnojLC"
+        "value" : "42KTE1hWM7"
       },
-      "canonicalId" : "wkzjlx5a",
-      "mergedTime" : "1974-05-03T18:39:30Z",
-      "sourceModifiedTime" : "1974-05-03T18:39:30Z",
+      "canonicalId" : "ixmya3fc",
+      "mergedTime" : "2034-05-02T12:57:22Z",
+      "sourceModifiedTime" : "2034-05-02T12:57:22Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
@@ -89,7 +89,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "wkzjlx5a",
+      "id" : "ixmya3fc",
       "title" : "tapirs",
       "alternativeTitles" : [
       ],
@@ -103,11 +103,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "SKphDnojLC",
+          "value" : "42KTE1hWM7",
           "type" : "Identifier"
         }
       ],
@@ -145,9 +145,9 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "wkzjlx5a",
+      "id" : "ixmya3fc",
       "identifiers.value" : [
-        "SKphDnojLC"
+        "42KTE1hWM7"
       ],
       "images.id" : [
       ],

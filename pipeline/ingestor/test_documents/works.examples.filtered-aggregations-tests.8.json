@@ -1,7 +1,7 @@
 {
   "description" : "examples for the works filtered aggregations tests",
-  "createdAt" : "2022-06-06T11:16:22.176195Z",
-  "id" : "k57syong",
+  "createdAt" : "2022-06-09T09:05:52.441045Z",
+  "id" : "odmv5gsm",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,12 +10,12 @@
             "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "czKSHpT0IR"
+          "value" : "l7z2IaIyPh"
         },
-        "version" : 78,
-        "modifiedTime" : "1943-06-02T04:26:11Z"
+        "version" : 13,
+        "modifiedTime" : "1991-05-16T22:52:22Z"
       },
-      "mergedTime" : "1943-06-02T04:26:11Z",
+      "mergedTime" : "1991-05-16T22:52:22Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
@@ -26,11 +26,11 @@
           "id" : "sierra-system-number"
         },
         "ontologyType" : "Work",
-        "value" : "czKSHpT0IR"
+        "value" : "l7z2IaIyPh"
       },
-      "canonicalId" : "k57syong",
-      "mergedTime" : "1943-06-02T04:26:11Z",
-      "sourceModifiedTime" : "1943-06-02T04:26:11Z",
+      "canonicalId" : "odmv5gsm",
+      "mergedTime" : "1991-05-16T22:52:22Z",
+      "sourceModifiedTime" : "1991-05-16T22:52:22Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
@@ -89,7 +89,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "k57syong",
+      "id" : "odmv5gsm",
       "title" : "tapirs",
       "alternativeTitles" : [
       ],
@@ -107,7 +107,7 @@
             "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "czKSHpT0IR",
+          "value" : "l7z2IaIyPh",
           "type" : "Identifier"
         }
       ],
@@ -145,9 +145,9 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "k57syong",
+      "id" : "odmv5gsm",
       "identifiers.value" : [
-        "czKSHpT0IR"
+        "l7z2IaIyPh"
       ],
       "images.id" : [
       ],

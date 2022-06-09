@@ -1,21 +1,21 @@
 {
   "description" : "examples for the genre tests",
-  "createdAt" : "2022-06-06T11:16:21.710141Z",
-  "id" : "jywtq4xg",
+  "createdAt" : "2022-06-09T09:05:51.923817Z",
+  "id" : "ebxxzis5",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "LgGFRAV0Zs"
+          "value" : "ylf5KLfzRZ"
         },
-        "version" : 85,
-        "modifiedTime" : "1934-09-04T19:55:55Z"
+        "version" : 84,
+        "modifiedTime" : "2043-04-20T02:16:49Z"
       },
-      "mergedTime" : "1934-09-04T19:55:55Z",
+      "mergedTime" : "2043-04-20T02:16:49Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
@@ -23,14 +23,14 @@
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "calm-record-id"
+          "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "LgGFRAV0Zs"
+        "value" : "ylf5KLfzRZ"
       },
-      "canonicalId" : "jywtq4xg",
-      "mergedTime" : "1934-09-04T19:55:55Z",
-      "sourceModifiedTime" : "1934-09-04T19:55:55Z",
+      "canonicalId" : "ebxxzis5",
+      "mergedTime" : "2043-04-20T02:16:49Z",
+      "sourceModifiedTime" : "2043-04-20T02:16:49Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
@@ -46,7 +46,7 @@
       }
     },
     "data" : {
-      "title" : "title-ZEnp6i2y6i",
+      "title" : "title-lN0hQ2tqCc",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -66,21 +66,21 @@
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "qp5RA4f5gWVIptl",
+              "label" : "Uq84cRgJ5Ue8m3H",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "xE0qlBbPiSihnTe",
+              "label" : "Vuers4RY14qUDXX",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "JBs3eSemcGNQXd8",
+              "label" : "1muoI8Tp8uFRfKD",
               "type" : "Concept"
             }
           ]
@@ -108,8 +108,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "jywtq4xg",
-      "title" : "title-ZEnp6i2y6i",
+      "id" : "ebxxzis5",
+      "title" : "title-lN0hQ2tqCc",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -117,11 +117,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "LgGFRAV0Zs",
+          "value" : "ylf5KLfzRZ",
           "type" : "Identifier"
         }
       ],
@@ -132,15 +132,15 @@
           "label" : "Annual reports.",
           "concepts" : [
             {
-              "label" : "qp5RA4f5gWVIptl",
+              "label" : "Uq84cRgJ5Ue8m3H",
               "type" : "Concept"
             },
             {
-              "label" : "xE0qlBbPiSihnTe",
+              "label" : "Vuers4RY14qUDXX",
               "type" : "Concept"
             },
             {
-              "label" : "JBs3eSemcGNQXd8",
+              "label" : "1muoI8Tp8uFRfKD",
               "type" : "Concept"
             }
           ],
@@ -172,9 +172,9 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "jywtq4xg",
+      "id" : "ebxxzis5",
       "identifiers.value" : [
-        "LgGFRAV0Zs"
+        "ylf5KLfzRZ"
       ],
       "images.id" : [
       ],
@@ -193,6 +193,9 @@
       "subjects.concepts.label" : [
       ],
       "genres.concepts.label" : [
+        "Uq84cRgJ5Ue8m3H",
+        "Vuers4RY14qUDXX",
+        "1muoI8Tp8uFRfKD"
       ],
       "partOf.id" : [
       ],

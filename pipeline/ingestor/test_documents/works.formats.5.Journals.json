@@ -1,21 +1,21 @@
 {
   "description" : "one of a list of works with a variety of formats",
-  "createdAt" : "2022-06-06T11:16:21.073293Z",
-  "id" : "plmmmkup",
+  "createdAt" : "2022-06-09T09:05:51.142506Z",
+  "id" : "49lemvha",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "X7kBc19InD"
+          "value" : "tQgSkyZiBA"
         },
-        "version" : 52,
-        "modifiedTime" : "1952-04-02T02:27:37Z"
+        "version" : 26,
+        "modifiedTime" : "1974-11-03T04:11:52Z"
       },
-      "mergedTime" : "1952-04-02T02:27:37Z",
+      "mergedTime" : "1974-11-03T04:11:52Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
@@ -23,14 +23,14 @@
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "miro-image-number"
+          "id" : "calm-record-id"
         },
         "ontologyType" : "Work",
-        "value" : "X7kBc19InD"
+        "value" : "tQgSkyZiBA"
       },
-      "canonicalId" : "plmmmkup",
-      "mergedTime" : "1952-04-02T02:27:37Z",
-      "sourceModifiedTime" : "1952-04-02T02:27:37Z",
+      "canonicalId" : "49lemvha",
+      "mergedTime" : "1974-11-03T04:11:52Z",
+      "sourceModifiedTime" : "1974-11-03T04:11:52Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
@@ -85,7 +85,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "plmmmkup",
+      "id" : "49lemvha",
       "title" : "A work with format Journals",
       "alternativeTitles" : [
       ],
@@ -99,11 +99,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "X7kBc19InD",
+          "value" : "tQgSkyZiBA",
           "type" : "Identifier"
         }
       ],
@@ -136,9 +136,9 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "plmmmkup",
+      "id" : "49lemvha",
       "identifiers.value" : [
-        "X7kBc19InD"
+        "tQgSkyZiBA"
       ],
       "images.id" : [
       ],

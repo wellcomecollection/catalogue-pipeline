@@ -1,21 +1,21 @@
 {
   "description" : "one of a list of works with a variety of formats",
-  "createdAt" : "2022-06-06T11:16:21.034772Z",
-  "id" : "j27g6hhl",
+  "createdAt" : "2022-06-09T09:05:51.119020Z",
+  "id" : "tanyzgp9",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "vyeItSna2X"
+          "value" : "z9bfcN5BFm"
         },
-        "version" : 12,
-        "modifiedTime" : "2067-01-08T22:50:46Z"
+        "version" : 52,
+        "modifiedTime" : "2021-11-20T08:53:32Z"
       },
-      "mergedTime" : "2067-01-08T22:50:46Z",
+      "mergedTime" : "2021-11-20T08:53:32Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
@@ -23,14 +23,14 @@
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "calm-record-id"
+          "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "vyeItSna2X"
+        "value" : "z9bfcN5BFm"
       },
-      "canonicalId" : "j27g6hhl",
-      "mergedTime" : "2067-01-08T22:50:46Z",
-      "sourceModifiedTime" : "2067-01-08T22:50:46Z",
+      "canonicalId" : "tanyzgp9",
+      "mergedTime" : "2021-11-20T08:53:32Z",
+      "sourceModifiedTime" : "2021-11-20T08:53:32Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
@@ -85,7 +85,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "j27g6hhl",
+      "id" : "tanyzgp9",
       "title" : "A work with format Books",
       "alternativeTitles" : [
       ],
@@ -99,11 +99,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "vyeItSna2X",
+          "value" : "z9bfcN5BFm",
           "type" : "Identifier"
         }
       ],
@@ -136,9 +136,9 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "j27g6hhl",
+      "id" : "tanyzgp9",
       "identifiers.value" : [
-        "vyeItSna2X"
+        "z9bfcN5BFm"
       ],
       "images.id" : [
       ],

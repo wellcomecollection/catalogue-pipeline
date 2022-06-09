@@ -1,21 +1,21 @@
 {
   "description" : "works with multi-year production ranges",
-  "createdAt" : "2022-06-06T11:16:21.512186Z",
-  "id" : "wmzcsqaf",
+  "createdAt" : "2022-06-09T09:05:51.661508Z",
+  "id" : "pujta45z",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "Kwytcvu6mF"
+          "value" : "4EFefGhSS8"
         },
-        "version" : 10,
-        "modifiedTime" : "1939-03-21T12:48:35Z"
+        "version" : 75,
+        "modifiedTime" : "2013-08-30T03:43:43Z"
       },
-      "mergedTime" : "1939-03-21T12:48:35Z",
+      "mergedTime" : "2013-08-30T03:43:43Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
@@ -23,14 +23,14 @@
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "calm-record-id"
+          "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "Kwytcvu6mF"
+        "value" : "4EFefGhSS8"
       },
-      "canonicalId" : "wmzcsqaf",
-      "mergedTime" : "1939-03-21T12:48:35Z",
-      "sourceModifiedTime" : "1939-03-21T12:48:35Z",
+      "canonicalId" : "pujta45z",
+      "mergedTime" : "2013-08-30T03:43:43Z",
+      "sourceModifiedTime" : "2013-08-30T03:43:43Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
@@ -46,7 +46,7 @@
       }
     },
     "data" : {
-      "title" : "title-tBeNhpR5aF",
+      "title" : "title-fq9upMxJZw",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -65,13 +65,13 @@
       "thumbnail" : null,
       "production" : [
         {
-          "label" : "Mse28ReU0tOIr878hfcCYXKeD",
+          "label" : "xBoirzqph7IoT8vGJFY3QKMnI",
           "places" : [
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "QMh6zvv2Jj"
+              "label" : "gomTs82bfn"
             }
           ],
           "agents" : [
@@ -79,7 +79,7 @@
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "5pKO9kAlfI",
+              "label" : "k23YGkB1Yd",
               "prefix" : null,
               "numeration" : null,
               "type" : "Person"
@@ -118,8 +118,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "wmzcsqaf",
-      "title" : "title-tBeNhpR5aF",
+      "id" : "pujta45z",
+      "title" : "title-fq9upMxJZw",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -127,11 +127,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "Kwytcvu6mF",
+          "value" : "4EFefGhSS8",
           "type" : "Identifier"
         }
       ],
@@ -147,16 +147,16 @@
       ],
       "production" : [
         {
-          "label" : "Mse28ReU0tOIr878hfcCYXKeD",
+          "label" : "xBoirzqph7IoT8vGJFY3QKMnI",
           "places" : [
             {
-              "label" : "QMh6zvv2Jj",
+              "label" : "gomTs82bfn",
               "type" : "Place"
             }
           ],
           "agents" : [
             {
-              "label" : "5pKO9kAlfI",
+              "label" : "k23YGkB1Yd",
               "type" : "Person"
             }
           ],
@@ -186,9 +186,9 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "wmzcsqaf",
+      "id" : "pujta45z",
       "identifiers.value" : [
-        "Kwytcvu6mF"
+        "4EFefGhSS8"
       ],
       "images.id" : [
       ],

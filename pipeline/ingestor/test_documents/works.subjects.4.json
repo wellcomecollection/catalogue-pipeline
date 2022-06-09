@@ -1,21 +1,21 @@
 {
   "description" : "works with different subjects",
-  "createdAt" : "2022-06-06T11:16:21.234865Z",
-  "id" : "t9nj8zse",
+  "createdAt" : "2022-06-09T09:05:51.346009Z",
+  "id" : "bobrvoek",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "8imBUVPHmu"
+          "value" : "3XqBJ6dy5r"
         },
-        "version" : 71,
-        "modifiedTime" : "2038-05-30T19:54:43Z"
+        "version" : 21,
+        "modifiedTime" : "2031-03-08T00:19:06Z"
       },
-      "mergedTime" : "2038-05-30T19:54:43Z",
+      "mergedTime" : "2031-03-08T00:19:06Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
@@ -23,14 +23,14 @@
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "calm-record-id"
+          "id" : "sierra-system-number"
         },
         "ontologyType" : "Work",
-        "value" : "8imBUVPHmu"
+        "value" : "3XqBJ6dy5r"
       },
-      "canonicalId" : "t9nj8zse",
-      "mergedTime" : "2038-05-30T19:54:43Z",
-      "sourceModifiedTime" : "2038-05-30T19:54:43Z",
+      "canonicalId" : "bobrvoek",
+      "mergedTime" : "2031-03-08T00:19:06Z",
+      "sourceModifiedTime" : "2031-03-08T00:19:06Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
@@ -46,7 +46,7 @@
       }
     },
     "data" : {
-      "title" : "title-9al0iIjgaH",
+      "title" : "title-muzt2ZO588",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -82,8 +82,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "t9nj8zse",
-      "title" : "title-9al0iIjgaH",
+      "id" : "bobrvoek",
+      "title" : "title-muzt2ZO588",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -91,11 +91,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "8imBUVPHmu",
+          "value" : "3XqBJ6dy5r",
           "type" : "Identifier"
         }
       ],
@@ -128,9 +128,9 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "t9nj8zse",
+      "id" : "bobrvoek",
       "identifiers.value" : [
-        "8imBUVPHmu"
+        "3XqBJ6dy5r"
       ],
       "images.id" : [
       ],

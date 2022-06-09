@@ -1,21 +1,21 @@
 {
   "description" : "one of a list of works with a variety of languages",
-  "createdAt" : "2022-06-06T11:16:21.137923Z",
-  "id" : "yhrq0rmr",
+  "createdAt" : "2022-06-09T09:05:51.213864Z",
+  "id" : "jwhxsuyy",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "tXlgR2VtcJ"
+          "value" : "h3lSc6Xmbq"
         },
-        "version" : 98,
-        "modifiedTime" : "2058-11-12T20:11:18Z"
+        "version" : 11,
+        "modifiedTime" : "1974-08-20T04:15:38Z"
       },
-      "mergedTime" : "2058-11-12T20:11:18Z",
+      "mergedTime" : "1974-08-20T04:15:38Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
@@ -23,14 +23,14 @@
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "miro-image-number"
+          "id" : "calm-record-id"
         },
         "ontologyType" : "Work",
-        "value" : "tXlgR2VtcJ"
+        "value" : "h3lSc6Xmbq"
       },
-      "canonicalId" : "yhrq0rmr",
-      "mergedTime" : "2058-11-12T20:11:18Z",
-      "sourceModifiedTime" : "2058-11-12T20:11:18Z",
+      "canonicalId" : "jwhxsuyy",
+      "mergedTime" : "1974-08-20T04:15:38Z",
+      "sourceModifiedTime" : "1974-08-20T04:15:38Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
@@ -86,7 +86,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "yhrq0rmr",
+      "id" : "jwhxsuyy",
       "title" : "A work with languages English",
       "alternativeTitles" : [
       ],
@@ -95,11 +95,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "tXlgR2VtcJ",
+          "value" : "h3lSc6Xmbq",
           "type" : "Identifier"
         }
       ],
@@ -137,9 +137,9 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "yhrq0rmr",
+      "id" : "jwhxsuyy",
       "identifiers.value" : [
-        "tXlgR2VtcJ"
+        "h3lSc6Xmbq"
       ],
       "images.id" : [
       ],

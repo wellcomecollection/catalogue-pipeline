@@ -1,7 +1,7 @@
 {
   "description" : "a work with a collection path",
-  "createdAt" : "2022-06-06T11:16:21.372748Z",
-  "id" : "mlqs2qbd",
+  "createdAt" : "2022-06-09T09:05:51.494674Z",
+  "id" : "tl7ykrmh",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,12 +10,12 @@
             "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "yQb1GgWKF4"
+          "value" : "ztO1kLlO6q"
         },
-        "version" : 75,
-        "modifiedTime" : "1978-12-10T03:28:38Z"
+        "version" : 27,
+        "modifiedTime" : "2021-10-01T06:49:35Z"
       },
-      "mergedTime" : "1978-12-10T03:28:38Z",
+      "mergedTime" : "2021-10-01T06:49:35Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
@@ -26,11 +26,11 @@
           "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "yQb1GgWKF4"
+        "value" : "ztO1kLlO6q"
       },
-      "canonicalId" : "mlqs2qbd",
-      "mergedTime" : "1978-12-10T03:28:38Z",
-      "sourceModifiedTime" : "1978-12-10T03:28:38Z",
+      "canonicalId" : "tl7ykrmh",
+      "mergedTime" : "2021-10-01T06:49:35Z",
+      "sourceModifiedTime" : "2021-10-01T06:49:35Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
@@ -46,7 +46,7 @@
       }
     },
     "data" : {
-      "title" : "title-X1EiWSsi1c",
+      "title" : "title-SgzBeJhda8",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -85,8 +85,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "mlqs2qbd",
-      "title" : "title-X1EiWSsi1c",
+      "id" : "tl7ykrmh",
+      "title" : "title-SgzBeJhda8",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -98,7 +98,7 @@
             "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "yQb1GgWKF4",
+          "value" : "ztO1kLlO6q",
           "type" : "Identifier"
         }
       ],
@@ -131,9 +131,9 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "mlqs2qbd",
+      "id" : "tl7ykrmh",
       "identifiers.value" : [
-        "yQb1GgWKF4"
+        "ztO1kLlO6q"
       ],
       "images.id" : [
       ],

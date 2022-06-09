@@ -1,7 +1,7 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2022-06-06T11:16:21.783894Z",
-  "id" : "gnuj1it3",
+  "createdAt" : "2022-06-09T09:05:52.005559Z",
+  "id" : "zfsssck3",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,12 +10,12 @@
             "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "Og3KGy7Mz5"
+          "value" : "LwDNn2Etp5"
         },
-        "version" : 57,
-        "modifiedTime" : "1987-11-24T07:59:41Z"
+        "version" : 8,
+        "modifiedTime" : "2028-02-16T17:48:13Z"
       },
-      "mergedTime" : "1987-11-24T07:59:41Z",
+      "mergedTime" : "2028-02-16T17:48:13Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
@@ -26,11 +26,11 @@
           "id" : "sierra-system-number"
         },
         "ontologyType" : "Work",
-        "value" : "Og3KGy7Mz5"
+        "value" : "LwDNn2Etp5"
       },
-      "canonicalId" : "gnuj1it3",
-      "mergedTime" : "1987-11-24T07:59:41Z",
-      "sourceModifiedTime" : "1987-11-24T07:59:41Z",
+      "canonicalId" : "zfsssck3",
+      "mergedTime" : "2028-02-16T17:48:13Z",
+      "sourceModifiedTime" : "2028-02-16T17:48:13Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
@@ -46,7 +46,7 @@
       }
     },
     "data" : {
-      "title" : "title-c4OR9LzJV7",
+      "title" : "title-tYS1KOlZmZ",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -98,8 +98,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "gnuj1it3",
-      "title" : "title-c4OR9LzJV7",
+      "id" : "zfsssck3",
+      "title" : "title-tYS1KOlZmZ",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -120,7 +120,7 @@
             "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "Og3KGy7Mz5",
+          "value" : "LwDNn2Etp5",
           "type" : "Identifier"
         }
       ],
@@ -153,9 +153,9 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "gnuj1it3",
+      "id" : "zfsssck3",
       "identifiers.value" : [
-        "Og3KGy7Mz5"
+        "LwDNn2Etp5"
       ],
       "images.id" : [
       ],

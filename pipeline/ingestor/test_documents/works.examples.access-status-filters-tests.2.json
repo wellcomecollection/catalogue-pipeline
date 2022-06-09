@@ -1,7 +1,7 @@
 {
   "description" : "examples for the access status tests",
-  "createdAt" : "2022-06-06T11:16:22.094713Z",
-  "id" : "glagakd2",
+  "createdAt" : "2022-06-09T09:05:52.364225Z",
+  "id" : "m9c4dagx",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,12 +10,12 @@
             "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "aCHuXzrv8P"
+          "value" : "XUhcLZhc35"
         },
-        "version" : 53,
-        "modifiedTime" : "2012-05-12T17:53:46Z"
+        "version" : 97,
+        "modifiedTime" : "1972-07-15T19:04:47Z"
       },
-      "mergedTime" : "2012-05-12T17:53:46Z",
+      "mergedTime" : "1972-07-15T19:04:47Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
@@ -26,11 +26,11 @@
           "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "aCHuXzrv8P"
+        "value" : "XUhcLZhc35"
       },
-      "canonicalId" : "glagakd2",
-      "mergedTime" : "2012-05-12T17:53:46Z",
-      "sourceModifiedTime" : "2012-05-12T17:53:46Z",
+      "canonicalId" : "m9c4dagx",
+      "mergedTime" : "1972-07-15T19:04:47Z",
+      "sourceModifiedTime" : "1972-07-15T19:04:47Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
@@ -46,7 +46,7 @@
       }
     },
     "data" : {
-      "title" : "title-zPZAnMiJNW",
+      "title" : "title-AjEybh6q7w",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -74,13 +74,13 @@
       "items" : [
         {
           "id" : {
-            "canonicalId" : "i3ppimzv",
+            "canonicalId" : "pwnrkdo6",
             "sourceIdentifier" : {
               "identifierType" : {
-                "id" : "miro-image-number"
+                "id" : "calm-record-id"
               },
               "ontologyType" : "Work",
-              "value" : "Cba0kh0iB2"
+              "value" : "p3bULWghZ3"
             },
             "otherIdentifiers" : [
             ],
@@ -90,7 +90,7 @@
           "note" : null,
           "locations" : [
             {
-              "url" : "https://iiif.wellcomecollection.org/image/VUp.jpg/info.json",
+              "url" : "https://iiif.wellcomecollection.org/image/oWR.jpg/info.json",
               "locationType" : {
                 "id" : "iiif-presentation"
               },
@@ -98,7 +98,7 @@
                 "id" : "cc-by"
               },
               "credit" : null,
-              "linkText" : null,
+              "linkText" : "Link text: FqozNGJ9Pf",
               "accessConditions" : [
                 {
                   "method" : {
@@ -125,8 +125,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "glagakd2",
-      "title" : "title-zPZAnMiJNW",
+      "id" : "m9c4dagx",
+      "title" : "title-AjEybh6q7w",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -138,7 +138,7 @@
             "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "aCHuXzrv8P",
+          "value" : "XUhcLZhc35",
           "type" : "Identifier"
         }
       ],
@@ -148,15 +148,15 @@
       ],
       "items" : [
         {
-          "id" : "i3ppimzv",
+          "id" : "pwnrkdo6",
           "identifiers" : [
             {
               "identifierType" : {
-                "id" : "miro-image-number",
-                "label" : "Miro image number",
+                "id" : "calm-record-id",
+                "label" : "Calm RecordIdentifier",
                 "type" : "IdentifierType"
               },
-              "value" : "Cba0kh0iB2",
+              "value" : "p3bULWghZ3",
               "type" : "Identifier"
             }
           ],
@@ -167,7 +167,8 @@
                 "label" : "IIIF Presentation API",
                 "type" : "LocationType"
               },
-              "url" : "https://iiif.wellcomecollection.org/image/VUp.jpg/info.json",
+              "url" : "https://iiif.wellcomecollection.org/image/oWR.jpg/info.json",
+              "linkText" : "Link text: FqozNGJ9Pf",
               "license" : {
                 "id" : "cc-by",
                 "label" : "Attribution 4.0 International (CC BY 4.0)",
@@ -218,17 +219,19 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "glagakd2",
+      "id" : "m9c4dagx",
       "identifiers.value" : [
-        "aCHuXzrv8P"
+        "XUhcLZhc35"
       ],
       "images.id" : [
       ],
       "images.identifiers.value" : [
       ],
       "items.id" : [
+        "pwnrkdo6"
       ],
       "items.identifiers.value" : [
+        "p3bULWghZ3"
       ],
       "subjects.id" : [
       ],

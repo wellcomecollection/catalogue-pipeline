@@ -1,7 +1,7 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2022-06-06T11:16:21.394471Z",
-  "id" : "tlc5rq9a",
+  "createdAt" : "2022-06-09T09:05:51.525991Z",
+  "id" : "4qynrhjt",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,12 +10,12 @@
             "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "mz25207khU"
+          "value" : "4K883LiigJ"
         },
-        "version" : 11,
-        "modifiedTime" : "1934-03-12T06:54:31Z"
+        "version" : 70,
+        "modifiedTime" : "2014-04-05T04:17:35Z"
       },
-      "mergedTime" : "1934-03-12T06:54:31Z",
+      "mergedTime" : "2014-04-05T04:17:35Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
@@ -26,11 +26,11 @@
           "id" : "sierra-system-number"
         },
         "ontologyType" : "Work",
-        "value" : "mz25207khU"
+        "value" : "4K883LiigJ"
       },
-      "canonicalId" : "tlc5rq9a",
-      "mergedTime" : "1934-03-12T06:54:31Z",
-      "sourceModifiedTime" : "1934-03-12T06:54:31Z",
+      "canonicalId" : "4qynrhjt",
+      "mergedTime" : "2014-04-05T04:17:35Z",
+      "sourceModifiedTime" : "2014-04-05T04:17:35Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
@@ -46,7 +46,7 @@
       }
     },
     "data" : {
-      "title" : "title-jNr737MdPw",
+      "title" : "title-fJrHY8gLbw",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -85,8 +85,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "tlc5rq9a",
-      "title" : "title-jNr737MdPw",
+      "id" : "4qynrhjt",
+      "title" : "title-fJrHY8gLbw",
       "alternativeTitles" : [
       ],
       "workType" : {
@@ -103,7 +103,7 @@
             "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "mz25207khU",
+          "value" : "4K883LiigJ",
           "type" : "Identifier"
         }
       ],
@@ -136,9 +136,9 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "tlc5rq9a",
+      "id" : "4qynrhjt",
       "identifiers.value" : [
-        "mz25207khU"
+        "4K883LiigJ"
       ],
       "images.id" : [
       ],

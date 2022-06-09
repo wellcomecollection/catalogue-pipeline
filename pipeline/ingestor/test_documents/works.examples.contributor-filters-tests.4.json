@@ -1,7 +1,7 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2022-06-06T11:16:21.785512Z",
-  "id" : "cpwnrkdo",
+  "createdAt" : "2022-06-09T09:05:52.009349Z",
+  "id" : "jor9vqae",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,12 +10,12 @@
             "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "FqozNGJ9Pf"
+          "value" : "uGQD3ShRQF"
         },
-        "version" : 52,
-        "modifiedTime" : "1990-04-28T07:06:53Z"
+        "version" : 16,
+        "modifiedTime" : "1962-05-28T12:54:22Z"
       },
-      "mergedTime" : "1990-04-28T07:06:53Z",
+      "mergedTime" : "1962-05-28T12:54:22Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
@@ -26,11 +26,11 @@
           "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "FqozNGJ9Pf"
+        "value" : "uGQD3ShRQF"
       },
-      "canonicalId" : "cpwnrkdo",
-      "mergedTime" : "1990-04-28T07:06:53Z",
-      "sourceModifiedTime" : "1990-04-28T07:06:53Z",
+      "canonicalId" : "jor9vqae",
+      "mergedTime" : "1962-05-28T12:54:22Z",
+      "sourceModifiedTime" : "1962-05-28T12:54:22Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
@@ -46,7 +46,7 @@
       }
     },
     "data" : {
-      "title" : "title-Vp3bULWghZ",
+      "title" : "title-AzAiZFAZvT",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -114,8 +114,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "cpwnrkdo",
-      "title" : "title-Vp3bULWghZ",
+      "id" : "jor9vqae",
+      "title" : "title-AzAiZFAZvT",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -145,7 +145,7 @@
             "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "FqozNGJ9Pf",
+          "value" : "uGQD3ShRQF",
           "type" : "Identifier"
         }
       ],
@@ -178,9 +178,9 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "cpwnrkdo",
+      "id" : "jor9vqae",
       "identifiers.value" : [
-        "FqozNGJ9Pf"
+        "uGQD3ShRQF"
       ],
       "images.id" : [
       ],

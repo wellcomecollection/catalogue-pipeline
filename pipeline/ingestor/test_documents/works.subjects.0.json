@@ -1,21 +1,21 @@
 {
   "description" : "works with different subjects",
-  "createdAt" : "2022-06-06T11:16:21.231622Z",
-  "id" : "6uwysojy",
+  "createdAt" : "2022-06-09T09:05:51.339422Z",
+  "id" : "y89wjvsf",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "pzLgxSR5EK"
+          "value" : "yTaqruNiUs"
         },
-        "version" : 77,
-        "modifiedTime" : "2005-10-29T13:02:10Z"
+        "version" : 78,
+        "modifiedTime" : "2022-11-01T08:05:39Z"
       },
-      "mergedTime" : "2005-10-29T13:02:10Z",
+      "mergedTime" : "2022-11-01T08:05:39Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
@@ -23,14 +23,14 @@
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "calm-record-id"
+          "id" : "sierra-system-number"
         },
         "ontologyType" : "Work",
-        "value" : "pzLgxSR5EK"
+        "value" : "yTaqruNiUs"
       },
-      "canonicalId" : "6uwysojy",
-      "mergedTime" : "2005-10-29T13:02:10Z",
-      "sourceModifiedTime" : "2005-10-29T13:02:10Z",
+      "canonicalId" : "y89wjvsf",
+      "mergedTime" : "2022-11-01T08:05:39Z",
+      "sourceModifiedTime" : "2022-11-01T08:05:39Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
@@ -46,7 +46,7 @@
       }
     },
     "data" : {
-      "title" : "title-Dtaaw5YmCW",
+      "title" : "title-c3yc67fbIT",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -67,21 +67,21 @@
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "qbmTfcJnlkosWvA",
+              "label" : "pon81Hb2fX49bQt",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "mEQcU7atgIJPhTv",
+              "label" : "ylYWIjswjHR3oqS",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "2pMEZn8L2YCE8E9",
+              "label" : "mye6nSw6ASPak01",
               "type" : "Concept"
             }
           ]
@@ -111,8 +111,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "6uwysojy",
-      "title" : "title-Dtaaw5YmCW",
+      "id" : "y89wjvsf",
+      "title" : "title-c3yc67fbIT",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -120,11 +120,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "pzLgxSR5EK",
+          "value" : "yTaqruNiUs",
           "type" : "Identifier"
         }
       ],
@@ -133,15 +133,15 @@
           "label" : "paleoNeuroBiology",
           "concepts" : [
             {
-              "label" : "qbmTfcJnlkosWvA",
+              "label" : "pon81Hb2fX49bQt",
               "type" : "Concept"
             },
             {
-              "label" : "mEQcU7atgIJPhTv",
+              "label" : "ylYWIjswjHR3oqS",
               "type" : "Concept"
             },
             {
-              "label" : "2pMEZn8L2YCE8E9",
+              "label" : "mye6nSw6ASPak01",
               "type" : "Concept"
             }
           ],
@@ -175,9 +175,9 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "6uwysojy",
+      "id" : "y89wjvsf",
       "identifiers.value" : [
-        "pzLgxSR5EK"
+        "yTaqruNiUs"
       ],
       "images.id" : [
       ],
@@ -195,6 +195,9 @@
         "paleoNeuroBiology"
       ],
       "subjects.concepts.label" : [
+        "pon81Hb2fX49bQt",
+        "ylYWIjswjHR3oqS",
+        "mye6nSw6ASPak01"
       ],
       "genres.concepts.label" : [
       ],
