@@ -53,10 +53,10 @@ import java.time.Instant
 class CreateTestWorkDocuments
     extends AnyFunSpec
     with Matchers
+    with TestDocumentUtils
     with WorkGenerators
     with ItemsGenerators
     with PeriodGenerators
-    with TestDocumentUtils
     with SubjectGenerators
     with GenreGenerators
     with ContributorGenerators
