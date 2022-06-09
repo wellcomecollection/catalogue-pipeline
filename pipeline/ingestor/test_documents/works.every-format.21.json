@@ -1,6 +1,6 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2022-06-01T09:53:16.444585Z",
+  "createdAt" : "2022-06-06T11:16:21.397317Z",
   "id" : "cwippax3",
   "document" : {
     "debug" : {
@@ -140,11 +140,23 @@
       "identifiers.value" : [
         "2PauY4Py8G"
       ],
+      "images.id" : [
+      ],
+      "images.identifiers.value" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "subjects.concepts.label" : [
+      ],
+      "genres.concepts.label" : [
       ],
       "partOf.id" : [
       ],

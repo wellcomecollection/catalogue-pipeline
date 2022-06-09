@@ -1,6 +1,6 @@
 {
   "description" : "a work with 'dodo' in the title",
-  "createdAt" : "2022-06-01T09:53:14.876106Z",
+  "createdAt" : "2022-06-06T11:16:20.501887Z",
   "id" : "ezagik4b",
   "document" : {
     "debug" : {
@@ -133,11 +133,23 @@
       "identifiers.value" : [
         "xg9OuzGali"
       ],
+      "images.id" : [
+      ],
+      "images.identifiers.value" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "subjects.concepts.label" : [
+      ],
+      "genres.concepts.label" : [
       ],
       "partOf.id" : [
       ],

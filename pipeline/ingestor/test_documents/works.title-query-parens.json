@@ -1,6 +1,6 @@
 {
   "description" : "a work whose title has parens meant to trip up ES",
-  "createdAt" : "2022-06-01T09:53:15.906185Z",
+  "createdAt" : "2022-06-06T11:16:21.118876Z",
   "id" : "omok5a37",
   "document" : {
     "debug" : {
@@ -132,11 +132,23 @@
       "identifiers.value" : [
         "y59nY1Nuok"
       ],
+      "images.id" : [
+      ],
+      "images.identifiers.value" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "subjects.concepts.label" : [
+      ],
+      "genres.concepts.label" : [
       ],
       "partOf.id" : [
       ],

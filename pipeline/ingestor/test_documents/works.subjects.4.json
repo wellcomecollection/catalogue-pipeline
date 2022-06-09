@@ -1,6 +1,6 @@
 {
   "description" : "works with different subjects",
-  "createdAt" : "2022-06-01T09:53:16.147462Z",
+  "createdAt" : "2022-06-06T11:16:21.234865Z",
   "id" : "t9nj8zse",
   "document" : {
     "debug" : {
@@ -132,11 +132,23 @@
       "identifiers.value" : [
         "8imBUVPHmu"
       ],
+      "images.id" : [
+      ],
+      "images.identifiers.value" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "subjects.concepts.label" : [
+      ],
+      "genres.concepts.label" : [
       ],
       "partOf.id" : [
       ],

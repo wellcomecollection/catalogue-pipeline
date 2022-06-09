@@ -1,6 +1,6 @@
 {
   "description" : "a work with a production event in 2020",
-  "createdAt" : "2022-06-01T09:53:15.091432Z",
+  "createdAt" : "2022-06-06T11:16:20.602970Z",
   "id" : "0fucriyr",
   "document" : {
     "debug" : {
@@ -167,11 +167,23 @@
       "identifiers.value" : [
         "KgSH5dUX0Z"
       ],
+      "images.id" : [
+      ],
+      "images.identifiers.value" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "subjects.concepts.label" : [
+      ],
+      "genres.concepts.label" : [
       ],
       "partOf.id" : [
       ],

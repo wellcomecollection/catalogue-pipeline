@@ -1,6 +1,6 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2022-06-01T09:53:17.226536Z",
+  "createdAt" : "2022-06-06T11:16:21.744453Z",
   "id" : "tayys6jp",
   "document" : {
     "debug" : {
@@ -217,6 +217,14 @@
       "identifiers.value" : [
         "3OfWNE6m5y"
       ],
+      "images.id" : [
+      ],
+      "images.identifiers.value" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
       "subjects.id" : [
         "sanitati"
       ],
@@ -226,6 +234,10 @@
       ],
       "subjects.label" : [
         "Sanitation."
+      ],
+      "subjects.concepts.label" : [
+      ],
+      "genres.concepts.label" : [
       ],
       "partOf.id" : [
       ],

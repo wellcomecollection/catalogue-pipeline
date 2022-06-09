@@ -1,6 +1,6 @@
 {
   "description" : "a work with different concepts in the genre",
-  "createdAt" : "2022-06-01T09:53:16.122326Z",
+  "createdAt" : "2022-06-06T11:16:21.223274Z",
   "id" : "2zo588up",
   "document" : {
     "debug" : {
@@ -199,11 +199,23 @@
       "identifiers.value" : [
         "rVoekomuzt"
       ],
+      "images.id" : [
+      ],
+      "images.identifiers.value" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "subjects.concepts.label" : [
+      ],
+      "genres.concepts.label" : [
       ],
       "partOf.id" : [
       ],

@@ -4,6 +4,7 @@ import buildinfo.BuildInfo
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.fields.{
   ElasticField,
+  KeywordField,
   ObjectField,
   TokenCountField
 }
@@ -225,13 +226,26 @@ object WorksIndexConfig extends IndexConfigFields {
       // This field contains the values we're actually going to query in search.
       val query = objectField("query")
         .fields(
-          lowercaseKeyword("id"),
-          lowercaseKeyword("identifiers.value"),
-          keywordField("subjects.id"),
-          keywordField("subjects.identifiers.value"),
+          // top-level work
+          canonicalIdField("id"),
+          sourceIdentifierField("identifiers.value"),
+          // images
+          canonicalIdField("images.id"),
+          sourceIdentifierField("images.identifiers.value"),
+          // items
+          canonicalIdField("items.id"),
+          sourceIdentifierField("items.identifiers.value"),
+          // subjects
+          canonicalIdField("subjects.id"),
+          sourceIdentifierField("subjects.identifiers.value"),
           keywordField("subjects.label"),
-          lowercaseKeyword("partOf.id"),
+          asciifoldingTextFieldWithKeyword("subjects.concepts.label"),
+          // genres
+          asciifoldingTextFieldWithKeyword("genres.concepts.label"),
+          // relations
+          canonicalIdField("partOf.id"),
           multilingualFieldWithKeyword("partOf.title"),
+          // availabilities
           keywordField("availabilities.id")
         )
 
@@ -269,4 +283,9 @@ object WorksIndexConfig extends IndexConfigFields {
     DynamicMapping.Strict,
     RefreshInterval.On(30.seconds)
   )
+
+  private def canonicalIdField(name: String): KeywordField =
+    lowercaseKeyword(name)
+  private def sourceIdentifierField(name: String): KeywordField =
+    lowercaseKeyword(name)
 }

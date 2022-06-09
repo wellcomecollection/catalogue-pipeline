@@ -3,7 +3,8 @@ package weco.catalogue.internal_model.generators
 import weco.catalogue.internal_model.identifiers.{
   CanonicalId,
   IdState,
-  IdentifierType
+  IdentifierType,
+  SourceIdentifier
 }
 import weco.catalogue.internal_model.image
 import weco.catalogue.internal_model.image.ParentWork._
@@ -33,14 +34,16 @@ trait ImageGenerators
     locations: List[DigitalLocation] = List(createImageLocation),
     version: Int = 1,
     identifierValue: String = randomAlphanumeric(10),
-    identifierType: IdentifierType = IdentifierType.MiroImageNumber
+    identifierType: IdentifierType = IdentifierType.MiroImageNumber,
+    otherIdentifiers: List[SourceIdentifier] = List()
   ): ImageData[IdState.Identifiable] =
     ImageData[IdState.Identifiable](
       id = IdState.Identifiable(
         sourceIdentifier = createSourceIdentifierWith(
           identifierType = identifierType,
           value = identifierValue
-        )
+        ),
+        otherIdentifiers = otherIdentifiers
       ),
       version = version,
       locations = locations
@@ -95,8 +98,9 @@ trait ImageGenerators
       : ImageData[IdState.Identified] =
       imageData.copy(
         id = IdState.Identified(
-          canonicalId = createCanonicalId,
-          sourceIdentifier = imageData.id.sourceIdentifier
+          canonicalId = canonicalId,
+          sourceIdentifier = imageData.id.sourceIdentifier,
+          otherIdentifiers = imageData.id.otherIdentifiers
         )
       )
 

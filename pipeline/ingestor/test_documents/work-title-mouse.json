@@ -1,6 +1,6 @@
 {
   "description" : "a work with 'mouse' in the title",
-  "createdAt" : "2022-06-01T09:53:14.895273Z",
+  "createdAt" : "2022-06-06T11:16:20.507953Z",
   "id" : "lnn17cwk",
   "document" : {
     "debug" : {
@@ -133,11 +133,23 @@
       "identifiers.value" : [
         "EhPpSB8mq7"
       ],
+      "images.id" : [
+      ],
+      "images.identifiers.value" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "subjects.concepts.label" : [
+      ],
+      "genres.concepts.label" : [
       ],
       "partOf.id" : [
       ],

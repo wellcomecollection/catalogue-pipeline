@@ -1,6 +1,6 @@
 {
   "description" : "one of a list of works with a variety of languages",
-  "createdAt" : "2022-06-01T09:53:15.918370Z",
+  "createdAt" : "2022-06-06T11:16:21.125399Z",
   "id" : "i8zcsj78",
   "document" : {
     "debug" : {
@@ -141,11 +141,23 @@
       "identifiers.value" : [
         "ZquhBnzQPW"
       ],
+      "images.id" : [
+      ],
+      "images.identifiers.value" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "subjects.concepts.label" : [
+      ],
+      "genres.concepts.label" : [
       ],
       "partOf.id" : [
       ],

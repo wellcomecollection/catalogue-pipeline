@@ -1,6 +1,6 @@
 {
   "description" : "a work with a collection path",
-  "createdAt" : "2022-06-01T09:53:16.394191Z",
+  "createdAt" : "2022-06-06T11:16:21.372748Z",
   "id" : "mlqs2qbd",
   "document" : {
     "debug" : {
@@ -135,11 +135,23 @@
       "identifiers.value" : [
         "yQb1GgWKF4"
       ],
+      "images.id" : [
+      ],
+      "images.identifiers.value" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "subjects.concepts.label" : [
+      ],
+      "genres.concepts.label" : [
       ],
       "partOf.id" : [
       ],

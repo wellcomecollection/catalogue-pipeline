@@ -1,6 +1,6 @@
 {
   "description" : "works with different subjects",
-  "createdAt" : "2022-06-01T09:53:16.146379Z",
+  "createdAt" : "2022-06-06T11:16:21.234434Z",
   "id" : "xcssabt1",
   "document" : {
     "debug" : {
@@ -226,6 +226,14 @@
       "identifiers.value" : [
         "7XE0Jxv45o"
       ],
+      "images.id" : [
+      ],
+      "images.identifiers.value" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
@@ -233,6 +241,10 @@
       "subjects.label" : [
         "paleoNeuroBiology",
         "realAnalysis"
+      ],
+      "subjects.concepts.label" : [
+      ],
+      "genres.concepts.label" : [
       ],
       "partOf.id" : [
       ],

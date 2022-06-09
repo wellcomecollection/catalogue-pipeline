@@ -1,6 +1,6 @@
 {
   "description" : "one of a list of works with a variety of formats",
-  "createdAt" : "2022-06-01T09:53:15.845332Z",
+  "createdAt" : "2022-06-06T11:16:21.079380Z",
   "id" : "xc5d7pc4",
   "document" : {
     "debug" : {
@@ -140,11 +140,23 @@
       "identifiers.value" : [
         "HXsUYY6dN4"
       ],
+      "images.id" : [
+      ],
+      "images.identifiers.value" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "subjects.concepts.label" : [
+      ],
+      "genres.concepts.label" : [
       ],
       "partOf.id" : [
       ],

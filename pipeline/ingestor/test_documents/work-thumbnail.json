@@ -1,6 +1,6 @@
 {
   "description" : "a work with a thumbnail",
-  "createdAt" : "2022-06-01T09:53:14.858288Z",
+  "createdAt" : "2022-06-06T11:16:20.493854Z",
   "id" : "sahqcluh",
   "document" : {
     "debug" : {
@@ -161,11 +161,23 @@
       "identifiers.value" : [
         "rRRYGQYiF7"
       ],
+      "images.id" : [
+      ],
+      "images.identifiers.value" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "subjects.concepts.label" : [
+      ],
+      "genres.concepts.label" : [
       ],
       "partOf.id" : [
       ],

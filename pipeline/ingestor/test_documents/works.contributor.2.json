@@ -1,6 +1,6 @@
 {
   "description" : "works with different contributor",
-  "createdAt" : "2022-06-01T09:53:16.280918Z",
+  "createdAt" : "2022-06-06T11:16:21.313112Z",
   "id" : "z08k6cnn",
   "document" : {
     "debug" : {
@@ -178,11 +178,23 @@
       "identifiers.value" : [
         "juTufKU2Ye"
       ],
+      "images.id" : [
+      ],
+      "images.identifiers.value" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "subjects.concepts.label" : [
+      ],
+      "genres.concepts.label" : [
       ],
       "partOf.id" : [
       ],

@@ -960,14 +960,58 @@
             "type" : "keyword",
             "normalizer" : "lowercase_normalizer"
           },
-          "subjects.id": {
-            "type": "keyword"
+          "images.id" : {
+            "type" : "keyword",
+            "normalizer" : "lowercase_normalizer"
           },
-          "subjects.identifiers.value": {
-            "type": "keyword"
+          "images.identifiers.value" : {
+            "type" : "keyword",
+            "normalizer" : "lowercase_normalizer"
           },
-          "subjects.label": {
-            "type": "keyword"
+          "items.id" : {
+            "type" : "keyword",
+            "normalizer" : "lowercase_normalizer"
+          },
+          "items.identifiers.value" : {
+            "type" : "keyword",
+            "normalizer" : "lowercase_normalizer"
+          },
+          "subjects.id" : {
+            "type" : "keyword",
+            "normalizer" : "lowercase_normalizer"
+          },
+          "subjects.identifiers.value" : {
+            "type" : "keyword",
+            "normalizer" : "lowercase_normalizer"
+          },
+          "subjects.label" : {
+            "type" : "keyword"
+          },
+          "subjects.concepts.label" : {
+            "type" : "text",
+            "analyzer" : "asciifolding_analyzer",
+            "fields" : {
+              "keyword" : {
+                "type" : "keyword"
+              },
+              "lowercaseKeyword" : {
+                "type" : "keyword",
+                "normalizer" : "lowercase_normalizer"
+              }
+            }
+          },
+          "genres.concepts.label" : {
+            "type" : "text",
+            "analyzer" : "asciifolding_analyzer",
+            "fields" : {
+              "keyword" : {
+                "type" : "keyword"
+              },
+              "lowercaseKeyword" : {
+                "type" : "keyword",
+                "normalizer" : "lowercase_normalizer"
+              }
+            }
           },
           "partOf.id" : {
             "type" : "keyword",
@@ -1014,8 +1058,8 @@
               }
             }
           },
-          "availabilities.id": {
-            "type": "keyword"
+          "availabilities.id" : {
+            "type" : "keyword"
           }
         }
       },

@@ -1,6 +1,6 @@
 {
   "description" : "a work with licensed digital items",
-  "createdAt" : "2022-06-01T09:53:16.009045Z",
+  "createdAt" : "2022-06-06T11:16:21.170312Z",
   "id" : "runiusy8",
   "document" : {
     "debug" : {
@@ -181,11 +181,23 @@
       "identifiers.value" : [
         "ZGWEGMyTaq"
       ],
+      "images.id" : [
+      ],
+      "images.identifiers.value" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
       ],
       "subjects.label" : [
+      ],
+      "subjects.concepts.label" : [
+      ],
+      "genres.concepts.label" : [
       ],
       "partOf.id" : [
       ],
