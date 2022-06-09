@@ -1,6 +1,6 @@
 {
   "description" : "works with different subjects",
-  "createdAt" : "2022-06-06T11:16:21.234434Z",
+  "createdAt" : "2022-06-09T10:25:50.375477Z",
   "id" : "xcssabt1",
   "document" : {
     "debug" : {
@@ -243,6 +243,12 @@
         "realAnalysis"
       ],
       "subjects.concepts.label" : [
+        "qbmTfcJnlkosWvA",
+        "mEQcU7atgIJPhTv",
+        "2pMEZn8L2YCE8E9",
+        "W7WKCBWrkxlOWWB",
+        "Kbkm5UMJEwTIE8u",
+        "H8GnKqkwP9ugIes"
       ],
       "genres.concepts.label" : [
       ],

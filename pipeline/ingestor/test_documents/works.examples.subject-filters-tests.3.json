@@ -1,6 +1,6 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2022-06-06T11:16:21.746453Z",
+  "createdAt" : "2022-06-09T10:25:50.805340Z",
   "id" : "b1r485o0",
   "document" : {
     "debug" : {
@@ -219,6 +219,9 @@
         "Darwin \"Jones\", Charles"
       ],
       "subjects.concepts.label" : [
+        "40zJbSlLwDNn2Et",
+        "p5zfssscK3StYS1",
+        "KOlZmZXOWd5kJ1F"
       ],
       "genres.concepts.label" : [
       ],

@@ -1,7 +1,7 @@
 {
   "description" : "example for the color filter tests",
-  "createdAt" : "2022-05-13T12:41:40.024Z",
-  "id" : "o2cq1vpp",
+  "createdAt" : "2022-06-09T12:37:30.255033Z",
+  "id" : "yfpzabzr",
   "document" : {
     "version" : 1,
     "state" : {
@@ -12,7 +12,7 @@
         "ontologyType" : "Work",
         "value" : "22f4SSECwz"
       },
-      "canonicalId" : "o2cq1vpp",
+      "canonicalId" : "yfpzabzr",
       "inferredData" : {
         "features1" : [
           0.019335374,
@@ -4346,7 +4346,7 @@
     },
     "modifiedTime" : "1933-05-03T22:58:22Z",
     "display" : {
-      "id" : "o2cq1vpp",
+      "id" : "yfpzabzr",
       "thumbnail" : {
         "locationType" : {
           "id" : "iiif-image",

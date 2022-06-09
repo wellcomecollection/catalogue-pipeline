@@ -1,6 +1,6 @@
 {
   "description" : "examples for the access status tests",
-  "createdAt" : "2022-06-06T11:16:22.095950Z",
+  "createdAt" : "2022-06-09T10:25:51.033401Z",
   "id" : "iqani2su",
   "document" : {
     "debug" : {
@@ -235,8 +235,10 @@
       "images.identifiers.value" : [
       ],
       "items.id" : [
+        "wbli95ga"
       ],
       "items.identifiers.value" : [
+        "clr9E9aLfx"
       ],
       "subjects.id" : [
       ],

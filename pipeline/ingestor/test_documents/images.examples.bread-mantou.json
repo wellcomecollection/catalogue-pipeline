@@ -1,7 +1,7 @@
 {
   "description" : "an example of images with work metadata for the API tests",
-  "createdAt" : "2022-05-13T12:41:40.082Z",
-  "id" : "m5raprx1",
+  "createdAt" : "2022-06-09T12:37:30.425327Z",
+  "id" : "hylz2v15",
   "document" : {
     "version" : 1,
     "state" : {
@@ -12,7 +12,7 @@
         "ontologyType" : "Work",
         "value" : "Tpd1aynN7i"
       },
-      "canonicalId" : "m5raprx1",
+      "canonicalId" : "hylz2v15",
       "inferredData" : {
         "features1" : [
           0.008474,
@@ -4427,7 +4427,7 @@
     },
     "modifiedTime" : "1950-12-03T16:01:32Z",
     "display" : {
-      "id" : "m5raprx1",
+      "id" : "hylz2v15",
       "thumbnail" : {
         "locationType" : {
           "id" : "iiif-image",

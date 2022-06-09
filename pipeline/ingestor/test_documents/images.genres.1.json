@@ -1,7 +1,7 @@
 {
   "description" : "images with different genres",
-  "createdAt" : "2022-05-13T12:41:39.759Z",
-  "id" : "a2grt8nl",
+  "createdAt" : "2022-06-09T12:37:29.764567Z",
+  "id" : "0e6ywtkv",
   "document" : {
     "version" : 1,
     "state" : {
@@ -12,7 +12,7 @@
         "ontologyType" : "Work",
         "value" : "GMFoUuGIGY"
       },
-      "canonicalId" : "a2grt8nl",
+      "canonicalId" : "0e6ywtkv",
       "inferredData" : {
         "features1" : [
           5.930139E-4,
@@ -4432,7 +4432,7 @@
     },
     "modifiedTime" : "1983-12-19T07:44:31Z",
     "display" : {
-      "id" : "a2grt8nl",
+      "id" : "0e6ywtkv",
       "thumbnail" : {
         "locationType" : {
           "id" : "iiif-image",

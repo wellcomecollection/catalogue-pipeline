@@ -1,7 +1,7 @@
 {
   "description" : "images with different licenses",
-  "createdAt" : "2022-05-13T12:41:39.573Z",
-  "id" : "qud4a611",
+  "createdAt" : "2022-06-09T12:37:29.010858Z",
+  "id" : "f0nj3tuz",
   "document" : {
     "version" : 1,
     "state" : {
@@ -12,7 +12,7 @@
         "ontologyType" : "Work",
         "value" : "R8UNWutFRZ"
       },
-      "canonicalId" : "qud4a611",
+      "canonicalId" : "f0nj3tuz",
       "inferredData" : {
         "features1" : [
           7.0621603E-4,
@@ -4464,7 +4464,7 @@
     },
     "modifiedTime" : "1941-09-23T10:55:10Z",
     "display" : {
-      "id" : "qud4a611",
+      "id" : "f0nj3tuz",
       "thumbnail" : {
         "locationType" : {
           "id" : "iiif-image",

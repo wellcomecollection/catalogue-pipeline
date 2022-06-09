@@ -1,7 +1,7 @@
 {
   "description" : "images with different genres",
-  "createdAt" : "2022-05-13T12:41:39.758Z",
-  "id" : "o6dibsuo",
+  "createdAt" : "2022-06-09T12:37:29.763449Z",
+  "id" : "j2kzh3nk",
   "document" : {
     "version" : 1,
     "state" : {
@@ -12,7 +12,7 @@
         "ontologyType" : "Work",
         "value" : "EbUDKLsKbN"
       },
-      "canonicalId" : "o6dibsuo",
+      "canonicalId" : "j2kzh3nk",
       "inferredData" : {
         "features1" : [
           -0.008902985,
@@ -4432,7 +4432,7 @@
     },
     "modifiedTime" : "1977-04-17T05:50:13Z",
     "display" : {
-      "id" : "o6dibsuo",
+      "id" : "j2kzh3nk",
       "thumbnail" : {
         "locationType" : {
           "id" : "iiif-image",

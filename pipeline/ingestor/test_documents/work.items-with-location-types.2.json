@@ -1,6 +1,6 @@
 {
   "description" : "items with different location types",
-  "createdAt" : "2022-06-06T11:16:21.546152Z",
+  "createdAt" : "2022-06-09T10:25:50.650563Z",
   "id" : "wt6pclbs",
   "document" : {
     "debug" : {
@@ -212,8 +212,10 @@
       "images.identifiers.value" : [
       ],
       "items.id" : [
+        "bhyswopl"
       ],
       "items.identifiers.value" : [
+        "G3f7j0ub0t"
       ],
       "subjects.id" : [
       ],

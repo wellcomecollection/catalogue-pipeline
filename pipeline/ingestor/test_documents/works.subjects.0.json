@@ -1,6 +1,6 @@
 {
   "description" : "works with different subjects",
-  "createdAt" : "2022-06-06T11:16:21.231622Z",
+  "createdAt" : "2022-06-09T10:25:50.372606Z",
   "id" : "6uwysojy",
   "document" : {
     "debug" : {
@@ -195,6 +195,9 @@
         "paleoNeuroBiology"
       ],
       "subjects.concepts.label" : [
+        "qbmTfcJnlkosWvA",
+        "mEQcU7atgIJPhTv",
+        "2pMEZn8L2YCE8E9"
       ],
       "genres.concepts.label" : [
       ],

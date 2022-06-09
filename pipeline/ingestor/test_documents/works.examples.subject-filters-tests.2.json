@@ -1,6 +1,6 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2022-06-06T11:16:21.745745Z",
+  "createdAt" : "2022-06-09T10:25:50.804666Z",
   "id" : "mazaizfa",
   "document" : {
     "debug" : {
@@ -195,6 +195,9 @@
         "Psychology, Pathological"
       ],
       "subjects.concepts.label" : [
+        "y2nMuMcZq1Jcxuk",
+        "acPWKUROxBsQ4CK",
+        "8DrDsk2kCAGURhx"
       ],
       "genres.concepts.label" : [
       ],

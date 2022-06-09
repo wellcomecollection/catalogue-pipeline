@@ -1,7 +1,7 @@
 {
   "description" : "example for the color filter tests",
-  "createdAt" : "2022-05-13T12:41:40.020Z",
-  "id" : "jealicsf",
+  "createdAt" : "2022-06-09T12:37:30.242178Z",
+  "id" : "jh411m3a",
   "document" : {
     "version" : 1,
     "state" : {
@@ -12,7 +12,7 @@
         "ontologyType" : "Work",
         "value" : "OE7j0Kwd9d"
       },
-      "canonicalId" : "jealicsf",
+      "canonicalId" : "jh411m3a",
       "inferredData" : {
         "features1" : [
           0.01003951,
@@ -4351,7 +4351,7 @@
     },
     "modifiedTime" : "1948-03-11T04:37:08Z",
     "display" : {
-      "id" : "jealicsf",
+      "id" : "jh411m3a",
       "thumbnail" : {
         "locationType" : {
           "id" : "iiif-image",

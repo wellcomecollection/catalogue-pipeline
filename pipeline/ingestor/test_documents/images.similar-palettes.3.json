@@ -1,7 +1,7 @@
 {
   "description" : "images with similar palettes",
-  "createdAt" : "2022-05-13T12:41:39.907Z",
-  "id" : "yf8dutox",
+  "createdAt" : "2022-06-09T12:37:29.999973Z",
+  "id" : "lsw9sbu8",
   "document" : {
     "version" : 1,
     "state" : {
@@ -12,7 +12,7 @@
         "ontologyType" : "Work",
         "value" : "UPWAEccN65"
       },
-      "canonicalId" : "yf8dutox",
+      "canonicalId" : "lsw9sbu8",
       "inferredData" : {
         "features1" : [
           0.05674019,
@@ -4441,7 +4441,7 @@
     },
     "modifiedTime" : "1971-09-22T22:04:19Z",
     "display" : {
-      "id" : "yf8dutox",
+      "id" : "lsw9sbu8",
       "thumbnail" : {
         "locationType" : {
           "id" : "iiif-image",

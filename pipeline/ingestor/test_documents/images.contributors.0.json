@@ -1,7 +1,7 @@
 {
   "description" : "images with different contributors",
-  "createdAt" : "2022-05-13T12:41:39.718Z",
-  "id" : "4jxmmwy7",
+  "createdAt" : "2022-06-09T12:37:29.696127Z",
+  "id" : "vfhrlsz5",
   "document" : {
     "version" : 1,
     "state" : {
@@ -12,7 +12,7 @@
         "ontologyType" : "Work",
         "value" : "hchGC5V7nZ"
       },
-      "canonicalId" : "4jxmmwy7",
+      "canonicalId" : "vfhrlsz5",
       "inferredData" : {
         "features1" : [
           0.010376045,
@@ -4442,7 +4442,7 @@
     },
     "modifiedTime" : "1965-07-07T22:50:25Z",
     "display" : {
-      "id" : "4jxmmwy7",
+      "id" : "vfhrlsz5",
       "thumbnail" : {
         "locationType" : {
           "id" : "iiif-image",

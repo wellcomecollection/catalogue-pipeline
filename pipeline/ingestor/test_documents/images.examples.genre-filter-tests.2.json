@@ -1,7 +1,7 @@
 {
   "description" : "examples for the genre filter tests",
-  "createdAt" : "2022-05-31T18:34:40.334267Z",
-  "id" : "yvgczrqk",
+  "createdAt" : "2022-06-09T12:37:30.192896Z",
+  "id" : "a5vdwjyw",
   "document" : {
     "version" : 1,
     "state" : {
@@ -12,7 +12,7 @@
         "ontologyType" : "Work",
         "value" : "WgSJWe8gdU"
       },
-      "canonicalId" : "yvgczrqk",
+      "canonicalId" : "a5vdwjyw",
       "inferredData" : {
         "features1" : [
           -0.01164634,
@@ -4479,7 +4479,7 @@
     },
     "modifiedTime" : "2008-11-21T17:51:58Z",
     "display" : {
-      "id" : "yvgczrqk",
+      "id" : "a5vdwjyw",
       "thumbnail" : {
         "locationType" : {
           "id" : "iiif-image",

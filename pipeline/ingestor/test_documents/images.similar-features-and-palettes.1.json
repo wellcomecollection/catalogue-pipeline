@@ -1,7 +1,7 @@
 {
   "description" : "images with similar features and palettes",
-  "createdAt" : "2022-05-13T12:41:39.825Z",
-  "id" : "ikkth39y",
+  "createdAt" : "2022-06-09T12:37:29.827177Z",
+  "id" : "dqlalauc",
   "document" : {
     "version" : 1,
     "state" : {
@@ -12,7 +12,7 @@
         "ontologyType" : "Work",
         "value" : "Zn7M7AjjUM"
       },
-      "canonicalId" : "ikkth39y",
+      "canonicalId" : "dqlalauc",
       "inferredData" : {
         "features1" : [
           -0.041821454,
@@ -4441,7 +4441,7 @@
     },
     "modifiedTime" : "2015-05-25T06:00:26Z",
     "display" : {
-      "id" : "ikkth39y",
+      "id" : "dqlalauc",
       "thumbnail" : {
         "locationType" : {
           "id" : "iiif-image",

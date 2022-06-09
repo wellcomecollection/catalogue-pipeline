@@ -1,7 +1,7 @@
 {
   "description" : "images with similar features and palettes",
-  "createdAt" : "2022-05-13T12:41:39.827Z",
-  "id" : "uirw9kod",
+  "createdAt" : "2022-06-09T12:37:29.827990Z",
+  "id" : "fp9x20si",
   "document" : {
     "version" : 1,
     "state" : {
@@ -12,7 +12,7 @@
         "ontologyType" : "Work",
         "value" : "HCXR6UEGpn"
       },
-      "canonicalId" : "uirw9kod",
+      "canonicalId" : "fp9x20si",
       "inferredData" : {
         "features1" : [
           -0.040513,
@@ -4441,7 +4441,7 @@
     },
     "modifiedTime" : "1965-08-27T13:12:51Z",
     "display" : {
-      "id" : "uirw9kod",
+      "id" : "fp9x20si",
       "thumbnail" : {
         "locationType" : {
           "id" : "iiif-image",

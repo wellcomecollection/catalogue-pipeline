@@ -1,7 +1,7 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2022-05-13T12:41:39.957Z",
-  "id" : "taakld5q",
+  "createdAt" : "2022-06-09T12:37:30.096119Z",
+  "id" : "7avdcsvd",
   "document" : {
     "version" : 1,
     "state" : {
@@ -12,7 +12,7 @@
         "ontologyType" : "Work",
         "value" : "P3XmFcXvrX"
       },
-      "canonicalId" : "taakld5q",
+      "canonicalId" : "7avdcsvd",
       "inferredData" : {
         "features1" : [
           0.022958621,
@@ -4444,7 +4444,7 @@
     },
     "modifiedTime" : "2040-06-15T09:50:49Z",
     "display" : {
-      "id" : "taakld5q",
+      "id" : "7avdcsvd",
       "thumbnail" : {
         "locationType" : {
           "id" : "iiif-image",

@@ -1,6 +1,6 @@
 {
   "description" : "a list of work with all the include-able fields",
-  "createdAt" : "2022-06-06T11:16:20.917296Z",
+  "createdAt" : "2022-06-09T10:25:50.116487Z",
   "id" : "tmdfbk5k",
   "document" : {
     "debug" : {
@@ -509,7 +509,7 @@
       "imageData" : [
         {
           "id" : {
-            "canonicalId" : "jh1bfhkx",
+            "canonicalId" : "eoedbdmz",
             "sourceIdentifier" : {
               "identifierType" : {
                 "id" : "miro-image-number"
@@ -539,7 +539,7 @@
         },
         {
           "id" : {
-            "canonicalId" : "nvapnemk",
+            "canonicalId" : "w1yfrq9a",
             "sourceIdentifier" : {
               "identifierType" : {
                 "id" : "miro-image-number"
@@ -934,11 +934,11 @@
       ],
       "images" : [
         {
-          "id" : "jh1bfhkx",
+          "id" : "eoedbdmz",
           "type" : "Image"
         },
         {
-          "id" : "nvapnemk",
+          "id" : "w1yfrq9a",
           "type" : "Image"
         }
       ],
@@ -996,12 +996,20 @@
         "UfcQYSxE7g"
       ],
       "images.id" : [
+        "eoedbdmz",
+        "w1yfrq9a"
       ],
       "images.identifiers.value" : [
+        "auL5Gzybrl",
+        "X01BTa4Rul"
       ],
       "items.id" : [
+        "ca3anii6",
+        "tuqkgha7"
       ],
       "items.identifiers.value" : [
+        "hKyStbKjx1",
+        "XLNdBtGWWF"
       ],
       "subjects.id" : [
       ],
@@ -1012,8 +1020,20 @@
         "k1WGWfqE6x"
       ],
       "subjects.concepts.label" : [
+        "goKOwWLrIbnrzZj",
+        "i3JH82kKuArEtlV",
+        "dV0jg08I834KKSX",
+        "FakoqsVT1GlsNpY",
+        "pthDMBLQZhG54Nz",
+        "omzMOR7nUmbDY87"
       ],
       "genres.concepts.label" : [
+        "IHQR23GK9tQdPt3",
+        "acHhNKnNq4fR1f4",
+        "tFlVnFnK1Qv0bPi",
+        "DgAW3Gj5M4V6Fk1",
+        "Uu2KL5QXsRV8G10",
+        "ObxxWE1MLX8biK5"
       ],
       "partOf.id" : [
         "0cs6cerb",

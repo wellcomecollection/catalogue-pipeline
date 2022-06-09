@@ -1,6 +1,6 @@
 {
   "description" : "works with different subjects",
-  "createdAt" : "2022-06-06T11:16:21.233357Z",
+  "createdAt" : "2022-06-09T10:25:50.374409Z",
   "id" : "evraub2i",
   "document" : {
     "debug" : {
@@ -195,6 +195,9 @@
         "realAnalysis"
       ],
       "subjects.concepts.label" : [
+        "W7WKCBWrkxlOWWB",
+        "Kbkm5UMJEwTIE8u",
+        "H8GnKqkwP9ugIes"
       ],
       "genres.concepts.label" : [
       ],

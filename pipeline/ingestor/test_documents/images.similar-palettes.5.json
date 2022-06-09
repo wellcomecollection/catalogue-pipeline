@@ -1,7 +1,7 @@
 {
   "description" : "images with similar palettes",
-  "createdAt" : "2022-05-13T12:41:39.909Z",
-  "id" : "fbim2viz",
+  "createdAt" : "2022-06-09T12:37:30.001291Z",
+  "id" : "jchfkdrz",
   "document" : {
     "version" : 1,
     "state" : {
@@ -12,7 +12,7 @@
         "ontologyType" : "Work",
         "value" : "4w2hKoRDWG"
       },
-      "canonicalId" : "fbim2viz",
+      "canonicalId" : "jchfkdrz",
       "inferredData" : {
         "features1" : [
           0.052299846,
@@ -4441,7 +4441,7 @@
     },
     "modifiedTime" : "2011-09-08T14:48:17Z",
     "display" : {
-      "id" : "fbim2viz",
+      "id" : "jchfkdrz",
       "thumbnail" : {
         "locationType" : {
           "id" : "iiif-image",
