@@ -69,7 +69,7 @@ class PathConcatenatorRequestBuilder(index: Index) {
       .size(maxResponseSize)
 
   private def wildPathQuery(path: String): WildcardQuery =
-    wildcardQuery(field = "data.collectionPath.path", value = path)
+    wildcardQuery(field = "data.collectionPath.path.keyword", value = path)
 
   private def exactPathQuery(path: String): TermQuery =
     termQuery(field = "data.collectionPath.path.keyword", value = path)
