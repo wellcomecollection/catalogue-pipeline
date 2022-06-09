@@ -9,8 +9,6 @@ import weco.catalogue.internal_model.locations.{
 }
 import weco.catalogue.internal_model.work.{Item, Work, WorkState}
 
-import scala.util.Random
-
 trait MiroWorkGenerators extends ImageGenerators {
   def miroThumbnail(): DigitalLocation =
     DigitalLocation(
@@ -21,7 +19,7 @@ trait MiroWorkGenerators extends ImageGenerators {
     )
 
   def miroItems(
-    count: Int = Random.nextInt(5)
+    count: Int = random.nextInt(5)
   ): List[Item[IdState.Unidentifiable.type]] =
     (1 to count).map { _ =>
       createUnidentifiableItemWith(
