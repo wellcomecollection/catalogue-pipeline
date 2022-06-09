@@ -213,13 +213,16 @@ class StateTest
           // Unnecessary trailing punctuation is expected to have
           // been removed in the creation of a SeriesRelation.
           relations = Relations(
-            ancestors = List(SeriesRelation("Basil Hood. Photograph Album"))
+            ancestors = List(
+              SeriesRelation("Basil Hood. Photograph Album"),
+              SeriesRelation("Studio Portraits of Women.")
+            )
           )
         ),
         data = WorkData(title = Some("My Title"))
       )
 
-      val newAlbum = new Relation(
+      val album = new Relation(
         id = Some(CanonicalId("deadbeef")),
         // The title is the same as the one already there, but with a trailing '.'
         title = Some("Basil Hood. Photograph Album."),
@@ -230,12 +233,23 @@ class StateTest
         numDescendents = 1
       )
 
+      val portraits = new Relation(
+        id = Some(CanonicalId("cafefeed")),
+        // The title is the same as the one already there, retaining the trailing '.'
+        title = Some("Studio Portraits of Women."),
+        collectionPath = Some(CollectionPath("abadcafe/cafefeed")),
+        workType = WorkType.Standard,
+        depth = 0,
+        numChildren = 1,
+        numDescendents = 1
+      )
+
       val denormalised = merged.transition[Denormalised](
         Relations(
-          ancestors = List(newAlbum)
+          ancestors = List(album, portraits)
         )
       )
-      denormalised.state.relations.ancestors shouldBe List(newAlbum)
+      denormalised.state.relations.ancestors shouldBe List(album, portraits)
     }
 
     it("preserves existing state members") {
