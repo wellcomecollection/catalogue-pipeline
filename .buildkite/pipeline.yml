@@ -60,8 +60,7 @@ steps:
       # The ingestor tests will regenerate the JSON test documents
       # used in the API tests.  Make sure the latest versions are
       # checked in.
-      # See https://github.com/wellcomecollection/platform/issues/5531
-      # - git diff --exit-code
+      - git diff --exit-code
     label: "ingestor (works)"
     agents:
       queue: "scala"
@@ -71,8 +70,7 @@ steps:
       # The ingestor tests will regenerate the JSON test documents
       # used in the API tests.  Make sure the latest versions are
       # checked in.
-      # See https://github.com/wellcomecollection/platform/issues/5531
-      # - git diff --exit-code
+      - git diff --exit-code
     label: "ingestor (images)"
     agents:
       queue: "scala"
