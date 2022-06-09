@@ -95,7 +95,19 @@ trait ImageGenerators
         )
 
     def toIdentifiedWith(canonicalId: CanonicalId = createCanonicalId)
-      : ImageData[IdState.Identified] =
+      : ImageData[IdState.Identified] = {
+
+      // This is for CreateTestWorkDocuments in the ingestors; they have a
+      // seeded random instance to ensure deterministic results.
+      //
+      // I removed a call to createCanonicalId in commit b8efb05 (because
+      // we were discarding the argument passed by the caller), but we want
+      // to call it anyway to preserve the random state.
+      //
+      // This avoids a bunch of unnecessary churn in the test documents,
+      // which in turn break the downstream API tests.
+      val _ = createCanonicalId
+
       imageData.copy(
         id = IdState.Identified(
           canonicalId = canonicalId,
@@ -103,6 +115,7 @@ trait ImageGenerators
           otherIdentifiers = imageData.id.otherIdentifiers
         )
       )
+    }
 
     def toIdentified: ImageData[IdState.Identified] =
       imageData.toIdentifiedWith()
