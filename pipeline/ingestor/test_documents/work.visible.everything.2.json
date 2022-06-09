@@ -1,6 +1,6 @@
 {
   "description" : "a list of work with all the include-able fields",
-  "createdAt" : "2022-06-06T11:16:20.989444Z",
+  "createdAt" : "2022-06-09T10:25:50.170626Z",
   "id" : "jfzz4ou9",
   "document" : {
     "debug" : {
@@ -545,7 +545,7 @@
       "imageData" : [
         {
           "id" : {
-            "canonicalId" : "qgsnmxvd",
+            "canonicalId" : "y3fstphe",
             "sourceIdentifier" : {
               "identifierType" : {
                 "id" : "miro-image-number"
@@ -575,7 +575,7 @@
         },
         {
           "id" : {
-            "canonicalId" : "44dibycc",
+            "canonicalId" : "whuucljo",
             "sourceIdentifier" : {
               "identifierType" : {
                 "id" : "miro-image-number"
@@ -1012,11 +1012,11 @@
       ],
       "images" : [
         {
-          "id" : "qgsnmxvd",
+          "id" : "y3fstphe",
           "type" : "Image"
         },
         {
-          "id" : "44dibycc",
+          "id" : "whuucljo",
           "type" : "Image"
         }
       ],
@@ -1074,12 +1074,20 @@
         "FhqVjVef8B"
       ],
       "images.id" : [
+        "y3fstphe",
+        "whuucljo"
       ],
       "images.identifiers.value" : [
+        "68MBxtQgjn",
+        "nh9jhXW1Qd"
       ],
       "items.id" : [
+        "iba49lem",
+        "zlqcxxmn"
       ],
       "items.identifiers.value" : [
+        "haLIuxnEwk",
+        "KFWEKKm2rQ"
       ],
       "subjects.id" : [
       ],
@@ -1090,8 +1098,20 @@
         "t4fspOh5tl"
       ],
       "subjects.concepts.label" : [
+        "hKQNGv31h63sJts",
+        "RuBvzw4YQmyoWab",
+        "AgXxwlS5TtSeuKJ",
+        "AUKxcPeEWECb7cJ",
+        "uhQpXNFDoA7rpYP",
+        "iDfifsBwXAEPbWR"
       ],
       "genres.concepts.label" : [
+        "MAgtlZTK6GyLzSr",
+        "eGLHq3k05FqagUa",
+        "uios0IzDAQA5geM",
+        "ZGNVldxfQFhVctB",
+        "FwsNPAX3Wg9bz6n",
+        "2QtjPUbfZXARrSC"
       ],
       "partOf.id" : [
         "k4gltrjv",

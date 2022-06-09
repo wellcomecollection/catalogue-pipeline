@@ -1,6 +1,6 @@
 {
   "description" : "works with items with other identifiers",
-  "createdAt" : "2022-06-06T11:16:21.337103Z",
+  "createdAt" : "2022-06-09T10:25:50.451711Z",
   "id" : "qjnwiqbs",
   "document" : {
     "debug" : {
@@ -220,8 +220,11 @@
       "images.identifiers.value" : [
       ],
       "items.id" : [
+        "nuywbjoj"
       ],
       "items.identifiers.value" : [
+        "nDSV5vB01p",
+        "xJJHLpGvU7"
       ],
       "subjects.id" : [
       ],
