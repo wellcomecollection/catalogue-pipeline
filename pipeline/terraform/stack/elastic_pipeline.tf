@@ -83,6 +83,7 @@ resource "aws_secretsmanager_secret" "es_username_catalogue" {
   for_each = toset([
     "snapshot_generator",
     "catalogue_api",
+    "concepts_api",
   ])
 
   name = "elasticsearch/pipeline_storage_${var.pipeline_date}/${each.key}/es_username"
@@ -96,6 +97,7 @@ resource "aws_secretsmanager_secret" "es_password_catalogue" {
   for_each = toset([
     "snapshot_generator",
     "catalogue_api",
+    "concepts_api",
   ])
 
   name = "elasticsearch/pipeline_storage_${var.pipeline_date}/${each.key}/es_password"

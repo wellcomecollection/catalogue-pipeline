@@ -1,8 +1,8 @@
-module "catalogue_pipeline_2022-05-26" {
+module "catalogue_pipeline_2022-06-09" {
   source = "./stack"
 
-  pipeline_date = "2022-05-26"
-  release_label = "2022-05-26"
+  pipeline_date = "2022-06-09"
+  release_label = "2022-06-09"
 
   reindexing_state = {
     connect_reindex_topics   = false
