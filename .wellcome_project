@@ -81,8 +81,8 @@ reindexer:
 
 catalogue_pipeline:
   environments:
-    - id: "2022-05-26"
-      name: "2022-05-26"
+    - id: "2022-06-09"
+      name: "2022-06-09"
     - id: "2022-05-30"
       name: "2022-05-30"
   image_repositories:
