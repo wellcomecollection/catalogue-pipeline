@@ -1025,6 +1025,19 @@
           "languages.id" : {
             "type" : "keyword"
           },
+          "contributors.agent.label" : {
+            "type" : "text",
+            "analyzer" : "asciifolding_analyzer",
+            "fields" : {
+              "keyword" : {
+                "type" : "keyword"
+              },
+              "lowercaseKeyword" : {
+                "type" : "keyword",
+                "normalizer" : "lowercase_normalizer"
+              }
+            }
+          },
           "partOf.id" : {
             "type" : "keyword",
             "normalizer" : "lowercase_normalizer"

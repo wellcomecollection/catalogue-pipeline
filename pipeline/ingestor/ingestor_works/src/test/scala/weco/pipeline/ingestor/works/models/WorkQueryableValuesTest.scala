@@ -4,9 +4,17 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.generators.ImageGenerators
 import weco.catalogue.internal_model.identifiers._
-import weco.catalogue.internal_model.locations.{AccessCondition, AccessMethod, AccessStatus, License, LocationType}
+import weco.catalogue.internal_model.languages.Language
+import weco.catalogue.internal_model.locations.{
+  AccessCondition,
+  AccessMethod,
+  AccessStatus,
+  License,
+  LocationType
+}
 import weco.catalogue.internal_model.work._
 import weco.catalogue.internal_model.work.generators.{
+  ContributorGenerators,
   ItemsGenerators,
   WorkGenerators
 }
@@ -14,6 +22,7 @@ import weco.catalogue.internal_model.work.generators.{
 class WorkQueryableValuesTest
     extends AnyFunSpec
     with Matchers
+    with ContributorGenerators
     with ItemsGenerators
     with ImageGenerators
     with WorkGenerators {
@@ -132,6 +141,48 @@ class WorkQueryableValuesTest
     )
 
     q.genreConceptLabels shouldBe List("generosity", "greebles", "greatness")
+  }
+
+  it("adds languages") {
+    val workData = WorkData[DataState.Identified](
+      title = Some(s"title-${randomAlphanumeric(length = 10)}"),
+      languages = List(
+        Language(id = "eng", label = "English"),
+        Language(id = "ger", label = "German"),
+        Language(id = "fre", label = "French"),
+      )
+    )
+
+    val q = WorkQueryableValues(
+      id = createCanonicalId,
+      sourceIdentifier = createSourceIdentifier,
+      workData = workData,
+      relations = Relations(),
+      availabilities = Set()
+    )
+
+    q.languageIds shouldBe List("eng", "ger", "fre")
+  }
+
+  it("adds contributors") {
+    val workData = WorkData[DataState.Identified](
+      title = Some(s"title-${randomAlphanumeric(length = 10)}"),
+      contributors = List(
+        createPersonContributorWith(label = "Crafty Carol"),
+        createPersonContributorWith(label = "Cruel Cinderella"),
+        createPersonContributorWith(label = "Careful Carlos"),
+      )
+    )
+
+    val q = WorkQueryableValues(
+      id = createCanonicalId,
+      sourceIdentifier = createSourceIdentifier,
+      workData = workData,
+      relations = Relations(),
+      availabilities = Set()
+    )
+
+    q.contributorAgentLabels shouldBe List("Crafty Carol", "Cruel Cinderella", "Careful Carlos")
   }
 
   it("adds items") {
