@@ -16,6 +16,9 @@ case class WorkQueryableValues(
   @JsonKey("images.identifiers.value") imageIdentifiers: List[String],
   @JsonKey("items.id") itemIds: List[String],
   @JsonKey("items.identifiers.value") itemIdentifiers: List[String],
+  @JsonKey("items.locations.accessConditions.status.id") itemAccessStatusIds: List[String],
+  @JsonKey("items.locations.license.id") itemLicenseIds: List[String],
+  @JsonKey("items.locations.locationType.id") itemLocationTypeIds: List[String],
   @JsonKey("subjects.id") subjectIds: List[String],
   @JsonKey("subjects.identifiers.value") subjectIdentifiers: List[String],
   @JsonKey("subjects.label") subjectLabels: List[String],
@@ -31,7 +34,9 @@ case object WorkQueryableValues {
             sourceIdentifier: SourceIdentifier,
             workData: WorkData[DataState.Identified],
             relations: Relations,
-            availabilities: Set[Availability]): WorkQueryableValues =
+            availabilities: Set[Availability]): WorkQueryableValues = {
+    val locations = workData.items.flatMap(_.locations)
+
     WorkQueryableValues(
       id = id.underlying,
       workIdentifiers =
@@ -41,6 +46,9 @@ case object WorkQueryableValues {
       itemIds = workData.items.flatMap(_.id.maybeCanonicalId).map(_.underlying),
       itemIdentifiers =
         workData.items.flatMap(_.id.allSourceIdentifiers).map(_.value),
+      itemAccessStatusIds = locations.flatMap(_.accessConditions).flatMap(_.status).map(_.id),
+      itemLicenseIds = locations.flatMap(_.license).map(_.id),
+      itemLocationTypeIds = locations.map(_.locationType.id),
       subjectIds = workData.subjects.map(_.id).canonicalIds,
       subjectIdentifiers = workData.subjects.map(_.id).sourceIdentifiers,
       subjectLabels = workData.subjects.map(_.label),
@@ -50,6 +58,7 @@ case object WorkQueryableValues {
       partOfTitles = relations.ancestors.flatMap(_.title),
       availabilityIds = availabilities.map(_.id).toList
     )
+  }
 
   implicit class IdStateOps(ids: Seq[IdState.Minted]) {
     def canonicalIds: List[String] =

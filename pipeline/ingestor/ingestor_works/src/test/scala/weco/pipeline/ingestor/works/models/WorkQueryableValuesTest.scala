@@ -4,6 +4,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.generators.ImageGenerators
 import weco.catalogue.internal_model.identifiers._
+import weco.catalogue.internal_model.locations.{AccessCondition, AccessMethod, AccessStatus, License, LocationType}
 import weco.catalogue.internal_model.work._
 import weco.catalogue.internal_model.work.generators.{
   ItemsGenerators,
@@ -137,11 +138,37 @@ class WorkQueryableValuesTest
     val data = WorkData[DataState.Identified](
       title = Some(s"title-${randomAlphanumeric(length = 10)}"),
       items = List(
-        createUnidentifiableItem,
+        createUnidentifiableItemWith(locations = List()),
         createIdentifiedItemWith(
           canonicalId = CanonicalId("item1111"),
           sourceIdentifier = createSourceIdentifierWith(value = "sourceItem1"),
           otherIdentifiers = List(),
+          locations = List(
+            createPhysicalLocationWith(
+              locationType = LocationType.OpenShelves,
+              accessConditions = List(
+                AccessCondition(
+                  method = AccessMethod.OpenShelves,
+                  status = AccessStatus.Open
+                ),
+                AccessCondition(
+                  method = AccessMethod.OpenShelves,
+                  status = AccessStatus.OpenWithAdvisory
+                )
+              ),
+              license = None
+            ),
+            createPhysicalLocationWith(
+              locationType = LocationType.ClosedStores,
+              accessConditions = List(
+                AccessCondition(
+                  method = AccessMethod.NotRequestable,
+                  status = AccessStatus.Closed
+                )
+              ),
+              license = None
+            )
+          )
         ),
         createIdentifiedItemWith(
           canonicalId = CanonicalId("item2222"),
@@ -149,6 +176,23 @@ class WorkQueryableValuesTest
           otherIdentifiers = List(
             createSourceIdentifierWith(value = "otherItem2")
           ),
+          locations = List(
+            createDigitalLocationWith(
+              locationType = LocationType.IIIFImageAPI,
+              license = Some(License.CCBY),
+              accessConditions = List(
+                AccessCondition(
+                  method = AccessMethod.ViewOnline,
+                  status = AccessStatus.OpenWithAdvisory
+                )
+              )
+            ),
+            createDigitalLocationWith(
+              locationType = LocationType.IIIFPresentationAPI,
+              license = Some(License.CCBYNC),
+              accessConditions = List()
+            )
+          )
         )
       )
     )
@@ -163,6 +207,13 @@ class WorkQueryableValuesTest
 
     q.itemIds shouldBe List("item1111", "item2222")
     q.itemIdentifiers shouldBe List("sourceItem1", "sourceItem2", "otherItem2")
+    q.itemAccessStatusIds shouldBe List(
+      "open", "open-with-advisory", "closed", "open-with-advisory"
+    )
+    q.itemLicenseIds shouldBe List("cc-by", "cc-by-nc")
+    q.itemLocationTypeIds shouldBe List(
+      "open-shelves", "closed-stores", "iiif-image", "iiif-presentation"
+    )
   }
 
   it("adds images") {

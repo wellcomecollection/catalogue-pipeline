@@ -976,6 +976,15 @@
             "type" : "keyword",
             "normalizer" : "lowercase_normalizer"
           },
+          "items.locations.accessConditions.status.id" : {
+            "type" : "keyword"
+          },
+          "items.locations.license.id" : {
+            "type" : "keyword"
+          },
+          "items.locations.locationType.id" : {
+            "type" : "keyword"
+          },
           "subjects.id" : {
             "type" : "keyword",
             "normalizer" : "lowercase_normalizer"
