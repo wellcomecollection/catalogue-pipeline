@@ -1022,6 +1022,9 @@
               }
             }
           },
+          "languages.id" : {
+            "type" : "keyword"
+          },
           "partOf.id" : {
             "type" : "keyword",
             "normalizer" : "lowercase_normalizer"

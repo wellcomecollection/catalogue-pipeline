@@ -245,6 +245,8 @@ object WorksIndexConfig extends IndexConfigFields {
           asciifoldingTextFieldWithKeyword("subjects.concepts.label"),
           // genres
           asciifoldingTextFieldWithKeyword("genres.concepts.label"),
+          // languages
+          keywordField("languages.id"),
           // relations
           canonicalIdField("partOf.id"),
           multilingualFieldWithKeyword("partOf.title"),

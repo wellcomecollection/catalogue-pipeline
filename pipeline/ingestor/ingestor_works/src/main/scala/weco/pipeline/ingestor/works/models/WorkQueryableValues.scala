@@ -24,6 +24,7 @@ case class WorkQueryableValues(
   @JsonKey("subjects.label") subjectLabels: List[String],
   @JsonKey("subjects.concepts.label") subjectConceptLabels: List[String],
   @JsonKey("genres.concepts.label") genreConceptLabels: List[String],
+  @JsonKey("languages.id") languageIds: List[String],
   @JsonKey("partOf.id") partOfIds: List[String],
   @JsonKey("partOf.title") partOfTitles: List[String],
   @JsonKey("availabilities.id") availabilityIds: List[String],
@@ -54,6 +55,7 @@ case object WorkQueryableValues {
       subjectLabels = workData.subjects.map(_.label),
       subjectConceptLabels = workData.subjects.flatMap(_.concepts).map(_.label),
       genreConceptLabels = workData.genres.flatMap(_.concepts).map(_.label),
+      languageIds = workData.languages.map(_.id),
       partOfIds = relations.ancestors.flatMap(_.id).map(_.underlying),
       partOfTitles = relations.ancestors.flatMap(_.title),
       availabilityIds = availabilities.map(_.id).toList
