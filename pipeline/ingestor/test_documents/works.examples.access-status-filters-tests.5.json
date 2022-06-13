@@ -1,6 +1,6 @@
 {
   "description" : "examples for the access status tests",
-  "createdAt" : "2022-06-09T10:25:51.053433Z",
+  "createdAt" : "2022-06-13T13:06:49.703919Z",
   "id" : "yh6sk7pv",
   "document" : {
     "debug" : {
@@ -244,6 +244,15 @@
       "items.identifiers.value" : [
         "M7iXmYa3Fc"
       ],
+      "items.locations.accessConditions.status.id" : [
+        "licensed-resources"
+      ],
+      "items.locations.license.id" : [
+        "cc-by"
+      ],
+      "items.locations.locationType.id" : [
+        "iiif-presentation"
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
@@ -253,6 +262,10 @@
       "subjects.concepts.label" : [
       ],
       "genres.concepts.label" : [
+      ],
+      "languages.id" : [
+      ],
+      "contributors.agent.label" : [
       ],
       "partOf.id" : [
       ],

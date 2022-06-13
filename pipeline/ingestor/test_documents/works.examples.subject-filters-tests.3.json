@@ -1,6 +1,6 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2022-06-09T10:25:50.805340Z",
+  "createdAt" : "2022-06-13T13:06:49.360678Z",
   "id" : "b1r485o0",
   "document" : {
     "debug" : {
@@ -209,6 +209,12 @@
       ],
       "items.identifiers.value" : [
       ],
+      "items.locations.accessConditions.status.id" : [
+      ],
+      "items.locations.license.id" : [
+      ],
+      "items.locations.locationType.id" : [
+      ],
       "subjects.id" : [
         "darwin01"
       ],
@@ -224,6 +230,10 @@
         "KOlZmZXOWd5kJ1F"
       ],
       "genres.concepts.label" : [
+      ],
+      "languages.id" : [
+      ],
+      "contributors.agent.label" : [
       ],
       "partOf.id" : [
       ],

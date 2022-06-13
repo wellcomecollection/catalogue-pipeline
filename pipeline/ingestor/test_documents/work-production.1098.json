@@ -1,6 +1,6 @@
 {
   "description" : "a work with a production event in 1098",
-  "createdAt" : "2022-06-06T11:16:20.610345Z",
+  "createdAt" : "2022-06-13T13:06:48.360331Z",
   "id" : "guav7chy",
   "document" : {
     "debug" : {
@@ -175,6 +175,12 @@
       ],
       "items.identifiers.value" : [
       ],
+      "items.locations.accessConditions.status.id" : [
+      ],
+      "items.locations.license.id" : [
+      ],
+      "items.locations.locationType.id" : [
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
@@ -184,6 +190,10 @@
       "subjects.concepts.label" : [
       ],
       "genres.concepts.label" : [
+      ],
+      "languages.id" : [
+      ],
+      "contributors.agent.label" : [
       ],
       "partOf.id" : [
       ],

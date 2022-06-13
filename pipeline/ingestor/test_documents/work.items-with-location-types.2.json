@@ -1,6 +1,6 @@
 {
   "description" : "items with different location types",
-  "createdAt" : "2022-06-09T10:25:50.650563Z",
+  "createdAt" : "2022-06-13T13:06:49.155017Z",
   "id" : "wt6pclbs",
   "document" : {
     "debug" : {
@@ -217,6 +217,14 @@
       "items.identifiers.value" : [
         "G3f7j0ub0t"
       ],
+      "items.locations.accessConditions.status.id" : [
+      ],
+      "items.locations.license.id" : [
+        "pdm"
+      ],
+      "items.locations.locationType.id" : [
+        "closed-stores"
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
@@ -226,6 +234,10 @@
       "subjects.concepts.label" : [
       ],
       "genres.concepts.label" : [
+      ],
+      "languages.id" : [
+      ],
+      "contributors.agent.label" : [
       ],
       "partOf.id" : [
       ],

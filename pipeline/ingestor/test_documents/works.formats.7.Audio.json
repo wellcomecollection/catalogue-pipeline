@@ -1,6 +1,6 @@
 {
   "description" : "one of a list of works with a variety of formats",
-  "createdAt" : "2022-06-09T10:25:50.256292Z",
+  "createdAt" : "2022-06-13T13:06:48.723703Z",
   "id" : "t3q2ufnz",
   "document" : {
     "debug" : {
@@ -148,6 +148,12 @@
       ],
       "items.identifiers.value" : [
       ],
+      "items.locations.accessConditions.status.id" : [
+      ],
+      "items.locations.license.id" : [
+      ],
+      "items.locations.locationType.id" : [
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
@@ -157,6 +163,10 @@
       "subjects.concepts.label" : [
       ],
       "genres.concepts.label" : [
+      ],
+      "languages.id" : [
+      ],
+      "contributors.agent.label" : [
       ],
       "partOf.id" : [
       ],

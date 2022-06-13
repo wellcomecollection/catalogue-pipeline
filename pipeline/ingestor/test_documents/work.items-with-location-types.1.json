@@ -1,6 +1,6 @@
 {
   "description" : "items with different location types",
-  "createdAt" : "2022-06-09T10:25:50.649871Z",
+  "createdAt" : "2022-06-13T13:06:49.154417Z",
   "id" : "sgatphra",
   "document" : {
     "debug" : {
@@ -241,6 +241,16 @@
       "items.identifiers.value" : [
         "lPj6a56tuj"
       ],
+      "items.locations.accessConditions.status.id" : [
+      ],
+      "items.locations.license.id" : [
+        "cc-by",
+        "cc-by"
+      ],
+      "items.locations.locationType.id" : [
+        "iiif-image",
+        "iiif-presentation"
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
@@ -250,6 +260,10 @@
       "subjects.concepts.label" : [
       ],
       "genres.concepts.label" : [
+      ],
+      "languages.id" : [
+      ],
+      "contributors.agent.label" : [
       ],
       "partOf.id" : [
       ],
