@@ -19,14 +19,14 @@
 # This template contains the JSON string for a *single* entry in the job config.
 
 locals {
-  jobs = {for job in local.reindexer_jobs :
+  jobs = { for job in local.reindexer_jobs :
     "${job["source"]}--${job["destination"]}" => {
-      source: job["source"],
-      dynamoConfig: {
-        tableName: job["table"]
+      source : job["source"],
+      dynamoConfig : {
+        tableName : job["table"]
       },
-      destinationConfig: {
-        topicArn: job["topic"]
+      destinationConfig : {
+        topicArn : job["topic"]
       }
     }
   }
