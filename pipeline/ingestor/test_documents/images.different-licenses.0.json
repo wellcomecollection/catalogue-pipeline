@@ -1,6 +1,6 @@
 {
   "description" : "images with different licenses",
-  "createdAt" : "2022-06-14T07:58:09.493Z",
+  "createdAt" : "2022-06-14T08:13:06.150797Z",
   "id" : "f0nj3tuz",
   "document" : {
     "version" : 1,
@@ -4509,6 +4509,8 @@
         "languages" : [
         ],
         "genres" : [
+        ],
+        "subjects" : [
         ],
         "type" : "Work"
       },

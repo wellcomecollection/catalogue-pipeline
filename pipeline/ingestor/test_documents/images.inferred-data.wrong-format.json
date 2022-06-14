@@ -1,6 +1,6 @@
 {
   "description" : "an image with inferred data in the wrong format",
-  "createdAt" : "2022-06-14T07:58:09.899Z",
+  "createdAt" : "2022-06-14T08:13:07.352740Z",
   "id" : "s2crnicc",
   "document" : {
     "version" : 1,
@@ -4472,6 +4472,8 @@
         "languages" : [
         ],
         "genres" : [
+        ],
+        "subjects" : [
         ],
         "type" : "Work"
       },

@@ -1,6 +1,6 @@
 {
   "description" : "example for the color filter tests",
-  "createdAt" : "2022-06-14T07:58:09.986Z",
+  "createdAt" : "2022-06-14T08:13:07.575787Z",
   "id" : "jh411m3a",
   "document" : {
     "version" : 1,
@@ -4400,6 +4400,8 @@
         "languages" : [
         ],
         "genres" : [
+        ],
+        "subjects" : [
         ],
         "type" : "Work"
       },

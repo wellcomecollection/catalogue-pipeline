@@ -1,6 +1,6 @@
 {
   "description" : "images linked with another work",
-  "createdAt" : "2022-06-14T07:58:10.041Z",
+  "createdAt" : "2022-06-14T08:13:07.730144Z",
   "id" : "pv9twlun",
   "document" : {
     "version" : 1,
@@ -4486,6 +4486,8 @@
         "languages" : [
         ],
         "genres" : [
+        ],
+        "subjects" : [
         ],
         "type" : "Work"
       },

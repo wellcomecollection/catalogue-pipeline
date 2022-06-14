@@ -1,6 +1,6 @@
 {
   "description" : "images with similar features and palettes",
-  "createdAt" : "2022-06-14T07:58:09.763Z",
+  "createdAt" : "2022-06-14T08:13:07.032985Z",
   "id" : "fsq3gsq0",
   "document" : {
     "version" : 1,
@@ -4488,6 +4488,8 @@
         "languages" : [
         ],
         "genres" : [
+        ],
+        "subjects" : [
         ],
         "type" : "Work"
       },

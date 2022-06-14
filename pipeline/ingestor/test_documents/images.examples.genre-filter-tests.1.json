@@ -1,6 +1,6 @@
 {
   "description" : "examples for the genre filter tests",
-  "createdAt" : "2022-06-14T07:58:09.960Z",
+  "createdAt" : "2022-06-14T08:13:07.515544Z",
   "id" : "lzykmofa",
   "document" : {
     "version" : 1,
@@ -4500,6 +4500,8 @@
         "languages" : [
         ],
         "genres" : [
+        ],
+        "subjects" : [
         ],
         "type" : "Work"
       },

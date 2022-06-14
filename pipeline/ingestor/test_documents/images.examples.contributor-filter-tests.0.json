@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2022-06-14T07:58:09.913Z",
+  "createdAt" : "2022-06-14T08:13:07.417570Z",
   "id" : "7avdcsvd",
   "document" : {
     "version" : 1,
@@ -4502,6 +4502,8 @@
         "languages" : [
         ],
         "genres" : [
+        ],
+        "subjects" : [
         ],
         "type" : "Work"
       },

@@ -1,6 +1,6 @@
 {
   "description" : "an example of images with work metadata for the API tests",
-  "createdAt" : "2022-06-14T07:58:10.059Z",
+  "createdAt" : "2022-06-14T08:13:07.779563Z",
   "id" : "iwc9jla6",
   "document" : {
     "version" : 1,
@@ -4458,6 +4458,8 @@
         "languages" : [
         ],
         "genres" : [
+        ],
+        "subjects" : [
         ],
         "type" : "Work"
       },

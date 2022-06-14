@@ -1,6 +1,6 @@
 {
   "description" : "images with different licenses",
-  "createdAt" : "2022-06-14T07:58:09.503Z",
+  "createdAt" : "2022-06-14T08:13:06.165842Z",
   "id" : "wm3hzclj",
   "document" : {
     "version" : 1,
@@ -4511,6 +4511,8 @@
         "languages" : [
         ],
         "genres" : [
+        ],
+        "subjects" : [
         ],
         "type" : "Work"
       },

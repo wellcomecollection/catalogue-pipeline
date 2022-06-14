@@ -1,6 +1,6 @@
 {
   "description" : "images linked with the same work",
-  "createdAt" : "2022-06-14T07:58:10.026Z",
+  "createdAt" : "2022-06-14T08:13:07.673575Z",
   "id" : "ca2bzfap",
   "document" : {
     "version" : 1,
@@ -4490,6 +4490,8 @@
         "languages" : [
         ],
         "genres" : [
+        ],
+        "subjects" : [
         ],
         "type" : "Work"
       },

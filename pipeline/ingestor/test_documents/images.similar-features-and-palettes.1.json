@@ -1,6 +1,6 @@
 {
   "description" : "images with similar features and palettes",
-  "createdAt" : "2022-06-14T07:58:09.760Z",
+  "createdAt" : "2022-06-14T08:13:07.031406Z",
   "id" : "dqlalauc",
   "document" : {
     "version" : 1,
@@ -4486,6 +4486,8 @@
         "languages" : [
         ],
         "genres" : [
+        ],
+        "subjects" : [
         ],
         "type" : "Work"
       },

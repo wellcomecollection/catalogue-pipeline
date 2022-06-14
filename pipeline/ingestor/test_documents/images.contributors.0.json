@@ -1,6 +1,6 @@
 {
   "description" : "images with different contributors",
-  "createdAt" : "2022-06-14T07:58:09.669Z",
+  "createdAt" : "2022-06-14T08:13:06.818947Z",
   "id" : "vfhrlsz5",
   "document" : {
     "version" : 1,
@@ -4500,6 +4500,8 @@
         "languages" : [
         ],
         "genres" : [
+        ],
+        "subjects" : [
         ],
         "type" : "Work"
       },

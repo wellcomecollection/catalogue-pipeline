@@ -1,6 +1,6 @@
 {
   "description" : "images with different genres",
-  "createdAt" : "2022-06-14T07:58:09.708Z",
+  "createdAt" : "2022-06-14T08:13:06.955811Z",
   "id" : "0e6ywtkv",
   "document" : {
     "version" : 1,
@@ -4479,6 +4479,8 @@
         "languages" : [
         ],
         "genres" : [
+        ],
+        "subjects" : [
         ],
         "type" : "Work"
       },
