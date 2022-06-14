@@ -16,7 +16,8 @@ case class WorkQueryableValues(
   @JsonKey("images.identifiers.value") imageIdentifiers: List[String],
   @JsonKey("items.id") itemIds: List[String],
   @JsonKey("items.identifiers.value") itemIdentifiers: List[String],
-  @JsonKey("items.locations.accessConditions.status.id") itemAccessStatusIds: List[String],
+  @JsonKey("items.locations.accessConditions.status.id") itemAccessStatusIds: List[
+    String],
   @JsonKey("items.locations.license.id") itemLicenseIds: List[String],
   @JsonKey("items.locations.locationType.id") itemLocationTypeIds: List[String],
   @JsonKey("subjects.id") subjectIds: List[String],
@@ -48,7 +49,8 @@ case object WorkQueryableValues {
       itemIds = workData.items.flatMap(_.id.maybeCanonicalId).map(_.underlying),
       itemIdentifiers =
         workData.items.flatMap(_.id.allSourceIdentifiers).map(_.value),
-      itemAccessStatusIds = locations.flatMap(_.accessConditions).flatMap(_.status).map(_.id),
+      itemAccessStatusIds =
+        locations.flatMap(_.accessConditions).flatMap(_.status).map(_.id),
       itemLicenseIds = locations.flatMap(_.license).map(_.id),
       itemLocationTypeIds = locations.map(_.locationType.id),
       subjectIds = workData.subjects.map(_.id).canonicalIds,

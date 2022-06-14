@@ -182,7 +182,10 @@ class WorkQueryableValuesTest
       availabilities = Set()
     )
 
-    q.contributorAgentLabels shouldBe List("Crafty Carol", "Cruel Cinderella", "Careful Carlos")
+    q.contributorAgentLabels shouldBe List(
+      "Crafty Carol",
+      "Cruel Cinderella",
+      "Careful Carlos")
   }
 
   it("adds items") {
@@ -259,11 +262,17 @@ class WorkQueryableValuesTest
     q.itemIds shouldBe List("item1111", "item2222")
     q.itemIdentifiers shouldBe List("sourceItem1", "sourceItem2", "otherItem2")
     q.itemAccessStatusIds shouldBe List(
-      "open", "open-with-advisory", "closed", "open-with-advisory"
+      "open",
+      "open-with-advisory",
+      "closed",
+      "open-with-advisory"
     )
     q.itemLicenseIds shouldBe List("cc-by", "cc-by-nc")
     q.itemLocationTypeIds shouldBe List(
-      "open-shelves", "closed-stores", "iiif-image", "iiif-presentation"
+      "open-shelves",
+      "closed-stores",
+      "iiif-image",
+      "iiif-presentation"
     )
   }
 
