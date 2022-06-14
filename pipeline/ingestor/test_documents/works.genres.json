@@ -1,6 +1,6 @@
 {
   "description" : "a work with different concepts in the genre",
-  "createdAt" : "2022-06-09T10:25:50.365481Z",
+  "createdAt" : "2022-06-13T13:06:48.847325Z",
   "id" : "2zo588up",
   "document" : {
     "debug" : {
@@ -207,6 +207,12 @@
       ],
       "items.identifiers.value" : [
       ],
+      "items.locations.accessConditions.status.id" : [
+      ],
+      "items.locations.license.id" : [
+      ],
+      "items.locations.locationType.id" : [
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
@@ -219,6 +225,10 @@
         "Conceptual Conversations",
         "Pleasant Paris",
         "Past Prehistory"
+      ],
+      "languages.id" : [
+      ],
+      "contributors.agent.label" : [
       ],
       "partOf.id" : [
       ],

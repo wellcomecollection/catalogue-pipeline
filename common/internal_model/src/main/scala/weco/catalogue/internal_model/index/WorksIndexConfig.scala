@@ -235,13 +235,20 @@ object WorksIndexConfig extends IndexConfigFields {
           // items
           canonicalIdField("items.id"),
           sourceIdentifierField("items.identifiers.value"),
+          keywordField("items.locations.accessConditions.status.id"),
+          keywordField("items.locations.license.id"),
+          keywordField("items.locations.locationType.id"),
           // subjects
           canonicalIdField("subjects.id"),
           sourceIdentifierField("subjects.identifiers.value"),
           keywordField("subjects.label"),
-          asciifoldingTextFieldWithKeyword("subjects.concepts.label"),
+          labelField("subjects.concepts.label"),
           // genres
-          asciifoldingTextFieldWithKeyword("genres.concepts.label"),
+          labelField("genres.concepts.label"),
+          // languages
+          keywordField("languages.id"),
+          // contributors
+          labelField("contributors.agent.label"),
           // relations
           canonicalIdField("partOf.id"),
           multilingualFieldWithKeyword("partOf.title"),

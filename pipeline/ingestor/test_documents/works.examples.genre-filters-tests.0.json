@@ -1,6 +1,6 @@
 {
   "description" : "examples for the genre tests",
-  "createdAt" : "2022-06-09T10:25:50.777848Z",
+  "createdAt" : "2022-06-13T13:06:49.322349Z",
   "id" : "jywtq4xg",
   "document" : {
     "debug" : {
@@ -184,6 +184,12 @@
       ],
       "items.identifiers.value" : [
       ],
+      "items.locations.accessConditions.status.id" : [
+      ],
+      "items.locations.license.id" : [
+      ],
+      "items.locations.locationType.id" : [
+      ],
       "subjects.id" : [
       ],
       "subjects.identifiers.value" : [
@@ -196,6 +202,10 @@
         "qp5RA4f5gWVIptl",
         "xE0qlBbPiSihnTe",
         "JBs3eSemcGNQXd8"
+      ],
+      "languages.id" : [
+      ],
+      "contributors.agent.label" : [
       ],
       "partOf.id" : [
       ],
