@@ -7,18 +7,21 @@ import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.generators.ImageGenerators
 import weco.catalogue.internal_model.image.{Image, ImageState}
 import weco.catalogue.internal_model.Implicits._
+import weco.catalogue.internal_model.identifiers.{CanonicalId, IdState}
 import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.locations.License
 import weco.catalogue.internal_model.work.generators.{
   ContributorGenerators,
-  GenreGenerators
+  GenreGenerators,
+  SubjectGenerators
 }
 import weco.catalogue.internal_model.work.{
   Agent,
   Contributor,
   Meeting,
   Organisation,
-  Person
+  Person,
+  Subject
 }
 import weco.json.JsonUtil._
 import weco.pipeline.ingestor.fixtures.TestDocumentUtils
@@ -41,6 +44,7 @@ class CreateTestImageDocuments
     with TestDocumentUtils
     with ContributorGenerators
     with GenreGenerators
+    with SubjectGenerators
     with ImageGenerators {
 
   override def randomInstant: Instant =
@@ -462,6 +466,58 @@ class CreateTestImageDocuments
       mantouImage,
       description = "an example of images with work metadata for the API tests",
       id = "images.examples.bread-mantou",
+    )
+  }
+
+  it("creates images with different subjects") {
+    val squareSounds = Subject(label = "Square sounds", concepts = List())
+    val squashedSquirrels = Subject(label = "Squashed squirrels", concepts = List())
+    val simpleScrewdrivers = Subject(
+      id = IdState.Identified(
+        canonicalId = CanonicalId("subject1"),
+        sourceIdentifier = createSourceIdentifier
+      ),
+      label = "Simple screwdrivers",
+      concepts = List()
+    )
+    val struckSamples = Subject(
+      id = IdState.Identified(
+        canonicalId = CanonicalId("subject2"),
+        sourceIdentifier = createSourceIdentifier
+      ),
+      label = "Struck samples",
+      concepts = List()
+    )
+
+    val squareSoundsImage = createImageData.toAugmentedImageWith(
+      parentWork = identifiedWork().subjects(List(squareSounds))
+    )
+    val redirectedSimpleScrewdriversImage = createImageData.toAugmentedImageWith(
+      redirectedWork = Some(identifiedWork().subjects(List(simpleScrewdrivers)))
+    )
+    val squirrelSampleImage =
+      createImageData.toAugmentedImageWith(
+        parentWork = identifiedWork().subjects(
+          List(squashedSquirrels, struckSamples)
+        )
+      )
+
+    saveImage(
+      squareSoundsImage,
+      description = "images with different subjects",
+      id = "images.subjects.sounds"
+    )
+
+    saveImage(
+      redirectedSimpleScrewdriversImage,
+      description = "images with different subjects",
+      id = "images.subjects.screwdrivers"
+    )
+
+    saveImage(
+      squirrelSampleImage,
+      description = "images with different subjects",
+      id = "images.subjects.squirrel,sample"
     )
   }
 
