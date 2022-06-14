@@ -1,6 +1,6 @@
 {
   "description" : "an image with every include",
-  "createdAt" : "2022-06-09T12:37:30.308161Z",
+  "createdAt" : "2022-06-14T07:58:10.012Z",
   "id" : "alwtbvyg",
   "document" : {
     "version" : 1,
@@ -4636,6 +4636,12 @@
         "type" : "Work"
       },
       "type" : "Image"
+    },
+    "query" : {
+      "source.subjects.id" : [
+      ],
+      "source.subjects.label" : [
+      ]
     },
     "aggregatableValues" : {
       "locations.license" : [

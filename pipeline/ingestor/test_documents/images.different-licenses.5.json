@@ -1,6 +1,6 @@
 {
   "description" : "images with different licenses",
-  "createdAt" : "2022-06-09T12:37:29.028271Z",
+  "createdAt" : "2022-06-14T07:58:09.503Z",
   "id" : "wm3hzclj",
   "document" : {
     "version" : 1,
@@ -4515,6 +4515,12 @@
         "type" : "Work"
       },
       "type" : "Image"
+    },
+    "query" : {
+      "source.subjects.id" : [
+      ],
+      "source.subjects.label" : [
+      ]
     },
     "aggregatableValues" : {
       "locations.license" : [

@@ -1,6 +1,6 @@
 {
   "description" : "examples for the genre filter tests",
-  "createdAt" : "2022-06-09T12:37:30.192896Z",
+  "createdAt" : "2022-06-14T07:58:09.962Z",
   "id" : "a5vdwjyw",
   "document" : {
     "version" : 1,
@@ -4566,6 +4566,12 @@
         "type" : "Work"
       },
       "type" : "Image"
+    },
+    "query" : {
+      "source.subjects.id" : [
+      ],
+      "source.subjects.label" : [
+      ]
     },
     "aggregatableValues" : {
       "locations.license" : [

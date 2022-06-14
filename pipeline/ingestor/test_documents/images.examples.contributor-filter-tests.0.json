@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2022-06-09T12:37:30.096119Z",
+  "createdAt" : "2022-06-14T07:58:09.913Z",
   "id" : "7avdcsvd",
   "document" : {
     "version" : 1,
@@ -4506,6 +4506,12 @@
         "type" : "Work"
       },
       "type" : "Image"
+    },
+    "query" : {
+      "source.subjects.id" : [
+      ],
+      "source.subjects.label" : [
+      ]
     },
     "aggregatableValues" : {
       "locations.license" : [

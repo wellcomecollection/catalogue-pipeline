@@ -1,6 +1,6 @@
 {
   "description" : "example for the color filter tests",
-  "createdAt" : "2022-06-09T12:37:30.242178Z",
+  "createdAt" : "2022-06-14T07:58:09.986Z",
   "id" : "jh411m3a",
   "document" : {
     "version" : 1,
@@ -4404,6 +4404,12 @@
         "type" : "Work"
       },
       "type" : "Image"
+    },
+    "query" : {
+      "source.subjects.id" : [
+      ],
+      "source.subjects.label" : [
+      ]
     },
     "aggregatableValues" : {
       "locations.license" : [

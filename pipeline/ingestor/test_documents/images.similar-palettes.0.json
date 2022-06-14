@@ -1,6 +1,6 @@
 {
   "description" : "images with similar palettes",
-  "createdAt" : "2022-06-09T12:37:29.997901Z",
+  "createdAt" : "2022-06-14T07:58:09.862Z",
   "id" : "ugow7dpj",
   "document" : {
     "version" : 1,
@@ -4490,6 +4490,12 @@
         "type" : "Work"
       },
       "type" : "Image"
+    },
+    "query" : {
+      "source.subjects.id" : [
+      ],
+      "source.subjects.label" : [
+      ]
     },
     "aggregatableValues" : {
       "locations.license" : [
