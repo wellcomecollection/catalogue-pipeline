@@ -85,6 +85,13 @@ object ImagesIndexConfig extends IndexConfigFields {
       // to index it -- it's just an arbitrary blob of JSON.
       val display = objectField("display").withEnabled(false)
 
+      // This field contains the values we're actually going to query in search.
+      val query = objectField("query")
+        .fields(
+          keywordField("source.subjects.id"),
+          keywordField("source.subjects.label")
+        )
+
       // This field contains the display documents used by aggregations.
       //
       // The values are JSON documents that can be included in an AggregationBucket from
@@ -110,6 +117,7 @@ object ImagesIndexConfig extends IndexConfigFields {
           )
           .withDynamic("false"),
         display,
+        query,
         aggregatableValues
       )
 

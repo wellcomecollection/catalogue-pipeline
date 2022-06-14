@@ -18,6 +18,7 @@ import weco.messaging.fixtures.SQS.{Queue, QueuePair}
 import weco.pipeline.ingestor.fixtures.IngestorFixtures
 import weco.pipeline.ingestor.images.models.{
   ImageAggregatableValues,
+  ImageQueryableValues,
   IndexedImage
 }
 import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
@@ -63,6 +64,7 @@ class ImagesIngestorFeatureTest
             val expectedJson =
               DisplayImage(image.transition[ImageState.Indexed]())
 
+            storedImage.query shouldBe ImageQueryableValues(image.source)
             storedImage.aggregatableValues shouldBe ImageAggregatableValues(
               image.source)
 
