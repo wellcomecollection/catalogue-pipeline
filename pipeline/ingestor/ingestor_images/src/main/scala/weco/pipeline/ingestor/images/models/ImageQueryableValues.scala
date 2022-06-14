@@ -14,16 +14,19 @@ case object ImageQueryableValues {
   def apply(source: ImageSource): ImageQueryableValues =
     source match {
       case ParentWorks(canonicalWork, Some(redirectedWork)) =>
-        val subjects: Seq[Subject[IdState.Minted]] = canonicalWork.data.subjects ++ redirectedWork.data.subjects
+        val subjects
+          : Seq[Subject[IdState.Minted]] = canonicalWork.data.subjects ++ redirectedWork.data.subjects
         ImageQueryableValues(subjects)
 
       case ParentWorks(canonicalWork, _) =>
         ImageQueryableValues(canonicalWork.data.subjects)
     }
 
-  private def apply(subjects: Seq[Subject[IdState.Minted]]): ImageQueryableValues =
+  private def apply(
+    subjects: Seq[Subject[IdState.Minted]]): ImageQueryableValues =
     ImageQueryableValues(
-      sourceSubjectIds = subjects.flatMap(_.id.maybeCanonicalId).map(_.underlying),
+      sourceSubjectIds =
+        subjects.flatMap(_.id.maybeCanonicalId).map(_.underlying),
       sourceSubjectLabels = subjects.map(_.label),
     )
 }

@@ -471,7 +471,8 @@ class CreateTestImageDocuments
 
   it("creates images with different subjects") {
     val squareSounds = Subject(label = "Square sounds", concepts = List())
-    val squashedSquirrels = Subject(label = "Squashed squirrels", concepts = List())
+    val squashedSquirrels =
+      Subject(label = "Squashed squirrels", concepts = List())
     val simpleScrewdrivers = Subject(
       id = IdState.Identified(
         canonicalId = CanonicalId("subject1"),
@@ -492,9 +493,11 @@ class CreateTestImageDocuments
     val squareSoundsImage = createImageData.toAugmentedImageWith(
       parentWork = identifiedWork().subjects(List(squareSounds))
     )
-    val redirectedSimpleScrewdriversImage = createImageData.toAugmentedImageWith(
-      redirectedWork = Some(identifiedWork().subjects(List(simpleScrewdrivers)))
-    )
+    val redirectedSimpleScrewdriversImage =
+      createImageData.toAugmentedImageWith(
+        redirectedWork =
+          Some(identifiedWork().subjects(List(simpleScrewdrivers)))
+      )
     val squirrelSampleImage =
       createImageData.toAugmentedImageWith(
         parentWork = identifiedWork().subjects(

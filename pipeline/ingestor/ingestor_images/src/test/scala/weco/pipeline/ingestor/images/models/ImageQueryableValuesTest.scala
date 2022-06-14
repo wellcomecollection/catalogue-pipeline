@@ -2,12 +2,19 @@ package weco.pipeline.ingestor.images.models
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.identifiers.{CanonicalId, DataState, IdState}
+import weco.catalogue.internal_model.identifiers.{
+  CanonicalId,
+  DataState,
+  IdState
+}
 import weco.catalogue.internal_model.image.{ParentWork, ParentWorks}
 import weco.catalogue.internal_model.work.generators.WorkGenerators
 import weco.catalogue.internal_model.work.{Concept, Subject, WorkData}
 
-class ImageQueryableValuesTest extends AnyFunSpec with Matchers with WorkGenerators {
+class ImageQueryableValuesTest
+    extends AnyFunSpec
+    with Matchers
+    with WorkGenerators {
   it("adds subjects") {
     val canonicalData = WorkData[DataState.Identified](
       title = Some(s"title-${randomAlphanumeric(length = 10)}"),
@@ -91,14 +98,31 @@ class ImageQueryableValuesTest extends AnyFunSpec with Matchers with WorkGenerat
 
     q1.sourceSubjectIds shouldBe List("subject1", "subject2")
     q1.sourceSubjectLabels shouldBe List(
-      "Sharp scissors", "Split sandwiches", "Soft spinners", "Straight strings"
+      "Sharp scissors",
+      "Split sandwiches",
+      "Soft spinners",
+      "Straight strings"
     )
 
-    val q2 = ImageQueryableValues(source = ParentWorks(canonicalWork, redirectedWork = Some(redirectedWork)))
+    val q2 =
+      ImageQueryableValues(
+        source =
+          ParentWorks(canonicalWork, redirectedWork = Some(redirectedWork)))
 
-    q2.sourceSubjectIds shouldBe List("subject1", "subject2", "subject3", "subject4")
+    q2.sourceSubjectIds shouldBe List(
+      "subject1",
+      "subject2",
+      "subject3",
+      "subject4")
     q2.sourceSubjectLabels shouldBe List(
-      "Sharp scissors", "Split sandwiches", "Soft spinners", "Straight strings", "Ropey roundels", "Rigid roads", "Round radishes", "Ripe razors"
+      "Sharp scissors",
+      "Split sandwiches",
+      "Soft spinners",
+      "Straight strings",
+      "Ropey roundels",
+      "Rigid roads",
+      "Round radishes",
+      "Ripe razors"
     )
   }
 }

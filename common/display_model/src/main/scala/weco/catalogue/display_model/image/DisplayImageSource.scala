@@ -2,7 +2,11 @@ package weco.catalogue.display_model.image
 
 import io.circe.generic.extras.JsonKey
 import weco.catalogue.display_model.languages.DisplayLanguage
-import weco.catalogue.display_model.work.{DisplayContributor, DisplayGenre, DisplaySubject}
+import weco.catalogue.display_model.work.{
+  DisplayContributor,
+  DisplayGenre,
+  DisplaySubject
+}
 import weco.catalogue.internal_model.image.{ImageSource, ParentWorks}
 
 case class DisplayImageSource(
