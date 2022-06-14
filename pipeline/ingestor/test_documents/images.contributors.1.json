@@ -1,6 +1,6 @@
 {
   "description" : "images with different contributors",
-  "createdAt" : "2022-06-09T12:37:29.705257Z",
+  "createdAt" : "2022-06-14T08:13:06.853865Z",
   "id" : "0taf9mko",
   "document" : {
     "version" : 1,
@@ -4539,9 +4539,17 @@
         ],
         "genres" : [
         ],
+        "subjects" : [
+        ],
         "type" : "Work"
       },
       "type" : "Image"
+    },
+    "query" : {
+      "source.subjects.id" : [
+      ],
+      "source.subjects.label" : [
+      ]
     },
     "aggregatableValues" : {
       "locations.license" : [

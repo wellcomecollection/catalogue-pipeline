@@ -5,6 +5,7 @@ import weco.catalogue.internal_model.image.Image
 import weco.catalogue.internal_model.image.ImageState.{Augmented, Indexed}
 import weco.pipeline.ingestor.images.models.{
   ImageAggregatableValues,
+  ImageQueryableValues,
   IndexedImage
 }
 import weco.catalogue.display_model.Implicits._
@@ -22,6 +23,7 @@ object ImageTransformer {
         source = indexedImage.source,
         modifiedTime = indexedImage.modifiedTime,
         display = DisplayImage(indexedImage).asJson.deepDropNullValues,
+        query = ImageQueryableValues(indexedImage.source),
         aggregatableValues = ImageAggregatableValues(indexedImage.source)
       )
     }

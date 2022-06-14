@@ -1167,6 +1167,17 @@
         "type" : "object",
         "enabled": false
       },
+      "query" : {
+        "type": "object",
+        "properties": {
+          "source.subjects.id": {
+            "type": "keyword"
+          },
+          "source.subjects.label": {
+            "type": "keyword"
+          }
+        }
+      },
       "aggregatableValues" : {
         "type" : "object",
         "properties" : {

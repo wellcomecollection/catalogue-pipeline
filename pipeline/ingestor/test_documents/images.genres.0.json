@@ -1,6 +1,6 @@
 {
   "description" : "images with different genres",
-  "createdAt" : "2022-06-09T12:37:29.763449Z",
+  "createdAt" : "2022-06-14T08:13:06.954724Z",
   "id" : "j2kzh3nk",
   "document" : {
     "version" : 1,
@@ -4486,9 +4486,17 @@
             "type" : "Genre"
           }
         ],
+        "subjects" : [
+        ],
         "type" : "Work"
       },
       "type" : "Image"
+    },
+    "query" : {
+      "source.subjects.id" : [
+      ],
+      "source.subjects.label" : [
+      ]
     },
     "aggregatableValues" : {
       "locations.license" : [

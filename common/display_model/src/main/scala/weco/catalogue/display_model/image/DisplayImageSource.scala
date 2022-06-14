@@ -2,7 +2,11 @@ package weco.catalogue.display_model.image
 
 import io.circe.generic.extras.JsonKey
 import weco.catalogue.display_model.languages.DisplayLanguage
-import weco.catalogue.display_model.work.{DisplayContributor, DisplayGenre}
+import weco.catalogue.display_model.work.{
+  DisplayContributor,
+  DisplayGenre,
+  DisplaySubject
+}
 import weco.catalogue.internal_model.image.{ImageSource, ParentWorks}
 
 case class DisplayImageSource(
@@ -11,6 +15,7 @@ case class DisplayImageSource(
   contributors: List[DisplayContributor],
   languages: List[DisplayLanguage],
   genres: List[DisplayGenre],
+  subjects: List[DisplaySubject],
   @JsonKey("type") ontologyType: String
 )
 
@@ -30,6 +35,8 @@ object DisplayImageSource {
       languages = parent.canonicalWork.data.languages.map { DisplayLanguage(_) },
       genres = parent.canonicalWork.data.genres
         .map { DisplayGenre(_, includesIdentifiers = false) },
+      subjects = parent.canonicalWork.data.subjects
+        .map { DisplaySubject(_, includesIdentifiers = false) },
       ontologyType = "Work"
     )
 }
