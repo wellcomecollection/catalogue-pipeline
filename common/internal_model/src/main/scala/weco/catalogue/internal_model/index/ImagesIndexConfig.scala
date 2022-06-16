@@ -88,7 +88,7 @@ object ImagesIndexConfig extends IndexConfigFields {
       // This field contains the values we're actually going to query in search.
       val query = objectField("query")
         .fields(
-          keywordField("source.subjects.id"),
+          keywordField("source.genres.label"),
           keywordField("source.subjects.label")
         )
 

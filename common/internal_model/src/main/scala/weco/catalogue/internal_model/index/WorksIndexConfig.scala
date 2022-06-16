@@ -239,9 +239,6 @@ object WorksIndexConfig extends IndexConfigFields {
           keywordField("items.locations.license.id"),
           keywordField("items.locations.locationType.id"),
           // subjects
-          canonicalIdField("subjects.id"),
-          sourceIdentifierField("subjects.identifiers.value"),
-          keywordField("subjects.label"),
           labelField("subjects.concepts.label"),
           // genres
           labelField("genres.concepts.label"),

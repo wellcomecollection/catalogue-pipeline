@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2022-06-14T08:13:07.418396Z",
+  "createdAt" : "2022-06-16T10:05:59.197Z",
   "id" : "sod8ij3c",
   "document" : {
     "version" : 1,
@@ -4506,9 +4506,9 @@
       "type" : "Image"
     },
     "query" : {
-      "source.subjects.id" : [
-      ],
       "source.subjects.label" : [
+      ],
+      "source.genres.label" : [
       ]
     },
     "aggregatableValues" : {
@@ -4518,6 +4518,8 @@
         "{\"label\":\"Edward Said\",\"type\":\"Person\"}"
       ],
       "source.genres.label" : [
+      ],
+      "source.subjects.label" : [
       ]
     }
   }

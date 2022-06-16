@@ -107,13 +107,6 @@ class WorkQueryableValuesTest
       availabilities = Set()
     )
 
-    q.subjectIds shouldBe List("ssssssss", "SSSSSSSS")
-    q.subjectIdentifiers shouldBe List("lcs-soggy", "mesh-soggy", "lcs-simon")
-    q.subjectLabels shouldBe List(
-      "Silly sausages",
-      "Straight scythes",
-      "Soggy sponges",
-      "Sam Smithington")
     q.subjectConceptLabels shouldBe List("silliness", "cylinders", "tools")
   }
 

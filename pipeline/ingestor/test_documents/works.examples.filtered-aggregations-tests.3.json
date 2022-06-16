@@ -1,6 +1,6 @@
 {
   "description" : "examples for the works filtered aggregations tests",
-  "createdAt" : "2022-06-13T13:06:49.740786Z",
+  "createdAt" : "2022-06-16T09:57:46.151Z",
   "id" : "lpoz1fy9",
   "document" : {
     "debug" : {
@@ -162,12 +162,6 @@
       "items.locations.license.id" : [
       ],
       "items.locations.locationType.id" : [
-      ],
-      "subjects.id" : [
-      ],
-      "subjects.identifiers.value" : [
-      ],
-      "subjects.label" : [
       ],
       "subjects.concepts.label" : [
       ],

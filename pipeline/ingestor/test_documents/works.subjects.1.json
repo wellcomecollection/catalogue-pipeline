@@ -1,6 +1,6 @@
 {
   "description" : "works with different subjects",
-  "createdAt" : "2022-06-13T13:06:48.855697Z",
+  "createdAt" : "2022-06-16T09:57:45.959Z",
   "id" : "mihwfxry",
   "document" : {
     "debug" : {
@@ -192,13 +192,6 @@
       "items.locations.license.id" : [
       ],
       "items.locations.locationType.id" : [
-      ],
-      "subjects.id" : [
-      ],
-      "subjects.identifiers.value" : [
-      ],
-      "subjects.label" : [
-        "realAnalysis"
       ],
       "subjects.concepts.label" : [
         "W7WKCBWrkxlOWWB",

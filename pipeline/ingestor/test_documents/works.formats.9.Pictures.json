@@ -1,6 +1,6 @@
 {
   "description" : "one of a list of works with a variety of formats",
-  "createdAt" : "2022-06-13T13:06:48.735198Z",
+  "createdAt" : "2022-06-16T09:57:45.927Z",
   "id" : "sym6ne7x",
   "document" : {
     "debug" : {
@@ -153,12 +153,6 @@
       "items.locations.license.id" : [
       ],
       "items.locations.locationType.id" : [
-      ],
-      "subjects.id" : [
-      ],
-      "subjects.identifiers.value" : [
-      ],
-      "subjects.label" : [
       ],
       "subjects.concepts.label" : [
       ],

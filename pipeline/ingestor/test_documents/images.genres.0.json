@@ -1,6 +1,6 @@
 {
   "description" : "images with different genres",
-  "createdAt" : "2022-06-14T08:13:06.954724Z",
+  "createdAt" : "2022-06-16T10:05:59.027Z",
   "id" : "j2kzh3nk",
   "document" : {
     "version" : 1,
@@ -4493,9 +4493,10 @@
       "type" : "Image"
     },
     "query" : {
-      "source.subjects.id" : [
-      ],
       "source.subjects.label" : [
+      ],
+      "source.genres.label" : [
+        "Carrot counselling"
       ]
     },
     "aggregatableValues" : {
@@ -4505,6 +4506,8 @@
       ],
       "source.genres.label" : [
         "{\"label\":\"Carrot counselling\",\"concepts\":[],\"type\":\"Genre\"}"
+      ],
+      "source.subjects.label" : [
       ]
     }
   }

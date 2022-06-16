@@ -1,6 +1,6 @@
 {
   "description" : "a work with optional top-level fields",
-  "createdAt" : "2022-06-13T13:06:48.189082Z",
+  "createdAt" : "2022-06-16T09:57:45.551Z",
   "id" : "gsruvqwf",
   "document" : {
     "debug" : {
@@ -147,12 +147,6 @@
       "items.locations.license.id" : [
       ],
       "items.locations.locationType.id" : [
-      ],
-      "subjects.id" : [
-      ],
-      "subjects.identifiers.value" : [
-      ],
-      "subjects.label" : [
       ],
       "subjects.concepts.label" : [
       ],
