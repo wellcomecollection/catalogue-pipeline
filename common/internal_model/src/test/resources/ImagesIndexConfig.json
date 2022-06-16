@@ -1189,6 +1189,9 @@
           },
           "source.genres.label" : {
             "type" : "keyword"
+          },
+          "source.subjects.label" : {
+            "type" : "keyword"
           }
         }
       }

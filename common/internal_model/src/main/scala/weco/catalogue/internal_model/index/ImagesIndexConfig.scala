@@ -103,7 +103,8 @@ object ImagesIndexConfig extends IndexConfigFields {
         .fields(
           keywordField("locations.license"),
           keywordField("source.contributors.agent.label"),
-          keywordField("source.genres.label")
+          keywordField("source.genres.label"),
+          keywordField("source.subjects.label")
         )
 
       val fields = Seq(
