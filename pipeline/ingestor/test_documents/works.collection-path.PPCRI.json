@@ -1,6 +1,6 @@
 {
   "description" : "a work with a collection path",
-  "createdAt" : "2022-06-13T13:06:48.979099Z",
+  "createdAt" : "2022-06-16T09:57:45.996Z",
   "id" : "mlqs2qbd",
   "document" : {
     "debug" : {
@@ -148,12 +148,6 @@
       "items.locations.license.id" : [
       ],
       "items.locations.locationType.id" : [
-      ],
-      "subjects.id" : [
-      ],
-      "subjects.identifiers.value" : [
-      ],
-      "subjects.label" : [
       ],
       "subjects.concepts.label" : [
       ],

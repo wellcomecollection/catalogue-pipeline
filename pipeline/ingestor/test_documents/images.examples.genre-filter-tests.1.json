@@ -1,6 +1,6 @@
 {
   "description" : "examples for the genre filter tests",
-  "createdAt" : "2022-06-14T08:13:07.515544Z",
+  "createdAt" : "2022-06-16T10:05:59.223Z",
   "id" : "lzykmofa",
   "document" : {
     "version" : 1,
@@ -4508,9 +4508,10 @@
       "type" : "Image"
     },
     "query" : {
-      "source.subjects.id" : [
-      ],
       "source.subjects.label" : [
+      ],
+      "source.genres.label" : [
+        "Dodo divination"
       ]
     },
     "aggregatableValues" : {
@@ -4519,6 +4520,8 @@
       "source.contributors.agent.label" : [
       ],
       "source.genres.label" : [
+      ],
+      "source.subjects.label" : [
       ]
     }
   }

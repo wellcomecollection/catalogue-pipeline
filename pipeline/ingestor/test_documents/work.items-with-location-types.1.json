@@ -1,6 +1,6 @@
 {
   "description" : "items with different location types",
-  "createdAt" : "2022-06-13T13:06:49.154417Z",
+  "createdAt" : "2022-06-16T09:57:46.037Z",
   "id" : "sgatphra",
   "document" : {
     "debug" : {
@@ -250,12 +250,6 @@
       "items.locations.locationType.id" : [
         "iiif-image",
         "iiif-presentation"
-      ],
-      "subjects.id" : [
-      ],
-      "subjects.identifiers.value" : [
-      ],
-      "subjects.label" : [
       ],
       "subjects.concepts.label" : [
       ],

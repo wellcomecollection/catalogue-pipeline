@@ -1,6 +1,6 @@
 {
   "description" : "images with different subjects",
-  "createdAt" : "2022-06-14T08:13:07.839710Z",
+  "createdAt" : "2022-06-16T10:05:59.322Z",
   "id" : "e4perwdd",
   "document" : {
     "version" : 1,
@@ -4500,11 +4500,10 @@
       "type" : "Image"
     },
     "query" : {
-      "source.subjects.id" : [
-        "subject1"
-      ],
       "source.subjects.label" : [
         "Simple screwdrivers"
+      ],
+      "source.genres.label" : [
       ]
     },
     "aggregatableValues" : {
@@ -4513,6 +4512,8 @@
       "source.contributors.agent.label" : [
       ],
       "source.genres.label" : [
+      ],
+      "source.subjects.label" : [
       ]
     }
   }

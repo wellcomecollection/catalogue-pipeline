@@ -1,6 +1,6 @@
 {
   "description" : "works with multi-year production ranges",
-  "createdAt" : "2022-06-13T13:06:49.114575Z",
+  "createdAt" : "2022-06-16T09:57:46.028Z",
   "id" : "q4abgj9v",
   "document" : {
     "debug" : {
@@ -203,12 +203,6 @@
       "items.locations.license.id" : [
       ],
       "items.locations.locationType.id" : [
-      ],
-      "subjects.id" : [
-      ],
-      "subjects.identifiers.value" : [
-      ],
-      "subjects.label" : [
       ],
       "subjects.concepts.label" : [
       ],

@@ -1,6 +1,6 @@
 {
   "description" : "examples for the genre tests",
-  "createdAt" : "2022-06-13T13:06:49.322349Z",
+  "createdAt" : "2022-06-16T09:57:46.077Z",
   "id" : "jywtq4xg",
   "document" : {
     "debug" : {
@@ -189,12 +189,6 @@
       "items.locations.license.id" : [
       ],
       "items.locations.locationType.id" : [
-      ],
-      "subjects.id" : [
-      ],
-      "subjects.identifiers.value" : [
-      ],
-      "subjects.label" : [
       ],
       "subjects.concepts.label" : [
       ],

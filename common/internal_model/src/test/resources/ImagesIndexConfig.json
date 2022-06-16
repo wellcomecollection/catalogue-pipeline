@@ -1170,7 +1170,7 @@
       "query" : {
         "type": "object",
         "properties": {
-          "source.subjects.id": {
+          "source.genres.label": {
             "type": "keyword"
           },
           "source.subjects.label": {
@@ -1188,6 +1188,9 @@
             "type" : "keyword"
           },
           "source.genres.label" : {
+            "type" : "keyword"
+          },
+          "source.subjects.label" : {
             "type" : "keyword"
           }
         }

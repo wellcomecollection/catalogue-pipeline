@@ -1,6 +1,6 @@
 {
   "description" : "a work with licensed digital items",
-  "createdAt" : "2022-06-13T13:06:48.797998Z",
+  "createdAt" : "2022-06-16T09:57:45.945Z",
   "id" : "yodfctxx",
   "document" : {
     "debug" : {
@@ -194,12 +194,6 @@
       ],
       "items.locations.locationType.id" : [
         "iiif-presentation"
-      ],
-      "subjects.id" : [
-      ],
-      "subjects.identifiers.value" : [
-      ],
-      "subjects.label" : [
       ],
       "subjects.concepts.label" : [
       ],

@@ -1,6 +1,6 @@
 {
   "description" : "images with different subjects",
-  "createdAt" : "2022-06-14T08:13:07.825974Z",
+  "createdAt" : "2022-06-16T10:05:59.318Z",
   "id" : "xnb29lxt",
   "document" : {
     "version" : 1,
@@ -4494,10 +4494,10 @@
       "type" : "Image"
     },
     "query" : {
-      "source.subjects.id" : [
-      ],
       "source.subjects.label" : [
         "Square sounds"
+      ],
+      "source.genres.label" : [
       ]
     },
     "aggregatableValues" : {
@@ -4506,6 +4506,9 @@
       "source.contributors.agent.label" : [
       ],
       "source.genres.label" : [
+      ],
+      "source.subjects.label" : [
+        "{\"label\":\"Square sounds\",\"concepts\":[],\"type\":\"Subject\"}"
       ]
     }
   }

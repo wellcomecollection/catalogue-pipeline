@@ -9,7 +9,8 @@ import weco.pipeline.ingestor.common.models.AggregatableValues
 case class ImageAggregatableValues(
   @JsonKey("locations.license") licenses: List[String],
   @JsonKey("source.contributors.agent.label") contributors: List[String],
-  @JsonKey("source.genres.label") genres: List[String]
+  @JsonKey("source.genres.label") genres: List[String],
+  @JsonKey("source.subjects.label") subjects: List[String]
 )
 
 case object ImageAggregatableValues extends AggregatableValues {
@@ -23,6 +24,7 @@ case object ImageAggregatableValues extends AggregatableValues {
     ImageAggregatableValues(
       licenses = workData.licenseAggregatableValues,
       contributors = workData.contributorAggregatableValues,
-      genres = workData.genreAggregatableValues
+      genres = workData.genreAggregatableValues,
+      subjects = workData.subjectAggregatableValues
     )
 }

@@ -1,6 +1,6 @@
 {
   "description" : "images with different genres",
-  "createdAt" : "2022-06-14T08:13:06.956934Z",
+  "createdAt" : "2022-06-16T10:05:59.029Z",
   "id" : "93ppiboa",
   "document" : {
     "version" : 1,
@@ -4513,9 +4513,12 @@
       "type" : "Image"
     },
     "query" : {
-      "source.subjects.id" : [
-      ],
       "source.subjects.label" : [
+      ],
+      "source.genres.label" : [
+        "Emu entrepreneurship",
+        "Falcon finances",
+        "Carrot counselling"
       ]
     },
     "aggregatableValues" : {
@@ -4527,6 +4530,8 @@
         "{\"label\":\"Emu entrepreneurship\",\"concepts\":[],\"type\":\"Genre\"}",
         "{\"label\":\"Falcon finances\",\"concepts\":[],\"type\":\"Genre\"}",
         "{\"label\":\"Carrot counselling\",\"concepts\":[],\"type\":\"Genre\"}"
+      ],
+      "source.subjects.label" : [
       ]
     }
   }

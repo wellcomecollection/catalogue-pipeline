@@ -1,6 +1,6 @@
 {
   "description" : "images with similar features and palettes",
-  "createdAt" : "2022-06-14T08:13:07.032985Z",
+  "createdAt" : "2022-06-16T10:05:59.067Z",
   "id" : "fsq3gsq0",
   "document" : {
     "version" : 1,
@@ -4496,9 +4496,9 @@
       "type" : "Image"
     },
     "query" : {
-      "source.subjects.id" : [
-      ],
       "source.subjects.label" : [
+      ],
+      "source.genres.label" : [
       ]
     },
     "aggregatableValues" : {
@@ -4507,6 +4507,8 @@
       "source.contributors.agent.label" : [
       ],
       "source.genres.label" : [
+      ],
+      "source.subjects.label" : [
       ]
     }
   }

@@ -1,6 +1,6 @@
 {
   "description" : "works with different subjects",
-  "createdAt" : "2022-06-13T13:06:48.858338Z",
+  "createdAt" : "2022-06-16T09:57:45.962Z",
   "id" : "t9nj8zse",
   "document" : {
     "debug" : {
@@ -145,12 +145,6 @@
       "items.locations.license.id" : [
       ],
       "items.locations.locationType.id" : [
-      ],
-      "subjects.id" : [
-      ],
-      "subjects.identifiers.value" : [
-      ],
-      "subjects.label" : [
       ],
       "subjects.concepts.label" : [
       ],

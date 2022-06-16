@@ -9,7 +9,7 @@ import weco.catalogue.internal_model.identifiers.{
 }
 import weco.catalogue.internal_model.image.{ParentWork, ParentWorks}
 import weco.catalogue.internal_model.work.generators.WorkGenerators
-import weco.catalogue.internal_model.work.{Concept, Subject, WorkData}
+import weco.catalogue.internal_model.work.{Concept, Genre, Subject, WorkData}
 
 class ImageQueryableValuesTest
     extends AnyFunSpec
@@ -96,7 +96,6 @@ class ImageQueryableValuesTest
 
     val q1 = ImageQueryableValues(source = ParentWorks(canonicalWork))
 
-    q1.sourceSubjectIds shouldBe List("subject1", "subject2")
     q1.sourceSubjectLabels shouldBe List(
       "Sharp scissors",
       "Split sandwiches",
@@ -109,11 +108,6 @@ class ImageQueryableValuesTest
         source =
           ParentWorks(canonicalWork, redirectedWork = Some(redirectedWork)))
 
-    q2.sourceSubjectIds shouldBe List(
-      "subject1",
-      "subject2",
-      "subject3",
-      "subject4")
     q2.sourceSubjectLabels shouldBe List(
       "Sharp scissors",
       "Split sandwiches",
@@ -123,6 +117,61 @@ class ImageQueryableValuesTest
       "Rigid roads",
       "Round radishes",
       "Ripe razors"
+    )
+  }
+
+  it("adds genres") {
+    val canonicalData = WorkData[DataState.Identified](
+      title = Some(s"title-${randomAlphanumeric(length = 10)}"),
+      genres = List(
+        Genre(label = "Green goblins"),
+        Genre(label = "Grand grinches"),
+      )
+    )
+
+    val redirectedData = WorkData[DataState.Identified](
+      title = Some(s"title-${randomAlphanumeric(length = 10)}"),
+      genres = List(
+        Genre(label = "Gruesome growls"),
+        Genre(label = "Grimy grips")
+      )
+    )
+
+    val canonicalWork = ParentWork(
+      id = IdState.Identified(
+        canonicalId = createCanonicalId,
+        sourceIdentifier = createSourceIdentifier
+      ),
+      data = canonicalData,
+      version = 1
+    )
+
+    val redirectedWork = ParentWork(
+      id = IdState.Identified(
+        canonicalId = createCanonicalId,
+        sourceIdentifier = createSourceIdentifier
+      ),
+      data = redirectedData,
+      version = 1
+    )
+
+    val q1 = ImageQueryableValues(source = ParentWorks(canonicalWork))
+
+    q1.sourceGenreLabels shouldBe List(
+      "Green goblins",
+      "Grand grinches",
+    )
+
+    val q2 =
+      ImageQueryableValues(
+        source =
+          ParentWorks(canonicalWork, redirectedWork = Some(redirectedWork)))
+
+    q2.sourceGenreLabels shouldBe List(
+      "Green goblins",
+      "Grand grinches",
+      "Gruesome growls",
+      "Grimy grips"
     )
   }
 }

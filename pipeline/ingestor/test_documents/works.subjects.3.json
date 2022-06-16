@@ -1,6 +1,6 @@
 {
   "description" : "works with different subjects",
-  "createdAt" : "2022-06-13T13:06:48.857916Z",
+  "createdAt" : "2022-06-16T09:57:45.961Z",
   "id" : "xcssabt1",
   "document" : {
     "debug" : {
@@ -239,14 +239,6 @@
       "items.locations.license.id" : [
       ],
       "items.locations.locationType.id" : [
-      ],
-      "subjects.id" : [
-      ],
-      "subjects.identifiers.value" : [
-      ],
-      "subjects.label" : [
-        "paleoNeuroBiology",
-        "realAnalysis"
       ],
       "subjects.concepts.label" : [
         "qbmTfcJnlkosWvA",

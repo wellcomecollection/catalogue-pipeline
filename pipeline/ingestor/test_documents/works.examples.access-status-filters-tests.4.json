@@ -1,6 +1,6 @@
 {
   "description" : "examples for the access status tests",
-  "createdAt" : "2022-06-13T13:06:49.671531Z",
+  "createdAt" : "2022-06-16T09:57:46.138Z",
   "id" : "iqani2su",
   "document" : {
     "debug" : {
@@ -248,12 +248,6 @@
       ],
       "items.locations.locationType.id" : [
         "iiif-presentation"
-      ],
-      "subjects.id" : [
-      ],
-      "subjects.identifiers.value" : [
-      ],
-      "subjects.label" : [
       ],
       "subjects.concepts.label" : [
       ],
