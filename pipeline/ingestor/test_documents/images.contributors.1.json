@@ -1,6 +1,6 @@
 {
   "description" : "images with different contributors",
-  "createdAt" : "2022-06-16T12:58:51.508385Z",
+  "createdAt" : "2022-06-16T13:22:33.820085Z",
   "id" : "0taf9mko",
   "document" : {
     "version" : 1,
@@ -4556,9 +4556,7 @@
       ],
       "source.contributors.agent.label" : [
         "{\"label\":\"carrots\",\"type\":\"Agent\"}",
-        "{\"label\":\"parrots\",\"type\":\"Organisation\"}",
-        "{\"label\":\"parrots\",\"type\":\"Organisation\"}",
-        "{\"label\":\"parrots\",\"type\":\"Meeting\"}"
+        "{\"label\":\"parrots\",\"type\":\"Organisation\"}"
       ],
       "source.genres.label" : [
       ],

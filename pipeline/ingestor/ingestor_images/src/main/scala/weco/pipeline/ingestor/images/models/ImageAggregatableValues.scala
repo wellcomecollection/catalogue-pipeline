@@ -11,23 +11,12 @@ case class ImageAggregatableValues(
   @JsonKey("source.contributors.agent.label") contributors: List[String],
   @JsonKey("source.genres.label") genres: List[String],
   @JsonKey("source.subjects.label") subjects: List[String]
-) {
-
-  def ++(other: ImageAggregatableValues): ImageAggregatableValues =
-    ImageAggregatableValues(
-      licenses = this.licenses ++ other.licenses,
-      contributors = this.contributors ++ other.contributors,
-      genres = this.genres ++ other.genres,
-      subjects = this.subjects ++ other.subjects
-    )
-}
+)
 
 case object ImageAggregatableValues extends AggregatableValues {
   def apply(source: ImageSource): ImageAggregatableValues =
     source match {
-      case ParentWorks(canonicalWork, Some(redirectedWork)) =>
-        fromWorkData(canonicalWork.data) ++ fromWorkData(redirectedWork.data)
-      case ParentWorks(canonicalWork, None) => fromWorkData(canonicalWork.data)
+      case ParentWorks(canonicalWork, _) => fromWorkData(canonicalWork.data)
     }
 
   private def fromWorkData(

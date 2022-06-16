@@ -120,7 +120,7 @@ class ImageAggregatableValuesTest
     )
   }
 
-  it("includes values from the redirected work") {
+  it("skips values from the redirected work") {
     val w = ParentWorks(
       canonicalWork = ParentWork(
         id = IdState.Identified(
@@ -174,19 +174,15 @@ class ImageAggregatableValuesTest
     ImageAggregatableValues(w) shouldBe ImageAggregatableValues(
       licenses = List(
         """{"id":"cc-by","label":"Attribution 4.0 International (CC BY 4.0)","url":"http://creativecommons.org/licenses/by/4.0/","type":"License"}""",
-        """{"id":"pdm","label":"Public Domain Mark","url":"https://creativecommons.org/share-your-work/public-domain/pdm/","type":"License"}"""
       ),
       contributors = List(
         """{"label":"proud polyglots","type":"Meeting"}""",
-        """{"label":"pink panacottas","type":"Person"}"""
       ),
       genres = List(
         """{"label":"glum gerbils","concepts":[],"type":"Genre"}""",
-        """{"label":"grimy gumballs","concepts":[],"type":"Genre"}"""
       ),
       subjects = List(
         """{"label":"sturdy shapes","concepts":[],"type":"Subject"}""",
-        """{"label":"stiff strüdel","concepts":[],"type":"Subject"}"""
       )
     )
   }
