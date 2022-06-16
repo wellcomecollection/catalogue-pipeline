@@ -152,7 +152,8 @@ class ImageAggregatableValuesTest
             sourceIdentifier = createSourceIdentifier
           ),
           data = WorkData[DataState.Identified](
-            title = Some("a redirected work used in the ImageAggregatableValues tests"),
+            title = Some(
+              "a redirected work used in the ImageAggregatableValues tests"),
             genres = List(Genre(label = "grimy gumballs")),
             subjects = List(Subject(label = "stiff strüdel", concepts = List())),
             contributors = List(

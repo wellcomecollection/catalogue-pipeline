@@ -495,13 +495,11 @@ class CreateTestImageDocuments
     )
     val simpleScrewdriversImage1 =
       createImageData.toAugmentedImageWith(
-        parentWork =
-          identifiedWork().subjects(List(simpleScrewdrivers))
+        parentWork = identifiedWork().subjects(List(simpleScrewdrivers))
       )
     val simpleScrewdriversImage2 =
       createImageData.toAugmentedImageWith(
-        parentWork =
-          identifiedWork().subjects(List(simpleScrewdrivers))
+        parentWork = identifiedWork().subjects(List(simpleScrewdrivers))
       )
     val squirrelSampleImage =
       createImageData.toAugmentedImageWith(

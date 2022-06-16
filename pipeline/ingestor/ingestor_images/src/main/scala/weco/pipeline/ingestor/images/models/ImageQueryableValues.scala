@@ -17,8 +17,8 @@ case object ImageQueryableValues {
         create(canonicalWork.data.subjects, canonicalWork.data.genres)
     }
 
-  private def create(
-    subjects: Seq[Subject[IdState.Minted]], genres: Seq[Genre[IdState.Minted]]): ImageQueryableValues =
+  private def create(subjects: Seq[Subject[IdState.Minted]],
+                     genres: Seq[Genre[IdState.Minted]]): ImageQueryableValues =
     ImageQueryableValues(
       sourceSubjectLabels = subjects.map(_.label),
       sourceGenreLabels = genres.map(_.label)
