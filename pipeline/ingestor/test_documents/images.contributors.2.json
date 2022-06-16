@@ -1,6 +1,6 @@
 {
   "description" : "images with different contributors",
-  "createdAt" : "2022-06-16T10:05:59Z",
+  "createdAt" : "2022-06-16T12:58:51.530964Z",
   "id" : "krb6vjce",
   "document" : {
     "version" : 1,
@@ -4540,7 +4540,8 @@
       ],
       "source.contributors.agent.label" : [
         "{\"label\":\"carrots\",\"type\":\"Agent\"}",
-        "{\"label\":\"parrots\",\"type\":\"Meeting\"}"
+        "{\"label\":\"parrots\",\"type\":\"Meeting\"}",
+        "{\"label\":\"rats\",\"type\":\"Person\"}"
       ],
       "source.genres.label" : [
       ],

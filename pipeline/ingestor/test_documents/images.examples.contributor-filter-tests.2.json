@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2022-06-16T10:05:59.198Z",
+  "createdAt" : "2022-06-16T12:58:51.880064Z",
   "id" : "prsdh2ux",
   "document" : {
     "version" : 1,
@@ -4505,6 +4505,7 @@
       "locations.license" : [
       ],
       "source.contributors.agent.label" : [
+        "{\"label\":\"Hypatia\",\"type\":\"Person\"}"
       ],
       "source.genres.label" : [
       ],

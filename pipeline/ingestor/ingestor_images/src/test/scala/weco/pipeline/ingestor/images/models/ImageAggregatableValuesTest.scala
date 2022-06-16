@@ -119,4 +119,75 @@ class ImageAggregatableValuesTest
       )
     )
   }
+
+  it("includes values from the redirected work") {
+    val w = ParentWorks(
+      canonicalWork = ParentWork(
+        id = IdState.Identified(
+          canonicalId = createCanonicalId,
+          sourceIdentifier = createSourceIdentifier
+        ),
+        data = WorkData[DataState.Identified](
+          title = Some("a work used in the ImageAggregatableValues tests"),
+          genres = List(Genre(label = "glum gerbils")),
+          subjects = List(Subject(label = "sturdy shapes", concepts = List())),
+          contributors = List(
+            Contributor(
+              id = IdState.Unidentifiable,
+              agent = Meeting(label = "proud polyglots"),
+              roles = List()
+            ),
+          ),
+          items = List(
+            createDigitalItemWith(license = None),
+            createDigitalItemWith(license = Some(License.CCBY)),
+          )
+        ),
+        version = 1
+      ),
+      redirectedWork = Some(
+        ParentWork(
+          id = IdState.Identified(
+            canonicalId = createCanonicalId,
+            sourceIdentifier = createSourceIdentifier
+          ),
+          data = WorkData[DataState.Identified](
+            title = Some("a redirected work used in the ImageAggregatableValues tests"),
+            genres = List(Genre(label = "grimy gumballs")),
+            subjects = List(Subject(label = "stiff strüdel", concepts = List())),
+            contributors = List(
+              Contributor(
+                id = IdState.Unidentifiable,
+                agent = Person(label = "pink panacottas"),
+                roles = List()
+              ),
+            ),
+            items = List(
+              createDigitalItemWith(license = Some(License.PDM)),
+            )
+          ),
+          version = 1
+        )
+      )
+    )
+
+    ImageAggregatableValues(w) shouldBe ImageAggregatableValues(
+      licenses = List(
+        """{"id":"cc-by","label":"Attribution 4.0 International (CC BY 4.0)","url":"http://creativecommons.org/licenses/by/4.0/","type":"License"}""",
+        """{"id":"pdm","label":"Public Domain Mark","url":"https://creativecommons.org/share-your-work/public-domain/pdm/","type":"License"}"""
+      ),
+      contributors = List(
+        """{"label":"proud polyglots","type":"Meeting"}""",
+        """{"label":"pink panacottas","type":"Person"}"""
+      ),
+      genres = List(
+        """{"label":"glum gerbils","concepts":[],"type":"Genre"}""",
+        """{"label":"grimy gumballs","concepts":[],"type":"Genre"}"""
+      ),
+      subjects = List(
+        """{"label":"sturdy shapes","concepts":[],"type":"Subject"}""",
+        """{"label":"stiff strüdel","concepts":[],"type":"Subject"}"""
+      )
+    )
+  }
 }
