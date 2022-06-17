@@ -173,8 +173,6 @@ object Implicits {
 
   implicit val _decInferredData: Decoder[InferredData] =
     deriveConfiguredDecoder
-  implicit val _decDerivedImageData: Decoder[DerivedImageData] =
-    deriveConfiguredDecoder
 
   implicit val _decImageDataIdentifiable
     : Decoder[ImageData[IdState.Identifiable]] =
@@ -434,8 +432,6 @@ object Implicits {
   implicit val _encRelations: Encoder[Relations] = deriveConfiguredEncoder
 
   implicit val _encInferredData: Encoder[InferredData] =
-    deriveConfiguredEncoder
-  implicit val _encDerivedImageData: Encoder[DerivedImageData] =
     deriveConfiguredEncoder
 
   implicit val _encImageDataIdentifiable

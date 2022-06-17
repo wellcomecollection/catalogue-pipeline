@@ -1137,15 +1137,6 @@
                 "type" : "float"
               }
             }
-          },
-          "derivedData" : {
-            "type" : "object",
-            "properties" : {
-              "sourceContributorAgents" : {
-                "type" : "keyword"
-              }
-            },
-            "dynamic" : "false"
           }
         }
       },
