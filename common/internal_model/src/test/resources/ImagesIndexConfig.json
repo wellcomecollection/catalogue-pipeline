@@ -173,6 +173,7 @@
       },
       "source" : {
         "type" : "object",
+        "dynamic" : "false",
         "properties" : {
           "id": {
             "type": "object",
@@ -621,7 +622,9 @@
               }
             }
           },
-          "dynamic": "false"
+          "type": {
+            "type": "keyword"
+          }
         }
       },
       "state" : {
