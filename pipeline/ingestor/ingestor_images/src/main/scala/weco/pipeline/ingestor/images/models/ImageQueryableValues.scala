@@ -13,15 +13,6 @@ case class ImageQueryableValues(
 case object ImageQueryableValues {
   def apply(source: ImageSource): ImageQueryableValues =
     source match {
-      case ParentWorks(canonicalWork, Some(redirectedWork)) =>
-        val subjects
-          : Seq[Subject[IdState.Minted]] = canonicalWork.data.subjects ++ redirectedWork.data.subjects
-
-        val genres
-          : Seq[Genre[IdState.Minted]] = canonicalWork.data.genres ++ redirectedWork.data.genres
-
-        create(subjects, genres)
-
       case ParentWorks(canonicalWork, _) =>
         create(canonicalWork.data.subjects, canonicalWork.data.genres)
     }

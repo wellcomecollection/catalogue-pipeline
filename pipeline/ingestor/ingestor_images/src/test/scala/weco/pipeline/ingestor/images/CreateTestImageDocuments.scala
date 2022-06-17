@@ -493,15 +493,24 @@ class CreateTestImageDocuments
     val squareSoundsImage = createImageData.toAugmentedImageWith(
       parentWork = identifiedWork().subjects(List(squareSounds))
     )
-    val redirectedSimpleScrewdriversImage =
+    val simpleScrewdriversImage1 =
       createImageData.toAugmentedImageWith(
-        redirectedWork =
-          Some(identifiedWork().subjects(List(simpleScrewdrivers)))
+        parentWork = identifiedWork().subjects(List(simpleScrewdrivers))
+      )
+    val simpleScrewdriversImage2 =
+      createImageData.toAugmentedImageWith(
+        parentWork = identifiedWork().subjects(List(simpleScrewdrivers))
       )
     val squirrelSampleImage =
       createImageData.toAugmentedImageWith(
         parentWork = identifiedWork().subjects(
           List(squashedSquirrels, struckSamples)
+        )
+      )
+    val squirrelScrewdriverImage =
+      createImageData.toAugmentedImageWith(
+        parentWork = identifiedWork().subjects(
+          List(squashedSquirrels, simpleScrewdrivers)
         )
       )
 
@@ -512,15 +521,26 @@ class CreateTestImageDocuments
     )
 
     saveImage(
-      redirectedSimpleScrewdriversImage,
+      simpleScrewdriversImage1,
       description = "images with different subjects",
-      id = "images.subjects.screwdrivers"
+      id = "images.subjects.screwdrivers-1"
+    )
+    saveImage(
+      simpleScrewdriversImage2,
+      description = "images with different subjects",
+      id = "images.subjects.screwdrivers-2"
     )
 
     saveImage(
       squirrelSampleImage,
       description = "images with different subjects",
       id = "images.subjects.squirrel,sample"
+    )
+
+    saveImage(
+      squirrelScrewdriverImage,
+      description = "images with different subjects",
+      id = "images.subjects.squirrel,screwdriver"
     )
   }
 

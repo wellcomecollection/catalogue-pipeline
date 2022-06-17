@@ -1,6 +1,6 @@
 {
   "description" : "images with different genres",
-  "createdAt" : "2022-06-16T10:05:59.028Z",
+  "createdAt" : "2022-06-16T13:22:34.069560Z",
   "id" : "0e6ywtkv",
   "document" : {
     "version" : 1,
@@ -4490,7 +4490,6 @@
       "source.subjects.label" : [
       ],
       "source.genres.label" : [
-        "Dodo divination"
       ]
     },
     "aggregatableValues" : {

@@ -108,16 +108,7 @@ class ImageQueryableValuesTest
         source =
           ParentWorks(canonicalWork, redirectedWork = Some(redirectedWork)))
 
-    q2.sourceSubjectLabels shouldBe List(
-      "Sharp scissors",
-      "Split sandwiches",
-      "Soft spinners",
-      "Straight strings",
-      "Ropey roundels",
-      "Rigid roads",
-      "Round radishes",
-      "Ripe razors"
-    )
+    q2.sourceSubjectLabels shouldBe q1.sourceSubjectLabels
   }
 
   it("adds genres") {
@@ -167,11 +158,6 @@ class ImageQueryableValuesTest
         source =
           ParentWorks(canonicalWork, redirectedWork = Some(redirectedWork)))
 
-    q2.sourceGenreLabels shouldBe List(
-      "Green goblins",
-      "Grand grinches",
-      "Gruesome growls",
-      "Grimy grips"
-    )
+    q2.sourceGenreLabels shouldBe q1.sourceGenreLabels
   }
 }
