@@ -1,6 +1,6 @@
 {
   "description" : "images with different licenses",
-  "createdAt" : "2022-06-16T10:05:58.836Z",
+  "createdAt" : "2022-06-17T11:30:48.399642Z",
   "id" : "wo5jm0ho",
   "document" : {
     "version" : 1,
@@ -4272,23 +4272,6 @@
           0.6996027
         ],
         "aspectRatio" : 0.9475815
-      },
-      "derivedData" : {
-        "thumbnail" : {
-          "url" : "https://iiif.wellcomecollection.org/image/rmb.jpg/info.json",
-          "locationType" : {
-            "id" : "iiif-image"
-          },
-          "license" : {
-            "id" : "pdm"
-          },
-          "credit" : "Credit line: 0mTuYpq7",
-          "linkText" : "Link text: rgJFxmIguP",
-          "accessConditions" : [
-          ]
-        },
-        "sourceContributorAgents" : [
-        ]
       }
     },
     "locations" : [
