@@ -2,7 +2,6 @@ package weco.pipeline.merger.services
 
 import cats.data.State
 import weco.catalogue.internal_model.identifiers.{DataState, IdState}
-import weco.catalogue.internal_model.image
 import weco.catalogue.internal_model.image.ImageData
 import weco.catalogue.internal_model.locations.DigitalLocation
 import weco.catalogue.internal_model.work.WorkState.Identified
