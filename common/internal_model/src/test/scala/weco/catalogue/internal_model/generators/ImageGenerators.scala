@@ -6,7 +6,6 @@ import weco.catalogue.internal_model.identifiers.{
   IdentifierType,
   SourceIdentifier
 }
-import weco.catalogue.internal_model.image
 import weco.catalogue.internal_model.image.ParentWork._
 import weco.catalogue.internal_model.image.ImageState.Initial
 import weco.catalogue.internal_model.image._
@@ -132,15 +131,12 @@ trait ImageGenerators
     imageData: ImageData[IdState.Identified]) {
     def toInitialImageWith(
       modifiedTime: Instant = randomInstant,
-      parentWorks: ParentWorks = ParentWorks(
-        canonicalWork = mergedWork().toParentWork,
-        redirectedWork = None
-      )
+      parentWork: ParentWork = mergedWork().toParentWork,
     ): Image[ImageState.Initial] = Image[ImageState.Initial](
       version = imageData.version,
       locations = imageData.locations,
       modifiedTime = modifiedTime,
-      source = parentWorks,
+      source = parentWork,
       state = ImageState.Initial(
         sourceIdentifier = imageData.id.sourceIdentifier,
         canonicalId = imageData.id.canonicalId
@@ -154,11 +150,7 @@ trait ImageGenerators
         sierraIdentifiedWork())
     ): Image[ImageState.Augmented] =
       imageData
-        .toInitialImageWith(
-          parentWorks = image.ParentWorks(
-            canonicalWork = parentWork.toParentWork,
-            redirectedWork = redirectedWork.map(_.toParentWork))
-        )
+        .toInitialImageWith(parentWork = parentWork.toParentWork)
         .transition[ImageState.Augmented](inferredData)
 
     def toIndexedImageWith(
