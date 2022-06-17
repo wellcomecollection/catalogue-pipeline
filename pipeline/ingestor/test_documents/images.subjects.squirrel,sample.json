@@ -1,6 +1,6 @@
 {
   "description" : "images with different subjects",
-  "createdAt" : "2022-06-17T11:30:50.175635Z",
+  "createdAt" : "2022-06-17T14:17:37.606745Z",
   "id" : "hszkjtb7",
   "document" : {
     "version" : 1,
@@ -4290,149 +4290,82 @@
       }
     ],
     "source" : {
-      "canonicalWork" : {
-        "id" : {
-          "canonicalId" : "oaegix5d",
-          "sourceIdentifier" : {
-            "identifierType" : {
-              "id" : "miro-image-number"
-            },
-            "ontologyType" : "Work",
-            "value" : "LvUtwxDf0F"
+      "id" : {
+        "canonicalId" : "oaegix5d",
+        "sourceIdentifier" : {
+          "identifierType" : {
+            "id" : "miro-image-number"
           },
-          "otherIdentifiers" : [
-          ]
+          "ontologyType" : "Work",
+          "value" : "LvUtwxDf0F"
         },
-        "data" : {
-          "title" : "title-aCK1XcqcTe",
-          "otherIdentifiers" : [
-          ],
-          "alternativeTitles" : [
-          ],
-          "format" : null,
-          "description" : null,
-          "physicalDescription" : null,
-          "lettering" : null,
-          "createdDate" : null,
-          "subjects" : [
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "Squashed squirrels",
-              "concepts" : [
-              ]
+        "otherIdentifiers" : [
+        ]
+      },
+      "data" : {
+        "title" : "title-aCK1XcqcTe",
+        "otherIdentifiers" : [
+        ],
+        "alternativeTitles" : [
+        ],
+        "format" : null,
+        "description" : null,
+        "physicalDescription" : null,
+        "lettering" : null,
+        "createdDate" : null,
+        "subjects" : [
+          {
+            "id" : {
+              "type" : "Unidentifiable"
             },
-            {
-              "id" : {
-                "canonicalId" : "subject2",
-                "sourceIdentifier" : {
-                  "identifierType" : {
-                    "id" : "sierra-system-number"
-                  },
-                  "ontologyType" : "Work",
-                  "value" : "b5OTITpYOx"
+            "label" : "Squashed squirrels",
+            "concepts" : [
+            ]
+          },
+          {
+            "id" : {
+              "canonicalId" : "subject2",
+              "sourceIdentifier" : {
+                "identifierType" : {
+                  "id" : "sierra-system-number"
                 },
-                "otherIdentifiers" : [
-                ],
-                "type" : "Identified"
+                "ontologyType" : "Work",
+                "value" : "b5OTITpYOx"
               },
-              "label" : "Struck samples",
-              "concepts" : [
-              ]
-            }
-          ],
-          "genres" : [
-          ],
-          "contributors" : [
-          ],
-          "thumbnail" : null,
-          "production" : [
-          ],
-          "languages" : [
-          ],
-          "edition" : null,
-          "notes" : [
-          ],
-          "duration" : null,
-          "items" : [
-          ],
-          "holdings" : [
-          ],
-          "collectionPath" : null,
-          "referenceNumber" : null,
-          "imageData" : [
-          ],
-          "workType" : "Standard"
-        },
-        "version" : 77
-      },
-      "redirectedWork" : {
-        "id" : {
-          "canonicalId" : "sriqjwbn",
-          "sourceIdentifier" : {
-            "identifierType" : {
-              "id" : "sierra-system-number"
+              "otherIdentifiers" : [
+              ],
+              "type" : "Identified"
             },
-            "ontologyType" : "Work",
-            "value" : "whYEBZGM9X"
-          },
-          "otherIdentifiers" : [
-          ]
-        },
-        "data" : {
-          "title" : "title-fbRZ78oL82",
-          "otherIdentifiers" : [
-            {
-              "identifierType" : {
-                "id" : "sierra-system-number"
-              },
-              "ontologyType" : "Work",
-              "value" : "gNIfUHFX98"
-            },
-            {
-              "identifierType" : {
-                "id" : "sierra-identifier"
-              },
-              "ontologyType" : "Work",
-              "value" : "vfrF2zfUhm"
-            }
-          ],
-          "alternativeTitles" : [
-          ],
-          "format" : null,
-          "description" : null,
-          "physicalDescription" : null,
-          "lettering" : null,
-          "createdDate" : null,
-          "subjects" : [
-          ],
-          "genres" : [
-          ],
-          "contributors" : [
-          ],
-          "thumbnail" : null,
-          "production" : [
-          ],
-          "languages" : [
-          ],
-          "edition" : null,
-          "notes" : [
-          ],
-          "duration" : null,
-          "items" : [
-          ],
-          "holdings" : [
-          ],
-          "collectionPath" : null,
-          "referenceNumber" : null,
-          "imageData" : [
-          ],
-          "workType" : "Standard"
-        },
-        "version" : 90
+            "label" : "Struck samples",
+            "concepts" : [
+            ]
+          }
+        ],
+        "genres" : [
+        ],
+        "contributors" : [
+        ],
+        "thumbnail" : null,
+        "production" : [
+        ],
+        "languages" : [
+        ],
+        "edition" : null,
+        "notes" : [
+        ],
+        "duration" : null,
+        "items" : [
+        ],
+        "holdings" : [
+        ],
+        "collectionPath" : null,
+        "referenceNumber" : null,
+        "imageData" : [
+        ],
+        "workType" : "Standard"
       },
-      "type" : "ParentWorks"
+      "version" : 77,
+      "type" : "ParentWork"
     },
     "modifiedTime" : "2023-02-21T17:37:02Z",
     "display" : {

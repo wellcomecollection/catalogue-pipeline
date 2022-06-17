@@ -1,6 +1,6 @@
 {
   "description" : "an example of images with work metadata for the API tests",
-  "createdAt" : "2022-06-17T11:30:50.097859Z",
+  "createdAt" : "2022-06-17T14:17:37.531610Z",
   "id" : "hylz2v15",
   "document" : {
     "version" : 1,
@@ -4290,123 +4290,56 @@
       }
     ],
     "source" : {
-      "canonicalWork" : {
-        "id" : {
-          "canonicalId" : "zu4e5ax7",
-          "sourceIdentifier" : {
-            "identifierType" : {
-              "id" : "calm-record-id"
-            },
-            "ontologyType" : "Work",
-            "value" : "eml0fHqxBM"
+      "id" : {
+        "canonicalId" : "zu4e5ax7",
+        "sourceIdentifier" : {
+          "identifierType" : {
+            "id" : "calm-record-id"
           },
-          "otherIdentifiers" : [
-          ]
+          "ontologyType" : "Work",
+          "value" : "eml0fHqxBM"
         },
-        "data" : {
-          "title" : "Mantou is a steamed bread associated with Northern China",
-          "otherIdentifiers" : [
-          ],
-          "alternativeTitles" : [
-          ],
-          "format" : null,
-          "description" : null,
-          "physicalDescription" : null,
-          "lettering" : null,
-          "createdDate" : null,
-          "subjects" : [
-          ],
-          "genres" : [
-          ],
-          "contributors" : [
-          ],
-          "thumbnail" : null,
-          "production" : [
-          ],
-          "languages" : [
-          ],
-          "edition" : null,
-          "notes" : [
-          ],
-          "duration" : null,
-          "items" : [
-          ],
-          "holdings" : [
-          ],
-          "collectionPath" : null,
-          "referenceNumber" : null,
-          "imageData" : [
-          ],
-          "workType" : "Standard"
-        },
-        "version" : 36
+        "otherIdentifiers" : [
+        ]
       },
-      "redirectedWork" : {
-        "id" : {
-          "canonicalId" : "mzotnjml",
-          "sourceIdentifier" : {
-            "identifierType" : {
-              "id" : "sierra-system-number"
-            },
-            "ontologyType" : "Work",
-            "value" : "iGeaBTO0XI"
-          },
-          "otherIdentifiers" : [
-          ]
-        },
-        "data" : {
-          "title" : "title-11ix0dz6tk",
-          "otherIdentifiers" : [
-            {
-              "identifierType" : {
-                "id" : "sierra-system-number"
-              },
-              "ontologyType" : "Work",
-              "value" : "rCG0TA5wSZ"
-            },
-            {
-              "identifierType" : {
-                "id" : "sierra-identifier"
-              },
-              "ontologyType" : "Work",
-              "value" : "7H0lacfd94"
-            }
-          ],
-          "alternativeTitles" : [
-          ],
-          "format" : null,
-          "description" : null,
-          "physicalDescription" : null,
-          "lettering" : null,
-          "createdDate" : null,
-          "subjects" : [
-          ],
-          "genres" : [
-          ],
-          "contributors" : [
-          ],
-          "thumbnail" : null,
-          "production" : [
-          ],
-          "languages" : [
-          ],
-          "edition" : null,
-          "notes" : [
-          ],
-          "duration" : null,
-          "items" : [
-          ],
-          "holdings" : [
-          ],
-          "collectionPath" : null,
-          "referenceNumber" : null,
-          "imageData" : [
-          ],
-          "workType" : "Standard"
-        },
-        "version" : 69
+      "data" : {
+        "title" : "Mantou is a steamed bread associated with Northern China",
+        "otherIdentifiers" : [
+        ],
+        "alternativeTitles" : [
+        ],
+        "format" : null,
+        "description" : null,
+        "physicalDescription" : null,
+        "lettering" : null,
+        "createdDate" : null,
+        "subjects" : [
+        ],
+        "genres" : [
+        ],
+        "contributors" : [
+        ],
+        "thumbnail" : null,
+        "production" : [
+        ],
+        "languages" : [
+        ],
+        "edition" : null,
+        "notes" : [
+        ],
+        "duration" : null,
+        "items" : [
+        ],
+        "holdings" : [
+        ],
+        "collectionPath" : null,
+        "referenceNumber" : null,
+        "imageData" : [
+        ],
+        "workType" : "Standard"
       },
-      "type" : "ParentWorks"
+      "version" : 36,
+      "type" : "ParentWork"
     },
     "modifiedTime" : "1950-12-03T16:01:32Z",
     "display" : {

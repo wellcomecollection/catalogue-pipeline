@@ -1,6 +1,6 @@
 {
   "description" : "an image with every include",
-  "createdAt" : "2022-06-17T11:30:49.973326Z",
+  "createdAt" : "2022-06-17T14:17:37.395235Z",
   "id" : "alwtbvyg",
   "document" : {
     "version" : 1,
@@ -4290,215 +4290,148 @@
       }
     ],
     "source" : {
-      "canonicalWork" : {
-        "id" : {
-          "canonicalId" : "v39xo2l4",
-          "sourceIdentifier" : {
-            "identifierType" : {
-              "id" : "sierra-system-number"
-            },
-            "ontologyType" : "Work",
-            "value" : "t1EzdSUck8"
+      "id" : {
+        "canonicalId" : "v39xo2l4",
+        "sourceIdentifier" : {
+          "identifierType" : {
+            "id" : "sierra-system-number"
           },
-          "otherIdentifiers" : [
-          ]
+          "ontologyType" : "Work",
+          "value" : "t1EzdSUck8"
         },
-        "data" : {
-          "title" : "Apple agitator",
-          "otherIdentifiers" : [
-          ],
-          "alternativeTitles" : [
-          ],
-          "format" : null,
-          "description" : null,
-          "physicalDescription" : null,
-          "lettering" : null,
-          "createdDate" : null,
-          "subjects" : [
-          ],
-          "genres" : [
-            {
-              "label" : "Crumbly cabbages",
-              "concepts" : [
-                {
-                  "id" : {
-                    "type" : "Unidentifiable"
-                  },
-                  "label" : "VTMxwlsU4ID8FJO",
-                  "type" : "Concept"
-                },
-                {
-                  "id" : {
-                    "type" : "Unidentifiable"
-                  },
-                  "label" : "smLVneLxGixuwYM",
-                  "type" : "Concept"
-                },
-                {
-                  "id" : {
-                    "type" : "Unidentifiable"
-                  },
-                  "label" : "WEKRGOyVEETAXu2",
-                  "type" : "Concept"
-                }
-              ]
-            },
-            {
-              "label" : "Deadly durians",
-              "concepts" : [
-                {
-                  "id" : {
-                    "type" : "Unidentifiable"
-                  },
-                  "label" : "wVgSyRdeyNrYD8Z",
-                  "type" : "Concept"
-                },
-                {
-                  "id" : {
-                    "type" : "Unidentifiable"
-                  },
-                  "label" : "5K6TPbywqiK3tTT",
-                  "type" : "Concept"
-                },
-                {
-                  "id" : {
-                    "type" : "Unidentifiable"
-                  },
-                  "label" : "s2UdfxnodZzKVgW",
-                  "type" : "Concept"
-                }
-              ]
-            }
-          ],
-          "contributors" : [
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "agent" : {
+        "otherIdentifiers" : [
+        ]
+      },
+      "data" : {
+        "title" : "Apple agitator",
+        "otherIdentifiers" : [
+        ],
+        "alternativeTitles" : [
+        ],
+        "format" : null,
+        "description" : null,
+        "physicalDescription" : null,
+        "lettering" : null,
+        "createdDate" : null,
+        "subjects" : [
+        ],
+        "genres" : [
+          {
+            "label" : "Crumbly cabbages",
+            "concepts" : [
+              {
                 "id" : {
                   "type" : "Unidentifiable"
                 },
-                "label" : "Adrian Aardvark",
-                "prefix" : null,
-                "numeration" : null,
-                "type" : "Person"
+                "label" : "VTMxwlsU4ID8FJO",
+                "type" : "Concept"
               },
-              "roles" : [
-              ]
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "agent" : {
+              {
                 "id" : {
                   "type" : "Unidentifiable"
                 },
-                "label" : "Beatrice Buffalo",
-                "prefix" : null,
-                "numeration" : null,
-                "type" : "Person"
+                "label" : "smLVneLxGixuwYM",
+                "type" : "Concept"
               },
-              "roles" : [
-              ]
-            }
-          ],
-          "thumbnail" : null,
-          "production" : [
-          ],
-          "languages" : [
-            {
-              "id" : "eng",
-              "label" : "English"
-            },
-            {
-              "id" : "tur",
-              "label" : "Turkish"
-            }
-          ],
-          "edition" : null,
-          "notes" : [
-          ],
-          "duration" : null,
-          "items" : [
-          ],
-          "holdings" : [
-          ],
-          "collectionPath" : null,
-          "referenceNumber" : null,
-          "imageData" : [
-          ],
-          "workType" : "Standard"
-        },
-        "version" : 48
-      },
-      "redirectedWork" : {
-        "id" : {
-          "canonicalId" : "uny5ux57",
-          "sourceIdentifier" : {
-            "identifierType" : {
-              "id" : "sierra-system-number"
-            },
-            "ontologyType" : "Work",
-            "value" : "30bd5gexA7"
+              {
+                "id" : {
+                  "type" : "Unidentifiable"
+                },
+                "label" : "WEKRGOyVEETAXu2",
+                "type" : "Concept"
+              }
+            ]
           },
-          "otherIdentifiers" : [
-          ]
-        },
-        "data" : {
-          "title" : "title-j4jY5Am96n",
-          "otherIdentifiers" : [
-            {
-              "identifierType" : {
-                "id" : "sierra-system-number"
+          {
+            "label" : "Deadly durians",
+            "concepts" : [
+              {
+                "id" : {
+                  "type" : "Unidentifiable"
+                },
+                "label" : "wVgSyRdeyNrYD8Z",
+                "type" : "Concept"
               },
-              "ontologyType" : "Work",
-              "value" : "j8AMk9kGqF"
+              {
+                "id" : {
+                  "type" : "Unidentifiable"
+                },
+                "label" : "5K6TPbywqiK3tTT",
+                "type" : "Concept"
+              },
+              {
+                "id" : {
+                  "type" : "Unidentifiable"
+                },
+                "label" : "s2UdfxnodZzKVgW",
+                "type" : "Concept"
+              }
+            ]
+          }
+        ],
+        "contributors" : [
+          {
+            "id" : {
+              "type" : "Unidentifiable"
             },
-            {
-              "identifierType" : {
-                "id" : "sierra-identifier"
+            "agent" : {
+              "id" : {
+                "type" : "Unidentifiable"
               },
-              "ontologyType" : "Work",
-              "value" : "iZStet5BWz"
-            }
-          ],
-          "alternativeTitles" : [
-          ],
-          "format" : null,
-          "description" : null,
-          "physicalDescription" : null,
-          "lettering" : null,
-          "createdDate" : null,
-          "subjects" : [
-          ],
-          "genres" : [
-          ],
-          "contributors" : [
-          ],
-          "thumbnail" : null,
-          "production" : [
-          ],
-          "languages" : [
-          ],
-          "edition" : null,
-          "notes" : [
-          ],
-          "duration" : null,
-          "items" : [
-          ],
-          "holdings" : [
-          ],
-          "collectionPath" : null,
-          "referenceNumber" : null,
-          "imageData" : [
-          ],
-          "workType" : "Standard"
-        },
-        "version" : 44
+              "label" : "Adrian Aardvark",
+              "prefix" : null,
+              "numeration" : null,
+              "type" : "Person"
+            },
+            "roles" : [
+            ]
+          },
+          {
+            "id" : {
+              "type" : "Unidentifiable"
+            },
+            "agent" : {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "Beatrice Buffalo",
+              "prefix" : null,
+              "numeration" : null,
+              "type" : "Person"
+            },
+            "roles" : [
+            ]
+          }
+        ],
+        "thumbnail" : null,
+        "production" : [
+        ],
+        "languages" : [
+          {
+            "id" : "eng",
+            "label" : "English"
+          },
+          {
+            "id" : "tur",
+            "label" : "Turkish"
+          }
+        ],
+        "edition" : null,
+        "notes" : [
+        ],
+        "duration" : null,
+        "items" : [
+        ],
+        "holdings" : [
+        ],
+        "collectionPath" : null,
+        "referenceNumber" : null,
+        "imageData" : [
+        ],
+        "workType" : "Standard"
       },
-      "type" : "ParentWorks"
+      "version" : 48,
+      "type" : "ParentWork"
     },
     "modifiedTime" : "1955-08-08T03:38:40Z",
     "display" : {

@@ -1,6 +1,6 @@
 {
   "description" : "images with different contributors",
-  "createdAt" : "2022-06-17T11:30:49.265539Z",
+  "createdAt" : "2022-06-17T14:17:36.698284Z",
   "id" : "krb6vjce",
   "document" : {
     "version" : 1,
@@ -4290,153 +4290,84 @@
       }
     ],
     "source" : {
-      "canonicalWork" : {
-        "id" : {
-          "canonicalId" : "apls471y",
-          "sourceIdentifier" : {
-            "identifierType" : {
-              "id" : "miro-image-number"
-            },
-            "ontologyType" : "Work",
-            "value" : "Uhj907eeAc"
+      "id" : {
+        "canonicalId" : "apls471y",
+        "sourceIdentifier" : {
+          "identifierType" : {
+            "id" : "miro-image-number"
           },
-          "otherIdentifiers" : [
-          ]
+          "ontologyType" : "Work",
+          "value" : "Uhj907eeAc"
         },
-        "data" : {
-          "title" : "title-ngkzrTYfkQ",
-          "otherIdentifiers" : [
-          ],
-          "alternativeTitles" : [
-          ],
-          "format" : null,
-          "description" : null,
-          "physicalDescription" : null,
-          "lettering" : null,
-          "createdDate" : null,
-          "subjects" : [
-          ],
-          "genres" : [
-          ],
-          "contributors" : [
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "agent" : {
-                "id" : {
-                  "type" : "Unidentifiable"
-                },
-                "label" : "carrots",
-                "type" : "Agent"
-              },
-              "roles" : [
-              ]
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "agent" : {
-                "id" : {
-                  "type" : "Unidentifiable"
-                },
-                "label" : "parrots",
-                "type" : "Meeting"
-              },
-              "roles" : [
-              ]
-            }
-          ],
-          "thumbnail" : null,
-          "production" : [
-          ],
-          "languages" : [
-          ],
-          "edition" : null,
-          "notes" : [
-          ],
-          "duration" : null,
-          "items" : [
-          ],
-          "holdings" : [
-          ],
-          "collectionPath" : null,
-          "referenceNumber" : null,
-          "imageData" : [
-          ],
-          "workType" : "Standard"
-        },
-        "version" : 71
+        "otherIdentifiers" : [
+        ]
       },
-      "redirectedWork" : {
-        "id" : {
-          "canonicalId" : "iffrfkfi",
-          "sourceIdentifier" : {
-            "identifierType" : {
-              "id" : "miro-image-number"
+      "data" : {
+        "title" : "title-ngkzrTYfkQ",
+        "otherIdentifiers" : [
+        ],
+        "alternativeTitles" : [
+        ],
+        "format" : null,
+        "description" : null,
+        "physicalDescription" : null,
+        "lettering" : null,
+        "createdDate" : null,
+        "subjects" : [
+        ],
+        "genres" : [
+        ],
+        "contributors" : [
+          {
+            "id" : {
+              "type" : "Unidentifiable"
             },
-            "ontologyType" : "Work",
-            "value" : "Xdhrg3bcU7"
+            "agent" : {
+              "id" : {
+                "type" : "Unidentifiable"
+              },
+              "label" : "carrots",
+              "type" : "Agent"
+            },
+            "roles" : [
+            ]
           },
-          "otherIdentifiers" : [
-          ]
-        },
-        "data" : {
-          "title" : "title-rHZI3YvD3n",
-          "otherIdentifiers" : [
-          ],
-          "alternativeTitles" : [
-          ],
-          "format" : null,
-          "description" : null,
-          "physicalDescription" : null,
-          "lettering" : null,
-          "createdDate" : null,
-          "subjects" : [
-          ],
-          "genres" : [
-          ],
-          "contributors" : [
-            {
+          {
+            "id" : {
+              "type" : "Unidentifiable"
+            },
+            "agent" : {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "agent" : {
-                "id" : {
-                  "type" : "Unidentifiable"
-                },
-                "label" : "rats",
-                "prefix" : null,
-                "numeration" : null,
-                "type" : "Person"
-              },
-              "roles" : [
-              ]
-            }
-          ],
-          "thumbnail" : null,
-          "production" : [
-          ],
-          "languages" : [
-          ],
-          "edition" : null,
-          "notes" : [
-          ],
-          "duration" : null,
-          "items" : [
-          ],
-          "holdings" : [
-          ],
-          "collectionPath" : null,
-          "referenceNumber" : null,
-          "imageData" : [
-          ],
-          "workType" : "Standard"
-        },
-        "version" : 35
+              "label" : "parrots",
+              "type" : "Meeting"
+            },
+            "roles" : [
+            ]
+          }
+        ],
+        "thumbnail" : null,
+        "production" : [
+        ],
+        "languages" : [
+        ],
+        "edition" : null,
+        "notes" : [
+        ],
+        "duration" : null,
+        "items" : [
+        ],
+        "holdings" : [
+        ],
+        "collectionPath" : null,
+        "referenceNumber" : null,
+        "imageData" : [
+        ],
+        "workType" : "Standard"
       },
-      "type" : "ParentWorks"
+      "version" : 71,
+      "type" : "ParentWork"
     },
     "modifiedTime" : "1938-05-06T18:45:07Z",
     "display" : {

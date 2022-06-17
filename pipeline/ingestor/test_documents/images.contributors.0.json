@@ -1,6 +1,6 @@
 {
   "description" : "images with different contributors",
-  "createdAt" : "2022-06-17T11:30:49.177229Z",
+  "createdAt" : "2022-06-17T14:17:36.622693Z",
   "id" : "vfhrlsz5",
   "document" : {
     "version" : 1,
@@ -4290,137 +4290,70 @@
       }
     ],
     "source" : {
-      "canonicalWork" : {
-        "id" : {
-          "canonicalId" : "hr55ornz",
-          "sourceIdentifier" : {
-            "identifierType" : {
-              "id" : "sierra-system-number"
-            },
-            "ontologyType" : "Work",
-            "value" : "RQcuhTTiaE"
+      "id" : {
+        "canonicalId" : "hr55ornz",
+        "sourceIdentifier" : {
+          "identifierType" : {
+            "id" : "sierra-system-number"
           },
-          "otherIdentifiers" : [
-          ]
+          "ontologyType" : "Work",
+          "value" : "RQcuhTTiaE"
         },
-        "data" : {
-          "title" : "title-bA22VxYxvw",
-          "otherIdentifiers" : [
-          ],
-          "alternativeTitles" : [
-          ],
-          "format" : null,
-          "description" : null,
-          "physicalDescription" : null,
-          "lettering" : null,
-          "createdDate" : null,
-          "subjects" : [
-          ],
-          "genres" : [
-          ],
-          "contributors" : [
-            {
+        "otherIdentifiers" : [
+        ]
+      },
+      "data" : {
+        "title" : "title-bA22VxYxvw",
+        "otherIdentifiers" : [
+        ],
+        "alternativeTitles" : [
+        ],
+        "format" : null,
+        "description" : null,
+        "physicalDescription" : null,
+        "lettering" : null,
+        "createdDate" : null,
+        "subjects" : [
+        ],
+        "genres" : [
+        ],
+        "contributors" : [
+          {
+            "id" : {
+              "type" : "Unidentifiable"
+            },
+            "agent" : {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "agent" : {
-                "id" : {
-                  "type" : "Unidentifiable"
-                },
-                "label" : "carrots",
-                "type" : "Agent"
-              },
-              "roles" : [
-              ]
-            }
-          ],
-          "thumbnail" : null,
-          "production" : [
-          ],
-          "languages" : [
-          ],
-          "edition" : null,
-          "notes" : [
-          ],
-          "duration" : null,
-          "items" : [
-          ],
-          "holdings" : [
-          ],
-          "collectionPath" : null,
-          "referenceNumber" : null,
-          "imageData" : [
-          ],
-          "workType" : "Standard"
-        },
-        "version" : 36
-      },
-      "redirectedWork" : {
-        "id" : {
-          "canonicalId" : "qm8swrzi",
-          "sourceIdentifier" : {
-            "identifierType" : {
-              "id" : "sierra-system-number"
+              "label" : "carrots",
+              "type" : "Agent"
             },
-            "ontologyType" : "Work",
-            "value" : "pLpOdhurZO"
-          },
-          "otherIdentifiers" : [
-          ]
-        },
-        "data" : {
-          "title" : "title-KazBvOQfgk",
-          "otherIdentifiers" : [
-            {
-              "identifierType" : {
-                "id" : "sierra-system-number"
-              },
-              "ontologyType" : "Work",
-              "value" : "UH3REaaf1q"
-            },
-            {
-              "identifierType" : {
-                "id" : "sierra-identifier"
-              },
-              "ontologyType" : "Work",
-              "value" : "GGRhJQ3L00"
-            }
-          ],
-          "alternativeTitles" : [
-          ],
-          "format" : null,
-          "description" : null,
-          "physicalDescription" : null,
-          "lettering" : null,
-          "createdDate" : null,
-          "subjects" : [
-          ],
-          "genres" : [
-          ],
-          "contributors" : [
-          ],
-          "thumbnail" : null,
-          "production" : [
-          ],
-          "languages" : [
-          ],
-          "edition" : null,
-          "notes" : [
-          ],
-          "duration" : null,
-          "items" : [
-          ],
-          "holdings" : [
-          ],
-          "collectionPath" : null,
-          "referenceNumber" : null,
-          "imageData" : [
-          ],
-          "workType" : "Standard"
-        },
-        "version" : 95
+            "roles" : [
+            ]
+          }
+        ],
+        "thumbnail" : null,
+        "production" : [
+        ],
+        "languages" : [
+        ],
+        "edition" : null,
+        "notes" : [
+        ],
+        "duration" : null,
+        "items" : [
+        ],
+        "holdings" : [
+        ],
+        "collectionPath" : null,
+        "referenceNumber" : null,
+        "imageData" : [
+        ],
+        "workType" : "Standard"
       },
-      "type" : "ParentWorks"
+      "version" : 36,
+      "type" : "ParentWork"
     },
     "modifiedTime" : "1965-07-07T22:50:25Z",
     "display" : {

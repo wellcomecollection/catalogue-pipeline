@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2022-06-17T11:30:49.769606Z",
+  "createdAt" : "2022-06-17T14:17:37.173018Z",
   "id" : "7avdcsvd",
   "document" : {
     "version" : 1,
@@ -4290,139 +4290,72 @@
       }
     ],
     "source" : {
-      "canonicalWork" : {
-        "id" : {
-          "canonicalId" : "lm3xkgmq",
-          "sourceIdentifier" : {
-            "identifierType" : {
-              "id" : "sierra-system-number"
-            },
-            "ontologyType" : "Work",
-            "value" : "ACVnzrp3sz"
+      "id" : {
+        "canonicalId" : "lm3xkgmq",
+        "sourceIdentifier" : {
+          "identifierType" : {
+            "id" : "sierra-system-number"
           },
-          "otherIdentifiers" : [
-          ]
+          "ontologyType" : "Work",
+          "value" : "ACVnzrp3sz"
         },
-        "data" : {
-          "title" : "title-yDB1dDDYEN",
-          "otherIdentifiers" : [
-          ],
-          "alternativeTitles" : [
-          ],
-          "format" : null,
-          "description" : null,
-          "physicalDescription" : null,
-          "lettering" : null,
-          "createdDate" : null,
-          "subjects" : [
-          ],
-          "genres" : [
-          ],
-          "contributors" : [
-            {
+        "otherIdentifiers" : [
+        ]
+      },
+      "data" : {
+        "title" : "title-yDB1dDDYEN",
+        "otherIdentifiers" : [
+        ],
+        "alternativeTitles" : [
+        ],
+        "format" : null,
+        "description" : null,
+        "physicalDescription" : null,
+        "lettering" : null,
+        "createdDate" : null,
+        "subjects" : [
+        ],
+        "genres" : [
+        ],
+        "contributors" : [
+          {
+            "id" : {
+              "type" : "Unidentifiable"
+            },
+            "agent" : {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "agent" : {
-                "id" : {
-                  "type" : "Unidentifiable"
-                },
-                "label" : "Machiavelli, Niccolo",
-                "prefix" : null,
-                "numeration" : null,
-                "type" : "Person"
-              },
-              "roles" : [
-              ]
-            }
-          ],
-          "thumbnail" : null,
-          "production" : [
-          ],
-          "languages" : [
-          ],
-          "edition" : null,
-          "notes" : [
-          ],
-          "duration" : null,
-          "items" : [
-          ],
-          "holdings" : [
-          ],
-          "collectionPath" : null,
-          "referenceNumber" : null,
-          "imageData" : [
-          ],
-          "workType" : "Standard"
-        },
-        "version" : 58
-      },
-      "redirectedWork" : {
-        "id" : {
-          "canonicalId" : "wtt752qw",
-          "sourceIdentifier" : {
-            "identifierType" : {
-              "id" : "sierra-system-number"
+              "label" : "Machiavelli, Niccolo",
+              "prefix" : null,
+              "numeration" : null,
+              "type" : "Person"
             },
-            "ontologyType" : "Work",
-            "value" : "BbKnQ5NeAM"
-          },
-          "otherIdentifiers" : [
-          ]
-        },
-        "data" : {
-          "title" : "title-rhQ1yqAAPL",
-          "otherIdentifiers" : [
-            {
-              "identifierType" : {
-                "id" : "sierra-system-number"
-              },
-              "ontologyType" : "Work",
-              "value" : "S76CtNxJEI"
-            },
-            {
-              "identifierType" : {
-                "id" : "sierra-identifier"
-              },
-              "ontologyType" : "Work",
-              "value" : "lzvPPopLGo"
-            }
-          ],
-          "alternativeTitles" : [
-          ],
-          "format" : null,
-          "description" : null,
-          "physicalDescription" : null,
-          "lettering" : null,
-          "createdDate" : null,
-          "subjects" : [
-          ],
-          "genres" : [
-          ],
-          "contributors" : [
-          ],
-          "thumbnail" : null,
-          "production" : [
-          ],
-          "languages" : [
-          ],
-          "edition" : null,
-          "notes" : [
-          ],
-          "duration" : null,
-          "items" : [
-          ],
-          "holdings" : [
-          ],
-          "collectionPath" : null,
-          "referenceNumber" : null,
-          "imageData" : [
-          ],
-          "workType" : "Standard"
-        },
-        "version" : 17
+            "roles" : [
+            ]
+          }
+        ],
+        "thumbnail" : null,
+        "production" : [
+        ],
+        "languages" : [
+        ],
+        "edition" : null,
+        "notes" : [
+        ],
+        "duration" : null,
+        "items" : [
+        ],
+        "holdings" : [
+        ],
+        "collectionPath" : null,
+        "referenceNumber" : null,
+        "imageData" : [
+        ],
+        "workType" : "Standard"
       },
-      "type" : "ParentWorks"
+      "version" : 58,
+      "type" : "ParentWork"
     },
     "modifiedTime" : "2040-06-15T09:50:49Z",
     "display" : {
