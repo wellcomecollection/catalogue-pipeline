@@ -29,7 +29,7 @@ object DisplayImageSource {
     }
 
   private def apply(id: IdState.Identified,
-  data: WorkData[DataState.Identified]): DisplayImageSource =
+                    data: WorkData[DataState.Identified]): DisplayImageSource =
     new DisplayImageSource(
       id = id.canonicalId.underlying,
       title = data.title,
