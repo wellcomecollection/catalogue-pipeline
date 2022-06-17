@@ -1,6 +1,6 @@
 {
   "description" : "images with different subjects",
-  "createdAt" : "2022-06-16T13:22:34.585775Z",
+  "createdAt" : "2022-06-17T11:30:50.161669Z",
   "id" : "xlfyrof0",
   "document" : {
     "version" : 1,
@@ -4272,23 +4272,6 @@
           0.6996027
         ],
         "aspectRatio" : 0.9475815
-      },
-      "derivedData" : {
-        "thumbnail" : {
-          "url" : "https://iiif.wellcomecollection.org/image/cpH.jpg/info.json",
-          "locationType" : {
-            "id" : "iiif-image"
-          },
-          "license" : {
-            "id" : "cc-by"
-          },
-          "credit" : "Credit line: fOEeLsDxVk",
-          "linkText" : "Link text: z848hRH",
-          "accessConditions" : [
-          ]
-        },
-        "sourceContributorAgents" : [
-        ]
       }
     },
     "locations" : [

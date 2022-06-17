@@ -83,8 +83,7 @@ object ImageState {
   case class Indexed(
     sourceIdentifier: SourceIdentifier,
     canonicalId: CanonicalId,
-    inferredData: Option[InferredData] = None,
-    derivedData: DerivedImageData
+    inferredData: Option[InferredData] = None
   ) extends ImageState {
     type TransitionArgs = Unit
   }
@@ -115,8 +114,7 @@ object ImageFsm {
       Indexed(
         sourceIdentifier = self.state.sourceIdentifier,
         canonicalId = self.state.canonicalId,
-        inferredData = self.state.inferredData,
-        derivedData = DerivedImageData(self)
+        inferredData = self.state.inferredData
       )
   }
 }

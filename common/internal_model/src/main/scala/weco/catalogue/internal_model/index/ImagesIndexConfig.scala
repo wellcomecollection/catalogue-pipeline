@@ -73,12 +73,7 @@ object ImagesIndexConfig extends IndexConfigFields {
         .fields(
           canonicalId,
           sourceIdentifier,
-          inferredData,
-          objectField("derivedData")
-            .fields(
-              keywordField("sourceContributorAgents")
-            )
-            .withDynamic("false")
+          inferredData
         )
 
       // This field contains the display document used by the API, but we don't want

@@ -1,6 +1,6 @@
 {
   "description" : "an image without any inferred data",
-  "createdAt" : "2022-06-16T10:05:59.172Z",
+  "createdAt" : "2022-06-17T11:30:49.703331Z",
   "id" : "3qfljen1",
   "document" : {
     "version" : 1,
@@ -13,24 +13,7 @@
         "value" : "EeP0YtzZkm"
       },
       "canonicalId" : "3qfljen1",
-      "inferredData" : null,
-      "derivedData" : {
-        "thumbnail" : {
-          "url" : "https://iiif.wellcomecollection.org/image/B4K.jpg/info.json",
-          "locationType" : {
-            "id" : "iiif-image"
-          },
-          "license" : {
-            "id" : "cc-by"
-          },
-          "credit" : "Credit line: 0y3zkJPxq",
-          "linkText" : "Link text: iGWWhPuT",
-          "accessConditions" : [
-          ]
-        },
-        "sourceContributorAgents" : [
-        ]
-      }
+      "inferredData" : null
     },
     "locations" : [
       {

@@ -1,6 +1,6 @@
 {
   "description" : "images with different contributors",
-  "createdAt" : "2022-06-16T13:22:33.820085Z",
+  "createdAt" : "2022-06-17T11:30:49.225174Z",
   "id" : "0taf9mko",
   "document" : {
     "version" : 1,
@@ -4272,25 +4272,6 @@
           0.6996027
         ],
         "aspectRatio" : 0.9475815
-      },
-      "derivedData" : {
-        "thumbnail" : {
-          "url" : "https://iiif.wellcomecollection.org/image/WJb.jpg/info.json",
-          "locationType" : {
-            "id" : "iiif-image"
-          },
-          "license" : {
-            "id" : "cc-by"
-          },
-          "credit" : "Credit line: gq8acPVa2M",
-          "linkText" : "Link text: LIo1BtSQj",
-          "accessConditions" : [
-          ]
-        },
-        "sourceContributorAgents" : [
-          "Agent:carrots",
-          "Organisation:parrots"
-        ]
       }
     },
     "locations" : [

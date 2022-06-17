@@ -1,6 +1,6 @@
 {
   "description" : "example for the color filter tests",
-  "createdAt" : "2022-06-16T10:05:59.258Z",
+  "createdAt" : "2022-06-17T11:30:49.942613Z",
   "id" : "nltbd6z9",
   "document" : {
     "version" : 1,
@@ -4191,23 +4191,6 @@
           0.6996027
         ],
         "aspectRatio" : 0.9475815
-      },
-      "derivedData" : {
-        "thumbnail" : {
-          "url" : "https://iiif.wellcomecollection.org/image/4yy.jpg/info.json",
-          "locationType" : {
-            "id" : "iiif-image"
-          },
-          "license" : {
-            "id" : "cc-by"
-          },
-          "credit" : null,
-          "linkText" : "Link text: 0s3BzC",
-          "accessConditions" : [
-          ]
-        },
-        "sourceContributorAgents" : [
-        ]
       }
     },
     "locations" : [
