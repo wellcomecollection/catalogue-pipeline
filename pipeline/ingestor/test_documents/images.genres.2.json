@@ -1,6 +1,6 @@
 {
   "description" : "images with different genres",
-  "createdAt" : "2022-06-17T11:30:49.351580Z",
+  "createdAt" : "2022-06-17T14:17:36.776518Z",
   "id" : "93ppiboa",
   "document" : {
     "version" : 1,
@@ -4290,138 +4290,71 @@
       }
     ],
     "source" : {
-      "canonicalWork" : {
-        "id" : {
-          "canonicalId" : "jg1envol",
-          "sourceIdentifier" : {
-            "identifierType" : {
-              "id" : "calm-record-id"
-            },
-            "ontologyType" : "Work",
-            "value" : "ffU7rWFuZ5"
+      "id" : {
+        "canonicalId" : "jg1envol",
+        "sourceIdentifier" : {
+          "identifierType" : {
+            "id" : "calm-record-id"
           },
-          "otherIdentifiers" : [
-          ]
+          "ontologyType" : "Work",
+          "value" : "ffU7rWFuZ5"
         },
-        "data" : {
-          "title" : "title-9LgUkLJbXx",
-          "otherIdentifiers" : [
-          ],
-          "alternativeTitles" : [
-          ],
-          "format" : null,
-          "description" : null,
-          "physicalDescription" : null,
-          "lettering" : null,
-          "createdDate" : null,
-          "subjects" : [
-          ],
-          "genres" : [
-            {
-              "label" : "Emu entrepreneurship",
-              "concepts" : [
-              ]
-            },
-            {
-              "label" : "Falcon finances",
-              "concepts" : [
-              ]
-            },
-            {
-              "label" : "Carrot counselling",
-              "concepts" : [
-              ]
-            }
-          ],
-          "contributors" : [
-          ],
-          "thumbnail" : null,
-          "production" : [
-          ],
-          "languages" : [
-          ],
-          "edition" : null,
-          "notes" : [
-          ],
-          "duration" : null,
-          "items" : [
-          ],
-          "holdings" : [
-          ],
-          "collectionPath" : null,
-          "referenceNumber" : null,
-          "imageData" : [
-          ],
-          "workType" : "Standard"
-        },
-        "version" : 20
+        "otherIdentifiers" : [
+        ]
       },
-      "redirectedWork" : {
-        "id" : {
-          "canonicalId" : "gl7spuby",
-          "sourceIdentifier" : {
-            "identifierType" : {
-              "id" : "sierra-system-number"
-            },
-            "ontologyType" : "Work",
-            "value" : "ynyefHr4pr"
+      "data" : {
+        "title" : "title-9LgUkLJbXx",
+        "otherIdentifiers" : [
+        ],
+        "alternativeTitles" : [
+        ],
+        "format" : null,
+        "description" : null,
+        "physicalDescription" : null,
+        "lettering" : null,
+        "createdDate" : null,
+        "subjects" : [
+        ],
+        "genres" : [
+          {
+            "label" : "Emu entrepreneurship",
+            "concepts" : [
+            ]
           },
-          "otherIdentifiers" : [
-          ]
-        },
-        "data" : {
-          "title" : "title-nhAG2LJXoY",
-          "otherIdentifiers" : [
-            {
-              "identifierType" : {
-                "id" : "sierra-system-number"
-              },
-              "ontologyType" : "Work",
-              "value" : "dfLc8CMFXa"
-            },
-            {
-              "identifierType" : {
-                "id" : "sierra-identifier"
-              },
-              "ontologyType" : "Work",
-              "value" : "SDX2jNOLTq"
-            }
-          ],
-          "alternativeTitles" : [
-          ],
-          "format" : null,
-          "description" : null,
-          "physicalDescription" : null,
-          "lettering" : null,
-          "createdDate" : null,
-          "subjects" : [
-          ],
-          "genres" : [
-          ],
-          "contributors" : [
-          ],
-          "thumbnail" : null,
-          "production" : [
-          ],
-          "languages" : [
-          ],
-          "edition" : null,
-          "notes" : [
-          ],
-          "duration" : null,
-          "items" : [
-          ],
-          "holdings" : [
-          ],
-          "collectionPath" : null,
-          "referenceNumber" : null,
-          "imageData" : [
-          ],
-          "workType" : "Standard"
-        },
-        "version" : 38
+          {
+            "label" : "Falcon finances",
+            "concepts" : [
+            ]
+          },
+          {
+            "label" : "Carrot counselling",
+            "concepts" : [
+            ]
+          }
+        ],
+        "contributors" : [
+        ],
+        "thumbnail" : null,
+        "production" : [
+        ],
+        "languages" : [
+        ],
+        "edition" : null,
+        "notes" : [
+        ],
+        "duration" : null,
+        "items" : [
+        ],
+        "holdings" : [
+        ],
+        "collectionPath" : null,
+        "referenceNumber" : null,
+        "imageData" : [
+        ],
+        "workType" : "Standard"
       },
-      "type" : "ParentWorks"
+      "version" : 20,
+      "type" : "ParentWork"
     },
     "modifiedTime" : "1993-04-06T16:54:43Z",
     "display" : {

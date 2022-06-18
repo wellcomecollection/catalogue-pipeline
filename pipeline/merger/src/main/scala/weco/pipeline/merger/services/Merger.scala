@@ -2,8 +2,7 @@ package weco.pipeline.merger.services
 
 import cats.data.State
 import weco.catalogue.internal_model.identifiers.{DataState, IdState}
-import weco.catalogue.internal_model.image
-import weco.catalogue.internal_model.image.{ImageData, ParentWorks}
+import weco.catalogue.internal_model.image.ImageData
 import weco.catalogue.internal_model.locations.DigitalLocation
 import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.catalogue.internal_model.work._
@@ -224,11 +223,8 @@ object PlatformMerger extends Merger {
           mergedTarget = modifyInternalWorks(target, target.data.items),
           imageDataWithSources = standaloneImages(target).map { image =>
             ImageDataWithSource(
-              image,
-              ParentWorks(
-                canonicalWork = target.toParentWork,
-                redirectedWork = None
-              )
+              imageData = image,
+              source = target.toParentWork
             )
           }
         )
@@ -254,12 +250,7 @@ object PlatformMerger extends Merger {
           imageDataWithSources = sourceImageData.map { imageData =>
             ImageDataWithSource(
               imageData = imageData,
-              source = image.ParentWorks(
-                canonicalWork = work.toParentWork,
-                redirectedWork = sources
-                  .find { _.data.imageData.contains(imageData) }
-                  .map(_.toParentWork)
-              )
+              source = work.toParentWork
             )
           }
         )

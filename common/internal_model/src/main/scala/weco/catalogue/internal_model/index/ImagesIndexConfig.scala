@@ -24,7 +24,7 @@ object ImagesIndexConfig extends IndexConfigFields {
         floatField("aspectRatio")
       )
 
-      def sourceWork(fieldName: String): ObjectField =
+      def parentWork(fieldName: String): ObjectField =
         objectField(fieldName)
           .fields(
             objectField("id").fields(canonicalId, sourceIdentifier),
@@ -63,11 +63,7 @@ object ImagesIndexConfig extends IndexConfigFields {
           )
           .withDynamic("false")
 
-      val source = objectField("source").fields(
-        sourceWork("canonicalWork"),
-        sourceWork("redirectedWork"),
-        keywordField("type")
-      )
+      val source = parentWork("source")
 
       val state = objectField("state")
         .fields(

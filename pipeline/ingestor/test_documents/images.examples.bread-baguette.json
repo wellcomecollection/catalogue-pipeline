@@ -1,6 +1,6 @@
 {
   "description" : "an example of images with work metadata for the API tests",
-  "createdAt" : "2022-06-17T11:30:50.058866Z",
+  "createdAt" : "2022-06-17T14:17:37.493257Z",
   "id" : "raqyttz2",
   "document" : {
     "version" : 1,
@@ -4290,123 +4290,56 @@
       }
     ],
     "source" : {
-      "canonicalWork" : {
-        "id" : {
-          "canonicalId" : "d7frptjr",
-          "sourceIdentifier" : {
-            "identifierType" : {
-              "id" : "calm-record-id"
-            },
-            "ontologyType" : "Work",
-            "value" : "sx2oArj0tz"
+      "id" : {
+        "canonicalId" : "d7frptjr",
+        "sourceIdentifier" : {
+          "identifierType" : {
+            "id" : "calm-record-id"
           },
-          "otherIdentifiers" : [
-          ]
+          "ontologyType" : "Work",
+          "value" : "sx2oArj0tz"
         },
-        "data" : {
-          "title" : "Baguette is a French style of bread; it's a long, thin bread; other countries also make this bread",
-          "otherIdentifiers" : [
-          ],
-          "alternativeTitles" : [
-          ],
-          "format" : null,
-          "description" : null,
-          "physicalDescription" : null,
-          "lettering" : null,
-          "createdDate" : null,
-          "subjects" : [
-          ],
-          "genres" : [
-          ],
-          "contributors" : [
-          ],
-          "thumbnail" : null,
-          "production" : [
-          ],
-          "languages" : [
-          ],
-          "edition" : null,
-          "notes" : [
-          ],
-          "duration" : null,
-          "items" : [
-          ],
-          "holdings" : [
-          ],
-          "collectionPath" : null,
-          "referenceNumber" : null,
-          "imageData" : [
-          ],
-          "workType" : "Standard"
-        },
-        "version" : 51
+        "otherIdentifiers" : [
+        ]
       },
-      "redirectedWork" : {
-        "id" : {
-          "canonicalId" : "rpngbg6v",
-          "sourceIdentifier" : {
-            "identifierType" : {
-              "id" : "sierra-system-number"
-            },
-            "ontologyType" : "Work",
-            "value" : "esfGksBtxD"
-          },
-          "otherIdentifiers" : [
-          ]
-        },
-        "data" : {
-          "title" : "title-91hz0jNQLV",
-          "otherIdentifiers" : [
-            {
-              "identifierType" : {
-                "id" : "sierra-system-number"
-              },
-              "ontologyType" : "Work",
-              "value" : "Dz3JiDxuSU"
-            },
-            {
-              "identifierType" : {
-                "id" : "sierra-identifier"
-              },
-              "ontologyType" : "Work",
-              "value" : "YiVh4P1vMi"
-            }
-          ],
-          "alternativeTitles" : [
-          ],
-          "format" : null,
-          "description" : null,
-          "physicalDescription" : null,
-          "lettering" : null,
-          "createdDate" : null,
-          "subjects" : [
-          ],
-          "genres" : [
-          ],
-          "contributors" : [
-          ],
-          "thumbnail" : null,
-          "production" : [
-          ],
-          "languages" : [
-          ],
-          "edition" : null,
-          "notes" : [
-          ],
-          "duration" : null,
-          "items" : [
-          ],
-          "holdings" : [
-          ],
-          "collectionPath" : null,
-          "referenceNumber" : null,
-          "imageData" : [
-          ],
-          "workType" : "Standard"
-        },
-        "version" : 94
+      "data" : {
+        "title" : "Baguette is a French style of bread; it's a long, thin bread; other countries also make this bread",
+        "otherIdentifiers" : [
+        ],
+        "alternativeTitles" : [
+        ],
+        "format" : null,
+        "description" : null,
+        "physicalDescription" : null,
+        "lettering" : null,
+        "createdDate" : null,
+        "subjects" : [
+        ],
+        "genres" : [
+        ],
+        "contributors" : [
+        ],
+        "thumbnail" : null,
+        "production" : [
+        ],
+        "languages" : [
+        ],
+        "edition" : null,
+        "notes" : [
+        ],
+        "duration" : null,
+        "items" : [
+        ],
+        "holdings" : [
+        ],
+        "collectionPath" : null,
+        "referenceNumber" : null,
+        "imageData" : [
+        ],
+        "workType" : "Standard"
       },
-      "type" : "ParentWorks"
+      "version" : 51,
+      "type" : "ParentWork"
     },
     "modifiedTime" : "1957-10-26T00:32:14Z",
     "display" : {

@@ -1,6 +1,6 @@
 {
   "description" : "images with different genres",
-  "createdAt" : "2022-06-17T11:30:49.349005Z",
+  "createdAt" : "2022-06-17T14:17:36.774374Z",
   "id" : "j2kzh3nk",
   "document" : {
     "version" : 1,
@@ -4290,128 +4290,61 @@
       }
     ],
     "source" : {
-      "canonicalWork" : {
-        "id" : {
-          "canonicalId" : "knpqsu1i",
-          "sourceIdentifier" : {
-            "identifierType" : {
-              "id" : "miro-image-number"
-            },
-            "ontologyType" : "Work",
-            "value" : "Vbl3GPrTBa"
+      "id" : {
+        "canonicalId" : "knpqsu1i",
+        "sourceIdentifier" : {
+          "identifierType" : {
+            "id" : "miro-image-number"
           },
-          "otherIdentifiers" : [
-          ]
+          "ontologyType" : "Work",
+          "value" : "Vbl3GPrTBa"
         },
-        "data" : {
-          "title" : "title-KW7LwA4X3s",
-          "otherIdentifiers" : [
-          ],
-          "alternativeTitles" : [
-          ],
-          "format" : null,
-          "description" : null,
-          "physicalDescription" : null,
-          "lettering" : null,
-          "createdDate" : null,
-          "subjects" : [
-          ],
-          "genres" : [
-            {
-              "label" : "Carrot counselling",
-              "concepts" : [
-              ]
-            }
-          ],
-          "contributors" : [
-          ],
-          "thumbnail" : null,
-          "production" : [
-          ],
-          "languages" : [
-          ],
-          "edition" : null,
-          "notes" : [
-          ],
-          "duration" : null,
-          "items" : [
-          ],
-          "holdings" : [
-          ],
-          "collectionPath" : null,
-          "referenceNumber" : null,
-          "imageData" : [
-          ],
-          "workType" : "Standard"
-        },
-        "version" : 51
+        "otherIdentifiers" : [
+        ]
       },
-      "redirectedWork" : {
-        "id" : {
-          "canonicalId" : "a2zyy2l6",
-          "sourceIdentifier" : {
-            "identifierType" : {
-              "id" : "sierra-system-number"
-            },
-            "ontologyType" : "Work",
-            "value" : "bsU5j58SPp"
-          },
-          "otherIdentifiers" : [
-          ]
-        },
-        "data" : {
-          "title" : "title-JNkNFej9S4",
-          "otherIdentifiers" : [
-            {
-              "identifierType" : {
-                "id" : "sierra-system-number"
-              },
-              "ontologyType" : "Work",
-              "value" : "bxNw6CjGBQ"
-            },
-            {
-              "identifierType" : {
-                "id" : "sierra-identifier"
-              },
-              "ontologyType" : "Work",
-              "value" : "V7uZKJdf3T"
-            }
-          ],
-          "alternativeTitles" : [
-          ],
-          "format" : null,
-          "description" : null,
-          "physicalDescription" : null,
-          "lettering" : null,
-          "createdDate" : null,
-          "subjects" : [
-          ],
-          "genres" : [
-          ],
-          "contributors" : [
-          ],
-          "thumbnail" : null,
-          "production" : [
-          ],
-          "languages" : [
-          ],
-          "edition" : null,
-          "notes" : [
-          ],
-          "duration" : null,
-          "items" : [
-          ],
-          "holdings" : [
-          ],
-          "collectionPath" : null,
-          "referenceNumber" : null,
-          "imageData" : [
-          ],
-          "workType" : "Standard"
-        },
-        "version" : 68
+      "data" : {
+        "title" : "title-KW7LwA4X3s",
+        "otherIdentifiers" : [
+        ],
+        "alternativeTitles" : [
+        ],
+        "format" : null,
+        "description" : null,
+        "physicalDescription" : null,
+        "lettering" : null,
+        "createdDate" : null,
+        "subjects" : [
+        ],
+        "genres" : [
+          {
+            "label" : "Carrot counselling",
+            "concepts" : [
+            ]
+          }
+        ],
+        "contributors" : [
+        ],
+        "thumbnail" : null,
+        "production" : [
+        ],
+        "languages" : [
+        ],
+        "edition" : null,
+        "notes" : [
+        ],
+        "duration" : null,
+        "items" : [
+        ],
+        "holdings" : [
+        ],
+        "collectionPath" : null,
+        "referenceNumber" : null,
+        "imageData" : [
+        ],
+        "workType" : "Standard"
       },
-      "type" : "ParentWorks"
+      "version" : 51,
+      "type" : "ParentWork"
     },
     "modifiedTime" : "1977-04-17T05:50:13Z",
     "display" : {

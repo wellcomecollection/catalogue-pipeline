@@ -1,6 +1,6 @@
 {
   "description" : "images with different subjects",
-  "createdAt" : "2022-06-17T11:30:50.161669Z",
+  "createdAt" : "2022-06-17T14:17:37.593619Z",
   "id" : "xlfyrof0",
   "document" : {
     "version" : 1,
@@ -4290,141 +4290,74 @@
       }
     ],
     "source" : {
-      "canonicalWork" : {
-        "id" : {
-          "canonicalId" : "bw9e8exh",
-          "sourceIdentifier" : {
-            "identifierType" : {
-              "id" : "miro-image-number"
-            },
-            "ontologyType" : "Work",
-            "value" : "pbGXS2tKwO"
+      "id" : {
+        "canonicalId" : "bw9e8exh",
+        "sourceIdentifier" : {
+          "identifierType" : {
+            "id" : "miro-image-number"
           },
-          "otherIdentifiers" : [
-          ]
+          "ontologyType" : "Work",
+          "value" : "pbGXS2tKwO"
         },
-        "data" : {
-          "title" : "title-xQFFUAnwSg",
-          "otherIdentifiers" : [
-          ],
-          "alternativeTitles" : [
-          ],
-          "format" : null,
-          "description" : null,
-          "physicalDescription" : null,
-          "lettering" : null,
-          "createdDate" : null,
-          "subjects" : [
-            {
-              "id" : {
-                "canonicalId" : "subject1",
-                "sourceIdentifier" : {
-                  "identifierType" : {
-                    "id" : "calm-record-id"
-                  },
-                  "ontologyType" : "Work",
-                  "value" : "6LCDqmBFKE"
+        "otherIdentifiers" : [
+        ]
+      },
+      "data" : {
+        "title" : "title-xQFFUAnwSg",
+        "otherIdentifiers" : [
+        ],
+        "alternativeTitles" : [
+        ],
+        "format" : null,
+        "description" : null,
+        "physicalDescription" : null,
+        "lettering" : null,
+        "createdDate" : null,
+        "subjects" : [
+          {
+            "id" : {
+              "canonicalId" : "subject1",
+              "sourceIdentifier" : {
+                "identifierType" : {
+                  "id" : "calm-record-id"
                 },
-                "otherIdentifiers" : [
-                ],
-                "type" : "Identified"
+                "ontologyType" : "Work",
+                "value" : "6LCDqmBFKE"
               },
-              "label" : "Simple screwdrivers",
-              "concepts" : [
-              ]
-            }
-          ],
-          "genres" : [
-          ],
-          "contributors" : [
-          ],
-          "thumbnail" : null,
-          "production" : [
-          ],
-          "languages" : [
-          ],
-          "edition" : null,
-          "notes" : [
-          ],
-          "duration" : null,
-          "items" : [
-          ],
-          "holdings" : [
-          ],
-          "collectionPath" : null,
-          "referenceNumber" : null,
-          "imageData" : [
-          ],
-          "workType" : "Standard"
-        },
-        "version" : 62
-      },
-      "redirectedWork" : {
-        "id" : {
-          "canonicalId" : "d9qf5r50",
-          "sourceIdentifier" : {
-            "identifierType" : {
-              "id" : "sierra-system-number"
+              "otherIdentifiers" : [
+              ],
+              "type" : "Identified"
             },
-            "ontologyType" : "Work",
-            "value" : "wS8uGSqVia"
-          },
-          "otherIdentifiers" : [
-          ]
-        },
-        "data" : {
-          "title" : "title-voIkCzfLY2",
-          "otherIdentifiers" : [
-            {
-              "identifierType" : {
-                "id" : "sierra-system-number"
-              },
-              "ontologyType" : "Work",
-              "value" : "byQOTrSAyw"
-            },
-            {
-              "identifierType" : {
-                "id" : "sierra-identifier"
-              },
-              "ontologyType" : "Work",
-              "value" : "02VTLrjN4e"
-            }
-          ],
-          "alternativeTitles" : [
-          ],
-          "format" : null,
-          "description" : null,
-          "physicalDescription" : null,
-          "lettering" : null,
-          "createdDate" : null,
-          "subjects" : [
-          ],
-          "genres" : [
-          ],
-          "contributors" : [
-          ],
-          "thumbnail" : null,
-          "production" : [
-          ],
-          "languages" : [
-          ],
-          "edition" : null,
-          "notes" : [
-          ],
-          "duration" : null,
-          "items" : [
-          ],
-          "holdings" : [
-          ],
-          "collectionPath" : null,
-          "referenceNumber" : null,
-          "imageData" : [
-          ],
-          "workType" : "Standard"
-        },
-        "version" : 16
+            "label" : "Simple screwdrivers",
+            "concepts" : [
+            ]
+          }
+        ],
+        "genres" : [
+        ],
+        "contributors" : [
+        ],
+        "thumbnail" : null,
+        "production" : [
+        ],
+        "languages" : [
+        ],
+        "edition" : null,
+        "notes" : [
+        ],
+        "duration" : null,
+        "items" : [
+        ],
+        "holdings" : [
+        ],
+        "collectionPath" : null,
+        "referenceNumber" : null,
+        "imageData" : [
+        ],
+        "workType" : "Standard"
       },
-      "type" : "ParentWorks"
+      "version" : 62,
+      "type" : "ParentWork"
     },
     "modifiedTime" : "2025-05-11T01:49:47Z",
     "display" : {

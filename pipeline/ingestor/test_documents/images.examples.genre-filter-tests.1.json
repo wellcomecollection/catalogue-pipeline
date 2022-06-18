@@ -1,6 +1,6 @@
 {
   "description" : "examples for the genre filter tests",
-  "createdAt" : "2022-06-17T11:30:49.857432Z",
+  "createdAt" : "2022-06-17T14:17:37.262966Z",
   "id" : "lzykmofa",
   "document" : {
     "version" : 1,
@@ -4290,149 +4290,70 @@
       }
     ],
     "source" : {
-      "canonicalWork" : {
-        "id" : {
-          "canonicalId" : "uhvc0wsj",
-          "sourceIdentifier" : {
+      "id" : {
+        "canonicalId" : "uhvc0wsj",
+        "sourceIdentifier" : {
+          "identifierType" : {
+            "id" : "sierra-system-number"
+          },
+          "ontologyType" : "Work",
+          "value" : "nXuQN3sRwm"
+        },
+        "otherIdentifiers" : [
+        ]
+      },
+      "data" : {
+        "title" : "title-Oi4EeXo6bC",
+        "otherIdentifiers" : [
+          {
             "identifierType" : {
               "id" : "sierra-system-number"
             },
             "ontologyType" : "Work",
-            "value" : "nXuQN3sRwm"
+            "value" : "BfqgGiu1XN"
           },
-          "otherIdentifiers" : [
-          ]
-        },
-        "data" : {
-          "title" : "title-Oi4EeXo6bC",
-          "otherIdentifiers" : [
-            {
-              "identifierType" : {
-                "id" : "sierra-system-number"
-              },
-              "ontologyType" : "Work",
-              "value" : "BfqgGiu1XN"
-            },
-            {
-              "identifierType" : {
-                "id" : "sierra-identifier"
-              },
-              "ontologyType" : "Work",
-              "value" : "oIGIxIwfaE"
-            }
-          ],
-          "alternativeTitles" : [
-          ],
-          "format" : null,
-          "description" : null,
-          "physicalDescription" : null,
-          "lettering" : null,
-          "createdDate" : null,
-          "subjects" : [
-          ],
-          "genres" : [
-          ],
-          "contributors" : [
-          ],
-          "thumbnail" : null,
-          "production" : [
-          ],
-          "languages" : [
-          ],
-          "edition" : null,
-          "notes" : [
-          ],
-          "duration" : null,
-          "items" : [
-          ],
-          "holdings" : [
-          ],
-          "collectionPath" : null,
-          "referenceNumber" : null,
-          "imageData" : [
-          ],
-          "workType" : "Standard"
-        },
-        "version" : 87
-      },
-      "redirectedWork" : {
-        "id" : {
-          "canonicalId" : "ytpvh6y6",
-          "sourceIdentifier" : {
+          {
             "identifierType" : {
-              "id" : "calm-record-id"
+              "id" : "sierra-identifier"
             },
             "ontologyType" : "Work",
-            "value" : "f7xAldBr9g"
-          },
-          "otherIdentifiers" : [
-          ]
-        },
-        "data" : {
-          "title" : "title-uN8gmcFlUj",
-          "otherIdentifiers" : [
-          ],
-          "alternativeTitles" : [
-          ],
-          "format" : null,
-          "description" : null,
-          "physicalDescription" : null,
-          "lettering" : null,
-          "createdDate" : null,
-          "subjects" : [
-          ],
-          "genres" : [
-            {
-              "label" : "Dodo divination",
-              "concepts" : [
-                {
-                  "id" : {
-                    "type" : "Unidentifiable"
-                  },
-                  "label" : "wxR3LuXUSwmwg8R",
-                  "type" : "Concept"
-                },
-                {
-                  "id" : {
-                    "type" : "Unidentifiable"
-                  },
-                  "label" : "ah8ruH4gW92lY0W",
-                  "type" : "Concept"
-                },
-                {
-                  "id" : {
-                    "type" : "Unidentifiable"
-                  },
-                  "label" : "YB5Iv2EQNO6HWaO",
-                  "type" : "Concept"
-                }
-              ]
-            }
-          ],
-          "contributors" : [
-          ],
-          "thumbnail" : null,
-          "production" : [
-          ],
-          "languages" : [
-          ],
-          "edition" : null,
-          "notes" : [
-          ],
-          "duration" : null,
-          "items" : [
-          ],
-          "holdings" : [
-          ],
-          "collectionPath" : null,
-          "referenceNumber" : null,
-          "imageData" : [
-          ],
-          "workType" : "Standard"
-        },
-        "version" : 73
+            "value" : "oIGIxIwfaE"
+          }
+        ],
+        "alternativeTitles" : [
+        ],
+        "format" : null,
+        "description" : null,
+        "physicalDescription" : null,
+        "lettering" : null,
+        "createdDate" : null,
+        "subjects" : [
+        ],
+        "genres" : [
+        ],
+        "contributors" : [
+        ],
+        "thumbnail" : null,
+        "production" : [
+        ],
+        "languages" : [
+        ],
+        "edition" : null,
+        "notes" : [
+        ],
+        "duration" : null,
+        "items" : [
+        ],
+        "holdings" : [
+        ],
+        "collectionPath" : null,
+        "referenceNumber" : null,
+        "imageData" : [
+        ],
+        "workType" : "Standard"
       },
-      "type" : "ParentWorks"
+      "version" : 87,
+      "type" : "ParentWork"
     },
     "modifiedTime" : "1940-05-31T19:25:04Z",
     "display" : {

@@ -1,6 +1,6 @@
 {
   "description" : "an example of images with work metadata for the API tests",
-  "createdAt" : "2022-06-17T11:30:50.072029Z",
+  "createdAt" : "2022-06-17T14:17:37.506316Z",
   "id" : "3903uugw",
   "document" : {
     "version" : 1,
@@ -4290,123 +4290,56 @@
       }
     ],
     "source" : {
-      "canonicalWork" : {
-        "id" : {
-          "canonicalId" : "tipn8axj",
-          "sourceIdentifier" : {
-            "identifierType" : {
-              "id" : "sierra-system-number"
-            },
-            "ontologyType" : "Work",
-            "value" : "zUwx61CbJh"
+      "id" : {
+        "canonicalId" : "tipn8axj",
+        "sourceIdentifier" : {
+          "identifierType" : {
+            "id" : "sierra-system-number"
           },
-          "otherIdentifiers" : [
-          ]
+          "ontologyType" : "Work",
+          "value" : "zUwx61CbJh"
         },
-        "data" : {
-          "title" : "A Ligurian style of bread, Focaccia is a flat Italian bread",
-          "otherIdentifiers" : [
-          ],
-          "alternativeTitles" : [
-          ],
-          "format" : null,
-          "description" : null,
-          "physicalDescription" : null,
-          "lettering" : null,
-          "createdDate" : null,
-          "subjects" : [
-          ],
-          "genres" : [
-          ],
-          "contributors" : [
-          ],
-          "thumbnail" : null,
-          "production" : [
-          ],
-          "languages" : [
-          ],
-          "edition" : null,
-          "notes" : [
-          ],
-          "duration" : null,
-          "items" : [
-          ],
-          "holdings" : [
-          ],
-          "collectionPath" : null,
-          "referenceNumber" : null,
-          "imageData" : [
-          ],
-          "workType" : "Standard"
-        },
-        "version" : 75
+        "otherIdentifiers" : [
+        ]
       },
-      "redirectedWork" : {
-        "id" : {
-          "canonicalId" : "nwgro5wt",
-          "sourceIdentifier" : {
-            "identifierType" : {
-              "id" : "sierra-system-number"
-            },
-            "ontologyType" : "Work",
-            "value" : "vyGdXHKt7z"
-          },
-          "otherIdentifiers" : [
-          ]
-        },
-        "data" : {
-          "title" : "title-OSy2FbBzGl",
-          "otherIdentifiers" : [
-            {
-              "identifierType" : {
-                "id" : "sierra-system-number"
-              },
-              "ontologyType" : "Work",
-              "value" : "lLmURysHhS"
-            },
-            {
-              "identifierType" : {
-                "id" : "sierra-identifier"
-              },
-              "ontologyType" : "Work",
-              "value" : "8FvpZVyq4R"
-            }
-          ],
-          "alternativeTitles" : [
-          ],
-          "format" : null,
-          "description" : null,
-          "physicalDescription" : null,
-          "lettering" : null,
-          "createdDate" : null,
-          "subjects" : [
-          ],
-          "genres" : [
-          ],
-          "contributors" : [
-          ],
-          "thumbnail" : null,
-          "production" : [
-          ],
-          "languages" : [
-          ],
-          "edition" : null,
-          "notes" : [
-          ],
-          "duration" : null,
-          "items" : [
-          ],
-          "holdings" : [
-          ],
-          "collectionPath" : null,
-          "referenceNumber" : null,
-          "imageData" : [
-          ],
-          "workType" : "Standard"
-        },
-        "version" : 27
+      "data" : {
+        "title" : "A Ligurian style of bread, Focaccia is a flat Italian bread",
+        "otherIdentifiers" : [
+        ],
+        "alternativeTitles" : [
+        ],
+        "format" : null,
+        "description" : null,
+        "physicalDescription" : null,
+        "lettering" : null,
+        "createdDate" : null,
+        "subjects" : [
+        ],
+        "genres" : [
+        ],
+        "contributors" : [
+        ],
+        "thumbnail" : null,
+        "production" : [
+        ],
+        "languages" : [
+        ],
+        "edition" : null,
+        "notes" : [
+        ],
+        "duration" : null,
+        "items" : [
+        ],
+        "holdings" : [
+        ],
+        "collectionPath" : null,
+        "referenceNumber" : null,
+        "imageData" : [
+        ],
+        "workType" : "Standard"
       },
-      "type" : "ParentWorks"
+      "version" : 75,
+      "type" : "ParentWork"
     },
     "modifiedTime" : "2007-10-07T21:15:47Z",
     "display" : {

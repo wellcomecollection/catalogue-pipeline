@@ -8,7 +8,7 @@ import weco.catalogue.internal_model.identifiers.{
   DataState,
   IdState
 }
-import weco.catalogue.internal_model.image.{ParentWork, ParentWorks}
+import weco.catalogue.internal_model.image.ParentWork
 import weco.catalogue.internal_model.locations.License
 import weco.catalogue.internal_model.work.generators.ItemsGenerators
 import weco.catalogue.internal_model.work.{
@@ -29,72 +29,70 @@ class ImageAggregatableValuesTest
     with IdentifiersGenerators
     with ItemsGenerators {
   it("creates aggregatable values from a source work") {
-    val w = ParentWorks(
-      ParentWork(
-        id = IdState.Identified(
-          canonicalId = createCanonicalId,
-          sourceIdentifier = createSourceIdentifier
+    val w = ParentWork(
+      id = IdState.Identified(
+        canonicalId = createCanonicalId,
+        sourceIdentifier = createSourceIdentifier
+      ),
+      data = WorkData[DataState.Identified](
+        title = Some("a work used in the ImageAggregatableValues tests"),
+        genres = List(
+          Genre(label = "genial giraffes"),
+          Genre(label = "gruesome gerunds")
         ),
-        data = WorkData[DataState.Identified](
-          title = Some("a work used in the ImageAggregatableValues tests"),
-          genres = List(
-            Genre(label = "genial giraffes"),
-            Genre(label = "gruesome gerunds")
+        subjects = List(
+          Subject(
+            label = "Sharp scissors",
+            concepts = List(Concept("sharpness"), Concept("shearing tools"))
           ),
-          subjects = List(
-            Subject(
-              label = "Sharp scissors",
-              concepts = List(Concept("sharpness"), Concept("shearing tools"))
-            ),
-            Subject(
-              label = "Split sandwiches",
-              concepts = List(Concept("split thing"))
-            ),
-            Subject(
-              id = IdState.Identified(
-                canonicalId = CanonicalId("subject1"),
-                sourceIdentifier = createSourceIdentifier
-              ),
-              label = "Soft spinners",
-              concepts = List()
-            ),
-            Subject(
-              id = IdState.Identified(
-                canonicalId = CanonicalId("subject2"),
-                sourceIdentifier = createSourceIdentifier
-              ),
-              label = "Straight strings",
-              concepts = List()
-            )
+          Subject(
+            label = "Split sandwiches",
+            concepts = List(Concept("split thing"))
           ),
-          contributors = List(
-            Contributor(
-              id = IdState.Unidentifiable,
-              agent = Person(label = "Polly Person"),
-              roles = List(ContributionRole("playwright"))
+          Subject(
+            id = IdState.Identified(
+              canonicalId = CanonicalId("subject1"),
+              sourceIdentifier = createSourceIdentifier
             ),
-            Contributor(
-              id = IdState.Unidentifiable,
-              agent = Organisation(label = "Printer Parsons"),
-              roles = List(ContributionRole("printer"))
-            ),
-            Contributor(
-              id = IdState.Identified(
-                canonicalId = createCanonicalId,
-                sourceIdentifier = createSourceIdentifier
-              ),
-              agent = Meeting(label = "People Professionals"),
-              roles = List()
-            ),
+            label = "Soft spinners",
+            concepts = List()
           ),
-          items = List(
-            createDigitalItemWith(license = None),
-            createDigitalItemWith(license = Some(License.CCBY)),
-            createDigitalItemWith(license = Some(License.PDM)),
+          Subject(
+            id = IdState.Identified(
+              canonicalId = CanonicalId("subject2"),
+              sourceIdentifier = createSourceIdentifier
+            ),
+            label = "Straight strings",
+            concepts = List()
           )
         ),
-        version = 1
-      )
+        contributors = List(
+          Contributor(
+            id = IdState.Unidentifiable,
+            agent = Person(label = "Polly Person"),
+            roles = List(ContributionRole("playwright"))
+          ),
+          Contributor(
+            id = IdState.Unidentifiable,
+            agent = Organisation(label = "Printer Parsons"),
+            roles = List(ContributionRole("printer"))
+          ),
+          Contributor(
+            id = IdState.Identified(
+              canonicalId = createCanonicalId,
+              sourceIdentifier = createSourceIdentifier
+            ),
+            agent = Meeting(label = "People Professionals"),
+            roles = List()
+          ),
+        ),
+        items = List(
+          createDigitalItemWith(license = None),
+          createDigitalItemWith(license = Some(License.CCBY)),
+          createDigitalItemWith(license = Some(License.PDM)),
+        )
+      ),
+      version = 1
     )
 
     ImageAggregatableValues(w) shouldBe ImageAggregatableValues(
@@ -116,74 +114,6 @@ class ImageAggregatableValuesTest
         """{"label":"Split sandwiches","concepts":[],"type":"Subject"}""",
         """{"id":"subject1","label":"Soft spinners","concepts":[],"type":"Subject"}""",
         """{"id":"subject2","label":"Straight strings","concepts":[],"type":"Subject"}"""
-      )
-    )
-  }
-
-  it("skips values from the redirected work") {
-    val w = ParentWorks(
-      canonicalWork = ParentWork(
-        id = IdState.Identified(
-          canonicalId = createCanonicalId,
-          sourceIdentifier = createSourceIdentifier
-        ),
-        data = WorkData[DataState.Identified](
-          title = Some("a work used in the ImageAggregatableValues tests"),
-          genres = List(Genre(label = "glum gerbils")),
-          subjects = List(Subject(label = "sturdy shapes", concepts = List())),
-          contributors = List(
-            Contributor(
-              id = IdState.Unidentifiable,
-              agent = Meeting(label = "proud polyglots"),
-              roles = List()
-            ),
-          ),
-          items = List(
-            createDigitalItemWith(license = None),
-            createDigitalItemWith(license = Some(License.CCBY)),
-          )
-        ),
-        version = 1
-      ),
-      redirectedWork = Some(
-        ParentWork(
-          id = IdState.Identified(
-            canonicalId = createCanonicalId,
-            sourceIdentifier = createSourceIdentifier
-          ),
-          data = WorkData[DataState.Identified](
-            title = Some(
-              "a redirected work used in the ImageAggregatableValues tests"),
-            genres = List(Genre(label = "grimy gumballs")),
-            subjects = List(Subject(label = "stiff strüdel", concepts = List())),
-            contributors = List(
-              Contributor(
-                id = IdState.Unidentifiable,
-                agent = Person(label = "pink panacottas"),
-                roles = List()
-              ),
-            ),
-            items = List(
-              createDigitalItemWith(license = Some(License.PDM)),
-            )
-          ),
-          version = 1
-        )
-      )
-    )
-
-    ImageAggregatableValues(w) shouldBe ImageAggregatableValues(
-      licenses = List(
-        """{"id":"cc-by","label":"Attribution 4.0 International (CC BY 4.0)","url":"http://creativecommons.org/licenses/by/4.0/","type":"License"}""",
-      ),
-      contributors = List(
-        """{"label":"proud polyglots","type":"Meeting"}""",
-      ),
-      genres = List(
-        """{"label":"glum gerbils","concepts":[],"type":"Genre"}""",
-      ),
-      subjects = List(
-        """{"label":"sturdy shapes","concepts":[],"type":"Subject"}""",
       )
     )
   }

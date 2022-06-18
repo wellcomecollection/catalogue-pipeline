@@ -7,7 +7,9 @@ import weco.catalogue.display_model.work.{
   DisplayGenre,
   DisplaySubject
 }
-import weco.catalogue.internal_model.image.{ImageSource, ParentWorks}
+import weco.catalogue.internal_model.identifiers.{DataState, IdState}
+import weco.catalogue.internal_model.image.{ImageSource, ParentWork}
+import weco.catalogue.internal_model.work.WorkData
 
 case class DisplayImageSource(
   id: String,
@@ -23,19 +25,20 @@ object DisplayImageSource {
 
   def apply(imageSource: ImageSource): DisplayImageSource =
     imageSource match {
-      case works: ParentWorks => DisplayImageSource(works)
+      case ParentWork(id, workData, _) => DisplayImageSource(id, workData)
     }
 
-  private def apply(parent: ParentWorks): DisplayImageSource =
+  private def apply(id: IdState.Identified,
+                    data: WorkData[DataState.Identified]): DisplayImageSource =
     new DisplayImageSource(
-      id = parent.id.canonicalId.underlying,
-      title = parent.canonicalWork.data.title,
-      contributors = parent.canonicalWork.data.contributors
+      id = id.canonicalId.underlying,
+      title = data.title,
+      contributors = data.contributors
         .map { DisplayContributor(_, includesIdentifiers = false) },
-      languages = parent.canonicalWork.data.languages.map { DisplayLanguage(_) },
-      genres = parent.canonicalWork.data.genres
+      languages = data.languages.map { DisplayLanguage(_) },
+      genres = data.genres
         .map { DisplayGenre(_, includesIdentifiers = false) },
-      subjects = parent.canonicalWork.data.subjects
+      subjects = data.subjects
         .map { DisplaySubject(_, includesIdentifiers = false) },
       ontologyType = "Work"
     )
