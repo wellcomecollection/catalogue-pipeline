@@ -153,27 +153,33 @@ def list_queue_urls_in_account(sess):
         yield from page["QueueUrls"]
 
 
-def get_dlq_stats(sess, *, reindex_date):
+def get_queue_stats(sess, *, reindex_date):
     """
-    Get the size of the DLQs associated with this pipeline.
+    Get the size of the queues associated with this pipeline.
     """
     dlq_urls = [
         q_url
         for q_url in list_queue_urls_in_account(sess)
-        if f"/catalogue-{reindex_date}_" in q_url and q_url.endswith("_dlq")
+        if f"/catalogue-{reindex_date}_" in q_url
     ]
 
     sqs_client = sess.client("sqs")
 
+    attribute_names = [
+        "ApproximateNumberOfMessages",
+        "ApproximateNumberOfMessagesNotVisible",
+        "ApproximateNumberOfMessagesDelayed",
+    ]
+
     dlq_responses = {
         q_url: sqs_client.get_queue_attributes(
-            QueueUrl=q_url, AttributeNames=["ApproximateNumberOfMessages"]
+            QueueUrl=q_url, AttributeNames=attribute_names
         )
         for q_url in dlq_urls
     }
 
     return {
-        q_url: int(resp["Attributes"]["ApproximateNumberOfMessages"])
+        q_url: sum(int(resp["Attributes"][attr]) for attr in attribute_names)
         for q_url, resp in dlq_responses.items()
     }
 
@@ -243,9 +249,32 @@ def main(reindex_date):
 
     print("")
 
-    print("*** Queue stats ***")
-    dlq_stats = get_dlq_stats(session_read_only, reindex_date=reindex_date)
-    non_empty_dlqs = {q_url: size for q_url, size in dlq_stats.items() if size > 0}
+    queue_stats = get_queue_stats(session_read_only, reindex_date=reindex_date)
+
+    print("*** SQS stats ***")
+    non_empty_queues = {
+        q_url: size
+        for q_url, size in queue_stats.items()
+        if not q_url.endswith("_dlq") and size > 0
+    }
+    if non_empty_queues:
+        print("The following queues still have messages:")
+        rows = [
+            [q_url.split("/")[-1].replace(f"catalogue-{reindex_date}_", ""), size]
+            for q_url, size in sorted(non_empty_queues.items())
+        ]
+        print(tabulate.tabulate(rows, tablefmt="plain", colalign=("left", "right")))
+    else:
+        print("There are no messages on queues")
+
+    print("")
+
+    print("*** DLQ stats ***")
+    non_empty_dlqs = {
+        q_url: size
+        for q_url, size in queue_stats.items()
+        if q_url.endswith("_dlq") and size > 0
+    }
     if non_empty_dlqs:
         print("The following DLQs have failed messages:")
         rows = [
