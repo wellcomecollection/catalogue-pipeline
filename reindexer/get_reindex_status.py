@@ -296,6 +296,15 @@ def main(reindex_date):
                 "yellow",
             )
         )
+
+        if work_index_stats["works-indexed"] == 0:
+            print(
+                click.style(
+                    "(This may be because the ingestors have refresh_interval=-1 while reindexing, to reduce load on the Elasticsearch cluster)",
+                    "yellow",
+                )
+            )
+
     else:
         print(
             click.style(
