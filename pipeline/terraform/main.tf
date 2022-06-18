@@ -91,11 +91,11 @@ module "catalogue_pipeline_2022-06-09" {
   logging_cluster_id = local.logging_cluster_id
 }
 
-module "catalogue_pipeline_2022-06-17" {
+module "catalogue_pipeline_2022-06-18" {
   source = "./stack"
 
-  pipeline_date = "2022-06-17"
-  release_label = "2022-06-17"
+  pipeline_date = "2022-06-18"
+  release_label = "2022-06-18"
 
   reindexing_state = {
     connect_reindex_topics   = false
