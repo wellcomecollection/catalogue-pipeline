@@ -1,6 +1,6 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2022-06-16T09:57:46.086Z",
+  "createdAt" : "2022-06-20T10:13:38.437129Z",
   "id" : "b1r485o0",
   "document" : {
     "debug" : {
@@ -214,6 +214,9 @@
       "items.locations.license.id" : [
       ],
       "items.locations.locationType.id" : [
+      ],
+      "subjects.id" : [
+        "darwin01"
       ],
       "subjects.concepts.label" : [
         "40zJbSlLwDNn2Et",

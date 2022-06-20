@@ -985,6 +985,9 @@
           "items.locations.locationType.id" : {
             "type" : "keyword"
           },
+          "subjects.id" : {
+            "type" : "keyword"
+          },
           "subjects.concepts.label" : {
             "type" : "text",
             "analyzer" : "asciifolding_analyzer",

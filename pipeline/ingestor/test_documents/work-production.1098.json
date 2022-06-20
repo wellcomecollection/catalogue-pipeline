@@ -1,6 +1,6 @@
 {
   "description" : "a work with a production event in 1098",
-  "createdAt" : "2022-06-16T10:10:34.250005Z",
+  "createdAt" : "2022-06-20T10:13:36.616330Z",
   "id" : "guav7chy",
   "document" : {
     "debug" : {
@@ -180,6 +180,8 @@
       "items.locations.license.id" : [
       ],
       "items.locations.locationType.id" : [
+      ],
+      "subjects.id" : [
       ],
       "subjects.concepts.label" : [
       ],

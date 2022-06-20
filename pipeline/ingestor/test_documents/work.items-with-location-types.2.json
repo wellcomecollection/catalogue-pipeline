@@ -1,6 +1,6 @@
 {
   "description" : "items with different location types",
-  "createdAt" : "2022-06-16T09:57:46.038Z",
+  "createdAt" : "2022-06-20T10:13:37.992675Z",
   "id" : "wt6pclbs",
   "document" : {
     "debug" : {
@@ -224,6 +224,8 @@
       ],
       "items.locations.locationType.id" : [
         "closed-stores"
+      ],
+      "subjects.id" : [
       ],
       "subjects.concepts.label" : [
       ],

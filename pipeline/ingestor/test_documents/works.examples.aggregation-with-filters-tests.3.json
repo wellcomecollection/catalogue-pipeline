@@ -1,6 +1,6 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2022-06-16T09:57:46.046Z",
+  "createdAt" : "2022-06-20T10:13:38.030170Z",
   "id" : "ivw1mq40",
   "document" : {
     "debug" : {
@@ -200,6 +200,8 @@
       "items.locations.license.id" : [
       ],
       "items.locations.locationType.id" : [
+      ],
+      "subjects.id" : [
       ],
       "subjects.concepts.label" : [
         "vgSyVfmtHDyMDGo",

@@ -1,6 +1,6 @@
 {
   "description" : "a list of work with all the include-able fields",
-  "createdAt" : "2022-06-16T10:10:34.553910Z",
+  "createdAt" : "2022-06-20T10:13:37.072965Z",
   "id" : "nlqnlwch",
   "document" : {
     "debug" : {
@@ -1091,6 +1091,8 @@
         "iiif-presentation",
         "iiif-presentation",
         "iiif-presentation"
+      ],
+      "subjects.id" : [
       ],
       "subjects.concepts.label" : [
         "VvWxgXRSdhZCyeu",

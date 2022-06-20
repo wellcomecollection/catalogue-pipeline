@@ -1,6 +1,6 @@
 {
   "description" : "examples for the access status tests",
-  "createdAt" : "2022-06-16T09:57:46.144Z",
+  "createdAt" : "2022-06-20T10:13:38.955672Z",
   "id" : "yh6sk7pv",
   "document" : {
     "debug" : {
@@ -252,6 +252,8 @@
       ],
       "items.locations.locationType.id" : [
         "iiif-presentation"
+      ],
+      "subjects.id" : [
       ],
       "subjects.concepts.label" : [
       ],
