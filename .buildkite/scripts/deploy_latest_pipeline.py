@@ -23,32 +23,6 @@ def get_secret_value(sess, *, secret_id):
     return client.get_secret_value(SecretId=secret_id)["SecretString"]
 
 
-def get_index_internal_model_versions(sess, *, pipeline_date, index_name):
-    """
-    Returns a list of internal_model versions supported by this index.
-    """
-    secret_prefix = f"elasticsearch/pipeline_storage_{pipeline_date}"
-
-    username = get_secret_value(
-        sess, secret_id=f"{secret_prefix}/read_only/es_username"
-    )
-    password = get_secret_value(
-        sess, secret_id=f"{secret_prefix}/read_only/es_password"
-    )
-    host = get_secret_value(sess, secret_id=f"{secret_prefix}/public_host")
-
-    # If the index has a suffix letter like 'works-indexed-2021-08-16a', remove
-    # that before querying the pipeline-storage cluster.
-    #
-    # Alternatively we could look at the API cluster, but that's more effort.
-    index_name = index_name.rstrip("abcde")
-
-    resp = httpx.get(f"https://{host}:9243/{index_name}", auth=(username, password))
-    resp.raise_for_status()
-
-    return resp.json()[index_name]["mappings"]["_meta"]
-
-
 if __name__ == "__main__":
     index_name = get_current_index_name()
     print(f"The current index name is {index_name}")
