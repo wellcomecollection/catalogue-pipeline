@@ -986,7 +986,8 @@
             "type" : "keyword"
           },
           "subjects.id" : {
-            "type" : "keyword"
+            "type" : "keyword",
+            "normalizer" : "lowercase_normalizer"
           },
           "subjects.concepts.label" : {
             "type" : "text",
