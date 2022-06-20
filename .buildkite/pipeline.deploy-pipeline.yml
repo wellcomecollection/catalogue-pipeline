@@ -1,6 +1,6 @@
   - label: deploy pipeline
     commands:
-      - pip3 install --user boto3 httpx
+      - pip3 install --user httpx
       - .buildkite/scripts/deploy_latest_pipeline.py
     agents:
       queue: nano
