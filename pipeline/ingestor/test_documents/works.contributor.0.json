@@ -1,6 +1,6 @@
 {
   "description" : "works with different contributor",
-  "createdAt" : "2022-06-16T09:57:45.973Z",
+  "createdAt" : "2022-06-20T10:13:37.573801Z",
   "id" : "gvkz3vff",
   "document" : {
     "debug" : {
@@ -168,6 +168,8 @@
       "items.locations.license.id" : [
       ],
       "items.locations.locationType.id" : [
+      ],
+      "subjects.id" : [
       ],
       "subjects.concepts.label" : [
       ],

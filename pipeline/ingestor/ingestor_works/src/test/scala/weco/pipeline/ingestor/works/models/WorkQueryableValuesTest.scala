@@ -107,6 +107,7 @@ class WorkQueryableValuesTest
       availabilities = Set()
     )
 
+    q.subjectIds shouldBe List("ssssssss", "SSSSSSSS")
     q.subjectConceptLabels shouldBe List("silliness", "cylinders", "tools")
   }
 

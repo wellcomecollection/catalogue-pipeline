@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2022-06-16T09:57:46.094Z",
+  "createdAt" : "2022-06-20T10:13:38.505855Z",
   "id" : "e1k1l8xu",
   "document" : {
     "debug" : {
@@ -170,6 +170,8 @@
       "items.locations.license.id" : [
       ],
       "items.locations.locationType.id" : [
+      ],
+      "subjects.id" : [
       ],
       "subjects.concepts.label" : [
       ],

@@ -1,6 +1,6 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2022-06-16T09:57:46.085Z",
+  "createdAt" : "2022-06-20T10:13:38.428548Z",
   "id" : "tayys6jp",
   "document" : {
     "debug" : {
@@ -230,6 +230,9 @@
       "items.locations.license.id" : [
       ],
       "items.locations.locationType.id" : [
+      ],
+      "subjects.id" : [
+        "sanitati"
       ],
       "subjects.concepts.label" : [
         "bCBtOF9X3cVR8q4",

@@ -1,6 +1,6 @@
 {
   "description" : "works with different subjects",
-  "createdAt" : "2022-06-16T09:57:45.961Z",
+  "createdAt" : "2022-06-20T10:13:37.465146Z",
   "id" : "xcssabt1",
   "document" : {
     "debug" : {
@@ -239,6 +239,8 @@
       "items.locations.license.id" : [
       ],
       "items.locations.locationType.id" : [
+      ],
+      "subjects.id" : [
       ],
       "subjects.concepts.label" : [
         "qbmTfcJnlkosWvA",

@@ -985,6 +985,10 @@
           "items.locations.locationType.id" : {
             "type" : "keyword"
           },
+          "subjects.id" : {
+            "type" : "keyword",
+            "normalizer" : "lowercase_normalizer"
+          },
           "subjects.concepts.label" : {
             "type" : "text",
             "analyzer" : "asciifolding_analyzer",

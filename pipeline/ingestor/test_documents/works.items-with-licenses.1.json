@@ -1,6 +1,6 @@
 {
   "description" : "a work with licensed digital items",
-  "createdAt" : "2022-06-16T09:57:45.946Z",
+  "createdAt" : "2022-06-20T10:13:37.359682Z",
   "id" : "runiusy8",
   "document" : {
     "debug" : {
@@ -196,6 +196,8 @@
       ],
       "items.locations.locationType.id" : [
         "iiif-presentation"
+      ],
+      "subjects.id" : [
       ],
       "subjects.concepts.label" : [
       ],

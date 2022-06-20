@@ -1,6 +1,6 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2022-06-16T09:57:46.010Z",
+  "createdAt" : "2022-06-20T10:13:37.727037Z",
   "id" : "9tar4kg6",
   "document" : {
     "debug" : {
@@ -153,6 +153,8 @@
       "items.locations.license.id" : [
       ],
       "items.locations.locationType.id" : [
+      ],
+      "subjects.id" : [
       ],
       "subjects.concepts.label" : [
       ],

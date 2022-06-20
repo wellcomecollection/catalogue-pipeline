@@ -1,6 +1,6 @@
 {
   "description" : "examples of works with different types",
-  "createdAt" : "2022-06-16T09:57:46.071Z",
+  "createdAt" : "2022-06-20T10:13:38.307678Z",
   "id" : "iw5fnuyy",
   "document" : {
     "debug" : {
@@ -145,6 +145,8 @@
       "items.locations.license.id" : [
       ],
       "items.locations.locationType.id" : [
+      ],
+      "subjects.id" : [
       ],
       "subjects.concepts.label" : [
       ],

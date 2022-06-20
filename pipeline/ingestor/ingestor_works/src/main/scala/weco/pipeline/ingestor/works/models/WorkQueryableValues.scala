@@ -20,6 +20,7 @@ case class WorkQueryableValues(
     String],
   @JsonKey("items.locations.license.id") itemLicenseIds: List[String],
   @JsonKey("items.locations.locationType.id") itemLocationTypeIds: List[String],
+  @JsonKey("subjects.id") subjectIds: List[String],
   @JsonKey("subjects.concepts.label") subjectConceptLabels: List[String],
   @JsonKey("genres.concepts.label") genreConceptLabels: List[String],
   @JsonKey("languages.id") languageIds: List[String],
@@ -43,13 +44,14 @@ case object WorkQueryableValues {
         (sourceIdentifier +: workData.otherIdentifiers).map(_.value),
       imageIds = workData.imageData.map(_.id).canonicalIds,
       imageIdentifiers = workData.imageData.map(_.id).sourceIdentifiers,
-      itemIds = workData.items.flatMap(_.id.maybeCanonicalId).map(_.underlying),
+      itemIds = workData.items.map(_.id).canonicalIds,
       itemIdentifiers =
         workData.items.flatMap(_.id.allSourceIdentifiers).map(_.value),
       itemAccessStatusIds =
         locations.flatMap(_.accessConditions).flatMap(_.status).map(_.id),
       itemLicenseIds = locations.flatMap(_.license).map(_.id),
       itemLocationTypeIds = locations.map(_.locationType.id),
+      subjectIds = workData.subjects.map(_.id).canonicalIds,
       subjectConceptLabels = workData.subjects.flatMap(_.concepts).map(_.label),
       genreConceptLabels = workData.genres.flatMap(_.concepts).map(_.label),
       languageIds = workData.languages.map(_.id),
