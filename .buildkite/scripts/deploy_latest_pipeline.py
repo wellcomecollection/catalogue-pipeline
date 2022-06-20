@@ -15,14 +15,6 @@ def get_current_index_name():
     return resp.json()["worksIndex"]
 
 
-def get_secret_value(sess, *, secret_id):
-    """
-    Retrieve a secret from Secrets Manager.
-    """
-    client = sess.client("secretsmanager")
-    return client.get_secret_value(SecretId=secret_id)["SecretString"]
-
-
 if __name__ == "__main__":
     index_name = get_current_index_name()
     print(f"The current index name is {index_name}")
