@@ -157,7 +157,7 @@ def get_queue_stats(sess, *, reindex_date):
     """
     Get the size of the queues associated with this pipeline.
     """
-    dlq_urls = [
+    queue_urls = [
         q_url
         for q_url in list_queue_urls_in_account(sess)
         if f"/catalogue-{reindex_date}_" in q_url
@@ -171,16 +171,16 @@ def get_queue_stats(sess, *, reindex_date):
         "ApproximateNumberOfMessagesDelayed",
     ]
 
-    dlq_responses = {
+    queue_responses = {
         q_url: sqs_client.get_queue_attributes(
             QueueUrl=q_url, AttributeNames=attribute_names
         )
-        for q_url in dlq_urls
+        for q_url in queue_urls
     }
 
     return {
         q_url: sum(int(resp["Attributes"][attr]) for attr in attribute_names)
-        for q_url, resp in dlq_responses.items()
+        for q_url, resp in queue_responses.items()
     }
 
 
