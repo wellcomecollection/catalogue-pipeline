@@ -11,12 +11,12 @@ trait IndexConfigFields extends ElasticFieldOps {
   def englishTextKeywordField(name: String) =
     textField(name).fields(
       keywordField("keyword"),
-      textField("english").analyzer("english")
+      textField("english").analyzer(englishAnalyzer.name)
     )
 
   def englishTextField(name: String) =
     textField(name).fields(
-      textField("english").analyzer("english")
+      textField("english").analyzer(englishAnalyzer.name)
     )
 
   val languagesTextFields =
