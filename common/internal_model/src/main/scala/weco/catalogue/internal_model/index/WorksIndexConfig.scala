@@ -51,10 +51,10 @@ object WorksIndexConfig extends IndexConfigFields {
       //
       objectField("data").fields(
         objectField("collectionPath").fields(
-        textField("path")
-          .copyTo("data.collectionPath.depth")
-          .analyzer(pathAnalyzer.name)
-          .fields(lowercaseKeyword("keyword")),
+          textField("path")
+            .copyTo("data.collectionPath.depth")
+            .analyzer(pathAnalyzer.name)
+            .fields(lowercaseKeyword("keyword")),
           TokenCountField("depth").withAnalyzer("standard")
         )
       )

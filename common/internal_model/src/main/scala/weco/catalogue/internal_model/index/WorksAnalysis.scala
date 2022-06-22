@@ -14,11 +14,11 @@ object WorksAnalysis {
   )
 
   val pathAnalyzer = CustomAnalyzer(
-      "path_hierarchy_analyzer",
-      tokenizer = "path_hierarchy",
-      tokenFilters = List("lowercase", asciiFoldingTokenFilter.name),
-      charFilters = Nil
-    )
+    "path_hierarchy_analyzer",
+    tokenizer = "path_hierarchy",
+    tokenFilters = List("lowercase", asciiFoldingTokenFilter.name),
+    charFilters = Nil
+  )
 
   val shingleTokenFilter = ShingleTokenFilter(
     "shingle_token_filter",
