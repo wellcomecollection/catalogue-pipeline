@@ -143,13 +143,15 @@ def get_images_index_stats(*, reindex_date):
     return result
 
 
-def list_queue_urls_in_account(sess):
+def list_queue_urls_in_account(sess, *, prefix):
     """
     Generates a list of all the queue URLs in an account.
     """
     sqs_client = sess.client("sqs")
 
-    for page in sqs_client.get_paginator("list_queues").paginate():
+    for page in sqs_client.get_paginator("list_queues").paginate(
+        QueueNamePrefix=prefix
+    ):
         yield from page["QueueUrls"]
 
 
@@ -157,11 +159,7 @@ def get_queue_stats(sess, *, reindex_date):
     """
     Get the size of the queues associated with this pipeline.
     """
-    queue_urls = [
-        q_url
-        for q_url in list_queue_urls_in_account(sess)
-        if f"/catalogue-{reindex_date}_" in q_url
-    ]
+    queue_urls = list_queue_urls_in_account(sess, prefix=f"catalogue-{reindex_date}")
 
     sqs_client = sess.client("sqs")
 
