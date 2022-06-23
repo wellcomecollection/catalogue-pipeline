@@ -16,7 +16,6 @@ object WorksAnalysis {
   val pathAnalyzer = CustomAnalyzer(
     "path_hierarchy_analyzer",
     tokenizer = "path_hierarchy",
-    tokenFilters = List("lowercase", asciiFoldingTokenFilter.name),
     charFilters = Nil
   )
 
