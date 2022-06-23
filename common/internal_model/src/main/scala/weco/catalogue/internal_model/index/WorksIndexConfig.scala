@@ -157,7 +157,9 @@ object WorksIndexConfig extends IndexConfigFields {
       def collectionPath(copyPathTo: Option[String]): ObjectField = {
         val path = textField("path")
           .analyzer(exactPathAnalyzer.name)
-          .fields(keywordField("keyword"), textField("clean").analyzer(cleanPathAnalyzer.name))
+          .fields(
+            keywordField("keyword"),
+            textField("clean").analyzer(cleanPathAnalyzer.name))
 
         objectField("collectionPath").fields(
           textField("label")
