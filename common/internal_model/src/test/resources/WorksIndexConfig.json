@@ -4,11 +4,7 @@
       "analyzer": {
         "path_hierarchy_analyzer": {
           "type": "custom",
-          "tokenizer": "path_hierarchy",
-          "filter": [
-            "lowercase",
-            "asciifolding_token_filter"
-          ]
+          "tokenizer": "path_hierarchy"
         },
         "asciifolding_analyzer": {
           "type": "custom",
