@@ -24,7 +24,7 @@ object ImagesIndexConfig extends IndexConfigFields {
         floatField("aspectRatio")
       )
 
-      def sourceWork(fieldName: String): ObjectField =
+      def parentWork(fieldName: String): ObjectField =
         objectField(fieldName)
           .fields(
             objectField("id").fields(canonicalId, sourceIdentifier),
@@ -63,27 +63,25 @@ object ImagesIndexConfig extends IndexConfigFields {
           )
           .withDynamic("false")
 
-      val source = objectField("source").fields(
-        sourceWork("canonicalWork"),
-        sourceWork("redirectedWork"),
-        keywordField("type")
-      )
+      val source = parentWork("source")
 
       val state = objectField("state")
         .fields(
           canonicalId,
           sourceIdentifier,
-          inferredData,
-          objectField("derivedData")
-            .fields(
-              keywordField("sourceContributorAgents")
-            )
-            .withDynamic("false")
+          inferredData
         )
 
       // This field contains the display document used by the API, but we don't want
       // to index it -- it's just an arbitrary blob of JSON.
       val display = objectField("display").withEnabled(false)
+
+      // This field contains the values we're actually going to query in search.
+      val query = objectField("query")
+        .fields(
+          keywordField("source.genres.label"),
+          keywordField("source.subjects.label")
+        )
 
       // This field contains the display documents used by aggregations.
       //
@@ -96,7 +94,8 @@ object ImagesIndexConfig extends IndexConfigFields {
         .fields(
           keywordField("locations.license"),
           keywordField("source.contributors.agent.label"),
-          keywordField("source.genres.label")
+          keywordField("source.genres.label"),
+          keywordField("source.subjects.label")
         )
 
       val fields = Seq(
@@ -110,6 +109,7 @@ object ImagesIndexConfig extends IndexConfigFields {
           )
           .withDynamic("false"),
         display,
+        query,
         aggregatableValues
       )
 

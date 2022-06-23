@@ -1,37 +1,37 @@
 {
   "description" : "works with different subjects",
-  "createdAt" : "2022-05-04T07:15:03.061Z",
-  "id" : "u7atgijp",
+  "createdAt" : "2022-06-20T10:13:37.459661Z",
+  "id" : "6uwysojy",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "kosWvAmEQc"
+          "value" : "pzLgxSR5EK"
         },
-        "version" : 47,
-        "modifiedTime" : "2022-04-13T14:43:22Z"
+        "version" : 77,
+        "modifiedTime" : "2005-10-29T13:02:10Z"
       },
-      "mergedTime" : "2022-04-13T14:43:22Z",
-      "indexedTime" : "2022-05-04T07:15:03.060Z",
+      "mergedTime" : "2005-10-29T13:02:10Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "miro-image-number"
+          "id" : "calm-record-id"
         },
         "ontologyType" : "Work",
-        "value" : "kosWvAmEQc"
+        "value" : "pzLgxSR5EK"
       },
-      "canonicalId" : "u7atgijp",
-      "mergedTime" : "2022-04-13T14:43:22Z",
-      "sourceModifiedTime" : "2022-04-13T14:43:22Z",
-      "indexedTime" : "2022-05-04T07:15:03.060Z",
+      "canonicalId" : "6uwysojy",
+      "mergedTime" : "2005-10-29T13:02:10Z",
+      "sourceModifiedTime" : "2005-10-29T13:02:10Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {
@@ -46,7 +46,7 @@
       }
     },
     "data" : {
-      "title" : "title-v2pMEZn8L2",
+      "title" : "title-Dtaaw5YmCW",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -67,21 +67,21 @@
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "a2FIC2DNd6NAvWG",
+              "label" : "qbmTfcJnlkosWvA",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "1cJ2yUYmmH4BoIs",
+              "label" : "mEQcU7atgIJPhTv",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "wjSVmALe83XqBJ6",
+              "label" : "2pMEZn8L2YCE8E9",
               "type" : "Concept"
             }
           ]
@@ -111,8 +111,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "u7atgijp",
-      "title" : "title-v2pMEZn8L2",
+      "id" : "6uwysojy",
+      "title" : "title-Dtaaw5YmCW",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -120,11 +120,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "kosWvAmEQc",
+          "value" : "pzLgxSR5EK",
           "type" : "Identifier"
         }
       ],
@@ -133,15 +133,15 @@
           "label" : "paleoNeuroBiology",
           "concepts" : [
             {
-              "label" : "a2FIC2DNd6NAvWG",
+              "label" : "qbmTfcJnlkosWvA",
               "type" : "Concept"
             },
             {
-              "label" : "1cJ2yUYmmH4BoIs",
+              "label" : "mEQcU7atgIJPhTv",
               "type" : "Concept"
             },
             {
-              "label" : "wjSVmALe83XqBJ6",
+              "label" : "2pMEZn8L2YCE8E9",
               "type" : "Concept"
             }
           ],
@@ -173,6 +173,45 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "query" : {
+      "id" : "6uwysojy",
+      "identifiers.value" : [
+        "pzLgxSR5EK"
+      ],
+      "images.id" : [
+      ],
+      "images.identifiers.value" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
+      "items.locations.accessConditions.status.id" : [
+      ],
+      "items.locations.license.id" : [
+      ],
+      "items.locations.locationType.id" : [
+      ],
+      "subjects.id" : [
+      ],
+      "subjects.concepts.label" : [
+        "qbmTfcJnlkosWvA",
+        "mEQcU7atgIJPhTv",
+        "2pMEZn8L2YCE8E9"
+      ],
+      "genres.concepts.label" : [
+      ],
+      "languages.id" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
+      ]
     },
     "aggregatableValues" : {
       "workType" : [

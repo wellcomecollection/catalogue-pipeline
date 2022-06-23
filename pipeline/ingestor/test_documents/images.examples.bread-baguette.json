@@ -1,7 +1,7 @@
 {
   "description" : "an example of images with work metadata for the API tests",
-  "createdAt" : "2022-05-13T12:41:40.074Z",
-  "id" : "45zj0oos",
+  "createdAt" : "2022-06-17T14:17:37.493257Z",
+  "id" : "raqyttz2",
   "document" : {
     "version" : 1,
     "state" : {
@@ -12,7 +12,7 @@
         "ontologyType" : "Work",
         "value" : "Ca52bR1XiR"
       },
-      "canonicalId" : "45zj0oos",
+      "canonicalId" : "raqyttz2",
       "inferredData" : {
         "features1" : [
           0.034636147,
@@ -4272,23 +4272,6 @@
           0.6996027
         ],
         "aspectRatio" : 0.9475815
-      },
-      "derivedData" : {
-        "thumbnail" : {
-          "url" : "https://iiif.wellcomecollection.org/image/7xD.jpg/info.json",
-          "locationType" : {
-            "id" : "iiif-image"
-          },
-          "license" : {
-            "id" : "cc-by"
-          },
-          "credit" : "Credit line: e5tEmO",
-          "linkText" : "Link text: 3kEQPI16",
-          "accessConditions" : [
-          ]
-        },
-        "sourceContributorAgents" : [
-        ]
       }
     },
     "locations" : [
@@ -4307,127 +4290,60 @@
       }
     ],
     "source" : {
-      "canonicalWork" : {
-        "id" : {
-          "canonicalId" : "d7frptjr",
-          "sourceIdentifier" : {
-            "identifierType" : {
-              "id" : "calm-record-id"
-            },
-            "ontologyType" : "Work",
-            "value" : "sx2oArj0tz"
+      "id" : {
+        "canonicalId" : "d7frptjr",
+        "sourceIdentifier" : {
+          "identifierType" : {
+            "id" : "calm-record-id"
           },
-          "otherIdentifiers" : [
-          ]
+          "ontologyType" : "Work",
+          "value" : "sx2oArj0tz"
         },
-        "data" : {
-          "title" : "Baguette is a French style of bread; it's a long, thin bread; other countries also make this bread",
-          "otherIdentifiers" : [
-          ],
-          "alternativeTitles" : [
-          ],
-          "format" : null,
-          "description" : null,
-          "physicalDescription" : null,
-          "lettering" : null,
-          "createdDate" : null,
-          "subjects" : [
-          ],
-          "genres" : [
-          ],
-          "contributors" : [
-          ],
-          "thumbnail" : null,
-          "production" : [
-          ],
-          "languages" : [
-          ],
-          "edition" : null,
-          "notes" : [
-          ],
-          "duration" : null,
-          "items" : [
-          ],
-          "holdings" : [
-          ],
-          "collectionPath" : null,
-          "referenceNumber" : null,
-          "imageData" : [
-          ],
-          "workType" : "Standard"
-        },
-        "version" : 51
+        "otherIdentifiers" : [
+        ]
       },
-      "redirectedWork" : {
-        "id" : {
-          "canonicalId" : "rpngbg6v",
-          "sourceIdentifier" : {
-            "identifierType" : {
-              "id" : "sierra-system-number"
-            },
-            "ontologyType" : "Work",
-            "value" : "esfGksBtxD"
-          },
-          "otherIdentifiers" : [
-          ]
-        },
-        "data" : {
-          "title" : "title-91hz0jNQLV",
-          "otherIdentifiers" : [
-            {
-              "identifierType" : {
-                "id" : "sierra-system-number"
-              },
-              "ontologyType" : "Work",
-              "value" : "Dz3JiDxuSU"
-            },
-            {
-              "identifierType" : {
-                "id" : "sierra-identifier"
-              },
-              "ontologyType" : "Work",
-              "value" : "YiVh4P1vMi"
-            }
-          ],
-          "alternativeTitles" : [
-          ],
-          "format" : null,
-          "description" : null,
-          "physicalDescription" : null,
-          "lettering" : null,
-          "createdDate" : null,
-          "subjects" : [
-          ],
-          "genres" : [
-          ],
-          "contributors" : [
-          ],
-          "thumbnail" : null,
-          "production" : [
-          ],
-          "languages" : [
-          ],
-          "edition" : null,
-          "notes" : [
-          ],
-          "duration" : null,
-          "items" : [
-          ],
-          "holdings" : [
-          ],
-          "collectionPath" : null,
-          "referenceNumber" : null,
-          "imageData" : [
-          ],
-          "workType" : "Standard"
-        },
-        "version" : 94
+      "data" : {
+        "title" : "Baguette is a French style of bread; it's a long, thin bread; other countries also make this bread",
+        "otherIdentifiers" : [
+        ],
+        "alternativeTitles" : [
+        ],
+        "format" : null,
+        "description" : null,
+        "physicalDescription" : null,
+        "lettering" : null,
+        "createdDate" : null,
+        "subjects" : [
+        ],
+        "genres" : [
+        ],
+        "contributors" : [
+        ],
+        "thumbnail" : null,
+        "production" : [
+        ],
+        "languages" : [
+        ],
+        "edition" : null,
+        "notes" : [
+        ],
+        "duration" : null,
+        "items" : [
+        ],
+        "holdings" : [
+        ],
+        "collectionPath" : null,
+        "referenceNumber" : null,
+        "imageData" : [
+        ],
+        "workType" : "Standard"
       },
-      "type" : "ParentWorks"
+      "version" : 51,
+      "type" : "ParentWork"
     },
     "modifiedTime" : "1957-10-26T00:32:14Z",
     "display" : {
-      "id" : "45zj0oos",
+      "id" : "raqyttz2",
       "thumbnail" : {
         "locationType" : {
           "id" : "iiif-image",
@@ -4477,9 +4393,17 @@
         ],
         "genres" : [
         ],
+        "subjects" : [
+        ],
         "type" : "Work"
       },
       "type" : "Image"
+    },
+    "query" : {
+      "source.subjects.label" : [
+      ],
+      "source.genres.label" : [
+      ]
     },
     "aggregatableValues" : {
       "locations.license" : [
@@ -4487,6 +4411,8 @@
       "source.contributors.agent.label" : [
       ],
       "source.genres.label" : [
+      ],
+      "source.subjects.label" : [
       ]
     }
   }

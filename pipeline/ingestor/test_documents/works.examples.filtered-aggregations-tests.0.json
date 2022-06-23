@@ -1,7 +1,7 @@
 {
   "description" : "examples for the works filtered aggregations tests",
-  "createdAt" : "2022-05-10T09:25:20.138Z",
-  "id" : "m6hdh9ay",
+  "createdAt" : "2022-06-20T10:13:39.016428Z",
+  "id" : "phodmv5g",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,13 +10,13 @@
             "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "yPhOdmV5Gs"
+          "value" : "kSl7z2IaIy"
         },
-        "version" : 51,
-        "modifiedTime" : "2022-05-03T22:07:02Z"
+        "version" : 2,
+        "modifiedTime" : "2040-01-22T01:35:50Z"
       },
-      "mergedTime" : "2022-05-03T22:07:02Z",
-      "indexedTime" : "2022-05-10T09:25:20.138Z",
+      "mergedTime" : "2040-01-22T01:35:50Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
@@ -26,12 +26,12 @@
           "id" : "calm-record-id"
         },
         "ontologyType" : "Work",
-        "value" : "yPhOdmV5Gs"
+        "value" : "kSl7z2IaIy"
       },
-      "canonicalId" : "m6hdh9ay",
-      "mergedTime" : "2022-05-03T22:07:02Z",
-      "sourceModifiedTime" : "2022-05-03T22:07:02Z",
-      "indexedTime" : "2022-05-10T09:25:20.138Z",
+      "canonicalId" : "phodmv5g",
+      "mergedTime" : "2040-01-22T01:35:50Z",
+      "sourceModifiedTime" : "2040-01-22T01:35:50Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {
@@ -89,7 +89,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "m6hdh9ay",
+      "id" : "phodmv5g",
       "title" : "rats",
       "alternativeTitles" : [
       ],
@@ -107,7 +107,7 @@
             "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "yPhOdmV5Gs",
+          "value" : "kSl7z2IaIy",
           "type" : "Identifier"
         }
       ],
@@ -143,6 +143,43 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "query" : {
+      "id" : "phodmv5g",
+      "identifiers.value" : [
+        "kSl7z2IaIy"
+      ],
+      "images.id" : [
+      ],
+      "images.identifiers.value" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
+      "items.locations.accessConditions.status.id" : [
+      ],
+      "items.locations.license.id" : [
+      ],
+      "items.locations.locationType.id" : [
+      ],
+      "subjects.id" : [
+      ],
+      "subjects.concepts.label" : [
+      ],
+      "genres.concepts.label" : [
+      ],
+      "languages.id" : [
+        "bak"
+      ],
+      "contributors.agent.label" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
+      ]
     },
     "aggregatableValues" : {
       "workType" : [

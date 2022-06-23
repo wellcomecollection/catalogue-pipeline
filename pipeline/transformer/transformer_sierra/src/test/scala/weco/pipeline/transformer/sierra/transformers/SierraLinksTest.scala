@@ -43,22 +43,41 @@ class SierraLinksTest
     )
     getLinks(varFields) shouldBe List(SeriesRelation("A Series"))
   }
+  it(
+    "returns a Series relation for a 773 - Host Item Entry field with the title from a subfield") {
+    forAll(
+      Table(
+        "tag",
+        "t",
+        "a",
+        "s"
+      )) { (tag) =>
+      val varFields = List(
+        VarField(
+          marcTag = "773",
+          subfields = List(Subfield(tag = tag, content = "A Series"))
+        )
+      )
+      getLinks(varFields) shouldBe List(SeriesRelation("A Series"))
+    }
+  }
 
-  it("returns a Series relation for a 773 - Host Item Entry field") {
-    // In phase one, all relations from parent to child are treated as
-    // Series links.
-    // This is subject to change in a later phase.
-    // 773 fields differ from the others in that the title is in a subfield
+  it("returns a Series relation with one title, even if multiple are available") {
+    // It is expected that there is one title subfield in the 773 field.
+    // If there are more than one, the first will be returned as the title
     val varFields = List(
       VarField(
         marcTag = "773",
-        subfields = List(Subfield(tag = "t", content = "A Series"))
+        subfields = List(
+          Subfield(tag = "t", content = "The Series"),
+          Subfield(tag = "a", content = "A Series"),
+          Subfield(tag = "s", content = "Some Series"))
       )
     )
-    getLinks(varFields) shouldBe List(SeriesRelation("A Series"))
+    getLinks(varFields) shouldBe List(SeriesRelation("The Series"))
   }
 
-  it("Extracts the title from the body of a 773 field, if title is absent") {
+  it("extracts the title from the body of a 773 field, if title is absent") {
     // This is not a scenario we expect to encounter, but applying
     // Postel's Law and logging a warning is better than discarding it
     val varFields = List(
@@ -81,7 +100,7 @@ class SierraLinksTest
     getLinks(varFields) shouldBe List(SeriesRelation("A Series"))
   }
 
-  it("Extracts the title from the 'a' subfield") {
+  it("extracts the title from the 'a' subfield") {
     forAll(
       Table(
         "marcTag",
@@ -99,6 +118,39 @@ class SierraLinksTest
       getLinks(varFields) shouldBe List(SeriesRelation("A Series"))
     }
 
+  }
+
+  it("prefers titles from a subfield over field content") {
+    forAll(
+      Table(
+        "marcTag",
+        "440",
+        "490",
+        "773",
+        "830"
+      )) { (marcTag) =>
+      val varFields = List(
+        VarField(
+          marcTag = Some(marcTag),
+          subfields = List(Subfield(tag = "a", content = "A Series")),
+          content = Some("Ignore me, I'm not here")
+        )
+      )
+      getLinks(varFields) shouldBe List(SeriesRelation("A Series"))
+    }
+  }
+
+  it("does not extract the title from the 830 $s subfield") {
+    // $s means Version in an 830 field,
+    // so should not be looked at as a potential "title"
+    val varFields = List(
+      VarField(
+        marcTag = Some("830"),
+        subfields = List(Subfield(tag = "s", content = "A Version")),
+        content = Some("A Series")
+      )
+    )
+    getLinks(varFields) shouldBe List(SeriesRelation("A Series"))
   }
 
   it(
@@ -150,7 +202,7 @@ class SierraLinksTest
         ),
         VarField(
           marcTag = Some(marcTag),
-          subfields = List(Subfield(tag = "t", content = "A Host"))
+          subfields = List(Subfield(tag = "a", content = "A Host"))
         ),
         VarField(
           marcTag = Some(marcTag),

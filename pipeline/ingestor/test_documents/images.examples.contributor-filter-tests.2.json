@@ -1,7 +1,7 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2022-05-13T12:41:39.960Z",
-  "id" : "nwhz3idj",
+  "createdAt" : "2022-06-17T14:17:37.174542Z",
+  "id" : "prsdh2ux",
   "document" : {
     "version" : 1,
     "state" : {
@@ -12,7 +12,7 @@
         "ontologyType" : "Work",
         "value" : "5cBujd6spE"
       },
-      "canonicalId" : "nwhz3idj",
+      "canonicalId" : "prsdh2ux",
       "inferredData" : {
         "features1" : [
           -0.021139324,
@@ -4272,23 +4272,6 @@
           0.6996027
         ],
         "aspectRatio" : 0.9475815
-      },
-      "derivedData" : {
-        "thumbnail" : {
-          "url" : "https://iiif.wellcomecollection.org/image/dUR.jpg/info.json",
-          "locationType" : {
-            "id" : "iiif-image"
-          },
-          "license" : {
-            "id" : "cc-by"
-          },
-          "credit" : null,
-          "linkText" : null,
-          "accessConditions" : [
-          ]
-        },
-        "sourceContributorAgents" : [
-        ]
       }
     },
     "locations" : [
@@ -4307,143 +4290,74 @@
       }
     ],
     "source" : {
-      "canonicalWork" : {
-        "id" : {
-          "canonicalId" : "jyclobfb",
-          "sourceIdentifier" : {
+      "id" : {
+        "canonicalId" : "jyclobfb",
+        "sourceIdentifier" : {
+          "identifierType" : {
+            "id" : "sierra-system-number"
+          },
+          "ontologyType" : "Work",
+          "value" : "LS9JRLzitb"
+        },
+        "otherIdentifiers" : [
+        ]
+      },
+      "data" : {
+        "title" : "title-oQp59XpMDX",
+        "otherIdentifiers" : [
+          {
             "identifierType" : {
               "id" : "sierra-system-number"
             },
             "ontologyType" : "Work",
-            "value" : "LS9JRLzitb"
+            "value" : "ePeodWcw6L"
           },
-          "otherIdentifiers" : [
-          ]
-        },
-        "data" : {
-          "title" : "title-oQp59XpMDX",
-          "otherIdentifiers" : [
-            {
-              "identifierType" : {
-                "id" : "sierra-system-number"
-              },
-              "ontologyType" : "Work",
-              "value" : "ePeodWcw6L"
-            },
-            {
-              "identifierType" : {
-                "id" : "sierra-identifier"
-              },
-              "ontologyType" : "Work",
-              "value" : "gzqCPb4Q7b"
-            }
-          ],
-          "alternativeTitles" : [
-          ],
-          "format" : null,
-          "description" : null,
-          "physicalDescription" : null,
-          "lettering" : null,
-          "createdDate" : null,
-          "subjects" : [
-          ],
-          "genres" : [
-          ],
-          "contributors" : [
-          ],
-          "thumbnail" : null,
-          "production" : [
-          ],
-          "languages" : [
-          ],
-          "edition" : null,
-          "notes" : [
-          ],
-          "duration" : null,
-          "items" : [
-          ],
-          "holdings" : [
-          ],
-          "collectionPath" : null,
-          "referenceNumber" : null,
-          "imageData" : [
-          ],
-          "workType" : "Standard"
-        },
-        "version" : 75
-      },
-      "redirectedWork" : {
-        "id" : {
-          "canonicalId" : "uuvqa0np",
-          "sourceIdentifier" : {
+          {
             "identifierType" : {
-              "id" : "miro-image-number"
+              "id" : "sierra-identifier"
             },
             "ontologyType" : "Work",
-            "value" : "3vOjlh3ibU"
-          },
-          "otherIdentifiers" : [
-          ]
-        },
-        "data" : {
-          "title" : "title-iYz6LnJY3J",
-          "otherIdentifiers" : [
-          ],
-          "alternativeTitles" : [
-          ],
-          "format" : null,
-          "description" : null,
-          "physicalDescription" : null,
-          "lettering" : null,
-          "createdDate" : null,
-          "subjects" : [
-          ],
-          "genres" : [
-          ],
-          "contributors" : [
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "agent" : {
-                "id" : {
-                  "type" : "Unidentifiable"
-                },
-                "label" : "Hypatia",
-                "prefix" : null,
-                "numeration" : null,
-                "type" : "Person"
-              },
-              "roles" : [
-              ]
-            }
-          ],
-          "thumbnail" : null,
-          "production" : [
-          ],
-          "languages" : [
-          ],
-          "edition" : null,
-          "notes" : [
-          ],
-          "duration" : null,
-          "items" : [
-          ],
-          "holdings" : [
-          ],
-          "collectionPath" : null,
-          "referenceNumber" : null,
-          "imageData" : [
-          ],
-          "workType" : "Standard"
-        },
-        "version" : 96
+            "value" : "gzqCPb4Q7b"
+          }
+        ],
+        "alternativeTitles" : [
+        ],
+        "format" : null,
+        "description" : null,
+        "physicalDescription" : null,
+        "lettering" : null,
+        "createdDate" : null,
+        "subjects" : [
+        ],
+        "genres" : [
+        ],
+        "contributors" : [
+        ],
+        "thumbnail" : null,
+        "production" : [
+        ],
+        "languages" : [
+        ],
+        "edition" : null,
+        "notes" : [
+        ],
+        "duration" : null,
+        "items" : [
+        ],
+        "holdings" : [
+        ],
+        "collectionPath" : null,
+        "referenceNumber" : null,
+        "imageData" : [
+        ],
+        "workType" : "Standard"
       },
-      "type" : "ParentWorks"
+      "version" : 75,
+      "type" : "ParentWork"
     },
     "modifiedTime" : "1950-07-06T14:11:05Z",
     "display" : {
-      "id" : "nwhz3idj",
+      "id" : "prsdh2ux",
       "thumbnail" : {
         "locationType" : {
           "id" : "iiif-image",
@@ -4489,9 +4403,17 @@
         ],
         "genres" : [
         ],
+        "subjects" : [
+        ],
         "type" : "Work"
       },
       "type" : "Image"
+    },
+    "query" : {
+      "source.subjects.label" : [
+      ],
+      "source.genres.label" : [
+      ]
     },
     "aggregatableValues" : {
       "locations.license" : [
@@ -4499,6 +4421,8 @@
       "source.contributors.agent.label" : [
       ],
       "source.genres.label" : [
+      ],
+      "source.subjects.label" : [
       ]
     }
   }

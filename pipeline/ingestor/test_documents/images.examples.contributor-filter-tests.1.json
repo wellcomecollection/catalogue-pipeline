@@ -1,7 +1,7 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2022-05-13T12:41:39.959Z",
-  "id" : "moihnmds",
+  "createdAt" : "2022-06-17T14:17:37.173925Z",
+  "id" : "sod8ij3c",
   "document" : {
     "version" : 1,
     "state" : {
@@ -12,7 +12,7 @@
         "ontologyType" : "Work",
         "value" : "eARrKjRNa5"
       },
-      "canonicalId" : "moihnmds",
+      "canonicalId" : "sod8ij3c",
       "inferredData" : {
         "features1" : [
           -0.026342716,
@@ -4272,24 +4272,6 @@
           0.6996027
         ],
         "aspectRatio" : 0.9475815
-      },
-      "derivedData" : {
-        "thumbnail" : {
-          "url" : "https://iiif.wellcomecollection.org/image/VY2.jpg/info.json",
-          "locationType" : {
-            "id" : "iiif-image"
-          },
-          "license" : {
-            "id" : "cc-by"
-          },
-          "credit" : null,
-          "linkText" : null,
-          "accessConditions" : [
-          ]
-        },
-        "sourceContributorAgents" : [
-          "Person:Edward Said"
-        ]
       }
     },
     "locations" : [
@@ -4308,143 +4290,76 @@
       }
     ],
     "source" : {
-      "canonicalWork" : {
-        "id" : {
-          "canonicalId" : "snibbgdn",
-          "sourceIdentifier" : {
-            "identifierType" : {
-              "id" : "calm-record-id"
-            },
-            "ontologyType" : "Work",
-            "value" : "7xHtrD1qTo"
+      "id" : {
+        "canonicalId" : "snibbgdn",
+        "sourceIdentifier" : {
+          "identifierType" : {
+            "id" : "calm-record-id"
           },
-          "otherIdentifiers" : [
-          ]
+          "ontologyType" : "Work",
+          "value" : "7xHtrD1qTo"
         },
-        "data" : {
-          "title" : "title-COvwVoGlOn",
-          "otherIdentifiers" : [
-          ],
-          "alternativeTitles" : [
-          ],
-          "format" : null,
-          "description" : null,
-          "physicalDescription" : null,
-          "lettering" : null,
-          "createdDate" : null,
-          "subjects" : [
-          ],
-          "genres" : [
-          ],
-          "contributors" : [
-            {
+        "otherIdentifiers" : [
+        ]
+      },
+      "data" : {
+        "title" : "title-COvwVoGlOn",
+        "otherIdentifiers" : [
+        ],
+        "alternativeTitles" : [
+        ],
+        "format" : null,
+        "description" : null,
+        "physicalDescription" : null,
+        "lettering" : null,
+        "createdDate" : null,
+        "subjects" : [
+        ],
+        "genres" : [
+        ],
+        "contributors" : [
+          {
+            "id" : {
+              "type" : "Unidentifiable"
+            },
+            "agent" : {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "agent" : {
-                "id" : {
-                  "type" : "Unidentifiable"
-                },
-                "label" : "Edward Said",
-                "prefix" : null,
-                "numeration" : null,
-                "type" : "Person"
-              },
-              "roles" : [
-              ]
-            }
-          ],
-          "thumbnail" : null,
-          "production" : [
-          ],
-          "languages" : [
-          ],
-          "edition" : null,
-          "notes" : [
-          ],
-          "duration" : null,
-          "items" : [
-          ],
-          "holdings" : [
-          ],
-          "collectionPath" : null,
-          "referenceNumber" : null,
-          "imageData" : [
-          ],
-          "workType" : "Standard"
-        },
-        "version" : 71
-      },
-      "redirectedWork" : {
-        "id" : {
-          "canonicalId" : "in3eoskc",
-          "sourceIdentifier" : {
-            "identifierType" : {
-              "id" : "sierra-system-number"
+              "label" : "Edward Said",
+              "prefix" : null,
+              "numeration" : null,
+              "type" : "Person"
             },
-            "ontologyType" : "Work",
-            "value" : "sp1DiCfAX8"
-          },
-          "otherIdentifiers" : [
-          ]
-        },
-        "data" : {
-          "title" : "title-W2GCQLe2BF",
-          "otherIdentifiers" : [
-            {
-              "identifierType" : {
-                "id" : "sierra-system-number"
-              },
-              "ontologyType" : "Work",
-              "value" : "mDJiMrR5fD"
-            },
-            {
-              "identifierType" : {
-                "id" : "sierra-identifier"
-              },
-              "ontologyType" : "Work",
-              "value" : "PfcjxarpqK"
-            }
-          ],
-          "alternativeTitles" : [
-          ],
-          "format" : null,
-          "description" : null,
-          "physicalDescription" : null,
-          "lettering" : null,
-          "createdDate" : null,
-          "subjects" : [
-          ],
-          "genres" : [
-          ],
-          "contributors" : [
-          ],
-          "thumbnail" : null,
-          "production" : [
-          ],
-          "languages" : [
-          ],
-          "edition" : null,
-          "notes" : [
-          ],
-          "duration" : null,
-          "items" : [
-          ],
-          "holdings" : [
-          ],
-          "collectionPath" : null,
-          "referenceNumber" : null,
-          "imageData" : [
-          ],
-          "workType" : "Standard"
-        },
-        "version" : 66
+            "roles" : [
+            ]
+          }
+        ],
+        "thumbnail" : null,
+        "production" : [
+        ],
+        "languages" : [
+        ],
+        "edition" : null,
+        "notes" : [
+        ],
+        "duration" : null,
+        "items" : [
+        ],
+        "holdings" : [
+        ],
+        "collectionPath" : null,
+        "referenceNumber" : null,
+        "imageData" : [
+        ],
+        "workType" : "Standard"
       },
-      "type" : "ParentWorks"
+      "version" : 71,
+      "type" : "ParentWork"
     },
     "modifiedTime" : "2015-03-17T09:54:31Z",
     "display" : {
-      "id" : "moihnmds",
+      "id" : "sod8ij3c",
       "thumbnail" : {
         "locationType" : {
           "id" : "iiif-image",
@@ -4499,9 +4414,17 @@
         ],
         "genres" : [
         ],
+        "subjects" : [
+        ],
         "type" : "Work"
       },
       "type" : "Image"
+    },
+    "query" : {
+      "source.subjects.label" : [
+      ],
+      "source.genres.label" : [
+      ]
     },
     "aggregatableValues" : {
       "locations.license" : [
@@ -4510,6 +4433,8 @@
         "{\"label\":\"Edward Said\",\"type\":\"Person\"}"
       ],
       "source.genres.label" : [
+      ],
+      "source.subjects.label" : [
       ]
     }
   }

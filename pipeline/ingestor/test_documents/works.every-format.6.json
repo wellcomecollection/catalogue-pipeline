@@ -1,6 +1,6 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2022-05-16T10:00:07.602Z",
+  "createdAt" : "2022-06-20T10:13:37.717375Z",
   "id" : "aftvp1wz",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "2034-11-25T17:40:29Z"
       },
       "mergedTime" : "2034-11-25T17:40:29Z",
-      "indexedTime" : "2022-05-16T10:00:07.602Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "aftvp1wz",
       "mergedTime" : "2034-11-25T17:40:29Z",
       "sourceModifiedTime" : "2034-11-25T17:40:29Z",
-      "indexedTime" : "2022-05-16T10:00:07.602Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {
@@ -134,6 +134,42 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "query" : {
+      "id" : "aftvp1wz",
+      "identifiers.value" : [
+        "rMq0Chsgjm"
+      ],
+      "images.id" : [
+      ],
+      "images.identifiers.value" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
+      "items.locations.accessConditions.status.id" : [
+      ],
+      "items.locations.license.id" : [
+      ],
+      "items.locations.locationType.id" : [
+      ],
+      "subjects.id" : [
+      ],
+      "subjects.concepts.label" : [
+      ],
+      "genres.concepts.label" : [
+      ],
+      "languages.id" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
+      ]
     },
     "aggregatableValues" : {
       "workType" : [

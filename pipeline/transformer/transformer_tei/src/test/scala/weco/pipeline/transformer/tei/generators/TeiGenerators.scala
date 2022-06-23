@@ -221,6 +221,7 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
 
   def itemTitle(str: String) = <title>{str}</title>
   def originalItemTitle(str: String) = <title type="original">{str}</title>
+  def standardItemTitle(str: String) = <title type="standard">{str}</title>
 
   def mainLanguage(id: String, label: String) =
     <textLang mainLang={id} source="IANA">{label}</textLang>

@@ -970,14 +970,132 @@
       "query": {
         "type": "object",
         "properties": {
-          "subjects.id": {
-            "type": "keyword"
+          "id" : {
+            "type" : "keyword",
+            "normalizer" : "lowercase_normalizer"
           },
-          "subjects.identifiers.value": {
-            "type": "keyword"
+          "identifiers.value" : {
+            "type" : "keyword",
+            "normalizer" : "lowercase_normalizer"
           },
-          "subjects.label": {
-            "type": "keyword"
+          "images.id" : {
+            "type" : "keyword",
+            "normalizer" : "lowercase_normalizer"
+          },
+          "images.identifiers.value" : {
+            "type" : "keyword",
+            "normalizer" : "lowercase_normalizer"
+          },
+          "items.id" : {
+            "type" : "keyword",
+            "normalizer" : "lowercase_normalizer"
+          },
+          "items.identifiers.value" : {
+            "type" : "keyword",
+            "normalizer" : "lowercase_normalizer"
+          },
+          "items.locations.accessConditions.status.id" : {
+            "type" : "keyword"
+          },
+          "items.locations.license.id" : {
+            "type" : "keyword"
+          },
+          "items.locations.locationType.id" : {
+            "type" : "keyword"
+          },
+          "subjects.id" : {
+            "type" : "keyword",
+            "normalizer" : "lowercase_normalizer"
+          },
+          "subjects.concepts.label" : {
+            "type" : "text",
+            "analyzer" : "asciifolding_analyzer",
+            "fields" : {
+              "keyword" : {
+                "type" : "keyword"
+              },
+              "lowercaseKeyword" : {
+                "type" : "keyword",
+                "normalizer" : "lowercase_normalizer"
+              }
+            }
+          },
+          "genres.concepts.label" : {
+            "type" : "text",
+            "analyzer" : "asciifolding_analyzer",
+            "fields" : {
+              "keyword" : {
+                "type" : "keyword"
+              },
+              "lowercaseKeyword" : {
+                "type" : "keyword",
+                "normalizer" : "lowercase_normalizer"
+              }
+            }
+          },
+          "languages.id" : {
+            "type" : "keyword"
+          },
+          "contributors.agent.label" : {
+            "type" : "text",
+            "analyzer" : "asciifolding_analyzer",
+            "fields" : {
+              "keyword" : {
+                "type" : "keyword"
+              },
+              "lowercaseKeyword" : {
+                "type" : "keyword",
+                "normalizer" : "lowercase_normalizer"
+              }
+            }
+          },
+          "partOf.id" : {
+            "type" : "keyword",
+            "normalizer" : "lowercase_normalizer"
+          },
+          "partOf.title" : {
+            "type" : "text",
+            "fields" : {
+              "keyword" : {
+                "type" : "keyword",
+                "normalizer" : "lowercase_normalizer"
+              },
+              "english" : {
+                "type" : "text",
+                "analyzer" : "english_analyzer"
+              },
+              "shingles" : {
+                "type" : "text",
+                "analyzer" : "shingle_asciifolding_analyzer"
+              },
+              "arabic" : {
+                "type" : "text",
+                "analyzer" : "arabic_analyzer"
+              },
+              "bengali" : {
+                "type" : "text",
+                "analyzer" : "bengali_analyzer"
+              },
+              "french" : {
+                "type" : "text",
+                "analyzer" : "french_analyzer"
+              },
+              "german" : {
+                "type" : "text",
+                "analyzer" : "german_analyzer"
+              },
+              "hindi" : {
+                "type" : "text",
+                "analyzer" : "hindi_analyzer"
+              },
+              "italian" : {
+                "type" : "text",
+                "analyzer" : "italian_analyzer"
+              }
+            }
+          },
+          "availabilities.id" : {
+            "type" : "keyword"
           }
         }
       },

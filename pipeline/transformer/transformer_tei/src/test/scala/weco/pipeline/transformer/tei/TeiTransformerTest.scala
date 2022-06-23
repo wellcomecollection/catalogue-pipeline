@@ -105,6 +105,8 @@ class TeiTransformerTest
               ),
               workData = WorkData[Unidentified](
                 title = Some("MS_Arabic_1 item 1"),
+                alternativeTitles =
+                  List("Al-Qānūn fī al-ṭibb", "كتاب القانون في الطبّ"),
                 languages = List(Language("ara", "Arabic")),
                 notes = List(
                   Note(
@@ -151,6 +153,18 @@ class TeiTransformerTest
 
     work.value.data.languages shouldBe List(
       Language(id = "jav", label = "Javanese")
+    )
+  }
+
+  it("extracts languages with different labels to MARC ") {
+    val work = transformToWork(filename = "/Batak_36801.xml")(
+      id = "Wellcome_Batak_36801"
+    )
+    // The document contains <textLang mainLang="bbc">Toba-Batak</textLang>
+    // The MARC code for that language is btk and the MARC label is Batak
+    // The extraction retains the label from the TEI document, but replaces the code
+    work.value.data.languages shouldBe List(
+      Language(id = "btk", label = "Toba-Batak")
     )
   }
 

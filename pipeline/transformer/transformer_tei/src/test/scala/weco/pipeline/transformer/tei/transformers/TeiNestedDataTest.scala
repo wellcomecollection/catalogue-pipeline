@@ -34,20 +34,57 @@ class TeiNestedDataTest extends AnyFunSpec with TeiGenerators with Matchers with
   }
 
   it(
+    "extracts the original title for internal items from an unmarked single title") {
+    val firstItemTitle = "this is only item title"
+    val itemId = s"${id}_1"
+    val firstItem = msItem(
+      id = itemId,
+      // not marked as original, but as it's the only one, this title is to be extracted as the main title
+      titles = List(itemTitle(firstItemTitle)))
+    val result = TeiNestedData.nestedTeiData(
+      xml = teiXml(
+        id = id,
+        items = List(firstItem)
+      ), wrapperTitle = wrapperTitle, scribesMap = Map.empty)
+
+    result shouldBe a[Right[_, _]]
+    result.value shouldBe Seq(TeiData(id = itemId, title = firstItemTitle))
+  }
+
+  it(
     "extracts the original title for internal items if there is more than one title") {
     val firstItemTitle = "this is original item title"
     val secondItemTitle = "this is second item title"
     val itemId = s"${id}_1"
     val firstItem = msItem(
-      itemId,
-      List(originalItemTitle(firstItemTitle), itemTitle(secondItemTitle)))
-    val result = TeiNestedData.nestedTeiData(teiXml(
+      id = itemId,
+      titles = List(originalItemTitle(firstItemTitle), itemTitle(secondItemTitle)))
+    val result = TeiNestedData.nestedTeiData(
+      xml = teiXml(
         id = id,
         items = List(firstItem)
-      ), wrapperTitle, Map.empty)
+      ), wrapperTitle = wrapperTitle, scribesMap = Map.empty)
 
     result shouldBe a[Right[_, _]]
-    result.value shouldBe Seq(TeiData(id = itemId, title = firstItemTitle))
+    result.value shouldBe Seq(TeiData(id = itemId, title = firstItemTitle, alternativeTitles = List(secondItemTitle)))
+  }
+
+  it(
+    "extracts alternative titles for internal items from various title types") {
+    val firstItemTitle = "this is original item title"
+    val secondItemTitle = "this is second item title"
+    val itemId = s"${id}_1"
+    val firstItem = msItem(
+      id = itemId,
+      titles = List(originalItemTitle(firstItemTitle), standardItemTitle(secondItemTitle)))
+    val result = TeiNestedData.nestedTeiData(
+      xml = teiXml(
+        id = id,
+        items = List(firstItem)
+      ), wrapperTitle = wrapperTitle, scribesMap = Map.empty)
+
+    result shouldBe a[Right[_, _]]
+    result.value shouldBe Seq(TeiData(id = itemId, title = firstItemTitle, alternativeTitles = List(secondItemTitle)))
   }
 
   it(
@@ -67,7 +104,7 @@ class TeiNestedDataTest extends AnyFunSpec with TeiGenerators with Matchers with
 
     result shouldBe a[Right[_, _]]
     result.value shouldBe Seq(
-      TeiData(id = itemId, title = "Wrapper title item 1"))
+      TeiData(id = itemId, title = "Wrapper title item 1", alternativeTitles = List(firstItemTitle, secondItemTitle)))
   }
 
   it("can parse language in items") {

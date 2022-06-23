@@ -1,37 +1,37 @@
 {
   "description" : "one of a list of works with a variety of formats",
-  "createdAt" : "2022-05-04T07:15:03.024Z",
-  "id" : "u9fwqcum",
+  "createdAt" : "2022-06-20T10:13:37.229117Z",
+  "id" : "t3q2ufnz",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "66avc628Sg"
+          "value" : "nNHPpdWbrm"
         },
-        "version" : 13,
-        "modifiedTime" : "2022-04-06T08:46:17Z"
+        "version" : 37,
+        "modifiedTime" : "2001-08-22T14:48:34Z"
       },
-      "mergedTime" : "2022-04-06T08:46:17Z",
-      "indexedTime" : "2022-05-04T07:15:03.024Z",
+      "mergedTime" : "2001-08-22T14:48:34Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "miro-image-number"
+          "id" : "calm-record-id"
         },
         "ontologyType" : "Work",
-        "value" : "66avc628Sg"
+        "value" : "nNHPpdWbrm"
       },
-      "canonicalId" : "u9fwqcum",
-      "mergedTime" : "2022-04-06T08:46:17Z",
-      "sourceModifiedTime" : "2022-04-06T08:46:17Z",
-      "indexedTime" : "2022-05-04T07:15:03.024Z",
+      "canonicalId" : "t3q2ufnz",
+      "mergedTime" : "2001-08-22T14:48:34Z",
+      "sourceModifiedTime" : "2001-08-22T14:48:34Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {
@@ -85,7 +85,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "u9fwqcum",
+      "id" : "t3q2ufnz",
       "title" : "A work with format Audio",
       "alternativeTitles" : [
       ],
@@ -99,11 +99,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "66avc628Sg",
+          "value" : "nNHPpdWbrm",
           "type" : "Identifier"
         }
       ],
@@ -134,6 +134,42 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "query" : {
+      "id" : "t3q2ufnz",
+      "identifiers.value" : [
+        "nNHPpdWbrm"
+      ],
+      "images.id" : [
+      ],
+      "images.identifiers.value" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
+      "items.locations.accessConditions.status.id" : [
+      ],
+      "items.locations.license.id" : [
+      ],
+      "items.locations.locationType.id" : [
+      ],
+      "subjects.id" : [
+      ],
+      "subjects.concepts.label" : [
+      ],
+      "genres.concepts.label" : [
+      ],
+      "languages.id" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
+      ]
     },
     "aggregatableValues" : {
       "workType" : [

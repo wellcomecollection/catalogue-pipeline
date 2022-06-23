@@ -1,37 +1,37 @@
 {
   "description" : "one of a list of works with a variety of languages",
-  "createdAt" : "2022-05-04T07:15:03.036Z",
-  "id" : "j78ps149",
+  "createdAt" : "2022-06-20T10:13:37.310508Z",
+  "id" : "ioqwetut",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "nzQPWi8zCS"
+          "value" : "5WuJppwWsm"
         },
-        "version" : 70,
-        "modifiedTime" : "2022-05-10T20:16:30Z"
+        "version" : 94,
+        "modifiedTime" : "1976-09-22T07:55:28Z"
       },
-      "mergedTime" : "2022-05-10T20:16:30Z",
-      "indexedTime" : "2022-05-04T07:15:03.035Z",
+      "mergedTime" : "1976-09-22T07:55:28Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "sierra-system-number"
+          "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "nzQPWi8zCS"
+        "value" : "5WuJppwWsm"
       },
-      "canonicalId" : "j78ps149",
-      "mergedTime" : "2022-05-10T20:16:30Z",
-      "sourceModifiedTime" : "2022-05-10T20:16:30Z",
-      "indexedTime" : "2022-05-04T07:15:03.035Z",
+      "canonicalId" : "ioqwetut",
+      "mergedTime" : "1976-09-22T07:55:28Z",
+      "sourceModifiedTime" : "1976-09-22T07:55:28Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {
@@ -90,7 +90,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "j78ps149",
+      "id" : "ioqwetut",
       "title" : "A work with languages English, Swedish",
       "alternativeTitles" : [
       ],
@@ -99,11 +99,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "nzQPWi8zCS",
+          "value" : "5WuJppwWsm",
           "type" : "Identifier"
         }
       ],
@@ -144,6 +144,44 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "query" : {
+      "id" : "ioqwetut",
+      "identifiers.value" : [
+        "5WuJppwWsm"
+      ],
+      "images.id" : [
+      ],
+      "images.identifiers.value" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
+      "items.locations.accessConditions.status.id" : [
+      ],
+      "items.locations.license.id" : [
+      ],
+      "items.locations.locationType.id" : [
+      ],
+      "subjects.id" : [
+      ],
+      "subjects.concepts.label" : [
+      ],
+      "genres.concepts.label" : [
+      ],
+      "languages.id" : [
+        "eng",
+        "swe"
+      ],
+      "contributors.agent.label" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
+      ]
     },
     "aggregatableValues" : {
       "workType" : [

@@ -8,23 +8,11 @@ sealed trait ImageSource {
   val version: Int
 }
 
-// Note: although the redirectedWork isn't used anywhere in the pipeline repo,
-// it is used for searching in the API repo.  Don't assume you can remove it
-// without checking whether it's still being used for the API first.
-case class ParentWorks(
-  canonicalWork: ParentWork,
-  redirectedWork: Option[ParentWork] = None
-) extends ImageSource {
-  override val id = canonicalWork.id
-  override val version =
-    canonicalWork.version + redirectedWork.map(_.version).getOrElse(0)
-}
-
 case class ParentWork(
   id: IdState.Identified,
   data: WorkData[DataState.Identified],
   version: Int,
-)
+) extends ImageSource
 
 object ParentWork {
 

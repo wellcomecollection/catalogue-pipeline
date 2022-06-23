@@ -1,37 +1,37 @@
 {
   "description" : "an arbitrary list of invisible works",
-  "createdAt" : "2022-05-04T07:15:02.727Z",
-  "id" : "ddalqckn",
+  "createdAt" : "2022-05-31T18:33:50.483261Z",
+  "id" : "0uk2wzxd",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "kut0Uk2wzX"
+          "value" : "x2TEreIkut"
         },
-        "version" : 89,
-        "modifiedTime" : "2022-05-13T00:06:23Z"
+        "version" : 58,
+        "modifiedTime" : "2056-08-06T12:14:07Z"
       },
-      "mergedTime" : "2022-05-13T00:06:23Z",
-      "indexedTime" : "2022-05-04T07:15:02.726Z",
+      "mergedTime" : "2056-08-06T12:14:07Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "invisibilityReasons" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "calm-record-id"
+          "id" : "sierra-system-number"
         },
         "ontologyType" : "Work",
-        "value" : "kut0Uk2wzX"
+        "value" : "x2TEreIkut"
       },
-      "canonicalId" : "ddalqckn",
-      "mergedTime" : "2022-05-13T00:06:23Z",
-      "sourceModifiedTime" : "2022-05-13T00:06:23Z",
-      "indexedTime" : "2022-05-04T07:15:02.726Z",
+      "canonicalId" : "0uk2wzxd",
+      "mergedTime" : "2056-08-06T12:14:07Z",
+      "sourceModifiedTime" : "2056-08-06T12:14:07Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {
@@ -46,7 +46,7 @@
       }
     },
     "data" : {
-      "title" : "title-ZKzaPciYoP",
+      "title" : "title-AlQcKN0hZK",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -81,73 +81,6 @@
       ],
       "workType" : "Standard"
     },
-    "type" : "Invisible"
-  },
-  "work" : {
-    "version" : 89,
-    "data" : {
-      "title" : "title-ZKzaPciYoP",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "calm-record-id"
-        },
-        "ontologyType" : "Work",
-        "value" : "kut0Uk2wzX"
-      },
-      "canonicalId" : "ddalqckn",
-      "mergedTime" : "2022-05-13T00:06:23Z",
-      "sourceModifiedTime" : "2022-05-13T00:06:23Z",
-      "indexedTime" : "2022-05-04T07:15:02.727Z",
-      "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "invisibilityReasons" : [
-    ],
     "type" : "Invisible"
   }
 }

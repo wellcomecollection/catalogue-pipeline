@@ -21,7 +21,7 @@ trait WorkTransformer {
       val indexedWork = work.transition[Indexed]()
 
       val mergedTime = work.state.mergedTime
-      val indexedTime = indexedWork.state.indexedTime
+      val indexedTime = getIndexedTime
 
       val source = SourceWorkDebugInformation(
         identifier = work.state.sourceIdentifier,
@@ -29,7 +29,9 @@ trait WorkTransformer {
         modifiedTime = work.state.sourceModifiedTime
       )
 
-      val state = indexedWork.state
+      val state = indexedWork.state.copy(
+        indexedTime = indexedTime
+      )
 
       work match {
         case w @ Work.Visible(_, data, _, redirectSources) => {
@@ -45,7 +47,13 @@ trait WorkTransformer {
             state = state,
             data = data,
             display = display,
-            query = WorkQueryableValues(w.data),
+            query = WorkQueryableValues(
+              id = w.state.canonicalId,
+              sourceIdentifier = w.state.sourceIdentifier,
+              workData = w.data,
+              relations = w.state.relations,
+              availabilities = w.state.availabilities
+            ),
             aggregatableValues = WorkAggregatableValues(
               w.data,
               availabilities = state.availabilities)

@@ -1,6 +1,7 @@
 package weco.pipeline.merger.rules
 
 import org.scalatest.Inside
+import org.scalatest.Inspectors.forAll
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.locations.{
@@ -20,14 +21,14 @@ class ThumbnailRuleTest
     with SourceWorkGenerators
     with Inside {
 
-  val physicalSierraWork = sierraPhysicalIdentifiedWork()
+  private val physicalSierraWork = sierraPhysicalIdentifiedWork()
 
-  val digitalSierraWork = sierraDigitalIdentifiedWork()
+  private val digitalSierraWork = sierraDigitalIdentifiedWork()
 
-  val calmWork = calmIdentifiedWork()
-  val teiWork = teiIdentifiedWork()
+  private val calmWork = calmIdentifiedWork()
+  private val teiWork = teiIdentifiedWork()
 
-  val metsWork = metsIdentifiedWork()
+  private val metsWork = metsIdentifiedWork()
     .thumbnail(
       DigitalLocation(
         url = "mets.com/thumbnail.jpg",
@@ -36,9 +37,79 @@ class ThumbnailRuleTest
       )
     )
 
-  val miroWorks = (0 to 3).map(_ => miroIdentifiedWork())
+  private val miroWorks = (0 to 3).map(_ => miroIdentifiedWork())
 
-  val restrictedDigitalWork =
+  private val restrictedPhysicalWork =
+    sierraIdentifiedWork().items(
+      List(
+        createUnidentifiableItemWith(
+          locations = List(
+            createPhysicalLocationWith(
+              accessConditions = List(
+                AccessCondition(
+                  method = AccessMethod.ManualRequest,
+                  status = AccessStatus.Restricted
+                )
+              )
+            )
+          )
+        )
+      )
+    )
+
+  private val multiLocationWorkWithPhysicalRestriction =
+    sierraIdentifiedWork().items(
+      List(
+        createUnidentifiableItemWith(
+          locations = List(
+            createPhysicalLocationWith(
+              accessConditions = List(
+                AccessCondition(
+                  method = AccessMethod.ManualRequest,
+                  status = AccessStatus.Restricted
+                )
+              )
+            ),
+            createDigitalLocationWith(
+              accessConditions = List(
+                AccessCondition(
+                  method = AccessMethod.ViewOnline,
+                  status = AccessStatus.Open
+                )
+              )
+            )
+          )
+        )
+      )
+    )
+
+  private val multiLocationWorkWithDigitalRestriction =
+    sierraIdentifiedWork().items(
+      List(
+        createUnidentifiableItemWith(
+          locations = List(
+            createPhysicalLocationWith(
+              accessConditions = List(
+                AccessCondition(
+                  method = AccessMethod.ManualRequest,
+                  status = AccessStatus.Open
+                )
+              )
+            ),
+            createDigitalLocationWith(
+              accessConditions = List(
+                AccessCondition(
+                  method = AccessMethod.ViewOnline,
+                  status = AccessStatus.Restricted
+                )
+              )
+            )
+          )
+        )
+      )
+    )
+
+  private val restrictedDigitalWork =
     sierraIdentifiedWork().items(
       List(
         createUnidentifiableItemWith(
@@ -119,10 +190,26 @@ class ThumbnailRuleTest
     }
   }
 
-  it("suppresses thumbnails when restricted access status") {
-    inside(ThumbnailRule.merge(restrictedDigitalWork, miroWorks :+ metsWork)) {
-      case FieldMergeResult(thumbnail, _) =>
-        thumbnail shouldBe None
+  it(
+    "suppresses thumbnails when a restriction is present on a digital location") {
+    forAll(List(restrictedDigitalWork, multiLocationWorkWithDigitalRestriction)) {
+      work =>
+        inside(ThumbnailRule.merge(work, miroWorks :+ metsWork)) {
+          case FieldMergeResult(thumbnail, _) =>
+            thumbnail shouldBe None
+        }
+    }
+  }
+
+  it(
+    "does not suppress thumbnails when a restriction is only present on a physical location") {
+    forAll(
+      List(restrictedPhysicalWork, multiLocationWorkWithPhysicalRestriction)) {
+      work =>
+        inside(ThumbnailRule.merge(work, miroWorks :+ metsWork)) {
+          case FieldMergeResult(thumbnail, _) =>
+            thumbnail shouldBe defined
+        }
     }
   }
 

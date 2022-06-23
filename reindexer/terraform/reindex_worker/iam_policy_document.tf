@@ -5,7 +5,10 @@ data "aws_iam_policy_document" "vhs_read_policy" {
       "dynamodb:BatchGetItem",
     ]
 
-    resources = local.reindexer_tables
+    resources = [
+      for job in var.reindexer_jobs :
+      "arn:aws:dynamodb:${var.aws_region}:${var.account_id}:table/${job["table"]}"
+    ]
   }
 }
 
@@ -15,36 +18,6 @@ data "aws_iam_policy_document" "sns_publish_policy" {
       "sns:Publish",
     ]
 
-    resources = local.reindexer_topics
+    resources = [for job in var.reindexer_jobs : job["topic"]]
   }
-}
-
-# This block of interpolation syntax gets a list of all the table ARNs that the
-# reindexer is configured to be able to read from.
-#
-
-data "template_file" "table_name" {
-  count    = length(var.reindexer_jobs)
-  template = "arn:aws:dynamodb:${var.aws_region}:${var.account_id}:table/$${table}"
-
-  vars = {
-    table = lookup(var.reindexer_jobs[count.index], "table")
-  }
-}
-
-locals {
-  reindexer_tables = distinct(data.template_file.table_name.*.rendered)
-}
-
-# This block of interpolation syntax gets a list of all the topic ARNs that the
-# reindexer is configured to be able to publish to.
-#
-
-data "template_file" "topic_arn" {
-  count    = length(var.reindexer_jobs)
-  template = lookup(var.reindexer_jobs[count.index], "topic")
-}
-
-locals {
-  reindexer_topics = distinct(data.template_file.topic_arn.*.rendered)
 }

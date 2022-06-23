@@ -4,6 +4,7 @@ import buildinfo.BuildInfo
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.fields.{
   ElasticField,
+  KeywordField,
   ObjectField,
   TokenCountField
 }
@@ -214,9 +215,32 @@ object WorksIndexConfig extends IndexConfigFields {
       // This field contains the values we're actually going to query in search.
       val query = objectField("query")
         .fields(
-          keywordField("subjects.id"),
-          keywordField("subjects.identifiers.value"),
-          keywordField("subjects.label")
+          // top-level work
+          canonicalIdField("id"),
+          sourceIdentifierField("identifiers.value"),
+          // images
+          canonicalIdField("images.id"),
+          sourceIdentifierField("images.identifiers.value"),
+          // items
+          canonicalIdField("items.id"),
+          sourceIdentifierField("items.identifiers.value"),
+          keywordField("items.locations.accessConditions.status.id"),
+          keywordField("items.locations.license.id"),
+          keywordField("items.locations.locationType.id"),
+          // subjects
+          canonicalIdField("subjects.id"),
+          labelField("subjects.concepts.label"),
+          // genres
+          labelField("genres.concepts.label"),
+          // languages
+          keywordField("languages.id"),
+          // contributors
+          labelField("contributors.agent.label"),
+          // relations
+          canonicalIdField("partOf.id"),
+          multilingualFieldWithKeyword("partOf.title"),
+          // availabilities
+          keywordField("availabilities.id")
         )
 
       // This field contains the display documents used by aggregations.
@@ -253,4 +277,9 @@ object WorksIndexConfig extends IndexConfigFields {
     DynamicMapping.Strict,
     RefreshInterval.On(30.seconds)
   )
+
+  private def canonicalIdField(name: String): KeywordField =
+    lowercaseKeyword(name)
+  private def sourceIdentifierField(name: String): KeywordField =
+    lowercaseKeyword(name)
 }

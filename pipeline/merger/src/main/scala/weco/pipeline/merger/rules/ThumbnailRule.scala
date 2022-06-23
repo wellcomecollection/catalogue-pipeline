@@ -14,9 +14,12 @@ import weco.pipeline.merger.models.FieldMergeResult
  * Miro. If there are multiple Miro sources, the one with the lexicographically
  * minimal ID is chosen.
  *
- * If any of the locations forming the work from any source are marked as
- * restricted or closed, we supress the thumbnail to be sure we are not
+ * If any of the digital locations forming the work from any source are marked as
+ * restricted or closed, we suppress the thumbnail to be sure we are not
  * displaying something we are not meant to.
+ *
+ * Physical location restrictions are ignored, as they are to do with the physical
+ * item (e.g. because of fragility), rather than content.
  */
 object ThumbnailRule extends FieldMergeRule with MergerLogging {
   import WorkPredicates._
@@ -36,8 +39,9 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
       }.distinct
     )
 
-  def getThumbnail(target: Work.Visible[Identified],
-                   sources: Seq[Work[Identified]]): Option[DigitalLocation] =
+  private def getThumbnail(
+    target: Work.Visible[Identified],
+    sources: Seq[Work[Identified]]): Option[DigitalLocation] =
     if (shouldSuppressThumbnail(target, sources))
       None
     else
@@ -45,7 +49,7 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
         .orElse(getMinMiroThumbnail(target, sources))
         .getOrElse(target.data.thumbnail)
 
-  val getMetsThumbnail =
+  private val getMetsThumbnail =
     new PartialRule {
       val isDefinedForTarget: WorkPredicate =
         sierraWork or singlePhysicalItemCalmWork or teiWork
@@ -58,7 +62,7 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
       }
     }
 
-  val getMinMiroThumbnail =
+  private val getMinMiroThumbnail =
     new PartialRule {
       val isDefinedForTarget: WorkPredicate =
         singleItemSierra or zeroItemSierra or singlePhysicalItemCalmWork or teiWork
@@ -85,11 +89,12 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
       }
     }
 
-  def shouldSuppressThumbnail(target: Work.Visible[Identified],
-                              sources: Seq[Work[Identified]]) =
+  private def shouldSuppressThumbnail(target: Work.Visible[Identified],
+                                      sources: Seq[Work[Identified]]): Boolean =
     (target :: sources.toList).exists { work =>
       work.data.items.exists { item =>
-        item.locations.exists(_.hasRestrictions)
+        item.locations.exists(location =>
+          location.hasRestrictions && location.isInstanceOf[DigitalLocation])
       }
     }
 }

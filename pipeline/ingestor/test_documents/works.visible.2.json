@@ -1,37 +1,37 @@
 {
   "description" : "an arbitrary list of visible works",
-  "createdAt" : "2022-05-04T07:15:02.624Z",
-  "id" : "pft15vam",
+  "createdAt" : "2022-06-20T10:13:35.371496Z",
+  "id" : "fyqts0co",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "u81tpB2TWO"
+          "value" : "ZvWebpA5WH"
         },
-        "version" : 76,
-        "modifiedTime" : "2022-04-09T11:31:42Z"
+        "version" : 89,
+        "modifiedTime" : "1979-01-28T05:43:24Z"
       },
-      "mergedTime" : "2022-04-09T11:31:42Z",
-      "indexedTime" : "2022-05-04T07:15:02.621Z",
+      "mergedTime" : "1979-01-28T05:43:24Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "sierra-system-number"
+          "id" : "calm-record-id"
         },
         "ontologyType" : "Work",
-        "value" : "u81tpB2TWO"
+        "value" : "ZvWebpA5WH"
       },
-      "canonicalId" : "pft15vam",
-      "mergedTime" : "2022-04-09T11:31:42Z",
-      "sourceModifiedTime" : "2022-04-09T11:31:42Z",
-      "indexedTime" : "2022-05-04T07:15:02.621Z",
+      "canonicalId" : "fyqts0co",
+      "mergedTime" : "1979-01-28T05:43:24Z",
+      "sourceModifiedTime" : "1979-01-28T05:43:24Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {
@@ -46,7 +46,7 @@
       }
     },
     "data" : {
-      "title" : "title-d8prf0oY4u",
+      "title" : "title-XQqPyuxbr5",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -82,8 +82,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "pft15vam",
-      "title" : "title-d8prf0oY4u",
+      "id" : "fyqts0co",
+      "title" : "title-XQqPyuxbr5",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -91,11 +91,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "u81tpB2TWO",
+          "value" : "ZvWebpA5WH",
           "type" : "Identifier"
         }
       ],
@@ -127,73 +127,60 @@
       ],
       "type" : "Work"
     },
-    "type" : "Visible"
-  },
-  "work" : {
-    "version" : 76,
-    "data" : {
-      "title" : "title-d8prf0oY4u",
-      "otherIdentifiers" : [
+    "query" : {
+      "id" : "fyqts0co",
+      "identifiers.value" : [
+        "ZvWebpA5WH"
       ],
-      "alternativeTitles" : [
+      "images.id" : [
       ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
+      "images.identifiers.value" : [
       ],
-      "genres" : [
+      "items.id" : [
       ],
-      "contributors" : [
+      "items.identifiers.value" : [
       ],
-      "thumbnail" : null,
-      "production" : [
+      "items.locations.accessConditions.status.id" : [
+      ],
+      "items.locations.license.id" : [
+      ],
+      "items.locations.locationType.id" : [
+      ],
+      "subjects.id" : [
+      ],
+      "subjects.concepts.label" : [
+      ],
+      "genres.concepts.label" : [
+      ],
+      "languages.id" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
+      ]
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
       ],
       "languages" : [
       ],
-      "edition" : null,
-      "notes" : [
+      "contributors.agent.label" : [
       ],
-      "duration" : null,
-      "items" : [
+      "items.locations.license" : [
       ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "sierra-system-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "u81tpB2TWO"
-      },
-      "canonicalId" : "pft15vam",
-      "mergedTime" : "2022-04-09T11:31:42Z",
-      "sourceModifiedTime" : "2022-04-09T11:31:42Z",
-      "indexedTime" : "2022-05-04T07:15:02.624Z",
       "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
+      ]
     },
-    "redirectSources" : [
-    ],
     "type" : "Visible"
   }
 }

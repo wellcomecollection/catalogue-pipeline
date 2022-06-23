@@ -1,6 +1,6 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2022-05-16T10:00:07.643Z",
+  "createdAt" : "2022-06-20T10:13:38.034590Z",
   "id" : "lwt2ohte",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "2026-11-06T07:42:08Z"
       },
       "mergedTime" : "2026-11-06T07:42:08Z",
-      "indexedTime" : "2022-05-16T10:00:07.642Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "lwt2ohte",
       "mergedTime" : "2026-11-06T07:42:08Z",
       "sourceModifiedTime" : "2026-11-06T07:42:08Z",
-      "indexedTime" : "2022-05-16T10:00:07.642Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {
@@ -182,10 +182,44 @@
       ],
       "type" : "Work"
     },
-    "query": {
-      "subjects.id": [],
-      "subjects.identifiers": [],
-      "subjects.label": ["Vo8KntFwFf"]
+    "query" : {
+      "id" : "lwt2ohte",
+      "identifiers.value" : [
+        "zOTvHYjPJX"
+      ],
+      "images.id" : [
+      ],
+      "images.identifiers.value" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
+      "items.locations.accessConditions.status.id" : [
+      ],
+      "items.locations.license.id" : [
+      ],
+      "items.locations.locationType.id" : [
+      ],
+      "subjects.id" : [
+      ],
+      "subjects.concepts.label" : [
+        "n6eIKIFN34LcQUS",
+        "hs8ZXp5KHLKOiPP",
+        "IvUnhx12Z5Ks7r7"
+      ],
+      "genres.concepts.label" : [
+      ],
+      "languages.id" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
+      ]
     },
     "aggregatableValues" : {
       "workType" : [

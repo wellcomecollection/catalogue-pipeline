@@ -14,6 +14,7 @@ case class IndexedImage(
   source: ImageSource,
   modifiedTime: Instant,
   display: Json,
+  query: ImageQueryableValues,
   aggregatableValues: ImageAggregatableValues,
 )
 

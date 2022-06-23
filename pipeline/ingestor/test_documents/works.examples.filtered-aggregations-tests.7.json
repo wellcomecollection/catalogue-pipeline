@@ -1,7 +1,7 @@
 {
   "description" : "examples for the works filtered aggregations tests",
-  "createdAt" : "2022-05-10T09:25:20.140Z",
-  "id" : "npfh1czk",
+  "createdAt" : "2022-06-20T10:13:39.020745Z",
+  "id" : "pskvh87t",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,13 +10,13 @@
             "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "7ts9VeAfYG"
+          "value" : "lBGTOMLJUB"
         },
-        "version" : 1,
-        "modifiedTime" : "2022-04-20T07:34:38Z"
+        "version" : 18,
+        "modifiedTime" : "1946-01-10T08:57:22Z"
       },
-      "mergedTime" : "2022-04-20T07:34:38Z",
-      "indexedTime" : "2022-05-10T09:25:20.140Z",
+      "mergedTime" : "1946-01-10T08:57:22Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
@@ -26,12 +26,12 @@
           "id" : "sierra-system-number"
         },
         "ontologyType" : "Work",
-        "value" : "7ts9VeAfYG"
+        "value" : "lBGTOMLJUB"
       },
-      "canonicalId" : "npfh1czk",
-      "mergedTime" : "2022-04-20T07:34:38Z",
-      "sourceModifiedTime" : "2022-04-20T07:34:38Z",
-      "indexedTime" : "2022-05-10T09:25:20.140Z",
+      "canonicalId" : "pskvh87t",
+      "mergedTime" : "1946-01-10T08:57:22Z",
+      "sourceModifiedTime" : "1946-01-10T08:57:22Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {
@@ -89,7 +89,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "npfh1czk",
+      "id" : "pskvh87t",
       "title" : "capybara",
       "alternativeTitles" : [
       ],
@@ -107,7 +107,7 @@
             "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "7ts9VeAfYG",
+          "value" : "lBGTOMLJUB",
           "type" : "Identifier"
         }
       ],
@@ -143,6 +143,43 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "query" : {
+      "id" : "pskvh87t",
+      "identifiers.value" : [
+        "lBGTOMLJUB"
+      ],
+      "images.id" : [
+      ],
+      "images.identifiers.value" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
+      "items.locations.accessConditions.status.id" : [
+      ],
+      "items.locations.license.id" : [
+      ],
+      "items.locations.locationType.id" : [
+      ],
+      "subjects.id" : [
+      ],
+      "subjects.concepts.label" : [
+      ],
+      "genres.concepts.label" : [
+      ],
+      "languages.id" : [
+        "mar"
+      ],
+      "contributors.agent.label" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
+      ]
     },
     "aggregatableValues" : {
       "workType" : [

@@ -53,6 +53,23 @@ class PathsServiceTest
       }
     }
 
+    it("correctly distinguishes parents from siblings") {
+      // Because of the nature of path analysis in the ElasticSearch index
+      // it is possible to write a query that looks like it returns a parent
+      // but will also return all the siblings.
+      val works: List[Work[Merged]] = List(
+        work(path = "grandparent/parent"),
+        work(path = "grandparent/parent/brother"),
+        work(path = "parent/sister")
+      )
+      withLocalMergedWorksIndex { index =>
+        insertIntoElasticsearch(index, works: _*)
+        whenReady(service(index).getParentPath("parent/sister")) {
+          _ shouldBe Some("grandparent/parent")
+        }
+      }
+    }
+
     it("only fetches a complex parentPath, simple parents are ignored") {
       // When the parent path consists of a single node, there is nothing to do,
       // because the point of this is to expand the "root" of the child with

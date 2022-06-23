@@ -45,6 +45,10 @@ import java.time.Instant
   * Also, be careful removing or editing existing examples.  It may be easier to
   * add a new example than remove an old one, to prevent regenerating some of the
   * examples you aren't editing.
+  *
+  * Note: for some reason you get slightly different results if you run this test
+  * in IntelliJ vs through Docker.  CI will use Docker and check you've committed
+  * the latest versions, so run it in Docker when you want to rebuild.
   */
 class CreateTestWorkDocuments
     extends AnyFunSpec

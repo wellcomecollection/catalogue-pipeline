@@ -58,7 +58,13 @@ trait WorksIngestorFixtures
               storedQuery,
               storedAggregations) =>
           w.data shouldBe expectedWork.asInstanceOf[IndexedWork.Visible].data
-          storedQuery shouldBe WorkQueryableValues(work.data)
+          storedQuery shouldBe WorkQueryableValues(
+            id = work.state.canonicalId,
+            sourceIdentifier = work.state.sourceIdentifier,
+            workData = work.data,
+            relations = work.state.relations,
+            availabilities = work.state.availabilities
+          )
           storedAggregations shouldBe WorkAggregatableValues(
             work.data,
             work.state.availabilities)

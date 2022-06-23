@@ -1,7 +1,7 @@
 {
   "description" : "a work with licensed digital items",
-  "createdAt" : "2022-05-04T07:15:03.044Z",
-  "id" : "tbgvrpdz",
+  "createdAt" : "2022-06-20T10:13:37.358279Z",
+  "id" : "yodfctxx",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,13 +10,13 @@
             "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "iG1sXjUpdc"
+          "value" : "HfU454vgiI"
         },
-        "version" : 63,
-        "modifiedTime" : "2022-04-23T08:19:10Z"
+        "version" : 94,
+        "modifiedTime" : "2058-09-04T15:38:34Z"
       },
-      "mergedTime" : "2022-04-23T08:19:10Z",
-      "indexedTime" : "2022-05-04T07:15:03.043Z",
+      "mergedTime" : "2058-09-04T15:38:34Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
@@ -26,12 +26,12 @@
           "id" : "calm-record-id"
         },
         "ontologyType" : "Work",
-        "value" : "iG1sXjUpdc"
+        "value" : "HfU454vgiI"
       },
-      "canonicalId" : "tbgvrpdz",
-      "mergedTime" : "2022-04-23T08:19:10Z",
-      "sourceModifiedTime" : "2022-04-23T08:19:10Z",
-      "indexedTime" : "2022-05-04T07:15:03.043Z",
+      "canonicalId" : "yodfctxx",
+      "mergedTime" : "2058-09-04T15:38:34Z",
+      "sourceModifiedTime" : "2058-09-04T15:38:34Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {
@@ -46,7 +46,7 @@
       }
     },
     "data" : {
-      "title" : "title-zGimVHoe2r",
+      "title" : "title-AIpgBtHAhx",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -80,14 +80,14 @@
           "note" : null,
           "locations" : [
             {
-              "url" : "https://iiif.wellcomecollection.org/image/eOe.jpg/info.json",
+              "url" : "https://iiif.wellcomecollection.org/image/mDG.jpg/info.json",
               "locationType" : {
                 "id" : "iiif-presentation"
               },
               "license" : {
                 "id" : "cc-by"
               },
-              "credit" : "Credit line: fIesEd",
+              "credit" : null,
               "linkText" : null,
               "accessConditions" : [
               ],
@@ -105,8 +105,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "tbgvrpdz",
-      "title" : "title-zGimVHoe2r",
+      "id" : "yodfctxx",
+      "title" : "title-AIpgBtHAhx",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -118,7 +118,7 @@
             "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "iG1sXjUpdc",
+          "value" : "HfU454vgiI",
           "type" : "Identifier"
         }
       ],
@@ -137,8 +137,7 @@
                 "label" : "IIIF Presentation API",
                 "type" : "LocationType"
               },
-              "url" : "https://iiif.wellcomecollection.org/image/eOe.jpg/info.json",
-              "credit" : "Credit line: fIesEd",
+              "url" : "https://iiif.wellcomecollection.org/image/mDG.jpg/info.json",
               "license" : {
                 "id" : "cc-by",
                 "label" : "Attribution 4.0 International (CC BY 4.0)",
@@ -174,6 +173,44 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "query" : {
+      "id" : "yodfctxx",
+      "identifiers.value" : [
+        "HfU454vgiI"
+      ],
+      "images.id" : [
+      ],
+      "images.identifiers.value" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
+      "items.locations.accessConditions.status.id" : [
+      ],
+      "items.locations.license.id" : [
+        "cc-by"
+      ],
+      "items.locations.locationType.id" : [
+        "iiif-presentation"
+      ],
+      "subjects.id" : [
+      ],
+      "subjects.concepts.label" : [
+      ],
+      "genres.concepts.label" : [
+      ],
+      "languages.id" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
+      ]
     },
     "aggregatableValues" : {
       "workType" : [

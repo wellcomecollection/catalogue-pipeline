@@ -1,7 +1,7 @@
 {
   "description" : "a work with a production event in 1976",
-  "createdAt" : "2022-05-04T07:15:02.873Z",
-  "id" : "jsc3aajx",
+  "createdAt" : "2022-06-20T10:13:36.578899Z",
+  "id" : "5vjghupy",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,13 +10,13 @@
             "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "1GVno9IboN"
+          "value" : "xrdlOL8J49"
         },
-        "version" : 5,
-        "modifiedTime" : "2022-05-28T11:11:05Z"
+        "version" : 83,
+        "modifiedTime" : "1970-01-23T23:11:47Z"
       },
-      "mergedTime" : "2022-05-28T11:11:05Z",
-      "indexedTime" : "2022-05-04T07:15:02.872Z",
+      "mergedTime" : "1970-01-23T23:11:47Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
@@ -26,12 +26,12 @@
           "id" : "sierra-system-number"
         },
         "ontologyType" : "Work",
-        "value" : "1GVno9IboN"
+        "value" : "xrdlOL8J49"
       },
-      "canonicalId" : "jsc3aajx",
-      "mergedTime" : "2022-05-28T11:11:05Z",
-      "sourceModifiedTime" : "2022-05-28T11:11:05Z",
-      "indexedTime" : "2022-05-04T07:15:02.872Z",
+      "canonicalId" : "5vjghupy",
+      "mergedTime" : "1970-01-23T23:11:47Z",
+      "sourceModifiedTime" : "1970-01-23T23:11:47Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {
@@ -65,7 +65,7 @@
       "thumbnail" : null,
       "production" : [
         {
-          "label" : "HUh0QyLvGt20AIV95SWJownjA",
+          "label" : "boNJsc3AAjxHM3WnjuDFIT1sH",
           "places" : [
           ],
           "agents" : [
@@ -103,7 +103,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "jsc3aajx",
+      "id" : "5vjghupy",
       "title" : "Production event in 1976",
       "alternativeTitles" : [
       ],
@@ -116,7 +116,7 @@
             "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "1GVno9IboN",
+          "value" : "xrdlOL8J49",
           "type" : "Identifier"
         }
       ],
@@ -132,7 +132,7 @@
       ],
       "production" : [
         {
-          "label" : "HUh0QyLvGt20AIV95SWJownjA",
+          "label" : "boNJsc3AAjxHM3WnjuDFIT1sH",
           "places" : [
           ],
           "agents" : [
@@ -161,6 +161,42 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "query" : {
+      "id" : "5vjghupy",
+      "identifiers.value" : [
+        "xrdlOL8J49"
+      ],
+      "images.id" : [
+      ],
+      "images.identifiers.value" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
+      "items.locations.accessConditions.status.id" : [
+      ],
+      "items.locations.license.id" : [
+      ],
+      "items.locations.locationType.id" : [
+      ],
+      "subjects.id" : [
+      ],
+      "subjects.concepts.label" : [
+      ],
+      "genres.concepts.label" : [
+      ],
+      "languages.id" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
+      ]
     },
     "aggregatableValues" : {
       "workType" : [

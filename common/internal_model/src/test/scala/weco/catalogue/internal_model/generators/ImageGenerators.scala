@@ -3,9 +3,9 @@ package weco.catalogue.internal_model.generators
 import weco.catalogue.internal_model.identifiers.{
   CanonicalId,
   IdState,
-  IdentifierType
+  IdentifierType,
+  SourceIdentifier
 }
-import weco.catalogue.internal_model.image
 import weco.catalogue.internal_model.image.ParentWork._
 import weco.catalogue.internal_model.image.ImageState.Initial
 import weco.catalogue.internal_model.image._
@@ -33,14 +33,16 @@ trait ImageGenerators
     locations: List[DigitalLocation] = List(createImageLocation),
     version: Int = 1,
     identifierValue: String = randomAlphanumeric(10),
-    identifierType: IdentifierType = IdentifierType.MiroImageNumber
+    identifierType: IdentifierType = IdentifierType.MiroImageNumber,
+    otherIdentifiers: List[SourceIdentifier] = List()
   ): ImageData[IdState.Identifiable] =
     ImageData[IdState.Identifiable](
       id = IdState.Identifiable(
         sourceIdentifier = createSourceIdentifierWith(
           identifierType = identifierType,
           value = identifierValue
-        )
+        ),
+        otherIdentifiers = otherIdentifiers
       ),
       version = version,
       locations = locations
@@ -92,13 +94,27 @@ trait ImageGenerators
         )
 
     def toIdentifiedWith(canonicalId: CanonicalId = createCanonicalId)
-      : ImageData[IdState.Identified] =
+      : ImageData[IdState.Identified] = {
+
+      // This is for CreateTestWorkDocuments in the ingestors; they have a
+      // seeded random instance to ensure deterministic results.
+      //
+      // I removed a call to createCanonicalId in commit b8efb05 (because
+      // we were discarding the argument passed by the caller), but we want
+      // to call it anyway to preserve the random state.
+      //
+      // This avoids a bunch of unnecessary churn in the test documents,
+      // which in turn break the downstream API tests.
+      val _ = createCanonicalId
+
       imageData.copy(
         id = IdState.Identified(
-          canonicalId = createCanonicalId,
-          sourceIdentifier = imageData.id.sourceIdentifier
+          canonicalId = canonicalId,
+          sourceIdentifier = imageData.id.sourceIdentifier,
+          otherIdentifiers = imageData.id.otherIdentifiers
         )
       )
+    }
 
     def toIdentified: ImageData[IdState.Identified] =
       imageData.toIdentifiedWith()
@@ -115,15 +131,12 @@ trait ImageGenerators
     imageData: ImageData[IdState.Identified]) {
     def toInitialImageWith(
       modifiedTime: Instant = randomInstant,
-      parentWorks: ParentWorks = ParentWorks(
-        canonicalWork = mergedWork().toParentWork,
-        redirectedWork = None
-      )
+      parentWork: ParentWork = mergedWork().toParentWork,
     ): Image[ImageState.Initial] = Image[ImageState.Initial](
       version = imageData.version,
       locations = imageData.locations,
       modifiedTime = modifiedTime,
-      source = parentWorks,
+      source = parentWork,
       state = ImageState.Initial(
         sourceIdentifier = imageData.id.sourceIdentifier,
         canonicalId = imageData.id.canonicalId
@@ -137,11 +150,7 @@ trait ImageGenerators
         sierraIdentifiedWork())
     ): Image[ImageState.Augmented] =
       imageData
-        .toInitialImageWith(
-          parentWorks = image.ParentWorks(
-            canonicalWork = parentWork.toParentWork,
-            redirectedWork = redirectedWork.map(_.toParentWork))
-        )
+        .toInitialImageWith(parentWork = parentWork.toParentWork)
         .transition[ImageState.Augmented](inferredData)
 
     def toIndexedImageWith(

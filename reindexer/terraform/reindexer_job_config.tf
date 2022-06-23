@@ -15,58 +15,25 @@
 #
 # It corresponds to a Map[String, ReindexJobConfig] in the Scala classes within
 # the reindexer, and tells it what combinations of table -> topic are allowed.
-#
-# Naturally, Terraform would not be as helpful as to provide us some loop
-# constructs or anything useful, so we have to construct the string by hand.
-# This file does that.
 
 # This template contains the JSON string for a *single* entry in the job config.
 
-data "template_file" "single_reindex_job_config" {
-  template = <<EOF
-  "$${source}--$${destination}": {
-    "source": "$${source}",
-    "dynamoConfig": {
-      "tableName": "$${table}"
-    },
-    "destinationConfig": {
-      "topicArn": "$${topicArn}"
+locals {
+  jobs = { for job in local.reindexer_jobs :
+    "${job["source"]}--${job["destination"]}" => {
+      source : job["source"],
+      dynamoConfig : {
+        tableName : job["table"]
+      },
+      destinationConfig : {
+        topicArn : job["topic"]
+      }
     }
   }
-EOF
-
-  count = length(local.reindexer_jobs)
-
-  vars = {
-    source      = lookup(local.reindexer_jobs[count.index], "source")
-    destination = lookup(local.reindexer_jobs[count.index], "destination")
-    table       = lookup(local.reindexer_jobs[count.index], "table")
-    topicArn    = lookup(local.reindexer_jobs[count.index], "topic")
-  }
 }
 
-# This template takes all of those JSON strings, and combines them into a single
-# JSON object.
-
-data "template_file" "all_reindex_job_config" {
-  template = <<EOF
-  {
-    $${value}
-  }
-EOF
-
-  vars = {
-    value = join(",", data.template_file.single_reindex_job_config.*.rendered)
-  }
-}
-
-# For an idea of what's going on, uncomment this line and run a 'terraform apply':
-# output "all_reindex_job_config" { value = "${data.template_file.all_reindex_job_config.rendered }"}
-
-# This renders the template, and removes all the whitespace so it can be passed
-# as a single line.
 locals {
-  reindex_job_config_json = replace(data.template_file.all_reindex_job_config.rendered, "/\\s/", "")
+  reindex_job_config_json = jsonencode(local.jobs)
 }
 
 output "reindex_job_config_json" {

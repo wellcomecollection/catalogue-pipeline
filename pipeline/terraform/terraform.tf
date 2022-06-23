@@ -20,8 +20,6 @@ provider "aws" {
   }
 }
 
-provider "template" {}
-
 provider "ec" {}
 
 terraform {

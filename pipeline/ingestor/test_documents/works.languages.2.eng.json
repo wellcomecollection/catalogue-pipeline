@@ -1,37 +1,37 @@
 {
   "description" : "one of a list of works with a variety of languages",
-  "createdAt" : "2022-05-04T07:15:03.035Z",
-  "id" : "5a37bi10",
+  "createdAt" : "2022-06-20T10:13:37.302170Z",
+  "id" : "yhrq0rmr",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "Y1NuokoMoK"
+          "value" : "tXlgR2VtcJ"
         },
-        "version" : 10,
-        "modifiedTime" : "2022-05-06T13:57:27Z"
+        "version" : 98,
+        "modifiedTime" : "2058-11-12T20:11:18Z"
       },
-      "mergedTime" : "2022-05-06T13:57:27Z",
-      "indexedTime" : "2022-05-04T07:15:03.034Z",
+      "mergedTime" : "2058-11-12T20:11:18Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "calm-record-id"
+          "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "Y1NuokoMoK"
+        "value" : "tXlgR2VtcJ"
       },
-      "canonicalId" : "5a37bi10",
-      "mergedTime" : "2022-05-06T13:57:27Z",
-      "sourceModifiedTime" : "2022-05-06T13:57:27Z",
-      "indexedTime" : "2022-05-04T07:15:03.034Z",
+      "canonicalId" : "yhrq0rmr",
+      "mergedTime" : "2058-11-12T20:11:18Z",
+      "sourceModifiedTime" : "2058-11-12T20:11:18Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {
@@ -86,7 +86,7 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "5a37bi10",
+      "id" : "yhrq0rmr",
       "title" : "A work with languages English",
       "alternativeTitles" : [
       ],
@@ -95,11 +95,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "Y1NuokoMoK",
+          "value" : "tXlgR2VtcJ",
           "type" : "Identifier"
         }
       ],
@@ -135,6 +135,43 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "query" : {
+      "id" : "yhrq0rmr",
+      "identifiers.value" : [
+        "tXlgR2VtcJ"
+      ],
+      "images.id" : [
+      ],
+      "images.identifiers.value" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
+      "items.locations.accessConditions.status.id" : [
+      ],
+      "items.locations.license.id" : [
+      ],
+      "items.locations.locationType.id" : [
+      ],
+      "subjects.id" : [
+      ],
+      "subjects.concepts.label" : [
+      ],
+      "genres.concepts.label" : [
+      ],
+      "languages.id" : [
+        "eng"
+      ],
+      "contributors.agent.label" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
+      ]
     },
     "aggregatableValues" : {
       "workType" : [

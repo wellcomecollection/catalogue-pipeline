@@ -10,7 +10,7 @@ locals {
   #
   # Once we stop reindexing and make the pipeline live, we want it to be
   # highly available, because it's serving API traffic.
-  es_node_count = var.reindexing_state.scale_up_elastic_cluster ? 1 : 3
+  es_node_count = var.reindexing_state.scale_up_elastic_cluster ? 2 : 3
 }
 
 data "ec_stack" "latest_patch" {
@@ -83,6 +83,7 @@ resource "aws_secretsmanager_secret" "es_username_catalogue" {
   for_each = toset([
     "snapshot_generator",
     "catalogue_api",
+    "concepts_api",
   ])
 
   name = "elasticsearch/pipeline_storage_${var.pipeline_date}/${each.key}/es_username"
@@ -96,6 +97,7 @@ resource "aws_secretsmanager_secret" "es_password_catalogue" {
   for_each = toset([
     "snapshot_generator",
     "catalogue_api",
+    "concepts_api",
   ])
 
   name = "elasticsearch/pipeline_storage_${var.pipeline_date}/${each.key}/es_password"

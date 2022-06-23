@@ -1,6 +1,6 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2022-05-16T10:00:07.644Z",
+  "createdAt" : "2022-06-20T10:13:38.038024Z",
   "id" : "atgvzcvy",
   "document" : {
     "debug" : {
@@ -16,7 +16,7 @@
         "modifiedTime" : "1977-12-05T06:19:48Z"
       },
       "mergedTime" : "1977-12-05T06:19:48Z",
-      "indexedTime" : "2022-05-16T10:00:07.643Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
@@ -31,7 +31,7 @@
       "canonicalId" : "atgvzcvy",
       "mergedTime" : "1977-12-05T06:19:48Z",
       "sourceModifiedTime" : "1977-12-05T06:19:48Z",
-      "indexedTime" : "2022-05-16T10:00:07.643Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {
@@ -182,10 +182,44 @@
       ],
       "type" : "Work"
     },
-    "query": {
-      "subjects.id": [],
-      "subjects.identifiers": [],
-      "subjects.label": ["Vo8KntFwFf"]
+    "query" : {
+      "id" : "atgvzcvy",
+      "identifiers.value" : [
+        "za69e7zAIP"
+      ],
+      "images.id" : [
+      ],
+      "images.identifiers.value" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
+      "items.locations.accessConditions.status.id" : [
+      ],
+      "items.locations.license.id" : [
+      ],
+      "items.locations.locationType.id" : [
+      ],
+      "subjects.id" : [
+      ],
+      "subjects.concepts.label" : [
+        "n6eIKIFN34LcQUS",
+        "hs8ZXp5KHLKOiPP",
+        "IvUnhx12Z5Ks7r7"
+      ],
+      "genres.concepts.label" : [
+      ],
+      "languages.id" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
+      ]
     },
     "aggregatableValues" : {
       "workType" : [

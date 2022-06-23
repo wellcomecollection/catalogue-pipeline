@@ -1,7 +1,7 @@
 {
   "description" : "an arbitrary list of visible works",
-  "createdAt" : "2022-05-04T07:15:02.621Z",
-  "id" : "ob2ruvbb",
+  "createdAt" : "2022-06-20T10:13:35.368332Z",
+  "id" : "dph7sjip",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,13 +10,13 @@
             "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "JzS2SuiHrA"
+          "value" : "WpBejTwv1N"
         },
-        "version" : 24,
-        "modifiedTime" : "2022-06-02T23:57:38Z"
+        "version" : 66,
+        "modifiedTime" : "1971-11-19T03:42:42Z"
       },
-      "mergedTime" : "2022-06-02T23:57:38Z",
-      "indexedTime" : "2022-05-04T07:15:02.618Z",
+      "mergedTime" : "1971-11-19T03:42:42Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
@@ -26,12 +26,12 @@
           "id" : "miro-image-number"
         },
         "ontologyType" : "Work",
-        "value" : "JzS2SuiHrA"
+        "value" : "WpBejTwv1N"
       },
-      "canonicalId" : "ob2ruvbb",
-      "mergedTime" : "2022-06-02T23:57:38Z",
-      "sourceModifiedTime" : "2022-06-02T23:57:38Z",
-      "indexedTime" : "2022-05-04T07:15:02.618Z",
+      "canonicalId" : "dph7sjip",
+      "mergedTime" : "1971-11-19T03:42:42Z",
+      "sourceModifiedTime" : "1971-11-19T03:42:42Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {
@@ -46,7 +46,7 @@
       }
     },
     "data" : {
-      "title" : "title-QPNB7ZuKSW",
+      "title" : "title-3hvGdgZfc8",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -82,8 +82,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "ob2ruvbb",
-      "title" : "title-QPNB7ZuKSW",
+      "id" : "dph7sjip",
+      "title" : "title-3hvGdgZfc8",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -95,7 +95,7 @@
             "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "JzS2SuiHrA",
+          "value" : "WpBejTwv1N",
           "type" : "Identifier"
         }
       ],
@@ -127,73 +127,60 @@
       ],
       "type" : "Work"
     },
-    "type" : "Visible"
-  },
-  "work" : {
-    "version" : 24,
-    "data" : {
-      "title" : "title-QPNB7ZuKSW",
-      "otherIdentifiers" : [
+    "query" : {
+      "id" : "dph7sjip",
+      "identifiers.value" : [
+        "WpBejTwv1N"
       ],
-      "alternativeTitles" : [
+      "images.id" : [
       ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
+      "images.identifiers.value" : [
       ],
-      "genres" : [
+      "items.id" : [
       ],
-      "contributors" : [
+      "items.identifiers.value" : [
       ],
-      "thumbnail" : null,
-      "production" : [
+      "items.locations.accessConditions.status.id" : [
+      ],
+      "items.locations.license.id" : [
+      ],
+      "items.locations.locationType.id" : [
+      ],
+      "subjects.id" : [
+      ],
+      "subjects.concepts.label" : [
+      ],
+      "genres.concepts.label" : [
+      ],
+      "languages.id" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
+      ]
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
       ],
       "languages" : [
       ],
-      "edition" : null,
-      "notes" : [
+      "contributors.agent.label" : [
       ],
-      "duration" : null,
-      "items" : [
+      "items.locations.license" : [
       ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "miro-image-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "JzS2SuiHrA"
-      },
-      "canonicalId" : "ob2ruvbb",
-      "mergedTime" : "2022-06-02T23:57:38Z",
-      "sourceModifiedTime" : "2022-06-02T23:57:38Z",
-      "indexedTime" : "2022-05-04T07:15:02.621Z",
       "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
+      ]
     },
-    "redirectSources" : [
-    ],
     "type" : "Visible"
   }
 }

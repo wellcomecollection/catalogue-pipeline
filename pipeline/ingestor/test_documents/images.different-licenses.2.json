@@ -1,7 +1,7 @@
 {
   "description" : "images with different licenses",
-  "createdAt" : "2022-05-13T12:41:39.580Z",
-  "id" : "6ymeffs0",
+  "createdAt" : "2022-06-17T14:17:35.880074Z",
+  "id" : "ufwuwch3",
   "document" : {
     "version" : 1,
     "state" : {
@@ -12,7 +12,7 @@
         "ontologyType" : "Work",
         "value" : "yqcDJr0miD"
       },
-      "canonicalId" : "6ymeffs0",
+      "canonicalId" : "ufwuwch3",
       "inferredData" : {
         "features1" : [
           0.018058794,
@@ -4272,23 +4272,6 @@
           0.6996027
         ],
         "aspectRatio" : 0.9475815
-      },
-      "derivedData" : {
-        "thumbnail" : {
-          "url" : "https://iiif.wellcomecollection.org/image/ASu.jpg/info.json",
-          "locationType" : {
-            "id" : "iiif-image"
-          },
-          "license" : {
-            "id" : "cc-by"
-          },
-          "credit" : "Credit line: Mu1w5nUkFX",
-          "linkText" : "Link text: fdT3kzyNAn",
-          "accessConditions" : [
-          ]
-        },
-        "sourceContributorAgents" : [
-        ]
       }
     },
     "locations" : [
@@ -4307,164 +4290,97 @@
       }
     ],
     "source" : {
-      "canonicalWork" : {
-        "id" : {
-          "canonicalId" : "id3h1gbz",
-          "sourceIdentifier" : {
+      "id" : {
+        "canonicalId" : "id3h1gbz",
+        "sourceIdentifier" : {
+          "identifierType" : {
+            "id" : "sierra-system-number"
+          },
+          "ontologyType" : "Work",
+          "value" : "pgLaFdFV62"
+        },
+        "otherIdentifiers" : [
+        ]
+      },
+      "data" : {
+        "title" : "title-V0vsNu6VGS",
+        "otherIdentifiers" : [
+          {
             "identifierType" : {
               "id" : "sierra-system-number"
             },
             "ontologyType" : "Work",
-            "value" : "pgLaFdFV62"
+            "value" : "Tt46XEFFyH"
           },
-          "otherIdentifiers" : [
-          ]
-        },
-        "data" : {
-          "title" : "title-V0vsNu6VGS",
-          "otherIdentifiers" : [
-            {
-              "identifierType" : {
-                "id" : "sierra-system-number"
-              },
-              "ontologyType" : "Work",
-              "value" : "Tt46XEFFyH"
-            },
-            {
-              "identifierType" : {
-                "id" : "sierra-identifier"
-              },
-              "ontologyType" : "Work",
-              "value" : "8iDKRhGT0W"
-            }
-          ],
-          "alternativeTitles" : [
-          ],
-          "format" : null,
-          "description" : null,
-          "physicalDescription" : null,
-          "lettering" : null,
-          "createdDate" : null,
-          "subjects" : [
-          ],
-          "genres" : [
-          ],
-          "contributors" : [
-          ],
-          "thumbnail" : null,
-          "production" : [
-          ],
-          "languages" : [
-          ],
-          "edition" : null,
-          "notes" : [
-          ],
-          "duration" : null,
-          "items" : [
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "title" : null,
-              "note" : null,
-              "locations" : [
-                {
-                  "url" : "https://iiif.wellcomecollection.org/image/ASu.jpg/info.json",
-                  "locationType" : {
-                    "id" : "iiif-image"
-                  },
-                  "license" : {
-                    "id" : "cc-by"
-                  },
-                  "credit" : "Credit line: Mu1w5nUkFX",
-                  "linkText" : "Link text: fdT3kzyNAn",
-                  "accessConditions" : [
-                  ],
-                  "type" : "DigitalLocation"
-                }
-              ]
-            }
-          ],
-          "holdings" : [
-          ],
-          "collectionPath" : null,
-          "referenceNumber" : null,
-          "imageData" : [
-          ],
-          "workType" : "Standard"
-        },
-        "version" : 40
-      },
-      "redirectedWork" : {
-        "id" : {
-          "canonicalId" : "uggctu4t",
-          "sourceIdentifier" : {
+          {
             "identifierType" : {
-              "id" : "sierra-system-number"
+              "id" : "sierra-identifier"
             },
             "ontologyType" : "Work",
-            "value" : "a0C44EkWOX"
-          },
-          "otherIdentifiers" : [
-          ]
-        },
-        "data" : {
-          "title" : "title-HWuxhtyDWp",
-          "otherIdentifiers" : [
-            {
-              "identifierType" : {
-                "id" : "sierra-system-number"
-              },
-              "ontologyType" : "Work",
-              "value" : "dIXiPVJzvU"
+            "value" : "8iDKRhGT0W"
+          }
+        ],
+        "alternativeTitles" : [
+        ],
+        "format" : null,
+        "description" : null,
+        "physicalDescription" : null,
+        "lettering" : null,
+        "createdDate" : null,
+        "subjects" : [
+        ],
+        "genres" : [
+        ],
+        "contributors" : [
+        ],
+        "thumbnail" : null,
+        "production" : [
+        ],
+        "languages" : [
+        ],
+        "edition" : null,
+        "notes" : [
+        ],
+        "duration" : null,
+        "items" : [
+          {
+            "id" : {
+              "type" : "Unidentifiable"
             },
-            {
-              "identifierType" : {
-                "id" : "sierra-identifier"
-              },
-              "ontologyType" : "Work",
-              "value" : "T3414OlMN8"
-            }
-          ],
-          "alternativeTitles" : [
-          ],
-          "format" : null,
-          "description" : null,
-          "physicalDescription" : null,
-          "lettering" : null,
-          "createdDate" : null,
-          "subjects" : [
-          ],
-          "genres" : [
-          ],
-          "contributors" : [
-          ],
-          "thumbnail" : null,
-          "production" : [
-          ],
-          "languages" : [
-          ],
-          "edition" : null,
-          "notes" : [
-          ],
-          "duration" : null,
-          "items" : [
-          ],
-          "holdings" : [
-          ],
-          "collectionPath" : null,
-          "referenceNumber" : null,
-          "imageData" : [
-          ],
-          "workType" : "Standard"
-        },
-        "version" : 94
+            "title" : null,
+            "note" : null,
+            "locations" : [
+              {
+                "url" : "https://iiif.wellcomecollection.org/image/ASu.jpg/info.json",
+                "locationType" : {
+                  "id" : "iiif-image"
+                },
+                "license" : {
+                  "id" : "cc-by"
+                },
+                "credit" : "Credit line: Mu1w5nUkFX",
+                "linkText" : "Link text: fdT3kzyNAn",
+                "accessConditions" : [
+                ],
+                "type" : "DigitalLocation"
+              }
+            ]
+          }
+        ],
+        "holdings" : [
+        ],
+        "collectionPath" : null,
+        "referenceNumber" : null,
+        "imageData" : [
+        ],
+        "workType" : "Standard"
       },
-      "type" : "ParentWorks"
+      "version" : 40,
+      "type" : "ParentWork"
     },
     "modifiedTime" : "1953-05-25T18:51:16Z",
     "display" : {
-      "id" : "6ymeffs0",
+      "id" : "ufwuwch3",
       "thumbnail" : {
         "locationType" : {
           "id" : "iiif-image",
@@ -4514,9 +4430,17 @@
         ],
         "genres" : [
         ],
+        "subjects" : [
+        ],
         "type" : "Work"
       },
       "type" : "Image"
+    },
+    "query" : {
+      "source.subjects.label" : [
+      ],
+      "source.genres.label" : [
+      ]
     },
     "aggregatableValues" : {
       "locations.license" : [
@@ -4525,6 +4449,8 @@
       "source.contributors.agent.label" : [
       ],
       "source.genres.label" : [
+      ],
+      "source.subjects.label" : [
       ]
     }
   }

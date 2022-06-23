@@ -1,7 +1,7 @@
 {
   "description" : "images with different genres",
-  "createdAt" : "2022-05-13T12:41:39.761Z",
-  "id" : "bkdh7han",
+  "createdAt" : "2022-06-17T14:17:36.776518Z",
+  "id" : "93ppiboa",
   "document" : {
     "version" : 1,
     "state" : {
@@ -12,7 +12,7 @@
         "ontologyType" : "Work",
         "value" : "N7vQiGMIxC"
       },
-      "canonicalId" : "bkdh7han",
+      "canonicalId" : "93ppiboa",
       "inferredData" : {
         "features1" : [
           -0.02831881,
@@ -4272,23 +4272,6 @@
           0.6996027
         ],
         "aspectRatio" : 0.9475815
-      },
-      "derivedData" : {
-        "thumbnail" : {
-          "url" : "https://iiif.wellcomecollection.org/image/RdA.jpg/info.json",
-          "locationType" : {
-            "id" : "iiif-image"
-          },
-          "license" : {
-            "id" : "cc-by"
-          },
-          "credit" : null,
-          "linkText" : null,
-          "accessConditions" : [
-          ]
-        },
-        "sourceContributorAgents" : [
-        ]
       }
     },
     "locations" : [
@@ -4307,142 +4290,75 @@
       }
     ],
     "source" : {
-      "canonicalWork" : {
-        "id" : {
-          "canonicalId" : "jg1envol",
-          "sourceIdentifier" : {
-            "identifierType" : {
-              "id" : "calm-record-id"
-            },
-            "ontologyType" : "Work",
-            "value" : "ffU7rWFuZ5"
+      "id" : {
+        "canonicalId" : "jg1envol",
+        "sourceIdentifier" : {
+          "identifierType" : {
+            "id" : "calm-record-id"
           },
-          "otherIdentifiers" : [
-          ]
+          "ontologyType" : "Work",
+          "value" : "ffU7rWFuZ5"
         },
-        "data" : {
-          "title" : "title-9LgUkLJbXx",
-          "otherIdentifiers" : [
-          ],
-          "alternativeTitles" : [
-          ],
-          "format" : null,
-          "description" : null,
-          "physicalDescription" : null,
-          "lettering" : null,
-          "createdDate" : null,
-          "subjects" : [
-          ],
-          "genres" : [
-            {
-              "label" : "Emu entrepreneurship",
-              "concepts" : [
-              ]
-            },
-            {
-              "label" : "Falcon finances",
-              "concepts" : [
-              ]
-            },
-            {
-              "label" : "Carrot counselling",
-              "concepts" : [
-              ]
-            }
-          ],
-          "contributors" : [
-          ],
-          "thumbnail" : null,
-          "production" : [
-          ],
-          "languages" : [
-          ],
-          "edition" : null,
-          "notes" : [
-          ],
-          "duration" : null,
-          "items" : [
-          ],
-          "holdings" : [
-          ],
-          "collectionPath" : null,
-          "referenceNumber" : null,
-          "imageData" : [
-          ],
-          "workType" : "Standard"
-        },
-        "version" : 20
+        "otherIdentifiers" : [
+        ]
       },
-      "redirectedWork" : {
-        "id" : {
-          "canonicalId" : "gl7spuby",
-          "sourceIdentifier" : {
-            "identifierType" : {
-              "id" : "sierra-system-number"
-            },
-            "ontologyType" : "Work",
-            "value" : "ynyefHr4pr"
+      "data" : {
+        "title" : "title-9LgUkLJbXx",
+        "otherIdentifiers" : [
+        ],
+        "alternativeTitles" : [
+        ],
+        "format" : null,
+        "description" : null,
+        "physicalDescription" : null,
+        "lettering" : null,
+        "createdDate" : null,
+        "subjects" : [
+        ],
+        "genres" : [
+          {
+            "label" : "Emu entrepreneurship",
+            "concepts" : [
+            ]
           },
-          "otherIdentifiers" : [
-          ]
-        },
-        "data" : {
-          "title" : "title-nhAG2LJXoY",
-          "otherIdentifiers" : [
-            {
-              "identifierType" : {
-                "id" : "sierra-system-number"
-              },
-              "ontologyType" : "Work",
-              "value" : "dfLc8CMFXa"
-            },
-            {
-              "identifierType" : {
-                "id" : "sierra-identifier"
-              },
-              "ontologyType" : "Work",
-              "value" : "SDX2jNOLTq"
-            }
-          ],
-          "alternativeTitles" : [
-          ],
-          "format" : null,
-          "description" : null,
-          "physicalDescription" : null,
-          "lettering" : null,
-          "createdDate" : null,
-          "subjects" : [
-          ],
-          "genres" : [
-          ],
-          "contributors" : [
-          ],
-          "thumbnail" : null,
-          "production" : [
-          ],
-          "languages" : [
-          ],
-          "edition" : null,
-          "notes" : [
-          ],
-          "duration" : null,
-          "items" : [
-          ],
-          "holdings" : [
-          ],
-          "collectionPath" : null,
-          "referenceNumber" : null,
-          "imageData" : [
-          ],
-          "workType" : "Standard"
-        },
-        "version" : 38
+          {
+            "label" : "Falcon finances",
+            "concepts" : [
+            ]
+          },
+          {
+            "label" : "Carrot counselling",
+            "concepts" : [
+            ]
+          }
+        ],
+        "contributors" : [
+        ],
+        "thumbnail" : null,
+        "production" : [
+        ],
+        "languages" : [
+        ],
+        "edition" : null,
+        "notes" : [
+        ],
+        "duration" : null,
+        "items" : [
+        ],
+        "holdings" : [
+        ],
+        "collectionPath" : null,
+        "referenceNumber" : null,
+        "imageData" : [
+        ],
+        "workType" : "Standard"
       },
-      "type" : "ParentWorks"
+      "version" : 20,
+      "type" : "ParentWork"
     },
     "modifiedTime" : "1993-04-06T16:54:43Z",
     "display" : {
-      "id" : "bkdh7han",
+      "id" : "93ppiboa",
       "thumbnail" : {
         "locationType" : {
           "id" : "iiif-image",
@@ -4506,9 +4422,20 @@
             "type" : "Genre"
           }
         ],
+        "subjects" : [
+        ],
         "type" : "Work"
       },
       "type" : "Image"
+    },
+    "query" : {
+      "source.subjects.label" : [
+      ],
+      "source.genres.label" : [
+        "Emu entrepreneurship",
+        "Falcon finances",
+        "Carrot counselling"
+      ]
     },
     "aggregatableValues" : {
       "locations.license" : [
@@ -4519,6 +4446,8 @@
         "{\"label\":\"Emu entrepreneurship\",\"concepts\":[],\"type\":\"Genre\"}",
         "{\"label\":\"Falcon finances\",\"concepts\":[],\"type\":\"Genre\"}",
         "{\"label\":\"Carrot counselling\",\"concepts\":[],\"type\":\"Genre\"}"
+      ],
+      "source.subjects.label" : [
       ]
     }
   }

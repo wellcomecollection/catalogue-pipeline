@@ -1,37 +1,37 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2022-05-10T09:10:37.798Z",
-  "id" : "bh6q7wko",
+  "createdAt" : "2022-06-20T10:13:38.506436Z",
+  "id" : "6q7wkowr",
   "document" : {
     "debug" : {
       "source" : {
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "4DAgxJAjEy"
+          "value" : "AgxJAjEybh"
         },
-        "version" : 46,
-        "modifiedTime" : "2022-05-02T06:06:28Z"
+        "version" : 30,
+        "modifiedTime" : "2013-02-12T12:43:10Z"
       },
-      "mergedTime" : "2022-05-02T06:06:28Z",
-      "indexedTime" : "2022-05-10T09:10:37.798Z",
+      "mergedTime" : "2013-02-12T12:43:10Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "state" : {
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "miro-image-number"
+          "id" : "sierra-system-number"
         },
         "ontologyType" : "Work",
-        "value" : "4DAgxJAjEy"
+        "value" : "AgxJAjEybh"
       },
-      "canonicalId" : "bh6q7wko",
-      "mergedTime" : "2022-05-02T06:06:28Z",
-      "sourceModifiedTime" : "2022-05-02T06:06:28Z",
-      "indexedTime" : "2022-05-10T09:10:37.798Z",
+      "canonicalId" : "6q7wkowr",
+      "mergedTime" : "2013-02-12T12:43:10Z",
+      "sourceModifiedTime" : "2013-02-12T12:43:10Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {
@@ -46,7 +46,7 @@
       }
     },
     "data" : {
-      "title" : "title-iNOoLbpS5j",
+      "title" : "title-NOoLbpS5jR",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -98,8 +98,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "bh6q7wko",
-      "title" : "title-iNOoLbpS5j",
+      "id" : "6q7wkowr",
+      "title" : "title-NOoLbpS5jR",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -116,11 +116,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "4DAgxJAjEy",
+          "value" : "AgxJAjEybh",
           "type" : "Identifier"
         }
       ],
@@ -151,6 +151,43 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "query" : {
+      "id" : "6q7wkowr",
+      "identifiers.value" : [
+        "AgxJAjEybh"
+      ],
+      "images.id" : [
+      ],
+      "images.identifiers.value" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
+      "items.locations.accessConditions.status.id" : [
+      ],
+      "items.locations.license.id" : [
+      ],
+      "items.locations.locationType.id" : [
+      ],
+      "subjects.id" : [
+      ],
+      "subjects.concepts.label" : [
+      ],
+      "genres.concepts.label" : [
+      ],
+      "languages.id" : [
+      ],
+      "contributors.agent.label" : [
+        "Darwin \"Jones\", Charles"
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
+      ]
     },
     "aggregatableValues" : {
       "workType" : [

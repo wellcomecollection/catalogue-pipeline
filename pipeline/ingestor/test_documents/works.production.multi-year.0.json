@@ -1,7 +1,7 @@
 {
   "description" : "works with multi-year production ranges",
-  "createdAt" : "2022-05-06T14:32:35.317Z",
-  "id" : "83tyy1gh",
+  "createdAt" : "2022-06-20T10:13:37.925774Z",
+  "id" : "31spt9st",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,13 +10,13 @@
             "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "qt38YgNxOY"
+          "value" : "WzsZA7OUAa"
         },
-        "version" : 71,
-        "modifiedTime" : "2022-05-25T20:43:45Z"
+        "version" : 3,
+        "modifiedTime" : "2001-02-11T00:36:52Z"
       },
-      "mergedTime" : "2022-05-25T20:43:45Z",
-      "indexedTime" : "2022-05-06T14:32:35.317Z",
+      "mergedTime" : "2001-02-11T00:36:52Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
@@ -26,12 +26,12 @@
           "id" : "calm-record-id"
         },
         "ontologyType" : "Work",
-        "value" : "qt38YgNxOY"
+        "value" : "WzsZA7OUAa"
       },
-      "canonicalId" : "83tyy1gh",
-      "mergedTime" : "2022-05-25T20:43:45Z",
-      "sourceModifiedTime" : "2022-05-25T20:43:45Z",
-      "indexedTime" : "2022-05-06T14:32:35.317Z",
+      "canonicalId" : "31spt9st",
+      "mergedTime" : "2001-02-11T00:36:52Z",
+      "sourceModifiedTime" : "2001-02-11T00:36:52Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {
@@ -46,7 +46,7 @@
       }
     },
     "data" : {
-      "title" : "title-Q9rgmu63iB",
+      "title" : "title-QoeggPvgjR",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -65,13 +65,13 @@
       "thumbnail" : null,
       "production" : [
         {
-          "label" : "DHZ5kGsC2NVWzsZA7OUAa31Sp",
+          "label" : "jwgMtGLcg1WHGjZrCwPK521Yf",
           "places" : [
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "T9StDQoegg"
+              "label" : "54blSY3iyd"
             }
           ],
           "agents" : [
@@ -79,7 +79,7 @@
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "PvgjRA9Vih",
+              "label" : "rQHICakdbo",
               "prefix" : null,
               "numeration" : null,
               "type" : "Person"
@@ -118,8 +118,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "83tyy1gh",
-      "title" : "title-Q9rgmu63iB",
+      "id" : "31spt9st",
+      "title" : "title-QoeggPvgjR",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -131,7 +131,7 @@
             "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "qt38YgNxOY",
+          "value" : "WzsZA7OUAa",
           "type" : "Identifier"
         }
       ],
@@ -147,16 +147,16 @@
       ],
       "production" : [
         {
-          "label" : "DHZ5kGsC2NVWzsZA7OUAa31Sp",
+          "label" : "jwgMtGLcg1WHGjZrCwPK521Yf",
           "places" : [
             {
-              "label" : "T9StDQoegg",
+              "label" : "54blSY3iyd",
               "type" : "Place"
             }
           ],
           "agents" : [
             {
-              "label" : "PvgjRA9Vih",
+              "label" : "rQHICakdbo",
               "type" : "Person"
             }
           ],
@@ -184,6 +184,42 @@
       "succeededBy" : [
       ],
       "type" : "Work"
+    },
+    "query" : {
+      "id" : "31spt9st",
+      "identifiers.value" : [
+        "WzsZA7OUAa"
+      ],
+      "images.id" : [
+      ],
+      "images.identifiers.value" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
+      "items.locations.accessConditions.status.id" : [
+      ],
+      "items.locations.license.id" : [
+      ],
+      "items.locations.locationType.id" : [
+      ],
+      "subjects.id" : [
+      ],
+      "subjects.concepts.label" : [
+      ],
+      "genres.concepts.label" : [
+      ],
+      "languages.id" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
+      ]
     },
     "aggregatableValues" : {
       "workType" : [

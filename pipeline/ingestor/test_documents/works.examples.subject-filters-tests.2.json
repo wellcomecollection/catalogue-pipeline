@@ -1,7 +1,7 @@
 {
   "description" : "examples for the subject filter tests",
-  "id" : "fjor9vqa",
-  "createdAt" : "2022-05-30T11:06:49.177Z",
+  "createdAt" : "2022-06-20T10:13:38.433679Z",
+  "id" : "mazaizfa",
   "document" : {
     "debug" : {
       "source" : {
@@ -10,13 +10,13 @@
             "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "VuGQD3ShRQ"
+          "value" : "QFJOR9VqAE"
         },
-        "version" : 16,
-        "modifiedTime" : "2022-05-30T14:57:12Z"
+        "version" : 44,
+        "modifiedTime" : "1986-01-27T17:06:16Z"
       },
-      "mergedTime" : "2022-05-30T14:57:12Z",
-      "indexedTime" : "2022-05-10T09:08:11.347Z",
+      "mergedTime" : "1986-01-27T17:06:16Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
@@ -26,12 +26,12 @@
           "id" : "calm-record-id"
         },
         "ontologyType" : "Work",
-        "value" : "VuGQD3ShRQ"
+        "value" : "QFJOR9VqAE"
       },
-      "canonicalId" : "fjor9vqa",
-      "mergedTime" : "2022-05-30T14:57:12Z",
-      "sourceModifiedTime" : "2022-05-30T14:57:12Z",
-      "indexedTime" : "2022-05-10T09:08:11.347Z",
+      "canonicalId" : "mazaizfa",
+      "mergedTime" : "1986-01-27T17:06:16Z",
+      "sourceModifiedTime" : "1986-01-27T17:06:16Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
       "availabilities" : [
       ],
       "relations" : {
@@ -46,7 +46,7 @@
       }
     },
     "data" : {
-      "title" : "title-AzAiZFAZvT",
+      "title" : "title-vTVR490Vab",
       "otherIdentifiers" : [
       ],
       "alternativeTitles" : [
@@ -67,21 +67,21 @@
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "tcCDpKgb0Wdy2nM",
+              "label" : "y2nMuMcZq1Jcxuk",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "uMcZq1JcxukacPW",
+              "label" : "acPWKUROxBsQ4CK",
               "type" : "Concept"
             },
             {
               "id" : {
                 "type" : "Unidentifiable"
               },
-              "label" : "KUROxBsQ4CK8DrD",
+              "label" : "8DrDsk2kCAGURhx",
               "type" : "Concept"
             }
           ]
@@ -111,8 +111,8 @@
       "workType" : "Standard"
     },
     "display" : {
-      "id" : "fjor9vqa",
-      "title" : "title-AzAiZFAZvT",
+      "id" : "mazaizfa",
+      "title" : "title-vTVR490Vab",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -124,7 +124,7 @@
             "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "VuGQD3ShRQ",
+          "value" : "QFJOR9VqAE",
           "type" : "Identifier"
         }
       ],
@@ -133,15 +133,15 @@
           "label" : "Psychology, Pathological",
           "concepts" : [
             {
-              "label" : "tcCDpKgb0Wdy2nM",
+              "label" : "y2nMuMcZq1Jcxuk",
               "type" : "Concept"
             },
             {
-              "label" : "uMcZq1JcxukacPW",
+              "label" : "acPWKUROxBsQ4CK",
               "type" : "Concept"
             },
             {
-              "label" : "KUROxBsQ4CK8DrD",
+              "label" : "8DrDsk2kCAGURhx",
               "type" : "Concept"
             }
           ],
@@ -175,12 +175,42 @@
       "type" : "Work"
     },
     "query" : {
+      "id" : "mazaizfa",
+      "identifiers.value" : [
+        "QFJOR9VqAE"
+      ],
+      "images.id" : [
+      ],
+      "images.identifiers.value" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
+      "items.locations.accessConditions.status.id" : [
+      ],
+      "items.locations.license.id" : [
+      ],
+      "items.locations.locationType.id" : [
+      ],
       "subjects.id" : [
       ],
-      "subjects.identifiers.value" : [
+      "subjects.concepts.label" : [
+        "y2nMuMcZq1Jcxuk",
+        "acPWKUROxBsQ4CK",
+        "8DrDsk2kCAGURhx"
       ],
-      "subjects.label" : [
-        "Psychology, Pathological"
+      "genres.concepts.label" : [
+      ],
+      "languages.id" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
       ]
     },
     "aggregatableValues" : {

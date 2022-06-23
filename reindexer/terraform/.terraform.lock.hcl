@@ -19,13 +19,6 @@ provider "registry.terraform.io/hashicorp/aws" {
   ]
 }
 
-provider "registry.terraform.io/hashicorp/random" {
-  version = "3.0.0"
-  hashes = [
-    "h1:yhHJpb4IfQQfuio7qjUXuUFTU/s+ensuEpm23A+VWz0=",
-  ]
-}
-
 provider "registry.terraform.io/hashicorp/template" {
   version = "2.2.0"
   hashes = [

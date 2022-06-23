@@ -54,7 +54,10 @@ trait IndexConfigFields extends ElasticFieldOps {
       )
       .analyzer(asciifoldingAnalyzer.name)
 
-  val label = asciifoldingTextFieldWithKeyword("label")
+  def labelField(name: String): TextField =
+    asciifoldingTextFieldWithKeyword(name)
+
+  val label = labelField(name = "label")
 
   val canonicalId = lowercaseKeyword("canonicalId")
 

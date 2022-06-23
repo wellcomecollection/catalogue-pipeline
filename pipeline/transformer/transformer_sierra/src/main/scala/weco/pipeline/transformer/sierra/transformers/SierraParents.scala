@@ -59,21 +59,41 @@ object SierraParents extends SierraQueryOps with Logging {
   /**
     * Return the title of the parent object represented by the given VarField
     * The part of the field that represents the title varies by which MARC tag is in use.
-    * 773 fields have no main field content, the title is in the 'title' subfield
-    * 440, 490 and 830 fields normally keep it in the main field content
+    * 773 fields normally have no main field content, the title is in one of the 'title' subfields
+    * 440, 490 and 830 fields normally keep it in the main field content.
+    * There are three subfields that may represent a title - $a, $s, $t
+    *  - any of these fields may use the $a subfield.
+    *  - 4XX fields only have the $a subfield
+    *  - the $s subfield in an 830 field has a different meaning.
+    *
+    *  In practice, there should be no problem with looking for $t and $a on any field,
+    *  because $a is always possible and $t means the same on both 773 and 830, and simply won't
+    *  be there on 4XX.
+    *  However, 830 $s means Version, so must not be included in the lookup for 830 fields.
     */
+  private val subFieldTags = Map[String, List[String]](
+    "440" -> List("a"),
+    "490" -> List("a"),
+    "773" -> List("t", "a", "s"),
+    "830" -> List("t", "a")
+  )
+
   private def titleFromVarField(field: VarField): Option[String] = {
-    (field.marcTag.get, field.subfieldsWithTags("t", "a")) match {
-      case (marcTag, Nil) =>
+    val marcTag = field.marcTag.get
+    val subfieldTagsForField = subFieldTags(marcTag)
+    field.subfieldsWithTags(subfieldTagsForField: _*) match {
+      case Nil =>
         if (!field.content.exists(_.nonEmpty)) {
           warn(
-            s"A $marcTag field is expected to have a title in the field content or one of the title subfields (t or a), there was none: $field")
+            s"A $marcTag field is expected to have a title in the field content or one of the title subfields (${subfieldTagsForField
+              .mkString(", ")}), there was none: $field")
         }
         field.content
-      case (marcTag, subfields) =>
+      case subfields =>
         if (subfields.tail.nonEmpty || field.content.exists(_.nonEmpty)) {
           warn(
-            s"Ambiguous $marcTag Series relationship, only one of t, a or the field content is expected to be populated $field")
+            s"Ambiguous $marcTag Series relationship, only one of ${subfieldTagsForField.mkString(
+              ", ")} or the field content is expected to be populated $field")
         }
         Some(subfields.head.content)
     }

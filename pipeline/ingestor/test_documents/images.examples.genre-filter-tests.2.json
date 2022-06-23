@@ -1,7 +1,7 @@
 {
   "description" : "examples for the genre filter tests",
-  "createdAt" : "2022-05-13T12:41:40.001Z",
-  "id" : "yvgczrqk",
+  "createdAt" : "2022-06-17T14:17:37.264474Z",
+  "id" : "a5vdwjyw",
   "document" : {
     "version" : 1,
     "state" : {
@@ -12,7 +12,7 @@
         "ontologyType" : "Work",
         "value" : "WgSJWe8gdU"
       },
-      "canonicalId" : "yvgczrqk",
+      "canonicalId" : "a5vdwjyw",
       "inferredData" : {
         "features1" : [
           -0.01164634,
@@ -4272,23 +4272,6 @@
           0.6996027
         ],
         "aspectRatio" : 0.9475815
-      },
-      "derivedData" : {
-        "thumbnail" : {
-          "url" : "https://iiif.wellcomecollection.org/image/dgW.jpg/info.json",
-          "locationType" : {
-            "id" : "iiif-image"
-          },
-          "license" : {
-            "id" : "cc-by"
-          },
-          "credit" : "Credit line: tG2Ppoj2Pk",
-          "linkText" : null,
-          "accessConditions" : [
-          ]
-        },
-        "sourceContributorAgents" : [
-        ]
       }
     },
     "locations" : [
@@ -4307,179 +4290,112 @@
       }
     ],
     "source" : {
-      "canonicalWork" : {
-        "id" : {
-          "canonicalId" : "ybvhvhmm",
-          "sourceIdentifier" : {
-            "identifierType" : {
-              "id" : "sierra-system-number"
-            },
-            "ontologyType" : "Work",
-            "value" : "d3F3T3c2Ex"
+      "id" : {
+        "canonicalId" : "ybvhvhmm",
+        "sourceIdentifier" : {
+          "identifierType" : {
+            "id" : "sierra-system-number"
           },
-          "otherIdentifiers" : [
-          ]
+          "ontologyType" : "Work",
+          "value" : "d3F3T3c2Ex"
         },
-        "data" : {
-          "title" : "title-FoY49Amdcn",
-          "otherIdentifiers" : [
-          ],
-          "alternativeTitles" : [
-          ],
-          "format" : null,
-          "description" : null,
-          "physicalDescription" : null,
-          "lettering" : null,
-          "createdDate" : null,
-          "subjects" : [
-          ],
-          "genres" : [
-            {
-              "label" : "Emu entrepreneurship",
-              "concepts" : [
-                {
-                  "id" : {
-                    "type" : "Unidentifiable"
-                  },
-                  "label" : "u7ZcdvICxoSK1Dr",
-                  "type" : "Concept"
-                },
-                {
-                  "id" : {
-                    "type" : "Unidentifiable"
-                  },
-                  "label" : "j431aOG9wNgvIxQ",
-                  "type" : "Concept"
-                },
-                {
-                  "id" : {
-                    "type" : "Unidentifiable"
-                  },
-                  "label" : "sPO5NW41ZZ2VTHa",
-                  "type" : "Concept"
-                }
-              ]
-            },
-            {
-              "label" : "Falcon finances",
-              "concepts" : [
-                {
-                  "id" : {
-                    "type" : "Unidentifiable"
-                  },
-                  "label" : "orJvBB7A7s6BgvM",
-                  "type" : "Concept"
-                },
-                {
-                  "id" : {
-                    "type" : "Unidentifiable"
-                  },
-                  "label" : "PyqMVLhLFJmbaaq",
-                  "type" : "Concept"
-                },
-                {
-                  "id" : {
-                    "type" : "Unidentifiable"
-                  },
-                  "label" : "rFzY1hfYkJfAizG",
-                  "type" : "Concept"
-                }
-              ]
-            }
-          ],
-          "contributors" : [
-          ],
-          "thumbnail" : null,
-          "production" : [
-          ],
-          "languages" : [
-          ],
-          "edition" : null,
-          "notes" : [
-          ],
-          "duration" : null,
-          "items" : [
-          ],
-          "holdings" : [
-          ],
-          "collectionPath" : null,
-          "referenceNumber" : null,
-          "imageData" : [
-          ],
-          "workType" : "Standard"
-        },
-        "version" : 77
+        "otherIdentifiers" : [
+        ]
       },
-      "redirectedWork" : {
-        "id" : {
-          "canonicalId" : "rlaqhgrm",
-          "sourceIdentifier" : {
-            "identifierType" : {
-              "id" : "sierra-system-number"
-            },
-            "ontologyType" : "Work",
-            "value" : "8IWg5VyDYz"
+      "data" : {
+        "title" : "title-FoY49Amdcn",
+        "otherIdentifiers" : [
+        ],
+        "alternativeTitles" : [
+        ],
+        "format" : null,
+        "description" : null,
+        "physicalDescription" : null,
+        "lettering" : null,
+        "createdDate" : null,
+        "subjects" : [
+        ],
+        "genres" : [
+          {
+            "label" : "Emu entrepreneurship",
+            "concepts" : [
+              {
+                "id" : {
+                  "type" : "Unidentifiable"
+                },
+                "label" : "u7ZcdvICxoSK1Dr",
+                "type" : "Concept"
+              },
+              {
+                "id" : {
+                  "type" : "Unidentifiable"
+                },
+                "label" : "j431aOG9wNgvIxQ",
+                "type" : "Concept"
+              },
+              {
+                "id" : {
+                  "type" : "Unidentifiable"
+                },
+                "label" : "sPO5NW41ZZ2VTHa",
+                "type" : "Concept"
+              }
+            ]
           },
-          "otherIdentifiers" : [
-          ]
-        },
-        "data" : {
-          "title" : "title-L2YzDbGxZD",
-          "otherIdentifiers" : [
-            {
-              "identifierType" : {
-                "id" : "sierra-system-number"
+          {
+            "label" : "Falcon finances",
+            "concepts" : [
+              {
+                "id" : {
+                  "type" : "Unidentifiable"
+                },
+                "label" : "orJvBB7A7s6BgvM",
+                "type" : "Concept"
               },
-              "ontologyType" : "Work",
-              "value" : "KjURDhjNiX"
-            },
-            {
-              "identifierType" : {
-                "id" : "sierra-identifier"
+              {
+                "id" : {
+                  "type" : "Unidentifiable"
+                },
+                "label" : "PyqMVLhLFJmbaaq",
+                "type" : "Concept"
               },
-              "ontologyType" : "Work",
-              "value" : "aSPptKYsrx"
-            }
-          ],
-          "alternativeTitles" : [
-          ],
-          "format" : null,
-          "description" : null,
-          "physicalDescription" : null,
-          "lettering" : null,
-          "createdDate" : null,
-          "subjects" : [
-          ],
-          "genres" : [
-          ],
-          "contributors" : [
-          ],
-          "thumbnail" : null,
-          "production" : [
-          ],
-          "languages" : [
-          ],
-          "edition" : null,
-          "notes" : [
-          ],
-          "duration" : null,
-          "items" : [
-          ],
-          "holdings" : [
-          ],
-          "collectionPath" : null,
-          "referenceNumber" : null,
-          "imageData" : [
-          ],
-          "workType" : "Standard"
-        },
-        "version" : 12
+              {
+                "id" : {
+                  "type" : "Unidentifiable"
+                },
+                "label" : "rFzY1hfYkJfAizG",
+                "type" : "Concept"
+              }
+            ]
+          }
+        ],
+        "contributors" : [
+        ],
+        "thumbnail" : null,
+        "production" : [
+        ],
+        "languages" : [
+        ],
+        "edition" : null,
+        "notes" : [
+        ],
+        "duration" : null,
+        "items" : [
+        ],
+        "holdings" : [
+        ],
+        "collectionPath" : null,
+        "referenceNumber" : null,
+        "imageData" : [
+        ],
+        "workType" : "Standard"
       },
-      "type" : "ParentWorks"
+      "version" : 77,
+      "type" : "ParentWork"
     },
     "modifiedTime" : "2008-11-21T17:51:58Z",
     "display" : {
-      "id" : "yvgczrqk",
+      "id" : "a5vdwjyw",
       "thumbnail" : {
         "locationType" : {
           "id" : "iiif-image",
@@ -4563,9 +4479,19 @@
             "type" : "Genre"
           }
         ],
+        "subjects" : [
+        ],
         "type" : "Work"
       },
       "type" : "Image"
+    },
+    "query" : {
+      "source.subjects.label" : [
+      ],
+      "source.genres.label" : [
+        "Emu entrepreneurship",
+        "Falcon finances"
+      ]
     },
     "aggregatableValues" : {
       "locations.license" : [
@@ -4573,8 +4499,10 @@
       "source.contributors.agent.label" : [
       ],
       "source.genres.label" : [
-        "{\"label\":\"Emu entrepreneurship\",\"concepts\":[{\"label\":\"u7ZcdvICxoSK1Dr\",\"type\":\"Concept\"},{\"label\":\"j431aOG9wNgvIxQ\",\"type\":\"Concept\"},{\"label\":\"sPO5NW41ZZ2VTHa\",\"type\":\"Concept\"}],\"type\":\"Genre\"}",
-        "{\"label\":\"Falcon finances\",\"concepts\":[{\"label\":\"orJvBB7A7s6BgvM\",\"type\":\"Concept\"},{\"label\":\"PyqMVLhLFJmbaaq\",\"type\":\"Concept\"},{\"label\":\"rFzY1hfYkJfAizG\",\"type\":\"Concept\"}],\"type\":\"Genre\"}"
+        "{\"label\":\"Emu entrepreneurship\",\"concepts\":[],\"type\":\"Genre\"}",
+        "{\"label\":\"Falcon finances\",\"concepts\":[],\"type\":\"Genre\"}"
+      ],
+      "source.subjects.label" : [
       ]
     }
   }
