@@ -11,8 +11,5 @@ terraform {
       source  = "elastic/ec"
       version = "0.2.1"
     }
-    template = {
-      source = "hashicorp/template"
-    }
   }
 }
