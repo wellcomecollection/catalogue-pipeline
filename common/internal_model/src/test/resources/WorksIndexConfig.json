@@ -2,9 +2,17 @@
   "settings": {
     "analysis": {
       "analyzer": {
-        "path_hierarchy_analyzer": {
+        "exact_path_analyzer": {
           "type": "custom",
           "tokenizer": "path_hierarchy"
+        },
+        "clean_path_analyzer": {
+          "type": "custom",
+          "tokenizer": "path_hierarchy",
+          "filter": [
+            "lowercase",
+            "asciifolding_token_filter"
+          ]
         },
         "asciifolding_analyzer": {
           "type": "custom",
@@ -278,16 +286,29 @@
                           },
                           "path": {
                             "type": "text",
-                            "analyzer": "path_hierarchy_analyzer"
+                            "analyzer": "exact_path_analyzer",
+                            "fields": {
+                              "keyword": {
+                                "type": "keyword"
+                              },
+                              "clean": {
+                                "type": "text",
+                                "analyzer": "clean_path_analyzer"
+                              }
+                            }
                           }
                         }
                       },
                       "path": {
                         "type": "text",
-                        "analyzer": "path_hierarchy_analyzer",
+                        "analyzer": "exact_path_analyzer",
                         "fields": {
                           "keyword": {
                             "type": "keyword"
+                          },
+                          "clean": {
+                            "type": "text",
+                            "analyzer": "clean_path_analyzer"
                           }
                         }
                       },
@@ -312,7 +333,7 @@
           },
           "relations": {
             "type": "text",
-            "analyzer": "path_hierarchy_analyzer"
+            "analyzer": "exact_path_analyzer"
           },
           "titlesAndContributors": {
             "type": "text",
@@ -858,19 +879,32 @@
                   },
                   "path": {
                     "type": "text",
-                    "analyzer": "path_hierarchy_analyzer"
+                    "analyzer": "exact_path_analyzer",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword"
+                      },
+                      "clean": {
+                        "type": "text",
+                        "analyzer": "clean_path_analyzer"
+                      }
+                    }
                   }
                 }
               },
               "path": {
                 "type": "text",
-                "analyzer": "path_hierarchy_analyzer",
+                "analyzer": "exact_path_analyzer",
                 "copy_to": [
                   "data.collectionPath.depth"
                 ],
                 "fields": {
                   "keyword": {
                     "type": "keyword"
+                  },
+                  "clean": {
+                    "type": "text",
+                    "analyzer": "clean_path_analyzer"
                   }
                 }
               },

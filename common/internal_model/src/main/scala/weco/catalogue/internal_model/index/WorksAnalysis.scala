@@ -13,10 +13,16 @@ object WorksAnalysis {
     preserveOriginal = Some(true)
   )
 
-  val pathAnalyzer = CustomAnalyzer(
-    "path_hierarchy_analyzer",
+  val exactPathAnalyzer = CustomAnalyzer(
+    "exact_path_analyzer",
+    tokenizer = "path_hierarchy"
+  )
+
+  val cleanPathAnalyzer = CustomAnalyzer(
+    "clean_path_analyzer",
     tokenizer = "path_hierarchy",
-    charFilters = Nil
+    charFilters = Nil,
+    tokenFilters = List("lowercase", asciiFoldingTokenFilter.name)
   )
 
   val shingleTokenFilter = ShingleTokenFilter(
@@ -104,7 +110,8 @@ object WorksAnalysis {
   def apply(): Analysis = {
     Analysis(
       analyzers = List(
-        pathAnalyzer,
+        exactPathAnalyzer,
+        cleanPathAnalyzer,
         asciifoldingAnalyzer,
         shingleAsciifoldingAnalyzer,
         englishAnalyzer,

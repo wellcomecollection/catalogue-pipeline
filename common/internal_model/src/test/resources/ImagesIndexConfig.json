@@ -2,13 +2,17 @@
   "settings": {
     "analysis": {
       "analyzer": {
-        "path_hierarchy_analyzer": {
+        "exact_path_analyzer": {
+          "type": "custom",
+          "tokenizer": "path_hierarchy"
+        },
+        "clean_path_analyzer": {
+          "type": "custom",
+          "tokenizer": "path_hierarchy",
           "filter": [
             "lowercase",
             "asciifolding_token_filter"
-          ],
-          "tokenizer": "path_hierarchy",
-          "type": "custom"
+          ]
         },
         "asciifolding_analyzer": {
           "type": "custom",

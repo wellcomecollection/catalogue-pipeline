@@ -53,7 +53,7 @@ object WorksIndexConfig extends IndexConfigFields {
         objectField("collectionPath").fields(
           textField("path")
             .copyTo("data.collectionPath.depth")
-            .analyzer(pathAnalyzer.name)
+            .analyzer(exactPathAnalyzer.name)
             .fields(lowercaseKeyword("keyword")),
           TokenCountField("depth").withAnalyzer("standard")
         )
@@ -155,19 +155,18 @@ object WorksIndexConfig extends IndexConfigFields {
 
       def collectionPath(copyPathTo: Option[String]): ObjectField = {
         val path = textField("path")
-          .analyzer(pathAnalyzer.name)
-          .fields(keywordField("keyword"))
-          .copyTo(copyPathTo.toList)
+          .analyzer(exactPathAnalyzer.name)
+          .fields(keywordField("keyword"), textField("clean").analyzer(cleanPathAnalyzer.name))
 
         objectField("collectionPath").fields(
           textField("label")
             .fields(
               keywordField("keyword"),
               lowercaseKeyword("lowercaseKeyword"),
-              textField("path").analyzer(pathAnalyzer.name)
+              path
             )
             .analyzer(asciifoldingAnalyzer.name),
-          path,
+          path.copyTo(copyPathTo.toList),
           TokenCountField("depth").withAnalyzer("standard")
         )
       }
@@ -200,7 +199,7 @@ object WorksIndexConfig extends IndexConfigFields {
 
       val search = objectField("search").fields(
         textField("identifiers").analyzer("whitespace_analyzer"),
-        textField("relations").analyzer("path_hierarchy_analyzer"),
+        textField("relations").analyzer(exactPathAnalyzer.name),
         multilingualField("titlesAndContributors")
       )
 
