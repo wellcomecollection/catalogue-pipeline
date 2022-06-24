@@ -150,7 +150,8 @@ class WorkAggregatableValuesTest
       )
     )
 
-    val aggregatableValues = WorkAggregatableValues(data, availabilities = Set())
+    val aggregatableValues =
+      WorkAggregatableValues(data, availabilities = Set())
 
     aggregatableValues.subjects shouldBe List(
       """{"label":"impish indicators","concepts":[],"type":"Subject"}""",
