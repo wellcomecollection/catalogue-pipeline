@@ -20,7 +20,7 @@ object SierraIndexConfig extends IndexConfigFields {
     keywordField("recordType")
   )
 
-  def indexer =
+  def indexer: IndexConfig =
     SierraIndexConfig(
       Seq(
         parent,
@@ -32,14 +32,14 @@ object SierraIndexConfig extends IndexConfigFields {
           keywordField("marcTag"),
           objectField("subfields").fields(
             keywordField("tag"),
-            englishTextKeywordField("content")
+            textKeywordField(name = "content", textFieldName = "english", analyzerName = "english")
           ),
-          englishTextKeywordField("content")
+          textKeywordField(name = "content", textFieldName = "english", analyzerName = "english")
         )
       )
     )
 
-  def varfield =
+  def varfield: IndexConfig =
     SierraIndexConfig(
       Seq(
         parent,
@@ -51,22 +51,22 @@ object SierraIndexConfig extends IndexConfigFields {
           keywordField("marcTag"),
           objectField("subfields").fields(
             keywordField("tag"),
-            englishTextKeywordField("content")
+            textKeywordField(name = "content", textFieldName = "english", analyzerName = "english")
           ),
-          englishTextKeywordField("content")
+          textKeywordField(name = "content", textFieldName = "english", analyzerName = "english")
         )
       )
     )
 
-  def fixedField =
+  def fixedField: IndexConfig =
     SierraIndexConfig(
       Seq(
         parent,
         keywordField("code"),
         objectField("fixedField").fields(
           keywordField("label"),
-          englishTextKeywordField("display"),
-          englishTextKeywordField("value")
+          textKeywordField(name = "display", textFieldName = "english", analyzerName = "english"),
+          textKeywordField(name = "value", textFieldName = "english", analyzerName = "english"),
         )
       )
     )
