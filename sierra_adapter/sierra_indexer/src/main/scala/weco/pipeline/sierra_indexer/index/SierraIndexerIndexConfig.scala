@@ -32,9 +32,15 @@ object SierraIndexConfig extends IndexConfigFields {
           keywordField("marcTag"),
           objectField("subfields").fields(
             keywordField("tag"),
-            textKeywordField(name = "content", textFieldName = "english", analyzerName = "english")
+            textKeywordField(
+              name = "content",
+              textFieldName = "english",
+              analyzerName = "english")
           ),
-          textKeywordField(name = "content", textFieldName = "english", analyzerName = "english")
+          textKeywordField(
+            name = "content",
+            textFieldName = "english",
+            analyzerName = "english")
         )
       )
     )
@@ -51,9 +57,15 @@ object SierraIndexConfig extends IndexConfigFields {
           keywordField("marcTag"),
           objectField("subfields").fields(
             keywordField("tag"),
-            textKeywordField(name = "content", textFieldName = "english", analyzerName = "english")
+            textKeywordField(
+              name = "content",
+              textFieldName = "english",
+              analyzerName = "english")
           ),
-          textKeywordField(name = "content", textFieldName = "english", analyzerName = "english")
+          textKeywordField(
+            name = "content",
+            textFieldName = "english",
+            analyzerName = "english")
         )
       )
     )
@@ -65,8 +77,14 @@ object SierraIndexConfig extends IndexConfigFields {
         keywordField("code"),
         objectField("fixedField").fields(
           keywordField("label"),
-          textKeywordField(name = "display", textFieldName = "english", analyzerName = "english"),
-          textKeywordField(name = "value", textFieldName = "english", analyzerName = "english"),
+          textKeywordField(
+            name = "display",
+            textFieldName = "english",
+            analyzerName = "english"),
+          textKeywordField(
+            name = "value",
+            textFieldName = "english",
+            analyzerName = "english"),
         )
       )
     )

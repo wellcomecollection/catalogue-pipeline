@@ -1,22 +1,32 @@
 package weco.catalogue.internal_model.index
 
 import com.sksamuel.elastic4s.ElasticDsl._
-import com.sksamuel.elastic4s.fields.{IntegerField, KeywordField, ObjectField, TextField}
+import com.sksamuel.elastic4s.fields.{
+  IntegerField,
+  KeywordField,
+  ObjectField,
+  TextField
+}
 import weco.catalogue.internal_model.index.WorksAnalysis._
 import weco.elasticsearch.ElasticFieldOps
 
 /** Mixin for common fields used within an IndexConfig in our internal models.
- */
+  */
 trait IndexConfigFields extends ElasticFieldOps {
 
-  def textKeywordField(name: String, textFieldName: String, analyzerName: String): TextField =
+  def textKeywordField(name: String,
+                       textFieldName: String,
+                       analyzerName: String): TextField =
     textField(name).fields(
       keywordField("keyword"),
       textField(textFieldName).analyzer(analyzerName)
     )
 
   def englishTextKeywordField(name: String): TextField =
-    textKeywordField(name = name, textFieldName = "english", analyzerName = englishAnalyzer.name)
+    textKeywordField(
+      name = name,
+      textFieldName = "english",
+      analyzerName = englishAnalyzer.name)
 
   def englishTextField(name: String): TextField =
     textField(name).fields(
@@ -50,10 +60,10 @@ trait IndexConfigFields extends ElasticFieldOps {
     textField(name)
       .fields(
         /**
-         * Having a keyword and lowercaseKeyword allows you to
-         * aggregate accurately on the field i.e. `ID123` does not become `id123`
-         * but also allows you to do keyword searches e.g. `id123` matches `ID123`
-         */
+          * Having a keyword and lowercaseKeyword allows you to
+          * aggregate accurately on the field i.e. `ID123` does not become `id123`
+          * but also allows you to do keyword searches e.g. `id123` matches `ID123`
+          */
         keywordField("keyword"),
         lowercaseKeyword("lowercaseKeyword")
       )
