@@ -245,7 +245,7 @@ class TeiTransformerTest
       ),
       Note(
         NoteType.HandNote,
-        "Several different hands have added text throughout the manuscript.      "
+        "Several different hands have added text throughout the manuscript."
       )
     )
   }
