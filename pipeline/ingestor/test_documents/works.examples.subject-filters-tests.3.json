@@ -1,6 +1,6 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2022-06-20T10:13:38.437129Z",
+  "createdAt" : "2022-06-27T08:16:13.995678Z",
   "id" : "b1r485o0",
   "document" : {
     "debug" : {
@@ -244,7 +244,7 @@
       "production.dates" : [
       ],
       "subjects.label" : [
-        "{\"id\":\"darwin01\",\"label\":\"Darwin \\\"Jones\\\", Charles\",\"concepts\":[],\"type\":\"Subject\"}"
+        "{\"label\":\"Darwin \\\"Jones\\\", Charles\",\"concepts\":[],\"type\":\"Subject\"}"
       ],
       "languages" : [
       ],

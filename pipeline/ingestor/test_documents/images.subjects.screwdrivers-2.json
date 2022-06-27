@@ -1,6 +1,6 @@
 {
   "description" : "images with different subjects",
-  "createdAt" : "2022-06-17T14:17:37.593619Z",
+  "createdAt" : "2022-06-27T08:19:26.844237Z",
   "id" : "xlfyrof0",
   "document" : {
     "version" : 1,
@@ -4439,7 +4439,7 @@
       "source.genres.label" : [
       ],
       "source.subjects.label" : [
-        "{\"id\":\"subject1\",\"label\":\"Simple screwdrivers\",\"concepts\":[],\"type\":\"Subject\"}"
+        "{\"label\":\"Simple screwdrivers\",\"concepts\":[],\"type\":\"Subject\"}"
       ]
     }
   }

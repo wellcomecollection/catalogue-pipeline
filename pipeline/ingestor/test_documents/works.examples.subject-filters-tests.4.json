@@ -1,6 +1,6 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2022-06-20T10:13:38.440295Z",
+  "createdAt" : "2022-06-27T08:16:13.997693Z",
   "id" : "gmzc1icz",
   "document" : {
     "debug" : {
@@ -346,7 +346,7 @@
       "subjects.label" : [
         "{\"label\":\"London (England)\",\"concepts\":[],\"type\":\"Subject\"}",
         "{\"label\":\"Psychology, Pathological\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"id\":\"darwin01\",\"label\":\"Darwin \\\"Jones\\\", Charles\",\"concepts\":[],\"type\":\"Subject\"}"
+        "{\"label\":\"Darwin \\\"Jones\\\", Charles\",\"concepts\":[],\"type\":\"Subject\"}"
       ],
       "languages" : [
       ],
