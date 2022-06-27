@@ -201,7 +201,7 @@ object WorksIndexConfig extends IndexConfigFields {
         )
 
       val search = objectField("search").fields(
-        textField("identifiers").analyzer("whitespace_analyzer"),
+        lowercaseKeyword("identifiers"),
         textField("relations").analyzer(exactPathAnalyzer.name),
         multilingualField("titlesAndContributors")
       )
