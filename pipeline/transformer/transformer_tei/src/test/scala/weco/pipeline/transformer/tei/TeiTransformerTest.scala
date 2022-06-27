@@ -216,12 +216,13 @@ class TeiTransformerTest
     )
   }
 
-  it("extracts authors") {
-    val work = transformToWork(filename = "/MS_MSL_114.xml")(
-      id = "MS_MSL_114"
-    )
+  private val MS_MSL_114_work = transformToWork(filename = "/MS_MSL_114.xml")(
+    id = "MS_MSL_114"
+  ).value
 
-    work.value.state.internalWorkStubs.head.workData.contributors shouldBe List(
+  it("extracts authors") {
+
+    MS_MSL_114_work.state.internalWorkStubs.head.workData.contributors shouldBe List(
       Contributor(
         Person(
           label = "Paul of Aegina",
@@ -232,6 +233,21 @@ class TeiTransformerTest
               "person_84812936"))),
         roles = List(ContributionRole("author"))
       ))
+  }
+
+  it("extracts hand description information") {
+    // https://www.tei-c.org/release/doc/tei-p5-doc/en/html/ref-handDesc.html
+
+    MS_MSL_114_work.data.notes should contain theSameElementsAs List(
+      Note(
+        NoteType.HandNote,
+        "Attributed by Nigel Wilson to Georgios Chrysokokkes (RGK III 126)."
+      ),
+      Note(
+        NoteType.HandNote,
+        "Several different hands have added text throughout the manuscript.      "
+      )
+    )
   }
 
   it("handles delete messages") {
