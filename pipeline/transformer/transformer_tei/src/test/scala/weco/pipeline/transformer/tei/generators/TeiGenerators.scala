@@ -86,13 +86,16 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
 
   def history(origPlace: Option[Elem] = None,
               originDates: List[Elem] = Nil,
-              provenance: List[Elem] = Nil): Elem =
+              provenance: List[Elem] = Nil,
+              acquisition: List[Elem] = Nil,
+             ): Elem =
     <history>
       <origin>
         {origPlace.getOrElse(NodeSeq.Empty)}
         {originDates}
       </origin>
       {provenance}
+      {}
     </history>
 
   def provenance(
@@ -115,6 +118,27 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
       case (metadata, (_, None)) => metadata
     }
     <provenance>{str}</provenance> % attributes
+  }
+
+  def acquisition(
+                     str: String,
+                     when: Option[String] = None,
+                     notBefore: Option[String] = None,
+                     from: Option[String] = None,
+                     to: Option[String] = None,
+                     notAfter: Option[String] = None
+                   ): Elem = {
+    val attributes = Map(
+      "when" -> when,
+      "notBefore" -> notBefore,
+      "from" -> from, "to" -> to,
+      "notAfter" -> notAfter,
+    ).foldLeft(Null: MetaData) {
+      case (metadata, (name, Some(value))) =>
+        Attribute(name, Text(value), metadata)
+      case (metadata, (_, None)) => metadata
+    }
+    <acquisition>{str}</acquisition> % attributes
   }
 
   def profileDesc(keywords: List[Elem]) = <profileDesc>

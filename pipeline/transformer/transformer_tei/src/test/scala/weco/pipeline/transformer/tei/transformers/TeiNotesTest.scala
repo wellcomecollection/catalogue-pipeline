@@ -247,7 +247,7 @@ class TeiNotesTest extends AnyFunSpec with Matchers with TeiGenerators {
     )
   }
 
-  it("includes specific date provenance"){
+  it("includes provenance with a specific date"){
     val id = "id"
     val result = TeiNotes(
       teiXml(
@@ -288,6 +288,54 @@ class TeiNotesTest extends AnyFunSpec with Matchers with TeiGenerators {
       Note(NoteType.OwnershipNote,"(not before 670): Owned by Frithuswith"),
       Note(NoteType.OwnershipNote,"(not after 1788): Owned by Charles Pratt"),
       Note(NoteType.OwnershipNote,"(to 1998-05-01): In the Charing Cross Library")
+    )
+  }
+
+  it("includes all date bounds in a provenance note"){
+    val id = "id"
+    val result = TeiNotes(
+      teiXml(
+        id,
+        history = Some(
+          history(
+            origPlace=None,
+            originDates = Nil,
+            provenance = List(
+              provenance(
+                "Owned by Herb Wells",
+                from = Some("1901-12-25"),
+                to=Some("1930-01-01"),
+                notBefore = Some("1876"),
+                notAfter = Some("1745"),
+                when = Some("2022-07-29")),
+            )
+          )
+        )
+      )
+    )
+    result shouldBe List(
+      Note(NoteType.OwnershipNote,"(2022-07-29, from 1901-12-25, not before 1876, to 1930-01-01, not after 1745): Owned by Herb Wells"),
+    )
+  }
+
+  it("includes provenance and acquisition together"){
+    val id = "id"
+    val result = TeiNotes(
+      teiXml(
+        id,
+        history = Some(
+          history(
+            origPlace=None,
+            originDates = Nil,
+            provenance = List(provenance("Owned by Charles Pratt", notAfter = Some("1794-04-18"))),
+            acquisition = List(acquisition("Gifted to HSW by Silas Burroughs", when = Some("1892-08-21")))
+          )
+        )
+      )
+    )
+    result shouldBe List(
+      Note(NoteType.OwnershipNote,"(not after 1794-04-18): Owned by Charles Pratt"),
+      Note(NoteType.AcquisitionNote,"(1892-08-21): Gifted to HSW by Silas Burroughs"),
     )
   }
 

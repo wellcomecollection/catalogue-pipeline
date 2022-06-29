@@ -157,11 +157,16 @@ object TeiNotes {
 
   private def getHistory(nodeSeq: NodeSeq): List[Note] =
     (nodeSeq \ "history").flatMap { history =>
-      getProvenance(history)
+      getProvenance(history) ++ getAcquisition(history)
     }.toList
 
   private def getProvenance(nodeSeq: NodeSeq): List[Note] =
     (nodeSeq \ "provenance").flatMap { provenance =>
+      TeiProvenanceNote(provenance.asInstanceOf[Elem])
+    }.toList
+
+  private def getAcquisition(nodeSeq: NodeSeq): List[Note] =
+    (nodeSeq \ "acquisition").flatMap { provenance =>
       TeiProvenanceNote(provenance.asInstanceOf[Elem])
     }.toList
 
