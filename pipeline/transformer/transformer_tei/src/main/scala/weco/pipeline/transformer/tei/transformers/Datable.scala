@@ -19,17 +19,20 @@ trait Datable {
       ("to", "to"),
       ("notAfter", "not after"),
     ).flatMap {
-      case (attribute, label) => attributeAsText(datableElement, attribute, label)
+      case (attribute, label) =>
+        attributeAsText(datableElement, attribute, label)
     } match {
-      case Nil => None
+      case Nil        => None
       case timeBounds => Some(s"(${timeBounds.mkString(", ")}):")
     }
   }
 
-  private def attributeAsText(provenance: Elem, attribute: String, label: String): Option[String] =
+  private def attributeAsText(provenance: Elem,
+                              attribute: String,
+                              label: String): Option[String] =
     (label, provenance \@ attribute) match {
-      case (_, "") => None
-      case ("", value) => Some(value)
+      case (_, "")        => None
+      case ("", value)    => Some(value)
       case (label, value) => Some(List(label, value).mkString(" "))
     }
 }

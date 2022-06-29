@@ -88,7 +88,7 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
               originDates: List[Elem] = Nil,
               provenance: List[Elem] = Nil,
               acquisition: List[Elem] = Nil,
-             ): Elem =
+  ): Elem =
     <history>
       <origin>
         {origPlace.getOrElse(NodeSeq.Empty)}
@@ -121,17 +121,18 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
   }
 
   def acquisition(
-                     str: String,
-                     when: Option[String] = None,
-                     notBefore: Option[String] = None,
-                     from: Option[String] = None,
-                     to: Option[String] = None,
-                     notAfter: Option[String] = None
-                   ): Elem = {
+    str: String,
+    when: Option[String] = None,
+    notBefore: Option[String] = None,
+    from: Option[String] = None,
+    to: Option[String] = None,
+    notAfter: Option[String] = None
+  ): Elem = {
     val attributes = Map(
       "when" -> when,
       "notBefore" -> notBefore,
-      "from" -> from, "to" -> to,
+      "from" -> from,
+      "to" -> to,
       "notAfter" -> notAfter,
     ).foldLeft(Null: MetaData) {
       case (metadata, (name, Some(value))) =>
