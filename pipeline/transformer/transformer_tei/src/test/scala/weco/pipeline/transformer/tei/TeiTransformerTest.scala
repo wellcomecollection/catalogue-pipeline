@@ -220,8 +220,12 @@ class TeiTransformerTest
   it("extracts provenance information") {
     // https://www.tei-c.org/release/doc/tei-p5-doc/en/html/ref-provenance.html
     MS_MSL_112_work.data.notes should contain theSameElementsAs List(
-      Note(NoteType.OwnershipNote, "Thought to have been newly excecuted when Anthony Askew acquired it"),
-      Note(NoteType.OwnershipNote, "Marks of ownership flyleaf IIr Ex Bibliotheca Askeviana / Part ii. Art. 541 / J. Sims")
+      Note(
+        NoteType.OwnershipNote,
+        "Thought to have been newly excecuted when Anthony Askew acquired it"),
+      Note(
+        NoteType.OwnershipNote,
+        "Marks of ownership flyleaf IIr Ex Bibliotheca Askeviana / Part ii. Art. 541 / J. Sims")
     )
   }
 

@@ -6,19 +6,20 @@ import weco.pipeline.transformer.tei.NormaliseText
 import scala.xml.Elem
 
 /**
- * Extract a provenance[1] element as a Note, including the att.datable.w3c[2] attributes
- * expressed as prose in the Note text.
- * 1. https://www.tei-c.org/release/doc/tei-p5-doc/en/html/ref-provenance.html,
- * 2. https://www.tei-c.org/release/doc/tei-p5-doc/en/html/ref-att.datable.w3c.html
- */
+  * Extract a provenance[1] element as a Note, including the att.datable.w3c[2] attributes
+  * expressed as prose in the Note text.
+  * 1. https://www.tei-c.org/release/doc/tei-p5-doc/en/html/ref-provenance.html,
+  * 2. https://www.tei-c.org/release/doc/tei-p5-doc/en/html/ref-att.datable.w3c.html
+  */
 object TeiProvenanceNote {
   def apply(provenance: Elem): Option[Note] =
-    NormaliseText(provenance.text.trim).map(provenanceText =>
-      Note(
-        NoteType.OwnershipNote,
-        List(formatProvenancePrefix(provenance), Some(provenanceText)).flatten.mkString(" ")
-      )
-    )
+    NormaliseText(provenance.text.trim).map(
+      provenanceText =>
+        Note(
+          NoteType.OwnershipNote,
+          List(formatProvenancePrefix(provenance), Some(provenanceText)).flatten
+            .mkString(" ")
+      ))
 
   private def formatProvenancePrefix(provenance: Elem): Option[String] = {
     // The order of this list is reflected in the output, and is intended to give an
@@ -37,15 +38,17 @@ object TeiProvenanceNote {
     ).flatMap {
       case (attribute, label) => attributeAsText(provenance, attribute, label)
     } match {
-      case Nil => None
+      case Nil        => None
       case timeBounds => Some(s"(${timeBounds.mkString(", ")}):")
     }
   }
 
-  private def attributeAsText(provenance: Elem, attribute: String, label: String): Option[String] =
+  private def attributeAsText(provenance: Elem,
+                              attribute: String,
+                              label: String): Option[String] =
     (label, provenance \@ attribute) match {
-      case (_, "") => None
-      case ("", value) => Some(value)
+      case (_, "")        => None
+      case ("", value)    => Some(value)
       case (label, value) => Some(List(label, value).mkString(" "))
     }
 }
