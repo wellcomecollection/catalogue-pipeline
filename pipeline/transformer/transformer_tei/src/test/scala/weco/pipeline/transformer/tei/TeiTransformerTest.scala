@@ -200,12 +200,13 @@ class TeiTransformerTest
     )
   }
 
-  it("extracts msItems within msItems") {
-    val work = transformToWork(filename = "/MS_MSL_112.xml")(
-      id = "Greek_MS_MSL_112"
-    )
+  private val MS_MSL_112_work = transformToWork(filename = "/MS_MSL_112.xml")(
+    id = "Greek_MS_MSL_112"
+  ).value
 
-    val internalWorkStubs = work.value.state.internalWorkStubs
+  it("extracts msItems within msItems") {
+
+    val internalWorkStubs = MS_MSL_112_work.state.internalWorkStubs
     internalWorkStubs should have size 5
     internalWorkStubs.map(_.workData.title.get) should contain theSameElementsAs List(
       " Medical Epitome - 3, first part of 6, 4, 5 ",
@@ -213,6 +214,14 @@ class TeiTransformerTest
       "Τοῦ αὐτοῦ περὶ θεραπείας παθῶν καὶ τῶν ἔξωθεν φαρμάκων",
       "Τοῦ αὐτοῦ περὶ θεραπευτικῆς μεθόδου τῶν κατὰ μέρος παθῶν βιβλίον δεύτερον",
       "Τοῦ αὐτοῦ περὶ συνθέσεως φαρμάκων λόγος Α ́"
+    )
+  }
+
+  it("extracts provenance information") {
+    // https://www.tei-c.org/release/doc/tei-p5-doc/en/html/ref-provenance.html
+    MS_MSL_112_work.data.notes should contain theSameElementsAs List(
+      Note(NoteType.OwnershipNote, "Thought to have been newly excecuted when Anthony Askew acquired it"),
+      Note(NoteType.OwnershipNote, "Marks of ownership flyleaf IIr Ex Bibliotheca Askeviana / Part ii. Art. 541 / J. Sims")
     )
   }
 

@@ -8,11 +8,16 @@ import scala.xml.{Elem, NodeSeq}
 object TeiNotes {
 
   def apply(xml: Elem): List[Note] =
-    apply(xml \\ "msDesc" \ "msContents") ++ getHandNotes(xml \\ "msDesc")
+    apply(xml \\ "msDesc" \ "msContents") ++ getDescLevelNotes(xml: Elem)
 
   def apply(node: NodeSeq): List[Note] =
     getLocus(node) ++ getColophon(node).toList ++ getIncipitAndExplicit(node) ++ getHandNotes(
       node)
+
+  private def getDescLevelNotes(xml: Elem): Seq[Note] = {
+    val msDesc = xml \\ "msDesc"
+    getHandNotes(msDesc) ++ getHistory(msDesc)
+  }
 
   /** The colophon is in `colophon` nodes under `msContents` or `msItem`.
     *
@@ -149,4 +154,15 @@ object TeiNotes {
         }
       } else None
     }.toList
+
+  private def getHistory(nodeSeq: NodeSeq): List[Note] =
+    (nodeSeq \ "history").flatMap { history =>
+      getProvenance(history)
+    }.toList
+
+  private def getProvenance(nodeSeq: NodeSeq): List[Note] =
+    (nodeSeq \ "provenance").flatMap { provenance =>
+      TeiProvenanceNote(provenance.asInstanceOf[Elem])
+    }.toList
+
 }
