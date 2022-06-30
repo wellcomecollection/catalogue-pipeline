@@ -95,7 +95,7 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
         {originDates}
       </origin>
       {provenance}
-      {}
+      {acquisition}
     </history>
 
   def provenance(

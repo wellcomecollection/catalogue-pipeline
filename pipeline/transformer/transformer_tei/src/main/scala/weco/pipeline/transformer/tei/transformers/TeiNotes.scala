@@ -166,8 +166,8 @@ object TeiNotes {
     }.toList
 
   private def getAcquisition(nodeSeq: NodeSeq): List[Note] =
-    (nodeSeq \ "acquisition").flatMap { provenance =>
-      TeiProvenanceNote(provenance.asInstanceOf[Elem])
+    (nodeSeq \ "acquisition").flatMap { acquisition =>
+      TeiAcquisitionNote(acquisition.asInstanceOf[Elem])
     }.toList
 
 }
