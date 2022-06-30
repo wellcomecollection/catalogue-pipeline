@@ -219,14 +219,21 @@ class TeiTransformerTest
 
   it("extracts provenance information") {
     // https://www.tei-c.org/release/doc/tei-p5-doc/en/html/ref-provenance.html
-    MS_MSL_112_work.data.notes should contain theSameElementsAs List(
+    MS_MSL_112_work.data.notes should contain allOf (
       Note(
         NoteType.OwnershipNote,
         "Thought to have been newly excecuted when Anthony Askew acquired it"),
       Note(
         NoteType.OwnershipNote,
-        "Marks of ownership flyleaf IIr Ex Bibliotheca Askeviana / Part ii. Art. 541 / J. Sims")
+        "Marks of ownership flyleaf IIrEx Bibliotheca Askeviana / Part ii. Art. 541 / J. Sims")
     )
+  }
+  it("extracts acquisition information") {
+    // https://www.tei-c.org/release/doc/tei-p5-doc/en/html/ref-acquisition.html
+    MS_MSL_112_work.data.notes should contain (Note(
+        NoteType.AcquisitionNote,
+        "Anthony Askew(1722–74)London; his sale at G. Leigh and J. Sotheby London 15 March 1785 , lot 541. Purchased by James Sims (1741–1820)London, in 1785. Purchased by the London Medical Society in 1802. Purchased by the Wellcome Library in 1984."))
+
   }
 
   private val MS_MSL_114_work = transformToWork(filename = "/MS_MSL_114.xml")(
@@ -251,7 +258,7 @@ class TeiTransformerTest
   it("extracts hand description information") {
     // https://www.tei-c.org/release/doc/tei-p5-doc/en/html/ref-handDesc.html
 
-    MS_MSL_114_work.data.notes should contain theSameElementsAs List(
+    MS_MSL_114_work.data.notes should contain allOf (
       Note(
         NoteType.HandNote,
         "Attributed by Nigel Wilson to Georgios Chrysokokkes (RGK III 126)."
