@@ -54,7 +54,7 @@ object WorksIndexConfig extends IndexConfigFields {
         objectField("collectionPath").fields(
           textField("path")
             .copyTo("data.collectionPath.depth")
-            .analyzer(pathAnalyzer.name)
+            .analyzer(exactPathAnalyzer.name)
             .fields(lowercaseKeyword("keyword")),
           TokenCountField("depth").withAnalyzer("standard")
         )
@@ -73,7 +73,6 @@ object WorksIndexConfig extends IndexConfigFields {
   val denormalised = WorksIndexConfig(Seq.empty)
   val indexed = WorksIndexConfig(
     {
-      val relationsPath = List("search.relations")
       val identifiersPath = List("search.identifiers")
       val titlesAndContributorsPath = List("search.titlesAndContributors")
 
@@ -86,10 +85,10 @@ object WorksIndexConfig extends IndexConfigFields {
             .fields(lowercaseKeyword("value").copy(copyTo = identifiersPath)),
           objectField("format").fields(keywordField("id")),
           multilingualFieldWithKeyword("title")
-            .copyTo(relationsPath ++ titlesAndContributorsPath),
+            .copyTo(titlesAndContributorsPath),
           multilingualFieldWithKeyword("alternativeTitles")
-            .copyTo(relationsPath ++ titlesAndContributorsPath),
-          englishTextField("description").copyTo(relationsPath),
+            .copyTo(titlesAndContributorsPath),
+          englishTextField("description"),
           englishTextKeywordField("physicalDescription"),
           multilingualField("lettering"),
           objectField("contributors").fields(
@@ -155,30 +154,22 @@ object WorksIndexConfig extends IndexConfigFields {
           keywordField("referenceNumber").copy(copyTo = identifiersPath)
         )
 
-      // We copy the collectionPath label and the tokenized fields into the
-      // search.relations field for two reasons:
-      //
-      //    - to enable searching for parts of a path
-      //      e.g. if we had the path "PP/CRI/1/2", we could find this work by
-      //      searching "PP/CRI" or "PP/CRI/1"
-      //
-      //    - so we can boost exact matches for the label
-      //      e.g. if a user searches for "SAFPA/1/2", we want to prioritise the
-      //      work where that appears as the referenceNumber, even if other works
-      //      mention this reference in other fields
-      //
-      // TODO: Do we need to copy the depth here?  We need this for the relation
-      // embedder, but it's not clear if it's used in the API.
-      //
       def collectionPath(copyPathTo: Option[String]): ObjectField = {
         val path = textField("path")
-          .analyzer(pathAnalyzer.name)
-          .fields(keywordField("keyword"))
-          .copyTo(copyPathTo.toList ++ relationsPath)
+          .analyzer(exactPathAnalyzer.name)
+          .fields(
+            keywordField("keyword"),
+            textField("clean").analyzer(cleanPathAnalyzer.name))
 
         objectField("collectionPath").fields(
-          label.copyTo(relationsPath),
-          path,
+          textField("label")
+            .fields(
+              keywordField("keyword"),
+              lowercaseKeyword("lowercaseKeyword"),
+              path
+            )
+            .analyzer(asciifoldingAnalyzer.name),
+          path.copyTo(copyPathTo.toList),
           TokenCountField("depth").withAnalyzer("standard")
         )
       }
@@ -202,7 +193,7 @@ object WorksIndexConfig extends IndexConfigFields {
                 intField("depth"),
                 intField("numChildren"),
                 intField("numDescendents"),
-                multilingualFieldWithKeyword("title").copyTo(relationsPath),
+                multilingualFieldWithKeyword("title"),
                 collectionPath(copyPathTo = None)
               )
             )
@@ -210,8 +201,8 @@ object WorksIndexConfig extends IndexConfigFields {
         )
 
       val search = objectField("search").fields(
-        textField("identifiers").analyzer("whitespace_analyzer"),
-        textField("relations").analyzer("with_slashes_text_analyzer"),
+        lowercaseKeyword("identifiers"),
+        textField("relations").analyzer(exactPathAnalyzer.name),
         multilingualField("titlesAndContributors")
       )
 

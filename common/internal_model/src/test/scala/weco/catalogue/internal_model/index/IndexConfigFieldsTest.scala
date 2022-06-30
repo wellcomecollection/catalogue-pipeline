@@ -38,7 +38,7 @@ class IndexConfigFieldsTest
   val testIndexConfig = IndexConfig(
     {
       val withSlashesField = textField("withSlashes").analyzer(
-        WorksAnalysis.withSlashesTextAnalyzer.name
+        WorksAnalysis.slashesAnalyzer.name
       )
 
       properties(
