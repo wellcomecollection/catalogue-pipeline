@@ -112,9 +112,49 @@ class ImageAggregatableValuesTest
       subjects = List(
         """{"label":"Sharp scissors","concepts":[],"type":"Subject"}""",
         """{"label":"Split sandwiches","concepts":[],"type":"Subject"}""",
-        """{"id":"subject1","label":"Soft spinners","concepts":[],"type":"Subject"}""",
-        """{"id":"subject2","label":"Straight strings","concepts":[],"type":"Subject"}"""
+        """{"label":"Soft spinners","concepts":[],"type":"Subject"}""",
+        """{"label":"Straight strings","concepts":[],"type":"Subject"}"""
       )
+    )
+  }
+
+  it("removes identifiers from subjects") {
+    val data = WorkData[DataState.Identified](
+      title = Some("a work used in the ImageAggregatableValues tests"),
+      subjects = List(
+        Subject(
+          id = IdState.Identified(
+            canonicalId = createCanonicalId,
+            sourceIdentifier = createSourceIdentifier
+          ),
+          label = "impish indicators"
+        ),
+        Subject(
+          id = IdState.Identified(
+            canonicalId = createCanonicalId,
+            sourceIdentifier = createSourceIdentifier
+          ),
+          label = "ill-fated ideas"
+        ),
+        Subject(label = "illicit implications", concepts = List()),
+      )
+    )
+
+    val w = ParentWork(
+      id = IdState.Identified(
+        canonicalId = createCanonicalId,
+        sourceIdentifier = createSourceIdentifier
+      ),
+      data = data,
+      version = 1
+    )
+
+    val aggregatableValues = ImageAggregatableValues(w)
+
+    aggregatableValues.subjects shouldBe List(
+      """{"label":"impish indicators","concepts":[],"type":"Subject"}""",
+      """{"label":"ill-fated ideas","concepts":[],"type":"Subject"}""",
+      """{"label":"illicit implications","concepts":[],"type":"Subject"}"""
     )
   }
 }

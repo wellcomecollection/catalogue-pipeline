@@ -28,10 +28,17 @@ trait AggregatableValues {
         .map(DisplayGenre(_, includesIdentifiers = false))
         .asJson(_.update("concepts", Json.fromValues(List())))
 
-    def subjectAggregatableValues: List[String] =
+    // We use this aggregation for subject *labels*, not ids.
+    //
+    // It's possible for the same subject label to appear with different identifiers.
+    // e.g. we have "Horses" as an LCSH-identified, MeSH-identified, and unidentified subject.
+    //
+    // For aggregating by label, we don't care about this distinction, so we
+    // remove the ID from subjects before aggregating.
+    def subjectLabelAggregatableValues: List[String] =
       workData.subjects
         .map(DisplaySubject(_, includesIdentifiers = false))
-        .asJson(_.update("concepts", Json.fromValues(List())))
+        .asJson(_.update("concepts", Json.fromValues(List())).remove("id"))
 
     def contributorAggregatableValues: List[String] =
       workData.contributors
@@ -123,5 +130,18 @@ trait AggregatableValues {
             )
             .asObject
             .get)
+
+    // Remove a key pair from a JSON object.
+    //
+    // e.g.
+    //
+    //    json =
+    //    { "color": "red", "sides": 5 }
+    //
+    //    json.remove("sides")
+    //    { "color": "red" }
+    //
+    def remove(key: String): Json =
+      json.mapObject(jsonObj => jsonObj.remove(key))
   }
 }

@@ -23,7 +23,7 @@ case object WorkAggregatableValues extends AggregatableValues {
       workTypes = workData.workTypeAggregatableValues,
       genres = workData.genreAggregatableValues,
       productionDates = workData.productionDateAggregatableValues,
-      subjects = workData.subjectAggregatableValues,
+      subjects = workData.subjectLabelAggregatableValues,
       languages = workData.languageAggregatableValues,
       contributors = workData.contributorAggregatableValues,
       itemLicenses = workData.licenseAggregatableValues,

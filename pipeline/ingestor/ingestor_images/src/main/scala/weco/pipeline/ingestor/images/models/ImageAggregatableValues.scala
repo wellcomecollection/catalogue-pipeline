@@ -25,6 +25,6 @@ case object ImageAggregatableValues extends AggregatableValues {
       licenses = workData.licenseAggregatableValues,
       contributors = workData.contributorAggregatableValues,
       genres = workData.genreAggregatableValues,
-      subjects = workData.subjectAggregatableValues
+      subjects = workData.subjectLabelAggregatableValues
     )
 }

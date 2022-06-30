@@ -20,7 +20,7 @@ class WorkAggregatableValuesTest
     with PeriodGenerators {
   it("creates aggregatable values") {
     val data = WorkData[DataState.Identified](
-      title = Some("a work used in the ImageAggregatableValues tests"),
+      title = Some("a work used in the WorkAggregatableValues tests"),
       format = Some(Format.CDRoms),
       genres = List(
         Genre(label = "grabby gerbils", concepts = List(Concept("rodents"))),
@@ -125,6 +125,38 @@ class WorkAggregatableValuesTest
         """{"id":"closed-stores","label":"Closed stores","type":"Availability"}""",
         """{"id":"online","label":"Online","type":"Availability"}"""
       ),
+    )
+  }
+
+  it("removes identifiers from subjects") {
+    val data = WorkData[DataState.Identified](
+      title = Some("a work used in the WorkAggregatableValues tests"),
+      subjects = List(
+        Subject(
+          id = IdState.Identified(
+            canonicalId = createCanonicalId,
+            sourceIdentifier = createSourceIdentifier
+          ),
+          label = "impish indicators"
+        ),
+        Subject(
+          id = IdState.Identified(
+            canonicalId = createCanonicalId,
+            sourceIdentifier = createSourceIdentifier
+          ),
+          label = "ill-fated ideas"
+        ),
+        Subject(label = "illicit implications", concepts = List()),
+      )
+    )
+
+    val aggregatableValues =
+      WorkAggregatableValues(data, availabilities = Set())
+
+    aggregatableValues.subjects shouldBe List(
+      """{"label":"impish indicators","concepts":[],"type":"Subject"}""",
+      """{"label":"ill-fated ideas","concepts":[],"type":"Subject"}""",
+      """{"label":"illicit implications","concepts":[],"type":"Subject"}"""
     )
   }
 
