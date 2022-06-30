@@ -40,6 +40,6 @@ trait Datable {
     (label, datableElement \@ attributeName) match {
       case (_, "")        => None
       case ("", value)    => Some(value)
-      case (label, value) => Some(List(label, value).mkString(" "))
+      case (label, value) => Some(s"$label $value")
     }
 }
