@@ -230,9 +230,11 @@ class TeiTransformerTest
   }
   it("extracts acquisition information") {
     // https://www.tei-c.org/release/doc/tei-p5-doc/en/html/ref-acquisition.html
-    MS_MSL_112_work.data.notes should contain (Note(
+    MS_MSL_112_work.data.notes should contain(
+      Note(
         NoteType.AcquisitionNote,
-        "Anthony Askew(1722–74)London; his sale at G. Leigh and J. Sotheby London 15 March 1785 , lot 541. Purchased by James Sims (1741–1820)London, in 1785. Purchased by the London Medical Society in 1802. Purchased by the Wellcome Library in 1984."))
+        "Anthony Askew(1722–74)London; his sale at G. Leigh and J. Sotheby London 15 March 1785 , lot 541. Purchased by James Sims (1741–1820)London, in 1785. Purchased by the London Medical Society in 1802. Purchased by the Wellcome Library in 1984."
+      ))
 
   }
 
