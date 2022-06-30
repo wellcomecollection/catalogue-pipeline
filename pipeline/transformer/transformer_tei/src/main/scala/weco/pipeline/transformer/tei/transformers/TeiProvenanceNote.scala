@@ -18,6 +18,6 @@ object TeiProvenanceNote extends Datable {
         Note(
           NoteType.OwnershipNote,
           List(formatDatablePrefix(provenance), Some(provenanceText)).flatten
-            .mkString(" ")
+            .mkString(": ")
       ))
 }
