@@ -17,7 +17,9 @@ object TeiAcquisitionNote extends Datable {
       acquisitionText =>
         Note(
           noteType = NoteType.AcquisitionNote,
-          contents = List(formatDatablePrefix(acquisition), Some(acquisitionText)).flatten
+          contents = List(
+            formatDatablePrefix(acquisition),
+            Some(acquisitionText)).flatten
             .mkString(": ")
       ))
 }

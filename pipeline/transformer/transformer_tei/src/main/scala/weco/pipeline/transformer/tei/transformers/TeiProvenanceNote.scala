@@ -17,7 +17,8 @@ object TeiProvenanceNote extends Datable {
       provenanceText =>
         Note(
           noteType = NoteType.OwnershipNote,
-          contents = List(formatDatablePrefix(provenance), Some(provenanceText)).flatten
-            .mkString(": ")
+          contents =
+            List(formatDatablePrefix(provenance), Some(provenanceText)).flatten
+              .mkString(": ")
       ))
 }
