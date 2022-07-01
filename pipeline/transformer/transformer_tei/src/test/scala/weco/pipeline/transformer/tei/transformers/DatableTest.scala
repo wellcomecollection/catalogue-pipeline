@@ -3,14 +3,13 @@ package weco.pipeline.transformer.tei.transformers
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks
-import weco.pipeline.transformer.tei.generators.TeiGenerators
 
 import scala.xml.{Attribute, Null, Text}
 
 
 object DatableObject extends Datable
 
-class DatableTest extends AnyFunSpec with Matchers with TeiGenerators with TableDrivenPropertyChecks
+class DatableTest extends AnyFunSpec with Matchers  with TableDrivenPropertyChecks
 {
   describe("datable elements") {
     it("returns None if there are no datable attributes") {
