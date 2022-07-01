@@ -8,11 +8,16 @@ import scala.xml.{Elem, NodeSeq}
 object TeiNotes {
 
   def apply(xml: Elem): List[Note] =
-    apply(xml \\ "msDesc" \ "msContents") ++ getHandNotes(xml \\ "msDesc")
+    apply(xml \\ "msDesc" \ "msContents") ++ getDescLevelNotes(xml: Elem)
 
   def apply(node: NodeSeq): List[Note] =
     getLocus(node) ++ getColophon(node).toList ++ getIncipitAndExplicit(node) ++ getHandNotes(
       node)
+
+  private def getDescLevelNotes(xml: Elem): Seq[Note] = {
+    val msDesc = xml \\ "msDesc"
+    getHandNotes(msDesc) ++ getHistory(msDesc)
+  }
 
   /** The colophon is in `colophon` nodes under `msContents` or `msItem`.
     *
@@ -149,4 +154,30 @@ object TeiNotes {
         }
       } else None
     }.toList
+
+  /**
+    * Extract the contents of `<history/>` that result in Notes.
+    *
+    *   https://tei-c.org/release/doc/tei-p5-doc/en/html/ref-history.html
+    *
+    *   - The two children of history that should result in notes are `<provenance/>` and `<acquisition/>`.
+    *   - The value of `<origin/>` is extracted eleswhere (TeiProduction)
+    *   - There are no examples of `history/summary` in the data at time of writing
+    *       - (wellcome-collection-tei: 9c2c8856e49738a6f70461694d4791c9ef19528c)
+    */
+  private def getHistory(nodeSeq: NodeSeq): List[Note] =
+    (nodeSeq \ "history").flatMap { history =>
+      getProvenance(history) ++ getAcquisition(history)
+    }.toList
+
+  private def getProvenance(nodeSeq: NodeSeq): List[Note] =
+    (nodeSeq \ "provenance").flatMap { provenance =>
+      TeiProvenanceNote(provenance.asInstanceOf[Elem])
+    }.toList
+
+  private def getAcquisition(nodeSeq: NodeSeq): List[Note] =
+    (nodeSeq \ "acquisition").flatMap { acquisition =>
+      TeiAcquisitionNote(acquisition.asInstanceOf[Elem])
+    }.toList
+
 }

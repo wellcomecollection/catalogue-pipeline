@@ -200,12 +200,13 @@ class TeiTransformerTest
     )
   }
 
-  it("extracts msItems within msItems") {
-    val work = transformToWork(filename = "/MS_MSL_112.xml")(
-      id = "Greek_MS_MSL_112"
-    )
+  private val MS_MSL_112_work = transformToWork(filename = "/MS_MSL_112.xml")(
+    id = "Greek_MS_MSL_112"
+  ).value
 
-    val internalWorkStubs = work.value.state.internalWorkStubs
+  it("extracts msItems within msItems") {
+
+    val internalWorkStubs = MS_MSL_112_work.state.internalWorkStubs
     internalWorkStubs should have size 5
     internalWorkStubs.map(_.workData.title.get) should contain theSameElementsAs List(
       " Medical Epitome - 3, first part of 6, 4, 5 ",
@@ -216,12 +217,34 @@ class TeiTransformerTest
     )
   }
 
-  it("extracts authors") {
-    val work = transformToWork(filename = "/MS_MSL_114.xml")(
-      id = "MS_MSL_114"
+  it("extracts provenance information") {
+    // https://www.tei-c.org/release/doc/tei-p5-doc/en/html/ref-provenance.html
+    MS_MSL_112_work.data.notes should contain allOf (
+      Note(
+        NoteType.OwnershipNote,
+        "Thought to have been newly excecuted when Anthony Askew acquired it"),
+      Note(
+        NoteType.OwnershipNote,
+        "Marks of ownership flyleaf IIrEx Bibliotheca Askeviana / Part ii. Art. 541 / J. Sims")
     )
+  }
+  it("extracts acquisition information") {
+    // https://www.tei-c.org/release/doc/tei-p5-doc/en/html/ref-acquisition.html
+    MS_MSL_112_work.data.notes should contain(
+      Note(
+        NoteType.AcquisitionNote,
+        "Anthony Askew(1722–74)London; his sale at G. Leigh and J. Sotheby London 15 March 1785 , lot 541. Purchased by James Sims (1741–1820)London, in 1785. Purchased by the London Medical Society in 1802. Purchased by the Wellcome Library in 1984."
+      ))
 
-    work.value.state.internalWorkStubs.head.workData.contributors shouldBe List(
+  }
+
+  private val MS_MSL_114_work = transformToWork(filename = "/MS_MSL_114.xml")(
+    id = "MS_MSL_114"
+  ).value
+
+  it("extracts authors") {
+
+    MS_MSL_114_work.state.internalWorkStubs.head.workData.contributors shouldBe List(
       Contributor(
         Person(
           label = "Paul of Aegina",
@@ -232,6 +255,21 @@ class TeiTransformerTest
               "person_84812936"))),
         roles = List(ContributionRole("author"))
       ))
+  }
+
+  it("extracts hand description information") {
+    // https://www.tei-c.org/release/doc/tei-p5-doc/en/html/ref-handDesc.html
+
+    MS_MSL_114_work.data.notes should contain allOf (
+      Note(
+        NoteType.HandNote,
+        "Attributed by Nigel Wilson to Georgios Chrysokokkes (RGK III 126)."
+      ),
+      Note(
+        NoteType.HandNote,
+        "Several different hands have added text throughout the manuscript."
+      )
+    )
   }
 
   it("handles delete messages") {
