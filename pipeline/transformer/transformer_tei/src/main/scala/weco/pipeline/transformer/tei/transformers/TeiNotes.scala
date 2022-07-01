@@ -156,15 +156,15 @@ object TeiNotes {
     }.toList
 
   /**
-   * Extract the contents of `<history/>` that result in Notes.
-   *
-   *   https://tei-c.org/release/doc/tei-p5-doc/en/html/ref-history.html
-   *
-   *   - The two children of history that should result in notes are `<provenance/>` and `<acquisition/>`.
-   *   - The value of `<origin/>` is extracted eleswhere (TeiProduction)
-   *   - There are no examples of `history/summary` in the data.
-   *
-   */
+    * Extract the contents of `<history/>` that result in Notes.
+    *
+    *   https://tei-c.org/release/doc/tei-p5-doc/en/html/ref-history.html
+    *
+    *   - The two children of history that should result in notes are `<provenance/>` and `<acquisition/>`.
+    *   - The value of `<origin/>` is extracted eleswhere (TeiProduction)
+    *   - There are no examples of `history/summary` in the data.
+    *
+    */
   private def getHistory(nodeSeq: NodeSeq): List[Note] =
     (nodeSeq \ "history").flatMap { history =>
       getProvenance(history) ++ getAcquisition(history)
