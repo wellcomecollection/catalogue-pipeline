@@ -161,7 +161,7 @@ object TeiNotes {
     *   https://tei-c.org/release/doc/tei-p5-doc/en/html/ref-history.html
     *
     *   - The two children of history that should result in notes are `<provenance/>` and `<acquisition/>`.
-    *   - The value of `<origin/>` is extracted eleswhere (TeiProduction)
+    *   - The value of `<origin/>` is extracted elsewhere (TeiProduction)
     *   - There are no examples of `history/summary` in the data.
     *
     */
