@@ -16,8 +16,8 @@ object TeiProvenanceNote extends Datable {
     NormaliseText(provenance.text.trim).map(
       provenanceText =>
         Note(
-          NoteType.OwnershipNote,
-          List(formatDatablePrefix(provenance), Some(provenanceText)).flatten
+          noteType = NoteType.OwnershipNote,
+          contents = List(formatDatablePrefix(provenance), Some(provenanceText)).flatten
             .mkString(": ")
       ))
 }

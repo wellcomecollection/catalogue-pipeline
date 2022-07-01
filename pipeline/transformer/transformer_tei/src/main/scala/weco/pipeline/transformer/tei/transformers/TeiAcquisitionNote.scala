@@ -16,8 +16,8 @@ object TeiAcquisitionNote extends Datable {
     NormaliseText(acquisition.text.trim).map(
       acquisitionText =>
         Note(
-          NoteType.AcquisitionNote,
-          List(formatDatablePrefix(acquisition), Some(acquisitionText)).flatten
+          noteType = NoteType.AcquisitionNote,
+          contents = List(formatDatablePrefix(acquisition), Some(acquisitionText)).flatten
             .mkString(": ")
       ))
 }
