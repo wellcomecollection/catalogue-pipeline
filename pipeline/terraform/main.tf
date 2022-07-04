@@ -98,7 +98,7 @@ module "catalogue_pipeline_2022-07-04" {
   release_label = "2022-07-04"
 
   reindexing_state = {
-    connect_reindex_topics   = false  # todo: better name
+    connect_reindex_topics   = false # todo: better name
     scale_up_tasks           = false
     scale_up_elastic_cluster = false
     scale_up_id_minter_db    = false
