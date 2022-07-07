@@ -121,7 +121,7 @@ private object HostEntryFieldCollectionPath
     if (hostEntryField.isDefined && bibId.nonEmpty)
       Some(
         CollectionPath(
-          path = collectionPathString(hostEntryField.get, bibId),
+          path = collectionPathString(hostEntryField.get, bibId.trim),
           label = None))
     else {
       // Should not be possible to reach this point, SierraCollectionPath.apply will have
@@ -172,6 +172,6 @@ private object HostEntryFieldCollectionPath
   }
 
   private def getHostId(varField: VarField): String = {
-    varField.subfieldsWithTag("w").head.content.stripPrefix("(Wcat)")
+    varField.subfieldsWithTag("w").head.content.stripPrefix("(Wcat)").trim
   }
 }

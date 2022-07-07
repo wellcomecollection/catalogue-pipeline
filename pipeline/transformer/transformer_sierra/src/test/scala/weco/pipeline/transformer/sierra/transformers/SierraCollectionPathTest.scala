@@ -147,6 +147,25 @@ class SierraCollectionPathTest
     getCollectionPath(varFields).get shouldBe CollectionPath(
       path = "12345i/56789i")
   }
+
+  it("ignores leading and trailing whitespace in path segments") {
+    val varFields = List(
+      VarField(
+        marcTag = Some("001"),
+        content = Some(" 56789i ")
+      ),
+      VarField(
+        marcTag = Some("773"),
+        subfields = List(
+          Subfield(tag = "t", content = "A Host"),
+          Subfield(tag = "w", content = " 12345i ")
+        )
+      )
+    )
+    getCollectionPath(varFields).get shouldBe CollectionPath(
+      path = "12345i/56789i")
+  }
+
   it("constructs a value from a 773 field, including $g if present") {
     val varFields = List(
       VarField(
