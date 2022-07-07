@@ -27,10 +27,12 @@ locals {
 }
 
 module "secrets" {
-  source = "github.com/wellcomecollection/terraform-aws-secrets?ref=v1.0.0"
+  source = "github.com/wellcomecollection/terraform-aws-secrets?ref=v1.4.0"
 
   key_value_map = {
     "${local.secret_prefix}/es_username" = var.name
     "${local.secret_prefix}/es_password" = random_password.password.result
   }
+
+  deletion_mode = "IMMEDIATE"
 }
