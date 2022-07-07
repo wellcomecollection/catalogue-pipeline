@@ -124,15 +124,15 @@ if __name__ == '__main__':
 
     newly_created_roles = set()
 
-    for index in WORK_INDICES:
-        for r in create_roles(es, index=f"works-{index}"):
-            newly_created_roles.add(r)
-            click.echo(f"Created role {click.style(r, 'green')}")
-
-    for index in IMAGE_INDICES:
-        for r in create_roles(es, index=f"images-{index}"):
-            newly_created_roles.add(r)
-            click.echo(f"Created role {click.style(r, 'green')}")
+    # for index in WORK_INDICES:
+    #     for r in create_roles(es, index=f"works-{index}"):
+    #         newly_created_roles.add(r)
+    #         click.echo(f"Created role {click.style(r, 'green')}")
+    #
+    # for index in IMAGE_INDICES:
+    #     for r in create_roles(es, index=f"images-{index}"):
+    #         newly_created_roles.add(r)
+    #         click.echo(f"Created role {click.style(r, 'green')}")
 
     print("")
 
