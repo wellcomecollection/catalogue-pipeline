@@ -53,87 +53,6 @@ resource "ec_deployment" "pipeline" {
   }
 }
 
-# We create the username/password secrets in Terraform, and set the values in the
-# Python script.  This ensures the secrets will be properly cleaned up when we delete
-# a pipeline.
-#
-# We set the recovery window to 0 so that secrets are deleted immediately,
-# rather than hanging around for a 30 day recovery period.
-# See https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret#recovery_window_in_days
-#
-resource "aws_secretsmanager_secret" "es_username" {
-  for_each = toset(concat(local.pipeline_storage_service_list, ["image_ingestor", "work_ingestor", "read_only"]))
-
-  name = "elasticsearch/pipeline_storage_${var.pipeline_date}/${each.key}/es_username"
-
-  recovery_window_in_days = 0
-}
-
-resource "aws_secretsmanager_secret" "es_password" {
-  for_each = toset(concat(local.pipeline_storage_service_list, ["image_ingestor", "work_ingestor", "read_only"]))
-
-  name = "elasticsearch/pipeline_storage_${var.pipeline_date}/${each.key}/es_password"
-
-  recovery_window_in_days = 0
-}
-
-resource "aws_secretsmanager_secret" "es_username_catalogue" {
-  provider = aws.catalogue
-
-  for_each = toset([
-    "snapshot_generator",
-    "catalogue_api",
-    "concepts_api",
-  ])
-
-  name = "elasticsearch/pipeline_storage_${var.pipeline_date}/${each.key}/es_username"
-
-  recovery_window_in_days = 0
-}
-
-resource "aws_secretsmanager_secret" "es_password_catalogue" {
-  provider = aws.catalogue
-
-  for_each = toset([
-    "snapshot_generator",
-    "catalogue_api",
-    "concepts_api",
-  ])
-
-  name = "elasticsearch/pipeline_storage_${var.pipeline_date}/${each.key}/es_password"
-
-  recovery_window_in_days = 0
-}
-
-# We can't attach the provisioner directly to the Elastic Cloud resource (I'm not
-# entirely sure why), so instead we create a null resource that will be recreated
-# whenever the cluster is created.
-#
-# The local-exec provisioner on this resource runs a script that sets up the
-# Elasticsearch users for the pipeline.
-#
-# Note: this must run *after* the cluster and secrets are created, or the script
-# won't work.
-#
-# TODO: Investigate why we can't attach the provisioner directly to the ec_deployment resource.
-# Some informal testing with a minimal TF configuration that just uses the EC provider
-# shows that this *should* work.
-resource "null_resource" "elasticsearch_users" {
-  triggers = {
-    pipeline_storage_elastic_id = local.pipeline_storage_elastic_id
-  }
-
-  depends_on = [
-    module.pipeline_storage_secrets,
-    aws_secretsmanager_secret.es_username,
-    aws_secretsmanager_secret.es_password,
-  ]
-
-  provisioner "local-exec" {
-    command = "python3 scripts/create_pipeline_storage_users.py ${var.pipeline_date}"
-  }
-}
-
 locals {
   pipeline_storage_elastic_id     = ec_deployment.pipeline.elasticsearch[0].resource_id
   pipeline_storage_elastic_region = ec_deployment.pipeline.elasticsearch[0].region
@@ -190,30 +109,4 @@ module "pipeline_storage_secrets_catalogue" {
   }
 
   deletion_mode = "IMMEDIATE"
-}
-
-locals {
-  pipeline_storage_service_list = [
-    "id_minter",
-    "matcher",
-    "merger",
-    "transformer",
-    "path_concatenator",
-    "relation_embedder",
-    "router",
-    "inferrer",
-    "work_ingestor",
-    "image_ingestor",
-  ]
-
-  pipeline_storage_es_service_secrets = zipmap(local.pipeline_storage_service_list, [
-    for service in local.pipeline_storage_service_list :
-    {
-      es_host     = local.pipeline_storage_private_host
-      es_port     = local.pipeline_storage_port
-      es_protocol = local.pipeline_storage_protocol
-      es_username = "elasticsearch/pipeline_storage_${var.pipeline_date}/${service}/es_username"
-      es_password = "elasticsearch/pipeline_storage_${var.pipeline_date}/${service}/es_password"
-    }
-  ])
 }
