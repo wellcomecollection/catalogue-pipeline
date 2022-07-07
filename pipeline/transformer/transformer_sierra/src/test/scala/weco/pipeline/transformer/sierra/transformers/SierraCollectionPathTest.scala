@@ -148,7 +148,6 @@ class SierraCollectionPathTest
       path = "12345i/56789i")
   }
 
-
   it("ignores leading and trailing whitespace in path segments") {
     val varFields = List(
       VarField(
