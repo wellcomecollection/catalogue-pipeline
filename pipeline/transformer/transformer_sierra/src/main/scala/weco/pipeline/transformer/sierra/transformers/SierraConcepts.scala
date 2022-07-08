@@ -69,15 +69,17 @@ trait SierraConcepts extends SierraQueryOps with ConceptsTransformer {
           varField = varField,
           identifierSubfieldContent = subfieldContent
         )
-      case Nil => addIdentifierFromText(ontologyType, varField)// There were no 0 subfields, use the body instead.
+      case Nil =>
+        addIdentifierFromText(ontologyType, varField) // There were no 0 subfields, use the body instead.
       case _ => IdState.Unidentifiable
     }
 
-  private def addIdentifierFromText(ontologyType: String, varField: VarField): IdState.Unminted =
+  private def addIdentifierFromText(ontologyType: String,
+                                    varField: VarField): IdState.Unminted =
     IdState.Identifiable(
       SierraConceptIdentifier.withNoIdentifier(
-        pseudoIdentifier=varField.subfieldsWithTag("a")(0).content,
-        ontologyType=ontologyType))
+        pseudoIdentifier = varField.subfieldsWithTag("a")(0).content,
+        ontologyType = ontologyType))
 
   // If there's exactly one subfield $0 on the VarField, add an identifier
   // if possible.
