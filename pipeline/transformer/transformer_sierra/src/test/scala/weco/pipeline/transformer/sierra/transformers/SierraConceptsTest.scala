@@ -39,7 +39,8 @@ class SierraConceptsTest
 
     maybeIdentifiedConcept shouldBe IdState.Identifiable(sourceIdentifier)
   }
-  it("ignores concepts with no identifier") {
+
+  it("creates a label-derived identifier for concepts with no identifier") {
     val maybeIdentifiedConcept = transformer.identifyConcept(
       ontologyType = "Concept",
       varField = createVarFieldWith(
@@ -50,8 +51,13 @@ class SierraConceptsTest
         )
       )
     )
+    val sourceIdentifier = SourceIdentifier(
+      identifierType = IdentifierType.LabelDerived,
+      value = "WhoKnows",
+      ontologyType = "Concept"
+    )
 
-    maybeIdentifiedConcept shouldBe IdState.Unidentifiable
+    maybeIdentifiedConcept shouldBe IdState.Identifiable(sourceIdentifier)
   }
 
   it("normalises and deduplicates identifiers in subfield 0") {

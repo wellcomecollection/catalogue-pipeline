@@ -131,4 +131,13 @@ object IdentifierType extends Enum[IdentifierType] {
     val id = "bl-estc-citation-no"
     val label = "British Library English Short Title Catalogue"
   }
+
+  // This is not a "real" identifier scheme, it exists so that things that only have a name
+  // in the source data can be treated as though they are properly identified.
+  // The expectation is that when a corresponding identifier is discovered for them
+  // they can be replaced.
+  case object LabelDerived extends IdentifierType {
+    val id = "label-derived"
+    val label = "Identifier derived from the label of the referent"
+  }
 }
