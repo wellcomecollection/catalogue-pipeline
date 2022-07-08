@@ -2,15 +2,13 @@ package weco.pipeline.transformer.sierra.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.identifiers.{
-  IdState,
-  IdentifierType,
-  SourceIdentifier
-}
+import org.scalatest.prop.TableDrivenPropertyChecks
+import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, SourceIdentifier}
 import weco.sierra.generators.MarcGenerators
 import weco.sierra.models.marc.Subfield
 
-class SierraConceptsTest extends AnyFunSpec with Matchers with MarcGenerators {
+class SierraConceptsTest extends AnyFunSpec with Matchers with MarcGenerators with TableDrivenPropertyChecks {
+  private val transformer = new SierraConcepts {}
 
   it("extracts identifiers from subfield 0") {
     val maybeIdentifiedConcept = transformer.identifyConcept(
@@ -32,6 +30,20 @@ class SierraConceptsTest extends AnyFunSpec with Matchers with MarcGenerators {
     )
 
     maybeIdentifiedConcept shouldBe IdState.Identifiable(sourceIdentifier)
+  }
+  it("ignores concepts with no identifier") {
+    val maybeIdentifiedConcept = transformer.identifyConcept(
+      ontologyType = "Concept",
+      varField = createVarFieldWith(
+        marcTag = "CCC",
+        indicator2 = "0",
+        subfields = List(
+          Subfield(tag = "a", content = "WhoKnows")
+        )
+      )
+    )
+
+    maybeIdentifiedConcept shouldBe IdState.Unidentifiable
   }
 
   it("normalises and deduplicates identifiers in subfield 0") {
@@ -70,10 +82,11 @@ class SierraConceptsTest extends AnyFunSpec with Matchers with MarcGenerators {
       ontologyType = "Concept",
       varField = createVarFieldWith(
         marcTag = "CCC",
+        indicator2 = "0",
         subfields = List(
           Subfield(tag = "a", content = "hitchhiking"),
-          Subfield(tag = "0", content = "u/xxx"),
-          Subfield(tag = "0", content = "u/yyy")
+          Subfield(tag = "0", content = "lcsh/xxx"),
+          Subfield(tag = "0", content = "lcsh/yyy")
         )
       )
     )
@@ -81,5 +94,28 @@ class SierraConceptsTest extends AnyFunSpec with Matchers with MarcGenerators {
     maybeIdentifiedConcept shouldBe IdState.Unidentifiable
   }
 
-  val transformer = new SierraConcepts {}
+  it("ignores unknown schemes") {
+    forAll(
+      Table(
+        "indicator2",
+        None, Some("1"), Some("3"), Some("4"), Some("5"), Some("6"), Some("7")
+      )
+    ){ indicator2 =>
+      val maybeIdentifiedConcept = transformer.identifyConcept(
+        ontologyType = "Concept",
+        varField = createVarFieldWith(
+          marcTag = "CCC",
+          indicator2 = indicator2,
+          subfields = List(
+            Subfield(tag = "a", content = "hitchhiking"),
+            Subfield(tag = "0", content = "dunno/xxx"),
+          )
+        )
+      )
+
+      maybeIdentifiedConcept shouldBe IdState.Unidentifiable
+    }
+
+  }
+
 }

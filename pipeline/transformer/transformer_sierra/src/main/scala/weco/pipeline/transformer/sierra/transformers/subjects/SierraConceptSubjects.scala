@@ -10,7 +10,11 @@ import weco.sierra.models.marc.{Subfield, VarField}
 
 // Populate wwork:subject
 //
-// Use MARC field "650", "648" and "651" where the second indicator is not 7.
+// Use MARC field "650", "648" and "651" where the second indicator is not 7 (7 = "Source specified in subfield $2").
+//
+// - https://www.loc.gov/marc/bibliographic/bd650.html
+// - https://www.loc.gov/marc/bibliographic/bd648.html
+// - https://www.loc.gov/marc/bibliographic/bd651.html
 //
 // Within these MARC tags, we have:
 //
@@ -55,6 +59,14 @@ object SierraConceptSubjects
     // than library of congress or mesh. Some MARC records have duplicated subjects
     // when the same subject has more than one authority (for example mesh and FAST),
     // which causes duplicated subjects to appear in the API.
+    //
+    // Example from b10199135 (j7jm24hj)
+    //  650  2 Retina|xphysiology.|0D012160Q000502
+    //  650  2 Vision, Ocular.|0D014785
+    //  650  2 Visual Pathways.|0D014795
+    //  650  7 Retina.|2fast|0(OCoLC)fst01096191
+    //  650  7 Vision.|2fast|0(OCoLC)fst01167852
+    //
     //
     // So let's filter anything that is from another authority for now.
     varfields.filterNot(_.indicator2.contains("7")).map { varfield =>
