@@ -3,11 +3,19 @@ package weco.pipeline.transformer.sierra.transformers
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks
-import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, SourceIdentifier}
+import weco.catalogue.internal_model.identifiers.{
+  IdState,
+  IdentifierType,
+  SourceIdentifier
+}
 import weco.sierra.generators.MarcGenerators
 import weco.sierra.models.marc.Subfield
 
-class SierraConceptsTest extends AnyFunSpec with Matchers with MarcGenerators with TableDrivenPropertyChecks {
+class SierraConceptsTest
+    extends AnyFunSpec
+    with Matchers
+    with MarcGenerators
+    with TableDrivenPropertyChecks {
   private val transformer = new SierraConcepts {}
 
   it("extracts identifiers from subfield 0") {
@@ -98,9 +106,15 @@ class SierraConceptsTest extends AnyFunSpec with Matchers with MarcGenerators wi
     forAll(
       Table(
         "indicator2",
-        None, Some("1"), Some("3"), Some("4"), Some("5"), Some("6"), Some("7")
+        None,
+        Some("1"),
+        Some("3"),
+        Some("4"),
+        Some("5"),
+        Some("6"),
+        Some("7")
       )
-    ){ indicator2 =>
+    ) { indicator2 =>
       val maybeIdentifiedConcept = transformer.identifyConcept(
         ontologyType = "Concept",
         varField = createVarFieldWith(
