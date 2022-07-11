@@ -689,7 +689,18 @@ class SierraTransformerTest
 
     val work = transformDataToSourceWork(id = id, data = data)
     work.data.subjects shouldBe List(
-      Subject(content, List(Concept(content)))
+      Subject(
+        id = IdState.Identifiable(
+          sourceIdentifier=SourceIdentifier(
+            identifierType = IdentifierType.LabelDerived,
+            value = content,
+            ontologyType = "Subject"
+          )
+        ),
+        label = content,
+        concepts = List(Concept(
+          label = content
+        )))
     )
   }
 

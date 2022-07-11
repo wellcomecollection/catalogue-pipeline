@@ -17,50 +17,83 @@ class SierraConceptsTest
     with MarcGenerators
     with TableDrivenPropertyChecks {
   private val transformer = new SierraConcepts {}
+  private val unsupportedSchemes = List(
+    None,
+    Some("1"),
+    Some("3"),
+    Some("4"),
+    Some("5"),
+    Some("6"),
+    Some("7")
+  )
+  private val supportedSchemes = List(
+    ("0", IdentifierType.LCSubjects),
+    ("2", IdentifierType.MESH)
+  )
+
+  private val allSchemes = unsupportedSchemes ++ supportedSchemes.map(scheme => Some(scheme._1))
 
   it("extracts identifiers from subfield 0") {
-    val maybeIdentifiedConcept = transformer.identifyConcept(
-      ontologyType = "Concept",
-      varField = createVarFieldWith(
-        marcTag = "CCC",
-        indicator2 = "0",
-        subfields = List(
-          Subfield(tag = "a", content = "pilots"),
-          Subfield(tag = "0", content = "lcsh/ppp")
+    forAll(
+      Table(
+        ("indicator2", "identifierType"),
+        supportedSchemes: _*
+      )
+    ) { (indicator2:String, identifierType:IdentifierType) =>
+
+      val maybeIdentifiedConcept = transformer.identifyConcept(
+        ontologyType = "Concept",
+        varField = createVarFieldWith(
+          marcTag = "CCC",
+          indicator2 = indicator2,
+          subfields = List(
+            Subfield(tag = "a", content = "pilots"),
+            Subfield(tag = "0", content = "lcsh/ppp")
+          )
         )
       )
-    )
 
-    val sourceIdentifier = SourceIdentifier(
-      identifierType = IdentifierType.LCSubjects,
-      value = "lcsh/ppp",
-      ontologyType = "Concept"
-    )
+      val sourceIdentifier = SourceIdentifier(
+        identifierType = identifierType,
+        value = "lcsh/ppp",
+        ontologyType = "Concept"
+      )
 
-    maybeIdentifiedConcept shouldBe IdState.Identifiable(sourceIdentifier)
+      maybeIdentifiedConcept shouldBe IdState.Identifiable(sourceIdentifier)
+    }
   }
 
-  it("creates a label-derived identifier for concepts with no identifier") {
-    val maybeIdentifiedConcept = transformer.identifyConcept(
-      ontologyType = "Concept",
-      varField = createVarFieldWith(
-        marcTag = "CCC",
-        indicator2 = "0",
-        subfields = List(
-          Subfield(tag = "a", content = "WhoKnows")
+  it("creates a label-derived identifier for concepts with no identifier, regardless of scheme") {
+    forAll(
+      Table(
+        "indicator2",
+        allSchemes: _*
+      )
+    ) { indicator2 =>
+
+      val maybeIdentifiedConcept = transformer.identifyConcept(
+        ontologyType = "Concept",
+        varField = createVarFieldWith(
+          marcTag = "CCC",
+          indicator2 = indicator2,
+          subfields = List(
+            Subfield(tag = "a", content = "Who Knows")
+          )
         )
       )
-    )
-    val sourceIdentifier = SourceIdentifier(
-      identifierType = IdentifierType.LabelDerived,
-      value = "WhoKnows",
-      ontologyType = "Concept"
-    )
+      val sourceIdentifier = SourceIdentifier(
+        identifierType = IdentifierType.LabelDerived,
+        value = "Who Knows",
+        ontologyType = "Concept"
+      )
 
-    maybeIdentifiedConcept shouldBe IdState.Identifiable(sourceIdentifier)
+      maybeIdentifiedConcept shouldBe IdState.Identifiable(sourceIdentifier)
+    }
   }
 
   it("normalises and deduplicates identifiers in subfield 0") {
+    // Given multiple 0 subfields that all resolve to the same value after normalisation
+    // Then that normalised value is the identifier value
     val maybeIdentifiedConcept = transformer.identifyConcept(
       ontologyType = "Concept",
       varField = createVarFieldWith(
@@ -92,6 +125,8 @@ class SierraConceptsTest
   }
 
   it("ignores multiple instances of subfield 0 in the otherIdentifiers") {
+    // Given multiple 0 subfields containing different values
+    // Then the Concept is unidentifiable
     val maybeIdentifiedConcept = transformer.identifyConcept(
       ontologyType = "Concept",
       varField = createVarFieldWith(
@@ -108,17 +143,14 @@ class SierraConceptsTest
     maybeIdentifiedConcept shouldBe IdState.Unidentifiable
   }
 
-  it("ignores unknown schemes") {
+  it("ignores identifiers in unknown schemes") {
+    // Given a varfield with an indicator2 other than 0 or 2
+    // Then the Concept is unidentifiable
+
     forAll(
       Table(
         "indicator2",
-        None,
-        Some("1"),
-        Some("3"),
-        Some("4"),
-        Some("5"),
-        Some("6"),
-        Some("7")
+        unsupportedSchemes: _*
       )
     ) { indicator2 =>
       val maybeIdentifiedConcept = transformer.identifyConcept(

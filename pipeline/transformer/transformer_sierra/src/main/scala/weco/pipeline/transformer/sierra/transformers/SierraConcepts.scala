@@ -60,6 +60,8 @@ trait SierraConcepts extends SierraQueryOps with ConceptsTransformer {
   //
   // Note that some identifiers have an identifier scheme in
   // indicator 2, but no ID.  In this case, we just ignore it.
+  //
+  // There are three
   def identifyConcept(ontologyType: String,
                       varField: VarField): IdState.Unminted =
     getIdentifierSubfieldContents(varField) match {
@@ -78,7 +80,7 @@ trait SierraConcepts extends SierraQueryOps with ConceptsTransformer {
                                     varField: VarField): IdState.Unminted =
     IdState.Identifiable(
       SierraConceptIdentifier.withNoIdentifier(
-        pseudoIdentifier = varField.subfieldsWithTag("a")(0).content,
+        pseudoIdentifier = varField.subfieldsWithTag("a").head.content,
         ontologyType = ontologyType))
 
   // If there's exactly one subfield $0 on the VarField, add an identifier

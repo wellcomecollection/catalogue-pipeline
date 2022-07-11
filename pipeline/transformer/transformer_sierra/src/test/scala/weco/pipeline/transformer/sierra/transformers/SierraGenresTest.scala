@@ -338,4 +338,50 @@ class SierraGenresTest
 
     expectedSourceIdentifiers shouldBe actualSourceIdentifiers
   }
+
+  it(s"creates a label-derived identifier for concepts with no identifier") {
+    val bibData = createSierraBibDataWith(
+      varFields = List(
+        createVarFieldWith(
+          marcTag = "655",
+          // LCSH heading
+          indicator2 = "0",
+          subfields = List(
+            Subfield(tag = "a", content = "absence"),
+          )
+        ),
+        createVarFieldWith(
+          marcTag = "655",
+          // MESH heading
+          indicator2 = "2",
+          subfields = List(
+            Subfield(tag = "a", content = "abolition"),
+          )
+        )
+      )
+    )
+
+    val expectedSourceIdentifiers = List(
+      SourceIdentifier(
+        identifierType = IdentifierType.LabelDerived,
+        value = "absence",
+        ontologyType = "Concept"
+      ),
+      SourceIdentifier(
+        identifierType = IdentifierType.LabelDerived,
+        value = "abolition",
+        ontologyType = "Concept"
+      )
+    )
+
+    val actualSourceIdentifiers = SierraGenres(bibData)
+      .map { _.concepts.head.id }
+      .map {
+        case IdState.Identifiable(sourceIdentifier, _, _) =>
+          sourceIdentifier
+        case other => assert(false, other)
+      }
+
+    expectedSourceIdentifiers shouldBe actualSourceIdentifiers
+  }
 }

@@ -2,14 +2,11 @@ package weco.pipeline.transformer.sierra.transformers.subjects
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.identifiers.{
-  IdState,
-  IdentifierType,
-  SourceIdentifier
-}
+import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, SourceIdentifier}
 import weco.catalogue.internal_model.work.{Concept, Place, Subject}
 import weco.pipeline.transformer.transformers.ParsedPeriod
 import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
+import weco.sierra.models.identifiers.SierraBibNumber
 import weco.sierra.models.marc.{Subfield, VarField}
 
 class SierraConceptSubjectsTest
@@ -18,7 +15,7 @@ class SierraConceptSubjectsTest
     with MarcGenerators
     with SierraDataGenerators {
 
-  def bibId = createSierraBibNumber
+  def bibId: SierraBibNumber = createSierraBibNumber
 
   it("returns zero subjects if there are none") {
     val bibData = createSierraBibDataWith(varFields = Nil)
@@ -39,6 +36,13 @@ class SierraConceptSubjectsTest
 
     SierraConceptSubjects(bibId, bibData) shouldBe List(
       Subject(
+        id = IdState.Identifiable(
+          sourceIdentifier=SourceIdentifier(
+            identifierType = IdentifierType.LabelDerived,
+            value = "A Content",
+            ontologyType = "Subject"
+          )
+        ),
         label = "A Content",
         concepts = List(Concept(label = "A Content"))
       )
