@@ -31,7 +31,8 @@ class SierraConceptsTest
     ("2", IdentifierType.MESH)
   )
 
-  private val allSchemes = unsupportedSchemes ++ supportedSchemes.map(scheme => Some(scheme._1))
+  private val allSchemes = unsupportedSchemes ++ supportedSchemes.map(scheme =>
+    Some(scheme._1))
 
   it("extracts identifiers from subfield 0") {
     forAll(
@@ -39,8 +40,7 @@ class SierraConceptsTest
         ("indicator2", "identifierType"),
         supportedSchemes: _*
       )
-    ) { (indicator2:String, identifierType:IdentifierType) =>
-
+    ) { (indicator2: String, identifierType: IdentifierType) =>
       val maybeIdentifiedConcept = transformer.identifyConcept(
         ontologyType = "Concept",
         varField = createVarFieldWith(
@@ -63,14 +63,14 @@ class SierraConceptsTest
     }
   }
 
-  it("creates a label-derived identifier for concepts with no identifier, regardless of scheme") {
+  it(
+    "creates a label-derived identifier for concepts with no identifier, regardless of scheme") {
     forAll(
       Table(
         "indicator2",
         allSchemes: _*
       )
     ) { indicator2 =>
-
       val maybeIdentifiedConcept = transformer.identifyConcept(
         ontologyType = "Concept",
         varField = createVarFieldWith(

@@ -2,7 +2,11 @@ package weco.pipeline.transformer.sierra.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, SourceIdentifier}
+import weco.catalogue.internal_model.identifiers.{
+  IdState,
+  IdentifierType,
+  SourceIdentifier
+}
 import weco.catalogue.internal_model.work.{Concept, Subject}
 import weco.sierra.generators.SierraDataGenerators
 import weco.sierra.models.marc.{Subfield, VarField}
@@ -32,9 +36,12 @@ class SierraSubjectsTest
 
     SierraSubjects(createSierraBibNumber, bibData) shouldBe List(
       Subject(
-        id = IdState.Identifiable(SourceIdentifier(
-          identifierType = IdentifierType.LabelDerived, ontologyType = "Subject", value = "Medicine"
-        )),
+        id = IdState.Identifiable(
+          SourceIdentifier(
+            identifierType = IdentifierType.LabelDerived,
+            ontologyType = "Subject",
+            value = "Medicine"
+          )),
         label = "Medicine",
         concepts = List(Concept("Medicine"))
       )
@@ -57,9 +64,12 @@ class SierraSubjectsTest
 
     SierraSubjects(createSierraBibNumber, bibData) shouldBe List(
       Subject(
-        id = IdState.Identifiable(SourceIdentifier(
-          identifierType = IdentifierType.LCSubjects, ontologyType = "Subject", value = "sh85083064"
-        )),
+        id = IdState.Identifiable(
+          SourceIdentifier(
+            identifierType = IdentifierType.LCSubjects,
+            ontologyType = "Subject",
+            value = "sh85083064"
+          )),
         label = "Medicine",
         concepts = List(Concept("Medicine")),
       )

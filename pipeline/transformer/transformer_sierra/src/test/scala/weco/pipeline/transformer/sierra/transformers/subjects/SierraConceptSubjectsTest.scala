@@ -2,7 +2,11 @@ package weco.pipeline.transformer.sierra.transformers.subjects
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, SourceIdentifier}
+import weco.catalogue.internal_model.identifiers.{
+  IdState,
+  IdentifierType,
+  SourceIdentifier
+}
 import weco.catalogue.internal_model.work.{Concept, Place, Subject}
 import weco.pipeline.transformer.transformers.ParsedPeriod
 import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
@@ -37,7 +41,7 @@ class SierraConceptSubjectsTest
     SierraConceptSubjects(bibId, bibData) shouldBe List(
       Subject(
         id = IdState.Identifiable(
-          sourceIdentifier=SourceIdentifier(
+          sourceIdentifier = SourceIdentifier(
             identifierType = IdentifierType.LabelDerived,
             value = "A Content",
             ontologyType = "Subject"

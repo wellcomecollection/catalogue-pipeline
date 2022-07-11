@@ -691,16 +691,18 @@ class SierraTransformerTest
     work.data.subjects shouldBe List(
       Subject(
         id = IdState.Identifiable(
-          sourceIdentifier=SourceIdentifier(
+          sourceIdentifier = SourceIdentifier(
             identifierType = IdentifierType.LabelDerived,
             value = content,
             ontologyType = "Subject"
           )
         ),
         label = content,
-        concepts = List(Concept(
-          label = content
-        )))
+        concepts = List(
+          Concept(
+            label = content
+          ))
+      )
     )
   }
 
