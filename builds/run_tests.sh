@@ -15,8 +15,7 @@ case "$PROJECT" in
     ;;
 
   "inference_manager")
-    $BUILDS_DIR/run_sbt_tests.sh "inference_manager"
-    $BUILDS_DIR/run_inference_manager_integration_tests.sh
+    $BUILDS_DIR/run_inference_manager_tests.sh
     ;;
   *)
     $BUILDS_DIR/run_sbt_tests.sh "$PROJECT"
