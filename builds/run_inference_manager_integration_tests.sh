@@ -16,7 +16,7 @@ do
 done
 
 pushd "$ROOT/pipeline/inferrer/inference_manager"
-  docker-compose up -d
+  docker-compose -f docker-compose.integration.yml up -d
 popd
 
 $BUILDS_DIR/run_sbt_task_in_docker.sh \
@@ -24,5 +24,5 @@ $BUILDS_DIR/run_sbt_task_in_docker.sh \
   ";testOnly **.integration.*"
 
 pushd "$ROOT/pipeline/inferrer/inference_manager"
-  docker-compose down
+  docker-compose -f docker-compose.integration.yml down
 popd
