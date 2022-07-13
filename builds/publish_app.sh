@@ -11,7 +11,7 @@ BUILDS_DIR="$ROOT/builds"
 
 case "$PROJECT" in
   "aspect_ratio_inferrer" | "feature_inferrer" | "palette_inferrer")
-    $BUILDS_DIR/run_inferrer_tests.sh "$PROJECT"
+    $BUILDS_DIR/publish_inferrer_app.sh "$PROJECT"
     ;;
 
   *)
