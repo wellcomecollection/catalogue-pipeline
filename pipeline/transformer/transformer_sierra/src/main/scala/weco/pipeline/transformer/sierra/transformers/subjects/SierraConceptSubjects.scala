@@ -8,7 +8,7 @@ import weco.pipeline.transformer.transformers.ParsedPeriod
 import weco.sierra.models.identifiers.SierraBibNumber
 import weco.sierra.models.marc.{Subfield, VarField}
 
-// Populate wwork:subject
+// Populate work:subject
 //
 // Use MARC field "650", "648" and "651" where the second indicator is not 7 (7 = "Source specified in subfield $2").
 //
@@ -95,9 +95,9 @@ object SierraConceptSubjects
       val label = subfield.content.trimTrailingPeriod
 
       varField.marcTag.get match {
-        case "650" => Concept(label = label)
-        case "648" => ParsedPeriod(label = label)
-        case "651" => Place(label = label)
+        case "650" => Concept(label = label).normalised.identifiable
+        case "648" => ParsedPeriod(label = label).identifiable
+        case "651" => Place(label = label).normalised.identifiable
       }
     }
 }

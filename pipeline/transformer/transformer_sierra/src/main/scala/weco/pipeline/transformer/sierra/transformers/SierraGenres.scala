@@ -49,10 +49,7 @@ object SierraGenres
     bibData
       .varfieldsWithTag("655")
       .map { varField =>
-        val (primarySubfields, subdivisionSubfields) =
-          varField
-            .subfieldsWithTags("a", "v", "x", "y", "z")
-            .partition { _.tag == "a" }
+        val (primarySubfields, subdivisionSubfields) = getLabelSubfields(varField)
 
         val label = getLabel(primarySubfields, subdivisionSubfields)
         val concepts = getPrimaryConcept(primarySubfields, varField = varField) ++ getSubdivisions(

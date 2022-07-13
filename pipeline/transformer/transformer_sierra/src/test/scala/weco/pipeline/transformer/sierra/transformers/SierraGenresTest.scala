@@ -28,7 +28,17 @@ class SierraGenresTest
       List(
         Genre(
           label = "A Content",
-          concepts = List(Concept(label = "A Content"))))
+          concepts = List(
+            Concept(
+              id = IdState.Identifiable(
+                sourceIdentifier=SourceIdentifier(
+                  identifierType = IdentifierType.LabelDerived,
+                  value = "A Content",
+                  ontologyType = "Concept"
+                )
+              ),
+              label = "A Content")
+          )))
 
     val bibData = createSierraBibDataWith(
       varFields = List(

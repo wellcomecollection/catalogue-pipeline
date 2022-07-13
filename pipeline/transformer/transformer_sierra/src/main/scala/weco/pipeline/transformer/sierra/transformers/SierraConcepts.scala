@@ -21,6 +21,16 @@ trait SierraConcepts extends SierraQueryOps with ConceptsTransformer {
     orderedSubfields.map { _.content }.mkString(" - ").trimTrailingPeriod
   }
 
+  protected def getLabel(varField:VarField):String = {
+    val (primarySubfields, subdivisionSubfields) = getLabelSubfields(varField)
+    getLabel(primarySubfields, subdivisionSubfields)
+  }
+
+  protected def getLabelSubfields(varField:VarField): (List[Subfield], List[Subfield]) =
+    varField
+      .subfieldsWithTags("a", "v", "x", "y", "z")
+      .partition { _.tag == "a" }
+
   /** Return a list of the distinct contents of every subfield 0 on
     * this varField, which is a commonly-used subfield for identifiers.
     */
@@ -61,7 +71,11 @@ trait SierraConcepts extends SierraQueryOps with ConceptsTransformer {
   // Note that some identifiers have an identifier scheme in
   // indicator 2, but no ID.  In this case, we just ignore it.
   //
-  // There are three
+  // There are three possible scenarios:
+  // - Exactly one identifier field:  use that
+  // - No identifier fields:  create an identifier for it
+  // - Multiple identifier fields: unidentifiable, we don't know what to use
+  // TODO: This latter is legal in MARC, but we should warn that it is having no effect.
   def identifyConcept(ontologyType: String,
                       varField: VarField): IdState.Unminted =
     getIdentifierSubfieldContents(varField) match {
@@ -72,7 +86,7 @@ trait SierraConcepts extends SierraQueryOps with ConceptsTransformer {
           identifierSubfieldContent = subfieldContent
         )
       case Nil =>
-        addIdentifierFromText(ontologyType, varField) // There were no 0 subfields, use the body instead.
+        addIdentifierFromText(ontologyType, varField)
       case _ => IdState.Unidentifiable
     }
 
@@ -80,7 +94,14 @@ trait SierraConcepts extends SierraQueryOps with ConceptsTransformer {
                                     varField: VarField): IdState.Unminted =
     IdState.Identifiable(
       SierraConceptIdentifier.withNoIdentifier(
-        pseudoIdentifier = varField.subfieldsWithTag("a").head.content,
+        //TODO:
+        // This should use getLabel instead, that means fiddling with the boundary between this trait
+        // and the classes that use it.
+        // where there is an id, the id corresponds to the whole, e.g.
+        // 650  0 Birds|xCollection and preservation.|0sh 85014314
+        // https://id.loc.gov/authorities/subjects/sh85014314.html
+
+        pseudoIdentifier = getLabel(varField),
         ontologyType = ontologyType))
 
   // If there's exactly one subfield $0 on the VarField, add an identifier
@@ -104,9 +125,9 @@ trait SierraConcepts extends SierraQueryOps with ConceptsTransformer {
     : List[AbstractConcept[IdState.Unminted]] =
     subdivisionSubfields.map { subfield =>
       subfield.tag match {
-        case "v" | "x" => Concept(label = subfield.content).normalised
-        case "y"       => ParsedPeriod(label = subfield.content)
-        case "z"       => Place(label = subfield.content).normalised
+        case "v" | "x" => Concept(label = subfield.content).normalised.identifiable
+        case "y"       => ParsedPeriod(label = subfield.content).identifiable
+        case "z"       => Place(label = subfield.content).normalised.identifiable
       }
     }
 }
