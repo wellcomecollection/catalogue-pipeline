@@ -19,7 +19,7 @@ pushd "$ROOT/pipeline/inferrer/inference_manager"
   docker-compose up -d
 popd
 
-$BUILDS_DIR/run_sbt_tests.sh inference_manager
+$BUILDS_DIR/run_sbt_task_in_docker.sh "project inference_manager" "test"
 
 pushd "$ROOT/pipeline/inferrer/inference_manager"
   docker-compose down
