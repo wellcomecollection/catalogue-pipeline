@@ -8,8 +8,8 @@ import weco.catalogue.internal_model.identifiers.{
   SourceIdentifier
 }
 import weco.catalogue.internal_model.work.{Concept, Place, Subject, Period}
+import org.scalatest.prop.TableDrivenPropertyChecks
 import weco.pipeline.transformer.sierra.transformers.matchers.{ConceptsMatchers, SourceIdentifierMatchers, SubjectMatchers}
-import weco.pipeline.transformer.transformers.ParsedPeriod
 import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
 import weco.sierra.models.identifiers.SierraBibNumber
 import weco.sierra.models.marc.{Subfield, VarField}
@@ -20,7 +20,9 @@ class SierraConceptSubjectsTest
     with ConceptsMatchers
     with SubjectMatchers
     with MarcGenerators
-    with SierraDataGenerators {
+    with SierraDataGenerators
+      with TableDrivenPropertyChecks
+{
 
   private def bibId: SierraBibNumber = createSierraBibNumber
 
@@ -274,16 +276,30 @@ class SierraConceptSubjectsTest
       )
     )
 
-    SierraConceptSubjects(bibId, bibData) shouldBe List(
-      Subject(
-        label = "A Content - X Content - V Content",
-        concepts = List(
-          ParsedPeriod(label = "A Content"),
-          Concept(label = "X Content"),
-          Concept(label = "V Content")
-        )
-      )
+    val List(subject) = SierraConceptSubjects(bibId, bibData)
+    subject should have (
+      subjectLabel( "A Content - X Content - V Content"),
+      labelDerivedSubjectId("A Content - X Content - V Content")
     )
+
+    val List(conceptA, conceptX, conceptV) = subject.concepts
+    conceptA shouldBe a [Period[_]]
+    conceptA should have (
+      conceptLabel ("A Content"),
+      labelDerivedConceptId ("A Content")
+    )
+
+    conceptX shouldBe a [Concept[_]]
+    conceptX should have (
+      conceptLabel ("X Content"),
+      labelDerivedConceptId ("X Content")
+    )
+    conceptV shouldBe a [Concept[_]]
+    conceptV should have (
+      conceptLabel ("V Content"),
+      labelDerivedConceptId ("V Content")
+    )
+
   }
 
   it("returns subjects with primary concept Place for tag 651") {
@@ -300,15 +316,29 @@ class SierraConceptSubjectsTest
       )
     )
 
-    SierraConceptSubjects(bibId, bibData) shouldBe List(
-      Subject(
-        label = "A Content - X Content - V Content",
-        concepts = List(
-          Place(label = "A Content"),
-          Concept(label = "X Content"),
-          Concept(label = "V Content")
-        )
-      )
+    val List(subject) = SierraConceptSubjects(bibId, bibData)
+    subject should have (
+      subjectLabel( "A Content - X Content - V Content"),
+      labelDerivedSubjectId("A Content - X Content - V Content")
+    )
+
+    val List(conceptA, conceptX, conceptV) = subject.concepts
+    conceptA shouldBe a [Place[_]]
+    conceptA should have (
+      conceptLabel ("A Content"),
+      labelDerivedConceptId ("A Content")
+    )
+
+    conceptX shouldBe a [Concept[_]]
+    conceptX should have (
+      conceptLabel ("X Content"),
+      labelDerivedConceptId ("X Content")
+    )
+
+    conceptV shouldBe a [Concept[_]]
+    conceptV should have (
+      conceptLabel ("V Content"),
+      labelDerivedConceptId ("V Content")
     )
   }
 
@@ -413,7 +443,11 @@ class SierraConceptSubjectsTest
     SierraConceptSubjects(bibId, bibData) shouldBe Nil
   }
 
-  it("removes a trailing period from a subject label") {
+  it("removes a trailing period from a primary subject label, regardless of type") {
+    // The different types of concept all normalise in their own fashion, removing
+    // whatever flavour of terminal punctuation is peculiar to that tag.
+    // However, when they are the Primary Concept, a terminal full stop is always removed
+    //"648", "650", "651"
     val bibData = createSierraBibDataWith(
       varFields = List(
         VarField(
@@ -429,5 +463,11 @@ class SierraConceptSubjectsTest
       Subject(
         "Diet, Food, and Nutrition",
         concepts = List(Concept("Diet, Food, and Nutrition"))))
+  }
+  it("Assigns an extracted id to the sole Concept") {
+    // Other tests use label-derived ids because there is no id.
+    // or the Subject is a compound subject consisting of multiple Concepts
+    // If the subject is made up of one Concept, then the id extracted from the
+    // $0 field should also be the id on the Concept itself.
   }
 }
