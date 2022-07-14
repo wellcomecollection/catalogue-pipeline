@@ -21,12 +21,13 @@ trait SierraConcepts extends SierraQueryOps with ConceptsTransformer {
     orderedSubfields.map { _.content }.mkString(" - ").trimTrailingPeriod
   }
 
-  protected def getLabel(varField:VarField):String = {
+  protected def getLabel(varField: VarField): String = {
     val (primarySubfields, subdivisionSubfields) = getLabelSubfields(varField)
     getLabel(primarySubfields, subdivisionSubfields)
   }
 
-  protected def getLabelSubfields(varField:VarField): (List[Subfield], List[Subfield]) =
+  protected def getLabelSubfields(
+    varField: VarField): (List[Subfield], List[Subfield]) =
     varField
       .subfieldsWithTags("a", "v", "x", "y", "z")
       .partition { _.tag == "a" }
@@ -100,9 +101,9 @@ trait SierraConcepts extends SierraQueryOps with ConceptsTransformer {
         // where there is an id, the id corresponds to the whole, e.g.
         // 650  0 Birds|xCollection and preservation.|0sh 85014314
         // https://id.loc.gov/authorities/subjects/sh85014314.html
-
         pseudoIdentifier = getLabel(varField),
-        ontologyType = ontologyType))
+        ontologyType = ontologyType
+      ))
 
   // If there's exactly one subfield $0 on the VarField, add an identifier
   // if possible.
@@ -125,9 +126,10 @@ trait SierraConcepts extends SierraQueryOps with ConceptsTransformer {
     : List[AbstractConcept[IdState.Unminted]] =
     subdivisionSubfields.map { subfield =>
       subfield.tag match {
-        case "v" | "x" => Concept(label = subfield.content).normalised.identifiable()
-        case "y"       => ParsedPeriod(label = subfield.content).identifiable()
-        case "z"       => Place(label = subfield.content).normalised.identifiable()
+        case "v" | "x" =>
+          Concept(label = subfield.content).normalised.identifiable()
+        case "y" => ParsedPeriod(label = subfield.content).identifiable()
+        case "z" => Place(label = subfield.content).normalised.identifiable()
       }
     }
 }

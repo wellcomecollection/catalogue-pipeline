@@ -31,14 +31,16 @@ class SierraGenresTest
           concepts = List(
             Concept(
               id = IdState.Identifiable(
-                sourceIdentifier=SourceIdentifier(
+                sourceIdentifier = SourceIdentifier(
                   identifierType = IdentifierType.LabelDerived,
                   value = "A Content",
                   ontologyType = "Concept"
                 )
               ),
-              label = "A Content")
-          )))
+              label = "A Content"
+            )
+          )
+        ))
 
     val bibData = createSierraBibDataWith(
       varFields = List(

@@ -75,7 +75,8 @@ object SierraConceptSubjects
       }
 
       val label = getLabel(primarySubfields, subdivisionSubfields)
-      val concepts = getConcepts(varfield, primarySubfields, subdivisionSubfields)
+      val concepts =
+        getConcepts(varfield, primarySubfields, subdivisionSubfields)
 
       Subject(
         id = identifyConcept(ontologyType = "Subject", varfield),
@@ -85,31 +86,34 @@ object SierraConceptSubjects
     }
   }
 
-  private def getConcepts(varfield: VarField, primarySubfields: List[Subfield], subdivisionSubfields: List[Subfield]): List[AbstractConcept[IdState.Unminted]] = {
+  private def getConcepts(varfield: VarField,
+                          primarySubfields: List[Subfield],
+                          subdivisionSubfields: List[Subfield])
+    : List[AbstractConcept[IdState.Unminted]] = {
     subdivisionSubfields match {
 
       case Nil =>
-        val conceptId = identifyConcept(ontologyType = "Concept", varfield) match {
-          case identifiable: IdState.Identifiable => Some(identifiable)
-          case _ => None
-        }
-        getPrimaryConcept (
+        val conceptId =
+          identifyConcept(ontologyType = "Concept", varfield) match {
+            case identifiable: IdState.Identifiable => Some(identifiable)
+            case _                                  => None
+          }
+        getPrimaryConcept(
           primarySubfields,
           varField = varfield,
           idstate = conceptId,
         )
       case _ =>
-        getPrimaryConcept (
-          primarySubfields,
-          varField = varfield) ++ getSubdivisions(subdivisionSubfields)
+        getPrimaryConcept(primarySubfields, varField = varfield) ++ getSubdivisions(
+          subdivisionSubfields)
     }
   }
 
   private def getPrimaryConcept(
     primarySubfields: List[Subfield],
     varField: VarField,
-    idstate:Option[IdState.Identifiable] = None
-                               ): List[AbstractConcept[IdState.Unminted]] =
+    idstate: Option[IdState.Identifiable] = None
+  ): List[AbstractConcept[IdState.Unminted]] =
     primarySubfields.map { subfield =>
       val label = subfield.content.trimTrailingPeriod
 

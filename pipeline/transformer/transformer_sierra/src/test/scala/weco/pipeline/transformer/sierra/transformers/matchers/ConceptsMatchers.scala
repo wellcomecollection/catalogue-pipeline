@@ -5,8 +5,10 @@ import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.AbstractRootConcept
 
 trait ConceptsMatchers {
-  private class HasLabel(expectedValue: String) extends HavePropertyMatcher[AbstractRootConcept[IdState.Unminted], String] {
-    override def apply(concept: AbstractRootConcept[IdState.Unminted]): HavePropertyMatchResult[String] = {
+  private class HasLabel(expectedValue: String)
+      extends HavePropertyMatcher[AbstractRootConcept[IdState.Unminted], String] {
+    override def apply(concept: AbstractRootConcept[IdState.Unminted])
+      : HavePropertyMatchResult[String] = {
       HavePropertyMatchResult(
         concept.label == expectedValue,
         "label",
@@ -16,14 +18,21 @@ trait ConceptsMatchers {
     }
   }
 
-  def conceptLabel(expectedValue: String): HavePropertyMatcher[AbstractRootConcept[IdState.Unminted], String] =
+  def conceptLabel(expectedValue: String)
+    : HavePropertyMatcher[AbstractRootConcept[IdState.Unminted], String] =
     new HasLabel(expectedValue)
 
-  def labelDerivedConceptId(expectedValue: String): HavePropertyMatcher[AbstractRootConcept[IdState.Unminted], String] =
-    new SourceIdentifierMatchers.HasLabelDerivedIdentifier(ontologyType = "Concept", expectedValue = expectedValue)
+  def labelDerivedConceptId(expectedValue: String)
+    : HavePropertyMatcher[AbstractRootConcept[IdState.Unminted], String] =
+    new SourceIdentifierMatchers.HasLabelDerivedIdentifier(
+      ontologyType = "Concept",
+      expectedValue = expectedValue)
 
-  def meshConceptId(expectedValue: String): HavePropertyMatcher[AbstractRootConcept[IdState.Unminted], String] =
-    new SourceIdentifierMatchers.HasMeshIdentifier(ontologyType = "Concept", expectedValue = expectedValue)
+  def meshConceptId(expectedValue: String)
+    : HavePropertyMatcher[AbstractRootConcept[IdState.Unminted], String] =
+    new SourceIdentifierMatchers.HasMeshIdentifier(
+      ontologyType = "Concept",
+      expectedValue = expectedValue)
 
 }
 
