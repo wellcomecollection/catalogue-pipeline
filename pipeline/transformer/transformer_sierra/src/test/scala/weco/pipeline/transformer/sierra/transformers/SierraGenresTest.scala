@@ -2,12 +2,9 @@ package weco.pipeline.transformer.sierra.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.identifiers.{
-  IdState,
-  IdentifierType,
-  SourceIdentifier
-}
+import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, SourceIdentifier}
 import weco.catalogue.internal_model.work.{Concept, Genre, Place}
+import weco.pipeline.transformer.sierra.transformers.matchers.ConceptMatchers
 import weco.pipeline.transformer.transformers.ParsedPeriod
 import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
 import weco.sierra.models.marc.{Subfield, VarField}
@@ -15,12 +12,13 @@ import weco.sierra.models.marc.{Subfield, VarField}
 class SierraGenresTest
     extends AnyFunSpec
     with Matchers
+      with ConceptMatchers
     with MarcGenerators
     with SierraDataGenerators {
 
   it("returns zero genres if there are none") {
     val bibData = createSierraBibDataWith(varFields = List())
-    SierraGenres(bibData) shouldBe List()
+    SierraGenres(bibData) shouldBe Nil
   }
 
   it("returns genres for tag 655 with only subfield a") {
@@ -55,17 +53,6 @@ class SierraGenresTest
   }
 
   it("returns subjects for tag 655 with subfields a and v") {
-    val expectedGenres =
-      List(
-        Genre(
-          label = "A Content - V Content",
-          concepts = List(
-            Concept(label = "A Content"),
-            Concept(label = "V Content")
-          )
-        )
-      )
-
     val bibData = createSierraBibDataWith(
       varFields = List(
         VarField(
@@ -77,8 +64,23 @@ class SierraGenresTest
         )
       )
     )
+    val List(genre) = SierraGenres(bibData)
 
-    SierraGenres(bibData) shouldBe expectedGenres
+    genre should have (
+      'label ("A Content - V Content")
+    )
+
+    val List(conceptA, conceptV) = genre.concepts
+    conceptA shouldBe a [Concept[_]]
+    conceptA should have (
+      'label ("A Content"),
+      labelDerivedConceptId ("A Content")
+    )
+    conceptV shouldBe a [Concept[_]]
+    conceptV should have (
+      'label ("V Content"),
+      labelDerivedConceptId ("V Content")
+    )
   }
 
   it(
