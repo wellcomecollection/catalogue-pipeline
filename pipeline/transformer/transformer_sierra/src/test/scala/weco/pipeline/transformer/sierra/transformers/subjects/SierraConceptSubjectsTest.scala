@@ -2,12 +2,8 @@ package weco.pipeline.transformer.sierra.transformers.subjects
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.identifiers.{
-  IdState,
-  IdentifierType,
-  SourceIdentifier
-}
-import weco.catalogue.internal_model.work.{Concept, Place, Subject, Period}
+import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, SourceIdentifier}
+import weco.catalogue.internal_model.work.{AbstractRootConcept, Concept, Period, Place}
 import org.scalatest.prop.TableDrivenPropertyChecks
 import weco.pipeline.transformer.sierra.transformers.matchers.{ConceptsMatchers, SourceIdentifierMatchers, SubjectMatchers}
 import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
@@ -390,6 +386,10 @@ class SierraConceptSubjectsTest
   }
 
   it("ignores subject with second indicator 7") {
+    // TODO, this is not correct, the desired state is a bit more complex.
+    // We ignore identified fields with second indicators other than 0 and 2
+    // but if unidentified, we should process them (I think?)
+
     val bibData = createSierraBibDataWith(
       varFields = List(
         createVarFieldWith(
@@ -412,22 +412,23 @@ class SierraConceptSubjectsTest
       )
     )
 
-    val sourceIdentifier = SourceIdentifier(
-      identifierType = IdentifierType.MESH,
-      value = "mesh/456",
-      ontologyType = "Subject"
+    val List(subject) = SierraConceptSubjects(bibId, bibData)
+    subject should have (
+      subjectLabel( "abolition"),
+      meshSubjectId("mesh/456")
     )
+    val List(concept) = subject.concepts
 
-    SierraConceptSubjects(bibId, bibData) shouldBe List(
-      Subject(
-        label = "abolition",
-        concepts = List(Concept("abolition")),
-        id = IdState.Identifiable(sourceIdentifier)
-      )
+    concept should have (
+      conceptLabel ("abolition"),
+      meshConceptId ("mesh/456")
     )
   }
 
   it("Ignores a subject with second indicator 7 but no subfield 0") {
+    // TODO, this is not correct, the desired state is a bit more complex.
+    // We ignore identified fields with second indicators other than 0 and 2
+    // but if unidentified, we should process them (I think?)
     val bibData = createSierraBibDataWith(
       varFields = List(
         createVarFieldWith(
@@ -447,27 +448,44 @@ class SierraConceptSubjectsTest
     // The different types of concept all normalise in their own fashion, removing
     // whatever flavour of terminal punctuation is peculiar to that tag.
     // However, when they are the Primary Concept, a terminal full stop is always removed
-    //"648", "650", "651"
-    val bibData = createSierraBibDataWith(
-      varFields = List(
-        VarField(
-          marcTag = "650",
-          subfields = List(
-            Subfield(tag = "a", content = "Diet, Food, and Nutrition.")
+    forAll(Table(
+      ("marcTag", "assertType"),
+      ("648", (concept:AbstractRootConcept[Any]) => concept shouldBe a [Period[_]]),
+      ("650", (concept:AbstractRootConcept[Any]) => concept shouldBe a [Concept[_]]),
+      ("651", (concept:AbstractRootConcept[Any]) => concept shouldBe a [Place[_]])
+    )) {
+      (marcTag, assertType) =>
+        val bibData = createSierraBibDataWith(
+          varFields = List(
+            VarField(
+              marcTag = marcTag,
+              subfields = List(
+                Subfield(tag = "a", content = "Diet, Food, and Nutrition.")
+              )
+            )
           )
         )
-      )
-    )
 
-    SierraConceptSubjects(bibId, bibData) shouldBe List(
-      Subject(
-        "Diet, Food, and Nutrition",
-        concepts = List(Concept("Diet, Food, and Nutrition"))))
+        val List(subject) = SierraConceptSubjects(bibId, bibData)
+        subject should have (
+          subjectLabel( "Diet, Food, and Nutrition"),
+          labelDerivedSubjectId("Diet, Food, and Nutrition")
+        )
+        val List(concept) = subject.concepts
+        assertType(concept)
+
+    }
   }
+
   it("Assigns an extracted id to the sole Concept") {
     // Other tests use label-derived ids because there is no id.
     // or the Subject is a compound subject consisting of multiple Concepts
     // If the subject is made up of one Concept, then the id extracted from the
     // $0 field should also be the id on the Concept itself.
+    // This is (kinda) caught in "ignores subject with second indicator 7",
+    pending
   }
+
+  //TODO: Now that it's not doing the Mocky style test, we need to check that ParsedPeriod is being used.
+  // put in a test with roman numeral dates and see what happens.
 }

@@ -23,5 +23,8 @@ trait SubjectMatchers {
 
   def labelDerivedSubjectId(expectedValue: String): HavePropertyMatcher[Subject[IdState.Unminted], String] =
     new SourceIdentifierMatchers.HasLabelDerivedIdentifier(ontologyType = "Subject", expectedValue = expectedValue)
+
+  def meshSubjectId(expectedValue: String): HavePropertyMatcher[Subject[IdState.Unminted], String] =
+    new SourceIdentifierMatchers.HasMeshIdentifier(ontologyType = "Subject", expectedValue = expectedValue)
 }
 

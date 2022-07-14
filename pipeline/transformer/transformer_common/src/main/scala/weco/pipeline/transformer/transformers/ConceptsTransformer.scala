@@ -14,13 +14,13 @@ trait ConceptsTransformer {
     def normalised: Concept[State] =
       c.copy(label = c.label.trimTrailingPeriod)
 
-    def identifiable: Concept[IdState.Identifiable] =
-      c.copy(id=IdState.Identifiable(
+    def identifiable(idState: Option[IdState.Identifiable] = None): Concept[IdState.Identifiable] =
+      c.copy(id=idState.getOrElse(IdState.Identifiable(
         SourceIdentifier(
           identifierType = IdentifierType.LabelDerived,
           ontologyType = "Concept",
           value = c.label
-        )
+        ))
       ))
   }
 
@@ -55,26 +55,26 @@ trait ConceptsTransformer {
     def normalised: Place[State] =
       pl.copy(label = pl.label.trimTrailing(':'))
 
-    def identifiable: Place[IdState.Identifiable] =
-      pl.copy(id=IdState.Identifiable(
+    def identifiable(idState: Option[IdState.Identifiable] = None): Place[IdState.Identifiable] =
+      pl.copy(id=idState.getOrElse(IdState.Identifiable(
         SourceIdentifier(
           identifierType = IdentifierType.LabelDerived,
           ontologyType = "Concept",
           value = pl.label
         )
-      ))
+      )))
 
   }
 
   implicit class PeriodOps[State](p: Period[State]) {
 
-    def identifiable: Period[IdState.Identifiable] =
-      p.copy(id=IdState.Identifiable(
+    def identifiable(idState: Option[IdState.Identifiable] = None): Period[IdState.Identifiable] =
+      p.copy(id=idState.getOrElse(IdState.Identifiable(
         SourceIdentifier(
           identifierType = IdentifierType.LabelDerived,
           ontologyType = "Concept",
           value = p.label
-        )
+        ))
       ))
   }
 }
