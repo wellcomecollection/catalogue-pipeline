@@ -14,8 +14,7 @@ import weco.sierra.models.marc.VarField
 object SierraBrandNameSubjects
     extends SierraSubjectsTransformer
     with ConceptsTransformer
-    with SierraConcepts
-      {
+    with SierraConcepts {
 
   val subjectVarFields = List("652")
 
@@ -24,7 +23,10 @@ object SierraBrandNameSubjects
     varFields
       .subfieldsWithTag("a")
       .contents
-      .map(label => new Subject(
-        id=addIdentifierFromText(ontologyType = "Subject", label=label),
-        label = label, concepts = List(Concept(label).identifiable())))
+      .map(
+        label =>
+          new Subject(
+            id = addIdentifierFromText(ontologyType = "Subject", label = label),
+            label = label,
+            concepts = List(Concept(label).identifiable())))
 }

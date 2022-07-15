@@ -93,7 +93,9 @@ trait SierraConcepts extends SierraQueryOps with ConceptsTransformer {
 
   def addIdentifierFromVarfieldText(ontologyType: String,
                                     varField: VarField): IdState.Unminted =
-    addIdentifierFromText(ontologyType=ontologyType, label=getLabel(varField))
+    addIdentifierFromText(
+      ontologyType = ontologyType,
+      label = getLabel(varField))
 
   def addIdentifierFromText(ontologyType: String,
                             label: String): IdState.Unminted =

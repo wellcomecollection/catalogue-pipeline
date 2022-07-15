@@ -2,15 +2,18 @@ package weco.pipeline.transformer.sierra.transformers.subjects
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.pipeline.transformer.sierra.transformers.matchers.{ConceptMatchers, SubjectMatchers}
+import weco.pipeline.transformer.sierra.transformers.matchers.{
+  ConceptMatchers,
+  SubjectMatchers
+}
 import weco.sierra.generators.SierraDataGenerators
 import weco.sierra.models.marc.{Subfield, VarField}
 
 class SierraBrandNameSubjectsTest
     extends AnyFunSpec
     with Matchers
-      with SubjectMatchers
-      with ConceptMatchers
+    with SubjectMatchers
+    with ConceptMatchers
     with SierraDataGenerators {
 
   it("returns zero subjects if there are none") {
@@ -23,13 +26,13 @@ class SierraBrandNameSubjectsTest
       VarField(marcTag = "652", subfields = List(Subfield("a", "Content"))),
     )
     val List(subject) = getBrandNameSubjects(varFields)
-    subject should have (
-      'label("Content"),
+    subject should have(
+      'label ("Content"),
       labelDerivedSubjectId("Content")
     )
     val List(concept) = subject.concepts
-    concept should have (
-      'label("Content"),
+    concept should have(
+      'label ("Content"),
       labelDerivedConceptId("Content")
     )
   }
@@ -53,14 +56,14 @@ class SierraBrandNameSubjectsTest
 
     subjects.length shouldBe 2
     List("First", "Second").zip(subjects).map {
-      case (label, subject)  =>
-        subject should have (
-          'label(label),
+      case (label, subject) =>
+        subject should have(
+          'label (label),
           labelDerivedSubjectId(label)
         )
         val List(concept) = subject.concepts
-        concept should have (
-          'label(label),
+        concept should have(
+          'label (label),
           labelDerivedConceptId(label)
         )
     }
