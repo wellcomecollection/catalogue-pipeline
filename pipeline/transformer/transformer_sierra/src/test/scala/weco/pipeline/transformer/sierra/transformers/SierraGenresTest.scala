@@ -85,16 +85,6 @@ class SierraGenresTest
 
   it(
     "subfield a is always first concept when returning subjects for tag 655 with subfields a, v") {
-    val expectedGenres =
-      List(
-        Genre(
-          label = "A Content - V Content",
-          concepts = List(
-            Concept(label = "A Content"),
-            Concept(label = "V Content")
-          )
-        )
-      )
 
     val bibData = createSierraBibDataWith(
       varFields = List(
@@ -108,21 +98,26 @@ class SierraGenresTest
       )
     )
 
-    SierraGenres(bibData) shouldBe expectedGenres
+    val List(genre) = SierraGenres(bibData)
+
+    genre should have (
+      'label ("A Content - V Content")
+    )
+
+    val List(conceptA, conceptV) = genre.concepts
+    conceptA shouldBe a [Concept[_]]
+    conceptA should have (
+      'label ("A Content"),
+      labelDerivedConceptId ("A Content")
+    )
+    conceptV shouldBe a [Concept[_]]
+    conceptV should have (
+      'label ("V Content"),
+      labelDerivedConceptId ("V Content")
+    )
   }
 
   it("returns genres for tag 655 subfields a, v, and x") {
-    val expectedGenres =
-      List(
-        Genre(
-          label = "A Content - X Content - V Content",
-          concepts = List(
-            Concept(label = "A Content"),
-            Concept(label = "X Content"),
-            Concept(label = "V Content")
-          )
-        ))
-
     val bibData = createSierraBibDataWith(
       varFields = List(
         VarField(
@@ -136,7 +131,29 @@ class SierraGenresTest
       )
     )
 
-    SierraGenres(bibData) shouldBe expectedGenres
+
+    val List(genre) = SierraGenres(bibData)
+
+    genre should have (
+      'label ("A Content - X Content - V Content")
+    )
+
+    val List(conceptA, conceptX, conceptV) = genre.concepts
+    conceptA shouldBe a [Concept[_]]
+    conceptA should have (
+      'label ("A Content"),
+      labelDerivedConceptId ("A Content")
+    )
+    conceptX shouldBe a [Concept[_]]
+    conceptX should have (
+      'label ("X Content"),
+      labelDerivedConceptId ("X Content")
+    )
+    conceptV shouldBe a [Concept[_]]
+    conceptV should have (
+      'label ("V Content"),
+      labelDerivedConceptId ("V Content")
+    )
   }
 
   it("returns subjects for tag 655 with subfields a, y") {
