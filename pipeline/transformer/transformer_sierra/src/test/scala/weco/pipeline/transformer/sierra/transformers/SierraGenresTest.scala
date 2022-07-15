@@ -7,7 +7,7 @@ import weco.catalogue.internal_model.identifiers.{
   IdentifierType,
   SourceIdentifier
 }
-import weco.catalogue.internal_model.work.{Concept, Genre, Place, Period}
+import weco.catalogue.internal_model.work.{Concept, Genre, Period, Place}
 import weco.pipeline.transformer.sierra.transformers.matchers.ConceptMatchers
 import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
 import weco.sierra.models.marc.{Subfield, VarField}
@@ -172,23 +172,22 @@ class SierraGenresTest
       )
     )
 
-
     val List(genre) = SierraGenres(bibData)
 
-    genre should have (
+    genre should have(
       'label ("A Content - Y Content")
     )
 
     val List(conceptA, conceptV) = genre.concepts
-    conceptA shouldBe a [Concept[_]]
-    conceptA should have (
+    conceptA shouldBe a[Concept[_]]
+    conceptA should have(
       'label ("A Content"),
-      labelDerivedConceptId ("A Content")
+      labelDerivedConceptId("A Content")
     )
-    conceptV shouldBe a [Period[_]]
-    conceptV should have (
+    conceptV shouldBe a[Period[_]]
+    conceptV should have(
       'label ("Y Content"),
-      labelDerivedConceptId ("Y Content")
+      labelDerivedConceptId("Y Content")
     )
   }
 
@@ -207,20 +206,20 @@ class SierraGenresTest
 
     val List(genre) = SierraGenres(bibData)
 
-    genre should have (
+    genre should have(
       'label ("A Content - Z Content")
     )
 
     val List(conceptA, conceptV) = genre.concepts
-    conceptA shouldBe a [Concept[_]]
-    conceptA should have (
+    conceptA shouldBe a[Concept[_]]
+    conceptA should have(
       'label ("A Content"),
-      labelDerivedConceptId ("A Content")
+      labelDerivedConceptId("A Content")
     )
-    conceptV shouldBe a [Place[_]]
-    conceptV should have (
+    conceptV shouldBe a[Place[_]]
+    conceptV should have(
       'label ("Z Content"),
-      labelDerivedConceptId ("Z Content")
+      labelDerivedConceptId("Z Content")
     )
   }
 
@@ -267,13 +266,13 @@ class SierraGenresTest
     List("Electronic journals", "Periodical", "Periodicals").zip(genres).map {
       case (genreName, genre) =>
         genre should have(
-          'label(genreName)
+          'label (genreName)
         )
 
         val List(concept) = genre.concepts
         concept shouldBe a[Concept[_]]
         concept should have(
-          'label(genreName),
+          'label (genreName),
           labelDerivedConceptId(genreName)
         )
     }
