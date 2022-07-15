@@ -50,12 +50,12 @@ trait SourceIdentifierMatchers {
   }
 
   class HasMeshIdentifier(ontologyType: String, expectedValue: String)
-    extends HasIdentifier(ontologyType: String, expectedValue: String) {
+      extends HasIdentifier(ontologyType: String, expectedValue: String) {
     val identifierType: IdentifierType = IdentifierType.MESH
   }
 
   class HasLCSubjectsIdentifier(ontologyType: String, expectedValue: String)
-    extends HasIdentifier(ontologyType: String, expectedValue: String) {
+      extends HasIdentifier(ontologyType: String, expectedValue: String) {
     val identifierType: IdentifierType = IdentifierType.LCSubjects
   }
 

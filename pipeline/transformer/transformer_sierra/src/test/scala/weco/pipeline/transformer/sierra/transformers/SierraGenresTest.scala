@@ -7,7 +7,13 @@ import weco.catalogue.internal_model.identifiers.{
   IdentifierType,
   SourceIdentifier
 }
-import weco.catalogue.internal_model.work.{AbstractConcept, Concept, Genre, Period, Place}
+import weco.catalogue.internal_model.work.{
+  AbstractConcept,
+  Concept,
+  Genre,
+  Period,
+  Place
+}
 import weco.pipeline.transformer.sierra.transformers.matchers.ConceptMatchers
 import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
 import weco.sierra.models.marc.{Subfield, VarField}
@@ -300,27 +306,36 @@ class SierraGenresTest
       )
     )
 
-
     val genres = SierraGenres(bibData)
     genres.length shouldBe 2
     List(
-      ("A1 Content - Z1 Content", "A1 Content", "Z1 Content", (concept:AbstractConcept[Any]) => concept shouldBe a[Place[_]]),
-      ("A2 Content - V2 Content", "A2 Content", "V2 Content", (concept:AbstractConcept[Any]) => concept shouldBe a[Concept[_]]),
+      (
+        "A1 Content - Z1 Content",
+        "A1 Content",
+        "Z1 Content",
+        (concept: AbstractConcept[Any]) => concept shouldBe a[Place[_]]),
+      (
+        "A2 Content - V2 Content",
+        "A2 Content",
+        "V2 Content",
+        (concept: AbstractConcept[Any]) => concept shouldBe a[Concept[_]]),
     ).zip(genres).map {
-      case ((genreName, concept1Name, concept2Name, assertConcept2Type), genre) =>
+      case (
+          (genreName, concept1Name, concept2Name, assertConcept2Type),
+          genre) =>
         genre should have(
-          'label(genreName)
+          'label (genreName)
         )
 
         val List(concept1, concept2) = genre.concepts
         concept1 shouldBe a[Concept[_]]
         concept1 should have(
-          'label(concept1Name),
+          'label (concept1Name),
           labelDerivedConceptId(concept1Name)
         )
         assertConcept2Type(concept2)
         concept2 should have(
-          'label(concept2Name),
+          'label (concept2Name),
           labelDerivedConceptId(concept2Name)
         )
     }
@@ -340,15 +355,15 @@ class SierraGenresTest
 
     val List(genre) = SierraGenres(bibData)
 
-    genre should have (
+    genre should have(
       'label ("Printed books")
     )
 
     val List(concept) = genre.concepts
-    concept shouldBe a [Concept[_]]
-    concept should have (
+    concept shouldBe a[Concept[_]]
+    concept should have(
       'label ("Printed books"),
-      labelDerivedConceptId ("Printed books")
+      labelDerivedConceptId("Printed books")
     )
   }
 

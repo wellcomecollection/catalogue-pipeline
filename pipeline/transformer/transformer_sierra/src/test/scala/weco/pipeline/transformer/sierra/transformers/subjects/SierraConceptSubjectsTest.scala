@@ -515,14 +515,14 @@ class SierraConceptSubjectsTest
       )
     )
     val List(subject) = SierraConceptSubjects(createSierraBibNumber, bibData)
-    subject should have (
-      'label("Medicine"),
+    subject should have(
+      'label ("Medicine"),
       lcSubjectsSubjectId("sh85083064")
     )
 
     val List(concept) = subject.concepts
-    concept should have (
-      'label("Medicine"),
+    concept should have(
+      'label ("Medicine"),
       lcSubjectsConceptId("sh85083064")
     )
   }

@@ -2,15 +2,18 @@ package weco.pipeline.transformer.sierra.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.pipeline.transformer.sierra.transformers.matchers.{ConceptMatchers, SubjectMatchers}
+import weco.pipeline.transformer.sierra.transformers.matchers.{
+  ConceptMatchers,
+  SubjectMatchers
+}
 import weco.sierra.generators.SierraDataGenerators
 import weco.sierra.models.marc.{Subfield, VarField}
 
 class SierraSubjectsTest
     extends AnyFunSpec
     with Matchers
-      with SubjectMatchers
-      with ConceptMatchers
+    with SubjectMatchers
+    with ConceptMatchers
     with SierraDataGenerators {
   it("deduplicates identical subjects") {
     // This is based on b2506728x.  The different second indicators
@@ -35,14 +38,14 @@ class SierraSubjectsTest
       )
     )
     val List(subject) = SierraSubjects(createSierraBibNumber, bibData)
-    subject should have (
-      'label("Medicine"),
+    subject should have(
+      'label ("Medicine"),
       labelDerivedSubjectId("Medicine")
     )
     val List(concept) = subject.concepts
 
-    concept should have (
-      'label("Medicine"),
+    concept should have(
+      'label ("Medicine"),
       labelDerivedConceptId("Medicine")
     )
   }
@@ -61,14 +64,14 @@ class SierraSubjectsTest
       )
     )
     val List(subject) = SierraSubjects(createSierraBibNumber, bibData)
-    subject should have (
-      'label("Medicine"),
+    subject should have(
+      'label ("Medicine"),
       lcSubjectsSubjectId("sh85083064")
     )
 
     val List(concept) = subject.concepts
-    concept should have (
-      'label("Medicine"),
+    concept should have(
+      'label ("Medicine"),
       lcSubjectsConceptId("sh85083064")
     )
   }
