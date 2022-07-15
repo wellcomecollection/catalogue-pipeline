@@ -17,12 +17,12 @@ class SierraMeetingSubjectsTest
     with MarcGenerators
     with SierraDataGenerators {
 
-  def bibId = createSierraBibNumber
+  private def bibId = createSierraBibNumber
 
-  def bibData(varFields: VarField*) =
+  private def bibData(varFields: VarField*) =
     createSierraBibDataWith(varFields = varFields.toList)
 
-  def varField(tag: String, subfields: Subfield*) =
+  private def varField(tag: String, subfields: Subfield*) =
     createVarFieldWith(
       marcTag = tag,
       subfields = subfields.toList,

@@ -87,12 +87,16 @@ trait SierraConcepts extends SierraQueryOps with ConceptsTransformer {
           identifierSubfieldContent = subfieldContent
         )
       case Nil =>
-        addIdentifierFromText(ontologyType, varField)
+        addIdentifierFromVarfieldText(ontologyType, varField)
       case _ => IdState.Unidentifiable
     }
 
-  private def addIdentifierFromText(ontologyType: String,
+  def addIdentifierFromVarfieldText(ontologyType: String,
                                     varField: VarField): IdState.Unminted =
+    addIdentifierFromText(ontologyType=ontologyType, label=getLabel(varField))
+
+  def addIdentifierFromText(ontologyType: String,
+                            label: String): IdState.Unminted =
     IdState.Identifiable(
       SierraConceptIdentifier.withNoIdentifier(
         //TODO:
@@ -101,7 +105,7 @@ trait SierraConcepts extends SierraQueryOps with ConceptsTransformer {
         // where there is an id, the id corresponds to the whole, e.g.
         // 650  0 Birds|xCollection and preservation.|0sh 85014314
         // https://id.loc.gov/authorities/subjects/sh85014314.html
-        pseudoIdentifier = getLabel(varField),
+        pseudoIdentifier = label,
         ontologyType = ontologyType
       ))
 
