@@ -18,6 +18,11 @@ trait ConceptMatchers {
       ontologyType = "Concept",
       expectedValue = expectedValue)
 
+  def lcSubjectsConceptId(expectedValue: String)
+  : HavePropertyMatcher[AbstractRootConcept[IdState.Unminted], String] =
+    new SourceIdentifierMatchers.HasLCSubjectsIdentifier(
+      ontologyType = "Concept",
+      expectedValue = expectedValue)
 }
 
 object ConceptMatchers extends ConceptMatchers

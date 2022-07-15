@@ -2,49 +2,48 @@ package weco.pipeline.transformer.sierra.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.identifiers.{
-  IdState,
-  IdentifierType,
-  SourceIdentifier
-}
-import weco.catalogue.internal_model.work.{Concept, Subject}
+import weco.pipeline.transformer.sierra.transformers.matchers.{ConceptMatchers, SubjectMatchers}
 import weco.sierra.generators.SierraDataGenerators
 import weco.sierra.models.marc.{Subfield, VarField}
 
 class SierraSubjectsTest
     extends AnyFunSpec
     with Matchers
+      with SubjectMatchers
+      with ConceptMatchers
     with SierraDataGenerators {
-  it("deduplicates subjects") {
+  it("deduplicates identical subjects") {
     // This is based on b2506728x.  The different second indicators
-    // tell us these are MESH/LCSH concepts, but because we don't expose
-    // those identifiers both varfields create the same subject.
+    // tell us these are MESH/LCSH concepts, but they do not have the $0 subfield
+    // so they create identical subjects, which are then deduplicated.
     val bibData = createSierraBibDataWith(
       varFields = List(
         VarField(
           marcTag = Some("650"),
           indicator2 = Some("0"),
-          subfields = List(Subfield(tag = "a", content = "Medicine"))
+          subfields = List(
+            Subfield(tag = "a", content = "Medicine")
+          )
         ),
         VarField(
           marcTag = Some("650"),
           indicator2 = Some("2"),
-          subfields = List(Subfield(tag = "a", content = "Medicine"))
+          subfields = List(
+            Subfield(tag = "a", content = "Medicine.")
+          )
         )
       )
     )
+    val List(subject) = SierraSubjects(createSierraBibNumber, bibData)
+    subject should have (
+      'label("Medicine"),
+      labelDerivedSubjectId("Medicine")
+    )
+    val List(concept) = subject.concepts
 
-    SierraSubjects(createSierraBibNumber, bibData) shouldBe List(
-      Subject(
-        id = IdState.Identifiable(
-          SourceIdentifier(
-            identifierType = IdentifierType.LabelDerived,
-            ontologyType = "Subject",
-            value = "Medicine"
-          )),
-        label = "Medicine",
-        concepts = List(Concept("Medicine"))
-      )
+    concept should have (
+      'label("Medicine"),
+      labelDerivedConceptId("Medicine")
     )
   }
 
@@ -61,18 +60,16 @@ class SierraSubjectsTest
         )
       )
     )
+    val List(subject) = SierraSubjects(createSierraBibNumber, bibData)
+    subject should have (
+      'label("Medicine"),
+      lcSubjectsSubjectId("sh85083064")
+    )
 
-    SierraSubjects(createSierraBibNumber, bibData) shouldBe List(
-      Subject(
-        id = IdState.Identifiable(
-          SourceIdentifier(
-            identifierType = IdentifierType.LCSubjects,
-            ontologyType = "Subject",
-            value = "sh85083064"
-          )),
-        label = "Medicine",
-        concepts = List(Concept("Medicine")),
-      )
+    val List(concept) = subject.concepts
+    concept should have (
+      'label("Medicine"),
+      lcSubjectsConceptId("sh85083064")
     )
   }
 

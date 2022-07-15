@@ -7,7 +7,7 @@ import weco.catalogue.internal_model.identifiers.{
   IdentifierType,
   SourceIdentifier
 }
-import weco.catalogue.internal_model.work.{Concept, Genre, Period, Place}
+import weco.catalogue.internal_model.work.{AbstractConcept, Concept, Genre, Period, Place}
 import weco.pipeline.transformer.sierra.transformers.matchers.ConceptMatchers
 import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
 import weco.sierra.models.marc.{Subfield, VarField}
@@ -184,6 +184,8 @@ class SierraGenresTest
       'label ("A Content"),
       labelDerivedConceptId("A Content")
     )
+    //TODO: Now that it's not doing the Mocky style test, we need to check that ParsedPeriod is being used.
+    // put in a test with roman numeral dates and see what happens.
     conceptV shouldBe a[Period[_]]
     conceptV should have(
       'label ("Y Content"),
@@ -298,22 +300,30 @@ class SierraGenresTest
       )
     )
 
-    val expectedSubjects =
-      List(
-        Genre(
-          label = "A1 Content - Z1 Content",
-          concepts = List(
-            Concept(label = "A1 Content"),
-            Place(label = "Z1 Content")
-          )),
-        Genre(
-          label = "A2 Content - V2 Content",
-          concepts = List(
-            Concept(label = "A2 Content"),
-            Concept(label = "V2 Content")
-          ))
-      )
-    SierraGenres(bibData) shouldBe expectedSubjects
+
+    val genres = SierraGenres(bibData)
+    genres.length shouldBe 2
+    List(
+      ("A1 Content - Z1 Content", "A1 Content", "Z1 Content", (concept:AbstractConcept[Any]) => concept shouldBe a[Place[_]]),
+      ("A2 Content - V2 Content", "A2 Content", "V2 Content", (concept:AbstractConcept[Any]) => concept shouldBe a[Concept[_]]),
+    ).zip(genres).map {
+      case ((genreName, concept1Name, concept2Name, assertConcept2Type), genre) =>
+        genre should have(
+          'label(genreName)
+        )
+
+        val List(concept1, concept2) = genre.concepts
+        concept1 shouldBe a[Concept[_]]
+        concept1 should have(
+          'label(concept1Name),
+          labelDerivedConceptId(concept1Name)
+        )
+        assertConcept2Type(concept2)
+        concept2 should have(
+          'label(concept2Name),
+          labelDerivedConceptId(concept2Name)
+        )
+    }
   }
 
   it("strips punctuation from Sierra genres") {
@@ -328,15 +338,18 @@ class SierraGenresTest
       )
     )
 
-    val expectedSubjects =
-      List(
-        Genre(
-          label = "Printed books",
-          concepts = List(
-            Concept(label = "Printed books")
-          ))
-      )
-    SierraGenres(bibData) shouldBe expectedSubjects
+    val List(genre) = SierraGenres(bibData)
+
+    genre should have (
+      'label ("Printed books")
+    )
+
+    val List(concept) = genre.concepts
+    concept shouldBe a [Concept[_]]
+    concept should have (
+      'label ("Printed books"),
+      labelDerivedConceptId ("Printed books")
+    )
   }
 
   it(s"gets identifiers from subfield $$0") {
@@ -374,52 +387,6 @@ class SierraGenresTest
       SourceIdentifier(
         identifierType = IdentifierType.MESH,
         value = "mesh/456",
-        ontologyType = "Concept"
-      )
-    )
-
-    val actualSourceIdentifiers = SierraGenres(bibData)
-      .map { _.concepts.head.id }
-      .map {
-        case IdState.Identifiable(sourceIdentifier, _, _) =>
-          sourceIdentifier
-        case other => assert(false, other)
-      }
-
-    expectedSourceIdentifiers shouldBe actualSourceIdentifiers
-  }
-
-  it(s"creates a label-derived identifier for concepts with no identifier") {
-    val bibData = createSierraBibDataWith(
-      varFields = List(
-        createVarFieldWith(
-          marcTag = "655",
-          // LCSH heading
-          indicator2 = "0",
-          subfields = List(
-            Subfield(tag = "a", content = "absence"),
-          )
-        ),
-        createVarFieldWith(
-          marcTag = "655",
-          // MESH heading
-          indicator2 = "2",
-          subfields = List(
-            Subfield(tag = "a", content = "abolition"),
-          )
-        )
-      )
-    )
-
-    val expectedSourceIdentifiers = List(
-      SourceIdentifier(
-        identifierType = IdentifierType.LabelDerived,
-        value = "absence",
-        ontologyType = "Concept"
-      ),
-      SourceIdentifier(
-        identifierType = IdentifierType.LabelDerived,
-        value = "abolition",
         ontologyType = "Concept"
       )
     )

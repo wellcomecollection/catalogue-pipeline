@@ -402,7 +402,7 @@ class SierraConceptSubjectsTest
   }
 
   it("ignores subject with second indicator 7") {
-    // TODO, this is not correct, the desired state is a bit more complex.
+    // TODO, I think the desired state is a bit more complex.
     // We ignore identified fields with second indicators other than 0 and 2
     // but if unidentified, we should process them (I think?)
 
@@ -502,14 +502,30 @@ class SierraConceptSubjectsTest
   }
 
   it("Assigns an extracted id to the sole Concept") {
-    // Other tests use label-derived ids because there is no id.
-    // or the Subject is a compound subject consisting of multiple Concepts
-    // If the subject is made up of one Concept, then the id extracted from the
-    // $0 field should also be the id on the Concept itself.
-    // This is (kinda) caught in "ignores subject with second indicator 7",
-    pending
-  }
+    val bibData = createSierraBibDataWith(
+      varFields = List(
+        VarField(
+          marcTag = Some("650"),
+          indicator2 = Some("0"),
+          subfields = List(
+            Subfield(tag = "a", content = "Medicine"),
+            Subfield(tag = "0", content = "sh85083064")
+          )
+        )
+      )
+    )
+    val List(subject) = SierraConceptSubjects(createSierraBibNumber, bibData)
+    subject should have (
+      'label("Medicine"),
+      lcSubjectsSubjectId("sh85083064")
+    )
 
+    val List(concept) = subject.concepts
+    concept should have (
+      'label("Medicine"),
+      lcSubjectsConceptId("sh85083064")
+    )
+  }
   //TODO: Now that it's not doing the Mocky style test, we need to check that ParsedPeriod is being used.
   // put in a test with roman numeral dates and see what happens.
 }
