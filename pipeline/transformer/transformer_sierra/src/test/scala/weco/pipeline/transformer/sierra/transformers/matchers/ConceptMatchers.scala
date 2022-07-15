@@ -6,11 +6,17 @@ import weco.catalogue.internal_model.work.AbstractRootConcept
 
 trait ConceptMatchers {
 
-  def labelDerivedConceptId(expectedValue: String): HavePropertyMatcher[AbstractRootConcept[IdState.Unminted], String] =
-    new SourceIdentifierMatchers.HasLabelDerivedIdentifier(ontologyType = "Concept", expectedValue = expectedValue)
+  def labelDerivedConceptId(expectedValue: String)
+    : HavePropertyMatcher[AbstractRootConcept[IdState.Unminted], String] =
+    new SourceIdentifierMatchers.HasLabelDerivedIdentifier(
+      ontologyType = "Concept",
+      expectedValue = expectedValue)
 
-  def meshConceptId(expectedValue: String): HavePropertyMatcher[AbstractRootConcept[IdState.Unminted], String] =
-    new SourceIdentifierMatchers.HasMeshIdentifier(ontologyType = "Concept", expectedValue = expectedValue)
+  def meshConceptId(expectedValue: String)
+    : HavePropertyMatcher[AbstractRootConcept[IdState.Unminted], String] =
+    new SourceIdentifierMatchers.HasMeshIdentifier(
+      ontologyType = "Concept",
+      expectedValue = expectedValue)
 
 }
 

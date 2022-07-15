@@ -10,18 +10,22 @@ import weco.pipeline.transformer.text.TextNormalisation._
 
 trait ConceptsTransformer {
 
-  def newIdIfNeeded[State](currentState: State, label: String, replacementState: Option[IdState.Identifiable] = None): IdState.Identifiable =
+  def newIdIfNeeded[State](
+    currentState: State,
+    label: String,
+    replacementState: Option[IdState.Identifiable] = None)
+    : IdState.Identifiable =
     currentState match {
       case currentAsIdentifiable: IdState.Identifiable => currentAsIdentifiable
-      case _ => replacementState.getOrElse(IdState.Identifiable(
-        SourceIdentifier(
-          identifierType = IdentifierType.LabelDerived,
-          ontologyType = "Concept",
-          value = label
-        ))
-      )
+      case _ =>
+        replacementState.getOrElse(
+          IdState.Identifiable(
+            SourceIdentifier(
+              identifierType = IdentifierType.LabelDerived,
+              ontologyType = "Concept",
+              value = label
+            )))
     }
-
 
   implicit class AgentOps[State](a: Agent[State]) {
     def normalised: Agent[State] =
@@ -32,8 +36,9 @@ trait ConceptsTransformer {
     def normalised: Concept[State] =
       c.copy(label = c.label.trimTrailingPeriod)
 
-    def identifiable(idState: Option[IdState.Identifiable] = None): Concept[IdState.Identifiable] =
-      c.copy(id=newIdIfNeeded(c.id, c.label, idState))
+    def identifiable(idState: Option[IdState.Identifiable] = None)
+      : Concept[IdState.Identifiable] =
+      c.copy(id = newIdIfNeeded(c.id, c.label, idState))
   }
 
   implicit class GenreOps[State](g: Genre[State]) {
@@ -67,12 +72,14 @@ trait ConceptsTransformer {
     def normalised: Place[State] =
       pl.copy(label = pl.label.trimTrailing(':'))
 
-    def identifiable(idState: Option[IdState.Identifiable] = None): Place[IdState.Identifiable] =
-      pl.copy(id=newIdIfNeeded(pl.id, pl.label, idState))
+    def identifiable(idState: Option[IdState.Identifiable] = None)
+      : Place[IdState.Identifiable] =
+      pl.copy(id = newIdIfNeeded(pl.id, pl.label, idState))
   }
 
   implicit class PeriodOps[State](p: Period[State]) {
-    def identifiable(idState: Option[IdState.Identifiable] = None): Period[IdState.Identifiable] =
-      p.copy(id=newIdIfNeeded(p.id, p.label, idState))
+    def identifiable(idState: Option[IdState.Identifiable] = None)
+      : Period[IdState.Identifiable] =
+      p.copy(id = newIdIfNeeded(p.id, p.label, idState))
   }
 }

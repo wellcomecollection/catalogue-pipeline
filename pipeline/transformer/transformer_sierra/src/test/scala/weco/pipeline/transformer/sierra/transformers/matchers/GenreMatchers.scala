@@ -1,5 +1,3 @@
 package weco.pipeline.transformer.sierra.transformers.matchers
 
-trait GenreMatchers {
-
-}
+trait GenreMatchers {}

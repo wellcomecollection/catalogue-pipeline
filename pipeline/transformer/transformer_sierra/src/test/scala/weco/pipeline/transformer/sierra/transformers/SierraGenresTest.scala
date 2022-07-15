@@ -2,7 +2,11 @@ package weco.pipeline.transformer.sierra.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, SourceIdentifier}
+import weco.catalogue.internal_model.identifiers.{
+  IdState,
+  IdentifierType,
+  SourceIdentifier
+}
 import weco.catalogue.internal_model.work.{Concept, Genre, Place}
 import weco.pipeline.transformer.sierra.transformers.matchers.ConceptMatchers
 import weco.pipeline.transformer.transformers.ParsedPeriod
@@ -12,7 +16,7 @@ import weco.sierra.models.marc.{Subfield, VarField}
 class SierraGenresTest
     extends AnyFunSpec
     with Matchers
-      with ConceptMatchers
+    with ConceptMatchers
     with MarcGenerators
     with SierraDataGenerators {
 
@@ -66,20 +70,20 @@ class SierraGenresTest
     )
     val List(genre) = SierraGenres(bibData)
 
-    genre should have (
+    genre should have(
       'label ("A Content - V Content")
     )
 
     val List(conceptA, conceptV) = genre.concepts
-    conceptA shouldBe a [Concept[_]]
-    conceptA should have (
+    conceptA shouldBe a[Concept[_]]
+    conceptA should have(
       'label ("A Content"),
-      labelDerivedConceptId ("A Content")
+      labelDerivedConceptId("A Content")
     )
-    conceptV shouldBe a [Concept[_]]
-    conceptV should have (
+    conceptV shouldBe a[Concept[_]]
+    conceptV should have(
       'label ("V Content"),
-      labelDerivedConceptId ("V Content")
+      labelDerivedConceptId("V Content")
     )
   }
 
@@ -100,20 +104,20 @@ class SierraGenresTest
 
     val List(genre) = SierraGenres(bibData)
 
-    genre should have (
+    genre should have(
       'label ("A Content - V Content")
     )
 
     val List(conceptA, conceptV) = genre.concepts
-    conceptA shouldBe a [Concept[_]]
-    conceptA should have (
+    conceptA shouldBe a[Concept[_]]
+    conceptA should have(
       'label ("A Content"),
-      labelDerivedConceptId ("A Content")
+      labelDerivedConceptId("A Content")
     )
-    conceptV shouldBe a [Concept[_]]
-    conceptV should have (
+    conceptV shouldBe a[Concept[_]]
+    conceptV should have(
       'label ("V Content"),
-      labelDerivedConceptId ("V Content")
+      labelDerivedConceptId("V Content")
     )
   }
 
@@ -131,28 +135,27 @@ class SierraGenresTest
       )
     )
 
-
     val List(genre) = SierraGenres(bibData)
 
-    genre should have (
+    genre should have(
       'label ("A Content - X Content - V Content")
     )
 
     val List(conceptA, conceptX, conceptV) = genre.concepts
-    conceptA shouldBe a [Concept[_]]
-    conceptA should have (
+    conceptA shouldBe a[Concept[_]]
+    conceptA should have(
       'label ("A Content"),
-      labelDerivedConceptId ("A Content")
+      labelDerivedConceptId("A Content")
     )
-    conceptX shouldBe a [Concept[_]]
-    conceptX should have (
+    conceptX shouldBe a[Concept[_]]
+    conceptX should have(
       'label ("X Content"),
-      labelDerivedConceptId ("X Content")
+      labelDerivedConceptId("X Content")
     )
-    conceptV shouldBe a [Concept[_]]
-    conceptV should have (
+    conceptV shouldBe a[Concept[_]]
+    conceptV should have(
       'label ("V Content"),
-      labelDerivedConceptId ("V Content")
+      labelDerivedConceptId("V Content")
     )
   }
 

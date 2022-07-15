@@ -74,7 +74,9 @@ object SierraGenres
     )
     wholeFieldConceptId match {
       case identifiable: IdState.Identifiable =>
-        if(identifiable.sourceIdentifier.identifierType == IdentifierType.LabelDerived) IdState.Unidentifiable else identifiable
+        if (identifiable.sourceIdentifier.identifierType == IdentifierType.LabelDerived)
+          IdState.Unidentifiable
+        else identifiable
       case other => other
     }
 
@@ -85,7 +87,6 @@ object SierraGenres
     primarySubfields: List[Subfield],
     varField: VarField): List[Concept[IdState.Unminted]] =
     primarySubfields.map { subfield =>
-
       Concept(
         id = identifyPrimaryConcept(varField),
         label = subfield.content
