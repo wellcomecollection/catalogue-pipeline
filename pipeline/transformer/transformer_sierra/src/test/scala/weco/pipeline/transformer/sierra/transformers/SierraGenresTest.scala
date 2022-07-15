@@ -7,9 +7,8 @@ import weco.catalogue.internal_model.identifiers.{
   IdentifierType,
   SourceIdentifier
 }
-import weco.catalogue.internal_model.work.{Concept, Genre, Place}
+import weco.catalogue.internal_model.work.{Concept, Genre, Place, Period}
 import weco.pipeline.transformer.sierra.transformers.matchers.ConceptMatchers
-import weco.pipeline.transformer.transformers.ParsedPeriod
 import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
 import weco.sierra.models.marc.{Subfield, VarField}
 
@@ -160,14 +159,6 @@ class SierraGenresTest
   }
 
   it("returns subjects for tag 655 with subfields a, y") {
-    val expectedGenres =
-      List(
-        Genre(
-          label = "A Content - Y Content",
-          concepts = List(
-            Concept(label = "A Content"),
-            ParsedPeriod(label = "Y Content")
-          )))
 
     val bibData = createSierraBibDataWith(
       varFields = List(
@@ -181,19 +172,27 @@ class SierraGenresTest
       )
     )
 
-    SierraGenres(bibData) shouldBe expectedGenres
+
+    val List(genre) = SierraGenres(bibData)
+
+    genre should have (
+      'label ("A Content - Y Content")
+    )
+
+    val List(conceptA, conceptV) = genre.concepts
+    conceptA shouldBe a [Concept[_]]
+    conceptA should have (
+      'label ("A Content"),
+      labelDerivedConceptId ("A Content")
+    )
+    conceptV shouldBe a [Period[_]]
+    conceptV should have (
+      'label ("Y Content"),
+      labelDerivedConceptId ("Y Content")
+    )
   }
 
   it("returns subjects for tag 655 with subfields a, z") {
-    val expectedGenres =
-      List(
-        Genre(
-          label = "A Content - Z Content",
-          concepts = List(
-            Concept(label = "A Content"),
-            Place(label = "Z Content")
-          )))
-
     val bibData = createSierraBibDataWith(
       varFields = List(
         VarField(
@@ -206,7 +205,23 @@ class SierraGenresTest
       )
     )
 
-    SierraGenres(bibData) shouldBe expectedGenres
+    val List(genre) = SierraGenres(bibData)
+
+    genre should have (
+      'label ("A Content - Z Content")
+    )
+
+    val List(conceptA, conceptV) = genre.concepts
+    conceptA shouldBe a [Concept[_]]
+    conceptA should have (
+      'label ("A Content"),
+      labelDerivedConceptId ("A Content")
+    )
+    conceptV shouldBe a [Place[_]]
+    conceptV should have (
+      'label ("Z Content"),
+      labelDerivedConceptId ("Z Content")
+    )
   }
 
   it("deduplicates transformed genres") {
@@ -248,18 +263,20 @@ class SierraGenresTest
       )
     )
 
-    val expectedGenres =
-      List("Electronic journals", "Periodical", "Periodicals")
-        .map { label =>
-          Genre(
-            label = label,
-            concepts = List(
-              Concept(label = label),
-            )
-          )
-        }
+    val genres = SierraGenres(bibData)
+    List("Electronic journals", "Periodical", "Periodicals").zip(genres).map {
+      case (genreName, genre) =>
+        genre should have(
+          'label(genreName)
+        )
 
-    SierraGenres(bibData) shouldBe expectedGenres
+        val List(concept) = genre.concepts
+        concept shouldBe a[Concept[_]]
+        concept should have(
+          'label(genreName),
+          labelDerivedConceptId(genreName)
+        )
+    }
   }
 
   it("returns subjects for multiple 655 tags with different subfields") {
