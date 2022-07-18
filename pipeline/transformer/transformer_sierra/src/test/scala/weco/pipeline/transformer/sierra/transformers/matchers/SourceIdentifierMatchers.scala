@@ -9,9 +9,8 @@ import weco.catalogue.internal_model.identifiers.{
 }
 
 trait SourceIdentifierMatchers {
-  abstract class HasIdentifier(ontologyType: String, expectedValue: String)
+  class HasIdentifier(ontologyType: String, expectedValue: String, identifierType: IdentifierType)
       extends HavePropertyMatcher[HasId[IdState], String] {
-    val identifierType: IdentifierType
     def apply(
       identifiableObject: HasId[IdState]): HavePropertyMatchResult[String] = {
       identifiableObject.id match {
@@ -38,26 +37,20 @@ trait SourceIdentifierMatchers {
         expectedValue = SourceIdentifier(
           value = expectedValue,
           ontologyType = ontologyType,
-          identifierType = IdentifierType.LabelDerived).toString,
+          identifierType = identifierType).toString,
         actualValue = sourceIdentifier.toString
       )
     }
   }
 
   class HasLabelDerivedIdentifier(ontologyType: String, expectedValue: String)
-      extends HasIdentifier(ontologyType: String, expectedValue: String) {
-    val identifierType: IdentifierType = IdentifierType.LabelDerived
-  }
+      extends HasIdentifier(ontologyType: String, expectedValue: String, identifierType = IdentifierType.LabelDerived)
 
   class HasMeshIdentifier(ontologyType: String, expectedValue: String)
-      extends HasIdentifier(ontologyType: String, expectedValue: String) {
-    val identifierType: IdentifierType = IdentifierType.MESH
-  }
+      extends HasIdentifier(ontologyType: String, expectedValue: String, identifierType =  IdentifierType.MESH)
 
   class HasLCSubjectsIdentifier(ontologyType: String, expectedValue: String)
-      extends HasIdentifier(ontologyType: String, expectedValue: String) {
-    val identifierType: IdentifierType = IdentifierType.LCSubjects
-  }
+    extends HasIdentifier(ontologyType: String, expectedValue: String, IdentifierType.LCSubjects)
 }
 
 object SourceIdentifierMatchers extends SourceIdentifierMatchers

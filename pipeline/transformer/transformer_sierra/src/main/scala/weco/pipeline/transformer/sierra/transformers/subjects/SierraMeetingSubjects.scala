@@ -1,5 +1,6 @@
 package weco.pipeline.transformer.sierra.transformers.subjects
 
+import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.{Meeting, Subject}
 import weco.pipeline.transformer.sierra.transformers.SierraAgents
 import weco.pipeline.transformer.transformers.ConceptsTransformer
@@ -37,11 +38,17 @@ object SierraMeetingSubjects
       createLabel(varField, subfieldTags = List("a", "c", "d")) match {
         case "" => None
         case label =>
+
+          val identifier:Option[IdState.Identifiable] = identify(varField.subfields, "Meeting") match {
+            case identifiable: IdState.Identifiable => Some(identifiable)
+            case _ => None
+          }
+
           Some(
             Subject(
               id = identify(varField.subfields, "Meeting"),
               label = label,
-              concepts = List(Meeting(label = label))
+              concepts = List(Meeting(label = label).identifiable(identifier))
             ))
       }
     }

@@ -66,6 +66,13 @@ trait ConceptMatchers {
     labelDerivedAbstractConceptId(
       ontologyType = "Place",
       expectedValue = expectedValue)
+
+  def labelDerivedMeetingId(expectedValue: String)
+  : HavePropertyMatcher[AbstractRootConcept[IdState.Unminted], String] =
+    labelDerivedAbstractConceptId(
+      ontologyType = "Meeting",
+      expectedValue = expectedValue)
+
 }
 
 object ConceptMatchers extends ConceptMatchers

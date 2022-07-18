@@ -58,6 +58,9 @@ class SierraBrandNameSubjectsTest
     subjects.length shouldBe 2
     List("First", "Second").zip(subjects).map {
       case (label, subject) =>
+        // As we are planning to get rid of Subject ids,
+        // only those places that did have them should keep them
+        // They should not be introduced anywhere else.
         subject should have(
           'label (label),
           'id (IdState.Unidentifiable)
