@@ -2,23 +2,10 @@ package weco.pipeline.transformer.sierra.transformers.subjects
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.identifiers.{
-  IdState,
-  IdentifierType,
-  SourceIdentifier
-}
-import weco.catalogue.internal_model.work.{
-  AbstractRootConcept,
-  Concept,
-  Period,
-  Place
-}
+import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, SourceIdentifier}
+import weco.catalogue.internal_model.work.{AbstractRootConcept, Concept, Period, Place}
 import org.scalatest.prop.TableDrivenPropertyChecks
-import weco.pipeline.transformer.sierra.transformers.matchers.{
-  ConceptMatchers,
-  SourceIdentifierMatchers,
-  SubjectMatchers
-}
+import weco.pipeline.transformer.sierra.transformers.matchers.{ConceptMatchers, HasIdMatchers, SourceIdentifierMatchers, SubjectMatchers}
 import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
 import weco.sierra.models.identifiers.SierraBibNumber
 import weco.sierra.models.marc.{Subfield, VarField}
@@ -28,6 +15,7 @@ class SierraConceptSubjectsTest
     with Matchers
     with SourceIdentifierMatchers
     with ConceptMatchers
+    with HasIdMatchers
     with SubjectMatchers
     with MarcGenerators
     with SierraDataGenerators
@@ -252,12 +240,12 @@ class SierraConceptSubjectsTest
     subjects
       .zip(
         List(
-          ("A1 Content - Z1 Content", "A1 Content", "Z1 Content"),
-          ("A2 Content - V2 Content", "A2 Content", "V2 Content"),
+          ("A1 Content - Z1 Content", "A1 Content", "Z1 Content", "Place"),
+          ("A2 Content - V2 Content", "A2 Content", "V2 Content", "Concept"),
         )
       )
       .map {
-        case (subject, (expectedSubjectLabel, concept1Label, concept2Label)) =>
+        case (subject, (expectedSubjectLabel, concept1Label, concept2Label, concept2Type)) =>
           subject should have(
             'label (expectedSubjectLabel),
             labelDerivedSubjectId(expectedSubjectLabel)
@@ -269,7 +257,7 @@ class SierraConceptSubjectsTest
           )
           concept2 should have(
             'label (concept2Label),
-            labelDerivedConceptId(concept2Label)
+            sourceIdentifier(value=concept2Label, ontologyType = concept2Type, identifierType = IdentifierType.LabelDerived)
           )
       }
   }
@@ -298,7 +286,7 @@ class SierraConceptSubjectsTest
     conceptA shouldBe a[Period[_]]
     conceptA should have(
       'label ("A Content"),
-      labelDerivedConceptId("A Content")
+      sourceIdentifier(value="A Content", ontologyType="Period", identifierType = IdentifierType.LabelDerived)
     )
 
     conceptX shouldBe a[Concept[_]]
@@ -338,7 +326,7 @@ class SierraConceptSubjectsTest
     conceptA shouldBe a[Place[_]]
     conceptA should have(
       'label ("A Content"),
-      labelDerivedConceptId("A Content")
+      sourceIdentifier(value="A Content", ontologyType="Place", identifierType = IdentifierType.LabelDerived)
     )
 
     conceptX shouldBe a[Concept[_]]
