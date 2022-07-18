@@ -37,11 +37,12 @@ object SierraMeetingSubjects
       createLabel(varField, subfieldTags = List("a", "c", "d")) match {
         case "" => None
         case label =>
-          Some(Subject(
-            id=identify(varField.subfields, "Meeting"),
-            label = label,
-            concepts = List(Meeting(label = label))
-          ))
+          Some(
+            Subject(
+              id = identify(varField.subfields, "Meeting"),
+              label = label,
+              concepts = List(Meeting(label = label))
+            ))
       }
     }
 }

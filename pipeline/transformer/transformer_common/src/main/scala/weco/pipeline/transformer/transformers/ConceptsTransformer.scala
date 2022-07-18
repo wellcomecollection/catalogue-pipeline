@@ -15,8 +15,7 @@ trait ConceptsTransformer {
     label: String,
     replacementState: Option[IdState.Identifiable] = None,
     ontologyType: String = "Concept"
-  )
-    : IdState.Identifiable =
+  ): IdState.Identifiable =
     currentState match {
       case currentAsIdentifiable: IdState.Identifiable => currentAsIdentifiable
       case _ =>
@@ -60,8 +59,9 @@ trait ConceptsTransformer {
       m.copy(label = m.label.trimTrailing(','))
 
     def identifiable(idState: Option[IdState.Identifiable] = None)
-    : Meeting[IdState.Identifiable] =
-      m.copy(id = newIdIfNeeded(m.id, m.label, idState, ontologyType="Meeting"))
+      : Meeting[IdState.Identifiable] =
+      m.copy(
+        id = newIdIfNeeded(m.id, m.label, idState, ontologyType = "Meeting"))
   }
 
   implicit class OrganisationOps[State](o: Organisation[State]) {
@@ -69,7 +69,7 @@ trait ConceptsTransformer {
       o.copy(label = o.label.trimTrailing(','))
 
     def identifiable(idState: Option[IdState.Identifiable] = None)
-    : Organisation[IdState.Identifiable] =
+      : Organisation[IdState.Identifiable] =
       o.copy(id = newIdIfNeeded(o.id, o.label, idState, "Organisation"))
   }
 
@@ -78,7 +78,7 @@ trait ConceptsTransformer {
       p.copy(label = p.label.trimTrailing(','))
 
     def identifiable(idState: Option[IdState.Identifiable] = None)
-    : Person[IdState.Identifiable] =
+      : Person[IdState.Identifiable] =
       p.copy(id = newIdIfNeeded(p.id, p.label, idState, "Person"))
 
   }

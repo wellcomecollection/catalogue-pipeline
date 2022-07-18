@@ -222,7 +222,6 @@ class SierraConceptSubjectsTest
     conceptY shouldBe a[Place[_]]
     conceptY should have(
       'label ("Z Content"),
-
       labelDerivedPlaceId("Z Content")
     )
   }

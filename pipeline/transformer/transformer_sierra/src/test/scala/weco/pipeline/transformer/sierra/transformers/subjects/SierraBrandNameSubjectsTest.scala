@@ -27,9 +27,9 @@ class SierraBrandNameSubjectsTest
       VarField(marcTag = "652", subfields = List(Subfield("a", "Content"))),
     )
     val List(subject) = getBrandNameSubjects(varFields)
-    subject should have (
-      'label("Content"),
-      'id(IdState.Unidentifiable)
+    subject should have(
+      'label ("Content"),
+      'id (IdState.Unidentifiable)
     )
     val List(concept) = subject.concepts
     concept should have(
@@ -57,10 +57,10 @@ class SierraBrandNameSubjectsTest
 
     subjects.length shouldBe 2
     List("First", "Second").zip(subjects).map {
-      case (label, subject)  =>
-        subject should have (
-          'label(label),
-          'id(IdState.Unidentifiable)
+      case (label, subject) =>
+        subject should have(
+          'label (label),
+          'id (IdState.Unidentifiable)
         )
         val List(concept) = subject.concepts
         concept should have(

@@ -835,10 +835,11 @@ class SierraTransformerTest
          | }
       """.stripMargin
 
-    val List(subject) = transformDataToSourceWork(id = id, data = data).data.subjects
-    subject should have (
-      'label(content),
-      'id(IdState.Unidentifiable)
+    val List(subject) =
+      transformDataToSourceWork(id = id, data = data).data.subjects
+    subject should have(
+      'label (content),
+      'id (IdState.Unidentifiable)
     )
     val List(concept) = subject.concepts
     concept should have(
