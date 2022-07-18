@@ -15,15 +15,8 @@ case "$PROJECT" in
     ;;
 
   "inference_manager")
-    for PROJECT in feature_inferrer palette_inferrer aspect_ratio_inferrer
-    do
-      docker build \
-        --file "$ROOT/pipeline/inferrer/$PROJECT/Dockerfile" \
-        --tag "$PROJECT" \
-        "$ROOT/pipeline/inferrer/$PROJECT"
-    done
+    $BUILDS_DIR/run_inference_manager_tests.sh
     ;;
-
   *)
     $BUILDS_DIR/run_sbt_tests.sh "$PROJECT"
     ;;
