@@ -1,5 +1,6 @@
 package weco.pipeline.transformer.sierra.transformers.subjects
 
+import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.{Concept, Subject}
 import weco.pipeline.transformer.sierra.transformers.SierraConcepts
 import weco.pipeline.transformer.transformers.ConceptsTransformer
@@ -23,10 +24,7 @@ object SierraBrandNameSubjects
     varFields
       .subfieldsWithTag("a")
       .contents
-      .map(
-        label =>
-          new Subject(
-            id = addIdentifierFromText(ontologyType = "Subject", label = label),
-            label = label,
-            concepts = List(Concept(label).identifiable())))
+      .map(label => new Subject(
+        id=IdState.Unidentifiable,
+        label = label, concepts = List(Concept(label).identifiable())))
 }

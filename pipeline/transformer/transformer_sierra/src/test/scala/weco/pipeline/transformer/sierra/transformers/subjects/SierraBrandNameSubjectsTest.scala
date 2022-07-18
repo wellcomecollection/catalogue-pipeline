@@ -6,6 +6,7 @@ import weco.pipeline.transformer.sierra.transformers.matchers.{
   ConceptMatchers,
   SubjectMatchers
 }
+import weco.catalogue.internal_model.identifiers.IdState
 import weco.sierra.generators.SierraDataGenerators
 import weco.sierra.models.marc.{Subfield, VarField}
 
@@ -26,9 +27,9 @@ class SierraBrandNameSubjectsTest
       VarField(marcTag = "652", subfields = List(Subfield("a", "Content"))),
     )
     val List(subject) = getBrandNameSubjects(varFields)
-    subject should have(
-      'label ("Content"),
-      labelDerivedSubjectId("Content")
+    subject should have (
+      'label("Content"),
+      'id(IdState.Unidentifiable)
     )
     val List(concept) = subject.concepts
     concept should have(
@@ -56,10 +57,10 @@ class SierraBrandNameSubjectsTest
 
     subjects.length shouldBe 2
     List("First", "Second").zip(subjects).map {
-      case (label, subject) =>
-        subject should have(
-          'label (label),
-          labelDerivedSubjectId(label)
+      case (label, subject)  =>
+        subject should have (
+          'label(label),
+          'id(IdState.Unidentifiable)
         )
         val List(concept) = subject.concepts
         concept should have(

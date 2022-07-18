@@ -58,7 +58,6 @@ trait SourceIdentifierMatchers {
       extends HasIdentifier(ontologyType: String, expectedValue: String) {
     val identifierType: IdentifierType = IdentifierType.LCSubjects
   }
-
 }
 
 object SourceIdentifierMatchers extends SourceIdentifierMatchers

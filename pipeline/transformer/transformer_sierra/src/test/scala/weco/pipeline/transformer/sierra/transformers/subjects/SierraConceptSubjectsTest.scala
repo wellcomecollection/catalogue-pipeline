@@ -189,7 +189,7 @@ class SierraConceptSubjectsTest
     conceptY shouldBe a[Period[_]]
     conceptY should have(
       'label ("Y Content"),
-      labelDerivedConceptId("Y Content")
+      labelDerivedPeriodId("Y Content")
     )
   }
 
@@ -222,7 +222,8 @@ class SierraConceptSubjectsTest
     conceptY shouldBe a[Place[_]]
     conceptY should have(
       'label ("Z Content"),
-      labelDerivedConceptId("Z Content")
+
+      labelDerivedPlaceId("Z Content")
     )
   }
 

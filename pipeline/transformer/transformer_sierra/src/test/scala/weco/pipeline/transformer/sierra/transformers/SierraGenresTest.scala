@@ -14,7 +14,7 @@ import weco.catalogue.internal_model.work.{
   Period,
   Place
 }
-import weco.pipeline.transformer.sierra.transformers.matchers.ConceptMatchers
+import weco.pipeline.transformer.sierra.transformers.matchers._
 import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
 import weco.sierra.models.marc.{Subfield, VarField}
 
@@ -195,7 +195,7 @@ class SierraGenresTest
     conceptV shouldBe a[Period[_]]
     conceptV should have(
       'label ("Y Content"),
-      labelDerivedConceptId("Y Content")
+      labelDerivedPeriodId("Y Content")
     )
   }
 
