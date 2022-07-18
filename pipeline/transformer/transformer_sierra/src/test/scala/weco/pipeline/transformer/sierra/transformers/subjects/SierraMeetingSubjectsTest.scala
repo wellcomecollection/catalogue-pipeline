@@ -3,7 +3,10 @@ package weco.pipeline.transformer.sierra.transformers.subjects
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType}
-import weco.pipeline.transformer.sierra.transformers.matchers.{ConceptMatchers, HasIdMatchers}
+import weco.pipeline.transformer.sierra.transformers.matchers.{
+  ConceptMatchers,
+  HasIdMatchers
+}
 import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
 import weco.sierra.models.marc.{Subfield, VarField}
 
@@ -11,7 +14,7 @@ class SierraMeetingSubjectsTest
     extends AnyFunSpec
     with Matchers
     with ConceptMatchers
-      with HasIdMatchers
+    with HasIdMatchers
     with MarcGenerators
     with SierraDataGenerators {
 
@@ -91,12 +94,18 @@ class SierraMeetingSubjectsTest
     val List(subject) = SierraMeetingSubjects(bibId, data)
     subject should have(
       'label ("Content"),
-      sourceIdentifier(value="lcsh7212", ontologyType = "Meeting", identifierType = IdentifierType.LCNames)
+      sourceIdentifier(
+        value = "lcsh7212",
+        ontologyType = "Meeting",
+        identifierType = IdentifierType.LCNames)
     )
     val List(concept) = subject.concepts
     concept should have(
       'label ("Content"),
-      sourceIdentifier(value="lcsh7212", ontologyType = "Meeting", identifierType = IdentifierType.LCNames)
+      sourceIdentifier(
+        value = "lcsh7212",
+        ontologyType = "Meeting",
+        identifierType = IdentifierType.LCNames)
     )
 
   }
@@ -120,7 +129,10 @@ class SierraMeetingSubjectsTest
         val List(concept) = subject.concepts
         concept should have(
           'label (label),
-          sourceIdentifier(value=label, ontologyType = "Meeting",  identifierType = IdentifierType.LabelDerived)
+          sourceIdentifier(
+            value = label,
+            ontologyType = "Meeting",
+            identifierType = IdentifierType.LabelDerived)
         )
     }
   }

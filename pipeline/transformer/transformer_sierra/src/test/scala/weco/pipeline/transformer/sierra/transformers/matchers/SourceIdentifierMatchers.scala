@@ -9,7 +9,9 @@ import weco.catalogue.internal_model.identifiers.{
 }
 
 trait SourceIdentifierMatchers {
-  class HasIdentifier(ontologyType: String, expectedValue: String, identifierType: IdentifierType)
+  class HasIdentifier(ontologyType: String,
+                      expectedValue: String,
+                      identifierType: IdentifierType)
       extends HavePropertyMatcher[HasId[IdState], String] {
     def apply(
       identifiableObject: HasId[IdState]): HavePropertyMatchResult[String] = {
@@ -44,13 +46,22 @@ trait SourceIdentifierMatchers {
   }
 
   class HasLabelDerivedIdentifier(ontologyType: String, expectedValue: String)
-      extends HasIdentifier(ontologyType: String, expectedValue: String, identifierType = IdentifierType.LabelDerived)
+      extends HasIdentifier(
+        ontologyType: String,
+        expectedValue: String,
+        identifierType = IdentifierType.LabelDerived)
 
   class HasMeshIdentifier(ontologyType: String, expectedValue: String)
-      extends HasIdentifier(ontologyType: String, expectedValue: String, identifierType =  IdentifierType.MESH)
+      extends HasIdentifier(
+        ontologyType: String,
+        expectedValue: String,
+        identifierType = IdentifierType.MESH)
 
   class HasLCSubjectsIdentifier(ontologyType: String, expectedValue: String)
-    extends HasIdentifier(ontologyType: String, expectedValue: String, IdentifierType.LCSubjects)
+      extends HasIdentifier(
+        ontologyType: String,
+        expectedValue: String,
+        IdentifierType.LCSubjects)
 }
 
 object SourceIdentifierMatchers extends SourceIdentifierMatchers

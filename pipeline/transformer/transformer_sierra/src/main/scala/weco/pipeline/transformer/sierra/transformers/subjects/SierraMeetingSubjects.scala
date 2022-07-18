@@ -38,11 +38,11 @@ object SierraMeetingSubjects
       createLabel(varField, subfieldTags = List("a", "c", "d")) match {
         case "" => None
         case label =>
-
-          val identifier:Option[IdState.Identifiable] = identify(varField.subfields, "Meeting") match {
-            case identifiable: IdState.Identifiable => Some(identifiable)
-            case _ => None
-          }
+          val identifier: Option[IdState.Identifiable] =
+            identify(varField.subfields, "Meeting") match {
+              case identifiable: IdState.Identifiable => Some(identifiable)
+              case _                                  => None
+            }
 
           Some(
             Subject(

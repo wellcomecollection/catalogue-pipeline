@@ -68,7 +68,7 @@ trait ConceptMatchers {
       expectedValue = expectedValue)
 
   def labelDerivedMeetingId(expectedValue: String)
-  : HavePropertyMatcher[AbstractRootConcept[IdState.Unminted], String] =
+    : HavePropertyMatcher[AbstractRootConcept[IdState.Unminted], String] =
     labelDerivedAbstractConceptId(
       ontologyType = "Meeting",
       expectedValue = expectedValue)
