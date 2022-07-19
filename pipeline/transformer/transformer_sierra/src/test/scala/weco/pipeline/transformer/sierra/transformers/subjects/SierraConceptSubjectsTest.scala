@@ -514,6 +514,9 @@ class SierraConceptSubjectsTest
       )
       val List(concept) = subject.concepts
       assertType(concept)
+      concept should have(
+        'label("Diet, Food, and Nutrition")
+      )
 
     }
   }
