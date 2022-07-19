@@ -101,12 +101,6 @@ trait SierraConcepts extends SierraQueryOps with ConceptsTransformer {
                             label: String): IdState.Unminted =
     IdState.Identifiable(
       SierraConceptIdentifier.withNoIdentifier(
-        //TODO:
-        // This should use getLabel instead, that means fiddling with the boundary between this trait
-        // and the classes that use it.
-        // where there is an id, the id corresponds to the whole, e.g.
-        // 650  0 Birds|xCollection and preservation.|0sh 85014314
-        // https://id.loc.gov/authorities/subjects/sh85014314.html
         pseudoIdentifier = label,
         ontologyType = ontologyType
       ))

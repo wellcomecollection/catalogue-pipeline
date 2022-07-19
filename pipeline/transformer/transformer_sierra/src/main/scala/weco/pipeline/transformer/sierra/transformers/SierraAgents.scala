@@ -1,12 +1,9 @@
 package weco.pipeline.transformer.sierra.transformers
 
-import weco.catalogue.internal_model.identifiers.{
-  IdState,
-  IdentifierType,
-  SourceIdentifier
-}
+import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, SourceIdentifier}
 import weco.catalogue.internal_model.work.{Meeting, Organisation, Person}
 import weco.pipeline.transformer.transformers.ConceptsTransformer
+import weco.pipeline.transformer.text.TextNormalisation._
 import weco.sierra.models.SierraQueryOps
 import weco.sierra.models.marc.Subfield
 
@@ -92,9 +89,31 @@ trait SierraAgents extends SierraQueryOps with ConceptsTransformer {
             ontologyType = ontologyType
           )
         )
+      case Nil =>
+        addIdentifierFromSubfieldText(ontologyType, subfields)
+
       case _ => IdState.Unidentifiable
     }
   }
+
+  def addIdentifierFromSubfieldText(ontologyType: String,
+                                    subFields: List[Subfield]): IdState.Unminted = {
+    getLabel(subFields) match {
+      case Some(label) => addIdentifierFromText(
+        ontologyType = ontologyType,
+        label = label.trimTrailingPeriod)
+      case None => IdState.Unidentifiable
+    }
+  }
+
+  def addIdentifierFromText(ontologyType: String,
+                            label: String): IdState.Unminted =
+    IdState.Identifiable(
+      SierraConceptIdentifier.withNoIdentifier(
+        pseudoIdentifier = label,
+        ontologyType = ontologyType
+      ))
+
 
   def getLabel(subfields: List[Subfield]): Option[String] =
     subfields.filter { s =>

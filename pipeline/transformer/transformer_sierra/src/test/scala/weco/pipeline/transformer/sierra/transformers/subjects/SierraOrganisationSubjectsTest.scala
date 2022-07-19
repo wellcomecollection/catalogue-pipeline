@@ -2,12 +2,9 @@ package weco.pipeline.transformer.sierra.transformers.subjects
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.identifiers.{
-  IdState,
-  IdentifierType,
-  SourceIdentifier
-}
+import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, SourceIdentifier}
 import weco.pipeline.transformer.sierra.exceptions.CataloguingException
+import weco.pipeline.transformer.sierra.transformers.matchers.{ConceptMatchers, HasIdMatchers}
 import weco.sierra.generators.SierraDataGenerators
 import weco.sierra.models.data.SierraBibData
 import weco.sierra.models.identifiers.SierraBibNumber
@@ -16,6 +13,8 @@ import weco.sierra.models.marc.{Subfield, VarField}
 class SierraOrganisationSubjectsTest
     extends AnyFunSpec
     with Matchers
+      with HasIdMatchers
+      with ConceptMatchers
     with SierraDataGenerators {
   it("returns an empty list if there are no instances of MARC tag 610") {
     val bibData = createSierraBibDataWith(varFields = Nil)
@@ -23,7 +22,7 @@ class SierraOrganisationSubjectsTest
   }
 
   describe("label") {
-    it("uses subfields a, b, c, d and e as the label") {
+    it("uses subfields a, b, c, d and e as the subject label") {
       val bibData = create610bibDataWith(
         subfields = List(
           Subfield(tag = "a", content = "United States."),
@@ -67,12 +66,16 @@ class SierraOrganisationSubjectsTest
         )
       )
 
-      val subjects = getOrganisationSubjects(bibData)
-      val concepts = subjects.head.concepts
-      concepts should have size 1
+      val List(subject) = getOrganisationSubjects(bibData)
 
-      val unmintedOrganisation = concepts.head
-      unmintedOrganisation.id shouldBe IdState.Unidentifiable
+      val List(concept) = subject.concepts
+      concept should have(
+        'label ("Wellcome Trust"),
+        sourceIdentifier(
+          value = "Wellcome Trust",
+          ontologyType = "Organisation",
+          identifierType = IdentifierType.LabelDerived)
+      )
     }
 
     it("uses subfields a and b for the Organisation label") {
@@ -90,7 +93,7 @@ class SierraOrganisationSubjectsTest
       concepts.head.label shouldBe "Wellcome Trust. Facilities, Health & Safety"
     }
 
-    it("creates an Identifiable Organisation if subfield 0 is present") {
+    it("creates an Identifiable Organisation using subfield 0, if present") {
       val lcNamesCode = "n81290903210"
       val bibData = create610bibDataWith(
         indicator2 = "0",

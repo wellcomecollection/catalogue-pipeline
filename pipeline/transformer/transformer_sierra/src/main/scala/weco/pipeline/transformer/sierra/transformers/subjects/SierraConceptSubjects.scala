@@ -91,7 +91,9 @@ object SierraConceptSubjects
                           subdivisionSubfields: List[Subfield])
     : List[AbstractConcept[IdState.Unminted]] = {
     subdivisionSubfields match {
-
+      // In the absence of subfields, the Subject will consist of one Concept.
+      // In that case, the identifier derived from the field as a whole
+      // also refers to that concept.
       case Nil =>
         val conceptId =
           identifyConcept(ontologyType = "Concept", varfield) match {
@@ -103,6 +105,10 @@ object SierraConceptSubjects
           varField = varfield,
           idstate = conceptId,
         )
+      // If there are subfields, then this Subject will consist of multiple Concepts
+      // In that case, the identifier derived from the field as a whole
+      // only refers to the Subject as a whole.
+      // The primary and subsequent Concepts will have to coin their own ids from their labels.
       case _ =>
         getPrimaryConcept(primarySubfields, varField = varfield) ++ getSubdivisions(
           subdivisionSubfields)
