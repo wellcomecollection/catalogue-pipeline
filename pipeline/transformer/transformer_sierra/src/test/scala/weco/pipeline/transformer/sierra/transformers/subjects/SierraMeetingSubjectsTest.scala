@@ -10,7 +10,6 @@ import weco.pipeline.transformer.sierra.transformers.matchers.{
 import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
 import weco.sierra.models.marc.{Subfield, VarField}
 
-
 class SierraMeetingSubjectsTest
     extends AnyFunSpec
     with Matchers
@@ -54,7 +53,10 @@ class SierraMeetingSubjectsTest
     val List(subject) = SierraMeetingSubjects(bibId, data)
     subject should have(
       'label ("Content"),
-      sourceIdentifier(value="Content", ontologyType = "Meeting", identifierType = IdentifierType.LabelDerived)
+      sourceIdentifier(
+        value = "Content",
+        ontologyType = "Meeting",
+        identifierType = IdentifierType.LabelDerived)
     )
     val List(concept) = subject.concepts
     concept should have(
