@@ -2,18 +2,17 @@ package weco.pipeline.transformer.sierra.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.identifiers.{
-  IdState,
-  IdentifierType,
-  SourceIdentifier
-}
+import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, SourceIdentifier}
 import weco.catalogue.internal_model.work._
+import weco.pipeline.transformer.sierra.transformers.matchers.{ConceptMatchers, HasIdMatchers}
 import weco.sierra.generators.SierraDataGenerators
 import weco.sierra.models.marc.{Subfield, VarField}
 
 class SierraContributorsTest
     extends AnyFunSpec
     with Matchers
+      with ConceptMatchers
+      with HasIdMatchers
     with SierraDataGenerators {
 
   it("gets an empty contributor list from empty bib data") {
@@ -796,6 +795,35 @@ class SierraContributorsTest
   ) = {
     val actualContributors = SierraContributors(
       createSierraBibDataWith(varFields = varFields))
-    actualContributors shouldBe expectedContributors
+
+    actualContributors.size shouldBe expectedContributors.size
+
+    actualContributors.zip(expectedContributors).map {
+      case (actualContributor, expectedContributor) =>
+        val (expectedOntologyType, subjectHasId) = expectedContributor.agent match {
+          case _:Person[IdState.Unminted] => ("Person", false)
+          case _:Organisation[IdState.Unminted] => ("Organisation", false)
+          case _:Meeting[IdState.Unminted] => ("Meeting", true)
+          case _:Agent[IdState.Unminted] => ("Agent", false)
+          case other => fail(s"Contributor $other was of an unexpected type")
+        }
+        if(subjectHasId)
+          actualContributor should have(
+            sourceIdentifier(
+              value = expectedContributor.agent.label,
+              identifierType = IdentifierType.LabelDerived,
+              ontologyType = expectedOntologyType
+            )
+          )
+
+        actualContributor.agent should have(
+          'label(expectedContributor.agent.label),
+          sourceIdentifier(
+            value = expectedContributor.agent.label,
+            identifierType = IdentifierType.LabelDerived,
+            ontologyType = expectedOntologyType
+          )
+        )
+    }
   }
 }

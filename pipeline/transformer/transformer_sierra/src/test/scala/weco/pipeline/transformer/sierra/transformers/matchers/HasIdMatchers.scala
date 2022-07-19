@@ -14,3 +14,5 @@ trait HasIdMatchers {
       value: String,
       identifierType: IdentifierType)
 }
+
+object HasIdMatchers extends HasIdMatchers

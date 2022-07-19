@@ -2,13 +2,14 @@ package weco.pipeline.transformer.sierra.transformers.subjects
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType}
+import weco.catalogue.internal_model.identifiers.IdentifierType
 import weco.pipeline.transformer.sierra.transformers.matchers.{
   ConceptMatchers,
   HasIdMatchers
 }
 import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
 import weco.sierra.models.marc.{Subfield, VarField}
+
 
 class SierraMeetingSubjectsTest
     extends AnyFunSpec
@@ -46,10 +47,14 @@ class SierraMeetingSubjectsTest
       varField("611", Subfield(tag = "a", content = "Content")),
     )
 
+    // It is a happy accident of history that Subjects derived from Meetings have an ontologyType
+    // of "Meeting", rather than "Subject", as other Subjects do.
+    // It is likely that in the near future, we will remove the identifier from Subject, and leave it
+    // simply up to the concepts that define it, but for now, we will ensure that it exists.
     val List(subject) = SierraMeetingSubjects(bibId, data)
     subject should have(
       'label ("Content"),
-      'id (IdState.Unidentifiable)
+      sourceIdentifier(value="Content", ontologyType = "Meeting", identifierType = IdentifierType.LabelDerived)
     )
     val List(concept) = subject.concepts
     concept should have(
@@ -73,12 +78,18 @@ class SierraMeetingSubjectsTest
     val List(subject) = SierraMeetingSubjects(bibId, data)
     subject should have(
       'label ("C A D"),
-      'id (IdState.Unidentifiable)
+      sourceIdentifier(
+        value = "C A D",
+        ontologyType = "Meeting",
+        identifierType = IdentifierType.LabelDerived)
     )
     val List(concept) = subject.concepts
     concept should have(
       'label ("C A D"),
-      labelDerivedMeetingId("C A D")
+      sourceIdentifier(
+        value = "C A D",
+        ontologyType = "Meeting",
+        identifierType = IdentifierType.LabelDerived)
     )
   }
 
@@ -124,7 +135,10 @@ class SierraMeetingSubjectsTest
         // They should not be introduced anywhere else.
         subject should have(
           'label (label),
-          'id (IdState.Unidentifiable)
+          sourceIdentifier(
+            value = label,
+            ontologyType = "Meeting",
+            identifierType = IdentifierType.LabelDerived)
         )
         val List(concept) = subject.concepts
         concept should have(
