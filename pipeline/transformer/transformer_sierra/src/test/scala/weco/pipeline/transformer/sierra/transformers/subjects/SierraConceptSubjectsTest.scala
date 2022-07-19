@@ -2,10 +2,24 @@ package weco.pipeline.transformer.sierra.transformers.subjects
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, SourceIdentifier}
-import weco.catalogue.internal_model.work.{AbstractRootConcept, Concept, Period, Place}
+import weco.catalogue.internal_model.identifiers.{
+  IdState,
+  IdentifierType,
+  SourceIdentifier
+}
+import weco.catalogue.internal_model.work.{
+  AbstractRootConcept,
+  Concept,
+  Period,
+  Place
+}
 import org.scalatest.prop.TableDrivenPropertyChecks
-import weco.pipeline.transformer.sierra.transformers.matchers.{ConceptMatchers, HasIdMatchers, SourceIdentifierMatchers, SubjectMatchers}
+import weco.pipeline.transformer.sierra.transformers.matchers.{
+  ConceptMatchers,
+  HasIdMatchers,
+  SourceIdentifierMatchers,
+  SubjectMatchers
+}
 import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
 import weco.sierra.models.identifiers.SierraBibNumber
 import weco.sierra.models.marc.{Subfield, VarField}
@@ -245,7 +259,13 @@ class SierraConceptSubjectsTest
         )
       )
       .map {
-        case (subject, (expectedSubjectLabel, concept1Label, concept2Label, concept2Type)) =>
+        case (
+            subject,
+            (
+              expectedSubjectLabel,
+              concept1Label,
+              concept2Label,
+              concept2Type)) =>
           subject should have(
             'label (expectedSubjectLabel),
             labelDerivedSubjectId(expectedSubjectLabel)
@@ -257,7 +277,10 @@ class SierraConceptSubjectsTest
           )
           concept2 should have(
             'label (concept2Label),
-            sourceIdentifier(value=concept2Label, ontologyType = concept2Type, identifierType = IdentifierType.LabelDerived)
+            sourceIdentifier(
+              value = concept2Label,
+              ontologyType = concept2Type,
+              identifierType = IdentifierType.LabelDerived)
           )
       }
   }
@@ -286,7 +309,10 @@ class SierraConceptSubjectsTest
     conceptA shouldBe a[Period[_]]
     conceptA should have(
       'label ("A Content"),
-      sourceIdentifier(value="A Content", ontologyType="Period", identifierType = IdentifierType.LabelDerived)
+      sourceIdentifier(
+        value = "A Content",
+        ontologyType = "Period",
+        identifierType = IdentifierType.LabelDerived)
     )
 
     conceptX shouldBe a[Concept[_]]
@@ -326,7 +352,10 @@ class SierraConceptSubjectsTest
     conceptA shouldBe a[Place[_]]
     conceptA should have(
       'label ("A Content"),
-      sourceIdentifier(value="A Content", ontologyType="Place", identifierType = IdentifierType.LabelDerived)
+      sourceIdentifier(
+        value = "A Content",
+        ontologyType = "Place",
+        identifierType = IdentifierType.LabelDerived)
     )
 
     conceptX shouldBe a[Concept[_]]

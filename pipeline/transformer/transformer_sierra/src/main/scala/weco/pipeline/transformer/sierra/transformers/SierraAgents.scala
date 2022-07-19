@@ -1,6 +1,10 @@
 package weco.pipeline.transformer.sierra.transformers
 
-import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, SourceIdentifier}
+import weco.catalogue.internal_model.identifiers.{
+  IdState,
+  IdentifierType,
+  SourceIdentifier
+}
 import weco.catalogue.internal_model.work.{Meeting, Organisation, Person}
 import weco.pipeline.transformer.transformers.ConceptsTransformer
 import weco.pipeline.transformer.text.TextNormalisation._
@@ -96,12 +100,14 @@ trait SierraAgents extends SierraQueryOps with ConceptsTransformer {
     }
   }
 
-  def addIdentifierFromSubfieldText(ontologyType: String,
-                                    subFields: List[Subfield]): IdState.Unminted = {
+  def addIdentifierFromSubfieldText(
+    ontologyType: String,
+    subFields: List[Subfield]): IdState.Unminted = {
     getLabel(subFields) match {
-      case Some(label) => addIdentifierFromText(
-        ontologyType = ontologyType,
-        label = label.trimTrailingPeriod)
+      case Some(label) =>
+        addIdentifierFromText(
+          ontologyType = ontologyType,
+          label = label.trimTrailingPeriod)
       case None => IdState.Unidentifiable
     }
   }
@@ -113,7 +119,6 @@ trait SierraAgents extends SierraQueryOps with ConceptsTransformer {
         pseudoIdentifier = label,
         ontologyType = ontologyType
       ))
-
 
   def getLabel(subfields: List[Subfield]): Option[String] =
     subfields.filter { s =>

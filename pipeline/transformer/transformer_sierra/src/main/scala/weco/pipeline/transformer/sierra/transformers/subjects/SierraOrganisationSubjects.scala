@@ -63,6 +63,9 @@ object SierraOrganisationSubjects
         s"Not enough information to build a label on $varField")
     }
 
-    Organisation(label = label, id=identify(subfields = varField.subfields, ontologyType = "Organisation"))
+    Organisation(
+      label = label,
+      id =
+        identify(subfields = varField.subfields, ontologyType = "Organisation"))
   }
 }
