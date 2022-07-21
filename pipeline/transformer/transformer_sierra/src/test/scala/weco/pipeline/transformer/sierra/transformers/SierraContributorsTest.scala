@@ -778,7 +778,7 @@ class SierraContributorsTest
     val List(contributor) =
       SierraContributors(createSierraBibDataWith(varFields = varFields))
 
-    contributor should have (
+    contributor should have(
       roles(List("writer of introduction"))
     )
   }
