@@ -26,22 +26,24 @@ trait SubjectMatchers {
       expectedValue = expectedValue)
 
   implicit class SubjectTestOps[State](subject: Subject[State]) {
+
     /**
-     * Return the concept from a Subject that has exactly one concept in its concepts list
-     *
-     * A common sequence in tests is to process an input that generates a Subject with one concept
-     * in order to assert that that concept has been created correctly.
-     *
-     * Although not strictly a Matcher, this forms part of the test DSL, and will cause a test failure
-     * when the Subject's concept list is not as expected.
-     */
+      * Return the concept from a Subject that has exactly one concept in its concepts list
+      *
+      * A common sequence in tests is to process an input that generates a Subject with one concept
+      * in order to assert that that concept has been created correctly.
+      *
+      * Although not strictly a Matcher, this forms part of the test DSL, and will cause a test failure
+      * when the Subject's concept list is not as expected.
+      */
     def onlyConcept: AbstractRootConcept[State] = {
       try {
         val List(concept) = subject.concepts
         concept
       } catch {
         case _: MatchError =>
-          fail(s"Subject expected to have exactly one concept, found: ${subject.concepts}")
+          fail(
+            s"Subject expected to have exactly one concept, found: ${subject.concepts}")
       }
     }
   }

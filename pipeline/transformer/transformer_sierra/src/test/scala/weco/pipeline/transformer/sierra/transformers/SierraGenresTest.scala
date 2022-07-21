@@ -316,7 +316,7 @@ class SierraGenresTest
         "Z1 Content",
         "Place",
         (concept: AbstractConcept[Any]) => concept shouldBe a[Place[_]]
-        ),
+      ),
       (
         "A2 Content - V2 Content",
         "A2 Content",
@@ -325,7 +325,12 @@ class SierraGenresTest
         (concept: AbstractConcept[Any]) => concept shouldBe a[Concept[_]])
     ).zip(genres).map {
       case (
-          (genreName, concept1Name, concept2Name, concept2OntologyType, assertConcept2Type),
+          (
+            genreName,
+            concept1Name,
+            concept2Name,
+            concept2OntologyType,
+            assertConcept2Type),
           genre) =>
         genre should have(
           'label (genreName)
@@ -340,7 +345,10 @@ class SierraGenresTest
         assertConcept2Type(concept2)
         concept2 should have(
           'label (concept2Name),
-          sourceIdentifier(value=concept2Name, identifierType = IdentifierType.LabelDerived, ontologyType = concept2OntologyType)
+          sourceIdentifier(
+            value = concept2Name,
+            identifierType = IdentifierType.LabelDerived,
+            ontologyType = concept2OntologyType)
         )
     }
   }
