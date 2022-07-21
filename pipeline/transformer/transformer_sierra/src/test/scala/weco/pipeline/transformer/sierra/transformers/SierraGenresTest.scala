@@ -22,6 +22,7 @@ class SierraGenresTest
     extends AnyFunSpec
     with Matchers
     with ConceptMatchers
+    with HasIdMatchers
     with MarcGenerators
     with SierraDataGenerators {
 
@@ -227,7 +228,7 @@ class SierraGenresTest
     conceptV shouldBe a[Place[_]]
     conceptV should have(
       'label ("Z Content"),
-      labelDerivedConceptId("Z Content")
+      labelDerivedPlaceId("Z Content")
     )
   }
 
@@ -305,7 +306,7 @@ class SierraGenresTest
         )
       )
     )
-
+    //TODO: This would be clearer without looping
     val genres = SierraGenres(bibData)
     genres.length shouldBe 2
     List(
@@ -313,15 +314,18 @@ class SierraGenresTest
         "A1 Content - Z1 Content",
         "A1 Content",
         "Z1 Content",
-        (concept: AbstractConcept[Any]) => concept shouldBe a[Place[_]]),
+        "Place",
+        (concept: AbstractConcept[Any]) => concept shouldBe a[Place[_]]
+        ),
       (
         "A2 Content - V2 Content",
         "A2 Content",
         "V2 Content",
-        (concept: AbstractConcept[Any]) => concept shouldBe a[Concept[_]]),
+        "Concept",
+        (concept: AbstractConcept[Any]) => concept shouldBe a[Concept[_]])
     ).zip(genres).map {
       case (
-          (genreName, concept1Name, concept2Name, assertConcept2Type),
+          (genreName, concept1Name, concept2Name, concept2OntologyType, assertConcept2Type),
           genre) =>
         genre should have(
           'label (genreName)
@@ -336,7 +340,7 @@ class SierraGenresTest
         assertConcept2Type(concept2)
         concept2 should have(
           'label (concept2Name),
-          labelDerivedConceptId(concept2Name)
+          sourceIdentifier(value=concept2Name, identifierType = IdentifierType.LabelDerived, ontologyType = concept2OntologyType)
         )
     }
   }

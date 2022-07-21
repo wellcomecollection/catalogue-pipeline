@@ -512,7 +512,7 @@ class SierraConceptSubjectsTest
         'label ("Diet, Food, and Nutrition"),
         labelDerivedSubjectId("Diet, Food, and Nutrition")
       )
-      val List(concept) = subject.concepts
+      val concept = subject.onlyConcept
       assertType(concept)
       concept should have(
         'label ("Diet, Food, and Nutrition")
