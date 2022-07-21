@@ -20,11 +20,12 @@ trait ContributorMatchers {
   }
 
   /**
-    * Match a Contributor's roles against a list of role names
-    */
+   * Match a Contributor's roles against a list of role names
+   */
   def roles(expectedRoles: List[String])
-    : HavePropertyMatcher[Contributor[Any], List[String]] =
+  : HavePropertyMatcher[Contributor[Any], List[String]] =
     new HaveRoles(expectedRoles)
+
 }
 
 object ContributorMatchers extends ContributorMatchers

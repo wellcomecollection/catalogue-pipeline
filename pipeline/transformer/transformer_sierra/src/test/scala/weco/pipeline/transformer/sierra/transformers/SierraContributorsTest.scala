@@ -775,11 +775,11 @@ class SierraContributorsTest
       ),
     )
 
-    val contributors =
+    val List(contributor) =
       SierraContributors(createSierraBibDataWith(varFields = varFields))
-    contributors should have size 1
 
-    contributors.head.roles shouldBe List(
-      ContributionRole("writer of introduction"))
+    contributor should have (
+      roles(List("writer of introduction"))
+    )
   }
 }
