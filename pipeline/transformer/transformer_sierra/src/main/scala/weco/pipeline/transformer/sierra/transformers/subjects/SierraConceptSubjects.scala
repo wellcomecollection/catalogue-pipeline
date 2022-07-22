@@ -1,6 +1,6 @@
 package weco.pipeline.transformer.sierra.transformers.subjects
 
-import weco.catalogue.internal_model.identifiers.{IdState}
+import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work._
 import weco.pipeline.transformer.sierra.transformers.SierraConcepts
 import weco.pipeline.transformer.text.TextNormalisation._
@@ -8,7 +8,7 @@ import weco.pipeline.transformer.transformers.ParsedPeriod
 import weco.sierra.models.identifiers.SierraBibNumber
 import weco.sierra.models.marc.{Subfield, VarField}
 
-// Populate work:subject
+// Populate wwork:subject
 //
 // Use MARC field "650", "648" and "651" where the second indicator is not 7 (7 = "Source specified in subfield $2").
 //
