@@ -10,7 +10,7 @@ trait SubjectMatchers {
   def labelDerivedSubjectId(expectedValue: String)
     : HavePropertyMatcher[Subject[IdState.Unminted], String] =
     new HasIdMatchers.HasIdentifier(
-      identifierType=IdentifierType.LabelDerived,
+      identifierType = IdentifierType.LabelDerived,
       ontologyType = "Subject",
       expectedValue = expectedValue)
 

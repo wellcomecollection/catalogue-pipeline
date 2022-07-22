@@ -10,7 +10,7 @@ trait ConceptMatchers {
     : HavePropertyMatcher[AbstractRootConcept[IdState.Unminted], String] = {
 
     new HasIdMatchers.HasIdentifier(
-      identifierType=IdentifierType.LabelDerived,
+      identifierType = IdentifierType.LabelDerived,
       ontologyType = ontologyType,
       expectedValue = expectedValue)
   }
