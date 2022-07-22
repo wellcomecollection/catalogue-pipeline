@@ -7,11 +7,10 @@ import weco.catalogue.internal_model.identifiers.{
 }
 import weco.catalogue.internal_model.work.{Meeting, Organisation, Person}
 import weco.pipeline.transformer.transformers.ConceptsTransformer
-import weco.pipeline.transformer.text.TextNormalisation._
 import weco.sierra.models.SierraQueryOps
 import weco.sierra.models.marc.{Subfield, VarField}
 
-trait SierraAgents extends SierraQueryOps with ConceptsTransformer {
+trait SierraAgents extends SierraQueryOps with ConceptsTransformer with SierraAbstractConcepts {
   // This is used to construct a Person from MARc tags 100, 700 and 600.
   // For all these cases:
   //  - subfield $a populates the person label
@@ -62,77 +61,55 @@ trait SierraAgents extends SierraQueryOps with ConceptsTransformer {
    *
    * This method extracts them (if present) and wraps the agent in Unidentifiable or Identifiable
    * as appropriate.
+   *
+   * Agents are only identified within the LCNames or LabelDerived schemata.
+   *
    */
   def identify(varfield: VarField, ontologyType: String): IdState.Unminted =
     varfield.indicator2 match {
       // 0 indicates LCNames id in use
       // In this example from b17950235 (fd6nk8fw), n50082847 is the LCNames id for Glaxo Laboratories
       // 110 2  Glaxo Laboratories.|0n  50082847
-      // Agents as Contributors h
       case Some("0") | Some("") | None =>
-        identifyContributor(varfield, ontologyType)
+        getIdState(ontologyType, varfield)
       // Other values of second indicator show that the id is in an unusable scheme.
       // Do not identify.
-      case _ => IdState.Unidentifiable
+      case _ =>
+        info(s"${varfield.indicator2} is an unusable 2nd indicator value for an Agent in $varfield")
+        IdState.Unidentifiable
     }
 
-  def identifyContributor(varfield: VarField,
-                          ontologyType: String): IdState.Unminted = {
-    val subfields = varfield.subfields
-    // We take the contents of subfield $0.  They may contain inconsistent
-    // spacing and punctuation, such as:
-    //
-    //    " nr 82270463"
-    //    "nr 82270463"
-    //    "nr 82270463.,"
-    //
-    // which all refer to the same identifier.
-    //
-    // For consistency, we remove all whitespace and some punctuation
-    // before continuing.
-    val codes = subfields.collect {
+  // We take the contents of subfield $0.  They may contain inconsistent
+  // spacing and punctuation, such as:
+  //
+  //    " nr 82270463"
+  //    "nr 82270463"
+  //    "nr 82270463.,"
+  //
+  // which all refer to the same identifier.
+  //
+  // For consistency, we remove all whitespace and some punctuation
+  // before continuing.
+  protected def getIdentifierSubfieldContents(varField: VarField): List[String] = {
+    varField.subfields.collect {
       case Subfield("0", content) => content.replaceAll("[.,\\s]", "")
-    }
-
-    // If we get exactly one value, we can use it to identify the record.
-    // Some records have multiple instances of subfield $0 (it's a repeatable
-    // field in the MARC spec).
-    codes.distinct match {
-      case Seq(code) =>
-        IdState.Identifiable(
-          SourceIdentifier(
-            identifierType = IdentifierType.LCNames,
-            value = code,
-            ontologyType = ontologyType
-          )
-        )
-      // No ids, make one up.
-      case Nil =>
-        addIdentifierFromSubfieldText(ontologyType, subfields)
-      // Multiple ids. We don't know which one to use, so don't use any.
-      case _ => IdState.Unidentifiable
-    }
+    }.distinct
   }
 
-  def addIdentifierFromSubfieldText(
-    ontologyType: String,
-    subFields: List[Subfield]): IdState.Unminted = {
-    getLabel(subFields) match {
-      case Some(label) =>
-        addIdentifierFromText(
-          ontologyType = ontologyType,
-          label = label.trimTrailingPeriod)
-      case None => IdState.Unidentifiable
-    }
-  }
-
-  def addIdentifierFromText(ontologyType: String,
-                            label: String): IdState.Unminted =
+  protected def maybeAddIdentifier(
+                                    ontologyType: String,
+                                    varField: VarField,
+                                    identifierSubfieldContent: String): IdState.Unminted =
     IdState.Identifiable(
-      SierraConceptIdentifier.withNoIdentifier(
-        pseudoIdentifier = label,
+      SourceIdentifier(
+        identifierType = IdentifierType.LCNames,
+        value = identifierSubfieldContent,
         ontologyType = ontologyType
-      ))
+      )
+    )
+
+  def getLabel(varField: VarField): Option[String] =
+    getLabel(varField.subfields)
 
   def getLabel(subfields: List[Subfield]): Option[String] =
     subfields.filter { s =>

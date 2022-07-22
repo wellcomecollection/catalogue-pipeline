@@ -10,7 +10,7 @@ import weco.pipeline.transformer.transformers.{
 import weco.sierra.models.SierraQueryOps
 import weco.sierra.models.marc.{Subfield, VarField}
 
-trait SierraConcepts extends SierraQueryOps with ConceptsTransformer {
+trait SierraConcepts extends SierraQueryOps with ConceptsTransformer with SierraAbstractConcepts{
 
   // Get the label.  This is populated by the label of subfield $a, followed
   // by other subfields, in the order they come from MARC.  The labels are
@@ -21,9 +21,12 @@ trait SierraConcepts extends SierraQueryOps with ConceptsTransformer {
     orderedSubfields.map { _.content }.mkString(" - ").trimTrailingPeriod
   }
 
-  protected def getLabel(varField: VarField): String = {
+  protected def getLabel(varField: VarField): Option[String] = {
     val (primarySubfields, subdivisionSubfields) = getLabelSubfields(varField)
-    getLabel(primarySubfields, subdivisionSubfields)
+    getLabel(primarySubfields, subdivisionSubfields) match {
+      case "" => None
+      case label => Some(label)
+    }
   }
 
   protected def getLabelSubfields(
@@ -69,45 +72,13 @@ trait SierraConcepts extends SierraQueryOps with ConceptsTransformer {
   // Apply an identifier to the primary concept.  We look in subfield $0
   // for the identifier value, then second indicator for the authority.
   //
-  // Note that some identifiers have an identifier scheme in
-  // indicator 2, but no ID.  In this case, we just ignore it.
-  //
-  // There are three possible scenarios:
-  // - Exactly one identifier field:  use that
-  // - No identifier fields:  create an identifier for it
-  // - Multiple identifier fields: unidentifiable, we don't know what to use
-  // TODO: This latter is legal in MARC, but we should warn that it is having no effect.
   def identifyConcept(ontologyType: String,
                       varField: VarField): IdState.Unminted =
-    getIdentifierSubfieldContents(varField) match {
-      case Seq(subfieldContent) =>
-        maybeAddIdentifier(
-          ontologyType = ontologyType,
-          varField = varField,
-          identifierSubfieldContent = subfieldContent
-        )
-      case Nil =>
-        addIdentifierFromVarfieldText(ontologyType, varField)
-      case _ => IdState.Unidentifiable
-    }
-
-  def addIdentifierFromVarfieldText(ontologyType: String,
-                                    varField: VarField): IdState.Unminted =
-    addIdentifierFromText(
-      ontologyType = ontologyType,
-      label = getLabel(varField))
-
-  def addIdentifierFromText(ontologyType: String,
-                            label: String): IdState.Unminted =
-    IdState.Identifiable(
-      SierraConceptIdentifier.withNoIdentifier(
-        pseudoIdentifier = label,
-        ontologyType = ontologyType
-      ))
+    getIdState(ontologyType, varField)
 
   // If there's exactly one subfield $0 on the VarField, add an identifier
   // if possible.
-  private def maybeAddIdentifier(
+  protected def maybeAddIdentifier(
     ontologyType: String,
     varField: VarField,
     identifierSubfieldContent: String): IdState.Unminted =
