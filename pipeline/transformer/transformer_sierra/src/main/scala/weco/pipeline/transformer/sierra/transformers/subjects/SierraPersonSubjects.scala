@@ -56,16 +56,11 @@ object SierraPersonSubjects
             generalSubdivisions = generalSubdivisions
           )
 
-          val subject = Subject(
+          Subject(
             label = label,
-            concepts = getConcepts(person, generalSubdivisions)
+            concepts = getConcepts(person, generalSubdivisions),
+            id=identify(varField, "Subject")
           )
-
-          varField.indicator2 match {
-            case Some("0") =>
-              subject.copy(id = identify(varField.subfields, "Subject"))
-            case _ => subject
-          }
         }
       }
   }

@@ -17,6 +17,8 @@ import weco.sierra.models.data.SierraBibData
 import weco.sierra.models.identifiers.SierraBibNumber
 import weco.sierra.models.marc.{Subfield, VarField}
 
+// TODO: There is a bunch of commonality between the different SubjectsTests that could be DRYed out
+
 class SierraOrganisationSubjectsTest
     extends AnyFunSpec
     with Matchers
@@ -123,6 +125,27 @@ class SierraOrganisationSubjectsTest
       )
     }
 
+    it("assumes LCNames if no indicator2 is given") {
+      val lcNamesCode = "n81290903210"
+      val bibData = create610bibDataWith(
+        indicator2 = "",
+        subfields = List(
+          Subfield(tag = "a", content = "ACME Corp"),
+          Subfield(tag = "0", content = lcNamesCode)
+        )
+      )
+
+      val List(subject) = getOrganisationSubjects(bibData)
+
+      subject should have (
+        sourceIdentifier(
+          identifierType = IdentifierType.LCNames,
+          ontologyType = "Subject",
+          value = lcNamesCode
+        )
+      )
+    }
+
     it(
       "creates an Identifiable Organisation if subfield 0 has multiple but unambiguous values") {
       val bibData = create610bibDataWith(
@@ -163,7 +186,7 @@ class SierraOrganisationSubjectsTest
       unmintedOrganisation.id shouldBe IdState.Unidentifiable
     }
 
-    it("skips adding an identifier if the 2nd indicator is not '0'") {
+    it("skips adding an identifier if a specified 2nd indicator is not '0'") {
       val bibData = create610bibDataWith(
         indicator2 = "2",
         subfields = List(
