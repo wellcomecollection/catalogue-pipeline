@@ -1,14 +1,16 @@
 package weco.pipeline.transformer.sierra.transformers.matchers
 
 import org.scalatest.matchers.HavePropertyMatcher
-import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType}
 import weco.catalogue.internal_model.work.AbstractRootConcept
 
 trait ConceptMatchers {
 
   def labelDerivedAbstractConceptId(ontologyType: String, expectedValue: String)
     : HavePropertyMatcher[AbstractRootConcept[IdState.Unminted], String] = {
-    new SourceIdentifierMatchers.HasLabelDerivedIdentifier(
+
+    new HasIdMatchers.HasIdentifier(
+      identifierType=IdentifierType.LabelDerived,
       ontologyType = ontologyType,
       expectedValue = expectedValue)
   }

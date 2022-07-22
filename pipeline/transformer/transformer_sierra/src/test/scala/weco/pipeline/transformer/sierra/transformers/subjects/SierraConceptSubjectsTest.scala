@@ -17,7 +17,6 @@ import org.scalatest.prop.TableDrivenPropertyChecks
 import weco.pipeline.transformer.sierra.transformers.matchers.{
   ConceptMatchers,
   HasIdMatchers,
-  SourceIdentifierMatchers,
   SubjectMatchers
 }
 import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
@@ -27,7 +26,6 @@ import weco.sierra.models.marc.{Subfield, VarField}
 class SierraConceptSubjectsTest
     extends AnyFunSpec
     with Matchers
-    with SourceIdentifierMatchers
     with ConceptMatchers
     with HasIdMatchers
     with SubjectMatchers

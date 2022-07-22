@@ -2,14 +2,15 @@ package weco.pipeline.transformer.sierra.transformers.matchers
 
 import org.scalatest.Assertions.fail
 import org.scalatest.matchers.HavePropertyMatcher
-import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType}
 import weco.catalogue.internal_model.work.{AbstractRootConcept, Subject}
 
 trait SubjectMatchers {
 
   def labelDerivedSubjectId(expectedValue: String)
     : HavePropertyMatcher[Subject[IdState.Unminted], String] =
-    new SourceIdentifierMatchers.HasLabelDerivedIdentifier(
+    new HasIdMatchers.HasIdentifier(
+      identifierType=IdentifierType.LabelDerived,
       ontologyType = "Subject",
       expectedValue = expectedValue)
 

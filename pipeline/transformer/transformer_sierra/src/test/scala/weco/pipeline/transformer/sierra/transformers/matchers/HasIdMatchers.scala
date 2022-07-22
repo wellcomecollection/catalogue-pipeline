@@ -47,14 +47,6 @@ trait HasIdMatchers {
     }
   }
 
-  // TODO: get expectedValue from identifiableObject.label
-  def labelDerivedId(ontologyType: String, expectedValue: String)
-    : HavePropertyMatcher[HasId[IdState.Unminted], String] = {
-    new SourceIdentifierMatchers.HasLabelDerivedIdentifier(
-      ontologyType = ontologyType,
-      expectedValue = expectedValue)
-  }
-
   def sourceIdentifier(ontologyType: String,
                        value: String,
                        identifierType: IdentifierType)
