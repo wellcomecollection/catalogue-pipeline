@@ -13,18 +13,6 @@ trait SubjectMatchers {
       ontologyType = "Subject",
       expectedValue = expectedValue)
 
-  def meshSubjectId(expectedValue: String)
-    : HavePropertyMatcher[Subject[IdState.Unminted], String] =
-    new SourceIdentifierMatchers.HasMeshIdentifier(
-      ontologyType = "Subject",
-      expectedValue = expectedValue)
-
-  def lcSubjectsSubjectId(expectedValue: String)
-    : HavePropertyMatcher[Subject[IdState.Unminted], String] =
-    new SourceIdentifierMatchers.HasLCSubjectsIdentifier(
-      ontologyType = "Subject",
-      expectedValue = expectedValue)
-
   implicit class SubjectTestOps[State](subject: Subject[State]) {
 
     /**

@@ -448,13 +448,13 @@ class SierraConceptSubjectsTest
     val List(subject) = SierraConceptSubjects(bibId, bibData)
     subject should have(
       'label ("abolition"),
-      meshSubjectId("mesh/456")
+      sourceIdentifier(value="mesh/456", ontologyType="Subject", identifierType=IdentifierType.MESH)
     )
     val List(concept) = subject.concepts
 
     concept should have(
       'label ("abolition"),
-      meshConceptId("mesh/456")
+      sourceIdentifier(value="mesh/456", ontologyType="Concept", identifierType=IdentifierType.MESH)
     )
   }
 
@@ -537,13 +537,13 @@ class SierraConceptSubjectsTest
     val List(subject) = SierraConceptSubjects(createSierraBibNumber, bibData)
     subject should have(
       'label ("Medicine"),
-      lcSubjectsSubjectId("sh85083064")
+      sourceIdentifier(value="sh85083064", ontologyType="Subject", identifierType=IdentifierType.LCSubjects)
     )
 
     val List(concept) = subject.concepts
     concept should have(
       'label ("Medicine"),
-      lcSubjectsConceptId("sh85083064")
+      sourceIdentifier(value="sh85083064", ontologyType="Concept", identifierType=IdentifierType.LCSubjects)
     )
   }
   //TODO: Now that it's not doing the Mocky style test, we need to check that ParsedPeriod is being used.
