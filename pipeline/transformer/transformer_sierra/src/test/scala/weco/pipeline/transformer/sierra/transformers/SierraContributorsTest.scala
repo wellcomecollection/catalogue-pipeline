@@ -220,7 +220,7 @@ class SierraContributorsTest
 
       val List(contributor) =
         SierraContributors(createSierraBibDataWith(varFields = varFields))
-      contributor.agent shouldBe a [Person[_]]
+      contributor.agent shouldBe a[Person[_]]
       contributor.agent should have('label (name))
       contributor should have(
         roles(List(role1, role2))
