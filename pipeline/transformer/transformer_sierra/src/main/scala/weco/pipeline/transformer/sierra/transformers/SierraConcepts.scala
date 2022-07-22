@@ -10,7 +10,10 @@ import weco.pipeline.transformer.transformers.{
 import weco.sierra.models.SierraQueryOps
 import weco.sierra.models.marc.{Subfield, VarField}
 
-trait SierraConcepts extends SierraQueryOps with ConceptsTransformer with SierraAbstractConcepts{
+trait SierraConcepts
+    extends SierraQueryOps
+    with ConceptsTransformer
+    with SierraAbstractConcepts {
 
   // Get the label.  This is populated by the label of subfield $a, followed
   // by other subfields, in the order they come from MARC.  The labels are
@@ -24,7 +27,7 @@ trait SierraConcepts extends SierraQueryOps with ConceptsTransformer with Sierra
   protected def getLabel(varField: VarField): Option[String] = {
     val (primarySubfields, subdivisionSubfields) = getLabelSubfields(varField)
     getLabel(primarySubfields, subdivisionSubfields) match {
-      case "" => None
+      case ""    => None
       case label => Some(label)
     }
   }

@@ -10,7 +10,10 @@ import weco.pipeline.transformer.transformers.ConceptsTransformer
 import weco.sierra.models.SierraQueryOps
 import weco.sierra.models.marc.{Subfield, VarField}
 
-trait SierraAgents extends SierraQueryOps with ConceptsTransformer with SierraAbstractConcepts {
+trait SierraAgents
+    extends SierraQueryOps
+    with ConceptsTransformer
+    with SierraAbstractConcepts {
   // This is used to construct a Person from MARc tags 100, 700 and 600.
   // For all these cases:
   //  - subfield $a populates the person label
@@ -75,7 +78,8 @@ trait SierraAgents extends SierraQueryOps with ConceptsTransformer with SierraAb
       // Other values of second indicator show that the id is in an unusable scheme.
       // Do not identify.
       case _ =>
-        info(s"${varfield.indicator2} is an unusable 2nd indicator value for an Agent in $varfield")
+        info(
+          s"${varfield.indicator2} is an unusable 2nd indicator value for an Agent in $varfield")
         IdState.Unidentifiable
     }
 
@@ -90,16 +94,17 @@ trait SierraAgents extends SierraQueryOps with ConceptsTransformer with SierraAb
   //
   // For consistency, we remove all whitespace and some punctuation
   // before continuing.
-  protected def getIdentifierSubfieldContents(varField: VarField): List[String] = {
+  protected def getIdentifierSubfieldContents(
+    varField: VarField): List[String] = {
     varField.subfields.collect {
       case Subfield("0", content) => content.replaceAll("[.,\\s]", "")
     }.distinct
   }
 
   protected def maybeAddIdentifier(
-                                    ontologyType: String,
-                                    varField: VarField,
-                                    identifierSubfieldContent: String): IdState.Unminted =
+    ontologyType: String,
+    varField: VarField,
+    identifierSubfieldContent: String): IdState.Unminted =
     IdState.Identifiable(
       SourceIdentifier(
         identifierType = IdentifierType.LCNames,

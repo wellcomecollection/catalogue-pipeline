@@ -7,9 +7,10 @@ import weco.sierra.models.marc.VarField
 trait SierraAbstractConcepts extends Logging {
   protected def getLabel(varField: VarField): Option[String]
   protected def getIdentifierSubfieldContents(varField: VarField): List[String]
-  protected def maybeAddIdentifier( ontologyType: String,
-                                    varField: VarField,
-                                    identifierSubfieldContent: String): IdState.Unminted
+  protected def maybeAddIdentifier(
+    ontologyType: String,
+    varField: VarField,
+    identifierSubfieldContent: String): IdState.Unminted
 
   /**
     * Returns an IdState populated by looking at the identifier ($0) subfields in the given varField
@@ -22,9 +23,8 @@ trait SierraAbstractConcepts extends Logging {
     *   - Multiple identifier fields: unidentifiable, we don't know what to use
     *
     */
-
   protected def getIdState(ontologyType: String,
-                 varField: VarField): IdState.Unminted = {
+                           varField: VarField): IdState.Unminted = {
     getIdentifierSubfieldContents(varField) match {
       case Seq(subfieldContent) =>
         maybeAddIdentifier(
@@ -40,9 +40,9 @@ trait SierraAbstractConcepts extends Logging {
     }
   }
 
-  private def addIdentifierFromVarfieldText(ontologyType: String,
-                                    varField: VarField): IdState.Unminted =
-
+  private def addIdentifierFromVarfieldText(
+    ontologyType: String,
+    varField: VarField): IdState.Unminted =
     getLabel(varField) match {
       case Some(label) =>
         addIdentifierFromText(
@@ -52,7 +52,7 @@ trait SierraAbstractConcepts extends Logging {
     }
 
   private def addIdentifierFromText(ontologyType: String,
-                            label: String): IdState.Unminted =
+                                    label: String): IdState.Unminted =
     IdState.Identifiable(
       SierraConceptIdentifier.withNoIdentifier(
         pseudoIdentifier = label,
