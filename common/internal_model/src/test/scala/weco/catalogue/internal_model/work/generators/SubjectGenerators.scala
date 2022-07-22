@@ -25,6 +25,5 @@ trait SubjectGenerators extends RandomGenerators {
   protected def createConcepts(
     conceptStrings: List[String] = List.fill(3)(randomAlphanumeric(15))
   ): List[AbstractRootConcept[IdState.Minted]] =
-    conceptStrings.map(conceptString =>
-      Concept(label = conceptString, id = IdState.Unidentifiable))
+    conceptStrings.map(Concept(_))
 }
