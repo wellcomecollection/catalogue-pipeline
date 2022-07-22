@@ -1,6 +1,10 @@
 package weco.pipeline.transformer.sierra.transformers
 
-import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, SourceIdentifier}
+import weco.catalogue.internal_model.identifiers.{
+  IdState,
+  IdentifierType,
+  SourceIdentifier
+}
 import weco.catalogue.internal_model.work.{Meeting, Organisation, Person}
 import weco.pipeline.transformer.transformers.ConceptsTransformer
 import weco.pipeline.transformer.text.TextNormalisation._
@@ -59,14 +63,13 @@ trait SierraAgents extends SierraQueryOps with ConceptsTransformer {
    * This method extracts them (if present) and wraps the agent in Unidentifiable or Identifiable
    * as appropriate.
    */
-  def identify(varfield: VarField,
-               ontologyType: String): IdState.Unminted =
+  def identify(varfield: VarField, ontologyType: String): IdState.Unminted =
     varfield.indicator2 match {
       // 0 indicates LCNames id in use
       // In this example from b17950235 (fd6nk8fw), n50082847 is the LCNames id for Glaxo Laboratories
       // 110 2  Glaxo Laboratories.|0n  50082847
       // Agents as Contributors h
-      case Some("0") | Some("") | None=>
+      case Some("0") | Some("") | None =>
         identifyContributor(varfield, ontologyType)
       // Other values of second indicator show that the id is in an unusable scheme.
       // Do not identify.
@@ -74,7 +77,7 @@ trait SierraAgents extends SierraQueryOps with ConceptsTransformer {
     }
 
   def identifyContributor(varfield: VarField,
-                 ontologyType: String): IdState.Unminted = {
+                          ontologyType: String): IdState.Unminted = {
     val subfields = varfield.subfields
     // We take the contents of subfield $0.  They may contain inconsistent
     // spacing and punctuation, such as:

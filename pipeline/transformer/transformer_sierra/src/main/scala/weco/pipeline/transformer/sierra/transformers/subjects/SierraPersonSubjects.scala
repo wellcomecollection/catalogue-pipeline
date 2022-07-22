@@ -59,7 +59,7 @@ object SierraPersonSubjects
           Subject(
             label = label,
             concepts = getConcepts(person, generalSubdivisions),
-            id=identify(varField, "Subject")
+            id = identify(varField, "Subject")
           )
         }
       }

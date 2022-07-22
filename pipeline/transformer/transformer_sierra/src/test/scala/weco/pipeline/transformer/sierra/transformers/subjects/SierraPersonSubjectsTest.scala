@@ -3,7 +3,11 @@ package weco.pipeline.transformer.sierra.transformers.subjects
 import org.scalatest.Assertion
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, SourceIdentifier}
+import weco.catalogue.internal_model.identifiers.{
+  IdState,
+  IdentifierType,
+  SourceIdentifier
+}
 import weco.catalogue.internal_model.work.{Concept, Person, Subject}
 import weco.pipeline.transformer.sierra.transformers.matchers.SubjectMatchers
 import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
@@ -35,7 +39,7 @@ class SierraPersonSubjectsTest
         )
       )
     )
-    assertCreatesSubjectWithLabel(bibData, label="A Content" )
+    assertCreatesSubjectWithLabel(bibData, label = "A Content")
   }
 
   it("returns subjects for tag 600 with only subfields a and c") {
@@ -51,7 +55,7 @@ class SierraPersonSubjectsTest
       )
     )
 
-    assertCreatesSubjectWithLabel(bibData, label="Larrey, D. J. baron")
+    assertCreatesSubjectWithLabel(bibData, label = "Larrey, D. J. baron")
   }
 
   it("returns subjects for tag 600 with only subfields a and multiple c") {
@@ -67,7 +71,9 @@ class SierraPersonSubjectsTest
         )
       )
     )
-    assertCreatesSubjectWithLabel(bibData, label="David Attenborough sir doctor")
+    assertCreatesSubjectWithLabel(
+      bibData,
+      label = "David Attenborough sir doctor")
   }
 
   it("returns subjects for tag 600 with only subfields a and b") {
@@ -82,7 +88,7 @@ class SierraPersonSubjectsTest
         )
       )
     )
-    assertCreatesSubjectWithLabel(bibData, label="David Attenborough II")
+    assertCreatesSubjectWithLabel(bibData, label = "David Attenborough II")
   }
 
   it("returns subjects for tag 600 with subfields a and e") {
@@ -100,7 +106,7 @@ class SierraPersonSubjectsTest
 
     val List(subject) = SierraPersonSubjects(bibId, bibData)
     subject.label shouldBe "David Attenborough, author"
-    subject.onlyConcept shouldBe a [Person[_]]
+    subject.onlyConcept shouldBe a[Person[_]]
     subject.onlyConcept.label shouldBe "David Attenborough,"
   }
 
@@ -116,7 +122,9 @@ class SierraPersonSubjectsTest
         )
       )
     )
-    assertCreatesSubjectWithLabel(bibData, "Rita Levi Montalcini, 22 April 1909 – 30 December 2012")
+    assertCreatesSubjectWithLabel(
+      bibData,
+      "Rita Levi Montalcini, 22 April 1909 – 30 December 2012")
   }
 
   it("returns subjects for tag 600 with subfields a and multiple e") {
@@ -134,7 +142,7 @@ class SierraPersonSubjectsTest
     )
     val List(subject) = SierraPersonSubjects(bibId, bibData)
     subject.label shouldBe "David Attenborough, author, editor"
-    subject.onlyConcept shouldBe a [Person[_]]
+    subject.onlyConcept shouldBe a[Person[_]]
     // Not "David Attenborough"
     // See https://github.com/wellcomecollection/catalogue-pipeline/blob/704cec1f6c43496313aebe0cc167e8b5aac32021/pipeline/transformer/transformer_sierra/src/main/scala/weco/pipeline/transformer/sierra/transformers/SierraAgents.scala#L32-L40
     subject.onlyConcept.label shouldBe "David Attenborough,"
@@ -288,17 +296,21 @@ class SierraPersonSubjectsTest
         )
       )
     )
-    assertCreatesSubjectWithLabel(bibData, label="Agate, John, 1676-1720. Sermon preach'd at Exeter, on the 30th of January ..." )
+    assertCreatesSubjectWithLabel(
+      bibData,
+      label =
+        "Agate, John, 1676-1720. Sermon preach'd at Exeter, on the 30th of January ...")
   }
 
   /**
-   * Assert that the result of creating subjects with the given bibdata results in a single
-   * subject with a single concept, both bearing the given label.
-   */
-  private def assertCreatesSubjectWithLabel(bibData:SierraBibData, label: String): Assertion = {
+    * Assert that the result of creating subjects with the given bibdata results in a single
+    * subject with a single concept, both bearing the given label.
+    */
+  private def assertCreatesSubjectWithLabel(bibData: SierraBibData,
+                                            label: String): Assertion = {
     val List(subject) = SierraPersonSubjects(bibId, bibData)
     subject.label shouldBe label
-    subject.onlyConcept shouldBe a [Person[_]]
+    subject.onlyConcept shouldBe a[Person[_]]
     subject.onlyConcept.label shouldBe label
   }
 

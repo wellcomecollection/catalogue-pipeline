@@ -60,7 +60,6 @@ object SierraOrganisationSubjects
 
     Organisation(
       label = label,
-      id =
-        identify(varfield = varField, ontologyType = "Organisation"))
+      id = identify(varfield = varField, ontologyType = "Organisation"))
   }
 }

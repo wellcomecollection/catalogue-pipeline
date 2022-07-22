@@ -137,7 +137,7 @@ class SierraOrganisationSubjectsTest
 
       val List(subject) = getOrganisationSubjects(bibData)
 
-      subject should have (
+      subject should have(
         sourceIdentifier(
           identifierType = IdentifierType.LCNames,
           ontologyType = "Subject",

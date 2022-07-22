@@ -53,8 +53,7 @@ object SierraContributors
             val (ontologyType, maybeAgent) = f(varfield.subfields)
             maybeAgent.map { agent =>
               Contributor(
-                agent =
-                  withId(agent, identify(varfield, ontologyType)),
+                agent = withId(agent, identify(varfield, ontologyType)),
                 roles = getContributionRoles(varfield.subfields, roleTag)
               )
             }
