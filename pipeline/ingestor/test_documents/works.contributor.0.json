@@ -1,6 +1,6 @@
 {
   "description" : "works with different contributor",
-  "createdAt" : "2022-06-20T10:13:37.573801Z",
+  "createdAt" : "2022-07-25T14:45:36.642571Z",
   "id" : "gvkz3vff",
   "document" : {
     "debug" : {
@@ -73,7 +73,8 @@
             "type" : "Agent"
           },
           "roles" : [
-          ]
+          ],
+          "primary" : true
         }
       ],
       "thumbnail" : null,
@@ -108,6 +109,7 @@
           },
           "roles" : [
           ],
+          "primary" : true,
           "type" : "Contributor"
         }
       ],

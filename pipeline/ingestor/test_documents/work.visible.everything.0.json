@@ -1,6 +1,6 @@
 {
   "description" : "a list of work with all the include-able fields",
-  "createdAt" : "2022-06-20T10:13:36.992078Z",
+  "createdAt" : "2022-07-25T14:45:36.297894Z",
   "id" : "tmdfbk5k",
   "document" : {
     "debug" : {
@@ -237,7 +237,8 @@
             "type" : "Person"
           },
           "roles" : [
-          ]
+          ],
+          "primary" : true
         },
         {
           "id" : {
@@ -253,7 +254,8 @@
             "type" : "Person"
           },
           "roles" : [
-          ]
+          ],
+          "primary" : true
         }
       ],
       "thumbnail" : null,
@@ -583,6 +585,7 @@
           },
           "roles" : [
           ],
+          "primary" : true,
           "type" : "Contributor"
         },
         {
@@ -592,6 +595,7 @@
           },
           "roles" : [
           ],
+          "primary" : true,
           "type" : "Contributor"
         }
       ],

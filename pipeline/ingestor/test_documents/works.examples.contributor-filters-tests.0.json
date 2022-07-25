@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2022-06-20T10:13:38.504424Z",
+  "createdAt" : "2022-07-25T14:45:36.977798Z",
   "id" : "h5zn9bqm",
   "document" : {
     "debug" : {
@@ -75,7 +75,8 @@
             "type" : "Person"
           },
           "roles" : [
-          ]
+          ],
+          "primary" : true
         }
       ],
       "thumbnail" : null,
@@ -110,6 +111,7 @@
           },
           "roles" : [
           ],
+          "primary" : true,
           "type" : "Contributor"
         }
       ],
