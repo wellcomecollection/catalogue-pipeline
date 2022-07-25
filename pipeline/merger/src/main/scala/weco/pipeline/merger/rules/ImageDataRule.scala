@@ -16,15 +16,14 @@ object ImageDataRule extends FieldMergeRule {
     target: Work.Visible[Identified],
     sources: Seq[Work[Identified]] = Nil
   ): FieldMergeResult[FieldData] = {
-    // We first try to merge images into Sierra targets, regardless of whether this is the principal
-    // target of the graph we're currently merging (ie if there's a Calm target, it's ignored).
-    // If this fails, we try to merge into a Calm target
+    // We merge images into Sierra targets, regardless of whether this is the principal
+    // target of the graph we're currently merging (ie if there's a Calm target, it's ignored)
     TargetPrecedence
       .targetSatisfying(sierraWork)(
         target +: sources.collect(TargetPrecedence.visibleWork)
       )
       .map(mergeSierraImages(sources))
-      .getOrElse(mergeCalmImages(target, sources))
+      .getOrElse(FieldMergeResult(data = Nil, sources = Nil))
   }
 
   private def mergeSierraImages(
@@ -40,15 +39,6 @@ object ImageDataRule extends FieldMergeRule {
       ).flatMap(_.mergedSources(sierraTarget, sources))
     )
 
-  private def mergeCalmImages(
-    target: Work.Visible[Identified],
-    sources: Seq[Work[Identified]]
-  ) =
-    FieldMergeResult(
-      data = getCalmMiroImages(target, sources).getOrElse(Nil),
-      sources = getCalmMiroImages.mergedSources(target, sources)
-    )
-
   private lazy val getMetsPictureAndEphemeraImages = new FlatImageMergeRule {
     val isDefinedForTarget: WorkPredicate = sierraPictureOrEphemera
     val isDefinedForSource: WorkPredicate = singleDigitalItemMetsWork
@@ -60,11 +50,6 @@ object ImageDataRule extends FieldMergeRule {
     val isDefinedForSource: WorkPredicate = singleDigitalItemMiroWork
   }
 
-  private lazy val getCalmMiroImages = new FlatImageMergeRule {
-    override val isDefinedForTarget: WorkPredicate = singlePhysicalItemCalmWork
-    override val isDefinedForSource: WorkPredicate = singleDigitalItemMiroWork
-  }
-
   trait FlatImageMergeRule extends PartialRule {
     final override def rule(
       target: Work.Visible[Identified],
@@ -72,5 +57,4 @@ object ImageDataRule extends FieldMergeRule {
     ): List[ImageData[IdState.Identified]] =
       (target :: sources).toList.flatMap(_.data.imageData)
   }
-
 }
