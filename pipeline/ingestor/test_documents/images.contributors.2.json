@@ -1,6 +1,6 @@
 {
   "description" : "images with different contributors",
-  "createdAt" : "2022-06-17T14:17:36.698284Z",
+  "createdAt" : "2022-07-25T14:43:39.168643Z",
   "id" : "krb6vjce",
   "document" : {
     "version" : 1,
@@ -4330,7 +4330,8 @@
               "type" : "Agent"
             },
             "roles" : [
-            ]
+            ],
+            "primary" : true
           },
           {
             "id" : {
@@ -4344,7 +4345,8 @@
               "type" : "Meeting"
             },
             "roles" : [
-            ]
+            ],
+            "primary" : true
           }
         ],
         "thumbnail" : null,
@@ -4419,6 +4421,7 @@
             },
             "roles" : [
             ],
+            "primary" : true,
             "type" : "Contributor"
           },
           {
@@ -4428,6 +4431,7 @@
             },
             "roles" : [
             ],
+            "primary" : true,
             "type" : "Contributor"
           }
         ],

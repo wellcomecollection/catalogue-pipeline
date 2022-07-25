@@ -7,6 +7,7 @@ import weco.catalogue.internal_model.work.Contributor
 case class DisplayContributor(
   agent: DisplayAbstractAgent,
   roles: List[DisplayContributionRole],
+  primary: Boolean,
   @JsonKey("type") ontologyType: String = "Contributor"
 )
 
@@ -20,6 +21,7 @@ object DisplayContributor {
         contributor.agent,
         includesIdentifiers = includesIdentifiers
       ),
-      roles = contributor.roles.map { DisplayContributionRole(_) }
+      roles = contributor.roles.map { DisplayContributionRole(_) },
+      primary = contributor.primary
     )
 }

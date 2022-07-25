@@ -35,33 +35,79 @@ object SierraContributors
 
   type Output = List[Contributor[IdState.Unminted]]
 
-  val contributorFields = List(
-    ("100", getPersonContributors _, "e"),
-    ("110", getOrganisationContributors _, "e"),
-    ("111", getMeetingContributors _, "j"),
-    ("700", getPersonContributors _, "e"),
-    ("710", getOrganisationContributors _, "e"),
-    ("711", getMeetingContributors _, "j"),
+  case class ContributorField(
+    marcTag: String,
+    roleTag: String,
+    isPrimary: Boolean,
+    getContributors: List[Subfield] => (String,
+                                        Option[
+                                          AbstractAgent[IdState.Unminted]]),
   )
 
-  def apply(bibData: SierraBibData) =
-    contributorFields.flatMap {
-      case (tag, f, roleTag) =>
+  val contributorFields = List(
+    ContributorField(
+      marcTag = "100",
+      roleTag = "e",
+      isPrimary = true,
+      getPersonContributors),
+    ContributorField(
+      marcTag = "110",
+      roleTag = "e",
+      isPrimary = true,
+      getOrganisationContributors),
+    ContributorField(
+      marcTag = "111",
+      roleTag = "j",
+      isPrimary = true,
+      getMeetingContributors),
+    ContributorField(
+      marcTag = "700",
+      roleTag = "e",
+      isPrimary = false,
+      getPersonContributors),
+    ContributorField(
+      marcTag = "710",
+      roleTag = "e",
+      isPrimary = false,
+      getOrganisationContributors),
+    ContributorField(
+      marcTag = "711",
+      roleTag = "j",
+      isPrimary = false,
+      getMeetingContributors),
+  )
+
+  def apply(bibData: SierraBibData): List[Contributor[IdState.Unminted]] = {
+    val allContributors = contributorFields.flatMap {
+      case ContributorField(marcTag, roleTag, isPrimary, getContributors) =>
         bibData
-          .varfieldsWithTag(tag)
+          .varfieldsWithTag(marcTag)
           .flatMap { varfield =>
-            val (ontologyType, maybeAgent) = f(varfield.subfields)
+            val (ontologyType, maybeAgent) = getContributors(varfield.subfields)
             maybeAgent.map { agent =>
               Contributor(
                 agent =
                   withId(agent, identify(varfield.subfields, ontologyType)),
-                roles = getContributionRoles(varfield.subfields, roleTag)
+                roles = getContributionRoles(varfield.subfields, roleTag),
+                primary = isPrimary
               )
             }
           }
     }.distinct
 
-  private def getPersonContributors(subfields: List[Subfield]) =
+    // We need to remove duplicates where two contributors differ only
+    // by primary/not-primary
+    val duplicatedContributors =
+      allContributors
+        .filter(_.primary == false)
+        .filter(c => allContributors.contains(c.copy(primary = true)))
+        .toSet
+
+    allContributors.filterNot(c => duplicatedContributors.contains(c))
+  }
+
+  private def getPersonContributors(subfields: List[Subfield])
+    : (String, Option[AbstractAgent[IdState.Unminted]]) =
     if (subfields.withTags("t").isEmpty)
       "Person" -> getPerson(subfields, normalisePerson = true)
     else

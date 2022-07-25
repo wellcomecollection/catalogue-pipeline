@@ -65,12 +65,24 @@ class SierraContributorsTest
     )
 
     val expectedContributors = List(
-      Contributor(Person("Sarah the soybean"), roles = Nil),
-      Contributor(Person("Sam the squash, Sir"), roles = Nil),
-      Contributor(Organisation("Spinach Solicitors"), roles = Nil),
-      Contributor(Person("Sebastian the sugarsnap"), roles = Nil),
-      Contributor(Organisation("Shallot Swimmers"), roles = Nil),
-      Contributor(Meeting("Sammys meet the Sammys at Sammys"), roles = Nil)
+      Contributor(Person("Sarah the soybean"), roles = Nil, primary = true),
+      Contributor(Person("Sam the squash, Sir"), roles = Nil, primary = true),
+      Contributor(
+        Organisation("Spinach Solicitors"),
+        roles = Nil,
+        primary = true),
+      Contributor(
+        Person("Sebastian the sugarsnap"),
+        roles = Nil,
+        primary = false),
+      Contributor(
+        Organisation("Shallot Swimmers"),
+        roles = Nil,
+        primary = false),
+      Contributor(
+        Meeting("Sammys meet the Sammys at Sammys"),
+        roles = Nil,
+        primary = false)
     )
     transformAndCheckContributors(
       varFields = varFields,
@@ -78,7 +90,7 @@ class SierraContributorsTest
   }
 
   describe("Person") {
-    it("extracts and combines only subfields $$a $$b $$c $$d for the label") {
+    it("extracts and combines only subfields ǂa ǂb ǂc ǂd for the label") {
       val varFields = List(
         VarField(
           marcTag = "100",
@@ -103,10 +115,12 @@ class SierraContributorsTest
       val expectedContributors = List(
         Contributor(
           Person(label = "Charles Emmanuel III, King of Sardinia, 1701-1773"),
-          roles = Nil),
+          roles = Nil,
+          primary = true),
         Contributor(
           Person(label = "Charles Emmanuel IV, King of Sardinia, 1796-1802"),
-          roles = Nil)
+          roles = Nil,
+          primary = false)
       )
 
       transformAndCheckContributors(
@@ -115,7 +129,7 @@ class SierraContributorsTest
     }
 
     it(
-      "combines subfield $$t with $$a $$b $$c $$d and creates an Agent, not a Person from MARC field 100 / 700") {
+      "combines subfield ǂt with ǂa ǂb ǂc ǂd and creates an Agent, not a Person from MARC field 100 / 700") {
       // Based on https://search.wellcomelibrary.org/iii/encore/record/C__Rb1159639?marcData=Y
       // as retrieved on 4 February 2019.
       val varFields = List(
@@ -139,7 +153,7 @@ class SierraContributorsTest
     }
 
     it(
-      "gets the name from MARC tags 100 and 700 subfield $$a in the right order") {
+      "gets the name from MARC tags 100 and 700 subfield ǂa in the right order") {
       val name1 = "Alfie the Artichoke"
       val name2 = "Alison the Apple"
       val name3 = "Archie the Aubergine"
@@ -163,9 +177,9 @@ class SierraContributorsTest
       )
 
       val expectedContributors = List(
-        Contributor(Person(label = name1), roles = Nil),
-        Contributor(Person(label = name2), roles = Nil),
-        Contributor(Person(label = name3), roles = Nil)
+        Contributor(Person(label = name1), roles = Nil, primary = true),
+        Contributor(Person(label = name2), roles = Nil, primary = false),
+        Contributor(Person(label = name3), roles = Nil, primary = false)
       )
 
       transformAndCheckContributors(
@@ -173,7 +187,7 @@ class SierraContributorsTest
         expectedContributors = expectedContributors)
     }
 
-    it("gets the roles from subfield $$e") {
+    it("gets the roles from subfield ǂe") {
       val name = "Violet the Vanilla"
       val role1 = "spice"
       val role2 = "flavour"
@@ -192,7 +206,8 @@ class SierraContributorsTest
       val expectedContributors = List(
         Contributor(
           agent = Person(label = name),
-          roles = List(ContributionRole(role1), ContributionRole(role2))
+          roles = List(ContributionRole(role1), ContributionRole(role2)),
+          primary = true
         )
       )
 
@@ -223,7 +238,7 @@ class SierraContributorsTest
       contributors.head.agent.label shouldBe "Faujas-de-St.-Fond, cit. (Barthélemey), 1741-1819"
     }
 
-    it("gets an identifier from subfield $$0") {
+    it("gets an identifier from subfield ǂ0") {
       val name = "Ivan the ivy"
       val lcshCode = "lcsh7101607"
 
@@ -255,7 +270,7 @@ class SierraContributorsTest
     }
 
     it(
-      "combines identifiers with inconsistent spacing/punctuation from subfield $$0") {
+      "combines identifiers with inconsistent spacing/punctuation from subfield ǂ0") {
       val name = "Wanda the watercress"
       val lcshCodeCanonical = "lcsh2055034"
       val lcshCode1 = "lcsh 2055034"
@@ -296,7 +311,7 @@ class SierraContributorsTest
     }
 
     it(
-      "does not identify the contributor if there are multiple distinct identifiers in subfield $$0") {
+      "does not identify the contributor if there are multiple distinct identifiers in subfield ǂ0") {
       val name = "Darren the Dill"
       val varFields = List(
         VarField(
@@ -333,8 +348,8 @@ class SierraContributorsTest
       )
 
       val expectedContributors = List(
-        Contributor(Person(label = "George"), roles = Nil),
-        Contributor(Person(label = "Sebastian"), roles = Nil)
+        Contributor(Person(label = "George"), roles = Nil, primary = true),
+        Contributor(Person(label = "Sebastian"), roles = Nil, primary = false)
       )
 
       transformAndCheckContributors(
@@ -344,7 +359,7 @@ class SierraContributorsTest
   }
 
   describe("Organisation") {
-    it("gets the name from MARC tag 110 subfield $$a") {
+    it("gets the name from MARC tag 110 subfield ǂa") {
       val name = "Ona the orache"
 
       val varFields = List(
@@ -364,7 +379,7 @@ class SierraContributorsTest
     }
 
     it(
-      "combines only subfields $$a $$b $$c $$d (multiples of) with spaces from MARC field 110 / 710") {
+      "combines only subfields ǂa ǂb ǂc ǂd (multiples of) with spaces from MARC field 110 / 710") {
       // Based on https://search.wellcomelibrary.org/iii/encore/record/C__Rb1000984
       // as retrieved from 25 April 2019
       val name =
@@ -401,7 +416,7 @@ class SierraContributorsTest
     }
 
     it(
-      "gets the name from MARC tags 110 and 710 subfield $$a in the right order") {
+      "gets the name from MARC tags 110 and 710 subfield ǂa in the right order") {
       val name1 = "Mary the mallow"
       val name2 = "Mike the mashua"
       val name3 = "Mickey the mozuku"
@@ -425,9 +440,9 @@ class SierraContributorsTest
       )
 
       val expectedContributors = List(
-        Contributor(Organisation(label = name1), roles = Nil),
-        Contributor(Organisation(label = name2), roles = Nil),
-        Contributor(Organisation(label = name3), roles = Nil)
+        Contributor(Organisation(label = name1), roles = Nil, primary = true),
+        Contributor(Organisation(label = name2), roles = Nil, primary = false),
+        Contributor(Organisation(label = name3), roles = Nil, primary = false)
       )
 
       transformAndCheckContributors(
@@ -435,7 +450,7 @@ class SierraContributorsTest
         expectedContributors = expectedContributors)
     }
 
-    it("gets the roles from subfield $$e") {
+    it("gets the roles from subfield ǂe") {
       val name = "Terry the turmeric"
       val role1 = "dye"
       val role2 = "colouring"
@@ -463,7 +478,7 @@ class SierraContributorsTest
         expectedContributors = expectedContributors)
     }
 
-    it("gets an identifier from subfield $$0") {
+    it("gets an identifier from subfield ǂ0") {
       val name = "Gerry the Garlic"
       val lcshCode = "lcsh7212"
 
@@ -496,7 +511,7 @@ class SierraContributorsTest
         expectedContributors = expectedContributors)
     }
 
-    it("gets an identifier with inconsistent spacing from subfield $$0") {
+    it("gets an identifier with inconsistent spacing from subfield ǂ0") {
       val name = "Charlie the chive"
       val lcshCodeCanonical = "lcsh6791210"
       val lcshCode1 = "lcsh 6791210"
@@ -535,7 +550,7 @@ class SierraContributorsTest
     }
 
     it(
-      "does not identify the contributor if there are multiple distinct identifiers in subfield $$0") {
+      "does not identify the contributor if there are multiple distinct identifiers in subfield ǂ0") {
       val name = "Luke the lime"
       val varFields = List(
         VarField(
@@ -571,8 +586,14 @@ class SierraContributorsTest
       )
 
       val expectedContributors = List(
-        Contributor(Organisation(label = "The organisation"), roles = Nil),
-        Contributor(Organisation(label = "Another organisation"), roles = Nil)
+        Contributor(
+          Organisation(label = "The organisation"),
+          roles = Nil,
+          primary = true),
+        Contributor(
+          Organisation(label = "Another organisation"),
+          roles = Nil,
+          primary = false)
       )
 
       transformAndCheckContributors(
@@ -584,7 +605,7 @@ class SierraContributorsTest
   // This is based on transformer failures we saw in October 2018 --
   // records 3069865, 3069866, 3069867, 3069872 all had empty instances of
   // the 110 field.
-  it("returns an empty list if subfield $$a is missing") {
+  it("returns an empty list if subfield ǂa is missing") {
     val varFields = List(
       VarField(
         marcTag = "100",
@@ -600,7 +621,7 @@ class SierraContributorsTest
   }
 
   describe("Meeting") {
-    it("gets the name from MARC tag 111 subfield $$a") {
+    it("gets the name from MARC tag 111 subfield ǂa") {
       val varField = VarField(
         marcTag = "111",
         subfields = List(Subfield(tag = "a", content = "Big meeting"))
@@ -609,16 +630,19 @@ class SierraContributorsTest
       transformAndCheckContributors(List(varField), List(contributor))
     }
 
-    it("gets the name from MARC tag 711 subfield $$a") {
+    it("gets the name from MARC tag 711 subfield ǂa") {
       val varField = VarField(
         marcTag = "711",
         subfields = List(Subfield(tag = "a", content = "Big meeting"))
       )
-      val contributor = Contributor(Meeting(label = "Big meeting"), roles = Nil)
+      val contributor = Contributor(
+        Meeting(label = "Big meeting"),
+        roles = Nil,
+        primary = false)
       transformAndCheckContributors(List(varField), List(contributor))
     }
 
-    it("combinies subfields $$a, $$c, $$d and $$t with spaces") {
+    it("combinies subfields ǂa, ǂc, ǂd and ǂt with spaces") {
       val varField = VarField(
         marcTag = "111",
         subfields = List(
@@ -629,11 +653,12 @@ class SierraContributorsTest
           Subfield(tag = "t", content = "4"),
         )
       )
-      val contributor = Contributor(Meeting(label = "1 2 3 4"), roles = Nil)
+      val contributor =
+        Contributor(Meeting(label = "1 2 3 4"), roles = Nil, primary = true)
       transformAndCheckContributors(List(varField), List(contributor))
     }
 
-    it("gets the roles from subfield $$j") {
+    it("gets the roles from subfield ǂj") {
       val varField = VarField(
         marcTag = "111",
         subfields = List(
@@ -650,7 +675,7 @@ class SierraContributorsTest
       transformAndCheckContributors(List(varField), List(contributor))
     }
 
-    it("gets an identifier from subfield $$0") {
+    it("gets an identifier from subfield ǂ0") {
       val varField = VarField(
         marcTag = "111",
         subfields = List(
@@ -698,7 +723,8 @@ class SierraContributorsTest
     SierraContributors(bibData) shouldBe List(
       Contributor(
         agent = Person(label = "Steele, Richard, Sir, 1672-1729."),
-        roles = List.empty
+        roles = List.empty,
+        primary = true
       )
     )
   }
@@ -726,7 +752,8 @@ class SierraContributorsTest
           label =
             "Brewer, George. Essays after the manner of Goldsmith, No. 1-22."
         ),
-        roles = List.empty
+        roles = List.empty,
+        primary = false
       )
     )
   }
@@ -764,7 +791,8 @@ class SierraContributorsTest
           label =
             "Hippocrates. Epistolae. Ad Ptolemaeum regem de hominis fabrica."
         ),
-        roles = List.empty
+        roles = List.empty,
+        primary = false
       )
     )
   }

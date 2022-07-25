@@ -1,6 +1,6 @@
 {
   "description" : "works with different contributor",
-  "createdAt" : "2022-06-20T10:13:37.585454Z",
+  "createdAt" : "2022-07-25T14:45:36.650198Z",
   "id" : "gtfjchvo",
   "document" : {
     "debug" : {
@@ -73,7 +73,8 @@
             "type" : "Organisation"
           },
           "roles" : [
-          ]
+          ],
+          "primary" : true
         },
         {
           "id" : {
@@ -87,7 +88,8 @@
             "type" : "Organisation"
           },
           "roles" : [
-          ]
+          ],
+          "primary" : true
         }
       ],
       "thumbnail" : null,
@@ -122,6 +124,7 @@
           },
           "roles" : [
           ],
+          "primary" : true,
           "type" : "Contributor"
         },
         {
@@ -131,6 +134,7 @@
           },
           "roles" : [
           ],
+          "primary" : true,
           "type" : "Contributor"
         }
       ],
