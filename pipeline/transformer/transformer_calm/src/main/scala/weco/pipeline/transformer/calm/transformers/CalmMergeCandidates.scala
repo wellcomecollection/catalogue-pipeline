@@ -12,25 +12,9 @@ import weco.pipeline.transformer.identifiers.SourceIdentifierValidation._
 
 object CalmMergeCandidates extends CalmRecordOps {
   def apply(record: CalmRecord): List[MergeCandidate[IdState.Identifiable]] =
-    sierraMergeCandidate(record).toList ++ miroMergeCandidates(record)
-
-  private def miroMergeCandidates(record: CalmRecord) =
-    // The internal field "Wheels" is mapped to "MiroID"
-    record
-      .getList("Wheels")
-      .flatMap { miroId =>
-        SourceIdentifier(
-          identifierType = IdentifierType.MiroImageNumber,
-          ontologyType = "Work",
-          value = miroId
-        ).validatedWithWarning
-      }
-      .map { sourceIdentifier =>
-        MergeCandidate(
-          identifier = sourceIdentifier,
-          reason = "CALM/Miro work"
-        )
-      }
+    List(
+      sierraMergeCandidate(record)
+    ).flatten
 
   private def sierraMergeCandidate(record: CalmRecord) =
     record
