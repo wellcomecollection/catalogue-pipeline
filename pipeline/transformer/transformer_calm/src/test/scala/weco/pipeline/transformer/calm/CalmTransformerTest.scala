@@ -129,8 +129,6 @@ class CalmTransformerTest
       "RefNo" -> "a/b/c",
       "AltRefNo" -> "a.b.c",
       "BNumber" -> "b12345672",
-      "Wheels" -> "M0000001",
-      "Wheels" -> "M0000002",
       "CatalogueStatus" -> "Catalogued"
     )
     CalmTransformer(record, version).right.get.state.mergeCandidates shouldBe
@@ -143,22 +141,6 @@ class CalmTransformerTest
           ),
           reason = "CALM/Sierra harvest work"
         ),
-        MergeCandidate(
-          identifier = SourceIdentifier(
-            value = "M0000001",
-            identifierType = IdentifierType.MiroImageNumber,
-            ontologyType = "Work"
-          ),
-          reason = "CALM/Miro work"
-        ),
-        MergeCandidate(
-          identifier = SourceIdentifier(
-            value = "M0000002",
-            identifierType = IdentifierType.MiroImageNumber,
-            ontologyType = "Work"
-          ),
-          reason = "CALM/Miro work"
-        )
       )
   }
 
