@@ -91,10 +91,10 @@ class OtherIdentifiersRuleTest
               .find(_.identifierType.id == IdentifierType.SierraIdentifier.id)
               .get
 
-        mergedSources should contain theSameElementsAs (List(
+        mergedSources should contain theSameElementsAs List(
           physicalSierraWork,
           miroWork,
-          calmWork))
+          calmWork)
     }
   }
 
