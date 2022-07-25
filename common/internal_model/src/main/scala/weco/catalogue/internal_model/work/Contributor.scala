@@ -24,4 +24,11 @@ object Contributor {
     roles: List[ContributionRole],
   ): Contributor[State] =
     Contributor(id = IdState.Unidentifiable, agent, roles)
+
+  def apply[State >: IdState.Unidentifiable.type](
+    agent: AbstractAgent[State],
+    roles: List[ContributionRole],
+    primary: Boolean
+  ): Contributor[State] =
+    Contributor(id = IdState.Unidentifiable, agent, roles, primary)
 }
