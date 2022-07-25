@@ -308,6 +308,7 @@ class MergerIntegrationTest
     }
   }
 
+  // We used to merge Calm/Miro works directly, but we no longer do this
   Scenario("A Calm work and multiple Miro works are matched") {
     withContext { implicit context =>
       Given("A Calm work and 2 Miro works")
