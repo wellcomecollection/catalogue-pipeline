@@ -67,10 +67,22 @@ class SierraContributorsTest
     val expectedContributors = List(
       Contributor(Person("Sarah the soybean"), roles = Nil, primary = true),
       Contributor(Person("Sam the squash, Sir"), roles = Nil, primary = true),
-      Contributor(Organisation("Spinach Solicitors"), roles = Nil, primary = true),
-      Contributor(Person("Sebastian the sugarsnap"), roles = Nil, primary = false),
-      Contributor(Organisation("Shallot Swimmers"), roles = Nil, primary = false),
-      Contributor(Meeting("Sammys meet the Sammys at Sammys"), roles = Nil, primary = false)
+      Contributor(
+        Organisation("Spinach Solicitors"),
+        roles = Nil,
+        primary = true),
+      Contributor(
+        Person("Sebastian the sugarsnap"),
+        roles = Nil,
+        primary = false),
+      Contributor(
+        Organisation("Shallot Swimmers"),
+        roles = Nil,
+        primary = false),
+      Contributor(
+        Meeting("Sammys meet the Sammys at Sammys"),
+        roles = Nil,
+        primary = false)
     )
     transformAndCheckContributors(
       varFields = varFields,
@@ -574,8 +586,14 @@ class SierraContributorsTest
       )
 
       val expectedContributors = List(
-        Contributor(Organisation(label = "The organisation"), roles = Nil, primary = true),
-        Contributor(Organisation(label = "Another organisation"), roles = Nil, primary = false)
+        Contributor(
+          Organisation(label = "The organisation"),
+          roles = Nil,
+          primary = true),
+        Contributor(
+          Organisation(label = "Another organisation"),
+          roles = Nil,
+          primary = false)
       )
 
       transformAndCheckContributors(
@@ -617,7 +635,10 @@ class SierraContributorsTest
         marcTag = "711",
         subfields = List(Subfield(tag = "a", content = "Big meeting"))
       )
-      val contributor = Contributor(Meeting(label = "Big meeting"), roles = Nil, primary = false)
+      val contributor = Contributor(
+        Meeting(label = "Big meeting"),
+        roles = Nil,
+        primary = false)
       transformAndCheckContributors(List(varField), List(contributor))
     }
 
@@ -632,7 +653,8 @@ class SierraContributorsTest
           Subfield(tag = "t", content = "4"),
         )
       )
-      val contributor = Contributor(Meeting(label = "1 2 3 4"), roles = Nil, primary = true)
+      val contributor =
+        Contributor(Meeting(label = "1 2 3 4"), roles = Nil, primary = true)
       transformAndCheckContributors(List(varField), List(contributor))
     }
 
@@ -701,7 +723,8 @@ class SierraContributorsTest
     SierraContributors(bibData) shouldBe List(
       Contributor(
         agent = Person(label = "Steele, Richard, Sir, 1672-1729."),
-        roles = List.empty, primary = true
+        roles = List.empty,
+        primary = true
       )
     )
   }
@@ -729,7 +752,8 @@ class SierraContributorsTest
           label =
             "Brewer, George. Essays after the manner of Goldsmith, No. 1-22."
         ),
-        roles = List.empty, primary = false
+        roles = List.empty,
+        primary = false
       )
     )
   }
@@ -767,7 +791,8 @@ class SierraContributorsTest
           label =
             "Hippocrates. Epistolae. Ad Ptolemaeum regem de hominis fabrica."
         ),
-        roles = List.empty, primary = false
+        roles = List.empty,
+        primary = false
       )
     )
   }

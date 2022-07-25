@@ -39,16 +39,42 @@ object SierraContributors
     marcTag: String,
     roleTag: String,
     isPrimary: Boolean,
-    getContributors: List[Subfield] => (String, Option[AbstractAgent[IdState.Unminted]]),
+    getContributors: List[Subfield] => (String,
+                                        Option[
+                                          AbstractAgent[IdState.Unminted]]),
   )
 
   val contributorFields = List(
-    ContributorField(marcTag = "100", roleTag = "e", isPrimary = true, getPersonContributors),
-    ContributorField(marcTag = "110", roleTag = "e", isPrimary = true, getOrganisationContributors),
-    ContributorField(marcTag = "111", roleTag = "j", isPrimary = true, getMeetingContributors),
-    ContributorField(marcTag = "700", roleTag = "e", isPrimary = false, getPersonContributors),
-    ContributorField(marcTag = "710", roleTag = "e", isPrimary = false, getOrganisationContributors),
-    ContributorField(marcTag = "711", roleTag = "j", isPrimary = false, getMeetingContributors),
+    ContributorField(
+      marcTag = "100",
+      roleTag = "e",
+      isPrimary = true,
+      getPersonContributors),
+    ContributorField(
+      marcTag = "110",
+      roleTag = "e",
+      isPrimary = true,
+      getOrganisationContributors),
+    ContributorField(
+      marcTag = "111",
+      roleTag = "j",
+      isPrimary = true,
+      getMeetingContributors),
+    ContributorField(
+      marcTag = "700",
+      roleTag = "e",
+      isPrimary = false,
+      getPersonContributors),
+    ContributorField(
+      marcTag = "710",
+      roleTag = "e",
+      isPrimary = false,
+      getOrganisationContributors),
+    ContributorField(
+      marcTag = "711",
+      roleTag = "j",
+      isPrimary = false,
+      getMeetingContributors),
   )
 
   def apply(bibData: SierraBibData): List[Contributor[IdState.Unminted]] = {
@@ -80,7 +106,8 @@ object SierraContributors
     allContributors.filterNot(c => duplicatedContributors.contains(c))
   }
 
-  private def getPersonContributors(subfields: List[Subfield]): (String, Option[AbstractAgent[IdState.Unminted]]) =
+  private def getPersonContributors(subfields: List[Subfield])
+    : (String, Option[AbstractAgent[IdState.Unminted]]) =
     if (subfields.withTags("t").isEmpty)
       "Person" -> getPerson(subfields, normalisePerson = true)
     else
