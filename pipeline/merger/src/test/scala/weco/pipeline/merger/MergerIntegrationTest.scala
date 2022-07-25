@@ -308,43 +308,6 @@ class MergerIntegrationTest
     }
   }
 
-  // We used to merge Calm/Miro works directly, but we no longer do this
-  Scenario("A Calm work and multiple Miro works are matched") {
-    withContext { implicit context =>
-      Given("A Calm work and 2 Miro works")
-      val miro1 = miroIdentifiedWork()
-      val miro2 = miroIdentifiedWork()
-      val calm = calmIdentifiedWork()
-        .mergeCandidates(
-          List(
-            createCalmMiroMergeCandidateFor(miro1),
-            createCalmMiroMergeCandidateFor(miro2),
-          )
-        )
-
-      When("the works are processed by the matcher/merger")
-      processWorks(calm, miro1, miro2)
-
-      Then("the Miro works are redirected to the Calm work")
-      context.getMerged(miro1) should beRedirectedTo(calm)
-      context.getMerged(miro2) should beRedirectedTo(calm)
-
-      And("the Calm work contains the miro items")
-      context
-        .getMerged(calm)
-        .data
-        .items should contain allElementsOf miro1.data.items
-      context
-        .getMerged(calm)
-        .data
-        .items should contain allElementsOf miro2.data.items
-
-      And("the Calm work contains the Miro images")
-      context.getMerged(calm).data.imageData should contain(miro1.singleImage)
-      context.getMerged(calm).data.imageData should contain(miro2.singleImage)
-    }
-  }
-
   Scenario("A digitised video with Sierra physical records and e-bibs") {
     withContext { implicit context =>
       // This test case is based on a real example of four related works that
