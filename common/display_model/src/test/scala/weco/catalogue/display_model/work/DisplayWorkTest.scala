@@ -136,13 +136,15 @@ class DisplayWorkTest
               sourceIdentifier = sourceIdentifier
             )
           ),
-          roles = Nil
+          roles = Nil,
+          primary = true
         ),
         Contributor(
           agent = Organisation(label = "Transylvania Terrors"),
           roles = List(
             ContributionRole(label = "Background location")
-          )
+          ),
+          primary = false
         )
       )
     )
@@ -158,7 +160,8 @@ class DisplayWorkTest
             List(DisplayIdentifier(sourceIdentifier))
           )
         ),
-        roles = List()
+        roles = List(),
+        primary = true
       ),
       DisplayContributor(
         agent = DisplayOrganisation(
@@ -166,7 +169,8 @@ class DisplayWorkTest
           label = "Transylvania Terrors",
           identifiers = None
         ),
-        roles = List(DisplayContributionRole(label = "Background location"))
+        roles = List(DisplayContributionRole(label = "Background location")),
+        primary = false
       )
     )
   }
