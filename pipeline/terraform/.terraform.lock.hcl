@@ -22,6 +22,13 @@ provider "registry.terraform.io/elastic/ec" {
   ]
 }
 
+provider "registry.terraform.io/elastic/elasticstack" {
+  version = "0.3.3"
+  hashes = [
+    "h1:oWyL+cdjUJXNEPdkLY4R3fQqs2e7or/HmCRQhIesblk=",
+  ]
+}
+
 provider "registry.terraform.io/hashicorp/aws" {
   version = "3.48.0"
   hashes = [

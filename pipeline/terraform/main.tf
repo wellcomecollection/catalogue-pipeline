@@ -1,11 +1,11 @@
-module "catalogue_pipeline_2022-06-18" {
+module "catalogue_pipeline_2022-07-04" {
   source = "./stack"
 
-  pipeline_date = "2022-06-18"
-  release_label = "2022-06-18"
+  pipeline_date = "2022-07-04"
+  release_label = "2022-07-04"
 
   reindexing_state = {
-    connect_reindex_topics   = false
+    listen_to_reindexer      = false # todo: better name
     scale_up_tasks           = false
     scale_up_elastic_cluster = false
     scale_up_id_minter_db    = false
@@ -91,18 +91,18 @@ module "catalogue_pipeline_2022-06-18" {
   logging_cluster_id = local.logging_cluster_id
 }
 
-module "catalogue_pipeline_2022-07-04" {
+module "catalogue_pipeline_2022-07-26" {
   source = "./stack"
 
-  pipeline_date = "2022-07-04"
-  release_label = "2022-07-04"
+  pipeline_date = "2022-07-26"
+  release_label = "2022-07-26"
 
   reindexing_state = {
-    connect_reindex_topics   = false # todo: better name
-    scale_up_tasks           = false
-    scale_up_elastic_cluster = false
-    scale_up_id_minter_db    = false
-    scale_up_matcher_db      = false
+    listen_to_reindexer      = true
+    scale_up_tasks           = true
+    scale_up_elastic_cluster = true
+    scale_up_id_minter_db    = true
+    scale_up_matcher_db      = true
   }
 
   # Boilerplate that shouldn't change between pipelines.

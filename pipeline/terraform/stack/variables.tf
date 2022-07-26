@@ -33,7 +33,7 @@ variable "rds_subnet_group_name" {
 
 variable "reindexing_state" {
   type = object({
-    connect_reindex_topics   = bool
+    listen_to_reindexer      = bool
     scale_up_tasks           = bool
     scale_up_elastic_cluster = bool
     scale_up_id_minter_db    = bool
