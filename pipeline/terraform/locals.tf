@@ -56,7 +56,7 @@ locals {
   traffic_filter_public_internet_id = local.shared_infra["ec_public_internet_traffic_filter_id"]
 
   logging_cluster_id = data.terraform_remote_state.shared_infra.outputs.logging_cluster_id
-  
+
   adapter_config = {
     sierra = {
       topics = [
