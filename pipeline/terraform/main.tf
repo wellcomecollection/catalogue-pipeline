@@ -14,46 +14,7 @@ module "catalogue_pipeline_2022-07-04" {
 
   # Boilerplate that shouldn't change between pipelines.
 
-  adapters = {
-    sierra = {
-      topics = [
-        local.sierra_merged_bibs_topic_arn,
-        local.sierra_merged_items_topic_arn,
-        local.sierra_merged_holdings_topic_arn,
-        local.sierra_merged_orders_topic_arn,
-      ]
-      reindex_topic = local.sierra_reindexer_topic_arn
-    }
-
-    miro = {
-      topics = [
-        local.miro_updates_topic_arn,
-      ]
-      reindex_topic = local.miro_reindexer_topic_arn,
-    }
-
-    mets = {
-      topics = [
-        local.mets_adapter_topic_arn,
-      ],
-      reindex_topic = local.mets_reindexer_topic_arn,
-    }
-
-    calm = {
-      topics = [
-        local.calm_adapter_topic_arn,
-        local.calm_deletions_topic_arn,
-      ],
-      reindex_topic = local.calm_reindexer_topic_arn,
-    }
-
-    tei = {
-      topics = [
-        local.tei_adapter_topic_arn,
-      ],
-      reindex_topic = local.tei_reindexer_topic_arn,
-    }
-  }
+  adapters = local.adapter_config
 
   vpc_id  = local.vpc_id
   subnets = local.private_subnets
@@ -107,46 +68,7 @@ module "catalogue_pipeline_2022-07-26" {
 
   # Boilerplate that shouldn't change between pipelines.
 
-  adapters = {
-    sierra = {
-      topics = [
-        local.sierra_merged_bibs_topic_arn,
-        local.sierra_merged_items_topic_arn,
-        local.sierra_merged_holdings_topic_arn,
-        local.sierra_merged_orders_topic_arn,
-      ]
-      reindex_topic = local.sierra_reindexer_topic_arn
-    }
-
-    miro = {
-      topics = [
-        local.miro_updates_topic_arn,
-      ]
-      reindex_topic = local.miro_reindexer_topic_arn,
-    }
-
-    mets = {
-      topics = [
-        local.mets_adapter_topic_arn,
-      ],
-      reindex_topic = local.mets_reindexer_topic_arn,
-    }
-
-    calm = {
-      topics = [
-        local.calm_adapter_topic_arn,
-        local.calm_deletions_topic_arn,
-      ],
-      reindex_topic = local.calm_reindexer_topic_arn,
-    }
-
-    tei = {
-      topics = [
-        local.tei_adapter_topic_arn,
-      ],
-      reindex_topic = local.tei_reindexer_topic_arn,
-    }
-  }
+  adapters = local.adapter_config
 
   vpc_id  = local.vpc_id
   subnets = local.private_subnets
