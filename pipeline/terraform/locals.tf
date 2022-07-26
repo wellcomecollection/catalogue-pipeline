@@ -97,4 +97,10 @@ locals {
       reindex_topic = local.tei_reindexer_topic_arn,
     }
   }
+
+  rds_config = {
+    cluster_id        = local.rds_cluster_id
+    subnet_group      = local.rds_subnet_group_name
+    security_group_id = local.rds_access_security_group_id
+  }
 }

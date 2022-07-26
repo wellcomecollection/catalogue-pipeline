@@ -14,18 +14,15 @@ module "catalogue_pipeline_2022-07-04" {
 
   # Boilerplate that shouldn't change between pipelines.
 
-  adapters = local.adapter_config
+  adapter_config = local.adapter_config
+  rds_config     = local.rds_config
 
   vpc_id  = local.vpc_id
   subnets = local.private_subnets
 
   dlq_alarm_arn = local.dlq_alarm_arn
 
-  rds_cluster_id        = local.rds_cluster_id
-  rds_subnet_group_name = local.rds_subnet_group_name
-
   # Security groups
-  rds_ids_access_security_group_id = local.rds_access_security_group_id
   ec_privatelink_security_group_id = local.ec_platform_privatelink_security_group_id
 
   traffic_filter_platform_vpce_id   = local.traffic_filter_platform_vpce_id
@@ -68,18 +65,15 @@ module "catalogue_pipeline_2022-07-26" {
 
   # Boilerplate that shouldn't change between pipelines.
 
-  adapters = local.adapter_config
+  adapter_config = local.adapter_config
+  rds_config     = local.rds_config
 
   vpc_id  = local.vpc_id
   subnets = local.private_subnets
 
   dlq_alarm_arn = local.dlq_alarm_arn
 
-  rds_cluster_id        = local.rds_cluster_id
-  rds_subnet_group_name = local.rds_subnet_group_name
-
   # Security groups
-  rds_ids_access_security_group_id = local.rds_access_security_group_id
   ec_privatelink_security_group_id = local.ec_platform_privatelink_security_group_id
 
   traffic_filter_platform_vpce_id   = local.traffic_filter_platform_vpce_id
