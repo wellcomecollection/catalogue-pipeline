@@ -24,13 +24,6 @@ variable "vpc_id" {}
 
 variable "dlq_alarm_arn" {}
 
-variable "rds_cluster_id" {
-  type = string
-}
-variable "rds_subnet_group_name" {
-  type = string
-}
-
 variable "reindexing_state" {
   type = object({
     listen_to_reindexer      = bool
@@ -41,7 +34,6 @@ variable "reindexing_state" {
   })
 }
 
-variable "rds_ids_access_security_group_id" {}
 variable "ec_privatelink_security_group_id" {
   type = string
 }
@@ -79,11 +71,19 @@ variable "traffic_filter_public_internet_id" {
   type = string
 }
 
-variable "adapters" {
+variable "adapter_config" {
   type = map(object({
     topics        = list(string)
     reindex_topic = string
   }))
+}
+
+variable "rds_config" {
+  type = object({
+    cluster_id        = string
+    subnet_group      = string
+    security_group_id = string
+  })
 }
 
 variable "logging_cluster_id" {
