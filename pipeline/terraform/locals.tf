@@ -56,4 +56,51 @@ locals {
   traffic_filter_public_internet_id = local.shared_infra["ec_public_internet_traffic_filter_id"]
 
   logging_cluster_id = data.terraform_remote_state.shared_infra.outputs.logging_cluster_id
+
+  adapter_config = {
+    sierra = {
+      topics = [
+        local.sierra_merged_bibs_topic_arn,
+        local.sierra_merged_items_topic_arn,
+        local.sierra_merged_holdings_topic_arn,
+        local.sierra_merged_orders_topic_arn,
+      ]
+      reindex_topic = local.sierra_reindexer_topic_arn
+    }
+
+    miro = {
+      topics = [
+        local.miro_updates_topic_arn,
+      ]
+      reindex_topic = local.miro_reindexer_topic_arn,
+    }
+
+    mets = {
+      topics = [
+        local.mets_adapter_topic_arn,
+      ],
+      reindex_topic = local.mets_reindexer_topic_arn,
+    }
+
+    calm = {
+      topics = [
+        local.calm_adapter_topic_arn,
+        local.calm_deletions_topic_arn,
+      ],
+      reindex_topic = local.calm_reindexer_topic_arn,
+    }
+
+    tei = {
+      topics = [
+        local.tei_adapter_topic_arn,
+      ],
+      reindex_topic = local.tei_reindexer_topic_arn,
+    }
+  }
+
+  rds_config = {
+    cluster_id        = local.rds_cluster_id
+    subnet_group      = local.rds_subnet_group_name
+    security_group_id = local.rds_access_security_group_id
+  }
 }
