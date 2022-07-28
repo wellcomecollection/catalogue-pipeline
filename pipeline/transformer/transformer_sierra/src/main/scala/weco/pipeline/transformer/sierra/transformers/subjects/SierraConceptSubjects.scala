@@ -79,7 +79,7 @@ object SierraConceptSubjects
         getConcepts(varfield, primarySubfields, subdivisionSubfields)
 
       Subject(
-        id = identifyConcept(ontologyType = "Subject", varfield),
+        id = getIdState(ontologyType = "Subject", varfield),
         label = label,
         concepts = concepts
       )
@@ -96,7 +96,7 @@ object SierraConceptSubjects
       // also refers to that concept.
       case Nil =>
         val conceptId =
-          identifyConcept(ontologyType = "Concept", varfield) match {
+          getIdState(ontologyType = "Concept", varfield) match {
             case identifiable: IdState.Identifiable => Some(identifiable)
             case _                                  => None
           }

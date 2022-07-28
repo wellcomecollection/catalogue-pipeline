@@ -68,7 +68,7 @@ object SierraGenres
     // will get an identifier made for the concept itself on its own.
     // This method fixes that inconsistency by discarding the LabelDerived identifier
     // It's a bit hacky, but I hope it will go away at some point.
-    val wholeFieldConceptId = identifyConcept(
+    val wholeFieldConceptId = getIdState(
       ontologyType = "Concept",
       varField = varField
     )

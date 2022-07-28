@@ -41,7 +41,7 @@ class SierraConceptsTest
         supportedSchemes: _*
       )
     ) { (indicator2: String, identifierType: IdentifierType) =>
-      val maybeIdentifiedConcept = transformer.identifyConcept(
+      val maybeIdentifiedConcept = transformer.getIdState(
         ontologyType = "Concept",
         varField = createVarFieldWith(
           marcTag = "CCC",
@@ -71,7 +71,7 @@ class SierraConceptsTest
         allSchemes: _*
       )
     ) { indicator2 =>
-      val maybeIdentifiedConcept = transformer.identifyConcept(
+      val maybeIdentifiedConcept = transformer.getIdState(
         ontologyType = "Concept",
         varField = createVarFieldWith(
           marcTag = "CCC",
@@ -94,7 +94,7 @@ class SierraConceptsTest
   it("normalises and deduplicates identifiers in subfield 0") {
     // Given multiple 0 subfields that all resolve to the same value after normalisation
     // Then that normalised value is the identifier value
-    val maybeIdentifiedConcept = transformer.identifyConcept(
+    val maybeIdentifiedConcept = transformer.getIdState(
       ontologyType = "Concept",
       varField = createVarFieldWith(
         marcTag = "CCC",
@@ -127,7 +127,7 @@ class SierraConceptsTest
   it("ignores multiple instances of subfield 0 in the otherIdentifiers") {
     // Given multiple 0 subfields containing different values
     // Then the Concept is unidentifiable
-    val maybeIdentifiedConcept = transformer.identifyConcept(
+    val maybeIdentifiedConcept = transformer.getIdState(
       ontologyType = "Concept",
       varField = createVarFieldWith(
         marcTag = "CCC",
@@ -153,7 +153,7 @@ class SierraConceptsTest
         unsupportedSchemes: _*
       )
     ) { indicator2 =>
-      val maybeIdentifiedConcept = transformer.identifyConcept(
+      val maybeIdentifiedConcept = transformer.getIdState(
         ontologyType = "Concept",
         varField = createVarFieldWith(
           marcTag = "CCC",

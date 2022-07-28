@@ -72,13 +72,6 @@ trait SierraConcepts
       .map { _.replaceAll("[.\\s]", "") }
       .distinct
 
-  // Apply an identifier to the primary concept.  We look in subfield $0
-  // for the identifier value, then second indicator for the authority.
-  //
-  def identifyConcept(ontologyType: String,
-                      varField: VarField): IdState.Unminted =
-    getIdState(ontologyType, varField)
-
   // If there's exactly one subfield $0 on the VarField, add an identifier
   // if possible.
   protected def maybeAddIdentifier(
