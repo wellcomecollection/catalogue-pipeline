@@ -2,8 +2,19 @@ package weco.pipeline.transformer.sierra.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, SourceIdentifier}
-import weco.catalogue.internal_model.work.{AbstractConcept, Concept, Genre, InstantRange, Period, Place}
+import weco.catalogue.internal_model.identifiers.{
+  IdState,
+  IdentifierType,
+  SourceIdentifier
+}
+import weco.catalogue.internal_model.work.{
+  AbstractConcept,
+  Concept,
+  Genre,
+  InstantRange,
+  Period,
+  Place
+}
 import weco.pipeline.transformer.sierra.transformers.matchers._
 import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
 import weco.sierra.models.marc.{Subfield, VarField}
@@ -187,11 +198,12 @@ class SierraGenresTest
     conceptV should have(
       'label ("MDCCLXXXVII. [1787]"),
       labelDerivedPeriodId("MDCCLXXXVII. [1787]"),
-      'range (Some(InstantRange(
-        LocalDate of (1787, 1, 1),
-        LocalDate of (1787, 12, 31),
-        "MDCCLXXXVII. [1787]"))
-      )
+      'range (
+        Some(
+          InstantRange(
+            LocalDate of (1787, 1, 1),
+            LocalDate of (1787, 12, 31),
+            "MDCCLXXXVII. [1787]")))
     )
   }
 
