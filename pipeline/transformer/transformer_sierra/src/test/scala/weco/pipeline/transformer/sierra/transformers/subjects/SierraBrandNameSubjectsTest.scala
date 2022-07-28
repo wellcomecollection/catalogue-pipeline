@@ -31,8 +31,7 @@ class SierraBrandNameSubjectsTest
       'label ("Content"),
       'id (IdState.Unidentifiable)
     )
-    val List(concept) = subject.concepts
-    concept should have(
+    subject.onlyConcept should have(
       'label ("Content"),
       labelDerivedConceptId("Content")
     )
