@@ -25,17 +25,13 @@ trait SubjectMatchers {
       * Although not strictly a Matcher, this forms part of the test DSL, and will cause a test failure
       * when the Subject's concept list is not as expected.
       */
-    def onlyConcept: AbstractRootConcept[State] = {
-      try {
-        val List(concept) = subject.concepts
-        concept
-      } catch {
-        case _: MatchError =>
-          fail(
-            s"Subject expected to have exactly one concept, found: ${subject.concepts}")
+    def onlyConcept: AbstractRootConcept[State] =
+      subject.concepts match {
+        case Seq(singleConcept) => singleConcept
+        case _ => fail(
+          s"Subject expected to have exactly one concept, found: ${subject.concepts}")
       }
     }
-  }
 
 }
 
