@@ -23,8 +23,7 @@ trait SierraAbstractConcepts extends Logging {
     *   - Multiple identifier fields: unidentifiable, we don't know what to use
     *
     */
-  def getIdState(ontologyType: String,
-                           varField: VarField): IdState.Unminted = {
+  def getIdState(ontologyType: String, varField: VarField): IdState.Unminted = {
     getIdentifierSubfieldContents(varField) match {
       case Seq(subfieldContent) =>
         maybeAddIdentifier(
