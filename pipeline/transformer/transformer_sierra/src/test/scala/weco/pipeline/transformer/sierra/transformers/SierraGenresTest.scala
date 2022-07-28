@@ -2,21 +2,13 @@ package weco.pipeline.transformer.sierra.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.identifiers.{
-  IdState,
-  IdentifierType,
-  SourceIdentifier
-}
-import weco.catalogue.internal_model.work.{
-  AbstractConcept,
-  Concept,
-  Genre,
-  Period,
-  Place
-}
+import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, SourceIdentifier}
+import weco.catalogue.internal_model.work.{AbstractConcept, Concept, Genre, InstantRange, Period, Place}
 import weco.pipeline.transformer.sierra.transformers.matchers._
 import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
 import weco.sierra.models.marc.{Subfield, VarField}
+
+import java.time.LocalDate
 
 class SierraGenresTest
     extends AnyFunSpec
@@ -172,7 +164,7 @@ class SierraGenresTest
         VarField(
           marcTag = "655",
           subfields = List(
-            Subfield(tag = "y", content = "Y Content"),
+            Subfield(tag = "y", content = "MDCCLXXXVII. [1787]"),
             Subfield(tag = "a", content = "A Content")
           )
         )
@@ -182,7 +174,7 @@ class SierraGenresTest
     val List(genre) = SierraGenres(bibData)
 
     genre should have(
-      'label ("A Content - Y Content")
+      'label ("A Content - MDCCLXXXVII. [1787]")
     )
 
     val List(conceptA, conceptV) = genre.concepts
@@ -191,12 +183,15 @@ class SierraGenresTest
       'label ("A Content"),
       labelDerivedConceptId("A Content")
     )
-    //TODO: Now that it's not doing the Mocky style test, we need to check that ParsedPeriod is being used.
-    // put in a test with roman numeral dates and see what happens.
     conceptV shouldBe a[Period[_]]
     conceptV should have(
-      'label ("Y Content"),
-      labelDerivedPeriodId("Y Content")
+      'label ("MDCCLXXXVII. [1787]"),
+      labelDerivedPeriodId("MDCCLXXXVII. [1787]"),
+      'range (Some(InstantRange(
+        LocalDate of (1787, 1, 1),
+        LocalDate of (1787, 12, 31),
+        "MDCCLXXXVII. [1787]"))
+      )
     )
   }
 
