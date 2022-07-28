@@ -12,7 +12,7 @@ trait ConceptMatchers {
     new HasIdMatchers.HasIdentifier(
       identifierType = IdentifierType.LabelDerived,
       ontologyType = ontologyType,
-      expectedValue = expectedValue)
+      value = expectedValue)
   }
 
   def labelDerivedConceptId(expectedValue: String)

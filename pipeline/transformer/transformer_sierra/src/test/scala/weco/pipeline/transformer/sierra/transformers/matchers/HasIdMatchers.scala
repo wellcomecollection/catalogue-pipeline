@@ -11,7 +11,7 @@ import weco.catalogue.internal_model.identifiers.{
 trait HasIdMatchers {
 
   class HasIdentifier(ontologyType: String,
-                      expectedValue: String,
+                      value: String,
                       identifierType: IdentifierType)
       extends HavePropertyMatcher[HasId[IdState], String] {
     def apply(
@@ -32,14 +32,14 @@ trait HasIdMatchers {
     protected def matchIdentifiableId(
       sourceIdentifier: SourceIdentifier): HavePropertyMatchResult[String] = {
       val isCorrectType = sourceIdentifier.identifierType == identifierType
-      val hasCorrectValue = sourceIdentifier.value == expectedValue
+      val hasCorrectValue = sourceIdentifier.value == value
       val isCorrectOntology = sourceIdentifier.ontologyType == ontologyType
 
       HavePropertyMatchResult[String](
         matches = isCorrectType && hasCorrectValue && isCorrectOntology,
         propertyName = "id.sourceIdentifier",
         expectedValue = SourceIdentifier(
-          value = expectedValue,
+          value = value,
           ontologyType = ontologyType,
           identifierType = identifierType).toString,
         actualValue = sourceIdentifier.toString

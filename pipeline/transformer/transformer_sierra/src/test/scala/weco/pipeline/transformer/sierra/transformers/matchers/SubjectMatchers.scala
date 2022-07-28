@@ -7,12 +7,12 @@ import weco.catalogue.internal_model.work.{AbstractRootConcept, Subject}
 
 trait SubjectMatchers {
 
-  def labelDerivedSubjectId(expectedValue: String)
+  def labelDerivedSubjectId(value: String)
     : HavePropertyMatcher[Subject[IdState.Unminted], String] =
     new HasIdMatchers.HasIdentifier(
       identifierType = IdentifierType.LabelDerived,
       ontologyType = "Subject",
-      expectedValue = expectedValue)
+      value = value)
 
   implicit class SubjectTestOps[State](subject: Subject[State]) {
 
