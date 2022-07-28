@@ -72,8 +72,8 @@ class SierraContributorsTest
     val contributors =
       SierraContributors(createSierraBibDataWith(varFields = varFields))
     contributors.size shouldBe 6
-    all(contributors.slice(0,2)) shouldBe primary
-    all(contributors.slice(3,5)) shouldNot be (primary)
+    all(contributors.slice(0, 2)) shouldBe primary
+    all(contributors.slice(3, 5)) shouldNot be(primary)
 
     List(
       (
@@ -146,7 +146,7 @@ class SierraContributorsTest
       c1.agent.label shouldBe "Charles Emmanuel III, King of Sardinia, 1701-1773"
       c1 shouldBe primary
       c2.agent.label shouldBe "Charles Emmanuel IV, King of Sardinia, 1796-1802"
-      c2 shouldNot be (primary)
+      c2 shouldNot be(primary)
     }
 
     it(
@@ -203,7 +203,7 @@ class SierraContributorsTest
       all(contributors) should have('roles (Nil))
       all(contributors.map(_.agent)) shouldBe a[Person[_]]
       contributors.map(_.agent.label) shouldBe List(name1, name2, name3)
-      all(contributors.tail) shouldNot be (primary)
+      all(contributors.tail) shouldNot be(primary)
       contributors.head shouldBe primary
     }
 
@@ -579,7 +579,7 @@ class SierraContributorsTest
         "The organisation",
         "Another organisation")
       contributors.head shouldBe primary
-      contributors(1) shouldNot be (primary)
+      contributors(1) shouldNot be(primary)
     }
   }
 
@@ -619,7 +619,7 @@ class SierraContributorsTest
         SierraContributors(createSierraBibDataWith(varFields = List(varField)))
       contributor.agent should have('label ("Big meeting"))
       contributor.agent shouldBe a[Meeting[_]]
-      contributor shouldNot be (primary)
+      contributor shouldNot be(primary)
 
     }
 
@@ -732,7 +732,7 @@ class SierraContributorsTest
 
     val bibData = createSierraBibDataWith(varFields = varFields)
     val List(contributor) = SierraContributors(bibData)
-    contributor shouldNot be (primary)
+    contributor shouldNot be(primary)
     contributor.agent should have(
       'label ("Brewer, George. Essays after the manner of Goldsmith, No. 1-22.")
     )

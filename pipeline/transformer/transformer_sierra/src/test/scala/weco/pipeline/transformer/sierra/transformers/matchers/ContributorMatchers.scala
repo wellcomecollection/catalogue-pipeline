@@ -1,6 +1,11 @@
 package weco.pipeline.transformer.sierra.transformers.matchers
 
-import org.scalatest.matchers.{BePropertyMatchResult, BePropertyMatcher, HavePropertyMatchResult, HavePropertyMatcher}
+import org.scalatest.matchers.{
+  BePropertyMatchResult,
+  BePropertyMatcher,
+  HavePropertyMatchResult,
+  HavePropertyMatcher
+}
 import weco.catalogue.internal_model.work.Contributor
 
 trait ContributorMatchers {
@@ -27,7 +32,8 @@ trait ContributorMatchers {
     new HaveRoles(expectedRoles)
 
   class IsPrimaryMatcher extends BePropertyMatcher[Contributor[Any]] {
-    def apply(left: Contributor[Any]): BePropertyMatchResult = BePropertyMatchResult(left.primary, "primary")
+    def apply(left: Contributor[Any]): BePropertyMatchResult =
+      BePropertyMatchResult(left.primary, "primary")
   }
   val primary = new IsPrimaryMatcher
 }
