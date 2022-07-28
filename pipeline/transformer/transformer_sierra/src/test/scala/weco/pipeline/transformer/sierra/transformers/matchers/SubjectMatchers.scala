@@ -28,10 +28,11 @@ trait SubjectMatchers {
     def onlyConcept: AbstractRootConcept[State] =
       subject.concepts match {
         case Seq(singleConcept) => singleConcept
-        case _ => fail(
-          s"Subject expected to have exactly one concept, found: ${subject.concepts}")
+        case _ =>
+          fail(
+            s"Subject expected to have exactly one concept, found: ${subject.concepts}")
       }
-    }
+  }
 
 }
 
