@@ -72,6 +72,8 @@ class SierraContributorsTest
     val contributors =
       SierraContributors(createSierraBibDataWith(varFields = varFields))
     contributors.size shouldBe 6
+    all(contributors.slice(0,2)) shouldBe primary
+    all(contributors.slice(3,5)) shouldNot be (primary)
 
     List(
       (
@@ -115,7 +117,7 @@ class SierraContributorsTest
   }
 
   describe("Person") {
-    it("extracts and combines only subfields $$a $$b $$c $$d for the label") {
+    it("extracts and combines only subfields ǂa ǂb ǂc ǂd for the label") {
       val varFields = List(
         VarField(
           marcTag = "100",
@@ -136,18 +138,19 @@ class SierraContributorsTest
           )
         )
       )
-
       val contributors =
         SierraContributors(createSierraBibDataWith(varFields = varFields))
       all(contributors) should have('roles (Nil))
       all(contributors.map(_.agent)) shouldBe a[Person[_]]
       val List(c1, c2) = contributors
       c1.agent.label shouldBe "Charles Emmanuel III, King of Sardinia, 1701-1773"
+      c1 shouldBe primary
       c2.agent.label shouldBe "Charles Emmanuel IV, King of Sardinia, 1796-1802"
+      c2 shouldNot be (primary)
     }
 
     it(
-      "combines subfield $$t with $$a $$b $$c $$d and creates an Agent, not a Person from MARC field 100 / 700") {
+      "combines subfield ǂt with ǂa ǂb ǂc ǂd and creates an Agent, not a Person from MARC field 100 / 700") {
       // Based on https://search.wellcomelibrary.org/iii/encore/record/C__Rb1159639?marcData=Y
       // as retrieved on 4 February 2019.
       val varFields = List(
@@ -171,7 +174,7 @@ class SierraContributorsTest
     }
 
     it(
-      "gets the name from MARC tags 100 and 700 subfield $$a in the right order") {
+      "gets the name from MARC tags 100 and 700 subfield ǂa in the right order") {
       val name1 = "Alfie the Artichoke"
       val name2 = "Alison the Apple"
       val name3 = "Archie the Aubergine"
@@ -200,9 +203,11 @@ class SierraContributorsTest
       all(contributors) should have('roles (Nil))
       all(contributors.map(_.agent)) shouldBe a[Person[_]]
       contributors.map(_.agent.label) shouldBe List(name1, name2, name3)
+      all(contributors.tail) shouldNot be (primary)
+      contributors.head shouldBe primary
     }
 
-    it("gets the roles from subfield $$e") {
+    it("gets the roles from subfield ǂe") {
       val name = "Violet the Vanilla"
       val role1 = "spice"
       val role2 = "flavour"
@@ -222,6 +227,7 @@ class SierraContributorsTest
         SierraContributors(createSierraBibDataWith(varFields = varFields))
       contributor.agent shouldBe a[Person[_]]
       contributor.agent should have('label (name))
+      contributor shouldBe primary
       contributor should have(
         roles(List(role1, role2))
       )
@@ -247,7 +253,7 @@ class SierraContributorsTest
       contributor.agent.label shouldBe "Faujas-de-St.-Fond, cit. (Barthélemey), 1741-1819"
     }
 
-    it("gets an identifier from subfield $$0") {
+    it("gets an identifier from subfield ǂ0") {
       val name = "Ivan the ivy"
       val lcshCode = "lcsh7101607"
 
@@ -273,7 +279,7 @@ class SierraContributorsTest
     }
 
     it(
-      "combines identifiers with inconsistent spacing/punctuation from subfield $$0") {
+      "combines identifiers with inconsistent spacing/punctuation from subfield ǂ0") {
       val name = "Wanda the watercress"
       val lcshCodeCanonical = "lcsh2055034"
       val lcshCode1 = "lcsh 2055034"
@@ -311,7 +317,7 @@ class SierraContributorsTest
     }
 
     it(
-      "does not identify the contributor if there are multiple distinct identifiers in subfield $$0") {
+      "does not identify the contributor if there are multiple distinct identifiers in subfield ǂ0") {
       val name = "Darren the Dill"
       val varFields = List(
         VarField(
@@ -354,12 +360,13 @@ class SierraContributorsTest
       all(contributors) should have('roles (Nil))
       all(contributors.map(_.agent)) shouldBe a[Person[_]]
       contributors.map(_.agent.label) shouldBe List("George", "Sebastian")
-
+      contributors.head shouldBe primary
+      contributors(1) shouldNot be(primary)
     }
   }
 
   describe("Organisation") {
-    it("gets the name from MARC tag 110 subfield $$a") {
+    it("gets the name from MARC tag 110 subfield ǂa") {
       val name = "Ona the orache"
 
       val varFields = List(
@@ -378,7 +385,7 @@ class SierraContributorsTest
     }
 
     it(
-      "combines only subfields $$a $$b $$c $$d (multiples of) with spaces from MARC field 110 / 710") {
+      "combines only subfields ǂa ǂb ǂc ǂd (multiples of) with spaces from MARC field 110 / 710") {
       // Based on https://search.wellcomelibrary.org/iii/encore/record/C__Rb1000984
       // as retrieved from 25 April 2019
       val name =
@@ -409,7 +416,7 @@ class SierraContributorsTest
     }
 
     it(
-      "gets the name from MARC tags 110 and 710 subfield $$a in the right order") {
+      "gets the name from MARC tags 110 and 710 subfield ǂa in the right order") {
       val name1 = "Mary the mallow"
       val name2 = "Mike the mashua"
       val name3 = "Mickey the mozuku"
@@ -431,17 +438,17 @@ class SierraContributorsTest
           subfields = List(Subfield(tag = "a", content = name3))
         )
       )
-
       val contributors =
         SierraContributors(createSierraBibDataWith(varFields = varFields))
 
       all(contributors) should have('roles (Nil))
       all(contributors.map(_.agent)) shouldBe a[Organisation[_]]
       contributors.map(_.agent.label) shouldBe List(name1, name2, name3)
-
+      contributors.head shouldBe primary
+      all(contributors.tail) shouldNot be(primary)
     }
 
-    it("gets the roles from subfield $$e") {
+    it("gets the roles from subfield ǂe") {
       val name = "Terry the turmeric"
       val role1 = "dye"
       val role2 = "colouring"
@@ -466,7 +473,7 @@ class SierraContributorsTest
       )
     }
 
-    it("gets an identifier from subfield $$0") {
+    it("gets an identifier from subfield ǂ0") {
       val name = "Gerry the Garlic"
       val lcshCode = "lcsh7212"
 
@@ -494,7 +501,7 @@ class SierraContributorsTest
       contributor.agent shouldBe an[Organisation[_]]
     }
 
-    it("gets an identifier with inconsistent spacing from subfield $$0") {
+    it("gets an identifier with inconsistent spacing from subfield ǂ0") {
       val name = "Charlie the chive"
       val lcshCodeCanonical = "lcsh6791210"
       val lcshCode1 = "lcsh 6791210"
@@ -528,7 +535,7 @@ class SierraContributorsTest
     }
 
     it(
-      "does not identify the contributor if there are multiple distinct identifiers in subfield $$0") {
+      "does not identify the contributor if there are multiple distinct identifiers in subfield ǂ0") {
       val name = "Luke the lime"
       val varFields = List(
         VarField(
@@ -571,13 +578,15 @@ class SierraContributorsTest
       contributors.map(_.agent.label) shouldBe List(
         "The organisation",
         "Another organisation")
+      contributors.head shouldBe primary
+      contributors(1) shouldNot be (primary)
     }
   }
 
   // This is based on transformer failures we saw in October 2018 --
   // records 3069865, 3069866, 3069867, 3069872 all had empty instances of
   // the 110 field.
-  it("returns an empty list if subfield $$a is missing") {
+  it("returns an empty list if subfield ǂa is missing") {
     val varFields = List(
       VarField(
         marcTag = "100",
@@ -590,7 +599,7 @@ class SierraContributorsTest
   }
 
   describe("Meeting") {
-    it("gets the name from MARC tag 111 subfield $$a") {
+    it("gets the name from MARC tag 111 subfield ǂa") {
       val varField = VarField(
         marcTag = "111",
         subfields = List(Subfield(tag = "a", content = "Big meeting"))
@@ -601,7 +610,7 @@ class SierraContributorsTest
       contributor.agent shouldBe a[Meeting[_]]
     }
 
-    it("gets the name from MARC tag 711 subfield $$a") {
+    it("gets the name from MARC tag 711 subfield ǂa") {
       val varField = VarField(
         marcTag = "711",
         subfields = List(Subfield(tag = "a", content = "Big meeting"))
@@ -610,9 +619,11 @@ class SierraContributorsTest
         SierraContributors(createSierraBibDataWith(varFields = List(varField)))
       contributor.agent should have('label ("Big meeting"))
       contributor.agent shouldBe a[Meeting[_]]
+      contributor shouldNot be (primary)
+
     }
 
-    it("combinies subfields $$a, $$c, $$d and $$t with spaces") {
+    it("combinies subfields ǂa, ǂc, ǂd and ǂt with spaces") {
       val varField = VarField(
         marcTag = "111",
         subfields = List(
@@ -626,9 +637,10 @@ class SierraContributorsTest
       val List(contributor) =
         SierraContributors(createSierraBibDataWith(varFields = List(varField)))
       contributor.agent should have('label ("1 2 3 4"))
+      contributor shouldBe primary
     }
 
-    it("gets the roles from subfield $$j") {
+    it("gets the roles from subfield ǂj") {
       val varField = VarField(
         marcTag = "111",
         subfields = List(
@@ -646,7 +658,7 @@ class SierraContributorsTest
       )
     }
 
-    it("gets an identifier from subfield $$0") {
+    it("gets an identifier from subfield ǂ0") {
       val varField = VarField(
         marcTag = "111",
         subfields = List(
@@ -696,6 +708,7 @@ class SierraContributorsTest
       'roles (Nil),
     )
     contributor.agent shouldBe a[Person[_]]
+    contributor shouldBe primary
     contributor.agent should have(
       'label ("Steele, Richard, Sir, 1672-1729.")
     )
@@ -719,6 +732,7 @@ class SierraContributorsTest
 
     val bibData = createSierraBibDataWith(varFields = varFields)
     val List(contributor) = SierraContributors(bibData)
+    contributor shouldNot be (primary)
     contributor.agent should have(
       'label ("Brewer, George. Essays after the manner of Goldsmith, No. 1-22.")
     )
@@ -757,7 +771,8 @@ class SierraContributorsTest
           label =
             "Hippocrates. Epistolae. Ad Ptolemaeum regem de hominis fabrica."
         ),
-        roles = List.empty
+        roles = List.empty,
+        primary = false
       )
     )
   }

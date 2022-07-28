@@ -6,7 +6,6 @@ case class Contributor[+State](
   id: State,
   agent: AbstractAgent[State],
   roles: List[ContributionRole] = Nil,
-
   // This indicates whether a contributor is suitable for including in
   // the list of primary contributors that we display in search results
   // and at the top of the work page.
