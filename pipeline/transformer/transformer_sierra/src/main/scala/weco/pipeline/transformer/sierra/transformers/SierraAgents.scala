@@ -70,7 +70,9 @@ trait SierraAgents
    */
   def identify(varfield: VarField, ontologyType: String): IdState.Unminted =
     varfield.indicator2 match {
-      // 0 indicates LCNames id in use
+      // 0 indicates LCNames id is in use.
+      // This is a Wellcome-specific convention. MARC 0 for these fields (e.g. https://www.loc.gov/marc/bibliographic/bd610.html)
+      // states that 0 means LCSH.
       // In this example from b17950235 (fd6nk8fw), n50082847 is the LCNames id for Glaxo Laboratories
       // 110 2  Glaxo Laboratories.|0n  50082847
       case Some("0") | Some("") | None =>
