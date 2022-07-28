@@ -4,7 +4,6 @@ import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.{Concept, Subject}
 import weco.pipeline.transformer.sierra.transformers.SierraConcepts
 import weco.pipeline.transformer.transformers.ConceptsTransformer
-//import weco.pipeline.transformer.sierra.transformers.SierraAgents
 import weco.sierra.models.identifiers.SierraBibNumber
 import weco.sierra.models.marc.VarField
 
