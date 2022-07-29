@@ -8,7 +8,6 @@ import weco.catalogue.internal_model.identifiers.{
   SourceIdentifier
 }
 import weco.catalogue.internal_model.work.{
-  AbstractConcept,
   Concept,
   Genre,
   InstantRange,
@@ -313,51 +312,41 @@ class SierraGenresTest
         )
       )
     )
-    //TODO: This would be clearer without looping
-    val genres = SierraGenres(bibData)
-    genres.length shouldBe 2
-    List(
-      (
-        "A1 Content - Z1 Content",
-        "A1 Content",
-        "Z1 Content",
-        "Place",
-        (concept: AbstractConcept[Any]) => concept shouldBe a[Place[_]]
-      ),
-      (
-        "A2 Content - V2 Content",
-        "A2 Content",
-        "V2 Content",
-        "Concept",
-        (concept: AbstractConcept[Any]) => concept shouldBe a[Concept[_]])
-    ).zip(genres).map {
-      case (
-          (
-            genreName,
-            concept1Name,
-            concept2Name,
-            concept2OntologyType,
-            assertConcept2Type),
-          genre) =>
-        genre should have(
-          'label (genreName)
-        )
 
-        val List(concept1, concept2) = genre.concepts
-        concept1 shouldBe a[Concept[_]]
-        concept1 should have(
-          'label (concept1Name),
-          labelDerivedConceptId(concept1Name)
-        )
-        assertConcept2Type(concept2)
-        concept2 should have(
-          'label (concept2Name),
-          sourceIdentifier(
-            value = concept2Name,
-            identifierType = IdentifierType.LabelDerived,
-            ontologyType = concept2OntologyType)
-        )
-    }
+    val List(genre1, genre2) =  SierraGenres(bibData)
+
+    genre1 should have(
+      'label ("A1 Content - Z1 Content")
+    )
+    val List(concept1, concept2) = genre1.concepts
+    concept1 shouldBe a[Concept[_]]
+    concept1 should have(
+      'label ("A1 Content"),
+      labelDerivedConceptId("A1 Content")
+    )
+    concept2 shouldBe a[Place[_]]
+    concept2 should have(
+      'label ("Z1 Content"),
+      sourceIdentifier(
+        value = "Z1 Content",
+        identifierType = IdentifierType.LabelDerived,
+        ontologyType = "Place")
+    )
+
+    genre2 should have(
+      'label ("A2 Content - V2 Content")
+    )
+    val List(concept3, concept4) = genre2.concepts
+    concept3 shouldBe a[Concept[_]]
+    concept3 should have(
+      'label ("A2 Content"),
+      labelDerivedConceptId("A2 Content")
+    )
+    concept4 shouldBe a[Concept[_]]
+    concept4 should have(
+      'label ("V2 Content"),
+      labelDerivedConceptId("V2 Content")
+    )
   }
 
   it("strips punctuation from Sierra genres") {
