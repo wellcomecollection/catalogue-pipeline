@@ -246,41 +246,31 @@ class SierraConceptSubjectsTest
       )
     )
 
-    val subjects = SierraConceptSubjects(bibId, bibData)
-    subjects.length shouldBe 2
+    val List(subject1, subject2) = SierraConceptSubjects(bibId, bibData)
+    subject1.concepts.length shouldBe 2
+    subject1 .concepts.head should have(
+      'label("A1 Content"),
+      labelDerivedConceptId("A1 Content")
+    )
 
-    subjects
-      .zip(
-        List(
-          ("A1 Content - Z1 Content", "A1 Content", "Z1 Content", "Place"),
-          ("A2 Content - V2 Content", "A2 Content", "V2 Content", "Concept"),
-        )
+    subject1.concepts(1) should have(
+      'label("Z1 Content"),
+      sourceIdentifier(
+        value="Z1 Content",
+        ontologyType = "Place",
+        identifierType = IdentifierType.LabelDerived
       )
-      .map {
-        case (
-            subject,
-            (
-              expectedSubjectLabel,
-              concept1Label,
-              concept2Label,
-              concept2Type)) =>
-          subject should have(
-            'label (expectedSubjectLabel),
-            labelDerivedSubjectId(expectedSubjectLabel)
-          )
-          val List(concept1, concept2) = subject.concepts
-          concept1 should have(
-            'label (concept1Label),
-            labelDerivedConceptId(concept1Label)
-          )
-          concept2 should have(
-            'label (concept2Label),
-            sourceIdentifier(
-              value = concept2Label,
-              ontologyType = concept2Type,
-              identifierType = IdentifierType.LabelDerived)
-          )
-      }
+    )
+
+    subject2.concepts.length shouldBe 2
+    subject2.concepts.head should have(
+      'label("A2 Content"),
+      labelDerivedConceptId("A2 Content")
+    )
+    subject2.concepts(1) should have(
+      'label("V2 Content"),
+      labelDerivedConceptId("V2 Content")
+    )
   }
 
   it("returns subjects with primary concept Period for tag 648") {

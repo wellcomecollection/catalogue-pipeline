@@ -314,36 +314,34 @@ class SierraGenresTest
     )
 
     val List(genre1, genre2) = SierraGenres(bibData)
-
+    genre1.concepts.length shouldBe 2
     genre1 should have(
       'label ("A1 Content - Z1 Content")
     )
-    val List(concept1, concept2) = genre1.concepts
-    concept1 shouldBe a[Concept[_]]
-    concept1 should have(
+    genre1.concepts.head shouldBe a[Concept[_]]
+    genre1.concepts.head should have(
       'label ("A1 Content"),
       labelDerivedConceptId("A1 Content")
     )
-    concept2 shouldBe a[Place[_]]
-    concept2 should have(
+    genre1.concepts(1) shouldBe a[Place[_]]
+    genre1.concepts(1) should have(
       'label ("Z1 Content"),
       sourceIdentifier(
         value = "Z1 Content",
         identifierType = IdentifierType.LabelDerived,
         ontologyType = "Place")
     )
-
+    genre2.concepts.length shouldBe 2
     genre2 should have(
       'label ("A2 Content - V2 Content")
     )
-    val List(concept3, concept4) = genre2.concepts
-    concept3 shouldBe a[Concept[_]]
-    concept3 should have(
+    genre2.concepts.head shouldBe a[Concept[_]]
+    genre2.concepts.head should have(
       'label ("A2 Content"),
       labelDerivedConceptId("A2 Content")
     )
-    concept4 shouldBe a[Concept[_]]
-    concept4 should have(
+    genre2.concepts(1) shouldBe a[Concept[_]]
+    genre2.concepts(1) should have(
       'label ("V2 Content"),
       labelDerivedConceptId("V2 Content")
     )

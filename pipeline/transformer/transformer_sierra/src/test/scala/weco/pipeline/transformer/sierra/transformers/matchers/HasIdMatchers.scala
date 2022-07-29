@@ -10,12 +10,12 @@ import weco.catalogue.internal_model.identifiers.{
 
 trait HasIdMatchers {
 
-  class HasIdentifier(ontologyType: String,
+  class HasIdentifier[T](ontologyType: String,
                       value: String,
                       identifierType: IdentifierType)
-      extends HavePropertyMatcher[HasId[IdState], String] {
+      extends HavePropertyMatcher[HasId[T], String] {
     def apply(
-      identifiableObject: HasId[IdState]): HavePropertyMatchResult[String] = {
+      identifiableObject: HasId[T]): HavePropertyMatchResult[String] = {
       identifiableObject.id match {
         case identified: IdState.Identifiable =>
           matchIdentifiableId(identified.sourceIdentifier)
@@ -47,10 +47,10 @@ trait HasIdMatchers {
     }
   }
 
-  def sourceIdentifier(ontologyType: String,
+  def sourceIdentifier[T](ontologyType: String,
                        value: String,
                        identifierType: IdentifierType)
-    : HavePropertyMatcher[HasId[IdState.Unminted], String] =
+    : HavePropertyMatcher[HasId[T], String] =
     new HasIdentifier(
       ontologyType: String,
       value: String,
