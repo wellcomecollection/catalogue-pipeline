@@ -248,15 +248,15 @@ class SierraConceptSubjectsTest
 
     val List(subject1, subject2) = SierraConceptSubjects(bibId, bibData)
     subject1.concepts.length shouldBe 2
-    subject1 .concepts.head should have(
-      'label("A1 Content"),
+    subject1.concepts.head should have(
+      'label ("A1 Content"),
       labelDerivedConceptId("A1 Content")
     )
 
     subject1.concepts(1) should have(
-      'label("Z1 Content"),
+      'label ("Z1 Content"),
       sourceIdentifier(
-        value="Z1 Content",
+        value = "Z1 Content",
         ontologyType = "Place",
         identifierType = IdentifierType.LabelDerived
       )
@@ -264,11 +264,11 @@ class SierraConceptSubjectsTest
 
     subject2.concepts.length shouldBe 2
     subject2.concepts.head should have(
-      'label("A2 Content"),
+      'label ("A2 Content"),
       labelDerivedConceptId("A2 Content")
     )
     subject2.concepts(1) should have(
-      'label("V2 Content"),
+      'label ("V2 Content"),
       labelDerivedConceptId("V2 Content")
     )
   }
