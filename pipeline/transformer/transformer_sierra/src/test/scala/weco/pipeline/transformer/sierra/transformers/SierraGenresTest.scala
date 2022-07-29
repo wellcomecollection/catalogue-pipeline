@@ -313,7 +313,7 @@ class SierraGenresTest
       )
     )
 
-    val List(genre1, genre2) =  SierraGenres(bibData)
+    val List(genre1, genre2) = SierraGenres(bibData)
 
     genre1 should have(
       'label ("A1 Content - Z1 Content")
