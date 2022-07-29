@@ -1,7 +1,7 @@
 package weco.pipeline.transformer.sierra.transformers.matchers
 
 import org.scalatest.matchers.HavePropertyMatcher
-import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType}
+import weco.catalogue.internal_model.identifiers.IdentifierType
 import weco.catalogue.internal_model.work.AbstractRootConcept
 
 trait ConceptMatchers {
