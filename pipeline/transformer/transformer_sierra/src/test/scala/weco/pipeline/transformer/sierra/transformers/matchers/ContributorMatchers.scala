@@ -37,5 +37,3 @@ trait ContributorMatchers {
   }
   val primary = new IsPrimaryMatcher
 }
-
-object ContributorMatchers extends ContributorMatchers

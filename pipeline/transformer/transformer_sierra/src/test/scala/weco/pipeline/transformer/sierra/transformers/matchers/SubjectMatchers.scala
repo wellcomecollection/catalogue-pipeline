@@ -33,7 +33,4 @@ trait SubjectMatchers {
             s"Subject expected to have exactly one concept, found: ${subject.concepts}")
       }
   }
-
 }
-
-object SubjectMatchers extends SubjectMatchers

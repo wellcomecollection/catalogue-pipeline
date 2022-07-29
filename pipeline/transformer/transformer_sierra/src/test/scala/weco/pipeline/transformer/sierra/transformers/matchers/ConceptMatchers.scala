@@ -40,5 +40,3 @@ trait ConceptMatchers {
       expectedValue = expectedValue)
 
 }
-
-object ConceptMatchers extends ConceptMatchers
