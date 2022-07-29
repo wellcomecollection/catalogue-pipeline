@@ -1,7 +1,7 @@
 package weco.pipeline.transformer.sierra.transformers
 import grizzled.slf4j.Logging
 import weco.pipeline.transformer.text.TextNormalisation._
-import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, SourceIdentifier}
 import weco.sierra.models.marc.VarField
 
 trait SierraAbstractConcepts extends Logging {
@@ -54,9 +54,11 @@ trait SierraAbstractConcepts extends Logging {
   private def addIdentifierFromText(ontologyType: String,
                                     label: String): IdState.Unminted =
     IdState.Identifiable(
-      SierraConceptIdentifier.withNoIdentifier(
-        pseudoIdentifier = label,
+      sourceIdentifier = SourceIdentifier(
+        identifierType = IdentifierType.LabelDerived,
+        value = label,
         ontologyType = ontologyType
-      ))
+      )
+    )
 
 }

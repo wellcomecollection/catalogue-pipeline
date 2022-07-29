@@ -24,15 +24,6 @@ import weco.sierra.models.marc.VarField
 //
 object SierraConceptIdentifier {
 
-  def withNoIdentifier(pseudoIdentifier: String,
-                       ontologyType: String): SourceIdentifier = {
-    SourceIdentifier(
-      identifierType = IdentifierType.LabelDerived,
-      value = pseudoIdentifier,
-      ontologyType = ontologyType
-    )
-  }
-
   def maybeFindIdentifier(varField: VarField,
                           identifierSubfieldContent: String,
                           ontologyType: String): Option[SourceIdentifier] = {
