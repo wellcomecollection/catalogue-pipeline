@@ -34,7 +34,7 @@ trait SierraAbstractConcepts extends Logging {
       case Nil =>
         addIdentifierFromVarfieldText(ontologyType, varField)
       case _ =>
-        warn(s"$varField has multiple identifier subfields, unable to identify")
+        warn(s"unable to identify has, multiple identifier subfields found on $varField")
         IdState.Unidentifiable
     }
   }
