@@ -90,6 +90,42 @@ class IdentifierGeneratorTest
     }
   }
 
+  it("reconciles new identical identifiers") {
+    //Given a batch with multiple identical source identifiers
+    //Only generate an identifier for each unique source id.
+    val sourceIdentifier1 = createSourceIdentifier
+    val sourceIdentifier2 = createSourceIdentifier
+
+    val sourceIdentifiers = List(sourceIdentifier1, sourceIdentifier2, sourceIdentifier1, sourceIdentifier2)
+
+    withIdentifierGenerator() {
+      case (identifierGenerator, identifiersTable) =>
+        implicit val session = NamedAutoSession('primary)
+
+        val triedIds = identifierGenerator.retrieveOrGenerateCanonicalIds(
+          sourceIdentifiers
+        )
+
+        triedIds shouldBe a[Success[_]]
+
+        val ids = triedIds.get
+        ids.size shouldBe 2
+
+        val i = identifiersTable.i
+        val maybeIdentifiers = withSQL {
+          select
+            .from(identifiersTable as i)
+            .where
+            .in(i.SourceId, sourceIdentifiers.map(_.value))
+        }.map(Identifier(i)).list.apply()
+
+        maybeIdentifiers should have length 2
+        maybeIdentifiers should contain theSameElementsAs
+          List(sourceIdentifier1, sourceIdentifier2).flatMap(ids.get)
+    }
+  }
+
+
   it("returns a failure if it fails registering new identifiers") {
     val config = IdentifiersTableConfig(
       database = createDatabaseName,
