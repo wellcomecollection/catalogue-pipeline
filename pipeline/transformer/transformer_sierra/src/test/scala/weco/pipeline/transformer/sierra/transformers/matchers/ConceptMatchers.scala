@@ -6,7 +6,7 @@ import weco.catalogue.internal_model.work.AbstractRootConcept
 
 trait ConceptMatchers {
 
-  def labelDerivedAbstractConceptId(ontologyType: String, expectedValue: String)
+  private def labelDerivedAbstractConceptId(ontologyType: String, expectedValue: String)
     : HavePropertyMatcher[AbstractRootConcept[Any], String] = {
     new HasIdMatchers.HasIdentifier(
       identifierType = IdentifierType.LabelDerived,
