@@ -10,7 +10,10 @@ import weco.pipeline.transformer.transformers.{
 import weco.sierra.models.SierraQueryOps
 import weco.sierra.models.marc.{Subfield, VarField}
 
-trait SierraConcepts extends SierraQueryOps with ConceptsTransformer {
+trait SierraConcepts
+    extends SierraQueryOps
+    with ConceptsTransformer
+    with SierraAbstractConcepts {
 
   // Get the label.  This is populated by the label of subfield $a, followed
   // by other subfields, in the order they come from MARC.  The labels are
@@ -20,6 +23,20 @@ trait SierraConcepts extends SierraQueryOps with ConceptsTransformer {
     val orderedSubfields = primarySubfields ++ subdivisionSubfields
     orderedSubfields.map { _.content }.mkString(" - ").trimTrailingPeriod
   }
+
+  protected def getLabel(varField: VarField): Option[String] = {
+    val (primarySubfields, subdivisionSubfields) = getLabelSubfields(varField)
+    getLabel(primarySubfields, subdivisionSubfields) match {
+      case ""    => None
+      case label => Some(label)
+    }
+  }
+
+  protected def getLabelSubfields(
+    varField: VarField): (List[Subfield], List[Subfield]) =
+    varField
+      .subfieldsWithTags("a", "v", "x", "y", "z")
+      .partition { _.tag == "a" }
 
   /** Return a list of the distinct contents of every subfield 0 on
     * this varField, which is a commonly-used subfield for identifiers.
@@ -55,26 +72,9 @@ trait SierraConcepts extends SierraQueryOps with ConceptsTransformer {
       .map { _.replaceAll("[.\\s]", "") }
       .distinct
 
-  // Apply an identifier to the primary concept.  We look in subfield $0
-  // for the identifier value, then second indicator for the authority.
-  //
-  // Note that some identifiers have an identifier scheme in
-  // indicator 2, but no ID.  In this case, we just ignore it.
-  def identifyConcept(ontologyType: String,
-                      varField: VarField): IdState.Unminted =
-    getIdentifierSubfieldContents(varField) match {
-      case Seq(subfieldContent) =>
-        maybeAddIdentifier(
-          ontologyType = ontologyType,
-          varField = varField,
-          identifierSubfieldContent = subfieldContent
-        )
-      case _ => IdState.Unidentifiable
-    }
-
   // If there's exactly one subfield $0 on the VarField, add an identifier
   // if possible.
-  private def maybeAddIdentifier(
+  protected def maybeAddIdentifier(
     ontologyType: String,
     varField: VarField,
     identifierSubfieldContent: String): IdState.Unminted =
@@ -93,9 +93,10 @@ trait SierraConcepts extends SierraQueryOps with ConceptsTransformer {
     : List[AbstractConcept[IdState.Unminted]] =
     subdivisionSubfields.map { subfield =>
       subfield.tag match {
-        case "v" | "x" => Concept(label = subfield.content).normalised
-        case "y"       => ParsedPeriod(label = subfield.content)
-        case "z"       => Place(label = subfield.content).normalised
+        case "v" | "x" =>
+          Concept(label = subfield.content).normalised.identifiable()
+        case "y" => ParsedPeriod(label = subfield.content).identifiable()
+        case "z" => Place(label = subfield.content).normalised.identifiable()
       }
     }
 }

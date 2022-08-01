@@ -34,6 +34,11 @@ import weco.catalogue.source_model.sierra._
 import weco.json.JsonUtil._
 import weco.pipeline.transformer.sierra.SierraTransformer
 import weco.pipeline.transformer.sierra.exceptions.SierraTransformerException
+import weco.pipeline.transformer.sierra.transformers.matchers.{
+  ConceptMatchers,
+  HasIdMatchers,
+  SubjectMatchers
+}
 import weco.pipeline.transformer.transformers.ParsedPeriod
 import weco.sierra.generators.MarcGenerators
 import weco.sierra.models.identifiers.{SierraBibNumber, SierraItemNumber}
@@ -42,6 +47,9 @@ import weco.sierra.models.marc.{Subfield, VarField}
 class SierraTransformerTest
     extends AnyFunSpec
     with Matchers
+    with SubjectMatchers
+    with HasIdMatchers
+    with ConceptMatchers
     with MarcGenerators
     with SierraRecordGenerators
     with SierraTransformableTestBase
@@ -658,7 +666,11 @@ class SierraTransformerTest
        """.stripMargin
 
     val work = transformDataToSourceWork(id = id, data = data)
-    work.data.contributors shouldBe List(Contributor(Person(name), roles = Nil))
+    val List(contributor) = work.data.contributors
+    contributor.agent shouldBe a[Person[_]]
+    contributor.agent should have(
+      'label (name)
+    )
   }
 
   it("extracts subjects if present") {
@@ -688,8 +700,16 @@ class SierraTransformerTest
       """.stripMargin
 
     val work = transformDataToSourceWork(id = id, data = data)
-    work.data.subjects shouldBe List(
-      Subject(content, List(Concept(content)))
+    val List(subject) = work.data.subjects
+    subject should have(
+      'label (content),
+      labelDerivedSubjectId(content)
+    )
+    val List(concept) = subject.concepts
+
+    concept should have(
+      'label (content),
+      labelDerivedConceptId(content)
     )
   }
 
@@ -751,13 +771,15 @@ class SierraTransformerTest
          | }
       """.stripMargin
 
-    val work = transformDataToSourceWork(id = id, data = data)
-    work.data.subjects shouldBe List(
-      Subject(
-        label = content,
-        concepts = List(Organisation(content))
-      )
+    val List(subject) =
+      transformDataToSourceWork(id = id, data = data).data.subjects
+
+    subject should have(
+      'label (content)
     )
+    val concept = subject.onlyConcept
+    concept shouldBe an[Organisation[_]]
+    concept.label shouldBe content
   }
 
   it("extracts meeting subjects if present") {
@@ -786,13 +808,15 @@ class SierraTransformerTest
          | }
       """.stripMargin
 
-    val work = transformDataToSourceWork(id = id, data = data)
-    work.data.subjects shouldBe List(
-      Subject(
-        label = content,
-        concepts = List(Meeting(content))
-      )
+    val List(subject) =
+      transformDataToSourceWork(id = id, data = data).data.subjects
+
+    subject should have(
+      'label (content)
     )
+    val concept = subject.onlyConcept
+    concept shouldBe an[Meeting[_]]
+    concept.label shouldBe content
   }
 
   it("extracts brand name subjects if present") {
@@ -821,12 +845,16 @@ class SierraTransformerTest
          | }
       """.stripMargin
 
-    val work = transformDataToSourceWork(id = id, data = data)
-    work.data.subjects shouldBe List(
-      Subject(
-        label = content,
-        concepts = List(Concept(content))
-      )
+    val List(subject) =
+      transformDataToSourceWork(id = id, data = data).data.subjects
+    subject should have(
+      'label (content),
+      'id (IdState.Unidentifiable)
+    )
+    val List(concept) = subject.concepts
+    concept should have(
+      'label (content),
+      labelDerivedConceptId(content)
     )
   }
 

@@ -1,6 +1,6 @@
 package weco.pipeline.transformer.sierra.transformers
 
-import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType}
 import weco.catalogue.internal_model.work.{Concept, Genre}
 import weco.pipeline.transformer.transformers.ConceptsTransformer
 import weco.sierra.models.SierraQueryOps
@@ -45,14 +45,12 @@ object SierraGenres
 
   type Output = List[Genre[IdState.Unminted]]
 
-  def apply(bibData: SierraBibData) =
+  def apply(bibData: SierraBibData): List[Genre[IdState.Unminted]] =
     bibData
       .varfieldsWithTag("655")
       .map { varField =>
         val (primarySubfields, subdivisionSubfields) =
-          varField
-            .subfieldsWithTags("a", "v", "x", "y", "z")
-            .partition { _.tag == "a" }
+          getLabelSubfields(varField)
 
         val label = getLabel(primarySubfields, subdivisionSubfields)
         val concepts = getPrimaryConcept(primarySubfields, varField = varField) ++ getSubdivisions(
@@ -62,6 +60,27 @@ object SierraGenres
       }
       .distinct
 
+  private def identifyPrimaryConcept(varField: VarField): IdState.Unminted = {
+    // For Genres, the identifier found in $0 is assigned to the primary concept.
+    // This is in contrast to Subjects, where it is assigned to the Subject itself.
+    // However, for a subject, if no identifier is found, one is created that represents
+    // the whole field.  In Genres, this should not be the case, because the primary concept
+    // will get an identifier made for the concept itself on its own.
+    // This method fixes that inconsistency by discarding the LabelDerived identifier
+    // It's a bit hacky, but I hope it will go away at some point.
+    val wholeFieldConceptId = getIdState(
+      ontologyType = "Concept",
+      varField = varField
+    )
+    wholeFieldConceptId match {
+      case identifiable: IdState.Identifiable
+          if (identifiable.sourceIdentifier.identifierType == IdentifierType.LabelDerived) =>
+        IdState.Unidentifiable
+
+      case other => other
+    }
+
+  }
   // Extract the primary concept, which comes from subfield $a.  This is the
   // only concept which might be identified.
   private def getPrimaryConcept(
@@ -69,11 +88,8 @@ object SierraGenres
     varField: VarField): List[Concept[IdState.Unminted]] =
     primarySubfields.map { subfield =>
       Concept(
-        id = identifyConcept(
-          ontologyType = "Concept",
-          varField = varField
-        ),
+        id = identifyPrimaryConcept(varField),
         label = subfield.content
-      ).normalised
+      ).normalised.identifiable()
     }
 }

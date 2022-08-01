@@ -2,27 +2,28 @@ package weco.pipeline.transformer.sierra.transformers.subjects
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.identifiers.{
-  IdState,
-  IdentifierType,
-  SourceIdentifier
+import weco.catalogue.internal_model.identifiers.IdentifierType
+import weco.pipeline.transformer.sierra.transformers.matchers.{
+  ConceptMatchers,
+  HasIdMatchers
 }
-import weco.catalogue.internal_model.work.{Meeting, Person, Subject}
 import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
 import weco.sierra.models.marc.{Subfield, VarField}
 
 class SierraMeetingSubjectsTest
     extends AnyFunSpec
     with Matchers
+    with ConceptMatchers
+    with HasIdMatchers
     with MarcGenerators
     with SierraDataGenerators {
 
-  def bibId = createSierraBibNumber
+  private def bibId = createSierraBibNumber
 
-  def bibData(varFields: VarField*) =
+  private def bibData(varFields: VarField*) =
     createSierraBibDataWith(varFields = varFields.toList)
 
-  def varField(tag: String, subfields: Subfield*) =
+  private def varField(tag: String, subfields: Subfield*) =
     createVarFieldWith(
       marcTag = tag,
       subfields = subfields.toList,
@@ -32,17 +33,37 @@ class SierraMeetingSubjectsTest
     SierraMeetingSubjects(bibId, bibData()) shouldBe Nil
   }
 
+  it("returns zero subjects if subfields all $$a, $$c and $$d are missing") {
+    val data = bibData(
+      varField("611", Subfield(tag = "x", content = "Hmmm"))
+    )
+    SierraMeetingSubjects(bibId, data) shouldBe Nil
+  }
+
   it("returns subjects for varfield 611, subfield $$a") {
     val data = bibData(
       varField("600", Subfield(tag = "a", content = "Not content")),
       varField("611", Subfield(tag = "a", content = "Content")),
     )
-    SierraMeetingSubjects(bibId, data) shouldBe List(
-      Subject(
-        label = "Content",
-        concepts = List(Meeting(label = "Content"))
-      )
+
+    // It is a happy accident of history that Subjects derived from Meetings have an ontologyType
+    // of "Meeting", rather than "Subject", as other Subjects do.
+    // It is likely that in the near future, we will remove the identifier from Subject, and leave it
+    // simply up to the concepts that define it, but for now, we will ensure that it exists.
+    val List(subject) = SierraMeetingSubjects(bibId, data)
+    subject should have(
+      'label ("Content"),
+      sourceIdentifier(
+        value = "Content",
+        ontologyType = "Meeting",
+        identifierType = IdentifierType.LabelDerived)
     )
+    val List(concept) = subject.concepts
+    concept should have(
+      'label ("Content"),
+      labelDerivedMeetingId("Content")
+    )
+
   }
 
   it(
@@ -55,41 +76,51 @@ class SierraMeetingSubjectsTest
         Subfield(tag = "d", content = "D"),
       )
     )
-    SierraMeetingSubjects(bibId, data) shouldBe List(
-      Subject(
-        label = "C A D",
-        concepts = List(Meeting(label = "C A D"))
-      )
-    )
-  }
 
-  it("returns zero subjects if subfields all $$a, $$c and $$d are missing") {
-    val data = bibData(
-      varField("611", Subfield(tag = "x", content = "Hmmm"))
+    val List(subject) = SierraMeetingSubjects(bibId, data)
+    subject should have(
+      'label ("C A D"),
+      sourceIdentifier(
+        value = "C A D",
+        ontologyType = "Meeting",
+        identifierType = IdentifierType.LabelDerived)
     )
-    SierraMeetingSubjects(bibId, data) shouldBe Nil
+    val List(concept) = subject.concepts
+    concept should have(
+      'label ("C A D"),
+      sourceIdentifier(
+        value = "C A D",
+        ontologyType = "Meeting",
+        identifierType = IdentifierType.LabelDerived)
+    )
   }
 
   it("creates an identifiable subject if subfield 0") {
     val data = bibData(
       varField(
-        "600",
+        "611",
         Subfield(tag = "a", content = "Content"),
         Subfield(tag = "0", content = "lcsh7212")
       )
     )
-    val sourceIdentifier = SourceIdentifier(
-      identifierType = IdentifierType.LCNames,
-      ontologyType = "Subject",
-      value = "lcsh7212"
+
+    val List(subject) = SierraMeetingSubjects(bibId, data)
+    subject should have(
+      'label ("Content"),
+      sourceIdentifier(
+        value = "lcsh7212",
+        ontologyType = "Meeting",
+        identifierType = IdentifierType.LCNames)
     )
-    SierraPersonSubjects(bibId, data) shouldBe List(
-      Subject(
-        id = IdState.Identifiable(sourceIdentifier),
-        label = "Content",
-        concepts = List(Person(label = "Content"))
-      )
+    val List(concept) = subject.concepts
+    concept should have(
+      'label ("Content"),
+      sourceIdentifier(
+        value = "lcsh7212",
+        ontologyType = "Meeting",
+        identifierType = IdentifierType.LCNames)
     )
+
   }
 
   it("returns multiple subjects if multiple 611") {
@@ -97,15 +128,28 @@ class SierraMeetingSubjectsTest
       varField("611", Subfield(tag = "a", content = "First")),
       varField("611", Subfield(tag = "a", content = "Second")),
     )
-    SierraMeetingSubjects(bibId, data) shouldBe List(
-      Subject(
-        label = "First",
-        concepts = List(Meeting(label = "First"))
-      ),
-      Subject(
-        label = "Second",
-        concepts = List(Meeting(label = "Second"))
-      )
-    )
+    val subjects = SierraMeetingSubjects(bibId, data)
+    subjects.length shouldBe 2
+    List("First", "Second").zip(subjects).map {
+      case (label, subject) =>
+        // As we are planning to get rid of Subject ids,
+        // only those places that did have them should keep them
+        // They should not be introduced anywhere else.
+        subject should have(
+          'label (label),
+          sourceIdentifier(
+            value = label,
+            ontologyType = "Meeting",
+            identifierType = IdentifierType.LabelDerived)
+        )
+        val List(concept) = subject.concepts
+        concept should have(
+          'label (label),
+          sourceIdentifier(
+            value = label,
+            ontologyType = "Meeting",
+            identifierType = IdentifierType.LabelDerived)
+        )
+    }
   }
 }

@@ -37,16 +37,11 @@ object SierraOrganisationSubjects
 
       val organisation = createOrganisation(bibId, varField)
 
-      val subject = Subject(
+      Subject(
         label = label,
-        concepts = List(organisation)
+        concepts = List(organisation),
+        id = identify(varField, "Subject")
       )
-
-      varField.indicator2 match {
-        case Some("0") =>
-          subject.copy(id = identify(varField.subfields, "Subject"))
-        case _ => subject
-      }
     }
 
   private def createOrganisation(
@@ -63,6 +58,8 @@ object SierraOrganisationSubjects
         s"Not enough information to build a label on $varField")
     }
 
-    Organisation(label = label)
+    Organisation(
+      label = label,
+      id = identify(varfield = varField, ontologyType = "Organisation"))
   }
 }

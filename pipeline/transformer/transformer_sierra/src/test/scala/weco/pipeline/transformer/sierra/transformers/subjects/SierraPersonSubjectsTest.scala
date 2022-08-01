@@ -1,5 +1,6 @@
 package weco.pipeline.transformer.sierra.transformers.subjects
 
+import org.scalatest.Assertion
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.{
@@ -8,12 +9,15 @@ import weco.catalogue.internal_model.identifiers.{
   SourceIdentifier
 }
 import weco.catalogue.internal_model.work.{Concept, Person, Subject}
+import weco.pipeline.transformer.sierra.transformers.matchers.SubjectMatchers
 import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
+import weco.sierra.models.data.SierraBibData
 import weco.sierra.models.marc.{Subfield, VarField}
 
 class SierraPersonSubjectsTest
     extends AnyFunSpec
     with Matchers
+    with SubjectMatchers
     with MarcGenerators
     with SierraDataGenerators {
 
@@ -35,13 +39,7 @@ class SierraPersonSubjectsTest
         )
       )
     )
-
-    SierraPersonSubjects(bibId, bibData) shouldBe List(
-      Subject(
-        label = "A Content",
-        concepts = List(Person(label = "A Content"))
-      )
-    )
+    assertCreatesSubjectWithLabel(bibData, label = "A Content")
   }
 
   it("returns subjects for tag 600 with only subfields a and c") {
@@ -57,14 +55,7 @@ class SierraPersonSubjectsTest
       )
     )
 
-    SierraPersonSubjects(bibId, bibData) shouldBe List(
-      Subject(
-        label = "Larrey, D. J. baron",
-        concepts = List(
-          Person(label = "Larrey, D. J. baron")
-        )
-      )
-    )
+    assertCreatesSubjectWithLabel(bibData, label = "Larrey, D. J. baron")
   }
 
   it("returns subjects for tag 600 with only subfields a and multiple c") {
@@ -80,13 +71,9 @@ class SierraPersonSubjectsTest
         )
       )
     )
-
-    SierraPersonSubjects(bibId, bibData) shouldBe List(
-      Subject(
-        label = "David Attenborough sir doctor",
-        concepts = List(Person(label = "David Attenborough sir doctor"))
-      )
-    )
+    assertCreatesSubjectWithLabel(
+      bibData,
+      label = "David Attenborough sir doctor")
   }
 
   it("returns subjects for tag 600 with only subfields a and b") {
@@ -101,13 +88,7 @@ class SierraPersonSubjectsTest
         )
       )
     )
-
-    SierraPersonSubjects(bibId, bibData) shouldBe List(
-      Subject(
-        label = "David Attenborough II",
-        concepts = List(Person(label = "David Attenborough II"))
-      )
-    )
+    assertCreatesSubjectWithLabel(bibData, label = "David Attenborough II")
   }
 
   it("returns subjects for tag 600 with subfields a and e") {
@@ -123,12 +104,10 @@ class SierraPersonSubjectsTest
       )
     )
 
-    SierraPersonSubjects(bibId, bibData) shouldBe List(
-      Subject(
-        label = "David Attenborough, author",
-        concepts = List(Person(label = "David Attenborough,"))
-      )
-    )
+    val List(subject) = SierraPersonSubjects(bibId, bibData)
+    subject.label shouldBe "David Attenborough, author"
+    subject.onlyConcept shouldBe a[Person[_]]
+    subject.onlyConcept.label shouldBe "David Attenborough,"
   }
 
   it("returns subjects for tag 600 with subfields a and d") {
@@ -143,15 +122,9 @@ class SierraPersonSubjectsTest
         )
       )
     )
-
-    SierraPersonSubjects(bibId, bibData) shouldBe List(
-      Subject(
-        label = "Rita Levi Montalcini, 22 April 1909 – 30 December 2012",
-        concepts = List(
-          Person(
-            label = "Rita Levi Montalcini, 22 April 1909 – 30 December 2012"))
-      )
-    )
+    assertCreatesSubjectWithLabel(
+      bibData,
+      "Rita Levi Montalcini, 22 April 1909 – 30 December 2012")
   }
 
   it("returns subjects for tag 600 with subfields a and multiple e") {
@@ -167,13 +140,12 @@ class SierraPersonSubjectsTest
         )
       )
     )
-
-    SierraPersonSubjects(bibId, bibData) shouldBe List(
-      Subject(
-        label = "David Attenborough, author, editor",
-        concepts = List(Person(label = "David Attenborough,"))
-      )
-    )
+    val List(subject) = SierraPersonSubjects(bibId, bibData)
+    subject.label shouldBe "David Attenborough, author, editor"
+    subject.onlyConcept shouldBe a[Person[_]]
+    // Not "David Attenborough"
+    // See https://github.com/wellcomecollection/catalogue-pipeline/blob/704cec1f6c43496313aebe0cc167e8b5aac32021/pipeline/transformer/transformer_sierra/src/main/scala/weco/pipeline/transformer/sierra/transformers/SierraAgents.scala#L32-L40
+    subject.onlyConcept.label shouldBe "David Attenborough,"
   }
 
   // There's nothing useful we can do here.  Arguably it's a cataloguing
@@ -324,12 +296,22 @@ class SierraPersonSubjectsTest
         )
       )
     )
-
-    SierraPersonSubjects(bibId, bibData) shouldBe List(
-      Subject(
-        "Agate, John, 1676-1720. Sermon preach'd at Exeter, on the 30th of January ...",
-        concepts = List(Person(
-          "Agate, John, 1676-1720. Sermon preach'd at Exeter, on the 30th of January ..."))
-      ))
+    assertCreatesSubjectWithLabel(
+      bibData,
+      label =
+        "Agate, John, 1676-1720. Sermon preach'd at Exeter, on the 30th of January ...")
   }
+
+  /**
+    * Assert that the result of creating subjects with the given bibdata results in a single
+    * subject with a single concept, both bearing the given label.
+    */
+  private def assertCreatesSubjectWithLabel(bibData: SierraBibData,
+                                            label: String): Assertion = {
+    val List(subject) = SierraPersonSubjects(bibId, bibData)
+    subject.label shouldBe label
+    subject.onlyConcept shouldBe a[Person[_]]
+    subject.onlyConcept.label shouldBe label
+  }
+
 }

@@ -8,18 +8,24 @@ import weco.catalogue.internal_model.identifiers.{
   SourceIdentifier
 }
 import weco.catalogue.internal_model.work._
+import weco.pipeline.transformer.sierra.transformers.matchers.{
+  ConceptMatchers,
+  ContributorMatchers,
+  HasIdMatchers
+}
 import weco.sierra.generators.SierraDataGenerators
 import weco.sierra.models.marc.{Subfield, VarField}
 
 class SierraContributorsTest
     extends AnyFunSpec
     with Matchers
+    with ContributorMatchers
+    with ConceptMatchers
+    with HasIdMatchers
     with SierraDataGenerators {
 
   it("gets an empty contributor list from empty bib data") {
-    transformAndCheckContributors(
-      varFields = List(),
-      expectedContributors = List())
+    SierraContributors(createSierraBibDataWith(varFields = Nil)) shouldBe Nil
   }
 
   it("extracts a mixture of Person, Organisation and Meeting contributors") {
@@ -63,30 +69,51 @@ class SierraContributorsTest
         )
       ),
     )
+    val contributors =
+      SierraContributors(createSierraBibDataWith(varFields = varFields))
+    contributors.size shouldBe 6
+    all(contributors.slice(0, 2)) shouldBe primary
+    all(contributors.slice(3, 5)) shouldNot be(primary)
 
-    val expectedContributors = List(
-      Contributor(Person("Sarah the soybean"), roles = Nil, primary = true),
-      Contributor(Person("Sam the squash, Sir"), roles = Nil, primary = true),
-      Contributor(
-        Organisation("Spinach Solicitors"),
-        roles = Nil,
-        primary = true),
-      Contributor(
-        Person("Sebastian the sugarsnap"),
-        roles = Nil,
-        primary = false),
-      Contributor(
-        Organisation("Shallot Swimmers"),
-        roles = Nil,
-        primary = false),
-      Contributor(
-        Meeting("Sammys meet the Sammys at Sammys"),
-        roles = Nil,
-        primary = false)
-    )
-    transformAndCheckContributors(
-      varFields = varFields,
-      expectedContributors = expectedContributors)
+    List(
+      (
+        (agent: AbstractAgent[IdState.Unminted]) => agent shouldBe a[Person[_]],
+        "Person",
+        "Sarah the soybean"),
+      (
+        (agent: AbstractAgent[IdState.Unminted]) => agent shouldBe a[Person[_]],
+        "Person",
+        "Sam the squash, Sir"),
+      (
+        (agent: AbstractAgent[IdState.Unminted]) =>
+          agent shouldBe a[Organisation[_]],
+        "Organisation",
+        "Spinach Solicitors"),
+      (
+        (agent: AbstractAgent[IdState.Unminted]) => agent shouldBe a[Person[_]],
+        "Person",
+        "Sebastian the sugarsnap"),
+      (
+        (agent: AbstractAgent[IdState.Unminted]) =>
+          agent shouldBe a[Organisation[_]],
+        "Organisation",
+        "Shallot Swimmers"),
+      (
+        (agent: AbstractAgent[IdState.Unminted]) =>
+          agent shouldBe a[Meeting[_]],
+        "Meeting",
+        "Sammys meet the Sammys at Sammys"),
+    ).zip(contributors).map {
+      case ((assertType, ontologyType, label), contributor) =>
+        assertType(contributor.agent)
+        contributor.agent should have(
+          'label (label),
+          sourceIdentifier(
+            ontologyType = ontologyType,
+            identifierType = IdentifierType.LabelDerived,
+            value = label)
+        )
+    }
   }
 
   describe("Person") {
@@ -111,21 +138,15 @@ class SierraContributorsTest
           )
         )
       )
-
-      val expectedContributors = List(
-        Contributor(
-          Person(label = "Charles Emmanuel III, King of Sardinia, 1701-1773"),
-          roles = Nil,
-          primary = true),
-        Contributor(
-          Person(label = "Charles Emmanuel IV, King of Sardinia, 1796-1802"),
-          roles = Nil,
-          primary = false)
-      )
-
-      transformAndCheckContributors(
-        varFields = varFields,
-        expectedContributors = expectedContributors)
+      val contributors =
+        SierraContributors(createSierraBibDataWith(varFields = varFields))
+      all(contributors) should have('roles (Nil))
+      all(contributors.map(_.agent)) shouldBe a[Person[_]]
+      val List(c1, c2) = contributors
+      c1.agent.label shouldBe "Charles Emmanuel III, King of Sardinia, 1701-1773"
+      c1 shouldBe primary
+      c2.agent.label shouldBe "Charles Emmanuel IV, King of Sardinia, 1796-1802"
+      c2 shouldNot be(primary)
     }
 
     it(
@@ -144,12 +165,12 @@ class SierraContributorsTest
       )
 
       val bibData = createSierraBibDataWith(varFields = varFields)
-      val contributors = SierraContributors(bibData)
-      contributors should have size 1
-      val contributor = contributors.head
+      val List(contributor) = SierraContributors(bibData)
 
-      contributor.agent shouldBe Agent(
-        "Shakespeare, William, 1564-1616. Hamlet.")
+      contributor.agent should have(
+        'label ("Shakespeare, William, 1564-1616. Hamlet.")
+      )
+      contributor.agent shouldBe an[Agent[IdState.Identifiable]]
     }
 
     it(
@@ -176,15 +197,14 @@ class SierraContributorsTest
         )
       )
 
-      val expectedContributors = List(
-        Contributor(Person(label = name1), roles = Nil, primary = true),
-        Contributor(Person(label = name2), roles = Nil, primary = false),
-        Contributor(Person(label = name3), roles = Nil, primary = false)
-      )
+      val contributors =
+        SierraContributors(createSierraBibDataWith(varFields = varFields))
 
-      transformAndCheckContributors(
-        varFields = varFields,
-        expectedContributors = expectedContributors)
+      all(contributors) should have('roles (Nil))
+      all(contributors.map(_.agent)) shouldBe a[Person[_]]
+      contributors.map(_.agent.label) shouldBe List(name1, name2, name3)
+      all(contributors.tail) shouldNot be(primary)
+      contributors.head shouldBe primary
     }
 
     it("gets the roles from subfield ǂe") {
@@ -203,17 +223,14 @@ class SierraContributorsTest
         )
       )
 
-      val expectedContributors = List(
-        Contributor(
-          agent = Person(label = name),
-          roles = List(ContributionRole(role1), ContributionRole(role2)),
-          primary = true
-        )
+      val List(contributor) =
+        SierraContributors(createSierraBibDataWith(varFields = varFields))
+      contributor.agent shouldBe a[Person[_]]
+      contributor.agent should have('label (name))
+      contributor shouldBe primary
+      contributor should have(
+        roles(List(role1, role2))
       )
-
-      transformAndCheckContributors(
-        varFields = varFields,
-        expectedContributors = expectedContributors)
     }
 
     it("gets the full form of a name from subfield ǂq") {
@@ -231,11 +248,9 @@ class SierraContributorsTest
         )
       )
 
-      val contributors =
+      val List(contributor) =
         SierraContributors(createSierraBibDataWith(varFields = varFields))
-      contributors should have size 1
-
-      contributors.head.agent.label shouldBe "Faujas-de-St.-Fond, cit. (Barthélemey), 1741-1819"
+      contributor.agent.label shouldBe "Faujas-de-St.-Fond, cit. (Barthélemey), 1741-1819"
     }
 
     it("gets an identifier from subfield ǂ0") {
@@ -251,22 +266,16 @@ class SierraContributorsTest
           )
         )
       )
-
-      val sourceIdentifier = SourceIdentifier(
-        identifierType = IdentifierType.LCNames,
-        ontologyType = "Person",
-        value = lcshCode
+      val List(contributor) =
+        SierraContributors(createSierraBibDataWith(varFields = varFields))
+      contributor.agent should have(
+        'label (name),
+        sourceIdentifier(
+          identifierType = IdentifierType.LCNames,
+          ontologyType = "Person",
+          value = lcshCode
+        )
       )
-
-      val expectedContributors = List(
-        Contributor(
-          Person(label = name, id = IdState.Identifiable(sourceIdentifier)),
-          roles = Nil)
-      )
-
-      transformAndCheckContributors(
-        varFields = varFields,
-        expectedContributors = expectedContributors)
     }
 
     it(
@@ -293,21 +302,18 @@ class SierraContributorsTest
         )
       )
 
-      val sourceIdentifier = SourceIdentifier(
-        identifierType = IdentifierType.LCNames,
-        ontologyType = "Person",
-        value = lcshCodeCanonical
+      val List(contributor) =
+        SierraContributors(createSierraBibDataWith(varFields = varFields))
+      contributor.agent should have(
+        'label (name),
+        sourceIdentifier(
+          identifierType = IdentifierType.LCNames,
+          ontologyType = "Person",
+          value = lcshCodeCanonical
+        )
       )
-
-      val expectedContributors = List(
-        Contributor(
-          Person(label = name, id = IdState.Identifiable(sourceIdentifier)),
-          roles = Nil)
-      )
-
-      transformAndCheckContributors(
-        varFields = varFields,
-        expectedContributors = expectedContributors)
+      contributor.roles shouldBe Nil
+      contributor.agent shouldBe a[Person[_]]
     }
 
     it(
@@ -324,13 +330,14 @@ class SierraContributorsTest
         )
       )
 
-      val expectedContributors = List(
-        Contributor(Person(name), roles = Nil)
-      )
+      val List(contributor) =
+        SierraContributors(createSierraBibDataWith(varFields = varFields))
 
-      transformAndCheckContributors(
-        varFields = varFields,
-        expectedContributors = expectedContributors)
+      contributor.agent shouldBe a[Person[_]]
+      contributor.agent should have(
+        'label (name),
+        'id (IdState.Unidentifiable)
+      )
     }
 
     it("normalises Person contributor labels") {
@@ -347,14 +354,14 @@ class SierraContributorsTest
         )
       )
 
-      val expectedContributors = List(
-        Contributor(Person(label = "George"), roles = Nil, primary = true),
-        Contributor(Person(label = "Sebastian"), roles = Nil, primary = false)
-      )
-
-      transformAndCheckContributors(
-        varFields = varFields,
-        expectedContributors = expectedContributors)
+      val contributors =
+        SierraContributors(createSierraBibDataWith(varFields = varFields))
+      contributors.size shouldBe 2
+      all(contributors) should have('roles (Nil))
+      all(contributors.map(_.agent)) shouldBe a[Person[_]]
+      contributors.map(_.agent.label) shouldBe List("George", "Sebastian")
+      contributors.head shouldBe primary
+      contributors(1) shouldNot be(primary)
     }
   }
 
@@ -369,13 +376,12 @@ class SierraContributorsTest
         )
       )
 
-      val expectedContributors = List(
-        Contributor(Organisation(label = name), roles = Nil)
+      val List(contributor) =
+        SierraContributors(createSierraBibDataWith(varFields = varFields))
+      contributor.agent shouldBe an[Organisation[_]]
+      contributor.agent should have(
+        'label (name),
       )
-
-      transformAndCheckContributors(
-        varFields = varFields,
-        expectedContributors = expectedContributors)
     }
 
     it(
@@ -400,19 +406,13 @@ class SierraContributorsTest
           )
         )
       )
-
-      val expectedContributors = List(
-        Contributor(
-          Organisation(
-            label =
-              "IARC Working Group on the Evaluation of the Carcinogenic Risk of Chemicals to Man. Meeting 1972 : Lyon, France"
-          ),
-          roles = Nil)
+      val List(contributor) =
+        SierraContributors(createSierraBibDataWith(varFields = varFields))
+      contributor.agent shouldBe an[Organisation[_]]
+      contributor.agent should have(
+        'label (
+          "IARC Working Group on the Evaluation of the Carcinogenic Risk of Chemicals to Man. Meeting 1972 : Lyon, France"),
       )
-
-      transformAndCheckContributors(
-        varFields = varFields,
-        expectedContributors = expectedContributors)
     }
 
     it(
@@ -438,16 +438,14 @@ class SierraContributorsTest
           subfields = List(Subfield(tag = "a", content = name3))
         )
       )
+      val contributors =
+        SierraContributors(createSierraBibDataWith(varFields = varFields))
 
-      val expectedContributors = List(
-        Contributor(Organisation(label = name1), roles = Nil, primary = true),
-        Contributor(Organisation(label = name2), roles = Nil, primary = false),
-        Contributor(Organisation(label = name3), roles = Nil, primary = false)
-      )
-
-      transformAndCheckContributors(
-        varFields = varFields,
-        expectedContributors = expectedContributors)
+      all(contributors) should have('roles (Nil))
+      all(contributors.map(_.agent)) shouldBe a[Organisation[_]]
+      contributors.map(_.agent.label) shouldBe List(name1, name2, name3)
+      contributors.head shouldBe primary
+      all(contributors.tail) shouldNot be(primary)
     }
 
     it("gets the roles from subfield ǂe") {
@@ -466,16 +464,13 @@ class SierraContributorsTest
         )
       )
 
-      val expectedContributors = List(
-        Contributor(
-          Organisation(label = name),
-          roles = List(ContributionRole(role1), ContributionRole(role2))
-        )
+      val List(contributor) =
+        SierraContributors(createSierraBibDataWith(varFields = varFields))
+      contributor.agent shouldBe an[Organisation[_]]
+      contributor.agent should have('label (name))
+      contributor should have(
+        roles(List(role1, role2))
       )
-
-      transformAndCheckContributors(
-        varFields = varFields,
-        expectedContributors = expectedContributors)
     }
 
     it("gets an identifier from subfield ǂ0") {
@@ -492,23 +487,18 @@ class SierraContributorsTest
         )
       )
 
-      val sourceIdentifier = SourceIdentifier(
-        identifierType = IdentifierType.LCNames,
-        ontologyType = "Organisation",
-        value = lcshCode
+      val List(contributor) =
+        SierraContributors(createSierraBibDataWith(varFields = varFields))
+      contributor.agent should have(
+        'label (name),
+        sourceIdentifier(
+          identifierType = IdentifierType.LCNames,
+          ontologyType = "Organisation",
+          value = lcshCode
+        )
       )
-
-      val expectedContributors = List(
-        Contributor(
-          Organisation(
-            label = name,
-            id = IdState.Identifiable(sourceIdentifier)),
-          roles = Nil)
-      )
-
-      transformAndCheckContributors(
-        varFields = varFields,
-        expectedContributors = expectedContributors)
+      contributor.roles shouldBe Nil
+      contributor.agent shouldBe an[Organisation[_]]
     }
 
     it("gets an identifier with inconsistent spacing from subfield ǂ0") {
@@ -530,23 +520,18 @@ class SierraContributorsTest
         )
       )
 
-      val sourceIdentifier = SourceIdentifier(
-        identifierType = IdentifierType.LCNames,
-        ontologyType = "Organisation",
-        value = lcshCodeCanonical
+      val List(contributor) =
+        SierraContributors(createSierraBibDataWith(varFields = varFields))
+      contributor.agent should have(
+        'label (name),
+        sourceIdentifier(
+          identifierType = IdentifierType.LCNames,
+          ontologyType = "Organisation",
+          value = lcshCodeCanonical
+        )
       )
-
-      val expectedContributors = List(
-        Contributor(
-          Organisation(
-            label = name,
-            id = IdState.Identifiable(sourceIdentifier)),
-          roles = Nil)
-      )
-
-      transformAndCheckContributors(
-        varFields = varFields,
-        expectedContributors = expectedContributors)
+      contributor.roles shouldBe Nil
+      contributor.agent shouldBe an[Organisation[_]]
     }
 
     it(
@@ -562,14 +547,14 @@ class SierraContributorsTest
           )
         )
       )
+      val List(contributor) =
+        SierraContributors(createSierraBibDataWith(varFields = varFields))
 
-      val expectedContributors = List(
-        Contributor(Organisation(label = name), roles = Nil)
+      contributor.agent shouldBe an[Organisation[_]]
+      contributor.agent should have(
+        'label (name),
+        'id (IdState.Unidentifiable)
       )
-
-      transformAndCheckContributors(
-        varFields = varFields,
-        expectedContributors = expectedContributors)
     }
 
     it("normalises Organisation contributor labels") {
@@ -585,20 +570,16 @@ class SierraContributorsTest
         )
       )
 
-      val expectedContributors = List(
-        Contributor(
-          Organisation(label = "The organisation"),
-          roles = Nil,
-          primary = true),
-        Contributor(
-          Organisation(label = "Another organisation"),
-          roles = Nil,
-          primary = false)
-      )
-
-      transformAndCheckContributors(
-        varFields = varFields,
-        expectedContributors = expectedContributors)
+      val contributors =
+        SierraContributors(createSierraBibDataWith(varFields = varFields))
+      contributors should have size 2
+      all(contributors) should have('roles (Nil))
+      all(contributors.map(_.agent)) shouldBe a[Organisation[_]]
+      contributors.map(_.agent.label) shouldBe List(
+        "The organisation",
+        "Another organisation")
+      contributors.head shouldBe primary
+      contributors(1) shouldNot be(primary)
     }
   }
 
@@ -614,10 +595,7 @@ class SierraContributorsTest
         )
       )
     )
-
-    transformAndCheckContributors(
-      varFields = varFields,
-      expectedContributors = List())
+    SierraContributors(createSierraBibDataWith(varFields = varFields)) shouldBe Nil
   }
 
   describe("Meeting") {
@@ -626,8 +604,10 @@ class SierraContributorsTest
         marcTag = "111",
         subfields = List(Subfield(tag = "a", content = "Big meeting"))
       )
-      val contributor = Contributor(Meeting(label = "Big meeting"), roles = Nil)
-      transformAndCheckContributors(List(varField), List(contributor))
+      val List(contributor) =
+        SierraContributors(createSierraBibDataWith(varFields = List(varField)))
+      contributor.agent should have('label ("Big meeting"))
+      contributor.agent shouldBe a[Meeting[_]]
     }
 
     it("gets the name from MARC tag 711 subfield ǂa") {
@@ -635,11 +615,12 @@ class SierraContributorsTest
         marcTag = "711",
         subfields = List(Subfield(tag = "a", content = "Big meeting"))
       )
-      val contributor = Contributor(
-        Meeting(label = "Big meeting"),
-        roles = Nil,
-        primary = false)
-      transformAndCheckContributors(List(varField), List(contributor))
+      val List(contributor) =
+        SierraContributors(createSierraBibDataWith(varFields = List(varField)))
+      contributor.agent should have('label ("Big meeting"))
+      contributor.agent shouldBe a[Meeting[_]]
+      contributor shouldNot be(primary)
+
     }
 
     it("combinies subfields ǂa, ǂc, ǂd and ǂt with spaces") {
@@ -653,9 +634,10 @@ class SierraContributorsTest
           Subfield(tag = "t", content = "4"),
         )
       )
-      val contributor =
-        Contributor(Meeting(label = "1 2 3 4"), roles = Nil, primary = true)
-      transformAndCheckContributors(List(varField), List(contributor))
+      val List(contributor) =
+        SierraContributors(createSierraBibDataWith(varFields = List(varField)))
+      contributor.agent should have('label ("1 2 3 4"))
+      contributor shouldBe primary
     }
 
     it("gets the roles from subfield ǂj") {
@@ -668,11 +650,12 @@ class SierraContributorsTest
           Subfield(tag = "j", content = "2nd role"),
         )
       )
-      val contributor = Contributor(
-        agent = Meeting(label = "label"),
-        roles = List(ContributionRole("1st role"), ContributionRole("2nd role"))
+      val List(contributor) =
+        SierraContributors(createSierraBibDataWith(varFields = List(varField)))
+      contributor.agent should have('label ("label"))
+      contributor should have(
+        roles(List("1st role", "2nd role"))
       )
-      transformAndCheckContributors(List(varField), List(contributor))
     }
 
     it("gets an identifier from subfield ǂ0") {
@@ -683,16 +666,17 @@ class SierraContributorsTest
           Subfield(tag = "0", content = "456")
         )
       )
-      val sourceIdentifier = SourceIdentifier(
-        identifierType = IdentifierType.LCNames,
-        ontologyType = "Meeting",
-        value = "456"
+      val List(contributor) =
+        SierraContributors(createSierraBibDataWith(varFields = List(varField)))
+      contributor.agent should have(
+        'label ("label"),
+        sourceIdentifier(
+          identifierType = IdentifierType.LCNames,
+          ontologyType = "Meeting",
+          value = "456"
+        )
       )
-      val contributor = Contributor(
-        Meeting(label = "label", id = IdState.Identifiable(sourceIdentifier)),
-        roles = Nil
-      )
-      transformAndCheckContributors(List(varField), List(contributor))
+      contributor.roles shouldBe Nil
     }
   }
 
@@ -719,14 +703,16 @@ class SierraContributorsTest
     )
 
     val bibData = createSierraBibDataWith(varFields = varFields)
-
-    SierraContributors(bibData) shouldBe List(
-      Contributor(
-        agent = Person(label = "Steele, Richard, Sir, 1672-1729."),
-        roles = List.empty,
-        primary = true
-      )
+    val List(contributor) = SierraContributors(bibData)
+    contributor should have(
+      'roles (Nil),
     )
+    contributor.agent shouldBe a[Person[_]]
+    contributor shouldBe primary
+    contributor.agent should have(
+      'label ("Steele, Richard, Sir, 1672-1729.")
+    )
+
   }
 
   it("includes subfield ǂn") {
@@ -745,16 +731,10 @@ class SierraContributorsTest
     )
 
     val bibData = createSierraBibDataWith(varFields = varFields)
-
-    SierraContributors(bibData) shouldBe List(
-      Contributor(
-        agent = Agent(
-          label =
-            "Brewer, George. Essays after the manner of Goldsmith, No. 1-22."
-        ),
-        roles = List.empty,
-        primary = false
-      )
+    val List(contributor) = SierraContributors(bibData)
+    contributor shouldNot be(primary)
+    contributor.agent should have(
+      'label ("Brewer, George. Essays after the manner of Goldsmith, No. 1-22.")
     )
   }
 
@@ -810,20 +790,11 @@ class SierraContributorsTest
       ),
     )
 
-    val contributors =
+    val List(contributor) =
       SierraContributors(createSierraBibDataWith(varFields = varFields))
-    contributors should have size 1
 
-    contributors.head.roles shouldBe List(
-      ContributionRole("writer of introduction"))
-  }
-
-  private def transformAndCheckContributors(
-    varFields: List[VarField],
-    expectedContributors: List[Contributor[IdState.Unminted]]
-  ) = {
-    val actualContributors = SierraContributors(
-      createSierraBibDataWith(varFields = varFields))
-    actualContributors shouldBe expectedContributors
+    contributor should have(
+      roles(List("writer of introduction"))
+    )
   }
 }
