@@ -33,7 +33,7 @@ class SierraBrandNameSubjectsTest
     )
     subject.onlyConcept should have(
       'label ("Content"),
-      labelDerivedConceptId("Content")
+      labelDerivedConceptId("content")
     )
   }
 
@@ -67,7 +67,7 @@ class SierraBrandNameSubjectsTest
         val List(concept) = subject.concepts
         concept should have(
           'label (label),
-          labelDerivedConceptId(label)
+          labelDerivedConceptId(label.toLowerCase)
         )
     }
   }

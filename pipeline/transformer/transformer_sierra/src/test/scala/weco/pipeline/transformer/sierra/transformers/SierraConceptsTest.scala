@@ -83,7 +83,7 @@ class SierraConceptsTest
       )
       val sourceIdentifier = SourceIdentifier(
         identifierType = IdentifierType.LabelDerived,
-        value = "Who Knows",
+        value = "who knows",
         ontologyType = "Concept"
       )
 

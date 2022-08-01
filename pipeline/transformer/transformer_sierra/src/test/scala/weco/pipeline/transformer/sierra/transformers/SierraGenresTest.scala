@@ -43,7 +43,7 @@ class SierraGenresTest
               id = IdState.Identifiable(
                 sourceIdentifier = SourceIdentifier(
                   identifierType = IdentifierType.LabelDerived,
-                  value = "A Content",
+                  value = "a content",
                   ontologyType = "Concept"
                 )
               ),
@@ -86,12 +86,12 @@ class SierraGenresTest
     conceptA shouldBe a[Concept[_]]
     conceptA should have(
       'label ("A Content"),
-      labelDerivedConceptId("A Content")
+      labelDerivedConceptId("a content")
     )
     conceptV shouldBe a[Concept[_]]
     conceptV should have(
       'label ("V Content"),
-      labelDerivedConceptId("V Content")
+      labelDerivedConceptId("v content")
     )
   }
 
@@ -120,12 +120,12 @@ class SierraGenresTest
     conceptA shouldBe a[Concept[_]]
     conceptA should have(
       'label ("A Content"),
-      labelDerivedConceptId("A Content")
+      labelDerivedConceptId("a content")
     )
     conceptV shouldBe a[Concept[_]]
     conceptV should have(
       'label ("V Content"),
-      labelDerivedConceptId("V Content")
+      labelDerivedConceptId("v content")
     )
   }
 
@@ -153,17 +153,17 @@ class SierraGenresTest
     conceptA shouldBe a[Concept[_]]
     conceptA should have(
       'label ("A Content"),
-      labelDerivedConceptId("A Content")
+      labelDerivedConceptId("a content")
     )
     conceptX shouldBe a[Concept[_]]
     conceptX should have(
       'label ("X Content"),
-      labelDerivedConceptId("X Content")
+      labelDerivedConceptId("x content")
     )
     conceptV shouldBe a[Concept[_]]
     conceptV should have(
       'label ("V Content"),
-      labelDerivedConceptId("V Content")
+      labelDerivedConceptId("v content")
     )
   }
 
@@ -191,12 +191,12 @@ class SierraGenresTest
     conceptA shouldBe a[Concept[_]]
     conceptA should have(
       'label ("A Content"),
-      labelDerivedConceptId("A Content")
+      labelDerivedConceptId("a content")
     )
     conceptV shouldBe a[Period[_]]
     conceptV should have(
       'label ("MDCCLXXXVII. [1787]"),
-      labelDerivedPeriodId("MDCCLXXXVII. [1787]"),
+      labelDerivedPeriodId("mdcclxxxvii. [1787]"),
       'range (
         Some(
           InstantRange(
@@ -229,12 +229,12 @@ class SierraGenresTest
     conceptA shouldBe a[Concept[_]]
     conceptA should have(
       'label ("A Content"),
-      labelDerivedConceptId("A Content")
+      labelDerivedConceptId("a content")
     )
     conceptV shouldBe a[Place[_]]
     conceptV should have(
       'label ("Z Content"),
-      labelDerivedPlaceId("Z Content")
+      labelDerivedPlaceId("z content")
     )
   }
 
@@ -288,7 +288,7 @@ class SierraGenresTest
         concept shouldBe a[Concept[_]]
         concept should have(
           'label (genreName),
-          labelDerivedConceptId(genreName)
+          labelDerivedConceptId(genreName.toLowerCase())
         )
     }
   }
@@ -321,13 +321,13 @@ class SierraGenresTest
     genre1.concepts.head shouldBe a[Concept[_]]
     genre1.concepts.head should have(
       'label ("A1 Content"),
-      labelDerivedConceptId("A1 Content")
+      labelDerivedConceptId("a1 content")
     )
     genre1.concepts(1) shouldBe a[Place[_]]
     genre1.concepts(1) should have(
       'label ("Z1 Content"),
       sourceIdentifier(
-        value = "Z1 Content",
+        value = "z1 content",
         identifierType = IdentifierType.LabelDerived,
         ontologyType = "Place")
     )
@@ -338,12 +338,12 @@ class SierraGenresTest
     genre2.concepts.head shouldBe a[Concept[_]]
     genre2.concepts.head should have(
       'label ("A2 Content"),
-      labelDerivedConceptId("A2 Content")
+      labelDerivedConceptId("a2 content")
     )
     genre2.concepts(1) shouldBe a[Concept[_]]
     genre2.concepts(1) should have(
       'label ("V2 Content"),
-      labelDerivedConceptId("V2 Content")
+      labelDerivedConceptId("v2 content")
     )
   }
 
@@ -369,7 +369,7 @@ class SierraGenresTest
     concept shouldBe a[Concept[_]]
     concept should have(
       'label ("Printed books"),
-      labelDerivedConceptId("Printed books")
+      labelDerivedConceptId("printed books")
     )
   }
 
