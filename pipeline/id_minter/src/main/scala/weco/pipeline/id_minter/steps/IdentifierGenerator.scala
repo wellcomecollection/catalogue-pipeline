@@ -35,7 +35,7 @@ class IdentifierGenerator(identifiersDao: IdentifiersDao) extends Logging {
     retrieveOrGenerateCanonicalIdsOnce(sourceIdentifiers) match {
       case Failure(_: InsertError) =>
         retrieveOrGenerateCanonicalIdsOnce(sourceIdentifiers)
-      case x => x
+      case success => success
     }
 
   /*
