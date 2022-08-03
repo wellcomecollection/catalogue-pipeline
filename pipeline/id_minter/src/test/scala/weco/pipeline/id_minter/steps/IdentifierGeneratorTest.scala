@@ -102,7 +102,11 @@ class IdentifierGeneratorTest
     val sourceIdentifier1 = createSourceIdentifier
     val sourceIdentifier2 = createSourceIdentifier
 
-    val sourceIdentifiers = List(sourceIdentifier1, sourceIdentifier2, sourceIdentifier1, sourceIdentifier2)
+    val sourceIdentifiers = List(
+      sourceIdentifier1,
+      sourceIdentifier2,
+      sourceIdentifier1,
+      sourceIdentifier2)
 
     withIdentifierGenerator() {
       case (identifierGenerator, identifiersTable) =>
@@ -131,7 +135,7 @@ class IdentifierGeneratorTest
     }
   }
 
-  it("tries looking up identifiers again if it fails to insert 'new' ids"){
+  it("tries looking up identifiers again if it fails to insert 'new' ids") {
     // Simulation of a race condition.  This test the behaviour of the
     // "second" participant in the race, with mocks representing the result
     // of the "first" participant.
@@ -148,10 +152,12 @@ class IdentifierGeneratorTest
     val canonicalIds = (1 to 5).map(_ => createCanonicalId).toList
     val existingEntries = (sourceIdentifiers zip canonicalIds).map {
       case (sourceId, canonicalId) =>
-        (sourceId,  Identifier(
-          canonicalId,
-          sourceId
-        ))
+        (
+          sourceId,
+          Identifier(
+            canonicalId,
+            sourceId
+          ))
     }.toMap
 
     val daoStub = mock[IdentifiersDao]("dao")
@@ -160,25 +166,29 @@ class IdentifierGeneratorTest
     // and a full set of unminted identifiers, because the other participant
     // in the race has not yet saved its identifiers.
     // On the second call, they have been saved, so the full/empty states are switched.
-    when(daoStub.lookupIds(any[List[SourceIdentifier]])(any[DBSession])).thenReturn(Success(
-      IdentifiersDao.LookupResult(
-        existingIdentifiers = Map.empty,
-        unmintedIdentifiers = sourceIdentifiers
-      ))).thenReturn(Success(
-      IdentifiersDao.LookupResult(
-        existingIdentifiers = existingEntries,
-        unmintedIdentifiers = Nil
-      )
-    ))
+    when(daoStub.lookupIds(any[List[SourceIdentifier]])(any[DBSession]))
+      .thenReturn(
+        Success(
+          IdentifiersDao.LookupResult(
+            existingIdentifiers = Map.empty,
+            unmintedIdentifiers = sourceIdentifiers
+          )))
+      .thenReturn(
+        Success(
+          IdentifiersDao.LookupResult(
+            existingIdentifiers = existingEntries,
+            unmintedIdentifiers = Nil
+          )
+        ))
 
     // When attempting to save, the first call fails, because the other participant
     // has now saved its identifiers.
     // The second run through will not call saveIdentifiers, as it will have retrieved
     // all of the ids from the database.
-    when(daoStub.saveIdentifiers(any[List[Identifier]])(any[DBSession])).thenReturn(
-      Failure(IdentifiersDao.InsertError(Nil, new Exception("no."), Nil))
-    )
-
+    when(daoStub.saveIdentifiers(any[List[Identifier]])(any[DBSession]))
+      .thenReturn(
+        Failure(IdentifiersDao.InsertError(Nil, new Exception("no."), Nil))
+      )
 
     withIdentifierGenerator(Some(daoStub)) {
       case (identifierGenerator, _) =>

@@ -33,9 +33,9 @@ class IdentifierGenerator(identifiersDao: IdentifiersDao) extends Logging {
   def retrieveOrGenerateCanonicalIds(sourceIdentifiers: Seq[SourceIdentifier])
     : Try[Map[SourceIdentifier, Identifier]] =
     retrieveOrGenerateCanonicalIdsOnce(sourceIdentifiers) match {
-    case Failure(_: InsertError) =>
-      retrieveOrGenerateCanonicalIdsOnce(sourceIdentifiers)
-    case x => x
+      case Failure(_: InsertError) =>
+        retrieveOrGenerateCanonicalIdsOnce(sourceIdentifiers)
+      case x => x
     }
 
   /*
@@ -47,8 +47,9 @@ class IdentifierGenerator(identifiersDao: IdentifiersDao) extends Logging {
    * the updates will fail due to duplicate key errors, when an identifier
    * is saved by another thread after `lookupIds` has been called.
    */
-  private def retrieveOrGenerateCanonicalIdsOnce(sourceIdentifiers: Seq[SourceIdentifier])
-  : Try[Map[SourceIdentifier, Identifier]] =
+  private def retrieveOrGenerateCanonicalIdsOnce(
+    sourceIdentifiers: Seq[SourceIdentifier])
+    : Try[Map[SourceIdentifier, Identifier]] =
     identifiersDao
       .lookupIds(sourceIdentifiers)
       .flatMap {
