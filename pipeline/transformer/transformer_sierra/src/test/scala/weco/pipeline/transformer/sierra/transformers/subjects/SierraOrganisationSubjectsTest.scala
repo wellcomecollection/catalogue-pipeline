@@ -81,7 +81,7 @@ class SierraOrganisationSubjectsTest
       concept should have(
         'label ("Wellcome Trust"),
         sourceIdentifier(
-          value = "Wellcome Trust",
+          value = "wellcome trust",
           ontologyType = "Organisation",
           identifierType = IdentifierType.LabelDerived)
       )

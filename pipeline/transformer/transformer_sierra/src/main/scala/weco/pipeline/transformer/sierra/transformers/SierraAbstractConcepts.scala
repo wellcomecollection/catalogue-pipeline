@@ -60,7 +60,7 @@ trait SierraAbstractConcepts extends Logging {
     IdState.Identifiable(
       sourceIdentifier = SourceIdentifier(
         identifierType = IdentifierType.LabelDerived,
-        value = label,
+        value = label.toLowerCase,
         ontologyType = ontologyType
       )
     )

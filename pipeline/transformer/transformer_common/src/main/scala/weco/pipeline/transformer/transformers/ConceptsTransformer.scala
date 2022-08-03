@@ -24,7 +24,7 @@ trait ConceptsTransformer {
             SourceIdentifier(
               identifierType = IdentifierType.LabelDerived,
               ontologyType = ontologyType,
-              value = label
+              value = label.toLowerCase
             )))
     }
 

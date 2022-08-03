@@ -111,7 +111,7 @@ class SierraContributorsTest
           sourceIdentifier(
             ontologyType = ontologyType,
             identifierType = IdentifierType.LabelDerived,
-            value = label)
+            value = label.toLowerCase())
         )
     }
   }

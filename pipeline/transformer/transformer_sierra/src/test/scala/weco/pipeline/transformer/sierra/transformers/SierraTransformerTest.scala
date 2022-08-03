@@ -703,13 +703,13 @@ class SierraTransformerTest
     val List(subject) = work.data.subjects
     subject should have(
       'label (content),
-      labelDerivedSubjectId(content)
+      labelDerivedSubjectId(content.toLowerCase)
     )
     val List(concept) = subject.concepts
 
     concept should have(
       'label (content),
-      labelDerivedConceptId(content)
+      labelDerivedConceptId(content.toLowerCase)
     )
   }
 
@@ -854,7 +854,7 @@ class SierraTransformerTest
     val List(concept) = subject.concepts
     concept should have(
       'label (content),
-      labelDerivedConceptId(content)
+      labelDerivedConceptId(content.toLowerCase)
     )
   }
 

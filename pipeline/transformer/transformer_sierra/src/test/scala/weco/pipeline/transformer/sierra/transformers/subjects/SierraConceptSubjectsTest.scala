@@ -55,14 +55,14 @@ class SierraConceptSubjectsTest
     val List(subject) = SierraConceptSubjects(bibId, bibData)
     subject should have(
       'label ("A Content"),
-      labelDerivedSubjectId("A Content")
+      labelDerivedSubjectId("a content")
     )
 
     val List(conceptA) = subject.concepts
     conceptA shouldBe a[Concept[_]]
     conceptA should have(
       'label ("A Content"),
-      labelDerivedConceptId("A Content")
+      labelDerivedConceptId("a content")
     )
   }
 
@@ -82,19 +82,19 @@ class SierraConceptSubjectsTest
     val List(subject) = SierraConceptSubjects(bibId, bibData)
     subject should have(
       'label ("A Content - V Content"),
-      labelDerivedSubjectId("A Content - V Content")
+      labelDerivedSubjectId("a content - v content")
     )
 
     val List(conceptA, conceptV) = subject.concepts
     conceptA shouldBe a[Concept[_]]
     conceptA should have(
       'label ("A Content"),
-      labelDerivedConceptId("A Content")
+      labelDerivedConceptId("a content")
     )
     conceptV shouldBe a[Concept[_]]
     conceptV should have(
       'label ("V Content"),
-      labelDerivedConceptId("V Content")
+      labelDerivedConceptId("v content")
     )
   }
 
@@ -115,19 +115,19 @@ class SierraConceptSubjectsTest
     val List(subject) = SierraConceptSubjects(bibId, bibData)
     subject should have(
       'label ("A Content - V Content"),
-      labelDerivedSubjectId("A Content - V Content")
+      labelDerivedSubjectId("a content - v content")
     )
 
     val List(conceptA, conceptV) = subject.concepts
     conceptA shouldBe a[Concept[_]]
     conceptA should have(
       'label ("A Content"),
-      labelDerivedConceptId("A Content")
+      labelDerivedConceptId("a content")
     )
     conceptV shouldBe a[Concept[_]]
     conceptV should have(
       'label ("V Content"),
-      labelDerivedConceptId("V Content")
+      labelDerivedConceptId("v content")
     )
   }
 
@@ -148,7 +148,7 @@ class SierraConceptSubjectsTest
     val List(subject) = SierraConceptSubjects(bibId, bibData)
     subject should have(
       'label ("A Content - X Content - V Content"),
-      labelDerivedSubjectId("A Content - X Content - V Content")
+      labelDerivedSubjectId("a content - x content - v content")
     )
     subject.concepts.length shouldBe 3
     subject.concepts.zip(List("A", "X", "V")).map {
@@ -156,7 +156,7 @@ class SierraConceptSubjectsTest
         concept shouldBe a[Concept[_]]
         concept should have(
           'label (s"$capitalTag Content"),
-          labelDerivedConceptId(s"$capitalTag Content")
+          labelDerivedConceptId(s"${capitalTag.toLowerCase} content")
         )
     }
   }
@@ -177,19 +177,19 @@ class SierraConceptSubjectsTest
     val List(subject) = SierraConceptSubjects(bibId, bibData)
     subject should have(
       'label ("A Content - Y Content"),
-      labelDerivedSubjectId("A Content - Y Content")
+      labelDerivedSubjectId("a content - y content")
     )
 
     val List(conceptA, conceptY) = subject.concepts
     conceptA shouldBe a[Concept[_]]
     conceptA should have(
       'label ("A Content"),
-      labelDerivedConceptId("A Content")
+      labelDerivedConceptId("a content")
     )
     conceptY shouldBe a[Period[_]]
     conceptY should have(
       'label ("Y Content"),
-      labelDerivedPeriodId("Y Content")
+      labelDerivedPeriodId("y content")
     )
   }
 
@@ -209,20 +209,20 @@ class SierraConceptSubjectsTest
     val List(subject) = SierraConceptSubjects(bibId, bibData)
     subject should have(
       'label ("A Content - Z Content"),
-      labelDerivedSubjectId("A Content - Z Content")
+      labelDerivedSubjectId("a content - z content")
     )
 
     val List(conceptA, conceptY) = subject.concepts
     conceptA shouldBe a[Concept[_]]
     conceptA should have(
       'label ("A Content"),
-      labelDerivedConceptId("A Content")
+      labelDerivedConceptId("a content")
     )
 
     conceptY shouldBe a[Place[_]]
     conceptY should have(
       'label ("Z Content"),
-      labelDerivedPlaceId("Z Content")
+      labelDerivedPlaceId("z content")
     )
   }
 
@@ -250,13 +250,13 @@ class SierraConceptSubjectsTest
     subject1.concepts.length shouldBe 2
     subject1.concepts.head should have(
       'label ("A1 Content"),
-      labelDerivedConceptId("A1 Content")
+      labelDerivedConceptId("a1 content")
     )
 
     subject1.concepts(1) should have(
       'label ("Z1 Content"),
       sourceIdentifier(
-        value = "Z1 Content",
+        value = "z1 content",
         ontologyType = "Place",
         identifierType = IdentifierType.LabelDerived
       )
@@ -265,11 +265,11 @@ class SierraConceptSubjectsTest
     subject2.concepts.length shouldBe 2
     subject2.concepts.head should have(
       'label ("A2 Content"),
-      labelDerivedConceptId("A2 Content")
+      labelDerivedConceptId("a2 content")
     )
     subject2.concepts(1) should have(
       'label ("V2 Content"),
-      labelDerivedConceptId("V2 Content")
+      labelDerivedConceptId("v2 content")
     )
   }
 
@@ -290,7 +290,7 @@ class SierraConceptSubjectsTest
     val List(subject) = SierraConceptSubjects(bibId, bibData)
     subject should have(
       'label ("A Content - X Content - V Content"),
-      labelDerivedSubjectId("A Content - X Content - V Content")
+      labelDerivedSubjectId("a content - x content - v content")
     )
 
     val List(conceptA, conceptX, conceptV) = subject.concepts
@@ -298,7 +298,7 @@ class SierraConceptSubjectsTest
     conceptA should have(
       'label ("A Content"),
       sourceIdentifier(
-        value = "A Content",
+        value = "a content",
         ontologyType = "Period",
         identifierType = IdentifierType.LabelDerived)
     )
@@ -306,12 +306,12 @@ class SierraConceptSubjectsTest
     conceptX shouldBe a[Concept[_]]
     conceptX should have(
       'label ("X Content"),
-      labelDerivedConceptId("X Content")
+      labelDerivedConceptId("x content")
     )
     conceptV shouldBe a[Concept[_]]
     conceptV should have(
       'label ("V Content"),
-      labelDerivedConceptId("V Content")
+      labelDerivedConceptId("v content")
     )
 
   }
@@ -333,7 +333,7 @@ class SierraConceptSubjectsTest
     val List(subject) = SierraConceptSubjects(bibId, bibData)
     subject should have(
       'label ("A Content - X Content - V Content"),
-      labelDerivedSubjectId("A Content - X Content - V Content")
+      labelDerivedSubjectId("a content - x content - v content")
     )
 
     val List(conceptA, conceptX, conceptV) = subject.concepts
@@ -341,7 +341,7 @@ class SierraConceptSubjectsTest
     conceptA should have(
       'label ("A Content"),
       sourceIdentifier(
-        value = "A Content",
+        value = "a content",
         ontologyType = "Place",
         identifierType = IdentifierType.LabelDerived)
     )
@@ -349,13 +349,13 @@ class SierraConceptSubjectsTest
     conceptX shouldBe a[Concept[_]]
     conceptX should have(
       'label ("X Content"),
-      labelDerivedConceptId("X Content")
+      labelDerivedConceptId("x content")
     )
 
     conceptV shouldBe a[Concept[_]]
     conceptV should have(
       'label ("V Content"),
-      labelDerivedConceptId("V Content")
+      labelDerivedConceptId("v content")
     )
   }
 
@@ -504,7 +504,7 @@ class SierraConceptSubjectsTest
       val List(subject) = SierraConceptSubjects(bibId, bibData)
       subject should have(
         'label ("Diet, Food, and Nutrition"),
-        labelDerivedSubjectId("Diet, Food, and Nutrition")
+        labelDerivedSubjectId("diet, food, and nutrition")
       )
       val concept = subject.onlyConcept
       assertType(concept)

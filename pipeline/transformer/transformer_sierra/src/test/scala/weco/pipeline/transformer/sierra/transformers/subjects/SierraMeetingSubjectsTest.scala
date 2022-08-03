@@ -54,14 +54,14 @@ class SierraMeetingSubjectsTest
     subject should have(
       'label ("Content"),
       sourceIdentifier(
-        value = "Content",
+        value = "content",
         ontologyType = "Meeting",
         identifierType = IdentifierType.LabelDerived)
     )
     val List(concept) = subject.concepts
     concept should have(
       'label ("Content"),
-      labelDerivedMeetingId("Content")
+      labelDerivedMeetingId("content")
     )
 
   }
@@ -81,7 +81,7 @@ class SierraMeetingSubjectsTest
     subject should have(
       'label ("C A D"),
       sourceIdentifier(
-        value = "C A D",
+        value = "c a d",
         ontologyType = "Meeting",
         identifierType = IdentifierType.LabelDerived)
     )
@@ -89,7 +89,7 @@ class SierraMeetingSubjectsTest
     concept should have(
       'label ("C A D"),
       sourceIdentifier(
-        value = "C A D",
+        value = "c a d",
         ontologyType = "Meeting",
         identifierType = IdentifierType.LabelDerived)
     )
@@ -138,7 +138,7 @@ class SierraMeetingSubjectsTest
         subject should have(
           'label (label),
           sourceIdentifier(
-            value = label,
+            value = label.toLowerCase,
             ontologyType = "Meeting",
             identifierType = IdentifierType.LabelDerived)
         )
@@ -146,7 +146,7 @@ class SierraMeetingSubjectsTest
         concept should have(
           'label (label),
           sourceIdentifier(
-            value = label,
+            value = label.toLowerCase,
             ontologyType = "Meeting",
             identifierType = IdentifierType.LabelDerived)
         )
