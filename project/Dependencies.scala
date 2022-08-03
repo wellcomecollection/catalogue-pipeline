@@ -141,13 +141,10 @@ object ExternalDependencies {
     "org.scala-graph" %% "graph-core" % versions.scalaGraph
   )
 
-  val mockitoDependencies = Seq(
-    "org.scalatestplus" %% versions.scalatestPlusMockitoArtifactId % versions.scalatestPlus % Test,
-  )
-
   val scalatestDependencies = Seq(
+    "org.scalatestplus" %% versions.scalatestPlusMockitoArtifactId % versions.scalatestPlus % Test,
     "org.scalatest" %% "scalatest" % versions.scalatest % "test"
-  ) ++ mockitoDependencies
+  )
 
   val parseDependencies = Seq(
     "com.lihaoyi" %% "fastparse" % versions.fastparse
