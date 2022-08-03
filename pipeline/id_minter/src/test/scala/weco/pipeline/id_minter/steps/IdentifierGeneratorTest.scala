@@ -136,9 +136,9 @@ class IdentifierGeneratorTest
   }
 
   it("tries looking up identifiers again if it fails to insert 'new' ids") {
-    // Simulation of a race condition.  This test the behaviour of the
-    // "second" participant in the race, with mocks representing the result
-    // of the "first" participant.
+    // Simulation of a race condition.  This test represents the behaviour of the
+    // "second" participant in the race, with mocks representing the  "first"
+    // participant.
     // When running in parallel (multiple threads, multiple hosts, whatever),
     // it is possible for a clash to occur, where two processes create a new
     // id for the same sourceIdentifier almost simultaneously.
