@@ -168,17 +168,17 @@ class IdentifiersDaoTest
       }
     }
 
-
-    it("retrieves label derived identifiers case-insensitively from different ontologytypes") {
+    it(
+      "retrieves label derived identifiers case-insensitively from different ontologytypes") {
       val conceptSourceIdentifier = createSourceIdentifierWith(
         identifierType = IdentifierType.LabelDerived,
         value = "bAnAnA",
-        ontologyType="Concept"
+        ontologyType = "Concept"
       )
       val subjectSourceIdentifier = createSourceIdentifierWith(
         identifierType = IdentifierType.LabelDerived,
         value = "bAnAnA",
-        ontologyType="Subject"
+        ontologyType = "Subject"
       )
       val conceptIdentifier = createSQLIdentifierWith(
         sourceIdentifier = conceptSourceIdentifier
@@ -188,12 +188,16 @@ class IdentifiersDaoTest
         sourceIdentifier = subjectSourceIdentifier
       )
 
-      val badCaseConceptIdentifier = conceptSourceIdentifier.copy(value = "BaNaNa")
-      val badCaseSubjectIdentifier = subjectSourceIdentifier.copy(value = "BaNaNa")
+      val badCaseConceptIdentifier =
+        conceptSourceIdentifier.copy(value = "BaNaNa")
+      val badCaseSubjectIdentifier =
+        subjectSourceIdentifier.copy(value = "BaNaNa")
 
-      withIdentifiersDao(existingEntries = Seq(conceptIdentifier, subjectIdentifier)) {
+      withIdentifiersDao(
+        existingEntries = Seq(conceptIdentifier, subjectIdentifier)) {
         case (identifiersDao, _) =>
-          val triedLookup = identifiersDao.lookupIds(List(badCaseConceptIdentifier, badCaseSubjectIdentifier))
+          val triedLookup = identifiersDao.lookupIds(
+            List(badCaseConceptIdentifier, badCaseSubjectIdentifier))
 
           triedLookup shouldBe a[Success[_]]
           // The resulting map maps the _requested_ sourceIdentifiers to
