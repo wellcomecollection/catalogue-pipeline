@@ -103,14 +103,8 @@ class IdentifiersDaoTest
         withIdentifiersDao(existingEntries = Seq(identifier)) {
           case (identifiersDao, _) =>
             val triedLookup = identifiersDao.lookupIds(List(badCaseIdentifier))
-            triedLookup match {
-              case Failure(e) =>
-                e.getMessage.strip shouldBe s"The query returned a sourceIdentifier (Work[${identifierType.id}/deadbeef]) which we weren't looking for (List(Work[${identifierType.id}/DEADBEEF]))"
-              case unexpected =>
-                fail(s"lookupIds should have failed: $unexpected")
-            }
             triedLookup shouldBe a[Failure[_]]
-
+            triedLookup.failed.get.getMessage.strip shouldBe s"The query returned a sourceIdentifier (Work[${identifierType.id}/deadbeef]) which we weren't looking for (List(Work[${identifierType.id}/DEADBEEF]))"
         }
       }
     }
@@ -127,14 +121,10 @@ class IdentifiersDaoTest
       withIdentifiersDao(existingEntries = Seq(identifier)) {
         case (identifiersDao, _) =>
           val triedLookup = identifiersDao.lookupIds(List(badCaseIdentifier))
-          triedLookup match {
-            case Failure(e) =>
-              e.getMessage should include(
-                "but it did return a similar identifier")
-            case unexpected =>
-              fail(s"lookupIds should have failed: $unexpected")
-          }
           triedLookup shouldBe a[Failure[_]]
+          triedLookup.failed.get.getMessage.strip should include(
+            "but it did return a similar identifier"
+          )
 
       }
     }
