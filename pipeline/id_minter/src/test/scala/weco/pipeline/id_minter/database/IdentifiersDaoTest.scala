@@ -42,6 +42,22 @@ class IdentifiersDaoTest
       }
     }
 
+    it("retrieves a single id from the identifiers database, multiple times") {
+      val sourceIdentifier = createSourceIdentifier
+      val identifier = createSQLIdentifierWith(
+        sourceIdentifier = sourceIdentifier
+      )
+
+      withIdentifiersDao(existingEntries = Seq(identifier)) {
+        case (identifiersDao, _) =>
+          val triedLookup = identifiersDao.lookupIds(List(sourceIdentifier))
+
+          triedLookup shouldBe a[Success[_]]
+          triedLookup.get.existingIdentifiers shouldBe Map(
+            sourceIdentifier -> identifier)
+          triedLookup.get.unmintedIdentifiers shouldBe empty
+      }
+    }
     it("retrieves multiple ids from the identifiers database") {
       val identifiersMap = (1 to 3).map { _ =>
         val sourceIdentifier = createSourceIdentifier
@@ -146,9 +162,47 @@ class IdentifiersDaoTest
           triedLookup shouldBe a[Success[_]]
           // The resulting map maps the _requested_ sourceIdentifiers to
           // the returned identifiers.
+          triedLookup.get.unmintedIdentifiers shouldBe empty
           triedLookup.get.existingIdentifiers shouldBe Map(
             badCaseIdentifier -> identifier)
+      }
+    }
+
+
+    it("retrieves label derived identifiers case-insensitively from different ontologytypes") {
+      val conceptSourceIdentifier = createSourceIdentifierWith(
+        identifierType = IdentifierType.LabelDerived,
+        value = "bAnAnA",
+        ontologyType="Concept"
+      )
+      val subjectSourceIdentifier = createSourceIdentifierWith(
+        identifierType = IdentifierType.LabelDerived,
+        value = "bAnAnA",
+        ontologyType="Subject"
+      )
+      val conceptIdentifier = createSQLIdentifierWith(
+        sourceIdentifier = conceptSourceIdentifier
+      )
+
+      val subjectIdentifier = createSQLIdentifierWith(
+        sourceIdentifier = subjectSourceIdentifier
+      )
+
+      val badCaseConceptIdentifier = conceptSourceIdentifier.copy(value = "BaNaNa")
+      val badCaseSubjectIdentifier = subjectSourceIdentifier.copy(value = "BaNaNa")
+
+      withIdentifiersDao(existingEntries = Seq(conceptIdentifier, subjectIdentifier)) {
+        case (identifiersDao, _) =>
+          val triedLookup = identifiersDao.lookupIds(List(badCaseConceptIdentifier, badCaseSubjectIdentifier))
+
+          triedLookup shouldBe a[Success[_]]
+          // The resulting map maps the _requested_ sourceIdentifiers to
+          // the returned identifiers.
           triedLookup.get.unmintedIdentifiers shouldBe empty
+          triedLookup.get.existingIdentifiers shouldBe Map(
+            badCaseConceptIdentifier -> conceptIdentifier,
+            badCaseSubjectIdentifier -> subjectIdentifier
+          )
       }
     }
 
