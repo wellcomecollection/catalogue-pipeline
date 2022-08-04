@@ -154,6 +154,8 @@ class IdentifiersDaoTest
           val triedLookup = identifiersDao.lookupIds(List(badCaseIdentifier))
 
           triedLookup shouldBe a[Success[_]]
+          // The resulting map maps the _requested_ sourceIdentifiers to
+          // the returned identifiers.
           triedLookup.get.existingIdentifiers shouldBe Map(
             badCaseIdentifier -> identifier)
           triedLookup.get.unmintedIdentifiers shouldBe empty
