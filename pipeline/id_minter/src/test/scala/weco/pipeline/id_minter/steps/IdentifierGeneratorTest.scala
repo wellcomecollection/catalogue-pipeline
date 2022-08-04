@@ -197,6 +197,9 @@ class IdentifierGeneratorTest
         )
 
         triedIds shouldBe a[Success[_]]
+        val ids = triedIds.get
+        ids shouldBe existingEntries
+
         // LookupIds runs once at the start, then once again when saveIdentifiers fails.
         verify(daoStub, times(2)).lookupIds(sourceIdentifiers)
         // saveIdentifiers is only called first time, the second run through it has nothing to save.
