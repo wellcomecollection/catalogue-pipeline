@@ -3,11 +3,10 @@ package weco.pipeline.id_minter.database
 import java.sql.BatchUpdateException
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.prop.TableDrivenPropertyChecks
 import scalikejdbc._
-import weco.pipeline.id_minter.fixtures.{
-  IdentifiersDatabase,
-  SqlIdentifiersGenerators
-}
+import weco.catalogue.internal_model.identifiers.IdentifierType
+import weco.pipeline.id_minter.fixtures.{IdentifiersDatabase, SqlIdentifiersGenerators}
 import weco.pipeline.id_minter.models.Identifier
 
 import scala.util.{Failure, Success}
@@ -16,7 +15,8 @@ class IdentifiersDaoTest
     extends AnyFunSpec
     with IdentifiersDatabase
     with Matchers
-    with SqlIdentifiersGenerators {
+    with SqlIdentifiersGenerators
+      with TableDrivenPropertyChecks {
 
   implicit val session: DBSession = NamedAutoSession('primary)
 
@@ -78,6 +78,73 @@ class IdentifiersDaoTest
           triedLookup.get.existingIdentifiers shouldBe sourceIdentifiers
             .zip(identifiers)
             .toMap
+          triedLookup.get.unmintedIdentifiers shouldBe empty
+      }
+    }
+
+    it("raises an exception if an unexpected id is returned")  {
+      val testCases = Table(
+        "identifierType",
+        IdentifierType.MiroImageNumber,
+        IdentifierType.SierraSystemNumber,
+        IdentifierType.CalmRecordIdentifier
+      )
+      forAll(testCases){
+        identifierType =>
+          val sourceIdentifier = createSourceIdentifierWith(value="deadbeef", identifierType=identifierType)
+          val identifier = createSQLIdentifierWith(
+            sourceIdentifier = sourceIdentifier
+          )
+          val badCaseIdentifier = sourceIdentifier.copy(value="DEADBEEF")
+          withIdentifiersDao(existingEntries = Seq(identifier)) {
+            case (identifiersDao, _) =>
+              val triedLookup = identifiersDao.lookupIds(List(badCaseIdentifier))
+              triedLookup match {
+                case Failure(e) => e.getMessage.strip shouldBe s"The query returned a sourceIdentifier (Work[${identifierType.id}/deadbeef]) which we weren't looking for (List(Work[${identifierType.id}/DEADBEEF]))"
+                case unexpected => fail(s"lookupIds should have failed: $unexpected")
+              }
+              triedLookup shouldBe a[Failure[_]]
+
+          }
+      }
+    }
+
+    it("raises a special exception if a wrong-case METS id is used")  {
+      val identifierType = IdentifierType.METS
+      val sourceIdentifier = createSourceIdentifierWith(value="B12345", identifierType=identifierType)
+      val identifier = createSQLIdentifierWith(
+        sourceIdentifier = sourceIdentifier
+      )
+      val badCaseIdentifier = sourceIdentifier.copy(value="b12345")
+      withIdentifiersDao(existingEntries = Seq(identifier)) {
+        case (identifiersDao, _) =>
+          val triedLookup = identifiersDao.lookupIds(List(badCaseIdentifier))
+          triedLookup match {
+            case Failure(e) => e.getMessage should include("but it did return a similar identifier")
+            case unexpected => fail(s"lookupIds should have failed: $unexpected")
+          }
+          triedLookup shouldBe a[Failure[_]]
+
+      }
+    }
+
+    it("retrieves label derived identifiers case-insensitively") {
+      val sourceIdentifier = createSourceIdentifierWith(
+        identifierType = IdentifierType.LabelDerived,
+        value = "bAnAnA"
+      )
+      val identifier = createSQLIdentifierWith(
+        sourceIdentifier = sourceIdentifier
+      )
+      val badCaseIdentifier = sourceIdentifier.copy(value="BaNaNa")
+
+      withIdentifiersDao(existingEntries = Seq(identifier)) {
+        case (identifiersDao, _) =>
+          val triedLookup = identifiersDao.lookupIds(List(badCaseIdentifier))
+
+          triedLookup shouldBe a[Success[_]]
+          triedLookup.get.existingIdentifiers shouldBe Map(
+            badCaseIdentifier -> identifier)
           triedLookup.get.unmintedIdentifiers shouldBe empty
       }
     }
