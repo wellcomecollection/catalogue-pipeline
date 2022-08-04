@@ -44,7 +44,9 @@ class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
       val caseNormalisedIdentifiers = distinctIdentifiers
         .filter(_.identifierType == IdentifierType.LabelDerived)
         .map { sourceIdentifier =>
-          (sourceIdentifier.value.toLowerCase, sourceIdentifier)
+          (
+            sourceIdentifier.copy(value = sourceIdentifier.value.toLowerCase),
+            sourceIdentifier)
         }
         .toMap
 
@@ -105,8 +107,8 @@ class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
                       // realise what's happened, we include a specific log for this case.
                       info(msg =
                         s"identifier returned from db not found in request, trying case-insensitive match: $sourceIdentifier")
-                      caseNormalisedIdentifiers.get(
-                        sourceIdentifier.value.toLowerCase) match {
+                      caseNormalisedIdentifiers.get(sourceIdentifier.copy(
+                        value = sourceIdentifier.value.toLowerCase)) match {
                         case Some(sourceId) => (sourceId, Identifier(i)(rs))
                         case _ =>
                           throw SurplusIdentifierException(
