@@ -1,6 +1,10 @@
 package weco.pipeline.transformer.transformers
 
-import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, SourceIdentifier}
+import weco.catalogue.internal_model.identifiers.{
+  IdState,
+  IdentifierType,
+  SourceIdentifier
+}
 import weco.catalogue.internal_model.work._
 import weco.pipeline.transformer.parse.PeriodParser
 import weco.pipeline.transformer.text.TextNormalisation._
@@ -92,6 +96,11 @@ trait ConceptsTransformer {
   implicit class PeriodOps[State](p: Period[State]) {
     def identifiable(idState: Option[IdState.Identifiable] = None)
       : Period[IdState.Identifiable] =
-      p.copy(id = newIdIfNeeded(p.id, PeriodParser.preprocess(p.label), idState, "Period"))
+      p.copy(
+        id = newIdIfNeeded(
+          p.id,
+          PeriodParser.preprocess(p.label),
+          idState,
+          "Period"))
   }
 }
