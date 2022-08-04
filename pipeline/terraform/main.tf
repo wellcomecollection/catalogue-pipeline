@@ -1,11 +1,11 @@
-module "catalogue_pipeline_2022-07-04" {
+module "catalogue_pipeline_2022-07-26" {
   source = "./stack"
 
-  pipeline_date = "2022-07-04"
-  release_label = "2022-07-04"
+  pipeline_date = "2022-07-26"
+  release_label = "2022-07-26"
 
   reindexing_state = {
-    listen_to_reindexer      = false # todo: better name
+    listen_to_reindexer      = false
     scale_up_tasks           = false
     scale_up_elastic_cluster = false
     scale_up_id_minter_db    = false
@@ -49,11 +49,11 @@ module "catalogue_pipeline_2022-07-04" {
   logging_cluster_id = local.logging_cluster_id
 }
 
-module "catalogue_pipeline_2022-07-26" {
+module "catalogue_pipeline_2022-08-04" {
   source = "./stack"
 
-  pipeline_date = "2022-07-26"
-  release_label = "2022-07-26"
+  pipeline_date = "2022-08-04"
+  release_label = "2022-08-04"
 
   reindexing_state = {
     listen_to_reindexer      = true
