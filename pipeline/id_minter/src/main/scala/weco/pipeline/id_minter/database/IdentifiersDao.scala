@@ -41,9 +41,12 @@ class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
 
       // Build a map of source identifiers that should be treated case-insensitively.
       // Currently, only label-derived ids are case-insensitive.
-      val caseNormalisedIdentifiers = distinctIdentifiers.filter(_.identifierType == IdentifierType.LabelDerived).map{
-        sourceIdentifier => (sourceIdentifier.value.toLowerCase, sourceIdentifier)
-      }.toMap
+      val caseNormalisedIdentifiers = distinctIdentifiers
+        .filter(_.identifierType == IdentifierType.LabelDerived)
+        .map { sourceIdentifier =>
+          (sourceIdentifier.value.toLowerCase, sourceIdentifier)
+        }
+        .toMap
 
       val foundIdentifiers =
         withTimeWarning(threshold = 10 seconds, distinctIdentifiers) {
@@ -100,10 +103,15 @@ class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
                       // Because the METS case is fairly rare, we usually fix this by modifying the row in the
                       // ID minter database to correct the case of the source identifier.  To help somebody
                       // realise what's happened, we include a specific log for this case.
-                      info(msg=s"identifier returned from db not found in request, trying case-insensitive match: $sourceIdentifier")
-                      caseNormalisedIdentifiers.get(sourceIdentifier.value.toLowerCase) match {
+                      info(msg =
+                        s"identifier returned from db not found in request, trying case-insensitive match: $sourceIdentifier")
+                      caseNormalisedIdentifiers.get(
+                        sourceIdentifier.value.toLowerCase) match {
                         case Some(sourceId) => (sourceId, Identifier(i)(rs))
-                        case _ => throw SurplusIdentifierException(sourceIdentifier, distinctIdentifiers)
+                        case _ =>
+                          throw SurplusIdentifierException(
+                            sourceIdentifier,
+                            distinctIdentifiers)
                       }
                     }
                   })

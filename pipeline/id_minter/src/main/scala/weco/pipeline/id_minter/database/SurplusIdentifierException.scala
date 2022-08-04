@@ -5,7 +5,9 @@ import weco.catalogue.internal_model.identifiers.SourceIdentifier
 case class SurplusIdentifierException(msg: String) extends RuntimeException(msg)
 
 case object SurplusIdentifierException {
-  def apply(sourceIdentifier: SourceIdentifier, distinctIdentifiers: Seq[SourceIdentifier]): SurplusIdentifierException = {
+  def apply(
+    sourceIdentifier: SourceIdentifier,
+    distinctIdentifiers: Seq[SourceIdentifier]): SurplusIdentifierException = {
     val similarIdentifier = sourceIdentifier.copy(
       value = "^B".r.replaceAllIn(sourceIdentifier.value, "b")
     )
@@ -25,7 +27,6 @@ case object SurplusIdentifierException {
            |""".stripMargin
       }
 
-    new SurplusIdentifierException(
-      errorMessage.replace("\n", " "))
+    new SurplusIdentifierException(errorMessage.replace("\n", " "))
   }
 }
