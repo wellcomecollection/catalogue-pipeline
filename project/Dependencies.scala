@@ -105,6 +105,8 @@ object ExternalDependencies {
     val enumeratumScalacheck = "1.6.1"
     val jsoup = "1.13.1"
     val logback = "1.1.8"
+    val scalatestPlus = "3.2.12.0"
+    val scalatestPlusMockitoArtifactId = "mockito-4-5"
   }
 
   val enumeratumDependencies = Seq(
@@ -140,6 +142,7 @@ object ExternalDependencies {
   )
 
   val scalatestDependencies = Seq(
+    "org.scalatestplus" %% versions.scalatestPlusMockitoArtifactId % versions.scalatestPlus % Test,
     "org.scalatest" %% "scalatest" % versions.scalatest % "test"
   )
 
@@ -203,7 +206,8 @@ object CatalogueDependencies {
 
   val idminterDependencies: Seq[ModuleID] =
     ExternalDependencies.mySqlDependencies ++
-      ExternalDependencies.circeOpticsDependencies
+      ExternalDependencies.circeOpticsDependencies ++
+      ExternalDependencies.scalatestDependencies
 
   val matcherDependencies: Seq[ModuleID] =
     ExternalDependencies.scalaGraphDependencies ++
