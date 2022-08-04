@@ -43,7 +43,7 @@ object PeriodParser extends Parser[InstantRange] with DateParserUtils {
     s"(?=[MDCLXVI\\.\\,\\s]{3,})M*$sep(C[MD]|D?C*)$sep(X[CL]|L?X*)$sep(I[XV]|V?I*)".toLowerCase
   }
 
-  private def preprocess(input: String): String =
+  def preprocess(input: String): String =
     ignoreRegex
       .replaceAllIn(input.toLowerCase, "")
       .trim

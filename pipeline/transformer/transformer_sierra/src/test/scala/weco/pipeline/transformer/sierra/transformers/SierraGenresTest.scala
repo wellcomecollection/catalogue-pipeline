@@ -196,7 +196,7 @@ class SierraGenresTest
     conceptV shouldBe a[Period[_]]
     conceptV should have(
       'label ("MDCCLXXXVII. [1787]"),
-      labelDerivedPeriodId("mdcclxxxvii. [1787]"),
+      labelDerivedPeriodId("1787"),
       'range (
         Some(
           InstantRange(
