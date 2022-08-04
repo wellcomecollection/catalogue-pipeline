@@ -28,6 +28,7 @@ object IdentifiersDao {
 class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
   import IdentifiersDao._
 
+  @throws(classOf[RuntimeException])
   def lookupIds(sourceIdentifiers: Seq[SourceIdentifier])(
     implicit session: DBSession = readOnlySession): Try[LookupResult] =
     Try {
@@ -37,6 +38,15 @@ class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
       )
       debug(s"Looking up ($sourceIdentifiers)")
       val distinctIdentifiers = sourceIdentifiers.distinct
+
+      // Build a map of source identifiers that should be treated case-insensitively.
+      // Currently, only label-derived ids are case-insensitive.
+      val caseNormalisedIdentifiers = distinctIdentifiers
+        .filter(_.identifierType == IdentifierType.LabelDerived)
+        .map { sourceIdentifier =>
+          (sourceIdentifier.value.toLowerCase, sourceIdentifier)
+        }
+        .toMap
 
       val foundIdentifiers =
         withTimeWarning(threshold = 10 seconds, distinctIdentifiers) {
@@ -74,39 +84,35 @@ class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
                       // It might seem like this is impossible -- how could the query return a source
                       // identifier we didn't request?
                       //
+                      // The reason is that the database query is case-insensitive.
+                      //
                       // This can occur if there's an existing source identifier with the same value
                       // but a different case, e.g. b13026252 and B13026252.  This occurs occasionally
                       // with METS works, where the work originally had an uppercase B but has now been
                       // fixed to use a lowercase b.
                       //
-                      // The query is case insensitive, so querying for "METS/b13026252" would return
+                      // This may also happen with label-derived identifiers, which should be treated
+                      // case-insensitively.
+                      //
+                      // Because the query is case insensitive, querying for "METS/b13026252" would return
                       // "METS/B13026252", which isn't what we were looking for.
                       //
-                      // Because this is fairly rare, we usually fix this by modifying the row in the
+                      // Alternatively, querying for label-derived/history would return label-derived/History
+                      // which is what we are looking for.
+                      //
+                      // Because the METS case is fairly rare, we usually fix this by modifying the row in the
                       // ID minter database to correct the case of the source identifier.  To help somebody
                       // realise what's happened, we include a specific log for this case.
-                      val similarIdentifier = sourceIdentifier.copy(
-                        value = "^B".r.replaceAllIn(sourceIdentifier.value, "b")
-                      )
-
-                      val errorMessage =
-                        if (distinctIdentifiers.contains(similarIdentifier)) {
-                          s"""
-                           |The query returned a source identifier ($sourceIdentifier) which we weren't looking for,
-                           |but it did return a similar identifier ($similarIdentifier).
-                           |If this is a METS identifier, may have fixed the case of the b number in the source file;
-                           |if so, you'll need to update the associated records in the ID minter database.
-                           |See https://github.com/wellcomecollection/catalogue-pipeline/blob/main/pipeline/id_minter/connect_to_the_database.md
-                           |""".stripMargin
-                        } else {
-                          s"""
-                           |The query returned a sourceIdentifier ($sourceIdentifier) which we weren't looking for
-                           |($distinctIdentifiers)
-                           |""".stripMargin
-                        }
-
-                      throw new RuntimeException(
-                        errorMessage.replace("\n", " "))
+                      info(msg =
+                        s"identifier returned from db not found in request, trying case-insensitive match: $sourceIdentifier")
+                      caseNormalisedIdentifiers.get(
+                        sourceIdentifier.value.toLowerCase) match {
+                        case Some(sourceId) => (sourceId, Identifier(i)(rs))
+                        case _ =>
+                          throw SurplusIdentifierException(
+                            sourceIdentifier,
+                            distinctIdentifiers)
+                      }
                     }
                   })
                   .list
