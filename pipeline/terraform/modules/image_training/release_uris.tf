@@ -1,5 +1,5 @@
 data "aws_ecr_repository" "feature_training" {
-  name  = "uk.ac.wellcome/feature_training"
+  name = "uk.ac.wellcome/feature_training"
 }
 
 locals {
