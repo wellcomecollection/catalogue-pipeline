@@ -5,7 +5,11 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.{IdentifierType}
 import weco.catalogue.internal_model.work.{Concept, Person, Subject}
-import weco.pipeline.transformer.sierra.transformers.matchers.{ConceptMatchers, HasIdMatchers, SubjectMatchers}
+import weco.pipeline.transformer.sierra.transformers.matchers.{
+  ConceptMatchers,
+  HasIdMatchers,
+  SubjectMatchers
+}
 import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
 import weco.sierra.models.data.SierraBibData
 import weco.sierra.models.marc.{Subfield, VarField}
@@ -202,10 +206,10 @@ class SierraPersonSubjectsTest
       )
     )
 
-    val List(subject)  = SierraPersonSubjects(bibId, bibData)
-    subject should have (
+    val List(subject) = SierraPersonSubjects(bibId, bibData)
+    subject should have(
       'label ("Gerry the Garlic"),
-      sourceIdentifier (
+      sourceIdentifier(
         identifierType = IdentifierType.LCNames,
         ontologyType = "Subject",
         value = lcshCode
@@ -213,7 +217,7 @@ class SierraPersonSubjectsTest
     )
     subject.onlyConcept should have(
       'label ("Gerry the Garlic"),
-      sourceIdentifier (
+      sourceIdentifier(
         identifierType = IdentifierType.LCNames,
         ontologyType = "Person",
         value = lcshCode
@@ -265,8 +269,8 @@ class SierraPersonSubjectsTest
     val subject = actualSubjects.head
 
     it("in the concepts") {
-      subject.concepts.head shouldBe a [Person[_]]
-      all (subject.concepts.tail) shouldBe a [Concept[_]]
+      subject.concepts.head shouldBe a[Person[_]]
+      all(subject.concepts.tail) shouldBe a[Concept[_]]
       subject.concepts.map(_.label) shouldBe List(
         "Shakespeare, William,",
         "Characters",
@@ -299,9 +303,9 @@ class SierraPersonSubjectsTest
     val subject = actualSubjects.head
 
     it("in the concepts") {
-      subject.onlyConcept shouldBe a [Person[_]]
-      subject.onlyConcept should have (
-        'label("Aristophanes. Birds."),
+      subject.onlyConcept shouldBe a[Person[_]]
+      subject.onlyConcept should have(
+        'label ("Aristophanes. Birds."),
         labelDerivedPersonId("aristophanes. birds")
       )
     }
