@@ -181,7 +181,7 @@ class IdentifiersDaoTest
         }
       }
     }
-    
+
     it(
       "retrieves label derived identifiers case-insensitively from different ontologytypes") {
       val conceptSourceIdentifier = createSourceIdentifierWith(
