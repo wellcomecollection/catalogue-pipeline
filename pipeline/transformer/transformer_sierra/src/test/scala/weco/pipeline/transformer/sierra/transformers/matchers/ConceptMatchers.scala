@@ -40,13 +40,13 @@ trait ConceptMatchers {
       expectedValue = expectedValue)
 
   def labelDerivedPersonId(expectedValue: String)
-  : HavePropertyMatcher[AbstractRootConcept[Any], String] =
+    : HavePropertyMatcher[AbstractRootConcept[Any], String] =
     labelDerivedAbstractConceptId(
       ontologyType = "Person",
       expectedValue = expectedValue)
 
   def labelDerivedOrganisationId(expectedValue: String)
-  : HavePropertyMatcher[AbstractRootConcept[Any], String] =
+    : HavePropertyMatcher[AbstractRootConcept[Any], String] =
     labelDerivedAbstractConceptId(
       ontologyType = "Organisation",
       expectedValue = expectedValue)

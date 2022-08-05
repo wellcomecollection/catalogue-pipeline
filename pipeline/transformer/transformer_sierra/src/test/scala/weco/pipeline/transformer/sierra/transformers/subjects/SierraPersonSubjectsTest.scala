@@ -3,9 +3,16 @@ package weco.pipeline.transformer.sierra.transformers.subjects
 import org.scalatest.Assertion
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, SourceIdentifier}
+import weco.catalogue.internal_model.identifiers.{
+  IdState,
+  IdentifierType,
+  SourceIdentifier
+}
 import weco.catalogue.internal_model.work.{Concept, Person, Subject}
-import weco.pipeline.transformer.sierra.transformers.matchers.{ConceptMatchers, SubjectMatchers}
+import weco.pipeline.transformer.sierra.transformers.matchers.{
+  ConceptMatchers,
+  SubjectMatchers
+}
 import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
 import weco.sierra.models.data.SierraBibData
 import weco.sierra.models.marc.{Subfield, VarField}
@@ -38,7 +45,6 @@ class SierraPersonSubjectsTest
     )
     assertCreatesSubjectWithLabel(bibData, label = "A Content")
   }
-
 
   it("returns a lowercase ascii normalised identifier") {
     val bibData = createSierraBibDataWith(

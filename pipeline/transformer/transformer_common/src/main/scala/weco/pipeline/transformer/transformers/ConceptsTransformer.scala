@@ -1,6 +1,10 @@
 package weco.pipeline.transformer.transformers
 
-import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, SourceIdentifier}
+import weco.catalogue.internal_model.identifiers.{
+  IdState,
+  IdentifierType,
+  SourceIdentifier
+}
 import weco.catalogue.internal_model.work._
 import weco.pipeline.transformer.text.TextNormalisation._
 
@@ -17,9 +21,12 @@ trait ConceptsTransformer {
     currentState match {
       case currentAsIdentifiable: IdState.Identifiable => currentAsIdentifiable
       case _ =>
-        val normalizedLabel = Normalizer.normalize(
-          label.toLowerCase, Normalizer.Form.NFKD
-        ).replaceAll("[^\\p{ASCII}]", "")
+        val normalizedLabel = Normalizer
+          .normalize(
+            label.toLowerCase,
+            Normalizer.Form.NFKD
+          )
+          .replaceAll("[^\\p{ASCII}]", "")
         replacementState.getOrElse(
           IdState.Identifiable(
             SourceIdentifier(
