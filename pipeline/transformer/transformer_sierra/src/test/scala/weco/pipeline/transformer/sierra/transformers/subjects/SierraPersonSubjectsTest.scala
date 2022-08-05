@@ -4,7 +4,7 @@ import org.scalatest.Assertion
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.{IdentifierType}
-import weco.catalogue.internal_model.work.{Concept, Person, Subject}
+import weco.catalogue.internal_model.work.{Concept, Person}
 import weco.pipeline.transformer.sierra.transformers.matchers.{
   ConceptMatchers,
   HasIdMatchers,
@@ -225,7 +225,7 @@ class SierraPersonSubjectsTest
     )
   }
 
-  it("creates an unidentifiable person concept if second indicator is not 0") {
+  it("does not extract an identifer if the second indicator is not 0") {
     val name = "Gerry the Garlic"
     val bibData = createSierraBibDataWith(
       varFields = List(
@@ -240,11 +240,14 @@ class SierraPersonSubjectsTest
       )
     )
 
-    SierraPersonSubjects(bibId, bibData) shouldBe List(
-      Subject(
-        label = "Gerry the Garlic",
-        concepts = List(Person(label = "Gerry the Garlic"))
-      )
+    val List(subject) = SierraPersonSubjects(bibId, bibData)
+    subject should have(
+      'label ("Gerry the Garlic")
+    )
+
+    subject.onlyConcept should have (
+      'label ("Gerry the Garlic"),
+      labelDerivedPersonId("gerry the garlic")
     )
   }
 
