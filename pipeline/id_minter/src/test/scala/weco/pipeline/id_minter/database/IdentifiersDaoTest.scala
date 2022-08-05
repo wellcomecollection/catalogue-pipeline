@@ -145,26 +145,41 @@ class IdentifiersDaoTest
       }
     }
 
-    it("retrieves label derived identifiers case-insensitively") {
-      val sourceIdentifier = createSourceIdentifierWith(
-        identifierType = IdentifierType.LabelDerived,
-        value = "bAnAnA"
+    it("retrieves label derived identifiers permissively") {
+      val equivalents = Table(
+        ("inDatabase", "inDocument"),
+        ("bAnAnA", "BaNaNa"), // Case insensitive matching
+        // The following two scenarios refer to the source data, rather than any
+        // normalisation that happens in this pipeline.
+        // A non-English name may have been recorded with non-English characters
+        // in some places, but constrained to English characters only in others.
+        // The direction in which this comparison has to be made will depend on the
+        // order in which the terms were encountered.
+        ("françois", "francois"), // Ascii folded in the document, not in database
+        ("francois", "françois") // Ascii folded in the database, not in document
       )
-      val identifier = createSQLIdentifierWith(
-        sourceIdentifier = sourceIdentifier
-      )
-      val badCaseIdentifier = sourceIdentifier.copy(value = "BaNaNa")
+      forAll(equivalents){
+        (inDatabase, inDocument) =>
+        val sourceIdentifier = createSourceIdentifierWith(
+          identifierType = IdentifierType.LabelDerived,
+          value = inDatabase
+        )
+        val identifier = createSQLIdentifierWith(
+          sourceIdentifier = sourceIdentifier
+        )
+        val badCaseIdentifier = sourceIdentifier.copy(value = inDocument)
 
-      withIdentifiersDao(existingEntries = Seq(identifier)) {
-        case (identifiersDao, _) =>
-          val triedLookup = identifiersDao.lookupIds(List(badCaseIdentifier))
+        withIdentifiersDao(existingEntries = Seq(identifier)) {
+          case (identifiersDao, _) =>
+            val triedLookup = identifiersDao.lookupIds(List(badCaseIdentifier))
 
-          triedLookup shouldBe a[Success[_]]
-          // The resulting map maps the _requested_ sourceIdentifiers to
-          // the returned identifiers.
-          triedLookup.get.unmintedIdentifiers shouldBe empty
-          triedLookup.get.existingIdentifiers shouldBe Map(
-            badCaseIdentifier -> identifier)
+            triedLookup shouldBe a[Success[_]]
+            // The resulting map maps the _requested_ sourceIdentifiers to
+            // the returned identifiers.
+            triedLookup.get.unmintedIdentifiers shouldBe empty
+            triedLookup.get.existingIdentifiers shouldBe Map(
+              badCaseIdentifier -> identifier)
+        }
       }
     }
 
