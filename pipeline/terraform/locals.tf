@@ -19,8 +19,8 @@ locals {
   mets_adapter_topic_arn = data.terraform_remote_state.mets_adapter.outputs.mets_adapter_topic_arn
 
   # Tei adapter topics
-  tei_adapter_topic_arn   = data.terraform_remote_state.tei_adapter.outputs.tei_adapter_topic_arn
-  tei_adapter_bucket_name = data.terraform_remote_state.tei_adapter.outputs.tei_adapter_bucket_name
+  tei_adapter_topic_arn = data.terraform_remote_state.tei_adapter.outputs.tei_adapter_topic_arn
+  tei_adapter_bucket    = data.terraform_remote_state.tei_adapter.outputs.tei_adapter_bucket_name
 
   # Calm adapter VHS
   vhs_calm_read_policy = data.terraform_remote_state.calm_adapter.outputs.vhs_read_policy
@@ -58,6 +58,7 @@ locals {
         local.sierra_merged_orders_topic_arn,
       ]
       reindex_topic = local.sierra_reindexer_topic_arn
+      read_policy = local.vhs_sierra_read_policy,
     }
 
     miro = {
@@ -65,6 +66,7 @@ locals {
         local.miro_updates_topic_arn,
       ]
       reindex_topic = local.miro_reindexer_topic_arn,
+      read_policy = local.vhs_miro_read_policy
     }
 
     mets = {
@@ -72,6 +74,7 @@ locals {
         local.mets_adapter_topic_arn,
       ],
       reindex_topic = local.mets_reindexer_topic_arn,
+      read_policy = data.aws_iam_policy_document.read_storage_bucket.json
     }
 
     calm = {
@@ -80,6 +83,7 @@ locals {
         local.calm_deletions_topic_arn,
       ],
       reindex_topic = local.calm_reindexer_topic_arn,
+      read_policy = local.vhs_calm_read_policy
     }
 
     tei = {
@@ -87,6 +91,7 @@ locals {
         local.tei_adapter_topic_arn,
       ],
       reindex_topic = local.tei_reindexer_topic_arn,
+      read_policy = data.aws_iam_policy_document.read_tei_adapter_bucket.json
     }
   }
 

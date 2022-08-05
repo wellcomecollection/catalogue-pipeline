@@ -1,27 +1,18 @@
+moved {
+  from = aws_iam_role_policy.read_storage_bucket
+  to   = aws_iam_role_policy.mets_transformer_read_adapter_store
+}
+
+resource "aws_iam_role_policy" "mets_transformer_read_adapter_store" {
+  role   = module.transformer_mets.task_role_name
+  policy = var.adapter_config["mets"].read_policy
+}
+
 module "transformer_mets_output_topic" {
   source = "../modules/topic"
 
   name       = "${local.namespace}_transformer_mets_output"
   role_names = [module.transformer_mets.task_role_name]
-}
-
-data "aws_iam_policy_document" "read_storage_bucket" {
-  statement {
-    actions = [
-      "s3:ListBucket",
-      "s3:GetObject*",
-    ]
-
-    resources = [
-      "arn:aws:s3:::${var.storage_bucket_name}",
-      "arn:aws:s3:::${var.storage_bucket_name}/*",
-    ]
-  }
-}
-
-resource "aws_iam_role_policy" "read_storage_bucket" {
-  role   = module.transformer_mets.task_role_name
-  policy = data.aws_iam_policy_document.read_storage_bucket.json
 }
 
 module "transformer_mets" {

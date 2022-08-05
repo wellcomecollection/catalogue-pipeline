@@ -1,6 +1,11 @@
-resource "aws_iam_role_policy" "miro_transformer_vhs_miro_adapter_read" {
+moved {
+  from = aws_iam_role_policy.miro_transformer_vhs_miro_adapter_read
+  to   = aws_iam_role_policy.miro_transformer_read_adapter_store
+}
+
+resource "aws_iam_role_policy" "miro_transformer_read_adapter_store" {
   role   = module.transformer_miro.task_role_name
-  policy = var.vhs_miro_read_policy
+  policy = var.adapter_config["miro"].read_policy
 }
 
 module "transformer_miro_output_topic" {

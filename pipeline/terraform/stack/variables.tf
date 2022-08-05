@@ -29,31 +29,24 @@ variable "reindexing_state" {
   })
 }
 
-variable "tei_adapter_bucket_name" {
-}
 variable "release_label" {
-  type = string
-}
-
-# Miro
-variable "vhs_miro_read_policy" {}
-
-# Sierra
-variable "vhs_sierra_read_policy" {}
-
-# Calm
-variable "vhs_calm_read_policy" {}
-
-variable "storage_bucket_name" {
   type = string
 }
 
 variable "inferrer_model_data_bucket_name" {}
 
+# Fields:
+#
+#   - `topics` -- that the adapter will write to in normal operation
+#   - `reindex_topic` -- that the reindexer will write to
+#   - `read_policy` -- an IAM policy document that will allow a service
+#     to read from the adapter store
+#
 variable "adapter_config" {
   type = map(object({
     topics        = list(string)
     reindex_topic = string
+    read_policy   = string
   }))
 }
 
@@ -65,7 +58,6 @@ variable "network_config" {
     traffic_filters                   = list(string)
   })
 }
-
 
 variable "rds_config" {
   type = object({

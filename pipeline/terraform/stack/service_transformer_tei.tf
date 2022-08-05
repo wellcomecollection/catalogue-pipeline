@@ -1,20 +1,11 @@
-data "aws_iam_policy_document" "read_tei_adapter_bucket" {
-  statement {
-    actions = [
-      "s3:ListBucket",
-      "s3:GetObject*",
-    ]
-
-    resources = [
-      "arn:aws:s3:::${var.tei_adapter_bucket_name}",
-      "arn:aws:s3:::${var.tei_adapter_bucket_name}/*",
-    ]
-  }
+moved {
+  from = aws_iam_role_policy.read_tei_adapter_bucket
+  to   = aws_iam_role_policy.tei_transformer_read_adapter_store
 }
 
-resource "aws_iam_role_policy" "read_tei_adapter_bucket" {
+resource "aws_iam_role_policy" "tei_transformer_read_adapter_store" {
   role   = module.transformer_tei.task_role_name
-  policy = data.aws_iam_policy_document.read_tei_adapter_bucket.json
+  policy = var.adapter_config["tei"].read_policy
 }
 
 module "transformer_tei_output_topic" {
