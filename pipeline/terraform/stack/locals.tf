@@ -76,7 +76,4 @@ locals {
   mets_adapter_topic_arns   = var.reindexing_state.listen_to_reindexer ? concat(var.adapter_config["mets"].topics, [var.adapter_config["mets"].reindex_topic]) : var.adapter_config["mets"].topics
   tei_adapter_topic_arns    = var.reindexing_state.listen_to_reindexer ? concat(var.adapter_config["tei"].topics, [var.adapter_config["tei"].reindex_topic]) : var.adapter_config["tei"].topics
   calm_adapter_topic_arns   = var.reindexing_state.listen_to_reindexer ? concat(var.adapter_config["calm"].topics, [var.adapter_config["calm"].reindex_topic]) : var.adapter_config["calm"].topics
-
-  logging_cluster_id = var.logging_cluster_id
 }
-

@@ -47,8 +47,6 @@ locals {
 
   shared_infra = data.terraform_remote_state.shared_infra.outputs
 
-  logging_cluster_id = data.terraform_remote_state.shared_infra.outputs.logging_cluster_id
-
   adapter_config = {
     sierra = {
       topics = [
@@ -93,6 +91,11 @@ locals {
       reindex_topic = local.tei_reindexer_topic_arn,
       read_policy = data.aws_iam_policy_document.read_tei_adapter_bucket.json
     }
+  }
+
+  logging_config = {
+    shared_secrets     = local.shared_infra["shared_secrets_logging"]
+    logging_cluster_id = local.shared_infra["logging_cluster_id"]
   }
 
   network_config = {

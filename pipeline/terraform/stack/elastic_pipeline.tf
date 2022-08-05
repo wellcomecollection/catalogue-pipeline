@@ -1,7 +1,3 @@
-data "ec_deployment" "logging" {
-  id = local.logging_cluster_id
-}
-
 locals {
   es_memory = var.reindexing_state.scale_up_elastic_cluster ? "58g" : "8g"
 
@@ -43,9 +39,8 @@ resource "ec_deployment" "pipeline" {
     }
   }
 
-  # TODO: Why do we round-trip this via a data block?
   observability {
-    deployment_id = data.ec_deployment.logging.id
+    deployment_id = var.logging_config.logging_cluster_id
   }
 }
 

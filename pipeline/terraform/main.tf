@@ -15,21 +15,17 @@ module "catalogue_pipeline_2022-07-26" {
   # Boilerplate that shouldn't change between pipelines.
 
   adapter_config = local.adapter_config
+  logging_config = local.logging_config
   network_config = local.network_config
   rds_config     = local.rds_config
 
   dlq_alarm_arn = local.dlq_alarm_arn
 
-  # Inferrer data
   inferrer_model_data_bucket_name = aws_s3_bucket.inferrer_model_core_data.id
-
-  shared_logging_secrets = data.terraform_remote_state.shared_infra.outputs.shared_secrets_logging
 
   providers = {
     aws.catalogue = aws.catalogue
   }
-
-  logging_cluster_id = local.logging_cluster_id
 }
 
 module "catalogue_pipeline_2022-08-04" {
@@ -49,19 +45,15 @@ module "catalogue_pipeline_2022-08-04" {
   # Boilerplate that shouldn't change between pipelines.
 
   adapter_config = local.adapter_config
+  logging_config = local.logging_config
   network_config = local.network_config
   rds_config     = local.rds_config
 
   dlq_alarm_arn = local.dlq_alarm_arn
 
-  # Inferrer data
   inferrer_model_data_bucket_name = aws_s3_bucket.inferrer_model_core_data.id
-
-  shared_logging_secrets = data.terraform_remote_state.shared_infra.outputs.shared_secrets_logging
 
   providers = {
     aws.catalogue = aws.catalogue
   }
-
-  logging_cluster_id = local.logging_cluster_id
 }

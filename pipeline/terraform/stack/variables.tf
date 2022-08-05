@@ -13,10 +13,6 @@ variable "max_capacity" {
   description = "The max capacity of every ECS service will be less than or equal to this value"
 }
 
-variable "shared_logging_secrets" {
-  type = map(any)
-}
-
 variable "dlq_alarm_arn" {}
 
 variable "reindexing_state" {
@@ -50,6 +46,13 @@ variable "adapter_config" {
   }))
 }
 
+variable "logging_config" {
+  type = object({
+    shared_secrets     = map(any)
+    logging_cluster_id = string
+  })
+}
+
 variable "network_config" {
   type = object({
     vpc_id                            = string
@@ -65,8 +68,4 @@ variable "rds_config" {
     subnet_group      = string
     security_group_id = string
   })
-}
-
-variable "logging_cluster_id" {
-  type = string
 }

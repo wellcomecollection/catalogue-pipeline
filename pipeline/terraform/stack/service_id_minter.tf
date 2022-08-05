@@ -80,5 +80,5 @@ module "id_minter" {
 
   deployment_service_env = var.release_label
 
-  shared_logging_secrets = var.shared_logging_secrets
+  shared_logging_secrets = var.logging_config.shared_secrets
 }
