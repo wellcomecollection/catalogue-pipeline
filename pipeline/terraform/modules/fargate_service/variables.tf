@@ -1,25 +1,6 @@
 variable "name" {
   type = string
 }
-variable "namespace" {
-  type = string
-}
-
-variable "cluster_arn" {
-  type = string
-}
-
-variable "cluster_name" {
-  type = string
-}
-
-variable "shared_logging_secrets" {
-  type = map(string)
-}
-
-variable "subnets" {
-  type = list(string)
-}
 
 variable "container_image" {
   type = string
@@ -48,21 +29,9 @@ variable "max_receive_count" {
   default = 4
 }
 
-variable "dlq_alarm_topic_arn" {
-  type = string
-}
-
 variable "security_group_ids" {
   default = []
   type    = list(string)
-}
-
-variable "egress_security_group_id" {
-  type = string
-}
-
-variable "elastic_cloud_vpce_security_group_id" {
-  type = string
 }
 
 variable "cpu" {
@@ -84,20 +53,6 @@ variable "max_capacity" {
   type = number
 }
 
-variable "scale_up_adjustment" {
-  type    = number
-  default = 1
-}
-
-variable "scale_down_adjustment" {
-  type    = number
-  default = -1
-}
-
-variable "deployment_service_env" {
-  type = string
-}
-
 variable "use_fargate_spot" {
   type    = bool
   default = true
@@ -106,4 +61,27 @@ variable "use_fargate_spot" {
 variable "cooldown_period" {
   type    = string
   default = "1m"
+}
+
+variable "fargate_service_boilerplate" {
+  type = object({
+    egress_security_group_id             = string
+    elastic_cloud_vpce_security_group_id = string
+
+    cluster_name = string
+    cluster_arn  = string
+
+    scale_down_adjustment = number
+    scale_up_adjustment   = number
+
+    dlq_alarm_topic_arn = string
+
+    subnets = list(string)
+
+    namespace = string
+
+    deployment_service_env = string
+
+    shared_logging_secrets = map(any)
+  })
 }

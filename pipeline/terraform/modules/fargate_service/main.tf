@@ -1,14 +1,14 @@
 module "worker" {
   source = "../../../../infrastructure/modules/worker"
 
-  name         = "${var.namespace}_${var.name}"
+  name         = "${local.namespace}_${var.name}"
   service_name = var.name
 
   image = var.container_image
 
   env_vars = merge(
     {
-      metrics_namespace = "${var.namespace}_${var.name}",
+      metrics_namespace = "${local.namespace}_${var.name}",
       queue_url         = module.input_queue.url,
     },
     var.env_vars,
@@ -16,19 +16,19 @@ module "worker" {
 
   secret_env_vars = var.secret_env_vars
 
-  subnets = var.subnets
+  subnets = var.fargate_service_boilerplate.subnets
 
-  cluster_name = var.cluster_name
-  cluster_arn  = var.cluster_arn
+  cluster_name = var.fargate_service_boilerplate.cluster_name
+  cluster_arn  = var.fargate_service_boilerplate.cluster_arn
 
   launch_type = "FARGATE"
 
   security_group_ids = concat(
     var.security_group_ids,
-    [var.egress_security_group_id]
+    [var.fargate_service_boilerplate.egress_security_group_id]
   )
 
-  elastic_cloud_vpce_sg_id = var.elastic_cloud_vpce_security_group_id
+  elastic_cloud_vpce_sg_id = var.fargate_service_boilerplate.elastic_cloud_vpce_security_group_id
 
   cpu    = var.cpu
   memory = var.memory
@@ -36,13 +36,13 @@ module "worker" {
   min_capacity = var.min_capacity
   max_capacity = var.max_capacity
 
-  scale_down_adjustment = var.scale_down_adjustment
-  scale_up_adjustment   = var.scale_up_adjustment
+  scale_down_adjustment = var.fargate_service_boilerplate.scale_down_adjustment
+  scale_up_adjustment   = var.fargate_service_boilerplate.scale_up_adjustment
 
-  deployment_service_env  = var.deployment_service_env
+  deployment_service_env  = var.fargate_service_boilerplate.deployment_service_env
   deployment_service_name = replace(var.name, "_", "-")
 
-  shared_logging_secrets = var.shared_logging_secrets
+  shared_logging_secrets = var.fargate_service_boilerplate.shared_logging_secrets
 
   use_fargate_spot = var.use_fargate_spot
 }
