@@ -14,7 +14,6 @@ not to be the linchpin of a major system.
 
 import datetime
 import json
-import os
 import re
 import sys
 
@@ -41,8 +40,6 @@ def get_boto3_session(*, role_arn):
 def get_messages_from_queue(sess, queue_url):
     sqs_client = sess.client("sqs")
 
-    messages = []
-
     while True:
         resp = sqs_client.receive_message(
             QueueUrl=queue_url, AttributeNames=["All"], MaxNumberOfMessages=10
@@ -62,8 +59,6 @@ def get_messages_from_queue(sess, queue_url):
 
 
 def save_dlq_locally(sess, *, out_file):
-    sqs_client = sess.client("sqs")
-
     with open(out_file, "a") as outfile:
         for transformer in ("calm", "mets", "miro", "sierra", "tei"):
             dlq_url = f"https://sqs.eu-west-1.amazonaws.com/760097843905/catalogue-{pipeline_date}_transformer_{transformer}_input_dlq"
