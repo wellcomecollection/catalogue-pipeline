@@ -59,7 +59,9 @@ object SierraPersonSubjects
             person.copy(id = identify(varField, "Person"))
           Subject(
             label = label,
-            concepts = getConcepts(maybeIdentifiedPerson.identifiable(), generalSubdivisions),
+            concepts = getConcepts(
+              maybeIdentifiedPerson.identifiable(),
+              generalSubdivisions),
             id = identify(varField, "Subject")
           )
         }
