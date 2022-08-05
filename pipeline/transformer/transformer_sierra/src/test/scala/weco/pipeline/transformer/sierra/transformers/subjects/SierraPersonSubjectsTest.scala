@@ -245,7 +245,7 @@ class SierraPersonSubjectsTest
       'label ("Gerry the Garlic")
     )
 
-    subject.onlyConcept should have (
+    subject.onlyConcept should have(
       'label ("Gerry the Garlic"),
       labelDerivedPersonId("gerry the garlic")
     )
