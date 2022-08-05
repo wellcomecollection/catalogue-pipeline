@@ -19,8 +19,8 @@ locals {
   mets_adapter_topic_arn = data.terraform_remote_state.mets_adapter.outputs.mets_adapter_topic_arn
 
   # Tei adapter topics
-  tei_adapter_topic_arn   = data.terraform_remote_state.tei_adapter.outputs.tei_adapter_topic_arn
-  tei_adapter_bucket_name = data.terraform_remote_state.tei_adapter.outputs.tei_adapter_bucket_name
+  tei_adapter_topic_arn = data.terraform_remote_state.tei_adapter.outputs.tei_adapter_topic_arn
+  tei_adapter_bucket    = data.terraform_remote_state.tei_adapter.outputs.tei_adapter_bucket_name
 
   # Calm adapter VHS
   vhs_calm_read_policy = data.terraform_remote_state.calm_adapter.outputs.vhs_read_policy
@@ -37,9 +37,7 @@ locals {
   calm_reindexer_topic_arn   = data.terraform_remote_state.reindexer.outputs.calm_reindexer_topic_arn
 
   # Infra stuff
-  dlq_alarm_arn   = data.terraform_remote_state.monitoring.outputs.platform_dlq_alarm_topic_arn
-  vpc_id          = local.catalogue_vpcs["catalogue_vpc_delta_id"]
-  private_subnets = local.catalogue_vpcs["catalogue_vpc_delta_private_subnets"]
+  dlq_alarm_arn = data.terraform_remote_state.monitoring.outputs.platform_dlq_alarm_topic_arn
 
   infra_critical = data.terraform_remote_state.catalogue_infra_critical.outputs
 
@@ -48,14 +46,6 @@ locals {
   rds_subnet_group_name        = local.infra_critical.rds_subnet_group_name
 
   shared_infra = data.terraform_remote_state.shared_infra.outputs
-
-  ec_platform_privatelink_security_group_id = local.shared_infra["ec_platform_privatelink_sg_id"]
-
-  traffic_filter_platform_vpce_id   = local.shared_infra["ec_platform_privatelink_traffic_filter_id"]
-  traffic_filter_catalogue_vpce_id  = local.shared_infra["ec_catalogue_privatelink_traffic_filter_id"]
-  traffic_filter_public_internet_id = local.shared_infra["ec_public_internet_traffic_filter_id"]
-
-  logging_cluster_id = data.terraform_remote_state.shared_infra.outputs.logging_cluster_id
 
   adapter_config = {
     sierra = {
@@ -66,6 +56,7 @@ locals {
         local.sierra_merged_orders_topic_arn,
       ]
       reindex_topic = local.sierra_reindexer_topic_arn
+      read_policy   = local.vhs_sierra_read_policy,
     }
 
     miro = {
@@ -73,6 +64,7 @@ locals {
         local.miro_updates_topic_arn,
       ]
       reindex_topic = local.miro_reindexer_topic_arn,
+      read_policy   = local.vhs_miro_read_policy
     }
 
     mets = {
@@ -80,6 +72,7 @@ locals {
         local.mets_adapter_topic_arn,
       ],
       reindex_topic = local.mets_reindexer_topic_arn,
+      read_policy   = data.aws_iam_policy_document.read_storage_bucket.json
     }
 
     calm = {
@@ -88,6 +81,7 @@ locals {
         local.calm_deletions_topic_arn,
       ],
       reindex_topic = local.calm_reindexer_topic_arn,
+      read_policy   = local.vhs_calm_read_policy
     }
 
     tei = {
@@ -95,7 +89,26 @@ locals {
         local.tei_adapter_topic_arn,
       ],
       reindex_topic = local.tei_reindexer_topic_arn,
+      read_policy   = data.aws_iam_policy_document.read_tei_adapter_bucket.json
     }
+  }
+
+  logging_config = {
+    shared_secrets     = local.shared_infra["shared_secrets_logging"]
+    logging_cluster_id = local.shared_infra["logging_cluster_id"]
+  }
+
+  network_config = {
+    vpc_id  = local.catalogue_vpcs["catalogue_vpc_delta_id"]
+    subnets = local.catalogue_vpcs["catalogue_vpc_delta_private_subnets"]
+
+    ec_privatelink_security_group_id = local.shared_infra["ec_platform_privatelink_sg_id"]
+
+    traffic_filters = [
+      local.shared_infra["ec_platform_privatelink_traffic_filter_id"],
+      local.shared_infra["ec_catalogue_privatelink_traffic_filter_id"],
+      local.shared_infra["ec_public_internet_traffic_filter_id"],
+    ]
   }
 
   rds_config = {

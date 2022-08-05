@@ -13,15 +13,6 @@ variable "max_capacity" {
   description = "The max capacity of every ECS service will be less than or equal to this value"
 }
 
-variable "subnets" {
-  type = list(string)
-}
-variable "shared_logging_secrets" {
-  type = map(any)
-}
-
-variable "vpc_id" {}
-
 variable "dlq_alarm_arn" {}
 
 variable "reindexing_state" {
@@ -34,48 +25,41 @@ variable "reindexing_state" {
   })
 }
 
-variable "ec_privatelink_security_group_id" {
-  type = string
-}
-
-variable "tei_adapter_bucket_name" {
-}
 variable "release_label" {
-  type = string
-}
-
-# Miro
-variable "vhs_miro_read_policy" {}
-
-# Sierra
-variable "vhs_sierra_read_policy" {}
-
-# Calm
-variable "vhs_calm_read_policy" {}
-
-variable "storage_bucket_name" {
   type = string
 }
 
 variable "inferrer_model_data_bucket_name" {}
 
-variable "traffic_filter_platform_vpce_id" {
-  type = string
-}
-
-variable "traffic_filter_catalogue_vpce_id" {
-  type = string
-}
-
-variable "traffic_filter_public_internet_id" {
-  type = string
-}
-
+# Fields:
+#
+#   - `topics` -- that the adapter will write to in normal operation
+#   - `reindex_topic` -- that the reindexer will write to
+#   - `read_policy` -- an IAM policy document that will allow a service
+#     to read from the adapter store
+#
 variable "adapter_config" {
   type = map(object({
     topics        = list(string)
     reindex_topic = string
+    read_policy   = string
   }))
+}
+
+variable "logging_config" {
+  type = object({
+    shared_secrets     = map(any)
+    logging_cluster_id = string
+  })
+}
+
+variable "network_config" {
+  type = object({
+    vpc_id                           = string
+    subnets                          = list(string)
+    ec_privatelink_security_group_id = string
+    traffic_filters                  = list(string)
+  })
 }
 
 variable "rds_config" {
@@ -84,8 +68,4 @@ variable "rds_config" {
     subnet_group      = string
     security_group_id = string
   })
-}
-
-variable "logging_cluster_id" {
-  type = string
 }

@@ -258,7 +258,10 @@ def main(reindex_date):
     if non_empty_queues:
         print("The following queues still have messages:")
         rows = [
-            [q_url.split("/")[-1].replace(f"catalogue-{reindex_date}_", ""), size]
+            [
+                q_url.split("/")[-1].replace(f"catalogue-{reindex_date}_", ""),
+                humanize.intcomma(size),
+            ]
             for q_url, size in sorted(non_empty_queues.items())
         ]
         print(tabulate.tabulate(rows, tablefmt="plain", colalign=("left", "right")))
@@ -276,7 +279,10 @@ def main(reindex_date):
     if non_empty_dlqs:
         print("The following DLQs have failed messages:")
         rows = [
-            [q_url.split("/")[-1].replace(f"catalogue-{reindex_date}_", ""), size]
+            [
+                q_url.split("/")[-1].replace(f"catalogue-{reindex_date}_", ""),
+                humanize.intcomma(size),
+            ]
             for q_url, size in sorted(non_empty_dlqs.items())
         ]
         print(tabulate.tabulate(rows, tablefmt="plain", colalign=("left", "right")))

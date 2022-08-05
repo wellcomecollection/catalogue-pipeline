@@ -20,7 +20,7 @@ module "inference_capacity_provider" {
   use_spot_purchasing     = true
   scaling_action_cooldown = 240
 
-  subnets = var.subnets
+  subnets = var.network_config.subnets
   security_group_ids = [
     aws_security_group.egress.id,
   ]

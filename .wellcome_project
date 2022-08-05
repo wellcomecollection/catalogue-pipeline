@@ -83,8 +83,8 @@ catalogue_pipeline:
   environments:
     - id: "2022-07-26"
       name: "2022-07-26"
-    - id:   "2022-07-04"
-      name: "2022-07-04"
+    - id:   "2022-08-04"
+      name: "2022-08-04"
   image_repositories:
     - id: id_minter
       services:

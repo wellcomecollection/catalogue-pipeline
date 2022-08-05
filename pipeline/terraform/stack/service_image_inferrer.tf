@@ -166,7 +166,7 @@ module "image_inferrer" {
   # Below this line is boilerplate that should be the same across
   # all services.
   egress_security_group_id             = aws_security_group.egress.id
-  elastic_cloud_vpce_security_group_id = var.ec_privatelink_security_group_id
+  elastic_cloud_vpce_security_group_id = var.network_config.ec_privatelink_security_group_id
 
   cluster_name = aws_ecs_cluster.cluster.name
   cluster_arn  = aws_ecs_cluster.cluster.id
@@ -176,13 +176,13 @@ module "image_inferrer" {
 
   dlq_alarm_topic_arn = var.dlq_alarm_arn
 
-  subnets = var.subnets
+  subnets = var.network_config.subnets
 
   namespace = local.namespace
 
   deployment_service_env = var.release_label
 
-  shared_logging_secrets = var.shared_logging_secrets
+  shared_logging_secrets = var.logging_config.shared_secrets
 }
 
 resource "aws_iam_role_policy" "read_inferrer_data" {

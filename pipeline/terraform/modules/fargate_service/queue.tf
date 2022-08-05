@@ -1,13 +1,13 @@
 module "input_queue" {
   source = "github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
 
-  queue_name = "${var.namespace}_${var.name}_input"
+  queue_name = "${local.namespace}_${var.name}_input"
 
   topic_arns                 = var.topic_arns
   visibility_timeout_seconds = var.queue_visibility_timeout_seconds
   max_receive_count          = var.max_receive_count
 
-  alarm_topic_arn = var.dlq_alarm_topic_arn
+  alarm_topic_arn = var.fargate_service_boilerplate.dlq_alarm_topic_arn
 }
 
 resource "aws_iam_role_policy" "read_from_q" {

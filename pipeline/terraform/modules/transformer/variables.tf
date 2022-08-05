@@ -1,9 +1,29 @@
-variable "name" {
+variable "source_name" {
   type = string
+}
+
+variable "adapter_config" {
+  type = object({
+    topics        = list(string)
+    reindex_topic = string
+    read_policy   = string
+  })
+}
+
+variable "listen_to_reindexer" {
+  type = bool
 }
 
 variable "container_image" {
   type = string
+}
+
+variable "queue_visibility_timeout_seconds" {
+  type = number
+}
+
+variable "env_vars" {
+  type = map(string)
 }
 
 variable "secret_env_vars" {
@@ -11,56 +31,20 @@ variable "secret_env_vars" {
   default = {}
 }
 
-variable "env_vars" {
-  type = map(string)
-}
-
-variable "topic_arns" {
-  type = list(string)
-}
-
-variable "queue_visibility_timeout_seconds" {
-  type    = number
-  default = 30
-}
-
-variable "max_receive_count" {
-  type    = number
-  default = 4
-}
-
-variable "security_group_ids" {
-  default = []
-  type    = list(string)
-}
-
 variable "cpu" {
-  type    = number
-  default = 512
+  type = number
 }
 
 variable "memory" {
-  type    = number
-  default = 1024
+  type = number
 }
 
 variable "min_capacity" {
-  type    = number
-  default = 0
+  type = number
 }
 
 variable "max_capacity" {
   type = number
-}
-
-variable "use_fargate_spot" {
-  type    = bool
-  default = true
-}
-
-variable "cooldown_period" {
-  type    = string
-  default = "1m"
 }
 
 variable "fargate_service_boilerplate" {

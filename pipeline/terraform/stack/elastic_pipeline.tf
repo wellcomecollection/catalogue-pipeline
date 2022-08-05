@@ -1,7 +1,3 @@
-data "ec_deployment" "logging" {
-  id = local.logging_cluster_id
-}
-
 locals {
   es_memory = var.reindexing_state.scale_up_elastic_cluster ? "58g" : "8g"
 
@@ -26,11 +22,7 @@ resource "ec_deployment" "pipeline" {
   region                 = "eu-west-1"
   deployment_template_id = "aws-io-optimized-v2"
 
-  traffic_filter = [
-    var.traffic_filter_platform_vpce_id,
-    var.traffic_filter_catalogue_vpce_id,
-    var.traffic_filter_public_internet_id,
-  ]
+  traffic_filter = var.network_config.traffic_filters
 
   elasticsearch {
     topology {
@@ -47,9 +39,8 @@ resource "ec_deployment" "pipeline" {
     }
   }
 
-  # TODO: Why do we round-trip this via a data block?
   observability {
-    deployment_id = data.ec_deployment.logging.id
+    deployment_id = var.logging_config.logging_cluster_id
   }
 }
 
