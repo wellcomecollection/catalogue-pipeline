@@ -1,8 +1,3 @@
-moved {
-  from = aws_iam_role_policy.sierra_transformer_vhs_sierra_adapter_read
-  to   = aws_iam_role_policy.sierra_transformer_read_adapter_store
-}
-
 resource "aws_iam_role_policy" "sierra_transformer_read_adapter_store" {
   role   = module.transformer_sierra.task_role_name
   policy = var.adapter_config["sierra"].read_policy

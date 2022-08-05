@@ -1,8 +1,3 @@
-moved {
-  from = aws_iam_role_policy.read_storage_bucket
-  to   = aws_iam_role_policy.mets_transformer_read_adapter_store
-}
-
 resource "aws_iam_role_policy" "mets_transformer_read_adapter_store" {
   role   = module.transformer_mets.task_role_name
   policy = var.adapter_config["mets"].read_policy

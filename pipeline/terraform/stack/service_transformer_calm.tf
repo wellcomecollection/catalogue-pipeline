@@ -1,8 +1,3 @@
-moved {
-  from = aws_iam_role_policy.calm_transformer_vhs_calm_adapter_read
-  to   = aws_iam_role_policy.calm_transformer_read_adapter_store
-}
-
 resource "aws_iam_role_policy" "calm_transformer_read_adapter_store" {
   role   = module.transformer_calm.task_role_name
   policy = var.adapter_config["calm"].read_policy

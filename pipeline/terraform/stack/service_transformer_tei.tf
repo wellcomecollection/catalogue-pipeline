@@ -1,8 +1,3 @@
-moved {
-  from = aws_iam_role_policy.read_tei_adapter_bucket
-  to   = aws_iam_role_policy.tei_transformer_read_adapter_store
-}
-
 resource "aws_iam_role_policy" "tei_transformer_read_adapter_store" {
   role   = module.transformer_tei.task_role_name
   policy = var.adapter_config["tei"].read_policy
