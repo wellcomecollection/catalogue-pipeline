@@ -8,6 +8,8 @@ import weco.catalogue.internal_model.identifiers.{
 }
 import weco.sierra.models.marc.VarField
 
+import java.text.Normalizer
+
 trait SierraAbstractConcepts extends Logging {
   protected def getLabel(varField: VarField): Option[String]
   protected def getIdentifierSubfieldContents(varField: VarField): List[String]
@@ -56,13 +58,21 @@ trait SierraAbstractConcepts extends Logging {
     }
 
   private def addIdentifierFromText(ontologyType: String,
-                                    label: String): IdState.Unminted =
+                                    label: String): IdState.Unminted = {
+    val normalizedLabel = Normalizer
+      .normalize(
+        label.toLowerCase,
+        Normalizer.Form.NFKD
+      )
+      .replaceAll("[^\\p{ASCII}]", "")
+
     IdState.Identifiable(
       sourceIdentifier = SourceIdentifier(
         identifierType = IdentifierType.LabelDerived,
-        value = label.toLowerCase,
+        value = normalizedLabel,
         ontologyType = ontologyType
       )
     )
+  }
 
 }

@@ -3,13 +3,13 @@ package weco.pipeline.transformer.sierra.transformers.subjects
 import org.scalatest.Assertion
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.identifiers.{
-  IdState,
-  IdentifierType,
-  SourceIdentifier
+import weco.catalogue.internal_model.identifiers.{IdentifierType}
+import weco.catalogue.internal_model.work.{Concept, Person}
+import weco.pipeline.transformer.sierra.transformers.matchers.{
+  ConceptMatchers,
+  HasIdMatchers,
+  SubjectMatchers
 }
-import weco.catalogue.internal_model.work.{Concept, Person, Subject}
-import weco.pipeline.transformer.sierra.transformers.matchers.SubjectMatchers
 import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
 import weco.sierra.models.data.SierraBibData
 import weco.sierra.models.marc.{Subfield, VarField}
@@ -17,7 +17,9 @@ import weco.sierra.models.marc.{Subfield, VarField}
 class SierraPersonSubjectsTest
     extends AnyFunSpec
     with Matchers
+    with HasIdMatchers
     with SubjectMatchers
+    with ConceptMatchers
     with MarcGenerators
     with SierraDataGenerators {
 
@@ -40,6 +42,28 @@ class SierraPersonSubjectsTest
       )
     )
     assertCreatesSubjectWithLabel(bibData, label = "A Content")
+  }
+
+  it("returns a lowercase ascii normalised identifier") {
+    val bibData = createSierraBibDataWith(
+      varFields = List(
+        VarField(
+          marcTag = "600",
+          subfields = List(
+            Subfield(tag = "a", content = "François")
+          )
+        )
+      )
+    )
+    val List(subject) = SierraPersonSubjects(bibId, bibData)
+    subject.label shouldBe "François"
+    subject should have(
+      labelDerivedSubjectId("francois")
+    )
+    subject.onlyConcept.label shouldBe "François"
+    subject.onlyConcept should have(
+      labelDerivedPersonId("francois")
+    )
   }
 
   it("returns subjects for tag 600 with only subfields a and c") {
@@ -182,22 +206,26 @@ class SierraPersonSubjectsTest
       )
     )
 
-    val sourceIdentifier = SourceIdentifier(
-      identifierType = IdentifierType.LCNames,
-      ontologyType = "Subject",
-      value = lcshCode
+    val List(subject) = SierraPersonSubjects(bibId, bibData)
+    subject should have(
+      'label ("Gerry the Garlic"),
+      sourceIdentifier(
+        identifierType = IdentifierType.LCNames,
+        ontologyType = "Subject",
+        value = lcshCode
+      )
     )
-
-    SierraPersonSubjects(bibId, bibData) shouldBe List(
-      Subject(
-        id = IdState.Identifiable(sourceIdentifier),
-        label = "Gerry the Garlic",
-        concepts = List(Person(label = "Gerry the Garlic"))
+    subject.onlyConcept should have(
+      'label ("Gerry the Garlic"),
+      sourceIdentifier(
+        identifierType = IdentifierType.LCNames,
+        ontologyType = "Person",
+        value = lcshCode
       )
     )
   }
 
-  it("creates an unidentifiable person concept if second indicator is not 0") {
+  it("does not extract an identifer if the second indicator is not 0") {
     val name = "Gerry the Garlic"
     val bibData = createSierraBibDataWith(
       varFields = List(
@@ -212,11 +240,14 @@ class SierraPersonSubjectsTest
       )
     )
 
-    SierraPersonSubjects(bibId, bibData) shouldBe List(
-      Subject(
-        label = "Gerry the Garlic",
-        concepts = List(Person(label = "Gerry the Garlic"))
-      )
+    val List(subject) = SierraPersonSubjects(bibId, bibData)
+    subject should have(
+      'label ("Gerry the Garlic")
+    )
+
+    subject.onlyConcept should have(
+      'label ("Gerry the Garlic"),
+      labelDerivedPersonId("gerry the garlic")
     )
   }
 
@@ -241,10 +272,12 @@ class SierraPersonSubjectsTest
     val subject = actualSubjects.head
 
     it("in the concepts") {
-      subject.concepts shouldBe List(
-        Person("Shakespeare, William,"),
-        Concept("Characters"),
-        Concept("Hamlet.")
+      subject.concepts.head shouldBe a[Person[_]]
+      all(subject.concepts.tail) shouldBe a[Concept[_]]
+      subject.concepts.map(_.label) shouldBe List(
+        "Shakespeare, William,",
+        "Characters",
+        "Hamlet."
       )
     }
 
@@ -273,7 +306,11 @@ class SierraPersonSubjectsTest
     val subject = actualSubjects.head
 
     it("in the concepts") {
-      subject.concepts shouldBe List(Person("Aristophanes. Birds."))
+      subject.onlyConcept shouldBe a[Person[_]]
+      subject.onlyConcept should have(
+        'label ("Aristophanes. Birds."),
+        labelDerivedPersonId("aristophanes. birds")
+      )
     }
 
     it("in the label") {

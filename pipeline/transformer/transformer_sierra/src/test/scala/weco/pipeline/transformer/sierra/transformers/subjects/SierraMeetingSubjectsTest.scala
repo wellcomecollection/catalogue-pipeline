@@ -63,7 +63,6 @@ class SierraMeetingSubjectsTest
       'label ("Content"),
       labelDerivedMeetingId("content")
     )
-
   }
 
   it(
@@ -90,6 +89,32 @@ class SierraMeetingSubjectsTest
       'label ("C A D"),
       sourceIdentifier(
         value = "c a d",
+        ontologyType = "Meeting",
+        identifierType = IdentifierType.LabelDerived)
+    )
+  }
+
+  it("returns a lowercase ascii normalised identifier") {
+    val data = bibData(
+      varField(
+        "611",
+        Subfield(tag = "a", content = "Düsseldorf Convention 2097"),
+      )
+    )
+
+    val List(subject) = SierraMeetingSubjects(bibId, data)
+    subject should have(
+      'label ("Düsseldorf Convention 2097"),
+      sourceIdentifier(
+        value = "dusseldorf convention 2097",
+        ontologyType = "Meeting",
+        identifierType = IdentifierType.LabelDerived)
+    )
+    val List(concept) = subject.concepts
+    concept should have(
+      'label ("Düsseldorf Convention 2097"),
+      sourceIdentifier(
+        value = "dusseldorf convention 2097",
         ontologyType = "Meeting",
         identifierType = IdentifierType.LabelDerived)
     )
@@ -152,4 +177,5 @@ class SierraMeetingSubjectsTest
         )
     }
   }
+
 }

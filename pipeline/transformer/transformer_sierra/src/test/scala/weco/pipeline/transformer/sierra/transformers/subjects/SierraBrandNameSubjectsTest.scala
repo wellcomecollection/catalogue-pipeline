@@ -37,6 +37,21 @@ class SierraBrandNameSubjectsTest
     )
   }
 
+  it("returns a lowercase ascii normalised identifier") {
+    val varFields = List(
+      VarField(marcTag = "652", subfields = List(Subfield("a", "Citroën"))),
+    )
+    val List(subject) = getBrandNameSubjects(varFields)
+    subject should have(
+      'label ("Citroën"),
+      'id (IdState.Unidentifiable)
+    )
+    subject.onlyConcept should have(
+      'label ("Citroën"),
+      labelDerivedConceptId("citroen")
+    )
+  }
+
   it("does not used non 'a' subfields to parse the content") {
     val varFields = List(
       VarField(

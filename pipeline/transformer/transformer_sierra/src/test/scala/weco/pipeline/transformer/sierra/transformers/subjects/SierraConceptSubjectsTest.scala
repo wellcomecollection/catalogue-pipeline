@@ -66,6 +66,32 @@ class SierraConceptSubjectsTest
     )
   }
 
+  it("returns a lowercase ascii normalised identifier") {
+    val bibData = createSierraBibDataWith(
+      varFields = List(
+        VarField(
+          marcTag = "650",
+          subfields = List(
+            Subfield(tag = "a", content = "Flüssigkeit")
+          )
+        )
+      )
+    )
+
+    val List(subject) = SierraConceptSubjects(bibId, bibData)
+    subject should have(
+      'label ("Flüssigkeit"),
+      labelDerivedSubjectId("flussigkeit")
+    )
+
+    val List(conceptA) = subject.concepts
+    conceptA shouldBe a[Concept[_]]
+    conceptA should have(
+      'label ("Flüssigkeit"),
+      labelDerivedConceptId("flussigkeit")
+    )
+  }
+
   it("returns subjects for tag 650 with only subfields a and v") {
     val bibData = createSierraBibDataWith(
       varFields = List(
