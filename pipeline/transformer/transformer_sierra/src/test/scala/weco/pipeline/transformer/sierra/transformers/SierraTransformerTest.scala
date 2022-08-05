@@ -740,8 +740,13 @@ class SierraTransformerTest
       """.stripMargin
 
     val work = transformDataToSourceWork(id = id, data = data)
-    work.data.subjects shouldBe List(
-      Subject(content, List(Person(content)))
+    val List(subject) = work.data.subjects
+    subject should have(
+      'label ("Nostradamus"),
+    )
+    subject.onlyConcept should have(
+      'label ("Nostradamus"),
+      labelDerivedPersonId("nostradamus")
     )
   }
 
