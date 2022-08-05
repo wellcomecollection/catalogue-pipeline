@@ -13,14 +13,9 @@ variable "max_capacity" {
   description = "The max capacity of every ECS service will be less than or equal to this value"
 }
 
-variable "subnets" {
-  type = list(string)
-}
 variable "shared_logging_secrets" {
   type = map(any)
 }
-
-variable "vpc_id" {}
 
 variable "dlq_alarm_arn" {}
 
@@ -32,10 +27,6 @@ variable "reindexing_state" {
     scale_up_id_minter_db    = bool
     scale_up_matcher_db      = bool
   })
-}
-
-variable "ec_privatelink_security_group_id" {
-  type = string
 }
 
 variable "tei_adapter_bucket_name" {
@@ -59,24 +50,22 @@ variable "storage_bucket_name" {
 
 variable "inferrer_model_data_bucket_name" {}
 
-variable "traffic_filter_platform_vpce_id" {
-  type = string
-}
-
-variable "traffic_filter_catalogue_vpce_id" {
-  type = string
-}
-
-variable "traffic_filter_public_internet_id" {
-  type = string
-}
-
 variable "adapter_config" {
   type = map(object({
     topics        = list(string)
     reindex_topic = string
   }))
 }
+
+variable "network_config" {
+  type = object({
+    vpc_id                            = string
+    subnets                           = list(string)
+    ec_privatelink_security_group_id  = string
+    traffic_filters                   = list(string)
+  })
+}
+
 
 variable "rds_config" {
   type = object({

@@ -38,8 +38,6 @@ locals {
 
   # Infra stuff
   dlq_alarm_arn   = data.terraform_remote_state.monitoring.outputs.platform_dlq_alarm_topic_arn
-  vpc_id          = local.catalogue_vpcs["catalogue_vpc_delta_id"]
-  private_subnets = local.catalogue_vpcs["catalogue_vpc_delta_private_subnets"]
 
   infra_critical = data.terraform_remote_state.catalogue_infra_critical.outputs
 
@@ -48,12 +46,6 @@ locals {
   rds_subnet_group_name        = local.infra_critical.rds_subnet_group_name
 
   shared_infra = data.terraform_remote_state.shared_infra.outputs
-
-  ec_platform_privatelink_security_group_id = local.shared_infra["ec_platform_privatelink_sg_id"]
-
-  traffic_filter_platform_vpce_id   = local.shared_infra["ec_platform_privatelink_traffic_filter_id"]
-  traffic_filter_catalogue_vpce_id  = local.shared_infra["ec_catalogue_privatelink_traffic_filter_id"]
-  traffic_filter_public_internet_id = local.shared_infra["ec_public_internet_traffic_filter_id"]
 
   logging_cluster_id = data.terraform_remote_state.shared_infra.outputs.logging_cluster_id
 
@@ -96,6 +88,19 @@ locals {
       ],
       reindex_topic = local.tei_reindexer_topic_arn,
     }
+  }
+
+  network_config = {
+    vpc_id  = local.catalogue_vpcs["catalogue_vpc_delta_id"]
+    subnets = local.catalogue_vpcs["catalogue_vpc_delta_private_subnets"]
+
+    ec_privatelink_security_group_id = local.shared_infra["ec_platform_privatelink_sg_id"]
+
+    traffic_filters = [
+      local.shared_infra["ec_platform_privatelink_traffic_filter_id"],
+      local.shared_infra["ec_catalogue_privatelink_traffic_filter_id"],
+      local.shared_infra["ec_public_internet_traffic_filter_id"],
+    ]
   }
 
   rds_config = {

@@ -26,11 +26,7 @@ resource "ec_deployment" "pipeline" {
   region                 = "eu-west-1"
   deployment_template_id = "aws-io-optimized-v2"
 
-  traffic_filter = [
-    var.traffic_filter_platform_vpce_id,
-    var.traffic_filter_catalogue_vpce_id,
-    var.traffic_filter_public_internet_id,
-  ]
+  traffic_filter = var.network_config.traffic_filters
 
   elasticsearch {
     topology {

@@ -15,19 +15,10 @@ module "catalogue_pipeline_2022-07-26" {
   # Boilerplate that shouldn't change between pipelines.
 
   adapter_config = local.adapter_config
+  network_config = local.network_config
   rds_config     = local.rds_config
 
-  vpc_id  = local.vpc_id
-  subnets = local.private_subnets
-
   dlq_alarm_arn = local.dlq_alarm_arn
-
-  # Security groups
-  ec_privatelink_security_group_id = local.ec_platform_privatelink_security_group_id
-
-  traffic_filter_platform_vpce_id   = local.traffic_filter_platform_vpce_id
-  traffic_filter_catalogue_vpce_id  = local.traffic_filter_catalogue_vpce_id
-  traffic_filter_public_internet_id = local.traffic_filter_public_internet_id
 
   # Adapter VHS
   vhs_miro_read_policy   = local.vhs_miro_read_policy
@@ -66,19 +57,10 @@ module "catalogue_pipeline_2022-08-04" {
   # Boilerplate that shouldn't change between pipelines.
 
   adapter_config = local.adapter_config
+  network_config = local.network_config
   rds_config     = local.rds_config
 
-  vpc_id  = local.vpc_id
-  subnets = local.private_subnets
-
   dlq_alarm_arn = local.dlq_alarm_arn
-
-  # Security groups
-  ec_privatelink_security_group_id = local.ec_platform_privatelink_security_group_id
-
-  traffic_filter_platform_vpce_id   = local.traffic_filter_platform_vpce_id
-  traffic_filter_catalogue_vpce_id  = local.traffic_filter_catalogue_vpce_id
-  traffic_filter_public_internet_id = local.traffic_filter_public_internet_id
 
   # Adapter VHS
   vhs_miro_read_policy   = local.vhs_miro_read_policy
