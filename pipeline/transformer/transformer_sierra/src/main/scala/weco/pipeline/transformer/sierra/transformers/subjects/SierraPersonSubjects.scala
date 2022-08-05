@@ -55,10 +55,10 @@ object SierraPersonSubjects
             dates = getDates(subfields),
             generalSubdivisions = generalSubdivisions
           )
-
+          val maybeIdentifiedPerson = person.copy(id=identify(varField, "Person"))
           Subject(
             label = label,
-            concepts = getConcepts(person.identifiable(), generalSubdivisions),
+            concepts = getConcepts(maybeIdentifiedPerson, generalSubdivisions),
             id = identify(varField, "Subject")
           )
         }
