@@ -4,66 +4,6 @@
 # We don't use it in a lot of pipelines, so we don't create it for every
 # pipeline -- but we save the definitions so we can create it when needed.
 
-moved {
-  from = module.catalogue_pipeline_2022-07-26.module.app_container
-  to   = module.image_training_2022-07-26.module.app_container
-}
-
-moved {
-  from = module.catalogue_pipeline_2022-07-26.module.log_router_container
-  to   = module.image_training_2022-07-26.module.log_router_container
-}
-
-moved {
-  from = module.catalogue_pipeline_2022-07-26.module.task_definition_image_training
-  to   = module.image_training_2022-07-26.module.task_definition_image_training
-}
-
-moved {
-  from = module.catalogue_pipeline_2022-07-26.aws_iam_role_policy.write_model_artifact
-  to   = module.image_training_2022-07-26.aws_iam_role_policy.write_model_artifact
-}
-
-moved {
-  from = module.catalogue_pipeline_2022-07-26.module.app_permissions
-  to   = module.image_training_2022-07-26.module.app_permissions
-}
-
-moved {
-  from = module.catalogue_pipeline_2022-07-26.module.log_router_permissions
-  to   = module.image_training_2022-07-26.module.log_router_permissions
-}
-
-moved {
-  from = module.catalogue_pipeline_2022-08-04.module.app_container
-  to   = module.image_training_2022-08-04.module.app_container
-}
-
-moved {
-  from = module.catalogue_pipeline_2022-08-04.module.log_router_container
-  to   = module.image_training_2022-08-04.module.log_router_container
-}
-
-moved {
-  from = module.catalogue_pipeline_2022-08-04.module.task_definition_image_training
-  to   = module.image_training_2022-08-04.module.task_definition_image_training
-}
-
-moved {
-  from = module.catalogue_pipeline_2022-08-04.aws_iam_role_policy.write_model_artifact
-  to   = module.image_training_2022-08-04.aws_iam_role_policy.write_model_artifact
-}
-
-moved {
-  from = module.catalogue_pipeline_2022-08-04.module.app_permissions
-  to   = module.image_training_2022-08-04.module.app_permissions
-}
-
-moved {
-  from = module.catalogue_pipeline_2022-08-04.module.log_router_permissions
-  to   = module.image_training_2022-08-04.module.log_router_permissions
-}
-
 module "image_training_2022-07-26" {
   source = "./modules/image_training"
 
