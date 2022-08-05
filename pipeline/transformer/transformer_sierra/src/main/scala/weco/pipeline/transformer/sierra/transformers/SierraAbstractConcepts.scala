@@ -1,12 +1,10 @@
 package weco.pipeline.transformer.sierra.transformers
 import grizzled.slf4j.Logging
 import weco.pipeline.transformer.text.TextNormalisation._
-import weco.catalogue.internal_model.identifiers.{
-  IdState,
-  IdentifierType,
-  SourceIdentifier
-}
+import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, SourceIdentifier}
 import weco.sierra.models.marc.VarField
+
+import java.text.Normalizer
 
 trait SierraAbstractConcepts extends Logging {
   protected def getLabel(varField: VarField): Option[String]
@@ -56,13 +54,18 @@ trait SierraAbstractConcepts extends Logging {
     }
 
   private def addIdentifierFromText(ontologyType: String,
-                                    label: String): IdState.Unminted =
+                                    label: String): IdState.Unminted = {
+    val normalizedLabel = Normalizer.normalize(
+      label.toLowerCase, Normalizer.Form.NFKD
+    ).replaceAll("[^\\p{ASCII}]", "")
+
     IdState.Identifiable(
       sourceIdentifier = SourceIdentifier(
         identifierType = IdentifierType.LabelDerived,
-        value = label.toLowerCase,
+        value = normalizedLabel,
         ontologyType = ontologyType
       )
     )
+  }
 
 }

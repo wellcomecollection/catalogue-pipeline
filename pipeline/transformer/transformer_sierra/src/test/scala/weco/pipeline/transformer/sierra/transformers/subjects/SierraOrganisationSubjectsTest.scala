@@ -2,16 +2,9 @@ package weco.pipeline.transformer.sierra.transformers.subjects
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.identifiers.{
-  IdState,
-  IdentifierType,
-  SourceIdentifier
-}
+import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, SourceIdentifier}
 import weco.pipeline.transformer.sierra.exceptions.CataloguingException
-import weco.pipeline.transformer.sierra.transformers.matchers.{
-  ConceptMatchers,
-  HasIdMatchers
-}
+import weco.pipeline.transformer.sierra.transformers.matchers.{ConceptMatchers, HasIdMatchers, SubjectMatchers}
 import weco.sierra.generators.SierraDataGenerators
 import weco.sierra.models.data.SierraBibData
 import weco.sierra.models.identifiers.SierraBibNumber
@@ -24,6 +17,7 @@ class SierraOrganisationSubjectsTest
     with Matchers
     with HasIdMatchers
     with ConceptMatchers
+    with SubjectMatchers
     with SierraDataGenerators {
   it("returns an empty list if there are no instances of MARC tag 610") {
     val bibData = createSierraBibDataWith(varFields = Nil)
@@ -84,6 +78,24 @@ class SierraOrganisationSubjectsTest
           value = "wellcome trust",
           ontologyType = "Organisation",
           identifierType = IdentifierType.LabelDerived)
+      )
+    }
+
+    it("returns a lowercase ascii normalised identifier") {
+      val bibData = create610bibDataWith(
+        subfields = List(
+          Subfield(tag = "a", content = "Hasseröder")
+        )
+      )
+      val List(subject) = getOrganisationSubjects(bibData)
+
+      subject.label shouldBe "Hasseröder"
+      subject should have(
+        labelDerivedSubjectId("hasseroder")
+      )
+      subject.onlyConcept.label shouldBe "Hasseröder"
+      subject.onlyConcept should have(
+        labelDerivedOrganisationId("hasseroder")
       )
     }
 

@@ -3,13 +3,9 @@ package weco.pipeline.transformer.sierra.transformers.subjects
 import org.scalatest.Assertion
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.identifiers.{
-  IdState,
-  IdentifierType,
-  SourceIdentifier
-}
+import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, SourceIdentifier}
 import weco.catalogue.internal_model.work.{Concept, Person, Subject}
-import weco.pipeline.transformer.sierra.transformers.matchers.SubjectMatchers
+import weco.pipeline.transformer.sierra.transformers.matchers.{ConceptMatchers, SubjectMatchers}
 import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
 import weco.sierra.models.data.SierraBibData
 import weco.sierra.models.marc.{Subfield, VarField}
@@ -18,6 +14,7 @@ class SierraPersonSubjectsTest
     extends AnyFunSpec
     with Matchers
     with SubjectMatchers
+    with ConceptMatchers
     with MarcGenerators
     with SierraDataGenerators {
 
@@ -40,6 +37,29 @@ class SierraPersonSubjectsTest
       )
     )
     assertCreatesSubjectWithLabel(bibData, label = "A Content")
+  }
+
+
+  it("returns a lowercase ascii normalised identifier") {
+    val bibData = createSierraBibDataWith(
+      varFields = List(
+        VarField(
+          marcTag = "600",
+          subfields = List(
+            Subfield(tag = "a", content = "François")
+          )
+        )
+      )
+    )
+    val List(subject) = SierraPersonSubjects(bibId, bibData)
+    subject.label shouldBe "François"
+    subject should have(
+      labelDerivedSubjectId("francois")
+    )
+    subject.onlyConcept.label shouldBe "François"
+    subject.onlyConcept should have(
+      labelDerivedPersonId("francois")
+    )
   }
 
   it("returns subjects for tag 600 with only subfields a and c") {
