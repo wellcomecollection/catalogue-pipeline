@@ -29,6 +29,8 @@ variable "release_label" {
   type = string
 }
 
+variable "inferrer_model_data_bucket_name" {}
+
 # Fields:
 #
 #   - `topics` -- that the adapter will write to in normal operation

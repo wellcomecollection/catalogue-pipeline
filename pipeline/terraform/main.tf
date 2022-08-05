@@ -25,6 +25,8 @@ module "catalogue_pipeline_2022-07-26" {
 
   dlq_alarm_arn = local.dlq_alarm_arn
 
+  inferrer_model_data_bucket_name = aws_s3_bucket.inferrer_model_core_data.id
+
   providers = {
     aws.catalogue = aws.catalogue
   }
@@ -56,6 +58,8 @@ module "catalogue_pipeline_2022-08-04" {
   rds_config     = local.rds_config
 
   dlq_alarm_arn = local.dlq_alarm_arn
+
+  inferrer_model_data_bucket_name = aws_s3_bucket.inferrer_model_core_data.id
 
   providers = {
     aws.catalogue = aws.catalogue
