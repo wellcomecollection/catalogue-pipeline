@@ -20,7 +20,7 @@ trait ConceptsTransformer {
   ): IdState.Identifiable =
     currentState match {
       case currentAsIdentifiable: IdState.Identifiable => currentAsIdentifiable
-      case _ =>
+      case _                                           =>
         // Normalisation is required here for both case and ascii folding.
         // With label-derived ids, case is (probably rightly) inconsistent, as the subfields
         // are intended to be concatenated, e.g. "History, bananas" and "Bananas, history"
