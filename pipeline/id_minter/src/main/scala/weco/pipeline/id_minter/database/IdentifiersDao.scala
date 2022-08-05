@@ -127,7 +127,8 @@ class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
                       // Because the METS case is fairly rare, we usually fix this by modifying the row in the
                       // ID minter database to correct the case of the source identifier.  To help somebody
                       // realise what's happened, we include a specific log for this case.
-                      info(msg = s"identifier returned from db not found in request, trying case-insensitive/ascii normalized match: $sourceIdentifier")
+                      info(msg =
+                        s"identifier returned from db not found in request, trying case-insensitive/ascii normalized match: $sourceIdentifier")
                       caseNormalisedIdentifiers.get(
                         NormalizedIdentifier(sourceIdentifier)) match {
                         case Some(sourceId) => (sourceId, Identifier(i)(rs))
