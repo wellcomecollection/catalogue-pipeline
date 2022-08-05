@@ -18,6 +18,8 @@ module "transformer" {
 
   topic_arns = local.topic_arns
 
+  queue_visibility_timeout_seconds = var.queue_visibility_timeout_seconds
+
   env_vars = merge(
     {
       sns_topic_arn = module.output_topic.arn,
@@ -26,6 +28,9 @@ module "transformer" {
   )
 
   secret_env_vars = var.secret_env_vars
+
+  cpu    = var.cpu
+  memory = var.memory
 
   min_capacity = var.min_capacity
   max_capacity = var.max_capacity

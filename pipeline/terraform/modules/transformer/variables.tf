@@ -18,6 +18,10 @@ variable "container_image" {
   type = string
 }
 
+variable "queue_visibility_timeout_seconds" {
+  type = number
+}
+
 variable "env_vars" {
   type = map(string)
 }
@@ -25,6 +29,14 @@ variable "env_vars" {
 variable "secret_env_vars" {
   type    = map(string)
   default = {}
+}
+
+variable "cpu" {
+  type = number
+}
+
+variable "memory" {
+  type = number
 }
 
 variable "min_capacity" {

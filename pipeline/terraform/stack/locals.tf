@@ -73,9 +73,7 @@ locals {
 
   sierra_adapter_topic_arns = var.reindexing_state.listen_to_reindexer ? concat(var.adapter_config["sierra"].topics, [var.adapter_config["sierra"].reindex_topic]) : var.adapter_config["sierra"].topics
   miro_adapter_topic_arns   = var.reindexing_state.listen_to_reindexer ? concat(var.adapter_config["miro"].topics, [var.adapter_config["miro"].reindex_topic]) : var.adapter_config["miro"].topics
-  mets_adapter_topic_arns   = var.reindexing_state.listen_to_reindexer ? concat(var.adapter_config["mets"].topics, [var.adapter_config["mets"].reindex_topic]) : var.adapter_config["mets"].topics
   tei_adapter_topic_arns    = var.reindexing_state.listen_to_reindexer ? concat(var.adapter_config["tei"].topics, [var.adapter_config["tei"].reindex_topic]) : var.adapter_config["tei"].topics
-  calm_adapter_topic_arns   = var.reindexing_state.listen_to_reindexer ? concat(var.adapter_config["calm"].topics, [var.adapter_config["calm"].reindex_topic]) : var.adapter_config["calm"].topics
 
   fargate_service_boilerplate = {
     egress_security_group_id             = aws_security_group.egress.id

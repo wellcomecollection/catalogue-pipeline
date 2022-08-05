@@ -18,7 +18,6 @@ module "id_minter" {
   topic_arns = concat(
     local.transformer_output_topic_arns,
     [
-      module.transformer_mets_output_topic.arn,
       module.transformer_miro_output_topic.arn,
       module.transformer_sierra_output_topic.arn,
       module.transformer_tei_output_topic.arn,
