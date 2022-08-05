@@ -1,33 +1,51 @@
-resource "aws_iam_role_policy" "calm_transformer_read_adapter_store" {
-  role   = module.transformer_calm.task_role_name
-  policy = var.adapter_config["calm"].read_policy
+moved {
+  from = module.transformer_calm
+  to   = module.transformers["calm"].module.transformer
 }
 
-module "transformer_calm_output_topic" {
-  source = "../modules/topic"
-
-  name       = "${local.namespace}_transformer_calm_output"
-  role_names = [module.transformer_calm.task_role_name]
+moved {
+  from = aws_iam_role_policy.calm_transformer_read_adapter_store
+  to   = module.transformers["calm"].aws_iam_role_policy.read_adapter_store
 }
 
-module "transformer_calm" {
-  source = "../modules/fargate_service"
+moved {
+  from = aws_iam_role_policy.transformer_calm_output_topic
+  to   = module.transformers["calm"].aws_iam_role_policy.output_topic
+}
 
-  name            = "transformer_calm"
-  container_image = local.transformer_calm_image
+locals {
+  transformers = {
+    calm = {
+      container_image = local.transformer_calm_image
 
-  topic_arns = local.calm_adapter_topic_arns
-
-  env_vars = {
-    sns_topic_arn = module.transformer_calm_output_topic.arn
-
-    es_index = local.es_works_source_index
-
-    batch_size             = 100
-    flush_interval_seconds = 30
+      batch_size             = 100
+      flush_interval_seconds = 30
+    }
   }
 
-  secret_env_vars = local.pipeline_storage_es_service_secrets["transformer"]
+  transformer_output_topic_arns = [
+    for k, v in module.transformers : v.output_topic_arn
+  ]
+}
+
+module "transformers" {
+  source = "../modules/transformer"
+
+  for_each = local.transformers
+
+  source_name = each.key
+
+  adapter_config      = var.adapter_config[each.key]
+  listen_to_reindexer = var.reindexing_state.listen_to_reindexer
+
+  container_image = each.value["container_image"]
+
+  env_vars = {
+    es_works_source_index = local.es_works_source_index
+
+    batch_size             = each.value["batch_size"]
+    flush_interval_seconds = each.value["flush_interval_seconds"]
+  }
 
   min_capacity = var.min_capacity
   max_capacity = local.max_capacity
