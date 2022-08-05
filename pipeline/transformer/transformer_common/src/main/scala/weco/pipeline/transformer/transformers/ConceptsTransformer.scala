@@ -6,6 +6,7 @@ import weco.catalogue.internal_model.identifiers.{
   SourceIdentifier
 }
 import weco.catalogue.internal_model.work._
+import weco.pipeline.transformer.parse.PeriodParser
 import weco.pipeline.transformer.text.TextNormalisation._
 
 trait ConceptsTransformer {
@@ -95,6 +96,15 @@ trait ConceptsTransformer {
   implicit class PeriodOps[State](p: Period[State]) {
     def identifiable(idState: Option[IdState.Identifiable] = None)
       : Period[IdState.Identifiable] =
-      p.copy(id = newIdIfNeeded(p.id, p.label, idState, "Period"))
+      // The label of a period may contain superfluous content that doesn't change the referent of the period
+      // e.g. years duplicated in Roman, punctuation, diverse renditions of the term "floruit".
+      // The id is therefore based on that "preprocessed" label, rather than simply passing through the
+      // label as written.
+      p.copy(
+        id = newIdIfNeeded(
+          p.id,
+          PeriodParser.preprocess(p.label),
+          idState,
+          "Period"))
   }
 }
