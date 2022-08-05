@@ -15,14 +15,7 @@ module "id_minter" {
     var.rds_config.security_group_id,
   ]
 
-  topic_arns = concat(
-    local.transformer_output_topic_arns,
-    [
-      module.transformer_miro_output_topic.arn,
-      module.transformer_sierra_output_topic.arn,
-      module.transformer_tei_output_topic.arn,
-    ]
-  )
+  topic_arns = local.transformer_output_topic_arns
 
   queue_visibility_timeout_seconds = 120
 
