@@ -1,14 +1,15 @@
 locals {
-  name   = "${local.namespace}_image_training"
+  name   = "${var.namespace}_image_training"
   cpu    = 4096
   memory = 8192
+
+  lsh_model_key = var.release_label == "prod" ? "prod" : "stage"
 
   env_vars = {
     MODEL_DATA_BUCKET = var.inferrer_model_data_bucket_name,
     MODEL_SSM_PATH    = data.aws_ssm_parameter.latest_lsh_model_key.name
-    ES_INDEX          = local.es_images_index
+    ES_INDEX          = var.es_images_index
   }
-  lsh_model_key = var.release_label == "prod" ? "prod" : "stage"
 
   secret_env_vars = {
     ES_HOST     = "catalogue/image_training/es_host"
