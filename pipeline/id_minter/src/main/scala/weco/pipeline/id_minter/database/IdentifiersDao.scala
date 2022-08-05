@@ -7,8 +7,9 @@ import weco.catalogue.internal_model.identifiers.{
   SourceIdentifier
 }
 import weco.pipeline.id_minter.models.{Identifier, IdentifiersTable}
-import java.sql.{BatchUpdateException, Statement}
 
+import java.sql.{BatchUpdateException, Statement}
+import java.text.Normalizer
 import scala.concurrent.blocking
 import scala.concurrent.duration._
 import scala.util.{Failure, Try}
@@ -23,6 +24,29 @@ object IdentifiersDao {
                          e: Throwable,
                          succeeded: List[Identifier])
       extends Exception
+}
+
+object NormalizedIdentifier {
+
+  /**
+    * Return the given sourceIdentifier, with its value normalized to the
+    * same permissiveness as the database query.
+    * When fetching from the database, an id will match regardless of case
+    * and regardless of diacritics/modifying characters.
+    *
+    * This is specifically intended for use by label-derived ids. Other schemes
+    *  are likely to avoid tricky situations like these, and if encountered,
+    *  it is probably a cataloguing error that needs to be notified.
+    */
+  def apply(sourceIdentifier: SourceIdentifier): SourceIdentifier = {
+    val newValue = Normalizer
+      .normalize(
+        sourceIdentifier.value.toLowerCase,
+        Normalizer.Form.NFKD
+      )
+      .replaceAll("[^\\p{ASCII}]", "")
+    sourceIdentifier.copy(value = newValue)
+  }
 }
 
 class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
@@ -44,9 +68,7 @@ class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
       val caseNormalisedIdentifiers = distinctIdentifiers
         .filter(_.identifierType == IdentifierType.LabelDerived)
         .map { sourceIdentifier =>
-          (
-            sourceIdentifier.copy(value = sourceIdentifier.value.toLowerCase),
-            sourceIdentifier)
+          (NormalizedIdentifier(sourceIdentifier), sourceIdentifier)
         }
         .toMap
 
@@ -106,9 +128,9 @@ class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
                       // ID minter database to correct the case of the source identifier.  To help somebody
                       // realise what's happened, we include a specific log for this case.
                       info(msg =
-                        s"identifier returned from db not found in request, trying case-insensitive match: $sourceIdentifier")
-                      caseNormalisedIdentifiers.get(sourceIdentifier.copy(
-                        value = sourceIdentifier.value.toLowerCase)) match {
+                        s"identifier returned from db not found in request, trying case-insensitive/ascii normalized match: $sourceIdentifier")
+                      caseNormalisedIdentifiers.get(
+                        NormalizedIdentifier(sourceIdentifier)) match {
                         case Some(sourceId) => (sourceId, Identifier(i)(rs))
                         case _ =>
                           throw SurplusIdentifierException(
