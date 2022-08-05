@@ -37,7 +37,7 @@ locals {
   calm_reindexer_topic_arn   = data.terraform_remote_state.reindexer.outputs.calm_reindexer_topic_arn
 
   # Infra stuff
-  dlq_alarm_arn   = data.terraform_remote_state.monitoring.outputs.platform_dlq_alarm_topic_arn
+  dlq_alarm_arn = data.terraform_remote_state.monitoring.outputs.platform_dlq_alarm_topic_arn
 
   infra_critical = data.terraform_remote_state.catalogue_infra_critical.outputs
 
@@ -56,7 +56,7 @@ locals {
         local.sierra_merged_orders_topic_arn,
       ]
       reindex_topic = local.sierra_reindexer_topic_arn
-      read_policy = local.vhs_sierra_read_policy,
+      read_policy   = local.vhs_sierra_read_policy,
     }
 
     miro = {
@@ -64,7 +64,7 @@ locals {
         local.miro_updates_topic_arn,
       ]
       reindex_topic = local.miro_reindexer_topic_arn,
-      read_policy = local.vhs_miro_read_policy
+      read_policy   = local.vhs_miro_read_policy
     }
 
     mets = {
@@ -72,7 +72,7 @@ locals {
         local.mets_adapter_topic_arn,
       ],
       reindex_topic = local.mets_reindexer_topic_arn,
-      read_policy = data.aws_iam_policy_document.read_storage_bucket.json
+      read_policy   = data.aws_iam_policy_document.read_storage_bucket.json
     }
 
     calm = {
@@ -81,7 +81,7 @@ locals {
         local.calm_deletions_topic_arn,
       ],
       reindex_topic = local.calm_reindexer_topic_arn,
-      read_policy = local.vhs_calm_read_policy
+      read_policy   = local.vhs_calm_read_policy
     }
 
     tei = {
@@ -89,7 +89,7 @@ locals {
         local.tei_adapter_topic_arn,
       ],
       reindex_topic = local.tei_reindexer_topic_arn,
-      read_policy = data.aws_iam_policy_document.read_tei_adapter_bucket.json
+      read_policy   = data.aws_iam_policy_document.read_tei_adapter_bucket.json
     }
   }
 

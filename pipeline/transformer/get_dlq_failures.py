@@ -111,7 +111,9 @@ def clean_log_line(line):
     #       TransformerError on MetsFileWithImages(…) with Version(b31851125,1)
     #       (java.lang.Exception: Couldn't match creativecommons.org/… to a license)
     #
-    if line.startswith('TransformerError on MetsFileWithImages') and line.endswith('to a license)'):
+    if line.startswith("TransformerError on MetsFileWithImages") and line.endswith(
+        "to a license)"
+    ):
         match = re.search(
             r"java\.lang\.Exception: Couldn't match (?P<url>[^\s]+) to a license", line
         )
@@ -174,7 +176,9 @@ if __name__ == "__main__":
         )
 
         if len(log_lines) == 1:
-            print(f"{source_record['transformer']} {source_record['payload']['id']}: {list(log_lines)[0]}")
+            print(
+                f"{source_record['transformer']} {source_record['payload']['id']}: {list(log_lines)[0]}"
+            )
             continue
 
         print(f"== {source_record['transformer']} {source_record['payload']['id']} ==")

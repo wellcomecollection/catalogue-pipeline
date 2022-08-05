@@ -55,10 +55,10 @@ variable "logging_config" {
 
 variable "network_config" {
   type = object({
-    vpc_id                            = string
-    subnets                           = list(string)
-    ec_privatelink_security_group_id  = string
-    traffic_filters                   = list(string)
+    vpc_id                           = string
+    subnets                          = list(string)
+    ec_privatelink_security_group_id = string
+    traffic_filters                  = list(string)
   })
 }
 

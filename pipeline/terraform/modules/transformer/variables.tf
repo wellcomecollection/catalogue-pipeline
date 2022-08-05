@@ -40,7 +40,7 @@ variable "memory" {
 }
 
 variable "min_capacity" {
-  type    = number
+  type = number
 }
 
 variable "max_capacity" {
