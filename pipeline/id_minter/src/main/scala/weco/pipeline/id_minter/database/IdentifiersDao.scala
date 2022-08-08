@@ -9,7 +9,6 @@ import weco.catalogue.internal_model.identifiers.{
 import weco.pipeline.id_minter.models.{Identifier, IdentifiersTable}
 
 import java.sql.{BatchUpdateException, Statement}
-import java.text.Normalizer
 import scala.concurrent.blocking
 import scala.concurrent.duration._
 import scala.util.{Failure, Try}
@@ -24,29 +23,6 @@ object IdentifiersDao {
                          e: Throwable,
                          succeeded: List[Identifier])
       extends Exception
-}
-
-object NormalizedIdentifier {
-
-  /**
-    * Return the given sourceIdentifier, with its value normalized to the
-    * same permissiveness as the database query.
-    * When fetching from the database, an id will match regardless of case
-    * and regardless of diacritics/modifying characters.
-    *
-    * This is specifically intended for use by label-derived ids. Other schemes
-    *  are likely to avoid tricky situations like these, and if encountered,
-    *  it is probably a cataloguing error that needs to be notified.
-    */
-  def apply(sourceIdentifier: SourceIdentifier): SourceIdentifier = {
-    val newValue = Normalizer
-      .normalize(
-        sourceIdentifier.value.toLowerCase,
-        Normalizer.Form.NFKD
-      )
-      .replaceAll("[^\\p{ASCII}]", "")
-    sourceIdentifier.copy(value = newValue)
-  }
 }
 
 class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
