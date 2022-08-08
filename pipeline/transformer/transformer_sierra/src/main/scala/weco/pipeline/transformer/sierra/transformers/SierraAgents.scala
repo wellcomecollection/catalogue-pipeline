@@ -119,11 +119,12 @@ trait SierraAgents
 
   def getLabel(subfields: List[Subfield]): Option[String] = {
     val contents =
-      subfields.filter { s =>
-        List("a", "b", "c", "d", "t", "p", "n", "q").contains(s.tag)
-      }
-      .filterNot { _.content.trim.isEmpty }
-      .map { _.content}
+      subfields
+        .filter { s =>
+          List("a", "b", "c", "d", "t", "p", "n", "q").contains(s.tag)
+        }
+        .filterNot { _.content.trim.isEmpty }
+        .map { _.content }
 
     contents match {
       case Nil          => None

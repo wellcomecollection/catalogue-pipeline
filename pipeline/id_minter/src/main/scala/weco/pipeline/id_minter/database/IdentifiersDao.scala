@@ -91,7 +91,9 @@ class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
                       warn(msg =
                         s"identifier returned from db not found in request, trying case-insensitive/ascii normalized match: $sourceIdentifier")
 
-                      throw SurplusIdentifierException(sourceIdentifier, distinctIdentifiers)
+                      throw SurplusIdentifierException(
+                        sourceIdentifier,
+                        distinctIdentifiers)
                     }
                   })
                   .list
