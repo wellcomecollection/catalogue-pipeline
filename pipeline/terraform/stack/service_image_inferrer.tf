@@ -33,12 +33,6 @@ locals {
 
   inferrer_cpu    = floor(0.5 * (local.total_cpu - local.manager_cpu - local.aspect_ratio_cpu))
   inferrer_memory = floor(0.5 * (local.total_memory - local.manager_memory - local.aspect_ratio_memory - local.log_router_memory))
-
-  lsh_model_key = var.release_label == "prod" ? "prod" : "stage"
-}
-
-data "aws_ssm_parameter" "inferrer_lsh_model_key" {
-  name = "/catalogue_pipeline/config/models/${local.lsh_model_key}/lsh_model"
 }
 
 module "image_inferrer" {
@@ -85,8 +79,8 @@ module "image_inferrer" {
       memory = local.inferrer_memory
       env_vars = {
         PORT              = local.feature_inferrer_port
-        MODEL_OBJECT_KEY  = data.aws_ssm_parameter.inferrer_lsh_model_key.value
-        MODEL_DATA_BUCKET = var.inferrer_model_data_bucket_name
+        MODEL_OBJECT_KEY  = var.inferrer_config.model_key
+        MODEL_DATA_BUCKET = var.inferrer_config.model_bucket
       }
       secret_env_vars = {}
       mount_points = [{
@@ -204,8 +198,8 @@ data "aws_iam_policy_document" "allow_inferrer_data_access" {
     ]
 
     resources = [
-      "arn:aws:s3:::${var.inferrer_model_data_bucket_name}",
-      "arn:aws:s3:::${var.inferrer_model_data_bucket_name}/*",
+      "arn:aws:s3:::${var.inferrer_config.model_bucket}",
+      "arn:aws:s3:::${var.inferrer_config.model_bucket}/*",
     ]
   }
 }

@@ -27,8 +27,6 @@ variable "release_label" {
   type = string
 }
 
-variable "inferrer_model_data_bucket_name" {}
-
 # Fields:
 #
 #   - `topics` -- that the adapter will write to in normal operation
@@ -42,6 +40,13 @@ variable "adapter_config" {
     reindex_topic = string
     read_policy   = string
   }))
+}
+
+variable "inferrer_config" {
+  type = object({
+    model_bucket = string
+    model_key    = string
+  })
 }
 
 variable "monitoring_config" {

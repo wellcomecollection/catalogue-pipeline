@@ -19,11 +19,10 @@ module "catalogue_pipeline_2022-07-26" {
   # Boilerplate that shouldn't change between pipelines.
 
   adapter_config    = local.adapter_config
+  inferrer_config   = local.inferrer_config
   monitoring_config = local.monitoring_config
   network_config    = local.network_config
   rds_config        = local.rds_config
-
-  inferrer_model_data_bucket_name = aws_s3_bucket.inferrer_model_core_data.id
 
   providers = {
     aws.catalogue = aws.catalogue
@@ -51,11 +50,10 @@ module "catalogue_pipeline_2022-08-04" {
   # Boilerplate that shouldn't change between pipelines.
 
   adapter_config    = local.adapter_config
+  inferrer_config   = local.inferrer_config
   monitoring_config = local.monitoring_config
   network_config    = local.network_config
   rds_config        = local.rds_config
-
-  inferrer_model_data_bucket_name = aws_s3_bucket.inferrer_model_core_data.id
 
   providers = {
     aws.catalogue = aws.catalogue
@@ -79,11 +77,10 @@ module "catalogue_pipeline_2022-08-08" {
   # Boilerplate that shouldn't change between pipelines.
 
   adapter_config    = local.adapter_config
+  inferrer_config   = local.inferrer_config
   monitoring_config = local.monitoring_config
   network_config    = local.network_config
   rds_config        = local.rds_config
-
-  inferrer_model_data_bucket_name = aws_s3_bucket.inferrer_model_core_data.id
 
   providers = {
     aws.catalogue = aws.catalogue
