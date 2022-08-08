@@ -33,12 +33,6 @@ locals {
 
   inferrer_cpu    = floor(0.5 * (local.total_cpu - local.manager_cpu - local.aspect_ratio_cpu))
   inferrer_memory = floor(0.5 * (local.total_memory - local.manager_memory - local.aspect_ratio_memory - local.log_router_memory))
-
-  lsh_model_key = var.release_label == "prod" ? "prod" : "stage"
-}
-
-data "aws_ssm_parameter" "inferrer_lsh_model_key" {
-  name = "/catalogue_pipeline/config/models/${local.lsh_model_key}/lsh_model"
 }
 
 module "image_inferrer" {
@@ -85,8 +79,8 @@ module "image_inferrer" {
       memory = local.inferrer_memory
       env_vars = {
         PORT              = local.feature_inferrer_port
-        MODEL_OBJECT_KEY  = data.aws_ssm_parameter.inferrer_lsh_model_key.value
-        MODEL_DATA_BUCKET = var.inferrer_model_data_bucket_name
+        MODEL_OBJECT_KEY  = var.inferrer_config.model_key
+        MODEL_DATA_BUCKET = var.inferrer_config.model_bucket
       }
       secret_env_vars = {}
       mount_points = [{
@@ -180,7 +174,7 @@ module "image_inferrer" {
   scale_down_adjustment = local.scale_down_adjustment
   scale_up_adjustment   = local.scale_up_adjustment
 
-  dlq_alarm_topic_arn = var.dlq_alarm_arn
+  dlq_alarm_topic_arn = var.monitoring_config.dlq_alarm_arn
 
   subnets = var.network_config.subnets
 
@@ -188,7 +182,7 @@ module "image_inferrer" {
 
   deployment_service_env = var.release_label
 
-  shared_logging_secrets = var.logging_config.shared_secrets
+  shared_logging_secrets = var.monitoring_config.shared_logging_secrets
 }
 
 resource "aws_iam_role_policy" "read_inferrer_data" {
@@ -204,8 +198,8 @@ data "aws_iam_policy_document" "allow_inferrer_data_access" {
     ]
 
     resources = [
-      "arn:aws:s3:::${var.inferrer_model_data_bucket_name}",
-      "arn:aws:s3:::${var.inferrer_model_data_bucket_name}/*",
+      "arn:aws:s3:::${var.inferrer_config.model_bucket}",
+      "arn:aws:s3:::${var.inferrer_config.model_bucket}/*",
     ]
   }
 }

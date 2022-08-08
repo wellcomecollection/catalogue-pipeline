@@ -10,6 +10,17 @@ resource "aws_s3_bucket" "inferrer_model_core_data" {
   }
 }
 
+data "aws_ssm_parameter" "inferrer_lsh_model_key" {
+  name = "/catalogue_pipeline/config/models/stage/lsh_model"
+}
+
+locals {
+  inferrer_config = {
+    model_bucket = aws_s3_bucket.inferrer_model_core_data.id
+    model_key    = data.aws_ssm_parameter.inferrer_lsh_model_key.value
+  }
+}
+
 # This defines the task definition for training the image inferrer model
 # on the contents of a pipeline.
 #

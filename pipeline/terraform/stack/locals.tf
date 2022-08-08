@@ -80,7 +80,7 @@ locals {
     scale_down_adjustment = local.scale_down_adjustment
     scale_up_adjustment   = local.scale_up_adjustment
 
-    dlq_alarm_topic_arn = var.dlq_alarm_arn
+    dlq_alarm_topic_arn = var.monitoring_config.dlq_alarm_arn
 
     subnets = var.network_config.subnets
 
@@ -88,6 +88,6 @@ locals {
 
     deployment_service_env = var.release_label
 
-    shared_logging_secrets = var.logging_config.shared_secrets
+    shared_logging_secrets = var.monitoring_config.shared_logging_secrets
   }
 }

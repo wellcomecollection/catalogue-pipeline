@@ -13,8 +13,6 @@ variable "max_capacity" {
   description = "The max capacity of every ECS service will be less than or equal to this value"
 }
 
-variable "dlq_alarm_arn" {}
-
 variable "reindexing_state" {
   type = object({
     listen_to_reindexer      = bool
@@ -28,8 +26,6 @@ variable "reindexing_state" {
 variable "release_label" {
   type = string
 }
-
-variable "inferrer_model_data_bucket_name" {}
 
 # Fields:
 #
@@ -46,10 +42,18 @@ variable "adapter_config" {
   }))
 }
 
-variable "logging_config" {
+variable "inferrer_config" {
   type = object({
-    shared_secrets     = map(any)
-    logging_cluster_id = string
+    model_bucket = string
+    model_key    = string
+  })
+}
+
+variable "monitoring_config" {
+  type = object({
+    shared_logging_secrets = map(any)
+    logging_cluster_id     = string
+    dlq_alarm_arn          = string
   })
 }
 
