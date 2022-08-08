@@ -14,7 +14,7 @@ elasticsearch:
     - "transport.host=0.0.0.0"
     - "cluster.name=wellcome"
     - "discovery.type=single-node"
-
+    - "xpack.security.enabled=false"
     # This is deliberately much lower than the default (100mb), because we want
     # to test that our code works correctly when it exceeds this limit, but without
     # queuing up 100mb+ of documents in-memory during tests.

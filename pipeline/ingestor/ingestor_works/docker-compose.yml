@@ -17,3 +17,4 @@ services:
       - "transport.host=0.0.0.0"
       - "cluster.name=wellcome"
       - "discovery.type=single-node"
+      - "xpack.security.enabled=false"

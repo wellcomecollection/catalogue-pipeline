@@ -2,9 +2,10 @@ package weco.pipeline.inference_manager.services
 
 import scala.collection.mutable
 import akka.http.scaladsl.model.{HttpResponse, Uri}
-import org.scalatest.concurrent.{Eventually, IntegrationPatience}
+import org.scalatest.concurrent.{Eventually, PatienceConfiguration}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.time._
 import org.scalatest.{BeforeAndAfterAll, Inside, Inspectors, OptionValues}
 import software.amazon.awssdk.services.sqs.model.Message
 import weco.fixtures.TestWith
@@ -37,9 +38,14 @@ class InferenceManagerWorkerServiceTest
     with Inspectors
     with BeforeAndAfterAll
     with Eventually
-    with IntegrationPatience
+    with PatienceConfiguration
     with InferenceManagerWorkerServiceFixture
     with RequestPoolFixtures {
+
+  override implicit def patienceConfig: PatienceConfig = PatienceConfig(
+    timeout = scaled(Span(25, Seconds)),
+    interval = scaled(Span(250, Milliseconds))
+  )
 
   it(
     "reads image messages, augments them with the inferrers, and sends them to SNS"
