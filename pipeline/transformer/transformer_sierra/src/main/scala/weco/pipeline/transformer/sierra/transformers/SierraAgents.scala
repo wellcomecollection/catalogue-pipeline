@@ -97,11 +97,10 @@ trait SierraAgents
   // For consistency, we remove all whitespace and some punctuation
   // before continuing.
   protected def getIdentifierSubfieldContents(
-    varField: VarField): List[String] = {
+    varField: VarField): List[String] =
     varField.subfields.collect {
       case Subfield("0", content) => content.replaceAll("[.,\\s]", "")
     }.distinct
-  }
 
   protected def maybeAddIdentifier(
     ontologyType: String,
@@ -118,11 +117,18 @@ trait SierraAgents
   def getLabel(varField: VarField): Option[String] =
     getLabel(varField.subfields)
 
-  def getLabel(subfields: List[Subfield]): Option[String] =
-    subfields.filter { s =>
-      List("a", "b", "c", "d", "t", "p", "n", "q").contains(s.tag)
-    } map (_.content) match {
+  def getLabel(subfields: List[Subfield]): Option[String] = {
+    val contents =
+      subfields
+        .filter { s =>
+          List("a", "b", "c", "d", "t", "p", "n", "q").contains(s.tag)
+        }
+        .filterNot { _.content.trim.isEmpty }
+        .map { _.content }
+
+    contents match {
       case Nil          => None
       case nonEmptyList => Some(nonEmptyList mkString " ")
     }
+  }
 }

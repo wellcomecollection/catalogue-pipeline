@@ -53,7 +53,7 @@ trait SierraAbstractConcepts extends Logging {
       case Some(label) =>
         addIdentifierFromText(
           ontologyType = ontologyType,
-          label = label.trimTrailingPeriod)
+          label = label.trimTrailingPeriod.trim)
       case None => IdState.Unidentifiable
     }
 

@@ -9,7 +9,6 @@ import weco.catalogue.internal_model.identifiers.{
 import weco.pipeline.id_minter.models.{Identifier, IdentifiersTable}
 
 import java.sql.{BatchUpdateException, Statement}
-import java.text.Normalizer
 import scala.concurrent.blocking
 import scala.concurrent.duration._
 import scala.util.{Failure, Try}
@@ -26,29 +25,6 @@ object IdentifiersDao {
       extends Exception
 }
 
-object NormalizedIdentifier {
-
-  /**
-    * Return the given sourceIdentifier, with its value normalized to the
-    * same permissiveness as the database query.
-    * When fetching from the database, an id will match regardless of case
-    * and regardless of diacritics/modifying characters.
-    *
-    * This is specifically intended for use by label-derived ids. Other schemes
-    *  are likely to avoid tricky situations like these, and if encountered,
-    *  it is probably a cataloguing error that needs to be notified.
-    */
-  def apply(sourceIdentifier: SourceIdentifier): SourceIdentifier = {
-    val newValue = Normalizer
-      .normalize(
-        sourceIdentifier.value.toLowerCase,
-        Normalizer.Form.NFKD
-      )
-      .replaceAll("[^\\p{ASCII}]", "")
-    sourceIdentifier.copy(value = newValue)
-  }
-}
-
 class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
   import IdentifiersDao._
 
@@ -62,15 +38,6 @@ class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
       )
       debug(s"Looking up ($sourceIdentifiers)")
       val distinctIdentifiers = sourceIdentifiers.distinct
-
-      // Build a map of source identifiers that should be treated case-insensitively.
-      // Currently, only label-derived ids are case-insensitive.
-      val caseNormalisedIdentifiers = distinctIdentifiers
-        .filter(_.identifierType == IdentifierType.LabelDerived)
-        .map { sourceIdentifier =>
-          (NormalizedIdentifier(sourceIdentifier), sourceIdentifier)
-        }
-        .toMap
 
       val foundIdentifiers =
         withTimeWarning(threshold = 10 seconds, distinctIdentifiers) {
@@ -115,28 +82,18 @@ class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
                       // with METS works, where the work originally had an uppercase B but has now been
                       // fixed to use a lowercase b.
                       //
-                      // This may also happen with label-derived identifiers, which should be treated
-                      // case-insensitively.
-                      //
                       // Because the query is case insensitive, querying for "METS/b13026252" would return
                       // "METS/B13026252", which isn't what we were looking for.
-                      //
-                      // Alternatively, querying for label-derived/history would return label-derived/History
-                      // which is what we are looking for.
                       //
                       // Because the METS case is fairly rare, we usually fix this by modifying the row in the
                       // ID minter database to correct the case of the source identifier.  To help somebody
                       // realise what's happened, we include a specific log for this case.
-                      info(msg =
+                      warn(msg =
                         s"identifier returned from db not found in request, trying case-insensitive/ascii normalized match: $sourceIdentifier")
-                      caseNormalisedIdentifiers.get(
-                        NormalizedIdentifier(sourceIdentifier)) match {
-                        case Some(sourceId) => (sourceId, Identifier(i)(rs))
-                        case _ =>
-                          throw SurplusIdentifierException(
-                            sourceIdentifier,
-                            distinctIdentifiers)
-                      }
+
+                      throw SurplusIdentifierException(
+                        sourceIdentifier,
+                        distinctIdentifiers)
                     }
                   })
                   .list
