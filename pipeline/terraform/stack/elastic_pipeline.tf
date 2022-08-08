@@ -40,7 +40,7 @@ resource "ec_deployment" "pipeline" {
   }
 
   observability {
-    deployment_id = var.logging_config.logging_cluster_id
+    deployment_id = var.monitoring_config.logging_cluster_id
   }
 }
 

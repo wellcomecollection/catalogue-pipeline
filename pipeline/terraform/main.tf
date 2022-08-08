@@ -18,12 +18,10 @@ module "catalogue_pipeline_2022-07-26" {
 
   # Boilerplate that shouldn't change between pipelines.
 
-  adapter_config = local.adapter_config
-  logging_config = local.logging_config
-  network_config = local.network_config
-  rds_config     = local.rds_config
-
-  dlq_alarm_arn = local.dlq_alarm_arn
+  adapter_config    = local.adapter_config
+  monitoring_config = local.monitoring_config
+  network_config    = local.network_config
+  rds_config        = local.rds_config
 
   inferrer_model_data_bucket_name = aws_s3_bucket.inferrer_model_core_data.id
 

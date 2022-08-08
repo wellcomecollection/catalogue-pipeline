@@ -36,14 +36,7 @@ locals {
   tei_reindexer_topic_arn    = data.terraform_remote_state.reindexer.outputs.tei_reindexer_topic_arn
   calm_reindexer_topic_arn   = data.terraform_remote_state.reindexer.outputs.calm_reindexer_topic_arn
 
-  # Infra stuff
-  dlq_alarm_arn = data.terraform_remote_state.monitoring.outputs.platform_dlq_alarm_topic_arn
-
   infra_critical = data.terraform_remote_state.catalogue_infra_critical.outputs
-
-  rds_access_security_group_id = local.infra_critical.rds_access_security_group_id
-  rds_cluster_id               = local.infra_critical.rds_cluster_id
-  rds_subnet_group_name        = local.infra_critical.rds_subnet_group_name
 
   shared_infra = data.terraform_remote_state.shared_infra.outputs
 
@@ -93,9 +86,10 @@ locals {
     }
   }
 
-  logging_config = {
-    shared_secrets     = local.shared_infra["shared_secrets_logging"]
-    logging_cluster_id = local.shared_infra["logging_cluster_id"]
+  monitoring_config = {
+    shared_logging_secrets = local.shared_infra["shared_secrets_logging"]
+    logging_cluster_id     = local.shared_infra["logging_cluster_id"]
+    dlq_alarm_arn          = data.terraform_remote_state.monitoring.outputs.platform_dlq_alarm_topic_arn
   }
 
   network_config = {
@@ -112,8 +106,8 @@ locals {
   }
 
   rds_config = {
-    cluster_id        = local.rds_cluster_id
-    subnet_group      = local.rds_subnet_group_name
-    security_group_id = local.rds_access_security_group_id
+    cluster_id        = local.infra_critical.rds_cluster_id
+    subnet_group      = local.infra_critical.rds_subnet_group_name
+    security_group_id = local.infra_critical.rds_access_security_group_id
   }
 }

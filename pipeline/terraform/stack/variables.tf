@@ -13,8 +13,6 @@ variable "max_capacity" {
   description = "The max capacity of every ECS service will be less than or equal to this value"
 }
 
-variable "dlq_alarm_arn" {}
-
 variable "reindexing_state" {
   type = object({
     listen_to_reindexer      = bool
@@ -46,10 +44,11 @@ variable "adapter_config" {
   }))
 }
 
-variable "logging_config" {
+variable "monitoring_config" {
   type = object({
-    shared_secrets     = map(any)
-    logging_cluster_id = string
+    shared_logging_secrets = map(any)
+    logging_cluster_id     = string
+    dlq_alarm_arn          = string
   })
 }
 
