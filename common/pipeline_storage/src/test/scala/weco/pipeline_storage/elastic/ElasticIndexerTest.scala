@@ -9,7 +9,7 @@ import com.sksamuel.elastic4s.requests.searches.SearchResponse
 import org.apache.http.HttpHost
 import org.elasticsearch.client.RestClient
 import org.scalatest.{Assertion, EitherValues}
-import weco.elasticsearch.{ElasticCredentials, IndexConfig}
+import weco.elasticsearch.{ElasticHttpClientConfig, IndexConfig}
 import weco.elasticsearch.test.fixtures.ElasticsearchFixtures
 import weco.fixtures.TestWith
 import weco.json.JsonUtil._
@@ -37,8 +37,9 @@ class ElasticIndexerTest
     canonicalId => sampleDocumentCanonicalId
   }
 
-  override def withContext[R](documents: Seq[SampleDocument])(
-    testWith: TestWith[Index, R]): R =
+  override def withContext[R](
+    documents: Seq[SampleDocument]
+  )(testWith: TestWith[Index, R]): R =
     withLocalElasticsearchIndex(config = IndexConfig.empty) { implicit index =>
       if (documents.nonEmpty) {
         withIndexer { indexer =>
@@ -61,8 +62,9 @@ class ElasticIndexerTest
       testWith(index)
     }
 
-  override def withIndexer[R](testWith: TestWith[Indexer[SampleDocument], R])(
-    implicit index: Index): R = {
+  override def withIndexer[R](
+    testWith: TestWith[Indexer[SampleDocument], R]
+  )(implicit index: Index): R = {
     val indexer = new ElasticIndexer[SampleDocument](
       client = elasticClient,
       index = index,
@@ -75,12 +77,14 @@ class ElasticIndexerTest
   override def createDocument: SampleDocument =
     createDocumentWith()
 
-  override def assertIsIndexed(doc: SampleDocument)(
-    implicit index: Index): Assertion =
+  override def assertIsIndexed(
+    doc: SampleDocument
+  )(implicit index: Index): Assertion =
     assertElasticsearchEventuallyHas(index, doc).head
 
-  override def assertIsNotIndexed(doc: SampleDocument)(
-    implicit index: Index): Assertion = {
+  override def assertIsNotIndexed(
+    doc: SampleDocument
+  )(implicit index: Index): Assertion = {
     val documentJson = toJson(doc).get
 
     eventually {
@@ -221,12 +225,13 @@ class ElasticIndexerTest
     // To avoid flakiness, we disable compression for these tests and these tests only.
 
     def withNoCompressionIndexer[R](
-      testWith: TestWith[Indexer[SampleDocument], R])(
-      implicit index: Index): R = {
+      testWith: TestWith[Indexer[SampleDocument], R]
+    )(implicit index: Index): R = {
       val restClient = RestClient
         .builder(new HttpHost("localhost", 9200, "http"))
         .setHttpClientConfigCallback(
-          new ElasticCredentials("elastic", "changeme"))
+          new ElasticHttpClientConfig("elastic", "changeme", None)
+        )
         .build()
 
       val elasticClient = ElasticClient(JavaClient.fromRestClient(restClient))

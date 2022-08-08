@@ -62,7 +62,8 @@ class WorkTest extends AnyFunSpec with Matchers with WorkGenerators {
       fromJson[Work[WorkState.Identified]](jsonString).get
     }
     caught.getMessage should startWith(
-      "Attempt to decode value on failed cursor")
+      "Missing required field"
+    )
   }
 
   it("preserves redirect sources when transitioning Work.Visible") {

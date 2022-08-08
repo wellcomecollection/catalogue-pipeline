@@ -9,7 +9,6 @@ import weco.catalogue.source_model.calm.CalmRecord
 import weco.catalogue.source_model.sierra._
 import weco.catalogue.source_model.tei._
 import weco.json.JsonUtil._
-import weco.sierra.models.data._
 
 object Implicits {
   // Cache these here to improve compilation times (otherwise they are
