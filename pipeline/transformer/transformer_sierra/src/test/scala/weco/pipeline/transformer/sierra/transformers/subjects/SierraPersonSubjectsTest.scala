@@ -3,7 +3,11 @@ package weco.pipeline.transformer.sierra.transformers.subjects
 import org.scalatest.Assertion
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.identifiers.{IdentifierType}
+import weco.catalogue.internal_model.identifiers.{
+  IdState,
+  IdentifierType,
+  SourceIdentifier
+}
 import weco.catalogue.internal_model.work.{Concept, Person}
 import weco.pipeline.transformer.sierra.transformers.matchers.{
   ConceptMatchers,
@@ -337,6 +341,37 @@ class SierraPersonSubjectsTest
       bibData,
       label =
         "Agate, John, 1676-1720. Sermon preach'd at Exeter, on the 30th of January ...")
+  }
+
+  it("trims whitespace from label-derived identifiers") {
+    // This is based on a real example: b24000802
+    val varField = VarField(
+      fieldTag = Some("d"),
+      marcTag = Some("600"),
+      indicator1 = Some(" "),
+      indicator2 = Some("0"),
+      subfields = List(
+        Subfield(
+          tag = "a",
+          content = ""
+        ),
+        Subfield(
+          tag = "a",
+          content = "Turner, John"
+        ),
+      )
+    )
+
+    val bibData = createSierraBibDataWith(varFields = List(varField))
+
+    val sourceIdentifier = SourceIdentifier(
+      identifierType = IdentifierType.LabelDerived,
+      value = "turner, john",
+      ontologyType = "Subject"
+    )
+
+    val List(subject) = SierraPersonSubjects(bibId, bibData)
+    subject.id shouldBe IdState.Identifiable(sourceIdentifier)
   }
 
   /**
