@@ -344,7 +344,7 @@ class SierraPersonSubjectsTest
   }
 
   it("trims whitespace from label-derived identifiers") {
-    // This is based on a real example: b24000802
+    // This is based on b24000802, retrieved 8 August 2022
     val varField = VarField(
       fieldTag = Some("d"),
       marcTag = Some("600"),

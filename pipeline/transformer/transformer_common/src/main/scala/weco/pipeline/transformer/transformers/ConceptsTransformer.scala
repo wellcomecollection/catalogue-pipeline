@@ -35,6 +35,7 @@ trait ConceptsTransformer {
             Normalizer.Form.NFKD
           )
           .replaceAll("[^\\p{ASCII}]", "")
+          .trim
         replacementState.getOrElse(
           IdState.Identifiable(
             SourceIdentifier(

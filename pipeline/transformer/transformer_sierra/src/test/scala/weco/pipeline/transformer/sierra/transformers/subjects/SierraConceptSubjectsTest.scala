@@ -572,6 +572,32 @@ class SierraConceptSubjectsTest
         identifierType = IdentifierType.LCSubjects)
     )
   }
+
+  it("trims whitespace from the identifier") {
+    // This is based on b3083353x, retrieved 8 August 2022
+    val bibData = createSierraBibDataWith(
+      varFields = List(
+        VarField(
+          marcTag = Some("650"),
+          indicator2 = Some("0"),
+          subfields = List(
+            Subfield(tag = "z", content = "United States. ")
+          )
+        )
+      )
+    )
+
+    val List(subject) = SierraConceptSubjects(createSierraBibNumber, bibData)
+    val concept = subject.onlyConcept
+
+    concept should have(
+      sourceIdentifier(
+        value = "united states.",
+        ontologyType = "Place",
+        identifierType = IdentifierType.LabelDerived)
+    )
+  }
+
   //TODO: Now that it's not doing the Mocky style test, we need to check that ParsedPeriod is being used.
   // put in a test with roman numeral dates and see what happens.
 }
