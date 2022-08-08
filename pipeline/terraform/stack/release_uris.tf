@@ -12,7 +12,6 @@ locals {
   merger_image                = local.image_ids["merger"]
   inference_manager_image     = local.image_ids["inference_manager"]
   feature_inferrer_image      = local.image_ids["feature_inferrer"]
-  feature_training_image      = local.image_ids["feature_training"]
   palette_inferrer_image      = local.image_ids["palette_inferrer"]
   aspect_ratio_inferrer_image = local.image_ids["aspect_ratio_inferrer"]
   router_image                = local.image_ids["router"]
