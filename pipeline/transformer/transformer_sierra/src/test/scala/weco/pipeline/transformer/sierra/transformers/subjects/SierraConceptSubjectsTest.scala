@@ -573,7 +573,7 @@ class SierraConceptSubjectsTest
     )
   }
 
-  it("trims whitespace from the identifier") {
+  it("trims whitespace from the identifier in subfield ǂz") {
     // This is based on b3083353x, retrieved 8 August 2022
     val bibData = createSierraBibDataWith(
       varFields = List(
@@ -594,6 +594,31 @@ class SierraConceptSubjectsTest
       sourceIdentifier(
         value = "united states.",
         ontologyType = "Place",
+        identifierType = IdentifierType.LabelDerived)
+    )
+  }
+
+  it("trims whitespace from the identifier in subfield ǂa") {
+    // This is based on b14653746, retrieved 8 August 2022
+    val bibData = createSierraBibDataWith(
+      varFields = List(
+        VarField(
+          marcTag = Some("650"),
+          indicator2 = Some("0"),
+          subfields = List(
+            Subfield(tag = "a", content = " Yellowstone National Park")
+          )
+        )
+      )
+    )
+
+    val List(subject) = SierraConceptSubjects(createSierraBibNumber, bibData)
+    val concept = subject.onlyConcept
+
+    concept should have(
+      sourceIdentifier(
+        value = "yellowstone national park",
+        ontologyType = "Concept",
         identifierType = IdentifierType.LabelDerived)
     )
   }
