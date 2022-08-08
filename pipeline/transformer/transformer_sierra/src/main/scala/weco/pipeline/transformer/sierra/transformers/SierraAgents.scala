@@ -97,11 +97,10 @@ trait SierraAgents
   // For consistency, we remove all whitespace and some punctuation
   // before continuing.
   protected def getIdentifierSubfieldContents(
-    varField: VarField): List[String] = {
+    varField: VarField): List[String] =
     varField.subfields.collect {
       case Subfield("0", content) => content.replaceAll("[.,\\s]", "")
     }.distinct
-  }
 
   protected def maybeAddIdentifier(
     ontologyType: String,
