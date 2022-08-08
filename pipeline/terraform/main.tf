@@ -52,12 +52,38 @@ module "catalogue_pipeline_2022-08-04" {
 
   # Boilerplate that shouldn't change between pipelines.
 
-  adapter_config = local.adapter_config
-  logging_config = local.logging_config
-  network_config = local.network_config
-  rds_config     = local.rds_config
+  adapter_config    = local.adapter_config
+  monitoring_config = local.monitoring_config
+  network_config    = local.network_config
+  rds_config        = local.rds_config
 
-  dlq_alarm_arn = local.dlq_alarm_arn
+  inferrer_model_data_bucket_name = aws_s3_bucket.inferrer_model_core_data.id
+
+  providers = {
+    aws.catalogue = aws.catalogue
+  }
+}
+
+module "catalogue_pipeline_2022-08-08" {
+  source = "./stack"
+
+  pipeline_date = "2022-08-08"
+  release_label = "2022-08-08"
+
+  reindexing_state = {
+    listen_to_reindexer      = true
+    scale_up_tasks           = true
+    scale_up_elastic_cluster = true
+    scale_up_id_minter_db    = true
+    scale_up_matcher_db      = true
+  }
+
+  # Boilerplate that shouldn't change between pipelines.
+
+  adapter_config    = local.adapter_config
+  monitoring_config = local.monitoring_config
+  network_config    = local.network_config
+  rds_config        = local.rds_config
 
   inferrer_model_data_bucket_name = aws_s3_bucket.inferrer_model_core_data.id
 

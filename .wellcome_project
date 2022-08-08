@@ -1,4 +1,4 @@
-mets_adapter:
+amets_adapter:
   environments:
     - id: prod
       name: Production
@@ -85,6 +85,8 @@ catalogue_pipeline:
       name: "2022-07-26"
     - id:   "2022-08-04"
       name: "2022-08-04"
+    - id:   "2022-08-08"
+      name: "2022-08-08"
   image_repositories:
     - id: id_minter
       services:
