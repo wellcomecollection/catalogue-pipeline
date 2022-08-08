@@ -27,13 +27,14 @@ import weco.storage.store.{HybridStoreWithMaxima, VersionedHybridStore}
 import weco.storage.{Identified, Version}
 
 import scala.language.higherKinds
+import scala.util.Success
 
 class SierraLiveDataTransformerTest
     extends AnyFunSpec
     with Matchers
     with EitherValues {
 
-  /** This "test" will fetch a Sierra record from the VHS using your local credentials
+  /** This "test" will fetch Sierra records from the VHS using your local credentials
     * and transform it with your local transformer.
     *
     * It's meant for debugging the transformer process, not automated tests.
@@ -41,16 +42,38 @@ class SierraLiveDataTransformerTest
     */
   it("transforms a live record") {
     val tableName = "vhs-sierra-sierra-adapter-20200604"
-    val bibNumber = SierraBibNumber("3043873")
 
-    val identifiedT = getSierraTransformable(tableName, bibNumber)
+    val bnumbers = Seq(
+      "2400080",
+      "3083353",
+      "3162948",
+      "1465374",
+      "1534632",
+      "2016069",
+      "1555386",
+      "2092789",
+      "3001902",
+      "1495441",
+      "2346133",
+      "3083358",
+      "1536647")
 
-    val version = identifiedT.id.version
-    val transformable = identifiedT.identifiedT
+    bnumbers.foreach { b =>
+      val bibNumber = SierraBibNumber(b)
 
-    val work = SierraTransformer(transformable, version)
+      val identifiedT = getSierraTransformable(tableName, bibNumber)
 
-    println(work)
+      val version = identifiedT.id.version
+      val transformable = identifiedT.identifiedT
+
+      val work = SierraTransformer(transformable, version)
+
+      println(s"$b => $work")
+
+      work shouldBe a[Success[_]]
+    }
+
+
   }
 
   private def getSierraTransformable(tableName: String,
