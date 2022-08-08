@@ -1,4 +1,4 @@
-amets_adapter:
+mets_adapter:
   environments:
     - id: prod
       name: Production
