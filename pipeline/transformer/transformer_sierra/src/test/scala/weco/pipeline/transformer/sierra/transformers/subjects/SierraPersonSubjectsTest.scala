@@ -343,8 +343,19 @@ class SierraPersonSubjectsTest
         "Agate, John, 1676-1720. Sermon preach'd at Exeter, on the 30th of January ...")
   }
 
-  it("trims whitespace from label-derived identifiers") {
+  it("filters out empty subfields from label-derived identifiers") {
     // This is based on b24000802, retrieved 8 August 2022
+    //
+    // If you took a naive approach here:
+    //
+    //    subfields.map(_.contents ).mkString(" ")
+    //
+    // then the empty subfield will cause there to be extra whitespace in the
+    // final string.  Check we filter it out correctly.
+    //
+    // (Arguably we should fix this in the source data, but it's a slight issue
+    // and one we can easily work around; requests for fixes in the source data
+    // tend to be reserved for more substantial changes.)
     val varField = VarField(
       fieldTag = Some("d"),
       marcTag = Some("600"),
