@@ -1,19 +1,26 @@
 package weco.catalogue.source_model.fixtures
 
 import org.scalatest.matchers.{HavePropertyMatchResult, HavePropertyMatcher}
-import weco.catalogue.internal_model.locations.{AccessCondition, AccessMethod, AccessStatus}
+import weco.catalogue.internal_model.locations.{
+  AccessCondition,
+  AccessMethod,
+  AccessStatus
+}
 
 trait AccessConditionMatchers {
   type AccessConditionMatcher[T] = HavePropertyMatcher[AccessCondition, T]
 
   private def createMatcher[T](
-    propertyName: String, expectedValue: T, actualValue: (AccessCondition => T)
+    propertyName: String,
+    expectedValue: T,
+    actualValue: (AccessCondition => T)
   ): AccessConditionMatcher[T] =
-    (condition: AccessCondition) => HavePropertyMatchResult(
-      matches = expectedValue == actualValue(condition),
-      propertyName = propertyName,
-      expectedValue = expectedValue,
-      actualValue = actualValue(condition)
+    (condition: AccessCondition) =>
+      HavePropertyMatchResult(
+        matches = expectedValue == actualValue(condition),
+        propertyName = propertyName,
+        expectedValue = expectedValue,
+        actualValue = actualValue(condition)
     )
 
   def method(method: AccessMethod): AccessConditionMatcher[AccessMethod] =
@@ -23,7 +30,8 @@ trait AccessConditionMatchers {
       actualValue = condition => condition.method
     )
 
-  def status(status: AccessStatus): AccessConditionMatcher[Option[AccessStatus]] =
+  def status(
+    status: AccessStatus): AccessConditionMatcher[Option[AccessStatus]] =
     createMatcher(
       propertyName = "status",
       expectedValue = Some(status),

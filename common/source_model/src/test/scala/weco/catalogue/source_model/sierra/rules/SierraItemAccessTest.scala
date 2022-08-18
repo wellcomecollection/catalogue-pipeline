@@ -2,7 +2,11 @@ package weco.catalogue.source_model.sierra.rules
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.locations.{AccessMethod, AccessStatus, LocationType}
+import weco.catalogue.internal_model.locations.{
+  AccessMethod,
+  AccessStatus,
+  LocationType
+}
 import weco.catalogue.source_model.fixtures.AccessConditionMatchers
 import weco.sierra.generators.SierraDataGenerators
 import weco.sierra.models.marc.{FixedField, VarField}
@@ -47,7 +51,7 @@ class SierraItemAccessTest
             itemData = itemData
           )
 
-          ac should have (
+          ac should have(
             method(AccessMethod.OnlineRequest),
             status(AccessStatus.Open),
             noTerms(),
@@ -185,7 +189,8 @@ class SierraItemAccessTest
           ac should have(
             method(AccessMethod.NotRequestable),
             status(AccessStatus.TemporarilyUnavailable),
-            note("This item is undergoing internal assessment or conservation work."),
+            note(
+              "This item is undergoing internal assessment or conservation work."),
             noTerms()
           )
         }
@@ -350,7 +355,8 @@ class SierraItemAccessTest
         ac should have(
           method(AccessMethod.NotRequestable),
           status(AccessStatus.TemporarilyUnavailable),
-          note("Item is in use by another reader. Please ask at Library Enquiry Desk."),
+          note(
+            "Item is in use by another reader. Please ask at Library Enquiry Desk."),
           noTerms()
         )
       }
@@ -374,7 +380,8 @@ class SierraItemAccessTest
         ac should have(
           method(AccessMethod.NotRequestable),
           status(AccessStatus.TemporarilyUnavailable),
-          note("Item is in use by another reader. Please ask at Library Enquiry Desk."),
+          note(
+            "Item is in use by another reader. Please ask at Library Enquiry Desk."),
           noTerms()
         )
       }
@@ -398,7 +405,8 @@ class SierraItemAccessTest
         ac should have(
           method(AccessMethod.NotRequestable),
           status(AccessStatus.TemporarilyUnavailable),
-          note("Item is in use by another reader. Please ask at Library Enquiry Desk."),
+          note(
+            "Item is in use by another reader. Please ask at Library Enquiry Desk."),
           noTerms()
         )
       }
@@ -421,7 +429,8 @@ class SierraItemAccessTest
         ac should have(
           method(AccessMethod.NotRequestable),
           status(AccessStatus.TemporarilyUnavailable),
-          note("Item is in use by another reader. Please ask at Library Enquiry Desk."),
+          note(
+            "Item is in use by another reader. Please ask at Library Enquiry Desk."),
           noTerms()
         )
       }
@@ -452,7 +461,8 @@ class SierraItemAccessTest
 
         ac should have(
           method(AccessMethod.ManualRequest),
-          note("Email library@wellcomecollection.org to tell us why you need access. We’ll reply within a week."),
+          note(
+            "Email library@wellcomecollection.org to tell us why you need access. We’ll reply within a week."),
           noStatus(),
           noTerms()
         )
@@ -482,8 +492,9 @@ class SierraItemAccessTest
           itemData = itemData
         )
 
-        ac should have (
-          note("Item is in use by another reader. Please ask at Library Enquiry Desk.")
+        ac should have(
+          note(
+            "Item is in use by another reader. Please ask at Library Enquiry Desk.")
         )
 
         itemNote shouldBe None
@@ -512,7 +523,8 @@ class SierraItemAccessTest
         )
 
         ac should have(
-          note("Email library@wellcomecollection.org to tell us why you need the physical copy. We'll reply within a week.")
+          note(
+            "Email library@wellcomecollection.org to tell us why you need the physical copy. We'll reply within a week.")
         )
       }
 
@@ -587,7 +599,8 @@ class SierraItemAccessTest
         )
 
         ac should have(
-          note("Shelved at the end of the Quick Ref. section with the oversize Quick Ref. books.")
+          note(
+            "Shelved at the end of the Quick Ref. section with the oversize Quick Ref. books.")
         )
       }
     }
@@ -633,7 +646,8 @@ class SierraItemAccessTest
       ac should have(
         method(AccessMethod.OpenShelves),
         status(AccessStatus.TemporarilyUnavailable),
-        note("This item is temporarily unavailable. It is due for return on 1 September 2020."),
+        note(
+          "This item is temporarily unavailable. It is due for return on 1 September 2020."),
         noTerms()
       )
     }
