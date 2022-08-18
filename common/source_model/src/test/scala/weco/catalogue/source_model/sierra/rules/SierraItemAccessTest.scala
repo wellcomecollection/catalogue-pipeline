@@ -2,18 +2,15 @@ package weco.catalogue.source_model.sierra.rules
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.locations.{
-  AccessCondition,
-  AccessMethod,
-  AccessStatus,
-  LocationType
-}
+import weco.catalogue.internal_model.locations.{AccessMethod, AccessStatus, LocationType}
+import weco.catalogue.source_model.fixtures.AccessConditionMatchers
 import weco.sierra.generators.SierraDataGenerators
 import weco.sierra.models.marc.{FixedField, VarField}
 
 class SierraItemAccessTest
     extends AnyFunSpec
     with Matchers
+    with AccessConditionMatchers
     with SierraDataGenerators {
 
   def createFixedFieldWith(label: String)(value: String,
@@ -50,9 +47,12 @@ class SierraItemAccessTest
             itemData = itemData
           )
 
-          ac shouldBe AccessCondition(
-            method = AccessMethod.OnlineRequest,
-            status = AccessStatus.Open)
+          ac should have (
+            method(AccessMethod.OnlineRequest),
+            status(AccessStatus.Open),
+            noTerms(),
+            noNote(),
+          )
         }
 
         it("if it's restricted") {
@@ -69,10 +69,12 @@ class SierraItemAccessTest
             itemData = itemData
           )
 
-          ac shouldBe
-            AccessCondition(
-              method = AccessMethod.OnlineRequest,
-              status = AccessStatus.Restricted)
+          ac should have(
+            method(AccessMethod.OnlineRequest),
+            status(AccessStatus.Restricted),
+            noTerms(),
+            noNote(),
+          )
         }
       }
 
@@ -92,7 +94,12 @@ class SierraItemAccessTest
             itemData = itemData
           )
 
-          ac shouldBe AccessCondition(method = AccessMethod.ManualRequest)
+          ac should have(
+            method(AccessMethod.ManualRequest),
+            noStatus(),
+            noTerms(),
+            noNote(),
+          )
         }
 
         it("if it's bound in the top item") {
@@ -109,10 +116,12 @@ class SierraItemAccessTest
             itemData = itemData
           )
 
-          ac shouldBe
-            AccessCondition(
-              method = AccessMethod.NotRequestable,
-              note = Some("Please request top item."))
+          ac should have(
+            method(AccessMethod.NotRequestable),
+            note("Please request top item."),
+            noStatus(),
+            noTerms()
+          )
         }
 
         it("if it's contained the top item") {
@@ -129,10 +138,12 @@ class SierraItemAccessTest
             itemData = itemData
           )
 
-          ac shouldBe
-            AccessCondition(
-              method = AccessMethod.NotRequestable,
-              note = Some("Please request top item."))
+          ac should have(
+            method(AccessMethod.NotRequestable),
+            note("Please request top item."),
+            noStatus(),
+            noTerms()
+          )
         }
 
         it("if the bib and the item are closed") {
@@ -149,11 +160,12 @@ class SierraItemAccessTest
             itemData = itemData
           )
 
-          ac shouldBe
-            AccessCondition(
-              method = AccessMethod.NotRequestable,
-              status = AccessStatus.Closed
-            )
+          ac should have(
+            method(AccessMethod.NotRequestable),
+            status(AccessStatus.Closed),
+            noTerms(),
+            noNote()
+          )
         }
 
         it("if the item is unavailable") {
@@ -170,13 +182,12 @@ class SierraItemAccessTest
             itemData = itemData
           )
 
-          ac shouldBe
-            AccessCondition(
-              method = AccessMethod.NotRequestable,
-              status = Some(AccessStatus.TemporarilyUnavailable),
-              note = Some(
-                "This item is undergoing internal assessment or conservation work.")
-            )
+          ac should have(
+            method(AccessMethod.NotRequestable),
+            status(AccessStatus.TemporarilyUnavailable),
+            note("This item is undergoing internal assessment or conservation work."),
+            noTerms()
+          )
         }
 
         it("if the item is at digitisation") {
@@ -193,13 +204,12 @@ class SierraItemAccessTest
             itemData = itemData
           )
 
-          ac shouldBe
-            AccessCondition(
-              method = AccessMethod.NotRequestable,
-              status = Some(AccessStatus.TemporarilyUnavailable),
-              note = Some(
-                "This item is being digitised and is currently unavailable.")
-            )
+          ac should have(
+            method(AccessMethod.NotRequestable),
+            status(AccessStatus.TemporarilyUnavailable),
+            note("This item is being digitised and is currently unavailable."),
+            noTerms()
+          )
         }
 
         it("if doesn't double up the note about digitisation") {
@@ -223,13 +233,12 @@ class SierraItemAccessTest
             itemData = itemData
           )
 
-          ac shouldBe
-            AccessCondition(
-              method = AccessMethod.NotRequestable,
-              status = Some(AccessStatus.TemporarilyUnavailable),
-              note = Some(
-                "This item is being digitised and is currently unavailable.")
-            )
+          ac should have(
+            method(AccessMethod.NotRequestable),
+            status(AccessStatus.TemporarilyUnavailable),
+            note("This item is being digitised and is currently unavailable."),
+            noTerms()
+          )
         }
 
         it("if the item is by appointment") {
@@ -246,10 +255,12 @@ class SierraItemAccessTest
             itemData = itemData
           )
 
-          ac shouldBe
-            AccessCondition(
-              method = AccessMethod.ManualRequest,
-              status = AccessStatus.ByAppointment)
+          ac should have(
+            method(AccessMethod.ManualRequest),
+            status(AccessStatus.ByAppointment),
+            noTerms(),
+            noNote()
+          )
         }
 
         it("if the item needs donor permission") {
@@ -266,10 +277,12 @@ class SierraItemAccessTest
             itemData = itemData
           )
 
-          ac shouldBe
-            AccessCondition(
-              method = AccessMethod.ManualRequest,
-              status = AccessStatus.PermissionRequired)
+          ac should have(
+            method(AccessMethod.ManualRequest),
+            status(AccessStatus.PermissionRequired),
+            noTerms(),
+            noNote()
+          )
         }
 
         it("if the item is missing") {
@@ -286,12 +299,12 @@ class SierraItemAccessTest
             itemData = itemData
           )
 
-          ac shouldBe
-            AccessCondition(
-              method = AccessMethod.NotRequestable,
-              status = Some(AccessStatus.Unavailable),
-              note = Some("This item is missing.")
-            )
+          ac should have(
+            method(AccessMethod.NotRequestable),
+            status(AccessStatus.Unavailable),
+            note("This item is missing."),
+            noTerms()
+          )
         }
 
         it("if the item is withdrawn") {
@@ -308,12 +321,12 @@ class SierraItemAccessTest
             itemData = itemData
           )
 
-          ac shouldBe
-            AccessCondition(
-              method = AccessMethod.NotRequestable,
-              status = Some(AccessStatus.Unavailable),
-              note = Some("This item is withdrawn.")
-            )
+          ac should have(
+            method(AccessMethod.NotRequestable),
+            status(AccessStatus.Unavailable),
+            note("This item is withdrawn."),
+            noTerms()
+          )
         }
       }
     }
@@ -334,13 +347,12 @@ class SierraItemAccessTest
           itemData = itemData
         )
 
-        ac shouldBe
-          AccessCondition(
-            method = AccessMethod.NotRequestable,
-            status = Some(AccessStatus.TemporarilyUnavailable),
-            note = Some(
-              "Item is in use by another reader. Please ask at Library Enquiry Desk.")
-          )
+        ac should have(
+          method(AccessMethod.NotRequestable),
+          status(AccessStatus.TemporarilyUnavailable),
+          note("Item is in use by another reader. Please ask at Library Enquiry Desk."),
+          noTerms()
+        )
       }
 
       it("when an item is on hold for a loan rule") {
@@ -359,13 +371,12 @@ class SierraItemAccessTest
           itemData = itemData
         )
 
-        ac shouldBe
-          AccessCondition(
-            method = AccessMethod.NotRequestable,
-            status = Some(AccessStatus.TemporarilyUnavailable),
-            note = Some(
-              "Item is in use by another reader. Please ask at Library Enquiry Desk.")
-          )
+        ac should have(
+          method(AccessMethod.NotRequestable),
+          status(AccessStatus.TemporarilyUnavailable),
+          note("Item is in use by another reader. Please ask at Library Enquiry Desk."),
+          noTerms()
+        )
       }
 
       it("when a manual request item is on hold for somebody else") {
@@ -384,13 +395,12 @@ class SierraItemAccessTest
           itemData = itemData
         )
 
-        ac shouldBe
-          AccessCondition(
-            method = AccessMethod.NotRequestable,
-            status = Some(AccessStatus.TemporarilyUnavailable),
-            note = Some(
-              "Item is in use by another reader. Please ask at Library Enquiry Desk.")
-          )
+        ac should have(
+          method(AccessMethod.NotRequestable),
+          status(AccessStatus.TemporarilyUnavailable),
+          note("Item is in use by another reader. Please ask at Library Enquiry Desk."),
+          noTerms()
+        )
       }
 
       it("when it's on the hold shelf for another reader") {
@@ -408,13 +418,12 @@ class SierraItemAccessTest
           itemData = itemData
         )
 
-        ac shouldBe
-          AccessCondition(
-            method = AccessMethod.NotRequestable,
-            status = Some(AccessStatus.TemporarilyUnavailable),
-            note = Some(
-              "Item is in use by another reader. Please ask at Library Enquiry Desk.")
-          )
+        ac should have(
+          method(AccessMethod.NotRequestable),
+          status(AccessStatus.TemporarilyUnavailable),
+          note("Item is in use by another reader. Please ask at Library Enquiry Desk."),
+          noTerms()
+        )
       }
     }
 
@@ -436,18 +445,19 @@ class SierraItemAccessTest
           )
         )
 
-        val (ac, note) = SierraItemAccess(
+        val (ac, itemNote) = SierraItemAccess(
           location = Some(LocationType.ClosedStores),
           itemData = itemData
         )
 
-        ac shouldBe AccessCondition(
-          method = AccessMethod.ManualRequest,
-          note = Some(
-            "Email library@wellcomecollection.org to tell us why you need access. We’ll reply within a week.")
+        ac should have(
+          method(AccessMethod.ManualRequest),
+          note("Email library@wellcomecollection.org to tell us why you need access. We’ll reply within a week."),
+          noStatus(),
+          noTerms()
         )
 
-        note shouldBe None
+        itemNote shouldBe None
       }
 
       it("doesn't overwrite the note if there's a hold on the item") {
@@ -467,14 +477,16 @@ class SierraItemAccessTest
           )
         )
 
-        val (ac, note) = SierraItemAccess(
+        val (ac, itemNote) = SierraItemAccess(
           location = Some(LocationType.ClosedStores),
           itemData = itemData
         )
 
-        ac.note shouldBe Some(
-          "Item is in use by another reader. Please ask at Library Enquiry Desk.")
-        note shouldBe None
+        ac should have (
+          note("Item is in use by another reader. Please ask at Library Enquiry Desk.")
+        )
+
+        itemNote shouldBe None
       }
 
       it("if there's a display note with access information") {
@@ -499,8 +511,9 @@ class SierraItemAccessTest
           itemData = itemData
         )
 
-        ac.note shouldBe Some(
-          "Email library@wellcomecollection.org to tell us why you need the physical copy. We'll reply within a week.")
+        ac should have(
+          note("Email library@wellcomecollection.org to tell us why you need the physical copy. We'll reply within a week.")
+        )
       }
 
       it("returns the note if it's unrelated to access data") {
@@ -518,12 +531,12 @@ class SierraItemAccessTest
           )
         )
 
-        val (_, Some(note)) = SierraItemAccess(
+        val (_, Some(itemNote)) = SierraItemAccess(
           location = Some(LocationType.ClosedStores),
           itemData = itemData
         )
 
-        note shouldBe "uncoloured impression on paper mount"
+        itemNote shouldBe "uncoloured impression on paper mount"
       }
     }
   }
@@ -544,7 +557,12 @@ class SierraItemAccessTest
           itemData = itemData
         )
 
-        ac shouldBe AccessCondition(method = AccessMethod.OpenShelves)
+        ac should have(
+          method(AccessMethod.OpenShelves),
+          noStatus(),
+          noTerms(),
+          noNote()
+        )
       }
 
       it("gets a display note") {
@@ -568,8 +586,9 @@ class SierraItemAccessTest
           itemData = itemData
         )
 
-        ac.note shouldBe Some(
-          "Shelved at the end of the Quick Ref. section with the oversize Quick Ref. books.")
+        ac should have(
+          note("Shelved at the end of the Quick Ref. section with the oversize Quick Ref. books.")
+        )
       }
     }
 
@@ -587,12 +606,12 @@ class SierraItemAccessTest
         itemData = itemData
       )
 
-      ac shouldBe
-        AccessCondition(
-          method = AccessMethod.NotRequestable,
-          status = Some(AccessStatus.Unavailable),
-          note = Some("This item is missing.")
-        )
+      ac should have(
+        method(AccessMethod.NotRequestable),
+        status(AccessStatus.Unavailable),
+        note("This item is missing."),
+        noTerms()
+      )
     }
 
     it("is not available if it has a due date") {
@@ -611,12 +630,11 @@ class SierraItemAccessTest
         itemData = itemData
       )
 
-      ac shouldBe AccessCondition(
-        method = AccessMethod.OpenShelves,
-        status = Some(AccessStatus.TemporarilyUnavailable),
-        note = Some(
-          "This item is temporarily unavailable. It is due for return on 1 September 2020."
-        )
+      ac should have(
+        method(AccessMethod.OpenShelves),
+        status(AccessStatus.TemporarilyUnavailable),
+        note("This item is temporarily unavailable. It is due for return on 1 September 2020."),
+        noTerms()
       )
     }
   }
@@ -638,9 +656,8 @@ class SierraItemAccessTest
         itemData = itemData
       )
 
-      ac shouldBe AccessCondition(
-        method = AccessMethod.NotRequestable,
-        note = Some(displayreservation)
+      ac should have(
+        note(displayreservation)
       )
     }
     it("can show multiple Reserves Notes") {
@@ -662,9 +679,8 @@ class SierraItemAccessTest
         itemData = itemData
       )
 
-      ac shouldBe AccessCondition(
-        method = AccessMethod.NotRequestable,
-        note = Some(
+      ac should have(
+        note(
           "in the bottom of a locked filing cabinet<br />" +
             "stuck in a disused lavatory<br />" +
             "with a sign on the door saying 'Beware of The Leopard'"
@@ -698,9 +714,8 @@ class SierraItemAccessTest
       //  - Something that has both an on and an off reserve entry is not expected to be On Exhibition.
       // However, it is something that *could* happen.
       // If these duplicate lines are encountered in real life, we should get the record corrected in Sierra.
-      ac shouldBe AccessCondition(
-        method = AccessMethod.NotRequestable,
-        note = Some(
+      ac should have(
+        note(
           "Beware of the Leopard<br />" +
             "Beware of the Leopard<br />" +
             "In a locked filing cabinet"
@@ -723,9 +738,8 @@ class SierraItemAccessTest
         itemData = itemData
       )
 
-      ac shouldBe AccessCondition(
-        method = AccessMethod.NotRequestable,
-        note = Some(
+      ac should have(
+        note(
           s"""This item cannot be requested online. Please contact <a href="mailto:library@wellcomecollection.org">library@wellcomecollection.org</a> for more information.""")
       )
     }
@@ -744,9 +758,8 @@ class SierraItemAccessTest
       itemData = itemData
     )
 
-    ac shouldBe AccessCondition(
-      method = AccessMethod.NotRequestable,
-      note = Some(
+    ac should have(
+      note(
         s"""This item cannot be requested online. Please contact <a href="mailto:library@wellcomecollection.org">library@wellcomecollection.org</a> for more information.""")
     )
   }
