@@ -16,16 +16,22 @@ class SierraItemAccessTest
     with Matchers
     with SierraDataGenerators {
 
-  def createFixedFieldWith(label: String)(value: String, display: String = ""): FixedField =
+  def createFixedFieldWith(label: String)(value: String,
+                                          display: String = ""): FixedField =
     FixedField(
       label = label,
-      value = value, if (display.isEmpty) { Some(display) } else { None }
+      value = value,
+      if (display.isEmpty) { Some(display) } else { None }
     )
 
-  def createLocationWith: (String, String) => FixedField = createFixedFieldWith(label = "LOCATION")
-  def createStatusWith: (String, String) => FixedField = createFixedFieldWith(label = "STATUS")
-  def createOpacMsgWith: (String, String) => FixedField = createFixedFieldWith(label = "OPACMSG")
-  def createItypeWith: (String, String) => FixedField = createFixedFieldWith(label = "ITYPE")
+  def createLocationWith: (String, String) => FixedField =
+    createFixedFieldWith(label = "LOCATION")
+  def createStatusWith: (String, String) => FixedField =
+    createFixedFieldWith(label = "STATUS")
+  def createOpacMsgWith: (String, String) => FixedField =
+    createFixedFieldWith(label = "OPACMSG")
+  def createItypeWith: (String, String) => FixedField =
+    createFixedFieldWith(label = "ITYPE")
 
   describe("an item in the closed stores") {
     describe("with no holds") {
@@ -317,7 +323,7 @@ class SierraItemAccessTest
         val itemData = createSierraItemDataWith(
           holdCount = Some(1),
           fixedFields = Map(
-            "79" -> createLocationWith("sgeph",  "Closed stores ephemera"),
+            "79" -> createLocationWith("sgeph", "Closed stores ephemera"),
             "88" -> createStatusWith("-", "Available"),
             "108" -> createOpacMsgWith("f", "Online request"),
           )
