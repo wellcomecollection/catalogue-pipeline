@@ -18,12 +18,14 @@ class SierraItemAccessTest
     with Matchers
     with SierraDataGenerators {
 
-  def createFixedFieldWith(label: String)(value: String, display: String): FixedField =
+  def createFixedFieldWith(label: String)(value: String, display: String): FixedField = {
+    And(s"$label = '$value' / '$display''")
     FixedField(
       label = label,
       value = value,
       display = display
     )
+  }
 
   def createLocationWith: (String, String) => FixedField = createFixedFieldWith(label = "LOCATION")
   def createOpacMsgWith: (String, String) => FixedField = createFixedFieldWith(label = "OPACMSG")
@@ -31,15 +33,11 @@ class SierraItemAccessTest
 
   it("an open item in the closed stores") {
     Given("an item in the closed stores with no holds")
-    val location = createLocationWith("scmac", "Closed stores Arch. & MSS")
-
     val holdCount = Some(0)
 
-    And("opacmsg = 'f' / online request")
-    val opacMsg = createOpacMsgWith("f", "Online request")
-
-    And("status = '-' / available")
+    val location = createLocationWith("scmac", "Closed stores Arch. & MSS")
     val status = createStatusWith("-", "Available")
+    val opacMsg = createOpacMsgWith("f", "Online request")
 
     When("we create an access condition")
     val itemData = createSierraItemDataWith(
@@ -69,27 +67,11 @@ class SierraItemAccessTest
 
   it("a restricted item in the closed stores") {
     Given("an item in the closed stores with no holds")
-    val location = FixedField(
-      label = "LOCATION",
-      value = "scmac",
-      display = "Closed stores Arch. & MSS"
-    )
-
     val holdCount = Some(0)
 
-    And("opacmsg = '-' / available")
-    val opacMsg = FixedField(
-      label = "OPACMSG",
-      value = "f",
-      display = "Online request"
-    )
-
-    And("status = 'f' / online request")
-    val status = FixedField(
-      label = "STATUS",
-      value = "-",
-      display = "Available"
-    )
+    val location = createLocationWith("scmac", "Closed stores Arch. & MSS")
+    val status = createStatusWith("-", "Available")
+    val opacMsg = createOpacMsgWith("c", "Restricted")
 
     When("we create an access condition")
     val itemData = createSierraItemDataWith(
@@ -109,8 +91,8 @@ class SierraItemAccessTest
     Then("the access method is 'online request'")
     ac.method shouldBe AccessMethod.OnlineRequest
 
-    And("the access status is 'open'")
-    ac.status shouldBe Some(AccessStatus.Open)
+    And("the access status is 'restricted'")
+    ac.status shouldBe Some(AccessStatus.Restricted)
 
     And("there's no free-text terms or note")
     ac.terms shouldBe None
@@ -119,36 +101,6 @@ class SierraItemAccessTest
 
   describe("an item in the closed stores") {
     describe("with no holds") {
-      describe("can be requested online") {
-        it("if it's restricted") {
-          val itemData = createSierraItemDataWith(
-            fixedFields = Map(
-              "79" -> FixedField(
-                label = "LOCATION",
-                value = "scmac",
-                display = "Closed stores Arch. & MSS"),
-              "88" -> FixedField(
-                label = "STATUS",
-                value = "-",
-                display = "Available"),
-              "108" -> FixedField(
-                label = "OPACMSG",
-                value = "c",
-                display = "Restricted"),
-            )
-          )
-
-          val (ac, _) = SierraItemAccess(
-            location = Some(LocationType.ClosedStores),
-            itemData = itemData
-          )
-
-          ac shouldBe
-            AccessCondition(
-              method = AccessMethod.OnlineRequest,
-              status = AccessStatus.Restricted)
-        }
-      }
 
       describe("cannot be requested") {
         it("if it needs a manual request") {
