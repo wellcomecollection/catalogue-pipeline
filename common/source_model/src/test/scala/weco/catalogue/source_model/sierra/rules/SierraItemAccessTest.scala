@@ -18,7 +18,8 @@ class SierraItemAccessTest
     with Matchers
     with SierraDataGenerators {
 
-  def createFixedFieldWith(label: String)(value: String, display: String): FixedField = {
+  def createFixedFieldWith(label: String)(value: String,
+                                          display: String): FixedField = {
     And(s"$label = '$value' / '$display''")
     FixedField(
       label = label,
@@ -27,9 +28,12 @@ class SierraItemAccessTest
     )
   }
 
-  def createLocationWith: (String, String) => FixedField = createFixedFieldWith(label = "LOCATION")
-  def createOpacMsgWith: (String, String) => FixedField = createFixedFieldWith(label = "OPACMSG")
-  def createStatusWith: (String, String) => FixedField = createFixedFieldWith(label = "STATUS")
+  def createLocationWith: (String, String) => FixedField =
+    createFixedFieldWith(label = "LOCATION")
+  def createOpacMsgWith: (String, String) => FixedField =
+    createFixedFieldWith(label = "OPACMSG")
+  def createStatusWith: (String, String) => FixedField =
+    createFixedFieldWith(label = "STATUS")
 
   it("an open item in the closed stores") {
     Given("an item in the closed stores with no holds")
