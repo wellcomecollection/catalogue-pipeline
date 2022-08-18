@@ -35,20 +35,16 @@ class SierraItemAccessTest
     Given("an item in the closed stores with no holds")
     val holdCount = Some(0)
 
-    val location = createLocationWith("scmac", "Closed stores Arch. & MSS")
-    val status = createStatusWith("-", "Available")
-    val opacMsg = createOpacMsgWith("f", "Online request")
-
-    When("we create an access condition")
     val itemData = createSierraItemDataWith(
       fixedFields = Map(
-        "79" -> location,
-        "88" -> status,
-        "108" -> opacMsg,
+        "79" -> createLocationWith("scmac", "Closed stores Arch. & MSS"),
+        "88" -> createStatusWith("-", "Available"),
+        "108" -> createOpacMsgWith("f", "Online request"),
       ),
       holdCount = holdCount
     )
 
+    When("we create an access condition")
     val (ac, _) = SierraItemAccess(
       location = Some(LocationType.ClosedStores),
       itemData = itemData
@@ -69,20 +65,16 @@ class SierraItemAccessTest
     Given("an item in the closed stores with no holds")
     val holdCount = Some(0)
 
-    val location = createLocationWith("scmac", "Closed stores Arch. & MSS")
-    val status = createStatusWith("-", "Available")
-    val opacMsg = createOpacMsgWith("c", "Restricted")
-
-    When("we create an access condition")
     val itemData = createSierraItemDataWith(
       fixedFields = Map(
-        "79" -> location,
-        "88" -> status,
-        "108" -> opacMsg,
+        "79" -> createLocationWith("scmac", "Closed stores Arch. & MSS"),
+        "88" -> createStatusWith("-", "Available"),
+        "108" -> createOpacMsgWith("c", "Restricted"),
       ),
       holdCount = holdCount
     )
 
+    When("we create an access condition")
     val (ac, _) = SierraItemAccess(
       location = Some(LocationType.ClosedStores),
       itemData = itemData
