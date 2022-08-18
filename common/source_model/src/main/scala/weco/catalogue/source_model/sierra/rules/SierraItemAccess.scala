@@ -145,7 +145,8 @@ object SierraItemAccess extends SierraQueryOps with Logging {
               Some(note)
 
             case _ =>
-              Some("This item needs to be ordered manually. Please ask a member of staff, or email <a href=\"mailto:library@wellcomecollection.org\">library@wellcomecollection.org</a>.")
+              Some(
+                "This item needs to be ordered manually. Please ask a member of staff, or email <a href=\"mailto:library@wellcomecollection.org\">library@wellcomecollection.org</a>.")
           }
 
         AccessCondition(method = AccessMethod.ManualRequest, note = accessNote)
