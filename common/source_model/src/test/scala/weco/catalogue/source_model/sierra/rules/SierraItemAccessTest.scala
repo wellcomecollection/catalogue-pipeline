@@ -15,24 +15,27 @@ class SierraItemAccessTest
     extends AnyFunSpec
     with Matchers
     with SierraDataGenerators {
+
+  def createFixedFieldWith(label: String)(value: String, display: String = ""): FixedField =
+    FixedField(
+      label = label,
+      value = value, if (display.isEmpty) { Some(display) } else { None }
+    )
+
+  def createLocationWith: (String, String) => FixedField = createFixedFieldWith(label = "LOCATION")
+  def createStatusWith: (String, String) => FixedField = createFixedFieldWith(label = "STATUS")
+  def createOpacMsgWith: (String, String) => FixedField = createFixedFieldWith(label = "OPACMSG")
+  def createItypeWith: (String, String) => FixedField = createFixedFieldWith(label = "ITYPE")
+
   describe("an item in the closed stores") {
     describe("with no holds") {
       describe("can be requested online") {
         it("if it has no restrictions") {
           val itemData = createSierraItemDataWith(
             fixedFields = Map(
-              "79" -> FixedField(
-                label = "LOCATION",
-                value = "scmac",
-                display = "Closed stores Arch. & MSS"),
-              "88" -> FixedField(
-                label = "STATUS",
-                value = "-",
-                display = "Available"),
-              "108" -> FixedField(
-                label = "OPACMSG",
-                value = "f",
-                display = "Online request"),
+              "79" -> createLocationWith("scmac", "Closed stores Arch. & MSS"),
+              "88" -> createStatusWith("-", "Available"),
+              "108" -> createOpacMsgWith("f", "Online request"),
             )
           )
 
@@ -49,18 +52,9 @@ class SierraItemAccessTest
         it("if it's restricted") {
           val itemData = createSierraItemDataWith(
             fixedFields = Map(
-              "79" -> FixedField(
-                label = "LOCATION",
-                value = "scmac",
-                display = "Closed stores Arch. & MSS"),
-              "88" -> FixedField(
-                label = "STATUS",
-                value = "-",
-                display = "Available"),
-              "108" -> FixedField(
-                label = "OPACMSG",
-                value = "c",
-                display = "Restricted"),
+              "79" -> createLocationWith("scmac", "Closed stores Arch. & MSS"),
+              "88" -> createStatusWith("-", "Available"),
+              "108" -> createOpacMsgWith("c", "Restricted"),
             )
           )
 
@@ -80,22 +74,10 @@ class SierraItemAccessTest
         it("if it needs a manual request") {
           val itemData = createSierraItemDataWith(
             fixedFields = Map(
-              "61" -> FixedField(
-                label = "I TYPE",
-                value = "4",
-                display = "serial"),
-              "79" -> FixedField(
-                label = "LOCATION",
-                value = "sgser",
-                display = "Closed stores journals"),
-              "88" -> FixedField(
-                label = "STATUS",
-                value = "-",
-                display = "Available"),
-              "108" -> FixedField(
-                label = "OPACMSG",
-                value = "n",
-                display = "Manual request"),
+              "61" -> createItypeWith("4", "serial"),
+              "79" -> createLocationWith("sgser", "Closed stores journals"),
+              "88" -> createStatusWith("-", "Available"),
+              "108" -> createOpacMsgWith("n", "Manual request"),
             )
           )
 
@@ -110,18 +92,9 @@ class SierraItemAccessTest
         it("if it's bound in the top item") {
           val itemData = createSierraItemDataWith(
             fixedFields = Map(
-              "79" -> FixedField(
-                label = "LOCATION",
-                value = "bwith",
-                display = "bound in above"),
-              "88" -> FixedField(
-                label = "STATUS",
-                value = "b",
-                display = "As above"),
-              "108" -> FixedField(
-                label = "OPACMSG",
-                value = "-",
-                display = "-"),
+              "79" -> createLocationWith("bwith", "bound in above"),
+              "88" -> createStatusWith("b", "As above"),
+              "108" -> createOpacMsgWith("-", "-"),
             )
           )
 
@@ -139,18 +112,9 @@ class SierraItemAccessTest
         it("if it's contained the top item") {
           val itemData = createSierraItemDataWith(
             fixedFields = Map(
-              "79" -> FixedField(
-                label = "LOCATION",
-                value = "cwith",
-                display = "contained in above"),
-              "88" -> FixedField(
-                label = "STATUS",
-                value = "c",
-                display = "As above"),
-              "108" -> FixedField(
-                label = "OPACMSG",
-                value = "-",
-                display = "-"),
+              "79" -> createLocationWith("cwith", "contained in above"),
+              "88" -> createStatusWith("c", "As above"),
+              "108" -> createOpacMsgWith("-", "-"),
             )
           )
 
@@ -168,18 +132,9 @@ class SierraItemAccessTest
         it("if the bib and the item are closed") {
           val itemData = createSierraItemDataWith(
             fixedFields = Map(
-              "79" -> FixedField(
-                label = "LOCATION",
-                value = "sc#ac",
-                display = "Unrequestable Arch. & MSS"),
-              "88" -> FixedField(
-                label = "STATUS",
-                value = "h",
-                display = "Closed"),
-              "108" -> FixedField(
-                label = "OPACMSG",
-                value = "u",
-                display = "Unavailable"),
+              "79" -> createLocationWith("sc#ac", "Unrequestable Arch. & MSS"),
+              "88" -> createStatusWith("h", "Closed"),
+              "108" -> createOpacMsgWith("u", "Unavailable"),
             )
           )
 
@@ -198,18 +153,9 @@ class SierraItemAccessTest
         it("if the item is unavailable") {
           val itemData = createSierraItemDataWith(
             fixedFields = Map(
-              "79" -> FixedField(
-                label = "LOCATION",
-                value = "sgser",
-                display = "Closed stores journals"),
-              "88" -> FixedField(
-                label = "STATUS",
-                value = "r",
-                display = "Unavailable"),
-              "108" -> FixedField(
-                label = "OPACMSG",
-                value = "u",
-                display = "Unavailable"),
+              "79" -> createLocationWith("sgser", "Closed stores journals"),
+              "88" -> createStatusWith("r", "Unavailable"),
+              "108" -> createOpacMsgWith("u", "Unavailable"),
             )
           )
 
@@ -230,18 +176,9 @@ class SierraItemAccessTest
         it("if the item is at digitisation") {
           val itemData = createSierraItemDataWith(
             fixedFields = Map(
-              "79" -> FixedField(
-                label = "LOCATION",
-                value = "sgser",
-                display = "Closed stores journals"),
-              "88" -> FixedField(
-                label = "STATUS",
-                value = "r",
-                display = "Unavailable"),
-              "108" -> FixedField(
-                label = "OPACMSG",
-                value = "b",
-                display = "@ digitisation"),
+              "79" -> createLocationWith("sgser", "Closed stores journals"),
+              "88" -> createStatusWith("r", "Unavailable"),
+              "108" -> createOpacMsgWith("b", "@ digitisation"),
             )
           )
 
@@ -262,18 +199,9 @@ class SierraItemAccessTest
         it("if doesn't double up the note about digitisation") {
           val itemData = createSierraItemDataWith(
             fixedFields = Map(
-              "79" -> FixedField(
-                label = "LOCATION",
-                value = "sgser",
-                display = "Closed stores journals"),
-              "88" -> FixedField(
-                label = "STATUS",
-                value = "r",
-                display = "Unavailable"),
-              "108" -> FixedField(
-                label = "OPACMSG",
-                value = "b",
-                display = "@ digitisation"),
+              "79" -> createLocationWith("sgser", "Closed stores journals"),
+              "88" -> createStatusWith("r", "Unavailable"),
+              "108" -> createOpacMsgWith("b", "@ digitisation"),
             ),
             varFields = List(
               VarField(
@@ -301,18 +229,9 @@ class SierraItemAccessTest
         it("if the item is by appointment") {
           val itemData = createSierraItemDataWith(
             fixedFields = Map(
-              "79" -> FixedField(
-                label = "LOCATION",
-                value = "scmac",
-                display = "Closed stores Arch. & MSS"),
-              "88" -> FixedField(
-                label = "STATUS",
-                value = "y",
-                display = "Permission required"),
-              "108" -> FixedField(
-                label = "OPACMSG",
-                value = "a",
-                display = "By appointment"),
+              "79" -> createLocationWith("scmac", "Closed stores Arch. & MSS"),
+              "88" -> createStatusWith("y", "Permission required"),
+              "108" -> createOpacMsgWith("a", "By appointment"),
             )
           )
 
@@ -330,18 +249,9 @@ class SierraItemAccessTest
         it("if the item needs donor permission") {
           val itemData = createSierraItemDataWith(
             fixedFields = Map(
-              "79" -> FixedField(
-                label = "LOCATION",
-                value = "sc#ac",
-                display = "Unrequestable Arch. & MSS"),
-              "88" -> FixedField(
-                label = "STATUS",
-                value = "y",
-                display = "Permission required"),
-              "108" -> FixedField(
-                label = "OPACMSG",
-                value = "q",
-                display = "Donor permission"),
+              "79" -> createLocationWith("sc#ac", "Unrequestable Arch. & MSS"),
+              "88" -> createStatusWith("y", "Permission required"),
+              "108" -> createOpacMsgWith("q", "Donor permission"),
             )
           )
 
@@ -359,18 +269,9 @@ class SierraItemAccessTest
         it("if the item is missing") {
           val itemData = createSierraItemDataWith(
             fixedFields = Map(
-              "79" -> FixedField(
-                label = "LOCATION",
-                value = "sghi2",
-                display = "Closed stores Hist. 2"),
-              "88" -> FixedField(
-                label = "STATUS",
-                value = "m",
-                display = "Missing"),
-              "108" -> FixedField(
-                label = "OPACMSG",
-                value = "f",
-                display = "Online request"),
+              "79" -> createLocationWith("sghi2", "Closed stores Hist. 2"),
+              "88" -> createStatusWith("m", "Missing"),
+              "108" -> createOpacMsgWith("f", "Online request"),
             )
           )
 
@@ -390,18 +291,9 @@ class SierraItemAccessTest
         it("if the item is withdrawn") {
           val itemData = createSierraItemDataWith(
             fixedFields = Map(
-              "79" -> FixedField(
-                label = "LOCATION",
-                value = "sghx2",
-                display = "Closed stores Hist. O/S 2"),
-              "88" -> FixedField(
-                label = "STATUS",
-                value = "x",
-                display = "Withdrawn"),
-              "108" -> FixedField(
-                label = "OPACMSG",
-                value = "u",
-                display = "Unavailable"),
+              "79" -> createLocationWith("sghx2", "Closed stores Hist. O/S 2"),
+              "88" -> createStatusWith("x", "Withdrawn"),
+              "108" -> createOpacMsgWith("u", "Unavailable"),
             )
           )
 
@@ -425,18 +317,9 @@ class SierraItemAccessTest
         val itemData = createSierraItemDataWith(
           holdCount = Some(1),
           fixedFields = Map(
-            "79" -> FixedField(
-              label = "LOCATION",
-              value = "sgeph",
-              display = "Closed stores ephemera"),
-            "88" -> FixedField(
-              label = "STATUS",
-              value = "-",
-              display = "Available"),
-            "108" -> FixedField(
-              label = "OPACMSG",
-              value = "f",
-              display = "Online request"),
+            "79" -> createLocationWith("sgeph",  "Closed stores ephemera"),
+            "88" -> createStatusWith("-", "Available"),
+            "108" -> createOpacMsgWith("f", "Online request"),
           )
         )
 
@@ -458,19 +341,10 @@ class SierraItemAccessTest
         val itemData = createSierraItemDataWith(
           holdCount = Some(1),
           fixedFields = Map(
-            "79" -> FixedField(
-              label = "LOCATION",
-              value = "sgeph",
-              display = "Closed stores ephemera"),
-            "87" -> FixedField(label = "LOANRULE", value = "5"),
-            "88" -> FixedField(
-              label = "STATUS",
-              value = "-",
-              display = "Available"),
-            "108" -> FixedField(
-              label = "OPACMSG",
-              value = "f",
-              display = "Online request"),
+            "79" -> createLocationWith("sgeph", "Closed stores ephemera"),
+            "87" -> createFixedFieldWith("LOANRULE")("5"),
+            "88" -> createStatusWith("-", "Available"),
+            "108" -> createOpacMsgWith("f", "Online request"),
           )
         )
 
@@ -492,22 +366,10 @@ class SierraItemAccessTest
         val itemData = createSierraItemDataWith(
           holdCount = Some(1),
           fixedFields = Map(
-            "61" -> FixedField(
-              label = "I TYPE",
-              value = "4",
-              display = "serial"),
-            "79" -> FixedField(
-              label = "LOCATION",
-              value = "sgser",
-              display = "Closed stores journals"),
-            "88" -> FixedField(
-              label = "STATUS",
-              value = "-",
-              display = "Available"),
-            "108" -> FixedField(
-              label = "OPACMSG",
-              value = "n",
-              display = "Manual request"),
+            "61" -> createItypeWith("4", "serial"),
+            "79" -> createLocationWith("sgser", "Closed stores journals"),
+            "88" -> createStatusWith("-", "Available"),
+            "108" -> createOpacMsgWith("n", "Manual request"),
           )
         )
 
@@ -529,18 +391,9 @@ class SierraItemAccessTest
         val itemData = createSierraItemDataWith(
           holdCount = Some(1),
           fixedFields = Map(
-            "79" -> FixedField(
-              label = "LOCATION",
-              value = "swms4",
-              display = "Closed stores WMS 4"),
-            "88" -> FixedField(
-              label = "STATUS",
-              value = "!",
-              display = "On holdshelf"),
-            "108" -> FixedField(
-              label = "OPACMSG",
-              value = "f",
-              display = "Online request"),
+            "79" -> createLocationWith("swms4", "Closed stores WMS 4"),
+            "88" -> createStatusWith("!", "On holdshelf"),
+            "108" -> createOpacMsgWith("f", "Online request"),
           )
         )
 
@@ -563,22 +416,10 @@ class SierraItemAccessTest
       it("if there's a display note about manual requesting") {
         val itemData = createSierraItemDataWith(
           fixedFields = Map(
-            "61" -> FixedField(
-              label = "I TYPE",
-              value = "4",
-              display = "serial"),
-            "79" -> FixedField(
-              label = "LOCATION",
-              value = "sgser",
-              display = "Closed stores journals"),
-            "88" -> FixedField(
-              label = "STATUS",
-              value = "-",
-              display = "Available"),
-            "108" -> FixedField(
-              label = "OPACMSG",
-              value = "n",
-              display = "Manual request"),
+            "61" -> createItypeWith("4", "serial"),
+            "79" -> createLocationWith("sgser", "Closed stores journals"),
+            "88" -> createStatusWith("-", "Available"),
+            "108" -> createOpacMsgWith("n", "Manual request"),
           ),
           varFields = List(
             VarField(
@@ -606,18 +447,9 @@ class SierraItemAccessTest
       it("doesn't overwrite the note if there's a hold on the item") {
         val itemData = createSierraItemDataWith(
           fixedFields = Map(
-            "79" -> FixedField(
-              label = "LOCATION",
-              value = "sgser",
-              display = "Closed stores journals"),
-            "88" -> FixedField(
-              label = "STATUS",
-              value = "-",
-              display = "Available"),
-            "108" -> FixedField(
-              label = "OPACMSG",
-              value = "f",
-              display = "Online request"),
+            "79" -> createLocationWith("sgser", "Closed stores journals"),
+            "88" -> createStatusWith("-", "Available"),
+            "108" -> createOpacMsgWith("f", "Online request"),
           ),
           holdCount = Some(1),
           varFields = List(
@@ -642,23 +474,10 @@ class SierraItemAccessTest
       it("if there's a display note with access information") {
         val itemData = createSierraItemDataWith(
           fixedFields = Map(
-            "61" -> FixedField(
-              label = "I TYPE",
-              value = "4",
-              display = "serial"
-            ),
-            "79" -> FixedField(
-              label = "LOCATION",
-              value = "hgser",
-              display = "Offsite"),
-            "88" -> FixedField(
-              label = "STATUS",
-              value = "y",
-              display = "Permission required"),
-            "108" -> FixedField(
-              label = "OPACMSG",
-              value = "a",
-              display = "By appointment"),
+            "61" -> createItypeWith("4", "serial"),
+            "79" -> createLocationWith("hgser", "Offsite"),
+            "88" -> createStatusWith("y", "Permission required"),
+            "108" -> createOpacMsgWith("a", "By appointment"),
           ),
           varFields = List(
             VarField(
@@ -681,18 +500,9 @@ class SierraItemAccessTest
       it("returns the note if it's unrelated to access data") {
         val itemData = createSierraItemDataWith(
           fixedFields = Map(
-            "79" -> FixedField(
-              label = "LOCATION",
-              value = "scmac",
-              display = "Closed stores Arch. & MSS"),
-            "88" -> FixedField(
-              label = "STATUS",
-              value = "-",
-              display = "Available"),
-            "108" -> FixedField(
-              label = "OPACMSG",
-              value = "f",
-              display = "Online request"),
+            "79" -> createLocationWith("scmac", "Closed stores Arch. & MSS"),
+            "88" -> createStatusWith("-", "Available"),
+            "108" -> createOpacMsgWith("f", "Online request"),
           ),
           varFields = List(
             VarField(
@@ -717,18 +527,9 @@ class SierraItemAccessTest
       it("cannot be requested online") {
         val itemData = createSierraItemDataWith(
           fixedFields = Map(
-            "79" -> FixedField(
-              label = "LOCATION",
-              value = "wgmem",
-              display = "Medical Collection"),
-            "88" -> FixedField(
-              label = "STATUS",
-              value = "-",
-              display = "Available"),
-            "108" -> FixedField(
-              label = "OPACMSG",
-              value = "o",
-              display = "Open shelves"),
+            "79" -> createLocationWith("wgmem", "Medical Collection"),
+            "88" -> createStatusWith("-", "Available"),
+            "108" -> createOpacMsgWith("o", "Open shelves"),
           )
         )
 
@@ -743,18 +544,9 @@ class SierraItemAccessTest
       it("gets a display note") {
         val itemData = createSierraItemDataWith(
           fixedFields = Map(
-            "79" -> FixedField(
-              label = "LOCATION",
-              value = "wgpvm",
-              display = "History of Medicine"),
-            "88" -> FixedField(
-              label = "STATUS",
-              value = "-",
-              display = "Available"),
-            "108" -> FixedField(
-              label = "OPACMSG",
-              value = "o",
-              display = "Open shelves"),
+            "79" -> createLocationWith("wgpvm", "History of Medicine"),
+            "88" -> createStatusWith("-", "Available"),
+            "108" -> createOpacMsgWith("o", "Open shelves"),
           ),
           varFields = List(
             VarField(
@@ -778,18 +570,9 @@ class SierraItemAccessTest
     it("is not available if it is missing") {
       val itemData = createSierraItemDataWith(
         fixedFields = Map(
-          "79" -> FixedField(
-            label = "LOCATION",
-            value = "wgmem",
-            display = "Medical Collection"),
-          "88" -> FixedField(
-            label = "STATUS",
-            value = "m",
-            display = "Missing"),
-          "108" -> FixedField(
-            label = "OPACMSG",
-            value = "o",
-            display = "Open shelves"),
+          "79" -> createLocationWith("wgmem", "Medical Collection"),
+          "88" -> createStatusWith("m", "Missing"),
+          "108" -> createOpacMsgWith("o", "Open shelves"),
         )
       )
 
@@ -809,29 +592,11 @@ class SierraItemAccessTest
     it("is not available if it has a due date") {
       val itemData = createSierraItemDataWith(
         fixedFields = Map(
-          "65" -> FixedField(
-            label = "DUE DATE",
-            value = "2020-09-01T03:00:00Z"
-          ),
-          "79" -> FixedField(
-            label = "LOCATION",
-            value = "wgpvm",
-            display = "History of Medicine"
-          ),
-          "87" -> FixedField(
-            label = "LOANRULE",
-            value = "14"
-          ),
-          "88" -> FixedField(
-            label = "STATUS",
-            value = "-",
-            display = "Available"
-          ),
-          "108" -> FixedField(
-            label = "OPACMSG",
-            value = "o",
-            display = "Open shelves"
-          )
+          "65" -> createFixedFieldWith("DUE DATE")("2020-09-01T03:00:00Z"),
+          "79" -> createLocationWith("wgpvm", "History of Medicine"),
+          "87" -> createFixedFieldWith("LOANRULE")("14"),
+          "88" -> createStatusWith("-", "Available"),
+          "108" -> createOpacMsgWith("o", "Open shelves")
         )
       )
 
@@ -855,10 +620,7 @@ class SierraItemAccessTest
         "Locked filing cabinet, disused lavatory with a sign saying 'Beware of The Leopard'"
       val itemData = createSierraItemDataWith(
         fixedFields = Map(
-          "79" -> FixedField(
-            label = "LOCATION",
-            value = "exres",
-            display = "On Exhibition")
+          "79" -> createLocationWith("exres", "On Exhibition")
         ),
         varFields = List(
           VarField(fieldTag = "r", displayreservation)
@@ -878,10 +640,7 @@ class SierraItemAccessTest
     it("can show multiple Reserves Notes") {
       val itemData = createSierraItemDataWith(
         fixedFields = Map(
-          "79" -> FixedField(
-            label = "LOCATION",
-            value = "exres",
-            display = "On Exhibition")
+          "79" -> createLocationWith("exres", "On Exhibition")
         ),
         varFields = List(
           VarField(fieldTag = "r", "in the bottom of a locked filing cabinet"),
@@ -909,10 +668,7 @@ class SierraItemAccessTest
     it("Only shows substantive content from Reserves Notes") {
       val itemData = createSierraItemDataWith(
         fixedFields = Map(
-          "79" -> FixedField(
-            label = "LOCATION",
-            value = "exres",
-            display = "On Exhibition")
+          "79" -> createLocationWith("exres", "On Exhibition")
         ),
         varFields = List(
           VarField(
@@ -949,10 +705,7 @@ class SierraItemAccessTest
       "has the default 'contact the library' note if there are no Reserves Notes") {
       val itemData = createSierraItemDataWith(
         fixedFields = Map(
-          "79" -> FixedField(
-            label = "LOCATION",
-            value = "exres",
-            display = "On Exhibition")
+          "79" -> createLocationWith("exres", "On Exhibition")
         ),
         varFields = List(
           VarField(fieldTag = "p", "GBP850")
@@ -974,15 +727,9 @@ class SierraItemAccessTest
   it("handles the case where we can't map the access data") {
     val itemData = createSierraItemDataWith(
       fixedFields = Map(
-        "79" -> FixedField(
-          label = "LOCATION",
-          value = "scmac",
-          display = "Closed stores Arch. & MSS"),
-        "88" -> FixedField(label = "STATUS", value = "?", display = "Unknown"),
-        "108" -> FixedField(
-          label = "OPACMSG",
-          value = "f",
-          display = "Online request"),
+        "79" -> createLocationWith("scmac", "Closed stores Arch. & MSS"),
+        "88" -> createStatusWith("?", "Unknown"),
+        "108" -> createOpacMsgWith("f", "Online request"),
       )
     )
 
