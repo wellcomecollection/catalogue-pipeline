@@ -1,5 +1,6 @@
 package weco.catalogue.source_model.sierra.rules
 
+import org.scalatest.GivenWhenThen
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.locations.{
@@ -13,39 +14,62 @@ import weco.sierra.models.marc.{FixedField, VarField}
 
 class SierraItemAccessTest
     extends AnyFunSpec
+    with GivenWhenThen
     with Matchers
     with SierraDataGenerators {
+  it("an open item in the closed stores") {
+    Given("an item in the closed stores with no holds")
+    val location = FixedField(
+      label = "LOCATION",
+      value = "scmac",
+      display = "Closed stores Arch. & MSS"
+    )
+
+    val holdCount = Some(0)
+
+    And("opacmsg = '-' / available")
+    val opacMsg = FixedField(
+      label = "OPACMSG",
+      value = "f",
+      display = "Online request"
+    )
+
+    And("status = 'f' / online request")
+    val status = FixedField(
+      label = "STATUS",
+      value = "-",
+      display = "Available"
+    )
+
+    When("we create an access condition")
+    val itemData = createSierraItemDataWith(
+      fixedFields = Map(
+        "79" -> location,
+        "88" -> status,
+        "108" -> opacMsg,
+      ),
+      holdCount = holdCount
+    )
+
+    val (ac, _) = SierraItemAccess(
+      location = Some(LocationType.ClosedStores),
+      itemData = itemData
+    )
+
+    Then("the access method is 'online request'")
+    ac.method shouldBe AccessMethod.OnlineRequest
+
+    And("the access status is 'open'")
+    ac.status shouldBe Some(AccessStatus.Open)
+
+    And("there's no free-text terms or note")
+    ac.terms shouldBe None
+    ac.note shouldBe None
+  }
+
   describe("an item in the closed stores") {
     describe("with no holds") {
       describe("can be requested online") {
-        it("if it has no restrictions") {
-          val itemData = createSierraItemDataWith(
-            fixedFields = Map(
-              "79" -> FixedField(
-                label = "LOCATION",
-                value = "scmac",
-                display = "Closed stores Arch. & MSS"),
-              "88" -> FixedField(
-                label = "STATUS",
-                value = "-",
-                display = "Available"),
-              "108" -> FixedField(
-                label = "OPACMSG",
-                value = "f",
-                display = "Online request"),
-            )
-          )
-
-          val (ac, _) = SierraItemAccess(
-            location = Some(LocationType.ClosedStores),
-            itemData = itemData
-          )
-
-          ac shouldBe AccessCondition(
-            method = AccessMethod.OnlineRequest,
-            status = AccessStatus.Open)
-        }
-
         it("if it's restricted") {
           val itemData = createSierraItemDataWith(
             fixedFields = Map(
