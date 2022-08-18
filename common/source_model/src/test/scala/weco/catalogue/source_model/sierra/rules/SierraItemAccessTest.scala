@@ -17,7 +17,57 @@ class SierraItemAccessTest
     with GivenWhenThen
     with Matchers
     with SierraDataGenerators {
+
+  def createFixedFieldWith(label: String)(value: String, display: String): FixedField =
+    FixedField(
+      label = label,
+      value = value,
+      display = display
+    )
+
+  def createLocationWith: (String, String) => FixedField = createFixedFieldWith(label = "LOCATION")
+  def createOpacMsgWith: (String, String) => FixedField = createFixedFieldWith(label = "OPACMSG")
+  def createStatusWith: (String, String) => FixedField = createFixedFieldWith(label = "STATUS")
+
   it("an open item in the closed stores") {
+    Given("an item in the closed stores with no holds")
+    val location = createLocationWith("scmac", "Closed stores Arch. & MSS")
+
+    val holdCount = Some(0)
+
+    And("opacmsg = 'f' / online request")
+    val opacMsg = createOpacMsgWith("f", "Online request")
+
+    And("status = '-' / available")
+    val status = createStatusWith("-", "Available")
+
+    When("we create an access condition")
+    val itemData = createSierraItemDataWith(
+      fixedFields = Map(
+        "79" -> location,
+        "88" -> status,
+        "108" -> opacMsg,
+      ),
+      holdCount = holdCount
+    )
+
+    val (ac, _) = SierraItemAccess(
+      location = Some(LocationType.ClosedStores),
+      itemData = itemData
+    )
+
+    Then("the access method is 'online request'")
+    ac.method shouldBe AccessMethod.OnlineRequest
+
+    And("the access status is 'open'")
+    ac.status shouldBe Some(AccessStatus.Open)
+
+    And("there's no free-text terms or note")
+    ac.terms shouldBe None
+    ac.note shouldBe None
+  }
+
+  it("a restricted item in the closed stores") {
     Given("an item in the closed stores with no holds")
     val location = FixedField(
       label = "LOCATION",
