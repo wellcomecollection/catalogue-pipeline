@@ -16,12 +16,13 @@ class SierraItemAccessTest
     with Matchers
     with SierraDataGenerators {
 
+  // Note: we capture the `display` value for debugging purposes, but
+  // it's not actually used in the downstream code so we ignore it.
   def createFixedFieldWith(label: String)(value: String,
                                           display: String = ""): FixedField =
     FixedField(
       label = label,
-      value = value,
-      if (display.isEmpty) { Some(display) } else { None }
+      value = value
     )
 
   def createLocationWith: (String, String) => FixedField =
