@@ -1,12 +1,13 @@
 package weco.catalogue.internal_model.index
 
-import com.sksamuel.elastic4s.handlers.index.CreateIndexContentBuilder
-import com.sksamuel.elastic4s.json.JacksonBuilder
-import com.sksamuel.elastic4s.requests.indexes.CreateIndexRequest
+import com.sksamuel.elastic4s.ElasticDsl._
+import io.circe.ACursor
+import io.circe.parser._
+import org.scalatest.Assertion
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import weco.elasticsearch.IndexConfig
 import weco.fixtures.LocalResources
-
 import weco.json.utils.JsonAssertions
 
 /**
@@ -25,35 +26,82 @@ class SearchIndexConfigJsonTest
     extends AnyFunSpec
     with Matchers
     with LocalResources
-    with JsonAssertions {
+    with JsonAssertions
+    with IndexFixtures {
+  def assertIndexConfigIsEquivalent(
+    jsonFile: String,
+    indexConfig: IndexConfig
+  ): Assertion = {
+    val fileJson =
+      parse(readResource(jsonFile)).right.get.hcursor
+    val fileMapping: String = fileJson.downField("mappings").focus.get.spaces2
+    val fileSettings: String = fileJson.downField("settings").focus.get.spaces2
+    withLocalElasticsearchIndex(config = indexConfig) { index =>
+      val indexMapping =
+        getJsonForIndex(
+          index.name,
+          "mappings",
+          elasticClient
+            .execute {
+              getMapping(index.name)
+            }
+            .await
+            .body
+            .get
+        ).focus.get.spaces2
+
+      val indexSettings = getAnalysisSettingsOnly(
+        responseBody = elasticClient
+          .execute {
+            getSettings(index.name)
+          }
+          .await
+          .body
+          .get,
+        indexName = index.name
+      )
+
+      assertJsonStringsAreEqual(fileMapping, indexMapping)
+      assertJsonStringsAreEqual(fileSettings, indexSettings)
+    }
+  }
 
   it("generates the correct works index config") {
-    val fileJson = readResource("WorksIndexConfig.json")
-
-    val indexJson = JacksonBuilder.writeAsString(
-      CreateIndexContentBuilder(
-        CreateIndexRequest(
-          "works",
-          analysis = Some(WorksIndexConfig.indexed.analysis),
-          mapping = Some(WorksIndexConfig.indexed.mapping.meta(Map()))
-        )
-      ).value)
-
-    assertJsonStringsAreEqual(fileJson, indexJson)
+    assertIndexConfigIsEquivalent(
+      "WorksIndexConfig.json",
+      WorksIndexConfig.indexed
+    )
   }
 
   it("generates the correct images index config") {
-    val fileJson = readResource("ImagesIndexConfig.json")
-
-    val indexJson = JacksonBuilder.writeAsString(
-      CreateIndexContentBuilder(
-        CreateIndexRequest(
-          "images",
-          analysis = Some(ImagesIndexConfig.indexed.analysis),
-          mapping = Some(ImagesIndexConfig.indexed.mapping.meta(Map()))
-        )
-      ).value)
-
-    assertJsonStringsAreEqual(fileJson, indexJson)
+    assertIndexConfigIsEquivalent(
+      "ImagesIndexConfig.json",
+      ImagesIndexConfig.indexed
+    )
   }
+
+  private def getAnalysisSettingsOnly(
+    responseBody: String,
+    indexName: String
+  ): String = {
+    val indexJson = getJsonForIndex(indexName, "settings", responseBody)
+    val filteredJson = indexJson
+      .downField("index")
+      .withFocus(_.mapObject(_.filter {
+        // We're only interested in looking at the analysis part of the settings
+        case ("analysis", _) => true
+        case _               => false
+      }))
+      .up
+    filteredJson.focus.get.spaces2
+  }
+
+  private def getJsonForIndex(
+    index: String,
+    path: String,
+    json: String
+  ): ACursor =
+    parse(json).right.get.hcursor
+      .downField(index)
+      .downField(path)
 }
