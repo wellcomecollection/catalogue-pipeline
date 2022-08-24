@@ -136,12 +136,17 @@ object SierraItemAccess extends SierraQueryOps with Logging {
         //      We'll reply within a week.
         //
         // If such a note is present, put it in the note field on the access condition.
+        //
+        // Otherwise, we use a placeholder note, which was asked for by Victoria Sloyan
+        // in an email to Alex dated 4 Jul 2022.
         val accessNote =
           itemData.displayNote match {
             case Some(note) if note.isManualRequestNote =>
               Some(note)
 
-            case _ => None
+            case _ =>
+              Some(
+                "This item needs to be ordered manually. Please ask a member of staff, or email <a href=\"mailto:library@wellcomecollection.org\">library@wellcomecollection.org</a>.")
           }
 
         AccessCondition(method = AccessMethod.ManualRequest, note = accessNote)

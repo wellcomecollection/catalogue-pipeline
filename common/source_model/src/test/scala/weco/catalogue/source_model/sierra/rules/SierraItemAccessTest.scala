@@ -103,7 +103,8 @@ class SierraItemAccessTest
             method(AccessMethod.ManualRequest),
             noStatus(),
             noTerms(),
-            noNote(),
+            note(
+              "This item needs to be ordered manually. Please ask a member of staff, or email <a href=\"mailto:library@wellcomecollection.org\">library@wellcomecollection.org</a>."),
           )
         }
 
