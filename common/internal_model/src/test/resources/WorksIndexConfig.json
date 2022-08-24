@@ -126,16 +126,11 @@
                   },
                   "path": {
                     "type": "text",
-                    "fields": {
-                      "clean": {
-                        "type": "text",
-                        "analyzer": "clean_path_analyzer"
-                      },
-                      "keyword": {
-                        "type": "keyword"
-                      }
-                    },
                     "analyzer": "exact_path_analyzer"
+                  },
+                  "cleanPath": {
+                    "type": "text",
+                    "analyzer": "clean_path_analyzer"
                   }
                 },
                 "analyzer": "asciifolding_analyzer"
@@ -920,17 +915,12 @@
                             "type": "keyword",
                             "normalizer": "lowercase_normalizer"
                           },
+                          "cleanPath": {
+                            "type": "text",
+                            "analyzer": "clean_path_analyzer"
+                          },
                           "path": {
                             "type": "text",
-                            "fields": {
-                              "clean": {
-                                "type": "text",
-                                "analyzer": "clean_path_analyzer"
-                              },
-                              "keyword": {
-                                "type": "keyword"
-                              }
-                            },
                             "analyzer": "exact_path_analyzer"
                           }
                         },
