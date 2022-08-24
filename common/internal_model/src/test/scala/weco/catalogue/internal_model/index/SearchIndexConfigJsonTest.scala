@@ -15,12 +15,10 @@ import weco.json.utils.JsonAssertions
   * from the Scala index config matches the work we do
   * in the rank app for search.
   *
-  * The reason being is that the scala4s can _sometimes_
-  * be hard to ensure it\s creating the right JSON,
-  * which in and of itself is easy to understand.
-  *
-  * In essence the flow is test in rank,
-  * get the JSON, paste it here and create the Scala.
+  * Once index config has been finalised in rank, and the
+  * resultant JSON copied to the files in `resources`,
+  * this test will confirm that it is equivalent to the config
+  * created using the elastic4s DSL.
   */
 class SearchIndexConfigJsonTest
     extends AnyFunSpec
