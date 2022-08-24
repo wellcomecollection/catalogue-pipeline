@@ -159,18 +159,22 @@ object WorksIndexConfig extends IndexConfigFields {
           .analyzer(exactPathAnalyzer.name)
           .fields(
             keywordField("keyword"),
-            textField("clean").analyzer(cleanPathAnalyzer.name))
+            textField("clean").analyzer(cleanPathAnalyzer.name)
+          )
+          .copyTo(copyPathTo.toList)
+        val label = textField("label")
+          .analyzer(asciifoldingAnalyzer.name)
+          .fields(
+            keywordField("keyword"),
+            lowercaseKeyword("lowercaseKeyword"),
+            textField("cleanPath").analyzer(cleanPathAnalyzer.name),
+            textField("path").analyzer(exactPathAnalyzer.name)
+          )
+        val depth = TokenCountField("depth").withAnalyzer("standard")
 
-        objectField("collectionPath").fields(
-          textField("label")
-            .fields(
-              keywordField("keyword"),
-              lowercaseKeyword("lowercaseKeyword"),
-              path
-            )
-            .analyzer(asciifoldingAnalyzer.name),
-          path.copyTo(copyPathTo.toList),
-          TokenCountField("depth").withAnalyzer("standard")
+        ObjectField(
+          name = "collectionPath",
+          properties = Seq(label, path, depth)
         )
       }
 
@@ -261,7 +265,7 @@ object WorksIndexConfig extends IndexConfigFields {
           keywordField("languages"),
           keywordField("contributors.agent.label"),
           keywordField("items.locations.license"),
-          keywordField("availabilities"),
+          keywordField("availabilities")
         )
 
       Seq(
