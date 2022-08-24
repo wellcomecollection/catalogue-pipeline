@@ -23,7 +23,8 @@ trait IngestorFixtures extends PipelineStorageStreamFixtures {
     withPipelineStream(
       queue,
       indexer,
-      pipelineStorageConfig = pipelineStorageConfig) { msgStream =>
+      pipelineStorageConfig = pipelineStorageConfig
+    ) { msgStream =>
       val workerService = new IngestorWorkerService(
         pipelineStream = msgStream,
         retriever = retriever,

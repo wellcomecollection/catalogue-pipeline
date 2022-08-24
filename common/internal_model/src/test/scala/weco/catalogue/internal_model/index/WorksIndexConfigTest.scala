@@ -95,9 +95,12 @@ class WorksIndexConfigTest
 
   private def assertWorkCanBeIndexed[W <: Work[_ <: WorkState]](
     work: W,
-    client: ElasticClient = elasticClient)(implicit index: Index,
-                                           decoder: Decoder[W],
-                                           encoder: Encoder[W]): Assertion = {
+    client: ElasticClient = elasticClient
+  )(
+    implicit index: Index,
+    decoder: Decoder[W],
+    encoder: Encoder[W]
+  ): Assertion = {
     val response = indexWork(client, id = work.state.id, work = work)
 
     if (response.isError) {
@@ -110,7 +113,8 @@ class WorksIndexConfigTest
   private def indexWork[W](
     client: ElasticClient = elasticClient,
     id: String,
-    work: W)(implicit index: Index, encoder: Encoder[W]) =
+    work: W
+  )(implicit index: Index, encoder: Encoder[W]) =
     client.execute {
       indexInto(index).doc(toJson(work).get).id(id)
     }.await
@@ -118,7 +122,8 @@ class WorksIndexConfigTest
   private def assertWorkIsIndexed[W](
     client: ElasticClient,
     id: String,
-    work: W)(implicit index: Index, decoder: Decoder[W]) =
+    work: W
+  )(implicit index: Index, decoder: Decoder[W]) =
     eventually {
       whenReady(client.execute(get(index, id))) { getResponse =>
         getResponse.result.exists shouldBe true
