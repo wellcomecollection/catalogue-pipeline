@@ -10,7 +10,7 @@ locals {
 }
 
 data "ec_stack" "latest_patch" {
-  version_regex = "7.17.?"
+  version_regex = "8.4.?"
   region        = "eu-west-1"
 }
 
