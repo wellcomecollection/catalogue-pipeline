@@ -2,7 +2,7 @@ steps:
   - label: deploy CALM adapter
     plugins:
       - docker#v3.5.0:
-          image: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/wellcome/weco-deploy:5.6
+          image: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/wellcome/weco-deploy:5.7
           workdir: /repo
           mount-ssh-agent: true
           command: [
@@ -18,7 +18,7 @@ steps:
   - label: deploy METS adapter
     plugins:
       - docker#v3.5.0:
-          image: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/wellcome/weco-deploy:5.6
+          image: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/wellcome/weco-deploy:5.7
           workdir: /repo
           mount-ssh-agent: true
           command: [
@@ -34,7 +34,7 @@ steps:
   - label: deploy Sierra adapter
     plugins:
       - docker#v3.5.0:
-          image: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/wellcome/weco-deploy:5.6
+          image: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/wellcome/weco-deploy:5.7
           workdir: /repo
           mount-ssh-agent: true
           command: [
@@ -50,7 +50,7 @@ steps:
   - label: deploy TEI adapter
     plugins:
       - docker#v3.5.0:
-          image: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/wellcome/weco-deploy:5.6
+          image: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/wellcome/weco-deploy:5.7
           workdir: /repo
           mount-ssh-agent: true
           command: [
@@ -66,7 +66,7 @@ steps:
   - label: deploy reindexer
     plugins:
       - docker#v3.5.0:
-          image: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/wellcome/weco-deploy:5.6
+          image: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/wellcome/weco-deploy:5.7
           workdir: /repo
           mount-ssh-agent: true
           command: [

@@ -47,7 +47,7 @@ if __name__ == "__main__":
             f"{root}:/repo",
             "--workdir",
             "/repo",
-            "760097843905.dkr.ecr.eu-west-1.amazonaws.com/wellcome/weco-deploy:5.6",
+            "760097843905.dkr.ecr.eu-west-1.amazonaws.com/wellcome/weco-deploy:5.7",
             "--project-id",
             "catalogue_pipeline",
             "--confirm",
