@@ -29,7 +29,7 @@ object DisplayImage {
       id = image.id,
       thumbnail = DisplayDigitalLocation(thumbnail(image)),
       locations = image.locations.map(DisplayDigitalLocation(_)),
-      aspectRatio = image.state.inferredData.flatMap(_.aspectRatio).getOrElse(1.0),
+      aspectRatio = image.state.inferredData.flatMap(_.aspectRatio).getOrElse(1.0f),
       source = DisplayImageSource(image.source)
     )
 }
