@@ -1,6 +1,6 @@
 {
   "description" : "images with different contributors",
-  "createdAt" : "2022-07-25T14:43:39.131445Z",
+  "createdAt" : "2022-08-31T14:42:28.057322Z",
   "id" : "0taf9mko",
   "document" : {
     "version" : 1,
@@ -4414,6 +4414,7 @@
           "type" : "DigitalLocation"
         }
       ],
+      "aspectRatio" : 0.9475815,
       "source" : {
         "id" : "nbflmlls",
         "title" : "title-MKFqleolFi",

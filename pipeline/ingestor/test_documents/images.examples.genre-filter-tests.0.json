@@ -1,6 +1,6 @@
 {
   "description" : "examples for the genre filter tests",
-  "createdAt" : "2022-06-17T14:17:37.262212Z",
+  "createdAt" : "2022-08-31T14:42:28.646266Z",
   "id" : "qcyfsx6m",
   "document" : {
     "version" : 1,
@@ -4406,6 +4406,7 @@
           "type" : "DigitalLocation"
         }
       ],
+      "aspectRatio" : 0.9475815,
       "source" : {
         "id" : "rqwaqzmg",
         "title" : "title-lrVi93g38g",

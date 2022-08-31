@@ -1,6 +1,6 @@
 {
   "description" : "example for the color filter tests",
-  "createdAt" : "2022-06-17T14:17:37.310046Z",
+  "createdAt" : "2022-08-31T14:42:28.680711Z",
   "id" : "jh411m3a",
   "document" : {
     "version" : 1,
@@ -4308,6 +4308,7 @@
           "type" : "DigitalLocation"
         }
       ],
+      "aspectRatio" : 0.9475815,
       "source" : {
         "id" : "h6j8p9h5",
         "title" : "title-9Zp5R7Cdd8",

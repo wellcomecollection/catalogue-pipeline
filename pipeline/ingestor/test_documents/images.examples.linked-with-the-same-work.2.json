@@ -1,6 +1,6 @@
 {
   "description" : "images linked with the same work",
-  "createdAt" : "2022-06-17T14:17:37.419712Z",
+  "createdAt" : "2022-08-31T14:42:28.738022Z",
   "id" : "ca2bzfap",
   "document" : {
     "version" : 1,
@@ -4398,6 +4398,7 @@
           "type" : "DigitalLocation"
         }
       ],
+      "aspectRatio" : 0.9475815,
       "source" : {
         "id" : "q5rilm5u",
         "title" : "title-3QUhCfD8KT",

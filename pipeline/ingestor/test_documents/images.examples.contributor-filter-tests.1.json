@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2022-07-25T14:43:39.640742Z",
+  "createdAt" : "2022-08-31T14:42:28.581534Z",
   "id" : "sod8ij3c",
   "document" : {
     "version" : 1,
@@ -4397,6 +4397,7 @@
           "type" : "DigitalLocation"
         }
       ],
+      "aspectRatio" : 0.9475815,
       "source" : {
         "id" : "snibbgdn",
         "title" : "title-COvwVoGlOn",
