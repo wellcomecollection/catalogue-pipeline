@@ -63,25 +63,16 @@ def main(reindex_date, document_type, test_doc_id):
             ),
             total=reingest_docs_count,
         ),
-        size=100
+        size=100,
     ):
         doc_ids = [hit["_id"] for hit in chunk]
         sns_batches = chunked_iterable(
-            iterable=[
-                {
-                    "Id": id,
-                    "Message": id
-                }
-                for id in doc_ids
-            ],
-            size=10 # Max SNS batch size
+            iterable=[{"Id": id, "Message": id} for id in doc_ids],
+            size=10,  # Max SNS batch size
         )
 
         def publish(batch):
-            sns.publish_batch(
-                TopicArn=dest_topic_arn,
-                PublishBatchRequestEntries=batch
-            )
+            sns.publish_batch(TopicArn=dest_topic_arn, PublishBatchRequestEntries=batch)
             return True
 
         for _ in concurrently(fn=publish, inputs=sns_batches, max_concurrency=10):
