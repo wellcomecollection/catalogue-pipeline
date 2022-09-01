@@ -113,6 +113,21 @@ object TransformableOps {
       setRecords(t, newRecords)
     }
 
+    // Note: we do care about strict equality here, not just "after".
+    //
+    // In particular, there have been cases where we saw:
+    //
+    //    - a record be modified and get an "updatedDate: $t"
+    //    - the same record be deleted with "updatedDate: $t"
+    //
+    // In these cases, we want to process the deletion, so we use
+    // "latest to the merger wins".  If this is wrong, somebody can
+    // update the record in Sierra again to increment the updatedDate.
+    private def shouldReplaceExisting(existing: Record,
+                                      newRecord: Record): Boolean =
+      newRecord.modifiedDate.isAfter(existing.modifiedDate) ||
+        newRecord.modifiedDate == existing.modifiedDate
+
     override def add(t: SierraTransformable,
                      record: Record): Option[SierraTransformable] = {
       if (!recordOps.getBibIds(record).contains(t.sierraId)) {
@@ -130,10 +145,8 @@ object TransformableOps {
       //
       val isNewerData = {
         getRecords(t).get(record.id) match {
-          case Some(existing) =>
-            record.modifiedDate.isAfter(existing.modifiedDate) ||
-              record.modifiedDate == existing.modifiedDate
-          case None => true
+          case Some(existing) => shouldReplaceExisting(existing, record)
+          case None           => true
         }
       }
 
@@ -155,14 +168,10 @@ object TransformableOps {
       val newRecords =
         getRecords(t)
           .filterNot {
-            case (id, currentRecord) =>
-              val matchesCurrentRecord = id == record.id
+            case (id, existing) =>
+              val hasMatchingId = id == record.id
 
-              val modifiedAfter = record.modifiedDate.isAfter(
-                currentRecord.modifiedDate
-              )
-
-              matchesCurrentRecord && modifiedAfter
+              hasMatchingId && shouldReplaceExisting(existing, record)
           }
 
       if (getRecords(t) != newRecords) {

@@ -24,4 +24,24 @@ resource "aws_s3_bucket" "sierra_adapter" {
       days = 7
     }
   }
+
+  lifecycle_rule {
+    id      = "expire_old_holdings"
+    prefix  = "records_holdings/"
+    enabled = true
+
+    expiration {
+      days = 7
+    }
+  }
+
+  lifecycle_rule {
+    id      = "expire_old_orders"
+    prefix  = "records_orders/"
+    enabled = true
+
+    expiration {
+      days = 7
+    }
+  }
 }
