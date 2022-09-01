@@ -102,3 +102,19 @@ So for example, if in the `2022-02-22` pipeline you had messages go missing in t
 ./pipeline_storage_diff.py 2022-02-22 --from works-merged --to works-denormalised ./missing-ids.csv
 ./pipeline_inject_messages.py 2022-02-22 merger_works_output ./missing-ids.csv
 ```
+
+## Reingesting for display
+
+Changes in the display model require that documents are reingested: not a complete reindex, but a reindex of visible works/images only, through the final stage of the pipeline.
+
+We can do this with `reingest_for_display.py`:
+
+```
+./reingest_for_display.py 2022-02-22 --type works
+```
+
+or if we just wanted to reingest a single document first to test:
+
+```
+./reingest_for_display.py 2022-02-22 --type images --test-doc-id abcd1234
+```
