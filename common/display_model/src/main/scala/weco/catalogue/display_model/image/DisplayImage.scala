@@ -9,6 +9,7 @@ case class DisplayImage(
   id: String,
   thumbnail: DisplayDigitalLocation,
   locations: Seq[DisplayDigitalLocation],
+  aspectRatio: Float,
   source: DisplayImageSource,
   @JsonKey("type") ontologyType: String = "Image"
 )
@@ -28,6 +29,8 @@ object DisplayImage {
       id = image.id,
       thumbnail = DisplayDigitalLocation(thumbnail(image)),
       locations = image.locations.map(DisplayDigitalLocation(_)),
+      aspectRatio =
+        image.state.inferredData.flatMap(_.aspectRatio).getOrElse(1.0f),
       source = DisplayImageSource(image.source)
     )
 }

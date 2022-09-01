@@ -1,6 +1,6 @@
 {
   "description" : "images with different subjects",
-  "createdAt" : "2022-06-27T08:19:26.712408Z",
+  "createdAt" : "2022-08-31T14:42:28.816067Z",
   "id" : "e4perwdd",
   "document" : {
     "version" : 1,
@@ -4400,6 +4400,7 @@
           "type" : "DigitalLocation"
         }
       ],
+      "aspectRatio" : 0.9475815,
       "source" : {
         "id" : "ywof9b5g",
         "title" : "title-bWGUlHzXp8",

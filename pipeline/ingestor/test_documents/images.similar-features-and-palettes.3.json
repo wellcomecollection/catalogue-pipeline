@@ -1,6 +1,6 @@
 {
   "description" : "images with similar features and palettes",
-  "createdAt" : "2022-06-17T14:17:36.842804Z",
+  "createdAt" : "2022-08-31T14:42:28.230639Z",
   "id" : "fsq3gsq0",
   "document" : {
     "version" : 1,
@@ -4396,6 +4396,7 @@
           "type" : "DigitalLocation"
         }
       ],
+      "aspectRatio" : 0.9475815,
       "source" : {
         "id" : "80trgzaf",
         "title" : "title-AOCEgK2yRE",

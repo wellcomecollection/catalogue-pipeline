@@ -1,6 +1,6 @@
 {
   "description" : "an image without any inferred data",
-  "createdAt" : "2022-06-17T14:17:37.108764Z",
+  "createdAt" : "2022-08-31T14:42:28.502143Z",
   "id" : "3qfljen1",
   "document" : {
     "version" : 1,
@@ -139,6 +139,7 @@
           "type" : "DigitalLocation"
         }
       ],
+      "aspectRatio" : 1.0,
       "source" : {
         "id" : "83lbmnbq",
         "title" : "title-RzQWwkxYvQ",

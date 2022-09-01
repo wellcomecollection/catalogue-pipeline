@@ -1,6 +1,6 @@
 {
   "description" : "images with different genres",
-  "createdAt" : "2022-06-17T14:17:36.775400Z",
+  "createdAt" : "2022-08-31T14:42:28.141572Z",
   "id" : "0e6ywtkv",
   "document" : {
     "version" : 1,
@@ -4396,6 +4396,7 @@
           "type" : "DigitalLocation"
         }
       ],
+      "aspectRatio" : 0.9475815,
       "source" : {
         "id" : "shuyd9d9",
         "title" : "title-1Eani7wEXC",

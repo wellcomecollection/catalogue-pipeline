@@ -1,6 +1,6 @@
 {
   "description" : "images with different subjects",
-  "createdAt" : "2022-06-27T08:19:26.876411Z",
+  "createdAt" : "2022-08-31T14:42:28.830609Z",
   "id" : "hszkjtb7",
   "document" : {
     "version" : 1,
@@ -4406,6 +4406,7 @@
           "type" : "DigitalLocation"
         }
       ],
+      "aspectRatio" : 0.9475815,
       "source" : {
         "id" : "oaegix5d",
         "title" : "title-aCK1XcqcTe",

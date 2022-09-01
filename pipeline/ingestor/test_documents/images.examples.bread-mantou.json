@@ -1,6 +1,6 @@
 {
   "description" : "an example of images with work metadata for the API tests",
-  "createdAt" : "2022-06-17T14:17:37.531610Z",
+  "createdAt" : "2022-08-31T14:42:28.791119Z",
   "id" : "hylz2v15",
   "document" : {
     "version" : 1,
@@ -4382,6 +4382,7 @@
           "type" : "DigitalLocation"
         }
       ],
+      "aspectRatio" : 0.9475815,
       "source" : {
         "id" : "zu4e5ax7",
         "title" : "Mantou is a steamed bread associated with Northern China",

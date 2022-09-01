@@ -1,6 +1,6 @@
 {
   "description" : "images with different contributors",
-  "createdAt" : "2022-07-25T14:43:39.168643Z",
+  "createdAt" : "2022-08-31T14:42:28.066648Z",
   "id" : "krb6vjce",
   "document" : {
     "version" : 1,
@@ -4410,6 +4410,7 @@
           "type" : "DigitalLocation"
         }
       ],
+      "aspectRatio" : 0.9475815,
       "source" : {
         "id" : "apls471y",
         "title" : "title-ngkzrTYfkQ",

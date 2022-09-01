@@ -1,6 +1,6 @@
 {
   "description" : "images with different licenses",
-  "createdAt" : "2022-06-17T14:17:35.880074Z",
+  "createdAt" : "2022-08-31T14:42:27.703675Z",
   "id" : "ufwuwch3",
   "document" : {
     "version" : 1,
@@ -4421,6 +4421,7 @@
           "type" : "DigitalLocation"
         }
       ],
+      "aspectRatio" : 0.9475815,
       "source" : {
         "id" : "id3h1gbz",
         "title" : "title-V0vsNu6VGS",

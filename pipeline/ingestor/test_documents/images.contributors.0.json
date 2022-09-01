@@ -1,6 +1,6 @@
 {
   "description" : "images with different contributors",
-  "createdAt" : "2022-07-25T14:43:39.088582Z",
+  "createdAt" : "2022-08-31T14:42:28.048601Z",
   "id" : "vfhrlsz5",
   "document" : {
     "version" : 1,
@@ -4399,6 +4399,7 @@
           "type" : "DigitalLocation"
         }
       ],
+      "aspectRatio" : 0.9475815,
       "source" : {
         "id" : "hr55ornz",
         "title" : "title-bA22VxYxvw",
