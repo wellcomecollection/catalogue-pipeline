@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import click
-from elasticsearch.exceptions import NotFoundError
 from elasticsearch.helpers import scan
 from tqdm import tqdm
 
@@ -41,6 +40,7 @@ def main(reindex_date, document_type, test_doc_id):
         print("Done!")
         return
 
+    print(f"Reingesting {reingest_docs_count} documents...")
     for hit in tqdm(
         scan(
             es,
