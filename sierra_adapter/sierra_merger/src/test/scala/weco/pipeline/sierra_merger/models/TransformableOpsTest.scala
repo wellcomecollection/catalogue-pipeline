@@ -455,7 +455,8 @@ class TransformableOpsTest
           .get shouldBe expectedSierraTransformable
       }
 
-      it("removes the holdings if the modified date matches the existing record") {
+      it(
+        "removes the holdings if the modified date matches the existing record") {
         val bibId = createSierraBibNumber
 
         val record = createSierraHoldingsRecordWith(

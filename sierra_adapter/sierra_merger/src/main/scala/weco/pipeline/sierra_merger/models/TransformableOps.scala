@@ -123,7 +123,8 @@ object TransformableOps {
     // In these cases, we want to process the deletion, so we use
     // "latest to the merger wins".  If this is wrong, somebody can
     // update the record in Sierra again to increment the updatedDate.
-    private def shouldReplaceExisting(existing: Record, newRecord: Record): Boolean =
+    private def shouldReplaceExisting(existing: Record,
+                                      newRecord: Record): Boolean =
       newRecord.modifiedDate.isAfter(existing.modifiedDate) ||
         newRecord.modifiedDate == existing.modifiedDate
 
