@@ -455,6 +455,36 @@ class TransformableOpsTest
           .get shouldBe expectedSierraTransformable
       }
 
+      it("removes the holdings if the modified date matches the existing record") {
+        val bibId = createSierraBibNumber
+
+        val record = createSierraHoldingsRecordWith(
+          bibIds = List(bibId),
+          unlinkedBibIds = List()
+        )
+
+        val unlinkedRecord = createSierraHoldingsRecordWith(
+          id = record.id,
+          bibIds = List(),
+          modifiedDate = record.modifiedDate,
+          unlinkedBibIds = List(bibId)
+        )
+
+        val sierraTransformable = createSierraTransformableStubWith(
+          bibId = bibId,
+          holdingsRecords = List(record)
+        )
+
+        val expectedSierraTransformable = sierraTransformable.copy(
+          holdingsRecords = Map.empty,
+          modifiedTime = unlinkedRecord.modifiedDate
+        )
+
+        sierraTransformable
+          .remove(unlinkedRecord)
+          .get shouldBe expectedSierraTransformable
+      }
+
       it("returns None when merging an unlinked record which is already absent") {
         val bibId = createSierraBibNumber
 
