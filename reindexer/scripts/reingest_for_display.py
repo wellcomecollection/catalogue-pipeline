@@ -1,10 +1,21 @@
 #!/usr/bin/env python3
 
 import click
+import itertools
 from elasticsearch.helpers import scan
 from tqdm import tqdm
 
+from concurrently import concurrently
 from get_reindex_status import get_pipeline_storage_es_client, get_session_with_role
+
+
+def chunked_iterable(iterable, size):
+    it = iter(iterable)
+    while True:
+        chunk = tuple(itertools.islice(it, size))
+        if not chunk:
+            break
+        yield chunk
 
 
 @click.command()
@@ -41,18 +52,40 @@ def main(reindex_date, document_type, test_doc_id):
         return
 
     print(f"Reingesting {reingest_docs_count} documents...")
-    for hit in tqdm(
-        scan(
-            es,
-            scroll="15m",
-            index=api_index,
-            query={"query": api_index_query},
-            _source=False,
+    for chunk in chunked_iterable(
+        iterable=tqdm(
+            scan(
+                es,
+                scroll="15m",
+                index=api_index,
+                query={"query": api_index_query},
+                _source=False,
+            ),
+            total=reingest_docs_count,
         ),
-        total=reingest_docs_count,
+        size=100
     ):
-        doc_id = hit["_id"]
-        sns.publish(TopicArn=dest_topic_arn, Message=doc_id)
+        doc_ids = [hit["_id"] for hit in chunk]
+        sns_batches = chunked_iterable(
+            iterable=[
+                {
+                    "Id": id,
+                    "Message": id
+                }
+                for id in doc_ids
+            ],
+            size=10 # Max SNS batch size
+        )
+
+        def publish(batch):
+            sns.publish_batch(
+                TopicArn=dest_topic_arn,
+                PublishBatchRequestEntries=batch
+            )
+            return True
+
+        for _ in concurrently(fn=publish, inputs=sns_batches, max_concurrency=10):
+            pass
 
 
 if __name__ == "__main__":
