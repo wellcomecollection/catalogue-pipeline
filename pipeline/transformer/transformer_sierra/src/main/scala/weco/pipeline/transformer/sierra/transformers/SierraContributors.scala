@@ -37,49 +37,69 @@ object SierraContributors
 
   case class ContributorField(
     marcTag: String,
-    roleTag: String,
+    roleTags: Seq[String],
     isPrimary: Boolean,
     getContributors: List[Subfield] => (String,
                                         Option[
                                           AbstractAgent[IdState.Unminted]]),
   )
 
+  // Quoting an email from Louise Grainger, dated 25 August 2022:
+  //
+  //      100 – we want valid subfield $e (relator/contributor), but NOT valid $j (attribution qualifier)
+  //          – if no $e do not display alternative
+  //
+  //      110 – we want valid subfield $e (relator/contributor); $j is invalid in this field
+  //          – if no $e do not display alternative
+  //
+  //      111 – we want valid subfield $j (relator/contributor); $e is invalid in this field
+  //          – if no $j do not display alternative
+  //
+  //      700 – we want valid subfield $e (relator/contributor) AND valid subfield $j (attribution qualifier)
+  //          – if no $e then display $j; if $e then (ideally) display $j too
+  //
+  //      710 - we want valid subfield $e (relator/contributor); $j is invalid in this field
+  //          – if no $e do not display alternative
+  //
+  //      711 - we want valid subfield $j (relator/contributor); $e is invalid in this field
+  //      – if no $j do not display alternative
+  //
   val contributorFields = List(
     ContributorField(
       marcTag = "100",
-      roleTag = "e",
+      roleTags = Seq("e"),
       isPrimary = true,
       getPersonContributors),
     ContributorField(
       marcTag = "110",
-      roleTag = "e",
+      roleTags = Seq("e"),
       isPrimary = true,
       getOrganisationContributors),
     ContributorField(
       marcTag = "111",
-      roleTag = "j",
+      roleTags = Seq("j"),
       isPrimary = true,
       getMeetingContributors),
     ContributorField(
       marcTag = "700",
-      roleTag = "e",
+      roleTags = Seq("e", "j"),
       isPrimary = false,
       getPersonContributors),
     ContributorField(
       marcTag = "710",
-      roleTag = "e",
+      roleTags = Seq("e"),
       isPrimary = false,
       getOrganisationContributors),
     ContributorField(
       marcTag = "711",
-      roleTag = "j",
+      roleTags = Seq("j"),
       isPrimary = false,
       getMeetingContributors),
   )
 
   def apply(bibData: SierraBibData): List[Contributor[IdState.Unminted]] = {
     val allContributors = contributorFields.flatMap {
-      case ContributorField(marcTag, roleTag, isPrimary, getContributors) =>
+      case ContributorField(marcTag, roleTags, isPrimary, getContributors) =>
         bibData
           .varfieldsWithTag(marcTag)
           .flatMap { varfield =>
@@ -87,7 +107,7 @@ object SierraContributors
             maybeAgent.map { agent =>
               Contributor(
                 agent = withId(agent, identify(varfield, ontologyType)),
-                roles = getContributionRoles(varfield.subfields, roleTag),
+                roles = getContributionRoles(varfield.subfields, roleTags),
                 primary = isPrimary
               )
             }
@@ -120,9 +140,9 @@ object SierraContributors
 
   private def getContributionRoles(
     subfields: List[Subfield],
-    subfieldTag: String): List[ContributionRole] =
+    roleTags: Seq[String]): List[ContributionRole] =
     subfields
-      .withTag(subfieldTag)
+      .withTags(roleTags: _*)
       .contents
       .map { role =>
         // The contribution role in the raw MARC data sometimes includes a

@@ -207,7 +207,7 @@ class SierraContributorsTest
       contributors.head shouldBe primary
     }
 
-    it("gets the roles from subfield ǂe") {
+    it("gets roles from subfield ǂe") {
       val name = "Violet the Vanilla"
       val role1 = "spice"
       val role2 = "flavour"
@@ -231,6 +231,45 @@ class SierraContributorsTest
       contributor should have(
         roles(List(role1, role2))
       )
+    }
+
+    it("gets a role from subfield ǂj") {
+      // This is based on b1202594x, as retrieved 8 September 2022
+      val varFields = List(
+        VarField(
+          marcTag = "700",
+          subfields = List(
+            Subfield(tag = "a", content = "Zurbarán, Francisco de,"),
+            Subfield(tag = "d", content = "1598-1664,"),
+            Subfield(tag = "j", content = "Follower of"),
+          )
+        )
+      )
+
+      val List(contributor) =
+        SierraContributors(createSierraBibDataWith(varFields = varFields))
+
+      contributor should have(roles(List("Follower of")))
+    }
+
+    it("gets roles from both subfield ǂe and ǂj") {
+      // This is a hypothetical test case, at time of writing (8 September 2022),
+      // there are no instances of 700 with both subfields.
+      val varFields = List(
+        VarField(
+          marcTag = "700",
+          subfields = List(
+            Subfield(tag = "a", content = "A made-up leader"),
+            Subfield(tag = "j", content = "Follower of"),
+            Subfield(tag = "e", content = "Disciple of"),
+          )
+        )
+      )
+
+      val List(contributor) =
+        SierraContributors(createSierraBibDataWith(varFields = varFields))
+
+      contributor should have(roles(List("Follower of", "Disciple of")))
     }
 
     it("gets the full form of a name from subfield ǂq") {
