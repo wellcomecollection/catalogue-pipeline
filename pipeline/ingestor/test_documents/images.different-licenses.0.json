@@ -1,7 +1,7 @@
 {
   "description" : "images with different licenses",
-  "createdAt" : "2022-08-31T14:42:27.692627Z",
-  "id" : "f0nj3tuz",
+  "createdAt" : "2022-09-13T17:09:39.389003Z",
+  "id" : "0nj3tuzq",
   "document" : {
     "version" : 1,
     "state" : {
@@ -12,7 +12,7 @@
         "ontologyType" : "Work",
         "value" : "R8UNWutFRZ"
       },
-      "canonicalId" : "f0nj3tuz",
+      "canonicalId" : "0nj3tuzq",
       "inferredData" : {
         "features1" : [
           7.0621603E-4,
@@ -4249,29 +4249,30 @@
           "151/2",
           "261/2"
         ],
+        "averageColorHex" : "#2F199D",
         "binSizes" : [
           [
-            1,
             7,
-            5
+            5,
+            0
           ],
           [
-            0,
             5,
-            7
+            7,
+            6
           ],
           [
-            6,
             5,
-            1
+            1,
+            2
           ]
         ],
         "binMinima" : [
-          0.7710878,
           0.8503088,
-          0.6996027
+          0.6996027,
+          0.9475815
         ],
-        "aspectRatio" : 0.9475815
+        "aspectRatio" : 0.022521317
       }
     },
     "locations" : [
@@ -4378,9 +4379,9 @@
       "version" : 6,
       "type" : "ParentWork"
     },
-    "modifiedTime" : "1941-09-23T10:55:10Z",
+    "modifiedTime" : "1992-03-07T13:03:07Z",
     "display" : {
-      "id" : "f0nj3tuz",
+      "id" : "0nj3tuzq",
       "thumbnail" : {
         "locationType" : {
           "id" : "iiif-image",
@@ -4417,7 +4418,7 @@
           "type" : "DigitalLocation"
         }
       ],
-      "aspectRatio" : 0.9475815,
+      "aspectRatio" : 0.022521317,
       "source" : {
         "id" : "yqts0coj",
         "title" : "title-QqPyuxbr58",
