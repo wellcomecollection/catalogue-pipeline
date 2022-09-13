@@ -66,3 +66,7 @@ def rgb_to_hsv(arr):
         out[..., 2] = arr_max
 
     return out / [max_hue, max_sat, max_val]
+
+
+def rgb_to_hex(r, g, b):
+    return '%02x%02x%02x' % (r, g, b)

@@ -10,5 +10,5 @@ docker run -p 80:80 palette_extraction_api
 ```
 
 ```
-curl "http://0.0.0.0/palette/?image_url=SOME_ENCODED_IMAGE_URL"
+curl "http://0.0.0.0/palette/?query_url=SOME_ENCODED_IMAGE_URL"
 ```
