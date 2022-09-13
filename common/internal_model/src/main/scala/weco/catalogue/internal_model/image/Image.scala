@@ -126,6 +126,7 @@ case class InferredData(
   features2: List[Float],
   lshEncodedFeatures: List[String],
   palette: List[String],
+  averageColorHex: Option[String],
   binSizes: List[List[Int]],
   binMinima: List[Float],
   aspectRatio: Option[Float]
@@ -137,6 +138,7 @@ object InferredData {
     features2 = Nil,
     lshEncodedFeatures = Nil,
     palette = Nil,
+    averageColorHex = None,
     binSizes = Nil,
     binMinima = Nil,
     aspectRatio = None
