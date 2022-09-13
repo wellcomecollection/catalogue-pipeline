@@ -63,7 +63,6 @@ class PaletteEncoder:
 
     @staticmethod
     def get_rgb_pixels(image):
-        # np.array(rgb_image).reshape(-1, 3)
         rgb_image = image.convert("RGB")
         return np.array(rgb_image).reshape(-1, 3)
 
