@@ -95,21 +95,25 @@ class ImageIndexableTest
   }
 
   private def assertIngestedImageIs(
-    result: Either[Seq[Image[ImageState.Indexed]],
-                   Seq[Image[ImageState.Indexed]]],
+    result: Either[Seq[Image[ImageState.Indexed]], Seq[
+      Image[ImageState.Indexed]
+    ]],
     ingestedImage: Image[ImageState.Indexed],
-    index: Index): Seq[Assertion] = {
+    index: Index
+  ): Seq[Assertion] = {
     result shouldBe a[Right[_, _]]
     assertElasticsearchEventuallyHasImage(index, ingestedImage)
   }
 
   private def withImagesIndexAndIndexer[R](
-    testWith: TestWith[(Index, ElasticIndexer[Image[ImageState.Indexed]]), R]) =
+    testWith: TestWith[(Index, ElasticIndexer[Image[ImageState.Indexed]]), R]
+  ) =
     withLocalImagesIndex { index =>
       val indexer = new ElasticIndexer[Image[ImageState.Indexed]](
         elasticClient,
         index,
-        ImagesIndexConfig.indexed)
+        ImagesIndexConfig.indexed
+      )
       testWith((index, indexer))
     }
 }
