@@ -44,6 +44,7 @@ class ImagesIndexConfigTest
             features2,
             List(randomAlphanumeric(10)),
             List(randomAlphanumeric(10)),
+            Some(randomHexString),
             List(List(4, 6, 9), List(2, 4, 6), List(1, 3, 5)),
             List(0f, 10f / 256, 10f / 256),
             Some(Random.nextFloat())
@@ -66,6 +67,7 @@ class ImagesIndexConfigTest
             List(2.0f),
             List(randomAlphanumeric(10)),
             List(randomAlphanumeric(10)),
+            Some(randomHexString),
             List(List(4, 6, 9), List(2, 4, 6), List(1, 3, 5)),
             List(0f, 10f / 256, 10f / 256),
             Some(Random.nextFloat())
@@ -93,20 +95,24 @@ class ImagesIndexConfigTest
   private def assertImageCanBeIndexed[I <: Image[_ <: ImageState]](image: I)(
     implicit index: Index,
     decoder: Decoder[I],
-    encoder: Encoder[I]): Assertion = {
+    encoder: Encoder[I]
+  ): Assertion = {
     indexImage(id = image.id, image = image)
     assertWorkIsIndexed(id = image.id, image = image)
   }
 
-  private def indexImage[I](id: String, image: I)(implicit index: Index,
-                                                  encoder: Encoder[I]) =
+  private def indexImage[I](
+    id: String,
+    image: I
+  )(implicit index: Index, encoder: Encoder[I]) =
     elasticClient.execute {
       indexInto(index).doc(toJson(image).get).id(id)
     }.await
 
-  private def assertWorkIsIndexed[I](id: String, image: I)(
-    implicit index: Index,
-    decoder: Decoder[I]) =
+  private def assertWorkIsIndexed[I](
+    id: String,
+    image: I
+  )(implicit index: Index, decoder: Decoder[I]) =
     eventually {
       whenReady(elasticClient.execute(get(index, id))) { getResponse =>
         getResponse.result.exists shouldBe true

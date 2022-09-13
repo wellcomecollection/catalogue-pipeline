@@ -57,7 +57,8 @@ trait ImageGenerators
         url = "https://iiif.wellcomecollection.org/V01234.jpg",
         locationType = LocationType.IIIFImageAPI,
         license = Some(License.CCBY)
-      ))
+      )
+    )
   )
 
   def createMetsImageData = createImageDataWith(
@@ -66,25 +67,29 @@ trait ImageGenerators
   )
 
   implicit class IdentifiableImageDataOps(
-    imageData: ImageData[IdState.Identifiable]) {
+    imageData: ImageData[IdState.Identifiable]
+  ) {
 
     def toAugmentedImageWith(
       inferredData: Option[InferredData] = createInferredData,
       parentWork: Work[WorkState.Identified] = sierraIdentifiedWork(),
       redirectedWork: Option[Work[WorkState.Identified]] = Some(
-        sierraIdentifiedWork())): Image[ImageState.Augmented] =
+        sierraIdentifiedWork()
+      )
+    ): Image[ImageState.Augmented] =
       imageData.toIdentified
         .toAugmentedImageWith(
           inferredData = inferredData,
           parentWork = parentWork,
-          redirectedWork = redirectedWork)
+          redirectedWork = redirectedWork
+        )
 
     def toIndexedImageWith(
       canonicalId: CanonicalId = createCanonicalId,
       parentWork: Work[WorkState.Identified] = identifiedWork(),
       redirectedWork: Option[Work[WorkState.Identified]] = None,
-      inferredData: Option[InferredData] = createInferredData)
-      : Image[ImageState.Indexed] =
+      inferredData: Option[InferredData] = createInferredData
+    ): Image[ImageState.Indexed] =
       imageData
         .toIdentifiedWith(canonicalId = canonicalId)
         .toIndexedImageWith(
@@ -93,8 +98,9 @@ trait ImageGenerators
           inferredData = inferredData
         )
 
-    def toIdentifiedWith(canonicalId: CanonicalId = createCanonicalId)
-      : ImageData[IdState.Identified] = {
+    def toIdentifiedWith(
+      canonicalId: CanonicalId = createCanonicalId
+    ): ImageData[IdState.Identified] = {
 
       // This is for CreateTestWorkDocuments in the ingestors; they have a
       // seeded random instance to ensure deterministic results.
@@ -128,10 +134,11 @@ trait ImageGenerators
   }
 
   implicit class IdentifiedImageDataOps(
-    imageData: ImageData[IdState.Identified]) {
+    imageData: ImageData[IdState.Identified]
+  ) {
     def toInitialImageWith(
       modifiedTime: Instant = randomInstant,
-      parentWork: ParentWork = mergedWork().toParentWork,
+      parentWork: ParentWork = mergedWork().toParentWork
     ): Image[ImageState.Initial] = Image[ImageState.Initial](
       version = imageData.version,
       locations = imageData.locations,
@@ -147,7 +154,8 @@ trait ImageGenerators
       inferredData: Option[InferredData] = createInferredData,
       parentWork: Work[WorkState.Identified] = sierraIdentifiedWork(),
       redirectedWork: Option[Work[WorkState.Identified]] = Some(
-        sierraIdentifiedWork())
+        sierraIdentifiedWork()
+      )
     ): Image[ImageState.Augmented] =
       imageData
         .toInitialImageWith(parentWork = parentWork.toParentWork)
@@ -156,8 +164,8 @@ trait ImageGenerators
     def toIndexedImageWith(
       parentWork: Work[WorkState.Identified] = identifiedWork(),
       redirectedWork: Option[Work[WorkState.Identified]] = None,
-      inferredData: Option[InferredData] = createInferredData)
-      : Image[ImageState.Indexed] =
+      inferredData: Option[InferredData] = createInferredData
+    ): Image[ImageState.Indexed] =
       imageData
         .toAugmentedImageWith(
           parentWork = parentWork,
@@ -178,6 +186,9 @@ trait ImageGenerators
 
   lazy private val inferredDataAspectRatio = Some(random.nextFloat())
 
+  def randomHexString: String =
+    s"#${randomBytes(3).map(b => f"$b%02X").mkString}"
+
   def createInferredData = {
     val features = randomVector(4096)
     val (features1, features2) = features.splitAt(features.size / 2)
@@ -189,6 +200,7 @@ trait ImageGenerators
         features2 = features2.toList,
         lshEncodedFeatures = lshEncodedFeatures.toList,
         palette = palette.toList,
+        averageColorHex = Some(randomHexString),
         binSizes = inferredDataBinSizes,
         binMinima = inferredDataBinMinima,
         aspectRatio = inferredDataAspectRatio
@@ -217,10 +229,13 @@ trait ImageGenerators
   def createSimilarImages(
     n: Int,
     similarFeatures: Boolean,
-    similarPalette: Boolean): Seq[Image[ImageState.Augmented]] = {
+    similarPalette: Boolean
+  ): Seq[Image[ImageState.Augmented]] = {
     val features = if (similarFeatures) {
       similarVectors(4096, n)
-    } else { (1 to n).map(_ => randomVector(4096, maxR = 10.0f)) }
+    } else {
+      (1 to n).map(_ => randomVector(4096, maxR = 10.0f))
+    }
     val lshFeatures = if (similarFeatures) {
       similarHashes(32, n)
     } else {
@@ -240,6 +255,7 @@ trait ImageGenerators
               features2 = f.slice(2048, 4096).toList,
               lshEncodedFeatures = l.toList,
               palette = p.toList,
+              averageColorHex = Some(randomHexString),
               binSizes = inferredDataBinSizes,
               binMinima = inferredDataBinMinima,
               aspectRatio = inferredDataAspectRatio
