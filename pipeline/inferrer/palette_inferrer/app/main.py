@@ -43,7 +43,7 @@ async def main(query_url: str):
     return {
         "palette": palette_result["lsh"],
         "average_color_hex": palette_result["average_color_hex"],
-        "hash_params": palette_hash_params
+        "hash_params": palette_hash_params,
     }
 
 

@@ -144,10 +144,10 @@ class PaletteEncoder:
             / (1.0 - self.bin_minima + min_bin_width)
         ).astype(int)
         return (
-                next_bin
-                + indices[0]
-                + bin_sizes[0] * indices[1]
-                + bin_sizes[0] * bin_sizes[1] * indices[2]
+            next_bin
+            + indices[0]
+            + bin_sizes[0] * indices[1]
+            + bin_sizes[0] * bin_sizes[1] * indices[2]
         )
 
     @staticmethod
@@ -175,10 +175,12 @@ class PaletteEncoder:
         average_color_hex = rgb_to_hex(
             average_color_truncated[0],
             average_color_truncated[1],
-            average_color_truncated[2]
+            average_color_truncated[2],
         )
 
-        colors, weights = zip(*self.get_significant_colors(rgb_pixels, self.palette_size))
+        colors, weights = zip(
+            *self.get_significant_colors(rgb_pixels, self.palette_size)
+        )
         scaled_weights = self.scale_weights(weights)
         combined_results = [
             (self.get_bin_index(color, bin_sizes), bin_i, weight)
@@ -188,7 +190,7 @@ class PaletteEncoder:
 
         return {
             "lsh": self.encode_for_elasticsearch(combined_results),
-            "average_color_hex": f"#{average_color_hex}"
+            "average_color_hex": f"#{average_color_hex}",
         }
 
     def __call__(self, images):
