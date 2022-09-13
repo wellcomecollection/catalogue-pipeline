@@ -42,30 +42,22 @@ class PaletteInferrerAdapterTest
   describe("augment") {
     it("augments InferredData with the data from the inferrer response") {
       val palette = (0 to 25).map(n => f"$n%03d").toList
+      val averageColorHex = "#aabbcc"
       val binSizes = List(List(1, 2, 3), List(4, 5, 6), List(7, 8, 9))
       val binMinima = List(0.1f, 0.2f, 0.3f)
       val response = PaletteInferrerResponse(
         palette = palette,
-        hash_params = HashParams(
+        averageColorHex = averageColorHex hash_params = HashParams(
           bin_sizes = binSizes,
           bin_minima = binMinima
         )
       )
       val inferredData = adapter.augment(InferredData.empty, response)
-      inside(inferredData) {
-        case InferredData(
-            _,
-            _,
-            _,
-            paletteResponse,
-            binSizesResponse,
-            binMinimaResponse,
-            _
-            ) =>
-          paletteResponse should be(palette)
-          binSizesResponse should be(binSizes)
-          binMinimaResponse should be(binMinima)
-      }
+
+      inferredData.palette should be(palette)
+      inferredData.averageColorHex should be(averageColorHex)
+      inferredData.binSizes should be(binSizes)
+      inferredData.binMinima should be(binMinima)
     }
   }
 }

@@ -77,7 +77,7 @@ class InferenceManagerWorkerServiceTest
           case None =>
             warn(s"Unable to find matching image for request $req")
             None
-      },
+        },
       images = _ => Some(Responses.image)
     ) {
       case (QueuePair(queue, dlq), messageSender, augmentedImages, _, _) =>
@@ -100,6 +100,7 @@ class InferenceManagerWorkerServiceTest
                       features2,
                       lshEncodedFeatures,
                       palette,
+                      averageColorHex,
                       binSizes,
                       binMinima,
                       aspectRatio
@@ -112,6 +113,9 @@ class InferenceManagerWorkerServiceTest
                       Responses.randomLshVector(seed)
                     )
                     palette should be(Responses.randomPaletteVector(seed))
+                    averageColorHex should be(
+                      Responses.randomAverageColorHex(seed)
+                    )
                     binSizes should be(Responses.randomBinSizes(seed))
                     binMinima should be(Responses.randomBinMinima(seed))
                     aspectRatio should be(
@@ -156,6 +160,7 @@ class InferenceManagerWorkerServiceTest
                       features2,
                       lshEncodedFeatures,
                       palette,
+                      averageColorHex,
                       binSizes,
                       binMinima,
                       aspectRatio
@@ -164,6 +169,7 @@ class InferenceManagerWorkerServiceTest
                     features2 should have length 2048
                     every(lshEncodedFeatures) should fullyMatch regex """(\d+)-(\d+)"""
                     every(palette) should fullyMatch regex """\d+"""
+                    averageColorHex.get should have length 7
                     every(binSizes) should not be empty
                     binMinima should not be empty
                     aspectRatio should not be empty
