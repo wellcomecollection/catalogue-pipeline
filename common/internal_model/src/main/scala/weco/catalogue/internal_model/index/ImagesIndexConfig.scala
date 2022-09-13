@@ -19,6 +19,7 @@ object ImagesIndexConfig extends IndexConfigFields {
         DenseVectorField("features2", dims = 2048),
         keywordField("lshEncodedFeatures"),
         keywordField("palette"),
+        keywordField("averageColorHex"),
         intField("binSizes").withIndex(false),
         floatField("binMinima").withIndex(false),
         floatField("aspectRatio")
