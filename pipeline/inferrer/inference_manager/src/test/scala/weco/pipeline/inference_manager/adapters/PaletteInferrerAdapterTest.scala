@@ -56,7 +56,7 @@ class PaletteInferrerAdapterTest
       val inferredData = adapter.augment(InferredData.empty, response)
 
       inferredData.palette should be(palette)
-      inferredData.averageColorHex should be(averageColorHex)
+      inferredData.averageColorHex.get should be(averageColorHex)
       inferredData.binSizes should be(binSizes)
       inferredData.binMinima should be(binMinima)
     }
