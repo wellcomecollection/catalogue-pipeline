@@ -95,9 +95,10 @@ class ImageIndexableTest
   }
 
   private def assertIngestedImageIs(
-    result: Either[Seq[Image[ImageState.Indexed]], Seq[
-      Image[ImageState.Indexed]
-    ]],
+    result: Either[Seq[Image[ImageState.Indexed]],
+                   Seq[
+                     Image[ImageState.Indexed]
+                   ]],
     ingestedImage: Image[ImageState.Indexed],
     index: Index
   ): Seq[Assertion] = {

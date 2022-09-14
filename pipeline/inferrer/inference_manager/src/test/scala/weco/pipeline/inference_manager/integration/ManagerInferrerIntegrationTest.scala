@@ -81,7 +81,7 @@ class ManagerInferrerIntegrationTest
                     features2,
                     lshEncodedFeatures,
                     palette,
-                  averageColorHex,
+                    averageColorHex,
                     binSizes,
                     binMinima,
                     aspectRatio
