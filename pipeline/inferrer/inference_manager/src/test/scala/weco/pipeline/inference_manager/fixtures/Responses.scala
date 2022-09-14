@@ -42,6 +42,7 @@ object Responses {
        "palette": [${randomPaletteVector(seed)
       .map(str => s""""$str"""")
       .mkString(", ")}],
+       "average_color_hex": "${randomAverageColorHex(seed)}",
        "hash_params": {
          "bin_sizes": [${randomBinSizes(seed)
       .map(l => s"[${l.mkString(",")}]")

@@ -77,7 +77,7 @@ class InferenceManagerWorkerServiceTest
           case None =>
             warn(s"Unable to find matching image for request $req")
             None
-      },
+        },
       images = _ => Some(Responses.image)
     ) {
       case (QueuePair(queue, dlq), messageSender, augmentedImages, _, _) =>
@@ -100,7 +100,7 @@ class InferenceManagerWorkerServiceTest
                       features2,
                       lshEncodedFeatures,
                       palette,
-                      averageColorHex,
+                      Some(averageColorHex),
                       binSizes,
                       binMinima,
                       aspectRatio

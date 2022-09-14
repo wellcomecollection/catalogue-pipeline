@@ -40,7 +40,8 @@ class ImageDownloaderTest
                 createDigitalLocationWith(
                   locationType = LocationType.IIIFImageAPI,
                   url = "http://images.com/this-image.jpg"
-                ))
+                )
+              )
             ).toInitialImage
             val result = Source
               .single(image)
@@ -51,7 +52,8 @@ class ImageDownloaderTest
             whenReady(result) { _ =>
               requestPool.requests should have size 1
               requestPool.requests.keys.head.uri.toString should be(
-                image.locations.head.url)
+                image.locations.head.url
+              )
             }
         }
       }
@@ -118,7 +120,8 @@ class ImageDownloaderTest
             whenReady(result) { _ =>
               requestPool.requests should have size 1
               requestPool.requests.keys.head.uri.toString should be(
-                image.locations(1).url)
+                image.locations(1).url
+              )
             }
         }
       }
@@ -134,7 +137,8 @@ class ImageDownloaderTest
       )
       withMaterializer { implicit materializer: Materializer =>
         withDownloaderAndFileWriter(
-          existingFilePaths = Set(downloadedImage.path)) {
+          existingFilePaths = Set(downloadedImage.path)
+        ) {
           case (downloader, _, fileWriter) =>
             val result = Source
               .single(downloadedImage)
@@ -148,24 +152,31 @@ class ImageDownloaderTest
     }
   }
 
-  def withDownloaderAndFileWriter[R](response: String => Option[HttpResponse] =
-                                       _ => Some(Responses.image),
-                                     existingFilePaths: Set[Path] = Set.empty)(
-    testWith: TestWith[(ImageDownloader[Unit],
-                        RequestPoolMock[(Uri, MergedIdentifiedImage), Unit],
-                        MemoryFileWriter),
-                       R])(implicit materializer: Materializer): R =
+  def withDownloaderAndFileWriter[R](
+    response: String => Option[HttpResponse] = _ => Some(Responses.image),
+    existingFilePaths: Set[Path] = Set.empty
+  )(
+    testWith: TestWith[
+      (
+        ImageDownloader[Unit],
+        RequestPoolMock[(Uri, MergedIdentifiedImage), Unit],
+        MemoryFileWriter
+      ),
+      R
+    ]
+  )(implicit materializer: Materializer): R =
     withRequestPool[(Uri, MergedIdentifiedImage), Unit, R](response) {
       requestPool =>
         val fileWriter = new MemoryFileWriter
         existingFilePaths.foreach { existingFile =>
           fileWriter.files
-            .put(existingFile, ByteString(Responses.randomImageBytes()))
+            .put(existingFile, ByteString(Responses.randomBytes()))
         }
         val downloader =
           new ImageDownloader(
             requestPool = requestPool.pool,
-            fileWriter = fileWriter)
+            fileWriter = fileWriter
+          )
         testWith((downloader, requestPool, fileWriter))
     }
 }

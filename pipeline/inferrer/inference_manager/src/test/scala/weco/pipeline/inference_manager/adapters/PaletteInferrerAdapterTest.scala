@@ -47,7 +47,8 @@ class PaletteInferrerAdapterTest
       val binMinima = List(0.1f, 0.2f, 0.3f)
       val response = PaletteInferrerResponse(
         palette = palette,
-        averageColorHex = averageColorHex hash_params = HashParams(
+        average_color_hex = averageColorHex,
+        hash_params = HashParams(
           bin_sizes = binSizes,
           bin_minima = binMinima
         )
