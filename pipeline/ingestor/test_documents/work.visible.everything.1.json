@@ -1,6 +1,6 @@
 {
   "description" : "a list of work with all the include-able fields",
-  "createdAt" : "2022-07-25T14:45:36.356758Z",
+  "createdAt" : "2022-09-14T14:03:48.593591Z",
   "id" : "nlqnlwch",
   "document" : {
     "debug" : {
@@ -1064,6 +1064,8 @@
     },
     "query" : {
       "id" : "nlqnlwch",
+      "format.id" : null,
+      "workType" : "Standard",
       "identifiers.value" : [
         "jfcicmGMGK",
         "aGKxAEeG0H"
@@ -1098,6 +1100,10 @@
       ],
       "subjects.id" : [
       ],
+      "subjects.label" : [
+        "zUX6yZ5LLM",
+        "MbAm0vPSF4"
+      ],
       "subjects.concepts.label" : [
         "VvWxgXRSdhZCyeu",
         "lPkNaP0Clgfwapm",
@@ -1105,6 +1111,10 @@
         "EIy1m22EMkmWOjl",
         "KvfRGKp22pTPNg1",
         "Fb7hLZCWP2ToHCa"
+      ],
+      "genres.label" : [
+        "1SqaQCD06A",
+        "yy1BmoiqJb"
       ],
       "genres.concepts.label" : [
         "WAxFOW2wBgqY0L1",

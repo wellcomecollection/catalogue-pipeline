@@ -1,6 +1,6 @@
 {
   "description" : "a work with a production event in 1904",
-  "createdAt" : "2022-06-20T10:13:36.594333Z",
+  "createdAt" : "2022-09-14T14:03:47.968961Z",
   "id" : "aiv95swj",
   "document" : {
     "debug" : {
@@ -164,6 +164,8 @@
     },
     "query" : {
       "id" : "aiv95swj",
+      "format.id" : null,
+      "workType" : "Standard",
       "identifiers.value" : [
         "h0QyLvGt20"
       ],
@@ -183,7 +185,11 @@
       ],
       "subjects.id" : [
       ],
+      "subjects.label" : [
+      ],
       "subjects.concepts.label" : [
+      ],
+      "genres.label" : [
       ],
       "genres.concepts.label" : [
       ],

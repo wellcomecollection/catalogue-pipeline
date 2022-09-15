@@ -1,6 +1,6 @@
 {
   "description" : "an arbitrary list of visible works",
-  "createdAt" : "2022-06-20T10:13:35.368332Z",
+  "createdAt" : "2022-09-14T14:03:46.269370Z",
   "id" : "dph7sjip",
   "document" : {
     "debug" : {
@@ -129,6 +129,8 @@
     },
     "query" : {
       "id" : "dph7sjip",
+      "format.id" : null,
+      "workType" : "Standard",
       "identifiers.value" : [
         "WpBejTwv1N"
       ],
@@ -148,7 +150,11 @@
       ],
       "subjects.id" : [
       ],
+      "subjects.label" : [
+      ],
       "subjects.concepts.label" : [
+      ],
+      "genres.label" : [
       ],
       "genres.concepts.label" : [
       ],

@@ -1,6 +1,6 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2022-06-20T10:13:38.056407Z",
+  "createdAt" : "2022-09-14T14:03:50.006069Z",
   "id" : "b5lylqvq",
   "document" : {
     "debug" : {
@@ -184,6 +184,8 @@
     },
     "query" : {
       "id" : "b5lylqvq",
+      "format.id" : "x",
+      "workType" : "Standard",
       "identifiers.value" : [
         "DIlUXQf0x4"
       ],
@@ -203,10 +205,15 @@
       ],
       "subjects.id" : [
       ],
+      "subjects.label" : [
+        "9hdRJC6PIO"
+      ],
       "subjects.concepts.label" : [
         "bmiPTNnwYSoEYyd",
         "ewbq2T7lfxMM8Gf",
         "uD4zaFerI8P7W1W"
+      ],
+      "genres.label" : [
       ],
       "genres.concepts.label" : [
       ],

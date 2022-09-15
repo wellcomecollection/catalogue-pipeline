@@ -1,6 +1,6 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2022-06-20T10:13:38.444858Z",
+  "createdAt" : "2022-09-14T14:03:50.375744Z",
   "id" : "rbao66qq",
   "document" : {
     "debug" : {
@@ -129,6 +129,8 @@
     },
     "query" : {
       "id" : "rbao66qq",
+      "format.id" : null,
+      "workType" : "Standard",
       "identifiers.value" : [
         "5hoUH5ZhFq"
       ],
@@ -148,7 +150,11 @@
       ],
       "subjects.id" : [
       ],
+      "subjects.label" : [
+      ],
       "subjects.concepts.label" : [
+      ],
+      "genres.label" : [
       ],
       "genres.concepts.label" : [
       ],

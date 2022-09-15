@@ -1,6 +1,6 @@
 {
   "description" : "examples for the genre tests",
-  "createdAt" : "2022-06-20T10:13:38.344574Z",
+  "createdAt" : "2022-09-14T14:03:50.293007Z",
   "id" : "ahr8n4ei",
   "document" : {
     "debug" : {
@@ -173,6 +173,8 @@
     },
     "query" : {
       "id" : "ahr8n4ei",
+      "format.id" : null,
+      "workType" : "Standard",
       "identifiers.value" : [
         "g4JnCRDZnk"
       ],
@@ -192,7 +194,12 @@
       ],
       "subjects.id" : [
       ],
+      "subjects.label" : [
+      ],
       "subjects.concepts.label" : [
+      ],
+      "genres.label" : [
+        "Pamphlets."
       ],
       "genres.concepts.label" : [
         "7ZYKrzxgMS4HDJM",

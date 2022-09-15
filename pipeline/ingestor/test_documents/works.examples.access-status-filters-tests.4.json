@@ -1,6 +1,6 @@
 {
   "description" : "examples for the access status tests",
-  "createdAt" : "2022-06-20T10:13:38.906950Z",
+  "createdAt" : "2022-09-14T14:03:50.788382Z",
   "id" : "iqani2su",
   "document" : {
     "debug" : {
@@ -227,6 +227,8 @@
     },
     "query" : {
       "id" : "iqani2su",
+      "format.id" : null,
+      "workType" : "Standard",
       "identifiers.value" : [
         "jYpuBxuni2"
       ],
@@ -251,7 +253,11 @@
       ],
       "subjects.id" : [
       ],
+      "subjects.label" : [
+      ],
       "subjects.concepts.label" : [
+      ],
+      "genres.label" : [
       ],
       "genres.concepts.label" : [
       ],

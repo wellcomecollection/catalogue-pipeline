@@ -1,6 +1,6 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2022-06-20T10:13:37.723463Z",
+  "createdAt" : "2022-09-14T14:03:49.508733Z",
   "id" : "ilrp0gol",
   "document" : {
     "debug" : {
@@ -137,6 +137,8 @@
     },
     "query" : {
       "id" : "ilrp0gol",
+      "format.id" : "h",
+      "workType" : "Standard",
       "identifiers.value" : [
         "TRLxjc4Dv7"
       ],
@@ -156,7 +158,11 @@
       ],
       "subjects.id" : [
       ],
+      "subjects.label" : [
+      ],
       "subjects.concepts.label" : [
+      ],
+      "genres.label" : [
       ],
       "genres.concepts.label" : [
       ],

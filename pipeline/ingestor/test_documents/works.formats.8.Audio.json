@@ -1,6 +1,6 @@
 {
   "description" : "one of a list of works with a variety of formats",
-  "createdAt" : "2022-06-20T10:13:37.239228Z",
+  "createdAt" : "2022-09-14T14:03:48.815525Z",
   "id" : "elrgwjtd",
   "document" : {
     "debug" : {
@@ -137,6 +137,8 @@
     },
     "query" : {
       "id" : "elrgwjtd",
+      "format.id" : "i",
+      "workType" : "Standard",
       "identifiers.value" : [
         "RMKkkMWH2B"
       ],
@@ -156,7 +158,11 @@
       ],
       "subjects.id" : [
       ],
+      "subjects.label" : [
+      ],
       "subjects.concepts.label" : [
+      ],
+      "genres.label" : [
       ],
       "genres.concepts.label" : [
       ],

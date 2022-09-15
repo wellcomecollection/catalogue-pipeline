@@ -1,6 +1,6 @@
 {
   "description" : "a work with different concepts in the genre",
-  "createdAt" : "2022-06-20T10:13:37.447701Z",
+  "createdAt" : "2022-09-14T14:03:49.103167Z",
   "id" : "2zo588up",
   "document" : {
     "debug" : {
@@ -196,6 +196,8 @@
     },
     "query" : {
       "id" : "2zo588up",
+      "format.id" : null,
+      "workType" : "Standard",
       "identifiers.value" : [
         "rVoekomuzt"
       ],
@@ -215,7 +217,12 @@
       ],
       "subjects.id" : [
       ],
+      "subjects.label" : [
+      ],
       "subjects.concepts.label" : [
+      ],
+      "genres.label" : [
+        "Electronic books"
       ],
       "genres.concepts.label" : [
         "Conceptual Conversations",

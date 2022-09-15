@@ -1,6 +1,6 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2022-06-20T10:13:37.719471Z",
+  "createdAt" : "2022-09-14T14:03:49.503507Z",
   "id" : "e2zva5mj",
   "document" : {
     "debug" : {
@@ -137,6 +137,8 @@
     },
     "query" : {
       "id" : "e2zva5mj",
+      "format.id" : "p",
+      "workType" : "Standard",
       "identifiers.value" : [
         "2Ap82csHfk"
       ],
@@ -156,7 +158,11 @@
       ],
       "subjects.id" : [
       ],
+      "subjects.label" : [
+      ],
       "subjects.concepts.label" : [
+      ],
+      "genres.label" : [
       ],
       "genres.concepts.label" : [
       ],

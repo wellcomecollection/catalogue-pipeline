@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2022-07-25T14:45:36.977798Z",
+  "createdAt" : "2022-09-14T14:03:50.443579Z",
   "id" : "h5zn9bqm",
   "document" : {
     "debug" : {
@@ -156,6 +156,8 @@
     },
     "query" : {
       "id" : "h5zn9bqm",
+      "format.id" : null,
+      "workType" : "Standard",
       "identifiers.value" : [
         "OQ6G6Rkv6Q"
       ],
@@ -175,7 +177,11 @@
       ],
       "subjects.id" : [
       ],
+      "subjects.label" : [
+      ],
       "subjects.concepts.label" : [
+      ],
+      "genres.label" : [
       ],
       "genres.concepts.label" : [
       ],
