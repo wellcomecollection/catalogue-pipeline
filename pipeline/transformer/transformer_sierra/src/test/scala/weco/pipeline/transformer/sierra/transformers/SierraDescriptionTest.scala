@@ -73,6 +73,22 @@ class SierraDescriptionTest
     )
   }
 
+  it("gets a description from subfields ǂa and ǂc") {
+    // This is based on b20646604, as retrieved 15 September 2022
+    assertFindsCorrectDescription(
+      varFields = List(
+        VarField(
+          marcTag = "520",
+          subfields = List(
+            Subfield(tag = "a", content = "\"This book is about the ethics of nursing and midwifery\""),
+            Subfield(tag = "c", content = "Provided by publisher.")
+          )
+        )
+      ),
+      expectedDescription = Some("<p>\"This book is about the ethics of nursing and midwifery\" Provided by publisher.</p>")
+    )
+  }
+
   describe("getting URLs from MARC 520 ǂu") {
     val description = "Picking particular pears in Poland."
     val summaryDescription = "Selecting sumptious starfruit in Spain."
