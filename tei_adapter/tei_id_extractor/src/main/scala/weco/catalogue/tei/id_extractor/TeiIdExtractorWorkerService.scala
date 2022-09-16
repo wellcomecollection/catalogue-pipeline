@@ -113,8 +113,8 @@ class TeiIdExtractorWorkerService[Dest](
 
     val excludedDirs = Seq(
       // These are directories used for TEI management, not actual TEI files.
-      "docs", "Templates",
-
+      "docs",
+      "Templates",
       // These are files we don't want to ingest directly into the platform;
       // e.g. stuff that's been written for collaboration on external projects.
       //
