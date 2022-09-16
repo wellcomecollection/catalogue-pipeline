@@ -356,7 +356,7 @@ class SierraTransformerTest
         Subfield(
           tag = "a",
           content = "A delightful description of a dead daisy."),
-        Subfield(tag = "c", content = "1923")
+        Subfield(tag = "x", content = "1923")
       )
     )
 

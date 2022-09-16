@@ -21,7 +21,7 @@ object SierraDescription
   //
   // We use MARC field "520".  Rules:
   //
-  //  - Join 520 ǂa, ǂb and ǂu with a space
+  //  - Join 520 ǂa, ǂb, ǂc and ǂu with a space
   //  - If the ǂu looks like a URL, we wrap it in <a> tags with the URL as the
   //    link text
   //  - Wrap resulting string in <p> tags
@@ -49,7 +49,8 @@ object SierraDescription
     val subfields =
       Seq(
         vf.nonrepeatableSubfieldWithTag(tag = "a"),
-        vf.nonrepeatableSubfieldWithTag(tag = "b")
+        vf.nonrepeatableSubfieldWithTag(tag = "b"),
+        vf.nonrepeatableSubfieldWithTag(tag = "c")
       ).flatten ++ vf.subfieldsWithTag("u")
 
     val contents =
