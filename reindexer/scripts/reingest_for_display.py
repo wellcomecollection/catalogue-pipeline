@@ -20,16 +20,10 @@ def chunked_iterable(iterable, size):
 
 def get_work_ids(es, api_index, query, reingest_docs_count):
     for hit in tqdm(
-        scan(
-            es,
-            scroll="15m",
-            index=api_index,
-            query={"query": query},
-            _source=False,
-        ),
+        scan(es, scroll="15m", index=api_index, query={"query": query}, _source=False),
         total=reingest_docs_count,
     ):
-        yield hit['_id']
+        yield hit["_id"]
 
 
 @click.command()
