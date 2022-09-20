@@ -1,6 +1,6 @@
 {
   "description" : "a work with 'mouse' in the title",
-  "createdAt" : "2022-09-14T14:03:47.847812Z",
+  "createdAt" : "2022-09-20T13:36:00.927265Z",
   "id" : "lnn17cwk",
   "document" : {
     "debug" : {
@@ -160,6 +160,8 @@
       "genres.concepts.label" : [
       ],
       "languages.id" : [
+      ],
+      "contributors.agent.id" : [
       ],
       "contributors.agent.label" : [
       ],

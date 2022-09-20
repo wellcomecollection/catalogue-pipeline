@@ -1,6 +1,6 @@
 {
   "description" : "works with different subjects",
-  "createdAt" : "2022-09-14T14:03:49.132423Z",
+  "createdAt" : "2022-09-20T13:36:02.110370Z",
   "id" : "t9nj8zse",
   "document" : {
     "debug" : {
@@ -159,6 +159,8 @@
       "genres.concepts.label" : [
       ],
       "languages.id" : [
+      ],
+      "contributors.agent.id" : [
       ],
       "contributors.agent.label" : [
       ],

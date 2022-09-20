@@ -1,6 +1,6 @@
 {
   "description" : "examples for the genre tests",
-  "createdAt" : "2022-09-14T14:03:50.295476Z",
+  "createdAt" : "2022-09-20T13:36:03.035578Z",
   "id" : "1mqutqzm",
   "document" : {
     "debug" : {
@@ -207,6 +207,8 @@
         "sJ0y4QwQTlrFnQP"
       ],
       "languages.id" : [
+      ],
+      "contributors.agent.id" : [
       ],
       "contributors.agent.label" : [
       ],

@@ -247,6 +247,7 @@ object WorksIndexConfig extends IndexConfigFields {
           // languages
           keywordField("languages.id"),
           // contributors
+          canonicalIdField("contributors.agent.id"),
           labelField("contributors.agent.label"),
           // relations
           canonicalIdField("partOf.id"),

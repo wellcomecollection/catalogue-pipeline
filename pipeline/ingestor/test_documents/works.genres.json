@@ -1,6 +1,6 @@
 {
   "description" : "a work with different concepts in the genre",
-  "createdAt" : "2022-09-14T14:03:49.103167Z",
+  "createdAt" : "2022-09-20T13:36:02.089717Z",
   "id" : "2zo588up",
   "document" : {
     "debug" : {
@@ -230,6 +230,8 @@
         "Past Prehistory"
       ],
       "languages.id" : [
+      ],
+      "contributors.agent.id" : [
       ],
       "contributors.agent.label" : [
       ],

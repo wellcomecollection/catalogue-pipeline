@@ -1,6 +1,6 @@
 {
   "description" : "works with items with other identifiers",
-  "createdAt" : "2022-09-14T14:03:49.356972Z",
+  "createdAt" : "2022-09-20T13:36:02.283781Z",
   "id" : "c5xw2xfj",
   "document" : {
     "debug" : {
@@ -249,6 +249,8 @@
       "genres.concepts.label" : [
       ],
       "languages.id" : [
+      ],
+      "contributors.agent.id" : [
       ],
       "contributors.agent.label" : [
       ],

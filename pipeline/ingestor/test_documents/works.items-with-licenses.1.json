@@ -1,6 +1,6 @@
 {
   "description" : "a work with licensed digital items",
-  "createdAt" : "2022-09-14T14:03:49.011411Z",
+  "createdAt" : "2022-09-20T13:36:01.985436Z",
   "id" : "runiusy8",
   "document" : {
     "debug" : {
@@ -210,6 +210,8 @@
       "genres.concepts.label" : [
       ],
       "languages.id" : [
+      ],
+      "contributors.agent.id" : [
       ],
       "contributors.agent.label" : [
       ],

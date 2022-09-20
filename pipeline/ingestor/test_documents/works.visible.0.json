@@ -1,6 +1,6 @@
 {
   "description" : "an arbitrary list of visible works",
-  "createdAt" : "2022-09-14T14:03:46.253963Z",
+  "createdAt" : "2022-09-20T13:35:59.600065Z",
   "id" : "2twopft1",
   "document" : {
     "debug" : {
@@ -159,6 +159,8 @@
       "genres.concepts.label" : [
       ],
       "languages.id" : [
+      ],
+      "contributors.agent.id" : [
       ],
       "contributors.agent.label" : [
       ],

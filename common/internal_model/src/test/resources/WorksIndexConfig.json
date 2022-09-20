@@ -637,6 +637,10 @@
                       }
                     },
                     "analyzer": "asciifolding_analyzer"
+                  },
+                  "id": {
+                    "type": "keyword",
+                    "normalizer": "lowercase_normalizer"
                   }
                 }
               }

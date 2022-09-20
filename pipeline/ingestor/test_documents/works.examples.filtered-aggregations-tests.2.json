@@ -1,6 +1,6 @@
 {
   "description" : "examples for the works filtered aggregations tests",
-  "createdAt" : "2022-09-14T14:03:50.914975Z",
+  "createdAt" : "2022-09-20T13:36:03.585804Z",
   "id" : "jfnymrg2",
   "document" : {
     "debug" : {
@@ -177,6 +177,8 @@
       ],
       "languages.id" : [
         "que"
+      ],
+      "contributors.agent.id" : [
       ],
       "contributors.agent.label" : [
       ],

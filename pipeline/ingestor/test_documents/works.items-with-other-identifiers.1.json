@@ -1,6 +1,6 @@
 {
   "description" : "works with items with other identifiers",
-  "createdAt" : "2022-09-14T14:03:49.348696Z",
+  "createdAt" : "2022-09-20T13:36:02.280654Z",
   "id" : "upm4bal7",
   "document" : {
     "debug" : {
@@ -248,6 +248,8 @@
       "genres.concepts.label" : [
       ],
       "languages.id" : [
+      ],
+      "contributors.agent.id" : [
       ],
       "contributors.agent.label" : [
       ],
