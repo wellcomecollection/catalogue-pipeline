@@ -201,7 +201,7 @@ class WorkQueryableValuesTest
         Contributor(
           agent = Person(
             id = IdState.Identified(
-              canonicalId = CanonicalId("craftyc"),
+              canonicalId = CanonicalId("craftyci"),
               sourceIdentifier = createSourceIdentifier,
             ),
             label = "Cruel Cinderella"
@@ -211,7 +211,7 @@ class WorkQueryableValuesTest
         Contributor(
           agent = Person(
             id = IdState.Identified(
-              canonicalId = CanonicalId("careful"),
+              canonicalId = CanonicalId("carefulc"),
               sourceIdentifier = createSourceIdentifier,
             ),
             label = "Careful Carlos"
