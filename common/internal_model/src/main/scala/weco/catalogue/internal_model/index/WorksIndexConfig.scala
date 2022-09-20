@@ -224,7 +224,7 @@ object WorksIndexConfig extends IndexConfigFields {
           // top-level work
           canonicalIdField("id"),
           keywordField("type"),
-          keywordField("formatId"),
+          keywordField("format.id"),
           keywordField("workType"),
           // identifiers
           sourceIdentifierField("identifiers.value"),

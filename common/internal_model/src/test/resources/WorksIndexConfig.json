@@ -687,8 +687,12 @@
           "type": {
             "type": "keyword"
           },
-          "formatId": {
-            "type": "keyword"
+          "format": {
+            "properties": {
+              "id": {
+                "type": "keyword"
+              }
+            }
           },
           "workType": {
             "type": "keyword"
