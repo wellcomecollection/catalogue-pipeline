@@ -229,7 +229,7 @@ class WorkQueryableValuesTest
       availabilities = Set()
     )
 
-    q.contributorAgentIds shouldBe List("craftyc", "careful")
+    q.contributorAgentIds shouldBe List("craftyci", "carefulc")
     q.contributorAgentLabels shouldBe List(
       "Crafty Carol",
       "Cruel Cinderella",
