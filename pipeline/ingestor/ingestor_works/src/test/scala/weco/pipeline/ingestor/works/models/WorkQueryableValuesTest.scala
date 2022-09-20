@@ -131,7 +131,11 @@ class WorkQueryableValuesTest
     )
 
     q.subjectIds shouldBe List("ssssssss", "SSSSSSSS")
-    q.subjectLabels shouldBe List("Silly sausages", "Straight scythes", "Soggy sponges", "Sam Smithington")
+    q.subjectLabels shouldBe List(
+      "Silly sausages",
+      "Straight scythes",
+      "Soggy sponges",
+      "Sam Smithington")
     q.subjectConceptLabels shouldBe List("silliness", "cylinders", "tools")
   }
 
