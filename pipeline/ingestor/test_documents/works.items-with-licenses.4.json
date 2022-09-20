@@ -1,6 +1,6 @@
 {
   "description" : "a work with licensed digital items",
-  "createdAt" : "2022-06-20T10:13:37.363455Z",
+  "createdAt" : "2022-09-14T14:03:49.017804Z",
   "id" : "vwg1cj2y",
   "document" : {
     "debug" : {
@@ -129,6 +129,8 @@
     },
     "query" : {
       "id" : "vwg1cj2y",
+      "format.id" : null,
+      "workType" : "Standard",
       "identifiers.value" : [
         "FIC2DNd6NA"
       ],
@@ -148,7 +150,11 @@
       ],
       "subjects.id" : [
       ],
+      "subjects.label" : [
+      ],
       "subjects.concepts.label" : [
+      ],
+      "genres.label" : [
       ],
       "genres.concepts.label" : [
       ],

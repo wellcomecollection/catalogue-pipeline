@@ -26,6 +26,29 @@ class WorkQueryableValuesTest
     with ItemsGenerators
     with ImageGenerators
     with WorkGenerators {
+  it("adds basic work info") {
+    val id = createCanonicalId
+    val format = Format.Books
+    val workType = WorkType.Series
+
+    val workData = WorkData[DataState.Identified](
+      title = Some(s"title-${randomAlphanumeric(length = 10)}"),
+      format = Some(format),
+      workType = workType
+    )
+
+    val q = WorkQueryableValues(
+      id,
+      sourceIdentifier = createSourceIdentifier,
+      workData,
+      relations = Relations(),
+      availabilities = Set()
+    )
+
+    q.formatId shouldBe Some("a")
+    q.workType shouldBe "Series"
+  }
+
   it("sets identifiers") {
     val id = CanonicalId("iiiiiiii")
     val sourceIdentifier = createSourceIdentifierWith(value = "b12345678")
@@ -108,6 +131,11 @@ class WorkQueryableValuesTest
     )
 
     q.subjectIds shouldBe List("ssssssss", "SSSSSSSS")
+    q.subjectLabels shouldBe List(
+      "Silly sausages",
+      "Straight scythes",
+      "Soggy sponges",
+      "Sam Smithington")
     q.subjectConceptLabels shouldBe List("silliness", "cylinders", "tools")
   }
 
@@ -134,6 +162,7 @@ class WorkQueryableValuesTest
       availabilities = Set()
     )
 
+    q.genreLabels shouldBe List("Green gerbils", "Grim giants")
     q.genreConceptLabels shouldBe List("generosity", "greebles", "greatness")
   }
 

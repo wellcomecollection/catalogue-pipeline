@@ -1,6 +1,6 @@
 {
   "description" : "an arbitrary list of visible works",
-  "createdAt" : "2022-06-20T10:13:35.374713Z",
+  "createdAt" : "2022-09-14T14:03:46.275702Z",
   "id" : "raob2ruv",
   "document" : {
     "debug" : {
@@ -129,6 +129,8 @@
     },
     "query" : {
       "id" : "raob2ruv",
+      "format.id" : null,
+      "workType" : "Standard",
       "identifiers.value" : [
         "wyJzS2SuiH"
       ],
@@ -148,7 +150,11 @@
       ],
       "subjects.id" : [
       ],
+      "subjects.label" : [
+      ],
       "subjects.concepts.label" : [
+      ],
+      "genres.label" : [
       ],
       "genres.concepts.label" : [
       ],

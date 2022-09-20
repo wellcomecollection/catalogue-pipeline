@@ -1,6 +1,6 @@
 {
   "description" : "works with multi-year production ranges",
-  "createdAt" : "2022-06-20T10:13:37.927119Z",
+  "createdAt" : "2022-09-14T14:03:49.812977Z",
   "id" : "v9is9e3t",
   "document" : {
     "debug" : {
@@ -187,6 +187,8 @@
     },
     "query" : {
       "id" : "v9is9e3t",
+      "format.id" : null,
+      "workType" : "Standard",
       "identifiers.value" : [
         "fZVe3xG7r6"
       ],
@@ -206,7 +208,11 @@
       ],
       "subjects.id" : [
       ],
+      "subjects.label" : [
+      ],
       "subjects.concepts.label" : [
+      ],
+      "genres.label" : [
       ],
       "genres.concepts.label" : [
       ],

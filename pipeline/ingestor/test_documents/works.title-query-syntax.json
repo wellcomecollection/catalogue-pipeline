@@ -1,6 +1,6 @@
 {
   "description" : "a work whose title has lots of ES query syntax operators",
-  "createdAt" : "2022-06-20T10:13:37.256596Z",
+  "createdAt" : "2022-09-14T14:03:48.854028Z",
   "id" : "hjjs3mu3",
   "document" : {
     "debug" : {
@@ -129,6 +129,8 @@
     },
     "query" : {
       "id" : "hjjs3mu3",
+      "format.id" : null,
+      "workType" : "Standard",
       "identifiers.value" : [
         "Z3LIdvnOPk"
       ],
@@ -148,7 +150,11 @@
       ],
       "subjects.id" : [
       ],
+      "subjects.label" : [
+      ],
       "subjects.concepts.label" : [
+      ],
+      "genres.label" : [
       ],
       "genres.concepts.label" : [
       ],

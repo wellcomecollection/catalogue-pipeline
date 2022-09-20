@@ -223,6 +223,10 @@ object WorksIndexConfig extends IndexConfigFields {
         .fields(
           // top-level work
           canonicalIdField("id"),
+          keywordField("type"),
+          keywordField("formatId"),
+          keywordField("workType"),
+          // identifiers
           sourceIdentifierField("identifiers.value"),
           // images
           canonicalIdField("images.id"),
@@ -235,8 +239,10 @@ object WorksIndexConfig extends IndexConfigFields {
           keywordField("items.locations.locationType.id"),
           // subjects
           canonicalIdField("subjects.id"),
+          labelField("subjects.label"),
           labelField("subjects.concepts.label"),
           // genres
+          labelField("genres.label"),
           labelField("genres.concepts.label"),
           // languages
           keywordField("languages.id"),

@@ -1,6 +1,6 @@
 {
   "description" : "examples of works with different types",
-  "createdAt" : "2022-06-20T10:13:38.316875Z",
+  "createdAt" : "2022-09-14T14:03:50.262224Z",
   "id" : "2tqcclh1",
   "document" : {
     "debug" : {
@@ -129,6 +129,8 @@
     },
     "query" : {
       "id" : "2tqcclh1",
+      "format.id" : null,
+      "workType" : "Collection",
       "identifiers.value" : [
         "ZiS5MlN0hQ"
       ],
@@ -148,7 +150,11 @@
       ],
       "subjects.id" : [
       ],
+      "subjects.label" : [
+      ],
       "subjects.concepts.label" : [
+      ],
+      "genres.label" : [
       ],
       "genres.concepts.label" : [
       ],

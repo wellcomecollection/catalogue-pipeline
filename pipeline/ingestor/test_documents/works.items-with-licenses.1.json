@@ -1,6 +1,6 @@
 {
   "description" : "a work with licensed digital items",
-  "createdAt" : "2022-06-20T10:13:37.359682Z",
+  "createdAt" : "2022-09-14T14:03:49.011411Z",
   "id" : "runiusy8",
   "document" : {
     "debug" : {
@@ -178,6 +178,8 @@
     },
     "query" : {
       "id" : "runiusy8",
+      "format.id" : null,
+      "workType" : "Standard",
       "identifiers.value" : [
         "ZGWEGMyTaq"
       ],
@@ -199,7 +201,11 @@
       ],
       "subjects.id" : [
       ],
+      "subjects.label" : [
+      ],
       "subjects.concepts.label" : [
+      ],
+      "genres.label" : [
       ],
       "genres.concepts.label" : [
       ],

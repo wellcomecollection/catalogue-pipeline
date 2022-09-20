@@ -1,6 +1,6 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2022-06-20T10:13:37.716666Z",
+  "createdAt" : "2022-09-14T14:03:49.497029Z",
   "id" : "cvdyxyqr",
   "document" : {
     "debug" : {
@@ -137,6 +137,8 @@
     },
     "query" : {
       "id" : "cvdyxyqr",
+      "format.id" : "w",
+      "workType" : "Standard",
       "identifiers.value" : [
         "LIOVK6f1ni"
       ],
@@ -156,7 +158,11 @@
       ],
       "subjects.id" : [
       ],
+      "subjects.label" : [
+      ],
       "subjects.concepts.label" : [
+      ],
+      "genres.label" : [
       ],
       "genres.concepts.label" : [
       ],

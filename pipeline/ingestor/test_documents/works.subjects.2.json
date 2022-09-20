@@ -1,6 +1,6 @@
 {
   "description" : "works with different subjects",
-  "createdAt" : "2022-06-20T10:13:37.463093Z",
+  "createdAt" : "2022-09-14T14:03:49.127607Z",
   "id" : "evraub2i",
   "document" : {
     "debug" : {
@@ -176,6 +176,8 @@
     },
     "query" : {
       "id" : "evraub2i",
+      "format.id" : null,
+      "workType" : "Standard",
       "identifiers.value" : [
         "E3Fqby26w1"
       ],
@@ -195,10 +197,15 @@
       ],
       "subjects.id" : [
       ],
+      "subjects.label" : [
+        "realAnalysis"
+      ],
       "subjects.concepts.label" : [
         "W7WKCBWrkxlOWWB",
         "Kbkm5UMJEwTIE8u",
         "H8GnKqkwP9ugIes"
+      ],
+      "genres.label" : [
       ],
       "genres.concepts.label" : [
       ],

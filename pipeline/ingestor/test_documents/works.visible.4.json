@@ -1,6 +1,6 @@
 {
   "description" : "an arbitrary list of visible works",
-  "createdAt" : "2022-06-20T10:13:35.377821Z",
+  "createdAt" : "2022-09-14T14:03:46.279013Z",
   "id" : "vbi1ii19",
   "document" : {
     "debug" : {
@@ -129,6 +129,8 @@
     },
     "query" : {
       "id" : "vbi1ii19",
+      "format.id" : null,
+      "workType" : "Standard",
       "identifiers.value" : [
         "CzLNHBFHuR"
       ],
@@ -148,7 +150,11 @@
       ],
       "subjects.id" : [
       ],
+      "subjects.label" : [
+      ],
       "subjects.concepts.label" : [
+      ],
+      "genres.label" : [
       ],
       "genres.concepts.label" : [
       ],

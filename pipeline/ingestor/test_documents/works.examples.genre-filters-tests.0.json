@@ -1,6 +1,6 @@
 {
   "description" : "examples for the genre tests",
-  "createdAt" : "2022-06-20T10:13:38.343366Z",
+  "createdAt" : "2022-09-14T14:03:50.291586Z",
   "id" : "jywtq4xg",
   "document" : {
     "debug" : {
@@ -173,6 +173,8 @@
     },
     "query" : {
       "id" : "jywtq4xg",
+      "format.id" : null,
+      "workType" : "Standard",
       "identifiers.value" : [
         "LgGFRAV0Zs"
       ],
@@ -192,7 +194,12 @@
       ],
       "subjects.id" : [
       ],
+      "subjects.label" : [
+      ],
       "subjects.concepts.label" : [
+      ],
+      "genres.label" : [
+        "Annual reports."
       ],
       "genres.concepts.label" : [
         "qp5RA4f5gWVIptl",

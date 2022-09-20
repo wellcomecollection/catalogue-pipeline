@@ -11,6 +11,8 @@ import weco.catalogue.internal_model.work.{Availability, Relations, WorkData}
 
 case class WorkQueryableValues(
   @JsonKey("id") id: String,
+  @JsonKey("format.id") formatId: Option[String],
+  @JsonKey("workType") workType: String,
   @JsonKey("identifiers.value") workIdentifiers: List[String],
   @JsonKey("images.id") imageIds: List[String],
   @JsonKey("images.identifiers.value") imageIdentifiers: List[String],
@@ -21,7 +23,9 @@ case class WorkQueryableValues(
   @JsonKey("items.locations.license.id") itemLicenseIds: List[String],
   @JsonKey("items.locations.locationType.id") itemLocationTypeIds: List[String],
   @JsonKey("subjects.id") subjectIds: List[String],
+  @JsonKey("subjects.label") subjectLabels: List[String],
   @JsonKey("subjects.concepts.label") subjectConceptLabels: List[String],
+  @JsonKey("genres.label") genreLabels: List[String],
   @JsonKey("genres.concepts.label") genreConceptLabels: List[String],
   @JsonKey("languages.id") languageIds: List[String],
   @JsonKey("contributors.agent.label") contributorAgentLabels: List[String],
@@ -40,6 +44,8 @@ case object WorkQueryableValues {
 
     WorkQueryableValues(
       id = id.underlying,
+      formatId = workData.format.map(_.id),
+      workType = workData.workType.toString,
       workIdentifiers =
         (sourceIdentifier +: workData.otherIdentifiers).map(_.value),
       imageIds = workData.imageData.map(_.id).canonicalIds,
@@ -52,7 +58,9 @@ case object WorkQueryableValues {
       itemLicenseIds = locations.flatMap(_.license).map(_.id),
       itemLocationTypeIds = locations.map(_.locationType.id),
       subjectIds = workData.subjects.map(_.id).canonicalIds,
+      subjectLabels = workData.subjects.map(_.label),
       subjectConceptLabels = workData.subjects.flatMap(_.concepts).map(_.label),
+      genreLabels = workData.genres.map(_.label),
       genreConceptLabels = workData.genres.flatMap(_.concepts).map(_.label),
       languageIds = workData.languages.map(_.id),
       contributorAgentLabels = workData.contributors.map(_.agent.label),

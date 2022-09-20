@@ -1,6 +1,6 @@
 {
   "description" : "works with different contributor",
-  "createdAt" : "2022-07-25T14:45:36.643754Z",
+  "createdAt" : "2022-09-14T14:03:49.265796Z",
   "id" : "bj9evx0c",
   "document" : {
     "debug" : {
@@ -154,6 +154,8 @@
     },
     "query" : {
       "id" : "bj9evx0c",
+      "format.id" : null,
+      "workType" : "Standard",
       "identifiers.value" : [
         "TjLML0MOH1"
       ],
@@ -173,7 +175,11 @@
       ],
       "subjects.id" : [
       ],
+      "subjects.label" : [
+      ],
       "subjects.concepts.label" : [
+      ],
+      "genres.label" : [
       ],
       "genres.concepts.label" : [
       ],

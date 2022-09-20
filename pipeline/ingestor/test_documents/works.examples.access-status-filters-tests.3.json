@@ -1,6 +1,6 @@
 {
   "description" : "examples for the access status tests",
-  "createdAt" : "2022-06-20T10:13:38.906258Z",
+  "createdAt" : "2022-09-14T14:03:50.787124Z",
   "id" : "wys5lz5r",
   "document" : {
     "debug" : {
@@ -228,6 +228,8 @@
     },
     "query" : {
       "id" : "wys5lz5r",
+      "format.id" : null,
+      "workType" : "Standard",
       "identifiers.value" : [
         "GWT6gTiZ6K"
       ],
@@ -252,7 +254,11 @@
       ],
       "subjects.id" : [
       ],
+      "subjects.label" : [
+      ],
       "subjects.concepts.label" : [
+      ],
+      "genres.label" : [
       ],
       "genres.concepts.label" : [
       ],

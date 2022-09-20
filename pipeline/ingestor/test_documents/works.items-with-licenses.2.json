@@ -1,6 +1,6 @@
 {
   "description" : "a work with licensed digital items",
-  "createdAt" : "2022-06-20T10:13:37.360693Z",
+  "createdAt" : "2022-09-14T14:03:49.012967Z",
   "id" : "ougtipki",
   "document" : {
     "debug" : {
@@ -176,6 +176,8 @@
     },
     "query" : {
       "id" : "ougtipki",
+      "format.id" : null,
+      "workType" : "Standard",
       "identifiers.value" : [
         "fbITZO5oAg"
       ],
@@ -197,7 +199,11 @@
       ],
       "subjects.id" : [
       ],
+      "subjects.label" : [
+      ],
       "subjects.concepts.label" : [
+      ],
+      "genres.label" : [
       ],
       "genres.concepts.label" : [
       ],

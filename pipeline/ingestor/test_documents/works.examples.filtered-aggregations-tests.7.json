@@ -1,6 +1,6 @@
 {
   "description" : "examples for the works filtered aggregations tests",
-  "createdAt" : "2022-06-20T10:13:39.020745Z",
+  "createdAt" : "2022-09-14T14:03:50.922643Z",
   "id" : "pskvh87t",
   "document" : {
     "debug" : {
@@ -146,6 +146,8 @@
     },
     "query" : {
       "id" : "pskvh87t",
+      "format.id" : "a",
+      "workType" : "Standard",
       "identifiers.value" : [
         "lBGTOMLJUB"
       ],
@@ -165,7 +167,11 @@
       ],
       "subjects.id" : [
       ],
+      "subjects.label" : [
+      ],
       "subjects.concepts.label" : [
+      ],
+      "genres.label" : [
       ],
       "genres.concepts.label" : [
       ],
