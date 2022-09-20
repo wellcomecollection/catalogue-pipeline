@@ -660,12 +660,34 @@
                     "analyzer": "asciifolding_analyzer"
                   }
                 }
+              },
+              "label": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword"
+                  },
+                  "lowercaseKeyword": {
+                    "type": "keyword",
+                    "normalizer": "lowercase_normalizer"
+                  }
+                },
+                "analyzer": "asciifolding_analyzer"
               }
             }
           },
           "id": {
             "type": "keyword",
             "normalizer": "lowercase_normalizer"
+          },
+          "type": {
+            "type": "keyword"
+          },
+          "formatId": {
+            "type": "keyword"
+          },
+          "workType": {
+            "type": "keyword"
           },
           "identifiers": {
             "properties": {
@@ -810,6 +832,19 @@
                     "analyzer": "asciifolding_analyzer"
                   }
                 }
+              },
+              "label": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword"
+                  },
+                  "lowercaseKeyword": {
+                    "type": "keyword",
+                    "normalizer": "lowercase_normalizer"
+                  }
+                },
+                "analyzer": "asciifolding_analyzer"
               },
               "id": {
                 "type": "keyword",
