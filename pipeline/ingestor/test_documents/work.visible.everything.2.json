@@ -1,6 +1,6 @@
 {
   "description" : "a list of work with all the include-able fields",
-  "createdAt" : "2022-09-14T14:03:48.605821Z",
+  "createdAt" : "2022-09-20T13:36:01.583178Z",
   "id" : "jfzz4ou9",
   "document" : {
     "debug" : {
@@ -1137,6 +1137,8 @@
         "6hh",
         "EHn",
         "7Jx"
+      ],
+      "contributors.agent.id" : [
       ],
       "contributors.agent.label" : [
         "person-UFES8H2",

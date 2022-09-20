@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2022-09-14T14:03:50.445591Z",
+  "createdAt" : "2022-09-20T13:36:03.182687Z",
   "id" : "e1k1l8xu",
   "document" : {
     "debug" : {
@@ -186,6 +186,8 @@
       "genres.concepts.label" : [
       ],
       "languages.id" : [
+      ],
+      "contributors.agent.id" : [
       ],
       "contributors.agent.label" : [
         "Jake Paul"

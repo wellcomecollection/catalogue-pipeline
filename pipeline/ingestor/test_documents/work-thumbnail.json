@@ -1,6 +1,6 @@
 {
   "description" : "a work with a thumbnail",
-  "createdAt" : "2022-09-14T14:03:47.812919Z",
+  "createdAt" : "2022-09-20T13:36:00.897791Z",
   "id" : "sahqcluh",
   "document" : {
     "debug" : {
@@ -188,6 +188,8 @@
       "genres.concepts.label" : [
       ],
       "languages.id" : [
+      ],
+      "contributors.agent.id" : [
       ],
       "contributors.agent.label" : [
       ],

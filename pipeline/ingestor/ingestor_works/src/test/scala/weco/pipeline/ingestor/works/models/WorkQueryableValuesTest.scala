@@ -191,9 +191,33 @@ class WorkQueryableValuesTest
     val workData = WorkData[DataState.Identified](
       title = Some(s"title-${randomAlphanumeric(length = 10)}"),
       contributors = List(
-        createPersonContributorWith(label = "Crafty Carol"),
-        createPersonContributorWith(label = "Cruel Cinderella"),
-        createPersonContributorWith(label = "Careful Carlos"),
+        Contributor(
+          agent = Person(
+            id = IdState.Unidentifiable,
+            label = "Crafty Carol"
+          ),
+          roles = List(),
+        ),
+        Contributor(
+          agent = Person(
+            id = IdState.Identified(
+              canonicalId = CanonicalId("craftyc"),
+              sourceIdentifier = createSourceIdentifier,
+            ),
+            label = "Cruel Cinderella"
+          ),
+          roles = List(),
+        ),
+        Contributor(
+          agent = Person(
+            id = IdState.Identified(
+              canonicalId = CanonicalId("careful"),
+              sourceIdentifier = createSourceIdentifier,
+            ),
+            label = "Careful Carlos"
+          ),
+          roles = List(),
+        ),
       )
     )
 
@@ -205,6 +229,7 @@ class WorkQueryableValuesTest
       availabilities = Set()
     )
 
+    q.contributorAgentIds shouldBe List("craftyc", "careful")
     q.contributorAgentLabels shouldBe List(
       "Crafty Carol",
       "Cruel Cinderella",

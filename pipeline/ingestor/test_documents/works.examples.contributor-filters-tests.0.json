@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2022-09-14T14:03:50.443579Z",
+  "createdAt" : "2022-09-20T13:36:03.180983Z",
   "id" : "h5zn9bqm",
   "document" : {
     "debug" : {
@@ -186,6 +186,8 @@
       "genres.concepts.label" : [
       ],
       "languages.id" : [
+      ],
+      "contributors.agent.id" : [
       ],
       "contributors.agent.label" : [
         "Bath, Patricia"

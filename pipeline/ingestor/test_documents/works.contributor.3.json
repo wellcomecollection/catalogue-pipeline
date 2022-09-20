@@ -1,6 +1,6 @@
 {
   "description" : "works with different contributor",
-  "createdAt" : "2022-09-14T14:03:49.284272Z",
+  "createdAt" : "2022-09-20T13:36:02.235156Z",
   "id" : "gtfjchvo",
   "document" : {
     "debug" : {
@@ -209,6 +209,8 @@
       "genres.concepts.label" : [
       ],
       "languages.id" : [
+      ],
+      "contributors.agent.id" : [
       ],
       "contributors.agent.label" : [
         "MI5",

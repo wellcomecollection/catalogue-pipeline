@@ -1,6 +1,6 @@
 {
   "description" : "examples for the access status tests",
-  "createdAt" : "2022-09-14T14:03:50.788382Z",
+  "createdAt" : "2022-09-20T13:36:03.483588Z",
   "id" : "iqani2su",
   "document" : {
     "debug" : {
@@ -262,6 +262,8 @@
       "genres.concepts.label" : [
       ],
       "languages.id" : [
+      ],
+      "contributors.agent.id" : [
       ],
       "contributors.agent.label" : [
       ],

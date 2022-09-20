@@ -1,6 +1,6 @@
 {
   "description" : "works with different subjects",
-  "createdAt" : "2022-09-14T14:03:49.130026Z",
+  "createdAt" : "2022-09-20T13:36:02.109184Z",
   "id" : "xcssabt1",
   "document" : {
     "debug" : {
@@ -261,6 +261,8 @@
       "genres.concepts.label" : [
       ],
       "languages.id" : [
+      ],
+      "contributors.agent.id" : [
       ],
       "contributors.agent.label" : [
       ],

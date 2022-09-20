@@ -1,6 +1,6 @@
 {
   "description" : "a list of work with all the include-able fields",
-  "createdAt" : "2022-09-14T14:03:48.593591Z",
+  "createdAt" : "2022-09-20T13:36:01.567542Z",
   "id" : "nlqnlwch",
   "document" : {
     "debug" : {
@@ -1128,6 +1128,8 @@
         "yc6",
         "hi6",
         "GkI"
+      ],
+      "contributors.agent.id" : [
       ],
       "contributors.agent.label" : [
         "person-kGPDWLL",

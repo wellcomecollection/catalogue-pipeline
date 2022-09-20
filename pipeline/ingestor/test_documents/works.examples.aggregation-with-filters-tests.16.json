@@ -1,6 +1,6 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2022-09-14T14:03:49.997210Z",
+  "createdAt" : "2022-09-20T13:36:02.739556Z",
   "id" : "pyub9jxo",
   "document" : {
     "debug" : {
@@ -218,6 +218,8 @@
       "genres.concepts.label" : [
       ],
       "languages.id" : [
+      ],
+      "contributors.agent.id" : [
       ],
       "contributors.agent.label" : [
       ],

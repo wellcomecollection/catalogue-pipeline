@@ -1,6 +1,6 @@
 {
   "description" : "a work with a production event in 1904",
-  "createdAt" : "2022-09-14T14:03:47.968961Z",
+  "createdAt" : "2022-09-20T13:36:01.047034Z",
   "id" : "aiv95swj",
   "document" : {
     "debug" : {
@@ -194,6 +194,8 @@
       "genres.concepts.label" : [
       ],
       "languages.id" : [
+      ],
+      "contributors.agent.id" : [
       ],
       "contributors.agent.label" : [
       ],
