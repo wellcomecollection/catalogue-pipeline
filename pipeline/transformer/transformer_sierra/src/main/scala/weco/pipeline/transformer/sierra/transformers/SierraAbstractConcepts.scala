@@ -57,8 +57,8 @@ trait SierraAbstractConcepts extends Logging {
       case None => IdState.Unidentifiable
     }
 
-  private def addIdentifierFromText(ontologyType: String,
-                                    label: String): IdState.Unminted = {
+  def addIdentifierFromText(ontologyType: String,
+                            label: String): IdState.Unminted = {
     val normalizedLabel = Normalizer
       .normalize(
         label.toLowerCase,

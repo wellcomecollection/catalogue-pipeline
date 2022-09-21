@@ -1,6 +1,6 @@
 package weco.pipeline.transformer.sierra.transformers
 
-import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, SourceIdentifier}
 import weco.catalogue.internal_model.work._
 import weco.sierra.models.SierraQueryOps
 import weco.sierra.models.data.SierraBibData
@@ -106,7 +106,7 @@ object SierraContributors
             val (ontologyType, maybeAgent) = getContributors(varfield.subfields)
             maybeAgent.map { agent =>
               Contributor(
-                agent = withId(agent, identify(varfield, ontologyType)),
+                agent = withId(agent, identify(varfield.subfields, ontologyType, agent.label)),
                 roles = getContributionRoles(varfield.subfields, roleTags),
                 primary = isPrimary
               )
@@ -162,4 +162,45 @@ object SierraContributors
       case o: Organisation[IdState.Unminted] => o.copy(id = id)
       case m: Meeting[IdState.Unminted]      => m.copy(id = id)
     }
+
+  /* Given an agent and the associated MARC subfields, look for instances of subfield $0,
+ * which are used for identifiers.
+ *
+ * This methods them (if present) and wraps the agent in Unidentifiable or Identifiable
+ * as appropriate.
+ */
+  private def identify(subfields: List[Subfield],
+                       ontologyType: String,
+                       label: String): IdState.Unminted = {
+
+    // We take the contents of subfield $0.  They may contain inconsistent
+    // spacing and punctuation, such as:
+    //
+    //    " nr 82270463"
+    //    "nr 82270463"
+    //    "nr 82270463.,"
+    //
+    // which all refer to the same identifier.
+    //
+    // For consistency, we remove all whitespace and some punctuation
+    // before continuing.
+    val codes = subfields.collect {
+      case Subfield("0", content) => content.replaceAll("[.,\\s]", "")
+    }
+
+    // If we get exactly one value, we can use it to identify the record.
+    // Some records have multiple instances of subfield $0 (it's a repeatable
+    // field in the MARC spec).
+    codes.distinct match {
+      case Seq(code) =>
+        IdState.Identifiable(
+          SourceIdentifier(
+            identifierType = IdentifierType.LCNames,
+            value = code,
+            ontologyType = ontologyType
+          )
+        )
+      case _ => addIdentifierFromText(ontologyType, label)
+    }
+  }
 }

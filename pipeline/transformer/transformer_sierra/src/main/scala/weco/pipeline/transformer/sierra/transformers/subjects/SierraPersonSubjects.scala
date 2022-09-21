@@ -56,13 +56,13 @@ object SierraPersonSubjects
             generalSubdivisions = generalSubdivisions
           )
           val maybeIdentifiedPerson =
-            person.copy(id = identify(varField, "Person"))
+            person.copy(id = identifyAgentSubject(varField, "Person"))
           Subject(
             label = label,
             concepts = getConcepts(
               maybeIdentifiedPerson.identifiable(),
               generalSubdivisions),
-            id = identify(varField, "Subject")
+            id = identifyAgentSubject(varField, "Subject")
           )
         }
       }

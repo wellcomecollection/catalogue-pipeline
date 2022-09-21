@@ -99,7 +99,7 @@ class SierraOrganisationSubjectsTest
 
       subject.label shouldBe "Hasseröder"
       subject should have(
-        labelDerivedSubjectId("hasseroder")
+        labelDerivedSubjectId("hasseroder", ontologyType = "Organisation")
       )
       subject.onlyConcept.label shouldBe "Hasseröder"
       subject.onlyConcept should have(
@@ -139,7 +139,7 @@ class SierraOrganisationSubjectsTest
       subject.id shouldBe IdState.Identifiable(
         SourceIdentifier(
           identifierType = IdentifierType.LCNames,
-          ontologyType = "Subject",
+          ontologyType = "Organisation",
           value = lcNamesCode
         )
       )
@@ -160,7 +160,7 @@ class SierraOrganisationSubjectsTest
       subject should have(
         sourceIdentifier(
           identifierType = IdentifierType.LCNames,
-          ontologyType = "Subject",
+          ontologyType = "Organisation",
           value = lcNamesCode
         )
       )
@@ -184,7 +184,7 @@ class SierraOrganisationSubjectsTest
       subject.id shouldBe IdState.Identifiable(
         SourceIdentifier(
           identifierType = IdentifierType.LCNames,
-          ontologyType = "Subject",
+          ontologyType = "Organisation",
           value = "n1234"
         )
       )
