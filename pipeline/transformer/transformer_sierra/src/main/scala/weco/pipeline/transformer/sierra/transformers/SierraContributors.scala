@@ -1,6 +1,10 @@
 package weco.pipeline.transformer.sierra.transformers
 
-import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, SourceIdentifier}
+import weco.catalogue.internal_model.identifiers.{
+  IdState,
+  IdentifierType,
+  SourceIdentifier
+}
 import weco.catalogue.internal_model.work._
 import weco.sierra.models.SierraQueryOps
 import weco.sierra.models.data.SierraBibData
@@ -106,7 +110,9 @@ object SierraContributors
             val (ontologyType, maybeAgent) = getContributors(varfield.subfields)
             maybeAgent.map { agent =>
               Contributor(
-                agent = withId(agent, identify(varfield.subfields, ontologyType, agent.label)),
+                agent = withId(
+                  agent,
+                  identify(varfield.subfields, ontologyType, agent.label)),
                 roles = getContributionRoles(varfield.subfields, roleTags),
                 primary = isPrimary
               )
@@ -164,11 +170,11 @@ object SierraContributors
     }
 
   /* Given an agent and the associated MARC subfields, look for instances of subfield $0,
- * which are used for identifiers.
- *
- * This methods them (if present) and wraps the agent in Unidentifiable or Identifiable
- * as appropriate.
- */
+   * which are used for identifiers.
+   *
+   * This methods them (if present) and wraps the agent in Unidentifiable or Identifiable
+   * as appropriate.
+   */
   private def identify(subfields: List[Subfield],
                        ontologyType: String,
                        label: String): IdState.Unminted = {

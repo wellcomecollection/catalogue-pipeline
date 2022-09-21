@@ -2,7 +2,10 @@ package weco.pipeline.transformer.sierra.transformers.subjects
 
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.Subject
-import weco.pipeline.transformer.sierra.transformers.{SierraAbstractConcepts, SierraIdentifiedDataTransformer}
+import weco.pipeline.transformer.sierra.transformers.{
+  SierraAbstractConcepts,
+  SierraIdentifiedDataTransformer
+}
 import weco.pipeline.transformer.text.TextNormalisation._
 import weco.sierra.models.SierraQueryOps
 import weco.sierra.models.data.SierraBibData
@@ -41,13 +44,14 @@ trait SierraSubjectsTransformer
       .trimTrailingPeriod
 
   /** Create an identifier for a subject created from an Agent.
-   *
-   * Note that these rules are different from the rules for Agents created
-   * for contributors, because subjects and contributors are drawn from
-   * different MARC fields with different behaviours.
-   *
-   */
-  def identifyAgentSubject(varfield: VarField, ontologyType: String): IdState.Unminted = {
+    *
+    * Note that these rules are different from the rules for Agents created
+    * for contributors, because subjects and contributors are drawn from
+    * different MARC fields with different behaviours.
+    *
+    */
+  def identifyAgentSubject(varfield: VarField,
+                           ontologyType: String): IdState.Unminted = {
     varfield.indicator2 match {
       // 0 indicates LCNames id is in use.
       // This is a Wellcome-specific convention. MARC 0 for these fields (e.g. https://www.loc.gov/marc/bibliographic/bd610.html)
