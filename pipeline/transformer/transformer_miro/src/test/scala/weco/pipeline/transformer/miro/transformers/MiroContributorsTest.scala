@@ -6,7 +6,7 @@ import weco.catalogue.internal_model.work.{Agent, Contributor}
 import weco.pipeline.transformer.miro.generators.MiroRecordGenerators
 import weco.pipeline.transformer.miro.source.MiroRecord
 
-class MiroRecordTransformerContributorsTest
+class MiroContributorsTest
     extends AnyFunSpec
     with MiroRecordGenerators
     with MiroTransformableWrapper {
