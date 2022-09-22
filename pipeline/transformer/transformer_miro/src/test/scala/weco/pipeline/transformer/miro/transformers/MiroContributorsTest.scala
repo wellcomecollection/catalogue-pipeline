@@ -2,6 +2,7 @@ package weco.pipeline.transformer.miro.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.Assertion
+import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, SourceIdentifier}
 import weco.catalogue.internal_model.work.{Agent, Contributor}
 import weco.pipeline.transformer.miro.generators.MiroRecordGenerators
 import weco.pipeline.transformer.miro.source.MiroRecord
@@ -20,68 +21,61 @@ class MiroContributorsTest
   }
 
   it("passes through a single value in the image_creator field") {
-    val creator = "Researcher Rosie"
     transformRecordAndCheckContributors(
       miroRecord = createMiroRecordWith(
-        creator = Some(List(Some(creator)))
+        creator = Some(List(Some("Researcher Rosie")))
       ),
-      expectedContributors = List(creator)
+      expectedContributors = List(
+        ExpectedContributor(label = "Researcher Rosie", idLabel = "researcher rosie")
+      )
     )
   }
 
   it("ignores null values in the image_creator field") {
-    val creator1 = "Beekeeper Brian"
-    val creator2 = "Dog-owner Derek"
     transformRecordAndCheckContributors(
       miroRecord = createMiroRecordWith(
-        creator = Some(List(Some(creator1), None, Some(creator2)))
+        creator = Some(List(Some("Beekeeper Brian"), None, Some("Dog-owner Derek")))
       ),
-      expectedContributors = List(creator1, creator2)
-    )
-  }
-
-  it("passes through multiple values in the image_creator field") {
-    val creator1 = "Beekeeper Brian"
-    val creator2 = "Cat-wrangler Carol"
-    val creator3 = "Dog-owner Derek"
-    transformRecordAndCheckContributors(
-      miroRecord = createMiroRecordWith(
-        creator = Some(List(Some(creator1), Some(creator2), Some(creator3)))
-      ),
-      expectedContributors = List(creator1, creator2, creator3)
+      expectedContributors = List(
+        ExpectedContributor(label = "Beekeeper Brian", idLabel = "beekeeper brian"),
+        ExpectedContributor(label = "Dog-owner Derek", idLabel = "dog-owner derek")
+      )
     )
   }
 
   it("passes through a single value in the image_creator_secondary field") {
-    val secondaryCreator = "Scientist Sarah"
     transformRecordAndCheckContributors(
       miroRecord = createMiroRecordWith(
-        secondaryCreator = Some(List(secondaryCreator))
+        secondaryCreator = Some(List("Scientist Sarah"))
       ),
-      expectedContributors = List(secondaryCreator)
+      expectedContributors = List(
+        ExpectedContributor(label = "Scientist Sarah", idLabel = "scientist sarah")
+      )
     )
   }
 
   it("passes through multiple values in the image_creator_secondary field") {
-    val secondaryCreator1 = "Gamekeeper Gordon"
-    val secondaryCreator2 = "Herpetologist Harriet"
     transformRecordAndCheckContributors(
       miroRecord = createMiroRecordWith(
-        secondaryCreator = Some(List(secondaryCreator1, secondaryCreator2))
+        secondaryCreator = Some(List("Gamekeeper Gordon", "Herpetologist Harriet"))
       ),
-      expectedContributors = List(secondaryCreator1, secondaryCreator2)
+      expectedContributors = List(
+        ExpectedContributor(label = "Gamekeeper Gordon", idLabel = "gamekeeper gordon"),
+        ExpectedContributor(label = "Herpetologist Harriet", idLabel = "herpetologist harriet")
+      )
     )
   }
 
   it("combines the image_creator and image_secondary_creator fields") {
-    val creator = "Mycologist Morgan"
-    val secondaryCreator = "Manufacturer Mel"
     transformRecordAndCheckContributors(
       miroRecord = createMiroRecordWith(
-        creator = Some(List(Some(creator))),
-        secondaryCreator = Some(List(secondaryCreator))
+        creator = Some(List(Some("Mycologist Morgan"))),
+        secondaryCreator = Some(List("Manufacturer Mel"))
       ),
-      expectedContributors = List(creator, secondaryCreator)
+      expectedContributors = List(
+        ExpectedContributor(label = "Mycologist Morgan", idLabel = "mycologist morgan"),
+        ExpectedContributor(label = "Manufacturer Mel", idLabel = "manufacturer mel")
+      )
     )
   }
 
@@ -90,7 +84,9 @@ class MiroContributorsTest
       miroRecord = createMiroRecordWith(
         sourceCode = Some("GAV")
       ),
-      expectedContributors = List("Isabella Gavazzi")
+      expectedContributors = List(
+        ExpectedContributor(label = "Isabella Gavazzi", idLabel = "isabella gavazzi")
+      )
     )
   }
 
@@ -104,24 +100,40 @@ class MiroContributorsTest
   }
 
   it("combines the image_creator and image_source_code fields") {
-    val creator = "Sally Snake"
     transformRecordAndCheckContributors(
       miroRecord = createMiroRecordWith(
-        creator = Some(List(Some(creator))),
+        creator = Some(List(Some("Sally Snake"))),
         sourceCode = Some("SNL")
       ),
-      expectedContributors = List(creator, "Sue Snell")
+      expectedContributors = List(
+        ExpectedContributor(label = "Sally Snake", idLabel = "sally snake"),
+        ExpectedContributor(label = "Sue Snell", idLabel = "sue snell")
+      )
     )
   }
 
+  case class ExpectedContributor(label: String, idLabel: String)
+
   private def transformRecordAndCheckContributors(
     miroRecord: MiroRecord,
-    expectedContributors: List[String]
+    expectedContributors: List[ExpectedContributor]
   ): Assertion = {
     val transformedWork = transformWork(miroRecord)
     transformedWork.data.contributors shouldBe expectedContributors.map {
-      contributor =>
-        Contributor(agent = Agent(contributor), roles = Nil)
+      case ExpectedContributor(label, idLabel) =>
+        Contributor(
+          agent = Agent(
+            id = IdState.Identifiable(
+              sourceIdentifier = SourceIdentifier(
+                identifierType = IdentifierType.LabelDerived,
+                value = idLabel,
+                ontologyType = "Agent"
+              )
+            ),
+            label = label
+          ),
+          roles = Nil
+        )
     }
   }
 }
