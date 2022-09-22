@@ -2,9 +2,20 @@ package weco.pipeline.transformer.tei.transformers
 
 import cats.instances.either._
 import cats.syntax.traverse._
-import weco.catalogue.internal_model.identifiers.IdState.{Identifiable, Unminted}
-import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, SourceIdentifier}
-import weco.catalogue.internal_model.work.{ContributionRole, Contributor, Person}
+import weco.catalogue.internal_model.identifiers.IdState.{
+  Identifiable,
+  Unminted
+}
+import weco.catalogue.internal_model.identifiers.{
+  IdState,
+  IdentifierType,
+  SourceIdentifier
+}
+import weco.catalogue.internal_model.work.{
+  ContributionRole,
+  Contributor,
+  Person
+}
 import weco.pipeline.transformer.identifiers.LabelDerivedIdentifiers
 import weco.pipeline.transformer.result.Result
 

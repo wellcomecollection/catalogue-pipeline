@@ -343,13 +343,14 @@ class CalmTransformerTest
     )
     CalmTransformer(record, version).right.get.data.contributors should contain theSameElementsAs List(
       Contributor(
-        agent = Agent(
-          id = labelDerivedAgentIdentifier("bebop"),
-          label = "Bebop"),
+        agent =
+          Agent(id = labelDerivedAgentIdentifier("bebop"), label = "Bebop"),
         roles = Nil
       ),
       Contributor(
-        agent = Agent(id = labelDerivedAgentIdentifier("rocksteady"), label = "Rocksteady"),
+        agent = Agent(
+          id = labelDerivedAgentIdentifier("rocksteady"),
+          label = "Rocksteady"),
         roles = Nil
       )
     )

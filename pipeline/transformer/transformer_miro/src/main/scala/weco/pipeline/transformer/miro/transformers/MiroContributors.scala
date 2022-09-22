@@ -6,8 +6,11 @@ import weco.pipeline.transformer.identifiers.LabelDerivedIdentifiers
 import weco.pipeline.transformer.miro.exceptions.MiroTransformerException
 import weco.pipeline.transformer.miro.source.MiroRecord
 
-trait MiroContributors extends MiroContributorCodes with LabelDerivedIdentifiers {
-  def getContributors(miroRecord: MiroRecord): List[Contributor[IdState.Unminted]] = {
+trait MiroContributors
+    extends MiroContributorCodes
+    with LabelDerivedIdentifiers {
+  def getContributors(
+    miroRecord: MiroRecord): List[Contributor[IdState.Unminted]] = {
 
     // <image_creator>: the primary creator
     val primaryCreatorLabels = miroRecord.creator
@@ -31,7 +34,8 @@ trait MiroContributors extends MiroContributorCodes with LabelDerivedIdentifiers
       }
     }
 
-    val labels = primaryCreatorLabels ++ secondaryCreatorLabels ++ List(maybeContributorCreatorLabel).flatten
+    val labels = primaryCreatorLabels ++ secondaryCreatorLabels ++ List(
+      maybeContributorCreatorLabel).flatten
 
     labels.map { label =>
       Contributor(

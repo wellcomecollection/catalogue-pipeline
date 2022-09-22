@@ -2,7 +2,11 @@ package weco.pipeline.transformer.miro.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.Assertion
-import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, SourceIdentifier}
+import weco.catalogue.internal_model.identifiers.{
+  IdState,
+  IdentifierType,
+  SourceIdentifier
+}
 import weco.catalogue.internal_model.work.{Agent, Contributor}
 import weco.pipeline.transformer.miro.generators.MiroRecordGenerators
 import weco.pipeline.transformer.miro.source.MiroRecord
@@ -26,7 +30,9 @@ class MiroContributorsTest
         creator = Some(List(Some("Researcher Rosie")))
       ),
       expectedContributors = List(
-        ExpectedContributor(label = "Researcher Rosie", idLabel = "researcher rosie")
+        ExpectedContributor(
+          label = "Researcher Rosie",
+          idLabel = "researcher rosie")
       )
     )
   }
@@ -34,11 +40,16 @@ class MiroContributorsTest
   it("ignores null values in the image_creator field") {
     transformRecordAndCheckContributors(
       miroRecord = createMiroRecordWith(
-        creator = Some(List(Some("Beekeeper Brian"), None, Some("Dog-owner Derek")))
+        creator =
+          Some(List(Some("Beekeeper Brian"), None, Some("Dog-owner Derek")))
       ),
       expectedContributors = List(
-        ExpectedContributor(label = "Beekeeper Brian", idLabel = "beekeeper brian"),
-        ExpectedContributor(label = "Dog-owner Derek", idLabel = "dog-owner derek")
+        ExpectedContributor(
+          label = "Beekeeper Brian",
+          idLabel = "beekeeper brian"),
+        ExpectedContributor(
+          label = "Dog-owner Derek",
+          idLabel = "dog-owner derek")
       )
     )
   }
@@ -49,7 +60,9 @@ class MiroContributorsTest
         secondaryCreator = Some(List("Scientist Sarah"))
       ),
       expectedContributors = List(
-        ExpectedContributor(label = "Scientist Sarah", idLabel = "scientist sarah")
+        ExpectedContributor(
+          label = "Scientist Sarah",
+          idLabel = "scientist sarah")
       )
     )
   }
@@ -57,11 +70,16 @@ class MiroContributorsTest
   it("passes through multiple values in the image_creator_secondary field") {
     transformRecordAndCheckContributors(
       miroRecord = createMiroRecordWith(
-        secondaryCreator = Some(List("Gamekeeper Gordon", "Herpetologist Harriet"))
+        secondaryCreator =
+          Some(List("Gamekeeper Gordon", "Herpetologist Harriet"))
       ),
       expectedContributors = List(
-        ExpectedContributor(label = "Gamekeeper Gordon", idLabel = "gamekeeper gordon"),
-        ExpectedContributor(label = "Herpetologist Harriet", idLabel = "herpetologist harriet")
+        ExpectedContributor(
+          label = "Gamekeeper Gordon",
+          idLabel = "gamekeeper gordon"),
+        ExpectedContributor(
+          label = "Herpetologist Harriet",
+          idLabel = "herpetologist harriet")
       )
     )
   }
@@ -73,8 +91,12 @@ class MiroContributorsTest
         secondaryCreator = Some(List("Manufacturer Mel"))
       ),
       expectedContributors = List(
-        ExpectedContributor(label = "Mycologist Morgan", idLabel = "mycologist morgan"),
-        ExpectedContributor(label = "Manufacturer Mel", idLabel = "manufacturer mel")
+        ExpectedContributor(
+          label = "Mycologist Morgan",
+          idLabel = "mycologist morgan"),
+        ExpectedContributor(
+          label = "Manufacturer Mel",
+          idLabel = "manufacturer mel")
       )
     )
   }
@@ -85,7 +107,9 @@ class MiroContributorsTest
         sourceCode = Some("GAV")
       ),
       expectedContributors = List(
-        ExpectedContributor(label = "Isabella Gavazzi", idLabel = "isabella gavazzi")
+        ExpectedContributor(
+          label = "Isabella Gavazzi",
+          idLabel = "isabella gavazzi")
       )
     )
   }
