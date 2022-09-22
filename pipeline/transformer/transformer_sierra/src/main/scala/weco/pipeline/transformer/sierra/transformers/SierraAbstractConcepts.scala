@@ -1,7 +1,6 @@
 package weco.pipeline.transformer.sierra.transformers
 
 import grizzled.slf4j.Logging
-import weco.pipeline.transformer.text.TextNormalisation._
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.pipeline.transformer.identifiers.LabelDerivedIdentifiers
 import weco.sierra.models.marc.VarField
