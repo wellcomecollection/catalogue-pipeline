@@ -68,22 +68,7 @@ trait SierraAgents
    * Agents are only identified within the LCNames or LabelDerived schemata.
    *
    */
-  def identify(varfield: VarField, ontologyType: String): IdState.Unminted =
-    varfield.indicator2 match {
-      // 0 indicates LCNames id is in use.
-      // This is a Wellcome-specific convention. MARC 0 for these fields (e.g. https://www.loc.gov/marc/bibliographic/bd610.html)
-      // states that 0 means LCSH.
-      // In this example from b17950235 (fd6nk8fw), n50082847 is the LCNames id for Glaxo Laboratories
-      // 110 2  Glaxo Laboratories.|0n  50082847
-      case Some("0") | Some("") | None =>
-        getIdState(ontologyType, varfield)
-      // Other values of second indicator show that the id is in an unusable scheme.
-      // Do not identify.
-      case _ =>
-        info(
-          s"${varfield.indicator2} is an unusable 2nd indicator value for an Agent in $varfield")
-        IdState.Unidentifiable
-    }
+//
 
   // We take the contents of subfield $0.  They may contain inconsistent
   // spacing and punctuation, such as:
