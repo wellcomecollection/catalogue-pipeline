@@ -40,7 +40,7 @@ object SierraOrganisationSubjects
       Subject(
         label = label,
         concepts = List(organisation),
-        id = identifyAgentSubject(varField, "Organisation")
+        id = identifyAgentSubject(varField, "Subject")
       )
     }
 
