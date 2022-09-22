@@ -7,7 +7,11 @@ import org.scalatest.prop.TableDrivenPropertyChecks._
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.internal_model.generators.IdentifiersGenerators
-import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType}
+import weco.catalogue.internal_model.identifiers.{
+  IdState,
+  IdentifierType,
+  SourceIdentifier
+}
 import weco.catalogue.internal_model.locations._
 import weco.catalogue.internal_model.work.DeletedReason.SuppressedFromSource
 import weco.catalogue.internal_model.work.InvisibilityReason.UnableToTransform
@@ -223,7 +227,16 @@ class MiroRecordTransformerTest
     work.data.title shouldBe Some("A café for cats")
     work.data.contributors shouldBe List(
       Contributor(
-        agent = Agent("Gyokushō, a cät Ôwnêr"),
+        agent = Agent(
+          id = IdState.Identifiable(
+            sourceIdentifier = SourceIdentifier(
+              identifierType = IdentifierType.LabelDerived,
+              value = "gyokusho, a cat owner",
+              ontologyType = "Agent"
+            )
+          ),
+          label = "Gyokushō, a cät Ôwnêr"
+        ),
         roles = Nil
       )
     )

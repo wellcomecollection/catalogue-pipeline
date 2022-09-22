@@ -4,6 +4,7 @@ import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.work._
+import weco.pipeline.transformer.generators.LabelDerivedIdentifiersGenerators
 import weco.pipeline.transformer.tei.generators.TeiGenerators
 import weco.sierra.generators.SierraIdentifierGenerators
 
@@ -14,7 +15,8 @@ class TeiXmlTest
     with Matchers
     with EitherValues
     with SierraIdentifierGenerators
-    with TeiGenerators {
+    with TeiGenerators
+    with LabelDerivedIdentifiersGenerators {
   val id = "manuscript_15651"
 
   it(
@@ -157,9 +159,9 @@ class TeiXmlTest
       )).parse
 
     result.value.contributors shouldBe List(
-      Contributor(Person("Tony Stark"), List(ContributionRole("scribe"))),
-      Contributor(Person("Peter Parker"), List(ContributionRole("scribe"))),
-      Contributor(Person("Steve Rogers"), List(ContributionRole("scribe")))
+      Contributor(agent = Person(label = "Tony Stark", id = labelDerivedPersonIdentifier("tony stark")), roles = List(ContributionRole("scribe"))),
+      Contributor(agent = Person(label = "Peter Parker", id = labelDerivedPersonIdentifier("peter parker")), roles = List(ContributionRole("scribe"))),
+      Contributor(agent = Person(label = "Steve Rogers", id = labelDerivedPersonIdentifier("steve rogers")), roles = List(ContributionRole("scribe")))
     )
   }
 

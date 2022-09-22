@@ -7,10 +7,11 @@ import weco.catalogue.internal_model.identifiers.IdState.Identifiable
 import weco.catalogue.internal_model.identifiers.{IdentifierType, SourceIdentifier}
 import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.work._
+import weco.pipeline.transformer.generators.LabelDerivedIdentifiersGenerators
 import weco.pipeline.transformer.tei.TeiData
 import weco.pipeline.transformer.tei.generators.TeiGenerators
 
-class TeiNestedDataTest extends AnyFunSpec with TeiGenerators with Matchers with EitherValues{
+class TeiNestedDataTest extends AnyFunSpec with TeiGenerators with Matchers with EitherValues with LabelDerivedIdentifiersGenerators {
   val id = "manuscript_15651"
   val wrapperTitle = "root title"
 
@@ -319,7 +320,7 @@ class TeiNestedDataTest extends AnyFunSpec with TeiGenerators with Matchers with
       ),wrapperTitle, Map.empty)
 
     result shouldBe a[Right[_, _]]
-    result.value.head.contributors shouldBe List(Contributor(Person("John Wick"), List(ContributionRole("author"))))
+    result.value.head.contributors shouldBe List(Contributor(agent = Person(label = "John Wick", id = labelDerivedPersonIdentifier("john wick")), roles = List(ContributionRole("author"))))
   }
 
   it("if the manuscript is part of the Fihrist catalogue, it extracts authors ids as the fihrist identifier type"){
