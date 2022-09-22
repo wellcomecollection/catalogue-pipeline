@@ -4,6 +4,13 @@ module "catalogue_pipeline_2022-08-24" {
   pipeline_date = "2022-08-24"
   release_label = "2022-08-24"
 
+  # The cluster in the 2022-08-24 pipeline is having issues, so we've
+  # turned off all the services to avoid making the problem worse.
+  #
+  # Additionally, the changes to add label-derived IDs to contributors
+  # may cause a flood of updates in the overnight harvest on the weekend.
+  max_capacity = 0
+
   reindexing_state = {
     listen_to_reindexer      = false
     scale_up_tasks           = false
