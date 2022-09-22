@@ -6,7 +6,8 @@ import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.IdState.Identifiable
 import weco.catalogue.internal_model.identifiers.{IdentifierType, SourceIdentifier}
 import weco.catalogue.internal_model.work.{ContributionRole, Contributor, Person}
-import weco.pipeline.transformer.tei.generators.{LabelDerivedIdentifiersGenerators, TeiGenerators}
+import weco.pipeline.transformer.generators.LabelDerivedIdentifiersGenerators
+import weco.pipeline.transformer.tei.generators.TeiGenerators
 
 class TeiContributorsTest
     extends AnyFunSpec

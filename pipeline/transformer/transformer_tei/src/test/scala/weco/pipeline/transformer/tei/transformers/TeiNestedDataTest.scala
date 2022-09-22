@@ -7,8 +7,9 @@ import weco.catalogue.internal_model.identifiers.IdState.Identifiable
 import weco.catalogue.internal_model.identifiers.{IdentifierType, SourceIdentifier}
 import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.work._
+import weco.pipeline.transformer.generators.LabelDerivedIdentifiersGenerators
 import weco.pipeline.transformer.tei.TeiData
-import weco.pipeline.transformer.tei.generators.{LabelDerivedIdentifiersGenerators, TeiGenerators}
+import weco.pipeline.transformer.tei.generators.TeiGenerators
 
 class TeiNestedDataTest extends AnyFunSpec with TeiGenerators with Matchers with EitherValues with LabelDerivedIdentifiersGenerators {
   val id = "manuscript_15651"

@@ -14,12 +14,14 @@ import weco.catalogue.internal_model.locations._
 import weco.catalogue.internal_model.work.DeletedReason._
 import weco.catalogue.internal_model.work._
 import weco.pipeline.transformer.calm.models.CalmSourceData
+import weco.pipeline.transformer.generators.LabelDerivedIdentifiersGenerators
 
 class CalmTransformerTest
     extends AnyFunSpec
     with Matchers
     with EitherValues
-    with CalmRecordGenerators {
+    with CalmRecordGenerators
+    with LabelDerivedIdentifiersGenerators {
 
   val version = 3
 
@@ -342,24 +344,12 @@ class CalmTransformerTest
     CalmTransformer(record, version).right.get.data.contributors should contain theSameElementsAs List(
       Contributor(
         agent = Agent(
-          id = IdState.Identifiable(
-            sourceIdentifier = SourceIdentifier(
-              identifierType = IdentifierType.LabelDerived,
-              value = "bebop",
-              ontologyType = "Agent"
-            )
-          ),
+          id = labelDerivedAgentIdentifier("bebop"),
           label = "Bebop"),
         roles = Nil
       ),
       Contributor(
-        agent = Agent(id = IdState.Identifiable(
-          sourceIdentifier = SourceIdentifier(
-            identifierType = IdentifierType.LabelDerived,
-            value = "rocksteady",
-            ontologyType = "Agent"
-          )
-        ), label = "Rocksteady"),
+        agent = Agent(id = labelDerivedAgentIdentifier("rocksteady"), label = "Rocksteady"),
         roles = Nil
       )
     )

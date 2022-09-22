@@ -4,7 +4,8 @@ import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.work._
-import weco.pipeline.transformer.tei.generators.{LabelDerivedIdentifiersGenerators, TeiGenerators}
+import weco.pipeline.transformer.generators.LabelDerivedIdentifiersGenerators
+import weco.pipeline.transformer.tei.generators.TeiGenerators
 import weco.sierra.generators.SierraIdentifierGenerators
 
 import scala.xml.Elem
