@@ -11,7 +11,7 @@ class MiroContributorsTest
     extends AnyFunSpec
     with MiroRecordGenerators
     with MiroTransformableWrapper {
-  it("if not image_creator field is present") {
+  it("has no contributors if no image_creator field is present") {
     transformRecordAndCheckContributors(
       miroRecord = createMiroRecordWith(
         creator = None
