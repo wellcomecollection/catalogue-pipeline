@@ -79,7 +79,7 @@ def create_roles(es, index):
         role_name = f"{index}_{role_suffix}"
 
         es.security.put_role(
-            role_name,
+            name=role_name,
             body={"indices": [{"names": [f"{index}*"], "privileges": privileges}]},
         )
 
