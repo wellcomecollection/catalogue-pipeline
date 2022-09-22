@@ -355,7 +355,8 @@ class SierraContributorsTest
       contributor.agent shouldBe a[Person[_]]
     }
 
-    it("uses a label-derived identifier if there are multiple distinct identifiers in subfield ǂ0") {
+    it(
+      "uses a label-derived identifier if there are multiple distinct identifiers in subfield ǂ0") {
       val name = "Darren the Dill"
       val varFields = List(
         VarField(
@@ -572,7 +573,8 @@ class SierraContributorsTest
       contributor.agent shouldBe an[Organisation[_]]
     }
 
-    it("uses a label-derived identifier if there are multiple distinct identifiers in subfield ǂ0") {
+    it(
+      "uses a label-derived identifier if there are multiple distinct identifiers in subfield ǂ0") {
       val name = "Luke the lime"
       val varFields = List(
         VarField(
