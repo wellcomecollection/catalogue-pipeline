@@ -1,6 +1,6 @@
 {
   "description" : "items with different location types",
-  "createdAt" : "2022-06-20T10:13:37.990589Z",
+  "createdAt" : "2022-09-20T13:36:02.683637Z",
   "id" : "kdwct2lf",
   "document" : {
     "debug" : {
@@ -196,6 +196,8 @@
     },
     "query" : {
       "id" : "kdwct2lf",
+      "format.id" : null,
+      "workType" : "Standard",
       "identifiers.value" : [
         "vUprsjrX3O"
       ],
@@ -219,11 +221,17 @@
       ],
       "subjects.id" : [
       ],
+      "subjects.label" : [
+      ],
       "subjects.concepts.label" : [
+      ],
+      "genres.label" : [
       ],
       "genres.concepts.label" : [
       ],
       "languages.id" : [
+      ],
+      "contributors.agent.id" : [
       ],
       "contributors.agent.label" : [
       ],

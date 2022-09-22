@@ -1,6 +1,6 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2022-06-20T10:13:38.431354Z",
+  "createdAt" : "2022-09-20T13:36:03.104104Z",
   "id" : "zwggainv",
   "document" : {
     "debug" : {
@@ -176,6 +176,8 @@
     },
     "query" : {
       "id" : "zwggainv",
+      "format.id" : null,
+      "workType" : "Standard",
       "identifiers.value" : [
         "RdbNpFC2P5"
       ],
@@ -195,14 +197,21 @@
       ],
       "subjects.id" : [
       ],
+      "subjects.label" : [
+        "London (England)"
+      ],
       "subjects.concepts.label" : [
         "pZYum1qUlCcjglM",
         "PaKQZ55SIuLPMgI",
         "G177tcCDpKgb0Wd"
       ],
+      "genres.label" : [
+      ],
       "genres.concepts.label" : [
       ],
       "languages.id" : [
+      ],
+      "contributors.agent.id" : [
       ],
       "contributors.agent.label" : [
       ],

@@ -1,6 +1,6 @@
 {
   "description" : "a work with a thumbnail",
-  "createdAt" : "2022-06-20T10:13:36.452288Z",
+  "createdAt" : "2022-09-20T13:36:00.897791Z",
   "id" : "sahqcluh",
   "document" : {
     "debug" : {
@@ -158,6 +158,8 @@
     },
     "query" : {
       "id" : "sahqcluh",
+      "format.id" : null,
+      "workType" : "Standard",
       "identifiers.value" : [
         "rRRYGQYiF7"
       ],
@@ -177,11 +179,17 @@
       ],
       "subjects.id" : [
       ],
+      "subjects.label" : [
+      ],
       "subjects.concepts.label" : [
+      ],
+      "genres.label" : [
       ],
       "genres.concepts.label" : [
       ],
       "languages.id" : [
+      ],
+      "contributors.agent.id" : [
       ],
       "contributors.agent.label" : [
       ],

@@ -81,6 +81,7 @@ class ManagerInferrerIntegrationTest
                     features2,
                     lshEncodedFeatures,
                     palette,
+                    Some(averageColorHex),
                     binSizes,
                     binMinima,
                     aspectRatio
@@ -91,6 +92,7 @@ class ManagerInferrerIntegrationTest
                   every(lshEncodedFeatures) should fullyMatch regex """(\d+)-(\d+)"""
                   every(palette) should fullyMatch regex """\d+/\d+"""
                   every(binSizes) should not be empty
+                  averageColorHex should have length 7
                   binMinima should not be empty
                   aspectRatio should not be empty
               }

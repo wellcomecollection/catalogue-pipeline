@@ -1,6 +1,6 @@
 {
   "description" : "examples of works with different types",
-  "createdAt" : "2022-06-20T10:13:38.329178Z",
+  "createdAt" : "2022-09-20T13:36:03.015064Z",
   "id" : "fndkxmxs",
   "document" : {
     "debug" : {
@@ -129,6 +129,8 @@
     },
     "query" : {
       "id" : "fndkxmxs",
+      "format.id" : null,
+      "workType" : "Series",
       "identifiers.value" : [
         "yW6CgVzwIJ"
       ],
@@ -148,11 +150,17 @@
       ],
       "subjects.id" : [
       ],
+      "subjects.label" : [
+      ],
       "subjects.concepts.label" : [
+      ],
+      "genres.label" : [
       ],
       "genres.concepts.label" : [
       ],
       "languages.id" : [
+      ],
+      "contributors.agent.id" : [
       ],
       "contributors.agent.label" : [
       ],

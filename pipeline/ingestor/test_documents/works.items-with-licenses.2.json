@@ -1,6 +1,6 @@
 {
   "description" : "a work with licensed digital items",
-  "createdAt" : "2022-06-20T10:13:37.360693Z",
+  "createdAt" : "2022-09-20T13:36:01.986763Z",
   "id" : "ougtipki",
   "document" : {
     "debug" : {
@@ -176,6 +176,8 @@
     },
     "query" : {
       "id" : "ougtipki",
+      "format.id" : null,
+      "workType" : "Standard",
       "identifiers.value" : [
         "fbITZO5oAg"
       ],
@@ -197,11 +199,17 @@
       ],
       "subjects.id" : [
       ],
+      "subjects.label" : [
+      ],
       "subjects.concepts.label" : [
+      ],
+      "genres.label" : [
       ],
       "genres.concepts.label" : [
       ],
       "languages.id" : [
+      ],
+      "contributors.agent.id" : [
       ],
       "contributors.agent.label" : [
       ],

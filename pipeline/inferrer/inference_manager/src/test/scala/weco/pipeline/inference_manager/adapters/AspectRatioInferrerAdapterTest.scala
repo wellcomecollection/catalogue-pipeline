@@ -46,10 +46,7 @@ class AspectRatioInferrerAdapterTest
       val aspectRatioResponse = AspectRatioInferrerResponse(aspectRatio)
       val inferredData =
         adapter.augment(InferredData.empty, aspectRatioResponse)
-      inside(inferredData) {
-        case InferredData(_, _, _, _, _, _, actualAspectRatio) =>
-          actualAspectRatio should be(aspectRatio)
-      }
+      inferredData.aspectRatio should be(aspectRatio)
     }
   }
 }

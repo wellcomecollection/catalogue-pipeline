@@ -1,6 +1,6 @@
 {
   "description" : "examples for the access status tests",
-  "createdAt" : "2022-06-20T10:13:38.905330Z",
+  "createdAt" : "2022-09-20T13:36:03.481784Z",
   "id" : "glagakd2",
   "document" : {
     "debug" : {
@@ -219,6 +219,8 @@
     },
     "query" : {
       "id" : "glagakd2",
+      "format.id" : null,
+      "workType" : "Standard",
       "identifiers.value" : [
         "aCHuXzrv8P"
       ],
@@ -243,11 +245,17 @@
       ],
       "subjects.id" : [
       ],
+      "subjects.label" : [
+      ],
       "subjects.concepts.label" : [
+      ],
+      "genres.label" : [
       ],
       "genres.concepts.label" : [
       ],
       "languages.id" : [
+      ],
+      "contributors.agent.id" : [
       ],
       "contributors.agent.label" : [
       ],

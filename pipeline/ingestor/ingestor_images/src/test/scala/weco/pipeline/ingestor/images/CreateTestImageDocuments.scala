@@ -447,25 +447,25 @@ class CreateTestImageDocuments
     saveImage(
       baguetteImage,
       description = "an example of images with work metadata for the API tests",
-      id = "images.examples.bread-baguette",
+      id = "images.examples.bread-baguette"
     )
 
     saveImage(
       focacciaImage,
       description = "an example of images with work metadata for the API tests",
-      id = "images.examples.bread-focaccia",
+      id = "images.examples.bread-focaccia"
     )
 
     saveImage(
       schiacciataImage,
       description = "an example of images with work metadata for the API tests",
-      id = "images.examples.bread-schiacciata",
+      id = "images.examples.bread-schiacciata"
     )
 
     saveImage(
       mantouImage,
       description = "an example of images with work metadata for the API tests",
-      id = "images.examples.bread-mantou",
+      id = "images.examples.bread-mantou"
     )
   }
 

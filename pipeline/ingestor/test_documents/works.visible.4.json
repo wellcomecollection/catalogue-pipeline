@@ -1,6 +1,6 @@
 {
   "description" : "an arbitrary list of visible works",
-  "createdAt" : "2022-06-20T10:13:35.377821Z",
+  "createdAt" : "2022-09-20T13:35:59.616694Z",
   "id" : "vbi1ii19",
   "document" : {
     "debug" : {
@@ -129,6 +129,8 @@
     },
     "query" : {
       "id" : "vbi1ii19",
+      "format.id" : null,
+      "workType" : "Standard",
       "identifiers.value" : [
         "CzLNHBFHuR"
       ],
@@ -148,11 +150,17 @@
       ],
       "subjects.id" : [
       ],
+      "subjects.label" : [
+      ],
       "subjects.concepts.label" : [
+      ],
+      "genres.label" : [
       ],
       "genres.concepts.label" : [
       ],
       "languages.id" : [
+      ],
+      "contributors.agent.id" : [
       ],
       "contributors.agent.label" : [
       ],

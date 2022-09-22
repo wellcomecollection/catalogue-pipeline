@@ -1,6 +1,6 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2022-06-20T10:13:38.041111Z",
+  "createdAt" : "2022-09-20T13:36:02.732727Z",
   "id" : "sw2fzgit",
   "document" : {
     "debug" : {
@@ -184,6 +184,8 @@
     },
     "query" : {
       "id" : "sw2fzgit",
+      "format.id" : "i",
+      "workType" : "Standard",
       "identifiers.value" : [
         "6gzFFn0MzM"
       ],
@@ -203,14 +205,21 @@
       ],
       "subjects.id" : [
       ],
+      "subjects.label" : [
+        "Vo8KntFwFf"
+      ],
       "subjects.concepts.label" : [
         "n6eIKIFN34LcQUS",
         "hs8ZXp5KHLKOiPP",
         "IvUnhx12Z5Ks7r7"
       ],
+      "genres.label" : [
+      ],
       "genres.concepts.label" : [
       ],
       "languages.id" : [
+      ],
+      "contributors.agent.id" : [
       ],
       "contributors.agent.label" : [
       ],

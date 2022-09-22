@@ -1,6 +1,6 @@
 {
   "description" : "works with items with other identifiers",
-  "createdAt" : "2022-06-20T10:13:37.624111Z",
+  "createdAt" : "2022-09-20T13:36:02.280654Z",
   "id" : "upm4bal7",
   "document" : {
     "debug" : {
@@ -213,6 +213,8 @@
     },
     "query" : {
       "id" : "upm4bal7",
+      "format.id" : null,
+      "workType" : "Standard",
       "identifiers.value" : [
         "wkKE1s2opA"
       ],
@@ -237,11 +239,17 @@
       ],
       "subjects.id" : [
       ],
+      "subjects.label" : [
+      ],
       "subjects.concepts.label" : [
+      ],
+      "genres.label" : [
       ],
       "genres.concepts.label" : [
       ],
       "languages.id" : [
+      ],
+      "contributors.agent.id" : [
       ],
       "contributors.agent.label" : [
       ],

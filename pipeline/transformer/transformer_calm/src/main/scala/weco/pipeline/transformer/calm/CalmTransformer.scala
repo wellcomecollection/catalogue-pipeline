@@ -155,7 +155,7 @@ object CalmTransformer
         subjects = subjects(record),
         languages = languages,
         items = CalmItems(record),
-        contributors = contributors(record),
+        contributors = CalmContributors(record),
         description = description(record),
         physicalDescription = physicalDescription(record),
         production = production(record),
@@ -268,9 +268,4 @@ object CalmTransformer
           concepts = List(Concept(normalisedLabel))
         )
       }
-
-  def contributors(record: CalmRecord): List[Contributor[IdState.Unminted]] =
-    record.getList("CreatorName").map { name =>
-      Contributor(Agent(name), Nil)
-    }
 }

@@ -1,6 +1,6 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2022-06-20T10:13:37.718707Z",
+  "createdAt" : "2022-09-20T13:36:02.391776Z",
   "id" : "4fkr6m6l",
   "document" : {
     "debug" : {
@@ -137,6 +137,8 @@
     },
     "query" : {
       "id" : "4fkr6m6l",
+      "format.id" : "d",
+      "workType" : "Standard",
       "identifiers.value" : [
         "Ngls6zS4b2"
       ],
@@ -156,11 +158,17 @@
       ],
       "subjects.id" : [
       ],
+      "subjects.label" : [
+      ],
       "subjects.concepts.label" : [
+      ],
+      "genres.label" : [
       ],
       "genres.concepts.label" : [
       ],
       "languages.id" : [
+      ],
+      "contributors.agent.id" : [
       ],
       "contributors.agent.label" : [
       ],

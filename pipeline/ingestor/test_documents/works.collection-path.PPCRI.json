@@ -1,6 +1,6 @@
 {
   "description" : "a work with a collection path",
-  "createdAt" : "2022-06-20T10:13:37.691139Z",
+  "createdAt" : "2022-09-20T13:36:02.351453Z",
   "id" : "mlqs2qbd",
   "document" : {
     "debug" : {
@@ -132,6 +132,8 @@
     },
     "query" : {
       "id" : "mlqs2qbd",
+      "format.id" : null,
+      "workType" : "Standard",
       "identifiers.value" : [
         "yQb1GgWKF4"
       ],
@@ -151,11 +153,17 @@
       ],
       "subjects.id" : [
       ],
+      "subjects.label" : [
+      ],
       "subjects.concepts.label" : [
+      ],
+      "genres.label" : [
       ],
       "genres.concepts.label" : [
       ],
       "languages.id" : [
+      ],
+      "contributors.agent.id" : [
       ],
       "contributors.agent.label" : [
       ],

@@ -16,11 +16,12 @@ import weco.catalogue.internal_model.work.{
   Contributor,
   Person
 }
+import weco.pipeline.transformer.identifiers.LabelDerivedIdentifiers
 import weco.pipeline.transformer.result.Result
 
 import scala.xml.{Elem, Node}
 
-object TeiContributors {
+object TeiContributors extends LabelDerivedIdentifiers {
 
   /**
     * author nodes appear only within msItem. They contain the name of the Author of the work and optionally the id of the Author.
@@ -229,8 +230,16 @@ object TeiContributors {
     (label, id) match {
       case (l, _) if l.isEmpty =>
         Left(new RuntimeException(s"The contributor label is empty!"))
-      case (l, id) if id.isEmpty =>
-        Right(Contributor(Person(l), List(role)))
+      case (label, id) if id.isEmpty =>
+        Right(
+          Contributor(
+            agent = Person(
+              id = identifierFromText(label, ontologyType = "Person"),
+              label = label
+            ),
+            roles = List(role)
+          )
+        )
       case (l, id) =>
         // If the manuscript is part of the Fihrist catalogue,
         // the ids of authors refer to the Fihrist authority: https://github.com/fihristorg/fihrist-mss/tree/master/authority
@@ -239,11 +248,11 @@ object TeiContributors {
           if (isFihrist) IdentifierType.Fihrist else IdentifierType.VIAF
         Right(
           Contributor(
-            Person(
+            agent = Person(
               label = l,
               id = Identifiable(SourceIdentifier(identifierType, "Person", id))
             ),
-            List(role)
+            roles = List(role)
           )
         )
     }
@@ -283,5 +292,4 @@ object TeiContributors {
       persNodeId
     }
   }
-
 }

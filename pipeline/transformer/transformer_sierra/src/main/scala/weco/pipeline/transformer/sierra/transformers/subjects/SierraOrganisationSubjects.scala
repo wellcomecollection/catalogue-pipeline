@@ -40,7 +40,7 @@ object SierraOrganisationSubjects
       Subject(
         label = label,
         concepts = List(organisation),
-        id = identify(varField, "Subject")
+        id = identifyAgentSubject(varField, "Subject")
       )
     }
 
@@ -60,6 +60,8 @@ object SierraOrganisationSubjects
 
     Organisation(
       label = label,
-      id = identify(varfield = varField, ontologyType = "Organisation"))
+      id = identifyAgentSubject(
+        varfield = varField,
+        ontologyType = "Organisation"))
   }
 }

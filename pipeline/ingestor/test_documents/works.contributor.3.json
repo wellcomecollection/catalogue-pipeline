@@ -1,6 +1,6 @@
 {
   "description" : "works with different contributor",
-  "createdAt" : "2022-07-25T14:45:36.650198Z",
+  "createdAt" : "2022-09-20T13:36:02.235156Z",
   "id" : "gtfjchvo",
   "document" : {
     "debug" : {
@@ -179,6 +179,8 @@
     },
     "query" : {
       "id" : "gtfjchvo",
+      "format.id" : null,
+      "workType" : "Standard",
       "identifiers.value" : [
         "xKXAvquihJ"
       ],
@@ -198,11 +200,17 @@
       ],
       "subjects.id" : [
       ],
+      "subjects.label" : [
+      ],
       "subjects.concepts.label" : [
+      ],
+      "genres.label" : [
       ],
       "genres.concepts.label" : [
       ],
       "languages.id" : [
+      ],
+      "contributors.agent.id" : [
       ],
       "contributors.agent.label" : [
         "MI5",

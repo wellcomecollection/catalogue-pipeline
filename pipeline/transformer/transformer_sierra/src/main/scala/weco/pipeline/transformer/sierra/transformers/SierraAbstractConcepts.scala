@@ -1,16 +1,11 @@
 package weco.pipeline.transformer.sierra.transformers
+
 import grizzled.slf4j.Logging
-import weco.pipeline.transformer.text.TextNormalisation._
-import weco.catalogue.internal_model.identifiers.{
-  IdState,
-  IdentifierType,
-  SourceIdentifier
-}
+import weco.catalogue.internal_model.identifiers.IdState
+import weco.pipeline.transformer.identifiers.LabelDerivedIdentifiers
 import weco.sierra.models.marc.VarField
 
-import java.text.Normalizer
-
-trait SierraAbstractConcepts extends Logging {
+trait SierraAbstractConcepts extends Logging with LabelDerivedIdentifiers {
   protected def getLabel(varField: VarField): Option[String]
   protected def getIdentifierSubfieldContents(varField: VarField): List[String]
   protected def maybeAddIdentifier(
@@ -51,28 +46,7 @@ trait SierraAbstractConcepts extends Logging {
     varField: VarField): IdState.Unminted =
     getLabel(varField) match {
       case Some(label) =>
-        addIdentifierFromText(
-          ontologyType = ontologyType,
-          label = label.trimTrailingPeriod.trim)
+        identifierFromText(label = label, ontologyType = ontologyType)
       case None => IdState.Unidentifiable
     }
-
-  private def addIdentifierFromText(ontologyType: String,
-                                    label: String): IdState.Unminted = {
-    val normalizedLabel = Normalizer
-      .normalize(
-        label.toLowerCase,
-        Normalizer.Form.NFKD
-      )
-      .replaceAll("[^\\p{ASCII}]", "")
-
-    IdState.Identifiable(
-      sourceIdentifier = SourceIdentifier(
-        identifierType = IdentifierType.LabelDerived,
-        value = normalizedLabel,
-        ontologyType = ontologyType
-      )
-    )
-  }
-
 }

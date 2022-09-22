@@ -4,22 +4,17 @@ import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.IdState.Identifiable
-import weco.catalogue.internal_model.identifiers.{
-  IdentifierType,
-  SourceIdentifier
-}
-import weco.catalogue.internal_model.work.{
-  ContributionRole,
-  Contributor,
-  Person
-}
+import weco.catalogue.internal_model.identifiers.{IdentifierType, SourceIdentifier}
+import weco.catalogue.internal_model.work.{ContributionRole, Contributor, Person}
+import weco.pipeline.transformer.generators.LabelDerivedIdentifiersGenerators
 import weco.pipeline.transformer.tei.generators.TeiGenerators
 
 class TeiContributorsTest
     extends AnyFunSpec
     with TeiGenerators
     with Matchers
-    with EitherValues {
+    with EitherValues
+    with LabelDerivedIdentifiersGenerators {
   val id = "manuscript_15651"
   it("extracts author from msItem") {
     val result = TeiContributors.authors(
@@ -29,7 +24,7 @@ class TeiContributorsTest
 
     result shouldBe a[Right[_, _]]
     result.value shouldBe List(
-      Contributor(Person("John Wick"), List(ContributionRole("author")))
+      Contributor(agent = Person(label = "John Wick", id = labelDerivedPersonIdentifier("john wick")), roles = List(ContributionRole("author")))
     )
   }
 
@@ -53,13 +48,13 @@ class TeiContributorsTest
     result shouldBe a[Right[_, _]]
     result.value shouldBe List(
       Contributor(
-        Person(
+        agent = Person(
           label = "Dominic Toretto",
           id = Identifiable(
             SourceIdentifier(IdentifierType.VIAF, "Person", "12534")
           )
         ),
-        List(ContributionRole("author"))
+        roles = List(ContributionRole("author"))
       )
     )
   }
@@ -75,7 +70,7 @@ class TeiContributorsTest
     )
     result shouldBe a[Right[_, _]]
     result.value shouldBe List(
-      Contributor(Person("Frank Martin"), List(ContributionRole("author")))
+      Contributor(agent = Person(label = "Frank Martin", id = labelDerivedPersonIdentifier("frank martin")), roles = List(ContributionRole("author")))
     )
   }
   it("extracts author from persName") {
@@ -96,13 +91,13 @@ class TeiContributorsTest
     result shouldBe a[Right[_, _]]
     result.value shouldBe List(
       Contributor(
-        Person(
+        agent = Person(
           label = "John Connor",
           id = Identifiable(
             SourceIdentifier(IdentifierType.VIAF, "Person", "12345")
           )
         ),
-        List(ContributionRole("author"))
+        roles = List(ContributionRole("author"))
       )
     )
   }
@@ -137,13 +132,13 @@ class TeiContributorsTest
     result shouldBe a[Right[_, _]]
     result.value shouldBe List(
       Contributor(
-        Person(
+        agent = Person(
           label = "Sarah Connor",
           id = Identifiable(
             SourceIdentifier(IdentifierType.VIAF, "Person", "12345")
           )
         ),
-        List(ContributionRole("author"))
+        roles = List(ContributionRole("author"))
       )
     )
   }
@@ -221,13 +216,13 @@ class TeiContributorsTest
     result shouldBe a[Right[_, _]]
     result.value shouldBe List(
       Contributor(
-        Person(
+        agent = Person(
           label = "Ellen Ripley",
           id = Identifiable(
             SourceIdentifier(IdentifierType.VIAF, "Person", "12345")
           )
         ),
-        List(ContributionRole("author"))
+        roles = List(ContributionRole("author"))
       )
     )
   }
@@ -253,13 +248,13 @@ class TeiContributorsTest
     result shouldBe a[Right[_, _]]
     result.value shouldBe List(
       Contributor(
-        Person(
+        agent = Person(
           label = "Sarah Connor",
           id = Identifiable(
             SourceIdentifier(IdentifierType.VIAF, "Person", "12345")
           )
         ),
-        List(ContributionRole("author"))
+        roles = List(ContributionRole("author"))
       )
     )
   }
@@ -283,13 +278,13 @@ class TeiContributorsTest
     result shouldBe a[Right[_, _]]
     result.value shouldBe List(
       Contributor(
-        Person(
+        agent = Person(
           label = "Sarah Connor",
           id = Identifiable(
             SourceIdentifier(IdentifierType.Fihrist, "Person", "12345")
           )
         ),
-        List(ContributionRole("author"))
+        roles = List(ContributionRole("author"))
       )
     )
   }
@@ -306,7 +301,7 @@ class TeiContributorsTest
 
       result.value shouldBe Map(
         id -> List(
-          Contributor(Person("Tony Stark"), List(ContributionRole("scribe")))
+          Contributor(agent = Person(label = "Tony Stark", id = labelDerivedPersonIdentifier("tony stark")), roles = List(ContributionRole("scribe")))
         ))
     }
     it("extracts a list of scribes from handNote/persName") {
@@ -324,9 +319,9 @@ class TeiContributorsTest
 
       result.value shouldBe Map(
         id -> List(
-          Contributor(Person("Tony Stark"), List(ContributionRole("scribe"))),
-          Contributor(Person("Peter Parker"), List(ContributionRole("scribe"))),
-          Contributor(Person("Steve Rogers"), List(ContributionRole("scribe")))
+          Contributor(agent = Person(label = "Tony Stark", id = labelDerivedPersonIdentifier("tony stark")), roles = List(ContributionRole("scribe"))),
+          Contributor(agent = Person(label = "Peter Parker", id = labelDerivedPersonIdentifier("peter parker")), roles = List(ContributionRole("scribe"))),
+          Contributor(agent = Person(label = "Steve Rogers", id = labelDerivedPersonIdentifier("steve rogers")), roles = List(ContributionRole("scribe")))
         ))
     }
     it(
@@ -357,7 +352,7 @@ class TeiContributorsTest
 
       result.value shouldBe Map(
         id -> List(
-          Contributor(Person("Bruce Banner"), List(ContributionRole("scribe")))
+          Contributor(agent = Person(label = "Bruce Banner", id = labelDerivedPersonIdentifier("bruce banner")), roles = List(ContributionRole("scribe")))
         ))
     }
     it(
@@ -403,8 +398,8 @@ class TeiContributorsTest
 
       result.value shouldBe Map(
         id -> List(
-          Contributor(Person("Steve Rogers"), List(ContributionRole("scribe"))),
-          Contributor(Person("Bruce Banner"), List(ContributionRole("scribe")))
+          Contributor(agent = Person(label = "Steve Rogers", id = labelDerivedPersonIdentifier("steve rogers")), roles = List(ContributionRole("scribe"))),
+          Contributor(agent = Person(label = "Bruce Banner", id = labelDerivedPersonIdentifier("bruce banner")), roles = List(ContributionRole("scribe")))
         ))
     }
     it("ignores handNote if it has no scribe attribute") {
@@ -443,7 +438,7 @@ class TeiContributorsTest
       result.value shouldBe Map(
         itemId -> List(
           Contributor(
-            Person("Wanda Maximoff"),
+            Person(label = "Wanda Maximoff", id = labelDerivedPersonIdentifier("wanda maximoff")),
             List(ContributionRole("scribe")))))
 
     }
@@ -467,7 +462,7 @@ class TeiContributorsTest
               locus =
                 List(locus(label = "p 22-24", target = Some(s"#$itemId2")))
             ),
-            handNotes(label = "Carol Denvers", scribe = Some("sole")),
+            handNotes(label = "Carol Danvers", scribe = Some("sole")),
             handNotes(persNames = List(scribe("Vision"))),
             handNotes(
               persNames = List(scribe("Stephen Strange")),
@@ -483,23 +478,25 @@ class TeiContributorsTest
       result.value shouldBe Map(
         itemId1 -> List(
           Contributor(
-            Person("Wanda Maximoff"),
-            List(ContributionRole("scribe"))),
+            agent = Person(label = "Wanda Maximoff", id = labelDerivedPersonIdentifier("wanda maximoff")),
+            roles = List(ContributionRole("scribe"))),
           Contributor(
-            Person("Stephen Strange"),
-            List(ContributionRole("scribe")))
+            agent = Person(label = "Stephen Strange", id = labelDerivedPersonIdentifier("stephen strange")),
+            roles = List(ContributionRole("scribe")))
         ),
         itemId2 -> List(
           Contributor(
-            Person("Natasha Romanoff"),
-            List(ContributionRole("scribe"))
+            agent = Person(label = "Natasha Romanoff", id = labelDerivedPersonIdentifier("natasha romanoff")),
+            roles = List(ContributionRole("scribe"))
           )
         ),
         id -> List(
           Contributor(
-            Person("Carol Denvers"),
-            List(ContributionRole("scribe"))),
-          Contributor(Person("Vision"), List(ContributionRole("scribe")))
+            agent = Person(label = "Carol Danvers", id = labelDerivedPersonIdentifier("carol danvers")),
+            roles = List(ContributionRole("scribe"))),
+          Contributor(
+            agent = Person(label = "Vision", id = labelDerivedPersonIdentifier("vision")),
+            roles = List(ContributionRole("scribe")))
         )
       )
     }
@@ -524,11 +521,11 @@ class TeiContributorsTest
       result.value shouldBe Map(
         itemId1 -> List(
           Contributor(
-            Person("Wanda Maximoff"),
+            Person(label = "Wanda Maximoff", id = labelDerivedPersonIdentifier("wanda maximoff")),
             List(ContributionRole("scribe")))),
         itemId2 -> List(
           Contributor(
-            Person("Wanda Maximoff"),
+            Person(label = "Wanda Maximoff", id = labelDerivedPersonIdentifier("wanda maximoff")),
             List(ContributionRole("scribe"))))
       )
     }

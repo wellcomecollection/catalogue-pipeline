@@ -1,6 +1,6 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2022-06-20T10:13:38.433679Z",
+  "createdAt" : "2022-09-20T13:36:03.105348Z",
   "id" : "mazaizfa",
   "document" : {
     "debug" : {
@@ -176,6 +176,8 @@
     },
     "query" : {
       "id" : "mazaizfa",
+      "format.id" : null,
+      "workType" : "Standard",
       "identifiers.value" : [
         "QFJOR9VqAE"
       ],
@@ -195,14 +197,21 @@
       ],
       "subjects.id" : [
       ],
+      "subjects.label" : [
+        "Psychology, Pathological"
+      ],
       "subjects.concepts.label" : [
         "y2nMuMcZq1Jcxuk",
         "acPWKUROxBsQ4CK",
         "8DrDsk2kCAGURhx"
       ],
+      "genres.label" : [
+      ],
       "genres.concepts.label" : [
       ],
       "languages.id" : [
+      ],
+      "contributors.agent.id" : [
       ],
       "contributors.agent.label" : [
       ],

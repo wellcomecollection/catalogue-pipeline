@@ -1,6 +1,6 @@
 {
   "description" : "a work with licensed digital items",
-  "createdAt" : "2022-06-20T10:13:37.362537Z",
+  "createdAt" : "2022-09-20T13:36:01.993967Z",
   "id" : "rstrzip9",
   "document" : {
     "debug" : {
@@ -227,6 +227,8 @@
     },
     "query" : {
       "id" : "rstrzip9",
+      "format.id" : null,
+      "workType" : "Standard",
       "identifiers.value" : [
         "AbkJTEEoLH"
       ],
@@ -250,11 +252,17 @@
       ],
       "subjects.id" : [
       ],
+      "subjects.label" : [
+      ],
       "subjects.concepts.label" : [
+      ],
+      "genres.label" : [
       ],
       "genres.concepts.label" : [
       ],
       "languages.id" : [
+      ],
+      "contributors.agent.id" : [
       ],
       "contributors.agent.label" : [
       ],

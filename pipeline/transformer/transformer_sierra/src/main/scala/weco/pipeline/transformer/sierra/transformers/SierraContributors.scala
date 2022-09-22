@@ -1,7 +1,12 @@
 package weco.pipeline.transformer.sierra.transformers
 
-import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.identifiers.{
+  IdState,
+  IdentifierType,
+  SourceIdentifier
+}
 import weco.catalogue.internal_model.work._
+import weco.pipeline.transformer.identifiers.LabelDerivedIdentifiers
 import weco.sierra.models.SierraQueryOps
 import weco.sierra.models.data.SierraBibData
 import weco.sierra.models.marc.Subfield
@@ -31,63 +36,86 @@ import weco.sierra.models.marc.Subfield
 object SierraContributors
     extends SierraDataTransformer
     with SierraQueryOps
-    with SierraAgents {
+    with SierraAgents
+    with LabelDerivedIdentifiers {
 
   type Output = List[Contributor[IdState.Unminted]]
 
   case class ContributorField(
     marcTag: String,
-    roleTag: String,
+    roleTags: Seq[String],
     isPrimary: Boolean,
     getContributors: List[Subfield] => (String,
                                         Option[
                                           AbstractAgent[IdState.Unminted]]),
   )
 
+  // Quoting an email from Louise Grainger, dated 25 August 2022:
+  //
+  //      100 – we want valid subfield $e (relator/contributor), but NOT valid $j (attribution qualifier)
+  //          – if no $e do not display alternative
+  //
+  //      110 – we want valid subfield $e (relator/contributor); $j is invalid in this field
+  //          – if no $e do not display alternative
+  //
+  //      111 – we want valid subfield $j (relator/contributor); $e is invalid in this field
+  //          – if no $j do not display alternative
+  //
+  //      700 – we want valid subfield $e (relator/contributor) AND valid subfield $j (attribution qualifier)
+  //          – if no $e then display $j; if $e then (ideally) display $j too
+  //
+  //      710 - we want valid subfield $e (relator/contributor); $j is invalid in this field
+  //          – if no $e do not display alternative
+  //
+  //      711 - we want valid subfield $j (relator/contributor); $e is invalid in this field
+  //      – if no $j do not display alternative
+  //
   val contributorFields = List(
     ContributorField(
       marcTag = "100",
-      roleTag = "e",
+      roleTags = Seq("e"),
       isPrimary = true,
       getPersonContributors),
     ContributorField(
       marcTag = "110",
-      roleTag = "e",
+      roleTags = Seq("e"),
       isPrimary = true,
       getOrganisationContributors),
     ContributorField(
       marcTag = "111",
-      roleTag = "j",
+      roleTags = Seq("j"),
       isPrimary = true,
       getMeetingContributors),
     ContributorField(
       marcTag = "700",
-      roleTag = "e",
+      roleTags = Seq("e", "j"),
       isPrimary = false,
       getPersonContributors),
     ContributorField(
       marcTag = "710",
-      roleTag = "e",
+      roleTags = Seq("e"),
       isPrimary = false,
       getOrganisationContributors),
     ContributorField(
       marcTag = "711",
-      roleTag = "j",
+      roleTags = Seq("j"),
       isPrimary = false,
       getMeetingContributors),
   )
 
   def apply(bibData: SierraBibData): List[Contributor[IdState.Unminted]] = {
     val allContributors = contributorFields.flatMap {
-      case ContributorField(marcTag, roleTag, isPrimary, getContributors) =>
+      case ContributorField(marcTag, roleTags, isPrimary, getContributors) =>
         bibData
           .varfieldsWithTag(marcTag)
           .flatMap { varfield =>
             val (ontologyType, maybeAgent) = getContributors(varfield.subfields)
             maybeAgent.map { agent =>
               Contributor(
-                agent = withId(agent, identify(varfield, ontologyType)),
-                roles = getContributionRoles(varfield.subfields, roleTag),
+                agent = withId(
+                  agent,
+                  identify(varfield.subfields, ontologyType, agent.label)),
+                roles = getContributionRoles(varfield.subfields, roleTags),
                 primary = isPrimary
               )
             }
@@ -120,9 +148,9 @@ object SierraContributors
 
   private def getContributionRoles(
     subfields: List[Subfield],
-    subfieldTag: String): List[ContributionRole] =
+    roleTags: Seq[String]): List[ContributionRole] =
     subfields
-      .withTag(subfieldTag)
+      .withTags(roleTags: _*)
       .contents
       .map { role =>
         // The contribution role in the raw MARC data sometimes includes a
@@ -142,4 +170,45 @@ object SierraContributors
       case o: Organisation[IdState.Unminted] => o.copy(id = id)
       case m: Meeting[IdState.Unminted]      => m.copy(id = id)
     }
+
+  /* Given an agent and the associated MARC subfields, look for instances of subfield $0,
+   * which are used for identifiers.
+   *
+   * This methods them (if present) and wraps the agent in Unidentifiable or Identifiable
+   * as appropriate.
+   */
+  private def identify(subfields: List[Subfield],
+                       ontologyType: String,
+                       label: String): IdState.Unminted = {
+
+    // We take the contents of subfield $0.  They may contain inconsistent
+    // spacing and punctuation, such as:
+    //
+    //    " nr 82270463"
+    //    "nr 82270463"
+    //    "nr 82270463.,"
+    //
+    // which all refer to the same identifier.
+    //
+    // For consistency, we remove all whitespace and some punctuation
+    // before continuing.
+    val codes = subfields.collect {
+      case Subfield("0", content) => content.replaceAll("[.,\\s]", "")
+    }
+
+    // If we get exactly one value, we can use it to identify the record.
+    // Some records have multiple instances of subfield $0 (it's a repeatable
+    // field in the MARC spec).
+    codes.distinct match {
+      case Seq(code) =>
+        IdState.Identifiable(
+          SourceIdentifier(
+            identifierType = IdentifierType.LCNames,
+            value = code,
+            ontologyType = ontologyType
+          )
+        )
+      case _ => identifierFromText(label = label, ontologyType = ontologyType)
+    }
+  }
 }

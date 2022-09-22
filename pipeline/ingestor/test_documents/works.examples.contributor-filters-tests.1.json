@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2022-07-25T14:45:36.978328Z",
+  "createdAt" : "2022-09-20T13:36:03.181612Z",
   "id" : "gnuj1it3",
   "document" : {
     "debug" : {
@@ -156,6 +156,8 @@
     },
     "query" : {
       "id" : "gnuj1it3",
+      "format.id" : null,
+      "workType" : "Standard",
       "identifiers.value" : [
         "Og3KGy7Mz5"
       ],
@@ -175,11 +177,17 @@
       ],
       "subjects.id" : [
       ],
+      "subjects.label" : [
+      ],
       "subjects.concepts.label" : [
+      ],
+      "genres.label" : [
       ],
       "genres.concepts.label" : [
       ],
       "languages.id" : [
+      ],
+      "contributors.agent.id" : [
       ],
       "contributors.agent.label" : [
         "Karl Marx"

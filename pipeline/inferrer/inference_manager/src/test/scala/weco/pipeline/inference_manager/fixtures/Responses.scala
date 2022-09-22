@@ -42,6 +42,7 @@ object Responses {
        "palette": [${randomPaletteVector(seed)
       .map(str => s""""$str"""")
       .mkString(", ")}],
+       "average_color_hex": "${randomAverageColorHex(seed)}",
        "hash_params": {
          "bin_sizes": [${randomBinSizes(seed)
       .map(l => s"[${l.mkString(",")}]")
@@ -57,6 +58,9 @@ object Responses {
 
   def randomPaletteVector(seed: Int): List[String] =
     List.fill(25)(List.fill(3)(new Random(seed).nextInt(10)).mkString(""))
+
+  def randomAverageColorHex(seed: Int): String =
+    s"#${randomBytes(random = new Random(seed), length = 3).map(b => f"$b%02X").mkString}"
 
   def randomBinSizes(seed: Int): List[List[Int]] =
     List
@@ -85,8 +89,8 @@ object Responses {
       )
     )
 
-  def randomImageBytes(random: Random = Random): Array[Byte] = {
-    val arr = Array.fill(32)(0x00.toByte)
+  def randomBytes(random: Random = Random, length: Int = 32): Array[Byte] = {
+    val arr = Array.fill(length)(0x00.toByte)
     random.nextBytes(arr)
     arr
   }
@@ -96,7 +100,7 @@ object Responses {
       status = StatusCodes.OK,
       entity = HttpEntity.apply(
         contentType = ContentType(MediaTypes.`image/jpeg`),
-        bytes = randomImageBytes()
+        bytes = randomBytes()
       )
     )
 

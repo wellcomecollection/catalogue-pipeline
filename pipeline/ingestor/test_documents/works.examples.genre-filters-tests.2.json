@@ -1,6 +1,6 @@
 {
   "description" : "examples for the genre tests",
-  "createdAt" : "2022-06-20T10:13:38.345633Z",
+  "createdAt" : "2022-09-20T13:36:03.033405Z",
   "id" : "yhjhxcof",
   "document" : {
     "debug" : {
@@ -173,6 +173,8 @@
     },
     "query" : {
       "id" : "yhjhxcof",
+      "format.id" : null,
+      "workType" : "Standard",
       "identifiers.value" : [
         "lydjDVoexx"
       ],
@@ -192,7 +194,12 @@
       ],
       "subjects.id" : [
       ],
+      "subjects.label" : [
+      ],
       "subjects.concepts.label" : [
+      ],
+      "genres.label" : [
+        "Psychology, Pathological"
       ],
       "genres.concepts.label" : [
         "uK4GKNsXvX3NJfI",
@@ -200,6 +207,8 @@
         "wn4mlLNPr0YHU0g"
       ],
       "languages.id" : [
+      ],
+      "contributors.agent.id" : [
       ],
       "contributors.agent.label" : [
       ],
