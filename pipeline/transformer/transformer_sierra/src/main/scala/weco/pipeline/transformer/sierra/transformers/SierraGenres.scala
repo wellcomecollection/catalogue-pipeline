@@ -74,7 +74,7 @@ object SierraGenres
     )
     wholeFieldConceptId match {
       case identifiable: IdState.Identifiable
-          if (identifiable.sourceIdentifier.identifierType == IdentifierType.LabelDerived) =>
+          if identifiable.sourceIdentifier.identifierType == IdentifierType.LabelDerived =>
         IdState.Unidentifiable
 
       case other => other

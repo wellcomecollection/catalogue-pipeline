@@ -6,6 +6,7 @@ import weco.catalogue.internal_model.identifiers.{
   SourceIdentifier
 }
 import weco.catalogue.internal_model.work._
+import weco.pipeline.transformer.identifiers.LabelDerivedIdentifiers
 import weco.sierra.models.SierraQueryOps
 import weco.sierra.models.data.SierraBibData
 import weco.sierra.models.marc.Subfield
@@ -35,7 +36,8 @@ import weco.sierra.models.marc.Subfield
 object SierraContributors
     extends SierraDataTransformer
     with SierraQueryOps
-    with SierraAgents {
+    with SierraAgents
+    with LabelDerivedIdentifiers {
 
   type Output = List[Contributor[IdState.Unminted]]
 
@@ -206,7 +208,7 @@ object SierraContributors
             ontologyType = ontologyType
           )
         )
-      case _ => addIdentifierFromText(ontologyType, label)
+      case _ => identifierFromText(label = label, ontologyType = ontologyType)
     }
   }
 }

@@ -592,7 +592,7 @@ class SierraConceptSubjectsTest
 
     concept should have(
       sourceIdentifier(
-        value = "united states.",
+        value = "united states",
         ontologyType = "Place",
         identifierType = IdentifierType.LabelDerived)
     )
