@@ -6,7 +6,10 @@ import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.{Agent, Contributor}
 import weco.catalogue.source_model.generators.CalmRecordGenerators
 
-class CalmContributorsTest extends AnyFunSpec with Matchers with CalmRecordGenerators {
+class CalmContributorsTest
+    extends AnyFunSpec
+    with Matchers
+    with CalmRecordGenerators {
   it("returns an empty list if there's nothing in 'CreatorName'") {
     val record = createCalmRecord
 

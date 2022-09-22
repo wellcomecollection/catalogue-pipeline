@@ -16,7 +16,7 @@ trait ConceptsTransformer extends LabelDerivedIdentifiers {
   ): IdState.Identifiable =
     currentState match {
       case currentAsIdentifiable: IdState.Identifiable => currentAsIdentifiable
-      case _                                           =>
+      case _ =>
         replacementState.getOrElse(
           identifierFromText(label = label, ontologyType = ontologyType)
         )

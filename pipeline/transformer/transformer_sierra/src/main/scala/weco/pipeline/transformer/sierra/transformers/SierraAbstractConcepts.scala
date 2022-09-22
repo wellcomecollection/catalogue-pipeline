@@ -46,7 +46,8 @@ trait SierraAbstractConcepts extends Logging with LabelDerivedIdentifiers {
     ontologyType: String,
     varField: VarField): IdState.Unminted =
     getLabel(varField) match {
-      case Some(label) => identifierFromText(label = label, ontologyType = ontologyType)
-      case None        => IdState.Unidentifiable
+      case Some(label) =>
+        identifierFromText(label = label, ontologyType = ontologyType)
+      case None => IdState.Unidentifiable
     }
 }
