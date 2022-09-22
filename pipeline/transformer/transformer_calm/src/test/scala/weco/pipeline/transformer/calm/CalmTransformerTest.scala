@@ -340,8 +340,28 @@ class CalmTransformerTest
       "CatalogueStatus" -> "Catalogued"
     )
     CalmTransformer(record, version).right.get.data.contributors should contain theSameElementsAs List(
-      Contributor(Agent("Bebop"), Nil),
-      Contributor(Agent("Rocksteady"), Nil)
+      Contributor(
+        agent = Agent(
+          id = IdState.Identifiable(
+            sourceIdentifier = SourceIdentifier(
+              identifierType = IdentifierType.LabelDerived,
+              value = "bebop",
+              ontologyType = "Agent"
+            )
+          ),
+          label = "Bebop"),
+        roles = Nil
+      ),
+      Contributor(
+        agent = Agent(id = IdState.Identifiable(
+          sourceIdentifier = SourceIdentifier(
+            identifierType = IdentifierType.LabelDerived,
+            value = "rocksteady",
+            ontologyType = "Agent"
+          )
+        ), label = "Rocksteady"),
+        roles = Nil
+      )
     )
   }
 
