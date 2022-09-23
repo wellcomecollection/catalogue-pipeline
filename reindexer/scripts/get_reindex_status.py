@@ -160,7 +160,9 @@ def get_queue_stats(sess, *, reindex_date):
     """
     Get the size of the queues associated with this pipeline.
     """
-    queue_urls = list_queue_urls_in_account(sess, prefixes=(f"catalogue-{reindex_date}", "reindex"))
+    queue_urls = list_queue_urls_in_account(
+        sess, prefixes=(f"catalogue-{reindex_date}", "reindex")
+    )
 
     sqs_client = sess.client("sqs")
 
