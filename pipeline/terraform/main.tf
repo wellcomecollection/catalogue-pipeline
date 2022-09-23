@@ -4,12 +4,12 @@ module "catalogue_pipeline_2022-08-24" {
   pipeline_date = "2022-08-24"
   release_label = "2022-08-24"
 
-  # The cluster in the 2022-08-24 pipeline is having issues, so we've
-  # turned off all the services to avoid making the problem worse.
-  #
-  # Additionally, the changes to add label-derived IDs to contributors
-  # may cause a flood of updates in the overnight harvest on the weekend.
-  max_capacity = 0
+  # This pipeline is running Elasticsearch 8.4.2, which seems to be
+  # broken with the queries we use.  I don't want to delete it without
+  # double checking (in case it's useful for further investigation),
+  # but we don't need to be running anything through it.
+  max_capacity    = 0
+  es_cluster_size = "2x2"
 
   reindexing_state = {
     listen_to_reindexer      = false
@@ -37,6 +37,13 @@ module "catalogue_pipeline_2022-09-22" {
 
   pipeline_date = "2022-09-22"
   release_label = "2022-09-22"
+
+  # This pipeline is running Elasticsearch 8.4.2, which seems to be
+  # broken with the queries we use.  I don't want to delete it without
+  # double checking (in case it's useful for further investigation),
+  # but we don't need to be running anything through it.
+  max_capacity    = 0
+  es_cluster_size = "2x2"
 
   reindexing_state = {
     listen_to_reindexer      = false

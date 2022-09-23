@@ -27,6 +27,63 @@ variable "release_label" {
   type = string
 }
 
+# This allows us to choose the size of the Elasticsearch cluster.
+#
+# There are three sizes we can choose from:
+#
+#     * 58GB x 2 = a 2-node instance with lots of memory, when we know we're
+#       going to be sending the cluster lots of traffic.
+#
+#       This is what we use when reindexing.  It's auto-selected if you
+#       enable `scale_up_elastic_cluster` = true.
+#
+#       Cost: ~$130/day
+#
+#     * 8GB x 3 = a 3-node, HA instance with enough memory to serve
+#       prod API traffic.
+#
+#       Cost: ~$30/day
+#
+#     * 2GB x 2 = a 2-node instance with just enough memory and storage,
+#       when we want to keep a cluster around (e.g. for investigation, or
+#       if we want to keep it just-in-case we need a rollback), but don't
+#       need it ready to serve traffic immediately.
+#
+#       Cost: ~$6.50/day
+#
+variable "es_cluster_size" {
+  description = "How big should the Elastic cluster be?"
+  default     = "8x3"
+
+  validation {
+    condition     = contains(["58x2", "8x3", "2x2"], var.es_cluster_size)
+    error_message = "Cooldown period should be one of: 58x2, 8x3, 2x2."
+  }
+}
+
+locals {
+  es_memory_lookup = {
+    "58x2": "58g"
+    "8x3": "8g"
+    "2x2": "2g"
+  }
+
+  es_node_lookup = {
+    "58x2": 2
+    "8x3": 3
+    "2x2": 2
+  }
+
+  es_memory = var.reindexing_state.scale_up_elastic_cluster ? "58g" : local.es_memory_lookup[var.es_cluster_size]
+
+  # When we're reindexing, this cluster isn't depended on for anything.
+  # It's ephemeral data (and at 58GB of memory, expensive).
+  #
+  # Once we stop reindexing and make the pipeline live, we want it to be
+  # highly available, because it's serving API traffic.
+  es_node_count = var.reindexing_state.scale_up_elastic_cluster ? 2 : local.es_node_lookup[var.es_cluster_size]
+}
+
 # Fields:
 #
 #   - `topics` -- that the adapter will write to in normal operation

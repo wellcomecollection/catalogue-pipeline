@@ -1,14 +1,3 @@
-locals {
-  es_memory = var.reindexing_state.scale_up_elastic_cluster ? "58g" : "8g"
-
-  # When we're reindexing, this cluster isn't depended on for anything.
-  # It's ephemeral data (and at 58GB of memory, expensive).
-  #
-  # Once we stop reindexing and make the pipeline live, we want it to be
-  # highly available, because it's serving API traffic.
-  es_node_count = var.reindexing_state.scale_up_elastic_cluster ? 2 : 3
-}
-
 data "ec_stack" "latest_patch" {
   # We're deliberately pinning to 8.3.x because there's an issue in 8.4.2
   # affecting the cross_fields query we use in the API.
