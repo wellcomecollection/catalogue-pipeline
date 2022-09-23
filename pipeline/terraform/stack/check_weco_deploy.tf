@@ -6,5 +6,5 @@
 # forgot to do something in weco-deploy.
 data "aws_ecr_image" "check_weco_deploy_tags_exist" {
   repository_name = "uk.ac.wellcome/transformer_tei"
-  image_tag       = "env.${var.pipeline_date}"
+  image_tag       = "env.${var.release_label}"
 }

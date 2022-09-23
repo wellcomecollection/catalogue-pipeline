@@ -10,7 +10,10 @@ locals {
 }
 
 data "ec_stack" "latest_patch" {
-  version_regex = "8.4.?"
+  # We're deliberately pinning to 8.3.x because there's an issue in 8.4.2
+  # affecting the cross_fields query we use in the API.
+  # See https://github.com/elastic/elasticsearch/issues/90275
+  version_regex = "8.3.?"
   region        = "eu-west-1"
 }
 
@@ -41,6 +44,20 @@ resource "ec_deployment" "pipeline" {
 
   observability {
     deployment_id = var.monitoring_config.logging_cluster_id
+  }
+
+  lifecycle {
+    ignore_changes = [
+
+      # We've had issues in the past when an Elastic upgrade is triggered
+      # unexpectedly, sometimes causing missing master nodes/search issues.
+      # e.g. https://wellcome.slack.com/archives/C01FBFSDLUA/p1663849437942949
+      #
+      # This `ignore_changes` means Terraform won't upgrade the cluster
+      # version after initial creation -- we'll have to log in to the
+      # Elastic Cloud console and trigger it explicitly.
+      version,
+    ]
   }
 }
 
