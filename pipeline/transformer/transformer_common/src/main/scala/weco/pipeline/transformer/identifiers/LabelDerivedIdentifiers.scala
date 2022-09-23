@@ -30,6 +30,7 @@ trait LabelDerivedIdentifiers {
         Normalizer.Form.NFKD
       )
       .replaceAll("[^\\p{ASCII}]", "")
+      .trim
 
     IdState.Identifiable(
       sourceIdentifier = SourceIdentifier(
