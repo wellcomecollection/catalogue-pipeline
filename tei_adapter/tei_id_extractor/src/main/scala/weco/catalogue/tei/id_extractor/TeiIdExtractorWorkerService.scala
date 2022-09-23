@@ -109,17 +109,17 @@ class TeiIdExtractorWorkerService[Dest](
   private def isTeiFile(path: String): Boolean = {
     val isXmlFile = path.endsWith(".xml")
 
-    val isInRootOfRepo = path.contains("/")
+    val isInRootOfRepo = !path.contains("/")
 
     val excludedDirs = Seq(
       // These are directories used for TEI management, not actual TEI files.
-      "docs",
-      "Templates",
+      "docs/",
+      "Templates/",
       // These are files we don't want to ingest directly into the platform;
       // e.g. stuff that's been written for collaboration on external projects.
       //
       // See https://github.com/wellcomecollection/catalogue-pipeline/issues/2197#issuecomment-1249665377
-      "Arabic/Fihrist"
+      "Arabic/Fihrist/"
     )
     val isInExcludedDir = excludedDirs.exists(dir => path.startsWith(dir))
 
