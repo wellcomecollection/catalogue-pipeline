@@ -13,4 +13,17 @@ class LabelDerivedIdentifiersTest extends AnyFunSpec with Matchers {
       identifiers.identifierFromText(label = label, ontologyType = "Person")
     identifier.sourceIdentifier.value shouldBe "mikic, zelimir"
   }
+
+  it("truncates label-derived identifiers to 256 characters") {
+    // This comes from b28117293
+    val label =
+      "National Insurance Act, 1911 : explained, annotated and indexed, with appendices consisting of the Insurance Commissioners' official explanatory leaflets, Treasury regulations for the joint committee, tables of reserve values and voluntary contributions, regulations for procedure by the umpire, etc."
+    val identifier =
+      identifiers.identifierFromText(
+        label = label,
+        ontologyType = "Organisation")
+
+    // truncated at 256 chars
+    identifier.sourceIdentifier.value shouldBe "national insurance act, 1911 : explained, annotated and indexed, with appendices consisting of the insurance commissioners' official explanatory leaflets, treasury regulations for the joint committee, tables of reserve values and voluntary contributions, r"
+  }
 }
