@@ -1,6 +1,6 @@
 {
   "description" : "items with different location types",
-  "createdAt" : "2022-09-20T13:36:02.684755Z",
+  "createdAt" : "2022-09-26T11:29:28.190576Z",
   "id" : "sgatphra",
   "document" : {
     "debug" : {
@@ -233,6 +233,13 @@
       "identifiers.value" : [
         "GsIdzZyGYB"
       ],
+      "title" : "title-GkJTZWwn4A",
+      "description" : null,
+      "physicalDescription" : null,
+      "edition" : null,
+      "notes.contents" : [
+      ],
+      "lettering" : null,
       "images.id" : [
       ],
       "images.identifiers.value" : [
@@ -264,6 +271,8 @@
       "genres.concepts.label" : [
       ],
       "languages.id" : [
+      ],
+      "languages.label" : [
       ],
       "contributors.agent.id" : [
       ],

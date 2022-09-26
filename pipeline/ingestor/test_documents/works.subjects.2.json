@@ -1,6 +1,6 @@
 {
   "description" : "works with different subjects",
-  "createdAt" : "2022-09-20T13:36:02.106626Z",
+  "createdAt" : "2022-09-26T11:29:27.842957Z",
   "id" : "evraub2i",
   "document" : {
     "debug" : {
@@ -181,6 +181,13 @@
       "identifiers.value" : [
         "E3Fqby26w1"
       ],
+      "title" : "title-sNTcYSKPkF",
+      "description" : null,
+      "physicalDescription" : null,
+      "edition" : null,
+      "notes.contents" : [
+      ],
+      "lettering" : null,
       "images.id" : [
       ],
       "images.identifiers.value" : [
@@ -210,6 +217,8 @@
       "genres.concepts.label" : [
       ],
       "languages.id" : [
+      ],
+      "languages.label" : [
       ],
       "contributors.agent.id" : [
       ],

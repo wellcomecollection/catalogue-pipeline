@@ -1,6 +1,6 @@
 {
   "description" : "examples for the works filtered aggregations tests",
-  "createdAt" : "2022-09-20T13:36:03.589590Z",
+  "createdAt" : "2022-09-26T11:29:28.700810Z",
   "id" : "iykrudzs",
   "document" : {
     "debug" : {
@@ -151,6 +151,13 @@
       "identifiers.value" : [
         "QnjXRANbEF"
       ],
+      "title" : "rats",
+      "description" : null,
+      "physicalDescription" : null,
+      "edition" : null,
+      "notes.contents" : [
+      ],
+      "lettering" : null,
       "images.id" : [
       ],
       "images.identifiers.value" : [
@@ -177,6 +184,9 @@
       ],
       "languages.id" : [
         "que"
+      ],
+      "languages.label" : [
+        "Quechua"
       ],
       "contributors.agent.id" : [
       ],

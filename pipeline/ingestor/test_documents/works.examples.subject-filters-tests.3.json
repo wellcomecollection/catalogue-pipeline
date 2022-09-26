@@ -1,6 +1,6 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2022-09-20T13:36:03.109177Z",
+  "createdAt" : "2022-09-26T11:29:28.433704Z",
   "id" : "b1r485o0",
   "document" : {
     "debug" : {
@@ -203,6 +203,13 @@
       "identifiers.value" : [
         "4zh18D0cbF"
       ],
+      "title" : "title-DxPLXKke6N",
+      "description" : null,
+      "physicalDescription" : null,
+      "edition" : null,
+      "notes.contents" : [
+      ],
+      "lettering" : null,
       "images.id" : [
       ],
       "images.identifiers.value" : [
@@ -233,6 +240,8 @@
       "genres.concepts.label" : [
       ],
       "languages.id" : [
+      ],
+      "languages.label" : [
       ],
       "contributors.agent.id" : [
       ],

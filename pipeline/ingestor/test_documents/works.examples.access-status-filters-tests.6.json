@@ -1,6 +1,6 @@
 {
   "description" : "examples for the access status tests",
-  "createdAt" : "2022-09-20T13:36:03.506198Z",
+  "createdAt" : "2022-09-26T11:29:28.661843Z",
   "id" : "uqhxoxvf",
   "document" : {
     "debug" : {
@@ -228,6 +228,13 @@
       "identifiers.value" : [
         "Ey1hoMJJvc"
       ],
+      "title" : "title-tU496lvqxD",
+      "description" : null,
+      "physicalDescription" : null,
+      "edition" : null,
+      "notes.contents" : [
+      ],
+      "lettering" : null,
       "images.id" : [
       ],
       "images.identifiers.value" : [
@@ -258,6 +265,8 @@
       "genres.concepts.label" : [
       ],
       "languages.id" : [
+      ],
+      "languages.label" : [
       ],
       "contributors.agent.id" : [
       ],

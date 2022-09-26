@@ -1,6 +1,6 @@
 {
   "description" : "a work with 'mouse' in the title",
-  "createdAt" : "2022-09-20T13:36:00.927265Z",
+  "createdAt" : "2022-09-26T11:29:27.187468Z",
   "id" : "lnn17cwk",
   "document" : {
     "debug" : {
@@ -135,6 +135,13 @@
       "identifiers.value" : [
         "EhPpSB8mq7"
       ],
+      "title" : "A mezzotint of a mouse",
+      "description" : null,
+      "physicalDescription" : null,
+      "edition" : null,
+      "notes.contents" : [
+      ],
+      "lettering" : "A print of proportional penmanship",
       "images.id" : [
       ],
       "images.identifiers.value" : [
@@ -160,6 +167,8 @@
       "genres.concepts.label" : [
       ],
       "languages.id" : [
+      ],
+      "languages.label" : [
       ],
       "contributors.agent.id" : [
       ],

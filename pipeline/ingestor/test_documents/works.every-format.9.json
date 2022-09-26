@@ -1,6 +1,6 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2022-09-20T13:36:02.392621Z",
+  "createdAt" : "2022-09-26T11:29:28.019371Z",
   "id" : "e2zva5mj",
   "document" : {
     "debug" : {
@@ -142,6 +142,13 @@
       "identifiers.value" : [
         "2Ap82csHfk"
       ],
+      "title" : "title-AcxE29kiXI",
+      "description" : null,
+      "physicalDescription" : null,
+      "edition" : null,
+      "notes.contents" : [
+      ],
+      "lettering" : null,
       "images.id" : [
       ],
       "images.identifiers.value" : [
@@ -167,6 +174,8 @@
       "genres.concepts.label" : [
       ],
       "languages.id" : [
+      ],
+      "languages.label" : [
       ],
       "contributors.agent.id" : [
       ],
