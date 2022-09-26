@@ -1,6 +1,6 @@
 {
   "description" : "a work with a thumbnail",
-  "createdAt" : "2022-09-20T13:36:00.897791Z",
+  "createdAt" : "2022-09-26T11:29:27.167985Z",
   "id" : "sahqcluh",
   "document" : {
     "debug" : {
@@ -163,6 +163,13 @@
       "identifiers.value" : [
         "rRRYGQYiF7"
       ],
+      "title" : "title-LSfnjHB2TS",
+      "description" : null,
+      "physicalDescription" : null,
+      "edition" : null,
+      "notes.contents" : [
+      ],
+      "lettering" : null,
       "images.id" : [
       ],
       "images.identifiers.value" : [
@@ -188,6 +195,8 @@
       "genres.concepts.label" : [
       ],
       "languages.id" : [
+      ],
+      "languages.label" : [
       ],
       "contributors.agent.id" : [
       ],

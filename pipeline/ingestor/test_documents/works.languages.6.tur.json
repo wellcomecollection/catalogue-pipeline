@@ -1,6 +1,6 @@
 {
   "description" : "one of a list of works with a variety of languages",
-  "createdAt" : "2022-09-20T13:36:01.962813Z",
+  "createdAt" : "2022-09-26T11:29:27.775151Z",
   "id" : "yblbdpjf",
   "document" : {
     "debug" : {
@@ -143,6 +143,13 @@
       "identifiers.value" : [
         "vcw0LP9LzQ"
       ],
+      "title" : "A work with languages Turkish",
+      "description" : null,
+      "physicalDescription" : null,
+      "edition" : null,
+      "notes.contents" : [
+      ],
+      "lettering" : null,
       "images.id" : [
       ],
       "images.identifiers.value" : [
@@ -169,6 +176,9 @@
       ],
       "languages.id" : [
         "tur"
+      ],
+      "languages.label" : [
+        "Turkish"
       ],
       "contributors.agent.id" : [
       ],

@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2022-09-20T13:36:03.183594Z",
+  "createdAt" : "2022-09-26T11:29:28.477016Z",
   "id" : "6q7wkowr",
   "document" : {
     "debug" : {
@@ -161,6 +161,13 @@
       "identifiers.value" : [
         "AgxJAjEybh"
       ],
+      "title" : "title-NOoLbpS5jR",
+      "description" : null,
+      "physicalDescription" : null,
+      "edition" : null,
+      "notes.contents" : [
+      ],
+      "lettering" : null,
       "images.id" : [
       ],
       "images.identifiers.value" : [
@@ -186,6 +193,8 @@
       "genres.concepts.label" : [
       ],
       "languages.id" : [
+      ],
+      "languages.label" : [
       ],
       "contributors.agent.id" : [
       ],

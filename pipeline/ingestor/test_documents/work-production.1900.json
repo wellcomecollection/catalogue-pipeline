@@ -1,6 +1,6 @@
 {
   "description" : "a work with a production event in 1900",
-  "createdAt" : "2022-09-20T13:36:01.015079Z",
+  "createdAt" : "2022-09-26T11:29:27.244442Z",
   "id" : "rbnro6wx",
   "document" : {
     "debug" : {
@@ -169,6 +169,13 @@
       "identifiers.value" : [
         "akaUmx5H3i"
       ],
+      "title" : "Production event in 1900",
+      "description" : null,
+      "physicalDescription" : null,
+      "edition" : null,
+      "notes.contents" : [
+      ],
+      "lettering" : null,
       "images.id" : [
       ],
       "images.identifiers.value" : [
@@ -194,6 +201,8 @@
       "genres.concepts.label" : [
       ],
       "languages.id" : [
+      ],
+      "languages.label" : [
       ],
       "contributors.agent.id" : [
       ],

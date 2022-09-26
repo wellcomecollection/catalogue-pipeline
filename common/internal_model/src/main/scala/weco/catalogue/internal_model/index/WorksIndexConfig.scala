@@ -226,6 +226,12 @@ object WorksIndexConfig extends IndexConfigFields {
           keywordField("type"),
           keywordField("format.id"),
           keywordField("workType"),
+          multilingualFieldWithKeyword("title"),
+          englishTextField("description"),
+          englishTextKeywordField("physicalDescription"),
+          textField("edition"),
+          englishTextField("notes.contents"),
+          multilingualField("lettering"),
           // identifiers
           sourceIdentifierField("identifiers.value"),
           // images
@@ -246,6 +252,7 @@ object WorksIndexConfig extends IndexConfigFields {
           labelField("genres.concepts.label"),
           // languages
           keywordField("languages.id"),
+          labelField("languages.label"),
           // contributors
           canonicalIdField("contributors.agent.id"),
           labelField("contributors.agent.label"),

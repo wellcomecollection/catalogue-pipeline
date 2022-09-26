@@ -646,6 +646,18 @@
               }
             }
           },
+          "description": {
+            "type": "text",
+            "fields": {
+              "english": {
+                "type": "text",
+                "analyzer": "english_analyzer"
+              }
+            }
+          },
+          "edition": {
+            "type": "text"
+          },
           "genres": {
             "properties": {
               "concepts": {
@@ -770,6 +782,69 @@
             "properties": {
               "id": {
                 "type": "keyword"
+              },
+              "label": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword"
+                  },
+                  "lowercaseKeyword": {
+                    "type": "keyword",
+                    "normalizer": "lowercase_normalizer"
+                  }
+                },
+                "analyzer": "asciifolding_analyzer"
+              }
+            }
+          },
+          "lettering": {
+            "type": "text",
+            "fields": {
+              "arabic": {
+                "type": "text",
+                "analyzer": "arabic_analyzer"
+              },
+              "bengali": {
+                "type": "text",
+                "analyzer": "bengali_analyzer"
+              },
+              "english": {
+                "type": "text",
+                "analyzer": "english_analyzer"
+              },
+              "french": {
+                "type": "text",
+                "analyzer": "french_analyzer"
+              },
+              "german": {
+                "type": "text",
+                "analyzer": "german_analyzer"
+              },
+              "hindi": {
+                "type": "text",
+                "analyzer": "hindi_analyzer"
+              },
+              "italian": {
+                "type": "text",
+                "analyzer": "italian_analyzer"
+              },
+              "shingles": {
+                "type": "text",
+                "analyzer": "shingle_asciifolding_analyzer"
+              }
+            }
+          },
+          "notes": {
+            "properties": {
+              "contents": {
+                "type": "text",
+                "fields": {
+                  "english": {
+                    "type": "text",
+                    "analyzer": "english_analyzer"
+                  }
+                }
               }
             }
           },
@@ -822,6 +897,18 @@
               }
             }
           },
+          "physicalDescription": {
+            "type": "text",
+            "fields": {
+              "english": {
+                "type": "text",
+                "analyzer": "english_analyzer"
+              },
+              "keyword": {
+                "type": "keyword"
+              }
+            }
+          },
           "subjects": {
             "properties": {
               "concepts": {
@@ -857,6 +944,47 @@
               "id": {
                 "type": "keyword",
                 "normalizer": "lowercase_normalizer"
+              }
+            }
+          },
+          "title": {
+            "type": "text",
+            "fields": {
+              "arabic": {
+                "type": "text",
+                "analyzer": "arabic_analyzer"
+              },
+              "bengali": {
+                "type": "text",
+                "analyzer": "bengali_analyzer"
+              },
+              "english": {
+                "type": "text",
+                "analyzer": "english_analyzer"
+              },
+              "french": {
+                "type": "text",
+                "analyzer": "french_analyzer"
+              },
+              "german": {
+                "type": "text",
+                "analyzer": "german_analyzer"
+              },
+              "hindi": {
+                "type": "text",
+                "analyzer": "hindi_analyzer"
+              },
+              "italian": {
+                "type": "text",
+                "analyzer": "italian_analyzer"
+              },
+              "keyword": {
+                "type": "keyword",
+                "normalizer": "lowercase_normalizer"
+              },
+              "shingles": {
+                "type": "text",
+                "analyzer": "shingle_asciifolding_analyzer"
               }
             }
           }
