@@ -41,7 +41,7 @@ trait LabelDerivedIdentifiers {
     // These labels aren't meant to be human-readable, and truncating is easier than
     // making the ID minter handle extreme edge cases.
     val truncatedLabel = normalizedLabel
-      .slice(0, 256)
+      .slice(0, 255)
       .trim
 
     IdState.Identifiable(

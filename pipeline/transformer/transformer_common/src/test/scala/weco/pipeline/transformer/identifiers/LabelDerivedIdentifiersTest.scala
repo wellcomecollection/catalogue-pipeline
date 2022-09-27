@@ -14,7 +14,7 @@ class LabelDerivedIdentifiersTest extends AnyFunSpec with Matchers {
     identifier.sourceIdentifier.value shouldBe "mikic, zelimir"
   }
 
-  it("truncates label-derived identifiers to 256 characters") {
+  it("truncates label-derived identifiers to 255 characters") {
     // This comes from b28117293
     val label =
       "National Insurance Act, 1911 : explained, annotated and indexed, with appendices consisting of the Insurance Commissioners' official explanatory leaflets, Treasury regulations for the joint committee, tables of reserve values and voluntary contributions, regulations for procedure by the umpire, etc."
@@ -23,7 +23,7 @@ class LabelDerivedIdentifiersTest extends AnyFunSpec with Matchers {
         label = label,
         ontologyType = "Organisation")
 
-    // truncated at 256 chars
-    identifier.sourceIdentifier.value shouldBe "national insurance act, 1911 : explained, annotated and indexed, with appendices consisting of the insurance commissioners' official explanatory leaflets, treasury regulations for the joint committee, tables of reserve values and voluntary contributions, r"
+    // truncated at 255 chars
+    identifier.sourceIdentifier.value shouldBe "national insurance act, 1911 : explained, annotated and indexed, with appendices consisting of the insurance commissioners' official explanatory leaflets, treasury regulations for the joint committee, tables of reserve values and voluntary contributions,"
   }
 }
