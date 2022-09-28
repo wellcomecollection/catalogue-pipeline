@@ -1,6 +1,6 @@
 {
   "description" : "works with multi-year production ranges",
-  "createdAt" : "2022-09-26T11:29:28.147985Z",
+  "createdAt" : "2022-09-28T15:53:40.806288Z",
   "id" : "31spt9st",
   "document" : {
     "debug" : {
@@ -193,6 +193,8 @@
         "WzsZA7OUAa"
       ],
       "title" : "title-QoeggPvgjR",
+      "alternativeTitles" : [
+      ],
       "description" : null,
       "physicalDescription" : null,
       "edition" : null,
@@ -231,12 +233,20 @@
       ],
       "contributors.agent.label" : [
       ],
+      "production.label" : [
+        "54blSY3iyd",
+        "rQHICakdbo",
+        "1850"
+      ],
       "partOf.id" : [
       ],
       "partOf.title" : [
       ],
       "availabilities.id" : [
-      ]
+      ],
+      "collectionPath.label" : null,
+      "collectionPath.path" : null,
+      "referenceNumber" : null
     },
     "aggregatableValues" : {
       "workType" : [

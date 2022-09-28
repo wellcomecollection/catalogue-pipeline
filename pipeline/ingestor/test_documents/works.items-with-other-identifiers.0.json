@@ -1,6 +1,6 @@
 {
   "description" : "works with items with other identifiers",
-  "createdAt" : "2022-09-26T11:29:27.941844Z",
+  "createdAt" : "2022-09-28T15:53:40.323642Z",
   "id" : "qjnwiqbs",
   "document" : {
     "debug" : {
@@ -218,6 +218,8 @@
         "Jj1GugWgka"
       ],
       "title" : "title-m47LFZN2Zg",
+      "alternativeTitles" : [
+      ],
       "description" : null,
       "physicalDescription" : null,
       "edition" : null,
@@ -261,12 +263,17 @@
       ],
       "contributors.agent.label" : [
       ],
+      "production.label" : [
+      ],
       "partOf.id" : [
       ],
       "partOf.title" : [
       ],
       "availabilities.id" : [
-      ]
+      ],
+      "collectionPath.label" : null,
+      "collectionPath.path" : null,
+      "referenceNumber" : null
     },
     "aggregatableValues" : {
       "workType" : [

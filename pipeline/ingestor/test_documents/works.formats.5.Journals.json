@@ -1,6 +1,6 @@
 {
   "description" : "one of a list of works with a variety of formats",
-  "createdAt" : "2022-09-26T11:29:27.648234Z",
+  "createdAt" : "2022-09-28T15:53:39.643198Z",
   "id" : "plmmmkup",
   "document" : {
     "debug" : {
@@ -143,6 +143,8 @@
         "X7kBc19InD"
       ],
       "title" : "A work with format Journals",
+      "alternativeTitles" : [
+      ],
       "description" : null,
       "physicalDescription" : null,
       "edition" : null,
@@ -181,12 +183,17 @@
       ],
       "contributors.agent.label" : [
       ],
+      "production.label" : [
+      ],
       "partOf.id" : [
       ],
       "partOf.title" : [
       ],
       "availabilities.id" : [
-      ]
+      ],
+      "collectionPath.label" : null,
+      "collectionPath.path" : null,
+      "referenceNumber" : null
     },
     "aggregatableValues" : {
       "workType" : [

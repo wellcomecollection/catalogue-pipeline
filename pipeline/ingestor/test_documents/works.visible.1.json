@@ -1,6 +1,6 @@
 {
   "description" : "an arbitrary list of visible works",
-  "createdAt" : "2022-09-26T11:29:26.469706Z",
+  "createdAt" : "2022-09-28T15:53:36.443941Z",
   "id" : "dph7sjip",
   "document" : {
     "debug" : {
@@ -135,6 +135,8 @@
         "WpBejTwv1N"
       ],
       "title" : "title-3hvGdgZfc8",
+      "alternativeTitles" : [
+      ],
       "description" : null,
       "physicalDescription" : null,
       "edition" : null,
@@ -173,12 +175,17 @@
       ],
       "contributors.agent.label" : [
       ],
+      "production.label" : [
+      ],
       "partOf.id" : [
       ],
       "partOf.title" : [
       ],
       "availabilities.id" : [
-      ]
+      ],
+      "collectionPath.label" : null,
+      "collectionPath.path" : null,
+      "referenceNumber" : null
     },
     "aggregatableValues" : {
       "workType" : [

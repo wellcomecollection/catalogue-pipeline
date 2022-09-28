@@ -1,6 +1,6 @@
 {
   "description" : "examples of works with different types",
-  "createdAt" : "2022-09-26T11:29:28.376725Z",
+  "createdAt" : "2022-09-28T15:53:41.700435Z",
   "id" : "2tqcclh1",
   "document" : {
     "debug" : {
@@ -135,6 +135,8 @@
         "ZiS5MlN0hQ"
       ],
       "title" : "rats",
+      "alternativeTitles" : [
+      ],
       "description" : null,
       "physicalDescription" : null,
       "edition" : null,
@@ -173,12 +175,17 @@
       ],
       "contributors.agent.label" : [
       ],
+      "production.label" : [
+      ],
       "partOf.id" : [
       ],
       "partOf.title" : [
       ],
       "availabilities.id" : [
-      ]
+      ],
+      "collectionPath.label" : null,
+      "collectionPath.path" : null,
+      "referenceNumber" : null
     },
     "aggregatableValues" : {
       "workType" : [

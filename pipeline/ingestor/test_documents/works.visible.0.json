@@ -1,6 +1,6 @@
 {
   "description" : "an arbitrary list of visible works",
-  "createdAt" : "2022-09-26T11:29:26.462829Z",
+  "createdAt" : "2022-09-28T15:53:36.426844Z",
   "id" : "2twopft1",
   "document" : {
     "debug" : {
@@ -135,6 +135,8 @@
         "Uaequ81tpB"
       ],
       "title" : "title-vaMzxd8prf",
+      "alternativeTitles" : [
+      ],
       "description" : null,
       "physicalDescription" : null,
       "edition" : null,
@@ -173,12 +175,17 @@
       ],
       "contributors.agent.label" : [
       ],
+      "production.label" : [
+      ],
       "partOf.id" : [
       ],
       "partOf.title" : [
       ],
       "availabilities.id" : [
-      ]
+      ],
+      "collectionPath.label" : null,
+      "collectionPath.path" : null,
+      "referenceNumber" : null
     },
     "aggregatableValues" : {
       "workType" : [

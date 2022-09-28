@@ -1,6 +1,6 @@
 {
   "description" : "works with multi-year production ranges",
-  "createdAt" : "2022-09-26T11:29:28.148897Z",
+  "createdAt" : "2022-09-28T15:53:40.809016Z",
   "id" : "v9is9e3t",
   "document" : {
     "debug" : {
@@ -193,6 +193,8 @@
         "fZVe3xG7r6"
       ],
       "title" : "title-JGYTcwsJbl",
+      "alternativeTitles" : [
+      ],
       "description" : null,
       "physicalDescription" : null,
       "edition" : null,
@@ -231,12 +233,20 @@
       ],
       "contributors.agent.label" : [
       ],
+      "production.label" : [
+        "Qjq4EFefGh",
+        "SS8PUjTA45",
+        "1850-2000"
+      ],
       "partOf.id" : [
       ],
       "partOf.title" : [
       ],
       "availabilities.id" : [
-      ]
+      ],
+      "collectionPath.label" : null,
+      "collectionPath.path" : null,
+      "referenceNumber" : null
     },
     "aggregatableValues" : {
       "workType" : [

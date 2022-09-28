@@ -1,6 +1,6 @@
 {
   "description" : "works with different subjects",
-  "createdAt" : "2022-09-26T11:29:27.840975Z",
+  "createdAt" : "2022-09-28T15:53:40.041971Z",
   "id" : "6uwysojy",
   "document" : {
     "debug" : {
@@ -182,6 +182,8 @@
         "pzLgxSR5EK"
       ],
       "title" : "title-Dtaaw5YmCW",
+      "alternativeTitles" : [
+      ],
       "description" : null,
       "physicalDescription" : null,
       "edition" : null,
@@ -224,12 +226,17 @@
       ],
       "contributors.agent.label" : [
       ],
+      "production.label" : [
+      ],
       "partOf.id" : [
       ],
       "partOf.title" : [
       ],
       "availabilities.id" : [
-      ]
+      ],
+      "collectionPath.label" : null,
+      "collectionPath.path" : null,
+      "referenceNumber" : null
     },
     "aggregatableValues" : {
       "workType" : [

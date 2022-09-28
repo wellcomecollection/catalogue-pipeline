@@ -1,6 +1,6 @@
 {
   "description" : "a work with a production event in 1976",
-  "createdAt" : "2022-09-26T11:29:27.257410Z",
+  "createdAt" : "2022-09-28T15:53:38.340357Z",
   "id" : "5vjghupy",
   "document" : {
     "debug" : {
@@ -170,6 +170,8 @@
         "xrdlOL8J49"
       ],
       "title" : "Production event in 1976",
+      "alternativeTitles" : [
+      ],
       "description" : null,
       "physicalDescription" : null,
       "edition" : null,
@@ -208,12 +210,18 @@
       ],
       "contributors.agent.label" : [
       ],
+      "production.label" : [
+        "1976"
+      ],
       "partOf.id" : [
       ],
       "partOf.title" : [
       ],
       "availabilities.id" : [
-      ]
+      ],
+      "collectionPath.label" : null,
+      "collectionPath.path" : null,
+      "referenceNumber" : null
     },
     "aggregatableValues" : {
       "workType" : [
