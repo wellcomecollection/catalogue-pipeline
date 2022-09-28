@@ -87,8 +87,7 @@ case object WorkQueryableValues {
       contributorAgentIds = workData.contributors.map(_.agent.id).canonicalIds,
       contributorAgentLabels = workData.contributors.map(_.agent.label),
       productionLabels = workData.production.flatMap(p =>
-        p.places.map(_.label) ++ p.agents.map(_.label) ++ p.dates.map(_.label)
-      ),
+        p.places.map(_.label) ++ p.agents.map(_.label) ++ p.dates.map(_.label)),
       partOfIds = relations.ancestors.flatMap(_.id).map(_.underlying),
       partOfTitles = relations.ancestors.flatMap(_.title),
       availabilityIds = availabilities.map(_.id).toList,

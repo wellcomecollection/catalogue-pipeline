@@ -229,8 +229,10 @@ object WorksIndexConfig extends IndexConfigFields {
           keywordField("type"),
           keywordField("format.id"),
           keywordField("workType"),
-          multilingualFieldWithKeyword("title").copy(copyTo = newTitlesAndContributorsPath),
-          multilingualFieldWithKeyword("alternativeTitles").copy(copyTo = newTitlesAndContributorsPath),
+          multilingualFieldWithKeyword("title").copy(
+            copyTo = newTitlesAndContributorsPath),
+          multilingualFieldWithKeyword("alternativeTitles").copy(
+            copyTo = newTitlesAndContributorsPath),
           englishTextField("description"),
           englishTextKeywordField("physicalDescription"),
           textField("edition"),
@@ -241,10 +243,12 @@ object WorksIndexConfig extends IndexConfigFields {
             .copy(copyTo = newIdentifiersPath),
           // images
           canonicalIdField("images.id").copy(copyTo = newIdentifiersPath),
-          sourceIdentifierField("images.identifiers.value").copy(copyTo = newIdentifiersPath),
+          sourceIdentifierField("images.identifiers.value").copy(
+            copyTo = newIdentifiersPath),
           // items
           canonicalIdField("items.id").copy(copyTo = newIdentifiersPath),
-          sourceIdentifierField("items.identifiers.value").copy(copyTo = newIdentifiersPath),
+          sourceIdentifierField("items.identifiers.value").copy(
+            copyTo = newIdentifiersPath),
           keywordField("items.locations.accessConditions.status.id"),
           keywordField("items.locations.license.id"),
           keywordField("items.locations.locationType.id"),
@@ -260,7 +264,8 @@ object WorksIndexConfig extends IndexConfigFields {
           labelField("languages.label"),
           // contributors
           canonicalIdField("contributors.agent.id"),
-          labelField("contributors.agent.label").copy(copyTo = newTitlesAndContributorsPath),
+          labelField("contributors.agent.label").copy(
+            copyTo = newTitlesAndContributorsPath),
           // production events
           labelField("production.label"),
           // relations
