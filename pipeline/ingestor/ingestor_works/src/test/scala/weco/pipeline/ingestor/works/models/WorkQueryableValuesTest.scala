@@ -397,6 +397,59 @@ class WorkQueryableValuesTest
     q.availabilityIds shouldBe List("online", "open-shelves")
   }
 
+  it("adds production labels") {
+    val workData = WorkData[DataState.Identified](
+      title = Some(s"title-${randomAlphanumeric(length = 10)}"),
+      production = List(
+        ProductionEvent(
+          label = "Percy publisher (top-level label => not included)",
+          places = List(
+            Place("Paris the place"),
+            Place("Perth the port")
+          ),
+          agents = List(
+            Person("Penny the press officer"),
+          ),
+          dates = List(
+            Period(id = IdState.Unidentifiable, label = "The past")
+          )
+        ),
+        ProductionEvent(
+          label = "Patrick the pharmacist (top-level label => not included)",
+          places = List(
+            Place("Porto the Portuguese"),
+          ),
+          agents = List(
+            Organisation("Purple People"),
+            Meeting("Proactive Publicists"),
+          ),
+          dates = List(
+            Period(id = IdState.Unidentifiable, label = "The rose-tinted past")
+          )
+        )
+      )
+    )
+
+    val q = WorkQueryableValues(
+      id = createCanonicalId,
+      sourceIdentifier = createSourceIdentifier,
+      workData = workData,
+      relations = Relations(),
+      availabilities = Set()
+    )
+
+    q.productionLabels shouldBe List(
+      "Paris the place",
+      "Perth the port",
+      "Penny the press officer",
+      "The past",
+      "Porto the Portuguese",
+      "Purple People",
+      "Proactive Publicists",
+      "The rose-tinted past"
+    )
+  }
+
   private def relation(id: Option[String], title: Option[String]): Relation =
     Relation(
       id = id.map(CanonicalId(_)),
