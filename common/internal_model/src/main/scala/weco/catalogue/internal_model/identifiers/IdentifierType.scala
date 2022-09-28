@@ -68,7 +68,7 @@ object IdentifierType extends Enum[IdentifierType] {
 
   case object MESH extends IdentifierType {
     val id = "nlm-mesh"
-    val label = "Medical Subject Headings (MESH) identifier"
+    val label = "Medical Subject Headings (MeSH) identifier"
   }
 
   case object CalmRefNo extends IdentifierType {
