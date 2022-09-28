@@ -1,6 +1,6 @@
 {
   "description" : "images with similar features",
-  "createdAt" : "2022-09-13T17:09:39.795998Z",
+  "createdAt" : "2022-09-28T12:18:41.224495Z",
   "id" : "k6oa7tyq",
   "document" : {
     "version" : 1,
@@ -4398,6 +4398,7 @@
         }
       ],
       "aspectRatio" : 0.022521317,
+      "averageColor" : "#F11267",
       "source" : {
         "id" : "b32rvpj3",
         "title" : "title-kIVOsu3kyj",

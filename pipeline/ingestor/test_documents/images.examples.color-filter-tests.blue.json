@@ -1,6 +1,6 @@
 {
   "description" : "example for the color filter tests",
-  "createdAt" : "2022-09-13T17:09:40.039480Z",
+  "createdAt" : "2022-09-28T12:18:41.533413Z",
   "id" : "c6elvmdf",
   "document" : {
     "version" : 1,
@@ -4317,6 +4317,7 @@
         }
       ],
       "aspectRatio" : 0.022521317,
+      "averageColor" : "#A0CA96",
       "source" : {
         "id" : "oefvh9tp",
         "title" : "title-iaLchMu2dl",

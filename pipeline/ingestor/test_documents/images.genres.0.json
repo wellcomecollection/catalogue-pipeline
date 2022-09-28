@@ -1,6 +1,6 @@
 {
   "description" : "images with different genres",
-  "createdAt" : "2022-09-13T17:09:39.668403Z",
+  "createdAt" : "2022-09-28T12:18:41.034308Z",
   "id" : "h7v2aaet",
   "document" : {
     "version" : 1,
@@ -4391,6 +4391,7 @@
         }
       ],
       "aspectRatio" : 0.022521317,
+      "averageColor" : "#733A7D",
       "source" : {
         "id" : "tosf3v85",
         "title" : "title-cODPVEG5v4",

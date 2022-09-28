@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2022-09-13T17:09:39.942053Z",
+  "createdAt" : "2022-09-28T12:18:41.410252Z",
   "id" : "guv3wimu",
   "document" : {
     "version" : 1,
@@ -4399,6 +4399,7 @@
         }
       ],
       "aspectRatio" : 0.022521317,
+      "averageColor" : "#979643",
       "source" : {
         "id" : "y2dcec1e",
         "title" : "title-PWicCq4pdZ",

@@ -1,6 +1,6 @@
 {
   "description" : "images with different genres",
-  "createdAt" : "2022-09-13T17:09:39.670009Z",
+  "createdAt" : "2022-09-28T12:18:41.035777Z",
   "id" : "2i4w2t7k",
   "document" : {
     "version" : 1,
@@ -4398,6 +4398,7 @@
         }
       ],
       "aspectRatio" : 0.022521317,
+      "averageColor" : "#A290A2",
       "source" : {
         "id" : "hwdyhya1",
         "title" : "title-MCNPZ7IYeI",

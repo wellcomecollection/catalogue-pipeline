@@ -1,6 +1,6 @@
 {
   "description" : "an image with every include",
-  "createdAt" : "2022-09-13T17:09:40.055795Z",
+  "createdAt" : "2022-09-28T12:18:41.551957Z",
   "id" : "vihqhhlw",
   "document" : {
     "version" : 1,
@@ -4476,6 +4476,7 @@
         }
       ],
       "aspectRatio" : 0.022521317,
+      "averageColor" : "#62C3E1",
       "source" : {
         "id" : "64m9ngi3",
         "title" : "Apple agitator",
