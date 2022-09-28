@@ -10,6 +10,7 @@ case class DisplayImage(
   thumbnail: DisplayDigitalLocation,
   locations: Seq[DisplayDigitalLocation],
   aspectRatio: Float,
+  averageColor: String,
   source: DisplayImageSource,
   @JsonKey("type") ontologyType: String = "Image"
 )
@@ -21,7 +22,8 @@ object DisplayImage {
       .getOrElse(
         // This should never happen
         throw new RuntimeException(
-          s"No iiif-image (thumbnail) location found on image ${image.sourceIdentifier}")
+          s"No iiif-image (thumbnail) location found on image ${image.sourceIdentifier}"
+        )
       )
 
   def apply(image: Image[ImageState.Indexed]): DisplayImage =
@@ -31,6 +33,9 @@ object DisplayImage {
       locations = image.locations.map(DisplayDigitalLocation(_)),
       aspectRatio =
         image.state.inferredData.flatMap(_.aspectRatio).getOrElse(1.0f),
+      averageColor = image.state.inferredData
+        .flatMap(_.averageColorHex)
+        .getOrElse("#ffffff"),
       source = DisplayImageSource(image.source)
     )
 }
