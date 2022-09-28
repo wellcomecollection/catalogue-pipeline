@@ -1,6 +1,6 @@
 {
   "description" : "images with different subjects",
-  "createdAt" : "2022-09-13T17:09:40.171752Z",
+  "createdAt" : "2022-09-28T12:18:41.715992Z",
   "id" : "vy5cbwmu",
   "document" : {
     "version" : 1,
@@ -4408,6 +4408,7 @@
         }
       ],
       "aspectRatio" : 0.022521317,
+      "averageColor" : "#315940",
       "source" : {
         "id" : "rzdy7j30",
         "title" : "title-TtTPX0c4SG",

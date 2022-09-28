@@ -1,6 +1,6 @@
 {
   "description" : "example for the color filter tests",
-  "createdAt" : "2022-09-13T17:09:40.033031Z",
+  "createdAt" : "2022-09-28T12:18:41.525671Z",
   "id" : "xqjiditc",
   "document" : {
     "version" : 1,
@@ -4302,6 +4302,7 @@
         }
       ],
       "aspectRatio" : 0.022521317,
+      "averageColor" : "#08D449",
       "source" : {
         "id" : "oieolfdo",
         "title" : "title-EcoKBCN1m2",

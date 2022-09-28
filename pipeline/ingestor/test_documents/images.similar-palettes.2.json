@@ -1,6 +1,6 @@
 {
   "description" : "images with similar palettes",
-  "createdAt" : "2022-09-13T17:09:39.860300Z",
+  "createdAt" : "2022-09-28T12:18:41.309844Z",
   "id" : "tivxhktz",
   "document" : {
     "version" : 1,
@@ -4398,6 +4398,7 @@
         }
       ],
       "aspectRatio" : 0.022521317,
+      "averageColor" : "#3AE9B2",
       "source" : {
         "id" : "vodsy58x",
         "title" : "title-NpAwCCxcnw",

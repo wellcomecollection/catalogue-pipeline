@@ -1,6 +1,6 @@
 {
   "description" : "images with different genres",
-  "createdAt" : "2022-09-13T17:09:39.671792Z",
+  "createdAt" : "2022-09-28T12:18:41.037489Z",
   "id" : "vfagreai",
   "document" : {
     "version" : 1,
@@ -4397,6 +4397,7 @@
         }
       ],
       "aspectRatio" : 0.022521317,
+      "averageColor" : "#F559FD",
       "source" : {
         "id" : "uhiqt84a",
         "title" : "title-O3h9IBe9DR",

@@ -1,6 +1,6 @@
 {
   "description" : "images with different licenses",
-  "createdAt" : "2022-09-13T17:09:39.411656Z",
+  "createdAt" : "2022-09-28T12:18:40.673858Z",
   "id" : "z9e1lnnv",
   "document" : {
     "version" : 1,
@@ -4423,6 +4423,7 @@
         }
       ],
       "aspectRatio" : 0.022521317,
+      "averageColor" : "#979329",
       "source" : {
         "id" : "cbm3ev9e",
         "title" : "title-PbbJQdXrdJ",

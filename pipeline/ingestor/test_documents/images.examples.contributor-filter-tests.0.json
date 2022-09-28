@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2022-09-13T17:09:39.940115Z",
+  "createdAt" : "2022-09-28T12:18:41.408927Z",
   "id" : "6lticgpc",
   "document" : {
     "version" : 1,
@@ -4401,6 +4401,7 @@
         }
       ],
       "aspectRatio" : 0.022521317,
+      "averageColor" : "#BD563A",
       "source" : {
         "id" : "sjsjtui2",
         "title" : "title-NpCNtq3nmM",

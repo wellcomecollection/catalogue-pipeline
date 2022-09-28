@@ -1,6 +1,6 @@
 {
   "description" : "an example of images with work metadata for the API tests",
-  "createdAt" : "2022-09-13T17:09:40.124419Z",
+  "createdAt" : "2022-09-28T12:18:41.654607Z",
   "id" : "ojy5ccix",
   "document" : {
     "version" : 1,
@@ -4384,6 +4384,7 @@
         }
       ],
       "aspectRatio" : 0.022521317,
+      "averageColor" : "#F3329F",
       "source" : {
         "id" : "heqzy5i2",
         "title" : "A Ligurian style of bread, Focaccia is a flat Italian bread",

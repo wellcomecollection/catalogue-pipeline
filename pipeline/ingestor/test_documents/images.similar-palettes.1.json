@@ -1,6 +1,6 @@
 {
   "description" : "images with similar palettes",
-  "createdAt" : "2022-09-13T17:09:39.859328Z",
+  "createdAt" : "2022-09-28T12:18:41.308706Z",
   "id" : "sqjpw8mc",
   "document" : {
     "version" : 1,
@@ -4400,6 +4400,7 @@
         }
       ],
       "aspectRatio" : 0.022521317,
+      "averageColor" : "#6CCEC4",
       "source" : {
         "id" : "chaen4ll",
         "title" : "title-coU2LNDRdV",

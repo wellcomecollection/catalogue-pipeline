@@ -1,6 +1,6 @@
 {
   "description" : "an example of images with work metadata for the API tests",
-  "createdAt" : "2022-09-13T17:09:40.118504Z",
+  "createdAt" : "2022-09-28T12:18:41.645652Z",
   "id" : "ojdlglxy",
   "document" : {
     "version" : 1,
@@ -4382,6 +4382,7 @@
         }
       ],
       "aspectRatio" : 0.022521317,
+      "averageColor" : "#718CFE",
       "source" : {
         "id" : "ozzeza6t",
         "title" : "Baguette is a French style of bread; it's a long, thin bread; other countries also make this bread",

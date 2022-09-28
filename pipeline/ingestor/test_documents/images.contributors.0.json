@@ -1,6 +1,6 @@
 {
   "description" : "images with different contributors",
-  "createdAt" : "2022-09-13T17:09:39.604641Z",
+  "createdAt" : "2022-09-28T12:18:40.953109Z",
   "id" : "juvasind",
   "document" : {
     "version" : 1,
@@ -4399,6 +4399,7 @@
         }
       ],
       "aspectRatio" : 0.022521317,
+      "averageColor" : "#395B28",
       "source" : {
         "id" : "3sveb2mo",
         "title" : "title-Mpr8zU4ceU",

@@ -1,6 +1,6 @@
 {
   "description" : "examples for the genre filter tests",
-  "createdAt" : "2022-09-13T17:09:39.990435Z",
+  "createdAt" : "2022-09-28T12:18:41.470636Z",
   "id" : "pdjafbnc",
   "document" : {
     "version" : 1,
@@ -4396,6 +4396,7 @@
         }
       ],
       "aspectRatio" : 0.022521317,
+      "averageColor" : "#944720",
       "source" : {
         "id" : "4ws2ekt5",
         "title" : "title-FgVnMxxUvQ",

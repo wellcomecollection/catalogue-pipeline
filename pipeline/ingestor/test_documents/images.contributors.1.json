@@ -1,6 +1,6 @@
 {
   "description" : "images with different contributors",
-  "createdAt" : "2022-09-13T17:09:39.614879Z",
+  "createdAt" : "2022-09-28T12:18:40.963750Z",
   "id" : "qkusykqo",
   "document" : {
     "version" : 1,
@@ -4412,6 +4412,7 @@
         }
       ],
       "aspectRatio" : 0.022521317,
+      "averageColor" : "#CD9411",
       "source" : {
         "id" : "tplolgti",
         "title" : "title-i8p3faeYPB",

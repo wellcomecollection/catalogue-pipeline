@@ -1,6 +1,6 @@
 {
   "description" : "an image with inferred data in the wrong format",
-  "createdAt" : "2022-09-13T17:09:39.903486Z",
+  "createdAt" : "2022-09-28T12:18:41.369851Z",
   "id" : "j2sapi9z",
   "document" : {
     "version" : 1,
@@ -4384,6 +4384,7 @@
         }
       ],
       "aspectRatio" : 0.022521317,
+      "averageColor" : "#20757D",
       "source" : {
         "id" : "n2pfpikw",
         "title" : "title-ZzFBkq2piz",

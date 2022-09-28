@@ -1,6 +1,6 @@
 {
   "description" : "an image without any inferred data",
-  "createdAt" : "2022-09-13T17:09:39.893907Z",
+  "createdAt" : "2022-09-28T12:18:41.361683Z",
   "id" : "l5gjhkar",
   "document" : {
     "version" : 1,
@@ -140,6 +140,7 @@
         }
       ],
       "aspectRatio" : 1.0,
+      "averageColor" : "#ffffff",
       "source" : {
         "id" : "dh33dnst",
         "title" : "title-xv9hSPqrWp",

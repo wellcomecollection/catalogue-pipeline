@@ -1,6 +1,6 @@
 {
   "description" : "images linked with the same work",
-  "createdAt" : "2022-09-13T17:09:40.077796Z",
+  "createdAt" : "2022-09-28T12:18:41.572095Z",
   "id" : "owdqv6d1",
   "document" : {
     "version" : 1,
@@ -4398,6 +4398,7 @@
         }
       ],
       "aspectRatio" : 0.022521317,
+      "averageColor" : "#DFC065",
       "source" : {
         "id" : "osxxkxkl",
         "title" : "title-ZQqHwUEtrG",
