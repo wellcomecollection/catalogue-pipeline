@@ -15,6 +15,7 @@ case class WorkQueryableValues(
   @JsonKey("workType") workType: String,
   @JsonKey("identifiers.value") workIdentifiers: List[String],
   @JsonKey("title") title: Option[String],
+  @JsonKey("alternativeTitles") alternativeTitles: List[String],
   @JsonKey("description") description: Option[String],
   @JsonKey("physicalDescription") physicalDescription: Option[String],
   @JsonKey("edition") edition: Option[String],
@@ -61,6 +62,7 @@ case object WorkQueryableValues {
       workIdentifiers =
         (sourceIdentifier +: workData.otherIdentifiers).map(_.value),
       title = workData.title,
+      alternativeTitles = workData.alternativeTitles,
       description = workData.description,
       physicalDescription = workData.physicalDescription,
       edition = workData.edition,
