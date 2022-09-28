@@ -76,7 +76,7 @@ object WorksIndexConfig extends IndexConfigFields {
       val identifiersPath = List("search.identifiers")
       val titlesAndContributorsPath = List("search.titlesAndContributors")
 
-      val newIdentifiersPath = List("query.allIentifiers")
+      val newIdentifiersPath = List("query.allIdentifiers")
       val newTitlesAndContributorsPath = List("query.titlesAndContributors")
 
       // Indexing lots of individual fields on Elasticsearch can be very CPU
