@@ -621,6 +621,44 @@
               }
             }
           },
+          "collectionPath": {
+            "properties": {
+              "label": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword"
+                  },
+                  "lowercaseKeyword": {
+                    "type": "keyword",
+                    "normalizer": "lowercase_normalizer"
+                  },
+                  "cleanPath": {
+                    "type": "text",
+                    "analyzer": "clean_path_analyzer"
+                  },
+                  "path": {
+                    "type": "text",
+                    "analyzer": "exact_path_analyzer"
+                  }
+                },
+                "analyzer": "asciifolding_analyzer"
+              },
+              "path": {
+                "type": "text",
+                "fields": {
+                  "clean": {
+                    "type": "text",
+                    "analyzer": "clean_path_analyzer"
+                  },
+                  "keyword": {
+                    "type": "keyword"
+                  }
+                },
+                "analyzer": "exact_path_analyzer"
+              }
+            }
+          },
           "contributors": {
             "properties": {
               "agent": {
@@ -908,6 +946,26 @@
                 "type": "keyword"
               }
             }
+          },
+          "production": {
+            "properties": {
+              "label": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword"
+                  },
+                  "lowercaseKeyword": {
+                    "type": "keyword",
+                    "normalizer": "lowercase_normalizer"
+                  }
+                },
+                "analyzer": "asciifolding_analyzer"
+              }
+            }
+          },
+          "referenceNumber": {
+            "type": "keyword"
           },
           "subjects": {
             "properties": {

@@ -256,11 +256,30 @@ object WorksIndexConfig extends IndexConfigFields {
           // contributors
           canonicalIdField("contributors.agent.id"),
           labelField("contributors.agent.label"),
+          // production events
+          labelField("production.label"),
           // relations
           canonicalIdField("partOf.id"),
           multilingualFieldWithKeyword("partOf.title"),
           // availabilities
-          keywordField("availabilities.id")
+          keywordField("availabilities.id"),
+          // collection path
+          textField("collectionPath.path")
+            .analyzer(exactPathAnalyzer.name)
+            .fields(
+              keywordField("keyword"),
+              textField("clean").analyzer(cleanPathAnalyzer.name)
+            ),
+          textField("collectionPath.label")
+            .analyzer(asciifoldingAnalyzer.name)
+            .fields(
+              keywordField("keyword"),
+              lowercaseKeyword("lowercaseKeyword"),
+              textField("cleanPath").analyzer(cleanPathAnalyzer.name),
+              textField("path").analyzer(exactPathAnalyzer.name)
+            ),
+          // reference number
+          keywordField("referenceNumber")
         )
 
       // This field contains the display documents used by aggregations.
