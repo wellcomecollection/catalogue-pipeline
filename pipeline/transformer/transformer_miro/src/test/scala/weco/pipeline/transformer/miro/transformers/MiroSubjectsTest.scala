@@ -3,6 +3,7 @@ package weco.pipeline.transformer.miro.transformers
 import org.scalatest.Assertion
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, SourceIdentifier}
 import weco.catalogue.internal_model.work.{Concept, Subject}
 import weco.pipeline.transformer.miro.generators.MiroRecordGenerators
 import weco.pipeline.transformer.miro.source.MiroRecord
@@ -31,7 +32,7 @@ class MiroSubjectsTest
       miroRecord = createMiroRecordWith(
         keywords = Some(List("Animals", "Arachnids", "Fruit"))
       ),
-      expectedSubjectLabels = List("Animals", "Arachnids", "Fruit")
+      expectedSubjectLabels = List(("animals", "Animals"), ("arachnids", "Arachnids"), ("fruit", "Fruit"))
     )
   }
 
@@ -40,7 +41,7 @@ class MiroSubjectsTest
       miroRecord = createMiroRecordWith(
         keywordsUnauth = Some(List(Some("Altruism"), Some("Mammals")))
       ),
-      expectedSubjectLabels = List("Altruism", "Mammals")
+      expectedSubjectLabels = List(("altruism", "Altruism"), ("mammals", "Mammals"))
     )
   }
 
@@ -50,7 +51,7 @@ class MiroSubjectsTest
         keywords = Some(List("Humour")),
         keywordsUnauth = Some(List(Some("Marine creatures")))
       ),
-      expectedSubjectLabels = List("Humour", "Marine creatures")
+      expectedSubjectLabels = List(("humour", "Humour"), ("marine creatures", "Marine creatures"))
     )
   }
 
@@ -61,17 +62,24 @@ class MiroSubjectsTest
         keywordsUnauth = Some(List(Some("marine creatures")))
       ),
       expectedSubjectLabels =
-        List("Humour", "Comedic aspect", "Marine creatures")
+        List(("humour", "Humour"), ("comedic aspect", "Comedic aspect"), ("marine creatures", "Marine creatures"))
     )
   }
 
   private def transformRecordAndCheckSubjects(
     miroRecord: MiroRecord,
-    expectedSubjectLabels: List[String]
+    expectedSubjectLabels: List[(String, String)]
   ): Assertion = {
     val transformedWork = transformWork(miroRecord)
-    val expectedSubjects = expectedSubjectLabels.map { label =>
+    val expectedSubjects = expectedSubjectLabels.map { case (idLabel, label) =>
       Subject(
+        id = IdState.Identifiable(
+          sourceIdentifier = SourceIdentifier(
+            identifierType = IdentifierType.LabelDerived,
+            ontologyType = "Subject",
+            value = idLabel
+          )
+        ),
         label = label,
         concepts = List(Concept(label))
       )
