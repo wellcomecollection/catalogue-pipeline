@@ -1,16 +1,13 @@
 package weco.pipeline.transformer.tei.transformers
 
-import weco.catalogue.internal_model.identifiers.{
-  IdState,
-  IdentifierType,
-  SourceIdentifier
-}
+import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, SourceIdentifier}
 import weco.catalogue.internal_model.work.{Concept, Subject}
+import weco.pipeline.transformer.identifiers.LabelDerivedIdentifiers
 import weco.pipeline.transformer.tei.NormaliseText
 
 import scala.xml.{Elem, Node}
 
-object TeiSubjects {
+object TeiSubjects extends LabelDerivedIdentifiers {
 
   /**
     * Subjects live in the profileDesc block of the tei which looks like this:
@@ -61,7 +58,8 @@ object TeiSubjects {
             value = value
           )
         )
-      case _ => IdState.Unidentifiable
+      case _ =>
+        identifierFromText(label, ontologyType = "Subject")
     }
   }
 

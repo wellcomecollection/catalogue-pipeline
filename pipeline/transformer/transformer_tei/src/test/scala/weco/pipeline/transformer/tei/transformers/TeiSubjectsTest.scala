@@ -5,9 +5,10 @@ import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.IdState.Identifiable
 import weco.catalogue.internal_model.identifiers.{IdentifierType, SourceIdentifier}
 import weco.catalogue.internal_model.work.{Concept, Subject}
+import weco.pipeline.transformer.generators.LabelDerivedIdentifiersGenerators
 import weco.pipeline.transformer.tei.generators.TeiGenerators
 
-class TeiSubjectsTest extends AnyFunSpec with TeiGenerators with Matchers{
+class TeiSubjectsTest extends AnyFunSpec with TeiGenerators with Matchers with LabelDerivedIdentifiersGenerators {
   val id = "MS123"
   it("extracts a subject"){
     val result = TeiSubjects(teiXml(
@@ -15,17 +16,25 @@ class TeiSubjectsTest extends AnyFunSpec with TeiGenerators with Matchers{
       profileDesc = Some(profileDesc(keywords = List(keywords(subjects = List(subject("Botany"))))))
     ))
 
-    result shouldBe List(Subject(label = "Botany", concepts = List(Concept("Botany"))))
+    result shouldBe List(
+      Subject(
+        id = labelDerivedSubjectIdentifier("botany"),
+        label = "Botany",
+        concepts = List(Concept("Botany"))
+      )
+    )
   }
+
   it("extracts a list of subjects"){
     val result = TeiSubjects(teiXml(
       id = id,
       profileDesc = Some(profileDesc(keywords = List(keywords(subjects = List(subject("Botany"),subject("Computers"),subject("Aliens"))))))
     ))
 
-    result shouldBe List(Subject(label = "Botany", concepts = List(Concept("Botany"))),
-      Subject(label = "Computers", concepts = List(Concept("Computers"))),
-      Subject(label = "Aliens", concepts = List(Concept("Aliens"))))
+    result shouldBe List(
+      Subject(id = labelDerivedSubjectIdentifier("botany"),label = "Botany", concepts = List(Concept("Botany"))),
+      Subject(id = labelDerivedSubjectIdentifier("computers"),label = "Computers", concepts = List(Concept("Computers"))),
+      Subject(id = labelDerivedSubjectIdentifier("aliens"),label = "Aliens", concepts = List(Concept("Aliens"))))
   }
   it("doesn't extract subjects with an empty label"){
     val result = TeiSubjects(teiXml(
@@ -45,7 +54,9 @@ class TeiSubjectsTest extends AnyFunSpec with TeiGenerators with Matchers{
           |   cars  """.stripMargin))))))
     ))
 
-    result shouldBe List(Subject(label = "Very fast cars", concepts = List(Concept("Very fast cars"))))
+    result shouldBe List(Subject(
+      id = labelDerivedSubjectIdentifier("very fast cars"),
+      label = "Very fast cars", concepts = List(Concept("Very fast cars"))))
   }
 
   it("extracts a subject with an lcsh id"){
@@ -100,7 +111,7 @@ class TeiSubjectsTest extends AnyFunSpec with TeiGenerators with Matchers{
       profileDesc = Some(profileDesc(keywords = List(keywords(keywordsScheme = Some("#somethingsomething"), subjects = List(subject("Botany", reference = Some("subject_D001901")))))))
     ))
 
-    result shouldBe List(Subject(label = "Botany", concepts = List(Concept(label ="Botany"))))
+    result shouldBe List(Subject(id = labelDerivedSubjectIdentifier("botany"),label = "Botany", concepts = List(Concept(label ="Botany"))))
   }
 
   it("extracts a subject with authority no reference"){
@@ -109,7 +120,7 @@ class TeiSubjectsTest extends AnyFunSpec with TeiGenerators with Matchers{
       profileDesc = Some(profileDesc(keywords = List(keywords(keywordsScheme = Some("#MeSH"), subjects = List(subject("Botany"))))))
     ))
 
-    result shouldBe List(Subject(label = "Botany", concepts = List(Concept(label ="Botany"))))
+    result shouldBe List(Subject(id = labelDerivedSubjectIdentifier("botany"),label = "Botany", concepts = List(Concept(label ="Botany"))))
   }
   it("extracts subjects from 2 lists with different authorities"){
     val result = TeiSubjects(teiXml(
@@ -117,8 +128,8 @@ class TeiSubjectsTest extends AnyFunSpec with TeiGenerators with Matchers{
       profileDesc = Some(profileDesc(keywords = List(keywords(subjects = List(subject("Botany"),subject("Computers"),subject("Aliens"))))))
     ))
 
-    result shouldBe List(Subject(label = "Botany", concepts = List(Concept("Botany"))),
-      Subject(label = "Computers", concepts = List(Concept("Computers"))),
-      Subject(label = "Aliens", concepts = List(Concept("Aliens"))))
+    result shouldBe List(Subject(id = labelDerivedSubjectIdentifier("botany"),label = "Botany", concepts = List(Concept("Botany"))),
+      Subject(id = labelDerivedSubjectIdentifier("computers"),label = "Computers", concepts = List(Concept("Computers"))),
+      Subject(id = labelDerivedSubjectIdentifier("aliens"),label = "Aliens", concepts = List(Concept("Aliens"))))
   }
 }
