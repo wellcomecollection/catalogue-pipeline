@@ -1036,7 +1036,7 @@
           "referenceNumber": {
             "type": "keyword",
             "copy_to": [
-              "query.identifiers"
+              "query.allIdentifiers"
             ]
           },
           "subjects": {
