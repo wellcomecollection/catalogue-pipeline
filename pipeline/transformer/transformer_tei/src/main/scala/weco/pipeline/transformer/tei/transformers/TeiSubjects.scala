@@ -1,20 +1,17 @@
 package weco.pipeline.transformer.tei.transformers
 
-import weco.catalogue.internal_model.identifiers.IdState.{
-  Identifiable,
-  Unidentifiable
-}
 import weco.catalogue.internal_model.identifiers.{
   IdState,
   IdentifierType,
   SourceIdentifier
 }
 import weco.catalogue.internal_model.work.{Concept, Subject}
+import weco.pipeline.transformer.identifiers.LabelDerivedIdentifiers
 import weco.pipeline.transformer.tei.NormaliseText
 
 import scala.xml.{Elem, Node}
 
-object TeiSubjects {
+object TeiSubjects extends LabelDerivedIdentifiers {
 
   /**
     * Subjects live in the profileDesc block of the tei which looks like this:
@@ -33,23 +30,44 @@ object TeiSubjects {
     */
   def apply(xml: Elem): List[Subject[IdState.Unminted]] =
     (xml \\ "profileDesc" \\ "keywords").flatMap { keywords =>
-      val identifierType = (keywords \@ "scheme").toLowerCase.trim match {
-        case s if s == "#lcsh" => Some(IdentifierType.LCSubjects)
-        case s if s == "#mesh" => Some(IdentifierType.MESH)
-        case _                 => None
-      }
       (keywords \\ "term").flatMap { term =>
-        val label = NormaliseText(term.text)
-        val reference = parseReference(term)
-        val id = (reference, identifierType) match {
-          case (Some(r), Some(identifierType)) =>
-            Identifiable(SourceIdentifier(identifierType, "Subject", r))
-          case _ => Unidentifiable
-        }
-        label.map(l =>
-          Subject(id = id, label = l, concepts = List(Concept(label = l))))
+        val maybeLabel = NormaliseText(term.text)
+
+        maybeLabel.map(label => {
+          val reference = parseReference(term)
+          val id = createIdentifier(keywords, reference, label)
+
+          Subject(
+            id = id,
+            label = label,
+            concepts = List(Concept(label))
+          )
+        })
       }
     }.toList
+
+  private def createIdentifier(keywords: Node,
+                               reference: Option[String],
+                               label: String): IdState.Unminted = {
+    val identifierType = (keywords \@ "scheme").toLowerCase.trim match {
+      case s if s == "#lcsh" => Some(IdentifierType.LCSubjects)
+      case s if s == "#mesh" => Some(IdentifierType.MESH)
+      case _                 => None
+    }
+
+    (reference, identifierType) match {
+      case (Some(value), Some(identifierType)) =>
+        IdState.Identifiable(
+          sourceIdentifier = SourceIdentifier(
+            identifierType = identifierType,
+            ontologyType = "Subject",
+            value = value
+          )
+        )
+      case _ =>
+        identifierFromText(label, ontologyType = "Subject")
+    }
+  }
 
   private def parseReference(term: Node) = {
     val referenceString = term \@ "ref"

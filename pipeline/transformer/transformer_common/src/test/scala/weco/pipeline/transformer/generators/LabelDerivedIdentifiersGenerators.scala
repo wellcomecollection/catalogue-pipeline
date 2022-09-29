@@ -25,4 +25,13 @@ trait LabelDerivedIdentifiersGenerators {
         ontologyType = "Person"
       )
     )
+
+  def labelDerivedSubjectIdentifier(value: String): Identifiable =
+    IdState.Identifiable(
+      sourceIdentifier = SourceIdentifier(
+        identifierType = IdentifierType.LabelDerived,
+        value = value,
+        ontologyType = "Subject"
+      )
+    )
 }
