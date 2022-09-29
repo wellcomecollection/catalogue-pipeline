@@ -1152,10 +1152,6 @@
                 "type": "text",
                 "analyzer": "italian_analyzer"
               },
-              "keyword": {
-                "type": "keyword",
-                "normalizer": "lowercase_normalizer"
-              },
               "shingles": {
                 "type": "text",
                 "analyzer": "shingle_asciifolding_analyzer"
