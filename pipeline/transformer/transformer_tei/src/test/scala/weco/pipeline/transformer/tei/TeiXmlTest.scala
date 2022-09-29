@@ -198,7 +198,7 @@ class TeiXmlTest
         profileDesc = Some(profileDesc(keywords = List(keywords(subjects = List(subject("Botany"))))))      )).parse
 
     result.value.subjects shouldBe List(Subject(
-      id = labelDerivedSubjectIdentifier("Botany"),
+      id = labelDerivedSubjectIdentifier("botany"),
       label = "Botany", concepts = List(Concept(label ="Botany"))))
   }
 
