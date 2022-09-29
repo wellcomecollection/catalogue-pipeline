@@ -1,6 +1,6 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2022-09-26T11:29:28.432760Z",
+  "createdAt" : "2022-09-28T15:53:41.842446Z",
   "id" : "mazaizfa",
   "document" : {
     "debug" : {
@@ -182,6 +182,8 @@
         "QFJOR9VqAE"
       ],
       "title" : "title-vTVR490Vab",
+      "alternativeTitles" : [
+      ],
       "description" : null,
       "physicalDescription" : null,
       "edition" : null,
@@ -224,12 +226,17 @@
       ],
       "contributors.agent.label" : [
       ],
+      "production.label" : [
+      ],
       "partOf.id" : [
       ],
       "partOf.title" : [
       ],
       "availabilities.id" : [
-      ]
+      ],
+      "collectionPath.label" : null,
+      "collectionPath.path" : null,
+      "referenceNumber" : null
     },
     "aggregatableValues" : {
       "workType" : [

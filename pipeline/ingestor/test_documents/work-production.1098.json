@@ -1,6 +1,6 @@
 {
   "description" : "a work with a production event in 1098",
-  "createdAt" : "2022-09-26T11:29:27.282394Z",
+  "createdAt" : "2022-09-28T15:53:38.397736Z",
   "id" : "guav7chy",
   "document" : {
     "debug" : {
@@ -170,6 +170,8 @@
         "W9fptfa5Xn"
       ],
       "title" : "Production event in 1098",
+      "alternativeTitles" : [
+      ],
       "description" : null,
       "physicalDescription" : null,
       "edition" : null,
@@ -208,12 +210,18 @@
       ],
       "contributors.agent.label" : [
       ],
+      "production.label" : [
+        "1098"
+      ],
       "partOf.id" : [
       ],
       "partOf.title" : [
       ],
       "availabilities.id" : [
-      ]
+      ],
+      "collectionPath.label" : null,
+      "collectionPath.path" : null,
+      "referenceNumber" : null
     },
     "aggregatableValues" : {
       "workType" : [

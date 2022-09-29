@@ -1,6 +1,6 @@
 {
   "description" : "a work with a production event in 1904",
-  "createdAt" : "2022-09-26T11:29:27.266410Z",
+  "createdAt" : "2022-09-28T15:53:38.360189Z",
   "id" : "aiv95swj",
   "document" : {
     "debug" : {
@@ -170,6 +170,8 @@
         "h0QyLvGt20"
       ],
       "title" : "Production event in 1904",
+      "alternativeTitles" : [
+      ],
       "description" : null,
       "physicalDescription" : null,
       "edition" : null,
@@ -208,12 +210,18 @@
       ],
       "contributors.agent.label" : [
       ],
+      "production.label" : [
+        "1904"
+      ],
       "partOf.id" : [
       ],
       "partOf.title" : [
       ],
       "availabilities.id" : [
-      ]
+      ],
+      "collectionPath.label" : null,
+      "collectionPath.path" : null,
+      "referenceNumber" : null
     },
     "aggregatableValues" : {
       "workType" : [

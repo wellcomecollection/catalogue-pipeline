@@ -15,6 +15,7 @@ case class WorkQueryableValues(
   @JsonKey("workType") workType: String,
   @JsonKey("identifiers.value") workIdentifiers: List[String],
   @JsonKey("title") title: Option[String],
+  @JsonKey("alternativeTitles") alternativeTitles: List[String],
   @JsonKey("description") description: Option[String],
   @JsonKey("physicalDescription") physicalDescription: Option[String],
   @JsonKey("edition") edition: Option[String],
@@ -37,9 +38,13 @@ case class WorkQueryableValues(
   @JsonKey("languages.label") languageLabels: List[String],
   @JsonKey("contributors.agent.id") contributorAgentIds: List[String],
   @JsonKey("contributors.agent.label") contributorAgentLabels: List[String],
+  @JsonKey("production.label") productionLabels: List[String],
   @JsonKey("partOf.id") partOfIds: List[String],
   @JsonKey("partOf.title") partOfTitles: List[String],
   @JsonKey("availabilities.id") availabilityIds: List[String],
+  @JsonKey("collectionPath.label") collectionPathLabel: Option[String],
+  @JsonKey("collectionPath.path") collectionPathPath: Option[String],
+  @JsonKey("referenceNumber") referenceNumber: Option[String],
 )
 
 case object WorkQueryableValues {
@@ -57,6 +62,7 @@ case object WorkQueryableValues {
       workIdentifiers =
         (sourceIdentifier +: workData.otherIdentifiers).map(_.value),
       title = workData.title,
+      alternativeTitles = workData.alternativeTitles,
       description = workData.description,
       physicalDescription = workData.physicalDescription,
       edition = workData.edition,
@@ -80,9 +86,14 @@ case object WorkQueryableValues {
       languageLabels = workData.languages.map(_.label),
       contributorAgentIds = workData.contributors.map(_.agent.id).canonicalIds,
       contributorAgentLabels = workData.contributors.map(_.agent.label),
+      productionLabels = workData.production.flatMap(p =>
+        p.places.map(_.label) ++ p.agents.map(_.label) ++ p.dates.map(_.label)),
       partOfIds = relations.ancestors.flatMap(_.id).map(_.underlying),
       partOfTitles = relations.ancestors.flatMap(_.title),
-      availabilityIds = availabilities.map(_.id).toList
+      availabilityIds = availabilities.map(_.id).toList,
+      collectionPathLabel = workData.collectionPath.flatMap(_.label),
+      collectionPathPath = workData.collectionPath.map(_.path),
+      referenceNumber = workData.referenceNumber.map(_.underlying)
     )
   }
 

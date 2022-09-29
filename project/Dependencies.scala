@@ -95,6 +95,7 @@ object ExternalDependencies {
   lazy val versions = new {
     val apacheCommons = "1.9"
     val circe = "0.13.0"
+    val diffJson = "4.1.1"
     val fastparse = "2.3.0"
     val scalatest = "3.2.3"
     val scalatestplus = "3.1.2.0"
@@ -163,6 +164,10 @@ object ExternalDependencies {
     "ch.qos.logback" % "logback-core" % versions.logback,
     "ch.qos.logback" % "logback-access" % versions.logback
   )
+
+  val diffJsonDependencies = Seq(
+    "org.gnieh" %% f"diffson-circe" % versions.diffJson % "test"
+  )
 }
 
 object CatalogueDependencies {
@@ -174,7 +179,8 @@ object CatalogueDependencies {
       ExternalDependencies.scalacheckDependencies ++
       ExternalDependencies.enumeratumDependencies ++
       ExternalDependencies.scalaXmlDependencies ++
-      WellcomeDependencies.storageLibrary
+      WellcomeDependencies.storageLibrary ++
+      ExternalDependencies.diffJsonDependencies
 
   val displayModelDependencies: Seq[ModuleID] =
     WellcomeDependencies.httpLibrary

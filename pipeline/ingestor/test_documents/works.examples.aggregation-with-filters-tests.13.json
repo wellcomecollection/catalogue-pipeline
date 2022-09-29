@@ -1,6 +1,6 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2022-09-26T11:29:28.228924Z",
+  "createdAt" : "2022-09-28T15:53:41.086516Z",
   "id" : "66bwuadw",
   "document" : {
     "debug" : {
@@ -190,6 +190,8 @@
         "t9Z95L7cLo"
       ],
       "title" : "title-2M9CVkukQI",
+      "alternativeTitles" : [
+      ],
       "description" : null,
       "physicalDescription" : null,
       "edition" : null,
@@ -232,12 +234,17 @@
       ],
       "contributors.agent.label" : [
       ],
+      "production.label" : [
+      ],
       "partOf.id" : [
       ],
       "partOf.title" : [
       ],
       "availabilities.id" : [
-      ]
+      ],
+      "collectionPath.label" : null,
+      "collectionPath.path" : null,
+      "referenceNumber" : null
     },
     "aggregatableValues" : {
       "workType" : [

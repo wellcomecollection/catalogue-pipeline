@@ -1,6 +1,6 @@
 {
   "description" : "a work with a production event in 2020",
-  "createdAt" : "2022-09-26T11:29:27.274530Z",
+  "createdAt" : "2022-09-28T15:53:38.374898Z",
   "id" : "0fucriyr",
   "document" : {
     "debug" : {
@@ -170,6 +170,8 @@
         "KgSH5dUX0Z"
       ],
       "title" : "Production event in 2020",
+      "alternativeTitles" : [
+      ],
       "description" : null,
       "physicalDescription" : null,
       "edition" : null,
@@ -208,12 +210,18 @@
       ],
       "contributors.agent.label" : [
       ],
+      "production.label" : [
+        "2020"
+      ],
       "partOf.id" : [
       ],
       "partOf.title" : [
       ],
       "availabilities.id" : [
-      ]
+      ],
+      "collectionPath.label" : null,
+      "collectionPath.path" : null,
+      "referenceNumber" : null
     },
     "aggregatableValues" : {
       "workType" : [

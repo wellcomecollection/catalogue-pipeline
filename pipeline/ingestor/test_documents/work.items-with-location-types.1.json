@@ -1,6 +1,6 @@
 {
   "description" : "items with different location types",
-  "createdAt" : "2022-09-26T11:29:28.190576Z",
+  "createdAt" : "2022-09-28T15:53:40.907824Z",
   "id" : "sgatphra",
   "document" : {
     "debug" : {
@@ -234,6 +234,8 @@
         "GsIdzZyGYB"
       ],
       "title" : "title-GkJTZWwn4A",
+      "alternativeTitles" : [
+      ],
       "description" : null,
       "physicalDescription" : null,
       "edition" : null,
@@ -278,12 +280,17 @@
       ],
       "contributors.agent.label" : [
       ],
+      "production.label" : [
+      ],
       "partOf.id" : [
       ],
       "partOf.title" : [
       ],
       "availabilities.id" : [
-      ]
+      ],
+      "collectionPath.label" : null,
+      "collectionPath.path" : null,
+      "referenceNumber" : null
     },
     "aggregatableValues" : {
       "workType" : [

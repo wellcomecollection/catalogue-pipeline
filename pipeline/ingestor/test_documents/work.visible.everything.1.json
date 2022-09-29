@@ -1,6 +1,6 @@
 {
   "description" : "a list of work with all the include-able fields",
-  "createdAt" : "2022-09-26T11:29:27.571095Z",
+  "createdAt" : "2022-09-28T15:53:39.245671Z",
   "id" : "nlqnlwch",
   "document" : {
     "debug" : {
@@ -1071,6 +1071,8 @@
         "aGKxAEeG0H"
       ],
       "title" : "A work with all the include-able fields",
+      "alternativeTitles" : [
+      ],
       "description" : null,
       "physicalDescription" : null,
       "edition" : null,
@@ -1151,6 +1153,14 @@
         "person-kGPDWLL",
         "person-2Xsatm0"
       ],
+      "production.label" : [
+        "RL51HaiqMv",
+        "Pe7X4srn7y",
+        "dL6XA",
+        "iRibBOUDMp",
+        "ITHk4Fal6y",
+        "LEuJL"
+      ],
       "partOf.id" : [
         "jlsj0le6",
         "qfoju3if"
@@ -1161,7 +1171,10 @@
       ],
       "availabilities.id" : [
         "closed-stores"
-      ]
+      ],
+      "collectionPath.label" : null,
+      "collectionPath.path" : null,
+      "referenceNumber" : null
     },
     "aggregatableValues" : {
       "workType" : [

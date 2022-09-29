@@ -1,6 +1,6 @@
 {
   "description" : "a work with licensed digital items",
-  "createdAt" : "2022-09-26T11:29:27.785908Z",
+  "createdAt" : "2022-09-28T15:53:39.884477Z",
   "id" : "runiusy8",
   "document" : {
     "debug" : {
@@ -184,6 +184,8 @@
         "ZGWEGMyTaq"
       ],
       "title" : "title-wjvsf3c3yc",
+      "alternativeTitles" : [
+      ],
       "description" : null,
       "physicalDescription" : null,
       "edition" : null,
@@ -224,12 +226,17 @@
       ],
       "contributors.agent.label" : [
       ],
+      "production.label" : [
+      ],
       "partOf.id" : [
       ],
       "partOf.title" : [
       ],
       "availabilities.id" : [
-      ]
+      ],
+      "collectionPath.label" : null,
+      "collectionPath.path" : null,
+      "referenceNumber" : null
     },
     "aggregatableValues" : {
       "workType" : [

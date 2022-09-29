@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2022-09-26T11:29:28.474688Z",
+  "createdAt" : "2022-09-28T15:53:41.907335Z",
   "id" : "h5zn9bqm",
   "document" : {
     "debug" : {
@@ -162,6 +162,8 @@
         "OQ6G6Rkv6Q"
       ],
       "title" : "title-6Obq6lxZzG",
+      "alternativeTitles" : [
+      ],
       "description" : null,
       "physicalDescription" : null,
       "edition" : null,
@@ -201,12 +203,17 @@
       "contributors.agent.label" : [
         "Bath, Patricia"
       ],
+      "production.label" : [
+      ],
       "partOf.id" : [
       ],
       "partOf.title" : [
       ],
       "availabilities.id" : [
-      ]
+      ],
+      "collectionPath.label" : null,
+      "collectionPath.path" : null,
+      "referenceNumber" : null
     },
     "aggregatableValues" : {
       "workType" : [

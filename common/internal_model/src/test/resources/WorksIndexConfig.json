@@ -614,10 +614,96 @@
       },
       "query": {
         "properties": {
+          "allIdentifiers": {
+            "type": "keyword",
+            "normalizer": "lowercase_normalizer"
+          },
+          "alternativeTitles": {
+            "type": "text",
+            "fields": {
+              "arabic": {
+                "type": "text",
+                "analyzer": "arabic_analyzer"
+              },
+              "bengali": {
+                "type": "text",
+                "analyzer": "bengali_analyzer"
+              },
+              "english": {
+                "type": "text",
+                "analyzer": "english_analyzer"
+              },
+              "french": {
+                "type": "text",
+                "analyzer": "french_analyzer"
+              },
+              "german": {
+                "type": "text",
+                "analyzer": "german_analyzer"
+              },
+              "hindi": {
+                "type": "text",
+                "analyzer": "hindi_analyzer"
+              },
+              "italian": {
+                "type": "text",
+                "analyzer": "italian_analyzer"
+              },
+              "keyword": {
+                "type": "keyword",
+                "normalizer": "lowercase_normalizer"
+              },
+              "shingles": {
+                "type": "text",
+                "analyzer": "shingle_asciifolding_analyzer"
+              }
+            },
+            "copy_to": [
+              "query.titlesAndContributors"
+            ]
+          },
           "availabilities": {
             "properties": {
               "id": {
                 "type": "keyword"
+              }
+            }
+          },
+          "collectionPath": {
+            "properties": {
+              "label": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword"
+                  },
+                  "lowercaseKeyword": {
+                    "type": "keyword",
+                    "normalizer": "lowercase_normalizer"
+                  },
+                  "cleanPath": {
+                    "type": "text",
+                    "analyzer": "clean_path_analyzer"
+                  },
+                  "path": {
+                    "type": "text",
+                    "analyzer": "exact_path_analyzer"
+                  }
+                },
+                "analyzer": "asciifolding_analyzer"
+              },
+              "path": {
+                "type": "text",
+                "fields": {
+                  "clean": {
+                    "type": "text",
+                    "analyzer": "clean_path_analyzer"
+                  },
+                  "keyword": {
+                    "type": "keyword"
+                  }
+                },
+                "analyzer": "exact_path_analyzer"
               }
             }
           },
@@ -636,7 +722,10 @@
                         "normalizer": "lowercase_normalizer"
                       }
                     },
-                    "analyzer": "asciifolding_analyzer"
+                    "analyzer": "asciifolding_analyzer",
+                    "copy_to": [
+                      "query.titlesAndContributors"
+                    ]
                   },
                   "id": {
                     "type": "keyword",
@@ -694,7 +783,10 @@
           },
           "id": {
             "type": "keyword",
-            "normalizer": "lowercase_normalizer"
+            "normalizer": "lowercase_normalizer",
+            "copy_to": [
+              "query.allIdentifiers"
+            ]
           },
           "type": {
             "type": "keyword"
@@ -713,7 +805,10 @@
             "properties": {
               "value": {
                 "type": "keyword",
-                "normalizer": "lowercase_normalizer"
+                "normalizer": "lowercase_normalizer",
+                "copy_to": [
+                  "query.allIdentifiers"
+                ]
               }
             }
           },
@@ -721,13 +816,19 @@
             "properties": {
               "id": {
                 "type": "keyword",
-                "normalizer": "lowercase_normalizer"
+                "normalizer": "lowercase_normalizer",
+                "copy_to": [
+                  "query.allIdentifiers"
+                ]
               },
               "identifiers": {
                 "properties": {
                   "value": {
                     "type": "keyword",
-                    "normalizer": "lowercase_normalizer"
+                    "normalizer": "lowercase_normalizer",
+                    "copy_to": [
+                      "query.allIdentifiers"
+                    ]
                   }
                 }
               }
@@ -737,13 +838,19 @@
             "properties": {
               "id": {
                 "type": "keyword",
-                "normalizer": "lowercase_normalizer"
+                "normalizer": "lowercase_normalizer",
+                "copy_to": [
+                  "query.allIdentifiers"
+                ]
               },
               "identifiers": {
                 "properties": {
                   "value": {
                     "type": "keyword",
-                    "normalizer": "lowercase_normalizer"
+                    "normalizer": "lowercase_normalizer",
+                    "copy_to": [
+                      "query.allIdentifiers"
+                    ]
                   }
                 }
               },
@@ -909,6 +1016,29 @@
               }
             }
           },
+          "production": {
+            "properties": {
+              "label": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword"
+                  },
+                  "lowercaseKeyword": {
+                    "type": "keyword",
+                    "normalizer": "lowercase_normalizer"
+                  }
+                },
+                "analyzer": "asciifolding_analyzer"
+              }
+            }
+          },
+          "referenceNumber": {
+            "type": "keyword",
+            "copy_to": [
+              "query.allIdentifiers"
+            ]
+          },
           "subjects": {
             "properties": {
               "concepts": {
@@ -981,6 +1111,46 @@
               "keyword": {
                 "type": "keyword",
                 "normalizer": "lowercase_normalizer"
+              },
+              "shingles": {
+                "type": "text",
+                "analyzer": "shingle_asciifolding_analyzer"
+              }
+            },
+            "copy_to": [
+              "query.titlesAndContributors"
+            ]
+          },
+          "titlesAndContributors": {
+            "type": "text",
+            "fields": {
+              "arabic": {
+                "type": "text",
+                "analyzer": "arabic_analyzer"
+              },
+              "bengali": {
+                "type": "text",
+                "analyzer": "bengali_analyzer"
+              },
+              "english": {
+                "type": "text",
+                "analyzer": "english_analyzer"
+              },
+              "french": {
+                "type": "text",
+                "analyzer": "french_analyzer"
+              },
+              "german": {
+                "type": "text",
+                "analyzer": "german_analyzer"
+              },
+              "hindi": {
+                "type": "text",
+                "analyzer": "hindi_analyzer"
+              },
+              "italian": {
+                "type": "text",
+                "analyzer": "italian_analyzer"
               },
               "shingles": {
                 "type": "text",

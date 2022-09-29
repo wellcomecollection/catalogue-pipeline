@@ -76,6 +76,9 @@ object WorksIndexConfig extends IndexConfigFields {
       val identifiersPath = List("search.identifiers")
       val titlesAndContributorsPath = List("search.titlesAndContributors")
 
+      val newIdentifiersPath = List("query.allIdentifiers")
+      val newTitlesAndContributorsPath = List("query.titlesAndContributors")
+
       // Indexing lots of individual fields on Elasticsearch can be very CPU
       // intensive, so here only include fields that are needed for querying in the
       // API.
@@ -222,24 +225,30 @@ object WorksIndexConfig extends IndexConfigFields {
       val query = objectField("query")
         .fields(
           // top-level work
-          canonicalIdField("id"),
+          canonicalIdField("id").copy(copyTo = newIdentifiersPath),
           keywordField("type"),
           keywordField("format.id"),
           keywordField("workType"),
-          multilingualFieldWithKeyword("title"),
+          multilingualFieldWithKeyword("title").copy(
+            copyTo = newTitlesAndContributorsPath),
+          multilingualFieldWithKeyword("alternativeTitles").copy(
+            copyTo = newTitlesAndContributorsPath),
           englishTextField("description"),
           englishTextKeywordField("physicalDescription"),
           textField("edition"),
           englishTextField("notes.contents"),
           multilingualField("lettering"),
           // identifiers
-          sourceIdentifierField("identifiers.value"),
+          sourceIdentifierField("identifiers.value")
+            .copy(copyTo = newIdentifiersPath),
           // images
-          canonicalIdField("images.id"),
-          sourceIdentifierField("images.identifiers.value"),
+          canonicalIdField("images.id").copy(copyTo = newIdentifiersPath),
+          sourceIdentifierField("images.identifiers.value").copy(
+            copyTo = newIdentifiersPath),
           // items
-          canonicalIdField("items.id"),
-          sourceIdentifierField("items.identifiers.value"),
+          canonicalIdField("items.id").copy(copyTo = newIdentifiersPath),
+          sourceIdentifierField("items.identifiers.value").copy(
+            copyTo = newIdentifiersPath),
           keywordField("items.locations.accessConditions.status.id"),
           keywordField("items.locations.license.id"),
           keywordField("items.locations.locationType.id"),
@@ -255,12 +264,35 @@ object WorksIndexConfig extends IndexConfigFields {
           labelField("languages.label"),
           // contributors
           canonicalIdField("contributors.agent.id"),
-          labelField("contributors.agent.label"),
+          labelField("contributors.agent.label").copy(
+            copyTo = newTitlesAndContributorsPath),
+          // production events
+          labelField("production.label"),
           // relations
           canonicalIdField("partOf.id"),
           multilingualFieldWithKeyword("partOf.title"),
           // availabilities
-          keywordField("availabilities.id")
+          keywordField("availabilities.id"),
+          // collection path
+          textField("collectionPath.path")
+            .analyzer(exactPathAnalyzer.name)
+            .fields(
+              keywordField("keyword"),
+              textField("clean").analyzer(cleanPathAnalyzer.name)
+            ),
+          textField("collectionPath.label")
+            .analyzer(asciifoldingAnalyzer.name)
+            .fields(
+              keywordField("keyword"),
+              lowercaseKeyword("lowercaseKeyword"),
+              textField("cleanPath").analyzer(cleanPathAnalyzer.name),
+              textField("path").analyzer(exactPathAnalyzer.name)
+            ),
+          // reference number
+          keywordField("referenceNumber").copy(copyTo = newIdentifiersPath),
+          // fields populated by copyTo
+          lowercaseKeyword("allIdentifiers"),
+          multilingualField("titlesAndContributors")
         )
 
       // This field contains the display documents used by aggregations.

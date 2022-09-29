@@ -1,6 +1,10 @@
 package weco.catalogue.internal_model.index
 
 import com.sksamuel.elastic4s.ElasticDsl._
+import diffson._
+import diffson.lcs._
+import diffson.circe._
+import diffson.jsonpatch.lcsdiff._
 import io.circe.{ACursor, Json}
 import io.circe.parser._
 import org.scalatest.{Assertion, EitherValues, OptionValues}
@@ -67,6 +71,14 @@ class SearchIndexConfigJsonTest
           .value,
         indexName = index.name
       )
+
+      implicit val lcs: Patience[Json] = new Patience[Json]
+
+      println("Mapping diff:")
+      println(diff(fileMapping, indexMapping))
+
+      println("Settings diff:")
+      println(diff(fileMapping, indexMapping))
 
       fileMapping shouldBe indexMapping
       fileSettings shouldBe indexSettings

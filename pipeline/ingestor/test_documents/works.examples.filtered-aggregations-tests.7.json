@@ -1,6 +1,6 @@
 {
   "description" : "examples for the works filtered aggregations tests",
-  "createdAt" : "2022-09-26T11:29:28.701369Z",
+  "createdAt" : "2022-09-28T15:53:42.333284Z",
   "id" : "pskvh87t",
   "document" : {
     "debug" : {
@@ -152,6 +152,8 @@
         "lBGTOMLJUB"
       ],
       "title" : "capybara",
+      "alternativeTitles" : [
+      ],
       "description" : null,
       "physicalDescription" : null,
       "edition" : null,
@@ -192,12 +194,17 @@
       ],
       "contributors.agent.label" : [
       ],
+      "production.label" : [
+      ],
       "partOf.id" : [
       ],
       "partOf.title" : [
       ],
       "availabilities.id" : [
-      ]
+      ],
+      "collectionPath.label" : null,
+      "collectionPath.path" : null,
+      "referenceNumber" : null
     },
     "aggregatableValues" : {
       "workType" : [

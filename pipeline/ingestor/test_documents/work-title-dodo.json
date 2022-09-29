@@ -1,6 +1,6 @@
 {
   "description" : "a work with 'dodo' in the title",
-  "createdAt" : "2022-09-26T11:29:27.180235Z",
+  "createdAt" : "2022-09-28T15:53:38.167109Z",
   "id" : "ezagik4b",
   "document" : {
     "debug" : {
@@ -136,6 +136,8 @@
         "xg9OuzGali"
       ],
       "title" : "A drawing of a dodo",
+      "alternativeTitles" : [
+      ],
       "description" : null,
       "physicalDescription" : null,
       "edition" : null,
@@ -174,12 +176,17 @@
       ],
       "contributors.agent.label" : [
       ],
+      "production.label" : [
+      ],
       "partOf.id" : [
       ],
       "partOf.title" : [
       ],
       "availabilities.id" : [
-      ]
+      ],
+      "collectionPath.label" : null,
+      "collectionPath.path" : null,
+      "referenceNumber" : null
     },
     "aggregatableValues" : {
       "workType" : [

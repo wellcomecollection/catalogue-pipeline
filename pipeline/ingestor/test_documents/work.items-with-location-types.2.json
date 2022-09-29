@@ -1,6 +1,6 @@
 {
   "description" : "items with different location types",
-  "createdAt" : "2022-09-26T11:29:28.191463Z",
+  "createdAt" : "2022-09-28T15:53:40.909295Z",
   "id" : "wt6pclbs",
   "document" : {
     "debug" : {
@@ -210,6 +210,8 @@
         "D31AdK5EfQ"
       ],
       "title" : "title-e4jqB3DBkI",
+      "alternativeTitles" : [
+      ],
       "description" : null,
       "physicalDescription" : null,
       "edition" : null,
@@ -252,13 +254,18 @@
       ],
       "contributors.agent.label" : [
       ],
+      "production.label" : [
+      ],
       "partOf.id" : [
       ],
       "partOf.title" : [
       ],
       "availabilities.id" : [
         "closed-stores"
-      ]
+      ],
+      "collectionPath.label" : null,
+      "collectionPath.path" : null,
+      "referenceNumber" : null
     },
     "aggregatableValues" : {
       "workType" : [

@@ -1,6 +1,6 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2022-09-26T11:29:28.433704Z",
+  "createdAt" : "2022-09-28T15:53:41.845504Z",
   "id" : "b1r485o0",
   "document" : {
     "debug" : {
@@ -204,6 +204,8 @@
         "4zh18D0cbF"
       ],
       "title" : "title-DxPLXKke6N",
+      "alternativeTitles" : [
+      ],
       "description" : null,
       "physicalDescription" : null,
       "edition" : null,
@@ -247,12 +249,17 @@
       ],
       "contributors.agent.label" : [
       ],
+      "production.label" : [
+      ],
       "partOf.id" : [
       ],
       "partOf.title" : [
       ],
       "availabilities.id" : [
-      ]
+      ],
+      "collectionPath.label" : null,
+      "collectionPath.path" : null,
+      "referenceNumber" : null
     },
     "aggregatableValues" : {
       "workType" : [

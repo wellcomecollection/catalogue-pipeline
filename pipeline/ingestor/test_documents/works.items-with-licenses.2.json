@@ -1,6 +1,6 @@
 {
   "description" : "a work with licensed digital items",
-  "createdAt" : "2022-09-26T11:29:27.786906Z",
+  "createdAt" : "2022-09-28T15:53:39.888761Z",
   "id" : "ougtipki",
   "document" : {
     "debug" : {
@@ -182,6 +182,8 @@
         "fbITZO5oAg"
       ],
       "title" : "title-pEBp6sf3WU",
+      "alternativeTitles" : [
+      ],
       "description" : null,
       "physicalDescription" : null,
       "edition" : null,
@@ -222,12 +224,17 @@
       ],
       "contributors.agent.label" : [
       ],
+      "production.label" : [
+      ],
       "partOf.id" : [
       ],
       "partOf.title" : [
       ],
       "availabilities.id" : [
-      ]
+      ],
+      "collectionPath.label" : null,
+      "collectionPath.path" : null,
+      "referenceNumber" : null
     },
     "aggregatableValues" : {
       "workType" : [
