@@ -1,9 +1,5 @@
 package weco.pipeline.transformer.tei.transformers
 
-import weco.catalogue.internal_model.identifiers.IdState.{
-  Identifiable,
-  Unidentifiable
-}
 import weco.catalogue.internal_model.identifiers.{
   IdState,
   IdentifierType,
@@ -39,15 +35,28 @@ object TeiSubjects {
         case _                 => None
       }
       (keywords \\ "term").flatMap { term =>
-        val label = NormaliseText(term.text)
+        val maybeLabel = NormaliseText(term.text)
         val reference = parseReference(term)
+
         val id = (reference, identifierType) match {
-          case (Some(r), Some(identifierType)) =>
-            Identifiable(SourceIdentifier(identifierType, "Subject", r))
-          case _ => Unidentifiable
+          case (Some(value), Some(identifierType)) =>
+            IdState.Identifiable(
+              sourceIdentifier = SourceIdentifier(
+                identifierType = identifierType,
+                ontologyType = "Subject",
+                value = value
+              )
+            )
+          case _ => IdState.Unidentifiable
         }
-        label.map(l =>
-          Subject(id = id, label = l, concepts = List(Concept(label = l))))
+
+        maybeLabel.map(label =>
+          Subject(
+            id = id,
+            label = label,
+            concepts = List(Concept(label))
+          )
+        )
       }
     }.toList
 
