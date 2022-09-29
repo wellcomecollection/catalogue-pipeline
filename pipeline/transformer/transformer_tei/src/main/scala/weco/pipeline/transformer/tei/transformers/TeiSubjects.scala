@@ -1,6 +1,10 @@
 package weco.pipeline.transformer.tei.transformers
 
-import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, SourceIdentifier}
+import weco.catalogue.internal_model.identifiers.{
+  IdState,
+  IdentifierType,
+  SourceIdentifier
+}
 import weco.catalogue.internal_model.work.{Concept, Subject}
 import weco.pipeline.transformer.identifiers.LabelDerivedIdentifiers
 import weco.pipeline.transformer.tei.NormaliseText
@@ -42,7 +46,9 @@ object TeiSubjects extends LabelDerivedIdentifiers {
       }
     }.toList
 
-  private def createIdentifier(keywords: Node, reference: Option[String], label: String): IdState.Unminted = {
+  private def createIdentifier(keywords: Node,
+                               reference: Option[String],
+                               label: String): IdState.Unminted = {
     val identifierType = (keywords \@ "scheme").toLowerCase.trim match {
       case s if s == "#lcsh" => Some(IdentifierType.LCSubjects)
       case s if s == "#mesh" => Some(IdentifierType.MESH)
