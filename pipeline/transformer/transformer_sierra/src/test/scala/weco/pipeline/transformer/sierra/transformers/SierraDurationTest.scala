@@ -10,17 +10,22 @@ class SierraDurationTest
     with Matchers
     with SierraDataGenerators {
 
-  it("should extract duration in milliseconds from 306") {
+  val hours = 60 * 60
+  val minutes = 60
+  val seconds = 1
+
+  it("extracts duration in seconds from 306") {
     val varFields = List(
       VarField(
         marcTag = "306",
         subfields = List(Subfield(tag = "a", content = "011012")))
     )
 
-    getDuration(varFields) shouldBe Some(4212000)
+    getDuration(varFields) shouldBe Some(
+      1 * hours + 10 * minutes + 12 * seconds)
   }
 
-  it("should use first duration when multiple defined") {
+  it("uses the first duration when multiple defined") {
     val varFields = List(
       VarField(
         marcTag = "306",
@@ -30,20 +35,20 @@ class SierraDurationTest
         subfields = List(Subfield(tag = "a", content = "001132")))
     )
 
-    getDuration(varFields) shouldBe Some(600000)
+    getDuration(varFields) shouldBe Some(10 * minutes)
   }
 
-  it("should not extract duration when varfield badly formatted") {
+  it("does not extract duration when varfield badly formatted") {
     val varFields = List(
       VarField(
-        marcTag = "500",
+        marcTag = "306",
         subfields = List(Subfield(tag = "a", content = "01xx1012")))
     )
 
     getDuration(varFields) shouldBe None
   }
 
-  it("should not extract duration when incorrect varfield") {
+  it("does not extract duration when incorrect varfield") {
     val varFields = List(
       VarField(
         marcTag = "500",
@@ -53,7 +58,7 @@ class SierraDurationTest
     getDuration(varFields) shouldBe None
   }
 
-  it("should not extract duration when incorrect subfield") {
+  it("does not extract duration when incorrect subfield") {
     val varFields = List(
       VarField(
         marcTag = "306",
