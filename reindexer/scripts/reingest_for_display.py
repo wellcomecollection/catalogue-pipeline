@@ -71,7 +71,9 @@ def main(reindex_date, document_type, test_doc_id):
         for (batch, _) in concurrently(
             fn=lambda b: sns.publish_batch(
                 TopicArn=dest_topic_arn, PublishBatchRequestEntries=b
-            ), inputs=sns_batches(), max_concurrency=10
+            ),
+            inputs=sns_batches(),
+            max_concurrency=10,
         ):
             pbar.update(len(batch))
 
