@@ -1,6 +1,6 @@
 {
   "description" : "a work with a production event in 2020",
-  "createdAt" : "2022-09-28T15:53:38.374898Z",
+  "createdAt" : "2022-09-30T08:11:41.058390Z",
   "id" : "0fucriyr",
   "document" : {
     "debug" : {
@@ -212,6 +212,9 @@
       ],
       "production.label" : [
         "2020"
+      ],
+      "production.dates.range.from" : [
+        1577836800000
       ],
       "partOf.id" : [
       ],

@@ -1,6 +1,6 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2022-09-28T15:53:41.845504Z",
+  "createdAt" : "2022-09-30T08:11:42.236572Z",
   "id" : "b1r485o0",
   "document" : {
     "debug" : {
@@ -250,6 +250,8 @@
       "contributors.agent.label" : [
       ],
       "production.label" : [
+      ],
+      "production.dates.range.from" : [
       ],
       "partOf.id" : [
       ],

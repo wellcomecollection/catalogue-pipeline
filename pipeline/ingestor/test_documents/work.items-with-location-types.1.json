@@ -1,6 +1,6 @@
 {
   "description" : "items with different location types",
-  "createdAt" : "2022-09-28T15:53:40.907824Z",
+  "createdAt" : "2022-09-30T08:11:41.943466Z",
   "id" : "sgatphra",
   "document" : {
     "debug" : {
@@ -281,6 +281,8 @@
       "contributors.agent.label" : [
       ],
       "production.label" : [
+      ],
+      "production.dates.range.from" : [
       ],
       "partOf.id" : [
       ],

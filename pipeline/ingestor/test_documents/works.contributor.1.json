@@ -1,6 +1,6 @@
 {
   "description" : "works with different contributor",
-  "createdAt" : "2022-09-28T15:53:40.220593Z",
+  "createdAt" : "2022-09-30T08:11:41.663295Z",
   "id" : "bj9evx0c",
   "document" : {
     "debug" : {
@@ -202,6 +202,8 @@
         "47"
       ],
       "production.label" : [
+      ],
+      "production.dates.range.from" : [
       ],
       "partOf.id" : [
       ],

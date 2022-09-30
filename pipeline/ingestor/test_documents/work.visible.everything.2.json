@@ -1,6 +1,6 @@
 {
   "description" : "a list of work with all the include-able fields",
-  "createdAt" : "2022-09-28T15:53:39.330982Z",
+  "createdAt" : "2022-09-30T08:11:41.314006Z",
   "id" : "jfzz4ou9",
   "document" : {
     "debug" : {
@@ -1169,6 +1169,8 @@
         "ba2c8ykXyK",
         "H9vtTXh5eC",
         "S91lO"
+      ],
+      "production.dates.range.from" : [
       ],
       "partOf.id" : [
         "k4gltrjv",

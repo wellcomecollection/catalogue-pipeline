@@ -1,6 +1,6 @@
 {
   "description" : "one of a list of works with a variety of formats",
-  "createdAt" : "2022-09-28T15:53:39.643198Z",
+  "createdAt" : "2022-09-30T08:11:41.395324Z",
   "id" : "plmmmkup",
   "document" : {
     "debug" : {
@@ -184,6 +184,8 @@
       "contributors.agent.label" : [
       ],
       "production.label" : [
+      ],
+      "production.dates.range.from" : [
       ],
       "partOf.id" : [
       ],

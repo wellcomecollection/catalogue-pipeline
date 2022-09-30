@@ -1,6 +1,6 @@
 {
   "description" : "one of a list of works with a variety of languages",
-  "createdAt" : "2022-09-28T15:53:39.764288Z",
+  "createdAt" : "2022-09-30T08:11:41.449268Z",
   "id" : "i8zcsj78",
   "document" : {
     "debug" : {
@@ -187,6 +187,8 @@
       "contributors.agent.label" : [
       ],
       "production.label" : [
+      ],
+      "production.dates.range.from" : [
       ],
       "partOf.id" : [
       ],

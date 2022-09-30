@@ -1,6 +1,6 @@
 {
   "description" : "a work with a production event in 1904",
-  "createdAt" : "2022-09-28T15:53:38.360189Z",
+  "createdAt" : "2022-09-30T08:11:41.051448Z",
   "id" : "aiv95swj",
   "document" : {
     "debug" : {
@@ -212,6 +212,9 @@
       ],
       "production.label" : [
         "1904"
+      ],
+      "production.dates.range.from" : [
+        -2082844800000
       ],
       "partOf.id" : [
       ],

@@ -1,6 +1,6 @@
 {
   "description" : "works with multi-year production ranges",
-  "createdAt" : "2022-09-28T15:53:40.811628Z",
+  "createdAt" : "2022-09-30T08:11:41.907875Z",
   "id" : "wg3kq4ux",
   "document" : {
     "debug" : {
@@ -237,6 +237,9 @@
         "YdIXqL6hBi",
         "4EVx0a62zj",
         "1860-1960"
+      ],
+      "production.dates.range.from" : [
+        -3471292800000
       ],
       "partOf.id" : [
       ],

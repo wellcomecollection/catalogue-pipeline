@@ -1,6 +1,6 @@
 {
   "description" : "an arbitrary list of visible works",
-  "createdAt" : "2022-09-28T15:53:36.443941Z",
+  "createdAt" : "2022-09-30T08:11:40.332534Z",
   "id" : "dph7sjip",
   "document" : {
     "debug" : {
@@ -176,6 +176,8 @@
       "contributors.agent.label" : [
       ],
       "production.label" : [
+      ],
+      "production.dates.range.from" : [
       ],
       "partOf.id" : [
       ],

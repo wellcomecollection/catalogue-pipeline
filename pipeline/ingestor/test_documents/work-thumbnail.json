@@ -1,6 +1,6 @@
 {
   "description" : "a work with a thumbnail",
-  "createdAt" : "2022-09-28T15:53:38.124862Z",
+  "createdAt" : "2022-09-30T08:11:40.977422Z",
   "id" : "sahqcluh",
   "document" : {
     "debug" : {
@@ -205,6 +205,8 @@
       "contributors.agent.label" : [
       ],
       "production.label" : [
+      ],
+      "production.dates.range.from" : [
       ],
       "partOf.id" : [
       ],

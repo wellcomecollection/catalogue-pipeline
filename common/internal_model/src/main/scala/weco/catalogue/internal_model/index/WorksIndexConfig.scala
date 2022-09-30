@@ -268,6 +268,7 @@ object WorksIndexConfig extends IndexConfigFields {
             copyTo = newTitlesAndContributorsPath),
           // production events
           labelField("production.label"),
+          dateField("production.dates.range.from"),
           // relations
           canonicalIdField("partOf.id"),
           multilingualFieldWithKeyword("partOf.title"),

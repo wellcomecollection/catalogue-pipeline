@@ -1,6 +1,6 @@
 {
   "description" : "examples of works with different types",
-  "createdAt" : "2022-09-28T15:53:41.700435Z",
+  "createdAt" : "2022-09-30T08:11:42.160265Z",
   "id" : "2tqcclh1",
   "document" : {
     "debug" : {
@@ -176,6 +176,8 @@
       "contributors.agent.label" : [
       ],
       "production.label" : [
+      ],
+      "production.dates.range.from" : [
       ],
       "partOf.id" : [
       ],

@@ -1,6 +1,6 @@
 {
   "description" : "examples for the access status tests",
-  "createdAt" : "2022-09-28T15:53:42.195931Z",
+  "createdAt" : "2022-09-30T08:11:42.424939Z",
   "id" : "jwvfegzn",
   "document" : {
     "debug" : {
@@ -271,6 +271,8 @@
       "contributors.agent.label" : [
       ],
       "production.label" : [
+      ],
+      "production.dates.range.from" : [
       ],
       "partOf.id" : [
       ],

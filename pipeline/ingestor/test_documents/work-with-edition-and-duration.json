@@ -1,6 +1,6 @@
 {
   "description" : "a work with optional top-level fields",
-  "createdAt" : "2022-09-28T15:53:37.928867Z",
+  "createdAt" : "2022-09-30T08:11:40.928940Z",
   "id" : "gsruvqwf",
   "document" : {
     "debug" : {
@@ -178,6 +178,8 @@
       "contributors.agent.label" : [
       ],
       "production.label" : [
+      ],
+      "production.dates.range.from" : [
       ],
       "partOf.id" : [
       ],

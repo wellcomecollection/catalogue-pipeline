@@ -1,6 +1,6 @@
 {
   "description" : "works with multi-year production ranges",
-  "createdAt" : "2022-09-28T15:53:40.817464Z",
+  "createdAt" : "2022-09-30T08:11:41.910262Z",
   "id" : "wmzcsqaf",
   "document" : {
     "debug" : {
@@ -237,6 +237,9 @@
         "QMh6zvv2Jj",
         "5pKO9kAlfI",
         "1962"
+      ],
+      "production.dates.range.from" : [
+        -252460800000
       ],
       "partOf.id" : [
       ],
