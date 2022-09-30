@@ -21,7 +21,8 @@ class SierraDurationTest
         subfields = List(Subfield(tag = "a", content = "011012")))
     )
 
-    getDuration(varFields) shouldBe Some(1 * hours + 10 * minutes + 12 * seconds)
+    getDuration(varFields) shouldBe Some(
+      1 * hours + 10 * minutes + 12 * seconds)
   }
 
   it("uses the first duration when multiple defined") {
