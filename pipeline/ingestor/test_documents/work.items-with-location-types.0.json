@@ -1,6 +1,6 @@
 {
   "description" : "items with different location types",
-  "createdAt" : "2022-09-28T15:53:40.901800Z",
+  "createdAt" : "2022-09-30T08:11:41.942541Z",
   "id" : "kdwct2lf",
   "document" : {
     "debug" : {
@@ -247,6 +247,8 @@
       "contributors.agent.label" : [
       ],
       "production.label" : [
+      ],
+      "production.dates.range.from" : [
       ],
       "partOf.id" : [
       ],

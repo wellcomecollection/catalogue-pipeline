@@ -1,6 +1,6 @@
 {
   "description" : "an arbitrary list of visible works",
-  "createdAt" : "2022-09-28T15:53:36.447259Z",
+  "createdAt" : "2022-09-30T08:11:40.334343Z",
   "id" : "fyqts0co",
   "document" : {
     "debug" : {
@@ -176,6 +176,8 @@
       "contributors.agent.label" : [
       ],
       "production.label" : [
+      ],
+      "production.dates.range.from" : [
       ],
       "partOf.id" : [
       ],

@@ -1,6 +1,6 @@
 {
   "description" : "a work with different concepts in the genre",
-  "createdAt" : "2022-09-28T15:53:40.005116Z",
+  "createdAt" : "2022-09-30T08:11:41.557882Z",
   "id" : "2zo588up",
   "document" : {
     "debug" : {
@@ -247,6 +247,8 @@
       "contributors.agent.label" : [
       ],
       "production.label" : [
+      ],
+      "production.dates.range.from" : [
       ],
       "partOf.id" : [
       ],

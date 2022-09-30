@@ -1,6 +1,6 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2022-09-28T15:53:40.527494Z",
+  "createdAt" : "2022-09-30T08:11:41.769174Z",
   "id" : "e2zva5mj",
   "document" : {
     "debug" : {
@@ -184,6 +184,8 @@
       "contributors.agent.label" : [
       ],
       "production.label" : [
+      ],
+      "production.dates.range.from" : [
       ],
       "partOf.id" : [
       ],

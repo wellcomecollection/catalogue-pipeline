@@ -1,6 +1,6 @@
 {
   "description" : "examples for the genre tests",
-  "createdAt" : "2022-09-28T15:53:41.772396Z",
+  "createdAt" : "2022-09-30T08:11:42.191071Z",
   "id" : "oo0o5odf",
   "document" : {
     "debug" : {
@@ -176,6 +176,8 @@
       "contributors.agent.label" : [
       ],
       "production.label" : [
+      ],
+      "production.dates.range.from" : [
       ],
       "partOf.id" : [
       ],

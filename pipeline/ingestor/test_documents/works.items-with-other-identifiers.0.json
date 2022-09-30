@@ -1,6 +1,6 @@
 {
   "description" : "works with items with other identifiers",
-  "createdAt" : "2022-09-28T15:53:40.323642Z",
+  "createdAt" : "2022-09-30T08:11:41.706587Z",
   "id" : "qjnwiqbs",
   "document" : {
     "debug" : {
@@ -264,6 +264,8 @@
       "contributors.agent.label" : [
       ],
       "production.label" : [
+      ],
+      "production.dates.range.from" : [
       ],
       "partOf.id" : [
       ],

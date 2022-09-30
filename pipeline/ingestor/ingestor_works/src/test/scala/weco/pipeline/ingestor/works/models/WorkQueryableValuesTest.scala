@@ -19,6 +19,8 @@ import weco.catalogue.internal_model.work.generators.{
   WorkGenerators
 }
 
+import java.time.{LocalDate}
+
 class WorkQueryableValuesTest
     extends AnyFunSpec
     with Matchers
@@ -447,6 +449,59 @@ class WorkQueryableValuesTest
       "Purple People",
       "Proactive Publicists",
       "The rose-tinted past"
+    )
+  }
+
+  it("adds production dates as milliseconds-since-the-epoch") {
+    val workData = WorkData[DataState.Identified](
+      title = Some(s"title-${randomAlphanumeric(length = 10)}"),
+      production = List(
+        ProductionEvent(
+          label = "Darren the Dastardly",
+          places = List(),
+          agents = List(),
+          dates = List(
+            Period(
+              id = IdState.Unidentifiable,
+              label = "The near future",
+              range = Some(
+                InstantRange(
+                  from = LocalDate.of(2022, 9, 22),
+                  to = LocalDate.of(2023, 9, 22),
+                  label = "September 2022–23"))
+            )
+          )
+        ),
+        ProductionEvent(
+          label = "Dana the Devilish",
+          places = List(),
+          agents = List(),
+          dates = List(
+            Period(
+              id = IdState.Unidentifiable,
+              label = "The distant future",
+              range = Some(
+                InstantRange(
+                  from = LocalDate.of(2032, 9, 22),
+                  to = LocalDate.of(2033, 9, 22),
+                  label = "September 2032–33"))
+            )
+          )
+        )
+      )
+    )
+
+    val q = WorkQueryableValues(
+      id = createCanonicalId,
+      sourceIdentifier = createSourceIdentifier,
+      workData = workData,
+      relations = Relations(),
+      availabilities = Set()
+    )
+
+    q.productionDatesRangeFrom shouldBe List(
+      1663804800000L,
+      1979424000000L
     )
   }
 

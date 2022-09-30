@@ -1030,6 +1030,17 @@
                   }
                 },
                 "analyzer": "asciifolding_analyzer"
+              },
+              "dates": {
+                "properties": {
+                  "range": {
+                    "properties": {
+                      "from": {
+                        "type": "date"
+                      }
+                    }
+                  }
+                }
               }
             }
           },

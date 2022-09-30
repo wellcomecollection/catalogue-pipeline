@@ -1,6 +1,6 @@
 {
   "description" : "works with different contributor",
-  "createdAt" : "2022-09-28T15:53:40.236628Z",
+  "createdAt" : "2022-09-30T08:11:41.670122Z",
   "id" : "z08k6cnn",
   "document" : {
     "debug" : {
@@ -228,6 +228,8 @@
         "MI5"
       ],
       "production.label" : [
+      ],
+      "production.dates.range.from" : [
       ],
       "partOf.id" : [
       ],

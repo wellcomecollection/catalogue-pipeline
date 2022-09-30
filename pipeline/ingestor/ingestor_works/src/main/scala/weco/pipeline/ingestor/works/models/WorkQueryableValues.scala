@@ -39,6 +39,7 @@ case class WorkQueryableValues(
   @JsonKey("contributors.agent.id") contributorAgentIds: List[String],
   @JsonKey("contributors.agent.label") contributorAgentLabels: List[String],
   @JsonKey("production.label") productionLabels: List[String],
+  @JsonKey("production.dates.range.from") productionDatesRangeFrom: List[Long],
   @JsonKey("partOf.id") partOfIds: List[String],
   @JsonKey("partOf.title") partOfTitles: List[String],
   @JsonKey("availabilities.id") availabilityIds: List[String],
@@ -88,6 +89,14 @@ case object WorkQueryableValues {
       contributorAgentLabels = workData.contributors.map(_.agent.label),
       productionLabels = workData.production.flatMap(p =>
         p.places.map(_.label) ++ p.agents.map(_.label) ++ p.dates.map(_.label)),
+      productionDatesRangeFrom = workData.production
+        .flatMap(_.dates)
+        .flatMap(_.range)
+        .map(
+          // Note: the Elasticsearch date field type wants milliseconds since
+          // the epoch.
+          // See https://www.elastic.co/guide/en/elasticsearch/reference/current/date.html
+          _.from.toEpochMilli),
       partOfIds = relations.ancestors.flatMap(_.id).map(_.underlying),
       partOfTitles = relations.ancestors.flatMap(_.title),
       availabilityIds = availabilities.map(_.id).toList,

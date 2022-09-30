@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2022-09-28T15:53:41.910214Z",
+  "createdAt" : "2022-09-30T08:11:42.275565Z",
   "id" : "e1k1l8xu",
   "document" : {
     "debug" : {
@@ -204,6 +204,8 @@
         "Jake Paul"
       ],
       "production.label" : [
+      ],
+      "production.dates.range.from" : [
       ],
       "partOf.id" : [
       ],

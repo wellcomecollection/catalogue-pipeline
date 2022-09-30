@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2022-09-28T15:53:41.907335Z",
+  "createdAt" : "2022-09-30T08:11:42.273823Z",
   "id" : "h5zn9bqm",
   "document" : {
     "debug" : {
@@ -204,6 +204,8 @@
         "Bath, Patricia"
       ],
       "production.label" : [
+      ],
+      "production.dates.range.from" : [
       ],
       "partOf.id" : [
       ],

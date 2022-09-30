@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2022-09-28T15:53:41.908904Z",
+  "createdAt" : "2022-09-30T08:11:42.274605Z",
   "id" : "gnuj1it3",
   "document" : {
     "debug" : {
@@ -204,6 +204,8 @@
         "Karl Marx"
       ],
       "production.label" : [
+      ],
+      "production.dates.range.from" : [
       ],
       "partOf.id" : [
       ],

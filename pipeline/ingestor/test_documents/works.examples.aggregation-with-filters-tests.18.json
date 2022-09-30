@@ -1,6 +1,6 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2022-09-28T15:53:41.149321Z",
+  "createdAt" : "2022-09-30T08:11:41.981358Z",
   "id" : "s4ry14qu",
   "document" : {
     "debug" : {
@@ -235,6 +235,8 @@
       "contributors.agent.label" : [
       ],
       "production.label" : [
+      ],
+      "production.dates.range.from" : [
       ],
       "partOf.id" : [
       ],

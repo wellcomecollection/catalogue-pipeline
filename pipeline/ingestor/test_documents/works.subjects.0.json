@@ -1,6 +1,6 @@
 {
   "description" : "works with different subjects",
-  "createdAt" : "2022-09-28T15:53:40.041971Z",
+  "createdAt" : "2022-09-30T08:11:41.572902Z",
   "id" : "6uwysojy",
   "document" : {
     "debug" : {
@@ -227,6 +227,8 @@
       "contributors.agent.label" : [
       ],
       "production.label" : [
+      ],
+      "production.dates.range.from" : [
       ],
       "partOf.id" : [
       ],

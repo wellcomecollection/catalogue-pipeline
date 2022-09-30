@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2022-09-28T15:53:41.912074Z",
+  "createdAt" : "2022-09-30T08:11:42.277314Z",
   "id" : "cpwnrkdo",
   "document" : {
     "debug" : {
@@ -232,6 +232,8 @@
         "Darwin \"Jones\", Charles"
       ],
       "production.label" : [
+      ],
+      "production.dates.range.from" : [
       ],
       "partOf.id" : [
       ],
