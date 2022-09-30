@@ -5,9 +5,19 @@ import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.generators.ImageGenerators
 import weco.catalogue.internal_model.identifiers._
 import weco.catalogue.internal_model.languages.Language
-import weco.catalogue.internal_model.locations.{AccessCondition, AccessMethod, AccessStatus, License, LocationType}
+import weco.catalogue.internal_model.locations.{
+  AccessCondition,
+  AccessMethod,
+  AccessStatus,
+  License,
+  LocationType
+}
 import weco.catalogue.internal_model.work._
-import weco.catalogue.internal_model.work.generators.{ContributorGenerators, ItemsGenerators, WorkGenerators}
+import weco.catalogue.internal_model.work.generators.{
+  ContributorGenerators,
+  ItemsGenerators,
+  WorkGenerators
+}
 
 import java.time.{LocalDate}
 
@@ -451,7 +461,15 @@ class WorkQueryableValuesTest
           places = List(),
           agents = List(),
           dates = List(
-            Period(id = IdState.Unidentifiable, label = "The near future", range = Some(InstantRange(from = LocalDate.of(2022, 9, 22), to = LocalDate.of(2023, 9, 22), label = "September 2022–23")))
+            Period(
+              id = IdState.Unidentifiable,
+              label = "The near future",
+              range = Some(
+                InstantRange(
+                  from = LocalDate.of(2022, 9, 22),
+                  to = LocalDate.of(2023, 9, 22),
+                  label = "September 2022–23"))
+            )
           )
         ),
         ProductionEvent(
@@ -459,7 +477,15 @@ class WorkQueryableValuesTest
           places = List(),
           agents = List(),
           dates = List(
-            Period(id = IdState.Unidentifiable, label = "The distant future", range = Some(InstantRange(from = LocalDate.of(2032, 9, 22), to = LocalDate.of(2033, 9, 22), label = "September 2032–33")))
+            Period(
+              id = IdState.Unidentifiable,
+              label = "The distant future",
+              range = Some(
+                InstantRange(
+                  from = LocalDate.of(2032, 9, 22),
+                  to = LocalDate.of(2033, 9, 22),
+                  label = "September 2032–33"))
+            )
           )
         )
       )
@@ -474,7 +500,8 @@ class WorkQueryableValuesTest
     )
 
     q.productionDatesRangeFrom shouldBe List(
-      1663804800000L, 1979424000000L
+      1663804800000L,
+      1979424000000L
     )
   }
 
