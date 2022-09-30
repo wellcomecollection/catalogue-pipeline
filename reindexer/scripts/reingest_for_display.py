@@ -18,6 +18,13 @@ def chunked_iterable(iterable, size):
         yield chunk
 
 
+def get_work_ids(es, api_index, query):
+    for hit in scan(
+        es, scroll="15m", index=api_index, query={"query": query}, _source=False
+    ):
+        yield hit["_id"]
+
+
 @click.command()
 @click.argument("reindex_date")
 @click.option(
@@ -52,31 +59,23 @@ def main(reindex_date, document_type, test_doc_id):
         return
 
     print(f"Reingesting {reingest_docs_count} documents...")
-    for chunk in chunked_iterable(
-        iterable=tqdm(
-            scan(
-                es,
-                scroll="15m",
-                index=api_index,
-                query={"query": api_index_query},
-                _source=False,
-            ),
-            total=reingest_docs_count,
-        ),
-        size=100,
-    ):
-        doc_ids = [hit["_id"] for hit in chunk]
-        sns_batches = chunked_iterable(
-            iterable=[{"Id": id, "Message": id} for id in doc_ids],
+
+    def sns_batches():
+        doc_ids = get_work_ids(es, api_index, api_index_query)
+        yield from chunked_iterable(
+            iterable=({"Id": id, "Message": id} for id in doc_ids),
             size=10,  # Max SNS batch size
         )
 
-        def publish(batch):
-            sns.publish_batch(TopicArn=dest_topic_arn, PublishBatchRequestEntries=batch)
-            return True
-
-        for _ in concurrently(fn=publish, inputs=sns_batches, max_concurrency=10):
-            pass
+    with tqdm(total=reingest_docs_count) as pbar:
+        for (batch, _) in concurrently(
+            fn=lambda b: sns.publish_batch(
+                TopicArn=dest_topic_arn, PublishBatchRequestEntries=b
+            ),
+            inputs=sns_batches(),
+            max_concurrency=10,
+        ):
+            pbar.update(len(batch))
 
 
 if __name__ == "__main__":
