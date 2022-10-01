@@ -1,6 +1,6 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2022-09-30T08:11:42.234160Z",
+  "createdAt" : "2022-10-01T19:21:01.779185Z",
   "id" : "tayys6jp",
   "document" : {
     "debug" : {
@@ -161,7 +161,7 @@
             {
               "identifierType" : {
                 "id" : "nlm-mesh",
-                "label" : "Medical Subject Headings (MESH) identifier",
+                "label" : "Medical Subject Headings (MeSH) identifier",
                 "type" : "IdentifierType"
               },
               "value" : "mesh-sanitation",
