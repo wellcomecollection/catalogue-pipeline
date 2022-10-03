@@ -157,7 +157,7 @@ class InferenceManagerWorkerService[Destination](
                   AdapterResponseBundle(DownloadedImage(image, _), _, _),
                   ctx) =>
                 (
-                  image.transition[ImageState.Augmented](Some(inferredData)),
+                  image.transition[ImageState.Augmented](inferredData),
                   ctx)
             }
           }

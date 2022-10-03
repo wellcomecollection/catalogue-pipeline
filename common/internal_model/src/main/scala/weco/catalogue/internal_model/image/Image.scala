@@ -75,15 +75,15 @@ object ImageState {
   case class Augmented(
     sourceIdentifier: SourceIdentifier,
     canonicalId: CanonicalId,
-    inferredData: Option[InferredData] = None
+    inferredData: InferredData
   ) extends ImageState {
-    type TransitionArgs = Option[InferredData]
+    type TransitionArgs = InferredData
   }
 
   case class Indexed(
     sourceIdentifier: SourceIdentifier,
     canonicalId: CanonicalId,
-    inferredData: Option[InferredData] = None
+    inferredData: InferredData
   ) extends ImageState {
     type TransitionArgs = Unit
   }
@@ -100,7 +100,7 @@ object ImageFsm {
   implicit val initialToAugmented = new Transition[Initial, Augmented] {
     def state(
       self: Image[Initial],
-      inferredData: Option[InferredData]
+      inferredData: InferredData
     ): Augmented =
       Augmented(
         sourceIdentifier = self.state.sourceIdentifier,
