@@ -1,10 +1,11 @@
 {
   "description" : "an arbitrary list of redirected works",
-  "createdAt" : "2022-05-31T18:33:50.500351Z",
+  "createdAt" : "2022-10-03T10:25:18.789Z",
   "id" : "4nwkprdt",
   "document" : {
     "debug" : {
       "source" : {
+        "id" : "4nwkprdt",
         "identifier" : {
           "identifierType" : {
             "id" : "calm-record-id"
@@ -17,31 +18,6 @@
       },
       "mergedTime" : "2044-05-21T11:37:26Z",
       "indexedTime" : "2001-01-01T01:01:01Z"
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "calm-record-id"
-        },
-        "ontologyType" : "Work",
-        "value" : "PciYoP2Wz6"
-      },
-      "canonicalId" : "4nwkprdt",
-      "mergedTime" : "2044-05-21T11:37:26Z",
-      "sourceModifiedTime" : "2044-05-21T11:37:26Z",
-      "indexedTime" : "2001-01-01T01:01:01Z",
-      "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
     },
     "redirectTarget" : {
       "canonicalId" : "mv6kix0n",

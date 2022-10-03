@@ -1,10 +1,11 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2022-09-30T08:11:41.982177Z",
+  "createdAt" : "2022-10-03T10:25:19.321Z",
   "id" : "svr3x3ca",
   "document" : {
     "debug" : {
       "source" : {
+        "id" : "svr3x3ca",
         "identifier" : {
           "identifierType" : {
             "id" : "miro-image-number"
@@ -19,99 +20,6 @@
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "miro-image-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "FRfKD3vr5o"
-      },
-      "canonicalId" : "svr3x3ca",
-      "mergedTime" : "1979-04-26T12:16:29Z",
-      "sourceModifiedTime" : "1979-04-26T12:16:29Z",
-      "indexedTime" : "2001-01-01T01:01:01Z",
-      "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "data" : {
-      "title" : "title-lluSXGQIID",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : {
-        "id" : "s",
-        "label" : "E-sound"
-      },
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-        {
-          "id" : {
-            "type" : "Unidentifiable"
-          },
-          "label" : "9hdRJC6PIO",
-          "concepts" : [
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "bmiPTNnwYSoEYyd",
-              "type" : "Concept"
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "ewbq2T7lfxMM8Gf",
-              "type" : "Concept"
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "uD4zaFerI8P7W1W",
-              "type" : "Concept"
-            }
-          ]
-        }
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
     },
     "display" : {
       "id" : "svr3x3ca",

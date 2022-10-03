@@ -1,10 +1,11 @@
 {
   "description" : "works with items with other identifiers",
-  "createdAt" : "2022-09-30T08:11:41.709806Z",
+  "createdAt" : "2022-10-03T10:25:19.240Z",
   "id" : "upm4bal7",
   "document" : {
     "debug" : {
       "source" : {
+        "id" : "upm4bal7",
         "identifier" : {
           "identifierType" : {
             "id" : "sierra-system-number"
@@ -19,107 +20,6 @@
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "sierra-system-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "wkKE1s2opA"
-      },
-      "canonicalId" : "upm4bal7",
-      "mergedTime" : "1940-10-02T05:59:00Z",
-      "sourceModifiedTime" : "1940-10-02T05:59:00Z",
-      "indexedTime" : "2001-01-01T01:01:01Z",
-      "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "data" : {
-      "title" : "title-lcjNV5vdX9",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-        {
-          "id" : {
-            "canonicalId" : "8gega8be",
-            "sourceIdentifier" : {
-              "identifierType" : {
-                "id" : "calm-record-id"
-              },
-              "ontologyType" : "Work",
-              "value" : "yxr73XcQDx"
-            },
-            "otherIdentifiers" : [
-              {
-                "identifierType" : {
-                  "id" : "sierra-system-number"
-                },
-                "ontologyType" : "Work",
-                "value" : "YGFYXAaEL2"
-              }
-            ],
-            "type" : "Identified"
-          },
-          "title" : null,
-          "note" : null,
-          "locations" : [
-            {
-              "url" : "https://iiif.wellcomecollection.org/image/4Hr.jpg/info.json",
-              "locationType" : {
-                "id" : "iiif-presentation"
-              },
-              "license" : {
-                "id" : "cc-by"
-              },
-              "credit" : "Credit line: 5FXFI5qG",
-              "linkText" : null,
-              "accessConditions" : [
-              ],
-              "type" : "DigitalLocation"
-            }
-          ]
-        }
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
     },
     "display" : {
       "id" : "upm4bal7",

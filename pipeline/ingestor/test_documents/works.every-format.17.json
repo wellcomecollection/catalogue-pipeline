@@ -1,10 +1,11 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2022-09-30T08:11:41.773909Z",
+  "createdAt" : "2022-10-03T10:25:19.266Z",
   "id" : "9tar4kg6",
   "document" : {
     "debug" : {
       "source" : {
+        "id" : "9tar4kg6",
         "identifier" : {
           "identifierType" : {
             "id" : "sierra-system-number"
@@ -19,70 +20,6 @@
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "sierra-system-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "WpfpIxjlf3"
-      },
-      "canonicalId" : "9tar4kg6",
-      "mergedTime" : "2066-07-16T07:33:18Z",
-      "sourceModifiedTime" : "2066-07-16T07:33:18Z",
-      "indexedTime" : "2001-01-01T01:01:01Z",
-      "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "data" : {
-      "title" : "title-zifN5hzpvx",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : {
-        "id" : "z",
-        "label" : "Web sites"
-      },
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
     },
     "display" : {
       "id" : "9tar4kg6",

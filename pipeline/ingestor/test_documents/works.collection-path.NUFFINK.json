@@ -1,10 +1,11 @@
 {
   "description" : "a work with a collection path",
-  "createdAt" : "2022-09-30T08:11:41.752638Z",
+  "createdAt" : "2022-10-03T10:25:19.254Z",
   "id" : "dtqmc0yn",
   "document" : {
     "debug" : {
       "source" : {
+        "id" : "dtqmc0yn",
         "identifier" : {
           "identifierType" : {
             "id" : "calm-record-id"
@@ -19,70 +20,6 @@
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "calm-record-id"
-        },
-        "ontologyType" : "Work",
-        "value" : "Lq95TrUx7A"
-      },
-      "canonicalId" : "dtqmc0yn",
-      "mergedTime" : "1972-05-12T18:12:24Z",
-      "sourceModifiedTime" : "1972-05-12T18:12:24Z",
-      "indexedTime" : "2001-01-01T01:01:01Z",
-      "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "data" : {
-      "title" : "title-boqbXNAi3a",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : {
-        "path" : "NUFFINK",
-        "label" : "NUF/FINK"
-      },
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
     },
     "display" : {
       "id" : "dtqmc0yn",

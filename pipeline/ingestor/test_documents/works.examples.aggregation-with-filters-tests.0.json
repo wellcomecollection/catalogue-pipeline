@@ -1,10 +1,11 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2022-09-30T08:11:41.965686Z",
+  "createdAt" : "2022-10-03T10:25:19.310Z",
   "id" : "vqys4hio",
   "document" : {
     "debug" : {
       "source" : {
+        "id" : "vqys4hio",
         "identifier" : {
           "identifierType" : {
             "id" : "calm-record-id"
@@ -19,99 +20,6 @@
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "calm-record-id"
-        },
-        "ontologyType" : "Work",
-        "value" : "ESZHkohLBq"
-      },
-      "canonicalId" : "vqys4hio",
-      "mergedTime" : "1954-08-08T14:52:27Z",
-      "sourceModifiedTime" : "1954-08-08T14:52:27Z",
-      "indexedTime" : "2001-01-01T01:01:01Z",
-      "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "data" : {
-      "title" : "title-vwQleJkqVb",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : {
-        "id" : "a",
-        "label" : "Books"
-      },
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-        {
-          "id" : {
-            "type" : "Unidentifiable"
-          },
-          "label" : "6IZ2DrUzFk",
-          "concepts" : [
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "vgSyVfmtHDyMDGo",
-              "type" : "Concept"
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "2rBCSPBNfFmnJIE",
-              "type" : "Concept"
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "pzyMJLtI2pjU6xn",
-              "type" : "Concept"
-            }
-          ]
-        }
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
     },
     "display" : {
       "id" : "vqys4hio",

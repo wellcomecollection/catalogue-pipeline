@@ -47,14 +47,7 @@ trait WorksIngestorFixtures
       val expectedWork = WorkTransformer.deriveData(work)
 
       storedWork match {
-        case w @ IndexedWork.Visible(
-              _,
-              _,
-              _,
-              _,
-              storedQuery,
-              storedAggregations) =>
-          w.data shouldBe expectedWork.asInstanceOf[IndexedWork.Visible].data
+        case w @ IndexedWork.Visible(_, _, storedQuery, storedAggregations) =>
           storedQuery shouldBe WorkQueryableValues(
             id = work.state.canonicalId,
             sourceIdentifier = work.state.sourceIdentifier,
@@ -70,14 +63,7 @@ trait WorksIngestorFixtures
 
       storedWork.debug.source shouldBe expectedWork.debug.source
 
-      storedWork.state.sourceIdentifier shouldBe expectedWork.state.sourceIdentifier
-      storedWork.state.canonicalId shouldBe expectedWork.state.canonicalId
-      storedWork.state.mergedTime shouldBe expectedWork.state.mergedTime
-      storedWork.state.sourceModifiedTime shouldBe expectedWork.state.sourceModifiedTime
-      storedWork.state.availabilities shouldBe expectedWork.state.availabilities
-      storedWork.state.relations shouldBe expectedWork.state.relations
-
-      assertRecent(storedWork.state.indexedTime)
+      assertRecent(storedWork.debug.indexedTime)
     }
 
   def withWorksIngestor[R](queue: Queue,

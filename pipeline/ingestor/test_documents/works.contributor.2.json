@@ -1,10 +1,11 @@
 {
   "description" : "works with different contributor",
-  "createdAt" : "2022-09-30T08:11:41.670122Z",
+  "createdAt" : "2022-10-03T10:25:19.230Z",
   "id" : "z08k6cnn",
   "document" : {
     "debug" : {
       "source" : {
+        "id" : "z08k6cnn",
         "identifier" : {
           "identifierType" : {
             "id" : "miro-image-number"
@@ -19,97 +20,6 @@
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "miro-image-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "juTufKU2Ye"
-      },
-      "canonicalId" : "z08k6cnn",
-      "mergedTime" : "1951-04-18T00:55:53Z",
-      "sourceModifiedTime" : "1951-04-18T00:55:53Z",
-      "indexedTime" : "2001-01-01T01:01:01Z",
-      "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "data" : {
-      "title" : "title-UVMdWdPx74",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-        {
-          "id" : {
-            "type" : "Unidentifiable"
-          },
-          "agent" : {
-            "id" : {
-              "type" : "Unidentifiable"
-            },
-            "label" : "007",
-            "type" : "Agent"
-          },
-          "roles" : [
-          ],
-          "primary" : true
-        },
-        {
-          "id" : {
-            "type" : "Unidentifiable"
-          },
-          "agent" : {
-            "id" : {
-              "type" : "Unidentifiable"
-            },
-            "label" : "MI5",
-            "type" : "Organisation"
-          },
-          "roles" : [
-          ],
-          "primary" : true
-        }
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
     },
     "display" : {
       "id" : "z08k6cnn",

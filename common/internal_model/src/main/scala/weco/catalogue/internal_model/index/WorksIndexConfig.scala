@@ -2,11 +2,7 @@ package weco.catalogue.internal_model.index
 
 import buildinfo.BuildInfo
 import com.sksamuel.elastic4s.ElasticDsl._
-import com.sksamuel.elastic4s.fields.{
-  ElasticField,
-  ObjectField,
-  TokenCountField
-}
+import com.sksamuel.elastic4s.fields.{ElasticField, TokenCountField}
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
 import weco.elasticsearch.{IndexConfig, RefreshInterval}
 
@@ -72,145 +68,8 @@ object WorksIndexConfig extends IndexConfigFields {
   val denormalised = WorksIndexConfig(Seq.empty)
   val indexed = WorksIndexConfig(
     {
-      val identifiersPath = List("search.identifiers")
-      val titlesAndContributorsPath = List("search.titlesAndContributors")
-
-      val newIdentifiersPath = List("query.allIdentifiers")
-      val newTitlesAndContributorsPath = List("query.titlesAndContributors")
-
-      // Indexing lots of individual fields on Elasticsearch can be very CPU
-      // intensive, so here only include fields that are needed for querying in the
-      // API.
-      def data: ObjectField =
-        objectField("data").fields(
-          objectField("otherIdentifiers")
-            .fields(lowercaseKeyword("value").copy(copyTo = identifiersPath)),
-          objectField("format").fields(keywordField("id")),
-          multilingualFieldWithKeyword("title")
-            .copyTo(titlesAndContributorsPath),
-          multilingualFieldWithKeyword("alternativeTitles")
-            .copyTo(titlesAndContributorsPath),
-          englishTextField("description"),
-          englishTextKeywordField("physicalDescription"),
-          multilingualField("lettering"),
-          objectField("contributors").fields(
-            objectField("agent")
-              .fields(label.copyTo(titlesAndContributorsPath))
-          ),
-          objectField("subjects").fields(
-            label,
-            objectField("concepts").fields(label)
-          ),
-          objectField("genres").fields(
-            label,
-            objectField("concepts").fields(label)
-          ),
-          objectField("items").fields(
-            objectField("locations").fields(
-              keywordField("type"),
-              objectField("locationType").fields(keywordField("id")),
-              objectField("license").fields(keywordField("id")),
-              objectField("accessConditions").fields(
-                objectField("status").fields(keywordField("type"))
-              )
-            ),
-            objectField("id").fields(
-              canonicalId.copy(copyTo = identifiersPath),
-              objectField("sourceIdentifier")
-                .fields(
-                  lowercaseKeyword("value").copy(copyTo = identifiersPath)
-                )
-                .withDynamic("false"),
-              objectField("otherIdentifiers")
-                .fields(
-                  lowercaseKeyword("value").copy(copyTo = identifiersPath)
-                )
-            )
-          ),
-          objectField("production").fields(
-            label,
-            objectField("places").fields(label),
-            objectField("agents").fields(label),
-            objectField("dates").fields(
-              label,
-              objectField("range").fields(dateField("from"))
-            ),
-            objectField("function").fields(label)
-          ),
-          objectField("languages").fields(label, keywordField("id")),
-          textField("edition"),
-          objectField("notes").fields(englishTextField("contents")),
-          intField("duration"),
-          collectionPath(copyPathTo = Some("data.collectionPath.depth")),
-          objectField("imageData").fields(
-            objectField("id").fields(
-              canonicalId.copy(copyTo = identifiersPath),
-              objectField("sourceIdentifier")
-                .fields(
-                  lowercaseKeyword("value").copy(copyTo = identifiersPath)
-                )
-                .withDynamic("false")
-            )
-          ),
-          keywordField("workType"),
-          keywordField("referenceNumber").copy(copyTo = identifiersPath)
-        )
-
-      def collectionPath(copyPathTo: Option[String]): ObjectField = {
-        val path = textField("path")
-          .analyzer(exactPathAnalyzer.name)
-          .fields(
-            keywordField("keyword"),
-            textField("clean").analyzer(cleanPathAnalyzer.name)
-          )
-          .copyTo(copyPathTo.toList)
-        val label = textField("label")
-          .analyzer(asciifoldingAnalyzer.name)
-          .fields(
-            keywordField("keyword"),
-            lowercaseKeyword("lowercaseKeyword"),
-            textField("cleanPath").analyzer(cleanPathAnalyzer.name),
-            textField("path").analyzer(exactPathAnalyzer.name)
-          )
-        val depth = TokenCountField("depth").withAnalyzer("standard")
-
-        ObjectField(
-          name = "collectionPath",
-          properties = Seq(label, path, depth)
-        )
-      }
-
-      val state = objectField("state")
-        .fields(
-          canonicalId.copy(copyTo = identifiersPath),
-          objectField("sourceIdentifier")
-            .fields(
-              lowercaseKeyword("value").copy(copyTo = identifiersPath)
-            )
-            .withDynamic("false"),
-          dateField("sourceModifiedTime"),
-          dateField("mergedTime"),
-          dateField("indexedTime"),
-          objectField("availabilities").fields(keywordField("id")),
-          objectField("relations")
-            .fields(
-              objectField("ancestors").fields(
-                lowercaseKeyword("id"),
-                intField("depth"),
-                intField("numChildren"),
-                intField("numDescendents"),
-                multilingualFieldWithKeyword("title"),
-                collectionPath(copyPathTo = None)
-              )
-            )
-            .withDynamic("false")
-        )
-
-      val search = objectField("search").fields(
-        lowercaseKeyword("identifiers"),
-        textField("relations").analyzer(exactPathAnalyzer.name),
-        multilingualField("titlesAndContributors")
-      )
+      val identifiersPath = List("query.allIdentifiers")
+      val titlesAndContributorsPath = List("query.titlesAndContributors")
 
       // This field contains debugging information which we don't want to index, which
       // is just used by developers debugging the pipeline.
@@ -224,14 +83,14 @@ object WorksIndexConfig extends IndexConfigFields {
       val query = objectField("query")
         .fields(
           // top-level work
-          canonicalIdField("id").copy(copyTo = newIdentifiersPath),
+          canonicalIdField("id").copy(copyTo = identifiersPath),
           keywordField("type"),
           keywordField("format.id"),
           keywordField("workType"),
           multilingualFieldWithKeyword("title").copy(
-            copyTo = newTitlesAndContributorsPath),
+            copyTo = titlesAndContributorsPath),
           multilingualFieldWithKeyword("alternativeTitles").copy(
-            copyTo = newTitlesAndContributorsPath),
+            copyTo = titlesAndContributorsPath),
           englishTextField("description"),
           englishTextKeywordField("physicalDescription"),
           textField("edition"),
@@ -239,15 +98,15 @@ object WorksIndexConfig extends IndexConfigFields {
           multilingualField("lettering"),
           // identifiers
           sourceIdentifierField("identifiers.value")
-            .copy(copyTo = newIdentifiersPath),
+            .copy(copyTo = identifiersPath),
           // images
-          canonicalIdField("images.id").copy(copyTo = newIdentifiersPath),
+          canonicalIdField("images.id").copy(copyTo = identifiersPath),
           sourceIdentifierField("images.identifiers.value").copy(
-            copyTo = newIdentifiersPath),
+            copyTo = identifiersPath),
           // items
-          canonicalIdField("items.id").copy(copyTo = newIdentifiersPath),
+          canonicalIdField("items.id").copy(copyTo = identifiersPath),
           sourceIdentifierField("items.identifiers.value").copy(
-            copyTo = newIdentifiersPath),
+            copyTo = identifiersPath),
           keywordField("items.locations.accessConditions.status.id"),
           keywordField("items.locations.license.id"),
           keywordField("items.locations.locationType.id"),
@@ -264,7 +123,7 @@ object WorksIndexConfig extends IndexConfigFields {
           // contributors
           canonicalIdField("contributors.agent.id"),
           labelField("contributors.agent.label").copy(
-            copyTo = newTitlesAndContributorsPath),
+            copyTo = titlesAndContributorsPath),
           // production events
           labelField("production.label"),
           dateField("production.dates.range.from"),
@@ -289,7 +148,7 @@ object WorksIndexConfig extends IndexConfigFields {
               textField("path").analyzer(exactPathAnalyzer.name)
             ),
           // reference number
-          keywordField("referenceNumber").copy(copyTo = newIdentifiersPath),
+          keywordField("referenceNumber").copy(copyTo = identifiersPath),
           // fields populated by copyTo
           lowercaseKeyword("allIdentifiers"),
           multilingualField("titlesAndContributors")
@@ -315,10 +174,7 @@ object WorksIndexConfig extends IndexConfigFields {
         )
 
       Seq(
-        state,
-        search,
         keywordField("type"),
-        data.withDynamic("false"),
         objectField("redirectTarget").withDynamic("false"),
         debug,
         display,

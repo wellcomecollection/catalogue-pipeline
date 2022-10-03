@@ -1,10 +1,11 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2022-09-30T08:11:41.763579Z",
+  "createdAt" : "2022-10-03T10:25:19.260Z",
   "id" : "fuwvinln",
   "document" : {
     "debug" : {
       "source" : {
+        "id" : "fuwvinln",
         "identifier" : {
           "identifierType" : {
             "id" : "miro-image-number"
@@ -19,70 +20,6 @@
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "miro-image-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "40wEIb4rPR"
-      },
-      "canonicalId" : "fuwvinln",
-      "mergedTime" : "1986-03-14T08:59:39Z",
-      "sourceModifiedTime" : "1986-03-14T08:59:39Z",
-      "indexedTime" : "2001-01-01T01:01:01Z",
-      "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "data" : {
-      "title" : "title-8ljlZQFqGf",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : {
-        "id" : "l",
-        "label" : "Ephemera"
-      },
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
     },
     "display" : {
       "id" : "fuwvinln",

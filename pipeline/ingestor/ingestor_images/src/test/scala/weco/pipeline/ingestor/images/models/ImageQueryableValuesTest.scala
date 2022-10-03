@@ -56,6 +56,8 @@ class ImageQueryableValuesTest
     )
 
     val q = ImageQueryableValues(
+      id = createCanonicalId,
+      sourceIdentifier = createSourceIdentifier,
       inferredData = InferredData.empty,
       source = canonicalWork
     )
@@ -87,6 +89,8 @@ class ImageQueryableValuesTest
     )
 
     val q = ImageQueryableValues(
+      id = createCanonicalId,
+      sourceIdentifier = createSourceIdentifier,
       inferredData = InferredData.empty,
       source = canonicalWork
     )

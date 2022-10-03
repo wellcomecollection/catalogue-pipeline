@@ -1,8 +1,8 @@
 package weco.catalogue.internal_model.index
 
 import buildinfo.BuildInfo
-import com.sksamuel.elastic4s.ElasticDsl.{keywordField, _}
-import com.sksamuel.elastic4s.fields.{DenseVectorField, ObjectField}
+import com.sksamuel.elastic4s.ElasticDsl._
+import com.sksamuel.elastic4s.fields.DenseVectorField
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
 import weco.catalogue.internal_model.index.WorksAnalysis.{
   asciifoldingAnalyzer,
@@ -29,54 +29,6 @@ object ImagesIndexConfig extends IndexConfigFields {
         floatField("binMinima").withIndex(false),
         floatField("aspectRatio")
       )
-
-      def parentWork(fieldName: String): ObjectField =
-        objectField(fieldName)
-          .fields(
-            objectField("id").fields(canonicalId, sourceIdentifier),
-            objectField("data").fields(
-              objectField("otherIdentifiers").fields(lowercaseKeyword("value")),
-              multilingualFieldWithKeyword("title"),
-              multilingualFieldWithKeyword("alternativeTitles"),
-              multilingualField("description"),
-              englishTextKeywordField("physicalDescription"),
-              multilingualField("lettering"),
-              objectField("contributors").fields(
-                objectField("agent").fields(label)
-              ),
-              objectField("subjects").fields(
-                objectField("concepts").fields(label)
-              ),
-              objectField("genres").fields(
-                label,
-                objectField("concepts").fields(label)
-              ),
-              objectField("production").fields(
-                objectField("places").fields(label),
-                objectField("agents").fields(label),
-                objectField("dates").fields(label),
-                objectField("function").fields(label)
-              ),
-              objectField("languages").fields(
-                label,
-                keywordField("id")
-              ),
-              textField("edition"),
-              objectField("notes").fields(multilingualField("content")),
-              objectField("collectionPath").fields(label, textField("path"))
-            ),
-            keywordField("type")
-          )
-          .withDynamic("false")
-
-      val source = parentWork("source")
-
-      val state = objectField("state")
-        .fields(
-          canonicalId,
-          sourceIdentifier,
-          inferredData
-        )
 
       // This field contains the display document used by the API, but we don't want
       // to index it -- it's just an arbitrary blob of JSON.
@@ -150,6 +102,8 @@ object ImagesIndexConfig extends IndexConfigFields {
 
       val query = objectField("query")
         .fields(
+          canonicalIdField("id"),
+          sourceIdentifierField("sourceIdentifier.value"),
           inferredData,
           sourceWork
         )
@@ -170,15 +124,7 @@ object ImagesIndexConfig extends IndexConfigFields {
         )
 
       val fields = Seq(
-        version,
         dateField("modifiedTime"),
-        source,
-        state,
-        objectField("locations")
-          .fields(
-            objectField("license").fields(keywordField("id"))
-          )
-          .withDynamic("false"),
         display,
         query,
         aggregatableValues

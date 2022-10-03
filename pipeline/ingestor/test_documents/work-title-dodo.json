@@ -1,10 +1,11 @@
 {
   "description" : "a work with 'dodo' in the title",
-  "createdAt" : "2022-09-30T08:11:40.986709Z",
+  "createdAt" : "2022-10-03T10:25:18.828Z",
   "id" : "ezagik4b",
   "document" : {
     "debug" : {
       "source" : {
+        "id" : "ezagik4b",
         "identifier" : {
           "identifierType" : {
             "id" : "sierra-system-number"
@@ -19,67 +20,6 @@
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "sierra-system-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "xg9OuzGali"
-      },
-      "canonicalId" : "ezagik4b",
-      "mergedTime" : "1965-10-11T02:36:15Z",
-      "sourceModifiedTime" : "1965-10-11T02:36:15Z",
-      "indexedTime" : "2001-01-01T01:01:01Z",
-      "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "data" : {
-      "title" : "A drawing of a dodo",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : "A line of legible ligatures",
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
     },
     "display" : {
       "id" : "ezagik4b",

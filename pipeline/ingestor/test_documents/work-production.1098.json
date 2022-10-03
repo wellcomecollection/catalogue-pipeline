@@ -1,10 +1,11 @@
 {
   "description" : "a work with a production event in 1098",
-  "createdAt" : "2022-09-30T08:11:41.065502Z",
+  "createdAt" : "2022-10-03T11:15:02.605399Z",
   "id" : "guav7chy",
   "document" : {
     "debug" : {
       "source" : {
+        "id" : "guav7chy",
         "identifier" : {
           "identifierType" : {
             "id" : "miro-image-number"
@@ -19,88 +20,6 @@
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "miro-image-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "W9fptfa5Xn"
-      },
-      "canonicalId" : "guav7chy",
-      "mergedTime" : "1947-04-11T10:50:49Z",
-      "sourceModifiedTime" : "1947-04-11T10:50:49Z",
-      "indexedTime" : "2001-01-01T01:01:01Z",
-      "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "data" : {
-      "title" : "Production event in 1098",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-        {
-          "label" : "O5NI3fmxMe7PvjOSdUDvO1WIV",
-          "places" : [
-          ],
-          "agents" : [
-          ],
-          "dates" : [
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "1098",
-              "range" : {
-                "from" : "1098-01-01T00:00:00Z",
-                "to" : "1098-12-31T23:59:59.999999999Z",
-                "label" : "1098"
-              }
-            }
-          ],
-          "function" : null
-        }
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
     },
     "display" : {
       "id" : "guav7chy",

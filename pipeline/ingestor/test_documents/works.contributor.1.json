@@ -1,10 +1,11 @@
 {
   "description" : "works with different contributor",
-  "createdAt" : "2022-09-30T08:11:41.663295Z",
+  "createdAt" : "2022-10-03T10:25:19.224Z",
   "id" : "bj9evx0c",
   "document" : {
     "debug" : {
       "source" : {
+        "id" : "bj9evx0c",
         "identifier" : {
           "identifierType" : {
             "id" : "calm-record-id"
@@ -19,82 +20,6 @@
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "calm-record-id"
-        },
-        "ontologyType" : "Work",
-        "value" : "TjLML0MOH1"
-      },
-      "canonicalId" : "bj9evx0c",
-      "mergedTime" : "1954-02-14T04:36:57Z",
-      "sourceModifiedTime" : "1954-02-14T04:36:57Z",
-      "indexedTime" : "2001-01-01T01:01:01Z",
-      "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "data" : {
-      "title" : "title-h70mKj49k3",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-        {
-          "id" : {
-            "type" : "Unidentifiable"
-          },
-          "agent" : {
-            "id" : {
-              "type" : "Unidentifiable"
-            },
-            "label" : "47",
-            "type" : "Agent"
-          },
-          "roles" : [
-          ],
-          "primary" : true
-        }
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
     },
     "display" : {
       "id" : "bj9evx0c",

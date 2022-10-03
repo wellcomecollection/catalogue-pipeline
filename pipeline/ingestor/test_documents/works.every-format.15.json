@@ -1,10 +1,11 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2022-09-30T08:11:41.772449Z",
+  "createdAt" : "2022-10-03T10:25:19.265Z",
   "id" : "tlc5rq9a",
   "document" : {
     "debug" : {
       "source" : {
+        "id" : "tlc5rq9a",
         "identifier" : {
           "identifierType" : {
             "id" : "sierra-system-number"
@@ -19,70 +20,6 @@
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "sierra-system-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "mz25207khU"
-      },
-      "canonicalId" : "tlc5rq9a",
-      "mergedTime" : "1934-03-12T06:54:31Z",
-      "sourceModifiedTime" : "1934-03-12T06:54:31Z",
-      "indexedTime" : "2001-01-01T01:01:01Z",
-      "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "data" : {
-      "title" : "title-jNr737MdPw",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : {
-        "id" : "c",
-        "label" : "Music"
-      },
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
     },
     "display" : {
       "id" : "tlc5rq9a",

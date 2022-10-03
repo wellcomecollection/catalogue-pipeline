@@ -1,10 +1,11 @@
 {
   "description" : "a work with 'mouse' in the title",
-  "createdAt" : "2022-09-30T08:11:40.993274Z",
+  "createdAt" : "2022-10-03T10:25:18.831Z",
   "id" : "lnn17cwk",
   "document" : {
     "debug" : {
       "source" : {
+        "id" : "lnn17cwk",
         "identifier" : {
           "identifierType" : {
             "id" : "miro-image-number"
@@ -19,67 +20,6 @@
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "miro-image-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "EhPpSB8mq7"
-      },
-      "canonicalId" : "lnn17cwk",
-      "mergedTime" : "2003-09-07T11:20:18Z",
-      "sourceModifiedTime" : "2003-09-07T11:20:18Z",
-      "indexedTime" : "2001-01-01T01:01:01Z",
-      "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "data" : {
-      "title" : "A mezzotint of a mouse",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : "A print of proportional penmanship",
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
     },
     "display" : {
       "id" : "lnn17cwk",

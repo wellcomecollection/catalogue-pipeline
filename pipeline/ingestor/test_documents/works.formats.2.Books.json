@@ -1,10 +1,11 @@
 {
   "description" : "one of a list of works with a variety of formats",
-  "createdAt" : "2022-09-30T08:11:41.372122Z",
+  "createdAt" : "2022-10-03T10:25:19.137Z",
   "id" : "j27g6hhl",
   "document" : {
     "debug" : {
       "source" : {
+        "id" : "j27g6hhl",
         "identifier" : {
           "identifierType" : {
             "id" : "calm-record-id"
@@ -19,70 +20,6 @@
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "calm-record-id"
-        },
-        "ontologyType" : "Work",
-        "value" : "vyeItSna2X"
-      },
-      "canonicalId" : "j27g6hhl",
-      "mergedTime" : "2067-01-08T22:50:46Z",
-      "sourceModifiedTime" : "2067-01-08T22:50:46Z",
-      "indexedTime" : "2001-01-01T01:01:01Z",
-      "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "data" : {
-      "title" : "A work with format Books",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : {
-        "id" : "a",
-        "label" : "Books"
-      },
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
     },
     "display" : {
       "id" : "j27g6hhl",

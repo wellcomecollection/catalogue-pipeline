@@ -1,10 +1,11 @@
 {
   "description" : "an invisible work with 'mouse' in the title",
-  "createdAt" : "2022-05-31T18:33:50.636066Z",
+  "createdAt" : "2022-10-03T10:25:18.862Z",
   "id" : "ehd2s7ek",
   "document" : {
     "debug" : {
       "source" : {
+        "id" : "ehd2s7ek",
         "identifier" : {
           "identifierType" : {
             "id" : "calm-record-id"
@@ -19,67 +20,6 @@
       "indexedTime" : "2001-01-01T01:01:01Z",
       "invisibilityReasons" : [
       ]
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "calm-record-id"
-        },
-        "ontologyType" : "Work",
-        "value" : "QAH5ZlILHM"
-      },
-      "canonicalId" : "ehd2s7ek",
-      "mergedTime" : "2006-12-05T07:13:26Z",
-      "sourceModifiedTime" : "2006-12-05T07:13:26Z",
-      "indexedTime" : "2001-01-01T01:01:01Z",
-      "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "data" : {
-      "title" : "An invisible mezzotint of a mouse",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
     },
     "type" : "Invisible"
   }

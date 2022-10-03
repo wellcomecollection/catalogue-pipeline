@@ -1,10 +1,11 @@
 {
   "description" : "examples for the genre tests",
-  "createdAt" : "2022-09-30T08:11:42.189933Z",
+  "createdAt" : "2022-10-03T10:25:19.349Z",
   "id" : "4btprmwn",
   "document" : {
     "debug" : {
       "source" : {
+        "id" : "4btprmwn",
         "identifier" : {
           "identifierType" : {
             "id" : "sierra-system-number"
@@ -19,145 +20,6 @@
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "sierra-system-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "C7XCeymDdf"
-      },
-      "canonicalId" : "4btprmwn",
-      "mergedTime" : "1953-03-04T04:51:01Z",
-      "sourceModifiedTime" : "1953-03-04T04:51:01Z",
-      "indexedTime" : "2001-01-01T01:01:01Z",
-      "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "data" : {
-      "title" : "title-iLGpm85YYF",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-        {
-          "label" : "Pamphlets.",
-          "concepts" : [
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "7ZYKrzxgMS4HDJM",
-              "type" : "Concept"
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "nToBweq2UFKJPlz",
-              "type" : "Concept"
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "YfNgtG1SKw3klDA",
-              "type" : "Concept"
-            }
-          ]
-        },
-        {
-          "label" : "Psychology, Pathological",
-          "concepts" : [
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "uK4GKNsXvX3NJfI",
-              "type" : "Concept"
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "XCFVccBcFLmxtr1",
-              "type" : "Concept"
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "wn4mlLNPr0YHU0g",
-              "type" : "Concept"
-            }
-          ]
-        },
-        {
-          "label" : "Darwin \"Jones\", Charles",
-          "concepts" : [
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "7V2pOSQnJOeXjVu",
-              "type" : "Concept"
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "ylz3BDWIViYo3qv",
-              "type" : "Concept"
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "sJ0y4QwQTlrFnQP",
-              "type" : "Concept"
-            }
-          ]
-        }
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
     },
     "display" : {
       "id" : "4btprmwn",

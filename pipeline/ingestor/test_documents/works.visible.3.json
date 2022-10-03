@@ -1,10 +1,11 @@
 {
   "description" : "an arbitrary list of visible works",
-  "createdAt" : "2022-09-30T08:11:40.335975Z",
+  "createdAt" : "2022-10-03T10:25:18.732Z",
   "id" : "raob2ruv",
   "document" : {
     "debug" : {
       "source" : {
+        "id" : "raob2ruv",
         "identifier" : {
           "identifierType" : {
             "id" : "sierra-system-number"
@@ -19,67 +20,6 @@
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "sierra-system-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "wyJzS2SuiH"
-      },
-      "canonicalId" : "raob2ruv",
-      "mergedTime" : "1966-03-23T00:51:51Z",
-      "sourceModifiedTime" : "1966-03-23T00:51:51Z",
-      "indexedTime" : "2001-01-01T01:01:01Z",
-      "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "data" : {
-      "title" : "title-bFbQPNB7Zu",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
     },
     "display" : {
       "id" : "raob2ruv",

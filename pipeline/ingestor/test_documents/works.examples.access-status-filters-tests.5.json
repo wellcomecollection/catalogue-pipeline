@@ -1,10 +1,11 @@
 {
   "description" : "examples for the access status tests",
-  "createdAt" : "2022-09-30T08:11:42.439095Z",
+  "createdAt" : "2022-10-03T10:25:19.395Z",
   "id" : "yh6sk7pv",
   "document" : {
     "debug" : {
       "source" : {
+        "id" : "yh6sk7pv",
         "identifier" : {
           "identifierType" : {
             "id" : "miro-image-number"
@@ -19,116 +20,6 @@
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "miro-image-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "5tbPGXaLqw"
-      },
-      "canonicalId" : "yh6sk7pv",
-      "mergedTime" : "2054-12-08T15:48:00Z",
-      "sourceModifiedTime" : "2054-12-08T15:48:00Z",
-      "indexedTime" : "2001-01-01T01:01:01Z",
-      "availabilities" : [
-        {
-          "id" : "online"
-        }
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "data" : {
-      "title" : "title-r7VLiwfab6",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-        {
-          "id" : {
-            "canonicalId" : "h42kte1h",
-            "sourceIdentifier" : {
-              "identifierType" : {
-                "id" : "sierra-system-number"
-              },
-              "ontologyType" : "Work",
-              "value" : "M7iXmYa3Fc"
-            },
-            "otherIdentifiers" : [
-            ],
-            "type" : "Identified"
-          },
-          "title" : null,
-          "note" : null,
-          "locations" : [
-            {
-              "url" : "https://iiif.wellcomecollection.org/image/Tff.jpg/info.json",
-              "locationType" : {
-                "id" : "iiif-presentation"
-              },
-              "license" : {
-                "id" : "cc-by"
-              },
-              "credit" : null,
-              "linkText" : "Link text: Jcj7uta",
-              "accessConditions" : [
-                {
-                  "method" : {
-                    "type" : "ManualRequest"
-                  },
-                  "status" : {
-                    "relationship" : {
-                      "type" : "Resource"
-                    },
-                    "type" : "LicensedResources"
-                  },
-                  "note" : null,
-                  "terms" : null
-                }
-              ],
-              "type" : "DigitalLocation"
-            }
-          ]
-        }
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
     },
     "display" : {
       "id" : "yh6sk7pv",

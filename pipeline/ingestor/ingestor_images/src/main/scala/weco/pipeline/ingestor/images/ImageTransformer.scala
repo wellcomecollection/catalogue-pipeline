@@ -1,8 +1,7 @@
 package weco.pipeline.ingestor.images
 
 import weco.catalogue.display_model.image.DisplayImage
-import weco.catalogue.internal_model.image.Image
-import weco.catalogue.internal_model.image.ImageState.{Augmented, Indexed}
+import weco.catalogue.internal_model.image.{Image, ImageState}
 import weco.pipeline.ingestor.images.models.{
   ImageAggregatableValues,
   ImageQueryableValues,
@@ -12,22 +11,17 @@ import weco.catalogue.display_model.Implicits._
 import io.circe.syntax._
 
 object ImageTransformer {
-  val deriveData: Image[Augmented] => IndexedImage =
-    image => {
-      val indexedImage = image.transition[Indexed]()
-
+  val deriveData: Image[ImageState.Augmented] => IndexedImage =
+    image =>
       IndexedImage(
-        version = indexedImage.version,
-        state = indexedImage.state,
-        locations = indexedImage.locations,
-        source = indexedImage.source,
-        modifiedTime = indexedImage.modifiedTime,
-        display = DisplayImage(indexedImage).asJson.deepDropNullValues,
+        modifiedTime = image.modifiedTime,
+        display = DisplayImage(image).asJson.deepDropNullValues,
         query = ImageQueryableValues(
-          inferredData = indexedImage.state.inferredData,
-          source = indexedImage.source
+          id = image.state.canonicalId,
+          sourceIdentifier = image.state.sourceIdentifier,
+          inferredData = image.state.inferredData,
+          source = image.source
         ),
-        aggregatableValues = ImageAggregatableValues(indexedImage.source)
-      )
-    }
+        aggregatableValues = ImageAggregatableValues(image.source)
+    )
 }

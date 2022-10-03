@@ -1,10 +1,11 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2022-09-30T08:11:42.238356Z",
+  "createdAt" : "2022-10-03T10:25:19.360Z",
   "id" : "gmzc1icz",
   "document" : {
     "debug" : {
       "source" : {
+        "id" : "gmzc1icz",
         "identifier" : {
           "identifierType" : {
             "id" : "calm-record-id"
@@ -19,164 +20,6 @@
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "calm-record-id"
-        },
-        "ontologyType" : "Work",
-        "value" : "Q8QOPJdAXF"
-      },
-      "canonicalId" : "gmzc1icz",
-      "mergedTime" : "1983-04-17T04:26:34Z",
-      "sourceModifiedTime" : "1983-04-17T04:26:34Z",
-      "indexedTime" : "2001-01-01T01:01:01Z",
-      "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "data" : {
-      "title" : "title-vNWbRfsAZ5",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-        {
-          "id" : {
-            "type" : "Unidentifiable"
-          },
-          "label" : "London (England)",
-          "concepts" : [
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "pZYum1qUlCcjglM",
-              "type" : "Concept"
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "PaKQZ55SIuLPMgI",
-              "type" : "Concept"
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "G177tcCDpKgb0Wd",
-              "type" : "Concept"
-            }
-          ]
-        },
-        {
-          "id" : {
-            "type" : "Unidentifiable"
-          },
-          "label" : "Psychology, Pathological",
-          "concepts" : [
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "y2nMuMcZq1Jcxuk",
-              "type" : "Concept"
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "acPWKUROxBsQ4CK",
-              "type" : "Concept"
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "8DrDsk2kCAGURhx",
-              "type" : "Concept"
-            }
-          ]
-        },
-        {
-          "id" : {
-            "canonicalId" : "darwin01",
-            "sourceIdentifier" : {
-              "identifierType" : {
-                "id" : "lc-names"
-              },
-              "ontologyType" : "Subject",
-              "value" : "lcnames-darwin"
-            },
-            "otherIdentifiers" : [
-            ],
-            "type" : "Identified"
-          },
-          "label" : "Darwin \"Jones\", Charles",
-          "concepts" : [
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "40zJbSlLwDNn2Et",
-              "type" : "Concept"
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "p5zfssscK3StYS1",
-              "type" : "Concept"
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "KOlZmZXOWd5kJ1F",
-              "type" : "Concept"
-            }
-          ]
-        }
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
     },
     "display" : {
       "id" : "gmzc1icz",

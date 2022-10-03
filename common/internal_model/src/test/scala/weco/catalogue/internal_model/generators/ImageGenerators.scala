@@ -84,20 +84,6 @@ trait ImageGenerators
           redirectedWork = redirectedWork
         )
 
-    def toIndexedImageWith(
-      canonicalId: CanonicalId = createCanonicalId,
-      parentWork: Work[WorkState.Identified] = identifiedWork(),
-      redirectedWork: Option[Work[WorkState.Identified]] = None,
-      inferredData: InferredData = createInferredData
-    ): Image[ImageState.Indexed] =
-      imageData
-        .toIdentifiedWith(canonicalId = canonicalId)
-        .toIndexedImageWith(
-          parentWork = parentWork,
-          redirectedWork = redirectedWork,
-          inferredData = inferredData
-        )
-
     def toIdentifiedWith(
       canonicalId: CanonicalId = createCanonicalId
     ): ImageData[IdState.Identified] = {
@@ -129,8 +115,6 @@ trait ImageGenerators
       imageData.toIdentified.toInitialImage
 
     def toAugmentedImage = toAugmentedImageWith()
-
-    def toIndexedImage = toIndexedImageWith()
   }
 
   implicit class IdentifiedImageDataOps(
@@ -160,19 +144,6 @@ trait ImageGenerators
       imageData
         .toInitialImageWith(parentWork = parentWork.toParentWork)
         .transition[ImageState.Augmented](inferredData)
-
-    def toIndexedImageWith(
-      parentWork: Work[WorkState.Identified] = identifiedWork(),
-      redirectedWork: Option[Work[WorkState.Identified]] = None,
-      inferredData: InferredData = createInferredData
-    ): Image[ImageState.Indexed] =
-      imageData
-        .toAugmentedImageWith(
-          parentWork = parentWork,
-          redirectedWork = redirectedWork,
-          inferredData = inferredData
-        )
-        .transition[ImageState.Indexed]()
 
     def toInitialImage = toInitialImageWith()
 

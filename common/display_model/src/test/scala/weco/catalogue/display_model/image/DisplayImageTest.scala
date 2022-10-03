@@ -21,7 +21,7 @@ class DisplayImageTest extends AnyFunSpec with Matchers with ImageGenerators {
       )
     )
 
-    val image = createImageDataWith(locations = locations).toIndexedImage
+    val image = createImageDataWith(locations = locations).toAugmentedImage
     val displayImage = DisplayImage(image)
 
     displayImage.thumbnail shouldBe DisplayDigitalLocation(imageLocation)
@@ -29,7 +29,7 @@ class DisplayImageTest extends AnyFunSpec with Matchers with ImageGenerators {
 
   it("throws an error if there is no iiif-image location") {
     val image =
-      createImageDataWith(locations = List(createManifestLocation)).toIndexedImage
+      createImageDataWith(locations = List(createManifestLocation)).toAugmentedImage
 
     assertThrows[RuntimeException] {
       DisplayImage(image)

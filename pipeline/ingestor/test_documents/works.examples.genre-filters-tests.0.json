@@ -1,10 +1,11 @@
 {
   "description" : "examples for the genre tests",
-  "createdAt" : "2022-09-30T08:11:42.181156Z",
+  "createdAt" : "2022-10-03T10:25:19.345Z",
   "id" : "jywtq4xg",
   "document" : {
     "debug" : {
       "source" : {
+        "id" : "jywtq4xg",
         "identifier" : {
           "identifierType" : {
             "id" : "calm-record-id"
@@ -19,93 +20,6 @@
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "calm-record-id"
-        },
-        "ontologyType" : "Work",
-        "value" : "LgGFRAV0Zs"
-      },
-      "canonicalId" : "jywtq4xg",
-      "mergedTime" : "1934-09-04T19:55:55Z",
-      "sourceModifiedTime" : "1934-09-04T19:55:55Z",
-      "indexedTime" : "2001-01-01T01:01:01Z",
-      "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "data" : {
-      "title" : "title-ZEnp6i2y6i",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-        {
-          "label" : "Annual reports.",
-          "concepts" : [
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "qp5RA4f5gWVIptl",
-              "type" : "Concept"
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "xE0qlBbPiSihnTe",
-              "type" : "Concept"
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "JBs3eSemcGNQXd8",
-              "type" : "Concept"
-            }
-          ]
-        }
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
     },
     "display" : {
       "id" : "jywtq4xg",

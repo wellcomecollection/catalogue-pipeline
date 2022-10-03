@@ -1,10 +1,11 @@
 {
   "description" : "a work with a production event in 2020",
-  "createdAt" : "2022-09-30T08:11:41.058390Z",
+  "createdAt" : "2022-10-03T10:25:18.857Z",
   "id" : "0fucriyr",
   "document" : {
     "debug" : {
       "source" : {
+        "id" : "0fucriyr",
         "identifier" : {
           "identifierType" : {
             "id" : "miro-image-number"
@@ -19,88 +20,6 @@
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "miro-image-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "KgSH5dUX0Z"
-      },
-      "canonicalId" : "0fucriyr",
-      "mergedTime" : "1936-06-08T14:59:50Z",
-      "sourceModifiedTime" : "1936-06-08T14:59:50Z",
-      "indexedTime" : "2001-01-01T01:01:01Z",
-      "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "data" : {
-      "title" : "Production event in 2020",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-        {
-          "label" : "qX1oaMinUSJLhD6RZ9qpj8A8L",
-          "places" : [
-          ],
-          "agents" : [
-          ],
-          "dates" : [
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "2020",
-              "range" : {
-                "from" : "2020-01-01T00:00:00Z",
-                "to" : "2020-12-31T23:59:59.999999999Z",
-                "label" : "2020"
-              }
-            }
-          ],
-          "function" : null
-        }
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
     },
     "display" : {
       "id" : "0fucriyr",

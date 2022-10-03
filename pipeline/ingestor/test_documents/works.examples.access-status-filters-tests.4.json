@@ -1,10 +1,11 @@
 {
   "description" : "examples for the access status tests",
-  "createdAt" : "2022-09-30T08:11:42.426853Z",
+  "createdAt" : "2022-10-03T10:25:19.393Z",
   "id" : "iqani2su",
   "document" : {
     "debug" : {
       "source" : {
+        "id" : "iqani2su",
         "identifier" : {
           "identifierType" : {
             "id" : "sierra-system-number"
@@ -19,113 +20,6 @@
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "sierra-system-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "jYpuBxuni2"
-      },
-      "canonicalId" : "iqani2su",
-      "mergedTime" : "2029-03-03T16:26:17Z",
-      "sourceModifiedTime" : "2029-03-03T16:26:17Z",
-      "indexedTime" : "2001-01-01T01:01:01Z",
-      "availabilities" : [
-        {
-          "id" : "online"
-        }
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "data" : {
-      "title" : "title-7p7NJFW4Dx",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-        {
-          "id" : {
-            "canonicalId" : "wbli95ga",
-            "sourceIdentifier" : {
-              "identifierType" : {
-                "id" : "calm-record-id"
-              },
-              "ontologyType" : "Work",
-              "value" : "clr9E9aLfx"
-            },
-            "otherIdentifiers" : [
-            ],
-            "type" : "Identified"
-          },
-          "title" : null,
-          "note" : null,
-          "locations" : [
-            {
-              "url" : "https://iiif.wellcomecollection.org/image/6NT.jpg/info.json",
-              "locationType" : {
-                "id" : "iiif-presentation"
-              },
-              "license" : {
-                "id" : "cc-by"
-              },
-              "credit" : null,
-              "linkText" : null,
-              "accessConditions" : [
-                {
-                  "method" : {
-                    "type" : "ManualRequest"
-                  },
-                  "status" : {
-                    "type" : "OpenWithAdvisory"
-                  },
-                  "note" : null,
-                  "terms" : null
-                }
-              ],
-              "type" : "DigitalLocation"
-            }
-          ]
-        }
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
     },
     "display" : {
       "id" : "iqani2su",

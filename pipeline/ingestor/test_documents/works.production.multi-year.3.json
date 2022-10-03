@@ -1,10 +1,11 @@
 {
   "description" : "works with multi-year production ranges",
-  "createdAt" : "2022-09-30T08:11:41.908786Z",
+  "createdAt" : "2022-10-03T10:25:19.292Z",
   "id" : "q4abgj9v",
   "document" : {
     "debug" : {
       "source" : {
+        "id" : "q4abgj9v",
         "identifier" : {
           "identifierType" : {
             "id" : "miro-image-number"
@@ -19,103 +20,6 @@
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "miro-image-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "09dkccFCHG"
-      },
-      "canonicalId" : "q4abgj9v",
-      "mergedTime" : "2033-02-19T17:04:42Z",
-      "sourceModifiedTime" : "2033-02-19T17:04:42Z",
-      "indexedTime" : "2001-01-01T01:01:01Z",
-      "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "data" : {
-      "title" : "title-PDvN43mh0p",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-        {
-          "label" : "Cgfghm8mPoOAv5vdS0YG4JWZR",
-          "places" : [
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "aIg4BPWRHb"
-            }
-          ],
-          "agents" : [
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "uSqTDzUOjO",
-              "prefix" : null,
-              "numeration" : null,
-              "type" : "Person"
-            }
-          ],
-          "dates" : [
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "1960",
-              "range" : {
-                "from" : "1960-01-01T00:00:00Z",
-                "to" : "1960-12-31T23:59:59.999999999Z",
-                "label" : "1960"
-              }
-            }
-          ],
-          "function" : null
-        }
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
     },
     "display" : {
       "id" : "q4abgj9v",

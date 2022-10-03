@@ -1,10 +1,11 @@
 {
   "description" : "one of a list of works with a variety of languages",
-  "createdAt" : "2022-09-30T08:11:41.490189Z",
+  "createdAt" : "2022-10-03T10:25:19.164Z",
   "id" : "yblbdpjf",
   "document" : {
     "debug" : {
       "source" : {
+        "id" : "yblbdpjf",
         "identifier" : {
           "identifierType" : {
             "id" : "sierra-system-number"
@@ -19,71 +20,6 @@
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "sierra-system-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "vcw0LP9LzQ"
-      },
-      "canonicalId" : "yblbdpjf",
-      "mergedTime" : "1950-07-07T08:46:09Z",
-      "sourceModifiedTime" : "1950-07-07T08:46:09Z",
-      "indexedTime" : "2001-01-01T01:01:01Z",
-      "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "data" : {
-      "title" : "A work with languages Turkish",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-        {
-          "id" : "tur",
-          "label" : "Turkish"
-        }
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
     },
     "display" : {
       "id" : "yblbdpjf",

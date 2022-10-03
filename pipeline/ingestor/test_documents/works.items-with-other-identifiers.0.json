@@ -1,10 +1,11 @@
 {
   "description" : "works with items with other identifiers",
-  "createdAt" : "2022-09-30T08:11:41.706587Z",
+  "createdAt" : "2022-10-03T10:25:19.239Z",
   "id" : "qjnwiqbs",
   "document" : {
     "debug" : {
       "source" : {
+        "id" : "qjnwiqbs",
         "identifier" : {
           "identifierType" : {
             "id" : "calm-record-id"
@@ -19,107 +20,6 @@
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "calm-record-id"
-        },
-        "ontologyType" : "Work",
-        "value" : "Jj1GugWgka"
-      },
-      "canonicalId" : "qjnwiqbs",
-      "mergedTime" : "2042-05-19T11:22:55Z",
-      "sourceModifiedTime" : "2042-05-19T11:22:55Z",
-      "indexedTime" : "2001-01-01T01:01:01Z",
-      "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "data" : {
-      "title" : "title-m47LFZN2Zg",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-        {
-          "id" : {
-            "canonicalId" : "nuywbjoj",
-            "sourceIdentifier" : {
-              "identifierType" : {
-                "id" : "calm-record-id"
-              },
-              "ontologyType" : "Work",
-              "value" : "nDSV5vB01p"
-            },
-            "otherIdentifiers" : [
-              {
-                "identifierType" : {
-                  "id" : "miro-image-number"
-                },
-                "ontologyType" : "Work",
-                "value" : "xJJHLpGvU7"
-              }
-            ],
-            "type" : "Identified"
-          },
-          "title" : null,
-          "note" : null,
-          "locations" : [
-            {
-              "url" : "https://iiif.wellcomecollection.org/image/fIx.jpg/info.json",
-              "locationType" : {
-                "id" : "iiif-presentation"
-              },
-              "license" : {
-                "id" : "cc-by"
-              },
-              "credit" : null,
-              "linkText" : null,
-              "accessConditions" : [
-              ],
-              "type" : "DigitalLocation"
-            }
-          ]
-        }
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
     },
     "display" : {
       "id" : "qjnwiqbs",

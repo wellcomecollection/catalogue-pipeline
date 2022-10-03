@@ -1,10 +1,11 @@
 {
   "description" : "examples for the works filtered aggregations tests",
-  "createdAt" : "2022-09-30T08:11:42.482544Z",
+  "createdAt" : "2022-10-03T10:25:19.413Z",
   "id" : "wkzjlx5a",
   "document" : {
     "debug" : {
       "source" : {
+        "id" : "wkzjlx5a",
         "identifier" : {
           "identifierType" : {
             "id" : "calm-record-id"
@@ -19,74 +20,6 @@
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "calm-record-id"
-        },
-        "ontologyType" : "Work",
-        "value" : "SKphDnojLC"
-      },
-      "canonicalId" : "wkzjlx5a",
-      "mergedTime" : "1974-05-03T18:39:30Z",
-      "sourceModifiedTime" : "1974-05-03T18:39:30Z",
-      "indexedTime" : "2001-01-01T01:01:01Z",
-      "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "data" : {
-      "title" : "tapirs",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : {
-        "id" : "a",
-        "label" : "Books"
-      },
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-        {
-          "id" : "bak",
-          "label" : "Bashkir"
-        }
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
     },
     "display" : {
       "id" : "wkzjlx5a",
