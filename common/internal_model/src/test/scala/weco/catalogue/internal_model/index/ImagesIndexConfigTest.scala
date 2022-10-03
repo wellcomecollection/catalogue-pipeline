@@ -96,7 +96,7 @@ class ImagesIndexConfigTest
     encoder: Encoder[I]
   ): Assertion = {
     indexImage(id = image.id, image = image)
-    assertWorkIsIndexed(id = image.id, image = image)
+    assertImageIsIndexed(id = image.id, image = image)
   }
 
   private def indexImage[I](
@@ -107,7 +107,7 @@ class ImagesIndexConfigTest
       indexInto(index).doc(toJson(image).get).id(id)
     }.await
 
-  private def assertWorkIsIndexed[I](
+  private def assertImageIsIndexed[I](
     id: String,
     image: I
   )(implicit index: Index, decoder: Decoder[I]) =
