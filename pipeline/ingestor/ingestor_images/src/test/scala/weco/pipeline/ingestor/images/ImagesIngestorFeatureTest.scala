@@ -16,12 +16,10 @@ import weco.fixtures.TestWith
 import weco.json.JsonUtil._
 import weco.messaging.fixtures.SQS.{Queue, QueuePair}
 import weco.pipeline.ingestor.fixtures.IngestorFixtures
-import weco.pipeline.ingestor.images.models.{
-  ImageAggregatableValues,
-  ImageQueryableValues,
-  IndexedImage
-}
+import weco.pipeline.ingestor.images.models.{ImageAggregatableValues, ImageQueryableValues, IndexedImage}
 import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
+import IndexedImage._
+import com.sksamuel.elastic4s.requests.common.VersionType.ExternalGte
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
@@ -99,7 +97,25 @@ class ImagesIngestorFeatureTest
     testWith: TestWith[Index, R]): R =
     withLocalImagesIndex { index =>
       withLocalAugmentedImageIndex { augmentedIndex =>
-        insertImagesIntoElasticsearch(augmentedIndex, existingImages: _*)
+        val indexedImages = existingImages.map(ImageTransformer.deriveData(_))
+
+        val result = elasticClient.execute(
+          bulk(
+            indexedImages.map { image =>
+              val jsonDoc = toJson(image).get
+
+              indexInto(index.name)
+                .version(IndexedImage.indexable.version(image))
+                .versionType(ExternalGte)
+                .id(IndexedImage.indexable.version(id))
+                .doc(jsonDoc)
+            }
+          ).refreshImmediately
+        )
+
+        whenReady(result) { _ =>
+          getSizeOf(index) shouldBe indexedImages.size
+        }
 
         val retriever = new ElasticSourceRetriever[Image[Augmented]](
           elasticClient,
