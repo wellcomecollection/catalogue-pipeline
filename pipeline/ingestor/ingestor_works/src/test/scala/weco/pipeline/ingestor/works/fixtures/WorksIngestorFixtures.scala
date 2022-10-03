@@ -17,6 +17,7 @@ import weco.pipeline.ingestor.works.WorkTransformer
 import weco.pipeline.ingestor.works.models.{IndexedWork, WorkAggregatableValues}
 import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
 import weco.json.JsonUtil._
+import weco.pipeline.ingestor.common.models.WorkQueryableValues
 
 trait WorksIngestorFixtures
     extends IndexFixtures
