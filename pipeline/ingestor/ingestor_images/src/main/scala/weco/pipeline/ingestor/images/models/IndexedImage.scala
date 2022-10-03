@@ -16,7 +16,7 @@ case object IndexedImage {
   implicit val indexable: Indexable[IndexedImage] =
     new Indexable[IndexedImage] {
       override def id(image: IndexedImage): String =
-        image.query.sourceIdentifier
+        image.query.id
 
       override def version(image: IndexedImage): Long =
         image.modifiedTime.toEpochMilli

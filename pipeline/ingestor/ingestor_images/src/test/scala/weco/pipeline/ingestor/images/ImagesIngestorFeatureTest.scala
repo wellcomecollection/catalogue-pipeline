@@ -101,9 +101,6 @@ class ImagesIngestorFeatureTest
       withLocalAugmentedImageIndex { augmentedIndex =>
         insertImagesIntoElasticsearch(augmentedIndex, existingImages: _*)
 
-        println(s"@@AWLC index          = $index")
-        println(s"@@AWLC augmentedIndex = $augmentedIndex")
-
         val retriever = new ElasticSourceRetriever[Image[Augmented]](
           elasticClient,
           augmentedIndex
