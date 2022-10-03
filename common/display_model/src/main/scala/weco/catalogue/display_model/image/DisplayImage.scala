@@ -16,7 +16,7 @@ case class DisplayImage(
 )
 
 object DisplayImage {
-  private def thumbnail(image: Image[ImageState.Indexed]): DigitalLocation =
+  private def thumbnail(image: Image[_]): DigitalLocation =
     image.locations
       .find(_.locationType == LocationType.IIIFImageAPI)
       .getOrElse(
@@ -26,7 +26,7 @@ object DisplayImage {
         )
       )
 
-  def apply(image: Image[ImageState.Indexed]): DisplayImage =
+  def apply(image: Image[ImageState.Augmented]): DisplayImage =
     new DisplayImage(
       id = image.id,
       thumbnail = DisplayDigitalLocation(thumbnail(image)),

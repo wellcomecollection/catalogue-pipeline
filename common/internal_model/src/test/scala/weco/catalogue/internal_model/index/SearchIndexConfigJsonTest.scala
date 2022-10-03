@@ -78,7 +78,7 @@ class SearchIndexConfigJsonTest
       println(diff(fileMapping, indexMapping))
 
       println("Settings diff:")
-      println(diff(fileMapping, indexMapping))
+      println(diff(fileSettings, indexSettings))
 
       fileMapping shouldBe indexMapping
       fileSettings shouldBe indexSettings

@@ -54,18 +54,15 @@ class ImagesIngestorFeatureTest
             val storedImage =
               fromJson[IndexedImage](getResponse.sourceAsString).get
 
-            storedImage.version shouldBe image.version
-            storedImage.state.sourceIdentifier shouldBe image.state.sourceIdentifier
-            storedImage.locations shouldBe image.locations
-            storedImage.source shouldBe image.source
             storedImage.modifiedTime shouldBe image.modifiedTime
 
             val storedJson = storedImage.display.as[DisplayImage].right.get
-            val expectedJson =
-              DisplayImage(image.transition[ImageState.Indexed]())
+            val expectedJson = DisplayImage(image)
 
             storedImage.query shouldBe ImageQueryableValues(
-              inferredData = storedImage.state.inferredData,
+              id = image.state.canonicalId,
+              sourceIdentifier = image.state.sourceIdentifier,
+              inferredData = image.state.inferredData,
               source = image.source
             )
             storedImage.aggregatableValues shouldBe ImageAggregatableValues(

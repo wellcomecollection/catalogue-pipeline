@@ -1,14 +1,16 @@
-package weco.catalogue.internal_model.index
+package weco.pipeline.ingestor.images.index
 
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.{ElasticError, Index}
-import io.circe.{Decoder, Encoder}
 import org.scalatest.Assertion
 import org.scalatest.funspec.AnyFunSpec
-import weco.json.JsonUtil._
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.generators.ImageGenerators
 import weco.catalogue.internal_model.image.{Image, ImageState, InferredData}
+import weco.catalogue.internal_model.index.IndexFixtures
+import weco.json.JsonUtil._
+import weco.pipeline.ingestor.images.ImageTransformer
+import weco.pipeline.ingestor.images.models.IndexedImage
 
 import scala.util.Random
 
@@ -69,21 +71,8 @@ class ImagesIndexConfigTest
     }
   }
 
-  it("doesn't index something that's not an image") {
-    case class BadDocument(Something: String, somethingElse: Int)
-    val notAnImage = BadDocument(randomAlphanumeric(10), 10)
-
-    withLocalImagesIndex { implicit index =>
-      val response = indexImage(id = "1", image = notAnImage)
-      response.isError shouldBe true
-      response.error shouldBe a[ElasticError]
-    }
-  }
-
-  private def assertImageCanBeIndexed[I <: Image[_ <: ImageState]](image: I)(
-    implicit index: Index,
-    decoder: Decoder[I],
-    encoder: Encoder[I]
+  private def assertImageCanBeIndexed(image: Image[ImageState.Augmented])(
+    implicit index: Index
   ): Assertion = {
     val r = indexImage(id = image.id, image = image)
 
@@ -94,23 +83,23 @@ class ImagesIndexConfigTest
     assertImageIsIndexed(id = image.id, image = image)
   }
 
-  private def indexImage[I](
+  private def indexImage(
     id: String,
-    image: I
-  )(implicit index: Index, encoder: Encoder[I]) =
+    image: Image[ImageState.Augmented]
+  )(implicit index: Index) =
     elasticClient.execute {
-      indexInto(index).doc(toJson(image).get).id(id)
+      indexInto(index).doc(toJson(ImageTransformer.deriveData(image)).get).id(id)
     }.await
 
-  private def assertImageIsIndexed[I](
+  private def assertImageIsIndexed(
     id: String,
-    image: I
-  )(implicit index: Index, decoder: Decoder[I]) =
+    image: Image[ImageState.Augmented]
+  )(implicit index: Index) =
     eventually {
       whenReady(elasticClient.execute(get(index, id))) { getResponse =>
         getResponse.result.exists shouldBe true
 
-        fromJson[I](getResponse.result.sourceAsString).get shouldBe image
+        fromJson[IndexedImage](getResponse.result.sourceAsString).get shouldBe ImageTransformer.deriveData(image)
       }
     }
 }

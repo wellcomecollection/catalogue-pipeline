@@ -27,7 +27,7 @@ class ImageIndexableTest
 
   describe("updating images with merged / redirected sources") {
     it("overrides an image if modifiedTime is higher") {
-      val originalImage = createImageData.toIndexedImage
+      val originalImage = createImageData.toAugmentedImage
       val updatedModifiedTimeImage = originalImage.copy(
         modifiedTime = originalImage.modifiedTime + (2 minutes)
       )
@@ -49,7 +49,7 @@ class ImageIndexableTest
       }
     }
     it("does not override an image if modifiedTime is lower") {
-      val originalImage = createImageData.toIndexedImage
+      val originalImage = createImageData.toAugmentedImage
       val updatedModifiedTimeImage = originalImage.copy(
         modifiedTime = originalImage.modifiedTime - (2 minutes)
       )
@@ -71,7 +71,7 @@ class ImageIndexableTest
       }
     }
     it("overrides an image if modifiedTime is the same") {
-      val originalImage = createImageData.toIndexedImage
+      val originalImage = createImageData.toAugmentedImage
       val updatedLocationImage = originalImage.copy(
         locations = originalImage.locations.tail
       )
@@ -95,11 +95,9 @@ class ImageIndexableTest
   }
 
   private def assertIngestedImageIs(
-    result: Either[Seq[Image[ImageState.Indexed]],
-                   Seq[
-                     Image[ImageState.Indexed]
-                   ]],
-    ingestedImage: Image[ImageState.Indexed],
+    result: Either[Seq[Image[ImageState.Augmented]],
+                   Seq[Image[ImageState.Augmented]]],
+    ingestedImage: Image[ImageState.Augmented],
     index: Index
   ): Seq[Assertion] = {
     result shouldBe a[Right[_, _]]
@@ -107,13 +105,13 @@ class ImageIndexableTest
   }
 
   private def withImagesIndexAndIndexer[R](
-    testWith: TestWith[(Index, ElasticIndexer[Image[ImageState.Indexed]]), R]
+    testWith: TestWith[(Index, ElasticIndexer[Image[ImageState.Augmented]]), R]
   ) =
     withLocalImagesIndex { index =>
-      val indexer = new ElasticIndexer[Image[ImageState.Indexed]](
+      val indexer = new ElasticIndexer[Image[ImageState.Augmented]](
         elasticClient,
         index,
-        ImagesIndexConfig.indexed
+        ImagesIndexConfig.augmented
       )
       testWith((index, indexer))
     }

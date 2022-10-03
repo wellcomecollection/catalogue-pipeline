@@ -79,14 +79,6 @@ object ImageState {
   ) extends ImageState {
     type TransitionArgs = InferredData
   }
-
-  case class Indexed(
-    sourceIdentifier: SourceIdentifier,
-    canonicalId: CanonicalId,
-    inferredData: InferredData
-  ) extends ImageState {
-    type TransitionArgs = Unit
-  }
 }
 
 // ImageFsm contains all of the possible transitions between image states
@@ -106,15 +98,6 @@ object ImageFsm {
         sourceIdentifier = self.state.sourceIdentifier,
         canonicalId = self.state.canonicalId,
         inferredData = inferredData
-      )
-  }
-
-  implicit val augmentedToIndexed = new Transition[Augmented, Indexed] {
-    def state(self: Image[Augmented], args: Unit): Indexed =
-      Indexed(
-        sourceIdentifier = self.state.sourceIdentifier,
-        canonicalId = self.state.canonicalId,
-        inferredData = self.state.inferredData
       )
   }
 }

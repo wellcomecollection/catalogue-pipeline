@@ -288,8 +288,6 @@ object Implicits {
     deriveConfiguredDecoder
   implicit val _decImageAugmented: Decoder[Image[ImageState.Augmented]] =
     deriveConfiguredDecoder
-  implicit val _decImageIndexed: Decoder[Image[ImageState.Indexed]] =
-    deriveConfiguredDecoder
 
   implicit val _encAccessCondition: Encoder[AccessCondition] =
     deriveConfiguredEncoder
@@ -548,7 +546,5 @@ object Implicits {
   implicit val _encImageInitial: Encoder[Image[ImageState.Initial]] =
     deriveConfiguredEncoder
   implicit val _encImageAugmented: Encoder[Image[ImageState.Augmented]] =
-    deriveConfiguredEncoder
-  implicit val _encImageIndexed: Encoder[Image[ImageState.Indexed]] =
     deriveConfiguredEncoder
 }
