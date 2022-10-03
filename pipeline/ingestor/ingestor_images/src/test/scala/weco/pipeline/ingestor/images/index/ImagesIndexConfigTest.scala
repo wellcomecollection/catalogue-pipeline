@@ -88,7 +88,9 @@ class ImagesIndexConfigTest
     image: Image[ImageState.Augmented]
   )(implicit index: Index) =
     elasticClient.execute {
-      indexInto(index).doc(toJson(ImageTransformer.deriveData(image)).get).id(id)
+      indexInto(index)
+        .doc(toJson(ImageTransformer.deriveData(image)).get)
+        .id(id)
     }.await
 
   private def assertImageIsIndexed(
@@ -99,7 +101,8 @@ class ImagesIndexConfigTest
       whenReady(elasticClient.execute(get(index, id))) { getResponse =>
         getResponse.result.exists shouldBe true
 
-        fromJson[IndexedImage](getResponse.result.sourceAsString).get shouldBe ImageTransformer.deriveData(image)
+        fromJson[IndexedImage](getResponse.result.sourceAsString).get shouldBe ImageTransformer
+          .deriveData(image)
       }
     }
 }

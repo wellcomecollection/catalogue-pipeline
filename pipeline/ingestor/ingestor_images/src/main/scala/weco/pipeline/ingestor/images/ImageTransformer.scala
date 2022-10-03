@@ -23,5 +23,5 @@ object ImageTransformer {
           source = image.source
         ),
         aggregatableValues = ImageAggregatableValues(image.source)
-      )
+    )
 }
