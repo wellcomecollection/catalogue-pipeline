@@ -1,7 +1,12 @@
 package weco.catalogue.internal_model.index
 
 import com.sksamuel.elastic4s.ElasticDsl._
-import com.sksamuel.elastic4s.fields.{IntegerField, KeywordField, ObjectField, TextField}
+import com.sksamuel.elastic4s.fields.{
+  IntegerField,
+  KeywordField,
+  ObjectField,
+  TextField
+}
 import weco.catalogue.internal_model.index.WorksAnalysis._
 import weco.elasticsearch.ElasticFieldOps
 
