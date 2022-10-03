@@ -28,7 +28,7 @@ class ImagesIndexConfigTest
   it("indexes an image without feature vectors") {
     withLocalImagesIndex { implicit index =>
       assertImageCanBeIndexed(
-        image = createImageData.toAugmentedImageWith(inferredData = None)
+        image = createImageData.toAugmentedImageWith(inferredData = InferredData.empty)
       )
     }
   }
@@ -38,7 +38,7 @@ class ImagesIndexConfigTest
       val features1 = (0 until 3000).map(_ => Random.nextFloat() * 100).toList
       val features2 = (0 until 3000).map(_ => Random.nextFloat() * 100).toList
       val image = createImageData.toAugmentedImageWith(
-        inferredData = Some(
+        inferredData =
           InferredData(
             features1,
             features2,
@@ -49,7 +49,6 @@ class ImagesIndexConfigTest
             List(0f, 10f / 256, 10f / 256),
             Some(Random.nextFloat())
           )
-        )
       )
 
       val response = indexImage(id = image.id, image = image)
@@ -61,7 +60,7 @@ class ImagesIndexConfigTest
   it("cannot index an image with image vectors that are shorter than 2048") {
     withLocalImagesIndex { implicit index =>
       val image = createImageData.toAugmentedImageWith(
-        inferredData = Some(
+        inferredData =
           InferredData(
             List(2.0f),
             List(2.0f),
@@ -72,7 +71,6 @@ class ImagesIndexConfigTest
             List(0f, 10f / 256, 10f / 256),
             Some(Random.nextFloat())
           )
-        )
       )
 
       val response = indexImage(id = image.id, image = image)

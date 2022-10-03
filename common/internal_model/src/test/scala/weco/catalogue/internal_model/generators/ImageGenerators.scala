@@ -71,7 +71,7 @@ trait ImageGenerators
   ) {
 
     def toAugmentedImageWith(
-      inferredData: Option[InferredData] = createInferredData,
+      inferredData: InferredData = createInferredData,
       parentWork: Work[WorkState.Identified] = sierraIdentifiedWork(),
       redirectedWork: Option[Work[WorkState.Identified]] = Some(
         sierraIdentifiedWork()
@@ -88,7 +88,7 @@ trait ImageGenerators
       canonicalId: CanonicalId = createCanonicalId,
       parentWork: Work[WorkState.Identified] = identifiedWork(),
       redirectedWork: Option[Work[WorkState.Identified]] = None,
-      inferredData: Option[InferredData] = createInferredData
+      inferredData: InferredData = createInferredData
     ): Image[ImageState.Indexed] =
       imageData
         .toIdentifiedWith(canonicalId = canonicalId)
@@ -151,7 +151,7 @@ trait ImageGenerators
     )
 
     def toAugmentedImageWith(
-      inferredData: Option[InferredData] = createInferredData,
+      inferredData: InferredData = createInferredData,
       parentWork: Work[WorkState.Identified] = sierraIdentifiedWork(),
       redirectedWork: Option[Work[WorkState.Identified]] = Some(
         sierraIdentifiedWork()
@@ -164,7 +164,7 @@ trait ImageGenerators
     def toIndexedImageWith(
       parentWork: Work[WorkState.Identified] = identifiedWork(),
       redirectedWork: Option[Work[WorkState.Identified]] = None,
-      inferredData: Option[InferredData] = createInferredData
+      inferredData: InferredData = createInferredData
     ): Image[ImageState.Indexed] =
       imageData
         .toAugmentedImageWith(
@@ -189,13 +189,13 @@ trait ImageGenerators
   def randomHexString: String =
     s"#${randomBytes(3).map(b => f"$b%02X").mkString}"
 
-  def createInferredData = {
+  def createInferredData: InferredData = {
     val features = randomVector(4096)
     val (features1, features2) = features.splitAt(features.size / 2)
     val lshEncodedFeatures = randomHash(32)
     val palette = randomColorVector()
-    Some(
-      InferredData(
+
+    InferredData(
         features1 = features1.toList,
         features2 = features2.toList,
         lshEncodedFeatures = lshEncodedFeatures.toList,
@@ -204,7 +204,6 @@ trait ImageGenerators
         binSizes = inferredDataBinSizes,
         binMinima = inferredDataBinMinima,
         aspectRatio = inferredDataAspectRatio
-      )
     )
   }
 
@@ -249,7 +248,7 @@ trait ImageGenerators
     (features, lshFeatures, palettes).zipped.map {
       case (f, l, p) =>
         createImageData.toAugmentedImageWith(
-          inferredData = Some(
+          inferredData =
             InferredData(
               features1 = f.slice(0, 2048).toList,
               features2 = f.slice(2048, 4096).toList,
@@ -260,7 +259,6 @@ trait ImageGenerators
               binMinima = inferredDataBinMinima,
               aspectRatio = inferredDataAspectRatio
             )
-          )
         )
     }
   }
