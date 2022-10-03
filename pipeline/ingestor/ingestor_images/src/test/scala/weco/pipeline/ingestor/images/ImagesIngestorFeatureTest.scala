@@ -107,7 +107,7 @@ class ImagesIngestorFeatureTest
               indexInto(index.name)
                 .version(IndexedImage.indexable.version(image))
                 .versionType(ExternalGte)
-                .id(IndexedImage.indexable.version(id))
+                .id(IndexedImage.indexable.id(image))
                 .doc(jsonDoc)
             }
           ).refreshImmediately
