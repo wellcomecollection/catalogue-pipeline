@@ -32,6 +32,7 @@ case object NoteType {
     NoteType(id = "location-of-original", label = "Location of original")
   val LocationOfDuplicatesNote =
     NoteType(id = "location-of-duplicates", label = "Location of duplicates")
+  val NumberingNote = NoteType(id = "numbering-note", label = "Numbering note")
   val BindingInformation =
     NoteType(id = "binding-detail", label = "Binding detail")
   val BiographicalNote =
