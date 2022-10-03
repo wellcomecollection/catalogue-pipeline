@@ -66,6 +66,38 @@
       },
       "query": {
         "properties": {
+          "inferredData": {
+            "properties": {
+              "aspectRatio": {
+                "type": "float"
+              },
+              "binMinima": {
+                "type": "float",
+                "index": false
+              },
+              "binSizes": {
+                "type": "integer",
+                "index": false
+              },
+              "features1": {
+                "type": "dense_vector",
+                "dims": 2048
+              },
+              "features2": {
+                "type": "dense_vector",
+                "dims": 2048
+              },
+              "lshEncodedFeatures": {
+                "type": "keyword"
+              },
+              "palette": {
+                "type": "keyword"
+              },
+              "averageColorHex": {
+                "type": "keyword"
+              }
+            }
+          },
           "source": {
             "properties": {
               "alternativeTitles": {

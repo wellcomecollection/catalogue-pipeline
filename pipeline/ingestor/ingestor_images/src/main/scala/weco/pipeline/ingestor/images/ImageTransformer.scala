@@ -23,7 +23,10 @@ object ImageTransformer {
         source = indexedImage.source,
         modifiedTime = indexedImage.modifiedTime,
         display = DisplayImage(indexedImage).asJson.deepDropNullValues,
-        query = ImageQueryableValues(indexedImage.source),
+        query = ImageQueryableValues(
+          inferredData = indexedImage.state.inferredData,
+          source = indexedImage.source
+        ),
         aggregatableValues = ImageAggregatableValues(indexedImage.source)
       )
     }
