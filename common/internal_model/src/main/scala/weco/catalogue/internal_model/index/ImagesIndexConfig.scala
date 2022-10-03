@@ -4,7 +4,11 @@ import buildinfo.BuildInfo
 import com.sksamuel.elastic4s.ElasticDsl.{keywordField, _}
 import com.sksamuel.elastic4s.fields.{DenseVectorField, ObjectField}
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
-import weco.catalogue.internal_model.index.WorksAnalysis.{asciifoldingAnalyzer, cleanPathAnalyzer, exactPathAnalyzer}
+import weco.catalogue.internal_model.index.WorksAnalysis.{
+  asciifoldingAnalyzer,
+  cleanPathAnalyzer,
+  exactPathAnalyzer
+}
 import weco.elasticsearch.IndexConfig
 
 object ImagesIndexConfig extends IndexConfigFields {
@@ -146,6 +150,7 @@ object ImagesIndexConfig extends IndexConfigFields {
 
       val query = objectField("query")
         .fields(
+          inferredData,
           sourceWork
         )
 
