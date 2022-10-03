@@ -1,10 +1,11 @@
 {
   "description" : "one of a list of works with a variety of languages",
-  "createdAt" : "2022-09-30T08:11:41.482442Z",
+  "createdAt" : "2022-10-03T10:25:19.162Z",
   "id" : "qfscz1rj",
   "document" : {
     "debug" : {
       "source" : {
+        "id" : "qfscz1rj",
         "identifier" : {
           "identifierType" : {
             "id" : "calm-record-id"
@@ -19,71 +20,6 @@
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "calm-record-id"
-        },
-        "ontologyType" : "Work",
-        "value" : "Gk6juMbOeK"
-      },
-      "canonicalId" : "qfscz1rj",
-      "mergedTime" : "2036-09-06T23:29:13Z",
-      "sourceModifiedTime" : "2036-09-06T23:29:13Z",
-      "indexedTime" : "2001-01-01T01:01:01Z",
-      "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "data" : {
-      "title" : "A work with languages Swedish",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-        {
-          "id" : "swe",
-          "label" : "Swedish"
-        }
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
     },
     "display" : {
       "id" : "qfscz1rj",

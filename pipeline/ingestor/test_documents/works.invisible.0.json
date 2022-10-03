@@ -1,10 +1,11 @@
 {
   "description" : "an arbitrary list of invisible works",
-  "createdAt" : "2022-05-31T18:33:50.481862Z",
+  "createdAt" : "2022-10-03T10:25:18.781Z",
   "id" : "rczekocx",
   "document" : {
     "debug" : {
       "source" : {
+        "id" : "rczekocx",
         "identifier" : {
           "identifierType" : {
             "id" : "miro-image-number"
@@ -19,67 +20,6 @@
       "indexedTime" : "2001-01-01T01:01:01Z",
       "invisibilityReasons" : [
       ]
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "miro-image-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "Y4unjFIXxl"
-      },
-      "canonicalId" : "rczekocx",
-      "mergedTime" : "2001-07-02T19:43:15Z",
-      "sourceModifiedTime" : "2001-07-02T19:43:15Z",
-      "indexedTime" : "2001-01-01T01:01:01Z",
-      "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "data" : {
-      "title" : "title-hLVIpJ1Ef6",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
     },
     "type" : "Invisible"
   }

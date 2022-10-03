@@ -206,8 +206,6 @@ object Implicits {
     deriveConfiguredDecoder
   implicit val _decWorkStateIdentified: Decoder[WorkState.Identified] =
     deriveConfiguredDecoder
-  implicit val _decWorkStateIndexed: Decoder[WorkState.Indexed] =
-    deriveConfiguredDecoder
 
   implicit val _decWorkVisibleSource: Decoder[Work.Visible[WorkState.Source]] =
     deriveConfiguredDecoder
@@ -218,9 +216,6 @@ object Implicits {
     deriveConfiguredDecoder
   implicit val _decWorkVisibleIdentified
     : Decoder[Work.Visible[WorkState.Identified]] =
-    deriveConfiguredDecoder
-  implicit val _decWorkVisibleIndexed
-    : Decoder[Work.Visible[WorkState.Indexed]] =
     deriveConfiguredDecoder
 
   implicit val _decWorkInvisibleSource
@@ -235,9 +230,6 @@ object Implicits {
   implicit val _decWorkInvisibleIdentified
     : Decoder[Work.Invisible[WorkState.Identified]] =
     deriveConfiguredDecoder
-  implicit val _decWorkInvisibleIndexed
-    : Decoder[Work.Invisible[WorkState.Indexed]] =
-    deriveConfiguredDecoder
 
   implicit val _decWorkRedirectedSource
     : Decoder[Work.Redirected[WorkState.Source]] =
@@ -251,9 +243,6 @@ object Implicits {
   implicit val _decWorkRedirectedIdentified
     : Decoder[Work.Redirected[WorkState.Identified]] =
     deriveConfiguredDecoder
-  implicit val _decWorkRedirectedIndexed
-    : Decoder[Work.Redirected[WorkState.Indexed]] =
-    deriveConfiguredDecoder
 
   implicit val _decWorkDeletedSource: Decoder[Work.Deleted[WorkState.Source]] =
     deriveConfiguredDecoder
@@ -265,9 +254,6 @@ object Implicits {
   implicit val _decWorkDeletedIdentified
     : Decoder[Work.Deleted[WorkState.Identified]] =
     deriveConfiguredDecoder
-  implicit val _decWorkDeletedIndexed
-    : Decoder[Work.Deleted[WorkState.Indexed]] =
-    deriveConfiguredDecoder
 
   implicit val _decWorkSource: Decoder[Work[WorkState.Source]] =
     deriveConfiguredDecoder
@@ -276,8 +262,6 @@ object Implicits {
   implicit val _decWorkDenormalised: Decoder[Work[WorkState.Denormalised]] =
     deriveConfiguredDecoder
   implicit val _decWorkIdentified: Decoder[Work[WorkState.Identified]] =
-    deriveConfiguredDecoder
-  implicit val _decWorkIndexed: Decoder[Work[WorkState.Indexed]] =
     deriveConfiguredDecoder
 
   implicit val _decParentWork: Decoder[ParentWork] =
@@ -465,8 +449,6 @@ object Implicits {
     deriveConfiguredEncoder
   implicit val _encWorkStateIdentified: Encoder[WorkState.Identified] =
     deriveConfiguredEncoder
-  implicit val _encWorkStateIndexed: Encoder[WorkState.Indexed] =
-    deriveConfiguredEncoder
 
   implicit val _encWorkVisibleSource: Encoder[Work.Visible[WorkState.Source]] =
     deriveConfiguredEncoder
@@ -477,9 +459,6 @@ object Implicits {
     deriveConfiguredEncoder
   implicit val _encWorkVisibleIdentified
     : Encoder[Work.Visible[WorkState.Identified]] =
-    deriveConfiguredEncoder
-  implicit val _encWorkVisibleIndexed
-    : Encoder[Work.Visible[WorkState.Indexed]] =
     deriveConfiguredEncoder
 
   implicit val _encWorkInvisibleSource
@@ -494,9 +473,6 @@ object Implicits {
   implicit val _encWorkInvisibleIdentified
     : Encoder[Work.Invisible[WorkState.Identified]] =
     deriveConfiguredEncoder
-  implicit val _encWorkInvisibleIndexed
-    : Encoder[Work.Invisible[WorkState.Indexed]] =
-    deriveConfiguredEncoder
 
   implicit val _encWorkRedirectedSource
     : Encoder[Work.Redirected[WorkState.Source]] =
@@ -510,9 +486,6 @@ object Implicits {
   implicit val _encWorkRedirectedIdentified
     : Encoder[Work.Redirected[WorkState.Identified]] =
     deriveConfiguredEncoder
-  implicit val _encWorkRedirectedIndexed
-    : Encoder[Work.Redirected[WorkState.Indexed]] =
-    deriveConfiguredEncoder
 
   implicit val _encWorkDeletedSource: Encoder[Work.Deleted[WorkState.Source]] =
     deriveConfiguredEncoder
@@ -524,9 +497,6 @@ object Implicits {
   implicit val _encWorkDeletedIdentified
     : Encoder[Work.Deleted[WorkState.Identified]] =
     deriveConfiguredEncoder
-  implicit val _encWorkDeletedIndexed
-    : Encoder[Work.Deleted[WorkState.Indexed]] =
-    deriveConfiguredEncoder
 
   implicit val _encWorkSource: Encoder[Work[WorkState.Source]] =
     deriveConfiguredEncoder
@@ -535,8 +505,6 @@ object Implicits {
   implicit val _encWorkDenormalised: Encoder[Work[WorkState.Denormalised]] =
     deriveConfiguredEncoder
   implicit val _encWorkIdentified: Encoder[Work[WorkState.Identified]] =
-    deriveConfiguredEncoder
-  implicit val _encWorkIndexed: Encoder[Work[WorkState.Indexed]] =
     deriveConfiguredEncoder
 
   implicit val _encParentWork: Encoder[ParentWork] =

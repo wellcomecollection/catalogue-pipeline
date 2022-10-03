@@ -1,10 +1,11 @@
 {
   "description" : "one of a list of works with a variety of formats",
-  "createdAt" : "2022-09-30T08:11:41.416366Z",
+  "createdAt" : "2022-10-03T10:25:19.146Z",
   "id" : "elrgwjtd",
   "document" : {
     "debug" : {
       "source" : {
+        "id" : "elrgwjtd",
         "identifier" : {
           "identifierType" : {
             "id" : "calm-record-id"
@@ -19,70 +20,6 @@
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "calm-record-id"
-        },
-        "ontologyType" : "Work",
-        "value" : "RMKkkMWH2B"
-      },
-      "canonicalId" : "elrgwjtd",
-      "mergedTime" : "1981-07-01T07:44:00Z",
-      "sourceModifiedTime" : "1981-07-01T07:44:00Z",
-      "indexedTime" : "2001-01-01T01:01:01Z",
-      "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "data" : {
-      "title" : "A work with format Audio",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : {
-        "id" : "i",
-        "label" : "Audio"
-      },
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
     },
     "display" : {
       "id" : "elrgwjtd",

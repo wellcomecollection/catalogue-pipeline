@@ -1,10 +1,11 @@
 {
   "description" : "one of a list of works with a variety of formats",
-  "createdAt" : "2022-09-30T08:11:41.386386Z",
+  "createdAt" : "2022-10-03T10:25:19.140Z",
   "id" : "wqcumcet",
   "document" : {
     "debug" : {
       "source" : {
+        "id" : "wqcumcet",
         "identifier" : {
           "identifierType" : {
             "id" : "sierra-system-number"
@@ -19,70 +20,6 @@
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "sierra-system-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "vc628Sgu9f"
-      },
-      "canonicalId" : "wqcumcet",
-      "mergedTime" : "2048-04-08T22:43:49Z",
-      "sourceModifiedTime" : "2048-04-08T22:43:49Z",
-      "indexedTime" : "2001-01-01T01:01:01Z",
-      "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "data" : {
-      "title" : "A work with format Journals",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : {
-        "id" : "d",
-        "label" : "Journals"
-      },
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
     },
     "display" : {
       "id" : "wqcumcet",

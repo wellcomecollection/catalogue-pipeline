@@ -1,10 +1,11 @@
 {
   "description" : "examples of works with different types",
-  "createdAt" : "2022-09-30T08:11:42.160265Z",
+  "createdAt" : "2022-10-03T10:25:19.340Z",
   "id" : "2tqcclh1",
   "document" : {
     "debug" : {
       "source" : {
+        "id" : "2tqcclh1",
         "identifier" : {
           "identifierType" : {
             "id" : "calm-record-id"
@@ -19,67 +20,6 @@
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "calm-record-id"
-        },
-        "ontologyType" : "Work",
-        "value" : "ZiS5MlN0hQ"
-      },
-      "canonicalId" : "2tqcclh1",
-      "mergedTime" : "1933-08-10T09:08:15Z",
-      "sourceModifiedTime" : "1933-08-10T09:08:15Z",
-      "indexedTime" : "2001-01-01T01:01:01Z",
-      "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "data" : {
-      "title" : "rats",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Collection"
     },
     "display" : {
       "id" : "2tqcclh1",

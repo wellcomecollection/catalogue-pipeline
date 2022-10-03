@@ -1,10 +1,11 @@
 {
   "description" : "an arbitrary list of visible works",
-  "createdAt" : "2022-09-30T08:11:40.332534Z",
+  "createdAt" : "2022-10-03T10:25:18.729Z",
   "id" : "dph7sjip",
   "document" : {
     "debug" : {
       "source" : {
+        "id" : "dph7sjip",
         "identifier" : {
           "identifierType" : {
             "id" : "miro-image-number"
@@ -19,67 +20,6 @@
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "miro-image-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "WpBejTwv1N"
-      },
-      "canonicalId" : "dph7sjip",
-      "mergedTime" : "1971-11-19T03:42:42Z",
-      "sourceModifiedTime" : "1971-11-19T03:42:42Z",
-      "indexedTime" : "2001-01-01T01:01:01Z",
-      "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "data" : {
-      "title" : "title-3hvGdgZfc8",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
     },
     "display" : {
       "id" : "dph7sjip",

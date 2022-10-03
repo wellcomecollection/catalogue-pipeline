@@ -1,10 +1,11 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2022-09-30T08:11:42.275565Z",
+  "createdAt" : "2022-10-03T10:25:19.369Z",
   "id" : "e1k1l8xu",
   "document" : {
     "debug" : {
       "source" : {
+        "id" : "e1k1l8xu",
         "identifier" : {
           "identifierType" : {
             "id" : "miro-image-number"
@@ -19,84 +20,6 @@
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "miro-image-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "Kvqw9fGol7"
-      },
-      "canonicalId" : "e1k1l8xu",
-      "mergedTime" : "1988-06-28T12:49:00Z",
-      "sourceModifiedTime" : "1988-06-28T12:49:00Z",
-      "indexedTime" : "2001-01-01T01:01:01Z",
-      "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "data" : {
-      "title" : "title-cLZhc35m9C",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-        {
-          "id" : {
-            "type" : "Unidentifiable"
-          },
-          "agent" : {
-            "id" : {
-              "type" : "Unidentifiable"
-            },
-            "label" : "Jake Paul",
-            "prefix" : null,
-            "numeration" : null,
-            "type" : "Person"
-          },
-          "roles" : [
-          ],
-          "primary" : true
-        }
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
     },
     "display" : {
       "id" : "e1k1l8xu",

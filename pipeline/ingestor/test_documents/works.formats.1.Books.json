@@ -1,10 +1,11 @@
 {
   "description" : "one of a list of works with a variety of formats",
-  "createdAt" : "2022-09-30T08:11:41.364805Z",
+  "createdAt" : "2022-10-03T10:25:19.135Z",
   "id" : "ciweswu5",
   "document" : {
     "debug" : {
       "source" : {
+        "id" : "ciweswu5",
         "identifier" : {
           "identifierType" : {
             "id" : "miro-image-number"
@@ -19,70 +20,6 @@
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "miro-image-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "ESu6j0cajz"
-      },
-      "canonicalId" : "ciweswu5",
-      "mergedTime" : "2020-01-23T16:33:57Z",
-      "sourceModifiedTime" : "2020-01-23T16:33:57Z",
-      "indexedTime" : "2001-01-01T01:01:01Z",
-      "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "data" : {
-      "title" : "A work with format Books",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : {
-        "id" : "a",
-        "label" : "Books"
-      },
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
     },
     "display" : {
       "id" : "ciweswu5",

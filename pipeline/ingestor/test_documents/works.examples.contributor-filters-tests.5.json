@@ -1,10 +1,11 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2022-09-30T08:11:42.277974Z",
+  "createdAt" : "2022-10-03T10:25:19.370Z",
   "id" : "bexh6kx6",
   "document" : {
     "debug" : {
       "source" : {
+        "id" : "bexh6kx6",
         "identifier" : {
           "identifierType" : {
             "id" : "calm-record-id"
@@ -19,67 +20,6 @@
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "calm-record-id"
-        },
-        "ontologyType" : "Work",
-        "value" : "5q2ktKEnxz"
-      },
-      "canonicalId" : "bexh6kx6",
-      "mergedTime" : "2067-03-29T22:14:53Z",
-      "sourceModifiedTime" : "2067-03-29T22:14:53Z",
-      "indexedTime" : "2001-01-01T01:01:01Z",
-      "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "data" : {
-      "title" : "title-ERuJHArEMd",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
     },
     "display" : {
       "id" : "bexh6kx6",

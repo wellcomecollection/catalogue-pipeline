@@ -1,10 +1,11 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2022-09-30T08:11:42.276268Z",
+  "createdAt" : "2022-10-03T10:25:19.369Z",
   "id" : "6q7wkowr",
   "document" : {
     "debug" : {
       "source" : {
+        "id" : "6q7wkowr",
         "identifier" : {
           "identifierType" : {
             "id" : "sierra-system-number"
@@ -19,84 +20,6 @@
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "sierra-system-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "AgxJAjEybh"
-      },
-      "canonicalId" : "6q7wkowr",
-      "mergedTime" : "2013-02-12T12:43:10Z",
-      "sourceModifiedTime" : "2013-02-12T12:43:10Z",
-      "indexedTime" : "2001-01-01T01:01:01Z",
-      "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "data" : {
-      "title" : "title-NOoLbpS5jR",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-        {
-          "id" : {
-            "type" : "Unidentifiable"
-          },
-          "agent" : {
-            "id" : {
-              "type" : "Unidentifiable"
-            },
-            "label" : "Darwin \"Jones\", Charles",
-            "prefix" : null,
-            "numeration" : null,
-            "type" : "Person"
-          },
-          "roles" : [
-          ],
-          "primary" : true
-        }
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
     },
     "display" : {
       "id" : "6q7wkowr",

@@ -1,10 +1,11 @@
 {
   "description" : "works with multi-year production ranges",
-  "createdAt" : "2022-09-30T08:11:41.906128Z",
+  "createdAt" : "2022-10-03T10:25:19.289Z",
   "id" : "31spt9st",
   "document" : {
     "debug" : {
       "source" : {
+        "id" : "31spt9st",
         "identifier" : {
           "identifierType" : {
             "id" : "calm-record-id"
@@ -19,103 +20,6 @@
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "calm-record-id"
-        },
-        "ontologyType" : "Work",
-        "value" : "WzsZA7OUAa"
-      },
-      "canonicalId" : "31spt9st",
-      "mergedTime" : "2001-02-11T00:36:52Z",
-      "sourceModifiedTime" : "2001-02-11T00:36:52Z",
-      "indexedTime" : "2001-01-01T01:01:01Z",
-      "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "data" : {
-      "title" : "title-QoeggPvgjR",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-        {
-          "label" : "jwgMtGLcg1WHGjZrCwPK521Yf",
-          "places" : [
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "54blSY3iyd"
-            }
-          ],
-          "agents" : [
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "rQHICakdbo",
-              "prefix" : null,
-              "numeration" : null,
-              "type" : "Person"
-            }
-          ],
-          "dates" : [
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "1850",
-              "range" : {
-                "from" : "1850-01-01T00:00:00Z",
-                "to" : "1850-12-31T23:59:59.999999999Z",
-                "label" : "1850"
-              }
-            }
-          ],
-          "function" : null
-        }
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
     },
     "display" : {
       "id" : "31spt9st",

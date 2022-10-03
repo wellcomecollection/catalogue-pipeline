@@ -1,10 +1,11 @@
 {
   "description" : "examples for the genre tests",
-  "createdAt" : "2022-09-30T08:11:42.182825Z",
+  "createdAt" : "2022-10-03T10:25:19.346Z",
   "id" : "ahr8n4ei",
   "document" : {
     "debug" : {
       "source" : {
+        "id" : "ahr8n4ei",
         "identifier" : {
           "identifierType" : {
             "id" : "sierra-system-number"
@@ -19,93 +20,6 @@
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "sierra-system-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "g4JnCRDZnk"
-      },
-      "canonicalId" : "ahr8n4ei",
-      "mergedTime" : "1961-08-08T05:16:19Z",
-      "sourceModifiedTime" : "1961-08-08T05:16:19Z",
-      "indexedTime" : "2001-01-01T01:01:01Z",
-      "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "data" : {
-      "title" : "title-Rew3RmJ48v",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-        {
-          "label" : "Pamphlets.",
-          "concepts" : [
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "7ZYKrzxgMS4HDJM",
-              "type" : "Concept"
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "nToBweq2UFKJPlz",
-              "type" : "Concept"
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "YfNgtG1SKw3klDA",
-              "type" : "Concept"
-            }
-          ]
-        }
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
     },
     "display" : {
       "id" : "ahr8n4ei",

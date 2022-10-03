@@ -2,7 +2,7 @@ package weco.pipeline.ingestor.works
 
 import io.circe.syntax._
 import weco.catalogue.display_model.work.DisplayWork
-import weco.catalogue.internal_model.work.WorkState.{Denormalised, Indexed}
+import weco.catalogue.internal_model.work.WorkState
 import weco.catalogue.internal_model.work.Work
 import weco.pipeline.ingestor.works.models.{
   DebugInformation,
@@ -16,21 +16,16 @@ import weco.pipeline.ingestor.common.models.WorkQueryableValues
 import java.time.Instant
 
 trait WorkTransformer {
-  val deriveData: Work[Denormalised] => IndexedWork =
+  val deriveData: Work[WorkState.Denormalised] => IndexedWork =
     work => {
-      val indexedWork = work.transition[Indexed]()
-
       val mergedTime = work.state.mergedTime
       val indexedTime = getIndexedTime
 
       val source = SourceWorkDebugInformation(
+        id = work.state.canonicalId,
         identifier = work.state.sourceIdentifier,
         version = work.version,
         modifiedTime = work.state.sourceModifiedTime
-      )
-
-      val state = indexedWork.state.copy(
-        indexedTime = indexedTime
       )
 
       work match {
@@ -44,8 +39,6 @@ trait WorkTransformer {
               indexedTime = indexedTime,
               redirectSources = redirectSources
             ),
-            state = state,
-            data = data,
             display = display,
             query = WorkQueryableValues(
               id = w.state.canonicalId,
@@ -56,7 +49,7 @@ trait WorkTransformer {
             ),
             aggregatableValues = WorkAggregatableValues(
               w.data,
-              availabilities = state.availabilities)
+              availabilities = work.state.availabilities)
           )
         }
 
@@ -67,9 +60,7 @@ trait WorkTransformer {
               mergedTime = mergedTime,
               indexedTime = indexedTime,
               invisibilityReasons = invisibilityReasons
-            ),
-            state = state,
-            data = data
+            )
           )
 
         case Work.Redirected(_, redirectTarget, _) =>
@@ -79,7 +70,6 @@ trait WorkTransformer {
               mergedTime = mergedTime,
               indexedTime = indexedTime,
             ),
-            state = state,
             redirectTarget = redirectTarget
           )
 
@@ -90,8 +80,7 @@ trait WorkTransformer {
               mergedTime = mergedTime,
               indexedTime = indexedTime,
               deletedReason = deletedReason
-            ),
-            state = state
+            )
           )
       }
     }

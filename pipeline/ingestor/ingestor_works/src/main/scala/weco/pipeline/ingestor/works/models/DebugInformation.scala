@@ -1,8 +1,7 @@
 package weco.pipeline.ingestor.works.models
 
 import java.time.Instant
-
-import weco.catalogue.internal_model.identifiers.{IdState, SourceIdentifier}
+import weco.catalogue.internal_model.identifiers.{CanonicalId, IdState, SourceIdentifier}
 import weco.catalogue.internal_model.work.{DeletedReason, InvisibilityReason}
 
 /** This is information we put in the Elasticsearch index because it's
@@ -11,6 +10,7 @@ import weco.catalogue.internal_model.work.{DeletedReason, InvisibilityReason}
   *
   */
 case class SourceWorkDebugInformation(
+  id: CanonicalId,
   identifier: SourceIdentifier,
   version: Int,
   modifiedTime: Instant

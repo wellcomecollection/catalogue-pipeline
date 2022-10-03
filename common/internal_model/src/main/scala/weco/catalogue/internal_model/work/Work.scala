@@ -255,37 +255,6 @@ object WorkState {
     // See https://github.com/wellcomecollection/docs/tree/main/rfcs/038-matcher-versioning
     val modifiedTime: Instant = mergedTime
   }
-
-  /** Why are there three *Time parameters?
-    *
-    * @param mergedTime
-    *   When did this Work get processed by the matcher/merger?
-    *   This is used to order updates in pipeline-storage.
-    *   See https://github.com/wellcomecollection/docs/tree/main/rfcs/038-matcher-versioning
-    * @param sourceModifiedTime
-    *   When was the underlying source record updated in the source system?
-    * @param indexedTime
-    *   When was this work indexed, and thus made available in the API?
-    *   Combined with sourceModifiedTime, this allows us to track the latency
-    *   of the pipeline.
-    */
-  case class Indexed(
-    sourceIdentifier: SourceIdentifier,
-    canonicalId: CanonicalId,
-    mergedTime: Instant,
-    sourceModifiedTime: Instant,
-    indexedTime: Instant,
-    availabilities: Set[Availability],
-    relations: Relations = Relations.none
-  ) extends WorkState {
-
-    type WorkDataState = DataState.Identified
-    type TransitionArgs = Unit
-
-    def id = canonicalId.toString
-
-    val modifiedTime: Instant = mergedTime
-  }
 }
 
 /** The WorkFsm contains all possible transitions between work states.
@@ -352,25 +321,4 @@ object WorkFsm {
 
       def redirect(redirect: IdState.Identified) = redirect
     }
-
-  implicit val denormalisedToIndexed = new Transition[Denormalised, Indexed] {
-    def state(
-      state: Denormalised,
-      data: WorkData[DataState.Identified],
-      args: Unit = ()
-    ): Indexed =
-      Indexed(
-        sourceIdentifier = state.sourceIdentifier,
-        canonicalId = state.canonicalId,
-        mergedTime = state.mergedTime,
-        sourceModifiedTime = state.sourceModifiedTime,
-        indexedTime = Instant.now(),
-        availabilities = state.availabilities,
-        relations = state.relations
-      )
-
-    def data(data: WorkData[DataState.Identified]) = data
-
-    def redirect(redirect: IdState.Identified) = redirect
-  }
 }

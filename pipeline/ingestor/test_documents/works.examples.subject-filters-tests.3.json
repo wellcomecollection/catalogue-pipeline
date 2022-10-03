@@ -1,10 +1,11 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2022-09-30T08:11:42.236572Z",
+  "createdAt" : "2022-10-03T10:25:19.359Z",
   "id" : "b1r485o0",
   "document" : {
     "debug" : {
       "source" : {
+        "id" : "b1r485o0",
         "identifier" : {
           "identifierType" : {
             "id" : "calm-record-id"
@@ -19,106 +20,6 @@
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "calm-record-id"
-        },
-        "ontologyType" : "Work",
-        "value" : "4zh18D0cbF"
-      },
-      "canonicalId" : "b1r485o0",
-      "mergedTime" : "1986-02-15T03:35:37Z",
-      "sourceModifiedTime" : "1986-02-15T03:35:37Z",
-      "indexedTime" : "2001-01-01T01:01:01Z",
-      "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "data" : {
-      "title" : "title-DxPLXKke6N",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-        {
-          "id" : {
-            "canonicalId" : "darwin01",
-            "sourceIdentifier" : {
-              "identifierType" : {
-                "id" : "lc-names"
-              },
-              "ontologyType" : "Subject",
-              "value" : "lcnames-darwin"
-            },
-            "otherIdentifiers" : [
-            ],
-            "type" : "Identified"
-          },
-          "label" : "Darwin \"Jones\", Charles",
-          "concepts" : [
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "40zJbSlLwDNn2Et",
-              "type" : "Concept"
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "p5zfssscK3StYS1",
-              "type" : "Concept"
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "KOlZmZXOWd5kJ1F",
-              "type" : "Concept"
-            }
-          ]
-        }
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
     },
     "display" : {
       "id" : "b1r485o0",

@@ -1,10 +1,11 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2022-09-30T08:11:41.767861Z",
+  "createdAt" : "2022-10-03T10:25:19.262Z",
   "id" : "y8glbwdh",
   "document" : {
     "debug" : {
       "source" : {
+        "id" : "y8glbwdh",
         "identifier" : {
           "identifierType" : {
             "id" : "miro-image-number"
@@ -19,70 +20,6 @@
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "miro-image-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "NrhJtvfJrH"
-      },
-      "canonicalId" : "y8glbwdh",
-      "mergedTime" : "2005-09-20T08:40:04Z",
-      "sourceModifiedTime" : "2005-09-20T08:40:04Z",
-      "indexedTime" : "2001-01-01T01:01:01Z",
-      "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "data" : {
-      "title" : "title-PcZctCb44q",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : {
-        "id" : "m",
-        "label" : "CD-Roms"
-      },
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
     },
     "display" : {
       "id" : "y8glbwdh",

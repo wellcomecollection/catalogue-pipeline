@@ -1,10 +1,11 @@
 {
   "description" : "an arbitrary list of redirected works",
-  "createdAt" : "2022-05-31T18:33:50.501464Z",
+  "createdAt" : "2022-10-03T10:25:18.789Z",
   "id" : "6yu7udsf",
   "document" : {
     "debug" : {
       "source" : {
+        "id" : "6yu7udsf",
         "identifier" : {
           "identifierType" : {
             "id" : "sierra-system-number"
@@ -17,31 +18,6 @@
       },
       "mergedTime" : "2018-10-24T16:12:55Z",
       "indexedTime" : "2001-01-01T01:01:01Z"
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "sierra-system-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "WDU051A4vR"
-      },
-      "canonicalId" : "6yu7udsf",
-      "mergedTime" : "2018-10-24T16:12:55Z",
-      "sourceModifiedTime" : "2018-10-24T16:12:55Z",
-      "indexedTime" : "2001-01-01T01:01:01Z",
-      "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
     },
     "redirectTarget" : {
       "canonicalId" : "7wax09hv",

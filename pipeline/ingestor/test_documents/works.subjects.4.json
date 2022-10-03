@@ -1,10 +1,11 @@
 {
   "description" : "works with different subjects",
-  "createdAt" : "2022-09-30T08:11:41.578430Z",
+  "createdAt" : "2022-10-03T10:25:19.202Z",
   "id" : "t9nj8zse",
   "document" : {
     "debug" : {
       "source" : {
+        "id" : "t9nj8zse",
         "identifier" : {
           "identifierType" : {
             "id" : "calm-record-id"
@@ -19,67 +20,6 @@
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "calm-record-id"
-        },
-        "ontologyType" : "Work",
-        "value" : "8imBUVPHmu"
-      },
-      "canonicalId" : "t9nj8zse",
-      "mergedTime" : "2038-05-30T19:54:43Z",
-      "sourceModifiedTime" : "2038-05-30T19:54:43Z",
-      "indexedTime" : "2001-01-01T01:01:01Z",
-      "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "data" : {
-      "title" : "title-9al0iIjgaH",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
     },
     "display" : {
       "id" : "t9nj8zse",

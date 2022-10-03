@@ -1,10 +1,11 @@
 {
   "description" : "a work with different concepts in the genre",
-  "createdAt" : "2022-09-30T08:11:41.557882Z",
+  "createdAt" : "2022-10-03T10:25:19.191Z",
   "id" : "2zo588up",
   "document" : {
     "debug" : {
       "source" : {
+        "id" : "2zo588up",
         "identifier" : {
           "identifierType" : {
             "id" : "calm-record-id"
@@ -19,104 +20,6 @@
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "calm-record-id"
-        },
-        "ontologyType" : "Work",
-        "value" : "rVoekomuzt"
-      },
-      "canonicalId" : "2zo588up",
-      "mergedTime" : "2054-02-13T07:35:27Z",
-      "sourceModifiedTime" : "2054-02-13T07:35:27Z",
-      "indexedTime" : "2001-01-01T01:01:01Z",
-      "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "data" : {
-      "title" : "A work with different concepts in the genre",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-        {
-          "label" : "Electronic books",
-          "concepts" : [
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "Conceptual Conversations",
-              "type" : "Concept"
-            },
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "Pleasant Paris",
-              "type" : "Place"
-            },
-            {
-              "id" : {
-                "canonicalId" : "svmale83",
-                "sourceIdentifier" : {
-                  "identifierType" : {
-                    "id" : "miro-image-number"
-                  },
-                  "ontologyType" : "Period",
-                  "value" : "qBJ6dy5rBO"
-                },
-                "otherIdentifiers" : [
-                ],
-                "type" : "Identified"
-              },
-              "label" : "Past Prehistory",
-              "range" : null,
-              "type" : "Period"
-            }
-          ]
-        }
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
     },
     "display" : {
       "id" : "2zo588up",

@@ -1,10 +1,11 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2022-09-30T08:11:41.764808Z",
+  "createdAt" : "2022-10-03T10:25:19.260Z",
   "id" : "i77xk8vj",
   "document" : {
     "debug" : {
       "source" : {
+        "id" : "i77xk8vj",
         "identifier" : {
           "identifierType" : {
             "id" : "calm-record-id"
@@ -19,70 +20,6 @@
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "calm-record-id"
-        },
-        "ontologyType" : "Work",
-        "value" : "SZKltFZVRN"
-      },
-      "canonicalId" : "i77xk8vj",
-      "mergedTime" : "1957-09-20T18:58:59Z",
-      "sourceModifiedTime" : "1957-09-20T18:58:59Z",
-      "indexedTime" : "2001-01-01T01:01:01Z",
-      "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "data" : {
-      "title" : "title-3TPxT5oi8C",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : {
-        "id" : "e",
-        "label" : "Maps"
-      },
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
     },
     "display" : {
       "id" : "i77xk8vj",

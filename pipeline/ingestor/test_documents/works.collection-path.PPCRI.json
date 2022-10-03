@@ -1,10 +1,11 @@
 {
   "description" : "a work with a collection path",
-  "createdAt" : "2022-09-30T08:11:41.746543Z",
+  "createdAt" : "2022-10-03T10:25:19.252Z",
   "id" : "mlqs2qbd",
   "document" : {
     "debug" : {
       "source" : {
+        "id" : "mlqs2qbd",
         "identifier" : {
           "identifierType" : {
             "id" : "miro-image-number"
@@ -19,70 +20,6 @@
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "miro-image-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "yQb1GgWKF4"
-      },
-      "canonicalId" : "mlqs2qbd",
-      "mergedTime" : "1978-12-10T03:28:38Z",
-      "sourceModifiedTime" : "1978-12-10T03:28:38Z",
-      "indexedTime" : "2001-01-01T01:01:01Z",
-      "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "data" : {
-      "title" : "title-X1EiWSsi1c",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : {
-        "path" : "PPCRI",
-        "label" : "PP/CRI"
-      },
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
     },
     "display" : {
       "id" : "mlqs2qbd",

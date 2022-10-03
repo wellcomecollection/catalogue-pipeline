@@ -1,10 +1,11 @@
 {
   "description" : "works with items with other identifiers",
-  "createdAt" : "2022-09-30T08:11:41.712991Z",
+  "createdAt" : "2022-10-03T10:25:19.243Z",
   "id" : "c5xw2xfj",
   "document" : {
     "debug" : {
       "source" : {
+        "id" : "c5xw2xfj",
         "identifier" : {
           "identifierType" : {
             "id" : "sierra-system-number"
@@ -19,107 +20,6 @@
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "sierra-system-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "fREqoThymw"
-      },
-      "canonicalId" : "c5xw2xfj",
-      "mergedTime" : "1937-12-14T11:58:33Z",
-      "sourceModifiedTime" : "1937-12-14T11:58:33Z",
-      "indexedTime" : "2001-01-01T01:01:01Z",
-      "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "data" : {
-      "title" : "title-jI6EjEMJ47",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-        {
-          "id" : {
-            "canonicalId" : "7jsbnatb",
-            "sourceIdentifier" : {
-              "identifierType" : {
-                "id" : "calm-record-id"
-              },
-              "ontologyType" : "Work",
-              "value" : "mhIMFLtNyg"
-            },
-            "otherIdentifiers" : [
-              {
-                "identifierType" : {
-                  "id" : "calm-record-id"
-                },
-                "ontologyType" : "Work",
-                "value" : "T07LdJrNoV"
-              }
-            ],
-            "type" : "Identified"
-          },
-          "title" : null,
-          "note" : null,
-          "locations" : [
-            {
-              "url" : "https://iiif.wellcomecollection.org/image/ZkV.jpg/info.json",
-              "locationType" : {
-                "id" : "iiif-presentation"
-              },
-              "license" : {
-                "id" : "cc-by"
-              },
-              "credit" : "Credit line: NqqpCuC",
-              "linkText" : "Link text: zFkNfX",
-              "accessConditions" : [
-              ],
-              "type" : "DigitalLocation"
-            }
-          ]
-        }
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
     },
     "display" : {
       "id" : "c5xw2xfj",

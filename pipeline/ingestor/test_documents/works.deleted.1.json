@@ -1,10 +1,11 @@
 {
   "description" : "an arbitrary list of deleted works",
-  "createdAt" : "2022-05-31T18:33:50.521362Z",
+  "createdAt" : "2022-10-03T10:25:18.803Z",
   "id" : "drwubxen",
   "document" : {
     "debug" : {
       "source" : {
+        "id" : "drwubxen",
         "identifier" : {
           "identifierType" : {
             "id" : "calm-record-id"
@@ -20,31 +21,6 @@
       "deletedReason" : {
         "info" : "tests",
         "type" : "DeletedFromSource"
-      }
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "calm-record-id"
-        },
-        "ontologyType" : "Work",
-        "value" : "id6G7vla4o"
-      },
-      "canonicalId" : "drwubxen",
-      "mergedTime" : "1966-04-26T05:44:05Z",
-      "sourceModifiedTime" : "1966-04-26T05:44:05Z",
-      "indexedTime" : "2001-01-01T01:01:01Z",
-      "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
       }
     },
     "type" : "Deleted"

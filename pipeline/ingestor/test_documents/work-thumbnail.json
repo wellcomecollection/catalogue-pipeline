@@ -1,10 +1,11 @@
 {
   "description" : "a work with a thumbnail",
-  "createdAt" : "2022-09-30T08:11:40.977422Z",
+  "createdAt" : "2022-10-03T10:25:18.825Z",
   "id" : "sahqcluh",
   "document" : {
     "debug" : {
       "source" : {
+        "id" : "sahqcluh",
         "identifier" : {
           "identifierType" : {
             "id" : "sierra-system-number"
@@ -19,79 +20,6 @@
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "sierra-system-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "rRRYGQYiF7"
-      },
-      "canonicalId" : "sahqcluh",
-      "mergedTime" : "2052-06-26T19:25:07Z",
-      "sourceModifiedTime" : "2052-06-26T19:25:07Z",
-      "indexedTime" : "2001-01-01T01:01:01Z",
-      "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "data" : {
-      "title" : "title-LSfnjHB2TS",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : {
-        "url" : "https://iiif.wellcomecollection.org/image/547.jpg/info.json",
-        "locationType" : {
-          "id" : "iiif-presentation"
-        },
-        "license" : {
-          "id" : "cc-by"
-        },
-        "credit" : null,
-        "linkText" : null,
-        "accessConditions" : [
-        ]
-      },
-      "production" : [
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
     },
     "display" : {
       "id" : "sahqcluh",

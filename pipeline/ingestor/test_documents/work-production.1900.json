@@ -1,10 +1,11 @@
 {
   "description" : "a work with a production event in 1900",
-  "createdAt" : "2022-09-30T08:11:41.036959Z",
+  "createdAt" : "2022-10-03T10:25:18.847Z",
   "id" : "rbnro6wx",
   "document" : {
     "debug" : {
       "source" : {
+        "id" : "rbnro6wx",
         "identifier" : {
           "identifierType" : {
             "id" : "miro-image-number"
@@ -19,88 +20,6 @@
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
-    },
-    "state" : {
-      "sourceIdentifier" : {
-        "identifierType" : {
-          "id" : "miro-image-number"
-        },
-        "ontologyType" : "Work",
-        "value" : "akaUmx5H3i"
-      },
-      "canonicalId" : "rbnro6wx",
-      "mergedTime" : "1935-04-27T19:39:17Z",
-      "sourceModifiedTime" : "1935-04-27T19:39:17Z",
-      "indexedTime" : "2001-01-01T01:01:01Z",
-      "availabilities" : [
-      ],
-      "relations" : {
-        "ancestors" : [
-        ],
-        "children" : [
-        ],
-        "siblingsPreceding" : [
-        ],
-        "siblingsSucceeding" : [
-        ]
-      }
-    },
-    "data" : {
-      "title" : "Production event in 1900",
-      "otherIdentifiers" : [
-      ],
-      "alternativeTitles" : [
-      ],
-      "format" : null,
-      "description" : null,
-      "physicalDescription" : null,
-      "lettering" : null,
-      "createdDate" : null,
-      "subjects" : [
-      ],
-      "genres" : [
-      ],
-      "contributors" : [
-      ],
-      "thumbnail" : null,
-      "production" : [
-        {
-          "label" : "gu6TgtWwNe2izyk21myzum5ko",
-          "places" : [
-          ],
-          "agents" : [
-          ],
-          "dates" : [
-            {
-              "id" : {
-                "type" : "Unidentifiable"
-              },
-              "label" : "1900",
-              "range" : {
-                "from" : "1900-01-01T00:00:00Z",
-                "to" : "1900-12-31T23:59:59.999999999Z",
-                "label" : "1900"
-              }
-            }
-          ],
-          "function" : null
-        }
-      ],
-      "languages" : [
-      ],
-      "edition" : null,
-      "notes" : [
-      ],
-      "duration" : null,
-      "items" : [
-      ],
-      "holdings" : [
-      ],
-      "collectionPath" : null,
-      "referenceNumber" : null,
-      "imageData" : [
-      ],
-      "workType" : "Standard"
     },
     "display" : {
       "id" : "rbnro6wx",
