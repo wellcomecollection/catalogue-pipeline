@@ -5,7 +5,7 @@ import io.circe.syntax._
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.generators.ImageGenerators
-import weco.catalogue.internal_model.image.{Image, ImageState}
+import weco.catalogue.internal_model.image.{Image, ImageState, InferredData}
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.identifiers.{CanonicalId, IdState}
 import weco.catalogue.internal_model.languages.Language
@@ -187,7 +187,7 @@ class CreateTestImageDocuments
   }
 
   it("creates an image without any inferred data") {
-    val image = createImageData.toAugmentedImageWith(inferredData = None)
+    val image = createImageData.toAugmentedImageWith(inferredData = InferredData.empty)
 
     saveImage(
       image,
@@ -198,12 +198,10 @@ class CreateTestImageDocuments
 
   it("creates an image with inferred data in the wrong format") {
     val image = createImageData.toAugmentedImageWith(
-      inferredData = createInferredData.map(
-        _.copy(
+      inferredData = createInferredData.copy(
           binMinima = List(1f),
           binSizes = List(List(1))
         )
-      )
     )
 
     saveImage(
@@ -275,8 +273,7 @@ class CreateTestImageDocuments
 
   it("creates examples for the color filter tests") {
     val redImage = createImageData.toAugmentedImageWith(
-      inferredData = createInferredData.map(
-        _.copy(
+      inferredData = createInferredData.copy(
           palette = List(
             "7/0",
             "7/0",
@@ -289,11 +286,9 @@ class CreateTestImageDocuments
             "268/2"
           )
         )
-      )
     )
     val blueImage = createImageData.toAugmentedImageWith(
-      inferredData = createInferredData.map(
-        _.copy(
+      inferredData = createInferredData.copy(
           palette = List(
             "9/0",
             "9/0",
@@ -315,11 +310,9 @@ class CreateTestImageDocuments
             "129/2"
           )
         )
-      )
     )
     val slightlyLessRedImage = createImageData.toAugmentedImageWith(
-      inferredData = createInferredData.map(
-        _.copy(
+      inferredData = createInferredData.copy(
           palette = List(
             "7/0",
             "71/1",
@@ -327,18 +320,15 @@ class CreateTestImageDocuments
             "71/1"
           )
         )
-      )
     )
     val evenLessRedImage = createImageData.toAugmentedImageWith(
-      inferredData = createInferredData.map(
-        _.copy(
+      inferredData = createInferredData.copy(
           palette = List(
             "7/0",
             "7/0",
             "7/0"
           )
         )
-      )
     )
 
     saveImage(
