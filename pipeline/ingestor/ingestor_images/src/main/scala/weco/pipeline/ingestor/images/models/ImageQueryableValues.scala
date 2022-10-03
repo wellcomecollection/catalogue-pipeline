@@ -2,7 +2,11 @@ package weco.pipeline.ingestor.images.models
 
 import io.circe.generic.extras.JsonKey
 import weco.catalogue.internal_model.identifiers.{CanonicalId, SourceIdentifier}
-import weco.catalogue.internal_model.image.{ImageSource, InferredData, ParentWork}
+import weco.catalogue.internal_model.image.{
+  ImageSource,
+  InferredData,
+  ParentWork
+}
 import weco.catalogue.internal_model.locations.DigitalLocation
 import weco.catalogue.internal_model.work.Relations
 import weco.pipeline.ingestor.common.models.WorkQueryableValues

@@ -63,15 +63,15 @@ variable "es_cluster_size" {
 
 locals {
   es_memory_lookup = {
-    "2x58g": "58g"
-    "3x8g": "8g"
-    "3x2g": "2g"
+    "2x58g" : "58g"
+    "3x8g" : "8g"
+    "3x2g" : "2g"
   }
 
   es_node_lookup = {
-    "2x58g": 2
-    "3x8g": 3
-    "3x2g": 3
+    "2x58g" : 2
+    "3x8g" : 3
+    "3x2g" : 3
   }
 
   es_memory = var.reindexing_state.scale_up_elastic_cluster ? "58g" : local.es_memory_lookup[var.es_cluster_size]
