@@ -156,9 +156,7 @@ class InferenceManagerWorkerService[Destination](
               case (
                   AdapterResponseBundle(DownloadedImage(image, _), _, _),
                   ctx) =>
-                (
-                  image.transition[ImageState.Augmented](Some(inferredData)),
-                  ctx)
+                (image.transition[ImageState.Augmented](inferredData), ctx)
             }
           }
           .mergeSubstreamsWithParallelism(

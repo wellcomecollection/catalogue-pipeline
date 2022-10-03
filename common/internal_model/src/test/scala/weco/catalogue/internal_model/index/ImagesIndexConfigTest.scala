@@ -25,30 +25,20 @@ class ImagesIndexConfigTest
     }
   }
 
-  it("indexes an image without feature vectors") {
-    withLocalImagesIndex { implicit index =>
-      assertImageCanBeIndexed(
-        image = createImageData.toAugmentedImageWith(inferredData = None)
-      )
-    }
-  }
-
   it("cannot index an image with image vectors that are longer than 2048") {
     withLocalImagesIndex { implicit index =>
       val features1 = (0 until 3000).map(_ => Random.nextFloat() * 100).toList
       val features2 = (0 until 3000).map(_ => Random.nextFloat() * 100).toList
       val image = createImageData.toAugmentedImageWith(
-        inferredData = Some(
-          InferredData(
-            features1,
-            features2,
-            List(randomAlphanumeric(10)),
-            List(randomAlphanumeric(10)),
-            Some(randomHexString),
-            List(List(4, 6, 9), List(2, 4, 6), List(1, 3, 5)),
-            List(0f, 10f / 256, 10f / 256),
-            Some(Random.nextFloat())
-          )
+        inferredData = InferredData(
+          features1,
+          features2,
+          List(randomAlphanumeric(10)),
+          List(randomAlphanumeric(10)),
+          Some(randomHexString),
+          List(List(4, 6, 9), List(2, 4, 6), List(1, 3, 5)),
+          List(0f, 10f / 256, 10f / 256),
+          Some(Random.nextFloat())
         )
       )
 
@@ -61,17 +51,15 @@ class ImagesIndexConfigTest
   it("cannot index an image with image vectors that are shorter than 2048") {
     withLocalImagesIndex { implicit index =>
       val image = createImageData.toAugmentedImageWith(
-        inferredData = Some(
-          InferredData(
-            List(2.0f),
-            List(2.0f),
-            List(randomAlphanumeric(10)),
-            List(randomAlphanumeric(10)),
-            Some(randomHexString),
-            List(List(4, 6, 9), List(2, 4, 6), List(1, 3, 5)),
-            List(0f, 10f / 256, 10f / 256),
-            Some(Random.nextFloat())
-          )
+        inferredData = InferredData(
+          List(2.0f),
+          List(2.0f),
+          List(randomAlphanumeric(10)),
+          List(randomAlphanumeric(10)),
+          Some(randomHexString),
+          List(List(4, 6, 9), List(2, 4, 6), List(1, 3, 5)),
+          List(0f, 10f / 256, 10f / 256),
+          Some(Random.nextFloat())
         )
       )
 
@@ -97,8 +85,13 @@ class ImagesIndexConfigTest
     decoder: Decoder[I],
     encoder: Encoder[I]
   ): Assertion = {
-    indexImage(id = image.id, image = image)
-    assertWorkIsIndexed(id = image.id, image = image)
+    val r = indexImage(id = image.id, image = image)
+
+    if (r.isError) {
+      println(s"Could not index image: $r")
+    }
+
+    assertImageIsIndexed(id = image.id, image = image)
   }
 
   private def indexImage[I](
@@ -109,7 +102,7 @@ class ImagesIndexConfigTest
       indexInto(index).doc(toJson(image).get).id(id)
     }.await
 
-  private def assertWorkIsIndexed[I](
+  private def assertImageIsIndexed[I](
     id: String,
     image: I
   )(implicit index: Index, decoder: Decoder[I]) =

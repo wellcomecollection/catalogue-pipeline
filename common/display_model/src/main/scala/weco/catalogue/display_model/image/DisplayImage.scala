@@ -31,11 +31,9 @@ object DisplayImage {
       id = image.id,
       thumbnail = DisplayDigitalLocation(thumbnail(image)),
       locations = image.locations.map(DisplayDigitalLocation(_)),
-      aspectRatio =
-        image.state.inferredData.flatMap(_.aspectRatio).getOrElse(1.0f),
-      averageColor = image.state.inferredData
-        .flatMap(_.averageColorHex)
-        .getOrElse("#ffffff"),
+      aspectRatio = image.state.inferredData.aspectRatio.getOrElse(1.0F),
+      averageColor =
+        image.state.inferredData.averageColorHex.getOrElse("#ffffff"),
       source = DisplayImageSource(image.source)
     )
 }

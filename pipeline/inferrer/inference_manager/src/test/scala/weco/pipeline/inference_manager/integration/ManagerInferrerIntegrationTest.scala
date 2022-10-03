@@ -73,7 +73,7 @@ class ManagerInferrerIntegrationTest
             augmentedImages(messageSender.messages.head.body)
 
           inside(augmentedImage.state) {
-            case Augmented(_, id, Some(inferredData)) =>
+            case Augmented(_, id, inferredData) =>
               id should be(image.state.canonicalId)
               inside(inferredData) {
                 case InferredData(
