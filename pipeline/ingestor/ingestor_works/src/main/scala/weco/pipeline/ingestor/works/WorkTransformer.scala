@@ -11,6 +11,7 @@ import weco.pipeline.ingestor.works.models.{
   WorkAggregatableValues
 }
 import weco.catalogue.display_model.Implicits._
+import weco.pipeline.ingestor.common.models.WorkQueryableValues
 
 import java.time.Instant
 
