@@ -7,7 +7,11 @@ import weco.catalogue.internal_model.identifiers._
 import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.locations._
 import weco.catalogue.internal_model.work._
-import weco.catalogue.internal_model.work.generators.{ContributorGenerators, ItemsGenerators, WorkGenerators}
+import weco.catalogue.internal_model.work.generators.{
+  ContributorGenerators,
+  ItemsGenerators,
+  WorkGenerators
+}
 import weco.pipeline.ingestor.common.models.WorkQueryableValues
 
 import java.time.LocalDate

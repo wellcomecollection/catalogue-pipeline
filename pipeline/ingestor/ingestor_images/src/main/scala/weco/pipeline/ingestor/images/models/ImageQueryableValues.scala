@@ -15,7 +15,8 @@ case class ImageQueryableValues(
 )
 
 case object ImageQueryableValues {
-  def apply(inferredData: InferredData, source: ImageSource): ImageQueryableValues =
+  def apply(inferredData: InferredData,
+            source: ImageSource): ImageQueryableValues =
     source match {
       case ParentWork(id, workData, _) =>
         ImageQueryableValues(

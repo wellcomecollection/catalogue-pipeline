@@ -187,7 +187,8 @@ class CreateTestImageDocuments
   }
 
   it("creates an image without any inferred data") {
-    val image = createImageData.toAugmentedImageWith(inferredData = InferredData.empty)
+    val image =
+      createImageData.toAugmentedImageWith(inferredData = InferredData.empty)
 
     saveImage(
       image,
@@ -199,9 +200,9 @@ class CreateTestImageDocuments
   it("creates an image with inferred data in the wrong format") {
     val image = createImageData.toAugmentedImageWith(
       inferredData = createInferredData.copy(
-          binMinima = List(1f),
-          binSizes = List(List(1))
-        )
+        binMinima = List(1f),
+        binSizes = List(List(1))
+      )
     )
 
     saveImage(
@@ -274,61 +275,61 @@ class CreateTestImageDocuments
   it("creates examples for the color filter tests") {
     val redImage = createImageData.toAugmentedImageWith(
       inferredData = createInferredData.copy(
-          palette = List(
-            "7/0",
-            "7/0",
-            "7/0",
-            "71/1",
-            "71/1",
-            "71/1",
-            "268/2",
-            "268/2",
-            "268/2"
-          )
+        palette = List(
+          "7/0",
+          "7/0",
+          "7/0",
+          "71/1",
+          "71/1",
+          "71/1",
+          "268/2",
+          "268/2",
+          "268/2"
         )
+      )
     )
     val blueImage = createImageData.toAugmentedImageWith(
       inferredData = createInferredData.copy(
-          palette = List(
-            "9/0",
-            "9/0",
-            "9/0",
-            "5/0",
-            "74/1",
-            "74/1",
-            "74/1",
-            "35/1",
-            "50/1",
-            "29/1",
-            "38/1",
-            "273/2",
-            "273/2",
-            "273/2",
-            "187/2",
-            "165/2",
-            "115/2",
-            "129/2"
-          )
+        palette = List(
+          "9/0",
+          "9/0",
+          "9/0",
+          "5/0",
+          "74/1",
+          "74/1",
+          "74/1",
+          "35/1",
+          "50/1",
+          "29/1",
+          "38/1",
+          "273/2",
+          "273/2",
+          "273/2",
+          "187/2",
+          "165/2",
+          "115/2",
+          "129/2"
         )
+      )
     )
     val slightlyLessRedImage = createImageData.toAugmentedImageWith(
       inferredData = createInferredData.copy(
-          palette = List(
-            "7/0",
-            "71/1",
-            "71/1",
-            "71/1"
-          )
+        palette = List(
+          "7/0",
+          "71/1",
+          "71/1",
+          "71/1"
         )
+      )
     )
     val evenLessRedImage = createImageData.toAugmentedImageWith(
       inferredData = createInferredData.copy(
-          palette = List(
-            "7/0",
-            "7/0",
-            "7/0"
-          )
+        palette = List(
+          "7/0",
+          "7/0",
+          "7/0"
         )
+      )
     )
 
     saveImage(

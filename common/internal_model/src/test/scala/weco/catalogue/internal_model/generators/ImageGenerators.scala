@@ -196,14 +196,14 @@ trait ImageGenerators
     val palette = randomColorVector()
 
     InferredData(
-        features1 = features1.toList,
-        features2 = features2.toList,
-        lshEncodedFeatures = lshEncodedFeatures.toList,
-        palette = palette.toList,
-        averageColorHex = Some(randomHexString),
-        binSizes = inferredDataBinSizes,
-        binMinima = inferredDataBinMinima,
-        aspectRatio = inferredDataAspectRatio
+      features1 = features1.toList,
+      features2 = features2.toList,
+      lshEncodedFeatures = lshEncodedFeatures.toList,
+      palette = palette.toList,
+      averageColorHex = Some(randomHexString),
+      binSizes = inferredDataBinSizes,
+      binMinima = inferredDataBinMinima,
+      aspectRatio = inferredDataAspectRatio
     )
   }
 
@@ -248,17 +248,16 @@ trait ImageGenerators
     (features, lshFeatures, palettes).zipped.map {
       case (f, l, p) =>
         createImageData.toAugmentedImageWith(
-          inferredData =
-            InferredData(
-              features1 = f.slice(0, 2048).toList,
-              features2 = f.slice(2048, 4096).toList,
-              lshEncodedFeatures = l.toList,
-              palette = p.toList,
-              averageColorHex = Some(randomHexString),
-              binSizes = inferredDataBinSizes,
-              binMinima = inferredDataBinMinima,
-              aspectRatio = inferredDataAspectRatio
-            )
+          inferredData = InferredData(
+            features1 = f.slice(0, 2048).toList,
+            features2 = f.slice(2048, 4096).toList,
+            lshEncodedFeatures = l.toList,
+            palette = p.toList,
+            averageColorHex = Some(randomHexString),
+            binSizes = inferredDataBinSizes,
+            binMinima = inferredDataBinMinima,
+            aspectRatio = inferredDataAspectRatio
+          )
         )
     }
   }
