@@ -1,6 +1,6 @@
 {
   "description" : "a list of work with all the include-able fields",
-  "createdAt" : "2022-10-03T10:25:19.118Z",
+  "createdAt" : "2022-10-03T11:15:02.828234Z",
   "id" : "nlqnlwch",
   "document" : {
     "debug" : {
@@ -392,12 +392,11 @@
       "notes" : [
         {
           "contents" : [
-            "LHOqPv8Cs",
-            "YxC3RLI"
+            "MM9NU3A"
           ],
           "noteType" : {
-            "id" : "funding-info",
-            "label" : "Funding information",
+            "id" : "general-note",
+            "label" : "Notes",
             "type" : "NoteType"
           },
           "type" : "Note"
@@ -415,11 +414,12 @@
         },
         {
           "contents" : [
-            "MM9NU3A"
+            "LHOqPv8Cs",
+            "YxC3RLI"
           ],
           "noteType" : {
-            "id" : "general-note",
-            "label" : "Notes",
+            "id" : "funding-info",
+            "label" : "Funding information",
             "type" : "NoteType"
           },
           "type" : "Note"

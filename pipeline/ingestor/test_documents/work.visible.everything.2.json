@@ -1,6 +1,6 @@
 {
   "description" : "a list of work with all the include-able fields",
-  "createdAt" : "2022-10-03T10:25:19.121Z",
+  "createdAt" : "2022-10-03T11:15:02.832351Z",
   "id" : "jfzz4ou9",
   "document" : {
     "debug" : {
@@ -404,6 +404,17 @@
       "notes" : [
         {
           "contents" : [
+            "0NVp7GvR"
+          ],
+          "noteType" : {
+            "id" : "general-note",
+            "label" : "Notes",
+            "type" : "NoteType"
+          },
+          "type" : "Note"
+        },
+        {
+          "contents" : [
             "6uOUAu",
             "RE2canCUR",
             "No7cLokW4L"
@@ -411,17 +422,6 @@
           "noteType" : {
             "id" : "location-of-duplicates",
             "label" : "Location of duplicates",
-            "type" : "NoteType"
-          },
-          "type" : "Note"
-        },
-        {
-          "contents" : [
-            "0NVp7GvR"
-          ],
-          "noteType" : {
-            "id" : "general-note",
-            "label" : "Notes",
             "type" : "NoteType"
           },
           "type" : "Note"
