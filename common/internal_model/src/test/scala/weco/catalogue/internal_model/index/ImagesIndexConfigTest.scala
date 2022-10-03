@@ -25,14 +25,6 @@ class ImagesIndexConfigTest
     }
   }
 
-  it("indexes an image without feature vectors") {
-    withLocalImagesIndex { implicit index =>
-      assertImageCanBeIndexed(
-        image = createImageData.toAugmentedImageWith(inferredData = InferredData.empty)
-      )
-    }
-  }
-
   it("cannot index an image with image vectors that are longer than 2048") {
     withLocalImagesIndex { implicit index =>
       val features1 = (0 until 3000).map(_ => Random.nextFloat() * 100).toList
@@ -95,7 +87,12 @@ class ImagesIndexConfigTest
     decoder: Decoder[I],
     encoder: Encoder[I]
   ): Assertion = {
-    indexImage(id = image.id, image = image)
+    val r = indexImage(id = image.id, image = image)
+
+    if (r.isError) {
+      println(s"Could not index image: $r")
+    }
+
     assertImageIsIndexed(id = image.id, image = image)
   }
 
