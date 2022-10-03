@@ -1,25 +1,20 @@
-package weco.pipeline.ingestor.works.models
+package weco.pipeline.ingestor.models
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.generators.ImageGenerators
 import weco.catalogue.internal_model.identifiers._
 import weco.catalogue.internal_model.languages.Language
-import weco.catalogue.internal_model.locations.{
-  AccessCondition,
-  AccessMethod,
-  AccessStatus,
-  License,
-  LocationType
-}
+import weco.catalogue.internal_model.locations._
 import weco.catalogue.internal_model.work._
 import weco.catalogue.internal_model.work.generators.{
   ContributorGenerators,
   ItemsGenerators,
   WorkGenerators
 }
+import weco.pipeline.ingestor.common.models.WorkQueryableValues
 
-import java.time.{LocalDate}
+import java.time.LocalDate
 
 class WorkQueryableValuesTest
     extends AnyFunSpec

@@ -1,6 +1,6 @@
 {
   "description" : "an image without any inferred data",
-  "createdAt" : "2022-10-03T07:50:11.780574Z",
+  "createdAt" : "2022-10-03T08:33:43.312247Z",
   "id" : "l5gjhkar",
   "document" : {
     "version" : 1,
@@ -172,10 +172,86 @@
       "type" : "Image"
     },
     "query" : {
-      "source.subjects.label" : [
-      ],
-      "source.genres.label" : [
-      ]
+      "inferredData" : {
+        "features1" : [
+        ],
+        "features2" : [
+        ],
+        "lshEncodedFeatures" : [
+        ],
+        "palette" : [
+        ],
+        "averageColorHex" : null,
+        "binSizes" : [
+        ],
+        "binMinima" : [
+        ],
+        "aspectRatio" : null
+      },
+      "source" : {
+        "id" : "dh33dnst",
+        "format.id" : null,
+        "workType" : "Standard",
+        "identifiers.value" : [
+          "USzOwz6Ub4",
+          "ATPvu9Np4H",
+          "Ix7WHxgwXJ"
+        ],
+        "title" : "title-xv9hSPqrWp",
+        "alternativeTitles" : [
+        ],
+        "description" : null,
+        "physicalDescription" : null,
+        "edition" : null,
+        "notes.contents" : [
+        ],
+        "lettering" : null,
+        "images.id" : [
+        ],
+        "images.identifiers.value" : [
+        ],
+        "items.id" : [
+        ],
+        "items.identifiers.value" : [
+        ],
+        "items.locations.accessConditions.status.id" : [
+        ],
+        "items.locations.license.id" : [
+        ],
+        "items.locations.locationType.id" : [
+        ],
+        "subjects.id" : [
+        ],
+        "subjects.label" : [
+        ],
+        "subjects.concepts.label" : [
+        ],
+        "genres.label" : [
+        ],
+        "genres.concepts.label" : [
+        ],
+        "languages.id" : [
+        ],
+        "languages.label" : [
+        ],
+        "contributors.agent.id" : [
+        ],
+        "contributors.agent.label" : [
+        ],
+        "production.label" : [
+        ],
+        "production.dates.range.from" : [
+        ],
+        "partOf.id" : [
+        ],
+        "partOf.title" : [
+        ],
+        "availabilities.id" : [
+        ],
+        "collectionPath.label" : null,
+        "collectionPath.path" : null,
+        "referenceNumber" : null
+      }
     },
     "aggregatableValues" : {
       "locations.license" : [

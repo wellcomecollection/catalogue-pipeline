@@ -4,6 +4,11 @@ import buildinfo.BuildInfo
 import com.sksamuel.elastic4s.ElasticDsl.{keywordField, _}
 import com.sksamuel.elastic4s.fields.{DenseVectorField, ObjectField}
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
+import weco.catalogue.internal_model.index.WorksAnalysis.{
+  asciifoldingAnalyzer,
+  cleanPathAnalyzer,
+  exactPathAnalyzer
+}
 import weco.elasticsearch.IndexConfig
 
 object ImagesIndexConfig extends IndexConfigFields {
@@ -78,10 +83,75 @@ object ImagesIndexConfig extends IndexConfigFields {
       val display = objectField("display").withEnabled(false)
 
       // This field contains the values we're actually going to query in search.
+      val sourceWork = objectField("source")
+        .fields(
+          // top-level work
+          canonicalIdField("id"),
+          keywordField("type"),
+          keywordField("format.id"),
+          keywordField("workType"),
+          multilingualFieldWithKeyword("title"),
+          multilingualFieldWithKeyword("alternativeTitles"),
+          englishTextField("description"),
+          englishTextKeywordField("physicalDescription"),
+          textField("edition"),
+          englishTextField("notes.contents"),
+          multilingualField("lettering"),
+          // identifiers
+          sourceIdentifierField("identifiers.value"),
+          // images
+          canonicalIdField("images.id"),
+          sourceIdentifierField("images.identifiers.value"),
+          // items
+          canonicalIdField("items.id"),
+          sourceIdentifierField("items.identifiers.value"),
+          keywordField("items.locations.accessConditions.status.id"),
+          keywordField("items.locations.license.id"),
+          keywordField("items.locations.locationType.id"),
+          // subjects
+          canonicalIdField("subjects.id"),
+          labelField("subjects.label"),
+          labelField("subjects.concepts.label"),
+          // genres
+          labelField("genres.label"),
+          labelField("genres.concepts.label"),
+          // languages
+          keywordField("languages.id"),
+          labelField("languages.label"),
+          // contributors
+          canonicalIdField("contributors.agent.id"),
+          labelField("contributors.agent.label"),
+          // production events
+          labelField("production.label"),
+          dateField("production.dates.range.from"),
+          // relations
+          canonicalIdField("partOf.id"),
+          multilingualFieldWithKeyword("partOf.title"),
+          // availabilities
+          keywordField("availabilities.id"),
+          // collection path
+          textField("collectionPath.path")
+            .analyzer(exactPathAnalyzer.name)
+            .fields(
+              keywordField("keyword"),
+              textField("clean").analyzer(cleanPathAnalyzer.name)
+            ),
+          textField("collectionPath.label")
+            .analyzer(asciifoldingAnalyzer.name)
+            .fields(
+              keywordField("keyword"),
+              lowercaseKeyword("lowercaseKeyword"),
+              textField("cleanPath").analyzer(cleanPathAnalyzer.name),
+              textField("path").analyzer(exactPathAnalyzer.name)
+            ),
+          // reference number
+          keywordField("referenceNumber"),
+        )
+
       val query = objectField("query")
         .fields(
-          keywordField("source.genres.label"),
-          keywordField("source.subjects.label")
+          inferredData,
+          sourceWork
         )
 
       // This field contains the display documents used by aggregations.

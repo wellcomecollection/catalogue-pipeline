@@ -82,4 +82,10 @@ trait IndexConfigFields extends ElasticFieldOps {
     objectField("sourceIdentifier")
       .fields(lowercaseKeyword("value"))
       .withDynamic("false")
+
+  def canonicalIdField(name: String): KeywordField =
+    lowercaseKeyword(name)
+
+  def sourceIdentifierField(name: String): KeywordField =
+    lowercaseKeyword(name)
 }

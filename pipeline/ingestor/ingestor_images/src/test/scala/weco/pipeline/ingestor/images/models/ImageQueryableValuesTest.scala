@@ -7,7 +7,7 @@ import weco.catalogue.internal_model.identifiers.{
   DataState,
   IdState
 }
-import weco.catalogue.internal_model.image.ParentWork
+import weco.catalogue.internal_model.image.{InferredData, ParentWork}
 import weco.catalogue.internal_model.work.generators.WorkGenerators
 import weco.catalogue.internal_model.work.{Concept, Genre, Subject, WorkData}
 
@@ -55,9 +55,12 @@ class ImageQueryableValuesTest
       version = 1
     )
 
-    val q = ImageQueryableValues(source = canonicalWork)
+    val q = ImageQueryableValues(
+      inferredData = InferredData.empty,
+      source = canonicalWork
+    )
 
-    q.sourceSubjectLabels shouldBe List(
+    q.source.subjectLabels shouldBe List(
       "Sharp scissors",
       "Split sandwiches",
       "Soft spinners",
@@ -83,9 +86,12 @@ class ImageQueryableValuesTest
       version = 1
     )
 
-    val q = ImageQueryableValues(source = canonicalWork)
+    val q = ImageQueryableValues(
+      inferredData = InferredData.empty,
+      source = canonicalWork
+    )
 
-    q.sourceGenreLabels shouldBe List(
+    q.source.genreLabels shouldBe List(
       "Green goblins",
       "Grand grinches",
     )

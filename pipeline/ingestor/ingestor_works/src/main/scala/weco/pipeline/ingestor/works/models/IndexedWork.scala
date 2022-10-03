@@ -3,6 +3,7 @@ package weco.pipeline.ingestor.works.models
 import io.circe.Json
 import weco.catalogue.internal_model.identifiers.{DataState, IdState}
 import weco.catalogue.internal_model.work.{WorkData, WorkState}
+import weco.pipeline.ingestor.common.models.WorkQueryableValues
 import weco.pipeline_storage.Indexable
 
 sealed trait IndexedWork {

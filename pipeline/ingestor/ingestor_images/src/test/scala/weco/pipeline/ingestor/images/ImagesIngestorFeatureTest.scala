@@ -64,7 +64,10 @@ class ImagesIngestorFeatureTest
             val expectedJson =
               DisplayImage(image.transition[ImageState.Indexed]())
 
-            storedImage.query shouldBe ImageQueryableValues(image.source)
+            storedImage.query shouldBe ImageQueryableValues(
+              inferredData = storedImage.state.inferredData,
+              source = image.source
+            )
             storedImage.aggregatableValues shouldBe ImageAggregatableValues(
               image.source)
 

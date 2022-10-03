@@ -8,10 +8,10 @@ import weco.pipeline.ingestor.works.models.{
   DebugInformation,
   IndexedWork,
   SourceWorkDebugInformation,
-  WorkAggregatableValues,
-  WorkQueryableValues
+  WorkAggregatableValues
 }
 import weco.catalogue.display_model.Implicits._
+import weco.pipeline.ingestor.common.models.WorkQueryableValues
 
 import java.time.Instant
 
