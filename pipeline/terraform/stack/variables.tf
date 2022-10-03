@@ -53,25 +53,25 @@ variable "release_label" {
 #
 variable "es_cluster_size" {
   description = "How big should the Elastic cluster be?"
-  default     = "8x3"
+  default     = "3x8g"
 
   validation {
-    condition     = contains(["58x2", "8x3", "2x2"], var.es_cluster_size)
-    error_message = "Cooldown period should be one of: 58x2, 8x3, 2x2."
+    condition     = contains(["2x58g", "3x8g", "3x2g"], var.es_cluster_size)
+    error_message = "Cooldown period should be one of: 2x58g, 3x8g, 3x2g."
   }
 }
 
 locals {
   es_memory_lookup = {
-    "58x2": "58g"
-    "8x3": "8g"
-    "2x2": "2g"
+    "2x58g": "58g"
+    "3x8g": "8g"
+    "3x2g": "2g"
   }
 
   es_node_lookup = {
-    "58x2": 2
-    "8x3": 3
-    "2x2": 2
+    "2x58g": 2
+    "3x8g": 3
+    "3x2g": 3
   }
 
   es_memory = var.reindexing_state.scale_up_elastic_cluster ? "58g" : local.es_memory_lookup[var.es_cluster_size]

@@ -9,7 +9,7 @@ module "catalogue_pipeline_2022-08-24" {
   # double checking (in case it's useful for further investigation),
   # but we don't need to be running anything through it.
   max_capacity    = 0
-  es_cluster_size = "2x2"
+  es_cluster_size = "3x2g"
 
   reindexing_state = {
     listen_to_reindexer      = false
