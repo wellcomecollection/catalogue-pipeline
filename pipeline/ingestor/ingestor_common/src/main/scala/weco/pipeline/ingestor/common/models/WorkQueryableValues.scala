@@ -1,4 +1,4 @@
-package weco.pipeline.ingestor.works.models
+package weco.pipeline.ingestor.common.models
 
 import io.circe.generic.extras.JsonKey
 import weco.catalogue.internal_model.identifiers.{
