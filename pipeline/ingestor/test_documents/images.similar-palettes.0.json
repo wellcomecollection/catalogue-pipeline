@@ -1,6 +1,6 @@
 {
   "description" : "images with similar palettes",
-  "createdAt" : "2022-10-03T10:11:20.567378Z",
+  "createdAt" : "2022-10-03T18:20:32.260Z",
   "id" : "lerxblzo",
   "document" : {
     "modifiedTime" : "1973-04-28T17:24:32Z",
@@ -64,6 +64,9 @@
     "query" : {
       "id" : "lerxblzo",
       "sourceIdentifier.value" : "Sy001hc9t5",
+      "locations.license.id" : [
+        "cc-by"
+      ],
       "inferredData" : {
         "features1" : [
           -0.16037653,

@@ -1,6 +1,6 @@
 {
   "description" : "an example of images with work metadata for the API tests",
-  "createdAt" : "2022-10-03T10:11:21.027501Z",
+  "createdAt" : "2022-10-03T18:20:32.440Z",
   "id" : "uwywethj",
   "document" : {
     "modifiedTime" : "2005-09-20T21:49:13Z",
@@ -64,6 +64,9 @@
     "query" : {
       "id" : "uwywethj",
       "sourceIdentifier.value" : "kfSXgmMfBa",
+      "locations.license.id" : [
+        "cc-by"
+      ],
       "inferredData" : {
         "features1" : [
           -0.0042760903,

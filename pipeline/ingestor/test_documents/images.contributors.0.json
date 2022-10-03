@@ -1,6 +1,6 @@
 {
   "description" : "images with different contributors",
-  "createdAt" : "2022-10-03T10:11:19.856915Z",
+  "createdAt" : "2022-10-03T18:20:32.128Z",
   "id" : "juvasind",
   "document" : {
     "modifiedTime" : "2067-01-28T19:35:44Z",
@@ -74,6 +74,9 @@
     "query" : {
       "id" : "juvasind",
       "sourceIdentifier.value" : "yDrbOhc3U3",
+      "locations.license.id" : [
+        "cc-by"
+      ],
       "inferredData" : {
         "features1" : [
           -0.010184521,

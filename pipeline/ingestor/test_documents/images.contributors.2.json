@@ -1,6 +1,6 @@
 {
   "description" : "images with different contributors",
-  "createdAt" : "2022-10-03T10:11:19.894185Z",
+  "createdAt" : "2022-10-03T18:20:32.130Z",
   "id" : "de54kq1t",
   "document" : {
     "modifiedTime" : "2027-10-27T20:57:21Z",
@@ -86,6 +86,9 @@
     "query" : {
       "id" : "de54kq1t",
       "sourceIdentifier.value" : "rBFTbCgefK",
+      "locations.license.id" : [
+        "cc-by"
+      ],
       "inferredData" : {
         "features1" : [
           0.022178002,

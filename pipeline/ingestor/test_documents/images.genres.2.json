@@ -1,6 +1,6 @@
 {
   "description" : "images with different genres",
-  "createdAt" : "2022-10-03T10:11:19.959079Z",
+  "createdAt" : "2022-10-03T18:20:32.158Z",
   "id" : "vfagreai",
   "document" : {
     "modifiedTime" : "2054-06-14T20:44:06Z",
@@ -80,6 +80,9 @@
     "query" : {
       "id" : "vfagreai",
       "sourceIdentifier.value" : "aU8xVpaIuX",
+      "locations.license.id" : [
+        "cc-by"
+      ],
       "inferredData" : {
         "features1" : [
           0.011709183,

@@ -1,6 +1,6 @@
 {
   "description" : "an image without any inferred data",
-  "createdAt" : "2022-10-03T10:11:20.649574Z",
+  "createdAt" : "2022-10-03T18:20:32.285Z",
   "id" : "l5gjhkar",
   "document" : {
     "modifiedTime" : "2068-12-21T14:14:18Z",
@@ -66,6 +66,9 @@
     "query" : {
       "id" : "l5gjhkar",
       "sourceIdentifier.value" : "eEnJzTwT3X",
+      "locations.license.id" : [
+        "cc-by"
+      ],
       "inferredData" : {
         "features1" : [
         ],

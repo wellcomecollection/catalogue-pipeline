@@ -1,6 +1,6 @@
 {
   "description" : "images with similar features",
-  "createdAt" : "2022-10-03T10:11:20.129847Z",
+  "createdAt" : "2022-10-03T18:20:32.230Z",
   "id" : "9f7x4ikz",
   "document" : {
     "modifiedTime" : "2046-11-28T04:54:36Z",
@@ -62,6 +62,9 @@
     "query" : {
       "id" : "9f7x4ikz",
       "sourceIdentifier.value" : "lATrNG3ecu",
+      "locations.license.id" : [
+        "cc-by"
+      ],
       "inferredData" : {
         "features1" : [
           0.12595819,

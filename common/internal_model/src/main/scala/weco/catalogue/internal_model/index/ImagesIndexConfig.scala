@@ -104,6 +104,7 @@ object ImagesIndexConfig extends IndexConfigFields {
         .fields(
           canonicalIdField("id"),
           sourceIdentifierField("sourceIdentifier.value"),
+          keywordField("locations.license.id"),
           inferredData,
           sourceWork
         )

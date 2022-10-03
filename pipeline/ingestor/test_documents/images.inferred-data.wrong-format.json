@@ -1,6 +1,6 @@
 {
   "description" : "an image with inferred data in the wrong format",
-  "createdAt" : "2022-10-03T10:11:20.657472Z",
+  "createdAt" : "2022-10-03T18:20:32.289Z",
   "id" : "j2sapi9z",
   "document" : {
     "modifiedTime" : "1934-12-12T10:01:42Z",
@@ -64,6 +64,9 @@
     "query" : {
       "id" : "j2sapi9z",
       "sourceIdentifier.value" : "j7OAiU3VfC",
+      "locations.license.id" : [
+        "cc-by"
+      ],
       "inferredData" : {
         "features1" : [
           -0.0030113524,
