@@ -4,7 +4,6 @@ import buildinfo.BuildInfo
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.fields.{
   ElasticField,
-  KeywordField,
   ObjectField,
   TokenCountField
 }
@@ -330,9 +329,4 @@ object WorksIndexConfig extends IndexConfigFields {
     DynamicMapping.Strict,
     RefreshInterval.On(30.seconds)
   )
-
-  private def canonicalIdField(name: String): KeywordField =
-    lowercaseKeyword(name)
-  private def sourceIdentifierField(name: String): KeywordField =
-    lowercaseKeyword(name)
 }
