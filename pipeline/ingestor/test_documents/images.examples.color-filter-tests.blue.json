@@ -1,6 +1,6 @@
 {
   "description" : "example for the color filter tests",
-  "createdAt" : "2022-10-03T10:11:20.862344Z",
+  "createdAt" : "2022-10-03T18:20:32.365Z",
   "id" : "c6elvmdf",
   "document" : {
     "modifiedTime" : "2018-08-10T01:08:30Z",
@@ -64,6 +64,9 @@
     "query" : {
       "id" : "c6elvmdf",
       "sourceIdentifier.value" : "XsTSq17sQd",
+      "locations.license.id" : [
+        "cc-by"
+      ],
       "inferredData" : {
         "features1" : [
           0.0042840512,

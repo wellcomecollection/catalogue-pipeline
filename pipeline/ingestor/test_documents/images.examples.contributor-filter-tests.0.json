@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2022-10-03T10:11:20.694044Z",
+  "createdAt" : "2022-10-03T18:20:32.303Z",
   "id" : "6lticgpc",
   "document" : {
     "modifiedTime" : "1978-04-13T01:50:51Z",
@@ -74,6 +74,9 @@
     "query" : {
       "id" : "6lticgpc",
       "sourceIdentifier.value" : "N5aYvgYviK",
+      "locations.license.id" : [
+        "cc-by"
+      ],
       "inferredData" : {
         "features1" : [
           0.013180412,

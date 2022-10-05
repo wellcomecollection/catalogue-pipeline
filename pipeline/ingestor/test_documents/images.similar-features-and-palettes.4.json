@@ -1,6 +1,6 @@
 {
   "description" : "images with similar features and palettes",
-  "createdAt" : "2022-10-03T10:11:20.034765Z",
+  "createdAt" : "2022-10-03T18:20:32.199Z",
   "id" : "zgaqbdy7",
   "document" : {
     "modifiedTime" : "1949-05-09T11:38:15Z",
@@ -62,6 +62,9 @@
     "query" : {
       "id" : "zgaqbdy7",
       "sourceIdentifier.value" : "69Xu1A2IYF",
+      "locations.license.id" : [
+        "cc-by"
+      ],
       "inferredData" : {
         "features1" : [
           -0.1626001,

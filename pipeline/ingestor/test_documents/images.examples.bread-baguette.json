@@ -1,6 +1,6 @@
 {
   "description" : "an example of images with work metadata for the API tests",
-  "createdAt" : "2022-10-03T10:11:20.996339Z",
+  "createdAt" : "2022-10-03T18:20:32.429Z",
   "id" : "ojdlglxy",
   "document" : {
     "modifiedTime" : "1964-06-01T09:24:46Z",
@@ -62,6 +62,9 @@
     "query" : {
       "id" : "ojdlglxy",
       "sourceIdentifier.value" : "OIlxR5l5Ue",
+      "locations.license.id" : [
+        "cc-by"
+      ],
       "inferredData" : {
         "features1" : [
           -0.004175817,

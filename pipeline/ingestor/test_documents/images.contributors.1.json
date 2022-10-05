@@ -1,6 +1,6 @@
 {
   "description" : "images with different contributors",
-  "createdAt" : "2022-10-03T10:11:19.878331Z",
+  "createdAt" : "2022-10-03T18:20:32.129Z",
   "id" : "qkusykqo",
   "document" : {
     "modifiedTime" : "2000-03-15T20:44:22Z",
@@ -82,6 +82,9 @@
     "query" : {
       "id" : "qkusykqo",
       "sourceIdentifier.value" : "vQIXYcUAhX",
+      "locations.license.id" : [
+        "cc-by"
+      ],
       "inferredData" : {
         "features1" : [
           0.0016554327,

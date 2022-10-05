@@ -1,6 +1,6 @@
 {
   "description" : "images linked with the same work",
-  "createdAt" : "2022-10-03T10:11:20.911104Z",
+  "createdAt" : "2022-10-03T18:20:32.392Z",
   "id" : "twwihhcj",
   "document" : {
     "modifiedTime" : "1940-09-19T04:40:13Z",
@@ -66,6 +66,9 @@
     "query" : {
       "id" : "twwihhcj",
       "sourceIdentifier.value" : "wMmgaWlSbN",
+      "locations.license.id" : [
+        "cc-by"
+      ],
       "inferredData" : {
         "features1" : [
           -0.009792778,

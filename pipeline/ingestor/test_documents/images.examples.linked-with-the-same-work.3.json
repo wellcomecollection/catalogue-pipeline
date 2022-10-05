@@ -1,6 +1,6 @@
 {
   "description" : "images linked with the same work",
-  "createdAt" : "2022-10-03T10:11:20.912440Z",
+  "createdAt" : "2022-10-03T18:20:32.395Z",
   "id" : "iw2nsqro",
   "document" : {
     "modifiedTime" : "2037-08-03T06:32:25Z",
@@ -64,6 +64,9 @@
     "query" : {
       "id" : "iw2nsqro",
       "sourceIdentifier.value" : "jO0dFxEkYi",
+      "locations.license.id" : [
+        "cc-by"
+      ],
       "inferredData" : {
         "features1" : [
           -0.005971288,

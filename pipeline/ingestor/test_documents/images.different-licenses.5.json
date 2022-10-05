@@ -1,6 +1,6 @@
 {
   "description" : "images with different licenses",
-  "createdAt" : "2022-10-03T10:11:19.266365Z",
+  "createdAt" : "2022-10-03T18:20:32.026Z",
   "id" : "i1k4zk7n",
   "document" : {
     "modifiedTime" : "1935-11-05T07:15:21Z",
@@ -66,6 +66,9 @@
     "query" : {
       "id" : "i1k4zk7n",
       "sourceIdentifier.value" : "wsFyHRBJKG",
+      "locations.license.id" : [
+        "pdm"
+      ],
       "inferredData" : {
         "features1" : [
           -0.022658588,

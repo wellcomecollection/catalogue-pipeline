@@ -1,6 +1,6 @@
 {
   "description" : "images with similar palettes",
-  "createdAt" : "2022-10-03T10:11:20.568530Z",
+  "createdAt" : "2022-10-03T18:20:32.261Z",
   "id" : "tivxhktz",
   "document" : {
     "modifiedTime" : "2022-07-29T03:33:32Z",
@@ -64,6 +64,9 @@
     "query" : {
       "id" : "tivxhktz",
       "sourceIdentifier.value" : "XMzKeg6oRm",
+      "locations.license.id" : [
+        "cc-by"
+      ],
       "inferredData" : {
         "features1" : [
           -0.005905605,

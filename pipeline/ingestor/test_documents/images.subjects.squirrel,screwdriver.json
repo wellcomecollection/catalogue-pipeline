@@ -1,6 +1,6 @@
 {
   "description" : "images with different subjects",
-  "createdAt" : "2022-10-03T10:11:21.128693Z",
+  "createdAt" : "2022-10-03T18:20:32.479Z",
   "id" : "jibj9ykt",
   "document" : {
     "modifiedTime" : "2007-08-27T20:33:46Z",
@@ -75,6 +75,9 @@
     "query" : {
       "id" : "jibj9ykt",
       "sourceIdentifier.value" : "SejMIu74SO",
+      "locations.license.id" : [
+        "cc-by"
+      ],
       "inferredData" : {
         "features1" : [
           0.004539426,

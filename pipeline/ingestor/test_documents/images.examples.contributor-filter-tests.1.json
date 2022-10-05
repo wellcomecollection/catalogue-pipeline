@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2022-10-03T10:11:20.694955Z",
+  "createdAt" : "2022-10-03T18:20:32.304Z",
   "id" : "guv3wimu",
   "document" : {
     "modifiedTime" : "1945-02-28T17:58:45Z",
@@ -72,6 +72,9 @@
     "query" : {
       "id" : "guv3wimu",
       "sourceIdentifier.value" : "2gLKwbmCNQ",
+      "locations.license.id" : [
+        "cc-by"
+      ],
       "inferredData" : {
         "features1" : [
           -0.00977648,

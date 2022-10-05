@@ -1,6 +1,6 @@
 {
   "description" : "images with different genres",
-  "createdAt" : "2022-10-03T10:11:19.955939Z",
+  "createdAt" : "2022-10-03T18:20:32.156Z",
   "id" : "h7v2aaet",
   "document" : {
     "modifiedTime" : "1996-12-17T16:22:29Z",
@@ -72,6 +72,9 @@
     "query" : {
       "id" : "h7v2aaet",
       "sourceIdentifier.value" : "omGBFtFDxM",
+      "locations.license.id" : [
+        "cc-by"
+      ],
       "inferredData" : {
         "features1" : [
           0.0041469056,

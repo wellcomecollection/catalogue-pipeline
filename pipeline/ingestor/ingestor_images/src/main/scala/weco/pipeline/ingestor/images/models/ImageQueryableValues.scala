@@ -7,12 +7,14 @@ import weco.catalogue.internal_model.image.{
   InferredData,
   ParentWork
 }
+import weco.catalogue.internal_model.locations.DigitalLocation
 import weco.catalogue.internal_model.work.Relations
 import weco.pipeline.ingestor.common.models.WorkQueryableValues
 
 case class ImageQueryableValues(
   @JsonKey("id") id: String,
   @JsonKey("sourceIdentifier.value") sourceIdentifier: String,
+  @JsonKey("locations.license.id") licenseIds: List[String],
   @JsonKey("inferredData") inferredData: InferredData,
   @JsonKey("source") source: WorkQueryableValues,
 )
@@ -21,6 +23,7 @@ case object ImageQueryableValues {
   def apply(id: CanonicalId,
             sourceIdentifier: SourceIdentifier,
             inferredData: InferredData,
+            locations: List[DigitalLocation],
             source: ImageSource): ImageQueryableValues =
     source match {
       case ParentWork(workId, workData, _) =>
@@ -28,6 +31,7 @@ case object ImageQueryableValues {
           id = id.underlying,
           sourceIdentifier = sourceIdentifier.value,
           inferredData = inferredData,
+          licenseIds = locations.flatMap(_.license).map(_.id),
           source = WorkQueryableValues(
             id = workId.canonicalId,
             sourceIdentifier = workId.sourceIdentifier,

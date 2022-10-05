@@ -1,6 +1,6 @@
 {
   "description" : "images with similar palettes",
-  "createdAt" : "2022-10-03T10:11:20.569930Z",
+  "createdAt" : "2022-10-03T18:20:32.262Z",
   "id" : "jeomchl0",
   "document" : {
     "modifiedTime" : "2019-10-06T23:09:53Z",
@@ -66,6 +66,9 @@
     "query" : {
       "id" : "jeomchl0",
       "sourceIdentifier.value" : "VhFfrAwd5d",
+      "locations.license.id" : [
+        "cc-by"
+      ],
       "inferredData" : {
         "features1" : [
           0.13684304,

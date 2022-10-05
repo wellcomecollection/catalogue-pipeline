@@ -1,6 +1,6 @@
 {
   "description" : "images linked with another work",
-  "createdAt" : "2022-10-03T10:11:20.971517Z",
+  "createdAt" : "2022-10-03T18:20:32.418Z",
   "id" : "2gthps4g",
   "document" : {
     "modifiedTime" : "2016-05-16T23:14:19Z",
@@ -64,6 +64,9 @@
     "query" : {
       "id" : "2gthps4g",
       "sourceIdentifier.value" : "qudxPV4kMQ",
+      "locations.license.id" : [
+        "cc-by"
+      ],
       "inferredData" : {
         "features1" : [
           0.030316448,

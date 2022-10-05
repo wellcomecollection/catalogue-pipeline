@@ -1,6 +1,6 @@
 {
   "description" : "images with similar features",
-  "createdAt" : "2022-10-03T10:11:20.127990Z",
+  "createdAt" : "2022-10-03T18:20:32.228Z",
   "id" : "02353bji",
   "document" : {
     "modifiedTime" : "2005-03-07T19:19:52Z",
@@ -66,6 +66,9 @@
     "query" : {
       "id" : "02353bji",
       "sourceIdentifier.value" : "VZoACCTNEO",
+      "locations.license.id" : [
+        "cc-by"
+      ],
       "inferredData" : {
         "features1" : [
           0.13125782,

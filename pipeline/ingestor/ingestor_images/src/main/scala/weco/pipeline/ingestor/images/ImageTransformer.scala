@@ -19,6 +19,7 @@ object ImageTransformer {
         query = ImageQueryableValues(
           id = image.state.canonicalId,
           sourceIdentifier = image.state.sourceIdentifier,
+          locations = image.locations,
           inferredData = image.state.inferredData,
           source = image.source
         ),

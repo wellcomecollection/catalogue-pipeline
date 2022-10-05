@@ -1,6 +1,6 @@
 {
   "description" : "images with different licenses",
-  "createdAt" : "2022-10-03T10:11:19.265070Z",
+  "createdAt" : "2022-10-03T18:20:32.025Z",
   "id" : "z9e1lnnv",
   "document" : {
     "modifiedTime" : "2028-11-24T11:30:56Z",
@@ -66,6 +66,9 @@
     "query" : {
       "id" : "z9e1lnnv",
       "sourceIdentifier.value" : "MYextQQ5ji",
+      "locations.license.id" : [
+        "cc-by"
+      ],
       "inferredData" : {
         "features1" : [
           -0.0077301464,

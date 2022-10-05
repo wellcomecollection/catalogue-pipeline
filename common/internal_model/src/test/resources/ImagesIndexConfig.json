@@ -90,6 +90,17 @@
               }
             }
           },
+          "locations": {
+            "properties": {
+              "license": {
+                "properties": {
+                  "id": {
+                    "type": "keyword"
+                  }
+                }
+              }
+            }
+          },
           "source": {
             "properties": {
               "alternativeTitles": {
