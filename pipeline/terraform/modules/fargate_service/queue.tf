@@ -6,7 +6,7 @@ module "input_queue" {
   topic_arns                 = var.topic_arns
   visibility_timeout_seconds = var.queue_visibility_timeout_seconds
   max_receive_count          = var.max_receive_count
-
+  message_retention_seconds  = var.message_retention_seconds
   alarm_topic_arn = var.fargate_service_boilerplate.dlq_alarm_topic_arn
 }
 
