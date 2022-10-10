@@ -24,6 +24,18 @@ variable "queue_visibility_timeout_seconds" {
   default = 30
 }
 
+variable "message_retention_seconds" {
+  type = number
+  # The actual default on SQS is four whole days.
+  #   default = 345600
+  # This is sufficient to cope with normal bank holiday weekends.
+
+  # However, if a message is sitting on any main queue for more than a day,
+  # then something has gone rather awry, and it should be moved to a DLQ,
+  # rather than cluttering a main queue.
+  default = 86400
+}
+
 variable "max_receive_count" {
   type    = number
   default = 4

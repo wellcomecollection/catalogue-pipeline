@@ -20,7 +20,35 @@ module "ingestor_works" {
     module.relation_embedder_output_topic.arn,
   ]
 
+  # The ingestor_works_flush_interval_seconds will wait for up to ingestor_works_flush_interval_seconds
+  # before starting to process any of the messages it has pulled from the queue.
+  # This is to allow it to run over efficiently sized batches, rather than processing everything one at a time.
+  # Allow a buffer on top of that for the processor to actually do work, before declaring a message dead.
   queue_visibility_timeout_seconds = local.ingestor_works_flush_interval_seconds + 30
+
+  # In normal running, we need to messages need to be kicked off the main queue as soon as possible
+  # if things start slowing down.
+  # During the overnight Sierra Harvest, the ingestor slows down to the extent that the oldest message
+  # normally sits for up to about 4000 seconds, and sometimes up to about 8000.
+  # During a reindex, everything is processed much more quickly (ca. 600s max), so there is no need to
+  # configure this value separately for the two scenarios
+
+  # This number may be subject to some refinement.  This is a bit under three hours, which, when considered
+  # alongside the 0200 Sierra Harvest (which is the situation where runaway ingestion has happened),
+  # means that it should start clearing down before 0500, with plenty of time before the lion's share
+  # of website users get up.
+  message_retention_seconds = 10000
+
+  # If, at any point, message processing slows down enough to take longer than queue_visibility_timeout_seconds (90),
+  # the retry facility will make things worse.
+  # The ingestor will have received the message, and be trying to process it, but SQS will declare it lost, and
+  # ask for it to be processed again.  As a result, if this system goes over capacity to this extent, each message
+  # will be processed max_receive_count times, which means going even further over capacity
+  # As with message_retention, there is no need to maintain two different configurations. In normal running,
+  # we want to protect the database from overloading by pushing messages onto the DLQ on first failure.
+  # During a reindex, it is under human supervision, and we can easily redrive the DLQ if required (and often do).
+
+  max_receive_count = 1
 
   env_vars = {
     topic_arn = module.ingestor_works_output_topic.arn
