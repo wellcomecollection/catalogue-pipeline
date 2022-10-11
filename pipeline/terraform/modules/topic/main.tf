@@ -14,6 +14,21 @@ data "aws_iam_policy_document" "publish_to_topic" {
   }
 }
 
+data "aws_iam_policy_document" "allow_external_subscribers" {
+  statement {
+    actions = [
+      "sns:Subscribe",
+    ]
+    principals {
+      identifiers = var.subscriber_accounts
+      type        = "AWS"
+    }
+    resources = [
+      aws_sns_topic.topic.arn,
+    ]
+  }
+}
+
 resource "aws_iam_role_policy" "task_sns" {
   count = length(var.role_names)
 
