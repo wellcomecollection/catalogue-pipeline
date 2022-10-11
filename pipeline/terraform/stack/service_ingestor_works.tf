@@ -7,6 +7,8 @@ module "ingestor_works_output_topic" {
 
   name       = "${local.namespace}_ingestor_works_output"
   role_names = [module.ingestor_works.task_role_name]
+  # Allow the catalogue account to subscribe to works being ingested.
+  # The Concepts Aggregator needs this access.
   subscriber_accounts = ["756629837203"]
 }
 
