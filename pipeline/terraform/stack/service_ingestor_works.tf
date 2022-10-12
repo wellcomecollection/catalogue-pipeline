@@ -10,6 +10,7 @@ locals {
   # very low, this can be prevented.
   ingestor_works_flush_interval_seconds = 10
 }
+
 module "ingestor_works_output_topic" {
   source = "../modules/topic"
 
