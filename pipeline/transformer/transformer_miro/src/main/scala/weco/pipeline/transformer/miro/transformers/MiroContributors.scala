@@ -22,10 +22,11 @@ trait MiroContributors
 
     // We also add the contributor code for the non-historical images, but
     // only if the contributor *isn't* Wellcome Collection.
-    val maybeContributorCreatorLabel = MiroContributorCredit.getCredit(miroRecord)
+    val maybeContributorCreatorLabel = MiroContributorCredit
+      .getCredit(miroRecord)
       .flatMap {
         case "Wellcome Collection" => None
-        case s => Some(s)
+        case s                     => Some(s)
       }
 
     val labels = primaryCreatorLabels ++ secondaryCreatorLabels ++ List(

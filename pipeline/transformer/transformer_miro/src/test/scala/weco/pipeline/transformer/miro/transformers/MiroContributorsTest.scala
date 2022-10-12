@@ -143,7 +143,9 @@ class MiroContributorsTest
         sourceCode = Some("FED")
       ),
       expectedContributors = List(
-        ExpectedContributor(label = "Anna Gordon, Fernan Federici & Jim Haseloff", idLabel = "anna gordon, fernan federici & jim haseloff"),
+        ExpectedContributor(
+          label = "Anna Gordon, Fernan Federici & Jim Haseloff",
+          idLabel = "anna gordon, fernan federici & jim haseloff"),
       )
     )
   }
