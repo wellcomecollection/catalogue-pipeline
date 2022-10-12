@@ -136,6 +136,20 @@ class MiroContributorsTest
     )
   }
 
+  it("prefers the image_credit_line to image_source_code") {
+    transformRecordAndCheckContributors(
+      miroRecord = createMiroRecordWith(
+        creditLine = Some("Anna Gordon, Fernan Federici & Jim Haseloff"),
+        sourceCode = Some("FED")
+      ),
+      expectedContributors = List(
+        ExpectedContributor(
+          label = "Anna Gordon, Fernan Federici & Jim Haseloff",
+          idLabel = "anna gordon, fernan federici & jim haseloff"),
+      )
+    )
+  }
+
   case class ExpectedContributor(label: String, idLabel: String)
 
   private def transformRecordAndCheckContributors(
