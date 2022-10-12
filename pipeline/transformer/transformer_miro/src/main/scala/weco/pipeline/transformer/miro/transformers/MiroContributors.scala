@@ -3,7 +3,6 @@ package weco.pipeline.transformer.miro.transformers
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.{Agent, Contributor}
 import weco.pipeline.transformer.identifiers.LabelDerivedIdentifiers
-import weco.pipeline.transformer.miro.exceptions.MiroTransformerException
 import weco.pipeline.transformer.miro.source.MiroRecord
 
 trait MiroContributors
