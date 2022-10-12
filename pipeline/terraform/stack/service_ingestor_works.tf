@@ -1,7 +1,15 @@
 locals {
-  ingestor_works_flush_interval_seconds = 60
+  # The flush interval must be significantly lower than the cooldown period
+  # for the scaling down alarm (1 minute).
+  # Fargate services take 60-90s to start up.
+  # Assuming the worst - that scaling up on detecting a message in the queue took
+  # 90s, that gives the ingestor a maximum of 30 seconds to finish working or
+  # it will be terminated prematurely.
+  # It is still a possibility that messages will fail, if they are received after the first flush
+  # and less than the flush period before the scale down happens, but by keeping this number
+  # very low, this can be prevented.
+  ingestor_works_flush_interval_seconds = 10
 }
-
 module "ingestor_works_output_topic" {
   source = "../modules/topic"
 
