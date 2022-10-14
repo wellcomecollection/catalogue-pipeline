@@ -12,10 +12,17 @@ locals {
 }
 
 module "ingestor_works_output_topic" {
-  source = "../modules/topic"
+  source = "git::github.com/wellcomecollection/terraform-aws-sns-topic.git//?ref=v1.0.1"
+  name   = "${local.namespace}_ingestor_works_output"
+  # Allow the catalogue account to subscribe to works being ingested.
+  # The Concepts Aggregator needs this access.
+  cross_account_subscription_ids = ["756629837203"]
+}
 
-  name       = "${local.namespace}_ingestor_works_output"
-  role_names = [module.ingestor_works.task_role_name]
+
+resource "aws_iam_role_policy" "worker_role_can_publish_sns" {
+  role   = module.ingestor_works.task_role_name
+  policy = module.ingestor_works_output_topic.publish_policy
 }
 
 module "ingestor_works" {
@@ -35,7 +42,7 @@ module "ingestor_works" {
   # Allow a buffer on top of that for the processor to actually do work, before declaring a message dead.
   queue_visibility_timeout_seconds = local.ingestor_works_flush_interval_seconds + 30
 
-  # In normal running, we need to messages need to be kicked off the main queue as soon as possible
+  # In normal running, messages need to be kicked off the main queue as soon as possible
   # if things start slowing down.
   # During the overnight Sierra Harvest, the ingestor slows down to the extent that the oldest message
   # normally sits for up to about 4000 seconds, and sometimes up to about 8000.
