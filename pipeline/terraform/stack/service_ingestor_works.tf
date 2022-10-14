@@ -13,7 +13,7 @@ locals {
 
 module "ingestor_works_output_topic" {
   source = "git::github.com/wellcomecollection/terraform-aws-sns-topic.git//?ref=v1.0.1"
-  name       = "${local.namespace}_ingestor_works_output"
+  name   = "${local.namespace}_ingestor_works_output"
   # Allow the catalogue account to subscribe to works being ingested.
   # The Concepts Aggregator needs this access.
   cross_account_subscription_ids = ["756629837203"]
