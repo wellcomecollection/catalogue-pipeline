@@ -12,13 +12,17 @@ locals {
 }
 
 module "ingestor_works_output_topic" {
-  source = "../modules/topic"
-
+  source = "git::github.com/wellcomecollection/terraform-aws-sns-topic.git//?ref=v1.0.1"
   name       = "${local.namespace}_ingestor_works_output"
-  role_names = [module.ingestor_works.task_role_name]
   # Allow the catalogue account to subscribe to works being ingested.
   # The Concepts Aggregator needs this access.
-  subscriber_accounts = ["756629837203"]
+  cross_account_subscription_ids = ["756629837203"]
+}
+
+
+resource "aws_iam_role_policy" "worker_role_can_publish_sns" {
+  role   = module.ingestor_works.task_role_name
+  policy = module.ingestor_works_output_topic.publish_policy
 }
 
 module "ingestor_works" {
