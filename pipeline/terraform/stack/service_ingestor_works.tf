@@ -9,6 +9,19 @@ locals {
   # and less than the flush period before the scale down happens, but by keeping this number
   # very low, this can be prevented.
   ingestor_works_flush_interval_seconds = 10
+
+  # In normal running, messages need to be kicked off the main queue as soon as possible
+  # if things start slowing down.
+  # During the overnight Sierra Harvest, the ingestor slows down to the extent that the oldest message
+  # normally sits for up to about 4000 seconds, and sometimes up to about 8000.
+  # During a reindex, everything is processed much more quickly (ca. 600s max), so there is no need to
+  # configure this value separately for the two scenarios
+
+  # This number may be subject to some refinement.  This is a bit under three hours, which, when considered
+  # alongside the 0200 Sierra Harvest (which is the situation where runaway ingestion has happened),
+  # means that it should start clearing down before 0500, with plenty of time before the lion's share
+  # of website users get up.
+  ingestor_works_queue_retention_seconds = 10000
 }
 
 module "ingestor_works_output_topic" {
@@ -36,24 +49,21 @@ module "ingestor_works" {
     module.relation_embedder_output_topic.arn,
   ]
 
-  # The ingestor_works_flush_interval_seconds will wait for up to ingestor_works_flush_interval_seconds
+  # The ingestor will wait for up to ingestor_works_flush_interval_seconds
   # before starting to process any of the messages it has pulled from the queue.
   # This is to allow it to run over efficiently sized batches, rather than processing everything one at a time.
-  # Allow a buffer on top of that for the processor to actually do work, before declaring a message dead.
-  queue_visibility_timeout_seconds = local.ingestor_works_flush_interval_seconds + 30
+  # If messages are arriving faster than the ingestor can complete processing, they will start
+  # backing up in the ingestor itself.
+  # Given that each message is only given one chance at processing before being sent to the DLQ,
+  # there is no need for a tight turnaround on declaring an in-flight message to have failed, so
+  # (in theory) visibility and retention can be the same value.
+  # However, if there is a risk of messages being "lost in the aether", then we should not
+  # have to wait for hours before attempting to redrive them.
+  # 12 minutes seems like an appropriate time , given that messages can wait for up to ten minutes
+  # during a reindex (though that is mostly spent on-queue, so it's more of a guide than a rule here)
+  queue_visibility_timeout_seconds = 720
 
-  # In normal running, messages need to be kicked off the main queue as soon as possible
-  # if things start slowing down.
-  # During the overnight Sierra Harvest, the ingestor slows down to the extent that the oldest message
-  # normally sits for up to about 4000 seconds, and sometimes up to about 8000.
-  # During a reindex, everything is processed much more quickly (ca. 600s max), so there is no need to
-  # configure this value separately for the two scenarios
-
-  # This number may be subject to some refinement.  This is a bit under three hours, which, when considered
-  # alongside the 0200 Sierra Harvest (which is the situation where runaway ingestion has happened),
-  # means that it should start clearing down before 0500, with plenty of time before the lion's share
-  # of website users get up.
-  message_retention_seconds = 10000
+  message_retention_seconds = local.ingestor_works_queue_retention_seconds
 
   # If, at any point, message processing slows down enough to take longer than queue_visibility_timeout_seconds (90),
   # the retry facility will make things worse.
