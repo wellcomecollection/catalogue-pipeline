@@ -116,7 +116,12 @@ function getLabelAttributes(
 export async function getAttributes(
   w: SourceWork
 ): Promise<Record<string, string>> {
-  const labelAttributes = await getLabelAttributes(w);
+  const { label } = await getLabelAttributes(w);
+
+  const labelAttributes = w.suppressed
+    ? { label: `${label}\n(suppressed)` }
+    : { label };
+
 
   const styleAttributes = w.suppressed ? { style: 'dashed' } : {};
 
