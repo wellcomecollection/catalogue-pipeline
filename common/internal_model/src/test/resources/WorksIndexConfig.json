@@ -62,8 +62,12 @@
         }
       },
       "debug": {
-        "type": "object",
-        "enabled": false
+        "dynamic": "false",
+        "properties": {
+          "indexedTime": {
+            "type": "date"
+          }
+        }
       },
       "display": {
         "type": "object",
