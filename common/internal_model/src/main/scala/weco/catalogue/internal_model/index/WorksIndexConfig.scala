@@ -87,6 +87,7 @@ object WorksIndexConfig extends IndexConfigFields {
           keywordField("type"),
           keywordField("format.id"),
           keywordField("workType"),
+          dateField("debug.indexedTime"),
           multilingualFieldWithKeyword("title").copy(
             copyTo = titlesAndContributorsPath),
           multilingualFieldWithKeyword("alternativeTitles").copy(
