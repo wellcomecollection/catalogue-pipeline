@@ -75,7 +75,9 @@ object WorksIndexConfig extends IndexConfigFields {
       // is just used by developers debugging the pipeline.
       // See dynamic-field-mapping in elasticsearch reference site: Setting the dynamic parameter to false ignores new fields
       // This means we will only index the indexedTime field within debug object for the snapshot reporter
-      val debug = objectField("debug").withDynamic("false").fields(dateField("indexedTime"))
+      val debug = objectField("debug")
+        .withDynamic("false")
+        .fields(dateField("indexedTime"))
 
       // This field contains the display document used by the API, but we don't want
       // to index it -- it's just an arbitrary blob of JSON.
