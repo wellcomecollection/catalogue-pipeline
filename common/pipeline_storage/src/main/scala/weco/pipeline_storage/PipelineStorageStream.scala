@@ -92,7 +92,7 @@ class PipelineStorageStream[In, Out, MsgDestination](
                 ),
                 noOutputFlow
               )
-            )
+          )
       )
     } yield done
 

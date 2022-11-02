@@ -2,7 +2,11 @@ package weco.pipeline.transformer.sierra.transformers.matchers
 
 import org.scalatest.Assertions.fail
 import org.scalatest.matchers.HavePropertyMatcher
-import weco.catalogue.internal_model.identifiers.{HasId, IdState, IdentifierType}
+import weco.catalogue.internal_model.identifiers.{
+  HasId,
+  IdState,
+  IdentifierType
+}
 import weco.catalogue.internal_model.work.{AbstractRootConcept, Subject}
 
 trait SubjectMatchers {
