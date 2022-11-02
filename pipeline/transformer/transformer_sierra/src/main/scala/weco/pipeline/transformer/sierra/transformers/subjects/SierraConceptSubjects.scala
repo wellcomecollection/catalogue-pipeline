@@ -53,8 +53,10 @@ object SierraConceptSubjects
 
   val subjectVarFields = List("650", "648", "651")
 
-  def getSubjectsFromVarFields(bibId: SierraBibNumber,
-                               varfields: List[VarField]): Output = {
+  def getSubjectsFromVarFields(
+    bibId: SierraBibNumber,
+    varfields: List[VarField]
+  ): Output = {
     // Second indicator 7 means that the subject authority is something other
     // than library of congress or mesh. Some MARC records have duplicated subjects
     // when the same subject has more than one authority (for example mesh and FAST),
@@ -86,10 +88,11 @@ object SierraConceptSubjects
     }
   }
 
-  private def getConcepts(varfield: VarField,
-                          primarySubfields: List[Subfield],
-                          subdivisionSubfields: List[Subfield])
-    : List[AbstractConcept[IdState.Unminted]] = {
+  private def getConcepts(
+    varfield: VarField,
+    primarySubfields: List[Subfield],
+    subdivisionSubfields: List[Subfield]
+  ): List[AbstractConcept[IdState.Unminted]] = {
     subdivisionSubfields match {
       // In the absence of subfields, the Subject will consist of one Concept.
       // In that case, the identifier derived from the field as a whole
@@ -103,7 +106,7 @@ object SierraConceptSubjects
         getPrimaryConcept(
           primarySubfields,
           varField = varfield,
-          idstate = conceptId,
+          idstate = conceptId
         )
       // If there are subfields, then this Subject will consist of multiple Concepts
       // In that case, the identifier derived from the field as a whole
@@ -111,7 +114,8 @@ object SierraConceptSubjects
       // The primary and subsequent Concepts will have to coin their own ids from their labels.
       case _ =>
         getPrimaryConcept(primarySubfields, varField = varfield) ++ getSubdivisions(
-          subdivisionSubfields)
+          subdivisionSubfields
+        )
     }
   }
 
