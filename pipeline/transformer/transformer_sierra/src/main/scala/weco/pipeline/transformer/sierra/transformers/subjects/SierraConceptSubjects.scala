@@ -71,7 +71,14 @@ object SierraConceptSubjects
     //
     // So let's filter anything that is from another authority for now.
     varfields.filterNot(_.indicator2.contains("7")).map { varfield =>
+      // Extract the relevant subfields from the given varField.
+      // $a - the name of the thing - Geographic/Topical/Chronological name
+      // $v - Form Subdivision
+      // $x - General Subdivision
+      // $y - Chronological Subdivision
+      // $z - Geographic Subdivision
       val subfields = varfield.subfieldsWithTags("a", "v", "x", "y", "z")
+      // A varfield may have multiple "a" subfields.
       val (primarySubfields, subdivisionSubfields) = subfields.partition {
         _.tag == "a"
       }

@@ -125,7 +125,8 @@ class SierraConceptSubjectsTest
   }
 
   it(
-    "subfield a is always first concept when returning subjects for tag 650 with subfields a, v") {
+    "subfield a is always first concept when returning subjects for tag 650 with subfields a, v"
+  ) {
     val bibData = createSierraBibDataWith(
       varFields = List(
         VarField(
@@ -326,7 +327,8 @@ class SierraConceptSubjectsTest
       sourceIdentifier(
         value = "a content",
         ontologyType = "Period",
-        identifierType = IdentifierType.LabelDerived)
+        identifierType = IdentifierType.LabelDerived
+      )
     )
 
     conceptX shouldBe a[Concept[_]]
@@ -369,7 +371,8 @@ class SierraConceptSubjectsTest
       sourceIdentifier(
         value = "a content",
         ontologyType = "Place",
-        identifierType = IdentifierType.LabelDerived)
+        identifierType = IdentifierType.LabelDerived
+      )
     )
 
     conceptX shouldBe a[Concept[_]]
@@ -465,7 +468,8 @@ class SierraConceptSubjectsTest
       sourceIdentifier(
         value = "mesh/456",
         ontologyType = "Subject",
-        identifierType = IdentifierType.MESH)
+        identifierType = IdentifierType.MESH
+      )
     )
     val List(concept) = subject.concepts
 
@@ -474,7 +478,8 @@ class SierraConceptSubjectsTest
       sourceIdentifier(
         value = "mesh/456",
         ontologyType = "Concept",
-        identifierType = IdentifierType.MESH)
+        identifierType = IdentifierType.MESH
+      )
     )
   }
 
@@ -498,7 +503,8 @@ class SierraConceptSubjectsTest
   }
 
   it(
-    "removes a trailing period from a primary subject label, regardless of type") {
+    "removes a trailing period from a primary subject label, regardless of type"
+  ) {
     // The different types of concept all normalise in their own fashion, removing
     // whatever flavour of terminal punctuation is peculiar to that tag.
     // However, when they are the Primary Concept, a terminal full stop is always removed
@@ -507,15 +513,18 @@ class SierraConceptSubjectsTest
         ("marcTag", "assertType"),
         (
           "648",
-          (concept: AbstractRootConcept[Any]) => concept shouldBe a[Period[_]]),
+          (concept: AbstractRootConcept[Any]) => concept shouldBe a[Period[_]]
+        ),
         (
           "650",
-          (concept: AbstractRootConcept[Any]) =>
-            concept shouldBe a[Concept[_]]),
+          (concept: AbstractRootConcept[Any]) => concept shouldBe a[Concept[_]]
+        ),
         (
           "651",
-          (concept: AbstractRootConcept[Any]) => concept shouldBe a[Place[_]])
-      )) { (marcTag, assertType) =>
+          (concept: AbstractRootConcept[Any]) => concept shouldBe a[Place[_]]
+        )
+      )
+    ) { (marcTag, assertType) =>
       val bibData = createSierraBibDataWith(
         varFields = List(
           VarField(
@@ -560,7 +569,8 @@ class SierraConceptSubjectsTest
       sourceIdentifier(
         value = "sh85083064",
         ontologyType = "Subject",
-        identifierType = IdentifierType.LCSubjects)
+        identifierType = IdentifierType.LCSubjects
+      )
     )
 
     val List(concept) = subject.concepts
@@ -569,7 +579,8 @@ class SierraConceptSubjectsTest
       sourceIdentifier(
         value = "sh85083064",
         ontologyType = "Concept",
-        identifierType = IdentifierType.LCSubjects)
+        identifierType = IdentifierType.LCSubjects
+      )
     )
   }
 
@@ -594,7 +605,8 @@ class SierraConceptSubjectsTest
       sourceIdentifier(
         value = "united states",
         ontologyType = "Place",
-        identifierType = IdentifierType.LabelDerived)
+        identifierType = IdentifierType.LabelDerived
+      )
     )
   }
 
@@ -619,10 +631,41 @@ class SierraConceptSubjectsTest
       sourceIdentifier(
         value = "yellowstone national park",
         ontologyType = "Concept",
-        identifierType = IdentifierType.LabelDerived)
+        identifierType = IdentifierType.LabelDerived
+      )
+    )
+  }
+
+  it("retrieves concepts from multiple ǂa subfields") {
+    val bibData = createSierraBibDataWith(
+      varFields = List(
+        VarField(
+          marcTag = Some("650"),
+          indicator2 = Some("0"),
+          subfields = List(
+            Subfield(tag = "a", content = " Yellowstone National Park")
+          )
+        )
+      )
+    )
+
+    val List(subject) = SierraConceptSubjects(createSierraBibNumber, bibData)
+    val concept = subject.onlyConcept
+
+    concept should have(
+      sourceIdentifier(
+        value = "yellowstone national park",
+        ontologyType = "Concept",
+        identifierType = IdentifierType.LabelDerived
+      )
     )
   }
 
   //TODO: Now that it's not doing the Mocky style test, we need to check that ParsedPeriod is being used.
   // put in a test with roman numeral dates and see what happens.
+
+  //TODO: Test for multiple 'a' subtags
+
+  // TODO: Test for multiple 'a' subtags when the first is empty
+  // TODO: Tell a librarian that b10938230 looks dodgy
 }
