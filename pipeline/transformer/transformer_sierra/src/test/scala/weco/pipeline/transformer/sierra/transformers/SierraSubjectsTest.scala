@@ -43,7 +43,7 @@ class SierraSubjectsTest
     val List(subject) = SierraSubjects(createSierraBibNumber, bibData)
     subject should have(
       'label ("Medicine"),
-      labelDerivedSubjectId("medicine")
+      labelDerivedConceptId("medicine")
     )
     val List(concept) = subject.concepts
 
@@ -71,7 +71,7 @@ class SierraSubjectsTest
       'label ("Medicine"),
       sourceIdentifier(
         value = "sh85083064",
-        ontologyType = "Subject",
+        ontologyType = "Concept",
         identifierType = IdentifierType.LCSubjects)
     )
 
