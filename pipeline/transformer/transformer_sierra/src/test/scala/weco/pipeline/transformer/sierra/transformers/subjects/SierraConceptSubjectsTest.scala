@@ -669,9 +669,4 @@ class SierraConceptSubjectsTest
 
   //TODO: Now that it's not doing the Mocky style test, we need to check that ParsedPeriod is being used.
   // put in a test with roman numeral dates and see what happens.
-
-  //TODO: Test for multiple 'a' subtags
-
-  // TODO: Test for multiple 'a' subtags when the first is empty
-  // TODO: Tell a librarian that b10938230 looks dodgy
 }
