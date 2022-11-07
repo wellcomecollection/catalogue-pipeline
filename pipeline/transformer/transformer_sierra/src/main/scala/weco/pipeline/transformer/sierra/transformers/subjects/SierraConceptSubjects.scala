@@ -1,7 +1,7 @@
 package weco.pipeline.transformer.sierra.transformers.subjects
 
 import weco.catalogue.internal_model.identifiers.IdState
-import weco.catalogue.internal_model.work._
+import weco.catalogue.internal_model.work.{Place, _}
 import weco.pipeline.transformer.sierra.transformers.SierraConcepts
 import weco.pipeline.transformer.text.TextNormalisation._
 import weco.pipeline.transformer.transformers.ParsedPeriod
@@ -88,7 +88,7 @@ object SierraConceptSubjects
         getConcepts(varfield, primarySubfields, subdivisionSubfields)
 
       Subject(
-        id = getIdState(ontologyType = "Subject", varfield),
+        id = getIdState(ontologyType = getFieldOntologyType(varfield), varfield),
         label = label,
         concepts = concepts
       )
@@ -105,8 +105,9 @@ object SierraConceptSubjects
       // In that case, the identifier derived from the field as a whole
       // also refers to that concept.
       case Nil =>
+        getFieldOntologyType(varfield)
         val conceptId =
-          getIdState(ontologyType = "Concept", varfield) match {
+          getIdState(ontologyType = getFieldOntologyType(varfield), varfield) match {
             case identifiable: IdState.Identifiable => Some(identifiable)
             case _                                  => None
           }
@@ -139,5 +140,12 @@ object SierraConceptSubjects
         case "648" => ParsedPeriod(label = label).identifiable(idstate)
         case "651" => Place(label = label).normalised.identifiable(idstate)
       }
+    }
+
+  private def getFieldOntologyType(varField: VarField): String =
+    varField.marcTag.get match {
+      case "650" => "Concept"
+      case "648" => "Period"
+      case "651" => "Place"
     }
 }

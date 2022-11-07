@@ -55,7 +55,7 @@ class SierraConceptSubjectsTest
     val List(subject) = SierraConceptSubjects(bibId, bibData)
     subject should have(
       'label ("A Content"),
-      labelDerivedSubjectId("a content")
+      labelDerivedConceptId("a content")
     )
 
     val List(conceptA) = subject.concepts
@@ -81,7 +81,7 @@ class SierraConceptSubjectsTest
     val List(subject) = SierraConceptSubjects(bibId, bibData)
     subject should have(
       'label ("Flüssigkeit"),
-      labelDerivedSubjectId("flussigkeit")
+      labelDerivedConceptId("flussigkeit")
     )
 
     val List(conceptA) = subject.concepts
@@ -108,7 +108,7 @@ class SierraConceptSubjectsTest
     val List(subject) = SierraConceptSubjects(bibId, bibData)
     subject should have(
       'label ("A Content - V Content"),
-      labelDerivedSubjectId("a content - v content")
+      labelDerivedConceptId("a content - v content")
     )
 
     val List(conceptA, conceptV) = subject.concepts
@@ -142,7 +142,7 @@ class SierraConceptSubjectsTest
     val List(subject) = SierraConceptSubjects(bibId, bibData)
     subject should have(
       'label ("A Content - V Content"),
-      labelDerivedSubjectId("a content - v content")
+      labelDerivedConceptId("a content - v content")
     )
 
     val List(conceptA, conceptV) = subject.concepts
@@ -175,7 +175,7 @@ class SierraConceptSubjectsTest
     val List(subject) = SierraConceptSubjects(bibId, bibData)
     subject should have(
       'label ("A Content - X Content - V Content"),
-      labelDerivedSubjectId("a content - x content - v content")
+      labelDerivedConceptId("a content - x content - v content")
     )
     subject.concepts.length shouldBe 3
     subject.concepts.zip(List("A", "X", "V")).map {
@@ -204,7 +204,7 @@ class SierraConceptSubjectsTest
     val List(subject) = SierraConceptSubjects(bibId, bibData)
     subject should have(
       'label ("A Content - Y Content"),
-      labelDerivedSubjectId("a content - y content")
+      labelDerivedConceptId("a content - y content")
     )
 
     val List(conceptA, conceptY) = subject.concepts
@@ -236,7 +236,7 @@ class SierraConceptSubjectsTest
     val List(subject) = SierraConceptSubjects(bibId, bibData)
     subject should have(
       'label ("A Content - Z Content"),
-      labelDerivedSubjectId("a content - z content")
+      labelDerivedConceptId("a content - z content")
     )
 
     val List(conceptA, conceptY) = subject.concepts
@@ -317,7 +317,7 @@ class SierraConceptSubjectsTest
     val List(subject) = SierraConceptSubjects(bibId, bibData)
     subject should have(
       'label ("A Content - X Content - V Content"),
-      labelDerivedSubjectId("a content - x content - v content")
+      labelDerivedPeriodId("a content - x content - v content")
     )
 
     val List(conceptA, conceptX, conceptV) = subject.concepts
@@ -361,7 +361,7 @@ class SierraConceptSubjectsTest
     val List(subject) = SierraConceptSubjects(bibId, bibData)
     subject should have(
       'label ("A Content - X Content - V Content"),
-      labelDerivedSubjectId("a content - x content - v content")
+      labelDerivedPlaceId("a content - x content - v content")
     )
 
     val List(conceptA, conceptX, conceptV) = subject.concepts
@@ -416,12 +416,12 @@ class SierraConceptSubjectsTest
       SourceIdentifier(
         identifierType = IdentifierType.LCSubjects,
         value = "lcsh/123",
-        ontologyType = "Subject"
+        ontologyType = "Concept"
       ),
       SourceIdentifier(
         identifierType = IdentifierType.MESH,
         value = "mesh/456",
-        ontologyType = "Subject"
+        ontologyType = "Concept"
       )
     )
 
@@ -467,7 +467,7 @@ class SierraConceptSubjectsTest
       'label ("abolition"),
       sourceIdentifier(
         value = "mesh/456",
-        ontologyType = "Subject",
+        ontologyType = "Concept",
         identifierType = IdentifierType.MESH
       )
     )
@@ -510,21 +510,24 @@ class SierraConceptSubjectsTest
     // However, when they are the Primary Concept, a terminal full stop is always removed
     forAll(
       Table(
-        ("marcTag", "assertType"),
+        ("marcTag", "ontologyType", "assertType"),
         (
           "648",
+          "Period",
           (concept: AbstractRootConcept[Any]) => concept shouldBe a[Period[_]]
         ),
         (
           "650",
+          "Concept",
           (concept: AbstractRootConcept[Any]) => concept shouldBe a[Concept[_]]
         ),
         (
           "651",
+          "Place",
           (concept: AbstractRootConcept[Any]) => concept shouldBe a[Place[_]]
         )
       )
-    ) { (marcTag, assertType) =>
+    ) { (marcTag, ontologyType, assertType) =>
       val bibData = createSierraBibDataWith(
         varFields = List(
           VarField(
@@ -539,7 +542,10 @@ class SierraConceptSubjectsTest
       val List(subject) = SierraConceptSubjects(bibId, bibData)
       subject should have(
         'label ("Diet, Food, and Nutrition"),
-        labelDerivedSubjectId("diet, food, and nutrition")
+        labelDerivedSubjectId(
+          "diet, food, and nutrition",
+          ontologyType = ontologyType
+        )
       )
       val concept = subject.onlyConcept
       assertType(concept)
@@ -568,7 +574,7 @@ class SierraConceptSubjectsTest
       'label ("Medicine"),
       sourceIdentifier(
         value = "sh85083064",
-        ontologyType = "Subject",
+        ontologyType = "Concept",
         identifierType = IdentifierType.LCSubjects
       )
     )
