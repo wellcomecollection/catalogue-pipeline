@@ -35,15 +35,19 @@ def get_api_es_client():
     host = get_secret_string(
         session, secret_id="elasticsearch/pipeline_storage_2022-10-03/public_host"
     )
-    port = get_secret_string(session, secret_id="elasticsearch/pipeline_storage_2022-10-03/port")
+    port = get_secret_string(
+        session, secret_id="elasticsearch/pipeline_storage_2022-10-03/port"
+    )
     protocol = get_secret_string(
         session, secret_id="elasticsearch/pipeline_storage_2022-10-03/protocol"
     )
     username = get_secret_string(
-        session, secret_id="elasticsearch/pipeline_storage_2022-10-03/catalogue_api/es_username"
+        session,
+        secret_id="elasticsearch/pipeline_storage_2022-10-03/catalogue_api/es_username",
     )
     password = get_secret_string(
-        session, secret_id="elasticsearch/pipeline_storage_2022-10-03/catalogue_api/es_password"
+        session,
+        secret_id="elasticsearch/pipeline_storage_2022-10-03/catalogue_api/es_password",
     )
 
     return Elasticsearch(f"{protocol}://{username}:{password}@{host}:{port}")
