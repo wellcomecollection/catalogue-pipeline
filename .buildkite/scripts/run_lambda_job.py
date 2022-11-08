@@ -7,7 +7,8 @@ from provider import is_default_branch
 if __name__ == "__main__":
     lambda_paths = [
         "calm_adapter/calm_window_generator",
-        "calm_adapter/calm_deletion_check_initiator" "common/window_generator",
+        "calm_adapter/calm_deletion_check_initiator",
+        "common/window_generator",
         "sierra_adapter/s3_demultiplexer",
         "sierra_adapter/sierra_progress_reporter",
         "sierra_adapter/update_embargoed_holdings",
