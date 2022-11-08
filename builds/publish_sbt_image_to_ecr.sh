@@ -2,22 +2,24 @@
 <<EOF
 Publish a Docker image to ECR.
 
-This is meant for use with the inferrer apps -- we use Docker Compose for
+This is meant for use with sbt-based images -- we use Docker Compose for
 our Node apps.  The image will be published both with the given tag and
 the floating tag 'latest'.
 
+This script is mirrored in our other Scala repos.
+
 == Usage ==
 
-Pass the name of the app as arg 1, and the image tag as arg 2, e.g.
+Pass the name of the sbt project as arg 1, and the image tag as arg 2, e.g.
 
-    $ publish_inferrer_app.sh aspect_ratio_inferrer 19872ab
-    $ publish_inferrer_app.sh feature_inferrer 1761817
+    $ publish_sbt_image_to_ecr.sh file_indexer ref.19872ab
+    $ publish_sbt_image_to_ecr.sh snapshot_generator ref.1761817
+    $ publish_sbt_image_to_ecr.sh transformer_mets ref.9811987
 
 EOF
 
 set -o errexit
 set -o nounset
-set -o verbose
 
 ECR_REGISTRY="760097843905.dkr.ecr.eu-west-1.amazonaws.com"
 
@@ -26,16 +28,9 @@ then
   PROJECT_NAME="$1"
   IMAGE_TAG="$2"
 else
-  echo "Usage: publish_inferrer_app.sh <PROJECT> <IMAGE_TAG>" >&2
+  echo "Usage: publish_sbt_image_to_ecr.sh <PROJECT> <IMAGE_TAG>" >&2
   exit 1
 fi
-
-ROOT=$(git rev-parse --show-toplevel)
-
-docker build \
-  --file "$ROOT/pipeline/inferrer/$PROJECT_NAME/Dockerfile" \
-  --tag "$PROJECT_NAME:$IMAGE_TAG" \
-  "$ROOT/pipeline/inferrer/$PROJECT_NAME"
 
 echo "*** Publishing Docker image to ECR"
 
