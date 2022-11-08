@@ -636,7 +636,7 @@ class SierraConceptSubjectsTest
     )
   }
 
-  describe("multiple ǂa subfields"){
+  describe("multiple ǂa subfields") {
     // This is illegal in MARC, but can occur in third party catalogue data.
     // In the interests of Postel, the transformer will extract them anyway.
 
