@@ -10,14 +10,6 @@ from git_utils import (
 from provider import current_branch, is_default_branch
 
 
-def should_run_lambda_tests(changed_paths):
-    relevant_file_types = [".py", ".ini", ".txt"]
-    for path in changed_paths:
-        if any(path.endswith(file_type) for file_type in relevant_file_types):
-            return True
-    return False
-
-
 if __name__ == "__main__":
     commit_range = None
     local_head = local_current_head()
