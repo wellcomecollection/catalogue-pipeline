@@ -1,0 +1,18 @@
+-r requirements.txt
+
+# Most of these pins are for versions that still support Python 3.6,
+# which is used by the 'tox' Docker image we use in CI.
+#
+# When we upgrade that image, we should consider removing these pins.
+pytest-cov
+moto==1.3.6
+boto3==1.7.31
+botocore==1.10.31
+docutils==0.14
+jmespath==0.9.3
+python-dateutil==2.7.3
+pytz==2018.4
+six==1.11.0
+
+# See https://github.com/getsentry/responses/releases/tag/0.18.0
+responses<0.18.0
