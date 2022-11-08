@@ -72,8 +72,6 @@ steps:
       - "calm_deletion_checker"
       - "calm_indexer"
 
-      - "inference_manager"
-
       - "tei_adapter"
       - "tei_id_extractor"
 
