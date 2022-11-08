@@ -1,6 +1,11 @@
 -r requirements.txt
 
+# Most of these pins are for versions that still support Python 3.6,
+# which is used by the 'tox' Docker image we use in CI.
+#
+# When we upgrade that image, we should consider removing these pins.
 coverage<6
 docker==5.0.0
 moto==2.0.8
+pytest<7.1.0  # See https://docs.pytest.org/en/stable/changelog.html#pytest-7-1-0-2022-03-13
 pytest-cov

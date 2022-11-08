@@ -47,8 +47,6 @@ elasticsearch==7.11.0
     # via
     #   -r requirements.txt
     #   wellcome-aws-utils
-exceptiongroup==1.0.1
-    # via pytest
 idna==3.4
     # via requests
 iniconfig==1.1.1
@@ -73,14 +71,18 @@ packaging==21.3
     # via pytest
 pluggy==1.0.0
     # via pytest
+py==1.11.0
+    # via pytest
 pycparser==2.21
     # via cffi
 pyparsing==3.0.9
     # via packaging
 pytest-cov==4.0.0
     # via -r test_requirements.in
-pytest==7.2.0
-    # via pytest-cov
+pytest==7.0.1
+    # via
+    #   -r test_requirements.in
+    #   pytest-cov
 python-dateutil==2.8.1
     # via
     #   -r requirements.txt
