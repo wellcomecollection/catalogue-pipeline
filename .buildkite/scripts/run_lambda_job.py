@@ -1,30 +1,10 @@
 #!/usr/bin/env python3
 
 from commands import run_build_script, _subprocess_run
-from git_utils import (
-    local_current_head,
-    get_sha1_for_tag,
-    remote_default_head,
-    get_changed_paths,
-)
-from provider import current_branch, is_default_branch
+from provider import is_default_branch
 
 
 if __name__ == "__main__":
-    commit_range = None
-    local_head = local_current_head()
-
-    if is_default_branch():
-        latest_sha = get_sha1_for_tag("latest")
-        commit_range = f"{latest_sha}..{local_head}"
-    else:
-        remote_head = remote_default_head()
-        commit_range = f"{remote_head}..{local_head}"
-
-    print(f"Working in branch: {current_branch()}")
-    print(f"On default branch: {is_default_branch()}")
-    print(f"Commit range: {commit_range}")
-
     lambda_paths = [
         "calm_adapter/calm_window_generator",
         "calm_adapter/calm_deletion_check_initiator" "common/window_generator",
