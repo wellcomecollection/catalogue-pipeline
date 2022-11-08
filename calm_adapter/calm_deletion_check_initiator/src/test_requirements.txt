@@ -31,8 +31,10 @@ charset-normalizer==2.1.1
     # via requests
 click==7.1.2
     # via -r requirements.txt
-coverage[toml]==6.5.0
-    # via pytest-cov
+coverage[toml]==5.5
+    # via
+    #   -r test_requirements.in
+    #   pytest-cov
 cryptography==38.0.3
     # via moto
 daiquiri==3.0.0
@@ -110,11 +112,11 @@ six==1.15.0
     #   moto
     #   python-dateutil
 toml==0.10.2
-    # via responses
-tomli==2.0.1
     # via
     #   coverage
-    #   pytest
+    #   responses
+tomli==2.0.1
+    # via pytest
 tqdm==4.56.2
     # via -r requirements.txt
 types-toml==0.10.8
