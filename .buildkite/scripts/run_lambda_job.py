@@ -34,16 +34,7 @@ if __name__ == "__main__":
         "tei_adapter/tei_updater",
     ]
 
-    changed_paths = get_changed_paths(commit_range)
-
     for path in lambda_paths:
-        if not any(
-            p.endswith((".py", ".ini", ".txt")) and p.startswith(path)
-            for p in changed_paths
-        ):
-            print(f"*** Nothing in this patch affects {path}, skipping")
-            continue
-
         run_build_script("run_python_tests.sh", path)
 
         if is_default_branch():
