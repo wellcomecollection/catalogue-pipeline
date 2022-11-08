@@ -4,10 +4,12 @@
 # which is used by the 'tox' Docker image we use in CI.
 #
 # When we upgrade that image, we should consider removing these pins.
-coverage<6
 docker==5.0.0
 moto==2.0.8
 pytest-cov
+
+# See https://coverage.readthedocs.io/en/6.5.0/changes.html#version-6-3-2022-01-25
+coverage<6.3
 
 # See https://jinja.palletsprojects.com/en/3.1.x/changes/#version-3-1-0
 jinja2<3.1.0

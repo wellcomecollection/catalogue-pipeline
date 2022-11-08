@@ -14,5 +14,8 @@ python-dateutil==2.7.3
 pytz==2018.4
 six==1.11.0
 
+# See https://coverage.readthedocs.io/en/6.5.0/changes.html#version-6-3-2022-01-25
+coverage<6.3
+
 # See https://github.com/getsentry/responses/releases/tag/0.18.0
 responses<0.18.0
