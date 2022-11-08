@@ -72,6 +72,9 @@ object SierraConceptSubjects
     // So let's filter anything that is from another authority for now.
     varfields.filterNot(_.indicator2.contains("7")).map { varfield =>
       val subfields = varfield.subfieldsWithTags("a", "v", "x", "y", "z")
+      // multiple $a subfields should not exist, but sometimes do.
+      // Prefer parsing them to rejecting them, as this error is not always within the
+      // control of collections staff.
       val (primarySubfields, subdivisionSubfields) = subfields.partition {
         _.tag == "a"
       }
@@ -121,9 +124,13 @@ object SierraConceptSubjects
 
   /**
     * Return AbstractConcepts of the appropriate subtype for this field
-    * A Concept Subject MARC field will contain one or more $a subfields.
+    * A Concept Subject MARC field should contain exactly one $a subfields or more $a subfields.
     * The $a subfield contains a term whose type is derived from the overall field,
     * so any $a subfields in a "Subject Added Entry-Chronological Term" will be a Period, etc.
+    * $a is a non-repeatable subfield, so you would expect primarySubfields to be a single value,
+    * and for this to return a single value.  However, some records that are received from third-party
+    * organisations do erroneously contain multiple $a subfields.  This transformer will accept them
+    * and produce the appropriate concepts.
     */
   private def getPrimaryTypeConcepts(
     primarySubfields: List[Subfield],
