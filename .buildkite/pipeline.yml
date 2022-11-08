@@ -1,106 +1,106 @@
 steps:
-  - command: .buildkite/scripts/run_autoformat.py
-    label: "autoformat"
-    agents:
-      queue: "scala"
-
-  - label: "{{ matrix }} (library)"
-    command: "./builds/run_sbt_tests.sh {{ matrix }}"
-
-    matrix:
-      - "internal_model"
-      - "display_model"
-      - "source_model"
-      - "pipeline_storage"
-      - "ingestor_common"
-      - "transformer_common"
-      - "calm_api_client"
-
-    agents:
-      queue: "scala"
-
-    # This will fail the build if internal model takes more than
-    # 13 minutes to build and test.  This is to make sure we know if
-    # the internal model compilation starts creeping again.
-    #
-    # We may increase this timeout, but we should do so intentionally.
-    # We should only increase it when we know what's causing the slowness,
-    # and we think it's an acceptable tradeoff.
-    #
-    # See https://buildkite.com/docs/pipelines/command-step
-    timeout_in_minutes: 13
-
-  - label: "{{ matrix }} (app)"
-    command: |
-      ./builds/run_sbt_tests.sh {{ matrix }}
-      ./builds/build_sbt_image.sh {{ matrix }} "$BUILDKITE_COMMIT"
-
-      # The ingestor tests will regenerate the JSON test documents
-      # used in the API tests.  Make sure the latest versions are
-      # checked in.  This has no effect in tests for other apps.
-      git diff --exit-code
-
-      if [[ "$BUILDKITE_BRANCH" == "main" ]]
-      then
-        ./builds/publish_sbt_image_to_ecr.sh {{ matrix }} "$BUILDKITE_COMMIT"
-      fi
-
-    matrix:
-      - "reindex_worker"
-      - "ingestor_works"
-      - "ingestor_images"
-      - "id_minter"
-      - "relation_embedder"
-      - "path_concatenator"
-      - "router"
-      - "batcher"
-      - "merger"
-      - "transformer_calm"
-      - "transformer_mets"
-      - "transformer_miro"
-      - "transformer_sierra"
-      - "transformer_tei"
-
-      - "sierra_indexer"
-      - "sierra_linker"
-      - "sierra_merger"
-      - "sierra_reader"
-
-      - "mets_adapter"
-
-      - "calm_adapter"
-      - "calm_deletion_checker"
-      - "calm_indexer"
-
-      - "tei_adapter"
-      - "tei_id_extractor"
-
-  - label: "{{ matrix }} (app)"
-    command: |
-      ./builds/run_inference_manager_tests.sh {{ matrix }}
-      ./builds/build_sbt_image.sh {{ matrix }} "$BUILDKITE_COMMIT"
-
-      if [[ "$BUILDKITE_BRANCH" == "main" ]]
-      then
-        ./builds/publish_sbt_image_to_ecr.sh {{ matrix }} "$BUILDKITE_COMMIT"
-      fi
-
-    matrix:
-      - "inference_manager"
-
-  - label: "{{ matrix }} (app)"
-    command: |
-      ./builds/run_inferrer_tests.sh {{ matrix }}
-
-      if [[ "$BUILDKITE_BRANCH" == "main" ]]
-      then
-        ./builds/publish_inferrer_app.sh {{ matrix }} "$BUILDKITE_COMMIT"
-      fi
-
-    matrix:
-      - "aspect_ratio_inferrer"
-      - "feature_inferrer"
-      - "palette_inferrer"
+  # - command: .buildkite/scripts/run_autoformat.py
+  #   label: "autoformat"
+  #   agents:
+  #     queue: "scala"
+  #
+  # - label: "{{ matrix }} (library)"
+  #   command: "./builds/run_sbt_tests.sh {{ matrix }}"
+  #
+  #   matrix:
+  #     - "internal_model"
+  #     - "display_model"
+  #     - "source_model"
+  #     - "pipeline_storage"
+  #     - "ingestor_common"
+  #     - "transformer_common"
+  #     - "calm_api_client"
+  #
+  #   agents:
+  #     queue: "scala"
+  #
+  #   # This will fail the build if internal model takes more than
+  #   # 13 minutes to build and test.  This is to make sure we know if
+  #   # the internal model compilation starts creeping again.
+  #   #
+  #   # We may increase this timeout, but we should do so intentionally.
+  #   # We should only increase it when we know what's causing the slowness,
+  #   # and we think it's an acceptable tradeoff.
+  #   #
+  #   # See https://buildkite.com/docs/pipelines/command-step
+  #   timeout_in_minutes: 13
+  #
+  # - label: "{{ matrix }} (app)"
+  #   command: |
+  #     ./builds/run_sbt_tests.sh {{ matrix }}
+  #     ./builds/build_sbt_image.sh {{ matrix }} "$BUILDKITE_COMMIT"
+  #
+  #     # The ingestor tests will regenerate the JSON test documents
+  #     # used in the API tests.  Make sure the latest versions are
+  #     # checked in.  This has no effect in tests for other apps.
+  #     git diff --exit-code
+  #
+  #     if [[ "$BUILDKITE_BRANCH" == "main" ]]
+  #     then
+  #       ./builds/publish_sbt_image_to_ecr.sh {{ matrix }} "$BUILDKITE_COMMIT"
+  #     fi
+  #
+  #   matrix:
+  #     - "reindex_worker"
+  #     - "ingestor_works"
+  #     - "ingestor_images"
+  #     - "id_minter"
+  #     - "relation_embedder"
+  #     - "path_concatenator"
+  #     - "router"
+  #     - "batcher"
+  #     - "merger"
+  #     - "transformer_calm"
+  #     - "transformer_mets"
+  #     - "transformer_miro"
+  #     - "transformer_sierra"
+  #     - "transformer_tei"
+  #
+  #     - "sierra_indexer"
+  #     - "sierra_linker"
+  #     - "sierra_merger"
+  #     - "sierra_reader"
+  #
+  #     - "mets_adapter"
+  #
+  #     - "calm_adapter"
+  #     - "calm_deletion_checker"
+  #     - "calm_indexer"
+  #
+  #     - "tei_adapter"
+  #     - "tei_id_extractor"
+  #
+  # - label: "{{ matrix }} (app)"
+  #   command: |
+  #     ./builds/run_inference_manager_tests.sh {{ matrix }}
+  #     ./builds/build_sbt_image.sh {{ matrix }} "$BUILDKITE_COMMIT"
+  #
+  #     if [[ "$BUILDKITE_BRANCH" == "main" ]]
+  #     then
+  #       ./builds/publish_sbt_image_to_ecr.sh {{ matrix }} "$BUILDKITE_COMMIT"
+  #     fi
+  #
+  #   matrix:
+  #     - "inference_manager"
+  #
+  # - label: "{{ matrix }} (app)"
+  #   command: |
+  #     ./builds/run_inferrer_tests.sh {{ matrix }}
+  #
+  #     if [[ "$BUILDKITE_BRANCH" == "main" ]]
+  #     then
+  #       ./builds/publish_inferrer_app.sh {{ matrix }} "$BUILDKITE_COMMIT"
+  #     fi
+  #
+  #   matrix:
+  #     - "aspect_ratio_inferrer"
+  #     - "feature_inferrer"
+  #     - "palette_inferrer"
 
   - command: .buildkite/scripts/run_lambda_job.py lambda
     label: "Lambdas"
