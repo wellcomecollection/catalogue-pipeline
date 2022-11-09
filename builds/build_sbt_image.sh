@@ -5,7 +5,7 @@ Build the Docker image for an sbt project.
 This script will automatically detect the location of the Dockerfile based
 on the sbt project config.
 
-This script is mirrored in the catalogue-pipeline and storage-service repos.
+This script is mirrored across our Scala projects.
 
 == Usage ==
 
