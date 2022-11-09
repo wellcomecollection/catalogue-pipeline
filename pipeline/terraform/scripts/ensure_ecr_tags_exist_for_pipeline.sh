@@ -6,8 +6,10 @@ Each instance of the catalogue pipeline is tagged with a particular date
 (e.g. 2022-11-09), and uses images with a corresponding tag (e.g. env.2022-11-09).
 This means different pipelines can use different versions of our apps.
 
-This script ensures that *a* set of images exists for a particular pipeline --
-if they don't exist, it will create a set of tags based on 'latest'.
+This script ensures that we have tagged images for a given pipeline --
+
+-   if the tags already exist, they're left as-is
+-   if the tags don't yet exist, they'll be created based on 'latest'
 
 == Usage example ==
 
