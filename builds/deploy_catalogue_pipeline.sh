@@ -16,12 +16,12 @@ for services to be stable.
 
 == Usage examples ==
 
-    PIPELINE_DATE="2022-11-09" deploy_catalogue_pipeline.sh retag_images
+    PIPELINE_DATE="2022-11-09" deploy_catalogue_pipeline.sh tag_images
 
         This will create a new set of images tagged 'env.2022-11-09' for
         the catalogue pipeline.
 
-    PIPELINE_DATE="2022-12-09" deploy_catalogue_pipeline.sh retag_images_and_deploy_services
+    PIPELINE_DATE="2022-12-09" deploy_catalogue_pipeline.sh tag_images_and_deploy_services
 
         This will create a new set of images tagged 'env.2022-12-09'
         for the catalogue pipeline, then deploy new services in the
@@ -36,13 +36,13 @@ if (( $# == 1 ))
 then
   TASK="$1"
 else
-  echo "Usage: run_sbt_tests.sh [retag_images | retag_images_and_deploy_services]" >&2
+  echo "Usage: run_sbt_tests.sh [tag_images | tag_images_and_deploy_services]" >&2
   exit 1
 fi
 
-if [[ "$TASK" != "retag_images" && "$TASK" != "retag_images_and_deploy_services" ]]
+if [[ "$TASK" != "tag_images" && "$TASK" != "tag_images_and_deploy_services" ]]
 then
-  echo "Usage: run_sbt_tests.sh [retag_images | retag_images_and_deploy_services]" >&2
+  echo "Usage: run_sbt_tests.sh [tag_images | tag_images_and_deploy_services]" >&2
   exit 1
 fi
 
@@ -66,7 +66,7 @@ ENV_TAG="env.$PIPELINE_DATE" ./builds/update_ecr_image_tag.sh \
   uk.ac.wellcome/transformer_sierra \
   uk.ac.wellcome/transformer_tei
 
-if [[ "$TASK" == "retag_images_and_deploy_services" ]]
+if [[ "$TASK" == "tag_images_and_deploy_services" ]]
 then
   CLUSTER="pipeline-$PIPELINE_DATE" ./builds/deploy_ecs_services.sh \
     id-minter \
