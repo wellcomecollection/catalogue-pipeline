@@ -21,7 +21,7 @@ EOF
 set -o errexit
 set -o nounset
 
-ECR_REGISTRY="760097843905.dkr.ecr.eu-west-1.amazonaws.com"
+ECR_REGISTRY="760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome"
 
 if (( $# == 2))
 then
