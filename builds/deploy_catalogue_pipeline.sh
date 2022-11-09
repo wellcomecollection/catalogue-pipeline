@@ -32,6 +32,8 @@ EOF
 set -o errexit
 set -o nounset
 
+ROOT=$(git rev-parse --show-toplevel)
+
 if (( $# == 1 ))
 then
   TASK="$1"
@@ -46,7 +48,7 @@ then
   exit 1
 fi
 
-ENV_TAG="env.$PIPELINE_DATE" ./builds/update_ecr_image_tag.sh \
+ENV_TAG="env.$PIPELINE_DATE" "$ROOT/builds/update_ecr_image_tag.sh" \
   uk.ac.wellcome/id_minter \
   uk.ac.wellcome/inference_manager \
   uk.ac.wellcome/feature_inferrer \
@@ -68,7 +70,7 @@ ENV_TAG="env.$PIPELINE_DATE" ./builds/update_ecr_image_tag.sh \
 
 if [[ "$TASK" == "tag_images_and_deploy_services" ]]
 then
-  CLUSTER="pipeline-$PIPELINE_DATE" ./builds/deploy_ecs_services.sh \
+  CLUSTER="pipeline-$PIPELINE_DATE" "$ROOT/builds/deploy_ecs_services.sh" \
     id-minter \
     image-inferrer \
     matcher \
