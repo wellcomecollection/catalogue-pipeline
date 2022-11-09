@@ -1,20 +1,19 @@
 {
   "description" : "an image without any inferred data",
-  "createdAt" : "2022-10-03T18:20:32.285Z",
-  "id" : "l5gjhkar",
+  "createdAt" : "2022-11-08T17:55:45.324298Z",
+  "id" : "gotsxy7q",
   "document" : {
-    "modifiedTime" : "2068-12-21T14:14:18Z",
+    "modifiedTime" : "2044-07-18T04:09:50Z",
     "display" : {
-      "id" : "l5gjhkar",
+      "id" : "gotsxy7q",
       "thumbnail" : {
         "locationType" : {
           "id" : "iiif-image",
           "label" : "IIIF Image API",
           "type" : "LocationType"
         },
-        "url" : "https://iiif.wellcomecollection.org/image/uPt.jpg/info.json",
-        "credit" : "Credit line: cdUR6Vu6d",
-        "linkText" : "Link text: VoIlBGoanp",
+        "url" : "https://iiif.wellcomecollection.org/image/7j9.jpg/info.json",
+        "linkText" : "Link text: K1aV8zyPud",
         "license" : {
           "id" : "cc-by",
           "label" : "Attribution 4.0 International (CC BY 4.0)",
@@ -32,9 +31,8 @@
             "label" : "IIIF Image API",
             "type" : "LocationType"
           },
-          "url" : "https://iiif.wellcomecollection.org/image/uPt.jpg/info.json",
-          "credit" : "Credit line: cdUR6Vu6d",
-          "linkText" : "Link text: VoIlBGoanp",
+          "url" : "https://iiif.wellcomecollection.org/image/7j9.jpg/info.json",
+          "linkText" : "Link text: K1aV8zyPud",
           "license" : {
             "id" : "cc-by",
             "label" : "Attribution 4.0 International (CC BY 4.0)",
@@ -49,8 +47,8 @@
       "aspectRatio" : 1.0,
       "averageColor" : "#ffffff",
       "source" : {
-        "id" : "dh33dnst",
-        "title" : "title-xv9hSPqrWp",
+        "id" : "snungkft",
+        "title" : "title-1XG6eVpuV0",
         "contributors" : [
         ],
         "languages" : [
@@ -64,8 +62,8 @@
       "type" : "Image"
     },
     "query" : {
-      "id" : "l5gjhkar",
-      "sourceIdentifier.value" : "eEnJzTwT3X",
+      "id" : "gotsxy7q",
+      "sourceIdentifier.value" : "0F491u5mwb",
       "locations.license.id" : [
         "cc-by"
       ],
@@ -74,7 +72,7 @@
         ],
         "features2" : [
         ],
-        "lshEncodedFeatures" : [
+        "reducedFeatures" : [
         ],
         "palette" : [
         ],
@@ -86,15 +84,15 @@
         "aspectRatio" : null
       },
       "source" : {
-        "id" : "dh33dnst",
+        "id" : "snungkft",
         "format.id" : null,
         "workType" : "Standard",
         "identifiers.value" : [
-          "USzOwz6Ub4",
-          "ATPvu9Np4H",
-          "Ix7WHxgwXJ"
+          "Gd8G0OKDLg",
+          "1oNsb2EumG",
+          "dpmeP3Bofp"
         ],
-        "title" : "title-xv9hSPqrWp",
+        "title" : "title-1XG6eVpuV0",
         "alternativeTitles" : [
         ],
         "description" : null,
