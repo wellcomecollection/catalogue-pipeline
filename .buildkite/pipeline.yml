@@ -190,17 +190,17 @@ steps:
     agents:
       queue: "scala"
 
-  - command: .buildkite/scripts/run_job.py feature_inferrer --changes-in pipeline/inferrer/feature_inferrer
+  - command: .buildkite/scripts/run_job.py feature_inferrer
     label: "feature inferrer"
     agents:
       queue: "scala"
 
-  - command: .buildkite/scripts/run_job.py palette_inferrer --changes-in pipeline/inferrer/palette_inferrer
+  - command: .buildkite/scripts/run_job.py palette_inferrer
     label: "palette inferrer"
     agents:
       queue: "scala"
 
-  - command: .buildkite/scripts/run_job.py aspect_ratio_inferrer --changes-in pipeline/inferrer/aspect_ratio_inferrer
+  - command: .buildkite/scripts/run_job.py aspect_ratio_inferrer
     label: "aspect ratio inferrer"
     agents:
       queue: "scala"
