@@ -18,6 +18,8 @@ EOF
 set -o errexit
 set -o nounset
 
+ROOT=$(git rev-parse --show-toplevel)
+
 ENV_TAG="env.$PIPELINE_DATE"
 
 # This will return a JSON object with two keys: images and failures.
@@ -39,5 +41,5 @@ then
   exit 0
 else
   echo "There are no images with tag $ENV_TAG, creating tags"
-  ./builds/deploy_catalogue_pipeline.sh tag_images
+  $ROOT/builds/deploy_catalogue_pipeline.sh tag_images
 fi
