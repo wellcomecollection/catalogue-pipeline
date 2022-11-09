@@ -39,26 +39,9 @@ if __name__ == "__main__":
 
     subprocess.check_call(
         [
-            "docker",
-            "run",
-            "--rm",
-            "--tty",
-            "--volume",
-            f"{root}:/repo",
-            "--workdir",
-            "/repo",
-            "760097843905.dkr.ecr.eu-west-1.amazonaws.com/wellcome/weco-deploy:5.7",
-            "--project-id",
-            "catalogue_pipeline",
-            "--confirm",
-            "release-deploy",
-            "--from-label",
-            f"ref.{os.environ['BUILDKITE_COMMIT']}",
-            "--environment-id",
-            pipeline_date,
-            "--description",
-            os.environ["BUILDKITE_BUILD_URL"],
-            "--confirmation-wait-for",
-            "3600",
-        ]
+            "bash",
+            f"{root}/builds/deploy_catalogue_pipeline.sh",
+            "tag_images_and_deploy_services"
+        ],
+        env={"PIPELINE_DATE": pipeline_date}
     )
