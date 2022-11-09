@@ -5,7 +5,7 @@ Run tests for an sbt project.
 This script will automatically detect whether we need to start containers
 using Docker Compose as part of these tests.
 
-This script is mirrored across our Scala projects.
+This script is mirrored across our Scala repos.
 
 == Usage ==
 
