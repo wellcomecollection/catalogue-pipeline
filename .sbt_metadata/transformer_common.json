@@ -1,9 +1,0 @@
-{
-  "id" : "transformer_common",
-  "folder" : "pipeline/transformer/transformer_common",
-  "dependencyIds" : [
-    "internal_model",
-    "source_model_typesafe",
-    "pipeline_storage_typesafe"
-  ]
-}

@@ -1,8 +1,0 @@
-{
-  "id" : "pipeline_storage",
-  "folder" : "common/pipeline_storage",
-  "dependencyIds" : [
-    "internal_model",
-    "flows"
-  ]
-}

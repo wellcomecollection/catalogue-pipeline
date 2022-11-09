@@ -1,8 +1,0 @@
-{
-  "id" : "path_concatenator",
-  "folder" : "pipeline/relation_embedder/path_concatenator",
-  "dependencyIds" : [
-    "internal_model",
-    "pipeline_storage_typesafe"
-  ]
-}
