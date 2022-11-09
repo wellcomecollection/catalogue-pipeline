@@ -10,6 +10,7 @@ Usage:
 import os
 import shutil
 import subprocess
+import sys
 import tempfile
 import zipfile
 
@@ -118,6 +119,6 @@ if __name__ == "__main__":
     key = f"{KEY_PREFIX}{lambda_dir}"
 
     name = os.path.basename(key)
-    filename = build_lambda_local(path=path, name=name)
+    filename = build_lambda_local(path=lambda_dir, name=name)
 
     subprocess.check_call(["aws", "s3", "cp", filename, f"s3://{bucket}/{key}"])
