@@ -2,7 +2,7 @@
 <<EOF
 Finds the path to an sbt project directory.
 
-This script is mirrored in the catalogue-pipeline and storage-service repos.
+This script is mirrored across our Scala projects.
 
 == Motivation ==
 
