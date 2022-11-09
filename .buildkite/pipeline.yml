@@ -93,11 +93,11 @@ steps:
   - label: "inference_manager (app)"
     command: |
       ./builds/run_inference_manager_tests.sh
-      ./builds/build_sbt_image.sh {{ matrix }} "$BUILDKITE_COMMIT"
+      ./builds/build_sbt_image.sh inference_manager "$BUILDKITE_COMMIT"
 
       if [[ "$BUILDKITE_BRANCH" == "main" ]]
       then
-        ./builds/publish_sbt_image_to_ecr.sh {{ matrix }} "$BUILDKITE_COMMIT"
+        ./builds/publish_sbt_image_to_ecr.sh inference_manager "$BUILDKITE_COMMIT"
       fi
 
     agents:
