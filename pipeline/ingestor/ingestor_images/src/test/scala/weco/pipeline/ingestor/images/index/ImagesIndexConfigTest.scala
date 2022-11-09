@@ -27,15 +27,16 @@ class ImagesIndexConfigTest
     }
   }
 
-  it("cannot index an image with image vectors that are longer than 2048") {
+  it("cannot index an image with image vectors that are too long") {
     withLocalImagesIndex { implicit index =>
       val features1 = (0 until 3000).map(_ => Random.nextFloat() * 100).toList
       val features2 = (0 until 3000).map(_ => Random.nextFloat() * 100).toList
+      val reducedFeatures = (0 until 3000).map(_ => Random.nextFloat() * 100).toList
       val image = createImageData.toAugmentedImageWith(
         inferredData = InferredData(
           features1,
           features2,
-          List(randomAlphanumeric(10)),
+          reducedFeatures,
           List(randomAlphanumeric(10)),
           Some(randomHexString),
           List(List(4, 6, 9), List(2, 4, 6), List(1, 3, 5)),
@@ -50,13 +51,13 @@ class ImagesIndexConfigTest
     }
   }
 
-  it("cannot index an image with image vectors that are shorter than 2048") {
+  it("cannot index an image with image vectors that are too short") {
     withLocalImagesIndex { implicit index =>
       val image = createImageData.toAugmentedImageWith(
         inferredData = InferredData(
           List(2.0f),
           List(2.0f),
-          List(randomAlphanumeric(10)),
+          List(2.0f),
           List(randomAlphanumeric(10)),
           Some(randomHexString),
           List(List(4, 6, 9), List(2, 4, 6), List(1, 3, 5)),

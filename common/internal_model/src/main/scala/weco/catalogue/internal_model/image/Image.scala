@@ -107,7 +107,7 @@ case class InferredData(
   // ES's dense vector type (max length 2048)
   features1: List[Float],
   features2: List[Float],
-  lshEncodedFeatures: List[String],
+  reducedFeatures: List[Float],
   palette: List[String],
   averageColorHex: Option[String],
   binSizes: List[List[Int]],
@@ -119,7 +119,7 @@ object InferredData {
   def empty: InferredData = InferredData(
     features1 = Nil,
     features2 = Nil,
-    lshEncodedFeatures = Nil,
+    reducedFeatures = Nil,
     palette = Nil,
     averageColorHex = None,
     binSizes = Nil,

@@ -22,7 +22,7 @@ object ImagesIndexConfig extends IndexConfigFields {
       val inferredData = objectField("inferredData").fields(
         DenseVectorField("features1", dims = 2048),
         DenseVectorField("features2", dims = 2048),
-        keywordField("lshEncodedFeatures"),
+        DenseVectorField("reducedFeatures", dims = 1024),
         keywordField("palette"),
         keywordField("averageColorHex"),
         intField("binSizes").withIndex(false),
@@ -97,7 +97,7 @@ object ImagesIndexConfig extends IndexConfigFields {
               textField("path").analyzer(exactPathAnalyzer.name)
             ),
           // reference number
-          keywordField("referenceNumber"),
+          keywordField("referenceNumber")
         )
 
       val query = objectField("query")
