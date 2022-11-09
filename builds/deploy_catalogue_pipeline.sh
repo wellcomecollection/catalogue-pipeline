@@ -70,7 +70,7 @@ ENV_TAG="env.$PIPELINE_DATE" "$ROOT/builds/update_ecr_image_tag.sh" \
 
 if [[ "$TASK" == "tag_images_and_deploy_services" ]]
 then
-  CLUSTER="pipeline-$PIPELINE_DATE" "$ROOT/builds/deploy_ecs_services.sh" \
+  CLUSTER="catalogue-$PIPELINE_DATE" "$ROOT/builds/deploy_ecs_services.sh" \
     id-minter \
     image-inferrer \
     matcher \
