@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
+import os
 import re
 import subprocess
+
 import httpx
 
 
@@ -36,11 +38,12 @@ if __name__ == "__main__":
         .strip()
     )
 
+    os.environ.update({"PIPELINE_DATE": pipeline_date})
+
     subprocess.check_call(
         [
             "bash",
             f"{root}/builds/deploy_catalogue_pipeline.sh",
             "tag_images_and_deploy_services",
         ],
-        env={"PIPELINE_DATE": pipeline_date},
     )
