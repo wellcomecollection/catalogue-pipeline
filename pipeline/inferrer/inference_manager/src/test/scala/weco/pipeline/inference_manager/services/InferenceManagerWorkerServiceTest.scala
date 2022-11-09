@@ -77,7 +77,7 @@ class InferenceManagerWorkerServiceTest
           case None =>
             warn(s"Unable to find matching image for request $req")
             None
-      },
+        },
       images = _ => Some(Responses.image)
     ) {
       case (QueuePair(queue, dlq), messageSender, augmentedImages, _, _) =>
@@ -98,7 +98,7 @@ class InferenceManagerWorkerServiceTest
                   case InferredData(
                       features1,
                       features2,
-                      lshEncodedFeatures,
+                      reducedFeatures,
                       palette,
                       Some(averageColorHex),
                       binSizes,
@@ -109,8 +109,8 @@ class InferenceManagerWorkerServiceTest
                       Responses.randomFeatureVector(seed)
                     features1 should be(featureVector.slice(0, 2048))
                     features2 should be(featureVector.slice(2048, 4096))
-                    lshEncodedFeatures should be(
-                      Responses.randomLshVector(seed)
+                    reducedFeatures should be(
+                      Responses.randomVector(seed)
                     )
                     palette should be(Responses.randomPaletteVector(seed))
                     averageColorHex should be(
@@ -158,7 +158,7 @@ class InferenceManagerWorkerServiceTest
                   case InferredData(
                       features1,
                       features2,
-                      lshEncodedFeatures,
+                      reducedFeatures,
                       palette,
                       averageColorHex,
                       binSizes,
@@ -167,7 +167,7 @@ class InferenceManagerWorkerServiceTest
                       ) =>
                     features1 should have length 2048
                     features2 should have length 2048
-                    every(lshEncodedFeatures) should fullyMatch regex """(\d+)-(\d+)"""
+                    reducedFeatures should have length 1024
                     every(palette) should fullyMatch regex """\d+"""
                     averageColorHex.get should have length 7
                     every(binSizes) should not be empty
