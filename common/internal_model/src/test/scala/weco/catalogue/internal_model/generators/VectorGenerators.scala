@@ -7,8 +7,6 @@ trait VectorGenerators extends RandomGenerators {
 
   private val defaultSimilarity = math.cos(Math.PI / 64).toFloat
 
-
-
   def randomColorVector(binSizes: Seq[Seq[Int]] =
                           Seq(Seq(4, 6, 9), Seq(2, 4, 6), Seq(1, 3, 5)),
                         nTokens: Int = 100): Seq[String] =

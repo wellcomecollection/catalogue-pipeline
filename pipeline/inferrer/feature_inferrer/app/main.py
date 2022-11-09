@@ -23,6 +23,7 @@ app = FastAPI(
 )
 logger.info("API started, awaiting requests")
 
+
 def feature_reducer(vectors: np.ndarray) -> np.ndarray:
     """
     return the first 1024 elements of a set of vectors, normalised 
@@ -36,13 +37,11 @@ def feature_reducer(vectors: np.ndarray) -> np.ndarray:
     normalised_vectors = sliced / np.linalg.norm(sliced, axis=1, keepdims=True)
     return normalised_vectors
 
+
 def batch_infer_features(images):
     vectors = extract_features(images)
     reduced = feature_reducer(vectors)
-    return [
-        {"vector": v, "reduced_vector": l} 
-        for v, l in zip(vectors, reduced)
-    ]
+    return [{"vector": v, "reduced_vector": l} for v, l in zip(vectors, reduced)]
 
 
 batch_inferrer_queue = BatchExecutionQueue(
