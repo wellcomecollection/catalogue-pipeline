@@ -6,34 +6,10 @@ A reindex operation runs the source data from the [adapters](docs/adapters/READM
 
 To run a reindex follow these steps:
 
-1. [Update the catalogue-pipeline environments](#update-the-catalogue-pipeline-environments)
-2. [Prepare a release](#prepare-a-release)
-3. [Deploy a release](#deploy-a-release)
-4. [Terraform a new pipeline](#terraform-a-new-pipeline)
-5. [Run the reindex script](#run-the-reindex-script)
-
-### Update the catalogue-pipeline environments
-
-The catalogue-pipeline is deployed using [weco-deploy](https://github.com/wellcomecollection/weco-deploy).
-
-Each environment represents a new pipeline.
-
-In `.wellcome_project`:
-
-```
-catalogue_pipeline:
-  environments:
-    - id: "2021-06-27"
-      name: "2021-06-27"
-    - id: "2021-07-06"
-      name: "2021-07-06"
-    - id: "YYYY-MM-DD"
-      name: "YYYY-MM-DD"
-```
-
-Give your new pipeline environment id and name using the date pattern `YYYY-MM-DD`.
-
-You will need to use the environment id when terraforming a new pipeline.
+1. [Prepare a release](#prepare-a-release)
+2. [Deploy a release](#deploy-a-release)
+3. [Terraform a new pipeline](#terraform-a-new-pipeline)
+4. [Run the reindex script](#run-the-reindex-script)
 
 ### Prepare a release
 
