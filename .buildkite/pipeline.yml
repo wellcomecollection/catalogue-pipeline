@@ -1,5 +1,5 @@
 steps:
-  - command: .buildkite/scripts/run_autoformat.py
+  - command: ".buildkite/scripts/run_autoformatting.sh"
     label: "autoformat"
     agents:
       queue: "scala"
@@ -102,8 +102,23 @@ steps:
       - "feature_inferrer"
       - "palette_inferrer"
 
-  - command: .buildkite/scripts/run_lambda_job.py lambda
-    label: "Lambdas"
+  - label: "Lambdas"
+    command: |
+      for lambdaPath in "calm_adapter/calm_window_generator \
+        calm_adapter/calm_deletion_check_initiator
+        common/window_generator \
+        sierra_adapter/s3_demultiplexer \
+        sierra_adapter/sierra_progress_reporter \
+        sierra_adapter/update_embargoed_holdings \
+        tei_adapter/tei_updater"
+      do
+        ./builds/run_python_tests.sh "$lambdaPath"
+
+        if [[ "$BUILDKITE_BRANCH" == "main" ]]
+        then
+          ./builds/publish_lambda_zip.py "$lambdaPath"
+        fi
+      done
 
   - wait
 
