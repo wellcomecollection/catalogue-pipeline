@@ -2,7 +2,7 @@ package weco.catalogue.internal_model.index
 
 import buildinfo.BuildInfo
 import com.sksamuel.elastic4s.ElasticDsl._
-import com.sksamuel.elastic4s.fields.{ElasticField, DenseVectorField}
+import com.sksamuel.elastic4s.fields.{DenseVectorField, ElasticField}
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
 import weco.catalogue.internal_model.index.WorksAnalysis.{
   asciifoldingAnalyzer,
@@ -11,8 +11,8 @@ import weco.catalogue.internal_model.index.WorksAnalysis.{
 }
 import weco.elasticsearch.IndexConfig
 
-// the `index` and `metric` parameters of dense vector fields are not available 
-// in the latest version of elastic4s, so we extend the ElasticField to add 
+// the `index` and `metric` parameters of dense vector fields are not available
+// in the latest version of elastic4s, so we extend the ElasticField to add
 // them and enable KNN queries
 case class IndexableDenseVectorField(
   name: String,
