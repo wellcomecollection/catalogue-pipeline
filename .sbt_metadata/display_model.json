@@ -1,7 +1,0 @@
-{
-  "id" : "display_model",
-  "folder" : "common/display_model",
-  "dependencyIds" : [
-    "internal_model"
-  ]
-}

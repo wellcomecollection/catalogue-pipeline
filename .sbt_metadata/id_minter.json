@@ -1,8 +1,0 @@
-{
-  "id" : "id_minter",
-  "folder" : "pipeline/id_minter",
-  "dependencyIds" : [
-    "internal_model",
-    "pipeline_storage_typesafe"
-  ]
-}

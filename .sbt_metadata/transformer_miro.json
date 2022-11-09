@@ -1,7 +1,0 @@
-{
-  "id" : "transformer_miro",
-  "folder" : "pipeline/transformer/transformer_miro",
-  "dependencyIds" : [
-    "transformer_common"
-  ]
-}

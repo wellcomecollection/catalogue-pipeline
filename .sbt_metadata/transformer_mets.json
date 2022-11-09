@@ -1,7 +1,0 @@
-{
-  "id" : "transformer_mets",
-  "folder" : "pipeline/transformer/transformer_mets",
-  "dependencyIds" : [
-    "transformer_common"
-  ]
-}

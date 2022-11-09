@@ -1,7 +1,0 @@
-{
-  "id" : "source_model",
-  "folder" : "common/source_model",
-  "dependencyIds" : [
-    "internal_model"
-  ]
-}

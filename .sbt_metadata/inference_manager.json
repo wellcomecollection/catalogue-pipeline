@@ -1,8 +1,0 @@
-{
-  "id" : "inference_manager",
-  "folder" : "pipeline/inferrer/inference_manager",
-  "dependencyIds" : [
-    "internal_model",
-    "pipeline_storage_typesafe"
-  ]
-}
