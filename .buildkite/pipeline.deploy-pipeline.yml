@@ -1,6 +1,12 @@
+steps:
   - label: deploy pipeline
     commands:
       - pip3 install --user httpx
       - .buildkite/scripts/deploy_latest_pipeline.py
+
+    plugins:
+      - wellcomecollection/aws-assume-role#v0.2.2:
+          role: "arn:aws:iam::760097843905:role/platform-ci"
+
     agents:
       queue: nano
