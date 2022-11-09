@@ -47,7 +47,7 @@ class FeatureVectorInferrerAdapterTest
       val reducedFeaturesB64 = Encoding.toLittleEndianBase64(reducedFeatures)
       val response = FeatureVectorInferrerResponse(
         features_b64 = featuresB64,
-        reduced_features_b64 = reducedFeatures
+        reduced_features_b64 = reducedFeaturesB64
       )
       val inferredData = adapter.augment(InferredData.empty, response)
       inferredData.features1 should be(features.slice(0, 2048))
