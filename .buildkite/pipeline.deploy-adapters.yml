@@ -78,8 +78,8 @@ steps:
 
   - label: deploy reindexer
     command: |
-      ENV_TAG=prod ./builds/update_ecr_image_tag.sh uk.ac.wellcome/reindexer
-      CLUSTER=reindexer ./builds/deploy_ecs_services.sh reindex_worker
+      ENV_TAG=prod ./builds/update_ecr_image_tag.sh uk.ac.wellcome/reindex_worker
+      CLUSTER=reindexer ./builds/deploy_ecs_services.sh reindexer
 
     plugins:
       - wellcomecollection/aws-assume-role#v0.2.2:
