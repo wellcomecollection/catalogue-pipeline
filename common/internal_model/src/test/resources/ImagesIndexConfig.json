@@ -79,8 +79,11 @@
                 "type": "dense_vector",
                 "dims": 2048
               },
-              "lshEncodedFeatures": {
-                "type": "keyword"
+              "reducedFeatures": {
+                "type": "dense_vector",
+                "dims": 1024,
+                "index": true,
+                "metric": "dot_product"
               },
               "palette": {
                 "type": "keyword"
