@@ -40,7 +40,7 @@ if __name__ == "__main__":
         [
             "bash",
             f"{root}/builds/deploy_catalogue_pipeline.sh",
-            "tag_images_and_deploy_services"
+            "tag_images_and_deploy_services",
         ],
-        env={"PIPELINE_DATE": pipeline_date}
+        env={"PIPELINE_DATE": pipeline_date},
     )
