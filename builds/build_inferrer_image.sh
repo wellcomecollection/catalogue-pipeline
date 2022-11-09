@@ -29,4 +29,4 @@ fi
 docker build \
   --file "pipeline/inferrer/$PROJECT_NAME/Dockerfile" \
   --tag "$PROJECT_NAME:$IMAGE_TAG" \
-  "pipeline/inferrer/$PROJECT"
+  "pipeline/inferrer/$PROJECT_NAME"
