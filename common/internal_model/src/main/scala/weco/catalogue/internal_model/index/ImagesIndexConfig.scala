@@ -2,7 +2,7 @@ package weco.catalogue.internal_model.index
 
 import buildinfo.BuildInfo
 import com.sksamuel.elastic4s.ElasticDsl._
-import com.sksamuel.elastic4s.fields.DenseVectorField
+import com.sksamuel.elastic4s.fields.{ElasticField, DenseVectorField}
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
 import weco.catalogue.internal_model.index.WorksAnalysis.{
   asciifoldingAnalyzer,
@@ -10,6 +10,18 @@ import weco.catalogue.internal_model.index.WorksAnalysis.{
   exactPathAnalyzer
 }
 import weco.elasticsearch.IndexConfig
+
+// the `index` and `metric` parameters of dense vector fields are not available 
+// in the latest version of elastic4s, so we extend the ElasticField to add 
+// them and enable KNN queries
+case class IndexableDenseVectorField(
+  name: String,
+  dims: Int,
+  index: Boolean,
+  metric: String
+) extends ElasticField {
+  override def `type`: String = "dense_vector"
+}
 
 object ImagesIndexConfig extends IndexConfigFields {
   val analysis = WorksAnalysis()
@@ -22,7 +34,12 @@ object ImagesIndexConfig extends IndexConfigFields {
       val inferredData = objectField("inferredData").fields(
         DenseVectorField("features1", dims = 2048),
         DenseVectorField("features2", dims = 2048),
-        DenseVectorField("reducedFeatures", dims = 1024),
+        IndexableDenseVectorField(
+          "reducedFeatures",
+          dims = 1024,
+          index = true,
+          metric = "dot_product"
+        ),
         keywordField("palette"),
         keywordField("averageColorHex"),
         intField("binSizes").withIndex(false),
