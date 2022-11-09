@@ -1,3 +1,4 @@
+import numpy as np
 import base64
 
 from fastapi import FastAPI, HTTPException
@@ -7,27 +8,41 @@ from weco_datascience.image import get_image_from_url
 from weco_datascience.logging import get_logger
 
 from src.feature_extraction import extract_features
-from src.lsh import LSHEncoder
 
 logger = get_logger(__name__)
 
-# Initialise encoder
-logger.info("Initialising LSHEncoder model")
-lsh_encoder = LSHEncoder()
 
 # initialise API
 logger.info("Starting API")
 app = FastAPI(
     title="Feature vector encoder",
-    description="Takes an image url and returns the image's feature vector encoded as an LSH string",
+    description=(
+        "Takes an image url and returns the image's feature vector, "
+        "and a reduced 1024-dimensional form of the vector"
+    ),
 )
 logger.info("API started, awaiting requests")
 
+def feature_reducer(vectors: np.ndarray) -> np.ndarray:
+    """
+    return the first 1024 elements of a set of vectors, normalised 
+    to unit length. Normalisation is done to ensure that the vectors
+    can be compared using dot_product similarity, rather than cosine.
+
+    N.B. This is a placeholder for a more sophisticated dimensionality 
+    reduction technique
+    """
+    sliced = vectors[:, :1024]
+    normalised_vectors = sliced / np.linalg.norm(sliced, axis=1, keepdims=True)
+    return normalised_vectors
 
 def batch_infer_features(images):
     vectors = extract_features(images)
-    lsh_encoded = lsh_encoder(vectors)
-    return [{"vector": v, "lsh": l} for v, l in zip(vectors, lsh_encoded)]
+    reduced = feature_reducer(vectors)
+    return [
+        {"vector": v, "reduced_vector": l} 
+        for v, l in zip(vectors, reduced)
+    ]
 
 
 batch_inferrer_queue = BatchExecutionQueue(
@@ -49,7 +64,7 @@ async def main(query_url: str):
 
     return {
         "features_b64": base64.b64encode(features["vector"]),
-        "lsh_encoded_features": features["lsh"],
+        "reduced_features_b64": base64.b64encode(features["reduced_vector"]),
     }
 
 
