@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 <<EOF
-Run autoformatting and linting on pull requests.
+If there are any changes from autoformatting, push them to the PR.
 
 This script is mirrored in our other Scala repos.
 
@@ -21,8 +21,6 @@ set -o nounset
 # exit-code 1 = changes, exit code 0 = no changes
 # See https://git-scm.com/docs/git-diff#Documentation/git-diff.txt---exit-code
 git diff --exit-code --quiet && has_changes=$? || has_changes=$?
-
-./builds/run_formatting.sh
 
 if (( has_changes == 1 ))
 then
@@ -49,5 +47,3 @@ then
 else
   echo "There were no changes from auto-formatting"
 fi
-
-./builds/run_linting.sh
