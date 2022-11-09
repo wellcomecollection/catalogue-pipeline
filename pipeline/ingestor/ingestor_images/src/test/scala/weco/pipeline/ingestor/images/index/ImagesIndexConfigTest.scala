@@ -31,7 +31,8 @@ class ImagesIndexConfigTest
     withLocalImagesIndex { implicit index =>
       val features1 = (0 until 3000).map(_ => Random.nextFloat() * 100).toList
       val features2 = (0 until 3000).map(_ => Random.nextFloat() * 100).toList
-      val reducedFeatures = (0 until 3000).map(_ => Random.nextFloat() * 100).toList
+      val reducedFeatures =
+        (0 until 3000).map(_ => Random.nextFloat() * 100).toList
       val image = createImageData.toAugmentedImageWith(
         inferredData = InferredData(
           features1,
