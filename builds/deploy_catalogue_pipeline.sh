@@ -80,7 +80,7 @@ then
     router \
     path_concatenator \
     batcher \
-    relation-embedder \
+    relation_embedder \
     transformer_calm \
     transformer_mets \
     transformer_miro \
