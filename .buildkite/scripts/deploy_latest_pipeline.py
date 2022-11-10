@@ -45,5 +45,5 @@ if __name__ == "__main__":
             "bash",
             f"{root}/builds/deploy_catalogue_pipeline.sh",
             "tag_images_and_deploy_services",
-        ],
+        ]
     )
