@@ -124,7 +124,8 @@ object SierraConceptSubjects
 
   /**
     * Return AbstractConcepts of the appropriate subtype for this field
-    * A Concept Subject MARC field should contain exactly one $a subfields or more $a subfields.
+    * A Concept Subject MARC field should contain exactly one $a subfields,
+    * but due to third-party cataloguing errors, may contain more.
     * The $a subfield contains a term whose type is derived from the overall field,
     * so any $a subfields in a "Subject Added Entry-Chronological Term" will be a Period, etc.
     * $a is a non-repeatable subfield, so you would expect primarySubfields to be a single value,
