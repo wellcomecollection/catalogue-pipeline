@@ -71,20 +71,20 @@ ENV_TAG="env.$PIPELINE_DATE" "$ROOT/builds/update_ecr_image_tag.sh" \
 if [[ "$TASK" == "tag_images_and_deploy_services" ]]
 then
   CLUSTER="catalogue-$PIPELINE_DATE" "$ROOT/builds/deploy_ecs_services.sh" \
-    id-minter \
-    image-inferrer \
+    id_minter \
+    image_inferrer \
     matcher \
     merger \
-    ingestor-images \
-    ingestor-works \
+    ingestor_images \
+    ingestor_works \
     router \
     path_concatenator \
     batcher \
     relation-embedder \
-    transformer-calm \
-    transformer-mets \
-    transformer-miro \
-    transformer-sierra \
-    transformer-tei
+    transformer_calm \
+    transformer_mets \
+    transformer_miro \
+    transformer_sierra \
+    transformer_tei
 fi
 
