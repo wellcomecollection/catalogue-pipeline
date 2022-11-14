@@ -53,8 +53,10 @@ object SierraConceptSubjects
 
   val subjectVarFields = List("650", "648", "651")
 
-  def getSubjectsFromVarFields(bibId: SierraBibNumber,
-                               varfields: List[VarField]): Output = {
+  def getSubjectsFromVarFields(
+    bibId: SierraBibNumber,
+    varfields: List[VarField]
+  ): Output = {
     // Second indicator 7 means that the subject authority is something other
     // than library of congress or mesh. Some MARC records have duplicated subjects
     // when the same subject has more than one authority (for example mesh and FAST),
@@ -70,6 +72,9 @@ object SierraConceptSubjects
     // So let's filter anything that is from another authority for now.
     varfields.filterNot(_.indicator2.contains("7")).map { varfield =>
       val subfields = varfield.subfieldsWithTags("a", "v", "x", "y", "z")
+      // multiple $a subfields should not exist, but sometimes do.
+      // Prefer parsing them to rejecting them, as this error is not always within the
+      // control of collections staff.
       val (primarySubfields, subdivisionSubfields) = subfields.partition {
         _.tag == "a"
       }
@@ -86,10 +91,11 @@ object SierraConceptSubjects
     }
   }
 
-  private def getConcepts(varfield: VarField,
-                          primarySubfields: List[Subfield],
-                          subdivisionSubfields: List[Subfield])
-    : List[AbstractConcept[IdState.Unminted]] = {
+  private def getConcepts(
+    varfield: VarField,
+    primarySubfields: List[Subfield],
+    subdivisionSubfields: List[Subfield]
+  ): List[AbstractConcept[IdState.Unminted]] = {
     subdivisionSubfields match {
       // In the absence of subfields, the Subject will consist of one Concept.
       // In that case, the identifier derived from the field as a whole
@@ -100,29 +106,40 @@ object SierraConceptSubjects
             case identifiable: IdState.Identifiable => Some(identifiable)
             case _                                  => None
           }
-        getPrimaryConcept(
+        getPrimaryTypeConcepts(
           primarySubfields,
           varField = varfield,
-          idstate = conceptId,
+          idstate = conceptId
         )
       // If there are subfields, then this Subject will consist of multiple Concepts
       // In that case, the identifier derived from the field as a whole
       // only refers to the Subject as a whole.
       // The primary and subsequent Concepts will have to coin their own ids from their labels.
       case _ =>
-        getPrimaryConcept(primarySubfields, varField = varfield) ++ getSubdivisions(
-          subdivisionSubfields)
+        getPrimaryTypeConcepts(primarySubfields, varField = varfield) ++ getSubdivisions(
+          subdivisionSubfields
+        )
     }
   }
 
-  private def getPrimaryConcept(
+  /**
+    * Return AbstractConcepts of the appropriate subtype for this field
+    * A Concept Subject MARC field should contain exactly one $a subfields,
+    * but due to third-party cataloguing errors, may contain more.
+    * The $a subfield contains a term whose type is derived from the overall field,
+    * so any $a subfields in a "Subject Added Entry-Chronological Term" will be a Period, etc.
+    * $a is a non-repeatable subfield, so you would expect primarySubfields to be a single value,
+    * and for this to return a single value.  However, some records that are received from third-party
+    * organisations do erroneously contain multiple $a subfields.  This transformer will accept them
+    * and produce the appropriate concepts.
+    */
+  private def getPrimaryTypeConcepts(
     primarySubfields: List[Subfield],
     varField: VarField,
     idstate: Option[IdState.Identifiable] = None
   ): List[AbstractConcept[IdState.Unminted]] =
     primarySubfields.map { subfield =>
       val label = subfield.content.trimTrailingPeriod
-
       varField.marcTag.get match {
         case "650" => Concept(label = label).normalised.identifiable(idstate)
         case "648" => ParsedPeriod(label = label).identifiable(idstate)
