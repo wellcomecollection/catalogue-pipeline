@@ -73,6 +73,16 @@ class ImagesIndexConfigTest
     }
   }
 
+  it("cannot index non-image data"){
+
+    withLocalImagesIndex { implicit index =>
+
+      val response = indexJson(id = "baadf00d", json = """{"hello":"world"}""")
+      response.isError shouldBe true
+      response.error shouldBe a[ElasticError]
+    }
+  }
+
   private def assertImageCanBeIndexed(image: Image[ImageState.Augmented])(
     implicit index: Index
   ): Assertion = {
@@ -84,6 +94,17 @@ class ImagesIndexConfigTest
 
     assertImageIsIndexed(id = image.id, image = image)
   }
+
+  private def indexJson(
+                          id: String,
+                          json: String
+                        )(implicit index: Index) =
+    elasticClient.execute {
+      indexInto(index)
+        .doc(json)
+        .id(id)
+    }.await
+
 
   private def indexImage(
     id: String,
