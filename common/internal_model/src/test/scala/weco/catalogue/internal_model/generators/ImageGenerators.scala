@@ -163,7 +163,7 @@ trait ImageGenerators
   def createInferredData: InferredData = {
     val features = randomVector(4096)
     val (features1, features2) = features.splitAt(features.size / 2)
-    val reducedFeatures = randomVector(1024)
+    val reducedFeatures = randomUnitLengthVector(1024)
     val palette = randomColorVector()
 
     InferredData(

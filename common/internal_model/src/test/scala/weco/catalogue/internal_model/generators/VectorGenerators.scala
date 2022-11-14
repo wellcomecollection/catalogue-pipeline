@@ -47,6 +47,8 @@ trait VectorGenerators extends RandomGenerators {
     scalarMultiply(r, rand)
   }
 
+  def randomUnitLengthVector(d: Int): Vec = normalize(randomNormal(d))
+
   def cosineSimilarVector(a: Vec,
                           similarity: Float = defaultSimilarity): Vec = {
     val r = norm(a)
