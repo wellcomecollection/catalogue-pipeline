@@ -73,10 +73,9 @@ class ImagesIndexConfigTest
     }
   }
 
-  it("cannot index non-image data"){
+  it("cannot index non-image data") {
 
     withLocalImagesIndex { implicit index =>
-
       val response = indexJson(id = "baadf00d", json = """{"hello":"world"}""")
       response.isError shouldBe true
       response.error shouldBe a[ElasticError]
@@ -96,15 +95,14 @@ class ImagesIndexConfigTest
   }
 
   private def indexJson(
-                          id: String,
-                          json: String
-                        )(implicit index: Index) =
+    id: String,
+    json: String
+  )(implicit index: Index) =
     elasticClient.execute {
       indexInto(index)
         .doc(json)
         .id(id)
     }.await
-
 
   private def indexImage(
     id: String,
