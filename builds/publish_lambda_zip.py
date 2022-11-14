@@ -3,23 +3,20 @@
 Build a deployment ZIP for a Lambda, and upload it to Amazon S3.
 
 Usage:
-  publish_lambda_zip.py <PATH> --bucket=<BUCKET> --key=<KEY>
-  publish_lambda_zip.py -h | --help
+  publish_lambda_zip.py <LAMBDA_SOURCE_DIR>
 
-Options:
-  <PATH>                Path to the source code for the Lambda
-  --bucket=<BUCKET>     Name of the Amazon S3 bucket
-  --key=<KEY>           Key for the upload ZIP file
 """
 
 import os
 import shutil
 import subprocess
+import sys
 import tempfile
 import zipfile
 
-import boto3
-import docopt
+
+BUCKET = "wellcomecollection-platform-infra"
+KEY_PREFIX = "lambdas/"
 
 
 def cmd(*args):
@@ -113,15 +110,15 @@ def build_lambda_local(path, name):
 
 
 if __name__ == "__main__":
-    args = docopt.docopt(__doc__)
+    try:
+        lambda_dir = sys.argv[1]
+    except IndexError:
+        sys.exit(f"Usage: {__file__} <LAMBDA_DIR>")
 
-    path = args["<PATH>"]
-    key = args["--key"]
-    bucket = args["--bucket"]
-
-    client = boto3.client("s3")
+    bucket = BUCKET
+    key = f"{KEY_PREFIX}{lambda_dir}"
 
     name = os.path.basename(key)
-    filename = build_lambda_local(path=path, name=name)
+    filename = build_lambda_local(path=lambda_dir, name=name)
 
-    client.upload_file(Bucket=bucket, Filename=filename, Key=key)
+    subprocess.check_call(["aws", "s3", "cp", filename, f"s3://{bucket}/{key}"])

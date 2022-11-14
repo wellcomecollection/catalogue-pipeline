@@ -1,7 +1,0 @@
-{
-  "id" : "sierra_linker",
-  "folder" : "sierra_adapter/sierra_linker",
-  "dependencyIds" : [
-    "source_model"
-  ]
-}

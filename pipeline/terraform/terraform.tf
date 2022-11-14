@@ -4,10 +4,6 @@ provider "aws" {
   assume_role {
     role_arn = "arn:aws:iam::760097843905:role/platform-admin"
   }
-
-  ignore_tags {
-    keys = ["deployment:label"]
-  }
 }
 
 provider "aws" {

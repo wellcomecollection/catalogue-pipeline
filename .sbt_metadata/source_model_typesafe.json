@@ -1,7 +1,0 @@
-{
-  "id" : "source_model_typesafe",
-  "folder" : "common/source_model_typesafe",
-  "dependencyIds" : [
-    "source_model"
-  ]
-}
