@@ -110,7 +110,7 @@ class InferenceManagerWorkerServiceTest
                     features1 should be(featureVector.slice(0, 2048))
                     features2 should be(featureVector.slice(2048, 4096))
                     reducedFeatures should be(
-                      Responses.randomVector(seed)
+                      featureVector.slice(0, 1024)
                     )
                     palette should be(Responses.randomPaletteVector(seed))
                     averageColorHex should be(
