@@ -64,7 +64,7 @@ module "ingestor_works" {
   # we want to protect the database from overloading by pushing messages onto the DLQ on first failure.
   # During a reindex, it is under human supervision, and we can easily redrive the DLQ if required (and often do).
 
-  max_receive_count = 1
+  max_receive_count = var.reindexing_state.scale_up_tasks ? 3 : 1
 
   env_vars = {
     topic_arn = module.ingestor_works_output_topic.arn

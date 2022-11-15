@@ -1,8 +1,0 @@
-{
-  "id" : "mets_adapter",
-  "folder" : "mets_adapter/mets_adapter",
-  "dependencyIds" : [
-    "source_model",
-    "flows"
-  ]
-}

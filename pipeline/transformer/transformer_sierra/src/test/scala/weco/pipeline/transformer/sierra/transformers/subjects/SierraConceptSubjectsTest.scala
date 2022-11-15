@@ -642,29 +642,104 @@ class SierraConceptSubjectsTest
     )
   }
 
-  it("retrieves concepts from multiple ǂa subfields") {
-    val bibData = createSierraBibDataWith(
-      varFields = List(
-        VarField(
-          marcTag = Some("650"),
-          indicator2 = Some("0"),
-          subfields = List(
-            Subfield(tag = "a", content = " Yellowstone National Park")
+  describe("multiple ǂa subfields") {
+    // This is illegal in MARC, but can occur in third party catalogue data.
+    // In the interests of Postel, the transformer will extract them anyway.
+
+    it("retrieves Concepts from multiple ǂa subfields") {
+      // This is based on b23990739 (bzvuqazb), retrieved 2022-11-03
+      val bibData = createSierraBibDataWith(
+        varFields = List(
+          VarField(
+            marcTag = Some("650"),
+            indicator2 = Some("0"),
+            subfields = List(
+              Subfield(tag = "a", content = "Geography"),
+              Subfield(tag = "a", content = "Textbooks"),
+              Subfield(tag = "v", content = "Early works to 1800.")
+            )
           )
         )
       )
-    )
 
-    val List(subject) = SierraConceptSubjects(createSierraBibNumber, bibData)
-    val concept = subject.onlyConcept
+      val List(subject) = SierraConceptSubjects(createSierraBibNumber, bibData)
+      subject.label shouldBe "Geography - Textbooks - Early works to 1800"
 
-    concept should have(
-      sourceIdentifier(
-        value = "yellowstone national park",
-        ontologyType = "Concept",
-        identifierType = IdentifierType.LabelDerived
+      val List(concept1, concept2, concept3) = subject.concepts
+      concept1 should have(
+        sourceIdentifier(
+          value = "geography",
+          ontologyType = "Concept",
+          identifierType = IdentifierType.LabelDerived
+        )
       )
-    )
+      concept2 should have(
+        sourceIdentifier(
+          value = "textbooks",
+          ontologyType = "Concept",
+          identifierType = IdentifierType.LabelDerived
+        )
+      )
+      concept3 should have(
+        sourceIdentifier(
+          value = "early works to 1800",
+          ontologyType = "Concept",
+          identifierType = IdentifierType.LabelDerived
+        )
+      )
+    }
+
+    it("groups ǂa subfield content at the start") {
+      // This is based on b17617558 (x2zezhr9), retrieved 2022-11-03
+      val bibData = createSierraBibDataWith(
+        varFields = List(
+          VarField(
+            marcTag = Some("650"),
+            indicator2 = Some("0"),
+            subfields = List(
+              Subfield(tag = "a", content = "Death notices"),
+              Subfield(tag = "z", content = "Great Britain"),
+              Subfield(tag = "y", content = "19th century"),
+              Subfield(tag = "a", content = "Last words")
+            )
+          )
+        )
+      )
+
+      val List(subject) = SierraConceptSubjects(createSierraBibNumber, bibData)
+      subject.label shouldBe "Death notices - Last words - Great Britain - 19th century"
+
+      val List(concept1, concept2, concept3, concept4) = subject.concepts
+      concept1 should have(
+        sourceIdentifier(
+          value = "death notices",
+          ontologyType = "Concept",
+          identifierType = IdentifierType.LabelDerived
+        )
+      )
+      concept2 should have(
+        sourceIdentifier(
+          value = "last words",
+          ontologyType = "Concept",
+          identifierType = IdentifierType.LabelDerived
+        )
+      )
+      concept3 should have(
+        sourceIdentifier(
+          value = "great britain",
+          ontologyType = "Place",
+          identifierType = IdentifierType.LabelDerived
+        )
+      )
+      concept4 should have(
+        sourceIdentifier(
+          value = "19th century",
+          ontologyType = "Period",
+          identifierType = IdentifierType.LabelDerived
+        )
+      )
+    }
+
   }
 
   //TODO: Now that it's not doing the Mocky style test, we need to check that ParsedPeriod is being used.

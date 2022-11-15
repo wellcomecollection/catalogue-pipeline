@@ -1,9 +1,0 @@
-{
-  "id" : "calm_adapter",
-  "folder" : "calm_adapter/calm_adapter",
-  "dependencyIds" : [
-    "calm_api_client",
-    "internal_model",
-    "source_model_typesafe"
-  ]
-}

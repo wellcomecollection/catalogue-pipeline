@@ -1,7 +1,0 @@
-{
-  "id" : "transformer_tei",
-  "folder" : "pipeline/transformer/transformer_tei",
-  "dependencyIds" : [
-    "transformer_common"
-  ]
-}

@@ -1,8 +1,0 @@
-{
-  "id" : "router",
-  "folder" : "pipeline/relation_embedder/router",
-  "dependencyIds" : [
-    "internal_model",
-    "pipeline_storage_typesafe"
-  ]
-}

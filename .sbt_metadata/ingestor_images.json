@@ -1,7 +1,0 @@
-{
-  "id" : "ingestor_images",
-  "folder" : "pipeline/ingestor/ingestor_images",
-  "dependencyIds" : [
-    "ingestor_common"
-  ]
-}
