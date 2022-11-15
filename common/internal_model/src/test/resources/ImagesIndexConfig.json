@@ -83,7 +83,7 @@
                 "type": "dense_vector",
                 "dims": 1024,
                 "index": true,
-                "metric": "dot_product"
+                "similarity": "dot_product"
               },
               "palette": {
                 "type": "keyword"
