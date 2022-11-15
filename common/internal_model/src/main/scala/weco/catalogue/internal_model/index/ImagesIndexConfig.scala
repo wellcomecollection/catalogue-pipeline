@@ -4,9 +4,9 @@ import buildinfo.BuildInfo
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.mappings.MappingDefinition
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
+import weco.elasticsearch.IndexConfig
 
 import scala.io.Source
-import weco.elasticsearch.IndexConfig
 
 object ImagesIndexConfig extends IndexConfigFields {
   val analysis = WorksAnalysis()
@@ -20,17 +20,18 @@ object ImagesIndexConfig extends IndexConfigFields {
       // image and contains the core fields, adding DynamicMapping.False in places
       // where we do not need to map every field and can save CPU.
       val mapping = {
-        val version = BuildInfo.version.split("\\.").toList
         MappingDefinition(
           rawSource = Some(
-            Source
-              .fromInputStream(
-                getClass.getResourceAsStream("/imagesIndexMapping.json")
-              )
-              .mkString
+            IndexMapping(
+              propertiesJson = Source
+                .fromInputStream(
+                  getClass.getResourceAsStream("/imagesIndexProperties.json")
+                )
+                .mkString,
+              buildVersion = BuildInfo.version
+            )
           )
-        ).dynamic(DynamicMapping.Strict)
-          .meta(Map(s"model.versions.${version.head}" -> version.tail.head))
+        )
       }
       mapping
     },

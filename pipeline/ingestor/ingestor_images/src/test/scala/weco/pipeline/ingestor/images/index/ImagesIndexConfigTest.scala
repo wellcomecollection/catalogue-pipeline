@@ -73,7 +73,10 @@ class ImagesIndexConfigTest
     }
   }
 
-  it("cannot index non-image data") {
+  it("refuses to index non-image data") {
+    val str = "%s%s"
+
+    println(str.format("banana", "sausage"))
 
     withLocalImagesIndex { implicit index =>
       val response = indexJson(id = "baadf00d", json = """{"hello":"world"}""")
