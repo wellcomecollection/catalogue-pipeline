@@ -26,11 +26,11 @@ logger.info("API started, awaiting requests")
 
 def feature_reducer(vectors: np.ndarray) -> np.ndarray:
     """
-    return the first 1024 elements of a set of vectors, normalised 
+    return the first 1024 elements of a set of vectors, normalised
     to unit length. Normalisation is done to ensure that the vectors
     can be compared using dot_product similarity, rather than cosine.
 
-    N.B. This is a placeholder for a more sophisticated dimensionality 
+    N.B. This is a placeholder for a more sophisticated dimensionality
     reduction technique
     """
     sliced = vectors[:, :1024]
