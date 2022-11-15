@@ -1,7 +1,0 @@
-{
-  "id" : "transformer_calm",
-  "folder" : "pipeline/transformer/transformer_calm",
-  "dependencyIds" : [
-    "transformer_common"
-  ]
-}

@@ -1,8 +1,0 @@
-{
-  "id" : "tei_id_extractor",
-  "folder" : "tei_adapter/tei_id_extractor",
-  "dependencyIds" : [
-    "flows",
-    "source_model"
-  ]
-}

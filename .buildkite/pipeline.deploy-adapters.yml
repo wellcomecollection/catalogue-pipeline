@@ -1,81 +1,89 @@
 steps:
   - label: deploy CALM adapter
+    command: |
+      ENV_TAG=prod ./builds/update_ecr_image_tag.sh \
+        uk.ac.wellcome/calm_adapter \
+        uk.ac.wellcome/calm_deletion_checker \
+        uk.ac.wellcome/calm_indexer
+
+      CLUSTER=calm-adapter ./builds/deploy_ecs_services.sh \
+        calm_adapter \
+        calm_deletion_checker \
+        calm_indexer
+
     plugins:
-      - docker#v3.5.0:
-          image: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/wellcome/weco-deploy:5.7
-          workdir: /repo
-          mount-ssh-agent: true
-          command: [
-              "--project-id", "calm_adapter",
-              "--confirm",
-              "release-deploy",
-              "--from-label", "ref.$BUILDKITE_COMMIT",
-              "--environment-id", "prod",
-              "--description", $BUILDKITE_BUILD_URL,
-              "--confirmation-wait-for", 3600]
+      - wellcomecollection/aws-assume-role#v0.2.2:
+          role: "arn:aws:iam::760097843905:role/platform-ci"
+
     agents:
       queue: nano
+
   - label: deploy METS adapter
+    command: |
+      ENV_TAG=prod ./builds/update_ecr_image_tag.sh uk.ac.wellcome/mets_adapter
+      CLUSTER=mets-adapter ./builds/deploy_ecs_services.sh mets-adapter
+
     plugins:
-      - docker#v3.5.0:
-          image: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/wellcome/weco-deploy:5.7
-          workdir: /repo
-          mount-ssh-agent: true
-          command: [
-              "--project-id", "mets_adapter",
-              "--confirm",
-              "release-deploy",
-              "--from-label", "ref.$BUILDKITE_COMMIT",
-              "--environment-id", "prod",
-              "--description", $BUILDKITE_BUILD_URL,
-              "--confirmation-wait-for", 3600]
+      - wellcomecollection/aws-assume-role#v0.2.2:
+          role: "arn:aws:iam::760097843905:role/platform-ci"
+
     agents:
       queue: nano
+
   - label: deploy Sierra adapter
+    command: |
+      ENV_TAG=prod ./builds/update_ecr_image_tag.sh \
+        uk.ac.wellcome/sierra_indexer \
+        uk.ac.wellcome/sierra_linker \
+        uk.ac.wellcome/sierra_merger \
+        uk.ac.wellcome/sierra_reader
+
+      CLUSTER=sierra-adapter-20200604 ./builds/deploy_ecs_services.sh \
+        sierra-adapter-20200604-bibs-merger \
+        sierra-adapter-20200604-bibs-reader \
+        sierra-adapter-20200604-holdings-linker \
+        sierra-adapter-20200604-holdings-merger \
+        sierra-adapter-20200604-holdings-reader \
+        sierra-adapter-20200604-items-linker \
+        sierra-adapter-20200604-items-merger \
+        sierra-adapter-20200604-items-reader \
+        sierra-adapter-20200604-orders-linker \
+        sierra-adapter-20200604-orders-merger \
+        sierra-adapter-20200604-orders-reader \
+        sierra-adapter-20200604-sierra_indexer
+
     plugins:
-      - docker#v3.5.0:
-          image: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/wellcome/weco-deploy:5.7
-          workdir: /repo
-          mount-ssh-agent: true
-          command: [
-              "--project-id", "sierra_adapter",
-              "--confirm",
-              "release-deploy",
-              "--from-label", "ref.$BUILDKITE_COMMIT",
-              "--environment-id", "prod",
-              "--description", $BUILDKITE_BUILD_URL,
-              "--confirmation-wait-for", 3600]
+      - wellcomecollection/aws-assume-role#v0.2.2:
+          role: "arn:aws:iam::760097843905:role/platform-ci"
+
     agents:
       queue: nano
+
   - label: deploy TEI adapter
+    command: |
+      ENV_TAG=prod ./builds/update_ecr_image_tag.sh \
+        uk.ac.wellcome/tei_adapter \
+        uk.ac.wellcome/tei_id_extractor
+
+      CLUSTER=tei-adapter ./builds/deploy_ecs_services.sh \
+        tei_adapter \
+        tei_id_extractor
+
     plugins:
-      - docker#v3.5.0:
-          image: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/wellcome/weco-deploy:5.7
-          workdir: /repo
-          mount-ssh-agent: true
-          command: [
-              "--project-id", "tei_adapter",
-              "--confirm",
-              "release-deploy",
-              "--from-label", "ref.$BUILDKITE_COMMIT",
-              "--environment-id", "prod",
-              "--description", $BUILDKITE_BUILD_URL,
-              "--confirmation-wait-for", 3600]
+      - wellcomecollection/aws-assume-role#v0.2.2:
+          role: "arn:aws:iam::760097843905:role/platform-ci"
+
     agents:
       queue: nano
+
   - label: deploy reindexer
+    command: |
+      ENV_TAG=prod ./builds/update_ecr_image_tag.sh uk.ac.wellcome/reindex_worker
+      CLUSTER=reindexer ./builds/deploy_ecs_services.sh reindexer
+
     plugins:
-      - docker#v3.5.0:
-          image: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/wellcome/weco-deploy:5.7
-          workdir: /repo
-          mount-ssh-agent: true
-          command: [
-              "--project-id", "reindexer",
-              "--confirm",
-              "release-deploy",
-              "--from-label", "ref.$BUILDKITE_COMMIT",
-              "--environment-id", "prod",
-              "--description", $BUILDKITE_BUILD_URL,
-              "--confirmation-wait-for", 3600]
+      - wellcomecollection/aws-assume-role#v0.2.2:
+          role: "arn:aws:iam::760097843905:role/platform-ci"
+
     agents:
       queue: nano

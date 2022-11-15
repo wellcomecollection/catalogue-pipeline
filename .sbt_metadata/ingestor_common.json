@@ -1,8 +1,0 @@
-{
-  "id" : "ingestor_common",
-  "folder" : "pipeline/ingestor/ingestor_common",
-  "dependencyIds" : [
-    "pipeline_storage_typesafe",
-    "display_model"
-  ]
-}
