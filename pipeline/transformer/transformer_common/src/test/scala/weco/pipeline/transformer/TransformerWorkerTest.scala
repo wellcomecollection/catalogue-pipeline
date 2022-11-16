@@ -80,7 +80,8 @@ class TransformerWorkerTest
 
         eventually {
           workIndexer.index.values.map { _.version }.toSeq shouldBe Seq(
-            storeVersion)
+            storeVersion
+          )
         }
     }
   }
@@ -138,7 +139,8 @@ class TransformerWorkerTest
     }
 
     it(
-      "re-sends a Work if the stored Work has the same version but different data") {
+      "re-sends a Work if the stored Work has the same version but different data"
+    ) {
       val id = randomAlphanumeric()
 
       withWorker() {
@@ -172,9 +174,11 @@ class TransformerWorkerTest
       val modifiedTime = Instant.now()
       val sourceIdentifier = createCalmSourceIdentifier
       val stateChangingTransformer = new Transformer[ExampleData] {
-        override def apply(id: String,
-                           sourceData: ExampleData,
-                           version: Int): Result[Work[Source]] =
+        override def apply(
+          id: String,
+          sourceData: ExampleData,
+          version: Int
+        ): Result[Work[Source]] =
           Right(
             Work.Visible[Source](
               version = version,
@@ -186,14 +190,18 @@ class TransformerWorkerTest
                 List(
                   MergeCandidate(
                     identifier = createSourceIdentifier,
-                    reason = ""))
+                    reason = ""
+                  )
+                )
               )
-            ))
+            )
+          )
       }
 
       withWorker(
         transformer = stateChangingTransformer,
-        visibilityTimeout = 5 seconds) {
+        visibilityTimeout = 5 seconds
+      ) {
         case (_, QueuePair(queue, dlq), workIndexer, workKeySender, store) =>
           val payload = createPayloadWith(id = id, version = 1)(store)
           sendNotificationToSQS(queue, payload)
@@ -217,7 +225,8 @@ class TransformerWorkerTest
     }
 
     it(
-      "re-sends a Work if the stored Work has the same version and the same data") {
+      "re-sends a Work if the stored Work has the same version and the same data"
+    ) {
       withWorker() {
         case (_, QueuePair(queue, dlq), workIndexer, workKeySender, store) =>
           val payload = createPayload(store)
@@ -245,7 +254,8 @@ class TransformerWorkerTest
     }
 
     it(
-      "skips sending a Work if the stored Work has a strictly older Version and the same data") {
+      "skips sending a Work if the stored Work has a strictly older Version and the same data"
+    ) {
 
       withWorker() {
         case (_, QueuePair(queue, dlq), workIndexer, workKeySender, store) =>
@@ -349,8 +359,9 @@ class TransformerWorkerTest
 
     it("if it can't index the work") {
       val brokenIndexer = new MemoryIndexer[Work[Source]]() {
-        override def apply(documents: Seq[Work[Source]])
-          : Future[Either[Seq[Work[Source]], Seq[Work[Source]]]] =
+        override def apply(
+          documents: Seq[Work[Source]]
+        ): Future[Either[Seq[Work[Source]], Seq[Work[Source]]]] =
           Future.failed(new Throwable("BOOM!"))
       }
       withWorker(workIndexer = brokenIndexer) {
@@ -397,24 +408,29 @@ class TransformerWorkerTest
     workKeySender: MemoryMessageSender = new MemoryMessageSender(),
     store: MemoryVersionedStore[S3ObjectLocation, ExampleData] =
       MemoryVersionedStore[S3ObjectLocation, ExampleData](
-        initialEntries = Map.empty),
+        initialEntries = Map.empty
+      ),
     transformer: Transformer[ExampleData] = new ExampleTransformer,
     visibilityTimeout: FiniteDuration = 1.second
   )(
     testWith: TestWith[
-      (TransformerWorker[CalmSourcePayload, ExampleData, String],
-       QueuePair,
-       MemoryIndexer[Work[Source]],
-       MemoryMessageSender,
-       MemoryVersionedStore[S3ObjectLocation, ExampleData]),
-      R]
+      (
+        TransformerWorker[CalmSourcePayload, ExampleData, String],
+        QueuePair,
+        MemoryIndexer[Work[Source]],
+        MemoryMessageSender,
+        MemoryVersionedStore[S3ObjectLocation, ExampleData]
+      ),
+      R
+    ]
   ): R =
     withLocalSqsQueuePair(visibilityTimeout) {
       case q @ QueuePair(queue, _) =>
         withPipelineStream[Work[Source], R](
           queue = queue,
           indexer = workIndexer,
-          sender = workKeySender) { pipelineStream =>
+          sender = workKeySender
+        ) { pipelineStream =>
           val retriever =
             new MemoryRetriever[Work[Source]](index = mutable.Map()) {
               override def apply(id: String): Future[Work[Source]] =
@@ -439,8 +455,8 @@ class TransformerWorkerTest
     }
 
   def createPayloadWith(id: String = randomAlphanumeric(), version: Int)(
-    implicit store: MemoryVersionedStore[S3ObjectLocation, ExampleData])
-    : CalmSourcePayload = {
+    implicit store: MemoryVersionedStore[S3ObjectLocation, ExampleData]
+  ): CalmSourcePayload = {
     val data = ValidExampleData(
       id = createSourceIdentifierWith(
         identifierType = IdentifierType.CalmRecordIdentifier,
@@ -457,8 +473,8 @@ class TransformerWorkerTest
   }
 
   def setPayloadVersion(p: CalmSourcePayload, version: Int)(
-    implicit store: MemoryVersionedStore[S3ObjectLocation, ExampleData])
-    : CalmSourcePayload = {
+    implicit store: MemoryVersionedStore[S3ObjectLocation, ExampleData]
+  ): CalmSourcePayload = {
     val storedData: ExampleData =
       store.get(Version(p.location, p.version)).value.identifiedT
 
@@ -469,8 +485,8 @@ class TransformerWorkerTest
   }
 
   def createBadPayload(
-    implicit store: MemoryVersionedStore[S3ObjectLocation, ExampleData])
-    : CalmSourcePayload = {
+    implicit store: MemoryVersionedStore[S3ObjectLocation, ExampleData]
+  ): CalmSourcePayload = {
     val data = InvalidExampleData
     val version = randomInt(from = 1, to = 10)
 
@@ -481,13 +497,14 @@ class TransformerWorkerTest
     CalmSourcePayload(
       id = randomAlphanumeric(),
       version = version,
-      location = location)
+      location = location
+    )
   }
 
   // Create a payload which can be transformer
   def createPayload(
-    implicit store: MemoryVersionedStore[S3ObjectLocation, ExampleData])
-    : CalmSourcePayload = createPayloadWith(
+    implicit store: MemoryVersionedStore[S3ObjectLocation, ExampleData]
+  ): CalmSourcePayload = createPayloadWith(
     version = randomInt(from = 1, to = 10)
   )
 }

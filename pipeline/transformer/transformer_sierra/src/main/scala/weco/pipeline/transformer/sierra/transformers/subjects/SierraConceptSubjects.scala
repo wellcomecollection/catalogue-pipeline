@@ -1,7 +1,7 @@
 package weco.pipeline.transformer.sierra.transformers.subjects
 
 import weco.catalogue.internal_model.identifiers.IdState
-import weco.catalogue.internal_model.work._
+import weco.catalogue.internal_model.work.{Place, _}
 import weco.pipeline.transformer.sierra.transformers.SierraConcepts
 import weco.pipeline.transformer.text.TextNormalisation._
 import weco.pipeline.transformer.transformers.ParsedPeriod
@@ -71,6 +71,12 @@ object SierraConceptSubjects
     //
     // So let's filter anything that is from another authority for now.
     varfields.filterNot(_.indicator2.contains("7")).map { varfield =>
+      // Extract the relevant subfields from the given varField.
+      // $a - the name of the thing - Geographic/Topical/Chronological name
+      // $v - Form Subdivision
+      // $x - General Subdivision
+      // $y - Chronological Subdivision
+      // $z - Geographic Subdivision
       val subfields = varfield.subfieldsWithTags("a", "v", "x", "y", "z")
       // multiple $a subfields should not exist, but sometimes do.
       // Prefer parsing them to rejecting them, as this error is not always within the
@@ -84,7 +90,7 @@ object SierraConceptSubjects
         getConcepts(varfield, primarySubfields, subdivisionSubfields)
 
       Subject(
-        id = getIdState(ontologyType = "Subject", varfield),
+        id = getIdState(ontologyType = getFieldOntologyType(varfield), varfield),
         label = label,
         concepts = concepts
       )
@@ -101,8 +107,9 @@ object SierraConceptSubjects
       // In that case, the identifier derived from the field as a whole
       // also refers to that concept.
       case Nil =>
+        getFieldOntologyType(varfield)
         val conceptId =
-          getIdState(ontologyType = "Concept", varfield) match {
+          getIdState(ontologyType = getFieldOntologyType(varfield), varfield) match {
             case identifiable: IdState.Identifiable => Some(identifiable)
             case _                                  => None
           }
@@ -145,5 +152,12 @@ object SierraConceptSubjects
         case "648" => ParsedPeriod(label = label).identifiable(idstate)
         case "651" => Place(label = label).normalised.identifiable(idstate)
       }
+    }
+
+  private def getFieldOntologyType(varField: VarField): String =
+    varField.marcTag.get match {
+      case "650" => "Concept"
+      case "648" => "Period"
+      case "651" => "Place"
     }
 }

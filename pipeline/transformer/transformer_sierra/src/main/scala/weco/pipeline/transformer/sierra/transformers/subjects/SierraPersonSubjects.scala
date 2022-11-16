@@ -28,8 +28,10 @@ object SierraPersonSubjects
 
   val subjectVarFields = List("600")
 
-  def getSubjectsFromVarFields(bibId: SierraBibNumber,
-                               varFields: List[VarField]): Output = {
+  def getSubjectsFromVarFields(
+    bibId: SierraBibNumber,
+    varFields: List[VarField]
+  ): Output = {
     // Second indicator 7 means that the subject authority is something other
     // than library of congress or mesh. Some MARC records have duplicated subjects
     // when the same subject has more than one authority (for example mesh and FAST),
@@ -55,29 +57,34 @@ object SierraPersonSubjects
             dates = getDates(subfields),
             generalSubdivisions = generalSubdivisions
           )
+          val subjectIdentifier = identifyAgentSubject(varField, "Person")
           val maybeIdentifiedPerson =
-            person.copy(id = identifyAgentSubject(varField, "Person"))
+            person.copy(id = subjectIdentifier)
           Subject(
             label = label,
             concepts = getConcepts(
               maybeIdentifiedPerson.identifiable(),
-              generalSubdivisions),
-            id = identifyAgentSubject(varField, "Subject")
+              generalSubdivisions
+            ),
+            id = subjectIdentifier
           )
         }
       }
   }
 
-  private def getPersonSubjectLabel(person: Person[IdState.Unminted],
-                                    roles: List[String],
-                                    dates: Option[String],
-                                    generalSubdivisions: List[String]): String =
+  private def getPersonSubjectLabel(
+    person: Person[IdState.Unminted],
+    roles: List[String],
+    dates: Option[String],
+    generalSubdivisions: List[String]
+  ): String =
     (List(person.label) ++ roles ++ generalSubdivisions)
       .mkString(" ")
 
-  private def getConcepts(person: Person[IdState.Unminted],
-                          generalSubdivisions: List[String])
-    : List[AbstractRootConcept[IdState.Unminted]] =
+  private def getConcepts(
+    person: Person[IdState.Unminted],
+    generalSubdivisions: List[String]
+  ): List[AbstractRootConcept[IdState.Unminted]] =
     person +: generalSubdivisions.map(Concept(_))
 
   private def getRoles(secondarySubfields: List[Subfield]) =
