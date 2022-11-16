@@ -28,9 +28,11 @@ def deploy_to(root, pipeline_date):
         ]
     )
 
+
 def get_pipeline_names_from_terraform_file(root):
-    with open(f"{root}/pipeline/terraform/main.tf", 'r') as maintf:
+    with open(f"{root}/pipeline/terraform/main.tf", "r") as maintf:
         return get_pipeline_names_from_terraform_data(maintf.read())
+
 
 def get_pipeline_names_from_terraform_data(tf_data):
     """
@@ -50,7 +52,9 @@ def get_pipeline_names_from_terraform_data(tf_data):
     ... ''')
     ['1999-12-25', '2022-12-25']
     """
-    pipeline_date_regex = re.compile(r'^\s*pipeline_date\s*=\s*"(?P<date>[^"]*)', re.MULTILINE)
+    pipeline_date_regex = re.compile(
+        r'^\s*pipeline_date\s*=\s*"(?P<date>[^"]*)', re.MULTILINE
+    )
     return pipeline_date_regex.findall(tf_data)
 
 
@@ -78,7 +82,8 @@ if __name__ == "__main__":
     latest_pipeline = sorted(candidate_pipelines, reverse=True)[0]
     print(f"most recent pipeline is: {latest_pipeline}")
     if latest_pipeline != prod_pipeline:
-        print("WARNING: The most up to date pipeline is not the current production pipeline ")
+        print(
+            "WARNING: The most up to date pipeline is not the current production pipeline "
+        )
         print(f"production:{prod_pipeline} latest:{latest_pipeline}")
     deploy_to(root, latest_pipeline)
-
