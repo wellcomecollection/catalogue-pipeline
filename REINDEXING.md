@@ -6,81 +6,8 @@ A reindex operation runs the source data from the [adapters](docs/adapters/READM
 
 To run a reindex follow these steps:
 
-1. [Prepare a release](#prepare-a-release)
-2. [Deploy a release](#deploy-a-release)
-3. [Terraform a new pipeline](#terraform-a-new-pipeline)
-4. [Run the reindex script](#run-the-reindex-script)
-
-### Prepare a release
-
-Prepare a release following the example below.
-
-You may want to choose a specific git ref as a label and _not_ `latest`.
-
-```
-> weco-deploy \
-  --project-id catalogue_pipeline prepare \
-  --from-label latest \
-  --description "A helpful description"
-
-Prepared release from images in latest
-Requested by: dev@Wellcomecloud.onmicrosoft.com
-Date created: 2021-07-08T15:11:48.403652
-
-service                old image    new image    Git commit
----------------------  -----------  -----------  ------------
-aspect_ratio_inferrer  efd451f      -            -
-...
-
-Created release eeb9482f-0a6a-4211-8de9-27cee7567134
-```
-
-### Deploy a release
-
-You will need to specify:
-
-- `release-id`: Gathered from preparing the release with `weco-deploy`
-- `environment-id`: The environment identifier added to [`.wellcome-project`](.wellcome_project)
-
-Using this you can do a `weco-deploy deploy` operation:
-
-```
-> weco-deploy --project-id catalogue_pipeline deploy \
-  --release-id eeb9482f-0a6a-4211-8de9-27cee7567134 \
-  --environment-id YYYY-MM-DD \
-  --description "A helpful description"
-
-Deploying release eeb9482f-0a6a-4211-8de9-27cee7567134
-Targeting env: YYYY-MM-DD (Environment(id='YYYY-MM-DD', name='YYYY-MM-DD'))
-Requested by: dev@Wellcomecloud.onmicrosoft.com
-Date created: 2021-07-08T15:11:48.403652
-
-ECS services discovered:
-
-image ID               services
----------------------  ----------
-aspect_ratio_inferrer
-...
-
-Create deployment? [y/N]: y
-
-Deployment Summary
-Requested by: dev@Wellcomecloud.onmicrosoft.com
-Date created: 2021-07-08T15:23:55.267305
-Deploy data:  deploy_2021-07-08_16-23-55.json
-
-image ID               summary of changes
----------------------  --------------------
-aspect_ratio_inferrer  ECR tag updated,
-...
-
-Deployed release eeb9482f-0a6a-4211-8de9-27cee7567134 to YYYY-MM-DD (Environment(id='YYYY-MM-DD', name='YYYY-MM-DD'))
-Deployment of eeb9482f-0a6a-4211-8de9-27cee7567134 to YYYY-MM-DD successful
-```
-
-This operation **only tags ECR images with the new environment** it does not deploy any services.
-
-This will be done when you terraform a new pipeline.
+1. [Terraform a new pipeline](#terraform-a-new-pipeline)
+2. [Run the reindex script](#run-the-reindex-script)
 
 ### Terraform a new pipeline
 
