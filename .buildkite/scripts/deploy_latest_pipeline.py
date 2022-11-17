@@ -85,5 +85,5 @@ if __name__ == "__main__":
         print(
             "WARNING: The most up to date pipeline is not the current production pipeline "
         )
-        print(f"production:{prod_pipeline} latest:{latest_pipeline}")
+        print(f"production:\t{prod_pipeline}\nlatest:\t\t{latest_pipeline}")
     deploy_to(root, latest_pipeline)
