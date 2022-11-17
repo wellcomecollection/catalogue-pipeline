@@ -39,9 +39,6 @@ module "worker" {
   scale_down_adjustment = var.fargate_service_boilerplate.scale_down_adjustment
   scale_up_adjustment   = var.fargate_service_boilerplate.scale_up_adjustment
 
-  deployment_service_env  = var.fargate_service_boilerplate.deployment_service_env
-  deployment_service_name = replace(var.name, "_", "-")
-
   shared_logging_secrets = var.fargate_service_boilerplate.shared_logging_secrets
 
   use_fargate_spot = var.use_fargate_spot

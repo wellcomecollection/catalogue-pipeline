@@ -39,9 +39,6 @@ module "tei_adapter" {
     aws_security_group.rds_ingress_security_group.id
   ]
 
-  deployment_service_env  = local.release_label
-  deployment_service_name = "tei-adapter"
-
   use_fargate_spot = true
 }
 

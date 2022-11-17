@@ -18,7 +18,6 @@ module "reindex_worker" {
   private_subnets = local.private_subnets
   dlq_alarm_arn   = local.dlq_alarm_arn
 
-  service_env  = local.environment
   service_name = "reindexer"
 
   shared_logging_secrets = data.terraform_remote_state.shared_infra.outputs.shared_secrets_logging

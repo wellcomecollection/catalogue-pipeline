@@ -92,8 +92,6 @@ variable "fargate_service_boilerplate" {
 
     namespace = string
 
-    deployment_service_env = string
-
     shared_logging_secrets = map(any)
   })
 }

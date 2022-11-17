@@ -27,7 +27,5 @@ module "sierra_indexer" {
   interservice_security_group_id   = var.interservice_security_group_id
   elastic_cloud_vpce_sg_id         = var.elastic_cloud_vpce_sg_id
 
-  deployment_service_env  = var.deployment_env
-  deployment_service_name = "sierra-indexer"
   shared_logging_secrets  = var.shared_logging_secrets
 }

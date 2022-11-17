@@ -48,9 +48,6 @@ module "calm_indexer" {
     aws_security_group.egress.id,
   ]
 
-  deployment_service_env  = local.release_label
-  deployment_service_name = "calm-indexer"
-
   use_fargate_spot = true
 }
 
