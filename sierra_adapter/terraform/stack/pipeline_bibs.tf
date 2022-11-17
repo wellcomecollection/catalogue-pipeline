@@ -28,7 +28,7 @@ module "bibs_reader" {
   interservice_security_group_id   = var.interservice_security_group_id
   elastic_cloud_vpce_sg_id         = var.elastic_cloud_vpce_sg_id
 
-  shared_logging_secrets  = var.shared_logging_secrets
+  shared_logging_secrets = var.shared_logging_secrets
 }
 
 module "bibs_merger" {
@@ -56,5 +56,5 @@ module "bibs_merger" {
   interservice_security_group_id   = var.interservice_security_group_id
   elastic_cloud_vpce_sg_id         = var.elastic_cloud_vpce_sg_id
 
-  shared_logging_secrets  = var.shared_logging_secrets
+  shared_logging_secrets = var.shared_logging_secrets
 }
