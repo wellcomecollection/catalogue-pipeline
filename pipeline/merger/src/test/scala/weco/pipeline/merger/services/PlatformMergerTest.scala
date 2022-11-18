@@ -750,6 +750,57 @@ class PlatformMergerTest
     visibleWorks(workForEbib.id).data.items shouldBe workForMets.data.items
   }
 
+  it("merges digitised audio from METS into e-bibs") {
+    // This test case is based on a real example of three related works that
+    // were being merged incorrectly.  In particular, the METS work (and associated
+    // IIIF manifest) was being merged into the physical audio formats, not the
+    // e-bib that it should have been attached to.
+    //
+    //
+    // See https://wellcome.slack.com/archives/C8X9YKM5X/p1668592141214869?thread_ts=1668438141.675609&cid=C8X9YKM5X
+    val workForPhysicalCassette = sierraIdentifiedWork()
+      .title("A physical cassette tape")
+      .format(Format.Audio)
+      .items(List(createIdentifiedPhysicalItem))
+
+    val workForEbib = sierraIdentifiedWork()
+      .title("A work for an e-bib")
+      .format(Format.Audio)
+
+    val workForMets = identifiedWork(sourceIdentifier = createMetsSourceIdentifier)
+      .title("The digital copy of the audio cassette")
+      .items(List(createDigitalItem))
+      .invisible()
+
+    val sierraWorks = List(workForPhysicalCassette, workForEbib)
+    val works = List(workForPhysicalCassette, workForEbib, workForMets)
+
+    val result = merger.merge(works).mergedWorksWithTime(now)
+
+    val visibleWorks = result
+      .collect { case w: Work.Visible[_] => w }
+      .map { w =>
+        w.id -> w
+      }
+      .toMap
+    val redirectedWorks = result.collect {
+      case w: Work.Redirected[Merged] => w
+    }
+    val invisibleWorks = result.collect { case w: Work.Invisible[Merged] => w }
+
+    // First check that the METS work got redirected into one of the Sierra works
+    visibleWorks.keys should contain theSameElementsAs sierraWorks.map { _.id }
+    redirectedWorks.map { _.id } shouldBe List(workForMets.id)
+    invisibleWorks shouldBe empty
+
+    // Now check that the METS work redirects into the e-bib specifically
+    val redirectedWork = redirectedWorks.head
+    redirectedWork.redirectTarget.canonicalId shouldBe workForEbib.state.canonicalId
+
+    visibleWorks(workForPhysicalCassette.id).data.items shouldBe workForPhysicalCassette.data.items
+    visibleWorks(workForEbib.id).data.items shouldBe workForMets.data.items
+  }
+
   it("ignores online resources for physical/digital bib merging rules") {
     // This test case is based on a real example of three related works that
     // were being merged incorrectly.  In particular, the METS work (and associated
