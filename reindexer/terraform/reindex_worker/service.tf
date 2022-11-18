@@ -3,9 +3,6 @@ module "service" {
 
   name = var.service_name
 
-  deployment_service_env  = var.service_env
-  deployment_service_name = var.service_name
-
   image = var.reindex_worker_container_image
 
   security_group_ids = [

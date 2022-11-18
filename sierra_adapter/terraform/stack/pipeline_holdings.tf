@@ -28,9 +28,7 @@ module "holdings_reader" {
   interservice_security_group_id   = var.interservice_security_group_id
   elastic_cloud_vpce_sg_id         = var.elastic_cloud_vpce_sg_id
 
-  deployment_service_env  = var.deployment_env
-  deployment_service_name = "holdings-reader"
-  shared_logging_secrets  = var.shared_logging_secrets
+  shared_logging_secrets = var.shared_logging_secrets
 }
 
 module "holdings_linker" {
@@ -55,9 +53,7 @@ module "holdings_linker" {
   interservice_security_group_id   = var.interservice_security_group_id
   elastic_cloud_vpce_sg_id         = var.elastic_cloud_vpce_sg_id
 
-  deployment_service_env  = var.deployment_env
-  deployment_service_name = "holdings-linker"
-  shared_logging_secrets  = var.shared_logging_secrets
+  shared_logging_secrets = var.shared_logging_secrets
 }
 
 module "holdings_merger" {
@@ -85,7 +81,5 @@ module "holdings_merger" {
   interservice_security_group_id   = var.interservice_security_group_id
   elastic_cloud_vpce_sg_id         = var.elastic_cloud_vpce_sg_id
 
-  deployment_service_env  = var.deployment_env
-  deployment_service_name = "holdings-merger"
-  shared_logging_secrets  = var.shared_logging_secrets
+  shared_logging_secrets = var.shared_logging_secrets
 }

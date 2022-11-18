@@ -180,8 +180,6 @@ module "image_inferrer" {
 
   namespace = local.namespace
 
-  deployment_service_env = var.release_label
-
   shared_logging_secrets = var.monitoring_config.shared_logging_secrets
 }
 

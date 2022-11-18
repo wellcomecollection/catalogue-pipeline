@@ -28,9 +28,7 @@ module "orders_reader" {
   interservice_security_group_id   = var.interservice_security_group_id
   elastic_cloud_vpce_sg_id         = var.elastic_cloud_vpce_sg_id
 
-  deployment_service_env  = var.deployment_env
-  deployment_service_name = "orders-reader"
-  shared_logging_secrets  = var.shared_logging_secrets
+  shared_logging_secrets = var.shared_logging_secrets
 }
 
 module "orders_linker" {
@@ -55,9 +53,7 @@ module "orders_linker" {
   interservice_security_group_id   = var.interservice_security_group_id
   elastic_cloud_vpce_sg_id         = var.elastic_cloud_vpce_sg_id
 
-  deployment_service_env  = var.deployment_env
-  deployment_service_name = "orders-linker"
-  shared_logging_secrets  = var.shared_logging_secrets
+  shared_logging_secrets = var.shared_logging_secrets
 }
 
 module "orders_merger" {
@@ -85,7 +81,5 @@ module "orders_merger" {
   interservice_security_group_id   = var.interservice_security_group_id
   elastic_cloud_vpce_sg_id         = var.elastic_cloud_vpce_sg_id
 
-  deployment_service_env  = var.deployment_env
-  deployment_service_name = "orders-merger"
-  shared_logging_secrets  = var.shared_logging_secrets
+  shared_logging_secrets = var.shared_logging_secrets
 }

@@ -1,7 +1,4 @@
 locals {
-  # Allow overriding the deployment service name used by weco-deploy
-  deployment_service_name = var.deployment_service_name == "" ? var.name : var.deployment_service_name
-
   # Allow overriding the ECS service name
   #
   # This is used to set a service name that isn't prefixed by the namespace,
@@ -13,7 +10,7 @@ locals {
 }
 
 module "service" {
-  source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/service?ref=v3.12.2"
+  source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/service?ref=v3.13.0"
 
   task_definition_arn            = module.task_definition.arn
   service_name                   = local.service_name
@@ -34,9 +31,6 @@ module "service" {
   )
 
   propagate_tags = "SERVICE"
-
-  deployment_service = local.deployment_service_name
-  deployment_env     = var.deployment_service_env
 }
 
 module "autoscaling" {
