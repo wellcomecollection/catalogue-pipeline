@@ -30,7 +30,6 @@ lazy val internal_model = setupProject(
   project,
   "common/internal_model",
   externalDependencies = CatalogueDependencies.internalModelDependencies)
-  .enablePlugins(BuildInfoPlugin)
 
 lazy val display_model = setupProject(
   project,
