@@ -10,7 +10,7 @@ object TargetPrecedence {
   private val targetPrecedence = Seq(
     teiWork,
     singlePhysicalItemCalmWork,
-    sierraElectronicVideo,
+    sierraDigitisedAv,
     physicalSierra,
     sierraWork
   )
