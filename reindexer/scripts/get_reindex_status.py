@@ -3,6 +3,7 @@
 Reports some stats about the state of a reindex.
 """
 
+import datetime
 import functools
 
 import boto3
@@ -12,7 +13,6 @@ from elasticsearch.exceptions import NotFoundError
 import humanize
 import tabulate
 from tenacity import retry, stop_after_attempt, wait_exponential
-
 
 def get_session_with_role(role_arn):
     """
@@ -194,6 +194,9 @@ def main(reindex_date):
 
     source_counts = get_source_counts(session_read_only)
     source_counts["TOTAL"] = sum(source_counts.values())
+    print("*** Status check time *** ")
+    print(datetime.datetime.now())
+    print("")
 
     print("*** Source tables ***")
     print(
