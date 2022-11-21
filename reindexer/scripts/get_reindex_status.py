@@ -14,6 +14,7 @@ import humanize
 import tabulate
 from tenacity import retry, stop_after_attempt, wait_exponential
 
+
 def get_session_with_role(role_arn):
     """
     Returns a boto3.Session that uses the given role ARN.

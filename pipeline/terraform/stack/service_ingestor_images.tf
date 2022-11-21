@@ -31,7 +31,7 @@ module "ingestor_images" {
     # It appears to be unnecessary, as the database copes well enough, so it is currently
     # explicitly set to false, pending the removal of the switch.
     # Was var.reindexing_state.scale_up_tasks
-    es_is_reindexing   = false
+    es_is_reindexing = false
 
     ingest_flush_interval_seconds = local.ingestor_images_flush_interval_seconds
 
