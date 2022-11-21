@@ -17,7 +17,7 @@ object Responses {
       "features_b64": "${Encoding.toLittleEndianBase64(
          randomFeatureVector(seed)
        )}",
-      "lsh_encoded_features": [${randomLshVector(seed)
+      "reduced_features_b64": [${randomLshVector(seed)
          .map(str => s""""$str"""")
          .mkString(", ")}]
     }""".stripMargin
