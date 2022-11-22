@@ -41,7 +41,7 @@ def feature_reducer(vectors: np.ndarray) -> np.ndarray:
 def batch_infer_features(images):
     vectors = extract_features(images)
     reduced = feature_reducer(vectors)
-    return [{"vector": v, "reduced_vector": l} for v, l in zip(vectors, reduced)]
+    return [{"vector": v, "reduced_vector": r} for v, r in zip(vectors, reduced)]
 
 
 batch_inferrer_queue = BatchExecutionQueue(
