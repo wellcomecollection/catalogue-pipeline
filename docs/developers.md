@@ -4,10 +4,6 @@ If you are new to the catalogue pipeline the [GitBook documentation](https://doc
 
 Information for developers working on the catalogue-pipeline.
 
-### Deploying
-
-We deploy catalogue-pipeline services using the [weco-deploy](https://github.com/wellcomecollection/weco-deploy) tool.
-
 ### Things you might want to do
 
 #### Reindexing
