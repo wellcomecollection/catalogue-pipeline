@@ -3,6 +3,7 @@
 Reports some stats about the state of a reindex.
 """
 
+import datetime
 import functools
 
 import boto3
@@ -194,6 +195,9 @@ def main(reindex_date):
 
     source_counts = get_source_counts(session_read_only)
     source_counts["TOTAL"] = sum(source_counts.values())
+    print("*** Status check time *** ")
+    print(datetime.datetime.now())
+    print("")
 
     print("*** Source tables ***")
     print(

@@ -25,18 +25,19 @@ module "catalogue_pipeline_2022-11-03" {
   }
 }
 
-module "catalogue_pipeline_2022-11-17" {
+
+module "catalogue_pipeline_2022-11-19" {
   source = "./stack"
 
-  pipeline_date = "2022-11-17"
-  release_label = "2022-11-17"
+  pipeline_date = "2022-11-19"
+  release_label = "2022-11-19"
 
   reindexing_state = {
-    listen_to_reindexer      = true
-    scale_up_tasks           = true
-    scale_up_elastic_cluster = true
-    scale_up_id_minter_db    = true
-    scale_up_matcher_db      = true
+    listen_to_reindexer      = false
+    scale_up_tasks           = false
+    scale_up_elastic_cluster = false
+    scale_up_id_minter_db    = false
+    scale_up_matcher_db      = false
   }
 
   # Boilerplate that shouldn't change between pipelines.
