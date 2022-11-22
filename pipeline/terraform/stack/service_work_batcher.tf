@@ -19,6 +19,7 @@ locals {
   wait_minutes = var.reindexing_state.scale_up_tasks ? 25 : 1
 
   # NOTE: SQS in flight limit is 120k
+  # See https://aws.amazon.com/sqs/faqs/ "Q: How large can Amazon SQS message queues be?"
   max_processed_paths = var.reindexing_state.scale_up_tasks ? 120000 : 5000
 }
 
