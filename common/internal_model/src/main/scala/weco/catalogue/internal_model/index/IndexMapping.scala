@@ -16,13 +16,12 @@ object IndexMapping {
     * allowing us to configure the properties in a mapping with plain JSON.
     *
     */
-  def apply(propertiesJson: String, buildVersion: String): String = {
-    val version = buildVersion.split("\\.").toList
-    val meta = toJson(
-      Map(s"model.versions.${version.head}" -> version.tail.head)).get
+  def apply(propertiesJson: String): String = {
+    // Here we set dynamic strict to be sure the object vaguely looks like an
+    // image and contains the core fields, adding DynamicMapping.False in places
+    // where we do not need to map every field and can save CPU.
     s"""{
        |"properties": $propertiesJson,
-       |"_meta": $meta,
        |"dynamic": "strict"
        |}""".stripMargin
   }
