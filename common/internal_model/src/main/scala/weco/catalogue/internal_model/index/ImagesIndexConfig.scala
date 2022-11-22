@@ -14,11 +14,12 @@ object ImagesIndexConfig extends IndexConfigFields {
   val initial = IndexConfig(emptyDynamicFalseMapping, analysis)
   val augmented = IndexConfig(emptyDynamicFalseMapping, analysis)
 
-  def getResourceAsString(resourceURL: String): String = Source
-    .fromInputStream(
-      getClass.getResourceAsStream(resourceURL)
-    )
-    .mkString
+  def getResourceAsString(resourceURL: String): String =
+    Source
+      .fromInputStream(
+        getClass.getResourceAsStream(resourceURL)
+      )
+      .mkString
 
   val indexed = IndexConfig(
     {
@@ -26,7 +27,8 @@ object ImagesIndexConfig extends IndexConfigFields {
         MappingDefinition(
           rawSource = Some(
             IndexMapping(
-              propertiesJson = getResourceAsString("/imagesIndexProperties.json")
+              propertiesJson =
+                getResourceAsString("/imagesIndexProperties.json")
             )
           )
         )
