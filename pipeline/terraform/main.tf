@@ -53,7 +53,7 @@ module "catalogue_pipeline_2022-11-19" {
   }
 }
 
-module "catalogue_pipeline_2022-11-19" {
+module "catalogue_pipeline_2022-11-28" {
   source = "./stack"
 
   pipeline_date = "2022-11-28"
