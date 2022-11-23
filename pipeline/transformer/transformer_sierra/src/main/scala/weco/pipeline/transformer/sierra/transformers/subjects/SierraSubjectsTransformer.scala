@@ -27,8 +27,10 @@ trait SierraSubjectsTransformer
       subjectVarFields.flatMap(bibData.varfieldsWithTag(_))
     )
 
-  def getSubjectsFromVarFields(bibId: SierraBibNumber,
-                               varFields: List[VarField]): Output
+  def getSubjectsFromVarFields(
+    bibId: SierraBibNumber,
+    varFields: List[VarField]
+  ): Output
 
   /** Given a varField and a list of subfield tags, create a label by
     * concatenating the contents of every subfield with one of the given tags.
@@ -50,8 +52,10 @@ trait SierraSubjectsTransformer
     * different MARC fields with different behaviours.
     *
     */
-  def identifyAgentSubject(varfield: VarField,
-                           ontologyType: String): IdState.Unminted = {
+  def identifyAgentSubject(
+    varfield: VarField,
+    ontologyType: String
+  ): IdState.Unminted = {
     varfield.indicator2 match {
       // 0 indicates LCNames id is in use.
       // This is a Wellcome-specific convention. MARC 0 for these fields (e.g. https://www.loc.gov/marc/bibliographic/bd610.html)
@@ -64,7 +68,8 @@ trait SierraSubjectsTransformer
       // Do not identify.
       case _ =>
         info(
-          s"${varfield.indicator2} is an unusable 2nd indicator value for an Agent in $varfield")
+          s"${varfield.indicator2} is an unusable 2nd indicator value for an Agent in $varfield"
+        )
         IdState.Unidentifiable
     }
   }

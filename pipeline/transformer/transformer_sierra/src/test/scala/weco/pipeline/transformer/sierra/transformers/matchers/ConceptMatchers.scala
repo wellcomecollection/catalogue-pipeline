@@ -1,54 +1,67 @@
 package weco.pipeline.transformer.sierra.transformers.matchers
 
 import org.scalatest.matchers.HavePropertyMatcher
-import weco.catalogue.internal_model.identifiers.IdentifierType
-import weco.catalogue.internal_model.work.AbstractRootConcept
+import weco.catalogue.internal_model.identifiers.{HasId, IdentifierType}
 
 trait ConceptMatchers {
 
-  private def labelDerivedAbstractConceptId(ontologyType: String,
-                                            expectedValue: String)
-    : HavePropertyMatcher[AbstractRootConcept[Any], String] = {
+  private def labelDerivedAbstractConceptId(
+    ontologyType: String,
+    expectedValue: String
+  ): HavePropertyMatcher[HasId[Any], String] = {
     new HasIdMatchers.HasIdentifier(
       identifierType = IdentifierType.LabelDerived,
       ontologyType = ontologyType,
-      value = expectedValue)
+      value = expectedValue
+    )
   }
 
-  def labelDerivedConceptId(expectedValue: String)
-    : HavePropertyMatcher[AbstractRootConcept[Any], String] =
+  def labelDerivedConceptId(
+    expectedValue: String
+  ): HavePropertyMatcher[HasId[Any], String] =
     labelDerivedAbstractConceptId(
       ontologyType = "Concept",
-      expectedValue = expectedValue)
+      expectedValue = expectedValue
+    )
 
-  def labelDerivedPeriodId(expectedValue: String)
-    : HavePropertyMatcher[AbstractRootConcept[Any], String] =
+  def labelDerivedPeriodId(
+    expectedValue: String
+  ): HavePropertyMatcher[HasId[Any], String] =
     labelDerivedAbstractConceptId(
       ontologyType = "Period",
-      expectedValue = expectedValue)
+      expectedValue = expectedValue
+    )
 
-  def labelDerivedPlaceId(expectedValue: String)
-    : HavePropertyMatcher[AbstractRootConcept[Any], String] =
+  def labelDerivedPlaceId(
+    expectedValue: String
+  ): HavePropertyMatcher[HasId[Any], String] =
     labelDerivedAbstractConceptId(
       ontologyType = "Place",
-      expectedValue = expectedValue)
+      expectedValue = expectedValue
+    )
 
-  def labelDerivedMeetingId(expectedValue: String)
-    : HavePropertyMatcher[AbstractRootConcept[Any], String] =
+  def labelDerivedMeetingId(
+    expectedValue: String
+  ): HavePropertyMatcher[HasId[Any], String] =
     labelDerivedAbstractConceptId(
       ontologyType = "Meeting",
-      expectedValue = expectedValue)
+      expectedValue = expectedValue
+    )
 
-  def labelDerivedPersonId(expectedValue: String)
-    : HavePropertyMatcher[AbstractRootConcept[Any], String] =
+  def labelDerivedPersonId(
+    expectedValue: String
+  ): HavePropertyMatcher[HasId[Any], String] =
     labelDerivedAbstractConceptId(
       ontologyType = "Person",
-      expectedValue = expectedValue)
+      expectedValue = expectedValue
+    )
 
-  def labelDerivedOrganisationId(expectedValue: String)
-    : HavePropertyMatcher[AbstractRootConcept[Any], String] =
+  def labelDerivedOrganisationId(
+    expectedValue: String
+  ): HavePropertyMatcher[HasId[Any], String] =
     labelDerivedAbstractConceptId(
       ontologyType = "Organisation",
-      expectedValue = expectedValue)
+      expectedValue = expectedValue
+    )
 
 }

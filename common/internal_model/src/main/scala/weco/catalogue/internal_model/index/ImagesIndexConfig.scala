@@ -1,6 +1,5 @@
 package weco.catalogue.internal_model.index
 
-import buildinfo.BuildInfo
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.mappings.MappingDefinition
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping

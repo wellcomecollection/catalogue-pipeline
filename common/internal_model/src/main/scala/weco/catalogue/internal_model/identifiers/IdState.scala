@@ -16,7 +16,7 @@ object IdState {
   case class Identified(
     canonicalId: CanonicalId,
     sourceIdentifier: SourceIdentifier,
-    otherIdentifiers: List[SourceIdentifier] = Nil,
+    otherIdentifiers: List[SourceIdentifier] = Nil
   ) extends Minted {
     def maybeCanonicalId: Option[CanonicalId] = Some(canonicalId)
     def allSourceIdentifiers: List[SourceIdentifier] =
@@ -32,7 +32,7 @@ object IdState {
   case class Identifiable(
     sourceIdentifier: SourceIdentifier,
     otherIdentifiers: List[SourceIdentifier] = Nil,
-    identifiedType: String = classOf[Identified].getSimpleName,
+    identifiedType: String = classOf[Identified].getSimpleName
   ) extends Unminted {
     def maybeCanonicalId: Option[CanonicalId] = None
     def allSourceIdentifiers: List[SourceIdentifier] =

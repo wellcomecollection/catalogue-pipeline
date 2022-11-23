@@ -62,7 +62,7 @@ class SierraPersonSubjectsTest
     val List(subject) = SierraPersonSubjects(bibId, bibData)
     subject.label shouldBe "François"
     subject should have(
-      labelDerivedSubjectId("francois")
+      labelDerivedPersonId("francois")
     )
     subject.onlyConcept.label shouldBe "François"
     subject.onlyConcept should have(
@@ -101,7 +101,8 @@ class SierraPersonSubjectsTest
     )
     assertCreatesSubjectWithLabel(
       bibData,
-      label = "David Attenborough sir doctor")
+      label = "David Attenborough sir doctor"
+    )
   }
 
   it("returns subjects for tag 600 with only subfields a and b") {
@@ -152,7 +153,8 @@ class SierraPersonSubjectsTest
     )
     assertCreatesSubjectWithLabel(
       bibData,
-      "Rita Levi Montalcini, 22 April 1909 – 30 December 2012")
+      "Rita Levi Montalcini, 22 April 1909 – 30 December 2012"
+    )
   }
 
   it("returns subjects for tag 600 with subfields a and multiple e") {
@@ -193,7 +195,8 @@ class SierraPersonSubjectsTest
   }
 
   it(
-    "creates an identifiable subject with library of congress heading if there is a subfield 0 and the second indicator is 0") {
+    "creates an identifiable subject with library of congress heading if there is a subfield 0 and the second indicator is 0"
+  ) {
     val name = "Gerry the Garlic"
     val lcshCode = "lcsh7212"
 
@@ -215,7 +218,7 @@ class SierraPersonSubjectsTest
       'label ("Gerry the Garlic"),
       sourceIdentifier(
         identifierType = IdentifierType.LCNames,
-        ontologyType = "Subject",
+        ontologyType = "Person",
         value = lcshCode
       )
     )
@@ -332,7 +335,8 @@ class SierraPersonSubjectsTest
             Subfield(tag = "d", content = "1676-1720."),
             Subfield(
               tag = "t",
-              content = "Sermon preach'd at Exeter, on the 30th of January ...")
+              content = "Sermon preach'd at Exeter, on the 30th of January ..."
+            )
           )
         )
       )
@@ -340,7 +344,8 @@ class SierraPersonSubjectsTest
     assertCreatesSubjectWithLabel(
       bibData,
       label =
-        "Agate, John, 1676-1720. Sermon preach'd at Exeter, on the 30th of January ...")
+        "Agate, John, 1676-1720. Sermon preach'd at Exeter, on the 30th of January ..."
+    )
   }
 
   it("filters out empty subfields from label-derived identifiers") {
@@ -369,7 +374,7 @@ class SierraPersonSubjectsTest
         Subfield(
           tag = "a",
           content = "Turner, John"
-        ),
+        )
       )
     )
 
@@ -378,7 +383,7 @@ class SierraPersonSubjectsTest
     val sourceIdentifier = SourceIdentifier(
       identifierType = IdentifierType.LabelDerived,
       value = "turner, john",
-      ontologyType = "Subject"
+      ontologyType = "Person"
     )
 
     val List(subject) = SierraPersonSubjects(bibId, bibData)
@@ -389,8 +394,10 @@ class SierraPersonSubjectsTest
     * Assert that the result of creating subjects with the given bibdata results in a single
     * subject with a single concept, both bearing the given label.
     */
-  private def assertCreatesSubjectWithLabel(bibData: SierraBibData,
-                                            label: String): Assertion = {
+  private def assertCreatesSubjectWithLabel(
+    bibData: SierraBibData,
+    label: String
+  ): Assertion = {
     val List(subject) = SierraPersonSubjects(bibId, bibData)
     subject.label shouldBe label
     subject.onlyConcept shouldBe a[Person[_]]

@@ -31,12 +31,6 @@ variable "namespace" {}
 variable "interservice_security_group_id" {}
 variable "service_egress_security_group_id" {}
 
-variable "deployment_service_env" {
-  type = string
-}
-variable "deployment_service_name" {
-  type = string
-}
 variable "shared_logging_secrets" {
   type = map(any)
 }

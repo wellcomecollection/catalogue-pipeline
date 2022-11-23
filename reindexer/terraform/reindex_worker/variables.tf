@@ -24,9 +24,6 @@ variable "reindexer_job_config_json" {}
 variable "service_name" {
   type = string
 }
-variable "service_env" {
-  type = string
-}
 
 variable "private_subnets" {
   type = list(string)

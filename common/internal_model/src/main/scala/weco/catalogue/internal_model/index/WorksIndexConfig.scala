@@ -1,6 +1,5 @@
 package weco.catalogue.internal_model.index
 
-import buildinfo.BuildInfo
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.fields.{ElasticField, TokenCountField}
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
@@ -19,12 +18,7 @@ object WorksIndexConfig extends IndexConfigFields {
     refreshInterval: RefreshInterval = RefreshInterval.Default
   ): IndexConfig = {
     IndexConfig(
-      {
-        val version = BuildInfo.version.split("\\.").toList
-        properties(fields)
-          .dynamic(dynamicMapping)
-          .meta(Map(s"model.versions.${version.head}" -> version.tail.head))
-      },
+      properties(fields).dynamic(dynamicMapping),
       analysis
     )
   }

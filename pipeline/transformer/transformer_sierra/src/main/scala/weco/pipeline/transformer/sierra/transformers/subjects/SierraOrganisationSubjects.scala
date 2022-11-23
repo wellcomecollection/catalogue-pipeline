@@ -29,8 +29,10 @@ object SierraOrganisationSubjects
 
   val subjectVarFields = List("610")
 
-  def getSubjectsFromVarFields(bibId: SierraBibNumber,
-                               varFields: List[VarField]): Output =
+  def getSubjectsFromVarFields(
+    bibId: SierraBibNumber,
+    varFields: List[VarField]
+  ): Output =
     varFields.map { varField =>
       val label =
         createLabel(varField, subfieldTags = List("a", "b", "c", "d", "e"))
@@ -40,13 +42,14 @@ object SierraOrganisationSubjects
       Subject(
         label = label,
         concepts = List(organisation),
-        id = identifyAgentSubject(varField, "Subject")
+        id = identifyAgentSubject(varField, "Organisation")
       )
     }
 
   private def createOrganisation(
     bibId: SierraBibNumber,
-    varField: VarField): Organisation[IdState.Unminted] = {
+    varField: VarField
+  ): Organisation[IdState.Unminted] = {
     val label = createLabel(varField, subfieldTags = List("a", "b"))
 
     // @@AWLC: I'm not sure if this can happen in practice -- but we don't have
@@ -55,13 +58,14 @@ object SierraOrganisationSubjects
     if (label == "") {
       throw CataloguingException(
         bibId,
-        s"Not enough information to build a label on $varField")
+        s"Not enough information to build a label on $varField"
+      )
     }
 
     Organisation(
       label = label,
-      id = identifyAgentSubject(
-        varfield = varField,
-        ontologyType = "Organisation"))
+      id =
+        identifyAgentSubject(varfield = varField, ontologyType = "Organisation")
+    )
   }
 }

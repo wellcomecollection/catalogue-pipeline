@@ -1,9 +1,6 @@
 {
   "mappings": {
     "dynamic": "strict",
-    "_meta": {
-      "model.versions.0": "1"
-    },
     "properties": {
       "aggregatableValues": {
         "properties": {

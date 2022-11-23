@@ -105,10 +105,10 @@ object WorkPredicates {
   val sierraDigitisedMiro: WorkPredicate =
     satisfiesAll(sierraWork, digaids or digmiro)
 
-  val sierraElectronicVideo: WorkPredicate =
+  val sierraDigitisedAv: WorkPredicate =
     satisfiesAll(
       sierraWork,
-      format(Format.Videos),
+      isAudiovisual,
       // We may get unidentified items on Sierra bibs, drawn from
       // resources in field 856 -- we don't care about those here.
       zeroIdentifiedItems

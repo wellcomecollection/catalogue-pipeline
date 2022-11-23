@@ -1,8 +1,8 @@
-module "catalogue_pipeline_2022-10-03" {
+module "catalogue_pipeline_2022-11-03" {
   source = "./stack"
 
-  pipeline_date = "2022-10-03"
-  release_label = "2022-10-03"
+  pipeline_date = "2022-11-03"
+  release_label = "2022-11-03"
 
   reindexing_state = {
     listen_to_reindexer      = false
@@ -25,11 +25,12 @@ module "catalogue_pipeline_2022-10-03" {
   }
 }
 
-module "catalogue_pipeline_2022-11-03" {
+
+module "catalogue_pipeline_2022-11-19" {
   source = "./stack"
 
-  pipeline_date = "2022-11-03"
-  release_label = "2022-11-03"
+  pipeline_date = "2022-11-19"
+  release_label = "2022-11-19"
 
   reindexing_state = {
     listen_to_reindexer      = false
