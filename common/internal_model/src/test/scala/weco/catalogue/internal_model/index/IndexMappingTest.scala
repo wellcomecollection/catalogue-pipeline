@@ -11,10 +11,9 @@ class IndexMappingTest extends AnyFunSpec with Matchers with JsonAssertions {
     assertJsonStringsAreEqual(
       """{
         "properties": {"modifiedTime": {"type": "date"}},
-        "_meta": {"model.versions.99": "5"},
         "dynamic": "strict"
         }""".stripMargin,
-      IndexMapping(propertiesJson = properties, buildVersion = "99.5.RC13")
+      IndexMapping(propertiesJson = properties)
     )
   }
 }
