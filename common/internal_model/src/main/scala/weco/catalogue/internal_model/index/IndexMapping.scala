@@ -1,7 +1,5 @@
 package weco.catalogue.internal_model.index
 
-import weco.json.JsonUtil.toJson
-
 object IndexMapping {
 
   /**
