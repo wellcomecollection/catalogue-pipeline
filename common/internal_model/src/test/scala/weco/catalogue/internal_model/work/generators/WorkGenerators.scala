@@ -243,6 +243,9 @@ trait WorkGenerators
     def currentFrequency(currentFrequency: Option[String]): Work.Visible[State] =
       work.map(_.copy(currentFrequency = currentFrequency))
 
+    def formerFrequency(formerFrequency: List[String]): Work.Visible[State] =
+      work.map(_.copy(formerFrequency = formerFrequency))
+
     def map(
       f: WorkData[State#WorkDataState] => WorkData[State#WorkDataState]
     ): Work.Visible[State] = {

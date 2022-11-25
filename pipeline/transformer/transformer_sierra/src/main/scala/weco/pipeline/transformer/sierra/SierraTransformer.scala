@@ -145,7 +145,8 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
       holdings = SierraHoldings(bibId, holdingsDataMap),
       referenceNumber = SierraReferenceNumber(bibData),
       collectionPath = SierraCollectionPath(bibData),
-      currentFrequency = SierraCurrentFrequency(bibData)
+      currentFrequency = SierraCurrentFrequency(bibData),
+      formerFrequency = SierraFormerFrequency(bibData)
     )
 
   lazy val bibId = sierraTransformable.sierraId
