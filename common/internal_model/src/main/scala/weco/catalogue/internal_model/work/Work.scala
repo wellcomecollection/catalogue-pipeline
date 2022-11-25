@@ -141,10 +141,6 @@ case class WorkData[State <: DataState](
   *      | (relation embedder)
   *      ▼
   * Denormalised
-  *      |
-  *      | (ingestor)
-  *      ▼
-  *   Indexed
   */
 sealed trait WorkState {
 
