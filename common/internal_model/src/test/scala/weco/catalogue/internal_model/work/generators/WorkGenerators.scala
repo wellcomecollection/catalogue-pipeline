@@ -240,6 +240,9 @@ trait WorkGenerators
     def holdings(newHoldings: List[Holdings]): Work.Visible[State] =
       work.map(_.copy(holdings = newHoldings))
 
+    def currentFrequency(currentFrequency: Option[String]): Work.Visible[State] =
+      work.map(_.copy(currentFrequency = currentFrequency))
+
     def map(
       f: WorkData[State#WorkDataState] => WorkData[State#WorkDataState]
     ): Work.Visible[State] = {
