@@ -7,7 +7,7 @@ We want to combine these records into a single work.
 The matcher constructs a graph of all the connections between works, which we can use to work out which Works should be merged together.
 For example, here's a graph of five works:
 
-![](dunrz35z.png)
+![A graph containing five nodes – a set of two and a set of three. Each node has a source name (Sierra, Miro, METS) and a catalogue identifier (e.g. b11077888). Two of the nodes also have thumbnail images to help us spot the record. The sets of two/three nodes are linked by arrows, showing which record is creating the link.](dunrz35z.png)
 
 Although there are five source records, we can see that these should be combined into two merged works:
 

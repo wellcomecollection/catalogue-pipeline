@@ -1,5 +1,13 @@
 # Table of contents
 
+* [Introduction](README.md)
+
+## Transforming records into a single, common model
+
+* [Creating canonical identifiers](transforming-records-into-a-single-common-model/creating-canonical-identifiers.md)
+
+## Other topics
+
 * [Catalogue](README.md)
 * [Search](search/README.md)
   * [wellcomecollection.org query development index](search/query-development-guide.md)
