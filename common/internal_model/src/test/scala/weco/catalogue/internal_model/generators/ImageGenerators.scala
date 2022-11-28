@@ -163,13 +163,13 @@ trait ImageGenerators
   def createInferredData: InferredData = {
     val features = randomVector(4096)
     val (features1, features2) = features.splitAt(features.size / 2)
-    val lshEncodedFeatures = randomHash(32)
+    val reducedFeatures = randomUnitLengthVector(1024)
     val palette = randomColorVector()
 
     InferredData(
       features1 = features1.toList,
       features2 = features2.toList,
-      lshEncodedFeatures = lshEncodedFeatures.toList,
+      reducedFeatures = reducedFeatures.toList,
       palette = palette.toList,
       averageColorHex = Some(randomHexString),
       binSizes = inferredDataBinSizes,
@@ -206,23 +206,23 @@ trait ImageGenerators
     } else {
       (1 to n).map(_ => randomVector(4096, maxR = 10.0f))
     }
-    val lshFeatures = if (similarFeatures) {
-      similarHashes(32, n)
+    val reducedFeatures = if (similarFeatures) {
+      similarVectors(1024, n)
     } else {
-      (1 to n).map(_ => randomHash(32))
+      (1 to n).map(_ => randomVector(1024, maxR = 10.0f))
     }
     val palettes = if (similarPalette) {
       similarColorVectors(n)
     } else {
       (1 to n).map(_ => randomColorVector())
     }
-    (features, lshFeatures, palettes).zipped.map {
-      case (f, l, p) =>
+    (features, reducedFeatures, palettes).zipped.map {
+      case (f, r, p) =>
         createImageData.toAugmentedImageWith(
           inferredData = InferredData(
             features1 = f.slice(0, 2048).toList,
             features2 = f.slice(2048, 4096).toList,
-            lshEncodedFeatures = l.toList,
+            reducedFeatures = r.toList,
             palette = p.toList,
             averageColorHex = Some(randomHexString),
             binSizes = inferredDataBinSizes,

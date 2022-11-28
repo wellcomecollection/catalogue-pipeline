@@ -7,19 +7,6 @@ trait VectorGenerators extends RandomGenerators {
 
   private val defaultSimilarity = math.cos(Math.PI / 64).toFloat
 
-  def randomHash(d: Int): Seq[String] =
-    randomVector(d, 1000).map(x => f"${math.abs(x.toInt)}%03d")
-
-  def similarHashes(d: Int, n: Int): Seq[Seq[String]] = {
-    val first = randomHash(d)
-    (0 until n).map { i =>
-      first.zipWithIndex.map {
-        case (_, j) if j < i => f"${random.nextInt(1000)}%03d"
-        case (x, _)          => x
-      }
-    }
-  }
-
   def randomColorVector(binSizes: Seq[Seq[Int]] =
                           Seq(Seq(4, 6, 9), Seq(2, 4, 6), Seq(1, 3, 5)),
                         nTokens: Int = 100): Seq[String] =
@@ -59,6 +46,8 @@ trait VectorGenerators extends RandomGenerators {
     val r = maxR * math.pow(random.nextFloat(), 1.0 / d).toFloat
     scalarMultiply(r, rand)
   }
+
+  def randomUnitLengthVector(d: Int): Vec = normalize(randomNormal(d))
 
   def cosineSimilarVector(a: Vec,
                           similarity: Float = defaultSimilarity): Vec = {

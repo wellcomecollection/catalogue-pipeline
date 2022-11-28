@@ -17,10 +17,10 @@ object Responses {
       "features_b64": "${Encoding.toLittleEndianBase64(
          randomFeatureVector(seed)
        )}",
-      "lsh_encoded_features": [${randomLshVector(seed)
-         .map(str => s""""$str"""")
-         .mkString(", ")}]
-    }""".stripMargin
+      "reduced_features_b64": "${Encoding.toLittleEndianBase64(
+        randomFeatureVector(seed).slice(0, 1024)
+      )
+    }"}""".stripMargin
   )
 
   def featureInferrer: HttpResponse =

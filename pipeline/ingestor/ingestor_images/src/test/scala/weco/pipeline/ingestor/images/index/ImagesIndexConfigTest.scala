@@ -27,15 +27,17 @@ class ImagesIndexConfigTest
     }
   }
 
-  it("cannot index an image with image vectors that are longer than 2048") {
+  it("cannot index an image with image vectors that are too long") {
     withLocalImagesIndex { implicit index =>
       val features1 = (0 until 3000).map(_ => Random.nextFloat() * 100).toList
       val features2 = (0 until 3000).map(_ => Random.nextFloat() * 100).toList
+      val reducedFeatures =
+        (0 until 3000).map(_ => Random.nextFloat() * 100).toList
       val image = createImageData.toAugmentedImageWith(
         inferredData = InferredData(
           features1,
           features2,
-          List(randomAlphanumeric(10)),
+          reducedFeatures,
           List(randomAlphanumeric(10)),
           Some(randomHexString),
           List(List(4, 6, 9), List(2, 4, 6), List(1, 3, 5)),
@@ -50,13 +52,13 @@ class ImagesIndexConfigTest
     }
   }
 
-  it("cannot index an image with image vectors that are shorter than 2048") {
+  it("cannot index an image with image vectors that are too short") {
     withLocalImagesIndex { implicit index =>
       val image = createImageData.toAugmentedImageWith(
         inferredData = InferredData(
           List(2.0f),
           List(2.0f),
-          List(randomAlphanumeric(10)),
+          List(2.0f),
           List(randomAlphanumeric(10)),
           Some(randomHexString),
           List(List(4, 6, 9), List(2, 4, 6), List(1, 3, 5)),
@@ -66,6 +68,18 @@ class ImagesIndexConfigTest
       )
 
       val response = indexImage(id = image.id, image = image)
+      response.isError shouldBe true
+      response.error shouldBe a[ElasticError]
+    }
+  }
+
+  it("refuses to index non-image data") {
+    val str = "%s%s"
+
+    println(str.format("banana", "sausage"))
+
+    withLocalImagesIndex { implicit index =>
+      val response = indexJson(id = "baadf00d", json = """{"hello":"world"}""")
       response.isError shouldBe true
       response.error shouldBe a[ElasticError]
     }
@@ -82,6 +96,16 @@ class ImagesIndexConfigTest
 
     assertImageIsIndexed(id = image.id, image = image)
   }
+
+  private def indexJson(
+    id: String,
+    json: String
+  )(implicit index: Index) =
+    elasticClient.execute {
+      indexInto(index)
+        .doc(json)
+        .id(id)
+    }.await
 
   private def indexImage(
     id: String,

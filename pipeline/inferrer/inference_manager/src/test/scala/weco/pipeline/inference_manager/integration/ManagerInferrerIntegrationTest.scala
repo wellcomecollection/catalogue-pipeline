@@ -79,7 +79,7 @@ class ManagerInferrerIntegrationTest
                 case InferredData(
                     features1,
                     features2,
-                    lshEncodedFeatures,
+                    reducedFeatures,
                     palette,
                     Some(averageColorHex),
                     binSizes,
@@ -89,7 +89,8 @@ class ManagerInferrerIntegrationTest
                   features1 should have length 2048
                   features2 should have length 2048
                   forAll(features1 ++ features2) { _.isNaN shouldBe false }
-                  every(lshEncodedFeatures) should fullyMatch regex """(\d+)-(\d+)"""
+                  reducedFeatures should have length 1024
+                  forAll(reducedFeatures) { _.isNaN shouldBe false }
                   every(palette) should fullyMatch regex """\d+/\d+"""
                   every(binSizes) should not be empty
                   averageColorHex should have length 7
