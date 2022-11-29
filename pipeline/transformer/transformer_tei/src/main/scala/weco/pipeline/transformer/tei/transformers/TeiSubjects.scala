@@ -70,18 +70,18 @@ object TeiSubjects extends LabelDerivedIdentifiers {
   }
 
   /**
-   * Extract the identifier from a term.
-   * *
-   * The relevant attributes are those in the att.canonical group
-   * https://tei-c.org/release/doc/tei-p5-doc/en/html/ref-att.canonical.html
-   *
-   * `key` should contain a "coded value of some kind" and
-   * `ref` should contain one or more URIs to locate the full definition.
-   *
-   *  However, in practice, these have been mostly used interchangeably.
-   *  As such, we prefer to return the key, which is expected to contain an
-   *  "externally-defined string identifying the referent"
-   */
+    * Extract the identifier from a term.
+    * *
+    * The relevant attributes are those in the att.canonical group
+    * https://tei-c.org/release/doc/tei-p5-doc/en/html/ref-att.canonical.html
+    *
+    * `key` should contain a "coded value of some kind" and
+    * `ref` should contain one or more URIs to locate the full definition.
+    *
+    *  However, in practice, these have been mostly used interchangeably.
+    *  As such, we prefer to return the key, which is expected to contain an
+    *  "externally-defined string identifying the referent"
+    */
   private def parseReference(term: Node) = {
     val referenceString = term \@ "ref"
     // arabic manuscripts seem to have the subject id in the
