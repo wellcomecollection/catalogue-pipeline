@@ -4,6 +4,7 @@
 
 ## Transforming records into a single, common model
 
+* [Our single model: the Work](transforming-records-into-a-single-common-model/our-single-model-the-work.md)
 * [Creating canonical identifiers](transforming-records-into-a-single-common-model/creating-canonical-identifiers.md)
 
 ## Other topics

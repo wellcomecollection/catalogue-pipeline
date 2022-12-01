@@ -11,9 +11,9 @@ This includes:
 
 ## Documentation
 
-This GitBook space is meant to provide a high-level overview of the catalogue pipeline and its design.
+This GitBook space is meant to provide a high-level overview of the catalogue pipeline and its design. These docs are meant for Wellcome Collection developers who want to learn about the project, or for colleagues at other institutions who want to build something similar.
 
-It does **not** contain specific operational details, e.g. how to deploy specific services. This is kept inside the code repository.
+It does **not** contain specific operational details, e.g. how to deploy specific services. Those are kept inside the code repository.
 
 ## Repo
 
