@@ -12,10 +12,6 @@ import weco.catalogue.source_model.sierra.source.{OpacMsg, Status}
 import weco.sierra.models.SierraQueryOps
 import weco.sierra.models.data.SierraItemData
 
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import scala.util.Try
-
 /** There are multiple sources of truth for item information in Sierra, and whether
   * a given item can be requested online.
   *
@@ -108,7 +104,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           Some(Status.Available),
           Some(OpacMsg.OpenShelves),
           NotRequestable.OnOpenShelves(_),
-          Some(LocationType.OpenShelves)) =>
+          Some(LocationType.OpenShelves)) if !itemData.hasDueDate =>
         AccessCondition(method = AccessMethod.OpenShelves)
 
       // There are some items that are labelled "bound in above" or "contained in above".
@@ -297,25 +293,41 @@ object SierraItemAccess extends SierraQueryOps with Logging {
             "Item is in use by another reader. Please ask at Library Enquiry Desk.")
         )
 
-      // Note that items can borrowed even if they're on the open shelves, but this
-      // isn't something that's available to regular library members, so don't be
+      // Items can borrowed even if they're on the open shelves, but this isn't
+      // something that's available to regular library members, so don't be
       // specific about why the item is unavailable.
+      //
+      // We deliberately omit the due date to avoid setting expectations, and because
+      // in some cases they seem to be inaccurate -- e.g. some records have due dates
+      // from 2020.  This is something LE&E can resolve when the reader asks about it;
+      // we prefer defaulting to unavailable and forcing the user to ask then sending
+      // them looking on the shelves for a book which isn't there.
       case (
-          _,
-          _,
-          _,
-          NotRequestable.InUseByAnotherReader(_),
-          Some(LocationType.OpenShelves)) =>
-        val noteText = itemData.dueDate match {
-          case Some(d) =>
-            s"This item is temporarily unavailable. It is due for return on ${d.format(displayFormat)}."
-          case _ => "This item is temporarily unavailable."
-        }
+        _,
+        _,
+        _,
+        NotRequestable.InUseByAnotherReader(_),
+        Some(LocationType.OpenShelves)) =>
 
         AccessCondition(
           method = AccessMethod.OpenShelves,
           status = Some(AccessStatus.TemporarilyUnavailable),
-          note = Some(noteText)
+          note = Some("Item is in use by another reader. Please ask at Library Enquiry Desk.")
+        )
+
+      case (_, _, _, _, Some(LocationType.OpenShelves)) if itemData.hasDueDate =>
+        AccessCondition(
+          method = AccessMethod.OpenShelves,
+          status = Some(AccessStatus.TemporarilyUnavailable),
+          note = Some("Item is in use by another reader. Please ask at Library Enquiry Desk.")
+        )
+
+      case (_, _, _, _, _) if itemData.hasDueDate =>
+        AccessCondition(
+          method = AccessMethod.NotRequestable,
+          status = Some(AccessStatus.TemporarilyUnavailable),
+          note = Some(
+            "Item is in use by another reader. Please ask at Library Enquiry Desk.")
         )
 
       // When an item is on display in an exhibition, it is not available for request.
@@ -361,9 +373,6 @@ object SierraItemAccess extends SierraQueryOps with Logging {
         )
     }
 
-  // e.g. 1 January 2021
-  private val displayFormat = DateTimeFormatter.ofPattern("d MMMM yyyy")
-
   implicit class ItemDataAccessOps(itemData: SierraItemData) {
     def status: Option[String] =
       itemData.fixedFields.get("88").map { _.value.trim }
@@ -371,20 +380,11 @@ object SierraItemAccess extends SierraQueryOps with Logging {
     def opacmsg: Option[String] =
       itemData.fixedFields.get("108").map { _.value.trim }
 
-    // e.g. 2020-09-01
-    private val dueDateFormat = DateTimeFormatter.ofPattern("yyyy-M-d")
-
-    def dueDate: Option[LocalDate] =
+    def hasDueDate: Boolean =
       itemData.fixedFields
         .get("65")
         .map { _.value.trim }
-        .map {
-          // e.g. 2020-09-01T03:00:00Z
-          _.split("T").head
-        }
-        .flatMap { s =>
-          Try(LocalDate.parse(s, dueDateFormat)).toOption
-        }
+        .nonEmpty
   }
 
   // The display note field has been used for multiple purposes, in particular:
