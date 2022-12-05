@@ -303,23 +303,25 @@ object SierraItemAccess extends SierraQueryOps with Logging {
       // we prefer defaulting to unavailable and forcing the user to ask then sending
       // them looking on the shelves for a book which isn't there.
       case (
-        _,
-        _,
-        _,
-        NotRequestable.InUseByAnotherReader(_),
-        Some(LocationType.OpenShelves)) =>
-
+          _,
+          _,
+          _,
+          NotRequestable.InUseByAnotherReader(_),
+          Some(LocationType.OpenShelves)) =>
         AccessCondition(
           method = AccessMethod.OpenShelves,
           status = Some(AccessStatus.TemporarilyUnavailable),
-          note = Some("Item is in use by another reader. Please ask at Library Enquiry Desk.")
+          note = Some(
+            "Item is in use by another reader. Please ask at Library Enquiry Desk.")
         )
 
-      case (_, _, _, _, Some(LocationType.OpenShelves)) if itemData.hasDueDate =>
+      case (_, _, _, _, Some(LocationType.OpenShelves))
+          if itemData.hasDueDate =>
         AccessCondition(
           method = AccessMethod.OpenShelves,
           status = Some(AccessStatus.TemporarilyUnavailable),
-          note = Some("Item is in use by another reader. Please ask at Library Enquiry Desk.")
+          note = Some(
+            "Item is in use by another reader. Please ask at Library Enquiry Desk.")
         )
 
       case (_, _, _, _, _) if itemData.hasDueDate =>
