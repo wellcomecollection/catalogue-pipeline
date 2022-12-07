@@ -1,19 +1,19 @@
 {
   "description" : "an image without any inferred data",
-  "createdAt" : "2022-11-08T17:55:45.324298Z",
-  "id" : "gotsxy7q",
+  "createdAt" : "2022-12-06T10:45:24.613052Z",
+  "id" : "2hf08w7o",
   "document" : {
-    "modifiedTime" : "2044-07-18T04:09:50Z",
+    "modifiedTime" : "2008-09-17T07:09:47Z",
     "display" : {
-      "id" : "gotsxy7q",
+      "id" : "2hf08w7o",
       "thumbnail" : {
         "locationType" : {
           "id" : "iiif-image",
           "label" : "IIIF Image API",
           "type" : "LocationType"
         },
-        "url" : "https://iiif.wellcomecollection.org/image/7j9.jpg/info.json",
-        "linkText" : "Link text: K1aV8zyPud",
+        "url" : "https://iiif.wellcomecollection.org/image/Ez7.jpg/info.json",
+        "credit" : "Credit line: B3SGJXFYW",
         "license" : {
           "id" : "cc-by",
           "label" : "Attribution 4.0 International (CC BY 4.0)",
@@ -31,8 +31,8 @@
             "label" : "IIIF Image API",
             "type" : "LocationType"
           },
-          "url" : "https://iiif.wellcomecollection.org/image/7j9.jpg/info.json",
-          "linkText" : "Link text: K1aV8zyPud",
+          "url" : "https://iiif.wellcomecollection.org/image/Ez7.jpg/info.json",
+          "credit" : "Credit line: B3SGJXFYW",
           "license" : {
             "id" : "cc-by",
             "label" : "Attribution 4.0 International (CC BY 4.0)",
@@ -47,8 +47,8 @@
       "aspectRatio" : 1.0,
       "averageColor" : "#ffffff",
       "source" : {
-        "id" : "snungkft",
-        "title" : "title-1XG6eVpuV0",
+        "id" : "pr1bquyc",
+        "title" : "title-e1jMMOXABz",
         "contributors" : [
         ],
         "languages" : [
@@ -62,8 +62,8 @@
       "type" : "Image"
     },
     "query" : {
-      "id" : "gotsxy7q",
-      "sourceIdentifier.value" : "0F491u5mwb",
+      "id" : "2hf08w7o",
+      "sourceIdentifier.value" : "hSOrtfIXq9",
       "locations.license.id" : [
         "cc-by"
       ],
@@ -84,15 +84,15 @@
         "aspectRatio" : null
       },
       "source" : {
-        "id" : "snungkft",
+        "id" : "pr1bquyc",
         "format.id" : null,
         "workType" : "Standard",
         "identifiers.value" : [
-          "Gd8G0OKDLg",
-          "1oNsb2EumG",
-          "dpmeP3Bofp"
+          "iMZwLewZ8c",
+          "8rxjWLp6Bk",
+          "r2T41hn28v"
         ],
-        "title" : "title-1XG6eVpuV0",
+        "title" : "title-e1jMMOXABz",
         "alternativeTitles" : [
         ],
         "description" : null,
