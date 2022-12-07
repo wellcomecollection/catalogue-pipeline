@@ -68,14 +68,28 @@ class TeiSubjectsTest extends AnyFunSpec with TeiGenerators with Matchers with L
     result shouldBe List(Subject(id = Identifiable(SourceIdentifier(IdentifierType.LCSubjects, "Subject","sh12345" )),label = "Botany", concepts = List(Concept(label ="Botany"))))
   }
 
-  it("extracts a subject id from attribute key"){
+  it("extracts a subject id from attribute key") {
     val result = TeiSubjects(teiXml(
       id = id,
       profileDesc = Some(profileDesc(keywords = List(keywords(keywordsScheme = Some("#LCSH"), subjects =
-        List(<item><term key="sh12345">Botany</term></item>)))))
+        List(<item>
+          <term key="sh12345">Botany</term>
+        </item>)))))
     ))
 
-    result shouldBe List(Subject(id = Identifiable(SourceIdentifier(IdentifierType.LCSubjects, "Subject","sh12345" )),label = "Botany", concepts = List(Concept(label ="Botany"))))
+    result shouldBe List(Subject(id = Identifiable(SourceIdentifier(IdentifierType.LCSubjects, "Subject", "sh12345")), label = "Botany", concepts = List(Concept(label = "Botany"))))
+  }
+
+  it("prefers to extract from key over ref") {
+    val result = TeiSubjects(teiXml(
+      id = id,
+      profileDesc = Some(profileDesc(keywords = List(keywords(keywordsScheme = Some("#LCSH"), subjects =
+        List(<item>
+          <term key="sh12345" ref="#WMS_Arabic_592-item1">Botany</term>
+        </item>)))))
+    ))
+
+    result shouldBe List(Subject(id = Identifiable(SourceIdentifier(IdentifierType.LCSubjects, "Subject", "sh12345")), label = "Botany", concepts = List(Concept(label = "Botany"))))
   }
 
   it("normalises the subject id"){
