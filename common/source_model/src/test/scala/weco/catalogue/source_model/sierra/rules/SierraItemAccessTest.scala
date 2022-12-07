@@ -629,7 +629,7 @@ class SierraItemAccessTest
       )
     }
 
-    it("is not available if it has a due date") {
+    it("is not available if it has a loan rule 14 and a due date") {
       val itemData = createSierraItemDataWith(
         fixedFields = Map(
           "65" -> createFixedFieldWith("DUE DATE")("2020-09-01T03:00:00Z"),
@@ -649,11 +649,36 @@ class SierraItemAccessTest
         method(AccessMethod.OpenShelves),
         status(AccessStatus.TemporarilyUnavailable),
         note(
-          "This item is temporarily unavailable. It is due for return on 1 September 2020."),
+          "Item is in use by another reader. Please ask at Library Enquiry Desk."),
+        noTerms()
+      )
+    }
+
+    it("is not available if it has a due date") {
+      val itemData = createSierraItemDataWith(
+        fixedFields = Map(
+          "65" -> createFixedFieldWith("DUE DATE")("2020-09-01T03:00:00Z"),
+          "79" -> createLocationWith("wgpvm", "History of Medicine"),
+          "88" -> createStatusWith("-", "Available"),
+          "108" -> createOpacMsgWith("o", "Open shelves")
+        )
+      )
+
+      val (ac, _) = SierraItemAccess(
+        location = Some(LocationType.OpenShelves),
+        itemData = itemData
+      )
+
+      ac should have(
+        method(AccessMethod.OpenShelves),
+        status(AccessStatus.TemporarilyUnavailable),
+        note(
+          "Item is in use by another reader. Please ask at Library Enquiry Desk."),
         noTerms()
       )
     }
   }
+
   describe("an item on exhibition") {
     it("has a note based on its Reserves Note") {
       val displayreservation =
