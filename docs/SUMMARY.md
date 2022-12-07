@@ -2,6 +2,10 @@
 
 * [Introduction](README.md)
 
+## Fetching records from source catalogues
+
+* [CALM: Our archive catalogue](fetching-records-from-source-catalogues/calm-our-archive-catalogue.md)
+
 ## Transforming records into a single, common model
 
 * [Our single model: the Work](transforming-records-into-a-single-common-model/our-single-model-the-work.md)
