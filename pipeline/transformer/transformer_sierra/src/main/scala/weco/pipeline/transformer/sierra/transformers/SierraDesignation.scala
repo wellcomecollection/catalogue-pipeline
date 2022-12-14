@@ -6,7 +6,7 @@ import weco.sierra.models.data.SierraBibData
 object SierraDesignation extends SierraDataTransformer with SierraQueryOps {
   override type Output = List[String]
 
-  // We use MARC field "362" subfield ǂa.  We join ǂa and ǂb with a space.
+  // We use MARC field "362" subfield ǂa.
   //
   // Notes:
   //  - As of November 2022, we use 362 subfields ǂa and ǂz, but it looks like
