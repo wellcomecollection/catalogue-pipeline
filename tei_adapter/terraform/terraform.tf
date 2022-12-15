@@ -48,4 +48,3 @@ data "terraform_remote_state" "monitoring" {
 locals {
   catalogue_vpcs = data.terraform_remote_state.accounts_catalogue.outputs
 }
-data "aws_caller_identity" "current" {}

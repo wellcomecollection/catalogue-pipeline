@@ -1,5 +1,6 @@
 package weco.catalogue.internal_model.generators
 
+import weco.catalogue.internal_model.generators.VectorOps.normalize
 import weco.catalogue.internal_model.identifiers.{
   CanonicalId,
   IdState,
@@ -165,7 +166,6 @@ trait ImageGenerators
     val (features1, features2) = features.splitAt(features.size / 2)
     val reducedFeatures = randomUnitLengthVector(1024)
     val palette = randomColorVector()
-
     InferredData(
       features1 = features1.toList,
       features2 = features2.toList,
@@ -207,9 +207,9 @@ trait ImageGenerators
       (1 to n).map(_ => randomVector(4096, maxR = 10.0f))
     }
     val reducedFeatures = if (similarFeatures) {
-      similarVectors(1024, n)
+      similarVectors(1024, n).map(normalize)
     } else {
-      (1 to n).map(_ => randomVector(1024, maxR = 10.0f))
+      (1 to n).map(_ => randomUnitLengthVector(1024))
     }
     val palettes = if (similarPalette) {
       similarColorVectors(n)

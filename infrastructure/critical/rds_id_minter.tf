@@ -60,6 +60,9 @@ module "identifiers_delta_rds_cluster" {
   db_security_group_id = aws_security_group.database_sg.id
 
   aws_db_subnet_group_name = aws_db_subnet_group.default.name
+
+  engine                  = "aurora-mysql"
+  db_parameter_group_name = "default.aurora-mysql5.7"
 }
 
 resource "aws_security_group" "rds_ingress_security_group" {
