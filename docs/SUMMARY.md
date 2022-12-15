@@ -4,6 +4,7 @@
 
 ## Fetching records from source catalogues
 
+* [What is an adapter?](fetching-records-from-source-catalogues/what-is-an-adapter.md)
 * [CALM: Our archive catalogue](fetching-records-from-source-catalogues/calm-our-archive-catalogue.md)
 
 ## Transforming records into a single, common model
