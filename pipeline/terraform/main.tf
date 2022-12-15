@@ -1,4 +1,3 @@
-
 module "catalogue_pipeline_2022-11-28" {
   source = "./stack"
 
