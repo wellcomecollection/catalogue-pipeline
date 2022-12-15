@@ -1,8 +1,5 @@
 data "ec_stack" "latest_patch" {
-  # We're deliberately pinning to 8.3.x because there's an issue in 8.4.2
-  # affecting the cross_fields query we use in the API.
-  # See https://github.com/elastic/elasticsearch/issues/90275
-  version_regex = "8.3.?"
+  version_regex = "8.5.?"
   region        = "eu-west-1"
 }
 
