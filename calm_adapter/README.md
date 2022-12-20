@@ -7,7 +7,10 @@ The CALM adapter fetches new records from CALM and keeps our copy of the CALM da
 
 *   The `calm_api_client` library is a generic client for the CALM API.
     It's a SOAP API that allows you to query CALM records.
-    As of January 2022, we do not have a working link to CALM API documentation (😬).
+
+    There's a [CALM API guide][api_guide] in one of our private S3 buckets.
+
+    [api_guide]: https://us-east-1.console.aws.amazon.com/s3/object/wellcomecollection-platform-infra?prefix=Calm.API.Guide.pdf&region=eu-west-1
 
 *   The `calm_adapter` service fetches updated records from CALM.
 

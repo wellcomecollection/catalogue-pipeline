@@ -25,6 +25,7 @@ object Main extends WellcomeTypesafeApp {
         username = config.requireString("calm.api.username"),
         password = config.requireString("calm.api.password"),
       ),
+      // See https://github.com/wellcomecollection/private/blob/main/2020-04-calm-suppressed-fields.md
       suppressedFields = config
         .requireString("calm.suppressedFields")
         .split(",")
