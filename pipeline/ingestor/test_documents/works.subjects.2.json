@@ -1,6 +1,6 @@
 {
   "description" : "works with different subjects",
-  "createdAt" : "2022-10-03T10:25:19.200Z",
+  "createdAt" : "2023-01-03T09:31:59.384131Z",
   "id" : "evraub2i",
   "document" : {
     "debug" : {
@@ -72,6 +72,10 @@
       "languages" : [
       ],
       "notes" : [
+      ],
+      "formerFrequency" : [
+      ],
+      "designation" : [
       ],
       "images" : [
       ],

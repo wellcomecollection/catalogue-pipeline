@@ -1,6 +1,6 @@
 {
   "description" : "works with different contributor",
-  "createdAt" : "2022-10-03T10:25:19.224Z",
+  "createdAt" : "2023-01-03T09:31:59.441899Z",
   "id" : "bj9evx0c",
   "document" : {
     "debug" : {
@@ -64,6 +64,10 @@
       "languages" : [
       ],
       "notes" : [
+      ],
+      "formerFrequency" : [
+      ],
+      "designation" : [
       ],
       "images" : [
       ],

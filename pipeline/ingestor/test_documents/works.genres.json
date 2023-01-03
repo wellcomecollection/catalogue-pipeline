@@ -1,6 +1,6 @@
 {
   "description" : "a work with different concepts in the genre",
-  "createdAt" : "2022-10-03T10:25:19.191Z",
+  "createdAt" : "2023-01-03T09:31:59.374733Z",
   "id" : "2zo588up",
   "document" : {
     "debug" : {
@@ -84,6 +84,10 @@
       "languages" : [
       ],
       "notes" : [
+      ],
+      "formerFrequency" : [
+      ],
+      "designation" : [
       ],
       "images" : [
       ],

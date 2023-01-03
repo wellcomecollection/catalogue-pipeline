@@ -1,6 +1,6 @@
 {
   "description" : "works with different subjects",
-  "createdAt" : "2022-10-03T10:25:19.201Z",
+  "createdAt" : "2023-01-03T09:31:59.385029Z",
   "id" : "xcssabt1",
   "document" : {
     "debug" : {
@@ -90,6 +90,10 @@
       "languages" : [
       ],
       "notes" : [
+      ],
+      "formerFrequency" : [
+      ],
+      "designation" : [
       ],
       "images" : [
       ],

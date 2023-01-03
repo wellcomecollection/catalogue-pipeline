@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2022-10-03T10:25:19.370Z",
+  "createdAt" : "2023-01-03T09:31:59.952518Z",
   "id" : "bexh6kx6",
   "document" : {
     "debug" : {
@@ -54,6 +54,10 @@
       "languages" : [
       ],
       "notes" : [
+      ],
+      "formerFrequency" : [
+      ],
+      "designation" : [
       ],
       "images" : [
       ],
