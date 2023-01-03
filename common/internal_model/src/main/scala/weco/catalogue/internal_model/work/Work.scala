@@ -117,7 +117,12 @@ case class WorkData[State <: DataState](
   collectionPath: Option[CollectionPath] = None,
   referenceNumber: Option[ReferenceNumber] = None,
   imageData: List[ImageData[State#Id]] = Nil,
-  workType: WorkType = WorkType.Standard
+  workType: WorkType = WorkType.Standard,
+  // In this context, frequency and designation refer to serial publications,
+  // e.g. how many issues a journal publishes each year
+  currentFrequency: Option[String] = None,
+  formerFrequency: List[String] = Nil,
+  designation: List[String] = Nil,
 )
 
 /** WorkState represents the state of the work in the pipeline, and contains

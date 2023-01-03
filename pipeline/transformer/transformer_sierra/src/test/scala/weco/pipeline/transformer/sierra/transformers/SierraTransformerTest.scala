@@ -368,6 +368,30 @@ class SierraTransformerTest
       )
     )
 
+    val currentFrequencyField = VarField(
+      marcTag = "310",
+      subfields = List(
+        Subfield(tag = "a", content = "Annual")
+      )
+    )
+    val expectedCurrentFrequency = Some("Annual")
+
+    val formerFrequencyField = VarField(
+      marcTag = "321",
+      subfields = List(
+        Subfield(tag = "a", content = "Weekly"),
+      )
+    )
+    val expectedFormerFrequency = List("Weekly")
+
+    val designationField = VarField(
+      marcTag = "362",
+      subfields = List(
+        Subfield(tag = "a", content = "Began in 1955; ceased with v. 49, no. 4 (Dec. 2003). "),
+      )
+    )
+    val expectedDesignation = List("Began in 1955; ceased with v. 49, no. 4 (Dec. 2003).")
+
     val notesField = VarField(
       marcTag = "500",
       subfields = List(
@@ -398,6 +422,9 @@ class SierraTransformerTest
         productionField,
         descriptionField,
         letteringField,
+        currentFrequencyField,
+        formerFrequencyField,
+        designationField,
         notesField) ++ langVarFields
 
     val data =
@@ -438,6 +465,9 @@ class SierraTransformerTest
         Note(contents = "It's a note", noteType = NoteType.GeneralNote)))
       .lettering(lettering)
       .languages(expectedLanguages)
+      .currentFrequency(expectedCurrentFrequency)
+      .formerFrequency(expectedFormerFrequency)
+      .designation(expectedDesignation)
   }
 
   it("deletes works with 'deleted': true") {
