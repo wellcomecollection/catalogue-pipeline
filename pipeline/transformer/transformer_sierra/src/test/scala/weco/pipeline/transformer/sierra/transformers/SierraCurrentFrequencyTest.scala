@@ -23,7 +23,7 @@ it("combines multiple 310 fields into a single string") {
              Subfield(tag = "a", content = "Annual,"),
              Subfield(tag = "b", content = "2007-2012"),
            )
-         )
+         ),
          VarField(
            marcTag = "310",
            subfields = List(
