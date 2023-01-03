@@ -1,6 +1,6 @@
 {
   "description" : "items with different location types",
-  "createdAt" : "2022-10-03T10:25:19.301Z",
+  "createdAt" : "2023-01-03T09:31:59.687243Z",
   "id" : "kdwct2lf",
   "document" : {
     "debug" : {
@@ -88,6 +88,10 @@
       "languages" : [
       ],
       "notes" : [
+      ],
+      "formerFrequency" : [
+      ],
+      "designation" : [
       ],
       "images" : [
       ],

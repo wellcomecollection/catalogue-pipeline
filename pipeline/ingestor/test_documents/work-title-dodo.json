@@ -1,6 +1,6 @@
 {
   "description" : "a work with 'dodo' in the title",
-  "createdAt" : "2022-10-03T10:25:18.828Z",
+  "createdAt" : "2023-01-03T09:31:58.888267Z",
   "id" : "ezagik4b",
   "document" : {
     "debug" : {
@@ -55,6 +55,10 @@
       "languages" : [
       ],
       "notes" : [
+      ],
+      "formerFrequency" : [
+      ],
+      "designation" : [
       ],
       "images" : [
       ],

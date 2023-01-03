@@ -1,6 +1,6 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2022-10-03T10:25:19.360Z",
+  "createdAt" : "2023-01-03T09:31:59.913261Z",
   "id" : "gmzc1icz",
   "document" : {
     "debug" : {
@@ -120,6 +120,10 @@
       "languages" : [
       ],
       "notes" : [
+      ],
+      "formerFrequency" : [
+      ],
+      "designation" : [
       ],
       "images" : [
       ],

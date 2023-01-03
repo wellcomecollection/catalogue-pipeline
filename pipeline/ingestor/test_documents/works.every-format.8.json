@@ -1,6 +1,6 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2022-10-03T10:25:19.262Z",
+  "createdAt" : "2023-01-03T09:31:59.518124Z",
   "id" : "4fkr6m6l",
   "document" : {
     "debug" : {
@@ -59,6 +59,10 @@
       "languages" : [
       ],
       "notes" : [
+      ],
+      "formerFrequency" : [
+      ],
+      "designation" : [
       ],
       "images" : [
       ],

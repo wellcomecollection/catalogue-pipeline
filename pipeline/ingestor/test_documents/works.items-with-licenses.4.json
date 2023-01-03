@@ -1,6 +1,6 @@
 {
   "description" : "a work with licensed digital items",
-  "createdAt" : "2022-10-03T10:25:19.173Z",
+  "createdAt" : "2023-01-03T09:31:59.331040Z",
   "id" : "vwg1cj2y",
   "document" : {
     "debug" : {
@@ -54,6 +54,10 @@
       "languages" : [
       ],
       "notes" : [
+      ],
+      "formerFrequency" : [
+      ],
+      "designation" : [
       ],
       "images" : [
       ],

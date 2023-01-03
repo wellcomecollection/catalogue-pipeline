@@ -1,6 +1,6 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2022-10-03T10:25:19.318Z",
+  "createdAt" : "2023-01-03T09:31:59.721291Z",
   "id" : "8yitytyw",
   "document" : {
     "debug" : {
@@ -77,6 +77,10 @@
       "languages" : [
       ],
       "notes" : [
+      ],
+      "formerFrequency" : [
+      ],
+      "designation" : [
       ],
       "images" : [
       ],

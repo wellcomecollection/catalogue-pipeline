@@ -1,6 +1,6 @@
 {
   "description" : "works with multi-year production ranges",
-  "createdAt" : "2022-10-03T10:25:19.293Z",
+  "createdAt" : "2023-01-03T09:31:59.650734Z",
   "id" : "cuh8ak2g",
   "document" : {
     "debug" : {
@@ -76,6 +76,10 @@
       "languages" : [
       ],
       "notes" : [
+      ],
+      "formerFrequency" : [
+      ],
+      "designation" : [
       ],
       "images" : [
       ],

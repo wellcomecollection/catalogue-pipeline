@@ -1,6 +1,6 @@
 {
   "description" : "an arbitrary list of visible works",
-  "createdAt" : "2022-10-03T10:25:18.731Z",
+  "createdAt" : "2023-01-03T09:31:58.222666Z",
   "id" : "fyqts0co",
   "document" : {
     "debug" : {
@@ -54,6 +54,10 @@
       "languages" : [
       ],
       "notes" : [
+      ],
+      "formerFrequency" : [
+      ],
+      "designation" : [
       ],
       "images" : [
       ],

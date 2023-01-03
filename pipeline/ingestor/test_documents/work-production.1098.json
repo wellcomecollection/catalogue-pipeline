@@ -1,6 +1,6 @@
 {
   "description" : "a work with a production event in 1098",
-  "createdAt" : "2022-10-03T11:15:02.605399Z",
+  "createdAt" : "2023-01-03T09:31:58.962044Z",
   "id" : "guav7chy",
   "document" : {
     "debug" : {
@@ -68,6 +68,10 @@
       "languages" : [
       ],
       "notes" : [
+      ],
+      "formerFrequency" : [
+      ],
+      "designation" : [
       ],
       "images" : [
       ],

@@ -1,6 +1,6 @@
 {
   "description" : "a list of work with all the include-able fields",
-  "createdAt" : "2022-10-03T11:15:02.792556Z",
+  "createdAt" : "2023-01-03T09:31:59.121362Z",
   "id" : "tmdfbk5k",
   "document" : {
     "debug" : {
@@ -384,6 +384,10 @@
           },
           "type" : "Note"
         }
+      ],
+      "formerFrequency" : [
+      ],
+      "designation" : [
       ],
       "images" : [
         {

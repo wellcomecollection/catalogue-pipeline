@@ -1,6 +1,6 @@
 {
   "description" : "a work with a production event in 2020",
-  "createdAt" : "2022-10-03T10:25:18.857Z",
+  "createdAt" : "2023-01-03T09:31:58.951226Z",
   "id" : "0fucriyr",
   "document" : {
     "debug" : {
@@ -68,6 +68,10 @@
       "languages" : [
       ],
       "notes" : [
+      ],
+      "formerFrequency" : [
+      ],
+      "designation" : [
       ],
       "images" : [
       ],

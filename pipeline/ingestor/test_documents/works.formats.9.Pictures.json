@@ -1,6 +1,6 @@
 {
   "description" : "one of a list of works with a variety of formats",
-  "createdAt" : "2022-10-03T10:25:19.147Z",
+  "createdAt" : "2023-01-03T09:31:59.252696Z",
   "id" : "sym6ne7x",
   "document" : {
     "debug" : {
@@ -59,6 +59,10 @@
       "languages" : [
       ],
       "notes" : [
+      ],
+      "formerFrequency" : [
+      ],
+      "designation" : [
       ],
       "images" : [
       ],

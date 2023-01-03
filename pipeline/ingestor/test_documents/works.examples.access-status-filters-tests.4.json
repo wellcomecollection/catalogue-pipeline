@@ -1,6 +1,6 @@
 {
   "description" : "examples for the access status tests",
-  "createdAt" : "2022-10-03T10:25:19.393Z",
+  "createdAt" : "2023-01-03T09:32:00.071714Z",
   "id" : "iqani2su",
   "document" : {
     "debug" : {
@@ -106,6 +106,10 @@
       "languages" : [
       ],
       "notes" : [
+      ],
+      "formerFrequency" : [
+      ],
+      "designation" : [
       ],
       "images" : [
       ],
