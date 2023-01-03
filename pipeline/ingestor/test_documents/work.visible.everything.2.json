@@ -1,6 +1,6 @@
 {
   "description" : "a list of work with all the include-able fields",
-  "createdAt" : "2023-01-03T09:31:59.165047Z",
+  "createdAt" : "2023-01-03T10:31:42.093645Z",
   "id" : "jfzz4ou9",
   "document" : {
     "debug" : {
@@ -428,8 +428,13 @@
         }
       ],
       "formerFrequency" : [
+        "Published in 2001",
+        "Published in 2002"
       ],
       "designation" : [
+        "Designation #1",
+        "Designation #2",
+        "Designation #3"
       ],
       "images" : [
         {
