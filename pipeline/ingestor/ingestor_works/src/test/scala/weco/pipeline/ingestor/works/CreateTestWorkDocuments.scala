@@ -200,6 +200,8 @@ class CreateTestWorkDocuments
                 .toList)
             .imageData((1 to 2).map(_ => createImageData.toIdentified).toList)
             .holdings(createHoldings(3))
+            .formerFrequency(List("Published in 2001", "Published in 2002"))
+            .designation(List("Designation #1", "Designation #2", "Designation #3"))
             .items((1 to 2)
               .map(_ => createIdentifiedItem)
               .toList :+ createUnidentifiableItem)),
