@@ -128,10 +128,7 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
     val (
       subjects: List[Subject[IdState.Unminted]],
       contributors: List[Contributor[IdState.Unminted]]
-    ) = ConceptTypeHarmoniser(
-      subjects = SierraSubjects(bibId, bibData),
-      contributors = SierraContributors(bibData)
-    )
+    ) = SubjectsAndContributors(bibId, bibData)
     WorkData[DataState.Unidentified](
       otherIdentifiers = SierraIdentifiers(bibId, bibData),
       title = SierraTitle(bibData),

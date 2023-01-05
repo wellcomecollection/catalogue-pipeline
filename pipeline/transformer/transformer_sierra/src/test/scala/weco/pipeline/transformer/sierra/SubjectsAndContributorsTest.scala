@@ -12,7 +12,7 @@ import weco.catalogue.internal_model.identifiers.{
 }
 import weco.catalogue.internal_model.work.Subject
 
-class ConceptTypeHarmoniserTest
+class SubjectsAndContributorsTest
     extends AnyFunSpec
     with Matchers
     with TableDrivenPropertyChecks
@@ -57,7 +57,7 @@ class ConceptTypeHarmoniserTest
           )
         )
         val (subjects, _) =
-          ConceptTypeHarmoniser(
+          SubjectsAndContributors(
             subjects = List(specificSubject, vagueSubject),
             contributors = Nil
           )
@@ -107,7 +107,7 @@ class ConceptTypeHarmoniserTest
       )
     )
     val (subjects, _) =
-      ConceptTypeHarmoniser(
+      SubjectsAndContributors(
         subjects = List(specificSubject1, specificSubject2, vagueSubject),
         contributors = Nil
       )
@@ -154,7 +154,7 @@ class ConceptTypeHarmoniserTest
       )
     )
     val (subjects, _) =
-      ConceptTypeHarmoniser(
+      SubjectsAndContributors(
         subjects = List(specificSubject1, specificSubject2, vagueSubject),
         contributors = Nil
       )
