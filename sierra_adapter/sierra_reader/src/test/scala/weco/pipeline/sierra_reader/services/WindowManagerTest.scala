@@ -13,6 +13,7 @@ import weco.storage.fixtures.S3Fixtures.Bucket
 import weco.catalogue.source_model.generators.SierraRecordGenerators
 import weco.pipeline.sierra_reader.models.WindowStatus
 import weco.sierra.models.identifiers.{SierraBibNumber, SierraRecordTypes}
+import weco.storage.s3.S3ObjectLocation
 
 class WindowManagerTest
     extends AnyFunSpec
@@ -60,16 +61,19 @@ class WindowManagerTest
           windowManager.buildWindowShard(s"[$startDateTime,$endDateTime]")
 
         // We pre-populate S3 with files as if they'd come from a prior run of the reader.
-        s3Client.putObject(bucket.name, s"${prefix}0000.json", "[]")
+        putString(
+          location = S3ObjectLocation(bucket.name, key = s"${prefix}0000.json"),
+          contents = "[]"
+        )
 
         val record = createSierraBibRecordWith(
           id = SierraBibNumber("1794165")
         )
 
-        s3Client.putObject(
-          bucket.name,
-          s"${prefix}0001.json",
-          toJson(List(record)).get
+        putString(
+          location = S3ObjectLocation(bucket.name, key=
+          s"${prefix}0001.json"),
+          contents = toJson(List(record)).get
         )
 
         val result =
@@ -88,7 +92,10 @@ class WindowManagerTest
       withWindowManager(bucket) { windowManager =>
         val prefix =
           windowManager.buildWindowShard(s"[$startDateTime,$endDateTime]")
-        s3Client.putObject(bucket.name, s"${prefix}0000.json", "not valid")
+        putString(
+          location = S3ObjectLocation(bucket.name, key = s"${prefix}0000.json"),
+          contents = "not valid"
+        )
 
         val result =
           windowManager.getCurrentStatus(s"[$startDateTime,$endDateTime]")
@@ -106,7 +113,10 @@ class WindowManagerTest
         val prefix =
           windowManager.buildWindowShard(s"[$startDateTime,$endDateTime]")
 
-        s3Client.putObject(bucket.name, s"${prefix}0000.json", "[]")
+        putString(
+          location = S3ObjectLocation(bucket.name, key = s"${prefix}0000.json"),
+          contents = "[]"
+        )
 
         val result =
           windowManager.getCurrentStatus(s"[$startDateTime,$endDateTime]")
@@ -124,7 +134,10 @@ class WindowManagerTest
         val prefix =
           windowManager.buildWindowShard(s"[$startDateTime,$endDateTime]")
 
-        s3Client.putObject(bucket.name, s"${prefix}000x.json", "[]")
+        putString(
+          location = S3ObjectLocation(bucket.name, key = s"${prefix}000x.json"),
+          contents = "[]"
+        )
 
         val result =
           windowManager.getCurrentStatus(s"[$startDateTime,$endDateTime]")

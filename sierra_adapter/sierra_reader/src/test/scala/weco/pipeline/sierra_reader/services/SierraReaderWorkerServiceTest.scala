@@ -223,7 +223,7 @@ class SierraReaderWorkerServiceTest
               _.endsWith("0000.json")
             }
             .foreach { key =>
-              s3Client.deleteObject(bucket.name, key)
+              deleteObject(S3ObjectLocation(bucket.name, key))
             }
 
           eventually {
