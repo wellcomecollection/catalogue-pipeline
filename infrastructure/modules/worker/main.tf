@@ -26,9 +26,17 @@ module "scaling_service" {
   memory = var.memory
 
   container_definitions = [
-    module.log_router_container.container_definition,
     module.app_container.container_definition,
   ]
+}
+
+moved {
+  from = module.log_router_container
+  to   = module.scaling_service.module.log_router_container
+}
+moved {
+  from = module.log_router_permissions
+  to   = module.scaling_service.module.log_router_permissions
 }
 
 module "app_container" {
@@ -40,24 +48,11 @@ module "app_container" {
   environment = var.env_vars
   secrets     = var.secret_env_vars
 
-  log_configuration = module.log_router_container.container_log_configuration
+  log_configuration = module.scaling_service.log_configuration
 }
 
 module "app_permissions" {
   source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/secrets?ref=v3.12.2"
   secrets   = var.secret_env_vars
-  role_name = module.scaling_service.task_execution_role_name
-}
-
-module "log_router_container" {
-  source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/firelens?ref=v3.12.2"
-  namespace = var.name
-
-  use_privatelink_endpoint = true
-}
-
-module "log_router_permissions" {
-  source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/secrets?ref=v3.12.2"
-  secrets   = var.shared_logging_secrets
   role_name = module.scaling_service.task_execution_role_name
 }

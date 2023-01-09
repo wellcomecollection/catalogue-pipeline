@@ -17,3 +17,7 @@ output "scale_up_arn" {
 output "scale_down_arn" {
   value = module.autoscaling.scale_down_arn
 }
+
+output "log_configuration" {
+  value = module.log_router_container.container_log_configuration
+}

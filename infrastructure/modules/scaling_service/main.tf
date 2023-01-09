@@ -57,5 +57,21 @@ module "task_definition" {
   launch_types = [var.launch_type]
   task_name    = var.name
 
-  container_definitions = var.container_definitions
+  container_definitions = concat(
+    [module.log_router_container.container_definition],
+    var.container_definitions
+  )
+}
+
+module "log_router_container" {
+  source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/firelens?ref=v3.12.2"
+  namespace = var.name
+
+  use_privatelink_endpoint = true
+}
+
+module "log_router_permissions" {
+  source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/secrets?ref=v3.12.2"
+  secrets   = var.shared_logging_secrets
+  role_name = module.task_definition.task_execution_role_name
 }
