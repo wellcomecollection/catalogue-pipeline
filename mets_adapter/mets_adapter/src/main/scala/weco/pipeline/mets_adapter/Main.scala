@@ -30,7 +30,7 @@ object Main extends WellcomeTypesafeApp {
     implicit val actorSystem: ActorSystem =
       AkkaBuilder.buildActorSystem()
 
-    implicit val dynamoClilent: DynamoDbClient =
+    implicit val dynamoClient: DynamoDbClient =
       DynamoBuilder.buildDynamoClient
 
     val oauthClient = new StorageServiceOauthHttpClient(
