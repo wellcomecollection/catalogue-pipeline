@@ -1,6 +1,7 @@
 package weco.pipeline.transformer.miro
 
-import com.amazonaws.services.s3.AmazonS3
+import software.amazon.awssdk.services.s3.S3Client
+import software.amazon.awssdk.transfer.s3.S3TransferManager
 import weco.catalogue.source_model.Implicits._
 import weco.pipeline.transformer.TransformerMain
 import weco.pipeline.transformer.miro.Implicits._
@@ -11,15 +12,13 @@ import weco.storage.streaming.Codec._
 import weco.typesafe.WellcomeTypesafeApp
 
 object Main extends WellcomeTypesafeApp {
-  def createSourceDataRetriever(s3Client: AmazonS3) = {
-    implicit val s: AmazonS3 = s3Client
-    new MiroSourceDataRetriever(miroReadable = S3TypedStore[MiroRecord])
-  }
+  implicit val s3Client: S3Client = S3Client.builder().build()
+  implicit val s3TransferManager: S3TransferManager = S3TransferManager.builder().build()
 
   val transformer = new TransformerMain(
     sourceName = "Miro",
-    createTransformer = _ => new MiroRecordTransformer,
-    createSourceDataRetriever = createSourceDataRetriever
+    transformer = new MiroRecordTransformer,
+    sourceDataRetriever = new MiroSourceDataRetriever(S3TypedStore[MiroRecord])
   )
 
   runWithConfig { config =>

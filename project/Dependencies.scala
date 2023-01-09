@@ -275,7 +275,7 @@ object CatalogueDependencies {
   val calmIndexerDependencies: Seq[ModuleID] =
     WellcomeDependencies.typesafeLibrary ++
       WellcomeDependencies.messagingTypesafeLibrary ++
-      WellcomeDependencies.storageTypesafeLibrary ++
+      WellcomeDependencies.storageLibrary ++
       WellcomeDependencies.elasticsearchTypesafeLibrary
 
   // Sierra adapter stack
@@ -299,7 +299,7 @@ object CatalogueDependencies {
       WellcomeDependencies.typesafeLibrary
 
   val sierraIndexerDependencies: Seq[ModuleID] =
-    WellcomeDependencies.storageTypesafeLibrary
+    WellcomeDependencies.storageLibrary
 
   // Inference manager
   val inferenceManagerDependencies: Seq[ModuleID] =
@@ -311,7 +311,7 @@ object CatalogueDependencies {
     WellcomeDependencies.messagingTypesafeLibrary ++
       WellcomeDependencies.httpLibrary ++
       WellcomeDependencies.typesafeLibrary ++
-      WellcomeDependencies.storageTypesafeLibrary ++
+      WellcomeDependencies.storageLibrary ++
       ExternalDependencies.mySqlDependencies ++
       ExternalDependencies.scalatestDependencies
 

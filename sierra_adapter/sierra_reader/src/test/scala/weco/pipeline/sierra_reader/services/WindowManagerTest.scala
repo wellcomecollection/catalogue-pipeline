@@ -1,9 +1,9 @@
 package weco.pipeline.sierra_reader.services
 
-import com.amazonaws.services.s3.model.AmazonS3Exception
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import software.amazon.awssdk.services.s3.model.S3Exception
 import weco.json.JsonUtil._
 import weco.pipeline.sierra_reader.config.models.ReaderConfig
 import weco.pipeline.sierra_reader.exceptions.SierraReaderException
@@ -155,7 +155,7 @@ class WindowManagerTest
         windowManager.getCurrentStatus(s"[$startDateTime,$endDateTime]")
 
       whenReady(future.failed) {
-        _ shouldBe an[AmazonS3Exception]
+        _ shouldBe an[S3Exception]
       }
     }
   }
