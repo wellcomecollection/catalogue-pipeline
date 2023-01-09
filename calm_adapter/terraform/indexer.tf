@@ -42,8 +42,3 @@ module "calm_indexer" {
     aws_security_group.egress.id,
   ]
 }
-
-moved {
-  from = module.calm_indexer_w
-  to   = module.calm_indexer
-}
