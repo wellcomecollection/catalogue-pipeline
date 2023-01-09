@@ -14,13 +14,11 @@ object Main extends WellcomeTypesafeApp {
   implicit val s3TransferManager: S3TransferManager =
     S3TransferManager.builder().build()
 
-  val transformer: Transformer[SierraTransformable] =
-    (id: String, transformable: SierraTransformable, version: Int) =>
-      SierraTransformer(transformable, version).toEither
-
   val transformer = new TransformerMain(
     sourceName = "Sierra",
-    transformer = transformer,
+    transformer =
+      (id: String, transformable: SierraTransformable, version: Int) =>
+        SierraTransformer(transformable, version).toEither,
     sourceDataRetriever =
       new SierraSourceDataRetriever(S3TypedStore[SierraTransformable])
   )
