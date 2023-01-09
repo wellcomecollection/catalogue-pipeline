@@ -59,23 +59,3 @@ moved {
   from = module.adapter_scaling_alarm
   to   = module.calm_adapter.module.scaling_alarm
 }
-
-moved {
-  from = module.calm_windows_queue
-  to   = module.calm_adapter.module.input_queue
-}
-
-moved {
-  from = module.adapter_worker
-  to   = module.calm_adapter.module.worker
-}
-
-moved {
-  from = aws_iam_role_policy.read_from_adapter_queue
-  to   = module.calm_adapter.aws_iam_role_policy.read_from_q
-}
-
-moved {
-  from = module.adapter_scaling_alarm
-  to   = module.calm_adapter.module.scaling_alarm
-}
