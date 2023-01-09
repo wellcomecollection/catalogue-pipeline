@@ -9,7 +9,8 @@ import weco.storage.store.s3.S3TypedStore
 import weco.typesafe.WellcomeTypesafeApp
 
 object Main extends WellcomeTypesafeApp {
-  def createTransformer(s3Client: S3Client, s3TransferManager: S3TransferManager) = {
+  def createTransformer(s3Client: S3Client,
+                        s3TransferManager: S3TransferManager) = {
     implicit val client: S3Client = s3Client
     implicit val transferManager: S3TransferManager = s3TransferManager
 

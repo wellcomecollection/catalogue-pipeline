@@ -35,7 +35,8 @@ class SierraReaderWorkerService(
 )(implicit
   actorSystem: ActorSystem,
   ec: ExecutionContext,
-  s3Client: S3Client, s3TransferManager: S3TransferManager)
+  s3Client: S3Client,
+  s3TransferManager: S3TransferManager)
     extends Logging
     with Runnable {
   val windowManager = new WindowManager(

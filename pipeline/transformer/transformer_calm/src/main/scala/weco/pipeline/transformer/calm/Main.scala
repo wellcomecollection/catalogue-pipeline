@@ -11,12 +11,14 @@ import weco.typesafe.WellcomeTypesafeApp
 
 object Main extends WellcomeTypesafeApp {
   implicit val s3Client: S3Client = S3Client.builder().build()
-  implicit val s3TransferManager: S3TransferManager = S3TransferManager.builder().build()
+  implicit val s3TransferManager: S3TransferManager =
+    S3TransferManager.builder().build()
 
   val transformer = new TransformerMain(
     sourceName = "CALM",
     transformer = CalmTransformer,
-    sourceDataRetriever = new CalmSourceDataRetriever(recordReadable = S3TypedStore[CalmRecord])
+    sourceDataRetriever =
+      new CalmSourceDataRetriever(recordReadable = S3TypedStore[CalmRecord])
   )
 
   runWithConfig { config =>
