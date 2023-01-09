@@ -1,6 +1,5 @@
 package weco.pipeline.transformer
 
-import com.amazonaws.services.s3.AmazonS3
 import com.sksamuel.elastic4s.Index
 import com.typesafe.config.Config
 import io.circe.Decoder
@@ -13,7 +12,6 @@ import weco.elasticsearch.typesafe.ElasticBuilder
 import weco.messaging.typesafe.SNSBuilder
 import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
 import weco.pipeline_storage.typesafe.PipelineStorageStreamBuilder
-import weco.storage.typesafe.S3Builder
 import weco.typesafe.Runnable
 import weco.typesafe.config.builders.AkkaBuilder
 import weco.typesafe.config.builders.EnrichConfig._
@@ -22,9 +20,8 @@ import scala.concurrent.ExecutionContext
 
 class TransformerMain[Payload <: SourcePayload, SourceData](
   sourceName: String,
-  createTransformer: AmazonS3 => Transformer[SourceData],
-  createSourceDataRetriever: AmazonS3 => SourceDataRetriever[Payload,
-                                                             SourceData]
+  transformer: Transformer[SourceData],
+  sourceDataRetriever: SourceDataRetriever[Payload, SourceData]
 )(
   implicit decoder: Decoder[Payload]
 ) {
@@ -58,13 +55,11 @@ class TransformerMain[Payload <: SourcePayload, SourceData](
     val pipelineStream = PipelineStorageStreamBuilder
       .buildPipelineStorageStream(sourceWorkIndexer, messageSender)(config)
 
-    implicit val s3Client: AmazonS3 = S3Builder.buildS3Client
-
     new TransformerWorker(
-      transformer = createTransformer(s3Client),
+      transformer = transformer,
       pipelineStream = pipelineStream,
       retriever = sourceWorkRetriever,
-      sourceDataRetriever = createSourceDataRetriever(s3Client)
+      sourceDataRetriever = sourceDataRetriever
     )
   }
 }

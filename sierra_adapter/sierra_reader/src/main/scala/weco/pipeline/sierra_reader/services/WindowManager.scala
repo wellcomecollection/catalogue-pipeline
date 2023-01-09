@@ -2,8 +2,9 @@ package weco.pipeline.sierra_reader.services
 
 import java.time.format.DateTimeFormatter
 import java.time.{Instant, ZoneOffset}
-import com.amazonaws.services.s3.AmazonS3
 import grizzled.slf4j.Logging
+import software.amazon.awssdk.services.s3.S3Client
+import software.amazon.awssdk.transfer.s3.S3TransferManager
 import weco.json.JsonUtil._
 import weco.pipeline.sierra_reader.config.models.ReaderConfig
 import weco.pipeline.sierra_reader.exceptions.SierraReaderException
@@ -20,7 +21,7 @@ import scala.util.{Failure, Success, Try}
 class WindowManager(
   s3Config: S3Config,
   readerConfig: ReaderConfig
-)(implicit s3Client: AmazonS3)
+)(implicit s3Client: S3Client, s3TransferManager: S3TransferManager)
     extends Logging {
 
   private val listing = S3ObjectLocationListing()

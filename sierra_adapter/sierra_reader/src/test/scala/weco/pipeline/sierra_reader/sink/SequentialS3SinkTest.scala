@@ -49,7 +49,7 @@ class SequentialS3SinkTest
             .single(json)
             .zipWithIndex
             .runWith(sink)
-
+s
           whenReady(futureDone) { _ =>
             val keys = listKeysInBucket(bucket = bucket)
             keys should have size 1
