@@ -1,6 +1,4 @@
 locals {
-  # Override the default service name if requested
-  deployment_service_name   = var.deployment_service_name == "" ? var.name : var.deployment_service_name
   all_secret_env_vars       = merge(values(var.apps)[*].secret_env_vars...)
   app_container_definitions = values(module.app_container)[*].container_definition
   other_container_definitions = [
@@ -10,7 +8,7 @@ locals {
 }
 
 module "service" {
-  source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/service?ref=v3.12.2"
+  source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/service?ref=v3.13.0"
 
   task_definition_arn            = module.task_definition.arn
   service_name                   = var.service_name == "" ? var.name : var.service_name
@@ -30,8 +28,6 @@ module "service" {
     [var.elastic_cloud_vpce_sg_id]
   )
 
-  deployment_service = local.deployment_service_name
-  deployment_env     = var.deployment_service_env
 }
 
 module "autoscaling" {

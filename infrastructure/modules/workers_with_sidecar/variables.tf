@@ -156,15 +156,3 @@ variable "sidecar_mount_points" {
   }))
   default = []
 }
-
-variable "deployment_service_name" {
-  type        = string
-  description = "Used by weco-deploy to determine which services to deploy, if unset the value used will be var.name"
-  default     = ""
-}
-
-variable "deployment_service_env" {
-  type        = string
-  description = "Used by weco-deploy to determine which services to deploy in conjunction with deployment_service_name"
-  default     = "prod"
-}
