@@ -15,7 +15,7 @@ module "input_queue" {
 }
 
 resource "aws_iam_role_policy" "read_from_q" {
-  role   = module.worker.task_role_name
+  role   = module.scaling_service.task_role_name
   policy = module.input_queue.read_policy
 }
 
@@ -24,8 +24,8 @@ module "scaling_alarm" {
 
   queue_name = module.input_queue.name
 
-  queue_high_actions = [module.worker.scale_up_arn]
-  queue_low_actions  = [module.worker.scale_down_arn]
+  queue_high_actions = [module.scaling_service.scale_up_arn]
+  queue_low_actions  = [module.scaling_service.scale_down_arn]
 
   cooldown_period = var.cooldown_period
 }
