@@ -5,7 +5,7 @@ import software.amazon.awssdk.transfer.s3.S3TransferManager
 import weco.catalogue.source_model.sierra.SierraTransformable
 import weco.catalogue.source_model.Implicits._
 import weco.pipeline.transformer.sierra.services.SierraSourceDataRetriever
-import weco.pipeline.transformer.{Transformer, TransformerMain}
+import weco.pipeline.transformer.TransformerMain
 import weco.storage.store.s3.S3TypedStore
 import weco.typesafe.WellcomeTypesafeApp
 
