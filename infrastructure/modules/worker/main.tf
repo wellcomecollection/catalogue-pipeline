@@ -31,26 +31,6 @@ module "scaling_service" {
   ]
 }
 
-moved {
-  from = module.task_definition
-  to   = module.scaling_service.module.task_definition
-}
-
-moved {
-  from = module.service
-  to   = module.scaling_service.module.service
-}
-
-moved {
-  from = module.autoscaling
-  to   = module.scaling_service.module.autoscaling
-}
-
-moved {
-  from = aws_iam_role_policy.cloudwatch_push_metrics
-  to   = module.scaling_service.aws_iam_role_policy.cloudwatch_push_metrics
-}
-
 module "app_container" {
   source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/container_definition?ref=v3.12.2"
 

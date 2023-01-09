@@ -1,8 +1,19 @@
+locals {
+  # Allow overriding the ECS service name
+  #
+  # This is used to set a service name that isn't prefixed by the namespace,
+  # e.g. "id_minter" instead of "catalogue-2021-09-23-id_minter".
+  #
+  # This makes it easier to identify services in contexts where the service
+  # name is truncated, like the logging cluster or the ECS console.
+  service_name = var.service_name == "" ? var.name : var.service_name
+}
+
 module "service" {
   source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/service?ref=v3.13.0"
 
   task_definition_arn            = module.task_definition.arn
-  service_name                   = var.service_name
+  service_name                   = local.service_name
   cluster_arn                    = var.cluster_arn
   subnets                        = var.subnets
   service_discovery_namespace_id = var.namespace_id
