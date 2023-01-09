@@ -4,6 +4,7 @@ import com.typesafe.config.Config
 import org.scanamo.generic.auto._
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.s3.S3Client
+import software.amazon.awssdk.transfer.s3.S3TransferManager
 import weco.storage.s3.{S3ObjectLocation, S3ObjectLocationPrefix}
 import weco.storage.store.{HybridStoreWithMaxima, VersionedHybridStore}
 import weco.storage.store.dynamo.{
@@ -14,7 +15,7 @@ import weco.storage.store.dynamo.{
 }
 import weco.storage.store.s3.S3TypedStore
 import weco.storage.streaming.Codec
-import weco.storage.typesafe.{DynamoBuilder, S3Builder}
+import weco.storage.typesafe.DynamoBuilder
 import weco.typesafe.config.builders.EnrichConfig._
 import weco.catalogue.source_model.store.SourceVHS
 
@@ -24,6 +25,9 @@ object SourceVHSBuilder {
   def build[T](config: Config, namespace: String = "vhs")(
     implicit codec: Codec[T]): SourceVHS[T] = {
     implicit val s3Client: S3Client = S3Client.builder().build()
+    implicit val s3TransferManager: S3TransferManager =
+      S3TransferManager.builder().build()
+
     implicit val dynamoClient: DynamoDbClient =
       DynamoBuilder.buildDynamoClient
 
