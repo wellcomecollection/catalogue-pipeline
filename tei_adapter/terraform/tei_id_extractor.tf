@@ -1,21 +1,16 @@
-module "tei_id_extractor_queue" {
-  source                     = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
-  queue_name                 = "tei-id-extractor"
-  topic_arns                 = [module.tei_updater_lambda.topic_arn]
-  alarm_topic_arn            = local.dlq_alarm_arn
-  visibility_timeout_seconds = local.rds_lock_timeout_seconds + 30
-}
+module "tei_id_extractor_w" {
+  source = "../../pipeline/terraform/modules/fargate_service"
 
-module "tei_id_extractor" {
-  source = "../../infrastructure/modules/worker"
+  name            = "tei_id_extractor"
+  container_image = local.tei_id_extractor_image
 
-  name = "tei_id_extractor"
+  topic_arns = [module.tei_updater_lambda.topic_arn]
 
-  image = local.tei_id_extractor_image
+  queue_name                       = "tei-id-extractor"
+  queue_visibility_timeout_seconds = local.rds_lock_timeout_seconds + 30
 
   env_vars = {
     metrics_namespace = "${local.namespace}_tei_id_extractor"
-    queue_url         = module.tei_id_extractor_queue.url
     topic_arn         = module.tei_id_extractor_topic.arn
     bucket            = aws_s3_bucket.tei_adapter.id
     parallelism       = 10
@@ -41,44 +36,50 @@ module "tei_id_extractor" {
   cpu    = 1024
   memory = 2048
 
-  cluster_name             = aws_ecs_cluster.cluster.name
-  cluster_arn              = aws_ecs_cluster.cluster.arn
-  subnets                  = local.private_subnets
-  shared_logging_secrets   = local.shared_logging_secrets
-  elastic_cloud_vpce_sg_id = local.elastic_cloud_vpce_sg_id
+  fargate_service_boilerplate = {
+    cluster_name           = aws_ecs_cluster.cluster.name
+    cluster_arn            = aws_ecs_cluster.cluster.arn
+    subnets                = local.private_subnets
+    shared_logging_secrets = local.shared_logging_secrets
+
+    dlq_alarm_topic_arn = local.dlq_alarm_arn
+
+    elastic_cloud_vpce_security_group_id = local.elastic_cloud_vpce_sg_id
+
+    egress_security_group_id = aws_security_group.egress.id
+  }
 
   security_group_ids = [
-    aws_security_group.egress.id,
     aws_security_group.rds_ingress_security_group.id
   ]
-
-  use_fargate_spot = true
 }
 
-resource "aws_iam_role_policy" "read_from_extractor_queue" {
-  role   = module.tei_id_extractor.task_role_name
-  policy = module.tei_id_extractor_queue.read_policy
+moved {
+  from = module.tei_id_extractor_queue
+  to = module.tei_id_extractor_w.module.input_queue
+}
+
+moved {
+  from = module.tei_id_extractor
+  to = module.tei_id_extractor_w.module.worker
+}
+
+moved {
+  from = aws_iam_role_policy.read_from_extractor_queue
+  to = module.tei_id_extractor_w.aws_iam_role_policy.read_from_q
+}
+
+moved {
+  from = module.tei_id_extractor_scaling_alarm
+  to = module.tei_id_extractor_w.module.scaling_alarm
 }
 
 resource "aws_iam_role_policy" "tei_id_extractor_publish_policy" {
-  role   = module.tei_id_extractor.task_role_name
+  role   = module.tei_id_extractor_w.task_role_name
   policy = module.tei_id_extractor_topic.publish_policy
 }
 
 resource "aws_iam_role_policy" "tei_id_extractor_put_policy" {
-  role   = module.tei_id_extractor.task_role_name
+  role   = module.tei_id_extractor_w.task_role_name
   policy = data.aws_iam_policy_document.allow_s3_read_write.json
-}
-
-module "tei_id_extractor_scaling_alarm" {
-  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.2.1"
-  queue_name = module.tei_id_extractor_queue.name
-
-  queue_high_actions = [
-    module.tei_id_extractor.scale_up_arn
-  ]
-
-  queue_low_actions = [
-    module.tei_id_extractor.scale_down_arn
-  ]
 }
