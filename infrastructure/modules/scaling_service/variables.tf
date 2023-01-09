@@ -109,13 +109,13 @@ variable "scale_down_adjustment" {
 
 variable "queue_config" {
   type = object({
-    name = string
-    topic_arns = list(string)
+    name                       = string
+    topic_arns                 = list(string)
     visibility_timeout_seconds = number
     message_retention_seconds  = number
     max_receive_count          = number
     message_retention_seconds  = number
-    cooldown_period = string
-    dlq_alarm_arn = string
+    cooldown_period            = string
+    dlq_alarm_arn              = string
   })
 }

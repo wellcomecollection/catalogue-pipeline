@@ -19,7 +19,7 @@ module "orders_reader" {
   namespace_id = aws_service_discovery_private_dns_namespace.namespace.id
   namespace    = local.namespace_hyphen
 
-  interservice_security_group_id   = var.interservice_security_group_id
+  interservice_security_group_id = var.interservice_security_group_id
 
   fargate_service_boilerplate = local.fargate_service_boilerplate
 }
@@ -36,7 +36,7 @@ module "orders_linker" {
   namespace_id = aws_service_discovery_private_dns_namespace.namespace.id
   namespace    = local.namespace_hyphen
 
-  interservice_security_group_id   = var.interservice_security_group_id
+  interservice_security_group_id = var.interservice_security_group_id
 
   fargate_service_boilerplate = local.fargate_service_boilerplate
 }
@@ -56,7 +56,7 @@ module "orders_merger" {
   namespace_id = aws_service_discovery_private_dns_namespace.namespace.id
   namespace    = local.namespace_hyphen
 
-  interservice_security_group_id   = var.interservice_security_group_id
+  interservice_security_group_id = var.interservice_security_group_id
 
   fargate_service_boilerplate = local.fargate_service_boilerplate
 }

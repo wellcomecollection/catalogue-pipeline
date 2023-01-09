@@ -5,15 +5,15 @@ locals {
 module "scaling_service" {
   source = "../../../../infrastructure/modules/scaling_service"
 
-  name = local.name
-  service_name                   = var.name
-  cluster_name = var.cluster_name
-  cluster_arn                    = var.cluster_arn
-  subnets                        = var.subnets
-  launch_type                    = var.launch_type
-  desired_task_count             = var.desired_task_count
-  capacity_provider_strategies   = var.capacity_provider_strategies
-  ordered_placement_strategies   = var.ordered_placement_strategies
+  name                         = local.name
+  service_name                 = var.name
+  cluster_name                 = var.cluster_name
+  cluster_arn                  = var.cluster_arn
+  subnets                      = var.subnets
+  launch_type                  = var.launch_type
+  desired_task_count           = var.desired_task_count
+  capacity_provider_strategies = var.capacity_provider_strategies
+  ordered_placement_strategies = var.ordered_placement_strategies
 
   elastic_cloud_vpce_sg_id = var.elastic_cloud_vpce_security_group_id
 
@@ -45,7 +45,7 @@ module "scaling_service" {
     max_receive_count          = var.max_receive_count
     message_retention_seconds  = 4 * 24 * 60 * 60
 
-    topic_arns                 = var.topic_arns
+    topic_arns = var.topic_arns
 
     dlq_alarm_arn = var.dlq_alarm_topic_arn
 
@@ -102,7 +102,7 @@ module "sidecar_container" {
     },
     var.manager_env_vars,
   )
-  secrets     = var.manager_secret_env_vars
+  secrets = var.manager_secret_env_vars
 
   depends = [for name, app in var.apps : {
     containerName = name

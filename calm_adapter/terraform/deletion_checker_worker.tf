@@ -7,7 +7,7 @@ module "calm_deletion_checker" {
   topic_arns = [local.calm_deletion_checker_topic_arn]
 
   queue_name                       = "calm-deletion-checker-input"
-  queue_visibility_timeout_seconds = 30 * 60   # 30 minutes
+  queue_visibility_timeout_seconds = 30 * 60 # 30 minutes
 
   env_vars = {
     calm_api_url          = local.calm_api_url

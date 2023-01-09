@@ -7,7 +7,7 @@ module "calm_adapter" {
   topic_arns = [aws_sns_topic.calm_windows_topic.arn]
 
   queue_name                       = "calm-windows"
-  queue_visibility_timeout_seconds = 3 * 60 * 60  # 3 hours
+  queue_visibility_timeout_seconds = 3 * 60 * 60 # 3 hours
 
   env_vars = {
     calm_api_url          = local.calm_api_url

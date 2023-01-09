@@ -28,14 +28,14 @@ module "scaling_service" {
   launch_type      = "FARGATE"
   use_fargate_spot = var.use_fargate_spot
 
-  subnets                      = var.fargate_service_boilerplate.subnets
+  subnets                  = var.fargate_service_boilerplate.subnets
   elastic_cloud_vpce_sg_id = var.fargate_service_boilerplate["elastic_cloud_vpce_security_group_id"]
   security_group_ids = concat(
     var.security_group_ids,
     lookup(var.fargate_service_boilerplate, "egress_security_group_id", "") != "" ? [var.fargate_service_boilerplate["egress_security_group_id"]] : []
   )
 
-  desired_task_count           = var.desired_task_count
+  desired_task_count = var.desired_task_count
 
   min_capacity = var.min_capacity
   max_capacity = var.max_capacity
@@ -52,13 +52,13 @@ module "scaling_service" {
 
     cooldown_period = var.cooldown_period
 
-    dlq_alarm_arn     = var.fargate_service_boilerplate.dlq_alarm_topic_arn
+    dlq_alarm_arn = var.fargate_service_boilerplate.dlq_alarm_topic_arn
   }
 
   scale_down_adjustment = lookup(var.fargate_service_boilerplate, "scale_down_adjustment", -1)
-  scale_up_adjustment   = lookup(var.fargate_service_boilerplate, "scale_up_adjustment",    1)
+  scale_up_adjustment   = lookup(var.fargate_service_boilerplate, "scale_up_adjustment", 1)
 
-  cpu = var.cpu
+  cpu    = var.cpu
   memory = var.memory
 
   container_definitions = [

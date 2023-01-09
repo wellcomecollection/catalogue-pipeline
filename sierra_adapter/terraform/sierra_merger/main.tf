@@ -20,7 +20,7 @@ module "sierra_merger" {
     sierra_vhs_dynamo_table_name = var.vhs_table_name
     sierra_vhs_bucket_name       = var.vhs_bucket_name
 
-    topic_arn         = module.output_topic.arn
+    topic_arn = module.output_topic.arn
 
     metrics_namespace = local.service_name
 

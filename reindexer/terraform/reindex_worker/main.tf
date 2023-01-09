@@ -20,9 +20,9 @@ module "reindex_worker" {
 
   omit_queue_url = true
 
-  desired_task_count     = 0
-  min_capacity           = 0
-  max_capacity           = 7
+  desired_task_count = 0
+  min_capacity       = 0
+  max_capacity       = 7
 
   cpu    = 1024
   memory = 2048

@@ -26,7 +26,7 @@ module "calm_indexer" {
     sqs_queue_url = module.calm_indexer.queue_url
   }
 
-    omit_queue_url = true
+  omit_queue_url = true
 
   secret_env_vars = {
     es_password = "reporting/calm_indexer/es_password"
