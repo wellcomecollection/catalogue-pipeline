@@ -57,6 +57,8 @@ module "task_definition" {
   launch_types = [var.launch_type]
   task_name    = var.name
 
+  volumes = var.volumes
+
   container_definitions = concat(
     [module.log_router_container.container_definition],
     var.container_definitions

@@ -1,35 +1,13 @@
-resource "aws_iam_role_policy" "cloudwatch_push_metrics" {
-  role   = module.task_definition.task_role_name
-  policy = data.aws_iam_policy_document.allow_cloudwatch_push_metrics.json
-}
-
-data "aws_iam_policy_document" "allow_cloudwatch_push_metrics" {
-  statement {
-    actions = [
-      "cloudwatch:PutMetricData",
-    ]
-
-    resources = [
-      "*",
-    ]
-  }
-}
-
-
 locals {
-  all_secret_env_vars       = merge(values(var.apps)[*].secret_env_vars...)
-  app_container_definitions = values(module.app_container)[*].container_definition
-  other_container_definitions = [
-    module.log_router_container.container_definition,
-    module.sidecar_container.container_definition
-  ]
+  name = "${var.namespace}_${var.name}"
 }
 
-module "service" {
-  source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/service?ref=v3.13.0"
+module "scaling_service" {
+  source = "../../../../infrastructure/modules/scaling_service"
 
-  task_definition_arn            = module.task_definition.arn
+  name = local.name
   service_name                   = var.name
+  cluster_name = var.cluster_name
   cluster_arn                    = var.cluster_arn
   subnets                        = var.subnets
   launch_type                    = var.launch_type
@@ -37,40 +15,64 @@ module "service" {
   capacity_provider_strategies   = var.capacity_provider_strategies
   ordered_placement_strategies   = var.ordered_placement_strategies
 
-  # We need to append the Elastic Cloud VPC endpoint security group so
-  # that our services can talk to the logging cluster.
+  elastic_cloud_vpce_sg_id = var.elastic_cloud_vpce_security_group_id
+
   security_group_ids = concat(
     var.security_group_ids,
-    [var.egress_security_group_id, var.elastic_cloud_vpce_security_group_id]
+    [var.egress_security_group_id]
   )
-}
 
-module "autoscaling" {
-  source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/autoscaling?ref=v3.12.2"
-
-  name = "${var.namespace}_${var.name}"
-
-  cluster_name = var.cluster_name
-  service_name = module.service.name
+  volumes = var.volumes
 
   min_capacity = var.min_capacity
   max_capacity = var.max_capacity
 
   scale_down_adjustment = var.scale_down_adjustment
   scale_up_adjustment   = var.scale_up_adjustment
-}
-
-module "task_definition" {
-  source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/task_definition?ref=v3.12.2"
 
   cpu    = var.host_cpu
   memory = var.host_memory
 
-  launch_types = [var.launch_type]
-  task_name    = "${var.namespace}_${var.name}"
+  container_definitions = concat(
+    local.app_container_definitions,
+    [module.sidecar_container.container_definition]
+  )
 
-  container_definitions = concat(local.app_container_definitions, local.other_container_definitions)
-  volumes               = var.volumes
+  queue_config = {
+    name = "${local.name}_input"
+
+    visibility_timeout_seconds = var.queue_visibility_timeout_seconds
+    max_receive_count          = var.max_receive_count
+    message_retention_seconds  = 4 * 24 * 60 * 60
+
+    topic_arns                 = var.topic_arns
+
+    dlq_alarm_arn = var.dlq_alarm_topic_arn
+
+    cooldown_period = "1m"
+  }
+
+  shared_logging_secrets = var.shared_logging_secrets
+}
+
+moved {
+  from = aws_iam_role_policy.cloudwatch_push_metrics
+  to = module.scaling_service.aws_iam_role_policy.cloudwatch_push_metrics
+}
+
+locals {
+  all_secret_env_vars       = merge(values(var.apps)[*].secret_env_vars...)
+  app_container_definitions = values(module.app_container)[*].container_definition
+}
+
+moved {
+  from = module.service
+  to = module.scaling_service.module.service
+}
+
+moved {
+  from = module.task_definition
+  to = module.scaling_service.module.task_definition
 }
 
 module "app_container" {
@@ -88,7 +90,7 @@ module "app_container" {
 
   healthcheck = each.value.healthcheck
 
-  log_configuration = module.log_router_container.container_log_configuration
+  log_configuration = module.scaling_service.log_configuration
 
   mount_points = each.value.mount_points
 }
@@ -96,7 +98,7 @@ module "app_container" {
 module "app_permissions" {
   source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/secrets?ref=v3.12.2"
   secrets   = local.all_secret_env_vars
-  role_name = module.task_definition.task_execution_role_name
+  role_name = module.scaling_service.task_execution_role_name
 }
 
 module "sidecar_container" {
@@ -110,8 +112,8 @@ module "sidecar_container" {
 
   environment = merge(
     {
-      metrics_namespace = "${var.namespace}_${var.name}",
-      queue_url         = module.input_queue.url,
+      metrics_namespace = local.name,
+      queue_url         = module.scaling_service.queue_url,
     },
     var.manager_env_vars,
   )
@@ -122,7 +124,7 @@ module "sidecar_container" {
     condition     = "HEALTHY"
   } if app.healthcheck != null]
 
-  log_configuration = module.log_router_container.container_log_configuration
+  log_configuration = module.scaling_service.log_configuration
 
   mount_points = var.manager_mount_points
 }
@@ -130,18 +132,35 @@ module "sidecar_container" {
 module "sidecar_permissions" {
   source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/secrets?ref=v3.12.2"
   secrets   = var.manager_secret_env_vars
-  role_name = module.task_definition.task_execution_role_name
+  role_name = module.scaling_service.task_execution_role_name
 }
 
-module "log_router_container" {
-  source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/firelens?ref=v3.12.2"
-  namespace = "${var.namespace}_${var.name}"
-
-  use_privatelink_endpoint = true
+moved {
+  from = module.log_router_container
+  to = module.scaling_service.module.log_router_container
 }
 
-module "log_router_permissions" {
-  source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/secrets?ref=v3.12.2"
-  secrets   = var.shared_logging_secrets
-  role_name = module.task_definition.task_execution_role_name
+moved {
+  from = module.autoscaling
+  to = module.scaling_service.module.autoscaling
+}
+
+moved {
+  from = module.log_router_permissions
+  to = module.scaling_service.module.log_router_permissions
+}
+
+moved {
+  from = module.input_queue
+  to = module.scaling_service.module.input_queue
+}
+
+moved {
+  from = aws_iam_role_policy.read_from_q
+  to = module.scaling_service.aws_iam_role_policy.read_from_q
+}
+
+moved {
+  from = module.scaling_alarm
+  to = module.scaling_service.module.scaling_alarm
 }

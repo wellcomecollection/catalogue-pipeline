@@ -20,6 +20,7 @@ variable "subnets" {
 
 variable "namespace_id" {
   type    = string
+  default = null
 }
 
 variable "desired_task_count" {
@@ -43,6 +44,14 @@ variable "ordered_placement_strategies" {
   type = list(object({
     type  = string
     field = string
+  }))
+  default = []
+}
+
+variable "volumes" {
+  type = list(object({
+    name      = string
+    host_path = string
   }))
   default = []
 }
