@@ -1,5 +1,5 @@
 locals {
-  queue_name = var.queue_name == "" ? "${local.namespace}_${var.name}_input" : var.queue_name
+  queue_name = var.queue_name == null ? trim("${local.namespace}_${var.name}_input", "_") : var.queue_name
 }
 
 module "input_queue" {

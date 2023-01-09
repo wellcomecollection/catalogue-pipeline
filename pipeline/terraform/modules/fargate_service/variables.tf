@@ -25,7 +25,8 @@ variable "topic_arns" {
 }
 
 variable "queue_name" {
-  type = string
+  type    = string
+  default = null
 }
 
 variable "queue_visibility_timeout_seconds" {
