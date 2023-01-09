@@ -26,8 +26,8 @@ module "scaling_service" {
   memory = var.memory
 
   container_definitions = [
-    module.app_container.container_definition,
     module.log_router_container.container_definition,
+    module.app_container.container_definition,
   ]
 }
 
