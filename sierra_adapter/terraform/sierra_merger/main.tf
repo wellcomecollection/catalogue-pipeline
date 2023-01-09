@@ -38,20 +38,7 @@ module "sierra_merger" {
   # TODO: Does the Sierra adapter need service discovery?
   service_discovery_namespace_id = var.namespace_id
 
-  fargate_service_boilerplate = {
-    cluster_name = var.cluster_name
-    cluster_arn  = var.cluster_arn
-
-    subnets = var.subnets
-
-    elastic_cloud_vpce_security_group_id = var.elastic_cloud_vpce_sg_id
-
-    dlq_alarm_topic_arn = var.dlq_alarm_arn
-
-    shared_logging_secrets = var.shared_logging_secrets
-
-    egress_security_group_id = var.service_egress_security_group_id
-  }
+  fargate_service_boilerplate = var.fargate_service_boilerplate
 
   security_group_ids = [
     # TODO: Do we need this interservice security group?
