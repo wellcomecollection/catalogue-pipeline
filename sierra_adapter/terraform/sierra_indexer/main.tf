@@ -48,23 +48,3 @@ module "sierra_indexer" {
     var.interservice_security_group_id,
   ]
 }
-
-moved {
-  from = module.service
-  to = module.sierra_indexer.module.worker
-}
-
-moved {
-  from = module.indexer_input_queue
-  to   = module.sierra_indexer.module.input_queue
-}
-
-moved {
-  from = module.scaling_alarm
-  to   = module.sierra_indexer.module.scaling_alarm
-}
-
-moved {
-  from = aws_iam_role_policy.read_from_q
-  to    = module.sierra_indexer.aws_iam_role_policy.read_from_q
-}

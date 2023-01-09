@@ -51,23 +51,3 @@ module "mets_adapter" {
     egress_security_group_id = aws_security_group.egress.id
   }
 }
-
-moved {
-  from = module.worker
-  to   = module.mets_adapter.module.worker
-}
-
-moved {
-  from = module.queue
-  to   = module.mets_adapter.module.input_queue
-}
-
-moved {
-  from = aws_iam_role_policy.read_from_q
-  to   = module.mets_adapter.aws_iam_role_policy.read_from_q
-}
-
-moved {
-  from = module.scaling_alarm
-  to   = module.mets_adapter.module.scaling_alarm
-}

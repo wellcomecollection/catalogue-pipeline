@@ -43,23 +43,3 @@ module "reindex_worker" {
     egress_security_group_id = var.service_egress_security_group_id
   }
 }
-
-moved {
-  from = module.service
-  to   = module.reindex_worker.module.worker
-}
-
-moved {
-  from = module.reindexer_scaling
-  to   = module.reindex_worker.module.scaling_alarm
-}
-
-moved {
-  from = module.reindexer_queue
-  to   = module.reindex_worker.module.input_queue
-}
-
-moved {
-  from = aws_iam_role_policy.allow_queue_read
-  to   = module.reindex_worker.aws_iam_role_policy.read_from_q
-}

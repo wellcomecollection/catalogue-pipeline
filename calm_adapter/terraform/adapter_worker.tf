@@ -39,18 +39,3 @@ module "calm_adapter" {
     aws_security_group.egress.id,
   ]
 }
-
-moved {
-  from = module.calm_windows_queue
-  to   = module.calm_adapter.module.input_queue
-}
-
-moved {
-  from = aws_iam_role_policy.read_from_adapter_queue
-  to   = module.calm_adapter.aws_iam_role_policy.read_from_q
-}
-
-moved {
-  from = module.adapter_scaling_alarm
-  to   = module.calm_adapter.module.scaling_alarm
-}

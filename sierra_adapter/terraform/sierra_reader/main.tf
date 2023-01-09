@@ -57,23 +57,3 @@ module "sierra_reader" {
     var.interservice_security_group_id,
   ]
 }
-
-moved {
-  from = module.sierra_reader_service
-  to = module.sierra_reader.module.worker
-}
-
-moved {
-  from = module.windows_queue
-  to = module.sierra_reader.module.input_queue
-}
-
-moved {
-  from = module.scaling_alarm
-  to = module.sierra_reader.module.scaling_alarm
-}
-
-moved {
-  from = aws_iam_role_policy.allow_read_from_windows_q
-  to = module.sierra_reader.aws_iam_role_policy.read_from_q
-}

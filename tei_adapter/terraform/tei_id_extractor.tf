@@ -54,26 +54,6 @@ module "tei_id_extractor_w" {
   ]
 }
 
-moved {
-  from = module.tei_id_extractor_queue
-  to = module.tei_id_extractor_w.module.input_queue
-}
-
-moved {
-  from = module.tei_id_extractor
-  to = module.tei_id_extractor_w.module.worker
-}
-
-moved {
-  from = aws_iam_role_policy.read_from_extractor_queue
-  to = module.tei_id_extractor_w.aws_iam_role_policy.read_from_q
-}
-
-moved {
-  from = module.tei_id_extractor_scaling_alarm
-  to = module.tei_id_extractor_w.module.scaling_alarm
-}
-
 resource "aws_iam_role_policy" "tei_id_extractor_publish_policy" {
   role   = module.tei_id_extractor_w.task_role_name
   policy = module.tei_id_extractor_topic.publish_policy

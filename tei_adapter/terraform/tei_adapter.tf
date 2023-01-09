@@ -42,26 +42,6 @@ module "tei_adapter_w" {
   ]
 }
 
-moved {
-  from = module.tei_adapter
-  to = module.tei_adapter_w.module.worker
-}
-
-moved {
-  from = module.tei_adapter_queue
-  to = module.tei_adapter_w.module.input_queue
-}
-
-moved {
-  from = aws_iam_role_policy.read_from_adapter_queue
-  to = module.tei_adapter_w.aws_iam_role_policy.read_from_q
-}
-
-moved {
-  from = module.tei_adapter_scaling_alarm
-  to = module.tei_adapter_w.module.scaling_alarm
-}
-
 resource "aws_iam_role_policy" "tei_adapter_publish_policy" {
   role   = module.tei_adapter_w.task_role_name
   policy = module.tei_adapter_topic.publish_policy
