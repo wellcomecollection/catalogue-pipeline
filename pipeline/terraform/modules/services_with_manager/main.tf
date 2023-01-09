@@ -1,8 +1,3 @@
-moved {
-  from = module.worker.aws_iam_role_policy.cloudwatch_push_metrics
-  to = aws_iam_role_policy.cloudwatch_push_metrics
-}
-
 resource "aws_iam_role_policy" "cloudwatch_push_metrics" {
   role   = module.task_definition.task_role_name
   policy = data.aws_iam_policy_document.allow_cloudwatch_push_metrics.json
@@ -30,11 +25,6 @@ locals {
   ]
 }
 
-moved {
-  from = module.worker.module.service
-  to = module.service
-}
-
 module "service" {
   source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/service?ref=v3.13.0"
 
@@ -55,11 +45,6 @@ module "service" {
   )
 }
 
-moved {
-  from = module.worker.module.autoscaling
-  to = module.autoscaling
-}
-
 module "autoscaling" {
   source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/autoscaling?ref=v3.12.2"
 
@@ -75,11 +60,6 @@ module "autoscaling" {
   scale_up_adjustment   = var.scale_up_adjustment
 }
 
-moved {
-  from = module.worker.module.task_definition
-  to = module.task_definition
-}
-
 module "task_definition" {
   source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/task_definition?ref=v3.12.2"
 
@@ -91,11 +71,6 @@ module "task_definition" {
 
   container_definitions = concat(local.app_container_definitions, local.other_container_definitions)
   volumes               = var.volumes
-}
-
-moved {
-  from = module.worker.module.app_container
-  to = module.app_container
 }
 
 module "app_container" {
@@ -118,20 +93,10 @@ module "app_container" {
   mount_points = each.value.mount_points
 }
 
-moved {
-  from = module.worker.module.app_permissions
-  to = module.app_permissions
-}
-
 module "app_permissions" {
   source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/secrets?ref=v3.12.2"
   secrets   = local.all_secret_env_vars
   role_name = module.task_definition.task_execution_role_name
-}
-
-moved {
-  from = module.worker.module.sidecar_container
-  to = module.sidecar_container
 }
 
 module "sidecar_container" {
@@ -162,20 +127,10 @@ module "sidecar_container" {
   mount_points = var.manager_mount_points
 }
 
-moved {
-  from = module.worker.module.sidecar_permissions
-  to = module.sidecar_permissions
-}
-
 module "sidecar_permissions" {
   source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/secrets?ref=v3.12.2"
   secrets   = var.manager_secret_env_vars
   role_name = module.task_definition.task_execution_role_name
-}
-
-moved {
-  from = module.worker.module.log_router_container
-  to = module.log_router_container
 }
 
 module "log_router_container" {
@@ -183,11 +138,6 @@ module "log_router_container" {
   namespace = "${var.namespace}_${var.name}"
 
   use_privatelink_endpoint = true
-}
-
-moved {
-  from = module.worker.module.log_router_permissions
-  to = module.log_router_permissions
 }
 
 module "log_router_permissions" {
