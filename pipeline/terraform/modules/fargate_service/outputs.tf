@@ -3,5 +3,5 @@ output "task_role_name" {
 }
 
 output "queue_url" {
-  value = module.input_queue.url
+  value = module.scaling_service.queue_url
 }

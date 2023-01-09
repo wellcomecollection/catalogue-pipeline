@@ -1,13 +1,15 @@
 locals {
   namespace = lookup(var.fargate_service_boilerplate, "namespace", "")
 
-  default_queue_env_vars = var.omit_queue_url ? {} : { queue_url = module.input_queue.url }
+  default_queue_env_vars = var.omit_queue_url ? {} : { queue_url = module.scaling_service.queue_url }
 
   default_namespace_env_vars = local.namespace == "" ? {} : {
     metrics_namespace = "${local.namespace}_${var.name}"
   }
 
   name = local.namespace == "" ? var.name : "${local.namespace}_${var.name}"
+
+  queue_name = var.queue_name == null ? trim("${local.namespace}_${var.name}_input", "_") : var.queue_name
 }
 
 moved {
@@ -23,6 +25,21 @@ moved {
 moved {
   from = module.worker.module.app_permissions
   to   = module.app_permissions
+}
+
+moved {
+  from = module.input_queue
+  to = module.scaling_service.module.input_queue
+}
+
+moved {
+  from = aws_iam_role_policy.read_from_q
+  to = module.scaling_service.aws_iam_role_policy.read_from_q
+}
+
+moved {
+  from = module.scaling_alarm
+  to = module.scaling_service.module.scaling_alarm
 }
 
 module "scaling_service" {
@@ -52,6 +69,21 @@ module "scaling_service" {
 
   min_capacity = var.min_capacity
   max_capacity = var.max_capacity
+
+  queue_config = {
+    name = local.queue_name
+
+    topic_arns = var.topic_arns
+
+    visibility_timeout_seconds = var.queue_visibility_timeout_seconds
+    message_retention_seconds  = var.message_retention_seconds
+    max_receive_count          = var.max_receive_count
+    message_retention_seconds  = var.message_retention_seconds
+
+    cooldown_period = var.cooldown_period
+
+    dlq_alarm_arn     = var.fargate_service_boilerplate.dlq_alarm_topic_arn
+  }
 
   scale_down_adjustment = lookup(var.fargate_service_boilerplate, "scale_down_adjustment", -1)
   scale_up_adjustment   = lookup(var.fargate_service_boilerplate, "scale_up_adjustment",    1)
