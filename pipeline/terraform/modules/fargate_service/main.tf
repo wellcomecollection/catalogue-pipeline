@@ -14,6 +14,8 @@ module "worker" {
   name         = local.namespace == "" ? var.name : "${local.namespace}_${var.name}"
   service_name = var.name
 
+  namespace_id = var.service_discovery_namespace_id
+
   image = var.container_image
 
   env_vars = merge(
@@ -33,7 +35,7 @@ module "worker" {
 
   security_group_ids = concat(
     var.security_group_ids,
-    lookup(var.fargate_service_boilerplate, "egress_security_group_id", false) ? [var.fargate_service_boilerplate["egress_security_group_id"]] : []
+    lookup(var.fargate_service_boilerplate, "egress_security_group_id", "") != "" ? [var.fargate_service_boilerplate["egress_security_group_id"]] : []
   )
 
   elastic_cloud_vpce_sg_id = var.fargate_service_boilerplate["elastic_cloud_vpce_security_group_id"]
@@ -43,6 +45,8 @@ module "worker" {
 
   min_capacity = var.min_capacity
   max_capacity = var.max_capacity
+
+  desired_task_count = var.desired_task_count
 
   scale_down_adjustment = lookup(var.fargate_service_boilerplate, "scale_down_adjustment", null)
   scale_up_adjustment   = lookup(var.fargate_service_boilerplate, "scale_up_adjustment", null)

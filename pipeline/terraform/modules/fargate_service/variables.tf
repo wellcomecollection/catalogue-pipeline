@@ -74,6 +74,11 @@ variable "max_capacity" {
   type = number
 }
 
+variable "desired_task_count" {
+  type    = number
+  default = 1
+}
+
 variable "use_fargate_spot" {
   type    = bool
   default = true
@@ -88,3 +93,8 @@ variable "cooldown_period" {
 # If typed you can't have optional nulls which results in some complexity.
 # See https://github.com/hashicorp/terraform/issues/19898
 variable "fargate_service_boilerplate" {}
+
+variable "service_discovery_namespace_id" {
+  type    = string
+  default = null
+}
