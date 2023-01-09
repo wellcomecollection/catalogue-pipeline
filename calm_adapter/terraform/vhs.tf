@@ -6,13 +6,18 @@ module "vhs" {
 }
 
 resource "aws_iam_role_policy" "vhs_adapter_readwrite" {
-  role   = module.adapter_worker.task_role_name
+  role   = module.calm_adapter.task_role_name
   policy = module.vhs.full_access_policy
 }
 
 resource "aws_iam_role_policy" "vhs_deletion_checker_dynamo_update" {
-  role   = module.deletion_checker_worker.task_role_name
+  role   = module.calm_deletion_checker.task_role_name
   policy = module.vhs.dynamodb_update_policy.json
+}
+
+resource "aws_iam_role_policy" "indexer_read_from_vhs" {
+  role   = module.calm_indexer.task_role_name
+  policy = module.vhs.read_policy
 }
 
 data "aws_iam_policy_document" "vhs_dynamo_read_policy" {

@@ -9,7 +9,6 @@ module "scaling_service" {
   cluster_name = var.cluster_name
   service_name                 = var.service_name
 
-
   namespace_id                 = var.namespace_id
 
   launch_type                  = var.launch_type
@@ -22,7 +21,6 @@ module "scaling_service" {
   security_group_ids = var.security_group_ids
 
   desired_task_count           = var.desired_task_count
-
 
   min_capacity = var.min_capacity
   max_capacity = var.max_capacity

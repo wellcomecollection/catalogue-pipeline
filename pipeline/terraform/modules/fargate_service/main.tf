@@ -1,16 +1,24 @@
+locals {
+  namespace = lookup(var.fargate_service_boilerplate, "namespace", "")
+
+  default_queue_env_vars = var.omit_queue_url ? {} : { queue_url = module.input_queue.url }
+
+  default_namespace_env_vars = local.namespace == "" ? {} : {
+    metrics_namespace = "${local.namespace}_${var.name}"
+  }
+}
+
 module "worker" {
   source = "../../../../infrastructure/modules/worker"
 
-  name         = "${local.namespace}_${var.name}"
+  name         = local.namespace == "" ? var.name : "${local.namespace}_${var.name}"
   service_name = var.name
 
   image = var.container_image
 
   env_vars = merge(
-    {
-      metrics_namespace = "${local.namespace}_${var.name}",
-      queue_url         = module.input_queue.url,
-    },
+    local.default_queue_env_vars,
+    local.default_namespace_env_vars,
     var.env_vars,
   )
 
@@ -25,10 +33,10 @@ module "worker" {
 
   security_group_ids = concat(
     var.security_group_ids,
-    [var.fargate_service_boilerplate.egress_security_group_id]
+    lookup(var.fargate_service_boilerplate, "egress_security_group_id", false) ? [var.fargate_service_boilerplate["egress_security_group_id"]] : []
   )
 
-  elastic_cloud_vpce_sg_id = var.fargate_service_boilerplate.elastic_cloud_vpce_security_group_id
+  elastic_cloud_vpce_sg_id = var.fargate_service_boilerplate["elastic_cloud_vpce_security_group_id"]
 
   cpu    = var.cpu
   memory = var.memory
@@ -36,8 +44,8 @@ module "worker" {
   min_capacity = var.min_capacity
   max_capacity = var.max_capacity
 
-  scale_down_adjustment = var.fargate_service_boilerplate.scale_down_adjustment
-  scale_up_adjustment   = var.fargate_service_boilerplate.scale_up_adjustment
+  scale_down_adjustment = lookup(var.fargate_service_boilerplate, "scale_down_adjustment", null)
+  scale_up_adjustment   = lookup(var.fargate_service_boilerplate, "scale_up_adjustment", null)
 
   shared_logging_secrets = var.fargate_service_boilerplate.shared_logging_secrets
 

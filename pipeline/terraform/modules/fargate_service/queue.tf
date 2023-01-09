@@ -1,7 +1,11 @@
+locals {
+  queue_name = var.queue_name == "" ? "${local.namespace}_${var.name}_input" : var.queue_name
+}
+
 module "input_queue" {
   source = "github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
 
-  queue_name = "${local.namespace}_${var.name}_input"
+  queue_name = local.queue_name
 
   topic_arns                 = var.topic_arns
   visibility_timeout_seconds = var.queue_visibility_timeout_seconds
