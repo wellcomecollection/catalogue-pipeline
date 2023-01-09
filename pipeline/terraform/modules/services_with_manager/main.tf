@@ -55,24 +55,9 @@ module "scaling_service" {
   shared_logging_secrets = var.shared_logging_secrets
 }
 
-moved {
-  from = aws_iam_role_policy.cloudwatch_push_metrics
-  to = module.scaling_service.aws_iam_role_policy.cloudwatch_push_metrics
-}
-
 locals {
   all_secret_env_vars       = merge(values(var.apps)[*].secret_env_vars...)
   app_container_definitions = values(module.app_container)[*].container_definition
-}
-
-moved {
-  from = module.service
-  to = module.scaling_service.module.service
-}
-
-moved {
-  from = module.task_definition
-  to = module.scaling_service.module.task_definition
 }
 
 module "app_container" {
@@ -133,34 +118,4 @@ module "sidecar_permissions" {
   source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/secrets?ref=v3.12.2"
   secrets   = var.manager_secret_env_vars
   role_name = module.scaling_service.task_execution_role_name
-}
-
-moved {
-  from = module.log_router_container
-  to = module.scaling_service.module.log_router_container
-}
-
-moved {
-  from = module.autoscaling
-  to = module.scaling_service.module.autoscaling
-}
-
-moved {
-  from = module.log_router_permissions
-  to = module.scaling_service.module.log_router_permissions
-}
-
-moved {
-  from = module.input_queue
-  to = module.scaling_service.module.input_queue
-}
-
-moved {
-  from = aws_iam_role_policy.read_from_q
-  to = module.scaling_service.aws_iam_role_policy.read_from_q
-}
-
-moved {
-  from = module.scaling_alarm
-  to = module.scaling_service.module.scaling_alarm
 }

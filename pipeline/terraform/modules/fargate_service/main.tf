@@ -12,36 +12,6 @@ locals {
   queue_name = var.queue_name == null ? trim("${local.namespace}_${var.name}_input", "_") : var.queue_name
 }
 
-moved {
-  from = module.worker.module.scaling_service
-  to   = module.scaling_service
-}
-
-moved {
-  from = module.worker.module.app_container
-  to   = module.app_container
-}
-
-moved {
-  from = module.worker.module.app_permissions
-  to   = module.app_permissions
-}
-
-moved {
-  from = module.input_queue
-  to = module.scaling_service.module.input_queue
-}
-
-moved {
-  from = aws_iam_role_policy.read_from_q
-  to = module.scaling_service.aws_iam_role_policy.read_from_q
-}
-
-moved {
-  from = module.scaling_alarm
-  to = module.scaling_service.module.scaling_alarm
-}
-
 module "scaling_service" {
   source = "../../../../infrastructure/modules/scaling_service"
 
