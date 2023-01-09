@@ -9,18 +9,14 @@ import weco.storage.store.s3.S3TypedStore
 import weco.typesafe.WellcomeTypesafeApp
 
 object Main extends WellcomeTypesafeApp {
-  def createTransformer(s3Client: S3Client,
-                        s3TransferManager: S3TransferManager) = {
-    implicit val client: S3Client = s3Client
-    implicit val transferManager: S3TransferManager = s3TransferManager
-
-    new TeiTransformer(teiReader = S3TypedStore[String])
-  }
+  implicit val s3Client: S3Client = S3Client.builder().build()
+  implicit val s3TransferManager: S3TransferManager =
+    S3TransferManager.builder().build()
 
   val transformer = new TransformerMain(
     sourceName = "TEI",
-    createTransformer = createTransformer,
-    createSourceDataRetriever = (_, _) => new TeiSourceDataRetriever
+    transformer = new TeiTransformer(teiReader = S3TypedStore[String]),
+    sourceDataRetriever = new TeiSourceDataRetriever
   )
 
   runWithConfig { config =>
