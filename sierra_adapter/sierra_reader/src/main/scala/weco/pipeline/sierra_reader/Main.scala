@@ -24,7 +24,8 @@ object Main extends WellcomeTypesafeApp {
     val sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config)
 
     implicit val s3Client: S3Client = S3Client.builder().build()
-    implicit val s3TransferManager: S3TransferManager = S3TransferManager.builder().build()
+    implicit val s3TransferManager: S3TransferManager =
+      S3TransferManager.builder().build()
 
     val client = SierraOauthHttpClientBuilder.build(config)
 

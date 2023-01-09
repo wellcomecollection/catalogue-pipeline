@@ -29,7 +29,8 @@ object Main extends WellcomeTypesafeApp {
       AkkaBuilder.buildActorSystem()
 
     implicit val s3Client: S3Client = S3Client.builder().build()
-    implicit val s3TransferManager: S3TransferManager = S3TransferManager.builder().build()
+    implicit val s3TransferManager: S3TransferManager =
+      S3TransferManager.builder().build()
 
     val rdsConfig = RDSClientBuilder.buildRDSClientConfig(config)
     val tableConfig = PathIdTableBuilder.buildTableConfig(config)

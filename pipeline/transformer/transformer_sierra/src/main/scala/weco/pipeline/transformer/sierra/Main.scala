@@ -11,7 +11,8 @@ import weco.typesafe.WellcomeTypesafeApp
 
 object Main extends WellcomeTypesafeApp {
   implicit val s3Client: S3Client = S3Client.builder().build()
-  implicit val s3TransferManager: S3TransferManager = S3TransferManager.builder().build()
+  implicit val s3TransferManager: S3TransferManager =
+    S3TransferManager.builder().build()
 
   val transformer: Transformer[SierraTransformable] =
     (id: String, transformable: SierraTransformable, version: Int) =>
@@ -20,7 +21,8 @@ object Main extends WellcomeTypesafeApp {
   val transformer = new TransformerMain(
     sourceName = "Sierra",
     transformer = transformer,
-    sourceDataRetriever = new SierraSourceDataRetriever(S3TypedStore[SierraTransformable])
+    sourceDataRetriever =
+      new SierraSourceDataRetriever(S3TypedStore[SierraTransformable])
   )
 
   runWithConfig { config =>
