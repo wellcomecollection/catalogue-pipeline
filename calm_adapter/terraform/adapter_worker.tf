@@ -46,11 +46,6 @@ moved {
 }
 
 moved {
-  from = module.adapter_worker
-  to   = module.calm_adapter.module.worker
-}
-
-moved {
   from = aws_iam_role_policy.read_from_adapter_queue
   to   = module.calm_adapter.aws_iam_role_policy.read_from_q
 }
