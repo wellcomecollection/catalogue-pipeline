@@ -15,8 +15,14 @@ module "inference_capacity_provider" {
 
   # When we're not reindexing, we halve the size of these instances and
   # the corresponding tasks, because they won't be getting as many updates.
-  instance_type           = var.reindexing_state.scale_up_tasks ? "c5.2xlarge" : "c5.xlarge"
-  max_instances           = var.reindexing_state.scale_up_tasks ? 12 : 1
+  #
+  # Note: although we only run one task at a time when we're not reindexing,
+  # we need to allow spiking to 2 instances, because when ECS does a
+  # blue-green deployment of an image inferrer task, it's (briefly) running
+  # two tasks at once: the old task and the new task.
+  instance_type = var.reindexing_state.scale_up_tasks ? "c5.2xlarge" : "c5.xlarge"
+  max_instances = var.reindexing_state.scale_up_tasks ? 12 : 2
+
   use_spot_purchasing     = true
   scaling_action_cooldown = 240
 
