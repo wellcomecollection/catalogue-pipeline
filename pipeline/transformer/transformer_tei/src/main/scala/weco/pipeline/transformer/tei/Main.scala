@@ -1,6 +1,7 @@
 package weco.pipeline.transformer.tei
 
-import com.amazonaws.services.s3.AmazonS3
+import software.amazon.awssdk.services.s3.S3Client
+import software.amazon.awssdk.transfer.s3.S3TransferManager
 import weco.catalogue.source_model.Implicits._
 import weco.pipeline.transformer.TransformerMain
 import weco.pipeline.transformer.tei.service.TeiSourceDataRetriever
@@ -8,15 +9,14 @@ import weco.storage.store.s3.S3TypedStore
 import weco.typesafe.WellcomeTypesafeApp
 
 object Main extends WellcomeTypesafeApp {
-  def createTransformer(s3Client: AmazonS3) = {
-    implicit val s: AmazonS3 = s3Client
-    new TeiTransformer(teiReader = S3TypedStore[String])
-  }
+  implicit val s3Client: S3Client = S3Client.builder().build()
+  implicit val s3TransferManager: S3TransferManager =
+    S3TransferManager.builder().build()
 
   val transformer = new TransformerMain(
     sourceName = "TEI",
-    createTransformer = createTransformer,
-    createSourceDataRetriever = _ => new TeiSourceDataRetriever
+    transformer = new TeiTransformer(teiReader = S3TypedStore[String]),
+    sourceDataRetriever = new TeiSourceDataRetriever
   )
 
   runWithConfig { config =>

@@ -2,7 +2,7 @@ import sbt._
 
 object WellcomeDependencies {
 
-  val defaultVersion = "32.19.4" // This is automatically bumped by the scala-libs release process, do not edit this line manually
+  val defaultVersion = "32.20.0" // This is automatically bumped by the scala-libs release process, do not edit this line manually
 
   lazy val versions = new {
     val typesafe = defaultVersion
@@ -275,7 +275,7 @@ object CatalogueDependencies {
   val calmIndexerDependencies: Seq[ModuleID] =
     WellcomeDependencies.typesafeLibrary ++
       WellcomeDependencies.messagingTypesafeLibrary ++
-      WellcomeDependencies.storageTypesafeLibrary ++
+      WellcomeDependencies.storageLibrary ++
       WellcomeDependencies.elasticsearchTypesafeLibrary
 
   // Sierra adapter stack
@@ -299,7 +299,7 @@ object CatalogueDependencies {
       WellcomeDependencies.typesafeLibrary
 
   val sierraIndexerDependencies: Seq[ModuleID] =
-    WellcomeDependencies.storageTypesafeLibrary
+    WellcomeDependencies.storageLibrary
 
   // Inference manager
   val inferenceManagerDependencies: Seq[ModuleID] =
@@ -311,7 +311,7 @@ object CatalogueDependencies {
     WellcomeDependencies.messagingTypesafeLibrary ++
       WellcomeDependencies.httpLibrary ++
       WellcomeDependencies.typesafeLibrary ++
-      WellcomeDependencies.storageTypesafeLibrary ++
+      WellcomeDependencies.storageLibrary ++
       ExternalDependencies.mySqlDependencies ++
       ExternalDependencies.scalatestDependencies
 
