@@ -41,13 +41,16 @@ object SierraContributors
 
   type Output = List[Contributor[IdState.Unminted]]
 
+  import OntologyTypeOps._
+
   case class ContributorField(
     marcTag: String,
     roleTags: Seq[String],
     isPrimary: Boolean,
-    getContributors: List[Subfield] => (String,
-                                        Option[
-                                          AbstractAgent[IdState.Unminted]]),
+    getContributors: List[Subfield] => (
+      String,
+      Option[AbstractAgent[IdState.Unminted]]
+    )
   )
 
   // Quoting an email from Louise Grainger, dated 25 August 2022:
@@ -75,32 +78,38 @@ object SierraContributors
       marcTag = "100",
       roleTags = Seq("e"),
       isPrimary = true,
-      getPersonContributors),
+      getPersonContributors
+    ),
     ContributorField(
       marcTag = "110",
       roleTags = Seq("e"),
       isPrimary = true,
-      getOrganisationContributors),
+      getOrganisationContributors
+    ),
     ContributorField(
       marcTag = "111",
       roleTags = Seq("j"),
       isPrimary = true,
-      getMeetingContributors),
+      getMeetingContributors
+    ),
     ContributorField(
       marcTag = "700",
       roleTags = Seq("e", "j"),
       isPrimary = false,
-      getPersonContributors),
+      getPersonContributors
+    ),
     ContributorField(
       marcTag = "710",
       roleTags = Seq("e"),
       isPrimary = false,
-      getOrganisationContributors),
+      getOrganisationContributors
+    ),
     ContributorField(
       marcTag = "711",
       roleTags = Seq("j"),
       isPrimary = false,
-      getMeetingContributors),
+      getMeetingContributors
+    )
   )
 
   def apply(bibData: SierraBibData): List[Contributor[IdState.Unminted]] = {
@@ -109,18 +118,20 @@ object SierraContributors
         bibData
           .varfieldsWithTag(marcTag)
           .flatMap { varfield =>
-            val (ontologyType, maybeAgent) = getContributors(varfield.subfields)
+            val (ontologyType, maybeAgent) =
+              getContributors(varfield.subfields)
             maybeAgent.map { agent =>
               Contributor(
                 agent = withId(
                   agent,
-                  identify(varfield.subfields, ontologyType, agent.label)),
+                  identify(varfield.subfields, ontologyType, agent.label)
+                ),
                 roles = getContributionRoles(varfield.subfields, roleTags),
                 primary = isPrimary
               )
             }
           }
-    }.distinct
+    }
 
     // We need to remove duplicates where two contributors differ only
     // by primary/not-primary
@@ -130,11 +141,13 @@ object SierraContributors
         .filter(c => allContributors.contains(c.copy(primary = true)))
         .toSet
 
-    allContributors.filterNot(c => duplicatedContributors.contains(c))
+    allContributors
+      .filterNot(c => duplicatedContributors.contains(c))
+      .harmoniseOntologyTypes
   }
-
-  private def getPersonContributors(subfields: List[Subfield])
-    : (String, Option[AbstractAgent[IdState.Unminted]]) =
+  private def getPersonContributors(
+    subfields: List[Subfield]
+  ): (String, Option[AbstractAgent[IdState.Unminted]]) =
     if (subfields.withTags("t").isEmpty)
       "Person" -> getPerson(subfields, normalisePerson = true)
     else
@@ -148,7 +161,8 @@ object SierraContributors
 
   private def getContributionRoles(
     subfields: List[Subfield],
-    roleTags: Seq[String]): List[ContributionRole] =
+    roleTags: Seq[String]
+  ): List[ContributionRole] =
     subfields
       .withTags(roleTags: _*)
       .contents
@@ -162,8 +176,10 @@ object SierraContributors
       }
       .map(ContributionRole)
 
-  private def withId(agent: AbstractAgent[IdState.Unminted],
-                     id: IdState.Unminted) =
+  private def withId(
+    agent: AbstractAgent[IdState.Unminted],
+    id: IdState.Unminted
+  ) =
     agent match {
       case a: Agent[IdState.Unminted]        => a.copy(id = id)
       case p: Person[IdState.Unminted]       => p.copy(id = id)
@@ -177,9 +193,11 @@ object SierraContributors
    * This methods them (if present) and wraps the agent in Unidentifiable or Identifiable
    * as appropriate.
    */
-  private def identify(subfields: List[Subfield],
-                       ontologyType: String,
-                       label: String): IdState.Unminted = {
+  private def identify(
+    subfields: List[Subfield],
+    ontologyType: String,
+    label: String
+  ): IdState.Unminted = {
 
     // We take the contents of subfield $0.  They may contain inconsistent
     // spacing and punctuation, such as:
