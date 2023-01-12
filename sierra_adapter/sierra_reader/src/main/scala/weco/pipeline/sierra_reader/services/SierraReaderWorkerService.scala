@@ -19,7 +19,7 @@ import weco.pipeline.sierra_reader.models.WindowStatus
 import weco.pipeline.sierra_reader.sink.SequentialS3Sink
 import weco.pipeline.sierra_reader.source.{SierraSource, ThrottleRate}
 import weco.sierra.models.identifiers.SierraRecordTypes
-import weco.storage.s3.{S3Config, S3ObjectLocation}
+import weco.storage.s3.S3Config
 import weco.storage.store.s3.S3TypedStore
 import weco.typesafe.Runnable
 
