@@ -6,7 +6,6 @@ import grizzled.slf4j.Logging
 import io.circe.Json
 import io.circe.syntax._
 import software.amazon.awssdk.services.s3.S3Client
-import software.amazon.awssdk.transfer.s3.S3TransferManager
 import weco.catalogue.source_model.sierra._
 import weco.catalogue.source_model.Implicits._
 import weco.http.client.HttpGet
@@ -35,8 +34,7 @@ class SierraReaderWorkerService(
 )(implicit
   actorSystem: ActorSystem,
   ec: ExecutionContext,
-  s3Client: S3Client,
-  s3TransferManager: S3TransferManager)
+  s3Client: S3Client)
     extends Logging
     with Runnable {
   val windowManager = new WindowManager(

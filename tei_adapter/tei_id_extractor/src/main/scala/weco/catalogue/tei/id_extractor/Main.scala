@@ -2,7 +2,6 @@ package weco.catalogue.tei.id_extractor
 
 import akka.actor.ActorSystem
 import software.amazon.awssdk.services.s3.S3Client
-import software.amazon.awssdk.transfer.s3.S3TransferManager
 import weco.messaging.sns.SNSConfig
 import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import weco.storage.store.s3.S3TypedStore
@@ -16,7 +15,6 @@ import weco.catalogue.tei.id_extractor.database.{
 }
 import weco.typesafe.config.builders.EnrichConfig.RichConfig
 import weco.http.client.AkkaHttpClient
-import weco.catalogue.tei.id_extractor.database.TableProvisioner
 import weco.catalogue.tei.id_extractor.github.GitHubAuthenticatedHttpClient
 
 import scala.concurrent.ExecutionContext
@@ -29,8 +27,6 @@ object Main extends WellcomeTypesafeApp {
       AkkaBuilder.buildActorSystem()
 
     implicit val s3Client: S3Client = S3Client.builder().build()
-    implicit val s3TransferManager: S3TransferManager =
-      S3TransferManager.builder().build()
 
     val rdsConfig = RDSClientBuilder.buildRDSClientConfig(config)
     val tableConfig = PathIdTableBuilder.buildTableConfig(config)
