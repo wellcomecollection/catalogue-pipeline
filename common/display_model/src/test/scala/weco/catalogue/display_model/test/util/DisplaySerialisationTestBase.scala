@@ -233,7 +233,7 @@ trait DisplaySerialisationTestBase {
     s"""
       {
         ${identifiers(contributor)}
-        "agent": ${abstractAgent(contributor.agent)},
+        "agent": ${abstractRootConcept(contributor.agent)},
         "roles": ${toJson(contributor.roles).get},
         "type": "Contributor"
       }
