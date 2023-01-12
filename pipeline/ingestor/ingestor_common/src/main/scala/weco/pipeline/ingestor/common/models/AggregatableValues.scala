@@ -65,7 +65,7 @@ trait AggregatableValues {
             MarcLanguageCodeList.fromCode(lang.id) match {
               case Some(canonicalLang) => canonicalLang
               case None                => lang
-            }
+          }
         )
         .distinct
         .map(DisplayLanguage(_))
