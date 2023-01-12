@@ -5,7 +5,7 @@ import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.Contributor
 
 case class DisplayContributor(
-  agent: DisplayAbstractAgent,
+  agent: DisplayAbstractRootConcept,
   roles: List[DisplayContributionRole],
   primary: Boolean,
   @JsonKey("type") ontologyType: String = "Contributor"
@@ -17,7 +17,7 @@ object DisplayContributor {
     includesIdentifiers: Boolean
   ): DisplayContributor =
     DisplayContributor(
-      agent = DisplayAbstractAgent(
+      agent = DisplayAbstractRootConcept(
         contributor.agent,
         includesIdentifiers = includesIdentifiers
       ),
