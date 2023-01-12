@@ -43,7 +43,7 @@ trait AggregatableValues {
     def contributorAggregatableValues: List[String] =
       workData.contributors
         .map(_.agent)
-        .map(DisplayAbstractAgent(_, includesIdentifiers = false))
+        .map(DisplayAbstractRootConcept(_, includesIdentifiers = false))
         .asJson(json => json.mapObject(_.remove("roles")))
 
     def licenseAggregatableValues: List[String] =
@@ -65,7 +65,8 @@ trait AggregatableValues {
             MarcLanguageCodeList.fromCode(lang.id) match {
               case Some(canonicalLang) => canonicalLang
               case None                => lang
-          })
+            }
+        )
         .distinct
         .map(DisplayLanguage(_))
         .asJson()
@@ -86,8 +87,10 @@ trait AggregatableValues {
       workData.production
         .flatMap(_.dates)
         .flatMap(_.range)
-        .map(range =>
-          LocalDateTime.ofInstant(range.from, ZoneId.systemDefault()).getYear)
+        .map(
+          range =>
+            LocalDateTime.ofInstant(range.from, ZoneId.systemDefault()).getYear
+        )
         .map(startYear => DisplayPeriod(label = startYear.toString))
         .asJson()
   }
@@ -129,7 +132,8 @@ trait AggregatableValues {
                 }
             )
             .asObject
-            .get)
+            .get
+      )
 
     // Remove a key pair from a JSON object.
     //
