@@ -5,8 +5,9 @@ import akka.actor.ActorSystem
 import grizzled.slf4j.Logging
 import io.circe.Json
 import io.circe.syntax._
+import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.S3Client
-import software.amazon.awssdk.transfer.s3.S3TransferManager
+import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import weco.catalogue.source_model.sierra._
 import weco.catalogue.source_model.Implicits._
 import weco.http.client.HttpGet
@@ -18,8 +19,7 @@ import weco.pipeline.sierra_reader.models.WindowStatus
 import weco.pipeline.sierra_reader.sink.SequentialS3Sink
 import weco.pipeline.sierra_reader.source.{SierraSource, ThrottleRate}
 import weco.sierra.models.identifiers.SierraRecordTypes
-import weco.storage.Identified
-import weco.storage.s3.{S3Config, S3ObjectLocation}
+import weco.storage.s3.S3Config
 import weco.storage.store.s3.S3TypedStore
 import weco.typesafe.Runnable
 
@@ -35,8 +35,7 @@ class SierraReaderWorkerService(
 )(implicit
   actorSystem: ActorSystem,
   ec: ExecutionContext,
-  s3Client: S3Client,
-  s3TransferManager: S3TransferManager)
+  s3Client: S3Client)
     extends Logging
     with Runnable {
   val windowManager = new WindowManager(
@@ -59,9 +58,8 @@ class SierraReaderWorkerService(
       _ <- runSierraStream(window = window, windowStatus = windowStatus)
     } yield ()
 
-  private def runSierraStream(window: String, windowStatus: WindowStatus)
-    : Future[Identified[S3ObjectLocation, String]] = {
-
+  private def runSierraStream(window: String,
+                              windowStatus: WindowStatus): Future[Unit] = {
     info(s"Running the stream with window=$window and status=$windowStatus")
 
     val baseParams =
@@ -97,12 +95,16 @@ class SierraReaderWorkerService(
         s"windows_${readerConfig.recordType.toString}_complete/${windowManager
           .buildWindowLabel(window)}"
 
-      Future.fromTry(
-        S3TypedStore[String]
-          .put(S3ObjectLocation(bucket = s3Config.bucketName, key = key))("")
-          .left
-          .map { _.e }
-          .toTry)
+      val putRequest =
+        PutObjectRequest
+          .builder()
+          .bucket(s3Config.bucketName)
+          .key(key)
+          .build()
+
+      val requestBody = RequestBody.empty()
+
+      Future { s3Client.putObject(putRequest, requestBody) }
     }
   }
 
