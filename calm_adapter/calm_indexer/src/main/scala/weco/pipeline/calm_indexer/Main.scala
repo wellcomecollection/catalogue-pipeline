@@ -3,7 +3,6 @@ package weco.pipeline.calm_indexer
 import akka.actor.ActorSystem
 import com.sksamuel.elastic4s.{ElasticClient, Index}
 import software.amazon.awssdk.services.s3.S3Client
-import software.amazon.awssdk.transfer.s3.S3TransferManager
 import weco.catalogue.source_model.calm.CalmRecord
 import weco.catalogue.source_model.Implicits._
 import weco.elasticsearch.typesafe.ElasticBuilder
@@ -25,8 +24,6 @@ object Main extends WellcomeTypesafeApp {
       ElasticBuilder.buildElasticClient(config)
 
     implicit val s3Client: S3Client = S3Client.builder().build()
-    implicit val s3TransferManager: S3TransferManager =
-      S3TransferManager.builder().build()
 
     new Worker(
       sqsStream = SQSBuilder.buildSQSStream(config),
