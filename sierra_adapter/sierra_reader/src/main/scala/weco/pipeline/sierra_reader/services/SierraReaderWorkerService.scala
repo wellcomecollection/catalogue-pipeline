@@ -58,7 +58,8 @@ class SierraReaderWorkerService(
       _ <- runSierraStream(window = window, windowStatus = windowStatus)
     } yield ()
 
-  private def runSierraStream(window: String, windowStatus: WindowStatus): Future[Unit] = {
+  private def runSierraStream(window: String,
+                              windowStatus: WindowStatus): Future[Unit] = {
     info(s"Running the stream with window=$window and status=$windowStatus")
 
     val baseParams =
@@ -95,7 +96,8 @@ class SierraReaderWorkerService(
           .buildWindowLabel(window)}"
 
       val putRequest =
-        PutObjectRequest.builder()
+        PutObjectRequest
+          .builder()
           .bucket(s3Config.bucketName)
           .key(key)
           .build()
