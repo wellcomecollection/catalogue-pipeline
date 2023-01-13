@@ -9,6 +9,7 @@ import weco.catalogue.internal_model.identifiers.{
 import weco.sierra.models.marc.VarField
 
 class SierraConceptIdentifierTest extends AnyFunSpec with Matchers {
+  val ontologyType = "Concept"
 
   it("finds an LCSH identifier") {
     val varField = create655VarFieldWith(indicator2 = "0")
@@ -99,8 +100,6 @@ class SierraConceptIdentifierTest extends AnyFunSpec with Matchers {
 
     actualSourceIdentifier shouldBe expectedSourceIdentifier
   }
-
-  val ontologyType = "Concept"
 
   private def create655VarFieldWith(indicator2: Option[String]): VarField =
     VarField(marcTag = Some("655"), indicator2 = indicator2)
