@@ -170,7 +170,8 @@ object OntologyTypeOps extends Logging {
     val specificTypes = types.filterNot(Seq("Agent", "Concept").contains(_))
     specificTypes match {
       // if there are no more specific types, Agent is more specific than Concept.
-      case Nil => if (types.contains("Agent")) "Agent" else "Concept"
+      case Nil if types.contains("Agent") => "Agent"
+      case Nil                            => "Concept"
       // Ideally, and in most cases, the specific list will have only one entry.
       case List(bestType) => bestType
       // If not, log that there are more than one, and return the head.
