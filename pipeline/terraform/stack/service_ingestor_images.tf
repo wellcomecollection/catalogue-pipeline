@@ -27,12 +27,6 @@ module "ingestor_images" {
     es_images_index    = local.es_images_index
     es_augmented_index = local.es_images_augmented_index
 
-    # This var is read by the ingestor to switch the refresh interval off during a reindex
-    # It appears to be unnecessary, as the database copes well enough, so it is currently
-    # explicitly set to false, pending the removal of the switch.
-    # Was var.reindexing_state.scale_up_tasks
-    es_is_reindexing = false
-
     ingest_flush_interval_seconds = local.ingestor_images_flush_interval_seconds
 
     # We initially had this set to 100, and we saw errors like:
