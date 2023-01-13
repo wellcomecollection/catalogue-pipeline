@@ -397,7 +397,7 @@ class SierraConceptSubjectsTest
           indicator2 = "0",
           subfields = List(
             Subfield(tag = "a", content = "absence"),
-            Subfield(tag = "0", content = "lcsh/123")
+            Subfield(tag = "0", content = "sh85060628")
           )
         ),
         createVarFieldWith(
@@ -415,7 +415,7 @@ class SierraConceptSubjectsTest
     val expectedSourceIdentifiers = List(
       SourceIdentifier(
         identifierType = IdentifierType.LCSubjects,
-        value = "lcsh/123",
+        value = "sh85060628",
         ontologyType = "Concept"
       ),
       SourceIdentifier(

@@ -16,19 +16,53 @@ class SierraConceptIdentifierTest extends AnyFunSpec with Matchers {
 
     val expectedSourceIdentifier = SourceIdentifier(
       identifierType = IdentifierType.LCSubjects,
-      value = "lcsh/123",
+      value = "sh2009124405",
       ontologyType = ontologyType
     )
 
     val actualSourceIdentifier = SierraConceptIdentifier
       .maybeFindIdentifier(
         varField = varField,
-        identifierSubfieldContent = "lcsh/123",
+        identifierSubfieldContent = "sh2009124405",
         ontologyType = ontologyType
       )
       .get
 
     actualSourceIdentifier shouldBe expectedSourceIdentifier
+  }
+
+  it("finds an LC-Names identifier") {
+    val varField = create655VarFieldWith(indicator2 = "0")
+
+    val expectedSourceIdentifier = SourceIdentifier(
+      identifierType = IdentifierType.LCNames,
+      value = "n84165387",
+      ontologyType = ontologyType
+    )
+
+    val actualSourceIdentifier = SierraConceptIdentifier
+      .maybeFindIdentifier(
+        varField = varField,
+        identifierSubfieldContent = "n84165387",
+        ontologyType = ontologyType
+      )
+      .get
+
+    actualSourceIdentifier shouldBe expectedSourceIdentifier
+  }
+  it("throws an exception on an invalid LoC identifier") {
+    val varField = create655VarFieldWith(indicator2 = "0")
+    assertThrows[IllegalArgumentException] {
+      SierraConceptIdentifier
+        .maybeFindIdentifier(
+          varField = varField,
+          //Occasionally, source data contains a MeSH id squatting erroneously in a field with indicator2=0
+          identifierSubfieldContent = "D000934",
+          ontologyType = ontologyType
+        )
+        .get
+    }
+
   }
 
   it("finds a MESH identifier") {

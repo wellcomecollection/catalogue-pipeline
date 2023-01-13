@@ -1,5 +1,6 @@
 package weco.pipeline.transformer.sierra.transformers
 
+import grizzled.slf4j.Logging
 import weco.catalogue.internal_model.identifiers.{
   IdentifierType,
   SourceIdentifier
@@ -22,17 +23,49 @@ import weco.sierra.models.marc.VarField
 // https://www.loc.gov/marc/bibliographic/bd651.html
 // https://www.loc.gov/marc/bibliographic/bd655.html
 //
-object SierraConceptIdentifier {
+object SierraConceptIdentifier extends Logging {
 
-  def maybeFindIdentifier(varField: VarField,
-                          identifierSubfieldContent: String,
-                          ontologyType: String): Option[SourceIdentifier] = {
+  /**
+    * Determine the Library of Congress identifier type from the identifier value prefix.
+    *
+    * There are multiple LoC schemes that may be indicated by the same value in indicator2,
+    * The two we are interested in are LCSubjects and LCNames.  These can be differentiated by
+    * the first character in the identifier.
+    *
+    * In the case of the 's' prefix, there are some other
+    *
+    * In concise definition of these fields, (e.g. https://www.loc.gov/marc/bibliographic/concise/bd648.html)
+    * * a second indicator value of 0 indicates that the identifier comes from LCSH:
+    * 0 - Library of Congress Subject Headings
+    * However, the extended description (e.g. https://www.loc.gov/marc/bibliographic/bd648.html) goes on
+    * to also include the "Name authority files" (i.e. LCNames).
+    * 0 - Library of Congress Subject Headings
+    *  Subject added entry conforms to and is appropriate for use in the Library of Congress Subject Headings (LCSH) and the Name authority files that are maintained by the Library of Congress.
+    *
+    */
+  private def locScheme(idValue: String): IdentifierType = idValue.head match {
+    case 's' => IdentifierType.LCSubjects
+    case 'n' => IdentifierType.LCNames
+    case _   =>
+      // At time of writing, there were 65 examples of identifiers designated as LoC ids
+      // that do not conform to this s|n prefix convention.
+      // They were all incorrect, mostly they were MeSH ids with an incorrect indicator2 value.
+      throw new IllegalArgumentException(
+        s"Could not determine LoC scheme from id '$idValue'"
+      )
+
+  }
+  def maybeFindIdentifier(
+    varField: VarField,
+    identifierSubfieldContent: String,
+    ontologyType: String
+  ): Option[SourceIdentifier] = {
     val maybeIdentifierType = varField.indicator2 match {
       case None => None
 
       // These mappings are provided by the MARC spec.
       // https://www.loc.gov/marc/bibliographic/bd655.html
-      case Some("0") => Some(IdentifierType.LCSubjects)
+      case Some("0") => Some(locScheme(identifierSubfieldContent))
       case Some("2") => Some(IdentifierType.MESH)
       case Some("4") => None
 
@@ -52,7 +85,8 @@ object SierraConceptIdentifier {
             identifierType = identifierType,
             value = identifierSubfieldContent,
             ontologyType = ontologyType
-          ))
+          )
+        )
     }
   }
 }
