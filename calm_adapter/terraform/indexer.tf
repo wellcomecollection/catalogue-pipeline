@@ -4,12 +4,11 @@ module "calm_indexer" {
   name            = "calm_indexer"
   container_image = local.calm_indexer_image
 
+  queue_name = "calm-indexer-input"
   topic_arns = [
     module.calm_adapter_topic.arn,
     local.calm_reporting_topic_arn
   ]
-
-  queue_name = "calm-indexer-input"
 
   min_capacity = 0
   max_capacity = 1
