@@ -247,10 +247,14 @@ object CatalogueDependencies {
       WellcomeDependencies.typesafeLibrary ++
       ExternalDependencies.scalatestDependencies
 
+  val stsDependencies = Seq(
+    "software.amazon.awssdk" % "sts" % "2.19.0"
+  )
+
   val sierraTransformerDependencies: Seq[ModuleID] =
     ExternalDependencies.apacheCommonsDependencies ++
       ExternalDependencies.scalacsvDependencies ++
-      WellcomeDependencies.jsonLibrary
+      WellcomeDependencies.jsonLibrary ++ stsDependencies
 
   val metsTransformerDependencies: Seq[ModuleID] =
     ExternalDependencies.apacheCommonsDependencies
