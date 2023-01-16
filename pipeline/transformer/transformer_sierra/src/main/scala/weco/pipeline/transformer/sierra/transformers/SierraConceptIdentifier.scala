@@ -51,15 +51,18 @@ object SierraConceptIdentifier extends Logging {
     */
   private def locScheme(idValue: String): IdentifierType =
     idValue.split("\\d", 2).head match {
+      // sh is the only legal prefix for a Subject Headings identifier.
+      // At time of writing, there were some other s~ prefixed identifiers in use and marked as
+      // LCSH in the Works Catalogue, but these appear to be errors, so an exact match is
+      // enforced here in order to guard against such typos re-emerging.
       case "sh" => IdentifierType.LCSubjects
-      // At time of writing there were five different n.+ prefixes in use in Wellcome data.
-      // All of them are correct LCNames prefixes.
-      // I
+      // There are actually seven different prefixes in use in the whole LCNames Authority file,
+      // but because there is no definitive list of LCNames prefixes, we do not wish to accidentally
+      // exclude a real one in the future by insisting that the prefix we find must be a member of
+      // a closed list.
       case prefix if prefix.head == 'n' => IdentifierType.LCNames
-      // At time of writing, there were 65 examples of identifiers designated as LoC ids
-      // that do not conform to this s|n prefix convention.
-      // They were all incorrect, mostly they were MeSH ids with an incorrect indicator2 value.
-      // Therefore, the best treatment is to reject them and get them fixed at source.
+      // Any prefix other than sh or n is an error. Common mistakes include MeSH ids marked as LoC ids
+      // and general typographical errors such as `shsh`.  Guard against these by rejecting the identifier.
       case _ =>
         throw new IllegalArgumentException(
           s"Could not determine LoC scheme from id '$idValue'"
