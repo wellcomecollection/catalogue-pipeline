@@ -2,13 +2,17 @@ package weco.pipeline.transformer.sierra.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.prop.TableDrivenPropertyChecks
 import weco.catalogue.internal_model.identifiers.{
   IdentifierType,
   SourceIdentifier
 }
 import weco.sierra.models.marc.VarField
 
-class SierraConceptIdentifierTest extends AnyFunSpec with Matchers {
+class SierraConceptIdentifierTest
+    extends AnyFunSpec
+    with Matchers
+    with TableDrivenPropertyChecks {
   val ontologyType = "Concept"
   describe("a field with indicator2 set to 0") {
     it("finds an LCSH identifier") {
@@ -52,19 +56,29 @@ class SierraConceptIdentifierTest extends AnyFunSpec with Matchers {
     }
 
     it("throws an exception on an invalid LoC identifier") {
-      val varField = create655VarFieldWith(indicator2 = "0")
-      assertThrows[IllegalArgumentException] {
-        SierraConceptIdentifier
-          .maybeFindIdentifier(
-            varField = varField,
-            //Occasionally, source data contains a MeSH id squatting erroneously
-            // in a field with indicator2=0
-            identifierSubfieldContent = "D000934",
-            ontologyType = ontologyType
-          )
-          .get
+      forAll(
+        Table(
+          "identifier",
+          //Occasionally, source data contains a MeSH id squatting erroneously
+          // in a field with indicator2=0
+          "D000934",
+          // We don't use Children's Subject Headings
+          "sj97002429",
+          // Sometimes, there are odd typos
+          "shsh85100861"
+        )
+      ) { identifier =>
+        val varField = create655VarFieldWith(indicator2 = "0")
+        assertThrows[IllegalArgumentException] {
+          SierraConceptIdentifier
+            .maybeFindIdentifier(
+              varField = varField,
+              identifierSubfieldContent = identifier,
+              ontologyType = ontologyType
+            )
+            .get
+        }
       }
-
     }
   }
 
