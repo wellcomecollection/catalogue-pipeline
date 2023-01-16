@@ -11,8 +11,7 @@ trait SierraAbstractConcepts extends Logging with LabelDerivedIdentifiers {
   protected def maybeAddIdentifier(
     ontologyType: String,
     varField: VarField,
-    identifierSubfieldContent: String
-  ): IdState.Unminted
+    identifierSubfieldContent: String): IdState.Unminted
 
   /**
     * Returns an IdState populated by looking at the identifier ($0) subfields in the given varField
@@ -37,16 +36,14 @@ trait SierraAbstractConcepts extends Logging with LabelDerivedIdentifiers {
         addIdentifierFromVarfieldText(ontologyType, varField)
       case _ =>
         warn(
-          s"unable to identify has, multiple identifier subfields found on $varField"
-        )
+          s"unable to identify has, multiple identifier subfields found on $varField")
         IdState.Unidentifiable
     }
   }
 
   private def addIdentifierFromVarfieldText(
     ontologyType: String,
-    varField: VarField
-  ): IdState.Unminted =
+    varField: VarField): IdState.Unminted =
     getLabel(varField) match {
       case Some(label) =>
         identifierFromText(label = label, ontologyType = ontologyType)
