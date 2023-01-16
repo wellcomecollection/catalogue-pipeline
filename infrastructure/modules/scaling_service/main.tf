@@ -57,28 +57,12 @@ module "task_definition" {
   launch_types = [var.launch_type]
   task_name    = var.name
 
-  container_definitions = [
-    module.log_router_container.container_definition,
-    module.app_container.container_definition
-  ]
-}
+  volumes = var.volumes
 
-module "app_container" {
-  source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/container_definition?ref=v3.12.2"
-
-  name  = var.name
-  image = var.image
-
-  environment = var.env_vars
-  secrets     = var.secret_env_vars
-
-  log_configuration = module.log_router_container.container_log_configuration
-}
-
-module "app_permissions" {
-  source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/secrets?ref=v3.12.2"
-  secrets   = var.secret_env_vars
-  role_name = module.task_definition.task_execution_role_name
+  container_definitions = concat(
+    [module.log_router_container.container_definition],
+    var.container_definitions
+  )
 }
 
 module "log_router_container" {

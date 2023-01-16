@@ -15,8 +15,18 @@ variable "env_vars" {
   type = map(string)
 }
 
+variable "omit_queue_url" {
+  type    = bool
+  default = false
+}
+
 variable "topic_arns" {
   type = list(string)
+}
+
+variable "queue_name" {
+  type    = string
+  default = null
 }
 
 variable "queue_visibility_timeout_seconds" {
@@ -65,6 +75,11 @@ variable "max_capacity" {
   type = number
 }
 
+variable "desired_task_count" {
+  type    = number
+  default = 1
+}
+
 variable "use_fargate_spot" {
   type    = bool
   default = true
@@ -75,23 +90,12 @@ variable "cooldown_period" {
   default = "1m"
 }
 
-variable "fargate_service_boilerplate" {
-  type = object({
-    egress_security_group_id             = string
-    elastic_cloud_vpce_security_group_id = string
+# This is intentionally untyped.
+# If typed you can't have optional nulls which results in some complexity.
+# See https://github.com/hashicorp/terraform/issues/19898
+variable "fargate_service_boilerplate" {}
 
-    cluster_name = string
-    cluster_arn  = string
-
-    scale_down_adjustment = number
-    scale_up_adjustment   = number
-
-    dlq_alarm_topic_arn = string
-
-    subnets = list(string)
-
-    namespace = string
-
-    shared_logging_secrets = map(any)
-  })
+variable "service_discovery_namespace_id" {
+  type    = string
+  default = null
 }

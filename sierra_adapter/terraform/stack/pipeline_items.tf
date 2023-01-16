@@ -12,23 +12,16 @@ module "items_reader" {
 
   container_image = local.sierra_reader_image
 
-  cluster_name = aws_ecs_cluster.cluster.name
-  cluster_arn  = aws_ecs_cluster.cluster.arn
-
-  dlq_alarm_arn          = var.dlq_alarm_arn
   lambda_error_alarm_arn = var.lambda_error_alarm_arn
 
   infra_bucket = var.infra_bucket
 
   namespace_id = aws_service_discovery_private_dns_namespace.namespace.id
   namespace    = local.namespace_hyphen
-  subnets      = var.private_subnets
 
-  service_egress_security_group_id = var.egress_security_group_id
-  interservice_security_group_id   = var.interservice_security_group_id
-  elastic_cloud_vpce_sg_id         = var.elastic_cloud_vpce_sg_id
+  interservice_security_group_id = var.interservice_security_group_id
 
-  shared_logging_secrets = var.shared_logging_secrets
+  fargate_service_boilerplate = local.fargate_service_boilerplate
 }
 
 module "item_linker" {
@@ -40,20 +33,12 @@ module "item_linker" {
 
   container_image = local.sierra_linker_image
 
-  cluster_name = aws_ecs_cluster.cluster.name
-  cluster_arn  = aws_ecs_cluster.cluster.arn
-
-  dlq_alarm_arn = var.dlq_alarm_arn
-
   namespace_id = aws_service_discovery_private_dns_namespace.namespace.id
   namespace    = local.namespace_hyphen
-  subnets      = var.private_subnets
 
-  service_egress_security_group_id = var.egress_security_group_id
-  interservice_security_group_id   = var.interservice_security_group_id
-  elastic_cloud_vpce_sg_id         = var.elastic_cloud_vpce_sg_id
+  interservice_security_group_id = var.interservice_security_group_id
 
-  shared_logging_secrets = var.shared_logging_secrets
+  fargate_service_boilerplate = local.fargate_service_boilerplate
 }
 
 module "items_merger" {
@@ -68,18 +53,10 @@ module "items_merger" {
   vhs_bucket_name       = module.vhs_sierra.bucket_name
   vhs_read_write_policy = module.vhs_sierra.full_access_policy
 
-  cluster_name = aws_ecs_cluster.cluster.name
-  cluster_arn  = aws_ecs_cluster.cluster.arn
-
-  dlq_alarm_arn = var.dlq_alarm_arn
-
   namespace_id = aws_service_discovery_private_dns_namespace.namespace.id
   namespace    = local.namespace_hyphen
-  subnets      = var.private_subnets
 
-  service_egress_security_group_id = var.egress_security_group_id
-  interservice_security_group_id   = var.interservice_security_group_id
-  elastic_cloud_vpce_sg_id         = var.elastic_cloud_vpce_sg_id
+  interservice_security_group_id = var.interservice_security_group_id
 
-  shared_logging_secrets = var.shared_logging_secrets
+  fargate_service_boilerplate = local.fargate_service_boilerplate
 }

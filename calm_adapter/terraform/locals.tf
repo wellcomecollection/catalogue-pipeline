@@ -21,4 +21,17 @@ locals {
 
   window_generator_interval = "60 minutes"
   deletion_check_interval   = "7 days"
+
+  fargate_service_boilerplate = {
+    elastic_cloud_vpce_security_group_id = local.elastic_cloud_vpce_sg_id
+
+    cluster_name = aws_ecs_cluster.cluster.name
+    cluster_arn  = aws_ecs_cluster.cluster.arn
+
+    dlq_alarm_topic_arn = local.dlq_alarm_arn
+
+    subnets = local.private_subnets
+
+    shared_logging_secrets = local.shared_logging_secrets
+  }
 }

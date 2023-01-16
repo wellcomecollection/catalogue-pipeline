@@ -1,42 +1,28 @@
-module "worker" {
-  source = "../../../../infrastructure/modules/workers_with_sidecar"
+locals {
+  name = "${var.namespace}_${var.name}"
+}
 
-  name         = "${var.namespace}_${var.name}"
-  service_name = var.name
+module "scaling_service" {
+  source = "../../../../infrastructure/modules/scaling_service"
 
-  subnets = var.subnets
-
-  cluster_name = var.cluster_name
-  cluster_arn  = var.cluster_arn
-
+  name                         = local.name
+  service_name                 = var.name
+  cluster_name                 = var.cluster_name
+  cluster_arn                  = var.cluster_arn
+  subnets                      = var.subnets
   launch_type                  = var.launch_type
+  desired_task_count           = var.desired_task_count
   capacity_provider_strategies = var.capacity_provider_strategies
   ordered_placement_strategies = var.ordered_placement_strategies
-  volumes                      = var.volumes
 
-  desired_task_count = var.desired_task_count
-
-  security_group_ids       = concat(var.security_group_ids, [var.egress_security_group_id])
   elastic_cloud_vpce_sg_id = var.elastic_cloud_vpce_security_group_id
 
-  apps = var.apps
-
-  sidecar_image  = var.manager_container_image
-  sidecar_name   = var.manager_container_name
-  sidecar_cpu    = var.manager_cpu
-  sidecar_memory = var.manager_memory
-  sidecar_env_vars = merge(
-    {
-      metrics_namespace = "${var.namespace}_${var.name}",
-      queue_url         = module.input_queue.url,
-    },
-    var.manager_env_vars,
+  security_group_ids = concat(
+    var.security_group_ids,
+    [var.egress_security_group_id]
   )
-  sidecar_secret_env_vars = var.manager_secret_env_vars
-  sidecar_mount_points    = var.manager_mount_points
 
-  cpu    = var.host_cpu
-  memory = var.host_memory
+  volumes = var.volumes
 
   min_capacity = var.min_capacity
   max_capacity = var.max_capacity
@@ -44,5 +30,92 @@ module "worker" {
   scale_down_adjustment = var.scale_down_adjustment
   scale_up_adjustment   = var.scale_up_adjustment
 
+  cpu    = var.host_cpu
+  memory = var.host_memory
+
+  container_definitions = concat(
+    local.app_container_definitions,
+    [module.sidecar_container.container_definition]
+  )
+
+  queue_config = {
+    name = "${local.name}_input"
+
+    visibility_timeout_seconds = var.queue_visibility_timeout_seconds
+    max_receive_count          = var.max_receive_count
+    message_retention_seconds  = 4 * 24 * 60 * 60
+
+    topic_arns = var.topic_arns
+
+    dlq_alarm_arn = var.dlq_alarm_topic_arn
+
+    cooldown_period = "1m"
+  }
+
   shared_logging_secrets = var.shared_logging_secrets
+}
+
+locals {
+  all_secret_env_vars       = merge(values(var.apps)[*].secret_env_vars...)
+  app_container_definitions = values(module.app_container)[*].container_definition
+}
+
+module "app_container" {
+  source   = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/container_definition?ref=v3.12.2"
+  for_each = var.apps
+
+  name  = each.key
+  image = each.value.image
+
+  cpu    = each.value.cpu
+  memory = each.value.memory
+
+  environment = each.value.env_vars
+  secrets     = each.value.secret_env_vars
+
+  healthcheck = each.value.healthcheck
+
+  log_configuration = module.scaling_service.log_configuration
+
+  mount_points = each.value.mount_points
+}
+
+module "app_permissions" {
+  source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/secrets?ref=v3.12.2"
+  secrets   = local.all_secret_env_vars
+  role_name = module.scaling_service.task_execution_role_name
+}
+
+module "sidecar_container" {
+  source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/container_definition?ref=v3.12.2"
+
+  name  = var.manager_container_name
+  image = var.manager_container_image
+
+  cpu    = var.manager_cpu
+  memory = var.manager_memory
+
+  environment = merge(
+    {
+      metrics_namespace = local.name,
+      queue_url         = module.scaling_service.queue_url,
+    },
+    var.manager_env_vars,
+  )
+  secrets = var.manager_secret_env_vars
+
+  depends = [for name, app in var.apps : {
+    containerName = name
+    condition     = "HEALTHY"
+  } if app.healthcheck != null]
+
+  log_configuration = module.scaling_service.log_configuration
+
+  mount_points = var.manager_mount_points
+}
+
+module "sidecar_permissions" {
+  source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/secrets?ref=v3.12.2"
+  secrets   = var.manager_secret_env_vars
+  role_name = module.scaling_service.task_execution_role_name
 }

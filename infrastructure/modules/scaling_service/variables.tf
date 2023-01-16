@@ -3,20 +3,17 @@ variable "name" {
 }
 
 variable "service_name" {
-  type    = string
-  default = ""
-}
-
-variable "image" {
   type = string
 }
 
 variable "cluster_name" {
   type = string
 }
+
 variable "shared_logging_secrets" {
   type = map(any)
 }
+
 variable "cluster_arn" {
   type = string
 }
@@ -30,19 +27,21 @@ variable "subnets" {
   type = list(string)
 }
 
-variable "env_vars" {
-  type    = map(string)
-  default = {}
+variable "volumes" {
+  type = list(object({
+    name      = string
+    host_path = string
+  }))
+  default = []
 }
 
-variable "secret_env_vars" {
-  type    = map(string)
-  default = {}
-}
+# This is intentionally untyped.
+# If typed you can't have optional nulls which results in some complexity.
+# See https://github.com/hashicorp/terraform/issues/19898
+variable "container_definitions" {}
 
 variable "desired_task_count" {
-  type    = number
-  default = 1
+  type = number
 }
 
 variable "min_capacity" {
@@ -80,8 +79,7 @@ variable "use_fargate_spot" {
 }
 
 variable "launch_type" {
-  type    = string
-  default = "FARGATE"
+  type = string
 }
 
 variable "capacity_provider_strategies" {
@@ -107,4 +105,17 @@ variable "security_group_ids" {
 
 variable "elastic_cloud_vpce_sg_id" {
   type = string
+}
+
+variable "queue_config" {
+  type = object({
+    name                       = string
+    topic_arns                 = list(string)
+    visibility_timeout_seconds = number
+    message_retention_seconds  = number
+    max_receive_count          = number
+    message_retention_seconds  = number
+    cooldown_period            = string
+    dlq_alarm_arn              = string
+  })
 }
