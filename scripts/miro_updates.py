@@ -117,7 +117,7 @@ def _set_image_availability(*, miro_id, message: str, is_available: bool):
 
     new_event = {
         "description": "Change isClearedForCatalogueAPI from %r to %r"
-                       % (item["isClearedForCatalogueAPI"], is_available),
+        % (item["isClearedForCatalogueAPI"], is_available),
         "message": message,
         "date": _get_timestamp(),
         "user": _get_user(),
@@ -174,14 +174,7 @@ def _remove_image_from_elasticsearch(*, miro_id):
 
     # Remove the work from the works index
     works_resp = api_es_client(pipeline_date).search(
-        index=works_index,
-        body={
-            "query": {
-                "term": {
-                    "query.allIdentifiers": miro_id
-                }
-            }
-        },
+        index=works_index, body={"query": {"term": {"query.allIdentifiers": miro_id}}}
     )
 
     try:
@@ -193,7 +186,9 @@ def _remove_image_from_elasticsearch(*, miro_id):
         )
     except StopIteration:
         print(f"Could not find a work for {miro_id} in {works_index}", file=sys.stderr)
-        print("It could be that the canonical work for this Miro ID is a Sierra work - that should be suppressed by collections information first")
+        print(
+            "It could be that the canonical work for this Miro ID is a Sierra work - that should be suppressed by collections information first"
+        )
         return
     else:
         work["_source"]["debug"]["deletedReason"] = {
@@ -202,18 +197,15 @@ def _remove_image_from_elasticsearch(*, miro_id):
         }
         work["_source"]["type"] = "Deleted"
 
-        index_resp = work_ingestor_es_client(date=pipeline_date).index(index=works_index, body=work["_source"],
-                                                                       id=work["_id"])
+        index_resp = work_ingestor_es_client(date=pipeline_date).index(
+            index=works_index, body=work["_source"], id=work["_id"]
+        )
         assert index_resp["result"] == "updated", index_resp
 
     images_resp = api_es_client(pipeline_date).search(
         index=images_index,
         body={
-            "query": {
-                "term": {
-                    "query.sourceIdentifier.value": miro_id
-                }
-            },
+            "query": {"term": {"query.sourceIdentifier.value": miro_id}},
             "_source": "",
         },
     )
@@ -227,7 +219,9 @@ def _remove_image_from_elasticsearch(*, miro_id):
         )
         return
     else:
-        delete_resp = image_ingestor_es_client(date=pipeline_date).delete(index=images_index, id=image_id)
+        delete_resp = image_ingestor_es_client(date=pipeline_date).delete(
+            index=images_index, id=image_id
+        )
         assert delete_resp["result"] == "deleted", delete_resp
 
 
@@ -269,7 +263,7 @@ def _set_overrides(*, miro_id, message: str, override_key: str, override_value: 
 
     new_event = {
         "description": "Change overrides.%s from %r to %r"
-                       % (override_key, item.get("overrides", {}).get(override_key), override_value),
+        % (override_key, item.get("overrides", {}).get(override_key), override_value),
         "message": message,
         "date": _get_timestamp(),
         "user": _get_user(),
@@ -309,7 +303,7 @@ def _remove_override(*, miro_id, message: str, override_key: str):
 
     new_event = {
         "description": "Remove overrides.%s (previously %r)"
-                       % (override_key, item.get("overrides", {}).get(override_key)),
+        % (override_key, item.get("overrides", {}).get(override_key)),
         "message": message,
         "date": _get_timestamp(),
         "user": _get_user(),
