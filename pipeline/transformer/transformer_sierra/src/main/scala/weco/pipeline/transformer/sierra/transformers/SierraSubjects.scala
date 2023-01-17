@@ -13,8 +13,8 @@ import weco.sierra.models.data.SierraBibData
 import weco.sierra.models.identifiers.SierraBibNumber
 
 object SierraSubjects extends SierraIdentifiedDataTransformer {
-
   type Output = List[Subject[IdState.Unminted]]
+  import OntologyTypeOps._
 
   val subjectsTransformers = List(
     SierraConceptSubjects,
@@ -24,9 +24,11 @@ object SierraSubjects extends SierraIdentifiedDataTransformer {
     SierraBrandNameSubjects
   )
 
-  def apply(bibId: SierraBibNumber,
-            bibData: SierraBibData): List[Subject[IdState.Unminted]] =
+  def apply(
+    bibId: SierraBibNumber,
+    bibData: SierraBibData
+  ): List[Subject[IdState.Unminted]] =
     subjectsTransformers
       .flatMap(transform => transform(bibId, bibData))
-      .distinct
+      .harmoniseOntologyTypes
 }

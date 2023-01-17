@@ -15,6 +15,9 @@ import weco.pipeline.transformer.sierra.transformers.matchers.{
 }
 import weco.sierra.generators.SierraDataGenerators
 import weco.sierra.models.marc.{Subfield, VarField}
+import org.scalatest.prop.TableDrivenPropertyChecks
+import org.scalatest.Inspectors
+import weco.catalogue.internal_model.identifiers.IdState.Identifiable
 
 class SierraContributorsTest
     extends AnyFunSpec
@@ -22,7 +25,10 @@ class SierraContributorsTest
     with ContributorMatchers
     with ConceptMatchers
     with HasIdMatchers
-    with SierraDataGenerators {
+    with SierraDataGenerators
+    with TableDrivenPropertyChecks
+    with Inspectors {
+  import OntologyTypeOps._
 
   it("gets an empty contributor list from empty bib data") {
     SierraContributors(createSierraBibDataWith(varFields = Nil)) shouldBe Nil
@@ -67,7 +73,7 @@ class SierraContributorsTest
           Subfield(tag = "a", content = "Sammys meet the Sammys"),
           Subfield(tag = "c", content = "at Sammys")
         )
-      ),
+      )
     )
     val contributors =
       SierraContributors(createSierraBibDataWith(varFields = varFields))
@@ -79,39 +85,48 @@ class SierraContributorsTest
       (
         (agent: AbstractAgent[IdState.Unminted]) => agent shouldBe a[Person[_]],
         "Person",
-        "Sarah the soybean"),
+        "Sarah the soybean"
+      ),
       (
         (agent: AbstractAgent[IdState.Unminted]) => agent shouldBe a[Person[_]],
         "Person",
-        "Sam the squash, Sir"),
+        "Sam the squash, Sir"
+      ),
       (
         (agent: AbstractAgent[IdState.Unminted]) =>
           agent shouldBe a[Organisation[_]],
         "Organisation",
-        "Spinach Solicitors"),
+        "Spinach Solicitors"
+      ),
       (
         (agent: AbstractAgent[IdState.Unminted]) => agent shouldBe a[Person[_]],
         "Person",
-        "Sebastian the sugarsnap"),
+        "Sebastian the sugarsnap"
+      ),
       (
         (agent: AbstractAgent[IdState.Unminted]) =>
           agent shouldBe a[Organisation[_]],
         "Organisation",
-        "Shallot Swimmers"),
+        "Shallot Swimmers"
+      ),
       (
         (agent: AbstractAgent[IdState.Unminted]) =>
           agent shouldBe a[Meeting[_]],
         "Meeting",
-        "Sammys meet the Sammys at Sammys"),
+        "Sammys meet the Sammys at Sammys"
+      )
     ).zip(contributors).map {
       case ((assertType, ontologyType, label), contributor) =>
-        assertType(contributor.agent)
+        assertType(
+          contributor.agent.asInstanceOf[AbstractAgent[IdState.Unminted]]
+        )
         contributor.agent should have(
           'label (label),
           sourceIdentifier(
             ontologyType = ontologyType,
             identifierType = IdentifierType.LabelDerived,
-            value = label.toLowerCase())
+            value = label.toLowerCase()
+          )
         )
     }
   }
@@ -125,7 +140,7 @@ class SierraContributorsTest
             Subfield(tag = "a", content = "Charles Emmanuel"),
             Subfield(tag = "b", content = "III,"),
             Subfield(tag = "c", content = "King of Sardinia,"),
-            Subfield(tag = "d", content = "1701-1773"),
+            Subfield(tag = "d", content = "1701-1773")
           )
         ),
         VarField(
@@ -134,7 +149,7 @@ class SierraContributorsTest
             Subfield(tag = "a", content = "Charles Emmanuel"),
             Subfield(tag = "b", content = "IV,"),
             Subfield(tag = "c", content = "King of Sardinia,"),
-            Subfield(tag = "d", content = "1796-1802"),
+            Subfield(tag = "d", content = "1796-1802")
           )
         )
       )
@@ -150,7 +165,8 @@ class SierraContributorsTest
     }
 
     it(
-      "combines subfield ǂt with ǂa ǂb ǂc ǂd and creates an Agent, not a Person from MARC field 100 / 700") {
+      "combines subfield ǂt with ǂa ǂb ǂc ǂd and creates an Agent, not a Person from MARC field 100 / 700"
+    ) {
       // Based on https://search.wellcomelibrary.org/iii/encore/record/C__Rb1159639?marcData=Y
       // as retrieved on 4 February 2019.
       val varFields = List(
@@ -174,7 +190,8 @@ class SierraContributorsTest
     }
 
     it(
-      "gets the name from MARC tags 100 and 700 subfield ǂa in the right order") {
+      "gets the name from MARC tags 100 and 700 subfield ǂa in the right order"
+    ) {
       val name1 = "Alfie the Artichoke"
       val name2 = "Alison the Apple"
       val name3 = "Archie the Aubergine"
@@ -241,7 +258,7 @@ class SierraContributorsTest
           subfields = List(
             Subfield(tag = "a", content = "Zurbarán, Francisco de,"),
             Subfield(tag = "d", content = "1598-1664,"),
-            Subfield(tag = "j", content = "Follower of"),
+            Subfield(tag = "j", content = "Follower of")
           )
         )
       )
@@ -261,7 +278,7 @@ class SierraContributorsTest
           subfields = List(
             Subfield(tag = "a", content = "A made-up leader"),
             Subfield(tag = "j", content = "Follower of"),
-            Subfield(tag = "e", content = "Disciple of"),
+            Subfield(tag = "e", content = "Disciple of")
           )
         )
       )
@@ -282,7 +299,7 @@ class SierraContributorsTest
             Subfield(tag = "c", content = "cit."),
             Subfield(tag = "q", content = "(Barthélemey),"),
             Subfield(tag = "d", content = "1741-1819"),
-            Subfield(tag = "e", content = "dedicatee."),
+            Subfield(tag = "e", content = "dedicatee.")
           )
         )
       )
@@ -318,7 +335,8 @@ class SierraContributorsTest
     }
 
     it(
-      "combines identifiers with inconsistent spacing/punctuation from subfield ǂ0") {
+      "combines identifiers with inconsistent spacing/punctuation from subfield ǂ0"
+    ) {
       val name = "Wanda the watercress"
       val lcshCodeCanonical = "lcsh2055034"
       val lcshCode1 = "lcsh 2055034"
@@ -356,7 +374,8 @@ class SierraContributorsTest
     }
 
     it(
-      "uses a label-derived identifier if there are multiple distinct identifiers in subfield ǂ0") {
+      "uses a label-derived identifier if there are multiple distinct identifiers in subfield ǂ0"
+    ) {
       val name = "Darren the Dill"
       val varFields = List(
         VarField(
@@ -419,12 +438,13 @@ class SierraContributorsTest
         SierraContributors(createSierraBibDataWith(varFields = varFields))
       contributor.agent shouldBe an[Organisation[_]]
       contributor.agent should have(
-        'label (name),
+        'label (name)
       )
     }
 
     it(
-      "combines only subfields ǂa ǂb ǂc ǂd (multiples of) with spaces from MARC field 110 / 710") {
+      "combines only subfields ǂa ǂb ǂc ǂd (multiples of) with spaces from MARC field 110 / 710"
+    ) {
       // Based on https://search.wellcomelibrary.org/iii/encore/record/C__Rb1000984
       // as retrieved from 25 April 2019
       val name =
@@ -450,12 +470,14 @@ class SierraContributorsTest
       contributor.agent shouldBe an[Organisation[_]]
       contributor.agent should have(
         'label (
-          "IARC Working Group on the Evaluation of the Carcinogenic Risk of Chemicals to Man. Meeting 1972 : Lyon, France"),
+          "IARC Working Group on the Evaluation of the Carcinogenic Risk of Chemicals to Man. Meeting 1972 : Lyon, France"
+        )
       )
     }
 
     it(
-      "gets the name from MARC tags 110 and 710 subfield ǂa in the right order") {
+      "gets the name from MARC tags 110 and 710 subfield ǂa in the right order"
+    ) {
       val name1 = "Mary the mallow"
       val name2 = "Mike the mashua"
       val name3 = "Mickey the mozuku"
@@ -574,7 +596,8 @@ class SierraContributorsTest
     }
 
     it(
-      "uses a label-derived identifier if there are multiple distinct identifiers in subfield ǂ0") {
+      "uses a label-derived identifier if there are multiple distinct identifiers in subfield ǂ0"
+    ) {
       val name = "Luke the lime"
       val varFields = List(
         VarField(
@@ -616,7 +639,8 @@ class SierraContributorsTest
       all(contributors.map(_.agent)) shouldBe a[Organisation[_]]
       contributors.map(_.agent.label) shouldBe List(
         "The organisation",
-        "Another organisation")
+        "Another organisation"
+      )
       contributors.head shouldBe primary
       contributors(1) shouldNot be(primary)
     }
@@ -670,7 +694,7 @@ class SierraContributorsTest
           Subfield(tag = "b", content = "not used"),
           Subfield(tag = "c", content = "2"),
           Subfield(tag = "d", content = "3"),
-          Subfield(tag = "t", content = "4"),
+          Subfield(tag = "t", content = "4")
         )
       )
       val List(contributor) =
@@ -686,7 +710,7 @@ class SierraContributorsTest
           Subfield(tag = "a", content = "label"),
           Subfield(tag = "e", content = "not a role"),
           Subfield(tag = "j", content = "1st role"),
-          Subfield(tag = "j", content = "2nd role"),
+          Subfield(tag = "j", content = "2nd role")
         )
       )
       val List(contributor) =
@@ -744,7 +768,7 @@ class SierraContributorsTest
     val bibData = createSierraBibDataWith(varFields = varFields)
     val List(contributor) = SierraContributors(bibData)
     contributor should have(
-      'roles (Nil),
+      'roles (Nil)
     )
     contributor.agent shouldBe a[Person[_]]
     contributor shouldBe primary
@@ -763,7 +787,8 @@ class SierraContributorsTest
           Subfield(tag = "a", content = "Brewer, George."),
           Subfield(
             tag = "t",
-            content = "Essays after the manner of Goldsmith,"),
+            content = "Essays after the manner of Goldsmith,"
+          ),
           Subfield(tag = "n", content = "No. 1-22.")
         )
       )
@@ -787,10 +812,11 @@ class SierraContributorsTest
           Subfield(tag = "t", content = "Epistolae."),
           Subfield(
             tag = "p",
-            content = "Ad Ptolemaeum regem de hominis fabrica."),
+            content = "Ad Ptolemaeum regem de hominis fabrica."
+          ),
           Subfield(tag = "l", content = "Latin."),
           Subfield(tag = "f", content = "1561."),
-          Subfield(tag = "0", content = "n  79005643"),
+          Subfield(tag = "0", content = "n  79005643")
         )
       )
     )
@@ -824,9 +850,9 @@ class SierraContributorsTest
         subfields = List(
           Subfield(tag = "a", content = "Nurse, Paul,"),
           Subfield(tag = "d", content = "1949-"),
-          Subfield(tag = "e", content = "writer of introduction."),
+          Subfield(tag = "e", content = "writer of introduction.")
         )
-      ),
+      )
     )
 
     val List(contributor) =
@@ -835,5 +861,185 @@ class SierraContributorsTest
     contributor should have(
       roles(List("writer of introduction"))
     )
+  }
+
+  describe("Harmonising contributor types") {
+    it(
+      "replaces vague agent ontology types with more specific ones with matching ids"
+    ) {
+      forAll(
+        Table(
+          ("vagueType", "specificType", "specificAgentConstructor"),
+          (
+            "Agent",
+            "Person",
+            (id: IdState.Identifiable, label: String) =>
+              new Person[IdState.Identifiable](id = id, label = label)
+          ),
+          (
+            "Agent",
+            "Organisation",
+            (id: IdState.Identifiable, label: String) =>
+              new Organisation[IdState.Identifiable](id = id, label = label)
+          ),
+          (
+            "Agent",
+            "Meeting",
+            (id: IdState.Identifiable, label: String) =>
+              new Meeting[IdState.Identifiable](id = id, label = label)
+          )
+        )
+      ) {
+        (
+          vagueType,
+          specificType,
+          specificAgentConstructor: (
+            Identifiable,
+            String
+          ) => AbstractAgent[Identifiable]
+        ) =>
+          val vagueContributor = Contributor(
+            agent = new Agent(
+              label = "Maimonides, in his work on Logic",
+              id = Identifiable(
+                SourceIdentifier(
+                  IdentifierType.LCSubjects,
+                  vagueType,
+                  "sh00000000"
+                )
+              )
+            ),
+            roles = Nil
+          )
+          val specificContributor = Contributor(
+            agent = specificAgentConstructor(
+              Identifiable(
+                SourceIdentifier(
+                  IdentifierType.LCSubjects,
+                  specificType,
+                  "sh00000000"
+                )
+              ),
+              "Maimonides"
+            ),
+            roles = Nil
+          )
+          val contributors =
+            List(vagueContributor, specificContributor).harmoniseOntologyTypes
+          // Both subjects should be represented in the output list.  They have different labels, so are different objects.
+          contributors.length shouldBe 2
+          val commonClass = contributors(1).agent.getClass
+          forAll(contributors) { contributor =>
+            contributor.agent.getClass shouldBe commonClass
+            contributor.agent.id.allSourceIdentifiers.head.ontologyType shouldBe specificType
+          }
+      }
+    }
+  }
+
+  it("collapses contributors who are no longer unique") {
+
+    val vagueContributor = Contributor(
+      agent = new Agent(
+        label = "Maimonides",
+        id = Identifiable(
+          SourceIdentifier(
+            IdentifierType.LCSubjects,
+            "Agent",
+            "sh00000000"
+          )
+        )
+      ),
+      roles = Nil
+    )
+    val specificContributor1 = Contributor(
+      agent = Person(
+        Identifiable(
+          SourceIdentifier(
+            IdentifierType.LCSubjects,
+            "Person",
+            "sh00000000"
+          )
+        ),
+        "Maimonides"
+      ),
+      roles = Nil
+    )
+    val vagueContributor2 = Contributor(
+      agent = Organisation(
+        Identifiable(
+          SourceIdentifier(
+            IdentifierType.LCSubjects,
+            "Agent",
+            "sh00000000"
+          )
+        ),
+        "Maimonides"
+      ),
+      roles = Nil
+    )
+    val contributors =
+      List(vagueContributor, specificContributor1, vagueContributor2).harmoniseOntologyTypes
+    // They all had the same label before, so they are no longer unique having harmonised their types
+    contributors.length shouldBe 1
+
+    contributors.head.agent.id.allSourceIdentifiers.head.ontologyType shouldBe "Person"
+  }
+
+  it("chooses the first specific concept if there are more than one") {
+
+    val vagueContributor = Contributor(
+      agent = new Agent(
+        label = "Maimonides, in his work on Logic",
+        id = Identifiable(
+          SourceIdentifier(
+            IdentifierType.LCSubjects,
+            "Agent",
+            "sh00000000"
+          )
+        )
+      ),
+      roles = Nil
+    )
+
+    val specificContributor1 = Contributor(
+      agent = Person(
+        Identifiable(
+          SourceIdentifier(
+            IdentifierType.LCSubjects,
+            "Person",
+            "sh00000000"
+          )
+        ),
+        "Maimonides"
+      ),
+      roles = Nil
+    )
+
+    val specificContributor2 = Contributor(
+      agent = Organisation(
+        Identifiable(
+          SourceIdentifier(
+            IdentifierType.LCSubjects,
+            "Agent",
+            "sh00000000"
+          )
+        ),
+        "Maimonides and his chums"
+      ),
+      roles = Nil
+    )
+    val contributors =
+      List(specificContributor1, specificContributor2, vagueContributor).harmoniseOntologyTypes
+
+    contributors.length shouldBe 3
+
+    forAll(contributors) { contributor =>
+      contributor.agent
+        .asInstanceOf[Person[IdState.Identifiable]]
+        .id
+        .sourceIdentifier
+        .ontologyType shouldBe "Person"
+    }
   }
 }

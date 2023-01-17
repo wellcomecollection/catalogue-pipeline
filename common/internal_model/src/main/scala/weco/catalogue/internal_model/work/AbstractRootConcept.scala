@@ -6,11 +6,36 @@ sealed trait AbstractRootConcept[+State] extends HasId[State] {
   val label: String
 }
 
+object AbstractRootConcept {
+
+  private val conceptTypeMap
+    : Map[String,
+          (IdState.Identifiable, String) => AbstractRootConcept[
+            IdState.Identifiable
+          ]] = Map(
+    "Concept" -> (new Concept[IdState.Identifiable](_, _)),
+    "Agent" -> (new Agent[IdState.Identifiable](_, _)),
+    "Place" -> (new Place[IdState.Identifiable](_, _)),
+    "Period" -> (new Period[IdState.Identifiable](_, _)),
+    "Meeting" -> (new Meeting[IdState.Identifiable](_, _)),
+    "Organisation" -> (new Organisation[IdState.Identifiable](_, _)),
+    "Person" -> (new Person[IdState.Identifiable](_, _))
+  )
+
+  def apply[State >: IdState.Identifiable](
+    ontologyType: String,
+    id: IdState.Identifiable,
+    label: String
+  ): AbstractRootConcept[IdState.Identifiable] =
+    conceptTypeMap(ontologyType)(id, label)
+
+}
+
 sealed trait AbstractConcept[+State] extends AbstractRootConcept[State]
 
 case class Concept[+State](
   id: State,
-  label: String,
+  label: String
 ) extends AbstractConcept[State]
 
 object Concept {
@@ -21,12 +46,14 @@ object Concept {
 case class Period[+State](
   id: State,
   label: String,
-  range: Option[InstantRange] = None,
+  range: Option[InstantRange] = None
 ) extends AbstractConcept[State]
 
 object Period {
-  def apply(label: String,
-            range: InstantRange): Period[IdState.Unidentifiable.type] =
+  def apply(
+    label: String,
+    range: InstantRange
+  ): Period[IdState.Unidentifiable.type] =
     Period(
       id = IdState.Unidentifiable,
       label = label,
@@ -36,7 +63,7 @@ object Period {
 
 case class Place[+State](
   id: State,
-  label: String,
+  label: String
 ) extends AbstractConcept[State]
 
 object Place {
@@ -44,13 +71,11 @@ object Place {
     Place(id = IdState.Unidentifiable, label = label)
 }
 
-sealed trait AbstractAgent[+State] extends AbstractRootConcept[State] {
-  def typedLabel: String = s"${this.getClass.getSimpleName}:$label"
-}
+sealed trait AbstractAgent[+State] extends AbstractRootConcept[State]
 
 case class Agent[+State](
   id: State,
-  label: String,
+  label: String
 ) extends AbstractAgent[State]
 
 object Agent {
@@ -60,7 +85,7 @@ object Agent {
 
 case class Organisation[+State](
   id: State,
-  label: String,
+  label: String
 ) extends AbstractAgent[State]
 
 object Organisation {

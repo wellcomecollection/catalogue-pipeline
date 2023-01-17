@@ -5,7 +5,13 @@ import weco.catalogue.internal_model.identifiers._
 import weco.catalogue.internal_model.work.DeletedReason._
 import weco.catalogue.internal_model.work.InvisibilityReason._
 import weco.catalogue.internal_model.work.WorkState.Source
-import weco.catalogue.internal_model.work.{Relations, Work, WorkData}
+import weco.catalogue.internal_model.work.{
+  Contributor,
+  Relations,
+  Subject,
+  Work,
+  WorkData
+}
 import weco.catalogue.source_model.sierra._
 import weco.catalogue.source_model.Implicits._
 import weco.json.JsonUtil.fromJson
@@ -62,7 +68,8 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
         case e: Throwable =>
           error(
             s"Failed to perform transform to unified item of $sourceIdentifier",
-            e)
+            e
+          )
           throw e
       }
 
@@ -117,7 +124,11 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
           )
       }
 
-  def workDataFromBibData(bibId: SierraBibNumber, bibData: SierraBibData) =
+  def workDataFromBibData(bibId: SierraBibNumber, bibData: SierraBibData) = {
+    val (
+      subjects: List[Subject[IdState.Unminted]],
+      contributors: List[Contributor[IdState.Unminted]]
+    ) = SubjectsAndContributors(bibId, bibData)
     WorkData[DataState.Unidentified](
       otherIdentifiers = SierraIdentifiers(bibId, bibData),
       title = SierraTitle(bibData),
@@ -126,9 +137,9 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
       description = SierraDescription(bibId, bibData),
       physicalDescription = SierraPhysicalDescription(bibData),
       lettering = SierraLettering(bibData),
-      subjects = SierraSubjects(bibId, bibData),
+      subjects = subjects,
       genres = SierraGenres(bibData),
-      contributors = SierraContributors(bibData),
+      contributors = contributors,
       production = SierraProduction(bibId, bibData),
       languages = SierraLanguages(bibId, bibData),
       edition = SierraEdition(bibData),
@@ -139,7 +150,8 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
           bibId,
           bibData = bibData,
           hasItems = hasItems,
-          orderDataMap) ++
+          orderDataMap
+        ) ++
           SierraItems(bibId, bibData, itemDataEntries) ++
           SierraElectronicResources(bibId, varFields = bibData.varFields),
       holdings = SierraHoldings(bibId, holdingsDataMap),
@@ -149,6 +161,7 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
       formerFrequency = SierraFormerFrequency(bibData),
       designation = SierraDesignation(bibData)
     )
+  }
 
   lazy val bibId = sierraTransformable.sierraId
 
@@ -168,7 +181,8 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
           case Success(itemData) => itemData
           case Failure(_) =>
             throw SierraTransformerException(
-              s"Unable to parse item data for ${itemRecord.id} as JSON: <<${itemRecord.data}>>")
+              s"Unable to parse item data for ${itemRecord.id} as JSON: <<${itemRecord.data}>>"
+            )
         }
     }.toSeq
 
@@ -181,7 +195,8 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
             case Success(data) => id -> data
             case Failure(_) =>
               throw SierraTransformerException(
-                s"Unable to parse holdings data for $id as JSON: <<$jsonString>>")
+                s"Unable to parse holdings data for $id as JSON: <<$jsonString>>"
+              )
           }
       }
 
@@ -194,14 +209,17 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
             case Success(data) => id -> data
             case Failure(_) =>
               throw SierraTransformerException(
-                s"Unable to parse order data for $id as JSON: <<$jsonString>>")
+                s"Unable to parse order data for $id as JSON: <<$jsonString>>"
+              )
           }
       }
 }
 
 object SierraTransformer {
 
-  def apply(transformable: SierraTransformable,
-            version: Int): Try[Work[Source]] =
+  def apply(
+    transformable: SierraTransformable,
+    version: Int
+  ): Try[Work[Source]] =
     new SierraTransformer(transformable, version).transform
 }
