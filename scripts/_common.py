@@ -27,28 +27,50 @@ def get_secret_string(session, *, secret_id):
     return secrets.get_secret_value(SecretId=secret_id)["SecretString"]
 
 
-def get_api_es_client():
+def _get_pipeline_cluster(session, *, date):
+    host = get_secret_string(
+        session, secret_id=f"elasticsearch/pipeline_storage_{date}/public_host"
+    )
+    port = get_secret_string(
+        session, secret_id=f"elasticsearch/pipeline_storage_{date}/port"
+    )
+    protocol = get_secret_string(
+        session, secret_id=f"elasticsearch/pipeline_storage_{date}/protocol"
+    )
+    return host, port, protocol
+
+
+def get_api_es_client(date):
     """
     Returns an Elasticsearch client for the catalogue cluster.
     """
     session = get_session(role_arn="arn:aws:iam::756629837203:role/catalogue-developer")
-
-    host = get_secret_string(
-        session, secret_id="elasticsearch/pipeline_storage_2022-10-03/public_host"
-    )
-    port = get_secret_string(
-        session, secret_id="elasticsearch/pipeline_storage_2022-10-03/port"
-    )
-    protocol = get_secret_string(
-        session, secret_id="elasticsearch/pipeline_storage_2022-10-03/protocol"
-    )
+    host, port, protocol = _get_pipeline_cluster(session, date=date)
     username = get_secret_string(
         session,
-        secret_id="elasticsearch/pipeline_storage_2022-10-03/catalogue_api/es_username",
+        secret_id=f"elasticsearch/pipeline_storage_{date}/catalogue_api/es_username",
     )
     password = get_secret_string(
         session,
-        secret_id="elasticsearch/pipeline_storage_2022-10-03/catalogue_api/es_password",
+        secret_id=f"elasticsearch/pipeline_storage_{date}/catalogue_api/es_password",
+    )
+
+    return Elasticsearch(f"{protocol}://{username}:{password}@{host}:{port}")
+
+
+def get_ingestor_es_client(date, doc_type):
+    """
+    Returns an Elasticsearch client for the catalogue cluster.
+    """
+    session = get_session(role_arn="arn:aws:iam::756629837203:role/catalogue-developer")
+    host, port, protocol = _get_pipeline_cluster(session, date=date)
+    username = get_secret_string(
+        session,
+        secret_id=f"elasticsearch/pipeline_storage_{date}/{doc_type}_ingestor/es_username",
+    )
+    password = get_secret_string(
+        session,
+        secret_id=f"elasticsearch/pipeline_storage_{date}/{doc_type}_ingestor/es_password",
     )
 
     return Elasticsearch(f"{protocol}://{username}:{password}@{host}:{port}")
