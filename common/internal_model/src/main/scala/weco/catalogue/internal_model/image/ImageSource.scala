@@ -8,20 +8,11 @@ sealed trait ImageSource {
   val version: Int
 }
 
-case class ParentWorks(
-  canonicalWork: ParentWork,
-  redirectedWork: Option[ParentWork] = None
-) extends ImageSource {
-  override val id = canonicalWork.id
-  override val version =
-    canonicalWork.version + redirectedWork.map(_.version).getOrElse(0)
-}
-
 case class ParentWork(
   id: IdState.Identified,
   data: WorkData[DataState.Identified],
   version: Int,
-)
+) extends ImageSource
 
 object ParentWork {
 

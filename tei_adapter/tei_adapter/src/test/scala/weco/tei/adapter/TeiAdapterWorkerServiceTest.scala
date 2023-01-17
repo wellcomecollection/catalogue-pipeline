@@ -23,6 +23,7 @@ import weco.catalogue.source_model.tei.{
   TeiIdMessage,
   TeiMetadata
 }
+import weco.catalogue.source_model.Implicits._
 
 import java.time.Instant
 import java.time.temporal.ChronoUnit.HOURS

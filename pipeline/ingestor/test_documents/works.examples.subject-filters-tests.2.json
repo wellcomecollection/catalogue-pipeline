@@ -1,0 +1,179 @@
+{
+  "description" : "examples for the subject filter tests",
+  "createdAt" : "2023-01-03T09:31:59.910946Z",
+  "id" : "mazaizfa",
+  "document" : {
+    "debug" : {
+      "source" : {
+        "id" : "mazaizfa",
+        "identifier" : {
+          "identifierType" : {
+            "id" : "calm-record-id"
+          },
+          "ontologyType" : "Work",
+          "value" : "QFJOR9VqAE"
+        },
+        "version" : 44,
+        "modifiedTime" : "1986-01-27T17:06:16Z"
+      },
+      "mergedTime" : "1986-01-27T17:06:16Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
+      "redirectSources" : [
+      ]
+    },
+    "display" : {
+      "id" : "mazaizfa",
+      "title" : "title-vTVR490Vab",
+      "alternativeTitles" : [
+      ],
+      "contributors" : [
+      ],
+      "identifiers" : [
+        {
+          "identifierType" : {
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
+            "type" : "IdentifierType"
+          },
+          "value" : "QFJOR9VqAE",
+          "type" : "Identifier"
+        }
+      ],
+      "subjects" : [
+        {
+          "label" : "Psychology, Pathological",
+          "concepts" : [
+            {
+              "label" : "y2nMuMcZq1Jcxuk",
+              "type" : "Concept"
+            },
+            {
+              "label" : "acPWKUROxBsQ4CK",
+              "type" : "Concept"
+            },
+            {
+              "label" : "8DrDsk2kCAGURhx",
+              "type" : "Concept"
+            }
+          ],
+          "type" : "Subject"
+        }
+      ],
+      "genres" : [
+      ],
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "availabilities" : [
+      ],
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "notes" : [
+      ],
+      "formerFrequency" : [
+      ],
+      "designation" : [
+      ],
+      "images" : [
+      ],
+      "parts" : [
+      ],
+      "partOf" : [
+      ],
+      "precededBy" : [
+      ],
+      "succeededBy" : [
+      ],
+      "type" : "Work"
+    },
+    "query" : {
+      "id" : "mazaizfa",
+      "format.id" : null,
+      "workType" : "Standard",
+      "identifiers.value" : [
+        "QFJOR9VqAE"
+      ],
+      "title" : "title-vTVR490Vab",
+      "alternativeTitles" : [
+      ],
+      "description" : null,
+      "physicalDescription" : null,
+      "edition" : null,
+      "notes.contents" : [
+      ],
+      "lettering" : null,
+      "images.id" : [
+      ],
+      "images.identifiers.value" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
+      "items.locations.accessConditions.status.id" : [
+      ],
+      "items.locations.license.id" : [
+      ],
+      "items.locations.locationType.id" : [
+      ],
+      "subjects.id" : [
+      ],
+      "subjects.label" : [
+        "Psychology, Pathological"
+      ],
+      "subjects.concepts.label" : [
+        "y2nMuMcZq1Jcxuk",
+        "acPWKUROxBsQ4CK",
+        "8DrDsk2kCAGURhx"
+      ],
+      "genres.label" : [
+      ],
+      "genres.concepts.label" : [
+      ],
+      "languages.id" : [
+      ],
+      "languages.label" : [
+      ],
+      "contributors.agent.id" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "production.label" : [
+      ],
+      "production.dates.range.from" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
+      ],
+      "collectionPath.label" : null,
+      "collectionPath.path" : null,
+      "referenceNumber" : null
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+        "{\"label\":\"Psychology, Pathological\",\"concepts\":[],\"type\":\"Subject\"}"
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
+    },
+    "type" : "Visible"
+  }
+}

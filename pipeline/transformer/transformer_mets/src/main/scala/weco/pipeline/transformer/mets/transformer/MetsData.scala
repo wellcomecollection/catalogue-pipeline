@@ -2,8 +2,6 @@ package weco.pipeline.transformer.mets.transformer
 
 import java.time.Instant
 import cats.syntax.traverse._
-import cats.instances.either._
-import cats.instances.option._
 import org.apache.commons.lang3.StringUtils.equalsIgnoreCase
 import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.internal_model.identifiers._
@@ -12,52 +10,83 @@ import weco.catalogue.internal_model.locations._
 import weco.catalogue.internal_model.work.DeletedReason.DeletedFromSource
 import weco.catalogue.internal_model.work.InvisibilityReason.MetsWorksAreNotVisible
 import weco.catalogue.internal_model.work.{Item, MergeCandidate, Work, WorkData}
-import weco.pipeline.transformer.mets.transformers.MetsAccessStatus
+import weco.pipeline.transformer.identifiers.SourceIdentifierValidation._
+import weco.pipeline.transformer.mets.transformers.{
+  MetsAccessStatus,
+  MetsLocation
+}
+import weco.pipeline.transformer.result.Result
 
-case class MetsData(
+sealed trait MetsData {
+  val recordIdentifier: String
+
+  def toWork(version: Int, modifiedTime: Instant): Result[Work[Source]]
+
+  protected def sourceIdentifier: SourceIdentifier =
+    SourceIdentifier(
+      identifierType = IdentifierType.METS,
+      ontologyType = "Work",
+      // We lowercase the b number in the METS file so it matches the
+      // case used by Sierra.
+      // e.g. b20442233 has the identifier "B20442233" in the METS file,
+      //
+      value = recordIdentifier.toLowerCase
+    )
+}
+
+case class DeletedMetsData(recordIdentifier: String) extends MetsData {
+  override def toWork(version: Int,
+                      modifiedTime: Instant): Either[Throwable, Work[Source]] =
+    Right(
+      Work.Deleted[Source](
+        version = version,
+        state = Source(sourceIdentifier, modifiedTime),
+        deletedReason = DeletedFromSource("Mets")
+      )
+    )
+}
+
+case class InvisibleMetsData(
   recordIdentifier: String,
+  title: String,
   accessConditionDz: Option[String] = None,
   accessConditionStatus: Option[String] = None,
   accessConditionUsage: Option[String] = None,
   fileReferencesMapping: List[(String, FileReference)] = Nil,
-  titlePageId: Option[String] = None,
-  deleted: Boolean = false
-) {
+  titlePageId: Option[String] = None
+) extends MetsData {
 
-  def toWork(version: Int,
-             modifiedTime: Instant): Either[Throwable, Work[Source]] = {
-    deleted match {
-      case true =>
-        Right(
-          Work.Deleted[Source](
-            version = version,
-            data = WorkData[DataState.Unidentified](),
-            state = Source(sourceIdentifier, modifiedTime),
-            deletedReason = DeletedFromSource("Mets")
-          )
-        )
-      case false =>
-        for {
-          license <- parseLicense
-          accessStatus <- MetsAccessStatus(accessConditionStatus)
-          item = Item[IdState.Unminted](
-            id = IdState.Unidentifiable,
-            locations = List(digitalLocation(license, accessStatus)))
-        } yield
-          Work.Invisible[Source](
-            version = version,
-            state = Source(sourceIdentifier, modifiedTime),
-            data = WorkData[DataState.Unidentified](
-              items = List(item),
-              mergeCandidates = List(mergeCandidate),
-              thumbnail =
-                thumbnail(sourceIdentifier.value, license, accessStatus),
-              imageData = imageData(version, license, accessStatus)
-            ),
-            invisibilityReasons = List(MetsWorksAreNotVisible)
-          )
-    }
-  }
+  def toWork(version: Int, modifiedTime: Instant): Result[Work[Source]] =
+    for {
+      license <- parseLicense
+      accessStatus <- MetsAccessStatus(accessConditionStatus)
+      location = MetsLocation(
+        recordIdentifier = recordIdentifier,
+        license = license,
+        accessStatus = accessStatus,
+        accessConditionUsage = accessConditionUsage
+      )
+      item = Item[IdState.Unminted](
+        id = IdState.Unidentifiable,
+        locations = List(location)
+      )
+
+      work = Work.Invisible[Source](
+        version = version,
+        state = Source(
+          sourceIdentifier = sourceIdentifier,
+          sourceModifiedTime = modifiedTime,
+          mergeCandidates = List(mergeCandidate)
+        ),
+        data = WorkData[DataState.Unidentified](
+          title = Some(title),
+          items = List(item),
+          thumbnail = thumbnail(sourceIdentifier.value, license, accessStatus),
+          imageData = imageData(version, license, accessStatus, location)
+        ),
+        invisibilityReasons = List(MetsWorksAreNotVisible)
+      )
+    } yield work
 
   private lazy val fileReferences: List[FileReference] =
     fileReferencesMapping.map { case (_, fileReference) => fileReference }
@@ -71,34 +100,15 @@ case class MetsData(
       // e.g. b20442233 has the identifier "B20442233" in the METS file,
       //
       value = recordIdentifier.toLowerCase
+    ).validatedWithWarning.getOrElse(
+      throw new RuntimeException(
+        s"METS works must have a valid Sierra merge candidate: ${recordIdentifier.toLowerCase} is not valid."
+      )
     ),
     reason = "METS work"
   )
 
-  private def digitalLocation(license: Option[License],
-                              accessStatus: Option[AccessStatus]) =
-    DigitalLocation(
-      url = s"https://wellcomelibrary.org/iiif/$recordIdentifier/manifest",
-      locationType = LocationType.IIIFPresentationAPI,
-      license = license,
-      accessConditions = accessConditions(accessStatus)
-    )
-
-  private def accessConditions(
-    accessStatus: Option[AccessStatus]): List[AccessCondition] =
-    (accessStatus, accessConditionUsage) match {
-      case (None, None) => Nil
-      case _ =>
-        List(
-          AccessCondition(
-            method = AccessMethod.ViewOnline,
-            status = accessStatus,
-            terms = accessConditionUsage
-          )
-        )
-    }
-
-  private def parseLicense: Either[Exception, Option[License]] =
+  private def parseLicense: Result[Option[License]] =
     accessConditionDz.map {
       // A lot of METS record have "Copyright not cleared"
       // or "rightsstatements.org/page/InC/1.0/?language=en" as dz access condition.
@@ -120,7 +130,8 @@ case class MetsData(
         License.values.find { license =>
           equalsIgnoreCase(license.id, accessCondition) || equalsIgnoreCase(
             license.label,
-            accessCondition) || license.url.equals(accessCondition)
+            accessCondition
+          ) || license.url.equals(accessCondition)
 
         } match {
           case Some(license) => Right(license)
@@ -128,17 +139,6 @@ case class MetsData(
             Left(new Exception(s"Couldn't match $accessCondition to a license"))
         }
     }.sequence
-
-  private def sourceIdentifier =
-    SourceIdentifier(
-      identifierType = IdentifierType.METS,
-      ontologyType = "Work",
-      // We lowercase the b number in the METS file so it matches the
-      // case used by Sierra.
-      // e.g. b20442233 has the identifier "B20442233" in the METS file,
-      //
-      value = recordIdentifier.toLowerCase
-    )
 
   private def titlePageFileReference: Option[FileReference] =
     titlePageId
@@ -151,7 +151,8 @@ case class MetsData(
   private def thumbnail(
     bnumber: String,
     license: Option[License],
-    accessStatus: Option[AccessStatus]): Option[DigitalLocation] =
+    accessStatus: Option[AccessStatus]
+  ): Option[DigitalLocation] =
     for {
       fileReference <- titlePageFileReference
         .orElse(fileReferences.find(ImageUtils.isThumbnail))
@@ -167,7 +168,9 @@ case class MetsData(
   private def imageData(
     version: Int,
     license: Option[License],
-    accessStatus: Option[AccessStatus]): List[ImageData[IdState.Identifiable]] =
+    accessStatus: Option[AccessStatus],
+    manifestLocation: DigitalLocation
+  ): List[ImageData[IdState.Identifiable]] =
     if (accessStatus.exists(_.hasRestrictions)) {
       Nil
     } else {
@@ -186,13 +189,12 @@ case class MetsData(
                   url = url,
                   locationType = LocationType.IIIFImageAPI,
                   license = license,
-                  accessConditions = accessConditions(accessStatus)
+                  accessConditions = manifestLocation.accessConditions
                 ),
-                digitalLocation(license, accessStatus)
+                manifestLocation
               )
             )
           }
         }
     }
-
 }

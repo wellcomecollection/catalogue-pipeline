@@ -4,31 +4,14 @@ import org.scalatest.Assertion
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks
-import weco.catalogue.source_model.generators.SierraDataGenerators
-import weco.catalogue.source_model.sierra.marc.FixedField
+import weco.sierra.generators.SierraDataGenerators
+import weco.sierra.models.marc.FixedField
 
 class SierraRulesForRequestingTest
     extends AnyFunSpec
     with Matchers
     with SierraDataGenerators
     with TableDrivenPropertyChecks {
-  it("blocks an item from the strong room") {
-    val item = createSierraItemDataWith(
-      fixedFields = Map("97" -> FixedField(label = "IMESSAGE", value = "x"))
-    )
-
-    SierraRulesForRequesting(item) shouldBe NotRequestable.BelongsInStrongroom(
-      "This item belongs in the Strongroom")
-  }
-
-  it("blocks an item with fixed field 97 (imessage) = j") {
-    val item = createSierraItemDataWith(
-      fixedFields = Map("97" -> FixedField(label = "IMESSAGE", value = "j"))
-    )
-
-    SierraRulesForRequesting(item) shouldBe NotRequestable.NoReason
-  }
-
   it("blocks an item based on the status") {
     val testCases = Table(
       ("status", "expectedMessage"),
@@ -36,7 +19,7 @@ class SierraRulesForRequestingTest
       ("s", NotRequestable.ItemOnSearch("This item is on search.")),
       ("x", NotRequestable.ItemWithdrawn("This item is withdrawn.")),
       ("r", NotRequestable.ItemUnavailable("This item is unavailable.")),
-      ("z", NotRequestable.NoReason),
+      ("z", NotRequestable.NoPublicMessage("fixed field 88 = z")),
       ("v", NotRequestable.AtConservation("This item is with conservation.")),
       ("h", NotRequestable.ItemClosed("This item is closed.")),
       ("b", NotRequestable.RequestTopItem("Please request top item.")),
@@ -46,7 +29,7 @@ class SierraRulesForRequestingTest
         "e",
         NotRequestable.OnExhibition(
           "On exhibition. Please ask at Enquiry Desk.")),
-      ("y", NotRequestable.NoReason),
+      ("y", NotRequestable.NoPublicMessage("fixed field 88 = y")),
     )
 
     forAll(testCases) {
@@ -65,7 +48,7 @@ class SierraRulesForRequestingTest
       fixedFields = Map("87" -> FixedField(label = "LOANRULE", value = "1"))
     )
 
-    SierraRulesForRequesting(item) shouldBe NotRequestable.OnHold(
+    SierraRulesForRequesting(item) shouldBe NotRequestable.InUseByAnotherReader(
       "Item is in use by another reader. Please ask at Enquiry Desk.")
   }
 
@@ -74,7 +57,7 @@ class SierraRulesForRequestingTest
       fixedFields = Map("88" -> FixedField(label = "STATUS", value = "!"))
     )
 
-    SierraRulesForRequesting(item) shouldBe NotRequestable.OnHold(
+    SierraRulesForRequesting(item) shouldBe NotRequestable.InUseByAnotherReader(
       "Item is in use by another reader. Please ask at Enquiry Desk.")
   }
 
@@ -191,10 +174,7 @@ class SierraRulesForRequestingTest
         "sgmoh",
         "somet",
         "somge",
-        "somhe",
-        "somhi",
         "somja",
-        "sompa",
         "sompr",
         "somsy")
 
@@ -210,7 +190,10 @@ class SierraRulesForRequestingTest
       val testCases = Table("locationCode", "sepep", "rm001", "rmdda")
 
       forAll(testCases) { locationCode =>
-        assertBlockedWith(_, expectedResult = NotRequestable.NoReason)
+        assertBlockedWith(
+          _,
+          expectedResult =
+            NotRequestable.NoPublicMessage(s"fixed field 79 = $locationCode"))
       }
     }
 
@@ -277,9 +260,9 @@ class SierraRulesForRequestingTest
         "22",
         NotRequestable.OnExhibition(
           "Item is on Exhibition Reserve. Please ask at the Enquiry Desk")),
-      ("17", NotRequestable.NoReason),
-      ("18", NotRequestable.NoReason),
-      ("15", NotRequestable.NoReason),
+      ("17", NotRequestable.NoPublicMessage("fixed field 61 = 17 (<none>)")),
+      ("18", NotRequestable.NoPublicMessage("fixed field 61 = 18 (<none>)")),
+      ("15", NotRequestable.NoPublicMessage("fixed field 61 = 15 (<none>)")),
       (
         "4",
         NotRequestable.NeedsManualRequest(

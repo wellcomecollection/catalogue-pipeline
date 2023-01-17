@@ -1,6 +1,5 @@
 locals {
-  namespace        = "catalogue-${var.pipeline_date}"
-  namespace_hyphen = replace(local.namespace, "_", "-")
+  namespace = "catalogue-${var.pipeline_date}"
 
   es_works_source_index       = "works-source-${var.pipeline_date}"
   es_works_merged_index       = "works-merged-${var.pipeline_date}"
@@ -34,7 +33,7 @@ locals {
   #
   # We also want to avoid running more ingestors when not reindexing
   # than when we are!
-  max_capacity = var.is_reindexing ? var.max_capacity : min(1, var.max_capacity)
+  max_capacity = var.reindexing_state.scale_up_tasks ? var.max_capacity : min(1, var.max_capacity)
 
   # If we're reindexing, our services will scale up to max capacity,
   # work through everything on the reindex queues, and then suddenly
@@ -47,8 +46,8 @@ locals {
   # Note: if the scale down adjustment is greater than the number of tasks,
   # ECS will just stop every task.  e.g. if scale_down_adjustment = -5 and
   # there are 3 tasks running, ECS will scale the tasks down to zero.
-  scale_down_adjustment = var.is_reindexing ? -5 : -1
-  scale_up_adjustment   = 1
+  scale_down_adjustment = var.reindexing_state.scale_up_tasks ? -5 : -1
+  scale_up_adjustment   = var.reindexing_state.scale_up_tasks ? 5 : 1
 
   services = [
     "ingestor_works",
@@ -58,21 +57,35 @@ locals {
     "id_minter",
     "inference_manager",
     "feature_inferrer",
-    "feature_training",
     "palette_inferrer",
     "aspect_ratio_inferrer",
     "router",
+    "path_concatenator",
     "batcher",
     "relation_embedder",
     "transformer_miro",
     "transformer_mets",
+    "transformer_tei",
     "transformer_sierra",
     "transformer_calm",
   ]
 
-  sierra_adapter_topic_arns = var.is_reindexing ? concat(var.adapters["sierra"].topics, [var.adapters["sierra"].reindex_topic]) : var.adapters["sierra"].topics
-  miro_adapter_topic_arns   = var.is_reindexing ? concat(var.adapters["miro"].topics, [var.adapters["miro"].reindex_topic]) : var.adapters["miro"].topics
-  mets_adapter_topic_arns   = var.is_reindexing ? concat(var.adapters["mets"].topics, [var.adapters["mets"].reindex_topic]) : var.adapters["mets"].topics
-  calm_adapter_topic_arns   = var.is_reindexing ? concat(var.adapters["calm"].topics, [var.adapters["calm"].reindex_topic]) : var.adapters["calm"].topics
-}
+  fargate_service_boilerplate = {
+    egress_security_group_id             = aws_security_group.egress.id
+    elastic_cloud_vpce_security_group_id = var.network_config.ec_privatelink_security_group_id
 
+    cluster_name = aws_ecs_cluster.cluster.name
+    cluster_arn  = aws_ecs_cluster.cluster.id
+
+    scale_down_adjustment = local.scale_down_adjustment
+    scale_up_adjustment   = local.scale_up_adjustment
+
+    dlq_alarm_topic_arn = var.monitoring_config.dlq_alarm_arn
+
+    subnets = var.network_config.subnets
+
+    namespace = local.namespace
+
+    shared_logging_secrets = var.monitoring_config.shared_logging_secrets
+  }
+}

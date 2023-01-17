@@ -7,21 +7,18 @@ import io.circe.optics.JsonOptics._
 import monocle.function.Plated
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.identifiers.{CanonicalId, SourceIdentifier}
-import weco.pipeline.id_minter.models.Identifier
 
 import scala.annotation.tailrec
 import scala.util.{Failure, Success, Try}
 
-/**
-  * SourceIdentifierEmbedder provides 2 methods:
-  *
-  * - `scan` takes Json and returns all of the sourceIdentifiers that are in it
-  * - `update` takes Json and a map of (SourceIdentifier -> Identifier) and adds
-  *   a canonicalId field next to sourceIdentifiers, as well as replacing
-  *   `identifiedType` fields with `type` fields of the same value.
-  *
-  */
 object SourceIdentifierEmbedder extends Logging {
+
+  /** Find all the source identifiers within this JSON.
+    *
+    * It looks at every object in the JSON and looks for a "sourceIdentifier" key
+    * which contains a SourceIdentifier object.
+    *
+    */
   def scan(inputJson: Json): Try[List[SourceIdentifier]] =
     Try(
       iterate(
@@ -33,8 +30,46 @@ object SourceIdentifierEmbedder extends Logging {
       )
     )
 
+  /** Updates a JSON with the minted identifiers.
+    *
+    * In particular:
+    *
+    *   - It looks at every object in the JSON.  If it has a "sourceIdentifier" key,
+    *     it adds an "canonicalId" with the corresponding canonical ID.
+    *
+    *   - It renamed the "identifiedType" key to "type".  The latter is used by Circe as
+    *     a type discriminator, so now Circe will decode this value as the identified version.
+    *
+    * e.g. you might have the Identifiable JSON:
+    *
+    *     {
+    *       "sourceIdentifier" : {
+    *         "identifierType" : {"id" : "lc-subjects"},
+    *         "ontologyType" : "Subject",
+    *         "value" : "sh85002427"
+    *       },
+    *       "identifiedType" : "Identified",
+    *       "type" : "Identifiable"
+    *     }
+    *
+    * Circe would decode this as type "IdState.Identifiable".  Once it passes through this method,
+    * it becomes
+    *
+    *     {
+    *       "canonicalId": "jsywryz7",
+    *       "sourceIdentifier" : {
+    *         "identifierType" : {"id" : "lc-subjects"},
+    *         "ontologyType" : "Subject",
+    *         "value" : "sh85002427"
+    *       },
+    *       "type" : "Identified"
+    *     }
+    *
+    * which now gets decoded as "IdState.Identified".
+    *
+    */
   def update(inputJson: Json,
-             identifiers: Map[SourceIdentifier, Identifier]): Try[Json] =
+             identifiers: Map[SourceIdentifier, CanonicalId]): Try[Json] =
     Try {
       val updateNode =
         (updateNodeType _) compose addCanonicalIdToNode(identifiers)
@@ -44,6 +79,7 @@ object SourceIdentifierEmbedder extends Logging {
       Plated.transform[Json](updateNode)(updatedRoot)
     }
 
+  /** Rename the "identifiedType" field to "type", and remove the old "type" field. */
   private def updateNodeType(node: Json): Json =
     root.identifiedType.json
       .getOption(node)
@@ -56,28 +92,22 @@ object SourceIdentifierEmbedder extends Logging {
       }
       .getOrElse(node)
 
+  /** Given a JSON object, add the canonical ID that corresponds to the source identifier
+    * (if specified).
+    *
+    */
   private def addCanonicalIdToNode(
-    identifiers: Map[SourceIdentifier, Identifier])(node: Json): Json =
+    identifiers: Map[SourceIdentifier, CanonicalId])(node: Json): Json =
     root.sourceIdentifier.json
       .getOption(node)
       .map(parseSourceIdentifier)
-      .map(getCanonicalId(identifiers))
+      .map(identifiers(_))
       .map { canonicalId =>
         root.obj.modify { obj =>
           ("canonicalId", Json.fromString(canonicalId.underlying)) +: obj
         }(node)
       }
       .getOrElse(node)
-
-  private def getCanonicalId(identifiers: Map[SourceIdentifier, Identifier])(
-    sourceIdentifier: SourceIdentifier): CanonicalId =
-    identifiers
-      .getOrElse(
-        sourceIdentifier,
-        throw new RuntimeException(
-          s"Could not find $sourceIdentifier in $identifiers")
-      )
-      .CanonicalId
 
   @tailrec
   private def iterate(
@@ -100,10 +130,8 @@ object SourceIdentifierEmbedder extends Logging {
       case Success(sourceIdentifier) => sourceIdentifier
       case Failure(exception) =>
         error(
-          s"Error parsing source identifier: ${sourceIdentifierJson.spaces2}")
+          s"Error parsing JSON as SourceIdentifier: ${sourceIdentifierJson.spaces2}")
         throw exception
     }
-
   }
-
 }

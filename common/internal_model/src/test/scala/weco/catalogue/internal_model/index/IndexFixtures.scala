@@ -8,18 +8,21 @@ import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.time.{Seconds, Span}
 import org.scalatest.{Assertion, Suite}
 import weco.elasticsearch.model.IndexId
-import weco.elasticsearch.IndexConfig
 import weco.elasticsearch.test.fixtures.ElasticsearchFixtures
 import weco.fixtures.TestWith
 import weco.json.JsonUtil.toJson
-import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.catalogue.internal_model.image.{Image, ImageState}
 import weco.catalogue.internal_model.work.{Work, WorkState}
 
 trait IndexFixtures extends ElasticsearchFixtures { this: Suite =>
 
   def withLocalWorksIndex[R](testWith: TestWith[Index, R]): R =
-    withLocalElasticsearchIndex[R](config = WorksIndexConfig.ingested) {
+    withLocalElasticsearchIndex[R](config = WorksIndexConfig.indexed) { index =>
+      testWith(index)
+    }
+
+  def withLocalIdentifiedWorksIndex[R](testWith: TestWith[Index, R]): R =
+    withLocalElasticsearchIndex[R](config = WorksIndexConfig.identified) {
       index =>
         testWith(index)
     }
@@ -47,14 +50,9 @@ trait IndexFixtures extends ElasticsearchFixtures { this: Suite =>
     }
 
   def withLocalImagesIndex[R](testWith: TestWith[Index, R]): R =
-    withLocalElasticsearchIndex[R](config = ImagesIndexConfig.ingested) {
+    withLocalElasticsearchIndex[R](config = ImagesIndexConfig.indexed) {
       index =>
         testWith(index)
-    }
-
-  def withLocalIndex[R](config: IndexConfig)(testWith: TestWith[Index, R]): R =
-    withLocalElasticsearchIndex[R](config) { index =>
-      testWith(index)
     }
 
   def assertElasticsearchEventuallyHasWork[State <: WorkState](
@@ -73,15 +71,6 @@ trait IndexFixtures extends ElasticsearchFixtures { this: Suite =>
     implicit val id: IndexId[Image[State]] =
       (image: Image[State]) => image.id
     assertElasticsearchEventuallyHas(index, images: _*)
-  }
-
-  def assertElasticsearchNeverHasWork(
-    index: Index,
-    works: Work[Identified]*
-  ): Unit = {
-    implicit val id: IndexId[Work[Identified]] =
-      (work: Work[Identified]) => work.state.canonicalId.toString
-    assertElasticsearchNeverHas(index, works: _*)
   }
 
   def insertIntoElasticsearch[State <: WorkState](

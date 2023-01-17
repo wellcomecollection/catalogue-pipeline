@@ -20,9 +20,9 @@ case class Batch(rootPath: String, selectors: List[Selector])
 class BatcherWorkerService[MsgDestination](
   msgStream: SQSStream[NotificationMessage],
   msgSender: MessageSender[MsgDestination],
-  flushInterval: FiniteDuration = 30 minutes,
-  maxProcessedPaths: Int = 100000,
-  maxBatchSize: Int = 20
+  flushInterval: FiniteDuration,
+  maxProcessedPaths: Int,
+  maxBatchSize: Int
 )(implicit ec: ExecutionContext, materializer: Materializer)
     extends Runnable
     with Logging {

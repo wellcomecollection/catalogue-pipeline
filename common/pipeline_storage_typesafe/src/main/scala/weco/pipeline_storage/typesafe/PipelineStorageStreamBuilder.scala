@@ -1,19 +1,17 @@
 package weco.pipeline_storage.typesafe
 
+import akka.actor.ActorSystem
 import com.typesafe.config.Config
 import weco.messaging.MessageSender
-import weco.messaging.sqs.SQSStream
-import weco.pipeline_storage.{
-  Indexer,
-  PipelineStorageConfig,
-  PipelineStorageStream
-}
+import weco.messaging.sns.NotificationMessage
+import weco.messaging.typesafe.SQSBuilder
 import weco.typesafe.config.builders.EnrichConfig._
 import weco.pipeline_storage.{
   Indexer,
   PipelineStorageConfig,
   PipelineStorageStream
 }
+import weco.typesafe.config.builders.AkkaBuilder
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.DurationInt
@@ -28,14 +26,19 @@ object PipelineStorageStreamBuilder {
         config.getIntOption("pipeline_storage.parallelism").getOrElse(10)
     )
 
-  def buildPipelineStorageStream[In, Out, MsgDestination](
-    sqsStream: SQSStream[In],
+  def buildPipelineStorageStream[Out, MsgDestination](
     indexer: Indexer[Out],
     messageSender: MessageSender[MsgDestination])(config: Config)(
     implicit ec: ExecutionContext)
-    : PipelineStorageStream[In, Out, MsgDestination] =
-    new PipelineStorageStream[In, Out, MsgDestination](
-      sqsStream,
+    : PipelineStorageStream[NotificationMessage, Out, MsgDestination] = {
+    implicit val actorSystem: ActorSystem =
+      AkkaBuilder.buildActorSystem()
+
+    val messageStream = SQSBuilder.buildSQSStream[NotificationMessage](config)
+
+    new PipelineStorageStream[NotificationMessage, Out, MsgDestination](
+      messageStream,
       indexer,
       messageSender)(buildPipelineStorageConfig(config))
+  }
 }

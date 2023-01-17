@@ -25,12 +25,12 @@ object Main extends WellcomeTypesafeApp {
       AkkaBuilder.buildExecutionContext()
 
     implicit val dynamoDBClient: DynamoDbClient =
-      DynamoBuilder.buildDynamoClient(config)
+      DynamoBuilder.buildDynamoClient
 
     val recordReader = new RecordReader
 
     val bulkMessageSender = new BulkMessageSender(
-      underlying = SNSBuilder.buildSNSIndividualMessageSender(config)
+      underlying = SNSBuilder.buildSNSIndividualMessageSender
     )
 
     new ReindexWorkerService(

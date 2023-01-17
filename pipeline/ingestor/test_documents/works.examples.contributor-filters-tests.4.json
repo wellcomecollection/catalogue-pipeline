@@ -1,0 +1,180 @@
+{
+  "description" : "examples for the contributor filter tests",
+  "createdAt" : "2023-01-03T09:31:59.952138Z",
+  "id" : "cpwnrkdo",
+  "document" : {
+    "debug" : {
+      "source" : {
+        "id" : "cpwnrkdo",
+        "identifier" : {
+          "identifierType" : {
+            "id" : "miro-image-number"
+          },
+          "ontologyType" : "Work",
+          "value" : "FqozNGJ9Pf"
+        },
+        "version" : 52,
+        "modifiedTime" : "1990-04-28T07:06:53Z"
+      },
+      "mergedTime" : "1990-04-28T07:06:53Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
+      "redirectSources" : [
+      ]
+    },
+    "display" : {
+      "id" : "cpwnrkdo",
+      "title" : "title-Vp3bULWghZ",
+      "alternativeTitles" : [
+      ],
+      "contributors" : [
+        {
+          "agent" : {
+            "label" : "Bath, Patricia",
+            "type" : "Person"
+          },
+          "roles" : [
+          ],
+          "primary" : true,
+          "type" : "Contributor"
+        },
+        {
+          "agent" : {
+            "label" : "Darwin \"Jones\", Charles",
+            "type" : "Person"
+          },
+          "roles" : [
+          ],
+          "primary" : true,
+          "type" : "Contributor"
+        }
+      ],
+      "identifiers" : [
+        {
+          "identifierType" : {
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
+            "type" : "IdentifierType"
+          },
+          "value" : "FqozNGJ9Pf",
+          "type" : "Identifier"
+        }
+      ],
+      "subjects" : [
+      ],
+      "genres" : [
+      ],
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "availabilities" : [
+      ],
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "notes" : [
+      ],
+      "formerFrequency" : [
+      ],
+      "designation" : [
+      ],
+      "images" : [
+      ],
+      "parts" : [
+      ],
+      "partOf" : [
+      ],
+      "precededBy" : [
+      ],
+      "succeededBy" : [
+      ],
+      "type" : "Work"
+    },
+    "query" : {
+      "id" : "cpwnrkdo",
+      "format.id" : null,
+      "workType" : "Standard",
+      "identifiers.value" : [
+        "FqozNGJ9Pf"
+      ],
+      "title" : "title-Vp3bULWghZ",
+      "alternativeTitles" : [
+      ],
+      "description" : null,
+      "physicalDescription" : null,
+      "edition" : null,
+      "notes.contents" : [
+      ],
+      "lettering" : null,
+      "images.id" : [
+      ],
+      "images.identifiers.value" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
+      "items.locations.accessConditions.status.id" : [
+      ],
+      "items.locations.license.id" : [
+      ],
+      "items.locations.locationType.id" : [
+      ],
+      "subjects.id" : [
+      ],
+      "subjects.label" : [
+      ],
+      "subjects.concepts.label" : [
+      ],
+      "genres.label" : [
+      ],
+      "genres.concepts.label" : [
+      ],
+      "languages.id" : [
+      ],
+      "languages.label" : [
+      ],
+      "contributors.agent.id" : [
+      ],
+      "contributors.agent.label" : [
+        "Bath, Patricia",
+        "Darwin \"Jones\", Charles"
+      ],
+      "production.label" : [
+      ],
+      "production.dates.range.from" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
+      ],
+      "collectionPath.label" : null,
+      "collectionPath.path" : null,
+      "referenceNumber" : null
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+        "{\"label\":\"Bath, Patricia\",\"type\":\"Person\"}",
+        "{\"label\":\"Darwin \\\"Jones\\\", Charles\",\"type\":\"Person\"}"
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
+    },
+    "type" : "Visible"
+  }
+}

@@ -3,9 +3,8 @@ package weco.catalogue.internal_model.locations
 case class AccessCondition(
   method: AccessMethod,
   status: Option[AccessStatus] = None,
-  terms: Option[String] = None,
-  to: Option[String] = None,
-  note: Option[String] = None
+  note: Option[String] = None,
+  terms: Option[String] = None
 ) {
   def isEmpty: Boolean =
     this == AccessCondition(method = AccessMethod.NotRequestable)

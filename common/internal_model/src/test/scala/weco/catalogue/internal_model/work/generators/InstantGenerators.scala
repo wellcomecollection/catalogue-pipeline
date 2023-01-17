@@ -3,10 +3,30 @@ package weco.catalogue.internal_model.work.generators
 import weco.catalogue.internal_model.work.InstantRange
 
 import java.time.{Instant, LocalDateTime}
-import scala.concurrent.duration._
-import scala.util.Random
+import org.scalacheck.Arbitrary
+import org.scalacheck.Gen.chooseNum
+import weco.fixtures.RandomGenerators
 
-trait InstantGenerators {
+import scala.concurrent.duration._
+
+trait InstantGenerators extends RandomGenerators {
+
+  // We use this for the scalacheck of the java.time.Instant type
+  // We could just import the library, but I might wait until we need more
+  // Taken from here:
+  // https://github.com/rallyhealth/scalacheck-ops/blob/master/core/src/main/scala/org/scalacheck/ops/time/ImplicitJavaTimeGenerators.scala
+  implicit val arbitraryInstant: Arbitrary[Instant] =
+    Arbitrary {
+      for {
+        millis <- chooseNum(
+          Instant.MIN.getEpochSecond,
+          Instant.MAX.getEpochSecond
+        )
+        nanos <- chooseNum(Instant.MIN.getNano, Instant.MAX.getNano)
+      } yield {
+        Instant.ofEpochMilli(millis).plusNanos(nanos)
+      }
+    }
 
   val now: Instant = Instant.now
 
@@ -21,7 +41,7 @@ trait InstantGenerators {
   )
 
   def randomInstantBefore(max: Instant, maxBefore: FiniteDuration) =
-    max - ((Random.nextLong() % maxBefore.toSeconds) seconds)
+    max - ((random.nextLong() % maxBefore.toSeconds) seconds)
 
   def instantInLast30Days = randomInstantBefore(now, 30 days)
 

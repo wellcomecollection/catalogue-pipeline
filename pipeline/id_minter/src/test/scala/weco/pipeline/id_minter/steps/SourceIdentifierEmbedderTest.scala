@@ -5,7 +5,6 @@ import io.circe.parser._
 import org.scalatest.funspec.AnyFunSpec
 import weco.json.utils.JsonAssertions
 import weco.pipeline.id_minter.fixtures.SqlIdentifiersGenerators
-import weco.pipeline.id_minter.models.Identifier
 
 import scala.util.{Failure, Success}
 
@@ -115,12 +114,12 @@ class SourceIdentifierEmbedderTest
         |}
       """.stripMargin
       val json = parse(jsonString).right.get
-      val identifier = Identifier(
-        canonicalId = createCanonicalId,
-        sourceIdentifier = sourceIdentifier)
+
+      val canonicalId = createCanonicalId
+
       val identified = SourceIdentifierEmbedder.update(
         json,
-        Map(sourceIdentifier -> identifier))
+        Map(sourceIdentifier -> canonicalId))
 
       identified shouldBe a[Success[_]]
       val updatedJsonString = identified.get.spaces2
@@ -135,7 +134,7 @@ class SourceIdentifierEmbedderTest
            |    "value": "${sourceIdentifier.value}",
            |    "ontologyType": "${sourceIdentifier.ontologyType}"
            |  },
-           |  "canonicalId": "${identifier.CanonicalId}"
+           |  "canonicalId": "$canonicalId"
            |}
         """.stripMargin
       )
@@ -143,6 +142,7 @@ class SourceIdentifierEmbedderTest
 
     it("modifies json to add multiple nested canonicalIds") {
       val sourceIdentifiers = (1 to 4).map(_ => createSourceIdentifier)
+      val canonicalIds = (1 to 4).map(_ => createCanonicalId)
       val jsonString = s"""
         |{
         |  "sourceIdentifier": {
@@ -186,11 +186,7 @@ class SourceIdentifierEmbedderTest
         |}
       """.stripMargin
       val json = parse(jsonString).right.get
-      val identifiers = sourceIdentifiers.map { sourceIdentifier =>
-        sourceIdentifier -> Identifier(createCanonicalId, sourceIdentifier)
-      }.toMap
-      val canonicalIds =
-        sourceIdentifiers.flatMap(identifiers.get).map(_.CanonicalId)
+      val identifiers = sourceIdentifiers.zip(canonicalIds).toMap
       val identified = SourceIdentifierEmbedder.update(
         json,
         identifiers
@@ -278,8 +274,8 @@ class SourceIdentifierEmbedderTest
       """.stripMargin
       val json = parse(jsonString).right.get
       val identifiers = Map(
-        sourceIdentifier1 -> Identifier(createCanonicalId, sourceIdentifier1),
-        sourceIdentifier2 -> Identifier(createCanonicalId, sourceIdentifier2)
+        sourceIdentifier1 -> createCanonicalId,
+        sourceIdentifier2 -> createCanonicalId
       )
       val identified = SourceIdentifierEmbedder.update(
         json,
@@ -299,7 +295,7 @@ class SourceIdentifierEmbedderTest
            |    "value": "${sourceIdentifier1.value}",
            |    "ontologyType": "${sourceIdentifier1.ontologyType}"
            |  },
-           |  "canonicalId": "${identifiers(sourceIdentifier1).CanonicalId}",
+           |  "canonicalId": "${identifiers(sourceIdentifier1)}",
            |  "type": "NewType",
            |  "moreThings": [
            |    {
@@ -310,7 +306,7 @@ class SourceIdentifierEmbedderTest
            |        "value": "${sourceIdentifier2.value}",
            |        "ontologyType": "${sourceIdentifier2.ontologyType}"
            |      },
-           |      "canonicalId": "${identifiers(sourceIdentifier2).CanonicalId}",
+           |      "canonicalId": "${identifiers(sourceIdentifier2)}",
            |      "type": "AnotherNewType"
            |    }
            |  ]
@@ -336,7 +332,7 @@ class SourceIdentifierEmbedderTest
       val json = parse(jsonString).right.get
       val identified = SourceIdentifierEmbedder.update(
         json,
-        Map.empty
+        identifiers = Map.empty
       )
 
       identified shouldBe a[Failure[_]]

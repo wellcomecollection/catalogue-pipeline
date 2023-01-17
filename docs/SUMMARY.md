@@ -1,5 +1,19 @@
 # Table of contents
 
+* [Introduction](README.md)
+
+## Fetching records from source catalogues
+
+* [What is an adapter?](fetching-records-from-source-catalogues/what-is-an-adapter.md)
+* [CALM: Our archive catalogue](fetching-records-from-source-catalogues/calm-our-archive-catalogue.md)
+
+## Transforming records into a single, common model
+
+* [Our single model: the Work](transforming-records-into-a-single-common-model/our-single-model-the-work.md)
+* [Creating canonical identifiers](transforming-records-into-a-single-common-model/creating-canonical-identifiers.md)
+
+## Other topics
+
 * [Catalogue](README.md)
 * [Search](search/README.md)
   * [wellcomecollection.org query development index](search/query-development-guide.md)

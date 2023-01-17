@@ -3,17 +3,18 @@ package weco.pipeline.sierra_linker.services
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.json.JsonUtil._
 import weco.messaging.fixtures.SQS.QueuePair
 import weco.messaging.memory.MemoryMessageSender
-import weco.monitoring.memory.MemoryMetrics
 import weco.storage.Version
 import weco.storage.store.memory.MemoryVersionedStore
-import weco.catalogue.source_model.generators.SierraGenerators
+import weco.catalogue.source_model.generators.SierraRecordGenerators
 import weco.catalogue.source_model.sierra.SierraItemRecord
-import weco.catalogue.source_model.sierra.identifiers.SierraItemNumber
+import weco.catalogue.source_model.Implicits._
 import weco.pipeline.sierra_linker.fixtures.WorkerFixture
 import weco.pipeline.sierra_linker.models.{Link, LinkOps}
+import weco.sierra.models.identifiers.SierraItemNumber
+
+import scala.concurrent.duration._
 
 class SierraLinkerWorkerTest
     extends AnyFunSpec
@@ -21,7 +22,7 @@ class SierraLinkerWorkerTest
     with Eventually
     with IntegrationPatience
     with ScalaFutures
-    with SierraGenerators
+    with SierraRecordGenerators
     with WorkerFixture {
 
   it("reads a Sierra record from SQS and stores it") {
@@ -138,14 +139,9 @@ class SierraLinkerWorkerTest
   }
 
   it("records a failure if it receives an invalid message") {
-    val metrics = new MemoryMetrics()
-
-    val store =
-      MemoryVersionedStore[SierraItemNumber, Link](initialEntries = Map.empty)
-
-    withLocalSqsQueuePair() {
+    withLocalSqsQueuePair(visibilityTimeout = 1 second) {
       case QueuePair(queue, dlq) =>
-        withItemWorker(queue, store = store, metrics = metrics) { _ =>
+        withItemWorker(queue) { _ =>
           val body =
             """
                     |{
@@ -158,7 +154,6 @@ class SierraLinkerWorkerTest
           eventually {
             assertQueueEmpty(queue)
             assertQueueHasSize(dlq, size = 1)
-            metrics.incrementedCounts should not contain "SierraItemsToDynamoWorkerService_ProcessMessage_failure"
           }
         }
     }

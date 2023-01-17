@@ -3,21 +3,21 @@ package weco.pipeline.sierra_indexer.services
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.Indexes
 import org.scalatest.funspec.AnyFunSpec
-import weco.json.JsonUtil._
 import weco.messaging.fixtures.SQS.QueuePair
 import weco.storage.generators.S3ObjectLocationGenerators
 import weco.storage.s3.S3ObjectLocation
 import weco.storage.store.memory.MemoryTypedStore
 import weco.catalogue.source_model.SierraSourcePayload
-import weco.catalogue.source_model.generators.SierraGenerators
+import weco.catalogue.source_model.generators.SierraRecordGenerators
 import weco.catalogue.source_model.sierra.SierraTransformable
+import weco.catalogue.source_model.Implicits._
 import weco.pipeline.sierra_indexer.fixtures.IndexerFixtures
 
 class WorkerTest
     extends AnyFunSpec
     with IndexerFixtures
     with S3ObjectLocationGenerators
-    with SierraGenerators {
+    with SierraRecordGenerators {
   it("returns an error if one of the bulk requests fails") {
     withIndices { indexPrefix =>
       val location = createS3ObjectLocation
@@ -25,10 +25,9 @@ class WorkerTest
       val bibId = createSierraBibNumber
 
       val transformable = createSierraTransformableWith(
-        maybeBibRecord = Some(
-          createSierraBibRecordWith(
-            id = bibId,
-            data = s"""
+        bibRecord = createSierraBibRecordWith(
+          id = bibId,
+          data = s"""
                  |{
                  |  "id" : "$bibId",
                  |  "updatedDate" : "2013-12-12T13:56:07Z",
@@ -53,7 +52,6 @@ class WorkerTest
                  |  ]
                  |}
                  |""".stripMargin
-          )
         )
       )
 
@@ -72,6 +70,7 @@ class WorkerTest
         )
         .await
 
+      // TODO: This should be a regular queue, not a DLQ pair
       withLocalSqsQueuePair() {
         case QueuePair(queue, dlq) =>
           withWorker(queue, store, indexPrefix) { worker =>
@@ -105,10 +104,9 @@ class WorkerTest
       // that one of the fields was a date -- preventing any non-date data
       // being indexed in future updates.
       val transformable = createSierraTransformableWith(
-        maybeBibRecord = Some(
-          createSierraBibRecordWith(
-            id = bibId,
-            data = s"""
+        bibRecord = createSierraBibRecordWith(
+          id = bibId,
+          data = s"""
                  |{
                  |  "id" : "$bibId",
                  |  "updatedDate" : "2013-12-12T13:56:07Z",
@@ -125,7 +123,6 @@ class WorkerTest
                  |  ]
                  |}
                  |""".stripMargin
-          )
         )
       )
 
@@ -173,10 +170,9 @@ class WorkerTest
       // that one of the fields was a date -- preventing any non-date data
       // being indexed in future updates.
       val transformable = createSierraTransformableWith(
-        maybeBibRecord = Some(
-          createSierraBibRecordWith(
-            id = bibId,
-            data = s"""
+        bibRecord = createSierraBibRecordWith(
+          id = bibId,
+          data = s"""
                  |{
                  |  "id" : "$bibId",
                  |  "updatedDate" : "2013-12-12T13:56:07Z",
@@ -193,7 +189,6 @@ class WorkerTest
                  |  }
                  |}
                  |""".stripMargin
-          )
         )
       )
 

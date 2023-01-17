@@ -1,65 +1,71 @@
 package weco.pipeline.router
 
-import akka.actor.ActorSystem
+import com.sksamuel.elastic4s.Index
 import com.typesafe.config.Config
 import weco.catalogue.internal_model.index.WorksIndexConfig
 import weco.elasticsearch.typesafe.ElasticBuilder
-import weco.messaging.sns.NotificationMessage
-import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
+import weco.messaging.typesafe.SNSBuilder
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.work.WorkState.{Denormalised, Merged}
-import weco.pipeline_storage.typesafe.ElasticSourceRetrieverBuilder
 import weco.typesafe.WellcomeTypesafeApp
 import weco.typesafe.config.builders.AkkaBuilder
 import weco.catalogue.internal_model.work.Work
-import weco.pipeline_storage.typesafe.{
-  ElasticIndexerBuilder,
-  ElasticSourceRetrieverBuilder,
-  PipelineStorageStreamBuilder
-}
+import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
+import weco.pipeline_storage.typesafe.PipelineStorageStreamBuilder
+import weco.typesafe.config.builders.EnrichConfig._
 
 import scala.concurrent.ExecutionContext
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
-    implicit val actorSystem: ActorSystem =
-      AkkaBuilder.buildActorSystem()
     implicit val executionContext: ExecutionContext =
       AkkaBuilder.buildExecutionContext()
 
     val esClient = ElasticBuilder.buildElasticClient(config)
 
-    val workIndexer = ElasticIndexerBuilder[Work[Denormalised]](
-      config,
-      esClient,
-      namespace = "denormalised-works",
-      indexConfig = WorksIndexConfig.denormalised
-    )
+    val workIndexer =
+      new ElasticIndexer[Work[Denormalised]](
+        client = esClient,
+        index = Index(config.requireString(s"es.denormalised-works.index")),
+        config = WorksIndexConfig.denormalised
+      )
 
-    val workRetriever = ElasticSourceRetrieverBuilder[Work[Merged]](
-      config,
-      esClient,
-      namespace = "merged-works"
-    )
+    val workRetriever =
+      new ElasticSourceRetriever[Work[Merged]](
+        client = esClient,
+        index = Index(config.requireString("es.merged-works.index"))
+      )
 
-    val stream = PipelineStorageStreamBuilder.buildPipelineStorageStream(
-      SQSBuilder.buildSQSStream[NotificationMessage](config),
-      indexer = workIndexer,
+    val workSender =
       SNSBuilder
         .buildSNSMessageSender(
           config,
           namespace = "work-sender",
           subject = "Sent from the router")
-    )(config)
 
-    new RouterWorkerService(
-      pathsMsgSender = SNSBuilder
+    val pathSender =
+      SNSBuilder
         .buildSNSMessageSender(
           config,
           namespace = "path-sender",
-          subject = "Sent from the router"),
+          subject = "Sent from the router")
+
+    val pathConcatenatorSender =
+      SNSBuilder
+        .buildSNSMessageSender(
+          config,
+          namespace = "path-concatenator-sender",
+          subject = "Sent from the router")
+
+    val pipelineStream =
+      PipelineStorageStreamBuilder
+        .buildPipelineStorageStream(workIndexer, workSender)(config)
+
+    new RouterWorkerService(
+      pathsMsgSender = pathSender,
+      pathConcatenatorMsgSender = pathConcatenatorSender,
       workRetriever = workRetriever,
-      pipelineStream = stream
+      pipelineStream = pipelineStream
     )
   }
 }

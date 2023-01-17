@@ -1,0 +1,185 @@
+{
+  "description" : "examples for the aggregation-with-filters tests",
+  "createdAt" : "2023-01-03T09:31:59.725242Z",
+  "id" : "s4ry14qu",
+  "document" : {
+    "debug" : {
+      "source" : {
+        "id" : "s4ry14qu",
+        "identifier" : {
+          "identifierType" : {
+            "id" : "calm-record-id"
+          },
+          "ontologyType" : "Work",
+          "value" : "Ue8m3HVuer"
+        },
+        "version" : 67,
+        "modifiedTime" : "2021-09-17T18:49:36Z"
+      },
+      "mergedTime" : "2021-09-17T18:49:36Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
+      "redirectSources" : [
+      ]
+    },
+    "display" : {
+      "id" : "s4ry14qu",
+      "title" : "title-XX1muoI8Tp",
+      "alternativeTitles" : [
+      ],
+      "workType" : {
+        "id" : "v",
+        "label" : "E-books",
+        "type" : "Format"
+      },
+      "contributors" : [
+      ],
+      "identifiers" : [
+        {
+          "identifierType" : {
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
+            "type" : "IdentifierType"
+          },
+          "value" : "Ue8m3HVuer",
+          "type" : "Identifier"
+        }
+      ],
+      "subjects" : [
+        {
+          "label" : "9hdRJC6PIO",
+          "concepts" : [
+            {
+              "label" : "bmiPTNnwYSoEYyd",
+              "type" : "Concept"
+            },
+            {
+              "label" : "ewbq2T7lfxMM8Gf",
+              "type" : "Concept"
+            },
+            {
+              "label" : "uD4zaFerI8P7W1W",
+              "type" : "Concept"
+            }
+          ],
+          "type" : "Subject"
+        }
+      ],
+      "genres" : [
+      ],
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "availabilities" : [
+      ],
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "notes" : [
+      ],
+      "formerFrequency" : [
+      ],
+      "designation" : [
+      ],
+      "images" : [
+      ],
+      "parts" : [
+      ],
+      "partOf" : [
+      ],
+      "precededBy" : [
+      ],
+      "succeededBy" : [
+      ],
+      "type" : "Work"
+    },
+    "query" : {
+      "id" : "s4ry14qu",
+      "format.id" : "v",
+      "workType" : "Standard",
+      "identifiers.value" : [
+        "Ue8m3HVuer"
+      ],
+      "title" : "title-XX1muoI8Tp",
+      "alternativeTitles" : [
+      ],
+      "description" : null,
+      "physicalDescription" : null,
+      "edition" : null,
+      "notes.contents" : [
+      ],
+      "lettering" : null,
+      "images.id" : [
+      ],
+      "images.identifiers.value" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
+      "items.locations.accessConditions.status.id" : [
+      ],
+      "items.locations.license.id" : [
+      ],
+      "items.locations.locationType.id" : [
+      ],
+      "subjects.id" : [
+      ],
+      "subjects.label" : [
+        "9hdRJC6PIO"
+      ],
+      "subjects.concepts.label" : [
+        "bmiPTNnwYSoEYyd",
+        "ewbq2T7lfxMM8Gf",
+        "uD4zaFerI8P7W1W"
+      ],
+      "genres.label" : [
+      ],
+      "genres.concepts.label" : [
+      ],
+      "languages.id" : [
+      ],
+      "languages.label" : [
+      ],
+      "contributors.agent.id" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "production.label" : [
+      ],
+      "production.dates.range.from" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
+      ],
+      "collectionPath.label" : null,
+      "collectionPath.path" : null,
+      "referenceNumber" : null
+    },
+    "aggregatableValues" : {
+      "workType" : [
+        "{\"id\":\"v\",\"label\":\"E-books\",\"type\":\"Format\"}"
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+        "{\"label\":\"9hdRJC6PIO\",\"concepts\":[],\"type\":\"Subject\"}"
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
+    },
+    "type" : "Visible"
+  }
+}

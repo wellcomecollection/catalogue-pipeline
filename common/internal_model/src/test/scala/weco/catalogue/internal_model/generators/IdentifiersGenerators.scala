@@ -1,5 +1,6 @@
 package weco.catalogue.internal_model.generators
 
+import org.scalacheck.Arbitrary
 import weco.fixtures.RandomGenerators
 import weco.catalogue.internal_model.identifiers.{
   CanonicalId,
@@ -7,9 +8,21 @@ import weco.catalogue.internal_model.identifiers.{
   SourceIdentifier
 }
 
-import scala.util.Random
-
 trait IdentifiersGenerators extends RandomGenerators {
+  implicit val arbitraryCanonicalId: Arbitrary[CanonicalId] =
+    Arbitrary {
+      createCanonicalId
+    }
+
+  // We have a rule that says SourceIdentifier isn't allowed to contain whitespace,
+  // but sometimes scalacheck will happen to generate such a string, which breaks
+  // tests in CI.  This generator is meant to create SourceIdentifiers that
+  // don't contain whitespace.
+  implicit val arbitrarySourceIdentifier: Arbitrary[SourceIdentifier] =
+    Arbitrary {
+      createSourceIdentifier
+    }
+
   def createCanonicalId: CanonicalId =
     CanonicalId(randomAlphanumeric(length = 8).toLowerCase())
 
@@ -71,7 +84,7 @@ trait IdentifiersGenerators extends RandomGenerators {
                    length: Int = 8): String =
     s"%c%0${length - 1}d".format(
       prefix,
-      Random.nextInt(math.pow(10, length - 1).toInt)
+      random.nextInt(math.pow(10, length - 1).toInt)
     )
 
   def createMiroSourceIdentifierWith(
@@ -94,6 +107,13 @@ trait IdentifiersGenerators extends RandomGenerators {
     SourceIdentifier(
       value = createCalmRecordID,
       identifierType = IdentifierType.CalmRecordIdentifier,
+      ontologyType = "Work"
+    )
+
+  def createTeiSourceIdentifier: SourceIdentifier =
+    SourceIdentifier(
+      value = randomAlphanumeric(10),
+      identifierType = IdentifierType.Tei,
       ontologyType = "Work"
     )
 

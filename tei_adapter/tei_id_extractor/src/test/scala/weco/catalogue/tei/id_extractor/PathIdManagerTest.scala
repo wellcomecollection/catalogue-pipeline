@@ -3,7 +3,6 @@ package weco.catalogue.tei.id_extractor
 import org.scalatest.funspec.AnyFunSpec
 import scalikejdbc._
 import weco.fixtures.TestWith
-import weco.json.JsonUtil._
 import weco.messaging.memory.MemoryMessageSender
 import weco.storage.fixtures.S3Fixtures.Bucket
 import weco.storage.s3.S3ObjectLocation
@@ -17,6 +16,7 @@ import weco.catalogue.source_model.tei.{
   TeiIdDeletedMessage,
   TeiIdMessage
 }
+import weco.catalogue.source_model.Implicits._
 
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -150,10 +150,10 @@ class PathIdManagerTest extends AnyFunSpec with PathIdDatabase {
             updatedPathId.id)
 
           messageSender
-            .getMessages[TeiIdChangeMessage]() should contain only (TeiIdChangeMessage(
+            .getMessages[TeiIdChangeMessage]() should contain only TeiIdChangeMessage(
             id = updatedPathId.id,
             s3Location = expectedS3Location,
-            newTime))
+            newTime)
       }
 
     }
@@ -330,7 +330,7 @@ class PathIdManagerTest extends AnyFunSpec with PathIdDatabase {
   describe("handlePathDeleted") {
     it("deletes a path") {
       withPathIdManager(bucket) {
-        case (table, manager, store, messageSender) =>
+        case (table, manager, _, messageSender) =>
           implicit val session = AutoSession
 
           val path = "Batak/WMS_Batak_1.xml"
@@ -347,9 +347,9 @@ class PathIdManagerTest extends AnyFunSpec with PathIdDatabase {
           }.map(PathId(table.p)).single.apply()
           maybePathId shouldBe None
           messageSender
-            .getMessages[TeiIdDeletedMessage]() should contain only (TeiIdDeletedMessage(
+            .getMessages[TeiIdDeletedMessage]() should contain only TeiIdDeletedMessage(
             id = "manuscript_1234",
-            newTime))
+            newTime)
       }
     }
 

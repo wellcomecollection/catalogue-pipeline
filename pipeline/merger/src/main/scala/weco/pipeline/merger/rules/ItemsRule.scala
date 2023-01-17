@@ -28,7 +28,8 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     sources: Seq[Work[Identified]]
   ): FieldMergeResult[FieldData] = {
     val items =
-      mergeIntoCalmTarget(target, sources)
+      mergeIntoTeiTarget(target, sources)
+        .orElse(mergeIntoCalmTarget(target, sources))
         .orElse(mergeMetsIntoSierraTarget(target, sources))
         .orElse(
           mergeSingleMiroIntoSingleOrZeroItemSierraTarget(target, sources)
@@ -38,6 +39,7 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
 
     val mergedSources = (
       List(
+        mergeIntoTeiTarget,
         mergeIntoCalmTarget,
         mergeMetsIntoSierraTarget,
         mergeSingleMiroIntoSingleOrZeroItemSierraTarget,
@@ -123,13 +125,14 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
   // we know that in some cases the duplication is such that we can treat the Miro source as having
   // been entirely subsumed into the target despite not having used any of its data.
   //
-  // At the moment, the only case of this is when we have a digaids work: we know that
+  // At the moment, the only case of this is when we have a (re)digitised Miro work: we know that
   // the Miro item is identical to the METS item.
   def knownDuplicateSources(
     target: Work.Visible[Identified],
     sources: Seq[Work[Identified]]
   ): Seq[Work[Identified]] =
-    if (sierraDigaids(target) && sources.exists(singleDigitalItemMetsWork)) {
+    if (sierraDigitisedMiro(target) && sources.exists(
+          singleDigitalItemMetsWork)) {
       sources.filter(singleDigitalItemMiroWork)
     } else {
       Nil
@@ -149,9 +152,24 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     *
     * For this reason, we keep all the items *except* the Calm item.  This means
     * we'll also pick up any items linked to the Sierra work from METS or Miro.
+    *
     */
   private val mergeIntoCalmTarget = new PartialRule {
     val isDefinedForTarget: WorkPredicate = singlePhysicalItemCalmWork
+    val isDefinedForSource: WorkPredicate =
+      singleDigitalItemMetsWork or
+        singleDigitalItemMiroWork or
+        sierraWork
+
+    def rule(
+      target: Work.Visible[Identified],
+      sources: NonEmptyList[Work[Identified]]
+    ): FieldData =
+      sources.map(_.data.items).toList.flatten
+  }
+
+  private val mergeIntoTeiTarget = new PartialRule {
+    val isDefinedForTarget: WorkPredicate = teiWork
     val isDefinedForSource: WorkPredicate =
       singleDigitalItemMetsWork or
         singleDigitalItemMiroWork or

@@ -97,4 +97,19 @@ locals {
   ])
 
   critical_slack_webhook = data.aws_ssm_parameter.critical_slack_webhook.value
+
+  fargate_service_boilerplate = {
+    cluster_name = aws_ecs_cluster.cluster.name
+    cluster_arn  = aws_ecs_cluster.cluster.arn
+
+    dlq_alarm_topic_arn = var.dlq_alarm_arn
+
+    subnets = var.private_subnets
+
+    elastic_cloud_vpce_security_group_id = var.elastic_cloud_vpce_sg_id
+
+    shared_logging_secrets = var.shared_logging_secrets
+
+    egress_security_group_id = var.egress_security_group_id
+  }
 }

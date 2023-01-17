@@ -1,36 +1,35 @@
-module "merger_queue" {
-  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
-  queue_name = "${local.namespace_hyphen}_merger"
+module "merger_works_output_topic" {
+  source = "../modules/topic"
+
+  name       = "${local.namespace}_merger_works_output"
+  role_names = [module.merger.task_role_name]
+}
+
+module "merger_images_output_topic" {
+  source = "../modules/topic"
+
+  name       = "${local.namespace}_merger_images_output"
+  role_names = [module.merger.task_role_name]
+}
+
+module "merger" {
+  source = "../modules/fargate_service"
+
+  name            = "merger"
+  container_image = local.merger_image
+
   topic_arns = [
-  module.matcher_topic.arn]
-  aws_region      = var.aws_region
-  alarm_topic_arn = var.dlq_alarm_arn
+    module.matcher_output_topic.arn,
+  ]
 
   # This has to be longer than the `flush_interval_seconds` in the merger.
   # It also has to be long enough for the Work to actually get processed,
   # and some of them are quite big.
-  visibility_timeout_seconds = 20 * 60
-}
-
-module "merger" {
-  source          = "../modules/service"
-  service_name    = "${local.namespace_hyphen}_merger"
-  container_image = local.merger_image
-  security_group_ids = [
-    aws_security_group.service_egress.id,
-  ]
-
-  elastic_cloud_vpce_sg_id = var.ec_privatelink_security_group_id
-
-  cluster_name = aws_ecs_cluster.cluster.name
-  cluster_arn  = aws_ecs_cluster.cluster.arn
+  queue_visibility_timeout_seconds = 20 * 60
 
   env_vars = {
-    metrics_namespace       = "${local.namespace_hyphen}_merger"
-    topic_arn               = module.matcher_topic.arn
-    merger_queue_id         = module.merger_queue.url
-    merger_works_topic_arn  = module.merger_works_topic.arn
-    merger_images_topic_arn = module.merger_images_topic.arn
+    merger_works_topic_arn  = module.merger_works_output_topic.arn
+    merger_images_topic_arn = module.merger_images_output_topic.arn
 
     es_identified_works_index = local.es_works_identified_index
     es_merged_works_index     = local.es_works_merged_index
@@ -45,45 +44,8 @@ module "merger" {
   cpu    = 2048
   memory = 4096
 
-  use_fargate_spot = true
-
-  subnets = var.subnets
-
   min_capacity = var.min_capacity
   max_capacity = local.max_capacity
 
-  scale_down_adjustment = local.scale_down_adjustment
-  scale_up_adjustment   = local.scale_up_adjustment
-
-  queue_read_policy = module.merger_queue.read_policy
-
-  depends_on = [
-    null_resource.elasticsearch_users,
-  ]
-
-  deployment_service_env  = var.release_label
-  deployment_service_name = "merger"
-  shared_logging_secrets  = var.shared_logging_secrets
-}
-
-module "merger_works_topic" {
-  source = "../modules/topic"
-
-  name       = "${local.namespace_hyphen}_merger_works"
-  role_names = [module.merger.task_role_name]
-}
-
-module "merger_images_topic" {
-  source = "../modules/topic"
-
-  name       = "${local.namespace_hyphen}_merger_images"
-  role_names = [module.merger.task_role_name]
-}
-
-module "merger_scaling_alarm" {
-  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.1.3"
-  queue_name = module.merger_queue.name
-
-  queue_high_actions = [module.merger.scale_up_arn]
-  queue_low_actions  = [module.merger.scale_down_arn]
+  fargate_service_boilerplate = local.fargate_service_boilerplate
 }

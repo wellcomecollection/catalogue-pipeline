@@ -1,0 +1,26 @@
+{
+  "description" : "an invisible work with 'mouse' in the title",
+  "createdAt" : "2022-10-03T10:25:18.862Z",
+  "id" : "ehd2s7ek",
+  "document" : {
+    "debug" : {
+      "source" : {
+        "id" : "ehd2s7ek",
+        "identifier" : {
+          "identifierType" : {
+            "id" : "calm-record-id"
+          },
+          "ontologyType" : "Work",
+          "value" : "QAH5ZlILHM"
+        },
+        "version" : 47,
+        "modifiedTime" : "2006-12-05T07:13:26Z"
+      },
+      "mergedTime" : "2006-12-05T07:13:26Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
+      "invisibilityReasons" : [
+      ]
+    },
+    "type" : "Invisible"
+  }
+}

@@ -5,28 +5,29 @@ import com.sksamuel.elastic4s.{Index, Indexes}
 import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.json.JsonUtil._
 import weco.messaging.fixtures.SQS.QueuePair
 import weco.storage.generators.S3ObjectLocationGenerators
 import weco.storage.s3.S3ObjectLocation
 import weco.storage.store.memory.MemoryTypedStore
 import weco.catalogue.source_model.SierraSourcePayload
-import weco.catalogue.source_model.generators.SierraGenerators
+import weco.catalogue.source_model.generators.SierraRecordGenerators
 import weco.catalogue.source_model.sierra.{
   SierraHoldingsRecord,
   SierraItemRecord,
   SierraOrderRecord,
   SierraTransformable
 }
+import weco.catalogue.source_model.Implicits._
 import weco.pipeline.sierra_indexer.fixtures.IndexerFixtures
 
 import java.time.Instant
+import scala.concurrent.duration._
 
 class SierraIndexerFeatureTest
     extends AnyFunSpec
     with Matchers
     with EitherValues
-    with SierraGenerators
+    with SierraRecordGenerators
     with S3ObjectLocationGenerators
     with IndexerFixtures {
   it("indexes bib records and their varFields/fixedFields") {
@@ -45,10 +46,9 @@ class SierraIndexerFeatureTest
     }
 
     val transformable = createSierraTransformableWith(
-      maybeBibRecord = Some(
-        createSierraBibRecordWith(
-          id = bibId,
-          data = s"""
+      bibRecord = createSierraBibRecordWith(
+        id = bibId,
+        data = s"""
                |{
                |  "id" : "$bibId",
                |  "updatedDate" : "2013-12-12T13:56:07Z",
@@ -83,16 +83,15 @@ class SierraIndexerFeatureTest
                |  }
                |}
                |""".stripMargin
-        )
       ),
       itemRecords = itemIds.map { id =>
-        createSierraItemRecordWith(id = id)
+        createSierraItemRecordWith(id = id, bibIds = List(bibId))
       },
       holdingsRecords = holdingsIds.map { id =>
-        createSierraHoldingsRecordWith(id = id)
+        createSierraHoldingsRecordWith(id = id, bibIds = List(bibId))
       },
       orderRecords = orderIds.map { id =>
-        createSierraOrderRecordWith(id = id)
+        createSierraOrderRecordWith(id = id, bibIds = List(bibId))
       }
     )
 
@@ -252,10 +251,9 @@ class SierraIndexerFeatureTest
     val bibId = createSierraBibNumber
 
     val transformable1 = createSierraTransformableWith(
-      maybeBibRecord = Some(
-        createSierraBibRecordWith(
-          id = bibId,
-          data = s"""
+      bibRecord = createSierraBibRecordWith(
+        id = bibId,
+        data = s"""
                     |{
                     |  "id" : "$bibId",
                     |  "updatedDate" : "2001-01-01T01:01:01Z",
@@ -274,17 +272,15 @@ class SierraIndexerFeatureTest
                     |  }
                     |}
                     |""".stripMargin
-        )
       ),
       itemRecords = List(),
       holdingsRecords = List(),
     )
 
     val transformable2 = createSierraTransformableWith(
-      maybeBibRecord = Some(
-        createSierraBibRecordWith(
-          id = bibId,
-          data = s"""
+      bibRecord = createSierraBibRecordWith(
+        id = bibId,
+        data = s"""
                     |{
                     |  "id" : "$bibId",
                     |  "updatedDate" : "2002-02-02T02:02:02Z",
@@ -303,7 +299,6 @@ class SierraIndexerFeatureTest
                     |  }
                     |}
                     |""".stripMargin
-        )
       ),
       itemRecords = List(),
       holdingsRecords = List(),
@@ -317,7 +312,7 @@ class SierraIndexerFeatureTest
     )
 
     withIndices { indexPrefix =>
-      withLocalSqsQueuePair(visibilityTimeout = 5) {
+      withLocalSqsQueuePair() {
         case QueuePair(queue, dlq) =>
           withWorker(queue, store, indexPrefix) { _ =>
             sendNotificationToSQS(
@@ -471,10 +466,12 @@ class SierraIndexerFeatureTest
   it("indexes item records and their varFields/fixedFields") {
     val location = createS3ObjectLocation
 
+    val bibId = createSierraBibNumber
     val itemId1 = createSierraItemNumber
     val itemId2 = createSierraItemNumber
 
-    val transformable = createSierraTransformableWith(
+    val transformable = createSierraTransformableStubWith(
+      bibId = bibId,
       itemRecords = List(
         SierraItemRecord(
           id = itemId1,
@@ -498,7 +495,7 @@ class SierraIndexerFeatureTest
             |}
             |""".stripMargin,
           modifiedDate = Instant.now(),
-          bibIds = List()
+          bibIds = List(bibId)
         ),
         SierraItemRecord(
           id = itemId2,
@@ -531,7 +528,7 @@ class SierraIndexerFeatureTest
                     |}
                     |""".stripMargin,
           modifiedDate = Instant.now(),
-          bibIds = List()
+          bibIds = List(bibId)
         )
       )
     )
@@ -668,10 +665,12 @@ class SierraIndexerFeatureTest
   it("indexes holdings records and their varFields/fixedFields") {
     val location = createS3ObjectLocation
 
+    val bibId = createSierraBibNumber
     val holdingsId1 = createSierraHoldingsNumber
     val holdingsId2 = createSierraHoldingsNumber
 
-    val transformable = createSierraTransformableWith(
+    val transformable = createSierraTransformableStubWith(
+      bibId = bibId,
       holdingsRecords = List(
         SierraHoldingsRecord(
           id = holdingsId1,
@@ -695,7 +694,7 @@ class SierraIndexerFeatureTest
                     |}
                     |""".stripMargin,
           modifiedDate = Instant.now(),
-          bibIds = List()
+          bibIds = List(bibId)
         ),
         SierraHoldingsRecord(
           id = holdingsId2,
@@ -727,7 +726,7 @@ class SierraIndexerFeatureTest
                     |}
                     |""".stripMargin,
           modifiedDate = Instant.now(),
-          bibIds = List()
+          bibIds = List(bibId)
         )
       )
     )
@@ -864,10 +863,12 @@ class SierraIndexerFeatureTest
   it("indexes order records and their varFields/fixedFields") {
     val location = createS3ObjectLocation
 
+    val bibId = createSierraBibNumber
     val orderId1 = createSierraOrderNumber
     val orderId2 = createSierraOrderNumber
 
-    val transformable = createSierraTransformableWith(
+    val transformable = createSierraTransformableStubWith(
+      bibId = bibId,
       orderRecords = List(
         SierraOrderRecord(
           id = orderId1,
@@ -891,7 +892,7 @@ class SierraIndexerFeatureTest
                     |}
                     |""".stripMargin,
           modifiedDate = Instant.now(),
-          bibIds = List()
+          bibIds = List(bibId)
         ),
         SierraOrderRecord(
           id = orderId2,
@@ -923,7 +924,7 @@ class SierraIndexerFeatureTest
                     |}
                     |""".stripMargin,
           modifiedDate = Instant.now(),
-          bibIds = List()
+          bibIds = List(bibId)
         )
       )
     )
@@ -1061,63 +1062,34 @@ class SierraIndexerFeatureTest
     withIndices { indexPrefix =>
       val location = createS3ObjectLocation
 
-      val bibId = createSierraBibNumber
-
-      val transformable = createSierraTransformableWith(
-        maybeBibRecord = Some(
-          createSierraBibRecordWith(
-            id = bibId,
-            data = s"""
-                 |{
-                 |  "id" : "$bibId",
-                 |  "updatedDate" : "2013-12-12T13:56:07Z",
-                 |  "deleted" : false,
-                 |  "varFields" : [
-                 |    {
-                 |      "fieldTag" : "b",
-                 |      "content" : "22501328220"
-                 |    },
-                 |    {
-                 |      "fieldTag" : "c",
-                 |      "marcTag" : "949",
-                 |      "ind1" : " ",
-                 |      "ind2" : " ",
-                 |      "subfields" : [
-                 |        {
-                 |          "tag" : "a",
-                 |          "content" : "/RHO"
-                 |        }
-                 |      ]
-                 |    }
-                 |  ]
-                 |}
-                 |""".stripMargin
-          )
-        )
-      )
+      val transformable = createSierraTransformable
 
       val store = MemoryTypedStore[S3ObjectLocation, SierraTransformable](
         initialEntries = Map(location -> transformable)
       )
 
-      // Make the varfields index read-only, so any attempt to index data into
-      // this index should fail.
-      elasticClient
-        .execute(
-          updateSettings(
-            Indexes(s"${indexPrefix}_varfields"),
-            settings = Map("blocks.read_only" -> "true")
-          )
-        )
-        .await
-
-      withLocalSqsQueuePair() {
+      withLocalSqsQueuePair(visibilityTimeout = 1.second) {
         case QueuePair(queue, dlq) =>
           withWorker(queue, store, indexPrefix) { _ =>
+            // Make the varfields index read-only, so any attempt to index data into
+            // this index should fail.
+            //
+            // We need to do this after the worker has started, or it won't be able
+            // to create the index mappings and will never fetch messages from the queue.
+            Thread.sleep(1000)
+            elasticClient
+              .execute(
+                updateSettings(
+                  Indexes(s"${indexPrefix}_varfields"),
+                  settings = Map("blocks.read_only" -> "true")
+                )
+              )
+              .await
+
             sendNotificationToSQS(
               queue,
               SierraSourcePayload(
-                id = bibId.withoutCheckDigit,
+                id = transformable.sierraId.withoutCheckDigit,
                 location = location,
                 version = 1
               )

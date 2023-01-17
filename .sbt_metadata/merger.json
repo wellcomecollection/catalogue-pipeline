@@ -1,8 +1,0 @@
-{
-  "id" : "merger",
-  "folder" : "pipeline/merger",
-  "dependencyIds" : [
-    "internal_model",
-    "pipeline_storage_typesafe"
-  ]
-}

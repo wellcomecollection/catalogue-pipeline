@@ -1,23 +1,22 @@
-locals {
-  es_memory = var.is_reindexing ? "58g" : "15g"
+data "ec_stack" "latest_patch" {
+  version_regex = "8.5.?"
+  region        = "eu-west-1"
 }
 
 resource "ec_deployment" "pipeline" {
   name = "pipeline-${var.pipeline_date}"
 
+  version = data.ec_stack.latest_patch.version
+
   region                 = "eu-west-1"
-  version                = "7.12.1"
   deployment_template_id = "aws-io-optimized-v2"
 
-  traffic_filter = [
-    var.traffic_filter_platform_vpce_id,
-    var.traffic_filter_catalogue_vpce_id,
-    var.traffic_filter_public_internet_id,
-  ]
+  traffic_filter = var.network_config.traffic_filters
 
   elasticsearch {
     topology {
-      zone_count = 1
+      id         = "hot_content"
+      zone_count = local.es_node_count
       size       = local.es_memory
     }
   }
@@ -28,37 +27,76 @@ resource "ec_deployment" "pipeline" {
       size       = "1g"
     }
   }
+
+  observability {
+    deployment_id = var.monitoring_config.logging_cluster_id
+  }
+
+  lifecycle {
+    ignore_changes = [
+
+      # We've had issues in the past when an Elastic upgrade is triggered
+      # unexpectedly, sometimes causing missing master nodes/search issues.
+      # e.g. https://wellcome.slack.com/archives/C01FBFSDLUA/p1663849437942949
+      #
+      # This `ignore_changes` means Terraform won't upgrade the cluster
+      # version after initial creation -- we'll have to log in to the
+      # Elastic Cloud console and trigger it explicitly.
+      version,
+    ]
+  }
 }
 
 # We create the username/password secrets in Terraform, and set the values in the
 # Python script.  This ensures the secrets will be properly cleaned up when we delete
 # a pipeline.
+#
+# We set the recovery window to 0 so that secrets are deleted immediately,
+# rather than hanging around for a 30 day recovery period.
+# See https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret#recovery_window_in_days
+#
 resource "aws_secretsmanager_secret" "es_username" {
   for_each = toset(concat(local.pipeline_storage_service_list, ["image_ingestor", "work_ingestor", "read_only"]))
 
   name = "elasticsearch/pipeline_storage_${var.pipeline_date}/${each.key}/es_username"
+
+  recovery_window_in_days = 0
 }
 
 resource "aws_secretsmanager_secret" "es_password" {
   for_each = toset(concat(local.pipeline_storage_service_list, ["image_ingestor", "work_ingestor", "read_only"]))
 
   name = "elasticsearch/pipeline_storage_${var.pipeline_date}/${each.key}/es_password"
+
+  recovery_window_in_days = 0
 }
 
 resource "aws_secretsmanager_secret" "es_username_catalogue" {
   provider = aws.catalogue
 
-  for_each = toset(["snapshot_generator"])
+  for_each = toset([
+    "snapshot_generator",
+    "catalogue_api",
+    "concepts_api",
+  ])
 
   name = "elasticsearch/pipeline_storage_${var.pipeline_date}/${each.key}/es_username"
+
+  recovery_window_in_days = 0
 }
 
 resource "aws_secretsmanager_secret" "es_password_catalogue" {
   provider = aws.catalogue
 
-  for_each = toset(["snapshot_generator"])
+  for_each = toset([
+    "snapshot_generator",
+    "catalogue_api",
+    "concepts_api",
+  ])
 
   name = "elasticsearch/pipeline_storage_${var.pipeline_date}/${each.key}/es_password"
+
+  recovery_window_in_days = 0
 }
 
 # We can't attach the provisioner directly to the Elastic Cloud resource (I'm not
@@ -103,7 +141,7 @@ locals {
 }
 
 module "pipeline_storage_secrets" {
-  source = "../../../infrastructure/modules/secrets"
+  source = "github.com/wellcomecollection/terraform-aws-secrets?ref=v1.3.0"
 
   key_value_map = {
     (local.pipeline_storage_public_host) = "${local.pipeline_storage_elastic_id}.${local.pipeline_storage_elastic_region}.aws.found.io"
@@ -119,10 +157,12 @@ module "pipeline_storage_secrets" {
     # See https://www.elastic.co/guide/en/cloud/current/ec-traffic-filtering-vpc.html
     (local.pipeline_storage_private_host) = "${local.pipeline_storage_elastic_id}.vpce.${local.pipeline_storage_elastic_region}.aws.elastic-cloud.com"
   }
+
+  deletion_mode = "IMMEDIATE"
 }
 
 module "pipeline_storage_secrets_catalogue" {
-  source = "../../../infrastructure/modules/secrets"
+  source = "github.com/wellcomecollection/terraform-aws-secrets?ref=v1.3.0"
 
   providers = {
     aws = aws.catalogue
@@ -142,6 +182,8 @@ module "pipeline_storage_secrets_catalogue" {
     # See https://www.elastic.co/guide/en/cloud/current/ec-traffic-filtering-vpc.html
     (local.pipeline_storage_private_host) = "${local.pipeline_storage_elastic_id}.vpce.${local.pipeline_storage_elastic_region}.aws.elastic-cloud.com"
   }
+
+  deletion_mode = "IMMEDIATE"
 }
 
 locals {
@@ -150,11 +192,12 @@ locals {
     "matcher",
     "merger",
     "transformer",
+    "path_concatenator",
     "relation_embedder",
     "router",
     "inferrer",
-    "ingestor_works",
-    "ingestor_images",
+    "work_ingestor",
+    "image_ingestor",
   ]
 
   pipeline_storage_es_service_secrets = zipmap(local.pipeline_storage_service_list, [

@@ -26,6 +26,11 @@ object IdentifierType extends Enum[IdentifierType] {
   def apply(id: String): IdentifierType =
     IdentifierType.withName(id)
 
+  case object Tei extends IdentifierType {
+    val id = "tei-manuscript-id"
+    val label = "Tei manuscript id"
+  }
+
   case object MiroImageNumber extends IdentifierType {
     val id = "miro-image-number"
     val label = "Miro image number"
@@ -63,7 +68,7 @@ object IdentifierType extends Enum[IdentifierType] {
 
   case object MESH extends IdentifierType {
     val id = "nlm-mesh"
-    val label = "Medical Subject Headings (MESH) identifier"
+    val label = "Medical Subject Headings (MeSH) identifier"
   }
 
   case object CalmRefNo extends IdentifierType {
@@ -109,5 +114,30 @@ object IdentifierType extends Enum[IdentifierType] {
   case object IconographicNumber extends IdentifierType {
     val id = "iconographic-number"
     val label = "Iconographic number"
+  }
+
+  case object VIAF extends IdentifierType {
+    val id = "viaf"
+    val label = "VIAF: The Virtual International Authority File"
+  }
+
+  case object Fihrist extends IdentifierType {
+    val id = "fihrist"
+    val label = "Fihrist Authority"
+  }
+
+  // http://estc.bl.uk/ / https://www.wikidata.org/wiki/Property:P3939
+  case object ESTC extends IdentifierType {
+    val id = "bl-estc-citation-no"
+    val label = "British Library English Short Title Catalogue"
+  }
+
+  // This is not a "real" identifier scheme, it exists so that things that only have a name
+  // in the source data can be treated as though they are properly identified.
+  // The expectation is that when a corresponding identifier is discovered for them
+  // they can be replaced.
+  case object LabelDerived extends IdentifierType {
+    val id = "label-derived"
+    val label = "Identifier derived from the label of the referent"
   }
 }

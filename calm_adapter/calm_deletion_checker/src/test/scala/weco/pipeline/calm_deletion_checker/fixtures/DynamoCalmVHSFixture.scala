@@ -6,9 +6,7 @@ import org.scanamo.generic.auto._
 import org.scanamo.{Table => ScanamoTable}
 import org.scanamo.syntax._
 import weco.fixtures.TestWith
-import weco.json.JsonUtil._
 import weco.storage.Version
-import weco.storage.dynamo.DynamoConfig
 import weco.storage.fixtures.DynamoFixtures
 import weco.storage.generators.S3ObjectLocationGenerators
 import weco.storage.maxima.Maxima
@@ -24,6 +22,7 @@ import weco.storage.store.{
 import weco.storage.streaming.Codec
 import weco.catalogue.source_model.calm.CalmRecord
 import weco.catalogue.source_model.store.SourceVHS
+import weco.catalogue.source_model.Implicits._
 import weco.pipeline.calm_deletion_checker.CalmSourceDynamoRow
 
 import scala.language.higherKinds
@@ -35,7 +34,7 @@ trait DynamoCalmVHSFixture
     with EitherValues {
   def createStore[T: Codec](table: DynamoFixtures.Table)
     : VersionedHybridStore[String, Int, S3ObjectLocation, T] = {
-    val dynamoConfig = DynamoConfig(table.name, table.index)
+    val dynamoConfig = createDynamoConfigWith(table)
     val hybridStore = {
       new HybridStoreWithMaxima[String, Int, S3ObjectLocation, T] {
         implicit override val indexedStore

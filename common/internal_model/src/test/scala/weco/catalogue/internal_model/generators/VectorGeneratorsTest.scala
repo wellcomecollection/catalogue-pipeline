@@ -17,20 +17,6 @@ class VectorGeneratorsTest
     norm(vec) shouldBe <=(10.0f)
   }
 
-  it("generates random vectors of strings") {
-    val hash = randomHash(32)
-    hash should have length 32
-    every(hash) should fullyMatch regex "\\d+"
-  }
-
-  it("generates similar hashes") {
-    val hashes = similarHashes(32, 5)
-    val differences = hashes.map { hash =>
-      (hashes.head.toSet -- hash.toSet).size
-    }
-    differences shouldBe sorted
-  }
-
   it("generates vectors close to known vectors") {
     val vecA = randomVector(16)
     val vecB = nearbyVector(vecA, 3f)

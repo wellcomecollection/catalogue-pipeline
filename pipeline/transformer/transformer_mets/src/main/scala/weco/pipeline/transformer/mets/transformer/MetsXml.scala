@@ -37,13 +37,11 @@ case class MetsXml(root: Elem) {
     */
   def recordIdentifier: Either[Exception, String] = {
     val identifierNodes =
-      (root \\ "dmdSec" \ "mdWrap" \\ "recordInfo" \ "recordIdentifier").toList
+      (root \\ "dmdSec" \ "mdWrap" \\ "recordInfo" \ "recordIdentifier").toList.distinct
     identifierNodes match {
-      case identifierNodes if identifierNodes.distinct.size == 1 =>
-        Right[Exception, String](identifierNodes.head.text)
+      case Seq(node) => Right(node.text)
       case _ =>
-        Left[Exception, String](
-          new Exception("Could not parse recordIdentifier from METS XML"))
+        Left(new Exception("Could not parse recordIdentifier from METS XML"))
     }
   }
 

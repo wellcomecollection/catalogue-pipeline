@@ -4,28 +4,21 @@ import org.scalatest.Inside
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.IdState
-import weco.catalogue.internal_model.locations.{
-  AccessCondition,
-  AccessMethod,
-  AccessStatus,
-  DigitalLocation,
-  LocationType
-}
+import weco.catalogue.internal_model.locations._
 import weco.catalogue.internal_model.work.generators.SourceWorkGenerators
-import weco.catalogue.internal_model.work.{
-  Format,
-  Item,
-  MergeCandidate,
-  Work,
-  WorkState
-}
+import weco.catalogue.internal_model.work.{Format, Item, Work, WorkState}
+import weco.pipeline.matcher.generators.MergeCandidateGenerators
 import weco.pipeline.merger.models.FieldMergeResult
 
 class ItemsRuleTest
     extends AnyFunSpec
     with Matchers
     with SourceWorkGenerators
+    with MergeCandidateGenerators
     with Inside {
+  val tei: Work.Visible[WorkState.Identified] =
+    teiIdentifiedWork()
+
   val physicalPictureSierra: Work.Visible[WorkState.Identified] =
     sierraPhysicalIdentifiedWork()
       .format(Format.Pictures)
@@ -76,6 +69,25 @@ class ItemsRuleTest
     }
   }
 
+  it("merges the item from Sierra works tei works") {
+    inside(ItemsRule.merge(tei, List(multiItemPhysicalSierra))) {
+      case FieldMergeResult(items, mergedSources) =>
+        items should have size 2
+        items.head shouldBe multiItemPhysicalSierra.data.items.head
+        mergedSources should be(Seq(multiItemPhysicalSierra))
+    }
+  }
+
+  it(
+    "When merging items from sierra and calm, it replaces the calm item with the sierra one") {
+    inside(ItemsRule.merge(tei, List(physicalPictureSierra, calmWork))) {
+      case FieldMergeResult(items, mergedSources) =>
+        items should have size 1
+        items.head shouldBe physicalPictureSierra.data.items.head
+        mergedSources should be(Seq(physicalPictureSierra))
+    }
+  }
+
   it("merges the item from METS works into zero-item Sierra works") {
     inside(ItemsRule.merge(zeroItemPhysicalSierra, List(metsWork))) {
       case FieldMergeResult(items, mergedSources) =>
@@ -95,7 +107,7 @@ class ItemsRuleTest
           accessConditions = List(
             AccessCondition(
               method = AccessMethod.ViewOnline,
-              status = AccessStatus.LicensedResources
+              status = AccessStatus.LicensedResources()
             )
           )
         )
@@ -107,15 +119,7 @@ class ItemsRuleTest
     val physicalWork =
       sierraIdentifiedWork()
         .mergeCandidates(
-          List(
-            MergeCandidate(
-              id = IdState.Identified(
-                canonicalId = digitisedWork.state.canonicalId,
-                sourceIdentifier = digitisedWork.state.sourceIdentifier
-              ),
-              reason = Some("Physical/digitised Sierra work")
-            )
-          )
+          List(createSierraPairMergeCandidateFor(digitisedWork))
         )
         .items(List(createIdentifiedPhysicalItem))
 

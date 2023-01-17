@@ -26,6 +26,11 @@ object WorkPredicates {
   private val calmIdentified: WorkPredicate = identifierTypeId(
     IdentifierType.CalmRecordIdentifier
   )
+  private val teiIdentified: WorkPredicate = identifierTypeId(
+    IdentifierType.Tei
+  )
+  private val isVisible: WorkPredicate = work =>
+    work.isInstanceOf[Work.Visible[_]]
   private val miroIdentified: WorkPredicate = identifierTypeId(
     IdentifierType.MiroImageNumber
   )
@@ -39,6 +44,12 @@ object WorkPredicates {
 
   val zeroIdentifiedItems: WorkPredicate =
     work => !work.data.items.exists { _.id.isInstanceOf[IdState.Identified] }
+
+  val teiWork: WorkPredicate = satisfiesAll(
+    teiIdentified,
+    zeroItem,
+    isVisible
+  )
 
   /**
     * This is the shape in which we expect the works from the transformers.
@@ -85,15 +96,19 @@ object WorkPredicates {
         format(Format.Pictures)
     )
 
-  // In future this may be changed to `digmiro` for all works
-  // where we know that the Miro and METS images are identical
-  val sierraDigaids: WorkPredicate =
-    satisfiesAll(sierraWork, hasDigcode("digaids"))
+  val digaids: WorkPredicate = hasDigcode("digaids")
+  val digmiro: WorkPredicate = hasDigcode("digmiro")
 
-  val sierraElectronicVideo: WorkPredicate =
+  // The AIDS posters (digaids) have all already been re-digitised
+  // and marked with `digaids`, whereas going forward Miro works
+  // that have been re-digitised will be marked as `digmiro`.
+  val sierraDigitisedMiro: WorkPredicate =
+    satisfiesAll(sierraWork, digaids or digmiro)
+
+  val sierraDigitisedAv: WorkPredicate =
     satisfiesAll(
       sierraWork,
-      format(Format.Videos),
+      isAudiovisual,
       // We may get unidentified items on Sierra bibs, drawn from
       // resources in field 856 -- we don't care about those here.
       zeroIdentifiedItems
@@ -112,7 +127,7 @@ object WorkPredicates {
       }
     }
 
-  private def allDigitalLocations(work: Work[Identified]): Boolean =
+  def allDigitalLocations(work: Work[Identified]): Boolean =
     work.data.items.forall { item =>
       item.locations.forall {
         case _: DigitalLocation => true
@@ -151,6 +166,10 @@ object WorkPredicates {
       case Some(f) if f.isInstanceOf[Format.Audiovisual] => true
       case _                                             => false
     }
+
+  def hasPhysicalDigitalMergeCandidate(work: Work[Identified]): Boolean =
+    work.state.mergeCandidates
+      .exists(_.reason.contains("Physical/digitised Sierra work"))
 
   private def satisfiesAll(predicates: (Work[Identified] => Boolean)*)(
     work: Work[Identified]

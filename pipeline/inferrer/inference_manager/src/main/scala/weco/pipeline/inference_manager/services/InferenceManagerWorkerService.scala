@@ -6,14 +6,12 @@ import akka.http.scaladsl.model.HttpResponse
 import akka.stream.scaladsl.{Flow, FlowWithContext, Source}
 import grizzled.slf4j.Logging
 import software.amazon.awssdk.services.sqs.model.Message
-import weco.json.JsonUtil._
 import weco.messaging.MessageSender
 import weco.messaging.sns.NotificationMessage
 import weco.messaging.sqs.SQSStream
 import weco.catalogue.internal_model.image.ImageState.{Augmented, Initial}
 import weco.pipeline_storage.Indexable.imageIndexable
 import weco.pipeline_storage.PipelineStorageStream._
-import weco.pipeline_storage.PipelineStorageConfig
 import weco.typesafe.Runnable
 import weco.catalogue.internal_model.image.{Image, ImageState, InferredData}
 import weco.pipeline.inference_manager.adapters.{
@@ -158,9 +156,7 @@ class InferenceManagerWorkerService[Destination](
               case (
                   AdapterResponseBundle(DownloadedImage(image, _), _, _),
                   ctx) =>
-                (
-                  image.transition[ImageState.Augmented](Some(inferredData)),
-                  ctx)
+                (image.transition[ImageState.Augmented](inferredData), ctx)
             }
           }
           .mergeSubstreamsWithParallelism(

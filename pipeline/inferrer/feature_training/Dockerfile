@@ -1,4 +1,4 @@
-FROM 760097843905.dkr.ecr.eu-west-1.amazonaws.com/python:3.7
+FROM public.ecr.aws/docker/library/python:3.7
 
 COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt

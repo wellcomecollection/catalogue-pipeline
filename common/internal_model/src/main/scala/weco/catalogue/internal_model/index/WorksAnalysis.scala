@@ -5,16 +5,24 @@ import com.sksamuel.elastic4s.analysis._
 object WorksAnalysis {
   // This analyzer "keeps" the slash, by turning it into
   // `__` which isn't removed by the standard tokenizer
-  val withSlashesCharFilter =
-    MappingCharFilter("with_slashes_char_filter", mappings = Map("/" -> " __"))
-  val pathTokenizer = PathHierarchyTokenizer("path_hierarchy_tokenizer")
-
-  val pathAnalyzer =
-    CustomAnalyzer("path_hierarchy_analyzer", pathTokenizer.name, Nil, Nil)
+  val slashesCharFilter =
+    MappingCharFilter("slashes_char_filter", mappings = Map("/" -> " __"))
 
   val asciiFoldingTokenFilter = AsciiFoldingTokenFilter(
     "asciifolding_token_filter",
     preserveOriginal = Some(true)
+  )
+
+  val exactPathAnalyzer = CustomAnalyzer(
+    "exact_path_analyzer",
+    tokenizer = "path_hierarchy"
+  )
+
+  val cleanPathAnalyzer = CustomAnalyzer(
+    "clean_path_analyzer",
+    tokenizer = "path_hierarchy",
+    charFilters = Nil,
+    tokenFilters = List("lowercase", asciiFoldingTokenFilter.name)
   )
 
   val shingleTokenFilter = ShingleTokenFilter(
@@ -24,11 +32,11 @@ object WorksAnalysis {
   )
 
   val englishStemmerTokenFilter =
-    StemmerTokenFilter("english_token_filter", lang = "english")
+    StemmerTokenFilter("english_stemmer", lang = "english")
 
   val englishPossessiveStemmerTokenFilter =
     StemmerTokenFilter(
-      "english_possessive_token_filter",
+      "english_possessive_stemmer",
       lang = "possessive_english"
     )
 
@@ -36,7 +44,7 @@ object WorksAnalysis {
     List("arabic", "bengali", "french", "german", "hindi", "italian")
 
   val languageFiltersAndAnalyzers = languages.map(lang => {
-    val name = s"${lang}_token_filter"
+    val name = s"${lang}_stemmer"
     (
       StemmerTokenFilter(name, lang = lang),
       CustomAnalyzer(
@@ -63,6 +71,7 @@ object WorksAnalysis {
     tokenizer = "standard",
     tokenFilters = List(
       "lowercase",
+      asciiFoldingTokenFilter.name,
       englishStemmerTokenFilter.name,
       englishPossessiveStemmerTokenFilter.name
     ),
@@ -84,11 +93,11 @@ object WorksAnalysis {
     charFilters = Nil
   )
 
-  val withSlashesTextAnalyzer =
+  val slashesAnalyzer =
     CustomAnalyzer(
-      "with_slashes_text_analyzer",
+      "slashes_analyzer",
       tokenizer = "standard",
-      charFilters = List(withSlashesCharFilter.name),
+      charFilters = List(slashesCharFilter.name),
       tokenFilters = List("lowercase", asciiFoldingTokenFilter.name)
     )
 
@@ -101,12 +110,13 @@ object WorksAnalysis {
   def apply(): Analysis = {
     Analysis(
       analyzers = List(
-        pathAnalyzer,
+        exactPathAnalyzer,
+        cleanPathAnalyzer,
         asciifoldingAnalyzer,
         shingleAsciifoldingAnalyzer,
         englishAnalyzer,
         whitespaceAnalyzer,
-        withSlashesTextAnalyzer
+        slashesAnalyzer
       ) ++ languageFiltersAndAnalyzers.map(_._2),
       tokenFilters = List(
         asciiFoldingTokenFilter,
@@ -114,9 +124,8 @@ object WorksAnalysis {
         englishStemmerTokenFilter,
         englishPossessiveStemmerTokenFilter
       ) ++ languageFiltersAndAnalyzers.map(_._1),
-      tokenizers = List(pathTokenizer),
       normalizers = List(lowercaseNormalizer),
-      charFilters = List(withSlashesCharFilter)
+      charFilters = List(slashesCharFilter)
     )
   }
 }

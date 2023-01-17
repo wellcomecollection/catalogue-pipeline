@@ -1,101 +1,61 @@
-# Catalogue Pipeline
+# catalogue-pipeline
 
-| CI Pipeline       | Status                                                                                                                                                                    |
-|-------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Build             | [![Build status](https://badge.buildkite.com/0ca819db1215b66ecb17019d8ee5331d8e537094d051141219.svg?branch=main)](https://buildkite.com/wellcomecollection/catalogue-pipeline)   |
+[![Build status](https://badge.buildkite.com/0ca819db1215b66ecb17019d8ee5331d8e537094d051141219.svg?branch=main)](https://buildkite.com/wellcomecollection/catalogue-pipeline) [![Adapter deployment status](https://img.shields.io/buildkite/2fb18a042947b93fb2b05a8c7b48c5db0e7fd0f9210bb993d5/main.svg?label=adapter%20deployment)](https://buildkite.com/wellcomecollection/catalogue-pipeline-deploy-adapters) [![Pipeline deployment status](https://img.shields.io/buildkite/120d56989228052f1539823186545fd7e1665aaa2cb98d0c91/main.svg?label=pipeline%20deployment)](https://buildkite.com/wellcomecollection/catalogue-pipeline-deploy-pipeline)
 
-## Purpose
+The catalogue pipeline creates the search index for our [unified collections search][search].
+It populates an Elasticsearch index with data which can then be read by our [catalogue API][api].
+This allows users to search data from all our catalogues in one place, rather than searching multiple systems which each have different views of the data.
 
-Making Wellcome Collection's catalogue open, accessible and
-discoverable.
-
-The catalogue consists of multiple sources including:
-* Library holdings
-* Archives and manuscripts
-* Born digital content
-* Images from what was previously wellcomeimages.org
-
-As and when these sources are made available digitally, we will consume
-them via [our pipeline](./pipeline), unify them into a
-[single model](./common/internal_model) and make them discoverable via
-our [API](https://github.com/wellcomecollection/catalogue-api).
-
-**Interested in how we make these services?**
-
-[Take a look at our documentation on the design and decision making
-processes of the services within the catalogue repo][catalogue docs].
-
-**Interested in making use of our data to build your own products or
-use in your research?**
-
-[Take look at our developer documentation][api developer docs] or
-[go straight to our API][api].
-
-**Interested in other parts of the Wellome Collection digital platform
-works?**
-
-[Take a look at our Platform repo][platform repo]
-
-**Interested in how all of this works**
-[Keep reading about the architecture of the services in this repo](#architecture).
+[search]: https://wellcomecollection.org/works
+[api]: https://github.com/wellcomecollection/catalogue-api
 
 
-## Architecture
 
-The catalogue consists of three main parts with supporting services.
+## Requirements
 
-These are:
+The catalogue pipeline is designed to:
 
-* Adapters: Syncing data from multiple external sources, enabling retrieving data performantly and at scale:
-  - [Sierra adapter](sierra_adapter/README.md): [Sierra](https://www.iii.com/products/sierra-ils/) contains data on things in the library
-  - [Calm adapter](calm_adapter/README.md): [Calm](https://www.axiell.com/uk/solutions/product/calm/) contains data on things in the archive
-  - [METS adapter](mets_adapter/README.md): [METS](http://www.loc.gov/standards/mets/) data on digital assets from our workflow & archival storage systems. 
-* [Pipeline](pipeline.md): Taking adapter data and putting it into our query index. We use [Elasticsearch](https://www.elastic.co/elasticsearch/) as our underlying search engine.
-* [API](https://github.com/wellcomecollection/catalogue-api/blob/main/README.md): The public APIs to query our catalogue data. The API services are stored in a different GitHub repository: https://github.com/wellcomecollection/catalogue-api
+*   Create a single search index for records from all our source systems (including image collections, library catalogue, and archive records)
+*   Stay up-to-date with updates and changes in those source systems
+*   Transform those records into a common model
+*   Combine records from different systems that refer to the same object
 
 
-## Dependencies
 
-* Java 1.8
-* Scala 2.12
-* SBT
-* Terraform 0.11
-* Docker
-* Make
+## High-level design
 
+<img src="docs/images/high_level_design.svg">
 
-## Problems you might have
+We have a series of "adapters" that fetch records from our source systems.
+The adapters are responsible for staying up-to-date with changes in the source systems.
 
-* **Stack overflow from scalac \(in IntelliJ\) when building projects**:
+The adapters feed a transformation pipeline, which transforms source records into a common model, adds a pipeline identifier, and combines records from different systems.
+The structure and logic of the transformation pipeline evolves over time, as we find new and better ways to transform the data.
 
-  Go to `Settings > Build, Execution, Deployment > Compiler` and change
-  `Build process heap size (Mbytes)` to something large, eg 2048.
+Once the transformation pipeline has finished processing the records, it stores them in a search index, which can be read by the [catalogue API][api].
 
-* **Pulling docker containers from ECR**
-  
-  You'll need to log into ECR before local docker can pull from there:
-  
-  ```bash
-  aws ecr get-login-password --region eu-west-1 --profile platform-dev | \
-  docker login --username AWS --password-stdin 760097843905.dkr.ecr.eu-west-1.amazonaws.com
-  ```
+The catalogue pipeline runs entirely in AWS, with no on-premise infrastructure required.
 
 
-## Deploying
 
-We deploy ECS catalogue services using the [weco-deploy](https://github.com/wellcomecollection/weco-deploy) tool.
+## Usage
+
+We always have at least one pipeline which is populating the currently-live search index, but we may have more than one pipeline running at a time.
+
+Running multiple pipelines means we can try experiments or breaking changes in a new pipeline, and keep them isolated from the live search index (and the public API).
+Over time, newer pipelines replace older pipelines, and the older pipelines are deleted.
+
+We publish our source code so that other people can learn from it, but it's very unlikely anybody would want to run it themselves.
+It contains a lot of Wellcome-specific logic, and would need extensive modification to be useful elsewhere.
 
 
-## Things you might want to do
 
-Generally small things you might want to do irregularly involving the
-API & data are stored within \[`./scripts`\].
+## Development
 
----
+See [docs/developers.md](docs/developers.md).
 
-Part of the [Wellcome Digital Platform][platform repo].
 
-[catalogue docs]: https://docs.wellcomecollection.org/catalogue/
-[api developer docs]: https://developers.wellcomecollection.org/catalogue/
-[api]: https://api.wellcomecollection.org/catalogue
-[platform repo]: [https://github.com/wellcomecollection/platform]
+
+## License
+
+MIT.

@@ -1,6 +1,6 @@
 # Merging
 
-Merging works is split up into 2 steps:
+Merging works occurs in 2 steps:
 
 ## 1. Linking works
 

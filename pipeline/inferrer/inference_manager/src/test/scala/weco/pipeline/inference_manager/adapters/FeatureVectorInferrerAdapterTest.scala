@@ -43,26 +43,16 @@ class FeatureVectorInferrerAdapterTest
     it("augments InferredData with the data from the inferrer response") {
       val features = (0 until 4096).map(_ / 4096f).toList
       val featuresB64 = Encoding.toLittleEndianBase64(features)
-      val lshEncodedFeatures = ('a' to 'z').map(_.toString * 3).toList
+      val reducedFeatures = (0 until 1024).map(_ / 1024f).toList
+      val reducedFeaturesB64 = Encoding.toLittleEndianBase64(reducedFeatures)
       val response = FeatureVectorInferrerResponse(
         features_b64 = featuresB64,
-        lsh_encoded_features = lshEncodedFeatures
+        reduced_features_b64 = reducedFeaturesB64
       )
       val inferredData = adapter.augment(InferredData.empty, response)
-      inside(inferredData) {
-        case InferredData(
-            features1,
-            features2,
-            actualLshEncodedFeatures,
-            _,
-            _,
-            _,
-            _
-            ) =>
-          features1 should be(features.slice(0, 2048))
-          features2 should be(features.slice(2048, 4096))
-          actualLshEncodedFeatures should be(lshEncodedFeatures)
-      }
+      inferredData.features1 should be(features.slice(0, 2048))
+      inferredData.features2 should be(features.slice(2048, 4096))
+      inferredData.reducedFeatures should be(reducedFeatures)
     }
   }
 }

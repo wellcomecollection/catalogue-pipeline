@@ -1,9 +1,11 @@
-sqs:
-  image: "760097843905.dkr.ecr.eu-west-1.amazonaws.com/s12v/elasticmq"
+localstack:
+  image: "760097843905.dkr.ecr.eu-west-1.amazonaws.com/localstack/localstack:0.12.5"
+  environment:
+    - SERVICES=sqs
   ports:
-    - "9324:9324"
+    - "4566:4566"
 elasticsearch:
-  image: "docker.elastic.co/elasticsearch/elasticsearch:7.9.3"
+  image: "docker.elastic.co/elasticsearch/elasticsearch:8.4.0"
   ports:
     - "9200:9200"
     - "9300:9300"
@@ -12,7 +14,7 @@ elasticsearch:
     - "transport.host=0.0.0.0"
     - "cluster.name=wellcome"
     - "discovery.type=single-node"
-
+    - "xpack.security.enabled=false"
     # This is deliberately much lower than the default (100mb), because we want
     # to test that our code works correctly when it exceeds this limit, but without
     # queuing up 100mb+ of documents in-memory during tests.

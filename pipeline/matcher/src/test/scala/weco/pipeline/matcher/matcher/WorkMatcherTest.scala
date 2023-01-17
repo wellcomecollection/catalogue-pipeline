@@ -1,71 +1,60 @@
 package weco.pipeline.matcher.matcher
 
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{spy, times, verify, when}
 import org.scalatest.EitherValues
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import org.scalatestplus.mockito.MockitoSugar
-import org.scanamo.syntax._
-import weco.catalogue.internal_model.matcher.{
-  MatchedIdentifiers,
-  WorkIdentifier,
-  WorkNode
-}
+import org.scanamo.generic.auto._
+import weco.catalogue.internal_model.identifiers.CanonicalId
+import weco.fixtures.TimeAssertions
+import weco.pipeline.matcher.fixtures.MatcherFixtures
+import weco.pipeline.matcher.generators.WorkNodeGenerators
+import weco.pipeline.matcher.models._
+import weco.pipeline.matcher.storage.{WorkGraphStore, WorkNodeDao}
+import weco.storage.fixtures.DynamoFixtures.Table
 import weco.storage.locking.LockFailure
 import weco.storage.locking.memory.{MemoryLockDao, MemoryLockingService}
-import weco.fixtures.TimeAssertions
-import weco.pipeline.matcher.exceptions.MatcherException
-import weco.pipeline.matcher.fixtures.MatcherFixtures
-import weco.pipeline.matcher.generators.WorkLinksGenerators
-import weco.pipeline.matcher.models.{WorkGraph, WorkLinks}
-import weco.pipeline.matcher.storage.WorkGraphStore
 
 import java.util.UUID
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.duration._
+import scala.concurrent.{Await, Future}
+import scala.language.higherKinds
+import scala.util.{Failure, Success, Try}
 
 class WorkMatcherTest
     extends AnyFunSpec
     with Matchers
     with MatcherFixtures
     with ScalaFutures
-    with MockitoSugar
     with EitherValues
-    with WorkLinksGenerators
+    with WorkNodeGenerators
     with TimeAssertions {
-
-  private val identifierA = createIdentifier("AAAAAAAA")
-  private val identifierB = createIdentifier("BBBBBBBB")
-  private val identifierC = createIdentifier("CCCCCCCC")
 
   it(
     "matches a work with no linked identifiers to itself only A and saves the updated graph A") {
     withWorkGraphTable { graphTable =>
       withWorkGraphStore(graphTable) { workGraphStore =>
         withWorkMatcher(workGraphStore) { workMatcher =>
-          val links = createWorkLinksWith(id = identifierA)
+          val work = createWorkWith(id = idA)
 
-          whenReady(workMatcher.matchWork(links)) { matcherResult =>
+          whenReady(workMatcher.matchWork(work)) { matcherResult =>
             assertRecent(matcherResult.createdTime)
             matcherResult.works shouldBe
-              Set(MatchedIdentifiers(
-                Set(WorkIdentifier(links.workId, links.version))))
+              Set(
+                MatchedIdentifiers(Set(WorkIdentifier(work.id, work.version))))
 
-            val savedLinkedWork =
-              get[WorkNode](dynamoClient, graphTable.name)(
-                "id" === links.workId)
-                .map(_.right.value)
+            val savedLinkedWork = getWorkNode(work.id, graphTable)
 
-            savedLinkedWork shouldBe Some(
+            savedLinkedWork shouldBe
               WorkNode(
-                id = links.workId,
-                version = links.version,
-                linkedIds = Nil,
-                componentId = ciHash(links.workId)
+                id = work.id,
+                subgraphId = SubgraphId(work.id),
+                componentIds = List(work.id),
+                sourceWork = SourceWorkData(
+                  id = work.state.sourceIdentifier,
+                  version = work.version),
               )
-            )
           }
         }
       }
@@ -77,38 +66,35 @@ class WorkMatcherTest
     withWorkGraphTable { graphTable =>
       withWorkGraphStore(graphTable) { workGraphStore =>
         withWorkMatcher(workGraphStore) { workMatcher =>
-          val links = createWorkLinksWith(
-            id = identifierA,
-            referencedIds = Set(identifierB)
+          val work = createWorkWith(
+            id = idA,
+            mergeCandidateIds = Set(idB)
           )
 
-          whenReady(workMatcher.matchWork(links)) { matcherResult =>
+          whenReady(workMatcher.matchWork(work)) { matcherResult =>
             assertRecent(matcherResult.createdTime)
             matcherResult.works shouldBe
-              Set(
-                MatchedIdentifiers(
-                  Set(
-                    WorkIdentifier(identifierA.canonicalId, links.version),
-                    WorkIdentifier(identifierB.canonicalId, None))))
+              Set(MatchedIdentifiers(Set(WorkIdentifier(idA, work.version))))
 
-            val savedWorkNodes = scan[WorkNode](dynamoClient, graphTable.name)
+            val savedWorkNodes = scanTable[WorkNode](graphTable)
               .map(_.right.value)
 
             savedWorkNodes should contain theSameElementsAs List(
               WorkNode(
-                id = identifierA.canonicalId,
-                version = links.version,
-                linkedIds = List(identifierB.canonicalId),
-                componentId =
-                  ciHash(identifierA.canonicalId, identifierB.canonicalId)
+                id = idA,
+                subgraphId = SubgraphId(idA, idB),
+                componentIds = List(idA, idB),
+                sourceWork = SourceWorkData(
+                  id = work.state.sourceIdentifier,
+                  version = work.version,
+                  mergeCandidateIds = List(idB)
+                ),
               ),
               WorkNode(
-                id = identifierB.canonicalId,
-                version = None,
-                linkedIds = Nil,
-                componentId =
-                  ciHash(identifierA.canonicalId, identifierB.canonicalId)
-              )
+                id = idB,
+                subgraphId = SubgraphId(idA, idB),
+                componentIds = List(idA, idB),
+              ),
             )
           }
         }
@@ -121,76 +107,53 @@ class WorkMatcherTest
     withWorkGraphTable { graphTable =>
       withWorkGraphStore(graphTable) { workGraphStore =>
         withWorkMatcher(workGraphStore) { workMatcher =>
-          val existingWorkA = WorkNode(
-            id = identifierA.canonicalId,
-            version = 1,
-            linkedIds = List(identifierB.canonicalId),
-            componentId =
-              ciHash(identifierA.canonicalId, identifierB.canonicalId)
-          )
-          val existingWorkB = WorkNode(
-            id = identifierB.canonicalId,
-            version = 1,
-            linkedIds = Nil,
-            componentId =
-              ciHash(identifierA.canonicalId, identifierB.canonicalId)
-          )
-          val existingWorkC = WorkNode(
-            id = identifierC.canonicalId,
-            version = 1,
-            linkedIds = Nil,
-            componentId = ciHash(identifierC.canonicalId)
-          )
-          put(dynamoClient, graphTable.name)(existingWorkA)
-          put(dynamoClient, graphTable.name)(existingWorkB)
-          put(dynamoClient, graphTable.name)(existingWorkC)
+          val (workA, workB) = createTwoWorks("A->B")
+          val workC = createOneWork("C")
 
-          val links = createWorkLinksWith(
-            id = identifierB,
+          putTableItems(
+            items = Seq(workA, workB, workC),
+            table = graphTable
+          )
+
+          val work = createWorkWith(
+            id = idB,
             version = 2,
-            referencedIds = Set(identifierC)
+            mergeCandidateIds = Set(idC)
           )
 
-          whenReady(workMatcher.matchWork(links)) { matcherResult =>
+          whenReady(workMatcher.matchWork(work)) { matcherResult =>
             assertRecent(matcherResult.createdTime)
             matcherResult.works shouldBe
               Set(
                 MatchedIdentifiers(
                   Set(
-                    WorkIdentifier(identifierA.canonicalId, 1),
-                    WorkIdentifier(identifierB.canonicalId, 2),
-                    WorkIdentifier(identifierC.canonicalId, 1))))
+                    WorkIdentifier(idA, version = 1),
+                    WorkIdentifier(idB, version = 2),
+                    WorkIdentifier(idC, version = 1))
+                )
+              )
 
-            val savedNodes = scan[WorkNode](dynamoClient, graphTable.name)
+            val savedNodes = scanTable[WorkNode](graphTable)
               .map(_.right.value)
+              .toSet
 
-            savedNodes should contain theSameElementsAs List(
-              WorkNode(
-                id = identifierA.canonicalId,
-                version = 1,
-                linkedIds = List(identifierB.canonicalId),
-                componentId = ciHash(
-                  identifierA.canonicalId,
-                  identifierB.canonicalId,
-                  identifierC.canonicalId)
-              ),
-              WorkNode(
-                id = identifierB.canonicalId,
-                version = 2,
-                linkedIds = List(identifierC.canonicalId),
-                componentId = ciHash(
-                  identifierA.canonicalId,
-                  identifierB.canonicalId,
-                  identifierC.canonicalId)
-              ),
-              WorkNode(
-                id = identifierC.canonicalId,
-                version = 1,
-                linkedIds = Nil,
-                componentId = ciHash(
-                  identifierA.canonicalId,
-                  identifierB.canonicalId,
-                  identifierC.canonicalId))
+            savedNodes shouldBe Set(
+              workA
+                .copy(
+                  subgraphId = SubgraphId(idA, idB, idC),
+                  componentIds = List(idA, idB, idC),
+                ),
+              workB
+                .copy(
+                  subgraphId = SubgraphId(idA, idB, idC),
+                  componentIds = List(idA, idB, idC),
+                )
+                .updateSourceWork(version = 2, mergeCandidateIds = Set(idC)),
+              workC
+                .copy(
+                  subgraphId = SubgraphId(idA, idB, idC),
+                  componentIds = List(idA, idB, idC),
+                ),
             )
           }
         }
@@ -198,58 +161,57 @@ class WorkMatcherTest
     }
   }
 
-  it("throws MatcherException if it fails to lock primary works") {
+  it("throws the locking error if it fails to lock primary works") {
+    val expectedException = new Throwable("BOOM!")
+
     implicit val lockDao: MemoryLockDao[String, UUID] =
       new MemoryLockDao[String, UUID] {
         override def lock(id: String, contextId: UUID): LockResult =
-          Left(LockFailure(id, e = new Throwable("BOOM!")))
+          Left(LockFailure(id, e = expectedException))
       }
 
     val lockingService =
-      new MemoryLockingService[Set[MatchedIdentifiers], Future]()
+      new MemoryLockingService[MatcherResult, Future]()
 
     withWorkGraphTable { graphTable =>
       withWorkGraphStore(graphTable) { workGraphStore =>
-        val links = createWorkLinks
+        val work = createWorkStub
 
         val workMatcher = new WorkMatcher(workGraphStore, lockingService)
 
-        val result = workMatcher.matchWork(links)
+        val result = workMatcher.matchWork(work)
 
         whenReady(result.failed) {
-          _ shouldBe a[MatcherException]
+          _.getMessage should startWith("FailedLock(")
         }
       }
     }
   }
 
-  it("throws MatcherException if it fails to lock secondary works") {
+  it("throws the locking error if it fails to lock secondary works") {
+    val expectedException = new Throwable("BOOM!")
+
     withWorkGraphTable { graphTable =>
       withWorkGraphStore(graphTable) { workGraphStore =>
-        val componentId = "ABC"
-        val idA = identifierA.canonicalId
-        val idB = identifierB.canonicalId
-        val idC = identifierC.canonicalId
+        val subgraphId = SubgraphId(idA, idB, idC)
 
-        val future = workGraphStore.put(
-          WorkGraph(Set(
-            WorkNode(idA, version = 0, linkedIds = List(idB), componentId),
-            WorkNode(idB, version = 0, linkedIds = List(idC), componentId),
-            WorkNode(idC, version = 0, linkedIds = Nil, componentId),
-          )))
+        val (workA, workB, workC) = createThreeWorks("A->B->C")
+
+        val future = workGraphStore.put(Set(workA, workB, workC))
 
         whenReady(future) { _ =>
-          val links = createWorkLinksWith(
-            id = identifierA,
-            referencedIds = Set(identifierB)
+          val work = createWorkWith(
+            id = idA,
+            mergeCandidateIds = Set(idB),
+            version = workA.sourceWork.get.version + 1
           )
 
           implicit val lockDao: MemoryLockDao[String, UUID] =
             new MemoryLockDao[String, UUID] {
               override def lock(id: String, contextId: UUID): LockResult =
                 synchronized {
-                  if (id == componentId) {
-                    Left(LockFailure(id, e = new Throwable("BOOM!")))
+                  if (id == subgraphId) {
+                    Left(LockFailure(id, e = expectedException))
                   } else {
                     super.lock(id, contextId)
                   }
@@ -257,69 +219,209 @@ class WorkMatcherTest
             }
 
           val lockingService =
-            new MemoryLockingService[Set[MatchedIdentifiers], Future]()
+            new MemoryLockingService[MatcherResult, Future]()
 
           val workMatcher = new WorkMatcher(workGraphStore, lockingService)
 
-          val result = workMatcher.matchWork(links)
+          val result = workMatcher.matchWork(work)
 
           whenReady(result.failed) {
-            _ shouldBe a[MatcherException]
+            _.getMessage should startWith("FailedLock(")
           }
         }
       }
     }
   }
 
-  it("fails if saving the updated links fails") {
-    val mockWorkGraphStore = mock[WorkGraphStore]
-    withWorkMatcher(mockWorkGraphStore) { workMatcher =>
-      val expectedException = new RuntimeException("Failed to put")
-      when(mockWorkGraphStore.findAffectedWorks(any[WorkLinks]))
-        .thenReturn(Future.successful(WorkGraph(Set.empty)))
-      when(mockWorkGraphStore.put(any[WorkGraph]))
-        .thenThrow(expectedException)
+  it("fails if saving the updated work fails") {
+    val workNodeDao = new WorkNodeDao(
+      dynamoClient = dynamoClient,
+      dynamoConfig = createDynamoConfigWith(nonExistentTable)
+    )
 
-      val links = createWorkLinks
+    val expectedException = new RuntimeException("Failed to put")
 
-      whenReady(workMatcher.matchWork(links).failed) { actualException =>
-        actualException shouldBe MatcherException(expectedException)
+    val brokenStore = new WorkGraphStore(workNodeDao) {
+      override def findAffectedWorks(
+        ids: Set[CanonicalId]): Future[Set[WorkNode]] =
+        Future.successful(Set[WorkNode]())
+
+      override def put(nodes: Set[WorkNode]): Future[Unit] =
+        Future.failed(expectedException)
+    }
+
+    withWorkMatcher(brokenStore) { workMatcher =>
+      val work = createWorkStub
+
+      whenReady(workMatcher.matchWork(work).failed) {
+        _.getMessage shouldBe expectedException.getMessage
       }
     }
   }
 
   it("skips writing to the store if there are no changes") {
     withWorkGraphTable { graphTable =>
-      withWorkGraphStore(graphTable) { workGraphStore =>
-        val spyStore = spy(workGraphStore)
+      withWorkNodeDao(graphTable) { workNodeDao =>
+        var putCount = 0
 
-        val links = createWorkLinks
+        val spyStore = new WorkGraphStore(workNodeDao) {
+          override def put(nodes: Set[WorkNode]): Future[Unit] = {
+            putCount += 1
+            super.put(nodes)
+          }
+        }
+
+        val work = createWorkStub
 
         withWorkMatcher(spyStore) { workMatcher =>
-          // Try to match the links more than once.  We have to match in sequence,
+          // Try to match the work more than once.  We have to match in sequence,
           // not in parallel, or the locking will block all but one of them from
           // doing anything non-trivial.
           val futures =
             workMatcher
-              .matchWork(links)
+              .matchWork(work)
               .flatMap { _ =>
-                workMatcher.matchWork(links)
+                workMatcher.matchWork(work)
               }
               .flatMap { _ =>
-                workMatcher.matchWork(links)
+                workMatcher.matchWork(work)
               }
               .flatMap { _ =>
-                workMatcher.matchWork(links)
+                workMatcher.matchWork(work)
               }
               .flatMap { _ =>
-                workMatcher.matchWork(links)
+                workMatcher.matchWork(work)
               }
 
           whenReady(futures) { _ =>
-            verify(spyStore, times(1)).put(any[Set[WorkNode]])
+            putCount shouldBe 1
           }
         }
       }
     }
   }
+
+  // This is a regression test for the failure mode where we only lock over
+  // the IDs we can see in the initial update, and not over IDs we discover
+  // we need to lock after inspecting the graph store.
+  //
+  // This is difficult to explain in the abstract, and is easiest to understand
+  // with an example.  Consider the following three works:
+  //
+  //      C -> B -> A
+  //
+  // We send them to the matcher in the following order:
+  //
+  // B, wait, then
+  // A, C simultaneously.
+  //
+  // We're trying to catch a very particular race condition where the update to C
+  // gets a stale value from A from the store, and blats the update to A.
+  //
+  it("locks over all the works affected in an update") {
+    withWorkGraphTable { graphTable =>
+      withWorkNodeDao(graphTable) { workNodeDao =>
+        // We take control of the lock dao here to ensure a very precise
+        // sequence of events:
+        //
+        //    1.  The matcher starts processing the update to A.
+        //    2.  It prepares what it's going to write to the graph store,
+        //        but it doesn't take an expanded lock. (*)
+        //    3.  The matcher starts processing the update to A.
+        //        It reads the old value of A/B from the store.
+        //    4.  Now we allow the update to 'A' to write the new values
+        //        to the store.
+        //    5.  The matcher prepares to write the new value of C, but doesn't
+        //        do so until the update to 'A' is finished. (**)
+        //
+        var createdLocksHistory: List[String] = List()
+        var findAffectedWorksHistory: List[Set[CanonicalId]] = List()
+
+        val workGraphStore = new WorkGraphStore(workNodeDao) {
+          override def findAffectedWorks(
+            ids: Set[CanonicalId]): Future[Set[WorkNode]] = {
+            findAffectedWorksHistory = findAffectedWorksHistory :+ ids
+            super.findAffectedWorks(ids)
+          }
+        }
+
+        implicit val lockDao: MemoryLockDao[String, UUID] =
+          new MemoryLockDao[String, UUID] {
+            override def lock(id: String, contextId: UUID): LockResult = {
+              // (*) We don't let the update to 'A' start writing graph updates until
+              // we know the update to 'C' has read the old state of the graph
+              if (id == SubgraphId(idA, idB) && createdLocksHistory.count(
+                    _ == SubgraphId(idA, idB)) == 1) {
+                while (!findAffectedWorksHistory.contains(Set(idB, idC))) {}
+              }
+
+              // (**) We don't let the update to 'C' start writing graph updates until
+              // we know the update to 'A' is finished
+              if ((id == SubgraphId(idA, idB) || id == SubgraphId(
+                    idA,
+                    idB,
+                    idC)) &&
+                  createdLocksHistory.count(_ == SubgraphId(idA, idB)) == 2) {
+                while (locks.contains(idA.underlying)) {}
+              }
+
+              createdLocksHistory = createdLocksHistory :+ id
+              super.lock(id, contextId)
+            }
+          }
+
+        val workMatcher = new WorkMatcher(
+          workGraphStore = workGraphStore,
+          lockingService = new MemoryLockingService[MatcherResult, Future]()
+        )
+
+        // We have three works:
+        // (A) is standalone
+        // (B) points to A
+        // (C) points to B
+        val workA = createWorkWith(id = idA)
+        val workB = createWorkWith(id = idB, mergeCandidateIds = Set(idA))
+        val workC = createWorkWith(id = idC, mergeCandidateIds = Set(idB))
+
+        // First store work B in the graph.
+        //
+        // This will put two nodes in the graph: a node for B, and a stub for A.
+        Await.result(workMatcher.matchWork(workB), atMost = 5 seconds)
+
+        // Now try to store works A and C simultaneously.
+        //
+        // Here's how this can go wrong: when we get work C, we know we need
+        // to lock at least {B, C}.  It's only when we inspect the existing graph
+        // that we discover that we also need to link in A, so we should lock
+        // that ID as well.  If we don't lock over A, we might blat the update
+        // coming in work A.
+        //
+        // We need the locking to ensure we don't try to apply both updates at once.
+        val futureA = workMatcher.matchWork(workA)
+        val futureC = workMatcher.matchWork(workC)
+
+        val resultA = Try {
+          Await.result(futureA, atMost = 5 seconds)
+        }
+        val resultC = Try {
+          Await.result(futureC, atMost = 5 seconds)
+        }
+
+        // The update to A should have succeeded; the update to B should have failed
+        // because of inconsistent data.
+        resultA shouldBe a[Success[_]]
+
+        resultC shouldBe a[Failure[_]]
+        resultC.asInstanceOf[Failure[_]].exception.getMessage should include(
+          "graph store contents changed during matching")
+
+        // If the update to A was successful, we should see the 'sourceWork' field
+        // for A is populated.  If not, this will fail.
+        getWorkNode(idA, graphTable).sourceWork shouldBe defined
+      }
+    }
+  }
+
+  private def getWorkNode(id: CanonicalId, graphTable: Table): WorkNode =
+    getTableItem[WorkNode](id.underlying, graphTable).map(_.right.value).get
 }

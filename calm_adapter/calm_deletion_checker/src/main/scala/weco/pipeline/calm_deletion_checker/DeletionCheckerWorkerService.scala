@@ -6,9 +6,10 @@ import software.amazon.awssdk.services.sqs.model.Message
 import weco.messaging.MessageSender
 import weco.messaging.sns.NotificationMessage
 import weco.messaging.sqs.SQSStream
-import weco.json.JsonUtil._
+import weco.json.JsonUtil.fromJson
 import weco.typesafe.Runnable
 import weco.catalogue.source_model.CalmSourcePayload
+import weco.catalogue.source_model.Implicits._
 import weco.pipeline.calm_api_client.CalmApiClient
 
 import scala.collection.immutable

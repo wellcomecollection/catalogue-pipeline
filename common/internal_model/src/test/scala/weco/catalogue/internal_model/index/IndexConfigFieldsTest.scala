@@ -1,7 +1,5 @@
 package weco.catalogue.internal_model.index
 
-import org.scalatest.concurrent.Eventually
-import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
@@ -31,8 +29,6 @@ object TestDoc {
 class IndexConfigFieldsTest
     extends AnyFunSpec
     with IndexFixtures
-    with ScalaFutures
-    with Eventually
     with Matchers
     with JsonAssertions
     with ScalaCheckPropertyChecks
@@ -42,7 +38,7 @@ class IndexConfigFieldsTest
   val testIndexConfig = IndexConfig(
     {
       val withSlashesField = textField("withSlashes").analyzer(
-        WorksAnalysis.withSlashesTextAnalyzer.name
+        WorksAnalysis.slashesAnalyzer.name
       )
 
       properties(
@@ -85,14 +81,14 @@ class IndexConfigFieldsTest
     val doc2 = TestDoc(Some("PM/RT/TYR"))
 
     it("text matches") {
-      withLocalIndex(testIndexConfig) { index =>
+      withLocalElasticsearchIndex(config = testIndexConfig) { index =>
         indexDocs(index, doc1, doc2)
         expectResultsSize(search(index).matchQuery("label", "Yōkai"), 1)
       }
     }
 
     it("asciifolds lowercases") {
-      withLocalIndex(testIndexConfig) { index =>
+      withLocalElasticsearchIndex(config = testIndexConfig) { index =>
         indexDocs(index, doc1, doc2)
         expectResultsSize(
           search(index).matchQuery("label", "arkaprakasa yokai"),
@@ -102,7 +98,7 @@ class IndexConfigFieldsTest
     }
 
     it("case sensitive keyword on `label.keyword`") {
-      withLocalIndex(testIndexConfig) { index =>
+      withLocalElasticsearchIndex(config = testIndexConfig) { index =>
         indexDocs(index, doc1, doc2)
         expectResultsSize(search(index).prefix("label.keyword", "PM/RT"), 1)
         expectResultsSize(search(index).prefix("label.keyword", "pm/rt"), 0)
@@ -110,7 +106,7 @@ class IndexConfigFieldsTest
     }
 
     it("case insensitive keyword matches on `label.lowercaseKeyword`") {
-      withLocalIndex(testIndexConfig) { index =>
+      withLocalElasticsearchIndex(config = testIndexConfig) { index =>
         indexDocs(index, doc1, doc2)
         expectResultsSize(
           search(index).prefix("label.lowercaseKeyword", "PM/RT"),
@@ -139,7 +135,7 @@ class IndexConfigFieldsTest
       )
 
     it("matches exactly and case insensitively with slashes") {
-      withLocalIndex(testIndexConfig) { index =>
+      withLocalElasticsearchIndex(config = testIndexConfig) { index =>
         indexDocs(index, doc1, doc2)
 
         val tests = Table(

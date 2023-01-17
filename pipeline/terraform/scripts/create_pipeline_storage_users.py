@@ -30,15 +30,29 @@ SERVICES = {
     "matcher": ["works-identified_read"],
     "merger": ["works-identified_read", "works-merged_write", "images-initial_write"],
     "router": ["works-merged_read", "works-denormalised_write"],
+    "path_concatenator": ["works-merged_read", "works-merged_write"],
     "relation_embedder": ["works-merged_read", "works-denormalised_write"],
     "work_ingestor": ["works-denormalised_read", "works-indexed_write"],
     "inferrer": ["images-initial_read", "images-augmented_write"],
     "image_ingestor": ["images-augmented_read", "images-indexed_write"],
     "snapshot_generator": ["works-indexed_read"],
+    "catalogue_api": [
+        "works-indexed_read", "images-indexed_read",
+
+        # This role allows the API to fetch index mappings, which it uses
+        # to check internal model compatibility.
+        # See https://github.com/wellcomecollection/catalogue-api/tree/main/internal_model_tool
+        "viewer",
+    ],
+    "concepts_api": [
+         "works-indexed_read"
+    ],
     # This role isn't used by applications, but instead provided to give developer scripts
     # read-only access to the pipeline_storage cluster.
-    "read_only": [f"works-{index}_read" for index in WORK_INDICES] + [f"images-{index}_read" for index in IMAGE_INDICES],
+    "read_only": [f"works-{index}_read" for index in WORK_INDICES] + [f"images-{index}_read" for index in IMAGE_INDICES] + ["viewer"],
 }
+
+CATALOGUE_SERVICES = {"catalogue_api", "concepts_api", "snapshot_generator"}
 
 
 def store_secret(session, *, secret_id, secret_value, description):
@@ -65,7 +79,7 @@ def create_roles(es, index):
         role_name = f"{index}_{role_suffix}"
 
         es.security.put_role(
-            role_name,
+            name=role_name,
             body={"indices": [{"names": [f"{index}*"], "privileges": privileges}]},
         )
 
@@ -125,18 +139,13 @@ if __name__ == '__main__':
     newly_created_usernames = []
 
     for username, roles in SERVICES.items():
-        if not set(roles).issubset(newly_created_roles):
-            raise RuntimeError(
-                f"Unrecognised roles: {set(roles) - newly_created_roles}"
-            )
-
         newly_created_usernames.append(create_user(es, username=username, roles=roles))
         click.echo(f"Created user {click.style(username, 'green')}")
 
     print("")
 
     for username, password in newly_created_usernames:
-        if username == "snapshot_generator":
+        if username in CATALOGUE_SERVICES:
             session = catalogue_session
         else:
             session = platform_session

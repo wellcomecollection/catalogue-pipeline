@@ -1,0 +1,225 @@
+{
+  "description" : "examples for the genre tests",
+  "createdAt" : "2023-01-03T09:31:59.877268Z",
+  "id" : "4btprmwn",
+  "document" : {
+    "debug" : {
+      "source" : {
+        "id" : "4btprmwn",
+        "identifier" : {
+          "identifierType" : {
+            "id" : "sierra-system-number"
+          },
+          "ontologyType" : "Work",
+          "value" : "C7XCeymDdf"
+        },
+        "version" : 54,
+        "modifiedTime" : "1953-03-04T04:51:01Z"
+      },
+      "mergedTime" : "1953-03-04T04:51:01Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
+      "redirectSources" : [
+      ]
+    },
+    "display" : {
+      "id" : "4btprmwn",
+      "title" : "title-iLGpm85YYF",
+      "alternativeTitles" : [
+      ],
+      "contributors" : [
+      ],
+      "identifiers" : [
+        {
+          "identifierType" : {
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
+            "type" : "IdentifierType"
+          },
+          "value" : "C7XCeymDdf",
+          "type" : "Identifier"
+        }
+      ],
+      "subjects" : [
+      ],
+      "genres" : [
+        {
+          "label" : "Pamphlets.",
+          "concepts" : [
+            {
+              "label" : "7ZYKrzxgMS4HDJM",
+              "type" : "Concept"
+            },
+            {
+              "label" : "nToBweq2UFKJPlz",
+              "type" : "Concept"
+            },
+            {
+              "label" : "YfNgtG1SKw3klDA",
+              "type" : "Concept"
+            }
+          ],
+          "type" : "Genre"
+        },
+        {
+          "label" : "Psychology, Pathological",
+          "concepts" : [
+            {
+              "label" : "uK4GKNsXvX3NJfI",
+              "type" : "Concept"
+            },
+            {
+              "label" : "XCFVccBcFLmxtr1",
+              "type" : "Concept"
+            },
+            {
+              "label" : "wn4mlLNPr0YHU0g",
+              "type" : "Concept"
+            }
+          ],
+          "type" : "Genre"
+        },
+        {
+          "label" : "Darwin \"Jones\", Charles",
+          "concepts" : [
+            {
+              "label" : "7V2pOSQnJOeXjVu",
+              "type" : "Concept"
+            },
+            {
+              "label" : "ylz3BDWIViYo3qv",
+              "type" : "Concept"
+            },
+            {
+              "label" : "sJ0y4QwQTlrFnQP",
+              "type" : "Concept"
+            }
+          ],
+          "type" : "Genre"
+        }
+      ],
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "availabilities" : [
+      ],
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "notes" : [
+      ],
+      "formerFrequency" : [
+      ],
+      "designation" : [
+      ],
+      "images" : [
+      ],
+      "parts" : [
+      ],
+      "partOf" : [
+      ],
+      "precededBy" : [
+      ],
+      "succeededBy" : [
+      ],
+      "type" : "Work"
+    },
+    "query" : {
+      "id" : "4btprmwn",
+      "format.id" : null,
+      "workType" : "Standard",
+      "identifiers.value" : [
+        "C7XCeymDdf"
+      ],
+      "title" : "title-iLGpm85YYF",
+      "alternativeTitles" : [
+      ],
+      "description" : null,
+      "physicalDescription" : null,
+      "edition" : null,
+      "notes.contents" : [
+      ],
+      "lettering" : null,
+      "images.id" : [
+      ],
+      "images.identifiers.value" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
+      "items.locations.accessConditions.status.id" : [
+      ],
+      "items.locations.license.id" : [
+      ],
+      "items.locations.locationType.id" : [
+      ],
+      "subjects.id" : [
+      ],
+      "subjects.label" : [
+      ],
+      "subjects.concepts.label" : [
+      ],
+      "genres.label" : [
+        "Pamphlets.",
+        "Psychology, Pathological",
+        "Darwin \"Jones\", Charles"
+      ],
+      "genres.concepts.label" : [
+        "7ZYKrzxgMS4HDJM",
+        "nToBweq2UFKJPlz",
+        "YfNgtG1SKw3klDA",
+        "uK4GKNsXvX3NJfI",
+        "XCFVccBcFLmxtr1",
+        "wn4mlLNPr0YHU0g",
+        "7V2pOSQnJOeXjVu",
+        "ylz3BDWIViYo3qv",
+        "sJ0y4QwQTlrFnQP"
+      ],
+      "languages.id" : [
+      ],
+      "languages.label" : [
+      ],
+      "contributors.agent.id" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "production.label" : [
+      ],
+      "production.dates.range.from" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
+      ],
+      "collectionPath.label" : null,
+      "collectionPath.path" : null,
+      "referenceNumber" : null
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+        "{\"label\":\"Pamphlets.\",\"concepts\":[],\"type\":\"Genre\"}",
+        "{\"label\":\"Psychology, Pathological\",\"concepts\":[],\"type\":\"Genre\"}",
+        "{\"label\":\"Darwin \\\"Jones\\\", Charles\",\"concepts\":[],\"type\":\"Genre\"}"
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
+    },
+    "type" : "Visible"
+  }
+}

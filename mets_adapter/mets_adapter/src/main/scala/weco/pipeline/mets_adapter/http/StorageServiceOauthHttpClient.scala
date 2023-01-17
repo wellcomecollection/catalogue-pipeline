@@ -9,8 +9,7 @@ import akka.http.scaladsl.model.headers.{
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.unmarshalling.{FromEntityUnmarshaller, Unmarshal}
 import weco.json.JsonUtil._
-import weco.http.client.{HttpClient, HttpGet, HttpPost}
-import weco.http.client.sierra.TokenExchange
+import weco.http.client.{HttpClient, HttpGet, TokenExchange}
 import weco.http.json.CirceMarshalling
 
 import java.time.Instant
@@ -18,7 +17,8 @@ import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
 
 class StorageServiceOauthHttpClient(
-  underlying: HttpClient with HttpGet with HttpPost,
+  underlying: HttpClient,
+  val baseUri: Uri,
   val tokenUri: Uri,
   val credentials: BasicHttpCredentials,
   val expiryGracePeriod: Duration = 60.seconds
@@ -28,7 +28,6 @@ class StorageServiceOauthHttpClient(
   val ec: ExecutionContext
 ) extends HttpClient
     with HttpGet
-    with HttpPost
     with TokenExchange[BasicHttpCredentials, OAuth2BearerToken] {
 
   implicit val um: FromEntityUnmarshaller[StorageServiceAccessToken] =
@@ -85,13 +84,9 @@ class StorageServiceOauthHttpClient(
           existingAuthHeaders.isEmpty,
           s"HTTP request already has auth headers: $request")
 
-        request.copy(
-          headers = request.headers :+ Authorization(token)
-        )
+        request.withHeaders(request.headers :+ Authorization(token))
       }
 
       response <- underlying.singleRequest(authenticatedRequest)
     } yield response
-
-  override val baseUri: Uri = underlying.baseUri
 }

@@ -1,81 +1,69 @@
 locals {
-  wait_minutes = var.is_reindexing ? 45 : 5
-}
+  # The purpose of the batcher is to minimise the number of times
+  # an individual record is processed, by batching them together when they
+  # are expected to modify each other.  This means that choosing parallelism
+  # and bundle size is not about maximising throughput, but about ensuring
+  # that the largest number of records are processed in the smallest number
+  # of executions.
 
-module "batcher_queue" {
-  source                     = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
-  queue_name                 = "${local.namespace_hyphen}_batcher"
-  topic_arns                 = [module.router_path_output_topic.arn]
-  visibility_timeout_seconds = (local.wait_minutes + 5) * 60
-  aws_region                 = var.aws_region
-  alarm_topic_arn            = var.dlq_alarm_arn
-}
+  # During a reindex, the batcher is expected to receive
+  # roughly 0.5 million messages in roughly 2 hours.
+  # At peak, messages appear at a rate of about 6000 per minute, so
+  # waiting for 20 minutes would perfectly align with processing 120000 at a time.
+  # Waiting a little longer ensures that the full 120K capacity is used up more often.
+  #
+  # During normal running, the maximum message count is never expected to be hit,
+  # and processing the same Work multiple times would not be a significant extra load.
+  # Wait a minute and bundle them up anyway, in case multiple related works are
+  # coming through together.
+  wait_minutes = var.reindexing_state.scale_up_tasks ? 25 : 1
 
-module "batcher" {
-  source          = "../modules/service"
-  service_name    = "${local.namespace_hyphen}_batcher"
-  container_image = local.batcher_image
-
-  security_group_ids = [
-    aws_security_group.service_egress.id,
-  ]
-
-  elastic_cloud_vpce_sg_id = var.ec_privatelink_security_group_id
-
-  cluster_name = aws_ecs_cluster.cluster.name
-  cluster_arn  = aws_ecs_cluster.cluster.id
-
-  env_vars = {
-    metrics_namespace = "${local.namespace_hyphen}_batcher"
-
-    queue_url        = module.batcher_queue.url
-    output_topic_arn = module.batcher_output_topic.arn
-
-    # NOTE: this needs to be less than visibility timeout
-    flush_interval_minutes = local.wait_minutes
-
-    # NOTE: SQS in flight limit is 120k
-    max_processed_paths = var.is_reindexing ? 100000 : 5000
-
-    max_batch_size = 40
-  }
-
-  secret_env_vars = {}
-
-  shared_logging_secrets = var.shared_logging_secrets
-
-  subnets = var.subnets
-
-  min_capacity = var.min_capacity
-  max_capacity = min(1, local.max_capacity)
-
-  scale_down_adjustment = local.scale_down_adjustment
-  scale_up_adjustment   = local.scale_up_adjustment
-
-  queue_read_policy = module.batcher_queue.read_policy
-
-  cpu    = 1024
-  memory = 2048
-
-  depends_on = [
-    null_resource.elasticsearch_users,
-  ]
-
-  deployment_service_env  = var.release_label
-  deployment_service_name = "work-batcher"
+  # NOTE: SQS in flight limit is 120k
+  # See https://aws.amazon.com/sqs/faqs/ "Q: How large can Amazon SQS message queues be?"
+  max_processed_paths = var.reindexing_state.scale_up_tasks ? 120000 : 5000
 }
 
 module "batcher_output_topic" {
   source = "../modules/topic"
 
-  name       = "${local.namespace_hyphen}_batcher_output"
+  name       = "${local.namespace}_batcher_output"
   role_names = [module.batcher.task_role_name]
 }
 
-module "batcher_scaling_alarm" {
-  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.1.3"
-  queue_name = module.batcher_queue.name
+module "batcher" {
+  source = "../modules/fargate_service"
 
-  queue_high_actions = [module.batcher.scale_up_arn]
-  queue_low_actions  = [module.batcher.scale_down_arn]
+  name            = "batcher"
+  container_image = local.batcher_image
+
+  topic_arns = [
+    module.router_path_output_topic.arn,
+    module.path_concatenator_output_topic.arn,
+  ]
+
+  # Note: this needs to be bigger than the flush_interval_minutes
+  queue_visibility_timeout_seconds = (local.wait_minutes + 5) * 60
+
+  env_vars = {
+    output_topic_arn = module.batcher_output_topic.arn
+
+    flush_interval_minutes = local.wait_minutes
+    max_processed_paths    = local.max_processed_paths
+
+    max_batch_size = 40
+  }
+
+  cpu    = 1024
+  memory = 2048
+
+  min_capacity = var.min_capacity
+  # We need to minimise fragmentation as much as possible, to serve the goal of the batcher.
+  # Running multiple batchers in parallel would defeat this purpose.
+  max_capacity = 1
+
+  # Unlike all our other tasks, the batcher isn't really set up to cope
+  # with unexpected interruptions.
+  use_fargate_spot = false
+
+  fargate_service_boilerplate = local.fargate_service_boilerplate
 }

@@ -3,6 +3,7 @@ package weco.pipeline.transformer.sierra.transformers
 import grizzled.slf4j.Logging
 import weco.catalogue.internal_model.locations.LocationType.OnlineResource
 import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.locations.AccessStatus.LicensedResources
 import weco.catalogue.internal_model.locations.{
   AccessCondition,
   AccessMethod,
@@ -10,9 +11,9 @@ import weco.catalogue.internal_model.locations.{
   DigitalLocation
 }
 import weco.catalogue.internal_model.work.Item
-import weco.catalogue.source_model.sierra.identifiers.TypedSierraRecordNumber
-import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
-import weco.catalogue.source_model.sierra.source.SierraQueryOps
+import weco.sierra.models.SierraQueryOps
+import weco.sierra.models.identifiers.TypedSierraRecordNumber
+import weco.sierra.models.marc.{Subfield, VarField}
 
 import java.net.URL
 import scala.util.Try
@@ -40,6 +41,26 @@ object SierraElectronicResources extends SierraQueryOps with Logging {
   private def createItem(id: TypedSierraRecordNumber,
                          vf: VarField): Option[Item[IdState.Unminted]] = {
     assert(vf.marcTag.contains("856"))
+
+    // 856 indicator 2 takes the following values:
+    //
+    //      Relationship
+    //      # - No information provided
+    //      0 - Resource
+    //      1 - Version of resource
+    //      2 - Related resource
+    //      8 - No display constant generated
+    //
+    // This allows us to include URLs that are related to the work, but not the
+    // work itself (e.g. a description on a publisher website).
+    val status = vf.indicator2 match {
+      case Some("2") =>
+        AccessStatus.LicensedResources(
+          relationship = LicensedResources.RelatedResource)
+      case _ =>
+        AccessStatus.LicensedResources(
+          relationship = LicensedResources.Resource)
+    }
 
     getUrl(id, vf).map { url =>
       // We don't want the link text to be too long (at most seven words), so
@@ -93,9 +114,7 @@ object SierraElectronicResources extends SierraQueryOps with Logging {
             // See https://github.com/wellcomecollection/platform/issues/5062 for
             // more discussion and conversations about this.
             accessConditions = List(
-              AccessCondition(
-                method = AccessMethod.ViewOnline,
-                status = AccessStatus.LicensedResources)
+              AccessCondition(method = AccessMethod.ViewOnline, status = status)
             )
           )
         )
@@ -108,20 +127,19 @@ object SierraElectronicResources extends SierraQueryOps with Logging {
   private def getUrl(id: TypedSierraRecordNumber,
                      vf: VarField): Option[String] =
     vf.subfieldsWithTag("u") match {
-      case Seq(MarcSubfield(_, content)) if isUrl(content) => Some(content)
+      case Seq(Subfield(_, content)) if isUrl(content) => Some(content)
 
-      case Seq(MarcSubfield(_, content)) =>
+      case Seq(Subfield(_, content)) =>
         warn(
-          s"Record ${id.withCheckDigit} has a value in 856 ǂu which isn't a URL: $content")
+          s"${id.withCheckDigit} has a value in 856 ǂu which isn't a URL: $content")
         None
 
       case Nil =>
-        warn(s"Record ${id.withCheckDigit} has a field 856 without any URLs")
+        warn(s"${id.withCheckDigit} has a field 856 without any URLs")
         None
 
       case other =>
-        warn(
-          s"Record ${id.withCheckDigit} has a field 856 with repeated subfield ǂu")
+        warn(s"${id.withCheckDigit} has a field 856 with repeated subfield ǂu")
         None
     }
 

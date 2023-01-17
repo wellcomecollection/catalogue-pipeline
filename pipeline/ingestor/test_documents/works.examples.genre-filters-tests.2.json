@@ -1,0 +1,179 @@
+{
+  "description" : "examples for the genre tests",
+  "createdAt" : "2023-01-03T09:31:59.875371Z",
+  "id" : "yhjhxcof",
+  "document" : {
+    "debug" : {
+      "source" : {
+        "id" : "yhjhxcof",
+        "identifier" : {
+          "identifierType" : {
+            "id" : "calm-record-id"
+          },
+          "ontologyType" : "Work",
+          "value" : "lydjDVoexx"
+        },
+        "version" : 68,
+        "modifiedTime" : "2037-12-19T21:38:57Z"
+      },
+      "mergedTime" : "2037-12-19T21:38:57Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
+      "redirectSources" : [
+      ]
+    },
+    "display" : {
+      "id" : "yhjhxcof",
+      "title" : "title-wsvmZKLOsI",
+      "alternativeTitles" : [
+      ],
+      "contributors" : [
+      ],
+      "identifiers" : [
+        {
+          "identifierType" : {
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
+            "type" : "IdentifierType"
+          },
+          "value" : "lydjDVoexx",
+          "type" : "Identifier"
+        }
+      ],
+      "subjects" : [
+      ],
+      "genres" : [
+        {
+          "label" : "Psychology, Pathological",
+          "concepts" : [
+            {
+              "label" : "uK4GKNsXvX3NJfI",
+              "type" : "Concept"
+            },
+            {
+              "label" : "XCFVccBcFLmxtr1",
+              "type" : "Concept"
+            },
+            {
+              "label" : "wn4mlLNPr0YHU0g",
+              "type" : "Concept"
+            }
+          ],
+          "type" : "Genre"
+        }
+      ],
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "availabilities" : [
+      ],
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "notes" : [
+      ],
+      "formerFrequency" : [
+      ],
+      "designation" : [
+      ],
+      "images" : [
+      ],
+      "parts" : [
+      ],
+      "partOf" : [
+      ],
+      "precededBy" : [
+      ],
+      "succeededBy" : [
+      ],
+      "type" : "Work"
+    },
+    "query" : {
+      "id" : "yhjhxcof",
+      "format.id" : null,
+      "workType" : "Standard",
+      "identifiers.value" : [
+        "lydjDVoexx"
+      ],
+      "title" : "title-wsvmZKLOsI",
+      "alternativeTitles" : [
+      ],
+      "description" : null,
+      "physicalDescription" : null,
+      "edition" : null,
+      "notes.contents" : [
+      ],
+      "lettering" : null,
+      "images.id" : [
+      ],
+      "images.identifiers.value" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
+      "items.locations.accessConditions.status.id" : [
+      ],
+      "items.locations.license.id" : [
+      ],
+      "items.locations.locationType.id" : [
+      ],
+      "subjects.id" : [
+      ],
+      "subjects.label" : [
+      ],
+      "subjects.concepts.label" : [
+      ],
+      "genres.label" : [
+        "Psychology, Pathological"
+      ],
+      "genres.concepts.label" : [
+        "uK4GKNsXvX3NJfI",
+        "XCFVccBcFLmxtr1",
+        "wn4mlLNPr0YHU0g"
+      ],
+      "languages.id" : [
+      ],
+      "languages.label" : [
+      ],
+      "contributors.agent.id" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "production.label" : [
+      ],
+      "production.dates.range.from" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
+      ],
+      "collectionPath.label" : null,
+      "collectionPath.path" : null,
+      "referenceNumber" : null
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+        "{\"label\":\"Psychology, Pathological\",\"concepts\":[],\"type\":\"Genre\"}"
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
+    },
+    "type" : "Visible"
+  }
+}

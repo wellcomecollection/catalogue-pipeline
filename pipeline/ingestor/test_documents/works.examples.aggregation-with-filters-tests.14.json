@@ -1,0 +1,185 @@
+{
+  "description" : "examples for the aggregation-with-filters tests",
+  "createdAt" : "2023-01-03T09:31:59.722792Z",
+  "id" : "dborzqld",
+  "document" : {
+    "debug" : {
+      "source" : {
+        "id" : "dborzqld",
+        "identifier" : {
+          "identifierType" : {
+            "id" : "miro-image-number"
+          },
+          "ontologyType" : "Work",
+          "value" : "xZlpWaXi4Y"
+        },
+        "version" : 74,
+        "modifiedTime" : "1951-04-17T23:48:59Z"
+      },
+      "mergedTime" : "1951-04-17T23:48:59Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
+      "redirectSources" : [
+      ]
+    },
+    "display" : {
+      "id" : "dborzqld",
+      "title" : "title-LN4dq7YPgQ",
+      "alternativeTitles" : [
+      ],
+      "workType" : {
+        "id" : "b",
+        "label" : "Manuscripts",
+        "type" : "Format"
+      },
+      "contributors" : [
+      ],
+      "identifiers" : [
+        {
+          "identifierType" : {
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
+            "type" : "IdentifierType"
+          },
+          "value" : "xZlpWaXi4Y",
+          "type" : "Identifier"
+        }
+      ],
+      "subjects" : [
+        {
+          "label" : "v4BHmwGTZr",
+          "concepts" : [
+            {
+              "label" : "0FUCKKVOQZLwA6u",
+              "type" : "Concept"
+            },
+            {
+              "label" : "WTQlXaTo6WyiCaL",
+              "type" : "Concept"
+            },
+            {
+              "label" : "acffLiQzk2sxFZY",
+              "type" : "Concept"
+            }
+          ],
+          "type" : "Subject"
+        }
+      ],
+      "genres" : [
+      ],
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "availabilities" : [
+      ],
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "notes" : [
+      ],
+      "formerFrequency" : [
+      ],
+      "designation" : [
+      ],
+      "images" : [
+      ],
+      "parts" : [
+      ],
+      "partOf" : [
+      ],
+      "precededBy" : [
+      ],
+      "succeededBy" : [
+      ],
+      "type" : "Work"
+    },
+    "query" : {
+      "id" : "dborzqld",
+      "format.id" : "b",
+      "workType" : "Standard",
+      "identifiers.value" : [
+        "xZlpWaXi4Y"
+      ],
+      "title" : "title-LN4dq7YPgQ",
+      "alternativeTitles" : [
+      ],
+      "description" : null,
+      "physicalDescription" : null,
+      "edition" : null,
+      "notes.contents" : [
+      ],
+      "lettering" : null,
+      "images.id" : [
+      ],
+      "images.identifiers.value" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
+      "items.locations.accessConditions.status.id" : [
+      ],
+      "items.locations.license.id" : [
+      ],
+      "items.locations.locationType.id" : [
+      ],
+      "subjects.id" : [
+      ],
+      "subjects.label" : [
+        "v4BHmwGTZr"
+      ],
+      "subjects.concepts.label" : [
+        "0FUCKKVOQZLwA6u",
+        "WTQlXaTo6WyiCaL",
+        "acffLiQzk2sxFZY"
+      ],
+      "genres.label" : [
+      ],
+      "genres.concepts.label" : [
+      ],
+      "languages.id" : [
+      ],
+      "languages.label" : [
+      ],
+      "contributors.agent.id" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "production.label" : [
+      ],
+      "production.dates.range.from" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
+      ],
+      "collectionPath.label" : null,
+      "collectionPath.path" : null,
+      "referenceNumber" : null
+    },
+    "aggregatableValues" : {
+      "workType" : [
+        "{\"id\":\"b\",\"label\":\"Manuscripts\",\"type\":\"Format\"}"
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+        "{\"label\":\"v4BHmwGTZr\",\"concepts\":[],\"type\":\"Subject\"}"
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
+    },
+    "type" : "Visible"
+  }
+}

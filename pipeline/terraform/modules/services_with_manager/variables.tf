@@ -1,3 +1,10 @@
+variable "name" {
+  type = string
+}
+variable "namespace" {
+  type = string
+}
+
 variable "subnets" {
   type = list(string)
 }
@@ -8,15 +15,16 @@ variable "cluster_name" {
 variable "cluster_arn" {
 }
 
-variable "service_name" {
-}
-
 variable "security_group_ids" {
   type    = list(string)
   default = []
 }
 
-variable "elastic_cloud_vpce_sg_id" {
+variable "egress_security_group_id" {
+  type = string
+}
+
+variable "elastic_cloud_vpce_security_group_id" {
   type = string
 }
 
@@ -55,8 +63,7 @@ variable "scale_down_adjustment" {
 }
 
 variable "launch_type" {
-  type    = string
-  default = "FARGATE"
+  type = string
 }
 
 variable "capacity_provider_strategies" {
@@ -90,8 +97,6 @@ variable "manager_mount_points" {
   }))
   default = []
 }
-
-variable "queue_read_policy" {}
 
 variable "apps" {
   type = map(object({
@@ -131,14 +136,24 @@ variable "manager_memory" {
   default = 1024
 }
 
-variable "deployment_service_env" {
-  type = string
-}
-
-variable "deployment_service_name" {
-  type = string
-}
-
 variable "shared_logging_secrets" {
-  type = map(any)
+  type = map(string)
+}
+
+variable "topic_arns" {
+  type = list(string)
+}
+
+variable "queue_visibility_timeout_seconds" {
+  type    = number
+  default = 30
+}
+
+variable "max_receive_count" {
+  type    = number
+  default = 4
+}
+
+variable "dlq_alarm_topic_arn" {
+  type = string
 }

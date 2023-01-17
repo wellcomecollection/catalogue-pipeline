@@ -1,19 +1,17 @@
 package weco.pipeline.merger
 
-import scala.concurrent.ExecutionContext
 import akka.actor.ActorSystem
+import com.sksamuel.elastic4s.Index
 import com.typesafe.config.Config
-import weco.catalogue.internal_model.index.{ImagesIndexConfig, WorksIndexConfig}
-import weco.messaging.sns.NotificationMessage
-import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import weco.catalogue.internal_model.Implicits._
-import weco.elasticsearch.typesafe.ElasticBuilder
-import weco.typesafe.WellcomeTypesafeApp
-import weco.typesafe.config.builders.AkkaBuilder
-import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.catalogue.internal_model.image.Image
 import weco.catalogue.internal_model.image.ImageState.Initial
+import weco.catalogue.internal_model.index.{ImagesIndexConfig, WorksIndexConfig}
 import weco.catalogue.internal_model.work.Work
+import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
+import weco.elasticsearch.typesafe.ElasticBuilder
+import weco.messaging.sns.NotificationMessage
+import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import weco.pipeline.merger.services.{
   IdentifiedWorkLookup,
   MergerManager,
@@ -21,11 +19,13 @@ import weco.pipeline.merger.services.{
   PlatformMerger
 }
 import weco.pipeline_storage.EitherIndexer
-import weco.pipeline_storage.typesafe.{
-  ElasticIndexerBuilder,
-  ElasticSourceRetrieverBuilder,
-  PipelineStorageStreamBuilder
-}
+import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
+import weco.pipeline_storage.typesafe.PipelineStorageStreamBuilder
+import weco.typesafe.WellcomeTypesafeApp
+import weco.typesafe.config.builders.AkkaBuilder
+import weco.typesafe.config.builders.EnrichConfig._
+
+import scala.concurrent.ExecutionContext
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
@@ -36,17 +36,15 @@ object Main extends WellcomeTypesafeApp {
 
     val esClient = ElasticBuilder.buildElasticClient(config)
 
-    val sourceWorkLookup = new IdentifiedWorkLookup(
-      retriever = ElasticSourceRetrieverBuilder.apply[Work[Identified]](
-        config,
-        esClient,
-        namespace = "identified-works"
+    val retriever =
+      new ElasticSourceRetriever[Work[Identified]](
+        client = esClient,
+        index = Index(config.requireString("es.identified-works.index"))
       )
-    )
 
-    val mergerManager = new MergerManager(
-      mergerRules = PlatformMerger
-    )
+    val sourceWorkLookup = new IdentifiedWorkLookup(retriever)
+
+    val mergerManager = new MergerManager(PlatformMerger)
 
     val workMsgSender =
       SNSBuilder.buildSNSMessageSender(
@@ -64,17 +62,15 @@ object Main extends WellcomeTypesafeApp {
 
     val workOrImageIndexer =
       new EitherIndexer[Work[Merged], Image[Initial]](
-        ElasticIndexerBuilder[Work[Merged]](
-          config,
-          esClient,
-          namespace = "merged-works",
-          indexConfig = WorksIndexConfig.merged
+        leftIndexer = new ElasticIndexer[Work[Merged]](
+          client = esClient,
+          index = Index(config.requireString("es.merged-works.index")),
+          config = WorksIndexConfig.merged
         ),
-        ElasticIndexerBuilder[Image[Initial]](
-          config,
-          esClient,
-          namespace = "initial-images",
-          indexConfig = ImagesIndexConfig.initial
+        rightIndexer = new ElasticIndexer[Image[Initial]](
+          client = esClient,
+          index = Index(config.requireString("es.initial-images.index")),
+          config = ImagesIndexConfig.initial
         )
       )
 
@@ -85,7 +81,7 @@ object Main extends WellcomeTypesafeApp {
       workOrImageIndexer = workOrImageIndexer,
       workMsgSender = workMsgSender,
       imageMsgSender = imageMsgSender,
-      config = PipelineStorageStreamBuilder.buildPipelineStorageConfig(config),
+      config = PipelineStorageStreamBuilder.buildPipelineStorageConfig(config)
     )
   }
 }

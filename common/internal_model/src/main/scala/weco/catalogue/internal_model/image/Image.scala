@@ -75,18 +75,9 @@ object ImageState {
   case class Augmented(
     sourceIdentifier: SourceIdentifier,
     canonicalId: CanonicalId,
-    inferredData: Option[InferredData] = None
+    inferredData: InferredData
   ) extends ImageState {
-    type TransitionArgs = Option[InferredData]
-  }
-
-  case class Indexed(
-    sourceIdentifier: SourceIdentifier,
-    canonicalId: CanonicalId,
-    inferredData: Option[InferredData] = None,
-    derivedData: DerivedImageData
-  ) extends ImageState {
-    type TransitionArgs = Unit
+    type TransitionArgs = InferredData
   }
 }
 
@@ -101,22 +92,12 @@ object ImageFsm {
   implicit val initialToAugmented = new Transition[Initial, Augmented] {
     def state(
       self: Image[Initial],
-      inferredData: Option[InferredData]
+      inferredData: InferredData
     ): Augmented =
       Augmented(
         sourceIdentifier = self.state.sourceIdentifier,
         canonicalId = self.state.canonicalId,
         inferredData = inferredData
-      )
-  }
-
-  implicit val augmentedToIndexed = new Transition[Augmented, Indexed] {
-    def state(self: Image[Augmented], args: Unit): Indexed =
-      Indexed(
-        sourceIdentifier = self.state.sourceIdentifier,
-        canonicalId = self.state.canonicalId,
-        inferredData = self.state.inferredData,
-        derivedData = DerivedImageData(self)
       )
   }
 }
@@ -126,13 +107,23 @@ case class InferredData(
   // ES's dense vector type (max length 2048)
   features1: List[Float],
   features2: List[Float],
-  lshEncodedFeatures: List[String],
+  reducedFeatures: List[Float],
   palette: List[String],
+  averageColorHex: Option[String],
   binSizes: List[List[Int]],
   binMinima: List[Float],
   aspectRatio: Option[Float]
 )
 
 object InferredData {
-  def empty: InferredData = InferredData(Nil, Nil, Nil, Nil, Nil, Nil, None)
+  def empty: InferredData = InferredData(
+    features1 = Nil,
+    features2 = Nil,
+    reducedFeatures = Nil,
+    palette = Nil,
+    averageColorHex = None,
+    binSizes = Nil,
+    binMinima = Nil,
+    aspectRatio = None
+  )
 }

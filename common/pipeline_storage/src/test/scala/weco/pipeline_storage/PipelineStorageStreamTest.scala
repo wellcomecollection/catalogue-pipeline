@@ -7,24 +7,16 @@ import com.sksamuel.elastic4s.requests.indexes.admin.IndexExistsResponse
 import com.sksamuel.elastic4s.{ElasticClient, Index, Response}
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.funspec.AnyFunSpec
-import org.scalatest.time.{Seconds, Span}
 import software.amazon.awssdk.services.sqs.model.Message
+import weco.catalogue.internal_model.index.IndexFixtures
 import weco.elasticsearch.{ElasticClientBuilder, IndexConfig}
 import weco.json.JsonUtil
 import weco.json.JsonUtil._
 import weco.messaging.fixtures.SQS.QueuePair
 import weco.messaging.memory.MemoryMessageSender
 import weco.messaging.sns.NotificationMessage
-import weco.pipeline_storage.fixtures.{
-  ElasticIndexerFixtures,
-  PipelineStorageStreamFixtures
-}
-import weco.pipeline_storage.generators.SampleDocument
 import weco.pipeline_storage.elastic.ElasticIndexer
-import weco.pipeline_storage.fixtures.{
-  ElasticIndexerFixtures,
-  PipelineStorageStreamFixtures
-}
+import weco.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 import weco.pipeline_storage.generators.{
   SampleDocument,
   SampleDocumentGenerators
@@ -38,7 +30,7 @@ import scala.util.{Failure, Random, Try}
 
 class PipelineStorageStreamTest
     extends AnyFunSpec
-    with ElasticIndexerFixtures
+    with IndexFixtures
     with PipelineStorageStreamFixtures
     with SampleDocumentGenerators {
 
@@ -67,7 +59,7 @@ class PipelineStorageStreamTest
 
     val sender = new MemoryMessageSender
 
-    withLocalSqsQueuePair(visibilityTimeout = 10) {
+    withLocalSqsQueuePair(visibilityTimeout = 10.seconds) {
       case QueuePair(queue, dlq) =>
         withPipelineStream(
           queue = queue,
@@ -105,7 +97,7 @@ class PipelineStorageStreamTest
 
     val sender = new MemoryMessageSender
 
-    withLocalSqsQueuePair(visibilityTimeout = 10) {
+    withLocalSqsQueuePair(visibilityTimeout = 10.seconds) {
       case QueuePair(queue, dlq) =>
         withPipelineStream(
           queue = queue,
@@ -157,7 +149,7 @@ class PipelineStorageStreamTest
 
     val sender = new MemoryMessageSender
 
-    withLocalSqsQueuePair(visibilityTimeout = 1) {
+    withLocalSqsQueuePair(visibilityTimeout = 1.second) {
       case QueuePair(queue, dlq) =>
         withPipelineStream(queue = queue, indexer = indexer, sender = sender) {
           pipelineStream =>
@@ -205,7 +197,7 @@ class PipelineStorageStreamTest
       }
     }
 
-    withLocalSqsQueuePair(visibilityTimeout = 1) {
+    withLocalSqsQueuePair(visibilityTimeout = 1.second) {
       case QueuePair(queue, dlq) =>
         withPipelineStream(
           queue = queue,
@@ -246,7 +238,7 @@ class PipelineStorageStreamTest
 
     val sender = new MemoryMessageSender
 
-    withLocalSqsQueuePair(visibilityTimeout = 10) {
+    withLocalSqsQueuePair(visibilityTimeout = 10.seconds) {
       case QueuePair(queue, dlq) =>
         withPipelineStream(
           queue = queue,
@@ -274,7 +266,7 @@ class PipelineStorageStreamTest
 
     val sender = new MemoryMessageSender
 
-    withLocalSqsQueuePair(visibilityTimeout = 5) {
+    withLocalSqsQueuePair(visibilityTimeout = 1 second) {
       case QueuePair(queue, dlq) =>
         withPipelineStream(
           queue = queue,
@@ -288,10 +280,10 @@ class PipelineStorageStreamTest
             "test stream",
             _ => throw new Exception("Boom!"))
 
-          eventually(Timeout(Span(30, Seconds))) {
+          eventually {
             sender.messages.map(_.body) shouldBe empty
             assertQueueEmpty(queue)
-            assertQueueHasSize(dlq, 1)
+            assertQueueHasSize(dlq, size = 1)
           }
         }
     }
@@ -309,7 +301,7 @@ class PipelineStorageStreamTest
 
     val sender = new MemoryMessageSender
 
-    withLocalSqsQueuePair(visibilityTimeout = 30) {
+    withLocalSqsQueuePair(visibilityTimeout = 30.seconds) {
       case QueuePair(queue, dlq) =>
         withPipelineStream(
           queue = queue,
@@ -344,7 +336,7 @@ class PipelineStorageStreamTest
     val index = createIndex
     val sender = new MemoryMessageSender
 
-    withLocalSqsQueuePair() {
+    withLocalSqsQueuePair(visibilityTimeout = 1.second) {
       case QueuePair(queue, dlq) =>
         withPipelineStream(queue = queue, indexer = indexer(index)) {
           pipelineStream =>
@@ -408,7 +400,7 @@ class PipelineStorageStreamTest
 
     val sender = new MemoryMessageSender
 
-    withLocalSqsQueuePair() {
+    withLocalSqsQueuePair(visibilityTimeout = 1.second) {
       case QueuePair(queue, dlq) =>
         withPipelineStream(queue = queue, indexer = indexer, sender = sender) {
           pipelineStream =>
@@ -442,7 +434,7 @@ class PipelineStorageStreamTest
         Failure(new Throwable("BOOM!"))
     }
 
-    withLocalSqsQueuePair() {
+    withLocalSqsQueuePair(visibilityTimeout = 1.second) {
       case QueuePair(queue, dlq) =>
         withPipelineStream(
           queue = queue,
@@ -450,14 +442,20 @@ class PipelineStorageStreamTest
           sender = brokenSender) { pipelineStream =>
           sendNotificationToSQS(queue, document)
 
-          pipelineStream.foreach(
-            "test stream",
-            _ => Future.successful(List(document))
-          )
+          def runStream =
+            () =>
+              pipelineStream.foreach(
+                "test stream",
+                _ => Future.successful(List(document))
+            )
 
-          eventually {
-            assertQueueEmpty(queue)
-            assertQueueHasSize(dlq, size = 1)
+          whenReady(runStream()) { _ =>
+            whenReady(runStream()) { _ =>
+              eventually {
+                assertQueueEmpty(queue)
+                assertQueueHasSize(dlq, size = 1)
+              }
+            }
           }
         }
     }

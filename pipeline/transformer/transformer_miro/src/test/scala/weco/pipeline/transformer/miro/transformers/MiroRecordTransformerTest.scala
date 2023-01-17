@@ -7,7 +7,11 @@ import org.scalatest.prop.TableDrivenPropertyChecks._
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.internal_model.generators.IdentifiersGenerators
-import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType}
+import weco.catalogue.internal_model.identifiers.{
+  IdState,
+  IdentifierType,
+  SourceIdentifier
+}
 import weco.catalogue.internal_model.locations._
 import weco.catalogue.internal_model.work.DeletedReason.SuppressedFromSource
 import weco.catalogue.internal_model.work.InvisibilityReason.UnableToTransform
@@ -16,6 +20,7 @@ import weco.catalogue.source_model.miro.MiroSourceOverrides
 import weco.pipeline.transformer.miro.generators.MiroRecordGenerators
 import weco.pipeline.transformer.miro.models.MiroMetadata
 import weco.pipeline.transformer.miro.source.MiroRecord
+import weco.pipeline.transformer.transformers.ParsedPeriod
 
 class MiroRecordTransformerTest
     extends AnyFunSpec
@@ -188,7 +193,7 @@ class MiroRecordTransformerTest
         imageNumber = "V1234567"
       )
     )
-    work.data.createdDate shouldBe Some(Period(date))
+    work.data.createdDate shouldBe Some(ParsedPeriod(date))
   }
 
   it("does not pass through the value of the creation date on non-V records") {
@@ -222,7 +227,16 @@ class MiroRecordTransformerTest
     work.data.title shouldBe Some("A café for cats")
     work.data.contributors shouldBe List(
       Contributor(
-        agent = Agent("Gyokushō, a cät Ôwnêr"),
+        agent = Agent(
+          id = IdState.Identifiable(
+            sourceIdentifier = SourceIdentifier(
+              identifierType = IdentifierType.LabelDerived,
+              value = "gyokusho, a cat owner",
+              ontologyType = "Agent"
+            )
+          ),
+          label = "Gyokushō, a cät Ôwnêr"
+        ),
         roles = Nil
       )
     )
@@ -438,7 +452,6 @@ class MiroRecordTransformerTest
         sourceModifiedTime = Instant.EPOCH
       ),
       version = 1,
-      data = WorkData(),
       deletedReason = deletedReason
     )
   }

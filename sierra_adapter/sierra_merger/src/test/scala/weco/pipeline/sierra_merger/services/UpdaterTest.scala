@@ -2,7 +2,6 @@ package weco.pipeline.sierra_merger.services
 
 import org.scalatest.{Assertion, EitherValues}
 import org.scalatest.funspec.AnyFunSpec
-import weco.json.JsonUtil._
 import weco.storage.maxima.Maxima
 import weco.storage.maxima.memory.MemoryMaxima
 import weco.storage.s3.S3ObjectLocation
@@ -15,19 +14,20 @@ import weco.storage.store.{
 }
 import weco.storage.{StoreWriteError, UpdateWriteError, Version}
 import weco.catalogue.source_model.fixtures.SourceVHSFixture
-import weco.catalogue.source_model.generators.SierraGenerators
-import weco.catalogue.source_model.sierra.identifiers.TypedSierraRecordNumber
+import weco.catalogue.source_model.generators.SierraRecordGenerators
 import weco.catalogue.source_model.sierra.{
   SierraItemRecord,
   SierraTransformable
 }
 import weco.catalogue.source_model.store.SourceVHS
+import weco.catalogue.source_model.Implicits._
 import weco.pipeline.sierra_merger.fixtures.RecordMergerFixtures
+import weco.sierra.models.identifiers.TypedSierraRecordNumber
 
 class UpdaterTest
     extends AnyFunSpec
     with EitherValues
-    with SierraGenerators
+    with SierraRecordGenerators
     with RecordMergerFixtures
     with SourceVHSFixture {
 
@@ -58,9 +58,8 @@ class UpdaterTest
       Version(bibId.withoutCheckDigit, 0))
 
     val expectedSierraTransformable =
-      createSierraTransformableWith(
-        sierraId = bibId,
-        maybeBibRecord = None,
+      createSierraTransformableStubWith(
+        bibId = bibId,
         itemRecords = List(newItemRecord)
       )
 
@@ -75,9 +74,8 @@ class UpdaterTest
       bibIds = List(bibId)
     )
 
-    val oldTransformable = createSierraTransformableWith(
-      sierraId = bibId,
-      maybeBibRecord = None,
+    val oldTransformable = createSierraTransformableStubWith(
+      bibId = bibId,
       itemRecords = List(itemRecord)
     )
 
@@ -93,14 +91,15 @@ class UpdaterTest
       modifiedDate = newerDate
     )
     val expectedTransformable = oldTransformable.copy(
-      itemRecords = Map(itemRecord.id -> newItemRecord)
+      itemRecords = Map(itemRecord.id -> newItemRecord),
+      modifiedTime = newerDate
     )
 
     val result = updater.update(newItemRecord)
 
     result shouldBe a[Right[_, _]]
-    result.right.get.map { _.id } should contain theSameElementsAs (List(
-      Version(bibId.withoutCheckDigit, 1)))
+    result.right.get.map { _.id } should contain theSameElementsAs List(
+      Version(bibId.withoutCheckDigit, 1))
 
     assertStored(
       expectedTransformable.sierraId,
@@ -117,15 +116,13 @@ class UpdaterTest
       bibIds = List(bibId1)
     )
 
-    val sierraTransformable1 = createSierraTransformableWith(
-      sierraId = bibId1,
-      maybeBibRecord = None,
+    val sierraTransformable1 = createSierraTransformableStubWith(
+      bibId = bibId1,
       itemRecords = List(itemRecord)
     )
 
-    val sierraTransformable2 = createSierraTransformableWith(
-      sierraId = bibId2,
-      maybeBibRecord = None
+    val sierraTransformable2 = createSierraTransformableStubWith(
+      bibId = bibId2
     )
 
     val sourceVHS = createSourceVHSWith(
@@ -143,7 +140,8 @@ class UpdaterTest
     )
 
     val expectedTransformable1 = sierraTransformable1.copy(
-      itemRecords = Map.empty
+      itemRecords = Map.empty,
+      modifiedTime = unlinkItemRecord.modifiedDate
     )
 
     val expectedItemRecords = Map(
@@ -154,15 +152,16 @@ class UpdaterTest
       )
     )
     val expectedTransformable2 = sierraTransformable2.copy(
-      itemRecords = expectedItemRecords
+      itemRecords = expectedItemRecords,
+      modifiedTime = unlinkItemRecord.modifiedDate
     )
 
     val result = updater.update(unlinkItemRecord)
 
     result shouldBe a[Right[_, _]]
-    result.right.get.map { _.id } should contain theSameElementsAs (List(
+    result.right.get.map { _.id } should contain theSameElementsAs List(
       Version(bibId1.withoutCheckDigit, 1),
-      Version(bibId2.withoutCheckDigit, 1)))
+      Version(bibId2.withoutCheckDigit, 1))
 
     assertStored(bibId1, expectedTransformable1, sourceVHS)
     assertStored(bibId2, expectedTransformable2, sourceVHS)
@@ -173,18 +172,16 @@ class UpdaterTest
     val bibId2 = createSierraBibNumber
 
     val itemRecord = createSierraItemRecordWith(
-      bibIds = List(bibId1)
+      bibIds = List(bibId1, bibId2)
     )
 
-    val sierraTransformable1 = createSierraTransformableWith(
-      sierraId = bibId1,
-      maybeBibRecord = None,
+    val sierraTransformable1 = createSierraTransformableStubWith(
+      bibId = bibId1,
       itemRecords = List(itemRecord)
     )
 
-    val sierraTransformable2 = createSierraTransformableWith(
-      sierraId = bibId2,
-      maybeBibRecord = None,
+    val sierraTransformable2 = createSierraTransformableStubWith(
+      bibId = bibId2,
       itemRecords = List(itemRecord)
     )
 
@@ -207,20 +204,22 @@ class UpdaterTest
     )
 
     val expectedTransformable1 = sierraTransformable1.copy(
-      itemRecords = Map.empty
+      itemRecords = Map.empty,
+      modifiedTime = unlinkItemRecord.modifiedDate
     )
 
     // In this situation the item was already linked to sierraTransformable2
     // but the modified date is updated in line with the item update
     val expectedTransformable2 = sierraTransformable2.copy(
-      itemRecords = expectedItemData
+      itemRecords = expectedItemData,
+      modifiedTime = unlinkItemRecord.modifiedDate
     )
 
     val result = updater.update(unlinkItemRecord)
     result shouldBe a[Right[_, _]]
-    result.right.get.map { _.id } should contain theSameElementsAs (List(
+    result.right.get.map { _.id } should contain theSameElementsAs List(
       Version(bibId1.withoutCheckDigit, 1),
-      Version(bibId2.withoutCheckDigit, 1)))
+      Version(bibId2.withoutCheckDigit, 1))
 
     assertStored(bibId1, expectedTransformable1, sourceVHS)
     assertStored(bibId2, expectedTransformable2, sourceVHS)
@@ -235,12 +234,12 @@ class UpdaterTest
     )
 
     val sierraTransformable1 =
-      createSierraTransformableWith(
-        sierraId = bibId1,
+      createSierraTransformableStubWith(
+        bibId = bibId1,
         itemRecords = List(itemRecord))
 
     val sierraTransformable2 =
-      createSierraTransformableWith(sierraId = bibId2)
+      createSierraTransformableStubWith(bibId = bibId2)
 
     val sourceVHS = createSourceVHSWith(
       initialEntries = Map(
@@ -289,9 +288,8 @@ class UpdaterTest
       bibIds = List(bibId)
     )
 
-    val transformable = createSierraTransformableWith(
-      sierraId = bibId,
-      maybeBibRecord = None,
+    val transformable = createSierraTransformableStubWith(
+      bibId = bibId,
       itemRecords = List(itemRecord)
     )
 
@@ -336,10 +334,7 @@ class UpdaterTest
 
   it("adds an item to the record if the bibId exists but has no itemData") {
     val bibId = createSierraBibNumber
-    val transformable = createSierraTransformableWith(
-      sierraId = bibId,
-      maybeBibRecord = None
-    )
+    val transformable = createSierraTransformableStubWith(bibId = bibId)
 
     val sourceVHS = createSourceVHSWith(
       initialEntries = Map(
@@ -352,16 +347,15 @@ class UpdaterTest
       bibIds = List(bibId)
     )
 
-    val expectedTransformable = createSierraTransformableWith(
-      sierraId = bibId,
-      maybeBibRecord = None,
+    val expectedTransformable = createSierraTransformableStubWith(
+      bibId = bibId,
       itemRecords = List(itemRecord)
     )
 
     val result = updater.update(itemRecord)
     result shouldBe a[Right[_, _]]
-    result.right.get.map { _.id } should contain theSameElementsAs (List(
-      Version(bibId.withoutCheckDigit, 1)))
+    result.right.get.map { _.id } should contain theSameElementsAs List(
+      Version(bibId.withoutCheckDigit, 1))
 
     assertStored(bibId, expectedTransformable, sourceVHS)
   }

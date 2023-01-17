@@ -2,7 +2,7 @@ package weco.catalogue.tei.id_extractor
 
 import akka.stream.scaladsl.Flow
 import software.amazon.awssdk.services.sqs.model.{Message => SQSMessage}
-import weco.json.JsonUtil._
+import weco.json.JsonUtil.fromJson
 import weco.messaging.sns.NotificationMessage
 import weco.messaging.sqs.SQSStream
 import weco.typesafe.Runnable
@@ -105,12 +105,25 @@ class TeiIdExtractorWorkerService[Dest](
       }
       .via(catchErrors)
 
-  // Files in https://github.com/wellcomecollection/wellcome-collection-tei in any
-  // directory that isn't "docs" or "Templates" and ends with .xml is a TEI file
-  private def isTeiFile(path: String) = {
-    val noTeiDirectories = Seq("docs", "Templates")
-    !noTeiDirectories.exists(dir => path.startsWith(dir)) && path.endsWith(
-      ".xml") && path.contains("/")
+  /** Is this a TEI file we want to process as part of the pipeline? */
+  private def isTeiFile(path: String): Boolean = {
+    val isXmlFile = path.endsWith(".xml")
+
+    val isInRootOfRepo = !path.contains("/")
+
+    val excludedDirs = Seq(
+      // These are directories used for TEI management, not actual TEI files.
+      "docs/",
+      "Templates/",
+      // These are files we don't want to ingest directly into the platform;
+      // e.g. stuff that's been written for collaboration on external projects.
+      //
+      // See https://github.com/wellcomecollection/catalogue-pipeline/issues/2197#issuecomment-1249665377
+      "Arabic/Fihrist/"
+    )
+    val isInExcludedDir = excludedDirs.exists(dir => path.startsWith(dir))
+
+    isXmlFile && !isInRootOfRepo && !isInExcludedDir
   }
 
   /** Encapsulates context to pass along each akka-stream stage. Newer versions

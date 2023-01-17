@@ -22,6 +22,11 @@ class MarcLanguageCodeListTest extends AnyFunSpec with Matchers {
       Language(label = "German", id = "ger"))
   }
 
+  it("finds Arabic by name") {
+    MarcLanguageCodeList.fromName(name = "Arabic") shouldBe Some(
+      Language(id = "ara", label = "Arabic"))
+  }
+
   it("finds a language by variant name") {
     MarcLanguageCodeList.fromName(name = "Flemish") shouldBe Some(
       Language(label = "Flemish", id = "dut"))

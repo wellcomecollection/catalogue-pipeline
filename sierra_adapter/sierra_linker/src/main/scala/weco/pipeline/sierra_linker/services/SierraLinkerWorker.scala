@@ -2,13 +2,13 @@ package weco.pipeline.sierra_linker.services
 
 import akka.Done
 import io.circe.{Decoder, Encoder}
-import weco.json.JsonUtil._
+import weco.json.JsonUtil.fromJson
 import weco.messaging.MessageSender
 import weco.messaging.sns.NotificationMessage
 import weco.messaging.sqs.SQSStream
 import weco.typesafe.Runnable
 import weco.catalogue.source_model.sierra.AbstractSierraRecord
-import weco.catalogue.source_model.sierra.identifiers.TypedSierraRecordNumber
+import weco.sierra.models.identifiers.TypedSierraRecordNumber
 
 import scala.concurrent.Future
 import scala.util.Success

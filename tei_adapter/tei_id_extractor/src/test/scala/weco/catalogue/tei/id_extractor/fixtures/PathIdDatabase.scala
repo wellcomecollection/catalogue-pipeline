@@ -19,11 +19,11 @@ trait PathIdDatabase
     with Matchers
     with TableNameGenerators {
 
-  val host = "localhost"
-  val port = 3307
-  val username = "root"
-  val password = "password"
-  val maxSize = 8
+  val rdsHost = "localhost"
+  val rdsPort = 3307
+  val rdsUsername = "root"
+  val rdsPassword = "password"
+  val rdsMaxSize = 8
 
   def eventuallyTableExists(tableConfig: PathIdTableConfig): Assertion =
     eventually {
@@ -63,20 +63,20 @@ trait PathIdDatabase
     }
 
   val rdsClientConfig = RDSClientConfig(
-    host = host,
-    port = port,
-    username = username,
-    password = password,
+    host = rdsHost,
+    port = rdsPort,
+    username = rdsUsername,
+    password = rdsPassword,
     maxConnections = 3
   )
 
   def withPathIdDatabase[R](testWith: TestWith[PathIdTableConfig, R]): R = {
     ConnectionPool.add(
       'default,
-      s"jdbc:mysql://$host:$port",
-      username,
-      password,
-      settings = ConnectionPoolSettings(maxSize = maxSize)
+      s"jdbc:mysql://$rdsHost:$rdsPort",
+      rdsUsername,
+      rdsPassword,
+      settings = ConnectionPoolSettings(maxSize = rdsMaxSize)
     )
 
     implicit val session = AutoSession

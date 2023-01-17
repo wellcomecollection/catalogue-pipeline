@@ -8,18 +8,14 @@ import weco.catalogue.internal_model.identifiers.{
   SourceIdentifier
 }
 import weco.catalogue.internal_model.work.MergeCandidate
-import weco.catalogue.source_model.generators.{
-  MarcGenerators,
-  SierraDataGenerators
-}
-import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
-import weco.catalogue.source_model.sierra.SierraBibData
-import weco.catalogue.source_model.sierra.source.SierraMaterialType
+import weco.sierra.generators.SierraDataGenerators
+import weco.sierra.models.data.SierraBibData
+import weco.sierra.models.fields.SierraMaterialType
+import weco.sierra.models.marc.{Subfield, VarField}
 
 class SierraMergeCandidatesTest
     extends AnyFunSpec
     with Matchers
-    with MarcGenerators
     with SierraDataGenerators {
 
   val mergeCandidateBibNumber = "b21414440"
@@ -66,10 +62,10 @@ class SierraMergeCandidatesTest
     it("returns an empty list if MARC tag 776 does not contain a subfield w") {
       val sierraData = createSierraBibDataWith(
         varFields = List(
-          createVarFieldWith(
+          VarField(
             marcTag = "776",
             subfields = List(
-              MarcSubfield(tag = "a", content = s"blah blah")
+              Subfield(tag = "a", content = s"blah blah")
             )
           )
         )
@@ -349,14 +345,21 @@ class SierraMergeCandidatesTest
 
       getMergeCandidates(bibData) shouldBe Nil
     }
+
+    it("ignores a malformed OCoLC value in 035 subfield ǂa") {
+      // This is based on a value from b11955491
+      val bibData = bibDataWith035(Seq("(OCoLC)92747927 "))
+
+      getMergeCandidates(bibData) shouldBe empty
+    }
   }
 
   private def bibDataWith035(calmIds: Seq[String]) =
     createSierraBibDataWith(
       varFields = List(
         VarField(
-          marcTag = Some("035"),
-          subfields = calmIds.map(MarcSubfield("a", _)).toList
+          marcTag = "035",
+          subfields = calmIds.map(Subfield("a", _)).toList
         )))
 
   private def createCalmMergeCandidate(calmId: String) = MergeCandidate(
@@ -387,20 +390,20 @@ class SierraMergeCandidatesTest
 
   private def create776subfieldsWith(ids: List[String]): List[VarField] =
     ids.map { idString =>
-      createVarFieldWith(
+      VarField(
         marcTag = "776",
         subfields = List(
-          MarcSubfield(tag = "w", content = idString)
+          Subfield(tag = "w", content = idString)
         )
       )
     }
 
   private def create962subfieldsWith(urls: List[String]): List[VarField] =
     urls.map { url =>
-      createVarFieldWith(
+      VarField(
         marcTag = "962",
         subfields = List(
-          MarcSubfield(tag = "u", content = url)
+          Subfield(tag = "u", content = url)
         )
       )
     }
@@ -412,10 +415,10 @@ class SierraMergeCandidatesTest
 
   private def create089subfieldsWith(miroIds: List[String]): List[VarField] =
     miroIds.map { miroId =>
-      createVarFieldWith(
+      VarField(
         marcTag = "089",
         subfields = List(
-          MarcSubfield(tag = "a", content = miroId)
+          Subfield(tag = "a", content = miroId)
         )
       )
     }

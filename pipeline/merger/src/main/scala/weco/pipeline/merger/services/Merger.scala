@@ -2,10 +2,10 @@ package weco.pipeline.merger.services
 
 import cats.data.State
 import weco.catalogue.internal_model.identifiers.{DataState, IdState}
+import weco.catalogue.internal_model.image.ImageData
+import weco.catalogue.internal_model.locations.DigitalLocation
 import weco.catalogue.internal_model.work.WorkState.Identified
-import weco.catalogue.internal_model.image
-import weco.catalogue.internal_model.image.{ImageData, ParentWorks}
-import weco.catalogue.internal_model.work.{Work, WorkData, WorkState}
+import weco.catalogue.internal_model.work._
 import weco.pipeline.merger.logging.MergerLogging
 import weco.pipeline.merger.models
 import weco.pipeline.merger.models.{
@@ -85,7 +85,7 @@ trait Merger extends MergerLogging {
       }
   }
 
-  def merge(works: Seq[Work[Identified]]): MergerOutcome =
+  def merge(works: Seq[Work[Identified]]): MergerOutcome = {
     categoriseWorks(works)
       .map {
         case CategorisedWorks(target, sources, deleted) =>
@@ -103,6 +103,11 @@ trait Merger extends MergerLogging {
           val redirects = redirectedSources.map(redirectSourceToTarget(target))
           logResult(result, redirects.toList, remaining.toList)
 
+          val internalWorks = result.mergedTarget.internalWorksWith(
+            thumbnail = result.mergedTarget.data.thumbnail,
+            version = result.mergedTarget.version
+          )
+
           val redirectedIdentifiers =
             redirectedSources.map { s =>
               IdState.Identified(s.state.canonicalId, s.sourceIdentifier)
@@ -117,11 +122,29 @@ trait Merger extends MergerLogging {
             )
 
           MergerOutcome(
-            resultWorks = redirects.toList ++ remaining ++ deleted :+ targetWork,
+            resultWorks = redirects.toList ++ remaining ++ deleted ++ internalWorks :+ targetWork,
             imagesWithSources = result.imageDataWithSources
           )
       }
       .getOrElse(MergerOutcome.passThrough(works))
+  }
+
+  private implicit class WorkOps(w: Work[Identified]) {
+    def internalWorksWith(thumbnail: Option[DigitalLocation],
+                          version: Int): List[Work.Visible[Identified]] =
+      w.state.internalWorkStubs.map {
+        case InternalWork.Identified(sourceIdentifier, canonicalId, data) =>
+          Work.Visible[Identified](
+            version = version,
+            data = data.copy(thumbnail = thumbnail),
+            state = WorkState.Identified(
+              sourceIdentifier = sourceIdentifier,
+              canonicalId = canonicalId,
+              sourceModifiedTime = w.state.sourceModifiedTime
+            )
+          )
+      }
+  }
 
   private def redirectSourceToTarget(
     target: Work.Visible[Identified]
@@ -129,9 +152,10 @@ trait Merger extends MergerLogging {
     Work.Redirected[Identified](
       version = source.version,
       state = Identified(
-        source.sourceIdentifier,
-        source.state.canonicalId,
-        source.state.sourceModifiedTime
+        sourceIdentifier = source.sourceIdentifier,
+        canonicalId = source.state.canonicalId,
+        sourceModifiedTime = source.state.sourceModifiedTime,
+        internalWorkStubs = Nil
       ),
       redirectTarget =
         IdState.Identified(target.state.canonicalId, target.sourceIdentifier)
@@ -173,12 +197,16 @@ object Merger {
       f: WorkData[StateT#WorkDataState] => WorkData[StateT#WorkDataState]
     ): Work.Visible[StateT] =
       work.copy(data = f(work.data))
+    def mapState(
+      f: StateT => StateT
+    ): Work.Visible[StateT] =
+      work.copy(state = f(work.state))
   }
 }
 
 object PlatformMerger extends Merger {
-  import weco.catalogue.internal_model.image.ParentWork._
   import Merger.WorkMergingOps
+  import weco.catalogue.internal_model.image.ParentWork._
 
   override def findTarget(
     works: Seq[Work[Identified]]
@@ -192,14 +220,11 @@ object PlatformMerger extends Merger {
     if (sources.isEmpty)
       State.pure(
         models.MergeResult(
-          mergedTarget = target,
+          mergedTarget = modifyInternalWorks(target, target.data.items),
           imageDataWithSources = standaloneImages(target).map { image =>
             ImageDataWithSource(
-              image,
-              ParentWorks(
-                canonicalWork = target.toParentWork,
-                redirectedWork = None
-              )
+              imageData = image,
+              source = target.toParentWork
             )
           }
         )
@@ -210,29 +235,40 @@ object PlatformMerger extends Merger {
         thumbnail <- ThumbnailRule(target, sources).redirectSources
         otherIdentifiers <- OtherIdentifiersRule(target, sources).redirectSources
         sourceImageData <- ImageDataRule(target, sources).redirectSources
-        work = target.mapData { data =>
-          data.copy[DataState.Identified](
-            items = items,
-            thumbnail = thumbnail,
-            otherIdentifiers = otherIdentifiers,
-            imageData = sourceImageData
-          )
-        }
+        work = target
+          .mapData { data =>
+            data.copy[DataState.Identified](
+              items = items,
+              thumbnail = thumbnail,
+              otherIdentifiers = otherIdentifiers,
+              imageData = sourceImageData
+            )
+          }
       } yield
         MergeResult(
-          mergedTarget = work,
+          mergedTarget = modifyInternalWorks(work, items),
           imageDataWithSources = sourceImageData.map { imageData =>
             ImageDataWithSource(
               imageData = imageData,
-              source = image.ParentWorks(
-                canonicalWork = work.toParentWork,
-                redirectedWork = sources
-                  .find { _.data.imageData.contains(imageData) }
-                  .map(_.toParentWork)
-              )
+              source = work.toParentWork
             )
           }
         )
+
+  private def modifyInternalWorks(work: Work.Visible[Identified],
+                                  items: List[Item[IdState.Minted]]) = {
+    // Internal works are in TEI works. If they are merged with Sierra, we want the Sierra
+    // items to be added to TEI internal works so that the user can request the item
+    // containing that work without having to find the wrapping work.
+    work
+      .mapState { state =>
+        state.copy(internalWorkStubs = state.internalWorkStubs.map { stub =>
+          stub.copy(
+            workData = stub.workData.copy[DataState.Identified](items = items)
+          )
+        })
+      }
+  }
 
   private def standaloneImages(
     target: Work.Visible[Identified]

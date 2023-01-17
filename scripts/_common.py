@@ -27,27 +27,29 @@ def get_secret_string(session, *, secret_id):
     return secrets.get_secret_value(SecretId=secret_id)["SecretString"]
 
 
-def get_pipeline_es_client(session, *, pipeline_date, action, doc_type):
+def get_api_es_client():
     """
     Returns an Elasticsearch client for the catalogue cluster.
     """
-    secret_path = f"elasticsearch/pipeline_storage_{pipeline_date}"
+    session = get_session(role_arn="arn:aws:iam::756629837203:role/catalogue-developer")
 
-    if doc_type not in ["work", "image"]:
-        raise Exception("doc_type must be 'work' or 'image'")
-
-    if action == "read":
-        user = "read_only"
-    elif action == "write":
-        user = f"{doc_type}_ingestor"
-    else:
-        raise Exception("action must be 'read' or 'write'")
-
-    host = get_secret_string(session, secret_id=f"{secret_path}/public_host")
-    port = get_secret_string(session, secret_id=f"{secret_path}/port")
-    protocol = get_secret_string(session, secret_id=f"{secret_path}/protocol")
-    username = get_secret_string(session, secret_id=f"{secret_path}/{user}/es_username")
-    password = get_secret_string(session, secret_id=f"{secret_path}/{user}/es_password")
+    host = get_secret_string(
+        session, secret_id="elasticsearch/pipeline_storage_2022-10-03/public_host"
+    )
+    port = get_secret_string(
+        session, secret_id="elasticsearch/pipeline_storage_2022-10-03/port"
+    )
+    protocol = get_secret_string(
+        session, secret_id="elasticsearch/pipeline_storage_2022-10-03/protocol"
+    )
+    username = get_secret_string(
+        session,
+        secret_id="elasticsearch/pipeline_storage_2022-10-03/catalogue_api/es_username",
+    )
+    password = get_secret_string(
+        session,
+        secret_id="elasticsearch/pipeline_storage_2022-10-03/catalogue_api/es_password",
+    )
 
     return Elasticsearch(f"{protocol}://{username}:{password}@{host}:{port}")
 

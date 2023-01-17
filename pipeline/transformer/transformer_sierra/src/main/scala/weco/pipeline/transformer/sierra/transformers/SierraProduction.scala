@@ -2,16 +2,21 @@ package weco.pipeline.transformer.sierra.transformers
 
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work._
-import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
-import weco.catalogue.source_model.sierra.source.SierraQueryOps
-import weco.catalogue.source_model.sierra.SierraBibData
-import weco.catalogue.source_model.sierra.identifiers.SierraBibNumber
 import weco.pipeline.transformer.sierra.exceptions.CataloguingException
 import weco.pipeline.transformer.sierra.transformers.parsers.Marc008Parser
+import weco.pipeline.transformer.transformers.{
+  ConceptsTransformer,
+  ParsedPeriod
+}
+import weco.sierra.models.SierraQueryOps
+import weco.sierra.models.data.SierraBibData
+import weco.sierra.models.identifiers.SierraBibNumber
+import weco.sierra.models.marc.{Subfield, VarField}
 
 object SierraProduction
     extends SierraIdentifiedDataTransformer
-    with SierraQueryOps {
+    with SierraQueryOps
+    with ConceptsTransformer {
 
   type Output = List[ProductionEvent[IdState.Unminted]]
 
@@ -190,13 +195,7 @@ object SierraProduction
     marc264fields: List[VarField]): Boolean =
     marc264fields match {
       case List(
-          VarField(
-            _,
-            Some("264"),
-            _,
-            _,
-            _,
-            List(MarcSubfield("c", content)))) =>
+          VarField(_, Some("264"), _, _, _, List(Subfield("c", content)))) =>
         content.matches("^©\\d{4}$")
       case _ => false
     }
@@ -285,7 +284,7 @@ object SierraProduction
     varfield
       .subfieldsWithTag(subfieldTag)
       .contents
-      .map(Place.normalised)
+      .map(Place(_).normalised)
 
   private def agentsFromSubfields(
     varfield: VarField,
@@ -293,7 +292,7 @@ object SierraProduction
     varfield
       .subfieldsWithTag(subfieldTag)
       .contents
-      .map(Agent.normalised)
+      .map(Agent(_).normalised)
 
   private def datesFromSubfields(
     varfield: VarField,
@@ -301,5 +300,5 @@ object SierraProduction
     varfield
       .subfieldsWithTag(subfieldTag)
       .contents
-      .map(Period(_))
+      .map(ParsedPeriod(_))
 }

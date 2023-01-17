@@ -17,7 +17,3 @@ output "vhs_bucket_name" {
 output "vhs_table_name" {
   value = module.vhs.table_name
 }
-
-output "assumable_read_role" {
-  value = module.vhs.assumable_read_role
-}

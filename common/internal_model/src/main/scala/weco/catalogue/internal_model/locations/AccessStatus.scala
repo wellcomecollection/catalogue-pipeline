@@ -1,8 +1,7 @@
 package weco.catalogue.internal_model.locations
 
 import enumeratum.{Enum, EnumEntry}
-
-class UnknownAccessStatus(status: String) extends Exception(status)
+import weco.catalogue.internal_model.locations.AccessStatus.LicensedResources
 
 sealed trait AccessStatus extends EnumEntry { this: AccessStatus =>
   def name: String = this.getClass.getSimpleName.stripSuffix("$")
@@ -11,10 +10,20 @@ sealed trait AccessStatus extends EnumEntry { this: AccessStatus =>
   val label: String
 
   def isAvailable: Boolean = this match {
-    case AccessStatus.Open              => true
-    case AccessStatus.OpenWithAdvisory  => true
-    case AccessStatus.LicensedResources => true
-    case _                              => false
+    case AccessStatus.Open                                          => true
+    case AccessStatus.OpenWithAdvisory                              => true
+    case AccessStatus.LicensedResources(LicensedResources.Resource) => true
+
+    // This is used for cases where we have items that link to something
+    // related to the item (e.g. a description on a publisher website),
+    // but which isn't the same as the item itself.
+    //
+    // We still want these items on the work, we just don't want these items
+    // to match the "available online" filter.
+    case AccessStatus.LicensedResources(LicensedResources.RelatedResource) =>
+      false
+
+    case _ => false
   }
 
   def hasRestrictions: Boolean = this match {
@@ -75,7 +84,20 @@ object AccessStatus extends Enum[AccessStatus] {
     override val label: String = "Closed"
   }
 
-  case object LicensedResources extends AccessStatus {
+  object LicensedResources {
+    // This is based on MARC field 856 indicator 2
+    // See https://www.loc.gov/marc/bibliographic/bd856.html
+    //
+    // We don't expose this distinction in the public API, but we need it for
+    // the "available online" filter (see above).
+    sealed trait Relationship
+    case object Resource extends Relationship
+    case object RelatedResource extends Relationship
+  }
+
+  case class LicensedResources(
+    relationship: LicensedResources.Relationship = LicensedResources.Resource)
+      extends AccessStatus {
     override val id: String = "licensed-resources"
     override val label: String = "Licensed resources"
   }
@@ -83,50 +105,5 @@ object AccessStatus extends Enum[AccessStatus] {
   case object PermissionRequired extends AccessStatus {
     override val id: String = "permission-required"
     override val label: String = "Permission required"
-  }
-
-  def apply(status: String): Either[Exception, AccessStatus] = {
-    val normalisedStatus = status.trim.stripSuffix(".").trim.toLowerCase()
-
-    normalisedStatus match {
-      case value if value == "open with advisory" =>
-        Right(AccessStatus.OpenWithAdvisory)
-
-      // This has to come after the "OpenWithAdvisory" branch so we don't
-      // match on the partial open.
-      case value
-          if value == "open" || value == "unrestricted" || value == "unrestricted / open" || value == "unrestricted (open)" || value == "open access" =>
-        Right(AccessStatus.Open)
-
-      case value
-          if value == "restricted" || value == "certain restrictions apply" || value
-            .startsWith("restricted access") =>
-        Right(AccessStatus.Restricted)
-
-      case value if value.startsWith("by appointment") =>
-        Right(AccessStatus.ByAppointment)
-
-      case value if value == "closed" =>
-        Right(AccessStatus.Closed)
-
-      case value
-          if value == "cannot be produced" || value == "missing" || value == "deaccessioned" =>
-        Right(AccessStatus.Unavailable)
-
-      case value if value == "temporarily unavailable" =>
-        Right(AccessStatus.TemporarilyUnavailable)
-
-      case value
-          if value == "donor permission" || value == "permission is required to view these item" || value == "permission is required to view this item" =>
-        Right(AccessStatus.PermissionRequired)
-
-      case _ =>
-        Left(new UnknownAccessStatus(status))
-    }
-  }
-
-  implicit class StringOps(s: String) {
-    def startsWith(prefixes: String*): Boolean =
-      prefixes.exists { s.startsWith }
   }
 }

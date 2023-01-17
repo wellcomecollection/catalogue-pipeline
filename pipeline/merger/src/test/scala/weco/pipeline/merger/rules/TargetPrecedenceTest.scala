@@ -12,6 +12,7 @@ class TargetPrecedenceTest
     with SourceWorkGenerators
     with OptionValues {
 
+  val tei = teiIdentifiedWork()
   val calm = calmIdentifiedWork()
   val videoSierra = sierraDigitalIdentifiedWork().format(Format.Videos)
   val multiItemPhysicalSierra = sierraIdentifiedWork().items(
@@ -21,21 +22,34 @@ class TargetPrecedenceTest
   val miro = miroIdentifiedWork()
 
   describe("target precedence is respected") {
-    it("first, chooses a Calm work") {
+    it("first, chooses a Tei work") {
+      TargetPrecedence
+        .getTarget(
+          Seq(
+            tei,
+            calm,
+            videoSierra,
+            multiItemPhysicalSierra,
+            digitalSierra,
+            miro)
+        )
+        .value shouldBe tei
+    }
+    it("second, chooses a Calm work") {
       TargetPrecedence
         .getTarget(
           Seq(calm, videoSierra, multiItemPhysicalSierra, digitalSierra, miro)
         )
         .value shouldBe calm
     }
-    it("second, chooses a Sierra e-video") {
+    it("third, chooses a Sierra e-video") {
       TargetPrecedence
         .getTarget(
           Seq(videoSierra, multiItemPhysicalSierra, digitalSierra, miro)
         )
         .value shouldBe videoSierra
     }
-    it("third, chooses a physical Sierra work") {
+    it("fourth, chooses a physical Sierra work") {
       TargetPrecedence
         .getTarget(
           Seq(multiItemPhysicalSierra, digitalSierra, miro)

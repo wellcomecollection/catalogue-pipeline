@@ -1,7 +1,7 @@
 package weco.catalogue.tei.id_extractor
 
 import akka.actor.ActorSystem
-import com.amazonaws.services.s3.AmazonS3
+import software.amazon.awssdk.services.s3.S3Client
 import weco.messaging.sns.SNSConfig
 import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import weco.storage.store.s3.S3TypedStore
@@ -13,19 +13,21 @@ import weco.catalogue.tei.id_extractor.database.{
   RDSClientBuilder,
   TableProvisioner
 }
-import weco.storage.typesafe.S3Builder
 import weco.typesafe.config.builders.EnrichConfig.RichConfig
 import weco.http.client.AkkaHttpClient
-import weco.catalogue.tei.id_extractor.database.TableProvisioner
+import weco.catalogue.tei.id_extractor.github.GitHubAuthenticatedHttpClient
 
 import scala.concurrent.ExecutionContext
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config =>
     implicit val ec: ExecutionContext = AkkaBuilder.buildExecutionContext()
+
     implicit val actorSystem: ActorSystem =
       AkkaBuilder.buildActorSystem()
-    implicit val s3Client: AmazonS3 = S3Builder.buildS3Client(config)
+
+    implicit val s3Client: S3Client = S3Client.builder().build()
+
     val rdsConfig = RDSClientBuilder.buildRDSClientConfig(config)
     val tableConfig = PathIdTableBuilder.buildTableConfig(config)
     val table = new PathIdTable(tableConfig)
@@ -33,11 +35,15 @@ object Main extends WellcomeTypesafeApp {
     val messageSender =
       SNSBuilder.buildSNSMessageSender(config, subject = "TEI id extractor")
     val store = S3TypedStore[String]
+
+    val httpClient = new GitHubAuthenticatedHttpClient(
+      underlying = new AkkaHttpClient(),
+      token = config.requireString("tei.github.token")
+    )
+
     new TeiIdExtractorWorkerService(
       messageStream = SQSBuilder.buildSQSStream(config),
-      gitHubBlobReader = new GitHubBlobContentReader(
-        new AkkaHttpClient(),
-        config.requireString("tei.github.token")),
+      gitHubBlobReader = new GitHubBlobContentReader(httpClient),
       tableProvisioner = new TableProvisioner(rdsConfig, tableConfig),
       pathIdManager = new PathIdManager[SNSConfig](
         table,

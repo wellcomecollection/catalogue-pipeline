@@ -1,0 +1,191 @@
+{
+  "description" : "a work with different concepts in the genre",
+  "createdAt" : "2023-01-03T09:31:59.374733Z",
+  "id" : "2zo588up",
+  "document" : {
+    "debug" : {
+      "source" : {
+        "id" : "2zo588up",
+        "identifier" : {
+          "identifierType" : {
+            "id" : "calm-record-id"
+          },
+          "ontologyType" : "Work",
+          "value" : "rVoekomuzt"
+        },
+        "version" : 49,
+        "modifiedTime" : "2054-02-13T07:35:27Z"
+      },
+      "mergedTime" : "2054-02-13T07:35:27Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
+      "redirectSources" : [
+      ]
+    },
+    "display" : {
+      "id" : "2zo588up",
+      "title" : "A work with different concepts in the genre",
+      "alternativeTitles" : [
+      ],
+      "contributors" : [
+      ],
+      "identifiers" : [
+        {
+          "identifierType" : {
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
+            "type" : "IdentifierType"
+          },
+          "value" : "rVoekomuzt",
+          "type" : "Identifier"
+        }
+      ],
+      "subjects" : [
+      ],
+      "genres" : [
+        {
+          "label" : "Electronic books",
+          "concepts" : [
+            {
+              "label" : "Conceptual Conversations",
+              "type" : "Concept"
+            },
+            {
+              "label" : "Pleasant Paris",
+              "type" : "Place"
+            },
+            {
+              "id" : "svmale83",
+              "identifiers" : [
+                {
+                  "identifierType" : {
+                    "id" : "miro-image-number",
+                    "label" : "Miro image number",
+                    "type" : "IdentifierType"
+                  },
+                  "value" : "qBJ6dy5rBO",
+                  "type" : "Identifier"
+                }
+              ],
+              "label" : "Past Prehistory",
+              "type" : "Period"
+            }
+          ],
+          "type" : "Genre"
+        }
+      ],
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "availabilities" : [
+      ],
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "notes" : [
+      ],
+      "formerFrequency" : [
+      ],
+      "designation" : [
+      ],
+      "images" : [
+      ],
+      "parts" : [
+      ],
+      "partOf" : [
+      ],
+      "precededBy" : [
+      ],
+      "succeededBy" : [
+      ],
+      "type" : "Work"
+    },
+    "query" : {
+      "id" : "2zo588up",
+      "format.id" : null,
+      "workType" : "Standard",
+      "identifiers.value" : [
+        "rVoekomuzt"
+      ],
+      "title" : "A work with different concepts in the genre",
+      "alternativeTitles" : [
+      ],
+      "description" : null,
+      "physicalDescription" : null,
+      "edition" : null,
+      "notes.contents" : [
+      ],
+      "lettering" : null,
+      "images.id" : [
+      ],
+      "images.identifiers.value" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
+      "items.locations.accessConditions.status.id" : [
+      ],
+      "items.locations.license.id" : [
+      ],
+      "items.locations.locationType.id" : [
+      ],
+      "subjects.id" : [
+      ],
+      "subjects.label" : [
+      ],
+      "subjects.concepts.label" : [
+      ],
+      "genres.label" : [
+        "Electronic books"
+      ],
+      "genres.concepts.label" : [
+        "Conceptual Conversations",
+        "Pleasant Paris",
+        "Past Prehistory"
+      ],
+      "languages.id" : [
+      ],
+      "languages.label" : [
+      ],
+      "contributors.agent.id" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "production.label" : [
+      ],
+      "production.dates.range.from" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
+      ],
+      "collectionPath.label" : null,
+      "collectionPath.path" : null,
+      "referenceNumber" : null
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+        "{\"label\":\"Electronic books\",\"concepts\":[],\"type\":\"Genre\"}"
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
+    },
+    "type" : "Visible"
+  }
+}

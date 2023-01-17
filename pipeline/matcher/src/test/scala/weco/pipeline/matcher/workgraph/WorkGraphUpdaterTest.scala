@@ -2,554 +2,476 @@ package weco.pipeline.matcher.workgraph
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.matcher.WorkNode
-import weco.catalogue.internal_model.identifiers.CanonicalId
-import weco.pipeline.matcher.fixtures.MatcherFixtures
+import weco.pipeline.matcher.generators.WorkNodeGenerators
 import weco.pipeline.matcher.models.{
+  SourceWorkData,
+  SubgraphId,
   VersionExpectedConflictException,
   VersionUnexpectedConflictException,
-  WorkGraph,
-  WorkLinks
+  WorkNode
 }
 
 class WorkGraphUpdaterTest
     extends AnyFunSpec
     with Matchers
-    with MatcherFixtures {
-
-  val idA = CanonicalId("AAAAAAAA")
-  val idB = CanonicalId("BBBBBBBB")
-  val idC = CanonicalId("CCCCCCCC")
-  val idD = CanonicalId("DDDDDDDD")
+    with WorkNodeGenerators {
 
   describe("Adding links without existing works") {
     it("updating nothing with A gives A:A") {
-      WorkGraphUpdater
+      val workA = createOneWork("A")
+
+      val result = WorkGraphUpdater
         .update(
-          links = WorkLinks(idA, version = 1, referencedWorkIds = Set.empty),
-          existingGraph = WorkGraph(Set.empty)
+          work = createWorkWith(idA, version = 1, mergeCandidateIds = Set.empty),
+          affectedNodes = Set()
         )
-        .nodes shouldBe Set(
-        WorkNode(
-          idA,
-          version = 1,
-          linkedIds = List(),
-          componentId = ciHash(idA)))
+
+      result shouldBe Set(workA)
     }
 
     it("updating nothing with A->B gives A+B:A->B") {
-      WorkGraphUpdater
-        .update(
-          links = WorkLinks(idA, version = 1, referencedWorkIds = Set(idB)),
-          existingGraph = WorkGraph(Set.empty)
-        )
-        .nodes shouldBe Set(
-        WorkNode(
-          idA,
-          version = 1,
-          linkedIds = List(idB),
-          componentId = ciHash(idA, idB)),
-        WorkNode(
-          idB,
-          version = None,
-          linkedIds = List(),
-          componentId = ciHash(idA, idB)))
-    }
+      val workStubA =
+        createWorkWith(idA, version = 1, mergeCandidateIds = Set(idB))
 
-    it("updating nothing with B->A gives A+B:B->A") {
-      WorkGraphUpdater
+      val result = WorkGraphUpdater
         .update(
-          links = WorkLinks(idB, version = 1, referencedWorkIds = Set(idA)),
-          existingGraph = WorkGraph(Set.empty)
+          work = workStubA,
+          affectedNodes = Set()
         )
-        .nodes shouldBe Set(
+
+      result shouldBe Set(
         WorkNode(
-          idB,
-          version = 1,
-          linkedIds = List(idA),
-          componentId = ciHash(idA, idB)),
+          id = idA,
+          subgraphId = SubgraphId(idA, idB),
+          componentIds = List(idA, idB),
+          sourceWork = SourceWorkData(
+            id = workStubA.state.sourceIdentifier,
+            version = 1,
+            mergeCandidateIds = List(idB)
+          ),
+        ),
         WorkNode(
-          idA,
-          version = None,
-          linkedIds = List(),
-          componentId = ciHash(idA, idB)))
+          id = idB,
+          subgraphId = SubgraphId(idA, idB),
+          componentIds = List(idA, idB),
+          sourceWork = None,
+        ),
+      )
     }
   }
 
   describe("Adding links to existing works") {
     it("updating A, B with A->B gives A+B:(A->B, B)") {
-      WorkGraphUpdater
+      val workA = createOneWork("A")
+      val workB = createOneWork("B")
+
+      val result = WorkGraphUpdater
         .update(
-          links = WorkLinks(idA, version = 2, referencedWorkIds = Set(idB)),
-          existingGraph = WorkGraph(
-            Set(
-              WorkNode(
-                idA,
-                version = 1,
-                linkedIds = Nil,
-                componentId = ciHash(idA)),
-              WorkNode(
-                idB,
-                version = 1,
-                linkedIds = Nil,
-                componentId = ciHash(idB))
-            )
-          )
+          work = createWorkWith(idA, version = 2, mergeCandidateIds = Set(idB)),
+          affectedNodes = Set(workA, workB)
         )
-        .nodes should contain theSameElementsAs
-        List(
-          WorkNode(
-            idA,
-            version = 2,
-            linkedIds = List(idB),
-            componentId = ciHash(idA, idB)),
-          WorkNode(
-            idB,
-            version = 1,
-            linkedIds = List(),
-            componentId = ciHash(idA, idB)))
+
+      result shouldBe
+        Set(
+          workA
+            .copy(
+              subgraphId = SubgraphId(idA, idB),
+              componentIds = List(idA, idB),
+            )
+            .updateSourceWork(version = 2, mergeCandidateIds = Set(idB)),
+          workB.copy(
+            subgraphId = SubgraphId(idA, idB),
+            componentIds = List(idA, idB),
+          ),
+        )
     }
 
     it("updating A->B with A->B gives A+B:(A->B, B)") {
-      WorkGraphUpdater
+      val (workA, workB) = createTwoWorks("A->B")
+
+      val result = WorkGraphUpdater
         .update(
-          links = WorkLinks(idA, version = 2, referencedWorkIds = Set(idB)),
-          existingGraph = WorkGraph(
-            Set(
-              WorkNode(
-                idA,
-                version = 1,
-                linkedIds = List(idB),
-                componentId = ciHash(idA, idB)),
-              WorkNode(
-                idB,
-                version = 1,
-                linkedIds = Nil,
-                componentId = ciHash(idA, idB))))
+          work = createWorkWith(idA, version = 2, mergeCandidateIds = Set(idB)),
+          affectedNodes = Set(workA, workB)
         )
-        .nodes shouldBe Set(
-        WorkNode(
-          idA,
-          version = 2,
-          linkedIds = List(idB),
-          componentId = ciHash(idA, idB)),
-        WorkNode(
-          idB,
-          version = 1,
-          linkedIds = List(),
-          componentId = ciHash(idA, idB))
+
+      result shouldBe Set(
+        workA.updateSourceWork(version = 2, mergeCandidateIds = Set(idB)),
+        workB,
       )
     }
 
     it("updating A->B, B, C with B->C gives A+B+C:(A->B, B->C, C)") {
-      WorkGraphUpdater
+      val (workA, workB) = createTwoWorks("A->B")
+      val workC = createOneWork("C")
+
+      val result = WorkGraphUpdater
         .update(
-          links = WorkLinks(idB, version = 2, referencedWorkIds = Set(idC)),
-          existingGraph = WorkGraph(Set(
-            WorkNode(
-              idA,
-              version = 2,
-              linkedIds = List(idB),
-              componentId = "A+B"),
-            WorkNode(
-              idB,
-              version = 1,
-              linkedIds = Nil,
-              componentId = ciHash(idA, idB)),
-            WorkNode(
-              idC,
-              version = 1,
-              linkedIds = Nil,
-              componentId = ciHash(idC))
-          ))
+          work = createWorkWith(idB, version = 2, mergeCandidateIds = Set(idC)),
+          affectedNodes = Set(workA, workB, workC)
         )
-        .nodes shouldBe Set(
-        WorkNode(
-          idA,
-          version = 2,
-          linkedIds = List(idB),
-          componentId = ciHash(idA, idB, idC)),
-        WorkNode(
-          idB,
-          version = 2,
-          linkedIds = List(idC),
-          componentId = ciHash(idA, idB, idC)),
-        WorkNode(
-          idC,
-          version = 1,
-          linkedIds = List(),
-          componentId = ciHash(idA, idB, idC))
+
+      result shouldBe Set(
+        workA.copy(
+          subgraphId = SubgraphId(idA, idB, idC),
+          componentIds = List(idA, idB, idC),
+        ),
+        workB
+          .copy(
+            subgraphId = SubgraphId(idA, idB, idC),
+            componentIds = List(idA, idB, idC),
+          )
+          .updateSourceWork(version = 2, mergeCandidateIds = Set(idC)),
+        workC.copy(
+          subgraphId = SubgraphId(idA, idB, idC),
+          componentIds = List(idA, idB, idC),
+        ),
       )
     }
 
     it("updating A->B, C->D with B->C gives A+B+C+D:(A->B, B->C, C->D, D)") {
-      WorkGraphUpdater
+      val (workA, workB) = createTwoWorks("A->B")
+      val (workC, workD) = createTwoWorks("C->D")
+
+      val result = WorkGraphUpdater
         .update(
-          links = WorkLinks(idB, version = 2, referencedWorkIds = Set(idC)),
-          existingGraph = WorkGraph(Set(
-            WorkNode(
-              idA,
-              version = 1,
-              linkedIds = List(idB),
-              componentId = "A+B"),
-            WorkNode(
-              idC,
-              version = 1,
-              linkedIds = List(idD),
-              componentId = "C+D"),
-            WorkNode(idB, version = 1, linkedIds = Nil, componentId = "A+B"),
-            WorkNode(idD, version = 1, linkedIds = Nil, componentId = "C+D")
-          ))
+          work = createWorkWith(idB, version = 2, mergeCandidateIds = Set(idC)),
+          affectedNodes = Set(workA, workB, workC, workD)
         )
-        .nodes shouldBe
+
+      result shouldBe
         Set(
-          WorkNode(
-            idA,
-            version = 1,
-            linkedIds = List(idB),
-            componentId = ciHash(idA, idB, idC, idD)),
-          WorkNode(
-            idB,
-            version = 2,
-            linkedIds = List(idC),
-            componentId = ciHash(idA, idB, idC, idD)),
-          WorkNode(
-            idC,
-            version = 1,
-            linkedIds = List(idD),
-            componentId = ciHash(idA, idB, idC, idD)),
-          WorkNode(
-            idD,
-            version = 1,
-            linkedIds = List(),
-            componentId = ciHash(idA, idB, idC, idD))
+          workA.copy(
+            subgraphId = SubgraphId(idA, idB, idC, idD),
+            componentIds = List(idA, idB, idC, idD),
+          ),
+          workB
+            .copy(
+              subgraphId = SubgraphId(idA, idB, idC, idD),
+              componentIds = List(idA, idB, idC, idD),
+            )
+            .updateSourceWork(version = 2, mergeCandidateIds = Set(idC)),
+          workC.copy(
+            subgraphId = SubgraphId(idA, idB, idC, idD),
+            componentIds = List(idA, idB, idC, idD),
+          ),
+          workD.copy(
+            subgraphId = SubgraphId(idA, idB, idC, idD),
+            componentIds = List(idA, idB, idC, idD),
+          ),
         )
     }
 
     it("updating A->B with B->[C,D] gives A+B+C+D:(A->B, B->C&D, C, D") {
-      WorkGraphUpdater
+      val (workA, workB) = createTwoWorks("A->B")
+      val workC = createOneWork("C")
+      val workD = createOneWork("D")
+
+      val result = WorkGraphUpdater
         .update(
-          links = WorkLinks(idB, version = 2, referencedWorkIds = Set(idC, idD)),
-          existingGraph = WorkGraph(Set(
-            WorkNode(
-              idA,
-              version = 2,
-              linkedIds = List(idB),
-              componentId = "A+B"),
-            WorkNode(
-              idB,
-              version = 1,
-              linkedIds = Nil,
-              componentId = ciHash(idA, idB)),
-            WorkNode(
-              idC,
-              version = 1,
-              linkedIds = Nil,
-              componentId = ciHash(idC)),
-            WorkNode(
-              idD,
-              version = 1,
-              linkedIds = Nil,
-              componentId = ciHash(idD))
-          ))
+          work =
+            createWorkWith(idB, version = 2, mergeCandidateIds = Set(idC, idD)),
+          affectedNodes = Set(workA, workB, workC, workD)
         )
-        .nodes shouldBe
+
+      result shouldBe
         Set(
-          WorkNode(
-            idA,
-            version = 2,
-            linkedIds = List(idB),
-            componentId = ciHash(idA, idB, idC, idD)),
-          WorkNode(
-            idB,
-            version = 2,
-            linkedIds = List(idC, idD),
-            componentId = ciHash(idA, idB, idC, idD)),
-          WorkNode(
-            idC,
-            version = 1,
-            linkedIds = List(),
-            componentId = ciHash(idA, idB, idC, idD)),
-          WorkNode(
-            idD,
-            version = 1,
-            linkedIds = List(),
-            componentId = ciHash(idA, idB, idC, idD))
+          workA.copy(
+            subgraphId = SubgraphId(idA, idB, idC, idD),
+            componentIds = List(idA, idB, idC, idD),
+          ),
+          workB
+            .copy(
+              subgraphId = SubgraphId(idA, idB, idC, idD),
+              componentIds = List(idA, idB, idC, idD),
+            )
+            .updateSourceWork(version = 2, mergeCandidateIds = Set(idC, idD)),
+          workC.copy(
+            subgraphId = SubgraphId(idA, idB, idC, idD),
+            componentIds = List(idA, idB, idC, idD),
+          ),
+          workD.copy(
+            subgraphId = SubgraphId(idA, idB, idC, idD),
+            componentIds = List(idA, idB, idC, idD),
+          ),
         )
     }
 
-    it("updating A->B->C with A->C gives A+B+C:(A->B, B->C, C->A") {
-      WorkGraphUpdater
+    it("updating A->B->C with C->A gives A+B+C:(A->B, B->C, C->A") {
+      val (workA, workB, workC) = createThreeWorks("A->B->C")
+
+      val result = WorkGraphUpdater
         .update(
-          links = WorkLinks(idC, version = 2, referencedWorkIds = Set(idA)),
-          existingGraph = WorkGraph(Set(
-            WorkNode(
-              idA,
-              version = 2,
-              linkedIds = List(idB),
-              componentId = "A+B+C"),
-            WorkNode(
-              idB,
-              version = 2,
-              linkedIds = List(idC),
-              componentId = "A+B+C"),
-            WorkNode(idC, version = 1, linkedIds = Nil, componentId = "A+B+C")
-          ))
+          work = createWorkWith(idC, version = 2, mergeCandidateIds = Set(idA)),
+          affectedNodes = Set(workA, workB, workC)
         )
-        .nodes shouldBe Set(
-        WorkNode(
-          idA,
-          version = 2,
-          linkedIds = List(idB),
-          componentId = ciHash(idA, idB, idC)),
-        WorkNode(
-          idB,
-          version = 2,
-          linkedIds = List(idC),
-          componentId = ciHash(idA, idB, idC)),
-        WorkNode(
-          idC,
-          version = 2,
-          linkedIds = List(idA),
-          componentId = ciHash(idA, idB, idC))
+
+      result shouldBe Set(
+        workA,
+        workB,
+        workC.updateSourceWork(version = 2, mergeCandidateIds = Set(idA)),
       )
     }
   }
 
   describe("Update version") {
     it("processes an update for a newer version") {
-      val existingVersion = 1
-      val updateVersion = 2
-      WorkGraphUpdater
+      val workA = createOneWork("A")
+
+      val existingVersion = workA.sourceWork.get.version
+      val updateVersion = existingVersion + 1
+
+      val result = WorkGraphUpdater
         .update(
-          links = WorkLinks(idA, updateVersion, referencedWorkIds = Set(idB)),
-          existingGraph = WorkGraph(
-            Set(
-              WorkNode(
-                idA,
-                existingVersion,
-                linkedIds = Nil,
-                componentId = ciHash(idA))))
+          work =
+            createWorkWith(idA, updateVersion, mergeCandidateIds = Set(idB)),
+          affectedNodes = Set(workA)
         )
-        .nodes should contain theSameElementsAs
-        List(
-          WorkNode(
-            idA,
-            updateVersion,
-            linkedIds = List(idB),
-            componentId = ciHash(idA, idB)),
+
+      result shouldBe
+        Set(
+          workA
+            .copy(
+              subgraphId = SubgraphId(idA, idB),
+              componentIds = List(idA, idB),
+            )
+            .updateSourceWork(
+              version = updateVersion,
+              mergeCandidateIds = Set(idB)),
           WorkNode(
             idB,
-            version = None,
-            linkedIds = List(),
-            componentId = ciHash(idA, idB)))
+            subgraphId = SubgraphId(idA, idB),
+            componentIds = List(idA, idB),
+          )
+        )
     }
 
     it("doesn't process an update for a lower version") {
-      val existingVersion = 3
-      val updateVersion = 1
+      val workA = createOneWork("A")
+
+      val existingVersion = workA.sourceWork.get.version
+      val updateVersion = existingVersion - 1
 
       val thrown = intercept[VersionExpectedConflictException] {
         WorkGraphUpdater
           .update(
-            links = WorkLinks(idA, updateVersion, referencedWorkIds = Set(idB)),
-            existingGraph = WorkGraph(
-              Set(
-                WorkNode(
-                  idA,
-                  existingVersion,
-                  linkedIds = Nil,
-                  componentId = ciHash(idA))))
+            work =
+              createWorkWith(idA, updateVersion, mergeCandidateIds = Set(idB)),
+            affectedNodes = Set(workA)
           )
       }
-      thrown.message shouldBe s"update failed, work:$idA v1 is not newer than existing work v3"
+      thrown.message shouldBe s"update failed, work:$idA v$updateVersion is not newer than existing work v$existingVersion"
     }
 
     it(
       "processes an update for the same version if it's the same as the one stored") {
-      val existingVersion = 2
-      val updateVersion = 2
+      val (workA, workB) = createTwoWorks("A->B")
 
-      WorkGraphUpdater
+      val existingVersion = workA.sourceWork.get.version
+
+      val result = WorkGraphUpdater
         .update(
-          links = WorkLinks(idA, updateVersion, referencedWorkIds = Set(idB)),
-          existingGraph = WorkGraph(
-            Set(
-              WorkNode(
-                idA,
-                existingVersion,
-                linkedIds = List(idB),
-                componentId = ciHash(idA, idB)),
-              WorkNode(
-                idB,
-                version = 0,
-                linkedIds = List(),
-                componentId = ciHash(idA, idB))))
+          work =
+            createWorkWith(idA, existingVersion, mergeCandidateIds = Set(idB)),
+          affectedNodes = Set(workA, workB)
         )
-        .nodes should contain theSameElementsAs
-        List(
-          WorkNode(
-            idA,
-            updateVersion,
-            linkedIds = List(idB),
-            componentId = ciHash(idA, idB)),
-          WorkNode(
-            idB,
-            version = 0,
-            linkedIds = List(),
-            componentId = ciHash(idA, idB)))
+
+      result shouldBe Set(workA, workB)
     }
 
     it(
       "doesn't process an update for the same version if the work is different from the one stored") {
-      val existingVersion = 2
-      val updateVersion = 2
+      val (workA, workB) = createTwoWorks("A->B")
+
+      val existingVersion = workA.sourceWork.get.version
 
       val thrown = intercept[VersionUnexpectedConflictException] {
         WorkGraphUpdater
           .update(
-            links = WorkLinks(idA, updateVersion, referencedWorkIds = Set(idA)),
-            existingGraph = WorkGraph(
-              Set(
-                WorkNode(
-                  idA,
-                  existingVersion,
-                  linkedIds = List(idB),
-                  componentId = ciHash(idA, idB)),
-                WorkNode(
-                  idB,
-                  version = 0,
-                  linkedIds = List(),
-                  componentId = ciHash(idA, idB))))
+            work = createWorkWith(
+              idA,
+              version = existingVersion,
+              mergeCandidateIds = Set(idC)),
+            affectedNodes = Set(workA, workB)
           )
       }
-      thrown.getMessage shouldBe s"update failed, work:$idA v2 already exists with different content! update-ids:Set($idA) != existing-ids:Set($idB)"
+      thrown.getMessage shouldBe s"update failed, work:$idA v$existingVersion already exists with different content! update-ids:Set($idC) != existing-ids:Set($idB)"
     }
   }
 
   describe("Removing links") {
-    it("updating  A->B with A gives A:A and B:B") {
-      WorkGraphUpdater
-        .update(
-          links = WorkLinks(idA, version = 2, referencedWorkIds = Set.empty),
-          existingGraph = WorkGraph(
-            Set(
-              WorkNode(
-                idA,
-                version = 1,
-                linkedIds = List(idB),
-                componentId = "A+B"),
-              WorkNode(
-                idB,
-                version = 1,
-                linkedIds = List(),
-                componentId = "A+B")))
-        )
-        .nodes shouldBe Set(
-        WorkNode(
-          idA,
-          version = 2,
-          linkedIds = List(),
-          componentId = ciHash(idA)),
-        WorkNode(
-          idB,
-          version = 1,
-          linkedIds = List(),
-          componentId = ciHash(idB))
-      )
-    }
+    it("updating A->B with A gives A:A and B:B") {
+      val (workA, workB) = createTwoWorks("A->B")
 
-    it("updating A->B with A but NO B (*should* not occur) gives A:A and B:B") {
-      WorkGraphUpdater
+      val result = WorkGraphUpdater
         .update(
-          links = WorkLinks(idA, version = 2, referencedWorkIds = Set.empty),
-          existingGraph = WorkGraph(
-            Set(
-              WorkNode(
-                idA,
-                version = 1,
-                linkedIds = List(idB),
-                componentId = "A+B")
-            ))
+          work = createWorkWith(idA, version = 2, mergeCandidateIds = Set.empty),
+          affectedNodes = Set(workA, workB)
         )
-        .nodes shouldBe Set(
-        WorkNode(idA, version = 2, linkedIds = Nil, componentId = ciHash(idA)),
-        WorkNode(
-          idB,
-          version = None,
-          linkedIds = Nil,
-          componentId = ciHash(idB))
+
+      result shouldBe Set(
+        workA
+          .copy(componentIds = List(idA))
+          .updateSourceWork(version = 2),
+        workB
+          .copy(componentIds = List(idB)),
       )
     }
 
     it("updating A->B->C with B gives A+B:(A->B, B) and C:C") {
-      WorkGraphUpdater
+      val (workA, workB, workC) = createThreeWorks("A->B->C")
+
+      val result = WorkGraphUpdater
         .update(
-          links = WorkLinks(idB, version = 3, referencedWorkIds = Set.empty),
-          existingGraph = WorkGraph(Set(
-            WorkNode(
-              idA,
-              version = 2,
-              linkedIds = List(idB),
-              componentId = "A+B+C"),
-            WorkNode(
-              idB,
-              version = 2,
-              linkedIds = List(idC),
-              componentId = "A+B+C"),
-            WorkNode(idC, version = 1, linkedIds = Nil, componentId = "A+B+C")
-          ))
+          work = createWorkWith(idB, version = 2, mergeCandidateIds = Set.empty),
+          affectedNodes = Set(workA, workB, workC)
         )
-        .nodes shouldBe Set(
-        WorkNode(
-          idA,
-          version = 2,
-          linkedIds = List(idB),
-          componentId = ciHash(idA, idB)),
-        WorkNode(
-          idB,
-          version = 3,
-          linkedIds = Nil,
-          componentId = ciHash(idA, idB)),
-        WorkNode(idC, version = 1, linkedIds = Nil, componentId = ciHash(idC))
+
+      result shouldBe Set(
+        workA
+          .copy(componentIds = List(idA, idB)),
+        workB
+          .copy(componentIds = List(idA, idB))
+          .updateSourceWork(version = 2),
+        workC
+          .copy(componentIds = List(idC)),
       )
     }
 
     it("updating A<->B->C with B->C gives A+B+C:(A->B, B->C, C)") {
-      WorkGraphUpdater
+      val (workA, workB, workC) = createThreeWorks("A<->B->C")
+
+      val result = WorkGraphUpdater
         .update(
-          links = WorkLinks(idB, version = 3, referencedWorkIds = Set(idC)),
-          existingGraph = WorkGraph(Set(
-            WorkNode(
-              idA,
-              version = 2,
-              linkedIds = List(idB),
-              componentId = "A+B+C"),
-            WorkNode(
-              idB,
-              version = 2,
-              linkedIds = List(idA, idC),
-              componentId = "A+B+C"),
-            WorkNode(idC, version = 1, linkedIds = Nil, componentId = "A+B+C")
-          ))
+          work = createWorkWith(idB, version = 2, mergeCandidateIds = Set(idC)),
+          affectedNodes = Set(workA, workB, workC)
         )
-        .nodes shouldBe Set(
-        WorkNode(
-          idA,
-          version = 2,
-          linkedIds = List(idB),
-          componentId = ciHash(idA, idB, idC)),
-        WorkNode(
-          idB,
-          version = 3,
-          linkedIds = List(idC),
-          componentId = ciHash(idA, idB, idC)),
-        WorkNode(
-          idC,
-          version = 1,
-          linkedIds = Nil,
-          componentId = ciHash(idA, idB, idC))
+
+      result shouldBe Set(
+        workA,
+        workB.updateSourceWork(version = 2, mergeCandidateIds = Set(idC)),
+        workC,
       )
+    }
+  }
+
+  describe("handling suppressed works") {
+    it("A->B, but B is suppressed (updating A)") {
+      val workA = createWorkWith(idA, version = 1, mergeCandidateIds = Set(idB))
+      val workB = createOneWork("B[suppressed]")
+
+      val result =
+        WorkGraphUpdater.update(
+          work = workA,
+          affectedNodes = Set(workB)
+        )
+
+      result shouldBe Set(
+        WorkNode(
+          id = idA,
+          subgraphId = SubgraphId(idA, idB),
+          componentIds = List(idA),
+          sourceWork = SourceWorkData(
+            id = workA.state.sourceIdentifier,
+            version = 1,
+            mergeCandidateIds = List(idB)),
+        ),
+        workB.copy(
+          subgraphId = SubgraphId(idA, idB),
+          componentIds = List(idB),
+        ),
+      )
+    }
+
+    it("A->B, but B is suppressed (updating B)") {
+      val (workA, workB) = createTwoWorks("A->B")
+
+      val result =
+        WorkGraphUpdater.update(
+          work = createWorkWith(
+            idB,
+            version = 2,
+            mergeCandidateIds = Set(idB),
+            workType = "Deleted"),
+          affectedNodes = Set(workA, workB)
+        )
+
+      result shouldBe Set(
+        workA
+          .copy(componentIds = List(idA)),
+        workB
+          .copy(componentIds = List(idB))
+          .updateSourceWork(version = 2, suppressed = true),
+      )
+    }
+
+    it("A->B->C->D->E, but C is suppressed (updating A)") {
+      val (workA, workB, workC, workD, workE) = createFiveWorks("A->B->C->D->E")
+      val suppressedWorkC = workC.copy(
+        sourceWork = Some(workC.sourceWork.get.copy(suppressed = true))
+      )
+
+      val result =
+        WorkGraphUpdater.update(
+          work = createWorkWith(idA, version = 2, mergeCandidateIds = Set(idB)),
+          affectedNodes = Set(workA, workB, suppressedWorkC, workD, workE)
+        )
+
+      result shouldBe Set(
+        workA
+          .copy(componentIds = List(idA, idB))
+          .updateSourceWork(version = 2, mergeCandidateIds = Set(idB)),
+        workB
+          .copy(componentIds = List(idA, idB)),
+        suppressedWorkC
+          .copy(componentIds = List(idC)),
+        workD
+          .copy(componentIds = List(idD, idE)),
+        workE
+          .copy(componentIds = List(idD, idE)),
+      )
+    }
+
+    it("A->B->C, B is suppressed, then B is updated as unsuppressed") {
+      val graph1 =
+        WorkGraphUpdater.update(
+          work = createWorkWith(idA, version = 1, mergeCandidateIds = Set(idB)),
+          affectedNodes = Set()
+        )
+
+      val graph2 =
+        WorkGraphUpdater.update(
+          work = createWorkWith(
+            idB,
+            version = 1,
+            mergeCandidateIds = Set(idC),
+            workType = "Deleted"),
+          affectedNodes = graph1
+        )
+
+      val graph3 =
+        WorkGraphUpdater.update(
+          work = createWorkWith(idC, version = 1, mergeCandidateIds = Set()),
+          affectedNodes = graph2
+        )
+
+      // At this point the graph database knows about all three of A/B/C, but it should
+      // be storing them as separate components.
+      //
+      // Now if we update B and B only, we should see the graphs be merged into a single component --
+      // that is, the graph remembers that A → B, even though it wasn't actively using that
+      // information for the matcher result.
+      val result =
+        WorkGraphUpdater.update(
+          work = createWorkWith(
+            idB,
+            version = 2,
+            mergeCandidateIds = Set(idC),
+            workType = "Undeleted"),
+          affectedNodes = graph3
+        )
+
+      result.map(_.subgraphId) shouldBe Set(SubgraphId(idA, idB, idC))
     }
   }
 }

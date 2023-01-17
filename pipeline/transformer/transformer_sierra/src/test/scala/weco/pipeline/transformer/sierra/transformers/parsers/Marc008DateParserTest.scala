@@ -77,7 +77,7 @@ class Marc008DateParserTest extends AnyFunSpec with Matchers {
       InstantRange(
         LocalDate of (2000, 1, 1),
         LocalDate of (9999, 12, 31),
-        "2000-9999"))
+        "2000-"))
   }
 
   it("parses continuing resource status unknown") {
@@ -85,7 +85,7 @@ class Marc008DateParserTest extends AnyFunSpec with Matchers {
       InstantRange(
         LocalDate of (1959, 1, 1),
         LocalDate of (9999, 12, 31),
-        "1959-9999"))
+        "1959-"))
   }
 
   it("parses questionable dates") {
@@ -110,5 +110,13 @@ class Marc008DateParserTest extends AnyFunSpec with Matchers {
         LocalDate of (1874, 1, 1),
         LocalDate of (1874, 12, 31),
         "1874"))
+  }
+
+  it("drops an explicit 9999 from the displayed range") {
+    Marc008DateParser("c20179999") shouldBe Some(
+      InstantRange(
+        LocalDate of (2017, 1, 1),
+        LocalDate of (9999, 12, 31),
+        "2017-"))
   }
 }

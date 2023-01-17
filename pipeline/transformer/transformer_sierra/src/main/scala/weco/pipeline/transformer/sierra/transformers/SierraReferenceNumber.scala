@@ -1,7 +1,7 @@
 package weco.pipeline.transformer.sierra.transformers
 
 import weco.catalogue.internal_model.identifiers.ReferenceNumber
-import weco.catalogue.source_model.sierra.SierraBibData
+import weco.sierra.models.data.SierraBibData
 
 object SierraReferenceNumber extends SierraDataTransformer {
   override type Output = Option[ReferenceNumber]

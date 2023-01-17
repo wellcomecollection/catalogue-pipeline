@@ -55,7 +55,7 @@ object Indexable extends Logging {
         // few key fields) is approximately the size of all the other data in a
         // single complete work. For example there are some works with around
         // 4000 relations, in which cases they will be considered to be
-        // equivilent to around 200 works without any relations.
+        // equivalent to around 200 works without any relations.
         Math.round(
           1.0 + (work.state.relations.size / 20.0)
         )

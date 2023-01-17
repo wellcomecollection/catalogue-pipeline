@@ -13,11 +13,11 @@ module "reindex_worker" {
   elastic_cloud_vpce_sg_id         = data.terraform_remote_state.shared_infra.outputs["ec_platform_privatelink_sg_id"]
 
   account_id = data.aws_caller_identity.current.account_id
+  aws_region = data.aws_region.current.name
 
   private_subnets = local.private_subnets
   dlq_alarm_arn   = local.dlq_alarm_arn
 
-  service_env  = local.environment
   service_name = "reindexer"
 
   shared_logging_secrets = data.terraform_remote_state.shared_infra.outputs.shared_secrets_logging

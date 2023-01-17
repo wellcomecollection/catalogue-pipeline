@@ -3,7 +3,8 @@ package weco.catalogue.internal_model.locations
 import org.scalatest.Assertion
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.json.JsonUtil._
+import weco.catalogue.internal_model.Implicits._
+import weco.json.JsonUtil.{fromJson, toJson}
 
 class LicenseTest extends AnyFunSpec with Matchers {
 

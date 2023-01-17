@@ -3,18 +3,16 @@ package weco.pipeline_storage.fixtures
 import com.sksamuel.elastic4s.{ElasticClient, Index}
 import io.circe.Encoder
 import org.scalatest.Suite
-import weco.akka.fixtures.Akka
 import weco.elasticsearch.model.IndexId
 import weco.elasticsearch.test.fixtures.ElasticsearchFixtures
 import weco.elasticsearch.IndexConfig
 import weco.fixtures.TestWith
 import weco.pipeline_storage.Indexable
-import weco.pipeline_storage.Indexable
 import weco.pipeline_storage.elastic.ElasticIndexer
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait ElasticIndexerFixtures extends ElasticsearchFixtures with Akka {
+trait ElasticIndexerFixtures extends ElasticsearchFixtures {
   this: Suite =>
 
   def withElasticIndexer[T, R](idx: Index,
@@ -29,7 +27,7 @@ trait ElasticIndexerFixtures extends ElasticsearchFixtures with Akka {
   implicit def canonicalId[T](implicit indexable: Indexable[T]): IndexId[T] =
     (doc: T) => indexable.id(doc)
 
-  def ingestInOrder[T](indexer: ElasticIndexer[T])(documents: T*)(
+  def indexInOrder[T](indexer: ElasticIndexer[T])(documents: T*)(
     implicit ec: ExecutionContext): Future[Either[Seq[T], Seq[T]]] =
     documents.tail.foldLeft(indexer(List(documents.head))) { (future, doc) =>
       future.flatMap { _ =>

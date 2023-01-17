@@ -1,34 +1,20 @@
 package weco.pipeline.matcher.fixtures
 
-import org.apache.commons.codec.digest.DigestUtils
-import org.scanamo.generic.semiauto.deriveDynamoFormat
-import org.scanamo.query.UniqueKey
-import org.scanamo.{
-  DynamoFormat,
-  DynamoReadError,
-  Scanamo,
-  Table => ScanamoTable
-}
-import software.amazon.awssdk.services.dynamodb.DynamoDbClient
+import org.scanamo.generic.auto._
 import weco.fixtures.TestWith
 import weco.messaging.fixtures.SQS
 import weco.messaging.memory.MemoryMessageSender
 import weco.messaging.sns.NotificationMessage
-import weco.catalogue.internal_model.matcher.{MatchedIdentifiers, WorkNode}
-import weco.storage.fixtures.DynamoFixtures.Table
-import weco.storage.locking.dynamo.{
-  DynamoLockDaoFixtures,
-  DynamoLockingService,
-  ExpiringLock
-}
-import weco.storage.locking.memory.{MemoryLockDao, MemoryLockingService}
-import weco.catalogue.internal_model.identifiers.CanonicalId
 import weco.pipeline.matcher.matcher.WorkMatcher
-import weco.pipeline.matcher.models.WorkLinks
+import weco.pipeline.matcher.models.{MatcherResult, WorkStub}
 import weco.pipeline.matcher.services.MatcherWorkerService
 import weco.pipeline.matcher.storage.{WorkGraphStore, WorkNodeDao}
+import weco.pipeline_storage.Retriever
 import weco.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 import weco.pipeline_storage.memory.MemoryRetriever
+import weco.storage.fixtures.DynamoFixtures.Table
+import weco.storage.locking.dynamo.DynamoLockDaoFixtures
+import weco.storage.locking.memory.{MemoryLockDao, MemoryLockingService}
 
 import java.util.UUID
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -40,16 +26,13 @@ trait MatcherFixtures
     with DynamoLockDaoFixtures
     with LocalWorkGraphDynamoDb {
 
-  implicit val workNodeFormat: DynamoFormat[WorkNode] = deriveDynamoFormat
-  implicit val lockFormat: DynamoFormat[ExpiringLock] = deriveDynamoFormat
-
   def withWorkGraphTable[R](testWith: TestWith[Table, R]): R =
     withSpecifiedTable(createWorkGraphTable) { table =>
       testWith(table)
     }
 
-  def withWorkerService[R](
-    workLinksRetriever: MemoryRetriever[WorkLinks],
+  def withMatcherService[R](
+    retriever: Retriever[WorkStub],
     queue: SQS.Queue,
     messageSender: MemoryMessageSender,
     graphTable: Table)(testWith: TestWith[MatcherWorkerService[String], R]): R =
@@ -60,7 +43,7 @@ trait MatcherFixtures
             val workerService =
               new MatcherWorkerService(
                 pipelineStorageConfig,
-                workLinksRetriever = workLinksRetriever,
+                retriever = retriever,
                 msgStream,
                 messageSender,
                 workMatcher)
@@ -71,12 +54,12 @@ trait MatcherFixtures
       }
     }
 
-  def withWorkerService[R](workLinksRetriever: MemoryRetriever[WorkLinks],
-                           queue: SQS.Queue,
-                           messageSender: MemoryMessageSender)(
+  def withMatcherService[R](retriever: Retriever[WorkStub],
+                            queue: SQS.Queue,
+                            messageSender: MemoryMessageSender)(
     testWith: TestWith[MatcherWorkerService[String], R]): R =
     withWorkGraphTable { graphTable =>
-      withWorkerService(workLinksRetriever, queue, messageSender, graphTable) {
+      withMatcherService(retriever, queue, messageSender, graphTable) {
         service =>
           testWith(service)
       }
@@ -87,21 +70,13 @@ trait MatcherFixtures
     implicit val lockDao: MemoryLockDao[String, UUID] =
       new MemoryLockDao[String, UUID]
     val lockingService =
-      new MemoryLockingService[Set[MatchedIdentifiers], Future]()
+      new MemoryLockingService[MatcherResult, Future]()
 
     val workMatcher = new WorkMatcher(
       workGraphStore = workGraphStore,
       lockingService = lockingService
     )
 
-    testWith(workMatcher)
-  }
-
-  def withWorkMatcherAndLockingService[R](
-    workGraphStore: WorkGraphStore,
-    lockingService: DynamoLockingService[Set[MatchedIdentifiers], Future])(
-    testWith: TestWith[WorkMatcher, R]): R = {
-    val workMatcher = new WorkMatcher(workGraphStore, lockingService)
     testWith(workMatcher)
   }
 
@@ -122,27 +97,11 @@ trait MatcherFixtures
   }
 
   def sendWork(
-    links: WorkLinks,
-    retriever: MemoryRetriever[WorkLinks],
+    work: WorkStub,
+    retriever: MemoryRetriever[WorkStub],
     queue: SQS.Queue
-  ): Any = {
-    retriever.index ++= Map(links.workId.toString -> links)
-    sendNotificationToSQS(queue, body = links.workId.toString)
+  ): Unit = {
+    retriever.index ++= Map(work.id.toString -> work)
+    sendNotificationToSQS(queue, body = work.id.toString)
   }
-
-  def ciHash(ids: CanonicalId*): String =
-    DigestUtils.sha256Hex(ids.sorted.map(_.underlying).mkString("+"))
-
-  def get[T](dynamoClient: DynamoDbClient, tableName: String)(
-    key: UniqueKey[_])(
-    implicit format: DynamoFormat[T]): Option[Either[DynamoReadError, T]] =
-    Scanamo(dynamoClient).exec { ScanamoTable[T](tableName).get(key) }
-
-  def put[T](dynamoClient: DynamoDbClient, tableName: String)(obj: T)(
-    implicit format: DynamoFormat[T]) =
-    Scanamo(dynamoClient).exec { ScanamoTable[T](tableName).put(obj) }
-
-  def scan[T](dynamoClient: DynamoDbClient, tableName: String)(
-    implicit format: DynamoFormat[T]): List[Either[DynamoReadError, T]] =
-    Scanamo(dynamoClient).exec { ScanamoTable[T](tableName).scan() }
 }

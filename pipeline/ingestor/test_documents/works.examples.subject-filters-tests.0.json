@@ -1,0 +1,201 @@
+{
+  "description" : "examples for the subject filter tests",
+  "createdAt" : "2023-01-03T09:31:59.909699Z",
+  "id" : "tayys6jp",
+  "document" : {
+    "debug" : {
+      "source" : {
+        "id" : "tayys6jp",
+        "identifier" : {
+          "identifierType" : {
+            "id" : "miro-image-number"
+          },
+          "ontologyType" : "Work",
+          "value" : "3OfWNE6m5y"
+        },
+        "version" : 7,
+        "modifiedTime" : "2009-01-17T02:57:31Z"
+      },
+      "mergedTime" : "2009-01-17T02:57:31Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
+      "redirectSources" : [
+      ]
+    },
+    "display" : {
+      "id" : "tayys6jp",
+      "title" : "title-JiYzJ9DWDL",
+      "alternativeTitles" : [
+      ],
+      "contributors" : [
+      ],
+      "identifiers" : [
+        {
+          "identifierType" : {
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
+            "type" : "IdentifierType"
+          },
+          "value" : "3OfWNE6m5y",
+          "type" : "Identifier"
+        }
+      ],
+      "subjects" : [
+        {
+          "id" : "sanitati",
+          "identifiers" : [
+            {
+              "identifierType" : {
+                "id" : "lc-subjects",
+                "label" : "Library of Congress Subject Headings (LCSH)",
+                "type" : "IdentifierType"
+              },
+              "value" : "lcsh-sanitation",
+              "type" : "Identifier"
+            },
+            {
+              "identifierType" : {
+                "id" : "nlm-mesh",
+                "label" : "Medical Subject Headings (MeSH) identifier",
+                "type" : "IdentifierType"
+              },
+              "value" : "mesh-sanitation",
+              "type" : "Identifier"
+            }
+          ],
+          "label" : "Sanitation.",
+          "concepts" : [
+            {
+              "label" : "bCBtOF9X3cVR8q4",
+              "type" : "Concept"
+            },
+            {
+              "label" : "GIgcsJhdmKTFidD",
+              "type" : "Concept"
+            },
+            {
+              "label" : "lsqnu7hZZtHlWPI",
+              "type" : "Concept"
+            }
+          ],
+          "type" : "Subject"
+        }
+      ],
+      "genres" : [
+      ],
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "availabilities" : [
+      ],
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "notes" : [
+      ],
+      "formerFrequency" : [
+      ],
+      "designation" : [
+      ],
+      "images" : [
+      ],
+      "parts" : [
+      ],
+      "partOf" : [
+      ],
+      "precededBy" : [
+      ],
+      "succeededBy" : [
+      ],
+      "type" : "Work"
+    },
+    "query" : {
+      "id" : "tayys6jp",
+      "format.id" : null,
+      "workType" : "Standard",
+      "identifiers.value" : [
+        "3OfWNE6m5y"
+      ],
+      "title" : "title-JiYzJ9DWDL",
+      "alternativeTitles" : [
+      ],
+      "description" : null,
+      "physicalDescription" : null,
+      "edition" : null,
+      "notes.contents" : [
+      ],
+      "lettering" : null,
+      "images.id" : [
+      ],
+      "images.identifiers.value" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
+      "items.locations.accessConditions.status.id" : [
+      ],
+      "items.locations.license.id" : [
+      ],
+      "items.locations.locationType.id" : [
+      ],
+      "subjects.id" : [
+        "sanitati"
+      ],
+      "subjects.label" : [
+        "Sanitation."
+      ],
+      "subjects.concepts.label" : [
+        "bCBtOF9X3cVR8q4",
+        "GIgcsJhdmKTFidD",
+        "lsqnu7hZZtHlWPI"
+      ],
+      "genres.label" : [
+      ],
+      "genres.concepts.label" : [
+      ],
+      "languages.id" : [
+      ],
+      "languages.label" : [
+      ],
+      "contributors.agent.id" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "production.label" : [
+      ],
+      "production.dates.range.from" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
+      ],
+      "collectionPath.label" : null,
+      "collectionPath.path" : null,
+      "referenceNumber" : null
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+        "{\"label\":\"Sanitation.\",\"concepts\":[],\"type\":\"Subject\"}"
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
+    },
+    "type" : "Visible"
+  }
+}

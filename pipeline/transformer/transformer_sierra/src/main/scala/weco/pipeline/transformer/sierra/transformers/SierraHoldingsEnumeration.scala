@@ -1,9 +1,9 @@
 package weco.pipeline.transformer.sierra.transformers
 
 import grizzled.slf4j.Logging
-import weco.catalogue.source_model.sierra.identifiers.TypedSierraRecordNumber
-import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
-import weco.catalogue.source_model.sierra.source.SierraQueryOps
+import weco.sierra.models.SierraQueryOps
+import weco.sierra.models.identifiers.TypedSierraRecordNumber
+import weco.sierra.models.marc.{Subfield, VarField}
 
 import scala.util.{Failure, Success, Try}
 
@@ -26,11 +26,32 @@ import scala.util.{Failure, Success, Try}
 // written in a generic way that would allow supporting them if we wanted to later.
 //
 object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
+
+  def apply(id: TypedSierraRecordNumber,
+            varFields: List[VarField]): List[String] =
+    getHumanWrittenEnumeration(varFields) ++
+      getAutomaticallyPopulatedEnumeration(id, varFields)
+
+  // Field tag h is used by librarians to describe the contents of our holdings
+  // when they wrote the description themselves.  Note that 853/863 will also
+  // have field tag h, so we want to filter to cases where it's just an h and
+  // a textual description.
+  //
+  // See https://documentation.iii.com/sierrahelp/Content/sril/sril_records_varfld_types_holdings.html
+  //
+  private def getHumanWrittenEnumeration(
+    varFields: List[VarField]): List[String] =
+    varFields
+      .filter(vf => vf.fieldTag.contains("h"))
+      .filterNot(vf => vf.marcTag.isDefined)
+      .flatMap(vf => vf.content)
+
   val labelTag = "853"
   val valueTag = "863"
 
-  def apply(id: TypedSierraRecordNumber,
-            varFields: List[VarField]): List[String] = {
+  private def getAutomaticallyPopulatedEnumeration(
+    id: TypedSierraRecordNumber,
+    varFields: List[VarField]): List[String] = {
 
     // The 85X and 86X pairs are associated based on the contents of subfield 8.
     //
@@ -112,7 +133,7 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
         }
         .flatMap { sf =>
           label.varField.subfieldsWithTag(sf.tag).headOption match {
-            case Some(MarcSubfield(_, subfieldLabel)) =>
+            case Some(Subfield(_, subfieldLabel)) =>
               Some((subfieldLabel, sf.content))
             case None => None
           }
@@ -147,7 +168,16 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
         case (label, value) => (label, value.split("-", 2).last)
       }
 
-      s"${concatenateParts(id, startParts)} - ${concatenateParts(id, endParts)}"
+      val startString = concatenateParts(id, startParts)
+      val endString = concatenateParts(id, endParts)
+
+      // It's possible the start/end of the range may be the same.  If so, collapse
+      // them into a single value to make them easier to read.
+      if (startString == endString) {
+        startString
+      } else {
+        s"$startString - $endString"
+      }
     } else {
       concatenateParts(id, parts)
     }
@@ -323,7 +353,7 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
   private def createLabel(id: TypedSierraRecordNumber,
                           vf: VarField): Option[Label] =
     vf.subfieldsWithTag("8").headOption match {
-      case Some(MarcSubfield(_, content)) =>
+      case Some(Subfield(_, content)) =>
         Try { content.toInt } match {
           case Success(link) => Some(Label(link, vf))
           case Failure(_) =>
@@ -345,7 +375,7 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
   private def createValue(id: TypedSierraRecordNumber,
                           vf: VarField): Option[Value] =
     vf.subfieldsWithTag("8").headOption match {
-      case Some(MarcSubfield(_, content)) =>
+      case Some(Subfield(_, content)) =>
         Try { content.split('.').map(_.toInt).toSeq } match {
           case Success(Seq(link, sequence)) => Some(Value(link, sequence, vf))
           case _ =>

@@ -4,8 +4,10 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.locations.License
 import weco.catalogue.source_model.mets.{DeletedMetsFile, MetsFileWithImages}
-import weco.pipeline.transformer.mets.fixtures.{LocalResources, MetsGenerators}
+import weco.fixtures.LocalResources
+import weco.pipeline.transformer.mets.generators.MetsGenerators
 import weco.pipeline.transformer.result.Result
+import weco.sierra.generators.SierraIdentifierGenerators
 import weco.storage.s3.{S3ObjectLocation, S3ObjectLocationPrefix}
 import weco.storage.store.memory.MemoryStore
 
@@ -15,13 +17,15 @@ class MetsXmlTransformerTest
     extends AnyFunSpec
     with Matchers
     with MetsGenerators
+    with SierraIdentifierGenerators
     with LocalResources {
 
   it("transforms METS XML") {
-    val xml = loadXmlFile("/b30246039.xml")
+    val xml = readResource("b30246039.xml")
     transform(root = Some(xml), createdDate = Instant.now) shouldBe Right(
-      MetsData(
+      InvisibleMetsData(
         recordIdentifier = "b30246039",
+        title = "[Report 1942] /",
         accessConditionDz = Some("CC-BY-NC"),
         accessConditionStatus = Some("Open"),
         accessConditionUsage = Some("Some terms"),
@@ -39,17 +43,7 @@ class MetsXmlTransformerTest
       id = "b30246039",
       root = Some(str),
       createdDate = Instant.now,
-      deleted = true) shouldBe Right(
-      MetsData(
-        recordIdentifier = "b30246039",
-        accessConditionDz = None,
-        accessConditionStatus = None,
-        accessConditionUsage = None,
-        fileReferencesMapping = Nil,
-        titlePageId = None,
-        deleted = true
-      )
-    )
+      deleted = true) shouldBe Right(DeletedMetsData("b30246039"))
   }
 
   it("errors when the root XML doesn't exist in the store") {
@@ -57,17 +51,19 @@ class MetsXmlTransformerTest
   }
 
   it("transforms METS XML with manifestations") {
-    val xml = loadXmlFile("/b22012692.xml")
+    val xml = readResource("b22012692.xml")
     val manifestations = Map(
-      "b22012692_0003.xml" -> Some(loadXmlFile("/b22012692_0003.xml")),
-      "b22012692_0001.xml" -> Some(loadXmlFile("/b22012692_0001.xml")),
+      "b22012692_0003.xml" -> Some(readResource("b22012692_0003.xml")),
+      "b22012692_0001.xml" -> Some(readResource("b22012692_0001.xml")),
     )
     transform(
       root = Some(xml),
       createdDate = Instant.now,
       manifestations = manifestations) shouldBe Right(
-      MetsData(
+      InvisibleMetsData(
         recordIdentifier = "b22012692",
+        title =
+          "Enciclopedia anatomica che comprende l'anatomia descrittiva, l'anatomia generale, l'anatomia patologica, la storia dello sviluppo e delle razze umane /",
         accessConditionDz = Some("PDM"),
         accessConditionStatus = Some("Open"),
         fileReferencesMapping = createFileReferences(2, "b22012692", Some(1)),
@@ -77,24 +73,32 @@ class MetsXmlTransformerTest
   }
 
   it("transforms METS XML with manifestations without .xml in the name") {
+    val title = "[Report 1942] /"
+
     val xml = xmlWithManifestations(
-      List(("LOG_0001", "01", "first"), ("LOG_0002", "02", "second.xml"))
+      title = title,
+      manifestations =
+        List(("LOG_0001", "01", "first"), ("LOG_0002", "02", "second.xml"))
     ).toString()
+
     val manifestations = Map(
       "first.xml" -> Some(
         metsXmlWith(
-          "b30246039",
+          recordIdentifier = "b30246039",
+          title = title,
           license = Some(License.InCopyright),
           fileSec = fileSec("b30246039"),
           structMap = structMap)),
-      "second.xml" -> Some(metsXmlWith("b30246039")),
+      "second.xml" -> Some(
+        metsXmlWith(recordIdentifier = "b30246039", title = title)),
     )
     transform(
       root = Some(xml),
       createdDate = Instant.now,
       manifestations = manifestations) shouldBe Right(
-      MetsData(
+      InvisibleMetsData(
         recordIdentifier = "b30246039",
+        title = title,
         accessConditionDz = Some("INC"),
         accessConditionStatus = None,
         fileReferencesMapping = createFileReferences(2, "b30246039"),
@@ -103,9 +107,9 @@ class MetsXmlTransformerTest
   }
 
   it("errors if first manifestation doesn't exist in store") {
-    val xml = loadXmlFile("/b22012692.xml")
+    val xml = readResource("b22012692.xml")
     val manifestations = Map(
-      "b22012692_0003.xml" -> Some(loadXmlFile("/b22012692_0003.xml")),
+      "b22012692_0003.xml" -> Some(readResource("b22012692_0003.xml")),
       "b22012692_0001.xml" -> None,
     )
     transform(
@@ -114,7 +118,7 @@ class MetsXmlTransformerTest
       manifestations = manifestations) shouldBe a[Left[_, _]]
   }
 
-  def transform(id: String = randomAlphanumeric(),
+  def transform(id: String = createSierraBibNumber.withoutCheckDigit,
                 root: Option[String],
                 createdDate: Instant,
                 deleted: Boolean = false,

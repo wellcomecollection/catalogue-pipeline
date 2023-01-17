@@ -9,74 +9,124 @@ variable "min_capacity" {
 
 variable "max_capacity" {
   type        = number
-  default     = 15
+  default     = 12
   description = "The max capacity of every ECS service will be less than or equal to this value"
 }
 
-variable "subnets" {
-  type = list(string)
-}
-variable "shared_logging_secrets" {
-  type = map(any)
-}
-
-variable "vpc_id" {}
-
-variable "aws_region" {}
-
-variable "dlq_alarm_arn" {}
-
-variable "rds_cluster_id" {
-  type = string
-}
-variable "rds_subnet_group_name" {
-  type = string
-}
-
-variable "is_reindexing" {
-  type        = bool
-  description = "Are you reindexing through this pipeline right now?"
-}
-
-variable "rds_ids_access_security_group_id" {}
-variable "ec_privatelink_security_group_id" {
-  type = string
+variable "reindexing_state" {
+  type = object({
+    listen_to_reindexer      = bool
+    scale_up_tasks           = bool
+    scale_up_elastic_cluster = bool
+    scale_up_id_minter_db    = bool
+    scale_up_matcher_db      = bool
+  })
 }
 
 variable "release_label" {
   type = string
 }
 
-# Miro
-variable "vhs_miro_read_policy" {}
+# This allows us to choose the size of the Elasticsearch cluster.
+#
+# There are three sizes we can choose from:
+#
+#     * 58GB x 2 = a 2-node instance with lots of memory, when we know we're
+#       going to be sending the cluster lots of traffic.
+#
+#       This is what we use when reindexing.  It's auto-selected if you
+#       enable `scale_up_elastic_cluster` = true.
+#
+#       Cost: ~$130/day
+#
+#     * 8GB x 3 = a 3-node, HA instance with enough memory to serve
+#       prod API traffic.
+#
+#       Cost: ~$30/day
+#
+#     * 2GB x 2 = a 2-node instance with just enough memory and storage,
+#       when we want to keep a cluster around (e.g. for investigation, or
+#       if we want to keep it just-in-case we need a rollback), but don't
+#       need it ready to serve traffic immediately.
+#
+#       Cost: ~$6.50/day
+#
+variable "es_cluster_size" {
+  description = "How big should the Elastic cluster be?"
+  default     = "3x8g"
 
-# Sierra
-variable "vhs_sierra_read_policy" {}
-
-# Calm
-variable "vhs_calm_read_policy" {}
-
-variable "storage_bucket_name" {
-  type = string
+  validation {
+    condition     = contains(["2x58g", "3x8g", "3x2g"], var.es_cluster_size)
+    error_message = "Cooldown period should be one of: 2x58g, 3x8g, 3x2g."
+  }
 }
 
-variable "inferrer_model_data_bucket_name" {}
+locals {
+  es_memory_lookup = {
+    "2x58g" : "58g"
+    "3x8g" : "8g"
+    "3x2g" : "2g"
+  }
 
-variable "traffic_filter_platform_vpce_id" {
-  type = string
+  es_node_lookup = {
+    "2x58g" : 2
+    "3x8g" : 3
+    "3x2g" : 3
+  }
+
+  es_memory = var.reindexing_state.scale_up_elastic_cluster ? "58g" : local.es_memory_lookup[var.es_cluster_size]
+
+  # When we're reindexing, this cluster isn't depended on for anything.
+  # It's ephemeral data (and at 58GB of memory, expensive).
+  #
+  # Once we stop reindexing and make the pipeline live, we want it to be
+  # highly available, because it's serving API traffic.
+  es_node_count = var.reindexing_state.scale_up_elastic_cluster ? 2 : local.es_node_lookup[var.es_cluster_size]
 }
 
-variable "traffic_filter_catalogue_vpce_id" {
-  type = string
-}
-
-variable "traffic_filter_public_internet_id" {
-  type = string
-}
-
-variable "adapters" {
+# Fields:
+#
+#   - `topics` -- that the adapter will write to in normal operation
+#   - `reindex_topic` -- that the reindexer will write to
+#   - `read_policy` -- an IAM policy document that will allow a service
+#     to read from the adapter store
+#
+variable "adapter_config" {
   type = map(object({
     topics        = list(string)
     reindex_topic = string
+    read_policy   = string
   }))
+}
+
+variable "inferrer_config" {
+  type = object({
+    model_bucket = string
+    model_key    = string
+  })
+}
+
+variable "monitoring_config" {
+  type = object({
+    shared_logging_secrets = map(any)
+    logging_cluster_id     = string
+    dlq_alarm_arn          = string
+  })
+}
+
+variable "network_config" {
+  type = object({
+    vpc_id                           = string
+    subnets                          = list(string)
+    ec_privatelink_security_group_id = string
+    traffic_filters                  = list(string)
+  })
+}
+
+variable "rds_config" {
+  type = object({
+    cluster_id        = string
+    subnet_group      = string
+    security_group_id = string
+  })
 }

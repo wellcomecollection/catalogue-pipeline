@@ -1,0 +1,179 @@
+{
+  "description" : "works with different subjects",
+  "createdAt" : "2023-01-03T09:31:59.382553Z",
+  "id" : "6uwysojy",
+  "document" : {
+    "debug" : {
+      "source" : {
+        "id" : "6uwysojy",
+        "identifier" : {
+          "identifierType" : {
+            "id" : "calm-record-id"
+          },
+          "ontologyType" : "Work",
+          "value" : "pzLgxSR5EK"
+        },
+        "version" : 77,
+        "modifiedTime" : "2005-10-29T13:02:10Z"
+      },
+      "mergedTime" : "2005-10-29T13:02:10Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
+      "redirectSources" : [
+      ]
+    },
+    "display" : {
+      "id" : "6uwysojy",
+      "title" : "title-Dtaaw5YmCW",
+      "alternativeTitles" : [
+      ],
+      "contributors" : [
+      ],
+      "identifiers" : [
+        {
+          "identifierType" : {
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
+            "type" : "IdentifierType"
+          },
+          "value" : "pzLgxSR5EK",
+          "type" : "Identifier"
+        }
+      ],
+      "subjects" : [
+        {
+          "label" : "paleoNeuroBiology",
+          "concepts" : [
+            {
+              "label" : "qbmTfcJnlkosWvA",
+              "type" : "Concept"
+            },
+            {
+              "label" : "mEQcU7atgIJPhTv",
+              "type" : "Concept"
+            },
+            {
+              "label" : "2pMEZn8L2YCE8E9",
+              "type" : "Concept"
+            }
+          ],
+          "type" : "Subject"
+        }
+      ],
+      "genres" : [
+      ],
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "availabilities" : [
+      ],
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "notes" : [
+      ],
+      "formerFrequency" : [
+      ],
+      "designation" : [
+      ],
+      "images" : [
+      ],
+      "parts" : [
+      ],
+      "partOf" : [
+      ],
+      "precededBy" : [
+      ],
+      "succeededBy" : [
+      ],
+      "type" : "Work"
+    },
+    "query" : {
+      "id" : "6uwysojy",
+      "format.id" : null,
+      "workType" : "Standard",
+      "identifiers.value" : [
+        "pzLgxSR5EK"
+      ],
+      "title" : "title-Dtaaw5YmCW",
+      "alternativeTitles" : [
+      ],
+      "description" : null,
+      "physicalDescription" : null,
+      "edition" : null,
+      "notes.contents" : [
+      ],
+      "lettering" : null,
+      "images.id" : [
+      ],
+      "images.identifiers.value" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
+      "items.locations.accessConditions.status.id" : [
+      ],
+      "items.locations.license.id" : [
+      ],
+      "items.locations.locationType.id" : [
+      ],
+      "subjects.id" : [
+      ],
+      "subjects.label" : [
+        "paleoNeuroBiology"
+      ],
+      "subjects.concepts.label" : [
+        "qbmTfcJnlkosWvA",
+        "mEQcU7atgIJPhTv",
+        "2pMEZn8L2YCE8E9"
+      ],
+      "genres.label" : [
+      ],
+      "genres.concepts.label" : [
+      ],
+      "languages.id" : [
+      ],
+      "languages.label" : [
+      ],
+      "contributors.agent.id" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "production.label" : [
+      ],
+      "production.dates.range.from" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
+      ],
+      "collectionPath.label" : null,
+      "collectionPath.path" : null,
+      "referenceNumber" : null
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+        "{\"label\":\"paleoNeuroBiology\",\"concepts\":[],\"type\":\"Subject\"}"
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
+    },
+    "type" : "Visible"
+  }
+}

@@ -1,6 +1,6 @@
 package weco.catalogue.source_model.sierra.rules
 
-import weco.catalogue.source_model.sierra.SierraItemData
+import weco.sierra.models.data.SierraItemData
 
 /** The Rules for Requesting are a set of rules in Sierra that can block an item
   * from being requested, and if so, optionally explain to the user why an item
@@ -33,19 +33,13 @@ import weco.catalogue.source_model.sierra.SierraItemData
   *   -   Variable length fields on items
   *       https://documentation.iii.com/sierrahelp/Content/sril/sril_records_varfld_types_item.html
   *
+  * This was last checked against Sierra based on a set of rules sent from
+  * Liz Richens on 31 January 2022.
+  *
   */
 object SierraRulesForRequesting {
   def apply(itemData: SierraItemData): RulesForRequestingResult =
     itemData match {
-
-      // This is the line:
-      //
-      //    q|i||97||=|x||This item belongs in the Strongroom
-      //
-      // This rule means "if fixed field 97 on the item has the value 'x'".
-      case i if i.fixedField("97").contains("x") =>
-        NotRequestable.BelongsInStrongroom(
-          "This item belongs in the Strongroom")
 
       // These cases cover the lines:
       //
@@ -67,7 +61,8 @@ object SierraRulesForRequesting {
         NotRequestable.ItemWithdrawn("This item is withdrawn.")
       case i if i.fixedField("88").contains("r") =>
         NotRequestable.ItemUnavailable("This item is unavailable.")
-      case i if i.fixedField("88").contains("z") => NotRequestable.NoReason
+      case i if i.fixedField("88").contains("z") =>
+        NotRequestable.NoPublicMessage("fixed field 88 = z")
       case i if i.fixedField("88").contains("v") =>
         NotRequestable.AtConservation("This item is with conservation.")
       case i if i.fixedField("88").contains("h") =>
@@ -99,7 +94,7 @@ object SierraRulesForRequesting {
         NotRequestable.OnExhibition(
           "On exhibition. Please ask at Enquiry Desk.")
       case i if i.fixedField("88").contains("y") =>
-        NotRequestable.NoReason
+        NotRequestable.NoPublicMessage("fixed field 88 = y")
 
       // These cases cover the lines:
       //
@@ -124,7 +119,7 @@ object SierraRulesForRequesting {
           if i.fixedField("87").getOrElse("0") != "0" || i
             .fixedField("88")
             .contains("!") =>
-        NotRequestable.OnHold(
+        NotRequestable.InUseByAnotherReader(
           "Item is in use by another reader. Please ask at Enquiry Desk.")
 
       // These cases cover the lines:
@@ -274,10 +269,7 @@ object SierraRulesForRequesting {
       //    v|i||79||=|sgmoh||
       //    v|i||79||=|somet||
       //    v|i||79||=|somge||
-      //    v|i||79||=|somhe||
-      //    v|i||79||=|somhi||
       //    v|i||79||=|somja||
-      //    v|i||79||=|sompa||
       //    v|i||79||=|sompr||
       //    q|i||79||=|somsy||Please complete a manual request slip.  This item cannot be requested online.
       //
@@ -286,7 +278,8 @@ object SierraRulesForRequesting {
           "Item is on Exhibition Reserve. Please ask at the Enquiry Desk")
 
       case i if i.fixedField("61").containsAnyOf("17", "18", "15") =>
-        NotRequestable.NoReason
+        NotRequestable.NoPublicMessage(
+          s"fixed field 61 = ${i.fixedField("61").get} (${i.fixedFields("61").display.getOrElse("<none>")})")
 
       case i
           if i.fixedField("61").containsAnyOf("4", "14") || i
@@ -297,10 +290,7 @@ object SierraRulesForRequesting {
               "sgmoh",
               "somet",
               "somge",
-              "somhe",
-              "somhi",
               "somja",
-              "sompa",
               "sompr",
               "somsy") =>
         NotRequestable.NeedsManualRequest(
@@ -311,7 +301,7 @@ object SierraRulesForRequesting {
       //    q|i||79||=|sepep||
       //
       case i if i.fixedField("79").contains("sepep") =>
-        NotRequestable.NoReason
+        NotRequestable.NoPublicMessage("fixed field 79 = sepep")
 
       // This case covers the lines:
       //
@@ -384,14 +374,8 @@ object SierraRulesForRequesting {
       //    q|i||79||=|rmdda||
       //
       case i if i.fixedField("79").containsAnyOf("rm001", "rmdda") =>
-        NotRequestable.NoReason
-
-      // This case covers the line:
-      //
-      //    q|i||97||=|j||
-      //
-      case i if i.fixedField("97").contains("j") =>
-        NotRequestable.NoReason
+        NotRequestable.NoPublicMessage(
+          s"fixed field 79 = ${i.fixedField("79").get}")
 
       case _ => Requestable
     }

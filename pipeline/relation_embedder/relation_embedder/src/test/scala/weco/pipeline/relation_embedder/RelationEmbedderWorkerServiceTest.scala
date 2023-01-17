@@ -5,31 +5,35 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import com.sksamuel.elastic4s.Index
 import org.scalatest.Assertion
-import org.scalatest.concurrent.Eventually
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import akka.NotUsed
 import akka.stream.scaladsl.Source
+import org.apache.commons.io.IOUtils
+import org.scalatest.concurrent.PatienceConfiguration.Timeout
+import org.scalatest.time.{Seconds, Span}
 import weco.akka.fixtures.Akka
 import weco.fixtures.TestWith
+import weco.json.JsonUtil._
 import weco.messaging.fixtures.SQS
 import weco.messaging.fixtures.SQS.QueuePair
 import weco.messaging.memory.MemoryMessageSender
 import weco.messaging.sns.NotificationMessage
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.work.WorkState.{Denormalised, Merged}
-import weco.json.JsonUtil._
 import weco.catalogue.internal_model.index.IndexFixtures
 import weco.catalogue.internal_model.work._
 import weco.pipeline.relation_embedder.fixtures.RelationGenerators
+import weco.pipeline.relation_embedder.models._
 import weco.pipeline_storage.memory.MemoryIndexer
+
+import java.nio.charset.StandardCharsets
 
 class RelationEmbedderWorkerServiceTest
     extends AnyFunSpec
     with Matchers
     with SQS
     with Akka
-    with Eventually
     with IndexFixtures
     with RelationGenerators {
 
@@ -77,24 +81,28 @@ class RelationEmbedderWorkerServiceTest
   val relations2 = Relations(
     ancestors = List(relA),
     children = List(relC, relD),
-    siblingsPreceding = List(rel1))
+    siblingsPreceding = List(rel1)
+  )
   val relationsC =
     Relations(ancestors = List(relA, rel2), siblingsSucceeding = List(relD))
   val relationsD = Relations(
     ancestors = List(relA, rel2),
     children = List(relE),
-    siblingsPreceding = List(relC))
+    siblingsPreceding = List(relC)
+  )
   val relationsE = Relations(ancestors = List(relA, rel2, relD))
 
   val works =
     List(workA, workB, workC, workD, workE, work2, work1)
 
   def relations(
-    index: mutable.Map[String, Work[Denormalised]]): Map[String, Relations] =
+    index: mutable.Map[String, Work[Denormalised]]
+  ): Map[String, Relations] =
     index.map { case (key, work) => key -> work.state.relations }.toMap
 
-  def availabilities(index: mutable.Map[String, Work[Denormalised]])
-    : Map[String, Set[Availability]] =
+  def availabilities(
+    index: mutable.Map[String, Work[Denormalised]]
+  ): Map[String, Set[Availability]] =
     index.map { case (key, work) => key -> work.state.availabilities }.toMap
 
   it("denormalises a batch containing a list of selectors") {
@@ -103,7 +111,8 @@ class RelationEmbedderWorkerServiceTest
         import Selector._
         val batch = Batch(
           rootPath = "a",
-          selectors = List(Node("a/2"), Descendents("a/2")))
+          selectors = List(Node("a/2"), Descendents("a/2"))
+        )
         sendNotificationToSQS(queue = queue, message = batch)
         eventually {
           assertQueueEmpty(queue)
@@ -119,10 +128,10 @@ class RelationEmbedderWorkerServiceTest
           work2.id -> relations2,
           workC.id -> relationsC,
           workD.id -> relationsD,
-          workE.id -> relationsE,
+          workE.id -> relationsE
         )
         availabilities(index) shouldBe Map(
-          work2.id -> Set(Availability.Online),
+          work2.id -> Set.empty,
           workC.id -> Set.empty,
           workD.id -> Set(Availability.Online),
           workE.id -> Set.empty
@@ -148,16 +157,16 @@ class RelationEmbedderWorkerServiceTest
           work2.id -> relations2,
           workC.id -> relationsC,
           workD.id -> relationsD,
-          workE.id -> relationsE,
+          workE.id -> relationsE
         )
         availabilities(index) shouldBe Map(
-          workA.id -> Set(Availability.Online),
+          workA.id -> Set.empty,
           work1.id -> Set.empty,
           workB.id -> Set.empty,
-          work2.id -> Set(Availability.Online),
+          work2.id -> Set.empty,
           workC.id -> Set.empty,
           workD.id -> Set(Availability.Online),
-          workE.id -> Set.empty,
+          workE.id -> Set.empty
         )
     }
   }
@@ -187,10 +196,10 @@ class RelationEmbedderWorkerServiceTest
           invisibleWork.id -> Relations.none
         )
         availabilities(index) shouldBe Map(
-          workA.id -> Set(Availability.Online),
+          workA.id -> Set.empty,
           work1.id -> Set.empty,
           workB.id -> Set.empty,
-          work2.id -> Set(Availability.Online),
+          work2.id -> Set.empty,
           workC.id -> Set.empty,
           workD.id -> Set(Availability.Online),
           workE.id -> Set.empty,
@@ -200,7 +209,7 @@ class RelationEmbedderWorkerServiceTest
   }
 
   it("puts failed messages onto the DLQ") {
-    withWorkerService(fails = true) {
+    withWorkerService(fails = true, visibilityTimeout = 1 second) {
       case (QueuePair(queue, dlq), _, msgSender) =>
         import Selector._
         val batch = Batch(rootPath = "a", selectors = List(Tree("a")))
@@ -213,35 +222,80 @@ class RelationEmbedderWorkerServiceTest
     }
   }
 
-  def withWorkerService[R](works: List[Work[Merged]] = works,
-                           fails: Boolean = false)(
-    testWith: TestWith[(QueuePair,
-                        mutable.Map[String, Work[Denormalised]],
-                        MemoryMessageSender),
-                       R]): R =
+  // This is a real set of nearly 7000 paths from SAFPA.  This test is less focused on
+  // the exact result, more that it returns in a reasonable time.
+  //
+  // In particular, the relation embedder has to handle large batches, but most of our
+  // other tests use small samples.  This helps us catch accidentally introduced
+  // complexity errors before we deploy new code.
+  it("handles a very large collection of works") {
+    val paths = IOUtils
+      .resourceToString("/paths.txt", StandardCharsets.UTF_8)
+      .split("\n")
+
+    val works = paths.map { work(_) }.toList
+
+    val batch = Batch(
+      rootPath = "SAFPA",
+      selectors = List(
+        Selector.Descendents("SAFPA/A/A14/1/48/2"),
+        Selector.Children("SAFPA/A/A14/1/48"),
+        Selector.Node("SAFPA/A/A14/1/48")
+      )
+    )
+
+    withWorkerService(works, visibilityTimeout = 30.seconds) {
+      case (QueuePair(queue, dlq), _, msgSender) =>
+        sendNotificationToSQS(queue = queue, message = batch)
+
+        eventually(Timeout(Span(45, Seconds))) {
+          assertQueueEmpty(queue)
+          assertQueueEmpty(dlq)
+        }
+
+        msgSender.messages should have size 5
+    }
+  }
+
+  def withWorkerService[R](
+    works: List[Work[Merged]] = works,
+    fails: Boolean = false,
+    visibilityTimeout: Duration = 5.seconds
+  )(
+    testWith: TestWith[
+      (QueuePair, mutable.Map[String, Work[Denormalised]], MemoryMessageSender),
+      R
+    ]
+  ): R =
     withLocalMergedWorksIndex { mergedIndex =>
       storeWorks(mergedIndex, works)
-      withLocalSqsQueuePair() { queuePair =>
-        withActorSystem { implicit actorSystem =>
-          withSQSStream[NotificationMessage, R](queuePair.queue) { sqsStream =>
-            val messageSender = new MemoryMessageSender
-            val denormalisedIndex =
-              mutable.Map.empty[String, Work[Denormalised]]
-            val relationsService =
-              if (fails) FailingRelationsService
-              else
-                new PathQueryRelationsService(elasticClient, mergedIndex, 10)
-            val workerService = new RelationEmbedderWorkerService[String](
-              sqsStream = sqsStream,
-              msgSender = messageSender,
-              workIndexer = new MemoryIndexer(denormalisedIndex),
-              relationsService = relationsService,
-              indexFlushInterval = 1 milliseconds,
-            )
-            workerService.run()
-            testWith((queuePair, denormalisedIndex, messageSender))
+      withLocalSqsQueuePair(visibilityTimeout = visibilityTimeout) {
+        queuePair =>
+          withActorSystem { implicit actorSystem =>
+            withSQSStream[NotificationMessage, R](queuePair.queue) {
+              sqsStream =>
+                val messageSender = new MemoryMessageSender
+                val denormalisedIndex =
+                  mutable.Map.empty[String, Work[Denormalised]]
+                val relationsService =
+                  if (fails) FailingRelationsService
+                  else
+                    new PathQueryRelationsService(
+                      elasticClient,
+                      mergedIndex,
+                      10
+                    )
+                val workerService = new RelationEmbedderWorkerService[String](
+                  sqsStream = sqsStream,
+                  msgSender = messageSender,
+                  workIndexer = new MemoryIndexer(denormalisedIndex),
+                  relationsService = relationsService,
+                  indexFlushInterval = 1 milliseconds
+                )
+                workerService.run()
+                testWith((queuePair, denormalisedIndex, messageSender))
+            }
           }
-        }
       }
     }
 

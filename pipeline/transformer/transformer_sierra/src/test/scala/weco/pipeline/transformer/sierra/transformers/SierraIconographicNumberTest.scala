@@ -2,9 +2,9 @@ package weco.pipeline.transformer.sierra.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.source_model.generators.SierraDataGenerators
-import weco.catalogue.source_model.sierra.marc.VarField
-import weco.catalogue.source_model.sierra.source.SierraMaterialType
+import weco.sierra.generators.SierraDataGenerators
+import weco.sierra.models.fields.SierraMaterialType
+import weco.sierra.models.marc.VarField
 
 class SierraIconographicNumberTest
     extends AnyFunSpec

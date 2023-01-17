@@ -7,7 +7,7 @@ import weco.catalogue.internal_model.work.generators.{
   WorkGenerators
 }
 import weco.catalogue.internal_model.work.{CollectionPath, Work}
-import weco.pipeline.relation_embedder.{
+import weco.pipeline.relation_embedder.models.{
   RelationWork,
   RelationWorkData,
   RelationWorkState

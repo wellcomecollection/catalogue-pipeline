@@ -53,7 +53,7 @@ class MergerManagerTest extends AnyFunSpec with Matchers with WorkGenerators {
       expectedWorks.map(_.transition[Merged](now))
   }
 
-  val mergerRules = new Merger {
+  val merger = new Merger {
 
     /** Make every work a redirect to the first work in the list, and leave
       * the first work intact.
@@ -62,9 +62,11 @@ class MergerManagerTest extends AnyFunSpec with Matchers with WorkGenerators {
       val outputWorks = works.head +: works.tail.map { work =>
         Work.Redirected[Identified](
           state = Identified(
-            work.sourceIdentifier,
-            work.state.canonicalId,
-            work.state.sourceModifiedTime),
+            sourceIdentifier = work.sourceIdentifier,
+            canonicalId = work.state.canonicalId,
+            sourceModifiedTime = work.state.sourceModifiedTime,
+            internalWorkStubs = work.state.internalWorkStubs
+          ),
           version = work.version,
           redirectTarget = IdState.Identified(
             works.head.state.canonicalId,
@@ -90,5 +92,6 @@ class MergerManagerTest extends AnyFunSpec with Matchers with WorkGenerators {
       )
   }
 
-  val mergerManager = new MergerManager(mergerRules = mergerRules)
+  val mergerManager = new MergerManager(merger)
+
 }

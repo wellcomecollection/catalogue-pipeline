@@ -2,9 +2,11 @@ package weco.pipeline.id_minter.fixtures
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.collection.mutable
+import scala.concurrent.duration._
 import io.circe.Json
 import io.circe.syntax._
 import scalikejdbc.{ConnectionPool, ConnectionPoolSettings}
+
 import weco.fixtures.TestWith
 import weco.messaging.fixtures.SQS.Queue
 import weco.messaging.memory.MemoryMessageSender
@@ -24,7 +26,7 @@ trait WorkerServiceFixture
     with PipelineStorageStreamFixtures {
   def withWorkerService[R](
     messageSender: MemoryMessageSender = new MemoryMessageSender(),
-    queue: Queue = Queue("url://q", "arn::q", visibilityTimeout = 1),
+    queue: Queue = Queue("url://q", "arn::q", visibilityTimeout = 1 seconds),
     identifiersDao: IdentifiersDao,
     identifiersTableConfig: IdentifiersTableConfig,
     mergedIndex: Map[String, Json] = Map.empty,
@@ -60,10 +62,10 @@ trait WorkerServiceFixture
     testWith: TestWith[IdMinterWorkerService[String], R]): R = {
     Class.forName("com.mysql.cj.jdbc.Driver")
     ConnectionPool.singleton(
-      s"jdbc:mysql://$host:$port",
-      username,
-      password,
-      settings = ConnectionPoolSettings(maxSize = maxSize)
+      s"jdbc:mysql://$rdsHost:$port",
+      rdsUsername,
+      rdsPassword,
+      settings = ConnectionPoolSettings(maxSize = rdsMaxPoolSize)
     )
 
     val identifiersDao = new IdentifiersDao(

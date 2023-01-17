@@ -1,24 +1,30 @@
 package weco.pipeline.ingestor.works
 
-import org.scalatest.Assertion
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.index.WorksIndexConfig
-import weco.messaging.fixtures.SQS.QueuePair
-import weco.catalogue.internal_model.Implicits._
-import weco.catalogue.internal_model.work.WorkState.{Denormalised, Indexed}
-import weco.pipeline_storage.Indexable.workIndexable
+import weco.catalogue.internal_model.generators.ImageGenerators
 import weco.catalogue.internal_model.identifiers.IdState
-import weco.catalogue.internal_model.work.Work
+import weco.catalogue.internal_model.locations.{
+  AccessCondition,
+  AccessMethod,
+  AccessStatus
+}
+import weco.catalogue.internal_model.work.WorkState.Denormalised
 import weco.catalogue.internal_model.work.generators.WorkGenerators
-import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
-
-import scala.concurrent.ExecutionContext.Implicits.global
+import weco.catalogue.internal_model.work.{
+  CollectionPath,
+  Person,
+  Subject,
+  Work
+}
+import weco.messaging.fixtures.SQS.QueuePair
+import weco.pipeline.ingestor.works.fixtures.WorksIngestorFixtures
 
 class IngestorWorkerServiceTest
     extends AnyFunSpec
     with Matchers
-    with IngestorFixtures
+    with WorksIngestorFixtures
+    with ImageGenerators
     with WorkGenerators {
 
   it("indexes a Miro denormalised Work") {
@@ -84,7 +90,7 @@ class IngestorWorkerServiceTest
     assertWorksIndexedCorrectly(work)
   }
 
-  it("indexes a mixture of Miro and Sierra, and otherly-denormalised Works") {
+  it("indexes a mixture of Miro and Sierra, and other-denormalised Works") {
     val miroWork = denormalisedWork(
       sourceIdentifier = createMiroSourceIdentifier
     )
@@ -98,6 +104,73 @@ class IngestorWorkerServiceTest
     val works = List(miroWork, sierraWork, otherWork)
 
     assertWorksIndexedCorrectly(works: _*)
+  }
+
+  it("indexes a work with images") {
+    val workWithImage = denormalisedWork()
+      .imageData(List(createImageData.toIdentified))
+
+    assertWorksIndexedCorrectly(workWithImage)
+  }
+
+  it("indexes an invisible work") {
+    val work = denormalisedWork().invisible()
+
+    assertWorksIndexedCorrectly(work)
+  }
+
+  // Because we use copy_to and some other index functionality
+  // the potentially fails at PUT index time, we urn this test
+  // e.g. copy_to was previously set to `collection.depth`
+  // which would not work as the mapping is strict and `collection`
+  // only exists at the `data.collectionPath` level
+  it("indexes a work with a collection") {
+    val collectionPath = CollectionPath(
+      path = "PATH/FOR/THE/COLLECTION",
+      label = Some("PATH/FOR/THE/COLLECTION")
+    )
+
+    val work = denormalisedWork().collectionPath(collectionPath)
+
+    assertWorksIndexedCorrectly(work)
+  }
+
+  // Possibly because the number of variations in the work model is too big,
+  // a bug in the mapping related to person subjects wasn't caught by other tests.
+  // So let's add a specific one.
+  it("puts a work with a person subject") {
+    val workWithSubjects = denormalisedWork().subjects(
+      List(
+        Subject(
+          id = IdState.Unidentifiable,
+          label = "Daredevil",
+          concepts = List(
+            Person(
+              id = IdState.Unidentifiable,
+              label = "Daredevil",
+              prefix = Some("Superhero"),
+              numeration = Some("I")
+            )
+          )
+        )
+      )
+    )
+
+    assertWorksIndexedCorrectly(workWithSubjects)
+  }
+
+  // Possibly because the number of variations in the work model is too big,
+  // a bug in the mapping related to accessConditions wasn't caught by the catch-all test above.
+  it("puts a work with a access condition") {
+    val accessCondition: AccessCondition = AccessCondition(
+      method = AccessMethod.OnlineRequest,
+      status = AccessStatus.Open)
+
+    val workWithAccessConditions = denormalisedWork().items(
+      List(createIdentifiedItemWith(locations = List(
+        createDigitalLocationWith(accessConditions = List(accessCondition))))))
+
+    assertWorksIndexedCorrectly(workWithAccessConditions)
   }
 
   it(
@@ -115,36 +188,22 @@ class IngestorWorkerServiceTest
     assertWorksIndexedCorrectly(works: _*)
   }
 
-  private def assertWorksIndexedCorrectly(
-    works: Work[Denormalised]*): Assertion =
-    withLocalWorksIndex { indexedIndex =>
-      withLocalDenormalisedWorksIndex { identifiedIndex =>
-        insertIntoElasticsearch(identifiedIndex, works: _*)
-        withLocalSqsQueuePair(visibilityTimeout = 10) {
-          case QueuePair(queue, dlq) =>
-            withWorkerService(
-              queue,
-              indexer = new ElasticIndexer[Work[Indexed]](
-                elasticClient,
-                indexedIndex,
-                WorksIndexConfig.ingested),
-              retriever = new ElasticSourceRetriever[Work[Denormalised]](
-                elasticClient,
-                identifiedIndex
-              )
-            ) { _ =>
-              works.map { work =>
-                sendNotificationToSQS(queue = queue, body = work.id)
-              }
+  private def assertWorksIndexedCorrectly(works: Work[Denormalised]*): Unit =
+    withLocalSqsQueuePair() {
+      case QueuePair(queue, dlq) =>
+        withWorksIngestor(queue, existingWorks = works) { index =>
+          works.map { work =>
+            sendNotificationToSQS(queue = queue, body = work.id)
+          }
 
-              works.foreach {
-                assertWorkIndexed(indexedIndex, _)
-              }
+          works.foreach {
+            assertWorkIndexed(index, _)
+          }
 
-              assertQueueEmpty(queue)
-              assertQueueEmpty(dlq)
-            }
+          eventually {
+            assertQueueEmpty(queue)
+            assertQueueEmpty(dlq)
+          }
         }
-      }
     }
 }

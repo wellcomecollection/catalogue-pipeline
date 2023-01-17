@@ -1,20 +1,19 @@
 package weco.pipeline.transformer.sierra.transformers
 
 import grizzled.slf4j.Logging
-
-import java.util.UUID
 import weco.catalogue.internal_model.identifiers.{
   IdState,
   IdentifierType,
   SourceIdentifier
 }
 import weco.catalogue.internal_model.work.MergeCandidate
-import weco.catalogue.source_model.sierra.source.SierraQueryOps
-import weco.catalogue.source_model.sierra.SierraBibData
-import weco.catalogue.source_model.sierra.identifiers.SierraBibNumber
+import weco.pipeline.transformer.identifiers.SourceIdentifierValidation._
 import weco.pipeline.transformer.sierra.transformers.parsers.MiroIdParsing
+import weco.sierra.models.SierraQueryOps
+import weco.sierra.models.data.SierraBibData
+import weco.sierra.models.identifiers.SierraBibNumber
 
-import scala.util.Try
+import scala.util.{Success, Try}
 import scala.util.matching.Regex
 
 object SierraMergeCandidates
@@ -27,7 +26,8 @@ object SierraMergeCandidates
   def apply(bibId: SierraBibNumber, bibData: SierraBibData) =
     get776mergeCandidates(bibId, bibData) ++
       getSinglePageMiroMergeCandidates(bibData) ++ get035CalmMergeCandidates(
-      bibData)
+      bibData
+    )
 
   // This regex matches any string starting with (UkLW), followed by
   // any number of spaces, and then captures everything after the
@@ -36,8 +36,6 @@ object SierraMergeCandidates
   // The UkLW match is case insensitive because there are sufficient
   // inconsistencies in the source data that it's easier to handle that here.
   private val uklwPrefixRegex: Regex = """\((?i:UkLW)\)[\s]*(.+)""".r.anchored
-
-  private val bnumberRegex: Regex = """b[0-9]{7}[0-9x]""".r.anchored
 
   /** We can merge a bib and the digitised version of that bib.  The number
     * of the other bib comes from MARC tag 776 subfield $w.
@@ -51,7 +49,8 @@ object SierraMergeCandidates
     */
   private def get776mergeCandidates(
     bibId: SierraBibNumber,
-    bibData: SierraBibData): List[MergeCandidate[IdState.Identifiable]] = {
+    bibData: SierraBibData
+  ): List[MergeCandidate[IdState.Identifiable]] = {
 
     val identifiers =
       bibData
@@ -61,24 +60,19 @@ object SierraMergeCandidates
           case uklwPrefixRegex(bibNumber) => Some(bibNumber.trim)
           case _                          => None
         }
-        .filter { s =>
-          bnumberRegex.findFirstIn(s) match {
-            case Some(_) => true
-            case None =>
-              warn(s"$bibId: not a b number in field 776 subfield ǂw: $s")
-              false
-          }
+        .flatMap { id =>
+          SourceIdentifier(
+            identifierType = IdentifierType.SierraSystemNumber,
+            ontologyType = "Work",
+            value = id
+          ).validatedWithWarning
         }
 
     identifiers.distinct match {
-      case List(bibNumber) =>
+      case List(bibSourceIdentifier) =>
         List(
           MergeCandidate(
-            identifier = SourceIdentifier(
-              identifierType = IdentifierType.SierraSystemNumber,
-              ontologyType = "Work",
-              value = bibNumber
-            ),
+            identifier = bibSourceIdentifier,
             reason = "Physical/digitised Sierra work"
           )
         )
@@ -90,7 +84,8 @@ object SierraMergeCandidates
    * We always try to merge all linked Miro and Sierra works
    */
   private def getSinglePageMiroMergeCandidates(
-    bibData: SierraBibData): List[MergeCandidate[IdState.Identifiable]] = {
+    bibData: SierraBibData
+  ): List[MergeCandidate[IdState.Identifiable]] = {
     val allIds = (matching089Ids(bibData) ++ matching962Ids(bibData)).distinct
     removeNonSuffixedIfSuffixedExists(allIds).map {
       miroMergeCandidate(_, "Miro/Sierra work")
@@ -100,30 +95,33 @@ object SierraMergeCandidates
   /** When we harvest the Calm data into Sierra, the `RecordID` is stored in
     * Marcfield 035$a.
     *
-    * Calm IDs follow the UUID spec
-    *
-    * e.g: f5217b45-b742-472b-95c3-f136d5de1104
-    * see: `https://search.wellcomelibrary.org/iii/encore/record/C__Rb1971204?marcData=Y`
-    *
     * This field is also used for other "system control numbers" from UKMHL, LSHTM etc.
     * e.g: (OCoLC)927468903, (lshtm)a60032
     * see: `https://search.wellcomelibrary.org/iii/encore/record/C__Rb1187988?marcData=Y`
     */
   private def get035CalmMergeCandidates(
-    bibData: SierraBibData): List[MergeCandidate[IdState.Identifiable]] =
+    bibData: SierraBibData
+  ): List[MergeCandidate[IdState.Identifiable]] =
     bibData
       .subfieldsWithTag("035" -> "a")
       .contents
-      .flatMap(str => Try(UUID.fromString(str)).toOption)
       .map { recordId =>
-        MergeCandidate(
-          identifier = SourceIdentifier(
+        Try {
+          SourceIdentifier(
             identifierType = IdentifierType.CalmRecordIdentifier,
             ontologyType = "Work",
-            value = recordId.toString
-          ),
-          reason = "Calm/Sierra harvest"
-        )
+            value = recordId
+          ).validated
+        }
+      }
+      .flatMap {
+        case Success(Some(sourceIdentifier)) =>
+          Some(
+            MergeCandidate(
+              identifier = sourceIdentifier,
+              reason = "Calm/Sierra harvest"
+            ))
+        case _ => None
       }
       .distinct
 
@@ -157,7 +155,8 @@ object SierraMergeCandidates
   // eg. if we have V0036036EL and V0036036, we want to remove
   // V0036036 and keep V0036036EL.
   private def removeNonSuffixedIfSuffixedExists(
-    ids: List[String]): List[String] =
+    ids: List[String]
+  ): List[String] =
     ids
       .groupBy(MiroIdParsing.stripSuffix)
       .flatMap {

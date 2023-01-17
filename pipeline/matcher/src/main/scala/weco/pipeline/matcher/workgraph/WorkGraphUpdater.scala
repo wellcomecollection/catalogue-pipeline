@@ -1,71 +1,84 @@
 package weco.pipeline.matcher.workgraph
 
 import grizzled.slf4j.Logging
-import org.apache.commons.codec.digest.DigestUtils
 import scalax.collection.Graph
 import scalax.collection.GraphPredef._
-import weco.catalogue.internal_model.matcher.WorkNode
 import weco.catalogue.internal_model.identifiers.CanonicalId
 import weco.pipeline.matcher.models.{
+  SourceWorkData,
+  SubgraphId,
   VersionExpectedConflictException,
   VersionUnexpectedConflictException,
-  WorkGraph,
-  WorkLinks
+  WorkNode,
+  WorkStub
 }
 
 object WorkGraphUpdater extends Logging {
-  def update(links: WorkLinks, existingGraph: WorkGraph): WorkGraph = {
-    checkVersionConflicts(links, existingGraph)
-    doUpdate(links, existingGraph)
+  def update(work: WorkStub, affectedNodes: Set[WorkNode]): Set[WorkNode] = {
+    val affectedWorks = affectedNodes.map { n =>
+      n.id -> n
+    }.toMap
+
+    checkVersionConflicts(work, affectedWorks)
+
+    val newSubgraph = new WorkSubgraph(
+      newWork = WorkNode(
+        id = work.id,
+        subgraphId = SubgraphId(work.id),
+        componentIds = List(work.id),
+        sourceWork = Some(
+          SourceWorkData(
+            id = work.state.sourceIdentifier,
+            version = work.version,
+            suppressed = work.suppressed,
+            mergeCandidateIds = work.mergeCandidateIds.toList.sorted
+          )
+        )
+      ),
+      existingWorks = affectedWorks.filterNot { case (id, _) => id == work.id }
+    )
+
+    newSubgraph.create
   }
 
-  private def checkVersionConflicts(links: WorkLinks,
-                                    existingGraph: WorkGraph): Unit = {
-    val maybeExistingNode = existingGraph.nodes.find(_.id == links.workId)
-    maybeExistingNode match {
-      case Some(WorkNode(_, Some(existingVersion), linkedIds, _)) =>
-        if (existingVersion > links.version) {
-          val versionConflictMessage =
-            s"update failed, work:${links.workId} v${links.version} is not newer than existing work v$existingVersion"
-          debug(versionConflictMessage)
-          throw VersionExpectedConflictException(versionConflictMessage)
-        }
-        if (existingVersion == links.version && links.referencedWorkIds != linkedIds.toSet) {
-          val versionConflictMessage =
-            s"update failed, work:${links.workId} v${links.version} already exists with different content! update-ids:${links.referencedWorkIds} != existing-ids:${linkedIds.toSet}"
-          debug(versionConflictMessage)
-          throw VersionUnexpectedConflictException(versionConflictMessage)
-        }
+  private def checkVersionConflicts(
+    work: WorkStub,
+    affectedWorks: Map[CanonicalId, WorkNode]): Unit =
+    affectedWorks.get(work.id).flatMap(_.sourceWork) match {
+      case Some(SourceWorkData(_, existingVersion, _, _))
+          if existingVersion > work.version =>
+        val versionConflictMessage =
+          s"update failed, work:${work.id} v${work.version} is not newer than existing work v$existingVersion"
+        debug(versionConflictMessage)
+        throw VersionExpectedConflictException(versionConflictMessage)
+
+      case Some(
+          SourceWorkData(_, existingVersion, _, existingMergeCandidateIds))
+          if existingVersion == work.version && work.mergeCandidateIds != existingMergeCandidateIds.toSet =>
+        val versionConflictMessage =
+          s"update failed, work:${work.id} v${work.version} already exists with different content! update-ids:${work.mergeCandidateIds} != existing-ids:${existingMergeCandidateIds.toSet}"
+        debug(versionConflictMessage)
+        throw VersionUnexpectedConflictException(versionConflictMessage)
+
       case _ => ()
     }
-  }
+}
 
-  private def doUpdate(workLinks: WorkLinks,
-                       existingGraph: WorkGraph): WorkGraph = {
+private class WorkSubgraph(newWork: WorkNode,
+                           existingWorks: Map[CanonicalId, WorkNode]) {
+  require(!existingWorks.contains(newWork.id))
 
-    // Find everything that's in the existing graph, but which isn't
-    // the node we're updating.
-    //
-    // e.g.     A   B
-    //           \ /
-    //            C
-    //           / \
-    //          D   E
-    //
-    // If we're updating work B, then this list will be (A C D E).
-    //
-    val linkedWorks =
-      existingGraph.nodes.filterNot(_.id == workLinks.workId)
+  // This is a lookup of all the works in this update
+  val allWorks
+    : Map[CanonicalId, WorkNode] = existingWorks + (newWork.id -> newWork)
 
-    // Create a map (work ID) -> (version) for every work in the graph.
-    //
-    // Every work in the existing graph will be in this list.
-    //
-    val workVersions: Map[CanonicalId, Int] =
-      linkedWorks.collect {
-        case WorkNode(id, Some(version), _, _) => (id, version)
-      }.toMap + (workLinks.workId -> workLinks.version)
+  lazy val sourceWorks: Map[CanonicalId, SourceWorkData] =
+    allWorks
+      .collect {
+        case (id, WorkNode(_, _, _, Some(sourceWork))) => id -> sourceWork
+      }
 
+  def create: Set[WorkNode] = {
     // Create a list of all the connections between works in the graph.
     //
     // e.g.     A → B → C
@@ -77,38 +90,36 @@ object WorkGraphUpdater extends Logging {
     //    updateLinks = (D → E)
     //    otherLinks  = (A → B, B → C, B → D)
     //
-    val updateLinks =
-      workLinks.referencedWorkIds.map {
-        workLinks.workId ~> _
-      }
-
-    val otherLinks =
-      linkedWorks
-        .flatMap { node =>
-          node.linkedIds.map { node.id ~> _ }
+    val links =
+      sourceWorks
+        .flatMap {
+          case (id, sourceWork) =>
+            sourceWork.mergeCandidateIds.map { id ~> _ }
         }
 
-    val links = updateLinks ++ otherLinks
+    // Remove any links that come to/from works that are suppressed.
+    // This means we won't match "through" these works.
+    //
+    // e.g.     A → B → C → (S) → D → E
+    //
+    // If work S was suppressed, then the graph would be split into three disconnected
+    // components:
+    //
+    //          A → B → C
+    //          S
+    //          D → E
+    //
+    // We record information about suppressions in the matcher database.
+    val unsuppressedLinks = links
+      .filterNot { link =>
+        link.head.isSuppressed || link.to.isSuppressed
+      }
 
     // Get the IDs of all the works in this graph, and construct a Graph object.
     val workIds =
-      existingGraph.nodes
-        .flatMap { node =>
-          node.id +: node.linkedIds
-        } + workLinks.workId
+      sourceWorks.flatMap { case (id, work) => id +: work.mergeCandidateIds }.toSet
 
-    val g = Graph.from(edges = links, nodes = workIds)
-
-    // Find all the works that this node links to.
-    //
-    // e.g.     A → B → C
-    //              ↓
-    //              D → E
-    //
-    // In this example, linkedWorkIds(B) = {C, D}
-    //
-    def linkedWorkIds(n: g.NodeT): List[CanonicalId] =
-      n.diSuccessors.map(_.value).toList.sorted
+    val g = Graph.from(edges = unsuppressedLinks, nodes = workIds)
 
     // Go through the components of the graph, and turn each of them into
     // a set of WorkNode instances.
@@ -119,33 +130,28 @@ object WorkGraphUpdater extends Logging {
     //
     // Here there are two components: (A B C F G) and (D E H)
     //
-    WorkGraph(
-      g.componentTraverser()
-        .flatMap(component => {
-          val nodeIds = component.nodes.map(_.value).toList
-          component.nodes.map(node => {
-            WorkNode(
-              id = node.value,
-              version = workVersions.get(node.value),
-              linkedIds = linkedWorkIds(node),
-              componentId = componentIdentifier(nodeIds))
-          })
+    val subgraphId = SubgraphId(workIds)
+
+    g.componentTraverser()
+      .flatMap(component => {
+        val componentIds = component.nodes.map(_.value).toList.sorted
+
+        component.nodes.map(node => {
+          val id = node.value
+
+          WorkNode(
+            id = id,
+            subgraphId = subgraphId,
+            componentIds = componentIds,
+            sourceWork = sourceWorks.get(id)
+          )
         })
-        .toSet
-    )
+      })
+      .toSet
   }
 
-  /** Create the "component identifier".
-    *
-    * This is shared by all the Works in the same component -- i.e., all the
-    * Works that are matched together.
-    *
-    * Note that this is based on the *unversioned* identifiers.  This means the
-    * component identifier is stable across different versions of a Work.
-    *
-    * TODO: Does this need to be a SHA-256 value?
-    * Could we just concatenate all the IDs?
-    */
-  private def componentIdentifier(nodeIds: List[CanonicalId]): String =
-    DigestUtils.sha256Hex(nodeIds.sorted.map(_.underlying).mkString("+"))
+  implicit class WorkOps(id: CanonicalId) {
+    def isSuppressed: Boolean =
+      sourceWorks.get(id).exists(_.suppressed)
+  }
 }

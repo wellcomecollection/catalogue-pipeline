@@ -1,5 +1,7 @@
 package weco.pipeline.transformer.calm
 
+import org.scalatest.EitherValues
+
 import java.time.LocalDate
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
@@ -12,11 +14,14 @@ import weco.catalogue.internal_model.locations._
 import weco.catalogue.internal_model.work.DeletedReason._
 import weco.catalogue.internal_model.work._
 import weco.pipeline.transformer.calm.models.CalmSourceData
+import weco.pipeline.transformer.generators.LabelDerivedIdentifiersGenerators
 
 class CalmTransformerTest
     extends AnyFunSpec
     with Matchers
-    with CalmRecordGenerators {
+    with EitherValues
+    with CalmRecordGenerators
+    with LabelDerivedIdentifiersGenerators {
 
   val version = 3
 
@@ -54,11 +59,13 @@ class CalmTransformerTest
             SourceIdentifier(
               value = "a/b/c",
               identifierType = IdentifierType.CalmRefNo,
-              ontologyType = "Work"),
+              ontologyType = "Work"
+            ),
             SourceIdentifier(
               value = "a.b.c",
               identifierType = IdentifierType.CalmAltRefNo,
-              ontologyType = "Work"),
+              ontologyType = "Work"
+            )
           ),
           items = List(
             Item(
@@ -78,7 +85,10 @@ class CalmTransformerTest
             Language(label = "Russian", id = "rus")
           ),
           notes = List(
-            LanguageNote("English, with Russian commentary")
+            Note(
+              contents = "English, with Russian commentary",
+              noteType = NoteType.LanguageNote
+            )
           )
         )
       )
@@ -99,15 +109,18 @@ class CalmTransformerTest
         SourceIdentifier(
           value = "a/b/c",
           identifierType = IdentifierType.CalmRefNo,
-          ontologyType = "Work"),
+          ontologyType = "Work"
+        ),
         SourceIdentifier(
           value = "a.b.c",
           identifierType = IdentifierType.CalmAltRefNo,
-          ontologyType = "Work"),
+          ontologyType = "Work"
+        ),
         SourceIdentifier(
           value = "b456",
           identifierType = IdentifierType.SierraSystemNumber,
-          ontologyType = "Work"),
+          ontologyType = "Work"
+        )
       )
   }
 
@@ -117,20 +130,19 @@ class CalmTransformerTest
       "Level" -> "Collection",
       "RefNo" -> "a/b/c",
       "AltRefNo" -> "a.b.c",
-      "BNumber" -> "b456",
+      "BNumber" -> "b12345672",
       "CatalogueStatus" -> "Catalogued"
     )
-    CalmTransformer(record, version).right.get.data.mergeCandidates shouldBe
+    CalmTransformer(record, version).right.get.state.mergeCandidates shouldBe
       List(
         MergeCandidate(
-          IdState.Identifiable(
-            SourceIdentifier(
-              value = "b456",
-              identifierType = IdentifierType.SierraSystemNumber,
-              ontologyType = "Work"
-            )
-          )
-        )
+          identifier = SourceIdentifier(
+            value = "b12345672",
+            identifierType = IdentifierType.SierraSystemNumber,
+            ontologyType = "Work"
+          ),
+          reason = "CALM/Sierra harvest work"
+        ),
       )
   }
 
@@ -147,7 +159,7 @@ class CalmTransformerTest
       "CatalogueStatus" -> "Catalogued"
     )
     val termsOfUse = CalmTransformer(record, version).right.get.data.notes
-      .collectFirst { case TermsOfUse(content) => content }
+      .collectFirst { case Note.TermsOfUse(contents) => contents }
 
     termsOfUse shouldBe Some("nope. nope. Restricted until 10 October 2050.")
   }
@@ -193,17 +205,20 @@ class CalmTransformerTest
         ProductionEvent(
           dates = List(
             Period(
-              "c.1900 and 1914",
-              Some(
-                InstantRange(
-                  LocalDate of (1890, 1, 1),
-                  LocalDate of (1914, 12, 31),
-                  "c.1900 and 1914")))),
+              label = "c.1900 and 1914",
+              range = InstantRange(
+                LocalDate of (1890, 1, 1),
+                LocalDate of (1914, 12, 31),
+                "c.1900 and 1914"
+              )
+            )
+          ),
           label = "c.1900 and 1914",
           places = Nil,
           agents = Nil,
           function = None
-        ))
+        )
+      )
   }
 
   it("transforms subjects, stripping all HTML") {
@@ -327,8 +342,17 @@ class CalmTransformerTest
       "CatalogueStatus" -> "Catalogued"
     )
     CalmTransformer(record, version).right.get.data.contributors should contain theSameElementsAs List(
-      Contributor(Agent("Bebop"), Nil),
-      Contributor(Agent("Rocksteady"), Nil),
+      Contributor(
+        agent =
+          Agent(id = labelDerivedAgentIdentifier("bebop"), label = "Bebop"),
+        roles = Nil
+      ),
+      Contributor(
+        agent = Agent(
+          id = labelDerivedAgentIdentifier("rocksteady"),
+          label = "Rocksteady"),
+        roles = Nil
+      )
     )
   }
 
@@ -344,8 +368,8 @@ class CalmTransformerTest
       "CatalogueStatus" -> "Catalogued"
     )
     CalmTransformer(record, version).right.get.data.notes should contain theSameElementsAs List(
-      CopyrightNote("no copyright"),
-      ArrangementNote("meet at midnight"),
+      Note(contents = "no copyright", noteType = NoteType.CopyrightNote),
+      Note(contents = "meet at midnight", noteType = NoteType.ArrangementNote)
     )
   }
 
@@ -373,7 +397,8 @@ class CalmTransformerTest
     val result = CalmTransformer(
       record.id,
       CalmSourceData(record, isDeleted = true),
-      version).right.get
+      version
+    ).right.get
     result shouldBe a[Work.Deleted[_]]
     val deletedWork = result.asInstanceOf[Work.Deleted[_]]
 
@@ -427,7 +452,7 @@ class CalmTransformerTest
     val suppressibleRecordB = createCalmRecordWith(
       "Title" -> "abc",
       "Level" -> "Collection",
-      "RefNo" -> "a/b/c",
+      "RefNo" -> "a/b/c"
     )
 
     val examples = Table(
@@ -544,7 +569,10 @@ class CalmTransformerTest
 
     workData.languages shouldBe empty
     workData.notes should contain(
-      LanguageNote("Some freeform discussion of the language")
+      Note(
+        contents = "Some freeform discussion of the language",
+        noteType = NoteType.LanguageNote
+      )
     )
   }
 
@@ -557,7 +585,6 @@ class CalmTransformerTest
     )
     CalmTransformer(record, version) shouldBe Right(
       Work.Deleted[Source](
-        data = WorkData(),
         state = Source(
           SourceIdentifier(
             value = record.id,
@@ -570,5 +597,19 @@ class CalmTransformerTest
         deletedReason = SuppressedFromSource("Calm")
       )
     )
+  }
+
+  it("unpicks bad encoding in the source record") {
+    // This is based on a real record: 995b1ac1-fdaa-4e6d-91c9-056c6030f6fb
+    val record = createCalmRecordWith(
+      "Title" -> "'Correspondence re \u0093Junk\u0094'",
+      "Level" -> "Section",
+      "RefNo" -> "PPCRI/H/6/13/8",
+      "CatalogueStatus" -> "Catalogued"
+    )
+
+    val work = CalmTransformer(record, version).value
+
+    work.data.title shouldBe Some("'Correspondence re “Junk”'")
   }
 }

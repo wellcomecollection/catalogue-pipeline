@@ -37,10 +37,14 @@ async def main(query_url: str):
         logger.error(error_string)
         raise HTTPException(status_code=404, detail=error_string)
 
-    palette = await batch_inferrer_queue.execute(image)
+    palette_result = await batch_inferrer_queue.execute(image)
     logger.info(f"extracted palette from url: {query_url}")
 
-    return {"palette": palette, "hash_params": palette_hash_params}
+    return {
+        "palette": palette_result["lsh"],
+        "average_color_hex": palette_result["average_color_hex"],
+        "hash_params": palette_hash_params,
+    }
 
 
 @app.get("/healthcheck")

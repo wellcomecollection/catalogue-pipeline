@@ -27,19 +27,28 @@ object ImageUtils {
     )
 
   private final val thumbnailDim = "200"
+  private final val thumbnailPathSuffix =
+    s"full/!$thumbnailDim,$thumbnailDim/0/default.jpg"
 
-  def buildThumbnailUrl(bnumber: String,
-                        validThumbnailFile: FileReference): Option[String] =
+  // The /thumbs URL is routed to DLCS which handles only images
+  // other asset types are routed to the iiif-builder service at /thumb
+  // See: https://github.com/wellcomecollection/iiif-builder/blob/master/docs/thumbnails.md
+  val imagesThumbBaseUrl = "https://iiif.wellcomecollection.org/thumbs"
+  val othersThumbBaseUrl = "https://iiif.wellcomecollection.org/thumb"
+
+  def buildThumbnailUrl(
+    bnumber: String,
+    validThumbnailFile: FileReference
+  ): Option[String] =
     validThumbnailFile.mimeType match {
-      case Some("application/pdf") =>
+      case Some(mimeType) if mimeType.startsWith("image/") =>
         Some(
-          s"https://wellcomelibrary.org/pdfthumbs/$bnumber/0/${validThumbnailFile.location}.jpg")
+          s"$imagesThumbBaseUrl/${validThumbnailFile.location}/$thumbnailPathSuffix")
       case _ =>
-        Some(
-          s"https://dlcs.io/thumbs/wellcome/5/${validThumbnailFile.location}/full/!$thumbnailDim,$thumbnailDim/0/default.jpg")
+        Some(s"$othersThumbBaseUrl/$bnumber")
     }
 
   def buildImageUrl(validImageFile: FileReference): Option[String] =
     Some(
-      s"https://dlcs.io/iiif-img/wellcome/5/${validImageFile.location}/info.json")
+      s"https://iiif.wellcomecollection.org/image/${validImageFile.location}/info.json")
 }

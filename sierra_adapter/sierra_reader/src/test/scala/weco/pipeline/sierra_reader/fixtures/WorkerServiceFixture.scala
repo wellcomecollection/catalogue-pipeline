@@ -10,8 +10,8 @@ import weco.pipeline.sierra_reader.config.models.ReaderConfig
 import weco.pipeline.sierra_reader.services.SierraReaderWorkerService
 import weco.storage.fixtures.S3Fixtures
 import weco.storage.fixtures.S3Fixtures.Bucket
-import weco.catalogue.source_model.sierra.identifiers.SierraRecordTypes
 import weco.http.client.{HttpGet, MemoryHttpClient}
+import weco.sierra.models.identifiers.SierraRecordTypes
 
 import scala.concurrent.ExecutionContext.Implicits.global
 

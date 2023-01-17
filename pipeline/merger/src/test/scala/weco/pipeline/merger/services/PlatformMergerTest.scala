@@ -3,25 +3,26 @@ package weco.pipeline.merger.services
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks._
-import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
-import weco.catalogue.internal_model.work.WorkFsm._
-import weco.catalogue.internal_model.image.ParentWork._
 import weco.catalogue.internal_model.identifiers.IdState
-import weco.catalogue.internal_model.image.ParentWorks
-import weco.catalogue.internal_model.locations.{
-  AccessCondition,
-  AccessMethod,
-  AccessStatus,
-  DigitalLocation,
-  License,
-  LocationType
-}
+import weco.catalogue.internal_model.image.ParentWork._
+import weco.catalogue.internal_model.locations._
+import weco.catalogue.internal_model.work.WorkFsm._
+import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.catalogue.internal_model.work.generators.SourceWorkGenerators
-import weco.catalogue.internal_model.work.{Format, Item, MergeCandidate, Work}
+import weco.catalogue.internal_model.work.{
+  Format,
+  InternalWork,
+  InvisibilityReason,
+  Item,
+  Work,
+  WorkData
+}
+import weco.pipeline.matcher.generators.MergeCandidateGenerators
 
 class PlatformMergerTest
     extends AnyFunSpec
     with SourceWorkGenerators
+    with MergeCandidateGenerators
     with Matchers {
 
   val digitalLocationCCBYNC = createDigitalLocationWith(
@@ -35,14 +36,7 @@ class PlatformMergerTest
     sierraPhysicalIdentifiedWork()
       .format(Format.`3DObjects`)
       .mergeCandidates(
-        List(
-          MergeCandidate(
-            id = IdState.Identified(
-              sourceIdentifier = sierraDigitisedWork.sourceIdentifier,
-              canonicalId = sierraDigitisedWork.state.canonicalId),
-            reason = Some("Physical/digitised Sierra work")
-          )
-        )
+        List(createSierraPairMergeCandidateFor(sierraDigitisedWork))
       )
 
   val zeroItemSierraWork: Work.Visible[Identified] =
@@ -56,14 +50,7 @@ class PlatformMergerTest
         createIdentifiedPhysicalItem
       }.toList)
       .mergeCandidates(
-        List(
-          MergeCandidate(
-            id = IdState.Identified(
-              sourceIdentifier = sierraDigitisedWork.sourceIdentifier,
-              canonicalId = sierraDigitisedWork.state.canonicalId),
-            reason = Some("Physical/digitised Sierra work")
-          )
-        )
+        List(createSierraPairMergeCandidateFor(sierraDigitisedWork))
       )
 
   private val sierraDigitalWork: Work.Visible[Identified] =
@@ -178,10 +165,7 @@ class PlatformMergerTest
     val expectedImage =
       miroWork.data.imageData.head.toInitialImageWith(
         modifiedTime = now,
-        parentWorks = ParentWorks(
-          canonicalWork = expectedMergedWork.toParentWork,
-          redirectedWork = Some(miroWork.toParentWork)
-        )
+        parentWork = expectedMergedWork.toParentWork
       )
     result.mergedWorksWithTime(now) should contain theSameElementsAs List(
       expectedMergedWork,
@@ -229,10 +213,7 @@ class PlatformMergerTest
     val expectedImage =
       miroWork.data.imageData.head.toInitialImageWith(
         modifiedTime = now,
-        parentWorks = ParentWorks(
-          canonicalWork = expectedMergedWork.toParentWork,
-          redirectedWork = Some(miroWork.toParentWork)
-        )
+        parentWork = expectedMergedWork.toParentWork
       )
 
     result.mergedWorksWithTime(now) should contain theSameElementsAs List(
@@ -289,10 +270,7 @@ class PlatformMergerTest
 
     val expectedImage = miroWork.data.imageData.head.toInitialImageWith(
       modifiedTime = now,
-      parentWorks = ParentWorks(
-        canonicalWork = expectedMergedWork.toParentWork,
-        redirectedWork = Some(miroWork.toParentWork)
-      )
+      parentWork = expectedMergedWork.toParentWork
     )
 
     result.mergedWorksWithTime(now) should contain theSameElementsAs List(
@@ -448,10 +426,7 @@ class PlatformMergerTest
     val expectedImage =
       metsWork.data.imageData.head.toInitialImageWith(
         modifiedTime = now,
-        parentWorks = ParentWorks(
-          canonicalWork = expectedMergedWork.toParentWork,
-          redirectedWork = Some(metsWork.toParentWork)
-        )
+        parentWork = expectedMergedWork.toParentWork
       )
 
     result.mergedWorksWithTime(now) should contain theSameElementsAs List(
@@ -541,10 +516,7 @@ class PlatformMergerTest
 
     val expectedImage = miroWork.data.imageData.head.toInitialImageWith(
       modifiedTime = now,
-      parentWorks = ParentWorks(
-        canonicalWork = expectedMergedWork.toParentWork,
-        redirectedWork = Some(miroWork.toParentWork)
-      )
+      parentWork = expectedMergedWork.toParentWork
     )
 
     result.mergedWorksWithTime(now) should contain theSameElementsAs List(
@@ -673,10 +645,7 @@ class PlatformMergerTest
     result.mergedImagesWithTime(now).head shouldBe miroWork.data.imageData.head
       .toInitialImageWith(
         modifiedTime = now,
-        parentWorks = ParentWorks(
-          canonicalWork = miroWork.toParentWork,
-          redirectedWork = None
-        )
+        parentWork = miroWork.toParentWork
       )
   }
 
@@ -688,14 +657,7 @@ class PlatformMergerTest
       sierraPhysicalIdentifiedWork()
         .format(Format.Videos)
         .mergeCandidates(
-          List(
-            MergeCandidate(
-              id = IdState.Identified(
-                sourceIdentifier = digitisedVideo.sourceIdentifier,
-                canonicalId = digitisedVideo.state.canonicalId),
-              reason = Some("Physical/digitised Sierra work")
-            )
-          )
+          List(createSierraPairMergeCandidateFor(digitisedVideo))
         )
 
     val result = merger.merge(
@@ -738,31 +700,13 @@ class PlatformMergerTest
         .title("A work for an e-bib")
         .format(Format.Videos)
         .mergeCandidates(
-          List(
-            MergeCandidate(
-              id = IdState.Identified(
-                canonicalId = workWithPhysicalVideoFormats.state.canonicalId,
-                sourceIdentifier = workWithPhysicalVideoFormats.sourceIdentifier
-              ),
-              reason = Some("Physical/digitised Sierra work")
-            )
-          )
+          List(createSierraPairMergeCandidateFor(workWithPhysicalVideoFormats))
         )
 
     val workForMets =
       identifiedWork(sourceIdentifier = createMetsSourceIdentifier)
         .title("A METS work")
-        .mergeCandidates(
-          List(
-            MergeCandidate(
-              id = IdState.Identified(
-                canonicalId = workForEbib.state.canonicalId,
-                sourceIdentifier = workForEbib.sourceIdentifier
-              ),
-              reason = Some("METS work")
-            )
-          )
-        )
+        .mergeCandidates(List(createMetsMergeCandidateFor(workForEbib)))
         .items(List(createDigitalItem))
         .invisible()
 
@@ -770,15 +714,7 @@ class PlatformMergerTest
       sierraIdentifiedWork()
         .title("Work for film reel")
         .mergeCandidates(
-          List(
-            MergeCandidate(
-              id = IdState.Identified(
-                canonicalId = workForEbib.state.canonicalId,
-                sourceIdentifier = workForEbib.sourceIdentifier
-              ),
-              reason = Some("Physical/digitised Sierra work")
-            )
-          )
+          List(createSierraPairMergeCandidateFor(workForEbib))
         )
         .format(Format.Videos)
 
@@ -814,6 +750,57 @@ class PlatformMergerTest
     visibleWorks(workForEbib.id).data.items shouldBe workForMets.data.items
   }
 
+  it("merges digitised audio from METS into e-bibs") {
+    // This test case is based on a real example of three related works that
+    // were being merged incorrectly.  In particular, the METS work (and associated
+    // IIIF manifest) was being merged into the physical audio formats, not the
+    // e-bib that it should have been attached to.
+    //
+    //
+    // See https://wellcome.slack.com/archives/C8X9YKM5X/p1668592141214869?thread_ts=1668438141.675609&cid=C8X9YKM5X
+    val workForPhysicalCassette = sierraIdentifiedWork()
+      .title("A physical cassette tape")
+      .format(Format.Audio)
+      .items(List(createIdentifiedPhysicalItem))
+
+    val workForEbib = sierraIdentifiedWork()
+      .title("A work for an e-bib")
+      .format(Format.Audio)
+
+    val workForMets = identifiedWork(sourceIdentifier = createMetsSourceIdentifier)
+      .title("The digital copy of the audio cassette")
+      .items(List(createDigitalItem))
+      .invisible()
+
+    val sierraWorks = List(workForPhysicalCassette, workForEbib)
+    val works = List(workForPhysicalCassette, workForEbib, workForMets)
+
+    val result = merger.merge(works).mergedWorksWithTime(now)
+
+    val visibleWorks = result
+      .collect { case w: Work.Visible[_] => w }
+      .map { w =>
+        w.id -> w
+      }
+      .toMap
+    val redirectedWorks = result.collect {
+      case w: Work.Redirected[Merged] => w
+    }
+    val invisibleWorks = result.collect { case w: Work.Invisible[Merged] => w }
+
+    // First check that the METS work got redirected into one of the Sierra works
+    visibleWorks.keys should contain theSameElementsAs sierraWorks.map { _.id }
+    redirectedWorks.map { _.id } shouldBe List(workForMets.id)
+    invisibleWorks shouldBe empty
+
+    // Now check that the METS work redirects into the e-bib specifically
+    val redirectedWork = redirectedWorks.head
+    redirectedWork.redirectTarget.canonicalId shouldBe workForEbib.state.canonicalId
+
+    visibleWorks(workForPhysicalCassette.id).data.items shouldBe workForPhysicalCassette.data.items
+    visibleWorks(workForEbib.id).data.items shouldBe workForMets.data.items
+  }
+
   it("ignores online resources for physical/digital bib merging rules") {
     // This test case is based on a real example of three related works that
     // were being merged incorrectly.  In particular, the METS work (and associated
@@ -836,7 +823,7 @@ class PlatformMergerTest
                   accessConditions = List(
                     AccessCondition(
                       method = AccessMethod.ViewOnline,
-                      status = AccessStatus.LicensedResources
+                      status = AccessStatus.LicensedResources()
                     )
                   )
                 )
@@ -848,32 +835,14 @@ class PlatformMergerTest
     val physicalVideoWork =
       sierraIdentifiedWork()
         .mergeCandidates(
-          List(
-            MergeCandidate(
-              id = IdState.Identified(
-                canonicalId = eVideoWork.state.canonicalId,
-                sourceIdentifier = eVideoWork.sourceIdentifier
-              ),
-              reason = Some("Physical/digitised Sierra work")
-            )
-          )
+          List(createSierraPairMergeCandidateFor(eVideoWork))
         )
         .format(Format.Videos)
         .items(List(createIdentifiedPhysicalItem))
 
     val metsWork =
       metsIdentifiedWork()
-        .mergeCandidates(
-          List(
-            MergeCandidate(
-              id = IdState.Identified(
-                canonicalId = eVideoWork.state.canonicalId,
-                sourceIdentifier = eVideoWork.sourceIdentifier
-              ),
-              reason = Some("METS work")
-            )
-          )
-        )
+        .mergeCandidates(List(createMetsMergeCandidateFor(eVideoWork)))
 
     val result = merger
       .merge(works = Seq(eVideoWork, physicalVideoWork, metsWork))
@@ -910,7 +879,7 @@ class PlatformMergerTest
           accessConditions = List(
             AccessCondition(
               method = AccessMethod.ViewOnline,
-              status = AccessStatus.LicensedResources
+              status = AccessStatus.LicensedResources()
             )
           )
         )
@@ -922,15 +891,7 @@ class PlatformMergerTest
     val physicalWork =
       sierraIdentifiedWork()
         .mergeCandidates(
-          List(
-            MergeCandidate(
-              id = IdState.Identified(
-                canonicalId = digitisedWork.state.canonicalId,
-                sourceIdentifier = digitisedWork.state.sourceIdentifier
-              ),
-              reason = Some("Physical/digitised Sierra work")
-            )
-          )
+          List(createSierraPairMergeCandidateFor(digitisedWork))
         )
         .items(List(createIdentifiedPhysicalItem))
 
@@ -947,5 +908,150 @@ class PlatformMergerTest
     visibleWorks should have size 1
 
     visibleWorks.head.data.items should contain(item)
+  }
+
+  it(
+    "preserves the identifiers when it merges a Sierra bib, e-bib and METS work and the e-bib has the link") {
+    // This test case is based on a real issue, when identifiers weren't being copied
+    // across correctly and we were losing identifiers in the merging process.
+
+    val physicalWork =
+      sierraIdentifiedWork()
+        .otherIdentifiers(
+          List(createSierraIdentifierSourceIdentifier)
+        )
+        .format(Format.Books)
+        .items(List(createIdentifiedPhysicalItem))
+
+    val electronicWork =
+      sierraIdentifiedWork()
+        .otherIdentifiers(
+          List(
+            createSierraIdentifierSourceIdentifier,
+            createDigcodeIdentifier("digsexology")
+          )
+        )
+        .format(Format.Books)
+        .mergeCandidates(
+          List(createSierraPairMergeCandidateFor(physicalWork))
+        )
+
+    val metsWork =
+      metsIdentifiedWork()
+        .mergeCandidates(List(createMetsMergeCandidateFor(electronicWork)))
+        .items(List(createDigitalItem))
+        .invisible(List(InvisibilityReason.MetsWorksAreNotVisible))
+
+    val works = Seq(metsWork, electronicWork, physicalWork)
+
+    val redirectedWork = merger
+      .merge(works)
+      .mergedWorksWithTime(now)
+      .collectFirst { case w: Work.Visible[Merged] => w }
+      .get
+
+    redirectedWork.state.canonicalId shouldBe physicalWork.state.canonicalId
+    redirectedWork.identifiers should contain theSameElementsAs (physicalWork.identifiers ++ electronicWork.identifiers)
+  }
+
+  it(
+    "handles a Sierra physical/digitised pair where there's an irrelevant Miro work in the mix") {
+    // This is a regression test for an issue we saw where the identifiers were
+    // being dropped from a set of works where:
+    //
+    //    Sierra e-bib
+    //        ↓
+    //    Sierra physical bib
+    //        ↓
+    //    Miro work
+    //
+    // and the identifiers were being dropped from the merged work.
+    //
+    // See https://wellcome.slack.com/archives/C8X9YKM5X/p1645180445345339
+
+    val miroWork = miroIdentifiedWork()
+
+    val physicalWork =
+      sierraPhysicalIdentifiedWork()
+        .format(Format.Books)
+        .mergeCandidates(
+          List(createMiroSierraMergeCandidateFor(miroWork))
+        )
+
+    val digitisedWork =
+      sierraDigitalIdentifiedWork()
+        .mergeCandidates(
+          List(createSierraPairMergeCandidateFor(physicalWork))
+        )
+
+    val result =
+      merger.merge(works = Seq(miroWork, physicalWork, digitisedWork))
+
+    val mergedWork =
+      result
+        .mergedWorksWithTime(now)
+        .collectFirst { case w: Work.Visible[Merged] => w }
+        .get
+
+    mergedWork.identifiers should contain theSameElementsAs (
+      physicalWork.identifiers ++ digitisedWork.identifiers
+    )
+  }
+
+  describe("merging TEI works") {
+    it("merges a physical sierra with a tei") {
+      val merger = PlatformMerger
+      val physicalWork =
+        sierraIdentifiedWork()
+          .items(List(createIdentifiedPhysicalItem))
+      val teiWork = teiIdentifiedWork()
+        .mergeCandidates(List(createSierraPairMergeCandidateFor(physicalWork)))
+
+      val result = merger
+        .merge(works = Seq(teiWork, physicalWork))
+        .mergedWorksWithTime(now)
+      val redirectedWorks = result.collect {
+        case w: Work.Redirected[Merged] => w
+      }
+      val visibleWorks = result.collect { case w: Work.Visible[Merged] => w }
+
+      redirectedWorks should have size 1
+      visibleWorks should have size 1
+
+      visibleWorks.head.state.canonicalId shouldBe teiWork.state.canonicalId
+    }
+
+    it("copies the thumbnail to the inner works") {
+      val teiWork = teiIdentifiedWork()
+        .mapState {
+          _.copy(
+            internalWorkStubs = List(
+              InternalWork.Identified(
+                sourceIdentifier = createTeiSourceIdentifier,
+                canonicalId = createCanonicalId,
+                workData = WorkData(
+                  title = Some(s"tei-inner-${randomAlphanumeric(length = 10)}")
+                )
+              )
+            )
+          )
+        }
+
+      val sierraWork = sierraPhysicalIdentifiedWork()
+
+      val metsWork = metsIdentifiedWork()
+        .thumbnail(createDigitalLocation)
+
+      val result =
+        PlatformMerger
+          .merge(works = Seq(teiWork, sierraWork, metsWork))
+          .mergedWorksWithTime(now)
+
+      val visibleWorks = result.collect { case w: Work.Visible[Merged] => w }
+
+      visibleWorks.foreach {
+        _.data.thumbnail shouldBe metsWork.data.thumbnail
+      }
+    }
   }
 }

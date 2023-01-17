@@ -1,0 +1,358 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="https://raw.githubusercontent.com/bodleian/consolidated-tei-schema/master/msdesc.rng" type="application/xml" schematypens="http://relaxng.org/ns/structure/1.0"?>
+
+<TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id="MS_MSL_114">
+
+    <teiHeader>
+    
+    <fileDesc>
+        
+        <titleStmt>
+            <title>MS.MSL.114</title>
+            <title type="collection">Wellcome Collection</title>
+            <respStmt xml:id="PBV">
+                <resp when="2015">Cataloguer</resp>
+                <persName>Petros Bouras-Vallianatos</persName>
+            </respStmt>
+            <respStmt xml:id="AP">
+                <resp when="2020-10-05">Template</resp>
+                <persName>Adrian Plau</persName>
+            </respStmt>
+            <respStmt xml:id="VS">
+                <resp when="2020">TEI Encoder</resp>
+                <persName>Victoria Sloyan</persName>
+            </respStmt>
+        </titleStmt>
+        
+        <publicationStmt>
+            <publisher>Wellcome Collection</publisher>
+            <idno>UkLW</idno>
+            <address>
+                <orgName type="institution">Wellcome Collection</orgName>
+                <street>215 Euston Rd</street>
+                <settlement>London</settlement>
+                <postCode>NW1 2BE</postCode>
+            </address>
+            <distributor>
+                <email>library@wellcomecollection.org</email>
+            </distributor>
+            <idno type="msID">MS.MSL.114</idno>
+            <idno type="catalogue">Greek Manuscripts at the Wellcome Library in London: A Descriptive Catalogue</idno>
+            <availability>
+                <licence><!-- Licensing statement to come in late-stage editing --></licence>
+            </availability>
+        </publicationStmt>
+        
+        <sourceDesc>
+            
+            <msDesc>
+                
+                <msIdentifier>
+                    <country>United Kingdom</country>
+                    <settlement>London</settlement>
+                    <institution>Wellcome Collection</institution>
+                    <repository>Wellcome Library</repository>
+                    <idno type="shelfmark">MS.MSL.114</idno>
+                    <altIdentifier type="Sierra">
+                        <idno>b18764459</idno>
+                    </altIdentifier> 
+                    <altIdentifier type="deprecated">
+                        <idno>AA c 2</idno>
+                    </altIdentifier>
+                    <altIdentifier type="deprecated">
+                        <idno>Wf 15</idno>
+                    </altIdentifier>
+                </msIdentifier>
+                
+                <msContents>
+                  
+                    <summary>Paul of Aegina's Medical Epitome</summary>
+                   
+                    <textLang mainLang="grc" source="IANA">Ancient Greek</textLang>
+
+                    <msItem n="1" xml:id="MS_MSL_114_1">
+                        <author key="person_84812936">Paul of Aegina</author>
+                        <title key="">Medical Epitome</title>
+                        
+                        <!-- Greek text to be picked up in late-stage editing -->
+                        <!-- Work has 7 books/chapters: to be divided across 7 elements in <msItem> -->
+
+                        <incipit><!-- insert --> <locus></locus>
+                            <!-- Use <note> to add general comment -->
+                        </incipit>
+                        
+                        <explicit><!-- insert --> <locus></locus>
+                            <!-- Use <note> to add general comment -->
+                        </explicit>
+                        
+                        <colophon><!-- insert --> <locus></locus>
+                            <!-- Use <note> to add general comment -->
+                        </colophon>
+                        
+                        <note>TLG reference: 0715.001</note>
+                        
+                    </msItem>
+                    
+                </msContents>
+                
+                <physDesc>
+                    <objectDesc form="codex">
+                        <supportDesc material="paper">       
+                            <support>Paper, folded in 2. 
+                                <watermark>First watermark very similar to <ref>Mosin and Traljic 6947, 6949, 6956</ref> (saucisson), attested in 1338-50.</watermark>                        
+                                <watermark>Second watermark identical with <ref>Mosin and Traljic 5791</ref> (licorne), attested in 1339-44.</watermark>                        
+                                <measure type="chainline">Chain distance 43 mm.</measure>
+                                Added leaves (folios 1 and 198): paper folded in 2. 
+                                <watermark>Watermarks similar to <ref>Piccard 122415</ref> (scissors), attested in 1457.</watermark>
+                                <measure type="chainline">Chain distance 35mm.</measure>
+                            </support>
+                            <extent>iii + 199 + iii.
+                                <dimensions unit="mm" >
+                                    <dim type="height">295</dim>
+                                    <dim type="length">230</dim> 
+                                </dimensions>
+                            </extent>
+                            
+                             <foliation>
+                                 <note>Foliated 1-128, 129-201.</note>   
+                             </foliation>     
+                            <collation>
+                                <formula>1 (flyleaf i), 2 (ii-iii), 1 (f.1), 4 (f.5), 2 x 1 (f.7), 23 x 8 (f.190), 1 (f.191), 6 (f.197), 1 (f.198), 2 (i-ii), 1 (iii)</formula>
+                            </collation>
+                        </supportDesc>
+                        
+                        <layoutDesc>
+                            
+                            <layout writtenLines="45">36 written lines.
+                                <measure type="height" unit="mm">225</measure>
+                                <measure type="length" unit="mm">160</measure>
+                                <note>Unclear ruling.</note>
+                            </layout>
+                                                        
+                        </layoutDesc> 
+                         
+                    </objectDesc>
+                    
+                    <handDesc>
+                        <handNote scope="major">Attributed by Nigel Wilson to Georgios Chrysokokkes (<ref>RGK III 126</ref>).</handNote>
+                        <handNote scope="minor">Several different hands have added text throughout the manuscript.</handNote>
+                    </handDesc>
+                    
+                    <additions>
+                        <p>Scribal additions (<locus>36r, 68r, 77r, 97r, 122r, 140v, 146r, 184v, 187r</locus>) to the text in the outer margins. 
+                           <locus>78r</locus> variant reading: <!-- Add Greek --></p>
+                        <p>Non-scribal annotations: <locus>16r, 18v, 20r, 20v, 22v, 26r, 29v, 32r, 37v, 39v, 40r, 43v, 44v, 48r, 48v, 49r, 49v, 
+                           50r, 51r, 52r, 53r, 53v, 54v, 55r, 55v, 56r, 57r, 58r, 58v, 62r, 62v, 63v, 65r, 67v, 68r, 68v, 69v, 73r, 74r, 75v, 76r, 76v, 91r, 
+                           92r, 93r, 94r, 94v, 97v, 100r, 101r, 101v, 102v, 104r, 106v, 109v, 151v, 152r, 153r, 153v, 154r, 154v, 155v, 156r, 156v, 157r, 157v, 
+                        158r, 158v, 159r, 159v, 160r, 160v, 161r, 161v, 162r, 162v, 163r, 163v, 165r, 165v, 166r, 166v, 167r, 167v, 168r, 168v, 169r, 169v, 
+                        170r, 170v, 171r, 171v, 172r, 172v, 173r, 173v, 174r, 174v, 175r, 176r, 177r, 177v, 178v, 179r, 179v, 180r, 180v, 181r, 182r, 183r, 183v, 
+                        185r, 185v, 186r, 189v, 190v, 193r, 193v</locus>. Mostly short phrases on single words, of four kinds: efficacy phrases, indication of contents or, less frequently, 
+                        short explanatory phrases and variant readings, e.g. (<locus>18v</locus>). <!-- Add Greek text --></p>
+                        <p>Text added by several different hands: <locus>1r-v, 2r lower margin, 69v outer margin, 178r lower margin, 195r outer margin, 195r lower margin, 195v outer margin, 
+                        195v lower margin, 196r outer margin, 196r lower margin, 196v upper margin, 196v outer margin, 196v lower margin, 197r upper margin, 197r outer margin, 197 lower margin, 
+                        197v upper margin, 197v outer margin, 197v lower margin, 198r, 198v, 197v</locus>. <!-- Add Greek text --></p>
+                        <p>Marks of ownership: <locus>5v, 20r, 36v, 88v, 117v</locus>: <!-- Add Greek text -->; <locus>151v</locus>: <!-- Add Greek text -->; <locus>flyleaf IIr</locus>: "Ex Bibliotheca 
+                        Askeviana P.ii.Art.404 / J. Sims / A A c 2 / WE15"; <locus>flyleaf IIIr</locus>: "W.H.18"; <locus>back pastedown</locus>: label inscribed "O.g.24".</p>
+                    </additions>
+                    
+                    <bindingDesc>
+                        <binding>
+                            <p>Corio russico. Flyleaves: chain distance 25mm, no watermarks.</p>
+                        </binding>
+                    </bindingDesc>                    
+                </physDesc>
+                
+                <history>
+                    <origin>
+                        <origPlace>
+                            <country>Byzantine Empire</country>
+                        </origPlace>
+                        <origDate calendar="Gregorian">ca. 1335-45 AD</origDate> (from watermarks).
+                    </origin>
+                    <provenance notBefore="1300" notAfter="1775">Owned by <persName>Gerakes</persName>, possibly <persName>Manuel Kantakouzenos Gerakes</persName></provenance>
+                    <provenance notBefore="1722" notAfter="1774">Owned by <persName>Anthony Askew</persName> (1722-1774) and sold at his auction sale, G. Leigh and J. Sotheby, London, <date>10 March 1785</date>, lot 404 to <persName>James Sims</persName> (1741-1820).</provenance>
+                    <provenance notBefore="1801" notAfter="1803">Purchased by the London Medical Society in <date>1802</date>.</provenance>
+                    <acquisition>Purchased by the Wellcome Library in <date>1984</date>.</acquisition>
+                </history>
+                
+                <additional>
+                    <adminInfo>
+                        <recordHist>
+                            <source>
+                                <bibl>
+                                    <title>'Greek Manuscripts at the Wellcome Library in London: A Descriptive Catalogue' in Medical History,  vol. 59 (2)</title>
+                                    <author>Petros Bouras-Vallianatos</author>
+                                    <date>2015</date>
+                                    <note>Pp. 275-326</note>
+                                </bibl>
+                                <bibl>
+                                    <note>A digitised version of the manuscript is available <ref target="https://wellcomelibrary.org/item/b18764459">here</ref>.</note>
+                                </bibl> 
+                            </source>
+                        </recordHist>
+                        <availability status="unknown"><p> <!-- Insert if relevant --></p>
+                        </availability> 
+                    </adminInfo>
+                    <listBibl>
+                        <head>Bibliographical abbreviations</head>
+                        <bibl>
+                            <title>Bibliotheca Askeviana manu scripta, sive catalogus librorum manuscriptorum Antonii Askew</title>
+                            <date>1785</date>
+                            <placeName>London</placeName>
+                            <publisher>Leigh and Sotheby</publisher>
+                            <abbr>Bibl. Askev.</abbr>
+                            <note>p.23 (no.404)</note>
+                        </bibl>
+                        <bibl>
+                            <title>A Catalogue of Books Contained in the Library of the Medical Society of London, Instituted AD 1773</title>
+                            <date>1803</date>
+                            <placeName>London</placeName>
+                            <publisher>Medical Society of London</publisher>
+                            <abbr>Cat. Med. Soc. 1803</abbr>
+                            <note>p.3</note>
+                        </bibl>
+                        <bibl>
+                            <title>A Catalogue of Books Contained in the Library of the Medical Society of London, Instituted AD 1773</title>
+                            <date>1829</date>
+                            <placeName>London</placeName>
+                            <publisher>Medical Society of London</publisher>
+                            <abbr>Cat. Med. Soc. 1829</abbr>
+                            <note>p.4</note>
+                        </bibl>
+                        <bibl>
+                            <title>Notices et extraits des manuscrits médicaux grecs, latins et français des principales bibliothèques de l’Europe</title>
+                            <author>Charles Victor Daremberg</author>
+                            <date>1853</date>
+                            <placeName>Paris</placeName>
+                            <publisher>J.-B. Baillière</publisher>
+                            <abbr>Daremberg</abbr>
+                            <note>p.164</note>
+                        </bibl>
+                        <bibl>
+                            <title>Manuscripta Medica: A Descriptive Catalogue of the Manuscripts in the Library of the Medical Society of London</title>
+                            <author>Warren Royal Dawson</author>
+                            <date>1932</date>
+                            <placeName>London</placeName>
+                            <publisher>J. Bale, Sons and Danielsson</publisher>
+                            <abbr>Dawson</abbr>
+                            <note>pp.115-6</note>
+                        </bibl>                        
+                        <bibl>
+                            <title>Die Handschriften der antiken Ärzte, 3 vols</title>
+                            <author>Hermann Diels</author>
+                            <date>1905-8</date>
+                            <placeName>Berlin</placeName>
+                            <abbr>Diels</abbr>
+                            <note>volume 2, p.77</note>
+                        </bibl>
+                        <bibl>
+                            <title>Paulus Aegineta, 2 vols</title>
+                            <author>Johan Ludvig Heiberg</author>
+                            <date>1921-24</date>
+                            <placeName>Leipzig</placeName>
+                            <publisher>Teubner</publisher>
+                            <abbr>Heiberg</abbr>
+                        </bibl>
+                        <bibl>
+                            <title>'Edition critique et traduction annotee du livre V des "Epitomae Medicae" de Paul d'Egine'</title>
+                            <author>Gabrielle Lherminier</author>
+                            <date>2013</date>
+                            <placeName>Paris</placeName>
+                            <publisher>Ecole Pratique des Hautes Etudes</publisher>
+                            <abbr>Mondrain</abbr>
+                            <note>Unpublished PhD thesis</note>
+                            <note>pp.249-50</note>
+                        </bibl>
+                        <bibl>
+                            <title>'La lecture et la copie de textes scientifiques a Byzance pendant l'epoque paleologue', Giuseppe De Gregorio and Maria Galante (eds): La produzione scritta tecnica e scientifica nel Medioevo: libro e documento tra scuole e professioni</title>
+                            <author>Brigitte Mondrain</author>
+                            <date>2012</date>
+                            <placeName>Spoleto</placeName>
+                            <publisher>Centro italiano di studi sull'alto medioevo</publisher>
+                            <abbr>Mondrain</abbr>
+                            <note>pp.607-32, p.632</note>
+                        </bibl>
+                        <bibl>
+                            <title>Filigranes des XIIIe et XIVe siecles, 2 vols</title>
+                            <author>Vladimir Mosin and Seid Traljic</author>
+                            <date>1957</date>
+                            <placeName>Zagreb</placeName>
+                            <publisher>Academie yougoslave des sciences et des beaux-arts</publisher>
+                            <abbr>Mosin and Traljic</abbr>
+                        </bibl>
+                        <bibl>
+                            <title>'Special Report on the Greek MSS in the Society’s Library’, Transactions of the Medical Society of London, 27, lii–lvii</title>
+                            <author>Joseph Baldwin Nias</author>
+                            <date>1905</date>
+                            <abbr>Nias</abbr>
+                            <note>1vi-1vii</note>
+                        </bibl>
+                        <bibl>
+                            <title>‘The Legacy of Hippocrates: Greek Medicine int he Library of the Medical Society of London’, Transactions of the Medical Society of London, 103, 21–30</title>
+                            <author>Vivian Nutton</author>
+                            <date>1986-7</date>
+                            <abbr>Nutton</abbr>
+                            <note>pp.24-5</note>
+                        </bibl>
+                        <bibl>
+                            <title>‘A Wellcome Manuscript of a Medical Practitioner’, in Véronique Boudon-Millot et al. (eds), Storia della tradizione e edizione dei medici greci: Atti del VI Colloquio Internazionale, Paris 12–14 Aprile 2008, 259-70</title>
+                            <author>Vivian Nutton and Barbara Zipser</author>
+                            <date>2010</date>
+                            <placeName>Naples</placeName>
+                            <publisher>D'Auria</publisher>
+                            <abbr>Nutton and Zipster</abbr>
+                            <note>p.261</note>
+                        </bibl>
+                        <bibl>
+                            <title>Repertorium der griechischen Kopisten, 800–1600, 3 vols in 9 pts.</title>
+                            <editor>Herbert Hunger</editor>
+                            <date>1981-97</date>
+                            <placeName>Oxford</placeName>
+                            <publisher>Verlag der Österreichischen Akademie der Wissenschaften</publisher>
+                            <note>Cited with volume no. followed by catalogue no., eg. RGKI 213</note>
+                            <abbr>RGK</abbr>
+                        </bibl>
+                        <bibl>
+                            <title>Thesaurus Linguae Graecae</title>
+                            <ref target="http://www.tlg.uci.edu">http://www.tlg.uci.edu</ref>
+                            <abbr>TLG</abbr>
+                        </bibl>
+                        <bibl>
+                            <title>‘Byzantine Medical Manuscripts: Towards a New Catalogue, with a Specimen for an Annotated Checklist of Manuscripts Based on an Index of Diels’ Catalogue’, Byzantion, 79, 453–595</title>
+                            <author>Alain Touwaide</author>
+                            <date>2009</date>
+                            <abbr>Touwaide</abbr>
+                            <note>pp.538-9</note>
+                        </bibl>
+                        
+                    </listBibl>
+                
+                </additional>
+            
+            </msDesc>
+        
+        </sourceDesc>
+    
+    </fileDesc>
+    
+        <revisionDesc>
+        <change when="2020" who="#VS">Added data from catalogue.</change>
+        <change when="2020-05-19" who="#AP">Created template for Wellcome Hebrew MSS project.</change>
+        </revisionDesc>
+
+    </teiHeader>    
+
+    <facsimile>
+        <surface></surface>
+
+    </facsimile>    
+
+    <text>
+    <body>
+        <p></p>
+        <!-- For future full transcription -->
+    </body>
+
+    </text>    
+
+</TEI>

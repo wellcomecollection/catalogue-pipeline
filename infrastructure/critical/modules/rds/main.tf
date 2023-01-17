@@ -1,6 +1,7 @@
 resource "aws_rds_cluster_instance" "cluster_instances" {
   count = var.instance_count
 
+  engine                  = var.engine
   identifier              = "${var.cluster_identifier}-${count.index}"
   cluster_identifier      = aws_rds_cluster.default.id
   instance_class          = var.instance_class
@@ -12,6 +13,7 @@ resource "aws_rds_cluster_instance" "cluster_instances" {
 resource "aws_rds_cluster" "default" {
   db_subnet_group_name = var.aws_db_subnet_group_name
 
+  engine                 = var.engine
   cluster_identifier     = var.cluster_identifier
   database_name          = var.database_name
   master_username        = var.username

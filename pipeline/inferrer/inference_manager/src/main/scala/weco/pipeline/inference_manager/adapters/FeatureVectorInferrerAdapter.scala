@@ -38,17 +38,25 @@ class FeatureVectorInferrerAdapter(val host: String, port: Int)
         .withScheme("http")
     )
 
-  def augment(inferredData: InferredData,
-              inferrerResponse: Response): InferredData =
+  def augment(
+    inferredData: InferredData,
+    inferrerResponse: Response
+  ): InferredData =
     inferrerResponse match {
-      case FeatureVectorInferrerResponse(features_b64, lsh_encoded_features) =>
+      case FeatureVectorInferrerResponse(
+          features_b64,
+          reduced_features_b64
+          ) =>
         val features = decodeBase64ToFloatList(features_b64)
+        val reducedFeatures = decodeBase64ToFloatList(
+          reduced_features_b64
+        )
         if (features.size == 4096) {
           val (features1, features2) = features.splitAt(features.size / 2)
           inferredData.copy(
             features1 = features1,
             features2 = features2,
-            lshEncodedFeatures = lsh_encoded_features
+            reducedFeatures = reducedFeatures
           )
         } else inferredData
     }

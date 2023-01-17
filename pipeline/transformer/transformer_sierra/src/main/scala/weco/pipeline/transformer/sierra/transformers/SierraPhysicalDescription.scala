@@ -1,7 +1,7 @@
 package weco.pipeline.transformer.sierra.transformers
 
-import weco.catalogue.source_model.sierra.SierraBibData
-import weco.catalogue.source_model.sierra.source.SierraQueryOps
+import weco.sierra.models.SierraQueryOps
+import weco.sierra.models.data.SierraBibData
 
 // Populate wwork:physicalDescription.
 //
@@ -17,15 +17,10 @@ import weco.catalogue.source_model.sierra.source.SierraQueryOps
 // Notes:
 //
 //  - MARC field 300 and subfield ǂb are both labelled "R" (repeatable).
-//    According to Branwen, this field does appear multiple times on some
-//    of our records -- not usually on books, but on some of the moving image
-//    & sound records.
+//    This field does appear multiple times on some of our records, in particular
+//    AV records.  See the tests for an example of this.
 //
-//  - So far we don't do any stripping of punctuation, and if multiple
-//    subfields are found on a record, I'm just joining them with newlines.
-//
-//    TODO: Decide a proper strategy for joining multiple physical
-//    descriptions!
+//  - Multiple physical descriptions go on multiple lines.
 //
 // https://www.loc.gov/marc/bibliographic/bd300.html
 //
@@ -35,13 +30,17 @@ object SierraPhysicalDescription
 
   type Output = Option[String]
 
-  def apply(bibData: SierraBibData) =
-    bibData
-      .subfieldsWithTags(
-        "300" -> "a",
-        "300" -> "b",
-        "300" -> "c",
-        "300" -> "e",
-      )
-      .contentString(" ")
+  def apply(bibData: SierraBibData): Option[String] = {
+    val lines =
+      bibData
+        .varfieldsWithTag("300")
+        .flatMap { vf =>
+          vf.subfieldsWithTags("a", "b", "c", "e").contentString(" ")
+        }
+
+    lines.mkString("<br/>") match {
+      case s if s.isEmpty => None
+      case s              => Some(s)
+    }
+  }
 }

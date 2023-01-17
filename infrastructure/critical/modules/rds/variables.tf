@@ -6,6 +6,10 @@ variable "username" {}
 
 variable "password" {}
 
+variable "engine" {
+  type = string
+}
+
 variable "db_security_group_id" {
   type = string
 }

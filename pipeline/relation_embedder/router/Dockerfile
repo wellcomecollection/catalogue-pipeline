@@ -1,5 +1,9 @@
-FROM 760097843905.dkr.ecr.eu-west-1.amazonaws.com/wellcome/typesafe_config_base:104
+FROM public.ecr.aws/docker/library/eclipse-temurin:11-jre-alpine
+
+LABEL maintainer = "Wellcome Collection <digital@wellcomecollection.org>"
+
+RUN apk add --no-cache bash
 
 ADD target/universal/stage /opt/docker
 
-ENV PROJECT router
+ENTRYPOINT ["/opt/docker/bin/router"]

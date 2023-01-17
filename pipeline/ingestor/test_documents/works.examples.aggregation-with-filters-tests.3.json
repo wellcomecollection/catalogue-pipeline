@@ -1,0 +1,185 @@
+{
+  "description" : "examples for the aggregation-with-filters tests",
+  "createdAt" : "2023-01-03T09:31:59.715137Z",
+  "id" : "ivw1mq40",
+  "document" : {
+    "debug" : {
+      "source" : {
+        "id" : "ivw1mq40",
+        "identifier" : {
+          "identifierType" : {
+            "id" : "miro-image-number"
+          },
+          "ontologyType" : "Work",
+          "value" : "zoIhNdLDgG"
+        },
+        "version" : 73,
+        "modifiedTime" : "1994-06-01T17:42:00Z"
+      },
+      "mergedTime" : "1994-06-01T17:42:00Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
+      "redirectSources" : [
+      ]
+    },
+    "display" : {
+      "id" : "ivw1mq40",
+      "title" : "title-gbiIgGzgYB",
+      "alternativeTitles" : [
+      ],
+      "workType" : {
+        "id" : "e",
+        "label" : "Maps",
+        "type" : "Format"
+      },
+      "contributors" : [
+      ],
+      "identifiers" : [
+        {
+          "identifierType" : {
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
+            "type" : "IdentifierType"
+          },
+          "value" : "zoIhNdLDgG",
+          "type" : "Identifier"
+        }
+      ],
+      "subjects" : [
+        {
+          "label" : "6IZ2DrUzFk",
+          "concepts" : [
+            {
+              "label" : "vgSyVfmtHDyMDGo",
+              "type" : "Concept"
+            },
+            {
+              "label" : "2rBCSPBNfFmnJIE",
+              "type" : "Concept"
+            },
+            {
+              "label" : "pzyMJLtI2pjU6xn",
+              "type" : "Concept"
+            }
+          ],
+          "type" : "Subject"
+        }
+      ],
+      "genres" : [
+      ],
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "availabilities" : [
+      ],
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "notes" : [
+      ],
+      "formerFrequency" : [
+      ],
+      "designation" : [
+      ],
+      "images" : [
+      ],
+      "parts" : [
+      ],
+      "partOf" : [
+      ],
+      "precededBy" : [
+      ],
+      "succeededBy" : [
+      ],
+      "type" : "Work"
+    },
+    "query" : {
+      "id" : "ivw1mq40",
+      "format.id" : "e",
+      "workType" : "Standard",
+      "identifiers.value" : [
+        "zoIhNdLDgG"
+      ],
+      "title" : "title-gbiIgGzgYB",
+      "alternativeTitles" : [
+      ],
+      "description" : null,
+      "physicalDescription" : null,
+      "edition" : null,
+      "notes.contents" : [
+      ],
+      "lettering" : null,
+      "images.id" : [
+      ],
+      "images.identifiers.value" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
+      "items.locations.accessConditions.status.id" : [
+      ],
+      "items.locations.license.id" : [
+      ],
+      "items.locations.locationType.id" : [
+      ],
+      "subjects.id" : [
+      ],
+      "subjects.label" : [
+        "6IZ2DrUzFk"
+      ],
+      "subjects.concepts.label" : [
+        "vgSyVfmtHDyMDGo",
+        "2rBCSPBNfFmnJIE",
+        "pzyMJLtI2pjU6xn"
+      ],
+      "genres.label" : [
+      ],
+      "genres.concepts.label" : [
+      ],
+      "languages.id" : [
+      ],
+      "languages.label" : [
+      ],
+      "contributors.agent.id" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "production.label" : [
+      ],
+      "production.dates.range.from" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
+      ],
+      "collectionPath.label" : null,
+      "collectionPath.path" : null,
+      "referenceNumber" : null
+    },
+    "aggregatableValues" : {
+      "workType" : [
+        "{\"id\":\"e\",\"label\":\"Maps\",\"type\":\"Format\"}"
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+        "{\"label\":\"6IZ2DrUzFk\",\"concepts\":[],\"type\":\"Subject\"}"
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
+    },
+    "type" : "Visible"
+  }
+}

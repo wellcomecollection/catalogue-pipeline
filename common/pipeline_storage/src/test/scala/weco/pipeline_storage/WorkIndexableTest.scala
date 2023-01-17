@@ -2,20 +2,15 @@ package weco.pipeline_storage
 
 import com.sksamuel.elastic4s.Index
 import org.scalatest.Assertion
-import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.index.{IndexFixtures, WorksIndexConfig}
 import weco.fixtures.TestWith
-import weco.catalogue.internal_model.work.generators.WorkGenerators
 import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.catalogue.internal_model.Implicits._
 import Indexable.workIndexable
 import weco.catalogue.internal_model.work.Work
-import weco.catalogue.internal_model.work.generators.{
-  InstantGenerators,
-  WorkGenerators
-}
+import weco.catalogue.internal_model.work.generators.WorkGenerators
 import weco.pipeline_storage.elastic.ElasticIndexer
 import weco.pipeline_storage.fixtures.ElasticIndexerFixtures
 
@@ -24,12 +19,10 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class WorkIndexableTest
     extends AnyFunSpec
-    with ScalaFutures
     with Matchers
     with IndexFixtures
     with ElasticIndexerFixtures
-    with WorkGenerators
-    with InstantGenerators {
+    with WorkGenerators {
 
   describe("updating merged / redirected works") {
     it("overrides with a work with a later modifiedDate") {
@@ -41,19 +34,15 @@ class WorkIndexableTest
 
       withWorksIndexAndIndexer {
         case (index, indexer) =>
-          val unmergedWorkInsertFuture = ingestInOrder(indexer)(
+          val unmergedWorkInsertFuture = indexInOrder(indexer)(
             originalWork,
             newWork
           )
 
-          whenReady(unmergedWorkInsertFuture) { result =>
-            assertIngestedWorkIs(
-              result = result,
-              ingestedWork = newWork,
-              index = index)
+          whenReady(unmergedWorkInsertFuture) {
+            assertIndexedWorkIs(_, indexedWork = newWork, index = index)
           }
       }
-
     }
 
     it("overrides with a work with the same modifiedDate") {
@@ -64,16 +53,13 @@ class WorkIndexableTest
 
       withWorksIndexAndIndexer {
         case (index, indexer) =>
-          val unmergedWorkInsertFuture = ingestInOrder(indexer)(
+          val unmergedWorkInsertFuture = indexInOrder(indexer)(
             originalWork,
             newWork
           )
 
           whenReady(unmergedWorkInsertFuture) { result =>
-            assertIngestedWorkIs(
-              result = result,
-              ingestedWork = newWork,
-              index = index)
+            assertIndexedWorkIs(_, indexedWork = newWork, index = index)
           }
       }
     }
@@ -86,33 +72,30 @@ class WorkIndexableTest
 
       withWorksIndexAndIndexer {
         case (index, indexer) =>
-          val unmergedWorkInsertFuture = ingestInOrder(indexer)(
+          val unmergedWorkInsertFuture = indexInOrder(indexer)(
             originalWork,
             olderWork
           )
 
           whenReady(unmergedWorkInsertFuture) { result =>
-            assertIngestedWorkIs(
-              result = result,
-              ingestedWork = originalWork,
-              index = index)
+            assertIndexedWorkIs(_, indexedWork = originalWork, index = index)
           }
       }
     }
 
   }
 
-  private def assertIngestedWorkIs(
+  private def assertIndexedWorkIs(
     result: Either[Seq[Work[Identified]], Seq[Work[Identified]]],
-    ingestedWork: Work[Identified],
+    indexedWork: Work[Identified],
     index: Index): Seq[Assertion] = {
-    result.isRight shouldBe true
-    assertElasticsearchEventuallyHasWork(index = index, ingestedWork)
+    result shouldBe a[Right[_, _]]
+    assertElasticsearchEventuallyHasWork(index = index, indexedWork)
   }
 
   def withWorksIndexAndIndexer[R](
-    testWith: TestWith[(Index, ElasticIndexer[Work[Identified]]), R]) = {
-    withLocalWorksIndex { index =>
+    testWith: TestWith[(Index, ElasticIndexer[Work[Identified]]), R]): R = {
+    withLocalIdentifiedWorksIndex { index =>
       val indexer =
         new ElasticIndexer[Work[Identified]](
           elasticClient,

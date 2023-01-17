@@ -18,7 +18,7 @@ import weco.catalogue.internal_model.identifiers.{
   */
 case class MergeCandidate[+State](
   id: State,
-  reason: Option[String] = None
+  reason: String
 ) extends HasId[State]
 
 case object MergeCandidate {
@@ -26,6 +26,6 @@ case object MergeCandidate {
             reason: String): MergeCandidate[IdState.Identifiable] =
     MergeCandidate(
       id = IdState.Identifiable(sourceIdentifier = identifier),
-      reason = Some(reason)
+      reason = reason
     )
 }

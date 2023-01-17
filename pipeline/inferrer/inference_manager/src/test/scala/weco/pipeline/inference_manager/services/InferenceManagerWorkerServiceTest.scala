@@ -2,9 +2,10 @@ package weco.pipeline.inference_manager.services
 
 import scala.collection.mutable
 import akka.http.scaladsl.model.{HttpResponse, Uri}
-import org.scalatest.concurrent.{Eventually, IntegrationPatience}
+import org.scalatest.concurrent.{Eventually, PatienceConfiguration}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.time._
 import org.scalatest.{BeforeAndAfterAll, Inside, Inspectors, OptionValues}
 import software.amazon.awssdk.services.sqs.model.Message
 import weco.fixtures.TestWith
@@ -37,9 +38,14 @@ class InferenceManagerWorkerServiceTest
     with Inspectors
     with BeforeAndAfterAll
     with Eventually
-    with IntegrationPatience
+    with PatienceConfiguration
     with InferenceManagerWorkerServiceFixture
     with RequestPoolFixtures {
+
+  override implicit def patienceConfig: PatienceConfig = PatienceConfig(
+    timeout = scaled(Span(25, Seconds)),
+    interval = scaled(Span(250, Milliseconds))
+  )
 
   it(
     "reads image messages, augments them with the inferrers, and sends them to SNS"
@@ -88,12 +94,13 @@ class InferenceManagerWorkerServiceTest
               case ImageState.Augmented(_, id, inferredData) =>
                 images should contain key id
                 val seed = id.hashCode
-                inside(inferredData.value) {
+                inside(inferredData) {
                   case InferredData(
                       features1,
                       features2,
-                      lshEncodedFeatures,
+                      reducedFeatures,
                       palette,
+                      Some(averageColorHex),
                       binSizes,
                       binMinima,
                       aspectRatio
@@ -102,10 +109,13 @@ class InferenceManagerWorkerServiceTest
                       Responses.randomFeatureVector(seed)
                     features1 should be(featureVector.slice(0, 2048))
                     features2 should be(featureVector.slice(2048, 4096))
-                    lshEncodedFeatures should be(
-                      Responses.randomLshVector(seed)
+                    reducedFeatures should be(
+                      featureVector.slice(0, 1024)
                     )
                     palette should be(Responses.randomPaletteVector(seed))
+                    averageColorHex should be(
+                      Responses.randomAverageColorHex(seed)
+                    )
                     binSizes should be(Responses.randomBinSizes(seed))
                     binMinima should be(Responses.randomBinMinima(seed))
                     aspectRatio should be(
@@ -144,20 +154,22 @@ class InferenceManagerWorkerServiceTest
             val image = augmentedImages(id)
             inside(image.state) {
               case ImageState.Augmented(_, _, inferredData) =>
-                inside(inferredData.value) {
+                inside(inferredData) {
                   case InferredData(
                       features1,
                       features2,
-                      lshEncodedFeatures,
+                      reducedFeatures,
                       palette,
+                      averageColorHex,
                       binSizes,
                       binMinima,
                       aspectRatio
                       ) =>
                     features1 should have length 2048
                     features2 should have length 2048
-                    every(lshEncodedFeatures) should fullyMatch regex """(\d+)-(\d+)"""
+                    reducedFeatures should have length 1024
                     every(palette) should fullyMatch regex """\d+"""
+                    averageColorHex.get should have length 7
                     every(binSizes) should not be empty
                     binMinima should not be empty
                     aspectRatio should not be empty

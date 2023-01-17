@@ -3,148 +3,83 @@ package weco.catalogue.source_model.sierra.rules
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.locations.{
-  AccessCondition,
   AccessMethod,
   AccessStatus,
   LocationType
 }
-import weco.catalogue.source_model.generators.SierraDataGenerators
-import weco.catalogue.source_model.sierra.identifiers.{
-  SierraBibNumber,
-  SierraItemNumber
-}
-import weco.catalogue.source_model.sierra.marc.{FixedField, VarField}
+import weco.catalogue.source_model.fixtures.AccessConditionMatchers
+import weco.sierra.generators.SierraDataGenerators
+import weco.sierra.models.marc.{FixedField, VarField}
 
 class SierraItemAccessTest
     extends AnyFunSpec
     with Matchers
+    with AccessConditionMatchers
     with SierraDataGenerators {
+
+  // Note: we capture the `display` value for debugging purposes, but
+  // it's not actually used in the downstream code so we ignore it.
+  def createFixedFieldWith(label: String)(value: String,
+                                          display: String = ""): FixedField =
+    FixedField(
+      label = label,
+      value = value
+    )
+
+  def createLocationWith: (String, String) => FixedField =
+    createFixedFieldWith(label = "LOCATION")
+  def createStatusWith: (String, String) => FixedField =
+    createFixedFieldWith(label = "STATUS")
+  def createOpacMsgWith: (String, String) => FixedField =
+    createFixedFieldWith(label = "OPACMSG")
+  def createItypeWith: (String, String) => FixedField =
+    createFixedFieldWith(label = "ITYPE")
+
   describe("an item in the closed stores") {
     describe("with no holds") {
       describe("can be requested online") {
         it("if it has no restrictions") {
           val itemData = createSierraItemDataWith(
             fixedFields = Map(
-              "79" -> FixedField(
-                label = "LOCATION",
-                value = "scmac",
-                display = "Closed stores Arch. & MSS"),
-              "88" -> FixedField(
-                label = "STATUS",
-                value = "-",
-                display = "Available"),
-              "108" -> FixedField(
-                label = "OPACMSG",
-                value = "f",
-                display = "Online request"),
+              "79" -> createLocationWith("scmac", "Closed stores Arch. & MSS"),
+              "88" -> createStatusWith("-", "Available"),
+              "108" -> createOpacMsgWith("f", "Online request"),
             )
           )
 
           val (ac, _) = SierraItemAccess(
-            bibId = bibId,
-            itemId = itemId,
-            bibStatus = None,
             location = Some(LocationType.ClosedStores),
             itemData = itemData
           )
 
-          ac shouldBe Some(AccessCondition(method = AccessMethod.OnlineRequest))
-        }
-
-        it("if it has no restrictions and the bib is open") {
-          val itemData = createSierraItemDataWith(
-            fixedFields = Map(
-              "79" -> FixedField(
-                label = "LOCATION",
-                value = "scmwf",
-                display = "Closed stores A&MSS Well.Found."),
-              "88" -> FixedField(
-                label = "STATUS",
-                value = "-",
-                display = "Available"),
-              "108" -> FixedField(
-                label = "OPACMSG",
-                value = "f",
-                display = "Online request"),
-            )
+          ac should have(
+            method(AccessMethod.OnlineRequest),
+            status(AccessStatus.Open),
+            noTerms(),
+            noNote(),
           )
-
-          val (ac, _) = SierraItemAccess(
-            bibId = bibId,
-            itemId = itemId,
-            bibStatus = Some(AccessStatus.Open),
-            location = Some(LocationType.ClosedStores),
-            itemData = itemData
-          )
-
-          ac shouldBe Some(
-            AccessCondition(
-              method = AccessMethod.OnlineRequest,
-              status = AccessStatus.Open))
         }
 
         it("if it's restricted") {
           val itemData = createSierraItemDataWith(
             fixedFields = Map(
-              "79" -> FixedField(
-                label = "LOCATION",
-                value = "scmac",
-                display = "Closed stores Arch. & MSS"),
-              "88" -> FixedField(
-                label = "STATUS",
-                value = "6",
-                display = "Restricted"),
-              "108" -> FixedField(
-                label = "OPACMSG",
-                value = "f",
-                display = "Online request"),
+              "79" -> createLocationWith("scmac", "Closed stores Arch. & MSS"),
+              "88" -> createStatusWith("-", "Available"),
+              "108" -> createOpacMsgWith("c", "Restricted"),
             )
           )
 
           val (ac, _) = SierraItemAccess(
-            bibId = bibId,
-            itemId = itemId,
-            bibStatus = Some(AccessStatus.Restricted),
             location = Some(LocationType.ClosedStores),
             itemData = itemData
           )
 
-          ac shouldBe Some(
-            AccessCondition(
-              method = AccessMethod.OnlineRequest,
-              status = AccessStatus.Restricted))
-        }
-
-        it("if the bib is restricted but the item is open") {
-          val itemData = createSierraItemDataWith(
-            fixedFields = Map(
-              "79" -> FixedField(
-                label = "LOCATION",
-                value = "scmac",
-                display = "Closed stores Arch. & MSS"),
-              "88" -> FixedField(
-                label = "STATUS",
-                value = "-",
-                display = "Available"),
-              "108" -> FixedField(
-                label = "OPACMSG",
-                value = "f",
-                display = "Online request"),
-            )
+          ac should have(
+            method(AccessMethod.OnlineRequest),
+            status(AccessStatus.Restricted),
+            noTerms(),
+            noNote(),
           )
-
-          val (ac, _) = SierraItemAccess(
-            bibId = bibId,
-            itemId = itemId,
-            bibStatus = Some(AccessStatus.Restricted),
-            location = Some(LocationType.ClosedStores),
-            itemData = itemData
-          )
-
-          ac shouldBe Some(
-            AccessCondition(
-              method = AccessMethod.OnlineRequest,
-              status = AccessStatus.Open))
         }
       }
 
@@ -152,248 +87,144 @@ class SierraItemAccessTest
         it("if it needs a manual request") {
           val itemData = createSierraItemDataWith(
             fixedFields = Map(
-              "61" -> FixedField(
-                label = "I TYPE",
-                value = "4",
-                display = "serial"),
-              "79" -> FixedField(
-                label = "LOCATION",
-                value = "sgser",
-                display = "Closed stores journals"),
-              "88" -> FixedField(
-                label = "STATUS",
-                value = "-",
-                display = "Available"),
-              "108" -> FixedField(
-                label = "OPACMSG",
-                value = "n",
-                display = "Manual request"),
+              "61" -> createItypeWith("4", "serial"),
+              "79" -> createLocationWith("sgser", "Closed stores journals"),
+              "88" -> createStatusWith("-", "Available"),
+              "108" -> createOpacMsgWith("n", "Manual request"),
             )
           )
 
           val (ac, _) = SierraItemAccess(
-            bibId = bibId,
-            itemId = itemId,
-            bibStatus = None,
             location = Some(LocationType.ClosedStores),
             itemData = itemData
           )
 
-          ac shouldBe Some(AccessCondition(method = AccessMethod.ManualRequest))
+          ac should have(
+            method(AccessMethod.ManualRequest),
+            noStatus(),
+            noTerms(),
+            note(
+              "This item needs to be ordered manually. Please ask a member of staff, or email <a href=\"mailto:library@wellcomecollection.org\">library@wellcomecollection.org</a>."),
+          )
         }
 
         it("if it's bound in the top item") {
           val itemData = createSierraItemDataWith(
             fixedFields = Map(
-              "79" -> FixedField(
-                label = "LOCATION",
-                value = "bwith",
-                display = "bound in above"),
-              "88" -> FixedField(
-                label = "STATUS",
-                value = "b",
-                display = "As above"),
-              "108" -> FixedField(
-                label = "OPACMSG",
-                value = "-",
-                display = "-"),
+              "79" -> createLocationWith("bwith", "bound in above"),
+              "88" -> createStatusWith("b", "As above"),
+              "108" -> createOpacMsgWith("-", "-"),
             )
           )
 
           val (ac, _) = SierraItemAccess(
-            bibId = bibId,
-            itemId = itemId,
-            bibStatus = None,
             location = None,
             itemData = itemData
           )
 
-          ac shouldBe Some(
-            AccessCondition(
-              method = AccessMethod.NotRequestable,
-              terms = Some("Please request top item.")))
+          ac should have(
+            method(AccessMethod.NotRequestable),
+            note("Please request top item."),
+            noStatus(),
+            noTerms()
+          )
         }
 
         it("if it's contained the top item") {
           val itemData = createSierraItemDataWith(
             fixedFields = Map(
-              "79" -> FixedField(
-                label = "LOCATION",
-                value = "cwith",
-                display = "contained in above"),
-              "88" -> FixedField(
-                label = "STATUS",
-                value = "c",
-                display = "As above"),
-              "108" -> FixedField(
-                label = "OPACMSG",
-                value = "-",
-                display = "-"),
+              "79" -> createLocationWith("cwith", "contained in above"),
+              "88" -> createStatusWith("c", "As above"),
+              "108" -> createOpacMsgWith("-", "-"),
             )
           )
 
           val (ac, _) = SierraItemAccess(
-            bibId = bibId,
-            itemId = itemId,
-            bibStatus = None,
             location = None,
             itemData = itemData
           )
 
-          ac shouldBe Some(
-            AccessCondition(
-              method = AccessMethod.NotRequestable,
-              terms = Some("Please request top item.")))
+          ac should have(
+            method(AccessMethod.NotRequestable),
+            note("Please request top item."),
+            noStatus(),
+            noTerms()
+          )
         }
 
         it("if the bib and the item are closed") {
           val itemData = createSierraItemDataWith(
             fixedFields = Map(
-              "79" -> FixedField(
-                label = "LOCATION",
-                value = "sc#ac",
-                display = "Unrequestable Arch. & MSS"),
-              "88" -> FixedField(
-                label = "STATUS",
-                value = "h",
-                display = "Closed"),
-              "108" -> FixedField(
-                label = "OPACMSG",
-                value = "u",
-                display = "Unavailable"),
+              "79" -> createLocationWith("sc#ac", "Unrequestable Arch. & MSS"),
+              "88" -> createStatusWith("h", "Closed"),
+              "108" -> createOpacMsgWith("u", "Unavailable"),
             )
           )
 
           val (ac, _) = SierraItemAccess(
-            bibId = bibId,
-            itemId = itemId,
-            bibStatus = Some(AccessStatus.Closed),
             location = Some(LocationType.ClosedStores),
             itemData = itemData
           )
 
-          ac shouldBe Some(
-            AccessCondition(
-              method = AccessMethod.NotRequestable,
-              status = AccessStatus.Closed
-            ))
-        }
-
-        it("if the bib and the item are closed, and there's no location") {
-          val itemData = createSierraItemDataWith(
-            fixedFields = Map(
-              "79" -> FixedField(
-                label = "LOCATION",
-                value = "sc#ac",
-                display = "Unrequestable Arch. & MSS"),
-              "88" -> FixedField(
-                label = "STATUS",
-                value = "h",
-                display = "Closed"),
-              "108" -> FixedField(
-                label = "OPACMSG",
-                value = "u",
-                display = "Unavailable"),
-            )
+          ac should have(
+            method(AccessMethod.NotRequestable),
+            status(AccessStatus.Closed),
+            noTerms(),
+            noNote()
           )
-
-          val (ac, _) = SierraItemAccess(
-            bibId = bibId,
-            itemId = itemId,
-            bibStatus = Some(AccessStatus.Closed),
-            location = None,
-            itemData = itemData
-          )
-
-          ac shouldBe Some(
-            AccessCondition(
-              method = AccessMethod.NotRequestable,
-              status = AccessStatus.Closed))
         }
 
         it("if the item is unavailable") {
           val itemData = createSierraItemDataWith(
             fixedFields = Map(
-              "79" -> FixedField(
-                label = "LOCATION",
-                value = "sgser",
-                display = "Closed stores journals"),
-              "88" -> FixedField(
-                label = "STATUS",
-                value = "r",
-                display = "Unavailable"),
-              "108" -> FixedField(
-                label = "OPACMSG",
-                value = "u",
-                display = "Unavailable"),
+              "79" -> createLocationWith("sgser", "Closed stores journals"),
+              "88" -> createStatusWith("r", "Unavailable"),
+              "108" -> createOpacMsgWith("u", "Unavailable"),
             )
           )
 
           val (ac, _) = SierraItemAccess(
-            bibId = bibId,
-            itemId = itemId,
-            bibStatus = None,
             location = Some(LocationType.ClosedStores),
             itemData = itemData
           )
 
-          ac shouldBe Some(
-            AccessCondition(
-              method = AccessMethod.NotRequestable,
-              status = AccessStatus.Unavailable))
+          ac should have(
+            method(AccessMethod.NotRequestable),
+            status(AccessStatus.TemporarilyUnavailable),
+            note(
+              "This item is undergoing internal assessment or conservation work."),
+            noTerms()
+          )
         }
 
         it("if the item is at digitisation") {
           val itemData = createSierraItemDataWith(
             fixedFields = Map(
-              "79" -> FixedField(
-                label = "LOCATION",
-                value = "sgser",
-                display = "Closed stores journals"),
-              "88" -> FixedField(
-                label = "STATUS",
-                value = "r",
-                display = "Unavailable"),
-              "108" -> FixedField(
-                label = "OPACMSG",
-                value = "b",
-                display = "@ digitisation"),
+              "79" -> createLocationWith("sgser", "Closed stores journals"),
+              "88" -> createStatusWith("r", "Unavailable"),
+              "108" -> createOpacMsgWith("b", "@ digitisation"),
             )
           )
 
           val (ac, _) = SierraItemAccess(
-            bibId = bibId,
-            itemId = itemId,
-            bibStatus = None,
             location = Some(LocationType.ClosedStores),
             itemData = itemData
           )
 
-          ac shouldBe Some(
-            AccessCondition(
-              method = AccessMethod.NotRequestable,
-              status = Some(AccessStatus.TemporarilyUnavailable),
-              note = Some(
-                "This item is being digitised and is currently unavailable.")
-            )
+          ac should have(
+            method(AccessMethod.NotRequestable),
+            status(AccessStatus.TemporarilyUnavailable),
+            note("This item is being digitised and is currently unavailable."),
+            noTerms()
           )
         }
 
         it("if doesn't double up the note about digitisation") {
           val itemData = createSierraItemDataWith(
             fixedFields = Map(
-              "79" -> FixedField(
-                label = "LOCATION",
-                value = "sgser",
-                display = "Closed stores journals"),
-              "88" -> FixedField(
-                label = "STATUS",
-                value = "r",
-                display = "Unavailable"),
-              "108" -> FixedField(
-                label = "OPACMSG",
-                value = "b",
-                display = "@ digitisation"),
+              "79" -> createLocationWith("sgser", "Closed stores journals"),
+              "88" -> createStatusWith("r", "Unavailable"),
+              "108" -> createOpacMsgWith("b", "@ digitisation"),
             ),
             varFields = List(
               VarField(
@@ -405,266 +236,204 @@ class SierraItemAccessTest
           )
 
           val (ac, _) = SierraItemAccess(
-            bibId = bibId,
-            itemId = itemId,
-            bibStatus = None,
             location = Some(LocationType.ClosedStores),
             itemData = itemData
           )
 
-          ac shouldBe Some(
-            AccessCondition(
-              method = AccessMethod.NotRequestable,
-              status = Some(AccessStatus.TemporarilyUnavailable),
-              note = Some(
-                "This item is being digitised and is currently unavailable.")
-            )
+          ac should have(
+            method(AccessMethod.NotRequestable),
+            status(AccessStatus.TemporarilyUnavailable),
+            note("This item is being digitised and is currently unavailable."),
+            noTerms()
           )
         }
 
-        it("if the bib and item are by appointment") {
+        it("if the item is by appointment") {
           val itemData = createSierraItemDataWith(
             fixedFields = Map(
-              "79" -> FixedField(
-                label = "LOCATION",
-                value = "scmac",
-                display = "Closed stores Arch. & MSS"),
-              "88" -> FixedField(
-                label = "STATUS",
-                value = "y",
-                display = "Permission required"),
-              "108" -> FixedField(
-                label = "OPACMSG",
-                value = "a",
-                display = "By appointment"),
+              "79" -> createLocationWith("scmac", "Closed stores Arch. & MSS"),
+              "88" -> createStatusWith("y", "Permission required"),
+              "108" -> createOpacMsgWith("a", "By appointment"),
             )
           )
 
           val (ac, _) = SierraItemAccess(
-            bibId = bibId,
-            itemId = itemId,
-            bibStatus = Some(AccessStatus.ByAppointment),
             location = Some(LocationType.ClosedStores),
             itemData = itemData
           )
 
-          ac shouldBe Some(
-            AccessCondition(
-              method = AccessMethod.ManualRequest,
-              status = AccessStatus.ByAppointment)
+          ac should have(
+            method(AccessMethod.ManualRequest),
+            status(AccessStatus.ByAppointment),
+            noTerms(),
+            noNote()
           )
         }
 
-        it("if the bib and item need donor permission") {
+        it("if the item needs donor permission") {
           val itemData = createSierraItemDataWith(
             fixedFields = Map(
-              "79" -> FixedField(
-                label = "LOCATION",
-                value = "sc#ac",
-                display = "Unrequestable Arch. & MSS"),
-              "88" -> FixedField(
-                label = "STATUS",
-                value = "y",
-                display = "Permission required"),
-              "108" -> FixedField(
-                label = "OPACMSG",
-                value = "q",
-                display = "Donor permission"),
+              "79" -> createLocationWith("sc#ac", "Unrequestable Arch. & MSS"),
+              "88" -> createStatusWith("y", "Permission required"),
+              "108" -> createOpacMsgWith("q", "Donor permission"),
             )
           )
 
           val (ac, _) = SierraItemAccess(
-            bibId = bibId,
-            itemId = itemId,
-            bibStatus = Some(AccessStatus.PermissionRequired),
             location = Some(LocationType.ClosedStores),
             itemData = itemData
           )
 
-          ac shouldBe Some(
-            AccessCondition(
-              method = AccessMethod.ManualRequest,
-              status = AccessStatus.PermissionRequired)
-          )
-        }
-
-        it("if the bib and item needs donor permission") {
-          val itemData = createSierraItemDataWith(
-            fixedFields = Map(
-              "79" -> FixedField(
-                label = "LOCATION",
-                value = "sicon",
-                display = "Closed stores Visual"),
-              "88" -> FixedField(
-                label = "STATUS",
-                value = "y",
-                display = "Permission required"),
-              "108" -> FixedField(
-                label = "OPACMSG",
-                value = "q",
-                display = "Donor permission"),
-            )
-          )
-
-          val (ac, _) = SierraItemAccess(
-            bibId = bibId,
-            itemId = itemId,
-            bibStatus = None,
-            location = Some(LocationType.ClosedStores),
-            itemData = itemData
-          )
-
-          ac shouldBe Some(
-            AccessCondition(
-              method = AccessMethod.ManualRequest,
-              status = AccessStatus.PermissionRequired)
+          ac should have(
+            method(AccessMethod.ManualRequest),
+            status(AccessStatus.PermissionRequired),
+            noTerms(),
+            noNote()
           )
         }
 
         it("if the item is missing") {
           val itemData = createSierraItemDataWith(
             fixedFields = Map(
-              "79" -> FixedField(
-                label = "LOCATION",
-                value = "sghi2",
-                display = "Closed stores Hist. 2"),
-              "88" -> FixedField(
-                label = "STATUS",
-                value = "m",
-                display = "Missing"),
-              "108" -> FixedField(
-                label = "OPACMSG",
-                value = "f",
-                display = "Online request"),
+              "79" -> createLocationWith("sghi2", "Closed stores Hist. 2"),
+              "88" -> createStatusWith("m", "Missing"),
+              "108" -> createOpacMsgWith("f", "Online request"),
             )
           )
 
           val (ac, _) = SierraItemAccess(
-            bibId = bibId,
-            itemId = itemId,
-            bibStatus = None,
             location = Some(LocationType.ClosedStores),
             itemData = itemData
           )
 
-          ac shouldBe Some(
-            AccessCondition(
-              method = AccessMethod.NotRequestable,
-              status = Some(AccessStatus.Unavailable),
-              note = Some("This item is missing.")
-            )
+          ac should have(
+            method(AccessMethod.NotRequestable),
+            status(AccessStatus.Unavailable),
+            note("This item is missing."),
+            noTerms()
           )
         }
 
         it("if the item is withdrawn") {
           val itemData = createSierraItemDataWith(
             fixedFields = Map(
-              "79" -> FixedField(
-                label = "LOCATION",
-                value = "sghx2",
-                display = "Closed stores Hist. O/S 2"),
-              "88" -> FixedField(
-                label = "STATUS",
-                value = "x",
-                display = "Withdrawn"),
-              "108" -> FixedField(
-                label = "OPACMSG",
-                value = "u",
-                display = "Unavailable"),
+              "79" -> createLocationWith("sghx2", "Closed stores Hist. O/S 2"),
+              "88" -> createStatusWith("x", "Withdrawn"),
+              "108" -> createOpacMsgWith("u", "Unavailable"),
             )
           )
 
           val (ac, _) = SierraItemAccess(
-            bibId = bibId,
-            itemId = itemId,
-            bibStatus = None,
             location = Some(LocationType.ClosedStores),
             itemData = itemData
           )
 
-          ac shouldBe Some(
-            AccessCondition(
-              method = AccessMethod.NotRequestable,
-              status = Some(AccessStatus.Unavailable),
-              note = Some("This item is withdrawn.")
-            )
+          ac should have(
+            method(AccessMethod.NotRequestable),
+            status(AccessStatus.Unavailable),
+            note("This item is withdrawn."),
+            noTerms()
           )
         }
       }
     }
 
-    describe("that's on hold") {
-      it("can't be requested when another reader has placed a hold") {
+    describe("that's on hold can't be requested") {
+      it("when another reader has placed a hold") {
         val itemData = createSierraItemDataWith(
           holdCount = Some(1),
           fixedFields = Map(
-            "79" -> FixedField(
-              label = "LOCATION",
-              value = "sgeph",
-              display = "Closed stores ephemera"),
-            "88" -> FixedField(
-              label = "STATUS",
-              value = "-",
-              display = "Available"),
-            "108" -> FixedField(
-              label = "OPACMSG",
-              value = "f",
-              display = "Online request"),
+            "79" -> createLocationWith("sgeph", "Closed stores ephemera"),
+            "88" -> createStatusWith("-", "Available"),
+            "108" -> createOpacMsgWith("f", "Online request"),
           )
         )
 
         val (ac, _) = SierraItemAccess(
-          bibId = bibId,
-          itemId = itemId,
-          bibStatus = None,
           location = Some(LocationType.ClosedStores),
           itemData = itemData
         )
 
-        ac shouldBe Some(
-          AccessCondition(
-            method = AccessMethod.ManualRequest,
-            status = Some(AccessStatus.TemporarilyUnavailable),
-            note = Some(
-              "Item is in use by another reader. Please ask at Enquiry Desk.")
-          )
+        ac should have(
+          method(AccessMethod.NotRequestable),
+          status(AccessStatus.TemporarilyUnavailable),
+          note(
+            "Item is in use by another reader. Please ask at Library Enquiry Desk."),
+          noTerms()
         )
       }
 
-      it("can't be requested when it's on the hold shelf for another reader") {
+      it("when an item is on hold for a loan rule") {
         val itemData = createSierraItemDataWith(
           holdCount = Some(1),
           fixedFields = Map(
-            "79" -> FixedField(
-              label = "LOCATION",
-              value = "swms4",
-              display = "Closed stores WMS 4"),
-            "88" -> FixedField(
-              label = "STATUS",
-              value = "!",
-              display = "On holdshelf"),
-            "108" -> FixedField(
-              label = "OPACMSG",
-              value = "f",
-              display = "Online request"),
+            "79" -> createLocationWith("sgeph", "Closed stores ephemera"),
+            "87" -> createFixedFieldWith("LOANRULE")("5"),
+            "88" -> createStatusWith("-", "Available"),
+            "108" -> createOpacMsgWith("f", "Online request"),
           )
         )
 
         val (ac, _) = SierraItemAccess(
-          bibId = bibId,
-          itemId = itemId,
-          bibStatus = None,
           location = Some(LocationType.ClosedStores),
           itemData = itemData
         )
 
-        ac shouldBe Some(
-          AccessCondition(
-            method = AccessMethod.ManualRequest,
-            status = Some(AccessStatus.TemporarilyUnavailable),
-            note = Some(
-              "Item is in use by another reader. Please ask at Enquiry Desk.")
+        ac should have(
+          method(AccessMethod.NotRequestable),
+          status(AccessStatus.TemporarilyUnavailable),
+          note(
+            "Item is in use by another reader. Please ask at Library Enquiry Desk."),
+          noTerms()
+        )
+      }
+
+      it("when a manual request item is on hold for somebody else") {
+        val itemData = createSierraItemDataWith(
+          holdCount = Some(1),
+          fixedFields = Map(
+            "61" -> createItypeWith("4", "serial"),
+            "79" -> createLocationWith("sgser", "Closed stores journals"),
+            "88" -> createStatusWith("-", "Available"),
+            "108" -> createOpacMsgWith("n", "Manual request"),
           )
+        )
+
+        val (ac, _) = SierraItemAccess(
+          location = Some(LocationType.ClosedStores),
+          itemData = itemData
+        )
+
+        ac should have(
+          method(AccessMethod.NotRequestable),
+          status(AccessStatus.TemporarilyUnavailable),
+          note(
+            "Item is in use by another reader. Please ask at Library Enquiry Desk."),
+          noTerms()
+        )
+      }
+
+      it("when it's on the hold shelf for another reader") {
+        val itemData = createSierraItemDataWith(
+          holdCount = Some(1),
+          fixedFields = Map(
+            "79" -> createLocationWith("swms4", "Closed stores WMS 4"),
+            "88" -> createStatusWith("!", "On holdshelf"),
+            "108" -> createOpacMsgWith("f", "Online request"),
+          )
+        )
+
+        val (ac, _) = SierraItemAccess(
+          location = Some(LocationType.ClosedStores),
+          itemData = itemData
+        )
+
+        ac should have(
+          method(AccessMethod.NotRequestable),
+          status(AccessStatus.TemporarilyUnavailable),
+          note(
+            "Item is in use by another reader. Please ask at Library Enquiry Desk."),
+          noTerms()
         )
       }
     }
@@ -673,22 +442,10 @@ class SierraItemAccessTest
       it("if there's a display note about manual requesting") {
         val itemData = createSierraItemDataWith(
           fixedFields = Map(
-            "61" -> FixedField(
-              label = "I TYPE",
-              value = "4",
-              display = "serial"),
-            "79" -> FixedField(
-              label = "LOCATION",
-              value = "sgser",
-              display = "Closed stores journals"),
-            "88" -> FixedField(
-              label = "STATUS",
-              value = "-",
-              display = "Available"),
-            "108" -> FixedField(
-              label = "OPACMSG",
-              value = "n",
-              display = "Manual request"),
+            "61" -> createItypeWith("4", "serial"),
+            "79" -> createLocationWith("sgser", "Closed stores journals"),
+            "88" -> createStatusWith("-", "Available"),
+            "108" -> createOpacMsgWith("n", "Manual request"),
           ),
           varFields = List(
             VarField(
@@ -699,38 +456,28 @@ class SierraItemAccessTest
           )
         )
 
-        val (Some(ac), note) = SierraItemAccess(
-          bibId = bibId,
-          itemId = itemId,
-          bibStatus = None,
+        val (ac, itemNote) = SierraItemAccess(
           location = Some(LocationType.ClosedStores),
           itemData = itemData
         )
 
-        ac shouldBe AccessCondition(
-          method = AccessMethod.ManualRequest,
-          note = Some(
-            "Email library@wellcomecollection.org to tell us why you need access. We’ll reply within a week.")
+        ac should have(
+          method(AccessMethod.ManualRequest),
+          note(
+            "Email library@wellcomecollection.org to tell us why you need access. We’ll reply within a week."),
+          noStatus(),
+          noTerms()
         )
 
-        note shouldBe None
+        itemNote shouldBe None
       }
 
       it("doesn't overwrite the note if there's a hold on the item") {
         val itemData = createSierraItemDataWith(
           fixedFields = Map(
-            "79" -> FixedField(
-              label = "LOCATION",
-              value = "sgser",
-              display = "Closed stores journals"),
-            "88" -> FixedField(
-              label = "STATUS",
-              value = "-",
-              display = "Available"),
-            "108" -> FixedField(
-              label = "OPACMSG",
-              value = "f",
-              display = "Online request"),
+            "79" -> createLocationWith("sgser", "Closed stores journals"),
+            "88" -> createStatusWith("-", "Available"),
+            "108" -> createOpacMsgWith("f", "Online request"),
           ),
           holdCount = Some(1),
           varFields = List(
@@ -742,39 +489,26 @@ class SierraItemAccessTest
           )
         )
 
-        val (Some(ac), note) = SierraItemAccess(
-          bibId = bibId,
-          itemId = itemId,
-          bibStatus = None,
+        val (ac, itemNote) = SierraItemAccess(
           location = Some(LocationType.ClosedStores),
           itemData = itemData
         )
 
-        ac.note shouldBe Some(
-          "Item is in use by another reader. Please ask at Enquiry Desk.")
-        note shouldBe None
+        ac should have(
+          note(
+            "Item is in use by another reader. Please ask at Library Enquiry Desk.")
+        )
+
+        itemNote shouldBe None
       }
 
       it("if there's a display note with access information") {
         val itemData = createSierraItemDataWith(
           fixedFields = Map(
-            "61" -> FixedField(
-              label = "I TYPE",
-              value = "4",
-              display = "serial"
-            ),
-            "79" -> FixedField(
-              label = "LOCATION",
-              value = "hgser",
-              display = "Offsite"),
-            "88" -> FixedField(
-              label = "STATUS",
-              value = "y",
-              display = "Permission required"),
-            "108" -> FixedField(
-              label = "OPACMSG",
-              value = "a",
-              display = "By appointment"),
+            "61" -> createItypeWith("4", "serial"),
+            "79" -> createLocationWith("hgser", "Offsite"),
+            "88" -> createStatusWith("y", "Permission required"),
+            "108" -> createOpacMsgWith("a", "By appointment"),
           ),
           varFields = List(
             VarField(
@@ -785,34 +519,23 @@ class SierraItemAccessTest
           )
         )
 
-        val (Some(ac), _) = SierraItemAccess(
-          bibId = bibId,
-          itemId = itemId,
-          bibStatus = None,
+        val (ac, _) = SierraItemAccess(
           location = Some(LocationType.ClosedStores),
           itemData = itemData
         )
 
-        ac.note shouldBe Some(
-          "Email library@wellcomecollection.org to tell us why you need the physical copy. We'll reply within a week.")
-        ac.terms shouldBe None
+        ac should have(
+          note(
+            "Email library@wellcomecollection.org to tell us why you need the physical copy. We'll reply within a week.")
+        )
       }
 
       it("returns the note if it's unrelated to access data") {
         val itemData = createSierraItemDataWith(
           fixedFields = Map(
-            "79" -> FixedField(
-              label = "LOCATION",
-              value = "scmac",
-              display = "Closed stores Arch. & MSS"),
-            "88" -> FixedField(
-              label = "STATUS",
-              value = "-",
-              display = "Available"),
-            "108" -> FixedField(
-              label = "OPACMSG",
-              value = "f",
-              display = "Online request"),
+            "79" -> createLocationWith("scmac", "Closed stores Arch. & MSS"),
+            "88" -> createStatusWith("-", "Available"),
+            "108" -> createOpacMsgWith("f", "Online request"),
           ),
           varFields = List(
             VarField(
@@ -822,15 +545,12 @@ class SierraItemAccessTest
           )
         )
 
-        val (_, Some(note)) = SierraItemAccess(
-          bibId = bibId,
-          itemId = itemId,
-          bibStatus = None,
+        val (_, Some(itemNote)) = SierraItemAccess(
           location = Some(LocationType.ClosedStores),
           itemData = itemData
         )
 
-        note shouldBe "uncoloured impression on paper mount"
+        itemNote shouldBe "uncoloured impression on paper mount"
       }
     }
   }
@@ -840,47 +560,31 @@ class SierraItemAccessTest
       it("cannot be requested online") {
         val itemData = createSierraItemDataWith(
           fixedFields = Map(
-            "79" -> FixedField(
-              label = "LOCATION",
-              value = "wgmem",
-              display = "Medical Collection"),
-            "88" -> FixedField(
-              label = "STATUS",
-              value = "-",
-              display = "Available"),
-            "108" -> FixedField(
-              label = "OPACMSG",
-              value = "o",
-              display = "Open shelves"),
+            "79" -> createLocationWith("wgmem", "Medical Collection"),
+            "88" -> createStatusWith("-", "Available"),
+            "108" -> createOpacMsgWith("o", "Open shelves"),
           )
         )
 
-        val (Some(ac), _) = SierraItemAccess(
-          bibId = bibId,
-          itemId = itemId,
-          bibStatus = None,
+        val (ac, _) = SierraItemAccess(
           location = Some(LocationType.OpenShelves),
           itemData = itemData
         )
 
-        ac shouldBe AccessCondition(method = AccessMethod.OpenShelves)
+        ac should have(
+          method(AccessMethod.OpenShelves),
+          noStatus(),
+          noTerms(),
+          noNote()
+        )
       }
 
       it("gets a display note") {
         val itemData = createSierraItemDataWith(
           fixedFields = Map(
-            "79" -> FixedField(
-              label = "LOCATION",
-              value = "wgpvm",
-              display = "History of Medicine"),
-            "88" -> FixedField(
-              label = "STATUS",
-              value = "-",
-              display = "Available"),
-            "108" -> FixedField(
-              label = "OPACMSG",
-              value = "o",
-              display = "Open shelves"),
+            "79" -> createLocationWith("wgpvm", "History of Medicine"),
+            "88" -> createStatusWith("-", "Available"),
+            "108" -> createOpacMsgWith("o", "Open shelves"),
           ),
           varFields = List(
             VarField(
@@ -892,19 +596,13 @@ class SierraItemAccessTest
         )
 
         val (ac, _) = SierraItemAccess(
-          bibId = bibId,
-          itemId = itemId,
-          bibStatus = None,
           location = Some(LocationType.OpenShelves),
           itemData = itemData
         )
 
-        ac shouldBe Some(
-          AccessCondition(
-            method = AccessMethod.OpenShelves,
-            note = Some(
-              "Shelved at the end of the Quick Ref. section with the oversize Quick Ref. books.")
-          )
+        ac should have(
+          note(
+            "Shelved at the end of the Quick Ref. section with the oversize Quick Ref. books.")
         )
       }
     }
@@ -912,69 +610,198 @@ class SierraItemAccessTest
     it("is not available if it is missing") {
       val itemData = createSierraItemDataWith(
         fixedFields = Map(
-          "79" -> FixedField(
-            label = "LOCATION",
-            value = "wgmem",
-            display = "Medical Collection"),
-          "88" -> FixedField(
-            label = "STATUS",
-            value = "m",
-            display = "Missing"),
-          "108" -> FixedField(
-            label = "OPACMSG",
-            value = "o",
-            display = "Open shelves"),
+          "79" -> createLocationWith("wgmem", "Medical Collection"),
+          "88" -> createStatusWith("m", "Missing"),
+          "108" -> createOpacMsgWith("o", "Open shelves"),
         )
       )
 
       val (ac, _) = SierraItemAccess(
-        bibId = bibId,
-        itemId = itemId,
-        bibStatus = None,
         location = Some(LocationType.OpenShelves),
         itemData = itemData
       )
 
-      ac shouldBe Some(
-        AccessCondition(
-          method = AccessMethod.NotRequestable,
-          status = Some(AccessStatus.Unavailable),
-          note = Some("This item is missing.")
+      ac should have(
+        method(AccessMethod.NotRequestable),
+        status(AccessStatus.Unavailable),
+        note("This item is missing."),
+        noTerms()
+      )
+    }
+
+    it("is not available if it has a loan rule 14 and a due date") {
+      val itemData = createSierraItemDataWith(
+        fixedFields = Map(
+          "65" -> createFixedFieldWith("DUE DATE")("2020-09-01T03:00:00Z"),
+          "79" -> createLocationWith("wgpvm", "History of Medicine"),
+          "87" -> createFixedFieldWith("LOANRULE")("14"),
+          "88" -> createStatusWith("-", "Available"),
+          "108" -> createOpacMsgWith("o", "Open shelves")
         )
+      )
+
+      val (ac, _) = SierraItemAccess(
+        location = Some(LocationType.OpenShelves),
+        itemData = itemData
+      )
+
+      ac should have(
+        method(AccessMethod.OpenShelves),
+        status(AccessStatus.TemporarilyUnavailable),
+        note(
+          "Item is in use by another reader. Please ask at Library Enquiry Desk."),
+        noTerms()
+      )
+    }
+
+    it("is not available if it has a due date") {
+      val itemData = createSierraItemDataWith(
+        fixedFields = Map(
+          "65" -> createFixedFieldWith("DUE DATE")("2020-09-01T03:00:00Z"),
+          "79" -> createLocationWith("wgpvm", "History of Medicine"),
+          "88" -> createStatusWith("-", "Available"),
+          "108" -> createOpacMsgWith("o", "Open shelves")
+        )
+      )
+
+      val (ac, _) = SierraItemAccess(
+        location = Some(LocationType.OpenShelves),
+        itemData = itemData
+      )
+
+      ac should have(
+        method(AccessMethod.OpenShelves),
+        status(AccessStatus.TemporarilyUnavailable),
+        note(
+          "Item is in use by another reader. Please ask at Library Enquiry Desk."),
+        noTerms()
       )
     }
   }
 
+  describe("an item on exhibition") {
+    it("has a note based on its Reserves Note") {
+      val displayreservation =
+        "Locked filing cabinet, disused lavatory with a sign saying 'Beware of The Leopard'"
+      val itemData = createSierraItemDataWith(
+        fixedFields = Map(
+          "79" -> createLocationWith("exres", "On Exhibition")
+        ),
+        varFields = List(
+          VarField(fieldTag = "r", displayreservation)
+        )
+      )
+
+      val (ac, _) = SierraItemAccess(
+        location = Some(LocationType.OnExhibition),
+        itemData = itemData
+      )
+
+      ac should have(
+        note(displayreservation)
+      )
+    }
+    it("can show multiple Reserves Notes") {
+      val itemData = createSierraItemDataWith(
+        fixedFields = Map(
+          "79" -> createLocationWith("exres", "On Exhibition")
+        ),
+        varFields = List(
+          VarField(fieldTag = "r", "in the bottom of a locked filing cabinet"),
+          VarField(fieldTag = "r", "stuck in a disused lavatory"),
+          VarField(
+            fieldTag = "r",
+            "with a sign on the door saying 'Beware of The Leopard'")
+        ),
+      )
+
+      val (ac, _) = SierraItemAccess(
+        location = Some(LocationType.OnExhibition),
+        itemData = itemData
+      )
+
+      ac should have(
+        note(
+          "in the bottom of a locked filing cabinet<br />" +
+            "stuck in a disused lavatory<br />" +
+            "with a sign on the door saying 'Beware of The Leopard'"
+        )
+      )
+    }
+    it("Only shows substantive content from Reserves Notes") {
+      val itemData = createSierraItemDataWith(
+        fixedFields = Map(
+          "79" -> createLocationWith("exres", "On Exhibition")
+        ),
+        varFields = List(
+          VarField(
+            fieldTag = "r",
+            "25-12-22 ON RESERVE FOR Beware of the Leopard"),
+          VarField(
+            fieldTag = "r",
+            "25-12-22 OFF RESERVE FOR Beware of the Leopard CIRCED 2 TIMES"),
+          VarField(fieldTag = "r", "In a locked filing cabinet")
+        )
+      )
+
+      val (ac, _) = SierraItemAccess(
+        location = Some(LocationType.OnExhibition),
+        itemData = itemData
+      )
+      // To avoid confusion for staff, and in the interest of completeness, notes that are identical
+      // after removing the non-interesting content are preserved.
+      // This scenario *should* not be encountered.
+      //  - Something that is On Exhibition is not expected to have an off reserve entry.
+      //  - Something that has both an on and an off reserve entry is not expected to be On Exhibition.
+      // However, it is something that *could* happen.
+      // If these duplicate lines are encountered in real life, we should get the record corrected in Sierra.
+      ac should have(
+        note(
+          "Beware of the Leopard<br />" +
+            "Beware of the Leopard<br />" +
+            "In a locked filing cabinet"
+        )
+      )
+    }
+    it(
+      "has the default 'contact the library' note if there are no Reserves Notes") {
+      val itemData = createSierraItemDataWith(
+        fixedFields = Map(
+          "79" -> createLocationWith("exres", "On Exhibition")
+        ),
+        varFields = List(
+          VarField(fieldTag = "p", "GBP850")
+        )
+      )
+
+      val (ac, _) = SierraItemAccess(
+        location = Some(LocationType.OnExhibition),
+        itemData = itemData
+      )
+
+      ac should have(
+        note(
+          s"""This item cannot be requested online. Please contact <a href="mailto:library@wellcomecollection.org">library@wellcomecollection.org</a> for more information.""")
+      )
+    }
+  }
   it("handles the case where we can't map the access data") {
     val itemData = createSierraItemDataWith(
       fixedFields = Map(
-        "79" -> FixedField(
-          label = "LOCATION",
-          value = "scmac",
-          display = "Closed stores Arch. & MSS"),
-        "88" -> FixedField(label = "STATUS", value = "?", display = "Unknown"),
-        "108" -> FixedField(
-          label = "OPACMSG",
-          value = "f",
-          display = "Online request"),
+        "79" -> createLocationWith("scmac", "Closed stores Arch. & MSS"),
+        "88" -> createStatusWith("?", "Unknown"),
+        "108" -> createOpacMsgWith("f", "Online request"),
       )
     )
 
-    val (Some(ac), _) = SierraItemAccess(
-      bibId = bibId,
-      itemId = itemId,
-      bibStatus = None,
+    val (ac, _) = SierraItemAccess(
       location = Some(LocationType.ClosedStores),
       itemData = itemData
     )
 
-    ac shouldBe AccessCondition(
-      method = AccessMethod.NotRequestable,
-      note = Some(
-        s"""Please check this item <a href="https://search.wellcomelibrary.org/iii/encore/record/C__Rb${bibId.withoutCheckDigit}?lang=eng">on the Wellcome Library website</a> for access information""")
+    ac should have(
+      note(
+        s"""This item cannot be requested online. Please contact <a href="mailto:library@wellcomecollection.org">library@wellcomecollection.org</a> for more information.""")
     )
   }
-
-  val bibId: SierraBibNumber = createSierraBibNumber
-  val itemId: SierraItemNumber = createSierraItemNumber
 }

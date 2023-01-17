@@ -1,60 +1,23 @@
 package weco.pipeline.transformer.mets
 
-import akka.actor.ActorSystem
-import com.amazonaws.services.s3.AmazonS3
-import com.typesafe.config.Config
-
-import scala.concurrent.ExecutionContext
-import weco.json.JsonUtil._
-import weco.messaging.sns.NotificationMessage
-import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
-import weco.storage.typesafe.S3Builder
-import weco.typesafe.WellcomeTypesafeApp
-import weco.typesafe.config.builders.AkkaBuilder
-import weco.catalogue.internal_model.index.WorksIndexConfig
-import weco.catalogue.internal_model.work.WorkState.Source
-import weco.elasticsearch.typesafe.ElasticBuilder
-import weco.pipeline_storage.typesafe.ElasticSourceRetrieverBuilder
+import software.amazon.awssdk.services.s3.S3Client
+import weco.catalogue.source_model.Implicits._
+import weco.pipeline.transformer.TransformerMain
+import weco.pipeline.transformer.mets.services.MetsSourceDataRetriever
+import weco.pipeline.transformer.mets.transformer.MetsXmlTransformer
 import weco.storage.store.s3.S3TypedStore
-import weco.typesafe.config.builders.AWSClientConfigBuilder
-import weco.catalogue.internal_model.work.Work
-import weco.pipeline.transformer.mets.services.MetsTransformerWorker
-import weco.pipeline_storage.typesafe.{
-  ElasticIndexerBuilder,
-  ElasticSourceRetrieverBuilder,
-  PipelineStorageStreamBuilder
-}
+import weco.typesafe.WellcomeTypesafeApp
 
-object Main extends WellcomeTypesafeApp with AWSClientConfigBuilder {
-  runWithConfig { config: Config =>
-    implicit val ec: ExecutionContext =
-      AkkaBuilder.buildExecutionContext()
-    implicit val actorSystem: ActorSystem =
-      AkkaBuilder.buildActorSystem()
+object Main extends WellcomeTypesafeApp {
+  implicit val s3Client: S3Client = S3Client.builder().build()
 
-    implicit val s3Client: AmazonS3 = S3Builder.buildS3Client(config)
+  val transformer = new TransformerMain(
+    sourceName = "METS",
+    transformer = new MetsXmlTransformer(S3TypedStore[String]),
+    sourceDataRetriever = new MetsSourceDataRetriever()
+  )
 
-    val esClient = ElasticBuilder.buildElasticClient(config)
-
-    val pipelineStream = PipelineStorageStreamBuilder
-      .buildPipelineStorageStream(
-        sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
-        indexer = ElasticIndexerBuilder[Work[Source]](
-          config,
-          esClient,
-          indexConfig = WorksIndexConfig.source
-        ),
-        messageSender = SNSBuilder
-          .buildSNSMessageSender(
-            config,
-            subject = "Sent from the METS transformer")
-      )(config)
-
-    new MetsTransformerWorker(
-      pipelineStream = pipelineStream,
-      metsXmlStore = S3TypedStore[String],
-      retriever =
-        ElasticSourceRetrieverBuilder.apply[Work[Source]](config, esClient)
-    )
+  runWithConfig { config =>
+    transformer.run(config)
   }
 }

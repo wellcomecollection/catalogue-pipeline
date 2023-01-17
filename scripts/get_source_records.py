@@ -31,26 +31,20 @@ SIERRA_ADAPTER_TABLE = "vhs-sierra-sierra-adapter-20200604"
 
 
 def get_current_works_index():
-    resp = httpx.get(
-        "https://api.wellcomecollection.org/catalogue/v2/search-templates.json"
-    )
+    resp = httpx.get("https://api.wellcomecollection.org/catalogue/v2/_elasticConfig")
 
-    return resp.json()["templates"][0]["index"]
+    return resp.json()["worksIndex"]
 
 
-def get_source_identifiers(session, *, work_id):
+def get_source_identifiers(*, work_id):
     """
     Return the identifiers for all the records that made up this work.
 
     This is *not* the same as the list of identifiers presented in the API.
 
     """
-
+    es_client = get_api_es_client()
     works_index = get_current_works_index()
-    pipeline_date = get_date_from_index_name(works_index)
-    es_client = get_pipeline_es_client(
-        session, pipeline_date=pipeline_date, doc_type="work", action="read"
-    )
 
     es_resp = es_client.get(index=works_index, id=work_id)
     work = es_resp["_source"]
@@ -165,11 +159,11 @@ if __name__ == "__main__":
 
     apply_cleanups = "--skip-cleanup" not in sys.argv
 
-    session = get_session(role_arn="arn:aws:iam::760097843905:role/platform-developer")
-
-    source_identifiers = get_source_identifiers(session, work_id=work_id)
+    source_identifiers = get_source_identifiers(work_id=work_id)
 
     temp_dir = tempfile.mkdtemp(prefix=work_id)
+
+    session = get_session(role_arn="arn:aws:iam::760097843905:role/platform-developer")
 
     for id in source_identifiers:
         record = get_source_record(

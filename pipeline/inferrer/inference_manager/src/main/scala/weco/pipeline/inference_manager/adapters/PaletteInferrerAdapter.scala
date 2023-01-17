@@ -22,18 +22,22 @@ class PaletteInferrerAdapter(host: String, port: Int) extends InferrerAdapter {
             "query_url" -> Uri
               .from(scheme = "file", path = image.pathString)
               .toString
-          ))
+          )
+        )
         .withHost(host)
         .withPort(port)
         .withScheme("http")
     )
 
-  def augment(inferredData: InferredData,
-              inferrerResponse: Response): InferredData =
+  def augment(
+    inferredData: InferredData,
+    inferrerResponse: Response
+  ): InferredData =
     inferrerResponse match {
-      case PaletteInferrerResponse(palette, params) =>
+      case PaletteInferrerResponse(palette, average_color_hex, params) =>
         inferredData.copy(
           palette = palette,
+          averageColorHex = Some(average_color_hex),
           binSizes = params.bin_sizes,
           binMinima = params.bin_minima
         )

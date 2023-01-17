@@ -1,13 +1,13 @@
 package weco.pipeline.merger.fixtures
 
 import weco.fixtures.RandomGenerators
-import weco.catalogue.internal_model.matcher.{
+import weco.catalogue.internal_model.work.WorkState.Identified
+import weco.catalogue.internal_model.work.Work
+import weco.pipeline.matcher.models.{
   MatchedIdentifiers,
   MatcherResult,
   WorkIdentifier
 }
-import weco.catalogue.internal_model.work.WorkState.Identified
-import weco.catalogue.internal_model.work.Work
 
 import java.time.Instant
 

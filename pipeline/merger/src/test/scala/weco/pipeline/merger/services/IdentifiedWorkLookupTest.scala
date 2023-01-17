@@ -3,10 +3,10 @@ package weco.pipeline.merger.services
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.matcher.WorkIdentifier
 import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.generators.WorkGenerators
+import weco.pipeline.matcher.models.WorkIdentifier
 import weco.pipeline_storage.memory.MemoryRetriever
 
 import scala.collection.mutable
@@ -38,22 +38,6 @@ class IdentifiedWorkLookupTest
 
     whenReady(fetchAllWorks(retriever = retriever, work).failed) {
       _ shouldBe a[Exception]
-    }
-  }
-
-  it("returns None if asked to fetch a Work without a version") {
-    val work = identifiedWork().withVersion(0)
-    val workId = WorkIdentifier(work.state.canonicalId, version = None)
-
-    val retriever = new MemoryRetriever[Work[Identified]](
-      index = mutable.Map(work.id -> work)
-    )
-
-    val identifiedWorkLookup = new IdentifiedWorkLookup(retriever)
-
-    whenReady(
-      identifiedWorkLookup.fetchAllWorks(workIdentifiers = List(workId))) {
-      _ shouldBe Seq(None)
     }
   }
 

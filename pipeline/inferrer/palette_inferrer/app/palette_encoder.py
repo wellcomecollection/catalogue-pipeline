@@ -3,7 +3,7 @@ import numpy as np
 from sklearn.cluster import KMeans
 from joblib import Parallel, delayed
 
-from .color import rgb_to_hsv
+from .color import rgb_to_hsv, rgb_to_hex
 
 tau = 2 * np.pi
 min_bin_width = 1.0 / 256
@@ -62,14 +62,17 @@ class PaletteEncoder:
         return np.stack([h, s, v], axis=-1)
 
     @staticmethod
-    def get_significant_colors(image, n):
+    def get_rgb_pixels(image):
+        rgb_image = image.convert("RGB")
+        return np.array(rgb_image).reshape(-1, 3)
+
+    @staticmethod
+    def get_significant_colors(rgb_pixels, n):
         """
         extract n significant colours from the image pixels by taking the
         centres of n kmeans clusters of the image's pixels arranged in colour
         space. Returns colours in descending order of cluster cardinality.
         """
-        rgb_image = image.convert("RGB")  # Should be RGB already but make sure
-        rgb_pixels = np.array(rgb_image).reshape(-1, 3)
         hsv_pixels = rgb_to_hsv(rgb_pixels)
 
         # Only cluster distinct colours but weight them by their frequency
@@ -167,7 +170,17 @@ class PaletteEncoder:
         """
         extract presence of colour in the image at multiple precision levels
         """
-        colors, weights = zip(*self.get_significant_colors(image, self.palette_size))
+        rgb_pixels = self.get_rgb_pixels(image)
+        average_color_truncated = np.mean(rgb_pixels, axis=0).astype(np.int64)
+        average_color_hex = rgb_to_hex(
+            average_color_truncated[0],
+            average_color_truncated[1],
+            average_color_truncated[2],
+        )
+
+        colors, weights = zip(
+            *self.get_significant_colors(rgb_pixels, self.palette_size)
+        )
         scaled_weights = self.scale_weights(weights)
         combined_results = [
             (self.get_bin_index(color, bin_sizes), bin_i, weight)
@@ -175,7 +188,10 @@ class PaletteEncoder:
             for color, weight in zip(colors, scaled_weights)
         ]
 
-        return self.encode_for_elasticsearch(combined_results)
+        return {
+            "lsh": self.encode_for_elasticsearch(combined_results),
+            "average_color_hex": f"#{average_color_hex}",
+        }
 
     def __call__(self, images):
         """

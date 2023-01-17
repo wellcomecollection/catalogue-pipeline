@@ -5,20 +5,26 @@ import com.typesafe.config.Config
 import org.scanamo.DynamoFormat
 import org.scanamo.generic.auto._
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import weco.catalogue.source_model.config.SierraRecordTypeBuilder
-import weco.catalogue.source_model.sierra.identifiers._
 import weco.catalogue.source_model.sierra.{
   AbstractSierraRecord,
   SierraHoldingsRecord,
   SierraItemRecord,
   SierraOrderRecord
 }
-import weco.json.JsonUtil._
+import weco.catalogue.source_model.Implicits._
 import weco.messaging.sns.NotificationMessage
 import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import weco.pipeline.sierra_linker.dynamo.Implicits._
 import weco.pipeline.sierra_linker.models.{Link, LinkOps}
 import weco.pipeline.sierra_linker.services.{LinkStore, SierraLinkerWorker}
+import weco.sierra.models.identifiers.{
+  SierraHoldingsNumber,
+  SierraItemNumber,
+  SierraOrderNumber,
+  SierraRecordTypes,
+  TypedSierraRecordNumber
+}
+import weco.sierra.typesafe.SierraRecordTypeBuilder
 import weco.storage.store.dynamo.DynamoSingleVersionStore
 import weco.storage.typesafe.DynamoBuilder
 import weco.typesafe.WellcomeTypesafeApp
@@ -81,7 +87,7 @@ object Main extends WellcomeTypesafeApp {
     format: DynamoFormat[Id]
   ): LinkStore[Id, Record] = {
     implicit val dynamoClient: DynamoDbClient =
-      DynamoBuilder.buildDynamoClient(config)
+      DynamoBuilder.buildDynamoClient
 
     val versionedStore =
       new DynamoSingleVersionStore[Id, Link](

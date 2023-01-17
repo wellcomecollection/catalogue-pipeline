@@ -18,7 +18,7 @@ object Main extends WellcomeTypesafeApp {
       AkkaBuilder.buildActorSystem()
 
     implicit val dynamoClient: DynamoDbClient =
-      DynamoBuilder.buildDynamoClient(config)
+      DynamoBuilder.buildDynamoClient
     val dynamoConfig =
       DynamoBuilder.buildDynamoConfig(config, namespace = "vhs")
 

@@ -3,6 +3,7 @@ package weco.pipeline.inference_manager.models
 import weco.pipeline.inference_manager.adapters.InferrerResponse
 
 // The type of the response from the inferrer, for Circe's decoding
-case class FeatureVectorInferrerResponse(features_b64: String,
-                                         lsh_encoded_features: List[String])
-    extends InferrerResponse
+case class FeatureVectorInferrerResponse(
+  features_b64: String,
+  reduced_features_b64: String
+) extends InferrerResponse

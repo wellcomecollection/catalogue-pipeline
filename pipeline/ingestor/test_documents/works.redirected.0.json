@@ -1,0 +1,36 @@
+{
+  "description" : "an arbitrary list of redirected works",
+  "createdAt" : "2022-10-03T10:25:18.789Z",
+  "id" : "4nwkprdt",
+  "document" : {
+    "debug" : {
+      "source" : {
+        "id" : "4nwkprdt",
+        "identifier" : {
+          "identifierType" : {
+            "id" : "calm-record-id"
+          },
+          "ontologyType" : "Work",
+          "value" : "PciYoP2Wz6"
+        },
+        "version" : 78,
+        "modifiedTime" : "2044-05-21T11:37:26Z"
+      },
+      "mergedTime" : "2044-05-21T11:37:26Z",
+      "indexedTime" : "2001-01-01T01:01:01Z"
+    },
+    "redirectTarget" : {
+      "canonicalId" : "mv6kix0n",
+      "sourceIdentifier" : {
+        "identifierType" : {
+          "id" : "sierra-system-number"
+        },
+        "ontologyType" : "Work",
+        "value" : "qklbwm3uF6"
+      },
+      "otherIdentifiers" : [
+      ]
+    },
+    "type" : "Redirected"
+  }
+}

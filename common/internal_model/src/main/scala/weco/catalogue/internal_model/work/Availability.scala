@@ -3,7 +3,6 @@ package weco.catalogue.internal_model.work
 import enumeratum.{Enum, EnumEntry}
 import io.circe.{Decoder, Encoder}
 import weco.catalogue.internal_model.locations.{
-  AccessCondition,
   DigitalLocation,
   Location,
   LocationType,
@@ -35,85 +34,69 @@ object Availability extends Enum[Availability] {
     val label = "Online"
   }
 
-  case object InLibrary extends Availability {
-    val id = "in-library"
-    val label = "In the library"
+  case object ClosedStores extends Availability {
+    val id = "closed-stores"
+    val label = "Closed stores"
+  }
+
+  case object OpenShelves extends Availability {
+    val id = "open-shelves"
+    val label = "Open shelves"
   }
 }
 
 object Availabilities {
-  def forWorkData(data: WorkData[_]): Set[Availability] = {
-    val locations =
-      data.items.flatMap { _.locations } ++
-        data.holdings.flatMap { _.location }
-
-    Set(
-      when(locations.exists(_.isAvailableInLibrary)) {
-        Availability.InLibrary
-      },
-      when(locations.exists(_.isAvailableOnline)) {
-        Availability.Online
-      },
-    ).flatten
-  }
+  def forWorkData(data: WorkData[_]): Set[Availability] =
+    (data.items.flatMap(_.locations) ++ data.holdings.flatMap(_.location))
+      .flatMap(_.availability(data.notes))
+      .toSet
 
   private implicit class LocationOps(loc: Location) {
-    def isAvailableInLibrary: Boolean =
+    def availability(notes: Seq[Note]): Option[Availability] =
       loc match {
-        // The availability filter is meant to show people things they
-        // can actually see, so we don't include items that have been ordered
-        // but aren't available to view yet.
-        case physicalLoc: PhysicalLocation
-            if physicalLoc.locationType == LocationType.OnOrder =>
-          false
-
-        // Don't include items if they have a physical location but are actually
-        // held in another institution.
-        //
-        // Right now we do crude string matching on the terms in the access condition.
-        // There might be something better we can do that looks at the reference numbers,
-        // but for now this is a significant improvement without much effort.
-        //
-        // See https://github.com/wellcomecollection/platform/issues/5190
-        case physicalLoc: PhysicalLocation
-            if physicalLoc.accessConditions.exists {
-              _.termsAreOtherInstitution
-            } =>
-          false
-
-        case _: PhysicalLocation => true
-
-        case _ => false
-      }
-
-    def isAvailableOnline: Boolean =
-      loc match {
-        case digitalLoc: DigitalLocation if digitalLoc.isAvailable => true
-        case _                                                     => false
+        case PhysicalLocation(LocationType.OpenShelves, _, _, _, _) =>
+          Some(Availability.OpenShelves)
+        case PhysicalLocation(LocationType.ClosedStores, _, _, _, _)
+            if !notes.exists(_.isInOtherLibrary) =>
+          Some(Availability.ClosedStores)
+        case digitalLocation: DigitalLocation if digitalLocation.isAvailable =>
+          Some(Availability.Online)
+        case _ => None
       }
   }
 
-  private implicit class OptionalAccessConditionOps(ac: AccessCondition) {
-    def termsAreOtherInstitution: Boolean =
-      ac.terms match {
-        case Some(t) if t.toLowerCase.contains("available at") => true
-        case Some(t) if t.toLowerCase.contains("available by appointment at") =>
+  private implicit class NoteOps(n: Note) {
+    // Don't include items if they have a physical location but are actually
+    // held in another institution.
+    //
+    // Right now we do crude string matching on the terms in the access condition.
+    // There might be something better we can do that looks at the reference numbers,
+    // but for now this is a significant improvement without much effort.
+    //
+    // See https://github.com/wellcomecollection/platform/issues/5190
+    def isInOtherLibrary: Boolean =
+      n match {
+        case Note.TermsOfUse(terms) => termsAreOtherInstitution(terms)
+        case _                      => false
+      }
+
+    def termsAreOtherInstitution(terms: String): Boolean =
+      terms match {
+        case t if t.toLowerCase.contains("available at") => true
+        case t if t.toLowerCase.contains("available by appointment at") =>
           true
 
-        case Some(t) if t.contains("Churchill Archives Centre") => true
-        case Some(t) if t.contains("UCL Special Collections and Archives") =>
+        case t if t.contains("Churchill Archives Centre") => true
+        case t if t.contains("UCL Special Collections and Archives") =>
           true
-        case Some(t) if t.contains("at King's College London") => true
-        case Some(t) if t.contains("at the Army Medical Services Museum") =>
+        case t if t.contains("at King's College London") => true
+        case t if t.contains("at the Army Medical Services Museum") =>
           true
-        case Some(t)
+        case t
             if t.contains("currently remains with the Martin Leake family") =>
           true
 
         case _ => false
       }
   }
-
-  private def when[T](condition: Boolean)(result: T): Option[T] =
-    if (condition) Some(result) else { None }
 }

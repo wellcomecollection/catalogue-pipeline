@@ -1,6 +1,6 @@
 package weco.pipeline.sierra_indexer.models
 
-import weco.catalogue.source_model.sierra.identifiers.{
+import weco.sierra.models.identifiers.{
   SierraRecordTypes,
   TypedSierraRecordNumber
 }

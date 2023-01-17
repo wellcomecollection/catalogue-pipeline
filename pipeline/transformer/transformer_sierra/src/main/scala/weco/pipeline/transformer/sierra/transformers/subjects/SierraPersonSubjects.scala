@@ -2,9 +2,9 @@ package weco.pipeline.transformer.sierra.transformers.subjects
 
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work._
-import weco.catalogue.source_model.sierra.identifiers.SierraBibNumber
-import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
 import weco.pipeline.transformer.sierra.transformers.SierraAgents
+import weco.sierra.models.identifiers.SierraBibNumber
+import weco.sierra.models.marc.{Subfield, VarField}
 
 // Populate wwork:subject
 //
@@ -28,8 +28,10 @@ object SierraPersonSubjects
 
   val subjectVarFields = List("600")
 
-  def getSubjectsFromVarFields(bibId: SierraBibNumber,
-                               varFields: List[VarField]): Output = {
+  def getSubjectsFromVarFields(
+    bibId: SierraBibNumber,
+    varFields: List[VarField]
+  ): Output = {
     // Second indicator 7 means that the subject authority is something other
     // than library of congress or mesh. Some MARC records have duplicated subjects
     // when the same subject has more than one authority (for example mesh and FAST),
@@ -45,7 +47,7 @@ object SierraPersonSubjects
         val generalSubdivisions =
           varField.subfields
             .collect {
-              case MarcSubfield("x", content) => content
+              case Subfield("x", content) => content
             }
 
         maybePerson.map { person =>
@@ -55,35 +57,38 @@ object SierraPersonSubjects
             dates = getDates(subfields),
             generalSubdivisions = generalSubdivisions
           )
-
-          val subject = Subject(
+          val subjectIdentifier = identifyAgentSubject(varField, "Person")
+          val maybeIdentifiedPerson =
+            person.copy(id = subjectIdentifier)
+          Subject(
             label = label,
-            concepts = getConcepts(person, generalSubdivisions)
+            concepts = getConcepts(
+              maybeIdentifiedPerson.identifiable(),
+              generalSubdivisions
+            ),
+            id = subjectIdentifier
           )
-
-          varField.indicator2 match {
-            case Some("0") =>
-              subject.copy(id = identify(varField.subfields, "Subject"))
-            case _ => subject
-          }
         }
       }
   }
 
-  private def getPersonSubjectLabel(person: Person[IdState.Unminted],
-                                    roles: List[String],
-                                    dates: Option[String],
-                                    generalSubdivisions: List[String]): String =
+  private def getPersonSubjectLabel(
+    person: Person[IdState.Unminted],
+    roles: List[String],
+    dates: Option[String],
+    generalSubdivisions: List[String]
+  ): String =
     (List(person.label) ++ roles ++ generalSubdivisions)
       .mkString(" ")
 
-  private def getConcepts(person: Person[IdState.Unminted],
-                          generalSubdivisions: List[String])
-    : List[AbstractRootConcept[IdState.Unminted]] =
+  private def getConcepts(
+    person: Person[IdState.Unminted],
+    generalSubdivisions: List[String]
+  ): List[AbstractRootConcept[IdState.Unminted]] =
     person +: generalSubdivisions.map(Concept(_))
 
-  private def getRoles(secondarySubfields: List[MarcSubfield]) =
-    secondarySubfields.collect { case MarcSubfield("e", role) => role }
-  private def getDates(secondarySubfields: List[MarcSubfield]) =
+  private def getRoles(secondarySubfields: List[Subfield]) =
+    secondarySubfields.collect { case Subfield("e", role) => role }
+  private def getDates(secondarySubfields: List[Subfield]) =
     secondarySubfields.find(_.tag == "d").map(_.content)
 }

@@ -1,11 +1,11 @@
 package weco.pipeline.sierra_linker.models
 
-import weco.catalogue.source_model.sierra.identifiers.SierraBibNumber
 import weco.catalogue.source_model.sierra.{
   SierraHoldingsRecord,
   SierraItemRecord,
   SierraOrderRecord
 }
+import weco.sierra.models.identifiers.SierraBibNumber
 
 import java.time.Instant
 

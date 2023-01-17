@@ -1,90 +1,171 @@
 steps:
-  - command: .buildkite/scripts/run_autoformat.py
+  - command: |
+      ./builds/run_formatting.sh
+      .buildkite/scripts/push_autoformatting_changes.sh
+      ./builds/run_linting.sh
     label: "autoformat"
-  - wait
-  - command: .buildkite/scripts/run_job.py internal_model
-    label: "internal model"
-  - command: .buildkite/scripts/run_job.py source_model
-    label: "source model"
-  - command: .buildkite/scripts/run_job.py pipeline_storage
-    label: "pipeline storage"
-  - command: .buildkite/scripts/run_job.py ingestor_common
-    label: "ingestor common"
-  - command: .buildkite/scripts/run_job.py transformer_common
-    label: "transformer common"
-  - command: .buildkite/scripts/run_job.py calm_api_client
-    label: "Calm API client"
-  - command: .buildkite/scripts/run_lambda_job.py lambda
-    label: "Lambdas"
-  - wait
-  - command: .buildkite/scripts/run_job.py reindex_worker
-    label: "reindex worker"
-  - command: .buildkite/scripts/run_job.py ingestor_works
-    label: "ingestor (works)"
-  - command: .buildkite/scripts/run_job.py ingestor_images
-    label: "ingestor (images)"
-  - command: .buildkite/scripts/run_job.py id_minter
-    label: "ID minter"
-  - command: .buildkite/scripts/run_job.py relation_embedder
-    label: "relation embedder"
-  - command: .buildkite/scripts/run_job.py router
-    label: "router"
-  - command: .buildkite/scripts/run_job.py batcher
-    label: "batcher"
-  - command: .buildkite/scripts/run_job.py matcher
-    label: "matcher"
-  - command: .buildkite/scripts/run_job.py merger
-    label: "merger"
-  - command: .buildkite/scripts/run_job.py transformer_miro
-    label: "transformer (Miro)"
-  - command: .buildkite/scripts/run_job.py transformer_sierra
-    label: "transformer (Sierra)"
-  - command: .buildkite/scripts/run_job.py transformer_mets
-    label: "transformer (METS)"
-  - command: .buildkite/scripts/run_job.py transformer_calm
-    label: "transformer (Calm)"
-  - command: .buildkite/scripts/run_job.py sierra_reader
-    label: "Sierra reader"
-  - command: .buildkite/scripts/run_job.py sierra_merger
-    label: "Sierra merger"
-  - command: .buildkite/scripts/run_job.py sierra_linker
-    label: "Sierra linker"
-  - command: .buildkite/scripts/run_job.py sierra_indexer
-    label: "Sierra indexer"
-  - command: .buildkite/scripts/run_job.py mets_adapter
-    label: "METS adapter"
-  - command: .buildkite/scripts/run_job.py calm_adapter
-    label: "Calm adapter"
-  - command: .buildkite/scripts/run_job.py calm_deletion_checker
-    label: "Calm deletion checker"
-  - command: .buildkite/scripts/run_job.py inference_manager
-    label: "inference manager"
-  - command: .buildkite/scripts/run_job.py tei_id_extractor
-    label: "Tei id extractor"
-  - command: .buildkite/scripts/run_job.py tei_adapter
-    label: "Tei adapter"
-  - command: .buildkite/scripts/run_job.py feature_inferrer --changes-in pipeline/inferrer/feature_inferrer
-    label: "feature inferrer"
-  - command: .buildkite/scripts/run_job.py palette_inferrer --changes-in pipeline/inferrer/palette_inferrer
-    label: "palette inferrer"
-  - command: .buildkite/scripts/run_job.py aspect_ratio_inferrer --changes-in pipeline/inferrer/aspect_ratio_inferrer
-    label: "aspect ratio inferrer"
-  - wait
-  - label: publish internal model
-    if: build.branch == "main"
-    env:
-      PROJECTS: internal_model source_model
-    plugins:
-      - docker#v3.5.0:
-          image: "wellcome/sbt_wrapper"
-          mount-ssh-agent: true
-          volumes: ["/var/run/docker.sock:/var/run/docker.sock"]
-          network: "host"
-          always-pull: true
-          propagate-environment: true
-          entrypoint: "/usr/bin/python3"
-    command: "/workdir/.buildkite/scripts/publish.py"
-  - wait
-  - command: .buildkite/scripts/tag_commit_as_latest.py
-    label: "tag commit as latest"
+    agents:
+      queue: "scala"
 
+  - label: "{{ matrix }} (library)"
+    command: "./builds/run_sbt_tests.sh {{ matrix }}"
+
+    matrix:
+      - "internal_model"
+      - "display_model"
+      - "source_model"
+      - "pipeline_storage"
+      - "ingestor_common"
+      - "transformer_common"
+      - "calm_api_client"
+
+    # This will fail the build if internal model takes more than
+    # 13 minutes to build and test.  This is to make sure we know if
+    # the internal model compilation starts creeping again.
+    #
+    # We may increase this timeout, but we should do so intentionally.
+    # We should only increase it when we know what's causing the slowness,
+    # and we think it's an acceptable tradeoff.
+    #
+    # See https://buildkite.com/docs/pipelines/command-step
+    timeout_in_minutes: 13
+
+    agents:
+      queue: "scala"
+
+  - label: "{{ matrix }} (app)"
+    command: |
+      ./builds/run_sbt_tests.sh {{ matrix }}
+      ./builds/build_sbt_image.sh {{ matrix }} "$BUILDKITE_COMMIT"
+
+      if [[ "$BUILDKITE_BRANCH" == "main" ]]
+      then
+        ./builds/publish_sbt_image_to_ecr.sh {{ matrix }} "$BUILDKITE_COMMIT"
+      fi
+
+    matrix:
+      - "batcher"
+      - "calm_adapter"
+      - "calm_deletion_checker"
+      - "calm_indexer"
+      - "id_minter"
+      - "matcher"
+      - "merger"
+      - "mets_adapter"
+      - "path_concatenator"
+      - "reindex_worker"
+      - "relation_embedder"
+      - "router"
+      - "sierra_indexer"
+      - "sierra_linker"
+      - "sierra_merger"
+      - "sierra_reader"
+      - "tei_adapter"
+      - "tei_id_extractor"
+      - "transformer_calm"
+      - "transformer_mets"
+      - "transformer_miro"
+      - "transformer_sierra"
+      - "transformer_tei"
+
+    agents:
+      queue: "scala"
+
+  - label: "{{ matrix }} (app)"
+    command: |
+      ./builds/run_sbt_tests.sh {{ matrix }}
+      ./builds/build_sbt_image.sh {{ matrix }} "$BUILDKITE_COMMIT"
+
+      # The ingestor tests will regenerate the JSON test documents
+      # used in the API tests.  Make sure the latest versions are
+      # checked in.
+      git diff --exit-code
+
+      if [[ "$BUILDKITE_BRANCH" == "main" ]]
+      then
+        ./builds/publish_sbt_image_to_ecr.sh {{ matrix }} "$BUILDKITE_COMMIT"
+      fi
+
+    matrix:
+      - "ingestor_works"
+      - "ingestor_images"
+
+    agents:
+      queue: "scala"
+
+  - label: "inference_manager (app)"
+    command: |
+      ./builds/run_inference_manager_tests.sh
+      ./builds/build_sbt_image.sh inference_manager "$BUILDKITE_COMMIT"
+
+      if [[ "$BUILDKITE_BRANCH" == "main" ]]
+      then
+        ./builds/publish_sbt_image_to_ecr.sh inference_manager "$BUILDKITE_COMMIT"
+      fi
+
+    agents:
+      queue: "scala"
+
+  - label: "{{ matrix }} (app)"
+    command: |
+      ./builds/run_inferrer_tests.sh {{ matrix }}
+      ./builds/build_inferrer_image.sh {{ matrix }} "$BUILDKITE_COMMIT"
+
+      if [[ "$BUILDKITE_BRANCH" == "main" ]]
+      then
+        ./builds/publish_inferrer_image_to_ecr.sh {{ matrix }} "$BUILDKITE_COMMIT"
+      fi
+
+    matrix:
+      - "aspect_ratio_inferrer"
+      - "feature_inferrer"
+      - "palette_inferrer"
+
+    agents:
+      queue: "scala"
+
+  - label: "{{ matrix }} (Lambda)"
+    command: |
+      ./builds/run_python_tests.sh "{{ matrix }}"
+
+      if [[ "$BUILDKITE_BRANCH" == "main" ]]
+      then
+        ./builds/publish_lambda_zip.py "{{ matrix }}"
+      fi
+
+    matrix:
+      - "calm_adapter/calm_window_generator"
+      - "calm_adapter/calm_deletion_check_initiator"
+      - "common/window_generator"
+      - "sierra_adapter/s3_demultiplexer"
+      - "sierra_adapter/sierra_progress_reporter"
+      - "sierra_adapter/update_embargoed_holdings"
+      - "tei_adapter/tei_updater"
+
+  - wait
+
+  - label: trigger adapter deployments
+    if: build.branch == "main"
+    trigger: "catalogue-pipeline-deploy-adapters"
+    async: true
+    build:
+      message: "${BUILDKITE_MESSAGE}"
+      commit: "${BUILDKITE_COMMIT}"
+      branch: "${BUILDKITE_BRANCH}"
+      env:
+        BUILDKITE_PULL_REQUEST:             "${BUILDKITE_PULL_REQUEST}"
+        BUILDKITE_PULL_REQUEST_BASE_BRANCH: "${BUILDKITE_PULL_REQUEST_BASE_BRANCH}"
+        BUILDKITE_PULL_REQUEST_REPO:        "${BUILDKITE_PULL_REQUEST_REPO}"
+
+  - label: trigger pipeline deployments
+    if: build.branch == "main"
+    trigger: "catalogue-pipeline-deploy-pipeline"
+    async: true
+    build:
+      message: "${BUILDKITE_MESSAGE}"
+      commit: "${BUILDKITE_COMMIT}"
+      branch: "${BUILDKITE_BRANCH}"
+      env:
+        BUILDKITE_PULL_REQUEST:             "${BUILDKITE_PULL_REQUEST}"
+        BUILDKITE_PULL_REQUEST_BASE_BRANCH: "${BUILDKITE_PULL_REQUEST_BASE_BRANCH}"
+        BUILDKITE_PULL_REQUEST_REPO:        "${BUILDKITE_PULL_REQUEST_REPO}"

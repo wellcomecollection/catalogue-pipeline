@@ -3,16 +3,12 @@ package weco.pipeline.transformer.sierra.transformers
 import org.scalatest.Assertion
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.source_model.generators.{
-  MarcGenerators,
-  SierraDataGenerators
-}
-import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
+import weco.sierra.generators.SierraDataGenerators
+import weco.sierra.models.marc.{Subfield, VarField}
 
 class SierraDescriptionTest
     extends AnyFunSpec
     with Matchers
-    with MarcGenerators
     with SierraDataGenerators {
 
   it("gets a description from a bib with a single instance of MARC 520") {
@@ -21,10 +17,10 @@ class SierraDescriptionTest
 
     assertFindsCorrectDescription(
       varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "520",
           subfields = List(
-            MarcSubfield(tag = "a", content = description)
+            Subfield(tag = "a", content = description)
           )
         )
       ),
@@ -40,16 +36,16 @@ class SierraDescriptionTest
 
     assertFindsCorrectDescription(
       varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "520",
           subfields = List(
-            MarcSubfield(tag = "a", content = description1)
+            Subfield(tag = "a", content = description1)
           )
         ),
-        createVarFieldWith(
+        VarField(
           marcTag = "520",
           subfields = List(
-            MarcSubfield(tag = "a", content = description2)
+            Subfield(tag = "a", content = description2)
           )
         )
       ),
@@ -65,15 +61,35 @@ class SierraDescriptionTest
 
     assertFindsCorrectDescription(
       varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "520",
           subfields = List(
-            MarcSubfield(tag = "a", content = description),
-            MarcSubfield(tag = "b", content = summaryDescription)
+            Subfield(tag = "a", content = description),
+            Subfield(tag = "b", content = summaryDescription)
           )
         )
       ),
       expectedDescription = Some(expectedDescription)
+    )
+  }
+
+  it("gets a description from subfields ǂa and ǂc") {
+    // This is based on b20646604, as retrieved 15 September 2022
+    assertFindsCorrectDescription(
+      varFields = List(
+        VarField(
+          marcTag = "520",
+          subfields = List(
+            Subfield(
+              tag = "a",
+              content =
+                "\"This book is about the ethics of nursing and midwifery\""),
+            Subfield(tag = "c", content = "Provided by publisher.")
+          )
+        )
+      ),
+      expectedDescription = Some(
+        "<p>\"This book is about the ethics of nursing and midwifery\" Provided by publisher.</p>")
     )
   }
 
@@ -89,12 +105,12 @@ class SierraDescriptionTest
 
       assertFindsCorrectDescription(
         varFields = List(
-          createVarFieldWith(
+          VarField(
             marcTag = "520",
             subfields = List(
-              MarcSubfield(tag = "a", content = description),
-              MarcSubfield(tag = "b", content = summaryDescription),
-              MarcSubfield(tag = "u", content = url)
+              Subfield(tag = "a", content = description),
+              Subfield(tag = "b", content = summaryDescription),
+              Subfield(tag = "u", content = url)
             )
           )
         ),
@@ -111,13 +127,13 @@ class SierraDescriptionTest
 
       assertFindsCorrectDescription(
         varFields = List(
-          createVarFieldWith(
+          VarField(
             marcTag = "520",
             subfields = List(
-              MarcSubfield(tag = "a", content = description),
-              MarcSubfield(tag = "b", content = summaryDescription),
-              MarcSubfield(tag = "u", content = url1),
-              MarcSubfield(tag = "u", content = url2)
+              Subfield(tag = "a", content = description),
+              Subfield(tag = "b", content = summaryDescription),
+              Subfield(tag = "u", content = url1),
+              Subfield(tag = "u", content = url2)
             )
           )
         ),
@@ -135,13 +151,13 @@ class SierraDescriptionTest
 
       assertFindsCorrectDescription(
         varFields = List(
-          createVarFieldWith(
+          VarField(
             marcTag = "520",
             subfields = List(
-              MarcSubfield(tag = "a", content = description),
-              MarcSubfield(tag = "b", content = summaryDescription),
-              MarcSubfield(tag = "u", content = url1),
-              MarcSubfield(tag = "u", content = uContents)
+              Subfield(tag = "a", content = description),
+              Subfield(tag = "b", content = summaryDescription),
+              Subfield(tag = "u", content = url1),
+              Subfield(tag = "u", content = uContents)
             )
           )
         ),
@@ -153,7 +169,7 @@ class SierraDescriptionTest
   it("does not get a description if MARC field 520 is absent") {
     assertFindsCorrectDescription(
       varFields = List(
-        createVarFieldWith(marcTag = "666")
+        VarField(marcTag = Some("666"))
       ),
       expectedDescription = None
     )

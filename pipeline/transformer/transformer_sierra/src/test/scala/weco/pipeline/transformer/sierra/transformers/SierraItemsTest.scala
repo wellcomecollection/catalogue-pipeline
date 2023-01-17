@@ -2,6 +2,7 @@ package weco.pipeline.transformer.sierra.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import weco.catalogue.internal_model.generators.IdentifiersGenerators
 import weco.catalogue.internal_model.identifiers.{
   IdState,
   IdentifierType,
@@ -10,28 +11,26 @@ import weco.catalogue.internal_model.identifiers.{
 import weco.catalogue.internal_model.locations.{
   AccessCondition,
   AccessMethod,
+  AccessStatus,
   LocationType,
   PhysicalLocation
 }
 import weco.catalogue.internal_model.work.Item
-import weco.catalogue.source_model.generators.SierraDataGenerators
-import weco.catalogue.source_model.sierra.identifiers.SierraItemNumber
-import weco.catalogue.source_model.sierra.marc.{
-  FixedField,
-  MarcSubfield,
-  VarField
-}
-import weco.catalogue.source_model.sierra.source.SierraSourceLocation
-import weco.catalogue.source_model.sierra.{SierraBibData, SierraItemData}
+import weco.sierra.generators.SierraDataGenerators
+import weco.sierra.models.data.{SierraBibData, SierraItemData}
+import weco.sierra.models.fields.SierraLocation
+import weco.sierra.models.identifiers.SierraItemNumber
+import weco.sierra.models.marc.{FixedField, Subfield, VarField}
 
 class SierraItemsTest
     extends AnyFunSpec
     with Matchers
+    with IdentifiersGenerators
     with SierraDataGenerators {
 
   it("creates both forms of the Sierra ID in 'identifiers'") {
     val itemData = createSierraItemData
-    val itemId = createSierraItemNumber
+    val itemId = itemData.id
 
     val sourceIdentifier1 = createSierraSystemSourceIdentifierWith(
       ontologyType = "Item",
@@ -46,7 +45,7 @@ class SierraItemsTest
     val expectedIdentifiers = List(sourceIdentifier1, sourceIdentifier2)
 
     val transformedItem = getTransformedItems(
-      itemDataMap = Map(itemId -> itemData)
+      itemDataEntries = Seq(itemData)
     ).head
 
     transformedItem.id.allSourceIdentifiers shouldBe expectedIdentifiers
@@ -58,10 +57,13 @@ class SierraItemsTest
       ontologyType = "Item",
       value = itemId.withCheckDigit
     )
-    val itemData = createSierraItemData
+
+    val itemData = createSierraItemDataWith(
+      id = itemId
+    )
 
     val transformedItem = getTransformedItems(
-      itemDataMap = Map(itemId -> itemData)
+      itemDataEntries = Seq(itemData)
     ).head
 
     transformedItem.id
@@ -106,7 +108,7 @@ class SierraItemsTest
           VarField(
             fieldTag = Some("v"),
             subfields = List(
-              MarcSubfield(tag = "a", content = "Vol 1–5")
+              Subfield(tag = "a", content = "Vol 1–5")
             ))
         )
       )
@@ -122,7 +124,7 @@ class SierraItemsTest
           VarField(
             fieldTag = Some("v"),
             subfields = List(
-              MarcSubfield(tag = "a", content = "Vol 1–5")
+              Subfield(tag = "a", content = "Vol 1–5")
             ))
         )
       )
@@ -131,12 +133,13 @@ class SierraItemsTest
     }
 
     it("uses the copy number if there are multiple items and no field tag v") {
-      val itemDataMap = Seq(1, 2, 4).map { copyNo =>
-        createSierraItemNumber -> createSierraItemDataWith(
-          copyNo = Some(copyNo))
-      }.toMap
+      val itemDataEntries = Seq(1, 2, 4).map { copyNo =>
+        createSierraItemDataWith(
+          copyNo = Some(copyNo)
+        )
+      }
 
-      val items = getTransformedItems(itemDataMap = itemDataMap)
+      val items = getTransformedItems(itemDataEntries = itemDataEntries)
 
       items.map { _.title.get } should contain theSameElementsAs Seq(
         "Copy 1",
@@ -144,19 +147,58 @@ class SierraItemsTest
         "Copy 4")
     }
 
-    it("omits the copy number if there's only a single item") {
-      val itemDataMap = Map(
-        createSierraItemNumber -> createSierraItemDataWith(copyNo = Some(1))
+    it("omits the copy number title if there's only a single item") {
+      val itemDataEntries = Seq(
+        createSierraItemDataWith(copyNo = Some(1))
       )
 
-      val items = getTransformedItems(itemDataMap = itemDataMap)
+      val items = getTransformedItems(itemDataEntries = itemDataEntries)
 
       items.map { _.title } shouldBe Seq(None)
     }
 
+    it("omits the copy number title if every item has the same copy number") {
+      val itemDataEntries = Seq(
+        createSierraItemDataWith(copyNo = Some(1)),
+        createSierraItemDataWith(copyNo = Some(1)),
+        createSierraItemDataWith(copyNo = Some(1))
+      )
+
+      val items = getTransformedItems(itemDataEntries = itemDataEntries)
+
+      items.map { _.title } shouldBe Seq(None, None, None)
+    }
+
+    it("uses the title if every item has the same explicitly set title") {
+      val itemDataEntries = Seq(
+        createSierraItemDataWith(
+          varFields = List(
+            VarField(fieldTag = "v", content = "Impression")
+          )
+        ),
+        createSierraItemDataWith(
+          varFields = List(
+            VarField(fieldTag = "v", content = "Impression")
+          )
+        ),
+        createSierraItemDataWith(
+          varFields = List(
+            VarField(fieldTag = "v", content = "Impression")
+          )
+        )
+      )
+
+      val items = getTransformedItems(itemDataEntries = itemDataEntries)
+
+      items.map { _.title } shouldBe Seq(
+        Some("Impression"),
+        Some("Impression"),
+        Some("Impression"))
+    }
+
     def getTitle(itemData: SierraItemData): Option[String] = {
       val transformedItem = getTransformedItems(
-        itemDataMap = Map(createSierraItemNumber -> itemData)
+        itemDataEntries = Seq(itemData)
       ).head
 
       transformedItem.title
@@ -164,47 +206,49 @@ class SierraItemsTest
   }
 
   it("skips deleted items") {
-    val itemDataMap = (1 to 3).map { _ =>
-      createSierraItemNumber -> createSierraItemData
-    }.toMap
+    val itemDataEntries = Seq(
+      createSierraItemData,
+      createSierraItemData,
+      createSierraItemData
+    )
 
     // First we transform the items without deleting them, to
     // check they're not being skipped for a reason unrelated
     // to deleted=true
-    getTransformedItems(itemDataMap = itemDataMap) should have size itemDataMap.size
+    getTransformedItems(itemDataEntries = itemDataEntries) should have size itemDataEntries.size
 
     // Then we mark them as deleted, and check they're all ignored.
-    val deletedItemDataMap =
-      itemDataMap
-        .map { case (id, itemData) => id -> itemData.copy(deleted = true) }
+    val deleteditemDataEntries = itemDataEntries.map(_.copy(deleted = true))
 
-    getTransformedItems(itemDataMap = deletedItemDataMap) shouldBe empty
+    getTransformedItems(itemDataEntries = deleteditemDataEntries) should have size 0
   }
 
   it("skips suppressed items") {
-    val itemDataMap = (1 to 3).map { _ =>
-      createSierraItemNumber -> createSierraItemData
-    }.toMap
+    val itemDataEntries = Seq(
+      createSierraItemData,
+      createSierraItemData,
+      createSierraItemData
+    )
 
     // First we transform the items without suppressing them, to
     // check they're not being skipped for a reason unrelated
     // to suppressing=true
-    getTransformedItems(itemDataMap = itemDataMap) should have size itemDataMap.size
+    getTransformedItems(itemDataEntries = itemDataEntries) should have size itemDataEntries.size
 
     // Then we mark them as deleted, and check they're all ignored.
-    val suppressedItemDataMap =
-      itemDataMap
-        .map { case (id, itemData) => id -> itemData.copy(suppressed = true) }
+    val suppresseditemDataEntries =
+      itemDataEntries
+        .map(_.copy(suppressed = true))
 
-    getTransformedItems(itemDataMap = suppressedItemDataMap) shouldBe empty
+    getTransformedItems(itemDataEntries = suppresseditemDataEntries) should have size 0
   }
 
   it("ignores all digital locations - 'dlnk', 'digi'") {
     val bibData = createSierraBibDataWith(
       locations = Some(
         List(
-          SierraSourceLocation("digi", "Digitised Collections"),
-          SierraSourceLocation("dlnk", "Digitised content")
+          SierraLocation("digi", "Digitised Collections"),
+          SierraLocation("dlnk", "Digitised content")
         ))
     )
 
@@ -212,7 +256,7 @@ class SierraItemsTest
   }
 
   it("creates an item with a physical location") {
-    val sierraLocation = SierraSourceLocation(
+    val sierraLocation = SierraLocation(
       code = "sghi2",
       name = "Closed stores Hist. 2"
     )
@@ -234,21 +278,23 @@ class SierraItemsTest
       )
     )
 
-    val itemDataMap = Map(createSierraItemNumber -> itemData)
+    val itemDataEntries = Seq(itemData)
 
-    val item = getTransformedItems(itemDataMap = itemDataMap).head
+    val item = getTransformedItems(itemDataEntries = itemDataEntries).head
     item.locations shouldBe List(
       PhysicalLocation(
         locationType = LocationType.ClosedStores,
         label = LocationType.ClosedStores.label,
-        accessConditions =
-          List(AccessCondition(method = AccessMethod.OnlineRequest))
+        accessConditions = List(
+          AccessCondition(
+            method = AccessMethod.OnlineRequest,
+            status = AccessStatus.Open))
       )
     )
   }
 
   it("adds a note to the item") {
-    val sierraLocation = SierraSourceLocation(
+    val sierraLocation = SierraLocation(
       code = "scmac",
       name = "Closed stores Arch. & MSS"
     )
@@ -276,22 +322,23 @@ class SierraItemsTest
       )
     )
 
-    val itemDataMap = Map(createSierraItemNumber -> itemData)
+    val itemDataEntries = Seq(itemData)
 
-    val item = getTransformedItems(itemDataMap = itemDataMap).head
+    val item = getTransformedItems(itemDataEntries = itemDataEntries).head
     item.note shouldBe Some("uncoloured impression")
   }
 
   it("uses the Sierra location name as the label for non-closed locations") {
-    val openLocation = SierraSourceLocation(
+    val openLocation = SierraLocation(
       code = "wghib",
       name = "Biographies"
     )
-    val itemData = createSierraItemDataWith(location = Some(openLocation))
 
-    val itemDataMap = Map(createSierraItemNumber -> itemData)
+    val itemDataEntries = Seq(
+      createSierraItemDataWith(location = Some(openLocation))
+    )
 
-    val item = getTransformedItems(itemDataMap = itemDataMap).head
+    val item = getTransformedItems(itemDataEntries = itemDataEntries).head
     item.locations should have size 1
     item.locations.head
       .asInstanceOf[PhysicalLocation]
@@ -300,14 +347,14 @@ class SierraItemsTest
 
   it("creates an item with a physical location and ignores digital locations") {
     val sierraPhysicalLocation1 =
-      SierraSourceLocation("sicon", "Closed stores Iconographic")
+      SierraLocation("sicon", "Closed stores Iconographic")
 
     val bibData =
       createSierraBibDataWith(
         locations = Some(
           List(
-            SierraSourceLocation("digi", "Digitised Collections"),
-            SierraSourceLocation("dlnk", "Digitised content"))))
+            SierraLocation("digi", "Digitised Collections"),
+            SierraLocation("dlnk", "Digitised content"))))
 
     val itemData = createSierraItemDataWith(
       location = Some(sierraPhysicalLocation1),
@@ -328,17 +375,17 @@ class SierraItemsTest
     )
 
     val results =
-      getTransformedItems(
-        bibData = bibData,
-        itemDataMap = Map(createSierraItemNumber -> itemData))
+      getTransformedItems(bibData = bibData, itemDataEntries = Seq(itemData))
 
     results.head.locations should be(
       List(
         PhysicalLocation(
           locationType = LocationType.ClosedStores,
           label = LocationType.ClosedStores.label,
-          accessConditions =
-            List(AccessCondition(method = AccessMethod.OnlineRequest))
+          accessConditions = List(
+            AccessCondition(
+              method = AccessMethod.OnlineRequest,
+              status = AccessStatus.Open))
         )
       ))
   }
@@ -346,38 +393,36 @@ class SierraItemsTest
   describe(
     "handling locations which are 'contained in above' or 'bound in above'") {
     it("skips adding a location if the Sierra location is 'bound in above'") {
-      val itemDataMap = Map(
-        createSierraItemNumber -> createSierraItemDataWith(
-          location = Some(SierraSourceLocation("bwith", "bound in above"))
+      val itemDataEntries = Seq(
+        createSierraItemDataWith(
+          location = Some(SierraLocation("bwith", "bound in above"))
         )
       )
 
-      val items = getTransformedItems(itemDataMap = itemDataMap)
+      val items = getTransformedItems(itemDataEntries = itemDataEntries)
 
       items should have size 1
-      items.head.locations shouldBe empty
+      items.head.locations should have size 0
     }
 
     it(
       "adds a location to 'bound/contained in above' if the other locations are unambiguous") {
-      val itemDataMap = Map(
-        createSierraItemNumber -> createSierraItemDataWith(
-          location = Some(SierraSourceLocation("bwith", "bound in above"))
+      val itemDataEntries = Seq(
+        createSierraItemDataWith(
+          location = Some(SierraLocation("bwith", "bound in above"))
         ),
-        createSierraItemNumber -> createSierraItemDataWith(
-          location =
-            Some(SierraSourceLocation("sicon", "Closed stores Iconographic"))
+        createSierraItemDataWith(
+          location = Some(SierraLocation("sicon", "Closed stores Iconographic"))
         ),
-        createSierraItemNumber -> createSierraItemDataWith(
-          location = Some(SierraSourceLocation("cwith", "contained in above"))
+        createSierraItemDataWith(
+          location = Some(SierraLocation("cwith", "contained in above"))
         ),
-        createSierraItemNumber -> createSierraItemDataWith(
-          location =
-            Some(SierraSourceLocation("sicon", "Closed stores Iconographic"))
+        createSierraItemDataWith(
+          location = Some(SierraLocation("sicon", "Closed stores Iconographic"))
         )
       )
 
-      val items = getTransformedItems(itemDataMap = itemDataMap)
+      val items = getTransformedItems(itemDataEntries = itemDataEntries)
 
       items should have size 4
       items.foreach {
@@ -391,24 +436,22 @@ class SierraItemsTest
 
     it(
       "adds a location to 'bound/contained in above' if the other locations are all closed") {
-      val itemDataMap = Map(
-        createSierraItemNumber -> createSierraItemDataWith(
-          location = Some(SierraSourceLocation("bwith", "bound in above"))
+      val itemDataEntries = Seq(
+        createSierraItemDataWith(
+          location = Some(SierraLocation("bwith", "bound in above"))
         ),
-        createSierraItemNumber -> createSierraItemDataWith(
-          location =
-            Some(SierraSourceLocation("sicon", "Closed stores Iconographic"))
+        createSierraItemDataWith(
+          location = Some(SierraLocation("sicon", "Closed stores Iconographic"))
         ),
-        createSierraItemNumber -> createSierraItemDataWith(
-          location = Some(SierraSourceLocation("cwith", "contained in above"))
+        createSierraItemDataWith(
+          location = Some(SierraLocation("cwith", "contained in above"))
         ),
-        createSierraItemNumber -> createSierraItemDataWith(
-          location =
-            Some(SierraSourceLocation("sobhi", "Closed stores P.B. Hindi"))
+        createSierraItemDataWith(
+          location = Some(SierraLocation("sobhi", "Closed stores P.B. Hindi"))
         )
       )
 
-      val items = getTransformedItems(itemDataMap = itemDataMap)
+      val items = getTransformedItems(itemDataEntries = itemDataEntries)
 
       items should have size 4
       items.foreach {
@@ -422,23 +465,22 @@ class SierraItemsTest
 
     it(
       "skips adding a location to 'bound/contained in above' if the other locations are ambiguous") {
-      val itemDataMap = Map(
-        createSierraItemNumber -> createSierraItemDataWith(
-          location = Some(SierraSourceLocation("bwith", "bound in above"))
+      val itemDataEntries = Seq(
+        createSierraItemDataWith(
+          location = Some(SierraLocation("bwith", "bound in above"))
         ),
-        createSierraItemNumber -> createSierraItemDataWith(
-          location =
-            Some(SierraSourceLocation("sicon", "Closed stores Iconographic"))
+        createSierraItemDataWith(
+          location = Some(SierraLocation("sicon", "Closed stores Iconographic"))
         ),
-        createSierraItemNumber -> createSierraItemDataWith(
-          location = Some(SierraSourceLocation("cwith", "contained in above"))
+        createSierraItemDataWith(
+          location = Some(SierraLocation("cwith", "contained in above"))
         ),
-        createSierraItemNumber -> createSierraItemDataWith(
-          location = Some(SierraSourceLocation("info", "Open shelves"))
+        createSierraItemDataWith(
+          location = Some(SierraLocation("info", "Open shelves"))
         )
       )
 
-      val items = getTransformedItems(itemDataMap = itemDataMap)
+      val items = getTransformedItems(itemDataEntries = itemDataEntries)
 
       items should have size 4
 
@@ -447,13 +489,13 @@ class SierraItemsTest
   }
 
   it("sorts items by sierra-identifier") {
-    val itemData = Map(
-      SierraItemNumber("0000002") -> createSierraItemData,
-      SierraItemNumber("0000001") -> createSierraItemData,
-      SierraItemNumber("0000004") -> createSierraItemData,
-      SierraItemNumber("0000003") -> createSierraItemData,
+    val itemData = Seq(
+      createSierraItemDataWith(id = SierraItemNumber("0000002")),
+      createSierraItemDataWith(id = SierraItemNumber("0000001")),
+      createSierraItemDataWith(id = SierraItemNumber("0000004")),
+      createSierraItemDataWith(id = SierraItemNumber("0000003")),
     )
-    getTransformedItems(itemDataMap = itemData)
+    getTransformedItems(itemDataEntries = itemData)
       .map(_.id.asInstanceOf[IdState.Identifiable].otherIdentifiers.head.value) shouldBe
       List(
         "0000001",
@@ -463,9 +505,12 @@ class SierraItemsTest
       )
   }
 
-  private def getTransformedItems(
-    bibData: SierraBibData = createSierraBibData,
-    itemDataMap: Map[SierraItemNumber, SierraItemData] = Map())
+  private def getTransformedItems(bibData: SierraBibData = createSierraBibData,
+                                  itemDataEntries: Seq[SierraItemData] = Seq())
     : List[Item[IdState.Unminted]] =
-    SierraItems(createSierraBibNumber, bibData, itemDataMap)
+    SierraItems(
+      bibId = createSierraBibNumber,
+      bibData = bibData,
+      itemDataEntries = itemDataEntries
+    )
 }

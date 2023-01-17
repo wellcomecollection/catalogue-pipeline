@@ -73,14 +73,15 @@ class ManagerInferrerIntegrationTest
             augmentedImages(messageSender.messages.head.body)
 
           inside(augmentedImage.state) {
-            case Augmented(_, id, Some(inferredData)) =>
+            case Augmented(_, id, inferredData) =>
               id should be(image.state.canonicalId)
               inside(inferredData) {
                 case InferredData(
                     features1,
                     features2,
-                    lshEncodedFeatures,
+                    reducedFeatures,
                     palette,
+                    Some(averageColorHex),
                     binSizes,
                     binMinima,
                     aspectRatio
@@ -88,9 +89,11 @@ class ManagerInferrerIntegrationTest
                   features1 should have length 2048
                   features2 should have length 2048
                   forAll(features1 ++ features2) { _.isNaN shouldBe false }
-                  every(lshEncodedFeatures) should fullyMatch regex """(\d+)-(\d+)"""
+                  reducedFeatures should have length 1024
+                  forAll(reducedFeatures) { _.isNaN shouldBe false }
                   every(palette) should fullyMatch regex """\d+/\d+"""
                   every(binSizes) should not be empty
+                  averageColorHex should have length 7
                   binMinima should not be empty
                   aspectRatio should not be empty
               }
@@ -127,9 +130,7 @@ class ManagerInferrerIntegrationTest
       R
     ]
   ): R =
-    // We would like a timeout longer than 1s here because the inferrer
-    // may need to warm up.
-    withLocalSqsQueuePair(visibilityTimeout = 5) { queuePair =>
+    withLocalSqsQueuePair() { queuePair =>
       val messageSender = new MemoryMessageSender()
       val root = Paths.get("integration-tmp").toFile
       root.mkdir()

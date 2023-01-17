@@ -5,18 +5,16 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Failure, Try}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import org.scalatest.concurrent.Eventually
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.time.{Seconds, Span}
 import io.circe.Encoder
-
 import weco.fixtures.TestWith
 import weco.akka.fixtures.Akka
 import weco.messaging.fixtures.SQS
 import weco.messaging.memory.MemoryMessageSender
 import weco.messaging.sns.NotificationMessage
 import weco.json.JsonUtil._
-
 import SQS.QueuePair
 
 class BatcherWorkerServiceTest
@@ -24,7 +22,8 @@ class BatcherWorkerServiceTest
     with Matchers
     with SQS
     with Akka
-    with Eventually {
+    with Eventually
+    with IntegrationPatience {
 
   import Selector._
 
@@ -40,7 +39,7 @@ class BatcherWorkerServiceTest
     * D  X  Y  Z   1  2  3  4
     */
   it("processes incoming paths into batches") {
-    withWorkerService() {
+    withWorkerService(visibilityTimeout = 2 seconds) {
       case (QueuePair(queue, dlq), msgSender) =>
         sendNotificationToSQS(queue = queue, body = "A/B")
         sendNotificationToSQS(queue = queue, body = "A/E/1")
@@ -62,7 +61,7 @@ class BatcherWorkerServiceTest
   }
 
   it("processes incoming paths into batches split per tree") {
-    withWorkerService() {
+    withWorkerService(visibilityTimeout = 2 seconds) {
       case (QueuePair(queue, dlq), msgSender) =>
         sendNotificationToSQS(queue = queue, body = "A")
         sendNotificationToSQS(queue = queue, body = "Other/Tree")
@@ -84,8 +83,12 @@ class BatcherWorkerServiceTest
   }
 
   it("sends the whole tree when batch consists of too many selectors") {
-    withWorkerService(3) {
+    withWorkerService(maxBatchSize = 3) {
       case (QueuePair(queue, dlq), msgSender) =>
+        // These two notifications yield five selectors,
+        // (see "it processes incoming paths into batches", above)
+        // which exceeds the maxBatchSize of 3.
+        // so the batch is then reduced to the whole tree from A
         sendNotificationToSQS(queue = queue, body = "A/B")
         sendNotificationToSQS(queue = queue, body = "A/E/1")
         eventually {
@@ -100,6 +103,7 @@ class BatcherWorkerServiceTest
 
   it("doesn't delete paths where selectors failed sending ") {
     withWorkerService(
+      visibilityTimeout = 2 seconds,
       brokenPaths = Set("A/E", "A/B"),
       flushInterval = 750 milliseconds) {
       case (QueuePair(queue, dlq), msgSender) =>
@@ -131,11 +135,12 @@ class BatcherWorkerServiceTest
   def batchWithRoot(rootPath: String, batches: Seq[Batch]): List[Selector] =
     batches.find(_.rootPath == rootPath).get.selectors
 
-  def withWorkerService[R](maxBatchSize: Int = 10,
+  def withWorkerService[R](visibilityTimeout: Duration = 5 seconds,
+                           maxBatchSize: Int = 10,
                            brokenPaths: Set[String] = Set.empty,
-                           flushInterval: FiniteDuration = 100 milliseconds)(
+                           flushInterval: FiniteDuration = 500 milliseconds)(
     testWith: TestWith[(QueuePair, MemoryMessageSender), R]): R =
-    withLocalSqsQueuePair() { queuePair =>
+    withLocalSqsQueuePair(visibilityTimeout = visibilityTimeout) { queuePair =>
       withActorSystem { implicit actorSystem =>
         withSQSStream[NotificationMessage, R](queuePair.queue) { msgStream =>
           val msgSender = new MessageSender(brokenPaths)
@@ -143,6 +148,7 @@ class BatcherWorkerServiceTest
             msgStream = msgStream,
             msgSender = msgSender,
             flushInterval = flushInterval,
+            maxProcessedPaths = 1000,
             maxBatchSize = maxBatchSize
           )
           workerService.run()

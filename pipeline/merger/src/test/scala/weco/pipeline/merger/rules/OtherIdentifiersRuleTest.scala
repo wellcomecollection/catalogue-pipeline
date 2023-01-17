@@ -4,23 +4,19 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.{Inside, Inspectors}
 import weco.catalogue.internal_model.identifiers.{
-  IdState,
   IdentifierType,
   SourceIdentifier
 }
 import weco.catalogue.internal_model.work.generators.SourceWorkGenerators
-import weco.catalogue.internal_model.work.{
-  Format,
-  MergeCandidate,
-  Work,
-  WorkState
-}
+import weco.catalogue.internal_model.work.{Format, Work, WorkState}
+import weco.pipeline.matcher.generators.MergeCandidateGenerators
 import weco.pipeline.merger.models.FieldMergeResult
 
 class OtherIdentifiersRuleTest
     extends AnyFunSpec
     with Matchers
     with SourceWorkGenerators
+    with MergeCandidateGenerators
     with Inside
     with Inspectors {
   val nothingWork: Work.Visible[WorkState.Identified] = identifiedWork(
@@ -30,6 +26,8 @@ class OtherIdentifiersRuleTest
       ontologyType = "Work"
     )
   )
+
+  val teiWork: Work.Visible[WorkState.Identified] = teiIdentifiedWork()
 
   val miroWork: Work.Visible[WorkState.Identified] = miroIdentifiedWork()
 
@@ -55,7 +53,13 @@ class OtherIdentifiersRuleTest
         createIdentifiedPhysicalItem
       }.toList)
 
-  val calmWork: Work.Visible[WorkState.Identified] = calmIdentifiedWork()
+  val calmWork: Work.Visible[WorkState.Identified] =
+    calmIdentifiedWork().otherIdentifiers(
+      List(
+        createSourceIdentifierWith(identifierType = IdentifierType.CalmRefNo),
+        createSourceIdentifierWith(
+          identifierType = IdentifierType.CalmAltRefNo),
+      ))
 
   val mergeCandidate: Work.Visible[WorkState.Identified] =
     sierraIdentifiedWork()
@@ -64,14 +68,7 @@ class OtherIdentifiersRuleTest
     sierraPhysicalIdentifiedWork()
       .format(Format.Pictures)
       .mergeCandidates(
-        List(
-          MergeCandidate(
-            IdState.Identified(
-              sourceIdentifier = mergeCandidate.sourceIdentifier,
-              canonicalId = mergeCandidate.state.canonicalId),
-            Some("Physical/digitised Sierra work")
-          )
-        )
+        List(createSierraPairMergeCandidateFor(mergeCandidate))
       )
 
   val sierraWithDigcode: Work.Visible[WorkState.Identified] =
@@ -81,6 +78,25 @@ class OtherIdentifiersRuleTest
         createDigcodeIdentifier("dighole")
       )
     )
+
+  it("merges METS, Miro, Calm and Sierra source IDs into Tei target") {
+    inside(OtherIdentifiersRule
+      .merge(
+        teiWork,
+        calmWork :: physicalSierraWork :: nothingWork :: miroWork :: metsWorks)) {
+      case FieldMergeResult(otherIdentifiers, mergedSources) =>
+        otherIdentifiers should contain theSameElementsAs
+          List(physicalSierraWork.sourceIdentifier, miroWork.sourceIdentifier) ++ calmWork.data.otherIdentifiers :+ calmWork.sourceIdentifier :+
+            physicalSierraWork.data.otherIdentifiers
+              .find(_.identifierType.id == IdentifierType.SierraIdentifier.id)
+              .get
+
+        mergedSources should contain theSameElementsAs List(
+          physicalSierraWork,
+          miroWork,
+          calmWork)
+    }
+  }
 
   it("merges METS, Miro, and Sierra source IDs into Calm target") {
     inside(
@@ -166,10 +182,10 @@ class OtherIdentifiersRuleTest
     inside(OtherIdentifiersRule.merge(calmWork, Seq(sierraWithDigcode))) {
       case FieldMergeResult(otherIdentifiers, _) =>
         otherIdentifiers should contain only (
-          sierraWithDigcode.sourceIdentifier,
-          sierraWithDigcode.data.otherIdentifiers
+          (calmWork.data.otherIdentifiers ++ sierraWithDigcode.data.otherIdentifiers
             .find(_.identifierType.id == "wellcome-digcode")
-            .get
+            .toList :+
+            sierraWithDigcode.sourceIdentifier): _*
         )
     }
   }

@@ -12,7 +12,7 @@ Options:
     --end=<END>             The earliest point to stop polling
     --window_length=<WINDOW_LENGTH>
                             The number of minutes per window
-    --resource=<RESOURCE>   Should the pipeline fetch bibs or items?
+    --resource=<RESOURCE>   What sort of resource should we fetch?
 
 
 This script generates windows to poll for updates, and sends

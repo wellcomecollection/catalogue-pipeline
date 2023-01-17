@@ -2,7 +2,6 @@ package weco.catalogue.tei.id_extractor
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.model._
-import akka.http.scaladsl.model.headers._
 import akka.http.scaladsl.unmarshalling.Unmarshal
 
 import java.net.URI
@@ -13,25 +12,21 @@ import io.circe.Decoder
 import weco.json.JsonUtil._
 import weco.http.client.HttpClient
 
-class GitHubBlobContentReader(httpClient: HttpClient, token: String)(
+class GitHubBlobContentReader(httpClient: HttpClient)(
   implicit ac: ActorSystem) {
   implicit val ec = ac.dispatcher
   def getBlob(uri: URI): Future[String] = {
-    val request = HttpRequest(
-      uri = Uri(uri.toString),
-      headers = List(
-        // Send the version of GitHub API we expect as per https://docs.github.com/en/rest/overview/media-types
-        Accept(
-          MediaType.applicationWithFixedCharset(
-            "vnd.github.v3+json",
-            HttpCharsets.`UTF-8`)),
-        Authorization(OAuth2BearerToken(token))
-      )
-    )
+    val request = HttpRequest(uri = Uri(uri.toString))
+
     for {
       response <- httpClient.singleRequest(request)
       blob <- unmarshalAs[Blob](response, request)
-      decoded <- Future.fromTry(decodeBase64(blob.content))
+      decoded <- Future
+        .fromTry(decodeBase64(blob.content))
+        // Some of the TEI file have a Byte Order Mark (https://en.wikipedia.org/wiki/Byte_order_mark)
+        // at the beginning, probably added by one of the tools used to edit the tei files.
+        // This is a very hacky solution stolen from https://stackoverflow.com/questions/26847500/remove-bom-from-string-in-java
+        .map(_.replace("\uFEFF", ""))
     } yield decoded
 
   }

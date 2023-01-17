@@ -13,20 +13,19 @@ import weco.catalogue.internal_model.locations.{
 }
 import weco.catalogue.internal_model.work.Item
 import weco.catalogue.source_model.sierra.rules.{
-  SierraAccessStatus,
   SierraItemAccess,
   SierraPhysicalLocationType
 }
-import weco.catalogue.source_model.sierra.source.SierraQueryOps
-import weco.catalogue.source_model.sierra.identifiers.{
-  SierraBibNumber,
-  SierraItemNumber
-}
-import weco.catalogue.source_model.sierra.marc.VarField
-import weco.catalogue.source_model.sierra.{SierraBibData, SierraItemData}
 import weco.pipeline.transformer.sierra.data.SierraPhysicalItemOrder
+import weco.sierra.models.SierraQueryOps
+import weco.sierra.models.data.{SierraBibData, SierraItemData}
+import weco.sierra.models.identifiers.SierraBibNumber
+import weco.sierra.models.marc.VarField
 
-object SierraItems extends Logging with SierraLocation with SierraQueryOps {
+object SierraItems
+    extends Logging
+    with SierraPhysicalLocation
+    with SierraQueryOps {
 
   type Output = List[Item[IdState.Unminted]]
 
@@ -37,25 +36,24 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
     * sierra-identifier.  We want to revisit this at some point.
     * See https://github.com/wellcomecollection/platform/issues/4993
     */
-  def apply(bibId: SierraBibNumber,
-            bibData: SierraBibData,
-            itemDataMap: Map[SierraItemNumber, SierraItemData])
-    : List[Item[IdState.Identifiable]] = {
+  def apply(
+    bibId: SierraBibNumber,
+    bibData: SierraBibData,
+    itemDataEntries: Seq[SierraItemData]): List[Item[IdState.Identifiable]] = {
     val visibleItems =
-      itemDataMap
-        .filterNot {
-          case (_, itemData) => itemData.deleted || itemData.suppressed
+      itemDataEntries
+        .filterNot { itemData =>
+          itemData.deleted || itemData.suppressed
         }
 
     SierraPhysicalItemOrder(
       bibId,
-      items = getPhysicalItems(bibId, visibleItems, bibData)
+      items = getPhysicalItems(visibleItems, bibData)
     )
   }
 
   private def getPhysicalItems(
-    bibId: SierraBibNumber,
-    sierraItemDataMap: Map[SierraItemNumber, SierraItemData],
+    itemDataEntries: Seq[SierraItemData],
     bibData: SierraBibData): List[Item[IdState.Identifiable]] = {
 
     // Some of the Sierra items have a location like "contained in above"
@@ -68,8 +66,10 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
     // We assume that "in above" refers to another item on the same bib, so if the
     // non-above locations are unambiguous, we use them instead.
     val otherLocations =
-      sierraItemDataMap
-        .collect { case (id, itemData) => id -> itemData.location }
+      itemDataEntries
+        .map { itemData =>
+          itemData.id -> itemData.location
+        }
         .collect { case (id, Some(location)) => id -> location }
         .filterNot {
           case (_, loc) =>
@@ -85,7 +85,6 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
               case other => (other, loc.name)
             }
         }
-        .toSeq
         .distinct
 
     val fallbackLocation = otherLocations match {
@@ -93,72 +92,86 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
       case _                                => None
     }
 
-    sierraItemDataMap.values
+    itemDataEntries
       .foreach { itemData =>
         require(!itemData.deleted)
         require(!itemData.suppressed)
       }
 
-    sierraItemDataMap.map {
-      case (itemId: SierraItemNumber, itemData: SierraItemData) =>
-        transformItemData(
-          bibId = bibId,
-          itemId = itemId,
-          itemData = itemData,
-          bibData = bibData,
-          fallbackLocation = fallbackLocation,
-          itemCount = sierraItemDataMap.size
-        )
+    val items = itemDataEntries.map { itemData =>
+      transformItemData(
+        itemData = itemData,
+        bibData = bibData,
+        fallbackLocation = fallbackLocation
+      )
     }.toList
+
+    tidyTitles(items)
   }
 
+  // A "automated" title is a title that we created automatically, as opposed
+  // to one that was written by a human cataloguer.
+  private type HasAutomatedTitle = Boolean
+
   private def transformItemData(
-    bibId: SierraBibNumber,
-    itemId: SierraItemNumber,
     itemData: SierraItemData,
     bibData: SierraBibData,
-    fallbackLocation: Option[(PhysicalLocationType, String)],
-    itemCount: Int): Item[IdState.Identifiable] = {
-    debug(s"Attempting to transform $itemId")
+    fallbackLocation: Option[(PhysicalLocationType, String)]
+  ): (Item[IdState.Identifiable], HasAutomatedTitle) = {
+    debug(s"Attempting to transform ${itemData.id.withCheckDigit}")
 
     val location =
-      getPhysicalLocation(bibId, itemId, itemData, bibData, fallbackLocation)
+      getPhysicalLocation(
+        itemData = itemData,
+        bibData = bibData,
+        fallbackLocation = fallbackLocation
+      )
 
-    Item(
-      title = getItemTitle(itemId, itemData, itemCount),
-      note = getItemNote(bibId, itemId, itemData, bibData, location),
+    val (title, hasInferredTitle) = getItemTitle(itemData)
+
+    val item = Item(
+      title = title,
+      note = getItemNote(
+        itemData = itemData,
+        location = location
+      ),
       locations = List(location).flatten,
       id = IdState.Identifiable(
         sourceIdentifier = SourceIdentifier(
           identifierType = IdentifierType.SierraSystemNumber,
           ontologyType = "Item",
-          value = itemId.withCheckDigit
+          value = itemData.id.withCheckDigit
         ),
         otherIdentifiers = List(
           SourceIdentifier(
             identifierType = IdentifierType.SierraIdentifier,
             ontologyType = "Item",
-            value = itemId.withoutCheckDigit
+            value = itemData.id.withoutCheckDigit
           )
         )
       )
     )
+
+    (item, hasInferredTitle)
   }
 
   /** Create a title for the item.
     *
     * We use one of:
     *
-    *   - field tag `v` for VOLUME
+    *   - field tag `v` for VOLUME.  This is written by a cataloguer.
     *     https://documentation.iii.com/sierrahelp/Content/sril/sril_records_varfld_types_item.html
     *
     *   - The copyNo field from the Sierra API response, which we use to
-    *     create a string like "Copy 2".  We only set this if there are multiple items
+    *     create a string like "Copy 2".
+    *
+    *     Elsewhere in this class, this is called an "automated title", because we're
+    *     creating the title automatically rather than using text written by a cataloguer.
+    *     In general, we prefer the human-written title where possible.
     *
     */
-  private def getItemTitle(itemId: SierraItemNumber,
-                           data: SierraItemData,
-                           itemCount: Int): Option[String] = {
+  private def getItemTitle(
+    data: SierraItemData): (Option[String], HasAutomatedTitle) = {
     val titleCandidates: List[String] =
       data.varFields
         .filter { _.fieldTag.contains("v") }
@@ -173,15 +186,14 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
       }
 
     titleCandidates match {
-      case Seq(title) => Some(title)
+      case Seq(title) => (Some(title), false)
 
-      case Nil if itemCount > 1 => copyNoTitle
-      case Nil                  => None
+      case Nil => (copyNoTitle, true)
 
       case multipleTitles =>
         warn(
-          s"Multiple title candidates on item $itemId: ${titleCandidates.mkString("; ")}")
-        Some(multipleTitles.head)
+          s"Multiple title candidates on item ${data.id}: ${titleCandidates.mkString("; ")}")
+        (Some(multipleTitles.head), false)
     }
   }
 
@@ -193,6 +205,39 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
         if (title.isEmpty) None else Some(title)
     }
 
+  /** Tidy up the automated titles (Copy 1, Copy 2, Copy 3, etc.)
+    *
+    * The purpose of a title is to help users distinguish between multiple items.
+    * We remove the automated title if they aren't doing that, in particular if:
+    *
+    *   1) There's only one item, and it has an inferred title
+    *   2) Every item has the same inferred title
+    *
+    * Note: (1) is really a special case of (2) for the case when there's a single item.
+    *
+    * Note: we can't do this when we add the title to the individual items, because this rule
+    * can only be applied when looking at the items together.
+    *
+    */
+  private def tidyTitles(
+    items: List[(Item[IdState.Identifiable], HasAutomatedTitle)])
+    : List[Item[IdState.Identifiable]] = {
+    val inferredTitles =
+      items.collect {
+        case (Item(_, Some(title), _, _), inferredTitle) if inferredTitle =>
+          title
+      }
+
+    val everyItemHasTheSameInferredTitle =
+      inferredTitles.size == items.size && inferredTitles.toSet.size == 1
+
+    if (everyItemHasTheSameInferredTitle) {
+      items.map { case (it, _) => it.copy(title = None) }
+    } else {
+      items.collect { case (it, _) => it }
+    }
+  }
+
   /** Create a note for the item.
     *
     * Note that this isn't as simple as just using the contents of field tag "n" --
@@ -200,17 +245,11 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
     * discard it.
     */
   private def getItemNote(
-    bibId: SierraBibNumber,
-    itemId: SierraItemNumber,
     itemData: SierraItemData,
-    bibData: SierraBibData,
     location: Option[PhysicalLocation]): Option[String] = {
     val (_, note) = SierraItemAccess(
-      bibId,
-      itemId,
-      SierraAccessStatus.forBib(bibId, bibData),
-      location.map(_.locationType),
-      itemData
+      location = location.map(_.locationType),
+      itemData = itemData
     )
 
     note

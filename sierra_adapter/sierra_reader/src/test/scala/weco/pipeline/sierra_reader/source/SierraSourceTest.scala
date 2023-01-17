@@ -7,8 +7,8 @@ import io.circe.optics.JsonPath.root
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.source_model.sierra.identifiers.SierraRecordTypes
 import weco.pipeline.sierra_reader.fixtures.WorkerServiceFixture
+import weco.sierra.models.identifiers.SierraRecordTypes
 
 import java.time.Instant
 import java.time.temporal.ChronoUnit

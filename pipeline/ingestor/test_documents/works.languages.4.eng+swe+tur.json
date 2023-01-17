@@ -1,0 +1,180 @@
+{
+  "description" : "one of a list of works with a variety of languages",
+  "createdAt" : "2023-01-03T09:31:59.296821Z",
+  "id" : "edfiesed",
+  "document" : {
+    "debug" : {
+      "source" : {
+        "id" : "edfiesed",
+        "identifier" : {
+          "identifierType" : {
+            "id" : "sierra-system-number"
+          },
+          "ontologyType" : "Work",
+          "value" : "tQZYPmQieO"
+        },
+        "version" : 9,
+        "modifiedTime" : "1938-07-07T08:02:52Z"
+      },
+      "mergedTime" : "1938-07-07T08:02:52Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
+      "redirectSources" : [
+      ]
+    },
+    "display" : {
+      "id" : "edfiesed",
+      "title" : "A work with languages English, Swedish, Turkish",
+      "alternativeTitles" : [
+      ],
+      "contributors" : [
+      ],
+      "identifiers" : [
+        {
+          "identifierType" : {
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
+            "type" : "IdentifierType"
+          },
+          "value" : "tQZYPmQieO",
+          "type" : "Identifier"
+        }
+      ],
+      "subjects" : [
+      ],
+      "genres" : [
+      ],
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "availabilities" : [
+      ],
+      "production" : [
+      ],
+      "languages" : [
+        {
+          "id" : "eng",
+          "label" : "English",
+          "type" : "Language"
+        },
+        {
+          "id" : "swe",
+          "label" : "Swedish",
+          "type" : "Language"
+        },
+        {
+          "id" : "tur",
+          "label" : "Turkish",
+          "type" : "Language"
+        }
+      ],
+      "notes" : [
+      ],
+      "formerFrequency" : [
+      ],
+      "designation" : [
+      ],
+      "images" : [
+      ],
+      "parts" : [
+      ],
+      "partOf" : [
+      ],
+      "precededBy" : [
+      ],
+      "succeededBy" : [
+      ],
+      "type" : "Work"
+    },
+    "query" : {
+      "id" : "edfiesed",
+      "format.id" : null,
+      "workType" : "Standard",
+      "identifiers.value" : [
+        "tQZYPmQieO"
+      ],
+      "title" : "A work with languages English, Swedish, Turkish",
+      "alternativeTitles" : [
+      ],
+      "description" : null,
+      "physicalDescription" : null,
+      "edition" : null,
+      "notes.contents" : [
+      ],
+      "lettering" : null,
+      "images.id" : [
+      ],
+      "images.identifiers.value" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
+      "items.locations.accessConditions.status.id" : [
+      ],
+      "items.locations.license.id" : [
+      ],
+      "items.locations.locationType.id" : [
+      ],
+      "subjects.id" : [
+      ],
+      "subjects.label" : [
+      ],
+      "subjects.concepts.label" : [
+      ],
+      "genres.label" : [
+      ],
+      "genres.concepts.label" : [
+      ],
+      "languages.id" : [
+        "eng",
+        "swe",
+        "tur"
+      ],
+      "languages.label" : [
+        "English",
+        "Swedish",
+        "Turkish"
+      ],
+      "contributors.agent.id" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "production.label" : [
+      ],
+      "production.dates.range.from" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
+      ],
+      "collectionPath.label" : null,
+      "collectionPath.path" : null,
+      "referenceNumber" : null
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+        "{\"id\":\"eng\",\"label\":\"English\",\"type\":\"Language\"}",
+        "{\"id\":\"swe\",\"label\":\"Swedish\",\"type\":\"Language\"}",
+        "{\"id\":\"tur\",\"label\":\"Turkish\",\"type\":\"Language\"}"
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
+    },
+    "type" : "Visible"
+  }
+}

@@ -4,13 +4,13 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks
 import weco.catalogue.internal_model.locations.LocationType
-import weco.catalogue.source_model.generators.SierraGenerators
+import weco.sierra.generators.SierraIdentifierGenerators
 
 class SierraPhysicalLocationTypeTest
     extends AnyFunSpec
     with Matchers
     with TableDrivenPropertyChecks
-    with SierraGenerators {
+    with SierraIdentifierGenerators {
   // These test cases are based on location names from every item in the
   // Sierra catalogue, as retrieved at the start of February 2021.
 

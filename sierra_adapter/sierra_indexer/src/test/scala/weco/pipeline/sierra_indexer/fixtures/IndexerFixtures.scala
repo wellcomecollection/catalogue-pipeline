@@ -1,10 +1,14 @@
 package weco.pipeline.sierra_indexer.fixtures
 
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
+
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.{Index, Response}
 import com.sksamuel.elastic4s.requests.get.GetResponse
 import org.scalatest.{Assertion, Suite}
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
+
 import weco.akka.fixtures.Akka
 import weco.elasticsearch.IndexConfig
 import weco.elasticsearch.test.fixtures.ElasticsearchFixtures
@@ -17,8 +21,6 @@ import weco.storage.store.memory.MemoryTypedStore
 import weco.catalogue.source_model.sierra.SierraTransformable
 import weco.pipeline.sierra_indexer.services.Worker
 
-import scala.concurrent.ExecutionContext.Implicits.global
-
 trait IndexerFixtures
     extends ElasticsearchFixtures
     with Eventually
@@ -26,7 +28,8 @@ trait IndexerFixtures
     with Akka
     with SQS { this: Suite =>
   def withWorker[R](
-    queue: Queue = Queue("test://q", "arn::test:q", visibilityTimeout = 1),
+    queue: Queue =
+      Queue("test://q", "arn::test:q", visibilityTimeout = 1 seconds),
     typedStore: MemoryTypedStore[S3ObjectLocation, SierraTransformable],
     indexPrefix: String)(
     testWith: TestWith[Worker, R]

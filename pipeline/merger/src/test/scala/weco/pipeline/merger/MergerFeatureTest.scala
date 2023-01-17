@@ -4,17 +4,14 @@ import org.scalatest.EitherValues
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.json.JsonUtil._
 import weco.messaging.fixtures.SQS.QueuePair
 import weco.messaging.memory.MemoryMessageSender
 import weco.catalogue.internal_model.identifiers.CanonicalId
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.catalogue.internal_model.work.generators.WorkGenerators
-import weco.pipeline.merger.fixtures.{
-  MatcherResultFixture,
-  WorkerServiceFixture
-}
+import weco.pipeline.matcher.models.MatcherResult._
+import weco.pipeline.merger.fixtures.{MatcherResultFixture, MergerFixtures}
 import weco.pipeline_storage.memory.MemoryRetriever
 
 import java.time.Instant
@@ -25,7 +22,7 @@ class MergerFeatureTest
     extends AnyFunSpec
     with Matchers
     with WorkGenerators
-    with WorkerServiceFixture
+    with MergerFixtures
     with MatcherResultFixture
     with Eventually
     with EitherValues
@@ -84,9 +81,9 @@ class MergerFeatureTest
 
     val workSender = new MemoryMessageSender
 
-    withLocalSqsQueuePair(visibilityTimeout = 5) {
+    withLocalSqsQueuePair() {
       case QueuePair(queue, dlq) =>
-        withWorkerService(retriever, queue, workSender, index = index) { _ =>
+        withMergerService(retriever, queue, workSender, index = index) { _ =>
           // 2) Now we update all four works at times t=1, t=2, t=3 and t=4.
           // However, due to best-effort ordering, we don't process these updates
           // in the correct order.
@@ -137,8 +134,6 @@ class MergerFeatureTest
 
           index(idD.underlying).left.value.data.title shouldBe Some(
             "I was updated at t = 4")
-
-          true shouldBe true
 
           // 4) Now suppose the updates to A and C get processed by the matcher
           // at time t = 6.

@@ -1,21 +1,19 @@
 package weco.pipeline.sierra_reader.services
 
-import com.amazonaws.services.s3.model.AmazonS3Exception
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import software.amazon.awssdk.services.s3.model.S3Exception
 import weco.json.JsonUtil._
 import weco.pipeline.sierra_reader.config.models.ReaderConfig
 import weco.pipeline.sierra_reader.exceptions.SierraReaderException
 import weco.fixtures.TestWith
 import weco.storage.fixtures.S3Fixtures
 import weco.storage.fixtures.S3Fixtures.Bucket
-import weco.catalogue.source_model.generators.SierraGenerators
-import weco.catalogue.source_model.sierra.identifiers.{
-  SierraBibNumber,
-  SierraRecordTypes
-}
+import weco.catalogue.source_model.generators.SierraRecordGenerators
 import weco.pipeline.sierra_reader.models.WindowStatus
+import weco.sierra.models.identifiers.{SierraBibNumber, SierraRecordTypes}
+import weco.storage.s3.S3ObjectLocation
 
 class WindowManagerTest
     extends AnyFunSpec
@@ -23,7 +21,7 @@ class WindowManagerTest
     with S3Fixtures
     with ScalaFutures
     with IntegrationPatience
-    with SierraGenerators {
+    with SierraRecordGenerators {
 
   private def withWindowManager[R](bucket: Bucket)(
     testWith: TestWith[WindowManager, R]) = {
@@ -63,16 +61,19 @@ class WindowManagerTest
           windowManager.buildWindowShard(s"[$startDateTime,$endDateTime]")
 
         // We pre-populate S3 with files as if they'd come from a prior run of the reader.
-        s3Client.putObject(bucket.name, s"${prefix}0000.json", "[]")
+        putString(
+          location = S3ObjectLocation(bucket.name, key = s"${prefix}0000.json"),
+          contents = "[]"
+        )
 
         val record = createSierraBibRecordWith(
           id = SierraBibNumber("1794165")
         )
 
-        s3Client.putObject(
-          bucket.name,
-          s"${prefix}0001.json",
-          toJson(List(record)).get
+        putString(
+          location = S3ObjectLocation(bucket.name, key=
+          s"${prefix}0001.json"),
+          contents = toJson(List(record)).get
         )
 
         val result =
@@ -91,7 +92,10 @@ class WindowManagerTest
       withWindowManager(bucket) { windowManager =>
         val prefix =
           windowManager.buildWindowShard(s"[$startDateTime,$endDateTime]")
-        s3Client.putObject(bucket.name, s"${prefix}0000.json", "not valid")
+        putString(
+          location = S3ObjectLocation(bucket.name, key = s"${prefix}0000.json"),
+          contents = "not valid"
+        )
 
         val result =
           windowManager.getCurrentStatus(s"[$startDateTime,$endDateTime]")
@@ -109,7 +113,10 @@ class WindowManagerTest
         val prefix =
           windowManager.buildWindowShard(s"[$startDateTime,$endDateTime]")
 
-        s3Client.putObject(bucket.name, s"${prefix}0000.json", "[]")
+        putString(
+          location = S3ObjectLocation(bucket.name, key = s"${prefix}0000.json"),
+          contents = "[]"
+        )
 
         val result =
           windowManager.getCurrentStatus(s"[$startDateTime,$endDateTime]")
@@ -127,7 +134,10 @@ class WindowManagerTest
         val prefix =
           windowManager.buildWindowShard(s"[$startDateTime,$endDateTime]")
 
-        s3Client.putObject(bucket.name, s"${prefix}000x.json", "[]")
+        putString(
+          location = S3ObjectLocation(bucket.name, key = s"${prefix}000x.json"),
+          contents = "[]"
+        )
 
         val result =
           windowManager.getCurrentStatus(s"[$startDateTime,$endDateTime]")
@@ -145,7 +155,7 @@ class WindowManagerTest
         windowManager.getCurrentStatus(s"[$startDateTime,$endDateTime]")
 
       whenReady(future.failed) {
-        _ shouldBe an[AmazonS3Exception]
+        _ shouldBe an[S3Exception]
       }
     }
   }

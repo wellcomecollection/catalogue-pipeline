@@ -4,8 +4,7 @@ locals {
 
   infra_bucket           = data.terraform_remote_state.shared_infra.outputs.infra_bucket
   account_id             = data.aws_caller_identity.current.account_id
-  aws_region             = "eu-west-1"
-  dlq_alarm_arn          = data.terraform_remote_state.shared_infra.outputs.dlq_alarm_arn
+  dlq_alarm_arn          = data.terraform_remote_state.monitoring.outputs.platform_dlq_alarm_topic_arn
   vpc_id                 = local.catalogue_vpcs["catalogue_vpc_delta_id"]
   private_subnets        = local.catalogue_vpcs["catalogue_vpc_delta_private_subnets"]
   shared_logging_secrets = data.terraform_remote_state.shared_infra.outputs.shared_secrets_logging
@@ -14,10 +13,25 @@ locals {
 
   reindex_jobs_topic_arn          = data.terraform_remote_state.reindexer.outputs.topic_arn
   calm_deletion_checker_topic_arn = data.terraform_remote_state.reindexer.outputs.calm_deletion_checker_topic_arn
-  calm_api_url                    = "https://archives.wellcome.ac.uk/CalmAPI/ContentService.asmx"
+  calm_reporting_topic_arn        = data.terraform_remote_state.reindexer.outputs.calm_reporting_topic_arn
+
+  calm_api_url = "https://archives.wellcome.org/CalmAPI/ContentService.asmx"
 
   deletion_checking_enabled = true
 
   window_generator_interval = "60 minutes"
   deletion_check_interval   = "7 days"
+
+  fargate_service_boilerplate = {
+    elastic_cloud_vpce_security_group_id = local.elastic_cloud_vpce_sg_id
+
+    cluster_name = aws_ecs_cluster.cluster.name
+    cluster_arn  = aws_ecs_cluster.cluster.arn
+
+    dlq_alarm_topic_arn = local.dlq_alarm_arn
+
+    subnets = local.private_subnets
+
+    shared_logging_secrets = local.shared_logging_secrets
+  }
 }

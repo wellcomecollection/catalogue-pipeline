@@ -4,10 +4,6 @@ provider "aws" {
   assume_role {
     role_arn = "arn:aws:iam::760097843905:role/platform-admin"
   }
-
-  ignore_tags {
-    keys = ["deployment:label"]
-  }
 }
 
 provider "aws" {
@@ -19,8 +15,6 @@ provider "aws" {
     role_arn = "arn:aws:iam::756629837203:role/catalogue-developer"
   }
 }
-
-provider "template" {}
 
 provider "ec" {}
 
@@ -54,6 +48,18 @@ data "terraform_remote_state" "shared_infra" {
     bucket   = "wellcomecollection-platform-infra"
     key      = "terraform/platform-infrastructure/shared.tfstate"
     region   = "eu-west-1"
+  }
+}
+
+data "terraform_remote_state" "monitoring" {
+  backend = "s3"
+
+  config = {
+    role_arn = "arn:aws:iam::760097843905:role/platform-read_only"
+
+    bucket = "wellcomecollection-platform-infra"
+    key    = "terraform/monitoring.tfstate"
+    region = "eu-west-1"
   }
 }
 
@@ -91,6 +97,17 @@ data "terraform_remote_state" "mets_adapter" {
     role_arn = "arn:aws:iam::760097843905:role/platform-read_only"
     bucket   = "wellcomecollection-platform-infra"
     key      = "terraform/catalogue/mets_adapter.tfstate"
+    region   = "eu-west-1"
+  }
+}
+
+data "terraform_remote_state" "tei_adapter" {
+  backend = "s3"
+
+  config = {
+    role_arn = "arn:aws:iam::760097843905:role/platform-read_only"
+    bucket   = "wellcomecollection-platform-infra"
+    key      = "terraform/tei_adapter.tfstate"
     region   = "eu-west-1"
   }
 }

@@ -1,24 +1,25 @@
 package weco.pipeline.merger.services
 
-import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Try
-import java.time.Instant
-import akka.{Done, NotUsed}
 import akka.stream.scaladsl.Flow
+import akka.{Done, NotUsed}
 import software.amazon.awssdk.services.sqs.model.Message
-import weco.json.JsonUtil._
-import weco.messaging.MessageSender
-import weco.messaging.sns.NotificationMessage
-import weco.catalogue.internal_model.Implicits._
-import weco.catalogue.internal_model.matcher.MatcherResult
-import weco.messaging.sqs.SQSStream
-import weco.typesafe.Runnable
-import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.catalogue.internal_model.image.Image
 import weco.catalogue.internal_model.image.ImageState.Initial
 import weco.catalogue.internal_model.work.Work
+import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.flows.FlowOps
+import weco.pipeline.matcher.models.MatcherResult._
+import weco.json.JsonUtil.fromJson
+import weco.messaging.MessageSender
+import weco.messaging.sns.NotificationMessage
+import weco.messaging.sqs.SQSStream
+import weco.pipeline.matcher.models.MatcherResult
 import weco.pipeline_storage.{Indexer, PipelineStorageConfig}
+import weco.typesafe.Runnable
+
+import java.time.Instant
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Try
 
 class MergerWorkerService[WorkDestination, ImageDestination](
   msgStream: SQSStream[NotificationMessage],
@@ -32,8 +33,8 @@ class MergerWorkerService[WorkDestination, ImageDestination](
     extends Runnable
     with FlowOps {
 
-  import weco.pipeline_storage.PipelineStorageStream._
   import weco.pipeline_storage.Indexable._
+  import weco.pipeline_storage.PipelineStorageStream._
 
   type WorkOrImage = Either[Work[Merged], Image[Initial]]
 

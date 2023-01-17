@@ -9,8 +9,6 @@ def setupProject(
   externalDependencies: Seq[ModuleID] = Seq()
 ): Project = {
 
-  Metadata.write(project, folder, localDependencies)
-
   val dependsOn = localDependencies
     .map { project: Project =>
       ClasspathDependency(
@@ -22,7 +20,6 @@ def setupProject(
   project
     .in(new File(folder))
     .settings(Common.settings: _*)
-    .settings(DockerCompose.settings: _*)
     .enablePlugins(DockerComposePlugin)
     .enablePlugins(JavaAppPackaging)
     .dependsOn(dependsOn: _*)
@@ -33,9 +30,13 @@ lazy val internal_model = setupProject(
   project,
   "common/internal_model",
   externalDependencies = CatalogueDependencies.internalModelDependencies)
-  .enablePlugins(GitVersioning)
-  .enablePlugins(BuildInfoPlugin)
-  .settings(Publish.sharedLibrarySettings: _*)
+
+lazy val display_model = setupProject(
+  project,
+  folder = "common/display_model",
+  localDependencies = Seq(internal_model),
+  externalDependencies = CatalogueDependencies.displayModelDependencies
+)
 
 lazy val flows = setupProject(
   project,
@@ -47,9 +48,6 @@ lazy val source_model = setupProject(
   folder = "common/source_model",
   localDependencies = Seq(internal_model),
   externalDependencies = CatalogueDependencies.sourceModelDependencies)
-  .enablePlugins(GitVersioning)
-  .enablePlugins(BuildInfoPlugin)
-  .settings(Publish.sharedLibrarySettings: _*)
 
 lazy val source_model_typesafe = setupProject(
   project,
@@ -83,7 +81,7 @@ lazy val id_minter = setupProject(
 lazy val ingestor_common = setupProject(
   project,
   "pipeline/ingestor/ingestor_common",
-  localDependencies = Seq(pipeline_storage_typesafe),
+  localDependencies = Seq(pipeline_storage_typesafe, display_model),
   externalDependencies = WellcomeDependencies.elasticsearchTypesafeLibrary
 )
 
@@ -109,8 +107,16 @@ lazy val matcher = setupProject(
 lazy val merger = setupProject(
   project,
   "pipeline/merger",
-  localDependencies = Seq(internal_model, pipeline_storage_typesafe),
+  localDependencies = Seq(internal_model, matcher, pipeline_storage_typesafe),
   externalDependencies = CatalogueDependencies.mergerDependencies
+)
+
+lazy val path_concatenator = setupProject(
+  project,
+  "pipeline/relation_embedder/path_concatenator",
+  localDependencies =
+    Seq(internal_model, pipeline_storage_typesafe),
+  externalDependencies = CatalogueDependencies.pathConcatenatorDependencies
 )
 
 lazy val relation_embedder = setupProject(
@@ -167,7 +173,7 @@ lazy val transformer_sierra = setupProject(
 lazy val transformer_mets = setupProject(
   project,
   folder = "pipeline/transformer/transformer_mets",
-  localDependencies = Seq(transformer_common, mets_adapter),
+  localDependencies = Seq(transformer_common),
   externalDependencies = CatalogueDependencies.metsTransformerDependencies
 )
 
@@ -178,12 +184,18 @@ lazy val transformer_calm = setupProject(
   externalDependencies = CatalogueDependencies.calmTransformerDependencies
 )
 
+lazy val transformer_tei = setupProject(
+  project,
+  folder = "pipeline/transformer/transformer_tei",
+  localDependencies = Seq(transformer_common)
+)
+
 // Sierra adapter
 
 lazy val sierra_reader = setupProject(
   project,
   "sierra_adapter/sierra_reader",
-  localDependencies = Seq(source_model_typesafe),
+  localDependencies = Seq(source_model),
   externalDependencies = CatalogueDependencies.sierraReaderDependencies
 )
 
@@ -197,14 +209,16 @@ lazy val sierra_merger = setupProject(
 lazy val sierra_linker = setupProject(
   project,
   folder = "sierra_adapter/sierra_linker",
-  localDependencies = Seq(source_model_typesafe),
+  localDependencies = Seq(source_model),
   externalDependencies = CatalogueDependencies.sierraLinkerDependencies
 )
 
 lazy val sierra_indexer = setupProject(
   project,
   folder = "sierra_adapter/sierra_indexer",
-  localDependencies = Seq(source_model_typesafe, pipeline_storage_typesafe))
+  localDependencies = Seq(source_model, pipeline_storage_typesafe),
+  externalDependencies = CatalogueDependencies.sierraIndexerDependencies
+)
 
 // METS adapter
 
@@ -236,6 +250,13 @@ lazy val calm_deletion_checker = setupProject(
   folder = "calm_adapter/calm_deletion_checker",
   localDependencies = Seq(calm_api_client, source_model_typesafe),
   externalDependencies = ExternalDependencies.scalacheckDependencies
+)
+
+lazy val calm_indexer = setupProject(
+  project,
+  folder = "calm_adapter/calm_indexer",
+  localDependencies = Seq(source_model),
+  externalDependencies = CatalogueDependencies.calmIndexerDependencies
 )
 
 // Inference manager

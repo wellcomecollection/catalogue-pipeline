@@ -1,5 +1,5 @@
 variable "aws_region" {
-  default = "eu-west-1"
+  type = string
 }
 
 variable "account_id" {}
@@ -22,9 +22,6 @@ variable "reindexer_jobs" {
 variable "reindexer_job_config_json" {}
 
 variable "service_name" {
-  type = string
-}
-variable "service_env" {
   type = string
 }
 

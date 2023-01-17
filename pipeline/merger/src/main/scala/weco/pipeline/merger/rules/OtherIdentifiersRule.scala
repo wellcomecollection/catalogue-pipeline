@@ -31,20 +31,26 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
   //   Encore records onto Calm target works if they are merged, because
   //   digcode identifiers are used as a tagging/classification system.
   private val otherIdentifiersTypeAllowList =
-    Set(IdentifierType.WellcomeDigcode, IdentifierType.SierraIdentifier)
+    Set(
+      IdentifierType.WellcomeDigcode,
+      IdentifierType.SierraIdentifier,
+      IdentifierType.CalmRefNo,
+      IdentifierType.CalmAltRefNo)
 
   override def merge(
     target: Work.Visible[Identified],
     sources: Seq[Work[Identified]]): FieldMergeResult[FieldData] = {
     val ids = (
       mergeDigitalIntoPhysicalSierraTarget(target, sources) |+|
-        mergeIntoCalmTarget(target, sources)
+        mergeIntoTeiTarget(target, sources)
+          .orElse(mergeIntoCalmTarget(target, sources))
           .orElse(
             mergeSingleMiroIntoSingleOrZeroItemSierraTarget(target, sources))
     ).getOrElse(target.data.otherIdentifiers).distinct
 
     val mergedSources = (
       List(
+        mergeIntoTeiTarget,
         mergeIntoCalmTarget,
         mergeSingleMiroIntoSingleOrZeroItemSierraTarget
       ).flatMap { rule =>
@@ -79,6 +85,17 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
           getAllowedIdentifiersFromSource)
     }
 
+  private val mergeIntoTeiTarget = new PartialRule {
+    val isDefinedForTarget: WorkPredicate = teiWork
+    val isDefinedForSource: WorkPredicate =
+      sierraWork or singleDigitalItemMiroWork or singlePhysicalItemCalmWork
+
+    def rule(target: Work.Visible[Identified],
+             sources: NonEmptyList[Work[Identified]]): FieldData =
+      target.data.otherIdentifiers ++ sources.toList.flatMap(
+        getAllowedIdentifiersFromSource)
+  }
+
   private val mergeIntoCalmTarget = new PartialRule {
     val isDefinedForTarget: WorkPredicate = singlePhysicalItemCalmWork
     val isDefinedForSource: WorkPredicate =
@@ -102,9 +119,18 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
     val isDefinedForSource: WorkPredicate = sierraWork
 
     def rule(target: Work.Visible[Identified],
-             sources: NonEmptyList[Work[Identified]]): FieldData =
-      findFirstLinkedDigitisedSierraWorkFor(target, sources.toList)
-        .map(target.data.otherIdentifiers ++ _.identifiers)
-        .getOrElse(Nil)
+             sources: NonEmptyList[Work[Identified]]): FieldData = {
+      val sourceIdentifiers =
+        findFirstLinkedDigitisedSierraWorkFor(target, sources.toList) match {
+          case Some(digitisedWork) =>
+            target.data.otherIdentifiers ++ digitisedWork.identifiers
+          case None =>
+            warn(
+              s"Unable to find other digitised Sierra identifiers for target work ${target.id}")
+            List()
+        }
+
+      target.data.otherIdentifiers ++ sourceIdentifiers
+    }
   }
 }

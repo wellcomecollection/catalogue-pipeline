@@ -2,16 +2,27 @@ package weco.catalogue.source_model.sierra
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.source_model.generators.SierraGenerators
-import weco.catalogue.source_model.sierra.identifiers.SierraItemNumber
+import weco.catalogue.source_model.generators.SierraRecordGenerators
+import weco.sierra.models.identifiers.SierraItemNumber
+
+import java.time.Instant
 
 class SierraTransformableTest
     extends AnyFunSpec
     with Matchers
-    with SierraGenerators {
+    with SierraRecordGenerators {
 
   it("allows creation of SierraTransformable with no data") {
-    SierraTransformable(sierraId = createSierraBibNumber)
+    // We need this for the case where:
+    //
+    //  1. We receive an item that links to a bib record b123
+    //  2. Later, we receive an update to the item that unlinks it
+    //
+    // Then we'd have a SierraTransformable for b123 but no attached records.
+    // Is that likely?  Hard to say, but we can handle it so we might as well.
+    SierraTransformable(
+      sierraId = createSierraBibNumber,
+      modifiedTime = Instant.now)
   }
 
   it("allows creation from only a SierraBibRecord") {
@@ -22,10 +33,12 @@ class SierraTransformableTest
   }
 
   it("allows looking up items by ID") {
+    val bibId = createSierraBibNumber
     val itemRecords = (0 to 3).map { _ =>
-      createSierraItemRecord
+      createSierraItemRecordWith(bibIds = List(bibId))
     }
-    val transformable = createSierraTransformableWith(
+    val transformable = createSierraTransformableStubWith(
+      bibId = bibId,
       itemRecords = itemRecords
     )
 

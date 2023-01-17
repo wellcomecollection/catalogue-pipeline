@@ -7,6 +7,7 @@ import weco.catalogue.source_model.mets.{
   MetsSourceData
 }
 import weco.pipeline.transformer.Transformer
+import weco.pipeline.transformer.mets.transformers.MetsTitle
 import weco.pipeline.transformer.result.Result
 import weco.storage.Identified
 import weco.storage.s3.S3ObjectLocation
@@ -30,7 +31,7 @@ class MetsXmlTransformer(store: Readable[S3ObjectLocation, String])
     metsSourceData match {
       case DeletedMetsFile(_, _) =>
         Right(
-          MetsData(recordIdentifier = id, deleted = true)
+          DeletedMetsData(recordIdentifier = id)
         )
 
       case metsFile @ MetsFileWithImages(_, _, manifestations, _, _) =>
@@ -44,15 +45,18 @@ class MetsXmlTransformer(store: Readable[S3ObjectLocation, String])
           }
     }
 
-  private def transformWithoutManifestations(root: MetsXml): Result[MetsData] =
+  private def transformWithoutManifestations(
+    root: MetsXml): Result[InvisibleMetsData] =
     for {
       id <- root.recordIdentifier
+      title <- MetsTitle(root.root)
       accessConditionDz <- root.accessConditionDz
       accessConditionStatus <- root.accessConditionStatus
       accessConditionUsage <- root.accessConditionUsage
     } yield
-      MetsData(
+      InvisibleMetsData(
         recordIdentifier = id,
+        title = title,
         accessConditionDz = accessConditionDz,
         accessConditionStatus = accessConditionStatus,
         accessConditionUsage = accessConditionUsage,
@@ -62,16 +66,18 @@ class MetsXmlTransformer(store: Readable[S3ObjectLocation, String])
 
   private def transformWithManifestations(
     root: MetsXml,
-    manifestations: List[S3ObjectLocation]): Result[MetsData] =
+    manifestations: List[S3ObjectLocation]): Result[InvisibleMetsData] =
     for {
       id <- root.recordIdentifier
+      title <- MetsTitle(root.root)
       firstManifestation <- getFirstManifestation(root, manifestations)
       accessConditionDz <- firstManifestation.accessConditionDz
       accessConditionStatus <- firstManifestation.accessConditionStatus
       accessConditionUsage <- firstManifestation.accessConditionUsage
     } yield
-      MetsData(
+      InvisibleMetsData(
         recordIdentifier = id,
+        title = title,
         accessConditionDz = accessConditionDz,
         accessConditionStatus = accessConditionStatus,
         accessConditionUsage = accessConditionUsage,

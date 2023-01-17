@@ -4,21 +4,32 @@ import weco.catalogue.internal_model.generators.IdentifiersGenerators
 import weco.catalogue.internal_model.identifiers.{
   CanonicalId,
   DataState,
+  IdState,
   SourceIdentifier
 }
 import weco.catalogue.internal_model.image.ImageData
 import weco.catalogue.internal_model.languages.Language
-import weco.catalogue.internal_model.locations.Location
+import weco.catalogue.internal_model.locations.DigitalLocation
 import weco.catalogue.internal_model.work.DeletedReason.DeletedFromSource
 import weco.catalogue.internal_model.work.WorkState._
 import weco.catalogue.internal_model.work._
 
 import java.time.Instant
-import scala.util.Random
 
-trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
+trait WorkGenerators
+    extends IdentifiersGenerators
+    with InstantGenerators
+    with LanguageGenerators {
+
   private def createVersion: Int =
-    Random.nextInt(100) + 1
+    random.nextInt(100) + 1
+
+  override def randomInstant: Instant =
+    if (random.nextBoolean()) {
+      Instant.now().plusSeconds(random.nextInt(1000))
+    } else {
+      Instant.now().minusSeconds(random.nextInt(1000))
+    }
 
   // To avoid having to specify a created date, it's handy having a default used in tests.
   // We can't use `Instant.now` as a default because that introduces all sorts of flakyness and race conditions.
@@ -27,10 +38,12 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
 
   def sourceWork(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
-    sourceModifiedTime: Instant = instantInLast30Days
+    sourceModifiedTime: Instant = randomInstant
   ): Work.Visible[Source] =
     Work.Visible[Source](
-      state = Source(sourceIdentifier, sourceModifiedTime),
+      state = Source(
+        sourceIdentifier = sourceIdentifier,
+        sourceModifiedTime = sourceModifiedTime),
       data = initData,
       version = createVersion
     )
@@ -38,7 +51,7 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
   def mergedWork(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     canonicalId: CanonicalId = createCanonicalId,
-    modifiedTime: Instant = instantInLast30Days
+    modifiedTime: Instant = randomInstant
   ): Work.Visible[Merged] = {
     val data = initData[DataState.Identified]
     Work.Visible[Merged](
@@ -57,7 +70,7 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
   def denormalisedWork(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     canonicalId: CanonicalId = createCanonicalId,
-    modifiedTime: Instant = instantInLast30Days,
+    modifiedTime: Instant = randomInstant,
     relations: Relations = Relations.none
   ): Work.Visible[Denormalised] = {
     val data = initData[DataState.Identified]
@@ -78,7 +91,7 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
   def identifiedWork(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     canonicalId: CanonicalId = createCanonicalId,
-    sourceModifiedTime: Instant = instantInLast30Days
+    sourceModifiedTime: Instant = randomInstant
   ): Work.Visible[Identified] =
     Work.Visible[Identified](
       state = Identified(
@@ -89,29 +102,6 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
       data = initData,
       version = createVersion
     )
-
-  def indexedWork(
-    sourceIdentifier: SourceIdentifier = createSourceIdentifier,
-    canonicalId: CanonicalId = createCanonicalId,
-    mergedTime: Instant = instantInLast30Days,
-    relations: Relations = Relations.none
-  ): Work.Visible[Indexed] = {
-    val data = initData[DataState.Identified]
-    Work.Visible[Indexed](
-      state = Indexed(
-        sourceIdentifier = sourceIdentifier,
-        canonicalId = canonicalId,
-        mergedTime = mergedTime,
-        sourceModifiedTime = mergedTime,
-        indexedTime = Instant.now(),
-        availabilities = Availabilities.forWorkData(data),
-        derivedData = DerivedWorkData(data),
-        relations = relations
-      ),
-      data = data,
-      version = createVersion
-    )
-  }
 
   def sourceWorks(count: Int): List[Work.Visible[Source]] =
     (1 to count).map(_ => sourceWork()).toList
@@ -124,9 +114,6 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
 
   def identifiedWorks(count: Int): List[Work.Visible[Identified]] =
     (1 to count).map(_ => identifiedWork()).toList
-
-  def indexedWorks(count: Int): List[Work.Visible[Indexed]] =
-    (1 to count).map(_ => indexedWork()).toList
 
   implicit class WorkOps[State <: WorkState: UpdateState](
     work: Work.Visible[State]
@@ -147,7 +134,6 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
     ): Work.Deleted[State] =
       Work.Deleted[State](
         state = work.state,
-        data = work.data,
         version = work.version,
         deletedReason = deletedReason
       )
@@ -183,11 +169,6 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
     ): Work.Visible[State] =
       work.map(_.copy(otherIdentifiers = otherIdentifiers))
 
-    def mergeCandidates(
-      mergeCandidates: List[MergeCandidate[State#WorkDataState#Id]]
-    ): Work.Visible[State] =
-      work.map(_.copy(mergeCandidates = mergeCandidates))
-
     def format(format: Format): Work.Visible[State] =
       work.map(_.copy(format = Some(format)))
 
@@ -220,7 +201,7 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
     ): Work.Visible[State] =
       work.map(_.copy(contributors = contributors))
 
-    def thumbnail(thumbnail: Location): Work.Visible[State] =
+    def thumbnail(thumbnail: DigitalLocation): Work.Visible[State] =
       work.map(_.copy(thumbnail = Some(thumbnail)))
 
     def production(
@@ -259,6 +240,15 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
     def holdings(newHoldings: List[Holdings]): Work.Visible[State] =
       work.map(_.copy(holdings = newHoldings))
 
+    def currentFrequency(currentFrequency: Option[String]): Work.Visible[State] =
+      work.map(_.copy(currentFrequency = currentFrequency))
+
+    def formerFrequency(formerFrequency: List[String]): Work.Visible[State] =
+      work.map(_.copy(formerFrequency = formerFrequency))
+
+    def designation(designation: List[String]): Work.Visible[State] =
+      work.map(_.copy(designation = designation))
+
     def map(
       f: WorkData[State#WorkDataState] => WorkData[State#WorkDataState]
     ): Work.Visible[State] = {
@@ -269,33 +259,39 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
         implicitly[UpdateState[State]].apply(work.state, nextData)
       )
     }
-  }
 
-  implicit class IndexedWorkOps(work: Work.Visible[Indexed])(
-    implicit updateState: UpdateState[Indexed]
-  ) {
-
-    def ancestors(works: Work.Visible[Indexed]*): Work.Visible[Indexed] =
-      Work.Visible[Indexed](
+    def mapState(
+      f: State => State
+    ): Work.Visible[State] = {
+      val nextState = f(work.state)
+      Work.Visible[State](
         work.version,
         work.data,
-        updateState(
-          work.state.copy(
-            relations = work.state.relations.copy(
-              ancestors = works.toList.zipWithIndex.map {
-                case (work, idx) =>
-                  Relation(
-                    work = work,
-                    depth = idx + 1,
-                    numChildren = 1,
-                    numDescendents = works.length - idx
-                  )
-              }
-            )
-          ),
-          work.data
-        )
+        nextState
       )
+    }
+  }
+
+  implicit class IdentifiedWorkOps(work: Work.Visible[Identified]) {
+    def mergeCandidates(
+      mergeCandidates: List[MergeCandidate[IdState.Identified]]
+    ): Work.Visible[Identified] =
+      work.mapState {
+        _.copy(mergeCandidates = mergeCandidates)
+      }
+
+    def internalWorks(internalWorks: List[Work.Visible[Identified]]): Work.Visible[Identified] =
+      work.mapState(state => {
+        state.copy(
+          internalWorkStubs = internalWorks.map(internalWork => (
+            InternalWork.Identified(
+              sourceIdentifier = internalWork.sourceIdentifier,
+              canonicalId = internalWork.state.canonicalId,
+              workData = internalWork.data
+            ),
+            )))
+
+      })
   }
 
   trait UpdateState[State <: WorkState] {
@@ -306,12 +302,6 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
     def identity[State <: WorkState]: UpdateState[State] =
       (state: State, _: WorkData[State#WorkDataState]) => state
 
-    implicit val updateIndexedState: UpdateState[Indexed] =
-      (state: Indexed, data: WorkData[DataState.Identified]) =>
-        state.copy(
-          derivedData = DerivedWorkData(data),
-          availabilities = Availabilities.forWorkData(data)
-      )
     implicit val updateIdentifiedState: UpdateState[Identified] = identity
     implicit val updateDenormalisedState: UpdateState[Denormalised] =
       (state: Denormalised, data: WorkData[DataState.Identified]) =>
@@ -324,6 +314,6 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
 
   private def initData[State <: DataState]: WorkData[State] =
     WorkData(
-      title = Some(randomAlphanumeric(length = 10))
+      title = Some(s"title-${randomAlphanumeric(length = 10)}")
     )
 }

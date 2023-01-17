@@ -1,8 +1,8 @@
 package weco.pipeline.sierra_linker.services
 
 import weco.catalogue.source_model.sierra.AbstractSierraRecord
-import weco.catalogue.source_model.sierra.identifiers.TypedSierraRecordNumber
 import weco.pipeline.sierra_linker.models.{Link, LinkOps}
+import weco.sierra.models.identifiers.TypedSierraRecordNumber
 import weco.storage.store.VersionedStore
 import weco.storage.{Identified, UpdateNotApplied}
 

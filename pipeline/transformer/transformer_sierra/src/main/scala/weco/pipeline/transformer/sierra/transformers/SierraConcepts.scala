@@ -1,26 +1,42 @@
 package weco.pipeline.transformer.sierra.transformers
 
-import weco.catalogue.internal_model.text.TextNormalisation._
 import weco.catalogue.internal_model.identifiers.IdState
-import weco.catalogue.internal_model.work.{
-  AbstractConcept,
-  Concept,
-  Period,
-  Place
+import weco.catalogue.internal_model.work.{AbstractConcept, Concept, Place}
+import weco.pipeline.transformer.text.TextNormalisation._
+import weco.pipeline.transformer.transformers.{
+  ConceptsTransformer,
+  ParsedPeriod
 }
-import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
-import weco.catalogue.source_model.sierra.source.SierraQueryOps
+import weco.sierra.models.SierraQueryOps
+import weco.sierra.models.marc.{Subfield, VarField}
 
-trait SierraConcepts extends SierraQueryOps {
+trait SierraConcepts
+    extends SierraQueryOps
+    with ConceptsTransformer
+    with SierraAbstractConcepts {
 
   // Get the label.  This is populated by the label of subfield $a, followed
   // by other subfields, in the order they come from MARC.  The labels are
   // joined by " - ".
-  protected def getLabel(primarySubfields: List[MarcSubfield],
-                         subdivisionSubfields: List[MarcSubfield]): String = {
+  protected def getLabel(primarySubfields: List[Subfield],
+                         subdivisionSubfields: List[Subfield]): String = {
     val orderedSubfields = primarySubfields ++ subdivisionSubfields
     orderedSubfields.map { _.content }.mkString(" - ").trimTrailingPeriod
   }
+
+  protected def getLabel(varField: VarField): Option[String] = {
+    val (primarySubfields, subdivisionSubfields) = getLabelSubfields(varField)
+    getLabel(primarySubfields, subdivisionSubfields) match {
+      case ""    => None
+      case label => Some(label)
+    }
+  }
+
+  protected def getLabelSubfields(
+    varField: VarField): (List[Subfield], List[Subfield]) =
+    varField
+      .subfieldsWithTags("a", "v", "x", "y", "z")
+      .partition { _.tag == "a" }
 
   /** Return a list of the distinct contents of every subfield 0 on
     * this varField, which is a commonly-used subfield for identifiers.
@@ -56,46 +72,31 @@ trait SierraConcepts extends SierraQueryOps {
       .map { _.replaceAll("[.\\s]", "") }
       .distinct
 
-  // Apply an identifier to the primary concept.  We look in subfield $0
-  // for the identifier value, then second indicator for the authority.
-  //
-  // Note that some identifiers have an identifier scheme in
-  // indicator 2, but no ID.  In this case, we just ignore it.
-  def identifyConcept[T](concept: T, varField: VarField): IdState.Unminted =
-    getIdentifierSubfieldContents(varField) match {
-      case Seq(subfieldContent) =>
-        maybeAddIdentifier[T](
-          concept = concept,
-          varField = varField,
-          identifierSubfieldContent = subfieldContent
-        )
-      case _ => IdState.Unidentifiable
-    }
-
   // If there's exactly one subfield $0 on the VarField, add an identifier
   // if possible.
-  private def maybeAddIdentifier[T](
-    concept: T,
+  protected def maybeAddIdentifier(
+    ontologyType: String,
     varField: VarField,
     identifierSubfieldContent: String): IdState.Unminted =
     SierraConceptIdentifier
       .maybeFindIdentifier(
         varField = varField,
         identifierSubfieldContent = identifierSubfieldContent,
-        ontologyType = concept.getClass.getSimpleName
+        ontologyType = ontologyType
       )
       .map(IdState.Identifiable(_))
       .getOrElse(IdState.Unidentifiable)
 
   // Extract the subdivisions, which come from everything except subfield $a.
   // These are never identified.  We preserve the order from MARC.
-  protected def getSubdivisions(subdivisionSubfields: List[MarcSubfield])
+  protected def getSubdivisions(subdivisionSubfields: List[Subfield])
     : List[AbstractConcept[IdState.Unminted]] =
     subdivisionSubfields.map { subfield =>
       subfield.tag match {
-        case "v" | "x" => Concept.normalised(label = subfield.content)
-        case "y"       => Period(label = subfield.content)
-        case "z"       => Place.normalised(label = subfield.content)
+        case "v" | "x" =>
+          Concept(label = subfield.content).normalised.identifiable()
+        case "y" => ParsedPeriod(label = subfield.content).identifiable()
+        case "z" => Place(label = subfield.content).normalised.identifiable()
       }
     }
 }

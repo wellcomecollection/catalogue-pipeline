@@ -4,13 +4,13 @@ import java.time.Instant
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.json.JsonUtil._
-import weco.catalogue.source_model.generators.SierraGenerators
-import weco.catalogue.source_model.sierra.identifiers.SierraItemNumber
+import weco.catalogue.source_model.generators.SierraRecordGenerators
+import weco.sierra.models.identifiers.SierraItemNumber
 
 class SierraItemRecordTest
     extends AnyFunSpec
     with Matchers
-    with SierraGenerators {
+    with SierraRecordGenerators {
 
   it("can cast a SierraItemRecord to JSON and back again") {
     val originalRecord = createSierraItemRecord
@@ -51,22 +51,23 @@ class SierraItemRecordTest
   it("throws an exception for valid JSON that doesn't contain bibIds") {
     assertCreatingFromDataFails(
       data = "{}",
-      expectedMessage =
-        "Attempt to decode value on failed cursor: DownField(bibIds)"
+      expectedMessage = "Missing required field: DownField(bibIds)"
     )
   }
 
   it("throws an exception when bibIds is not a list of strings") {
     assertCreatingFromDataFails(
       data = """{"bibIds":[1,2,3]}""",
-      expectedMessage = "String: DownArray,DownField(bibIds)"
+      expectedMessage =
+        "Got value '1' with wrong type, expecting string: DownArray,DownField(bibIds)"
     )
   }
 
   it("throws an exception when bibIds is not a list") {
     assertCreatingFromDataFails(
       data = """{"bibIds":"blah"}""",
-      expectedMessage = "C[A]: DownField(bibIds)"
+      expectedMessage =
+        "Got value '\"blah\"' with wrong type, expecting array: DownField(bibIds)"
     )
   }
 

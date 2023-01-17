@@ -7,15 +7,25 @@ import weco.catalogue.internal_model.identifiers.{
   IdentifierType,
   SourceIdentifier
 }
-import weco.catalogue.source_model.generators.SierraDataGenerators
-import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
-import weco.catalogue.source_model.sierra.SierraBibData
-import weco.catalogue.source_model.sierra.identifiers.SierraBibNumber
 import weco.pipeline.transformer.sierra.exceptions.CataloguingException
+import weco.pipeline.transformer.sierra.transformers.matchers.{
+  ConceptMatchers,
+  HasIdMatchers,
+  SubjectMatchers
+}
+import weco.sierra.generators.SierraDataGenerators
+import weco.sierra.models.data.SierraBibData
+import weco.sierra.models.identifiers.SierraBibNumber
+import weco.sierra.models.marc.{Subfield, VarField}
+
+// TODO: There is a bunch of commonality between the different SubjectsTests that could be DRYed out
 
 class SierraOrganisationSubjectsTest
     extends AnyFunSpec
     with Matchers
+    with HasIdMatchers
+    with ConceptMatchers
+    with SubjectMatchers
     with SierraDataGenerators {
   it("returns an empty list if there are no instances of MARC tag 610") {
     val bibData = createSierraBibDataWith(varFields = Nil)
@@ -23,14 +33,14 @@ class SierraOrganisationSubjectsTest
   }
 
   describe("label") {
-    it("uses subfields a, b, c, d and e as the label") {
+    it("uses subfields a, b, c, d and e as the subject label") {
       val bibData = create610bibDataWith(
         subfields = List(
-          MarcSubfield(tag = "a", content = "United States."),
-          MarcSubfield(tag = "b", content = "Supreme Court,"),
-          MarcSubfield(tag = "c", content = "Washington, DC."),
-          MarcSubfield(tag = "d", content = "September 29, 2005,"),
-          MarcSubfield(tag = "e", content = "pictured.")
+          Subfield(tag = "a", content = "United States."),
+          Subfield(tag = "b", content = "Supreme Court,"),
+          Subfield(tag = "c", content = "Washington, DC."),
+          Subfield(tag = "d", content = "September 29, 2005,"),
+          Subfield(tag = "e", content = "pictured.")
         )
       )
 
@@ -44,11 +54,11 @@ class SierraOrganisationSubjectsTest
       // This is based on an example from the MARC spec
       val bibData = create610bibDataWith(
         subfields = List(
-          MarcSubfield(tag = "a", content = "United States."),
-          MarcSubfield(tag = "b", content = "Army."),
-          MarcSubfield(tag = "b", content = "Cavalry, 7th."),
-          MarcSubfield(tag = "b", content = "Company E,"),
-          MarcSubfield(tag = "e", content = "depicted.")
+          Subfield(tag = "a", content = "United States."),
+          Subfield(tag = "b", content = "Army."),
+          Subfield(tag = "b", content = "Cavalry, 7th."),
+          Subfield(tag = "b", content = "Company E,"),
+          Subfield(tag = "e", content = "depicted.")
         )
       )
 
@@ -63,25 +73,47 @@ class SierraOrganisationSubjectsTest
     it("creates an Organisation as the concept") {
       val bibData = create610bibDataWith(
         subfields = List(
-          MarcSubfield(tag = "a", content = "Wellcome Trust."),
+          Subfield(tag = "a", content = "Wellcome Trust."),
         )
       )
 
-      val subjects = getOrganisationSubjects(bibData)
-      val concepts = subjects.head.concepts
-      concepts should have size 1
+      val List(subject) = getOrganisationSubjects(bibData)
 
-      val unmintedOrganisation = concepts.head
-      unmintedOrganisation.id shouldBe IdState.Unidentifiable
+      val List(concept) = subject.concepts
+      concept should have(
+        'label ("Wellcome Trust"),
+        sourceIdentifier(
+          value = "wellcome trust",
+          ontologyType = "Organisation",
+          identifierType = IdentifierType.LabelDerived)
+      )
+    }
+
+    it("returns a lowercase ascii normalised identifier") {
+      val bibData = create610bibDataWith(
+        subfields = List(
+          Subfield(tag = "a", content = "Hasseröder")
+        )
+      )
+      val List(subject) = getOrganisationSubjects(bibData)
+
+      subject.label shouldBe "Hasseröder"
+      subject should have(
+        labelDerivedOrganisationId("hasseroder")
+      )
+      subject.onlyConcept.label shouldBe "Hasseröder"
+      subject.onlyConcept should have(
+        labelDerivedOrganisationId("hasseroder")
+      )
     }
 
     it("uses subfields a and b for the Organisation label") {
       val bibData = create610bibDataWith(
         subfields = List(
-          MarcSubfield(tag = "a", content = "Wellcome Trust."),
-          MarcSubfield(tag = "b", content = "Facilities,"),
-          MarcSubfield(tag = "b", content = "Health & Safety"),
-          MarcSubfield(tag = "c", content = "27 September 2018")
+          Subfield(tag = "a", content = "Wellcome Trust."),
+          Subfield(tag = "b", content = "Facilities,"),
+          Subfield(tag = "b", content = "Health & Safety"),
+          Subfield(tag = "c", content = "27 September 2018")
         )
       )
 
@@ -90,13 +122,13 @@ class SierraOrganisationSubjectsTest
       concepts.head.label shouldBe "Wellcome Trust. Facilities, Health & Safety"
     }
 
-    it("creates an Identifiable Organisation if subfield 0 is present") {
+    it("creates an Identifiable Organisation using subfield 0, if present") {
       val lcNamesCode = "n81290903210"
       val bibData = create610bibDataWith(
         indicator2 = "0",
         subfields = List(
-          MarcSubfield(tag = "a", content = "ACME Corp"),
-          MarcSubfield(tag = "0", content = lcNamesCode)
+          Subfield(tag = "a", content = "ACME Corp"),
+          Subfield(tag = "0", content = lcNamesCode)
         )
       )
 
@@ -107,7 +139,28 @@ class SierraOrganisationSubjectsTest
       subject.id shouldBe IdState.Identifiable(
         SourceIdentifier(
           identifierType = IdentifierType.LCNames,
-          ontologyType = "Subject",
+          ontologyType = "Organisation",
+          value = lcNamesCode
+        )
+      )
+    }
+
+    it("assumes LCNames if no indicator2 is given") {
+      val lcNamesCode = "n81290903210"
+      val bibData = create610bibDataWith(
+        indicator2 = "",
+        subfields = List(
+          Subfield(tag = "a", content = "ACME Corp"),
+          Subfield(tag = "0", content = lcNamesCode)
+        )
+      )
+
+      val List(subject) = getOrganisationSubjects(bibData)
+
+      subject should have(
+        sourceIdentifier(
+          identifierType = IdentifierType.LCNames,
+          ontologyType = "Organisation",
           value = lcNamesCode
         )
       )
@@ -118,9 +171,9 @@ class SierraOrganisationSubjectsTest
       val bibData = create610bibDataWith(
         indicator2 = "0",
         subfields = List(
-          MarcSubfield(tag = "a", content = "ACME Corp"),
-          MarcSubfield(tag = "0", content = "  n1234"),
-          MarcSubfield(tag = "0", content = "n1234"),
+          Subfield(tag = "a", content = "ACME Corp"),
+          Subfield(tag = "0", content = "  n1234"),
+          Subfield(tag = "0", content = "n1234"),
         )
       )
 
@@ -131,7 +184,7 @@ class SierraOrganisationSubjectsTest
       subject.id shouldBe IdState.Identifiable(
         SourceIdentifier(
           identifierType = IdentifierType.LCNames,
-          ontologyType = "Subject",
+          ontologyType = "Organisation",
           value = "n1234"
         )
       )
@@ -141,9 +194,9 @@ class SierraOrganisationSubjectsTest
       val bibData = create610bibDataWith(
         indicator2 = "0",
         subfields = List(
-          MarcSubfield(tag = "a", content = "ACME Corp"),
-          MarcSubfield(tag = "0", content = "n12345"),
-          MarcSubfield(tag = "0", content = "n67890")
+          Subfield(tag = "a", content = "ACME Corp"),
+          Subfield(tag = "0", content = "n12345"),
+          Subfield(tag = "0", content = "n67890")
         )
       )
 
@@ -153,12 +206,12 @@ class SierraOrganisationSubjectsTest
       unmintedOrganisation.id shouldBe IdState.Unidentifiable
     }
 
-    it("skips adding an identifier if the 2nd indicator is not '0'") {
+    it("skips adding an identifier if a specified 2nd indicator is not '0'") {
       val bibData = create610bibDataWith(
         indicator2 = "2",
         subfields = List(
-          MarcSubfield(tag = "a", content = "ACME Corp"),
-          MarcSubfield(tag = "0", content = "n12345")
+          Subfield(tag = "a", content = "ACME Corp"),
+          Subfield(tag = "0", content = "n12345")
         )
       )
 
@@ -197,17 +250,17 @@ class SierraOrganisationSubjectsTest
       varFields = List(
         createMarc610VarField(
           subfields = List(
-            MarcSubfield(tag = "a", content = "ACME Corp.")
+            Subfield(tag = "a", content = "ACME Corp.")
           )
         ),
         createMarc610VarField(
           subfields = List(
-            MarcSubfield(tag = "a", content = "BBC.")
+            Subfield(tag = "a", content = "BBC.")
           )
         ),
         createMarc610VarField(
           subfields = List(
-            MarcSubfield(tag = "a", content = "Charlie's Chocolate Factory.")
+            Subfield(tag = "a", content = "Charlie's Chocolate Factory.")
           )
         )
       )
@@ -217,7 +270,7 @@ class SierraOrganisationSubjectsTest
     subjects should have size 3
   }
 
-  private def create610bibDataWith(subfields: List[MarcSubfield],
+  private def create610bibDataWith(subfields: List[Subfield],
                                    indicator2: String = ""): SierraBibData =
     createSierraBibDataWith(
       varFields = List(
@@ -225,7 +278,7 @@ class SierraOrganisationSubjectsTest
       )
     )
 
-  private def createMarc610VarField(subfields: List[MarcSubfield],
+  private def createMarc610VarField(subfields: List[Subfield],
                                     indicator2: String = ""): VarField =
     VarField(
       marcTag = Some("610"),

@@ -3,10 +3,9 @@ package weco.pipeline.id_minter.services
 import akka.Done
 import akka.stream.scaladsl.Flow
 import grizzled.slf4j.Logging
-import io.circe.{Decoder, Json}
+import io.circe.Json
 import software.amazon.awssdk.services.sqs.model.Message
-import weco.json.JsonUtil
-import weco.json.JsonUtil._
+import weco.json.JsonUtil.fromJson
 import weco.messaging.sns.NotificationMessage
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.work.WorkState.Identified
@@ -56,25 +55,33 @@ class IdMinterWorkerService[Destination](
       this.getClass.getSimpleName,
       Flow[(Message, NotificationMessage)]
         .via(batchRetrieveFlow(pipelineStream.config, jsonRetriever))
-        .via(processFlow(pipelineStream.config, item => processMessage(item)))
+        .via(
+          processFlow(
+            pipelineStream.config,
+            item => Future.fromTry(processMessage(item))))
     )
   }
 
-  def processMessage(json: Json): Future[List[Work[Identified]]] =
+  def processMessage(json: Json): Try[List[Work[Identified]]] =
     for {
-      updatedJson <- Future.fromTry(embedIds(json))
-      work <- Future.fromTry(decodeJson(updatedJson))
+      updatedJson <- embedIds(json)
+      work <- decodeWork(updatedJson)
     } yield List(work)
 
-  def embedIds(json: Json): Try[Json] =
+  private def embedIds(json: Json): Try[Json] =
     for {
       sourceIdentifiers <- SourceIdentifierEmbedder.scan(json)
       mintedIdentifiers <- identifierGenerator.retrieveOrGenerateCanonicalIds(
         sourceIdentifiers)
-      updatedJson <- SourceIdentifierEmbedder.update(json, mintedIdentifiers)
+
+      canonicalIdentifiers = mintedIdentifiers.map {
+        case (sourceIdentifier, identifier) =>
+          (sourceIdentifier, identifier.CanonicalId)
+      }
+
+      updatedJson <- SourceIdentifierEmbedder.update(json, canonicalIdentifiers)
     } yield updatedJson
 
-  def decodeJson(json: Json)(
-    implicit decoder: Decoder[Work[Identified]]): Try[Work[Identified]] =
-    JsonUtil.fromJson[Work[Identified]](json.noSpaces)(decoder)
+  private def decodeWork(json: Json): Try[Work[Identified]] =
+    fromJson[Work[Identified]](json.noSpaces)
 }

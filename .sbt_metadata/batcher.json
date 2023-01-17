@@ -1,6 +1,0 @@
-{
-  "id" : "batcher",
-  "folder" : "pipeline/relation_embedder/batcher",
-  "dependencyIds" : [
-  ]
-}

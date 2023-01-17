@@ -1,6 +1,6 @@
 package weco.pipeline.transformer.calm.transformers
 
-import weco.catalogue.internal_model.work.LanguageNote
+import weco.catalogue.internal_model.work.{Note, NoteType}
 import weco.catalogue.internal_model.languages.{Language, MarcLanguageCodeList}
 
 import scala.util.matching.Regex
@@ -18,17 +18,16 @@ object CalmLanguages {
   // languages we can, and keep the original sentence in a note.
   // e.g. "Mainly in German, smaller parts in English."
   //
-  def apply(
-    languageFieldValues: List[String]): (List[Language], List[LanguageNote]) =
+  def apply(languageFieldValues: List[String]): (List[Language], List[Note]) =
     languageFieldValues
-      .foldLeft((List[Language](), List[LanguageNote]())) {
+      .foldLeft((List[Language](), List[Note]())) {
         case ((languages, notes), value) =>
           val (newLanguages, newNotes) = parseSingleValue(value)
           ((languages ++ newLanguages).distinct, (notes ++ newNotes).distinct)
       }
 
   private def parseSingleValue(
-    languageField: String): (List[Language], List[LanguageNote]) =
+    languageField: String): (List[Language], List[Note]) =
     languageField match {
       case value if value.trim.nonEmpty =>
         parseLanguages(value) match {
@@ -42,7 +41,12 @@ object CalmLanguages {
           case None =>
             (
               guessLanguages(value),
-              List(LanguageNote(value.replace("recieved", "received")))
+              List(
+                Note(
+                  contents = value.replace("recieved", "received"),
+                  noteType = NoteType.LanguageNote
+                )
+              )
             )
         }
 

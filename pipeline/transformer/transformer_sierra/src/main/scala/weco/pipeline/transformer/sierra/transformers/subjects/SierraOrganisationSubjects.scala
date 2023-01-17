@@ -2,10 +2,10 @@ package weco.pipeline.transformer.sierra.transformers.subjects
 
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.{Organisation, Subject}
-import weco.catalogue.source_model.sierra.identifiers.SierraBibNumber
-import weco.catalogue.source_model.sierra.marc.VarField
 import weco.pipeline.transformer.sierra.exceptions.CataloguingException
 import weco.pipeline.transformer.sierra.transformers.SierraAgents
+import weco.sierra.models.identifiers.SierraBibNumber
+import weco.sierra.models.marc.VarField
 
 // Populate wwork:subject
 //
@@ -29,29 +29,27 @@ object SierraOrganisationSubjects
 
   val subjectVarFields = List("610")
 
-  def getSubjectsFromVarFields(bibId: SierraBibNumber,
-                               varFields: List[VarField]): Output =
+  def getSubjectsFromVarFields(
+    bibId: SierraBibNumber,
+    varFields: List[VarField]
+  ): Output =
     varFields.map { varField =>
       val label =
         createLabel(varField, subfieldTags = List("a", "b", "c", "d", "e"))
 
       val organisation = createOrganisation(bibId, varField)
 
-      val subject = Subject(
+      Subject(
         label = label,
-        concepts = List(organisation)
+        concepts = List(organisation),
+        id = identifyAgentSubject(varField, "Organisation")
       )
-
-      varField.indicator2 match {
-        case Some("0") =>
-          subject.copy(id = identify(varField.subfields, "Subject"))
-        case _ => subject
-      }
     }
 
   private def createOrganisation(
     bibId: SierraBibNumber,
-    varField: VarField): Organisation[IdState.Unminted] = {
+    varField: VarField
+  ): Organisation[IdState.Unminted] = {
     val label = createLabel(varField, subfieldTags = List("a", "b"))
 
     // @@AWLC: I'm not sure if this can happen in practice -- but we don't have
@@ -60,9 +58,14 @@ object SierraOrganisationSubjects
     if (label == "") {
       throw CataloguingException(
         bibId,
-        s"Not enough information to build a label on $varField")
+        s"Not enough information to build a label on $varField"
+      )
     }
 
-    Organisation(label = label)
+    Organisation(
+      label = label,
+      id =
+        identifyAgentSubject(varfield = varField, ontologyType = "Organisation")
+    )
   }
 }

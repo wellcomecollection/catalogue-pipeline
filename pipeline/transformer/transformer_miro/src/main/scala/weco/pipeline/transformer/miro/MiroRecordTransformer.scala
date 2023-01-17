@@ -11,7 +11,7 @@ import weco.catalogue.internal_model.work.InvisibilityReason.UnableToTransform
 import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.internal_model.work.{Work, WorkData}
 import weco.catalogue.source_model.miro.MiroSourceOverrides
-import weco.json.JsonUtil._
+import weco.json.JsonUtil.toJson
 import weco.pipeline.transformer.Transformer
 import weco.pipeline.transformer.miro.exceptions.{
   ShouldNotTransformException,
@@ -21,6 +21,7 @@ import weco.pipeline.transformer.miro.models.MiroMetadata
 import weco.pipeline.transformer.miro.source.MiroRecord
 import weco.pipeline.transformer.miro.transformers._
 import weco.pipeline.transformer.result.Result
+import Implicits._
 
 import java.time.Instant
 import scala.util.{Success, Try}
@@ -82,7 +83,6 @@ class MiroRecordTransformer
       Success(
         Work.Deleted[Source](
           version = version,
-          data = WorkData(),
           state = state,
           deletedReason =
             SuppressedFromSource("Miro: isClearedForCatalogueAPI = false")
@@ -97,7 +97,6 @@ class MiroRecordTransformer
       Success(
         Work.Deleted[Source](
           version = version,
-          data = WorkData(),
           state = state,
           deletedReason = SuppressedFromSource(
             s"Miro: image_copyright_cleared = ${originalMiroRecord.copyrightCleared
@@ -137,7 +136,6 @@ class MiroRecordTransformer
         case e: ShouldSuppressException =>
           Work.Deleted[Source](
             version = version,
-            data = WorkData(),
             state = state,
             deletedReason = SuppressedFromSource(s"Miro: ${e.getMessage}")
           )

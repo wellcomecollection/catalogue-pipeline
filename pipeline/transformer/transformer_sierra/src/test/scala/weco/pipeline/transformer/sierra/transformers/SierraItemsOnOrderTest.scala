@@ -6,9 +6,9 @@ import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.identifiers.IdState.Unidentifiable
 import weco.catalogue.internal_model.locations.{LocationType, PhysicalLocation}
 import weco.catalogue.internal_model.work.Item
-import weco.catalogue.source_model.generators.SierraDataGenerators
-import weco.catalogue.source_model.sierra.marc.FixedField
-import weco.catalogue.source_model.sierra.{SierraBibData, SierraOrderData}
+import weco.sierra.generators.SierraDataGenerators
+import weco.sierra.models.data.{SierraBibData, SierraOrderData}
+import weco.sierra.models.marc.FixedField
 
 class SierraItemsOnOrderTest
     extends AnyFunSpec

@@ -1,0 +1,28 @@
+{
+  "description" : "an arbitrary list of deleted works",
+  "createdAt" : "2022-10-03T10:25:18.804Z",
+  "id" : "0tkkvzgo",
+  "document" : {
+    "debug" : {
+      "source" : {
+        "id" : "0tkkvzgo",
+        "identifier" : {
+          "identifierType" : {
+            "id" : "calm-record-id"
+          },
+          "ontologyType" : "Work",
+          "value" : "ROtwcbnYKN"
+        },
+        "version" : 97,
+        "modifiedTime" : "2009-09-05T08:49:35Z"
+      },
+      "mergedTime" : "2009-09-05T08:49:35Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
+      "deletedReason" : {
+        "info" : "tests",
+        "type" : "DeletedFromSource"
+      }
+    },
+    "type" : "Deleted"
+  }
+}

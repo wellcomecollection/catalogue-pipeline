@@ -22,9 +22,37 @@ case class MetsFileWithImages(
 
   def manifestationLocations: List[S3ObjectLocation] =
     manifestations.map { root.asLocation(_) }
+
+  // We store these values in DynamoDB, which only supports second-level
+  // precision of Instant values.  We can treat two instances of this class
+  // as equal if their createdDates are at the same second.
+  override def equals(other: Any): Boolean =
+    other match {
+      case m: MetsFileWithImages
+          if m.root == root &&
+            m.filename == filename &&
+            m.manifestations == manifestations &&
+            m.createdDate.getEpochSecond == createdDate.getEpochSecond &&
+            m.version == version =>
+        true
+      case _ => false
+    }
 }
 
 case class DeletedMetsFile(
   createdDate: Instant,
   version: Int
-) extends MetsSourceData
+) extends MetsSourceData {
+
+  // We store these values in DynamoDB, which only supports second-level
+  // precision of Instant values.  We can treat two instances of this class
+  // as equal if their createdDates are at the same second.
+  override def equals(other: Any): Boolean =
+    other match {
+      case d: DeletedMetsFile
+          if d.createdDate.getEpochSecond == createdDate.getEpochSecond &&
+            d.version == version =>
+        true
+      case _ => false
+    }
+}

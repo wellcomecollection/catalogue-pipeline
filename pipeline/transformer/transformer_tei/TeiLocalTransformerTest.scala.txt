@@ -1,0 +1,49 @@
+package weco.pipeline.transformer.tei
+
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
+
+import java.io.FileInputStream
+import java.nio.file.{Files, Path, Paths}
+import java.time.Instant
+import java.util.stream.Collectors
+import scala.collection.JavaConverters._
+import scala.util.{Failure, Success, Try}
+import scala.xml.XML
+
+class TeiLocalTransformerTest extends AnyFunSpec with Matchers {
+
+  /** This test runs the TEI transformer over every XML file in the TEI repo.
+   *
+   * Because there are relatively few TEI files, you can run this locally to see
+   * if there are any files that can't be handled without spinning up a whole pipeline.
+   *
+   */
+  it("handles all the TEI files") {
+    val root = Paths.get("/Users/alexwlchan/repos", "wellcome-collection-tei")
+    val xmlPaths =
+      Files
+        .walk(root)
+        .collect(Collectors.toList[Path])
+        .asScala
+        .filter { Files.isRegularFile(_) }
+        .filter { _.getFileName.toString.endsWith(".xml") }
+
+    xmlPaths
+      .filterNot { _.toString.endsWith("/Wellcome_TEI_Manuscript_Guidelines.xml") }
+      .filterNot { _.toString.contains("/Templates/") }
+      .foreach { p =>
+        val result = Try {
+          val xml = XML.load(new FileInputStream(p.toAbsolutePath.toString))
+
+          new TeiXml(xml).parse.map(_.toWork(time = Instant.now(), version = 1))
+        }
+
+        result match {
+          case Success(Right(_))  => ()
+          case Success(Left(err)) => println(s"Unable to transform $p:\n$err\n")
+          case Failure(err) => println(s"Unable to parse $p:\n$err\n")
+        }
+      }
+  }
+}

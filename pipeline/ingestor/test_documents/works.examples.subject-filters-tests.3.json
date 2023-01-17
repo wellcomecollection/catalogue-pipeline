@@ -1,0 +1,192 @@
+{
+  "description" : "examples for the subject filter tests",
+  "createdAt" : "2023-01-03T09:31:59.911976Z",
+  "id" : "b1r485o0",
+  "document" : {
+    "debug" : {
+      "source" : {
+        "id" : "b1r485o0",
+        "identifier" : {
+          "identifierType" : {
+            "id" : "calm-record-id"
+          },
+          "ontologyType" : "Work",
+          "value" : "4zh18D0cbF"
+        },
+        "version" : 43,
+        "modifiedTime" : "1986-02-15T03:35:37Z"
+      },
+      "mergedTime" : "1986-02-15T03:35:37Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
+      "redirectSources" : [
+      ]
+    },
+    "display" : {
+      "id" : "b1r485o0",
+      "title" : "title-DxPLXKke6N",
+      "alternativeTitles" : [
+      ],
+      "contributors" : [
+      ],
+      "identifiers" : [
+        {
+          "identifierType" : {
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
+            "type" : "IdentifierType"
+          },
+          "value" : "4zh18D0cbF",
+          "type" : "Identifier"
+        }
+      ],
+      "subjects" : [
+        {
+          "id" : "darwin01",
+          "identifiers" : [
+            {
+              "identifierType" : {
+                "id" : "lc-names",
+                "label" : "Library of Congress Name authority records",
+                "type" : "IdentifierType"
+              },
+              "value" : "lcnames-darwin",
+              "type" : "Identifier"
+            }
+          ],
+          "label" : "Darwin \"Jones\", Charles",
+          "concepts" : [
+            {
+              "label" : "40zJbSlLwDNn2Et",
+              "type" : "Concept"
+            },
+            {
+              "label" : "p5zfssscK3StYS1",
+              "type" : "Concept"
+            },
+            {
+              "label" : "KOlZmZXOWd5kJ1F",
+              "type" : "Concept"
+            }
+          ],
+          "type" : "Subject"
+        }
+      ],
+      "genres" : [
+      ],
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "availabilities" : [
+      ],
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "notes" : [
+      ],
+      "formerFrequency" : [
+      ],
+      "designation" : [
+      ],
+      "images" : [
+      ],
+      "parts" : [
+      ],
+      "partOf" : [
+      ],
+      "precededBy" : [
+      ],
+      "succeededBy" : [
+      ],
+      "type" : "Work"
+    },
+    "query" : {
+      "id" : "b1r485o0",
+      "format.id" : null,
+      "workType" : "Standard",
+      "identifiers.value" : [
+        "4zh18D0cbF"
+      ],
+      "title" : "title-DxPLXKke6N",
+      "alternativeTitles" : [
+      ],
+      "description" : null,
+      "physicalDescription" : null,
+      "edition" : null,
+      "notes.contents" : [
+      ],
+      "lettering" : null,
+      "images.id" : [
+      ],
+      "images.identifiers.value" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
+      "items.locations.accessConditions.status.id" : [
+      ],
+      "items.locations.license.id" : [
+      ],
+      "items.locations.locationType.id" : [
+      ],
+      "subjects.id" : [
+        "darwin01"
+      ],
+      "subjects.label" : [
+        "Darwin \"Jones\", Charles"
+      ],
+      "subjects.concepts.label" : [
+        "40zJbSlLwDNn2Et",
+        "p5zfssscK3StYS1",
+        "KOlZmZXOWd5kJ1F"
+      ],
+      "genres.label" : [
+      ],
+      "genres.concepts.label" : [
+      ],
+      "languages.id" : [
+      ],
+      "languages.label" : [
+      ],
+      "contributors.agent.id" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "production.label" : [
+      ],
+      "production.dates.range.from" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
+      ],
+      "collectionPath.label" : null,
+      "collectionPath.path" : null,
+      "referenceNumber" : null
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+        "{\"label\":\"Darwin \\\"Jones\\\", Charles\",\"concepts\":[],\"type\":\"Subject\"}"
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
+    },
+    "type" : "Visible"
+  }
+}

@@ -2,12 +2,10 @@ package weco.pipeline.transformer.sierra.transformers
 
 import grizzled.slf4j.Logging
 import weco.catalogue.internal_model.languages.{Language, MarcLanguageCodeList}
-import weco.catalogue.source_model.sierra.source.{
-  SierraQueryOps,
-  SierraSourceLanguage
-}
-import weco.catalogue.source_model.sierra.SierraBibData
-import weco.catalogue.source_model.sierra.identifiers.SierraBibNumber
+import weco.sierra.models.SierraQueryOps
+import weco.sierra.models.data.SierraBibData
+import weco.sierra.models.fields.SierraLanguage
+import weco.sierra.models.identifiers.SierraBibNumber
 
 object SierraLanguages
     extends SierraIdentifiedDataTransformer
@@ -58,7 +56,7 @@ object SierraLanguages
         .map {
           case (_, Some(lang)) => Some(lang)
           case (code, None) =>
-            warn(s"$bibId: Unrecognised code in MARC 041 ǂa: $code")
+            warn(s"${bibId.withCheckDigit}: Unrecognised code in MARC 041 ǂa: $code")
             None
         }
 
@@ -68,12 +66,19 @@ object SierraLanguages
       .distinct
   }
 
-  private def createLanguage(bibId: SierraBibNumber, lang: SierraSourceLanguage): Option[Language] =
+  private def createLanguage(bibId: SierraBibNumber, lang: SierraLanguage): Option[Language] =
     (lang, MarcLanguageCodeList.fromCode(lang.code)) match {
       case (_, Some(deducedLang)) => Some(deducedLang)
-      case (SierraSourceLanguage(code, Some(name)), _) => Some(Language(label = name, id = code))
+      case (SierraLanguage(code, Some(name)), _) => Some(Language(label = name, id = code))
+
+      // Some records in Sierra don't have a language, e.g. paintings, and this is
+      // represented by a string that is only whitespace "   ".  This isn't a data error,
+      // and we shouldn't warn for it.
+      case (SierraLanguage(code, _), _) if code.trim.isEmpty =>
+        None
+
       case _ =>
-        warn(s"$bibId: Unrecognised primary language: $lang")
+        warn(s"${bibId.withCheckDigit}: Unrecognised primary language: $lang")
         None
     }
 }

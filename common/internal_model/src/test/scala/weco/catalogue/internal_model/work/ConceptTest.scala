@@ -9,7 +9,11 @@ import weco.catalogue.internal_model.identifiers.IdState
 
 class ConceptTest extends AnyFunSpec with Matchers with JsonAssertions {
 
-  val concept = Concept[IdState.Minted](label = "Woodwork")
+  val concept: Concept[IdState.Minted] = Concept(
+    id = IdState.Unidentifiable,
+    label = "Woodwork"
+  )
+
   val expectedJson =
     s"""{
         "id": {"type": "Unidentifiable"},

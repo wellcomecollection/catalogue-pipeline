@@ -16,20 +16,15 @@ import weco.catalogue.internal_model.locations.{
   PhysicalLocation
 }
 import weco.catalogue.internal_model.work.Holdings
-import weco.catalogue.source_model.generators.{MarcGenerators, SierraGenerators}
-import weco.catalogue.source_model.sierra.marc.{
-  FixedField,
-  MarcSubfield,
-  VarField
-}
-import weco.catalogue.source_model.sierra.SierraHoldingsData
-import weco.catalogue.source_model.sierra.identifiers.SierraHoldingsNumber
+import weco.catalogue.source_model.generators.SierraRecordGenerators
+import weco.sierra.models.data.SierraHoldingsData
+import weco.sierra.models.identifiers.SierraHoldingsNumber
+import weco.sierra.models.marc.{FixedField, Subfield, VarField}
 
 class SierraHoldingsTest
     extends AnyFunSpec
     with Matchers
-    with MarcGenerators
-    with SierraGenerators {
+    with SierraRecordGenerators {
   it("an empty map becomes an empty list of items and holdings") {
     getHoldings(holdingsDataMap = Map.empty) shouldBe empty
   }
@@ -60,34 +55,34 @@ class SierraHoldingsTest
 
     it("creates a single holdings based on field 856") {
       val varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "856",
           subfields = List(
-            MarcSubfield(
+            Subfield(
               tag = "u",
               content = "https://resolver.example.com/journal"),
-            MarcSubfield(tag = "z", content = "Connect to Example Journals")
+            Subfield(tag = "z", content = "Connect to Example Journals")
           )
         ),
-        createVarFieldWith(
+        VarField(
           marcTag = "863",
           subfields = List(
-            MarcSubfield(tag = "8", content = "1.1"),
-            MarcSubfield(tag = "i", content = "1991-2017"),
-            MarcSubfield(tag = "j", content = "02-04"),
-            MarcSubfield(tag = "k", content = "01-17"),
-            MarcSubfield(
+            Subfield(tag = "8", content = "1.1"),
+            Subfield(tag = "i", content = "1991-2017"),
+            Subfield(tag = "j", content = "02-04"),
+            Subfield(tag = "k", content = "01-17"),
+            Subfield(
               tag = "x",
               content = "Chronology adjusted by embargo period"),
           )
         ),
-        createVarFieldWith(
+        VarField(
           marcTag = "853",
           subfields = List(
-            MarcSubfield(tag = "8", content = "1"),
-            MarcSubfield(tag = "i", content = "(year)"),
-            MarcSubfield(tag = "j", content = "(month)"),
-            MarcSubfield(tag = "k", content = "(day)"),
+            Subfield(tag = "8", content = "1"),
+            Subfield(tag = "i", content = "(year)"),
+            Subfield(tag = "j", content = "(month)"),
+            Subfield(tag = "k", content = "(day)"),
           )
         )
       )
@@ -111,7 +106,7 @@ class SierraHoldingsTest
               accessConditions = List(
                 AccessCondition(
                   method = AccessMethod.ViewOnline,
-                  status = AccessStatus.LicensedResources)
+                  status = AccessStatus.LicensedResources())
               )
             )
           )
@@ -122,21 +117,19 @@ class SierraHoldingsTest
     it(
       "creates multiple holdings based on multiple instance of 856 on the same holdings") {
       val varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "856",
           subfields = List(
-            MarcSubfield(
+            Subfield(
               tag = "u",
               content = "https://resolver.example.com/journal"),
-            MarcSubfield(tag = "z", content = "Connect to Example Journals")
+            Subfield(tag = "z", content = "Connect to Example Journals")
           )
         ),
-        createVarFieldWith(
+        VarField(
           marcTag = "856",
           subfields = List(
-            MarcSubfield(
-              tag = "u",
-              content = "https://example.org/subscriptions")
+            Subfield(tag = "u", content = "https://example.org/subscriptions")
           )
         )
       )
@@ -159,7 +152,7 @@ class SierraHoldingsTest
               accessConditions = List(
                 AccessCondition(
                   method = AccessMethod.ViewOnline,
-                  status = AccessStatus.LicensedResources)
+                  status = AccessStatus.LicensedResources())
               )
             )
           ),
@@ -174,7 +167,7 @@ class SierraHoldingsTest
               accessConditions = List(
                 AccessCondition(
                   method = AccessMethod.ViewOnline,
-                  status = AccessStatus.LicensedResources)
+                  status = AccessStatus.LicensedResources())
               )
             )
           ),
@@ -185,24 +178,22 @@ class SierraHoldingsTest
 
     it("creates multiple holdings based on multiple holdings records") {
       val varFields1 = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "856",
           subfields = List(
-            MarcSubfield(
+            Subfield(
               tag = "u",
               content = "https://resolver.example.com/journal"),
-            MarcSubfield(tag = "z", content = "Connect to Example Journals")
+            Subfield(tag = "z", content = "Connect to Example Journals")
           )
         )
       )
 
       val varFields2 = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "856",
           subfields = List(
-            MarcSubfield(
-              tag = "u",
-              content = "https://example.org/subscriptions")
+            Subfield(tag = "u", content = "https://example.org/subscriptions")
           )
         )
       )
@@ -228,7 +219,7 @@ class SierraHoldingsTest
               accessConditions = List(
                 AccessCondition(
                   method = AccessMethod.ViewOnline,
-                  status = AccessStatus.LicensedResources)
+                  status = AccessStatus.LicensedResources())
               )
             )
           ),
@@ -243,7 +234,7 @@ class SierraHoldingsTest
               accessConditions = List(
                 AccessCondition(
                   method = AccessMethod.ViewOnline,
-                  status = AccessStatus.LicensedResources)
+                  status = AccessStatus.LicensedResources())
               )
             )
           ),
@@ -261,28 +252,28 @@ class SierraHoldingsTest
         ),
         varFields = List(
           VarField(
-            marcTag = Some("863"),
+            marcTag = "863",
             subfields = List(
-              MarcSubfield(tag = "8", content = "1.1"),
-              MarcSubfield(tag = "i", content = "1787-1789"),
-              MarcSubfield(tag = "j", content = "01-12"),
-              MarcSubfield(tag = "k", content = "01-31")
+              Subfield(tag = "8", content = "1.1"),
+              Subfield(tag = "i", content = "1787-1789"),
+              Subfield(tag = "j", content = "01-12"),
+              Subfield(tag = "k", content = "01-31")
             )
           ),
           VarField(
-            marcTag = Some("853"),
+            marcTag = "853",
             subfields = List(
-              MarcSubfield(tag = "8", content = "1"),
-              MarcSubfield(tag = "i", content = "(year)"),
-              MarcSubfield(tag = "j", content = "(month)"),
-              MarcSubfield(tag = "k", content = "(day)")
+              Subfield(tag = "8", content = "1"),
+              Subfield(tag = "i", content = "(year)"),
+              Subfield(tag = "j", content = "(month)"),
+              Subfield(tag = "k", content = "(day)")
             )
           ),
           VarField(
-            marcTag = Some("856"),
+            marcTag = "856",
             subfields = List(
-              MarcSubfield(tag = "u", content = "http://example.org/journal"),
-              MarcSubfield(
+              Subfield(tag = "u", content = "http://example.org/journal"),
+              Subfield(
                 tag = "z",
                 content =
                   "Connect to 17th-18th Century Burney Collection newspapers")
@@ -297,28 +288,28 @@ class SierraHoldingsTest
         ),
         varFields = List(
           VarField(
-            marcTag = Some("863"),
+            marcTag = "863",
             subfields = List(
-              MarcSubfield(tag = "8", content = "1.1"),
-              MarcSubfield(tag = "i", content = "1787-1789"),
-              MarcSubfield(tag = "j", content = "01-12"),
-              MarcSubfield(tag = "k", content = "01-31")
+              Subfield(tag = "8", content = "1.1"),
+              Subfield(tag = "i", content = "1787-1789"),
+              Subfield(tag = "j", content = "01-12"),
+              Subfield(tag = "k", content = "01-31")
             )
           ),
           VarField(
-            marcTag = Some("853"),
+            marcTag = "853",
             subfields = List(
-              MarcSubfield(tag = "8", content = "1"),
-              MarcSubfield(tag = "i", content = "(year)"),
-              MarcSubfield(tag = "j", content = "(month)"),
-              MarcSubfield(tag = "k", content = "(day)")
+              Subfield(tag = "8", content = "1"),
+              Subfield(tag = "i", content = "(year)"),
+              Subfield(tag = "j", content = "(month)"),
+              Subfield(tag = "k", content = "(day)")
             )
           ),
           VarField(
-            marcTag = Some("856"),
+            marcTag = "856",
             subfields = List(
-              MarcSubfield(tag = "u", content = "http://example.org/journal"),
-              MarcSubfield(
+              Subfield(tag = "u", content = "http://example.org/journal"),
+              Subfield(
                 tag = "z",
                 content =
                   "Universal London Price Current -- Seventeenth and Eighteenth Century Burney Newspapers Collection")
@@ -348,7 +339,7 @@ class SierraHoldingsTest
               accessConditions = List(
                 AccessCondition(
                   method = AccessMethod.ViewOnline,
-                  status = AccessStatus.LicensedResources)
+                  status = AccessStatus.LicensedResources())
               )
             )
           )
@@ -358,13 +349,13 @@ class SierraHoldingsTest
 
     it("skips field 856 if fixed field 40 is not 'elro'") {
       val varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "856",
           subfields = List(
-            MarcSubfield(
+            Subfield(
               tag = "u",
               content = "https://resolver.example.com/journal"),
-            MarcSubfield(tag = "z", content = "Connect to Example Journals")
+            Subfield(tag = "z", content = "Connect to Example Journals")
           )
         )
       )
@@ -381,12 +372,10 @@ class SierraHoldingsTest
 
     it("ignores electronic holdings that are deleted") {
       val varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "856",
           subfields = List(
-            MarcSubfield(
-              tag = "u",
-              content = "https://deleted.example.org/journal")
+            Subfield(tag = "u", content = "https://deleted.example.org/journal")
           )
         )
       )
@@ -408,10 +397,10 @@ class SierraHoldingsTest
 
     it("ignores electronic holdings that are suppressed") {
       val varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "856",
           subfields = List(
-            MarcSubfield(
+            Subfield(
               tag = "u",
               content = "https://suppressed.example.org/journal")
           )
@@ -438,10 +427,10 @@ class SierraHoldingsTest
   describe("creates physical holdings") {
     it("does not create holdings if there is no useful data") {
       val varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "989",
           subfields = List(
-            MarcSubfield(tag = "a", content = "This is old location data")
+            Subfield(tag = "a", content = "This is old location data")
           )
         )
       )
@@ -459,10 +448,10 @@ class SierraHoldingsTest
 
     it("uses the description from 866 subfield ǂa") {
       val varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "866",
           subfields = List(
-            MarcSubfield(tag = "a", content = "Vol. 3 only")
+            Subfield(tag = "a", content = "Vol. 3 only")
           )
         )
       )
@@ -482,10 +471,10 @@ class SierraHoldingsTest
 
     it("uses the note from 866 subfield ǂz") {
       val varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "866",
           subfields = List(
-            MarcSubfield(tag = "z", content = "Another note about the document")
+            Subfield(tag = "z", content = "Another note about the document")
           )
         )
       )
@@ -505,11 +494,11 @@ class SierraHoldingsTest
 
     it("uses both the note and the description") {
       val varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "866",
           subfields = List(
-            MarcSubfield(tag = "a", content = "Missing Vol. 2"),
-            MarcSubfield(
+            Subfield(tag = "a", content = "Missing Vol. 2"),
+            Subfield(
               tag = "z",
               content = "Lost in a mysterious fishing accident")
           )
@@ -531,28 +520,28 @@ class SierraHoldingsTest
 
     it("creates an enumeration based on the contents of 85X/86X") {
       val varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "863",
           subfields = List(
-            MarcSubfield(tag = "8", content = "1.1"),
-            MarcSubfield(tag = "a", content = "57-59"),
-            MarcSubfield(tag = "b", content = "4-1")
+            Subfield(tag = "8", content = "1.1"),
+            Subfield(tag = "a", content = "57-59"),
+            Subfield(tag = "b", content = "4-1")
           )
         ),
-        createVarFieldWith(
+        VarField(
           marcTag = "863",
           subfields = List(
-            MarcSubfield(tag = "8", content = "1.2"),
-            MarcSubfield(tag = "a", content = "60-61"),
-            MarcSubfield(tag = "b", content = "3-2")
+            Subfield(tag = "8", content = "1.2"),
+            Subfield(tag = "a", content = "60-61"),
+            Subfield(tag = "b", content = "3-2")
           )
         ),
-        createVarFieldWith(
+        VarField(
           marcTag = "853",
           subfields = List(
-            MarcSubfield(tag = "8", content = "1"),
-            MarcSubfield(tag = "a", content = "v."),
-            MarcSubfield(tag = "b", content = "no.")
+            Subfield(tag = "8", content = "1"),
+            Subfield(tag = "a", content = "v."),
+            Subfield(tag = "b", content = "no.")
           )
         )
       )
@@ -574,10 +563,10 @@ class SierraHoldingsTest
 
     it("uses the location type from fixed field 40 (closed stores)") {
       val varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "866",
           subfields = List(
-            MarcSubfield(tag = "a", content = "A secret holdings")
+            Subfield(tag = "a", content = "A secret holdings")
           )
         )
       )
@@ -602,10 +591,10 @@ class SierraHoldingsTest
 
     it("uses the location type from fixed field 40 (open shelves)") {
       val varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "866",
           subfields = List(
-            MarcSubfield(tag = "a", content = "Journals on the shelves")
+            Subfield(tag = "a", content = "Journals on the shelves")
           )
         )
       )
@@ -630,16 +619,16 @@ class SierraHoldingsTest
 
     it("uses 949 subfield ǂa as the shelfmark") {
       val varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "866",
           subfields = List(
-            MarcSubfield(tag = "a", content = "Journals on the shelves")
+            Subfield(tag = "a", content = "Journals on the shelves")
           )
         ),
-        createVarFieldWith(
+        VarField(
           marcTag = "949",
           subfields = List(
-            MarcSubfield(tag = "a", content = "/MED     ")
+            Subfield(tag = "a", content = "/MED     ")
           )
         )
       )
@@ -661,10 +650,10 @@ class SierraHoldingsTest
 
     it("skips adding a location if the location code is unrecognised") {
       val varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "866",
           subfields = List(
-            MarcSubfield(tag = "a", content = "Journals on the shelves")
+            Subfield(tag = "a", content = "Journals on the shelves")
           )
         )
       )
@@ -685,10 +674,10 @@ class SierraHoldingsTest
     it("creates multiple holdings based on multiple data blocks") {
       val dataMap = (1 to 3).map { volno =>
         val varFields = List(
-          createVarFieldWith(
+          VarField(
             marcTag = "866",
             subfields = List(
-              MarcSubfield(tag = "a", content = s"Vol. $volno only")
+              Subfield(tag = "a", content = s"Vol. $volno only")
             )
           )
         )
@@ -714,10 +703,10 @@ class SierraHoldingsTest
     it("de-duplicates holdings after transformation") {
       val dataMap = (1 to 3).map { _ =>
         val varFields = List(
-          createVarFieldWith(
+          VarField(
             marcTag = "866",
             subfields = List(
-              MarcSubfield(tag = "a", content = "Complete set")
+              Subfield(tag = "a", content = "Complete set")
             )
           )
         )
@@ -737,10 +726,10 @@ class SierraHoldingsTest
 
     it("skips holdings that are deleted") {
       val varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "866",
           subfields = List(
-            MarcSubfield(tag = "a", content = "A deleted holdings")
+            Subfield(tag = "a", content = "A deleted holdings")
           )
         )
       )
@@ -762,10 +751,10 @@ class SierraHoldingsTest
 
     it("skips holdings that are suppressed") {
       val varFields = List(
-        createVarFieldWith(
+        VarField(
           marcTag = "866",
           subfields = List(
-            MarcSubfield(tag = "a", content = "A suppressed holdings")
+            Subfield(tag = "a", content = "A suppressed holdings")
           )
         )
       )

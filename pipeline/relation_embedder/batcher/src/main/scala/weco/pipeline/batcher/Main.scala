@@ -3,7 +3,6 @@ package weco.pipeline.batcher
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 import akka.actor.ActorSystem
-import akka.stream.Materializer
 import com.typesafe.config.Config
 
 import weco.messaging.sns.NotificationMessage
@@ -18,8 +17,6 @@ object Main extends WellcomeTypesafeApp {
       AkkaBuilder.buildExecutionContext()
     implicit val actorSystem: ActorSystem =
       AkkaBuilder.buildActorSystem()
-    implicit val materializer: Materializer =
-      AkkaBuilder.buildMaterializer()
 
     new BatcherWorkerService(
       msgStream = SQSBuilder.buildSQSStream[NotificationMessage](config),

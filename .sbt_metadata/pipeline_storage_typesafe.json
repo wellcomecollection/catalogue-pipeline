@@ -1,7 +1,0 @@
-{
-  "id" : "pipeline_storage_typesafe",
-  "folder" : "common/pipeline_storage_typesafe",
-  "dependencyIds" : [
-    "pipeline_storage"
-  ]
-}

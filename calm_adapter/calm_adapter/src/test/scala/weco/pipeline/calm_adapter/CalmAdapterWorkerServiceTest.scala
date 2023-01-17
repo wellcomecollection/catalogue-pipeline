@@ -25,9 +25,11 @@ import weco.catalogue.source_model.CalmSourcePayload
 import weco.catalogue.source_model.calm.CalmRecord
 import weco.catalogue.source_model.fixtures.SourceVHSFixture
 import weco.catalogue.source_model.store.SourceVHS
+import weco.catalogue.source_model.Implicits._
 import weco.pipeline.calm_api_client.CalmQuery
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
 import scala.language.reflectiveCalls
 import scala.util.{Failure, Try}
 
@@ -76,8 +78,11 @@ class CalmAdapterWorkerServiceTest
 
           retriever.previousQuery shouldBe Some(
             CalmQuery.ModifiedDate(queryDate))
-          assertQueueEmpty(queue)
-          assertQueueEmpty(dlq)
+
+          eventually {
+            assertQueueEmpty(queue)
+            assertQueueEmpty(dlq)
+          }
 
           val expectedVersions = List(
             Version("A", 0),
@@ -107,9 +112,10 @@ class CalmAdapterWorkerServiceTest
           queue,
           CalmQuery.ModifiedDate(queryDate))
 
-        Thread.sleep(1500)
-        assertQueueEmpty(queue)
-        assertQueueEmpty(dlq)
+        eventually {
+          assertQueueEmpty(queue)
+          assertQueueEmpty(dlq)
+        }
 
         messageSender.messages shouldBe empty
     }
@@ -144,9 +150,11 @@ class CalmAdapterWorkerServiceTest
         sendNotificationToSQS[CalmQuery](
           queue,
           CalmQuery.ModifiedDate(queryDate))
-        Thread.sleep(2000)
-        assertQueueEmpty(queue)
-        assertQueueHasSize(dlq, size = 1)
+
+        eventually {
+          assertQueueEmpty(queue)
+          assertQueueHasSize(dlq, size = 1)
+        }
     }
   }
 
@@ -156,7 +164,7 @@ class CalmAdapterWorkerServiceTest
     messageSender: MemoryMessageSender = new MemoryMessageSender())(
     testWith: TestWith[(CalmAdapterWorkerService[String], QueuePair), R]): R =
     withActorSystem { implicit actorSystem =>
-      withLocalSqsQueuePair() {
+      withLocalSqsQueuePair(visibilityTimeout = 1.second) {
         case QueuePair(queue, dlq) =>
           withSQSStream[NotificationMessage, R](queue) { stream =>
             val calmAdapter = new CalmAdapterWorkerService(

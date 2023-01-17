@@ -2,11 +2,15 @@ package weco.pipeline.id_minter.database
 
 import grizzled.slf4j.Logging
 import scalikejdbc._
-import weco.catalogue.internal_model.identifiers.SourceIdentifier
+import weco.catalogue.internal_model.identifiers.{
+  IdentifierType,
+  SourceIdentifier
+}
 import weco.pipeline.id_minter.models.{Identifier, IdentifiersTable}
 
 import java.sql.{BatchUpdateException, Statement}
 import scala.concurrent.blocking
+import scala.concurrent.duration._
 import scala.util.{Failure, Try}
 
 object IdentifiersDao {
@@ -24,6 +28,7 @@ object IdentifiersDao {
 class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
   import IdentifiersDao._
 
+  @throws(classOf[RuntimeException])
   def lookupIds(sourceIdentifiers: Seq[SourceIdentifier])(
     implicit session: DBSession = readOnlySession): Try[LookupResult] =
     Try {
@@ -31,15 +36,11 @@ class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
         sourceIdentifiers.nonEmpty,
         message = "Cannot look up an empty list of sourceIdentifiers"
       )
-      debug(s"Matching ($sourceIdentifiers)")
+      debug(s"Looking up ($sourceIdentifiers)")
       val distinctIdentifiers = sourceIdentifiers.distinct
-      val identifierRowsMap: Map[(String, String, String), SourceIdentifier] =
-        distinctIdentifiers.map { id =>
-          (id.ontologyType, id.identifierType.id, id.value) -> id
-        }.toMap
 
       val foundIdentifiers =
-        withTimeWarning(thresholdMillis = 10000L, distinctIdentifiers) {
+        withTimeWarning(threshold = 10 seconds, distinctIdentifiers) {
           batchSourceIdentifiers(distinctIdentifiers)
             .flatMap { identifierBatch =>
               blocking {
@@ -66,16 +67,34 @@ class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
                       }
                     }
                 }.map(rs => {
-                    val row = getRowFromResult(i, rs)
-                    identifierRowsMap.get(row) match {
-                      case Some(sourceIdentifier) =>
-                        (sourceIdentifier, Identifier(i)(rs))
-                      case None =>
-                        // this should be impossible in practice
-                        throw new RuntimeException(
-                          s"The row returned by the query ($row) could not be matched to a sourceIdentifier in $sourceIdentifiers")
-                    }
+                    val sourceIdentifier = getSourceIdentifierFromResult(i, rs)
 
+                    if (distinctIdentifiers.contains(sourceIdentifier)) {
+                      (sourceIdentifier, Identifier(i)(rs))
+                    } else {
+                      // It might seem like this is impossible -- how could the query return a source
+                      // identifier we didn't request?
+                      //
+                      // The reason is that the database query is case-insensitive.
+                      //
+                      // This can occur if there's an existing source identifier with the same value
+                      // but a different case, e.g. b13026252 and B13026252.  This occurs occasionally
+                      // with METS works, where the work originally had an uppercase B but has now been
+                      // fixed to use a lowercase b.
+                      //
+                      // Because the query is case insensitive, querying for "METS/b13026252" would return
+                      // "METS/B13026252", which isn't what we were looking for.
+                      //
+                      // Because the METS case is fairly rare, we usually fix this by modifying the row in the
+                      // ID minter database to correct the case of the source identifier.  To help somebody
+                      // realise what's happened, we include a specific log for this case.
+                      warn(msg =
+                        s"identifier returned from db not found in request, trying case-insensitive/ascii normalized match: $sourceIdentifier")
+
+                      throw SurplusIdentifierException(
+                        sourceIdentifier,
+                        distinctIdentifiers)
+                    }
                   })
                   .list
                 debug(s"Executing:'${query.statement}'")
@@ -153,13 +172,19 @@ class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
       .and
       .eq(i.SourceId, sourceIdentifier.value)
 
-  private def getRowFromResult(i: SyntaxProvider[Identifier],
-                               rs: WrappedResultSet) = {
-    (
-      rs.string(i.resultName.OntologyType),
-      rs.string(i.resultName.SourceSystem),
-      rs.string(i.resultName.SourceId))
-  }
+  // Note: this could throw if the "SourceSystem" variable contains an identifierType
+  // ID that we don't use, but if it does then something has gone very wrong.
+  // That should be impossible in practice.
+  private def getSourceIdentifierFromResult(
+    i: SyntaxProvider[Identifier],
+    rs: WrappedResultSet
+  ): SourceIdentifier =
+    SourceIdentifier(
+      identifierType =
+        IdentifierType.apply(rs.string(i.resultName.SourceSystem)),
+      ontologyType = rs.string(i.resultName.OntologyType),
+      value = rs.string(i.resultName.SourceId)
+    )
 
   private val poolNames = Iterator
     .continually(List('replica, 'primary))
@@ -226,14 +251,14 @@ class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
   }
 
   private def withTimeWarning[R](
-    thresholdMillis: Long,
+    threshold: Duration,
     identifiers: Seq[SourceIdentifier])(f: => R): R = {
     val start = System.currentTimeMillis()
     val result = f
     val end = System.currentTimeMillis()
 
     val duration = end - start
-    if (duration > thresholdMillis) {
+    if (duration > threshold.toMillis) {
       warn(
         s"Query for ${identifiers.size} identifiers (first: ${identifiers.head.value}) took $duration milliseconds",
       )

@@ -14,31 +14,67 @@ import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future, TimeoutException}
 import scala.util.Try
 
-case class PipelineStorageConfig(batchSize: Int,
-                                 flushInterval: FiniteDuration,
-                                 parallelism: Int)
+/**
+  * Configuration for the processing of messages in batches.
+  *
+  * Messages will be processed when either batchSize or flushInterval are reached.
+  *
+  * The intended use for this is where it can be significantly more efficient to process
+  * multiple messages together, rather than one at a time.  For example where
+  * downloading all the data to service a bundle of messages incurs less overhead than
+  * making individual requests for the data to service each message.
+  *
+  * ==Setting batchSize and flushInterval==
+  *
+  * The numbers for batchSize and flushInterval should be chosen based on how responsive
+  * you want the service to be and how many messages the service can realistically handle
+  * in one go, as well as the expected frequency with which messages are likely to be received.
+  *
+  * In normal running, where this activity is triggered by a few real humans manually modifying
+  * a few records at a time, you might expect the flush interval to be reached most of the time.
+  *
+  * On the other hand, when this activity is triggered by some kind of computer-initiated batch
+  * update, you might expect the batch size to be the threshold that normally triggers processing.
+
+  * @note The values for batchSize and flushInterval are related to the duration set externally
+  * for the expiry of the messages being consumed (visibility timeout in SQS).
+  *
+  * `((Message Expiry) - (Flush Interval))` must be long enough to allow
+  * `(Batch Size - 1)` messages to be processed, otherwise those messages will
+  * expire and either be re-queued or fail completely.
+  *
+  * @param batchSize The maximum number of messages to process in one batch.
+  * @param flushInterval The maximum duration to wait before processing messages.
+  * @param parallelism
+  */
+case class PipelineStorageConfig(
+  batchSize: Int,
+  flushInterval: FiniteDuration,
+  parallelism: Int
+)
 
 case class Bundle[T](message: Message, item: T, numberOfItems: Int)
 
 class PipelineStorageStream[In, Out, MsgDestination](
   messageStream: SQSStream[In],
   indexer: Indexer[Out],
-  messageSender: MessageSender[MsgDestination])(
-  val config: PipelineStorageConfig)(implicit val ec: ExecutionContext)
+  messageSender: MessageSender[MsgDestination]
+)(val config: PipelineStorageConfig)(implicit val ec: ExecutionContext)
     extends Logging
     with FlowOps {
 
   import PipelineStorageStream._
 
-  def foreach(streamName: String, process: In => Future[List[Out]])(
-    implicit decoderT: Decoder[In],
-    indexable: Indexable[Out]): Future[Done] =
+  def foreach(
+    streamName: String,
+    process: In => Future[List[Out]]
+  )(implicit decoderT: Decoder[In], indexable: Indexable[Out]): Future[Done] =
     run(streamName = streamName, processFlow(config, process))
 
-  def run(streamName: String,
-          processFlow: Flow[(Message, In), (Message, List[Out]), NotUsed])(
-    implicit decoder: Decoder[In],
-    indexable: Indexable[Out]): Future[Done] =
+  def run(
+    streamName: String,
+    processFlow: Flow[(Message, In), (Message, List[Out]), NotUsed]
+  )(implicit decoder: Decoder[In], indexable: Indexable[Out]): Future[Done] =
     for {
       _ <- indexer.init()
       done: Done <- messageStream.runStream(
@@ -54,7 +90,8 @@ class PipelineStorageStream[In, Out, MsgDestination](
                     sendIndexable[Out, MsgDestination](messageSender)(item),
                   indexer
                 ),
-                noOutputFlow)
+                noOutputFlow
+              )
           )
       )
     } yield done
@@ -62,18 +99,23 @@ class PipelineStorageStream[In, Out, MsgDestination](
 }
 
 object PipelineStorageStream extends Logging {
-  def batchIndexAndSendFlow[T, MsgDestination](config: PipelineStorageConfig,
-                                               send: T => Try[Unit],
-                                               indexer: Indexer[T])(
+  def batchIndexAndSendFlow[T, MsgDestination](
+    config: PipelineStorageConfig,
+    send: T => Try[Unit],
+    indexer: Indexer[T]
+  )(
     implicit
     ec: ExecutionContext,
-    indexable: Indexable[T]) = {
+    indexable: Indexable[T]
+  ) = {
     val maxSubStreams = Integer.MAX_VALUE
     Flow[(Message, List[T])]
       .collect {
         case (msg, items @ _ :: _) =>
-          items.map(item =>
-            Bundle[T](message = msg, item = item, numberOfItems = items.size))
+          items.map(
+            item =>
+              Bundle[T](message = msg, item = item, numberOfItems = items.size)
+          )
       }
       .mapConcat[Bundle[T]](identity)
       .via(batchIndexFlow(config, indexer))
@@ -84,16 +126,20 @@ object PipelineStorageStream extends Logging {
           _ <- Future.fromTry(send(bundle.item))
         } yield bundle
       }
-      .via(takeListsOfCompleteBundles[T](maxSubStreams, 5 minutes)
-        .collect {
-          case head :: _ => head.message
-        })
+      .via(
+        takeListsOfCompleteBundles[T](maxSubStreams, 5 minutes)
+          .collect {
+            case head :: _ => head.message
+          }
+      )
   }
 
   def processFlow[In, Out](
     config: PipelineStorageConfig,
-    process: In => Future[List[Out]])(implicit ec: ExecutionContext)
-    : Flow[(Message, In), (Message, List[Out]), NotUsed] =
+    process: In => Future[List[Out]]
+  )(
+    implicit ec: ExecutionContext
+  ): Flow[(Message, In), (Message, List[Out]), NotUsed] =
     Flow[(Message, In)].mapAsyncUnordered(parallelism = config.parallelism) {
       case (message, in) =>
         debug(s"Processing message ${message.messageId()}")
@@ -102,8 +148,10 @@ object PipelineStorageStream extends Logging {
 
   def batchRetrieveFlow[T](
     config: PipelineStorageConfig,
-    retriever: Retriever[T])(implicit ec: ExecutionContext)
-    : Flow[(Message, NotificationMessage), (Message, T), NotUsed] =
+    retriever: Retriever[T]
+  )(
+    implicit ec: ExecutionContext
+  ): Flow[(Message, NotificationMessage), (Message, T), NotUsed] =
     Flow[(Message, NotificationMessage)]
       .map {
         case (message, notificationMessage) =>
@@ -132,7 +180,8 @@ object PipelineStorageStream extends Logging {
   def batchIndexFlow[T](config: PipelineStorageConfig, indexer: Indexer[T])(
     implicit
     ec: ExecutionContext,
-    indexable: Indexable[T]): Flow[Bundle[T], Bundle[T], NotUsed] =
+    indexable: Indexable[T]
+  ): Flow[Bundle[T], Bundle[T], NotUsed] =
     Flow[Bundle[T]]
       .groupedWeightedWithin(
         config.batchSize,
@@ -147,7 +196,8 @@ object PipelineStorageStream extends Logging {
           if (failed.nonEmpty) {
             val failedIds = failed.map { indexable.id }
             warn(
-              s"Some documents failed ingesting: ${failedIds.mkString(", ")}")
+              s"Some documents failed ingesting: ${failedIds.mkString(", ")}"
+            )
           }
           bundles.collect {
             case Bundle(message, doc, numberOfItems) if !failed.contains(doc) =>
@@ -163,12 +213,14 @@ object PipelineStorageStream extends Logging {
   // The result is a flow of list of _complete_ bundles
   def takeListsOfCompleteBundles[T](
     maxSubStreams: Int,
-    t: FiniteDuration): Flow[Bundle[T], List[Bundle[T]], NotUsed] = {
+    t: FiniteDuration
+  ): Flow[Bundle[T], List[Bundle[T]], NotUsed] = {
     val groupByMessage = Flow[Bundle[T]]
       .groupBy(
         maxSubStreams,
         m => (m.message.messageId(), m.message.md5OfMessageAttributes()),
-        allowClosedSubstreamRecreation = true)
+        allowClosedSubstreamRecreation = true
+      )
       .scan(Nil: List[Bundle[T]]) {
         case (bundleList, b) => b :: bundleList
       }
@@ -198,11 +250,13 @@ object PipelineStorageStream extends Logging {
       .collect { case (message, Nil) => message }
 
   private def unzipBundles[T](
-    bundles: Seq[Bundle[T]]): (List[Message], List[T]) =
+    bundles: Seq[Bundle[T]]
+  ): (List[Message], List[T]) =
     bundles.toList
       .unzip(bundle => bundle.message -> bundle.item)
 
-  def sendIndexable[T, Destination](messageSender: MessageSender[Destination])(
-    item: T)(implicit indexable: Indexable[T]) =
+  private def sendIndexable[T, Destination](
+    messageSender: MessageSender[Destination]
+  )(item: T)(implicit indexable: Indexable[T]) =
     messageSender.send(indexable.id(item))
 }

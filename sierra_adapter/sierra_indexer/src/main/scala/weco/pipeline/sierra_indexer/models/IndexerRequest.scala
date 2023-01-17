@@ -13,7 +13,7 @@ import io.circe.{Encoder, Json}
 import io.circe.syntax._
 import weco.json.JsonUtil._
 import weco.pipeline.sierra_indexer.services.SierraJsonOps._
-import weco.catalogue.source_model.sierra.identifiers.{
+import weco.sierra.models.identifiers.{
   SierraRecordTypes,
   TypedSierraRecordNumber
 }
