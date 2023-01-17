@@ -196,7 +196,7 @@ def _remove_image_from_elasticsearch(*, miro_id):
         print("It could be that the canonical work for this Miro ID is a Sierra work - that should be suppressed by collections information first")
         return
     else:
-        work["_source"]["deletedReason"] = {
+        work["_source"]["debug"]["deletedReason"] = {
             "info": "Miro: isClearedForCatalogueAPI = false",
             "type": "SuppressedFromSource",
         }
