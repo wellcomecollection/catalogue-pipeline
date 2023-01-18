@@ -4,7 +4,7 @@ data "aws_s3_object" "package" {
 }
 
 module "lambda_function" {
-  source = "git@github.com:wellcomecollection/terraform-aws-lambda.git?ref=v1.1.0"
+  source = "git@github.com:wellcomecollection/terraform-aws-lambda.git?ref=v1.1.1"
 
   description = var.description
   name        = var.name
