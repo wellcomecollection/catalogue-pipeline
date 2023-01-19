@@ -1,6 +1,5 @@
 package weco.pipeline.transformer.sierra.transformers
 
-import grizzled.slf4j.Logging
 import weco.catalogue.internal_model.identifiers.{
   IdentifierType,
   SourceIdentifier
@@ -23,7 +22,7 @@ import weco.sierra.models.marc.VarField
 // https://www.loc.gov/marc/bibliographic/bd651.html
 // https://www.loc.gov/marc/bibliographic/bd655.html
 //
-object SierraConceptIdentifier extends Logging {
+object SierraConceptIdentifier {
 
   /**
     * Determine the Library of Congress identifier type from the identifier value prefix.
