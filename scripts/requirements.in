@@ -1,0 +1,8 @@
+boto3
+elasticsearch
+httpx
+maya
+yaspin
+hyperlink
+tqdm
+click

@@ -11,8 +11,13 @@ import sys
 import boto3
 import httpx
 
-from _common import get_api_es_client, get_secret_string, get_session
-
+from _common import (
+    get_api_es_client,
+    get_ingestor_es_client,
+    get_secret_string,
+    get_session,
+    get_date_from_index_name,
+)
 
 SESSION = get_session(role_arn="arn:aws:iam::760097843905:role/platform-developer")
 DYNAMO_CLIENT = SESSION.resource("dynamodb").meta.client
@@ -21,8 +26,18 @@ TABLE_NAME = "vhs-sourcedata-miro"
 
 
 @functools.lru_cache()
-def api_es_client():
-    return get_api_es_client(SESSION)
+def api_es_client(date):
+    return get_api_es_client(date)
+
+
+@functools.lru_cache()
+def work_ingestor_es_client(date):
+    return get_ingestor_es_client(date=date, doc_type="work")
+
+
+@functools.lru_cache()
+def image_ingestor_es_client(date):
+    return get_ingestor_es_client(date=date, doc_type="image")
 
 
 @functools.lru_cache()
@@ -155,51 +170,43 @@ def _remove_image_from_elasticsearch(*, miro_id):
     images_index = next(
         index for index in current_indexes if index.startswith("images-")
     )
+    pipeline_date = get_date_from_index_name(works_index)
 
     # Remove the work from the works index
-    works_resp = api_es_client().search(
-        index=works_index,
-        body={
-            "query": {
-                "bool": {
-                    "filter": [{"term": {"state.sourceIdentifier.value": miro_id}}]
-                }
-            }
-        },
+    works_resp = api_es_client(pipeline_date).search(
+        index=works_index, body={"query": {"term": {"query.allIdentifiers": miro_id}}}
     )
 
     try:
         work = next(
             hit
             for hit in works_resp["hits"]["hits"]
-            if hit["_source"]["state"]["sourceIdentifier"]["identifierType"]["id"]
+            if hit["_source"]["debug"]["source"]["identifier"]["identifierType"]["id"]
             == "miro-image-number"
         )
     except StopIteration:
         print(f"Could not find a work for {miro_id} in {works_index}", file=sys.stderr)
+        print(
+            "It could be that the canonical work for this Miro ID is a Sierra work - that should be suppressed by collections information first",
+            file=sys.stderr,
+        )
         return
     else:
-        work["_source"]["deletedReason"] = {
+        work["_source"]["debug"]["deletedReason"] = {
             "info": "Miro: isClearedForCatalogueAPI = false",
             "type": "SuppressedFromSource",
         }
         work["_source"]["type"] = "Deleted"
 
-        index_resp = api_es_client().index(
+        index_resp = work_ingestor_es_client(date=pipeline_date).index(
             index=works_index, body=work["_source"], id=work["_id"]
         )
         assert index_resp["result"] == "updated", index_resp
 
-    images_resp = api_es_client().search(
+    images_resp = api_es_client(pipeline_date).search(
         index=images_index,
         body={
-            "query": {
-                "bool": {
-                    "filter": [
-                        {"term": {"source.canonicalWork.id.canonicalId": work["_id"]}}
-                    ]
-                }
-            },
+            "query": {"term": {"query.sourceIdentifier.value": miro_id}},
             "_source": "",
         },
     )
@@ -213,7 +220,9 @@ def _remove_image_from_elasticsearch(*, miro_id):
         )
         return
     else:
-        delete_resp = api_es_client().delete(index=images_index, id=image_id)
+        delete_resp = image_ingestor_es_client(date=pipeline_date).delete(
+            index=images_index, id=image_id
+        )
         assert delete_resp["result"] == "deleted", delete_resp
 
 
