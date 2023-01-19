@@ -31,8 +31,9 @@ class SierraConceptsTest
     ("2", IdentifierType.MESH)
   )
 
-  private val allSchemes = unsupportedSchemes ++ supportedSchemes.map(scheme =>
-    Some(scheme._1))
+  private val allSchemes = unsupportedSchemes ++ supportedSchemes.map(
+    scheme => Some(scheme._1)
+  )
 
   it("extracts identifiers from subfield 0") {
     forAll(
@@ -48,14 +49,14 @@ class SierraConceptsTest
           indicator2 = indicator2,
           subfields = List(
             Subfield(tag = "a", content = "pilots"),
-            Subfield(tag = "0", content = "lcsh/ppp")
+            Subfield(tag = "0", content = "sh85102165")
           )
         )
       )
 
       val sourceIdentifier = SourceIdentifier(
         identifierType = identifierType,
-        value = "lcsh/ppp",
+        value = "sh85102165",
         ontologyType = "Concept"
       )
 
@@ -64,7 +65,8 @@ class SierraConceptsTest
   }
 
   it(
-    "creates a label-derived identifier for concepts with no identifier, regardless of scheme") {
+    "creates a label-derived identifier for concepts with no identifier, regardless of scheme"
+  ) {
     forAll(
       Table(
         "indicator2",
@@ -101,23 +103,26 @@ class SierraConceptsTest
         indicator2 = "0",
         subfields = List(
           Subfield(tag = "a", content = "martians"),
-          Subfield(tag = "0", content = "lcsh/bbb"),
-          Subfield(tag = "0", content = "lcsh/bbb"),
+          Subfield(tag = "0", content = "sh96010159"),
+          Subfield(tag = "0", content = "sh96010159"),
           // Including the (DNLM) prefix
-          Subfield(tag = "0", content = "(DNLM)lcsh/bbb"),
+          Subfield(tag = "0", content = "(DNLM)sh96010159"),
           // With trailing punctuation
-          Subfield(tag = "0", content = "lcsh/bbb."),
+          Subfield(tag = "0", content = "sh96010159."),
           // Including whitespace
-          Subfield(tag = "0", content = "lcsh / bbb"),
+          Subfield(tag = "0", content = "sh 96010159"),
           // Including a MESH URL prefix
-          Subfield(tag = "0", content = "https://id.nlm.nih.gov/mesh/lcsh/bbb")
+          Subfield(
+            tag = "0",
+            content = "https://id.nlm.nih.gov/mesh/sh96010159"
+          )
         )
       )
     )
 
     val sourceIdentifier = SourceIdentifier(
       identifierType = IdentifierType.LCSubjects,
-      value = "lcsh/bbb",
+      value = "sh96010159",
       ontologyType = "Concept"
     )
 
@@ -160,7 +165,7 @@ class SierraConceptsTest
           indicator2 = indicator2,
           subfields = List(
             Subfield(tag = "a", content = "hitchhiking"),
-            Subfield(tag = "0", content = "dunno/xxx"),
+            Subfield(tag = "0", content = "dunno/xxx")
           )
         )
       )

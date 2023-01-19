@@ -50,7 +50,8 @@ class SierraGenresTest
               label = "A Content"
             )
           )
-        ))
+        )
+      )
 
     val bibData = createSierraBibDataWith(
       varFields = List(
@@ -96,7 +97,8 @@ class SierraGenresTest
   }
 
   it(
-    "subfield a is always first concept when returning subjects for tag 655 with subfields a, v") {
+    "subfield a is always first concept when returning subjects for tag 655 with subfields a, v"
+  ) {
 
     val bibData = createSierraBibDataWith(
       varFields = List(
@@ -202,7 +204,10 @@ class SierraGenresTest
           InstantRange(
             LocalDate of (1787, 1, 1),
             LocalDate of (1787, 12, 31),
-            "MDCCLXXXVII. [1787]")))
+            "MDCCLXXXVII. [1787]"
+          )
+        )
+      )
     )
   }
 
@@ -273,7 +278,7 @@ class SierraGenresTest
             Subfield(tag = "a", content = "Periodicals"),
             Subfield(tag = "2", content = "lcgft")
           )
-        ),
+        )
       )
     )
 
@@ -329,7 +334,8 @@ class SierraGenresTest
       sourceIdentifier(
         value = "z1 content",
         identifierType = IdentifierType.LabelDerived,
-        ontologyType = "Place")
+        ontologyType = "Place"
+      )
     )
     genre2.concepts.length shouldBe 2
     genre2 should have(
@@ -382,7 +388,7 @@ class SierraGenresTest
           indicator2 = "0",
           subfields = List(
             Subfield(tag = "a", content = "absence"),
-            Subfield(tag = "0", content = "lcsh/123")
+            Subfield(tag = "0", content = "sh85060628")
           )
         ),
         createVarFieldWith(
@@ -402,7 +408,7 @@ class SierraGenresTest
     val expectedSourceIdentifiers = List(
       SourceIdentifier(
         identifierType = IdentifierType.LCSubjects,
-        value = "lcsh/123",
+        value = "sh85060628",
         ontologyType = "Concept"
       ),
       SourceIdentifier(

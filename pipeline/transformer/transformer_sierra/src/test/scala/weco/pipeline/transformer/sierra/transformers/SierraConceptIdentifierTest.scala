@@ -2,32 +2,84 @@ package weco.pipeline.transformer.sierra.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.prop.TableDrivenPropertyChecks
 import weco.catalogue.internal_model.identifiers.{
   IdentifierType,
   SourceIdentifier
 }
 import weco.sierra.models.marc.VarField
 
-class SierraConceptIdentifierTest extends AnyFunSpec with Matchers {
+class SierraConceptIdentifierTest
+    extends AnyFunSpec
+    with Matchers
+    with TableDrivenPropertyChecks {
+  val ontologyType = "Concept"
+  describe("a field with indicator2 set to 0") {
+    it("finds an LCSH identifier") {
+      val varField = create655VarFieldWith(indicator2 = "0")
 
-  it("finds an LCSH identifier") {
-    val varField = create655VarFieldWith(indicator2 = "0")
-
-    val expectedSourceIdentifier = SourceIdentifier(
-      identifierType = IdentifierType.LCSubjects,
-      value = "lcsh/123",
-      ontologyType = ontologyType
-    )
-
-    val actualSourceIdentifier = SierraConceptIdentifier
-      .maybeFindIdentifier(
-        varField = varField,
-        identifierSubfieldContent = "lcsh/123",
+      val expectedSourceIdentifier = SourceIdentifier(
+        identifierType = IdentifierType.LCSubjects,
+        value = "sh2009124405",
         ontologyType = ontologyType
       )
-      .get
 
-    actualSourceIdentifier shouldBe expectedSourceIdentifier
+      val actualSourceIdentifier = SierraConceptIdentifier
+        .maybeFindIdentifier(
+          varField = varField,
+          identifierSubfieldContent = "sh2009124405",
+          ontologyType = ontologyType
+        )
+        .get
+
+      actualSourceIdentifier shouldBe expectedSourceIdentifier
+    }
+
+    it("finds an LC-Names identifier") {
+      val varField = create655VarFieldWith(indicator2 = "0")
+
+      val expectedSourceIdentifier = SourceIdentifier(
+        identifierType = IdentifierType.LCNames,
+        value = "n84165387",
+        ontologyType = ontologyType
+      )
+
+      val actualSourceIdentifier = SierraConceptIdentifier
+        .maybeFindIdentifier(
+          varField = varField,
+          identifierSubfieldContent = "n84165387",
+          ontologyType = ontologyType
+        )
+        .get
+
+      actualSourceIdentifier shouldBe expectedSourceIdentifier
+    }
+
+    it("throws an exception on an invalid LoC identifier") {
+      forAll(
+        Table(
+          "identifier",
+          //Occasionally, source data contains a MeSH id squatting erroneously
+          // in a field with indicator2=0
+          "D000934",
+          // We don't use Children's Subject Headings
+          "sj97002429",
+          // Sometimes, there are odd typos
+          "shsh85100861"
+        )
+      ) { identifier =>
+        val varField = create655VarFieldWith(indicator2 = "0")
+        assertThrows[IllegalArgumentException] {
+          SierraConceptIdentifier
+            .maybeFindIdentifier(
+              varField = varField,
+              identifierSubfieldContent = identifier,
+              ontologyType = ontologyType
+            )
+            .get
+        }
+      }
+    }
   }
 
   it("finds a MESH identifier") {
@@ -99,8 +151,6 @@ class SierraConceptIdentifierTest extends AnyFunSpec with Matchers {
 
     actualSourceIdentifier shouldBe expectedSourceIdentifier
   }
-
-  val ontologyType = "Concept"
 
   private def create655VarFieldWith(indicator2: Option[String]): VarField =
     VarField(marcTag = Some("655"), indicator2 = indicator2)

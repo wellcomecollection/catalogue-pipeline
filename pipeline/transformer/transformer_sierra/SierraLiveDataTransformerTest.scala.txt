@@ -1,10 +1,4 @@
-package weco.pipeline.transformer.sierra
-
-import com.amazonaws.auth.{
-  AWSStaticCredentialsProvider,
-  BasicSessionCredentials
-}
-import com.amazonaws.services.s3.{AmazonS3, AmazonS3ClientBuilder}
+import software.amazon.awssdk.services.s3.S3Client
 import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
@@ -18,6 +12,7 @@ import software.amazon.awssdk.services.sts.StsClient
 import software.amazon.awssdk.services.sts.model.AssumeRoleRequest
 import weco.catalogue.source_model.sierra.SierraTransformable
 import weco.json.JsonUtil._
+import weco.pipeline.transformer.sierra.SierraTransformer
 import weco.sierra.models.identifiers.SierraBibNumber
 import weco.storage.dynamo.DynamoConfig
 import weco.storage.s3.{S3ObjectLocation, S3ObjectLocationPrefix}
@@ -56,7 +51,8 @@ class SierraLiveDataTransformerTest
       "1495441",
       "2346133",
       "3083358",
-      "1536647")
+      "1536647"
+    )
 
     bnumbers.foreach { b =>
       val bibNumber = SierraBibNumber(b)
@@ -73,12 +69,12 @@ class SierraLiveDataTransformerTest
       work shouldBe a[Success[_]]
     }
 
-
   }
 
-  private def getSierraTransformable(tableName: String,
-                                     bibNumber: SierraBibNumber)
-    : Identified[Version[String, Int], SierraTransformable] = {
+  private def getSierraTransformable(
+    tableName: String,
+    bibNumber: SierraBibNumber
+  ): Identified[Version[String, Int], SierraTransformable] = {
     val assumeRoleRequest =
       AssumeRoleRequest
         .builder()
@@ -106,19 +102,12 @@ class SierraLiveDataTransformerTest
         .credentialsProvider(sessionCredentials)
         .build()
 
-    implicit val s3Client: AmazonS3 =
-      AmazonS3ClientBuilder
-        .standard()
-        .withCredentials(
-          new AWSStaticCredentialsProvider(
-            new BasicSessionCredentials(
-              credentials.accessKeyId(),
-              credentials.secretAccessKey(),
-              credentials.sessionToken()
-            )
-          ))
-        .withPathStyleAccessEnabled(true)
+    implicit val s3Client: S3Client = {
+      S3Client
+        .builder()
+        .credentialsProvider(sessionCredentials)
         .build()
+    }
 
     implicit val typedStore: S3TypedStore[SierraTransformable] =
       S3TypedStore[SierraTransformable]
@@ -134,19 +123,22 @@ class SierraLiveDataTransformerTest
       typedStore: S3TypedStore[SierraTransformable]
     ) extends DynamoHybridStore[SierraTransformable](prefix)(
           indexedStore,
-          typedStore)
+          typedStore
+        )
         with HybridStoreWithMaxima[
           String,
           Int,
           S3ObjectLocation,
-          SierraTransformable]
+          SierraTransformable
+        ]
 
     val vhs =
       new VersionedHybridStore[
         String,
         Int,
         S3ObjectLocation,
-        SierraTransformable](
+        SierraTransformable
+      ](
         new VHSInternalStore(
           prefix = S3ObjectLocationPrefix("", "")
         )
