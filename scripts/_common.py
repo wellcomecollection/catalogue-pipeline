@@ -42,7 +42,7 @@ def _get_pipeline_cluster(session, *, date):
 
 def get_api_es_client(date):
     """
-    Returns an Elasticsearch client for the catalogue cluster.
+    Returns an Elasticsearch client with read-only privileges for the catalogue cluster.
     """
     session = get_session(role_arn="arn:aws:iam::756629837203:role/catalogue-developer")
     host, port, protocol = _get_pipeline_cluster(session, date=date)
@@ -60,7 +60,7 @@ def get_api_es_client(date):
 
 def get_ingestor_es_client(date, doc_type):
     """
-    Returns an Elasticsearch client for the catalogue cluster.
+    Returns an Elasticsearch client with write privileges for the catalogue cluster.
     """
     session = get_session(role_arn="arn:aws:iam::760097843905:role/platform-developer")
     host, port, protocol = _get_pipeline_cluster(session, date=date)
