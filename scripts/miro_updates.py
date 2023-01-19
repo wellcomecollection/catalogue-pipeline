@@ -188,7 +188,7 @@ def _remove_image_from_elasticsearch(*, miro_id):
         print(f"Could not find a work for {miro_id} in {works_index}", file=sys.stderr)
         print(
             "It could be that the canonical work for this Miro ID is a Sierra work - that should be suppressed by collections information first",
-            file=sys.stderr
+            file=sys.stderr,
         )
         return
     else:
