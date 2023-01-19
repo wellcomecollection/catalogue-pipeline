@@ -10,4 +10,5 @@ resource "aws_rds_cluster_instance" "extra_instances" {
   instance_class       = "db.t3.medium"
   db_subnet_group_name = var.rds_config.subnet_group
   publicly_accessible  = false
+  engine = "aurora-mysql"
 }
