@@ -1,42 +1,24 @@
-resource "aws_lambda_function" "scheduled_lambda" {
+module "scheduled_lambda" {
+  source = "git@github.com:wellcomecollection/terraform-aws-lambda.git?ref=v1.1.1"
 
-  function_name = var.name
-  description   = var.description
-
-  role = aws_iam_role.lambda_role.arn
+  name        = var.name
+  description = var.description
 
   handler = "lambda.main"
   runtime = "python3.7"
   timeout = var.timeout
 
-  s3_bucket         = data.aws_s3_bucket_object.package.bucket
-  s3_key            = data.aws_s3_bucket_object.package.key
-  s3_object_version = data.aws_s3_bucket_object.package.version_id
+  s3_bucket         = data.aws_s3_object.package.bucket
+  s3_key            = data.aws_s3_object.package.key
+  s3_object_version = data.aws_s3_object.package.version_id
 
-  environment {
+  environment = {
     variables = var.env_vars
   }
 }
 
-data "aws_s3_bucket_object" "package" {
+data "aws_s3_object" "package" {
   bucket = var.s3_bucket
   key    = var.s3_key
 }
 
-resource "aws_iam_role" "lambda_role" {
-  name               = "${var.name}_role"
-  assume_role_policy = data.aws_iam_policy_document.assume_lambda_role.json
-}
-
-data "aws_iam_policy_document" "assume_lambda_role" {
-  statement {
-    actions = [
-      "sts:AssumeRole",
-    ]
-
-    principals {
-      type        = "Service"
-      identifiers = ["lambda.amazonaws.com"]
-    }
-  }
-}
