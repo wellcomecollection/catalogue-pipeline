@@ -10,7 +10,6 @@ import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.work.WorkState.Denormalised
 import weco.typesafe.WellcomeTypesafeApp
-import weco.typesafe.config.builders.AkkaBuilder
 import weco.typesafe.config.builders.EnrichConfig._
 import weco.catalogue.internal_model.work.Work
 import weco.pipeline_storage.elastic.ElasticIndexer
@@ -21,9 +20,9 @@ import scala.concurrent.duration._
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
     implicit val actorSystem: ActorSystem =
-      AkkaBuilder.buildActorSystem()
-    implicit val executionContext: ExecutionContext =
-      AkkaBuilder.buildExecutionContext()
+      ActorSystem("main-actor-system")
+    implicit val ec: ExecutionContext =
+      actorSystem.dispatcher
 
     val identifiedIndex =
       Index(config.requireString("es.merged-works.index"))

@@ -1,11 +1,12 @@
 package weco.pipeline.id_minter
 
+import akka.actor.ActorSystem
+
 import scala.concurrent.ExecutionContext
 import com.sksamuel.elastic4s.Index
 import com.typesafe.config.Config
 import io.circe.Json
 import weco.typesafe.WellcomeTypesafeApp
-import weco.typesafe.config.builders.AkkaBuilder
 import weco.messaging.typesafe.SNSBuilder
 import weco.elasticsearch.typesafe.ElasticBuilder
 import weco.catalogue.internal_model.Implicits._
@@ -27,7 +28,7 @@ import weco.typesafe.config.builders.EnrichConfig._
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
     implicit val executionContext: ExecutionContext =
-      AkkaBuilder.buildExecutionContext()
+      ActorSystem("main-actor-system").dispatcher
 
     val identifiersTableConfig = IdentifiersTableBuilder.buildConfig(config)
     RDSBuilder.buildDB(config)

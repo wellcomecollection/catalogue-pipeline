@@ -6,7 +6,6 @@ import weco.messaging.sns.SNSConfig
 import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import weco.storage.store.s3.S3TypedStore
 import weco.typesafe.WellcomeTypesafeApp
-import weco.typesafe.config.builders.AkkaBuilder
 import weco.catalogue.tei.id_extractor.database.{
   PathIdTable,
   PathIdTableBuilder,
@@ -21,10 +20,11 @@ import scala.concurrent.ExecutionContext
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config =>
-    implicit val ec: ExecutionContext = AkkaBuilder.buildExecutionContext()
-
     implicit val actorSystem: ActorSystem =
-      AkkaBuilder.buildActorSystem()
+      ActorSystem("main-actor-system")
+
+    implicit val ec: ExecutionContext =
+      actorSystem.dispatcher
 
     implicit val s3Client: S3Client = S3Client.builder().build()
 

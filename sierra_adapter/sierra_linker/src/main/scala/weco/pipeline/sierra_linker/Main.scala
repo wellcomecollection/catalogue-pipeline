@@ -28,16 +28,16 @@ import weco.sierra.typesafe.SierraRecordTypeBuilder
 import weco.storage.store.dynamo.DynamoSingleVersionStore
 import weco.storage.typesafe.DynamoBuilder
 import weco.typesafe.WellcomeTypesafeApp
-import weco.typesafe.config.builders.AkkaBuilder
 
 import scala.concurrent.ExecutionContext
 import scala.language.higherKinds
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
-    implicit val actorSystem: ActorSystem = AkkaBuilder.buildActorSystem()
+    implicit val actorSystem: ActorSystem =
+      ActorSystem("main-actor-system")
     implicit val executionContext: ExecutionContext =
-      AkkaBuilder.buildExecutionContext()
+      actorSystem.dispatcher
 
     val sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config)
 
@@ -87,7 +87,7 @@ object Main extends WellcomeTypesafeApp {
     format: DynamoFormat[Id]
   ): LinkStore[Id, Record] = {
     implicit val dynamoClient: DynamoDbClient =
-      DynamoBuilder.buildDynamoClient
+      DynamoDbClient.builder().build()
 
     val versionedStore =
       new DynamoSingleVersionStore[Id, Link](

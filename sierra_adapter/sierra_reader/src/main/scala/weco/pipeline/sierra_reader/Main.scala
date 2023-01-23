@@ -10,15 +10,15 @@ import weco.pipeline.sierra_reader.services.SierraReaderWorkerService
 import weco.sierra.typesafe.SierraOauthHttpClientBuilder
 import weco.storage.typesafe.S3Builder
 import weco.typesafe.WellcomeTypesafeApp
-import weco.typesafe.config.builders.AkkaBuilder
 
 import scala.concurrent.ExecutionContext
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
-    implicit val actorSystem: ActorSystem = AkkaBuilder.buildActorSystem()
+    implicit val actorSystem: ActorSystem =
+      ActorSystem("main-actor-system")
     implicit val executionContext: ExecutionContext =
-      AkkaBuilder.buildExecutionContext()
+      actorSystem.dispatcher
 
     val sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config)
 

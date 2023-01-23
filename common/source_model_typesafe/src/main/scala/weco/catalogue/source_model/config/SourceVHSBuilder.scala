@@ -26,7 +26,7 @@ object SourceVHSBuilder {
     implicit val s3Client: S3Client = S3Client.builder().build()
 
     implicit val dynamoClient: DynamoDbClient =
-      DynamoBuilder.buildDynamoClient
+      DynamoDbClient.builder().build()
 
     val dynamoConfig =
       DynamoBuilder.buildDynamoConfig(config, namespace = namespace)

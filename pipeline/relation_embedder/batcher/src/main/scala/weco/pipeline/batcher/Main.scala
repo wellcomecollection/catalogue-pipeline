@@ -8,15 +8,14 @@ import com.typesafe.config.Config
 import weco.messaging.sns.NotificationMessage
 import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import weco.typesafe.WellcomeTypesafeApp
-import weco.typesafe.config.builders.AkkaBuilder
 import weco.typesafe.config.builders.EnrichConfig._
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
-    implicit val executionContext: ExecutionContext =
-      AkkaBuilder.buildExecutionContext()
     implicit val actorSystem: ActorSystem =
-      AkkaBuilder.buildActorSystem()
+      ActorSystem("main-actor-system")
+    implicit val ec: ExecutionContext =
+      actorSystem.dispatcher
 
     new BatcherWorkerService(
       msgStream = SQSBuilder.buildSQSStream[NotificationMessage](config),

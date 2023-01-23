@@ -3,34 +3,35 @@ package weco.pipeline.reindex_worker
 import akka.actor.ActorSystem
 import com.typesafe.config.Config
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import weco.messaging.sns.NotificationMessage
-import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
+import software.amazon.awssdk.services.sns.SnsClient
+import weco.messaging.sns.{NotificationMessage, SNSIndividualMessageSender}
+import weco.messaging.typesafe.SQSBuilder
 import weco.pipeline.reindex_worker.config.ReindexJobConfigBuilder
 import weco.pipeline.reindex_worker.services.{
   BulkMessageSender,
   RecordReader,
   ReindexWorkerService
 }
-import weco.storage.typesafe.DynamoBuilder
 import weco.typesafe.WellcomeTypesafeApp
-import weco.typesafe.config.builders.AkkaBuilder
 
 import scala.concurrent.ExecutionContext
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
     implicit val actorSystem: ActorSystem =
-      AkkaBuilder.buildActorSystem()
+      ActorSystem("main-actor-system")
     implicit val executionContext: ExecutionContext =
-      AkkaBuilder.buildExecutionContext()
+      actorSystem.dispatcher
 
     implicit val dynamoDBClient: DynamoDbClient =
-      DynamoBuilder.buildDynamoClient
+      DynamoDbClient.builder().build()
 
     val recordReader = new RecordReader
 
     val bulkMessageSender = new BulkMessageSender(
-      underlying = SNSBuilder.buildSNSIndividualMessageSender
+      underlying = new SNSIndividualMessageSender(
+        snsClient = SnsClient.builder().build()
+      )
     )
 
     new ReindexWorkerService(

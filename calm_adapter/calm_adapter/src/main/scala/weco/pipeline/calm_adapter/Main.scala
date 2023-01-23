@@ -3,7 +3,6 @@ package weco.pipeline.calm_adapter
 import scala.concurrent.ExecutionContext
 import akka.actor.ActorSystem
 import weco.typesafe.WellcomeTypesafeApp
-import weco.typesafe.config.builders.AkkaBuilder
 import weco.typesafe.config.builders.EnrichConfig._
 import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import weco.catalogue.source_model.calm.CalmRecord
@@ -14,10 +13,10 @@ import weco.pipeline.calm_api_client.AkkaHttpCalmApiClient
 object Main extends WellcomeTypesafeApp {
 
   runWithConfig { config =>
-    implicit val ec: ExecutionContext =
-      AkkaBuilder.buildExecutionContext()
     implicit val actorSystem: ActorSystem =
-      AkkaBuilder.buildActorSystem()
+      ActorSystem("main-actor-system")
+    implicit val ec: ExecutionContext =
+      actorSystem.dispatcher
 
     val calmRetriever = new ApiCalmRetriever(
       apiClient = new AkkaHttpCalmApiClient(

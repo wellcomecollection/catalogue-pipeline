@@ -5,7 +5,6 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import weco.storage.typesafe.DynamoBuilder
 import weco.typesafe.WellcomeTypesafeApp
-import weco.typesafe.config.builders.AkkaBuilder
 import weco.typesafe.config.builders.EnrichConfig._
 import weco.pipeline.calm_api_client.AkkaHttpCalmApiClient
 
@@ -13,12 +12,13 @@ import scala.concurrent.ExecutionContext
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config =>
-    implicit val ec: ExecutionContext = AkkaBuilder.buildExecutionContext()
     implicit val actorSystem: ActorSystem =
-      AkkaBuilder.buildActorSystem()
+      ActorSystem("main-actor-system")
+    implicit val ec: ExecutionContext =
+      actorSystem.dispatcher
 
     implicit val dynamoClient: DynamoDbClient =
-      DynamoBuilder.buildDynamoClient
+      DynamoDbClient.builder().build()
     val dynamoConfig =
       DynamoBuilder.buildDynamoConfig(config, namespace = "vhs")
 
