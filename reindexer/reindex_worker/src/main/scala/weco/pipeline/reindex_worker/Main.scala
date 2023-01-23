@@ -7,7 +7,11 @@ import software.amazon.awssdk.services.sns.SnsClient
 import weco.messaging.sns.{NotificationMessage, SNSIndividualMessageSender}
 import weco.messaging.typesafe.SQSBuilder
 import weco.pipeline.reindex_worker.config.ReindexJobConfigBuilder
-import weco.pipeline.reindex_worker.services.{BulkMessageSender, RecordReader, ReindexWorkerService}
+import weco.pipeline.reindex_worker.services.{
+  BulkMessageSender,
+  RecordReader,
+  ReindexWorkerService
+}
 import weco.typesafe.WellcomeTypesafeApp
 
 import scala.concurrent.ExecutionContext
