@@ -55,13 +55,32 @@ class SierraConceptIdentifierTest
       actualSourceIdentifier shouldBe expectedSourceIdentifier
     }
 
+    it("fixes an incorrectly marked MeSH ientifier") {
+      //Occasionally, source data contains a MeSH id squatting erroneously
+      // in a field with indicator2=0
+      val varField = create655VarFieldWith(indicator2 = "0")
+
+      val expectedSourceIdentifier = SourceIdentifier(
+        identifierType = IdentifierType.MESH,
+        value = "D000934",
+        ontologyType = ontologyType
+      )
+
+      val actualSourceIdentifier = SierraConceptIdentifier
+        .maybeFindIdentifier(
+          varField = varField,
+          identifierSubfieldContent = "D000934",
+          ontologyType = ontologyType
+        )
+        .get
+
+      actualSourceIdentifier shouldBe expectedSourceIdentifier
+    }
+
     it("throws an exception on an invalid LoC identifier") {
       forAll(
         Table(
           "identifier",
-          //Occasionally, source data contains a MeSH id squatting erroneously
-          // in a field with indicator2=0
-          "D000934",
           // We don't use Children's Subject Headings
           "sj97002429",
           // Sometimes, there are odd typos
