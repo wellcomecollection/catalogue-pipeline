@@ -10,6 +10,7 @@ import boto3
 import json
 from pprint import pprint
 
+
 @click.command()
 @click.argument("pipeline_date")
 @click.argument("transformer_name")
@@ -17,10 +18,7 @@ from pprint import pprint
 def main(pipeline_date, transformer_name, max_messages):
     queue_name = f"catalogue-{pipeline_date}_transformer_{transformer_name}_input_dlq"
 
-
-    session = get_session_with_role(
-        "arn:aws:iam::760097843905:role/platform-read_only"
-    )
+    session = get_session_with_role("arn:aws:iam::760097843905:role/platform-read_only")
     sqs_client = session.client("sqs")
     s3_client = session.client("s3")
     messages_pulled = 0
@@ -28,7 +26,7 @@ def main(pipeline_date, transformer_name, max_messages):
         messages = sqs_client.receive_message(
             QueueUrl=f"https://sqs.eu-west-1.amazonaws.com/760097843905/{queue_name}",
             MaxNumberOfMessages=10,
-            WaitTimeSeconds=20
+            WaitTimeSeconds=20,
         )["Messages"]
         if not messages:
             break
@@ -36,7 +34,11 @@ def main(pipeline_date, transformer_name, max_messages):
             messages_pulled += 1
             actual_message = unwrap_message(message)
             pprint(actual_message)
-            s3_client.download_file(actual_message["location"]["bucket"], actual_message["location"]["key"], f"{actual_message['id']}.json")
+            s3_client.download_file(
+                actual_message["location"]["bucket"],
+                actual_message["location"]["key"],
+                f"{actual_message['id']}.json",
+            )
 
 
 def get_session_with_role(role_arn):
@@ -55,6 +57,7 @@ def get_session_with_role(role_arn):
         aws_session_token=credentials["SessionToken"],
     )
 
+
 def unwrap_message(msg):
     """
 
@@ -62,6 +65,7 @@ def unwrap_message(msg):
     :return: The actual messagey bit that we are interested in.
     """
     return json.loads(json.loads(msg["Body"])["Message"])
+
 
 if __name__ == "__main__":
     main()
