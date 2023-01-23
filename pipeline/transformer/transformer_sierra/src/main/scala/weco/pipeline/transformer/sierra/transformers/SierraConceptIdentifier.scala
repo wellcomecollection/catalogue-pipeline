@@ -57,7 +57,7 @@ object SierraConceptIdentifier extends Logging {
       // enforced here in order to guard against such typos re-emerging.
       case "sh" => IdentifierType.LCSubjects
       // MESH is not a Library of Congress scheme, but a common error found in source documents
-      // is to mark a MeSH id as a LoC id. Fix it, but also post a warning
+      // is to mark a MeSH id as a LoC id. Fix it, but also log a warning
       case "D" =>
         warn(s"MeSH identifier found masquerading as LoC identifier: $idValue")
         IdentifierType.MESH
