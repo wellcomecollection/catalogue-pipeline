@@ -1,5 +1,6 @@
 package weco.pipeline.router
 
+import akka.actor.ActorSystem
 import com.sksamuel.elastic4s.Index
 import com.typesafe.config.Config
 import weco.catalogue.internal_model.index.WorksIndexConfig
@@ -8,7 +9,6 @@ import weco.messaging.typesafe.SNSBuilder
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.work.WorkState.{Denormalised, Merged}
 import weco.typesafe.WellcomeTypesafeApp
-import weco.typesafe.config.builders.AkkaBuilder
 import weco.catalogue.internal_model.work.Work
 import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
 import weco.pipeline_storage.typesafe.PipelineStorageStreamBuilder
@@ -18,8 +18,8 @@ import scala.concurrent.ExecutionContext
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
-    implicit val executionContext: ExecutionContext =
-      AkkaBuilder.buildExecutionContext()
+    implicit val ec: ExecutionContext =
+      ActorSystem("main-actor-system").dispatcher
 
     val esClient = ElasticBuilder.buildElasticClient(config)
 
