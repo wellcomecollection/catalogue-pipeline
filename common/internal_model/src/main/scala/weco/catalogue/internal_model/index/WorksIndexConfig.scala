@@ -3,9 +3,7 @@ package weco.catalogue.internal_model.index
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.fields.{ElasticField, TokenCountField}
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
-import weco.elasticsearch.{IndexConfig, RefreshInterval}
-
-import scala.concurrent.duration.DurationInt
+import weco.elasticsearch.IndexConfig
 
 sealed trait WorksIndexConfig
 object WorksIndexConfig extends IndexConfigFields {
@@ -15,13 +13,11 @@ object WorksIndexConfig extends IndexConfigFields {
   def apply(
     fields: Seq[ElasticField],
     dynamicMapping: DynamicMapping = DynamicMapping.False,
-    refreshInterval: RefreshInterval = RefreshInterval.Default
-  ): IndexConfig = {
+  ): IndexConfig =
     IndexConfig(
       properties(fields).dynamic(dynamicMapping),
       analysis
     )
-  }
 
   val source = WorksIndexConfig(Seq.empty)
   val merged = WorksIndexConfig(
@@ -181,6 +177,5 @@ object WorksIndexConfig extends IndexConfigFields {
       )
     },
     DynamicMapping.Strict,
-    RefreshInterval.On(30.seconds)
   )
 }

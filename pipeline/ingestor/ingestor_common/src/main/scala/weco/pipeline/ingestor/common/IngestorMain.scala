@@ -43,7 +43,7 @@ class IngestorMain[In, Out](
       new ElasticIndexer[Out](
         client = client,
         index = Index(config.requireString(outputIndexField)),
-        config = indexConfig.withRefreshIntervalFromConfig(config)
+        config = indexConfig
       )
 
     val messageSender = SNSBuilder
