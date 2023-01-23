@@ -11,7 +11,6 @@ import weco.catalogue.internal_model.index.ImagesIndexConfig
 import weco.typesafe.WellcomeTypesafeApp
 import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import weco.messaging.sns.NotificationMessage
-import weco.typesafe.config.builders.AkkaBuilder
 import weco.typesafe.config.builders.EnrichConfig._
 import weco.elasticsearch.typesafe.ElasticBuilder
 import weco.catalogue.internal_model.image.Image
@@ -32,9 +31,10 @@ import weco.pipeline_storage.typesafe.PipelineStorageStreamBuilder
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
-    implicit val actorSystem: ActorSystem = AkkaBuilder.buildActorSystem()
+    implicit val actorSystem: ActorSystem =
+      ActorSystem("main-actor-system")
     implicit val executionContext: ExecutionContext =
-      AkkaBuilder.buildExecutionContext()
+      actorSystem.dispatcher
 
     val imageDownloader = ImageDownloader(
       config

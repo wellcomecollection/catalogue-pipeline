@@ -22,7 +22,6 @@ import weco.pipeline_storage.EitherIndexer
 import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
 import weco.pipeline_storage.typesafe.PipelineStorageStreamBuilder
 import weco.typesafe.WellcomeTypesafeApp
-import weco.typesafe.config.builders.AkkaBuilder
 import weco.typesafe.config.builders.EnrichConfig._
 
 import scala.concurrent.ExecutionContext
@@ -30,9 +29,9 @@ import scala.concurrent.ExecutionContext
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
     implicit val actorSystem: ActorSystem =
-      AkkaBuilder.buildActorSystem()
+      ActorSystem("main-actor-system")
     implicit val executionContext: ExecutionContext =
-      AkkaBuilder.buildExecutionContext()
+      actorSystem.dispatcher
 
     val esClient = ElasticBuilder.buildElasticClient(config)
 

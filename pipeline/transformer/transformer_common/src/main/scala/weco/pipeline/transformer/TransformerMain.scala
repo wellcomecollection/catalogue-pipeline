@@ -1,5 +1,6 @@
 package weco.pipeline.transformer
 
+import akka.actor.ActorSystem
 import com.sksamuel.elastic4s.Index
 import com.typesafe.config.Config
 import io.circe.Decoder
@@ -13,7 +14,6 @@ import weco.messaging.typesafe.SNSBuilder
 import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
 import weco.pipeline_storage.typesafe.PipelineStorageStreamBuilder
 import weco.typesafe.Runnable
-import weco.typesafe.config.builders.AkkaBuilder
 import weco.typesafe.config.builders.EnrichConfig._
 
 import scala.concurrent.ExecutionContext
@@ -27,7 +27,7 @@ class TransformerMain[Payload <: SourcePayload, SourceData](
 ) {
   def run(config: Config): Runnable = {
     implicit val ec: ExecutionContext =
-      AkkaBuilder.buildExecutionContext()
+      ActorSystem("main-actor-system").dispatcher
 
     val esClient = ElasticBuilder.buildElasticClient(config)
 

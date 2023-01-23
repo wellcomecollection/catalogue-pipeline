@@ -1,5 +1,6 @@
 package weco.pipeline.ingestor.common
 
+import akka.actor.ActorSystem
 import com.sksamuel.elastic4s.Index
 import com.typesafe.config.Config
 import io.circe.{Decoder, Encoder}
@@ -9,7 +10,6 @@ import weco.messaging.typesafe.SNSBuilder
 import weco.pipeline_storage.Indexable
 import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
 import weco.pipeline_storage.typesafe.PipelineStorageStreamBuilder
-import weco.typesafe.config.builders.AkkaBuilder
 import weco.typesafe.config.builders.EnrichConfig._
 import weco.typesafe.Runnable
 
@@ -29,7 +29,7 @@ class IngestorMain[In, Out](
 ) {
   def run(config: Config): Runnable = {
     implicit val ec: ExecutionContext =
-      AkkaBuilder.buildExecutionContext()
+      ActorSystem("main-actor-system").dispatcher
 
     val client = ElasticBuilder.buildElasticClient(config)
 

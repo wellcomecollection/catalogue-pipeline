@@ -11,15 +11,15 @@ import weco.pipeline.sierra_merger.services.{Updater, Worker}
 import weco.sierra.models.identifiers.SierraRecordTypes
 import weco.sierra.typesafe.SierraRecordTypeBuilder
 import weco.typesafe.WellcomeTypesafeApp
-import weco.typesafe.config.builders.AkkaBuilder
 
 import scala.concurrent.ExecutionContext
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
-    implicit val actorSystem: ActorSystem = AkkaBuilder.buildActorSystem()
+    implicit val actorSystem: ActorSystem =
+      ActorSystem("main-actor-system")
     implicit val executionContext: ExecutionContext =
-      AkkaBuilder.buildExecutionContext()
+      actorSystem.dispatcher
 
     val sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config)
 
