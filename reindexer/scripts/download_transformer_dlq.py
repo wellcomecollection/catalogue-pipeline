@@ -11,7 +11,6 @@ import json
 from pprint import pprint
 
 
-
 @click.command()
 @click.argument("pipeline_date")
 @click.argument("transformer_name")

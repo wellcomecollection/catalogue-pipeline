@@ -22,6 +22,7 @@ def main(files):
                 total += len(row[2])
     print(total)
 
+
 def find_dodgy_ids_in_file(filepath):
     return find_dodgy_ids_in_json(json.load(filepath))
 
