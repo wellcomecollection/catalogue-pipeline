@@ -1,4 +1,8 @@
+echo "Scanning for warnings"
+
 WARNING_COUNT=`cat - | grep -c '\[warn\]'`
+
+echo "$WARNING_COUNT warning(s) found"
 
 if [ $WARNING_COUNT != 0 ]
 then
