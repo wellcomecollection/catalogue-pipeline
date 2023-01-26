@@ -6,6 +6,6 @@ echo "$WARNING_COUNT warning(s) found"
 
 if [ $WARNING_COUNT != 0 ]
 then
-  buildkite-agent annotate "Completed with $WARNING_COUNT warning(s)\n\`\`\`$WARNINGS\`\`\`" --style 'warning' --context 'ctx-warn'
+  echo -e "Completed with $WARNING_COUNT warning(s)\n\`\`\`term\n$WARNINGS\n\`\`\`" | buildkite-agent annotate  --style 'warning' --context 'ctx-warn'
   exit 2
 fi
