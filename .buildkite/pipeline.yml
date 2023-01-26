@@ -3,6 +3,7 @@ steps:
       ./builds/run_formatting.sh
       .buildkite/scripts/push_autoformatting_changes.sh
       ./builds/run_linting.sh
+      cat reports/scalafmt.out | ./buildkite/scripts/report_sbt_warnings.sh
     label: "autoformat"
     agents:
       queue: "scala"
