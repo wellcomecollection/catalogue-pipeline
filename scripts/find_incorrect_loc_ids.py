@@ -12,13 +12,15 @@ import csv
 @click.command()
 @click.argument("files", type=click.File("rb"), nargs=-1)
 def main(files):
+    total = 0
     with open("dodgy-ids.csv", "w") as csvfile:
         dodgywriter = csv.writer(csvfile, quoting=csv.QUOTE_MINIMAL)
         dodgywriter.writerow(("sierra number", "b number", "non-compliant identifiers"))
         for row in (find_dodgy_ids_in_file(filepath) for filepath in files):
             if row[2]:
                 dodgywriter.writerow(row)
-
+                total += len(row[2])
+    print(total)
 
 def find_dodgy_ids_in_file(filepath):
     return find_dodgy_ids_in_json(json.load(filepath))

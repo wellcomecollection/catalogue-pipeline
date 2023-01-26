@@ -11,13 +11,13 @@ import json
 from pprint import pprint
 
 
+
 @click.command()
 @click.argument("pipeline_date")
 @click.argument("transformer_name")
 @click.argument("max_messages", type=click.INT)
 def main(pipeline_date, transformer_name, max_messages):
     queue_name = f"catalogue-{pipeline_date}_transformer_{transformer_name}_input_dlq"
-
     session = get_session_with_role("arn:aws:iam::760097843905:role/platform-read_only")
     sqs_client = session.client("sqs")
     s3_client = session.client("s3")
