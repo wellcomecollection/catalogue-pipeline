@@ -9,7 +9,8 @@ import weco.catalogue.source_model.sierra.AbstractSierraRecord
 
 object SierraRecordParser {
   def apply[T <: AbstractSierraRecord[_]](
-    createRecord: (String, String, Instant) => T)(json: Json): T = {
+    createRecord: (String, String, Instant) => T
+  )(json: Json): T = {
     val id = getId(json)
     val data = json.noSpaces
     val modifiedDate = getModifiedDate(json)

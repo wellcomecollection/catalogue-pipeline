@@ -4,8 +4,10 @@ import org.flywaydb.core.Flyway
 
 import scala.collection.JavaConverters._
 
-class TableProvisioner(rdsClientConfig: RDSClientConfig,
-                       pathIdConfig: PathIdTableConfig) {
+class TableProvisioner(
+  rdsClientConfig: RDSClientConfig,
+  pathIdConfig: PathIdTableConfig
+) {
 
   def provision(): Unit = {
     val flyway = new Flyway()
@@ -17,7 +19,9 @@ class TableProvisioner(rdsClientConfig: RDSClientConfig,
     flyway.setPlaceholders(
       Map(
         "database" -> pathIdConfig.database,
-        "tableName" -> pathIdConfig.tableName).asJava)
+        "tableName" -> pathIdConfig.tableName
+      ).asJava
+    )
     flyway.migrate()
   }
 

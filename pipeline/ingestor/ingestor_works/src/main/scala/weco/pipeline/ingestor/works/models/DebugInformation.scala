@@ -8,10 +8,9 @@ import weco.catalogue.internal_model.identifiers.{
 }
 import weco.catalogue.internal_model.work.{DeletedReason, InvisibilityReason}
 
-/** This is information we put in the Elasticsearch index because it's
-  * useful when we're debugging the pipeline, but not something we'd
-  * want to display in public API responses.
-  *
+/** This is information we put in the Elasticsearch index because it's useful
+  * when we're debugging the pipeline, but not something we'd want to display in
+  * public API responses.
   */
 case class SourceWorkDebugInformation(
   id: CanonicalId,
@@ -45,7 +44,7 @@ object DebugInformation {
   case class Redirected(
     source: SourceWorkDebugInformation,
     mergedTime: Instant,
-    indexedTime: Instant,
+    indexedTime: Instant
   ) extends DebugInformation
 
   case class Deleted(

@@ -32,10 +32,7 @@ class SierraReaderWorkerService(
   sqsStream: SQSStream[NotificationMessage],
   s3Config: S3Config,
   readerConfig: ReaderConfig
-)(implicit
-  actorSystem: ActorSystem,
-  ec: ExecutionContext,
-  s3Client: S3Client)
+)(implicit actorSystem: ActorSystem, ec: ExecutionContext, s3Client: S3Client)
     extends Logging
     with Runnable {
   val windowManager = new WindowManager(
@@ -58,8 +55,10 @@ class SierraReaderWorkerService(
       _ <- runSierraStream(window = window, windowStatus = windowStatus)
     } yield ()
 
-  private def runSierraStream(window: String,
-                              windowStatus: WindowStatus): Future[Unit] = {
+  private def runSierraStream(
+    window: String,
+    windowStatus: WindowStatus
+  ): Future[Unit] = {
     info(s"Running the stream with window=$window and status=$windowStatus")
 
     val baseParams =
@@ -93,7 +92,7 @@ class SierraReaderWorkerService(
     outcome.flatMap { _ =>
       val key =
         s"windows_${readerConfig.recordType.toString}_complete/${windowManager
-          .buildWindowLabel(window)}"
+            .buildWindowLabel(window)}"
 
       val putRequest =
         PutObjectRequest

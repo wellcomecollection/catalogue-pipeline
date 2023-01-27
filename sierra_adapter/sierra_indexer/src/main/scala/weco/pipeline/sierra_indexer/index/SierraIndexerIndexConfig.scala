@@ -35,12 +35,14 @@ object SierraIndexConfig extends IndexConfigFields {
             textKeywordField(
               name = "content",
               textFieldName = "english",
-              analyzerName = "english")
+              analyzerName = "english"
+            )
           ),
           textKeywordField(
             name = "content",
             textFieldName = "english",
-            analyzerName = "english")
+            analyzerName = "english"
+          )
         )
       )
     )
@@ -60,12 +62,14 @@ object SierraIndexConfig extends IndexConfigFields {
             textKeywordField(
               name = "content",
               textFieldName = "english",
-              analyzerName = "english")
+              analyzerName = "english"
+            )
           ),
           textKeywordField(
             name = "content",
             textFieldName = "english",
-            analyzerName = "english")
+            analyzerName = "english"
+          )
         )
       )
     )
@@ -80,11 +84,13 @@ object SierraIndexConfig extends IndexConfigFields {
           textKeywordField(
             name = "display",
             textFieldName = "english",
-            analyzerName = "english"),
+            analyzerName = "english"
+          ),
           textKeywordField(
             name = "value",
             textFieldName = "english",
-            analyzerName = "english"),
+            analyzerName = "english"
+          )
         )
       )
     )

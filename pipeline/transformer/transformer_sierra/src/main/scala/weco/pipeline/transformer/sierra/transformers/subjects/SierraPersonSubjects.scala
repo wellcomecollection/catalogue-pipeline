@@ -46,8 +46,8 @@ object SierraPersonSubjects
           getPerson(subfields)
         val generalSubdivisions =
           varField.subfields
-            .collect {
-              case Subfield("x", content) => content
+            .collect { case Subfield("x", content) =>
+              content
             }
 
         maybePerson.map { person =>

@@ -14,37 +14,45 @@ import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future, TimeoutException}
 import scala.util.Try
 
-/**
-  * Configuration for the processing of messages in batches.
+/** Configuration for the processing of messages in batches.
   *
-  * Messages will be processed when either batchSize or flushInterval are reached.
+  * Messages will be processed when either batchSize or flushInterval are
+  * reached.
   *
-  * The intended use for this is where it can be significantly more efficient to process
-  * multiple messages together, rather than one at a time.  For example where
-  * downloading all the data to service a bundle of messages incurs less overhead than
-  * making individual requests for the data to service each message.
+  * The intended use for this is where it can be significantly more efficient to
+  * process multiple messages together, rather than one at a time. For example
+  * where downloading all the data to service a bundle of messages incurs less
+  * overhead than making individual requests for the data to service each
+  * message.
   *
   * ==Setting batchSize and flushInterval==
   *
-  * The numbers for batchSize and flushInterval should be chosen based on how responsive
-  * you want the service to be and how many messages the service can realistically handle
-  * in one go, as well as the expected frequency with which messages are likely to be received.
+  * The numbers for batchSize and flushInterval should be chosen based on how
+  * responsive you want the service to be and how many messages the service can
+  * realistically handle in one go, as well as the expected frequency with which
+  * messages are likely to be received.
   *
-  * In normal running, where this activity is triggered by a few real humans manually modifying
-  * a few records at a time, you might expect the flush interval to be reached most of the time.
+  * In normal running, where this activity is triggered by a few real humans
+  * manually modifying a few records at a time, you might expect the flush
+  * interval to be reached most of the time.
   *
-  * On the other hand, when this activity is triggered by some kind of computer-initiated batch
-  * update, you might expect the batch size to be the threshold that normally triggers processing.
-
-  * @note The values for batchSize and flushInterval are related to the duration set externally
-  * for the expiry of the messages being consumed (visibility timeout in SQS).
+  * On the other hand, when this activity is triggered by some kind of
+  * computer-initiated batch update, you might expect the batch size to be the
+  * threshold that normally triggers processing.
   *
-  * `((Message Expiry) - (Flush Interval))` must be long enough to allow
-  * `(Batch Size - 1)` messages to be processed, otherwise those messages will
-  * expire and either be re-queued or fail completely.
+  * @note
+  *   The values for batchSize and flushInterval are related to the duration set
+  *   externally for the expiry of the messages being consumed (visibility
+  *   timeout in SQS).
   *
-  * @param batchSize The maximum number of messages to process in one batch.
-  * @param flushInterval The maximum duration to wait before processing messages.
+  * `((Message Expiry) - (Flush Interval))` must be long enough to allow `(Batch
+  * Size - 1)` messages to be processed, otherwise those messages will expire
+  * and either be re-queued or fail completely.
+  *
+  * @param batchSize
+  *   The maximum number of messages to process in one batch.
+  * @param flushInterval
+  *   The maximum duration to wait before processing messages.
   * @param parallelism
   */
 case class PipelineStorageConfig(
@@ -92,7 +100,7 @@ class PipelineStorageStream[In, Out, MsgDestination](
                 ),
                 noOutputFlow
               )
-          )
+            )
       )
     } yield done
 
@@ -103,19 +111,16 @@ object PipelineStorageStream extends Logging {
     config: PipelineStorageConfig,
     send: T => Try[Unit],
     indexer: Indexer[T]
-  )(
-    implicit
+  )(implicit
     ec: ExecutionContext,
     indexable: Indexable[T]
   ) = {
     val maxSubStreams = Integer.MAX_VALUE
     Flow[(Message, List[T])]
-      .collect {
-        case (msg, items @ _ :: _) =>
-          items.map(
-            item =>
-              Bundle[T](message = msg, item = item, numberOfItems = items.size)
-          )
+      .collect { case (msg, items @ _ :: _) =>
+        items.map(item =>
+          Bundle[T](message = msg, item = item, numberOfItems = items.size)
+        )
       }
       .mapConcat[Bundle[T]](identity)
       .via(batchIndexFlow(config, indexer))
@@ -128,8 +133,8 @@ object PipelineStorageStream extends Logging {
       }
       .via(
         takeListsOfCompleteBundles[T](maxSubStreams, 5 minutes)
-          .collect {
-            case head :: _ => head.message
+          .collect { case head :: _ =>
+            head.message
           }
       )
   }
@@ -137,8 +142,8 @@ object PipelineStorageStream extends Logging {
   def processFlow[In, Out](
     config: PipelineStorageConfig,
     process: In => Future[List[Out]]
-  )(
-    implicit ec: ExecutionContext
+  )(implicit
+    ec: ExecutionContext
   ): Flow[(Message, In), (Message, List[Out]), NotUsed] =
     Flow[(Message, In)].mapAsyncUnordered(parallelism = config.parallelism) {
       case (message, in) =>
@@ -149,13 +154,12 @@ object PipelineStorageStream extends Logging {
   def batchRetrieveFlow[T](
     config: PipelineStorageConfig,
     retriever: Retriever[T]
-  )(
-    implicit ec: ExecutionContext
+  )(implicit
+    ec: ExecutionContext
   ): Flow[(Message, NotificationMessage), (Message, T), NotUsed] =
     Flow[(Message, NotificationMessage)]
-      .map {
-        case (message, notificationMessage) =>
-          Bundle(message, notificationMessage.body, numberOfItems = 1)
+      .map { case (message, notificationMessage) =>
+        Bundle(message, notificationMessage.body, numberOfItems = 1)
       }
       .groupedWithin(config.batchSize, config.flushInterval)
       .mapAsyncUnordered(parallelism = config.parallelism) { bundles =>
@@ -163,14 +167,13 @@ object PipelineStorageStream extends Logging {
         retriever(ids)
           .map { result =>
             ids.zipWithIndex
-              .map {
-                case (id, idx) =>
-                  result(id) match {
-                    case Left(err) =>
-                      error(s"Could not retrieve document with id: $id", err)
-                      None
-                    case Right(doc) => Some((messages(idx), doc))
-                  }
+              .map { case (id, idx) =>
+                result(id) match {
+                  case Left(err) =>
+                    error(s"Could not retrieve document with id: $id", err)
+                    None
+                  case Right(doc) => Some((messages(idx), doc))
+                }
               }
               .collect { case Some((msg, doc)) => (msg, doc) }
           }
@@ -186,8 +189,8 @@ object PipelineStorageStream extends Logging {
       .groupedWeightedWithin(
         config.batchSize,
         config.flushInterval
-      ) {
-        case Bundle(_, item, _) => indexable.weight(item)
+      ) { case Bundle(_, item, _) =>
+        indexable.weight(item)
       }
       .mapAsyncUnordered(config.parallelism) { bundles =>
         val (_, items) = unzipBundles(bundles)
@@ -221,8 +224,8 @@ object PipelineStorageStream extends Logging {
         m => (m.message.messageId(), m.message.md5OfMessageAttributes()),
         allowClosedSubstreamRecreation = true
       )
-      .scan(Nil: List[Bundle[T]]) {
-        case (bundleList, b) => b :: bundleList
+      .scan(Nil: List[Bundle[T]]) { case (bundleList, b) =>
+        b :: bundleList
       }
     groupByMessage
       .filter { list =>
@@ -237,10 +240,9 @@ object PipelineStorageStream extends Logging {
       // or after timeout if it fails
       .take(1)
       .initialTimeout(t)
-      .recover {
-        case e: TimeoutException =>
-          warn("Timeout when processing substream", e)
-          Nil
+      .recover { case e: TimeoutException =>
+        warn("Timeout when processing substream", e)
+        Nil
       }
       .mergeSubstreams
   }

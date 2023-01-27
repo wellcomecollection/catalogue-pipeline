@@ -49,7 +49,8 @@ trait WorkTransformer {
             ),
             aggregatableValues = WorkAggregatableValues(
               w.data,
-              availabilities = work.state.availabilities)
+              availabilities = work.state.availabilities
+            )
           )
         }
 
@@ -68,7 +69,7 @@ trait WorkTransformer {
             debug = DebugInformation.Redirected(
               source = source,
               mergedTime = mergedTime,
-              indexedTime = indexedTime,
+              indexedTime = indexedTime
             ),
             redirectTarget = redirectTarget
           )

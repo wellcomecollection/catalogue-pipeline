@@ -49,7 +49,8 @@ object Main extends WellcomeTypesafeApp {
         table,
         store,
         messageSender,
-        bucket = config.requireString("tei.id_extractor.bucket")),
+        bucket = config.requireString("tei.id_extractor.bucket")
+      ),
       config = TeiIdExtractorConfigBuilder.buildTeiIdExtractorConfig(config)
     )
   }

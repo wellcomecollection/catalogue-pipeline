@@ -12,12 +12,12 @@ import scala.concurrent.{ExecutionContext, Future}
 
 // This object splits a SierraTransformable into indexable pieces
 // that can be sent to Elasticsearch.
-class Splitter(indexPrefix: String)(
-  implicit
+class Splitter(indexPrefix: String)(implicit
   ec: ExecutionContext
 ) extends Logging {
-  def split(t: SierraTransformable)
-    : Future[(Seq[IndexRequest], Seq[DeleteByQueryRequest])] = Future {
+  def split(
+    t: SierraTransformable
+  ): Future[(Seq[IndexRequest], Seq[DeleteByQueryRequest])] = Future {
     val apiData = getSierraApiData(t)
 
     val mainRecords = IndexerRequest.mainRecords(indexPrefix, apiData)
@@ -49,16 +49,30 @@ class Splitter(indexPrefix: String)(
             parse(bibRecord.data)
               .map { json =>
                 json
-                  .mapObject(_.add("itemIds", Json.fromValues(itemIds.map {
-                    Json.fromString
-                  })))
                   .mapObject(
-                    _.add("holdingsIds", Json.fromValues(holdingsIds.map {
-                      Json.fromString
-                    })))
-                  .mapObject(_.add("orderIds", Json.fromValues(orderIds.map {
-                    Json.fromString
-                  })))
+                    _.add(
+                      "itemIds",
+                      Json.fromValues(itemIds.map {
+                        Json.fromString
+                      })
+                    )
+                  )
+                  .mapObject(
+                    _.add(
+                      "holdingsIds",
+                      Json.fromValues(holdingsIds.map {
+                        Json.fromString
+                      })
+                    )
+                  )
+                  .mapObject(
+                    _.add(
+                      "orderIds",
+                      Json.fromValues(orderIds.map {
+                        Json.fromString
+                      })
+                    )
+                  )
               }
         )
       case None => Seq()
@@ -81,8 +95,8 @@ class Splitter(indexPrefix: String)(
 
     val data = bibData ++ itemData ++ holdingsData ++ orderData
 
-    val successes = data.collect {
-      case (parent, Right(json)) => (parent, json)
+    val successes = data.collect { case (parent, Right(json)) =>
+      (parent, json)
     }
     val failures = data.collect { case (parent, Left(err)) => (parent, err) }
 

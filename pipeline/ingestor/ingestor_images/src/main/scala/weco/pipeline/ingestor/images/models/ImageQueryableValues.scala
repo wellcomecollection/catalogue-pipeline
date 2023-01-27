@@ -16,15 +16,17 @@ case class ImageQueryableValues(
   @JsonKey("sourceIdentifier.value") sourceIdentifier: String,
   @JsonKey("locations.license.id") licenseIds: List[String],
   @JsonKey("inferredData") inferredData: InferredData,
-  @JsonKey("source") source: WorkQueryableValues,
+  @JsonKey("source") source: WorkQueryableValues
 )
 
 case object ImageQueryableValues {
-  def apply(id: CanonicalId,
-            sourceIdentifier: SourceIdentifier,
-            inferredData: InferredData,
-            locations: List[DigitalLocation],
-            source: ImageSource): ImageQueryableValues =
+  def apply(
+    id: CanonicalId,
+    sourceIdentifier: SourceIdentifier,
+    inferredData: InferredData,
+    locations: List[DigitalLocation],
+    source: ImageSource
+  ): ImageQueryableValues =
     source match {
       case ParentWork(workId, workData, _) =>
         ImageQueryableValues(

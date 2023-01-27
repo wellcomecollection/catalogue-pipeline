@@ -39,7 +39,8 @@ object Main extends WellcomeTypesafeApp {
       LockingBuilder
         .buildDynamoLockingService[MatcherResult, Future](
           config,
-          namespace = "locking")
+          namespace = "locking"
+        )
 
     val workMatcher = new WorkMatcher(workGraphStore, lockingService)
 

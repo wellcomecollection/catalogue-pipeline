@@ -19,13 +19,13 @@ case class RelationWork(
       workType = data.workType,
       depth = depth,
       numChildren = numChildren,
-      numDescendents = numDescendents,
+      numDescendents = numDescendents
     )
 }
 
 case class RelationWorkState(
   canonicalId: CanonicalId,
-  availabilities: Set[Availability],
+  availabilities: Set[Availability]
 )
 
 case class RelationWorkData(

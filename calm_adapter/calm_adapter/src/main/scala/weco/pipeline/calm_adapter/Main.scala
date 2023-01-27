@@ -22,7 +22,7 @@ object Main extends WellcomeTypesafeApp {
       apiClient = new AkkaHttpCalmApiClient(
         url = config.requireString("calm.api.url"),
         username = config.requireString("calm.api.username"),
-        password = config.requireString("calm.api.password"),
+        password = config.requireString("calm.api.password")
       ),
       // See https://github.com/wellcomecollection/private/blob/main/2020-04-calm-suppressed-fields.md
       suppressedFields = config
@@ -37,7 +37,7 @@ object Main extends WellcomeTypesafeApp {
       calmRetriever = calmRetriever,
       calmStore = new CalmStore(
         SourceVHSBuilder.build[CalmRecord](config)
-      ),
+      )
     )
   }
 }

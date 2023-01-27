@@ -80,9 +80,10 @@ object Main extends WellcomeTypesafeApp {
     }
   }
 
-  def createLinkStore[Id <: TypedSierraRecordNumber,
-                      Record <: AbstractSierraRecord[Id]](config: Config)(
-    implicit
+  def createLinkStore[
+    Id <: TypedSierraRecordNumber,
+    Record <: AbstractSierraRecord[Id]
+  ](config: Config)(implicit
     linkOps: LinkOps[Record],
     format: DynamoFormat[Id]
   ): LinkStore[Id, Record] = {

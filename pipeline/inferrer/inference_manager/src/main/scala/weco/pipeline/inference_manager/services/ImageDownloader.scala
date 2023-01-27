@@ -31,23 +31,26 @@ trait FileWriter {
 class ImageDownloader[Ctx](
   requestPool: RequestPoolFlow[(Uri, MergedIdentifiedImage), Ctx],
   fileWriter: FileWriter,
-  root: String = "/")(implicit materializer: Materializer) {
+  root: String = "/"
+)(implicit materializer: Materializer) {
 
   implicit val ec: ExecutionContext = materializer.executionContext
 
   private val parallelism = 10
 
-  def download: FlowWithContext[MergedIdentifiedImage,
-                                Ctx,
-                                DownloadedImage,
-                                Ctx,
-                                NotUsed] =
+  def download: FlowWithContext[
+    MergedIdentifiedImage,
+    Ctx,
+    DownloadedImage,
+    Ctx,
+    NotUsed
+  ] =
     FlowWithContext[MergedIdentifiedImage, Ctx]
       .map(createImageFileRequest)
       .via(requestPool.asContextFlow)
       .mapAsync(parallelism)(saveImageFile)
-      .map {
-        case (image, path) => models.DownloadedImage(image, path)
+      .map { case (image, path) =>
+        models.DownloadedImage(image, path)
       }
 
   def delete: Sink[DownloadedImage, Future[Done]] =
@@ -57,7 +60,8 @@ class ImageDownloader[Ctx](
     Paths.get(root, image.id, "default.jpg").toAbsolutePath
 
   private def createImageFileRequest(
-    image: MergedIdentifiedImage): (HttpRequest, (Uri, MergedIdentifiedImage)) =
+    image: MergedIdentifiedImage
+  ): (HttpRequest, (Uri, MergedIdentifiedImage)) =
     getImageUri(image.locations) match {
       case Some(uri) =>
         (HttpRequest(method = HttpMethods.GET, uri = uri), (uri, image))
@@ -72,8 +76,9 @@ class ImageDownloader[Ctx](
     Future[(MergedIdentifiedImage, Path)]
   ] = {
     case (
-        Success(response @ HttpResponse(StatusCodes.OK, _, _, _)),
-        (_, image)) =>
+          Success(response @ HttpResponse(StatusCodes.OK, _, _, _)),
+          (_, image)
+        ) =>
       val path = getLocalImagePath(image)
       response.entity.dataBytes
         .runWith(fileWriter.write(path))
@@ -85,7 +90,8 @@ class ImageDownloader[Ctx](
       Future.failed(
         throw new RuntimeException(
           s"Image request for $uri failed with status ${failedResponse.status}"
-        ))
+        )
+      )
     case (Failure(exception), _) => Future.failed(exception)
   }
 

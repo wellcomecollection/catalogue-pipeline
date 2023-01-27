@@ -17,8 +17,7 @@ import weco.pipeline.reindex_worker.models.{
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class RecordReader(
-  implicit
+class RecordReader(implicit
   dynamoClient: DynamoDbClient,
   ec: ExecutionContext
 ) extends Logging {

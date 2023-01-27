@@ -25,8 +25,8 @@ import java.util.UUID
 
 class WorkMatcher(
   workGraphStore: WorkGraphStore,
-  lockingService: LockingService[MatcherResult, Future, LockDao[String, UUID]])(
-  implicit ec: ExecutionContext)
+  lockingService: LockingService[MatcherResult, Future, LockDao[String, UUID]]
+)(implicit ec: ExecutionContext)
     extends Logging {
 
   def matchWork(work: WorkStub): Future[MatcherResult] = {
@@ -51,24 +51,27 @@ class WorkMatcher(
         // but I haven't thought hard enough about whether it might introduce a
         // hard-to-debug consistency error if another process updates the graph
         // between us reading it and writing it.
-        matcherResult <- if (updatedNodes.isEmpty) {
-          val result = MatcherResult(
-            works = toMatchedIdentifiers(afterNodes),
-            createdTime = Instant.now()
-          )
+        matcherResult <-
+          if (updatedNodes.isEmpty) {
+            val result = MatcherResult(
+              works = toMatchedIdentifiers(afterNodes),
+              createdTime = Instant.now()
+            )
 
-          Future.successful(result)
-        } else {
-          writeUpdate(work, beforeNodes, afterNodes)
-        }
+            Future.successful(result)
+          } else {
+            writeUpdate(work, beforeNodes, afterNodes)
+          }
 
       } yield matcherResult
     }
   }
 
-  private def writeUpdate(work: WorkStub,
-                          beforeNodes: Set[WorkNode],
-                          afterNodes: Set[WorkNode]): Future[MatcherResult] = {
+  private def writeUpdate(
+    work: WorkStub,
+    beforeNodes: Set[WorkNode],
+    afterNodes: Set[WorkNode]
+  ): Future[MatcherResult] = {
 
     // We lock over all the subgraphs we're modifying.
     //
@@ -91,14 +94,15 @@ class WorkMatcher(
         // Check our graph store data is still correct -- if it's stale, we should
         // bail out and wait for the SQS logic to retry us rather than recover.
         refreshedBeforeNodes <- workGraphStore.findAffectedWorks(work.ids)
-        _ <- if (refreshedBeforeNodes == beforeNodes) {
-          workGraphStore.put(afterNodes)
-        } else {
-          val t = new RuntimeException(
-            s"Error processing ${work.id}: graph store contents changed during matching"
-          )
-          Future.failed(t)
-        }
+        _ <-
+          if (refreshedBeforeNodes == beforeNodes) {
+            workGraphStore.put(afterNodes)
+          } else {
+            val t = new RuntimeException(
+              s"Error processing ${work.id}: graph store contents changed during matching"
+            )
+            Future.failed(t)
+          }
 
         result = MatcherResult(
           works = toMatchedIdentifiers(afterNodes),
@@ -109,7 +113,8 @@ class WorkMatcher(
   }
 
   private def withLocks(w: WorkStub, ids: Set[String])(
-    f: => Future[MatcherResult]): Future[MatcherResult] =
+    f: => Future[MatcherResult]
+  ): Future[MatcherResult] =
     lockingService
       .withLocks(ids)(f)
       .map {
@@ -127,24 +132,23 @@ class WorkMatcher(
     }
 
   private def toMatchedIdentifiers(
-    nodes: Set[WorkNode]): Set[MatchedIdentifiers] =
+    nodes: Set[WorkNode]
+  ): Set[MatchedIdentifiers] =
     nodes
       .groupBy { _.componentIds }
-      .map {
-        case (_, workNodes) =>
-          // The matcher graph may include nodes for Works it hasn't seen yet, or which
-          // don't exist.  These are placeholders, in case we see the Work later -- but we
-          // shouldn't expose their existence to other services.
-          //
-          // We only send identifiers that correspond to real Works.
-          val identifiers =
-            workNodes
-              .collect {
-                case WorkNode(id, _, _, Some(sourceWorkData)) =>
-                  WorkIdentifier(id, sourceWorkData.version)
-              }
+      .map { case (_, workNodes) =>
+        // The matcher graph may include nodes for Works it hasn't seen yet, or which
+        // don't exist.  These are placeholders, in case we see the Work later -- but we
+        // shouldn't expose their existence to other services.
+        //
+        // We only send identifiers that correspond to real Works.
+        val identifiers =
+          workNodes
+            .collect { case WorkNode(id, _, _, Some(sourceWorkData)) =>
+              WorkIdentifier(id, sourceWorkData.version)
+            }
 
-          MatchedIdentifiers(identifiers)
+        MatchedIdentifiers(identifiers)
       }
       .filter { _.identifiers.nonEmpty }
       .toSet

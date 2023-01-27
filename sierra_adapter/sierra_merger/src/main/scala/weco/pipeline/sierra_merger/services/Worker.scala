@@ -20,9 +20,7 @@ class Worker[Record <: AbstractSierraRecord[_], Destination](
   sqsStream: SQSStream[NotificationMessage],
   updater: Updater[Record],
   messageSender: MessageSender[Destination]
-)(implicit
-  ec: ExecutionContext,
-  decoder: Decoder[Record])
+)(implicit ec: ExecutionContext, decoder: Decoder[Record])
     extends Runnable
     with Logging {
 
@@ -42,22 +40,21 @@ class Worker[Record <: AbstractSierraRecord[_], Destination](
   }
 
   private def sendUpdates(
-    updatedKeys: Seq[Identified[Version[String, Int], S3ObjectLocation]])
-    : Future[Unit] =
+    updatedKeys: Seq[Identified[Version[String, Int], S3ObjectLocation]]
+  ): Future[Unit] =
     Future
       .sequence {
         updatedKeys
-          .map {
-            case Identified(Version(id, version), location) =>
-              Future.fromTry {
-                val payload = SierraSourcePayload(
-                  id = id,
-                  location = location,
-                  version = version
-                )
+          .map { case Identified(Version(id, version), location) =>
+            Future.fromTry {
+              val payload = SierraSourcePayload(
+                id = id,
+                location = location,
+                version = version
+              )
 
-                messageSender.sendT(payload)
-              }
+              messageSender.sendT(payload)
+            }
           }
       }
       .map(_ => ())

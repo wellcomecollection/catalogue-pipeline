@@ -69,18 +69,16 @@ object MarcLanguageCodeList extends Logging {
         // catching variant names, e.g. Chinese/Mandarin
         (lang \\ "name").map { _ -> code }
       }
-      .filterNot {
-        case (_, code) =>
-          val status = code.head.attribute("status").map { _.toString }
-          status.contains("obsolete")
+      .filterNot { case (_, code) =>
+        val status = code.head.attribute("status").map { _.toString }
+        status.contains("obsolete")
       }
-      .map {
-        case (name, code) => name.text -> code.text
+      .map { case (name, code) =>
+        name.text -> code.text
       }
       .groupBy { case (name, _) => name }
-      .map {
-        case (name, pairs) =>
-          name -> pairs.collect { case (_, code) => code }
+      .map { case (name, pairs) =>
+        name -> pairs.collect { case (_, code) => code }
       }
   }
 
@@ -88,7 +86,8 @@ object MarcLanguageCodeList extends Logging {
   def fromCode(code: String): Option[Language] = {
     if (code.length != 3) {
       warn(
-        s"MARC language codes are 3 letters long; got $code (length ${code.length})")
+        s"MARC language codes are 3 letters long; got $code (length ${code.length})"
+      )
     }
 
     codeLookup

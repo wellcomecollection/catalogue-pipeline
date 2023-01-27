@@ -4,21 +4,20 @@ import fastparse._
 import grizzled.slf4j.Logging
 import weco.catalogue.internal_model.work.InstantRange
 
-/**
-  *  Trait for parsing some input into T with the FastParse library
+/** Trait for parsing some input into T with the FastParse library
   */
 trait Parser[T] extends Logging {
 
-  /**
-    *  The FastParse parser combinator applied to the input
+  /** The FastParse parser combinator applied to the input
     */
   def parser[_: P]: P[T]
 
-  /**
-    *  Parse some input
+  /** Parse some input
     *
-    *  @param input the input string
-    *  @return Some(output) if parse was successful, None otherwise
+    * @param input
+    *   the input string
+    * @return
+    *   Some(output) if parse was successful, None otherwise
     */
   def apply(input: String): Option[T] =
     parse(input, parser(_)) match {
@@ -27,8 +26,7 @@ trait Parser[T] extends Logging {
     }
 }
 
-/**
-  *  Parser implementations intended to be used as implicit parameters
+/** Parser implementations intended to be used as implicit parameters
   */
 package object parsers {
   implicit val DateParser: Parser[InstantRange] = PeriodParser

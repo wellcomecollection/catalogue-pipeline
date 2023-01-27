@@ -6,36 +6,36 @@ import weco.sierra.models.data.SierraItemData
   * from being requested, and if so, optionally explain to the user why an item
   * can't be requested.
   *
-  * This object translates the rules from the MARC-like syntax into Scala.
-  * The original rules are included for reference and to help apply updates,
-  * along with explanations of the syntax.
+  * This object translates the rules from the MARC-like syntax into Scala. The
+  * original rules are included for reference and to help apply updates, along
+  * with explanations of the syntax.
   *
   * If you disagree with one of these rules, you have two options:
   *
-  *   1)  Discuss the change with Library Systems Support and get it changed
-  *       in Sierra proper, then update this object to match
-  *   2)  Work around it elsewhere in our applications
+  * 1) Discuss the change with Library Systems Support and get it changed in
+  * Sierra proper, then update this object to match 2) Work around it elsewhere
+  * in our applications
   *
   * But don't modify these rules without updating the canonical set in Sierra --
-  * this is meant to be a 1:1 reflection of those rules, not a mix of Sierra rules
-  * and platform logic.
+  * this is meant to be a 1:1 reflection of those rules, not a mix of Sierra
+  * rules and platform logic.
   *
   * The type hierarchy for NotRequestable is to allow us to pattern match in our
-  * downstream applications without being tied to the exact wording of the messages --
-  * so if they get changed in Sierra, we can change them without breaking our other code.
+  * downstream applications without being tied to the exact wording of the
+  * messages -- so if they get changed in Sierra, we can change them without
+  * breaking our other code.
   *
   * Relevant Sierra docs:
   *
-  *   -   Rules for Requesting syntax
-  *       https://documentation.iii.com/sierrahelp/Content/sgasaa/sgasaa_requestrl.html
-  *   -   Fixed fields on items
-  *       https://documentation.iii.com/sierrahelp/Content/sril/sril_records_fixed_field_types_item.html
-  *   -   Variable length fields on items
-  *       https://documentation.iii.com/sierrahelp/Content/sril/sril_records_varfld_types_item.html
+  *   - Rules for Requesting syntax
+  *     https://documentation.iii.com/sierrahelp/Content/sgasaa/sgasaa_requestrl.html
+  *   - Fixed fields on items
+  *     https://documentation.iii.com/sierrahelp/Content/sril/sril_records_fixed_field_types_item.html
+  *   - Variable length fields on items
+  *     https://documentation.iii.com/sierrahelp/Content/sril/sril_records_varfld_types_item.html
   *
-  * This was last checked against Sierra based on a set of rules sent from
-  * Liz Richens on 31 January 2022.
-  *
+  * This was last checked against Sierra based on a set of rules sent from Liz
+  * Richens on 31 January 2022.
   */
 object SierraRulesForRequesting {
   def apply(itemData: SierraItemData): RulesForRequestingResult =
@@ -92,7 +92,8 @@ object SierraRulesForRequesting {
         NotRequestable.OnNewBooksDisplay("On new books display.")
       case i if i.fixedField("88").contains("e") =>
         NotRequestable.OnExhibition(
-          "On exhibition. Please ask at Enquiry Desk.")
+          "On exhibition. Please ask at Enquiry Desk."
+        )
       case i if i.fixedField("88").contains("y") =>
         NotRequestable.NoPublicMessage("fixed field 88 = y")
 
@@ -120,7 +121,8 @@ object SierraRulesForRequesting {
             .fixedField("88")
             .contains("!") =>
         NotRequestable.InUseByAnotherReader(
-          "Item is in use by another reader. Please ask at Enquiry Desk.")
+          "Item is in use by another reader. Please ask at Enquiry Desk."
+        )
 
       // These cases cover the lines:
       //
@@ -135,7 +137,8 @@ object SierraRulesForRequesting {
             .fixedField("79")
             .containsAnyOf("mfgmc", "mfinc", "mfwcm", "hmfac", "mfulc") =>
         NotRequestable.ContactUs(
-          "Item cannot be requested online. Please contact Medical Film & Audio Library.   Email: mfac@wellcome.ac.uk. Telephone: +44 (0)20 76118596/97.")
+          "Item cannot be requested online. Please contact Medical Film & Audio Library.   Email: mfac@wellcome.ac.uk. Telephone: +44 (0)20 76118596/97."
+        )
 
       // These cases cover the lines:
       //
@@ -173,9 +176,11 @@ object SierraRulesForRequesting {
               "dpleg",
               "dpuih",
               "gblip",
-              "ofvds") =>
+              "ofvds"
+            ) =>
         NotRequestable.NeedsManualRequest(
-          "This item cannot be requested online. Please place a manual request.")
+          "This item cannot be requested online. Please place a manual request."
+        )
 
       // These cases cover the lines:
       //
@@ -184,7 +189,8 @@ object SierraRulesForRequesting {
       //
       case i if i.fixedField("79").containsAnyOf("isvid", "iscdr") =>
         NotRequestable.ContactUs(
-          "Item cannot be requested online. Please ask at Information Service desk, email: infoserv@wellcome.ac.uk or telephone +44 (0)20 7611 8722.")
+          "Item cannot be requested online. Please ask at Information Service desk, email: infoserv@wellcome.ac.uk or telephone +44 (0)20 7611 8722."
+        )
 
       // These cases cover the lines:
       //
@@ -253,7 +259,8 @@ object SierraRulesForRequesting {
               "wsrex"
             ) =>
         NotRequestable.OnOpenShelves(
-          "Item is on open shelves.  Check Location and Shelfmark for location details.")
+          "Item is on open shelves.  Check Location and Shelfmark for location details."
+        )
 
       // These cases cover the lines:
       //
@@ -275,11 +282,13 @@ object SierraRulesForRequesting {
       //
       case i if i.fixedField("61").contains("22") =>
         NotRequestable.OnExhibition(
-          "Item is on Exhibition Reserve. Please ask at the Enquiry Desk")
+          "Item is on Exhibition Reserve. Please ask at the Enquiry Desk"
+        )
 
       case i if i.fixedField("61").containsAnyOf("17", "18", "15") =>
         NotRequestable.NoPublicMessage(
-          s"fixed field 61 = ${i.fixedField("61").get} (${i.fixedFields("61").display.getOrElse("<none>")})")
+          s"fixed field 61 = ${i.fixedField("61").get} (${i.fixedFields("61").display.getOrElse("<none>")})"
+        )
 
       case i
           if i.fixedField("61").containsAnyOf("4", "14") || i
@@ -292,9 +301,11 @@ object SierraRulesForRequesting {
               "somge",
               "somja",
               "sompr",
-              "somsy") =>
+              "somsy"
+            ) =>
         NotRequestable.NeedsManualRequest(
-          "Please complete a manual request slip.  This item cannot be requested online.")
+          "Please complete a manual request slip.  This item cannot be requested online."
+        )
 
       // This case covers the line:
       //
@@ -335,9 +346,11 @@ object SierraRulesForRequesting {
               "swm#4",
               "swm#5",
               "swm#6",
-              "swm#7") =>
+              "swm#7"
+            ) =>
         NotRequestable.ItemUnavailable(
-          "Item not available due to provisions of Data Protection Act. Return to Archives catalogue to see when this file will be opened.")
+          "Item not available due to provisions of Data Protection Act. Return to Archives catalogue to see when this file will be opened."
+        )
 
       // There's a rule in the Rules for Requesting that goes:
       //
@@ -364,9 +377,11 @@ object SierraRulesForRequesting {
               "temp3",
               "temp4",
               "temp5",
-              "temp6") =>
+              "temp6"
+            ) =>
         NotRequestable.AtDigitisation(
-          "At digitisation and temporarily unavailable.")
+          "At digitisation and temporarily unavailable."
+        )
 
       // This case covers the lines:
       //
@@ -375,7 +390,8 @@ object SierraRulesForRequesting {
       //
       case i if i.fixedField("79").containsAnyOf("rm001", "rmdda") =>
         NotRequestable.NoPublicMessage(
-          s"fixed field 79 = ${i.fixedField("79").get}")
+          s"fixed field 79 = ${i.fixedField("79").get}"
+        )
 
       case _ => Requestable
     }

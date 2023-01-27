@@ -2,8 +2,7 @@ package weco.pipeline.transformer.parse
 
 import java.time.LocalDate
 
-/**
-  *  An exact or ambigous date
+/** An exact or ambigous date
   */
 sealed trait FuzzyDate extends TimePeriod
 case class CalendarDate(day: Int, month: Int, year: Int) extends FuzzyDate
@@ -15,11 +14,12 @@ case class MonthAndDay(month: Int, day: Int) extends FuzzyDate
 case class Century(century: Int) extends FuzzyDate
 case class CenturyAndDecade(century: Int, decade: Int) extends FuzzyDate
 
-/**
-  *  A continuous period over some days / months / years
+/** A continuous period over some days / months / years
   *
-  *  @param from The start date
-  *  @param to The end date
+  * @param from
+  *   The start date
+  * @param to
+  *   The end date
   */
 case class FuzzyDateRange[F <: FuzzyDate, T <: FuzzyDate](from: F, to: T)
     extends TimePeriod
@@ -28,8 +28,10 @@ object FuzzyDateRange {
   def combine[
     F <: FuzzyDate,
     T <: FuzzyDate
-  ](from: FuzzyDateRange[F, _ <: FuzzyDate],
-    to: FuzzyDateRange[_ <: FuzzyDate, T]): FuzzyDateRange[F, T] =
+  ](
+    from: FuzzyDateRange[F, _ <: FuzzyDate],
+    to: FuzzyDateRange[_ <: FuzzyDate, T]
+  ): FuzzyDateRange[F, T] =
     FuzzyDateRange(from.from, to.to)
 }
 
@@ -64,8 +66,7 @@ sealed trait TimePeriod extends DateHelpers {
     }
 }
 
-/**
-  *  Mixin containing helper functions for generating LocalDate objects
+/** Mixin containing helper functions for generating LocalDate objects
   */
 trait DateHelpers {
 
@@ -88,13 +89,16 @@ trait DateHelpers {
     LocalDate.of(year, 12, 31)
 
   protected def centuryToFuzzyDateRange(
-    century: Int): FuzzyDateRange[Year, Year] =
+    century: Int
+  ): FuzzyDateRange[Year, Year] =
     FuzzyDateRange(Year(century * 100), Year(century * 100 + 99))
 
   protected def centuryAndDecadeToFuzzyDateRange(
     century: Int,
-    decade: Int): FuzzyDateRange[Year, Year] =
+    decade: Int
+  ): FuzzyDateRange[Year, Year] =
     FuzzyDateRange(
       Year(century * 100 + decade * 10),
-      Year(century * 100 + decade * 10 + 9))
+      Year(century * 100 + decade * 10 + 9)
+    )
 }

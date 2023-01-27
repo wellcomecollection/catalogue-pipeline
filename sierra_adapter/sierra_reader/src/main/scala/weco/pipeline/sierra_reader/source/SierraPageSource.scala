@@ -18,8 +18,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class SierraPageSource(
   client: HttpGet
-)(
-  implicit
+)(implicit
   ec: ExecutionContext,
   mat: Materializer
 ) extends Logging {
@@ -83,7 +82,8 @@ class SierraPageSource(
       .getOption(entries.last)
       .getOrElse(
         throw new RuntimeException(
-          "Couldn't find ID in last item of list response")
+          "Couldn't find ID in last item of list response"
+        )
       )
       .underlying
       .toInt

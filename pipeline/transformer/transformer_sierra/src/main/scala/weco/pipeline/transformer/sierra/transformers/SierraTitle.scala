@@ -27,7 +27,8 @@ object SierraTitle extends SierraDataTransformer with SierraQueryOps {
       .nonrepeatableVarfieldWithTag("245")
       .getOrElse(
         throw new ShouldNotTransformException(
-          "Could not find field 245 to create title")
+          "Could not find field 245 to create title"
+        )
       )
 
     val selectedSubfields =
@@ -65,7 +66,8 @@ object SierraTitle extends SierraDataTransformer with SierraQueryOps {
 
     if (components.isEmpty) {
       throw new ShouldNotTransformException(
-        "No subfields in field 245 for constructing the title")
+        "No subfields in field 245 for constructing the title"
+      )
     }
 
     Some(components.mkString(" "))

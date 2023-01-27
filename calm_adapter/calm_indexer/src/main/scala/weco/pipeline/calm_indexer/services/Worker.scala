@@ -22,8 +22,7 @@ class Worker(
   sqsStream: SQSStream[NotificationMessage],
   calmReader: Readable[S3ObjectLocation, CalmRecord],
   index: Index
-)(
-  implicit
+)(implicit
   ec: ExecutionContext,
   elasticClient: ElasticClient
 ) extends Runnable {
@@ -45,11 +44,12 @@ class Worker(
         fromJson[CalmSourcePayload](notificationMessage.body)
       )
 
-      _ <- if (payload.isDeleted) {
-        deleteRecord(payload)
-      } else {
-        indexRecord(payload)
-      }
+      _ <-
+        if (payload.isDeleted) {
+          deleteRecord(payload)
+        } else {
+          indexRecord(payload)
+        }
     } yield ()
 
   private def deleteRecord(payload: CalmSourcePayload): Future[Unit] =

@@ -20,8 +20,9 @@ import scala.concurrent.{ExecutionContext, Future}
 trait DefectiveChecker[Item] {
   protected def test(items: Set[Item]): Future[Int]
 
-  def defectiveRecords(allItems: Set[Item])(
-    implicit ec: ExecutionContext): Future[Set[Item]] = {
+  def defectiveRecords(
+    allItems: Set[Item]
+  )(implicit ec: ExecutionContext): Future[Set[Item]] = {
     def nested(items: Set[Item], d: Int): Future[Set[Item]] = d match {
       case 0                    => Future.successful(Set.empty)
       case n if n == items.size => Future.successful(items)
@@ -61,9 +62,9 @@ trait DefectiveChecker[Item] {
   private def log2(x: Float): Float = (math.log(x) / math.log(2)).toFloat
 }
 
-class ApiDeletionChecker(calmApiClient: CalmApiClient)(
-  implicit ec: ExecutionContext)
-    extends DefectiveChecker[CalmSourcePayload]
+class ApiDeletionChecker(calmApiClient: CalmApiClient)(implicit
+  ec: ExecutionContext
+) extends DefectiveChecker[CalmSourcePayload]
     with Logging {
 
   def test(records: Set[CalmSourcePayload]): Future[Int] =
@@ -76,16 +77,15 @@ class ApiDeletionChecker(calmApiClient: CalmApiClient)(
         )
       // Performing a search creates a new session which we'll never use.
       // Abandon it here to give the Calm API a chance.
-      _ <- calmApiClient.abandon(session.cookie).recover {
-        case abandonError =>
-          warn(s"Error abandoning session: ${abandonError.getMessage}")
+      _ <- calmApiClient.abandon(session.cookie).recover { case abandonError =>
+        warn(s"Error abandoning session: ${abandonError.getMessage}")
       }
-    } yield
-      session match {
-        case CalmSession(n, _) if n <= records.size => records.size - n
-        case CalmSession(n, _) =>
-          throw new RuntimeException(
-            s"More results returned ($n) than searched for (${records.size}): this should never happen!")
-      }
+    } yield session match {
+      case CalmSession(n, _) if n <= records.size => records.size - n
+      case CalmSession(n, _) =>
+        throw new RuntimeException(
+          s"More results returned ($n) than searched for (${records.size}): this should never happen!"
+        )
+    }
 
 }

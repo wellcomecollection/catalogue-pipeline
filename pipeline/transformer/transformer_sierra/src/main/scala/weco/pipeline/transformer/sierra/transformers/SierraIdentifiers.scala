@@ -17,8 +17,10 @@ object SierraIdentifiers
 
   type Output = List[SourceIdentifier]
 
-  def apply(bibId: SierraBibNumber,
-            bibData: SierraBibData): List[SourceIdentifier] =
+  def apply(
+    bibId: SierraBibNumber,
+    bibData: SierraBibData
+  ): List[SourceIdentifier] =
     createSierraIdentifier(bibId) ++
       getIsbnIdentifiers(bibData) ++
       getIssnIdentifiers(bibData) ++
@@ -28,11 +30,12 @@ object SierraIdentifiers
 
   /** Create a seven-digit ID based on the internal ID.
     *
-    * We use the eight-digit ID with check digit as the sourceIdentifier on the Work.
-    *
+    * We use the eight-digit ID with check digit as the sourceIdentifier on the
+    * Work.
     */
   private def createSierraIdentifier(
-    bibId: SierraBibNumber): List[SourceIdentifier] =
+    bibId: SierraBibNumber
+  ): List[SourceIdentifier] =
     List(
       SourceIdentifier(
         identifierType = IdentifierType.SierraIdentifier,
@@ -43,10 +46,12 @@ object SierraIdentifiers
 
   /** Find ISBN (International Serial Book Number) identifiers from MARC 020 ǂa.
     *
-    * This field is repeatable.  See https://www.loc.gov/marc/bibliographic/bd020.html
+    * This field is repeatable. See
+    * https://www.loc.gov/marc/bibliographic/bd020.html
     */
   private def getIsbnIdentifiers(
-    bibData: SierraBibData): List[SourceIdentifier] =
+    bibData: SierraBibData
+  ): List[SourceIdentifier] =
     bibData
       .subfieldsWithTag("020" -> "a")
       .contents
@@ -59,12 +64,15 @@ object SierraIdentifiers
         )
       }
 
-  /** Find ISSN (International Standard Serial Number) identifiers from MARC 022 ǂa.
+  /** Find ISSN (International Standard Serial Number) identifiers from MARC 022
+    * ǂa.
     *
-    * This field is repeatable.  See https://www.loc.gov/marc/bibliographic/bd022.html
+    * This field is repeatable. See
+    * https://www.loc.gov/marc/bibliographic/bd022.html
     */
   private def getIssnIdentifiers(
-    bibData: SierraBibData): List[SourceIdentifier] =
+    bibData: SierraBibData
+  ): List[SourceIdentifier] =
     bibData
       .subfieldsWithTag("022" -> "a")
       .contents
@@ -80,12 +88,12 @@ object SierraIdentifiers
   /** Find the digcodes from MARC 759 ǂa.
     *
     * A digcode is a Wellcome-specific identifier that identifies the
-    * digitisation project under which the item was digitised.  These are
-    * used by staff to quickly locate, for example, all the MOH reports or
-    * everything digitised from a partner institution.
+    * digitisation project under which the item was digitised. These are used by
+    * staff to quickly locate, for example, all the MOH reports or everything
+    * digitised from a partner institution.
     *
-    * The value of the digcode should only be the contiguous alphabetic
-    * string that starts with `dig`.
+    * The value of the digcode should only be the contiguous alphabetic string
+    * that starts with `dig`.
     *
     * Note: MARC 759 is not assigned by the MARC spec.
     */
@@ -107,8 +115,8 @@ object SierraIdentifiers
 
     val digcodeValues =
       marcValues
-        .collect {
-          case digcodeRegex(d) => d
+        .collect { case digcodeRegex(d) =>
+          d
         }
 
     digcodeValues.distinct
@@ -127,7 +135,8 @@ object SierraIdentifiers
     * here so they're easily searchable.
     */
   private def getIconographicNumbers(
-    bibData: SierraBibData): List[SourceIdentifier] =
+    bibData: SierraBibData
+  ): List[SourceIdentifier] =
     SierraIconographicNumber(bibData).map { iconographicNumber =>
       SourceIdentifier(
         identifierType = IdentifierType.IconographicNumber,
@@ -138,11 +147,12 @@ object SierraIdentifiers
 
   /** Add the ESTC references from MARC 510 ǂc.
     *
-    * These are also included in the notes field on a Work; we add them here
-    * so they're easily searchable.
+    * These are also included in the notes field on a Work; we add them here so
+    * they're easily searchable.
     */
   private def getEstcReferences(
-    bibData: SierraBibData): List[SourceIdentifier] =
+    bibData: SierraBibData
+  ): List[SourceIdentifier] =
     bibData.varFields
       .filter { vf =>
         vf.marcTag.contains("510")

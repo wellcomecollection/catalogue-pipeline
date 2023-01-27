@@ -11,8 +11,8 @@ trait SierraPhysicalLocation {
   def getPhysicalLocation(
     itemData: SierraItemData,
     bibData: SierraBibData,
-    fallbackLocation: Option[(PhysicalLocationType, String)] = None)
-    : Option[PhysicalLocation] =
+    fallbackLocation: Option[(PhysicalLocationType, String)] = None
+  ): Option[PhysicalLocation] =
     for {
       sourceLocation <- itemData.location
 

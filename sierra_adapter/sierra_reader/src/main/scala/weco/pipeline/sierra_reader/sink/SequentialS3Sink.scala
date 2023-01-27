@@ -9,10 +9,12 @@ import weco.storage.store.s3.S3TypedStore
 import scala.concurrent.Future
 
 object SequentialS3Sink {
-  def apply(store: S3TypedStore[String],
-            bucketName: String,
-            keyPrefix: String = "",
-            offset: Int = 0): Sink[(Json, Long), Future[Done]] =
+  def apply(
+    store: S3TypedStore[String],
+    bucketName: String,
+    keyPrefix: String = "",
+    offset: Int = 0
+  ): Sink[(Json, Long), Future[Done]] =
     Sink.foreach {
       case (json: Json, index: Long) => {
         // Zero-pad the index to four digits for easy sorting,

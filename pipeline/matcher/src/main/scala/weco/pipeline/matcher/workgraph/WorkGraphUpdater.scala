@@ -43,7 +43,8 @@ object WorkGraphUpdater extends Logging {
 
   private def checkVersionConflicts(
     work: WorkStub,
-    affectedWorks: Map[CanonicalId, WorkNode]): Unit =
+    affectedWorks: Map[CanonicalId, WorkNode]
+  ): Unit =
     affectedWorks.get(work.id).flatMap(_.sourceWork) match {
       case Some(SourceWorkData(_, existingVersion, _, _))
           if existingVersion > work.version =>
@@ -53,7 +54,8 @@ object WorkGraphUpdater extends Logging {
         throw VersionExpectedConflictException(versionConflictMessage)
 
       case Some(
-          SourceWorkData(_, existingVersion, _, existingMergeCandidateIds))
+            SourceWorkData(_, existingVersion, _, existingMergeCandidateIds)
+          )
           if existingVersion == work.version && work.mergeCandidateIds != existingMergeCandidateIds.toSet =>
         val versionConflictMessage =
           s"update failed, work:${work.id} v${work.version} already exists with different content! update-ids:${work.mergeCandidateIds} != existing-ids:${existingMergeCandidateIds.toSet}"
@@ -64,18 +66,20 @@ object WorkGraphUpdater extends Logging {
     }
 }
 
-private class WorkSubgraph(newWork: WorkNode,
-                           existingWorks: Map[CanonicalId, WorkNode]) {
+private class WorkSubgraph(
+  newWork: WorkNode,
+  existingWorks: Map[CanonicalId, WorkNode]
+) {
   require(!existingWorks.contains(newWork.id))
 
   // This is a lookup of all the works in this update
-  val allWorks
-    : Map[CanonicalId, WorkNode] = existingWorks + (newWork.id -> newWork)
+  val allWorks: Map[CanonicalId, WorkNode] =
+    existingWorks + (newWork.id -> newWork)
 
   lazy val sourceWorks: Map[CanonicalId, SourceWorkData] =
     allWorks
-      .collect {
-        case (id, WorkNode(_, _, _, Some(sourceWork))) => id -> sourceWork
+      .collect { case (id, WorkNode(_, _, _, Some(sourceWork))) =>
+        id -> sourceWork
       }
 
   def create: Set[WorkNode] = {
@@ -92,9 +96,8 @@ private class WorkSubgraph(newWork: WorkNode,
     //
     val links =
       sourceWorks
-        .flatMap {
-          case (id, sourceWork) =>
-            sourceWork.mergeCandidateIds.map { id ~> _ }
+        .flatMap { case (id, sourceWork) =>
+          sourceWork.mergeCandidateIds.map { id ~> _ }
         }
 
     // Remove any links that come to/from works that are suppressed.
@@ -117,7 +120,9 @@ private class WorkSubgraph(newWork: WorkNode,
 
     // Get the IDs of all the works in this graph, and construct a Graph object.
     val workIds =
-      sourceWorks.flatMap { case (id, work) => id +: work.mergeCandidateIds }.toSet
+      sourceWorks.flatMap { case (id, work) =>
+        id +: work.mergeCandidateIds
+      }.toSet
 
     val g = Graph.from(edges = unsuppressedLinks, nodes = workIds)
 

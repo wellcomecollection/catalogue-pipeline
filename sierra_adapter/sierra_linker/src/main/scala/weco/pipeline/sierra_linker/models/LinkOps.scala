@@ -17,8 +17,10 @@ trait LinkOps[Record <: AbstractSierraRecord[_]] extends Logging {
   def copyUnlinkedBibIds(link: Link, targetRecord: Record): Record
 
   def updateLink(existingLink: Link, newRecord: Record): Option[Link] =
-    if (existingLink.modifiedDate.isBefore(newRecord.modifiedDate) ||
-        existingLink.modifiedDate == newRecord.modifiedDate) {
+    if (
+      existingLink.modifiedDate.isBefore(newRecord.modifiedDate) ||
+      existingLink.modifiedDate == newRecord.modifiedDate
+    ) {
       Some(
         Link(
           modifiedDate = newRecord.modifiedDate,
@@ -43,7 +45,7 @@ trait LinkOps[Record <: AbstractSierraRecord[_]] extends Logging {
           unlinkedBibIds = subList(
             addList(existingLink.unlinkedBibIds, existingLink.bibIds),
             getBibIds(newRecord)
-          ),
+          )
         )
       )
     } else {
@@ -68,7 +70,8 @@ trait LinkOps[Record <: AbstractSierraRecord[_]] extends Logging {
 object LinkOps {
   implicit val itemLinksOps = new LinkOps[SierraItemRecord] {
     override def getBibIds(
-      itemRecord: SierraItemRecord): List[SierraBibNumber] =
+      itemRecord: SierraItemRecord
+    ): List[SierraBibNumber] =
       itemRecord.bibIds
 
     override def createLink(itemRecord: SierraItemRecord): Link =
@@ -76,13 +79,15 @@ object LinkOps {
 
     override def copyUnlinkedBibIds(
       link: Link,
-      itemRecord: SierraItemRecord): SierraItemRecord =
+      itemRecord: SierraItemRecord
+    ): SierraItemRecord =
       itemRecord.copy(unlinkedBibIds = link.unlinkedBibIds)
   }
 
   implicit val holdingsLinkOps = new LinkOps[SierraHoldingsRecord] {
     override def getBibIds(
-      holdingsRecord: SierraHoldingsRecord): List[SierraBibNumber] =
+      holdingsRecord: SierraHoldingsRecord
+    ): List[SierraBibNumber] =
       holdingsRecord.bibIds
 
     override def createLink(holdingsRecord: SierraHoldingsRecord): Link =
@@ -90,13 +95,15 @@ object LinkOps {
 
     override def copyUnlinkedBibIds(
       link: Link,
-      holdingsRecord: SierraHoldingsRecord): SierraHoldingsRecord =
+      holdingsRecord: SierraHoldingsRecord
+    ): SierraHoldingsRecord =
       holdingsRecord.copy(unlinkedBibIds = link.unlinkedBibIds)
   }
 
   implicit val orderLinkOps = new LinkOps[SierraOrderRecord] {
     override def getBibIds(
-      orderRecord: SierraOrderRecord): List[SierraBibNumber] =
+      orderRecord: SierraOrderRecord
+    ): List[SierraBibNumber] =
       orderRecord.bibIds
 
     override def createLink(orderRecord: SierraOrderRecord): Link =
@@ -104,7 +111,8 @@ object LinkOps {
 
     override def copyUnlinkedBibIds(
       link: Link,
-      orderRecord: SierraOrderRecord): SierraOrderRecord =
+      orderRecord: SierraOrderRecord
+    ): SierraOrderRecord =
       orderRecord.copy(unlinkedBibIds = link.unlinkedBibIds)
   }
 }

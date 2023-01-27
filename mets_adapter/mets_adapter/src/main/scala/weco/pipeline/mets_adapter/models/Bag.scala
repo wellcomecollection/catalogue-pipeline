@@ -11,11 +11,13 @@ import weco.catalogue.source_model.mets.{
 
 /** The response received from the storage-service bag API.
   */
-case class Bag(info: BagInfo,
-               manifest: BagManifest,
-               location: BagLocation,
-               version: String,
-               createdDate: Instant) {
+case class Bag(
+  info: BagInfo,
+  manifest: BagManifest,
+  location: BagLocation,
+  version: String,
+  createdDate: Instant
+) {
 
   def metsSourceData: Either[Throwable, MetsSourceData] =
     parsedVersion.flatMap { version =>

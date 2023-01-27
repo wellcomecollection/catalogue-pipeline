@@ -22,8 +22,9 @@ trait QualifyFuzzyDate[D <: FuzzyDate] {
 // Qualifier behaviours are specified here
 // http://www.dswebhosting.info/documents/Manuals/ALM/V10/MANUAL/main_menu/basics/period_field_format.htm
 object QualifyFuzzyDate extends ParserUtils {
-  def qualified[_: P, D <: FuzzyDate](unqualified: => P[D])(
-    implicit q: QualifyFuzzyDate[D]): P[FuzzyDateRange[Year, Year]] =
+  def qualified[_: P, D <: FuzzyDate](unqualified: => P[D])(implicit
+    q: QualifyFuzzyDate[D]
+  ): P[FuzzyDateRange[Year, Year]] =
     (Lex.qualifier ~ ws.? ~ "-".? ~ ws.? ~ unqualified) collect q.toDateRange
 
   implicit val qualifyCentury =
@@ -32,32 +33,32 @@ object QualifyFuzzyDate extends ParserUtils {
         case (Qualifier.Early, Century(century)) =>
           FuzzyDateRange(
             Year(100 * century),
-            Year(100 * century + 39),
+            Year(100 * century + 39)
           )
         case (Qualifier.Mid, Century(century)) =>
           FuzzyDateRange(
             Year(100 * century + 30),
-            Year(100 * century + 69),
+            Year(100 * century + 69)
           )
         case (Qualifier.Late, Century(century)) =>
           FuzzyDateRange(
             Year(100 * century + 60),
-            Year(100 * century + 99),
+            Year(100 * century + 99)
           )
         case (Qualifier.EarlyMid, Century(century)) =>
           FuzzyDateRange(
             Year(100 * century),
-            Year(100 * century + 69),
+            Year(100 * century + 69)
           )
         case (Qualifier.MidLate, Century(century)) =>
           FuzzyDateRange(
             Year(100 * century + 30),
-            Year(100 * century + 99),
+            Year(100 * century + 99)
           )
         case (Qualifier.About, Century(century)) =>
           FuzzyDateRange(
             Year(100 * century - 10),
-            Year(100 * century + 109),
+            Year(100 * century + 109)
           )
       }
     }
@@ -68,17 +69,17 @@ object QualifyFuzzyDate extends ParserUtils {
         case (Qualifier.About, Year(year)) =>
           FuzzyDateRange(
             Year(year - 10),
-            Year(year + 9),
+            Year(year + 9)
           )
         case (Qualifier.Pre, Year(year)) =>
           FuzzyDateRange(
             Year(year - 10),
-            Year(year),
+            Year(year)
           )
         case (Qualifier.Post, Year(year)) =>
           FuzzyDateRange(
             Year(year),
-            Year(year + 9),
+            Year(year + 9)
           )
       }
     }
@@ -89,7 +90,7 @@ object QualifyFuzzyDate extends ParserUtils {
         case (Qualifier.About, CenturyAndDecade(century, decade)) =>
           FuzzyDateRange(
             Year(century * 100 + (decade - 1) * 10),
-            Year(century * 100 + (decade + 1) * 10),
+            Year(century * 100 + (decade + 1) * 10)
           )
         case (Qualifier.Early, CenturyAndDecade(century, decade)) =>
           FuzzyDateRange(

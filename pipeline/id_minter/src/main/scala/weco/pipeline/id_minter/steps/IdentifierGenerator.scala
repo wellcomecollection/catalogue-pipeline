@@ -30,8 +30,9 @@ class IdentifierGenerator(identifiersDao: IdentifiersDao) extends Logging {
    * its ids.
    *
    */
-  def retrieveOrGenerateCanonicalIds(sourceIdentifiers: Seq[SourceIdentifier])
-    : Try[Map[SourceIdentifier, Identifier]] =
+  def retrieveOrGenerateCanonicalIds(
+    sourceIdentifiers: Seq[SourceIdentifier]
+  ): Try[Map[SourceIdentifier, Identifier]] =
     retrieveOrGenerateCanonicalIdsOnce(sourceIdentifiers) match {
       case Failure(_: InsertError) =>
         retrieveOrGenerateCanonicalIdsOnce(sourceIdentifiers)
@@ -48,8 +49,8 @@ class IdentifierGenerator(identifiersDao: IdentifiersDao) extends Logging {
    * is saved by another thread after `lookupIds` has been called.
    */
   private def retrieveOrGenerateCanonicalIdsOnce(
-    sourceIdentifiers: Seq[SourceIdentifier])
-    : Try[Map[SourceIdentifier, Identifier]] =
+    sourceIdentifiers: Seq[SourceIdentifier]
+  ): Try[Map[SourceIdentifier, Identifier]] =
     identifiersDao
       .lookupIds(sourceIdentifiers)
       .flatMap {
@@ -63,7 +64,8 @@ class IdentifierGenerator(identifiersDao: IdentifiersDao) extends Logging {
       }
 
   private def generateAndSaveCanonicalIds(
-    unmintedIdentifiers: List[SourceIdentifier]): Try[List[Identifier]] =
+    unmintedIdentifiers: List[SourceIdentifier]
+  ): Try[List[Identifier]] =
     unmintedIdentifiers match {
       case Nil => Success(Nil)
       case _ =>

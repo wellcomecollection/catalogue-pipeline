@@ -90,7 +90,8 @@ object SierraConceptSubjects
         getConcepts(varfield, primarySubfields, subdivisionSubfields)
 
       Subject(
-        id = getIdState(ontologyType = getFieldOntologyType(varfield), varfield),
+        id =
+          getIdState(ontologyType = getFieldOntologyType(varfield), varfield),
         label = label,
         concepts = concepts
       )
@@ -109,7 +110,10 @@ object SierraConceptSubjects
       case Nil =>
         getFieldOntologyType(varfield)
         val conceptId =
-          getIdState(ontologyType = getFieldOntologyType(varfield), varfield) match {
+          getIdState(
+            ontologyType = getFieldOntologyType(varfield),
+            varfield
+          ) match {
             case identifiable: IdState.Identifiable => Some(identifiable)
             case _                                  => None
           }
@@ -123,22 +127,25 @@ object SierraConceptSubjects
       // only refers to the Subject as a whole.
       // The primary and subsequent Concepts will have to coin their own ids from their labels.
       case _ =>
-        getPrimaryTypeConcepts(primarySubfields, varField = varfield) ++ getSubdivisions(
+        getPrimaryTypeConcepts(
+          primarySubfields,
+          varField = varfield
+        ) ++ getSubdivisions(
           subdivisionSubfields
         )
     }
   }
 
-  /**
-    * Return AbstractConcepts of the appropriate subtype for this field
-    * A Concept Subject MARC field should contain exactly one $a subfields,
-    * but due to third-party cataloguing errors, may contain more.
-    * The $a subfield contains a term whose type is derived from the overall field,
-    * so any $a subfields in a "Subject Added Entry-Chronological Term" will be a Period, etc.
-    * $a is a non-repeatable subfield, so you would expect primarySubfields to be a single value,
-    * and for this to return a single value.  However, some records that are received from third-party
-    * organisations do erroneously contain multiple $a subfields.  This transformer will accept them
-    * and produce the appropriate concepts.
+  /** Return AbstractConcepts of the appropriate subtype for this field A
+    * Concept Subject MARC field should contain exactly one $a subfields, but
+    * due to third-party cataloguing errors, may contain more. The $a subfield
+    * contains a term whose type is derived from the overall field, so any $a
+    * subfields in a "Subject Added Entry-Chronological Term" will be a Period,
+    * etc. $a is a non-repeatable subfield, so you would expect primarySubfields
+    * to be a single value, and for this to return a single value. However, some
+    * records that are received from third-party organisations do erroneously
+    * contain multiple $a subfields. This transformer will accept them and
+    * produce the appropriate concepts.
     */
   private def getPrimaryTypeConcepts(
     primarySubfields: List[Subfield],

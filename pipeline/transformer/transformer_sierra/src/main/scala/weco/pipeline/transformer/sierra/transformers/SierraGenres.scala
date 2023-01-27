@@ -53,8 +53,10 @@ object SierraGenres
           getLabelSubfields(varField)
 
         val label = getLabel(primarySubfields, subdivisionSubfields)
-        val concepts = getPrimaryConcept(primarySubfields, varField = varField) ++ getSubdivisions(
-          subdivisionSubfields)
+        val concepts = getPrimaryConcept(
+          primarySubfields,
+          varField = varField
+        ) ++ getSubdivisions(subdivisionSubfields)
 
         Genre(label = label, concepts = concepts).normalised
       }
@@ -85,7 +87,8 @@ object SierraGenres
   // only concept which might be identified.
   private def getPrimaryConcept(
     primarySubfields: List[Subfield],
-    varField: VarField): List[Concept[IdState.Unminted]] =
+    varField: VarField
+  ): List[Concept[IdState.Unminted]] =
     primarySubfields.map { subfield =>
       Concept(
         id = identifyPrimaryConcept(varField),

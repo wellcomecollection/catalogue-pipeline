@@ -71,34 +71,33 @@ trait MiroIdentifiers extends MiroTransformableUtils {
         keys = miroRecord.libraryRefDepartment,
         values = miroRecord.libraryRefId
       ).distinct
-        .collect {
-          case (Some(label), Some(value)) =>
-            Option(label)
-              .flatMap {
-                // We have an identifier type for iconographic numbers (e.g. 577895i),
-                // so use that when possible.
-                //
-                // Note that the "Iconographic Collection" identifiers have a lot of
-                // other stuff which isn't an i-number, so we should be careful what
-                // we put here - so we make sure to validate the SourceIdentifier.
-                case "Iconographic Collection" =>
-                  SourceIdentifier(
-                    identifierType = IdentifierType.IconographicNumber,
-                    ontologyType = "Work",
-                    value = value
-                  ).validated
-                case _ => None
-              }
-              .getOrElse(
-                // Put any other identifiers in one catch-all scheme until we come
-                // up with a better way to handle them.  We want them visible and
-                // searchable, but they're not worth spending more time on right now.
+        .collect { case (Some(label), Some(value)) =>
+          Option(label)
+            .flatMap {
+              // We have an identifier type for iconographic numbers (e.g. 577895i),
+              // so use that when possible.
+              //
+              // Note that the "Iconographic Collection" identifiers have a lot of
+              // other stuff which isn't an i-number, so we should be careful what
+              // we put here - so we make sure to validate the SourceIdentifier.
+              case "Iconographic Collection" =>
                 SourceIdentifier(
-                  identifierType = IdentifierType.MiroLibraryReference,
+                  identifierType = IdentifierType.IconographicNumber,
                   ontologyType = "Work",
-                  value = s"$label $value"
-                )
+                  value = value
+                ).validated
+              case _ => None
+            }
+            .getOrElse(
+              // Put any other identifiers in one catch-all scheme until we come
+              // up with a better way to handle them.  We want them visible and
+              // searchable, but they're not worth spending more time on right now.
+              SourceIdentifier(
+                identifierType = IdentifierType.MiroLibraryReference,
+                ontologyType = "Work",
+                value = s"$label $value"
               )
+            )
         }
     sierraList ++ libraryRefsList
   }

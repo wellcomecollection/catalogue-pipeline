@@ -44,7 +44,8 @@ object Main extends WellcomeTypesafeApp {
         .buildSNSMessageSender(
           config,
           namespace = "downstream",
-          subject = "Sent from the path concatenator")
+          subject = "Sent from the path concatenator"
+        )
 
     new PathConcatenatorWorkerService(
       sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),

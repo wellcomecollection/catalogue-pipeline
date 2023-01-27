@@ -12,7 +12,8 @@ object Subject {
 
   def apply[State >: IdState.Unidentifiable.type](
     label: String,
-    concepts: List[AbstractRootConcept[State]]): Subject[State] =
+    concepts: List[AbstractRootConcept[State]]
+  ): Subject[State] =
     Subject(
       id = IdState.Unidentifiable,
       label = label,

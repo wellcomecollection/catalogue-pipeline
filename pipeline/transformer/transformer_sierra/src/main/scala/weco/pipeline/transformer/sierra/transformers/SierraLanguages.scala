@@ -16,9 +16,9 @@ object SierraLanguages
   // We only want to display languages that actually correspond to languages.
   // These language codes don't tell us anything useful, so we suppress them.
   private val suppressedLanguageCodes: Set[String] = Set(
-    "mul",  // Multiple languages
-    "und",  // Undetermined
-    "zxx",  // No linguistic content
+    "mul", // Multiple languages
+    "und", // Undetermined
+    "zxx" // No linguistic content
   )
 
   // Populate wwork:language.
@@ -33,7 +33,10 @@ object SierraLanguages
   //    This is a repeatable field, as is the subfield.
   //    See https://www.loc.gov/marc/bibliographic/bd041.html
   //
-  override def apply(bibId: SierraBibNumber, bibData: SierraBibData): List[Language] = {
+  override def apply(
+    bibId: SierraBibNumber,
+    bibData: SierraBibData
+  ): List[Language] = {
     val primaryLanguage = bibData.lang.flatMap { createLanguage(bibId, _) }
 
     val additionalLanguages =
@@ -56,20 +59,25 @@ object SierraLanguages
         .map {
           case (_, Some(lang)) => Some(lang)
           case (code, None) =>
-            warn(s"${bibId.withCheckDigit}: Unrecognised code in MARC 041 ǂa: $code")
+            warn(
+              s"${bibId.withCheckDigit}: Unrecognised code in MARC 041 ǂa: $code"
+            )
             None
         }
 
-    (List(primaryLanguage) ++ additionalLanguages)
-      .flatten
-      .filterNot { lang => suppressedLanguageCodes.contains(lang.id) }
-      .distinct
+    (List(primaryLanguage) ++ additionalLanguages).flatten.filterNot { lang =>
+      suppressedLanguageCodes.contains(lang.id)
+    }.distinct
   }
 
-  private def createLanguage(bibId: SierraBibNumber, lang: SierraLanguage): Option[Language] =
+  private def createLanguage(
+    bibId: SierraBibNumber,
+    lang: SierraLanguage
+  ): Option[Language] =
     (lang, MarcLanguageCodeList.fromCode(lang.code)) match {
       case (_, Some(deducedLang)) => Some(deducedLang)
-      case (SierraLanguage(code, Some(name)), _) => Some(Language(label = name, id = code))
+      case (SierraLanguage(code, Some(name)), _) =>
+        Some(Language(label = name, id = code))
 
       // Some records in Sierra don't have a language, e.g. paintings, and this is
       // represented by a string that is only whitespace "   ".  This isn't a data error,

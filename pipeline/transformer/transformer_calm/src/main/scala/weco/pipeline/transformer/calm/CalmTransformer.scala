@@ -145,23 +145,22 @@ object CalmTransformer
       title <- title(record)
       workType <- workType(record)
       collectionPath <- collectionPath(record)
-    } yield
-      WorkData[DataState.Unidentified](
-        title = Some(title),
-        otherIdentifiers = otherIdentifiers(record),
-        format = Some(Format.ArchivesAndManuscripts),
-        collectionPath = Some(collectionPath),
-        referenceNumber = collectionPath.label.map(ReferenceNumber(_)),
-        subjects = subjects(record),
-        languages = languages,
-        items = CalmItems(record),
-        contributors = CalmContributors(record),
-        description = description(record),
-        physicalDescription = physicalDescription(record),
-        production = production(record),
-        workType = workType,
-        notes = CalmNotes(record) ++ languageNotes ++ CalmTermsOfUse(record)
-      )
+    } yield WorkData[DataState.Unidentified](
+      title = Some(title),
+      otherIdentifiers = otherIdentifiers(record),
+      format = Some(Format.ArchivesAndManuscripts),
+      collectionPath = Some(collectionPath),
+      referenceNumber = collectionPath.label.map(ReferenceNumber(_)),
+      subjects = subjects(record),
+      languages = languages,
+      items = CalmItems(record),
+      contributors = CalmContributors(record),
+      description = description(record),
+      physicalDescription = physicalDescription(record),
+      production = production(record),
+      workType = workType,
+      notes = CalmNotes(record) ++ languageNotes ++ CalmTermsOfUse(record)
+    )
   }
 
   def sourceIdentifier(record: CalmRecord): SourceIdentifier =
@@ -172,18 +171,16 @@ object CalmTransformer
     )
 
   def otherIdentifiers(record: CalmRecord): List[SourceIdentifier] =
-    identifierMapping.toList.flatMap {
-      case (key, idType) =>
-        record
-          .getList(key)
-          .map(
-            id =>
-              SourceIdentifier(
-                identifierType = idType,
-                value = id,
-                ontologyType = "Work"
-            )
+    identifierMapping.toList.flatMap { case (key, idType) =>
+      record
+        .getList(key)
+        .map(id =>
+          SourceIdentifier(
+            identifierType = idType,
+            value = id,
+            ontologyType = "Work"
           )
+        )
     }
 
   def title(record: CalmRecord): Result[String] =

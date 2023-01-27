@@ -210,8 +210,8 @@ object SierraContributors
     //
     // For consistency, we remove all whitespace and some punctuation
     // before continuing.
-    val codes = subfields.collect {
-      case Subfield("0", content) => content.replaceAll("[.,\\s]", "")
+    val codes = subfields.collect { case Subfield("0", content) =>
+      content.replaceAll("[.,\\s]", "")
     }
 
     // If we get exactly one value, we can use it to identify the record.

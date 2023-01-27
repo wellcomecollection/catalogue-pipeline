@@ -12,17 +12,18 @@ class CalmSourceDataRetriever(
   recordReadable: Readable[S3ObjectLocation, CalmRecord]
 ) extends SourceDataRetriever[CalmSourcePayload, CalmSourceData] {
 
-  override def lookupSourceData(p: CalmSourcePayload)
-    : Either[ReadError, Identified[Version[String, Int], CalmSourceData]] =
+  override def lookupSourceData(
+    p: CalmSourcePayload
+  ): Either[ReadError, Identified[Version[String, Int], CalmSourceData]] =
     recordReadable
       .get(p.location)
-      .map {
-        case Identified(_, record) =>
-          Identified(
-            Version(p.id, p.version),
-            CalmSourceData(
-              record = record,
-              isDeleted = p.isDeleted
-            ))
+      .map { case Identified(_, record) =>
+        Identified(
+          Version(p.id, p.version),
+          CalmSourceData(
+            record = record,
+            isDeleted = p.isDeleted
+          )
+        )
       }
 }

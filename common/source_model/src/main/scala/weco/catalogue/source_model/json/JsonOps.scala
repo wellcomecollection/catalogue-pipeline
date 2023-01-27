@@ -15,7 +15,7 @@ object JsonOps {
           c.as[Int].map { v =>
             new StringOrInt(v.toString)
           }
-    }
+      }
 
   implicit val encoder: Encoder[StringOrInt] =
     (id: StringOrInt) => Json.fromString(id.underlying)

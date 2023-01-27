@@ -16,13 +16,17 @@ trait MiroLocation extends MiroLicenses with MiroContributorCodes {
     val imageUriTemplate = imageUriTemplates.getOrElse(
       templateName,
       throw new Exception(
-        s"Unrecognised Image API URI template ($templateName)!"))
+        s"Unrecognised Image API URI template ($templateName)!"
+      )
+    )
 
     imageUriTemplate.format(iiifImageApiBaseUri, miroId)
   }
 
-  def getLocation(miroRecord: MiroRecord,
-                  overrides: MiroSourceOverrides): DigitalLocation =
+  def getLocation(
+    miroRecord: MiroRecord,
+    overrides: MiroSourceOverrides
+  ): DigitalLocation =
     DigitalLocation(
       locationType = LocationType.IIIFImageAPI,
       url = buildImageApiURL(

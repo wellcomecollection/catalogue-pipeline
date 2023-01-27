@@ -31,7 +31,9 @@ trait ElasticRetriever[T] extends Retriever[T] with Logging {
           require(
             ids.nonEmpty,
             "You should never look up an empty list of IDs!"
-          )))
+          )
+        )
+      )
 
       result <- client
         .execute {
@@ -44,7 +46,8 @@ trait ElasticRetriever[T] extends Retriever[T] with Logging {
           case RequestSuccess(_, _, _, result)
               if result.docs.size != ids.size =>
             warn(
-              s"Asked for ${ids.size} IDs in index $index, only got ${result.docs.size}")
+              s"Asked for ${ids.size} IDs in index $index, only got ${result.docs.size}"
+            )
             throw new RetrieverNotFoundException(ids.mkString(", "))
           case RequestSuccess(_, _, _, result) =>
             // Documents are guaranteed to be returned in the same order as the
@@ -52,21 +55,22 @@ trait ElasticRetriever[T] extends Retriever[T] with Logging {
             // See https://www.elastic.co/guide/en/elasticsearch/reference/6.8/docs-multi-get.html
             val documents = result.docs
               .zip(ids)
-              .map {
-                case (getResponse, id) =>
-                  if (getResponse.found) {
-                    id -> parseGetResponse(getResponse)
-                  } else {
-                    id -> Failure(
-                      new RetrieverNotFoundException(
-                        id,
-                        Some(getResponse.sourceAsString)))
-                  }
+              .map { case (getResponse, id) =>
+                if (getResponse.found) {
+                  id -> parseGetResponse(getResponse)
+                } else {
+                  id -> Failure(
+                    new RetrieverNotFoundException(
+                      id,
+                      Some(getResponse.sourceAsString)
+                    )
+                  )
+                }
               }
               .toMap
 
             RetrieverMultiResult(
-              found = documents.collect { case (id, Success(t))    => id -> t },
+              found = documents.collect { case (id, Success(t)) => id -> t },
               notFound = documents.collect { case (id, Failure(e)) => id -> e }
             )
         }
@@ -84,7 +88,8 @@ trait ElasticRetriever[T] extends Retriever[T] with Logging {
           case e: OutOfMemoryError =>
             error(
               s"Out of memory error thrown while trying to retrieve ${ids.size} IDs: $ids",
-              e)
+              e
+            )
             System.exit(1)
 
             // This line is just to keep the compiler happy, because it can't see that

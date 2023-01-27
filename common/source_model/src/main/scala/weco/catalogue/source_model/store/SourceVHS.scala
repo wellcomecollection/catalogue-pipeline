@@ -13,33 +13,40 @@ class SourceVHS[T](
 
   private def wrappedOp(
     f: Either[StorageError, Identified[Version[String, Int], T]]
-  ): Either[StorageError,
-            Identified[Version[String, Int], (S3ObjectLocation, T)]] =
-    f.flatMap {
-      case Identified(id, record) =>
-        indexedStore.get(id).map {
-          case Identified(_, location) =>
-            Identified(id, (location, record))
-        }
+  ): Either[StorageError, Identified[
+    Version[String, Int],
+    (S3ObjectLocation, T)
+  ]] =
+    f.flatMap { case Identified(id, record) =>
+      indexedStore.get(id).map { case Identified(_, location) =>
+        Identified(id, (location, record))
+      }
     }
 
-  def putLatest(id: String)(
-    t: T): Either[StorageError,
-                  Identified[Version[String, Int], (S3ObjectLocation, T)]] =
+  def putLatest(id: String)(t: T): Either[StorageError, Identified[
+    Version[String, Int],
+    (S3ObjectLocation, T)
+  ]] =
     wrappedOp {
       underlying.putLatest(id)(t)
     }
 
-  def update(id: String)(f: underlying.UpdateFunction)
-    : Either[StorageError,
-             Identified[Version[String, Int], (S3ObjectLocation, T)]] =
+  def update(
+    id: String
+  )(f: underlying.UpdateFunction): Either[StorageError, Identified[
+    Version[String, Int],
+    (S3ObjectLocation, T)
+  ]] =
     wrappedOp {
       underlying.update(id)(f)
     }
 
-  def upsert(id: String)(t: T)(f: underlying.UpdateFunction)
-    : Either[StorageError,
-             Identified[Version[String, Int], (S3ObjectLocation, T)]] =
+  def upsert(
+    id: String
+  )(t: T)(f: underlying.UpdateFunction): Either[StorageError, Identified[
+    Version[String, Int],
+    (S3ObjectLocation, T)
+  ]] =
     wrappedOp {
       underlying.upsert(id)(t)(f)
     }

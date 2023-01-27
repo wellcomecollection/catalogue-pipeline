@@ -130,7 +130,9 @@ object PeriodParser extends Parser[InstantRange] with DateParserUtils {
   private def centuryToDate[_: P]: P[InstantRange] =
     (qualified(century | inferredCentury) to century).toInstantRange |
       ((century | inferredCentury) to qualified(century)).toInstantRange |
-      (qualified(century | inferredCentury) to qualified(century)).toInstantRange |
+      (qualified(century | inferredCentury) to qualified(
+        century
+      )).toInstantRange |
       ((century | inferredCentury) to century).toInstantRange |
       (century to decade).toInstantRange |
       (century to year).toInstantRange |
@@ -258,12 +260,11 @@ object PeriodParser extends Parser[InstantRange] with DateParserUtils {
       // Winter YEAR refers to the year in which the winter starts
       // https://www.metoffice.gov.uk/weather/learn-about/weather/seasons/winter/when-does-winter-start
       case "winter" => (12, 2)
-    }) ~ ws ~ yearDigits map {
-      case (fromMonth, toMonth, year) =>
-        FuzzyDateRange(
-          MonthAndYear(fromMonth, year),
-          MonthAndYear(toMonth, if (fromMonth < toMonth) year else year + 1)
-        )
+    }) ~ ws ~ yearDigits map { case (fromMonth, toMonth, year) =>
+      FuzzyDateRange(
+        MonthAndYear(fromMonth, year),
+        MonthAndYear(toMonth, if (fromMonth < toMonth) year else year + 1)
+      )
     })
 
   // eg "michaelmas"
@@ -273,12 +274,11 @@ object PeriodParser extends Parser[InstantRange] with DateParserUtils {
       case "hilary"     => (1, 2)
       case "easter"     => (4, 5)
       case "trinity"    => (6, 7)
-    }) ~ ws ~ yearDigits map {
-      case (fromMonth, toMonth, year) =>
-        FuzzyDateRange(
-          MonthAndYear(fromMonth, year),
-          MonthAndYear(toMonth, year)
-        )
+    }) ~ ws ~ yearDigits map { case (fromMonth, toMonth, year) =>
+      FuzzyDateRange(
+        MonthAndYear(fromMonth, year),
+        MonthAndYear(toMonth, year)
+      )
     })
 
 }

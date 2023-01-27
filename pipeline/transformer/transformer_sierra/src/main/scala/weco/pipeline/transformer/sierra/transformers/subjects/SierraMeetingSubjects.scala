@@ -31,8 +31,10 @@ object SierraMeetingSubjects
 
   val labelSubfields = List("a", "b", "c")
 
-  def getSubjectsFromVarFields(bibId: SierraBibNumber,
-                               varFields: List[VarField]): Output =
+  def getSubjectsFromVarFields(
+    bibId: SierraBibNumber,
+    varFields: List[VarField]
+  ): Output =
     varFields.flatMap { varField =>
       createLabel(varField, subfieldTags = List("a", "c", "d")) match {
         case "" => None
@@ -44,7 +46,8 @@ object SierraMeetingSubjects
               id = identifier,
               label = label,
               concepts = List(Meeting(label = label, id = identifier))
-            ))
+            )
+          )
       }
     }
 }

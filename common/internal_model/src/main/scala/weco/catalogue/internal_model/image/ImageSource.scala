@@ -11,7 +11,7 @@ sealed trait ImageSource {
 case class ParentWork(
   id: IdState.Identified,
   data: WorkData[DataState.Identified],
-  version: Int,
+  version: Int
 ) extends ImageSource
 
 object ParentWork {

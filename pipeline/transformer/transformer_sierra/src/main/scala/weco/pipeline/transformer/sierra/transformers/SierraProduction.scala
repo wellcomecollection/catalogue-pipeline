@@ -59,10 +59,12 @@ object SierraProduction
     (productionEvents, marc008productionEvents) match {
       // Use the dates from the first 008 production event if we couldn't parse those in 260/4
       case (
-          firstEvent :: otherEvents,
-          ProductionEvent(_, _, _, marc008dates, _) :: _
+            firstEvent :: otherEvents,
+            ProductionEvent(_, _, _, marc008dates, _) :: _
           )
-          if firstEvent.dates.forall(_.range.isEmpty) && marc008dates.nonEmpty =>
+          if firstEvent.dates.forall(
+            _.range.isEmpty
+          ) && marc008dates.nonEmpty =>
         // There is only ever 1 date in an 008 production event
         val productionLabelledDate = marc008dates.head.copy(
           label = firstEvent.dates.headOption
@@ -155,8 +157,10 @@ object SierraProduction
   //
   // https://www.loc.gov/marc/bibliographic/bd264.html
   //
-  private def getProductionFrom264Fields(bibId: SierraBibNumber,
-                                         varFields: List[VarField]) =
+  private def getProductionFrom264Fields(
+    bibId: SierraBibNumber,
+    varFields: List[VarField]
+  ) =
     varFields
       .filterNot { vf =>
         vf.indicator2.contains("4") || vf.indicator2.contains(" ")
@@ -192,10 +196,12 @@ object SierraProduction
       }
 
   private def marc264OnlyContainsCopyright(
-    marc264fields: List[VarField]): Boolean =
+    marc264fields: List[VarField]
+  ): Boolean =
     marc264fields match {
       case List(
-          VarField(_, Some("264"), _, _, _, List(Subfield("c", content)))) =>
+            VarField(_, Some("264"), _, _, _, List(Subfield("c", content)))
+          ) =>
         content.matches("^©\\d{4}$")
       case _ => false
     }
@@ -207,12 +213,14 @@ object SierraProduction
 
   /** Populate the production data if both 260 and 264 are present.
     *
-    * In general, this is a cataloguing error, but sometimes we can do
-    * something more sensible depending on if/how they're duplicated.
+    * In general, this is a cataloguing error, but sometimes we can do something
+    * more sensible depending on if/how they're duplicated.
     */
-  private def getProductionFromBothFields(bibId: SierraBibNumber,
-                                          marc260fields: List[VarField],
-                                          marc264fields: List[VarField]) = {
+  private def getProductionFromBothFields(
+    bibId: SierraBibNumber,
+    marc260fields: List[VarField],
+    marc264fields: List[VarField]
+  ) = {
 
     // We've seen cases where the 264 field only has the following subfields:
     //
@@ -227,8 +235,10 @@ object SierraProduction
     // We've also seen cases where the 260 and 264 field are both present,
     // and they have matching subfields!  We use the 260 field as it's not
     // going to throw an exception about unrecognised second indicator.
-    else if (marc260fields.map { _.subfields } ==
-               marc264fields.map { _.subfields }) {
+    else if (
+      marc260fields.map { _.subfields } ==
+        marc264fields.map { _.subfields }
+    ) {
       getProductionFrom260Fields(marc260fields)
     }
 
@@ -255,7 +265,8 @@ object SierraProduction
   }
 
   def getProductionFrom008(
-    bibData: SierraBibData): List[ProductionEvent[IdState.Unminted]] =
+    bibData: SierraBibData
+  ): List[ProductionEvent[IdState.Unminted]] =
     bibData
       .varfieldsWithTag("008")
       .contents
@@ -280,7 +291,8 @@ object SierraProduction
 
   private def placesFromSubfields(
     varfield: VarField,
-    subfieldTag: String): List[Place[IdState.Unminted]] =
+    subfieldTag: String
+  ): List[Place[IdState.Unminted]] =
     varfield
       .subfieldsWithTag(subfieldTag)
       .contents
@@ -288,7 +300,8 @@ object SierraProduction
 
   private def agentsFromSubfields(
     varfield: VarField,
-    subfieldTag: String): List[Agent[IdState.Unminted]] =
+    subfieldTag: String
+  ): List[Agent[IdState.Unminted]] =
     varfield
       .subfieldsWithTag(subfieldTag)
       .contents
@@ -296,7 +309,8 @@ object SierraProduction
 
   private def datesFromSubfields(
     varfield: VarField,
-    subfieldTag: String): List[Period[IdState.Unminted]] =
+    subfieldTag: String
+  ): List[Period[IdState.Unminted]] =
     varfield
       .subfieldsWithTag(subfieldTag)
       .contents

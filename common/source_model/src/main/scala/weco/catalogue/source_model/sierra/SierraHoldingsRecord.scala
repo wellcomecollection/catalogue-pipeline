@@ -18,12 +18,14 @@ case object SierraHoldingsRecord {
 
   private case class SierraAPIData(bibIds: List[Int])
 
-  /** This apply method is for parsing JSON bodies that come from the
-    * Sierra API.
+  /** This apply method is for parsing JSON bodies that come from the Sierra
+    * API.
     */
-  def apply(id: String,
-            data: String,
-            modifiedDate: Instant): SierraHoldingsRecord = {
+  def apply(
+    id: String,
+    data: String,
+    modifiedDate: Instant
+  ): SierraHoldingsRecord = {
     val bibIds = fromJson[SierraAPIData](data) match {
       case Success(apiData) =>
         apiData.bibIds.map { v =>
@@ -31,7 +33,8 @@ case object SierraHoldingsRecord {
         }
       case Failure(e) =>
         throw new IllegalArgumentException(
-          s"Error parsing bibIds from JSON <<$data>> ($e)")
+          s"Error parsing bibIds from JSON <<$data>> ($e)"
+        )
     }
 
     SierraHoldingsRecord(

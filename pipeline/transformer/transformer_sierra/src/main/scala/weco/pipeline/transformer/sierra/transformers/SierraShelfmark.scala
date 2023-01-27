@@ -37,7 +37,8 @@ object SierraShelfmark extends SierraQueryOps {
       //
       case _
           if bibData.hasIconographicNumber && itemData.shelfmarkStartsWith(
-            bibData.iconographicNumber + ".") =>
+            bibData.iconographicNumber + "."
+          ) =>
         itemData.shelfmark
 
       case _ if bibData.hasIconographicNumber =>

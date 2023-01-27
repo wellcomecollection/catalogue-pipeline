@@ -26,15 +26,13 @@ class ApiCalmRetriever(
   def apply(query: CalmQuery): Source[CalmRecord, NotUsed] =
     Source
       .future(apiClient.search(query))
-      .mapConcat {
-        case CalmSession(numHits, cookie) =>
-          info(s"Received $numHits records for query: ${query.queryExpression}")
-          (0 until numHits).map(pos => (pos, cookie))
+      .mapConcat { case CalmSession(numHits, cookie) =>
+        info(s"Received $numHits records for query: ${query.queryExpression}")
+        (0 until numHits).map(pos => (pos, cookie))
       }
-      .mapAsync(concurrentHttpConnections) {
-        case (pos, cookie) =>
-          info(s"Querying record $pos for query: ${query.queryExpression}")
-          apiClient.summary(pos, Some(cookie))
+      .mapAsync(concurrentHttpConnections) { case (pos, cookie) =>
+        info(s"Querying record $pos for query: ${query.queryExpression}")
+        apiClient.summary(pos, Some(cookie))
       }
 
   private implicit val suppressedSummaryParser

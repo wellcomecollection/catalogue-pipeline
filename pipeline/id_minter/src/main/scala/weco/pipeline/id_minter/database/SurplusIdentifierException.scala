@@ -7,7 +7,8 @@ case class SurplusIdentifierException(msg: String) extends RuntimeException(msg)
 case object SurplusIdentifierException {
   def apply(
     sourceIdentifier: SourceIdentifier,
-    distinctIdentifiers: Seq[SourceIdentifier]): SurplusIdentifierException = {
+    distinctIdentifiers: Seq[SourceIdentifier]
+  ): SurplusIdentifierException = {
     val similarIdentifier = sourceIdentifier.copy(
       value = "^B".r.replaceAllIn(sourceIdentifier.value, "b")
     )

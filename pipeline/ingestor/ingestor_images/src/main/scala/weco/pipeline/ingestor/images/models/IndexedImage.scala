@@ -9,7 +9,7 @@ case class IndexedImage(
   modifiedTime: Instant,
   display: Json,
   query: ImageQueryableValues,
-  aggregatableValues: ImageAggregatableValues,
+  aggregatableValues: ImageAggregatableValues
 )
 
 case object IndexedImage {

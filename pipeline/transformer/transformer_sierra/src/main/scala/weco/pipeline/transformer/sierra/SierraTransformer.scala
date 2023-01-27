@@ -64,13 +64,12 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
         debug(s"Transformed record to $transformed")
         transformed
       }
-      .recover {
-        case e: Throwable =>
-          error(
-            s"Failed to perform transform to unified item of $sourceIdentifier",
-            e
-          )
-          throw e
+      .recover { case e: Throwable =>
+        error(
+          s"Failed to perform transform to unified item of $sourceIdentifier",
+          e
+        )
+        throw e
       }
 
   def workFromBibRecord(bibRecord: SierraBibRecord): Try[Work[Source]] =
@@ -145,15 +144,14 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
       edition = SierraEdition(bibData),
       notes = SierraNotes(bibData),
       duration = SierraDuration(bibData),
-      items =
-        SierraItemsOnOrder(
-          bibId,
-          bibData = bibData,
-          hasItems = hasItems,
-          orderDataMap
-        ) ++
-          SierraItems(bibId, bibData, itemDataEntries) ++
-          SierraElectronicResources(bibId, varFields = bibData.varFields),
+      items = SierraItemsOnOrder(
+        bibId,
+        bibData = bibData,
+        hasItems = hasItems,
+        orderDataMap
+      ) ++
+        SierraItems(bibId, bibData, itemDataEntries) ++
+        SierraElectronicResources(bibId, varFields = bibData.varFields),
       holdings = SierraHoldings(bibId, holdingsDataMap),
       referenceNumber = SierraReferenceNumber(bibData),
       collectionPath = SierraCollectionPath(bibData),
@@ -175,43 +173,40 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
     sierraTransformable.itemRecords.nonEmpty
 
   lazy val itemDataEntries: Seq[SierraItemData] =
-    sierraTransformable.itemRecords.map {
-      case (_, itemRecord) =>
-        fromJson[SierraItemData](itemRecord.data) match {
-          case Success(itemData) => itemData
-          case Failure(_) =>
-            throw SierraTransformerException(
-              s"Unable to parse item data for ${itemRecord.id} as JSON: <<${itemRecord.data}>>"
-            )
-        }
+    sierraTransformable.itemRecords.map { case (_, itemRecord) =>
+      fromJson[SierraItemData](itemRecord.data) match {
+        case Success(itemData) => itemData
+        case Failure(_) =>
+          throw SierraTransformerException(
+            s"Unable to parse item data for ${itemRecord.id} as JSON: <<${itemRecord.data}>>"
+          )
+      }
     }.toSeq
 
   lazy val holdingsDataMap: Map[SierraHoldingsNumber, SierraHoldingsData] =
     sierraTransformable.holdingsRecords
       .map { case (id, hRecord) => (id, hRecord.data) }
-      .map {
-        case (id, jsonString) =>
-          fromJson[SierraHoldingsData](jsonString) match {
-            case Success(data) => id -> data
-            case Failure(_) =>
-              throw SierraTransformerException(
-                s"Unable to parse holdings data for $id as JSON: <<$jsonString>>"
-              )
-          }
+      .map { case (id, jsonString) =>
+        fromJson[SierraHoldingsData](jsonString) match {
+          case Success(data) => id -> data
+          case Failure(_) =>
+            throw SierraTransformerException(
+              s"Unable to parse holdings data for $id as JSON: <<$jsonString>>"
+            )
+        }
       }
 
   lazy val orderDataMap: Map[SierraOrderNumber, SierraOrderData] =
     sierraTransformable.orderRecords
       .map { case (id, oRecord) => (id, oRecord.data) }
-      .map {
-        case (id, jsonString) =>
-          fromJson[SierraOrderData](jsonString) match {
-            case Success(data) => id -> data
-            case Failure(_) =>
-              throw SierraTransformerException(
-                s"Unable to parse order data for $id as JSON: <<$jsonString>>"
-              )
-          }
+      .map { case (id, jsonString) =>
+        fromJson[SierraOrderData](jsonString) match {
+          case Success(data) => id -> data
+          case Failure(_) =>
+            throw SierraTransformerException(
+              s"Unable to parse order data for $id as JSON: <<$jsonString>>"
+            )
+        }
       }
 }
 

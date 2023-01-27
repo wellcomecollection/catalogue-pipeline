@@ -34,15 +34,15 @@ object SourceIdentifierValidation {
 
     private def isValid: Boolean = {
       val predicate: String => Boolean = sourceIdentifier.identifierType match {
-        case IdentifierType.MiroImageNumber      => miroImageNumber.toPredicate
-        case IdentifierType.SierraSystemNumber   => sierraSystemNumber.toPredicate
-        case IdentifierType.SierraIdentifier     => sierraIdentifier.toPredicate
-        case IdentifierType.CalmRefNo            => calmRefNo.toPredicate
-        case IdentifierType.CalmAltRefNo         => calmRefNo.toPredicate
+        case IdentifierType.MiroImageNumber    => miroImageNumber.toPredicate
+        case IdentifierType.SierraSystemNumber => sierraSystemNumber.toPredicate
+        case IdentifierType.SierraIdentifier   => sierraIdentifier.toPredicate
+        case IdentifierType.CalmRefNo          => calmRefNo.toPredicate
+        case IdentifierType.CalmAltRefNo       => calmRefNo.toPredicate
         case IdentifierType.CalmRecordIdentifier => tryParseUUID(_).isSuccess
-        case IdentifierType.METS                 => sierraSystemNumber.toPredicate
-        case IdentifierType.WellcomeDigcode      => wellcomeDigcode.toPredicate
-        case IdentifierType.IconographicNumber   => iconographicNumber.toPredicate
+        case IdentifierType.METS               => sierraSystemNumber.toPredicate
+        case IdentifierType.WellcomeDigcode    => wellcomeDigcode.toPredicate
+        case IdentifierType.IconographicNumber => iconographicNumber.toPredicate
         // For other identifier types, we don't do validation
         case _ => const(true)
       }

@@ -31,9 +31,9 @@ import scala.util.Try
 
 class IdMinterWorkerService[Destination](
   identifierGenerator: IdentifierGenerator,
-  pipelineStream: PipelineStorageStream[NotificationMessage,
-                                        Work[Identified],
-                                        Destination],
+  pipelineStream: PipelineStorageStream[NotificationMessage, Work[
+    Identified
+  ], Destination],
   jsonRetriever: Retriever[Json],
   rdsClientConfig: RDSClientConfig,
   identifiersTableConfig: IdentifiersTableConfig
@@ -58,7 +58,9 @@ class IdMinterWorkerService[Destination](
         .via(
           processFlow(
             pipelineStream.config,
-            item => Future.fromTry(processMessage(item))))
+            item => Future.fromTry(processMessage(item))
+          )
+        )
     )
   }
 
@@ -72,7 +74,8 @@ class IdMinterWorkerService[Destination](
     for {
       sourceIdentifiers <- SourceIdentifierEmbedder.scan(json)
       mintedIdentifiers <- identifierGenerator.retrieveOrGenerateCanonicalIds(
-        sourceIdentifiers)
+        sourceIdentifiers
+      )
 
       canonicalIdentifiers = mintedIdentifiers.map {
         case (sourceIdentifier, identifier) =>

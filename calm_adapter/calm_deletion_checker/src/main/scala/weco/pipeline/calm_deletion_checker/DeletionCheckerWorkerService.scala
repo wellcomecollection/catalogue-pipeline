@@ -47,11 +47,10 @@ class DeletionCheckerWorkerService[Destination](
 
   private def parseBody =
     Flow[(Message, NotificationMessage)]
-      .mapAsyncUnordered(parallelism) {
-        case (msg, NotificationMessage(body)) =>
-          Future
-            .fromTry(fromJson[CalmSourcePayload](body))
-            .map(payload => (msg, payload))
+      .mapAsyncUnordered(parallelism) { case (msg, NotificationMessage(body)) =>
+        Future
+          .fromTry(fromJson[CalmSourcePayload](body))
+          .map(payload => (msg, payload))
       }
 
   private def checkDeletions =

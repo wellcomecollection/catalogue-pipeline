@@ -30,7 +30,8 @@ object SierraHoldings extends SierraQueryOps {
 
   def apply(
     id: SierraBibNumber,
-    holdingsDataMap: Map[SierraHoldingsNumber, SierraHoldingsData]): Output = {
+    holdingsDataMap: Map[SierraHoldingsNumber, SierraHoldingsData]
+  ): Output = {
 
     // We start by looking at fixed field 40, which contains a Sierra location code.
     // The value 'elro' tells us this is an online resource; if so, we create a series
@@ -41,43 +42,38 @@ object SierraHoldings extends SierraQueryOps {
     val (electronicHoldingsData, physicalHoldingsData) =
       holdingsDataMap
         .filterNot { case (_, data) => data.deleted || data.suppressed }
-        .partition {
-          case (_, holdingsData) =>
-            holdingsData.fixedFields.get("40") match {
-              case Some(FixedField(_, value, _)) if value.trim == "elro" => true
-              case _                                                     => false
-            }
+        .partition { case (_, holdingsData) =>
+          holdingsData.fixedFields.get("40") match {
+            case Some(FixedField(_, value, _)) if value.trim == "elro" => true
+            case _                                                     => false
+          }
         }
 
     val physicalHoldings =
       physicalHoldingsData.toList
-        .flatMap {
-          case (_, data) =>
-            createPhysicalHoldings(id, data)
+        .flatMap { case (_, data) =>
+          createPhysicalHoldings(id, data)
         }
 
     val digitalHoldings =
       electronicHoldingsData.toList
         .sortBy { case (id, _) => id.withCheckDigit }
-        .map {
-          case (id, data) =>
-            (data.varFields, SierraElectronicResources(id, data.varFields))
+        .map { case (id, data) =>
+          (data.varFields, SierraElectronicResources(id, data.varFields))
         }
-        .flatMap {
-          case (varFields, items) =>
-            items.map { it =>
-              (varFields, it)
-            }
+        .flatMap { case (varFields, items) =>
+          items.map { it =>
+            (varFields, it)
+          }
         }
-        .flatMap {
-          case (varFields, Item(_, title, _, locations)) =>
-            locations.map { loc =>
-              Holdings(
-                note = title,
-                enumeration = SierraHoldingsEnumeration(id, varFields),
-                location = Some(loc)
-              )
-            }
+        .flatMap { case (varFields, Item(_, title, _, locations)) =>
+          locations.map { loc =>
+            Holdings(
+              note = title,
+              enumeration = SierraHoldingsEnumeration(id, varFields),
+              location = Some(loc)
+            )
+          }
         }
 
     // Note: holdings records are sparsely populated, and a lot of the information is
@@ -90,7 +86,8 @@ object SierraHoldings extends SierraQueryOps {
 
   private def createPhysicalHoldings(
     id: TypedSierraRecordNumber,
-    data: SierraHoldingsData): Option[Holdings] = {
+    data: SierraHoldingsData
+  ): Option[Holdings] = {
 
     // We take the description from field 866 subfield ǂa
     val description = data.varFields
@@ -153,7 +150,8 @@ object SierraHoldings extends SierraQueryOps {
 
   private def createPhysicalLocation(
     id: TypedSierraRecordNumber,
-    data: SierraHoldingsData): Option[PhysicalLocation] =
+    data: SierraHoldingsData
+  ): Option[PhysicalLocation] =
     for {
       // We use the location code from fixed field 40.  If this is missing, we don't
       // create a location.
@@ -198,7 +196,8 @@ object SierraHoldings extends SierraQueryOps {
   //      publishers, and thus tricky to change
   //
   private def deduplicateDigitalHoldings(
-    holdings: List[Holdings]): List[Holdings] = {
+    holdings: List[Holdings]
+  ): List[Holdings] = {
 
     // These should all be holdings with digital locations; extracting this
     // information is so the compiler knows this further down.
@@ -218,11 +217,13 @@ object SierraHoldings extends SierraQueryOps {
     //    - they are equal (e.g. Some("Connect to the database") and Some("Connect to the database"))
     //    - one is defined and the other is empty (e.g. Some("Connect to the database") and None)
     //
-    val distinctUrls = locations.map { case (_, location) => location.url }.distinct
+    val distinctUrls = locations.map { case (_, location) =>
+      location.url
+    }.distinct
 
     distinctUrls.flatMap { url =>
-      val matchingHoldings = locations.filter {
-        case (_, location) => location.url == url
+      val matchingHoldings = locations.filter { case (_, location) =>
+        location.url == url
       }
 
       val notes = matchingHoldings
@@ -230,7 +231,9 @@ object SierraHoldings extends SierraQueryOps {
         .distinct
         .flatten
 
-      val enumerations = matchingHoldings.map { case (h, _) => h.enumeration }.distinct
+      val enumerations = matchingHoldings.map { case (h, _) =>
+        h.enumeration
+      }.distinct
 
       val linkTexts = matchingHoldings
         .map { case (_, loc) => loc.linkText }
@@ -268,7 +271,8 @@ object SierraHoldings extends SierraQueryOps {
                       // but at time of writing (Aug 2021), there are no holdings records
                       // where this is the case.
                       status = AccessStatus.LicensedResources(
-                        relationship = LicensedResources.Resource)
+                        relationship = LicensedResources.Resource
+                      )
                     )
                   )
                 )

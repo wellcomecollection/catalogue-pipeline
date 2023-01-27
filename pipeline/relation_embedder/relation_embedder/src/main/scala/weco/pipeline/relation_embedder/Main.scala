@@ -41,7 +41,8 @@ object Main extends WellcomeTypesafeApp {
       msgSender = SNSBuilder
         .buildSNSMessageSender(
           config,
-          subject = "Sent from the relation_embedder"),
+          subject = "Sent from the relation_embedder"
+        ),
       workIndexer = workIndexer,
       relationsService = new PathQueryRelationsService(
         esClient,
@@ -52,7 +53,7 @@ object Main extends WellcomeTypesafeApp {
       ),
       indexBatchSize = config.requireInt("es.works.batch_size"),
       indexFlushInterval =
-        config.requireInt("es.works.flush_interval_seconds").seconds,
+        config.requireInt("es.works.flush_interval_seconds").seconds
     )
   }
 }

@@ -2,10 +2,10 @@ package weco.pipeline.batcher
 
 /** A `Selector` is used to match nodes within a particular archive. A selector
   * matches one of the following:
-  * - The `Tree` with some root `path`
-  * - A single `Node` at some `path`
-  * - The `Children` of some `path`
-  * - All `Descendents` of some `path`
+  *   - The `Tree` with some root `path`
+  *   - A single `Node` at some `path`
+  *   - The `Children` of some `path`
+  *   - All `Descendents` of some `path`
   */
 sealed trait Selector {
 
@@ -54,20 +54,18 @@ object Selector {
     * which should be sent to the `relation_embedder` for denormalisation.
     *
     * This consists of:
-    * - The nodes parent
-    * - All children of the nodes parent
-    * - All descendents of the node
+    *   - The nodes parent
+    *   - All children of the nodes parent
+    *   - All descendents of the node
     *
     * To see why this is the case, consider the following tree:
     *
     * A
-    * |
-    * |-------------
-    * |  |         |
-    * B  C         E
-    * |  |------   |---------
-    * |  |  |  |   |  |  |  |
-    * D  X  Y  Z   1  2  3  4
+    * \|
+    * \|-------------
+    * \| | | B C E
+    * \| |------ |---------
+    * \| | | | | | | | D X Y Z 1 2 3 4
     *
     * Given node `C` as an input, we need to denormalise the parent `A` as it
     * contains `C` as a child relation. We need to denormalise the input `C`
@@ -101,13 +99,11 @@ object Selector {
     * For example, given the following tree:
     *
     * A
-    * |
-    * |-------------
-    * |  |         |
-    * B  C         E
-    * |  |------   |---------
-    * |  |  |  |   |  |  |  |
-    * D  X  Y  Z   1  2  3  4
+    * \|
+    * \|-------------
+    * \| | | B C E
+    * \| |------ |---------
+    * \| | | | | | | | D X Y Z 1 2 3 4
     *
     * We would not need to include selectors for `Node(X)` or `Children(Y)` if
     * for example either the selectors `Tree(A)` or `Descendents(C)` also
@@ -115,9 +111,8 @@ object Selector {
     */
   def forPaths(paths: List[Path]): List[(Selector, Long)] = {
     val selectors = paths.zipWithIndex
-      .flatMap {
-        case (path, idx) =>
-          Selector.forPath(path).map(selector => (selector, idx.toLong))
+      .flatMap { case (path, idx) =>
+        Selector.forPath(path).map(selector => (selector, idx.toLong))
       }
       .groupBy(_._1)
       .map(_._2.head)

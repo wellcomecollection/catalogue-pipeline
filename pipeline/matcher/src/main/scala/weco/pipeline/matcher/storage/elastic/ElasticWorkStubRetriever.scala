@@ -10,15 +10,15 @@ import weco.pipeline_storage.elastic.ElasticSourceRetriever
 
 import scala.concurrent.ExecutionContext
 
-/** The matcher only needs to know about linking data on works; most of the fields
-  * it can completely ignore.
+/** The matcher only needs to know about linking data on works; most of the
+  * fields it can completely ignore.
   *
-  * This custom retriever fetches only the specific fields that the matcher needs, to
-  * reduce the amount of data we have to get out of Elasticsearch (and pay to send through
-  * the VPC endpoint).
+  * This custom retriever fetches only the specific fields that the matcher
+  * needs, to reduce the amount of data we have to get out of Elasticsearch (and
+  * pay to send through the VPC endpoint).
   */
-class ElasticWorkStubRetriever(client: ElasticClient, index: Index)(
-  implicit ec: ExecutionContext
+class ElasticWorkStubRetriever(client: ElasticClient, index: Index)(implicit
+  ec: ExecutionContext
 ) extends ElasticSourceRetriever[WorkStub](client, index) {
 
   override def createGetRequest(id: String): GetRequest =

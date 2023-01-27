@@ -6,10 +6,9 @@ import weco.catalogue.internal_model.work.InstantRange
 import weco.pipeline.transformer.parse.DateParserImplicits._
 import weco.pipeline.transformer.parse._
 
-/**
-  *  Parses Marc 008 date information into InstantRange
+/** Parses Marc 008 date information into InstantRange
   *
-  *  Spec: https://www.loc.gov/marc/bibliographic/bd008a.html
+  * Spec: https://www.loc.gov/marc/bibliographic/bd008a.html
   */
 object Marc008DateParser extends Parser[InstantRange] with DateParserUtils {
 

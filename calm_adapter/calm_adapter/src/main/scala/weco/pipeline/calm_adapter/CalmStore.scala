@@ -13,9 +13,10 @@ class CalmStore(store: SourceVHS[CalmRecord]) extends Logging {
   type Result[T] = Either[Throwable, T]
 
   def putRecord(
-    record: CalmRecord): Result[Option[(Key, S3ObjectLocation, CalmRecord)]] = {
-    val recordSummmary = s"ID=${record.id}, RefNo=${record.refNo.getOrElse(
-      "NONE")}, Modified=${record.modified.getOrElse("NONE")}"
+    record: CalmRecord
+  ): Result[Option[(Key, S3ObjectLocation, CalmRecord)]] = {
+    val recordSummmary =
+      s"ID=${record.id}, RefNo=${record.refNo.getOrElse("NONE")}, Modified=${record.modified.getOrElse("NONE")}"
     shouldStoreRecord(record)
       .flatMap {
         case false =>
@@ -50,8 +51,10 @@ class CalmStore(store: SourceVHS[CalmRecord]) extends Logging {
       case Left(err) => Left(err.e)
     }
 
-  def checkResolvable(record: CalmRecord,
-                      storedRecord: CalmRecord): Option[Exception] = {
+  def checkResolvable(
+    record: CalmRecord,
+    storedRecord: CalmRecord
+  ): Option[Exception] = {
     val sameTimestamp = record.retrievedAt == storedRecord.retrievedAt
     val differingData = record.data != storedRecord.data
     if (sameTimestamp && differingData)

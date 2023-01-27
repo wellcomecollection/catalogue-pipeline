@@ -24,7 +24,8 @@ class PathQueryRelationsService(
   elasticClient: ElasticClient,
   index: Index,
   completeTreeScroll: Int = 1000,
-  affectedWorksScroll: Int = 250)(implicit as: ActorSystem)
+  affectedWorksScroll: Int = 250
+)(implicit as: ActorSystem)
     extends RelationsService
     with Logging {
 
@@ -33,7 +34,8 @@ class PathQueryRelationsService(
   def getAffectedWorks(batch: Batch): Source[Work[Merged], NotUsed] = {
     val request = requestBuilder.affectedWorks(batch, affectedWorksScroll)
     debug(
-      s"Querying affected works with ES request: ${elasticClient.show(request)}")
+      s"Querying affected works with ES request: ${elasticClient.show(request)}"
+    )
     Source
       .fromPublisher(elasticClient.publisher(request))
       .map(searchHit => searchHit.safeTo[Work[Merged]].get)
@@ -42,7 +44,8 @@ class PathQueryRelationsService(
   def getRelationTree(batch: Batch): Source[RelationWork, NotUsed] = {
     val request = requestBuilder.completeTree(batch, completeTreeScroll)
     debug(
-      s"Querying complete tree with ES request: ${elasticClient.show(request)}")
+      s"Querying complete tree with ES request: ${elasticClient.show(request)}"
+    )
     Source
       .fromPublisher(elasticClient.publisher(request))
       .map(searchHit => searchHit.safeTo[RelationWork].get)

@@ -41,21 +41,24 @@ object Main extends WellcomeTypesafeApp {
         .buildSNSMessageSender(
           config,
           namespace = "work-sender",
-          subject = "Sent from the router")
+          subject = "Sent from the router"
+        )
 
     val pathSender =
       SNSBuilder
         .buildSNSMessageSender(
           config,
           namespace = "path-sender",
-          subject = "Sent from the router")
+          subject = "Sent from the router"
+        )
 
     val pathConcatenatorSender =
       SNSBuilder
         .buildSNSMessageSender(
           config,
           namespace = "path-concatenator-sender",
-          subject = "Sent from the router")
+          subject = "Sent from the router"
+        )
 
     val pipelineStream =
       PipelineStorageStreamBuilder

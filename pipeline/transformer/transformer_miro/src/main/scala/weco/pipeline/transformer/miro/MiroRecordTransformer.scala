@@ -43,30 +43,34 @@ class MiroRecordTransformer
   override def apply(
     id: String,
     sourceData: (MiroRecord, MiroSourceOverrides, MiroMetadata),
-    version: Int): Result[Work[Source]] = {
+    version: Int
+  ): Result[Work[Source]] = {
     val (miroRecord, overrides, miroMetadata) = sourceData
 
     transform(miroRecord, overrides, miroMetadata, version).toEither
   }
 
-  def transform(miroRecord: MiroRecord,
-                overrides: MiroSourceOverrides,
-                miroMetadata: MiroMetadata,
-                version: Int): Try[Work[Source]] =
+  def transform(
+    miroRecord: MiroRecord,
+    overrides: MiroSourceOverrides,
+    miroMetadata: MiroMetadata,
+    version: Int
+  ): Try[Work[Source]] =
     doTransform(miroRecord, overrides, miroMetadata, version) map {
       transformed =>
         debug(s"Transformed record to $transformed")
         transformed
-    } recover {
-      case e: Throwable =>
-        error("Failed to perform transform to unified item", e)
-        throw e
+    } recover { case e: Throwable =>
+      error("Failed to perform transform to unified item", e)
+      throw e
     }
 
-  private def doTransform(originalMiroRecord: MiroRecord,
-                          overrides: MiroSourceOverrides,
-                          miroMetadata: MiroMetadata,
-                          version: Int): Try[Work[Source]] = {
+  private def doTransform(
+    originalMiroRecord: MiroRecord,
+    overrides: MiroSourceOverrides,
+    miroMetadata: MiroMetadata,
+    version: Int
+  ): Try[Work[Source]] = {
     val sourceIdentifier = SourceIdentifier(
       identifierType = IdentifierType.MiroImageNumber,
       ontologyType = "Work",
@@ -100,7 +104,8 @@ class MiroRecordTransformer
           state = state,
           deletedReason = SuppressedFromSource(
             s"Miro: image_copyright_cleared = ${originalMiroRecord.copyrightCleared
-              .getOrElse("<empty>")}")
+                .getOrElse("<empty>")}"
+          )
         )
       )
     } else {
@@ -124,7 +129,8 @@ class MiroRecordTransformer
           thumbnail = Some(getThumbnail(miroRecord, overrides)),
           items = getItems(miroRecord, overrides),
           imageData = List(
-            getImageData(miroRecord, overrides = overrides, version = version))
+            getImageData(miroRecord, overrides = overrides, version = version)
+          )
         )
 
         Work.Visible[Source](

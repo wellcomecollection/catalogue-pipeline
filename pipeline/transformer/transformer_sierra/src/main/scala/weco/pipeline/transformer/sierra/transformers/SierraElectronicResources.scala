@@ -30,16 +30,20 @@ import scala.util.Try
 // TODO: Update this link to the published version of the RFC
 //
 object SierraElectronicResources extends SierraQueryOps with Logging {
-  def apply(id: TypedSierraRecordNumber,
-            varFields: List[VarField]): List[Item[IdState.Unminted]] =
+  def apply(
+    id: TypedSierraRecordNumber,
+    varFields: List[VarField]
+  ): List[Item[IdState.Unminted]] =
     varFields
       .filter { _.marcTag.contains("856") }
       .flatMap { vf =>
         createItem(id, vf)
       }
 
-  private def createItem(id: TypedSierraRecordNumber,
-                         vf: VarField): Option[Item[IdState.Unminted]] = {
+  private def createItem(
+    id: TypedSierraRecordNumber,
+    vf: VarField
+  ): Option[Item[IdState.Unminted]] = {
     assert(vf.marcTag.contains("856"))
 
     // 856 indicator 2 takes the following values:
@@ -56,10 +60,12 @@ object SierraElectronicResources extends SierraQueryOps with Logging {
     val status = vf.indicator2 match {
       case Some("2") =>
         AccessStatus.LicensedResources(
-          relationship = LicensedResources.RelatedResource)
+          relationship = LicensedResources.RelatedResource
+        )
       case _ =>
         AccessStatus.LicensedResources(
-          relationship = LicensedResources.Resource)
+          relationship = LicensedResources.Resource
+        )
     }
 
     getUrl(id, vf).map { url =>
@@ -71,13 +77,15 @@ object SierraElectronicResources extends SierraQueryOps with Logging {
       // Otherwise, we put it in the item's "title" field.
       val (title, linkText) = getLabel(vf) match {
         case Some(label) =>
-          if (label.split(" ").length <= 7 &&
-              label.containsAnyOf("access", "view", "connect"))
+          if (
+            label.split(" ").length <= 7 &&
+            label.containsAnyOf("access", "view", "connect")
+          )
             (
               None,
               Some(
                 label
-                // e.g. "View resource." ~> "View resource"
+                  // e.g. "View resource." ~> "View resource"
                   .stripSuffix(".")
                   .stripSuffix(":")
                   // e.g. "view resource" ~> "View resource"
@@ -91,7 +99,9 @@ object SierraElectronicResources extends SierraQueryOps with Logging {
                   .replace("View resource {PDF", "View resource [PDF")
                   .replace(
                     "View resource 613.7 KB]",
-                    "View resource [613.7 KB]"))
+                    "View resource [613.7 KB]"
+                  )
+              )
             )
           else
             (Some(label), None)
@@ -124,14 +134,17 @@ object SierraElectronicResources extends SierraQueryOps with Logging {
 
   // We take the URL from subfield ǂu.  If subfield ǂu is missing, repeated,
   // or contains something other than a URL, we discard it.
-  private def getUrl(id: TypedSierraRecordNumber,
-                     vf: VarField): Option[String] =
+  private def getUrl(
+    id: TypedSierraRecordNumber,
+    vf: VarField
+  ): Option[String] =
     vf.subfieldsWithTag("u") match {
       case Seq(Subfield(_, content)) if isUrl(content) => Some(content)
 
       case Seq(Subfield(_, content)) =>
         warn(
-          s"${id.withCheckDigit} has a value in 856 ǂu which isn't a URL: $content")
+          s"${id.withCheckDigit} has a value in 856 ǂu which isn't a URL: $content"
+        )
         None
 
       case Nil =>

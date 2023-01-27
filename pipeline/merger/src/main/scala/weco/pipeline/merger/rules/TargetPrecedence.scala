@@ -19,8 +19,8 @@ object TargetPrecedence {
     additionalPredicate: WorkPredicate
   )(works: Seq[Work[Identified]]): Option[Work.Visible[Identified]] =
     targetPrecedence.view
-      .flatMap(
-        pred => works.find(work => pred(work) && additionalPredicate(work))
+      .flatMap(pred =>
+        works.find(work => pred(work) && additionalPredicate(work))
       )
       .headOption
       .collect(visibleWork)

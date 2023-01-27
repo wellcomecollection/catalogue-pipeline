@@ -20,8 +20,10 @@ object Identifier {
       SourceId = rs.string(p.resultName.SourceId)
     )
 
-  def apply(canonicalId: CanonicalId,
-            sourceIdentifier: SourceIdentifier): Identifier =
+  def apply(
+    canonicalId: CanonicalId,
+    sourceIdentifier: SourceIdentifier
+  ): Identifier =
     Identifier(
       CanonicalId = canonicalId,
       OntologyType = sourceIdentifier.ontologyType,

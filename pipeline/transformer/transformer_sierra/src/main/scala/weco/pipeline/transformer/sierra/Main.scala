@@ -16,8 +16,9 @@ object Main extends WellcomeTypesafeApp {
     transformer =
       (id: String, transformable: SierraTransformable, version: Int) =>
         SierraTransformer(transformable, version).toEither,
-    sourceDataRetriever =
-      new SierraSourceDataRetriever(S3TypedStore[SierraTransformable])
+    sourceDataRetriever = new SierraSourceDataRetriever(
+      S3TypedStore[SierraTransformable]
+    )
   )
 
   runWithConfig { config =>

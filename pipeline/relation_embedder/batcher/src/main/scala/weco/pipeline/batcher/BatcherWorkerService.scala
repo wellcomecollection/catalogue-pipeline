@@ -32,16 +32,14 @@ class BatcherWorkerService[MsgDestination](
       this.getClass.getSimpleName,
       source =>
         source
-          .map {
-            case (msg, notificationMessage) =>
-              (msg, notificationMessage.body)
+          .map { case (msg, notificationMessage) =>
+            (msg, notificationMessage.body)
           }
           .groupedWithin(maxProcessedPaths, flushInterval)
           .map(_.toList.unzip)
-          .mapAsync(1) {
-            case (msgs, paths) =>
-              info(s"Processing ${paths.size} input paths")
-              processPaths(msgs, paths)
+          .mapAsync(1) { case (msgs, paths) =>
+            info(s"Processing ${paths.size} input paths")
+            processPaths(msgs, paths)
           }
           .flatMapConcat(identity)
     )
@@ -52,18 +50,18 @@ class BatcherWorkerService[MsgDestination](
     */
   private def processPaths(
     msgs: List[SQSMessage],
-    paths: List[String]): Future[Source[SQSMessage, NotUsed]] =
+    paths: List[String]
+  ): Future[Source[SQSMessage, NotUsed]] =
     generateBatches(paths)
-      .mapAsyncUnordered(10) {
-        case (batch, msgIndices) =>
-          Future {
-            msgSender.sendT(batch) match {
-              case Success(_) => None
-              case Failure(err) =>
-                error(s"Failed processing batch $batch with error: $err")
-                Some(msgIndices)
-            }
+      .mapAsyncUnordered(10) { case (batch, msgIndices) =>
+        Future {
+          msgSender.sendT(batch) match {
+            case Success(_) => None
+            case Failure(err) =>
+              error(s"Failed processing batch $batch with error: $err")
+              Some(msgIndices)
           }
+        }
       }
       .collect { case Some(failedIndices) => failedIndices }
       .mapConcat(identity)
@@ -81,7 +79,8 @@ class BatcherWorkerService[MsgDestination](
     * tree and within a maximum `batchSize`.
     */
   private def generateBatches(
-    paths: List[String]): Source[(Batch, List[Long]), NotUsed] = {
+    paths: List[String]
+  ): Source[(Batch, List[Long]), NotUsed] = {
     val selectors = Selector.forPaths(paths)
     val groupedSelectors = selectors.groupBy(_._1.rootPath)
     info(
@@ -94,10 +93,10 @@ class BatcherWorkerService[MsgDestination](
           s"Input paths ($startIdx-${startIdx + paths.length - 1}): ${paths.mkString(", ")}"
         )
     }
-    groupedSelectors.foreach {
-      case (rootPath, selectors) =>
-        info(
-          s"Selectors for root path $rootPath: ${selectors.map(_._1).mkString(", ")}")
+    groupedSelectors.foreach { case (rootPath, selectors) =>
+      info(
+        s"Selectors for root path $rootPath: ${selectors.map(_._1).mkString(", ")}"
+      )
     }
     Source(groupedSelectors.toList).map {
       case (rootPath, selectorsAndIndices) =>

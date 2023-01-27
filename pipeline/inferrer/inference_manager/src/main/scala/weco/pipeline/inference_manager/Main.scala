@@ -80,7 +80,8 @@ object Main extends WellcomeTypesafeApp {
       msgStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
       msgSender = SNSBuilder.buildSNSMessageSender(
         config,
-        subject = "Sent from the inference_manager"),
+        subject = "Sent from the inference_manager"
+      ),
       imageRetriever = imageRetriever,
       imageIndexer = imageIndexer,
       pipelineStorageConfig = pipelineStorageConfig,

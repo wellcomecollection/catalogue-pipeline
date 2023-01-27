@@ -9,9 +9,9 @@ import weco.pipeline_storage.{
 import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, Future}
 
-class MemoryRetriever[T](val index: mutable.Map[String, T] =
-                           mutable.Map[String, T]())(
-  implicit val ec: ExecutionContext)
+class MemoryRetriever[T](
+  val index: mutable.Map[String, T] = mutable.Map[String, T]()
+)(implicit val ec: ExecutionContext)
     extends Retriever[T] {
 
   override def apply(ids: Seq[String]): Future[RetrieverMultiResult[T]] =
@@ -23,8 +23,8 @@ class MemoryRetriever[T](val index: mutable.Map[String, T] =
 
       RetrieverMultiResult(
         found = lookupResults.collect { case (id, Some(t)) => (id, t) },
-        notFound = lookupResults.collect {
-          case (id, None) => (id, new RetrieverNotFoundException(id))
+        notFound = lookupResults.collect { case (id, None) =>
+          (id, new RetrieverNotFoundException(id))
         }
       )
     }

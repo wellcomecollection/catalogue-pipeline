@@ -6,10 +6,9 @@ import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.Place
 import weco.pipeline.transformer.parse.Parser
 
-/**
-  *  Parses Marc country information
+/** Parses Marc country information
   *
-  *  https://www.loc.gov/marc/countries/countries_code.html
+  * https://www.loc.gov/marc/countries/countries_code.html
   */
 object MarcPlaceParser extends Parser[Place[IdState.Unminted]] {
 

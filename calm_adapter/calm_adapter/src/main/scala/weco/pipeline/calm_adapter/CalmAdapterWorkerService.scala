@@ -25,20 +25,19 @@ import scala.util.{Failure, Success}
   * records to the transformer that have been modified within this window.
   *
   * Consists of the following stages:
-  * - Retrieve all CALM records which have modified field the same date as the
-  *   window
-  * - Store these records in VHS, filtering out ones older than what is
-  *   currently in  the store
-  * - Publish the VHS key to SNS
+  *   - Retrieve all CALM records which have modified field the same date as the
+  *     window
+  *   - Store these records in VHS, filtering out ones older than what is
+  *     currently in the store
+  *   - Publish the VHS key to SNS
   */
 class CalmAdapterWorkerService[Destination](
   msgStream: SQSStream[NotificationMessage],
   messageSender: MessageSender[Destination],
   calmRetriever: CalmRetriever,
   calmStore: CalmStore,
-  concurrentWindows: Int = 2)(implicit
-                              val ec: ExecutionContext,
-                              materializer: Materializer)
+  concurrentWindows: Int = 2
+)(implicit val ec: ExecutionContext, materializer: Materializer)
     extends Runnable
     with FlowOps
     with Logging {
@@ -65,9 +64,8 @@ class CalmAdapterWorkerService[Destination](
 
   def unwrapMessage =
     Flow[(SQSMessage, NotificationMessage)]
-      .map {
-        case (msg, NotificationMessage(body)) =>
-          (Context(msg), fromJson[CalmQuery](body).toEither)
+      .map { case (msg, NotificationMessage(body)) =>
+        (Context(msg), fromJson[CalmQuery](body).toEither)
       }
       .via(catchErrors)
 
@@ -77,17 +75,15 @@ class CalmAdapterWorkerService[Destination](
     */
   def processWindow =
     Flow[(Context, CalmQuery)]
-      .mapAsync(concurrentWindows) {
-        case (ctx, query) =>
-          info(
-            s"Ingesting all Calm records for query: ${query.queryExpression}")
-          calmRetriever(query)
-            .map(calmStore.putRecord)
-            .via(publishKey)
-            .via(updatePublished)
-            .runWith(Sink.seq)
-            .map(checkResultsForErrors(_, query))
-            .map((ctx, _))
+      .mapAsync(concurrentWindows) { case (ctx, query) =>
+        info(s"Ingesting all Calm records for query: ${query.queryExpression}")
+        calmRetriever(query)
+          .map(calmStore.putRecord)
+          .via(publishKey)
+          .via(updatePublished)
+          .runWith(Sink.seq)
+          .map(checkResultsForErrors(_, query))
+          .map((ctx, _))
       }
       .via(catchErrors)
 
@@ -118,13 +114,17 @@ class CalmAdapterWorkerService[Destination](
         case Left(err)   => Left(err)
       }
 
-  def checkResultsForErrors(results: Seq[Result[_]],
-                            query: CalmQuery): Result[Unit] = {
+  def checkResultsForErrors(
+    results: Seq[Result[_]],
+    query: CalmQuery
+  ): Result[Unit] = {
     val errs = results.collect { case Left(err) => err }.toList
     if (errs.nonEmpty)
       Left(
         new Exception(
-          s"Errors processing query: ${query.queryExpression}: $errs"))
+          s"Errors processing query: ${query.queryExpression}: $errs"
+        )
+      )
     else
       Right(())
   }

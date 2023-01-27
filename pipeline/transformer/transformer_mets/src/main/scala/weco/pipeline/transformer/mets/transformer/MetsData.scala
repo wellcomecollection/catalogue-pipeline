@@ -35,8 +35,10 @@ sealed trait MetsData {
 }
 
 case class DeletedMetsData(recordIdentifier: String) extends MetsData {
-  override def toWork(version: Int,
-                      modifiedTime: Instant): Either[Throwable, Work[Source]] =
+  override def toWork(
+    version: Int,
+    modifiedTime: Instant
+  ): Either[Throwable, Work[Source]] =
     Right(
       Work.Deleted[Source](
         version = version,
@@ -158,12 +160,11 @@ case class InvisibleMetsData(
         .orElse(fileReferences.find(ImageUtils.isThumbnail))
       url <- ImageUtils.buildThumbnailUrl(bnumber, fileReference)
       if !accessStatus.exists(_.hasRestrictions)
-    } yield
-      DigitalLocation(
-        url = url,
-        locationType = LocationType.ThumbnailImage,
-        license = license
-      )
+    } yield DigitalLocation(
+      url = url,
+      locationType = LocationType.ThumbnailImage,
+      license = license
+    )
 
   private def imageData(
     version: Int,

@@ -12,14 +12,15 @@ import weco.catalogue.internal_model.work.{Availability, WorkData}
 
 import java.time.{LocalDateTime, ZoneId}
 
-/** We store aggregatable values in the Elasticsearch documents we store for the API.
+/** We store aggregatable values in the Elasticsearch documents we store for the
+  * API.
   *
-  * These values are serialised with the display models, so the API can read these values
-  * and drop them directly into an API response, without needing to know about what the
-  * display models look like.
+  * These values are serialised with the display models, so the API can read
+  * these values and drop them directly into an API response, without needing to
+  * know about what the display models look like.
   *
-  * See https://github.com/wellcomecollection/docs/tree/main/rfcs/049-catalogue-api-aggregations-modelling
-  *
+  * See
+  * https://github.com/wellcomecollection/docs/tree/main/rfcs/049-catalogue-api-aggregations-modelling
   */
 trait AggregatableValues {
   implicit class WorkDataOps(workData: WorkData[DataState.Identified]) {
@@ -55,16 +56,15 @@ trait AggregatableValues {
 
     def languageAggregatableValues: List[String] =
       workData.languages
-        .map(
-          lang =>
-            // There are cases where two languages may have the same ID but different
-            // labels, e.g. Chinese and Mandarin are two names for the same language
-            // which has MARC language code "chi".  The distinct names may be important
-            // for display on individual works pages, but for filtering/aggregating
-            // we want to use the canonical labels.
-            MarcLanguageCodeList.fromCode(lang.id) match {
-              case Some(canonicalLang) => canonicalLang
-              case None                => lang
+        .map(lang =>
+          // There are cases where two languages may have the same ID but different
+          // labels, e.g. Chinese and Mandarin are two names for the same language
+          // which has MARC language code "chi".  The distinct names may be important
+          // for display on individual works pages, but for filtering/aggregating
+          // we want to use the canonical labels.
+          MarcLanguageCodeList.fromCode(lang.id) match {
+            case Some(canonicalLang) => canonicalLang
+            case None                => lang
           }
         )
         .distinct
@@ -87,9 +87,8 @@ trait AggregatableValues {
       workData.production
         .flatMap(_.dates)
         .flatMap(_.range)
-        .map(
-          range =>
-            LocalDateTime.ofInstant(range.from, ZoneId.systemDefault()).getYear
+        .map(range =>
+          LocalDateTime.ofInstant(range.from, ZoneId.systemDefault()).getYear
         )
         .map(startYear => DisplayPeriod(label = startYear.toString))
         .asJson()
@@ -121,18 +120,16 @@ trait AggregatableValues {
     // Note: this is meant to preserve the order of keys in the original object.
     //
     def update(key: String, value: Json): Json =
-      json.mapObject(
-        jsonObj =>
-          Json
-            .fromFields(
-              jsonObj.toIterable
-                .map {
-                  case (k, v) =>
-                    if (k == key) (key, value) else (k, v)
-                }
-            )
-            .asObject
-            .get
+      json.mapObject(jsonObj =>
+        Json
+          .fromFields(
+            jsonObj.toIterable
+              .map { case (k, v) =>
+                if (k == key) (key, value) else (k, v)
+              }
+          )
+          .asObject
+          .get
       )
 
     // Remove a key pair from a JSON object.

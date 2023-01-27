@@ -24,8 +24,7 @@ class Worker(
   sqsStream: SQSStream[NotificationMessage],
   sierraReadable: Readable[S3ObjectLocation, SierraTransformable],
   indexPrefix: String = "sierra"
-)(
-  implicit
+)(implicit
   ec: ExecutionContext,
   elasticClient: ElasticClient
 ) extends Runnable {
@@ -66,12 +65,13 @@ class Worker(
       } yield ops
 
     ops
-      .flatMap {
-        case (indexRequests, deleteByQueryRequests) =>
-          val futures = deleteByQueryRequests.map { elasticClient.execute(_) } :+ elasticClient
-            .execute(bulk(indexRequests))
+      .flatMap { case (indexRequests, deleteByQueryRequests) =>
+        val futures = deleteByQueryRequests.map {
+          elasticClient.execute(_)
+        } :+ elasticClient
+          .execute(bulk(indexRequests))
 
-          Future.sequence(futures)
+        Future.sequence(futures)
       }
       .map { resp =>
         resp.foreach {

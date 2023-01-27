@@ -14,9 +14,11 @@ abstract class Indexer[T: Indexable] {
 
   /** Indexes the given documents into the store
     *
-    * @param documents The documents to be indexed
-    * @return A future either containing a Left with the failed documents or a
-    *         Right with the succesfully indexed documents
+    * @param documents
+    *   The documents to be indexed
+    * @return
+    *   A future either containing a Left with the failed documents or a Right
+    *   with the succesfully indexed documents
     */
   def apply(documents: Seq[T]): Future[Either[Seq[T], Seq[T]]]
 

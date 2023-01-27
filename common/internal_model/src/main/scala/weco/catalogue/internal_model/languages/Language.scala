@@ -4,19 +4,18 @@ import grizzled.slf4j.Logging
 
 /** Represents the language of a work.
   *
-  * Note: unlike other models that have an id/label field, here there isn't
-  * a 1:1 mapping between the two.  In particular, it's possible for two instances
+  * Note: unlike other models that have an id/label field, here there isn't a
+  * 1:1 mapping between the two. In particular, it's possible for two instances
   * of Language to have the same ID but different labels.
   *
   * e.g. you might have two languages:
   *
-  *       Language(it = "ita", label = "Italian")
-  *       Language(it = "ita", label = "Judeo-Italian")
+  * Language(it = "ita", label = "Italian") Language(it = "ita", label =
+  * "Judeo-Italian")
   *
-  * This is based on the MARC language code list.  A single language might have
+  * This is based on the MARC language code list. A single language might have
   * multiple variants that we want to count together for filtering/aggregations,
   * but we also want to capture the distinction on individual works pages.
-  *
   */
 case class Language(id: String, label: String) extends Logging {
 

@@ -23,9 +23,10 @@ import scala.xml.{Elem, Node}
 
 object TeiContributors extends LabelDerivedIdentifiers {
 
-  /**
-    * author nodes appear only within msItem. They contain the name of the Author of the work and optionally the id of the Author.
-    * The Id of the Author refers to two different authorities depending on whether the work is an Arabic manuscript or not
+  /** author nodes appear only within msItem. They contain the name of the
+    * Author of the work and optionally the id of the Author. The Id of the
+    * Author refers to two different authorities depending on whether the work
+    * is an Arabic manuscript or not
     */
   def authors(
     node: Node,
@@ -35,13 +36,13 @@ object TeiContributors extends LabelDerivedIdentifiers {
       .map { author =>
         for {
           authorInfo <- getLabelAndId(author)
-          contributor <- authorInfo.map {
-            case (label, id) =>
-              createContributor(
-                label = label,
-                ContributionRole("author"),
-                isFihrist = isFihrist,
-                id = id)
+          contributor <- authorInfo.map { case (label, id) =>
+            createContributor(
+              label = label,
+              ContributionRole("author"),
+              isFihrist = isFihrist,
+              id = id
+            )
           }.sequence
         } yield contributor
       }
@@ -49,43 +50,35 @@ object TeiContributors extends LabelDerivedIdentifiers {
       .sequence
       .map(_.flatten)
 
-  /**
-    * Scribes appear in the physical description section of the manuscript and can appear
-    * within a handNote tag with attribute "scribe" as in this example
-    * <physDesc>
-    *     <handDesc>
-    *         <handNote scope="minor" scribe="Scribe_A">
-    *           <locus target="#Wellcome_Batak_36801_1 #Wellcome_Batak_36801_2" >a 2-62, b 2-7; b 8-22</locus>Gorak-gorahan, etc. Southern form of ta.
-    *         </handNote>
-    *         <handNote scope="minor" scribe="Scribe_B">
-    *           <locus target="#Wellcome_Batak_36801_3">b 23-35</locus>Another hand, which uses the northern ta.
-    *         </handNote>
-    *         <handNote scope="minor" scribe="Scribe_C">
-    *           <locus target="#Wellcome_Batak_36801_9">b 44-45</locus>Another hand; careless writing, at first with northern ta, later southern ta.
-    *         </handNote>
-    *         <handNote scope="minor" scribe="Scribe_D">
-    *           <locus target="#Wellcome_Batak_36801_10">b 45-56</locus>A different handwriting, using the southern form of ta but not the peculiar form of ya which is found in the text written by <persName>Datu Poduwon</persName>.
-    *         </handNote>
-    *     </handDesc>
-    * </physDesc>
+  /** Scribes appear in the physical description section of the manuscript and
+    * can appear within a handNote tag with attribute "scribe" as in this
+    * example <physDesc> <handDesc> <handNote scope="minor" scribe="Scribe_A">
+    * <locus target="#Wellcome_Batak_36801_1 #Wellcome_Batak_36801_2" >a 2-62, b
+    * 2-7; b 8-22</locus>Gorak-gorahan, etc. Southern form of ta. </handNote>
+    * <handNote scope="minor" scribe="Scribe_B"> <locus
+    * target="#Wellcome_Batak_36801_3">b 23-35</locus>Another hand, which uses
+    * the northern ta. </handNote> <handNote scope="minor" scribe="Scribe_C">
+    * <locus target="#Wellcome_Batak_36801_9">b 44-45</locus>Another hand;
+    * careless writing, at first with northern ta, later southern ta.
+    * </handNote> <handNote scope="minor" scribe="Scribe_D"> <locus
+    * target="#Wellcome_Batak_36801_10">b 45-56</locus>A different handwriting,
+    * using the southern form of ta but not the peculiar form of ya which is
+    * found in the text written by <persName>Datu Poduwon</persName>.
+    * </handNote> </handDesc> </physDesc>
     *
-    * or within a persName tag with role=scr inside the handNote tag
-    * <physDesc>
-    *    <handDesc>
-    *        <handNote scope="sole">
-    *            <persName role="scr">Mahādeva Pāṇḍe</persName>
-    *        </handNote>
-    *    </handDesc>
-    *</physDesc>
-    * If the scribe refers to a part or item of the manuscript, the handNote
-    * tag will have a locus node with the item or part ids that it refers to
+    * or within a persName tag with role=scr inside the handNote tag <physDesc>
+    * <handDesc> <handNote scope="sole"> <persName role="scr">Mahādeva
+    * Pāṇḍe</persName> </handNote> </handDesc> </physDesc> If the scribe refers
+    * to a part or item of the manuscript, the handNote tag will have a locus
+    * node with the item or part ids that it refers to
     *
-    * This function returns a map where the keys are the work ids
-    * the scribes are assigned to, and the values are lists of scribes.
+    * This function returns a map where the keys are the work ids the scribes
+    * are assigned to, and the values are lists of scribes.
     */
   def scribes(
     xml: Elem,
-    workId: String): Result[Map[String, List[Contributor[Unminted]]]] =
+    workId: String
+  ): Result[Map[String, List[Contributor[Unminted]]]] =
     (xml \\ "sourceDesc" \ "msDesc" \ "physDesc" \ "handDesc" \ "handNote")
       .foldLeft(
         Right(Map.empty): Result[Map[String, List[Contributor[Unminted]]]]
@@ -97,20 +90,13 @@ object TeiContributors extends LabelDerivedIdentifiers {
           } yield mapContributorToWorkId(workId, node, contributor, scribesMap)
       }
 
-  /**
-    * Author nodes can be in 2 forms:
-    * <msItem xml:id="MS_Arabic_1-item1">
-    *  <author key="person_97166546">
-    *    <persName xml:lang="en">Avicenna, d. 980-1037
-    *    </persName>
-    *    <persName xml:lang="ar" type="original">ابو على الحسين ابن عبد الله ابن
-    *    سينا</persName>
-    *  </author>
-    *  or
-    * <msItem n="1" xml:id="MS_MSL_114_1">
-    *  <author key="person_84812936">Paul of Aegina</author>
-    *  So we must check for the existence of the internal persName nodes to decide
-    *  where to get the label and id from
+  /** Author nodes can be in 2 forms: <msItem xml:id="MS_Arabic_1-item1">
+    * <author key="person_97166546"> <persName xml:lang="en">Avicenna, d.
+    * 980-1037 </persName> <persName xml:lang="ar" type="original">ابو على
+    * الحسين ابن عبد الله ابن سينا</persName> </author> or <msItem n="1"
+    * xml:id="MS_MSL_114_1"> <author key="person_84812936">Paul of
+    * Aegina</author> So we must check for the existence of the internal
+    * persName nodes to decide where to get the label and id from
     */
   private def getLabelAndId(author: Node) = {
     val exceptionOrTuple = (author \ "persName").toList match {
@@ -133,18 +119,21 @@ object TeiContributors extends LabelDerivedIdentifiers {
       }.sequence
     } yield contributor
 
-  /**
-    * If the scribe refers to a nested part or item, it will have a locus tag with a target attribute like:
-    * <handNote scope="minor" scribe="Scribe_A"> <locus target="#Wellcome_Batak_36801_1 #Wellcome_Batak_36801_2" >a 2-62, b 2-7; b 8-22</locus> Gorak-gorahan, etc. Southern form of ta.</handNote>
+  /** If the scribe refers to a nested part or item, it will have a locus tag
+    * with a target attribute like: <handNote scope="minor" scribe="Scribe_A">
+    * <locus target="#Wellcome_Batak_36801_1 #Wellcome_Batak_36801_2" >a 2-62, b
+    * 2-7; b 8-22</locus> Gorak-gorahan, etc. Southern form of ta.</handNote>
     *
-    * If the scribe refers to the wrapper work then it has no locus tag.
-    * Here we extract the id of the work the scribe refers to and add it to a map workId -> contributors
+    * If the scribe refers to the wrapper work then it has no locus tag. Here we
+    * extract the id of the work the scribe refers to and add it to a map workId
+    * -> contributors
     */
   private def mapContributorToWorkId(
     workId: String,
     n: Node,
     maybeContributor: Option[Contributor[Unminted]],
-    scribesMap: Map[String, List[Contributor[Unminted]]]) =
+    scribesMap: Map[String, List[Contributor[Unminted]]]
+  ) =
     maybeContributor match {
       case None => scribesMap
       case Some(contributor) =>
@@ -159,20 +148,16 @@ object TeiContributors extends LabelDerivedIdentifiers {
 
     }
 
-  /**
-    * The scribe name can be directly within the handNote with attribute "scribe" tag like so:
-    * <handNote scope="minor" scribe="Scribe_A">
-    *   Gorak-gorahan, etc. Southern form of ta.
-    *  </handNote>
+  /** The scribe name can be directly within the handNote with attribute
+    * "scribe" tag like so: <handNote scope="minor" scribe="Scribe_A">
+    * Gorak-gorahan, etc. Southern form of ta. </handNote>
     *
     * or within a persName node with role="src" inside the handNote tag
-    * <handNote scope="sole">
-    *    <persName role="scr">Mahādeva Pāṇḍe</persName>
-    * </handNote>
-    * So we check for the existence of handNote/persName with role="src" or
-    * handNote with "scribe" attribute.
-    * If there is a persName tag, we pick that to construct the scribe name.
-    * Otherwise we use the text directly inside the handNote tag
+    * <handNote scope="sole"> <persName role="scr">Mahādeva Pāṇḍe</persName>
+    * </handNote> So we check for the existence of handNote/persName with
+    * role="src" or handNote with "scribe" attribute. If there is a persName
+    * tag, we pick that to construct the scribe name. Otherwise we use the text
+    * directly inside the handNote tag
     */
   private def parseScribeLabel(handNote: Node) = {
     val persNameNodes =
@@ -181,16 +166,18 @@ object TeiContributors extends LabelDerivedIdentifiers {
       case (Some(_), Nil)      => parseLabelFromHandNode(handNote)
       case (_, List(persName)) => Right(Some(persName.text.trim))
       case (_, list @ _ :: _) =>
-        getFromOriginalPersName(handNote, list).map {
-          case (label, _) => Some(label)
+        getFromOriginalPersName(handNote, list).map { case (label, _) =>
+          Some(label)
         }
       case (None, Nil) => Right(None)
     }
   }
 
-  /** Very annoyingly if the scribe is in this form:
-    *  <handNote scope="minor" scribe="Scribe_A"> <locus target="#Wellcome_Batak_36801_1 #Wellcome_Batak_36801_2" >a 2-62, b 2-7; b 8-22</locus> Gorak-gorahan, etc. Southern form of ta.</handNote>
-    *  we have to get the text of the handNote node without getting the text of the locus node.
+  /** Very annoyingly if the scribe is in this form: <handNote scope="minor"
+    * scribe="Scribe_A"> <locus target="#Wellcome_Batak_36801_1
+    * #Wellcome_Batak_36801_2" >a 2-62, b 2-7; b 8-22</locus> Gorak-gorahan,
+    * etc. Southern form of ta.</handNote> we have to get the text of the
+    * handNote node without getting the text of the locus node.
     */
   private def parseLabelFromHandNode(handNote: Node) =
     Right(
@@ -198,20 +185,24 @@ object TeiContributors extends LabelDerivedIdentifiers {
         handNote.child
           .collect { case node if node.label != "locus" => node.text }
           .mkString
-          .trim))
-
-  private def addIdsToMap(scribesMap: Map[String, List[Contributor[Unminted]]],
-                          c: Contributor[Unminted],
-                          nodeIds: List[String]) =
-    nodeIds
-      .map(
-        id => addIdToMap(id, scribesMap, c)
+          .trim
       )
+    )
+
+  private def addIdsToMap(
+    scribesMap: Map[String, List[Contributor[Unminted]]],
+    c: Contributor[Unminted],
+    nodeIds: List[String]
+  ) =
+    nodeIds
+      .map(id => addIdToMap(id, scribesMap, c))
       .toMap
 
-  private def addIdToMap(workId: String,
-                         scribesMap: Map[String, List[Contributor[Unminted]]],
-                         contributor: Contributor[Unminted]) =
+  private def addIdToMap(
+    workId: String,
+    scribesMap: Map[String, List[Contributor[Unminted]]],
+    contributor: Contributor[Unminted]
+  ) =
     (workId, scribesMap.getOrElse(workId, List()) :+ contributor)
 
   private def extractNestedWorkIds(n: Node) = {
@@ -223,10 +214,12 @@ object TeiContributors extends LabelDerivedIdentifiers {
       .flatten
   }
 
-  private def createContributor(label: String,
-                                role: ContributionRole,
-                                isFihrist: Boolean = false,
-                                id: String = "") =
+  private def createContributor(
+    label: String,
+    role: ContributionRole,
+    isFihrist: Boolean = false,
+    id: String = ""
+  ) =
     (label, id) match {
       case (l, _) if l.isEmpty =>
         Left(new RuntimeException(s"The contributor label is empty!"))
@@ -280,9 +273,8 @@ object TeiContributors extends LabelDerivedIdentifiers {
   private def getFromAuthorNode(author: Node) =
     Right((author.text.trim, (author \@ "key").trim))
 
-  /**
-    * Sometimes the id of the author is on the persName node
-    * and sometimes it is on the wrapping author node and we must deal with both cases.
+  /** Sometimes the id of the author is on the persName node and sometimes it is
+    * on the wrapping author node and we must deal with both cases.
     */
   private def getId(handNote: Node, persName: Node) = {
     val persNodeId = (persName \@ "key").trim

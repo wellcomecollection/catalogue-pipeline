@@ -17,15 +17,14 @@ object CalmNotes extends CalmRecordOps {
     ("UserWrapped4", NoteType.FindingAids),
     ("Copyright", NoteType.CopyrightNote),
     ("Arrangement", NoteType.ArrangementNote),
-    ("Copies", NoteType.LocationOfDuplicatesNote),
+    ("Copies", NoteType.LocationOfDuplicatesNote)
   )
 
   def apply(record: CalmRecord): List[Note] =
-    noteTypeMapping.flatMap {
-      case (key, noteType) =>
-        record
-          .getList(key)
-          .map(NormaliseText(_))
-          .map(contents => Note(contents = contents, noteType = noteType))
+    noteTypeMapping.flatMap { case (key, noteType) =>
+      record
+        .getList(key)
+        .map(NormaliseText(_))
+        .map(contents => Note(contents = contents, noteType = noteType))
     }
 }

@@ -9,7 +9,8 @@ object Sources {
 
   def findFirstLinkedDigitisedSierraWorkFor(
     target: Work.Visible[Identified],
-    sources: Seq[Work[Identified]]): Option[Work[Identified]] =
+    sources: Seq[Work[Identified]]
+  ): Option[Work[Identified]] =
     target match {
       // Audiovisual works are catalogued as multiple bib records, one for the physical
       // format and another for the digitised version, where available.
@@ -34,7 +35,8 @@ object Sources {
           .map(_.id.canonicalId)
 
         sources.find(source =>
-          digitisedLinkedIds.contains(source.state.canonicalId))
+          digitisedLinkedIds.contains(source.state.canonicalId)
+        )
 
       // Handle the case where the e-bib links to the physical bib, but not
       // the other way round.

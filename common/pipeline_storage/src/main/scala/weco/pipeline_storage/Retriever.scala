@@ -8,8 +8,10 @@ trait Retriever[T] {
 
   /** Retrieves document with the given ID from the store
     *
-    * @param id The id of the document
-    * @return A future containing the document
+    * @param id
+    *   The id of the document
+    * @return
+    *   A future containing the document
     */
   def apply(id: String): Future[T] =
     apply(Seq(id))

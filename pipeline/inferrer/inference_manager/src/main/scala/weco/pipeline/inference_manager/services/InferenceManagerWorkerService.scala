@@ -90,16 +90,16 @@ class InferenceManagerWorkerService[Destination](
   private def unmarshalResponse[Ctx] =
     FlowWithContext[
       (Try[HttpResponse], (DownloadedImage, InferrerAdapter)),
-      Ctx]
+      Ctx
+    ]
       .mapAsync(parallelism) {
         case (Success(response), (image, adapter)) =>
           adapter
             .parseResponse(response)
             .map(Success(_))
-            .recover {
-              case e: Exception =>
-                response.discardEntityBytes()
-                Failure(e)
+            .recover { case e: Exception =>
+              response.discardEntityBytes()
+              Failure(e)
             }
             .map { response =>
               AdapterResponseBundle(
@@ -117,15 +117,18 @@ class InferenceManagerWorkerService[Destination](
     FlowWithContext[AdapterResponseBundle[DownloadedImage], Ctx]
       .via {
         Flow[(AdapterResponseBundle[DownloadedImage], Ctx)]
-          .groupBy(maxOpenRequests * inferrerAdapters.size, _ match {
-            case (_, msg) => msg.messageId()
-          }, allowClosedSubstreamRecreation = true)
+          .groupBy(
+            maxOpenRequests * inferrerAdapters.size,
+            _ match {
+              case (_, msg) => msg.messageId()
+            },
+            allowClosedSubstreamRecreation = true
+          )
           .groupedWithin(inferrerAdapters.size, maxInferrerWait)
           .take(1)
           .map { elements =>
-            elements.foreach {
-              case (AdapterResponseBundle(image, _, _), _) =>
-                imageDownloader.delete.runWith(Source.single(image))
+            elements.foreach { case (AdapterResponseBundle(image, _, _), _) =>
+              imageDownloader.delete.runWith(Source.single(image))
             }
             elements
           }
@@ -141,21 +144,24 @@ class InferenceManagerWorkerService[Destination](
                 inferrerAdapters.map(_.getClass.getSimpleName) --
                   elements.map(_._1.adapter.getClass.getSimpleName).toSet
               throw new Exception(
-                s"Did not receive responses from $failedInferrers within $maxInferrerWait")
+                s"Did not receive responses from $failedInferrers within $maxInferrerWait"
+              )
             }
             elements
           }
           .map { elements =>
             val inferredData = elements.foldLeft(InferredData.empty) {
               case (
-                  data,
-                  (AdapterResponseBundle(_, adapter, Success(response)), _)) =>
+                    data,
+                    (AdapterResponseBundle(_, adapter, Success(response)), _)
+                  ) =>
                 adapter.augment(data, response.asInstanceOf[adapter.Response])
             }
             elements.head match {
               case (
-                  AdapterResponseBundle(DownloadedImage(image, _), _, _),
-                  ctx) =>
+                    AdapterResponseBundle(DownloadedImage(image, _), _, _),
+                    ctx
+                  ) =>
                 (image.transition[ImageState.Augmented](inferredData), ctx)
             }
           }

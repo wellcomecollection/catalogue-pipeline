@@ -20,7 +20,8 @@ import scala.util.Try
 class ElasticIndexer[T: Indexable](
   client: ElasticClient,
   index: Index,
-  config: IndexConfig)(implicit ec: ExecutionContext, encoder: Encoder[T])
+  config: IndexConfig
+)(implicit ec: ExecutionContext, encoder: Encoder[T])
     extends Indexer[T]
     with Logging {
 
@@ -40,11 +41,15 @@ class ElasticIndexer[T: Indexable](
 
   final def apply(documents: Seq[T]): Future[Either[Seq[T], Seq[T]]] =
     Future
-      .fromTry(Try(
-        require(documents.nonEmpty, "Cannot index an empty list of documents")))
+      .fromTry(
+        Try(
+          require(documents.nonEmpty, "Cannot index an empty list of documents")
+        )
+      )
       .flatMap { _ =>
         debug(
-          s"Indexing ${documents.map(doc => indexable.id(doc)).mkString(", ")}")
+          s"Indexing ${documents.map(doc => indexable.id(doc)).mkString(", ")}"
+        )
         val inserts = documents.map { document =>
           indexInto(index.name)
             .version(indexable.version(document))
@@ -71,7 +76,7 @@ class ElasticIndexer[T: Indexable](
               // https://twitter.com/smolrobots/status/1001226918107246592
               if (documents.size == 1) {
                 warn(s"HTTP 413 from Elasticsearch for a single document (${indexable
-                  .id(documents.head)})")
+                    .id(documents.head)})")
                 Future.successful(Left(documents))
               }
 
@@ -87,14 +92,16 @@ class ElasticIndexer[T: Indexable](
                 val traceId =
                   s"${createTraceId(documents)} => ${createTraceId(slice0)} / ${createTraceId(slice1)}}"
                 warn(
-                  s"HTTP 413 from Elasticsearch (${documents.size} documents); trying smaller slices (trace $traceId)")
+                  s"HTTP 413 from Elasticsearch (${documents.size} documents); trying smaller slices (trace $traceId)"
+                )
 
                 val futures: Future[Seq[Either[Seq[T], Seq[T]]]] =
                   Future
                     .sequence(Seq(apply(slice0), apply(slice1)))
                     .map { result =>
                       info(
-                        s"Received both results from HTTP 413 retry (trace $traceId)")
+                        s"Received both results from HTTP 413 retry (trace $traceId)"
+                      )
                       result
                     }
 
@@ -132,20 +139,23 @@ class ElasticIndexer[T: Indexable](
           }
       }
 
-  /** Did we try to PUT a document with a lower version than the existing version?
-    *
+  /** Did we try to PUT a document with a lower version than the existing
+    * version?
     */
   private def isVersionConflictException(
-    bulkResponseItem: BulkResponseItem): Boolean = {
+    bulkResponseItem: BulkResponseItem
+  ): Boolean = {
     // This error is returned by Elasticsearch when we try to PUT a document
     // with a lower version than the existing version.
     val alreadyIndexedHasHigherVersion = bulkResponseItem.error
       .exists(bulkError =>
-        bulkError.`type`.contains("version_conflict_engine_exception"))
+        bulkError.`type`.contains("version_conflict_engine_exception")
+      )
 
     if (alreadyIndexedHasHigherVersion) {
       info(
-        s"Skipping ${bulkResponseItem.id} because already indexed item has a higher version (${bulkResponseItem.error}")
+        s"Skipping ${bulkResponseItem.id} because already indexed item has a higher version (${bulkResponseItem.error}"
+      )
     }
 
     alreadyIndexedHasHigherVersion

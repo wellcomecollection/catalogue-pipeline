@@ -18,7 +18,8 @@ trait RecordOps[Record <: AbstractSierraRecord[_]] extends Logging {
 
 object RecordOps {
   implicit class SierraRecordOps[Record <: AbstractSierraRecord[_]](r: Record)(
-    implicit ops: RecordOps[Record]) {
+    implicit ops: RecordOps[Record]
+  ) {
     def linkedBibIds: List[SierraBibNumber] =
       ops.getBibIds(r)
 
@@ -47,7 +48,8 @@ object RecordOps {
       r.bibIds
 
     override def getUnlinkedBibIds(
-      r: SierraHoldingsRecord): List[SierraBibNumber] =
+      r: SierraHoldingsRecord
+    ): List[SierraBibNumber] =
       r.unlinkedBibIds
   }
 
@@ -56,7 +58,8 @@ object RecordOps {
       r.bibIds
 
     override def getUnlinkedBibIds(
-      r: SierraOrderRecord): List[SierraBibNumber] =
+      r: SierraOrderRecord
+    ): List[SierraBibNumber] =
       r.unlinkedBibIds
   }
 }
