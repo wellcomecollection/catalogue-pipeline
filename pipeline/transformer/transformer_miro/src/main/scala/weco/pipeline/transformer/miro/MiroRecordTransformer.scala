@@ -60,9 +60,10 @@ class MiroRecordTransformer
       transformed =>
         debug(s"Transformed record to $transformed")
         transformed
-    } recover { case e: Throwable =>
-      error("Failed to perform transform to unified item", e)
-      throw e
+    } recover {
+      case e: Throwable =>
+        error("Failed to perform transform to unified item", e)
+        throw e
     }
 
   private def doTransform(

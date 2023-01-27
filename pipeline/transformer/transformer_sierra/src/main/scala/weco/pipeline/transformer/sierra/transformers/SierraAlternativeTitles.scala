@@ -25,16 +25,18 @@ object SierraAlternativeTitles
   def apply(bibData: SierraBibData): List[String] =
     bibData
       .varfieldsWithTags("240", "130", "246")
-      .filterNot { varfield =>
-        varfield.marcTag.contains("246") && varfield.indicator2.contains("6")
+      .filterNot {
+        varfield =>
+          varfield.marcTag.contains("246") && varfield.indicator2.contains("6")
       }
-      .flatMap { varfield =>
-        varfield.subfields
-          .filter {
-            case Subfield("5", "UkLW") => false
-            case _                     => true
-          }
-          .contentString(" ")
+      .flatMap {
+        varfield =>
+          varfield.subfields
+            .filter {
+              case Subfield("5", "UkLW") => false
+              case _                     => true
+            }
+            .contentString(" ")
       }
       .distinct
 }

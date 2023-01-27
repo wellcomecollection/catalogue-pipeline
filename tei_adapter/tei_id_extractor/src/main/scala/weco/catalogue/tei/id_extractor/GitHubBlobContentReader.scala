@@ -12,8 +12,8 @@ import io.circe.Decoder
 import weco.json.JsonUtil._
 import weco.http.client.HttpClient
 
-class GitHubBlobContentReader(httpClient: HttpClient)(implicit
-  ac: ActorSystem
+class GitHubBlobContentReader(httpClient: HttpClient)(
+  implicit ac: ActorSystem
 ) {
   implicit val ec = ac.dispatcher
   def getBlob(uri: URI): Future[String] = {
@@ -44,13 +44,14 @@ class GitHubBlobContentReader(httpClient: HttpClient)(implicit
   ): Future[T] = {
     response match {
       case HttpResponse(StatusCodes.OK, _, entity, _) =>
-        Unmarshal(entity).to[T].recoverWith { case t: Throwable =>
-          Future.failed(
-            new RuntimeException(
-              s"Failed to unmarshal GitHub api response for url ${request.uri} with headers ${response.headers}: $entity",
-              t
+        Unmarshal(entity).to[T].recoverWith {
+          case t: Throwable =>
+            Future.failed(
+              new RuntimeException(
+                s"Failed to unmarshal GitHub api response for url ${request.uri} with headers ${response.headers}: $entity",
+                t
+              )
             )
-          )
         }
       case HttpResponse(code, _, entity, _) =>
         Unmarshal(entity).to[String].transform {

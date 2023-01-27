@@ -22,41 +22,42 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.language.higherKinds
 
 object Main extends WellcomeTypesafeApp {
-  runWithConfig { config: Config =>
-    implicit val actorSystem: ActorSystem =
-      ActorSystem("main-actor-system")
-    implicit val executionContext: ExecutionContext =
-      actorSystem.dispatcher
+  runWithConfig {
+    config: Config =>
+      implicit val actorSystem: ActorSystem =
+        ActorSystem("main-actor-system")
+      implicit val executionContext: ExecutionContext =
+        actorSystem.dispatcher
 
-    val workGraphStore = new WorkGraphStore(
-      workNodeDao = new WorkNodeDao(
-        dynamoClient = DynamoDbClient.builder().build(),
-        dynamoConfig = DynamoBuilder.buildDynamoConfig(config)
+      val workGraphStore = new WorkGraphStore(
+        workNodeDao = new WorkNodeDao(
+          dynamoClient = DynamoDbClient.builder().build(),
+          dynamoConfig = DynamoBuilder.buildDynamoConfig(config)
+        )
       )
-    )
 
-    val lockingService =
-      LockingBuilder
-        .buildDynamoLockingService[MatcherResult, Future](
-          config,
-          namespace = "locking"
+      val lockingService =
+        LockingBuilder
+          .buildDynamoLockingService[MatcherResult, Future](
+            config,
+            namespace = "locking"
+          )
+
+      val workMatcher = new WorkMatcher(workGraphStore, lockingService)
+
+      val retriever =
+        new ElasticWorkStubRetriever(
+          client = ElasticBuilder.buildElasticClient(config),
+          index = Index(config.requireString("es.index"))
         )
 
-    val workMatcher = new WorkMatcher(workGraphStore, lockingService)
-
-    val retriever =
-      new ElasticWorkStubRetriever(
-        client = ElasticBuilder.buildElasticClient(config),
-        index = Index(config.requireString("es.index"))
+      new MatcherWorkerService(
+        PipelineStorageStreamBuilder.buildPipelineStorageConfig(config),
+        retriever = retriever,
+        msgStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
+        msgSender = SNSBuilder
+          .buildSNSMessageSender(config, subject = "Sent from the matcher"),
+        workMatcher = workMatcher
       )
-
-    new MatcherWorkerService(
-      PipelineStorageStreamBuilder.buildPipelineStorageConfig(config),
-      retriever = retriever,
-      msgStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
-      msgSender = SNSBuilder
-        .buildSNSMessageSender(config, subject = "Sent from the matcher"),
-      workMatcher = workMatcher
-    )
   }
 }

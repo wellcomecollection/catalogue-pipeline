@@ -55,17 +55,18 @@ trait ElasticRetriever[T] extends Retriever[T] with Logging {
             // See https://www.elastic.co/guide/en/elasticsearch/reference/6.8/docs-multi-get.html
             val documents = result.docs
               .zip(ids)
-              .map { case (getResponse, id) =>
-                if (getResponse.found) {
-                  id -> parseGetResponse(getResponse)
-                } else {
-                  id -> Failure(
-                    new RetrieverNotFoundException(
-                      id,
-                      Some(getResponse.sourceAsString)
+              .map {
+                case (getResponse, id) =>
+                  if (getResponse.found) {
+                    id -> parseGetResponse(getResponse)
+                  } else {
+                    id -> Failure(
+                      new RetrieverNotFoundException(
+                        id,
+                        Some(getResponse.sourceAsString)
+                      )
                     )
-                  )
-                }
+                  }
               }
               .toMap
 

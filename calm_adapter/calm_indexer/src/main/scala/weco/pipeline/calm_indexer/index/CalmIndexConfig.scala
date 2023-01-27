@@ -10,12 +10,13 @@ object CalmIndexConfig extends IndexConfigFields {
   def apply(): IndexConfig =
     IndexConfig(
       properties(
-        fieldNames.map(fieldName =>
-          textKeywordField(
-            name = fieldName,
-            textFieldName = "english",
-            analyzerName = "english"
-          )
+        fieldNames.map(
+          fieldName =>
+            textKeywordField(
+              name = fieldName,
+              textFieldName = "english",
+              analyzerName = "english"
+            )
         )
       )
         .dynamic(DynamicMapping.Strict),

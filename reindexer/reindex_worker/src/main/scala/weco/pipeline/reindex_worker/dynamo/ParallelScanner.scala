@@ -13,8 +13,8 @@ import scala.concurrent.{ExecutionContext, Future}
   *
   * https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Scan.html#Scan.ParallelScan
   */
-class ParallelScanner(implicit
-  val dynamoClient: DynamoDbClient,
+class ParallelScanner(
+  implicit val dynamoClient: DynamoDbClient,
   val ec: ExecutionContext
 ) extends ScanRequestScanner {
 

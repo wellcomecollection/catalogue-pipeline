@@ -19,21 +19,25 @@ object TeiSubjects extends LabelDerivedIdentifiers {
     * </textClass> </profileDesc>
     */
   def apply(xml: Elem): List[Subject[IdState.Unminted]] =
-    (xml \\ "profileDesc" \\ "keywords").flatMap { keywords =>
-      (keywords \\ "term").flatMap { term =>
-        val maybeLabel = NormaliseText(term.text)
+    (xml \\ "profileDesc" \\ "keywords").flatMap {
+      keywords =>
+        (keywords \\ "term").flatMap {
+          term =>
+            val maybeLabel = NormaliseText(term.text)
 
-        maybeLabel.map(label => {
-          val reference = parseReference(term)
-          val id = createIdentifier(keywords, reference, label)
+            maybeLabel.map(
+              label => {
+                val reference = parseReference(term)
+                val id = createIdentifier(keywords, reference, label)
 
-          Subject(
-            id = id,
-            label = label,
-            concepts = List(Concept(label))
-          )
-        })
-      }
+                Subject(
+                  id = id,
+                  label = label,
+                  concepts = List(Concept(label))
+                )
+              }
+            )
+        }
     }.toList
 
   private def createIdentifier(

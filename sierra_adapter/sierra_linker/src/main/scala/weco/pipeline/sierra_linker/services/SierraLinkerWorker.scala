@@ -21,10 +21,8 @@ class SierraLinkerWorker[
   sqsStream: SQSStream[NotificationMessage],
   linkStore: LinkStore[Id, Record],
   messageSender: MessageSender[Destination]
-)(implicit
-  decoder: Decoder[Record],
-  encoder: Encoder[Record]
-) extends Runnable {
+)(implicit decoder: Decoder[Record], encoder: Encoder[Record])
+    extends Runnable {
 
   private def process(message: NotificationMessage): Future[Unit] =
     Future.fromTry {

@@ -26,8 +26,8 @@ import scala.concurrent.{ExecutionContext, Future}
   *   - change leaf/blade and leaf/tip to root/branch/leaf/blade and
   *     root/branch/leaf/tip, respectively.
   */
-case class PathsModifier(pathsService: PathsService)(implicit
-  ec: ExecutionContext
+case class PathsModifier(pathsService: PathsService)(
+  implicit ec: ExecutionContext
 ) extends Logging {
 
   def modifyPaths(path: String): Future[Seq[Work.Visible[Merged]]] = {
@@ -46,8 +46,9 @@ case class PathsModifier(pathsService: PathsService)(implicit
   ): Future[Option[Work.Visible[Merged]]] =
     pathsService.getParentPath(path) flatMap {
       case Some(parentPath) =>
-        pathsService.getWorkWithPath(path) map { work: Work.Visible[Merged] =>
-          Some(ChildWork(parentPath, work))
+        pathsService.getWorkWithPath(path) map {
+          work: Work.Visible[Merged] =>
+            Some(ChildWork(parentPath, work))
         }
       case _ => Future.successful(None) // This is expected, if parent is root
 
@@ -73,9 +74,10 @@ case class PathsModifier(pathsService: PathsService)(implicit
   ): Future[Seq[Work.Visible[Merged]]] = {
     pathsService
       .getChildWorks(path)
-      .map { childWorks =>
-        info(s"Received ${childWorks.size} children under $path")
-        childWorks
+      .map {
+        childWorks =>
+          info(s"Received ${childWorks.size} children under $path")
+          childWorks
       }
   }
 

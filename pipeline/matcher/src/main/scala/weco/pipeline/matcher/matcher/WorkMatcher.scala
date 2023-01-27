@@ -136,19 +136,21 @@ class WorkMatcher(
   ): Set[MatchedIdentifiers] =
     nodes
       .groupBy { _.componentIds }
-      .map { case (_, workNodes) =>
-        // The matcher graph may include nodes for Works it hasn't seen yet, or which
-        // don't exist.  These are placeholders, in case we see the Work later -- but we
-        // shouldn't expose their existence to other services.
-        //
-        // We only send identifiers that correspond to real Works.
-        val identifiers =
-          workNodes
-            .collect { case WorkNode(id, _, _, Some(sourceWorkData)) =>
-              WorkIdentifier(id, sourceWorkData.version)
-            }
+      .map {
+        case (_, workNodes) =>
+          // The matcher graph may include nodes for Works it hasn't seen yet, or which
+          // don't exist.  These are placeholders, in case we see the Work later -- but we
+          // shouldn't expose their existence to other services.
+          //
+          // We only send identifiers that correspond to real Works.
+          val identifiers =
+            workNodes
+              .collect {
+                case WorkNode(id, _, _, Some(sourceWorkData)) =>
+                  WorkIdentifier(id, sourceWorkData.version)
+              }
 
-        MatchedIdentifiers(identifiers)
+          MatchedIdentifiers(identifiers)
       }
       .filter { _.identifiers.nonEmpty }
       .toSet

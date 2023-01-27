@@ -26,26 +26,28 @@ trait TransformableOps[Record <: AbstractSierraRecord[_]] {
 
 object TransformableOps {
   implicit class SierraTransformableOps(t: SierraTransformable) {
-    def add[Record <: AbstractSierraRecord[_]](r: Record)(implicit
-      ops: TransformableOps[Record]
-    ): Option[SierraTransformable] =
+    def add[Record <: AbstractSierraRecord[_]](
+      r: Record
+    )(implicit ops: TransformableOps[Record]): Option[SierraTransformable] =
       ops
         .add(t, r)
-        .map { transformable =>
-          transformable.copy(
-            modifiedTime = Seq(transformable.modifiedTime, r.modifiedDate).max
-          )
+        .map {
+          transformable =>
+            transformable.copy(
+              modifiedTime = Seq(transformable.modifiedTime, r.modifiedDate).max
+            )
         }
 
-    def remove[Record <: AbstractSierraRecord[_]](r: Record)(implicit
-      ops: TransformableOps[Record]
-    ): Option[SierraTransformable] =
+    def remove[Record <: AbstractSierraRecord[_]](
+      r: Record
+    )(implicit ops: TransformableOps[Record]): Option[SierraTransformable] =
       ops
         .remove(t, r)
-        .map { transformable =>
-          transformable.copy(
-            modifiedTime = Seq(transformable.modifiedTime, r.modifiedDate).max
-          )
+        .map {
+          transformable =>
+            transformable.copy(
+              modifiedTime = Seq(transformable.modifiedTime, r.modifiedDate).max
+            )
         }
   }
 
@@ -185,10 +187,11 @@ object TransformableOps {
 
       val newRecords =
         getRecords(t)
-          .filterNot { case (id, existing) =>
-            val hasMatchingId = id == record.id
+          .filterNot {
+            case (id, existing) =>
+              val hasMatchingId = id == record.id
 
-            hasMatchingId && shouldReplaceExisting(existing, record)
+              hasMatchingId && shouldReplaceExisting(existing, record)
           }
 
       if (getRecords(t) != newRecords) {

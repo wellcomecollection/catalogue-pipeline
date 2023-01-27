@@ -114,10 +114,11 @@ case class TeiData(
       // corresponding Works.
       internalWorks.flatMap(_.workData.languages) match {
         case Nil =>
-          internalWorks.map { w =>
-            w.copy(
-              workData = w.workData.copy(languages = topLevel.languages)
-            )
+          internalWorks.map {
+            w =>
+              w.copy(
+                workData = w.workData.copy(languages = topLevel.languages)
+              )
           }
 
         case _ => internalWorks

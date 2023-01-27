@@ -143,7 +143,8 @@ object TeiLanguageData extends Logging {
   ): Option[Language] =
     MarcLanguageCodeList
       .fromName(name)
-      .map { lang =>
-        lang.copy(label = overrideLabel)
+      .map {
+        lang =>
+          lang.copy(label = overrideLabel)
       }
 }

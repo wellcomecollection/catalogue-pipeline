@@ -21,7 +21,8 @@ object Main extends WellcomeTypesafeApp {
     )
   )
 
-  runWithConfig { config =>
-    transformer.run(config)
+  runWithConfig {
+    config =>
+      transformer.run(config)
   }
 }

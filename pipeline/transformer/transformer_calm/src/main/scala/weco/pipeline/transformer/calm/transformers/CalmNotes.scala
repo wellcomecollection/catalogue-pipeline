@@ -21,10 +21,11 @@ object CalmNotes extends CalmRecordOps {
   )
 
   def apply(record: CalmRecord): List[Note] =
-    noteTypeMapping.flatMap { case (key, noteType) =>
-      record
-        .getList(key)
-        .map(NormaliseText(_))
-        .map(contents => Note(contents = contents, noteType = noteType))
+    noteTypeMapping.flatMap {
+      case (key, noteType) =>
+        record
+          .getList(key)
+          .map(NormaliseText(_))
+          .map(contents => Note(contents = contents, noteType = noteType))
     }
 }

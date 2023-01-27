@@ -66,13 +66,15 @@ class MetsAdapterWorkerService[Destination](
 
   def unwrapMessage =
     Flow[(SQSMessage, NotificationMessage)]
-      .map { case (msg, NotificationMessage(body)) =>
-        (msg, fromJson[BagRegistrationNotification](body).toEither)
+      .map {
+        case (msg, NotificationMessage(body)) =>
+          (msg, fromJson[BagRegistrationNotification](body).toEither)
       }
       .via(catchErrors)
-      .map { case (msg, notification) =>
-        info(s"Processing notification $notification")
-        (Context(msg, notification.externalIdentifier), notification)
+      .map {
+        case (msg, notification) =>
+          info(s"Processing notification $notification")
+          (Context(msg, notification.externalIdentifier), notification)
       }
 
   // Bags in the storage service are grouped by "space", e.g. "digitised" or

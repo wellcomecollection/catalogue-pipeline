@@ -72,13 +72,15 @@ object SierraPhysicalItemOrder {
         overrideOrder.contains(itemNumber)
     }
 
-    val sortedInOrder = inOrder.sortBy { it =>
-      val itemNumber = SierraItemNumber(it.id.sourceIdentifier.value)
-      overrideOrder.indexOf(itemNumber)
+    val sortedInOrder = inOrder.sortBy {
+      it =>
+        val itemNumber = SierraItemNumber(it.id.sourceIdentifier.value)
+        overrideOrder.indexOf(itemNumber)
     }
 
-    val sortedOutOfOrder = outOfOrder.sortBy { it =>
-      it.id.sourceIdentifier.value
+    val sortedOutOfOrder = outOfOrder.sortBy {
+      it =>
+        it.id.sourceIdentifier.value
     }
 
     sortedInOrder ++ sortedOutOfOrder

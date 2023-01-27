@@ -21,8 +21,8 @@ class IngestorMain[In, Out](
   outputIndexField: String,
   indexConfig: IndexConfig,
   transform: In => Out
-)(implicit
-  decoder: Decoder[In],
+)(
+  implicit decoder: Decoder[In],
   encoder: Encoder[Out],
   indexable: Indexable[Out]
 ) {

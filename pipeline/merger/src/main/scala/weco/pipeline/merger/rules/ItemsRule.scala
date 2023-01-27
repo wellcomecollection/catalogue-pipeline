@@ -41,8 +41,9 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
         mergeMetsIntoSierraTarget,
         mergeSingleMiroIntoSingleOrZeroItemSierraTarget,
         mergeDigitalIntoPhysicalSierraTarget
-      ).flatMap { rule =>
-        rule.mergedSources(target, sources)
+      ).flatMap {
+        rule =>
+          rule.mergedSources(target, sources)
       } ++ findFirstLinkedDigitisedSierraWorkFor(target, sources)
         ++ knownDuplicateSources(target, sources)
     ).distinct
@@ -197,13 +198,17 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
       sources: NonEmptyList[Work[Identified]]
     ): FieldData =
       findFirstLinkedDigitisedSierraWorkFor(target, sources.toList)
-        .map { digitisedWork =>
-          val onlineItems = digitisedWork.data.items
-            .filter { it =>
-              it.locations.exists(_.locationType == LocationType.OnlineResource)
-            }
+        .map {
+          digitisedWork =>
+            val onlineItems = digitisedWork.data.items
+              .filter {
+                it =>
+                  it.locations.exists(
+                    _.locationType == LocationType.OnlineResource
+                  )
+              }
 
-          target.data.items ++ onlineItems
+            target.data.items ++ onlineItems
         }
         .getOrElse(Nil)
   }

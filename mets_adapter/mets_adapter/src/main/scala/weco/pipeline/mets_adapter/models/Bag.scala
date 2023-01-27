@@ -20,42 +20,44 @@ case class Bag(
 ) {
 
   def metsSourceData: Either[Throwable, MetsSourceData] =
-    parsedVersion.flatMap { version =>
-      // If the bag doesn't contain any files, then it's empty and the
-      // METS file has been deleted.
-      // See https://github.com/wellcomecollection/platform/issues/4872
-      if (manifest.files.isEmpty) {
-        Right(
-          DeletedMetsFile(
-            createdDate = createdDate,
-            version = version
-          )
-        )
-      } else {
-
-        metsFile.map { filename =>
-          // If the only file in the bag is the METS file, that means
-          // the bag has been deleted.
-          // See https://github.com/wellcomecollection/platform/issues/4893
-          if (containsOnlyMetsFile(filename)) {
+    parsedVersion.flatMap {
+      version =>
+        // If the bag doesn't contain any files, then it's empty and the
+        // METS file has been deleted.
+        // See https://github.com/wellcomecollection/platform/issues/4872
+        if (manifest.files.isEmpty) {
+          Right(
             DeletedMetsFile(
               createdDate = createdDate,
               version = version
             )
-          } else {
-            MetsFileWithImages(
-              root = S3ObjectLocationPrefix(
-                bucket = location.bucket,
-                keyPrefix = location.path
-              ),
-              filename = filename,
-              manifestations = manifestations,
-              createdDate = createdDate,
-              version = version
-            )
+          )
+        } else {
+
+          metsFile.map {
+            filename =>
+              // If the only file in the bag is the METS file, that means
+              // the bag has been deleted.
+              // See https://github.com/wellcomecollection/platform/issues/4893
+              if (containsOnlyMetsFile(filename)) {
+                DeletedMetsFile(
+                  createdDate = createdDate,
+                  version = version
+                )
+              } else {
+                MetsFileWithImages(
+                  root = S3ObjectLocationPrefix(
+                    bucket = location.bucket,
+                    keyPrefix = location.path
+                  ),
+                  filename = filename,
+                  manifestations = manifestations,
+                  createdDate = createdDate,
+                  version = version
+                )
+              }
           }
         }
-      }
     }
 
   private def containsOnlyMetsFile(metsFile: String): Boolean =

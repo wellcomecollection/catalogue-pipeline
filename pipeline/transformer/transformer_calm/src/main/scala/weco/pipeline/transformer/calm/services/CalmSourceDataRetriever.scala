@@ -17,13 +17,14 @@ class CalmSourceDataRetriever(
   ): Either[ReadError, Identified[Version[String, Int], CalmSourceData]] =
     recordReadable
       .get(p.location)
-      .map { case Identified(_, record) =>
-        Identified(
-          Version(p.id, p.version),
-          CalmSourceData(
-            record = record,
-            isDeleted = p.isDeleted
+      .map {
+        case Identified(_, record) =>
+          Identified(
+            Version(p.id, p.version),
+            CalmSourceData(
+              record = record,
+              isDeleted = p.isDeleted
+            )
           )
-        )
       }
 }

@@ -15,16 +15,17 @@ class MemoryIndexer[T: Indexable](
     Future.successful(())
 
   def apply(documents: Seq[T]): Future[Either[Seq[T], Seq[T]]] = synchronized {
-    documents.foreach { doc =>
-      index.get(indexable.id(doc)) match {
-        case Some(storedDoc)
-            if indexable.version(storedDoc) > indexable.version(doc) =>
-          info(
-            s"Skipping ${indexable.id(doc)} because already indexed item has a higher version"
-          )
-          ()
-        case _ => index.put(indexable.id(doc), doc)
-      }
+    documents.foreach {
+      doc =>
+        index.get(indexable.id(doc)) match {
+          case Some(storedDoc)
+              if indexable.version(storedDoc) > indexable.version(doc) =>
+            info(
+              s"Skipping ${indexable.id(doc)} because already indexed item has a higher version"
+            )
+            ()
+          case _ => index.put(indexable.id(doc), doc)
+        }
 
     }
 

@@ -54,10 +54,11 @@ case class CalmSearchResponse(root: Elem, cookie: Cookie)
   def parse: Either[Throwable, CalmSession] =
     responseNode
       .flatMap(_.childWithTag("SearchResult"))
-      .flatMap { result =>
-        Try(result.text.toInt)
-          .map(numHits => CalmSession(numHits, cookie))
-          .toEither
+      .flatMap {
+        result =>
+          Try(result.text.toInt)
+            .map(numHits => CalmSession(numHits, cookie))
+            .toEither
       }
 }
 
@@ -98,23 +99,25 @@ case class CalmSummaryResponse(
   def parse: Either[Throwable, CalmRecord] =
     responseNode
       .flatMap(_.childWithTag("SummaryHeaderResult"))
-      .flatMap { node =>
-        // The response contains an inner XML document (ISO-8859-1 encoded)
-        // within the top level UTF-8 one, so we need to parse this here if
-        // it exists
-        Try(XML.loadString(node.text)).toEither.left
-          .flatMap(_ => node.childWithTag("SummaryList"))
+      .flatMap {
+        node =>
+          // The response contains an inner XML document (ISO-8859-1 encoded)
+          // within the top level UTF-8 one, so we need to parse this here if
+          // it exists
+          Try(XML.loadString(node.text)).toEither.left
+            .flatMap(_ => node.childWithTag("SummaryList"))
       }
       .flatMap(_.childWithTag("Summary"))
       .map(_ \ "_")
-      .flatMap { nodes =>
-        val data = toMapping(nodes)
-        data.get("RecordID") match {
-          case Some(List(id)) =>
-            Right(CalmRecord(id, data, retrievedAt))
-          case Some(_) => Left(new Exception("Multiple RecordIDs found"))
-          case None    => Left(new Exception("RecordID not found"))
-        }
+      .flatMap {
+        nodes =>
+          val data = toMapping(nodes)
+          data.get("RecordID") match {
+            case Some(List(id)) =>
+              Right(CalmRecord(id, data, retrievedAt))
+            case Some(_) => Left(new Exception("Multiple RecordIDs found"))
+            case None    => Left(new Exception("RecordID not found"))
+          }
       }
 
   def toMapping(nodes: NodeSeq): Map[String, List[String]] =

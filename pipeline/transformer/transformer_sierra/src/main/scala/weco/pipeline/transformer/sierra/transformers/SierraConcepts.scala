@@ -96,12 +96,13 @@ trait SierraConcepts
   protected def getSubdivisions(
     subdivisionSubfields: List[Subfield]
   ): List[AbstractConcept[IdState.Unminted]] =
-    subdivisionSubfields.map { subfield =>
-      subfield.tag match {
-        case "v" | "x" =>
-          Concept(label = subfield.content).normalised.identifiable()
-        case "y" => ParsedPeriod(label = subfield.content).identifiable()
-        case "z" => Place(label = subfield.content).normalised.identifiable()
-      }
+    subdivisionSubfields.map {
+      subfield =>
+        subfield.tag match {
+          case "v" | "x" =>
+            Concept(label = subfield.content).normalised.identifiable()
+          case "y" => ParsedPeriod(label = subfield.content).identifiable()
+          case "z" => Place(label = subfield.content).normalised.identifiable()
+        }
     }
 }

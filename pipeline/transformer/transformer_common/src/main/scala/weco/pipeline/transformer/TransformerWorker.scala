@@ -125,19 +125,21 @@ final class TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest](
       case Right((transformedWork, key)) =>
         retriever
           .apply(workIndexable.id(transformedWork))
-          .map { storedWork =>
-            if (shouldSend(transformedWork, storedWork)) {
-              Right(Some((transformedWork, key)))
-            } else {
-              info(
-                s"$name: from $key transformed work with id ${transformedWork.id}; already in pipeline so not re-sending"
-              )
-              Right(None)
-            }
+          .map {
+            storedWork =>
+              if (shouldSend(transformedWork, storedWork)) {
+                Right(Some((transformedWork, key)))
+              } else {
+                info(
+                  s"$name: from $key transformed work with id ${transformedWork.id}; already in pipeline so not re-sending"
+                )
+                Right(None)
+              }
           }
-          .recover { case err: Throwable =>
-            debug(s"Unable to retrieve work $key: $err")
-            Right(Some((transformedWork, key)))
+          .recover {
+            case err: Throwable =>
+              debug(s"Unable to retrieve work $key: $err")
+              Right(Some((transformedWork, key)))
           }
 
       case Left(err) => Future.successful(Left(err))
@@ -163,18 +165,20 @@ final class TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest](
   private def getSourceData(p: Payload): Result[(SourceData, Int)] =
     sourceDataRetriever
       .lookupSourceData(p)
-      .map { case Identified(Version(storedId, storedVersion), sourceData) =>
-        if (storedId != p.id) {
-          warn(
-            s"Stored ID ($storedId) does not match ID from message (${p.id})"
-          )
-        }
+      .map {
+        case Identified(Version(storedId, storedVersion), sourceData) =>
+          if (storedId != p.id) {
+            warn(
+              s"Stored ID ($storedId) does not match ID from message (${p.id})"
+            )
+          }
 
-        (sourceData, storedVersion)
+          (sourceData, storedVersion)
       }
       .left
-      .map { err =>
-        StoreReadError(err, p)
+      .map {
+        err =>
+          StoreReadError(err, p)
       }
 
   private def shouldSend(

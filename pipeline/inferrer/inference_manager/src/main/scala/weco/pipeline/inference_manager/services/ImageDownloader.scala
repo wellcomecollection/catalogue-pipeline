@@ -49,8 +49,9 @@ class ImageDownloader[Ctx](
       .map(createImageFileRequest)
       .via(requestPool.asContextFlow)
       .mapAsync(parallelism)(saveImageFile)
-      .map { case (image, path) =>
-        models.DownloadedImage(image, path)
+      .map {
+        case (image, path) =>
+          models.DownloadedImage(image, path)
       }
 
   def delete: Sink[DownloadedImage, Future[Done]] =
@@ -82,8 +83,9 @@ class ImageDownloader[Ctx](
       val path = getLocalImagePath(image)
       response.entity.dataBytes
         .runWith(fileWriter.write(path))
-        .map { _ =>
-          (image, path)
+        .map {
+          _ =>
+            (image, path)
         }
     case (Success(failedResponse), (uri, image)) =>
       failedResponse.discardEntityBytes()
@@ -98,25 +100,26 @@ class ImageDownloader[Ctx](
   private def getImageUri(locations: List[DigitalLocation]): Option[Uri] =
     locations
       .find(_.locationType == LocationType.IIIFImageAPI)
-      .map { location =>
-        Uri(location.url) match {
-          case uri @ Uri(_, _, path, _, _)
-              if path.endsWith("info.json", ignoreTrailingSlash = true) =>
-            uri.withPath(
-              Uri.Path(
-                path
-                  .toString()
-                  .replace(
-                    "info.json",
-                    // DLCS provides a thumbnails service which only serves certain sizes of image.
-                    // Requests for these don't touch the image server and so, as we're performing
-                    // lots of requests, we use 400x400 thumbnails and resize them ourselves later on.
-                    "full/!400,400/0/default.jpg"
-                  )
+      .map {
+        location =>
+          Uri(location.url) match {
+            case uri @ Uri(_, _, path, _, _)
+                if path.endsWith("info.json", ignoreTrailingSlash = true) =>
+              uri.withPath(
+                Uri.Path(
+                  path
+                    .toString()
+                    .replace(
+                      "info.json",
+                      // DLCS provides a thumbnails service which only serves certain sizes of image.
+                      // Requests for these don't touch the image server and so, as we're performing
+                      // lots of requests, we use 400x400 thumbnails and resize them ourselves later on.
+                      "full/!400,400/0/default.jpg"
+                    )
+                )
               )
-            )
-          case other => other
-        }
+            case other => other
+          }
       }
 }
 

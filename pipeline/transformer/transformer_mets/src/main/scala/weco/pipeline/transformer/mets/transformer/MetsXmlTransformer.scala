@@ -38,12 +38,16 @@ class MetsXmlTransformer(store: Readable[S3ObjectLocation, String])
 
       case metsFile @ MetsFileWithImages(_, _, manifestations, _, _) =>
         getMetsXml(metsFile.xmlLocation)
-          .flatMap { root =>
-            if (manifestations.isEmpty) {
-              transformWithoutManifestations(root)
-            } else {
-              transformWithManifestations(root, metsFile.manifestationLocations)
-            }
+          .flatMap {
+            root =>
+              if (manifestations.isEmpty) {
+                transformWithoutManifestations(root)
+              } else {
+                transformWithManifestations(
+                  root,
+                  metsFile.manifestationLocations
+                )
+              }
           }
     }
 
@@ -92,18 +96,19 @@ class MetsXmlTransformer(store: Readable[S3ObjectLocation, String])
     manifestations: List[S3ObjectLocation]
   ): Result[MetsXml] =
     root.firstManifestationFilename
-      .flatMap { name =>
-        manifestations.find(loc =>
-          loc.key.endsWith(name) || loc.key.endsWith(s"$name.xml")
-        ) match {
-          case Some(location) => Right(location)
-          case None =>
-            Left(
-              new Exception(
-                s"Could not find manifestation with filename: $name"
+      .flatMap {
+        name =>
+          manifestations.find(
+            loc => loc.key.endsWith(name) || loc.key.endsWith(s"$name.xml")
+          ) match {
+            case Some(location) => Right(location)
+            case None =>
+              Left(
+                new Exception(
+                  s"Could not find manifestation with filename: $name"
+                )
               )
-            )
-        }
+          }
       }
       .flatMap(getMetsXml)
 

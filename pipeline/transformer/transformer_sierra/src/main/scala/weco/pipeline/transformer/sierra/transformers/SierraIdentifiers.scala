@@ -56,12 +56,13 @@ object SierraIdentifiers
       .subfieldsWithTag("020" -> "a")
       .contents
       .distinct
-      .map { value =>
-        SourceIdentifier(
-          identifierType = IdentifierType.ISBN,
-          ontologyType = "Work",
-          value = value.trim
-        )
+      .map {
+        value =>
+          SourceIdentifier(
+            identifierType = IdentifierType.ISBN,
+            ontologyType = "Work",
+            value = value.trim
+          )
       }
 
   /** Find ISSN (International Standard Serial Number) identifiers from MARC 022
@@ -77,12 +78,13 @@ object SierraIdentifiers
       .subfieldsWithTag("022" -> "a")
       .contents
       .distinct
-      .map { value =>
-        SourceIdentifier(
-          identifierType = IdentifierType.ISSN,
-          ontologyType = "Work",
-          value = value.trim
-        )
+      .map {
+        value =>
+          SourceIdentifier(
+            identifierType = IdentifierType.ISSN,
+            ontologyType = "Work",
+            value = value.trim
+          )
       }
 
   /** Find the digcodes from MARC 759 ǂa.
@@ -115,17 +117,19 @@ object SierraIdentifiers
 
     val digcodeValues =
       marcValues
-        .collect { case digcodeRegex(d) =>
-          d
+        .collect {
+          case digcodeRegex(d) =>
+            d
         }
 
     digcodeValues.distinct
-      .map { value =>
-        SourceIdentifier(
-          identifierType = IdentifierType.WellcomeDigcode,
-          ontologyType = "Work",
-          value = value
-        )
+      .map {
+        value =>
+          SourceIdentifier(
+            identifierType = IdentifierType.WellcomeDigcode,
+            ontologyType = "Work",
+            value = value
+          )
       }
   }
 
@@ -137,12 +141,13 @@ object SierraIdentifiers
   private def getIconographicNumbers(
     bibData: SierraBibData
   ): List[SourceIdentifier] =
-    SierraIconographicNumber(bibData).map { iconographicNumber =>
-      SourceIdentifier(
-        identifierType = IdentifierType.IconographicNumber,
-        ontologyType = "Work",
-        value = iconographicNumber
-      )
+    SierraIconographicNumber(bibData).map {
+      iconographicNumber =>
+        SourceIdentifier(
+          identifierType = IdentifierType.IconographicNumber,
+          ontologyType = "Work",
+          value = iconographicNumber
+        )
     }.toList
 
   /** Add the ESTC references from MARC 510 ǂc.
@@ -154,8 +159,9 @@ object SierraIdentifiers
     bibData: SierraBibData
   ): List[SourceIdentifier] =
     bibData.varFields
-      .filter { vf =>
-        vf.marcTag.contains("510")
+      .filter {
+        vf =>
+          vf.marcTag.contains("510")
       }
       .map { _.subfields }
       .collect {
@@ -175,12 +181,13 @@ object SierraIdentifiers
         case estcRegex(identifier) => Some(identifier)
       }
       .flatten
-      .map { value =>
-        SourceIdentifier(
-          identifierType = IdentifierType.ESTC,
-          ontologyType = "Work",
-          value = value
-        )
+      .map {
+        value =>
+          SourceIdentifier(
+            identifierType = IdentifierType.ESTC,
+            ontologyType = "Work",
+            value = value
+          )
       }
 
   private val estcRegex = new Regex("([TWRNPS][0-9]+)")

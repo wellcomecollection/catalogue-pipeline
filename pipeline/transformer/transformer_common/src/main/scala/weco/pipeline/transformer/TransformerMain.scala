@@ -22,9 +22,7 @@ class TransformerMain[Payload <: SourcePayload, SourceData](
   sourceName: String,
   transformer: Transformer[SourceData],
   sourceDataRetriever: SourceDataRetriever[Payload, SourceData]
-)(implicit
-  decoder: Decoder[Payload]
-) {
+)(implicit decoder: Decoder[Payload]) {
   def run(config: Config): Runnable = {
     implicit val ec: ExecutionContext =
       ActorSystem("main-actor-system").dispatcher

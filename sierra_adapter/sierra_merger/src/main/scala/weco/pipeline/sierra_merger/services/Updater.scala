@@ -13,8 +13,8 @@ import weco.storage.{Identified, StorageError, UpdateNotApplied, Version}
 
 class Updater[Record <: AbstractSierraRecord[_]](
   sourceVHS: SourceVHS[SierraTransformable]
-)(implicit
-  transformableOps: TransformableOps[Record],
+)(
+  implicit transformableOps: TransformableOps[Record],
   recordOps: RecordOps[Record]
 ) {
   import weco.pipeline.sierra_merger.models.RecordOps._

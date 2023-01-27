@@ -34,14 +34,15 @@ trait MiroContributors
       maybeContributorCreatorLabel
     ).flatten
 
-    labels.map { label =>
-      Contributor(
-        agent = Agent(
-          id = identifierFromText(label, ontologyType = "Agent"),
-          label = label
-        ),
-        roles = List()
-      )
+    labels.map {
+      label =>
+        Contributor(
+          agent = Agent(
+            id = identifierFromText(label, ontologyType = "Agent"),
+            label = label
+          ),
+          roles = List()
+        )
     }
   }
 }

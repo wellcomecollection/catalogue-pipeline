@@ -32,14 +32,16 @@ class BatcherWorkerService[MsgDestination](
       this.getClass.getSimpleName,
       source =>
         source
-          .map { case (msg, notificationMessage) =>
-            (msg, notificationMessage.body)
+          .map {
+            case (msg, notificationMessage) =>
+              (msg, notificationMessage.body)
           }
           .groupedWithin(maxProcessedPaths, flushInterval)
           .map(_.toList.unzip)
-          .mapAsync(1) { case (msgs, paths) =>
-            info(s"Processing ${paths.size} input paths")
-            processPaths(msgs, paths)
+          .mapAsync(1) {
+            case (msgs, paths) =>
+              info(s"Processing ${paths.size} input paths")
+              processPaths(msgs, paths)
           }
           .flatMapConcat(identity)
     )
@@ -53,25 +55,27 @@ class BatcherWorkerService[MsgDestination](
     paths: List[String]
   ): Future[Source[SQSMessage, NotUsed]] =
     generateBatches(paths)
-      .mapAsyncUnordered(10) { case (batch, msgIndices) =>
-        Future {
-          msgSender.sendT(batch) match {
-            case Success(_) => None
-            case Failure(err) =>
-              error(s"Failed processing batch $batch with error: $err")
-              Some(msgIndices)
+      .mapAsyncUnordered(10) {
+        case (batch, msgIndices) =>
+          Future {
+            msgSender.sendT(batch) match {
+              case Success(_) => None
+              case Failure(err) =>
+                error(s"Failed processing batch $batch with error: $err")
+                Some(msgIndices)
+            }
           }
-        }
       }
       .collect { case Some(failedIndices) => failedIndices }
       .mapConcat(identity)
       .runWith(Sink.seq)
-      .map { failedIndices =>
-        val failedIdxSet = failedIndices.toSet
-        Source(msgs).zipWithIndex
-          .collect {
-            case (msg, idx) if !failedIdxSet.contains(idx) => msg
-          }
+      .map {
+        failedIndices =>
+          val failedIdxSet = failedIndices.toSet
+          Source(msgs).zipWithIndex
+            .collect {
+              case (msg, idx) if !failedIdxSet.contains(idx) => msg
+            }
       }
 
   /** Given a list of input paths, generate the minimal set of selectors
@@ -93,10 +97,11 @@ class BatcherWorkerService[MsgDestination](
           s"Input paths ($startIdx-${startIdx + paths.length - 1}): ${paths.mkString(", ")}"
         )
     }
-    groupedSelectors.foreach { case (rootPath, selectors) =>
-      info(
-        s"Selectors for root path $rootPath: ${selectors.map(_._1).mkString(", ")}"
-      )
+    groupedSelectors.foreach {
+      case (rootPath, selectors) =>
+        info(
+          s"Selectors for root path $rootPath: ${selectors.map(_._1).mkString(", ")}"
+        )
     }
     Source(groupedSelectors.toList).map {
       case (rootPath, selectorsAndIndices) =>

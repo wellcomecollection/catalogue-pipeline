@@ -8,16 +8,17 @@ import weco.pipeline.transformer.identifiers.LabelDerivedIdentifiers
 
 object CalmContributors extends CalmRecordOps with LabelDerivedIdentifiers {
   def apply(record: CalmRecord): List[Contributor[IdState.Unminted]] =
-    record.getList("CreatorName").map { name =>
-      Contributor(
-        agent = Agent(
-          id = identifierFromText(
-            label = name,
-            ontologyType = "Agent"
+    record.getList("CreatorName").map {
+      name =>
+        Contributor(
+          agent = Agent(
+            id = identifierFromText(
+              label = name,
+              ontologyType = "Agent"
+            ),
+            label = name
           ),
-          label = name
-        ),
-        roles = Nil
-      )
+          roles = Nil
+        )
     }
 }

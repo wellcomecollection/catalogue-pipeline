@@ -41,10 +41,11 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
 
   def transform: Try[Work[Source]] =
     sierraTransformable.maybeBibRecord
-      .map { bibRecord =>
-        debug(s"Attempting to transform ${bibRecord.id.withCheckDigit}")
+      .map {
+        bibRecord =>
+          debug(s"Attempting to transform ${bibRecord.id.withCheckDigit}")
 
-        workFromBibRecord(bibRecord)
+          workFromBibRecord(bibRecord)
       }
       .getOrElse {
         // A merged record can have both bibs and items.  If we only have
@@ -60,47 +61,50 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
           )
         )
       }
-      .map { transformed =>
-        debug(s"Transformed record to $transformed")
-        transformed
+      .map {
+        transformed =>
+          debug(s"Transformed record to $transformed")
+          transformed
       }
-      .recover { case e: Throwable =>
-        error(
-          s"Failed to perform transform to unified item of $sourceIdentifier",
-          e
-        )
-        throw e
+      .recover {
+        case e: Throwable =>
+          error(
+            s"Failed to perform transform to unified item of $sourceIdentifier",
+            e
+          )
+          throw e
       }
 
   def workFromBibRecord(bibRecord: SierraBibRecord): Try[Work[Source]] =
     fromJson[SierraBibData](bibRecord.data)
-      .map { bibData =>
-        val state = Source(
-          sourceIdentifier = sourceIdentifier,
-          sourceModifiedTime = sierraTransformable.modifiedTime,
-          mergeCandidates = SierraMergeCandidates(bibId, bibData),
-          relations = Relations(ancestors = SierraParents(bibData))
-        )
+      .map {
+        bibData =>
+          val state = Source(
+            sourceIdentifier = sourceIdentifier,
+            sourceModifiedTime = sierraTransformable.modifiedTime,
+            mergeCandidates = SierraMergeCandidates(bibId, bibData),
+            relations = Relations(ancestors = SierraParents(bibData))
+          )
 
-        if (bibData.deleted) {
-          Work.Deleted[Source](
-            version = version,
-            state = state,
-            deletedReason = DeletedFromSource("Sierra")
-          )
-        } else if (bibData.suppressed) {
-          Work.Deleted[Source](
-            version = version,
-            state = state,
-            deletedReason = SuppressedFromSource("Sierra")
-          )
-        } else {
-          Work.Visible[Source](
-            version = version,
-            state = state,
-            data = workDataFromBibData(bibId, bibData)
-          )
-        }
+          if (bibData.deleted) {
+            Work.Deleted[Source](
+              version = version,
+              state = state,
+              deletedReason = DeletedFromSource("Sierra")
+            )
+          } else if (bibData.suppressed) {
+            Work.Deleted[Source](
+              version = version,
+              state = state,
+              deletedReason = SuppressedFromSource("Sierra")
+            )
+          } else {
+            Work.Visible[Source](
+              version = version,
+              state = state,
+              data = workDataFromBibData(bibId, bibData)
+            )
+          }
       }
       .recover {
         case e: JsonDecodingError =>
@@ -173,40 +177,43 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
     sierraTransformable.itemRecords.nonEmpty
 
   lazy val itemDataEntries: Seq[SierraItemData] =
-    sierraTransformable.itemRecords.map { case (_, itemRecord) =>
-      fromJson[SierraItemData](itemRecord.data) match {
-        case Success(itemData) => itemData
-        case Failure(_) =>
-          throw SierraTransformerException(
-            s"Unable to parse item data for ${itemRecord.id} as JSON: <<${itemRecord.data}>>"
-          )
-      }
+    sierraTransformable.itemRecords.map {
+      case (_, itemRecord) =>
+        fromJson[SierraItemData](itemRecord.data) match {
+          case Success(itemData) => itemData
+          case Failure(_) =>
+            throw SierraTransformerException(
+              s"Unable to parse item data for ${itemRecord.id} as JSON: <<${itemRecord.data}>>"
+            )
+        }
     }.toSeq
 
   lazy val holdingsDataMap: Map[SierraHoldingsNumber, SierraHoldingsData] =
     sierraTransformable.holdingsRecords
       .map { case (id, hRecord) => (id, hRecord.data) }
-      .map { case (id, jsonString) =>
-        fromJson[SierraHoldingsData](jsonString) match {
-          case Success(data) => id -> data
-          case Failure(_) =>
-            throw SierraTransformerException(
-              s"Unable to parse holdings data for $id as JSON: <<$jsonString>>"
-            )
-        }
+      .map {
+        case (id, jsonString) =>
+          fromJson[SierraHoldingsData](jsonString) match {
+            case Success(data) => id -> data
+            case Failure(_) =>
+              throw SierraTransformerException(
+                s"Unable to parse holdings data for $id as JSON: <<$jsonString>>"
+              )
+          }
       }
 
   lazy val orderDataMap: Map[SierraOrderNumber, SierraOrderData] =
     sierraTransformable.orderRecords
       .map { case (id, oRecord) => (id, oRecord.data) }
-      .map { case (id, jsonString) =>
-        fromJson[SierraOrderData](jsonString) match {
-          case Success(data) => id -> data
-          case Failure(_) =>
-            throw SierraTransformerException(
-              s"Unable to parse order data for $id as JSON: <<$jsonString>>"
-            )
-        }
+      .map {
+        case (id, jsonString) =>
+          fromJson[SierraOrderData](jsonString) match {
+            case Success(data) => id -> data
+            case Failure(_) =>
+              throw SierraTransformerException(
+                s"Unable to parse order data for $id as JSON: <<$jsonString>>"
+              )
+          }
       }
 }
 

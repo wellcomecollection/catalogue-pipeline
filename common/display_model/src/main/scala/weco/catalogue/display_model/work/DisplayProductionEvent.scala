@@ -24,8 +24,9 @@ object DisplayProductionEvent {
         DisplayAbstractAgent(_, includesIdentifiers = true)
       },
       dates = productionEvent.dates.map { DisplayPeriod(_) },
-      function = productionEvent.function.map { concept =>
-        DisplayConcept(label = concept.label)
+      function = productionEvent.function.map {
+        concept =>
+          DisplayConcept(label = concept.label)
       }
     )
 }

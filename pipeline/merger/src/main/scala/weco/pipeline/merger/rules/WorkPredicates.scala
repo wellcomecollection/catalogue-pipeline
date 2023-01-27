@@ -119,32 +119,36 @@ object WorkPredicates {
     work.sourceIdentifier == id
 
   private def physicalLocationExists(work: Work[Identified]): Boolean =
-    work.data.items.exists { item =>
-      item.locations.exists {
-        case _: PhysicalLocation => true
-        case _                   => false
-      }
+    work.data.items.exists {
+      item =>
+        item.locations.exists {
+          case _: PhysicalLocation => true
+          case _                   => false
+        }
     }
 
   def allDigitalLocations(work: Work[Identified]): Boolean =
-    work.data.items.forall { item =>
-      item.locations.forall {
-        case _: DigitalLocation => true
-        case _                  => false
-      }
+    work.data.items.forall {
+      item =>
+        item.locations.forall {
+          case _: DigitalLocation => true
+          case _                  => false
+        }
     }
 
   private def allPhysicalLocations(work: Work[Identified]): Boolean =
-    work.data.items.forall { item =>
-      item.locations.forall {
-        case _: PhysicalLocation => true
-        case _                   => false
-      }
+    work.data.items.forall {
+      item =>
+        item.locations.forall {
+          case _: PhysicalLocation => true
+          case _                   => false
+        }
     }
 
   private def singleLocation(work: Work[Identified]): Boolean =
-    work.data.items.forall { item =>
-      item.locations.size == 1
+    work.data.items.forall {
+      item =>
+        item.locations.size == 1
     }
 
   private def hasDigcode(digcode: String)(work: Work[Identified]): Boolean =

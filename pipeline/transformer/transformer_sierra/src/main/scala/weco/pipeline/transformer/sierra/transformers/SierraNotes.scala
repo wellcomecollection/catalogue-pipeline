@@ -70,8 +70,9 @@ object SierraNotes extends SierraDataTransformer with SierraQueryOps {
           Some((vf, notesFields.get(marcTag)))
         case _ => None
       }
-      .collect { case Some((vf, Some(createNote))) =>
-        createNote(vf)
+      .collect {
+        case Some((vf, Some(createNote))) =>
+          createNote(vf)
       }
       .filterNot { _.contents.isWhitespace }
 

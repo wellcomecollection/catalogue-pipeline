@@ -13,12 +13,15 @@ import scala.xml.Elem
   */
 object TeiAcquisitionNote extends Datable {
   def apply(acquisition: Elem): Option[Note] =
-    NormaliseText(acquisition.text.trim).map(acquisitionText =>
-      Note(
-        noteType = NoteType.AcquisitionNote,
-        contents =
-          List(formatDatablePrefix(acquisition), Some(acquisitionText)).flatten
+    NormaliseText(acquisition.text.trim).map(
+      acquisitionText =>
+        Note(
+          noteType = NoteType.AcquisitionNote,
+          contents = List(
+            formatDatablePrefix(acquisition),
+            Some(acquisitionText)
+          ).flatten
             .mkString(": ")
-      )
+        )
     )
 }

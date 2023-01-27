@@ -106,28 +106,29 @@ object SierraProduction
   // https://www.loc.gov/marc/bibliographic/bd260.html
   //
   private def getProductionFrom260Fields(varFields: List[VarField]) =
-    varFields.map { vf =>
-      val label = labelFromSubFields(vf)
-      val places = placesFromSubfields(vf, subfieldTag = "a")
-      val agents = agentsFromSubfields(vf, subfieldTag = "b")
-      val dates = datesFromSubfields(vf, subfieldTag = "c")
+    varFields.map {
+      vf =>
+        val label = labelFromSubFields(vf)
+        val places = placesFromSubfields(vf, subfieldTag = "a")
+        val agents = agentsFromSubfields(vf, subfieldTag = "b")
+        val dates = datesFromSubfields(vf, subfieldTag = "c")
 
-      val extraPlaces = placesFromSubfields(vf, subfieldTag = "e")
-      val extraAgents = agentsFromSubfields(vf, subfieldTag = "f")
-      val extraDates = datesFromSubfields(vf, subfieldTag = "g")
+        val extraPlaces = placesFromSubfields(vf, subfieldTag = "e")
+        val extraAgents = agentsFromSubfields(vf, subfieldTag = "f")
+        val extraDates = datesFromSubfields(vf, subfieldTag = "g")
 
-      val productionFunction =
-        if (extraPlaces != Nil || extraAgents != Nil || extraDates != Nil) {
-          Some(Concept(label = "Manufacture"))
-        } else None
+        val productionFunction =
+          if (extraPlaces != Nil || extraAgents != Nil || extraDates != Nil) {
+            Some(Concept(label = "Manufacture"))
+          } else None
 
-      ProductionEvent(
-        label = label,
-        places = places ++ extraPlaces,
-        agents = agents ++ extraAgents,
-        dates = dates ++ extraDates,
-        function = productionFunction
-      )
+        ProductionEvent(
+          label = label,
+          places = places ++ extraPlaces,
+          agents = agents ++ extraAgents,
+          dates = dates ++ extraDates,
+          function = productionFunction
+        )
     }
 
   // Populate wwork:production from MARC tag 264.
@@ -162,37 +163,40 @@ object SierraProduction
     varFields: List[VarField]
   ) =
     varFields
-      .filterNot { vf =>
-        vf.indicator2.contains("4") || vf.indicator2.contains(" ")
+      .filterNot {
+        vf =>
+          vf.indicator2.contains("4") || vf.indicator2.contains(" ")
       }
-      .map { vf =>
-        val label = labelFromSubFields(vf)
-        val places = placesFromSubfields(vf, subfieldTag = "a")
-        val agents = agentsFromSubfields(vf, subfieldTag = "b")
-        val dates = datesFromSubfields(vf, subfieldTag = "c")
+      .map {
+        vf =>
+          val label = labelFromSubFields(vf)
+          val places = placesFromSubfields(vf, subfieldTag = "a")
+          val agents = agentsFromSubfields(vf, subfieldTag = "b")
+          val dates = datesFromSubfields(vf, subfieldTag = "c")
 
-        val productionFunctionLabel = vf.indicator2 match {
-          case Some("0") => "Production"
-          case Some("1") => "Publication"
-          case Some("2") => "Distribution"
-          case Some("3") => "Manufacture"
-          case other =>
-            throw CataloguingException(
-              bibId,
-              message =
-                s"Unrecognised second indicator for production function: [$other]"
-            )
-        }
+          val productionFunctionLabel = vf.indicator2 match {
+            case Some("0") => "Production"
+            case Some("1") => "Publication"
+            case Some("2") => "Distribution"
+            case Some("3") => "Manufacture"
+            case other =>
+              throw CataloguingException(
+                bibId,
+                message =
+                  s"Unrecognised second indicator for production function: [$other]"
+              )
+          }
 
-        val productionFunction = Some(Concept(label = productionFunctionLabel))
+          val productionFunction =
+            Some(Concept(label = productionFunctionLabel))
 
-        ProductionEvent(
-          label = label,
-          places = places,
-          agents = agents,
-          dates = dates,
-          function = productionFunction
-        )
+          ProductionEvent(
+            label = label,
+            places = places,
+            agents = agents,
+            dates = dates,
+            function = productionFunction
+          )
       }
 
   private def marc264OnlyContainsCopyright(

@@ -17,14 +17,16 @@ class MemoryRetriever[T](
   override def apply(ids: Seq[String]): Future[RetrieverMultiResult[T]] =
     Future {
       val lookupResults =
-        ids.map { id =>
-          id -> index.get(id)
+        ids.map {
+          id =>
+            id -> index.get(id)
         }.toMap
 
       RetrieverMultiResult(
         found = lookupResults.collect { case (id, Some(t)) => (id, t) },
-        notFound = lookupResults.collect { case (id, None) =>
-          (id, new RetrieverNotFoundException(id))
+        notFound = lookupResults.collect {
+          case (id, None) =>
+            (id, new RetrieverNotFoundException(id))
         }
       )
     }

@@ -24,17 +24,20 @@ case class SierraTransformable(
     case _               => ()
   }
 
-  itemRecords.foreach { case (id, record) =>
-    require(record.id == id)
-    require(record.bibIds.contains(sierraId))
+  itemRecords.foreach {
+    case (id, record) =>
+      require(record.id == id)
+      require(record.bibIds.contains(sierraId))
   }
-  holdingsRecords.foreach { case (id, record) =>
-    require(record.id == id)
-    require(record.bibIds.contains(sierraId))
+  holdingsRecords.foreach {
+    case (id, record) =>
+      require(record.id == id)
+      require(record.bibIds.contains(sierraId))
   }
-  orderRecords.foreach { case (id, record) =>
-    require(record.id == id)
-    require(record.bibIds.contains(sierraId))
+  orderRecords.foreach {
+    case (id, record) =>
+      require(record.id == id)
+      require(record.bibIds.contains(sierraId))
   }
 
   // Check the modifiedTime makes sense.

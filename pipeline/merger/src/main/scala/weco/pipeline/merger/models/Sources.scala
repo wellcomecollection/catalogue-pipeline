@@ -34,22 +34,25 @@ object Sources {
           .filter(_.reason.contains("Physical/digitised Sierra work"))
           .map(_.id.canonicalId)
 
-        sources.find(source =>
-          digitisedLinkedIds.contains(source.state.canonicalId)
+        sources.find(
+          source => digitisedLinkedIds.contains(source.state.canonicalId)
         )
 
       // Handle the case where the e-bib links to the physical bib, but not
       // the other way round.
       case t if physicalSierra(t) =>
         sources
-          .filter { w =>
-            sierraWork(w) && allDigitalLocations(w)
+          .filter {
+            w =>
+              sierraWork(w) && allDigitalLocations(w)
           }
-          .find { w =>
-            w.state.mergeCandidates.exists { mc =>
-              mc.reason == "Physical/digitised Sierra work" &&
-              mc.id.canonicalId == target.state.canonicalId
-            }
+          .find {
+            w =>
+              w.state.mergeCandidates.exists {
+                mc =>
+                  mc.reason == "Physical/digitised Sierra work" &&
+                  mc.id.canonicalId == target.state.canonicalId
+              }
           }
 
       case _ => None

@@ -17,8 +17,8 @@ import scala.concurrent.ExecutionContext
   * needs, to reduce the amount of data we have to get out of Elasticsearch (and
   * pay to send through the VPC endpoint).
   */
-class ElasticWorkStubRetriever(client: ElasticClient, index: Index)(implicit
-  ec: ExecutionContext
+class ElasticWorkStubRetriever(client: ElasticClient, index: Index)(
+  implicit ec: ExecutionContext
 ) extends ElasticSourceRetriever[WorkStub](client, index) {
 
   override def createGetRequest(id: String): GetRequest =

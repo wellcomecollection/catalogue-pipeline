@@ -129,11 +129,12 @@ case class InvisibleMetsData(
       // sometimes the label (ie "in copyright")
       // and sometimes the url of the license
       case accessCondition =>
-        License.values.find { license =>
-          equalsIgnoreCase(license.id, accessCondition) || equalsIgnoreCase(
-            license.label,
-            accessCondition
-          ) || license.url.equals(accessCondition)
+        License.values.find {
+          license =>
+            equalsIgnoreCase(license.id, accessCondition) || equalsIgnoreCase(
+              license.label,
+              accessCondition
+            ) || license.url.equals(accessCondition)
 
         } match {
           case Some(license) => Right(license)
@@ -144,10 +145,11 @@ case class InvisibleMetsData(
 
   private def titlePageFileReference: Option[FileReference] =
     titlePageId
-      .flatMap { titleId =>
-        fileReferencesMapping.collectFirst {
-          case (id, fileReference) if id == titleId => fileReference
-        }
+      .flatMap {
+        titleId =>
+          fileReferencesMapping.collectFirst {
+            case (id, fileReference) if id == titleId => fileReference
+          }
       }
 
   private def thumbnail(
@@ -177,25 +179,27 @@ case class InvisibleMetsData(
     } else {
       fileReferences
         .filter(ImageUtils.isImage)
-        .flatMap { fileReference =>
-          ImageUtils.buildImageUrl(fileReference).map { url =>
-            ImageData[IdState.Identifiable](
-              id = IdState.Identifiable(
-                sourceIdentifier = ImageUtils
-                  .getImageSourceId(recordIdentifier, fileReference.id)
-              ),
-              version = version,
-              locations = List(
-                DigitalLocation(
-                  url = url,
-                  locationType = LocationType.IIIFImageAPI,
-                  license = license,
-                  accessConditions = manifestLocation.accessConditions
-                ),
-                manifestLocation
-              )
-            )
-          }
+        .flatMap {
+          fileReference =>
+            ImageUtils.buildImageUrl(fileReference).map {
+              url =>
+                ImageData[IdState.Identifiable](
+                  id = IdState.Identifiable(
+                    sourceIdentifier = ImageUtils
+                      .getImageSourceId(recordIdentifier, fileReference.id)
+                  ),
+                  version = version,
+                  locations = List(
+                    DigitalLocation(
+                      url = url,
+                      locationType = LocationType.IIIFImageAPI,
+                      license = license,
+                      accessConditions = manifestLocation.accessConditions
+                    ),
+                    manifestLocation
+                  )
+                )
+            }
         }
     }
 }

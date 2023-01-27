@@ -70,31 +70,32 @@ object SierraConceptSubjects
     //  650  7 Vision.|2fast|0(OCoLC)fst01167852
     //
     // So let's filter anything that is from another authority for now.
-    varfields.filterNot(_.indicator2.contains("7")).map { varfield =>
-      // Extract the relevant subfields from the given varField.
-      // $a - the name of the thing - Geographic/Topical/Chronological name
-      // $v - Form Subdivision
-      // $x - General Subdivision
-      // $y - Chronological Subdivision
-      // $z - Geographic Subdivision
-      val subfields = varfield.subfieldsWithTags("a", "v", "x", "y", "z")
-      // multiple $a subfields should not exist, but sometimes do.
-      // Prefer parsing them to rejecting them, as this error is not always within the
-      // control of collections staff.
-      val (primarySubfields, subdivisionSubfields) = subfields.partition {
-        _.tag == "a"
-      }
+    varfields.filterNot(_.indicator2.contains("7")).map {
+      varfield =>
+        // Extract the relevant subfields from the given varField.
+        // $a - the name of the thing - Geographic/Topical/Chronological name
+        // $v - Form Subdivision
+        // $x - General Subdivision
+        // $y - Chronological Subdivision
+        // $z - Geographic Subdivision
+        val subfields = varfield.subfieldsWithTags("a", "v", "x", "y", "z")
+        // multiple $a subfields should not exist, but sometimes do.
+        // Prefer parsing them to rejecting them, as this error is not always within the
+        // control of collections staff.
+        val (primarySubfields, subdivisionSubfields) = subfields.partition {
+          _.tag == "a"
+        }
 
-      val label = getLabel(primarySubfields, subdivisionSubfields)
-      val concepts =
-        getConcepts(varfield, primarySubfields, subdivisionSubfields)
+        val label = getLabel(primarySubfields, subdivisionSubfields)
+        val concepts =
+          getConcepts(varfield, primarySubfields, subdivisionSubfields)
 
-      Subject(
-        id =
-          getIdState(ontologyType = getFieldOntologyType(varfield), varfield),
-        label = label,
-        concepts = concepts
-      )
+        Subject(
+          id =
+            getIdState(ontologyType = getFieldOntologyType(varfield), varfield),
+          label = label,
+          concepts = concepts
+        )
     }
   }
 
@@ -152,13 +153,14 @@ object SierraConceptSubjects
     varField: VarField,
     idstate: Option[IdState.Identifiable] = None
   ): List[AbstractConcept[IdState.Unminted]] =
-    primarySubfields.map { subfield =>
-      val label = subfield.content.trimTrailingPeriod
-      varField.marcTag.get match {
-        case "650" => Concept(label = label).normalised.identifiable(idstate)
-        case "648" => ParsedPeriod(label = label).identifiable(idstate)
-        case "651" => Place(label = label).normalised.identifiable(idstate)
-      }
+    primarySubfields.map {
+      subfield =>
+        val label = subfield.content.trimTrailingPeriod
+        varField.marcTag.get match {
+          case "650" => Concept(label = label).normalised.identifiable(idstate)
+          case "648" => ParsedPeriod(label = label).identifiable(idstate)
+          case "651" => Place(label = label).normalised.identifiable(idstate)
+        }
     }
 
   private def getFieldOntologyType(varField: VarField): String =

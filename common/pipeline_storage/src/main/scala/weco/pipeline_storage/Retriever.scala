@@ -15,11 +15,12 @@ trait Retriever[T] {
     */
   def apply(id: String): Future[T] =
     apply(Seq(id))
-      .map { result =>
-        result.found.getOrElse(
-          id,
-          throw result.notFound(id)
-        )
+      .map {
+        result =>
+          result.found.getOrElse(
+            id,
+            throw result.notFound(id)
+          )
       }
 
   /** Retrieves a series of documents from the store. */

@@ -26,35 +26,37 @@ class PathIdManager[Dest](
 ) {
 
   def handlePathChanged(pathId: PathId, blobContent: String): Try[Unit] =
-    DB localTx { implicit session =>
-      for {
-        idRow <- selectById(pathIdTable, pathId.id)
-        pathRow <- selectByPath(pathIdTable, pathId.path)
-        _ <- (idRow, pathRow) match {
-          case (Some(row), None) =>
-            update(pathId, blobContent, row)
-          case (None, None) =>
-            insert(pathId, blobContent)
-          case (None, Some(row)) =>
-            updatePathRowDeleteOldId(pathId, blobContent, row)
-          case (Some(idRow), Some(pathRow)) if idRow == pathRow =>
-            update(pathId, blobContent, idRow)
-          case (Some(idRow), Some(pathRow)) =>
-            deletePathRowUpdateIdRow(pathId, blobContent, idRow, pathRow)
-        }
-      } yield ()
+    DB localTx {
+      implicit session =>
+        for {
+          idRow <- selectById(pathIdTable, pathId.id)
+          pathRow <- selectByPath(pathIdTable, pathId.path)
+          _ <- (idRow, pathRow) match {
+            case (Some(row), None) =>
+              update(pathId, blobContent, row)
+            case (None, None) =>
+              insert(pathId, blobContent)
+            case (None, Some(row)) =>
+              updatePathRowDeleteOldId(pathId, blobContent, row)
+            case (Some(idRow), Some(pathRow)) if idRow == pathRow =>
+              update(pathId, blobContent, idRow)
+            case (Some(idRow), Some(pathRow)) =>
+              deletePathRowUpdateIdRow(pathId, blobContent, idRow, pathRow)
+          }
+        } yield ()
     }
 
   def handlePathDeleted(path: String, timeDeleted: Instant): Try[Unit] =
-    DB localTx { implicit session =>
-      for {
-        maybePathId <- selectByPath(pathIdTable, path)
-        _ <- maybePathId match {
-          case Some(existingPathId) =>
-            delete(existingPathId, timeDeleted)
-          case None => Success(())
-        }
-      } yield ()
+    DB localTx {
+      implicit session =>
+        for {
+          maybePathId <- selectByPath(pathIdTable, path)
+          _ <- maybePathId match {
+            case Some(existingPathId) =>
+              delete(existingPathId, timeDeleted)
+            case None => Success(())
+          }
+        } yield ()
     }
 
   // delete row matching path & update row matching id
@@ -91,8 +93,8 @@ class PathIdManager[Dest](
     } else Success(())
 
   // delete a pathId from the database
-  private def delete(pathId: PathId, timeDeleted: Instant)(implicit
-    session: DBSession
+  private def delete(pathId: PathId, timeDeleted: Instant)(
+    implicit session: DBSession
   ) =
     if (timeDeleted.isAfter(pathId.timeModified)) {
       for {
@@ -102,8 +104,8 @@ class PathIdManager[Dest](
     } else Success(())
 
   // insert a new pathid in the database
-  private def insert(pathId: PathId, blobContent: String)(implicit
-    session: DBSession
+  private def insert(pathId: PathId, blobContent: String)(
+    implicit session: DBSession
   ) =
     for {
       _ <- storeAndSendChange(pathId, blobContent)
@@ -148,8 +150,8 @@ class PathIdManager[Dest](
 
 object PathIdManager {
 
-  def selectById(pathIdTable: PathIdTable, id: String)(implicit
-    session: DBSession
+  def selectById(pathIdTable: PathIdTable, id: String)(
+    implicit session: DBSession
   ) =
     Try(withSQL {
       select
@@ -159,8 +161,8 @@ object PathIdManager {
         .forUpdate
     }.map(models.PathId(pathIdTable.p)).single().apply())
 
-  def selectByPath(pathIdTable: PathIdTable, path: String)(implicit
-    session: DBSession
+  def selectByPath(pathIdTable: PathIdTable, path: String)(
+    implicit session: DBSession
   ) =
     Try(withSQL {
       select
@@ -170,8 +172,8 @@ object PathIdManager {
         .forUpdate
     }.map(models.PathId(pathIdTable.p)).single().apply())
 
-  def updateById(pathIdTable: PathIdTable, pathId: PathId)(implicit
-    session: DBSession
+  def updateById(pathIdTable: PathIdTable, pathId: PathId)(
+    implicit session: DBSession
   ) =
     Try(withSQL {
       update(pathIdTable)
@@ -183,8 +185,8 @@ object PathIdManager {
         .eq(pathIdTable.column.id, pathId.id)
     }.update.apply())
 
-  def updateByPath(pathIdTable: PathIdTable, pathId: PathId)(implicit
-    session: DBSession
+  def updateByPath(pathIdTable: PathIdTable, pathId: PathId)(
+    implicit session: DBSession
   ) =
     Try(withSQL {
       update(pathIdTable)
@@ -196,8 +198,8 @@ object PathIdManager {
         .eq(pathIdTable.column.path, pathId.path)
     }.update.apply())
 
-  def insertPathId(pathIdTable: PathIdTable, pathId: PathId)(implicit
-    session: DBSession
+  def insertPathId(pathIdTable: PathIdTable, pathId: PathId)(
+    implicit session: DBSession
   ) =
     Try(withSQL {
       insert
@@ -209,8 +211,8 @@ object PathIdManager {
         )
     }.update.apply())
 
-  def deletePathId(pathIdTable: PathIdTable, path: String)(implicit
-    session: DBSession
+  def deletePathId(pathIdTable: PathIdTable, path: String)(
+    implicit session: DBSession
   ) =
     Try(withSQL {
       delete.from(pathIdTable).where.eq(pathIdTable.column.path, path)

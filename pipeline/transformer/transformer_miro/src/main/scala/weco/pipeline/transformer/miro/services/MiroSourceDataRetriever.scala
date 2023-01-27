@@ -24,14 +24,17 @@ class MiroSourceDataRetriever(
   ]] =
     miroReadable
       .get(p.location)
-      .map { case Identified(_, miroRecord) =>
-        Identified(
-          Version(p.id, p.version),
-          (
-            miroRecord,
-            p.overrides.getOrElse(MiroSourceOverrides.empty),
-            MiroMetadata(isClearedForCatalogueAPI = p.isClearedForCatalogueAPI)
+      .map {
+        case Identified(_, miroRecord) =>
+          Identified(
+            Version(p.id, p.version),
+            (
+              miroRecord,
+              p.overrides.getOrElse(MiroSourceOverrides.empty),
+              MiroMetadata(isClearedForCatalogueAPI =
+                p.isClearedForCatalogueAPI
+              )
+            )
           )
-        )
       }
 }

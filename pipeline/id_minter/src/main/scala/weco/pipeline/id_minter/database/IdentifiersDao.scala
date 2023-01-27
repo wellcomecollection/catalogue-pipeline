@@ -45,65 +45,73 @@ class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
       val foundIdentifiers =
         withTimeWarning(threshold = 10 seconds, distinctIdentifiers) {
           batchSourceIdentifiers(distinctIdentifiers)
-            .flatMap { identifierBatch =>
-              blocking {
-                val i = identifiers.i
-                val matchRow = rowMatcherFromSyntaxProvider(i) _
+            .flatMap {
+              identifierBatch =>
+                blocking {
+                  val i = identifiers.i
+                  val matchRow = rowMatcherFromSyntaxProvider(i) _
 
-                // The query is manually constructed like this because using WHERE IN
-                // statements with multiple items causes a full-index scan on MySQL 5.6.
-                // See: https://stackoverflow.com/a/53180813
-                // Therefore, we perform the rewrites here on the client.
-                //
-                // Because of issues in `scalikejdbc`'s typing, it's necessary to
-                // specify the `Nothing` type parameters as done here in order for
-                // the `map` statement to work properly.
-                val query = withSQL[Nothing] {
-                  select
-                    .from[Nothing](identifiers as i)
-                    .where
-                    .map { query =>
-                      identifierBatch.tail.foldLeft(
-                        query.withRoundBracket(matchRow(identifierBatch.head))
-                      ) { (q, sourceIdentifier) =>
-                        q.or.withRoundBracket(matchRow(sourceIdentifier))
+                  // The query is manually constructed like this because using WHERE IN
+                  // statements with multiple items causes a full-index scan on MySQL 5.6.
+                  // See: https://stackoverflow.com/a/53180813
+                  // Therefore, we perform the rewrites here on the client.
+                  //
+                  // Because of issues in `scalikejdbc`'s typing, it's necessary to
+                  // specify the `Nothing` type parameters as done here in order for
+                  // the `map` statement to work properly.
+                  val query = withSQL[Nothing] {
+                    select
+                      .from[Nothing](identifiers as i)
+                      .where
+                      .map {
+                        query =>
+                          identifierBatch.tail.foldLeft(
+                            query.withRoundBracket(
+                              matchRow(identifierBatch.head)
+                            )
+                          ) {
+                            (q, sourceIdentifier) =>
+                              q.or.withRoundBracket(matchRow(sourceIdentifier))
+                          }
+                      }
+                  }.map(
+                    rs => {
+                      val sourceIdentifier =
+                        getSourceIdentifierFromResult(i, rs)
+
+                      if (distinctIdentifiers.contains(sourceIdentifier)) {
+                        (sourceIdentifier, Identifier(i)(rs))
+                      } else {
+                        // It might seem like this is impossible -- how could the query return a source
+                        // identifier we didn't request?
+                        //
+                        // The reason is that the database query is case-insensitive.
+                        //
+                        // This can occur if there's an existing source identifier with the same value
+                        // but a different case, e.g. b13026252 and B13026252.  This occurs occasionally
+                        // with METS works, where the work originally had an uppercase B but has now been
+                        // fixed to use a lowercase b.
+                        //
+                        // Because the query is case insensitive, querying for "METS/b13026252" would return
+                        // "METS/B13026252", which isn't what we were looking for.
+                        //
+                        // Because the METS case is fairly rare, we usually fix this by modifying the row in the
+                        // ID minter database to correct the case of the source identifier.  To help somebody
+                        // realise what's happened, we include a specific log for this case.
+                        warn(msg =
+                          s"identifier returned from db not found in request, trying case-insensitive/ascii normalized match: $sourceIdentifier"
+                        )
+
+                        throw SurplusIdentifierException(
+                          sourceIdentifier,
+                          distinctIdentifiers
+                        )
                       }
                     }
-                }.map(rs => {
-                  val sourceIdentifier = getSourceIdentifierFromResult(i, rs)
-
-                  if (distinctIdentifiers.contains(sourceIdentifier)) {
-                    (sourceIdentifier, Identifier(i)(rs))
-                  } else {
-                    // It might seem like this is impossible -- how could the query return a source
-                    // identifier we didn't request?
-                    //
-                    // The reason is that the database query is case-insensitive.
-                    //
-                    // This can occur if there's an existing source identifier with the same value
-                    // but a different case, e.g. b13026252 and B13026252.  This occurs occasionally
-                    // with METS works, where the work originally had an uppercase B but has now been
-                    // fixed to use a lowercase b.
-                    //
-                    // Because the query is case insensitive, querying for "METS/b13026252" would return
-                    // "METS/B13026252", which isn't what we were looking for.
-                    //
-                    // Because the METS case is fairly rare, we usually fix this by modifying the row in the
-                    // ID minter database to correct the case of the source identifier.  To help somebody
-                    // realise what's happened, we include a specific log for this case.
-                    warn(msg =
-                      s"identifier returned from db not found in request, trying case-insensitive/ascii normalized match: $sourceIdentifier"
-                    )
-
-                    throw SurplusIdentifierException(
-                      sourceIdentifier,
-                      distinctIdentifiers
-                    )
-                  }
-                }).list
-                debug(s"Executing:'${query.statement}'")
-                query.apply()
-              }
+                  ).list
+                  debug(s"Executing:'${query.statement}'")
+                  query.apply()
+                }
             }
         }
       val existingIdentifiers = foundIdentifiers.toMap
@@ -116,12 +124,18 @@ class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
     }
 
   @throws(classOf[InsertError])
-  def saveIdentifiers(ids: List[Identifier])(implicit
-    session: DBSession = NamedAutoSession('primary)
+  def saveIdentifiers(ids: List[Identifier])(
+    implicit session: DBSession = NamedAutoSession('primary)
   ): Try[InsertResult] =
     Try {
-      val values = ids.map(i =>
-        Seq(i.CanonicalId.toString, i.OntologyType, i.SourceSystem, i.SourceId)
+      val values = ids.map(
+        i =>
+          Seq(
+            i.CanonicalId.toString,
+            i.OntologyType,
+            i.SourceSystem,
+            i.SourceId
+          )
       )
       blocking {
         debug(s"Putting new identifier $ids")

@@ -56,16 +56,17 @@ trait AggregatableValues {
 
     def languageAggregatableValues: List[String] =
       workData.languages
-        .map(lang =>
-          // There are cases where two languages may have the same ID but different
-          // labels, e.g. Chinese and Mandarin are two names for the same language
-          // which has MARC language code "chi".  The distinct names may be important
-          // for display on individual works pages, but for filtering/aggregating
-          // we want to use the canonical labels.
-          MarcLanguageCodeList.fromCode(lang.id) match {
-            case Some(canonicalLang) => canonicalLang
-            case None                => lang
-          }
+        .map(
+          lang =>
+            // There are cases where two languages may have the same ID but different
+            // labels, e.g. Chinese and Mandarin are two names for the same language
+            // which has MARC language code "chi".  The distinct names may be important
+            // for display on individual works pages, but for filtering/aggregating
+            // we want to use the canonical labels.
+            MarcLanguageCodeList.fromCode(lang.id) match {
+              case Some(canonicalLang) => canonicalLang
+              case None                => lang
+            }
         )
         .distinct
         .map(DisplayLanguage(_))
@@ -87,8 +88,9 @@ trait AggregatableValues {
       workData.production
         .flatMap(_.dates)
         .flatMap(_.range)
-        .map(range =>
-          LocalDateTime.ofInstant(range.from, ZoneId.systemDefault()).getYear
+        .map(
+          range =>
+            LocalDateTime.ofInstant(range.from, ZoneId.systemDefault()).getYear
         )
         .map(startYear => DisplayPeriod(label = startYear.toString))
         .asJson()
@@ -120,16 +122,18 @@ trait AggregatableValues {
     // Note: this is meant to preserve the order of keys in the original object.
     //
     def update(key: String, value: Json): Json =
-      json.mapObject(jsonObj =>
-        Json
-          .fromFields(
-            jsonObj.toIterable
-              .map { case (k, v) =>
-                if (k == key) (key, value) else (k, v)
-              }
-          )
-          .asObject
-          .get
+      json.mapObject(
+        jsonObj =>
+          Json
+            .fromFields(
+              jsonObj.toIterable
+                .map {
+                  case (k, v) =>
+                    if (k == key) (key, value) else (k, v)
+                }
+            )
+            .asObject
+            .get
       )
 
     // Remove a key pair from a JSON object.

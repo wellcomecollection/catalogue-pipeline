@@ -21,8 +21,8 @@ object SierraSource {
   def apply(
     client: HttpGet,
     throttleRate: ThrottleRate = ThrottleRate(elements = 0, per = 0 seconds)
-  )(recordType: SierraRecordTypes.Value, params: Map[String, String])(implicit
-    system: ActorSystem,
+  )(recordType: SierraRecordTypes.Value, params: Map[String, String])(
+    implicit system: ActorSystem,
     ec: ExecutionContext
   ): Source[Json, NotUsed] = {
 

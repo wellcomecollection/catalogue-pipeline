@@ -21,17 +21,18 @@ object TeiPhysicalDescription {
     * one volume.</support> </supportDesc> </objectDesc>
     */
   private def physicalDescription(nodeSeq: NodeSeq) =
-    (nodeSeq \ "physDesc" \\ "supportDesc").flatMap { supportDesc =>
-      val materialString = (supportDesc \@ "material").trim
-      val material =
-        NormaliseText(
-          if (materialString.nonEmpty) s"Material: $materialString" else ""
-        )
-      val support = parseSupport(supportDesc)
-      val extent = parseExtent(supportDesc)
-      val physicalDescriptionStr =
-        List(support, material, extent).flatten.mkString("; ")
-      NormaliseText(physicalDescriptionStr)
+    (nodeSeq \ "physDesc" \\ "supportDesc").flatMap {
+      supportDesc =>
+        val materialString = (supportDesc \@ "material").trim
+        val material =
+          NormaliseText(
+            if (materialString.nonEmpty) s"Material: $materialString" else ""
+          )
+        val support = parseSupport(supportDesc)
+        val extent = parseExtent(supportDesc)
+        val physicalDescriptionStr =
+          List(support, material, extent).flatten.mkString("; ")
+        NormaliseText(physicalDescriptionStr)
     }.headOption
 
   /** The extent contains information about the page count and dimension of the
@@ -90,19 +91,20 @@ object TeiPhysicalDescription {
     * <width>300</width> </dimensions>
     */
   private def parseDimensions(extent: NodeSeq) =
-    (extent \ "dimensions").map { dimensions =>
-      val unit = (dimensions \@ "unit").trim
-      val `type` = (dimensions \@ "type").trim
-      val unitStr = if (unit.nonEmpty) unit else ""
+    (extent \ "dimensions").map {
+      dimensions =>
+        val unit = (dimensions \@ "unit").trim
+        val `type` = (dimensions \@ "type").trim
+        val unitStr = if (unit.nonEmpty) unit else ""
 
-      val dimensionStr = (dimensions \ "dim").toList match {
-        case Nil  => parseWidthHeight(dimensions, unitStr)
-        case list => parseDim(unitStr, list)
-      }
-      NormaliseText(
-        if (dimensionStr.nonEmpty) s"${`type`} dimensions: $dimensionStr"
-        else ""
-      )
+        val dimensionStr = (dimensions \ "dim").toList match {
+          case Nil  => parseWidthHeight(dimensions, unitStr)
+          case list => parseDim(unitStr, list)
+        }
+        NormaliseText(
+          if (dimensionStr.nonEmpty) s"${`type`} dimensions: $dimensionStr"
+          else ""
+        )
     }
 
   /** Dimensions can be expressed in 2 ways. This function parses dimensions
@@ -128,10 +130,11 @@ object TeiPhysicalDescription {
     */
   private def parseDim(unitStr: String, list: List[Node]) = {
     list
-      .map { dim =>
-        val label = (dim \@ "type").trim
-        val str = dim.text.trim
-        appendUnit(s"$label $str".trim, unitStr)
+      .map {
+        dim =>
+          val label = (dim \@ "type").trim
+          val str = dim.text.trim
+          appendUnit(s"$label $str".trim, unitStr)
       }
       .filterNot(_.isEmpty)
       .mkString(", ")

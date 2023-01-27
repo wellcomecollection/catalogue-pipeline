@@ -53,8 +53,9 @@ object SierraLanguages
           // the code.  e.g. "Lat" means the same as "lat"
           _.toLowerCase()
         }
-        .map { code =>
-          (code, MarcLanguageCodeList.fromCode(code))
+        .map {
+          code =>
+            (code, MarcLanguageCodeList.fromCode(code))
         }
         .map {
           case (_, Some(lang)) => Some(lang)
@@ -65,8 +66,9 @@ object SierraLanguages
             None
         }
 
-    (List(primaryLanguage) ++ additionalLanguages).flatten.filterNot { lang =>
-      suppressedLanguageCodes.contains(lang.id)
+    (List(primaryLanguage) ++ additionalLanguages).flatten.filterNot {
+      lang =>
+        suppressedLanguageCodes.contains(lang.id)
     }.distinct
   }
 

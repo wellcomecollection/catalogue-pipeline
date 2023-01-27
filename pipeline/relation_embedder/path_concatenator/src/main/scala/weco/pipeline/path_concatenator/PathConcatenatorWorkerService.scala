@@ -73,8 +73,9 @@ class PathConcatenatorWorkerService[MsgDestination](
         Future(Seq(path))
       }
     }
-    futurePaths flatMap { paths: Seq[String] =>
-      notifyPaths(paths)
+    futurePaths flatMap {
+      paths: Seq[String] =>
+        notifyPaths(paths)
     }
   }
 
@@ -88,10 +89,11 @@ class PathConcatenatorWorkerService[MsgDestination](
     path +: works.map(work => work.data.collectionPath.get.path)
 
   private def notifyPaths(paths: Seq[String]): Future[Seq[Unit]] =
-    Future.sequence(paths map { path =>
-      Future(msgSender.send(path)).flatMap {
-        case Success(_)   => Future.successful(())
-        case Failure(err) => Future.failed(err)
-      }
+    Future.sequence(paths map {
+      path =>
+        Future(msgSender.send(path)).flatMap {
+          case Success(_)   => Future.successful(())
+          case Failure(err) => Future.failed(err)
+        }
     })
 }

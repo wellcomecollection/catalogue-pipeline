@@ -64,8 +64,9 @@ class CalmAdapterWorkerService[Destination](
 
   def unwrapMessage =
     Flow[(SQSMessage, NotificationMessage)]
-      .map { case (msg, NotificationMessage(body)) =>
-        (Context(msg), fromJson[CalmQuery](body).toEither)
+      .map {
+        case (msg, NotificationMessage(body)) =>
+          (Context(msg), fromJson[CalmQuery](body).toEither)
       }
       .via(catchErrors)
 
@@ -75,15 +76,18 @@ class CalmAdapterWorkerService[Destination](
     */
   def processWindow =
     Flow[(Context, CalmQuery)]
-      .mapAsync(concurrentWindows) { case (ctx, query) =>
-        info(s"Ingesting all Calm records for query: ${query.queryExpression}")
-        calmRetriever(query)
-          .map(calmStore.putRecord)
-          .via(publishKey)
-          .via(updatePublished)
-          .runWith(Sink.seq)
-          .map(checkResultsForErrors(_, query))
-          .map((ctx, _))
+      .mapAsync(concurrentWindows) {
+        case (ctx, query) =>
+          info(
+            s"Ingesting all Calm records for query: ${query.queryExpression}"
+          )
+          calmRetriever(query)
+            .map(calmStore.putRecord)
+            .via(publishKey)
+            .via(updatePublished)
+            .runWith(Sink.seq)
+            .map(checkResultsForErrors(_, query))
+            .map((ctx, _))
       }
       .via(catchErrors)
 

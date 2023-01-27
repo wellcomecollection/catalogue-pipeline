@@ -22,8 +22,8 @@ trait QualifyFuzzyDate[D <: FuzzyDate] {
 // Qualifier behaviours are specified here
 // http://www.dswebhosting.info/documents/Manuals/ALM/V10/MANUAL/main_menu/basics/period_field_format.htm
 object QualifyFuzzyDate extends ParserUtils {
-  def qualified[_: P, D <: FuzzyDate](unqualified: => P[D])(implicit
-    q: QualifyFuzzyDate[D]
+  def qualified[_: P, D <: FuzzyDate](unqualified: => P[D])(
+    implicit q: QualifyFuzzyDate[D]
   ): P[FuzzyDateRange[Year, Year]] =
     (Lex.qualifier ~ ws.? ~ "-".? ~ ws.? ~ unqualified) collect q.toDateRange
 

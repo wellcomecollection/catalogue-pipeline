@@ -27,11 +27,12 @@ object CollectionPathSorter {
     """\d+|\D+""".r
       .findAllIn(s)
       .toList
-      .map { part =>
-        Try(part.toInt) match {
-          case Success(number) => Left(number)
-          case _               => Right(part)
-        }
+      .map {
+        part =>
+          Try(part.toInt) match {
+            case Success(number) => Left(number)
+            case _               => Right(part)
+          }
       }
 
   // Note: when calling compare(x, y), the result sign has the following meaning:

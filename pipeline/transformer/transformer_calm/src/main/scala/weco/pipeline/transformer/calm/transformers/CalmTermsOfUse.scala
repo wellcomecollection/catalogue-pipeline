@@ -134,8 +134,8 @@ object CalmTermsOfUse extends CalmRecordOps with Logging {
           warn(s"Unclear how to create a TermsOfUse note for item ${record.id}")
           val parts = Seq(
             conditions,
-            restrictedUntil.map(d =>
-              s"Restricted until ${d.format(displayFormat)}."
+            restrictedUntil.map(
+              d => s"Restricted until ${d.format(displayFormat)}."
             ),
             closedUntil.map(d => s"Closed until ${d.format(displayFormat)}.")
           ).flatten
@@ -144,8 +144,8 @@ object CalmTermsOfUse extends CalmRecordOps with Logging {
       }
 
     terms
-      .map(contents =>
-        Note(contents = contents, noteType = NoteType.TermsOfUse)
+      .map(
+        contents => Note(contents = contents, noteType = NoteType.TermsOfUse)
       )
       .toList
   }
@@ -154,8 +154,9 @@ object CalmTermsOfUse extends CalmRecordOps with Logging {
   private val displayFormat = DateTimeFormatter.ofPattern("d MMMM yyyy")
 
   private def getAccessConditions(record: CalmRecord): Option[String] =
-    record.getJoined("AccessConditions").map { s =>
-      if (s.endsWith(".")) s else s + "."
+    record.getJoined("AccessConditions").map {
+      s =>
+        if (s.endsWith(".")) s else s + "."
     }
 
   // e.g. parsing dates "01/01/2039"
@@ -174,9 +175,10 @@ object CalmTermsOfUse extends CalmRecordOps with Logging {
       Seq(
         "d MMMM yyyy", // 1 January 2021
         "dd/MM/yyyy" // 01/01/2021
-      ).exists { fmt =>
-        val dateString = d.format(DateTimeFormatter.ofPattern(fmt))
-        normalisedS.contains(s"until $dateString")
+      ).exists {
+        fmt =>
+          val dateString = d.format(DateTimeFormatter.ofPattern(fmt))
+          normalisedS.contains(s"until $dateString")
       }
     }
 

@@ -20,8 +20,9 @@ case class WorkStub(
 
   lazy val mergeCandidateIds: Set[CanonicalId] =
     state.mergeCandidates
-      .map { mergeCandidate =>
-        mergeCandidate.id.canonicalId
+      .map {
+        mergeCandidate =>
+          mergeCandidate.id.canonicalId
       }
       // TODO: Do we need this filterNot?  Will a work ever refer to itself?
       .filterNot { _ == id }

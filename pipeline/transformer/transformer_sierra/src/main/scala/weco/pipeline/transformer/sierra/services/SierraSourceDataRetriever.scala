@@ -16,7 +16,8 @@ class SierraSourceDataRetriever(
   ): Either[ReadError, Identified[Version[String, Int], SierraTransformable]] =
     sierraReadable
       .get(p.location)
-      .map { case Identified(_, record) =>
-        Identified(Version(p.id, p.version), record)
+      .map {
+        case Identified(_, record) =>
+          Identified(Version(p.id, p.version), record)
       }
 }

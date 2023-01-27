@@ -35,8 +35,9 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
       sources = List(
         getMetsThumbnail,
         getMinMiroThumbnail
-      ).flatMap { rule =>
-        rule.mergedSources(target, sources)
+      ).flatMap {
+        rule =>
+          rule.mergedSources(target, sources)
       }.distinct
     )
 
@@ -77,8 +78,9 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
         sources: NonEmptyList[Work[Identified]]
       ): FieldData = {
         val minMiroSource = Try(sources.toList.min(MiroIdOrdering)).toOption
-        minMiroSource.foreach { source =>
-          debug(s"Choosing Miro thumbnail from ${describeWork(source)}")
+        minMiroSource.foreach {
+          source =>
+            debug(s"Choosing Miro thumbnail from ${describeWork(source)}")
         }
         minMiroSource.flatMap(_.data.thumbnail)
       }
@@ -103,11 +105,15 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
     target: Work.Visible[Identified],
     sources: Seq[Work[Identified]]
   ): Boolean =
-    (target :: sources.toList).exists { work =>
-      work.data.items.exists { item =>
-        item.locations.exists(location =>
-          location.hasRestrictions && location.isInstanceOf[DigitalLocation]
-        )
-      }
+    (target :: sources.toList).exists {
+      work =>
+        work.data.items.exists {
+          item =>
+            item.locations.exists(
+              location =>
+                location.hasRestrictions && location
+                  .isInstanceOf[DigitalLocation]
+            )
+        }
     }
 }

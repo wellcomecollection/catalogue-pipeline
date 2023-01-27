@@ -108,9 +108,10 @@ case class MetsXml(root: Elem) {
     * IDs in the (normalised) fileObjects mapping
     */
   def fileReferencesMapping(bnumber: String): List[(String, FileReference)] =
-    physicalFileIdsMapping.flatMap { case (id, fileId) =>
-      getFileReferences(fileId)
-        .map(ref => (id, normaliseLocation(bnumber, ref)))
+    physicalFileIdsMapping.flatMap {
+      case (id, fileId) =>
+        getFileReferences(fileId)
+          .map(ref => (id, normaliseLocation(bnumber, ref)))
     }.toList
 
   /** Returns the first href to a manifestation in the logical structMap
@@ -128,10 +129,11 @@ case class MetsXml(root: Elem) {
   def titlePageId: Option[String] =
     logicalStructMapForType
       .collectFirst { case (id, "TitlePage") => id }
-      .flatMap { id =>
-        structLink.collectFirst {
-          case (from, to) if from == id => to
-        }
+      .flatMap {
+        id =>
+          structLink.collectFirst {
+            case (from, to) if from == id => to
+          }
       }
 
   /** Valid METS documents should contain a physicalStructMap section, with the
@@ -303,13 +305,14 @@ case class MetsXml(root: Elem) {
       valueNode: Option[String] = None
     ): Seq[(String, String)] =
       nodes
-        .map { node =>
-          val key = node \@ keyAttrib
-          val value = valueNode
-            .flatMap(tag => (node \ tag).headOption)
-            .orElse(Some(node))
-            .map(_ \@ valueAttrib)
-          (key, value)
+        .map {
+          node =>
+            val key = node \@ keyAttrib
+            val value = valueNode
+              .flatMap(tag => (node \ tag).headOption)
+              .orElse(Some(node))
+              .map(_ \@ valueAttrib)
+            (key, value)
         }
         .collect {
           case (key, Some(value)) if key.nonEmpty && value.nonEmpty =>

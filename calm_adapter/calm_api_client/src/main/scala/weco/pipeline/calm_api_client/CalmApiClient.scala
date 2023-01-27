@@ -31,8 +31,8 @@ trait CalmApiClient {
     request(request = CalmSearchRequest(query), cookie = cookie)
 
   // We defer resolution of the summary parser so consumers can suppress fields
-  def summary(pos: Int, cookie: Option[Cookie] = None)(implicit
-    p: CalmHttpResponseParser[CalmSummaryRequest]
+  def summary(pos: Int, cookie: Option[Cookie] = None)(
+    implicit p: CalmHttpResponseParser[CalmSummaryRequest]
   ): Future[CalmRecord] =
     request(request = CalmSummaryRequest(pos), cookie = cookie)
 
@@ -66,17 +66,19 @@ class HttpCalmApiClient(
     RetryFuture {
       client
         .singleRequest(createHttpRequest(request, cookie))
-        .map { resp =>
-          resp.status match {
-            case StatusCodes.OK => resp
-            case status =>
-              throw new Exception(s"Unexpected status: $status")
-          }
+        .map {
+          resp =>
+            resp.status match {
+              case StatusCodes.OK => resp
+              case status =>
+                throw new Exception(s"Unexpected status: $status")
+            }
         }
-    }.recover { case lastException =>
-      throw new RuntimeException(
-        s"Max retries attempted when calling Calm API. Last failure was: ${lastException.getMessage}"
-      )
+    }.recover {
+      case lastException =>
+        throw new RuntimeException(
+          s"Max retries attempted when calling Calm API. Last failure was: ${lastException.getMessage}"
+        )
     }.flatMap(parse.apply)
 
   private def createHttpRequest(

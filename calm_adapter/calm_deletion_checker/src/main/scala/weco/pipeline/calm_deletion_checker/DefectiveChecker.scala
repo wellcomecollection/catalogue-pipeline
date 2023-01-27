@@ -35,8 +35,9 @@ trait DefectiveChecker[Item] {
         } yield deletions1 ++ deletions2
     }
 
-    test(allItems).flatMap { d =>
-      nested(allItems, d)
+    test(allItems).flatMap {
+      d =>
+        nested(allItems, d)
     }
   }
 
@@ -62,8 +63,8 @@ trait DefectiveChecker[Item] {
   private def log2(x: Float): Float = (math.log(x) / math.log(2)).toFloat
 }
 
-class ApiDeletionChecker(calmApiClient: CalmApiClient)(implicit
-  ec: ExecutionContext
+class ApiDeletionChecker(calmApiClient: CalmApiClient)(
+  implicit ec: ExecutionContext
 ) extends DefectiveChecker[CalmSourcePayload]
     with Logging {
 
@@ -77,8 +78,9 @@ class ApiDeletionChecker(calmApiClient: CalmApiClient)(implicit
         )
       // Performing a search creates a new session which we'll never use.
       // Abandon it here to give the Calm API a chance.
-      _ <- calmApiClient.abandon(session.cookie).recover { case abandonError =>
-        warn(s"Error abandoning session: ${abandonError.getMessage}")
+      _ <- calmApiClient.abandon(session.cookie).recover {
+        case abandonError =>
+          warn(s"Error abandoning session: ${abandonError.getMessage}")
       }
     } yield session match {
       case CalmSession(n, _) if n <= records.size => records.size - n

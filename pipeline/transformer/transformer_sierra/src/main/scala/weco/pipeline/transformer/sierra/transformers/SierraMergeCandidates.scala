@@ -59,12 +59,13 @@ object SierraMergeCandidates
           case uklwPrefixRegex(bibNumber) => Some(bibNumber.trim)
           case _                          => None
         }
-        .flatMap { id =>
-          SourceIdentifier(
-            identifierType = IdentifierType.SierraSystemNumber,
-            ontologyType = "Work",
-            value = id
-          ).validatedWithWarning
+        .flatMap {
+          id =>
+            SourceIdentifier(
+              identifierType = IdentifierType.SierraSystemNumber,
+              ontologyType = "Work",
+              value = id
+            ).validatedWithWarning
         }
 
     identifiers.distinct match {
@@ -104,14 +105,15 @@ object SierraMergeCandidates
     bibData
       .subfieldsWithTag("035" -> "a")
       .contents
-      .map { recordId =>
-        Try {
-          SourceIdentifier(
-            identifierType = IdentifierType.CalmRecordIdentifier,
-            ontologyType = "Work",
-            value = recordId
-          ).validated
-        }
+      .map {
+        recordId =>
+          Try {
+            SourceIdentifier(
+              identifierType = IdentifierType.CalmRecordIdentifier,
+              ontologyType = "Work",
+              value = recordId
+            ).validated
+          }
       }
       .flatMap {
         case Success(Some(sourceIdentifier)) =>

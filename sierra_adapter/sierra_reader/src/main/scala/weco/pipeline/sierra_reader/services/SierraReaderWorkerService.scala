@@ -89,21 +89,22 @@ class SierraReaderWorkerService(
 
     // This serves as a marker that the window is complete, so we can audit
     // our S3 bucket to see which windows were never successfully completed.
-    outcome.flatMap { _ =>
-      val key =
-        s"windows_${readerConfig.recordType.toString}_complete/${windowManager
-            .buildWindowLabel(window)}"
+    outcome.flatMap {
+      _ =>
+        val key =
+          s"windows_${readerConfig.recordType.toString}_complete/${windowManager
+              .buildWindowLabel(window)}"
 
-      val putRequest =
-        PutObjectRequest
-          .builder()
-          .bucket(s3Config.bucketName)
-          .key(key)
-          .build()
+        val putRequest =
+          PutObjectRequest
+            .builder()
+            .bucket(s3Config.bucketName)
+            .key(key)
+            .build()
 
-      val requestBody = RequestBody.empty()
+        val requestBody = RequestBody.empty()
 
-      Future { s3Client.putObject(putRequest, requestBody) }
+        Future { s3Client.putObject(putRequest, requestBody) }
     }
   }
 

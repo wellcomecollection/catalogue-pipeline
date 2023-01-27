@@ -19,7 +19,8 @@ object Main extends WellcomeTypesafeApp {
     sourceDataRetriever = new MiroSourceDataRetriever(S3TypedStore[MiroRecord])
   )
 
-  runWithConfig { config =>
-    transformer.run(config)
+  runWithConfig {
+    config =>
+      transformer.run(config)
   }
 }

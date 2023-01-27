@@ -7,8 +7,8 @@ import software.amazon.awssdk.services.dynamodb.model.ScanRequest
 import scala.concurrent.{ExecutionContext, Future}
 
 /** Fetch at most `maxRecords` values from the table. */
-class MaxRecordsScanner(implicit
-  val dynamoClient: DynamoDbClient,
+class MaxRecordsScanner(
+  implicit val dynamoClient: DynamoDbClient,
   val ec: ExecutionContext
 ) extends ScanRequestScanner {
 

@@ -17,10 +17,11 @@ object IdExtractor {
         .getOrElse(
           throw new RuntimeException(s"Could not find an id in XML at $path")
         )
-    }.recoverWith { case th =>
-      Failure(
-        new RuntimeException(s"Unable to extract ID from XML at $path", th)
-      )
+    }.recoverWith {
+      case th =>
+        Failure(
+          new RuntimeException(s"Unable to extract ID from XML at $path", th)
+        )
     }
 
 }

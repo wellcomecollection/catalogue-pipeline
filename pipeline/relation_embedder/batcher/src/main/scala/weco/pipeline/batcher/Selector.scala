@@ -77,8 +77,9 @@ object Selector {
     */
   def forPath(path: Path): List[Selector] =
     parent(path)
-      .map { parent =>
-        List(Node(parent), Children(parent), Descendents(path))
+      .map {
+        parent =>
+          List(Node(parent), Children(parent), Descendents(path))
       }
       .getOrElse(List(Tree(path)))
 
@@ -103,8 +104,9 @@ object Selector {
     */
   def forPaths(paths: List[Path]): List[(Selector, Long)] = {
     val selectors = paths.zipWithIndex
-      .flatMap { case (path, idx) =>
-        Selector.forPath(path).map(selector => (selector, idx.toLong))
+      .flatMap {
+        case (path, idx) =>
+          Selector.forPath(path).map(selector => (selector, idx.toLong))
       }
       .groupBy(_._1)
       .map(_._2.head)
@@ -124,8 +126,9 @@ object Selector {
 
   private def ancestors(path: Path): List[Path] = {
     val tokens = tokenize(path).dropRight(1)
-    (1 to tokens.length).map { i =>
-      join(tokens.slice(0, i))
+    (1 to tokens.length).map {
+      i =>
+        join(tokens.slice(0, i))
     }.toList
   }
 

@@ -75,11 +75,13 @@ object SourceIdentifierEmbedder extends Logging {
     root.identifiedType.json
       .getOption(node)
       .flatMap(_.asString)
-      .map { identifiedType =>
-        root.obj.modify { obj =>
-          ("type", Json.fromString(identifiedType)) +:
-            obj.remove("identifiedType")
-        }(node)
+      .map {
+        identifiedType =>
+          root.obj.modify {
+            obj =>
+              ("type", Json.fromString(identifiedType)) +:
+                obj.remove("identifiedType")
+          }(node)
       }
       .getOrElse(node)
 
@@ -93,10 +95,12 @@ object SourceIdentifierEmbedder extends Logging {
       .getOption(node)
       .map(parseSourceIdentifier)
       .map(identifiers(_))
-      .map { canonicalId =>
-        root.obj.modify { obj =>
-          ("canonicalId", Json.fromString(canonicalId.underlying)) +: obj
-        }(node)
+      .map {
+        canonicalId =>
+          root.obj.modify {
+            obj =>
+              ("canonicalId", Json.fromString(canonicalId.underlying)) +: obj
+          }(node)
       }
       .getOrElse(node)
 

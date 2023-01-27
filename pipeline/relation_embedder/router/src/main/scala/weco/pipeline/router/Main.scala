@@ -17,58 +17,59 @@ import weco.typesafe.config.builders.EnrichConfig._
 import scala.concurrent.ExecutionContext
 
 object Main extends WellcomeTypesafeApp {
-  runWithConfig { config: Config =>
-    implicit val ec: ExecutionContext =
-      ActorSystem("main-actor-system").dispatcher
+  runWithConfig {
+    config: Config =>
+      implicit val ec: ExecutionContext =
+        ActorSystem("main-actor-system").dispatcher
 
-    val esClient = ElasticBuilder.buildElasticClient(config)
+      val esClient = ElasticBuilder.buildElasticClient(config)
 
-    val workIndexer =
-      new ElasticIndexer[Work[Denormalised]](
-        client = esClient,
-        index = Index(config.requireString(s"es.denormalised-works.index")),
-        config = WorksIndexConfig.denormalised
+      val workIndexer =
+        new ElasticIndexer[Work[Denormalised]](
+          client = esClient,
+          index = Index(config.requireString(s"es.denormalised-works.index")),
+          config = WorksIndexConfig.denormalised
+        )
+
+      val workRetriever =
+        new ElasticSourceRetriever[Work[Merged]](
+          client = esClient,
+          index = Index(config.requireString("es.merged-works.index"))
+        )
+
+      val workSender =
+        SNSBuilder
+          .buildSNSMessageSender(
+            config,
+            namespace = "work-sender",
+            subject = "Sent from the router"
+          )
+
+      val pathSender =
+        SNSBuilder
+          .buildSNSMessageSender(
+            config,
+            namespace = "path-sender",
+            subject = "Sent from the router"
+          )
+
+      val pathConcatenatorSender =
+        SNSBuilder
+          .buildSNSMessageSender(
+            config,
+            namespace = "path-concatenator-sender",
+            subject = "Sent from the router"
+          )
+
+      val pipelineStream =
+        PipelineStorageStreamBuilder
+          .buildPipelineStorageStream(workIndexer, workSender)(config)
+
+      new RouterWorkerService(
+        pathsMsgSender = pathSender,
+        pathConcatenatorMsgSender = pathConcatenatorSender,
+        workRetriever = workRetriever,
+        pipelineStream = pipelineStream
       )
-
-    val workRetriever =
-      new ElasticSourceRetriever[Work[Merged]](
-        client = esClient,
-        index = Index(config.requireString("es.merged-works.index"))
-      )
-
-    val workSender =
-      SNSBuilder
-        .buildSNSMessageSender(
-          config,
-          namespace = "work-sender",
-          subject = "Sent from the router"
-        )
-
-    val pathSender =
-      SNSBuilder
-        .buildSNSMessageSender(
-          config,
-          namespace = "path-sender",
-          subject = "Sent from the router"
-        )
-
-    val pathConcatenatorSender =
-      SNSBuilder
-        .buildSNSMessageSender(
-          config,
-          namespace = "path-concatenator-sender",
-          subject = "Sent from the router"
-        )
-
-    val pipelineStream =
-      PipelineStorageStreamBuilder
-        .buildPipelineStorageStream(workIndexer, workSender)(config)
-
-    new RouterWorkerService(
-      pathsMsgSender = pathSender,
-      pathConcatenatorMsgSender = pathConcatenatorSender,
-      workRetriever = workRetriever,
-      pipelineStream = pipelineStream
-    )
   }
 }

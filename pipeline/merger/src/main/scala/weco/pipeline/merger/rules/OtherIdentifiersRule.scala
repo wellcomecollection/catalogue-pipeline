@@ -55,8 +55,9 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
         mergeIntoTeiTarget,
         mergeIntoCalmTarget,
         mergeSingleMiroIntoSingleOrZeroItemSierraTarget
-      ).flatMap { rule =>
-        rule.mergedSources(target, sources)
+      ).flatMap {
+        rule =>
+          rule.mergedSources(target, sources)
       } ++ findFirstLinkedDigitisedSierraWorkFor(target, sources)
     ).distinct
 
@@ -69,8 +70,9 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
   private def getAllowedIdentifiersFromSource(
     source: Work[Identified]
   ): List[SourceIdentifier] =
-    (source.sourceIdentifier +: source.data.otherIdentifiers.filter { id =>
-      otherIdentifiersTypeAllowList.exists(_ == id.identifierType)
+    (source.sourceIdentifier +: source.data.otherIdentifiers.filter {
+      id =>
+        otherIdentifiersTypeAllowList.exists(_ == id.identifierType)
     }).distinct
 
   private val mergeSingleMiroIntoSingleOrZeroItemSierraTarget =

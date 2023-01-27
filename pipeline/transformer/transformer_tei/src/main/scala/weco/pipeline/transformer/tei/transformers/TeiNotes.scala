@@ -28,13 +28,15 @@ object TeiNotes {
     */
   private def getColophon(value: NodeSeq): Seq[Note] =
     (value \ "colophon")
-      .map { n =>
-        n.text.trim
+      .map {
+        n =>
+          n.text.trim
       }
       .flatMap { NormaliseText(_) }
       .filter { _.nonEmpty }
-      .map { contents =>
-        Note(contents = contents, noteType = NoteType.ColophonNote)
+      .map {
+        contents =>
+          Note(contents = contents, noteType = NoteType.ColophonNote)
       }
 
   /** The `incipit` and `explicit` nodes are under `msItem` or `msPart`.
@@ -55,18 +57,19 @@ object TeiNotes {
     value
       .flatMap(_.nonEmptyChildren)
       .filter(n => n.label == "incipit" || n.label == "explicit")
-      .map { n =>
-        // The <locus> tag in an incipit/explicit tells us where this extract comes from;
-        // so this is clear in the display prefix it with a colon.
-        val locus = (n \ "locus").text
+      .map {
+        n =>
+          // The <locus> tag in an incipit/explicit tells us where this extract comes from;
+          // so this is clear in the display prefix it with a colon.
+          val locus = (n \ "locus").text
 
-        val contents = if (locus.isEmpty) {
-          n.text
-        } else {
-          n.text.replaceAll(s"$locus\\s*", s"$locus: ")
-        }
+          val contents = if (locus.isEmpty) {
+            n.text
+          } else {
+            n.text.replaceAll(s"$locus\\s*", s"$locus: ")
+          }
 
-        (n.label, NormaliseText(contents))
+          (n.label, NormaliseText(contents))
       }
       .collect {
         case ("incipit", Some(contents)) =>
@@ -84,8 +87,9 @@ object TeiNotes {
     * </msItem>
     */
   private def getLocus(nodeSeq: NodeSeq): List[Note] =
-    (nodeSeq \ "locus").flatMap { locus =>
-      NormaliseText(locus.text.trim).map(Note(NoteType.LocusNote, _))
+    (nodeSeq \ "locus").flatMap {
+      locus =>
+        NormaliseText(locus.text.trim).map(Note(NoteType.LocusNote, _))
     }.toList
 
   /** HandNotes contain information about how/who wrote the manuscript and are
@@ -101,26 +105,27 @@ object TeiNotes {
     * Cypriot hand.</handNote> </handDesc> </physDesc> </msPart>
     */
   def getHandNotes(nodeSeq: NodeSeq): List[Note] =
-    (nodeSeq \ "physDesc" \ "handDesc" \ "handNote").flatMap { n =>
-      // if the handNote has a scribe attribute, then it's being extracted as a contributor. No need to extract it again as a note
-      if ((n \@ "scribe").isEmpty) {
-        val label = n.text
-        // scribes can also appear in handNote as <persName role="scr">someone</persName>.
-        // Sometimes the persName tags are the only thing in the handNote tag and in that case, and in that case because
-        // they are already extracted as contributors, there's no need to extract them again as notes.
-        // Sometimes however, the persName nodes appear as part of a wider text in handNote. In that case we do
-        // want to extract everything otherwise that text becomes unintelligible ie:
-        // <handNote>In  neat handwriting by <persName role="scr">someone</persName></handNote>
-        val labelNoScribes = n.child
-          .filterNot(n => n.label == "persName" && (n \@ "role") == "scr")
-          .text
-          .trim
-        if (labelNoScribes.nonEmpty) {
-          NormaliseText(label).map(Note(NoteType.HandNote, _))
-        } else {
-          None
-        }
-      } else None
+    (nodeSeq \ "physDesc" \ "handDesc" \ "handNote").flatMap {
+      n =>
+        // if the handNote has a scribe attribute, then it's being extracted as a contributor. No need to extract it again as a note
+        if ((n \@ "scribe").isEmpty) {
+          val label = n.text
+          // scribes can also appear in handNote as <persName role="scr">someone</persName>.
+          // Sometimes the persName tags are the only thing in the handNote tag and in that case, and in that case because
+          // they are already extracted as contributors, there's no need to extract them again as notes.
+          // Sometimes however, the persName nodes appear as part of a wider text in handNote. In that case we do
+          // want to extract everything otherwise that text becomes unintelligible ie:
+          // <handNote>In  neat handwriting by <persName role="scr">someone</persName></handNote>
+          val labelNoScribes = n.child
+            .filterNot(n => n.label == "persName" && (n \@ "role") == "scr")
+            .text
+            .trim
+          if (labelNoScribes.nonEmpty) {
+            NormaliseText(label).map(Note(NoteType.HandNote, _))
+          } else {
+            None
+          }
+        } else None
     }.toList
 
   /** Extract the contents of `<history/>` that result in Notes.
@@ -135,18 +140,21 @@ object TeiNotes {
     *     - (wellcome-collection-tei: 9c2c8856e49738a6f70461694d4791c9ef19528c)
     */
   private def getHistory(nodeSeq: NodeSeq): List[Note] =
-    (nodeSeq \ "history").flatMap { history =>
-      getProvenance(history) ++ getAcquisition(history)
+    (nodeSeq \ "history").flatMap {
+      history =>
+        getProvenance(history) ++ getAcquisition(history)
     }.toList
 
   private def getProvenance(nodeSeq: NodeSeq): List[Note] =
-    (nodeSeq \ "provenance").flatMap { provenance =>
-      TeiProvenanceNote(provenance.asInstanceOf[Elem])
+    (nodeSeq \ "provenance").flatMap {
+      provenance =>
+        TeiProvenanceNote(provenance.asInstanceOf[Elem])
     }.toList
 
   private def getAcquisition(nodeSeq: NodeSeq): List[Note] =
-    (nodeSeq \ "acquisition").flatMap { acquisition =>
-      TeiAcquisitionNote(acquisition.asInstanceOf[Elem])
+    (nodeSeq \ "acquisition").flatMap {
+      acquisition =>
+        TeiAcquisitionNote(acquisition.asInstanceOf[Elem])
     }.toList
 
 }

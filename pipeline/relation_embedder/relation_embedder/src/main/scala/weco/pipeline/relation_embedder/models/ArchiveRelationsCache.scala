@@ -8,23 +8,24 @@ class ArchiveRelationsCache(works: Map[String, RelationWork]) extends Logging {
 
   def apply(work: Work[Merged]): Relations =
     work.data.collectionPath
-      .map { case CollectionPath(path, _) =>
-        val (siblingsPreceding, siblingsSucceeding) = getSiblings(path)
-        val ancestors = getAncestors(path)
-        val children = getChildren(path)
-        val relations = Relations(
-          ancestors = ancestors,
-          children = children,
-          siblingsPreceding = siblingsPreceding,
-          siblingsSucceeding = siblingsSucceeding
-        )
-        if (relations == Relations.none)
-          info(s"Found no relations for work with path $path")
-        else
-          info(
-            s"Found relations for work with path $path: ${ancestors.size} ancestors, ${children.size} children, and ${siblingsPreceding.size + siblingsSucceeding.size} siblings"
+      .map {
+        case CollectionPath(path, _) =>
+          val (siblingsPreceding, siblingsSucceeding) = getSiblings(path)
+          val ancestors = getAncestors(path)
+          val children = getChildren(path)
+          val relations = Relations(
+            ancestors = ancestors,
+            children = children,
+            siblingsPreceding = siblingsPreceding,
+            siblingsSucceeding = siblingsSucceeding
           )
-        relations
+          if (relations == Relations.none)
+            info(s"Found no relations for work with path $path")
+          else
+            info(
+              s"Found relations for work with path $path: ${ancestors.size} ancestors, ${children.size} children, and ${siblingsPreceding.size + siblingsSucceeding.size} siblings"
+            )
+          relations
       }
       .getOrElse {
         warn(s"Received work with empty collectionPath field: ${work.id}")
@@ -52,12 +53,13 @@ class ArchiveRelationsCache(works: Map[String, RelationWork]) extends Logging {
   import weco.pipeline.relation_embedder.models.PathOps._
 
   private lazy val relations: Map[String, Relation] =
-    works.map { case (path, work) =>
-      path -> work.toRelation(
-        depth = path.depth,
-        numChildren = paths.childrenOf(path).length,
-        numDescendents = paths.knownDescendentsOf(path).length
-      )
+    works.map {
+      case (path, work) =>
+        path -> work.toRelation(
+          depth = path.depth,
+          numChildren = paths.childrenOf(path).length,
+          numDescendents = paths.knownDescendentsOf(path).length
+        )
     }
 }
 

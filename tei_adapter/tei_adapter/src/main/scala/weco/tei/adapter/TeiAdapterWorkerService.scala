@@ -47,27 +47,29 @@ class TeiAdapterWorkerService[Dest](
     source
       .via(unwrapMessage)
       .via(broadcastAndMerge(delayDeleted, sendChanged))
-      .mapAsync(parallelism) { case (ctx, msg) =>
-        Future.fromTry {
-          for {
-            stored <- updateStore(msg.id, msg.toMetadata)
-            _ <- messageSender.sendT(
-              TeiSourcePayload(
-                stored.id.id,
-                stored.identifiedT,
-                stored.id.version
+      .mapAsync(parallelism) {
+        case (ctx, msg) =>
+          Future.fromTry {
+            for {
+              stored <- updateStore(msg.id, msg.toMetadata)
+              _ <- messageSender.sendT(
+                TeiSourcePayload(
+                  stored.id.id,
+                  stored.identifiedT,
+                  stored.id.version
+                )
               )
-            )
 
-          } yield ctx.msg
-        }
+            } yield ctx.msg
+          }
 
       }
 
   def unwrapMessage =
     Flow[(Message, NotificationMessage)]
-      .map { case (msg, NotificationMessage(body)) =>
-        (Context(msg), fromJson[TeiIdMessage](body).toEither)
+      .map {
+        case (msg, NotificationMessage(body)) =>
+          (Context(msg), fromJson[TeiIdMessage](body).toEither)
       }
       .via(catchErrors)
 
@@ -93,11 +95,12 @@ class TeiAdapterWorkerService[Dest](
 
   private def updateStore(id: String, metadata: TeiMetadata) =
     store
-      .upsert(id)(metadata)(existingMetadata =>
-        updateMetadata(
-          newMetadata = metadata,
-          existingMetadata = existingMetadata
-        )
+      .upsert(id)(metadata)(
+        existingMetadata =>
+          updateMetadata(
+            newMetadata = metadata,
+            existingMetadata = existingMetadata
+          )
       )
       .left
       .map(_.e)

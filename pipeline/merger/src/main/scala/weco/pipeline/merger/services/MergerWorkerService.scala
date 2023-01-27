@@ -72,25 +72,27 @@ class MergerWorkerService[WorkDestination, ImageDestination](
       result = workSets match {
         case Nil => Nil
         case workSets =>
-          workSets.flatMap(ws =>
-            // We use the matcher result time as the "modified" time on
-            // the merged works, because it reflects the last time the
-            // matcher inspected the connections between these works.
-            //
-            // We *cannot* rely on the modified times of the individual
-            // works -- this may cause us to drop updates if works
-            // get unlinked.
-            //
-            // See https://github.com/wellcomecollection/docs/tree/8d83d75aba89ead23559584db2533e95ceb09200/rfcs/038-matcher-versioning
-            applyMerge(ws, matcherResult.createdTime)
+          workSets.flatMap(
+            ws =>
+              // We use the matcher result time as the "modified" time on
+              // the merged works, because it reflects the last time the
+              // matcher inspected the connections between these works.
+              //
+              // We *cannot* rely on the modified times of the individual
+              // works -- this may cause us to drop updates if works
+              // get unlinked.
+              //
+              // See https://github.com/wellcomecollection/docs/tree/8d83d75aba89ead23559584db2533e95ceb09200/rfcs/038-matcher-versioning
+              applyMerge(ws, matcherResult.createdTime)
           )
       }
     } yield result
 
   private def getWorkSets(matcherResult: MatcherResult): Future[List[WorkSet]] =
     Future.sequence {
-      matcherResult.works.toList.map { matchedIdentifiers =>
-        sourceWorkLookup.fetchAllWorks(matchedIdentifiers.identifiers.toList)
+      matcherResult.works.toList.map {
+        matchedIdentifiers =>
+          sourceWorkLookup.fetchAllWorks(matchedIdentifiers.identifiers.toList)
       }
     }
 

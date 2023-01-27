@@ -14,20 +14,23 @@ import scala.concurrent.{ExecutionContext, Future}
 trait CalmHttpResponseParser[Request <: CalmXmlRequest] extends Logging {
   type Result[U] = Either[Throwable, U]
 
-  def apply(resp: HttpResponse)(implicit
-    mat: Materializer,
+  def apply(resp: HttpResponse)(
+    implicit mat: Materializer,
     ec: ExecutionContext
   ): Future[Request#Response] =
     Unmarshal(resp.entity)
       .to[Array[Byte]]
-      .flatMap { bytes =>
-        Future.fromTry(parseXml(resp, bytes).flatMap(_.parse).toTry)
+      .flatMap {
+        bytes =>
+          Future.fromTry(parseXml(resp, bytes).flatMap(_.parse).toTry)
       }
-      .recoverWith { case parseException =>
-        CalmHttpResponseParser.responseText(resp.entity).map { responseString =>
-          error(s"Error while parsing response: $responseString")
-          throw parseException
-        }
+      .recoverWith {
+        case parseException =>
+          CalmHttpResponseParser.responseText(resp.entity).map {
+            responseString =>
+              error(s"Error while parsing response: $responseString")
+              throw parseException
+          }
       }
 
   def parseXml(
@@ -54,8 +57,9 @@ object CalmHttpResponseParser {
 
   private def parseCookie(resp: HttpResponse): Cookie =
     resp.headers
-      .collectFirst { case `Set-Cookie`(cookie) =>
-        Cookie(cookie.pair)
+      .collectFirst {
+        case `Set-Cookie`(cookie) =>
+          Cookie(cookie.pair)
       }
       .getOrElse(
         throw new Exception("Session cookie not found in CALM response")
@@ -63,8 +67,9 @@ object CalmHttpResponseParser {
 
   private def parseTimestamp(resp: HttpResponse): Instant =
     resp.headers
-      .collectFirst { case `Date`(dateTime) =>
-        Instant.ofEpochMilli(dateTime.clicks)
+      .collectFirst {
+        case `Date`(dateTime) =>
+          Instant.ofEpochMilli(dateTime.clicks)
       }
       .getOrElse(throw new Exception("Timestamp not found in CALM response"))
 

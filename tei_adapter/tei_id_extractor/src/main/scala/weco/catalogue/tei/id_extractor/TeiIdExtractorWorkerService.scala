@@ -47,8 +47,9 @@ class TeiIdExtractorWorkerService[Dest](
 
   def unwrapMessage =
     Flow[(SQSMessage, NotificationMessage)]
-      .map { case (msg, NotificationMessage(body)) =>
-        (Context(msg), fromJson[TeiPathMessage](body).toEither)
+      .map {
+        case (msg, NotificationMessage(body)) =>
+          (Context(msg), fromJson[TeiPathMessage](body).toEither)
       }
       .via(catchErrors)
 
@@ -58,8 +59,9 @@ class TeiIdExtractorWorkerService[Dest](
 
   def processMessage =
     Flow[(Context, TeiPathMessage)]
-      .filter { case (_, teiPathMessage) =>
-        isTeiFile(teiPathMessage.path)
+      .filter {
+        case (_, teiPathMessage) =>
+          isTeiFile(teiPathMessage.path)
       }
       .via(broadcastAndMerge(processDeleted, processChange))
 
@@ -75,13 +77,14 @@ class TeiIdExtractorWorkerService[Dest](
       // (the change message will override the deleted message changes eventually). So we're introducing
       // a delay for deleted messages so that changed messages are processed first
       .delay(config.deleteMessageDelay)
-      .mapAsync(config.parallelism) { case (ctx, message) =>
-        for {
-          _ <- Future.fromTry(
-            pathIdManager
-              .handlePathDeleted(message.path, message.timeDeleted)
-          )
-        } yield (ctx, Right(()))
+      .mapAsync(config.parallelism) {
+        case (ctx, message) =>
+          for {
+            _ <- Future.fromTry(
+              pathIdManager
+                .handlePathDeleted(message.path, message.timeDeleted)
+            )
+          } yield (ctx, Right(()))
       }
       .via(catchErrors)
 
@@ -91,17 +94,20 @@ class TeiIdExtractorWorkerService[Dest](
         case (ctx, msg) if msg.isInstanceOf[TeiPathChangedMessage] =>
           (ctx, msg.asInstanceOf[TeiPathChangedMessage])
       }
-      .mapAsync(config.parallelism) { case (ctx, message) =>
-        for {
-          blobContent <- gitHubBlobReader.getBlob(message.uri)
-          id <- Future.fromTry(IdExtractor.extractId(blobContent, message.path))
-          _ <- Future.fromTry(
-            pathIdManager.handlePathChanged(
-              PathId(message.path, id, message.timeModified),
-              blobContent
+      .mapAsync(config.parallelism) {
+        case (ctx, message) =>
+          for {
+            blobContent <- gitHubBlobReader.getBlob(message.uri)
+            id <- Future.fromTry(
+              IdExtractor.extractId(blobContent, message.path)
             )
-          )
-        } yield (ctx, Right(()))
+            _ <- Future.fromTry(
+              pathIdManager.handlePathChanged(
+                PathId(message.path, id, message.timeModified),
+                blobContent
+              )
+            )
+          } yield (ctx, Right(()))
       }
       .via(catchErrors)
 

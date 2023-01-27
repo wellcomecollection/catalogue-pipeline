@@ -12,8 +12,9 @@ object JsonOps {
       c.as[String] match {
         case Right(value) => Right(new StringOrInt(value))
         case Left(_) =>
-          c.as[Int].map { v =>
-            new StringOrInt(v.toString)
+          c.as[Int].map {
+            v =>
+              new StringOrInt(v.toString)
           }
       }
 

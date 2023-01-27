@@ -14,23 +14,24 @@ import scala.concurrent.ExecutionContext
 import scala.language.higherKinds
 
 object Main extends WellcomeTypesafeApp {
-  runWithConfig { config =>
-    implicit val actorSystem: ActorSystem =
-      ActorSystem("main-actor-system")
-    implicit val ec: ExecutionContext =
-      actorSystem.dispatcher
-    implicit val dynamoClient: DynamoDbClient =
-      DynamoDbClient.builder().build()
+  runWithConfig {
+    config =>
+      implicit val actorSystem: ActorSystem =
+        ActorSystem("main-actor-system")
+      implicit val ec: ExecutionContext =
+        actorSystem.dispatcher
+      implicit val dynamoClient: DynamoDbClient =
+        DynamoDbClient.builder().build()
 
-    new TeiAdapterWorkerService(
-      messageStream = SQSBuilder.buildSQSStream(config),
-      messageSender =
-        SNSBuilder.buildSNSMessageSender(config, subject = "TEI adapter"),
-      store = new DynamoSingleVersionStore(
-        DynamoBuilder.buildDynamoConfig(config, namespace = "tei")
-      ),
-      parallelism = config.requireInt("tei.adapter.parallelism"),
-      delay = config.getDuration("tei.adapter.delete.delay").toScala
-    )
+      new TeiAdapterWorkerService(
+        messageStream = SQSBuilder.buildSQSStream(config),
+        messageSender =
+          SNSBuilder.buildSNSMessageSender(config, subject = "TEI adapter"),
+        store = new DynamoSingleVersionStore(
+          DynamoBuilder.buildDynamoConfig(config, namespace = "tei")
+        ),
+        parallelism = config.requireInt("tei.adapter.parallelism"),
+        delay = config.getDuration("tei.adapter.delete.delay").toScala
+      )
   }
 }

@@ -33,18 +33,20 @@ object TeiContributors extends LabelDerivedIdentifiers {
     isFihrist: Boolean
   ): Result[List[Contributor[IdState.Unminted]]] =
     (node \ "author")
-      .map { author =>
-        for {
-          authorInfo <- getLabelAndId(author)
-          contributor <- authorInfo.map { case (label, id) =>
-            createContributor(
-              label = label,
-              ContributionRole("author"),
-              isFihrist = isFihrist,
-              id = id
-            )
-          }.sequence
-        } yield contributor
+      .map {
+        author =>
+          for {
+            authorInfo <- getLabelAndId(author)
+            contributor <- authorInfo.map {
+              case (label, id) =>
+                createContributor(
+                  label = label,
+                  ContributionRole("author"),
+                  isFihrist = isFihrist,
+                  id = id
+                )
+            }.sequence
+          } yield contributor
       }
       .toList
       .sequence
@@ -114,8 +116,9 @@ object TeiContributors extends LabelDerivedIdentifiers {
   private def getScribeContributor(n: Node) =
     for {
       maybeLabel <- parseScribeLabel(n)
-      contributor <- maybeLabel.map { label =>
-        createContributor(label = label, role = ContributionRole("scribe"))
+      contributor <- maybeLabel.map {
+        label =>
+          createContributor(label = label, role = ContributionRole("scribe"))
       }.sequence
     } yield contributor
 
@@ -166,8 +169,9 @@ object TeiContributors extends LabelDerivedIdentifiers {
       case (Some(_), Nil)      => parseLabelFromHandNode(handNote)
       case (_, List(persName)) => Right(Some(persName.text.trim))
       case (_, list @ _ :: _) =>
-        getFromOriginalPersName(handNote, list).map { case (label, _) =>
-          Some(label)
+        getFromOriginalPersName(handNote, list).map {
+          case (label, _) =>
+            Some(label)
         }
       case (None, Nil) => Right(None)
     }
@@ -207,8 +211,9 @@ object TeiContributors extends LabelDerivedIdentifiers {
 
   private def extractNestedWorkIds(n: Node) = {
     (n \ "locus")
-      .map { locus =>
-        (locus \@ "target").trim.replaceAll("#", "").split(" ")
+      .map {
+        locus =>
+          (locus \@ "target").trim.replaceAll("#", "").split(" ")
       }
       .toList
       .flatten

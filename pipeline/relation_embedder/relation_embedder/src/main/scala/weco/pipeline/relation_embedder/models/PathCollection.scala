@@ -21,8 +21,9 @@ case class PathCollection(paths: Set[String]) {
     */
   lazy val parentMapping: Map[String, String] =
     paths
-      .map { p =>
-        p -> p.parent
+      .map {
+        p =>
+          p -> p.parent
       }
       .filter { case (_, parentPath) => paths.contains(parentPath) }
       .toMap
@@ -45,15 +46,16 @@ case class PathCollection(paths: Set[String]) {
     * The children are sorted in CollectionPath order.
     */
   lazy val childMapping: Map[String, List[String]] =
-    paths.map { p =>
-      val childPaths = parentMapping.collect {
-        case (childPath, parentPath) if parentPath == p =>
-          childPath
-      }.toSet
+    paths.map {
+      p =>
+        val childPaths = parentMapping.collect {
+          case (childPath, parentPath) if parentPath == p =>
+            childPath
+        }.toSet
 
-      require(childPaths.forall(_.parent == p))
+        require(childPaths.forall(_.parent == p))
 
-      p -> CollectionPathSorter.sortPaths(childPaths)
+        p -> CollectionPathSorter.sortPaths(childPaths)
     }.toMap
 
   /** Returns the siblings of ``path``.

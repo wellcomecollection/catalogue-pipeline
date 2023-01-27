@@ -43,21 +43,23 @@ object WorksAnalysis {
   val languages =
     List("arabic", "bengali", "french", "german", "hindi", "italian")
 
-  val languageFiltersAndAnalyzers = languages.map(lang => {
-    val name = s"${lang}_stemmer"
-    (
-      StemmerTokenFilter(name, lang = lang),
-      CustomAnalyzer(
-        s"${lang}_analyzer",
-        tokenizer = "standard",
-        tokenFilters = List(
-          "lowercase",
-          name
-        ),
-        charFilters = Nil
+  val languageFiltersAndAnalyzers = languages.map(
+    lang => {
+      val name = s"${lang}_stemmer"
+      (
+        StemmerTokenFilter(name, lang = lang),
+        CustomAnalyzer(
+          s"${lang}_analyzer",
+          tokenizer = "standard",
+          tokenFilters = List(
+            "lowercase",
+            name
+          ),
+          charFilters = Nil
+        )
       )
-    )
-  })
+    }
+  )
 
   val asciifoldingAnalyzer = CustomAnalyzer(
     "asciifolding_analyzer",

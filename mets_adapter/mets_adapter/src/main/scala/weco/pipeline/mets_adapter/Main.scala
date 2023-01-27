@@ -23,33 +23,34 @@ import scala.concurrent.ExecutionContext
 import scala.language.higherKinds
 
 object Main extends WellcomeTypesafeApp {
-  runWithConfig { config: Config =>
-    implicit val actorSystem: ActorSystem =
-      ActorSystem("main-actor-system")
-    implicit val ec: ExecutionContext =
-      actorSystem.dispatcher
+  runWithConfig {
+    config: Config =>
+      implicit val actorSystem: ActorSystem =
+        ActorSystem("main-actor-system")
+      implicit val ec: ExecutionContext =
+        actorSystem.dispatcher
 
-    implicit val dynamoClient: DynamoDbClient =
-      DynamoDbClient.builder().build()
+      implicit val dynamoClient: DynamoDbClient =
+        DynamoDbClient.builder().build()
 
-    val oauthClient = new StorageServiceOauthHttpClient(
-      underlying = new AkkaHttpClient(),
-      baseUri = Uri(config.requireString("bags.api.url")),
-      tokenUri = Uri(config.requireString("bags.oauth.url")),
-      credentials = BasicHttpCredentials(
-        config.requireString("bags.oauth.client_id"),
-        config.requireString("bags.oauth.secret")
+      val oauthClient = new StorageServiceOauthHttpClient(
+        underlying = new AkkaHttpClient(),
+        baseUri = Uri(config.requireString("bags.api.url")),
+        tokenUri = Uri(config.requireString("bags.oauth.url")),
+        credentials = BasicHttpCredentials(
+          config.requireString("bags.oauth.client_id"),
+          config.requireString("bags.oauth.secret")
+        )
       )
-    )
-    val metsStore = new DynamoSingleVersionStore[String, MetsSourceData](
-      DynamoBuilder.buildDynamoConfig(config, namespace = "mets")
-    )
+      val metsStore = new DynamoSingleVersionStore[String, MetsSourceData](
+        DynamoBuilder.buildDynamoConfig(config, namespace = "mets")
+      )
 
-    new MetsAdapterWorkerService(
-      SQSBuilder.buildSQSStream(config),
-      SNSBuilder.buildSNSMessageSender(config, subject = "METS adapter"),
-      bagRetriever = new HttpBagRetriever(oauthClient),
-      metsStore = metsStore
-    )
+      new MetsAdapterWorkerService(
+        SQSBuilder.buildSQSStream(config),
+        SNSBuilder.buildSNSMessageSender(config, subject = "METS adapter"),
+        bagRetriever = new HttpBagRetriever(oauthClient),
+        metsStore = metsStore
+      )
   }
 }

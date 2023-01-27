@@ -24,8 +24,9 @@ trait Datable {
       ("notBefore", "not before"),
       ("to", "to"),
       ("notAfter", "not after")
-    ).flatMap { case (attributeName, proseLabel) =>
-      attributeAsText(datableElement, attributeName, proseLabel)
+    ).flatMap {
+      case (attributeName, proseLabel) =>
+        attributeAsText(datableElement, attributeName, proseLabel)
     } match {
       case Nil        => None
       case timeBounds => Some(s"(${timeBounds.mkString(", ")})")

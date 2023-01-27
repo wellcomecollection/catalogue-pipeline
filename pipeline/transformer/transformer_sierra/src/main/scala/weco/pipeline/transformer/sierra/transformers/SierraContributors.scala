@@ -117,19 +117,21 @@ object SierraContributors
       case ContributorField(marcTag, roleTags, isPrimary, getContributors) =>
         bibData
           .varfieldsWithTag(marcTag)
-          .flatMap { varfield =>
-            val (ontologyType, maybeAgent) =
-              getContributors(varfield.subfields)
-            maybeAgent.map { agent =>
-              Contributor(
-                agent = withId(
-                  agent,
-                  identify(varfield.subfields, ontologyType, agent.label)
-                ),
-                roles = getContributionRoles(varfield.subfields, roleTags),
-                primary = isPrimary
-              )
-            }
+          .flatMap {
+            varfield =>
+              val (ontologyType, maybeAgent) =
+                getContributors(varfield.subfields)
+              maybeAgent.map {
+                agent =>
+                  Contributor(
+                    agent = withId(
+                      agent,
+                      identify(varfield.subfields, ontologyType, agent.label)
+                    ),
+                    roles = getContributionRoles(varfield.subfields, roleTags),
+                    primary = isPrimary
+                  )
+              }
           }
     }
 
@@ -166,13 +168,14 @@ object SierraContributors
     subfields
       .withTags(roleTags: _*)
       .contents
-      .map { role =>
-        // The contribution role in the raw MARC data sometimes includes a
-        // trailing full stop, because all the subfields are meant to be concatenated
-        // into a single sentence.
-        //
-        // This full stop doesn't make sense in a structured field, so remove it.
-        role.stripSuffix(".")
+      .map {
+        role =>
+          // The contribution role in the raw MARC data sometimes includes a
+          // trailing full stop, because all the subfields are meant to be concatenated
+          // into a single sentence.
+          //
+          // This full stop doesn't make sense in a structured field, so remove it.
+          role.stripSuffix(".")
       }
       .map(ContributionRole)
 
@@ -210,8 +213,9 @@ object SierraContributors
     //
     // For consistency, we remove all whitespace and some punctuation
     // before continuing.
-    val codes = subfields.collect { case Subfield("0", content) =>
-      content.replaceAll("[.,\\s]", "")
+    val codes = subfields.collect {
+      case Subfield("0", content) =>
+        content.replaceAll("[.,\\s]", "")
     }
 
     // If we get exactly one value, we can use it to identify the record.

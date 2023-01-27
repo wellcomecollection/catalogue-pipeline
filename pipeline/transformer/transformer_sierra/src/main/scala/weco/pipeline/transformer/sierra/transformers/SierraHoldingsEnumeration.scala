@@ -75,8 +75,9 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
         .filter { _.marcTag.contains(valueTag) }
         .flatMap { createValue(id, _) }
 
-    val labelsLookup = labels.map { case label @ Label(link, _) =>
-      link -> label
+    val labelsLookup = labels.map {
+      case label @ Label(link, _) =>
+        link -> label
     }.toMap
 
     // We have seen records where two instances of field 853 have the
@@ -102,25 +103,27 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
     //
     // If we can't find a label for a given value, we omit it.
     values
-      .flatMap { value =>
-        labelsLookup.get(value.link) match {
-          case Some(label) => Some((label, value))
-          case None =>
-            warn(
-              s"${id.withCheckDigit}: an instance of $valueTag refers to a missing sequence number in $labelTag: ${value.varField}"
-            )
-            None
-        }
+      .flatMap {
+        value =>
+          labelsLookup.get(value.link) match {
+            case Some(label) => Some((label, value))
+            case None =>
+              warn(
+                s"${id.withCheckDigit}: an instance of $valueTag refers to a missing sequence number in $labelTag: ${value.varField}"
+              )
+              None
+          }
       }
       .sortBy { case (_, value) => (value.link, value.sequence) }
-      .map { case (label, value) =>
-        // We concatenate the contents of the public note in subfield ǂz.
-        // This is completely separate from the logic for combining the
-        // labels/values from the 85X/86X pair.
-        val publicNote =
-          value.varField.subfieldsWithTag("z").map { _.content }.mkString(" ")
+      .map {
+        case (label, value) =>
+          // We concatenate the contents of the public note in subfield ǂz.
+          // This is completely separate from the logic for combining the
+          // labels/values from the 85X/86X pair.
+          val publicNote =
+            value.varField.subfieldsWithTag("z").map { _.content }.mkString(" ")
 
-        createString(id, label, value) + " " + publicNote
+          createString(id, label, value) + " " + publicNote
       }
       .map { _.trim }
       .distinct
@@ -138,12 +141,13 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
           // creating the display string.
           _.tag == "8"
         }
-        .flatMap { sf =>
-          label.varField.subfieldsWithTag(sf.tag).headOption match {
-            case Some(Subfield(_, subfieldLabel)) =>
-              Some((subfieldLabel, sf.content))
-            case None => None
-          }
+        .flatMap {
+          sf =>
+            label.varField.subfieldsWithTag(sf.tag).headOption match {
+              case Some(Subfield(_, subfieldLabel)) =>
+                Some((subfieldLabel, sf.content))
+              case None => None
+            }
         }
         .filterNot { case (_, value) => value.trim == "-" }
 
@@ -168,11 +172,13 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
     // The tests have more examples for all the cases this range logic is meant to handle.
     //
     if (parts.exists { case (_, value) => value.contains("-") }) {
-      val startParts = parts.map { case (label, value) =>
-        (label, value.split("-", 2).head)
+      val startParts = parts.map {
+        case (label, value) =>
+          (label, value.split("-", 2).head)
       }
-      val endParts = parts.map { case (label, value) =>
-        (label, value.split("-", 2).last)
+      val endParts = parts.map {
+        case (label, value) =>
+          (label, value.split("-", 2).last)
       }
 
       val startString = concatenateParts(id, startParts)
@@ -201,8 +207,9 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
     // the text values can be presented as is.
     val dateParts =
       nonEmptyParts
-        .filter { case (label, _) =>
-          label.toLowerCase.hasSubstring("season", "year", "month", "day")
+        .filter {
+          case (label, _) =>
+            label.toLowerCase.hasSubstring("season", "year", "month", "day")
         }
 
     val textualParts = nonEmptyParts.filterNot { dateParts.contains }
@@ -234,8 +241,9 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
           List(
             datePartsMap
               .get("season")
-              .flatMap { s =>
-                toNamedMonth(id, Some(s))
+              .flatMap {
+                s =>
+                  toNamedMonth(id, Some(s))
               }
               .map(_.value),
             year
@@ -284,15 +292,16 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
           case (label, value) =>
             s"$label$value"
         }
-        .foldRight("") { case (nextPart, accum) =>
-          // I haven't worked out the exact rules around this yet.
-          // In some cases, the old Wellcome Library site would join parts with
-          // a space.  In others (e.g. "v.130:no.3"), it uses a colon.
-          if (accum.startsWith("no.") && nextPart.startsWith("v")) {
-            nextPart + ":" + accum
-          } else {
-            nextPart + " " + accum
-          }
+        .foldRight("") {
+          case (nextPart, accum) =>
+            // I haven't worked out the exact rules around this yet.
+            // In some cases, the old Wellcome Library site would join parts with
+            // a space.  In others (e.g. "v.130:no.3"), it uses a colon.
+            if (accum.startsWith("no.") && nextPart.startsWith("v")) {
+              nextPart + ":" + accum
+            } else {
+              nextPart + " " + accum
+            }
         }
         .trim
 
@@ -316,19 +325,20 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
     id: TypedSierraRecordNumber,
     maybeS: Option[String]
   ): Option[NamedMonthResult] =
-    maybeS.flatMap { s =>
-      val parts = s.split("/").toList
-      if (parts.forall(monthNames.contains)) {
-        Some(
-          NamedMonthResult(
-            value = parts.map { monthNames(_) }.mkString("/"),
-            isAllMonths = !parts.exists(seasonNames.contains)
+    maybeS.flatMap {
+      s =>
+        val parts = s.split("/").toList
+        if (parts.forall(monthNames.contains)) {
+          Some(
+            NamedMonthResult(
+              value = parts.map { monthNames(_) }.mkString("/"),
+              isAllMonths = !parts.exists(seasonNames.contains)
+            )
           )
-        )
-      } else {
-        warn(s"$id: Unable to completely parse ($s) as a named month.season")
-        None
-      }
+        } else {
+          warn(s"$id: Unable to completely parse ($s) as a named month.season")
+          None
+        }
     }
 
   private val seasonNames = Map(

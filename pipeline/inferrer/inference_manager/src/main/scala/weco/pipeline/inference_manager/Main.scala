@@ -30,68 +30,69 @@ import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
 import weco.pipeline_storage.typesafe.PipelineStorageStreamBuilder
 
 object Main extends WellcomeTypesafeApp {
-  runWithConfig { config: Config =>
-    implicit val actorSystem: ActorSystem =
-      ActorSystem("main-actor-system")
-    implicit val executionContext: ExecutionContext =
-      actorSystem.dispatcher
+  runWithConfig {
+    config: Config =>
+      implicit val actorSystem: ActorSystem =
+        ActorSystem("main-actor-system")
+      implicit val executionContext: ExecutionContext =
+        actorSystem.dispatcher
 
-    val imageDownloader = ImageDownloader(
-      config
-        .getStringOption("shared.images-root")
-        .getOrElse("/tmp")
-    )
-
-    val featureInferrerAdapter = new FeatureVectorInferrerAdapter(
-      config.getString("inferrer.feature.host"),
-      config.getInt("inferrer.feature.port")
-    )
-    val paletteInferrerAdapter = new PaletteInferrerAdapter(
-      config.getString("inferrer.palette.host"),
-      config.getInt("inferrer.palette.port")
-    )
-    val aspectRatioInferrerAdapter = new AspectRatioInferrerAdapter(
-      config.getString("inferrer.aspectRatio.host"),
-      config.getInt("inferrer.aspectRatio.port")
-    )
-
-    val inferrerClientFlow =
-      Http().superPool[((DownloadedImage, InferrerAdapter), Message)]()
-
-    val esClient = ElasticBuilder.buildElasticClient(config)
-
-    val imageRetriever =
-      new ElasticSourceRetriever[Image[Initial]](
-        client = esClient,
-        index = Index(config.requireString("es.initial-images.index"))
+      val imageDownloader = ImageDownloader(
+        config
+          .getStringOption("shared.images-root")
+          .getOrElse("/tmp")
       )
 
-    val imageIndexer =
-      new ElasticIndexer[Image[Augmented]](
-        client = esClient,
-        index = Index(config.requireString("es.augmented-images.index")),
-        config = ImagesIndexConfig.augmented
+      val featureInferrerAdapter = new FeatureVectorInferrerAdapter(
+        config.getString("inferrer.feature.host"),
+        config.getInt("inferrer.feature.port")
+      )
+      val paletteInferrerAdapter = new PaletteInferrerAdapter(
+        config.getString("inferrer.palette.host"),
+        config.getInt("inferrer.palette.port")
+      )
+      val aspectRatioInferrerAdapter = new AspectRatioInferrerAdapter(
+        config.getString("inferrer.aspectRatio.host"),
+        config.getInt("inferrer.aspectRatio.port")
       )
 
-    val pipelineStorageConfig = PipelineStorageStreamBuilder
-      .buildPipelineStorageConfig(config)
+      val inferrerClientFlow =
+        Http().superPool[((DownloadedImage, InferrerAdapter), Message)]()
 
-    new InferenceManagerWorkerService(
-      msgStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
-      msgSender = SNSBuilder.buildSNSMessageSender(
-        config,
-        subject = "Sent from the inference_manager"
-      ),
-      imageRetriever = imageRetriever,
-      imageIndexer = imageIndexer,
-      pipelineStorageConfig = pipelineStorageConfig,
-      imageDownloader = imageDownloader,
-      inferrerAdapters = Set(
-        featureInferrerAdapter,
-        paletteInferrerAdapter,
-        aspectRatioInferrerAdapter
-      ),
-      requestPool = inferrerClientFlow
-    )
+      val esClient = ElasticBuilder.buildElasticClient(config)
+
+      val imageRetriever =
+        new ElasticSourceRetriever[Image[Initial]](
+          client = esClient,
+          index = Index(config.requireString("es.initial-images.index"))
+        )
+
+      val imageIndexer =
+        new ElasticIndexer[Image[Augmented]](
+          client = esClient,
+          index = Index(config.requireString("es.augmented-images.index")),
+          config = ImagesIndexConfig.augmented
+        )
+
+      val pipelineStorageConfig = PipelineStorageStreamBuilder
+        .buildPipelineStorageConfig(config)
+
+      new InferenceManagerWorkerService(
+        msgStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
+        msgSender = SNSBuilder.buildSNSMessageSender(
+          config,
+          subject = "Sent from the inference_manager"
+        ),
+        imageRetriever = imageRetriever,
+        imageIndexer = imageIndexer,
+        pipelineStorageConfig = pipelineStorageConfig,
+        imageDownloader = imageDownloader,
+        inferrerAdapters = Set(
+          featureInferrerAdapter,
+          paletteInferrerAdapter,
+          aspectRatioInferrerAdapter
+        ),
+        requestPool = inferrerClientFlow
+      )
   }
 }

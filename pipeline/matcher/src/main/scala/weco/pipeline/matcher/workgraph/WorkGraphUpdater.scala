@@ -15,8 +15,9 @@ import weco.pipeline.matcher.models.{
 
 object WorkGraphUpdater extends Logging {
   def update(work: WorkStub, affectedNodes: Set[WorkNode]): Set[WorkNode] = {
-    val affectedWorks = affectedNodes.map { n =>
-      n.id -> n
+    val affectedWorks = affectedNodes.map {
+      n =>
+        n.id -> n
     }.toMap
 
     checkVersionConflicts(work, affectedWorks)
@@ -78,8 +79,9 @@ private class WorkSubgraph(
 
   lazy val sourceWorks: Map[CanonicalId, SourceWorkData] =
     allWorks
-      .collect { case (id, WorkNode(_, _, _, Some(sourceWork))) =>
-        id -> sourceWork
+      .collect {
+        case (id, WorkNode(_, _, _, Some(sourceWork))) =>
+          id -> sourceWork
       }
 
   def create: Set[WorkNode] = {
@@ -96,8 +98,9 @@ private class WorkSubgraph(
     //
     val links =
       sourceWorks
-        .flatMap { case (id, sourceWork) =>
-          sourceWork.mergeCandidateIds.map { id ~> _ }
+        .flatMap {
+          case (id, sourceWork) =>
+            sourceWork.mergeCandidateIds.map { id ~> _ }
         }
 
     // Remove any links that come to/from works that are suppressed.
@@ -114,14 +117,16 @@ private class WorkSubgraph(
     //
     // We record information about suppressions in the matcher database.
     val unsuppressedLinks = links
-      .filterNot { link =>
-        link.head.isSuppressed || link.to.isSuppressed
+      .filterNot {
+        link =>
+          link.head.isSuppressed || link.to.isSuppressed
       }
 
     // Get the IDs of all the works in this graph, and construct a Graph object.
     val workIds =
-      sourceWorks.flatMap { case (id, work) =>
-        id +: work.mergeCandidateIds
+      sourceWorks.flatMap {
+        case (id, work) =>
+          id +: work.mergeCandidateIds
       }.toSet
 
     val g = Graph.from(edges = unsuppressedLinks, nodes = workIds)
@@ -138,20 +143,24 @@ private class WorkSubgraph(
     val subgraphId = SubgraphId(workIds)
 
     g.componentTraverser()
-      .flatMap(component => {
-        val componentIds = component.nodes.map(_.value).toList.sorted
+      .flatMap(
+        component => {
+          val componentIds = component.nodes.map(_.value).toList.sorted
 
-        component.nodes.map(node => {
-          val id = node.value
+          component.nodes.map(
+            node => {
+              val id = node.value
 
-          WorkNode(
-            id = id,
-            subgraphId = subgraphId,
-            componentIds = componentIds,
-            sourceWork = sourceWorks.get(id)
+              WorkNode(
+                id = id,
+                subgraphId = subgraphId,
+                componentIds = componentIds,
+                sourceWork = sourceWorks.get(id)
+              )
+            }
           )
-        })
-      })
+        }
+      )
       .toSet
   }
 

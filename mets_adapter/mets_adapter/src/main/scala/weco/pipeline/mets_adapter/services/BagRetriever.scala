@@ -16,8 +16,8 @@ trait BagRetriever {
   def getBag(space: String, externalIdentifier: String): Future[Bag]
 }
 
-class HttpBagRetriever(client: HttpGet)(implicit
-  actorSystem: ActorSystem,
+class HttpBagRetriever(client: HttpGet)(
+  implicit actorSystem: ActorSystem,
   executionContext: ExecutionContext
 ) extends BagRetriever
     with Logging {
@@ -60,7 +60,8 @@ class HttpBagRetriever(client: HttpGet)(implicit
     }
 
   private def parseResponseIntoBag(response: HttpResponse): Future[Bag] =
-    Unmarshal(response.entity).to[Bag].recover { case err =>
-      throw new Exception(s"Failed parsing response into a Bag: $err")
+    Unmarshal(response.entity).to[Bag].recover {
+      case err =>
+        throw new Exception(s"Failed parsing response into a Bag: $err")
     }
 }

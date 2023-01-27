@@ -27,8 +27,9 @@ object DisplayNote {
     notes
       .groupBy(_.noteType)
       .toList
-      .map { case (noteType, notes) =>
-        DisplayNote(notes.flatMap(_.contents), noteType)
+      .map {
+        case (noteType, notes) =>
+          DisplayNote(notes.flatMap(_.contents), noteType)
       }
 }
 

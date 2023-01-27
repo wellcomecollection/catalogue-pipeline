@@ -33,17 +33,18 @@ object SierraOrganisationSubjects
     bibId: SierraBibNumber,
     varFields: List[VarField]
   ): Output =
-    varFields.map { varField =>
-      val label =
-        createLabel(varField, subfieldTags = List("a", "b", "c", "d", "e"))
+    varFields.map {
+      varField =>
+        val label =
+          createLabel(varField, subfieldTags = List("a", "b", "c", "d", "e"))
 
-      val organisation = createOrganisation(bibId, varField)
+        val organisation = createOrganisation(bibId, varField)
 
-      Subject(
-        label = label,
-        concepts = List(organisation),
-        id = identifyAgentSubject(varField, "Organisation")
-      )
+        Subject(
+          label = label,
+          concepts = List(organisation),
+          id = identifyAgentSubject(varField, "Organisation")
+        )
     }
 
   private def createOrganisation(

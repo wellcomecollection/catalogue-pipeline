@@ -24,7 +24,8 @@ object SierraFormat extends SierraDataTransformer {
    * Note: will map to a controlled vocabulary terms in future
    */
   def apply(bibData: SierraBibData): Option[Format] =
-    bibData.materialType.flatMap { t =>
-      SierraMaterialTypes.fromCode(t.code)
+    bibData.materialType.flatMap {
+      t =>
+        SierraMaterialTypes.fromCode(t.code)
     }
 }

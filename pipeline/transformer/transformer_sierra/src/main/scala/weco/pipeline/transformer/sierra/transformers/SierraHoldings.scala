@@ -42,38 +42,45 @@ object SierraHoldings extends SierraQueryOps {
     val (electronicHoldingsData, physicalHoldingsData) =
       holdingsDataMap
         .filterNot { case (_, data) => data.deleted || data.suppressed }
-        .partition { case (_, holdingsData) =>
-          holdingsData.fixedFields.get("40") match {
-            case Some(FixedField(_, value, _)) if value.trim == "elro" => true
-            case _                                                     => false
-          }
+        .partition {
+          case (_, holdingsData) =>
+            holdingsData.fixedFields.get("40") match {
+              case Some(FixedField(_, value, _)) if value.trim == "elro" => true
+              case _ => false
+            }
         }
 
     val physicalHoldings =
       physicalHoldingsData.toList
-        .flatMap { case (_, data) =>
-          createPhysicalHoldings(id, data)
+        .flatMap {
+          case (_, data) =>
+            createPhysicalHoldings(id, data)
         }
 
     val digitalHoldings =
       electronicHoldingsData.toList
         .sortBy { case (id, _) => id.withCheckDigit }
-        .map { case (id, data) =>
-          (data.varFields, SierraElectronicResources(id, data.varFields))
+        .map {
+          case (id, data) =>
+            (data.varFields, SierraElectronicResources(id, data.varFields))
         }
-        .flatMap { case (varFields, items) =>
-          items.map { it =>
-            (varFields, it)
-          }
+        .flatMap {
+          case (varFields, items) =>
+            items.map {
+              it =>
+                (varFields, it)
+            }
         }
-        .flatMap { case (varFields, Item(_, title, _, locations)) =>
-          locations.map { loc =>
-            Holdings(
-              note = title,
-              enumeration = SierraHoldingsEnumeration(id, varFields),
-              location = Some(loc)
-            )
-          }
+        .flatMap {
+          case (varFields, Item(_, title, _, locations)) =>
+            locations.map {
+              loc =>
+                Holdings(
+                  note = title,
+                  enumeration = SierraHoldingsEnumeration(id, varFields),
+                  location = Some(loc)
+                )
+            }
         }
 
     // Note: holdings records are sparsely populated, and a lot of the information is
@@ -143,9 +150,10 @@ object SierraHoldings extends SierraQueryOps {
   //    acqi,Info Service acquisitions
   //    acql,Wellcome Library
   //
-  private val locationTypeMap: Map[String, String] = csvRows.map { row =>
-    assert(row.size == 2)
-    row.head -> row.last
+  private val locationTypeMap: Map[String, String] = csvRows.map {
+    row =>
+      assert(row.size == 2)
+      row.head -> row.last
   }.toMap
 
   private def createPhysicalLocation(
@@ -217,71 +225,75 @@ object SierraHoldings extends SierraQueryOps {
     //    - they are equal (e.g. Some("Connect to the database") and Some("Connect to the database"))
     //    - one is defined and the other is empty (e.g. Some("Connect to the database") and None)
     //
-    val distinctUrls = locations.map { case (_, location) =>
-      location.url
+    val distinctUrls = locations.map {
+      case (_, location) =>
+        location.url
     }.distinct
 
-    distinctUrls.flatMap { url =>
-      val matchingHoldings = locations.filter { case (_, location) =>
-        location.url == url
-      }
+    distinctUrls.flatMap {
+      url =>
+        val matchingHoldings = locations.filter {
+          case (_, location) =>
+            location.url == url
+        }
 
-      val notes = matchingHoldings
-        .map { case (h, _) => h.note }
-        .distinct
-        .flatten
+        val notes = matchingHoldings
+          .map { case (h, _) => h.note }
+          .distinct
+          .flatten
 
-      val enumerations = matchingHoldings.map { case (h, _) =>
-        h.enumeration
-      }.distinct
+        val enumerations = matchingHoldings.map {
+          case (h, _) =>
+            h.enumeration
+        }.distinct
 
-      val linkTexts = matchingHoldings
-        .map { case (_, loc) => loc.linkText }
-        .distinct
-        .flatten
+        val linkTexts = matchingHoldings
+          .map { case (_, loc) => loc.linkText }
+          .distinct
+          .flatten
 
-      val uniqueNote = notes match {
-        case Seq(n) => Right(Some(n))
-        case Nil    => Right(None)
-        case _      => Left(None)
-      }
+        val uniqueNote = notes match {
+          case Seq(n) => Right(Some(n))
+          case Nil    => Right(None)
+          case _      => Left(None)
+        }
 
-      val uniqueLinkText = linkTexts match {
-        case Seq(text) => Right(Some(text))
-        case Nil       => Right(None)
-        case _         => Left(None)
-      }
+        val uniqueLinkText = linkTexts match {
+          case Seq(text) => Right(Some(text))
+          case Nil       => Right(None)
+          case _         => Left(None)
+        }
 
-      (uniqueNote, enumerations, uniqueLinkText) match {
-        case (Right(note), Seq(uniqueEnumerations), Right(linkText)) =>
-          List(
-            Holdings(
-              note = note,
-              enumeration = uniqueEnumerations,
-              location = Some(
-                DigitalLocation(
-                  url = url,
-                  locationType = LocationType.OnlineResource,
-                  linkText = linkText,
-                  accessConditions = List(
-                    AccessCondition(
-                      method = AccessMethod.ViewOnline,
-                      // Note: it's theoretically possible for an 856 URL to have the
-                      // relationship "Related resources" -- see SierraElectronicResources --
-                      // but at time of writing (Aug 2021), there are no holdings records
-                      // where this is the case.
-                      status = AccessStatus.LicensedResources(
-                        relationship = LicensedResources.Resource
+        (uniqueNote, enumerations, uniqueLinkText) match {
+          case (Right(note), Seq(uniqueEnumerations), Right(linkText)) =>
+            List(
+              Holdings(
+                note = note,
+                enumeration = uniqueEnumerations,
+                location = Some(
+                  DigitalLocation(
+                    url = url,
+                    locationType = LocationType.OnlineResource,
+                    linkText = linkText,
+                    accessConditions = List(
+                      AccessCondition(
+                        method = AccessMethod.ViewOnline,
+                        // Note: it's theoretically possible for an 856 URL to have the
+                        // relationship "Related resources" -- see SierraElectronicResources --
+                        // but at time of writing (Aug 2021), there are no holdings records
+                        // where this is the case.
+                        status = AccessStatus.LicensedResources(
+                          relationship = LicensedResources.Resource
+                        )
                       )
                     )
                   )
                 )
               )
             )
-          )
 
-        case _ => matchingHoldings.map { case (h, _) => h }
-      }
+          case _ => matchingHoldings.map { case (h, _) => h }
+        }
     }
   }
 }

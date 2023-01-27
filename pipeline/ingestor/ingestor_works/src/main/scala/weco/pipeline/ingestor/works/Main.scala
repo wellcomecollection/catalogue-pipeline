@@ -18,7 +18,8 @@ object Main extends WellcomeTypesafeApp {
       transform = WorkTransformer.deriveData
     )
 
-  runWithConfig { config =>
-    ingestor.run(config)
+  runWithConfig {
+    config =>
+      ingestor.run(config)
   }
 }

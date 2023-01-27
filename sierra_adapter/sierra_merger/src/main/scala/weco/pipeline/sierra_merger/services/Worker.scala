@@ -45,16 +45,17 @@ class Worker[Record <: AbstractSierraRecord[_], Destination](
     Future
       .sequence {
         updatedKeys
-          .map { case Identified(Version(id, version), location) =>
-            Future.fromTry {
-              val payload = SierraSourcePayload(
-                id = id,
-                location = location,
-                version = version
-              )
+          .map {
+            case Identified(Version(id, version), location) =>
+              Future.fromTry {
+                val payload = SierraSourcePayload(
+                  id = id,
+                  location = location,
+                  version = version
+                )
 
-              messageSender.sendT(payload)
-            }
+                messageSender.sendT(payload)
+              }
           }
       }
       .map(_ => ())

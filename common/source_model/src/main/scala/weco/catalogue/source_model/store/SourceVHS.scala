@@ -17,10 +17,12 @@ class SourceVHS[T](
     Version[String, Int],
     (S3ObjectLocation, T)
   ]] =
-    f.flatMap { case Identified(id, record) =>
-      indexedStore.get(id).map { case Identified(_, location) =>
-        Identified(id, (location, record))
-      }
+    f.flatMap {
+      case Identified(id, record) =>
+        indexedStore.get(id).map {
+          case Identified(_, location) =>
+            Identified(id, (location, record))
+        }
     }
 
   def putLatest(id: String)(t: T): Either[StorageError, Identified[

@@ -14,16 +14,17 @@ object Marc008Parser extends Parser[ProductionEvent[IdState.Unminted]] {
 
   def parser[_: P] =
     (Start ~ createdDate ~ Marc008DateParser.parser ~ MarcPlaceParser.parser.?)
-      .map { case (instantRange, place) =>
-        ProductionEvent(
-          label = instantRange.label,
-          agents = Nil,
-          dates = List(
-            Period(label = instantRange.label, range = instantRange)
-          ),
-          places = place.toList,
-          function = None
-        )
+      .map {
+        case (instantRange, place) =>
+          ProductionEvent(
+            label = instantRange.label,
+            agents = Nil,
+            dates = List(
+              Period(label = instantRange.label, range = instantRange)
+            ),
+            places = place.toList,
+            function = None
+          )
       }
 
   def createdDate[_: P] = AnyChar.rep(exactly = 6)

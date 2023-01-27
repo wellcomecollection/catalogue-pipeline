@@ -47,22 +47,26 @@ class DeletionCheckerWorkerService[Destination](
 
   private def parseBody =
     Flow[(Message, NotificationMessage)]
-      .mapAsyncUnordered(parallelism) { case (msg, NotificationMessage(body)) =>
-        Future
-          .fromTry(fromJson[CalmSourcePayload](body))
-          .map(payload => (msg, payload))
+      .mapAsyncUnordered(parallelism) {
+        case (msg, NotificationMessage(body)) =>
+          Future
+            .fromTry(fromJson[CalmSourcePayload](body))
+            .map(payload => (msg, payload))
       }
 
   private def checkDeletions =
     Flow[immutable.Seq[(Message, CalmSourcePayload)]]
-      .mapAsyncUnordered(parallelism) { messages =>
-        val (_, batch) = messages.unzip
-        deletionChecker.defectiveRecords(batch.toSet).map { deleted =>
-          messages.map {
-            case (m, record) if deleted.contains(record) => (m, record, Deleted)
-            case (m, record)                             => (m, record, Extant)
+      .mapAsyncUnordered(parallelism) {
+        messages =>
+          val (_, batch) = messages.unzip
+          deletionChecker.defectiveRecords(batch.toSet).map {
+            deleted =>
+              messages.map {
+                case (m, record) if deleted.contains(record) =>
+                  (m, record, Deleted)
+                case (m, record) => (m, record, Extant)
+              }
           }
-        }
       }
 
   private def updateSourceData =

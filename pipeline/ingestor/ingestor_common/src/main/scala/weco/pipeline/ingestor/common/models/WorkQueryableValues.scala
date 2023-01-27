@@ -90,8 +90,9 @@ case object WorkQueryableValues {
       languageLabels = workData.languages.map(_.label),
       contributorAgentIds = workData.contributors.map(_.agent.id).canonicalIds,
       contributorAgentLabels = workData.contributors.map(_.agent.label),
-      productionLabels = workData.production.flatMap(p =>
-        p.places.map(_.label) ++ p.agents.map(_.label) ++ p.dates.map(_.label)
+      productionLabels = workData.production.flatMap(
+        p =>
+          p.places.map(_.label) ++ p.agents.map(_.label) ++ p.dates.map(_.label)
       ),
       productionDatesRangeFrom = workData.production
         .flatMap(_.dates)

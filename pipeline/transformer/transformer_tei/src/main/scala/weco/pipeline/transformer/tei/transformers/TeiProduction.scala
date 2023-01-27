@@ -54,8 +54,8 @@ object TeiProduction {
     * calendar="Gregorian">ca.1732-63AD <note>from watermarks</note> </origDate>
     */
   private def parseDate(origin: NodeSeq) = {
-    val dateNodes = (origin \ "origDate").filter(n =>
-      (n \@ "calendar").toLowerCase == "gregorian"
+    val dateNodes = (origin \ "origDate").filter(
+      n => (n \@ "calendar").toLowerCase == "gregorian"
     )
     val date =
       if (dateNodes.exists(_.child.size > 1))

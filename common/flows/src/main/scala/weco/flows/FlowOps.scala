@@ -47,14 +47,16 @@ trait FlowOps extends Logging {
 
   def catchErrors[C, T] =
     Flow[(C, Result[T])]
-      .map { case (ctx, result) =>
-        result.left.map { err =>
-          error(
-            s"Error encountered processing SQS message. [Error]: ${err.getMessage} [Context]: $ctx",
-            err
-          )
-        }
-        (ctx, result)
+      .map {
+        case (ctx, result) =>
+          result.left.map {
+            err =>
+              error(
+                s"Error encountered processing SQS message. [Error]: ${err.getMessage} [Context]: $ctx",
+                err
+              )
+          }
+          (ctx, result)
       }
       .collect { case (ctx, Right(data)) => (ctx, data) }
 
@@ -65,13 +67,14 @@ trait FlowOps extends Logging {
     b: Flow[I, O, NotUsed]
   ): Flow[I, O, NotUsed] =
     Flow.fromGraph(
-      GraphDSL.create() { implicit builder =>
-        import GraphDSL.Implicits._
-        val broadcast = builder.add(Broadcast[I](2))
-        val merge = builder.add(Merge[O](2))
-        broadcast ~> a ~> merge
-        broadcast ~> b ~> merge
-        FlowShape(broadcast.in, merge.out)
+      GraphDSL.create() {
+        implicit builder =>
+          import GraphDSL.Implicits._
+          val broadcast = builder.add(Broadcast[I](2))
+          val merge = builder.add(Merge[O](2))
+          broadcast ~> a ~> merge
+          broadcast ~> b ~> merge
+          FlowShape(broadcast.in, merge.out)
       }
     )
 }

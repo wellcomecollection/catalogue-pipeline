@@ -16,23 +16,25 @@ object WindowExtractor extends Logging {
 
   def extractWindow(jsonString: String): Try[String] =
     Try(parse(jsonString).right.get)
-      .map { json =>
-        val start = extractField("start", json)
-        val end = extractField("end", json)
+      .map {
+        json =>
+          val start = extractField("start", json)
+          val end = extractField("end", json)
 
-        val startDateTime = parseStringToDateTime(start)
-        val endDateTime = parseStringToDateTime(end)
-        if (
-          startDateTime
-            .isAfter(endDateTime) || startDateTime.isEqual(endDateTime)
-        )
-          throw new Exception(s"$start must be before $end")
+          val startDateTime = parseStringToDateTime(start)
+          val endDateTime = parseStringToDateTime(end)
+          if (
+            startDateTime
+              .isAfter(endDateTime) || startDateTime.isEqual(endDateTime)
+          )
+            throw new Exception(s"$start must be before $end")
 
-        s"[$start,$end]"
+          s"[$start,$end]"
       }
-      .recover { case e: Exception =>
-        warn(s"Error parsing $jsonString", e)
-        throw SierraReaderException(e)
+      .recover {
+        case e: Exception =>
+          warn(s"Error parsing $jsonString", e)
+          throw SierraReaderException(e)
       }
 
   private def extractField(field: String, json: Json): String =

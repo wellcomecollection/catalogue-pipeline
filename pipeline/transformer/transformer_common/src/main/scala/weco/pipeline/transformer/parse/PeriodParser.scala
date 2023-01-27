@@ -176,16 +176,18 @@ object PeriodParser extends Parser[InstantRange] with DateParserUtils {
   // We can infer a century intention for some numbers, eg for
   // 14 in the string "14th-15th century"
   private def inferredCentury[_: P]: P[Century] =
-    P(Lex.int.filter(_ <= 999) ~ Lex.ordinalSuffix.? map { n =>
-      Century(n - 1)
+    P(Lex.int.filter(_ <= 999) ~ Lex.ordinalSuffix.? map {
+      n =>
+        Century(n - 1)
     })
 
   // eg "1800s"
   private def century[_: P]: P[Century] = Lex.century map Century
 
   // eg "1920s"
-  private def decade[_: P]: P[CenturyAndDecade] = Lex.decade map { year =>
-    CenturyAndDecade(century = year / 100, decade = (year % 100) / 10)
+  private def decade[_: P]: P[CenturyAndDecade] = Lex.decade map {
+    year =>
+      CenturyAndDecade(century = year / 100, decade = (year % 100) / 10)
   }
 
   // A year range is a string like 1994-5 or 1066-90
@@ -260,11 +262,12 @@ object PeriodParser extends Parser[InstantRange] with DateParserUtils {
       // Winter YEAR refers to the year in which the winter starts
       // https://www.metoffice.gov.uk/weather/learn-about/weather/seasons/winter/when-does-winter-start
       case "winter" => (12, 2)
-    }) ~ ws ~ yearDigits map { case (fromMonth, toMonth, year) =>
-      FuzzyDateRange(
-        MonthAndYear(fromMonth, year),
-        MonthAndYear(toMonth, if (fromMonth < toMonth) year else year + 1)
-      )
+    }) ~ ws ~ yearDigits map {
+      case (fromMonth, toMonth, year) =>
+        FuzzyDateRange(
+          MonthAndYear(fromMonth, year),
+          MonthAndYear(toMonth, if (fromMonth < toMonth) year else year + 1)
+        )
     })
 
   // eg "michaelmas"
@@ -274,11 +277,12 @@ object PeriodParser extends Parser[InstantRange] with DateParserUtils {
       case "hilary"     => (1, 2)
       case "easter"     => (4, 5)
       case "trinity"    => (6, 7)
-    }) ~ ws ~ yearDigits map { case (fromMonth, toMonth, year) =>
-      FuzzyDateRange(
-        MonthAndYear(fromMonth, year),
-        MonthAndYear(toMonth, year)
-      )
+    }) ~ ws ~ yearDigits map {
+      case (fromMonth, toMonth, year) =>
+        FuzzyDateRange(
+          MonthAndYear(fromMonth, year),
+          MonthAndYear(toMonth, year)
+        )
     })
 
 }

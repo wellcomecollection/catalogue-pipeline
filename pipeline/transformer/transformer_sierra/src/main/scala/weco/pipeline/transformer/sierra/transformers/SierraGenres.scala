@@ -48,17 +48,18 @@ object SierraGenres
   def apply(bibData: SierraBibData): List[Genre[IdState.Unminted]] =
     bibData
       .varfieldsWithTag("655")
-      .map { varField =>
-        val (primarySubfields, subdivisionSubfields) =
-          getLabelSubfields(varField)
+      .map {
+        varField =>
+          val (primarySubfields, subdivisionSubfields) =
+            getLabelSubfields(varField)
 
-        val label = getLabel(primarySubfields, subdivisionSubfields)
-        val concepts = getPrimaryConcept(
-          primarySubfields,
-          varField = varField
-        ) ++ getSubdivisions(subdivisionSubfields)
+          val label = getLabel(primarySubfields, subdivisionSubfields)
+          val concepts = getPrimaryConcept(
+            primarySubfields,
+            varField = varField
+          ) ++ getSubdivisions(subdivisionSubfields)
 
-        Genre(label = label, concepts = concepts).normalised
+          Genre(label = label, concepts = concepts).normalised
       }
       .distinct
 
@@ -89,10 +90,11 @@ object SierraGenres
     primarySubfields: List[Subfield],
     varField: VarField
   ): List[Concept[IdState.Unminted]] =
-    primarySubfields.map { subfield =>
-      Concept(
-        id = identifyPrimaryConcept(varField),
-        label = subfield.content
-      ).normalised.identifiable()
+    primarySubfields.map {
+      subfield =>
+        Concept(
+          id = identifyPrimaryConcept(varField),
+          label = subfield.content
+        ).normalised.identifiable()
     }
 }

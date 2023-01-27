@@ -40,8 +40,9 @@ trait DateParserUtils extends ParserUtils {
       "oct",
       "nov",
       "dec"
-    ).!.map { name =>
-      monthMapping.get(name.toLowerCase.substring(0, 3)).get
+    ).!.map {
+      name =>
+        monthMapping.get(name.toLowerCase.substring(0, 3)).get
     }
 
   val monthMapping = Map(
@@ -133,8 +134,9 @@ object DateParserImplicits extends ParserUtils {
       to: => P[FuzzyDateRange[_ <: FuzzyDate, T]]
     )(implicit d: DummyImplicit): P[FuzzyDateRange[F, T]] =
       (from ~ sep ~ to)
-        .map { case (f, FuzzyDateRange(_, t)) =>
-          FuzzyDateRange(f, t)
+        .map {
+          case (f, FuzzyDateRange(_, t)) =>
+            FuzzyDateRange(f, t)
         }
   }
 
@@ -144,8 +146,9 @@ object DateParserImplicits extends ParserUtils {
 
     def to[_: P, T <: FuzzyDate](to: => P[T]): P[FuzzyDateRange[F, T]] =
       (from ~ sep ~ to)
-        .map { case (FuzzyDateRange(f, _), t) =>
-          FuzzyDateRange(f, t)
+        .map {
+          case (FuzzyDateRange(f, _), t) =>
+            FuzzyDateRange(f, t)
         }
 
     // The DummyImplicit is to prevent type erasure causing these methods
@@ -154,15 +157,16 @@ object DateParserImplicits extends ParserUtils {
       to: => P[FuzzyDateRange[_ <: FuzzyDate, T]]
     )(implicit d: DummyImplicit): P[FuzzyDateRange[F, T]] =
       (from ~ sep ~ to)
-        .map { case (FuzzyDateRange(f, _), FuzzyDateRange(_, t)) =>
-          FuzzyDateRange(f, t)
+        .map {
+          case (FuzzyDateRange(f, _), FuzzyDateRange(_, t)) =>
+            FuzzyDateRange(f, t)
         }
   }
 
   implicit class ToInstantRangeParser[T <: TimePeriod](parser: P[T]) {
 
-    def toInstantRange[_: P](implicit
-      toInstantRange: ToInstantRange[T]
+    def toInstantRange[_: P](
+      implicit toInstantRange: ToInstantRange[T]
     ): P[InstantRange] =
       parser.flatMapOption(toInstantRange.safeConvert)
   }

@@ -59,33 +59,34 @@ object TeiNestedData extends Logging {
   ): Result[List[TeiData]] =
     (xml \\ "msDesc" \ "msPart").zipWithIndex
       .map { case (node, i) => (node, i + 1) }
-      .map { case (node, i) =>
-        for {
-          id <- TeiOps.getIdFrom(node)
-          description <- TeiOps.summary(node)
-          languageData <- TeiLanguages.parseLanguages(node \ "msContents")
-          (languages, languageNotes) = languageData
-          partTitle = s"$wrapperTitle part $i"
-          items <- extractLowerLevelItems(
-            xml,
-            partTitle,
-            node \ "msContents",
-            catalogues,
-            scribesMap
-          )
-        } yield {
-          TeiData(
-            id = id,
-            title = partTitle,
-            languages = languages,
-            notes = languageNotes ++ TeiNotes(node),
-            description = description,
-            nestedTeiData = items,
-            contributors = scribesMap.getOrElse(id, Nil),
-            origin = TeiProduction(node \ "history" \ "origin"),
-            physicalDescription = TeiPhysicalDescription(node)
-          )
-        }
+      .map {
+        case (node, i) =>
+          for {
+            id <- TeiOps.getIdFrom(node)
+            description <- TeiOps.summary(node)
+            languageData <- TeiLanguages.parseLanguages(node \ "msContents")
+            (languages, languageNotes) = languageData
+            partTitle = s"$wrapperTitle part $i"
+            items <- extractLowerLevelItems(
+              xml,
+              partTitle,
+              node \ "msContents",
+              catalogues,
+              scribesMap
+            )
+          } yield {
+            TeiData(
+              id = id,
+              title = partTitle,
+              languages = languages,
+              notes = languageNotes ++ TeiNotes(node),
+              description = description,
+              nestedTeiData = items,
+              contributors = scribesMap.getOrElse(id, Nil),
+              origin = TeiProduction(node \ "history" \ "origin"),
+              physicalDescription = TeiPhysicalDescription(node)
+            )
+          }
       }
       .toList
       .sequence
@@ -103,34 +104,38 @@ object TeiNestedData extends Logging {
     (nodeSeq \ "msItem").zipWithIndex
       // The indexing starts at zero but we want to count items from 1 so we add 1
       .map { case (node, i) => (node, i + 1) }
-      .map { case (node, i) =>
-        for {
-          title <- getTitleForItem(
-            node,
-            wrapperTitle = wrapperTitle,
-            itemNumber = i
+      .map {
+        case (node, i) =>
+          for {
+            title <- getTitleForItem(
+              node,
+              wrapperTitle = wrapperTitle,
+              itemNumber = i
+            )
+            id <- TeiOps.getIdFrom(node)
+            languageData <- TeiLanguages.parseLanguages(node)
+            (languages, languageNotes) = languageData
+            notes = TeiNotes(node)
+            items <- extractLowerLevelItems(
+              xml,
+              title,
+              node,
+              catalogues,
+              scribesMap
+            )
+            authors <- TeiContributors.authors(
+              node,
+              containsFihrist(catalogues)
+            )
+          } yield TeiData(
+            id = id,
+            title = title,
+            languages = languages,
+            notes = languageNotes ++ notes,
+            nestedTeiData = items,
+            contributors = authors ++ scribesMap.getOrElse(id, Nil),
+            alternativeTitles = extractAlternativeTitles(node)
           )
-          id <- TeiOps.getIdFrom(node)
-          languageData <- TeiLanguages.parseLanguages(node)
-          (languages, languageNotes) = languageData
-          notes = TeiNotes(node)
-          items <- extractLowerLevelItems(
-            xml,
-            title,
-            node,
-            catalogues,
-            scribesMap
-          )
-          authors <- TeiContributors.authors(node, containsFihrist(catalogues))
-        } yield TeiData(
-          id = id,
-          title = title,
-          languages = languages,
-          notes = languageNotes ++ notes,
-          nestedTeiData = items,
-          contributors = authors ++ scribesMap.getOrElse(id, Nil),
-          alternativeTitles = extractAlternativeTitles(node)
-        )
       }
       .toList
       .sequence

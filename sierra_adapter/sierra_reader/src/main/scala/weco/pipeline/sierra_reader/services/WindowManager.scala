@@ -98,11 +98,13 @@ class WindowManager(
       .split(",")
 
     dateTimes
-      .map(dateTime => {
-        val accessor = DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(dateTime)
-        val instant = Instant.from(accessor).atOffset(ZoneOffset.UTC)
-        DateTimeFormatter.ofPattern("uuuu-MM-dd'T'HH-mm-ssX").format(instant)
-      })
+      .map(
+        dateTime => {
+          val accessor = DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(dateTime)
+          val instant = Instant.from(accessor).atOffset(ZoneOffset.UTC)
+          DateTimeFormatter.ofPattern("uuuu-MM-dd'T'HH-mm-ssX").format(instant)
+        }
+      )
       .mkString("__")
   }
 

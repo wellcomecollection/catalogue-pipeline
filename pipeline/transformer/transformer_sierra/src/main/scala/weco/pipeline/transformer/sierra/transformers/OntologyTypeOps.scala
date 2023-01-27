@@ -40,8 +40,9 @@ object OntologyTypeOps extends Logging {
       * blanked.
       */
     def typeFreeSourceIdentifier: Option[SourceIdentifier] =
-      mainSourceIdentifier flatMap { sourceIdentifier =>
-        Some(sourceIdentifier.copy(ontologyType = ""))
+      mainSourceIdentifier flatMap {
+        sourceIdentifier =>
+          Some(sourceIdentifier.copy(ontologyType = ""))
       }
   }
 
@@ -139,14 +140,15 @@ object OntologyTypeOps extends Logging {
     def harmoniseOntologyTypesWith(
       idsToOntologyTypes: Map[Option[SourceIdentifier], String]
     ): List[T] = {
-      val harmonisedEntries: List[T] = wrappedEntries map { entry =>
-        idsToOntologyTypes.get(entry.typeFreeSourceIdentifier) match {
-          case None => entry.original
-          case Some(bestType) =>
-            entry.copyWithNewType(
-              bestType
-            )
-        }
+      val harmonisedEntries: List[T] = wrappedEntries map {
+        entry =>
+          idsToOntologyTypes.get(entry.typeFreeSourceIdentifier) match {
+            case None => entry.original
+            case Some(bestType) =>
+              entry.copyWithNewType(
+                bestType
+              )
+          }
       }
       harmonisedEntries.distinct
     }

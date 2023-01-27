@@ -43,8 +43,9 @@ object SierraItems
   ): List[Item[IdState.Identifiable]] = {
     val visibleItems =
       itemDataEntries
-        .filterNot { itemData =>
-          itemData.deleted || itemData.suppressed
+        .filterNot {
+          itemData =>
+            itemData.deleted || itemData.suppressed
         }
 
     SierraPhysicalItemOrder(
@@ -69,21 +70,27 @@ object SierraItems
     // non-above locations are unambiguous, we use them instead.
     val otherLocations =
       itemDataEntries
-        .map { itemData =>
-          itemData.id -> itemData.location
+        .map {
+          itemData =>
+            itemData.id -> itemData.location
         }
         .collect { case (id, Some(location)) => id -> location }
-        .filterNot { case (_, loc) =>
-          loc.name.toLowerCase.contains(
-            "above"
-          ) || loc.name == "-" || loc.name == ""
+        .filterNot {
+          case (_, loc) =>
+            loc.name.toLowerCase.contains(
+              "above"
+            ) || loc.name == "-" || loc.name == ""
         }
-        .map { case (id, loc) =>
-          SierraPhysicalLocationType.fromName(id, loc.name) match {
-            case Some(LocationType.ClosedStores) =>
-              (Some(LocationType.ClosedStores), LocationType.ClosedStores.label)
-            case other => (other, loc.name)
-          }
+        .map {
+          case (id, loc) =>
+            SierraPhysicalLocationType.fromName(id, loc.name) match {
+              case Some(LocationType.ClosedStores) =>
+                (
+                  Some(LocationType.ClosedStores),
+                  LocationType.ClosedStores.label
+                )
+              case other => (other, loc.name)
+            }
         }
         .distinct
 
@@ -93,17 +100,19 @@ object SierraItems
     }
 
     itemDataEntries
-      .foreach { itemData =>
-        require(!itemData.deleted)
-        require(!itemData.suppressed)
+      .foreach {
+        itemData =>
+          require(!itemData.deleted)
+          require(!itemData.suppressed)
       }
 
-    val items = itemDataEntries.map { itemData =>
-      transformItemData(
-        itemData = itemData,
-        bibData = bibData,
-        fallbackLocation = fallbackLocation
-      )
+    val items = itemDataEntries.map {
+      itemData =>
+        transformItemData(
+          itemData = itemData,
+          bibData = bibData,
+          fallbackLocation = fallbackLocation
+        )
     }.toList
 
     tidyTitles(items)
@@ -181,8 +190,9 @@ object SierraItems
         .distinct
 
     val copyNoTitle =
-      data.copyNo.map { copyNo =>
-        s"Copy $copyNo"
+      data.copyNo.map {
+        copyNo =>
+          s"Copy $copyNo"
       }
 
     titleCandidates match {

@@ -31,11 +31,14 @@ case object SierraOrderRecord {
       //
       // For now, just split on slashes and take the final part.
       case Success(apiData) =>
-        apiData.bibs.map { url =>
-          assert(
-            url.startsWith("https://libsys.wellcomelibrary.org/iii/sierra-api")
-          )
-          SierraBibNumber(url.split("/").last)
+        apiData.bibs.map {
+          url =>
+            assert(
+              url.startsWith(
+                "https://libsys.wellcomelibrary.org/iii/sierra-api"
+              )
+            )
+            SierraBibNumber(url.split("/").last)
         }
       case Failure(e) =>
         throw new IllegalArgumentException(

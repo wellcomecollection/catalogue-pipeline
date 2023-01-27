@@ -47,8 +47,8 @@ class TeiXml(val xml: Elem) extends Logging {
     */
   private def bNumber: Result[Option[String]] = {
     val identifiersNodes = xml \\ "msDesc" \ "msIdentifier" \ "altIdentifier"
-    val seq = (identifiersNodes.filter(n =>
-      (n \@ "type").toLowerCase == "sierra"
+    val seq = (identifiersNodes.filter(
+      n => (n \@ "type").toLowerCase == "sierra"
     ) \ "idno").toList
     seq match {
       case List(node) => Right(Some(node.text.trim))

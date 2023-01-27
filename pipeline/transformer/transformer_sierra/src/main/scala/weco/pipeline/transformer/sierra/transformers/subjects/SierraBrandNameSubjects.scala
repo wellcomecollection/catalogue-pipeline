@@ -25,11 +25,12 @@ object SierraBrandNameSubjects
     varFields
       .subfieldsWithTag("a")
       .contents
-      .map(label =>
-        new Subject(
-          id = IdState.Unidentifiable,
-          label = label,
-          concepts = List(Concept(label).identifiable())
-        )
+      .map(
+        label =>
+          new Subject(
+            id = IdState.Unidentifiable,
+            label = label,
+            concepts = List(Concept(label).identifiable())
+          )
       )
 }

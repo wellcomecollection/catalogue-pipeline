@@ -50,8 +50,9 @@ object SierraItemsOnOrder extends Logging {
   ): List[Item[IdState.Unidentifiable.type]] =
     if (!hasItems && !bibData.hasCatDate) {
       orderDataMap.toList
-        .filterNot { case (_, orderData) =>
-          orderData.suppressed || orderData.deleted
+        .filterNot {
+          case (_, orderData) =>
+            orderData.suppressed || orderData.deleted
         }
         .sortBy { case (id, _) => id.withoutCheckDigit }
         .flatMap { case (_, orderData) => createItem(id, orderData) }
@@ -133,8 +134,9 @@ object SierraItemsOnOrder extends Logging {
     order.fixedFields
       .get("13")
       .map { _.value }
-      .flatMap { d =>
-        Try(marcDateFormat.parse(d)).toOption
+      .flatMap {
+        d =>
+          Try(marcDateFormat.parse(d)).toOption
       }
 
   // Fixed field 17 = RDATE.  This is usually a date in the form YYYY-MM-DD.
@@ -142,8 +144,9 @@ object SierraItemsOnOrder extends Logging {
     order.fixedFields
       .get("17")
       .map { _.value }
-      .flatMap { d =>
-        Try(marcDateFormat.parse(d)).toOption
+      .flatMap {
+        d =>
+          Try(marcDateFormat.parse(d)).toOption
       }
 
   private val displayFormat = new SimpleDateFormat("d MMMM yyyy")

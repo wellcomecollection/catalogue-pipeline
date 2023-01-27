@@ -26,49 +26,50 @@ import weco.pipeline_storage.typesafe.PipelineStorageStreamBuilder
 import weco.typesafe.config.builders.EnrichConfig._
 
 object Main extends WellcomeTypesafeApp {
-  runWithConfig { config: Config =>
-    implicit val executionContext: ExecutionContext =
-      ActorSystem("main-actor-system").dispatcher
+  runWithConfig {
+    config: Config =>
+      implicit val executionContext: ExecutionContext =
+        ActorSystem("main-actor-system").dispatcher
 
-    val identifiersTableConfig = IdentifiersTableBuilder.buildConfig(config)
-    RDSBuilder.buildDB(config)
+      val identifiersTableConfig = IdentifiersTableBuilder.buildConfig(config)
+      RDSBuilder.buildDB(config)
 
-    val identifierGenerator = new IdentifierGenerator(
-      identifiersDao = new IdentifiersDao(
-        identifiers = new IdentifiersTable(
-          identifiersTableConfig = identifiersTableConfig
+      val identifierGenerator = new IdentifierGenerator(
+        identifiersDao = new IdentifiersDao(
+          identifiers = new IdentifiersTable(
+            identifiersTableConfig = identifiersTableConfig
+          )
         )
       )
-    )
 
-    val esClient = ElasticBuilder.buildElasticClient(config)
+      val esClient = ElasticBuilder.buildElasticClient(config)
 
-    val workIndexer =
-      new ElasticIndexer[Work[Identified]](
-        client = esClient,
-        index = Index(config.requireString("es.identified-works.index")),
-        config = WorksIndexConfig.identified
+      val workIndexer =
+        new ElasticIndexer[Work[Identified]](
+          client = esClient,
+          index = Index(config.requireString("es.identified-works.index")),
+          config = WorksIndexConfig.identified
+        )
+
+      val messageSender = SNSBuilder
+        .buildSNSMessageSender(config, subject = "Sent from the id-minter")
+
+      val pipelineStream =
+        PipelineStorageStreamBuilder
+          .buildPipelineStorageStream(workIndexer, messageSender)(config)
+
+      val jsonRetriever =
+        new ElasticSourceRetriever[Json](
+          client = esClient,
+          index = Index(config.requireString("es.source-works.index"))
+        )
+
+      new IdMinterWorkerService(
+        identifierGenerator = identifierGenerator,
+        jsonRetriever = jsonRetriever,
+        pipelineStream = pipelineStream,
+        rdsClientConfig = RDSBuilder.buildRDSClientConfig(config),
+        identifiersTableConfig = identifiersTableConfig
       )
-
-    val messageSender = SNSBuilder
-      .buildSNSMessageSender(config, subject = "Sent from the id-minter")
-
-    val pipelineStream =
-      PipelineStorageStreamBuilder
-        .buildPipelineStorageStream(workIndexer, messageSender)(config)
-
-    val jsonRetriever =
-      new ElasticSourceRetriever[Json](
-        client = esClient,
-        index = Index(config.requireString("es.source-works.index"))
-      )
-
-    new IdMinterWorkerService(
-      identifierGenerator = identifierGenerator,
-      jsonRetriever = jsonRetriever,
-      pipelineStream = pipelineStream,
-      rdsClientConfig = RDSBuilder.buildRDSClientConfig(config),
-      identifiersTableConfig = identifiersTableConfig
-    )
   }
 }

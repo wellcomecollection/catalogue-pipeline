@@ -134,8 +134,9 @@ object CalmTransformer
   def catalogueStatusSuppressesRecord(record: CalmRecord): Boolean =
     record
       .get("CatalogueStatus")
-      .forall { status =>
-        !nonSuppressedStatuses.contains(status.toLowerCase.trim)
+      .forall {
+        status =>
+          !nonSuppressedStatuses.contains(status.toLowerCase.trim)
       }
 
   def workData(record: CalmRecord): Result[WorkData[DataState.Unidentified]] = {
@@ -171,16 +172,18 @@ object CalmTransformer
     )
 
   def otherIdentifiers(record: CalmRecord): List[SourceIdentifier] =
-    identifierMapping.toList.flatMap { case (key, idType) =>
-      record
-        .getList(key)
-        .map(id =>
-          SourceIdentifier(
-            identifierType = idType,
-            value = id,
-            ontologyType = "Work"
+    identifierMapping.toList.flatMap {
+      case (key, idType) =>
+        record
+          .getList(key)
+          .map(
+            id =>
+              SourceIdentifier(
+                identifierType = idType,
+                value = id,
+                ontologyType = "Work"
+              )
           )
-        )
     }
 
   def title(record: CalmRecord): Result[String] =
@@ -193,10 +196,11 @@ object CalmTransformer
   def collectionPath(record: CalmRecord): Result[CollectionPath] =
     record
       .get("RefNo")
-      .map { path =>
-        Right(
-          CollectionPath(path = path, label = record.get("AltRefNo"))
-        )
+      .map {
+        path =>
+          Right(
+            CollectionPath(path = path, label = record.get("AltRefNo"))
+          )
       }
       .getOrElse(Left(RefNoMissing))
 
@@ -257,12 +261,13 @@ object CalmTransformer
   def subjects(record: CalmRecord): List[Subject[IdState.Unminted]] =
     record
       .getList("Subject")
-      .map { label =>
-        val normalisedLabel =
-          NormaliseText(label, whitelist = NormaliseText.none)
-        Subject(
-          label = normalisedLabel,
-          concepts = List(Concept(normalisedLabel))
-        )
+      .map {
+        label =>
+          val normalisedLabel =
+            NormaliseText(label, whitelist = NormaliseText.none)
+          Subject(
+            label = normalisedLabel,
+            concepts = List(Concept(normalisedLabel))
+          )
       }
 }

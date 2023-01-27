@@ -71,11 +71,12 @@ class IdentifierGenerator(identifiersDao: IdentifiersDao) extends Logging {
       case _ =>
         identifiersDao
           .saveIdentifiers(
-            unmintedIdentifiers.map { id =>
-              Identifier(
-                canonicalId = Identifiable.generate,
-                sourceIdentifier = id
-              )
+            unmintedIdentifiers.map {
+              id =>
+                Identifier(
+                  canonicalId = Identifiable.generate,
+                  sourceIdentifier = id
+                )
             }
           )
           .map(_.succeeded)

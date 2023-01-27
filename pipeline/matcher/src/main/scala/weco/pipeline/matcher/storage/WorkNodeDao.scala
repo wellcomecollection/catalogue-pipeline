@@ -11,8 +11,7 @@ import weco.pipeline.matcher.models.WorkNode
 import scala.concurrent.{ExecutionContext, Future}
 
 class WorkNodeDao(dynamoClient: DynamoDbClient, dynamoConfig: DynamoConfig)(
-  implicit
-  ec: ExecutionContext,
+  implicit ec: ExecutionContext,
   format: DynamoFormat[WorkNode]
 ) extends Logging {
 

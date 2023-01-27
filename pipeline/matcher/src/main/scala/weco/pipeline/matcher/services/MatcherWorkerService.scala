@@ -30,20 +30,23 @@ class MatcherWorkerService[MsgDestination](
       source =>
         source
           .via(batchRetrieveFlow(config, retriever))
-          .mapAsync(config.parallelism) { case (message, workStub) =>
-            processMessage(workStub).map(_ => message)
+          .mapAsync(config.parallelism) {
+            case (message, workStub) =>
+              processMessage(workStub).map(_ => message)
           }
     )
 
   def processMessage(workStub: WorkStub): Future[Unit] =
     workMatcher
       .matchWork(workStub)
-      .flatMap { matcherResult =>
-        Future.fromTry(msgSender.sendT(matcherResult))
+      .flatMap {
+        matcherResult =>
+          Future.fromTry(msgSender.sendT(matcherResult))
       }
-      .recover { case e: VersionExpectedConflictException =>
-        debug(
-          s"Not matching work due to version conflict exception: ${e.getMessage}"
-        )
+      .recover {
+        case e: VersionExpectedConflictException =>
+          debug(
+            s"Not matching work due to version conflict exception: ${e.getMessage}"
+          )
       }
 }

@@ -14,13 +14,14 @@ object RetryFuture {
     randomFactor = 0.2
   ).withMaxRestarts(10, 100 milliseconds)
 
-  def apply[T](f: => Future[T])(implicit
-    mat: Materializer,
+  def apply[T](f: => Future[T])(
+    implicit mat: Materializer,
     settings: RestartSettings = defaultRestartSettings
   ): Future[T] =
     RestartSource
-      .onFailuresWithBackoff(settings) { () =>
-        Source.future(f)
+      .onFailuresWithBackoff(settings) {
+        () =>
+          Source.future(f)
       }
       .runWith(Sink.head)
 

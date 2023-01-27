@@ -15,8 +15,8 @@ import scala.concurrent.{ExecutionContext, Future}
   * If an ID doesn't exist, then no item is returned. It returns up to 100 items
   * or 16 MB of data, whichever comes first.
   */
-class MultiItemGetter(implicit
-  val dynamoClient: DynamoDbClient,
+class MultiItemGetter(
+  implicit val dynamoClient: DynamoDbClient,
   val ec: ExecutionContext
 ) extends Logging {
 

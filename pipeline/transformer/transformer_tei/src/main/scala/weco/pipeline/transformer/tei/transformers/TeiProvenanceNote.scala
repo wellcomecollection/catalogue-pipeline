@@ -13,12 +13,13 @@ import scala.xml.Elem
   */
 object TeiProvenanceNote extends Datable {
   def apply(provenance: Elem): Option[Note] =
-    NormaliseText(provenance.text.trim).map(provenanceText =>
-      Note(
-        noteType = NoteType.OwnershipNote,
-        contents =
-          List(formatDatablePrefix(provenance), Some(provenanceText)).flatten
-            .mkString(": ")
-      )
+    NormaliseText(provenance.text.trim).map(
+      provenanceText =>
+        Note(
+          noteType = NoteType.OwnershipNote,
+          contents =
+            List(formatDatablePrefix(provenance), Some(provenanceText)).flatten
+              .mkString(": ")
+        )
     )
 }
