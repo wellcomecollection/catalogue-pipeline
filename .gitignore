@@ -19,6 +19,9 @@ shared_infra/.releases
 .pytest_cache
 node_modules
 
+# output from code checkers, tests etc.
+.reports
+
 # Files which could contain secrets we do not want in the repo
 secrets
 secrets.zip
