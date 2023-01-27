@@ -49,12 +49,8 @@ sealed trait ImageState {
 /** ImageState represents the state of the image in the pipeline. Its stages are
   * as follows:
   *
-  * \|
-  * \| (merger) ▼ Initial
-  * \|
-  * \| (inferrer) ▼ Augmented
-  * \|
-  * \| (ingestor) ▼ Indexed
+  * \| \| (merger) ▼ Initial \| \| (inferrer) ▼ Augmented \| \| (ingestor) ▼
+  * Indexed
   */
 object ImageState {
 

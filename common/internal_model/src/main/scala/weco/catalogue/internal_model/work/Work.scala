@@ -135,14 +135,8 @@ case class WorkData[State <: DataState](
   * Work model as a finite state machine with the following stages corresponding
   * to stages of the pipeline:
   *
-  * \|
-  * \| (transformer) ▼ Source
-  * \|
-  * \| (id minter) ▼ Identified
-  * \|
-  * \| (matcher / merger) ▼ Merged
-  * \|
-  * \| (relation embedder) ▼ Denormalised
+  * \| \| (transformer) ▼ Source \| \| (id minter) ▼ Identified \| \| (matcher /
+  * merger) ▼ Merged \| \| (relation embedder) ▼ Denormalised
   */
 sealed trait WorkState {
 

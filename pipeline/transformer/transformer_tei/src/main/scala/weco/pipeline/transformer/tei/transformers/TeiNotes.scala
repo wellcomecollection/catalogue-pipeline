@@ -44,8 +44,8 @@ object TeiNotes {
     * xml:id="Alpha_932_1"> <incipit> <locus>F. 1v</locus> <!-- transcript -->
     * oṃ namaḥ japāpuṣyena saṃkāśaṃ kāśyapeyaṃ mahādyutiṃ tam ahaṃ
     * sarvapāpaghnaṃ praṇato smi divākaraṃ sūryāya namaḥ </incipit> <explicit>
-    * <locus>F. 3r</locus> <!-- transcript -->
-    * \||12|| navagrahastotraṃ saṃpūraṇaṃ </explicit>
+    * <locus>F. 3r</locus> <!-- transcript --> \||12|| navagrahastotraṃ
+    * saṃpūraṇaṃ </explicit>
     *
     * The incipit/explicit are the first and last words of the text. Normally
     * they appear next to each other in the TEI; we create their notes together

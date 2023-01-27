@@ -60,12 +60,8 @@ object Selector {
     *
     * To see why this is the case, consider the following tree:
     *
-    * A
-    * \|
-    * \|-------------
-    * \| | | B C E
-    * \| |------ |---------
-    * \| | | | | | | | D X Y Z 1 2 3 4
+    * A \| \|------------- \| | | B C E \| |------ |--------- \| | | | | | | | D
+    * X Y Z 1 2 3 4
     *
     * Given node `C` as an input, we need to denormalise the parent `A` as it
     * contains `C` as a child relation. We need to denormalise the input `C`
@@ -98,12 +94,8 @@ object Selector {
     *
     * For example, given the following tree:
     *
-    * A
-    * \|
-    * \|-------------
-    * \| | | B C E
-    * \| |------ |---------
-    * \| | | | | | | | D X Y Z 1 2 3 4
+    * A \| \|------------- \| | | B C E \| |------ |--------- \| | | | | | | | D
+    * X Y Z 1 2 3 4
     *
     * We would not need to include selectors for `Node(X)` or `Children(Y)` if
     * for example either the selectors `Tree(A)` or `Descendents(C)` also
