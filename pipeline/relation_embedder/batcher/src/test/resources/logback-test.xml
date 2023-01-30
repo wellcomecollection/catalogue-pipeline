@@ -16,10 +16,10 @@
   </root>
 
   <!-- Edit these to change the log levels for external libraries -->
-  <logger name="org.apache.http" level="OFF"/>
+  <logger name="org.apache.http" level="DEBUG"/>
   <logger name="io.netty" level="OFF"/>
-  <logger name="com.amazonaws" level="OFF"/>
-  <logger name="software.amazon.awssdk" level="OFF"/>
+  <logger name="com.amazonaws" level="DEBUG"/>
+  <logger name="software.amazon.awssdk" level="DEBUG"/>
   <logger name="akka.actor" level="OFF"/>
   <logger name="com.sksamuel.elastic4s" level="OFF"/>
 </configuration>
