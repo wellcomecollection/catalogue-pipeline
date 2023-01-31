@@ -35,6 +35,7 @@ object SierraNotes extends SierraDataTransformer with SierraQueryOps {
     "536" -> createNoteFromContents(NoteType.FundingInformation),
     "540" -> createNoteFromContents(NoteType.TermsOfUse),
     "542" -> createNoteFromContents(NoteType.CopyrightNote),
+    "544" -> createNoteFromContents(NoteType.RelatedMaterial),
     "545" -> createNoteFromContents(NoteType.BiographicalNote),
     "546" -> createNoteFromContents(NoteType.LanguageNote),
     "547" -> createNoteFromContents(NoteType.GeneralNote),
