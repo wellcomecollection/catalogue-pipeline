@@ -138,7 +138,7 @@ class BatcherWorkerServiceTest
     batches.find(_.rootPath == rootPath).get.selectors
 
   def withWorkerService[R](
-    visibilityTimeout: Duration = 5 seconds,
+    visibilityTimeout: Duration = 1.second,
     maxBatchSize: Int = 10,
     brokenPaths: Set[String] = Set.empty,
     flushInterval: FiniteDuration = 500 milliseconds
