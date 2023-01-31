@@ -8,5 +8,5 @@ echo "$MESSAGE"
 if [ $WARNING_COUNT != 0 ]
 then
   echo -e "$MESSAGE" | buildkite-agent annotate  --style 'warning' --context 'ctx-warn'
-  buildkite-agent step update "outcome" "soft_failed"
+  exit 2
 fi

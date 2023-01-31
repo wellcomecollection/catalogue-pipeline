@@ -5,6 +5,8 @@ steps:
       ./builds/run_linting.sh
       cat .reports/scalafmt.out | .buildkite/scripts/report_sbt_warnings.sh
     label: "autoformat"
+    soft_fail:
+      - exit_status: 1
     agents:
       queue: "scala"
 
