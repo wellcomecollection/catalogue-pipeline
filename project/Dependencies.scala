@@ -235,7 +235,7 @@ object CatalogueDependencies {
       WellcomeDependencies.typesafeLibrary ++
       WellcomeDependencies.fixturesLibrary ++
       WellcomeDependencies.messagingTypesafeLibrary ++
-      WellcomeDependencies.httpLibrary
+      WellcomeDependencies.storageLibrary
 
   val miroTransformerDependencies: Seq[ModuleID] =
     ExternalDependencies.apacheCommonsDependencies ++
