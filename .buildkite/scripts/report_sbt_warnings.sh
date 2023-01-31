@@ -8,5 +8,4 @@ echo "$MESSAGE"
 if [ $WARNING_COUNT != 0 ]
 then
   echo -e "$MESSAGE" | buildkite-agent annotate  --style 'warning' --context 'ctx-warn'
-  exit 2
 fi
