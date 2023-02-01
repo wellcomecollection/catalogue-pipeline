@@ -4,7 +4,7 @@ object WellcomeDependencies {
 
   val defaultVersion = "32.24.1" // This is automatically bumped by the scala-libs release process, do not edit this line manually
 
-  lazy val versions = new {
+  private object Versions {
     val typesafe = defaultVersion
     val fixtures = defaultVersion
     val http = defaultVersion
@@ -17,62 +17,62 @@ object WellcomeDependencies {
 
   val jsonLibrary: Seq[ModuleID] = library(
     name = "json",
-    version = versions.json
+    version = Versions.json
   )
 
   val fixturesLibrary: Seq[ModuleID] = library(
     name = "fixtures",
-    version = versions.fixtures
+    version = Versions.fixtures
   )
 
   val messagingLibrary: Seq[ModuleID] = library(
     name = "messaging",
-    version = versions.messaging
+    version = Versions.messaging
   )
 
   val elasticsearchLibrary: Seq[ModuleID] = library(
     name = "elasticsearch",
-    version = versions.elasticsearch
+    version = Versions.elasticsearch
   )
 
   val elasticsearchTypesafeLibrary: Seq[ModuleID] = library(
     name = "elasticsearch_typesafe",
-    version = versions.elasticsearch
+    version = Versions.elasticsearch
   )
 
   val httpLibrary: Seq[ModuleID] = library(
     name = "http",
-    version = versions.http
+    version = Versions.http
   )
 
   val monitoringLibrary: Seq[ModuleID] = library(
     name = "monitoring",
-    version = versions.monitoring
+    version = Versions.monitoring
   )
 
   val monitoringTypesafeLibrary: Seq[ModuleID] = monitoringLibrary ++ library(
     name = "monitoring_typesafe",
-    version = versions.monitoring
+    version = Versions.monitoring
   )
 
   val storageLibrary: Seq[ModuleID] = library(
     name = "storage",
-    version = versions.storage
+    version = Versions.storage
   )
 
   val typesafeLibrary: Seq[ModuleID] = library(
     name = "typesafe_app",
-    version = versions.typesafe
+    version = Versions.typesafe
   ) ++ fixturesLibrary
 
   val storageTypesafeLibrary: Seq[ModuleID] = storageLibrary ++ library(
     name = "storage_typesafe",
-    version = versions.storage
+    version = Versions.storage
   )
 
   val messagingTypesafeLibrary: Seq[ModuleID] = messagingLibrary ++ library(
     name = "messaging_typesafe",
-    version = versions.messaging
+    version = Versions.messaging
   ) ++ monitoringLibrary
 
   val sierraLibrary: Seq[ModuleID] = library(
@@ -92,7 +92,7 @@ object WellcomeDependencies {
 }
 
 object ExternalDependencies {
-  lazy val versions = new {
+  private object Versions {
     val apacheCommons = "1.9"
     val circe = "0.13.0"
     val diffJson = "4.1.1"
@@ -111,16 +111,16 @@ object ExternalDependencies {
   }
 
   val enumeratumDependencies = Seq(
-    "com.beachape" %% "enumeratum" % versions.enumeratum,
-    "com.beachape" %% "enumeratum-scalacheck" % versions.enumeratumScalacheck % "test"
+    "com.beachape" %% "enumeratum" % Versions.enumeratum,
+    "com.beachape" %% "enumeratum-scalacheck" % Versions.enumeratumScalacheck % "test"
   )
 
   val apacheCommonsDependencies = Seq(
-    "org.apache.commons" % "commons-text" % versions.apacheCommons
+    "org.apache.commons" % "commons-text" % Versions.apacheCommons
   )
 
   val circeOpticsDependencies = Seq(
-    "io.circe" %% "circe-optics" % versions.circe
+    "io.circe" %% "circe-optics" % Versions.circe
   )
 
   val mySqlDependencies = Seq(
@@ -130,25 +130,25 @@ object ExternalDependencies {
   )
 
   val scalacheckDependencies = Seq(
-    "org.scalatestplus" %% "scalacheck-1-14" % versions.scalatestplus % "test",
-    "com.github.alexarchambault" %% "scalacheck-shapeless_1.13" % versions.scalacheckShapeless % "test"
+    "org.scalatestplus" %% "scalacheck-1-14" % Versions.scalatestplus % "test",
+    "com.github.alexarchambault" %% "scalacheck-shapeless_1.13" % Versions.scalacheckShapeless % "test"
   )
 
   val scalacsvDependencies = Seq(
-    "com.github.tototoshi" %% "scala-csv" % versions.scalacsv
+    "com.github.tototoshi" %% "scala-csv" % Versions.scalacsv
   )
 
   val scalaGraphDependencies = Seq(
-    "org.scala-graph" %% "graph-core" % versions.scalaGraph
+    "org.scala-graph" %% "graph-core" % Versions.scalaGraph
   )
 
   val scalatestDependencies = Seq(
-    "org.scalatestplus" %% versions.scalatestPlusMockitoArtifactId % versions.scalatestPlus % Test,
-    "org.scalatest" %% "scalatest" % versions.scalatest % "test"
+    "org.scalatestplus" %% Versions.scalatestPlusMockitoArtifactId % Versions.scalatestPlus % Test,
+    "org.scalatest" %% "scalatest" % Versions.scalatest % "test"
   )
 
   val parseDependencies = Seq(
-    "com.lihaoyi" %% "fastparse" % versions.fastparse
+    "com.lihaoyi" %% "fastparse" % Versions.fastparse
   )
 
   val scalaXmlDependencies = Seq(
@@ -156,17 +156,17 @@ object ExternalDependencies {
   )
 
   val jsoupDependencies = Seq(
-    "org.jsoup" % "jsoup" % versions.jsoup
+    "org.jsoup" % "jsoup" % Versions.jsoup
   )
 
   val logbackDependencies = Seq(
-    "ch.qos.logback" % "logback-classic" % versions.logback,
-    "ch.qos.logback" % "logback-core" % versions.logback,
-    "ch.qos.logback" % "logback-access" % versions.logback
+    "ch.qos.logback" % "logback-classic" % Versions.logback,
+    "ch.qos.logback" % "logback-core" % Versions.logback,
+    "ch.qos.logback" % "logback-access" % Versions.logback
   )
 
   val diffJsonDependencies = Seq(
-    "org.gnieh" %% f"diffson-circe" % versions.diffJson % "test"
+    "org.gnieh" %% f"diffson-circe" % Versions.diffJson % "test"
   )
 }
 
