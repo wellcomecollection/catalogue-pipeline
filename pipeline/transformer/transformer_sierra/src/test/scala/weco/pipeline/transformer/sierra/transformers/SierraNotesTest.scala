@@ -353,6 +353,76 @@ class SierraNotesTest
     )
   }
 
+  describe("related material in MARC field 787") {
+    it("gets a related material note from 787") {
+      // This example is based on b33032440
+      val varFields = List(
+        VarField(
+          marcTag = "787",
+          subfields = List(
+            Subfield(tag = "t", content = "Daily telegraph."),
+            Subfield(tag = "g", content = "1989"),
+          )
+        )
+      )
+
+      val bibData = createSierraBibDataWith(varFields = varFields)
+
+      SierraNotes(bibData) shouldBe List(
+        Note(
+          contents = "Daily telegraph. 1989",
+          noteType = NoteType.RelatedMaterial
+        )
+      )
+    }
+
+    it("creates a search link for b-numbers in ǂw") {
+      // This example is based on b33039136
+      val varFields = List(
+        VarField(
+          marcTag = "787",
+          subfields = List(
+            Subfield(tag = "i", content = "Complemented by (work):"),
+            Subfield(tag = "t", content = "Depression ain't the sads."),
+            Subfield(tag = "w", content = "(UkLW)b33039112"),
+          )
+        )
+      )
+
+      val bibData = createSierraBibDataWith(varFields = varFields)
+
+      SierraNotes(bibData) shouldBe List(
+        Note(
+          contents = "Complemented by (work): Depression ain't the sads. (<a href=\"https://wellcomecollection.org/search/works?query=b33039112\">b33039112</a>)",
+          noteType = NoteType.RelatedMaterial
+        )
+      )
+    }
+
+    it("doesn't create a search link if ǂw isn't a b number") {
+      // This example is based on b15900976
+      val varFields = List(
+        VarField(
+          marcTag = "787",
+          subfields = List(
+            Subfield(tag = "s", content = "Times (London, England :  1788)."),
+            Subfield(tag = "g", content = "May 27, 2004."),
+            Subfield(tag = "w", content = "(OCoLC)6967919"),
+          )
+        )
+      )
+
+      val bibData = createSierraBibDataWith(varFields = varFields)
+
+      SierraNotes(bibData) shouldBe List(
+        Note(
+          contents = "Times (London, England :  1788). May 27, 2004. (OCoLC)6967919",
+          noteType = NoteType.RelatedMaterial
+        )
+      )
+    }
+  }
+
   def bibData(contents: List[(String, Note)]): SierraBibData =
     bibData(contents.map { case (tag, note) => (tag, note.contents) }: _*)
 
