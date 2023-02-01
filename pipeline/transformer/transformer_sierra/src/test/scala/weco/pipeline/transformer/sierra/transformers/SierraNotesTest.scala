@@ -335,6 +335,24 @@ class SierraNotesTest
     )
   }
 
+  it("strips whitespace from the subfield ǂu") {
+    // This example is based on b33032440
+    val varFields = List(
+      VarField(
+        marcTag = "540",
+        subfields = List(
+          Subfield(tag = "u", content = "https://wellcomecollection.org/works/a65fex5m "),
+        )
+      )
+    )
+
+    val bibData = createSierraBibDataWith(varFields = varFields)
+
+    SierraNotes(bibData).map(_.contents) shouldBe List(
+      "<a href=\"https://wellcomecollection.org/works/a65fex5m\">https://wellcomecollection.org/works/a65fex5m</a>"
+    )
+  }
+
   def bibData(contents: List[(String, Note)]): SierraBibData =
     bibData(contents.map { case (tag, note) => (tag, note.contents) }: _*)
 
