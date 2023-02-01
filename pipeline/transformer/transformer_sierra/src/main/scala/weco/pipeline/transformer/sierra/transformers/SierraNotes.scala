@@ -128,15 +128,15 @@ object SierraNotes extends SierraDataTransformer with SierraQueryOps {
   // now a canned search is enough.
   private def createNoteFrom787(vf: VarField): Note = {
     val contents =
-      vf
-        .subfieldsWithoutTags(globallySuppressedSubfields.toSeq: _*)
+      vf.subfieldsWithoutTags(globallySuppressedSubfields.toSeq: _*)
         .map {
-          case Subfield("w", contents) => contents match {
-            case uklwPrefixRegex(bibNumber) =>
-              s"""(<a href="https://wellcomecollection.org/search/works?query=${bibNumber.trim}">${bibNumber.trim}</a>)"""
+          case Subfield("w", contents) =>
+            contents match {
+              case uklwPrefixRegex(bibNumber) =>
+                s"""(<a href="https://wellcomecollection.org/search/works?query=${bibNumber.trim}">${bibNumber.trim}</a>)"""
 
-            case _ => contents
-          }
+              case _ => contents
+            }
 
           case Subfield(_, contents) => contents
         }
