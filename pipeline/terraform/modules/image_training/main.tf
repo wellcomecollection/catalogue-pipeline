@@ -29,7 +29,7 @@ data "aws_ssm_parameter" "latest_lsh_model_key" {
 }
 
 module "app_container" {
-  source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/container_definition?ref=v3.12.2"
+  source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/container_definition?ref=v3.13.1"
 
   name  = local.name
   image = local.feature_training_image
@@ -44,14 +44,14 @@ module "app_container" {
 }
 
 module "log_router_container" {
-  source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/firelens?ref=v3.12.2"
+  source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/firelens?ref=v3.13.1"
   namespace = local.name
 
   use_privatelink_endpoint = true
 }
 
 module "task_definition_image_training" {
-  source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/task_definition?ref=v3.12.2"
+  source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/task_definition?ref=v3.13.1"
 
   cpu    = local.cpu
   memory = local.memory
@@ -87,13 +87,13 @@ data "aws_iam_policy_document" "allow_model_write" {
 }
 
 module "app_permissions" {
-  source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/secrets?ref=v3.12.2"
+  source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/secrets?ref=v3.13.1"
   secrets   = local.secret_env_vars
   role_name = module.task_definition_image_training.task_execution_role_name
 }
 
 module "log_router_permissions" {
-  source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/secrets?ref=v3.12.2"
+  source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/secrets?ref=v3.13.1"
   secrets   = module.log_router_container.shared_secrets_logging
   role_name = module.task_definition_image_training.task_execution_role_name
 }
