@@ -1,6 +1,6 @@
 {
   "description" : "images with different licenses",
-  "createdAt" : "2022-12-01T11:10:59.498559Z",
+  "createdAt" : "2023-02-02T16:21:28.532554Z",
   "id" : "by60ajvp",
   "document" : {
     "modifiedTime" : "1956-05-21T11:24:15Z",
@@ -5395,6 +5395,9 @@
       ],
       "source.subjects.label" : [
       ]
+    },
+    "debug" : {
+      "indexedTime" : "2001-01-01T01:01:01Z"
     }
   }
 }

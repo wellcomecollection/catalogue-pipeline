@@ -1,6 +1,6 @@
 {
   "description" : "images with different genres",
-  "createdAt" : "2022-12-01T11:10:59.697134Z",
+  "createdAt" : "2023-02-02T16:21:29.631574Z",
   "id" : "6nlqpfst",
   "document" : {
     "modifiedTime" : "1949-09-28T13:28:06Z",
@@ -5394,6 +5394,9 @@
       ],
       "source.subjects.label" : [
       ]
+    },
+    "debug" : {
+      "indexedTime" : "2001-01-01T01:01:01Z"
     }
   }
 }

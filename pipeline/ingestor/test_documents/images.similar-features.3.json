@@ -1,6 +1,6 @@
 {
   "description" : "images with similar features",
-  "createdAt" : "2022-12-02T13:54:50.926457Z",
+  "createdAt" : "2023-02-02T16:21:30.344288Z",
   "id" : "wbandvl5",
   "document" : {
     "modifiedTime" : "2006-06-05T03:27:37Z",
@@ -5394,6 +5394,9 @@
       ],
       "source.subjects.label" : [
       ]
+    },
+    "debug" : {
+      "indexedTime" : "2001-01-01T01:01:01Z"
     }
   }
 }

@@ -1,6 +1,6 @@
 {
   "description" : "images with different contributors",
-  "createdAt" : "2022-12-01T11:10:59.643824Z",
+  "createdAt" : "2023-02-02T16:21:29.369392Z",
   "id" : "73tnjige",
   "document" : {
     "modifiedTime" : "2002-01-08T08:34:31Z",
@@ -5404,6 +5404,9 @@
       ],
       "source.subjects.label" : [
       ]
+    },
+    "debug" : {
+      "indexedTime" : "2001-01-01T01:01:01Z"
     }
   }
 }

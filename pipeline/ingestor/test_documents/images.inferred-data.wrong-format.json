@@ -1,6 +1,6 @@
 {
   "description" : "an image with inferred data in the wrong format",
-  "createdAt" : "2022-12-06T10:45:24.619937Z",
+  "createdAt" : "2023-02-02T16:21:30.688782Z",
   "id" : "cap1allo",
   "document" : {
     "modifiedTime" : "2027-12-29T00:13:45Z",
@@ -5382,6 +5382,9 @@
       ],
       "source.subjects.label" : [
       ]
+    },
+    "debug" : {
+      "indexedTime" : "2001-01-01T01:01:01Z"
     }
   }
 }
