@@ -308,9 +308,7 @@ class SierraPersonSubjectsTest
       )
     )
 
-    val actualSubjects = SierraPersonSubjects(bibId, bibData)
-    actualSubjects should have size 1
-    val subject = actualSubjects.head
+    val subject = SierraPersonSubjects(bibId, bibData).onlySubject
 
     it("in the concepts") {
       subject.onlyConcept shouldBe a[Person[_]]
@@ -331,7 +329,7 @@ class SierraPersonSubjectsTest
       // of the title as a whole as distinct from
       //  - the unmarked version n80119944, found in b13149143,
       //  - or the French version nr2006002530, found in b2201679x
-      SierraPersonSubjects(
+      val subjectsWithLanguage = SierraPersonSubjects(
         bibId,
         createSierraBibDataWith(
           varFields = List(
@@ -346,7 +344,8 @@ class SierraPersonSubjectsTest
             )
           )
         )
-      ).onlySubject.label shouldBe "Hippocrates. Aphorisms. Latin."
+      )
+      subjectsWithLanguage.onlySubject.label shouldBe "Hippocrates. Aphorisms. Latin."
     }
 
   }
