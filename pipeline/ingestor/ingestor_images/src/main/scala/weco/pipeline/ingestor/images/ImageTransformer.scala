@@ -28,7 +28,7 @@ trait ImageTransformer {
         ),
         aggregatableValues = ImageAggregatableValues(image.source),
         debug = DebugInformation(indexedTime = getIndexedTime)
-      )
+    )
 
   // This is a def rather than an inline call so we can override it in the
   // tests; in particular we want it to be deterministic when we're creating
