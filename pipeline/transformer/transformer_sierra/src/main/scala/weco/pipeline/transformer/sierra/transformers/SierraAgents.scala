@@ -22,7 +22,8 @@ trait SierraAgents
   //
   def getPerson(
     subfields: List[Subfield],
-    normalisePerson: Boolean = false): Option[Person[IdState.Unminted]] =
+    normalisePerson: Boolean = false
+  ): Option[Person[IdState.Unminted]] =
     getLabel(subfields).map { label =>
       val person =
         Person(
@@ -51,7 +52,8 @@ trait SierraAgents
   //    in the label.
   //
   def getOrganisation(
-    subfields: List[Subfield]): Option[Organisation[IdState.Unminted]] =
+    subfields: List[Subfield]
+  ): Option[Organisation[IdState.Unminted]] =
     getLabel(subfields.filterNot(_.tag == "n"))
       .map { Organisation(_).normalised }
 
@@ -82,7 +84,8 @@ trait SierraAgents
   // For consistency, we remove all whitespace and some punctuation
   // before continuing.
   protected def getIdentifierSubfieldContents(
-    varField: VarField): List[String] =
+    varField: VarField
+  ): List[String] =
     varField.subfields.collect {
       case Subfield("0", content) => content.replaceAll("[.,\\s]", "")
     }.distinct
@@ -90,7 +93,8 @@ trait SierraAgents
   protected def maybeAddIdentifier(
     ontologyType: String,
     varField: VarField,
-    identifierSubfieldContent: String): IdState.Unminted =
+    identifierSubfieldContent: String
+  ): IdState.Unminted =
     IdState.Identifiable(
       SourceIdentifier(
         identifierType = IdentifierType.LCNames,
@@ -106,7 +110,7 @@ trait SierraAgents
     val contents =
       subfields
         .filter { s =>
-          List("a", "b", "c", "d", "t", "p", "n", "q").contains(s.tag)
+          List("a", "b", "c", "d", "t", "p", "n", "q", "l").contains(s.tag)
         }
         .filterNot { _.content.trim.isEmpty }
         .map { _.content }
