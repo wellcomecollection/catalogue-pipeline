@@ -8,6 +8,7 @@ import weco.sierra.models.marc.{Subfield, VarField}
 
 import java.net.URL
 import scala.util.Try
+import scala.util.matching.Regex
 
 object SierraNotes extends SierraDataTransformer with SierraQueryOps {
 
@@ -53,6 +54,7 @@ object SierraNotes extends SierraDataTransformer with SierraQueryOps {
       NoteType.GeneralNote,
       suppressedSubfields = Set("9")),
     "593" -> createNoteFromContents(NoteType.CopyrightNote),
+    "787" -> createNoteFrom787 _,
   )
 
   def apply(bibData: SierraBibData): List[Note] =
@@ -86,8 +88,8 @@ object SierraNotes extends SierraDataTransformer with SierraQueryOps {
           .map {
             // We want to make ǂu into a clickable link, but only if it's a URL --
             // we don't want to make non-URLs into clickable objects.
-            case Subfield("u", contents) if isUrl(contents) =>
-              s"""<a href="$contents">$contents</a>"""
+            case Subfield("u", contents) if isUrl(contents.trim) =>
+              s"""<a href="${contents.trim}">${contents.trim}</a>"""
             case Subfield("u", contents) =>
               warn(s"Subfield ǂu which doesn't look like a URL: $contents")
               contents
@@ -110,6 +112,38 @@ object SierraNotes extends SierraDataTransformer with SierraQueryOps {
         createNoteFromContents(NoteType.LocationOfDuplicatesNote)(vf)
       case _ => createNoteFromContents(NoteType.LocationOfOriginalNote)(vf)
     }
+
+  // This regex matches any string starting with (UkLW), followed by
+  // any number of spaces, and then captures everything after the
+  // space, which is the bib number we're interested in.
+  //
+  // The UkLW match is case insensitive because there are sufficient
+  // inconsistencies in the source data that it's easier to handle that here.
+  private val uklwPrefixRegex: Regex = """\((?i:UkLW)\)[\s]*(.+)""".r.anchored
+
+  // In MARC 787, subfield $w may contain a catalogue reference, in which
+  // case we want to create a clickable link.
+  //
+  // Eventually it'd be nice if these went direct to the works page, but for
+  // now a canned search is enough.
+  private def createNoteFrom787(vf: VarField): Note = {
+    val contents =
+      vf.subfieldsWithoutTags(globallySuppressedSubfields.toSeq: _*)
+        .map {
+          case Subfield("w", contents) =>
+            contents match {
+              case uklwPrefixRegex(bibNumber) =>
+                s"""(<a href="https://wellcomecollection.org/search/works?query=${bibNumber.trim}">${bibNumber.trim}</a>)"""
+
+              case _ => contents
+            }
+
+          case Subfield(_, contents) => contents
+        }
+        .mkString(" ")
+
+    Note(contents = contents, noteType = NoteType.RelatedMaterial)
+  }
 
   private def isUrl(s: String): Boolean =
     Try { new URL(s) }.isSuccess
