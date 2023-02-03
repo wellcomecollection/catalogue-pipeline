@@ -373,6 +373,18 @@ class CalmTransformerTest
     )
   }
 
+  it("transforms alternative titles") {
+    val record = createCalmRecordWith(
+      "Title" -> "abc",
+      "Level" -> "Collection",
+      "RefNo" -> "a/b/c",
+      "AltRefNo" -> "a.b.c",
+      "Alternative_Title" -> "Original title: Disk 2",
+      "CatalogueStatus" -> "Catalogued"
+    )
+    CalmTransformer(record, version).right.get.data.alternativeTitles shouldBe List("Original title: Disk 2")
+  }
+
   it("ignores case when transforming workType") {
     val record = createCalmRecordWith(
       "Title" -> "abc",

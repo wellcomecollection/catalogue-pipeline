@@ -148,6 +148,7 @@ object CalmTransformer
     } yield
       WorkData[DataState.Unidentified](
         title = Some(title),
+        alternativeTitles = CalmAlternativeTitles(record),
         otherIdentifiers = otherIdentifiers(record),
         format = Some(Format.ArchivesAndManuscripts),
         collectionPath = Some(collectionPath),
