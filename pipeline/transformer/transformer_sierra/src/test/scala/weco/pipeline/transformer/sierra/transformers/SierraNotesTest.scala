@@ -65,6 +65,9 @@ class SierraNotesTest
       "542" -> Note(
         contents = "copyright a",
         noteType = NoteType.CopyrightNote),
+      "544" -> Note(
+        contents = "related material a",
+        noteType = NoteType.RelatedMaterial),
       "545" -> Note(
         contents = "bib info b",
         noteType = NoteType.BiographicalNote),

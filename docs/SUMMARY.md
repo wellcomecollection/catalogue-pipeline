@@ -12,6 +12,11 @@
 * [Our single model: the Work](transforming-records-into-a-single-common-model/our-single-model-the-work.md)
 * [Creating canonical identifiers](transforming-records-into-a-single-common-model/creating-canonical-identifiers.md)
 
+## Combining records from multiple sources
+
+* [Why do we combine records?](combining-records-from-multiple-sources/why-do-we-combine-records.md)
+* [How we choose which records to combine](combining-records-from-multiple-sources/how-we-choose-which-records-to-combine.md)
+
 ## Other topics
 
 * [Catalogue](README.md)
