@@ -308,7 +308,7 @@ class SierraPersonSubjectsTest
       )
     )
 
-    val subject = SierraPersonSubjects(bibId, bibData).onlySubject
+    val List(subject) = SierraPersonSubjects(bibId, bibData)
 
     it("in the concepts") {
       subject.onlyConcept shouldBe a[Person[_]]
@@ -329,7 +329,7 @@ class SierraPersonSubjectsTest
       // of the title as a whole as distinct from
       //  - the unmarked version n80119944, found in b13149143,
       //  - or the French version nr2006002530, found in b2201679x
-      val subjectsWithLanguage = SierraPersonSubjects(
+      val List(subjectWithLanguage)= SierraPersonSubjects(
         bibId,
         createSierraBibDataWith(
           varFields = List(
@@ -345,7 +345,7 @@ class SierraPersonSubjectsTest
           )
         )
       )
-      subjectsWithLanguage.onlySubject.label shouldBe "Hippocrates. Aphorisms. Latin."
+      subjectWithLanguage.label shouldBe "Hippocrates. Aphorisms. Latin."
     }
 
   }
