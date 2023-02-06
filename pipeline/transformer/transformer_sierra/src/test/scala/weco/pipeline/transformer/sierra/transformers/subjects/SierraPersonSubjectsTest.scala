@@ -308,9 +308,7 @@ class SierraPersonSubjectsTest
       )
     )
 
-    val actualSubjects = SierraPersonSubjects(bibId, bibData)
-    actualSubjects should have size 1
-    val subject = actualSubjects.head
+    val List(subject) = SierraPersonSubjects(bibId, bibData)
 
     it("in the concepts") {
       subject.onlyConcept shouldBe a[Person[_]]
@@ -323,6 +321,33 @@ class SierraPersonSubjectsTest
     it("in the label") {
       subject.label shouldBe "Aristophanes. Birds."
     }
+
+    it("with the $l subfield") {
+      // From b30764701 (https://wellcomecollection.org/works/vbpkxhgv), among other places
+      // This work contains a subject referring to https://id.loc.gov/authorities/names/n85221892.html
+      // in which $l the language portion of the subject title, forms a distinguishing part
+      // of the title as a whole as distinct from
+      //  - the unmarked version n80119944, found in b13149143,
+      //  - or the French version nr2006002530, found in b2201679x
+      val List(subjectWithLanguage)= SierraPersonSubjects(
+        bibId,
+        createSierraBibDataWith(
+          varFields = List(
+            VarField(
+              marcTag = "600",
+              subfields = List(
+                Subfield(tag = "a", content = "Hippocrates."),
+                Subfield(tag = "t", content = "Aphorisms."),
+                Subfield(tag = "l", content = "Latin."),
+                Subfield(tag = "0", content = "n85221892")
+              )
+            )
+          )
+        )
+      )
+      subjectWithLanguage.label shouldBe "Hippocrates. Aphorisms. Latin."
+    }
+
   }
 
   it("doesn't remove a trailing ellipsis from a subject label") {
