@@ -18,6 +18,8 @@ object CalmNotes extends CalmRecordOps {
     ("Copyright", NoteType.CopyrightNote),
     ("Arrangement", NoteType.ArrangementNote),
     ("Copies", NoteType.LocationOfDuplicatesNote),
+    ("Notes", NoteType.GeneralNote),
+    ("Originals", NoteType.LocationOfOriginalNote),
   )
 
   def apply(record: CalmRecord): List[Note] =
