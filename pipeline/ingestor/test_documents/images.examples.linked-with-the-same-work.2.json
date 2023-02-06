@@ -1,6 +1,6 @@
 {
   "description" : "images linked with the same work",
-  "createdAt" : "2022-12-06T10:45:24.748968Z",
+  "createdAt" : "2023-02-02T16:21:31.518871Z",
   "id" : "yyotij66",
   "document" : {
     "modifiedTime" : "2013-01-25T06:33:09Z",
@@ -5392,6 +5392,9 @@
       ],
       "source.subjects.label" : [
       ]
+    },
+    "debug" : {
+      "indexedTime" : "2001-01-01T01:01:01Z"
     }
   }
 }

@@ -1,6 +1,6 @@
 {
   "description" : "images with similar features and palettes",
-  "createdAt" : "2022-12-02T13:54:50.815239Z",
+  "createdAt" : "2023-02-02T16:21:30.032041Z",
   "id" : "ej0cb179",
   "document" : {
     "modifiedTime" : "2062-01-01T01:59:37Z",
@@ -5394,6 +5394,9 @@
       ],
       "source.subjects.label" : [
       ]
+    },
+    "debug" : {
+      "indexedTime" : "2001-01-01T01:01:01Z"
     }
   }
 }

@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2022-12-06T10:45:24.647225Z",
+  "createdAt" : "2023-02-02T16:21:30.879574Z",
   "id" : "a8fd7kej",
   "document" : {
     "modifiedTime" : "2041-10-04T05:15:25Z",
@@ -5402,6 +5402,9 @@
       ],
       "source.subjects.label" : [
       ]
+    },
+    "debug" : {
+      "indexedTime" : "2001-01-01T01:01:01Z"
     }
   }
 }

@@ -1,6 +1,6 @@
 {
   "description" : "an example of images with work metadata for the API tests",
-  "createdAt" : "2022-12-06T10:45:24.795687Z",
+  "createdAt" : "2023-02-02T16:21:31.675669Z",
   "id" : "bj7sufo1",
   "document" : {
     "modifiedTime" : "2021-01-01T12:11:01Z",
@@ -5394,6 +5394,9 @@
       ],
       "source.subjects.label" : [
       ]
+    },
+    "debug" : {
+      "indexedTime" : "2001-01-01T01:01:01Z"
     }
   }
 }

@@ -3,6 +3,7 @@ package weco.pipeline.ingestor.images
 import weco.catalogue.display_model.image.DisplayImage
 import weco.catalogue.internal_model.image.{Image, ImageState}
 import weco.pipeline.ingestor.images.models.{
+  DebugInformation,
   ImageAggregatableValues,
   ImageQueryableValues,
   IndexedImage
@@ -10,7 +11,9 @@ import weco.pipeline.ingestor.images.models.{
 import weco.catalogue.display_model.Implicits._
 import io.circe.syntax._
 
-object ImageTransformer {
+import java.time.Instant
+
+trait ImageTransformer {
   val deriveData: Image[ImageState.Augmented] => IndexedImage =
     image =>
       IndexedImage(
@@ -23,6 +26,14 @@ object ImageTransformer {
           inferredData = image.state.inferredData,
           source = image.source
         ),
-        aggregatableValues = ImageAggregatableValues(image.source)
+        aggregatableValues = ImageAggregatableValues(image.source),
+        debug = DebugInformation(indexedTime = getIndexedTime)
     )
+
+  // This is a def rather than an inline call so we can override it in the
+  // tests; in particular we want it to be deterministic when we're creating
+  // example documents to send to the API repo.
+  protected def getIndexedTime: Instant = Instant.now()
 }
+
+object ImageTransformer extends ImageTransformer

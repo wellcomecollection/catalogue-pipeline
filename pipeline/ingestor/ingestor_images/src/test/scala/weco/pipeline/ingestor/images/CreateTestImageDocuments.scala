@@ -574,7 +574,14 @@ class CreateTestImageDocuments
   }
 
   implicit class ImageOps(image: Image[ImageState.Augmented]) {
-    def toDocument: Json =
-      ImageTransformer.deriveData(image).asJson
+    def toDocument: Json = {
+      // This is a fixed date so we get consistent values in the indexedTime
+      // field in the generated documents.
+      val transformer = new ImageTransformer {
+        override protected def getIndexedTime: Instant =
+          Instant.parse("2001-01-01T01:01:01.00Z")
+      }
+      transformer.deriveData(image).asJson
+    }
   }
 }

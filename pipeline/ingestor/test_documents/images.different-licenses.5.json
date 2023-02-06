@@ -1,6 +1,6 @@
 {
   "description" : "images with different licenses",
-  "createdAt" : "2022-12-01T11:10:59.505723Z",
+  "createdAt" : "2023-02-02T16:21:28.558605Z",
   "id" : "cqamwwme",
   "document" : {
     "modifiedTime" : "1994-03-14T09:51:03Z",
@@ -5399,6 +5399,9 @@
       ],
       "source.subjects.label" : [
       ]
+    },
+    "debug" : {
+      "indexedTime" : "2001-01-01T01:01:01Z"
     }
   }
 }

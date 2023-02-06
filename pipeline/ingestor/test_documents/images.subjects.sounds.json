@@ -1,6 +1,6 @@
 {
   "description" : "images with different subjects",
-  "createdAt" : "2022-12-06T10:45:24.819931Z",
+  "createdAt" : "2023-02-02T16:21:31.769211Z",
   "id" : "czppqd9r",
   "document" : {
     "modifiedTime" : "1948-05-28T09:36:35Z",
@@ -5398,6 +5398,9 @@
       "source.subjects.label" : [
         "{\"label\":\"Square sounds\",\"concepts\":[],\"type\":\"Subject\"}"
       ]
+    },
+    "debug" : {
+      "indexedTime" : "2001-01-01T01:01:01Z"
     }
   }
 }
