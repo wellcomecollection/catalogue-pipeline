@@ -35,7 +35,7 @@ SERVICES = {
     "work_ingestor": ["works-denormalised_read", "works-indexed_write"],
     "inferrer": ["images-initial_read", "images-augmented_write"],
     "image_ingestor": ["images-augmented_read", "images-indexed_write"],
-    "snapshot_generator": ["works-indexed_read"],
+    "snapshot_generator": ["works-indexed_read", "images-indexed_read"],
     "catalogue_api": [
         "works-indexed_read", "images-indexed_read",
 
