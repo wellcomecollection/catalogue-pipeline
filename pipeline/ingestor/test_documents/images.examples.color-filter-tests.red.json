@@ -1,6 +1,6 @@
 {
   "description" : "example for the color filter tests",
-  "createdAt" : "2022-12-06T10:45:24.706020Z",
+  "createdAt" : "2023-02-02T16:21:31.413877Z",
   "id" : "noapixti",
   "document" : {
     "modifiedTime" : "1979-12-22T11:02:42Z",
@@ -5304,6 +5304,9 @@
       ],
       "source.subjects.label" : [
       ]
+    },
+    "debug" : {
+      "indexedTime" : "2001-01-01T01:01:01Z"
     }
   }
 }

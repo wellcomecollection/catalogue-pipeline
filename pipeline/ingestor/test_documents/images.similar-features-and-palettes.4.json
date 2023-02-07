@@ -1,6 +1,6 @@
 {
   "description" : "images with similar features and palettes",
-  "createdAt" : "2022-12-02T13:54:50.813697Z",
+  "createdAt" : "2023-02-02T16:21:30.023752Z",
   "id" : "xctlvvat",
   "document" : {
     "modifiedTime" : "1996-08-28T19:25:27Z",
@@ -5392,6 +5392,9 @@
       ],
       "source.subjects.label" : [
       ]
+    },
+    "debug" : {
+      "indexedTime" : "2001-01-01T01:01:01Z"
     }
   }
 }

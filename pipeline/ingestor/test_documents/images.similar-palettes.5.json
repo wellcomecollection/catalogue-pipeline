@@ -1,6 +1,6 @@
 {
   "description" : "images with similar palettes",
-  "createdAt" : "2022-12-06T10:45:24.550935Z",
+  "createdAt" : "2023-02-02T16:21:30.534101Z",
   "id" : "ttvshbny",
   "document" : {
     "modifiedTime" : "1974-03-20T04:50:30Z",
@@ -5392,6 +5392,9 @@
       ],
       "source.subjects.label" : [
       ]
+    },
+    "debug" : {
+      "indexedTime" : "2001-01-01T01:01:01Z"
     }
   }
 }

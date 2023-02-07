@@ -11,12 +11,15 @@ import weco.catalogue.internal_model.work.{AbstractRootConcept, Subject}
 
 trait SubjectMatchers {
 
-  def labelDerivedSubjectId(value: String, ontologyType: String = "Subject")
-    : HavePropertyMatcher[HasId[IdState.Unminted], String] =
+  def labelDerivedSubjectId(
+    value: String,
+    ontologyType: String = "Subject"
+  ): HavePropertyMatcher[HasId[IdState.Unminted], String] =
     new HasIdMatchers.HasIdentifier(
       identifierType = IdentifierType.LabelDerived,
       ontologyType = ontologyType,
-      value = value)
+      value = value
+    )
 
   implicit class SubjectTestOps[State](subject: Subject[State]) {
 
@@ -34,7 +37,8 @@ trait SubjectMatchers {
         case Seq(singleConcept) => singleConcept
         case _ =>
           fail(
-            s"Subject expected to have exactly one concept, found: ${subject.concepts}")
+            s"Subject expected to have exactly one concept, found: ${subject.concepts}"
+          )
       }
   }
 }

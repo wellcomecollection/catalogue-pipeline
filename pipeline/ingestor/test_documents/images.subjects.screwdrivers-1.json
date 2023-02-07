@@ -1,6 +1,6 @@
 {
   "description" : "images with different subjects",
-  "createdAt" : "2022-12-06T10:45:24.830303Z",
+  "createdAt" : "2023-02-02T16:21:31.781405Z",
   "id" : "s5qpaltk",
   "document" : {
     "modifiedTime" : "1972-01-08T04:13:54Z",
@@ -5402,6 +5402,9 @@
       "source.subjects.label" : [
         "{\"label\":\"Simple screwdrivers\",\"concepts\":[],\"type\":\"Subject\"}"
       ]
+    },
+    "debug" : {
+      "indexedTime" : "2001-01-01T01:01:01Z"
     }
   }
 }

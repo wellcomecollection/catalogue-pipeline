@@ -816,7 +816,7 @@ class SierraContributorsTest
           ),
           Subfield(tag = "l", content = "Latin."),
           Subfield(tag = "f", content = "1561."),
-          Subfield(tag = "0", content = "n  79005643")
+          Subfield(tag = "0", content = "n  79005643") // This identifier is for Hippocrates only
         )
       )
     )
@@ -834,7 +834,7 @@ class SierraContributorsTest
             )
           ),
           label =
-            "Hippocrates. Epistolae. Ad Ptolemaeum regem de hominis fabrica."
+            "Hippocrates. Epistolae. Ad Ptolemaeum regem de hominis fabrica. Latin."
         ),
         roles = List.empty,
         primary = false
