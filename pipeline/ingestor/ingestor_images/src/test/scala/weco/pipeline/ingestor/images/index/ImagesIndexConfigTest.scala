@@ -12,6 +12,7 @@ import weco.json.JsonUtil._
 import weco.pipeline.ingestor.images.ImageTransformer
 import weco.pipeline.ingestor.images.models.IndexedImage
 
+import java.time.Instant
 import scala.util.Random
 
 class ImagesIndexConfigTest
@@ -107,15 +108,24 @@ class ImagesIndexConfigTest
         .id(id)
     }.await
 
+  private lazy val imageTransformer = new ImageTransformer {
+    override protected def getIndexedTime: Instant =
+      Instant.parse("2001-01-01T01:01:01.00Z")
+  }
+
   private def indexImage(
     id: String,
     image: Image[ImageState.Augmented]
-  )(implicit index: Index) =
+  )(implicit index: Index) = {
+    // This is a fixed date so we get consistent values in the indexedTime
+    // field in the generated documents.
+
     elasticClient.execute {
       indexInto(index)
-        .doc(toJson(ImageTransformer.deriveData(image)).get)
+        .doc(toJson(imageTransformer.deriveData(image)).get)
         .id(id)
     }.await
+  }
 
   private def assertImageIsIndexed(
     id: String,
@@ -125,7 +135,7 @@ class ImagesIndexConfigTest
       whenReady(elasticClient.execute(get(index, id))) { getResponse =>
         getResponse.result.exists shouldBe true
 
-        fromJson[IndexedImage](getResponse.result.sourceAsString).get shouldBe ImageTransformer
+        fromJson[IndexedImage](getResponse.result.sourceAsString).get shouldBe imageTransformer
           .deriveData(image)
       }
     }

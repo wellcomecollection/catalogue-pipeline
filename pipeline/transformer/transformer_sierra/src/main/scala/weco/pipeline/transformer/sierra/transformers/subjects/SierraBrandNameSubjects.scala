@@ -31,7 +31,7 @@ object SierraBrandNameSubjects
           new Subject(
             id = identifier,
             label = label,
-            concepts = List(new Concept(id = identifier, label = label))
+            concepts = List(Concept(label).identifiable())
           )
-      }
+      )
 }

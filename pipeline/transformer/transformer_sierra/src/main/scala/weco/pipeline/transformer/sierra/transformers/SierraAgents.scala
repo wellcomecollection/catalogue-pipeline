@@ -113,7 +113,7 @@ trait SierraAgents
       subfields
         .filter {
           s =>
-            List("a", "b", "c", "d", "t", "p", "n", "q").contains(s.tag)
+            List("a", "b", "c", "d", "t", "p", "n", "q", "l").contains(s.tag)
         }
         .filterNot { _.content.trim.isEmpty }
         .map { _.content }

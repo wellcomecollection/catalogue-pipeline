@@ -598,6 +598,14 @@
             }
           }
         }
+      },
+      "debug": {
+        "dynamic": "false",
+        "properties": {
+          "indexedTime": {
+            "type": "date"
+          }
+        }
       }
     }
   },

@@ -19,6 +19,8 @@ class CalmNotesTest extends AnyFunSpec with Matchers with CalmRecordGenerators {
       ("Copyright", "Copyright the Creative Consortium"),
       ("Arrangement", "Arranged in an Adorable Alignment"),
       ("Copies", "A copy is contained in the Circular Church"),
+      ("Notes", "Named now by Nicola Noble"),
+      ("Originals", "The original object is in the Orange Octagon")
     )
 
     val notes = CalmNotes(record)
@@ -59,6 +61,12 @@ class CalmNotesTest extends AnyFunSpec with Matchers with CalmRecordGenerators {
       Note(
         contents = "A copy is contained in the Circular Church",
         noteType = NoteType.LocationOfDuplicatesNote),
+      Note(
+        contents = "Named now by Nicola Noble",
+        noteType = NoteType.GeneralNote),
+      Note(
+        contents = "The original object is in the Orange Octagon",
+        noteType = NoteType.LocationOfOriginalNote)
     )
   }
 

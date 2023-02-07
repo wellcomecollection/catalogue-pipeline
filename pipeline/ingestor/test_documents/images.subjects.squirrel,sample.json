@@ -1,6 +1,6 @@
 {
   "description" : "images with different subjects",
-  "createdAt" : "2022-12-06T10:45:24.852197Z",
+  "createdAt" : "2023-02-02T16:21:31.811543Z",
   "id" : "jf27ko0m",
   "document" : {
     "modifiedTime" : "1955-01-03T04:26:20Z",
@@ -5410,6 +5410,9 @@
         "{\"label\":\"Squashed squirrels\",\"concepts\":[],\"type\":\"Subject\"}",
         "{\"label\":\"Struck samples\",\"concepts\":[],\"type\":\"Subject\"}"
       ]
+    },
+    "debug" : {
+      "indexedTime" : "2001-01-01T01:01:01Z"
     }
   }
 }

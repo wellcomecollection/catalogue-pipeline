@@ -1,6 +1,6 @@
 {
   "description" : "an image without any inferred data",
-  "createdAt" : "2022-12-06T10:45:24.613052Z",
+  "createdAt" : "2023-02-02T16:21:30.637401Z",
   "id" : "2hf08w7o",
   "document" : {
     "modifiedTime" : "2008-09-17T07:09:47Z",
@@ -157,6 +157,9 @@
       ],
       "source.subjects.label" : [
       ]
+    },
+    "debug" : {
+      "indexedTime" : "2001-01-01T01:01:01Z"
     }
   }
 }
