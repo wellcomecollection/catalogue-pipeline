@@ -6,7 +6,6 @@ import weco.pipeline.transformer.sierra.transformers.matchers.{
   ConceptMatchers,
   SubjectMatchers
 }
-import weco.catalogue.internal_model.identifiers.IdState
 import weco.sierra.generators.SierraDataGenerators
 import weco.sierra.models.marc.{Subfield, VarField}
 
@@ -24,30 +23,30 @@ class SierraBrandNameSubjectsTest
   it("returns subjects for varfield 652") {
     val varFields = List(
       VarField(marcTag = "600", subfields = List(Subfield("a", "Not Content"))),
-      VarField(marcTag = "652", subfields = List(Subfield("a", "Content"))),
+      VarField(marcTag = "652", subfields = List(Subfield("a", "Content")))
     )
     val List(subject) = getBrandNameSubjects(varFields)
     subject should have(
-      'label ("Content"),
-      'id (IdState.Unidentifiable)
+      'label("Content"),
+      labelDerivedConceptId("content")
     )
     subject.onlyConcept should have(
-      'label ("Content"),
+      'label("Content"),
       labelDerivedConceptId("content")
     )
   }
 
   it("returns a lowercase ascii normalised identifier") {
     val varFields = List(
-      VarField(marcTag = "652", subfields = List(Subfield("a", "Citroën"))),
+      VarField(marcTag = "652", subfields = List(Subfield("a", "Citroën")))
     )
     val List(subject) = getBrandNameSubjects(varFields)
     subject should have(
-      'label ("Citroën"),
-      'id (IdState.Unidentifiable)
+      'label("Citroën"),
+      labelDerivedConceptId("citroen")
     )
     subject.onlyConcept should have(
-      'label ("Citroën"),
+      'label("Citroën"),
       labelDerivedConceptId("citroen")
     )
   }
@@ -56,7 +55,8 @@ class SierraBrandNameSubjectsTest
     val varFields = List(
       VarField(
         marcTag = "652",
-        subfields = List(Subfield(tag = "b", content = "Hmmm")))
+        subfields = List(Subfield(tag = "b", content = "Hmmm"))
+      )
     )
 
     getBrandNameSubjects(varFields) shouldBe Nil
@@ -76,12 +76,12 @@ class SierraBrandNameSubjectsTest
         // only those places that did have them should keep them
         // They should not be introduced anywhere else.
         subject should have(
-          'label (label),
-          'id (IdState.Unidentifiable)
+          'label(label),
+          labelDerivedConceptId(label.toLowerCase)
         )
         val List(concept) = subject.concepts
         concept should have(
-          'label (label),
+          'label(label),
           labelDerivedConceptId(label.toLowerCase)
         )
     }
@@ -90,5 +90,6 @@ class SierraBrandNameSubjectsTest
   private def getBrandNameSubjects(varFields: List[VarField]) =
     SierraBrandNameSubjects(
       createSierraBibNumber,
-      createSierraBibDataWith(varFields = varFields))
+      createSierraBibDataWith(varFields = varFields)
+    )
 }
