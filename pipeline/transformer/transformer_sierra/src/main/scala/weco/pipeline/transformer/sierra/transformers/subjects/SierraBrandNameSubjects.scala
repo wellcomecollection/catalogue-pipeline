@@ -33,5 +33,5 @@ object SierraBrandNameSubjects
             label = label,
             concepts = List(Concept(label).identifiable())
           )
-      )
+      }
 }
