@@ -22,7 +22,8 @@ import scala.language.higherKinds
 
 object SourceVHSBuilder {
   def build[T](config: Config, namespace: String = "vhs")(
-    implicit codec: Codec[T]): SourceVHS[T] = {
+    implicit codec: Codec[T]
+  ): SourceVHS[T] = {
     implicit val s3Client: S3Client = S3Client.builder().build()
 
     implicit val dynamoClient: DynamoDbClient =
@@ -43,8 +44,7 @@ object SourceVHSBuilder {
     implicit val typedStore: S3TypedStore[T] = S3TypedStore[T]
 
     class VHSInternalStore(prefix: S3ObjectLocationPrefix)(
-      implicit
-      indexedStore: DynamoHashStore[String, Int, S3ObjectLocation],
+      implicit indexedStore: DynamoHashStore[String, Int, S3ObjectLocation],
       typedStore: S3TypedStore[T]
     ) extends DynamoHybridStore[T](prefix)(indexedStore, typedStore)
         with HybridStoreWithMaxima[String, Int, S3ObjectLocation, T]

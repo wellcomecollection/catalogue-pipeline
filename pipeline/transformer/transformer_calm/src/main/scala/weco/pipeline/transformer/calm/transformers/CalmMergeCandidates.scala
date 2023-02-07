@@ -19,17 +19,19 @@ object CalmMergeCandidates extends CalmRecordOps {
   private def sierraMergeCandidate(record: CalmRecord) =
     record
       .get("BNumber")
-      .flatMap { id =>
-        SourceIdentifier(
-          identifierType = IdentifierType.SierraSystemNumber,
-          ontologyType = "Work",
-          value = id
-        ).validatedWithWarning
+      .flatMap {
+        id =>
+          SourceIdentifier(
+            identifierType = IdentifierType.SierraSystemNumber,
+            ontologyType = "Work",
+            value = id
+          ).validatedWithWarning
       }
-      .map { sourceIdentifier =>
-        MergeCandidate(
-          identifier = sourceIdentifier,
-          reason = "CALM/Sierra harvest work"
-        )
+      .map {
+        sourceIdentifier =>
+          MergeCandidate(
+            identifier = sourceIdentifier,
+            reason = "CALM/Sierra harvest work"
+          )
       }
 }

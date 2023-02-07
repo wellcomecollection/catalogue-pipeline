@@ -10,15 +10,18 @@ import weco.storage.store.Readable
 import weco.storage.{Identified, ReadError, Version}
 
 class MiroSourceDataRetriever(
-  miroReadable: Readable[S3ObjectLocation, MiroRecord])
-    extends SourceDataRetriever[
+  miroReadable: Readable[S3ObjectLocation, MiroRecord]
+) extends SourceDataRetriever[
       MiroSourcePayload,
-      (MiroRecord, MiroSourceOverrides, MiroMetadata)] {
+      (MiroRecord, MiroSourceOverrides, MiroMetadata)
+    ] {
 
-  override def lookupSourceData(p: MiroSourcePayload)
-    : Either[ReadError,
-             Identified[Version[String, Int],
-                        (MiroRecord, MiroSourceOverrides, MiroMetadata)]] =
+  override def lookupSourceData(
+    p: MiroSourcePayload
+  ): Either[ReadError, Identified[
+    Version[String, Int],
+    (MiroRecord, MiroSourceOverrides, MiroMetadata)
+  ]] =
     miroReadable
       .get(p.location)
       .map {
@@ -28,8 +31,10 @@ class MiroSourceDataRetriever(
             (
               miroRecord,
               p.overrides.getOrElse(MiroSourceOverrides.empty),
-              MiroMetadata(
-                isClearedForCatalogueAPI = p.isClearedForCatalogueAPI))
+              MiroMetadata(isClearedForCatalogueAPI =
+                p.isClearedForCatalogueAPI
+              )
+            )
           )
       }
 }

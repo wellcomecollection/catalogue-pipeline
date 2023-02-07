@@ -15,7 +15,10 @@ object CalmIndexConfig extends IndexConfigFields {
             textKeywordField(
               name = fieldName,
               textFieldName = "english",
-              analyzerName = "english")))
+              analyzerName = "english"
+            )
+        )
+      )
         .dynamic(DynamicMapping.Strict),
       Analysis(analyzers = List())
     )

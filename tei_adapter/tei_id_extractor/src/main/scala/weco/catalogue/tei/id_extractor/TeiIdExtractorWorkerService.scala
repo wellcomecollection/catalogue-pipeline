@@ -22,7 +22,7 @@ class TeiIdExtractorWorkerService[Dest](
   gitHubBlobReader: GitHubBlobContentReader,
   tableProvisioner: TableProvisioner,
   pathIdManager: PathIdManager[Dest],
-  config: TeiIdExtractorConfig,
+  config: TeiIdExtractorConfig
 )(implicit val ec: ExecutionContext)
     extends Runnable
     with FlowOps {
@@ -41,7 +41,8 @@ class TeiIdExtractorWorkerService[Dest](
         source
           .via(unwrapMessage)
           .via(broadcastAndMerge(filterNonTei, processMessage))
-          .map { case (Context(msg), _) => msg })
+          .map { case (Context(msg), _) => msg }
+    )
   }
 
   def unwrapMessage =
@@ -59,7 +60,8 @@ class TeiIdExtractorWorkerService[Dest](
   def processMessage =
     Flow[(Context, TeiPathMessage)]
       .filter {
-        case (_, teiPathMessage) => isTeiFile(teiPathMessage.path)
+        case (_, teiPathMessage) =>
+          isTeiFile(teiPathMessage.path)
       }
       .via(broadcastAndMerge(processDeleted, processChange))
 
@@ -80,7 +82,8 @@ class TeiIdExtractorWorkerService[Dest](
           for {
             _ <- Future.fromTry(
               pathIdManager
-                .handlePathDeleted(message.path, message.timeDeleted))
+                .handlePathDeleted(message.path, message.timeDeleted)
+            )
           } yield (ctx, Right(()))
       }
       .via(catchErrors)
@@ -96,11 +99,14 @@ class TeiIdExtractorWorkerService[Dest](
           for {
             blobContent <- gitHubBlobReader.getBlob(message.uri)
             id <- Future.fromTry(
-              IdExtractor.extractId(blobContent, message.path))
+              IdExtractor.extractId(blobContent, message.path)
+            )
             _ <- Future.fromTry(
               pathIdManager.handlePathChanged(
                 PathId(message.path, id, message.timeModified),
-                blobContent))
+                blobContent
+              )
+            )
           } yield (ctx, Right(()))
       }
       .via(catchErrors)

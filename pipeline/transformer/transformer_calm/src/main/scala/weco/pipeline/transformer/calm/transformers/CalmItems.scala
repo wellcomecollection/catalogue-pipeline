@@ -27,7 +27,8 @@ object CalmItems extends CalmRecordOps {
     )
 
   private def createAccessCondition(
-    record: CalmRecord): List[AccessCondition] = {
+    record: CalmRecord
+  ): List[AccessCondition] = {
     val accessStatus = CalmAccessStatus(record)
 
     List(

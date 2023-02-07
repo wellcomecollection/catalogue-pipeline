@@ -32,7 +32,8 @@ trait MiroTitleAndDescription extends MiroTransformableUtils {
    *  here if there's nothing more useful in the other fields.
    */
   def getTitleAndDescription(
-    miroRecord: MiroRecord): (String, Option[String]) = {
+    miroRecord: MiroRecord
+  ): (String, Option[String]) = {
     val candidateDescription: String = miroRecord.description match {
       case Some(s) =>
         if (s == "--" || s == "-") miroRecord.academicDescription.getOrElse("")

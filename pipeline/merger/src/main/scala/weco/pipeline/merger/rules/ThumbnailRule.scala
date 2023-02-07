@@ -28,20 +28,23 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
 
   override def merge(
     target: Work.Visible[Identified],
-    sources: Seq[Work[Identified]]): FieldMergeResult[FieldData] =
+    sources: Seq[Work[Identified]]
+  ): FieldMergeResult[FieldData] =
     FieldMergeResult(
       data = getThumbnail(target, sources),
       sources = List(
         getMetsThumbnail,
         getMinMiroThumbnail
-      ).flatMap { rule =>
-        rule.mergedSources(target, sources)
+      ).flatMap {
+        rule =>
+          rule.mergedSources(target, sources)
       }.distinct
     )
 
   private def getThumbnail(
     target: Work.Visible[Identified],
-    sources: Seq[Work[Identified]]): Option[DigitalLocation] =
+    sources: Seq[Work[Identified]]
+  ): Option[DigitalLocation] =
     if (shouldSuppressThumbnail(target, sources))
       None
     else
@@ -55,8 +58,10 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
         sierraWork or singlePhysicalItemCalmWork or teiWork
       val isDefinedForSource: WorkPredicate = singleDigitalItemMetsWork
 
-      def rule(target: Work.Visible[Identified],
-               sources: NonEmptyList[Work[Identified]]): FieldData = {
+      def rule(
+        target: Work.Visible[Identified],
+        sources: NonEmptyList[Work[Identified]]
+      ): FieldData = {
         debug(s"Choosing METS thumbnail from ${describeWork(sources.head)}")
         sources.head.data.thumbnail
       }
@@ -68,33 +73,47 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
         singleItemSierra or zeroItemSierra or singlePhysicalItemCalmWork or teiWork
       val isDefinedForSource: WorkPredicate = singleDigitalItemMiroWork
 
-      def rule(target: Work.Visible[Identified],
-               sources: NonEmptyList[Work[Identified]]): FieldData = {
+      def rule(
+        target: Work.Visible[Identified],
+        sources: NonEmptyList[Work[Identified]]
+      ): FieldData = {
         val minMiroSource = Try(sources.toList.min(MiroIdOrdering)).toOption
-        minMiroSource.foreach { source =>
-          debug(s"Choosing Miro thumbnail from ${describeWork(source)}")
+        minMiroSource.foreach {
+          source =>
+            debug(s"Choosing Miro thumbnail from ${describeWork(source)}")
         }
         minMiroSource.flatMap(_.data.thumbnail)
       }
 
       object MiroIdOrdering extends Ordering[Work[Identified]] {
         def compare(x: Work[Identified], y: Work[Identified]): Int =
-          (x.sourceIdentifier.identifierType, y.sourceIdentifier.identifierType) match {
+          (
+            x.sourceIdentifier.identifierType,
+            y.sourceIdentifier.identifierType
+          ) match {
             case (
-                IdentifierType.MiroImageNumber,
-                IdentifierType.MiroImageNumber) =>
+                  IdentifierType.MiroImageNumber,
+                  IdentifierType.MiroImageNumber
+                ) =>
               x.sourceIdentifier.value compare y.sourceIdentifier.value
             case _ => 0
           }
       }
     }
 
-  private def shouldSuppressThumbnail(target: Work.Visible[Identified],
-                                      sources: Seq[Work[Identified]]): Boolean =
-    (target :: sources.toList).exists { work =>
-      work.data.items.exists { item =>
-        item.locations.exists(location =>
-          location.hasRestrictions && location.isInstanceOf[DigitalLocation])
-      }
+  private def shouldSuppressThumbnail(
+    target: Work.Visible[Identified],
+    sources: Seq[Work[Identified]]
+  ): Boolean =
+    (target :: sources.toList).exists {
+      work =>
+        work.data.items.exists {
+          item =>
+            item.locations.exists(
+              location =>
+                location.hasRestrictions && location
+                  .isInstanceOf[DigitalLocation]
+            )
+        }
     }
 }

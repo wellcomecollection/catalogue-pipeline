@@ -12,7 +12,7 @@ object WorksIndexConfig extends IndexConfigFields {
 
   def apply(
     fields: Seq[ElasticField],
-    dynamicMapping: DynamicMapping = DynamicMapping.False,
+    dynamicMapping: DynamicMapping = DynamicMapping.False
   ): IndexConfig =
     IndexConfig(
       properties(fields).dynamic(dynamicMapping),
@@ -82,9 +82,11 @@ object WorksIndexConfig extends IndexConfigFields {
           keywordField("format.id"),
           keywordField("workType"),
           multilingualFieldWithKeyword("title").copy(
-            copyTo = titlesAndContributorsPath),
+            copyTo = titlesAndContributorsPath
+          ),
           multilingualFieldWithKeyword("alternativeTitles").copy(
-            copyTo = titlesAndContributorsPath),
+            copyTo = titlesAndContributorsPath
+          ),
           englishTextField("description"),
           englishTextKeywordField("physicalDescription"),
           textField("edition"),
@@ -96,11 +98,13 @@ object WorksIndexConfig extends IndexConfigFields {
           // images
           canonicalIdField("images.id").copy(copyTo = identifiersPath),
           sourceIdentifierField("images.identifiers.value").copy(
-            copyTo = identifiersPath),
+            copyTo = identifiersPath
+          ),
           // items
           canonicalIdField("items.id").copy(copyTo = identifiersPath),
           sourceIdentifierField("items.identifiers.value").copy(
-            copyTo = identifiersPath),
+            copyTo = identifiersPath
+          ),
           keywordField("items.locations.accessConditions.status.id"),
           keywordField("items.locations.license.id"),
           keywordField("items.locations.locationType.id"),
@@ -117,7 +121,8 @@ object WorksIndexConfig extends IndexConfigFields {
           // contributors
           canonicalIdField("contributors.agent.id"),
           labelField("contributors.agent.label").copy(
-            copyTo = titlesAndContributorsPath),
+            copyTo = titlesAndContributorsPath
+          ),
           // production events
           labelField("production.label"),
           dateField("production.dates.range.from"),
@@ -176,6 +181,6 @@ object WorksIndexConfig extends IndexConfigFields {
         aggregatableValues
       )
     },
-    DynamicMapping.Strict,
+    DynamicMapping.Strict
   )
 }

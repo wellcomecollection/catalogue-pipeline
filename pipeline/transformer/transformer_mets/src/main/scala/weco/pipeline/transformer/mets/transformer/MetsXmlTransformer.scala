@@ -16,9 +16,11 @@ import weco.storage.store.Readable
 class MetsXmlTransformer(store: Readable[S3ObjectLocation, String])
     extends Transformer[MetsSourceData] {
 
-  override def apply(id: String,
-                     metsSourceData: MetsSourceData,
-                     version: Int): Result[Work[WorkState.Source]] =
+  override def apply(
+    id: String,
+    metsSourceData: MetsSourceData,
+    version: Int
+  ): Result[Work[WorkState.Source]] =
     for {
       metsData <- transform(id, metsSourceData)
       work <- metsData.toWork(
@@ -36,37 +38,42 @@ class MetsXmlTransformer(store: Readable[S3ObjectLocation, String])
 
       case metsFile @ MetsFileWithImages(_, _, manifestations, _, _) =>
         getMetsXml(metsFile.xmlLocation)
-          .flatMap { root =>
-            if (manifestations.isEmpty) {
-              transformWithoutManifestations(root)
-            } else {
-              transformWithManifestations(root, metsFile.manifestationLocations)
-            }
+          .flatMap {
+            root =>
+              if (manifestations.isEmpty) {
+                transformWithoutManifestations(root)
+              } else {
+                transformWithManifestations(
+                  root,
+                  metsFile.manifestationLocations
+                )
+              }
           }
     }
 
   private def transformWithoutManifestations(
-    root: MetsXml): Result[InvisibleMetsData] =
+    root: MetsXml
+  ): Result[InvisibleMetsData] =
     for {
       id <- root.recordIdentifier
       title <- MetsTitle(root.root)
       accessConditionDz <- root.accessConditionDz
       accessConditionStatus <- root.accessConditionStatus
       accessConditionUsage <- root.accessConditionUsage
-    } yield
-      InvisibleMetsData(
-        recordIdentifier = id,
-        title = title,
-        accessConditionDz = accessConditionDz,
-        accessConditionStatus = accessConditionStatus,
-        accessConditionUsage = accessConditionUsage,
-        fileReferencesMapping = root.fileReferencesMapping(id),
-        titlePageId = root.titlePageId,
-      )
+    } yield InvisibleMetsData(
+      recordIdentifier = id,
+      title = title,
+      accessConditionDz = accessConditionDz,
+      accessConditionStatus = accessConditionStatus,
+      accessConditionUsage = accessConditionUsage,
+      fileReferencesMapping = root.fileReferencesMapping(id),
+      titlePageId = root.titlePageId
+    )
 
   private def transformWithManifestations(
     root: MetsXml,
-    manifestations: List[S3ObjectLocation]): Result[InvisibleMetsData] =
+    manifestations: List[S3ObjectLocation]
+  ): Result[InvisibleMetsData] =
     for {
       id <- root.recordIdentifier
       title <- MetsTitle(root.root)
@@ -74,31 +81,34 @@ class MetsXmlTransformer(store: Readable[S3ObjectLocation, String])
       accessConditionDz <- firstManifestation.accessConditionDz
       accessConditionStatus <- firstManifestation.accessConditionStatus
       accessConditionUsage <- firstManifestation.accessConditionUsage
-    } yield
-      InvisibleMetsData(
-        recordIdentifier = id,
-        title = title,
-        accessConditionDz = accessConditionDz,
-        accessConditionStatus = accessConditionStatus,
-        accessConditionUsage = accessConditionUsage,
-        fileReferencesMapping = firstManifestation.fileReferencesMapping(id),
-        titlePageId = firstManifestation.titlePageId,
-      )
+    } yield InvisibleMetsData(
+      recordIdentifier = id,
+      title = title,
+      accessConditionDz = accessConditionDz,
+      accessConditionStatus = accessConditionStatus,
+      accessConditionUsage = accessConditionUsage,
+      fileReferencesMapping = firstManifestation.fileReferencesMapping(id),
+      titlePageId = firstManifestation.titlePageId
+    )
 
   private def getFirstManifestation(
     root: MetsXml,
-    manifestations: List[S3ObjectLocation]): Result[MetsXml] =
+    manifestations: List[S3ObjectLocation]
+  ): Result[MetsXml] =
     root.firstManifestationFilename
-      .flatMap { name =>
-        manifestations.find(loc =>
-          loc.key.endsWith(name) || loc.key.endsWith(s"$name.xml")) match {
-          case Some(location) => Right(location)
-          case None =>
-            Left(
-              new Exception(
-                s"Could not find manifestation with filename: $name")
-            )
-        }
+      .flatMap {
+        name =>
+          manifestations.find(
+            loc => loc.key.endsWith(name) || loc.key.endsWith(s"$name.xml")
+          ) match {
+            case Some(location) => Right(location)
+            case None =>
+              Left(
+                new Exception(
+                  s"Could not find manifestation with filename: $name"
+                )
+              )
+          }
       }
       .flatMap(getMetsXml)
 

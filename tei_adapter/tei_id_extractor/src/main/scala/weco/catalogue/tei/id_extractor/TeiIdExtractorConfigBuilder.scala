@@ -9,7 +9,10 @@ object TeiIdExtractorConfigBuilder {
     TeiIdExtractorConfig(
       parallelism = config.requireInt("tei.id_extractor.parallelism"),
       deleteMessageDelay =
-        config.getDuration("tei.id_extractor.delete.delay").toScala)
+        config.getDuration("tei.id_extractor.delete.delay").toScala
+    )
 }
-case class TeiIdExtractorConfig(parallelism: Int,
-                                deleteMessageDelay: FiniteDuration)
+case class TeiIdExtractorConfig(
+  parallelism: Int,
+  deleteMessageDelay: FiniteDuration
+)

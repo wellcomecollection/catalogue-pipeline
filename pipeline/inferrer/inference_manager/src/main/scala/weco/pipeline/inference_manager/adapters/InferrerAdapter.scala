@@ -29,11 +29,14 @@ trait InferrerAdapter extends Logging {
   implicit val responseDecoder: Decoder[Response]
 
   def createRequest(image: DownloadedImage): HttpRequest
-  def augment(inferredData: InferredData,
-              inferrerResponse: Response): InferredData
+  def augment(
+    inferredData: InferredData,
+    inferrerResponse: Response
+  ): InferredData
 
-  def parseResponse(response: HttpResponse)(
-    implicit mat: Materializer): Future[Response] =
+  def parseResponse(
+    response: HttpResponse
+  )(implicit mat: Materializer): Future[Response] =
     response.status match {
       case StatusCodes.OK =>
         Unmarshal(response.entity).to[Response]
@@ -43,6 +46,7 @@ trait InferrerAdapter extends Logging {
         Future.failed(new Exception("Entity not found"))
       case statusCode =>
         Future.failed(
-          new Exception(s"Request failed with code ${statusCode.value}"))
+          new Exception(s"Request failed with code ${statusCode.value}")
+        )
     }
 }

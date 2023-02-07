@@ -27,9 +27,10 @@ object PipelineStorageStreamBuilder {
 
   def buildPipelineStorageStream[Out, MsgDestination](
     indexer: Indexer[Out],
-    messageSender: MessageSender[MsgDestination])(config: Config)(
-    implicit ec: ExecutionContext)
-    : PipelineStorageStream[NotificationMessage, Out, MsgDestination] = {
+    messageSender: MessageSender[MsgDestination]
+  )(config: Config)(
+    implicit ec: ExecutionContext
+  ): PipelineStorageStream[NotificationMessage, Out, MsgDestination] = {
     implicit val actorSystem: ActorSystem =
       ActorSystem("main-actor-system")
 
@@ -38,6 +39,7 @@ object PipelineStorageStreamBuilder {
     new PipelineStorageStream[NotificationMessage, Out, MsgDestination](
       messageStream,
       indexer,
-      messageSender)(buildPipelineStorageConfig(config))
+      messageSender
+    )(buildPipelineStorageConfig(config))
   }
 }

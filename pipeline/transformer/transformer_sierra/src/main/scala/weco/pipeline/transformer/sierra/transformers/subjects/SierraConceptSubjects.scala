@@ -70,30 +70,32 @@ object SierraConceptSubjects
     //  650  7 Vision.|2fast|0(OCoLC)fst01167852
     //
     // So let's filter anything that is from another authority for now.
-    varfields.filterNot(_.indicator2.contains("7")).map { varfield =>
-      // Extract the relevant subfields from the given varField.
-      // $a - the name of the thing - Geographic/Topical/Chronological name
-      // $v - Form Subdivision
-      // $x - General Subdivision
-      // $y - Chronological Subdivision
-      // $z - Geographic Subdivision
-      val subfields = varfield.subfieldsWithTags("a", "v", "x", "y", "z")
-      // multiple $a subfields should not exist, but sometimes do.
-      // Prefer parsing them to rejecting them, as this error is not always within the
-      // control of collections staff.
-      val (primarySubfields, subdivisionSubfields) = subfields.partition {
-        _.tag == "a"
-      }
+    varfields.filterNot(_.indicator2.contains("7")).map {
+      varfield =>
+        // Extract the relevant subfields from the given varField.
+        // $a - the name of the thing - Geographic/Topical/Chronological name
+        // $v - Form Subdivision
+        // $x - General Subdivision
+        // $y - Chronological Subdivision
+        // $z - Geographic Subdivision
+        val subfields = varfield.subfieldsWithTags("a", "v", "x", "y", "z")
+        // multiple $a subfields should not exist, but sometimes do.
+        // Prefer parsing them to rejecting them, as this error is not always within the
+        // control of collections staff.
+        val (primarySubfields, subdivisionSubfields) = subfields.partition {
+          _.tag == "a"
+        }
 
-      val label = getLabel(primarySubfields, subdivisionSubfields)
-      val concepts =
-        getConcepts(varfield, primarySubfields, subdivisionSubfields)
+        val label = getLabel(primarySubfields, subdivisionSubfields)
+        val concepts =
+          getConcepts(varfield, primarySubfields, subdivisionSubfields)
 
-      Subject(
-        id = getIdState(ontologyType = getFieldOntologyType(varfield), varfield),
-        label = label,
-        concepts = concepts
-      )
+        Subject(
+          id =
+            getIdState(ontologyType = getFieldOntologyType(varfield), varfield),
+          label = label,
+          concepts = concepts
+        )
     }
   }
 
@@ -109,7 +111,10 @@ object SierraConceptSubjects
       case Nil =>
         getFieldOntologyType(varfield)
         val conceptId =
-          getIdState(ontologyType = getFieldOntologyType(varfield), varfield) match {
+          getIdState(
+            ontologyType = getFieldOntologyType(varfield),
+            varfield
+          ) match {
             case identifiable: IdState.Identifiable => Some(identifiable)
             case _                                  => None
           }
@@ -123,35 +128,39 @@ object SierraConceptSubjects
       // only refers to the Subject as a whole.
       // The primary and subsequent Concepts will have to coin their own ids from their labels.
       case _ =>
-        getPrimaryTypeConcepts(primarySubfields, varField = varfield) ++ getSubdivisions(
+        getPrimaryTypeConcepts(
+          primarySubfields,
+          varField = varfield
+        ) ++ getSubdivisions(
           subdivisionSubfields
         )
     }
   }
 
-  /**
-    * Return AbstractConcepts of the appropriate subtype for this field
-    * A Concept Subject MARC field should contain exactly one $a subfields,
-    * but due to third-party cataloguing errors, may contain more.
-    * The $a subfield contains a term whose type is derived from the overall field,
-    * so any $a subfields in a "Subject Added Entry-Chronological Term" will be a Period, etc.
-    * $a is a non-repeatable subfield, so you would expect primarySubfields to be a single value,
-    * and for this to return a single value.  However, some records that are received from third-party
-    * organisations do erroneously contain multiple $a subfields.  This transformer will accept them
-    * and produce the appropriate concepts.
+  /** Return AbstractConcepts of the appropriate subtype for this field A
+    * Concept Subject MARC field should contain exactly one $a subfields, but
+    * due to third-party cataloguing errors, may contain more. The $a subfield
+    * contains a term whose type is derived from the overall field, so any $a
+    * subfields in a "Subject Added Entry-Chronological Term" will be a Period,
+    * etc. $a is a non-repeatable subfield, so you would expect primarySubfields
+    * to be a single value, and for this to return a single value. However, some
+    * records that are received from third-party organisations do erroneously
+    * contain multiple $a subfields. This transformer will accept them and
+    * produce the appropriate concepts.
     */
   private def getPrimaryTypeConcepts(
     primarySubfields: List[Subfield],
     varField: VarField,
     idstate: Option[IdState.Identifiable] = None
   ): List[AbstractConcept[IdState.Unminted]] =
-    primarySubfields.map { subfield =>
-      val label = subfield.content.trimTrailingPeriod
-      varField.marcTag.get match {
-        case "650" => Concept(label = label).normalised.identifiable(idstate)
-        case "648" => ParsedPeriod(label = label).identifiable(idstate)
-        case "651" => Place(label = label).normalised.identifiable(idstate)
-      }
+    primarySubfields.map {
+      subfield =>
+        val label = subfield.content.trimTrailingPeriod
+        varField.marcTag.get match {
+          case "650" => Concept(label = label).normalised.identifiable(idstate)
+          case "648" => ParsedPeriod(label = label).identifiable(idstate)
+          case "651" => Place(label = label).normalised.identifiable(idstate)
+        }
     }
 
   private def getFieldOntologyType(varField: VarField): String =

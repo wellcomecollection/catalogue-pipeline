@@ -34,8 +34,9 @@ object SierraPhysicalDescription
     val lines =
       bibData
         .varfieldsWithTag("300")
-        .flatMap { vf =>
-          vf.subfieldsWithTags("a", "b", "c", "e").contentString(" ")
+        .flatMap {
+          vf =>
+            vf.subfieldsWithTags("a", "b", "c", "e").contentString(" ")
         }
 
     lines.mkString("<br/>") match {

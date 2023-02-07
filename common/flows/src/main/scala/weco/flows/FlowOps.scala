@@ -14,13 +14,16 @@ trait FlowOps extends Logging {
   type Result[T] = Either[Throwable, T]
 
   /** Allows mapping a flow with a function, where:
-    *  - Context is passed through.
-    *  - Any errors are caught and the message prevented from propagating downstream,
-    *    resulting in the message being put back on the queue / on the dlq.
-    *  - None values are ignored but passed through (so they don't end up on the dlq)
+    *   - Context is passed through.
+    *   - Any errors are caught and the message prevented from propagating
+    *     downstream, resulting in the message being put back on the queue / on
+    *     the dlq.
+    *   - None values are ignored but passed through (so they don't end up on
+    *     the dlq)
     */
   implicit class ContextFlowOps[Ctx, In, Out](
-    val flow: Flow[(Ctx, In), (Ctx, Option[Out]), NotUsed]) {
+    val flow: Flow[(Ctx, In), (Ctx, Option[Out]), NotUsed]
+  ) {
 
     def mapWithContext[T](f: (Ctx, Out) => Result[T]) =
       flow
@@ -30,8 +33,9 @@ trait FlowOps extends Logging {
         }
         .via(catchErrors)
 
-    def mapWithContextAsync[T](parallelism: Int)(
-      f: (Ctx, Out) => Future[Result[T]]) =
+    def mapWithContextAsync[T](
+      parallelism: Int
+    )(f: (Ctx, Out) => Future[Result[T]]) =
       flow
         .mapAsync(parallelism) {
           case (ctx, Some(data)) =>
@@ -45,28 +49,32 @@ trait FlowOps extends Logging {
     Flow[(C, Result[T])]
       .map {
         case (ctx, result) =>
-          result.left.map { err =>
-            error(
-              s"Error encountered processing SQS message. [Error]: ${err.getMessage} [Context]: $ctx",
-              err)
+          result.left.map {
+            err =>
+              error(
+                s"Error encountered processing SQS message. [Error]: ${err.getMessage} [Context]: $ctx",
+                err
+              )
           }
           (ctx, result)
       }
       .collect { case (ctx, Right(data)) => (ctx, data) }
 
-  /**
-    * Broadcasts the output of a flow to flows `a` and `b` and merges them again
+  /** Broadcasts the output of a flow to flows `a` and `b` and merges them again
     */
-  def broadcastAndMerge[I, O](a: Flow[I, O, NotUsed],
-                              b: Flow[I, O, NotUsed]): Flow[I, O, NotUsed] =
+  def broadcastAndMerge[I, O](
+    a: Flow[I, O, NotUsed],
+    b: Flow[I, O, NotUsed]
+  ): Flow[I, O, NotUsed] =
     Flow.fromGraph(
-      GraphDSL.create() { implicit builder =>
-        import GraphDSL.Implicits._
-        val broadcast = builder.add(Broadcast[I](2))
-        val merge = builder.add(Merge[O](2))
-        broadcast ~> a ~> merge
-        broadcast ~> b ~> merge
-        FlowShape(broadcast.in, merge.out)
+      GraphDSL.create() {
+        implicit builder =>
+          import GraphDSL.Implicits._
+          val broadcast = builder.add(Broadcast[I](2))
+          val merge = builder.add(Merge[O](2))
+          broadcast ~> a ~> merge
+          broadcast ~> b ~> merge
+          FlowShape(broadcast.in, merge.out)
       }
     )
 }

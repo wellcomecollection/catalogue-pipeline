@@ -14,16 +14,15 @@ import weco.storage.{Identified, StorageError, UpdateNotApplied, Version}
 class Updater[Record <: AbstractSierraRecord[_]](
   sourceVHS: SourceVHS[SierraTransformable]
 )(
-  implicit
-  transformableOps: TransformableOps[Record],
+  implicit transformableOps: TransformableOps[Record],
   recordOps: RecordOps[Record]
 ) {
   import weco.pipeline.sierra_merger.models.RecordOps._
   import weco.pipeline.sierra_merger.models.TransformableOps._
 
-  def update(record: Record)
-    : Either[StorageError,
-             List[Identified[Version[String, Int], S3ObjectLocation]]] = {
+  def update(record: Record): Either[StorageError, List[
+    Identified[Version[String, Int], S3ObjectLocation]
+  ]] = {
     val linkUpdates =
       record.linkedBibIds.map { linkBib(_, record) }
 
@@ -38,7 +37,8 @@ class Updater[Record <: AbstractSierraRecord[_]](
 
   private def linkBib(bibId: SierraBibNumber, record: Record): Either[
     StorageError,
-    Identified[Version[String, Int], S3ObjectLocation]] = {
+    Identified[Version[String, Int], S3ObjectLocation]
+  ] = {
     val newTransformable = transformableOps.create(bibId, record)
 
     sourceVHS
@@ -48,14 +48,18 @@ class Updater[Record <: AbstractSierraRecord[_]](
           case None =>
             Left(
               UpdateNotApplied(
-                new Throwable(s"Bib $bibId is already up to date")))
+                new Throwable(s"Bib $bibId is already up to date")
+              )
+            )
         }
       }
       .map { case Identified(id, (location, _)) => Identified(id, location) }
   }
 
-  private def unlinkBib(unlinkedBibId: SierraBibNumber, record: Record)
-    : Either[StorageError, Identified[Version[String, Int], S3ObjectLocation]] =
+  private def unlinkBib(
+    unlinkedBibId: SierraBibNumber,
+    record: Record
+  ): Either[StorageError, Identified[Version[String, Int], S3ObjectLocation]] =
     sourceVHS
       .update(unlinkedBibId.withoutCheckDigit) {
         _.remove(record) match {
@@ -63,7 +67,9 @@ class Updater[Record <: AbstractSierraRecord[_]](
           case None =>
             Left(
               UpdateNotApplied(
-                new Throwable(s"Bib $unlinkedBibId is already up to date")))
+                new Throwable(s"Bib $unlinkedBibId is already up to date")
+              )
+            )
         }
       }
       .map { case Identified(id, (location, _)) => Identified(id, location) }

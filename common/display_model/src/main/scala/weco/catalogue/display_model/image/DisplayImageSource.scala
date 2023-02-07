@@ -28,8 +28,10 @@ object DisplayImageSource {
       case ParentWork(id, workData, _) => DisplayImageSource(id, workData)
     }
 
-  private def apply(id: IdState.Identified,
-                    data: WorkData[DataState.Identified]): DisplayImageSource =
+  private def apply(
+    id: IdState.Identified,
+    data: WorkData[DataState.Identified]
+  ): DisplayImageSource =
     new DisplayImageSource(
       id = id.canonicalId.underlying,
       title = data.title,

@@ -134,8 +134,9 @@ object CalmTransformer
   def catalogueStatusSuppressesRecord(record: CalmRecord): Boolean =
     record
       .get("CatalogueStatus")
-      .forall { status =>
-        !nonSuppressedStatuses.contains(status.toLowerCase.trim)
+      .forall {
+        status =>
+          !nonSuppressedStatuses.contains(status.toLowerCase.trim)
       }
 
   def workData(record: CalmRecord): Result[WorkData[DataState.Unidentified]] = {
@@ -145,24 +146,23 @@ object CalmTransformer
       title <- title(record)
       workType <- workType(record)
       collectionPath <- collectionPath(record)
-    } yield
-      WorkData[DataState.Unidentified](
-        title = Some(title),
-        alternativeTitles = CalmAlternativeTitles(record),
-        otherIdentifiers = otherIdentifiers(record),
-        format = Some(Format.ArchivesAndManuscripts),
-        collectionPath = Some(collectionPath),
-        referenceNumber = collectionPath.label.map(ReferenceNumber(_)),
-        subjects = subjects(record),
-        languages = languages,
-        items = CalmItems(record),
-        contributors = CalmContributors(record),
-        description = description(record),
-        physicalDescription = physicalDescription(record),
-        production = production(record),
-        workType = workType,
-        notes = CalmNotes(record) ++ languageNotes ++ CalmTermsOfUse(record)
-      )
+    } yield WorkData[DataState.Unidentified](
+      title = Some(title),
+      alternativeTitles = CalmAlternativeTitles(record),
+      otherIdentifiers = otherIdentifiers(record),
+      format = Some(Format.ArchivesAndManuscripts),
+      collectionPath = Some(collectionPath),
+      referenceNumber = collectionPath.label.map(ReferenceNumber(_)),
+      subjects = subjects(record),
+      languages = languages,
+      items = CalmItems(record),
+      contributors = CalmContributors(record),
+      description = description(record),
+      physicalDescription = physicalDescription(record),
+      production = production(record),
+      workType = workType,
+      notes = CalmNotes(record) ++ languageNotes ++ CalmTermsOfUse(record)
+    )
   }
 
   def sourceIdentifier(record: CalmRecord): SourceIdentifier =
@@ -183,7 +183,7 @@ object CalmTransformer
                 identifierType = idType,
                 value = id,
                 ontologyType = "Work"
-            )
+              )
           )
     }
 
@@ -197,10 +197,11 @@ object CalmTransformer
   def collectionPath(record: CalmRecord): Result[CollectionPath] =
     record
       .get("RefNo")
-      .map { path =>
-        Right(
-          CollectionPath(path = path, label = record.get("AltRefNo"))
-        )
+      .map {
+        path =>
+          Right(
+            CollectionPath(path = path, label = record.get("AltRefNo"))
+          )
       }
       .getOrElse(Left(RefNoMissing))
 
@@ -261,12 +262,13 @@ object CalmTransformer
   def subjects(record: CalmRecord): List[Subject[IdState.Unminted]] =
     record
       .getList("Subject")
-      .map { label =>
-        val normalisedLabel =
-          NormaliseText(label, whitelist = NormaliseText.none)
-        Subject(
-          label = normalisedLabel,
-          concepts = List(Concept(normalisedLabel))
-        )
+      .map {
+        label =>
+          val normalisedLabel =
+            NormaliseText(label, whitelist = NormaliseText.none)
+          Subject(
+            label = normalisedLabel,
+            concepts = List(Concept(normalisedLabel))
+          )
       }
 }

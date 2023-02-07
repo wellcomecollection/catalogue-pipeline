@@ -50,12 +50,13 @@ trait MiroIdentifiers extends MiroTransformableUtils {
         val regexMatch = """^(?:\.?[bB])?([0-9]{7}[0-9xX])$""".r.unapplySeq(s)
         regexMatch match {
           case Some(s) =>
-            s.flatMap { id =>
-              SourceIdentifier(
-                identifierType = IdentifierType.SierraSystemNumber,
-                ontologyType = "Work",
-                value = s"b$id"
-              ).validatedWithWarning
+            s.flatMap {
+              id =>
+                SourceIdentifier(
+                  identifierType = IdentifierType.SierraSystemNumber,
+                  ontologyType = "Work",
+                  value = s"b$id"
+                ).validatedWithWarning
             }
           case _ =>
             throw new RuntimeException(

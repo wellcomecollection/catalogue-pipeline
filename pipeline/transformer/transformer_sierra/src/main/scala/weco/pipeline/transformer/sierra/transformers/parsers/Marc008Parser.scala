@@ -6,10 +6,9 @@ import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.{Period, ProductionEvent}
 import weco.pipeline.transformer.parse.Parser
 
-/**
-  *  Parses Marc 008 fields into ProductionEvent
+/** Parses Marc 008 fields into ProductionEvent
   *
-  *  Spec: https://www.loc.gov/marc/bibliographic/bd008a.html
+  * Spec: https://www.loc.gov/marc/bibliographic/bd008a.html
   */
 object Marc008Parser extends Parser[ProductionEvent[IdState.Unminted]] {
 
@@ -24,7 +23,8 @@ object Marc008Parser extends Parser[ProductionEvent[IdState.Unminted]] {
               Period(label = instantRange.label, range = instantRange)
             ),
             places = place.toList,
-            function = None)
+            function = None
+          )
       }
 
   def createdDate[_: P] = AnyChar.rep(exactly = 6)

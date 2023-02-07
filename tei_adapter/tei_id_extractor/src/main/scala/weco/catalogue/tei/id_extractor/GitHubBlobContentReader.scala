@@ -13,7 +13,8 @@ import weco.json.JsonUtil._
 import weco.http.client.HttpClient
 
 class GitHubBlobContentReader(httpClient: HttpClient)(
-  implicit ac: ActorSystem) {
+  implicit ac: ActorSystem
+) {
   implicit val ec = ac.dispatcher
   def getBlob(uri: URI): Future[String] = {
     val request = HttpRequest(uri = Uri(uri.toString))
@@ -39,23 +40,33 @@ class GitHubBlobContentReader(httpClient: HttpClient)(
   }
 
   private def unmarshalAs[T](response: HttpResponse, request: HttpRequest)(
-    implicit decoder: Decoder[T]): Future[T] = {
+    implicit decoder: Decoder[T]
+  ): Future[T] = {
     response match {
       case HttpResponse(StatusCodes.OK, _, entity, _) =>
         Unmarshal(entity).to[T].recoverWith {
           case t: Throwable =>
-            Future.failed(new RuntimeException(
-              s"Failed to unmarshal GitHub api response for url ${request.uri} with headers ${response.headers}: $entity",
-              t))
+            Future.failed(
+              new RuntimeException(
+                s"Failed to unmarshal GitHub api response for url ${request.uri} with headers ${response.headers}: $entity",
+                t
+              )
+            )
         }
       case HttpResponse(code, _, entity, _) =>
         Unmarshal(entity).to[String].transform {
           case Success(responseEntity) =>
-            Failure(new RuntimeException(
-              s"The GitHub api returned an error: ${code.value} for url ${request.uri} with headers ${response.headers}: $responseEntity"))
+            Failure(
+              new RuntimeException(
+                s"The GitHub api returned an error: ${code.value} for url ${request.uri} with headers ${response.headers}: $responseEntity"
+              )
+            )
           case _ =>
-            Failure(new RuntimeException(
-              s"The GitHub api returned an error: ${code.value} for url ${request.uri} with headers ${response.headers}: $entity (couldn't decode entity as string)"))
+            Failure(
+              new RuntimeException(
+                s"The GitHub api returned an error: ${code.value} for url ${request.uri} with headers ${response.headers}: $entity (couldn't decode entity as string)"
+              )
+            )
         }
     }
   }

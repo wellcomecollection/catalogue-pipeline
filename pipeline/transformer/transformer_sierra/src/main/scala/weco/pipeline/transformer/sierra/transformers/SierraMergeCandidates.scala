@@ -26,8 +26,8 @@ object SierraMergeCandidates
   def apply(bibId: SierraBibNumber, bibData: SierraBibData) =
     get776mergeCandidates(bibId, bibData) ++
       getSinglePageMiroMergeCandidates(bibData) ++ get035CalmMergeCandidates(
-      bibData
-    )
+        bibData
+      )
 
   // This regex matches any string starting with (UkLW), followed by
   // any number of spaces, and then captures everything after the
@@ -37,15 +37,14 @@ object SierraMergeCandidates
   // inconsistencies in the source data that it's easier to handle that here.
   private val uklwPrefixRegex: Regex = """\((?i:UkLW)\)[\s]*(.+)""".r.anchored
 
-  /** We can merge a bib and the digitised version of that bib.  The number
-    * of the other bib comes from MARC tag 776 subfield $w.
+  /** We can merge a bib and the digitised version of that bib. The number of
+    * the other bib comes from MARC tag 776 subfield $w.
     *
-    * If the identifier starts with (UkLW), we strip the prefix and use the
-    * bib number as a merge candidate.
+    * If the identifier starts with (UkLW), we strip the prefix and use the bib
+    * number as a merge candidate.
     *
-    * We ignore any values in 776 subfield ǂw that don't start with (UkLW),
-    * e.g. identifiers that start (OCLC).
-    *
+    * We ignore any values in 776 subfield ǂw that don't start with (UkLW), e.g.
+    * identifiers that start (OCLC).
     */
   private def get776mergeCandidates(
     bibId: SierraBibNumber,
@@ -60,12 +59,13 @@ object SierraMergeCandidates
           case uklwPrefixRegex(bibNumber) => Some(bibNumber.trim)
           case _                          => None
         }
-        .flatMap { id =>
-          SourceIdentifier(
-            identifierType = IdentifierType.SierraSystemNumber,
-            ontologyType = "Work",
-            value = id
-          ).validatedWithWarning
+        .flatMap {
+          id =>
+            SourceIdentifier(
+              identifierType = IdentifierType.SierraSystemNumber,
+              ontologyType = "Work",
+              value = id
+            ).validatedWithWarning
         }
 
     identifiers.distinct match {
@@ -95,9 +95,9 @@ object SierraMergeCandidates
   /** When we harvest the Calm data into Sierra, the `RecordID` is stored in
     * Marcfield 035$a.
     *
-    * This field is also used for other "system control numbers" from UKMHL, LSHTM etc.
-    * e.g: (OCoLC)927468903, (lshtm)a60032
-    * see: `https://search.wellcomelibrary.org/iii/encore/record/C__Rb1187988?marcData=Y`
+    * This field is also used for other "system control numbers" from UKMHL,
+    * LSHTM etc. e.g: (OCoLC)927468903, (lshtm)a60032 see:
+    * `https://search.wellcomelibrary.org/iii/encore/record/C__Rb1187988?marcData=Y`
     */
   private def get035CalmMergeCandidates(
     bibData: SierraBibData
@@ -105,14 +105,15 @@ object SierraMergeCandidates
     bibData
       .subfieldsWithTag("035" -> "a")
       .contents
-      .map { recordId =>
-        Try {
-          SourceIdentifier(
-            identifierType = IdentifierType.CalmRecordIdentifier,
-            ontologyType = "Work",
-            value = recordId
-          ).validated
-        }
+      .map {
+        recordId =>
+          Try {
+            SourceIdentifier(
+              identifierType = IdentifierType.CalmRecordIdentifier,
+              ontologyType = "Work",
+              value = recordId
+            ).validated
+          }
       }
       .flatMap {
         case Success(Some(sourceIdentifier)) =>
@@ -120,7 +121,8 @@ object SierraMergeCandidates
             MergeCandidate(
               identifier = sourceIdentifier,
               reason = "Calm/Sierra harvest"
-            ))
+            )
+          )
         case _ => None
       }
       .distinct

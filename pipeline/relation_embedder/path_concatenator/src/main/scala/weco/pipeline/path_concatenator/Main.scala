@@ -17,40 +17,42 @@ import weco.typesafe.config.builders.EnrichConfig._
 import scala.concurrent.ExecutionContext
 
 object Main extends WellcomeTypesafeApp {
-  runWithConfig { config: Config =>
-    implicit val actorSystem: ActorSystem =
-      ActorSystem("main-actor-system")
-    implicit val ec: ExecutionContext =
-      actorSystem.dispatcher
+  runWithConfig {
+    config: Config =>
+      implicit val actorSystem: ActorSystem =
+        ActorSystem("main-actor-system")
+      implicit val ec: ExecutionContext =
+        actorSystem.dispatcher
 
-    val esClient = ElasticBuilder.buildElasticClient(config)
+      val esClient = ElasticBuilder.buildElasticClient(config)
 
-    val pathsModifier = PathsModifier(
-      pathsService = new PathsService(
-        elasticClient = esClient,
-        index = Index(config.requireString("es.read-from.index"))
-      )
-    )
-
-    val workIndexer =
-      new ElasticIndexer[Work[Merged]](
-        client = esClient,
-        index = Index(config.requireString(s"es.write-to.index")),
-        config = WorksIndexConfig.merged
+      val pathsModifier = PathsModifier(
+        pathsService = new PathsService(
+          elasticClient = esClient,
+          index = Index(config.requireString("es.read-from.index"))
+        )
       )
 
-    val downstreamSender =
-      SNSBuilder
-        .buildSNSMessageSender(
-          config,
-          namespace = "downstream",
-          subject = "Sent from the path concatenator")
+      val workIndexer =
+        new ElasticIndexer[Work[Merged]](
+          client = esClient,
+          index = Index(config.requireString(s"es.write-to.index")),
+          config = WorksIndexConfig.merged
+        )
 
-    new PathConcatenatorWorkerService(
-      sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
-      pathsModifier = pathsModifier,
-      workIndexer = workIndexer,
-      msgSender = downstreamSender
-    )
+      val downstreamSender =
+        SNSBuilder
+          .buildSNSMessageSender(
+            config,
+            namespace = "downstream",
+            subject = "Sent from the path concatenator"
+          )
+
+      new PathConcatenatorWorkerService(
+        sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
+        pathsModifier = pathsModifier,
+        workIndexer = workIndexer,
+        msgSender = downstreamSender
+      )
   }
 }

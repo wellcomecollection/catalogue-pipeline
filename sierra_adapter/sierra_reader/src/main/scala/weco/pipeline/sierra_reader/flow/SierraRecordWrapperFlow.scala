@@ -10,6 +10,7 @@ import weco.catalogue.source_model.sierra.AbstractSierraRecord
 
 object SierraRecordWrapperFlow {
   def apply[T <: AbstractSierraRecord[_]](
-    createRecord: (String, String, Instant) => T): Flow[Json, T, NotUsed] =
+    createRecord: (String, String, Instant) => T
+  ): Flow[Json, T, NotUsed] =
     Flow.fromFunction(SierraRecordParser(createRecord))
 }

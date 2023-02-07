@@ -12,8 +12,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class WorkNodeDao(dynamoClient: DynamoDbClient, dynamoConfig: DynamoConfig)(
   implicit ec: ExecutionContext,
-  format: DynamoFormat[WorkNode])
-    extends Logging {
+  format: DynamoFormat[WorkNode]
+) extends Logging {
 
   private val scanamo = Scanamo(dynamoClient)
   private val nodes = Table[WorkNode](dynamoConfig.tableName)
@@ -32,7 +32,8 @@ class WorkNodeDao(dynamoClient: DynamoDbClient, dynamoConfig: DynamoConfig)(
             val exception = new RuntimeException(scanamoError.toString)
             error(
               s"An error occurred while retrieving ids=$ids from DynamoDB",
-              exception)
+              exception
+            )
             throw exception
         }
     }

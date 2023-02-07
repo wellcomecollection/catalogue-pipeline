@@ -130,7 +130,9 @@ object PeriodParser extends Parser[InstantRange] with DateParserUtils {
   private def centuryToDate[_: P]: P[InstantRange] =
     (qualified(century | inferredCentury) to century).toInstantRange |
       ((century | inferredCentury) to qualified(century)).toInstantRange |
-      (qualified(century | inferredCentury) to qualified(century)).toInstantRange |
+      (qualified(century | inferredCentury) to qualified(
+        century
+      )).toInstantRange |
       ((century | inferredCentury) to century).toInstantRange |
       (century to decade).toInstantRange |
       (century to year).toInstantRange |
@@ -174,16 +176,18 @@ object PeriodParser extends Parser[InstantRange] with DateParserUtils {
   // We can infer a century intention for some numbers, eg for
   // 14 in the string "14th-15th century"
   private def inferredCentury[_: P]: P[Century] =
-    P(Lex.int.filter(_ <= 999) ~ Lex.ordinalSuffix.? map { n =>
-      Century(n - 1)
+    P(Lex.int.filter(_ <= 999) ~ Lex.ordinalSuffix.? map {
+      n =>
+        Century(n - 1)
     })
 
   // eg "1800s"
   private def century[_: P]: P[Century] = Lex.century map Century
 
   // eg "1920s"
-  private def decade[_: P]: P[CenturyAndDecade] = Lex.decade map { year =>
-    CenturyAndDecade(century = year / 100, decade = (year % 100) / 10)
+  private def decade[_: P]: P[CenturyAndDecade] = Lex.decade map {
+    year =>
+      CenturyAndDecade(century = year / 100, decade = (year % 100) / 10)
   }
 
   // A year range is a string like 1994-5 or 1066-90

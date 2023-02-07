@@ -15,7 +15,8 @@ object PathOps {
 
     if (childRoot != parentLeaf) {
       throw new IllegalArgumentException(
-        s"$parentPath is not the parent of $childPath")
+        s"$parentPath is not the parent of $childPath"
+      )
     } else {
       pathJoin(parentPath +: childPath.split("/").tail)
     }

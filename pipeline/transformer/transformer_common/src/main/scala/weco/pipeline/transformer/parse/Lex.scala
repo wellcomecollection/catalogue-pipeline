@@ -20,7 +20,13 @@ object Lex extends ParserUtils {
   def numericCentury[_: P]: P[Int] =
     P(int ~ "'".? ~ "s" filter (_ % 100 == 0) map (_ / 100))
   def textCentury[_: P]: P[Int] =
-    P(int ~ ordinalSuffix.? ~ ws ~ StringIn("century", "cent.", "cent") map (_ - 1))
+    P(
+      int ~ ordinalSuffix.? ~ ws ~ StringIn(
+        "century",
+        "cent.",
+        "cent"
+      ) map (_ - 1)
+    )
   def century[_: P]: P[Int] = P(numericCentury | textCentury)
 
   def decade[_: P]: P[Int] =

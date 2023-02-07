@@ -41,10 +41,11 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
 
   def transform: Try[Work[Source]] =
     sierraTransformable.maybeBibRecord
-      .map { bibRecord =>
-        debug(s"Attempting to transform ${bibRecord.id.withCheckDigit}")
+      .map {
+        bibRecord =>
+          debug(s"Attempting to transform ${bibRecord.id.withCheckDigit}")
 
-        workFromBibRecord(bibRecord)
+          workFromBibRecord(bibRecord)
       }
       .getOrElse {
         // A merged record can have both bibs and items.  If we only have
@@ -60,9 +61,10 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
           )
         )
       }
-      .map { transformed =>
-        debug(s"Transformed record to $transformed")
-        transformed
+      .map {
+        transformed =>
+          debug(s"Transformed record to $transformed")
+          transformed
       }
       .recover {
         case e: Throwable =>
@@ -75,33 +77,34 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
 
   def workFromBibRecord(bibRecord: SierraBibRecord): Try[Work[Source]] =
     fromJson[SierraBibData](bibRecord.data)
-      .map { bibData =>
-        val state = Source(
-          sourceIdentifier = sourceIdentifier,
-          sourceModifiedTime = sierraTransformable.modifiedTime,
-          mergeCandidates = SierraMergeCandidates(bibId, bibData),
-          relations = Relations(ancestors = SierraParents(bibData))
-        )
+      .map {
+        bibData =>
+          val state = Source(
+            sourceIdentifier = sourceIdentifier,
+            sourceModifiedTime = sierraTransformable.modifiedTime,
+            mergeCandidates = SierraMergeCandidates(bibId, bibData),
+            relations = Relations(ancestors = SierraParents(bibData))
+          )
 
-        if (bibData.deleted) {
-          Work.Deleted[Source](
-            version = version,
-            state = state,
-            deletedReason = DeletedFromSource("Sierra")
-          )
-        } else if (bibData.suppressed) {
-          Work.Deleted[Source](
-            version = version,
-            state = state,
-            deletedReason = SuppressedFromSource("Sierra")
-          )
-        } else {
-          Work.Visible[Source](
-            version = version,
-            state = state,
-            data = workDataFromBibData(bibId, bibData)
-          )
-        }
+          if (bibData.deleted) {
+            Work.Deleted[Source](
+              version = version,
+              state = state,
+              deletedReason = DeletedFromSource("Sierra")
+            )
+          } else if (bibData.suppressed) {
+            Work.Deleted[Source](
+              version = version,
+              state = state,
+              deletedReason = SuppressedFromSource("Sierra")
+            )
+          } else {
+            Work.Visible[Source](
+              version = version,
+              state = state,
+              data = workDataFromBibData(bibId, bibData)
+            )
+          }
       }
       .recover {
         case e: JsonDecodingError =>
@@ -145,15 +148,14 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
       edition = SierraEdition(bibData),
       notes = SierraNotes(bibData),
       duration = SierraDuration(bibData),
-      items =
-        SierraItemsOnOrder(
-          bibId,
-          bibData = bibData,
-          hasItems = hasItems,
-          orderDataMap
-        ) ++
-          SierraItems(bibId, bibData, itemDataEntries) ++
-          SierraElectronicResources(bibId, varFields = bibData.varFields),
+      items = SierraItemsOnOrder(
+        bibId,
+        bibData = bibData,
+        hasItems = hasItems,
+        orderDataMap
+      ) ++
+        SierraItems(bibId, bibData, itemDataEntries) ++
+        SierraElectronicResources(bibId, varFields = bibData.varFields),
       holdings = SierraHoldings(bibId, holdingsDataMap),
       referenceNumber = SierraReferenceNumber(bibData),
       collectionPath = SierraCollectionPath(bibData),

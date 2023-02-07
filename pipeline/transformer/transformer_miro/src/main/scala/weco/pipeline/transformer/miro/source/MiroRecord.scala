@@ -23,7 +23,8 @@ case class MiroRecord(
   @JsonKey("image_copyright_cleared") copyrightCleared: Option[String] = None,
   @JsonKey("image_keywords") keywords: Option[List[String]] = None,
   @JsonKey("image_keywords_unauth") keywordsUnauth: Option[
-    List[Option[String]]] = None,
+    List[Option[String]]
+  ] = None,
   @JsonKey("image_phys_format") physFormat: Option[String] = None,
   @JsonKey("image_lc_genre") lcGenre: Option[String] = None,
   @JsonKey("image_tech_file_size") techFileSize: Option[List[String]] = None,
@@ -33,7 +34,8 @@ case class MiroRecord(
   @JsonKey("image_credit_line") creditLine: Option[String] = None,
   @JsonKey("image_source_code") sourceCode: Option[String] = None,
   @JsonKey("image_library_ref_department") libraryRefDepartment: List[
-    Option[String]] = Nil,
+    Option[String]
+  ] = Nil,
   @JsonKey("image_library_ref_id") libraryRefId: List[Option[String]] = Nil,
   @JsonKey("image_award") award: List[Option[String]] = Nil,
   @JsonKey("image_award_date") awardDate: List[Option[String]] = Nil,

@@ -24,29 +24,31 @@ import weco.sierra.models.marc.VarField
 //
 object SierraConceptIdentifier {
 
-  /**
-    * Determine the Library of Congress identifier type from the identifier value prefix.
+  /** Determine the Library of Congress identifier type from the identifier
+    * value prefix.
     *
-    * There are multiple LoC schemes that may be indicated by the same value in indicator2,
-    * The two we are interested in are LCSubjects and LCNames.  These can be differentiated by
-    * the first character in the identifier.
+    * There are multiple LoC schemes that may be indicated by the same value in
+    * indicator2, The two we are interested in are LCSubjects and LCNames. These
+    * can be differentiated by the first character in the identifier.
     *
-    * Technically, the LoC schemes are differentiated by a sequence of alphabetic characters before
-    * the numbers start.
-    * - LC Names identifiers all have a one or two character prefix starting with n - e.g. n, no, nb.
-    * - LC Subjects identifiers all start with sh.
+    * Technically, the LoC schemes are differentiated by a sequence of
+    * alphabetic characters before the numbers start.
+    *   - LC Names identifiers all have a one or two character prefix starting
+    *     with n - e.g. n, no, nb.
+    *   - LC Subjects identifiers all start with sh.
     *
-    * There are other schemes that start with s (e.g. sj: Children's Subject Headings), but they are not
-    * in use in Wellcome data.
+    * There are other schemes that start with s (e.g. sj: Children's Subject
+    * Headings), but they are not in use in Wellcome data.
     *
-    * In concise definition of these fields, (e.g. https://www.loc.gov/marc/bibliographic/concise/bd648.html)
-    * * a second indicator value of 0 indicates that the identifier comes from LCSH:
-    * 0 - Library of Congress Subject Headings
-    * However, the extended description (e.g. https://www.loc.gov/marc/bibliographic/bd648.html) goes on
-    * to also include the "Name authority files" (i.e. LCNames).
-    * 0 - Library of Congress Subject Headings
-    *  Subject added entry conforms to and is appropriate for use in the Library of Congress Subject Headings (LCSH) and the Name authority files that are maintained by the Library of Congress.
-    *
+    * In concise definition of these fields, (e.g.
+    * https://www.loc.gov/marc/bibliographic/concise/bd648.html) * a second
+    * indicator value of 0 indicates that the identifier comes from LCSH: 0 -
+    * Library of Congress Subject Headings However, the extended description
+    * (e.g. https://www.loc.gov/marc/bibliographic/bd648.html) goes on to also
+    * include the "Name authority files" (i.e. LCNames). 0 - Library of Congress
+    * Subject Headings Subject added entry conforms to and is appropriate for
+    * use in the Library of Congress Subject Headings (LCSH) and the Name
+    * authority files that are maintained by the Library of Congress.
     */
   private def locScheme(idValue: String): IdentifierType =
     idValue.split("\\d", 2).head match {

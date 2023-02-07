@@ -18,41 +18,44 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
 object Main extends WellcomeTypesafeApp {
-  runWithConfig { config: Config =>
-    implicit val actorSystem: ActorSystem =
-      ActorSystem("main-actor-system")
-    implicit val ec: ExecutionContext =
-      actorSystem.dispatcher
+  runWithConfig {
+    config: Config =>
+      implicit val actorSystem: ActorSystem =
+        ActorSystem("main-actor-system")
+      implicit val ec: ExecutionContext =
+        actorSystem.dispatcher
 
-    val identifiedIndex =
-      Index(config.requireString("es.merged-works.index"))
+      val identifiedIndex =
+        Index(config.requireString("es.merged-works.index"))
 
-    val esClient = ElasticBuilder.buildElasticClient(config)
+      val esClient = ElasticBuilder.buildElasticClient(config)
 
-    val workIndexer =
-      new ElasticIndexer[Work[Denormalised]](
-        client = esClient,
-        index = Index(config.requireString(s"es.denormalised-works.index")),
-        config = WorksIndexConfig.denormalised
+      val workIndexer =
+        new ElasticIndexer[Work[Denormalised]](
+          client = esClient,
+          index = Index(config.requireString(s"es.denormalised-works.index")),
+          config = WorksIndexConfig.denormalised
+        )
+
+      new RelationEmbedderWorkerService(
+        sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
+        msgSender = SNSBuilder
+          .buildSNSMessageSender(
+            config,
+            subject = "Sent from the relation_embedder"
+          ),
+        workIndexer = workIndexer,
+        relationsService = new PathQueryRelationsService(
+          esClient,
+          identifiedIndex,
+          completeTreeScroll =
+            config.requireInt("es.works.scroll.complete_tree"),
+          affectedWorksScroll =
+            config.requireInt("es.works.scroll.affected_works")
+        ),
+        indexBatchSize = config.requireInt("es.works.batch_size"),
+        indexFlushInterval =
+          config.requireInt("es.works.flush_interval_seconds").seconds
       )
-
-    new RelationEmbedderWorkerService(
-      sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
-      msgSender = SNSBuilder
-        .buildSNSMessageSender(
-          config,
-          subject = "Sent from the relation_embedder"),
-      workIndexer = workIndexer,
-      relationsService = new PathQueryRelationsService(
-        esClient,
-        identifiedIndex,
-        completeTreeScroll = config.requireInt("es.works.scroll.complete_tree"),
-        affectedWorksScroll =
-          config.requireInt("es.works.scroll.affected_works")
-      ),
-      indexBatchSize = config.requireInt("es.works.batch_size"),
-      indexFlushInterval =
-        config.requireInt("es.works.flush_interval_seconds").seconds,
-    )
   }
 }

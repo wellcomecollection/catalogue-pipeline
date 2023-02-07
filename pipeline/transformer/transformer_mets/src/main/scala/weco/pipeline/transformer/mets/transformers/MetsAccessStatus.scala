@@ -3,8 +3,9 @@ package weco.pipeline.transformer.mets.transformers
 import weco.catalogue.internal_model.locations.AccessStatus
 
 object MetsAccessStatus {
-  def apply(accessConditionStatus: Option[String])
-    : Either[Throwable, Option[AccessStatus]] =
+  def apply(
+    accessConditionStatus: Option[String]
+  ): Either[Throwable, Option[AccessStatus]] =
     accessConditionStatus match {
       // e.g. b21718969
       case Some(s) if s == "Open" => Right(Some(AccessStatus.Open))

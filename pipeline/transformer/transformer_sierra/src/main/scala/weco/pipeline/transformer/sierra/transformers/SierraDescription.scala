@@ -44,8 +44,10 @@ object SierraDescription
     if (description.nonEmpty) Some(description) else None
   }
 
-  private def descriptionFromVarfield(bibId: SierraBibNumber,
-                                      vf: VarField): String = {
+  private def descriptionFromVarfield(
+    bibId: SierraBibNumber,
+    vf: VarField
+  ): String = {
     val subfields =
       Seq(
         vf.nonrepeatableSubfieldWithTag(tag = "a"),
@@ -67,7 +69,8 @@ object SierraDescription
           // best to handle it later.
           case Subfield("u", contents) =>
             warn(
-              s"${bibId.withCheckDigit} has MARC 520 ǂu which doesn't look like a URL: $contents")
+              s"${bibId.withCheckDigit} has MARC 520 ǂu which doesn't look like a URL: $contents"
+            )
             contents
 
           case Subfield(_, contents) => contents

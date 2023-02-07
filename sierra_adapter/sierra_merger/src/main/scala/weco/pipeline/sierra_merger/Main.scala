@@ -15,52 +15,53 @@ import weco.typesafe.WellcomeTypesafeApp
 import scala.concurrent.ExecutionContext
 
 object Main extends WellcomeTypesafeApp {
-  runWithConfig { config: Config =>
-    implicit val actorSystem: ActorSystem =
-      ActorSystem("main-actor-system")
-    implicit val executionContext: ExecutionContext =
-      actorSystem.dispatcher
+  runWithConfig {
+    config: Config =>
+      implicit val actorSystem: ActorSystem =
+        ActorSystem("main-actor-system")
+      implicit val executionContext: ExecutionContext =
+        actorSystem.dispatcher
 
-    val sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config)
+      val sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config)
 
-    val messageSender =
-      SNSBuilder.buildSNSMessageSender(config, subject = "Sierra merger")
+      val messageSender =
+        SNSBuilder.buildSNSMessageSender(config, subject = "Sierra merger")
 
-    val sourceVHS = SourceVHSBuilder.build[SierraTransformable](config)
+      val sourceVHS = SourceVHSBuilder.build[SierraTransformable](config)
 
-    val recordType = SierraRecordTypeBuilder.build(config, name = "merger")
+      val recordType = SierraRecordTypeBuilder.build(config, name = "merger")
 
-    import weco.pipeline.sierra_merger.models.RecordOps._
-    import weco.pipeline.sierra_merger.models.TransformableOps._
+      import weco.pipeline.sierra_merger.models.RecordOps._
+      import weco.pipeline.sierra_merger.models.TransformableOps._
 
-    recordType match {
-      case SierraRecordTypes.bibs =>
-        new Worker(
-          sqsStream = sqsStream,
-          updater = new Updater[SierraBibRecord](sourceVHS),
-          messageSender = messageSender
-        )
+      recordType match {
+        case SierraRecordTypes.bibs =>
+          new Worker(
+            sqsStream = sqsStream,
+            updater = new Updater[SierraBibRecord](sourceVHS),
+            messageSender = messageSender
+          )
 
-      case SierraRecordTypes.items =>
-        new Worker(
-          sqsStream = sqsStream,
-          updater = new Updater[SierraItemRecord](sourceVHS),
-          messageSender = messageSender
-        )
+        case SierraRecordTypes.items =>
+          new Worker(
+            sqsStream = sqsStream,
+            updater = new Updater[SierraItemRecord](sourceVHS),
+            messageSender = messageSender
+          )
 
-      case SierraRecordTypes.holdings =>
-        new Worker(
-          sqsStream = sqsStream,
-          updater = new Updater[SierraHoldingsRecord](sourceVHS),
-          messageSender = messageSender
-        )
+        case SierraRecordTypes.holdings =>
+          new Worker(
+            sqsStream = sqsStream,
+            updater = new Updater[SierraHoldingsRecord](sourceVHS),
+            messageSender = messageSender
+          )
 
-      case SierraRecordTypes.orders =>
-        new Worker(
-          sqsStream = sqsStream,
-          updater = new Updater[SierraOrderRecord](sourceVHS),
-          messageSender = messageSender
-        )
-    }
+        case SierraRecordTypes.orders =>
+          new Worker(
+            sqsStream = sqsStream,
+            updater = new Updater[SierraOrderRecord](sourceVHS),
+            messageSender = messageSender
+          )
+      }
   }
 }

@@ -45,9 +45,14 @@ sealed trait Work[State <: WorkState] {
     val outData = transition.data(data)
     this match {
       case Work.Visible(version, _, _, redirectSources) =>
-        Work.Visible(version, outData, outState, redirectSources.map {
-          transition.redirect
-        })
+        Work.Visible(
+          version,
+          outData,
+          outState,
+          redirectSources.map {
+            transition.redirect
+          }
+        )
       case Work.Invisible(version, _, _, invisibilityReasons) =>
         Work.Invisible(version, outData, outState, invisibilityReasons)
       case Work.Deleted(version, _, deletedReason) =>
@@ -122,7 +127,7 @@ case class WorkData[State <: DataState](
   // e.g. how many issues a journal publishes each year
   currentFrequency: Option[String] = None,
   formerFrequency: List[String] = Nil,
-  designation: List[String] = Nil,
+  designation: List[String] = Nil
 )
 
 /** WorkState represents the state of the work in the pipeline, and contains
@@ -130,22 +135,8 @@ case class WorkData[State <: DataState](
   * Work model as a finite state machine with the following stages corresponding
   * to stages of the pipeline:
   *
-  *      |
-  *      | (transformer)
-  *      ▼
-  *    Source
-  *      |
-  *      | (id minter)
-  *      ▼
-  *   Identified
-  *      |
-  *      | (matcher / merger)
-  *      ▼
-  *  Merged
-  *      |
-  *      | (relation embedder)
-  *      ▼
-  * Denormalised
+  * \| \| (transformer) ▼ Source \| \| (id minter) ▼ Identified \| \| (matcher /
+  * merger) ▼ Merged \| \| (relation embedder) ▼ Denormalised
   */
 sealed trait WorkState {
 

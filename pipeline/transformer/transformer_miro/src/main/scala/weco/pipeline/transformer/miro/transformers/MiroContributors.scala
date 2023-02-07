@@ -9,7 +9,8 @@ trait MiroContributors
     extends MiroContributorCodes
     with LabelDerivedIdentifiers {
   def getContributors(
-    miroRecord: MiroRecord): List[Contributor[IdState.Unminted]] = {
+    miroRecord: MiroRecord
+  ): List[Contributor[IdState.Unminted]] = {
 
     // <image_creator>: the primary creator
     val primaryCreatorLabels = miroRecord.creator
@@ -30,16 +31,18 @@ trait MiroContributors
       }
 
     val labels = primaryCreatorLabels ++ secondaryCreatorLabels ++ List(
-      maybeContributorCreatorLabel).flatten
+      maybeContributorCreatorLabel
+    ).flatten
 
-    labels.map { label =>
-      Contributor(
-        agent = Agent(
-          id = identifierFromText(label, ontologyType = "Agent"),
-          label = label,
-        ),
-        roles = List()
-      )
+    labels.map {
+      label =>
+        Contributor(
+          agent = Agent(
+            id = identifierFromText(label, ontologyType = "Agent"),
+            label = label
+          ),
+          roles = List()
+        )
     }
   }
 }

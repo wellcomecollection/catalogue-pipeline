@@ -18,8 +18,10 @@ object SierraBrandNameSubjects
 
   val subjectVarFields = List("652")
 
-  def getSubjectsFromVarFields(bibId: SierraBibNumber,
-                               varFields: List[VarField]): Output =
+  def getSubjectsFromVarFields(
+    bibId: SierraBibNumber,
+    varFields: List[VarField]
+  ): Output =
     varFields
       .subfieldsWithTag("a")
       .contents
@@ -28,5 +30,7 @@ object SierraBrandNameSubjects
           new Subject(
             id = IdState.Unidentifiable,
             label = label,
-            concepts = List(Concept(label).identifiable())))
+            concepts = List(Concept(label).identifiable())
+          )
+      )
 }

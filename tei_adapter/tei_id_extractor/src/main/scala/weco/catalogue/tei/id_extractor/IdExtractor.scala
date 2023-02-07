@@ -15,11 +15,13 @@ object IdExtractor {
           case metadata if metadata.key == "id" => metadata.value.text
         }
         .getOrElse(
-          throw new RuntimeException(s"Could not find an id in XML at $path"))
+          throw new RuntimeException(s"Could not find an id in XML at $path")
+        )
     }.recoverWith {
       case th =>
         Failure(
-          new RuntimeException(s"Unable to extract ID from XML at $path", th))
+          new RuntimeException(s"Unable to extract ID from XML at $path", th)
+        )
     }
 
 }

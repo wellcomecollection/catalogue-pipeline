@@ -14,9 +14,11 @@ import weco.elasticsearch.ElasticFieldOps
   */
 trait IndexConfigFields extends ElasticFieldOps {
 
-  def textKeywordField(name: String,
-                       textFieldName: String,
-                       analyzerName: String): TextField =
+  def textKeywordField(
+    name: String,
+    textFieldName: String,
+    analyzerName: String
+  ): TextField =
     textField(name).fields(
       keywordField("keyword"),
       textField(textFieldName).analyzer(analyzerName)
@@ -26,7 +28,8 @@ trait IndexConfigFields extends ElasticFieldOps {
     textKeywordField(
       name = name,
       textFieldName = "english",
-      analyzerName = englishAnalyzer.name)
+      analyzerName = englishAnalyzer.name
+    )
 
   def englishTextField(name: String): TextField =
     textField(name).fields(
@@ -59,10 +62,9 @@ trait IndexConfigFields extends ElasticFieldOps {
   def asciifoldingTextFieldWithKeyword(name: String): TextField =
     textField(name)
       .fields(
-        /**
-          * Having a keyword and lowercaseKeyword allows you to
-          * aggregate accurately on the field i.e. `ID123` does not become `id123`
-          * but also allows you to do keyword searches e.g. `id123` matches `ID123`
+        /** Having a keyword and lowercaseKeyword allows you to aggregate
+          * accurately on the field i.e. `ID123` does not become `id123` but
+          * also allows you to do keyword searches e.g. `id123` matches `ID123`
           */
         keywordField("keyword"),
         lowercaseKeyword("lowercaseKeyword")

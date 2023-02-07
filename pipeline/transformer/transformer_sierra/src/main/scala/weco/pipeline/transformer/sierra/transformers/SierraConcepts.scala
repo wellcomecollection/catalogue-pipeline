@@ -18,8 +18,10 @@ trait SierraConcepts
   // Get the label.  This is populated by the label of subfield $a, followed
   // by other subfields, in the order they come from MARC.  The labels are
   // joined by " - ".
-  protected def getLabel(primarySubfields: List[Subfield],
-                         subdivisionSubfields: List[Subfield]): String = {
+  protected def getLabel(
+    primarySubfields: List[Subfield],
+    subdivisionSubfields: List[Subfield]
+  ): String = {
     val orderedSubfields = primarySubfields ++ subdivisionSubfields
     orderedSubfields.map { _.content }.mkString(" - ").trimTrailingPeriod
   }
@@ -33,13 +35,14 @@ trait SierraConcepts
   }
 
   protected def getLabelSubfields(
-    varField: VarField): (List[Subfield], List[Subfield]) =
+    varField: VarField
+  ): (List[Subfield], List[Subfield]) =
     varField
       .subfieldsWithTags("a", "v", "x", "y", "z")
       .partition { _.tag == "a" }
 
-  /** Return a list of the distinct contents of every subfield 0 on
-    * this varField, which is a commonly-used subfield for identifiers.
+  /** Return a list of the distinct contents of every subfield 0 on this
+    * varField, which is a commonly-used subfield for identifiers.
     */
   def getIdentifierSubfieldContents(varField: VarField): List[String] =
     varField
@@ -77,7 +80,8 @@ trait SierraConcepts
   protected def maybeAddIdentifier(
     ontologyType: String,
     varField: VarField,
-    identifierSubfieldContent: String): IdState.Unminted =
+    identifierSubfieldContent: String
+  ): IdState.Unminted =
     SierraConceptIdentifier
       .maybeFindIdentifier(
         varField = varField,
@@ -89,14 +93,16 @@ trait SierraConcepts
 
   // Extract the subdivisions, which come from everything except subfield $a.
   // These are never identified.  We preserve the order from MARC.
-  protected def getSubdivisions(subdivisionSubfields: List[Subfield])
-    : List[AbstractConcept[IdState.Unminted]] =
-    subdivisionSubfields.map { subfield =>
-      subfield.tag match {
-        case "v" | "x" =>
-          Concept(label = subfield.content).normalised.identifiable()
-        case "y" => ParsedPeriod(label = subfield.content).identifiable()
-        case "z" => Place(label = subfield.content).normalised.identifiable()
-      }
+  protected def getSubdivisions(
+    subdivisionSubfields: List[Subfield]
+  ): List[AbstractConcept[IdState.Unminted]] =
+    subdivisionSubfields.map {
+      subfield =>
+        subfield.tag match {
+          case "v" | "x" =>
+            Concept(label = subfield.content).normalised.identifiable()
+          case "y" => ParsedPeriod(label = subfield.content).identifiable()
+          case "z" => Place(label = subfield.content).normalised.identifiable()
+        }
     }
 }

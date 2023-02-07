@@ -33,7 +33,8 @@ class WindowManager(
     )
 
     info(
-      s"Searching for records from previous invocation of the reader in $prefix")
+      s"Searching for records from previous invocation of the reader in $prefix"
+    )
 
     for {
       lastExistingKey: Option[S3ObjectLocation] <- Try {
@@ -56,7 +57,8 @@ class WindowManager(
   }
 
   private def getStatusFromLastKey(
-    location: S3ObjectLocation): Try[WindowStatus] = {
+    location: S3ObjectLocation
+  ): Try[WindowStatus] = {
     // Our SequentialS3Sink creates filenames that end 0000.json, 0001.json, ..., with an optional prefix.
     // Find the number on the end of the last file.
     val embeddedIndexMatch = "(\\d{4})\\.json$".r.unanchored
@@ -66,7 +68,8 @@ class WindowManager(
         case embeddedIndexMatch(index) => Success(index.toInt)
         case _ =>
           Failure(
-            SierraReaderException(s"Unable to determine offset in $location"))
+            SierraReaderException(s"Unable to determine offset in $location")
+          )
       }
 
       latestBody <- store.get(location) match {
@@ -95,11 +98,13 @@ class WindowManager(
       .split(",")
 
     dateTimes
-      .map(dateTime => {
-        val accessor = DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(dateTime)
-        val instant = Instant.from(accessor).atOffset(ZoneOffset.UTC)
-        DateTimeFormatter.ofPattern("uuuu-MM-dd'T'HH-mm-ssX").format(instant)
-      })
+      .map(
+        dateTime => {
+          val accessor = DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(dateTime)
+          val instant = Instant.from(accessor).atOffset(ZoneOffset.UTC)
+          DateTimeFormatter.ofPattern("uuuu-MM-dd'T'HH-mm-ssX").format(instant)
+        }
+      )
       .mkString("__")
   }
 
@@ -107,8 +112,10 @@ class WindowManager(
   // or SierraItemRecord; we want to get the last ID of the current contents
   // so we know what to ask the Sierra API for next.
   //
-  private def getLatestId(location: S3ObjectLocation,
-                          s3contents: String): Try[String] = {
+  private def getLatestId(
+    location: S3ObjectLocation,
+    s3contents: String
+  ): Try[String] = {
     case class Identified(id: UntypedSierraRecordNumber)
 
     fromJson[List[Identified]](s3contents) match {

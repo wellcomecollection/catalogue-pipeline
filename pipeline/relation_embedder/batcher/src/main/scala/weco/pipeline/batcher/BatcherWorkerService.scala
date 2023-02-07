@@ -52,7 +52,8 @@ class BatcherWorkerService[MsgDestination](
     */
   private def processPaths(
     msgs: List[SQSMessage],
-    paths: List[String]): Future[Source[SQSMessage, NotUsed]] =
+    paths: List[String]
+  ): Future[Source[SQSMessage, NotUsed]] =
     generateBatches(paths)
       .mapAsyncUnordered(10) {
         case (batch, msgIndices) =>
@@ -68,12 +69,13 @@ class BatcherWorkerService[MsgDestination](
       .collect { case Some(failedIndices) => failedIndices }
       .mapConcat(identity)
       .runWith(Sink.seq)
-      .map { failedIndices =>
-        val failedIdxSet = failedIndices.toSet
-        Source(msgs).zipWithIndex
-          .collect {
-            case (msg, idx) if !failedIdxSet.contains(idx) => msg
-          }
+      .map {
+        failedIndices =>
+          val failedIdxSet = failedIndices.toSet
+          Source(msgs).zipWithIndex
+            .collect {
+              case (msg, idx) if !failedIdxSet.contains(idx) => msg
+            }
       }
 
   /** Given a list of input paths, generate the minimal set of selectors
@@ -81,7 +83,8 @@ class BatcherWorkerService[MsgDestination](
     * tree and within a maximum `batchSize`.
     */
   private def generateBatches(
-    paths: List[String]): Source[(Batch, List[Long]), NotUsed] = {
+    paths: List[String]
+  ): Source[(Batch, List[Long]), NotUsed] = {
     val selectors = Selector.forPaths(paths)
     val groupedSelectors = selectors.groupBy(_._1.rootPath)
     info(
@@ -97,7 +100,8 @@ class BatcherWorkerService[MsgDestination](
     groupedSelectors.foreach {
       case (rootPath, selectors) =>
         info(
-          s"Selectors for root path $rootPath: ${selectors.map(_._1).mkString(", ")}")
+          s"Selectors for root path $rootPath: ${selectors.map(_._1).mkString(", ")}"
+        )
     }
     Source(groupedSelectors.toList).map {
       case (rootPath, selectorsAndIndices) =>

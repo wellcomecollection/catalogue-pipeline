@@ -19,8 +19,10 @@ import weco.sierra.models.identifiers.{
 }
 
 object IndexerRequest {
-  def mainRecords(indexPrefix: String,
-                  apiData: Seq[(Parent, Json)]): Seq[IndexRequest] =
+  def mainRecords(
+    indexPrefix: String,
+    apiData: Seq[(Parent, Json)]
+  ): Seq[IndexRequest] =
     List(
       apiData.map {
         case (parent, json) =>
@@ -51,8 +53,10 @@ object IndexerRequest {
     varField: Json
   )
 
-  def varFields(indexPrefix: String,
-                apiData: Seq[(Parent, Json)]): Seq[IndexRequest] =
+  def varFields(
+    indexPrefix: String,
+    apiData: Seq[(Parent, Json)]
+  ): Seq[IndexRequest] =
     apiData.flatMap {
       case (parent, json) =>
         json.varFields.zipWithIndex
@@ -70,7 +74,8 @@ object IndexerRequest {
 
   def varFieldDeletions(
     indexPrefix: String,
-    apiData: Seq[(Parent, Json)]): Seq[DeleteByQueryRequest] =
+    apiData: Seq[(Parent, Json)]
+  ): Seq[DeleteByQueryRequest] =
     apiData.map {
       case (parent, json) =>
         DeleteByQueryRequest(
@@ -89,8 +94,10 @@ object IndexerRequest {
     fixedField: Json
   )
 
-  def fixedFields(indexPrefix: String,
-                  apiData: Seq[(Parent, Json)]): Seq[IndexRequest] =
+  def fixedFields(
+    indexPrefix: String,
+    apiData: Seq[(Parent, Json)]
+  ): Seq[IndexRequest] =
     apiData.flatMap {
       case (parent, json) =>
         json.fixedFields
@@ -108,14 +115,15 @@ object IndexerRequest {
 
   def fixedFieldDeletions(
     indexPrefix: String,
-    apiData: Seq[(Parent, Json)]): Seq[DeleteByQueryRequest] =
+    apiData: Seq[(Parent, Json)]
+  ): Seq[DeleteByQueryRequest] =
     apiData.map {
       case (parent, json) =>
         DeleteByQueryRequest(
           indexes = Indexes(fixedFieldIndex(indexPrefix).name),
           query = must(
             termQuery("parent.id", parent.id),
-            termQuery("parent.recordType.keyword", parent.recordType.toString),
+            termQuery("parent.recordType.keyword", parent.recordType.toString)
           ).not(
             termsQuery("code", json.fixedFields.keys)
           )

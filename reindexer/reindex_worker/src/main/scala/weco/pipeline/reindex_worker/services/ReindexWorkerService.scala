@@ -34,7 +34,8 @@ class ReindexWorkerService[Destination](
       reindexJobConfig = reindexJobConfigMap.getOrElse(
         reindexRequest.jobConfigId,
         throw new RuntimeException(
-          s"No such job config: ${reindexRequest.jobConfigId}")
+          s"No such job config: ${reindexRequest.jobConfigId}"
+        )
       )
 
       records <- readRecords(
@@ -54,9 +55,11 @@ class ReindexWorkerService[Destination](
   def run(): Future[Done] =
     sqsStream.foreach(this.getClass.getSimpleName, processMessage)
 
-  private def readRecords(source: ReindexSource,
-                          reindexParameters: ReindexParameters,
-                          tableName: String): Future[Seq[ReindexPayload]] =
+  private def readRecords(
+    source: ReindexSource,
+    reindexParameters: ReindexParameters,
+    tableName: String
+  ): Future[Seq[ReindexPayload]] =
     source match {
       case ReindexSource.Calm =>
         recordReader
@@ -77,7 +80,8 @@ class ReindexWorkerService[Destination](
       case ReindexSource.MiroInventory =>
         recordReader.findRecords[MiroInventoryReindexPayload](
           reindexParameters,
-          tableName)
+          tableName
+        )
 
       case ReindexSource.Sierra =>
         recordReader

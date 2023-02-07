@@ -28,8 +28,9 @@ class DeletionMarker(sourceTable: String)(implicit client: DynamoDbClient)
         .map(_.toPayload)
     )(record)
 
-  private def toTry(result: Either[ScanamoError, CalmSourcePayload])(
-    inputRecord: CalmSourcePayload) =
+  private def toTry(
+    result: Either[ScanamoError, CalmSourcePayload]
+  )(inputRecord: CalmSourcePayload) =
     result match {
       case Right(record) => Success(record)
       case Left(ConditionNotMet(e)) =>

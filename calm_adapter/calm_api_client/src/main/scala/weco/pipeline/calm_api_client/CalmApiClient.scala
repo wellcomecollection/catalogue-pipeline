@@ -24,14 +24,16 @@ trait CalmApiClient {
     cookie: Option[Cookie]
   ): Future[Request#Response]
 
-  def search(query: CalmQuery,
-             cookie: Option[Cookie] = None): Future[CalmSession] =
+  def search(
+    query: CalmQuery,
+    cookie: Option[Cookie] = None
+  ): Future[CalmSession] =
     request(request = CalmSearchRequest(query), cookie = cookie)
 
   // We defer resolution of the summary parser so consumers can suppress fields
   def summary(pos: Int, cookie: Option[Cookie] = None)(
-    implicit p: CalmHttpResponseParser[CalmSummaryRequest])
-    : Future[CalmRecord] =
+    implicit p: CalmHttpResponseParser[CalmSummaryRequest]
+  ): Future[CalmRecord] =
     request(request = CalmSummaryRequest(pos), cookie = cookie)
 
   def abandon(cookie: Cookie): Future[Done] =
@@ -54,31 +56,35 @@ class HttpCalmApiClient(
   private implicit val restartSettings: RestartSettings = RestartSettings(
     minBackoff = minBackoff,
     maxBackoff = maxBackoff,
-    randomFactor = randomFactor,
+    randomFactor = randomFactor
   ).withMaxRestarts(maxRestarts, minBackoff)
 
-  def request[Request <: CalmXmlRequest](request: Request,
-                                         cookie: Option[Cookie])(
-    implicit parse: CalmHttpResponseParser[Request]): Future[Request#Response] =
+  def request[Request <: CalmXmlRequest](
+    request: Request,
+    cookie: Option[Cookie]
+  )(implicit parse: CalmHttpResponseParser[Request]): Future[Request#Response] =
     RetryFuture {
       client
         .singleRequest(createHttpRequest(request, cookie))
-        .map { resp =>
-          resp.status match {
-            case StatusCodes.OK => resp
-            case status =>
-              throw new Exception(s"Unexpected status: $status")
-          }
+        .map {
+          resp =>
+            resp.status match {
+              case StatusCodes.OK => resp
+              case status =>
+                throw new Exception(s"Unexpected status: $status")
+            }
         }
     }.recover {
-        case lastException =>
-          throw new RuntimeException(
-            s"Max retries attempted when calling Calm API. Last failure was: ${lastException.getMessage}")
-      }
-      .flatMap(parse.apply)
+      case lastException =>
+        throw new RuntimeException(
+          s"Max retries attempted when calling Calm API. Last failure was: ${lastException.getMessage}"
+        )
+    }.flatMap(parse.apply)
 
-  private def createHttpRequest(xmlRequest: CalmXmlRequest,
-                                cookie: Option[Cookie]): HttpRequest = {
+  private def createHttpRequest(
+    xmlRequest: CalmXmlRequest,
+    cookie: Option[Cookie]
+  ): HttpRequest = {
     val request =
       HttpRequest(uri = url, method = HttpMethods.POST)
         .withEntity(ContentTypes.`text/xml(UTF-8)`, xmlRequest.xml.toString)
@@ -86,7 +92,8 @@ class HttpCalmApiClient(
         .addHeader(
           RawHeader(
             "SOAPAction",
-            s"http://ds.co.uk/cs/webservices/${xmlRequest.action}")
+            s"http://ds.co.uk/cs/webservices/${xmlRequest.action}"
+          )
         )
     cookie match {
       case Some(cookie) => request.addHeader(cookie)
@@ -112,4 +119,5 @@ class AkkaHttpCalmApiClient(
       minBackoff,
       maxBackoff,
       randomFactor,
-      maxRestarts)
+      maxRestarts
+    )

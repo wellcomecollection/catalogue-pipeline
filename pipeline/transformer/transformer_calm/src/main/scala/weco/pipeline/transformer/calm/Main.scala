@@ -18,7 +18,8 @@ object Main extends WellcomeTypesafeApp {
       new CalmSourceDataRetriever(recordReadable = S3TypedStore[CalmRecord])
   )
 
-  runWithConfig { config =>
-    transformer.run(config)
+  runWithConfig {
+    config =>
+      transformer.run(config)
   }
 }

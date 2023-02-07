@@ -20,7 +20,8 @@ object CalmAccessStatus extends CalmRecordOps with Logging {
       case Some("By Appointment")   => Some(AccessStatus.ByAppointment)
       case Some("Donor Permission") => Some(AccessStatus.PermissionRequired)
       case Some("Cannot Be Produced") | Some("Missing") | Some(
-            "Deaccessioned") =>
+            "Deaccessioned"
+          ) =>
         Some(AccessStatus.Unavailable)
       case Some("Temporarily Unavailable") =>
         Some(AccessStatus.TemporarilyUnavailable)

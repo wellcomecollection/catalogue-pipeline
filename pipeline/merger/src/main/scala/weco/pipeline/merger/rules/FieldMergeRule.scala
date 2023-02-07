@@ -31,12 +31,16 @@ trait FieldMergeRule {
   protected type FieldData
   protected type MergeState = State[Set[Work[Identified]], FieldData]
 
-  def apply(target: Work.Visible[Identified],
-            sources: Seq[Work[Identified]]): FieldMergeResult[FieldData] =
+  def apply(
+    target: Work.Visible[Identified],
+    sources: Seq[Work[Identified]]
+  ): FieldMergeResult[FieldData] =
     merge(target, sources)
 
-  def merge(target: Work.Visible[Identified],
-            sources: Seq[Work[Identified]]): FieldMergeResult[FieldData]
+  def merge(
+    target: Work.Visible[Identified],
+    sources: Seq[Work[Identified]]
+  ): FieldMergeResult[FieldData]
 
   protected trait PartialRule {
     val isDefinedForTarget: WorkPredicate
@@ -44,19 +48,25 @@ trait FieldMergeRule {
     val isDefinedForSourceList: Seq[Work[Identified]] => Boolean =
       const(true)
 
-    protected def rule(target: Work.Visible[Identified],
-                       sources: NonEmptyList[Work[Identified]]): FieldData
+    protected def rule(
+      target: Work.Visible[Identified],
+      sources: NonEmptyList[Work[Identified]]
+    ): FieldData
 
-    def apply(target: Work.Visible[Identified],
-              sources: Seq[Work[Identified]]): Option[FieldData] =
+    def apply(
+      target: Work.Visible[Identified],
+      sources: Seq[Work[Identified]]
+    ): Option[FieldData] =
       mergedSources(target, sources) match {
         case head +: tail =>
           Some(rule(target, NonEmptyList(head, tail.toList)))
         case _ => None
       }
 
-    def apply(target: Work.Visible[Identified],
-              source: Work[Identified]): Option[FieldData] =
+    def apply(
+      target: Work.Visible[Identified],
+      source: Work[Identified]
+    ): Option[FieldData] =
       apply(target, List(source))
 
     /*
@@ -68,8 +78,10 @@ trait FieldMergeRule {
      * - `isDefinedForSourceList(sources)` is `true`
      * - `isDefinedForSource(source)` is `true` for at least one element of `sources`
      */
-    def mergedSources(target: Work.Visible[Identified],
-                      sources: Seq[Work[Identified]]): Seq[Work[Identified]] =
+    def mergedSources(
+      target: Work.Visible[Identified],
+      sources: Seq[Work[Identified]]
+    ): Seq[Work[Identified]] =
       if (isDefinedForSourceList(sources) && isDefinedForTarget(target)) {
         sources.filter(isDefinedForSource)
       } else {

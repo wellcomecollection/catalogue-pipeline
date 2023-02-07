@@ -49,7 +49,8 @@ class MergerWorkerService[WorkDestination, ImageDestination](
           source
             .via(processFlow(config, processMessage))
             .via(
-              broadcastAndMerge(batchIndexAndSendWorksAndImages, noOutputFlow))
+              broadcastAndMerge(batchIndexAndSendWorksAndImages, noOutputFlow)
+            )
       )
     } yield Done
 
@@ -58,7 +59,8 @@ class MergerWorkerService[WorkDestination, ImageDestination](
     batchIndexAndSendFlow(config, sendWorkOrImage, workOrImageIndexer)
 
   private def processMessage(
-    message: NotificationMessage): Future[List[WorkOrImage]] =
+    message: NotificationMessage
+  ): Future[List[WorkOrImage]] =
     for {
       matcherResult <- Future.fromTry(
         fromJson[MatcherResult](message.body)
@@ -81,19 +83,23 @@ class MergerWorkerService[WorkDestination, ImageDestination](
               // get unlinked.
               //
               // See https://github.com/wellcomecollection/docs/tree/8d83d75aba89ead23559584db2533e95ceb09200/rfcs/038-matcher-versioning
-              applyMerge(ws, matcherResult.createdTime))
+              applyMerge(ws, matcherResult.createdTime)
+          )
       }
     } yield result
 
   private def getWorkSets(matcherResult: MatcherResult): Future[List[WorkSet]] =
     Future.sequence {
-      matcherResult.works.toList.map { matchedIdentifiers =>
-        sourceWorkLookup.fetchAllWorks(matchedIdentifiers.identifiers.toList)
+      matcherResult.works.toList.map {
+        matchedIdentifiers =>
+          sourceWorkLookup.fetchAllWorks(matchedIdentifiers.identifiers.toList)
       }
     }
 
-  private def applyMerge(workSet: WorkSet,
-                         matcherResultTime: Instant): Seq[WorkOrImage] =
+  private def applyMerge(
+    workSet: WorkSet,
+    matcherResultTime: Instant
+  ): Seq[WorkOrImage] =
     mergerManager
       .applyMerge(maybeWorks = workSet)
       .mergedWorksAndImagesWithTime(matcherResultTime)

@@ -43,12 +43,14 @@ object ImageUtils {
     validThumbnailFile.mimeType match {
       case Some(mimeType) if mimeType.startsWith("image/") =>
         Some(
-          s"$imagesThumbBaseUrl/${validThumbnailFile.location}/$thumbnailPathSuffix")
+          s"$imagesThumbBaseUrl/${validThumbnailFile.location}/$thumbnailPathSuffix"
+        )
       case _ =>
         Some(s"$othersThumbBaseUrl/$bnumber")
     }
 
   def buildImageUrl(validImageFile: FileReference): Option[String] =
     Some(
-      s"https://iiif.wellcomecollection.org/image/${validImageFile.location}/info.json")
+      s"https://iiif.wellcomecollection.org/image/${validImageFile.location}/info.json"
+    )
 }

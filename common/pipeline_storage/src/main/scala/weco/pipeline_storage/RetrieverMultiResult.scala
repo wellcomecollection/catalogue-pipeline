@@ -7,7 +7,7 @@ case class RetrieverMultiResult[T](
   require(
     found.keySet.intersect(notFound.keySet).isEmpty,
     s"The Retriever both found and did not find the same key: ${found.keySet
-      .intersect(notFound.keySet)}. " +
+        .intersect(notFound.keySet)}. " +
       "This probably indicates a programming error."
   )
 
@@ -17,5 +17,6 @@ case class RetrieverMultiResult[T](
       .map(Right(_))
       .orElse(notFound.get(id).map(Left(_)))
       .getOrElse(
-        Left(new Exception(s"ID not found in RetrieverMultiResult: $id")))
+        Left(new Exception(s"ID not found in RetrieverMultiResult: $id"))
+      )
 }

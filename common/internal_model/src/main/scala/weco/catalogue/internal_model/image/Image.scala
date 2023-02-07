@@ -46,22 +46,11 @@ sealed trait ImageState {
   def id: String = canonicalId.toString
 }
 
-/** ImageState represents the state of the image in the pipeline.
-  * Its stages are as follows:
-
-  *      |
-  *      | (merger)
-  *      ▼
-  *    Initial
-  *      |
-  *      | (inferrer)
-  *      ▼
-  *  Augmented
-  *       |
-  *       | (ingestor)
-  *       ▼
-  *    Indexed
+/** ImageState represents the state of the image in the pipeline. Its stages are
+  * as follows:
   *
+  * \| \| (merger) ▼ Initial \| \| (inferrer) ▼ Augmented \| \| (ingestor) ▼
+  * Indexed
   */
 object ImageState {
 

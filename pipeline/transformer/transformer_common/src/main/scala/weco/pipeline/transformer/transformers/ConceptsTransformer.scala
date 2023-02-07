@@ -31,8 +31,9 @@ trait ConceptsTransformer extends LabelDerivedIdentifiers {
     def normalised: Concept[State] =
       c.copy(label = c.label.trimTrailingPeriod)
 
-    def identifiable(idState: Option[IdState.Identifiable] = None)
-      : Concept[IdState.Identifiable] =
+    def identifiable(
+      idState: Option[IdState.Identifiable] = None
+    ): Concept[IdState.Identifiable] =
       c.copy(id = newIdIfNeeded(c.id, c.label, idState))
   }
 
@@ -52,18 +53,21 @@ trait ConceptsTransformer extends LabelDerivedIdentifiers {
     def normalised: Meeting[State] =
       m.copy(label = m.label.trimTrailing(','))
 
-    def identifiable(idState: Option[IdState.Identifiable] = None)
-      : Meeting[IdState.Identifiable] =
+    def identifiable(
+      idState: Option[IdState.Identifiable] = None
+    ): Meeting[IdState.Identifiable] =
       m.copy(
-        id = newIdIfNeeded(m.id, m.label, idState, ontologyType = "Meeting"))
+        id = newIdIfNeeded(m.id, m.label, idState, ontologyType = "Meeting")
+      )
   }
 
   implicit class OrganisationOps[State](o: Organisation[State]) {
     def normalised: Organisation[State] =
       o.copy(label = o.label.trimTrailing(','))
 
-    def identifiable(idState: Option[IdState.Identifiable] = None)
-      : Organisation[IdState.Identifiable] =
+    def identifiable(
+      idState: Option[IdState.Identifiable] = None
+    ): Organisation[IdState.Identifiable] =
       o.copy(id = newIdIfNeeded(o.id, o.label, idState, "Organisation"))
   }
 
@@ -71,8 +75,9 @@ trait ConceptsTransformer extends LabelDerivedIdentifiers {
     def normalised: Person[State] =
       p.copy(label = p.label.trimTrailing(','))
 
-    def identifiable(idState: Option[IdState.Identifiable] = None)
-      : Person[IdState.Identifiable] =
+    def identifiable(
+      idState: Option[IdState.Identifiable] = None
+    ): Person[IdState.Identifiable] =
       p.copy(id = newIdIfNeeded(p.id, p.label, idState, "Person"))
 
   }
@@ -81,14 +86,16 @@ trait ConceptsTransformer extends LabelDerivedIdentifiers {
     def normalised: Place[State] =
       pl.copy(label = pl.label.trimTrailing(':'))
 
-    def identifiable(idState: Option[IdState.Identifiable] = None)
-      : Place[IdState.Identifiable] =
+    def identifiable(
+      idState: Option[IdState.Identifiable] = None
+    ): Place[IdState.Identifiable] =
       pl.copy(id = newIdIfNeeded(pl.id, pl.label, idState, "Place"))
   }
 
   implicit class PeriodOps[State](p: Period[State]) {
-    def identifiable(idState: Option[IdState.Identifiable] = None)
-      : Period[IdState.Identifiable] =
+    def identifiable(
+      idState: Option[IdState.Identifiable] = None
+    ): Period[IdState.Identifiable] =
       // The label of a period may contain superfluous content that doesn't change the referent of the period
       // e.g. years duplicated in Roman, punctuation, diverse renditions of the term "floruit".
       // The id is therefore based on that "preprocessed" label, rather than simply passing through the
@@ -98,6 +105,8 @@ trait ConceptsTransformer extends LabelDerivedIdentifiers {
           p.id,
           PeriodParser.preprocess(p.label),
           idState,
-          "Period"))
+          "Period"
+        )
+      )
   }
 }

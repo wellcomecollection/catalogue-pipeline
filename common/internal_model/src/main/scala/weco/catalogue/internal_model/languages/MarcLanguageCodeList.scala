@@ -18,11 +18,12 @@ object MarcLanguageCodeList extends Logging {
       XML.load(getClass.getResourceAsStream("/languages.xml")) \\ "language"
 
     val codeNamePairs = languages
-      .map { lang =>
-        val code = (lang \ "code").text
-        val name = (lang \ "name").text
+      .map {
+        lang =>
+          val code = (lang \ "code").text
+          val name = (lang \ "name").text
 
-        code -> name
+          code -> name
       }
 
     // This checks that we aren't repeating codes.  This should be handled
@@ -62,12 +63,13 @@ object MarcLanguageCodeList extends Logging {
       XML.load(getClass.getResourceAsStream("/languages.xml")) \\ "language"
 
     languages
-      .flatMap { lang =>
-        val code = lang \ "code"
+      .flatMap {
+        lang =>
+          val code = lang \ "code"
 
-        // We go down into all instances of <name> to be sure we're
-        // catching variant names, e.g. Chinese/Mandarin
-        (lang \\ "name").map { _ -> code }
+          // We go down into all instances of <name> to be sure we're
+          // catching variant names, e.g. Chinese/Mandarin
+          (lang \\ "name").map { _ -> code }
       }
       .filterNot {
         case (_, code) =>
@@ -75,7 +77,8 @@ object MarcLanguageCodeList extends Logging {
           status.contains("obsolete")
       }
       .map {
-        case (name, code) => name.text -> code.text
+        case (name, code) =>
+          name.text -> code.text
       }
       .groupBy { case (name, _) => name }
       .map {
@@ -88,13 +91,15 @@ object MarcLanguageCodeList extends Logging {
   def fromCode(code: String): Option[Language] = {
     if (code.length != 3) {
       warn(
-        s"MARC language codes are 3 letters long; got $code (length ${code.length})")
+        s"MARC language codes are 3 letters long; got $code (length ${code.length})"
+      )
     }
 
     codeLookup
       .get(code)
-      .map { name =>
-        Language(label = name, id = code)
+      .map {
+        name =>
+          Language(label = name, id = code)
       }
   }
 

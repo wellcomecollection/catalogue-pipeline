@@ -15,8 +15,8 @@ import weco.pipeline_storage.{Indexable, PipelineStorageStream, Retriever}
 class IngestorWorkerService[Destination, In, Out](
   pipelineStream: PipelineStorageStream[NotificationMessage, Out, Destination],
   retriever: Retriever[In],
-  transform: In => Out)(implicit ec: ExecutionContext,
-                        indexable: Indexable[Out])
+  transform: In => Out
+)(implicit ec: ExecutionContext, indexable: Indexable[Out])
     extends Runnable {
 
   def run(): Future[Done] =

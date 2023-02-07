@@ -24,11 +24,8 @@ class Worker(
   sqsStream: SQSStream[NotificationMessage],
   sierraReadable: Readable[S3ObjectLocation, SierraTransformable],
   indexPrefix: String = "sierra"
-)(
-  implicit
-  ec: ExecutionContext,
-  elasticClient: ElasticClient
-) extends Runnable {
+)(implicit ec: ExecutionContext, elasticClient: ElasticClient)
+    extends Runnable {
 
   private val splitter = new Splitter(indexPrefix = indexPrefix)
 
@@ -68,24 +65,27 @@ class Worker(
     ops
       .flatMap {
         case (indexRequests, deleteByQueryRequests) =>
-          val futures = deleteByQueryRequests.map { elasticClient.execute(_) } :+ elasticClient
+          val futures = deleteByQueryRequests.map {
+            elasticClient.execute(_)
+          } :+ elasticClient
             .execute(bulk(indexRequests))
 
           Future.sequence(futures)
       }
-      .map { resp =>
-        resp.foreach {
-          case RequestSuccess(_, _, _, d: DeleteByQueryResponse) =>
-            ()
+      .map {
+        resp =>
+          resp.foreach {
+            case RequestSuccess(_, _, _, d: DeleteByQueryResponse) =>
+              ()
 
-          case RequestSuccess(_, _, _, b: BulkResponse) =>
-            if (b.hasFailures) {
-              throw new RuntimeException(s"Errors in the bulk response: $b")
-            }
+            case RequestSuccess(_, _, _, b: BulkResponse) =>
+              if (b.hasFailures) {
+                throw new RuntimeException(s"Errors in the bulk response: $b")
+              }
 
-          case _ =>
-            ()
-        }
+            case _ =>
+              ()
+          }
       }
   }
 }

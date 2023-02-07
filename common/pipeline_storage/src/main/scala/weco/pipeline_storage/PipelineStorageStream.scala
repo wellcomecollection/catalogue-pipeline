@@ -14,37 +14,45 @@ import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future, TimeoutException}
 import scala.util.Try
 
-/**
-  * Configuration for the processing of messages in batches.
+/** Configuration for the processing of messages in batches.
   *
-  * Messages will be processed when either batchSize or flushInterval are reached.
+  * Messages will be processed when either batchSize or flushInterval are
+  * reached.
   *
-  * The intended use for this is where it can be significantly more efficient to process
-  * multiple messages together, rather than one at a time.  For example where
-  * downloading all the data to service a bundle of messages incurs less overhead than
-  * making individual requests for the data to service each message.
+  * The intended use for this is where it can be significantly more efficient to
+  * process multiple messages together, rather than one at a time. For example
+  * where downloading all the data to service a bundle of messages incurs less
+  * overhead than making individual requests for the data to service each
+  * message.
   *
   * ==Setting batchSize and flushInterval==
   *
-  * The numbers for batchSize and flushInterval should be chosen based on how responsive
-  * you want the service to be and how many messages the service can realistically handle
-  * in one go, as well as the expected frequency with which messages are likely to be received.
+  * The numbers for batchSize and flushInterval should be chosen based on how
+  * responsive you want the service to be and how many messages the service can
+  * realistically handle in one go, as well as the expected frequency with which
+  * messages are likely to be received.
   *
-  * In normal running, where this activity is triggered by a few real humans manually modifying
-  * a few records at a time, you might expect the flush interval to be reached most of the time.
+  * In normal running, where this activity is triggered by a few real humans
+  * manually modifying a few records at a time, you might expect the flush
+  * interval to be reached most of the time.
   *
-  * On the other hand, when this activity is triggered by some kind of computer-initiated batch
-  * update, you might expect the batch size to be the threshold that normally triggers processing.
-
-  * @note The values for batchSize and flushInterval are related to the duration set externally
-  * for the expiry of the messages being consumed (visibility timeout in SQS).
+  * On the other hand, when this activity is triggered by some kind of
+  * computer-initiated batch update, you might expect the batch size to be the
+  * threshold that normally triggers processing.
   *
-  * `((Message Expiry) - (Flush Interval))` must be long enough to allow
-  * `(Batch Size - 1)` messages to be processed, otherwise those messages will
-  * expire and either be re-queued or fail completely.
+  * @note
+  *   The values for batchSize and flushInterval are related to the duration set
+  *   externally for the expiry of the messages being consumed (visibility
+  *   timeout in SQS).
   *
-  * @param batchSize The maximum number of messages to process in one batch.
-  * @param flushInterval The maximum duration to wait before processing messages.
+  * `((Message Expiry) - (Flush Interval))` must be long enough to allow `(Batch
+  * Size - 1)` messages to be processed, otherwise those messages will expire
+  * and either be re-queued or fail completely.
+  *
+  * @param batchSize
+  *   The maximum number of messages to process in one batch.
+  * @param flushInterval
+  *   The maximum duration to wait before processing messages.
   * @param parallelism
   */
 case class PipelineStorageConfig(
@@ -92,7 +100,7 @@ class PipelineStorageStream[In, Out, MsgDestination](
                 ),
                 noOutputFlow
               )
-          )
+            )
       )
     } yield done
 
@@ -103,11 +111,7 @@ object PipelineStorageStream extends Logging {
     config: PipelineStorageConfig,
     send: T => Try[Unit],
     indexer: Indexer[T]
-  )(
-    implicit
-    ec: ExecutionContext,
-    indexable: Indexable[T]
-  ) = {
+  )(implicit ec: ExecutionContext, indexable: Indexable[T]) = {
     val maxSubStreams = Integer.MAX_VALUE
     Flow[(Message, List[T])]
       .collect {
@@ -121,15 +125,17 @@ object PipelineStorageStream extends Logging {
       .via(batchIndexFlow(config, indexer))
       .via(takeListsOfCompleteBundles(maxSubStreams, 5 minutes))
       .mapConcat(identity)
-      .mapAsyncUnordered(config.parallelism) { bundle =>
-        for {
-          _ <- Future.fromTry(send(bundle.item))
-        } yield bundle
+      .mapAsyncUnordered(config.parallelism) {
+        bundle =>
+          for {
+            _ <- Future.fromTry(send(bundle.item))
+          } yield bundle
       }
       .via(
         takeListsOfCompleteBundles[T](maxSubStreams, 5 minutes)
           .collect {
-            case head :: _ => head.message
+            case head :: _ =>
+              head.message
           }
       )
   }
@@ -158,28 +164,32 @@ object PipelineStorageStream extends Logging {
           Bundle(message, notificationMessage.body, numberOfItems = 1)
       }
       .groupedWithin(config.batchSize, config.flushInterval)
-      .mapAsyncUnordered(parallelism = config.parallelism) { bundles =>
-        val (messages, ids) = unzipBundles(bundles)
-        retriever(ids)
-          .map { result =>
-            ids.zipWithIndex
-              .map {
-                case (id, idx) =>
-                  result(id) match {
-                    case Left(err) =>
-                      error(s"Could not retrieve document with id: $id", err)
-                      None
-                    case Right(doc) => Some((messages(idx), doc))
+      .mapAsyncUnordered(parallelism = config.parallelism) {
+        bundles =>
+          val (messages, ids) = unzipBundles(bundles)
+          retriever(ids)
+            .map {
+              result =>
+                ids.zipWithIndex
+                  .map {
+                    case (id, idx) =>
+                      result(id) match {
+                        case Left(err) =>
+                          error(
+                            s"Could not retrieve document with id: $id",
+                            err
+                          )
+                          None
+                        case Right(doc) => Some((messages(idx), doc))
+                      }
                   }
-              }
-              .collect { case Some((msg, doc)) => (msg, doc) }
-          }
+                  .collect { case Some((msg, doc)) => (msg, doc) }
+            }
       }
       .mapConcat(identity)
 
   def batchIndexFlow[T](config: PipelineStorageConfig, indexer: Indexer[T])(
-    implicit
-    ec: ExecutionContext,
+    implicit ec: ExecutionContext,
     indexable: Indexable[T]
   ): Flow[Bundle[T], Bundle[T], NotUsed] =
     Flow[Bundle[T]]
@@ -187,23 +197,27 @@ object PipelineStorageStream extends Logging {
         config.batchSize,
         config.flushInterval
       ) {
-        case Bundle(_, item, _) => indexable.weight(item)
+        case Bundle(_, item, _) =>
+          indexable.weight(item)
       }
-      .mapAsyncUnordered(config.parallelism) { bundles =>
-        val (_, items) = unzipBundles(bundles)
-        indexer(items).map { result =>
-          val failed = result.left.getOrElse(Nil)
-          if (failed.nonEmpty) {
-            val failedIds = failed.map { indexable.id }
-            warn(
-              s"Some documents failed ingesting: ${failedIds.mkString(", ")}"
-            )
+      .mapAsyncUnordered(config.parallelism) {
+        bundles =>
+          val (_, items) = unzipBundles(bundles)
+          indexer(items).map {
+            result =>
+              val failed = result.left.getOrElse(Nil)
+              if (failed.nonEmpty) {
+                val failedIds = failed.map { indexable.id }
+                warn(
+                  s"Some documents failed ingesting: ${failedIds.mkString(", ")}"
+                )
+              }
+              bundles.collect {
+                case Bundle(message, doc, numberOfItems)
+                    if !failed.contains(doc) =>
+                  Bundle(message, doc, numberOfItems)
+              }
           }
-          bundles.collect {
-            case Bundle(message, doc, numberOfItems) if !failed.contains(doc) =>
-              Bundle(message, doc, numberOfItems)
-          }
-        }
       }
       .mapConcat(identity)
 
@@ -222,14 +236,16 @@ object PipelineStorageStream extends Logging {
         allowClosedSubstreamRecreation = true
       )
       .scan(Nil: List[Bundle[T]]) {
-        case (bundleList, b) => b :: bundleList
+        case (bundleList, b) =>
+          b :: bundleList
       }
     groupByMessage
-      .filter { list =>
-        list.nonEmpty && list
-          .map(_.item)
-          .distinct
-          .size == list.head.numberOfItems
+      .filter {
+        list =>
+          list.nonEmpty && list
+            .map(_.item)
+            .distinct
+            .size == list.head.numberOfItems
       }
       // There's a maximum number of substreams that you can have,
       // so we need to close them or eventually we will run out of substreams.

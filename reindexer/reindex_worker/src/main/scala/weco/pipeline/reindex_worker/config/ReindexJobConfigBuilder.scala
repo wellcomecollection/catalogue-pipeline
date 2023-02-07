@@ -11,13 +11,15 @@ import scala.util.{Failure, Success}
 
 object ReindexJobConfigBuilder extends Logging {
   def buildReindexJobConfigMap(
-    config: Config): Map[String, ReindexJobConfig[SNSConfig]] =
+    config: Config
+  ): Map[String, ReindexJobConfig[SNSConfig]] =
     buildReindexJobConfigMap(
       config.requireString("reindexer.jobConfig")
     )
 
   def buildReindexJobConfigMap(
-    jsonString: String): Map[String, ReindexJobConfig[SNSConfig]] = {
+    jsonString: String
+  ): Map[String, ReindexJobConfig[SNSConfig]] = {
     val configMap =
       fromJson[Map[String, ReindexJobConfig[SNSConfig]]](jsonString) match {
         case Success(value) => value

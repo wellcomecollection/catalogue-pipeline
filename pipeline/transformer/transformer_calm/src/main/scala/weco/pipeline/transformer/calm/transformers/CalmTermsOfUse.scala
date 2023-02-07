@@ -45,20 +45,41 @@ object CalmTermsOfUse extends CalmRecordOps with Logging {
         //      Closed until 1 January 2065.
         //
         case (Some(conditions), Some(AccessStatus.Closed), Some(closedUntil), _)
-          if conditions.toLowerCase.contains("closed") & conditions.containsDate(closedUntil) =>
+            if conditions.toLowerCase.contains("closed") & conditions
+              .containsDate(closedUntil) =>
           Some(conditions)
-        case (Some(conditions), Some(AccessStatus.Closed), Some(closedUntil), _) =>
-          Some(s"$conditions Closed until ${closedUntil.format(displayFormat)}.")
+        case (
+              Some(conditions),
+              Some(AccessStatus.Closed),
+              Some(closedUntil),
+              _
+            ) =>
+          Some(
+            s"$conditions Closed until ${closedUntil.format(displayFormat)}."
+          )
         case (None, Some(AccessStatus.Closed), Some(closedUntil), _) =>
           Some(s"Closed until ${closedUntil.format(displayFormat)}.")
 
         // Similarly, if an item is restricted and we have a RestrictedUntil date,
         // we create a message.
-        case (Some(conditions), Some(AccessStatus.Restricted), _, Some(restrictedUntil))
-          if conditions.toLowerCase.contains("restricted") & conditions.containsDate(restrictedUntil) =>
+        case (
+              Some(conditions),
+              Some(AccessStatus.Restricted),
+              _,
+              Some(restrictedUntil)
+            )
+            if conditions.toLowerCase.contains("restricted") & conditions
+              .containsDate(restrictedUntil) =>
           Some(conditions)
-        case (Some(conditions), Some(AccessStatus.Restricted), _, Some(restrictedUntil)) =>
-          Some(s"$conditions Restricted until ${restrictedUntil.format(displayFormat)}.")
+        case (
+              Some(conditions),
+              Some(AccessStatus.Restricted),
+              _,
+              Some(restrictedUntil)
+            ) =>
+          Some(
+            s"$conditions Restricted until ${restrictedUntil.format(displayFormat)}."
+          )
         case (None, Some(AccessStatus.Restricted), _, Some(restrictedUntil)) =>
           Some(s"Restricted until ${restrictedUntil.format(displayFormat)}.")
 
@@ -72,12 +93,30 @@ object CalmTermsOfUse extends CalmRecordOps with Logging {
         //      be allowed to view this item. Please see our Access Policy for more details.
         //      Restricted until 1 January 2027.
         //
-        case (Some(conditions), Some(AccessStatus.PermissionRequired), _, Some(restrictedUntil))
-          if conditions.toLowerCase.contains("permission") & conditions.hasRestrictions & conditions.containsDate(restrictedUntil) =>
+        case (
+              Some(conditions),
+              Some(AccessStatus.PermissionRequired),
+              _,
+              Some(restrictedUntil)
+            )
+            if conditions.toLowerCase.contains(
+              "permission"
+            ) & conditions.hasRestrictions & conditions.containsDate(
+              restrictedUntil
+            ) =>
           Some(conditions)
-        case (Some(conditions), Some(AccessStatus.PermissionRequired), _, Some(restrictedUntil))
-          if conditions.toLowerCase.contains("permission") & conditions.hasRestrictions =>
-          Some(s"$conditions Restricted until ${restrictedUntil.format(displayFormat)}.")
+        case (
+              Some(conditions),
+              Some(AccessStatus.PermissionRequired),
+              _,
+              Some(restrictedUntil)
+            )
+            if conditions.toLowerCase.contains(
+              "permission"
+            ) & conditions.hasRestrictions =>
+          Some(
+            s"$conditions Restricted until ${restrictedUntil.format(displayFormat)}."
+          )
 
         // If the item only has an access status or there's no information at all, there's
         // nothing useful to put in the access terms.
@@ -95,7 +134,9 @@ object CalmTermsOfUse extends CalmRecordOps with Logging {
           warn(s"Unclear how to create a TermsOfUse note for item ${record.id}")
           val parts = Seq(
             conditions,
-            restrictedUntil.map(d => s"Restricted until ${d.format(displayFormat)}."),
+            restrictedUntil.map(
+              d => s"Restricted until ${d.format(displayFormat)}."
+            ),
             closedUntil.map(d => s"Closed until ${d.format(displayFormat)}.")
           ).flatten
 
@@ -103,7 +144,9 @@ object CalmTermsOfUse extends CalmRecordOps with Logging {
       }
 
     terms
-      .map(contents => Note(contents = contents, noteType = NoteType.TermsOfUse))
+      .map(
+        contents => Note(contents = contents, noteType = NoteType.TermsOfUse)
+      )
       .toList
   }
 
@@ -111,8 +154,9 @@ object CalmTermsOfUse extends CalmRecordOps with Logging {
   private val displayFormat = DateTimeFormatter.ofPattern("d MMMM yyyy")
 
   private def getAccessConditions(record: CalmRecord): Option[String] =
-    record.getJoined("AccessConditions").map { s =>
-      if (s.endsWith(".")) s else s + "."
+    record.getJoined("AccessConditions").map {
+      s =>
+        if (s.endsWith(".")) s else s + "."
     }
 
   // e.g. parsing dates "01/01/2039"
@@ -129,8 +173,8 @@ object CalmTermsOfUse extends CalmRecordOps with Logging {
         .replace("th", "")
 
       Seq(
-        "d MMMM yyyy",  // 1 January 2021
-        "dd/MM/yyyy",   // 01/01/2021
+        "d MMMM yyyy", // 1 January 2021
+        "dd/MM/yyyy" // 01/01/2021
       ).exists {
         fmt =>
           val dateString = d.format(DateTimeFormatter.ofPattern(fmt))

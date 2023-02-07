@@ -8,9 +8,11 @@ import weco.pipeline_storage.{Retriever, RetrieverMultiResult}
 import scala.concurrent.{ExecutionContext, Future}
 
 class IdentifiedWorkLookup(retriever: Retriever[Work[Identified]])(
-  implicit ec: ExecutionContext) {
-  def fetchAllWorks(workIdentifiers: Seq[WorkIdentifier])
-    : Future[Seq[Option[Work[Identified]]]] = {
+  implicit ec: ExecutionContext
+) {
+  def fetchAllWorks(
+    workIdentifiers: Seq[WorkIdentifier]
+  ): Future[Seq[Option[Work[Identified]]]] = {
     assert(
       workIdentifiers.nonEmpty,
       "You should never look up an empty list of WorkIdentifiers!"

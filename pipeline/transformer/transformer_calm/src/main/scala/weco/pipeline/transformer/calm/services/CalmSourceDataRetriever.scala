@@ -12,8 +12,9 @@ class CalmSourceDataRetriever(
   recordReadable: Readable[S3ObjectLocation, CalmRecord]
 ) extends SourceDataRetriever[CalmSourcePayload, CalmSourceData] {
 
-  override def lookupSourceData(p: CalmSourcePayload)
-    : Either[ReadError, Identified[Version[String, Int], CalmSourceData]] =
+  override def lookupSourceData(
+    p: CalmSourcePayload
+  ): Either[ReadError, Identified[Version[String, Int], CalmSourceData]] =
     recordReadable
       .get(p.location)
       .map {
@@ -23,6 +24,7 @@ class CalmSourceDataRetriever(
             CalmSourceData(
               record = record,
               isDeleted = p.isDeleted
-            ))
+            )
+          )
       }
 }

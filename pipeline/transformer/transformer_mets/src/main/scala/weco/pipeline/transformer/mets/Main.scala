@@ -17,7 +17,8 @@ object Main extends WellcomeTypesafeApp {
     sourceDataRetriever = new MetsSourceDataRetriever()
   )
 
-  runWithConfig { config =>
-    transformer.run(config)
+  runWithConfig {
+    config =>
+      transformer.run(config)
   }
 }

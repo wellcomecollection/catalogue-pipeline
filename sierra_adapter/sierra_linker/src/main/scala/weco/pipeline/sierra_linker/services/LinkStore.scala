@@ -6,12 +6,11 @@ import weco.sierra.models.identifiers.TypedSierraRecordNumber
 import weco.storage.store.VersionedStore
 import weco.storage.{Identified, UpdateNotApplied}
 
-class LinkStore[Id <: TypedSierraRecordNumber,
-                Record <: AbstractSierraRecord[Id]](
+class LinkStore[Id <: TypedSierraRecordNumber, Record <: AbstractSierraRecord[
+  Id
+]](
   store: VersionedStore[Id, Int, Link]
-)(
-  implicit linkOps: LinkOps[Record]
-) {
+)(implicit linkOps: LinkOps[Record]) {
   def update(newRecord: Record): Either[Throwable, Option[Record]] = {
     val newLink = linkOps.createLink(newRecord)
 
@@ -22,7 +21,9 @@ class LinkStore[Id <: TypedSierraRecordNumber,
           case None =>
             Left(
               UpdateNotApplied(
-                new Throwable(s"Item ${newRecord.id} is already up-to-date")))
+                new Throwable(s"Item ${newRecord.id} is already up-to-date")
+              )
+            )
         }
       }
 
@@ -31,7 +32,8 @@ class LinkStore[Id <: TypedSierraRecordNumber,
         Right(
           Some(
             linkOps.copyUnlinkedBibIds(updatedLink, newRecord)
-          ))
+          )
+        )
 
       case Left(_: UpdateNotApplied) => Right(None)
       case Left(err)                 => Left(err.e)

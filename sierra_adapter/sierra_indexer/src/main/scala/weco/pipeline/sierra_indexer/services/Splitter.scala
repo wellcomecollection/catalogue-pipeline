@@ -12,12 +12,11 @@ import scala.concurrent.{ExecutionContext, Future}
 
 // This object splits a SierraTransformable into indexable pieces
 // that can be sent to Elasticsearch.
-class Splitter(indexPrefix: String)(
-  implicit
-  ec: ExecutionContext
-) extends Logging {
-  def split(t: SierraTransformable)
-    : Future[(Seq[IndexRequest], Seq[DeleteByQueryRequest])] = Future {
+class Splitter(indexPrefix: String)(implicit ec: ExecutionContext)
+    extends Logging {
+  def split(
+    t: SierraTransformable
+  ): Future[(Seq[IndexRequest], Seq[DeleteByQueryRequest])] = Future {
     val apiData = getSierraApiData(t)
 
     val mainRecords = IndexerRequest.mainRecords(indexPrefix, apiData)
@@ -47,42 +46,61 @@ class Splitter(indexPrefix: String)(
         Seq(
           Parent(bibRecord.id) ->
             parse(bibRecord.data)
-              .map { json =>
-                json
-                  .mapObject(_.add("itemIds", Json.fromValues(itemIds.map {
-                    Json.fromString
-                  })))
-                  .mapObject(
-                    _.add("holdingsIds", Json.fromValues(holdingsIds.map {
-                      Json.fromString
-                    })))
-                  .mapObject(_.add("orderIds", Json.fromValues(orderIds.map {
-                    Json.fromString
-                  })))
+              .map {
+                json =>
+                  json
+                    .mapObject(
+                      _.add(
+                        "itemIds",
+                        Json.fromValues(itemIds.map {
+                          Json.fromString
+                        })
+                      )
+                    )
+                    .mapObject(
+                      _.add(
+                        "holdingsIds",
+                        Json.fromValues(holdingsIds.map {
+                          Json.fromString
+                        })
+                      )
+                    )
+                    .mapObject(
+                      _.add(
+                        "orderIds",
+                        Json.fromValues(orderIds.map {
+                          Json.fromString
+                        })
+                      )
+                    )
               }
         )
       case None => Seq()
     }
 
     val itemData: Seq[(Parent, Either[ParsingFailure, Json])] =
-      t.itemRecords.values.map { itemRecord =>
-        Parent(itemRecord.id) -> parse(itemRecord.data)
+      t.itemRecords.values.map {
+        itemRecord =>
+          Parent(itemRecord.id) -> parse(itemRecord.data)
       }.toSeq
 
     val holdingsData: Seq[(Parent, Either[ParsingFailure, Json])] =
-      t.holdingsRecords.values.map { holdingsRecord =>
-        Parent(holdingsRecord.id) -> parse(holdingsRecord.data)
+      t.holdingsRecords.values.map {
+        holdingsRecord =>
+          Parent(holdingsRecord.id) -> parse(holdingsRecord.data)
       }.toSeq
 
     val orderData: Seq[(Parent, Either[ParsingFailure, Json])] =
-      t.orderRecords.values.map { orderRecord =>
-        Parent(orderRecord.id) -> parse(orderRecord.data)
+      t.orderRecords.values.map {
+        orderRecord =>
+          Parent(orderRecord.id) -> parse(orderRecord.data)
       }.toSeq
 
     val data = bibData ++ itemData ++ holdingsData ++ orderData
 
     val successes = data.collect {
-      case (parent, Right(json)) => (parent, json)
+      case (parent, Right(json)) =>
+        (parent, json)
     }
     val failures = data.collect { case (parent, Left(err)) => (parent, err) }
 

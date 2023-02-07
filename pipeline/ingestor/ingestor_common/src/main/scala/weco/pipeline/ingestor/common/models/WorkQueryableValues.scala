@@ -25,8 +25,9 @@ case class WorkQueryableValues(
   @JsonKey("images.identifiers.value") imageIdentifiers: List[String],
   @JsonKey("items.id") itemIds: List[String],
   @JsonKey("items.identifiers.value") itemIdentifiers: List[String],
-  @JsonKey("items.locations.accessConditions.status.id") itemAccessStatusIds: List[
-    String],
+  @JsonKey(
+    "items.locations.accessConditions.status.id"
+  ) itemAccessStatusIds: List[String],
   @JsonKey("items.locations.license.id") itemLicenseIds: List[String],
   @JsonKey("items.locations.locationType.id") itemLocationTypeIds: List[String],
   @JsonKey("subjects.id") subjectIds: List[String],
@@ -45,15 +46,17 @@ case class WorkQueryableValues(
   @JsonKey("availabilities.id") availabilityIds: List[String],
   @JsonKey("collectionPath.label") collectionPathLabel: Option[String],
   @JsonKey("collectionPath.path") collectionPathPath: Option[String],
-  @JsonKey("referenceNumber") referenceNumber: Option[String],
+  @JsonKey("referenceNumber") referenceNumber: Option[String]
 )
 
 case object WorkQueryableValues {
-  def apply(id: CanonicalId,
-            sourceIdentifier: SourceIdentifier,
-            workData: WorkData[DataState.Identified],
-            relations: Relations,
-            availabilities: Set[Availability]): WorkQueryableValues = {
+  def apply(
+    id: CanonicalId,
+    sourceIdentifier: SourceIdentifier,
+    workData: WorkData[DataState.Identified],
+    relations: Relations,
+    availabilities: Set[Availability]
+  ): WorkQueryableValues = {
     val locations = workData.items.flatMap(_.locations)
 
     WorkQueryableValues(
@@ -87,8 +90,10 @@ case object WorkQueryableValues {
       languageLabels = workData.languages.map(_.label),
       contributorAgentIds = workData.contributors.map(_.agent.id).canonicalIds,
       contributorAgentLabels = workData.contributors.map(_.agent.label),
-      productionLabels = workData.production.flatMap(p =>
-        p.places.map(_.label) ++ p.agents.map(_.label) ++ p.dates.map(_.label)),
+      productionLabels = workData.production.flatMap(
+        p =>
+          p.places.map(_.label) ++ p.agents.map(_.label) ++ p.dates.map(_.label)
+      ),
       productionDatesRangeFrom = workData.production
         .flatMap(_.dates)
         .flatMap(_.range)
@@ -96,7 +101,8 @@ case object WorkQueryableValues {
           // Note: the Elasticsearch date field type wants milliseconds since
           // the epoch.
           // See https://www.elastic.co/guide/en/elasticsearch/reference/current/date.html
-          _.from.toEpochMilli),
+          _.from.toEpochMilli
+        ),
       partOfIds = relations.ancestors.flatMap(_.id).map(_.underlying),
       partOfTitles = relations.ancestors.flatMap(_.title),
       availabilityIds = availabilities.map(_.id).toList,

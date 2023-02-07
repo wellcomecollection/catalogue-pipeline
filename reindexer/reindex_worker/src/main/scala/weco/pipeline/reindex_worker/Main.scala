@@ -17,29 +17,30 @@ import weco.typesafe.WellcomeTypesafeApp
 import scala.concurrent.ExecutionContext
 
 object Main extends WellcomeTypesafeApp {
-  runWithConfig { config: Config =>
-    implicit val actorSystem: ActorSystem =
-      ActorSystem("main-actor-system")
-    implicit val executionContext: ExecutionContext =
-      actorSystem.dispatcher
+  runWithConfig {
+    config: Config =>
+      implicit val actorSystem: ActorSystem =
+        ActorSystem("main-actor-system")
+      implicit val executionContext: ExecutionContext =
+        actorSystem.dispatcher
 
-    implicit val dynamoDBClient: DynamoDbClient =
-      DynamoDbClient.builder().build()
+      implicit val dynamoDBClient: DynamoDbClient =
+        DynamoDbClient.builder().build()
 
-    val recordReader = new RecordReader
+      val recordReader = new RecordReader
 
-    val bulkMessageSender = new BulkMessageSender(
-      underlying = new SNSIndividualMessageSender(
-        snsClient = SnsClient.builder().build()
+      val bulkMessageSender = new BulkMessageSender(
+        underlying = new SNSIndividualMessageSender(
+          snsClient = SnsClient.builder().build()
+        )
       )
-    )
 
-    new ReindexWorkerService(
-      recordReader = recordReader,
-      bulkMessageSender = bulkMessageSender,
-      sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
-      reindexJobConfigMap =
-        ReindexJobConfigBuilder.buildReindexJobConfigMap(config)
-    )
+      new ReindexWorkerService(
+        recordReader = recordReader,
+        bulkMessageSender = bulkMessageSender,
+        sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
+        reindexJobConfigMap =
+          ReindexJobConfigBuilder.buildReindexJobConfigMap(config)
+      )
   }
 }

@@ -14,11 +14,12 @@ object SierraAccessStatus extends SierraQueryOps {
     val statuses =
       bibData
         .varfieldsWithTag("506")
-        .flatMap { varField =>
-          val terms = getTerms(varField)
-          val termsStatus = statusFromTerms(terms)
+        .flatMap {
+          varField =>
+            val terms = getTerms(varField)
+            val termsStatus = statusFromTerms(terms)
 
-          getAccessStatus(bibId, varField, termsStatus)
+            getAccessStatus(bibId, varField, termsStatus)
         }
         .distinct
 

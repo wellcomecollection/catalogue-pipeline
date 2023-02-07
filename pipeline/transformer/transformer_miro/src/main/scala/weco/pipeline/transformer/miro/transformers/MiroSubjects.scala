@@ -27,13 +27,14 @@ trait MiroSubjects extends LabelDerivedIdentifiers {
         case None                => List()
       }
 
-    (keywords ++ keywordsUnauth).map { keyword =>
-      val normalisedLabel = keyword.sentenceCase
-      Subject(
-        id = identifierFromText(normalisedLabel, ontologyType = "Subject"),
-        label = normalisedLabel,
-        concepts = List(Concept(normalisedLabel))
-      )
+    (keywords ++ keywordsUnauth).map {
+      keyword =>
+        val normalisedLabel = keyword.sentenceCase
+        Subject(
+          id = identifierFromText(normalisedLabel, ontologyType = "Subject"),
+          label = normalisedLabel,
+          concepts = List(Concept(normalisedLabel))
+        )
     }
   }
 }

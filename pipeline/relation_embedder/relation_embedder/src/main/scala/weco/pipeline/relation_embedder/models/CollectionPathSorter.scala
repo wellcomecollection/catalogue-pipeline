@@ -27,11 +27,12 @@ object CollectionPathSorter {
     """\d+|\D+""".r
       .findAllIn(s)
       .toList
-      .map { part =>
-        Try(part.toInt) match {
-          case Success(number) => Left(number)
-          case _               => Right(part)
-        }
+      .map {
+        part =>
+          Try(part.toInt) match {
+            case Success(number) => Left(number)
+            case _               => Right(part)
+          }
       }
 
   // Note: when calling compare(x, y), the result sign has the following meaning:
@@ -48,10 +49,11 @@ object CollectionPathSorter {
         case (Right(strX), Right(strY))     => strX.compareTo(strY)
         case (Left(_), _)                   => -1
         case _                              => 1
-    }
+      }
 
   def shorterPathsWinOrdering[T](
-    perItemOrdering: Ordering[T]): Ordering[List[T]] =
+    perItemOrdering: Ordering[T]
+  ): Ordering[List[T]] =
     new Ordering[List[T]] {
       @tailrec
       override def compare(x: List[T], y: List[T]): Int =

@@ -14,23 +14,24 @@ import weco.typesafe.WellcomeTypesafeApp
 import scala.concurrent.ExecutionContext
 
 object Main extends WellcomeTypesafeApp {
-  runWithConfig { config: Config =>
-    implicit val actorSystem: ActorSystem =
-      ActorSystem("main-actor-system")
-    implicit val executionContext: ExecutionContext =
-      actorSystem.dispatcher
+  runWithConfig {
+    config: Config =>
+      implicit val actorSystem: ActorSystem =
+        ActorSystem("main-actor-system")
+      implicit val executionContext: ExecutionContext =
+        actorSystem.dispatcher
 
-    val sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config)
+      val sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config)
 
-    implicit val s3Client: S3Client = S3Client.builder().build()
+      implicit val s3Client: S3Client = S3Client.builder().build()
 
-    val client = SierraOauthHttpClientBuilder.build(config)
+      val client = SierraOauthHttpClientBuilder.build(config)
 
-    new SierraReaderWorkerService(
-      client = client,
-      sqsStream = sqsStream,
-      s3Config = S3Builder.buildS3Config(config),
-      readerConfig = ReaderConfigBuilder.buildReaderConfig(config)
-    )
+      new SierraReaderWorkerService(
+        client = client,
+        sqsStream = sqsStream,
+        s3Config = S3Builder.buildS3Config(config),
+        readerConfig = ReaderConfigBuilder.buildReaderConfig(config)
+      )
   }
 }

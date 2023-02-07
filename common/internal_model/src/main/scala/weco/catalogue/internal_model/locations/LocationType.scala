@@ -36,13 +36,13 @@ object LocationType extends Enum[LocationType] {
     cursor =>
       locationTypeDecoder.apply(cursor).map {
         _.asInstanceOf[PhysicalLocationType]
-    }
+      }
 
   implicit val digitalLocationTypeDecoder: Decoder[DigitalLocationType] =
     cursor =>
       locationTypeDecoder.apply(cursor).map {
         _.asInstanceOf[DigitalLocationType]
-    }
+      }
 
   case object ClosedStores extends PhysicalLocationType {
     val id = "closed-stores"

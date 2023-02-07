@@ -15,7 +15,8 @@ class TableProvisioner(rdsClientConfig: RDSClientConfig) {
       rdsClientConfig.password
     )
     flyway.setPlaceholders(
-      Map("database" -> database, "tableName" -> tableName).asJava)
+      Map("database" -> database, "tableName" -> tableName).asJava
+    )
     flyway.migrate()
   }
 

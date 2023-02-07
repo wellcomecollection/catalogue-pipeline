@@ -96,8 +96,8 @@ object AccessStatus extends Enum[AccessStatus] {
   }
 
   case class LicensedResources(
-    relationship: LicensedResources.Relationship = LicensedResources.Resource)
-      extends AccessStatus {
+    relationship: LicensedResources.Relationship = LicensedResources.Resource
+  ) extends AccessStatus {
     override val id: String = "licensed-resources"
     override val label: String = "Licensed resources"
   }

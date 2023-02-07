@@ -15,21 +15,18 @@ object TeiLanguages extends Logging {
 
   /** The languages of the TEI are in `textLang` nodes under `msContents`.
     *
-    * <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id={id}>
-    *   <teiHeader>
-    *     <fileDesc>
-    *       <sourceDesc>
-    *         <msDesc xml:lang="en" xml:id="MS_Arabic_1">
-    *           <msContents>
-    *             <textLang mainLang={id} source="IANA">{label}</textLang>
+    * <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id={id}> <teiHeader>
+    * <fileDesc> <sourceDesc> <msDesc xml:lang="en" xml:id="MS_Arabic_1">
+    * <msContents> <textLang mainLang={id} source="IANA">{label}</textLang>
     *
-    * This function extracts all the nodes from a parsed XML and returns
-    * a list of (id, label) pairs.
+    * This function extracts all the nodes from a parsed XML and returns a list
+    * of (id, label) pairs.
     */
   def parseLanguages(value: NodeSeq): Result[(List[Language], List[Note])] =
     (value \ "textLang")
       .foldRight(
-        Right((Nil, Nil)): Either[Throwable, (List[Language], List[Note])]) {
+        Right((Nil, Nil)): Either[Throwable, (List[Language], List[Note])]
+      ) {
         case (n, Right((languageList, languageNoteList))) =>
           val label = n.text
 
@@ -62,10 +59,12 @@ object TeiLanguages extends Logging {
     }
   }
 
-  private def appendLanguageOrNote(languageList: List[Language],
-                                   languageNoteList: List[Note],
-                                   id: String,
-                                   label: String) =
+  private def appendLanguageOrNote(
+    languageList: List[Language],
+    languageNoteList: List[Note],
+    id: String,
+    label: String
+  ) =
     TeiLanguageData(id, label).fold(
       err => {
         warn("Could not parse language", err)
@@ -74,14 +73,18 @@ object TeiLanguages extends Logging {
       appendLanguage(languageList, languageNoteList, _)
     )
 
-  private def appendLanguage(languageList: List[Language],
-                             languageNoteList: List[Note],
-                             language: Language) =
+  private def appendLanguage(
+    languageList: List[Language],
+    languageNoteList: List[Note],
+    language: Language
+  ) =
     Right((language +: languageList, languageNoteList))
 
-  private def appendNote(languageList: List[Language],
-                         languageNoteList: List[Note],
-                         label: String) =
+  private def appendNote(
+    languageList: List[Language],
+    languageNoteList: List[Note],
+    label: String
+  ) =
     Right((languageList, languageNoteFrom(label) +: languageNoteList))
 
   private def languageNoteFrom(label: String) =

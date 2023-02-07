@@ -36,7 +36,9 @@ trait MiroContributorCodes {
   private val perRecordStream: InputStream = getClass
     .getResourceAsStream("/miro_individual_record_contributor_map.json")
   private val perRecordContributorMap: Map[String, Map[String, String]] =
-    toMap[Map[String, String]](Source.fromInputStream(perRecordStream).mkString).get
+    toMap[Map[String, String]](
+      Source.fromInputStream(perRecordStream).mkString
+    ).get
 
   // Returns our best guess for the credit line of an image, given its
   // Miro ID and contributor code.
@@ -71,7 +73,8 @@ trait MiroContributorCodes {
 
     if (creditCode == "GUS" && gusMiroIds.contains(miroId)) {
       throw new ShouldSuppressException(
-        "we do not expose image_source_code = GUS")
+        "we do not expose image_source_code = GUS"
+      )
     }
 
     contributorMap.get(creditCode) match {

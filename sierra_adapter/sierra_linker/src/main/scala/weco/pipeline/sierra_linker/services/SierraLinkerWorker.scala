@@ -13,17 +13,16 @@ import weco.sierra.models.identifiers.TypedSierraRecordNumber
 import scala.concurrent.Future
 import scala.util.Success
 
-class SierraLinkerWorker[Id <: TypedSierraRecordNumber,
-                         Record <: AbstractSierraRecord[Id],
-                         Destination](
+class SierraLinkerWorker[
+  Id <: TypedSierraRecordNumber,
+  Record <: AbstractSierraRecord[Id],
+  Destination
+](
   sqsStream: SQSStream[NotificationMessage],
   linkStore: LinkStore[Id, Record],
   messageSender: MessageSender[Destination]
-)(
-  implicit
-  decoder: Decoder[Record],
-  encoder: Encoder[Record]
-) extends Runnable {
+)(implicit decoder: Decoder[Record], encoder: Encoder[Record])
+    extends Runnable {
 
   private def process(message: NotificationMessage): Future[Unit] =
     Future.fromTry {

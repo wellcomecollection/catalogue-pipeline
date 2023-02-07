@@ -40,35 +40,38 @@ object SierraPersonSubjects
     // So let's filter anything that is from another authority for now.
     varFields
       .filterNot { _.indicator2.contains("7") }
-      .flatMap { varField: VarField =>
-        val subfields = varField.subfields
-        val maybePerson =
-          getPerson(subfields)
-        val generalSubdivisions =
-          varField.subfields
-            .collect {
-              case Subfield("x", content) => content
-            }
+      .flatMap {
+        varField: VarField =>
+          val subfields = varField.subfields
+          val maybePerson =
+            getPerson(subfields)
+          val generalSubdivisions =
+            varField.subfields
+              .collect {
+                case Subfield("x", content) =>
+                  content
+              }
 
-        maybePerson.map { person =>
-          val label = getPersonSubjectLabel(
-            person = person,
-            roles = getRoles(subfields),
-            dates = getDates(subfields),
-            generalSubdivisions = generalSubdivisions
-          )
-          val subjectIdentifier = identifyAgentSubject(varField, "Person")
-          val maybeIdentifiedPerson =
-            person.copy(id = subjectIdentifier)
-          Subject(
-            label = label,
-            concepts = getConcepts(
-              maybeIdentifiedPerson.identifiable(),
-              generalSubdivisions
-            ),
-            id = subjectIdentifier
-          )
-        }
+          maybePerson.map {
+            person =>
+              val label = getPersonSubjectLabel(
+                person = person,
+                roles = getRoles(subfields),
+                dates = getDates(subfields),
+                generalSubdivisions = generalSubdivisions
+              )
+              val subjectIdentifier = identifyAgentSubject(varField, "Person")
+              val maybeIdentifiedPerson =
+                person.copy(id = subjectIdentifier)
+              Subject(
+                label = label,
+                concepts = getConcepts(
+                  maybeIdentifiedPerson.identifiable(),
+                  generalSubdivisions
+                ),
+                id = subjectIdentifier
+              )
+          }
       }
   }
 

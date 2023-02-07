@@ -52,9 +52,10 @@ object SierraNotes extends SierraDataTransformer with SierraQueryOps {
     // 591 subfield ǂ9 contains barcodes that we don't want to show on /works.
     "591" -> createNoteFromContents(
       NoteType.GeneralNote,
-      suppressedSubfields = Set("9")),
+      suppressedSubfields = Set("9")
+    ),
     "593" -> createNoteFromContents(NoteType.CopyrightNote),
-    "787" -> createNoteFrom787 _,
+    "787" -> createNoteFrom787 _
   )
 
   def apply(bibData: SierraBibData): List[Note] =
@@ -73,18 +74,21 @@ object SierraNotes extends SierraDataTransformer with SierraQueryOps {
         case _ => None
       }
       .collect {
-        case Some((vf, Some(createNote))) => createNote(vf)
+        case Some((vf, Some(createNote))) =>
+          createNote(vf)
       }
       .filterNot { _.contents.isWhitespace }
 
   private def createNoteFromContents(
     noteType: NoteType,
-    suppressedSubfields: Set[String] = Set()): VarField => Note =
+    suppressedSubfields: Set[String] = Set()
+  ): VarField => Note =
     (varField: VarField) => {
       val contents =
         varField
           .subfieldsWithoutTags(
-            (globallySuppressedSubfields ++ suppressedSubfields).toSeq: _*)
+            (globallySuppressedSubfields ++ suppressedSubfields).toSeq: _*
+          )
           .map {
             // We want to make ǂu into a clickable link, but only if it's a URL --
             // we don't want to make non-URLs into clickable objects.

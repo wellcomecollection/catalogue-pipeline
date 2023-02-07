@@ -56,16 +56,18 @@ trait Merger extends MergerLogging {
       case List(unmatchedWork: Work.Visible[Identified]) =>
         Some(CategorisedWorks(target = unmatchedWork))
       case matchedWorks =>
-        findTarget(matchedWorks).map { target =>
-          CategorisedWorks(
-            target = target,
-            sources = matchedWorks
-              .filterNot { _.isInstanceOf[Work.Deleted[Identified]] }
-              .filterNot { _.sourceIdentifier == target.sourceIdentifier },
-            deleted = matchedWorks.collect {
-              case w: Work.Deleted[Identified] => w
-            }
-          )
+        findTarget(matchedWorks).map {
+          target =>
+            CategorisedWorks(
+              target = target,
+              sources = matchedWorks
+                .filterNot { _.isInstanceOf[Work.Deleted[Identified]] }
+                .filterNot { _.sourceIdentifier == target.sourceIdentifier },
+              deleted = matchedWorks.collect {
+                case w: Work.Deleted[Identified] =>
+                  w
+              }
+            )
         }
     }
 
@@ -76,12 +78,13 @@ trait Merger extends MergerLogging {
     // If the state already contains a source, then don't change the existing `redirect` value
     // Otherwise, add the source with the current value.
     private def shouldRedirect(redirect: Boolean): State[MergeState, T] =
-      State { prevState =>
-        val nextState = result.sources.foldLeft(prevState) {
-          case (state, source) if state.contains(source) => state
-          case (state, source)                           => state + (source -> redirect)
-        }
-        (nextState, result.data)
+      State {
+        prevState =>
+          val nextState = result.sources.foldLeft(prevState) {
+            case (state, source) if state.contains(source) => state
+            case (state, source) => state + (source -> redirect)
+          }
+          (nextState, result.data)
       }
   }
 
@@ -109,8 +112,9 @@ trait Merger extends MergerLogging {
           )
 
           val redirectedIdentifiers =
-            redirectedSources.map { s =>
-              IdState.Identified(s.state.canonicalId, s.sourceIdentifier)
+            redirectedSources.map {
+              s =>
+                IdState.Identified(s.state.canonicalId, s.sourceIdentifier)
             }.toSeq
 
           val targetWork: Work.Visible[Identified] =
@@ -118,11 +122,13 @@ trait Merger extends MergerLogging {
               version = result.mergedTarget.version,
               data = result.mergedTarget.data,
               state = result.mergedTarget.state,
-              redirectSources = result.mergedTarget.redirectSources ++ redirectedIdentifiers
+              redirectSources =
+                result.mergedTarget.redirectSources ++ redirectedIdentifiers
             )
 
           MergerOutcome(
-            resultWorks = redirects.toList ++ remaining ++ deleted ++ internalWorks :+ targetWork,
+            resultWorks =
+              redirects.toList ++ remaining ++ deleted ++ internalWorks :+ targetWork,
             imagesWithSources = result.imageDataWithSources
           )
       }
@@ -130,8 +136,10 @@ trait Merger extends MergerLogging {
   }
 
   private implicit class WorkOps(w: Work[Identified]) {
-    def internalWorksWith(thumbnail: Option[DigitalLocation],
-                          version: Int): List[Work.Visible[Identified]] =
+    def internalWorksWith(
+      thumbnail: Option[DigitalLocation],
+      version: Int
+    ): List[Work.Visible[Identified]] =
       w.state.internalWorkStubs.map {
         case InternalWork.Identified(sourceIdentifier, canonicalId, data) =>
           Work.Visible[Identified](
@@ -221,11 +229,12 @@ object PlatformMerger extends Merger {
       State.pure(
         models.MergeResult(
           mergedTarget = modifyInternalWorks(target, target.data.items),
-          imageDataWithSources = standaloneImages(target).map { image =>
-            ImageDataWithSource(
-              imageData = image,
-              source = target.toParentWork
-            )
+          imageDataWithSources = standaloneImages(target).map {
+            image =>
+              ImageDataWithSource(
+                imageData = image,
+                source = target.toParentWork
+              )
           }
         )
       )
@@ -233,40 +242,49 @@ object PlatformMerger extends Merger {
       for {
         items <- ItemsRule(target, sources).redirectSources
         thumbnail <- ThumbnailRule(target, sources).redirectSources
-        otherIdentifiers <- OtherIdentifiersRule(target, sources).redirectSources
+        otherIdentifiers <- OtherIdentifiersRule(
+          target,
+          sources
+        ).redirectSources
         sourceImageData <- ImageDataRule(target, sources).redirectSources
         work = target
-          .mapData { data =>
-            data.copy[DataState.Identified](
-              items = items,
-              thumbnail = thumbnail,
-              otherIdentifiers = otherIdentifiers,
-              imageData = sourceImageData
-            )
+          .mapData {
+            data =>
+              data.copy[DataState.Identified](
+                items = items,
+                thumbnail = thumbnail,
+                otherIdentifiers = otherIdentifiers,
+                imageData = sourceImageData
+              )
           }
-      } yield
-        MergeResult(
-          mergedTarget = modifyInternalWorks(work, items),
-          imageDataWithSources = sourceImageData.map { imageData =>
+      } yield MergeResult(
+        mergedTarget = modifyInternalWorks(work, items),
+        imageDataWithSources = sourceImageData.map {
+          imageData =>
             ImageDataWithSource(
               imageData = imageData,
               source = work.toParentWork
             )
-          }
-        )
+        }
+      )
 
-  private def modifyInternalWorks(work: Work.Visible[Identified],
-                                  items: List[Item[IdState.Minted]]) = {
+  private def modifyInternalWorks(
+    work: Work.Visible[Identified],
+    items: List[Item[IdState.Minted]]
+  ) = {
     // Internal works are in TEI works. If they are merged with Sierra, we want the Sierra
     // items to be added to TEI internal works so that the user can request the item
     // containing that work without having to find the wrapping work.
     work
-      .mapState { state =>
-        state.copy(internalWorkStubs = state.internalWorkStubs.map { stub =>
-          stub.copy(
-            workData = stub.workData.copy[DataState.Identified](items = items)
-          )
-        })
+      .mapState {
+        state =>
+          state.copy(internalWorkStubs = state.internalWorkStubs.map {
+            stub =>
+              stub.copy(
+                workData =
+                  stub.workData.copy[DataState.Identified](items = items)
+              )
+          })
       }
   }
 

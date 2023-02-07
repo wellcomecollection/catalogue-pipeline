@@ -20,9 +20,11 @@ import java.time.Instant
 
 class TeiTransformer(teiReader: Readable[S3ObjectLocation, String])
     extends Transformer[TeiMetadata] {
-  override def apply(id: String,
-                     sourceData: TeiMetadata,
-                     version: Int): Result[Work[WorkState.Source]] =
+  override def apply(
+    id: String,
+    sourceData: TeiMetadata,
+    version: Int
+  ): Result[Work[WorkState.Source]] =
     sourceData match {
       case TeiChangedMetadata(s3Location, time) =>
         handleTeiChange(id, version, s3Location, time)
@@ -36,12 +38,15 @@ class TeiTransformer(teiReader: Readable[S3ObjectLocation, String])
         version = version,
         state = Source(SourceIdentifier(IdentifierType.Tei, "Work", id), time),
         deletedReason = DeletedReason.DeletedFromSource("Deleted by TEI source")
-      ))
+      )
+    )
 
-  private def handleTeiChange(id: String,
-                              version: Int,
-                              s3Location: S3ObjectLocation,
-                              time: Instant): Result[Work[Source]] =
+  private def handleTeiChange(
+    id: String,
+    version: Int,
+    s3Location: S3ObjectLocation,
+    time: Instant
+  ): Result[Work[Source]] =
     for {
       xmlString <- teiReader.get(s3Location).left.map(_.e)
       teiXml <- TeiXml(id, xmlString.identifiedT)

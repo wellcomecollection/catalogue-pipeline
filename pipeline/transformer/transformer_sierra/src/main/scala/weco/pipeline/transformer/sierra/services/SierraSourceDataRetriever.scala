@@ -8,11 +8,12 @@ import weco.storage.store.Readable
 import weco.storage.{Identified, ReadError, Version}
 
 class SierraSourceDataRetriever(
-  sierraReadable: Readable[S3ObjectLocation, SierraTransformable],
+  sierraReadable: Readable[S3ObjectLocation, SierraTransformable]
 ) extends SourceDataRetriever[SierraSourcePayload, SierraTransformable] {
 
-  override def lookupSourceData(p: SierraSourcePayload)
-    : Either[ReadError, Identified[Version[String, Int], SierraTransformable]] =
+  override def lookupSourceData(
+    p: SierraSourcePayload
+  ): Either[ReadError, Identified[Version[String, Int], SierraTransformable]] =
     sierraReadable
       .get(p.location)
       .map {

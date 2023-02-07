@@ -25,7 +25,9 @@ class GitHubAuthenticatedHttpClient(underlying: HttpClient, token: String)
           Accept(
             MediaType.applicationWithFixedCharset(
               "vnd.github.v3+json",
-              HttpCharsets.`UTF-8`)),
+              HttpCharsets.`UTF-8`
+            )
+          ),
           Authorization(OAuth2BearerToken(token))
         )
       )

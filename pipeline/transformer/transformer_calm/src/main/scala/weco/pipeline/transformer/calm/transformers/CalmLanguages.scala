@@ -27,7 +27,8 @@ object CalmLanguages {
       }
 
   private def parseSingleValue(
-    languageField: String): (List[Language], List[Note]) =
+    languageField: String
+  ): (List[Language], List[Note]) =
     languageField match {
       case value if value.trim.nonEmpty =>
         parseLanguages(value) match {
@@ -166,7 +167,10 @@ object CalmLanguages {
           .replace("Norweigan", "Norwegian")
           .replace("Lugandan", "Luganda")
           .replaceAll("^Eng$", "English")
-          .replaceAll("^Language$", "") // We can't do anything useful with this!
+          .replaceAll(
+            "^Language$",
+            ""
+          ) // We can't do anything useful with this!
 
       if (langField != correctedLangField) {
         parseLanguages(correctedLangField)

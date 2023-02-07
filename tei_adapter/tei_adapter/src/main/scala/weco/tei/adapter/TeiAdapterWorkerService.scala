@@ -42,7 +42,8 @@ class TeiAdapterWorkerService[Dest](
     )
 
   private def runStream(
-    source: Source[(Message, NotificationMessage), NotUsed]) =
+    source: Source[(Message, NotificationMessage), NotUsed]
+  ) =
     source
       .via(unwrapMessage)
       .via(broadcastAndMerge(delayDeleted, sendChanged))
@@ -99,7 +100,7 @@ class TeiAdapterWorkerService[Dest](
           updateMetadata(
             newMetadata = metadata,
             existingMetadata = existingMetadata
-        )
+          )
       )
       .left
       .map(_.e)

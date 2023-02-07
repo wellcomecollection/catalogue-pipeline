@@ -28,26 +28,28 @@ import weco.catalogue.internal_model.work.{
 import weco.pipeline.transformer.identifiers.SourceIdentifierValidation._
 import java.time.Instant
 
-case class TeiData(id: String,
-                   title: String,
-                   bNumber: Option[String] = None,
-                   referenceNumber: Option[ReferenceNumber] = None,
-                   description: Option[String] = None,
-                   languages: List[Language] = Nil,
-                   notes: List[Note] = Nil,
-                   nestedTeiData: List[TeiData] = Nil,
-                   contributors: List[Contributor[Unminted]] = Nil,
-                   origin: List[ProductionEvent[Unminted]] = Nil,
-                   physicalDescription: Option[String] = None,
-                   subjects: List[Subject[Unminted]] = Nil,
-                   alternativeTitles: List[String] = Nil)
-    extends Logging {
+case class TeiData(
+  id: String,
+  title: String,
+  bNumber: Option[String] = None,
+  referenceNumber: Option[ReferenceNumber] = None,
+  description: Option[String] = None,
+  languages: List[Language] = Nil,
+  notes: List[Note] = Nil,
+  nestedTeiData: List[TeiData] = Nil,
+  contributors: List[Contributor[Unminted]] = Nil,
+  origin: List[ProductionEvent[Unminted]] = Nil,
+  physicalDescription: Option[String] = None,
+  subjects: List[Subject[Unminted]] = Nil,
+  alternativeTitles: List[String] = Nil
+) extends Logging {
   def toWork(time: Instant, version: Int): Work[Source] = {
     val topLevelData = toWorkData(referenceNumber = referenceNumber)
 
     def iterateNestedData(
       nestedTeiData: List[TeiData],
-      topLevelData: WorkData[Unidentified]): List[InternalWork.Source] =
+      topLevelData: WorkData[Unidentified]
+    ): List[InternalWork.Source] =
       nestedTeiData.foldLeft(Nil: List[InternalWork.Source]) {
         case (internalWorks, data) =>
           val upperLevelWorkData =
@@ -90,18 +92,19 @@ case class TeiData(id: String,
       sourceIdentifier <- SourceIdentifier(
         identifierType = IdentifierType.SierraSystemNumber,
         ontologyType = "Work",
-        value = id).validatedWithWarning
-    } yield
-      MergeCandidate(
-        identifier = sourceIdentifier,
-        reason = "Bnumber present in TEI file"
-      )
+        value = id
+      ).validatedWithWarning
+    } yield MergeCandidate(
+      identifier = sourceIdentifier,
+      reason = "Bnumber present in TEI file"
+    )
 
     bNumberMergeCandidate.toList
   }
   implicit class InternalWorkOps(internalWorks: List[InternalWork.Source]) {
     def withLanguage(
-      topLevel: WorkData[Unidentified]): List[InternalWork.Source] =
+      topLevel: WorkData[Unidentified]
+    ): List[InternalWork.Source] =
       // If all the individual items/parts all use the same language,
       // it's specified once at the top level but not on the individual
       // entries.  The individual entries will not have languages.
@@ -111,10 +114,11 @@ case class TeiData(id: String,
       // corresponding Works.
       internalWorks.flatMap(_.workData.languages) match {
         case Nil =>
-          internalWorks.map { w =>
-            w.copy(
-              workData = w.workData.copy(languages = topLevel.languages)
-            )
+          internalWorks.map {
+            w =>
+              w.copy(
+                workData = w.workData.copy(languages = topLevel.languages)
+              )
           }
 
         case _ => internalWorks
@@ -122,7 +126,8 @@ case class TeiData(id: String,
   }
   private def toWorkData(
     parentCollectionPath: Option[CollectionPath] = None,
-    referenceNumber: Option[ReferenceNumber] = None): WorkData[Unidentified] =
+    referenceNumber: Option[ReferenceNumber] = None
+  ): WorkData[Unidentified] =
     WorkData[Unidentified](
       title = Some(title),
       alternativeTitles = alternativeTitles,

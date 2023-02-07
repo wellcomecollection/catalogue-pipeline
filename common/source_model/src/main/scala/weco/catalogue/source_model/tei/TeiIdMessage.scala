@@ -7,10 +7,11 @@ import java.time.Instant
 sealed trait TeiIdMessage {
   val id: String
 }
-case class TeiIdChangeMessage(id: String,
-                              s3Location: S3ObjectLocation,
-                              timeModified: Instant)
-    extends TeiIdMessage
+case class TeiIdChangeMessage(
+  id: String,
+  s3Location: S3ObjectLocation,
+  timeModified: Instant
+) extends TeiIdMessage
 case class TeiIdDeletedMessage(id: String, timeDeleted: Instant)
     extends TeiIdMessage
 

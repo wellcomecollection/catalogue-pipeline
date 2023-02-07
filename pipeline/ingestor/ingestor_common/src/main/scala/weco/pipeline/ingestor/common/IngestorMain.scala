@@ -22,8 +22,7 @@ class IngestorMain[In, Out](
   indexConfig: IndexConfig,
   transform: In => Out
 )(
-  implicit
-  decoder: Decoder[In],
+  implicit decoder: Decoder[In],
   encoder: Encoder[Out],
   indexable: Indexable[Out]
 ) {

@@ -24,8 +24,10 @@ trait MergerLogging extends Logging {
   def describeMergeSet(target: Work[_], sources: Seq[Work[_]]): String =
     s"target${describeWork(target)} with sources${describeWorks(sources)}"
 
-  def describeMergeOutcome(target: Work[_],
-                           redirected: Seq[Work[_]],
-                           remaining: Seq[Work[_]]): String =
+  def describeMergeOutcome(
+    target: Work[_],
+    redirected: Seq[Work[_]],
+    remaining: Seq[Work[_]]
+  ): String =
     s"target${describeWork(target)} with redirected${describeWorks(redirected)} and remaining${describeWorks(remaining)}"
 }

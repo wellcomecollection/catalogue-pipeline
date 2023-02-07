@@ -7,10 +7,14 @@ import weco.pipeline.transformer.miro.source.MiroRecord
 
 trait MiroItems extends MiroLocation {
 
-  def getItems(miroRecord: MiroRecord,
-               overrides: MiroSourceOverrides): List[Item[IdState.Unminted]] =
+  def getItems(
+    miroRecord: MiroRecord,
+    overrides: MiroSourceOverrides
+  ): List[Item[IdState.Unminted]] =
     List(
       Item(
         id = IdState.Unidentifiable,
-        locations = List(getLocation(miroRecord, overrides))))
+        locations = List(getLocation(miroRecord, overrides))
+      )
+    )
 }

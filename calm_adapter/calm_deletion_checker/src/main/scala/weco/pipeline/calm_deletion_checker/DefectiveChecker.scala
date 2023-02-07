@@ -20,8 +20,9 @@ import scala.concurrent.{ExecutionContext, Future}
 trait DefectiveChecker[Item] {
   protected def test(items: Set[Item]): Future[Int]
 
-  def defectiveRecords(allItems: Set[Item])(
-    implicit ec: ExecutionContext): Future[Set[Item]] = {
+  def defectiveRecords(
+    allItems: Set[Item]
+  )(implicit ec: ExecutionContext): Future[Set[Item]] = {
     def nested(items: Set[Item], d: Int): Future[Set[Item]] = d match {
       case 0                    => Future.successful(Set.empty)
       case n if n == items.size => Future.successful(items)
@@ -34,8 +35,9 @@ trait DefectiveChecker[Item] {
         } yield deletions1 ++ deletions2
     }
 
-    test(allItems).flatMap { d =>
-      nested(allItems, d)
+    test(allItems).flatMap {
+      d =>
+        nested(allItems, d)
     }
   }
 
@@ -62,8 +64,8 @@ trait DefectiveChecker[Item] {
 }
 
 class ApiDeletionChecker(calmApiClient: CalmApiClient)(
-  implicit ec: ExecutionContext)
-    extends DefectiveChecker[CalmSourcePayload]
+  implicit ec: ExecutionContext
+) extends DefectiveChecker[CalmSourcePayload]
     with Logging {
 
   def test(records: Set[CalmSourcePayload]): Future[Int] =
@@ -80,12 +82,12 @@ class ApiDeletionChecker(calmApiClient: CalmApiClient)(
         case abandonError =>
           warn(s"Error abandoning session: ${abandonError.getMessage}")
       }
-    } yield
-      session match {
-        case CalmSession(n, _) if n <= records.size => records.size - n
-        case CalmSession(n, _) =>
-          throw new RuntimeException(
-            s"More results returned ($n) than searched for (${records.size}): this should never happen!")
-      }
+    } yield session match {
+      case CalmSession(n, _) if n <= records.size => records.size - n
+      case CalmSession(n, _) =>
+        throw new RuntimeException(
+          s"More results returned ($n) than searched for (${records.size}): this should never happen!"
+        )
+    }
 
 }

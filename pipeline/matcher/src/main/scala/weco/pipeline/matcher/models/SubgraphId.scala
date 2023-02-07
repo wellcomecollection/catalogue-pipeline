@@ -8,7 +8,7 @@ object SubgraphId {
   /** This is shared by all the Works in the same subgraph -- all the Works that
     * should be processed together.
     *
-    * Note that this is based on the *unversioned* identifiers.  This means the
+    * Note that this is based on the *unversioned* identifiers. This means the
     * subgraph identifier is stable across different versions of a Work.
     */
   def apply(ids: CanonicalId*): String = {

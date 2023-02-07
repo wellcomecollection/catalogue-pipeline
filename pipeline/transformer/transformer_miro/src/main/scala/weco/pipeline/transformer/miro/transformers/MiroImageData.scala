@@ -11,9 +11,11 @@ import weco.pipeline.transformer.miro.source.MiroRecord
 
 trait MiroImageData extends MiroLocation {
 
-  def getImageData(miroRecord: MiroRecord,
-                   overrides: MiroSourceOverrides,
-                   version: Int): ImageData[IdState.Identifiable] =
+  def getImageData(
+    miroRecord: MiroRecord,
+    overrides: MiroSourceOverrides,
+    version: Int
+  ): ImageData[IdState.Identifiable] =
     ImageData[IdState.Identifiable](
       id = IdState.Identifiable(
         sourceIdentifier = SourceIdentifier(

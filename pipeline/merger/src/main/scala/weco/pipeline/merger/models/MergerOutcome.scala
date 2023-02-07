@@ -13,13 +13,17 @@ import weco.catalogue.internal_model.work.Work
  * the works/images getters must be provided with a modifiedTime to use for all
  * the output entities.
  */
-case class MergerOutcome(resultWorks: Seq[Work[Identified]],
-                         imagesWithSources: Seq[ImageDataWithSource]) {
+case class MergerOutcome(
+  resultWorks: Seq[Work[Identified]],
+  imagesWithSources: Seq[ImageDataWithSource]
+) {
 
   def mergedWorksAndImagesWithTime(
-    modifiedTime: Instant): Seq[Either[Work[Merged], Image[Initial]]] =
+    modifiedTime: Instant
+  ): Seq[Either[Work[Merged], Image[Initial]]] =
     mergedWorksWithTime(modifiedTime).map(Left(_)) ++ mergedImagesWithTime(
-      modifiedTime).map(Right(_))
+      modifiedTime
+    ).map(Right(_))
 
   def mergedWorksWithTime(modifiedTime: Instant): Seq[Work[Merged]] =
     resultWorks.map(_.transition[Merged](modifiedTime))

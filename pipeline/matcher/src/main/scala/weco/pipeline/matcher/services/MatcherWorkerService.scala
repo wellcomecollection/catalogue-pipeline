@@ -19,7 +19,8 @@ class MatcherWorkerService[MsgDestination](
   retriever: Retriever[WorkStub],
   msgStream: SQSStream[NotificationMessage],
   msgSender: MessageSender[MsgDestination],
-  workMatcher: WorkMatcher)(implicit ec: ExecutionContext)
+  workMatcher: WorkMatcher
+)(implicit ec: ExecutionContext)
     extends Logging
     with Runnable {
 
@@ -32,18 +33,20 @@ class MatcherWorkerService[MsgDestination](
           .mapAsync(config.parallelism) {
             case (message, workStub) =>
               processMessage(workStub).map(_ => message)
-        }
+          }
     )
 
   def processMessage(workStub: WorkStub): Future[Unit] =
     workMatcher
       .matchWork(workStub)
-      .flatMap { matcherResult =>
-        Future.fromTry(msgSender.sendT(matcherResult))
+      .flatMap {
+        matcherResult =>
+          Future.fromTry(msgSender.sendT(matcherResult))
       }
       .recover {
         case e: VersionExpectedConflictException =>
           debug(
-            s"Not matching work due to version conflict exception: ${e.getMessage}")
+            s"Not matching work due to version conflict exception: ${e.getMessage}"
+          )
       }
 }

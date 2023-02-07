@@ -8,7 +8,8 @@ import weco.storage.{Identified, ReadError, Version}
 class MetsSourceDataRetriever
     extends SourceDataRetriever[MetsSourcePayload, MetsSourceData] {
 
-  override def lookupSourceData(p: MetsSourcePayload)
-    : Either[ReadError, Identified[Version[String, Int], MetsSourceData]] =
+  override def lookupSourceData(
+    p: MetsSourcePayload
+  ): Either[ReadError, Identified[Version[String, Int], MetsSourceData]] =
     Right(Identified(Version(p.id, p.version), p.sourceData))
 }

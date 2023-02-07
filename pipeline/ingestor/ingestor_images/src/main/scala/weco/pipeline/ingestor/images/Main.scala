@@ -15,7 +15,8 @@ object Main extends WellcomeTypesafeApp {
     transform = ImageTransformer.deriveData
   )
 
-  runWithConfig { config =>
-    ingestor.run(config)
+  runWithConfig {
+    config =>
+      ingestor.run(config)
   }
 }

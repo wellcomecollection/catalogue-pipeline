@@ -13,21 +13,22 @@ import weco.typesafe.Runnable
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
-/**
-  * Worker service that responds to SQS messages and updates
-  * Works with the relevant paths.
+/** Worker service that responds to SQS messages and updates Works with the
+  * relevant paths.
   *
   * The service:
   *
-  *  - takes messages from sqsStream
-  *    - The messages are expected to contain path strings corresponding to collectionPath.path values.
-  *  - uses pathsModifier to retrieve and modify relevant Works
-  *  - saves the modified Works using workIndexer
-  *  - notifies the downstream service using msgSender
-  *    - The messages contain path strings corresponding to collectionPath.path values.
-  *    - There will be a message for the input path retrieved from sqsStream
-  *    - There will be a message containing any new paths created/changed by this service
-  *
+  *   - takes messages from sqsStream
+  *     - The messages are expected to contain path strings corresponding to
+  *       collectionPath.path values.
+  *   - uses pathsModifier to retrieve and modify relevant Works
+  *   - saves the modified Works using workIndexer
+  *   - notifies the downstream service using msgSender
+  *     - The messages contain path strings corresponding to collectionPath.path
+  *       values.
+  *     - There will be a message for the input path retrieved from sqsStream
+  *     - There will be a message containing any new paths created/changed by
+  *       this service
   */
 class PathConcatenatorWorkerService[MsgDestination](
   sqsStream: SQSStream[NotificationMessage],
@@ -47,7 +48,7 @@ class PathConcatenatorWorkerService[MsgDestination](
     processPath(message.body).map(_ => ())
 
   private def processPath(
-    path: String,
+    path: String
   ): Future[Seq[Unit]] = {
     val changedWorks = pathsModifier.modifyPaths(path)
     val futurePaths: Future[Seq[String]] = changedWorks transformWith {
@@ -67,27 +68,32 @@ class PathConcatenatorWorkerService[MsgDestination](
         // even if its position in a path hierarchy is not correctly resolved.
         error(
           msg = s"Unable to update collectionPaths relating to $path",
-          exception)
+          exception
+        )
         Future(Seq(path))
       }
     }
-    futurePaths flatMap { paths: Seq[String] =>
-      notifyPaths(paths)
+    futurePaths flatMap {
+      paths: Seq[String] =>
+        notifyPaths(paths)
     }
   }
 
   // always send the original path from the incoming message.
   // batcher/relation embedder don't mind if paths don't resolve
   // and it's simpler than checking here whether the current path has changed
-  private def pathsToNotify(path: String,
-                            works: Seq[Work[Merged]]): Seq[String] =
+  private def pathsToNotify(
+    path: String,
+    works: Seq[Work[Merged]]
+  ): Seq[String] =
     path +: works.map(work => work.data.collectionPath.get.path)
 
   private def notifyPaths(paths: Seq[String]): Future[Seq[Unit]] =
-    Future.sequence(paths map { path =>
-      Future(msgSender.send(path)).flatMap {
-        case Success(_)   => Future.successful(())
-        case Failure(err) => Future.failed(err)
-      }
+    Future.sequence(paths map {
+      path =>
+        Future(msgSender.send(path)).flatMap {
+          case Success(_)   => Future.successful(())
+          case Failure(err) => Future.failed(err)
+        }
     })
 }

@@ -6,8 +6,10 @@ import com.sksamuel.elastic4s.requests.searches.SearchRequest
 import com.sksamuel.elastic4s.requests.searches.queries.Query
 import weco.pipeline.relation_embedder.models._
 
-case class RelationsRequestBuilder(index: Index,
-                                   scrollKeepAlive: String = "2m") {
+case class RelationsRequestBuilder(
+  index: Index,
+  scrollKeepAlive: String = "2m"
+) {
 
   // To reduce response size and improve Elasticsearch performance we only
   // return core fields
@@ -17,7 +19,7 @@ case class RelationsRequestBuilder(index: Index,
     "data.title",
     "data.collectionPath.path",
     "data.collectionPath.label",
-    "data.workType",
+    "data.workType"
   )
 
   def completeTree(batch: Batch, scrollSize: Int): SearchRequest =

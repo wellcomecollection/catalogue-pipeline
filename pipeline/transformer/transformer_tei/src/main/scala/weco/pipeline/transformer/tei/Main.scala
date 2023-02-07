@@ -16,7 +16,8 @@ object Main extends WellcomeTypesafeApp {
     sourceDataRetriever = new TeiSourceDataRetriever
   )
 
-  runWithConfig { config =>
-    transformer.run(config)
+  runWithConfig {
+    config =>
+      transformer.run(config)
   }
 }

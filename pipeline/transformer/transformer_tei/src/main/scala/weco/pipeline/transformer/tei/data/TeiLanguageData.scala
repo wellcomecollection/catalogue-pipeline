@@ -6,23 +6,23 @@ import weco.catalogue.internal_model.languages.{Language, MarcLanguageCodeList}
 /** The TEI language data uses the IANA language codes from:
   * https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
   *
-  * In the rest of the pipeline, we use MARC language codes.  We need to be consistent
-  * so we can filter/aggregate languages across sources.
+  * In the rest of the pipeline, we use MARC language codes. We need to be
+  * consistent so we can filter/aggregate languages across sources.
   *
-  * This object maps languages from the TEI files into MARC-based language codes.
-  * Trying to create a complete IANA-to-MARC mapper is beyond the scope of the pipeline,
-  * and unnecessary -- our TEI files only use a small subset of IANA languages.
-  *
+  * This object maps languages from the TEI files into MARC-based language
+  * codes. Trying to create a complete IANA-to-MARC mapper is beyond the scope
+  * of the pipeline, and unnecessary -- our TEI files only use a small subset of
+  * IANA languages.
   */
 object TeiLanguageData extends Logging {
 
   /** Given the ID and label from a <textLang> element of the form
     *
-    *     <textLang mainLang={id}>{label}</textLang>
+    * <textLang mainLang={id}>{label}</textLang>
     *
     * or
     *
-    *     <textLang otherLangs={id}>{label}</textLang>
+    * <textLang otherLangs={id}>{label}</textLang>
     *
     * create a Language based on the MARC language code list.
     */
@@ -106,11 +106,13 @@ object TeiLanguageData extends Logging {
       case ("pka", "Ardhamāgadhi Prakrit") =>
         customLanguage(
           "Prakrit languages",
-          overrideLabel = "Ardhamāgadhi Prakrit")
+          overrideLabel = "Ardhamāgadhi Prakrit"
+        )
       case ("pka", "Ardhamāgadhī Prākrit") =>
         customLanguage(
           "Prakrit languages",
-          overrideLabel = "Ardhamāgadhī Prākrit")
+          overrideLabel = "Ardhamāgadhī Prākrit"
+        )
       case ("itk", "Judeo-Italian") =>
         customLanguage("Italian", overrideLabel = "Judeo-Italian")
       case ("jv", "Java") => customLanguage("Javanese", overrideLabel = "Java")
@@ -119,23 +121,30 @@ object TeiLanguageData extends Logging {
       // the logs for us to come back and investigate further.
       case (id, label) =>
         warn(
-          s"Unable to map TEI language to catalogue language: id=$id, label=$label")
+          s"Unable to map TEI language to catalogue language: id=$id, label=$label"
+        )
         None
     }
 
     result match {
       case Some(lang) => Right(lang)
       case None =>
-        Left(new Throwable(
-          s"Unable to map TEI language to catalogue language: id=$id, label=$label"))
+        Left(
+          new Throwable(
+            s"Unable to map TEI language to catalogue language: id=$id, label=$label"
+          )
+        )
     }
   }
 
-  private def customLanguage(name: String,
-                             overrideLabel: String): Option[Language] =
+  private def customLanguage(
+    name: String,
+    overrideLabel: String
+  ): Option[Language] =
     MarcLanguageCodeList
       .fromName(name)
-      .map { lang =>
-        lang.copy(label = overrideLabel)
+      .map {
+        lang =>
+          lang.copy(label = overrideLabel)
       }
 }

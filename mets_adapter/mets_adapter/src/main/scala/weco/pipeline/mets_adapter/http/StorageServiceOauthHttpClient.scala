@@ -22,11 +22,8 @@ class StorageServiceOauthHttpClient(
   val tokenUri: Uri,
   val credentials: BasicHttpCredentials,
   val expiryGracePeriod: Duration = 60.seconds
-)(
-  implicit
-  val system: ActorSystem,
-  val ec: ExecutionContext
-) extends HttpClient
+)(implicit val system: ActorSystem, val ec: ExecutionContext)
+    extends HttpClient
     with HttpGet
     with TokenExchange[BasicHttpCredentials, OAuth2BearerToken] {
 
@@ -53,11 +50,13 @@ class StorageServiceOauthHttpClient(
         case StatusCodes.OK =>
           Unmarshal(tokenResponse).to[StorageServiceAccessToken]
         case code =>
-          Unmarshal(tokenResponse).to[String].flatMap { resp =>
-            Future.failed(
-              new Throwable(
-                s"Unexpected status code $code from $tokenUri: $resp")
-            )
+          Unmarshal(tokenResponse).to[String].flatMap {
+            resp =>
+              Future.failed(
+                new Throwable(
+                  s"Unexpected status code $code from $tokenUri: $resp"
+                )
+              )
           }
       }
 
@@ -82,7 +81,8 @@ class StorageServiceOauthHttpClient(
         }
         require(
           existingAuthHeaders.isEmpty,
-          s"HTTP request already has auth headers: $request")
+          s"HTTP request already has auth headers: $request"
+        )
 
         request.withHeaders(request.headers :+ Authorization(token))
       }

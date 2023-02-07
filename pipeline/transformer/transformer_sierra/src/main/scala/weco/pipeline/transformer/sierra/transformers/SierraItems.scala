@@ -29,21 +29,23 @@ object SierraItems
 
   type Output = List[Item[IdState.Unminted]]
 
-  /** We don't get the digital items from Sierra.
-    * The `dlnk` was previously used, but we now use the METS source.
+  /** We don't get the digital items from Sierra. The `dlnk` was previously
+    * used, but we now use the METS source.
     *
     * So the output is deterministic here we sort all items by the
-    * sierra-identifier.  We want to revisit this at some point.
-    * See https://github.com/wellcomecollection/platform/issues/4993
+    * sierra-identifier. We want to revisit this at some point. See
+    * https://github.com/wellcomecollection/platform/issues/4993
     */
   def apply(
     bibId: SierraBibNumber,
     bibData: SierraBibData,
-    itemDataEntries: Seq[SierraItemData]): List[Item[IdState.Identifiable]] = {
+    itemDataEntries: Seq[SierraItemData]
+  ): List[Item[IdState.Identifiable]] = {
     val visibleItems =
       itemDataEntries
-        .filterNot { itemData =>
-          itemData.deleted || itemData.suppressed
+        .filterNot {
+          itemData =>
+            itemData.deleted || itemData.suppressed
         }
 
     SierraPhysicalItemOrder(
@@ -54,7 +56,8 @@ object SierraItems
 
   private def getPhysicalItems(
     itemDataEntries: Seq[SierraItemData],
-    bibData: SierraBibData): List[Item[IdState.Identifiable]] = {
+    bibData: SierraBibData
+  ): List[Item[IdState.Identifiable]] = {
 
     // Some of the Sierra items have a location like "contained in above"
     // or "bound in above".
@@ -67,13 +70,16 @@ object SierraItems
     // non-above locations are unambiguous, we use them instead.
     val otherLocations =
       itemDataEntries
-        .map { itemData =>
-          itemData.id -> itemData.location
+        .map {
+          itemData =>
+            itemData.id -> itemData.location
         }
         .collect { case (id, Some(location)) => id -> location }
         .filterNot {
           case (_, loc) =>
-            loc.name.toLowerCase.contains("above") || loc.name == "-" || loc.name == ""
+            loc.name.toLowerCase.contains(
+              "above"
+            ) || loc.name == "-" || loc.name == ""
         }
         .map {
           case (id, loc) =>
@@ -81,7 +87,8 @@ object SierraItems
               case Some(LocationType.ClosedStores) =>
                 (
                   Some(LocationType.ClosedStores),
-                  LocationType.ClosedStores.label)
+                  LocationType.ClosedStores.label
+                )
               case other => (other, loc.name)
             }
         }
@@ -93,17 +100,19 @@ object SierraItems
     }
 
     itemDataEntries
-      .foreach { itemData =>
-        require(!itemData.deleted)
-        require(!itemData.suppressed)
+      .foreach {
+        itemData =>
+          require(!itemData.deleted)
+          require(!itemData.suppressed)
       }
 
-    val items = itemDataEntries.map { itemData =>
-      transformItemData(
-        itemData = itemData,
-        bibData = bibData,
-        fallbackLocation = fallbackLocation
-      )
+    val items = itemDataEntries.map {
+      itemData =>
+        transformItemData(
+          itemData = itemData,
+          bibData = bibData,
+          fallbackLocation = fallbackLocation
+        )
     }.toList
 
     tidyTitles(items)
@@ -159,19 +168,19 @@ object SierraItems
     *
     * We use one of:
     *
-    *   - field tag `v` for VOLUME.  This is written by a cataloguer.
+    *   - field tag `v` for VOLUME. This is written by a cataloguer.
     *     https://documentation.iii.com/sierrahelp/Content/sril/sril_records_varfld_types_item.html
     *
-    *   - The copyNo field from the Sierra API response, which we use to
-    *     create a string like "Copy 2".
+    *   - The copyNo field from the Sierra API response, which we use to create
+    *     a string like "Copy 2".
     *
-    *     Elsewhere in this class, this is called an "automated title", because we're
-    *     creating the title automatically rather than using text written by a cataloguer.
-    *     In general, we prefer the human-written title where possible.
-    *
+    * Elsewhere in this class, this is called an "automated title", because
+    * we're creating the title automatically rather than using text written by a
+    * cataloguer. In general, we prefer the human-written title where possible.
     */
   private def getItemTitle(
-    data: SierraItemData): (Option[String], HasAutomatedTitle) = {
+    data: SierraItemData
+  ): (Option[String], HasAutomatedTitle) = {
     val titleCandidates: List[String] =
       data.varFields
         .filter { _.fieldTag.contains("v") }
@@ -181,8 +190,9 @@ object SierraItems
         .distinct
 
     val copyNoTitle =
-      data.copyNo.map { copyNo =>
-        s"Copy $copyNo"
+      data.copyNo.map {
+        copyNo =>
+          s"Copy $copyNo"
       }
 
     titleCandidates match {
@@ -192,7 +202,8 @@ object SierraItems
 
       case multipleTitles =>
         warn(
-          s"Multiple title candidates on item ${data.id}: ${titleCandidates.mkString("; ")}")
+          s"Multiple title candidates on item ${data.id}: ${titleCandidates.mkString("; ")}"
+        )
         (Some(multipleTitles.head), false)
     }
   }
@@ -207,21 +218,22 @@ object SierraItems
 
   /** Tidy up the automated titles (Copy 1, Copy 2, Copy 3, etc.)
     *
-    * The purpose of a title is to help users distinguish between multiple items.
-    * We remove the automated title if they aren't doing that, in particular if:
+    * The purpose of a title is to help users distinguish between multiple
+    * items. We remove the automated title if they aren't doing that, in
+    * particular if:
     *
-    *   1) There's only one item, and it has an inferred title
-    *   2) Every item has the same inferred title
+    * 1) There's only one item, and it has an inferred title 2) Every item has
+    * the same inferred title
     *
-    * Note: (1) is really a special case of (2) for the case when there's a single item.
+    * Note: (1) is really a special case of (2) for the case when there's a
+    * single item.
     *
-    * Note: we can't do this when we add the title to the individual items, because this rule
-    * can only be applied when looking at the items together.
-    *
+    * Note: we can't do this when we add the title to the individual items,
+    * because this rule can only be applied when looking at the items together.
     */
   private def tidyTitles(
-    items: List[(Item[IdState.Identifiable], HasAutomatedTitle)])
-    : List[Item[IdState.Identifiable]] = {
+    items: List[(Item[IdState.Identifiable], HasAutomatedTitle)]
+  ): List[Item[IdState.Identifiable]] = {
     val inferredTitles =
       items.collect {
         case (Item(_, Some(title), _, _), inferredTitle) if inferredTitle =>
@@ -240,13 +252,14 @@ object SierraItems
 
   /** Create a note for the item.
     *
-    * Note that this isn't as simple as just using the contents of field tag "n" --
-    * we may have copied the note to the access conditions instead, or decided to
-    * discard it.
+    * Note that this isn't as simple as just using the contents of field tag "n"
+    * -- we may have copied the note to the access conditions instead, or
+    * decided to discard it.
     */
   private def getItemNote(
     itemData: SierraItemData,
-    location: Option[PhysicalLocation]): Option[String] = {
+    location: Option[PhysicalLocation]
+  ): Option[String] = {
     val (_, note) = SierraItemAccess(
       location = location.map(_.locationType),
       itemData = itemData

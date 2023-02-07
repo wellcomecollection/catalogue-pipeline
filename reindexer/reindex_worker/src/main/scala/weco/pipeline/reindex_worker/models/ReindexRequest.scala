@@ -5,8 +5,11 @@ package weco.pipeline.reindex_worker.models
   * It receives JSON-encoded instances of this case class from SNS, and uses
   * them to decide what sort of reindex to run.
   *
-  * @param jobConfigId The name of the reindex to run, e.g. "miro--reporting" or "sierra--catalogue".
-  * @param parameters Parameters for the reindex.
+  * @param jobConfigId
+  *   The name of the reindex to run, e.g. "miro--reporting" or
+  *   "sierra--catalogue".
+  * @param parameters
+  *   Parameters for the reindex.
   */
 case class ReindexRequest(
   jobConfigId: String,
