@@ -24,14 +24,15 @@ trait SierraAgents
     subfields: List[Subfield],
     normalisePerson: Boolean = false
   ): Option[Person[IdState.Unminted]] =
-    getLabel(subfields).map { label =>
-      val person =
-        Person(
-          id = IdState.Unidentifiable,
-          label = label,
-          prefix = None,
-          numeration = None
-        )
+    getLabel(subfields).map {
+      label =>
+        val person =
+          Person(
+            id = IdState.Unidentifiable,
+            label = label,
+            prefix = None,
+            numeration = None
+          )
 
         // The rule is to only normalise the 'Person' label when a contributor.  Strictly a 'Person' within
         // 'Subjects' (sourced from Marc 600) should not be normalised -- however, as these labels
@@ -110,8 +111,9 @@ trait SierraAgents
   def getLabel(subfields: List[Subfield]): Option[String] = {
     val contents =
       subfields
-        .filter { s =>
-          List("a", "b", "c", "d", "t", "p", "n", "q", "l").contains(s.tag)
+        .filter {
+          s =>
+            List("a", "b", "c", "d", "t", "p", "n", "q", "l").contains(s.tag)
         }
         .filterNot { _.content.trim.isEmpty }
         .map { _.content }
