@@ -42,8 +42,8 @@ trait IndexConfigFields extends ElasticFieldOps {
         List(
           textField("english").analyzer(englishAnalyzer.name),
           textField("shingles").analyzer(shingleAsciifoldingAnalyzer.name)
-          textField("english_cased").analyzer(englishCasedAnalyzer.name)
-          textField("shingles_cased").analyzer(shingleCasedAnalyzer.name)
+            textField ("english_cased").analyzer(englishCasedAnalyzer.name)
+            textField ("shingles_cased").analyzer(shingleCasedAnalyzer.name)
         ) ++
           languagesTextFields
       )
