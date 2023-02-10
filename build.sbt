@@ -139,7 +139,9 @@ lazy val batcher = setupProject(
   project,
   "pipeline/relation_embedder/batcher",
   localDependencies = Seq(internal_model),
-  externalDependencies = CatalogueDependencies.batcherDependencies ++ CatalogueDependencies.calmApiClientDependencies
+  externalDependencies = CatalogueDependencies.batcherDependencies ++
+      ExternalDependencies.scalatestDependencies ++
+      WellcomeDependencies.httpLibrary
 )
 
 lazy val reindex_worker = setupProject(
