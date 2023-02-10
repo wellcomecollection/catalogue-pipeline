@@ -138,9 +138,8 @@ lazy val router = setupProject(
 lazy val batcher = setupProject(
   project,
   "pipeline/relation_embedder/batcher",
-  externalDependencies = CatalogueDependencies.batcherDependencies ++ WellcomeDependencies.fixturesLibrary ++
-      WellcomeDependencies.jsonLibrary ++
-      WellcomeDependencies.storageLibrary
+  localDependencies = Seq(internal_model),
+  externalDependencies = CatalogueDependencies.batcherDependencies
 )
 
 lazy val reindex_worker = setupProject(
