@@ -138,7 +138,7 @@ lazy val router = setupProject(
 lazy val batcher = setupProject(
   project,
   "pipeline/relation_embedder/batcher",
-  localDependencies = Seq(calm_api_client, internal_model, source_model_typesafe),
+  localDependencies = Seq(calm_api_client, internal_model),
   externalDependencies = CatalogueDependencies.batcherDependencies
 )
 
