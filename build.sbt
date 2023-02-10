@@ -139,8 +139,14 @@ lazy val batcher = setupProject(
   project,
   "pipeline/relation_embedder/batcher",
   externalDependencies = CatalogueDependencies.batcherDependencies ++ WellcomeDependencies.fixturesLibrary ++
+      WellcomeDependencies.elasticsearchLibrary ++
+      WellcomeDependencies.elasticsearchTypesafeLibrary ++
       WellcomeDependencies.jsonLibrary ++
-      WellcomeDependencies.storageLibrary
+      ExternalDependencies.scalacheckDependencies ++
+      ExternalDependencies.enumeratumDependencies ++
+      ExternalDependencies.scalaXmlDependencies ++
+      WellcomeDependencies.storageLibrary ++
+      ExternalDependencies.diffJsonDependencies
 )
 
 lazy val reindex_worker = setupProject(
