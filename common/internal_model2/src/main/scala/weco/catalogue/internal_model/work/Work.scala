@@ -15,26 +15,7 @@ sealed trait Work[State <: WorkState] {
   val state: State
   val data: WorkData[State#WorkDataState]
 
-  def sourceIdentifier: SourceIdentifier = state.sourceIdentifier
-
-  // This version comes from the version in the adapter, so we can trace
-  // a Work back to the exact source record that was used to create it
-  // in the transformer.
-  //
-  // It should only be trusted for ordering updates of an individual Work.
-  // You cannot compare the version between different Works -- use the
-  // modifiedTime instead.
-
-  // NOTE: Beware of changing the name or position of this field. The transformer
-  // removes the version from the json when comparing two works to determine if they're equivalent.
-  // Renaming/moving this field will make the check fail silently and could cause unnecessary
-  // work to be performed by the pipeline
-  val version: Int
-
   def id: String = state.id
-
-  def identifiers: List[SourceIdentifier] =
-    sourceIdentifier :: data.otherIdentifiers
 }
 
 /** WorkData contains data common to all types of works that can exist at any
