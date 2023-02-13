@@ -5,11 +5,6 @@ import weco.catalogue.internal_model.image.ImageData
 
 import java.time.Instant
 
-/** Work is the core model in the pipeline / API.
-  *
-  * It is parameterised by State, meaning the same type of Work can be in a
-  * number of possible states depending on where in the pipeline it is.
-  */
 sealed trait Work[State <: WorkState] {
 
   val state: State
@@ -18,9 +13,6 @@ sealed trait Work[State <: WorkState] {
   def id: String = state.id
 }
 
-/** WorkData contains data common to all types of works that can exist at any
-  * stage of the pipeline.
-  */
 case class WorkData[State <: DataState](
   otherIdentifiers: List[SourceIdentifier] = Nil,
   format: Option[Format] = None,
@@ -36,14 +28,6 @@ case class WorkData[State <: DataState](
   workType: WorkType = WorkType.Standard
 )
 
-/** WorkState represents the state of the work in the pipeline, and contains
-  * different data depending on what state it is. This allows us to consider the
-  * Work model as a finite state machine with the following stages corresponding
-  * to stages of the pipeline:
-  *
-  * \| \| (transformer) ▼ Source \| \| (id minter) ▼ Identified \| \| (matcher /
-  * merger) ▼ Merged \| \| (relation embedder) ▼ Denormalised
-  */
 sealed trait WorkState {
 
   type WorkDataState <: DataState
@@ -54,15 +38,6 @@ sealed trait WorkState {
 }
 
 object InternalWork {
-  // Originally we used a full instance of Work[Source] and Work[Identified] here,
-  // but for reasons we don't fully understand, that causes the compilation times of
-  // internal_model to explode.
-  //
-  // This is probably a sign that the entire Id/Data/WorkState hierarchy needs a rethink
-  // to make it less thorny and complicated, but doing that now would block the TEI work.
-  //
-  // TODO: Investigate the internal model compilation slowness further.
-  // See https://github.com/wellcomecollection/platform/issues/5298
   case class Source(
     sourceIdentifier: SourceIdentifier,
     workData: WorkData[DataState.Unidentified]
@@ -79,10 +54,6 @@ object WorkState {
 
   case class Source(
     sourceIdentifier: SourceIdentifier,
-    // NOTE: Beware of changing the name or position of this field. The transformer
-    // removes the sourceModifiedTime from the json when comparing two works to determine if they're equivalent.
-    // Renaming/moving this field will make the check fail silently and could cause unnecessary
-    // work to be performed by the pipeline
     sourceModifiedTime: Instant,
     mergeCandidates: List[MergeCandidate[IdState.Identifiable]] = Nil,
     internalWorkStubs: List[InternalWork.Source] = Nil
