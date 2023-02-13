@@ -37,30 +37,6 @@ sealed trait Work[State <: WorkState] {
 
   def identifiers: List[SourceIdentifier] =
     sourceIdentifier :: data.otherIdentifiers
-
-  def transition[OutState <: WorkState](args: OutState#TransitionArgs = ())(
-    implicit transition: WorkFsm.Transition[State, OutState]
-  ): Work[OutState] = {
-    val outState = transition.state(state, data, args)
-    val outData = transition.data(data)
-    this match {
-      case Work.Visible(version, _, _, redirectSources) =>
-        Work.Visible(
-          version,
-          outData,
-          outState,
-          redirectSources.map {
-            transition.redirect
-          }
-        )
-      case Work.Invisible(version, _, _, invisibilityReasons) =>
-        Work.Invisible(version, outData, outState, invisibilityReasons)
-      case Work.Deleted(version, _, deletedReason) =>
-        Work.Deleted(version, outState, deletedReason)
-      case Work.Redirected(version, redirectTarget, _) =>
-        Work.Redirected(version, transition.redirect(redirectTarget), outState)
-    }
-  }
 }
 
 object Work {
@@ -141,11 +117,9 @@ case class WorkData[State <: DataState](
 sealed trait WorkState {
 
   type WorkDataState <: DataState
-  type TransitionArgs
 
   val sourceIdentifier: SourceIdentifier
   val modifiedTime: Instant
-  val relations: Relations
   def id: String
 }
 
@@ -182,11 +156,9 @@ object WorkState {
     sourceModifiedTime: Instant,
     mergeCandidates: List[MergeCandidate[IdState.Identifiable]] = Nil,
     internalWorkStubs: List[InternalWork.Source] = Nil,
-    relations: Relations = Relations.none
   ) extends WorkState {
 
     type WorkDataState = DataState.Unidentified
-    type TransitionArgs = Unit
 
     def id = sourceIdentifier.toString
 
@@ -199,11 +171,9 @@ object WorkState {
     sourceModifiedTime: Instant,
     mergeCandidates: List[MergeCandidate[IdState.Identified]] = Nil,
     internalWorkStubs: List[InternalWork.Identified] = Nil,
-    relations: Relations = Relations.none
   ) extends WorkState {
 
     type WorkDataState = DataState.Identified
-    type TransitionArgs = Unit
 
     def id = canonicalId.toString
 
@@ -216,11 +186,9 @@ object WorkState {
     mergedTime: Instant,
     sourceModifiedTime: Instant,
     availabilities: Set[Availability] = Set.empty,
-    relations: Relations = Relations.none
   ) extends WorkState {
 
     type WorkDataState = DataState.Identified
-    type TransitionArgs = Instant
 
     def id: String = canonicalId.toString
 
@@ -235,11 +203,9 @@ object WorkState {
     mergedTime: Instant,
     sourceModifiedTime: Instant,
     availabilities: Set[Availability],
-    relations: Relations = Relations.none
   ) extends WorkState {
 
     type WorkDataState = DataState.Identified
-    type TransitionArgs = Relations
 
     def id = canonicalId.toString
 
@@ -247,70 +213,4 @@ object WorkState {
     // See https://github.com/wellcomecollection/docs/tree/main/rfcs/038-matcher-versioning
     val modifiedTime: Instant = mergedTime
   }
-}
-
-/** The WorkFsm contains all possible transitions between work states.
-  *
-  * The `transition` method on `Work` allows invocation of these transitions by
-  * providing the type parameter of the new state and it's respective arguments.
-  */
-object WorkFsm {
-
-  import WorkState._
-
-  sealed trait Transition[InState <: WorkState, OutState <: WorkState] {
-
-    def state(
-      state: InState,
-      data: WorkData[InState#WorkDataState],
-      args: OutState#TransitionArgs
-    ): OutState
-
-    def data(
-      data: WorkData[InState#WorkDataState]
-    ): WorkData[OutState#WorkDataState]
-
-    def redirect(redirect: InState#WorkDataState#Id): OutState#WorkDataState#Id
-  }
-
-  implicit val identifiedToMerged = new Transition[Identified, Merged] {
-    def state(
-      state: Identified,
-      data: WorkData[DataState.Identified],
-      mergedTime: Instant
-    ): Merged =
-      Merged(
-        sourceIdentifier = state.sourceIdentifier,
-        canonicalId = state.canonicalId,
-        mergedTime = mergedTime,
-        sourceModifiedTime = state.sourceModifiedTime,
-        availabilities = Availabilities.forWorkData(data),
-        relations = state.relations
-      )
-
-    def data(data: WorkData[DataState.Identified]) = data
-
-    def redirect(redirect: IdState.Identified): IdState.Identified = redirect
-  }
-
-  implicit val mergedToDenormalised =
-    new Transition[Merged, Denormalised] {
-      def state(
-        state: Merged,
-        data: WorkData[DataState.Identified],
-        relations: Relations
-      ): Denormalised =
-        Denormalised(
-          sourceIdentifier = state.sourceIdentifier,
-          canonicalId = state.canonicalId,
-          mergedTime = state.mergedTime,
-          sourceModifiedTime = state.sourceModifiedTime,
-          availabilities = state.availabilities,
-          relations = state.relations + relations
-        )
-
-      def data(data: WorkData[DataState.Identified]) = data
-
-      def redirect(redirect: IdState.Identified) = redirect
-    }
 }
