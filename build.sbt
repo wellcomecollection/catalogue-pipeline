@@ -31,6 +31,12 @@ lazy val internal_model = setupProject(
   "common/internal_model",
   externalDependencies = CatalogueDependencies.internalModelDependencies)
 
+lazy val internal_model2 = setupProject(
+  project,
+  "common/internal_model",
+  externalDependencies = CatalogueDependencies.internalModel2Dependencies)
+
+
 lazy val display_model = setupProject(
   project,
   folder = "common/display_model",
@@ -138,7 +144,8 @@ lazy val router = setupProject(
 lazy val batcher = setupProject(
   project,
   "pipeline/relation_embedder/batcher",
-  externalDependencies = CatalogueDependencies.internalModelDependencies ++ CatalogueDependencies.batcherDependencies
+  localDependencies = Seq(internal_model2),
+  externalDependencies = CatalogueDependencies.batcherDependencies
 )
 
 lazy val reindex_worker = setupProject(

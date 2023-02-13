@@ -182,6 +182,17 @@ object CatalogueDependencies {
       WellcomeDependencies.storageLibrary ++
       ExternalDependencies.diffJsonDependencies
 
+  val internalModel2Dependencies: Seq[ModuleID] =
+    WellcomeDependencies.fixturesLibrary ++
+      WellcomeDependencies.elasticsearchLibrary ++
+      WellcomeDependencies.elasticsearchTypesafeLibrary ++
+      WellcomeDependencies.jsonLibrary ++
+      ExternalDependencies.scalacheckDependencies ++
+      ExternalDependencies.enumeratumDependencies ++
+      ExternalDependencies.scalaXmlDependencies ++
+      WellcomeDependencies.storageLibrary ++
+      ExternalDependencies.diffJsonDependencies
+
   val displayModelDependencies: Seq[ModuleID] =
     WellcomeDependencies.httpLibrary
 
