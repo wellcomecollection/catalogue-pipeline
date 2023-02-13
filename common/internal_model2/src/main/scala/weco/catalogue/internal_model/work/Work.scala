@@ -57,7 +57,8 @@ case class WorkData[State <: DataState](
   holdings: List[Holdings] = Nil,
   collectionPath: Option[CollectionPath] = None,
   referenceNumber: Option[ReferenceNumber] = None,
-  imageData: List[ImageData[State#Id]] = Nil
+  imageData: List[ImageData[State#Id]] = Nil,
+  workType: WorkType = WorkType.Standard
 )
 
 /** WorkState represents the state of the work in the pipeline, and contains
@@ -77,6 +78,28 @@ sealed trait WorkState {
   def id: String
 }
 
+object InternalWork {
+  // Originally we used a full instance of Work[Source] and Work[Identified] here,
+  // but for reasons we don't fully understand, that causes the compilation times of
+  // internal_model to explode.
+  //
+  // This is probably a sign that the entire Id/Data/WorkState hierarchy needs a rethink
+  // to make it less thorny and complicated, but doing that now would block the TEI work.
+  //
+  // TODO: Investigate the internal model compilation slowness further.
+  // See https://github.com/wellcomecollection/platform/issues/5298
+  case class Source(
+    sourceIdentifier: SourceIdentifier,
+    workData: WorkData[DataState.Unidentified]
+  )
+
+  case class Identified(
+    sourceIdentifier: SourceIdentifier,
+    canonicalId: CanonicalId,
+    workData: WorkData[DataState.Identified]
+  )
+}
+
 object WorkState {
 
   case class Source(
@@ -86,7 +109,8 @@ object WorkState {
     // Renaming/moving this field will make the check fail silently and could cause unnecessary
     // work to be performed by the pipeline
     sourceModifiedTime: Instant,
-    mergeCandidates: List[MergeCandidate[IdState.Identifiable]] = Nil
+    mergeCandidates: List[MergeCandidate[IdState.Identifiable]] = Nil,
+    internalWorkStubs: List[InternalWork.Source] = Nil
   ) extends WorkState {
 
     type WorkDataState = DataState.Unidentified
@@ -100,7 +124,8 @@ object WorkState {
     sourceIdentifier: SourceIdentifier,
     canonicalId: CanonicalId,
     sourceModifiedTime: Instant,
-    mergeCandidates: List[MergeCandidate[IdState.Identified]] = Nil
+    mergeCandidates: List[MergeCandidate[IdState.Identified]] = Nil,
+    internalWorkStubs: List[InternalWork.Identified] = Nil
   ) extends WorkState {
 
     type WorkDataState = DataState.Identified

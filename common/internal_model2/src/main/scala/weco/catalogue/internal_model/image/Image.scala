@@ -26,6 +26,8 @@ case class Image[State <: ImageState](
 }
 
 sealed trait ImageState {
+  type TransitionArgs
+
   val canonicalId: CanonicalId
   val sourceIdentifier: SourceIdentifier
 
