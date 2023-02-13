@@ -2,6 +2,7 @@ package weco.catalogue.internal_model.work
 
 import weco.catalogue.internal_model.identifiers._
 import weco.catalogue.internal_model.image.ImageData
+import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.locations.DigitalLocation
 
 import java.time.Instant
@@ -50,6 +51,8 @@ case class WorkData[State <: DataState](
   contributors: List[Contributor[State#MaybeId]] = Nil,
   thumbnail: Option[DigitalLocation] = None,
   production: List[ProductionEvent[State#MaybeId]] = Nil,
+  languages: List[Language] = Nil,
+  notes: List[Note] = Nil,
   items: List[Item[State#MaybeId]] = Nil,
   holdings: List[Holdings] = Nil,
   collectionPath: Option[CollectionPath] = None,
