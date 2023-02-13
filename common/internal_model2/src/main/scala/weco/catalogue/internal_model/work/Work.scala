@@ -16,7 +16,6 @@ sealed trait Work[State <: WorkState] {
 case class WorkData[State <: DataState](
   otherIdentifiers: List[SourceIdentifier] = Nil,
   format: Option[Format] = None,
-  createdDate: Option[Period[State#MaybeId]] = None,
   subjects: List[Subject[State#MaybeId]] = Nil,
   genres: List[Genre[State#MaybeId]] = Nil,
   contributors: List[Contributor[State#MaybeId]] = Nil,
