@@ -33,7 +33,7 @@ lazy val internal_model = setupProject(
 
 lazy val internal_model2 = setupProject(
   project,
-  "common/internal_model",
+  "common/internal_model2",
   externalDependencies = CatalogueDependencies.internalModel2Dependencies)
 
 
