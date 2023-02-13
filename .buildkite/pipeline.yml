@@ -106,23 +106,23 @@ steps:
     agents:
       queue: "scala"
 
-  - label: "{{ matrix }} (app)"
-    command: |
-      ./builds/run_inferrer_tests.sh {{ matrix }}
-      ./builds/build_inferrer_image.sh {{ matrix }} "$BUILDKITE_COMMIT"
+#  - label: "{{ matrix }} (app)"
+#    command: |
+#      ./builds/run_inferrer_tests.sh {{ matrix }}
+#      ./builds/build_inferrer_image.sh {{ matrix }} "$BUILDKITE_COMMIT"
+#
+#      if [[ "$BUILDKITE_BRANCH" == "main" ]]
+#      then
+#        ./builds/publish_inferrer_image_to_ecr.sh {{ matrix }} "$BUILDKITE_COMMIT"
+#      fi
+#
+#    matrix:
+#      - "aspect_ratio_inferrer"
+#      - "feature_inferrer"
+#      - "palette_inferrer"
 
-      if [[ "$BUILDKITE_BRANCH" == "main" ]]
-      then
-        ./builds/publish_inferrer_image_to_ecr.sh {{ matrix }} "$BUILDKITE_COMMIT"
-      fi
-
-    matrix:
-      - "aspect_ratio_inferrer"
-      - "feature_inferrer"
-      - "palette_inferrer"
-
-    agents:
-      queue: "scala"
+#    agents:
+#      queue: "scala"
 
 #  - label: "{{ matrix }} (Lambda)"
 #    command: |
