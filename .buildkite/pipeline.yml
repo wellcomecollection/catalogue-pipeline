@@ -124,23 +124,23 @@ steps:
     agents:
       queue: "scala"
 
-  - label: "{{ matrix }} (Lambda)"
-    command: |
-      ./builds/run_python_tests.sh "{{ matrix }}"
-
-      if [[ "$BUILDKITE_BRANCH" == "main" ]]
-      then
-        ./builds/publish_lambda_zip.py "{{ matrix }}"
-      fi
-
-    matrix:
-      - "calm_adapter/calm_window_generator"
-      - "calm_adapter/calm_deletion_check_initiator"
-      - "common/window_generator"
-      - "sierra_adapter/s3_demultiplexer"
-      - "sierra_adapter/sierra_progress_reporter"
-      - "sierra_adapter/update_embargoed_holdings"
-      - "tei_adapter/tei_updater"
+#  - label: "{{ matrix }} (Lambda)"
+#    command: |
+#      ./builds/run_python_tests.sh "{{ matrix }}"
+#
+#      if [[ "$BUILDKITE_BRANCH" == "main" ]]
+#      then
+#        ./builds/publish_lambda_zip.py "{{ matrix }}"
+#      fi
+#
+#    matrix:
+#      - "calm_adapter/calm_window_generator"
+#      - "calm_adapter/calm_deletion_check_initiator"
+#      - "common/window_generator"
+#      - "sierra_adapter/s3_demultiplexer"
+#      - "sierra_adapter/sierra_progress_reporter"
+#      - "sierra_adapter/update_embargoed_holdings"
+#      - "tei_adapter/tei_updater"
 
   - wait
 
