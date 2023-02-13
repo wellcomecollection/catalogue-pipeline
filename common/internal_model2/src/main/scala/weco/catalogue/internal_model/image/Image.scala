@@ -23,16 +23,6 @@ case class Image[State <: ImageState](
 ) {
   def id: String = state.id
   def sourceIdentifier: SourceIdentifier = state.sourceIdentifier
-
-  def transition[OutState <: ImageState](args: OutState#TransitionArgs = ())(
-    implicit transition: ImageFsm.Transition[State, OutState]
-  ): Image[OutState] =
-    Image[OutState](
-      state = transition.state(this, args),
-      version = version,
-      locations = locations,
-      modifiedTime = modifiedTime
-    )
 }
 
 sealed trait ImageState {
@@ -65,27 +55,6 @@ object ImageState {
     inferredData: InferredData
   ) extends ImageState {
     type TransitionArgs = InferredData
-  }
-}
-
-// ImageFsm contains all of the possible transitions between image states
-object ImageFsm {
-  import ImageState._
-
-  sealed trait Transition[InState <: ImageState, OutState <: ImageState] {
-    def state(self: Image[InState], args: OutState#TransitionArgs): OutState
-  }
-
-  implicit val initialToAugmented = new Transition[Initial, Augmented] {
-    def state(
-      self: Image[Initial],
-      inferredData: InferredData
-    ): Augmented =
-      Augmented(
-        sourceIdentifier = self.state.sourceIdentifier,
-        canonicalId = self.state.canonicalId,
-        inferredData = inferredData
-      )
   }
 }
 
