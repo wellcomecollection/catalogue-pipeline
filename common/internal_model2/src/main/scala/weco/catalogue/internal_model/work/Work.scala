@@ -39,50 +39,12 @@ sealed trait Work[State <: WorkState] {
     sourceIdentifier :: data.otherIdentifiers
 }
 
-object Work {
-
-  case class Visible[State <: WorkState](
-    version: Int,
-    data: WorkData[State#WorkDataState],
-    state: State,
-    redirectSources: Seq[State#WorkDataState#Id] = Nil
-  ) extends Work[State]
-
-  case class Redirected[State <: WorkState](
-    version: Int,
-    redirectTarget: State#WorkDataState#Id,
-    state: State
-  ) extends Work[State] {
-    val data = WorkData[State#WorkDataState]()
-  }
-
-  case class Invisible[State <: WorkState](
-    version: Int,
-    data: WorkData[State#WorkDataState],
-    state: State,
-    invisibilityReasons: List[InvisibilityReason] = Nil
-  ) extends Work[State]
-
-  case class Deleted[State <: WorkState](
-    version: Int,
-    state: State,
-    deletedReason: DeletedReason
-  ) extends Work[State] {
-    val data: WorkData[State#WorkDataState] = WorkData[State#WorkDataState]()
-  }
-}
-
 /** WorkData contains data common to all types of works that can exist at any
   * stage of the pipeline.
   */
 case class WorkData[State <: DataState](
-  title: Option[String] = None,
   otherIdentifiers: List[SourceIdentifier] = Nil,
-  alternativeTitles: List[String] = Nil,
   format: Option[Format] = None,
-  description: Option[String] = None,
-  physicalDescription: Option[String] = None,
-  lettering: Option[String] = None,
   createdDate: Option[Period[State#MaybeId]] = None,
   subjects: List[Subject[State#MaybeId]] = Nil,
   genres: List[Genre[State#MaybeId]] = Nil,
@@ -90,20 +52,13 @@ case class WorkData[State <: DataState](
   thumbnail: Option[DigitalLocation] = None,
   production: List[ProductionEvent[State#MaybeId]] = Nil,
   languages: List[Language] = Nil,
-  edition: Option[String] = None,
   notes: List[Note] = Nil,
-  duration: Option[Int] = None,
   items: List[Item[State#MaybeId]] = Nil,
   holdings: List[Holdings] = Nil,
   collectionPath: Option[CollectionPath] = None,
   referenceNumber: Option[ReferenceNumber] = None,
   imageData: List[ImageData[State#Id]] = Nil,
   workType: WorkType = WorkType.Standard,
-  // In this context, frequency and designation refer to serial publications,
-  // e.g. how many issues a journal publishes each year
-  currentFrequency: Option[String] = None,
-  formerFrequency: List[String] = Nil,
-  designation: List[String] = Nil
 )
 
 /** WorkState represents the state of the work in the pipeline, and contains
