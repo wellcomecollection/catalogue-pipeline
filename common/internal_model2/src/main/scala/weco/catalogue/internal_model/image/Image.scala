@@ -19,7 +19,6 @@ case class Image[State <: ImageState](
   version: Int,
   state: State,
   locations: List[DigitalLocation],
-  source: ImageSource,
   modifiedTime: Instant
 ) {
   def id: String = state.id
@@ -32,7 +31,6 @@ case class Image[State <: ImageState](
       state = transition.state(this, args),
       version = version,
       locations = locations,
-      source = source,
       modifiedTime = modifiedTime
     )
 }
