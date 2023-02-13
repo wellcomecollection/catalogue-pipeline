@@ -53,7 +53,6 @@ case class WorkData[State <: DataState](
   notes: List[Note] = Nil,
   items: List[Item[State#MaybeId]] = Nil,
   holdings: List[Holdings] = Nil,
-  collectionPath: Option[CollectionPath] = None,
   referenceNumber: Option[ReferenceNumber] = None,
   imageData: List[ImageData[State#Id]] = Nil,
   workType: WorkType = WorkType.Standard
