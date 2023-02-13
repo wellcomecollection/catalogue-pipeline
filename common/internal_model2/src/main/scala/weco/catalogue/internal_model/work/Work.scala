@@ -134,38 +134,4 @@ object WorkState {
 
     val modifiedTime: Instant = sourceModifiedTime
   }
-
-  case class Merged(
-    sourceIdentifier: SourceIdentifier,
-    canonicalId: CanonicalId,
-    mergedTime: Instant,
-    sourceModifiedTime: Instant,
-    availabilities: Set[Availability] = Set.empty
-  ) extends WorkState {
-
-    type WorkDataState = DataState.Identified
-
-    def id: String = canonicalId.toString
-
-    // This is used to order updates in pipeline-storage.
-    // See https://github.com/wellcomecollection/docs/tree/main/rfcs/038-matcher-versioning
-    val modifiedTime: Instant = mergedTime
-  }
-
-  case class Denormalised(
-    sourceIdentifier: SourceIdentifier,
-    canonicalId: CanonicalId,
-    mergedTime: Instant,
-    sourceModifiedTime: Instant,
-    availabilities: Set[Availability]
-  ) extends WorkState {
-
-    type WorkDataState = DataState.Identified
-
-    def id = canonicalId.toString
-
-    // This is used to order updates in pipeline-storage.
-    // See https://github.com/wellcomecollection/docs/tree/main/rfcs/038-matcher-versioning
-    val modifiedTime: Instant = mergedTime
-  }
 }
