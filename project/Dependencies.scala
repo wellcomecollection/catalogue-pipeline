@@ -189,7 +189,6 @@ object CatalogueDependencies {
       WellcomeDependencies.jsonLibrary ++
       ExternalDependencies.scalacheckDependencies ++
       ExternalDependencies.enumeratumDependencies ++
-      ExternalDependencies.scalaXmlDependencies ++
       WellcomeDependencies.storageLibrary ++
       ExternalDependencies.diffJsonDependencies
 
