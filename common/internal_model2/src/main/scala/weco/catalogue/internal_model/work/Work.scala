@@ -58,7 +58,7 @@ case class WorkData[State <: DataState](
   collectionPath: Option[CollectionPath] = None,
   referenceNumber: Option[ReferenceNumber] = None,
   imageData: List[ImageData[State#Id]] = Nil,
-  workType: WorkType = WorkType.Standard,
+  workType: WorkType = WorkType.Standard
 )
 
 /** WorkState represents the state of the work in the pipeline, and contains
@@ -110,7 +110,7 @@ object WorkState {
     // work to be performed by the pipeline
     sourceModifiedTime: Instant,
     mergeCandidates: List[MergeCandidate[IdState.Identifiable]] = Nil,
-    internalWorkStubs: List[InternalWork.Source] = Nil,
+    internalWorkStubs: List[InternalWork.Source] = Nil
   ) extends WorkState {
 
     type WorkDataState = DataState.Unidentified
@@ -125,7 +125,7 @@ object WorkState {
     canonicalId: CanonicalId,
     sourceModifiedTime: Instant,
     mergeCandidates: List[MergeCandidate[IdState.Identified]] = Nil,
-    internalWorkStubs: List[InternalWork.Identified] = Nil,
+    internalWorkStubs: List[InternalWork.Identified] = Nil
   ) extends WorkState {
 
     type WorkDataState = DataState.Identified
@@ -140,7 +140,7 @@ object WorkState {
     canonicalId: CanonicalId,
     mergedTime: Instant,
     sourceModifiedTime: Instant,
-    availabilities: Set[Availability] = Set.empty,
+    availabilities: Set[Availability] = Set.empty
   ) extends WorkState {
 
     type WorkDataState = DataState.Identified
@@ -157,7 +157,7 @@ object WorkState {
     canonicalId: CanonicalId,
     mergedTime: Instant,
     sourceModifiedTime: Instant,
-    availabilities: Set[Availability],
+    availabilities: Set[Availability]
   ) extends WorkState {
 
     type WorkDataState = DataState.Identified
