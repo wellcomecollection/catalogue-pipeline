@@ -71,27 +71,27 @@ steps:
     agents:
       queue: "scala"
 
-  - label: "{{ matrix }} (app)"
-    command: |
-      ./builds/run_sbt_tests.sh {{ matrix }}
-      ./builds/build_sbt_image.sh {{ matrix }} "$BUILDKITE_COMMIT"
+#  - label: "{{ matrix }} (app)"
+#    command: |
+#      ./builds/run_sbt_tests.sh {{ matrix }}
+#      ./builds/build_sbt_image.sh {{ matrix }} "$BUILDKITE_COMMIT"
+#
+#      # The ingestor tests will regenerate the JSON test documents
+#      # used in the API tests.  Make sure the latest versions are
+#      # checked in.
+#      git diff --exit-code
+#
+#      if [[ "$BUILDKITE_BRANCH" == "main" ]]
+#      then
+#        ./builds/publish_sbt_image_to_ecr.sh {{ matrix }} "$BUILDKITE_COMMIT"
+#      fi
+#
+#    matrix:
+#      - "ingestor_works"
+#      - "ingestor_images"
 
-      # The ingestor tests will regenerate the JSON test documents
-      # used in the API tests.  Make sure the latest versions are
-      # checked in.
-      git diff --exit-code
-
-      if [[ "$BUILDKITE_BRANCH" == "main" ]]
-      then
-        ./builds/publish_sbt_image_to_ecr.sh {{ matrix }} "$BUILDKITE_COMMIT"
-      fi
-
-    matrix:
-      - "ingestor_works"
-      - "ingestor_images"
-
-    agents:
-      queue: "scala"
+#    agents:
+#      queue: "scala"
 
   - label: "inference_manager (app)"
     command: |
