@@ -67,11 +67,12 @@ class SierraTransformerTest
       itemRecords = itemRecords
     )
 
-    val expectedIdentifiers = itemRecords.map { record =>
-      createSierraSystemSourceIdentifierWith(
-        value = record.id.withCheckDigit,
-        ontologyType = "Item"
-      )
+    val expectedIdentifiers = itemRecords.map {
+      record =>
+        createSierraSystemSourceIdentifierWith(
+          value = record.id.withCheckDigit,
+          ontologyType = "Item"
+        )
     }
 
     val work = transformToWork(sierraTransformable)
@@ -98,7 +99,7 @@ class SierraTransformerTest
          |}
          |""".stripMargin
     val sierraTransformable = createSierraTransformableWith(
-      bibRecord = createSierraBibRecordWith(id = bibId, data = data),
+      bibRecord = createSierraBibRecordWith(id = bibId, data = data)
     )
 
     val work = transformToWork(sierraTransformable)
@@ -126,20 +127,24 @@ class SierraTransformerTest
     val triedWork =
       SierraTransformer(
         transformable = createSierraTransformableWith(bibRecord = bibRecord),
-        version = 1)
+        version = 1
+      )
     triedWork.isSuccess shouldBe true
 
     triedWork.get.asInstanceOf[Work.Visible[_]].data.format shouldBe Some(
-      Pictures)
+      Pictures
+    )
   }
 
   it("extracts information from items") {
     val bibId = createSierraBibNumber
     val itemId = createSierraItemNumber
 
-    def itemData(itemId: SierraItemNumber,
-                 modifiedDate: Instant,
-                 bibIds: List[SierraBibNumber]) =
+    def itemData(
+      itemId: SierraItemNumber,
+      modifiedDate: Instant,
+      bibIds: List[SierraBibNumber]
+    ) =
       s"""
          |{
          |  "id": "$itemId",
@@ -195,7 +200,8 @@ class SierraTransformerTest
     unidentifiedWork.data.items.head shouldBe Item(
       id = IdState.Identifiable(
         sourceIdentifier = expectedSourceIdentifier,
-        otherIdentifiers = expectedOtherIdentifiers),
+        otherIdentifiers = expectedOtherIdentifiers
+      ),
       locations = List(
         PhysicalLocation(
           locationType = LocationType.ClosedStores,
@@ -203,7 +209,9 @@ class SierraTransformerTest
           accessConditions = List(
             AccessCondition(
               method = AccessMethod.OnlineRequest,
-              status = AccessStatus.Open))
+              status = AccessStatus.Open
+            )
+          )
         )
       )
     )
@@ -214,9 +222,11 @@ class SierraTransformerTest
     val itemId = createSierraItemNumber
     val locationType = LocationType.ClosedStores
     val locationLabel = "A museum of mermaids"
-    def itemData(itemId: SierraItemNumber,
-                 modifiedDate: Instant,
-                 bibIds: List[SierraBibNumber]) =
+    def itemData(
+      itemId: SierraItemNumber,
+      modifiedDate: Instant,
+      bibIds: List[SierraBibNumber]
+    ) =
       s"""
          |{
          |  "id": "$itemId",
@@ -255,9 +265,11 @@ class SierraTransformerTest
   it("puts items in the right order") {
     val bibId = SierraBibNumber("1000024")
 
-    def itemData(itemId: SierraItemNumber,
-                 modifiedDate: Instant,
-                 bibIds: List[SierraBibNumber]) =
+    def itemData(
+      itemId: SierraItemNumber,
+      modifiedDate: Instant,
+      bibIds: List[SierraBibNumber]
+    ) =
       s"""
          |{
          |  "id": "$itemId",
@@ -307,12 +319,13 @@ class SierraTransformerTest
       }
 
     identifiers shouldBe Seq("i18743547", "i18743559", "i10000318", "i18743535")
-      .map { id =>
-        SourceIdentifier(
-          identifierType = IdentifierType.SierraSystemNumber,
-          value = id,
-          ontologyType = "Item"
-        )
+      .map {
+        id =>
+          SourceIdentifier(
+            identifierType = IdentifierType.SierraSystemNumber,
+            value = id,
+            ontologyType = "Item"
+          )
       }
   }
 
@@ -355,7 +368,8 @@ class SierraTransformerTest
       subfields = List(
         Subfield(
           tag = "a",
-          content = "A delightful description of a dead daisy."),
+          content = "A delightful description of a dead daisy."
+        ),
         Subfield(tag = "x", content = "1923")
       )
     )
@@ -379,7 +393,7 @@ class SierraTransformerTest
     val formerFrequencyField = VarField(
       marcTag = "321",
       subfields = List(
-        Subfield(tag = "a", content = "Weekly"),
+        Subfield(tag = "a", content = "Weekly")
       )
     )
     val expectedFormerFrequency = List("Weekly")
@@ -387,10 +401,14 @@ class SierraTransformerTest
     val designationField = VarField(
       marcTag = "362",
       subfields = List(
-        Subfield(tag = "a", content = "Began in 1955; ceased with v. 49, no. 4 (Dec. 2003). "),
+        Subfield(
+          tag = "a",
+          content = "Began in 1955; ceased with v. 49, no. 4 (Dec. 2003). "
+        )
       )
     )
-    val expectedDesignation = List("Began in 1955; ceased with v. 49, no. 4 (Dec. 2003).")
+    val expectedDesignation =
+      List("Began in 1955; ceased with v. 49, no. 4 (Dec. 2003).")
 
     val notesField = VarField(
       marcTag = "500",
@@ -405,7 +423,7 @@ class SierraTransformerTest
         marcTag = "041",
         subfields = List(
           Subfield(tag = "a", content = "ger"),
-          Subfield(tag = "a", content = "fre"),
+          Subfield(tag = "a", content = "fre")
         )
       )
     )
@@ -425,7 +443,8 @@ class SierraTransformerTest
         currentFrequencyField,
         formerFrequencyField,
         designationField,
-        notesField) ++ langVarFields
+        notesField
+      ) ++ langVarFields
 
     val data =
       s"""
@@ -461,8 +480,9 @@ class SierraTransformerTest
           )
         )
       )
-      .notes(List(
-        Note(contents = "It's a note", noteType = NoteType.GeneralNote)))
+      .notes(
+        List(Note(contents = "It's a note", noteType = NoteType.GeneralNote))
+      )
       .lettering(lettering)
       .languages(expectedLanguages)
       .currentFrequency(expectedCurrentFrequency)
@@ -699,7 +719,7 @@ class SierraTransformerTest
     val List(contributor) = work.data.contributors
     contributor.agent shouldBe a[Person[_]]
     contributor.agent should have(
-      'label (name)
+      'label(name)
     )
   }
 
@@ -732,13 +752,13 @@ class SierraTransformerTest
     val work = transformDataToSourceWork(id = id, data = data)
     val List(subject) = work.data.subjects
     subject should have(
-      'label (content),
+      'label(content),
       labelDerivedConceptId(content.toLowerCase)
     )
     val List(concept) = subject.concepts
 
     concept should have(
-      'label (content),
+      'label(content),
       labelDerivedConceptId(content.toLowerCase)
     )
   }
@@ -772,10 +792,10 @@ class SierraTransformerTest
     val work = transformDataToSourceWork(id = id, data = data)
     val List(subject) = work.data.subjects
     subject should have(
-      'label ("Nostradamus"),
+      'label("Nostradamus")
     )
     subject.onlyConcept should have(
-      'label ("Nostradamus"),
+      'label("Nostradamus"),
       labelDerivedPersonId("nostradamus")
     )
   }
@@ -810,7 +830,7 @@ class SierraTransformerTest
       transformDataToSourceWork(id = id, data = data).data.subjects
 
     subject should have(
-      'label (content)
+      'label(content)
     )
     val concept = subject.onlyConcept
     concept shouldBe an[Organisation[_]]
@@ -847,7 +867,7 @@ class SierraTransformerTest
       transformDataToSourceWork(id = id, data = data).data.subjects
 
     subject should have(
-      'label (content)
+      'label(content)
     )
     val concept = subject.onlyConcept
     concept shouldBe an[Meeting[_]]
@@ -883,12 +903,12 @@ class SierraTransformerTest
     val List(subject) =
       transformDataToSourceWork(id = id, data = data).data.subjects
     subject should have(
-      'label (content),
-      'id (IdState.Unidentifiable)
+      'label(content),
+      labelDerivedConceptId(content.toLowerCase)
     )
     val List(concept) = subject.concepts
     concept should have(
-      'label (content),
+      'label(content),
       labelDerivedConceptId(content.toLowerCase)
     )
   }
@@ -1087,11 +1107,13 @@ class SierraTransformerTest
             accessConditions = List(
               AccessCondition(
                 method = AccessMethod.ViewOnline,
-                status = AccessStatus.LicensedResources())
+                status = AccessStatus.LicensedResources()
+              )
             )
           )
         )
-      ))
+      )
+    )
   }
 
   describe("includes the holdings") {
@@ -1195,7 +1217,8 @@ class SierraTransformerTest
   // b32496485.  This Work didn't have any items in Sierra, but it did get
   // a digitised item from the METS.
   it(
-    "does not create an item from the order record if there are no items but there is a CAT DATE on the bib") {
+    "does not create an item from the order record if there are no items but there is a CAT DATE on the bib"
+  ) {
     val id = createSierraBibNumber
 
     val transformable = createSierraTransformableWith(
@@ -1258,7 +1281,8 @@ class SierraTransformerTest
       bibRecord = SierraBibRecord(
         id = bibId,
         data = bibData,
-        modifiedDate = Instant.now()),
+        modifiedDate = Instant.now()
+      ),
       itemRecords = List(
         SierraItemRecord(
           id = itemId,
@@ -1420,7 +1444,8 @@ class SierraTransformerTest
   private def transformDataToWork(
     id: SierraBibNumber,
     data: String,
-    modifiedDate: Instant = olderDate): Work[Source] = {
+    modifiedDate: Instant = olderDate
+  ): Work[Source] = {
     val bibRecord = createSierraBibRecordWith(
       id = id,
       data = data,
@@ -1437,7 +1462,8 @@ class SierraTransformerTest
   private def assertTransformReturnsInvisibleWork(
     t: SierraTransformable,
     modifiedDate: Instant,
-    invisibilityReasons: List[InvisibilityReason]): Assertion = {
+    invisibilityReasons: List[InvisibilityReason]
+  ): Assertion = {
     val triedMaybeWork = SierraTransformer(t, version = 1)
     triedMaybeWork.isSuccess shouldBe true
 
@@ -1454,8 +1480,10 @@ class SierraTransformerTest
     )
   }
 
-  private def transformDataToSourceWork(id: SierraBibNumber,
-                                        data: String): Work.Visible[Source] = {
+  private def transformDataToSourceWork(
+    id: SierraBibNumber,
+    data: String
+  ): Work.Visible[Source] = {
 
     val work = transformDataToWork(id = id, data = data)
     work shouldBe a[Work.Visible[_]]
