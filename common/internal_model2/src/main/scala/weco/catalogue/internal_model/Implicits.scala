@@ -3,7 +3,6 @@ package weco.catalogue.internal_model
 import io.circe.generic.extras.semiauto._
 import io.circe._
 import weco.catalogue.internal_model.locations.AccessCondition
-import weco.catalogue.internal_model.work.Note
 import weco.json.JsonUtil._
 
 object Implicits {
@@ -21,9 +20,7 @@ object Implicits {
 
   implicit val _decAccessCondition: Decoder[AccessCondition] =
     deriveConfiguredDecoder
-  implicit val _decNote: Decoder[Note] = deriveConfiguredDecoder
 
   implicit val _encAccessCondition: Encoder[AccessCondition] =
     deriveConfiguredEncoder
-  implicit val _encNote: Encoder[Note] = deriveConfiguredEncoder
 }

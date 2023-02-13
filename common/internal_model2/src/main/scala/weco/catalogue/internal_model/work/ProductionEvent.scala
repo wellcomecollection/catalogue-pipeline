@@ -1,5 +1,6 @@
 package weco.catalogue.internal_model.work
 
+// i think this is part of the culprit
 case class ProductionEvent[+State](
   label: String,
   places: List[Place[State]],
