@@ -144,8 +144,7 @@ object WorksAnalysis {
         shingleAsciifoldingAnalyzer,
         shingleCasedAnalyzer,
         englishAnalyzer,
-        englishCasedAnalyzer
-        whitespaceAnalyzer,
+        englishCasedAnalyzer whitespaceAnalyzer,
         slashesAnalyzer
       ) ++ languageFiltersAndAnalyzers.map(_._2),
       tokenFilters = List(
