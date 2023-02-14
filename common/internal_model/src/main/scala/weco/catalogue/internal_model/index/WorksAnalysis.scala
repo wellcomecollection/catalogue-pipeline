@@ -11,7 +11,11 @@ object WorksAnalysis {
   // This analyzer "keeps" the hyphen, by removing it and treating hyphenated
   // tokens as a single token.
   val hyphensCharFilter =
-    MappingCharFilter("hyphens_char_filter", mappings = Map("-" -> ""))
+    PatternReplaceCharFilter(
+      "hyphens_char_filter",
+      pattern = "-",
+      replacement = ""
+    )
 
   val asciiFoldingTokenFilter = AsciiFoldingTokenFilter(
     "asciifolding_token_filter",
