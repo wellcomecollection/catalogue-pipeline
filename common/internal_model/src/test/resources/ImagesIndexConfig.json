@@ -661,6 +661,11 @@
             "mappings": [
               "/=> __"
             ]
+          },
+          "hyphens_char_filter": {
+            "pattern": "-",
+            "type": "pattern_replace",
+            "replacement": ""
           }
         },
         "normalizer": {
@@ -750,6 +755,9 @@
               "lowercase",
               "shingle_token_filter",
               "asciifolding_token_filter"
+            ],
+            "char_filter": [
+              "hyphens_char_filter"
             ],
             "type": "custom",
             "tokenizer": "standard"
