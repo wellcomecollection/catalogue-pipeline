@@ -685,6 +685,15 @@
             "type": "custom",
             "tokenizer": "standard"
           },
+          "english_cased_analyzer": {
+            "filter": [
+              "asciifolding_token_filter",
+              "english_stemmer",
+              "english_possessive_stemmer"
+            ],
+            "type": "custom",
+            "tokenizer": "standard"
+          },
           "asciifolding_analyzer": {
             "filter": [
               "lowercase",
@@ -738,6 +747,17 @@
             ],
             "char_filter": [
               "slashes_char_filter"
+            ],
+            "type": "custom",
+            "tokenizer": "standard"
+          },
+          "shingle_cased_analyzer": {
+            "filter": [
+              "shingle_token_filter",
+              "asciifolding_token_filter"
+            ],
+            "char_filter": [
+              "hyphens_char_filter"
             ],
             "type": "custom",
             "tokenizer": "standard"

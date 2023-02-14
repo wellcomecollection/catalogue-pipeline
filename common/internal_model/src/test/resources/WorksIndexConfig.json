@@ -400,10 +400,6 @@
                 "type": "text",
                 "analyzer": "italian_analyzer"
               },
-              "keyword": {
-                "type": "keyword",
-                "normalizer": "lowercase_normalizer"
-              },
               "shingles": {
                 "type": "text",
                 "analyzer": "shingle_asciifolding_analyzer"
@@ -635,6 +631,10 @@
                 "type": "text",
                 "analyzer": "english_analyzer"
               },
+              "english_cased": {
+                "type": "text",
+                "analyzer": "english_cased_analyzer"
+              },
               "french": {
                 "type": "text",
                 "analyzer": "french_analyzer"
@@ -654,6 +654,10 @@
               "shingles": {
                 "type": "text",
                 "analyzer": "shingle_asciifolding_analyzer"
+              },
+              "shingles_cased": {
+                "type": "text",
+                "analyzer": "shingle_cased_analyzer"
               }
             }
           },
