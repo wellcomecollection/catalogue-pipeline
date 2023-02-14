@@ -144,7 +144,7 @@ object WorksAnalysis {
         shingleAsciifoldingAnalyzer,
         shingleCasedAnalyzer,
         englishAnalyzer,
-        englishCasedAnalyzer
+        englishCasedAnalyzer,
         whitespaceAnalyzer,
         slashesAnalyzer
       ) ++ languageFiltersAndAnalyzers.map(_._2),
