@@ -100,14 +100,14 @@ object WorksAnalysis {
     tokenizer = "standard",
     tokenFilters =
       List("lowercase", shingleTokenFilter.name, asciiFoldingTokenFilter.name),
-    charFilters = List(hyphensCharFilter)
+    charFilters = List(hyphensCharFilter.name)
   )
 
   val shingleCasedAnalyzer = CustomAnalyzer(
     "shingle_cased_analyzer",
     tokenizer = "standard",
     tokenFilters = List(shingleTokenFilter.name, asciiFoldingTokenFilter.name),
-    charFilters = List(hyphensCharFilter)
+    charFilters = List(hyphensCharFilter.name)
   )
 
   val whitespaceAnalyzer = CustomAnalyzer(

@@ -41,8 +41,8 @@ trait IndexConfigFields extends ElasticFieldOps {
       .fields(
         List(
           textField("english").analyzer(englishAnalyzer.name),
-          textField("shingles").analyzer(shingleAsciifoldingAnalyzer.name)
-          textField("english_cased").analyzer(englishCasedAnalyzer.name)
+          textField("shingles").analyzer(shingleAsciifoldingAnalyzer.name),
+          textField("english_cased").analyzer(englishCasedAnalyzer.name),
           textField("shingles_cased").analyzer(shingleCasedAnalyzer.name)
         ) ++
           languagesTextFields
@@ -52,7 +52,7 @@ trait IndexConfigFields extends ElasticFieldOps {
     textField(name).fields(
       Seq(lowercaseKeyword("keyword")) ++
         // we don't care about the name, we just want to compose the fields parameter
-        multilingualField("").fields ++
+        multilingualField("").fields
     )
 
   def lowercaseKeyword(name: String): KeywordField =
