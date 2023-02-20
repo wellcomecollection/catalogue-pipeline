@@ -3,6 +3,7 @@ package weco.pipeline.transformer.sierra.transformers
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
+import weco.sierra.models.fields.SierraMaterialType
 import weco.sierra.models.marc.{Subfield, VarField}
 
 class SierraLetteringTest
@@ -98,6 +99,45 @@ class SierraLetteringTest
       expectedLettering = Some(
         "Daring dalmations dance with danger\n\nEnterprising eskimos exile every eagle")
     )
+  }
+
+  describe("lettering for visual material") {
+    it("uses both 246 .6 ǂa and 514 for visual material") {
+      // This is based on b16529888
+      val bibData = createSierraBibDataWith(
+        materialType = Some(SierraMaterialType("k")),
+        varFields = List(
+          VarField(marcTag = "514", subfields = List(Subfield(tag = "a", content = "Lettering continues: Comment va  le malade? H\\u00e9las Monsieur, il est mort ce matin \\u00e0 six heures! Ah il est mort le gaillard! .. Il n'a donc pas pris ma potion? Si Monsieur. Il en a donc trop pris? Non Monsieur. C'est qu'il n'en a assez pris. H.D."))),
+          VarField(
+            marcTag = Some("246"),
+            indicator2 = Some("6"),
+            subfields = List(
+              Subfield(tag = "a", content = "Le m\u00e9decin et la garde malade. H.D. ...")
+            )
+          )
+        )
+      )
+
+      SierraLettering(bibData) shouldBe Some("Le m\u00e9decin et la garde malade. H.D. ...\n\nLettering continues: Comment va  le malade? H\\u00e9las Monsieur, il est mort ce matin \\u00e0 six heures! Ah il est mort le gaillard! .. Il n'a donc pas pris ma potion? Si Monsieur. Il en a donc trop pris? Non Monsieur. C'est qu'il n'en a assez pris. H.D.")
+    }
+
+    it("only uses both 246 .6 ǂa for non-visual material") {
+      val bibData = createSierraBibDataWith(
+        materialType = Some(SierraMaterialType("not-k")),
+        varFields = List(
+          VarField(marcTag = "514", subfields = List(Subfield(tag = "a", content = "Lettering continues: Comment va  le malade? H\\u00e9las Monsieur, il est mort ce matin \\u00e0 six heures! Ah il est mort le gaillard! .. Il n'a donc pas pris ma potion? Si Monsieur. Il en a donc trop pris? Non Monsieur. C'est qu'il n'en a assez pris. H.D."))),
+          VarField(
+            marcTag = Some("246"),
+            indicator2 = Some("6"),
+            subfields = List(
+              Subfield(tag = "a", content = "Le m\u00e9decin et la garde malade. H.D. ...")
+            )
+          )
+        )
+      )
+
+      SierraLettering(bibData) shouldBe Some("Le m\u00e9decin et la garde malade. H.D. ...")
+    }
   }
 
   private def assertFindsCorrectLettering(
