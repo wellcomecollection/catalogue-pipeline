@@ -71,7 +71,8 @@ object SierraNotes extends SierraDataTransformer with SierraQueryOps {
 
         // For visual material (matType k) we want to put 514 in the lettering
         // field, not as a lettering note.  See comment on SierraLettering.
-        case VarField(_, Some("514"), _, _, _, _) if bibData.materialType.map(_.code).contains("k") =>
+        case VarField(_, Some("514"), _, _, _, _)
+            if bibData.materialType.map(_.code).contains("k") =>
           None
 
         case vf @ VarField(_, Some(marcTag), _, _, _, _) =>
