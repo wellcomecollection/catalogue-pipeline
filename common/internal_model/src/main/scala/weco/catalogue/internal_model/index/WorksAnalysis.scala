@@ -103,14 +103,22 @@ object WorksAnalysis {
   val shingleAsciifoldingAnalyzer = CustomAnalyzer(
     "shingle_asciifolding_analyzer",
     tokenizer = "standard",
-    tokenFilters =
-      List("lowercase", punctuationTokenFilter.name, shingleTokenFilter.name, asciiFoldingTokenFilter.name),
+    tokenFilters = List(
+      "lowercase",
+      punctuationTokenFilter.name,
+      shingleTokenFilter.name,
+      asciiFoldingTokenFilter.name
+    )
   )
 
   val shingleCasedAnalyzer = CustomAnalyzer(
     "shingle_cased_analyzer",
     tokenizer = "standard",
-    tokenFilters = List(punctuationTokenFilter.name, shingleTokenFilter.name, asciiFoldingTokenFilter.name),
+    tokenFilters = List(
+      punctuationTokenFilter.name,
+      shingleTokenFilter.name,
+      asciiFoldingTokenFilter.name
+    )
   )
 
   val whitespaceAnalyzer = CustomAnalyzer(
