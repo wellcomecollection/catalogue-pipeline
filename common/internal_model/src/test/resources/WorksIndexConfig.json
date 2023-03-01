@@ -631,10 +631,6 @@
                 "type": "text",
                 "analyzer": "english_analyzer"
               },
-              "english_cased": {
-                "type": "text",
-                "analyzer": "english_cased_analyzer"
-              },
               "french": {
                 "type": "text",
                 "analyzer": "french_analyzer"
@@ -652,8 +648,12 @@
                 "analyzer": "italian_analyzer"
               },
               "shingles": {
+                "type" : "text",
+                "analyzer" : "shingle_asciifolding_analyzer"
+              },
+              "english_cased": {
                 "type": "text",
-                "analyzer": "shingle_asciifolding_analyzer"
+                "analyzer": "english_cased_analyzer"
               },
               "shingles_cased": {
                 "type": "text",
@@ -682,6 +682,11 @@
     "index": {
       "analysis": {
         "filter": {
+          "punctuation": {
+            "type": "pattern_replace",
+            "pattern": "[^\\w\\s]",
+            "replacement": ""
+          },
           "english_stemmer": {
             "name": "english",
             "type": "stemmer"
@@ -725,11 +730,6 @@
           }
         },
         "char_filter": {
-          "hyphens_char_filter": {
-            "pattern": "-",
-            "type": "pattern_replace",
-            "replacement": ""
-          },
           "slashes_char_filter": {
             "type": "mapping",
             "mappings": [
@@ -831,22 +831,18 @@
           "shingle_asciifolding_analyzer": {
             "filter": [
               "lowercase",
+              "punctuation",
               "shingle_token_filter",
               "asciifolding_token_filter"
-            ],
-            "char_filter": [
-              "hyphens_char_filter"
             ],
             "type": "custom",
             "tokenizer": "standard"
           },
           "shingle_cased_analyzer": {
             "filter": [
+              "punctuation",
               "shingle_token_filter",
               "asciifolding_token_filter"
-            ],
-            "char_filter": [
-              "hyphens_char_filter"
             ],
             "type": "custom",
             "tokenizer": "standard"

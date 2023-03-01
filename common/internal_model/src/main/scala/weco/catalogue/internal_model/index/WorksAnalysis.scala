@@ -8,12 +8,11 @@ object WorksAnalysis {
   val slashesCharFilter =
     MappingCharFilter("slashes_char_filter", mappings = Map("/" -> " __"))
 
-  // This analyzer "keeps" the hyphen, by removing it and treating hyphenated
-  // tokens as a single token.
-  val hyphensCharFilter =
-    PatternReplaceCharFilter(
-      "hyphens_char_filter",
-      pattern = "-",
+  // This char filter removes all punctuation
+  val punctuationTokenFilter =
+    PatternReplaceTokenFilter(
+      "punctuation",
+      pattern = "[^\\w\\s]",
       replacement = ""
     )
 
@@ -105,15 +104,13 @@ object WorksAnalysis {
     "shingle_asciifolding_analyzer",
     tokenizer = "standard",
     tokenFilters =
-      List("lowercase", shingleTokenFilter.name, asciiFoldingTokenFilter.name),
-    charFilters = List(hyphensCharFilter.name)
+      List("lowercase", punctuationTokenFilter.name, shingleTokenFilter.name, asciiFoldingTokenFilter.name),
   )
 
   val shingleCasedAnalyzer = CustomAnalyzer(
     "shingle_cased_analyzer",
     tokenizer = "standard",
-    tokenFilters = List(shingleTokenFilter.name, asciiFoldingTokenFilter.name),
-    charFilters = List(hyphensCharFilter.name)
+    tokenFilters = List(punctuationTokenFilter.name, shingleTokenFilter.name, asciiFoldingTokenFilter.name),
   )
 
   val whitespaceAnalyzer = CustomAnalyzer(
@@ -154,10 +151,11 @@ object WorksAnalysis {
         asciiFoldingTokenFilter,
         shingleTokenFilter,
         englishStemmerTokenFilter,
-        englishPossessiveStemmerTokenFilter
+        englishPossessiveStemmerTokenFilter,
+        punctuationTokenFilter
       ) ++ languageFiltersAndAnalyzers.map(_._1),
       normalizers = List(lowercaseNormalizer),
-      charFilters = List(slashesCharFilter, hyphensCharFilter)
+      charFilters = List(slashesCharFilter)
     )
   }
 }
