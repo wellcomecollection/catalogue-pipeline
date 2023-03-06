@@ -1,18 +1,20 @@
-localstack:
-  image: "760097843905.dkr.ecr.eu-west-1.amazonaws.com/localstack/localstack:0.12.5"
-  environment:
-    - SERVICES=sqs
-  ports:
-    - "4566:4566"
-elasticsearch:
-  image: "docker.elastic.co/elasticsearch/elasticsearch:8.4.0"
-  ports:
-    - "9200:9200"
-    - "9300:9300"
-  environment:
-    - "http.host=0.0.0.0"
-    - "transport.host=0.0.0.0"
-    - "cluster.name=wellcome"
-    - "logger.level=DEBUG"
-    - "discovery.type=single-node"
-    - "xpack.security.enabled=false"
+version: '3.3'
+services:
+  localstack:
+    image: "760097843905.dkr.ecr.eu-west-1.amazonaws.com/localstack/localstack:0.12.5"
+    environment:
+      - SERVICES=sqs
+    ports:
+      - "4566:4566"
+  elasticsearch:
+    image: "docker.elastic.co/elasticsearch/elasticsearch:8.4.0"
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      - "http.host=0.0.0.0"
+      - "transport.host=0.0.0.0"
+      - "cluster.name=wellcome"
+      - "logger.level=DEBUG"
+      - "discovery.type=single-node"
+      - "xpack.security.enabled=false"

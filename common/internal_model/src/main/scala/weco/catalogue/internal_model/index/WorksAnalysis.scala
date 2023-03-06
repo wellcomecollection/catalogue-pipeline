@@ -8,6 +8,15 @@ object WorksAnalysis {
   val slashesCharFilter =
     MappingCharFilter("slashes_char_filter", mappings = Map("/" -> " __"))
 
+  // This analyzer "keeps" the hyphen, by removing it and treating hyphenated
+  // tokens as a single token.
+  val hyphensCharFilter =
+    PatternReplaceCharFilter(
+      "hyphens_char_filter",
+      pattern = "-",
+      replacement = ""
+    )
+
   val asciiFoldingTokenFilter = AsciiFoldingTokenFilter(
     "asciifolding_token_filter",
     preserveOriginal = Some(true)
@@ -80,12 +89,31 @@ object WorksAnalysis {
     charFilters = Nil
   )
 
+  // now also include a case sensitive version of the english analyzer
+  val englishCasedAnalyzer = CustomAnalyzer(
+    "english_cased_analyzer",
+    tokenizer = "standard",
+    tokenFilters = List(
+      asciiFoldingTokenFilter.name,
+      englishStemmerTokenFilter.name,
+      englishPossessiveStemmerTokenFilter.name
+    ),
+    charFilters = Nil
+  )
+
   val shingleAsciifoldingAnalyzer = CustomAnalyzer(
     "shingle_asciifolding_analyzer",
     tokenizer = "standard",
     tokenFilters =
       List("lowercase", shingleTokenFilter.name, asciiFoldingTokenFilter.name),
-    charFilters = Nil
+    charFilters = List(hyphensCharFilter.name)
+  )
+
+  val shingleCasedAnalyzer = CustomAnalyzer(
+    "shingle_cased_analyzer",
+    tokenizer = "standard",
+    tokenFilters = List(shingleTokenFilter.name, asciiFoldingTokenFilter.name),
+    charFilters = List(hyphensCharFilter.name)
   )
 
   val whitespaceAnalyzer = CustomAnalyzer(
@@ -116,7 +144,9 @@ object WorksAnalysis {
         cleanPathAnalyzer,
         asciifoldingAnalyzer,
         shingleAsciifoldingAnalyzer,
+        shingleCasedAnalyzer,
         englishAnalyzer,
+        englishCasedAnalyzer,
         whitespaceAnalyzer,
         slashesAnalyzer
       ) ++ languageFiltersAndAnalyzers.map(_._2),
@@ -127,7 +157,7 @@ object WorksAnalysis {
         englishPossessiveStemmerTokenFilter
       ) ++ languageFiltersAndAnalyzers.map(_._1),
       normalizers = List(lowercaseNormalizer),
-      charFilters = List(slashesCharFilter)
+      charFilters = List(slashesCharFilter, hyphensCharFilter)
     )
   }
 }
