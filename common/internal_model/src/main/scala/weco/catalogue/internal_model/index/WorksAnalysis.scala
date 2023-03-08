@@ -8,12 +8,18 @@ object WorksAnalysis {
   val slashesCharFilter =
     MappingCharFilter("slashes_char_filter", mappings = Map("/" -> " __"))
 
-  // This analyzer "keeps" the hyphen, by removing it and treating hyphenated
-  // tokens as a single token.
-  val hyphensCharFilter =
-    PatternReplaceCharFilter(
-      "hyphens_char_filter",
-      pattern = "-",
+  // This filter removes any character which isn't
+  // - a number (0-9)
+  // - a character in any language (\p{L})
+  // - whitespace (\s)
+  //
+  // We use \p{L} instead of \w because \w doesn't include accented or
+  // non-Latin characters.
+  // See https://github.com/wellcomecollection/catalogue-pipeline/pull/2334#discussion_r1126687056
+  val punctuationTokenFilter =
+    PatternReplaceTokenFilter(
+      "punctuation",
+      pattern = "[^0-9\\p{L}\\s]",
       replacement = ""
     )
 
@@ -104,16 +110,22 @@ object WorksAnalysis {
   val shingleAsciifoldingAnalyzer = CustomAnalyzer(
     "shingle_asciifolding_analyzer",
     tokenizer = "standard",
-    tokenFilters =
-      List("lowercase", shingleTokenFilter.name, asciiFoldingTokenFilter.name),
-    charFilters = List(hyphensCharFilter.name)
+    tokenFilters = List(
+      "lowercase",
+      punctuationTokenFilter.name,
+      shingleTokenFilter.name,
+      asciiFoldingTokenFilter.name
+    )
   )
 
   val shingleCasedAnalyzer = CustomAnalyzer(
     "shingle_cased_analyzer",
     tokenizer = "standard",
-    tokenFilters = List(shingleTokenFilter.name, asciiFoldingTokenFilter.name),
-    charFilters = List(hyphensCharFilter.name)
+    tokenFilters = List(
+      punctuationTokenFilter.name,
+      shingleTokenFilter.name,
+      asciiFoldingTokenFilter.name
+    )
   )
 
   val whitespaceAnalyzer = CustomAnalyzer(
@@ -154,10 +166,11 @@ object WorksAnalysis {
         asciiFoldingTokenFilter,
         shingleTokenFilter,
         englishStemmerTokenFilter,
-        englishPossessiveStemmerTokenFilter
+        englishPossessiveStemmerTokenFilter,
+        punctuationTokenFilter
       ) ++ languageFiltersAndAnalyzers.map(_._1),
       normalizers = List(lowercaseNormalizer),
-      charFilters = List(slashesCharFilter, hyphensCharFilter)
+      charFilters = List(slashesCharFilter)
     )
   }
 }
