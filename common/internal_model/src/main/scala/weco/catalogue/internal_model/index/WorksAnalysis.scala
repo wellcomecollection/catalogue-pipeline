@@ -8,7 +8,14 @@ object WorksAnalysis {
   val slashesCharFilter =
     MappingCharFilter("slashes_char_filter", mappings = Map("/" -> " __"))
 
-  // This char filter removes all punctuation
+  // This filter removes any character which isn't
+  // - a number (0-9)
+  // - a character in any language (\p{L})
+  // - whitespace (\s)
+  //
+  // We use \p{L} instead of \w because \w doesn't include accented or
+  // non-Latin characters.
+  // See https://github.com/wellcomecollection/catalogue-pipeline/pull/2334#discussion_r1126687056
   val punctuationTokenFilter =
     PatternReplaceTokenFilter(
       "punctuation",
