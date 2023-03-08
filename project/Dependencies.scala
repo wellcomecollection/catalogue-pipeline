@@ -2,7 +2,8 @@ import sbt._
 
 object WellcomeDependencies {
 
-  val defaultVersion = "32.24.2" // This is automatically bumped by the scala-libs release process, do not edit this line manually
+  val defaultVersion =
+    "32.24.2" // This is automatically bumped by the scala-libs release process, do not edit this line manually
 
   lazy val versions = new {
     val typesafe = defaultVersion
@@ -144,7 +145,9 @@ object ExternalDependencies {
 
   val scalatestDependencies = Seq(
     "org.scalatestplus" %% versions.scalatestPlusMockitoArtifactId % versions.scalatestPlus % Test,
-    "org.scalatest" %% "scalatest" % versions.scalatest % "test"
+    "org.scalatest" %% "scalatest" % versions.scalatest % "test",
+    "com.vladsch.flexmark" % "flexmark-util" % "0.64.0" % "test",
+    "com.vladsch.flexmark" % "flexmark-profile-pegdown" % "0.64.0" % "test"
   )
 
   val parseDependencies = Seq(
