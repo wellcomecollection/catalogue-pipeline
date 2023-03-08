@@ -648,8 +648,8 @@
                 "analyzer": "italian_analyzer"
               },
               "shingles": {
-                "type" : "text",
-                "analyzer" : "shingle_asciifolding_analyzer"
+                "type": "text",
+                "analyzer": "shingle_asciifolding_analyzer"
               },
               "english_cased": {
                 "type": "text",
@@ -684,7 +684,7 @@
         "filter": {
           "punctuation": {
             "type": "pattern_replace",
-            "pattern": "[^\\w\\s]",
+            "pattern": "[^0-9\\p{L}\\s]",
             "replacement": ""
           },
           "english_stemmer": {

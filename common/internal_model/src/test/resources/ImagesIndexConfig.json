@@ -615,7 +615,7 @@
         "filter": {
           "punctuation": {
             "type": "pattern_replace",
-            "pattern": "[^\\w\\s]",
+            "pattern": "[^0-9\\p{L}\\s]",
             "replacement": ""
           },
           "english_stemmer": {

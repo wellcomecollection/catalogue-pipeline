@@ -12,7 +12,7 @@ object WorksAnalysis {
   val punctuationTokenFilter =
     PatternReplaceTokenFilter(
       "punctuation",
-      pattern = "[^\\w\\s]",
+      pattern = "[^0-9\\p{L}\\s]",
       replacement = ""
     )
 
