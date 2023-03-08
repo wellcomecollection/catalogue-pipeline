@@ -29,6 +29,7 @@ class SierraContributorsTest
     with TableDrivenPropertyChecks
     with Inspectors {
   import OntologyTypeOps._
+  override def suiteName = "Contributors"
 
   it("gets an empty contributor list from empty bib data") {
     SierraContributors(createSierraBibDataWith(varFields = Nil)) shouldBe Nil

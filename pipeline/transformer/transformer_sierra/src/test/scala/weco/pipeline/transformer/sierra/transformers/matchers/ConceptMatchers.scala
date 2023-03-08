@@ -24,6 +24,14 @@ trait ConceptMatchers {
       expectedValue = expectedValue
     )
 
+  def labelDerivedGenreId(
+    expectedValue: String
+  ): HavePropertyMatcher[HasId[Any], String] =
+    labelDerivedAbstractConceptId(
+      ontologyType = "Genre",
+      expectedValue = expectedValue
+    )
+
   def labelDerivedPeriodId(
     expectedValue: String
   ): HavePropertyMatcher[HasId[Any], String] =

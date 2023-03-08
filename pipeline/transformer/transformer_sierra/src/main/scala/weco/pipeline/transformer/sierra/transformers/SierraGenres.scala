@@ -1,6 +1,6 @@
 package weco.pipeline.transformer.sierra.transformers
 
-import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType}
+import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.{Concept, Genre}
 import weco.pipeline.transformer.transformers.ConceptsTransformer
 import weco.sierra.models.SierraQueryOps
@@ -71,17 +71,17 @@ object SierraGenres
     // will get an identifier made for the concept itself on its own.
     // This method fixes that inconsistency by discarding the LabelDerived identifier
     // It's a bit hacky, but I hope it will go away at some point.
-    val wholeFieldConceptId = getIdState(
-      ontologyType = "Concept",
+    getIdState(
+      ontologyType = "Genre",
       varField = varField
     )
-    wholeFieldConceptId match {
-      case identifiable: IdState.Identifiable
-          if identifiable.sourceIdentifier.identifierType == IdentifierType.LabelDerived =>
-        IdState.Unidentifiable
-
-      case other => other
-    }
+//    wholeFieldConceptId match {
+//      case identifiable: IdState.Identifiable
+//          if identifiable.sourceIdentifier.identifierType == IdentifierType.LabelDerived =>
+//        IdState.Unidentifiable
+//
+//      case other => other
+//    }
 
   }
   // Extract the primary concept, which comes from subfield $a.  This is the
