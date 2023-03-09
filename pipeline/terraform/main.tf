@@ -1,16 +1,31 @@
-module "catalogue_pipeline_2023-02-21" {
+locals {
+  pipelines = {
+    "2023-02-21" = {
+      listen_to_reindexer      = false
+      scale_up_tasks           = false
+      scale_up_elastic_cluster = false
+      scale_up_id_minter_db    = false
+      scale_up_matcher_db      = false
+    }
+
+    "2023-03-09" = {
+      listen_to_reindexer      = true
+      scale_up_tasks           = true
+      scale_up_elastic_cluster = true
+      scale_up_id_minter_db    = true
+      scale_up_matcher_db      = true
+    }
+  }
+}
+
+module "pipelines" {
   source = "./stack"
 
-  pipeline_date = "2023-02-21"
-  release_label = "2023-02-21"
+  for_each = local.pipelines
 
-  reindexing_state = {
-    listen_to_reindexer      = false
-    scale_up_tasks           = false
-    scale_up_elastic_cluster = false
-    scale_up_id_minter_db    = false
-    scale_up_matcher_db      = false
-  }
+  pipeline_date    = each.key
+  release_label    = each.key
+  reindexing_state = each.value
 
   # Boilerplate that shouldn't change between pipelines.
 
