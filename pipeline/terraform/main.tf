@@ -10,11 +10,6 @@ locals {
   }
 }
 
-moved {
-  from = module.catalogue_pipeline_2023-02-21
-  to   = module.pipelines["2023-02-21"]
-}
-
 module "pipelines" {
   source = "./stack"
 
