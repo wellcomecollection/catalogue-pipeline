@@ -1,7 +1,7 @@
 package weco.pipeline.transformer.sierra.transformers
 
 import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType}
-import weco.catalogue.internal_model.work.{Concept, Genre}
+import weco.catalogue.internal_model.work.{AbstractConcept, Genre, GenreConcept}
 import weco.pipeline.transformer.transformers.ConceptsTransformer
 import weco.sierra.models.SierraQueryOps
 import weco.sierra.models.data.SierraBibData
@@ -72,7 +72,7 @@ object SierraGenres
     // This method fixes that inconsistency by discarding the LabelDerived identifier
     // It's a bit hacky, but I hope it will go away at some point.
     val wholeFieldConceptId = getIdState(
-      ontologyType = "Concept",
+      ontologyType = "Genre",
       varField = varField
     )
     wholeFieldConceptId match {
@@ -89,10 +89,10 @@ object SierraGenres
   private def getPrimaryConcept(
     primarySubfields: List[Subfield],
     varField: VarField
-  ): List[Concept[IdState.Unminted]] =
+  ): List[AbstractConcept[IdState.Unminted]] =
     primarySubfields.map {
       subfield =>
-        Concept(
+        GenreConcept(
           id = identifyPrimaryConcept(varField),
           label = subfield.content
         ).normalised.identifiable()

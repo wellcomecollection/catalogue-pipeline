@@ -188,7 +188,7 @@ class IngestorWorkerServiceTest
     assertWorksIndexedCorrectly(works: _*)
   }
 
-  private def assertWorksIndexedCorrectly(works: Work[Denormalised]*): Unit =
+  private def  assertWorksIndexedCorrectly(works: Work[Denormalised]*): Unit =
     withLocalSqsQueuePair() {
       case QueuePair(queue, dlq) =>
         withWorksIngestor(queue, existingWorks = works) { index =>
