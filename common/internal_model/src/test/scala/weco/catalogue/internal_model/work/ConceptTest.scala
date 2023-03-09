@@ -8,27 +8,25 @@ import weco.json.utils.JsonAssertions
 import weco.catalogue.internal_model.identifiers.IdState
 
 class ConceptTest extends AnyFunSpec with Matchers with JsonAssertions {
-  describe("A plain, unidentifiable concept") {
 
-    val concept: Concept[IdState.Minted] = Concept(
-      id = IdState.Unidentifiable,
-      label = "Woodwork"
-    )
+  val concept: Concept[IdState.Minted] = Concept(
+    id = IdState.Unidentifiable,
+    label = "Woodwork"
+  )
 
-    val expectedJson =
-      s"""{
-          "id": {"type": "Unidentifiable"},
-          "label": "Woodwork"
-        }"""
+  val expectedJson =
+    s"""{
+        "id": {"type": "Unidentifiable"},
+        "label": "Woodwork"
+      }"""
 
-    it("serialises Concepts to JSON") {
-      val actualJson = toJson(concept).get
-      assertJsonStringsAreEqual(actualJson, expectedJson)
-    }
+  it("serialises Concepts to JSON") {
+    val actualJson = toJson(concept).get
+    assertJsonStringsAreEqual(actualJson, expectedJson)
+  }
 
-    it("deserialises JSON as Concepts") {
-      val parsedConcept = fromJson[Concept[IdState.Minted]](expectedJson).get
-      parsedConcept shouldBe concept
-    }
+  it("deserialises JSON as Concepts") {
+    val parsedConcept = fromJson[Concept[IdState.Minted]](expectedJson).get
+    parsedConcept shouldBe concept
   }
 }
