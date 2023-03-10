@@ -1,6 +1,8 @@
 package weco.pipeline.transformer.miro.transformers
 
-import org.scalatest.Assertion
+import org.scalatest.Inside.inside
+import org.scalatest.LoneElement.convertToCollectionLoneElementWrapper
+import org.scalatest.{Assertion, Inspectors}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.{
@@ -14,13 +16,14 @@ import weco.pipeline.transformer.miro.source.MiroRecord
 
 /** Tests that the Miro transformer extracts the "subjects" field correctly.
   *
-  *  Although this transformation is currently a bit basic, the data we get
-  *  from Miro will need cleaning before it's presented in the API (casing,
-  *  names, etc.) -- these tests will become more complicated.
+  * Although this transformation is currently a bit basic, the data we get from
+  * Miro will need cleaning before it's presented in the API (casing, names,
+  * etc.) -- these tests will become more complicated.
   */
 class MiroSubjectsTest
     extends AnyFunSpec
     with Matchers
+    with Inspectors
     with MiroRecordGenerators
     with MiroTransformableWrapper {
 
@@ -39,7 +42,8 @@ class MiroSubjectsTest
       expectedSubjectLabels = List(
         ("animals", "Animals"),
         ("arachnids", "Arachnids"),
-        ("fruit", "Fruit"))
+        ("fruit", "Fruit")
+      )
     )
   }
 
@@ -53,7 +57,9 @@ class MiroSubjectsTest
     )
   }
 
-  it("uses the image_keywords and image_keywords_unauth fields if both present") {
+  it(
+    "uses the image_keywords and image_keywords_unauth fields if both present"
+  ) {
     transformRecordAndCheckSubjects(
       miroRecord = createMiroRecordWith(
         keywords = Some(List("Humour")),
@@ -73,29 +79,37 @@ class MiroSubjectsTest
       expectedSubjectLabels = List(
         ("humour", "Humour"),
         ("comedic aspect", "Comedic aspect"),
-        ("marine creatures", "Marine creatures"))
+        ("marine creatures", "Marine creatures")
+      )
     )
   }
 
   private def transformRecordAndCheckSubjects(
     miroRecord: MiroRecord,
     expectedSubjectLabels: List[(String, String)]
-  ): Assertion = {
-    val transformedWork = transformWork(miroRecord)
-    val expectedSubjects = expectedSubjectLabels.map {
-      case (idLabel, label) =>
-        Subject(
-          id = IdState.Identifiable(
-            sourceIdentifier = SourceIdentifier(
-              identifierType = IdentifierType.LabelDerived,
-              ontologyType = "Subject",
-              value = idLabel
-            )
-          ),
-          label = label,
-          concepts = List(Concept(label))
-        )
+  ): Assertion =
+    forAll(transformWork(miroRecord).data.subjects zip expectedSubjectLabels) {
+      case (actualSubject: Subject[_], (idLabel, label)) =>
+        actualSubject.label shouldBe label
+        inside(actualSubject.id.allSourceIdentifiers.loneElement) {
+          case SourceIdentifier(identifierType, ontologyType, value) =>
+            identifierType shouldBe IdentifierType.LabelDerived
+            ontologyType shouldBe "Concept"
+            value shouldBe idLabel
+        }
+        inside(actualSubject.concepts.loneElement) {
+          // Miro Subjects are not compounds,
+          // so the subject as a whole and the single concept it contains
+          // will both represent the same thing.
+          // Although strictly unnecessary for discovery purposes,
+          // the Subject and Concept are both assigned the same identifier.
+          // This is in order to be consistent with other source systems (Sierra),
+          // allowing queries to target ids in the subjects.concepts list
+          case Concept(id: IdState.Identifiable, actualLabel) =>
+            actualLabel shouldBe label
+            id.sourceIdentifier.identifierType shouldBe IdentifierType.LabelDerived
+            id.sourceIdentifier.ontologyType shouldBe "Concept"
+            id.sourceIdentifier.value shouldBe idLabel
+        }
     }
-    transformedWork.data.subjects shouldBe expectedSubjects
-  }
 }

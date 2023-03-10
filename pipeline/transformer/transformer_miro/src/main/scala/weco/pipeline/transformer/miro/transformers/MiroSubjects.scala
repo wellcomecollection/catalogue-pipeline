@@ -2,11 +2,12 @@ package weco.pipeline.transformer.miro.transformers
 
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.{Concept, Subject}
+import weco.pipeline.transformer.transformers.ConceptsTransformer
 import weco.pipeline.transformer.identifiers.LabelDerivedIdentifiers
 import weco.pipeline.transformer.miro.source.MiroRecord
 import weco.pipeline.transformer.text.TextNormalisation._
 
-trait MiroSubjects extends LabelDerivedIdentifiers {
+trait MiroSubjects extends LabelDerivedIdentifiers with ConceptsTransformer {
 
   /* Populate the subjects field.  This is based on two fields in the XML,
    *  <image_keywords> and <image_keywords_unauth>.  Both of these were
@@ -31,9 +32,9 @@ trait MiroSubjects extends LabelDerivedIdentifiers {
       keyword =>
         val normalisedLabel = keyword.sentenceCase
         Subject(
-          id = identifierFromText(normalisedLabel, ontologyType = "Subject"),
+          id = identifierFromText(normalisedLabel, ontologyType = "Concept"),
           label = normalisedLabel,
-          concepts = List(Concept(normalisedLabel))
+          concepts = List(Concept(normalisedLabel).identifiable())
         )
     }
   }
