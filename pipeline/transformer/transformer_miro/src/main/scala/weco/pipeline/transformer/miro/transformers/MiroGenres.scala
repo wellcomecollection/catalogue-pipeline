@@ -1,7 +1,7 @@
 package weco.pipeline.transformer.miro.transformers
 
 import weco.catalogue.internal_model.identifiers.IdState
-import weco.catalogue.internal_model.work.{Concept, Genre}
+import weco.catalogue.internal_model.work.{Genre, GenreConcept}
 import weco.pipeline.transformer.miro.source.MiroRecord
 import weco.pipeline.transformer.text.TextNormalisation._
 import weco.pipeline.transformer.transformers.ConceptsTransformer
@@ -14,7 +14,8 @@ trait MiroGenres extends ConceptsTransformer {
       label =>
         val normalisedLabel = label.sentenceCase
 
-        val concept = Concept(label = normalisedLabel).normalised
+        val concept =
+          GenreConcept(label = normalisedLabel).normalised.identifiable()
 
         val genre = Genre(
           label = normalisedLabel,
