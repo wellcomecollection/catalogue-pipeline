@@ -90,7 +90,7 @@ class MiroGenresTest
     expectedGenreLabels: List[String]
   ): Assertion =
     forAll(transformWork(miroRecord).data.genres zip expectedGenreLabels) {
-      case (actualGenre, expectedLabel) =>
+      case (actualGenre: Genre[_], expectedLabel) =>
         actualGenre.label shouldBe expectedLabel
         inside(actualGenre.concepts.loneElement) {
           case GenreConcept(id, label) =>
