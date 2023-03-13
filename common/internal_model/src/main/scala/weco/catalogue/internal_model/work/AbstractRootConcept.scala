@@ -41,6 +41,15 @@ object Concept {
   def apply(label: String): Concept[IdState.Unidentifiable.type] =
     Concept(id = IdState.Unidentifiable, label = label)
 }
+case class GenreConcept[+State](
+  id: State,
+  label: String
+) extends AbstractConcept[State]
+
+object GenreConcept {
+  def apply(label: String): GenreConcept[IdState.Unidentifiable.type] =
+    GenreConcept(id = IdState.Unidentifiable, label = label)
+}
 
 case class Period[+State](
   id: State,

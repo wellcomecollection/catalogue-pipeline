@@ -37,6 +37,16 @@ trait ConceptsTransformer extends LabelDerivedIdentifiers {
       c.copy(id = newIdIfNeeded(c.id, c.label, idState))
   }
 
+  implicit class GenreConceptOps[State](g: GenreConcept[State]) {
+    def normalised: GenreConcept[State] =
+      g.copy(label = g.label.trimTrailingPeriod)
+
+    def identifiable(
+      idState: Option[IdState.Identifiable] = None
+    ): GenreConcept[IdState.Identifiable] =
+      g.copy(id = newIdIfNeeded(g.id, g.label, idState, ontologyType = "Genre"))
+  }
+
   implicit class GenreOps[State](g: Genre[State]) {
     def normalised: Genre[State] = {
       val normalisedLabel =

@@ -7,7 +7,13 @@ import weco.catalogue.display_model.test.util.{
 }
 import weco.catalogue.internal_model.generators.IdentifiersGenerators
 import weco.catalogue.internal_model.identifiers.IdState
-import weco.catalogue.internal_model.work.{Concept, InstantRange, Period, Place}
+import weco.catalogue.internal_model.work.{
+  Concept,
+  GenreConcept,
+  InstantRange,
+  Period,
+  Place
+}
 import weco.http.json.DisplayJsonUtil._
 
 import java.time.Instant
@@ -60,10 +66,26 @@ class DisplayAbstractConceptSerialisationTest
         label = "placeLabel"
       ),
       expectedJson = s"""
-         |  {
-         |    "label" : "placeLabel",
-         |    "type"  : "Place"
-         |  }
+           |  {
+           |    "label" : "placeLabel",
+           |    "type"  : "Place"
+           |  }
+       """.stripMargin
+    )
+  }
+
+  it("serialises an unidentified DisplayGenreConcept") {
+    assertObjectMapsToJson(
+      DisplayGenreConcept(
+        id = None,
+        identifiers = None,
+        label = "genreLabel"
+      ),
+      expectedJson = s"""
+           |  {
+           |    "label" : "genreLabel",
+           |    "type"  : "Genre"
+           |  }
          """.stripMargin
     )
   }
@@ -97,7 +119,8 @@ class DisplayAbstractConceptSerialisationTest
       List(
         Concept("conceptLabel"),
         Place("placeLabel"),
-        Period("periodLabel", InstantRange(Instant.now, Instant.now))
+        Period("periodLabel", InstantRange(Instant.now, Instant.now)),
+        GenreConcept("genreLabel")
       )
     assertObjectMapsToJson(
       concepts.map(DisplayAbstractConcept(_, includesIdentifiers = false)),
@@ -114,6 +137,10 @@ class DisplayAbstractConceptSerialisationTest
           |    {
           |      "label" : "periodLabel",
           |      "type"  : "Period"
+          |    },
+          |    {
+          |      "label" : "genreLabel",
+          |      "type"  : "Genre"
           |    }
           |  ]
           """.stripMargin

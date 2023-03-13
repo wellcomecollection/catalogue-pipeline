@@ -28,9 +28,10 @@ object Implicits {
   }
 
   implicit val abstractConceptEncoder: Encoder[DisplayAbstractConcept] = {
-    case concept: DisplayConcept => concept.asJson
-    case place: DisplayPlace     => place.asJson
-    case period: DisplayPeriod   => period.asJson
+    case concept: DisplayConcept    => concept.asJson
+    case place: DisplayPlace        => place.asJson
+    case period: DisplayPeriod      => period.asJson
+    case genre: DisplayGenreConcept => genre.asJson
   }
 
   implicit val abstractRootConceptEncoder

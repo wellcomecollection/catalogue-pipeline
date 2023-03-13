@@ -1,15 +1,23 @@
 package weco.pipeline.transformer.miro.transformers
 
 import org.scalatest.Assertion
+import org.scalatest.Inside.inside
+import org.scalatest.Inspectors
+import org.scalatest.LoneElement._
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.work.{Concept, Genre}
+import weco.catalogue.internal_model.identifiers.{
+  IdentifierType,
+  SourceIdentifier
+}
+import weco.catalogue.internal_model.work.{Genre, GenreConcept}
 import weco.pipeline.transformer.miro.generators.MiroRecordGenerators
 import weco.pipeline.transformer.miro.source.MiroRecord
 
 class MiroGenresTest
     extends AnyFunSpec
     with Matchers
+    with Inspectors
     with MiroRecordGenerators
     with MiroTransformableWrapper {
 
@@ -80,11 +88,19 @@ class MiroGenresTest
   private def transformRecordAndCheckGenres(
     miroRecord: MiroRecord,
     expectedGenreLabels: List[String]
-  ): Assertion = {
-    val transformedWork = transformWork(miroRecord)
-    val expectedGenres = expectedGenreLabels.map { label =>
-      Genre(label, concepts = List(Concept(label)))
+  ): Assertion =
+    forAll(transformWork(miroRecord).data.genres zip expectedGenreLabels) {
+      case (actualGenre: Genre[_], expectedLabel) =>
+        actualGenre.label shouldBe expectedLabel
+        inside(actualGenre.concepts.loneElement) {
+          case GenreConcept(id, label) =>
+            label shouldBe expectedLabel
+            inside(id.allSourceIdentifiers.loneElement) {
+              case SourceIdentifier(identifierType, ontologyType, value) =>
+                identifierType shouldBe IdentifierType.LabelDerived
+                ontologyType shouldBe "Genre"
+                value shouldBe expectedLabel.toLowerCase
+            }
+        }
     }
-    transformedWork.data.genres shouldBe expectedGenres
-  }
 }

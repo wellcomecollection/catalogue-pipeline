@@ -27,7 +27,7 @@ trait DisplaySerialisationTestBase {
     def tidy: String = {
       val tidiedFields =
         s
-        // Replace anything that looks like '"key": None,' in the output.
+          // Replace anything that looks like '"key": None,' in the output.
           .replaceAll(""""[a-zA-Z]+": None,""".stripMargin, "")
           // Unwrap anything that looks like '"key": Some({…})' in the output
           .replaceAll("""Some\(\{(.*)\}\)""", "{$1}")
@@ -122,7 +122,7 @@ trait DisplaySerialisationTestBase {
       case IdState.Identified(canonicalId, _, _) => s"""
         "id": "$canonicalId",
       """
-      case IdState.Unidentifiable                => ""
+      case IdState.Unidentifiable => ""
     }
 
   def abstractAgent(ag: AbstractAgent[IdState.Minted]) =
@@ -185,12 +185,19 @@ trait DisplaySerialisationTestBase {
       "type": "Concept",
       "label": "${concept.label}"
     }"""
+  def genreConcept(genre: GenreConcept[IdState.Minted]) =
+    s"""{
+     ${identifiers(genre)}
+    "type": "Genre",
+    "label": "${genre.label}"
+  }"""
 
   def abstractRootConcept(
     abstractRootConcept: AbstractRootConcept[IdState.Minted]
   ) =
     abstractRootConcept match {
       case c: Concept[IdState.Minted]      => concept(c)
+      case g: GenreConcept[IdState.Minted] => genreConcept(g)
       case p: Place[IdState.Minted]        => place(p)
       case p: Period[IdState.Minted]       => period(p)
       case a: Agent[IdState.Minted]        => agent(a)
@@ -342,7 +349,6 @@ trait DisplaySerialisationTestBase {
 
   def listOfHoldings(hs: List[Holdings]): String =
     hs.map {
-        singleHoldings
-      }
-      .mkString(",")
+      singleHoldings
+    }.mkString(",")
 }

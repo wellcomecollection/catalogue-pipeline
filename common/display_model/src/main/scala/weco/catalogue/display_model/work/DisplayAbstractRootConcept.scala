@@ -38,7 +38,17 @@ case object DisplayAbstractConcept extends GetIdentifiers {
     abstractConcept match {
       case Concept(id, label) =>
         DisplayConcept(
-          id = id.maybeCanonicalId.map { _.underlying },
+          id = id.maybeCanonicalId.map {
+            _.underlying
+          },
+          label = label,
+          identifiers = getIdentifiers(id, includesIdentifiers)
+        )
+      case GenreConcept(id, label) =>
+        DisplayGenreConcept(
+          id = id.maybeCanonicalId.map {
+            _.underlying
+          },
           label = label,
           identifiers = getIdentifiers(id, includesIdentifiers)
         )
@@ -62,6 +72,13 @@ case class DisplayConcept(
   identifiers: Option[List[DisplayIdentifier]] = None,
   label: String,
   @JsonKey("type") ontologyType: String = "Concept"
+) extends DisplayAbstractConcept
+
+case class DisplayGenreConcept(
+  id: Option[String] = None,
+  identifiers: Option[List[DisplayIdentifier]] = None,
+  label: String,
+  @JsonKey("type") ontologyType: String = "Genre"
 ) extends DisplayAbstractConcept
 
 case class DisplayPeriod(

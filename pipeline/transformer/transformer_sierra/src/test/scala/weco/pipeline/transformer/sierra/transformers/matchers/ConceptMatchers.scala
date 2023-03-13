@@ -5,7 +5,7 @@ import weco.catalogue.internal_model.identifiers.{HasId, IdentifierType}
 
 trait ConceptMatchers {
 
-  private def labelDerivedAbstractConceptId(
+  def labelDerivedAbstractConceptId(
     ontologyType: String,
     expectedValue: String
   ): HavePropertyMatcher[HasId[Any], String] = {
@@ -21,6 +21,14 @@ trait ConceptMatchers {
   ): HavePropertyMatcher[HasId[Any], String] =
     labelDerivedAbstractConceptId(
       ontologyType = "Concept",
+      expectedValue = expectedValue
+    )
+
+  def labelDerivedGenreId(
+    expectedValue: String
+  ): HavePropertyMatcher[HasId[Any], String] =
+    labelDerivedAbstractConceptId(
+      ontologyType = "Genre",
       expectedValue = expectedValue
     )
 
