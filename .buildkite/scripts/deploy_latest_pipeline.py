@@ -37,23 +37,29 @@ def get_pipeline_names_from_terraform_file(root):
 def get_pipeline_names_from_terraform_data(tf_data):
     """
     returns any pipeline date definitions found in a terraform file
-    >>> get_pipeline_names_from_terraform_data('\tpipeline_date = "1999-12-25"')
+    >>> get_pipeline_names_from_terraform_data('\t"1999-12-25" = {')
     ['1999-12-25']
 
     ignores other lines
     >>> get_pipeline_names_from_terraform_data('''
-    ... module "catalogue_pipeline_1999-12-25" {
-    ... pipeline_date = "1999-12-25"
+    ... locals {
+    ... pipelines = {
+    ... "1999-12-25" = {
+    ... listen_to_reindexer      = false
+    ... scale_up_tasks           = false
+    ... scale_up_elastic_cluster = false
+    ... scale_up_id_minter_db    = false
+    ... scale_up_matcher_db      = false
     ... }
     ...
-    ... module "catalogue_pipeline_2022-12-25" {
-    ... pipeline_date = "2022-12-25"
+    ... "2022-12-25" = {
+    ... listen_to_reindexer      = true
     ... }
     ... ''')
     ['1999-12-25', '2022-12-25']
     """
     pipeline_date_regex = re.compile(
-        r'^\s*pipeline_date\s*=\s*"(?P<date>[^"]*)', re.MULTILINE
+        r'^\s*"(?P<date>\d\d\d\d-\d\d-\d\d)" = {', re.MULTILINE
     )
     return pipeline_date_regex.findall(tf_data)
 
@@ -78,7 +84,7 @@ if __name__ == "__main__":
         .strip()
     )
     candidate_pipelines = get_pipeline_names_from_terraform_file(root)
-    print(f"possible existing pipeline are: {', '.join(candidate_pipelines)}")
+    print(f"possible existing pipelines are: {', '.join(candidate_pipelines)}")
     latest_pipeline = sorted(candidate_pipelines, reverse=True)[0]
     print(f"most recent pipeline is: {latest_pipeline}")
     if latest_pipeline != prod_pipeline:
