@@ -227,6 +227,10 @@
             "properties": {
               "concepts": {
                 "properties": {
+                  "id": {
+                    "type": "keyword",
+                    "normalizer": "lowercase_normalizer"
+                  },
                   "label": {
                     "type": "text",
                     "fields": {

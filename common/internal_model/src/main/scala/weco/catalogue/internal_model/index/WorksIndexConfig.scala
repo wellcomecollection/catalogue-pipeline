@@ -115,6 +115,7 @@ object WorksIndexConfig extends IndexConfigFields {
           // genres
           labelField("genres.label"),
           labelField("genres.concepts.label"),
+          keywordField("genres.concepts.id"),
           // languages
           keywordField("languages.id"),
           labelField("languages.label"),

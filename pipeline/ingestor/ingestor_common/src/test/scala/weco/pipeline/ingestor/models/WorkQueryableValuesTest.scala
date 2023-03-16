@@ -50,8 +50,9 @@ class WorkQueryableValuesTest
     val id = CanonicalId("iiiiiiii")
     val sourceIdentifier = createSourceIdentifierWith(value = "b12345678")
     val otherIdentifiers =
-      List("V0000001", "PP/CRI/1", "lcsh-fish").map(value =>
-        createSourceIdentifierWith(value = value))
+      List("V0000001", "PP/CRI/1", "lcsh-fish").map(
+        value => createSourceIdentifierWith(value = value)
+      )
     val workData = WorkData[DataState.Identified](
       title = Some(s"title-${randomAlphanumeric(length = 10)}"),
       otherIdentifiers = otherIdentifiers
@@ -70,7 +71,8 @@ class WorkQueryableValuesTest
       "b12345678",
       "V0000001",
       "PP/CRI/1",
-      "lcsh-fish")
+      "lcsh-fish"
+    )
   }
 
   it("adds subjects") {
@@ -132,7 +134,8 @@ class WorkQueryableValuesTest
       "Silly sausages",
       "Straight scythes",
       "Soggy sponges",
-      "Sam Smithington")
+      "Sam Smithington"
+    )
     q.subjectConceptLabels shouldBe List("silliness", "cylinders", "tools")
   }
 
@@ -147,7 +150,7 @@ class WorkQueryableValuesTest
         Genre(
           label = "Grim giants",
           concepts = List(Concept("greatness"))
-        ),
+        )
       )
     )
 
@@ -163,13 +166,146 @@ class WorkQueryableValuesTest
     q.genreConceptLabels shouldBe List("generosity", "greebles", "greatness")
   }
 
+  describe("adding ids from genre concepts") {
+    def genreConceptWithCanonicalId(
+      label: String,
+      canonicalId: String
+    ): GenreConcept[IdState.Identified] =
+      GenreConcept[IdState.Identified](
+        id = IdState.Identified(
+          canonicalId = CanonicalId(canonicalId),
+          sourceIdentifier = SourceIdentifier(
+            IdentifierType.LabelDerived,
+            ontologyType = "Genre",
+            value = label
+          ),
+          otherIdentifiers = Nil
+        ),
+        label = label
+      )
+
+    def conceptWithCanonicalId(
+      label: String,
+      canonicalId: String
+    ): Concept[IdState.Identified] =
+      Concept[IdState.Identified](
+        id = IdState.Identified(
+          canonicalId = CanonicalId(canonicalId),
+          sourceIdentifier = SourceIdentifier(
+            IdentifierType.LabelDerived,
+            ontologyType = "Concept",
+            value = label
+          ),
+          otherIdentifiers = Nil
+        ),
+        label = label
+      )
+
+    it("produces an empty list if there are no genres") {
+      val q = WorkQueryableValues(
+        id = createCanonicalId,
+        sourceIdentifier = createSourceIdentifier,
+        workData = WorkData[DataState.Identified](),
+        relations = Relations(),
+        availabilities = Set()
+      )
+      q.genreConceptIds shouldBe Nil
+    }
+
+    it(
+      "produces a list consisting of the canonicalIds for each Genre concept"
+    ) {
+      val data = WorkData[DataState.Identified](
+        title = Some(s"title-${randomAlphanumeric(length = 10)}"),
+        genres = List(
+          Genre(
+            label = "Etching",
+            concepts = List(
+              genreConceptWithCanonicalId(
+                label = "Etching",
+                canonicalId = "qfsrdqed"
+              )
+            )
+          ),
+          Genre(
+            label = "Netsuke",
+            concepts = List(
+              genreConceptWithCanonicalId(
+                label = "Netsuke",
+                canonicalId = "xe5nyufs"
+              )
+            )
+          )
+        )
+      )
+      val q = WorkQueryableValues(
+        id = createCanonicalId,
+        sourceIdentifier = createSourceIdentifier,
+        workData = data,
+        relations = Relations(),
+        availabilities = Set()
+      )
+      q.genreConceptIds shouldBe List("qfsrdqed", "xe5nyufs")
+    }
+
+    it(
+      "Only uses the first concept in each concepts list"
+    ) {
+      info("The first concept is the one pertaining to the actual genre.")
+      info("Other concepts in the list are just extra information.")
+      info("It may be worthwhile exposing them to queries,")
+      info("but the known use-case for this field is to link between genres")
+      info(
+        "rather than (e.g.) cities or periods, which are inconsistently marked up in the source data"
+      )
+
+      val data = WorkData[DataState.Identified](
+        title = Some(s"title-${randomAlphanumeric(length = 10)}"),
+        genres = List(
+          Genre(
+            label = "Etching",
+            concepts = List(
+              genreConceptWithCanonicalId(
+                label = "Etching",
+                canonicalId = "qfsrdqed"
+              ),
+              conceptWithCanonicalId(
+                label = "Ribald 18th Century cartoons",
+                canonicalId = "cyskv5me"
+              )
+            )
+          ),
+          Genre(
+            label = "Netsuke",
+            concepts = List(
+              genreConceptWithCanonicalId(
+                label = "Netsuke",
+                canonicalId = "xe5nyufs"
+              )
+            )
+          )
+        )
+      )
+      val q = WorkQueryableValues(
+        id = createCanonicalId,
+        sourceIdentifier = createSourceIdentifier,
+        workData = data,
+        relations = Relations(),
+        availabilities = Set()
+      )
+      q.genreConceptIds shouldBe List("qfsrdqed", "xe5nyufs")
+      // yxey85un
+    }
+
+  }
+
   it("adds languages") {
     val workData = WorkData[DataState.Identified](
       title = Some(s"title-${randomAlphanumeric(length = 10)}"),
       languages = List(
         Language(id = "eng", label = "English"),
         Language(id = "ger", label = "German"),
-        Language(id = "fre", label = "French"),
+        Language(id = "fre", label = "French")
       )
     )
 
@@ -193,28 +329,28 @@ class WorkQueryableValuesTest
             id = IdState.Unidentifiable,
             label = "Crafty Carol"
           ),
-          roles = List(),
+          roles = List()
         ),
         Contributor(
           agent = Person(
             id = IdState.Identified(
               canonicalId = CanonicalId("craftyci"),
-              sourceIdentifier = createSourceIdentifier,
+              sourceIdentifier = createSourceIdentifier
             ),
             label = "Cruel Cinderella"
           ),
-          roles = List(),
+          roles = List()
         ),
         Contributor(
           agent = Person(
             id = IdState.Identified(
               canonicalId = CanonicalId("carefulc"),
-              sourceIdentifier = createSourceIdentifier,
+              sourceIdentifier = createSourceIdentifier
             ),
             label = "Careful Carlos"
           ),
-          roles = List(),
-        ),
+          roles = List()
+        )
       )
     )
 
@@ -230,7 +366,8 @@ class WorkQueryableValuesTest
     q.contributorAgentLabels shouldBe List(
       "Crafty Carol",
       "Cruel Cinderella",
-      "Careful Carlos")
+      "Careful Carlos"
+    )
   }
 
   it("adds items") {
@@ -330,7 +467,8 @@ class WorkQueryableValuesTest
         createImageDataWith(
           identifierValue = "sourceImage2",
           otherIdentifiers =
-            List(createSourceIdentifierWith(value = "otherImage2")))
+            List(createSourceIdentifierWith(value = "otherImage2"))
+        )
           .toIdentifiedWith(canonicalId = CanonicalId("image222"))
       )
     )
@@ -347,7 +485,8 @@ class WorkQueryableValuesTest
     q.imageIdentifiers shouldBe List(
       "sourceImage1",
       "sourceImage2",
-      "otherImage2")
+      "otherImage2"
+    )
   }
 
   it("sets partOf") {
@@ -356,7 +495,7 @@ class WorkQueryableValuesTest
         relation(id = Some("partOf11"), title = Some("The first relation")),
         relation(id = None, title = Some("The second relation")),
         relation(id = Some("partOf33"), title = None),
-        relation(id = Some("partOf44"), title = Some("The fourth relation")),
+        relation(id = Some("partOf44"), title = Some("The fourth relation"))
       )
     )
 
@@ -374,7 +513,8 @@ class WorkQueryableValuesTest
     q.partOfTitles shouldBe List(
       "The first relation",
       "The second relation",
-      "The fourth relation")
+      "The fourth relation"
+    )
   }
 
   it("adds availabilities") {
@@ -405,7 +545,7 @@ class WorkQueryableValuesTest
             Place("Perth the port")
           ),
           agents = List(
-            Person("Penny the press officer"),
+            Person("Penny the press officer")
           ),
           dates = List(
             Period(id = IdState.Unidentifiable, label = "The past")
@@ -414,11 +554,11 @@ class WorkQueryableValuesTest
         ProductionEvent(
           label = "Patrick the pharmacist (top-level label => not included)",
           places = List(
-            Place("Porto the Portuguese"),
+            Place("Porto the Portuguese")
           ),
           agents = List(
             Organisation("Purple People"),
-            Meeting("Proactive Publicists"),
+            Meeting("Proactive Publicists")
           ),
           dates = List(
             Period(id = IdState.Unidentifiable, label = "The rose-tinted past")
@@ -463,7 +603,9 @@ class WorkQueryableValuesTest
                 InstantRange(
                   from = LocalDate.of(2022, 9, 22),
                   to = LocalDate.of(2023, 9, 22),
-                  label = "September 2022–23"))
+                  label = "September 2022–23"
+                )
+              )
             )
           )
         ),
@@ -479,7 +621,9 @@ class WorkQueryableValuesTest
                 InstantRange(
                   from = LocalDate.of(2032, 9, 22),
                   to = LocalDate.of(2033, 9, 22),
-                  label = "September 2032–33"))
+                  label = "September 2032–33"
+                )
+              )
             )
           )
         )
@@ -508,6 +652,6 @@ class WorkQueryableValuesTest
       workType = WorkType.Standard,
       depth = 1,
       numChildren = 0,
-      numDescendents = 0,
+      numDescendents = 0
     )
 }
