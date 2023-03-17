@@ -1,29 +1,29 @@
 {
   "description" : "a work with licensed digital items",
-  "createdAt" : "2023-01-03T09:31:59.331040Z",
-  "id" : "vwg1cj2y",
+  "createdAt" : "2023-03-17T11:03:31.781215Z",
+  "id" : "abt11p2s",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "vwg1cj2y",
+        "id" : "abt11p2s",
         "identifier" : {
           "identifierType" : {
             "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "FIC2DNd6NA"
+          "value" : "Jxv45oXcss"
         },
-        "version" : 54,
-        "modifiedTime" : "1971-03-03T04:45:38Z"
+        "version" : 33,
+        "modifiedTime" : "1983-08-27T05:28:32Z"
       },
-      "mergedTime" : "1971-03-03T04:45:38Z",
+      "mergedTime" : "1983-08-27T05:28:32Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "vwg1cj2y",
-      "title" : "title-YmmH4BoIsw",
+      "id" : "abt11p2s",
+      "title" : "title-lO6WXilF8i",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -35,7 +35,7 @@
             "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "FIC2DNd6NA",
+          "value" : "Jxv45oXcss",
           "type" : "Identifier"
         }
       ],
@@ -72,13 +72,13 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "vwg1cj2y",
+      "id" : "abt11p2s",
       "format.id" : null,
       "workType" : "Standard",
       "identifiers.value" : [
-        "FIC2DNd6NA"
+        "Jxv45oXcss"
       ],
-      "title" : "title-YmmH4BoIsw",
+      "title" : "title-lO6WXilF8i",
       "alternativeTitles" : [
       ],
       "description" : null,
@@ -110,6 +110,8 @@
       "genres.label" : [
       ],
       "genres.concepts.label" : [
+      ],
+      "genres.concepts.id" : [
       ],
       "languages.id" : [
       ],

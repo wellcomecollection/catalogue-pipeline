@@ -1,28 +1,28 @@
 {
   "description" : "one of a list of works with a variety of languages",
-  "createdAt" : "2023-01-03T09:31:59.290069Z",
-  "id" : "ioqwetut",
+  "createdAt" : "2023-03-17T11:03:31.767835Z",
+  "id" : "taqruniu",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "ioqwetut",
+        "id" : "taqruniu",
         "identifier" : {
           "identifierType" : {
             "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "5WuJppwWsm"
+          "value" : "xzEZGWEGMy"
         },
-        "version" : 94,
-        "modifiedTime" : "1976-09-22T07:55:28Z"
+        "version" : 58,
+        "modifiedTime" : "1953-09-06T15:14:14Z"
       },
-      "mergedTime" : "1976-09-22T07:55:28Z",
+      "mergedTime" : "1953-09-06T15:14:14Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "ioqwetut",
+      "id" : "taqruniu",
       "title" : "A work with languages English, Swedish",
       "alternativeTitles" : [
       ],
@@ -35,7 +35,7 @@
             "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "5WuJppwWsm",
+          "value" : "xzEZGWEGMy",
           "type" : "Identifier"
         }
       ],
@@ -82,11 +82,11 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "ioqwetut",
+      "id" : "taqruniu",
       "format.id" : null,
       "workType" : "Standard",
       "identifiers.value" : [
-        "5WuJppwWsm"
+        "xzEZGWEGMy"
       ],
       "title" : "A work with languages English, Swedish",
       "alternativeTitles" : [
@@ -120,6 +120,8 @@
       "genres.label" : [
       ],
       "genres.concepts.label" : [
+      ],
+      "genres.concepts.id" : [
       ],
       "languages.id" : [
         "eng",

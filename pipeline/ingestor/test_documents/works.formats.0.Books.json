@@ -1,28 +1,28 @@
 {
   "description" : "one of a list of works with a variety of formats",
-  "createdAt" : "2023-01-03T09:31:59.190455Z",
-  "id" : "gfw8fs9l",
+  "createdAt" : "2023-03-17T11:03:31.729090Z",
+  "id" : "cfrzpe3b",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "gfw8fs9l",
+        "id" : "cfrzpe3b",
         "identifier" : {
           "identifierType" : {
             "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "wayOhJ3Mha"
+          "value" : "yPjPNkcxB9"
         },
-        "version" : 73,
-        "modifiedTime" : "1943-07-01T04:18:01Z"
+        "version" : 65,
+        "modifiedTime" : "1960-07-19T22:15:33Z"
       },
-      "mergedTime" : "1943-07-01T04:18:01Z",
+      "mergedTime" : "1960-07-19T22:15:33Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "gfw8fs9l",
+      "id" : "cfrzpe3b",
       "title" : "A work with format Books",
       "alternativeTitles" : [
       ],
@@ -40,7 +40,7 @@
             "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "wayOhJ3Mha",
+          "value" : "yPjPNkcxB9",
           "type" : "Identifier"
         }
       ],
@@ -77,11 +77,11 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "gfw8fs9l",
+      "id" : "cfrzpe3b",
       "format.id" : "a",
       "workType" : "Standard",
       "identifiers.value" : [
-        "wayOhJ3Mha"
+        "yPjPNkcxB9"
       ],
       "title" : "A work with format Books",
       "alternativeTitles" : [
@@ -115,6 +115,8 @@
       "genres.label" : [
       ],
       "genres.concepts.label" : [
+      ],
+      "genres.concepts.id" : [
       ],
       "languages.id" : [
       ],

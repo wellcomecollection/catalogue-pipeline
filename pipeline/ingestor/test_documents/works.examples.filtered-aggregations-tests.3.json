@@ -1,28 +1,28 @@
 {
   "description" : "examples for the works filtered aggregations tests",
-  "createdAt" : "2023-01-03T09:32:00.111671Z",
-  "id" : "lpoz1fy9",
+  "createdAt" : "2023-03-17T11:03:32.032317Z",
+  "id" : "xrfr8el5",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "lpoz1fy9",
+        "id" : "xrfr8el5",
         "identifier" : {
           "identifierType" : {
             "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "FGpPdnmb6i"
+          "value" : "fRGHEuNmLr"
         },
-        "version" : 5,
-        "modifiedTime" : "1957-11-02T06:45:45Z"
+        "version" : 30,
+        "modifiedTime" : "1981-08-28T12:24:28Z"
       },
-      "mergedTime" : "1957-11-02T06:45:45Z",
+      "mergedTime" : "1981-08-28T12:24:28Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "lpoz1fy9",
+      "id" : "xrfr8el5",
       "title" : "rats",
       "alternativeTitles" : [
       ],
@@ -40,7 +40,7 @@
             "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "FGpPdnmb6i",
+          "value" : "fRGHEuNmLr",
           "type" : "Identifier"
         }
       ],
@@ -82,11 +82,11 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "lpoz1fy9",
+      "id" : "xrfr8el5",
       "format.id" : "i",
       "workType" : "Standard",
       "identifiers.value" : [
-        "FGpPdnmb6i"
+        "fRGHEuNmLr"
       ],
       "title" : "rats",
       "alternativeTitles" : [
@@ -120,6 +120,8 @@
       "genres.label" : [
       ],
       "genres.concepts.label" : [
+      ],
+      "genres.concepts.id" : [
       ],
       "languages.id" : [
         "bak"

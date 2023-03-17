@@ -1,6 +1,6 @@
 {
   "description" : "a work with a production event in 1976",
-  "createdAt" : "2023-01-03T09:31:58.933431Z",
+  "createdAt" : "2023-03-17T11:03:31.403326Z",
   "id" : "5vjghupy",
   "document" : {
     "debug" : {
@@ -124,6 +124,8 @@
       "genres.label" : [
       ],
       "genres.concepts.label" : [
+      ],
+      "genres.concepts.id" : [
       ],
       "languages.id" : [
       ],

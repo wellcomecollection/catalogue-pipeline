@@ -1,29 +1,29 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2023-01-03T09:31:59.911976Z",
-  "id" : "b1r485o0",
+  "createdAt" : "2023-03-17T11:03:31.977917Z",
+  "id" : "gtiz6kwy",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "b1r485o0",
+        "id" : "gtiz6kwy",
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "4zh18D0cbF"
+          "value" : "h0iB2aGWT6"
         },
-        "version" : 43,
-        "modifiedTime" : "1986-02-15T03:35:37Z"
+        "version" : 51,
+        "modifiedTime" : "2061-06-14T11:27:49Z"
       },
-      "mergedTime" : "1986-02-15T03:35:37Z",
+      "mergedTime" : "2061-06-14T11:27:49Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "b1r485o0",
-      "title" : "title-DxPLXKke6N",
+      "id" : "gtiz6kwy",
+      "title" : "title-5lZ5raMofT",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -31,11 +31,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "4zh18D0cbF",
+          "value" : "h0iB2aGWT6",
           "type" : "Identifier"
         }
       ],
@@ -56,15 +56,15 @@
           "label" : "Darwin \"Jones\", Charles",
           "concepts" : [
             {
-              "label" : "40zJbSlLwDNn2Et",
+              "label" : "qcFvAY3kDPeOJwv",
               "type" : "Concept"
             },
             {
-              "label" : "p5zfssscK3StYS1",
+              "label" : "FeGzni8X1iQV3o0",
               "type" : "Concept"
             },
             {
-              "label" : "KOlZmZXOWd5kJ1F",
+              "label" : "GGLKeJCppCDklf9",
               "type" : "Concept"
             }
           ],
@@ -102,13 +102,13 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "b1r485o0",
+      "id" : "gtiz6kwy",
       "format.id" : null,
       "workType" : "Standard",
       "identifiers.value" : [
-        "4zh18D0cbF"
+        "h0iB2aGWT6"
       ],
-      "title" : "title-DxPLXKke6N",
+      "title" : "title-5lZ5raMofT",
       "alternativeTitles" : [
       ],
       "description" : null,
@@ -138,13 +138,15 @@
         "Darwin \"Jones\", Charles"
       ],
       "subjects.concepts.label" : [
-        "40zJbSlLwDNn2Et",
-        "p5zfssscK3StYS1",
-        "KOlZmZXOWd5kJ1F"
+        "qcFvAY3kDPeOJwv",
+        "FeGzni8X1iQV3o0",
+        "GGLKeJCppCDklf9"
       ],
       "genres.label" : [
       ],
       "genres.concepts.label" : [
+      ],
+      "genres.concepts.id" : [
       ],
       "languages.id" : [
       ],

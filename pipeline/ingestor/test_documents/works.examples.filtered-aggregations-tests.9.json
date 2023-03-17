@@ -1,28 +1,28 @@
 {
   "description" : "examples for the works filtered aggregations tests",
-  "createdAt" : "2023-01-03T09:32:00.114329Z",
-  "id" : "lkq8nygj",
+  "createdAt" : "2023-03-17T11:03:32.036141Z",
+  "id" : "tlrk7nwd",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "lkq8nygj",
+        "id" : "tlrk7nwd",
         "identifier" : {
           "identifierType" : {
             "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "UBhh45MMdu"
+          "value" : "pCp7jd9rFN"
         },
-        "version" : 68,
-        "modifiedTime" : "1980-11-27T00:49:23Z"
+        "version" : 17,
+        "modifiedTime" : "2021-04-17T00:45:15Z"
       },
-      "mergedTime" : "1980-11-27T00:49:23Z",
+      "mergedTime" : "2021-04-17T00:45:15Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "lkq8nygj",
+      "id" : "tlrk7nwd",
       "title" : "rats",
       "alternativeTitles" : [
       ],
@@ -40,7 +40,7 @@
             "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "UBhh45MMdu",
+          "value" : "pCp7jd9rFN",
           "type" : "Identifier"
         }
       ],
@@ -82,11 +82,11 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "lkq8nygj",
+      "id" : "tlrk7nwd",
       "format.id" : "i",
       "workType" : "Standard",
       "identifiers.value" : [
-        "UBhh45MMdu"
+        "pCp7jd9rFN"
       ],
       "title" : "rats",
       "alternativeTitles" : [
@@ -120,6 +120,8 @@
       "genres.label" : [
       ],
       "genres.concepts.label" : [
+      ],
+      "genres.concepts.id" : [
       ],
       "languages.id" : [
         "che"

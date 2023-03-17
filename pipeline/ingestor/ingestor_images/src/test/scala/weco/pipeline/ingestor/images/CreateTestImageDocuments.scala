@@ -13,6 +13,7 @@ import weco.catalogue.internal_model.locations.License
 import weco.catalogue.internal_model.work.generators.{
   ContributorGenerators,
   GenreGenerators,
+  IdentifiedConceptGenerators,
   SubjectGenerators
 }
 import weco.catalogue.internal_model.work.{
@@ -31,17 +32,19 @@ import java.time.Instant
 /** Creates the example documents we use in the API tests.
   *
   * These tests use a seeded RNG to ensure deterministic results; to prevent
-  * regenerating existing examples and causing unnecessary churn in the API tests
-  * when values change, I suggest adding new examples at the bottom of this file.
+  * regenerating existing examples and causing unnecessary churn in the API
+  * tests when values change, I suggest adding new examples at the bottom of
+  * this file.
   *
-  * Also, be careful removing or editing existing examples.  It may be easier to
-  * add a new example than remove an old one, to prevent regenerating some of the
-  * examples you aren't editing.
+  * Also, be careful removing or editing existing examples. It may be easier to
+  * add a new example than remove an old one, to prevent regenerating some of
+  * the examples you aren't editing.
   */
 class CreateTestImageDocuments
     extends AnyFunSpec
     with Matchers
     with TestDocumentUtils
+    with IdentifiedConceptGenerators
     with ContributorGenerators
     with GenreGenerators
     with SubjectGenerators
@@ -51,12 +54,14 @@ class CreateTestImageDocuments
     Instant.parse("2001-01-01T01:01:01Z").plusSeconds(random.nextInt())
 
   it("creates images with different licenses") {
-    val ccByImages = (1 to 5).map { _ =>
-      createLicensedImage(License.CCBY)
+    val ccByImages = (1 to 5).map {
+      _ =>
+        createLicensedImage(License.CCBY)
     }
 
-    val pdmImages = (1 to 2).map { _ =>
-      createLicensedImage(License.PDM)
+    val pdmImages = (1 to 2).map {
+      _ =>
+        createLicensedImage(License.PDM)
     }
 
     val images = ccByImages ++ pdmImages
@@ -242,17 +247,29 @@ class CreateTestImageDocuments
   }
 
   it("creates examples for the genre filter tests") {
-    val carrotCounselling = createGenreWith("Carrot counselling")
+    val carrotCounselling = createGenreWith(
+      "Carrot counselling",
+      concepts = List(createGenreConcept(canonicalId = "g00dcafe"))
+    )
     val dodoDivination = createGenreWith("Dodo divination")
-    val emuEntrepreneurship = createGenreWith("Emu entrepreneurship")
-    val falconFinances = createGenreWith("Falcon finances")
+    val emuEntrepreneurship =
+      createGenreWith(
+        "Emu entrepreneurship",
+        concepts = List(createGenreConcept(canonicalId = "g00dcafe"))
+      )
+    val falconFinances = createGenreWith(
+      "Falcon finances",
+      concepts = List(createGenreConcept(canonicalId = "baadf00d"))
+    )
 
     val carrotCounsellingImage = createImageData.toAugmentedImageWith(
       parentWork = identifiedWork().genres(List(carrotCounselling))
     )
+
     val redirectedDodoDivinationImage = createImageData.toAugmentedImageWith(
       redirectedWork = Some(identifiedWork().genres(List(dodoDivination)))
     )
+
     val emuEntrepreneurShipAndFalconFinancesImage =
       createImageData.toAugmentedImageWith(
         parentWork =
@@ -391,9 +408,7 @@ class CreateTestImageDocuments
     val parentWork = sierraIdentifiedWork()
     val workImages =
       (0 to 3)
-        .map(
-          _ => createImageData.toAugmentedImageWith(parentWork = parentWork)
-        )
+        .map(_ => createImageData.toAugmentedImageWith(parentWork = parentWork))
         .toList
     val otherImage = createImageData.toAugmentedImage
 

@@ -1,29 +1,29 @@
 {
   "description" : "examples for the genre tests",
-  "createdAt" : "2023-01-03T09:31:59.873207Z",
-  "id" : "jywtq4xg",
+  "createdAt" : "2023-03-17T11:03:31.959666Z",
+  "id" : "fgmzc1ic",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "jywtq4xg",
+        "id" : "fgmzc1ic",
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "LgGFRAV0Zs"
+          "value" : "cQ8QOPJdAX"
         },
-        "version" : 85,
-        "modifiedTime" : "1934-09-04T19:55:55Z"
+        "version" : 88,
+        "modifiedTime" : "2016-05-05T19:34:08Z"
       },
-      "mergedTime" : "1934-09-04T19:55:55Z",
+      "mergedTime" : "2016-05-05T19:34:08Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "jywtq4xg",
-      "title" : "title-ZEnp6i2y6i",
+      "id" : "fgmzc1ic",
+      "title" : "title-OvNWbRfsAZ",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -31,11 +31,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "LgGFRAV0Zs",
+          "value" : "cQ8QOPJdAX",
           "type" : "Identifier"
         }
       ],
@@ -46,15 +46,51 @@
           "label" : "Annual reports.",
           "concepts" : [
             {
-              "label" : "qp5RA4f5gWVIptl",
+              "id" : "qhmrojyr",
+              "identifiers" : [
+                {
+                  "identifierType" : {
+                    "id" : "miro-image-number",
+                    "label" : "Miro image number",
+                    "type" : "IdentifierType"
+                  },
+                  "value" : "MqUtqZmmbP",
+                  "type" : "Identifier"
+                }
+              ],
+              "label" : "YwsvmZKLOsIneEm",
+              "type" : "Genre"
+            },
+            {
+              "id" : "ymddf4bt",
+              "identifiers" : [
+                {
+                  "identifierType" : {
+                    "id" : "miro-image-number",
+                    "label" : "Miro image number",
+                    "type" : "IdentifierType"
+                  },
+                  "value" : "rmWNKiLGpm",
+                  "type" : "Identifier"
+                }
+              ],
+              "label" : "JWDqmpbeaNC7XCe",
               "type" : "Concept"
             },
             {
-              "label" : "xE0qlBbPiSihnTe",
-              "type" : "Concept"
-            },
-            {
-              "label" : "JBs3eSemcGNQXd8",
+              "id" : "upoo0o5o",
+              "identifiers" : [
+                {
+                  "identifierType" : {
+                    "id" : "miro-image-number",
+                    "label" : "Miro image number",
+                    "type" : "IdentifierType"
+                  },
+                  "value" : "fdodercwIW",
+                  "type" : "Identifier"
+                }
+              ],
+              "label" : "85YYFFvT9fhswtS",
               "type" : "Concept"
             }
           ],
@@ -90,13 +126,13 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "jywtq4xg",
+      "id" : "fgmzc1ic",
       "format.id" : null,
       "workType" : "Standard",
       "identifiers.value" : [
-        "LgGFRAV0Zs"
+        "cQ8QOPJdAX"
       ],
-      "title" : "title-ZEnp6i2y6i",
+      "title" : "title-OvNWbRfsAZ",
       "alternativeTitles" : [
       ],
       "description" : null,
@@ -129,9 +165,12 @@
         "Annual reports."
       ],
       "genres.concepts.label" : [
-        "qp5RA4f5gWVIptl",
-        "xE0qlBbPiSihnTe",
-        "JBs3eSemcGNQXd8"
+        "YwsvmZKLOsIneEm",
+        "JWDqmpbeaNC7XCe",
+        "85YYFFvT9fhswtS"
+      ],
+      "genres.concepts.id" : [
+        "qhmrojyr"
       ],
       "languages.id" : [
       ],

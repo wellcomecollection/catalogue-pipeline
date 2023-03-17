@@ -1,29 +1,29 @@
 {
   "description" : "works with different subjects",
-  "createdAt" : "2023-01-03T09:31:59.382553Z",
-  "id" : "6uwysojy",
+  "createdAt" : "2023-03-17T11:03:31.794783Z",
+  "id" : "njj1gugw",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "6uwysojy",
+        "id" : "njj1gugw",
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "pzLgxSR5EK"
+          "value" : "JeGRUgE73g"
         },
-        "version" : 77,
-        "modifiedTime" : "2005-10-29T13:02:10Z"
+        "version" : 58,
+        "modifiedTime" : "2009-03-20T11:29:10Z"
       },
-      "mergedTime" : "2005-10-29T13:02:10Z",
+      "mergedTime" : "2009-03-20T11:29:10Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "6uwysojy",
-      "title" : "title-Dtaaw5YmCW",
+      "id" : "njj1gugw",
+      "title" : "title-kaqjnWIqBs",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -31,11 +31,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "pzLgxSR5EK",
+          "value" : "JeGRUgE73g",
           "type" : "Identifier"
         }
       ],
@@ -44,15 +44,15 @@
           "label" : "paleoNeuroBiology",
           "concepts" : [
             {
-              "label" : "qbmTfcJnlkosWvA",
+              "label" : "OVfDtEVhuTjLML0",
               "type" : "Concept"
             },
             {
-              "label" : "mEQcU7atgIJPhTv",
+              "label" : "MOH1Bj9evx0cAh7",
               "type" : "Concept"
             },
             {
-              "label" : "2pMEZn8L2YCE8E9",
+              "label" : "0mKj49k3BjjuTuf",
               "type" : "Concept"
             }
           ],
@@ -90,13 +90,13 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "6uwysojy",
+      "id" : "njj1gugw",
       "format.id" : null,
       "workType" : "Standard",
       "identifiers.value" : [
-        "pzLgxSR5EK"
+        "JeGRUgE73g"
       ],
-      "title" : "title-Dtaaw5YmCW",
+      "title" : "title-kaqjnWIqBs",
       "alternativeTitles" : [
       ],
       "description" : null,
@@ -125,13 +125,15 @@
         "paleoNeuroBiology"
       ],
       "subjects.concepts.label" : [
-        "qbmTfcJnlkosWvA",
-        "mEQcU7atgIJPhTv",
-        "2pMEZn8L2YCE8E9"
+        "OVfDtEVhuTjLML0",
+        "MOH1Bj9evx0cAh7",
+        "0mKj49k3BjjuTuf"
       ],
       "genres.label" : [
       ],
       "genres.concepts.label" : [
+      ],
+      "genres.concepts.id" : [
       ],
       "languages.id" : [
       ],

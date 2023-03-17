@@ -1,28 +1,28 @@
 {
   "description" : "one of a list of works with a variety of languages",
-  "createdAt" : "2023-01-03T09:31:59.270764Z",
-  "id" : "i8zcsj78",
+  "createdAt" : "2023-03-17T11:03:31.757874Z",
+  "id" : "9pon81hb",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "i8zcsj78",
+        "id" : "9pon81hb",
         "identifier" : {
           "identifierType" : {
             "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "ZquhBnzQPW"
+          "value" : "mVHoe2r6sk"
         },
-        "version" : 30,
-        "modifiedTime" : "2044-10-23T19:22:08Z"
+        "version" : 97,
+        "modifiedTime" : "2020-11-07T23:22:13Z"
       },
-      "mergedTime" : "2044-10-23T19:22:08Z",
+      "mergedTime" : "2020-11-07T23:22:13Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "i8zcsj78",
+      "id" : "9pon81hb",
       "title" : "A work with languages English",
       "alternativeTitles" : [
       ],
@@ -35,7 +35,7 @@
             "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "ZquhBnzQPW",
+          "value" : "mVHoe2r6sk",
           "type" : "Identifier"
         }
       ],
@@ -77,11 +77,11 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "i8zcsj78",
+      "id" : "9pon81hb",
       "format.id" : null,
       "workType" : "Standard",
       "identifiers.value" : [
-        "ZquhBnzQPW"
+        "mVHoe2r6sk"
       ],
       "title" : "A work with languages English",
       "alternativeTitles" : [
@@ -115,6 +115,8 @@
       "genres.label" : [
       ],
       "genres.concepts.label" : [
+      ],
+      "genres.concepts.id" : [
       ],
       "languages.id" : [
         "eng"

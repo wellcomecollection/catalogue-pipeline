@@ -1,28 +1,28 @@
 {
   "description" : "one of a list of works with a variety of formats",
-  "createdAt" : "2023-01-03T09:31:59.239338Z",
-  "id" : "t3q2ufnz",
+  "createdAt" : "2023-03-17T11:03:31.743551Z",
+  "id" : "jtqzypmq",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "t3q2ufnz",
+        "id" : "jtqzypmq",
         "identifier" : {
           "identifierType" : {
             "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "nNHPpdWbrm"
+          "value" : "kstGwqrv9f"
         },
-        "version" : 37,
-        "modifiedTime" : "2001-08-22T14:48:34Z"
+        "version" : 4,
+        "modifiedTime" : "2029-04-07T22:56:33Z"
       },
-      "mergedTime" : "2001-08-22T14:48:34Z",
+      "mergedTime" : "2029-04-07T22:56:33Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "t3q2ufnz",
+      "id" : "jtqzypmq",
       "title" : "A work with format Audio",
       "alternativeTitles" : [
       ],
@@ -40,7 +40,7 @@
             "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "nNHPpdWbrm",
+          "value" : "kstGwqrv9f",
           "type" : "Identifier"
         }
       ],
@@ -77,11 +77,11 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "t3q2ufnz",
+      "id" : "jtqzypmq",
       "format.id" : "i",
       "workType" : "Standard",
       "identifiers.value" : [
-        "nNHPpdWbrm"
+        "kstGwqrv9f"
       ],
       "title" : "A work with format Audio",
       "alternativeTitles" : [
@@ -115,6 +115,8 @@
       "genres.label" : [
       ],
       "genres.concepts.label" : [
+      ],
+      "genres.concepts.id" : [
       ],
       "languages.id" : [
       ],

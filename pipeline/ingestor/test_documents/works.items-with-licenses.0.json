@@ -1,29 +1,29 @@
 {
   "description" : "a work with licensed digital items",
-  "createdAt" : "2023-01-03T09:31:59.324926Z",
-  "id" : "yodfctxx",
+  "createdAt" : "2023-03-17T11:03:31.778294Z",
+  "id" : "uh8gnkqk",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "yodfctxx",
+        "id" : "uh8gnkqk",
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "HfU454vgiI"
+          "value" : "5UMJEwTIE8"
         },
-        "version" : 94,
-        "modifiedTime" : "2058-09-04T15:38:34Z"
+        "version" : 36,
+        "modifiedTime" : "2004-04-05T10:15:53Z"
       },
-      "mergedTime" : "2058-09-04T15:38:34Z",
+      "mergedTime" : "2004-04-05T10:15:53Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "yodfctxx",
-      "title" : "title-AIpgBtHAhx",
+      "id" : "uh8gnkqk",
+      "title" : "title-P9ugIes0pz",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -31,11 +31,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "HfU454vgiI",
+          "value" : "5UMJEwTIE8",
           "type" : "Identifier"
         }
       ],
@@ -54,7 +54,9 @@
                 "label" : "IIIF Presentation API",
                 "type" : "LocationType"
               },
-              "url" : "https://iiif.wellcomecollection.org/image/mDG.jpg/info.json",
+              "url" : "https://iiif.wellcomecollection.org/image/swj.jpg/info.json",
+              "credit" : "Credit line: VmALe83",
+              "linkText" : "Link text: BJ6dy5rBOb",
               "license" : {
                 "id" : "cc-by",
                 "label" : "Attribution 4.0 International (CC BY 4.0)",
@@ -96,13 +98,13 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "yodfctxx",
+      "id" : "uh8gnkqk",
       "format.id" : null,
       "workType" : "Standard",
       "identifiers.value" : [
-        "HfU454vgiI"
+        "5UMJEwTIE8"
       ],
-      "title" : "title-AIpgBtHAhx",
+      "title" : "title-P9ugIes0pz",
       "alternativeTitles" : [
       ],
       "description" : null,
@@ -136,6 +138,8 @@
       "genres.label" : [
       ],
       "genres.concepts.label" : [
+      ],
+      "genres.concepts.id" : [
       ],
       "languages.id" : [
       ],

@@ -1,29 +1,29 @@
 {
   "description" : "works with different subjects",
-  "createdAt" : "2023-01-03T09:31:59.385631Z",
-  "id" : "t9nj8zse",
+  "createdAt" : "2023-03-17T11:03:31.797822Z",
+  "id" : "el28gega",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "t9nj8zse",
+        "id" : "el28gega",
         "identifier" : {
           "identifierType" : {
             "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "8imBUVPHmu"
+          "value" : "9qDYGFYXAa"
         },
-        "version" : 71,
-        "modifiedTime" : "2038-05-30T19:54:43Z"
+        "version" : 63,
+        "modifiedTime" : "1997-06-19T05:13:34Z"
       },
-      "mergedTime" : "2038-05-30T19:54:43Z",
+      "mergedTime" : "1997-06-19T05:13:34Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "t9nj8zse",
-      "title" : "title-9al0iIjgaH",
+      "id" : "el28gega",
+      "title" : "title-be5yxr73Xc",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -35,7 +35,7 @@
             "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "8imBUVPHmu",
+          "value" : "9qDYGFYXAa",
           "type" : "Identifier"
         }
       ],
@@ -72,13 +72,13 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "t9nj8zse",
+      "id" : "el28gega",
       "format.id" : null,
       "workType" : "Standard",
       "identifiers.value" : [
-        "8imBUVPHmu"
+        "9qDYGFYXAa"
       ],
-      "title" : "title-9al0iIjgaH",
+      "title" : "title-be5yxr73Xc",
       "alternativeTitles" : [
       ],
       "description" : null,
@@ -110,6 +110,8 @@
       "genres.label" : [
       ],
       "genres.concepts.label" : [
+      ],
+      "genres.concepts.id" : [
       ],
       "languages.id" : [
       ],

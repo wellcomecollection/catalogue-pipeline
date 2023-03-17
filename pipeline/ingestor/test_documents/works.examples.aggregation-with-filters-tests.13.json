@@ -1,29 +1,29 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2023-01-03T09:31:59.721959Z",
-  "id" : "66bwuadw",
+  "createdAt" : "2023-03-17T11:03:31.917156Z",
+  "id" : "bsxzfe7h",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "66bwuadw",
+        "id" : "bsxzfe7h",
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "t9Z95L7cLo"
+          "value" : "MPZzhLJtbk"
         },
-        "version" : 87,
-        "modifiedTime" : "1965-01-04T22:54:26Z"
+        "version" : 88,
+        "modifiedTime" : "1998-08-02T02:39:28Z"
       },
-      "mergedTime" : "1965-01-04T22:54:26Z",
+      "mergedTime" : "1998-08-02T02:39:28Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "66bwuadw",
-      "title" : "title-2M9CVkukQI",
+      "id" : "bsxzfe7h",
+      "title" : "title-IlUXQf0x4b",
       "alternativeTitles" : [
       ],
       "workType" : {
@@ -36,28 +36,28 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "t9Z95L7cLo",
+          "value" : "MPZzhLJtbk",
           "type" : "Identifier"
         }
       ],
       "subjects" : [
         {
-          "label" : "v4BHmwGTZr",
+          "label" : "9SceRNaTEl",
           "concepts" : [
             {
-              "label" : "0FUCKKVOQZLwA6u",
+              "label" : "ZtfG4qEc4MTvdPA",
               "type" : "Concept"
             },
             {
-              "label" : "WTQlXaTo6WyiCaL",
+              "label" : "cgpfIbfVPkqafPg",
               "type" : "Concept"
             },
             {
-              "label" : "acffLiQzk2sxFZY",
+              "label" : "pz7am59I9Cwkjzo",
               "type" : "Concept"
             }
           ],
@@ -95,13 +95,13 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "66bwuadw",
+      "id" : "bsxzfe7h",
       "format.id" : "n",
       "workType" : "Standard",
       "identifiers.value" : [
-        "t9Z95L7cLo"
+        "MPZzhLJtbk"
       ],
-      "title" : "title-2M9CVkukQI",
+      "title" : "title-IlUXQf0x4b",
       "alternativeTitles" : [
       ],
       "description" : null,
@@ -127,16 +127,18 @@
       "subjects.id" : [
       ],
       "subjects.label" : [
-        "v4BHmwGTZr"
+        "9SceRNaTEl"
       ],
       "subjects.concepts.label" : [
-        "0FUCKKVOQZLwA6u",
-        "WTQlXaTo6WyiCaL",
-        "acffLiQzk2sxFZY"
+        "ZtfG4qEc4MTvdPA",
+        "cgpfIbfVPkqafPg",
+        "pz7am59I9Cwkjzo"
       ],
       "genres.label" : [
       ],
       "genres.concepts.label" : [
+      ],
+      "genres.concepts.id" : [
       ],
       "languages.id" : [
       ],
@@ -169,7 +171,7 @@
       "production.dates" : [
       ],
       "subjects.label" : [
-        "{\"label\":\"v4BHmwGTZr\",\"concepts\":[],\"type\":\"Subject\"}"
+        "{\"label\":\"9SceRNaTEl\",\"concepts\":[],\"type\":\"Subject\"}"
       ],
       "languages" : [
       ],

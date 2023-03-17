@@ -1,28 +1,28 @@
 {
   "description" : "a work whose title has parens meant to trip up ES",
-  "createdAt" : "2023-01-03T09:31:59.263696Z",
-  "id" : "omok5a37",
+  "createdAt" : "2023-03-17T11:03:31.754956Z",
+  "id" : "1sxjupdc",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "omok5a37",
+        "id" : "1sxjupdc",
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "y59nY1Nuok"
+          "value" : "weuV0WsLiG"
         },
-        "version" : 12,
-        "modifiedTime" : "2019-11-29T09:02:16Z"
+        "version" : 89,
+        "modifiedTime" : "2025-04-27T22:28:23Z"
       },
-      "mergedTime" : "2019-11-29T09:02:16Z",
+      "mergedTime" : "2025-04-27T22:28:23Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "omok5a37",
+      "id" : "1sxjupdc",
       "title" : "(a b c d e) h",
       "alternativeTitles" : [
       ],
@@ -31,11 +31,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "y59nY1Nuok",
+          "value" : "weuV0WsLiG",
           "type" : "Identifier"
         }
       ],
@@ -72,11 +72,11 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "omok5a37",
+      "id" : "1sxjupdc",
       "format.id" : null,
       "workType" : "Standard",
       "identifiers.value" : [
-        "y59nY1Nuok"
+        "weuV0WsLiG"
       ],
       "title" : "(a b c d e) h",
       "alternativeTitles" : [
@@ -110,6 +110,8 @@
       "genres.label" : [
       ],
       "genres.concepts.label" : [
+      ],
+      "genres.concepts.id" : [
       ],
       "languages.id" : [
       ],

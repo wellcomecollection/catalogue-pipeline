@@ -242,6 +242,9 @@
                           }
                         },
                         "analyzer": "asciifolding_analyzer"
+                      },
+                      "id": {
+                        "type": "keyword"
                       }
                     }
                   },

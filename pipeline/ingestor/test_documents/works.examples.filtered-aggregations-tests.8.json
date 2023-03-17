@@ -1,28 +1,28 @@
 {
   "description" : "examples for the works filtered aggregations tests",
-  "createdAt" : "2023-01-03T09:32:00.113940Z",
-  "id" : "k57syong",
+  "createdAt" : "2023-03-17T11:03:32.035596Z",
+  "id" : "mvr7oym6",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "k57syong",
+        "id" : "mvr7oym6",
         "identifier" : {
           "identifierType" : {
             "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "czKSHpT0IR"
+          "value" : "roYBuxRqEO"
         },
-        "version" : 78,
-        "modifiedTime" : "1943-06-02T04:26:11Z"
+        "version" : 31,
+        "modifiedTime" : "1961-03-20T02:18:28Z"
       },
-      "mergedTime" : "1943-06-02T04:26:11Z",
+      "mergedTime" : "1961-03-20T02:18:28Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "k57syong",
+      "id" : "mvr7oym6",
       "title" : "tapirs",
       "alternativeTitles" : [
       ],
@@ -40,7 +40,7 @@
             "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "czKSHpT0IR",
+          "value" : "roYBuxRqEO",
           "type" : "Identifier"
         }
       ],
@@ -82,11 +82,11 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "k57syong",
+      "id" : "mvr7oym6",
       "format.id" : "d",
       "workType" : "Standard",
       "identifiers.value" : [
-        "czKSHpT0IR"
+        "roYBuxRqEO"
       ],
       "title" : "tapirs",
       "alternativeTitles" : [
@@ -120,6 +120,8 @@
       "genres.label" : [
       ],
       "genres.concepts.label" : [
+      ],
+      "genres.concepts.id" : [
       ],
       "languages.id" : [
         "que"

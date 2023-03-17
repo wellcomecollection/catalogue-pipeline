@@ -1,28 +1,28 @@
 {
   "description" : "one of a list of works with a variety of formats",
-  "createdAt" : "2023-01-03T09:31:59.218142Z",
-  "id" : "wqcumcet",
+  "createdAt" : "2023-03-17T11:03:31.737713Z",
+  "id" : "rbbzqhyt",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "wqcumcet",
+        "id" : "rbbzqhyt",
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "vc628Sgu9f"
+          "value" : "149f5nQPon"
         },
-        "version" : 84,
-        "modifiedTime" : "2048-04-08T22:43:49Z"
+        "version" : 74,
+        "modifiedTime" : "1956-07-19T10:08:24Z"
       },
-      "mergedTime" : "2048-04-08T22:43:49Z",
+      "mergedTime" : "1956-07-19T10:08:24Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "wqcumcet",
+      "id" : "rbbzqhyt",
       "title" : "A work with format Journals",
       "alternativeTitles" : [
       ],
@@ -36,11 +36,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "vc628Sgu9f",
+          "value" : "149f5nQPon",
           "type" : "Identifier"
         }
       ],
@@ -77,11 +77,11 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "wqcumcet",
+      "id" : "rbbzqhyt",
       "format.id" : "d",
       "workType" : "Standard",
       "identifiers.value" : [
-        "vc628Sgu9f"
+        "149f5nQPon"
       ],
       "title" : "A work with format Journals",
       "alternativeTitles" : [
@@ -115,6 +115,8 @@
       "genres.label" : [
       ],
       "genres.concepts.label" : [
+      ],
+      "genres.concepts.id" : [
       ],
       "languages.id" : [
       ],

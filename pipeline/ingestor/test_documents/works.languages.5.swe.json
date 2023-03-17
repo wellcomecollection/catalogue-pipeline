@@ -1,28 +1,28 @@
 {
   "description" : "one of a list of works with a variety of languages",
-  "createdAt" : "2023-01-03T09:31:59.303010Z",
-  "id" : "qfscz1rj",
+  "createdAt" : "2023-03-17T11:03:31.772265Z",
+  "id" : "olhrstrz",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "qfscz1rj",
+        "id" : "olhrstrz",
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "Gk6juMbOeK"
+          "value" : "UagAbkJTEE"
         },
-        "version" : 98,
-        "modifiedTime" : "2036-09-06T23:29:13Z"
+        "version" : 58,
+        "modifiedTime" : "2026-09-11T17:29:57Z"
       },
-      "mergedTime" : "2036-09-06T23:29:13Z",
+      "mergedTime" : "2026-09-11T17:29:57Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "qfscz1rj",
+      "id" : "olhrstrz",
       "title" : "A work with languages Swedish",
       "alternativeTitles" : [
       ],
@@ -31,11 +31,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "Gk6juMbOeK",
+          "value" : "UagAbkJTEE",
           "type" : "Identifier"
         }
       ],
@@ -77,11 +77,11 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "qfscz1rj",
+      "id" : "olhrstrz",
       "format.id" : null,
       "workType" : "Standard",
       "identifiers.value" : [
-        "Gk6juMbOeK"
+        "UagAbkJTEE"
       ],
       "title" : "A work with languages Swedish",
       "alternativeTitles" : [
@@ -115,6 +115,8 @@
       "genres.label" : [
       ],
       "genres.concepts.label" : [
+      ],
+      "genres.concepts.id" : [
       ],
       "languages.id" : [
         "swe"

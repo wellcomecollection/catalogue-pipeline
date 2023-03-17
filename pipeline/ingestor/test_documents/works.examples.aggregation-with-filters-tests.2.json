@@ -1,29 +1,29 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2023-01-03T09:31:59.714256Z",
-  "id" : "vpkqafpg",
+  "createdAt" : "2023-03-17T11:03:31.908326Z",
+  "id" : "msgkyj11",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "vpkqafpg",
+        "id" : "msgkyj11",
         "identifier" : {
           "identifierType" : {
             "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "dPAcgpfIbf"
+          "value" : "fZgItN5K9R"
         },
-        "version" : 41,
-        "modifiedTime" : "2047-01-14T15:40:08Z"
+        "version" : 9,
+        "modifiedTime" : "2025-06-19T20:45:06Z"
       },
-      "mergedTime" : "2047-01-14T15:40:08Z",
+      "mergedTime" : "2025-06-19T20:45:06Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "vpkqafpg",
-      "title" : "title-z7am59I9Cw",
+      "id" : "msgkyj11",
+      "title" : "title-yiVFCEDYI4",
       "alternativeTitles" : [
       ],
       "workType" : {
@@ -40,24 +40,24 @@
             "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "dPAcgpfIbf",
+          "value" : "fZgItN5K9R",
           "type" : "Identifier"
         }
       ],
       "subjects" : [
         {
-          "label" : "6IZ2DrUzFk",
+          "label" : "y0B0TSmDGU",
           "concepts" : [
             {
-              "label" : "vgSyVfmtHDyMDGo",
+              "label" : "bHlXq1fwO98EpYD",
               "type" : "Concept"
             },
             {
-              "label" : "2rBCSPBNfFmnJIE",
+              "label" : "0Ex6rJpSUKd2dbi",
               "type" : "Concept"
             },
             {
-              "label" : "pzyMJLtI2pjU6xn",
+              "label" : "OiRlog5DCYVH5TP",
               "type" : "Concept"
             }
           ],
@@ -95,13 +95,13 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "vpkqafpg",
+      "id" : "msgkyj11",
       "format.id" : "l",
       "workType" : "Standard",
       "identifiers.value" : [
-        "dPAcgpfIbf"
+        "fZgItN5K9R"
       ],
-      "title" : "title-z7am59I9Cw",
+      "title" : "title-yiVFCEDYI4",
       "alternativeTitles" : [
       ],
       "description" : null,
@@ -127,16 +127,18 @@
       "subjects.id" : [
       ],
       "subjects.label" : [
-        "6IZ2DrUzFk"
+        "y0B0TSmDGU"
       ],
       "subjects.concepts.label" : [
-        "vgSyVfmtHDyMDGo",
-        "2rBCSPBNfFmnJIE",
-        "pzyMJLtI2pjU6xn"
+        "bHlXq1fwO98EpYD",
+        "0Ex6rJpSUKd2dbi",
+        "OiRlog5DCYVH5TP"
       ],
       "genres.label" : [
       ],
       "genres.concepts.label" : [
+      ],
+      "genres.concepts.id" : [
       ],
       "languages.id" : [
       ],
@@ -169,7 +171,7 @@
       "production.dates" : [
       ],
       "subjects.label" : [
-        "{\"label\":\"6IZ2DrUzFk\",\"concepts\":[],\"type\":\"Subject\"}"
+        "{\"label\":\"y0B0TSmDGU\",\"concepts\":[],\"type\":\"Subject\"}"
       ],
       "languages" : [
       ],

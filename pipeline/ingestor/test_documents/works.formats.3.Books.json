@@ -1,28 +1,28 @@
 {
   "description" : "one of a list of works with a variety of formats",
-  "createdAt" : "2023-01-03T09:31:59.211269Z",
-  "id" : "bujceq4p",
+  "createdAt" : "2023-03-17T11:03:31.736105Z",
+  "id" : "qzquhbnz",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "bujceq4p",
+        "id" : "qzquhbnz",
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "HuLHN83UU0"
+          "value" : "10w3BfGmqj"
         },
-        "version" : 25,
-        "modifiedTime" : "2026-06-29T23:47:01Z"
+        "version" : 34,
+        "modifiedTime" : "1946-10-01T09:18:22Z"
       },
-      "mergedTime" : "2026-06-29T23:47:01Z",
+      "mergedTime" : "1946-10-01T09:18:22Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "bujceq4p",
+      "id" : "qzquhbnz",
       "title" : "A work with format Books",
       "alternativeTitles" : [
       ],
@@ -36,11 +36,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "HuLHN83UU0",
+          "value" : "10w3BfGmqj",
           "type" : "Identifier"
         }
       ],
@@ -77,11 +77,11 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "bujceq4p",
+      "id" : "qzquhbnz",
       "format.id" : "a",
       "workType" : "Standard",
       "identifiers.value" : [
-        "HuLHN83UU0"
+        "10w3BfGmqj"
       ],
       "title" : "A work with format Books",
       "alternativeTitles" : [
@@ -115,6 +115,8 @@
       "genres.label" : [
       ],
       "genres.concepts.label" : [
+      ],
+      "genres.concepts.id" : [
       ],
       "languages.id" : [
       ],

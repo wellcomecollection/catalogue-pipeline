@@ -1,29 +1,29 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2023-01-03T09:31:59.950314Z",
-  "id" : "gnuj1it3",
+  "createdAt" : "2023-03-17T11:03:31.990462Z",
+  "id" : "bli95gaz",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "gnuj1it3",
+        "id" : "bli95gaz",
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "Og3KGy7Mz5"
+          "value" : "bSjf9AwXjw"
         },
-        "version" : 57,
-        "modifiedTime" : "1987-11-24T07:59:41Z"
+        "version" : 40,
+        "modifiedTime" : "1952-10-25T10:27:46Z"
       },
-      "mergedTime" : "1987-11-24T07:59:41Z",
+      "mergedTime" : "1952-10-25T10:27:46Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "gnuj1it3",
-      "title" : "title-c4OR9LzJV7",
+      "id" : "bli95gaz",
+      "title" : "title-lr9E9aLfxX",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -41,11 +41,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "Og3KGy7Mz5",
+          "value" : "bSjf9AwXjw",
           "type" : "Identifier"
         }
       ],
@@ -82,13 +82,13 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "gnuj1it3",
+      "id" : "bli95gaz",
       "format.id" : null,
       "workType" : "Standard",
       "identifiers.value" : [
-        "Og3KGy7Mz5"
+        "bSjf9AwXjw"
       ],
-      "title" : "title-c4OR9LzJV7",
+      "title" : "title-lr9E9aLfxX",
       "alternativeTitles" : [
       ],
       "description" : null,
@@ -120,6 +120,8 @@
       "genres.label" : [
       ],
       "genres.concepts.label" : [
+      ],
+      "genres.concepts.id" : [
       ],
       "languages.id" : [
       ],

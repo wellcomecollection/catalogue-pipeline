@@ -1,28 +1,28 @@
 {
   "description" : "examples of works with different types",
-  "createdAt" : "2023-01-03T09:31:59.864651Z",
-  "id" : "fndkxmxs",
+  "createdAt" : "2023-03-17T11:03:31.953463Z",
+  "id" : "velydjdv",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "fndkxmxs",
+        "id" : "velydjdv",
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "yW6CgVzwIJ"
+          "value" : "Rew3RmJ48v"
         },
-        "version" : 23,
-        "modifiedTime" : "1994-04-16T05:30:11Z"
+        "version" : 20,
+        "modifiedTime" : "1960-03-11T19:55:05Z"
       },
-      "mergedTime" : "1994-04-16T05:30:11Z",
+      "mergedTime" : "1960-03-11T19:55:05Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "fndkxmxs",
+      "id" : "velydjdv",
       "title" : "rats",
       "alternativeTitles" : [
       ],
@@ -31,11 +31,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "yW6CgVzwIJ",
+          "value" : "Rew3RmJ48v",
           "type" : "Identifier"
         }
       ],
@@ -72,11 +72,11 @@
       "type" : "Series"
     },
     "query" : {
-      "id" : "fndkxmxs",
+      "id" : "velydjdv",
       "format.id" : null,
       "workType" : "Series",
       "identifiers.value" : [
-        "yW6CgVzwIJ"
+        "Rew3RmJ48v"
       ],
       "title" : "rats",
       "alternativeTitles" : [
@@ -110,6 +110,8 @@
       "genres.label" : [
       ],
       "genres.concepts.label" : [
+      ],
+      "genres.concepts.id" : [
       ],
       "languages.id" : [
       ],

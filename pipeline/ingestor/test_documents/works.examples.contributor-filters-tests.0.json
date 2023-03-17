@@ -1,29 +1,29 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2023-01-03T09:31:59.949831Z",
-  "id" : "h5zn9bqm",
+  "createdAt" : "2023-03-17T11:03:31.989850Z",
+  "id" : "fw4dxc6n",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "h5zn9bqm",
+        "id" : "fw4dxc6n",
         "identifier" : {
           "identifierType" : {
             "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "OQ6G6Rkv6Q"
+          "value" : "I2SUm7p7NJ"
         },
-        "version" : 74,
-        "modifiedTime" : "1934-08-02T20:29:45Z"
+        "version" : 5,
+        "modifiedTime" : "1942-03-14T20:58:28Z"
       },
-      "mergedTime" : "1934-08-02T20:29:45Z",
+      "mergedTime" : "1942-03-14T20:58:28Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "h5zn9bqm",
-      "title" : "title-6Obq6lxZzG",
+      "id" : "fw4dxc6n",
+      "title" : "title-EVZsYV21F7",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -45,7 +45,7 @@
             "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "OQ6G6Rkv6Q",
+          "value" : "I2SUm7p7NJ",
           "type" : "Identifier"
         }
       ],
@@ -82,13 +82,13 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "h5zn9bqm",
+      "id" : "fw4dxc6n",
       "format.id" : null,
       "workType" : "Standard",
       "identifiers.value" : [
-        "OQ6G6Rkv6Q"
+        "I2SUm7p7NJ"
       ],
-      "title" : "title-6Obq6lxZzG",
+      "title" : "title-EVZsYV21F7",
       "alternativeTitles" : [
       ],
       "description" : null,
@@ -120,6 +120,8 @@
       "genres.label" : [
       ],
       "genres.concepts.label" : [
+      ],
+      "genres.concepts.id" : [
       ],
       "languages.id" : [
       ],

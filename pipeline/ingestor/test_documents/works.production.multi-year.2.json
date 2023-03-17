@@ -1,29 +1,29 @@
 {
   "description" : "works with multi-year production ranges",
-  "createdAt" : "2023-01-03T09:31:59.649148Z",
-  "id" : "wg3kq4ux",
+  "createdAt" : "2023-03-17T11:03:31.881725Z",
+  "id" : "mse28reu",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "wg3kq4ux",
+        "id" : "mse28reu",
         "identifier" : {
           "identifierType" : {
             "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "lfq9upMxJZ"
+          "value" : "R5aFhbmGJs"
         },
-        "version" : 14,
-        "modifiedTime" : "1992-12-28T05:24:03Z"
+        "version" : 65,
+        "modifiedTime" : "1981-12-24T12:24:54Z"
       },
-      "mergedTime" : "1992-12-28T05:24:03Z",
+      "mergedTime" : "1981-12-24T12:24:54Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "wg3kq4ux",
-      "title" : "title-oirzqph7Io",
+      "id" : "mse28reu",
+      "title" : "title-tOIr878hfc",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -35,7 +35,7 @@
             "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "lfq9upMxJZ",
+          "value" : "R5aFhbmGJs",
           "type" : "Identifier"
         }
       ],
@@ -51,16 +51,16 @@
       ],
       "production" : [
         {
-          "label" : "Y3QKMnIgomTs82bfnk23YGkB1",
+          "label" : "QMh6zvv2Jj5pKO9kAlfIDxe8F",
           "places" : [
             {
-              "label" : "YdIXqL6hBi",
+              "label" : "davLbUT0mo",
               "type" : "Place"
             }
           ],
           "agents" : [
             {
-              "label" : "4EVx0a62zj",
+              "label" : "bVH4nMKaFf",
               "type" : "Person"
             }
           ],
@@ -94,13 +94,13 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "wg3kq4ux",
+      "id" : "mse28reu",
       "format.id" : null,
       "workType" : "Standard",
       "identifiers.value" : [
-        "lfq9upMxJZ"
+        "R5aFhbmGJs"
       ],
-      "title" : "title-oirzqph7Io",
+      "title" : "title-tOIr878hfc",
       "alternativeTitles" : [
       ],
       "description" : null,
@@ -133,6 +133,8 @@
       ],
       "genres.concepts.label" : [
       ],
+      "genres.concepts.id" : [
+      ],
       "languages.id" : [
       ],
       "languages.label" : [
@@ -142,8 +144,8 @@
       "contributors.agent.label" : [
       ],
       "production.label" : [
-        "YdIXqL6hBi",
-        "4EVx0a62zj",
+        "davLbUT0mo",
+        "bVH4nMKaFf",
         "1860-1960"
       ],
       "production.dates.range.from" : [

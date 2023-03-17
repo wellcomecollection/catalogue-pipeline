@@ -270,7 +270,7 @@ class WorkQueryableValuesTest
                 canonicalId = "qfsrdqed"
               ),
               conceptWithCanonicalId(
-                label = "Ribald 18th Century cartoons",
+                label = "Base 18th century humour",
                 canonicalId = "cyskv5me"
               )
             )
@@ -281,6 +281,10 @@ class WorkQueryableValuesTest
               genreConceptWithCanonicalId(
                 label = "Netsuke",
                 canonicalId = "xe5nyufs"
+              ),
+              conceptWithCanonicalId(
+                label = "Tanuki",
+                canonicalId = "stqe4kw6"
               )
             )
           )
