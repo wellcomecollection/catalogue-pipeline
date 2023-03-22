@@ -69,6 +69,12 @@ object SierraNotes extends SierraDataTransformer with SierraQueryOps {
         case vf @ VarField(_, Some("561"), _, Some("1"), _, _) =>
           Some((vf, Some(createNoteFromContents(NoteType.OwnershipNote))))
 
+        // For visual material (matType k) we want to put 514 in the lettering
+        // field, not as a lettering note.  See comment on SierraLettering.
+        case VarField(_, Some("514"), _, _, _, _)
+            if bibData.materialType.map(_.code).contains("k") =>
+          None
+
         case vf @ VarField(_, Some(marcTag), _, _, _, _) =>
           Some((vf, notesFields.get(marcTag)))
         case _ => None

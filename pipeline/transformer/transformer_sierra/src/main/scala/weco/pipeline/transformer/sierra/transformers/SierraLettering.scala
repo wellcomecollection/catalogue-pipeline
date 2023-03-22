@@ -2,6 +2,7 @@ package weco.pipeline.transformer.sierra.transformers
 
 import weco.sierra.models.SierraQueryOps
 import weco.sierra.models.data.SierraBibData
+import weco.sierra.models.fields.SierraMaterialType
 
 // Populate wwork:lettering.
 //
@@ -24,16 +25,32 @@ import weco.sierra.models.data.SierraBibData
 //
 //    TODO: Get a definite answer.
 //
+//  - For visual material (material type k), MARC 514 is used to continue the
+//    lettering; on other records it's used for the lettering note.
+//
+//    See https://wellcome.slack.com/archives/C8X9YKM5X/p1676627452951479
+//
 // https://www.loc.gov/marc/bibliographic/bd246.html
 //
 object SierraLettering extends SierraDataTransformer with SierraQueryOps {
 
   type Output = Option[String]
 
-  def apply(bibData: SierraBibData) =
-    bibData
+  def apply(bibData: SierraBibData) = {
+    val marc246 = bibData
       .varfieldsWithTag("246")
       .withIndicator2("6")
       .subfieldsWithTag("a")
-      .contentString("\n\n")
+
+    val marc514 = bibData.materialType match {
+      case Some(SierraMaterialType("k")) =>
+        bibData
+          .varfieldsWithTag("514")
+          .subfieldsWithTag("a")
+
+      case _ => List()
+    }
+
+    (marc246 ++ marc514).contentString("\n\n")
+  }
 }

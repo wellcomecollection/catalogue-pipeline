@@ -5,6 +5,7 @@ import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.work._
 import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
 import weco.sierra.models.data.SierraBibData
+import weco.sierra.models.fields.SierraMaterialType
 import weco.sierra.models.marc.{Subfield, VarField}
 
 class SierraNotesTest
@@ -418,6 +419,50 @@ class SierraNotesTest
         Note(
           contents = "Times (London, England :  1788). May 27, 2004. (OCoLC)6967919",
           noteType = NoteType.RelatedMaterial
+        )
+      )
+    }
+  }
+
+  describe("lettering note") {
+    it("doesn't create a note from 246 .6 ǂa or 514 for visual material") {
+      // This is based on b16529888
+      val bibData = createSierraBibDataWith(
+        materialType = Some(SierraMaterialType("k")),
+        varFields = List(
+          VarField(marcTag = "514", subfields = List(Subfield(tag = "a", content = "Lettering continues: Comment va  le malade? H\\u00e9las Monsieur, il est mort ce matin \\u00e0 six heures! Ah il est mort le gaillard! .. Il n'a donc pas pris ma potion? Si Monsieur. Il en a donc trop pris? Non Monsieur. C'est qu'il n'en a assez pris. H.D."))),
+          VarField(
+            marcTag = Some("246"),
+            indicator2 = Some("6"),
+            subfields = List(
+              Subfield(tag = "a", content = "Le m\u00e9decin et la garde malade. H.D. ...")
+            )
+          )
+        )
+      )
+
+      SierraNotes(bibData) shouldBe empty
+    }
+
+    it("uses 514 for non-visual material") {
+      val bibData = createSierraBibDataWith(
+        materialType = Some(SierraMaterialType("not-k")),
+        varFields = List(
+          VarField(marcTag = "514", subfields = List(Subfield(tag = "a", content = "Lettering continues: Comment va  le malade? H\\u00e9las Monsieur, il est mort ce matin \\u00e0 six heures! Ah il est mort le gaillard! .. Il n'a donc pas pris ma potion? Si Monsieur. Il en a donc trop pris? Non Monsieur. C'est qu'il n'en a assez pris. H.D."))),
+          VarField(
+            marcTag = Some("246"),
+            indicator2 = Some("6"),
+            subfields = List(
+              Subfield(tag = "a", content = "Le m\u00e9decin et la garde malade. H.D. ...")
+            )
+          )
+        )
+      )
+
+      SierraNotes(bibData) shouldBe List(
+        Note(
+          noteType = NoteType.LetteringNote,
+          contents = "Lettering continues: Comment va  le malade? H\\u00e9las Monsieur, il est mort ce matin \\u00e0 six heures! Ah il est mort le gaillard! .. Il n'a donc pas pris ma potion? Si Monsieur. Il en a donc trop pris? Non Monsieur. C'est qu'il n'en a assez pris. H.D."
         )
       )
     }
