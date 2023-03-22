@@ -424,8 +424,8 @@ class SierraNotesTest
     }
   }
 
-  describe("lettering for visual material") {
-    it("uses both 246 .6 ǂa and 514 for visual material") {
+  describe("lettering note") {
+    it("doesn't create a note from 246 .6 ǂa or 514 for visual material") {
       // This is based on b16529888
       val bibData = createSierraBibDataWith(
         materialType = Some(SierraMaterialType("k")),
@@ -444,7 +444,7 @@ class SierraNotesTest
       SierraNotes(bibData) shouldBe empty
     }
 
-    it("only uses 246 .6 ǂa for non-visual material") {
+    it("uses 514 for non-visual material") {
       val bibData = createSierraBibDataWith(
         materialType = Some(SierraMaterialType("not-k")),
         varFields = List(
