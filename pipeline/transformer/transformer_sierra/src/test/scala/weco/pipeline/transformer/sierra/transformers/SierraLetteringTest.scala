@@ -121,7 +121,7 @@ class SierraLetteringTest
       SierraLettering(bibData) shouldBe Some("Le m\u00e9decin et la garde malade. H.D. ...\n\nLettering continues: Comment va  le malade? H\\u00e9las Monsieur, il est mort ce matin \\u00e0 six heures! Ah il est mort le gaillard! .. Il n'a donc pas pris ma potion? Si Monsieur. Il en a donc trop pris? Non Monsieur. C'est qu'il n'en a assez pris. H.D.")
     }
 
-    it("only uses both 246 .6 ǂa for non-visual material") {
+    it("only uses 246 .6 ǂa for non-visual material") {
       val bibData = createSierraBibDataWith(
         materialType = Some(SierraMaterialType("not-k")),
         varFields = List(
