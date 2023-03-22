@@ -444,7 +444,7 @@ class SierraNotesTest
       SierraNotes(bibData) shouldBe empty
     }
 
-    it("only uses both 246 .6 ǂa for non-visual material") {
+    it("only uses 246 .6 ǂa for non-visual material") {
       val bibData = createSierraBibDataWith(
         materialType = Some(SierraMaterialType("not-k")),
         varFields = List(
