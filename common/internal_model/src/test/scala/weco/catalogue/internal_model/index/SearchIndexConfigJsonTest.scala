@@ -14,12 +14,15 @@ import weco.elasticsearch.IndexConfig
 import weco.fixtures.LocalResources
 import weco.json.utils.JsonAssertions
 
-/** These tests are to allow us to confirm that the JSON from the Scala index
-  * config matches the work we do in the rank app for search.
+/**
+  * These tests are to allow us to confirm that the JSON
+  * from the Scala index config matches the work we do
+  * in the rank app for search.
   *
-  * Once index config has been finalised in rank, and the resultant JSON copied
-  * to the files in `resources`, this test will confirm that it is equivalent to
-  * the config created using the elastic4s DSL.
+  * Once index config has been finalised in rank, and the
+  * resultant JSON copied to the files in `resources`,
+  * this test will confirm that it is equivalent to the config
+  * created using the elastic4s DSL.
   */
 class SearchIndexConfigJsonTest
     extends AnyFunSpec
@@ -44,42 +47,41 @@ class SearchIndexConfigJsonTest
      * we've seen that field names with dots ("a.b.c") get expanded into nested objects
      * ({ a: { b: { c: ... } } })
      */
-    withLocalElasticsearchIndex(config = indexConfig) {
-      index =>
-        val indexMapping =
-          getJsonForIndex(
-            index.name,
-            "mappings",
-            elasticClient
-              .execute {
-                getMapping(index.name)
-              }
-              .await
-              .body
-              .value
-          ).focus.value
-
-        val indexSettings = getAnalysisSettingsOnly(
-          responseBody = elasticClient
+    withLocalElasticsearchIndex(config = indexConfig) { index =>
+      val indexMapping =
+        getJsonForIndex(
+          index.name,
+          "mappings",
+          elasticClient
             .execute {
-              getSettings(index.name)
+              getMapping(index.name)
             }
             .await
             .body
-            .value,
-          indexName = index.name
-        )
+            .value
+        ).focus.value
 
-        implicit val lcs: Patience[Json] = new Patience[Json]
+      val indexSettings = getAnalysisSettingsOnly(
+        responseBody = elasticClient
+          .execute {
+            getSettings(index.name)
+          }
+          .await
+          .body
+          .value,
+        indexName = index.name
+      )
 
-        println("Mapping diff:")
-        println(diff(fileMapping, indexMapping))
+      implicit val lcs: Patience[Json] = new Patience[Json]
 
-        println("Settings diff:")
-        println(diff(fileSettings, indexSettings))
+      println("Mapping diff:")
+      println(diff(fileMapping, indexMapping))
 
-        fileMapping shouldBe indexMapping
-        fileSettings shouldBe indexSettings
+      println("Settings diff:")
+      println(diff(fileSettings, indexSettings))
+
+      fileMapping shouldBe indexMapping
+      fileSettings shouldBe indexSettings
     }
   }
 
