@@ -10,7 +10,7 @@ import weco.catalogue.internal_model.identifiers.DataState
 import weco.catalogue.internal_model.languages.MarcLanguageCodeList
 import weco.catalogue.internal_model.work.{Availability, WorkData}
 
-import java.time.{LocalDateTime, ZoneId}
+import java.time.{LocalDate, ZoneOffset}
 
 /** We store aggregatable values in the Elasticsearch documents we store for the
   * API.
@@ -89,8 +89,15 @@ trait AggregatableValues {
         .flatMap(_.dates)
         .flatMap(_.range)
         .map(
-          range =>
-            LocalDateTime.ofInstant(range.from, ZoneId.systemDefault()).getYear
+          // Extract the year part from the start of the range.
+          // range.from is an Instant with an underlying representation in Epoch Time.
+          // Extracting the year using LocalDateTime requires it to be first localised
+          // then the year in Local Time is extracted.
+          // If the epoch time is close to either end of a year, then a non-zero timezone
+          // offset could cause the "wrong" year to be returned.
+          // This will be the case when range represents a whole year or range of years
+          // where _.from is the very beginning of the year.
+          range => LocalDate.ofInstant(range.from, ZoneOffset.UTC).getYear
         )
         .map(startYear => DisplayPeriod(label = startYear.toString))
         .asJson()
