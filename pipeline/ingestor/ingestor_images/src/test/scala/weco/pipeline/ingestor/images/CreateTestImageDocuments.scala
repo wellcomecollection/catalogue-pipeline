@@ -249,7 +249,10 @@ class CreateTestImageDocuments
   it("creates examples for the genre filter tests") {
     val carrotCounselling = createGenreWith(
       "Carrot counselling",
-      concepts = List(createGenreConcept(canonicalId = "g00dcafe"))
+      concepts = List(
+        createGenreConcept(canonicalId = "g00dcafe"),
+        createConcept(canonicalId = "baadf00d")
+      )
     )
     val dodoDivination = createGenreWith("Dodo divination")
     val emuEntrepreneurship =

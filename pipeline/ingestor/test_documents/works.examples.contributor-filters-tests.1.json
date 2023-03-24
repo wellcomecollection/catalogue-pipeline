@@ -1,29 +1,29 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2023-03-17T11:03:31.990462Z",
-  "id" : "bli95gaz",
+  "createdAt" : "2023-03-24T09:25:43.422970Z",
+  "id" : "t6gtiz6k",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "bli95gaz",
+        "id" : "t6gtiz6k",
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "bSjf9AwXjw"
+          "value" : "0kh0iB2aGW"
         },
-        "version" : 40,
-        "modifiedTime" : "1952-10-25T10:27:46Z"
+        "version" : 54,
+        "modifiedTime" : "1978-01-25T13:41:01Z"
       },
-      "mergedTime" : "1952-10-25T10:27:46Z",
+      "mergedTime" : "1978-01-25T13:41:01Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "bli95gaz",
-      "title" : "title-lr9E9aLfxX",
+      "id" : "t6gtiz6k",
+      "title" : "title-ys5lZ5raMo",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -41,11 +41,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "bSjf9AwXjw",
+          "value" : "0kh0iB2aGW",
           "type" : "Identifier"
         }
       ],
@@ -82,13 +82,13 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "bli95gaz",
+      "id" : "t6gtiz6k",
       "format.id" : null,
       "workType" : "Standard",
       "identifiers.value" : [
-        "bSjf9AwXjw"
+        "0kh0iB2aGW"
       ],
-      "title" : "title-lr9E9aLfxX",
+      "title" : "title-ys5lZ5raMo",
       "alternativeTitles" : [
       ],
       "description" : null,

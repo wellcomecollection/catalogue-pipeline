@@ -1,29 +1,29 @@
 {
   "description" : "examples for the genre tests",
-  "createdAt" : "2023-03-23T08:48:50.777318Z",
-  "id" : "qh5zn9bq",
+  "createdAt" : "2023-03-24T11:34:22.391267Z",
+  "id" : "mv6kix0n",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "qh5zn9bq",
+        "id" : "mv6kix0n",
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "zOQ6G6Rkv6"
+          "value" : "Md0v8N5yZN"
         },
-        "version" : 59,
-        "modifiedTime" : "1991-09-14T16:19:42Z"
+        "version" : 24,
+        "modifiedTime" : "1938-01-29T14:12:05Z"
       },
-      "mergedTime" : "1991-09-14T16:19:42Z",
+      "mergedTime" : "1938-01-29T14:12:05Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "qh5zn9bq",
-      "title" : "title-Y6Obq6lxZz",
+      "id" : "mv6kix0n",
+      "title" : "title-qklbwm3uF6",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -31,11 +31,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "zOQ6G6Rkv6",
+          "value" : "Md0v8N5yZN",
           "type" : "Identifier"
         }
       ],
@@ -46,52 +46,20 @@
           "label" : "Psychology, Pathological",
           "concepts" : [
             {
-              "id" : "1jcxukac",
+              "id" : "baadf00d",
               "identifiers" : [
                 {
                   "identifierType" : {
-                    "id" : "sierra-system-number",
-                    "label" : "Sierra system number",
+                    "id" : "miro-image-number",
+                    "label" : "Miro image number",
                     "type" : "IdentifierType"
                   },
-                  "value" : "Dsk2kCAGUR",
+                  "value" : "WpBejTwv1N",
                   "type" : "Identifier"
                 }
               ],
-              "label" : "PWKUROxBsQ4CK8D",
+              "label" : "RuvBbFbQPNB7ZuK",
               "type" : "Genre"
-            },
-            {
-              "id" : "hx40zjbs",
-              "identifiers" : [
-                {
-                  "identifierType" : {
-                    "id" : "miro-image-number",
-                    "label" : "Miro image number",
-                    "type" : "IdentifierType"
-                  },
-                  "value" : "cK3StYS1KO",
-                  "type" : "Identifier"
-                }
-              ],
-              "label" : "lLwDNn2Etp5zfss",
-              "type" : "Concept"
-            },
-            {
-              "id" : "lzmzxowd",
-              "identifiers" : [
-                {
-                  "identifierType" : {
-                    "id" : "miro-image-number",
-                    "label" : "Miro image number",
-                    "type" : "IdentifierType"
-                  },
-                  "value" : "tAYys6jP7J",
-                  "type" : "Identifier"
-                }
-              ],
-              "label" : "5kJ1FX3OfWNE6m5",
-              "type" : "Concept"
             }
           ],
           "type" : "Genre"
@@ -126,13 +94,13 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "qh5zn9bq",
+      "id" : "mv6kix0n",
       "format.id" : null,
       "workType" : "Standard",
       "identifiers.value" : [
-        "zOQ6G6Rkv6"
+        "Md0v8N5yZN"
       ],
-      "title" : "title-Y6Obq6lxZz",
+      "title" : "title-qklbwm3uF6",
       "alternativeTitles" : [
       ],
       "description" : null,
@@ -165,12 +133,10 @@
         "Psychology, Pathological"
       ],
       "genres.concepts.label" : [
-        "PWKUROxBsQ4CK8D",
-        "lLwDNn2Etp5zfss",
-        "5kJ1FX3OfWNE6m5"
+        "RuvBbFbQPNB7ZuK"
       ],
       "genres.concepts.id" : [
-        "1jcxukac"
+        "baadf00d"
       ],
       "languages.id" : [
       ],

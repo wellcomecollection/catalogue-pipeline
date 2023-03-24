@@ -1,28 +1,28 @@
 {
   "description" : "examples for the works filtered aggregations tests",
-  "createdAt" : "2023-03-17T11:03:32.032981Z",
-  "id" : "vu8irsvn",
+  "createdAt" : "2023-03-24T09:25:43.468938Z",
+  "id" : "jxf5y7z5",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "vu8irsvn",
+        "id" : "jxf5y7z5",
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "WXSBlJFu0Q"
+          "value" : "YUHTp8Aw7u"
         },
-        "version" : 61,
-        "modifiedTime" : "2041-11-23T11:39:16Z"
+        "version" : 14,
+        "modifiedTime" : "2031-02-03T20:00:25Z"
       },
-      "mergedTime" : "2041-11-23T11:39:16Z",
+      "mergedTime" : "2031-02-03T20:00:25Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "vu8irsvn",
+      "id" : "jxf5y7z5",
       "title" : "capybara",
       "alternativeTitles" : [
       ],
@@ -36,11 +36,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "WXSBlJFu0Q",
+          "value" : "YUHTp8Aw7u",
           "type" : "Identifier"
         }
       ],
@@ -82,11 +82,11 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "vu8irsvn",
+      "id" : "jxf5y7z5",
       "format.id" : "a",
       "workType" : "Standard",
       "identifiers.value" : [
-        "WXSBlJFu0Q"
+        "YUHTp8Aw7u"
       ],
       "title" : "capybara",
       "alternativeTitles" : [

@@ -1,29 +1,29 @@
 {
   "description" : "examples for the genre tests",
-  "createdAt" : "2023-03-23T08:48:50.776148Z",
-  "id" : "qrbao66q",
+  "createdAt" : "2023-03-24T11:34:22.388577Z",
+  "id" : "apciyop2",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "qrbao66q",
+        "id" : "apciyop2",
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "u5hoUH5ZhF"
+          "value" : "lQcKN0hZKz"
         },
-        "version" : 44,
-        "modifiedTime" : "2014-12-29T00:58:01Z"
+        "version" : 93,
+        "modifiedTime" : "1948-06-01T20:43:42Z"
       },
-      "mergedTime" : "2014-12-29T00:58:01Z",
+      "mergedTime" : "1948-06-01T20:43:42Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "qrbao66q",
-      "title" : "title-lbcmHn7act",
+      "id" : "apciyop2",
+      "title" : "title-z64nwkPrDT",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -31,11 +31,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "u5hoUH5ZhF",
+          "value" : "lQcKN0hZKz",
           "type" : "Identifier"
         }
       ],
@@ -46,7 +46,7 @@
           "label" : "Pamphlets.",
           "concepts" : [
             {
-              "id" : "kjqbcbto",
+              "id" : "g00dcafe",
               "identifiers" : [
                 {
                   "identifierType" : {
@@ -54,44 +54,12 @@
                     "label" : "Calm RecordIdentifier",
                     "type" : "IdentifierType"
                   },
-                  "value" : "hdmKTFidDl",
+                  "value" : "2SuiHrAOB2",
                   "type" : "Identifier"
                 }
               ],
-              "label" : "F9X3cVR8q4GIgcs",
+              "label" : "QqPyuxbr589wyJz",
               "type" : "Genre"
-            },
-            {
-              "id" : "sqnu7hzz",
-              "identifiers" : [
-                {
-                  "identifierType" : {
-                    "id" : "miro-image-number",
-                    "label" : "Miro image number",
-                    "type" : "IdentifierType"
-                  },
-                  "value" : "cjglMPaKQZ",
-                  "type" : "Identifier"
-                }
-              ],
-              "label" : "tHlWPIpZYum1qUl",
-              "type" : "Concept"
-            },
-            {
-              "id" : "55siulpm",
-              "identifiers" : [
-                {
-                  "identifierType" : {
-                    "id" : "miro-image-number",
-                    "label" : "Miro image number",
-                    "type" : "IdentifierType"
-                  },
-                  "value" : "dy2nMuMcZq",
-                  "type" : "Identifier"
-                }
-              ],
-              "label" : "gIG177tcCDpKgb0",
-              "type" : "Concept"
             }
           ],
           "type" : "Genre"
@@ -126,13 +94,13 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "qrbao66q",
+      "id" : "apciyop2",
       "format.id" : null,
       "workType" : "Standard",
       "identifiers.value" : [
-        "u5hoUH5ZhF"
+        "lQcKN0hZKz"
       ],
-      "title" : "title-lbcmHn7act",
+      "title" : "title-z64nwkPrDT",
       "alternativeTitles" : [
       ],
       "description" : null,
@@ -165,12 +133,10 @@
         "Pamphlets."
       ],
       "genres.concepts.label" : [
-        "F9X3cVR8q4GIgcs",
-        "tHlWPIpZYum1qUl",
-        "gIG177tcCDpKgb0"
+        "QqPyuxbr589wyJz"
       ],
       "genres.concepts.id" : [
-        "kjqbcbto"
+        "g00dcafe"
       ],
       "languages.id" : [
       ],

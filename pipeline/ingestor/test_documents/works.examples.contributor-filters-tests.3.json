@@ -1,29 +1,29 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2023-03-17T11:03:31.991983Z",
-  "id" : "33tjcj7u",
+  "createdAt" : "2023-03-24T09:25:43.424302Z",
+  "id" : "5rf0xzqw",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "33tjcj7u",
+        "id" : "5rf0xzqw",
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "QNH8tetLdS"
+          "value" : "Joq4UJD6zf"
         },
-        "version" : 9,
-        "modifiedTime" : "2031-10-03T04:35:55Z"
+        "version" : 85,
+        "modifiedTime" : "1975-09-27T20:16:36Z"
       },
-      "mergedTime" : "2031-10-03T04:35:55Z",
+      "mergedTime" : "1975-09-27T20:16:36Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "33tjcj7u",
-      "title" : "title-a7H42KTE1h",
+      "id" : "5rf0xzqw",
+      "title" : "title-jYpuBxuni2",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -41,11 +41,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "QNH8tetLdS",
+          "value" : "Joq4UJD6zf",
           "type" : "Identifier"
         }
       ],
@@ -82,13 +82,13 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "33tjcj7u",
+      "id" : "5rf0xzqw",
       "format.id" : null,
       "workType" : "Standard",
       "identifiers.value" : [
-        "QNH8tetLdS"
+        "Joq4UJD6zf"
       ],
-      "title" : "title-a7H42KTE1h",
+      "title" : "title-jYpuBxuni2",
       "alternativeTitles" : [
       ],
       "description" : null,

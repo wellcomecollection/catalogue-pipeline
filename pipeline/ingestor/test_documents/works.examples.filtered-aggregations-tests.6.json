@@ -1,28 +1,28 @@
 {
   "description" : "examples for the works filtered aggregations tests",
-  "createdAt" : "2023-03-17T11:03:32.034436Z",
-  "id" : "wmxlwpw7",
+  "createdAt" : "2023-03-24T09:25:43.470478Z",
+  "id" : "wmi4ke1h",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "wmxlwpw7",
+        "id" : "wmi4ke1h",
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "A611O9UIgS"
+          "value" : "AmC1nVJH0t"
         },
-        "version" : 49,
-        "modifiedTime" : "1989-09-05T11:26:26Z"
+        "version" : 9,
+        "modifiedTime" : "1938-06-19T10:15:49Z"
       },
-      "mergedTime" : "1989-09-05T11:26:26Z",
+      "mergedTime" : "1938-06-19T10:15:49Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "wmxlwpw7",
+      "id" : "wmi4ke1h",
       "title" : "rats",
       "alternativeTitles" : [
       ],
@@ -36,11 +36,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "A611O9UIgS",
+          "value" : "AmC1nVJH0t",
           "type" : "Identifier"
         }
       ],
@@ -82,11 +82,11 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "wmxlwpw7",
+      "id" : "wmi4ke1h",
       "format.id" : "d",
       "workType" : "Standard",
       "identifiers.value" : [
-        "A611O9UIgS"
+        "AmC1nVJH0t"
       ],
       "title" : "rats",
       "alternativeTitles" : [

@@ -1,29 +1,29 @@
 {
   "description" : "examples for the access status tests",
-  "createdAt" : "2023-03-17T11:03:32.021562Z",
-  "id" : "lgbquzpd",
+  "createdAt" : "2023-03-24T09:25:43.451986Z",
+  "id" : "o0u9h1wt",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "lgbquzpd",
+        "id" : "o0u9h1wt",
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "ayKiD0AuOT"
+          "value" : "Q8nyGjzx3m"
         },
-        "version" : 69,
-        "modifiedTime" : "2039-08-31T06:44:18Z"
+        "version" : 97,
+        "modifiedTime" : "1998-09-03T03:15:10Z"
       },
-      "mergedTime" : "2039-08-31T06:44:18Z",
+      "mergedTime" : "1998-09-03T03:15:10Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "lgbquzpd",
-      "title" : "title-t7fsTs5C3l",
+      "id" : "o0u9h1wt",
+      "title" : "title-iO1husne03",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -31,11 +31,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "ayKiD0AuOT",
+          "value" : "Q8nyGjzx3m",
           "type" : "Identifier"
         }
       ],
@@ -45,15 +45,15 @@
       ],
       "items" : [
         {
-          "id" : "qlcvursf",
+          "id" : "aufiahc4",
           "identifiers" : [
             {
               "identifierType" : {
-                "id" : "miro-image-number",
-                "label" : "Miro image number",
+                "id" : "calm-record-id",
+                "label" : "Calm RecordIdentifier",
                 "type" : "IdentifierType"
               },
-              "value" : "pYUHTp8Aw7",
+              "value" : "eAffGPGNx8",
               "type" : "Identifier"
             }
           ],
@@ -64,8 +64,9 @@
                 "label" : "IIIF Presentation API",
                 "type" : "LocationType"
               },
-              "url" : "https://iiif.wellcomecollection.org/image/9kH.jpg/info.json",
-              "credit" : "Credit line: TVQd9s",
+              "url" : "https://iiif.wellcomecollection.org/image/YHg.jpg/info.json",
+              "credit" : "Credit line: mZ1Psfx1ND",
+              "linkText" : "Link text: TONjKwK",
               "license" : {
                 "id" : "cc-by",
                 "label" : "Attribution 4.0 International (CC BY 4.0)",
@@ -120,13 +121,13 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "lgbquzpd",
+      "id" : "o0u9h1wt",
       "format.id" : null,
       "workType" : "Standard",
       "identifiers.value" : [
-        "ayKiD0AuOT"
+        "Q8nyGjzx3m"
       ],
-      "title" : "title-t7fsTs5C3l",
+      "title" : "title-iO1husne03",
       "alternativeTitles" : [
       ],
       "description" : null,
@@ -140,10 +141,10 @@
       "images.identifiers.value" : [
       ],
       "items.id" : [
-        "qlcvursf"
+        "aufiahc4"
       ],
       "items.identifiers.value" : [
-        "pYUHTp8Aw7"
+        "eAffGPGNx8"
       ],
       "items.locations.accessConditions.status.id" : [
         "licensed-resources"
