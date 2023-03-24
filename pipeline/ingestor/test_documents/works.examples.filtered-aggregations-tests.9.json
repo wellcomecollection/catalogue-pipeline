@@ -1,28 +1,28 @@
 {
   "description" : "examples for the works filtered aggregations tests",
-  "createdAt" : "2023-03-24T09:25:43.472544Z",
-  "id" : "mhkxq3gl",
+  "createdAt" : "2023-03-24T14:12:13.395161Z",
+  "id" : "qwuhqead",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "mhkxq3gl",
+        "id" : "qwuhqead",
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "sensP3JJ01"
+          "value" : "k1Ah2xRfCk"
         },
-        "version" : 22,
-        "modifiedTime" : "2019-01-25T14:56:32Z"
+        "version" : 61,
+        "modifiedTime" : "1940-07-03T22:01:02Z"
       },
-      "mergedTime" : "2019-01-25T14:56:32Z",
+      "mergedTime" : "1940-07-03T22:01:02Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "mhkxq3gl",
+      "id" : "qwuhqead",
       "title" : "rats",
       "alternativeTitles" : [
       ],
@@ -36,11 +36,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "sensP3JJ01",
+          "value" : "k1Ah2xRfCk",
           "type" : "Identifier"
         }
       ],
@@ -82,11 +82,11 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "mhkxq3gl",
+      "id" : "qwuhqead",
       "format.id" : "i",
       "workType" : "Standard",
       "identifiers.value" : [
-        "sensP3JJ01"
+        "k1Ah2xRfCk"
       ],
       "title" : "rats",
       "alternativeTitles" : [

@@ -1,29 +1,29 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2023-03-24T09:25:43.425568Z",
-  "id" : "jwbli95g",
+  "createdAt" : "2023-03-24T14:12:13.344256Z",
+  "id" : "tru6joq4",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "jwbli95g",
+        "id" : "tru6joq4",
         "identifier" : {
           "identifierType" : {
             "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "GjbSjf9AwX"
+          "value" : "NS7lxBF816"
         },
-        "version" : 94,
-        "modifiedTime" : "2039-02-24T20:50:34Z"
+        "version" : 38,
+        "modifiedTime" : "2022-09-30T14:40:50Z"
       },
-      "mergedTime" : "2039-02-24T20:50:34Z",
+      "mergedTime" : "2022-09-30T14:40:50Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "jwbli95g",
-      "title" : "title-zclr9E9aLf",
+      "id" : "tru6joq4",
+      "title" : "title-JD6zf5rF0X",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -35,7 +35,7 @@
             "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "GjbSjf9AwX",
+          "value" : "NS7lxBF816",
           "type" : "Identifier"
         }
       ],
@@ -72,13 +72,13 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "jwbli95g",
+      "id" : "tru6joq4",
       "format.id" : null,
       "workType" : "Standard",
       "identifiers.value" : [
-        "GjbSjf9AwX"
+        "NS7lxBF816"
       ],
-      "title" : "title-zclr9E9aLf",
+      "title" : "title-JD6zf5rF0X",
       "alternativeTitles" : [
       ],
       "description" : null,

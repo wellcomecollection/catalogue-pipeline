@@ -1,28 +1,28 @@
 {
   "description" : "examples for the works filtered aggregations tests",
-  "createdAt" : "2023-03-24T09:25:43.471949Z",
-  "id" : "wxsbljfu",
+  "createdAt" : "2023-03-24T14:12:13.394684Z",
+  "id" : "u1amc1nv",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "wxsbljfu",
+        "id" : "u1amc1nv",
         "identifier" : {
           "identifierType" : {
             "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "4Tv6zd8upt"
+          "value" : "rB0Sw27DZl"
         },
-        "version" : 84,
-        "modifiedTime" : "2041-08-19T10:12:25Z"
+        "version" : 30,
+        "modifiedTime" : "1945-11-08T14:38:47Z"
       },
-      "mergedTime" : "2041-08-19T10:12:25Z",
+      "mergedTime" : "1945-11-08T14:38:47Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "wxsbljfu",
+      "id" : "u1amc1nv",
       "title" : "tapirs",
       "alternativeTitles" : [
       ],
@@ -40,7 +40,7 @@
             "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "4Tv6zd8upt",
+          "value" : "rB0Sw27DZl",
           "type" : "Identifier"
         }
       ],
@@ -82,11 +82,11 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "wxsbljfu",
+      "id" : "u1amc1nv",
       "format.id" : "d",
       "workType" : "Standard",
       "identifiers.value" : [
-        "4Tv6zd8upt"
+        "rB0Sw27DZl"
       ],
       "title" : "tapirs",
       "alternativeTitles" : [
