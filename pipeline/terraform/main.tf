@@ -1,12 +1,5 @@
 locals {
   pipelines = {
-    "2023-02-21" = {
-      listen_to_reindexer      = false
-      scale_up_tasks           = false
-      scale_up_elastic_cluster = false
-      scale_up_id_minter_db    = false
-      scale_up_matcher_db      = false
-    }
 
     "2023-03-09" = {
       listen_to_reindexer      = false
@@ -16,7 +9,7 @@ locals {
       scale_up_matcher_db      = false
     }
 
-    "2023-03-16" = {
+    "2023-03-27" = {
       listen_to_reindexer      = false
       scale_up_tasks           = false
       scale_up_elastic_cluster = false
