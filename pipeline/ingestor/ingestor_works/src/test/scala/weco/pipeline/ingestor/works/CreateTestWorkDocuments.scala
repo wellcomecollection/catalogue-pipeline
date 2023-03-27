@@ -750,6 +750,33 @@ class CreateTestWorkDocuments
     )
   }
 
+  it("creates examples for works with different availabilities") {
+    Seq[(String, Set[Availability])](
+      ("open-only", Set(Availability.OpenShelves)),
+      ("closed-only", Set(Availability.ClosedStores)),
+      ("online-only", Set(Availability.Online)),
+      ("nowhere", Set()),
+      (
+        "everywhere",
+        Set(
+          Availability.OpenShelves,
+          Availability.ClosedStores,
+          Availability.Online
+        )
+      )
+    ).map {
+      case (availability, availabilities) =>
+        val work = denormalisedWork()
+        saveWork(
+          work = work
+            .title(s"availability: $availability")
+            .copy(state = work.state.copy(availabilities = availabilities)),
+          description = s"A work which is available $availability",
+          id = s"works.examples.availabilities.$availability"
+        )
+    }
+  }
+
   private def saveWork(
     work: Work[WorkState.Denormalised],
     description: String,

@@ -1,0 +1,179 @@
+{
+  "description" : "A work which is available everywhere",
+  "createdAt" : "2023-03-27T11:16:18.823382Z",
+  "id" : "2twopft1",
+  "document" : {
+    "debug" : {
+      "source" : {
+        "id" : "2twopft1",
+        "identifier" : {
+          "identifierType" : {
+            "id" : "sierra-system-number"
+          },
+          "ontologyType" : "Work",
+          "value" : "Uaequ81tpB"
+        },
+        "version" : 59,
+        "modifiedTime" : "1972-02-10T18:53:31Z"
+      },
+      "mergedTime" : "1972-02-10T18:53:31Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
+      "redirectSources" : [
+      ]
+    },
+    "display" : {
+      "id" : "2twopft1",
+      "title" : "availability: everywhere",
+      "alternativeTitles" : [
+      ],
+      "contributors" : [
+      ],
+      "identifiers" : [
+        {
+          "identifierType" : {
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
+            "type" : "IdentifierType"
+          },
+          "value" : "Uaequ81tpB",
+          "type" : "Identifier"
+        }
+      ],
+      "subjects" : [
+      ],
+      "genres" : [
+      ],
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "availabilities" : [
+        {
+          "id" : "open-shelves",
+          "label" : "Open shelves",
+          "type" : "Availability"
+        },
+        {
+          "id" : "closed-stores",
+          "label" : "Closed stores",
+          "type" : "Availability"
+        },
+        {
+          "id" : "online",
+          "label" : "Online",
+          "type" : "Availability"
+        }
+      ],
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "notes" : [
+      ],
+      "formerFrequency" : [
+      ],
+      "designation" : [
+      ],
+      "images" : [
+      ],
+      "parts" : [
+      ],
+      "partOf" : [
+      ],
+      "precededBy" : [
+      ],
+      "succeededBy" : [
+      ],
+      "type" : "Work"
+    },
+    "query" : {
+      "id" : "2twopft1",
+      "format.id" : null,
+      "workType" : "Standard",
+      "identifiers.value" : [
+        "Uaequ81tpB"
+      ],
+      "title" : "availability: everywhere",
+      "alternativeTitles" : [
+      ],
+      "description" : null,
+      "physicalDescription" : null,
+      "edition" : null,
+      "notes.contents" : [
+      ],
+      "lettering" : null,
+      "images.id" : [
+      ],
+      "images.identifiers.value" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
+      "items.locations.accessConditions.status.id" : [
+      ],
+      "items.locations.license.id" : [
+      ],
+      "items.locations.locationType.id" : [
+      ],
+      "subjects.id" : [
+      ],
+      "subjects.label" : [
+      ],
+      "subjects.concepts.label" : [
+      ],
+      "genres.label" : [
+      ],
+      "genres.concepts.label" : [
+      ],
+      "genres.concepts.id" : [
+      ],
+      "languages.id" : [
+      ],
+      "languages.label" : [
+      ],
+      "contributors.agent.id" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "production.label" : [
+      ],
+      "production.dates.range.from" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
+        "open-shelves",
+        "closed-stores",
+        "online"
+      ],
+      "collectionPath.label" : null,
+      "collectionPath.path" : null,
+      "referenceNumber" : null
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+        "{\"id\":\"closed-stores\",\"label\":\"Closed stores\",\"type\":\"Availability\"}",
+        "{\"id\":\"online\",\"label\":\"Online\",\"type\":\"Availability\"}",
+        "{\"id\":\"open-shelves\",\"label\":\"Open shelves\",\"type\":\"Availability\"}"
+      ]
+    },
+    "type" : "Visible"
+  }
+}

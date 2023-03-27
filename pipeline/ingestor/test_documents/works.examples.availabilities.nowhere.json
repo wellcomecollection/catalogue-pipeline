@@ -1,0 +1,158 @@
+{
+  "description" : "A work which is available nowhere",
+  "createdAt" : "2023-03-27T11:16:18.817459Z",
+  "id" : "dph7sjip",
+  "document" : {
+    "debug" : {
+      "source" : {
+        "id" : "dph7sjip",
+        "identifier" : {
+          "identifierType" : {
+            "id" : "miro-image-number"
+          },
+          "ontologyType" : "Work",
+          "value" : "WpBejTwv1N"
+        },
+        "version" : 66,
+        "modifiedTime" : "1971-11-19T03:42:42Z"
+      },
+      "mergedTime" : "1971-11-19T03:42:42Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
+      "redirectSources" : [
+      ]
+    },
+    "display" : {
+      "id" : "dph7sjip",
+      "title" : "availability: nowhere",
+      "alternativeTitles" : [
+      ],
+      "contributors" : [
+      ],
+      "identifiers" : [
+        {
+          "identifierType" : {
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
+            "type" : "IdentifierType"
+          },
+          "value" : "WpBejTwv1N",
+          "type" : "Identifier"
+        }
+      ],
+      "subjects" : [
+      ],
+      "genres" : [
+      ],
+      "items" : [
+      ],
+      "holdings" : [
+      ],
+      "availabilities" : [
+      ],
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "notes" : [
+      ],
+      "formerFrequency" : [
+      ],
+      "designation" : [
+      ],
+      "images" : [
+      ],
+      "parts" : [
+      ],
+      "partOf" : [
+      ],
+      "precededBy" : [
+      ],
+      "succeededBy" : [
+      ],
+      "type" : "Work"
+    },
+    "query" : {
+      "id" : "dph7sjip",
+      "format.id" : null,
+      "workType" : "Standard",
+      "identifiers.value" : [
+        "WpBejTwv1N"
+      ],
+      "title" : "availability: nowhere",
+      "alternativeTitles" : [
+      ],
+      "description" : null,
+      "physicalDescription" : null,
+      "edition" : null,
+      "notes.contents" : [
+      ],
+      "lettering" : null,
+      "images.id" : [
+      ],
+      "images.identifiers.value" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
+      "items.locations.accessConditions.status.id" : [
+      ],
+      "items.locations.license.id" : [
+      ],
+      "items.locations.locationType.id" : [
+      ],
+      "subjects.id" : [
+      ],
+      "subjects.label" : [
+      ],
+      "subjects.concepts.label" : [
+      ],
+      "genres.label" : [
+      ],
+      "genres.concepts.label" : [
+      ],
+      "genres.concepts.id" : [
+      ],
+      "languages.id" : [
+      ],
+      "languages.label" : [
+      ],
+      "contributors.agent.id" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "production.label" : [
+      ],
+      "production.dates.range.from" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
+      ],
+      "collectionPath.label" : null,
+      "collectionPath.path" : null,
+      "referenceNumber" : null
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+      ],
+      "availabilities" : [
+      ]
+    },
+    "type" : "Visible"
+  }
+}
