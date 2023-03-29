@@ -1,29 +1,29 @@
 {
   "description" : "works with different subjects",
-  "createdAt" : "2023-01-03T09:31:59.385029Z",
-  "id" : "xcssabt1",
+  "createdAt" : "2023-03-17T11:03:31.797313Z",
+  "id" : "opaupm4b",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "xcssabt1",
+        "id" : "opaupm4b",
         "identifier" : {
           "identifierType" : {
             "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "7XE0Jxv45o"
+          "value" : "spewkKE1s2"
         },
-        "version" : 48,
-        "modifiedTime" : "2018-09-21T04:30:20Z"
+        "version" : 2,
+        "modifiedTime" : "1963-02-18T22:51:22Z"
       },
-      "mergedTime" : "2018-09-21T04:30:20Z",
+      "mergedTime" : "1963-02-18T22:51:22Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "xcssabt1",
-      "title" : "title-p2sZlO6WXi",
+      "id" : "opaupm4b",
+      "title" : "title-l7TlcjNV5v",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -35,7 +35,7 @@
             "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "7XE0Jxv45o",
+          "value" : "spewkKE1s2",
           "type" : "Identifier"
         }
       ],
@@ -44,15 +44,15 @@
           "label" : "paleoNeuroBiology",
           "concepts" : [
             {
-              "label" : "qbmTfcJnlkosWvA",
+              "label" : "OVfDtEVhuTjLML0",
               "type" : "Concept"
             },
             {
-              "label" : "mEQcU7atgIJPhTv",
+              "label" : "MOH1Bj9evx0cAh7",
               "type" : "Concept"
             },
             {
-              "label" : "2pMEZn8L2YCE8E9",
+              "label" : "0mKj49k3BjjuTuf",
               "type" : "Concept"
             }
           ],
@@ -62,15 +62,15 @@
           "label" : "realAnalysis",
           "concepts" : [
             {
-              "label" : "W7WKCBWrkxlOWWB",
+              "label" : "KU2Yez08k6CNnSU",
               "type" : "Concept"
             },
             {
-              "label" : "Kbkm5UMJEwTIE8u",
+              "label" : "VMdWdPx74hNxKXA",
               "type" : "Concept"
             },
             {
-              "label" : "H8GnKqkwP9ugIes",
+              "label" : "vquihJgTfjChVoT",
               "type" : "Concept"
             }
           ],
@@ -108,13 +108,13 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "xcssabt1",
+      "id" : "opaupm4b",
       "format.id" : null,
       "workType" : "Standard",
       "identifiers.value" : [
-        "7XE0Jxv45o"
+        "spewkKE1s2"
       ],
-      "title" : "title-p2sZlO6WXi",
+      "title" : "title-l7TlcjNV5v",
       "alternativeTitles" : [
       ],
       "description" : null,
@@ -144,16 +144,18 @@
         "realAnalysis"
       ],
       "subjects.concepts.label" : [
-        "qbmTfcJnlkosWvA",
-        "mEQcU7atgIJPhTv",
-        "2pMEZn8L2YCE8E9",
-        "W7WKCBWrkxlOWWB",
-        "Kbkm5UMJEwTIE8u",
-        "H8GnKqkwP9ugIes"
+        "OVfDtEVhuTjLML0",
+        "MOH1Bj9evx0cAh7",
+        "0mKj49k3BjjuTuf",
+        "KU2Yez08k6CNnSU",
+        "VMdWdPx74hNxKXA",
+        "vquihJgTfjChVoT"
       ],
       "genres.label" : [
       ],
       "genres.concepts.label" : [
+      ],
+      "genres.concepts.id" : [
       ],
       "languages.id" : [
       ],

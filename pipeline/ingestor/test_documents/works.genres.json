@@ -1,28 +1,28 @@
 {
   "description" : "a work with different concepts in the genre",
-  "createdAt" : "2023-01-03T09:31:59.374733Z",
-  "id" : "2zo588up",
+  "createdAt" : "2023-03-17T11:03:31.790835Z",
+  "id" : "jlp05mgl",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "2zo588up",
+        "id" : "jlp05mgl",
         "identifier" : {
           "identifierType" : {
             "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "rVoekomuzt"
+          "value" : "iIjgaHUI5C"
         },
-        "version" : 49,
-        "modifiedTime" : "2054-02-13T07:35:27Z"
+        "version" : 91,
+        "modifiedTime" : "1978-12-03T12:21:42Z"
       },
-      "mergedTime" : "2054-02-13T07:35:27Z",
+      "mergedTime" : "1978-12-03T12:21:42Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "2zo588up",
+      "id" : "jlp05mgl",
       "title" : "A work with different concepts in the genre",
       "alternativeTitles" : [
       ],
@@ -35,7 +35,7 @@
             "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "rVoekomuzt",
+          "value" : "iIjgaHUI5C",
           "type" : "Identifier"
         }
       ],
@@ -54,7 +54,7 @@
               "type" : "Place"
             },
             {
-              "id" : "svmale83",
+              "id" : "buvphmut",
               "identifiers" : [
                 {
                   "identifierType" : {
@@ -62,7 +62,7 @@
                     "label" : "Miro image number",
                     "type" : "IdentifierType"
                   },
-                  "value" : "qBJ6dy5rBO",
+                  "value" : "nJ8zsEX9al",
                   "type" : "Identifier"
                 }
               ],
@@ -102,11 +102,11 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "2zo588up",
+      "id" : "jlp05mgl",
       "format.id" : null,
       "workType" : "Standard",
       "identifiers.value" : [
-        "rVoekomuzt"
+        "iIjgaHUI5C"
       ],
       "title" : "A work with different concepts in the genre",
       "alternativeTitles" : [
@@ -144,6 +144,8 @@
         "Conceptual Conversations",
         "Pleasant Paris",
         "Past Prehistory"
+      ],
+      "genres.concepts.id" : [
       ],
       "languages.id" : [
       ],

@@ -1,28 +1,28 @@
 {
   "description" : "examples of works with different types",
-  "createdAt" : "2023-01-03T09:31:59.858592Z",
-  "id" : "2tqcclh1",
+  "createdAt" : "2023-03-17T11:03:31.951215Z",
+  "id" : "ujg4jncr",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "2tqcclh1",
+        "id" : "ujg4jncr",
         "identifier" : {
           "identifierType" : {
             "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "ZiS5MlN0hQ"
+          "value" : "ZEnp6i2y6i"
         },
-        "version" : 15,
-        "modifiedTime" : "1933-08-10T09:08:15Z"
+        "version" : 27,
+        "modifiedTime" : "1951-02-24T01:30:35Z"
       },
-      "mergedTime" : "1933-08-10T09:08:15Z",
+      "mergedTime" : "1951-02-24T01:30:35Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "2tqcclh1",
+      "id" : "ujg4jncr",
       "title" : "rats",
       "alternativeTitles" : [
       ],
@@ -35,7 +35,7 @@
             "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "ZiS5MlN0hQ",
+          "value" : "ZEnp6i2y6i",
           "type" : "Identifier"
         }
       ],
@@ -72,11 +72,11 @@
       "type" : "Collection"
     },
     "query" : {
-      "id" : "2tqcclh1",
+      "id" : "ujg4jncr",
       "format.id" : null,
       "workType" : "Collection",
       "identifiers.value" : [
-        "ZiS5MlN0hQ"
+        "ZEnp6i2y6i"
       ],
       "title" : "rats",
       "alternativeTitles" : [
@@ -110,6 +110,8 @@
       "genres.label" : [
       ],
       "genres.concepts.label" : [
+      ],
+      "genres.concepts.id" : [
       ],
       "languages.id" : [
       ],

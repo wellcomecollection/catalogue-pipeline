@@ -1,29 +1,29 @@
 {
   "description" : "a work with licensed digital items",
-  "createdAt" : "2023-01-03T09:31:59.326732Z",
-  "id" : "runiusy8",
+  "createdAt" : "2023-03-17T11:03:31.779088Z",
+  "id" : "sojyedta",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "runiusy8",
+        "id" : "sojyedta",
         "identifier" : {
           "identifierType" : {
             "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "ZGWEGMyTaq"
+          "value" : "xSR5EK6UWY"
         },
-        "version" : 9,
-        "modifiedTime" : "2062-01-08T01:49:39Z"
+        "version" : 62,
+        "modifiedTime" : "2030-04-29T05:27:13Z"
       },
-      "mergedTime" : "2062-01-08T01:49:39Z",
+      "mergedTime" : "2030-04-29T05:27:13Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "runiusy8",
-      "title" : "title-wjvsf3c3yc",
+      "id" : "sojyedta",
+      "title" : "title-w5YmCWk8Hy",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -35,7 +35,7 @@
             "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "ZGWEGMyTaq",
+          "value" : "xSR5EK6UWY",
           "type" : "Identifier"
         }
       ],
@@ -54,9 +54,8 @@
                 "label" : "IIIF Presentation API",
                 "type" : "LocationType"
               },
-              "url" : "https://iiif.wellcomecollection.org/image/V0W.jpg/info.json",
-              "credit" : "Credit line: LiG1sX",
-              "linkText" : "Link text: pdcTBgVrpD",
+              "url" : "https://iiif.wellcomecollection.org/image/Voe.jpg/info.json",
+              "credit" : "Credit line: omuzt2Z",
               "license" : {
                 "id" : "cc-by",
                 "label" : "Attribution 4.0 International (CC BY 4.0)",
@@ -98,13 +97,13 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "runiusy8",
+      "id" : "sojyedta",
       "format.id" : null,
       "workType" : "Standard",
       "identifiers.value" : [
-        "ZGWEGMyTaq"
+        "xSR5EK6UWY"
       ],
-      "title" : "title-wjvsf3c3yc",
+      "title" : "title-w5YmCWk8Hy",
       "alternativeTitles" : [
       ],
       "description" : null,
@@ -138,6 +137,8 @@
       "genres.label" : [
       ],
       "genres.concepts.label" : [
+      ],
+      "genres.concepts.id" : [
       ],
       "languages.id" : [
       ],

@@ -39,43 +39,45 @@ class ImagesIngestorFeatureTest
       case QueuePair(queue, dlq) =>
         sendNotificationToSQS(queue = queue, body = image.id)
 
-        withImagesIngestor(queue, existingImages = Seq(image)) { index =>
-          eventually {
-            val response: Response[GetResponse] = elasticClient.execute {
-              get(index, image.id)
-            }.await
+        withImagesIngestor(queue, existingImages = Seq(image)) {
+          index =>
+            eventually {
+              val response: Response[GetResponse] = elasticClient.execute {
+                get(index, image.id)
+              }.await
 
-            val getResponse = response.result
+              val getResponse = response.result
 
-            if (getResponse.sourceAsString == null) {
-              warn("Got null when trying to fetch image from Elasticsearch")
+              if (getResponse.sourceAsString == null) {
+                warn("Got null when trying to fetch image from Elasticsearch")
+              }
+
+              val storedImage =
+                fromJson[IndexedImage](getResponse.sourceAsString).get
+
+              storedImage.modifiedTime shouldBe image.modifiedTime
+
+              val storedJson = storedImage.display.as[DisplayImage].right.get
+              val expectedJson = DisplayImage(image)
+
+              storedImage.query shouldBe ImageQueryableValues(
+                id = image.state.canonicalId,
+                sourceIdentifier = image.state.sourceIdentifier,
+                locations = image.locations,
+                inferredData = image.state.inferredData,
+                source = image.source
+              )
+              storedImage.aggregatableValues shouldBe ImageAggregatableValues(
+                image.source
+              )
+
+              storedJson shouldBe expectedJson
             }
 
-            val storedImage =
-              fromJson[IndexedImage](getResponse.sourceAsString).get
-
-            storedImage.modifiedTime shouldBe image.modifiedTime
-
-            val storedJson = storedImage.display.as[DisplayImage].right.get
-            val expectedJson = DisplayImage(image)
-
-            storedImage.query shouldBe ImageQueryableValues(
-              id = image.state.canonicalId,
-              sourceIdentifier = image.state.sourceIdentifier,
-              locations = image.locations,
-              inferredData = image.state.inferredData,
-              source = image.source
-            )
-            storedImage.aggregatableValues shouldBe ImageAggregatableValues(
-              image.source)
-
-            storedJson shouldBe expectedJson
-          }
-
-          eventually {
-            assertQueueEmpty(queue)
-            assertQueueEmpty(dlq)
-          }
+            eventually {
+              assertQueueEmpty(queue)
+              assertQueueEmpty(dlq)
+            }
         }
     }
   }
@@ -85,40 +87,47 @@ class ImagesIngestorFeatureTest
       case QueuePair(queue, dlq) =>
         sendNotificationToSQS(queue = queue, body = "nope")
 
-        withImagesIngestor(queue, existingImages = Nil) { index =>
-          assertElasticsearchEmpty(index)
-          eventually(Timeout(Span(5, Seconds))) {
-            assertQueueEmpty(queue)
-            assertQueueHasSize(dlq, size = 1)
-          }
+        withImagesIngestor(queue, existingImages = Nil) {
+          index =>
+            assertElasticsearchEmpty(index)
+            eventually(Timeout(Span(5, Seconds))) {
+              assertQueueEmpty(queue)
+              assertQueueHasSize(dlq, size = 1)
+            }
         }
     }
   }
 
-  def withImagesIngestor[R](queue: Queue,
-                            existingImages: Seq[Image[ImageState.Augmented]])(
-    testWith: TestWith[Index, R]): R =
-    withLocalImagesIndex { index =>
-      withLocalAugmentedImageIndex { augmentedIndex =>
-        insertImagesIntoElasticsearch(augmentedIndex, existingImages: _*)
+  def withImagesIngestor[R](
+    queue: Queue,
+    existingImages: Seq[Image[ImageState.Augmented]]
+  )(testWith: TestWith[Index, R]): R =
+    withLocalImagesIndex {
+      index =>
+        withLocalAugmentedImageIndex {
+          augmentedIndex =>
+            insertImagesIntoElasticsearch(augmentedIndex, existingImages: _*)
 
-        val retriever = new ElasticSourceRetriever[Image[Augmented]](
-          elasticClient,
-          augmentedIndex
-        )
+            val retriever = new ElasticSourceRetriever[Image[Augmented]](
+              elasticClient,
+              augmentedIndex
+            )
 
-        val indexer = new ElasticIndexer[IndexedImage](
-          elasticClient,
-          index,
-          config = ImagesIndexConfig.indexed)
+            val indexer = new ElasticIndexer[IndexedImage](
+              elasticClient,
+              index,
+              config = ImagesIndexConfig.indexed
+            )
 
-        withWorkerService(
-          queue,
-          retriever,
-          indexer,
-          transform = ImageTransformer.deriveData) { _ =>
-          testWith(index)
+            withWorkerService(
+              queue,
+              retriever,
+              indexer,
+              transform = ImageTransformer.deriveData
+            ) {
+              _ =>
+                testWith(index)
+            }
         }
-      }
     }
 }

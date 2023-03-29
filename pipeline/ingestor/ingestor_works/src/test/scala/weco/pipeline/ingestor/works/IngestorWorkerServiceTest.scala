@@ -10,9 +10,13 @@ import weco.catalogue.internal_model.locations.{
   AccessStatus
 }
 import weco.catalogue.internal_model.work.WorkState.Denormalised
-import weco.catalogue.internal_model.work.generators.WorkGenerators
+import weco.catalogue.internal_model.work.generators.{
+  IdentifiedConceptGenerators,
+  WorkGenerators
+}
 import weco.catalogue.internal_model.work.{
   CollectionPath,
+  Genre,
   Person,
   Subject,
   Work
@@ -24,6 +28,7 @@ class IngestorWorkerServiceTest
     extends AnyFunSpec
     with Matchers
     with WorksIngestorFixtures
+    with IdentifiedConceptGenerators
     with ImageGenerators
     with WorkGenerators {
 
@@ -58,7 +63,8 @@ class IngestorWorkerServiceTest
           IdState.Identified(
             canonicalId = createCanonicalId,
             sourceIdentifier = createSourceIdentifier
-          ))
+          )
+        )
 
     assertWorksIndexedCorrectly(work)
   }
@@ -159,22 +165,59 @@ class IngestorWorkerServiceTest
     assertWorksIndexedCorrectly(workWithSubjects)
   }
 
+  it("puts a work with genres") {
+    info("genres extract to multiple queryable fields:")
+    info(
+      "all the top-level labels; all the concept labels; and the first id in each Genre"
+    )
+    val workWithSubjects = denormalisedWork().genres(
+      List(
+        Genre(
+          label = "Yosegi-zaiku",
+          concepts = List(
+            createGenreConcept(label = "Yosegi-zaiku", canonicalId = "cafebeef")
+          )
+        ),
+        Genre(
+          label = "kerbschnitt",
+          concepts = List(
+            createGenreConcept(
+              label = "Chip Carving",
+              canonicalId = "beefcafe"
+            ),
+            createConcept(label = "woody stuff", canonicalId = "baadf00d")
+          )
+        )
+      )
+    )
+
+    assertWorksIndexedCorrectly(workWithSubjects)
+  }
+
   // Possibly because the number of variations in the work model is too big,
   // a bug in the mapping related to accessConditions wasn't caught by the catch-all test above.
   it("puts a work with a access condition") {
     val accessCondition: AccessCondition = AccessCondition(
       method = AccessMethod.OnlineRequest,
-      status = AccessStatus.Open)
+      status = AccessStatus.Open
+    )
 
     val workWithAccessConditions = denormalisedWork().items(
-      List(createIdentifiedItemWith(locations = List(
-        createDigitalLocationWith(accessConditions = List(accessCondition))))))
+      List(
+        createIdentifiedItemWith(locations =
+          List(
+            createDigitalLocationWith(accessConditions = List(accessCondition))
+          )
+        )
+      )
+    )
 
     assertWorksIndexedCorrectly(workWithAccessConditions)
   }
 
   it(
-    "deletes works from the queue, including older versions of already ingested works") {
+    "deletes works from the queue, including older versions of already ingested works"
+  ) {
     val oldSierraWork = denormalisedWork(
       sourceIdentifier = createSierraSystemSourceIdentifier
     )
@@ -191,19 +234,21 @@ class IngestorWorkerServiceTest
   private def assertWorksIndexedCorrectly(works: Work[Denormalised]*): Unit =
     withLocalSqsQueuePair() {
       case QueuePair(queue, dlq) =>
-        withWorksIngestor(queue, existingWorks = works) { index =>
-          works.map { work =>
-            sendNotificationToSQS(queue = queue, body = work.id)
-          }
+        withWorksIngestor(queue, existingWorks = works) {
+          index =>
+            works.map {
+              work =>
+                sendNotificationToSQS(queue = queue, body = work.id)
+            }
 
-          works.foreach {
-            assertWorkIndexed(index, _)
-          }
+            works.foreach {
+              assertWorkIndexed(index, _)
+            }
 
-          eventually {
-            assertQueueEmpty(queue)
-            assertQueueEmpty(dlq)
-          }
+            eventually {
+              assertQueueEmpty(queue)
+              assertQueueEmpty(dlq)
+            }
         }
     }
 }

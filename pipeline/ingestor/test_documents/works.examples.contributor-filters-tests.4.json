@@ -1,29 +1,29 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2023-01-03T09:31:59.952138Z",
-  "id" : "cpwnrkdo",
+  "createdAt" : "2023-03-24T14:12:13.343432Z",
+  "id" : "moftow5b",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "cpwnrkdo",
+        "id" : "moftow5b",
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "FqozNGJ9Pf"
+          "value" : "KWys5lZ5ra"
         },
-        "version" : 52,
-        "modifiedTime" : "1990-04-28T07:06:53Z"
+        "version" : 66,
+        "modifiedTime" : "1950-07-15T20:46:42Z"
       },
-      "mergedTime" : "1990-04-28T07:06:53Z",
+      "mergedTime" : "1950-07-15T20:46:42Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "cpwnrkdo",
-      "title" : "title-Vp3bULWghZ",
+      "id" : "moftow5b",
+      "title" : "title-vMTmP7wsQ9",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -51,11 +51,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "FqozNGJ9Pf",
+          "value" : "KWys5lZ5ra",
           "type" : "Identifier"
         }
       ],
@@ -92,13 +92,13 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "cpwnrkdo",
+      "id" : "moftow5b",
       "format.id" : null,
       "workType" : "Standard",
       "identifiers.value" : [
-        "FqozNGJ9Pf"
+        "KWys5lZ5ra"
       ],
-      "title" : "title-Vp3bULWghZ",
+      "title" : "title-vMTmP7wsQ9",
       "alternativeTitles" : [
       ],
       "description" : null,
@@ -130,6 +130,8 @@
       "genres.label" : [
       ],
       "genres.concepts.label" : [
+      ],
+      "genres.concepts.id" : [
       ],
       "languages.id" : [
       ],

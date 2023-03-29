@@ -1,29 +1,29 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2023-01-03T09:31:59.522171Z",
-  "id" : "sdb22mdv",
+  "createdAt" : "2023-03-17T11:03:31.853662Z",
+  "id" : "4blsy3iy",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "sdb22mdv",
+        "id" : "4blsy3iy",
         "identifier" : {
           "identifierType" : {
             "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "qjgnqBCXUR"
+          "value" : "CwPK521Yf5"
         },
-        "version" : 10,
-        "modifiedTime" : "1999-07-23T14:54:17Z"
+        "version" : 80,
+        "modifiedTime" : "1989-12-01T18:27:04Z"
       },
-      "mergedTime" : "1999-07-23T14:54:17Z",
+      "mergedTime" : "1989-12-01T18:27:04Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "sdb22mdv",
-      "title" : "title-8D1YQhdjF0",
+      "id" : "4blsy3iy",
+      "title" : "title-rQHICakdbo",
       "alternativeTitles" : [
       ],
       "workType" : {
@@ -40,7 +40,7 @@
             "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "qjgnqBCXUR",
+          "value" : "CwPK521Yf5",
           "type" : "Identifier"
         }
       ],
@@ -77,13 +77,13 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "sdb22mdv",
+      "id" : "4blsy3iy",
       "format.id" : "u",
       "workType" : "Standard",
       "identifiers.value" : [
-        "qjgnqBCXUR"
+        "CwPK521Yf5"
       ],
-      "title" : "title-8D1YQhdjF0",
+      "title" : "title-rQHICakdbo",
       "alternativeTitles" : [
       ],
       "description" : null,
@@ -115,6 +115,8 @@
       "genres.label" : [
       ],
       "genres.concepts.label" : [
+      ],
+      "genres.concepts.id" : [
       ],
       "languages.id" : [
       ],

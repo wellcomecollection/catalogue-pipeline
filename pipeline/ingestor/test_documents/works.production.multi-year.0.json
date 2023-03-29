@@ -1,29 +1,29 @@
 {
   "description" : "works with multi-year production ranges",
-  "createdAt" : "2023-01-03T09:31:59.646758Z",
-  "id" : "31spt9st",
+  "createdAt" : "2023-03-17T11:03:31.880149Z",
+  "id" : "cgfghm8m",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "31spt9st",
+        "id" : "cgfghm8m",
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "WzsZA7OUAa"
+          "value" : "mh0pYazvpR"
         },
-        "version" : 3,
-        "modifiedTime" : "2001-02-11T00:36:52Z"
+        "version" : 37,
+        "modifiedTime" : "1945-01-10T19:58:56Z"
       },
-      "mergedTime" : "2001-02-11T00:36:52Z",
+      "mergedTime" : "1945-01-10T19:58:56Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "31spt9st",
-      "title" : "title-QoeggPvgjR",
+      "id" : "cgfghm8m",
+      "title" : "title-oOAv5vdS0Y",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -31,11 +31,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "WzsZA7OUAa",
+          "value" : "mh0pYazvpR",
           "type" : "Identifier"
         }
       ],
@@ -51,16 +51,16 @@
       ],
       "production" : [
         {
-          "label" : "jwgMtGLcg1WHGjZrCwPK521Yf",
+          "label" : "aIg4BPWRHbuSqTDzUOjOyKabH",
           "places" : [
             {
-              "label" : "54blSY3iyd",
+              "label" : "lF2fhJcUH8",
               "type" : "Place"
             }
           ],
           "agents" : [
             {
-              "label" : "rQHICakdbo",
+              "label" : "ak2gePdAnZ",
               "type" : "Person"
             }
           ],
@@ -94,13 +94,13 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "31spt9st",
+      "id" : "cgfghm8m",
       "format.id" : null,
       "workType" : "Standard",
       "identifiers.value" : [
-        "WzsZA7OUAa"
+        "mh0pYazvpR"
       ],
-      "title" : "title-QoeggPvgjR",
+      "title" : "title-oOAv5vdS0Y",
       "alternativeTitles" : [
       ],
       "description" : null,
@@ -133,6 +133,8 @@
       ],
       "genres.concepts.label" : [
       ],
+      "genres.concepts.id" : [
+      ],
       "languages.id" : [
       ],
       "languages.label" : [
@@ -142,8 +144,8 @@
       "contributors.agent.label" : [
       ],
       "production.label" : [
-        "54blSY3iyd",
-        "rQHICakdbo",
+        "lF2fhJcUH8",
+        "ak2gePdAnZ",
         "1850"
       ],
       "production.dates.range.from" : [

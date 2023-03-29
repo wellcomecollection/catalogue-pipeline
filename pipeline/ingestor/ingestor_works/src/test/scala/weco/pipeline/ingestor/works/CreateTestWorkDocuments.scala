@@ -39,16 +39,17 @@ import java.time.Instant
 /** Creates the example documents we use in the API tests.
   *
   * These tests use a seeded RNG to ensure deterministic results; to prevent
-  * regenerating existing examples and causing unnecessary churn in the API tests
-  * when values change, I suggest adding new examples at the bottom of this file.
+  * regenerating existing examples and causing unnecessary churn in the API
+  * tests when values change, I suggest adding new examples at the bottom of
+  * this file.
   *
-  * Also, be careful removing or editing existing examples.  It may be easier to
-  * add a new example than remove an old one, to prevent regenerating some of the
-  * examples you aren't editing.
+  * Also, be careful removing or editing existing examples. It may be easier to
+  * add a new example than remove an old one, to prevent regenerating some of
+  * the examples you aren't editing.
   *
-  * Note: for some reason you get slightly different results if you run this test
-  * in IntelliJ vs through Docker.  CI will use Docker and check you've committed
-  * the latest versions, so run it in Docker when you want to rebuild.
+  * Note: for some reason you get slightly different results if you run this
+  * test in IntelliJ vs through Docker. CI will use Docker and check you've
+  * committed the latest versions, so run it in Docker when you want to rebuild.
   */
 class CreateTestWorkDocuments
     extends AnyFunSpec
@@ -86,7 +87,8 @@ class CreateTestWorkDocuments
               canonicalId = createCanonicalId,
               sourceIdentifier = createSourceIdentifier
             )
-        )),
+          )
+      ),
       description = "an arbitrary list of redirected works",
       id = "works.redirected"
     )
@@ -131,23 +133,24 @@ class CreateTestWorkDocuments
   }
 
   it("creates works with specific production events") {
-    Seq("1900", "1976", "1904", "2020", "1098").foreach { year =>
-      saveWork(
-        work = denormalisedWork()
-          .production(
-            List(
-              ProductionEvent(
-                label = randomAlphanumeric(25),
-                places = List(),
-                agents = List(),
-                dates = List(createPeriodForYear(year))
+    Seq("1900", "1976", "1904", "2020", "1098").foreach {
+      year =>
+        saveWork(
+          work = denormalisedWork()
+            .production(
+              List(
+                ProductionEvent(
+                  label = randomAlphanumeric(25),
+                  places = List(),
+                  agents = List(),
+                  dates = List(createPeriodForYear(year))
+                )
               )
             )
-          )
-          .title(s"Production event in $year"),
-        description = s"a work with a production event in $year",
-        id = s"work-production.$year"
-      )
+            .title(s"Production event in $year"),
+          description = s"a work with a production event in $year",
+          id = s"work-production.$year"
+        )
     }
 
     saveWork(
@@ -177,11 +180,16 @@ class CreateTestWorkDocuments
             .otherIdentifiers(List(createSourceIdentifier))
             .subjects((1 to 2).map(_ => createSubject).toList)
             .genres((1 to 2).map(_ => createGenre).toList)
-            .contributors((1 to 2)
-              .map(_ =>
-                createPersonContributorWith(label =
-                  s"person-${randomAlphanumeric()}"))
-              .toList)
+            .contributors(
+              (1 to 2)
+                .map(
+                  _ =>
+                    createPersonContributorWith(label =
+                      s"person-${randomAlphanumeric()}"
+                    )
+                )
+                .toList
+            )
             .production((1 to 2).map(_ => createProductionEvent).toList)
             .languages((1 to 3).map(_ => createLanguage).toList)
             .notes(
@@ -195,23 +203,30 @@ class CreateTestWorkDocuments
                         NoteType.FundingInformation,
                         NoteType.LocationOfDuplicatesNote
                       )
-                  )
+                    )
                 )
-                .toList)
+                .toList
+            )
             .imageData((1 to 2).map(_ => createImageData.toIdentified).toList)
             .holdings(createHoldings(3))
             .formerFrequency(List("Published in 2001", "Published in 2002"))
-            .designation(List("Designation #1", "Designation #2", "Designation #3"))
-            .items((1 to 2)
-              .map(_ => createIdentifiedItem)
-              .toList :+ createUnidentifiableItem)),
+            .designation(
+              List("Designation #1", "Designation #2", "Designation #3")
+            )
+            .items(
+              (1 to 2)
+                .map(_ => createIdentifiedItem)
+                .toList :+ createUnidentifiableItem
+            )
+      ),
       description = "a list of work with all the include-able fields",
       id = "work.visible.everything"
     )
 
     // Create some examples to use in the format filter and aggregation tests
-    val formats = (1 to 4).map(_ => Format.Books) ++ (1 to 3).map(_ =>
-      Format.Journals) ++ (1 to 2).map(_ => Format.Audio) :+ Format.Pictures
+    val formats = (1 to 4).map(_ => Format.Books) ++ (1 to 3).map(
+      _ => Format.Journals
+    ) ++ (1 to 2).map(_ => Format.Audio) :+ Format.Pictures
     formats.zipWithIndex.foreach {
       case (format, i) =>
         saveWork(
@@ -225,7 +240,8 @@ class CreateTestWorkDocuments
 
     saveWork(
       work = denormalisedWork().title(
-        "+a -title | with (all the simple) query~4 syntax operators in it*"),
+        "+a -title | with (all the simple) query~4 syntax operators in it*"
+      ),
       description = "a work whose title has lots of ES query syntax operators",
       id = "works.title-query-syntax"
     )
@@ -247,7 +263,7 @@ class CreateTestWorkDocuments
       List(english, swedish),
       List(english, swedish, turkish),
       List(swedish),
-      List(turkish),
+      List(turkish)
     )
     languageCombos.zipWithIndex.foreach {
       case (languages, i) =>
@@ -273,8 +289,9 @@ class CreateTestWorkDocuments
       List.empty
     )
 
-    val itemCombos = licenseCombos.map { licenses =>
-      licenses.map(lic => createDigitalItemWith(license = Some(lic)))
+    val itemCombos = licenseCombos.map {
+      licenses =>
+        licenses.map(lic => createDigitalItemWith(license = Some(lic)))
     }
 
     val works = itemCombos.map(items => denormalisedWork().items(items))
@@ -349,8 +366,9 @@ class CreateTestWorkDocuments
       List(mi5, gchq)
     )
 
-    val works = agentCombos.map { agents =>
-      denormalisedWork().contributors(agents.map(Contributor(_, roles = Nil)))
+    val works = agentCombos.map {
+      agents =>
+        denormalisedWork().contributors(agents.map(Contributor(_, roles = Nil)))
     }
 
     saveWorks(
@@ -361,15 +379,16 @@ class CreateTestWorkDocuments
   }
 
   it("creates items with multiple source identifiers") {
-    val works = (1 to 5).map { _ =>
-      denormalisedWork()
-        .items(
-          List(
-            createIdentifiedItemWith(
-              otherIdentifiers = List(createSourceIdentifier)
+    val works = (1 to 5).map {
+      _ =>
+        denormalisedWork()
+          .items(
+            List(
+              createIdentifiedItemWith(
+                otherIdentifiers = List(createSourceIdentifier)
+              )
             )
           )
-        )
     }
 
     saveWorks(
@@ -396,8 +415,9 @@ class CreateTestWorkDocuments
   }
 
   it("creates examples of every format") {
-    val works = Format.values.map { format =>
-      denormalisedWork().format(format)
+    val works = Format.values.map {
+      format =>
+        denormalisedWork().format(format)
     }
 
     saveWorks(
@@ -417,11 +437,12 @@ class CreateTestWorkDocuments
       createPeriodForYear(year = "1962")
     )
 
-    val works = periods.map { p =>
-      denormalisedWork()
-        .production(
-          List(createProductionEvent.copy(dates = List(p)))
-        )
+    val works = periods.map {
+      p =>
+        denormalisedWork()
+          .production(
+            List(createProductionEvent.copy(dates = List(p)))
+          )
     }
 
     saveWorks(
@@ -448,12 +469,14 @@ class CreateTestWorkDocuments
       }
     }
 
-    val items = locations.map { locations =>
-      createIdentifiedItemWith(locations = locations)
+    val items = locations.map {
+      locations =>
+        createIdentifiedItemWith(locations = locations)
     }
 
-    val works = items.map { item =>
-      denormalisedWork().items(List(item))
+    val works = items.map {
+      item =>
+        denormalisedWork().items(List(item))
     }
 
     saveWorks(
@@ -484,20 +507,33 @@ class CreateTestWorkDocuments
     Seq(
       WorkType.Section,
       WorkType.Collection,
-      WorkType.Series,
-    ).map { workType =>
-      saveWork(
-        work = denormalisedWork().title("rats").workType(workType),
-        description = "examples of works with different types",
-        id = s"works.examples.different-work-types.$workType"
-      )
+      WorkType.Series
+    ).map {
+      workType =>
+        saveWork(
+          work = denormalisedWork().title("rats").workType(workType),
+          description = "examples of works with different types",
+          id = s"works.examples.different-work-types.$workType"
+        )
     }
   }
 
   it("creates examples for the genre filter tests") {
-    val annualReports = createGenreWith("Annual reports.")
-    val pamphlets = createGenreWith("Pamphlets.")
-    val psychology = createGenreWith("Psychology, Pathological")
+    val annualReports = createGenreWith(
+      "Annual reports.",
+      concepts = List(
+        createGenreConcept(canonicalId = "g00dcafe"),
+        createConcept("baadf00d")
+      )
+    )
+    val pamphlets = createGenreWith(
+      label = "Pamphlets.",
+      concepts = List(createGenreConcept(canonicalId = "g00dcafe"))
+    )
+    val psychology = createGenreWith(
+      label = "Psychology, Pathological",
+      concepts = List(createGenreConcept(canonicalId = "baadf00d"))
+    )
     val darwin = createGenreWith("Darwin \"Jones\", Charles")
 
     val annualReportsWork = denormalisedWork().genres(List(annualReports))

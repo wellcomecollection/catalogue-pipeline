@@ -1,29 +1,29 @@
 {
   "description" : "examples for the genre tests",
-  "createdAt" : "2023-01-03T09:31:59.874176Z",
-  "id" : "ahr8n4ei",
+  "createdAt" : "2023-03-24T14:12:13.303744Z",
+  "id" : "wdnn2etp",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "ahr8n4ei",
+        "id" : "wdnn2etp",
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "g4JnCRDZnk"
+          "value" : "hx40zJbSlL"
         },
-        "version" : 50,
-        "modifiedTime" : "1961-08-08T05:16:19Z"
+        "version" : 23,
+        "modifiedTime" : "1953-09-20T12:06:56Z"
       },
-      "mergedTime" : "1961-08-08T05:16:19Z",
+      "mergedTime" : "1953-09-20T12:06:56Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "ahr8n4ei",
-      "title" : "title-Rew3RmJ48v",
+      "id" : "wdnn2etp",
+      "title" : "title-zfssscK3St",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -31,11 +31,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "g4JnCRDZnk",
+          "value" : "hx40zJbSlL",
           "type" : "Identifier"
         }
       ],
@@ -46,16 +46,20 @@
           "label" : "Pamphlets.",
           "concepts" : [
             {
-              "label" : "7ZYKrzxgMS4HDJM",
-              "type" : "Concept"
-            },
-            {
-              "label" : "nToBweq2UFKJPlz",
-              "type" : "Concept"
-            },
-            {
-              "label" : "YfNgtG1SKw3klDA",
-              "type" : "Concept"
+              "id" : "g00dcafe",
+              "identifiers" : [
+                {
+                  "identifierType" : {
+                    "id" : "calm-record-id",
+                    "label" : "Calm RecordIdentifier",
+                    "type" : "IdentifierType"
+                  },
+                  "value" : "85YYFFvT9f",
+                  "type" : "Identifier"
+                }
+              ],
+              "label" : "df4bTPrmWNKiLGp",
+              "type" : "Genre"
             }
           ],
           "type" : "Genre"
@@ -90,13 +94,13 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "ahr8n4ei",
+      "id" : "wdnn2etp",
       "format.id" : null,
       "workType" : "Standard",
       "identifiers.value" : [
-        "g4JnCRDZnk"
+        "hx40zJbSlL"
       ],
-      "title" : "title-Rew3RmJ48v",
+      "title" : "title-zfssscK3St",
       "alternativeTitles" : [
       ],
       "description" : null,
@@ -129,9 +133,10 @@
         "Pamphlets."
       ],
       "genres.concepts.label" : [
-        "7ZYKrzxgMS4HDJM",
-        "nToBweq2UFKJPlz",
-        "YfNgtG1SKw3klDA"
+        "df4bTPrmWNKiLGp"
+      ],
+      "genres.concepts.id" : [
+        "g00dcafe"
       ],
       "languages.id" : [
       ],

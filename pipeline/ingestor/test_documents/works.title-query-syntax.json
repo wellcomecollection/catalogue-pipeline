@@ -1,28 +1,28 @@
 {
   "description" : "a work whose title has lots of ES query syntax operators",
-  "createdAt" : "2023-01-03T09:31:59.258292Z",
-  "id" : "hjjs3mu3",
+  "createdAt" : "2023-03-17T11:03:31.751196Z",
+  "id" : "mdg1yvuv",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "hjjs3mu3",
+        "id" : "mdg1yvuv",
         "identifier" : {
           "identifierType" : {
             "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "Z3LIdvnOPk"
+          "value" : "9P6mnsoyfd"
         },
-        "version" : 88,
-        "modifiedTime" : "2060-06-24T09:00:48Z"
+        "version" : 52,
+        "modifiedTime" : "1967-11-04T04:23:34Z"
       },
-      "mergedTime" : "2060-06-24T09:00:48Z",
+      "mergedTime" : "1967-11-04T04:23:34Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "hjjs3mu3",
+      "id" : "mdg1yvuv",
       "title" : "+a -title | with (all the simple) query~4 syntax operators in it*",
       "alternativeTitles" : [
       ],
@@ -35,7 +35,7 @@
             "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "Z3LIdvnOPk",
+          "value" : "9P6mnsoyfd",
           "type" : "Identifier"
         }
       ],
@@ -72,11 +72,11 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "hjjs3mu3",
+      "id" : "mdg1yvuv",
       "format.id" : null,
       "workType" : "Standard",
       "identifiers.value" : [
-        "Z3LIdvnOPk"
+        "9P6mnsoyfd"
       ],
       "title" : "+a -title | with (all the simple) query~4 syntax operators in it*",
       "alternativeTitles" : [
@@ -110,6 +110,8 @@
       "genres.label" : [
       ],
       "genres.concepts.label" : [
+      ],
+      "genres.concepts.id" : [
       ],
       "languages.id" : [
       ],

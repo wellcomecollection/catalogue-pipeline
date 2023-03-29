@@ -1,29 +1,29 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2023-01-03T09:31:59.911976Z",
-  "id" : "b1r485o0",
+  "createdAt" : "2023-03-24T14:12:13.326746Z",
+  "id" : "igluyxyl",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "b1r485o0",
+        "id" : "igluyxyl",
         "identifier" : {
           "identifierType" : {
             "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "4zh18D0cbF"
+          "value" : "R5Stsp385V"
         },
-        "version" : 43,
-        "modifiedTime" : "1986-02-15T03:35:37Z"
+        "version" : 91,
+        "modifiedTime" : "2014-07-17T10:56:43Z"
       },
-      "mergedTime" : "1986-02-15T03:35:37Z",
+      "mergedTime" : "2014-07-17T10:56:43Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "b1r485o0",
-      "title" : "title-DxPLXKke6N",
+      "id" : "igluyxyl",
+      "title" : "title-wWOedI3v8S",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -35,7 +35,7 @@
             "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "4zh18D0cbF",
+          "value" : "R5Stsp385V",
           "type" : "Identifier"
         }
       ],
@@ -56,15 +56,15 @@
           "label" : "Darwin \"Jones\", Charles",
           "concepts" : [
             {
-              "label" : "40zJbSlLwDNn2Et",
+              "label" : "LzJV7M3Kvqw9fGo",
               "type" : "Concept"
             },
             {
-              "label" : "p5zfssscK3StYS1",
+              "label" : "l7E1K1L8XUhcLZh",
               "type" : "Concept"
             },
             {
-              "label" : "KOlZmZXOWd5kJ1F",
+              "label" : "c35m9C4DAgxJAjE",
               "type" : "Concept"
             }
           ],
@@ -102,13 +102,13 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "b1r485o0",
+      "id" : "igluyxyl",
       "format.id" : null,
       "workType" : "Standard",
       "identifiers.value" : [
-        "4zh18D0cbF"
+        "R5Stsp385V"
       ],
-      "title" : "title-DxPLXKke6N",
+      "title" : "title-wWOedI3v8S",
       "alternativeTitles" : [
       ],
       "description" : null,
@@ -138,13 +138,15 @@
         "Darwin \"Jones\", Charles"
       ],
       "subjects.concepts.label" : [
-        "40zJbSlLwDNn2Et",
-        "p5zfssscK3StYS1",
-        "KOlZmZXOWd5kJ1F"
+        "LzJV7M3Kvqw9fGo",
+        "l7E1K1L8XUhcLZh",
+        "c35m9C4DAgxJAjE"
       ],
       "genres.label" : [
       ],
       "genres.concepts.label" : [
+      ],
+      "genres.concepts.id" : [
       ],
       "languages.id" : [
       ],

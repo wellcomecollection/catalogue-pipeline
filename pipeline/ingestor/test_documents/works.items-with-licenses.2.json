@@ -1,29 +1,29 @@
 {
   "description" : "a work with licensed digital items",
-  "createdAt" : "2023-01-03T09:31:59.327778Z",
-  "id" : "ougtipki",
+  "createdAt" : "2023-03-17T11:03:31.779914Z",
+  "id" : "fxryjmiz",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "ougtipki",
+        "id" : "fxryjmiz",
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "fbITZO5oAg"
+          "value" : "D9r1zHmiHw"
         },
-        "version" : 37,
-        "modifiedTime" : "2063-06-30T11:46:39Z"
+        "version" : 94,
+        "modifiedTime" : "1984-06-01T20:55:52Z"
       },
-      "mergedTime" : "2063-06-30T11:46:39Z",
+      "mergedTime" : "1984-06-01T20:55:52Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "ougtipki",
-      "title" : "title-pEBp6sf3WU",
+      "id" : "fxryjmiz",
+      "title" : "title-gL6jXRK5E3",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -31,11 +31,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "fbITZO5oAg",
+          "value" : "D9r1zHmiHw",
           "type" : "Identifier"
         }
       ],
@@ -54,7 +54,7 @@
                 "label" : "IIIF Presentation API",
                 "type" : "LocationType"
               },
-              "url" : "https://iiif.wellcomecollection.org/image/65z.jpg/info.json",
+              "url" : "https://iiif.wellcomecollection.org/image/Tl2.jpg/info.json",
               "license" : {
                 "id" : "cc-by-nc",
                 "label" : "Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)",
@@ -96,13 +96,13 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "ougtipki",
+      "id" : "fxryjmiz",
       "format.id" : null,
       "workType" : "Standard",
       "identifiers.value" : [
-        "fbITZO5oAg"
+        "D9r1zHmiHw"
       ],
-      "title" : "title-pEBp6sf3WU",
+      "title" : "title-gL6jXRK5E3",
       "alternativeTitles" : [
       ],
       "description" : null,
@@ -136,6 +136,8 @@
       "genres.label" : [
       ],
       "genres.concepts.label" : [
+      ],
+      "genres.concepts.id" : [
       ],
       "languages.id" : [
       ],

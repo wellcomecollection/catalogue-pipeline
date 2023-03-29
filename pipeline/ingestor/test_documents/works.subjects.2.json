@@ -1,29 +1,29 @@
 {
   "description" : "works with different subjects",
-  "createdAt" : "2023-01-03T09:31:59.384131Z",
-  "id" : "evraub2i",
+  "createdAt" : "2023-03-17T11:03:31.796368Z",
+  "id" : "ixapupnn",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "evraub2i",
+        "id" : "ixapupnn",
         "identifier" : {
           "identifierType" : {
             "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "E3Fqby26w1"
+          "value" : "DSV5vB01pf"
         },
-        "version" : 58,
-        "modifiedTime" : "1975-10-22T13:49:30Z"
+        "version" : 51,
+        "modifiedTime" : "2038-11-26T21:07:39Z"
       },
-      "mergedTime" : "1975-10-22T13:49:30Z",
+      "mergedTime" : "2038-11-26T21:07:39Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "evraub2i",
-      "title" : "title-sNTcYSKPkF",
+      "id" : "ixapupnn",
+      "title" : "title-FXwxyxQUQw",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -35,7 +35,7 @@
             "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "E3Fqby26w1",
+          "value" : "DSV5vB01pf",
           "type" : "Identifier"
         }
       ],
@@ -44,15 +44,15 @@
           "label" : "realAnalysis",
           "concepts" : [
             {
-              "label" : "W7WKCBWrkxlOWWB",
+              "label" : "KU2Yez08k6CNnSU",
               "type" : "Concept"
             },
             {
-              "label" : "Kbkm5UMJEwTIE8u",
+              "label" : "VMdWdPx74hNxKXA",
               "type" : "Concept"
             },
             {
-              "label" : "H8GnKqkwP9ugIes",
+              "label" : "vquihJgTfjChVoT",
               "type" : "Concept"
             }
           ],
@@ -90,13 +90,13 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "evraub2i",
+      "id" : "ixapupnn",
       "format.id" : null,
       "workType" : "Standard",
       "identifiers.value" : [
-        "E3Fqby26w1"
+        "DSV5vB01pf"
       ],
-      "title" : "title-sNTcYSKPkF",
+      "title" : "title-FXwxyxQUQw",
       "alternativeTitles" : [
       ],
       "description" : null,
@@ -125,13 +125,15 @@
         "realAnalysis"
       ],
       "subjects.concepts.label" : [
-        "W7WKCBWrkxlOWWB",
-        "Kbkm5UMJEwTIE8u",
-        "H8GnKqkwP9ugIes"
+        "KU2Yez08k6CNnSU",
+        "VMdWdPx74hNxKXA",
+        "vquihJgTfjChVoT"
       ],
       "genres.label" : [
       ],
       "genres.concepts.label" : [
+      ],
+      "genres.concepts.id" : [
       ],
       "languages.id" : [
       ],

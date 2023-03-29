@@ -227,6 +227,9 @@
             "properties": {
               "concepts": {
                 "properties": {
+                  "id": {
+                    "type": "keyword"
+                  },
                   "label": {
                     "type": "text",
                     "fields": {

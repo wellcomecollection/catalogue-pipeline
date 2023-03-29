@@ -1,29 +1,29 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2023-01-03T09:31:59.910287Z",
-  "id" : "zwggainv",
+  "createdAt" : "2023-03-24T14:12:13.324930Z",
+  "id" : "6vp3bulw",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "zwggainv",
+        "id" : "6vp3bulw",
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "RdbNpFC2P5"
+          "value" : "PfCPwnrkDO"
         },
-        "version" : 60,
-        "modifiedTime" : "2019-06-03T10:02:53Z"
+        "version" : 45,
+        "modifiedTime" : "2034-03-26T04:42:25Z"
       },
-      "mergedTime" : "2019-06-03T10:02:53Z",
+      "mergedTime" : "2034-03-26T04:42:25Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "zwggainv",
-      "title" : "title-k5aVuGQD3S",
+      "id" : "6vp3bulw",
+      "title" : "title-hZ3Z5q2ktK",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -31,11 +31,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "RdbNpFC2P5",
+          "value" : "PfCPwnrkDO",
           "type" : "Identifier"
         }
       ],
@@ -44,15 +44,15 @@
           "label" : "London (England)",
           "concepts" : [
             {
-              "label" : "pZYum1qUlCcjglM",
+              "label" : "Z5Ju5hoUH5ZhFqr",
               "type" : "Concept"
             },
             {
-              "label" : "PaKQZ55SIuLPMgI",
+              "label" : "BAO66qqlbcmHn7a",
               "type" : "Concept"
             },
             {
-              "label" : "G177tcCDpKgb0Wd",
+              "label" : "ct97zOQ6G6Rkv6Q",
               "type" : "Concept"
             }
           ],
@@ -90,13 +90,13 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "zwggainv",
+      "id" : "6vp3bulw",
       "format.id" : null,
       "workType" : "Standard",
       "identifiers.value" : [
-        "RdbNpFC2P5"
+        "PfCPwnrkDO"
       ],
-      "title" : "title-k5aVuGQD3S",
+      "title" : "title-hZ3Z5q2ktK",
       "alternativeTitles" : [
       ],
       "description" : null,
@@ -125,13 +125,15 @@
         "London (England)"
       ],
       "subjects.concepts.label" : [
-        "pZYum1qUlCcjglM",
-        "PaKQZ55SIuLPMgI",
-        "G177tcCDpKgb0Wd"
+        "Z5Ju5hoUH5ZhFqr",
+        "BAO66qqlbcmHn7a",
+        "ct97zOQ6G6Rkv6Q"
       ],
       "genres.label" : [
       ],
       "genres.concepts.label" : [
+      ],
+      "genres.concepts.id" : [
       ],
       "languages.id" : [
       ],

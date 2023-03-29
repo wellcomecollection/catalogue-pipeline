@@ -1,28 +1,28 @@
 {
   "description" : "examples for the works filtered aggregations tests",
-  "createdAt" : "2023-01-03T09:32:00.113940Z",
-  "id" : "k57syong",
+  "createdAt" : "2023-03-24T14:12:13.394684Z",
+  "id" : "u1amc1nv",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "k57syong",
+        "id" : "u1amc1nv",
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "czKSHpT0IR"
+          "value" : "rB0Sw27DZl"
         },
-        "version" : 78,
-        "modifiedTime" : "1943-06-02T04:26:11Z"
+        "version" : 30,
+        "modifiedTime" : "1945-11-08T14:38:47Z"
       },
-      "mergedTime" : "1943-06-02T04:26:11Z",
+      "mergedTime" : "1945-11-08T14:38:47Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "k57syong",
+      "id" : "u1amc1nv",
       "title" : "tapirs",
       "alternativeTitles" : [
       ],
@@ -36,11 +36,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "czKSHpT0IR",
+          "value" : "rB0Sw27DZl",
           "type" : "Identifier"
         }
       ],
@@ -82,11 +82,11 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "k57syong",
+      "id" : "u1amc1nv",
       "format.id" : "d",
       "workType" : "Standard",
       "identifiers.value" : [
-        "czKSHpT0IR"
+        "rB0Sw27DZl"
       ],
       "title" : "tapirs",
       "alternativeTitles" : [
@@ -120,6 +120,8 @@
       "genres.label" : [
       ],
       "genres.concepts.label" : [
+      ],
+      "genres.concepts.id" : [
       ],
       "languages.id" : [
         "que"

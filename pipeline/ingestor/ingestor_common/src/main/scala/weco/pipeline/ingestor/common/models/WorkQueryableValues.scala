@@ -35,6 +35,7 @@ case class WorkQueryableValues(
   @JsonKey("subjects.concepts.label") subjectConceptLabels: List[String],
   @JsonKey("genres.label") genreLabels: List[String],
   @JsonKey("genres.concepts.label") genreConceptLabels: List[String],
+  @JsonKey("genres.concepts.id") genreConceptIds: List[String],
   @JsonKey("languages.id") languageIds: List[String],
   @JsonKey("languages.label") languageLabels: List[String],
   @JsonKey("contributors.agent.id") contributorAgentIds: List[String],
@@ -86,6 +87,13 @@ case object WorkQueryableValues {
       subjectConceptLabels = workData.subjects.flatMap(_.concepts).map(_.label),
       genreLabels = workData.genres.map(_.label),
       genreConceptLabels = workData.genres.flatMap(_.concepts).map(_.label),
+      genreConceptIds = workData.genres
+        // Only the first concept counts, the others include things like places and periods that help
+        // a reader understand more about the genre of a given item, but do not contribute meaningfully
+        // to a filter, so are excluded from the query section.
+        .flatMap(_.concepts.headOption)
+        .flatMap(_.id.maybeCanonicalId)
+        .map(_.underlying),
       languageIds = workData.languages.map(_.id),
       languageLabels = workData.languages.map(_.label),
       contributorAgentIds = workData.contributors.map(_.agent.id).canonicalIds,

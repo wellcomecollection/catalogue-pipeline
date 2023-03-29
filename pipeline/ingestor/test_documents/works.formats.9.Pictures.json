@@ -1,28 +1,28 @@
 {
   "description" : "one of a list of works with a variety of formats",
-  "createdAt" : "2023-01-03T09:31:59.252696Z",
-  "id" : "sym6ne7x",
+  "createdAt" : "2023-03-17T11:03:31.748484Z",
+  "id" : "wvcw0lp9",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "sym6ne7x",
+        "id" : "wvcw0lp9",
         "identifier" : {
           "identifierType" : {
             "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "FRzpe3bQyh"
+          "value" : "h2CF3B2FRN"
         },
-        "version" : 87,
-        "modifiedTime" : "2051-09-16T11:43:09Z"
+        "version" : 3,
+        "modifiedTime" : "1938-05-13T23:46:55Z"
       },
-      "mergedTime" : "2051-09-16T11:43:09Z",
+      "mergedTime" : "1938-05-13T23:46:55Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "sym6ne7x",
+      "id" : "wvcw0lp9",
       "title" : "A work with format Pictures",
       "alternativeTitles" : [
       ],
@@ -40,7 +40,7 @@
             "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "FRzpe3bQyh",
+          "value" : "h2CF3B2FRN",
           "type" : "Identifier"
         }
       ],
@@ -77,11 +77,11 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "sym6ne7x",
+      "id" : "wvcw0lp9",
       "format.id" : "k",
       "workType" : "Standard",
       "identifiers.value" : [
-        "FRzpe3bQyh"
+        "h2CF3B2FRN"
       ],
       "title" : "A work with format Pictures",
       "alternativeTitles" : [
@@ -115,6 +115,8 @@
       "genres.label" : [
       ],
       "genres.concepts.label" : [
+      ],
+      "genres.concepts.id" : [
       ],
       "languages.id" : [
       ],

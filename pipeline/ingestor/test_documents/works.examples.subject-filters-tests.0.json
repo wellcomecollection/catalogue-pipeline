@@ -1,29 +1,29 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2023-01-03T09:31:59.909699Z",
-  "id" : "tayys6jp",
+  "createdAt" : "2023-03-24T14:12:13.324100Z",
+  "id" : "inoolbps",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "tayys6jp",
+        "id" : "inoolbps",
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "3OfWNE6m5y"
+          "value" : "bh6q7wkoWR"
         },
-        "version" : 7,
-        "modifiedTime" : "2009-01-17T02:57:31Z"
+        "version" : 4,
+        "modifiedTime" : "1988-02-26T07:09:16Z"
       },
-      "mergedTime" : "2009-01-17T02:57:31Z",
+      "mergedTime" : "1988-02-26T07:09:16Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "tayys6jp",
-      "title" : "title-JiYzJ9DWDL",
+      "id" : "inoolbps",
+      "title" : "title-jRX3FqozNG",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -31,11 +31,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "3OfWNE6m5y",
+          "value" : "bh6q7wkoWR",
           "type" : "Identifier"
         }
       ],
@@ -65,15 +65,15 @@
           "label" : "Sanitation.",
           "concepts" : [
             {
-              "label" : "bCBtOF9X3cVR8q4",
+              "label" : "485o02DxPLXKke6",
               "type" : "Concept"
             },
             {
-              "label" : "GIgcsJhdmKTFidD",
+              "label" : "NacQ8QOPJdAXFgM",
               "type" : "Concept"
             },
             {
-              "label" : "lsqnu7hZZtHlWPI",
+              "label" : "zC1ICZOvNWbRfsA",
               "type" : "Concept"
             }
           ],
@@ -111,13 +111,13 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "tayys6jp",
+      "id" : "inoolbps",
       "format.id" : null,
       "workType" : "Standard",
       "identifiers.value" : [
-        "3OfWNE6m5y"
+        "bh6q7wkoWR"
       ],
-      "title" : "title-JiYzJ9DWDL",
+      "title" : "title-jRX3FqozNG",
       "alternativeTitles" : [
       ],
       "description" : null,
@@ -147,13 +147,15 @@
         "Sanitation."
       ],
       "subjects.concepts.label" : [
-        "bCBtOF9X3cVR8q4",
-        "GIgcsJhdmKTFidD",
-        "lsqnu7hZZtHlWPI"
+        "485o02DxPLXKke6",
+        "NacQ8QOPJdAXFgM",
+        "zC1ICZOvNWbRfsA"
       ],
       "genres.label" : [
       ],
       "genres.concepts.label" : [
+      ],
+      "genres.concepts.id" : [
       ],
       "languages.id" : [
       ],

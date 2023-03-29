@@ -1,28 +1,28 @@
 {
   "description" : "examples for the works filtered aggregations tests",
-  "createdAt" : "2023-01-03T09:32:00.110192Z",
-  "id" : "phodmv5g",
+  "createdAt" : "2023-03-24T14:12:13.384872Z",
+  "id" : "o0u9h1wt",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "phodmv5g",
+        "id" : "o0u9h1wt",
         "identifier" : {
           "identifierType" : {
             "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "kSl7z2IaIy"
+          "value" : "Q8nyGjzx3m"
         },
-        "version" : 2,
-        "modifiedTime" : "2040-01-22T01:35:50Z"
+        "version" : 97,
+        "modifiedTime" : "1998-09-03T03:15:10Z"
       },
-      "mergedTime" : "2040-01-22T01:35:50Z",
+      "mergedTime" : "1998-09-03T03:15:10Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "phodmv5g",
+      "id" : "o0u9h1wt",
       "title" : "rats",
       "alternativeTitles" : [
       ],
@@ -40,7 +40,7 @@
             "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "kSl7z2IaIy",
+          "value" : "Q8nyGjzx3m",
           "type" : "Identifier"
         }
       ],
@@ -82,11 +82,11 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "phodmv5g",
+      "id" : "o0u9h1wt",
       "format.id" : "a",
       "workType" : "Standard",
       "identifiers.value" : [
-        "kSl7z2IaIy"
+        "Q8nyGjzx3m"
       ],
       "title" : "rats",
       "alternativeTitles" : [
@@ -120,6 +120,8 @@
       "genres.label" : [
       ],
       "genres.concepts.label" : [
+      ],
+      "genres.concepts.id" : [
       ],
       "languages.id" : [
         "bak"

@@ -1,29 +1,29 @@
 {
   "description" : "items with different location types",
-  "createdAt" : "2023-01-03T09:31:59.688745Z",
-  "id" : "wt6pclbs",
+  "createdAt" : "2023-03-17T11:03:31.894698Z",
+  "id" : "xzwsggki",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "wt6pclbs",
+        "id" : "xzwsggki",
         "identifier" : {
           "identifierType" : {
             "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "D31AdK5EfQ"
+          "value" : "G6KR1DmPfn"
         },
-        "version" : 5,
-        "modifiedTime" : "2051-01-28T15:07:11Z"
+        "version" : 27,
+        "modifiedTime" : "1950-04-09T22:30:42Z"
       },
-      "mergedTime" : "2051-01-28T15:07:11Z",
+      "mergedTime" : "1950-04-09T22:30:42Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "wt6pclbs",
-      "title" : "title-e4jqB3DBkI",
+      "id" : "xzwsggki",
+      "title" : "title-po5xNC2PnQ",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -35,7 +35,7 @@
             "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "D31AdK5EfQ",
+          "value" : "G6KR1DmPfn",
           "type" : "Identifier"
         }
       ],
@@ -45,15 +45,15 @@
       ],
       "items" : [
         {
-          "id" : "bhyswopl",
+          "id" : "lacffliq",
           "identifiers" : [
             {
               "identifierType" : {
-                "id" : "calm-record-id",
-                "label" : "Calm RecordIdentifier",
+                "id" : "sierra-system-number",
+                "label" : "Sierra system number",
                 "type" : "IdentifierType"
               },
-              "value" : "G3f7j0ub0t",
+              "value" : "k2sxFZY9hd",
               "type" : "Identifier"
             }
           ],
@@ -71,7 +71,6 @@
                 "url" : "https://creativecommons.org/share-your-work/public-domain/pdm/",
                 "type" : "License"
               },
-              "shelfmark" : "Shelfmark: dZTQ6alxf",
               "accessConditions" : [
               ],
               "type" : "PhysicalLocation"
@@ -112,13 +111,13 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "wt6pclbs",
+      "id" : "xzwsggki",
       "format.id" : null,
       "workType" : "Standard",
       "identifiers.value" : [
-        "D31AdK5EfQ"
+        "G6KR1DmPfn"
       ],
-      "title" : "title-e4jqB3DBkI",
+      "title" : "title-po5xNC2PnQ",
       "alternativeTitles" : [
       ],
       "description" : null,
@@ -132,10 +131,10 @@
       "images.identifiers.value" : [
       ],
       "items.id" : [
-        "bhyswopl"
+        "lacffliq"
       ],
       "items.identifiers.value" : [
-        "G3f7j0ub0t"
+        "k2sxFZY9hd"
       ],
       "items.locations.accessConditions.status.id" : [
       ],
@@ -154,6 +153,8 @@
       "genres.label" : [
       ],
       "genres.concepts.label" : [
+      ],
+      "genres.concepts.id" : [
       ],
       "languages.id" : [
       ],

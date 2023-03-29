@@ -1,29 +1,29 @@
 {
   "description" : "works with items with other identifiers",
-  "createdAt" : "2023-01-03T09:31:59.471685Z",
-  "id" : "c5xw2xfj",
+  "createdAt" : "2023-03-17T11:03:31.829011Z",
+  "id" : "rzcvxgso",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "c5xw2xfj",
+        "id" : "rzcvxgso",
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "fREqoThymw"
+          "value" : "8CwvL5s2ax"
         },
-        "version" : 94,
-        "modifiedTime" : "1937-12-14T11:58:33Z"
+        "version" : 66,
+        "modifiedTime" : "1974-02-26T09:34:25Z"
       },
-      "mergedTime" : "1937-12-14T11:58:33Z",
+      "mergedTime" : "1974-02-26T09:34:25Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "c5xw2xfj",
-      "title" : "title-jI6EjEMJ47",
+      "id" : "rzcvxgso",
+      "title" : "title-rHr2K7J507",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -31,11 +31,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "fREqoThymw",
+          "value" : "8CwvL5s2ax",
           "type" : "Identifier"
         }
       ],
@@ -45,24 +45,24 @@
       ],
       "items" : [
         {
-          "id" : "7jsbnatb",
+          "id" : "f1nicvdy",
           "identifiers" : [
             {
               "identifierType" : {
-                "id" : "calm-record-id",
-                "label" : "Calm RecordIdentifier",
+                "id" : "sierra-system-number",
+                "label" : "Sierra system number",
                 "type" : "IdentifierType"
               },
-              "value" : "mhIMFLtNyg",
+              "value" : "yqR7eWPnru",
               "type" : "Identifier"
             },
             {
               "identifierType" : {
-                "id" : "calm-record-id",
-                "label" : "Calm RecordIdentifier",
+                "id" : "sierra-system-number",
+                "label" : "Sierra system number",
                 "type" : "IdentifierType"
               },
-              "value" : "T07LdJrNoV",
+              "value" : "wmEBLIOVK6",
               "type" : "Identifier"
             }
           ],
@@ -73,9 +73,7 @@
                 "label" : "IIIF Presentation API",
                 "type" : "LocationType"
               },
-              "url" : "https://iiif.wellcomecollection.org/image/ZkV.jpg/info.json",
-              "credit" : "Credit line: NqqpCuC",
-              "linkText" : "Link text: zFkNfX",
+              "url" : "https://iiif.wellcomecollection.org/image/NlW.jpg/info.json",
               "license" : {
                 "id" : "cc-by",
                 "label" : "Attribution 4.0 International (CC BY 4.0)",
@@ -117,13 +115,13 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "c5xw2xfj",
+      "id" : "rzcvxgso",
       "format.id" : null,
       "workType" : "Standard",
       "identifiers.value" : [
-        "fREqoThymw"
+        "8CwvL5s2ax"
       ],
-      "title" : "title-jI6EjEMJ47",
+      "title" : "title-rHr2K7J507",
       "alternativeTitles" : [
       ],
       "description" : null,
@@ -137,11 +135,11 @@
       "images.identifiers.value" : [
       ],
       "items.id" : [
-        "7jsbnatb"
+        "f1nicvdy"
       ],
       "items.identifiers.value" : [
-        "mhIMFLtNyg",
-        "T07LdJrNoV"
+        "yqR7eWPnru",
+        "wmEBLIOVK6"
       ],
       "items.locations.accessConditions.status.id" : [
       ],
@@ -160,6 +158,8 @@
       "genres.label" : [
       ],
       "genres.concepts.label" : [
+      ],
+      "genres.concepts.id" : [
       ],
       "languages.id" : [
       ],

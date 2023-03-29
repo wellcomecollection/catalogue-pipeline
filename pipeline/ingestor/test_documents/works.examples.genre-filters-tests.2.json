@@ -1,29 +1,29 @@
 {
   "description" : "examples for the genre tests",
-  "createdAt" : "2023-01-03T09:31:59.875371Z",
-  "id" : "yhjhxcof",
+  "createdAt" : "2023-03-24T14:12:13.304598Z",
+  "id" : "d5kj1fx3",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "yhjhxcof",
+        "id" : "d5kj1fx3",
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "lydjDVoexx"
+          "value" : "1KOlZmZXOW"
         },
-        "version" : 68,
-        "modifiedTime" : "2037-12-19T21:38:57Z"
+        "version" : 51,
+        "modifiedTime" : "2047-04-18T16:27:14Z"
       },
-      "mergedTime" : "2037-12-19T21:38:57Z",
+      "mergedTime" : "2047-04-18T16:27:14Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "yhjhxcof",
-      "title" : "title-wsvmZKLOsI",
+      "id" : "d5kj1fx3",
+      "title" : "title-fWNE6m5ytA",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -31,11 +31,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "lydjDVoexx",
+          "value" : "1KOlZmZXOW",
           "type" : "Identifier"
         }
       ],
@@ -46,16 +46,20 @@
           "label" : "Psychology, Pathological",
           "concepts" : [
             {
-              "label" : "uK4GKNsXvX3NJfI",
-              "type" : "Concept"
-            },
-            {
-              "label" : "XCFVccBcFLmxtr1",
-              "type" : "Concept"
-            },
-            {
-              "label" : "wn4mlLNPr0YHU0g",
-              "type" : "Concept"
+              "id" : "baadf00d",
+              "identifiers" : [
+                {
+                  "identifierType" : {
+                    "id" : "calm-record-id",
+                    "label" : "Calm RecordIdentifier",
+                    "type" : "IdentifierType"
+                  },
+                  "value" : "odercwIWKJ",
+                  "type" : "Identifier"
+                }
+              ],
+              "label" : "hswtSuPOo0o5Odf",
+              "type" : "Genre"
             }
           ],
           "type" : "Genre"
@@ -90,13 +94,13 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "yhjhxcof",
+      "id" : "d5kj1fx3",
       "format.id" : null,
       "workType" : "Standard",
       "identifiers.value" : [
-        "lydjDVoexx"
+        "1KOlZmZXOW"
       ],
-      "title" : "title-wsvmZKLOsI",
+      "title" : "title-fWNE6m5ytA",
       "alternativeTitles" : [
       ],
       "description" : null,
@@ -129,9 +133,10 @@
         "Psychology, Pathological"
       ],
       "genres.concepts.label" : [
-        "uK4GKNsXvX3NJfI",
-        "XCFVccBcFLmxtr1",
-        "wn4mlLNPr0YHU0g"
+        "hswtSuPOo0o5Odf"
+      ],
+      "genres.concepts.id" : [
+        "baadf00d"
       ],
       "languages.id" : [
       ],

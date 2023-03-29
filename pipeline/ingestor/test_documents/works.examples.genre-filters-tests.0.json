@@ -1,29 +1,29 @@
 {
   "description" : "examples for the genre tests",
-  "createdAt" : "2023-01-03T09:31:59.873207Z",
-  "id" : "jywtq4xg",
+  "createdAt" : "2023-03-24T14:12:13.302902Z",
+  "id" : "oxbsq4ck",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "jywtq4xg",
+        "id" : "oxbsq4ck",
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "LgGFRAV0Zs"
+          "value" : "xukacPWKUR"
         },
-        "version" : 85,
-        "modifiedTime" : "1934-09-04T19:55:55Z"
+        "version" : 53,
+        "modifiedTime" : "2011-03-12T19:27:33Z"
       },
-      "mergedTime" : "1934-09-04T19:55:55Z",
+      "mergedTime" : "2011-03-12T19:27:33Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "jywtq4xg",
-      "title" : "title-ZEnp6i2y6i",
+      "id" : "oxbsq4ck",
+      "title" : "title-DrDsk2kCAG",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -31,11 +31,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "LgGFRAV0Zs",
+          "value" : "xukacPWKUR",
           "type" : "Identifier"
         }
       ],
@@ -46,15 +46,35 @@
           "label" : "Annual reports.",
           "concepts" : [
             {
-              "label" : "qp5RA4f5gWVIptl",
-              "type" : "Concept"
+              "id" : "g00dcafe",
+              "identifiers" : [
+                {
+                  "identifierType" : {
+                    "id" : "sierra-system-number",
+                    "label" : "Sierra system number",
+                    "type" : "IdentifierType"
+                  },
+                  "value" : "hmRoJyr1Mq",
+                  "type" : "Identifier"
+                }
+              ],
+              "label" : "YwsvmZKLOsIneEm",
+              "type" : "Genre"
             },
             {
-              "label" : "xE0qlBbPiSihnTe",
-              "type" : "Concept"
-            },
-            {
-              "label" : "JBs3eSemcGNQXd8",
+              "id" : "baadf00d",
+              "identifiers" : [
+                {
+                  "identifierType" : {
+                    "id" : "miro-image-number",
+                    "label" : "Miro image number",
+                    "type" : "IdentifierType"
+                  },
+                  "value" : "aNC7XCeymD",
+                  "type" : "Identifier"
+                }
+              ],
+              "label" : "UtqZmmbPJWDqmpb",
               "type" : "Concept"
             }
           ],
@@ -90,13 +110,13 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "jywtq4xg",
+      "id" : "oxbsq4ck",
       "format.id" : null,
       "workType" : "Standard",
       "identifiers.value" : [
-        "LgGFRAV0Zs"
+        "xukacPWKUR"
       ],
-      "title" : "title-ZEnp6i2y6i",
+      "title" : "title-DrDsk2kCAG",
       "alternativeTitles" : [
       ],
       "description" : null,
@@ -129,9 +149,11 @@
         "Annual reports."
       ],
       "genres.concepts.label" : [
-        "qp5RA4f5gWVIptl",
-        "xE0qlBbPiSihnTe",
-        "JBs3eSemcGNQXd8"
+        "YwsvmZKLOsIneEm",
+        "UtqZmmbPJWDqmpb"
+      ],
+      "genres.concepts.id" : [
+        "g00dcafe"
       ],
       "languages.id" : [
       ],

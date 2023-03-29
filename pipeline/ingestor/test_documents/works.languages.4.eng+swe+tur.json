@@ -1,28 +1,28 @@
 {
   "description" : "one of a list of works with a variety of languages",
-  "createdAt" : "2023-01-03T09:31:59.296821Z",
-  "id" : "edfiesed",
+  "createdAt" : "2023-03-17T11:03:31.770553Z",
+  "id" : "oagougti",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "edfiesed",
+        "id" : "oagougti",
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "tQZYPmQieO"
+          "value" : "c67fbITZO5"
         },
-        "version" : 9,
-        "modifiedTime" : "1938-07-07T08:02:52Z"
+        "version" : 76,
+        "modifiedTime" : "2039-12-01T11:37:40Z"
       },
-      "mergedTime" : "1938-07-07T08:02:52Z",
+      "mergedTime" : "2039-12-01T11:37:40Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "edfiesed",
+      "id" : "oagougti",
       "title" : "A work with languages English, Swedish, Turkish",
       "alternativeTitles" : [
       ],
@@ -31,11 +31,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "tQZYPmQieO",
+          "value" : "c67fbITZO5",
           "type" : "Identifier"
         }
       ],
@@ -87,11 +87,11 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "edfiesed",
+      "id" : "oagougti",
       "format.id" : null,
       "workType" : "Standard",
       "identifiers.value" : [
-        "tQZYPmQieO"
+        "c67fbITZO5"
       ],
       "title" : "A work with languages English, Swedish, Turkish",
       "alternativeTitles" : [
@@ -125,6 +125,8 @@
       "genres.label" : [
       ],
       "genres.concepts.label" : [
+      ],
+      "genres.concepts.id" : [
       ],
       "languages.id" : [
         "eng",

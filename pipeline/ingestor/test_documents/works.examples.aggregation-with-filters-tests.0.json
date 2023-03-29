@@ -1,29 +1,29 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2023-01-03T09:31:59.712649Z",
-  "id" : "vqys4hio",
+  "createdAt" : "2023-03-17T11:03:31.906203Z",
+  "id" : "kbmotyqc",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "vqys4hio",
+        "id" : "kbmotyqc",
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "ESZHkohLBq"
+          "value" : "vZCvYXWMl0"
         },
-        "version" : 36,
-        "modifiedTime" : "1954-08-08T14:52:27Z"
+        "version" : 61,
+        "modifiedTime" : "2014-03-15T15:15:55Z"
       },
-      "mergedTime" : "1954-08-08T14:52:27Z",
+      "mergedTime" : "2014-03-15T15:15:55Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "vqys4hio",
-      "title" : "title-vwQleJkqVb",
+      "id" : "kbmotyqc",
+      "title" : "title-IXUuyd8hWM",
       "alternativeTitles" : [
       ],
       "workType" : {
@@ -36,28 +36,28 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "ESZHkohLBq",
+          "value" : "vZCvYXWMl0",
           "type" : "Identifier"
         }
       ],
       "subjects" : [
         {
-          "label" : "6IZ2DrUzFk",
+          "label" : "y0B0TSmDGU",
           "concepts" : [
             {
-              "label" : "vgSyVfmtHDyMDGo",
+              "label" : "bHlXq1fwO98EpYD",
               "type" : "Concept"
             },
             {
-              "label" : "2rBCSPBNfFmnJIE",
+              "label" : "0Ex6rJpSUKd2dbi",
               "type" : "Concept"
             },
             {
-              "label" : "pzyMJLtI2pjU6xn",
+              "label" : "OiRlog5DCYVH5TP",
               "type" : "Concept"
             }
           ],
@@ -95,13 +95,13 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "vqys4hio",
+      "id" : "kbmotyqc",
       "format.id" : "a",
       "workType" : "Standard",
       "identifiers.value" : [
-        "ESZHkohLBq"
+        "vZCvYXWMl0"
       ],
-      "title" : "title-vwQleJkqVb",
+      "title" : "title-IXUuyd8hWM",
       "alternativeTitles" : [
       ],
       "description" : null,
@@ -127,16 +127,18 @@
       "subjects.id" : [
       ],
       "subjects.label" : [
-        "6IZ2DrUzFk"
+        "y0B0TSmDGU"
       ],
       "subjects.concepts.label" : [
-        "vgSyVfmtHDyMDGo",
-        "2rBCSPBNfFmnJIE",
-        "pzyMJLtI2pjU6xn"
+        "bHlXq1fwO98EpYD",
+        "0Ex6rJpSUKd2dbi",
+        "OiRlog5DCYVH5TP"
       ],
       "genres.label" : [
       ],
       "genres.concepts.label" : [
+      ],
+      "genres.concepts.id" : [
       ],
       "languages.id" : [
       ],
@@ -169,7 +171,7 @@
       "production.dates" : [
       ],
       "subjects.label" : [
-        "{\"label\":\"6IZ2DrUzFk\",\"concepts\":[],\"type\":\"Subject\"}"
+        "{\"label\":\"y0B0TSmDGU\",\"concepts\":[],\"type\":\"Subject\"}"
       ],
       "languages" : [
       ],

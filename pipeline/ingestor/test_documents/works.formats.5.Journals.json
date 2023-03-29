@@ -1,28 +1,28 @@
 {
   "description" : "one of a list of works with a variety of formats",
-  "createdAt" : "2023-01-03T09:31:59.225876Z",
-  "id" : "plmmmkup",
+  "createdAt" : "2023-03-17T11:03:31.739295Z",
+  "id" : "ftxlgr2v",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "plmmmkup",
+        "id" : "ftxlgr2v",
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "X7kBc19InD"
+          "value" : "RLx5N8CTsZ"
         },
-        "version" : 52,
-        "modifiedTime" : "1952-04-02T02:27:37Z"
+        "version" : 9,
+        "modifiedTime" : "1985-11-10T14:57:32Z"
       },
-      "mergedTime" : "1952-04-02T02:27:37Z",
+      "mergedTime" : "1985-11-10T14:57:32Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "plmmmkup",
+      "id" : "ftxlgr2v",
       "title" : "A work with format Journals",
       "alternativeTitles" : [
       ],
@@ -36,11 +36,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "X7kBc19InD",
+          "value" : "RLx5N8CTsZ",
           "type" : "Identifier"
         }
       ],
@@ -77,11 +77,11 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "plmmmkup",
+      "id" : "ftxlgr2v",
       "format.id" : "d",
       "workType" : "Standard",
       "identifiers.value" : [
-        "X7kBc19InD"
+        "RLx5N8CTsZ"
       ],
       "title" : "A work with format Journals",
       "alternativeTitles" : [
@@ -115,6 +115,8 @@
       "genres.label" : [
       ],
       "genres.concepts.label" : [
+      ],
+      "genres.concepts.id" : [
       ],
       "languages.id" : [
       ],

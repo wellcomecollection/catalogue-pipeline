@@ -1,29 +1,29 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2023-01-03T09:31:59.722792Z",
-  "id" : "dborzqld",
+  "createdAt" : "2023-03-17T11:03:31.918029Z",
+  "id" : "rdsofxpt",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "dborzqld",
+        "id" : "rdsofxpt",
         "identifier" : {
           "identifierType" : {
             "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "xZlpWaXi4Y"
+          "value" : "YlQvQzSQr2"
         },
-        "version" : 74,
-        "modifiedTime" : "1951-04-17T23:48:59Z"
+        "version" : 35,
+        "modifiedTime" : "2033-03-18T16:57:24Z"
       },
-      "mergedTime" : "1951-04-17T23:48:59Z",
+      "mergedTime" : "2033-03-18T16:57:24Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "dborzqld",
-      "title" : "title-LN4dq7YPgQ",
+      "id" : "rdsofxpt",
+      "title" : "title-o35aec2IoI",
       "alternativeTitles" : [
       ],
       "workType" : {
@@ -40,24 +40,24 @@
             "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "xZlpWaXi4Y",
+          "value" : "YlQvQzSQr2",
           "type" : "Identifier"
         }
       ],
       "subjects" : [
         {
-          "label" : "v4BHmwGTZr",
+          "label" : "9SceRNaTEl",
           "concepts" : [
             {
-              "label" : "0FUCKKVOQZLwA6u",
+              "label" : "ZtfG4qEc4MTvdPA",
               "type" : "Concept"
             },
             {
-              "label" : "WTQlXaTo6WyiCaL",
+              "label" : "cgpfIbfVPkqafPg",
               "type" : "Concept"
             },
             {
-              "label" : "acffLiQzk2sxFZY",
+              "label" : "pz7am59I9Cwkjzo",
               "type" : "Concept"
             }
           ],
@@ -95,13 +95,13 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "dborzqld",
+      "id" : "rdsofxpt",
       "format.id" : "b",
       "workType" : "Standard",
       "identifiers.value" : [
-        "xZlpWaXi4Y"
+        "YlQvQzSQr2"
       ],
-      "title" : "title-LN4dq7YPgQ",
+      "title" : "title-o35aec2IoI",
       "alternativeTitles" : [
       ],
       "description" : null,
@@ -127,16 +127,18 @@
       "subjects.id" : [
       ],
       "subjects.label" : [
-        "v4BHmwGTZr"
+        "9SceRNaTEl"
       ],
       "subjects.concepts.label" : [
-        "0FUCKKVOQZLwA6u",
-        "WTQlXaTo6WyiCaL",
-        "acffLiQzk2sxFZY"
+        "ZtfG4qEc4MTvdPA",
+        "cgpfIbfVPkqafPg",
+        "pz7am59I9Cwkjzo"
       ],
       "genres.label" : [
       ],
       "genres.concepts.label" : [
+      ],
+      "genres.concepts.id" : [
       ],
       "languages.id" : [
       ],
@@ -169,7 +171,7 @@
       "production.dates" : [
       ],
       "subjects.label" : [
-        "{\"label\":\"v4BHmwGTZr\",\"concepts\":[],\"type\":\"Subject\"}"
+        "{\"label\":\"9SceRNaTEl\",\"concepts\":[],\"type\":\"Subject\"}"
       ],
       "languages" : [
       ],

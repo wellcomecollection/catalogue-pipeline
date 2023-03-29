@@ -1,29 +1,29 @@
 {
   "description" : "a work with a collection path",
-  "createdAt" : "2023-01-03T09:31:59.505317Z",
-  "id" : "dtqmc0yn",
+  "createdAt" : "2023-03-17T11:03:31.837701Z",
+  "id" : "xngls6zs",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "dtqmc0yn",
+        "id" : "xngls6zs",
         "identifier" : {
           "identifierType" : {
             "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "Lq95TrUx7A"
+          "value" : "cZctCb44q4"
         },
-        "version" : 18,
-        "modifiedTime" : "1972-05-12T18:12:24Z"
+        "version" : 33,
+        "modifiedTime" : "2068-10-10T17:34:06Z"
       },
-      "mergedTime" : "1972-05-12T18:12:24Z",
+      "mergedTime" : "2068-10-10T17:34:06Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "dtqmc0yn",
-      "title" : "title-boqbXNAi3a",
+      "id" : "xngls6zs",
+      "title" : "title-b24fkr6m6L",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -35,7 +35,7 @@
             "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "Lq95TrUx7A",
+          "value" : "cZctCb44q4",
           "type" : "Identifier"
         }
       ],
@@ -72,13 +72,13 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "dtqmc0yn",
+      "id" : "xngls6zs",
       "format.id" : null,
       "workType" : "Standard",
       "identifiers.value" : [
-        "Lq95TrUx7A"
+        "cZctCb44q4"
       ],
-      "title" : "title-boqbXNAi3a",
+      "title" : "title-b24fkr6m6L",
       "alternativeTitles" : [
       ],
       "description" : null,
@@ -110,6 +110,8 @@
       "genres.label" : [
       ],
       "genres.concepts.label" : [
+      ],
+      "genres.concepts.id" : [
       ],
       "languages.id" : [
       ],

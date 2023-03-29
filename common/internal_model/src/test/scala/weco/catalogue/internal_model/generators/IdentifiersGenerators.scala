@@ -24,7 +24,10 @@ trait IdentifiersGenerators extends RandomGenerators {
     }
 
   def createCanonicalId: CanonicalId =
-    CanonicalId(randomAlphanumeric(length = 8).toLowerCase())
+    CanonicalId(createUnderlyingCanonicalId)
+
+  def createUnderlyingCanonicalId: String =
+    randomAlphanumeric(length = 8).toLowerCase()
 
   def createSourceIdentifier: SourceIdentifier = createSourceIdentifierWith()
 
@@ -35,7 +38,8 @@ trait IdentifiersGenerators extends RandomGenerators {
       IdentifierType.CalmRecordIdentifier
     ),
     value: String = randomAlphanumeric(length = 10),
-    ontologyType: String = "Work"): SourceIdentifier =
+    ontologyType: String = "Work"
+  ): SourceIdentifier =
     SourceIdentifier(
       identifierType = identifierType,
       value = value,
@@ -80,8 +84,10 @@ trait IdentifiersGenerators extends RandomGenerators {
     'C', 'L', 'V', 'W', 'N', 'M', 'B', 'A', 'S', 'F', 'D'
   )
 
-  def randomMiroId(prefix: Char = chooseFrom(miroIdPrefixes: _*),
-                   length: Int = 8): String =
+  def randomMiroId(
+    prefix: Char = chooseFrom(miroIdPrefixes: _*),
+    length: Int = 8
+  ): String =
     s"%c%0${length - 1}d".format(
       prefix,
       random.nextInt(math.pow(10, length - 1).toInt)
