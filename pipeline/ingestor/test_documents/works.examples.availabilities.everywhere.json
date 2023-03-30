@@ -1,28 +1,28 @@
 {
   "description" : "A work which is available everywhere",
-  "createdAt" : "2023-03-27T11:16:18.823382Z",
-  "id" : "2twopft1",
+  "createdAt" : "2023-03-30T11:15:34.220444Z",
+  "id" : "s7ocjmnn",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "2twopft1",
+        "id" : "s7ocjmnn",
         "identifier" : {
           "identifierType" : {
             "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "Uaequ81tpB"
+          "value" : "JWvJyZ6GWb"
         },
-        "version" : 59,
-        "modifiedTime" : "1972-02-10T18:53:31Z"
+        "version" : 35,
+        "modifiedTime" : "1976-03-12T21:19:36Z"
       },
-      "mergedTime" : "1972-02-10T18:53:31Z",
+      "mergedTime" : "1976-03-12T21:19:36Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "2twopft1",
+      "id" : "s7ocjmnn",
       "title" : "availability: everywhere",
       "alternativeTitles" : [
       ],
@@ -35,7 +35,7 @@
             "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "Uaequ81tpB",
+          "value" : "JWvJyZ6GWb",
           "type" : "Identifier"
         }
       ],
@@ -87,11 +87,11 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "2twopft1",
+      "id" : "s7ocjmnn",
       "format.id" : null,
       "workType" : "Standard",
       "identifiers.value" : [
-        "Uaequ81tpB"
+        "JWvJyZ6GWb"
       ],
       "title" : "availability: everywhere",
       "alternativeTitles" : [

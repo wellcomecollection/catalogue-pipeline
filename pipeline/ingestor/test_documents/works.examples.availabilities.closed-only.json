@@ -1,28 +1,28 @@
 {
   "description" : "A work which is available closed-only",
-  "createdAt" : "2023-03-27T11:16:18.803230Z",
-  "id" : "fyqts0co",
+  "createdAt" : "2023-03-30T11:15:34.214830Z",
+  "id" : "bwsensp3",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "fyqts0co",
+        "id" : "bwsensp3",
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "ZvWebpA5WH"
+          "value" : "QVu8iRSvNL"
         },
-        "version" : 89,
-        "modifiedTime" : "1979-01-28T05:43:24Z"
+        "version" : 92,
+        "modifiedTime" : "2039-04-16T22:38:32Z"
       },
-      "mergedTime" : "1979-01-28T05:43:24Z",
+      "mergedTime" : "2039-04-16T22:38:32Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "fyqts0co",
+      "id" : "bwsensp3",
       "title" : "availability: closed-only",
       "alternativeTitles" : [
       ],
@@ -31,11 +31,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "ZvWebpA5WH",
+          "value" : "QVu8iRSvNL",
           "type" : "Identifier"
         }
       ],
@@ -77,11 +77,11 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "fyqts0co",
+      "id" : "bwsensp3",
       "format.id" : null,
       "workType" : "Standard",
       "identifiers.value" : [
-        "ZvWebpA5WH"
+        "QVu8iRSvNL"
       ],
       "title" : "availability: closed-only",
       "alternativeTitles" : [

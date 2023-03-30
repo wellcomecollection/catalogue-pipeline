@@ -1,28 +1,28 @@
 {
   "description" : "A work which is available nowhere",
-  "createdAt" : "2023-03-27T11:16:18.817459Z",
-  "id" : "dph7sjip",
+  "createdAt" : "2023-03-30T11:15:34.218514Z",
+  "id" : "qmdqvoev",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "dph7sjip",
+        "id" : "qmdqvoev",
         "identifier" : {
           "identifierType" : {
             "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "WpBejTwv1N"
+          "value" : "SWmxlWpw7k"
         },
-        "version" : 66,
-        "modifiedTime" : "1971-11-19T03:42:42Z"
+        "version" : 65,
+        "modifiedTime" : "2015-05-25T14:40:46Z"
       },
-      "mergedTime" : "1971-11-19T03:42:42Z",
+      "mergedTime" : "2015-05-25T14:40:46Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "dph7sjip",
+      "id" : "qmdqvoev",
       "title" : "availability: nowhere",
       "alternativeTitles" : [
       ],
@@ -35,7 +35,7 @@
             "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "WpBejTwv1N",
+          "value" : "SWmxlWpw7k",
           "type" : "Identifier"
         }
       ],
@@ -72,11 +72,11 @@
       "type" : "Work"
     },
     "query" : {
-      "id" : "dph7sjip",
+      "id" : "qmdqvoev",
       "format.id" : null,
       "workType" : "Standard",
       "identifiers.value" : [
-        "WpBejTwv1N"
+        "SWmxlWpw7k"
       ],
       "title" : "availability: nowhere",
       "alternativeTitles" : [
