@@ -3,11 +3,15 @@
 
 resource "aws_s3_bucket" "inferrer_model_core_data" {
   bucket = "wellcomecollection-inferrer-model-core-data"
-  acl    = "private"
 
   lifecycle {
     prevent_destroy = true
   }
+}
+
+resource "aws_s3_bucket_acl" "inferrer_model_core_data" {
+  bucket = aws_s3_bucket.inferrer_model_core_data.id
+  acl    = "private"
 }
 
 data "aws_ssm_parameter" "inferrer_lsh_model_key" {
