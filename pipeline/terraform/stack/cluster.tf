@@ -1,10 +1,10 @@
 resource "aws_ecs_cluster" "cluster" {
-  name               = local.namespace
+  name = local.namespace
 
 }
 
 resource "aws_ecs_cluster_capacity_providers" "cluster" {
-  cluster_name = aws_ecs_cluster.cluster.name
+  cluster_name       = aws_ecs_cluster.cluster.name
   capacity_providers = [module.inference_capacity_provider.name]
 }
 
