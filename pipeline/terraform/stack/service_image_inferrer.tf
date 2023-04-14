@@ -9,11 +9,14 @@ locals {
   shared_storage_name      = "shared_storage"
   shared_storage_path      = "/data"
 
+  # This is the CPU/memory available on an ECS instance which isn't running
+  # any tasks.  You can find it in the ECS console, in the list of
+  # capacity providers.
   base_2x_total_cpu = 8192
   base_1x_total_cpu = 4096
 
   base_2x_total_memory = 15463
-  base_1x_total_memory = 7623
+  base_1x_total_memory = 7611
 
   base_manager_memory      = 2048
   base_manager_cpu         = 1024
