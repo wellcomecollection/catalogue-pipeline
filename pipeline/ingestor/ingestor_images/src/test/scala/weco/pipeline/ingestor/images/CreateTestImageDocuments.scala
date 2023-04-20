@@ -14,6 +14,7 @@ import weco.catalogue.internal_model.work.generators.{
   ContributorGenerators,
   GenreGenerators,
   IdentifiedConceptGenerators,
+  PeriodGenerators,
   SubjectGenerators
 }
 import weco.catalogue.internal_model.work.{
@@ -22,6 +23,7 @@ import weco.catalogue.internal_model.work.{
   Meeting,
   Organisation,
   Person,
+  ProductionEvent,
   Subject
 }
 import weco.json.JsonUtil._
@@ -48,7 +50,8 @@ class CreateTestImageDocuments
     with ContributorGenerators
     with GenreGenerators
     with SubjectGenerators
-    with ImageGenerators {
+    with ImageGenerators
+    with PeriodGenerators {
 
   override def randomInstant: Instant =
     Instant.parse("2001-01-01T01:01:01Z").plusSeconds(random.nextInt())
@@ -551,6 +554,30 @@ class CreateTestImageDocuments
       description = "images with different subjects",
       id = "images.subjects.squirrel,screwdriver"
     )
+  }
+
+  it("creates works with specific production events") {
+    Seq("1900", "1976", "1904", "2020", "1098").map {
+      year =>
+        saveImage(
+          createImageData.toAugmentedImageWith(
+            parentWork = identifiedWork()
+              .production(
+                List(
+                  ProductionEvent(
+                    label = randomAlphanumeric(25),
+                    places = List(),
+                    agents = List(),
+                    dates = List(createPeriodForYear(year))
+                  )
+                )
+              )
+              .title(s"Production event in $year"),
+          ),
+          description = s"an image with a production event in $year",
+          id = s"image-production.$year"
+        )
+    }
   }
 
   def saveImage(
