@@ -1,5 +1,5 @@
 locals {
-  mets_adapter_image = "${aws_ecr_repository.mets_adapter.repository_url}:env.prod"
+  mets_adapter_image = "${aws_ecr_repository.mets_adapter_services["mets_adapter"].repository_url}:env.prod"
 
   namespace                       = "mets-adapter"
   storage_notifications_topic_arn = data.terraform_remote_state.storage_service.outputs.registered_bag_notifications_topic_arn

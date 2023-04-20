@@ -5,40 +5,59 @@ resource "aws_s3_bucket" "sierra_adapter" {
     prevent_destroy = false
   }
 
-  lifecycle_rule {
-    id      = "expire_old_items"
-    prefix  = "records_items/"
-    enabled = true
+
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "sierra_adapter" {
+  bucket = aws_s3_bucket.sierra_adapter.id
+
+  rule {
+    id     = "expire_old_items"
+    status = "Enabled"
+
+    filter {
+      prefix = "records_items/"
+    }
 
     expiration {
       days = 7
     }
   }
 
-  lifecycle_rule {
-    id      = "expire_old_bibs"
-    prefix  = "records_bibs/"
-    enabled = true
+  rule {
+    id     = "expire_old_bibs"
+    status = "Enabled"
+
+    filter {
+      prefix = "records_bibs/"
+    }
 
     expiration {
       days = 7
     }
   }
 
-  lifecycle_rule {
-    id      = "expire_old_holdings"
-    prefix  = "records_holdings/"
-    enabled = true
+  rule {
+    id     = "expire_old_holdings"
+    status = "Enabled"
+
+    filter {
+      prefix = "records_holdings/"
+    }
 
     expiration {
       days = 7
     }
   }
 
-  lifecycle_rule {
-    id      = "expire_old_orders"
-    prefix  = "records_orders/"
-    enabled = true
+  rule {
+    id = "expire_old_orders"
+
+    status = "Enabled"
+
+    filter {
+      prefix = "records_orders/"
+    }
 
     expiration {
       days = 7

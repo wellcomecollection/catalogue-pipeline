@@ -36,10 +36,10 @@ module "sierra-adapter-20200604" {
 
   reporting_reindex_topic_arn = local.reporting_reindex_topic_arn
 
-  sierra_reader_image  = aws_ecr_repository.sierra_reader.repository_url
-  sierra_linker_image  = aws_ecr_repository.sierra_linker.repository_url
-  sierra_merger_image  = aws_ecr_repository.sierra_merger.repository_url
-  sierra_indexer_image = aws_ecr_repository.sierra_indexer.repository_url
+  sierra_reader_image  = aws_ecr_repository.sierra_adapter_services["sierra_reader"].repository_url
+  sierra_linker_image  = aws_ecr_repository.sierra_adapter_services["sierra_linker"].repository_url
+  sierra_merger_image  = aws_ecr_repository.sierra_adapter_services["sierra_merger"].repository_url
+  sierra_indexer_image = aws_ecr_repository.sierra_adapter_services["sierra_indexer"].repository_url
 
   deployment_env         = "prod"
   shared_logging_secrets = data.terraform_remote_state.shared_infra.outputs.shared_secrets_logging

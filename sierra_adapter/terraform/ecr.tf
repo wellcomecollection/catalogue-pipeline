@@ -1,35 +1,38 @@
 locals {
-  repository_prefix = "uk.ac.wellcome"
+  sierra_adapter_images = [
+    "sierra_reader",
+    "sierra_merger",
+    "sierra_linker",
+    "sierra_indexer",
+  ]
+
+  ecr_policy_only_keep_the_last_100_images = jsonencode({
+    rules = [
+      {
+        rulePriority = 1
+        description  = "Only keep the last 100 images in a repo"
+        selection = {
+          tagStatus   = "any"
+          countType   = "imageCountMoreThan"
+          countNumber = 100
+        }
+        action = {
+          type = "expire"
+        }
+      }
+    ]
+  })
 }
 
-resource "aws_ecr_repository" "sierra_reader" {
-  name = "${local.repository_prefix}/sierra_reader"
+resource "aws_ecr_repository" "sierra_adapter_services" {
+  for_each = toset(local.sierra_adapter_images)
 
-  lifecycle {
-    prevent_destroy = true
-  }
+  name = "uk.ac.wellcome/${each.key}"
 }
 
-resource "aws_ecr_repository" "sierra_merger" {
-  name = "${local.repository_prefix}/sierra_merger"
+resource "aws_ecr_lifecycle_policy" "sierra_adapter_services" {
+  for_each = aws_ecr_repository.sierra_adapter_services
 
-  lifecycle {
-    prevent_destroy = true
-  }
-}
-
-resource "aws_ecr_repository" "sierra_linker" {
-  name = "${local.repository_prefix}/sierra_linker"
-
-  lifecycle {
-    prevent_destroy = true
-  }
-}
-
-resource "aws_ecr_repository" "sierra_indexer" {
-  name = "${local.repository_prefix}/sierra_indexer"
-
-  lifecycle {
-    prevent_destroy = true
-  }
+  repository = each.value.name
+  policy     = local.ecr_policy_only_keep_the_last_100_images
 }
