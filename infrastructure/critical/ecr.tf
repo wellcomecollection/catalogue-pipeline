@@ -1,79 +1,111 @@
-resource "aws_ecr_repository" "nginx_services" {
-  name = "uk.ac.wellcome/nginx_services"
+locals {
+  images = [
+    "nginx_services",
+    "transformer_miro",
+    "transformer_sierra",
+    "transformer_mets",
+    "transformer_calm",
+    "transformer_tei",
+    "id_minter",
+    "matcher",
+    "merger",
+    "ingestor_works",
+    "inference_manager",
+    "feature_inferrer",
+    "feature_training",
+    "palette_inferrer",
+    "aspect_ratio_inferrer",
+    "ingestor_images",
+    "elasticdump",
+    "relation_embedder",
+    "router",
+    "batcher",
+  ]
 }
 
-resource "aws_ecr_repository" "transformer_miro" {
-  name = "uk.ac.wellcome/transformer_miro"
+resource "aws_ecr_repository" "service" {
+  for_each = toset(local.images)
+
+  name = "uk.ac.wellcome/${each.key}"
 }
 
-resource "aws_ecr_repository" "transformer_sierra" {
-  name = "uk.ac.wellcome/transformer_sierra"
+moved {
+  from = aws_ecr_repository.nginx_services
+  to   = aws_ecr_repository.service["nginx_services"]
 }
-
-resource "aws_ecr_repository" "transformer_mets" {
-  name = "uk.ac.wellcome/transformer_mets"
+moved {
+  from = aws_ecr_repository.transformer_miro
+  to   = aws_ecr_repository.service["transformer_miro"]
 }
-
-resource "aws_ecr_repository" "transformer_calm" {
-  name = "uk.ac.wellcome/transformer_calm"
+moved {
+  from = aws_ecr_repository.transformer_sierra
+  to   = aws_ecr_repository.service["transformer_sierra"]
 }
-
-resource "aws_ecr_repository" "transformer_tei" {
-  name = "uk.ac.wellcome/transformer_tei"
+moved {
+  from = aws_ecr_repository.transformer_mets
+  to   = aws_ecr_repository.service["transformer_mets"]
 }
-
-resource "aws_ecr_repository" "id_minter" {
-  name = "uk.ac.wellcome/id_minter"
+moved {
+  from = aws_ecr_repository.transformer_calm
+  to   = aws_ecr_repository.service["transformer_calm"]
 }
-
-resource "aws_ecr_repository" "matcher" {
-  name = "uk.ac.wellcome/matcher"
+moved {
+  from = aws_ecr_repository.transformer_tei
+  to   = aws_ecr_repository.service["transformer_tei"]
 }
-
-resource "aws_ecr_repository" "merger" {
-  name = "uk.ac.wellcome/merger"
+moved {
+  from = aws_ecr_repository.id_minter
+  to   = aws_ecr_repository.service["id_minter"]
 }
-
-resource "aws_ecr_repository" "ingestor_works" {
-  name = "uk.ac.wellcome/ingestor_works"
+moved {
+  from = aws_ecr_repository.matcher
+  to   = aws_ecr_repository.service["matcher"]
 }
-
-resource "aws_ecr_repository" "inference_manager" {
-  name = "uk.ac.wellcome/inference_manager"
+moved {
+  from = aws_ecr_repository.merger
+  to   = aws_ecr_repository.service["merger"]
 }
-
-resource "aws_ecr_repository" "feature_inferrer" {
-  name = "uk.ac.wellcome/feature_inferrer"
+moved {
+  from = aws_ecr_repository.ingestor_works
+  to   = aws_ecr_repository.service["ingestor_works"]
 }
-
-resource "aws_ecr_repository" "feature_training" {
-  name = "uk.ac.wellcome/feature_training"
+moved {
+  from = aws_ecr_repository.inference_manager
+  to   = aws_ecr_repository.service["inference_manager"]
 }
-
-resource "aws_ecr_repository" "palette_inferrer" {
-  name = "uk.ac.wellcome/palette_inferrer"
+moved {
+  from = aws_ecr_repository.feature_inferrer
+  to   = aws_ecr_repository.service["feature_inferrer"]
 }
-
-resource "aws_ecr_repository" "aspect_ratio_inferrer" {
-  name = "uk.ac.wellcome/aspect_ratio_inferrer"
+moved {
+  from = aws_ecr_repository.feature_training
+  to   = aws_ecr_repository.service["feature_training"]
 }
-
-resource "aws_ecr_repository" "ingestor_images" {
-  name = "uk.ac.wellcome/ingestor_images"
+moved {
+  from = aws_ecr_repository.palette_inferrer
+  to   = aws_ecr_repository.service["palette_inferrer"]
 }
-
-resource "aws_ecr_repository" "elasticdump" {
-  name = "uk.ac.wellcome/elasticdump"
+moved {
+  from = aws_ecr_repository.aspect_ratio_inferrer
+  to   = aws_ecr_repository.service["aspect_ratio_inferrer"]
 }
-
-resource "aws_ecr_repository" "relation_embedder" {
-  name = "uk.ac.wellcome/relation_embedder"
+moved {
+  from = aws_ecr_repository.ingestor_images
+  to   = aws_ecr_repository.service["ingestor_images"]
 }
-
-resource "aws_ecr_repository" "router" {
-  name = "uk.ac.wellcome/router"
+moved {
+  from = aws_ecr_repository.elasticdump
+  to   = aws_ecr_repository.service["elasticdump"]
 }
-
-resource "aws_ecr_repository" "batcher" {
-  name = "uk.ac.wellcome/batcher"
+moved {
+  from = aws_ecr_repository.relation_embedder
+  to   = aws_ecr_repository.service["relation_embedder"]
+}
+moved {
+  from = aws_ecr_repository.router
+  to   = aws_ecr_repository.service["router"]
+}
+moved {
+  from = aws_ecr_repository.batcher
+  to   = aws_ecr_repository.service["batcher"]
 }
