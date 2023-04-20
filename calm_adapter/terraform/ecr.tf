@@ -23,21 +23,6 @@ locals {
   })
 }
 
-moved {
-  from = aws_ecr_repository.calm_adapter
-  to   = aws_ecr_repository.calm_adapter_services["calm_adapter"]
-}
-
-moved {
-  from = aws_ecr_repository.calm_indexer
-  to   = aws_ecr_repository.calm_adapter_services["calm_indexer"]
-}
-
-moved {
-  from = aws_ecr_repository.calm_deletion_checker
-  to   = aws_ecr_repository.calm_adapter_services["calm_deletion_checker"]
-}
-
 resource "aws_ecr_repository" "calm_adapter_services" {
   for_each = toset(local.calm_adapter_images)
 

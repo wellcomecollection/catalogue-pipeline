@@ -22,15 +22,6 @@ locals {
   })
 }
 
-moved {
-  from = aws_ecr_repository.ecr_repository_tei_id_extractor
-  to   = aws_ecr_repository.tei_adapter_services["tei_id_extractor"]
-}
-
-moved {
-  from = aws_ecr_repository.ecr_repository_tei_adapter
-  to   = aws_ecr_repository.tei_adapter_services["tei_adapter"]
-}
 
 resource "aws_ecr_repository" "tei_adapter_services" {
   for_each = toset(local.tei_adapter_images)

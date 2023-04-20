@@ -21,11 +21,6 @@ locals {
   })
 }
 
-moved {
-  from = aws_ecr_repository.mets_adapter
-  to   = aws_ecr_repository.mets_adapter_services["mets_adapter"]
-}
-
 resource "aws_ecr_repository" "mets_adapter_services" {
   for_each = toset(local.mets_adapter_images)
 

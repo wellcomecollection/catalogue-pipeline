@@ -24,26 +24,6 @@ locals {
   })
 }
 
-moved {
-  from = aws_ecr_repository.sierra_reader
-  to   = aws_ecr_repository.sierra_adapter_services["sierra_reader"]
-}
-
-moved {
-  from = aws_ecr_repository.sierra_merger
-  to   = aws_ecr_repository.sierra_adapter_services["sierra_merger"]
-}
-
-moved {
-  from = aws_ecr_repository.sierra_indexer
-  to   = aws_ecr_repository.sierra_adapter_services["sierra_indexer"]
-}
-
-moved {
-  from = aws_ecr_repository.sierra_linker
-  to   = aws_ecr_repository.sierra_adapter_services["sierra_linker"]
-}
-
 resource "aws_ecr_repository" "sierra_adapter_services" {
   for_each = toset(local.sierra_adapter_images)
 
