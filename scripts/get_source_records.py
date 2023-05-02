@@ -50,9 +50,11 @@ def get_source_identifiers(*, work_id):
     es_resp = es_client.get(index=works_index, id=work_id)
     work = es_resp["_source"]
 
-    redirect_sources = [rs["sourceIdentifier"] for rs in work["redirectSources"]]
+    redirect_sources = [
+        rs["sourceIdentifier"] for rs in work["debug"]["redirectSources"]
+    ]
 
-    return [work["state"]["sourceIdentifier"]] + redirect_sources
+    return [work["debug"]["source"]["identifier"]] + redirect_sources
 
 
 def _get_vhs_record(session, *, table_name, id):
