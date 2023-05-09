@@ -3,7 +3,7 @@ import click
 import re
 import httpx
 
-from miro_updates import suppress_image
+from miro_updates import suppress_image, update_miro_image_suppressions_doc
 
 
 miro_id_regex = re.compile("^[A-Z][0-9]{7}[A-Z]{0,4}[0-9]{0,2}$")
@@ -44,6 +44,7 @@ def suppress_miro(id, message):
             )
 
     suppress_image(miro_id=miro_id, message=message)
+    update_miro_image_suppressions_doc()
 
 
 if __name__ == "__main__":
