@@ -47,6 +47,8 @@ def cloned_repo(git_url):
 def get_github_api_key(sess):
     secrets_client = sess.client("secretsmanager")
 
-    secret_value = secrets_client.get_secret_value(SecretId="builds/github_wecobot/scala_libs_pr_bumps")
+    secret_value = secrets_client.get_secret_value(
+        SecretId="builds/github_wecobot/scala_libs_pr_bumps"
+    )
 
     return secret_value["SecretString"]
