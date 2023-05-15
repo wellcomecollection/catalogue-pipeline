@@ -96,7 +96,7 @@ def get_dynamodb_items(sess, *, TableName, **kwargs):
     """
     Generates all the items in a DynamoDB table.
 
-    :param dynamo_client: A boto3 client for DynamoDB.
+    :param sess: A boto3 Session which can read this table.
     :param TableName: The name of the table to scan.
 
     Other keyword arguments will be passed directly to the Scan operation.
