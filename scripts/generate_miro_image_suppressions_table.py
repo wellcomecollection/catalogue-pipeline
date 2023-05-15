@@ -1,16 +1,7 @@
-#!/usr/bin/env python3
-
 import contextlib
 import os
-import shutil
 import subprocess
-import sys
 import tempfile
-
-
-def git(*args):
-    """Run a Git command and return its output."""
-    subprocess.check_call(["git"] + list(args))
 
 
 @contextlib.contextmanager
@@ -33,15 +24,11 @@ def cloned_repo(git_url):
     Clones the repository and changes the working directory to the cloned
     repo.  Cleans up the clone when it's done.
     """
-    repo_dir = tempfile.mkdtemp()
+    with tempfile.TemporaryDirectory() as repo_dir:
+        subprocess.check_call(["git", "clone", git_url, repo_dir])
 
-    git("clone", git_url, repo_dir)
-
-    try:
         with working_directory(repo_dir):
             yield
-    finally:
-        shutil.rmtree(repo_dir)
 
 
 def get_github_api_key(sess):
