@@ -443,4 +443,4 @@ def update_miro_image_suppressions_doc():
             json={"team_reviewers": ["developers"]},
         )
 
-        print(f"To approve these changes, visit https://github.com/wellcomecollection/private/pull/{new_pr_number}")
+        print(f"*** To approve these changes, visit https://github.com/wellcomecollection/private/pull/{new_pr_number}")
