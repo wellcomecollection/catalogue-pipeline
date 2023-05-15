@@ -27,11 +27,19 @@ def cloned_repo(git_url):
     repo.  Cleans up the clone when it's done.
     """
     with tempfile.TemporaryDirectory() as repo_dir:
-        git("clone", git_url, repo_dir, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        git(
+            "clone",
+            git_url,
+            repo_dir,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
 
         with working_directory(repo_dir):
             yield
 
 
 def get_github_api_key(sess):
-    return get_secret_string(sess, secret_id="builds/github_wecobot/scala_libs_pr_bumps")
+    return get_secret_string(
+        sess, secret_id="builds/github_wecobot/scala_libs_pr_bumps"
+    )

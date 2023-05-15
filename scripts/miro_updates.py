@@ -381,7 +381,10 @@ def update_miro_image_suppressions_doc():
     print("*** Updating the list of Miro image suppressions...")
     api_key = get_github_api_key(SESSION)
 
-    client = httpx.Client(auth=("weco-bot", api_key), event_hooks={'response': [lambda r: r.raise_for_status()]})
+    client = httpx.Client(
+        auth=("weco-bot", api_key),
+        event_hooks={"response": [lambda r: r.raise_for_status()]},
+    )
 
     with cloned_repo("git@github.com:wellcomecollection/private.git"):
         with open("miro-suppressions.md", "w") as outfile:
@@ -443,4 +446,6 @@ def update_miro_image_suppressions_doc():
             json={"team_reviewers": ["developers"]},
         )
 
-        print(f"*** To approve these changes, visit https://github.com/wellcomecollection/private/pull/{new_pr_number}")
+        print(
+            f"*** To approve these changes, visit https://github.com/wellcomecollection/private/pull/{new_pr_number}"
+        )
