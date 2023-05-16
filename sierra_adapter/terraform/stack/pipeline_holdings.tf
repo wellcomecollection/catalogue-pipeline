@@ -1,3 +1,14 @@
+module "holdings_reader_new" {
+  source = "../sierra_reader_new"
+
+  resource_type      = "holdings"
+  windows_topic_arns = var.holdings_windows_topic_arns
+  sierra_fields      = local.sierra_holdings_fields
+
+  namespace              = local.namespace_hyphen
+  lambda_error_alarm_arn = var.lambda_error_alarm_arn
+}
+
 module "holdings_reader" {
   source = "./../sierra_reader"
 

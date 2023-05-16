@@ -1,3 +1,14 @@
+module "orders_reader_new" {
+  source = "../sierra_reader_new"
+
+  resource_type      = "orders"
+  windows_topic_arns = var.orders_windows_topic_arns
+  sierra_fields      = local.sierra_orders_fields
+
+  namespace              = local.namespace_hyphen
+  lambda_error_alarm_arn = var.lambda_error_alarm_arn
+}
+
 module "orders_reader" {
   source = "./../sierra_reader"
 

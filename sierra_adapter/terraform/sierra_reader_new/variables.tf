@@ -1,5 +1,3 @@
-variable "sierra_reader_zip" {}
-
 variable "namespace" {
   type = string
 }
@@ -14,5 +12,9 @@ variable "windows_topic_arns" {
 }
 
 variable "lambda_error_alarm_arn" {
+  type = string
+}
+
+variable "sierra_fields" {
   type = string
 }

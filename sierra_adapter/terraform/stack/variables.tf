@@ -43,5 +43,3 @@ variable "reporting_reindex_topic_arn" {
 variable "elastic_cloud_vpce_sg_id" {
   type = string
 }
-
-variable "sierra_reader_zip" {}
