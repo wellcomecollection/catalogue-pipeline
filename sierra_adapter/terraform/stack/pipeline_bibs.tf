@@ -1,3 +1,15 @@
+module "bibs_reader_new" {
+  source = "../sierra_reader_new"
+
+  resource_type = "bibs"
+
+  windows_topic_arns = var.bibs_windows_topic_arns
+
+  namespace              = local.namespace_hyphen
+  sierra_reader_zip      = var.sierra_reader_zip
+  lambda_error_alarm_arn = var.lambda_error_alarm_arn
+}
+
 module "bibs_reader" {
   source = "./../sierra_reader"
 

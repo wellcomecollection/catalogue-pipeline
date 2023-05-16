@@ -41,6 +41,8 @@ module "sierra-adapter-20200604" {
   sierra_merger_image  = aws_ecr_repository.sierra_adapter_services["sierra_merger"].repository_url
   sierra_indexer_image = aws_ecr_repository.sierra_adapter_services["sierra_indexer"].repository_url
 
+  sierra_reader_zip = local.sierra_reader_zip
+
   deployment_env         = "prod"
   shared_logging_secrets = data.terraform_remote_state.shared_infra.outputs.shared_secrets_logging
 
