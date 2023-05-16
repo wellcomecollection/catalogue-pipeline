@@ -8,6 +8,6 @@ variable "mappings_name" {
 }
 
 variable "analysis_name" {
-  type = string
+  type    = string
   default = ""
 }
