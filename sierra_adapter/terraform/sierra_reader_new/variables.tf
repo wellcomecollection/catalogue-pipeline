@@ -18,3 +18,7 @@ variable "lambda_error_alarm_arn" {
 variable "sierra_fields" {
   type = string
 }
+
+variable "reader_bucket" {
+  type = string
+}

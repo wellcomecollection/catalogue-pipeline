@@ -56,10 +56,12 @@ def main(event, context):
     client = catalogue_client()
 
     sns_client = boto3.client("sns")
+    s3_client = boto3.client("s3")
 
     topic_arn = os.environ["TOPIC_ARN"]
     resource_type = os.environ["RESOURCE_TYPE"]
     sierra_fields = os.environ["SIERRA_FIELDS"]
+    bucket_name = os.environ["READER_BUCKET"]
 
     for window in get_windows(event):
         affected_records = get_sierra_records(client, window)
@@ -78,3 +80,13 @@ def main(event, context):
             # I've never actually seen this in practice so I've not written
             # any code to handle it but I include it just in case.
             assert len(resp["Failed"]) == 0, resp
+
+        print(f"Window {window} is complete!")
+        start = f"{window['start'][:19]}Z"
+        end = f"{window['end'][:19]}Z"
+
+        s3_client.put_object(
+            Bucket=bucket_name,
+            Key=f"windows_{resource_type}_complete/{start}__{end}",
+            Body=b""
+        )

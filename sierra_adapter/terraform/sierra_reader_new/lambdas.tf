@@ -18,6 +18,7 @@ module "lambda" {
     TOPIC_ARN     = module.output_topic.arn
     RESOURCE_TYPE = var.resource_type
     SIERRA_FIELDS = var.sierra_fields
+    READER_BUCKET = var.reader_bucket
   }
 
   runtime = "python3.9"

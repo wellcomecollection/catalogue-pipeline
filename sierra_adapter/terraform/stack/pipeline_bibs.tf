@@ -5,6 +5,7 @@ module "bibs_reader_new" {
   windows_topic_arns = var.bibs_windows_topic_arns
   sierra_fields      = local.sierra_bibs_fields
 
+  reader_bucket          = aws_s3_bucket.sierra_adapter.id
   namespace              = local.namespace_hyphen
   lambda_error_alarm_arn = var.lambda_error_alarm_arn
 }
