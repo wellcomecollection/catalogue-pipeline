@@ -42,7 +42,7 @@ module "bibs_merger" {
   resource_type = "bibs"
 
   container_image   = local.sierra_merger_image
-  updates_topic_arn = module.bibs_reader.topic_arn
+  updates_topic_arn = module.bibs_reader_new.topic_arn
 
   vhs_table_name        = module.vhs_sierra.table_name
   vhs_bucket_name       = module.vhs_sierra.bucket_name
