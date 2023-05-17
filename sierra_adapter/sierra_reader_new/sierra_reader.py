@@ -27,15 +27,31 @@ def get_sierra_records(client, window):
     ):
         yield record
 
+    deleted_date
+
     dates = {window["start"].split("T")[0], window["end"].split("T")[0]}
 
     print(f"Fetching deleted records for {dates}")
-    for deleted_date in dates:
-        for record in client.get_objects(
-            f"/{resource_type}",
-            params={"fields": sierra_fields, "deletedDate": deleted_date},
-        ):
-            yield record
+    deleted_start, _ = window['start'].split('T')
+    deleted_end, _ = window['end'].split('T')
+
+    if deleted_start == deleted_end:
+        deleted_date = deleted_start
+    else:
+        deleted_date = f'[{deleted_start},{deleted_end}]'
+
+    for record in client.get_objects(
+        f"/{resource_type}",
+        params={"fields": sierra_fields, "deletedDate": deleted_date},
+    ):
+        yield record
+
+
+def to_scala_record(record):
+    try:
+        return json.dumps({"id": record["id"], "data": json.dumps(record), "bibIds": [], "modifiedDate": record['deletedDate'] + "T23:59:59Z"})
+    except KeyError:
+                return json.dumps({"id": record["id"], "data": json.dumps(record), "bibIds": [str(bib_id) for bib_id in record.get("bibIds", [])], "modifiedDate": record['updatedDate']})
 
 
 def chunked_iterable(iterable, size):
@@ -68,7 +84,7 @@ def main(event, context):
 
         for batch in chunked_iterable(affected_records, size=10):
             batch_entries = [
-                {"Id": str(uuid.uuid4()), "Message": json.dumps(record)}
+                {"Id": str(uuid.uuid4()), "Message": to_scala_record(record)}
                 for record in batch
             ]
 
@@ -82,8 +98,9 @@ def main(event, context):
             assert len(resp["Failed"]) == 0, resp
 
         print(f"Window {window} is complete!")
-        start = f"{window['start'][:19]}Z"
-        end = f"{window['end'][:19]}Z"
+
+        start = window['start'].replace(':', '-')
+        end = window['end'].replace(':', '-')
 
         s3_client.put_object(
             Bucket=bucket_name,
