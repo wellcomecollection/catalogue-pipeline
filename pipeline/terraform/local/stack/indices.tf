@@ -28,10 +28,10 @@ module "images_augmented_index" {
 
 
 module "works_identified_index" {
-  source = "../modules/es_index"
-  name = local.es_works_identified_index
-  mappings_name  = "works_identified.v1"
-  config_path = "${path.root}/../../../index_config"
+  source        = "../modules/es_index"
+  name          = local.es_works_identified_index
+  mappings_name = "works_identified.v1"
+  config_path   = "${path.root}/../../../index_config"
 }
 
 
@@ -39,14 +39,14 @@ module "works_merged_index" {
   source        = "../modules/es_index"
   name          = local.es_works_merged_index
   mappings_name = "works_merged.v1"
-  config_path = "${path.root}/../../../index_config"
+  config_path   = "${path.root}/../../../index_config"
 }
 
 module "works_indexed_index" {
-  source = "../modules/es_index"
-  name = local.es_works_index
-  mappings_name  = "works_indexed.v1"
-  config_path = "${path.root}/../../../index_config"
+  source        = "../modules/es_index"
+  name          = local.es_works_index
+  mappings_name = "works_indexed.v1"
+  config_path   = "${path.root}/../../../index_config"
 }
 
 module "images_indexed_index" {
@@ -56,8 +56,8 @@ module "images_indexed_index" {
   // Images contain a superset of the fields in Works
   // and share the same analysis settings for them
   // The images-specific fields do not use any extra custom analysis.
-  analysis_name  = "works_indexed.v1"
-  config_path = "${path.root}/../../../index_config"
+  analysis_name = "works_indexed.v1"
+  config_path   = "${path.root}/../../../index_config"
 }
 
 
