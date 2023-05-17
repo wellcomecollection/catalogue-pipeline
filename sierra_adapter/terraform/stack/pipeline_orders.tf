@@ -41,7 +41,7 @@ module "orders_linker" {
 
   resource_type = "orders"
 
-  demultiplexer_topic_arn = module.orders_reader.topic_arn
+  demultiplexer_topic_arn = module.orders_reader_new.topic_arn
 
   container_image = local.sierra_linker_image
 
