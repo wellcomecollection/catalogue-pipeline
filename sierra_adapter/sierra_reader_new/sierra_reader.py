@@ -127,7 +127,8 @@ def get_sns_batches(messages):
             this_batch = []
             continue
 
-    if this_batch
+    # If there are any leftover records, send them when we're done.
+    if this_batch:
         yield this_batch
 
 
@@ -144,8 +145,7 @@ def main(event, context):
 
     for window in get_windows(event):
         sierra_records = (
-            to_scala_record(record)
-            for record in get_sierra_records(client, window)
+            to_scala_record(record) for record in get_sierra_records(client, window)
         )
 
         for batch_entries in get_sns_batches(sierra_records):
