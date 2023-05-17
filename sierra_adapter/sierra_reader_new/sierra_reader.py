@@ -1,4 +1,3 @@
-import itertools
 import json
 import os
 import uuid
@@ -92,18 +91,44 @@ def to_scala_record(record):
         )
 
 
-def chunked_iterable(iterable, size):
+def get_sns_batches(messages):
     """
-    Break an iterable into pieces of the given size.
+    Given an iterable of SNS messages, group them into batches which
+    are suitable for sending to the SNS PublishBatch API.
 
-    See https://alexwlchan.net/2018/iterating-in-fixed-size-chunks/
+    There are two rules for batches:
+
+    *   You can send up to 10 messages in a single batch
+    *   A single batch can't exceed 256KB
+
     """
     it = iter(iterable)
-    while True:
-        chunk = tuple(itertools.islice(it, size))
-        if not chunk:
-            break
-        yield chunk
+
+    this_batch = []
+
+    for m in messages:
+        this_message = [{"Id": str(uuid.uuid4()), "Message": m}]
+
+        old_batch = this_batch
+        new_batch = this_batch + this_message
+
+        # If adding this message to the batch will push us over the 256KB
+        # threshold, send all the other messages then start a new batch
+        # with the latest message.
+        if len(json.dumps(new_batch)) > 250 * 1024:
+            yield old_batch
+            this_batch = [this_message]
+            continue
+
+        # If there are 10 messages in this batch, send the entire batch
+        # and then start a new batch.
+        if len(new_batch) == 10:
+            yield new_batch
+            this_batch = []
+            continue
+
+    if this_batch
+        yield this_batch
 
 
 def main(event, context):
@@ -118,14 +143,12 @@ def main(event, context):
     bucket_name = os.environ["READER_BUCKET"]
 
     for window in get_windows(event):
-        affected_records = get_sierra_records(client, window)
+        sierra_records = (
+            to_scala_record(record)
+            for record in get_sierra_records(client, window)
+        )
 
-        for batch in chunked_iterable(affected_records, size=10):
-            batch_entries = [
-                {"Id": str(uuid.uuid4()), "Message": to_scala_record(record)}
-                for record in batch
-            ]
-
+        for batch_entries in get_sns_batches(sierra_records):
             resp = sns_client.publish_batch(
                 TopicArn=topic_arn, PublishBatchRequestEntries=batch_entries
             )
