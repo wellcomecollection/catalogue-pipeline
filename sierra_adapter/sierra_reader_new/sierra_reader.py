@@ -102,8 +102,6 @@ def get_sns_batches(messages):
     *   A single batch can't exceed 256KB
 
     """
-    it = iter(iterable)
-
     this_batch = []
 
     for m in messages:
@@ -140,7 +138,6 @@ def main(event, context):
 
     topic_arn = os.environ["TOPIC_ARN"]
     resource_type = os.environ["RESOURCE_TYPE"]
-    sierra_fields = os.environ["SIERRA_FIELDS"]
     bucket_name = os.environ["READER_BUCKET"]
 
     for window in get_windows(event):
