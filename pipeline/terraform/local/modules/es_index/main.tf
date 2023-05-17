@@ -6,8 +6,11 @@ locals {
   analysis_name = var.analysis_name != "" ? var.analysis_name : var.mappings_name
 
   empty_analysis = {
-    analyzer : {}
-    normalizer : {}
+    analyzer: {}
+    normalizer: {}
+    filter: {}
+    char_filter: {}
+    tokenizer: {}
   }
   analysis_json = local.analysis_name != "empty" ? merge(local.empty_analysis, jsondecode(file("${path.root}/index_config/analysis.${var.mappings_name}.json"))) : local.empty_analysis
 }
@@ -17,4 +20,7 @@ resource "elasticstack_elasticsearch_index" "the_index" {
   mappings            = file(local.mappings_file)
   analysis_analyzer   = jsonencode(local.analysis_json["analyzer"])
   analysis_normalizer = jsonencode(local.analysis_json["normalizer"])
+  analysis_filter = jsonencode(local.analysis_json["normalizer"])
+  analysis_char_filter = jsonencode(local.analysis_json["char_filter"])
+  analysis_tokenizer = jsonencode(local.analysis_json["tokenizer"])
 }
