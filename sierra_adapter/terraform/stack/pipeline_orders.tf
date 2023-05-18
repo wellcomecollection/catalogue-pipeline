@@ -16,7 +16,7 @@ module "orders_reader" {
   resource_type = "orders"
 
   bucket_name        = aws_s3_bucket.sierra_adapter.id
-  windows_topic_arns = var.orders_windows_topic_arns
+  windows_topic_arns = []
 
   sierra_fields = local.sierra_orders_fields
 
