@@ -72,23 +72,49 @@ def to_scala_record(record):
     by the existing Sierra reader.
     """
     try:
-        return json.dumps(
-            {
-                "id": record["id"],
-                "data": json.dumps(record),
-                "bibIds": [],
-                "modifiedDate": record["deletedDate"] + "T23:59:59Z",
-            }
-        )
+        # The choice of "end of day" for deleted records is to ensure
+        # that deletions take precedence over updates.
+        #
+        # In the rest of the Sierra reader, we use the modifiedDate field
+        # to order updates.  Deletions always take precedence, because
+        # deleting a record is a one-way operation -- once deleted, a record
+        # can't be undeleted or modified again.
+        #
+        # Example:
+        #
+        #   1.  A librarian updates a record at 12:00.  When we get the
+        #       record from the Sierra API, it has a timestamp:
+        #
+        #           updatedDate  => "2001-01-01T12:00:00Z"
+        #
+        #       We send this date directly to the downstream apps:
+        #
+        #           modifiedDate => "2001-01-01T12:00:00Z"
+        #
+        #   2.  Another librarian deletes the record at 13:00.  When we
+        #       get the record from the Sierra API, it just has a date:
+        #
+        #           deletedDate  => "2001-01-01"
+        #
+        #       We send a 23:59:59 timestamp to the downstream apps:
+        #
+        #           modifiedDate => "2001-01-01T23:59:59Z"
+        #
+        #       Because this modifiedDate is newer, this ensures the deletion
+        #       will replace the update we saw earlier in the day.
+        #
+        modified_date = record["deletedDate"] + "T23:59:59Z"
     except KeyError:
-        return json.dumps(
-            {
-                "id": record["id"],
-                "data": json.dumps(record),
-                "bibIds": [str(bib_id) for bib_id in record.get("bibIds", [])],
-                "modifiedDate": record["updatedDate"],
-            }
-        )
+        modified_date = record["updatedDate"]
+
+    return json.dumps(
+        {
+            "id": record["id"],
+            "data": json.dumps(record),
+            "bibIds": [str(bib_id) for bib_id in record.get("bibIds", [])],
+            "modifiedDate": modified_date,
+        }
+    )
 
 
 def get_sns_batches(messages):
