@@ -47,6 +47,9 @@ def get_sierra_records(client, window):
     #       deletedDate=2022-07-16
     #       deletedDate=[2022-07-16,2022-07-20]
     #
+    # Note: this means we may process the same deletion multiple times
+    # in a day.  We consider this to be acceptable -- deletions are
+    # idempotent and have a minimal impact on the rest of the pipeline.
     print(f"Fetching deleted records for {dates}")
     deleted_start, _ = window["start"].split("T")
     deleted_end, _ = window["end"].split("T")
