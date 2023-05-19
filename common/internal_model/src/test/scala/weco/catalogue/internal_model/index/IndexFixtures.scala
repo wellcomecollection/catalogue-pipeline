@@ -16,27 +16,27 @@ import weco.catalogue.internal_model.work.{Work, WorkState}
 
 trait IndexFixtures extends ElasticsearchFixtures { this: Suite =>
 
-  def withLocalWorksIndex[R](testWith: TestWith[Index, R]): R =
-    withLocalElasticsearchIndex[R](config = WorksIndexConfig.indexed) { index =>
-      testWith(index)
-    }
+//  def withLocalWorksIndex[R](testWith: TestWith[Index, R]): R =
+//    withLocalElasticsearchIndex[R](config = WorksIndexConfig.indexed) { index =>
+//      testWith(index)
+//    }
 
-  def withLocalIdentifiedWorksIndex[R](testWith: TestWith[Index, R]): R =
-    withLocalElasticsearchIndex[R](config = WorksIndexConfig.identified) {
-      index =>
-        testWith(index)
-    }
+//  def withLocalIdentifiedWorksIndex[R](testWith: TestWith[Index, R]): R =
+//    withLocalElasticsearchIndex[R](config = WorksIndexConfig.identified) {
+//      index =>
+//        testWith(index)
+//    }
 
-  def withLocalMergedWorksIndex[R](testWith: TestWith[Index, R]): R =
-    withLocalElasticsearchIndex[R](config = WorksIndexConfig.merged) { index =>
-      testWith(index)
-    }
-
-  def withLocalDenormalisedWorksIndex[R](testWith: TestWith[Index, R]): R =
-    withLocalElasticsearchIndex[R](config = WorksIndexConfig.denormalised) {
-      index =>
-        testWith(index)
-    }
+//  def withLocalMergedWorksIndex[R](testWith: TestWith[Index, R]): R =
+//    withLocalElasticsearchIndex[R](config = WorksIndexConfig.merged) { index =>
+//      testWith(index)
+//    }
+//
+//  def withLocalDenormalisedWorksIndex[R](testWith: TestWith[Index, R]): R =
+//    withLocalElasticsearchIndex[R](config = WorksIndexConfig.denormalised) {
+//      index =>
+//        testWith(index)
+//    }
   def withLocalInitialImagesIndex[R](testWith: TestWith[Index, R]): R =
     withLocalElasticsearchIndex[R](config = ImagesIndexConfig.initial) {
       index =>
@@ -79,21 +79,23 @@ trait IndexFixtures extends ElasticsearchFixtures { this: Suite =>
   )(implicit encoder: Encoder[Work[State]]): Assertion = {
     val result = elasticClient.execute(
       bulk(
-        works.map { work =>
-          val jsonDoc = toJson(work).get
-          indexInto(index.name)
-            .version(work.version)
-            .versionType(ExternalGte)
-            .id(work.id)
-            .doc(jsonDoc)
+        works.map {
+          work =>
+            val jsonDoc = toJson(work).get
+            indexInto(index.name)
+              .version(work.version)
+              .versionType(ExternalGte)
+              .id(work.id)
+              .doc(jsonDoc)
         }
       ).refreshImmediately
     )
 
     // With a large number of works this can take a long time
     // 30 seconds should be enough
-    whenReady(result, Timeout(Span(30, Seconds))) { _ =>
-      getSizeOf(index) shouldBe works.size
+    whenReady(result, Timeout(Span(30, Seconds))) {
+      _ =>
+        getSizeOf(index) shouldBe works.size
     }
   }
 
@@ -103,20 +105,22 @@ trait IndexFixtures extends ElasticsearchFixtures { this: Suite =>
   )(implicit encoder: Encoder[Image[State]]): Assertion = {
     val result = elasticClient.execute(
       bulk(
-        images.map { image =>
-          val jsonDoc = toJson(image).get
+        images.map {
+          image =>
+            val jsonDoc = toJson(image).get
 
-          indexInto(index.name)
-            .version(image.version)
-            .versionType(ExternalGte)
-            .id(image.id)
-            .doc(jsonDoc)
+            indexInto(index.name)
+              .version(image.version)
+              .versionType(ExternalGte)
+              .id(image.id)
+              .doc(jsonDoc)
         }
       ).refreshImmediately
     )
 
-    whenReady(result) { _ =>
-      getSizeOf(index) shouldBe images.size
+    whenReady(result) {
+      _ =>
+        getSizeOf(index) shouldBe images.size
     }
   }
   def getSizeOf(index: Index): Long =

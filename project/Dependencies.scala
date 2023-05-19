@@ -2,7 +2,8 @@ import sbt._
 
 object WellcomeDependencies {
 
-  val defaultVersion = "32.24.2" // This is automatically bumped by the scala-libs release process, do not edit this line manually
+  val defaultVersion =
+    "32.24.2" // This is automatically bumped by the scala-libs release process, do not edit this line manually
 
   lazy val versions = new {
     val typesafe = defaultVersion
@@ -180,7 +181,8 @@ object CatalogueDependencies {
       ExternalDependencies.enumeratumDependencies ++
       ExternalDependencies.scalaXmlDependencies ++
       WellcomeDependencies.storageLibrary ++
-      ExternalDependencies.diffJsonDependencies
+      ExternalDependencies.diffJsonDependencies ++
+      WellcomeDependencies.httpLibrary // Currently only needed for test, but maybe more soon?
 
   val displayModelDependencies: Seq[ModuleID] =
     WellcomeDependencies.httpLibrary

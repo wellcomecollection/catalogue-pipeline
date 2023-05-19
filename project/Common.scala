@@ -6,7 +6,8 @@ object Common {
     scalaVersion := "2.12.8",
     organization := "weco",
     resolvers ++= Seq(
-      "Wellcome releases" at "s3://releases.mvn-repo.wellcomecollection.org/"),
+      "Wellcome releases" at "s3://releases.mvn-repo.wellcomecollection.org/"
+    ),
     scalacOptions ++= Seq(
       "-deprecation",
       "-unchecked",

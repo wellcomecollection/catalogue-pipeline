@@ -33,33 +33,35 @@ class ElasticIndexerTest
     with SampleDocumentGenerators {
 
   import weco.pipeline_storage.generators.SampleDocument._,
-  weco.pipeline_storage.generators.SampleDocument.{
+    weco.pipeline_storage.generators.SampleDocument.{
     canonicalId => sampleDocumentCanonicalId
   }
 
   override def withContext[R](
     documents: Seq[SampleDocument]
   )(testWith: TestWith[Index, R]): R =
-    withLocalElasticsearchIndex(config = IndexConfig.empty) { implicit index =>
-      if (documents.nonEmpty) {
-        withIndexer { indexer =>
-          indexer(documents).await shouldBe a[Right[_, _]]
+    withLocalElasticsearchIndex(config = IndexConfig.empty) {
+      implicit index =>
+        if (documents.nonEmpty) {
+          withIndexer {
+            indexer =>
+              indexer(documents).await shouldBe a[Right[_, _]]
+          }
         }
-      }
 
-      eventually {
-        val response: Response[SearchResponse] = elasticClient.execute {
-          search(index).matchAllQuery()
-        }.await
+        eventually {
+          val response: Response[SearchResponse] = elasticClient.execute {
+            search(index).matchAllQuery()
+          }.await
 
-        val storedDocuments = response.result.hits.hits
-          .map(_.sourceAsString)
-          .map(fromJson[SampleDocument](_).get)
+          val storedDocuments = response.result.hits.hits
+            .map(_.sourceAsString)
+            .map(fromJson[SampleDocument](_).get)
 
-        storedDocuments should contain theSameElementsAs documents
-      }
+          storedDocuments should contain theSameElementsAs documents
+        }
 
-      testWith(index)
+        testWith(index)
     }
 
   override def withIndexer[R](
@@ -105,12 +107,14 @@ class ElasticIndexerTest
   }
 
   it("returns a list of documents that weren't indexed correctly") {
-    val validDocuments = (1 to 5).map { _ =>
-      createDocument
+    val validDocuments = (1 to 5).map {
+      _ =>
+        createDocument
     }
-    val invalidDocuments = (1 to 3).map { _ =>
-      createDocument
-        .copy(data = SampleDocumentData(genre = Some(randomAlphanumeric())))
+    val invalidDocuments = (1 to 3).map {
+      _ =>
+        createDocument
+          .copy(data = SampleDocumentData(genre = Some(randomAlphanumeric())))
     }
 
     val strictWithNoDataIndexConfig = IndexConfig(
@@ -127,20 +131,24 @@ class ElasticIndexerTest
 
     withLocalElasticsearchIndex(config = strictWithNoDataIndexConfig) {
       implicit index =>
-        withIndexer { indexer =>
-          val future = indexer(validDocuments ++ invalidDocuments)
+        withIndexer {
+          indexer =>
+            val future = indexer(validDocuments ++ invalidDocuments)
 
-          whenReady(future) { result =>
-            result.left.get should contain only (invalidDocuments: _*)
+            whenReady(future) {
+              result =>
+                result.left.get should contain only (invalidDocuments: _*)
 
-            validDocuments.foreach { doc =>
-              assertIsIndexed(doc)
+                validDocuments.foreach {
+                  doc =>
+                    assertIsIndexed(doc)
+                }
+
+                invalidDocuments.foreach {
+                  doc =>
+                    assertIsNotIndexed(doc)
+                }
             }
-
-            invalidDocuments.foreach { doc =>
-              assertIsNotIndexed(doc)
-            }
-          }
         }
     }
   }
@@ -170,49 +178,53 @@ class ElasticIndexerTest
 
     withLocalElasticsearchIndex(config = unmappedDataMappingIndexConfig) {
       implicit index =>
-        withIndexer { indexer =>
-          val future = indexer(documents)
+        withIndexer {
+          indexer =>
+            val future = indexer(documents)
 
-          whenReady(future) { result =>
-            result.right.get should contain only (documents: _*)
-            val hits = eventually {
-              val response = elasticClient.execute {
-                search(index).matchAllQuery()
-              }.await
+            whenReady(future) {
+              result =>
+                result.right.get should contain only (documents: _*)
+                val hits = eventually {
+                  val response = elasticClient.execute {
+                    search(index).matchAllQuery()
+                  }.await
 
-              val hits = response.result.hits.hits
+                  val hits = response.result.hits.hits
 
-              hits should have size 2
-              hits
+                  hits should have size 2
+                  hits
+                }
+                hits.map(_.sourceAsMap).toList shouldBe List(
+                  Map(
+                    "id" -> documentA.id,
+                    "version" -> documentA.version,
+                    "title" -> documentA.title,
+                    "data" -> Map("genre" -> "Crime")
+                  ),
+                  Map(
+                    "id" -> documentB.id,
+                    "version" -> documentB.version,
+                    "title" -> documentB.title,
+                    "data" -> Map("date" -> "10/10/2010")
+                  )
+                )
             }
-            hits.map(_.sourceAsMap).toList shouldBe List(
-              Map(
-                "id" -> documentA.id,
-                "version" -> documentA.version,
-                "title" -> documentA.title,
-                "data" -> Map("genre" -> "Crime")
-              ),
-              Map(
-                "id" -> documentB.id,
-                "version" -> documentB.version,
-                "title" -> documentB.title,
-                "data" -> Map("date" -> "10/10/2010")
-              )
-            )
-          }
         }
     }
   }
 
   it("returns a failed future if indexing an empty list of ids") {
-    withContext() { implicit context =>
-      withIndexer { indexer =>
-        val future = indexer(Seq())
+    withContext() {
+      implicit context =>
+        withIndexer {
+          indexer =>
+            val future = indexer(Seq())
 
-        whenReady(future.failed) {
-          _ shouldBe a[IllegalArgumentException]
+            whenReady(future.failed) {
+              _ shouldBe a[IllegalArgumentException]
+            }
         }
-      }
     }
   }
 
@@ -254,31 +266,35 @@ class ElasticIndexerTest
       // Docker Compose file for these tests.
       val title = randomAlphanumeric(length = 20000)
       val documents = (1 to 100)
-        .map { _ =>
-          createDocument.copy(title = title)
+        .map {
+          _ =>
+            createDocument.copy(title = title)
         }
 
-      withContext() { implicit index: Index =>
-        withNoCompressionIndexer { indexer =>
-          val future = indexer(documents)
+      withContext() {
+        implicit index: Index =>
+          withNoCompressionIndexer {
+            indexer =>
+              val future = indexer(documents)
 
-          whenReady(future) { resp =>
-            resp shouldBe a[Right[_, _]]
-            resp.right.value should contain theSameElementsAs documents
+              whenReady(future) {
+                resp =>
+                  resp shouldBe a[Right[_, _]]
+                  resp.right.value should contain theSameElementsAs documents
+              }
+
+              // Because Elasticsearch isn't strongly consistent, it may take a
+              // few seconds for the count response to be accurate.
+              eventually {
+                val countFuture = elasticClient.execute {
+                  count(index.name)
+                }
+
+                whenReady(countFuture) {
+                  _.result.count shouldBe documents.size
+                }
+              }
           }
-
-          // Because Elasticsearch isn't strongly consistent, it may take a
-          // few seconds for the count response to be accurate.
-          eventually {
-            val countFuture = elasticClient.execute {
-              count(index.name)
-            }
-
-            whenReady(countFuture) {
-              _.result.count shouldBe documents.size
-            }
-          }
-        }
       }
     }
 
@@ -286,14 +302,16 @@ class ElasticIndexerTest
       val title = randomAlphanumeric(length = 2000000)
       val documents = Seq(createDocument.copy(title = title))
 
-      withContext() { implicit index: Index =>
-        withNoCompressionIndexer { indexer =>
-          val future = indexer(documents)
+      withContext() {
+        implicit index: Index =>
+          withNoCompressionIndexer {
+            indexer =>
+              val future = indexer(documents)
 
-          whenReady(future) {
-            _.left.value shouldBe documents
+              whenReady(future) {
+                _.left.value shouldBe documents
+              }
           }
-        }
       }
     }
 
@@ -304,14 +322,16 @@ class ElasticIndexerTest
         createDocument.copy(title = title)
       )
 
-      withContext() { implicit index: Index =>
-        withNoCompressionIndexer { indexer =>
-          val future = indexer(documents)
+      withContext() {
+        implicit index: Index =>
+          withNoCompressionIndexer {
+            indexer =>
+              val future = indexer(documents)
 
-          whenReady(future) {
-            _.left.value shouldBe documents
+              whenReady(future) {
+                _.left.value shouldBe documents
+              }
           }
-        }
       }
     }
 
@@ -319,35 +339,43 @@ class ElasticIndexerTest
     val bigDocument =
       createDocument.copy(title = randomAlphanumeric(length = 2000000))
 
-    it("indexes everything except the single big document (big document last)") {
+    it(
+      "indexes everything except the single big document (big document last)"
+    ) {
       val documents = Seq(smallDocument, bigDocument)
 
-      withContext() { implicit index: Index =>
-        withIndexer { indexer =>
-          val future = indexer(documents)
+      withContext() {
+        implicit index: Index =>
+          withIndexer {
+            indexer =>
+              val future = indexer(documents)
 
-          whenReady(future) {
-            _.left.value shouldBe Seq(bigDocument)
+              whenReady(future) {
+                _.left.value shouldBe Seq(bigDocument)
+              }
+
+              assertElasticsearchEventuallyHas(index, smallDocument)
           }
-
-          assertElasticsearchEventuallyHas(index, smallDocument)
-        }
       }
     }
 
-    it("indexes everything except the single big document (big document first)") {
+    it(
+      "indexes everything except the single big document (big document first)"
+    ) {
       val documents = Seq(bigDocument, smallDocument)
 
-      withContext() { implicit index: Index =>
-        withIndexer { indexer =>
-          val future = indexer(documents)
+      withContext() {
+        implicit index: Index =>
+          withIndexer {
+            indexer =>
+              val future = indexer(documents)
 
-          whenReady(future) {
-            _.left.value shouldBe Seq(bigDocument)
+              whenReady(future) {
+                _.left.value shouldBe Seq(bigDocument)
+              }
+
+              assertElasticsearchEventuallyHas(index, smallDocument)
           }
-
-          assertElasticsearchEventuallyHas(index, smallDocument)
-        }
       }
     }
   }

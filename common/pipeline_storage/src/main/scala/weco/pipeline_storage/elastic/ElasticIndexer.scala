@@ -10,7 +10,7 @@ import com.sksamuel.elastic4s.{
 }
 import grizzled.slf4j.Logging
 import io.circe.{Encoder, Printer}
-import weco.elasticsearch.{ElasticsearchIndexCreator, IndexConfig}
+import weco.elasticsearch.IndexConfig
 import weco.pipeline_storage.{Indexable, Indexer}
 
 import java.security.MessageDigest
@@ -36,8 +36,11 @@ class ElasticIndexer[T: Indexable](
     }
   }
 
-  final def init(): Future[Unit] =
-    new ElasticsearchIndexCreator(client, index, config).create
+  final def init(): Future[Unit] = {
+    client.execute(indexExists(index.name)).map(_.result.isExists)
+    // TODO write test to illustrate that is will fail if the index isn't there.
+//    new ElasticsearchIndexCreator(client, index, config).create
+  }
 
   final def apply(documents: Seq[T]): Future[Either[Seq[T], Seq[T]]] =
     Future

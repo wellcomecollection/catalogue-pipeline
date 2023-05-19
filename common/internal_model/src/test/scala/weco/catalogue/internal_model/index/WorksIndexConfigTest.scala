@@ -12,6 +12,7 @@ import io.circe.generic.semiauto.deriveEncoder
 import org.scalatest.Assertion
 import weco.json.utils.JsonAssertions
 import weco.catalogue.internal_model.Implicits._
+import weco.catalogue.internal_model.fixtures.index.IndexFixturesNew
 import weco.catalogue.internal_model.generators.ImageGenerators
 import weco.catalogue.internal_model.work._
 import weco.catalogue.internal_model.work.generators.WorkGenerators
@@ -19,7 +20,7 @@ import weco.json.JsonUtil._
 
 class WorksIndexConfigTest
     extends AnyFunSpec
-    with IndexFixtures
+    with IndexFixturesNew
     with Matchers
     with JsonAssertions
     with ScalaCheckPropertyChecks
@@ -43,53 +44,58 @@ class WorksIndexConfigTest
 
   describe("indexing different works with every type of WorkState") {
     it("WorkState.Source") {
-      withLocalElasticsearchIndex(config = WorksIndexConfig.source) {
+      withLocalSourceIndex {
         implicit index =>
-          forAll { sourceWork: Work[WorkState.Source] =>
-            assertWorkCanBeIndexed(sourceWork)
+          forAll {
+            sourceWork: Work[WorkState.Source] =>
+              assertWorkCanBeIndexed(sourceWork)
           }
       }
     }
 
     it("WorkState.Identified") {
-      withLocalElasticsearchIndex(config = WorksIndexConfig.identified) {
+      withLocalIdentifiedWorksIndex {
         implicit index =>
-          forAll { identifiedWork: Work[WorkState.Identified] =>
-            assertWorkCanBeIndexed(identifiedWork)
+          forAll {
+            identifiedWork: Work[WorkState.Identified] =>
+              assertWorkCanBeIndexed(identifiedWork)
           }
       }
     }
 
     it("WorkState.Merged") {
-      withLocalElasticsearchIndex(config = WorksIndexConfig.merged) {
+      withLocalMergedWorksIndex {
         implicit index =>
-          forAll { mergedWork: Work[WorkState.Merged] =>
-            assertWorkCanBeIndexed(mergedWork)
+          forAll {
+            mergedWork: Work[WorkState.Merged] =>
+              assertWorkCanBeIndexed(mergedWork)
           }
       }
     }
 
     it("WorkState.Denormalised") {
-      withLocalElasticsearchIndex(config = WorksIndexConfig.denormalised) {
+      withLocalDenormalisedWorksIndex {
         implicit index =>
-          forAll { denormalisedWork: Work[WorkState.Denormalised] =>
-            assertWorkCanBeIndexed(denormalisedWork)
+          forAll {
+            denormalisedWork: Work[WorkState.Denormalised] =>
+              assertWorkCanBeIndexed(denormalisedWork)
           }
       }
     }
   }
 
   it("does not put an invalid work") {
-    withLocalWorksIndex { implicit index =>
-      val notAWork = BadTestObject(
-        id = "id",
-        weight = 5
-      )
+    withLocalWorksIndex {
+      implicit index =>
+        val notAWork = BadTestObject(
+          id = "id",
+          weight = 5
+        )
 
-      val response = indexWork(id = "id", work = notAWork)
+        val response = indexWork(id = "id", work = notAWork)
 
-      response.isError shouldBe true
-      response.error shouldBe a[ElasticError]
+        response.isError shouldBe true
+        response.error shouldBe a[ElasticError]
     }
   }
 
@@ -114,10 +120,12 @@ class WorksIndexConfigTest
     client: ElasticClient = elasticClient,
     id: String,
     work: W
-  )(implicit index: Index, encoder: Encoder[W]) =
+  )(implicit index: Index, encoder: Encoder[W]) = {
+    // TODO: Change this to use REST
     client.execute {
       indexInto(index).doc(toJson(work).get).id(id)
     }.await
+  }
 
   private def assertWorkIsIndexed[W](
     client: ElasticClient,
@@ -125,10 +133,13 @@ class WorksIndexConfigTest
     work: W
   )(implicit index: Index, decoder: Decoder[W]) =
     eventually {
-      whenReady(client.execute(get(index, id))) { getResponse =>
-        getResponse.result.exists shouldBe true
+      // TODO: Change this to use REST
 
-        fromJson[W](getResponse.result.sourceAsString).get shouldBe work
+      whenReady(client.execute(get(index, id))) {
+        getResponse =>
+          getResponse.result.exists shouldBe true
+
+          fromJson[W](getResponse.result.sourceAsString).get shouldBe work
       }
     }
 }
