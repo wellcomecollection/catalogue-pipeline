@@ -102,13 +102,16 @@ class SierraClient:
 
     def get_objects(self, *args, **kwargs):
         kwargs["id"] = 0
+        total_seen = 0
 
         while True:
             response = self._get_objects_from_id(*args, **kwargs)
             entries = response["entries"]
 
             yield from entries
-            print(f"  Got a batch of {len(entries)} records from Sierra…")
+
+            total_seen += len(entries)
+            print(f"  Got a batch of {len(entries)} records from Sierra… ({total_seen} so far)")
 
             if not entries:
                 break
