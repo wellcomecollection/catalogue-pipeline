@@ -28,17 +28,14 @@ def get_sierra_records(client, window):
     #
     # This only fetches Sierra records which have been updated but not
     # deleted.
-    updated_date_format = '%Y-%m-%dT%H:%M:%SZ'
+    updated_date_format = "%Y-%m-%dT%H:%M:%SZ"
 
     updated_date = f'[{window["start"].strftime(updated_date_format)},{window["end"].strftime(updated_date_format)}]'
 
     print(f"Fetching updated records --> {updated_date}")
     for record in client.get_objects(
         f"/{resource_type}",
-        params={
-            "fields": sierra_fields,
-            "updatedDate": updated_date,
-        },
+        params={"fields": sierra_fields, "updatedDate": updated_date},
     ):
         yield record
 
@@ -126,9 +123,7 @@ def to_scala_record(record):
 
 
 def run_with(json_window):
-    window = {
-        k: datetime.datetime.fromisoformat(v) for k, v in json_window.items()
-    }
+    window = {k: datetime.datetime.fromisoformat(v) for k, v in json_window.items()}
 
     client = catalogue_client()
 
@@ -177,7 +172,7 @@ def main(event, context):
         run_with(window)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     try:
         window = json.loads(sys.argv[1])
     except (IndexError, ValueError):

@@ -111,7 +111,9 @@ class SierraClient:
             yield from entries
 
             total_seen += len(entries)
-            print(f"  Got a batch of {len(entries)} records from Sierra… ({total_seen} so far)")
+            print(
+                f"  Got a batch of {len(entries)} records from Sierra… ({total_seen} so far)"
+            )
 
             if not entries:
                 break
@@ -132,9 +134,7 @@ def catalogue_client():
 
     credentials = {
         "api_url": "https://libsys.wellcomelibrary.org/iii/sierra-api/v6",
-        "oauth_key": get_secret_string(
-            sess, SecretId="sierra_adapter/sierra_api_key"
-        ),
+        "oauth_key": get_secret_string(sess, SecretId="sierra_adapter/sierra_api_key"),
         "oauth_secret": get_secret_string(
             sess, SecretId="sierra_adapter/sierra_api_client_secret"
         ),
