@@ -25,6 +25,10 @@ module "lambda" {
 
   # max timeout for a Lambda is 15 minutes
   timeout = 15 * 60
+
+  # Avoid running more than one instance at once, so we don't
+  # overwhelm Sierra.
+  reserved_concurrent_executions = 1
 }
 
 resource "aws_lambda_permission" "allow_sns_trigger" {

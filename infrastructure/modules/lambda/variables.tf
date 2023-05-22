@@ -54,3 +54,8 @@ variable "runtime" {
   default = "python3.6"
   type    = string
 }
+
+variable "reserved_concurrent_executions" {
+  type    = number
+  default = null
+}
