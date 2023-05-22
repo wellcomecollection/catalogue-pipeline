@@ -10,4 +10,4 @@ ENVIRONMENT=$(aws lambda get-function-configuration \
 
 export BUCKET=$(echo "$ENVIRONMENT" | jq -r .BUCKET)
 
-python3 src/sierra_progress_reporter.py
+python3 sierra_progress_reporter.py

@@ -100,7 +100,7 @@ def consolidate_windows(sess, *, bucket, resource_type):
 
             consolidated_key = (f"completed_{resource_type}/{json.dumps(window)}")
 
-            s3_client.put_object(Bucket=bucket, Key=consolidated_key, Body=b"")
+            s3_client.put_object(Bucket=bucket, Key=consolidated_key, Body=b"", ContentType="text/plain")
 
             # Then clean up the individual intervals that made up the set.
             # We sacrifice granularity for performance.
