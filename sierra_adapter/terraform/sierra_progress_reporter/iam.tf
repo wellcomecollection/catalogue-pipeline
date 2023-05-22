@@ -8,6 +8,17 @@ data "aws_iam_policy_document" "allow_s3_access" {
       "arn:aws:s3:::${var.s3_adapter_bucket_name}/completed*",
     ]
   }
+
+  statement {
+    actions = [
+      "s3:List*",
+    ]
+
+    resources = [
+      "arn:aws:s3:::${var.s3_adapter_bucket_name}",
+      "arn:aws:s3:::${var.s3_adapter_bucket_name}/*",
+    ]
+  }
 }
 
 resource "aws_iam_role_policy" "allow_s3_access" {
@@ -22,7 +33,7 @@ data "aws_iam_policy_document" "allow_secrets_read" {
     ]
 
     resources = [
-      "arn:aws:secretsmanager:eu-west-1:760097843905:secret:sierra_adapter/critical_slack_webhook/*",
+      "arn:aws:secretsmanager:eu-west-1:760097843905:secret:sierra_adapter/critical_slack_webhook*",
     ]
   }
 }
