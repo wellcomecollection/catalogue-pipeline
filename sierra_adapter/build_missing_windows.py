@@ -9,9 +9,7 @@ import sys
 
 import boto3
 
-sys.path.append(
-    os.path.join(os.path.dirname(__file__), "sierra_progress_reporter")
-)
+sys.path.append(os.path.join(os.path.dirname(__file__), "sierra_progress_reporter"))
 sys.path.append(
     os.path.join(os.path.dirname(__file__), "sierra_window_generator", "src")
 )

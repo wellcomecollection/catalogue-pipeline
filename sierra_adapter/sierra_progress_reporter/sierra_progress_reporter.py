@@ -75,7 +75,9 @@ def prepare_missing_report(sess, *, bucket, resource_type):
     yield ""
     yield f"*missing {resource_type} windows*"
 
-    for iv1, iv2 in window(build_report(sess, bucket=bucket, resource_type=resource_type)):
+    for iv1, iv2 in window(
+        build_report(sess, bucket=bucket, resource_type=resource_type)
+    ):
         missing_start = iv1.end
         missing_end = iv2.start
         if missing_start.date() == missing_end.date():
@@ -87,7 +89,9 @@ def prepare_missing_report(sess, *, bucket, resource_type):
 
 
 def consolidate_windows(sess, *, bucket, resource_type):
-    intervals = get_intervals(keys=list_s3_prefix(sess, bucket=bucket, prefix=f"completed_{resource_type}"))
+    intervals = get_intervals(
+        keys=list_s3_prefix(sess, bucket=bucket, prefix=f"completed_{resource_type}")
+    )
 
     s3_client = sess.client("s3")
 
@@ -98,9 +102,11 @@ def consolidate_windows(sess, *, bucket, resource_type):
             # so combining them makes reporting faster on subsequent runs.
             window = {"start": iv.start.isoformat(), "end": iv.end.isoformat()}
 
-            consolidated_key = (f"completed_{resource_type}/{json.dumps(window)}")
+            consolidated_key = f"completed_{resource_type}/{json.dumps(window)}"
 
-            s3_client.put_object(Bucket=bucket, Key=consolidated_key, Body=b"", ContentType="text/plain")
+            s3_client.put_object(
+                Bucket=bucket, Key=consolidated_key, Body=b"", ContentType="text/plain"
+            )
 
             # Then clean up the individual intervals that made up the set.
             # We sacrifice granularity for performance.
@@ -116,7 +122,9 @@ def main(event=None, _ctxt=None):
 
     bucket = os.environ["BUCKET"]
 
-    slack_webhook = get_secret_string(sess, SecretId="sierra_adapter/critical_slack_webhook")
+    slack_webhook = get_secret_string(
+        sess, SecretId="sierra_adapter/critical_slack_webhook"
+    )
 
     errors = []
     error_lines = []
@@ -127,9 +135,7 @@ def main(event=None, _ctxt=None):
             process_report(sess, bucket=bucket, resource_type=resource_type)
         except IncompleteReportError:
             error_lines.extend(
-                prepare_missing_report(
-                    sess, bucket=bucket, resource_type=resource_type
-                )
+                prepare_missing_report(sess, bucket=bucket, resource_type=resource_type)
             )
             errors.append(resource_type)
 
@@ -160,5 +166,5 @@ def main(event=None, _ctxt=None):
         resp.raise_for_status()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

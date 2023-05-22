@@ -38,14 +38,10 @@ def get_intervals(keys):
         name = os.path.basename(k)
         data = json.loads(name)
 
-        start = dt.datetime.fromisoformat(data['start']).replace(tzinfo=None)
-        end = dt.datetime.fromisoformat(data['end']).replace(tzinfo=None)
+        start = dt.datetime.fromisoformat(data["start"]).replace(tzinfo=None)
+        end = dt.datetime.fromisoformat(data["end"]).replace(tzinfo=None)
 
-        yield Interval(
-            start=start,
-            end=end,
-            key=k,
-        )
+        yield Interval(start=start, end=end, key=k)
 
 
 def combine_overlapping_intervals(sorted_intervals):
