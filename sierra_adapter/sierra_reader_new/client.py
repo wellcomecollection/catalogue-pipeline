@@ -1,5 +1,13 @@
+import datetime
+import json
+import time
+
 import boto3
 import httpx
+
+
+class TokenExpiredError(Exception):
+    pass
 
 
 class SierraClient:
@@ -13,16 +21,58 @@ class SierraClient:
         self._refresh_auth_token()
 
     def _refresh_auth_token(self):
-        # Get an access token
-        # https://sandbox.iii.com/docs/Content/zReference/authClient.htm
-        resp = self.client.post("/token", auth=(self.oauth_key, self.oauth_secret))
-
+        # Get an access token from Sierra.
+        # See https://techdocs.iii.com/sierraapi/Content/zAuth/authClient.htm
+        #
+        # Our instance of Sierra creates access tokens that are valid for
+        # an hour, so rather than requesting a new token on every run of
+        # the Lambda, cache the token on the filesystem so it can be
+        # reused between runs.
         try:
-            access_token = resp.json()["access_token"]
-        except KeyError:
-            print(resp)
-            print(resp.json())
-            raise
+            with open("/tmp/access_token.json") as infile:
+                data = json.load(infile)
+
+            # Check if the cached token is expired.  We actually check
+            # if it's good for another 5 minutes (the max runtime of
+            # this Lambda), so we know the token is good for this entire
+            # invocation.  If it's close to expire, we refresh it early
+            # to avoid expiry mid-run.
+            expiry_time = datetime.datetime.fromisoformat(data["expiry_time"])
+            now = datetime.datetime.now() + datetime.timedelta(minutes=5)
+
+            if expiry_time > now:
+                print("Access token is expired…")
+                raise TokenExpiredError
+
+            print("Using cached access token credentials…")
+            access_token = data["access_token"]
+        except (FileNotFoundError, TokenExpiredError):
+            print("Fetching new access token from Sierra…")
+
+            # Get an access token
+            # https://sandbox.iii.com/docs/Content/zReference/authClient.htm
+            resp = self.client.post("/token", auth=(self.oauth_key, self.oauth_secret))
+
+            try:
+                access_token = resp.json()["access_token"]
+            except KeyError:
+                print(resp)
+                print(resp.json())
+                raise
+
+            with open("/tmp/access_token.json", "w") as outfile:
+                expires_in = datetime.timedelta(seconds=resp.json()["expires_in"])
+
+                outfile.write(
+                    json.dumps(
+                        {
+                            "access_token": access_token,
+                            "expiry_time": (
+                                datetime.datetime.now() + expires_in
+                            ).isoformat(),
+                        }
+                    )
+                )
 
         self.client.headers = {
             "Authorization": f"Bearer {access_token}",
@@ -40,14 +90,13 @@ class SierraClient:
 
             return self._current_response
         except httpx.HTTPError as err:
-
             # When requesting a set of objects that is empty
             # the API will return a 404, so substitute for an
             # empty list.
-            if err.response.status_code == 404:
+            if hasattr(err, "response") and err.response.status_code == 404:
                 return []
-            else:
-                raise
+
+            raise
 
     def get_objects(self, path, params=None):
         if params is None:
@@ -69,6 +118,8 @@ class SierraClient:
                         yield from _self.objs["entries"]
                         last_id = int(_self.objs["entries"][-1]["id"]) + 1
                         _self.objs = _get(last_id)
+
+                        time.sleep(1 / 3)
                     except KeyError:
                         break
 
@@ -80,7 +131,7 @@ class SierraClient:
         return o
 
 
-def catalogue_client():
+def get_catalogue_client_credentials():
     sess = boto3.Session()
 
     secrets_client = sess.client("secretsmanager")
@@ -93,8 +144,12 @@ def catalogue_client():
         SecretId="sierra_adapter/sierra_api_client_secret"
     )["SecretString"]
 
-    return SierraClient(
-        api_url=sierra_api_root,
-        oauth_key=sierra_client_key,
-        oauth_secret=sierra_client_secret,
-    )
+    return {
+        "api_url": sierra_api_root,
+        "oauth_key": sierra_client_key,
+        "oauth_secret": sierra_client_secret,
+    }
+
+
+def catalogue_client():
+    return SierraClient(**get_catalogue_client_credentials())
