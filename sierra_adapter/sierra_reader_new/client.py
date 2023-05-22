@@ -40,8 +40,8 @@ class SierraClient:
             expiry_time = datetime.datetime.fromisoformat(data["expiry_time"])
             now = datetime.datetime.now() + datetime.timedelta(minutes=5)
 
-            if expiry_time > now:
-                print("Access token is expired…")
+            if expiry_time <= now:
+                print(f"Access token is expired, skipping cached credentials… (expiry_time = {expiry_time}, now = {now})")
                 raise TokenExpiredError
 
             print("Using cached access token credentials…")
@@ -115,8 +115,12 @@ class SierraClient:
             def __iter__(_self):
                 while True:
                     try:
-                        yield from _self.objs["entries"]
-                        last_id = int(_self.objs["entries"][-1]["id"]) + 1
+                        entries = _self.objs["entries"]
+
+                        print(f"Got a batch of {len(entries)} records from Sierra…")
+                        yield from entries
+
+                        last_id = int(entries[-1]["id"]) + 1
                         _self.objs = _get(last_id)
 
                         time.sleep(1 / 3)
