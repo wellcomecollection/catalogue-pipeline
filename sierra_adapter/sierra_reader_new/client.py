@@ -106,7 +106,12 @@ class SierraClient:
 
         while True:
             response = self._get_objects_from_id(*args, **kwargs)
-            entries = response["entries"]
+
+            try:
+                entries = response["entries"]
+            except KeyError:
+                print(response)
+                raise
 
             yield from entries
 
