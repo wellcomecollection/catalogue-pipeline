@@ -1,5 +1,7 @@
+import datetime
 import json
 import os
+import sys
 import uuid
 
 import boto3
@@ -26,17 +28,19 @@ def get_sierra_records(client, window):
     #
     # This only fetches Sierra records which have been updated but not
     # deleted.
-    print(f"Fetching updated records for {window}")
+    updated_date_format = '%Y-%m-%dT%H:%M:%SZ'
+
+    updated_date = f'[{window["start"].strftime(updated_date_format)},{window["end"].strftime(updated_date_format)}]'
+
+    print(f"Fetching updated records --> {updated_date}")
     for record in client.get_objects(
         f"/{resource_type}",
         params={
             "fields": sierra_fields,
-            "updatedDate": f'[{window["start"]},{window["end"]}]',
+            "updatedDate": updated_date,
         },
     ):
         yield record
-
-    dates = {window["start"].split("T")[0], window["end"].split("T")[0]}
 
     # Because filtering by updatedDate doesn't catch deleted records, we
     # need to make a separate query that filters on deletedDate.
@@ -50,14 +54,15 @@ def get_sierra_records(client, window):
     # Note: this means we may process the same deletion multiple times
     # in a day.  We consider this to be acceptable -- deletions are
     # idempotent and have a minimal impact on the rest of the pipeline.
-    print(f"Fetching deleted records for {dates}")
-    deleted_start, _ = window["start"].split("T")
-    deleted_end, _ = window["end"].split("T")
+    deleted_start = window["start"].date()
+    deleted_end = window["end"].date()
 
     if deleted_start == deleted_end:
-        deleted_date = deleted_start
+        deleted_date = deleted_start.isoformat()
     else:
-        deleted_date = f"[{deleted_start},{deleted_end}]"
+        deleted_date = f"[{deleted_start.isoformat()},{deleted_end.isoformat()}]"
+
+    print(f"Fetching deleted records --> {deleted_date}")
 
     for record in client.get_objects(
         f"/{resource_type}",
@@ -159,7 +164,11 @@ def get_sns_batches(messages):
         yield this_batch
 
 
-def main(event, context):
+def run_with(json_window):
+    window = {
+        k: datetime.datetime.fromisoformat(v) for k, v in json_window.items()
+    }
+
     client = catalogue_client()
 
     sns_client = boto3.client("sns")
@@ -169,34 +178,47 @@ def main(event, context):
     resource_type = os.environ["RESOURCE_TYPE"]
     bucket_name = os.environ["READER_BUCKET"]
 
+    sierra_records = (
+        to_scala_record(record) for record in get_sierra_records(client, window)
+    )
+
+    for batch_entries in get_sns_batches(sierra_records):
+        resp = sns_client.publish_batch(
+            TopicArn=topic_arn, PublishBatchRequestEntries=batch_entries
+        )
+
+        # This is to account for any failures in sending messages to SNS.
+        # I've never actually seen this in practice so I've not written
+        # any code to handle it but I include it just in case.
+        assert len(resp["Failed"]) == 0, resp
+
+    print(f"Window is complete --> {json.dumps(json_window)}")
+
+    # Once the window is completed, we write an empty object to S3 to
+    # mark it as such.  The progress reporter can read these files
+    # and determine whether any windows have been missed.
+    #
+    # Note: the slightly odd date serialisation here is a legacy of
+    # the old Scala reader; we might want to consider changing it later.
+    start = window["start"].isoformat().replace(":", "-")
+    end = window["end"].isoformat().replace(":", "-")
+
+    s3_client.put_object(
+        Bucket=bucket_name,
+        Key=f"windows_{resource_type}_complete/{start}__{end}",
+        Body=b"",
+    )
+
+
+def main(event, context):
     for window in get_windows(event):
-        sierra_records = (
-            to_scala_record(record) for record in get_sierra_records(client, window)
-        )
+        run_with(window)
 
-        for batch_entries in get_sns_batches(sierra_records):
-            resp = sns_client.publish_batch(
-                TopicArn=topic_arn, PublishBatchRequestEntries=batch_entries
-            )
 
-            # This is to account for any failures in sending messages to SNS.
-            # I've never actually seen this in practice so I've not written
-            # any code to handle it but I include it just in case.
-            assert len(resp["Failed"]) == 0, resp
+if __name__ == '__main__':
+    try:
+        window = json.loads(sys.argv[1])
+    except (IndexError, ValueError):
+        sys.exit(f"Usage: {__file__} <WINDOW>")
 
-        print(f"Window {window} is complete!")
-
-        # Once the window is completed, we write an empty object to S3 to
-        # mark it as such.  The progress reporter can read these files
-        # and determine whether any windows have been missed.
-        #
-        # Note: the slightly odd date serialisation here is a legacy of
-        # the old Scala reader; we might want to consider changing it later.
-        start = window["start"].replace(":", "-")
-        end = window["end"].replace(":", "-")
-
-        s3_client.put_object(
-            Bucket=bucket_name,
-            Key=f"windows_{resource_type}_complete/{start}__{end}",
-            Body=b"",
-        )
+    run_with(window)

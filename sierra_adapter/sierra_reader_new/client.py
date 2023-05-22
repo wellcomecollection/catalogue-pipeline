@@ -21,6 +21,8 @@ class SierraClient:
         self._refresh_auth_token()
 
     def _refresh_auth_token(self):
+        print("Getting Sierra access token…")
+
         # Get an access token from Sierra.
         # See https://techdocs.iii.com/sierraapi/Content/zAuth/authClient.htm
         #
@@ -41,13 +43,13 @@ class SierraClient:
             now = datetime.datetime.now() + datetime.timedelta(minutes=5)
 
             if expiry_time <= now:
-                print(f"Access token is expired, skipping cached credentials… (expiry_time = {expiry_time}, now = {now})")
+                print(f"  Access token is expired, skipping cached credentials… (expiry_time = {expiry_time}, now = {now})")
                 raise TokenExpiredError
 
-            print("Using cached access token credentials…")
+            print("  Using cached access token credentials…")
             access_token = data["access_token"]
         except (FileNotFoundError, TokenExpiredError):
-            print("Fetching new access token from Sierra…")
+            print("  Fetching new access token from Sierra…")
 
             # Get an access token
             # https://sandbox.iii.com/docs/Content/zReference/authClient.htm
@@ -83,56 +85,34 @@ class SierraClient:
     def _get_objects_from_id(self, path, id, params):
         id_param = {"id": f"[{id},]"}
         merged_params = {**id_param, **params}
-        try:
-            json_response = self.client.get(path, params=merged_params).json()
 
-            self._current_response = json_response
+        resp = self.client.get(path, params=merged_params).json()
 
-            return self._current_response
-        except httpx.HTTPError as err:
-            # When requesting a set of objects that is empty
-            # the API will return a 404, so substitute for an
-            # empty list.
-            if hasattr(err, "response") and err.response.status_code == 404:
-                return []
+        # When requesting a set of objects that is empty
+        # the API will return a 404, so substitute for an
+        # empty list.
+        if resp.get('httpStatus') == 404:
+            return {'entries': []}
 
-            raise
+        return resp
 
-    def get_objects(self, path, params=None):
-        if params is None:
-            params = {}
+    def get_objects(self, *args, **kwargs):
+        kwargs['id'] = 0
 
-        def _get(id):
-            return self._get_objects_from_id(path=path, id=id, params=params)
+        while True:
+            response = self._get_objects_from_id(*args, **kwargs)
+            entries = response['entries']
 
-        class ObjectIterable(object):
-            def __init__(_self):
-                _self.objs = _get(0)
+            yield from entries
+            print(f'  Got a batch of {len(entries)} records from Sierra…')
 
-            def __len__(_self):
-                return self._current_response["total"]
+            if not entries:
+                break
 
-            def __iter__(_self):
-                while True:
-                    try:
-                        entries = _self.objs["entries"]
+            last_id = int(entries[-1]["id"]) + 1
+            kwargs['id'] = last_id
 
-                        print(f"Got a batch of {len(entries)} records from Sierra…")
-                        yield from entries
-
-                        last_id = int(entries[-1]["id"]) + 1
-                        _self.objs = _get(last_id)
-
-                        time.sleep(1 / 3)
-                    except KeyError:
-                        break
-
-            def next(_self):
-                return next(_self._gen)
-
-        o = ObjectIterable()
-
-        return o
+            time.sleep(1 / 3)
 
 
 def get_catalogue_client_credentials():
