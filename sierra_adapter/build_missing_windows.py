@@ -50,7 +50,7 @@ def get_missing_windows(report):
         missing_start = interval_1.end - dt.timedelta(seconds=1)
         missing_end = interval_2.start + dt.timedelta(seconds=1)
 
-        yield from generate_windows(start=missing_start, end=missing_end, minutes=20)
+        yield from generate_windows(start=missing_start, end=missing_end, minutes=2)
 
 
 if __name__ == "__main__":
