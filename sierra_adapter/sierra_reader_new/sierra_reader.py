@@ -158,6 +158,7 @@ def run_with(json_window):
         Bucket=bucket_name,
         Key=f"completed_{resource_type}/{json.dumps(json_window)}",
         Body=b"",
+        ContentType="text/plain",
     )
 
 
