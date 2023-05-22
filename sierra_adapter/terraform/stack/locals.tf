@@ -1,7 +1,3 @@
-data "aws_ssm_parameter" "critical_slack_webhook" {
-  name = "/aws/reference/secretsmanager/sierra_adapter/critical_slack_webhook"
-}
-
 locals {
   namespace_hyphen = replace(var.namespace, "_", "-")
 
@@ -95,8 +91,6 @@ locals {
     "fixedFields",
     "varFields",
   ])
-
-  critical_slack_webhook = data.aws_ssm_parameter.critical_slack_webhook.value
 
   fargate_service_boilerplate = {
     cluster_name = aws_ecs_cluster.cluster.name

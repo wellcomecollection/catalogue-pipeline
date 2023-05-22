@@ -22,3 +22,13 @@ s3://wc-platform-adapters-sierra
 This gives us a crude reporting mechanism to see whether we missed any updates.
 
 If it spots a gap in the windows, it sends a message to a Slack channel.
+
+## Running locally
+
+You can test the Lambda by running it locally.
+
+Use the `run_lambda.sh` script, for example:
+
+```console
+$ AWS_PROFILE=platform-dev bash run_lambda.sh
+```

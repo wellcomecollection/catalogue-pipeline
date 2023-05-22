@@ -36,6 +36,7 @@ data "aws_iam_policy_document" "allow_s3_access" {
     ]
 
     resources = [
+      "${data.aws_s3_bucket.sierra_data.arn}/completed_${var.resource_type}/*",
       "${data.aws_s3_bucket.sierra_data.arn}/windows_${var.resource_type}_complete/*",
     ]
   }

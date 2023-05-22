@@ -154,15 +154,9 @@ def run_with(json_window):
     # Once the window is completed, we write an empty object to S3 to
     # mark it as such.  The progress reporter can read these files
     # and determine whether any windows have been missed.
-    #
-    # Note: the slightly odd date serialisation here is a legacy of
-    # the old Scala reader; we might want to consider changing it later.
-    start = window["start"].isoformat().replace(":", "-")
-    end = window["end"].isoformat().replace(":", "-")
-
     s3_client.put_object(
         Bucket=bucket_name,
-        Key=f"windows_{resource_type}_complete/{start}__{end}",
+        Key=f"completed_{resource_type}/{json.dumps(json_window)}",
         Body=b"",
     )
 

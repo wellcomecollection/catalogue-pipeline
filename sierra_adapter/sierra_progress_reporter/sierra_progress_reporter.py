@@ -1,4 +1,4 @@
-# -*- encoding: utf-8 -*-
+#!/usr/bin/env python3
 """
 Query the S3 bucket containing Sierra progress reports, and log
 a report in Slack
@@ -12,27 +12,15 @@ import os
 import boto3
 import requests
 
+from aws import get_secret_string, list_s3_prefix
 from interval_arithmetic import combine_overlapping_intervals, get_intervals
 
 
-def get_matching_s3_keys(s3_client, bucket, prefix):
-    """
-    Generate the keys in an S3 bucket that match a given prefix.
-    """
-    paginator = s3_client.get_paginator("list_objects")
-    for page in paginator.paginate(Bucket=bucket, Prefix=prefix):
-        print("Got page of %d objects from S3…" % len(page["Contents"]))
-        for s3_object in page["Contents"]:
-            yield s3_object["Key"]
-
-
-def build_report(s3_client, bucket, resource_type):
+def build_report(sess, bucket, resource_type):
     """
     Generate a complete set of covering windows for a resource type.
     """
-    keys = get_matching_s3_keys(
-        s3_client=s3_client, bucket=bucket, prefix=f"windows_{resource_type}_complete"
-    )
+    keys = list_s3_prefix(sess, bucket=bucket, prefix=f"completed_{resource_type}/")
     yield from get_intervals(keys=keys)
 
 
@@ -44,7 +32,7 @@ class IncompleteReportError(Exception):
     pass
 
 
-def process_report(s3_client, bucket, resource_type):
+def process_report(sess, *, bucket, resource_type):
     # Start by consolidating all the windows as best we can.  This is an
     # incremental consolidation: it consolidates the first 1000 keys, then
     # the second 1000 keys, and so on.
@@ -52,13 +40,13 @@ def process_report(s3_client, bucket, resource_type):
     # If there are more keys than it can consolidate in a single invocation,
     # it will at least have made progress and be less likely to time out
     # next time.
-    consolidate_windows(s3_client=s3_client, bucket=bucket, resource_type=resource_type)
+    consolidate_windows(sess, bucket=bucket, resource_type=resource_type)
 
-    for iv in build_report(s3_client, bucket, resource_type):
+    for iv in build_report(sess, bucket=bucket, resource_type=resource_type):
 
         # If the first gap is more than 6 hours old, we might have a
         # bug in the Sierra reader.  Raise an exception.
-        hours = (dt.datetime.now() - iv.end).total_seconds() / 3600
+        hours = (dt.datetime.utcnow() - iv.end).total_seconds() / 3600
         if hours > 6:
             raise IncompleteReportError(resource_type)
 
@@ -80,14 +68,14 @@ def window(seq, n=2):
         yield result
 
 
-def prepare_missing_report(s3_client, bucket, resource_type):
+def prepare_missing_report(sess, *, bucket, resource_type):
     """
     Generate a report for windows that are missing.
     """
     yield ""
     yield f"*missing {resource_type} windows*"
 
-    for iv1, iv2 in window(build_report(s3_client, bucket, resource_type)):
+    for iv1, iv2 in window(build_report(sess, bucket=bucket, resource_type=resource_type)):
         missing_start = iv1.end
         missing_end = iv2.start
         if missing_start.date() == missing_end.date():
@@ -98,54 +86,50 @@ def prepare_missing_report(s3_client, bucket, resource_type):
     yield ""
 
 
-def consolidate_windows(s3_client, bucket, resource_type):
-    paginator = s3_client.get_paginator("list_objects")
-    prefix = f"windows_{resource_type}_complete"
+def consolidate_windows(sess, *, bucket, resource_type):
+    intervals = get_intervals(keys=list_s3_prefix(sess, bucket=bucket, prefix=f"completed_{resource_type}"))
 
-    for page in paginator.paginate(Bucket=bucket, Prefix=prefix):
-        keys = [s3_obj["Key"] for s3_obj in page["Contents"]]
-        intervals = get_intervals(keys=keys)
+    s3_client = sess.client("s3")
 
-        for iv, running in combine_overlapping_intervals(intervals):
-            if len(running) > 1:
-                # Create a consolidated marker that represents the entire
-                # interval.  The back-history of Sierra includes >100k windows,
-                # so combining them makes reporting faster on subsequent runs.
-                start_str = iv.start.strftime("%Y-%m-%dT%H-%M-%S.%f+00-00")
-                end_str = iv.end.strftime("%Y-%m-%dT%H-%M-%S.%f+00-00")
+    for iv, running in combine_overlapping_intervals(intervals):
+        if len(running) > 1:
+            # Create a consolidated marker that represents the entire
+            # interval.  The back-history of Sierra includes >100k windows,
+            # so combining them makes reporting faster on subsequent runs.
+            window = {"start": iv.start.isoformat(), "end": iv.end.isoformat()}
 
-                consolidated_key = (
-                    f"windows_{resource_type}_complete/{start_str}__{end_str}"
+            consolidated_key = (f"completed_{resource_type}/{json.dumps(window)}")
+
+            s3_client.put_object(Bucket=bucket, Key=consolidated_key, Body=b"")
+
+            # Then clean up the individual intervals that made up the set.
+            # We sacrifice granularity for performance.
+            for sub_ivs in chunks(running, chunk_size=1000):
+                keys = [s.key for s in sub_ivs if s.key != consolidated_key]
+                s3_client.delete_objects(
+                    Bucket=bucket, Delete={"Objects": [{"Key": k} for k in keys]}
                 )
-
-                s3_client.put_object(Bucket=bucket, Key=consolidated_key, Body=b"")
-
-                # Then clean up the individual intervals that made up the set.
-                # We sacrifice granularity for performance.
-                for sub_ivs in chunks(running, chunk_size=1000):
-                    keys = [s.key for s in sub_ivs if s.key != consolidated_key]
-                    s3_client.delete_objects(
-                        Bucket=bucket, Delete={"Objects": [{"Key": k} for k in keys]}
-                    )
 
 
 def main(event=None, _ctxt=None):
-    s3_client = boto3.client("s3")
+    sess = boto3.Session()
+
+    s3_client = sess.client("s3")
     bucket = os.environ["BUCKET"]
-    slack_webhook = os.environ["SLACK_WEBHOOK"]
+
+    slack_webhook = get_secret_string(sess, SecretId="sierra_adapter/critical_slack_webhook")
 
     errors = []
     error_lines = []
 
     for resource_type in ("bibs", "items", "holdings", "orders"):
+        print(f"Preparing report for {resource_type}…")
         try:
-            process_report(
-                s3_client=s3_client, bucket=bucket, resource_type=resource_type
-            )
+            process_report(sess, bucket=bucket, resource_type=resource_type)
         except IncompleteReportError:
             error_lines.extend(
                 prepare_missing_report(
-                    s3_client=s3_client, bucket=bucket, resource_type=resource_type
+                    sess, bucket=bucket, resource_type=resource_type
                 )
             )
             errors.append(resource_type)
@@ -175,3 +159,7 @@ def main(event=None, _ctxt=None):
             headers={"Content-Type": "application/json"},
         )
         resp.raise_for_status()
+
+
+if __name__ == '__main__':
+    main()
