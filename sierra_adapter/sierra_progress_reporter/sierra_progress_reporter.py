@@ -121,7 +121,7 @@ def main(event=None, _ctxt=None):
     errors = []
     error_lines = []
 
-    for resource_type in ("bibs", "items", "holdings", "orders"):
+    for resource_type in ("bibs", "holdings", "items", "orders"):
         print(f"Preparing report for {resource_type}…")
         try:
             process_report(sess, bucket=bucket, resource_type=resource_type)
