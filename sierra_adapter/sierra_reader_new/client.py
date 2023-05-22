@@ -98,9 +98,6 @@ class SierraClient:
         if resp.get("httpStatus") == 404:
             return {"entries": []}
 
-        if id == 0:
-            print(f"  Sierra reports {resp['total']} records in this window")
-
         return resp
 
     def get_objects(self, *args, **kwargs):
