@@ -5,6 +5,8 @@ import time
 import boto3
 import httpx
 
+from aws import get_secret_string
+
 
 class TokenExpiredError(Exception):
     pass
@@ -43,7 +45,9 @@ class SierraClient:
             now = datetime.datetime.now() + datetime.timedelta(minutes=5)
 
             if expiry_time <= now:
-                print(f"  Access token is expired, skipping cached credentials… (expiry_time = {expiry_time}, now = {now})")
+                print(
+                    f"  Access token is expired, skipping cached credentials… (expiry_time = {expiry_time}, now = {now})"
+                )
                 raise TokenExpiredError
 
             print("  Using cached access token credentials…")
@@ -91,49 +95,43 @@ class SierraClient:
         # When requesting a set of objects that is empty
         # the API will return a 404, so substitute for an
         # empty list.
-        if resp.get('httpStatus') == 404:
-            return {'entries': []}
+        if resp.get("httpStatus") == 404:
+            return {"entries": []}
 
         return resp
 
     def get_objects(self, *args, **kwargs):
-        kwargs['id'] = 0
+        kwargs["id"] = 0
 
         while True:
             response = self._get_objects_from_id(*args, **kwargs)
-            entries = response['entries']
+            entries = response["entries"]
 
             yield from entries
-            print(f'  Got a batch of {len(entries)} records from Sierra…')
+            print(f"  Got a batch of {len(entries)} records from Sierra…")
 
             if not entries:
                 break
 
             last_id = int(entries[-1]["id"]) + 1
-            kwargs['id'] = last_id
+            kwargs["id"] = last_id
 
             time.sleep(1 / 3)
 
 
-def get_catalogue_client_credentials():
+def catalogue_client():
+    print("Getting Sierra API credentials…")
+
     sess = boto3.Session()
 
-    secrets_client = sess.client("secretsmanager")
-
-    sierra_api_root = "https://libsys.wellcomelibrary.org/iii/sierra-api/v6"
-    sierra_client_key = secrets_client.get_secret_value(
-        SecretId="sierra_adapter/sierra_api_key"
-    )["SecretString"]
-    sierra_client_secret = secrets_client.get_secret_value(
-        SecretId="sierra_adapter/sierra_api_client_secret"
-    )["SecretString"]
-
-    return {
-        "api_url": sierra_api_root,
-        "oauth_key": sierra_client_key,
-        "oauth_secret": sierra_client_secret,
+    credentials = {
+        "api_url": "https://libsys.wellcomelibrary.org/iii/sierra-api/v6",
+        "oauth_key": get_secret_string(
+            sess, SecretId="sierra_adapter/sierra_api_key"
+        ),
+        "oauth_secret": get_secret_string(
+            sess, SecretId="sierra_adapter/sierra_api_client_secret"
+        ),
     }
 
-
-def catalogue_client():
-    return SierraClient(**get_catalogue_client_credentials())
+    return SierraClient(**credentials)
