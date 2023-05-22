@@ -116,6 +116,9 @@ class SierraClient:
             last_id = int(entries[-1]["id"]) + 1
             kwargs["id"] = last_id
 
+            # This is a very primitive form of throttling, to prevent us
+            # overwhelming the Sierra API server.  The choice of interval
+            # is somewhat arbitrary.
             time.sleep(1 / 3)
 
 
