@@ -114,7 +114,6 @@ def consolidate_windows(sess, *, bucket, resource_type):
 def main(event=None, _ctxt=None):
     sess = boto3.Session()
 
-    s3_client = sess.client("s3")
     bucket = os.environ["BUCKET"]
 
     slack_webhook = get_secret_string(sess, SecretId="sierra_adapter/critical_slack_webhook")
