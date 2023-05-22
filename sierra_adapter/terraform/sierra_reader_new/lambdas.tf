@@ -23,7 +23,9 @@ module "lambda" {
 
   runtime = "python3.9"
 
-  timeout = 5 * 60
+  # Max runtime is 15 minutes, we want to give this as long as possible
+  # in case it gets a lot of updates in a window.
+  timeout = 15 * 60
 
   # Avoid running more than one instance at once, so we don't
   # overwhelm Sierra.
