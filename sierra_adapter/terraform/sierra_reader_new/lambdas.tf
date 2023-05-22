@@ -23,8 +23,7 @@ module "lambda" {
 
   runtime = "python3.9"
 
-  # max timeout for a Lambda is 15 minutes
-  timeout = 15 * 60
+  timeout = 5 * 60
 
   # Avoid running more than one instance at once, so we don't
   # overwhelm Sierra.
