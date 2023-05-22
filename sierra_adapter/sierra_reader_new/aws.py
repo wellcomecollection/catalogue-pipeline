@@ -1,8 +1,6 @@
 import json
 import uuid
 
-import boto3
-
 
 def get_secret_string(sess, **kwargs):
     secrets_client = sess.client("secretsmanager")
