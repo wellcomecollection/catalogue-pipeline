@@ -42,7 +42,7 @@ class SierraClient:
             # invocation.  If it's close to expire, we refresh it early
             # to avoid expiry mid-run.
             expiry_time = datetime.datetime.fromisoformat(data["expiry_time"])
-            now = datetime.datetime.now() + datetime.timedelta(minutes=5)
+            now = datetime.datetime.now() + datetime.timedelta(minutes=15)
 
             if expiry_time <= now:
                 print(
