@@ -1,5 +1,6 @@
 import datetime
 import json
+import os
 import time
 
 import boto3
@@ -37,12 +38,13 @@ class SierraClient:
                 data = json.load(infile)
 
             # Check if the cached token is expired.  We actually check
-            # if it's good for another 5 minutes (the max runtime of
-            # this Lambda), so we know the token is good for this entire
-            # invocation.  If it's close to expire, we refresh it early
-            # to avoid expiry mid-run.
+            # if it's good for the max runtime of this Lambda, so we know
+            # the token is good for this entire invocation.  If it's close
+            # to expire, we refresh it early to avoid expiry mid-run.
             expiry_time = datetime.datetime.fromisoformat(data["expiry_time"])
-            now = datetime.datetime.now() + datetime.timedelta(minutes=15)
+            now = datetime.datetime.now() + datetime.timedelta(
+                minutes=int(os.environ["TIMEOUT_IN_MINUTES"]) - 1
+            )
 
             if expiry_time <= now:
                 print(

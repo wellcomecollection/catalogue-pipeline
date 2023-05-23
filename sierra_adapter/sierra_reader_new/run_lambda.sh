@@ -23,5 +23,6 @@ ENVIRONMENT=$(aws lambda get-function-configuration \
 export SIERRA_FIELDS=$(echo "$ENVIRONMENT" | jq -r .SIERRA_FIELDS)
 export READER_BUCKET=$(echo "$ENVIRONMENT" | jq -r .READER_BUCKET)
 export TOPIC_ARN=$(echo "$ENVIRONMENT" | jq -r .TOPIC_ARN)
+export TIMEOUT_IN_MINUTES=$(echo "$ENVIRONMENT" | jq -r .TIMEOUT_IN_MINUTES)
 
 python3 sierra_reader.py "$WINDOW"
