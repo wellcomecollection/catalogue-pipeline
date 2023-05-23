@@ -89,7 +89,7 @@ class SierraClient:
             "Connection": "close",
         }
 
-    @retry(stop_after=stop_after_attempt(3))
+    @retry(stop=stop_after_attempt(3))
     def _get_objects_from_id(self, path, id, params):
         id_param = {"id": f"[{id},]"}
         merged_params = {**id_param, **params}
