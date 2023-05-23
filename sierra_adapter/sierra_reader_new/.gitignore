@@ -6,3 +6,4 @@ httpcore*
 httpx*
 idna*
 sniffio*
+tenacity*

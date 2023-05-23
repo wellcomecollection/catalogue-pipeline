@@ -5,6 +5,7 @@ import time
 
 import boto3
 import httpx
+from tenacity import retry, stop_after_attempt
 
 from aws import get_secret_string
 
@@ -88,6 +89,7 @@ class SierraClient:
             "Connection": "close",
         }
 
+    @retry(stop_after=stop_after_attempt(3))
     def _get_objects_from_id(self, path, id, params):
         id_param = {"id": f"[{id},]"}
         merged_params = {**id_param, **params}

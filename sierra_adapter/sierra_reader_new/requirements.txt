@@ -25,3 +25,5 @@ sniffio==1.3.0
     #   anyio
     #   httpcore
     #   httpx
+tenacity==8.2.2
+    # via -r requirements.in
