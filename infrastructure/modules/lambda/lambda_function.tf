@@ -19,8 +19,6 @@ module "lambda_function" {
 
   memory_size = var.memory_size
 
-  reserved_concurrent_executions = var.reserved_concurrent_executions
-
   dead_letter_config = {
     target_arn = aws_sqs_queue.lambda_dlq.arn
   }
