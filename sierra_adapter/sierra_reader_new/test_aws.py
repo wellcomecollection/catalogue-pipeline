@@ -30,8 +30,7 @@ class TestGetSnsBatches(unittest.TestCase):
         messages = [secrets.token_hex(252 * 1024) for _ in range(5)]
 
         self.assertGetsCorrectBatches(
-            messages=messages,
-            expectedBatches=[[m] for m in messages],
+            messages=messages, expectedBatches=[[m] for m in messages]
         )
 
 
