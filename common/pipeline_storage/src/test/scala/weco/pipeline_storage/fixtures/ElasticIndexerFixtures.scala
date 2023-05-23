@@ -4,7 +4,7 @@ import com.sksamuel.elastic4s.{ElasticClient, Index}
 import io.circe.Encoder
 import org.scalatest.Suite
 import weco.elasticsearch.model.IndexId
-import weco.elasticsearch.test.fixtures.ElasticsearchFixtures
+import weco.catalogue.internal_model.fixtures.elasticsearch.ElasticsearchFixtures
 import weco.elasticsearch.IndexConfig
 import weco.fixtures.TestWith
 import weco.pipeline_storage.Indexable

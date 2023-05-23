@@ -5,7 +5,10 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scanamo.generic.auto._
 import weco.catalogue.internal_model.Implicits._
-import weco.catalogue.internal_model.index.IndexFixtures
+import weco.catalogue.internal_model.fixtures.index.{
+  IndexFixtures,
+  IndexFixturesE4S
+}
 import weco.catalogue.internal_model.work.DeletedReason.SuppressedFromSource
 import weco.catalogue.internal_model.work.generators.SourceWorkGenerators
 import weco.fixtures.TimeAssertions
@@ -32,6 +35,7 @@ class MatcherFeatureTest
     with IntegrationPatience
     with MatcherFixtures
     with IndexFixtures
+    with IndexFixturesE4S
     with WorkStubGenerators
     with SourceWorkGenerators
     with MergeCandidateGenerators
@@ -42,27 +46,30 @@ class MatcherFeatureTest
       new MemoryRetriever[WorkStub]()
     val messageSender = new MemoryMessageSender()
 
-    withLocalSqsQueue() { queue =>
-      withMatcherService(retriever, queue, messageSender) { _ =>
-        val work = createWorkWith(mergeCandidateIds = Set.empty)
+    withLocalSqsQueue() {
+      queue =>
+        withMatcherService(retriever, queue, messageSender) {
+          _ =>
+            val work = createWorkWith(mergeCandidateIds = Set.empty)
 
-        val expectedWorks =
-          Set(
-            MatchedIdentifiers(
-              identifiers = Set(WorkIdentifier(work.id, version = work.version))
-            )
-          )
+            val expectedWorks =
+              Set(
+                MatchedIdentifiers(
+                  identifiers =
+                    Set(WorkIdentifier(work.id, version = work.version))
+                )
+              )
 
-        sendWork(work, retriever, queue)
+            sendWork(work, retriever, queue)
 
-        eventually {
-          messageSender.messages should have size 1
+            eventually {
+              messageSender.messages should have size 1
 
-          val result = messageSender.getMessages[MatcherResult].head
-          result.works shouldBe expectedWorks
-          assertRecent(result.createdTime)
+              val result = messageSender.getMessages[MatcherResult].head
+              result.works shouldBe expectedWorks
+              assertRecent(result.createdTime)
+            }
         }
-      }
     }
   }
 
@@ -73,34 +80,36 @@ class MatcherFeatureTest
 
     withLocalSqsQueuePair() {
       case QueuePair(queue, dlq) =>
-        withWorkGraphTable { graphTable =>
-          withMatcherService(retriever, queue, messageSender, graphTable) { _ =>
-            val existingWorkVersion = 2
-            val updatedWorkVersion = 1
+        withWorkGraphTable {
+          graphTable =>
+            withMatcherService(retriever, queue, messageSender, graphTable) {
+              _ =>
+                val existingWorkVersion = 2
+                val updatedWorkVersion = 1
 
-            val workV1 = createWorkWith(version = updatedWorkVersion)
+                val workV1 = createWorkWith(version = updatedWorkVersion)
 
-            val nodeV2 = WorkNode(
-              id = workV1.id,
-              subgraphId = SubgraphId(workV1.id),
-              componentIds = List(workV1.id),
-              sourceWork = SourceWorkData(
-                id = workV1.state.sourceIdentifier,
-                version = existingWorkVersion
-              ),
-            )
+                val nodeV2 = WorkNode(
+                  id = workV1.id,
+                  subgraphId = SubgraphId(workV1.id),
+                  componentIds = List(workV1.id),
+                  sourceWork = SourceWorkData(
+                    id = workV1.state.sourceIdentifier,
+                    version = existingWorkVersion
+                  )
+                )
 
-            putTableItem[WorkNode](nodeV2, table = graphTable)
+                putTableItem[WorkNode](nodeV2, table = graphTable)
 
-            sendWork(workV1, retriever, queue)
+                sendWork(workV1, retriever, queue)
 
-            eventually {
-              assertQueueEmpty(queue)
-              assertQueueEmpty(dlq)
+                eventually {
+                  assertQueueEmpty(queue)
+                  assertQueueEmpty(dlq)
+                }
+
+                messageSender.messages shouldBe empty
             }
-
-            messageSender.messages shouldBe empty
-          }
         }
     }
   }
@@ -123,7 +132,8 @@ class MatcherFeatureTest
 
     val sierraDigitisedBib = sierraDigitalIdentifiedWork()
       .mergeCandidates(
-        List(createSierraPairMergeCandidateFor(sierraPhysicalBib)))
+        List(createSierraPairMergeCandidateFor(sierraPhysicalBib))
+      )
       .deleted(SuppressedFromSource("Sierra"))
 
     val metsRecord = metsIdentifiedWork()
@@ -131,38 +141,42 @@ class MatcherFeatureTest
 
     val works = Seq(sierraPhysicalBib, sierraDigitisedBib, metsRecord)
 
-    withLocalIdentifiedWorksIndex { index =>
-      insertIntoElasticsearch(index, works: _*)
+    withLocalIdentifiedWorksIndex {
+      index =>
+        insertIntoElasticsearch(index, works: _*)
 
-      implicit val retriever: Retriever[WorkStub] =
-        new ElasticWorkStubRetriever(elasticClient, index)
+        implicit val retriever: Retriever[WorkStub] =
+          new ElasticWorkStubRetriever(elasticClient, index)
 
-      val messageSender = new MemoryMessageSender()
+        val messageSender = new MemoryMessageSender()
 
-      withLocalSqsQueuePair() {
-        case QueuePair(queue, dlq) =>
-          withMatcherService(retriever, queue, messageSender) { _ =>
-            works.foreach { w =>
-              sendNotificationToSQS(queue, body = w.id)
+        withLocalSqsQueuePair() {
+          case QueuePair(queue, dlq) =>
+            withMatcherService(retriever, queue, messageSender) {
+              _ =>
+                works.foreach {
+                  w =>
+                    sendNotificationToSQS(queue, body = w.id)
+                }
+
+                eventually {
+                  val results = messageSender.getMessages[MatcherResult]
+                  results should have size 3
+
+                  // Every collection of MatchedIdentifiers only has a single entry.
+                  //
+                  // This is a bit easier than matching directly on the result, which varies
+                  // depending on the exact order the notifications are processed.
+                  results.forall {
+                    matcherResult =>
+                      matcherResult.works.forall(_.identifiers.size == 1)
+                  }
+
+                  assertQueueEmpty(queue)
+                  assertQueueEmpty(dlq)
+                }
             }
-
-            eventually {
-              val results = messageSender.getMessages[MatcherResult]
-              results should have size 3
-
-              // Every collection of MatchedIdentifiers only has a single entry.
-              //
-              // This is a bit easier than matching directly on the result, which varies
-              // depending on the exact order the notifications are processed.
-              results.forall { matcherResult =>
-                matcherResult.works.forall(_.identifiers.size == 1)
-              }
-
-              assertQueueEmpty(queue)
-              assertQueueEmpty(dlq)
-            }
-          }
-      }
+        }
     }
   }
 }

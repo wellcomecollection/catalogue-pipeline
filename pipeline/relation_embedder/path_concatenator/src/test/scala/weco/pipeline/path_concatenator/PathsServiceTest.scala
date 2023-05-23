@@ -3,19 +3,20 @@ package weco.pipeline.path_concatenator
 import com.sksamuel.elastic4s.Index
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.index.IndexFixtures
 import weco.catalogue.internal_model.work.{CollectionPath, Work}
 import weco.catalogue.internal_model.work.WorkState.Merged
 import weco.catalogue.internal_model.Implicits._
-import weco.elasticsearch.test.fixtures.ElasticsearchFixtures
 import weco.akka.fixtures.Akka
-
+import weco.catalogue.internal_model.fixtures.index.{
+  IndexFixtures,
+  IndexFixturesE4S
+}
 import weco.catalogue.internal_model.work.generators.WorkGenerators
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
-/**
-  * Tests covering the PathsService, which fetches data from Elasticsearch
-  * in order to support the PathConcatenator.
+/** Tests covering the PathsService, which fetches data from Elasticsearch in
+  * order to support the PathConcatenator.
   *
   * These tests require a running ElasticSearch Instance.
   */
@@ -23,7 +24,7 @@ class PathsServiceTest
     extends AnyFunSpec
     with Matchers
     with IndexFixtures
-    with ElasticsearchFixtures
+    with IndexFixturesE4S
     with Akka
     with WorkGenerators {
 
@@ -35,7 +36,7 @@ class PathsServiceTest
   private def service(index: Index) =
     new PathsService(
       elasticClient = elasticClient,
-      index = index,
+      index = index
     )
 
   describe("The PathService parentPath getter") {
@@ -45,11 +46,12 @@ class PathsServiceTest
         work(path = "grandparent/parent"),
         work(path = "parent/child")
       )
-      withLocalMergedWorksIndex { index =>
-        insertIntoElasticsearch(index, works: _*)
-        whenReady(service(index).getParentPath("parent/child")) {
-          _ shouldBe Some("grandparent/parent")
-        }
+      withLocalMergedWorksIndex {
+        index =>
+          insertIntoElasticsearch(index, works: _*)
+          whenReady(service(index).getParentPath("parent/child")) {
+            _ shouldBe Some("grandparent/parent")
+          }
       }
     }
 
@@ -62,11 +64,12 @@ class PathsServiceTest
         work(path = "grandparent/parent/brother"),
         work(path = "parent/sister")
       )
-      withLocalMergedWorksIndex { index =>
-        insertIntoElasticsearch(index, works: _*)
-        whenReady(service(index).getParentPath("parent/sister")) {
-          _ shouldBe Some("grandparent/parent")
-        }
+      withLocalMergedWorksIndex {
+        index =>
+          insertIntoElasticsearch(index, works: _*)
+          whenReady(service(index).getParentPath("parent/sister")) {
+            _ shouldBe Some("grandparent/parent")
+          }
       }
     }
 
@@ -79,11 +82,12 @@ class PathsServiceTest
         work(path = "parent"),
         work(path = "parent/child")
       )
-      withLocalMergedWorksIndex { index =>
-        insertIntoElasticsearch(index, works: _*)
-        whenReady(service(index).getParentPath("parent/child")) {
-          _ shouldBe empty
-        }
+      withLocalMergedWorksIndex {
+        index =>
+          insertIntoElasticsearch(index, works: _*)
+          whenReady(service(index).getParentPath("parent/child")) {
+            _ shouldBe empty
+          }
       }
     }
 
@@ -92,11 +96,12 @@ class PathsServiceTest
         work(path = "a/b/c/d/e"),
         work(path = "e/f/g/h/i")
       )
-      withLocalMergedWorksIndex { index =>
-        insertIntoElasticsearch(index, works: _*)
-        whenReady(service(index).getParentPath("e/f/g/h/i")) {
-          _ shouldBe Some("a/b/c/d/e")
-        }
+      withLocalMergedWorksIndex {
+        index =>
+          insertIntoElasticsearch(index, works: _*)
+          whenReady(service(index).getParentPath("e/f/g/h/i")) {
+            _ shouldBe Some("a/b/c/d/e")
+          }
       }
     }
 
@@ -106,14 +111,15 @@ class PathsServiceTest
         work(path = "grandfather/parent"),
         work(path = "parent/child")
       )
-      withLocalMergedWorksIndex { index =>
-        insertIntoElasticsearch(index, works: _*)
+      withLocalMergedWorksIndex {
+        index =>
+          insertIntoElasticsearch(index, works: _*)
 
-        val future = service(index).getParentPath("parent/child")
+          val future = service(index).getParentPath("parent/child")
 
-        whenReady(future.failed) {
-          _ shouldBe a[RuntimeException]
-        }
+          whenReady(future.failed) {
+            _ shouldBe a[RuntimeException]
+          }
       }
     }
   }
@@ -126,11 +132,12 @@ class PathsServiceTest
         expectedWork,
         work(path = "parent/child/grandchild")
       )
-      withLocalMergedWorksIndex { index =>
-        insertIntoElasticsearch(index, works: _*)
-        whenReady(service(index).getWorkWithPath("parent/child")) {
-          _ shouldBe expectedWork
-        }
+      withLocalMergedWorksIndex {
+        index =>
+          insertIntoElasticsearch(index, works: _*)
+          whenReady(service(index).getWorkWithPath("parent/child")) {
+            _ shouldBe expectedWork
+          }
       }
     }
 
@@ -139,13 +146,14 @@ class PathsServiceTest
         work(path = "parent/child"),
         work(path = "parent/child")
       )
-      withLocalMergedWorksIndex { index =>
-        insertIntoElasticsearch(index, works: _*)
+      withLocalMergedWorksIndex {
+        index =>
+          insertIntoElasticsearch(index, works: _*)
 
-        service(index)
-          .getWorkWithPath("parent/child")
-          .failed
-          .futureValue shouldBe a[RuntimeException]
+          service(index)
+            .getWorkWithPath("parent/child")
+            .failed
+            .futureValue shouldBe a[RuntimeException]
       }
     }
 
@@ -153,13 +161,14 @@ class PathsServiceTest
       val works: List[Work[Merged]] = List(
         work(path = "hello/world")
       )
-      withLocalMergedWorksIndex { index =>
-        insertIntoElasticsearch(index, works: _*)
+      withLocalMergedWorksIndex {
+        index =>
+          insertIntoElasticsearch(index, works: _*)
 
-        service(index)
-          .getWorkWithPath("parent/child")
-          .failed
-          .futureValue shouldBe a[RuntimeException]
+          service(index)
+            .getWorkWithPath("parent/child")
+            .failed
+            .futureValue shouldBe a[RuntimeException]
       }
     }
   }
@@ -171,14 +180,19 @@ class PathsServiceTest
         work(path = "grandparent/parent"),
         work(path = "parent/child/grandchild1"),
         work(path = "parent/child/grandchild2"),
-        work(path = "grandparent/parent/child/grandchild3"), // ignored - it has already been resolved up to grandparent
-        work(path = "child/grandchild3") // ignored - could be child of a different parent
+        work(path =
+          "grandparent/parent/child/grandchild3"
+        ), // ignored - it has already been resolved up to grandparent
+        work(path =
+          "child/grandchild3"
+        ) // ignored - could be child of a different parent
       )
-      withLocalMergedWorksIndex { index =>
-        insertIntoElasticsearch(index, works: _*)
-        whenReady(service(index).getChildWorks("grandparent/parent")) {
-          _ should contain theSameElementsAs List(works(2), works(3))
-        }
+      withLocalMergedWorksIndex {
+        index =>
+          insertIntoElasticsearch(index, works: _*)
+          whenReady(service(index).getChildWorks("grandparent/parent")) {
+            _ should contain theSameElementsAs List(works(2), works(3))
+          }
       }
     }
     it("Returns an empty list if there are no children") {
@@ -186,11 +200,12 @@ class PathsServiceTest
         work(path = "grandparent"),
         work(path = "grandparent/parent")
       )
-      withLocalMergedWorksIndex { index =>
-        insertIntoElasticsearch(index, works: _*)
-        whenReady(service(index).getChildWorks("grandparent/parent")) {
-          _ shouldBe empty
-        }
+      withLocalMergedWorksIndex {
+        index =>
+          insertIntoElasticsearch(index, works: _*)
+          whenReady(service(index).getChildWorks("grandparent/parent")) {
+            _ shouldBe empty
+          }
       }
     }
   }

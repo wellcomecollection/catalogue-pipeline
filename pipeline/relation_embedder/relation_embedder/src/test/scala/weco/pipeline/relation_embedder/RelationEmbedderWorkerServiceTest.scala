@@ -20,8 +20,11 @@ import weco.messaging.fixtures.SQS.QueuePair
 import weco.messaging.memory.MemoryMessageSender
 import weco.messaging.sns.NotificationMessage
 import weco.catalogue.internal_model.Implicits._
+import weco.catalogue.internal_model.fixtures.index.{
+  IndexFixtures,
+  IndexFixturesE4S
+}
 import weco.catalogue.internal_model.work.WorkState.{Denormalised, Merged}
-import weco.catalogue.internal_model.index.IndexFixtures
 import weco.catalogue.internal_model.work._
 import weco.pipeline.relation_embedder.fixtures.RelationGenerators
 import weco.pipeline.relation_embedder.models._
@@ -35,6 +38,7 @@ class RelationEmbedderWorkerServiceTest
     with SQS
     with Akka
     with IndexFixtures
+    with IndexFixturesE4S
     with RelationGenerators {
 
   def storeWorks(index: Index, works: List[Work[Merged]] = works): Assertion =
@@ -42,16 +46,7 @@ class RelationEmbedderWorkerServiceTest
 
   /** The following tests use works within this tree:
     *
-    * a
-    * |---
-    * |  |
-    * 1  2
-    * |  |---
-    * |  |  |
-    * b  c  d†
-    *    |
-    *    |
-    *    e
+    * a \|--- \| | 1 2 \| |--- \| | | b c d† \| \| e
     *
     * d† is available online
     */
@@ -267,36 +262,39 @@ class RelationEmbedderWorkerServiceTest
       R
     ]
   ): R =
-    withLocalMergedWorksIndex { mergedIndex =>
-      storeWorks(mergedIndex, works)
-      withLocalSqsQueuePair(visibilityTimeout = visibilityTimeout) {
-        queuePair =>
-          withActorSystem { implicit actorSystem =>
-            withSQSStream[NotificationMessage, R](queuePair.queue) {
-              sqsStream =>
-                val messageSender = new MemoryMessageSender
-                val denormalisedIndex =
-                  mutable.Map.empty[String, Work[Denormalised]]
-                val relationsService =
-                  if (fails) FailingRelationsService
-                  else
-                    new PathQueryRelationsService(
-                      elasticClient,
-                      mergedIndex,
-                      10
-                    )
-                val workerService = new RelationEmbedderWorkerService[String](
-                  sqsStream = sqsStream,
-                  msgSender = messageSender,
-                  workIndexer = new MemoryIndexer(denormalisedIndex),
-                  relationsService = relationsService,
-                  indexFlushInterval = 1 milliseconds
-                )
-                workerService.run()
-                testWith((queuePair, denormalisedIndex, messageSender))
+    withLocalMergedWorksIndex {
+      mergedIndex =>
+        storeWorks(mergedIndex, works)
+        withLocalSqsQueuePair(visibilityTimeout = visibilityTimeout) {
+          queuePair =>
+            withActorSystem {
+              implicit actorSystem =>
+                withSQSStream[NotificationMessage, R](queuePair.queue) {
+                  sqsStream =>
+                    val messageSender = new MemoryMessageSender
+                    val denormalisedIndex =
+                      mutable.Map.empty[String, Work[Denormalised]]
+                    val relationsService =
+                      if (fails) FailingRelationsService
+                      else
+                        new PathQueryRelationsService(
+                          elasticClient,
+                          mergedIndex,
+                          10
+                        )
+                    val workerService =
+                      new RelationEmbedderWorkerService[String](
+                        sqsStream = sqsStream,
+                        msgSender = messageSender,
+                        workIndexer = new MemoryIndexer(denormalisedIndex),
+                        relationsService = relationsService,
+                        indexFlushInterval = 1 milliseconds
+                      )
+                    workerService.run()
+                    testWith((queuePair, denormalisedIndex, messageSender))
+                }
             }
-          }
-      }
+        }
     }
 
   object FailingRelationsService extends RelationsService {

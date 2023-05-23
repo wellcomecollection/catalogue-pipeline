@@ -7,7 +7,11 @@ import com.sksamuel.elastic4s.requests.get.GetResponse
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.scalatest.{Assertion, Suite}
 import weco.catalogue.internal_model.Implicits._
-import weco.catalogue.internal_model.index.{IndexFixtures, WorksIndexConfig}
+import weco.catalogue.internal_model.fixtures.index.{
+  IndexFixtures,
+  IndexFixturesE4S
+}
+import weco.catalogue.internal_model.index.WorksIndexConfig
 import weco.catalogue.internal_model.work.WorkState.Denormalised
 import weco.catalogue.internal_model.work.{Work, WorkState}
 import weco.fixtures.{TestWith, TimeAssertions}
@@ -21,6 +25,7 @@ import weco.pipeline.ingestor.common.models.WorkQueryableValues
 
 trait WorksIngestorFixtures
     extends IndexFixtures
+    with IndexFixturesE4S
     with IngestorFixtures
     with TimeAssertions {
   this: Suite =>
@@ -57,7 +62,8 @@ trait WorksIngestorFixtures
           )
           storedAggregations shouldBe WorkAggregatableValues(
             work.data,
-            work.state.availabilities)
+            work.state.availabilities
+          )
         case _ => ()
       }
 
@@ -66,31 +72,36 @@ trait WorksIngestorFixtures
       assertRecent(storedWork.debug.indexedTime)
     }
 
-  def withWorksIngestor[R](queue: Queue,
-                           existingWorks: Seq[Work[WorkState.Denormalised]])(
-    testWith: TestWith[Index, R]): R =
-    withLocalWorksIndex { index =>
-      withLocalDenormalisedWorksIndex { denormalisedIndex =>
-        insertIntoElasticsearch(denormalisedIndex, existingWorks: _*)
+  def withWorksIngestor[R](
+    queue: Queue,
+    existingWorks: Seq[Work[WorkState.Denormalised]]
+  )(testWith: TestWith[Index, R]): R =
+    withLocalWorksIndex {
+      index =>
+        withLocalDenormalisedWorksIndex {
+          denormalisedIndex =>
+            insertIntoElasticsearch(denormalisedIndex, existingWorks: _*)
 
-        val retriever = new ElasticSourceRetriever[Work[Denormalised]](
-          client = elasticClient,
-          index = denormalisedIndex
-        )
+            val retriever = new ElasticSourceRetriever[Work[Denormalised]](
+              client = elasticClient,
+              index = denormalisedIndex
+            )
 
-        val indexer = new ElasticIndexer[IndexedWork](
-          client = elasticClient,
-          index = index,
-          config = WorksIndexConfig.indexed
-        )
+            val indexer = new ElasticIndexer[IndexedWork](
+              client = elasticClient,
+              index = index,
+              config = WorksIndexConfig.indexed
+            )
 
-        withWorkerService(
-          queue,
-          retriever,
-          indexer,
-          transform = WorkTransformer.deriveData) { service =>
-          testWith(index)
+            withWorkerService(
+              queue,
+              retriever,
+              indexer,
+              transform = WorkTransformer.deriveData
+            ) {
+              service =>
+                testWith(index)
+            }
         }
-      }
     }
 }

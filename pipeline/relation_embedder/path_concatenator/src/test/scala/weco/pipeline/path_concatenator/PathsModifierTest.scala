@@ -5,12 +5,14 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.akka.fixtures.Akka
-import weco.catalogue.internal_model.index.IndexFixtures
 import weco.catalogue.internal_model.work.{CollectionPath, Work}
 import weco.catalogue.internal_model.work.WorkState.Merged
 import weco.catalogue.internal_model.work.generators.WorkGenerators
 import weco.catalogue.internal_model.Implicits._
-import weco.elasticsearch.test.fixtures.ElasticsearchFixtures
+import weco.catalogue.internal_model.fixtures.index.{
+  IndexFixtures,
+  IndexFixturesE4S
+}
 import weco.fixtures.TestWith
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -20,7 +22,7 @@ class PathsModifierTest
     with Matchers
     with ScalaFutures
     with IndexFixtures
-    with ElasticsearchFixtures
+    with IndexFixturesE4S
     with Akka
     with WorkGenerators {
 
@@ -29,33 +31,42 @@ class PathsModifierTest
       .collectionPath(CollectionPath(path = path))
       .title(path)
 
-  private def withContext[R](works: List[Work[Merged]])(
-    testWith: TestWith[PathsModifier, R]): R =
-    withLocalMergedWorksIndex { index =>
-      insertIntoElasticsearch(index, works: _*)
-      val pathModifier = PathsModifier(
-        new PathsService(
-          elasticClient = elasticClient,
-          index = index,
-        ))
-      testWith(pathModifier)
+  private def withContext[R](
+    works: List[Work[Merged]]
+  )(testWith: TestWith[PathsModifier, R]): R =
+    withLocalMergedWorksIndex {
+      index =>
+        insertIntoElasticsearch(index, works: _*)
+        val pathModifier = PathsModifier(
+          new PathsService(
+            elasticClient = elasticClient,
+            index = index
+          )
+        )
+        testWith(pathModifier)
     }
 
-  private def assertDoesNothing(worksInDB: List[Work[Merged]],
-                                path: String): Assertion =
-    withContext(worksInDB) { pathsModifier =>
-      whenReady(pathsModifier.modifyPaths(path)) {
-        _ shouldBe empty
-      }
+  private def assertDoesNothing(
+    worksInDB: List[Work[Merged]],
+    path: String
+  ): Assertion =
+    withContext(worksInDB) {
+      pathsModifier =>
+        whenReady(pathsModifier.modifyPaths(path)) {
+          _ shouldBe empty
+        }
     }
 
-  private def assertFails(worksInDB: List[Work[Merged]],
-                          path: String): Assertion =
-    withContext(worksInDB) { pathsModifier =>
-      pathsModifier
-        .modifyPaths(path)
-        .failed
-        .futureValue shouldBe a[RuntimeException]
+  private def assertFails(
+    worksInDB: List[Work[Merged]],
+    path: String
+  ): Assertion =
+    withContext(worksInDB) {
+      pathsModifier =>
+        pathsModifier
+          .modifyPaths(path)
+          .failed
+          .futureValue shouldBe a[RuntimeException]
     }
 
   describe("PathsModifier") {
@@ -68,7 +79,8 @@ class PathsModifierTest
         worksInDB = List(
           work(path = "grandparent/parent")
         ),
-        path = "grandparent/parent")
+        path = "grandparent/parent"
+      )
     }
 
     it("does nothing if the parent work is the root of its own path") {
@@ -108,11 +120,13 @@ class PathsModifierTest
         work(path = "grandparent/parent"),
         work(path = "parent/child")
       )
-      withContext(works) { pathsModifier =>
-        whenReady(pathsModifier.modifyPaths("parent/child")) { resultWorks =>
-          resultWorks.head.data.collectionPath.get.path shouldBe "grandparent/parent/child"
-          resultWorks.length shouldBe 1
-        }
+      withContext(works) {
+        pathsModifier =>
+          whenReady(pathsModifier.modifyPaths("parent/child")) {
+            resultWorks =>
+              resultWorks.head.data.collectionPath.get.path shouldBe "grandparent/parent/child"
+              resultWorks.length shouldBe 1
+          }
       }
     }
 
@@ -121,12 +135,13 @@ class PathsModifierTest
         work(path = "grandparent/parent"),
         work(path = "parent/child")
       )
-      withContext(works) { pathsModifier =>
-        whenReady(pathsModifier.modifyPaths("grandparent/parent")) {
-          resultWorks =>
-            resultWorks.head.data.collectionPath.get.path shouldBe "grandparent/parent/child"
-            resultWorks.length shouldBe 1
-        }
+      withContext(works) {
+        pathsModifier =>
+          whenReady(pathsModifier.modifyPaths("grandparent/parent")) {
+            resultWorks =>
+              resultWorks.head.data.collectionPath.get.path shouldBe "grandparent/parent/child"
+              resultWorks.length shouldBe 1
+          }
       }
     }
 
@@ -136,14 +151,17 @@ class PathsModifierTest
       val works = work(path = "grandparent/parent") +: (0 to 100)
         .map(i => work(path = s"parent/$i"))
         .toList
-      withContext(works) { pathsModifier =>
-        whenReady(pathsModifier.modifyPaths("grandparent/parent")) {
-          resultWorks =>
-            resultWorks map { resultWork =>
-              resultWork.data.collectionPath.get.path
-            } should contain theSameElementsAs (0 to 100).map(i =>
-              s"grandparent/parent/$i")
-        }
+      withContext(works) {
+        pathsModifier =>
+          whenReady(pathsModifier.modifyPaths("grandparent/parent")) {
+            resultWorks =>
+              resultWorks map {
+                resultWork =>
+                  resultWork.data.collectionPath.get.path
+              } should contain theSameElementsAs (0 to 100).map(
+                i => s"grandparent/parent/$i"
+              )
+          }
       }
     }
 
@@ -157,12 +175,15 @@ class PathsModifierTest
         "grandparent/parent/child",
         "grandparent/parent/child/grandchild"
       )
-      withContext(works) { pathsModifier =>
-        whenReady(pathsModifier.modifyPaths("parent/child")) { resultWorks =>
-          resultWorks map { resultWork =>
-            resultWork.data.collectionPath.get.path
-          } should contain theSameElementsAs expectedPaths
-        }
+      withContext(works) {
+        pathsModifier =>
+          whenReady(pathsModifier.modifyPaths("parent/child")) {
+            resultWorks =>
+              resultWorks map {
+                resultWork =>
+                  resultWork.data.collectionPath.get.path
+              } should contain theSameElementsAs expectedPaths
+          }
       }
     }
   }

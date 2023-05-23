@@ -12,7 +12,7 @@ import io.circe.generic.semiauto.deriveEncoder
 import org.scalatest.Assertion
 import weco.json.utils.JsonAssertions
 import weco.catalogue.internal_model.Implicits._
-import weco.catalogue.internal_model.fixtures.index.IndexFixturesNew
+import weco.catalogue.internal_model.fixtures.index.IndexFixtures
 import weco.catalogue.internal_model.generators.ImageGenerators
 import weco.catalogue.internal_model.work._
 import weco.catalogue.internal_model.work.generators.WorkGenerators
@@ -20,7 +20,7 @@ import weco.json.JsonUtil._
 
 class WorksIndexConfigTest
     extends AnyFunSpec
-    with IndexFixturesNew
+    with IndexFixtures
     with Matchers
     with JsonAssertions
     with ScalaCheckPropertyChecks
@@ -121,7 +121,7 @@ class WorksIndexConfigTest
     id: String,
     work: W
   )(implicit index: Index, encoder: Encoder[W]) = {
-    // TODO: Change this to use REST
+    // TODO: Change this to use the REST client when the application uses it
     client.execute {
       indexInto(index).doc(toJson(work).get).id(id)
     }.await
@@ -133,12 +133,10 @@ class WorksIndexConfigTest
     work: W
   )(implicit index: Index, decoder: Decoder[W]) =
     eventually {
-      // TODO: Change this to use REST
-
+      // TODO: Change this to use the REST client when the application uses it
       whenReady(client.execute(get(index, id))) {
         getResponse =>
           getResponse.result.exists shouldBe true
-
           fromJson[W](getResponse.result.sourceAsString).get shouldBe work
       }
     }
