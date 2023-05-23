@@ -22,16 +22,21 @@ def get_sns_batches(messages):
     this_batch = []
 
     for m in messages:
-        this_message = [{"Id": str(uuid.uuid4()), "Message": m}]
+        this_message = {"Id": str(uuid.uuid4()), "Message": m}
 
         old_batch = this_batch
-        new_batch = this_batch + this_message
+        new_batch = this_batch + [this_message]
 
         # If adding this message to the batch will push us over the 256KB
         # threshold, send all the other messages then start a new batch
         # with the latest message.
         if len(json.dumps(new_batch)) > 250 * 1024:
-            yield old_batch
+
+            # If we've just sent a batch of messages, old_batch may be
+            # empty -- don't yield it unless there's something here.
+            if old_batch:
+                yield old_batch
+
             this_batch = [this_message]
             continue
 
