@@ -21,3 +21,4 @@ services:
       # to test that our code works correctly when it exceeds this limit, but without
       # queuing up 100mb+ of documents in-memory during tests.
       - "http.max_content_length=1mb"
+      - "action.auto_create_index=false"
