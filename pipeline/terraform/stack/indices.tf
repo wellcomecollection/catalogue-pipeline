@@ -1,6 +1,6 @@
 module "pipeline_indices" {
 
-  source = "../../modules/pipeline_indices"
+  source = "../modules/pipeline_indices"
 
   es_works_source_index       = local.es_works_source_index
   es_works_merged_index       = local.es_works_merged_index
@@ -13,6 +13,6 @@ module "pipeline_indices" {
   es_images_index           = local.es_images_index
 
   # Path to folder containing mappings and analysis settings for Elasticsearch Index creation
-  es_config_path = "${path.root}/../../../index_config"
+  es_config_path = "${path.root}/../../index_config"
 
 }

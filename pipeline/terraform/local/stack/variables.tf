@@ -1,3 +1,3 @@
-variable "pipeline_date" {
+variable "local_pipeline_name" {
   type = string
 }
