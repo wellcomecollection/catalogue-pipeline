@@ -25,9 +25,7 @@ trait WorksIndexFixtures extends IndexFixturesBase {
     )
   }
 
-  def withLocalDenormalisedWorksIndex[R]: Fixture[Index, R] = {
-    withLocalElasticSearchIndex[R](config = getConfig("mappings.empty.v1.json"))
-  }
+  def withLocalDenormalisedWorksIndex[R]: Fixture[Index, R] = withLocalUnanalysedJsonStore[R]
 
   def withLocalWorksIndex[R]: Fixture[Index, R] = {
     withLocalElasticSearchIndex[R](config =
