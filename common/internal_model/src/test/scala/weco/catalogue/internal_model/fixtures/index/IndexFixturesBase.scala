@@ -6,11 +6,6 @@ import weco.fixtures.Fixture
 
 trait IndexFixturesBase extends ElasticsearchFixtures with IndexFixturesE4S {
 
-  protected def getConfig(mappings: String) =
-    s"""{"mappings":${Source
-        .fromResource(mappings)(Codec.UTF8)
-        .mkString}}"""
-
   protected def getConfig(mappings: String, analysis: String) =
     s"""{"mappings":${Source
         .fromResource(mappings)(Codec.UTF8)
@@ -23,7 +18,12 @@ trait IndexFixturesBase extends ElasticsearchFixtures with IndexFixturesE4S {
       """
 
   protected def withLocalUnanalysedJsonStore[R]: Fixture[Index, R] = {
-    withLocalElasticSearchIndex[R](config = getConfig("mappings.empty.v1.json"))
+    withLocalElasticSearchIndex[R](config =
+      s"""{"mappings":${
+        Source
+          .fromResource("mappings.empty.json")(Codec.UTF8)
+          .mkString
+      }}""")
   }
 
 }
