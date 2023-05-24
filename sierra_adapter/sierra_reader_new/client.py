@@ -113,8 +113,22 @@ class SierraClient:
             try:
                 entries = response["entries"]
             except KeyError:
-                print(response)
-                raise
+
+                # If we get an error from Sierra, it probably means our
+                # access token has expired -- ask for a refreshed token
+                # and try again.
+                if response == {
+                    "code": 123,
+                    "specificCode": 0,
+                    "httpStatus": 401,
+                    "name": "Unauthorized",
+                    "description": "invalid_grant",
+                }:
+                    self._refresh_auth_token()
+                    continue
+                else:
+                    print(response)
+                    raise
 
             yield from entries
 
