@@ -1,7 +1,7 @@
 locals {
   full_name = var.name
 
-  mappings_file = var.mappings_name != "empty" ? "${var.config_path}/mappings.${var.mappings_name}.json" : "${path.module}/mappings.empty.json"
+  mappings_file = "${var.config_path}/mappings.${var.mappings_name}.json"
   analysis_name = var.analysis_name != "" ? var.analysis_name : var.mappings_name
 
   analysis_json = jsondecode(local.analysis_name != "empty" ? file("${var.config_path}/analysis.${local.analysis_name}.json") : "{}")
