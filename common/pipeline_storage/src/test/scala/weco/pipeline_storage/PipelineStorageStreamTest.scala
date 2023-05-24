@@ -8,7 +8,7 @@ import com.sksamuel.elastic4s.{ElasticClient, Index, Response}
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.funspec.AnyFunSpec
 import software.amazon.awssdk.services.sqs.model.Message
-import weco.catalogue.internal_model.index.IndexFixturesOld
+import weco.catalogue.internal_model.fixtures.index.IndexFixtures
 import weco.elasticsearch.{ElasticClientBuilder, IndexConfig}
 import weco.json.JsonUtil
 import weco.json.JsonUtil._
@@ -30,7 +30,7 @@ import scala.util.{Failure, Random, Try}
 
 class PipelineStorageStreamTest
     extends AnyFunSpec
-    with IndexFixturesOld
+    with IndexFixtures
     with PipelineStorageStreamFixtures
     with SampleDocumentGenerators {
 

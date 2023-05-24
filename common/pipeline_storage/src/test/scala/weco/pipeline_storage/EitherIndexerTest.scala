@@ -4,12 +4,9 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import weco.catalogue.internal_model.index.{
-  ImagesIndexConfig,
-  IndexFixturesOld,
-  WorksIndexConfig
-}
+import weco.catalogue.internal_model.index.{ImagesIndexConfig, WorksIndexConfig}
 import weco.catalogue.internal_model.Implicits._
+import weco.catalogue.internal_model.fixtures.index.IndexFixtures
 import weco.elasticsearch.model.IndexId
 import weco.catalogue.internal_model.work.WorkState.Merged
 import weco.catalogue.internal_model.generators.ImageGenerators
@@ -22,7 +19,7 @@ import weco.pipeline_storage.elastic.ElasticIndexer
 class EitherIndexerTest
     extends AnyFunSpec
     with Matchers
-    with IndexFixturesOld
+    with IndexFixtures
     with WorkGenerators
     with ImageGenerators {
 

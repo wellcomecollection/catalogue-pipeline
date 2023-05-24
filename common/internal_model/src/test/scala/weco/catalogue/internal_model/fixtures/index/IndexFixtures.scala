@@ -1,5 +1,7 @@
 package weco.catalogue.internal_model.fixtures.index
 
-trait IndexFixtures extends WorksIndexFixtures with ImagesIndexFixtures {
+import weco.catalogue.internal_model.matchers.EventuallyInElasticsearch
+
+trait IndexFixtures extends WorksIndexFixtures with ImagesIndexFixtures with EventuallyInElasticsearch {
 
 }
