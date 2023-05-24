@@ -1,6 +1,6 @@
 package weco.pipeline.ingestor.images
 
-import com.sksamuel.elastic4s.ElasticDsl.{get, _}
+import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.get.GetResponse
 import com.sksamuel.elastic4s.{Index, Response}
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
@@ -11,7 +11,7 @@ import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.generators.ImageGenerators
 import weco.catalogue.internal_model.image.ImageState.Augmented
 import weco.catalogue.internal_model.image.{Image, ImageState}
-import weco.catalogue.internal_model.index.{ImagesIndexConfig, IndexFixtures}
+import weco.catalogue.internal_model.index.{ImagesIndexConfig, IndexFixturesOld}
 import weco.fixtures.TestWith
 import weco.json.JsonUtil._
 import weco.messaging.fixtures.SQS.{Queue, QueuePair}
@@ -29,7 +29,7 @@ import scala.concurrent.duration._
 class ImagesIngestorFeatureTest
     extends AnyFunSpec
     with ImageGenerators
-    with IndexFixtures
+    with IndexFixturesOld
     with IngestorFixtures {
 
   it("reads an image from the queue, ingests it and deletes the message") {

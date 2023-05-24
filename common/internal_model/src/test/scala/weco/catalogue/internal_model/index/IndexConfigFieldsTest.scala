@@ -28,7 +28,7 @@ object TestDoc {
 
 class IndexConfigFieldsTest
     extends AnyFunSpec
-    with IndexFixtures
+    with IndexFixturesOld
     with Matchers
     with JsonAssertions
     with ScalaCheckPropertyChecks

@@ -5,7 +5,7 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.akka.fixtures.Akka
-import weco.catalogue.internal_model.index.IndexFixtures
+import weco.catalogue.internal_model.index.IndexFixturesOld
 import weco.catalogue.internal_model.work.{CollectionPath, Work}
 import weco.catalogue.internal_model.work.WorkState.Merged
 import weco.catalogue.internal_model.work.generators.WorkGenerators
@@ -19,7 +19,7 @@ class PathsModifierTest
     extends AnyFunSpec
     with Matchers
     with ScalaFutures
-    with IndexFixtures
+    with IndexFixturesOld
     with ElasticsearchFixtures
     with Akka
     with WorkGenerators {

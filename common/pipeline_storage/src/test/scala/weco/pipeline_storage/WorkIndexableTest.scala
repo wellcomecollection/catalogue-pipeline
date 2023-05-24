@@ -4,7 +4,7 @@ import com.sksamuel.elastic4s.Index
 import org.scalatest.Assertion
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.index.{IndexFixtures, WorksIndexConfig}
+import weco.catalogue.internal_model.index.{IndexFixturesOld, WorksIndexConfig}
 import weco.fixtures.TestWith
 import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.catalogue.internal_model.Implicits._
@@ -20,7 +20,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class WorkIndexableTest
     extends AnyFunSpec
     with Matchers
-    with IndexFixtures
+    with IndexFixturesOld
     with ElasticIndexerFixtures
     with WorkGenerators {
 

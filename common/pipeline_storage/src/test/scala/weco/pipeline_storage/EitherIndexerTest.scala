@@ -6,7 +6,7 @@ import org.scalatest.matchers.should.Matchers
 import scala.concurrent.ExecutionContext.Implicits.global
 import weco.catalogue.internal_model.index.{
   ImagesIndexConfig,
-  IndexFixtures,
+  IndexFixturesOld,
   WorksIndexConfig
 }
 import weco.catalogue.internal_model.Implicits._
@@ -22,7 +22,7 @@ import weco.pipeline_storage.elastic.ElasticIndexer
 class EitherIndexerTest
     extends AnyFunSpec
     with Matchers
-    with IndexFixtures
+    with IndexFixturesOld
     with WorkGenerators
     with ImageGenerators {
 

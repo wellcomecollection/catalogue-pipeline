@@ -31,7 +31,7 @@ class SearchIndexConfigJsonTest
     with OptionValues
     with LocalResources
     with JsonAssertions
-    with IndexFixtures {
+    with IndexFixturesOld {
   def assertIndexConfigIsEquivalent(
     jsonFile: String,
     indexConfig: IndexConfig

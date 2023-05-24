@@ -14,7 +14,7 @@ import weco.json.JsonUtil.toJson
 import weco.catalogue.internal_model.image.{Image, ImageState}
 import weco.catalogue.internal_model.work.{Work, WorkState}
 
-trait IndexFixtures extends ElasticsearchFixtures { this: Suite =>
+trait IndexFixturesOld extends ElasticsearchFixtures { this: Suite =>
 
   def withLocalWorksIndex[R](testWith: TestWith[Index, R]): R =
     withLocalElasticsearchIndex[R](config = WorksIndexConfig.indexed) { index =>

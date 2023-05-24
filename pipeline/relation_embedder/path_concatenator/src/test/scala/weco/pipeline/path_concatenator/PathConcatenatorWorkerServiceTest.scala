@@ -5,7 +5,7 @@ import org.scalatest.Assertion
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import weco.akka.fixtures.Akka
-import weco.catalogue.internal_model.index.IndexFixtures
+import weco.catalogue.internal_model.index.IndexFixturesOld
 import weco.catalogue.internal_model.work.WorkState.Merged
 import weco.catalogue.internal_model.work.generators.WorkGenerators
 import weco.catalogue.internal_model.work.{CollectionPath, Work}
@@ -39,7 +39,7 @@ class PathConcatenatorWorkerServiceTest
     with IntegrationPatience
     with Akka
     with ElasticsearchFixtures
-    with IndexFixtures {
+    with IndexFixturesOld {
 
   it(
     "updates a work and its children, sending all their paths to the downstream queue") {

@@ -4,7 +4,7 @@ import com.sksamuel.elastic4s.Index
 import org.scalatest.Assertion
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.index.{ImagesIndexConfig, IndexFixtures}
+import weco.catalogue.internal_model.index.{ImagesIndexConfig, IndexFixturesOld}
 import weco.fixtures.TestWith
 import weco.catalogue.internal_model.Implicits._
 import Indexable.imageIndexable
@@ -20,7 +20,7 @@ import scala.concurrent.duration._
 class ImageIndexableTest
     extends AnyFunSpec
     with Matchers
-    with IndexFixtures
+    with IndexFixturesOld
     with ElasticIndexerFixtures
     with ImageGenerators
     with WorkGenerators {
