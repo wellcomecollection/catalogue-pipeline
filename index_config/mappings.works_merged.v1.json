@@ -1,0 +1,33 @@
+{
+  "dynamic": "false",
+  "properties": {
+    "data": {
+      "properties": {
+        "collectionPath": {
+          "properties": {
+            "depth": {
+              "type": "token_count",
+              "analyzer": "standard"
+            },
+            "path": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "normalizer": "lowercase_normalizer"
+                }
+              },
+              "copy_to": [
+                "data.collectionPath.depth"
+              ],
+              "analyzer": "exact_path_analyzer"
+            }
+          }
+        }
+      }
+    },
+    "type": {
+      "type": "keyword"
+    }
+  }
+}
