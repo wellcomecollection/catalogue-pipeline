@@ -2,6 +2,13 @@ import java.io.File
 import java.util.UUID
 import com.amazonaws.auth.STSAssumeRoleSessionCredentialsProvider
 
+// At the root of the repository is a directory containing index configurations
+// In "Real Life" the indices are configured at deploy time, so the applications
+// do not need them.  However, they are needed in some projects for creating
+// ephemeral indices for testing.
+lazy val indexConfigDir =
+settingKey[File]("Folder in which index configurations are found")
+Global / indexConfigDir := baseDirectory.value / "index_config"
 def setupProject(
   project: Project,
   folder: String,
@@ -29,8 +36,11 @@ def setupProject(
 lazy val internal_model = setupProject(
   project,
   "common/internal_model",
-  externalDependencies = CatalogueDependencies.internalModelDependencies)
-
+  externalDependencies = CatalogueDependencies.internalModelDependencies
+).settings(
+  // Only needed for generating ephemeral indices for testing
+  Test / unmanagedResourceDirectories += indexConfigDir.value
+)
 lazy val display_model = setupProject(
   project,
   folder = "common/display_model",
