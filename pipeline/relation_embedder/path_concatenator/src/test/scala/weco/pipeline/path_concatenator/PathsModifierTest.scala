@@ -10,7 +10,6 @@ import weco.catalogue.internal_model.work.{CollectionPath, Work}
 import weco.catalogue.internal_model.work.WorkState.Merged
 import weco.catalogue.internal_model.work.generators.WorkGenerators
 import weco.catalogue.internal_model.Implicits._
-import weco.elasticsearch.test.fixtures.ElasticsearchFixtures
 import weco.fixtures.TestWith
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -20,7 +19,6 @@ class PathsModifierTest
     with Matchers
     with ScalaFutures
     with IndexFixtures
-    with ElasticsearchFixtures
     with Akka
     with WorkGenerators {
 

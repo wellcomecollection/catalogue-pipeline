@@ -7,7 +7,6 @@ import weco.catalogue.internal_model.fixtures.index.IndexFixtures
 import weco.catalogue.internal_model.work.{CollectionPath, Work}
 import weco.catalogue.internal_model.work.WorkState.Merged
 import weco.catalogue.internal_model.Implicits._
-import weco.elasticsearch.test.fixtures.ElasticsearchFixtures
 import weco.akka.fixtures.Akka
 
 import weco.catalogue.internal_model.work.generators.WorkGenerators
@@ -23,7 +22,6 @@ class PathsServiceTest
     extends AnyFunSpec
     with Matchers
     with IndexFixtures
-    with ElasticsearchFixtures
     with Akka
     with WorkGenerators {
 
