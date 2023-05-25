@@ -19,6 +19,9 @@ resource "ec_deployment" "pipeline" {
       zone_count = local.es_node_count
       size       = local.es_memory
     }
+    config {
+      user_settings_yaml = "action.auto_create_index=false"
+    }
   }
 
   kibana {

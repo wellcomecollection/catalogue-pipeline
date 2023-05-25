@@ -18,3 +18,4 @@ services:
       - "logger.level=DEBUG"
       - "discovery.type=single-node"
       - "xpack.security.enabled=false"
+      - "action.auto_create_index=false"
