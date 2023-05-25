@@ -21,7 +21,8 @@ import org.scalatest.matchers.should.Matchers
  *
  * These are just copied out of the existing code and are waiting to be rewritten.
  *
- * When rewritten to directly use the Rest client, put them in IndexFeaturesBase.
+ * When rewritten to directly use the Rest client, put them in the appropriate
+ * trait (IndexFixturesBase or ElasticearchFixtures)
  * Eventually, this trait will be empty and can be deleted
  */
 trait IndexFixturesE4S extends Eventually with ScalaFutures with Matchers {
