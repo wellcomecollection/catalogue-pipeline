@@ -4,7 +4,7 @@ import weco.fixtures.Fixture
 
 trait WorksIndexFixtures extends IndexFixturesBase {
 
-  def withLocalSourceIndex[R]: Fixture[Index, R] =
+  def withLocalSourceWorksIndex[R]: Fixture[Index, R] =
     withLocalUnanalysedJsonStore[R]
 
   def withLocalIdentifiedWorksIndex[R]: Fixture[Index, R] = {
