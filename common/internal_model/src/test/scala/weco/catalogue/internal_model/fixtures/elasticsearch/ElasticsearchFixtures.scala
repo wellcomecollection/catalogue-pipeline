@@ -9,16 +9,16 @@ import weco.fixtures.{fixture, Fixture, RandomGenerators}
 
 trait ElasticsearchFixtures
     extends RandomGenerators
-    // Including IntegrationPatience here will save test authors a degree of heartache.
+    // These waiting traits are included for convenience, so that this can act
+    // more like a drop-in replacement for the scala-libs ElasticsearchFixtures
+    with Eventually
+    with ScalaFutures
+    // Similarly, including IntegrationPatience here will save test authors a degree of heartache.
     // It isn't strictly proper to include it here, as this trait never waits for anything.
     // However, it is generally expected that if you are using this fixture you will be doing some ES CRUD, and
     // then you will also want to ask ES if it has the data you now expect.
     // That will nondeterministically fail unless there are adequate timeouts.
-    with IntegrationPatience
-    // Similarly, these waiting traits are included for convenience, so that this can act
-    // more like a drop-in replacement for the scala-libs ElasticsearchFixtures
-    with Eventually
-    with ScalaFutures {
+    with IntegrationPatience {
 
   protected val restClient: RestClient = RestClient
     .builder(new HttpHost("localhost", 9200, "http"))
