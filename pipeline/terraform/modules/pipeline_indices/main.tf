@@ -34,7 +34,7 @@ module "images_augmented_index" {
 module "works_identified_index" {
   source        = "../es_index"
   name          = var.es_works_identified_index
-  mappings_name = "works_identified.v1"
+  mappings_name = "works_identified.2023-05-26"
   config_path   = var.es_config_path
 }
 
@@ -42,25 +42,25 @@ module "works_identified_index" {
 module "works_merged_index" {
   source        = "../es_index"
   name          = var.es_works_merged_index
-  mappings_name = "works_merged.v1"
+  mappings_name = "works_merged.2023-05-26"
   config_path   = var.es_config_path
 }
 
 module "works_indexed_index" {
   source        = "../es_index"
   name          = var.es_works_index
-  mappings_name = "works_indexed.v1"
+  mappings_name = "works_indexed.2023-05-26"
   config_path   = var.es_config_path
 }
 
 module "images_indexed_index" {
   source        = "../es_index"
   name          = var.es_images_index
-  mappings_name = "images_indexed.v1"
+  mappings_name = "images_indexed.2023-05-26"
   # Images contain a superset of the fields in Works
   # and share the same analysis settings for them
   # The images-specific fields do not use any extra custom analysis.
-  analysis_name = "works_indexed.v1"
+  analysis_name = "works_indexed.2023-05-26"
   config_path   = var.es_config_path
 }
 
