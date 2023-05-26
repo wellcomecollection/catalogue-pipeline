@@ -1,7 +1,7 @@
 steps:
   - label: deploy CALM adapter
     command: |
-      ENV_TAG=prod ./builds/update_ecr_image_tag.sh \
+      ENV_TAG=env.prod ./builds/update_ecr_image_tag.sh \
         uk.ac.wellcome/calm_adapter \
         uk.ac.wellcome/calm_deletion_checker \
         uk.ac.wellcome/calm_indexer
@@ -20,7 +20,7 @@ steps:
 
   - label: deploy METS adapter
     command: |
-      ENV_TAG=prod ./builds/update_ecr_image_tag.sh uk.ac.wellcome/mets_adapter
+      ENV_TAG=env.prod ./builds/update_ecr_image_tag.sh uk.ac.wellcome/mets_adapter
       CLUSTER=mets-adapter ./builds/deploy_ecs_services.sh mets-adapter
 
     plugins:
@@ -32,7 +32,7 @@ steps:
 
   - label: deploy Sierra adapter
     command: |
-      ENV_TAG=prod ./builds/update_ecr_image_tag.sh \
+      ENV_TAG=env.prod ./builds/update_ecr_image_tag.sh \
         uk.ac.wellcome/sierra_indexer \
         uk.ac.wellcome/sierra_linker \
         uk.ac.wellcome/sierra_merger \
@@ -61,7 +61,7 @@ steps:
 
   - label: deploy TEI adapter
     command: |
-      ENV_TAG=prod ./builds/update_ecr_image_tag.sh \
+      ENV_TAG=env.prod ./builds/update_ecr_image_tag.sh \
         uk.ac.wellcome/tei_adapter \
         uk.ac.wellcome/tei_id_extractor
 
@@ -78,7 +78,7 @@ steps:
 
   - label: deploy reindexer
     command: |
-      ENV_TAG=prod ./builds/update_ecr_image_tag.sh uk.ac.wellcome/reindex_worker
+      ENV_TAG=env.prod ./builds/update_ecr_image_tag.sh uk.ac.wellcome/reindex_worker
       CLUSTER=reindexer ./builds/deploy_ecs_services.sh reindexer
 
     plugins:
