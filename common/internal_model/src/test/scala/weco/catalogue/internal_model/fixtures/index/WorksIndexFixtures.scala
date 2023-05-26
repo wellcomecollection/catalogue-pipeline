@@ -10,8 +10,8 @@ trait WorksIndexFixtures extends IndexFixturesBase {
   def withLocalIdentifiedWorksIndex[R]: Fixture[Index, R] = {
     withLocalElasticSearchIndex[R](config =
       getConfig(
-        mappings = "mappings.works_identified.v1.json",
-        analysis = "analysis.works_identified.v1.json"
+        mappings = "mappings.works_identified.2023-05-26.json",
+        analysis = "analysis.works_identified.2023-05-26.json"
       )
     )
   }
@@ -19,8 +19,8 @@ trait WorksIndexFixtures extends IndexFixturesBase {
   def withLocalMergedWorksIndex[R]: Fixture[Index, R] = {
     withLocalElasticSearchIndex[R](config =
       getConfig(
-        mappings = "mappings.works_merged.v1.json",
-        analysis = "analysis.works_merged.v1.json"
+        mappings = "mappings.works_merged.2023-05-26.json",
+        analysis = "analysis.works_merged.2023-05-26.json"
       )
     )
   }
@@ -30,8 +30,8 @@ trait WorksIndexFixtures extends IndexFixturesBase {
   def withLocalWorksIndex[R]: Fixture[Index, R] = {
     withLocalElasticSearchIndex[R](config =
       getConfig(
-        mappings = "mappings.works_indexed.v1.json",
-        analysis = "analysis.works_indexed.v1.json"
+        mappings = "mappings.works_indexed.2023-05-26.json",
+        analysis = "analysis.works_indexed.2023-05-26.json"
       )
     )
   }
