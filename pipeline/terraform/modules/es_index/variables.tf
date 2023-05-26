@@ -8,8 +8,8 @@ variable "mappings_name" {
 }
 
 variable "analysis_name" {
-  type    = string
-  default = ""
+  type        = string
+  default     = ""
   description = "Defaults to match mappings_name"
 }
 
