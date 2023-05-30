@@ -7,7 +7,8 @@ import com.sksamuel.elastic4s.requests.get.GetResponse
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.scalatest.{Assertion, Suite}
 import weco.catalogue.internal_model.Implicits._
-import weco.catalogue.internal_model.index.{IndexFixturesOld, WorksIndexConfig}
+import weco.catalogue.internal_model.index.WorksIndexConfig
+import weco.catalogue.internal_model.fixtures.index.IndexFixtures
 import weco.catalogue.internal_model.work.WorkState.Denormalised
 import weco.catalogue.internal_model.work.{Work, WorkState}
 import weco.fixtures.{TestWith, TimeAssertions}
@@ -20,7 +21,7 @@ import weco.json.JsonUtil._
 import weco.pipeline.ingestor.common.models.WorkQueryableValues
 
 trait WorksIngestorFixtures
-    extends IndexFixturesOld
+    extends IndexFixtures
     with IngestorFixtures
     with TimeAssertions {
   this: Suite =>
