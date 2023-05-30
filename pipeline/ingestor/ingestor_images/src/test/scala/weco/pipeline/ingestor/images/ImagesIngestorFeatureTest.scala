@@ -11,7 +11,8 @@ import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.generators.ImageGenerators
 import weco.catalogue.internal_model.image.ImageState.Augmented
 import weco.catalogue.internal_model.image.{Image, ImageState}
-import weco.catalogue.internal_model.index.{ImagesIndexConfig, IndexFixturesOld}
+import weco.catalogue.internal_model.index.ImagesIndexConfig
+import weco.catalogue.internal_model.fixtures.index.IndexFixtures
 import weco.fixtures.TestWith
 import weco.json.JsonUtil._
 import weco.messaging.fixtures.SQS.{Queue, QueuePair}
@@ -29,7 +30,7 @@ import scala.concurrent.duration._
 class ImagesIngestorFeatureTest
     extends AnyFunSpec
     with ImageGenerators
-    with IndexFixturesOld
+    with IndexFixtures
     with IngestorFixtures {
 
   it("reads an image from the queue, ingests it and deletes the message") {
