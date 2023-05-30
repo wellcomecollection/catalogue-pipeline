@@ -11,6 +11,9 @@ locals {
   es_images_augmented_index = "images-augmented-${var.pipeline_date}"
   es_images_index           = "images-indexed-${var.pipeline_date}"
 
+  # Path to folder containing mappings and analysis settings for Elasticsearch Index creation
+  es_config_path = "${path.root}/../../../index_config"
+
   # The max number of connections allowed by the instance.
   # specified at /infrastructure/critical/rds_id_minter.tf
   base_rds_instances             = 1

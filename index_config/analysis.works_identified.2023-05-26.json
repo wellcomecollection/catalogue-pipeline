@@ -1,0 +1,10 @@
+{
+  "normalizer": {
+    "lowercase_normalizer": {
+      "filter": [
+        "lowercase"
+      ],
+      "type": "custom"
+    }
+  }
+}
