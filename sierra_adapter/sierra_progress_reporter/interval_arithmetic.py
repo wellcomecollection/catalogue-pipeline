@@ -1,4 +1,5 @@
 import datetime as dt
+import json
 import os
 
 import attr
@@ -35,21 +36,12 @@ def get_intervals(keys):
     """
     for k in keys:
         name = os.path.basename(k)
-        start, end = name.split("__")
-        start = strip_timestamp(start)
-        end = strip_timestamp(end)
-        try:
-            yield Interval(
-                start=dt.datetime.strptime(start, "%Y-%m-%dT%H-%M-%S.%f"),
-                end=dt.datetime.strptime(end, "%Y-%m-%dT%H-%M-%S.%f"),
-                key=k,
-            )
-        except ValueError:
-            yield Interval(
-                start=dt.datetime.strptime(start, "%Y-%m-%dT%H-%M-%S"),
-                end=dt.datetime.strptime(end, "%Y-%m-%dT%H-%M-%S"),
-                key=k,
-            )
+        data = json.loads(name)
+
+        start = dt.datetime.fromisoformat(data["start"]).replace(tzinfo=None)
+        end = dt.datetime.fromisoformat(data["end"]).replace(tzinfo=None)
+
+        yield Interval(start=start, end=end, key=k)
 
 
 def combine_overlapping_intervals(sorted_intervals):

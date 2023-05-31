@@ -59,6 +59,28 @@ steps:
     agents:
       queue: nano
 
+  - label: deploy Sierra reader
+    command: |
+      ./sierra_adapter/sierra_reader_new/deploy.sh
+
+    plugins:
+      - wellcomecollection/aws-assume-role#v0.2.2:
+          role: "arn:aws:iam::760097843905:role/platform-ci"
+
+    agents:
+      queue: nano
+
+  - label: deploy Sierra progress reporter
+    command: |
+      ./sierra_adapter/sierra_progress_reporter/deploy.sh
+
+    plugins:
+      - wellcomecollection/aws-assume-role#v0.2.2:
+          role: "arn:aws:iam::760097843905:role/platform-ci"
+
+    agents:
+      queue: nano
+
   - label: deploy TEI adapter
     command: |
       ENV_TAG=env.prod ./builds/update_ecr_image_tag.sh \

@@ -1,10 +1,22 @@
+module "items_reader_new" {
+  source = "../sierra_reader_new"
+
+  resource_type      = "items"
+  windows_topic_arns = var.items_windows_topic_arns
+  sierra_fields      = local.sierra_items_fields
+
+  reader_bucket          = aws_s3_bucket.sierra_adapter.id
+  namespace              = local.namespace_hyphen
+  lambda_error_alarm_arn = var.lambda_error_alarm_arn
+}
+
 module "items_reader" {
   source = "./../sierra_reader"
 
   resource_type = "items"
 
   bucket_name        = aws_s3_bucket.sierra_adapter.id
-  windows_topic_arns = var.items_windows_topic_arns
+  windows_topic_arns = []
 
   sierra_fields = local.sierra_items_fields
 
@@ -29,7 +41,7 @@ module "item_linker" {
 
   resource_type = "items"
 
-  demultiplexer_topic_arn = module.items_reader.topic_arn
+  demultiplexer_topic_arn = module.items_reader_new.topic_arn
 
   container_image = local.sierra_linker_image
 

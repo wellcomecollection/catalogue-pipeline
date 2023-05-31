@@ -4,13 +4,13 @@
 Build 'update windows' for the Sierra or TEI adapter pipeline.
 
 Usage:
-    build_windows.py --start=<START> --end=<END> [--window_length=<WINDOW_LENGTH>] --resource=<RESOURCE>
+    build_windows.py --start=<START> --end=<END> [--window-length=<WINDOW_LENGTH>] --resource=<RESOURCE>
     build_windows.py -h | --help
 
 Options:
     --start=<START>         When to start polling
     --end=<END>             The earliest point to stop polling
-    --window_length=<WINDOW_LENGTH>
+    --window-length=<WINDOW_LENGTH>
                             The number of minutes per window
     --resource=<RESOURCE>   What sort of resource should we fetch?
 
@@ -24,8 +24,8 @@ For example, calling the script with arguments
 
     start           = 10:00
     end             = 10:59
-    window_length   = 15
-    resource        = bibs
+    window-length   = 15
+    resource        = sierra-bibs
 
 which generate four windows:
 
