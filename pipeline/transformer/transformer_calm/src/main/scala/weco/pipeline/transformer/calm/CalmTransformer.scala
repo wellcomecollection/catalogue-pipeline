@@ -29,7 +29,8 @@ object CalmTransformer
   val identifierMapping = Map(
     "RefNo" -> IdentifierType.CalmRefNo,
     "AltRefNo" -> IdentifierType.CalmAltRefNo,
-    "BNumber" -> IdentifierType.SierraSystemNumber
+    "BNumber" -> IdentifierType.SierraSystemNumber,
+    "AccNo" -> IdentifierType.AccessionNumber
   )
 
   // As much as it might not look like it, these values mean it should
@@ -181,7 +182,7 @@ object CalmTransformer
             id =>
               SourceIdentifier(
                 identifierType = idType,
-                value = id,
+                value = NormaliseText(id, whitelist = NormaliseText.none),
                 ontologyType = "Work"
               )
           )

@@ -32,7 +32,8 @@ class CalmTransformerTest
       "RefNo" -> "a/b/c",
       "AltRefNo" -> "a.b.c",
       "CatalogueStatus" -> "Catalogued",
-      "Language" -> "English, with Russian commentary"
+      "Language" -> "English, with Russian commentary",
+      "AccNo" -> """<span class="HIT">WI</span>/<span class="HIT">86</span>"""
     )
     CalmTransformer(record, version) shouldBe Right(
       Work.Visible[Source](
@@ -64,6 +65,11 @@ class CalmTransformerTest
             SourceIdentifier(
               value = "a.b.c",
               identifierType = IdentifierType.CalmAltRefNo,
+              ontologyType = "Work"
+            ),
+            SourceIdentifier(
+              value = "WI/86",
+              identifierType = IdentifierType.AccessionNumber,
               ontologyType = "Work"
             )
           ),

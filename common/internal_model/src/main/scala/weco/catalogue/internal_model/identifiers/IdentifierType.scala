@@ -140,4 +140,9 @@ object IdentifierType extends Enum[IdentifierType] {
     val id = "label-derived"
     val label = "Identifier derived from the label of the referent"
   }
+
+  case object AccessionNumber extends IdentifierType {
+    val id = "wellcome-accession-number"
+    val label = "Accession number"
+  }
 }
