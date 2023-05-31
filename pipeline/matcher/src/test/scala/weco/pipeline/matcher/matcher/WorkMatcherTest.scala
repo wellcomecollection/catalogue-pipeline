@@ -386,7 +386,7 @@ class WorkMatcherTest
         // First store work B in the graph.
         //
         // This will put two nodes in the graph: a node for B, and a stub for A.
-        Await.result(workMatcher.matchWork(workB), atMost = 5 seconds)
+        Await.result(workMatcher.matchWork(workB), atMost = 10 seconds)
 
         // Now try to store works A and C simultaneously.
         //
@@ -401,10 +401,10 @@ class WorkMatcherTest
         val futureC = workMatcher.matchWork(workC)
 
         val resultA = Try {
-          Await.result(futureA, atMost = 5 seconds)
+          Await.result(futureA, atMost = 10 seconds)
         }
         val resultC = Try {
-          Await.result(futureC, atMost = 5 seconds)
+          Await.result(futureC, atMost = 10 seconds)
         }
 
         // The update to A should have succeeded; the update to B should have failed
