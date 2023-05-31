@@ -26,21 +26,24 @@ trait PipelineStorageStreamFixtures extends Akka with SQS {
     indexer: Indexer[T],
     sender: MemoryMessageSender = new MemoryMessageSender(),
     metrics: Metrics[Future] = new MemoryMetrics(),
-    pipelineStorageConfig: PipelineStorageConfig = pipelineStorageConfig)(
-    testWith: TestWith[PipelineStorageStream[NotificationMessage, T, String],
-                       R]): R =
-    withActorSystem { implicit actorSystem =>
-      withSQSStream[NotificationMessage, R](queue, metrics) { messageStream =>
-        val pipelineStream =
-          new PipelineStorageStream[NotificationMessage, T, String](
-            messageStream = messageStream,
-            indexer = indexer,
-            messageSender = sender
-          )(
-            config = pipelineStorageConfig
-          )
+    pipelineStorageConfig: PipelineStorageConfig = pipelineStorageConfig
+  )(
+    testWith: TestWith[PipelineStorageStream[NotificationMessage, T, String], R]
+  ): R =
+    withActorSystem {
+      implicit actorSystem =>
+        withSQSStream[NotificationMessage, R](queue, metrics) {
+          messageStream =>
+            val pipelineStream =
+              new PipelineStorageStream[NotificationMessage, T, String](
+                messageStream = messageStream,
+                indexer = indexer,
+                messageSender = sender
+              )(
+                config = pipelineStorageConfig
+              )
 
-        testWith(pipelineStream)
-      }
+            testWith(pipelineStream)
+        }
     }
 }

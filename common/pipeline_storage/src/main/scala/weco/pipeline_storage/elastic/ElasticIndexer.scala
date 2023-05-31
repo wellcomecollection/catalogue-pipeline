@@ -10,7 +10,7 @@ import com.sksamuel.elastic4s.{
 }
 import grizzled.slf4j.Logging
 import io.circe.{Encoder, Printer}
-import weco.elasticsearch.{ElasticsearchIndexCreator, IndexConfig}
+import weco.elasticsearch.IndexConfig
 import weco.pipeline_storage.{Indexable, Indexer}
 
 import java.security.MessageDigest
@@ -36,8 +36,17 @@ class ElasticIndexer[T: Indexable](
     }
   }
 
-  final def init(): Future[Unit] =
-    new ElasticsearchIndexCreator(client, index, config).create
+  final def init(): Future[Unit] = {
+    // TODO: replace this with restclient performRequest
+    client.execute(indexExists(index.name)).map {
+      response =>
+        if (!response.result.isExists) {
+          throw new RuntimeException(
+            s"Indexer Initialisation error on index: ${index.name} resp: $response"
+          )
+        }
+    }
+  }
 
   final def apply(documents: Seq[T]): Future[Either[Seq[T], Seq[T]]] =
     Future

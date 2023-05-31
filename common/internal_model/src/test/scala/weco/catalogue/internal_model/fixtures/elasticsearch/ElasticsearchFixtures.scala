@@ -46,7 +46,7 @@ trait ElasticsearchFixtures
     index: String = createIndexName
   ): Fixture[Index, R] = fixture[Index, R](
     create = {
-      httpPut(index, config)
+      httpPut(index, config)()
       Index(index)
     },
     destroy = {
