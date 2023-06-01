@@ -11,7 +11,6 @@ import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.generators.ImageGenerators
 import weco.catalogue.internal_model.image.ImageState.Augmented
 import weco.catalogue.internal_model.image.{Image, ImageState}
-import weco.catalogue.internal_model.index.ImagesIndexConfig
 import weco.catalogue.internal_model.fixtures.index.IndexFixtures
 import weco.fixtures.TestWith
 import weco.json.JsonUtil._
@@ -116,8 +115,7 @@ class ImagesIngestorFeatureTest
 
             val indexer = new ElasticIndexer[IndexedImage](
               elasticClient,
-              index,
-              config = ImagesIndexConfig.indexed
+              index
             )
 
             withWorkerService(

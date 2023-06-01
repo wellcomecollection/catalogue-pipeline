@@ -16,7 +16,7 @@ case class SampleDocument(
 
 case class SampleDocumentData(
   genre: Option[String] = None,
-  date: Option[String] = None,
+  date: Option[String] = None
 )
 
 object SampleDocument {

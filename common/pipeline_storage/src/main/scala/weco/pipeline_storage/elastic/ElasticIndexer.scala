@@ -10,7 +10,6 @@ import com.sksamuel.elastic4s.{
 }
 import grizzled.slf4j.Logging
 import io.circe.{Encoder, Printer}
-import weco.elasticsearch.IndexConfig
 import weco.pipeline_storage.{Indexable, Indexer}
 
 import java.security.MessageDigest
@@ -19,8 +18,7 @@ import scala.util.Try
 
 class ElasticIndexer[T: Indexable](
   client: ElasticClient,
-  index: Index,
-  config: IndexConfig
+  index: Index
 )(implicit ec: ExecutionContext, encoder: Encoder[T])
     extends Indexer[T]
     with Logging {

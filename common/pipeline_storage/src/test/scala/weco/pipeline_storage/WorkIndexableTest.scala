@@ -4,7 +4,6 @@ import com.sksamuel.elastic4s.Index
 import org.scalatest.Assertion
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.index.WorksIndexConfig
 import weco.fixtures.TestWith
 import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.catalogue.internal_model.Implicits._
@@ -100,8 +99,7 @@ class WorkIndexableTest
       val indexer =
         new ElasticIndexer[Work[Identified]](
           elasticClient,
-          index,
-          WorksIndexConfig.identified)
+          index)
       testWith((index, indexer))
     }
   }

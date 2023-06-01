@@ -7,7 +7,6 @@ import com.sksamuel.elastic4s.Index
 import com.typesafe.config.Config
 import software.amazon.awssdk.services.sqs.model.Message
 import weco.catalogue.internal_model.Implicits._
-import weco.catalogue.internal_model.index.ImagesIndexConfig
 import weco.typesafe.WellcomeTypesafeApp
 import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import weco.messaging.sns.NotificationMessage
@@ -70,8 +69,7 @@ object Main extends WellcomeTypesafeApp {
       val imageIndexer =
         new ElasticIndexer[Image[Augmented]](
           client = esClient,
-          index = Index(config.requireString("es.augmented-images.index")),
-          config = ImagesIndexConfig.augmented
+          index = Index(config.requireString("es.augmented-images.index"))
         )
 
       val pipelineStorageConfig = PipelineStorageStreamBuilder

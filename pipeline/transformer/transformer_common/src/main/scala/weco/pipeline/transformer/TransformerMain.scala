@@ -4,7 +4,6 @@ import akka.actor.ActorSystem
 import com.sksamuel.elastic4s.Index
 import com.typesafe.config.Config
 import io.circe.Decoder
-import weco.catalogue.internal_model.index.WorksIndexConfig
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.internal_model.Implicits._
@@ -34,8 +33,7 @@ class TransformerMain[Payload <: SourcePayload, SourceData](
     val sourceWorkIndexer =
       new ElasticIndexer[Work[Source]](
         client = esClient,
-        index = sourceWorkIndex,
-        config = WorksIndexConfig.source
+        index = sourceWorkIndex
       )
 
     val sourceWorkRetriever =

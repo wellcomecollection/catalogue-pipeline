@@ -19,7 +19,6 @@ class IngestorMain[In, Out](
   name: String,
   inputIndexField: String,
   outputIndexField: String,
-  indexConfig: IndexConfig,
   transform: In => Out
 )(
   implicit decoder: Decoder[In],
@@ -41,8 +40,7 @@ class IngestorMain[In, Out](
     val indexer =
       new ElasticIndexer[Out](
         client = client,
-        index = Index(config.requireString(outputIndexField)),
-        config = indexConfig
+        index = Index(config.requireString(outputIndexField))
       )
 
     val messageSender = SNSBuilder

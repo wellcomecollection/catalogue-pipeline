@@ -3,7 +3,6 @@ package weco.pipeline.relation_embedder
 import akka.actor.ActorSystem
 import com.sksamuel.elastic4s.Index
 import com.typesafe.config.Config
-import weco.catalogue.internal_model.index.WorksIndexConfig
 import weco.elasticsearch.typesafe.ElasticBuilder
 import weco.messaging.sns.NotificationMessage
 import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
@@ -33,8 +32,7 @@ object Main extends WellcomeTypesafeApp {
       val workIndexer =
         new ElasticIndexer[Work[Denormalised]](
           client = esClient,
-          index = Index(config.requireString(s"es.denormalised-works.index")),
-          config = WorksIndexConfig.denormalised
+          index = Index(config.requireString(s"es.denormalised-works.index"))
         )
 
       new RelationEmbedderWorkerService(

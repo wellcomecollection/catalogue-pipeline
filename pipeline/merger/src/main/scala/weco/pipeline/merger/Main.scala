@@ -6,7 +6,6 @@ import com.typesafe.config.Config
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.image.Image
 import weco.catalogue.internal_model.image.ImageState.Initial
-import weco.catalogue.internal_model.index.{ImagesIndexConfig, WorksIndexConfig}
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.elasticsearch.typesafe.ElasticBuilder
@@ -64,13 +63,11 @@ object Main extends WellcomeTypesafeApp {
         new EitherIndexer[Work[Merged], Image[Initial]](
           leftIndexer = new ElasticIndexer[Work[Merged]](
             client = esClient,
-            index = Index(config.requireString("es.merged-works.index")),
-            config = WorksIndexConfig.merged
+            index = Index(config.requireString("es.merged-works.index"))
           ),
           rightIndexer = new ElasticIndexer[Image[Initial]](
             client = esClient,
-            index = Index(config.requireString("es.initial-images.index")),
-            config = ImagesIndexConfig.initial
+            index = Index(config.requireString("es.initial-images.index"))
           )
         )
 

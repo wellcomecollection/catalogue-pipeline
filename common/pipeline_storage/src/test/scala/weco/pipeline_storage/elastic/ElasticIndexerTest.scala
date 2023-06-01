@@ -14,12 +14,9 @@ import weco.elasticsearch.test.fixtures.ElasticsearchFixtures
 import weco.fixtures.TestWith
 import weco.json.JsonUtil._
 import weco.catalogue.internal_model.index.{IndexConfigFields, WorksAnalysis}
+import weco.catalogue.internal_model.matchers.EventuallyInElasticsearch
 import weco.json.utils.JsonAssertions
-import weco.pipeline_storage.generators.{
-  SampleDocument,
-  SampleDocumentData,
-  SampleDocumentGenerators
-}
+import weco.pipeline_storage.generators.{SampleDocument, SampleDocumentData, SampleDocumentGenerators}
 import weco.pipeline_storage.{Indexer, IndexerTestCases}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -30,7 +27,8 @@ class ElasticIndexerTest
     with EitherValues
     with JsonAssertions
     with IndexConfigFields
-    with SampleDocumentGenerators {
+    with SampleDocumentGenerators
+    with EventuallyInElasticsearch {
 
   import weco.pipeline_storage.generators.SampleDocument._,
   weco.pipeline_storage.generators.SampleDocument.{
