@@ -21,7 +21,7 @@ import weco.messaging.memory.MemoryMessageSender
 import weco.messaging.sns.NotificationMessage
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.work.WorkState.{Denormalised, Merged}
-import weco.catalogue.internal_model.index.IndexFixtures
+import weco.catalogue.internal_model.fixtures.index.IndexFixtures
 import weco.catalogue.internal_model.work._
 import weco.pipeline.relation_embedder.fixtures.RelationGenerators
 import weco.pipeline.relation_embedder.models._

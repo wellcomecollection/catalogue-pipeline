@@ -4,12 +4,9 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import weco.catalogue.internal_model.index.{
-  ImagesIndexConfig,
-  IndexFixtures,
-  WorksIndexConfig
-}
+import weco.catalogue.internal_model.index.{ImagesIndexConfig, WorksIndexConfig}
 import weco.catalogue.internal_model.Implicits._
+import weco.catalogue.internal_model.fixtures.index.IndexFixtures
 import weco.elasticsearch.model.IndexId
 import weco.catalogue.internal_model.work.WorkState.Merged
 import weco.catalogue.internal_model.generators.ImageGenerators

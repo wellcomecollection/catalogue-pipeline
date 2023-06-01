@@ -4,11 +4,12 @@ import com.sksamuel.elastic4s.Index
 import org.scalatest.Assertion
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.index.{IndexFixtures, WorksIndexConfig}
+import weco.catalogue.internal_model.index.WorksIndexConfig
 import weco.fixtures.TestWith
 import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.catalogue.internal_model.Implicits._
 import Indexable.workIndexable
+import weco.catalogue.internal_model.fixtures.index.IndexFixtures
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.generators.WorkGenerators
 import weco.pipeline_storage.elastic.ElasticIndexer

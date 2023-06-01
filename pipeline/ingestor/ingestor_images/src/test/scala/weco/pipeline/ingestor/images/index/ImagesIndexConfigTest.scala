@@ -7,7 +7,7 @@ import org.scalatest.funspec.AnyFunSpec
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.generators.ImageGenerators
 import weco.catalogue.internal_model.image.{Image, ImageState, InferredData}
-import weco.catalogue.internal_model.index.IndexFixtures
+import weco.catalogue.internal_model.fixtures.index.IndexFixtures
 import weco.json.JsonUtil._
 import weco.pipeline.ingestor.images.ImageTransformer
 import weco.pipeline.ingestor.images.models.IndexedImage

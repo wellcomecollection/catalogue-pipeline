@@ -1,7 +1,6 @@
 package weco.pipeline.matcher.storage.elastic
 
 import com.sksamuel.elastic4s.Index
-import weco.catalogue.internal_model.index.WorksIndexConfig
 import weco.catalogue.internal_model.work.generators.WorkGenerators
 import weco.catalogue.internal_model.work.{Work, WorkState}
 import weco.catalogue.internal_model.Implicits._
@@ -23,7 +22,7 @@ class ElasticWorkStubRetrieverTest
 
   it("can retrieve a deleted work") {
     val work: Work[WorkState.Identified] = identifiedWork().deleted()
-    withLocalElasticsearchIndex(config = WorksIndexConfig.identified) {
+    withLocalIdentifiedWorksIndex {
       implicit index =>
         withElasticIndexer(index) {
           indexer: ElasticIndexer[Work[WorkState.Identified]] =>
@@ -46,7 +45,7 @@ class ElasticWorkStubRetrieverTest
 
   override def withContext[R](stubs: Seq[WorkStub])(
     testWith: TestWith[Index, R]): R =
-    withLocalElasticsearchIndex(config = WorksIndexConfig.identified) { index =>
+    withLocalIdentifiedWorksIndex { index =>
       withElasticIndexer[Work[WorkState.Identified], R](index) { indexer =>
         val works: Seq[Work[WorkState.Identified]] = stubs.map { w =>
           identifiedWork()

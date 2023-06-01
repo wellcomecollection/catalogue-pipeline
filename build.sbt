@@ -2,6 +2,14 @@ import java.io.File
 import java.util.UUID
 import com.amazonaws.auth.STSAssumeRoleSessionCredentialsProvider
 
+// At the root of the repository is a directory containing index configurations
+// In "Real Life" the indices are configured at deploy time, so the applications
+// do not need them.  However, they are needed in some projects for creating
+// ephemeral indices for testing.
+lazy val indexConfigDir =
+  settingKey[File]("Folder in which index configurations are found")
+Global / indexConfigDir := baseDirectory.value / "index_config"
+
 def setupProject(
   project: Project,
   folder: String,
@@ -10,11 +18,12 @@ def setupProject(
 ): Project = {
 
   val dependsOn = localDependencies
-    .map { project: Project =>
-      ClasspathDependency(
-        project = project,
-        configuration = Some("compile->compile;test->test")
-      )
+    .map {
+      project: Project =>
+        ClasspathDependency(
+          project = project,
+          configuration = Some("compile->compile;test->test")
+        )
     }
 
   project
@@ -29,8 +38,11 @@ def setupProject(
 lazy val internal_model = setupProject(
   project,
   "common/internal_model",
-  externalDependencies = CatalogueDependencies.internalModelDependencies)
-
+  externalDependencies = CatalogueDependencies.internalModelDependencies
+).settings(
+  // Only needed for generating ephemeral indices for testing
+  Test / unmanagedResourceDirectories += indexConfigDir.value
+)
 lazy val display_model = setupProject(
   project,
   folder = "common/display_model",
@@ -41,13 +53,15 @@ lazy val display_model = setupProject(
 lazy val flows = setupProject(
   project,
   "common/flows",
-  externalDependencies = CatalogueDependencies.flowDependencies)
+  externalDependencies = CatalogueDependencies.flowDependencies
+)
 
 lazy val source_model = setupProject(
   project,
   folder = "common/source_model",
   localDependencies = Seq(internal_model),
-  externalDependencies = CatalogueDependencies.sourceModelDependencies)
+  externalDependencies = CatalogueDependencies.sourceModelDependencies
+)
 
 lazy val source_model_typesafe = setupProject(
   project,
@@ -114,24 +128,21 @@ lazy val merger = setupProject(
 lazy val path_concatenator = setupProject(
   project,
   "pipeline/relation_embedder/path_concatenator",
-  localDependencies =
-    Seq(internal_model, pipeline_storage_typesafe),
+  localDependencies = Seq(internal_model, pipeline_storage_typesafe),
   externalDependencies = CatalogueDependencies.pathConcatenatorDependencies
 )
 
 lazy val relation_embedder = setupProject(
   project,
   "pipeline/relation_embedder/relation_embedder",
-  localDependencies =
-    Seq(internal_model, pipeline_storage_typesafe),
+  localDependencies = Seq(internal_model, pipeline_storage_typesafe),
   externalDependencies = CatalogueDependencies.relationEmbedderDependencies
 )
 
 lazy val router = setupProject(
   project,
   "pipeline/relation_embedder/router",
-  localDependencies =
-    Seq(internal_model, pipeline_storage_typesafe),
+  localDependencies = Seq(internal_model, pipeline_storage_typesafe),
   externalDependencies = CatalogueDependencies.routerDependencies
 )
 
@@ -189,7 +200,8 @@ lazy val reindex_worker = setupProject(
   project,
   "reindexer/reindex_worker",
   localDependencies = Seq(source_model),
-  externalDependencies = CatalogueDependencies.reindexWorkerDependencies)
+  externalDependencies = CatalogueDependencies.reindexWorkerDependencies
+)
 
 lazy val transformer_common = setupProject(
   project,
@@ -326,10 +338,11 @@ lazy val tei_adapter = setupProject(
 )
 // AWS Credentials to read from S3
 
-s3CredentialsProvider := { _ =>
-  val builder = new STSAssumeRoleSessionCredentialsProvider.Builder(
-    "arn:aws:iam::760097843905:role/platform-ci",
-    UUID.randomUUID().toString
-  )
-  builder.build()
+s3CredentialsProvider := {
+  _ =>
+    val builder = new STSAssumeRoleSessionCredentialsProvider.Builder(
+      "arn:aws:iam::760097843905:role/platform-ci",
+      UUID.randomUUID().toString
+    )
+    builder.build()
 }

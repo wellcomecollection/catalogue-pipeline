@@ -5,11 +5,10 @@ import org.scalatest.Assertion
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import weco.akka.fixtures.Akka
-import weco.catalogue.internal_model.index.IndexFixtures
+import weco.catalogue.internal_model.fixtures.index.IndexFixtures
 import weco.catalogue.internal_model.work.WorkState.Merged
 import weco.catalogue.internal_model.work.generators.WorkGenerators
 import weco.catalogue.internal_model.work.{CollectionPath, Work}
-import weco.elasticsearch.test.fixtures.ElasticsearchFixtures
 import weco.fixtures.TestWith
 import weco.messaging.fixtures.SQS.QueuePair
 import weco.messaging.memory.MemoryMessageSender
@@ -38,7 +37,6 @@ class PathConcatenatorWorkerServiceTest
     with Eventually
     with IntegrationPatience
     with Akka
-    with ElasticsearchFixtures
     with IndexFixtures {
 
   it(

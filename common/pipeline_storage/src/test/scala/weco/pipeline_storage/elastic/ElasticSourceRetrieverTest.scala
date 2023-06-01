@@ -1,7 +1,6 @@
 package weco.pipeline_storage.elastic
 
 import com.sksamuel.elastic4s.Index
-import weco.elasticsearch.IndexConfig
 import weco.elasticsearch.model.IndexId
 import weco.fixtures.TestWith
 import weco.pipeline_storage.Retriever
@@ -24,7 +23,7 @@ class ElasticSourceRetrieverTest
 
   override def withContext[R](documents: Seq[SampleDocument])(
     testWith: TestWith[Index, R]): R =
-    withLocalElasticsearchIndex(config = IndexConfig.empty) { index =>
+    withLocalUnanalysedJsonStore { index =>
       withElasticIndexer[SampleDocument, R](index) { indexer =>
         whenReady(indexer(documents)) { _ =>
           assertElasticsearchEventuallyHas(index, documents: _*)

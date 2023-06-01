@@ -13,8 +13,9 @@ import org.scalatest.Assertion
 import weco.json.utils.JsonAssertions
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.generators.ImageGenerators
-import weco.catalogue.internal_model.work._
+import weco.catalogue.internal_model.work.{Work, WorkState}
 import weco.catalogue.internal_model.work.generators.WorkGenerators
+import weco.catalogue.internal_model.fixtures.index.IndexFixtures
 import weco.json.JsonUtil._
 
 class WorksIndexConfigTest
@@ -43,7 +44,7 @@ class WorksIndexConfigTest
 
   describe("indexing different works with every type of WorkState") {
     it("WorkState.Source") {
-      withLocalElasticsearchIndex(config = WorksIndexConfig.source) {
+      withLocalSourceWorksIndex {
         implicit index =>
           forAll { sourceWork: Work[WorkState.Source] =>
             assertWorkCanBeIndexed(sourceWork)
@@ -52,7 +53,7 @@ class WorksIndexConfigTest
     }
 
     it("WorkState.Identified") {
-      withLocalElasticsearchIndex(config = WorksIndexConfig.identified) {
+      withLocalIdentifiedWorksIndex {
         implicit index =>
           forAll { identifiedWork: Work[WorkState.Identified] =>
             assertWorkCanBeIndexed(identifiedWork)
@@ -61,7 +62,7 @@ class WorksIndexConfigTest
     }
 
     it("WorkState.Merged") {
-      withLocalElasticsearchIndex(config = WorksIndexConfig.merged) {
+      withLocalMergedWorksIndex {
         implicit index =>
           forAll { mergedWork: Work[WorkState.Merged] =>
             assertWorkCanBeIndexed(mergedWork)
@@ -70,7 +71,7 @@ class WorksIndexConfigTest
     }
 
     it("WorkState.Denormalised") {
-      withLocalElasticsearchIndex(config = WorksIndexConfig.denormalised) {
+      withLocalDenormalisedWorksIndex{
         implicit index =>
           forAll { denormalisedWork: Work[WorkState.Denormalised] =>
             assertWorkCanBeIndexed(denormalisedWork)
