@@ -106,7 +106,7 @@ class ImageIndexableTest
   private def withImagesIndexAndIndexer[R](
     testWith: TestWith[(Index, ElasticIndexer[Image[ImageState.Augmented]]), R]
   ) =
-    withLocalAugmentedImageIndex { index:Index =>
+    withLocalAugmentedImageIndex { index: Index =>
       val indexer = new ElasticIndexer[Image[ImageState.Augmented]](
         elasticClient,
         index,
