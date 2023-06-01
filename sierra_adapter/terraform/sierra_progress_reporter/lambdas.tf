@@ -12,9 +12,10 @@ module "lambda" {
   alarm_topic_arn = var.lambda_error_alarm_arn
   timeout         = 900
 
+  runtime = "python3.9"
+
   environment_variables = {
-    BUCKET        = var.s3_adapter_bucket_name
-    SLACK_WEBHOOK = var.slack_access_token
+    BUCKET = var.s3_adapter_bucket_name
   }
 
   log_retention_in_days = 30

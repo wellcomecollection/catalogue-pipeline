@@ -1,10 +1,22 @@
+module "bibs_reader_new" {
+  source = "../sierra_reader_new"
+
+  resource_type      = "bibs"
+  windows_topic_arns = var.bibs_windows_topic_arns
+  sierra_fields      = local.sierra_bibs_fields
+
+  reader_bucket          = aws_s3_bucket.sierra_adapter.id
+  namespace              = local.namespace_hyphen
+  lambda_error_alarm_arn = var.lambda_error_alarm_arn
+}
+
 module "bibs_reader" {
   source = "./../sierra_reader"
 
   resource_type = "bibs"
 
   bucket_name        = aws_s3_bucket.sierra_adapter.id
-  windows_topic_arns = var.bibs_windows_topic_arns
+  windows_topic_arns = []
 
   sierra_fields = local.sierra_bibs_fields
 
@@ -30,7 +42,7 @@ module "bibs_merger" {
   resource_type = "bibs"
 
   container_image   = local.sierra_merger_image
-  updates_topic_arn = module.bibs_reader.topic_arn
+  updates_topic_arn = module.bibs_reader_new.topic_arn
 
   vhs_table_name        = module.vhs_sierra.table_name
   vhs_bucket_name       = module.vhs_sierra.bucket_name

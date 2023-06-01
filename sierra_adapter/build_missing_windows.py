@@ -9,9 +9,7 @@ import sys
 
 import boto3
 
-sys.path.append(
-    os.path.join(os.path.dirname(__file__), "sierra_progress_reporter", "src")
-)
+sys.path.append(os.path.join(os.path.dirname(__file__), "sierra_progress_reporter"))
 sys.path.append(
     os.path.join(os.path.dirname(__file__), "sierra_window_generator", "src")
 )
@@ -69,9 +67,7 @@ if __name__ == "__main__":
     client = session.client("sns")
 
     for resource_type in ("bibs", "items", "holdings", "orders"):
-        report = build_report(
-            s3_client=session.client("s3"), bucket=BUCKET, resource_type=resource_type
-        )
+        report = build_report(session, bucket=BUCKET, resource_type=resource_type)
         for missing_window in get_missing_windows(report):
             print(missing_window)
             client.publish(

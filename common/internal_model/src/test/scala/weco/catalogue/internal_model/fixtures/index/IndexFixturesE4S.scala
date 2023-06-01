@@ -2,8 +2,14 @@ package weco.catalogue.internal_model.fixtures.index
 
 import com.sksamuel.elastic4s.http.JavaClient
 import com.sksamuel.elastic4s.ElasticDsl._
+<<<<<<< HEAD
 import com.sksamuel.elastic4s.{ElasticClient, Index}
 import com.sksamuel.elastic4s.requests.common.VersionType.ExternalGte
+=======
+import com.sksamuel.elastic4s.{ElasticClient, Index, Response}
+import com.sksamuel.elastic4s.requests.common.VersionType.ExternalGte
+import com.sksamuel.elastic4s.requests.indexes.admin.IndexExistsResponse
+>>>>>>> main
 import io.circe.Encoder
 import org.elasticsearch.client.RestClient
 import org.scalatest.concurrent.{Eventually, ScalaFutures}
@@ -95,5 +101,4 @@ trait IndexFixturesE4S extends Eventually with ScalaFutures with Matchers {
       .await
       .result
       .count
-
 }
