@@ -14,23 +14,28 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait ElasticIndexerFixtures extends IndexFixtures {
   this: Suite =>
-  def withElasticIndexer[T, R](idx: Index,
-                               esClient: ElasticClient = elasticClient,
-                               config: IndexConfig = IndexConfig.empty)(
-    testWith: TestWith[ElasticIndexer[T], R])(implicit
-                                              ec: ExecutionContext,
-                                              encoder: Encoder[T],
-                                              indexable: Indexable[T]): R =
-    testWith(new ElasticIndexer[T](esClient, idx, config))
+  def withElasticIndexer[T, R](
+    idx: Index,
+    esClient: ElasticClient = elasticClient,
+    config: IndexConfig = IndexConfig.empty
+  )(testWith: TestWith[ElasticIndexer[T], R])(
+    implicit ec: ExecutionContext,
+    encoder: Encoder[T],
+    indexable: Indexable[T]
+  ): R =
+    testWith(new ElasticIndexer[T](esClient, idx))
 
   implicit def canonicalId[T](implicit indexable: Indexable[T]): IndexId[T] =
     (doc: T) => indexable.id(doc)
 
-  def indexInOrder[T](indexer: ElasticIndexer[T])(documents: T*)(
-    implicit ec: ExecutionContext): Future[Either[Seq[T], Seq[T]]] =
-    documents.tail.foldLeft(indexer(List(documents.head))) { (future, doc) =>
-      future.flatMap { _ =>
-        indexer(List(doc))
-      }
+  def indexInOrder[T](indexer: ElasticIndexer[T])(
+    documents: T*
+  )(implicit ec: ExecutionContext): Future[Either[Seq[T], Seq[T]]] =
+    documents.tail.foldLeft(indexer(List(documents.head))) {
+      (future, doc) =>
+        future.flatMap {
+          _ =>
+            indexer(List(doc))
+        }
     }
 }

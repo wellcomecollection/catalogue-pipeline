@@ -8,7 +8,7 @@ import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.funspec.AnyFunSpec
 import software.amazon.awssdk.services.sqs.model.Message
 import weco.catalogue.internal_model.fixtures.index.IndexFixtures
-import weco.elasticsearch.{ElasticClientBuilder, IndexConfig}
+import weco.elasticsearch.ElasticClientBuilder
 import weco.fixtures.TestWith
 import weco.json.JsonUtil
 import weco.json.JsonUtil._
@@ -35,7 +35,7 @@ class PipelineStorageStreamTest
     with SampleDocumentGenerators {
 
   def indexer(index: Index, elasticClient: ElasticClient = elasticClient) =
-    new ElasticIndexer[SampleDocument](elasticClient, index, IndexConfig.empty)
+    new ElasticIndexer[SampleDocument](elasticClient, index)
 
   def withPipelineStreamTestEnvironment[R](
     sender: MemoryMessageSender,
