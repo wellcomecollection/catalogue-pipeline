@@ -2,13 +2,13 @@ package weco.catalogue.internal_model.matchers
 
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.get.GetResponse
-import com.sksamuel.elastic4s.requests.searches.SearchResponse
+import com.sksamuel.elastic4s.requests.searches.{SearchHit, SearchResponse}
 import com.sksamuel.elastic4s.{ElasticClient, Index, Response}
-import io.circe.Encoder
+import io.circe.{Decoder, Encoder}
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
 import org.scalatest.Assertion
 import weco.elasticsearch.model.IndexId
-import weco.json.JsonUtil.toJson
+import weco.json.JsonUtil.{fromJson, toJson}
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.image.{Image, ImageState}
 import weco.catalogue.internal_model.work.{Work, WorkState}
@@ -53,7 +53,7 @@ trait EventuallyInElasticsearch
         }
     }
 
-  def assertElasticsearchEventuallyHasWork[State <: WorkState](
+  protected def assertElasticsearchEventuallyHasWork[State <: WorkState](
     index: Index,
     works: Work[State]*
   )(implicit enc: Encoder[Work[State]]): Seq[Assertion] = {
@@ -62,7 +62,7 @@ trait EventuallyInElasticsearch
     assertElasticsearchEventuallyHas(index, works: _*)
   }
 
-  def assertElasticsearchEventuallyHasImage[State <: ImageState](
+  protected def assertElasticsearchEventuallyHasImage[State <: ImageState](
     index: Index,
     images: Image[State]*
   )(implicit enc: Encoder[Image[State]]): Seq[Assertion] = {
@@ -71,9 +71,29 @@ trait EventuallyInElasticsearch
     assertElasticsearchEventuallyHas(index, images: _*)
   }
 
-  def assertElasticsearchEmpty[T](index: Index): Assertion =
+  protected def assertElasticsearchEmpty(index: Index): Assertion = {
     // Elasticsearch is eventually consistent so, when the future completes,
     // the documents won't appear in the search until after a refresh
+    shouldHaveCount(index, 0)
+  }
+
+  protected def shouldHaveCount(index: Index, expectedCount: Int): Assertion = {
+    eventually {
+      val countFuture = elasticClient.execute {
+        count(index.name)
+      }
+
+      whenReady(countFuture) {
+        _.result.count shouldBe expectedCount
+      }
+    }
+
+  }
+
+  protected def matchAll(
+    index: Index,
+    expectedCount: Int
+  ): Array[SearchHit] = {
     eventually {
       val response: Response[SearchResponse] = elasticClient.execute {
         search(index).matchAllQuery()
@@ -81,7 +101,32 @@ trait EventuallyInElasticsearch
 
       val hits = response.result.hits.hits
 
-      hits should have size 0
+      hits should have size expectedCount
+      hits
     }
+  }
+
+  protected def matchAllAsMaps(
+    index: Index,
+    expectedCount: Int
+  ): List[Map[String, AnyRef]] = {
+    matchAll(index, expectedCount).map(_.sourceAsMap).toList
+  }
+
+  protected def matchAllAsJsonStrings(
+    index: Index,
+    expectedCount: Int
+  ): List[String] = {
+    matchAll(index, expectedCount)
+      .map(_.sourceAsString)
+      .toList
+  }
+
+  protected def matchAllAsDocuments[Doc](
+    index: Index,
+    expectedCount: Int
+  )(implicit decoder: Decoder[Doc]): List[Doc] = {
+    matchAllAsJsonStrings(index, expectedCount).map(fromJson[Doc](_).get)
+  }
 
 }

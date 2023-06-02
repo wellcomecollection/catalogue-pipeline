@@ -4,7 +4,6 @@ import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.http.JavaClient
 import com.sksamuel.elastic4s.{ElasticClient, Index, Response}
 import com.sksamuel.elastic4s.requests.get.GetResponse
-import com.sksamuel.elastic4s.requests.searches.SearchResponse
 import org.apache.http.HttpHost
 import org.elasticsearch.client.RestClient
 import org.scalatest.{Assertion, EitherValues}
@@ -46,14 +45,8 @@ class ElasticIndexerTest
         }
 
         eventually {
-          val response: Response[SearchResponse] = elasticClient.execute {
-            search(index).matchAllQuery()
-          }.await
-
-          val storedDocuments = response.result.hits.hits
-            .map(_.sourceAsString)
-            .map(fromJson[SampleDocument](_).get)
-
+          val storedDocuments =
+            matchAllAsDocuments[SampleDocument](index, documents.size)
           storedDocuments should contain theSameElementsAs documents
         }
 
@@ -67,7 +60,6 @@ class ElasticIndexerTest
       client = elasticClient,
       index = index
     )
-
     testWith(indexer)
   }
 
@@ -184,17 +176,7 @@ class ElasticIndexerTest
             whenReady(future) {
               result =>
                 result.right.get should contain only (documents: _*)
-                val hits = eventually {
-                  val response = elasticClient.execute {
-                    search(index).matchAllQuery()
-                  }.await
-
-                  val hits = response.result.hits.hits
-
-                  hits should have size 2
-                  hits
-                }
-                hits.map(_.sourceAsMap).toList shouldBe List(
+                matchAllAsMaps(index, 2) shouldBe List(
                   Map(
                     "id" -> documentA.id,
                     "version" -> documentA.version,
@@ -283,15 +265,7 @@ class ElasticIndexerTest
 
               // Because Elasticsearch isn't strongly consistent, it may take a
               // few seconds for the count response to be accurate.
-              eventually {
-                val countFuture = elasticClient.execute {
-                  count(index.name)
-                }
-
-                whenReady(countFuture) {
-                  _.result.count shouldBe documents.size
-                }
-              }
+              shouldHaveCount(index, documents.size)
           }
       }
     }
