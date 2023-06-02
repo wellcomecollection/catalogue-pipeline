@@ -5,7 +5,6 @@ import io.circe.Encoder
 import org.scalatest.Suite
 import weco.catalogue.internal_model.fixtures.index.IndexFixtures
 import weco.elasticsearch.model.IndexId
-import weco.elasticsearch.IndexConfig
 import weco.fixtures.TestWith
 import weco.pipeline_storage.Indexable
 import weco.pipeline_storage.elastic.ElasticIndexer
@@ -16,8 +15,7 @@ trait ElasticIndexerFixtures extends IndexFixtures {
   this: Suite =>
   def withElasticIndexer[T, R](
     idx: Index,
-    esClient: ElasticClient = elasticClient,
-    config: IndexConfig = IndexConfig.empty
+    esClient: ElasticClient = elasticClient
   )(testWith: TestWith[ElasticIndexer[T], R])(
     implicit ec: ExecutionContext,
     encoder: Encoder[T],
