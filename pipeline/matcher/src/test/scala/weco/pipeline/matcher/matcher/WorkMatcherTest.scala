@@ -407,7 +407,7 @@ class WorkMatcherTest
           Await.result(futureC, atMost = 10 seconds)
         }
 
-        // The update to A should have succeeded; the update to B should have failed
+        // The update to A should have succeeded; the update to C should have failed
         // because of inconsistent data.
         resultA shouldBe a[Success[_]]
 
