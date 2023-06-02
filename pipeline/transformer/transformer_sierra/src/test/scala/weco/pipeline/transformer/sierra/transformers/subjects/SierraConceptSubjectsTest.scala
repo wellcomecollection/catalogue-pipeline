@@ -642,6 +642,34 @@ class SierraConceptSubjectsTest
     )
   }
 
+  it("ignores the identifier in 650 ǂ0 if it can't deduce the identifier scheme") {
+    // This is based on b10234159, retrieved 2 June 2023
+    val bibData = createSierraBibDataWith(
+      varFields = List(
+        VarField(
+          marcTag = Some("650"),
+          indicator2 = Some("0"),
+          subfields = List(
+            Subfield(tag = "a", content = "Animals"),
+            Subfield(tag = "0", content = "D000818"),
+          )
+        )
+      )
+    )
+
+    val List(subject) = SierraConceptSubjects(createSierraBibNumber, bibData)
+    val concept = subject.onlyConcept
+
+    concept should have(
+      sourceIdentifier(
+        value = "animals",
+        ontologyType = "Concept",
+        identifierType = IdentifierType.LabelDerived
+      )
+    )
+  }
+
+
   describe("multiple ǂa subfields") {
     // This is illegal in MARC, but can occur in third party catalogue data.
     // In the interests of Postel, the transformer will extract them anyway.

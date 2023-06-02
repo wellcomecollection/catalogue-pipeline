@@ -1,5 +1,6 @@
 package weco.pipeline.transformer.sierra.transformers
 
+import grizzled.slf4j.Logging
 import weco.catalogue.internal_model.identifiers.{
   IdentifierType,
   SourceIdentifier
@@ -22,7 +23,7 @@ import weco.sierra.models.marc.VarField
 // https://www.loc.gov/marc/bibliographic/bd651.html
 // https://www.loc.gov/marc/bibliographic/bd655.html
 //
-object SierraConceptIdentifier {
+object SierraConceptIdentifier extends Logging {
 
   /** Determine the Library of Congress identifier type from the identifier
     * value prefix.
@@ -50,24 +51,23 @@ object SierraConceptIdentifier {
     * use in the Library of Congress Subject Headings (LCSH) and the Name
     * authority files that are maintained by the Library of Congress.
     */
-  private def locScheme(idValue: String): IdentifierType =
+  private def locScheme(idValue: String): Option[IdentifierType] =
     idValue.split("\\d", 2).head match {
       // sh is the only legal prefix for a Subject Headings identifier.
       // At time of writing, there were some other s~ prefixed identifiers in use and marked as
       // LCSH in the Works Catalogue, but these appear to be errors, so an exact match is
       // enforced here in order to guard against such typos re-emerging.
-      case "sh" => IdentifierType.LCSubjects
+      case "sh" => Some(IdentifierType.LCSubjects)
       // There are actually seven different prefixes in use in the whole LCNames Authority file,
       // but because there is no definitive list of LCNames prefixes, we do not wish to accidentally
       // exclude a real one in the future by insisting that the prefix we find must be a member of
       // a closed list.
-      case prefix if prefix.head == 'n' => IdentifierType.LCNames
+      case prefix if prefix.head == 'n' => Some(IdentifierType.LCNames)
       // Any prefix other than sh or n is an error. Common mistakes include MeSH ids marked as LoC ids
       // and general typographical errors such as `shsh`.  Guard against these by rejecting the identifier.
       case _ =>
-        throw new IllegalArgumentException(
-          s"Could not determine LoC scheme from id '$idValue'"
-        )
+        warn(s"Could not determine LoC scheme from id '$idValue'")
+        None
 
     }
   def maybeFindIdentifier(
@@ -80,7 +80,7 @@ object SierraConceptIdentifier {
 
       // These mappings are provided by the MARC spec.
       // https://www.loc.gov/marc/bibliographic/bd655.html
-      case Some("0") => Some(locScheme(identifierSubfieldContent))
+      case Some("0") => locScheme(identifierSubfieldContent)
       case Some("2") => Some(IdentifierType.MESH)
       case Some("4") => None
 
