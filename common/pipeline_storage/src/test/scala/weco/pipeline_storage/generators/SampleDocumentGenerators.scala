@@ -20,10 +20,11 @@ case class SampleDocumentData(
 )
 
 object SampleDocument {
-  implicit val indexable = new Indexable[SampleDocument] {
-    def version(document: SampleDocument): Long = document.version
-    def id(document: SampleDocument): String = document.id
-  }
+  implicit val indexable: Indexable[SampleDocument] =
+    new Indexable[SampleDocument] {
+      def version(document: SampleDocument): Long = document.version
+      def id(document: SampleDocument): String = document.id
+    }
 
   implicit val canonicalId: IndexId[SampleDocument] =
     (doc: SampleDocument) => doc.id

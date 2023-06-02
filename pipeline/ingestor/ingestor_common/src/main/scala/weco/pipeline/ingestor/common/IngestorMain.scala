@@ -4,7 +4,6 @@ import akka.actor.ActorSystem
 import com.sksamuel.elastic4s.Index
 import com.typesafe.config.Config
 import io.circe.{Decoder, Encoder}
-import weco.elasticsearch.IndexConfig
 import weco.elasticsearch.typesafe.ElasticBuilder
 import weco.messaging.typesafe.SNSBuilder
 import weco.pipeline_storage.Indexable
