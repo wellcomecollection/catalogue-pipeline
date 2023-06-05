@@ -1,5 +1,7 @@
 package weco.pipeline_storage
 
+import com.sksamuel.elastic4s.Index
+import io.circe.Encoder
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -13,6 +15,7 @@ import weco.catalogue.internal_model.image.Image
 import weco.catalogue.internal_model.image.ImageState.Initial
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.generators.WorkGenerators
+import weco.fixtures.TestWith
 import weco.pipeline_storage.elastic.ElasticIndexer
 
 class EitherIndexerTest
@@ -34,54 +37,62 @@ class EitherIndexerTest
   val worksAndImages: Seq[Either[Work[Merged], Image[Initial]]] =
     works.map(Left(_)) ++ images.map(Right(_))
 
-  it("indexes a list of either works or images") {
+  def withEitherIndexer[L: Indexable, R: Indexable](
+    testWith: TestWith[(EitherIndexer[L, R], Index, Index), Unit]
+  )(
+    implicit leftEncoder: Encoder[L],
+    rightEncoder: Encoder[R]
+  ): Unit = {
     withLocalInitialImagesIndex {
       imageIndex =>
         withLocalMergedWorksIndex {
           workIndex =>
             val indexer = new EitherIndexer(
-              leftIndexer = new ElasticIndexer[Work[Merged]](
+              leftIndexer = new ElasticIndexer[L](
                 client = elasticClient,
                 index = workIndex
               ),
-              rightIndexer = new ElasticIndexer[Image[Initial]](
+              rightIndexer = new ElasticIndexer[R](
                 client = elasticClient,
                 index = imageIndex
               )
             )
+            testWith((indexer, workIndex, imageIndex))
+        }
+    }
 
-            whenReady(indexer(worksAndImages)) {
-              result =>
-                result shouldBe a[Right[_, _]]
+  }
 
-                assertElasticsearchEventuallyHas(workIndex, works: _*)
-                assertElasticsearchEventuallyHas(imageIndex, images: _*)
-            }
+  it("indexes a list of either works or images") {
+    withEitherIndexer[Work[Merged], Image[Initial]] {
+      case (indexer, workIndex, imageIndex) =>
+        whenReady(indexer(worksAndImages)) {
+          result =>
+            result shouldBe a[Right[_, _]]
+            assertElasticsearchEventuallyHas(workIndex, works: _*)
+            assertElasticsearchEventuallyHas(imageIndex, images: _*)
         }
     }
   }
 
   it("indexes a list of only works") {
-    withLocalInitialImagesIndex {
-      imageIndex =>
-        withLocalMergedWorksIndex {
-          workIndex =>
-            val indexer = new EitherIndexer(
-              leftIndexer = new ElasticIndexer[Work[Merged]](
-                client = elasticClient,
-                index = workIndex
-              ),
-              rightIndexer = new ElasticIndexer[Image[Initial]](
-                client = elasticClient,
-                index = imageIndex
-              )
-            )
+    withEitherIndexer[Work[Merged], Image[Initial]] {
+      case (indexer, workIndex, _) =>
+        whenReady(indexer(works.map(Left(_)))) {
+          result =>
+            result shouldBe a[Right[_, _]]
+            assertElasticsearchEventuallyHas(workIndex, works: _*)
+        }
+    }
+  }
 
-            whenReady(indexer(works.map(Left(_)))) {
-              result =>
-                result shouldBe a[Right[_, _]]
-                assertElasticsearchEventuallyHas(workIndex, works: _*)
-            }
+  it("indexes a list of only images") {
+    withEitherIndexer[Work[Merged], Image[Initial]] {
+      case (indexer, _, imageIndex) =>
+        whenReady(indexer(images.map(Right(_)))) {
+          result =>
+            result shouldBe a[Right[_, _]]
+            assertElasticsearchEventuallyHas(imageIndex, images: _*)
         }
     }
   }

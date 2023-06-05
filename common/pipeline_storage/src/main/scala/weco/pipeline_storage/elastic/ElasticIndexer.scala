@@ -35,12 +35,11 @@ class ElasticIndexer[T: Indexable](
   }
 
   final def init(): Future[Unit] = {
-    // TODO: replace this with restclient performRequest
     client.execute(indexExists(index.name)).map {
       response =>
         if (!response.result.isExists) {
           throw new RuntimeException(
-            s"Indexer Initialisation error on index: ${index.name} resp: $response"
+            s"Indexer Initialisation error looking for index: ${index.name} resp: $response"
           )
         }
     }
