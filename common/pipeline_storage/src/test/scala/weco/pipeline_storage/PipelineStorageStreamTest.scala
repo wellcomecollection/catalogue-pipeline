@@ -38,13 +38,14 @@ class PipelineStorageStreamTest
     new ElasticIndexer[SampleDocument](elasticClient, index)
 
   def withPipelineStreamTestEnvironment[R](
-    sender: MemoryMessageSender,
+    maybeSender: Option[MemoryMessageSender] = None,
     maybeIndexer: Option[Indexer[SampleDocument]] = None,
     pipelineStorageConfig: PipelineStorageConfig = pipelineStorageConfig,
     queueVisibilityTimeout: FiniteDuration = 10.seconds
   )(
     testWith: TestWith[
       (
+        MemoryMessageSender,
         Index,
         QueuePair,
         PipelineStorageStream[NotificationMessage, SampleDocument, String]
@@ -52,6 +53,7 @@ class PipelineStorageStreamTest
       R
     ]
   ): R = {
+    val sender = maybeSender.getOrElse(new MemoryMessageSender)
     withLocalUnanalysedJsonStore {
       index =>
         withLocalSqsQueuePair(visibilityTimeout = queueVisibilityTimeout) {
@@ -63,7 +65,7 @@ class PipelineStorageStreamTest
               pipelineStorageConfig = pipelineStorageConfig
             ) {
               stream =>
-                testWith((index, pair, stream))
+                testWith((sender, index, pair, stream))
             }
         }
     }
@@ -89,9 +91,8 @@ class PipelineStorageStreamTest
 
   it("ingests a single document and sends it on") {
     val document = createDocument
-    val sender = new MemoryMessageSender
-    withPipelineStreamTestEnvironment(sender) {
-      case (index, QueuePair(queue, dlq), pipelineStream) =>
+    withPipelineStreamTestEnvironment() {
+      case (sender, index, QueuePair(queue, dlq), pipelineStream) =>
         sendNotificationToSQS(
           queue = queue,
           message = document
@@ -121,10 +122,8 @@ class PipelineStorageStreamTest
       .toList
     val documents = documentsFirstMessage ++ documentsSecondMessage
 
-    val sender = new MemoryMessageSender
-
-    withPipelineStreamTestEnvironment(sender) {
-      case (index, QueuePair(queue, dlq), pipelineStream) =>
+    withPipelineStreamTestEnvironment() {
+      case (sender, index, QueuePair(queue, dlq), pipelineStream) =>
         sendNotificationToSQS(
           queue = queue,
           message = 1
@@ -176,14 +175,11 @@ class PipelineStorageStreamTest
       }
     }
 
-    val sender = new MemoryMessageSender
-
     withPipelineStreamTestEnvironment(
-      sender,
       maybeIndexer = Some(indexer),
       queueVisibilityTimeout = 1.second
     ) {
-      case (_, QueuePair(queue, dlq), pipelineStream) =>
+      case (sender, _, QueuePair(queue, dlq), pipelineStream) =>
         sendNotificationToSQS(
           queue = queue,
           message = 1
@@ -235,10 +231,10 @@ class PipelineStorageStreamTest
     }
 
     withPipelineStreamTestEnvironment(
-      brokenSender,
+      maybeSender = Some(brokenSender),
       queueVisibilityTimeout = 1.second
     ) {
-      case (index, QueuePair(queue, dlq), pipelineStream) =>
+      case (sender, index, QueuePair(queue, dlq), pipelineStream) =>
         sendNotificationToSQS(
           queue = queue,
           message = 1
@@ -261,7 +257,7 @@ class PipelineStorageStreamTest
           failingDocument +: sentDocuments: _*
         )
         eventually {
-          brokenSender.messages
+          sender.messages
             .map(_.body)
             .distinct should contain theSameElementsAs sentDocuments.map(
             _.id
@@ -277,10 +273,8 @@ class PipelineStorageStreamTest
   ) {
     val document = createDocument
 
-    val sender = new MemoryMessageSender
-
-    withPipelineStreamTestEnvironment(sender) {
-      case (index, QueuePair(queue, dlq), pipelineStream) =>
+    withPipelineStreamTestEnvironment() {
+      case (sender, index, QueuePair(queue, dlq), pipelineStream) =>
         sendNotificationToSQS(
           queue = queue,
           message = document
@@ -301,14 +295,11 @@ class PipelineStorageStreamTest
   ) {
     val document = createDocument
 
-    val sender = new MemoryMessageSender
-
     withPipelineStreamTestEnvironment(
-      sender,
       maybeIndexer = Some(new MemoryIndexer[SampleDocument]()),
       queueVisibilityTimeout = 1.second
     ) {
-      case (_, QueuePair(queue, dlq), pipelineStream) =>
+      case (sender, _, QueuePair(queue, dlq), pipelineStream) =>
         sendNotificationToSQS(
           queue = queue,
           message = document
@@ -335,14 +326,11 @@ class PipelineStorageStreamTest
       parallelism = 10
     )
 
-    val sender = new MemoryMessageSender
-
     withPipelineStreamTestEnvironment(
-      sender,
       pipelineStorageConfig = pipelineStorageConfig,
       queueVisibilityTimeout = 30.seconds
     ) {
-      case (index, QueuePair(queue, dlq), pipelineStream) =>
+      case (sender, index, QueuePair(queue, dlq), pipelineStream) =>
         documents.foreach(
           doc =>
             sendNotificationToSQS(
@@ -370,13 +358,10 @@ class PipelineStorageStreamTest
   }
 
   it("leaves a message on the queue if it fails processing") {
-    val sender = new MemoryMessageSender
-
     withPipelineStreamTestEnvironment(
-      sender,
       queueVisibilityTimeout = 1.second
     ) {
-      case (_, QueuePair(queue, dlq), pipelineStream) =>
+      case (sender, _, QueuePair(queue, dlq), pipelineStream) =>
         sendInvalidJSONto(queue)
         pipelineStream.foreach(
           "test stream",
@@ -403,10 +388,9 @@ class PipelineStorageStreamTest
       password = "dontletmein"
     )
     withPipelineStreamTestEnvironment(
-      new MemoryMessageSender,
       maybeIndexer = Some(indexer(index, brokenClient))
     ) {
-      case (_, _, pipelineStream) =>
+      case (_, _, _, pipelineStream) =>
         whenReady(
           pipelineStream
             .foreach("test stream", _ => Future.successful(Nil))
@@ -441,14 +425,11 @@ class PipelineStorageStreamTest
       }
     }
 
-    val sender = new MemoryMessageSender
-
     withPipelineStreamTestEnvironment(
-      sender,
       maybeIndexer = Some(indexer),
       queueVisibilityTimeout = 1.second
     ) {
-      case (_, QueuePair(queue, dlq), pipelineStream) =>
+      case (sender, _, QueuePair(queue, dlq), pipelineStream) =>
         documents.foreach(
           doc =>
             sendNotificationToSQS(
@@ -482,10 +463,10 @@ class PipelineStorageStreamTest
         Failure(new Throwable("BOOM!"))
     }
     withPipelineStreamTestEnvironment(
-      brokenSender,
+      maybeSender = Some(brokenSender),
       queueVisibilityTimeout = 1.second
     ) {
-      case (_, QueuePair(queue, dlq), pipelineStream) =>
+      case (_, _, QueuePair(queue, dlq), pipelineStream) =>
         sendNotificationToSQS(queue, document)
 
         def runStream: () => Future[Done] =
