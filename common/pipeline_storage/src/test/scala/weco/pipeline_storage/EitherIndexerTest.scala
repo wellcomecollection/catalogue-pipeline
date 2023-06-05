@@ -96,4 +96,15 @@ class EitherIndexerTest
         }
     }
   }
+
+  it("returns successfully when there are neither works nor images") {
+    withEitherIndexer[Work[Merged], Image[Initial]] {
+      case (indexer, _, _) =>
+        whenReady(indexer(Nil)) {
+          result =>
+            result shouldBe a[Right[_, _]]
+        }
+    }
+  }
+
 }
