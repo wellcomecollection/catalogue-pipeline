@@ -37,6 +37,14 @@ class PipelineStorageStreamTest
   def indexer(index: Index, elasticClient: ElasticClient = elasticClient) =
     new ElasticIndexer[SampleDocument](elasticClient, index)
 
+  /** Set up an environment to run pipeline stream tests.
+    *
+    * The environment for a pipeline stream consists of
+    *   - a pair of queues, the input queue and its corresponding Dead Letter
+    *     Queue
+    *   - an index into which this stream will write
+    *   - a message sender, where this pipeline step sends messages of success
+    */
   def withPipelineStreamTestEnvironment[R](
     maybeSender: Option[MemoryMessageSender] = None,
     maybeIndexer: Option[Indexer[SampleDocument]] = None,
