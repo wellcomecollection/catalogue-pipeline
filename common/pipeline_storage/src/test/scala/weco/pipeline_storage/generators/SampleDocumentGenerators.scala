@@ -16,14 +16,15 @@ case class SampleDocument(
 
 case class SampleDocumentData(
   genre: Option[String] = None,
-  date: Option[String] = None,
+  date: Option[String] = None
 )
 
 object SampleDocument {
-  implicit val indexable = new Indexable[SampleDocument] {
-    def version(document: SampleDocument): Long = document.version
-    def id(document: SampleDocument): String = document.id
-  }
+  implicit val indexable: Indexable[SampleDocument] =
+    new Indexable[SampleDocument] {
+      def version(document: SampleDocument): Long = document.version
+      def id(document: SampleDocument): String = document.id
+    }
 
   implicit val canonicalId: IndexId[SampleDocument] =
     (doc: SampleDocument) => doc.id

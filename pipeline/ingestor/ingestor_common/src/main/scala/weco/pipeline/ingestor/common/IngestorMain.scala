@@ -4,7 +4,6 @@ import akka.actor.ActorSystem
 import com.sksamuel.elastic4s.Index
 import com.typesafe.config.Config
 import io.circe.{Decoder, Encoder}
-import weco.elasticsearch.IndexConfig
 import weco.elasticsearch.typesafe.ElasticBuilder
 import weco.messaging.typesafe.SNSBuilder
 import weco.pipeline_storage.Indexable
@@ -19,7 +18,6 @@ class IngestorMain[In, Out](
   name: String,
   inputIndexField: String,
   outputIndexField: String,
-  indexConfig: IndexConfig,
   transform: In => Out
 )(
   implicit decoder: Decoder[In],
@@ -41,8 +39,7 @@ class IngestorMain[In, Out](
     val indexer =
       new ElasticIndexer[Out](
         client = client,
-        index = Index(config.requireString(outputIndexField)),
-        config = indexConfig
+        index = Index(config.requireString(outputIndexField))
       )
 
     val messageSender = SNSBuilder

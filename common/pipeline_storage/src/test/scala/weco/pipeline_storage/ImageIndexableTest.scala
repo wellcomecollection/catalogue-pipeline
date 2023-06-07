@@ -4,7 +4,6 @@ import com.sksamuel.elastic4s.Index
 import org.scalatest.Assertion
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.index.ImagesIndexConfig
 import weco.fixtures.TestWith
 import weco.catalogue.internal_model.Implicits._
 import Indexable.imageIndexable
@@ -38,12 +37,13 @@ class ImageIndexableTest
             updatedModifiedTimeImage
           )
 
-          whenReady(insertFuture) { result =>
-            assertIngestedImageIs(
-              result = result,
-              image = updatedModifiedTimeImage,
-              index = index
-            )
+          whenReady(insertFuture) {
+            result =>
+              assertIngestedImageIs(
+                result = result,
+                image = updatedModifiedTimeImage,
+                index = index
+              )
           }
       }
     }
@@ -60,12 +60,13 @@ class ImageIndexableTest
             updatedModifiedTimeImage
           )
 
-          whenReady(insertFuture) { result =>
-            assertIngestedImageIs(
-              result = result,
-              image = originalImage,
-              index = index
-            )
+          whenReady(insertFuture) {
+            result =>
+              assertIngestedImageIs(
+                result = result,
+                image = originalImage,
+                index = index
+              )
           }
       }
     }
@@ -82,20 +83,22 @@ class ImageIndexableTest
             updatedLocationImage
           )
 
-          whenReady(insertFuture) { result =>
-            assertIngestedImageIs(
-              result = result,
-              image = updatedLocationImage,
-              index = index
-            )
+          whenReady(insertFuture) {
+            result =>
+              assertIngestedImageIs(
+                result = result,
+                image = updatedLocationImage,
+                index = index
+              )
           }
       }
     }
   }
 
   private def assertIngestedImageIs(
-    result: Either[Seq[Image[ImageState.Augmented]],
-                   Seq[Image[ImageState.Augmented]]],
+    result: Either[Seq[Image[ImageState.Augmented]], Seq[
+      Image[ImageState.Augmented]
+    ]],
     image: Image[ImageState.Augmented],
     index: Index
   ): Seq[Assertion] = {
@@ -106,12 +109,12 @@ class ImageIndexableTest
   private def withImagesIndexAndIndexer[R](
     testWith: TestWith[(Index, ElasticIndexer[Image[ImageState.Augmented]]), R]
   ) =
-    withLocalAugmentedImageIndex { index: Index =>
-      val indexer = new ElasticIndexer[Image[ImageState.Augmented]](
-        elasticClient,
-        index,
-        ImagesIndexConfig.augmented
-      )
-      testWith((index, indexer))
+    withLocalAugmentedImageIndex {
+      index: Index =>
+        val indexer = new ElasticIndexer[Image[ImageState.Augmented]](
+          elasticClient,
+          index
+        )
+        testWith((index, indexer))
     }
 }

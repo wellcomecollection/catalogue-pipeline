@@ -4,7 +4,6 @@ import com.sksamuel.elastic4s.Index
 import org.scalatest.Assertion
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.index.WorksIndexConfig
 import weco.fixtures.TestWith
 import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.catalogue.internal_model.Implicits._
@@ -31,7 +30,9 @@ class WorkIndexableTest
 
       val newWork: Work.Visible[Identified] = originalWork.copy(
         state = originalWork.state.copy(
-          sourceModifiedTime = originalWork.state.sourceModifiedTime + (2 days)))
+          sourceModifiedTime = originalWork.state.sourceModifiedTime + (2 days)
+        )
+      )
 
       withWorksIndexAndIndexer {
         case (index, indexer) =>
@@ -50,7 +51,8 @@ class WorkIndexableTest
       val originalWork = identifiedWork()
 
       val newWork: Work.Visible[Identified] = originalWork.copy(
-        data = originalWork.data.copy(description = Some(randomAlphanumeric())))
+        data = originalWork.data.copy(description = Some(randomAlphanumeric()))
+      )
 
       withWorksIndexAndIndexer {
         case (index, indexer) =>
@@ -59,8 +61,9 @@ class WorkIndexableTest
             newWork
           )
 
-          whenReady(unmergedWorkInsertFuture) { result =>
-            assertIndexedWorkIs(_, indexedWork = newWork, index = index)
+          whenReady(unmergedWorkInsertFuture) {
+            result =>
+              assertIndexedWorkIs(_, indexedWork = newWork, index = index)
           }
       }
     }
@@ -69,7 +72,9 @@ class WorkIndexableTest
 
       val olderWork: Work.Visible[Identified] = originalWork.copy(
         state = originalWork.state.copy(
-          sourceModifiedTime = originalWork.state.sourceModifiedTime - (2 days)))
+          sourceModifiedTime = originalWork.state.sourceModifiedTime - (2 days)
+        )
+      )
 
       withWorksIndexAndIndexer {
         case (index, indexer) =>
@@ -78,8 +83,9 @@ class WorkIndexableTest
             olderWork
           )
 
-          whenReady(unmergedWorkInsertFuture) { result =>
-            assertIndexedWorkIs(_, indexedWork = originalWork, index = index)
+          whenReady(unmergedWorkInsertFuture) {
+            result =>
+              assertIndexedWorkIs(_, indexedWork = originalWork, index = index)
           }
       }
     }
@@ -89,20 +95,20 @@ class WorkIndexableTest
   private def assertIndexedWorkIs(
     result: Either[Seq[Work[Identified]], Seq[Work[Identified]]],
     indexedWork: Work[Identified],
-    index: Index): Seq[Assertion] = {
+    index: Index
+  ): Seq[Assertion] = {
     result shouldBe a[Right[_, _]]
     assertElasticsearchEventuallyHasWork(index = index, indexedWork)
   }
 
   def withWorksIndexAndIndexer[R](
-    testWith: TestWith[(Index, ElasticIndexer[Work[Identified]]), R]): R = {
-    withLocalIdentifiedWorksIndex { index =>
-      val indexer =
-        new ElasticIndexer[Work[Identified]](
-          elasticClient,
-          index,
-          WorksIndexConfig.identified)
-      testWith((index, indexer))
+    testWith: TestWith[(Index, ElasticIndexer[Work[Identified]]), R]
+  ): R = {
+    withLocalIdentifiedWorksIndex {
+      index =>
+        val indexer =
+          new ElasticIndexer[Work[Identified]](elasticClient, index)
+        testWith((index, indexer))
     }
   }
 }

@@ -10,7 +10,6 @@ import weco.typesafe.WellcomeTypesafeApp
 import weco.messaging.typesafe.SNSBuilder
 import weco.elasticsearch.typesafe.ElasticBuilder
 import weco.catalogue.internal_model.Implicits._
-import weco.catalogue.internal_model.index.WorksIndexConfig
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.pipeline.id_minter.config.builders.{
@@ -47,8 +46,7 @@ object Main extends WellcomeTypesafeApp {
       val workIndexer =
         new ElasticIndexer[Work[Identified]](
           client = esClient,
-          index = Index(config.requireString("es.identified-works.index")),
-          config = WorksIndexConfig.identified
+          index = Index(config.requireString("es.identified-works.index"))
         )
 
       val messageSender = SNSBuilder

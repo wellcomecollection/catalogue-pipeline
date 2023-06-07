@@ -4,7 +4,6 @@ import akka.actor.ActorSystem
 import com.sksamuel.elastic4s.Index
 import com.typesafe.config.Config
 import weco.catalogue.internal_model.Implicits._
-import weco.catalogue.internal_model.index.WorksIndexConfig
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.Merged
 import weco.elasticsearch.typesafe.ElasticBuilder
@@ -36,8 +35,7 @@ object Main extends WellcomeTypesafeApp {
       val workIndexer =
         new ElasticIndexer[Work[Merged]](
           client = esClient,
-          index = Index(config.requireString(s"es.write-to.index")),
-          config = WorksIndexConfig.merged
+          index = Index(config.requireString(s"es.write-to.index"))
         )
 
       val downstreamSender =
