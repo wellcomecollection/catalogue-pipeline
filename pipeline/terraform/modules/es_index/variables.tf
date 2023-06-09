@@ -17,3 +17,13 @@ variable "config_path" {
   type    = string
   default = ""
 }
+
+
+variable "connection" {
+  type = object({
+    username = string
+    password   = string
+    endpoints = list(string)
+  })
+}
+
