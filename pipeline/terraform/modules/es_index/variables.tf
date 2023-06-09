@@ -21,8 +21,8 @@ variable "config_path" {
 
 variable "connection" {
   type = object({
-    username = string
-    password   = string
+    username  = string
+    password  = string
     endpoints = list(string)
   })
 }

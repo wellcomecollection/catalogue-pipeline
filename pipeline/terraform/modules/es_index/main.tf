@@ -26,7 +26,7 @@ resource "elasticstack_elasticsearch_index" "the_index" {
 
   elasticsearch_connection {
     endpoints = var.connection.endpoints
-    username = var.connection.username
-    password = var.connection.password
+    username  = var.connection.username
+    password  = var.connection.password
   }
 }

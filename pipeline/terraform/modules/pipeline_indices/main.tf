@@ -6,7 +6,7 @@ module "source_index" {
   name          = var.es_works_source_index
   mappings_name = "empty"
   config_path   = var.es_config_path
-  connection = var.connection
+  connection    = var.connection
 }
 
 module "denormalised_index" {
@@ -14,7 +14,7 @@ module "denormalised_index" {
   name          = var.es_works_denormalised_index
   mappings_name = "empty"
   config_path   = var.es_config_path
-  connection = var.connection
+  connection    = var.connection
 }
 
 module "images_initial_index" {
@@ -22,7 +22,7 @@ module "images_initial_index" {
   name          = var.es_images_initial_index
   mappings_name = "empty"
   config_path   = var.es_config_path
-  connection = var.connection
+  connection    = var.connection
 }
 
 module "images_augmented_index" {
@@ -30,7 +30,7 @@ module "images_augmented_index" {
   name          = var.es_images_augmented_index
   mappings_name = "empty"
   config_path   = var.es_config_path
-  connection = var.connection
+  connection    = var.connection
 }
 
 # Indices with their own specific mapping and analysis configurations
@@ -40,7 +40,7 @@ module "works_identified_index" {
   name          = var.es_works_identified_index
   mappings_name = "works_identified.2023-05-26"
   config_path   = var.es_config_path
-  connection = var.connection
+  connection    = var.connection
 }
 
 
@@ -49,7 +49,7 @@ module "works_merged_index" {
   name          = var.es_works_merged_index
   mappings_name = "works_merged.2023-05-26"
   config_path   = var.es_config_path
-  connection = var.connection
+  connection    = var.connection
 }
 
 module "works_indexed_index" {
@@ -57,7 +57,7 @@ module "works_indexed_index" {
   name          = var.es_works_index
   mappings_name = "works_indexed.2023-05-26"
   config_path   = var.es_config_path
-  connection = var.connection
+  connection    = var.connection
 }
 
 module "images_indexed_index" {
@@ -69,7 +69,7 @@ module "images_indexed_index" {
   # The images-specific fields do not use any extra custom analysis.
   analysis_name = "works_indexed.2023-05-26"
   config_path   = var.es_config_path
-  connection = var.connection
+  connection    = var.connection
 }
 
 
