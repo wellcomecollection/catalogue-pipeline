@@ -27,3 +27,12 @@ variable "es_images_index" {
 variable "es_config_path" {
   type = string
 }
+
+variable "connection" {
+  type = object({
+    username  = string
+    password  = string
+    endpoints = list(string)
+  })
+}
+

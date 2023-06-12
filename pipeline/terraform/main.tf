@@ -7,6 +7,14 @@ locals {
       scale_up_id_minter_db    = false
       scale_up_matcher_db      = false
     }
+
+    "2023-06-09" = {
+      listen_to_reindexer      = false
+      scale_up_tasks           = false
+      scale_up_elastic_cluster = false
+      scale_up_id_minter_db    = false
+      scale_up_matcher_db      = false
+    }
   }
 }
 
