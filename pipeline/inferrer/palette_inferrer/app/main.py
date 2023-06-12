@@ -10,22 +10,19 @@ logger = get_logger(__name__)
 
 # Initialise encoder
 logger.info("Initialising PaletteEncoder model")
-palette_encoder = PaletteEncoder(
-    palette_size=5,
-    hue_bins=[4, 6, 9],
-    sat_bins=[2, 4, 6],
-    val_bins=[1, 3, 5],
-    sat_min=(10 / 256),
-    val_min=(10 / 256),
-)
-palette_hash_params = palette_encoder.get_hash_params()
+palette_encoder = PaletteEncoder()
 
 # initialise API
 logger.info("Starting API")
-app = FastAPI(title="Palette extractor", description="extracts palettes")
+app = FastAPI(
+    title="Palette extractor",
+    description="extracts color palette vectors from images",
+)
 logger.info("API started, awaiting requests")
 
-batch_inferrer_queue = BatchExecutionQueue(palette_encoder, batch_size=8, timeout=1)
+batch_inferrer_queue = BatchExecutionQueue(
+    palette_encoder, batch_size=8, timeout=1
+)
 
 
 @app.get("/palette/")
@@ -38,12 +35,11 @@ async def main(query_url: str):
         raise HTTPException(status_code=404, detail=error_string)
 
     palette_result = await batch_inferrer_queue.execute(image)
-    logger.info(f"extracted palette from url: {query_url}")
+    logger.info(f"extracted color palette from url: {query_url}")
 
     return {
-        "palette": palette_result["lsh"],
+        "palette_embedding": palette_result["palette_embedding"],
         "average_color_hex": palette_result["average_color_hex"],
-        "hash_params": palette_hash_params,
     }
 
 
