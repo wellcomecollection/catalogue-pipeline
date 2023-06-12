@@ -15,14 +15,11 @@ palette_encoder = PaletteEncoder()
 # initialise API
 logger.info("Starting API")
 app = FastAPI(
-    title="Palette extractor",
-    description="extracts color palette vectors from images",
+    title="Palette extractor", description="extracts color palette vectors from images"
 )
 logger.info("API started, awaiting requests")
 
-batch_inferrer_queue = BatchExecutionQueue(
-    palette_encoder, batch_size=8, timeout=1
-)
+batch_inferrer_queue = BatchExecutionQueue(palette_encoder, batch_size=8, timeout=1)
 
 
 @app.get("/palette/")

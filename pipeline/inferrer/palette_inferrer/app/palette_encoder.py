@@ -45,8 +45,7 @@ class PaletteEncoder:
         pixel_array = repeated_pixel_array + noise
 
         histogram, _ = np.histogramdd(
-            pixel_array,
-            bins=[self.bins, self.bins, self.bins],
+            pixel_array, bins=[self.bins, self.bins, self.bins]
         )
 
         # make sure the vector is of unit length
