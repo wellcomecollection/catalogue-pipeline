@@ -80,10 +80,8 @@ class ManagerInferrerIntegrationTest
                     features1,
                     features2,
                     reducedFeatures,
-                    palette,
+                    paletteEmbedding,
                     Some(averageColorHex),
-                    binSizes,
-                    binMinima,
                     aspectRatio
                     ) =>
                   features1 should have length 2048
@@ -91,10 +89,9 @@ class ManagerInferrerIntegrationTest
                   forAll(features1 ++ features2) { _.isNaN shouldBe false }
                   reducedFeatures should have length 1024
                   forAll(reducedFeatures) { _.isNaN shouldBe false }
-                  every(palette) should fullyMatch regex """\d+/\d+"""
-                  every(binSizes) should not be empty
+                  paletteEmbedding should have length 216
+                  paletteEmbedding.sum should equal (1)
                   averageColorHex should have length 7
-                  binMinima should not be empty
                   aspectRatio should not be empty
               }
           }

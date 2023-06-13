@@ -99,10 +99,8 @@ class InferenceManagerWorkerServiceTest
                       features1,
                       features2,
                       reducedFeatures,
-                      palette,
+                      paletteEmbedding,
                       Some(averageColorHex),
-                      binSizes,
-                      binMinima,
                       aspectRatio
                       ) =>
                     val featureVector =
@@ -112,12 +110,10 @@ class InferenceManagerWorkerServiceTest
                     reducedFeatures should be(
                       featureVector.slice(0, 1024)
                     )
-                    palette should be(Responses.randomPaletteVector(seed))
+                    paletteEmbedding should be(Responses.randomPaletteVector(seed))
                     averageColorHex should be(
                       Responses.randomAverageColorHex(seed)
                     )
-                    binSizes should be(Responses.randomBinSizes(seed))
-                    binMinima should be(Responses.randomBinMinima(seed))
                     aspectRatio should be(
                       Some(Responses.randomAspectRatio(seed))
                     )
@@ -159,19 +155,16 @@ class InferenceManagerWorkerServiceTest
                       features1,
                       features2,
                       reducedFeatures,
-                      palette,
+                      paletteEmbedding,
                       averageColorHex,
-                      binSizes,
-                      binMinima,
                       aspectRatio
                       ) =>
                     features1 should have length 2048
                     features2 should have length 2048
                     reducedFeatures should have length 1024
-                    every(palette) should fullyMatch regex """\d+"""
+                    paletteEmbedding should have length 216
+                    paletteEmbedding.sum should equal (1)
                     averageColorHex.get should have length 7
-                    every(binSizes) should not be empty
-                    binMinima should not be empty
                     aspectRatio should not be empty
                 }
             }
