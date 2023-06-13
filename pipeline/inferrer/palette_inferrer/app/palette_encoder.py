@@ -89,9 +89,9 @@ class PaletteEncoder:
         }
 
     def __call__(self, images):
-            """
+        """
             process images in parallel
             """
-            return Parallel(n_jobs=-2)(
-                self.delayed_process_image(image) for image in images
-            )
+        return Parallel(n_jobs=-2)(
+            self.delayed_process_image(image) for image in images
+        )

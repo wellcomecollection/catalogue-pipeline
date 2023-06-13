@@ -42,7 +42,7 @@ class PaletteInferrerAdapter(host: String, port: Int) extends InferrerAdapter {
         val paletteEmbedding = decodeBase64ToFloatList(palette_embedding)
         inferredData.copy(
           paletteEmbedding = paletteEmbedding,
-          averageColorHex = Some(average_color_hex),
+          averageColorHex = Some(average_color_hex)
         )
     }
 

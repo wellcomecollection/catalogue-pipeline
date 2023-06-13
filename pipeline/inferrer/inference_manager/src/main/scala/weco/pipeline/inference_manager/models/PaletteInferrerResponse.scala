@@ -4,5 +4,5 @@ import weco.pipeline.inference_manager.adapters.InferrerResponse
 
 case class PaletteInferrerResponse(
   palette_embedding: String,
-  average_color_hex: String,
+  average_color_hex: String
 ) extends InferrerResponse
