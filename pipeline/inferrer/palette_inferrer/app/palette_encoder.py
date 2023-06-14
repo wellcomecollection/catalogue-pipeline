@@ -6,7 +6,7 @@ from joblib import Parallel, delayed
 class PaletteEncoder:
     """A class for embedding color information from an image."""
 
-    def __init__(self, n_bins: int = 8, alpha: float = 5):
+    def __init__(self, n_bins: int = 6, alpha: float = 5):
         """
         Initialise the encoder.
 

@@ -150,12 +150,7 @@ class CreateTestImageDocuments
   }
 
   it("creates images with similar features and palettes") {
-    val images =
-      createSimilarImages(
-        n = 6,
-        similarFeatures = true,
-        similarPalette = true
-      )
+    val images = ???
 
     saveImages(
       images,
@@ -165,12 +160,7 @@ class CreateTestImageDocuments
   }
 
   it("creates images with similar features") {
-    val images =
-      createSimilarImages(
-        n = 6,
-        similarFeatures = true,
-        similarPalette = false
-      )
+    val images = ???
 
     saveImages(
       images,
@@ -180,12 +170,7 @@ class CreateTestImageDocuments
   }
 
   it("creates images with similar palettes") {
-    val images =
-      createSimilarImages(
-        n = 6,
-        similarFeatures = false,
-        similarPalette = true
-      )
+    val images = ???
 
     saveImages(
       images,
