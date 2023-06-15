@@ -5,7 +5,7 @@
 set -o errexit
 set -o nounset
 
-pushd sierra_reader_new
+pushd sierra_reader
   pip3 install \
     --target . \
     --platform manylinux2014_x86_64 \
