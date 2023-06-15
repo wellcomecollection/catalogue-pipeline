@@ -59,7 +59,6 @@ steps:
       - "sierra_indexer"
       - "sierra_linker"
       - "sierra_merger"
-      - "sierra_reader"
       - "tei_adapter"
       - "tei_id_extractor"
       - "transformer_calm"

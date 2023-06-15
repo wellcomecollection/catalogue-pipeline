@@ -247,13 +247,6 @@ lazy val transformer_tei = setupProject(
 
 // Sierra adapter
 
-lazy val sierra_reader = setupProject(
-  project,
-  "sierra_adapter/sierra_reader",
-  localDependencies = Seq(source_model),
-  externalDependencies = CatalogueDependencies.sierraReaderDependencies
-)
-
 lazy val sierra_merger = setupProject(
   project,
   "sierra_adapter/sierra_merger",
