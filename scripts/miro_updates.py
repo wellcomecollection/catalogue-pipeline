@@ -372,7 +372,11 @@ def get_all_miro_suppression_events():
             first_deletion = next(
                 ev
                 for ev in item.get("events", [])
-                if ev["description"] in {"Change isClearedForCatalogueAPI from True to False", "Change isClearedForCatalogueAPI from False to False"}
+                if ev["description"]
+                in {
+                    "Change isClearedForCatalogueAPI from True to False",
+                    "Change isClearedForCatalogueAPI from False to False",
+                }
             )
         except StopIteration:
             continue
