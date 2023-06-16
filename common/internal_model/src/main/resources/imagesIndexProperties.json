@@ -72,8 +72,10 @@
             "similarity": "dot_product"
           },
           "paletteEmbedding": {
-            "type": "dense_vector"
-            // needs dims
+            "type": "dense_vector",
+            "dims": 216,
+            "index": true,
+            "similarity": "dot_product"
           },
           "averageColorHex": {
             "type": "keyword"
