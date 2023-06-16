@@ -365,16 +365,23 @@ def remove_license_override(*, miro_id: str, message: str):
 
 def get_all_miro_suppression_events():
     for item in get_dynamodb_items(SESSION, TableName=TABLE_NAME):
-        for ev in item.get("events", []):
-            if (
-                ev["description"]
-                == "Change isClearedForCatalogueAPI from True to False"
-            ):
-                yield {
-                    "id": item["id"],
-                    "message": ev["message"],
-                    "date": datetime.datetime.fromtimestamp(int(ev["date"]) / 1000),
-                }
+        try:
+            # Note: there are cases where the suppressed description was
+            # added to DynamoDB after the image was initially suppressed,
+            # so we need to catch both variants of this message.
+            first_deletion = next(
+                ev
+                for ev in item.get("events", [])
+                if ev["description"] in {"Change isClearedForCatalogueAPI from True to False", "Change isClearedForCatalogueAPI from False to False"}
+            )
+        except StopIteration:
+            continue
+
+        yield {
+            "id": item["id"],
+            "message": first_deletion["message"],
+            "date": datetime.datetime.fromtimestamp(int(first_deletion["date"]) / 1000),
+        }
 
 
 def update_miro_image_suppressions_doc():
