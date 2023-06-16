@@ -79,7 +79,8 @@
               "dims": 2048
             },
             "paletteEmbedding": {
-              "type": "dense_vector"
+              "type": "dense_vector",
+              "dims": 216
             },
             "reducedFeatures": {
               "type": "dense_vector",
