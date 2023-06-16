@@ -80,7 +80,9 @@
             },
             "paletteEmbedding": {
               "type": "dense_vector",
-              "dims": 216
+              "dims": 216,
+              "index": true,
+              "similarity": "dot_product"
             },
             "reducedFeatures": {
               "type": "dense_vector",
