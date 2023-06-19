@@ -84,6 +84,9 @@ class ManagerInferrerIntegrationTest
                     Some(averageColorHex),
                     aspectRatio
                     ) =>
+                  println("?????????????????????????")
+                  println(paletteEmbedding.length)
+                  println(paletteEmbedding)
                   features1 should have length 2048
                   features2 should have length 2048
                   forAll(features1 ++ features2) { _.isNaN shouldBe false }
