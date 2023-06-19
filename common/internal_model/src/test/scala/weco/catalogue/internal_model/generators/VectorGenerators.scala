@@ -13,6 +13,8 @@ trait VectorGenerators extends RandomGenerators {
 
   private def randomNormal(d: Int): Vec =
     Seq.fill(d)(random.nextGaussian().toFloat)
+
+  def randomUnitLengthVector(d: Int): Vec = normalize(randomNormal(d))
 }
 
 object VectorOps {
