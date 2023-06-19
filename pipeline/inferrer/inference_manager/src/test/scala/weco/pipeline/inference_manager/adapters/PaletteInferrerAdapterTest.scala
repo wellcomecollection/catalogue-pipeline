@@ -41,7 +41,7 @@ class PaletteInferrerAdapterTest
 
   describe("augment") {
     it("augments InferredData with the data from the inferrer response") {
-      val paletteEmbedding = (0 to 216).map(n => n / 216.0f).toList // the sum of the elements in the List must be 1
+      val paletteEmbedding = (0 to 215).map(n => n / 215.0f).toList // the sum of the elements in the List must be 1
       val paletteEmbeddingB64 =  Encoding.toLittleEndianBase64(paletteEmbedding)
       val averageColorHex = "#aabbcc"
       val response = PaletteInferrerResponse(
@@ -49,7 +49,8 @@ class PaletteInferrerAdapterTest
         average_color_hex = averageColorHex
       )
       val inferredData = adapter.augment(InferredData.empty, response)
-
+      println("!!!!!!!!!!!")
+      println(inferredData.paletteEmbedding.length)
       inferredData.paletteEmbedding should be(paletteEmbedding)
       inferredData.averageColorHex.get should be(averageColorHex)
     }
