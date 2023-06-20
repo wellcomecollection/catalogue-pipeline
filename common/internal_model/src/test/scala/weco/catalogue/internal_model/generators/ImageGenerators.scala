@@ -160,7 +160,7 @@ trait ImageGenerators
     val features = randomVector(4096)
     val (features1, features2) = features.splitAt(features.size / 2)
     val reducedFeatures = randomVector(1024)
-    val paletteEmbedding = (0 to 216).map(n => n / 216.0f)
+    val paletteEmbedding = randomUnitLengthVector(216)
     InferredData(
       features1 = features1.toList,
       features2 = features2.toList,
