@@ -49,8 +49,6 @@ class PaletteInferrerAdapterTest
         average_color_hex = averageColorHex
       )
       val inferredData = adapter.augment(InferredData.empty, response)
-      println("!!!!!!!!!!!")
-      println(inferredData.paletteEmbedding.length)
       inferredData.paletteEmbedding should be(paletteEmbedding)
       inferredData.averageColorHex.get should be(averageColorHex)
     }

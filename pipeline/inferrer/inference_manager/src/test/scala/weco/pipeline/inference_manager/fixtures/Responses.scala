@@ -15,10 +15,10 @@ object Responses {
   def featureInferrerDeterministic(seed: Int): HttpResponse = json(
     s"""{
       "features_b64": "${Encoding.toLittleEndianBase64(
-      randomFeatureVector(seed)
+        randomFeatureVector(seed)
     )}",
       "reduced_features_b64": "${Encoding.toLittleEndianBase64(
-      randomFeatureVector(seed).slice(0, 1024)
+        randomFeatureVector(seed).slice(0, 1024)
     )
     }"}""".stripMargin
   )
@@ -39,11 +39,11 @@ object Responses {
 
   def paletteInferrerDeterministic(seed: Int): HttpResponse = json(
     s"""{
-         "paletteEmbedding": "${Encoding.toLittleEndianBase64(
-        randomPaletteVector(seed)
-      )}",
-         "average_color_hex": "${randomAverageColorHex(seed)}",
-       }"""
+      "paletteEmbedding": "${Encoding.toLittleEndianBase64(
+      randomPaletteVector(seed)
+    )}",
+      "average_color_hex": "${randomAverageColorHex(seed)}",
+    }"""
   )
 
 
@@ -51,7 +51,7 @@ object Responses {
     paletteInferrerDeterministic(Random.nextInt())
 
   def randomPaletteVector(seed: Int): List[Float] =
-    List.fill(216)(new Random(seed).nextGaussian().toFloat)
+    List.fill(216)(new Random(seed).nextFloat)
 
   def randomAverageColorHex(seed: Int): String =
     s"#${randomBytes(random = new Random(seed), length = 3).map(b => f"$b%02X").mkString}"
