@@ -39,12 +39,13 @@ object Responses {
 
   def paletteInferrerDeterministic(seed: Int): HttpResponse = json(
     s"""{
-       "palette": [${Encoding.toLittleEndianBase64(randomPaletteVector(seed))
-      .map(str => s""""$str"""")
-      .mkString(", ")}],
-       "average_color_hex": "${randomAverageColorHex(seed)}",
-     }"""
+         "paletteEmbedding": "${Encoding.toLittleEndianBase64(
+        randomPaletteVector(seed)
+      )}",
+         "average_color_hex": "${randomAverageColorHex(seed)}",
+       }"""
   )
+
 
   def paletteInferrer: HttpResponse =
     paletteInferrerDeterministic(Random.nextInt())
