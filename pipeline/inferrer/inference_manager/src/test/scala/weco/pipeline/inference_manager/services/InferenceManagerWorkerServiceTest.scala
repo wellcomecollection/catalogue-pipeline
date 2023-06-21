@@ -104,13 +104,13 @@ class InferenceManagerWorkerServiceTest
                       aspectRatio
                       ) =>
                     val featureVector =
-                      Responses.randomUnitLengthVector(seed).toList
+                      Responses.randomFeatureVector(seed)
                     features1 should be(featureVector.slice(0, 2048))
                     features2 should be(featureVector.slice(2048, 4096))
                     reducedFeatures should be(
                       featureVector.slice(0, 1024)
                     )
-                    paletteEmbedding should be(Responses.randomUnitLengthVector(seed).toList)
+                    paletteEmbedding should be(Responses.randomPaletteVector(seed))
                     averageColorHex should be(
                       Responses.randomAverageColorHex(seed)
                     )
