@@ -157,9 +157,9 @@ trait ImageGenerators
     s"#${randomBytes(3).map(b => f"$b%02X").mkString}"
 
   def createInferredData: InferredData = {
-    val features = randomVector(4096)
+    val features = randomUnitLengthVector(4096)
     val (features1, features2) = features.splitAt(features.size / 2)
-    val reducedFeatures = randomVector(1024)
+    val reducedFeatures = randomUnitLengthVector(1024)
     val paletteEmbedding = randomUnitLengthVector(216)
     InferredData(
       features1 = features1.toList,
