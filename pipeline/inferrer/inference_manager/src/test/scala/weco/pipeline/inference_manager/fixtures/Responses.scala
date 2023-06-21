@@ -1,23 +1,30 @@
 package weco.pipeline.inference_manager.fixtures
 
-import akka.http.scaladsl.model.{ContentType, ContentTypes, HttpEntity, HttpResponse, MediaTypes, StatusCodes}
-import weco.catalogue.internal_model.generators.VectorGenerators
+import akka.http.scaladsl.model.{
+  ContentType,
+  ContentTypes,
+  HttpEntity,
+  HttpResponse,
+  MediaTypes,
+  StatusCodes
+}
 
-object Responses extends VectorGenerators {
+import scala.util.Random
 
+object Responses {
   def featureInferrerDeterministic(seed: Int): HttpResponse = json(
     s"""{
       "features_b64": "${Encoding.toLittleEndianBase64(
-         randomUnitLengthVector(seed).toList
-       )}",
+      randomFeatureVector(seed)
+    )}",
       "reduced_features_b64": "${Encoding.toLittleEndianBase64(
-      randomUnitLengthVector(seed).toList.slice(0, 1024)
-      )
+      randomFeatureVector(seed).slice(0, 1024)
+    )
     }"}""".stripMargin
   )
 
   def featureInferrer: HttpResponse =
-    featureInferrerDeterministic(randomInt())
+    featureInferrerDeterministic(Random.nextInt())
 
   def aspectRatioInferrerDeterministic(seed: Int): HttpResponse = json(
     s"""{
@@ -26,24 +33,35 @@ object Responses extends VectorGenerators {
   )
 
   def aspectRatioInferrer: HttpResponse =
-    aspectRatioInferrerDeterministic(randomInt())
+    aspectRatioInferrerDeterministic(Random.nextInt())
 
-  def randomAspectRatio(seed: Int): Float = seed.toFloat
+  def randomAspectRatio(seed: Int): Float = new Random(seed).nextFloat()
 
   def paletteInferrerDeterministic(seed: Int): HttpResponse = json(
     s"""{
-       "paletteEmbedding": "${Encoding.toLittleEndianBase64(
-        randomUnitLengthVector(seed).toList
-      )}",
+       "palette": [${Encoding.toLittleEndianBase64(randomPaletteVector(seed))
+      .map(str => s""""$str"""")
+      .mkString(", ")}],
        "average_color_hex": "${randomAverageColorHex(seed)}",
      }"""
   )
 
   def paletteInferrer: HttpResponse =
-    paletteInferrerDeterministic(randomInt())
+    paletteInferrerDeterministic(Random.nextInt())
+
+  def randomPaletteVector(seed: Int): List[Float] =
+    List.fill(216)(new Random(seed).nextGaussian().toFloat)
 
   def randomAverageColorHex(seed: Int): String =
-    s"#${randomBytes(seed).mkString.slice(0, 2)}"
+    s"#${randomBytes(random = new Random(seed), length = 3).map(b => f"$b%02X").mkString}"
+
+  def randomFeatureVector(seed: Int): List[Float] =
+    List.fill(4096)(new Random(seed).nextFloat)
+
+  def randomLshVector(seed: Int): List[String] = {
+    val random = new Random(seed)
+    List.fill(256)(s"${random.nextInt(256)}-${random.nextInt(32)}")
+  }
 
   def json(json: String): HttpResponse =
     HttpResponse(
@@ -54,12 +72,18 @@ object Responses extends VectorGenerators {
       )
     )
 
+  def randomBytes(random: Random = Random, length: Int = 32): Array[Byte] = {
+    val arr = Array.fill(length)(0x00.toByte)
+    random.nextBytes(arr)
+    arr
+  }
+
   def image: HttpResponse =
     HttpResponse(
       status = StatusCodes.OK,
       entity = HttpEntity.apply(
         contentType = ContentType(MediaTypes.`image/jpeg`),
-        bytes = randomBytes(32)
+        bytes = randomBytes()
       )
     )
 

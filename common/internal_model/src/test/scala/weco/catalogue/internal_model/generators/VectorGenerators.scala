@@ -11,7 +11,7 @@ trait VectorGenerators extends RandomGenerators {
     scalarMultiply(r, rand)
   }
 
-  def randomUnitLengthVector(seed: Int): Vec = normalize(randomNormal(seed))
+  def randomUnitLengthVector(d: Int): Vec = normalize(randomNormal(d))
 
   private def randomNormal(d: Int): Vec =
     Seq.fill(d)(random.nextGaussian().toFloat)
