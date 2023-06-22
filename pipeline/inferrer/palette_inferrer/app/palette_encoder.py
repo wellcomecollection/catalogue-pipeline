@@ -82,9 +82,15 @@ class PaletteEncoder:
             resample=Image.NEAREST,
         )
         pixel_array = np.array(rgb_image).reshape(-1, 3)
+        embedding = self.embed(pixel_array)
 
         return {
-            "palette_embedding": self.embed(pixel_array),
+            # We want to truncate these bytes because dense_vector fields do
+            # not support double precision floating point numbers
+            # https://www.elastic.co/guide/en/elasticsearch/reference/current/dense-vector.html#dense-vector-params
+            # The inference manager receives base64-encoded bytes and converts them to
+            # (single precision) floats.
+            "palette_embedding": np.float32(embedding),
             "average_color_hex": self.average_color_hex(pixel_array),
         }
 

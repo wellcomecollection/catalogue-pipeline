@@ -39,10 +39,10 @@ object Responses {
 
   def paletteInferrerDeterministic(seed: Int): HttpResponse = json(
     s"""{
-      "paletteEmbedding": "${Encoding.toLittleEndianBase64(
+      "palette_embedding": "${Encoding.toLittleEndianBase64(
       randomPaletteVector(seed)
     )}",
-      "average_color_hex": "${randomAverageColorHex(seed)}",
+      "average_color_hex": "${randomAverageColorHex(seed)}"
     }"""
   )
 

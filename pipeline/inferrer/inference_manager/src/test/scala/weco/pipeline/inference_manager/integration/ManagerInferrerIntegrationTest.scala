@@ -84,12 +84,15 @@ class ManagerInferrerIntegrationTest
                     Some(averageColorHex),
                     aspectRatio
                     ) =>
+                  // Note for future explorers: if a vector is the wrong length,
+                  // make sure that the inferrer is encoding a list of single precision
+                  // floats (ie float32/double) as that's what we're expecting to decode!
                   features1 should have length 2048
                   features2 should have length 2048
                   forAll(features1 ++ features2) { _.isNaN shouldBe false }
                   reducedFeatures should have length 1024
                   forAll(reducedFeatures) { _.isNaN shouldBe false }
-//                  paletteEmbedding shouldBe a[List[Float]]
+                  paletteEmbedding shouldBe a[List[Float]]
                   paletteEmbedding should have length 216
                   averageColorHex should have length 7
                   aspectRatio should not be empty
