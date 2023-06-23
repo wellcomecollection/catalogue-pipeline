@@ -20,10 +20,6 @@ variable "shared_logging_secrets" {
   type = map(any)
 }
 
-variable "sierra_reader_image" {
-  type = string
-}
-
 variable "sierra_linker_image" {
   type = string
 }

@@ -59,7 +59,6 @@ steps:
       - "sierra_indexer"
       - "sierra_linker"
       - "sierra_merger"
-      - "sierra_reader"
       - "tei_adapter"
       - "tei_id_extractor"
       - "transformer_calm"
@@ -137,7 +136,6 @@ steps:
       - "calm_adapter/calm_window_generator"
       - "calm_adapter/calm_deletion_check_initiator"
       - "common/window_generator"
-      - "sierra_adapter/s3_demultiplexer"
       - "sierra_adapter/update_embargoed_holdings"
       - "tei_adapter/tei_updater"
 

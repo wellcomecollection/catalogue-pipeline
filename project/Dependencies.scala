@@ -290,14 +290,6 @@ object CatalogueDependencies {
     WellcomeDependencies.sierraTypesafeLibrary ++
       WellcomeDependencies.typesafeLibrary
 
-  val sierraReaderDependencies: Seq[ModuleID] =
-    ExternalDependencies.circeOpticsDependencies ++
-      WellcomeDependencies.messagingTypesafeLibrary ++
-      WellcomeDependencies.jsonLibrary ++
-      WellcomeDependencies.storageTypesafeLibrary ++
-      WellcomeDependencies.sierraTypesafeLibrary ++
-      WellcomeDependencies.typesafeLibrary
-
   val sierraIndexerDependencies: Seq[ModuleID] =
     WellcomeDependencies.storageLibrary
 
