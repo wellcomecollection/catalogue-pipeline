@@ -6,6 +6,7 @@
 
 * [What is an adapter?](fetching-records-from-source-catalogues/what-is-an-adapter.md)
 * [CALM: Our archive catalogue](fetching-records-from-source-catalogues/calm-our-archive-catalogue.md)
+* [MIRO: Our image collections](fetching-records-from-source-catalogues/miro-our-image-collections.md)
 
 ## Transforming records into a single, common model
 
