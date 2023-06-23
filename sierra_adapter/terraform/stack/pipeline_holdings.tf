@@ -1,5 +1,5 @@
 module "holdings_reader_new" {
-  source = "../sierra_reader_new"
+  source = "../sierra_reader"
 
   resource_type      = "holdings"
   windows_topic_arns = var.holdings_windows_topic_arns

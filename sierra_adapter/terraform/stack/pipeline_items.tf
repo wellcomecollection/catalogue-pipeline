@@ -1,5 +1,5 @@
 module "items_reader_new" {
-  source = "../sierra_reader_new"
+  source = "../sierra_reader"
 
   resource_type      = "items"
   windows_topic_arns = var.items_windows_topic_arns

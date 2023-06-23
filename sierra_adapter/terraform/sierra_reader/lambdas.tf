@@ -1,7 +1,7 @@
 data "archive_file" "lambda" {
   type        = "zip"
-  source_dir  = "${path.module}/../../sierra_reader_new"
-  output_path = "${path.module}/sierra_reader_new.zip"
+  source_dir  = "${path.module}/../../sierra_reader"
+  output_path = "${path.module}/sierra_reader.zip"
 }
 
 locals {

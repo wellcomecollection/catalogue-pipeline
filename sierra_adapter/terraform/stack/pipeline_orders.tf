@@ -1,5 +1,5 @@
 module "orders_reader_new" {
-  source = "../sierra_reader_new"
+  source = "../sierra_reader"
 
   resource_type      = "orders"
   windows_topic_arns = var.orders_windows_topic_arns

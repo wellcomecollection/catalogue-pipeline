@@ -1,5 +1,5 @@
 module "bibs_reader_new" {
-  source = "../sierra_reader_new"
+  source = "../sierra_reader"
 
   resource_type      = "bibs"
   windows_topic_arns = var.bibs_windows_topic_arns
