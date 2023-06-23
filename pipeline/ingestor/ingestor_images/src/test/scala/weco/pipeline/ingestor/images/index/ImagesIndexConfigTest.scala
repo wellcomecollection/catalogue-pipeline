@@ -47,10 +47,7 @@ class ImagesIndexConfigTest
           aspectRatio
         )
       )
-//
-//      averageColorHex: Option[String]
-//      ,
-//      aspectRatio: Option[Float]
+
       val response = indexImage(id = image.id, image = image)
       response.isError shouldBe true
       response.error shouldBe a[ElasticError]

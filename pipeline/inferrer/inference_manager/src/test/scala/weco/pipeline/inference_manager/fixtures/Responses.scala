@@ -16,11 +16,11 @@ object Responses {
     s"""{
       "features_b64": "${Encoding.toLittleEndianBase64(
         randomFeatureVector(seed)
-    )}",
+      )}",
       "reduced_features_b64": "${Encoding.toLittleEndianBase64(
         randomFeatureVector(seed).slice(0, 1024)
-    )
-    }"}""".stripMargin
+      )}"
+     }""".stripMargin
   )
 
   def featureInferrer: HttpResponse =
@@ -40,12 +40,11 @@ object Responses {
   def paletteInferrerDeterministic(seed: Int): HttpResponse = json(
     s"""{
       "palette_embedding": "${Encoding.toLittleEndianBase64(
-      randomPaletteVector(seed)
-    )}",
+        randomPaletteVector(seed)
+      )}",
       "average_color_hex": "${randomAverageColorHex(seed)}"
     }"""
   )
-
 
   def paletteInferrer: HttpResponse =
     paletteInferrerDeterministic(Random.nextInt())

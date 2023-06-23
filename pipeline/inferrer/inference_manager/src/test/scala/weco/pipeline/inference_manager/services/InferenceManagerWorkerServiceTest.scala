@@ -162,7 +162,6 @@ class InferenceManagerWorkerServiceTest
                     features1 should have length 2048
                     features2 should have length 2048
                     reducedFeatures should have length 1024
-//                    paletteEmbedding shouldBe a[List[Float]]
                     paletteEmbedding should have length 216
                     averageColorHex.get should have length 7
                     aspectRatio should not be empty
