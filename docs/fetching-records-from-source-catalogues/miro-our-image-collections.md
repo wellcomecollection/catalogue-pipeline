@@ -60,6 +60,6 @@ All the Miro images we're keeping are gradually being ingested through Goobi, af
 
 ## How we delete records
 
-Occasionaly Collections will ask us to take down a Miro image; we have a script for doing this in the pipeline repo.
+Occasionally Collections will ask us to take down a Miro image; we have a script for doing this in the pipeline repo.
 
 All the Miro takedowns are recorded here: https://github.com/wellcomecollection/private/blob/main/miro-suppressions.md
