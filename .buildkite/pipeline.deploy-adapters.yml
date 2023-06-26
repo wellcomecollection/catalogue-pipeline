@@ -40,16 +40,12 @@ steps:
 
       CLUSTER=sierra-adapter-20200604 ./builds/deploy_ecs_services.sh \
         sierra-adapter-20200604-bibs-merger \
-        sierra-adapter-20200604-bibs-reader \
         sierra-adapter-20200604-holdings-linker \
         sierra-adapter-20200604-holdings-merger \
-        sierra-adapter-20200604-holdings-reader \
         sierra-adapter-20200604-items-linker \
         sierra-adapter-20200604-items-merger \
-        sierra-adapter-20200604-items-reader \
         sierra-adapter-20200604-orders-linker \
         sierra-adapter-20200604-orders-merger \
-        sierra-adapter-20200604-orders-reader \
         sierra-adapter-20200604-sierra_indexer
 
     plugins:
@@ -61,7 +57,7 @@ steps:
 
   - label: deploy Sierra reader
     command: |
-      ./sierra_adapter/sierra_reader_new/deploy.sh
+      ./sierra_adapter/sierra_reader/deploy.sh
 
     plugins:
       - wellcomecollection/aws-assume-role#v0.2.2:
