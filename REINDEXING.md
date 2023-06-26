@@ -13,39 +13,41 @@ To run a reindex follow these steps:
 
 You will now need to create a new pipeline module in [./pipeline/terraform/main.tf](./pipeline/terraform/main.tf).
 
-Copy and paste an existing pipeline making sure to update the fields:
+Copy and paste an existing pipeline making sure to update the new pipeline:
 
-- `pipeline_date`: References secrets required to access ES and to sets internal infrastructure labels.
-- `release_label`: Sets the ECR label to use on the service deployment images, created in the above deployment process.
-- `is_reindexing`: Sets ES cluster/service scaling limits while reindexing, and connects reindexing topics. Enabling this will incur above normal costs for a pipeline.
+- `key`: References secrets required to access ES and to sets internal infrastructure labels, and sets the ECR label to use on the service deployment images, created in the above deployment process. Set to pipeline deployment date.
+- `value`: Sets ES cluster/service scaling limits while reindexing, and connects reindexing topics. Enabling this will incur above normal costs for a pipeline.
 
 See the following example:
 
 ```tf
-module "catalogue_pipeline_2021-07-06" {
-  source = "./stack"
-
-  pipeline_date = "2021-07-06"
-  release_label = "2021-07-06"
-
-  is_reindexing = false
-
-  # Boilerplate that shouldn't change between pipelines.
-  # ...
-}
-
-module "catalogue_pipeline_YYYY-MM-DD" {
-  source = "./stack"
-
-  pipeline_date = "YYYY-MM-DD"
-  release_label = "YYYY-MM-DD"
-
-  is_reindexing = true
-
-  # Boilerplate that shouldn't change between pipelines.
-  # ...
+locals {
+  pipelines = {
+    // existing pipeline
+    "2023-06-09" = {
+      listen_to_reindexer      = false
+      scale_up_tasks           = false
+      scale_up_elastic_cluster = false
+      scale_up_id_minter_db    = false
+      scale_up_matcher_db      = false
+    },
+    // pipeline to create and reindex
+    "2023-06-26" = {
+      // connect reindexing topics
+      listen_to_reindexer      = true 
+      // scale up to handle reindexing the whole catalogue
+      scale_up_tasks           = true 
+      scale_up_elastic_cluster = true
+      scale_up_id_minter_db    = true
+      scale_up_matcher_db      = true
+    }
+  }
 }
 ```
+NOTE: once the reindexing of the new pipeline has completed, change `true` to `false` then `terraform apply` the changes to scale ES clusters/services down. 
+⚠️ This can only be performed once a day so time it right!
+
+
 
 Remember to create a pull request with this change.
 
