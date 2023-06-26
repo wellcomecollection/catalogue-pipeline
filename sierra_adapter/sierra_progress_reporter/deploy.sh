@@ -5,7 +5,9 @@
 set -o errexit
 set -o nounset
 
-pushd sierra_progress_reporter
+ROOT=$(git rev-parse --show-toplevel)
+
+pushd "$ROOT/sierra_adapter/sierra_progress_reporter"
   pip3 install \
     --target . \
     --platform manylinux2014_x86_64 \

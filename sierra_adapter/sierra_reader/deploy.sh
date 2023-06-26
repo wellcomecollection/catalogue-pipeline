@@ -5,7 +5,9 @@
 set -o errexit
 set -o nounset
 
-pushd sierra_reader
+ROOT=$(git rev-parse --show-toplevel)
+
+pushd "$ROOT/sierra_adapter/sierra_reader"
   pip3 install \
     --target . \
     --platform manylinux2014_x86_64 \
