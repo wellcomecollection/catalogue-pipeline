@@ -1,6 +1,5 @@
 package weco.catalogue.internal_model.generators
 
-import weco.catalogue.internal_model.generators.VectorOps.normalize
 import weco.catalogue.internal_model.identifiers.{
   CanonicalId,
   IdState,
@@ -151,29 +150,22 @@ trait ImageGenerators
     def toAugmentedImage = toAugmentedImageWith()
   }
 
-  lazy private val inferredDataBinSizes =
-    List.fill(9)(random.nextInt(10)).grouped(3).toList
-
-  lazy private val inferredDataBinMinima = List.fill(3)(random.nextFloat)
-
   lazy private val inferredDataAspectRatio = Some(random.nextFloat())
 
   def randomHexString: String =
     s"#${randomBytes(3).map(b => f"$b%02X").mkString}"
 
   def createInferredData: InferredData = {
-    val features = randomVector(4096)
+    val features = randomUnitLengthVector(4096)
     val (features1, features2) = features.splitAt(features.size / 2)
     val reducedFeatures = randomUnitLengthVector(1024)
-    val palette = randomColorVector()
+    val paletteEmbedding = randomUnitLengthVector(216)
     InferredData(
       features1 = features1.toList,
       features2 = features2.toList,
       reducedFeatures = reducedFeatures.toList,
-      palette = palette.toList,
+      paletteEmbedding = paletteEmbedding.toList,
       averageColorHex = Some(randomHexString),
-      binSizes = inferredDataBinSizes,
-      binMinima = inferredDataBinMinima,
       aspectRatio = inferredDataAspectRatio
     )
   }
@@ -191,45 +183,5 @@ trait ImageGenerators
             List(createDigitalItemWith(locations = List(location)))
           )
       )
-  }
-
-  //   Create a set of images with intersecting LSH lists to ensure
-  //   that similarity queries will return something. Returns them in order
-  //   of similarity.
-  def createSimilarImages(
-    n: Int,
-    similarFeatures: Boolean,
-    similarPalette: Boolean
-  ): Seq[Image[ImageState.Augmented]] = {
-    val features = if (similarFeatures) {
-      similarVectors(4096, n)
-    } else {
-      (1 to n).map(_ => randomVector(4096, maxR = 10.0f))
-    }
-    val reducedFeatures = if (similarFeatures) {
-      similarVectors(1024, n).map(normalize)
-    } else {
-      (1 to n).map(_ => randomUnitLengthVector(1024))
-    }
-    val palettes = if (similarPalette) {
-      similarColorVectors(n)
-    } else {
-      (1 to n).map(_ => randomColorVector())
-    }
-    (features, reducedFeatures, palettes).zipped.map {
-      case (f, r, p) =>
-        createImageData.toAugmentedImageWith(
-          inferredData = InferredData(
-            features1 = f.slice(0, 2048).toList,
-            features2 = f.slice(2048, 4096).toList,
-            reducedFeatures = r.toList,
-            palette = p.toList,
-            averageColorHex = Some(randomHexString),
-            binSizes = inferredDataBinSizes,
-            binMinima = inferredDataBinMinima,
-            aspectRatio = inferredDataAspectRatio
-          )
-        )
-    }
   }
 }

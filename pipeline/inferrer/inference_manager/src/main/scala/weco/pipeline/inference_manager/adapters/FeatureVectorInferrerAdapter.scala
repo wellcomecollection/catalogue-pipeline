@@ -1,7 +1,5 @@
 package weco.pipeline.inference_manager.adapters
 
-import java.nio.{ByteBuffer, ByteOrder}
-import java.util.Base64
 import akka.http.scaladsl.model.{HttpMethods, HttpRequest, Uri}
 import io.circe.Decoder
 import io.circe.generic.semiauto.deriveDecoder
@@ -10,8 +8,7 @@ import weco.pipeline.inference_manager.models.{
   DownloadedImage,
   FeatureVectorInferrerResponse
 }
-
-import scala.util.{Success, Try}
+import AdapterCommon.decodeBase64ToFloatList
 
 // The InferrerAdaptor for feature vectors, consuming Image[Identified] and
 // augmenting them into Image[Augmented]
@@ -60,19 +57,6 @@ class FeatureVectorInferrerAdapter(val host: String, port: Int)
           )
         } else inferredData
     }
-
-  private def decodeBase64ToFloatList(base64str: String): List[Float] = {
-    // The JVM is big-endian whereas Python has encoded this with
-    // little-endian ordering, so we need to manually set the order
-    val buf = ByteBuffer
-      .wrap(Base64.getDecoder.decode(base64str))
-      .order(ByteOrder.LITTLE_ENDIAN)
-    Stream
-      .continually(Try(buf.getFloat))
-      .takeWhile(_.isSuccess)
-      .collect { case Success(f) => f }
-      .toList
-  }
 
   implicit val responseDecoder: Decoder[Response] = deriveDecoder
 }

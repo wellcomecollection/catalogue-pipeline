@@ -80,21 +80,20 @@ class ManagerInferrerIntegrationTest
                     features1,
                     features2,
                     reducedFeatures,
-                    palette,
+                    paletteEmbedding,
                     Some(averageColorHex),
-                    binSizes,
-                    binMinima,
                     aspectRatio
                     ) =>
+                  // Note for future explorers: if a vector is the wrong length,
+                  // make sure that the inferrer is encoding a list of single precision
+                  // floats (ie float32/double) as that's what we're expecting to decode!
                   features1 should have length 2048
                   features2 should have length 2048
                   forAll(features1 ++ features2) { _.isNaN shouldBe false }
                   reducedFeatures should have length 1024
                   forAll(reducedFeatures) { _.isNaN shouldBe false }
-                  every(palette) should fullyMatch regex """\d+/\d+"""
-                  every(binSizes) should not be empty
+                  paletteEmbedding should have length 216
                   averageColorHex should have length 7
-                  binMinima should not be empty
                   aspectRatio should not be empty
               }
           }

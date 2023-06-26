@@ -97,10 +97,8 @@ case class InferredData(
   features1: List[Float],
   features2: List[Float],
   reducedFeatures: List[Float],
-  palette: List[String],
+  paletteEmbedding: List[Float],
   averageColorHex: Option[String],
-  binSizes: List[List[Int]],
-  binMinima: List[Float],
   aspectRatio: Option[Float]
 )
 
@@ -109,10 +107,8 @@ object InferredData {
     features1 = Nil,
     features2 = Nil,
     reducedFeatures = Nil,
-    palette = Nil,
+    paletteEmbedding = Nil,
     averageColorHex = None,
-    binSizes = Nil,
-    binMinima = Nil,
     aspectRatio = None
   )
 }

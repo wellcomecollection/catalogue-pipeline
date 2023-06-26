@@ -9,7 +9,10 @@ import io.circe.Decoder
 import weco.catalogue.internal_model.image.InferredData
 import weco.pipeline.inference_manager.models.DownloadedImage
 
+import java.nio.{ByteBuffer, ByteOrder}
+import java.util.Base64
 import scala.concurrent.Future
+import scala.util.{Success, Try}
 
 /*
  * An InferrerAdapter is specific to the inferrer and the data that is being augmented.
@@ -49,4 +52,19 @@ trait InferrerAdapter extends Logging {
           new Exception(s"Request failed with code ${statusCode.value}")
         )
     }
+}
+
+object AdapterCommon {
+  def decodeBase64ToFloatList(base64str: String): List[Float] = {
+    // The JVM is big-endian whereas Python has encoded this with
+    // little-endian ordering, so we need to manually set the order
+    val buf = ByteBuffer
+      .wrap(Base64.getDecoder.decode(base64str))
+      .order(ByteOrder.LITTLE_ENDIAN)
+    Stream
+      .continually(Try(buf.getFloat))
+      .takeWhile(_.isSuccess)
+      .collect { case Success(f) => f }
+      .toList
+  }
 }

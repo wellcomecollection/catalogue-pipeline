@@ -15,12 +15,12 @@ object Responses {
   def featureInferrerDeterministic(seed: Int): HttpResponse = json(
     s"""{
       "features_b64": "${Encoding.toLittleEndianBase64(
-         randomFeatureVector(seed)
-       )}",
+        randomFeatureVector(seed)
+      )}",
       "reduced_features_b64": "${Encoding.toLittleEndianBase64(
         randomFeatureVector(seed).slice(0, 1024)
-      )
-    }"}""".stripMargin
+      )}"
+     }""".stripMargin
   )
 
   def featureInferrer: HttpResponse =
@@ -39,38 +39,21 @@ object Responses {
 
   def paletteInferrerDeterministic(seed: Int): HttpResponse = json(
     s"""{
-       "palette": [${randomPaletteVector(seed)
-      .map(str => s""""$str"""")
-      .mkString(", ")}],
-       "average_color_hex": "${randomAverageColorHex(seed)}",
-       "hash_params": {
-         "bin_sizes": [${randomBinSizes(seed)
-      .map(l => s"[${l.mkString(",")}]")
-      .mkString(",")}],
-         "bin_minima": [${randomBinMinima(seed)
-      .mkString(",")}]
-       }
-     }"""
+      "palette_embedding": "${Encoding.toLittleEndianBase64(
+        randomPaletteVector(seed)
+      )}",
+      "average_color_hex": "${randomAverageColorHex(seed)}"
+    }"""
   )
 
   def paletteInferrer: HttpResponse =
     paletteInferrerDeterministic(Random.nextInt())
 
-  def randomPaletteVector(seed: Int): List[String] =
-    List.fill(25)(List.fill(3)(new Random(seed).nextInt(10)).mkString(""))
+  def randomPaletteVector(seed: Int): List[Float] =
+    List.fill(216)(new Random(seed).nextFloat)
 
   def randomAverageColorHex(seed: Int): String =
     s"#${randomBytes(random = new Random(seed), length = 3).map(b => f"$b%02X").mkString}"
-
-  def randomBinSizes(seed: Int): List[List[Int]] =
-    List
-      .fill(9)(new Random(seed).nextInt(10))
-      .grouped(3)
-      .toList
-
-  def randomBinMinima(seed: Int): List[Float] =
-    List
-      .fill(3)(new Random(seed).nextFloat())
 
   def randomFeatureVector(seed: Int): List[Float] =
     List.fill(4096)(new Random(seed).nextFloat)

@@ -1,19 +1,20 @@
 {
   "description" : "an image without any inferred data",
-  "createdAt" : "2023-03-17T09:13:02.826Z",
-  "id" : "2hf08w7o",
+  "createdAt" : "2023-06-20T10:47:06.075347Z",
+  "id" : "s23qv3zx",
   "document" : {
-    "modifiedTime" : "2008-09-17T07:09:47Z",
+    "modifiedTime" : "2003-04-26T10:13:00Z",
     "display" : {
-      "id" : "2hf08w7o",
+      "id" : "s23qv3zx",
       "thumbnail" : {
         "locationType" : {
           "id" : "iiif-image",
           "label" : "IIIF Image API",
           "type" : "LocationType"
         },
-        "url" : "https://iiif.wellcomecollection.org/image/Ez7.jpg/info.json",
-        "credit" : "Credit line: B3SGJXFYW",
+        "url" : "https://iiif.wellcomecollection.org/image/oKq.jpg/info.json",
+        "credit" : "Credit line: G4Ui6VvHFM",
+        "linkText" : "Link text: XW4tH4",
         "license" : {
           "id" : "cc-by",
           "label" : "Attribution 4.0 International (CC BY 4.0)",
@@ -31,8 +32,9 @@
             "label" : "IIIF Image API",
             "type" : "LocationType"
           },
-          "url" : "https://iiif.wellcomecollection.org/image/Ez7.jpg/info.json",
-          "credit" : "Credit line: B3SGJXFYW",
+          "url" : "https://iiif.wellcomecollection.org/image/oKq.jpg/info.json",
+          "credit" : "Credit line: G4Ui6VvHFM",
+          "linkText" : "Link text: XW4tH4",
           "license" : {
             "id" : "cc-by",
             "label" : "Attribution 4.0 International (CC BY 4.0)",
@@ -47,8 +49,8 @@
       "aspectRatio" : 1.0,
       "averageColor" : "#ffffff",
       "source" : {
-        "id" : "pr1bquyc",
-        "title" : "title-e1jMMOXABz",
+        "id" : "os0t70dl",
+        "title" : "title-DSSS6FJy22",
         "contributors" : [
         ],
         "languages" : [
@@ -62,8 +64,8 @@
       "type" : "Image"
     },
     "query" : {
-      "id" : "2hf08w7o",
-      "sourceIdentifier.value" : "hSOrtfIXq9",
+      "id" : "s23qv3zx",
+      "sourceIdentifier.value" : "KCdNTb2mx7",
       "locations.license.id" : [
         "cc-by"
       ],
@@ -74,25 +76,21 @@
         ],
         "reducedFeatures" : [
         ],
-        "palette" : [
+        "paletteEmbedding" : [
         ],
         "averageColorHex" : null,
-        "binSizes" : [
-        ],
-        "binMinima" : [
-        ],
         "aspectRatio" : null
       },
       "source" : {
-        "id" : "pr1bquyc",
+        "id" : "os0t70dl",
         "format.id" : null,
         "workType" : "Standard",
         "identifiers.value" : [
-          "iMZwLewZ8c",
-          "8rxjWLp6Bk",
-          "r2T41hn28v"
+          "MBTS8Ndyly",
+          "YOiznxUDiL",
+          "ZYp0g3anuy"
         ],
-        "title" : "title-e1jMMOXABz",
+        "title" : "title-DSSS6FJy22",
         "alternativeTitles" : [
         ],
         "description" : null,
