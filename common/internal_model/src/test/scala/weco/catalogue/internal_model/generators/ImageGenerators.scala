@@ -1,6 +1,5 @@
 package weco.catalogue.internal_model.generators
 
-//import weco.catalogue.internal_model.generators.VectorOps.normalize
 import weco.catalogue.internal_model.identifiers.{
   CanonicalId,
   IdState,
