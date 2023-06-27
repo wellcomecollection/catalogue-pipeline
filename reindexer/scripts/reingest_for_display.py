@@ -31,9 +31,12 @@ def get_document_ids(es, api_index, query):
     "--type", "document_type", type=click.Choice(["works", "images"]), default="works"
 )
 @click.option(
-    "--source", "source", type=click.Choice(["api", "last_stage"]), default="api",
+    "--source",
+    "source",
+    type=click.Choice(["api", "last_stage"]),
+    default="api",
     help="whether to reingest documents that are already in the API, or those from the last stage of the pipeline. "
-         "The latter option is useful for when something has gone wrong in the ingest step or the API index."
+    "The latter option is useful for when something has gone wrong in the ingest step or the API index.",
 )
 @click.option("--test-doc-id", type=str)
 def main(reindex_date, document_type, source, test_doc_id):
