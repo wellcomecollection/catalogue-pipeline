@@ -49,12 +49,12 @@ def main(reindex_date, document_type, source, test_doc_id):
     )
 
     if document_type == "works":
-        index_namespace = "indexed" if source is "api" else "denormalised"
+        index_namespace = "indexed" if source == "api" else "denormalised"
         source_index = f"{document_type}-{index_namespace}-{reindex_date}"
         dest_topic_arn = f"{dest_topic_arn_prefix}_relation_embedder_output"
-        api_index_query = {"term": {"type": "Visible"}} if source is "api" else None
+        api_index_query = {"term": {"type": "Visible"}} if source == "api" else None
     elif document_type == "images":
-        index_namespace = "indexed" if source is "api" else "augmented"
+        index_namespace = "indexed" if source == "api" else "augmented"
         source_index = f"{document_type}-{index_namespace}-{reindex_date}"
         dest_topic_arn = f"{dest_topic_arn_prefix}_image_inferrer_output"
         api_index_query = None
