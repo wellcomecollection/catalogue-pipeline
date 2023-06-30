@@ -40,6 +40,8 @@ locals {
 
   shared_infra = data.terraform_remote_state.shared_infra.outputs
 
+  inferrer_config = data.terraform_remote_state.inferrer.outputs["inferrer_config"]
+
   adapter_config = {
     sierra = {
       topics = [
