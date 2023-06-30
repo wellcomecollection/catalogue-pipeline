@@ -12,7 +12,7 @@ module "id_minter" {
   container_image = local.id_minter_image
 
   security_group_ids = [
-    var.rds_config.security_group_id,
+    local.rds_config.security_group_id,
   ]
 
   topic_arns = local.transformer_output_topic_arns

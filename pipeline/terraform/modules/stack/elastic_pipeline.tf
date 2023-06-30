@@ -11,7 +11,7 @@ resource "ec_deployment" "pipeline" {
   region                 = "eu-west-1"
   deployment_template_id = "aws-io-optimized-v2"
 
-  traffic_filter = var.network_config.traffic_filters
+  traffic_filter = local.network_config.traffic_filters
 
   elasticsearch {
     topology {
@@ -32,7 +32,7 @@ resource "ec_deployment" "pipeline" {
   }
 
   observability {
-    deployment_id = var.monitoring_config.logging_cluster_id
+    deployment_id = local.monitoring_config.logging_cluster_id
   }
 
   lifecycle {

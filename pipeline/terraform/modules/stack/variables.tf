@@ -84,53 +84,6 @@ locals {
   es_node_count = var.reindexing_state.scale_up_elastic_cluster ? 2 : local.es_node_lookup[var.es_cluster_size]
 }
 
-# Fields:
-#
-#   - `topics` -- that the adapter will write to in normal operation
-#   - `reindex_topic` -- that the reindexer will write to
-#   - `read_policy` -- an IAM policy document that will allow a service
-#     to read from the adapter store
-#
-variable "adapter_config" {
-  type = map(object({
-    topics        = list(string)
-    reindex_topic = string
-    read_policy   = string
-  }))
-}
-
-variable "inferrer_config" {
-  type = object({
-    model_bucket = string
-    model_key    = string
-  })
-}
-
-variable "monitoring_config" {
-  type = object({
-    shared_logging_secrets = map(any)
-    logging_cluster_id     = string
-    dlq_alarm_arn          = string
-  })
-}
-
-variable "network_config" {
-  type = object({
-    vpc_id                           = string
-    subnets                          = list(string)
-    ec_privatelink_security_group_id = string
-    traffic_filters                  = list(string)
-  })
-}
-
-variable "rds_config" {
-  type = object({
-    cluster_id        = string
-    subnet_group      = string
-    security_group_id = string
-  })
-}
-
 variable "index_config" {
   type = object({
     works = object({

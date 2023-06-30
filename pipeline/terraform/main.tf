@@ -59,14 +59,6 @@ module "pipelines" {
 
   index_config = each.value["index_config"]
 
-  # Boilerplate that shouldn't change between pipelines.
-
-  adapter_config    = local.adapter_config
-  inferrer_config   = local.inferrer_config
-  monitoring_config = local.monitoring_config
-  network_config    = local.network_config
-  rds_config        = local.rds_config
-
   providers = {
     aws.catalogue = aws.catalogue
   }

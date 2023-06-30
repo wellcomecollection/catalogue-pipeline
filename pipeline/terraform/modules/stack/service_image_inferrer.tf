@@ -82,8 +82,8 @@ module "image_inferrer" {
       memory = local.inferrer_memory
       env_vars = {
         PORT              = local.feature_inferrer_port
-        MODEL_OBJECT_KEY  = var.inferrer_config.model_key
-        MODEL_DATA_BUCKET = var.inferrer_config.model_bucket
+        MODEL_OBJECT_KEY  = local.inferrer_config.model_key
+        MODEL_DATA_BUCKET = local.inferrer_config.model_bucket
       }
       secret_env_vars = {}
       mount_points = [{
@@ -169,7 +169,7 @@ module "image_inferrer" {
   # Below this line is boilerplate that should be the same across
   # all services.
   egress_security_group_id             = aws_security_group.egress.id
-  elastic_cloud_vpce_security_group_id = var.network_config.ec_privatelink_security_group_id
+  elastic_cloud_vpce_security_group_id = local.network_config.ec_privatelink_security_group_id
 
   cluster_name = aws_ecs_cluster.cluster.name
   cluster_arn  = aws_ecs_cluster.cluster.id
@@ -177,13 +177,13 @@ module "image_inferrer" {
   scale_down_adjustment = local.scale_down_adjustment
   scale_up_adjustment   = local.scale_up_adjustment
 
-  dlq_alarm_topic_arn = var.monitoring_config.dlq_alarm_arn
+  dlq_alarm_topic_arn = local.monitoring_config.dlq_alarm_arn
 
-  subnets = var.network_config.subnets
+  subnets = local.network_config.subnets
 
   namespace = local.namespace
 
-  shared_logging_secrets = var.monitoring_config.shared_logging_secrets
+  shared_logging_secrets = local.monitoring_config.shared_logging_secrets
 }
 
 resource "aws_iam_role_policy" "read_inferrer_data" {
@@ -199,8 +199,8 @@ data "aws_iam_policy_document" "allow_inferrer_data_access" {
     ]
 
     resources = [
-      "arn:aws:s3:::${var.inferrer_config.model_bucket}",
-      "arn:aws:s3:::${var.inferrer_config.model_bucket}/*",
+      "arn:aws:s3:::${local.inferrer_config.model_bucket}",
+      "arn:aws:s3:::${local.inferrer_config.model_bucket}/*",
     ]
   }
 }
