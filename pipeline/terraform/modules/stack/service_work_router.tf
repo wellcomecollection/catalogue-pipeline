@@ -1,26 +1,26 @@
 module "router_path_output_topic" {
-  source = "../modules/topic"
+  source = "../topic"
 
   name       = "${local.namespace}_router_path_output"
   role_names = [module.router.task_role_name]
 }
 
 module "router_candidate_incomplete_paths_output_topic" {
-  source = "../modules/topic"
+  source = "../topic"
 
   name       = "${local.namespace}_router_candidate_incomplete_paths_output"
   role_names = [module.router.task_role_name]
 }
 
 module "router_work_output_topic" {
-  source = "../modules/topic"
+  source = "../topic"
 
   name       = "${local.namespace}_router_work_output"
   role_names = [module.router.task_role_name]
 }
 
 module "router" {
-  source = "../modules/fargate_service"
+  source = "../fargate_service"
 
   name            = "router"
   container_image = local.router_image

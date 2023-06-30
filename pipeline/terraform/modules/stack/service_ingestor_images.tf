@@ -3,14 +3,14 @@ locals {
 }
 
 module "ingestor_images_output_topic" {
-  source = "../modules/topic"
+  source = "../topic"
 
   name       = "${local.namespace}_ingestor_images_output"
   role_names = [module.ingestor_images.task_role_name]
 }
 
 module "ingestor_images" {
-  source = "../modules/fargate_service"
+  source = "../fargate_service"
 
   name            = "ingestor_images"
   container_image = local.ingestor_images_image

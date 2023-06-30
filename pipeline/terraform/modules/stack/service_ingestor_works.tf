@@ -26,7 +26,7 @@ resource "aws_iam_role_policy" "worker_role_can_publish_sns" {
 }
 
 module "ingestor_works" {
-  source = "../modules/fargate_service"
+  source = "../fargate_service"
 
   name            = "ingestor_works"
   container_image = local.ingestor_works_image

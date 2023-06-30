@@ -70,14 +70,6 @@
             "averageColorHex": {
               "type": "keyword"
             },
-            "binMinima": {
-               "type": "float",
-               "index": false
-             },
-             "binSizes": {
-               "type": "integer",
-               "index": false
-             },
             "features1": {
               "type": "dense_vector",
               "dims": 2048
@@ -86,8 +78,11 @@
               "type": "dense_vector",
               "dims": 2048
             },
-            "palette": {
-               "type": "keyword"
+            "paletteEmbedding": {
+              "type": "dense_vector",
+              "dims": 216,
+              "index": true,
+              "similarity": "dot_product"
             },
             "reducedFeatures": {
               "type": "dense_vector",

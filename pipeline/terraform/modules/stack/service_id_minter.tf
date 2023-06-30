@@ -1,12 +1,12 @@
 module "id_minter_output_topic" {
-  source = "../modules/topic"
+  source = "../topic"
 
   name       = "${local.namespace}_id_minter_output"
   role_names = [module.id_minter.task_role_name]
 }
 
 module "id_minter" {
-  source = "../modules/fargate_service"
+  source = "../fargate_service"
 
   name            = "id_minter"
   container_image = local.id_minter_image

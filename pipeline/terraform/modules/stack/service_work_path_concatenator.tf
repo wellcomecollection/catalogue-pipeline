@@ -1,13 +1,13 @@
 
 module "path_concatenator_output_topic" {
-  source = "../modules/topic"
+  source = "../topic"
 
   name       = "${local.namespace}_path_concatenator_output_topic"
   role_names = [module.path_concatenator.task_role_name]
 }
 
 module "path_concatenator" {
-  source = "../modules/fargate_service"
+  source = "../fargate_service"
 
   name            = "path_concatenator"
   container_image = local.path_concatenator_image

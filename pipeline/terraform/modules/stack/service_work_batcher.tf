@@ -24,14 +24,14 @@ locals {
 }
 
 module "batcher_output_topic" {
-  source = "../modules/topic"
+  source = "../topic"
 
   name       = "${local.namespace}_batcher_output"
   role_names = [module.batcher.task_role_name]
 }
 
 module "batcher" {
-  source = "../modules/fargate_service"
+  source = "../fargate_service"
 
   name            = "batcher"
   container_image = local.batcher_image
