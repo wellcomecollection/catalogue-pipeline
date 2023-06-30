@@ -58,7 +58,7 @@ module "transformers" {
 
   source_name = each.key
 
-  adapter_config      = var.adapter_config[each.key]
+  adapter_config      = local.adapter_config[each.key]
   listen_to_reindexer = var.reindexing_state.listen_to_reindexer
 
   queue_visibility_timeout_seconds = lookup(each.value, "queue_visibility_timeout_seconds", 30)

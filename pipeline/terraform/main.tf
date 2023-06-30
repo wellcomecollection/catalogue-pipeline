@@ -59,15 +59,51 @@ module "pipelines" {
 
   index_config = each.value["index_config"]
 
-  # Boilerplate that shouldn't change between pipelines.
-
-  adapter_config    = local.adapter_config
-  inferrer_config   = local.inferrer_config
-  monitoring_config = local.monitoring_config
-  network_config    = local.network_config
-  rds_config        = local.rds_config
-
   providers = {
     aws.catalogue = aws.catalogue
+  }
+}
+
+provider "aws" {
+  region = "eu-west-1"
+
+  assume_role {
+    role_arn = "arn:aws:iam::760097843905:role/platform-admin"
+  }
+}
+
+provider "aws" {
+  region = "eu-west-1"
+
+  alias = "catalogue"
+
+  assume_role {
+    role_arn = "arn:aws:iam::756629837203:role/catalogue-developer"
+  }
+}
+
+provider "ec" {}
+
+terraform {
+  required_version = ">= 0.13"
+  required_providers {
+    aws = {
+      source = "hashicorp/aws"
+    }
+    ec = {
+      source  = "elastic/ec"
+      version = "0.2.1"
+    }
+  }
+}
+
+terraform {
+  backend "s3" {
+    role_arn = "arn:aws:iam::760097843905:role/platform-developer"
+
+    bucket         = "wellcomecollection-platform-infra"
+    key            = "terraform/catalogue/pipeline.tfstate"
+    dynamodb_table = "terraform-locktable"
+    region         = "eu-west-1"
   }
 }

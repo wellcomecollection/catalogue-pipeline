@@ -1,7 +1,7 @@
 resource "aws_security_group" "egress" {
   name        = "${local.namespace}_egress"
   description = "Allow egress traffic from the services"
-  vpc_id      = var.network_config.vpc_id
+  vpc_id      = local.network_config.vpc_id
 
   egress {
     from_port = 0
