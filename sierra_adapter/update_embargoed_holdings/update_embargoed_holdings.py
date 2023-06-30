@@ -73,7 +73,7 @@ def get_holdings_under_embargo(*, es_host, es_username, es_password):
     )
     mget_resp.raise_for_status()
 
-    for doc in mget_resp.json()['docs']:
+    for doc in mget_resp.json()["docs"]:
         yield datetime.datetime.strptime(
             doc["_source"]["updatedDate"], "%Y-%m-%dT%H:%M:%SZ"
         )
