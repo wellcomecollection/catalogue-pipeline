@@ -36,3 +36,17 @@ variable "connection" {
   })
 }
 
+variable "index_config" {
+  type = object({
+    works = object({
+      identified = string
+      merged     = string
+      indexed    = string
+    })
+
+    images = object({
+      indexed        = string
+      works_analysis = string
+    })
+  })
+}

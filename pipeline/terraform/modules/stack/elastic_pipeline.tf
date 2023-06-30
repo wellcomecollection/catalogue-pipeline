@@ -216,7 +216,6 @@ locals {
 }
 
 module "pipeline_indices" {
-
   source = "../pipeline_indices"
 
   es_works_source_index       = local.es_works_source_index
@@ -228,6 +227,8 @@ module "pipeline_indices" {
   es_images_initial_index   = local.es_images_initial_index
   es_images_augmented_index = local.es_images_augmented_index
   es_images_index           = local.es_images_index
+
+  index_config = var.index_config
 
   # Path to folder containing mappings and analysis settings for Elasticsearch Index creation
   es_config_path = "${path.root}/../../index_config"
