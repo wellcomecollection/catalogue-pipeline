@@ -18,7 +18,7 @@ locals {
 }
 
 module "pipelines" {
-  source = "./stack"
+  source = "./modules/stack"
 
   for_each = local.pipelines
 

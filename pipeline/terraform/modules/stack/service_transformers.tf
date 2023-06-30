@@ -52,7 +52,7 @@ locals {
 }
 
 module "transformers" {
-  source = "../modules/transformer"
+  source = "../transformer"
 
   for_each = local.transformers
 

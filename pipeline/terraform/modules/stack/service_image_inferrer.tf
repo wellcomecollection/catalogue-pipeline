@@ -39,7 +39,7 @@ locals {
 }
 
 module "image_inferrer" {
-  source = "../modules/services_with_manager"
+  source = "../services_with_manager"
 
   name = "image_inferrer"
 
@@ -206,7 +206,7 @@ data "aws_iam_policy_document" "allow_inferrer_data_access" {
 }
 
 module "image_inferrer_output_topic" {
-  source = "../modules/topic"
+  source = "../topic"
 
   name       = "${local.namespace}_image_inferrer_output"
   role_names = [module.image_inferrer.task_role_name]

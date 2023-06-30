@@ -217,7 +217,7 @@ locals {
 
 module "pipeline_indices" {
 
-  source = "../modules/pipeline_indices"
+  source = "../pipeline_indices"
 
   es_works_source_index       = local.es_works_source_index
   es_works_merged_index       = local.es_works_merged_index

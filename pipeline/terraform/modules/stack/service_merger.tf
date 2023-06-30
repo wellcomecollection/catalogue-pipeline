@@ -1,19 +1,19 @@
 module "merger_works_output_topic" {
-  source = "../modules/topic"
+  source = "../topic"
 
   name       = "${local.namespace}_merger_works_output"
   role_names = [module.merger.task_role_name]
 }
 
 module "merger_images_output_topic" {
-  source = "../modules/topic"
+  source = "../topic"
 
   name       = "${local.namespace}_merger_images_output"
   role_names = [module.merger.task_role_name]
 }
 
 module "merger" {
-  source = "../modules/fargate_service"
+  source = "../fargate_service"
 
   name            = "merger"
   container_image = local.merger_image

@@ -1,12 +1,12 @@
 module "relation_embedder_output_topic" {
-  source = "../modules/topic"
+  source = "../topic"
 
   name       = "${local.namespace}_relation_embedder_output"
   role_names = [module.relation_embedder.task_role_name]
 }
 
 module "relation_embedder" {
-  source = "../modules/fargate_service"
+  source = "../fargate_service"
 
   name            = "relation_embedder"
   container_image = local.relation_embedder_image

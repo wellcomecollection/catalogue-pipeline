@@ -13,14 +13,14 @@ resource "aws_iam_role_policy" "matcher_lock_readwrite" {
 }
 
 module "matcher_output_topic" {
-  source = "../modules/topic"
+  source = "../topic"
 
   name       = "${local.namespace}_matcher_output"
   role_names = [module.matcher.task_role_name]
 }
 
 module "matcher" {
-  source = "../modules/fargate_service"
+  source = "../fargate_service"
 
   name            = "matcher"
   container_image = local.matcher_image
