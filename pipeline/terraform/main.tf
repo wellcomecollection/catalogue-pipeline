@@ -46,15 +46,15 @@ module "pipelines" {
 
   for_each = local.pipelines
 
-  pipeline_date    = each.key
-  release_label    = each.key
+  pipeline_date = each.key
+  release_label = each.key
 
   reindexing_state = {
-    listen_to_reindexer = each.value["listen_to_reindexer"]
-    scale_up_tasks = each.value["scale_up_tasks"]
+    listen_to_reindexer      = each.value["listen_to_reindexer"]
+    scale_up_tasks           = each.value["scale_up_tasks"]
     scale_up_elastic_cluster = each.value["scale_up_elastic_cluster"]
-    scale_up_id_minter_db = each.value["scale_up_id_minter_db"]
-    scale_up_matcher_db = each.value["scale_up_matcher_db"]
+    scale_up_id_minter_db    = each.value["scale_up_id_minter_db"]
+    scale_up_matcher_db      = each.value["scale_up_matcher_db"]
   }
 
   index_config = each.value["index_config"]
