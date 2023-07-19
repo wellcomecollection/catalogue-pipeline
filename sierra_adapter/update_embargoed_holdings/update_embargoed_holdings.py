@@ -19,6 +19,9 @@ fetch the update.
 This Lambda looks in the reporting cluster to find holdings records that
 have this note, then asks the Sierra adapter to re-fetch those records.
 
+Additionally, it fetches any holdings which have been updated in
+the last 90 days, to catch any other changes that Sierra hasn't spotted.
+
 """
 
 import datetime
