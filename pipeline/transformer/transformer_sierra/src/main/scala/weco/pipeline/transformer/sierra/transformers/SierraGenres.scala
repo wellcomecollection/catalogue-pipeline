@@ -53,15 +53,15 @@ object SierraGenres
           val (primarySubfields, subdivisionSubfields) =
             getLabelSubfields(varField)
 
-          getLabel(primarySubfields, subdivisionSubfields) match {
+          val label = getLabel(primarySubfields, subdivisionSubfields)
+          val concepts = getPrimaryConcept(
+            primarySubfields,
+            varField = varField
+          ) ++ getSubdivisions(subdivisionSubfields)
+          label match {
             case "" => None
-            case label =>
-              val concepts = getPrimaryConcept(
-                primarySubfields,
-                varField = varField
-              ) ++ getSubdivisions(subdivisionSubfields)
-
-              Some(Genre(label = label, concepts = concepts).normalised)
+            case nonEmptyLabel =>
+              Some(Genre(label = nonEmptyLabel, concepts = concepts).normalised)
           }
       }
       .distinct
