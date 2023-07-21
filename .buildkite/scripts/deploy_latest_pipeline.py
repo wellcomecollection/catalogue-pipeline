@@ -31,10 +31,10 @@ def deploy_to(root, pipeline_date):
 
 def get_pipeline_names_from_terraform_dir(root):
     tf_dir = f"{root}/pipeline/terraform"
-    pipeline_date_regex = re.compile(
-        r'^(?P<date>\d\d\d\d-\d\d-\d\d)'
-    )
-    subdirectories = [file for file in os.listdir(tf_dir) if os.path.isdir(os.path.join(tf_dir, file))]
+    pipeline_date_regex = re.compile(r"^(?P<date>\d\d\d\d-\d\d-\d\d)")
+    subdirectories = [
+        file for file in os.listdir(tf_dir) if os.path.isdir(os.path.join(tf_dir, file))
+    ]
     return [dir for dir in subdirectories if pipeline_date_regex.match(dir)]
 
 
