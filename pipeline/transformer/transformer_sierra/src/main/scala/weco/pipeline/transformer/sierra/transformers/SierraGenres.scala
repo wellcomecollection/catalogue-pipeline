@@ -48,7 +48,7 @@ object SierraGenres
   def apply(bibData: SierraBibData): List[Genre[IdState.Unminted]] =
     bibData
       .varfieldsWithTag("655")
-      .map {
+      .flatMap {
         varField =>
           val (primarySubfields, subdivisionSubfields) =
             getLabelSubfields(varField)
@@ -58,8 +58,11 @@ object SierraGenres
             primarySubfields,
             varField = varField
           ) ++ getSubdivisions(subdivisionSubfields)
-
-          Genre(label = label, concepts = concepts).normalised
+          label match {
+            case "" => None
+            case nonEmptyLabel =>
+              Some(Genre(label = nonEmptyLabel, concepts = concepts).normalised)
+          }
       }
       .distinct
 
