@@ -19,9 +19,12 @@ fetch the update.
 This Lambda looks in the reporting cluster to find holdings records that
 have this note, then asks the Sierra adapter to re-fetch those records.
 
+Additionally, it fetches any holdings which have been updated in
+the last 90 days, to catch any other changes that Sierra hasn't spotted.
+
 """
 
-from datetime import datetime
+import datetime
 import json
 import os
 
@@ -73,12 +76,22 @@ def get_holdings_under_embargo(*, es_host, es_username, es_password):
     )
     mget_resp.raise_for_status()
 
-    return {
-        doc["_id"]: datetime.strptime(
+    for doc in mget_resp.json()["docs"]:
+        yield datetime.datetime.strptime(
             doc["_source"]["updatedDate"], "%Y-%m-%dT%H:%M:%SZ"
         )
-        for doc in mget_resp.json()["docs"]
-    }
+
+    # We additionally fetch any holdings that have been modified in the
+    # last 90 days.  The Sierra updatedDate field for holdings records is
+    # quite flaky and not always accurate; this is a stopgap to catch
+    # cases where the record changes (e.g. in the monthly coverage load)
+    # that Sierra doesn't notice.
+    #
+    # See https://wellcome.slack.com/archives/C8X9YKM5X/p1688135850998959
+    today = datetime.datetime.now()
+
+    for days in range(90):
+        yield today - datetime.timedelta(days=days)
 
 
 def main(_event, _context):
@@ -102,12 +115,10 @@ def update_embargoed_holdings():
         es_host=es_host, es_username=es_username, es_password=es_password
     )
 
-    print(f"affected_holdings = {affected_holdings.keys()!r}")
-
     # A bunch of these were modified on similar times on a small number
     # of dates (e.g. 2002-11-28 00:42:42, 00:46:38, 00:52:38), so find
     # a unique set of dates.
-    affected_dates = {d.date() for d in affected_holdings.values()}
+    affected_dates = {d.date() for d in affected_holdings}
 
     sns_client = session.client("sns")
     for d in affected_dates:
