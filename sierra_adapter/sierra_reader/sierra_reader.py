@@ -115,7 +115,7 @@ def to_scala_record(record):
     try:
         bib_ids = [str(bib_id) for bib_id in record["bibIds"]]
     except KeyError:
-        bib_ids = [url.split("/")[-1] for url in record["bibs"]]
+        bib_ids = [url.split("/")[-1] for url in record.get("bibs", [])]
 
     return json.dumps(
         {
