@@ -33,6 +33,11 @@ trait ImageTransformer {
   // * Representing only the Work's licences is inappropriate
   // because some Works do not have a licence defined, and the
   // Image's licence should stand.
+  //
+  // There is a fairly significant disconnect between the
+  // values derived from images vs parent works:
+  // (https://github.com/wellcomecollection/wellcomecollection.org/issues/10074#issuecomment-1662364132)
+
   val deriveData: Image[ImageState.Augmented] => IndexedImage =
     image =>
       IndexedImage(
