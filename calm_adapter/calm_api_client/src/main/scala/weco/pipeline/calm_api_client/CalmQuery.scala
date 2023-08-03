@@ -21,11 +21,8 @@ sealed trait CalmQuery {
   def queryExpression: String
 }
 
-// These general classes need to be sealed so we can derive codecs for
-// the specific cases in the companion object
-
 // Query leaves become expressions like `(key=value)` in full queries
-sealed case class QueryLeaf(
+case class QueryLeaf(
   key: String,
   value: String,
   relationalOperator: String = "="
@@ -33,7 +30,7 @@ sealed case class QueryLeaf(
   def queryExpression: String = s"($key$relationalOperator$value)"
 }
 // Query nodes join query leaves together with booleans like `(a=b)OR(c=d)`
-sealed case class QueryNode(
+case class QueryNode(
   left: CalmQuery,
   right: CalmQuery,
   logicalOperator: String = "OR"
