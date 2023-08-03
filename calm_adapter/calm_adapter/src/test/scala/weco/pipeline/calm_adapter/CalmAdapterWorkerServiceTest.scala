@@ -64,20 +64,25 @@ class CalmAdapterWorkerServiceTest
       case (_, QueuePair(queue, dlq)) =>
         sendNotificationToSQS[CalmQuery](
           queue,
-          CalmQuery.ModifiedDate(queryDate))
+          CalmQuery.ModifiedDate(queryDate)
+        )
         eventually {
           vhs.underlying.getLatest("A").value shouldBe Identified(
             Version("A", 1),
-            recordA.copy(published = true))
+            recordA.copy(published = true)
+          )
           vhs.underlying.getLatest("B").value shouldBe Identified(
             Version("B", 1),
-            recordB.copy(published = true))
+            recordB.copy(published = true)
+          )
           vhs.underlying.getLatest("C").value shouldBe Identified(
             Version("C", 1),
-            recordC.copy(published = true))
+            recordC.copy(published = true)
+          )
 
           retriever.previousQuery shouldBe Some(
-            CalmQuery.ModifiedDate(queryDate))
+            CalmQuery.ModifiedDate(queryDate)
+          )
 
           eventually {
             assertQueueEmpty(queue)
@@ -95,8 +100,9 @@ class CalmAdapterWorkerServiceTest
 
           messageSender
             .getMessages[CalmSourcePayload]
-            .map { payload =>
-              Version(payload.id, payload.version)
+            .map {
+              payload =>
+                Version(payload.id, payload.version)
             } shouldBe expectedVersions
         }
     }
@@ -110,7 +116,8 @@ class CalmAdapterWorkerServiceTest
       case (_, QueuePair(queue, dlq)) =>
         sendNotificationToSQS[CalmQuery](
           queue,
-          CalmQuery.ModifiedDate(queryDate))
+          CalmQuery.ModifiedDate(queryDate)
+        )
 
         eventually {
           assertQueueEmpty(queue)
@@ -128,7 +135,7 @@ class CalmAdapterWorkerServiceTest
         val records = List(
           CalmRecord("A", Map.empty, timestamp),
           CalmRecord("B", Map.empty, timestamp),
-          CalmRecord("C", Map.empty, timestamp),
+          CalmRecord("C", Map.empty, timestamp)
         )
         Source.fromIterator(() => records.toIterator)
       }
@@ -137,7 +144,8 @@ class CalmAdapterWorkerServiceTest
       override val underlying: MemoryIndividualMessageSender =
         new MemoryIndividualMessageSender() {
           override def sendT[T](t: T)(subject: String, destination: String)(
-            implicit encoder: Encoder[T]): Try[Unit] =
+            implicit encoder: Encoder[T]
+          ): Try[Unit] =
             if (t.asInstanceOf[Version[String, Int]].id == "B")
               Failure(new Exception("Waaah I couldn't send message"))
             else
@@ -145,11 +153,15 @@ class CalmAdapterWorkerServiceTest
         }
     }
 
-    withCalmAdapterWorkerService(retriever, messageSender = brokenMessageSender) {
+    withCalmAdapterWorkerService(
+      retriever,
+      messageSender = brokenMessageSender
+    ) {
       case (_, QueuePair(queue, dlq)) =>
         sendNotificationToSQS[CalmQuery](
           queue,
-          CalmQuery.ModifiedDate(queryDate))
+          CalmQuery.ModifiedDate(queryDate)
+        )
 
         eventually {
           assertQueueEmpty(queue)
@@ -161,22 +173,24 @@ class CalmAdapterWorkerServiceTest
   def withCalmAdapterWorkerService[R](
     retriever: CalmRetriever,
     vhs: SourceVHS[CalmRecord] = createSourceVHS[CalmRecord],
-    messageSender: MemoryMessageSender = new MemoryMessageSender())(
-    testWith: TestWith[(CalmAdapterWorkerService[String], QueuePair), R]): R =
-    withActorSystem { implicit actorSystem =>
-      withLocalSqsQueuePair(visibilityTimeout = 1.second) {
-        case QueuePair(queue, dlq) =>
-          withSQSStream[NotificationMessage, R](queue) { stream =>
-            val calmAdapter = new CalmAdapterWorkerService(
-              stream,
-              messageSender = messageSender,
-              retriever,
-              calmStore = new CalmStore(vhs)
-            )
-            calmAdapter.run()
-            testWith((calmAdapter, QueuePair(queue, dlq)))
-          }
-      }
+    messageSender: MemoryMessageSender = new MemoryMessageSender()
+  )(testWith: TestWith[(CalmAdapterWorkerService[String], QueuePair), R]): R =
+    withActorSystem {
+      implicit actorSystem =>
+        withLocalSqsQueuePair(visibilityTimeout = 1.second) {
+          case QueuePair(queue, dlq) =>
+            withSQSStream[NotificationMessage, R](queue) {
+              stream =>
+                val calmAdapter = new CalmAdapterWorkerService(
+                  stream,
+                  messageSender = messageSender,
+                  retriever,
+                  calmStore = new CalmStore(vhs)
+                )
+                calmAdapter.run()
+                testWith((calmAdapter, QueuePair(queue, dlq)))
+            }
+        }
     }
 
   def calmRetriever(records: List[CalmRecord]) =
@@ -184,7 +198,7 @@ class CalmAdapterWorkerServiceTest
       var previousQuery: Option[CalmQuery] = None
       def apply(query: CalmQuery): Source[CalmRecord, NotUsed] = {
         previousQuery = Some(query)
-        Source.fromIterator(() => records.toIterator)
+        Source(records)
       }
     }
 

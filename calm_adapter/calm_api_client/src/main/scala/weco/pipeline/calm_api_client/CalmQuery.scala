@@ -1,7 +1,7 @@
 package weco.pipeline.calm_api_client
 
-import io.circe.Decoder
-import io.circe.generic.semiauto.deriveDecoder
+import io.circe.{Decoder, Encoder}
+import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -25,18 +25,18 @@ sealed trait CalmQuery {
 // the specific cases in the companion object
 
 // Query leaves become expressions like `(key=value)` in full queries
-sealed class QueryLeaf(
-  val key: String,
-  val value: String,
-  val relationalOperator: String = "="
+sealed case class QueryLeaf(
+  key: String,
+  value: String,
+  relationalOperator: String = "="
 ) extends CalmQuery {
   def queryExpression: String = s"($key$relationalOperator$value)"
 }
 // Query nodes join query leaves together with booleans like `(a=b)OR(c=d)`
-sealed class QueryNode(
-  val left: CalmQuery,
-  val right: CalmQuery,
-  val logicalOperator: String = "OR"
+sealed case class QueryNode(
+  left: CalmQuery,
+  right: CalmQuery,
+  logicalOperator: String = "OR"
 ) extends CalmQuery {
   def queryExpression: String =
     left.queryExpression + logicalOperator + right.queryExpression
@@ -53,40 +53,35 @@ object QueryNode {
 }
 
 object CalmQuery {
-  // Keep these as case classes rather than `def`s so they're easy to (de)serialize
-
   // (Modified=<date>)
-  case class ModifiedDate(date: LocalDate)
-      extends QueryLeaf(key = "Modified", value = formatDate(date))
+  def ModifiedDate(date: LocalDate) =
+    new QueryLeaf(key = "Modified", value = formatDate(date))
 
   // (Created=<date>)
-  case class CreatedDate(date: LocalDate)
-      extends QueryLeaf(key = "Created", value = formatDate(date))
+  def CreatedDate(date: LocalDate) =
+    new QueryLeaf(key = "Created", value = formatDate(date))
 
   // (Modified=<date>)OR(Created=<date>)
-  case class CreatedOrModifiedDate(date: LocalDate)
-      extends QueryNode(
-        left = CreatedDate(date),
-        right = ModifiedDate(date),
-        logicalOperator = "OR"
-      )
+  def CreatedOrModifiedDate(date: LocalDate) = new QueryNode(
+    left = CreatedDate(date),
+    right = ModifiedDate(date),
+    logicalOperator = "OR"
+  )
 
   // (Created!=*)AND(Modified!=*)
-  case object EmptyCreatedAndModifiedDate
-      extends QueryNode(
-        left = emptyKey("Created"),
-        right = emptyKey("Modified"),
-        logicalOperator = "AND"
-      )
+  def EmptyCreatedAndModifiedDate = new QueryNode(
+    left = emptyKey("Created"),
+    right = emptyKey("Modified"),
+    logicalOperator = "AND"
+  )
 
   // (RefNo=refNo)
-  case class RefNo(refNo: String)
-      extends QueryLeaf(key = "RefNo", value = refNo)
+  def RefNo(refNo: String) = new QueryLeaf(key = "RefNo", value = refNo)
 
   // RecordId queries need to have double quotes for some reason
   // (RecordId="<id>")
-  case class RecordId(id: String)
-      extends QueryLeaf(key = "RecordId", value = s""""$id"""")
+  def RecordId(id: String) =
+    new QueryLeaf(key = "RecordId", value = s""""$id"""")
 
   // (key!=*)
   def emptyKey(key: String) =
@@ -109,6 +104,7 @@ object CalmQuery {
     )
   }
 
-  // For some reason Circe no longer tolerates auto-deriving this decoder
-  implicit val decoder: Decoder[CalmQuery] = deriveDecoder[CalmQuery]
+  // For some reason Circe no longer tolerates auto-deriving these
+  implicit val calmQueryDecoder: Decoder[CalmQuery] = deriveDecoder[CalmQuery]
+  implicit val calmQueryEncoder: Encoder[CalmQuery] = deriveEncoder[CalmQuery]
 }
