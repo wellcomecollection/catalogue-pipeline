@@ -1,5 +1,8 @@
 package weco.pipeline.calm_api_client
 
+import io.circe.Decoder
+import io.circe.generic.semiauto.deriveDecoder
+
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -105,4 +108,7 @@ object CalmQuery {
       logicalOperator = "AND"
     )
   }
+
+  // For some reason Circe no longer tolerates auto-deriving this decoder
+  implicit val decoder: Decoder[CalmQuery] = deriveDecoder[CalmQuery]
 }
