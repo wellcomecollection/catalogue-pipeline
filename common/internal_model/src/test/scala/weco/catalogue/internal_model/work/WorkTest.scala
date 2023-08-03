@@ -62,7 +62,7 @@ class WorkTest extends AnyFunSpec with Matchers with WorkGenerators {
       fromJson[Work[WorkState.Identified]](jsonString).get
     }
     caught.getMessage should startWith(
-      "Missing required field"
+      "DecodingFailure at .type: Missing required field"
     )
   }
 
