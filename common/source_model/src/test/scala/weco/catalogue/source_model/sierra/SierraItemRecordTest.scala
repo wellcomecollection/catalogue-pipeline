@@ -51,7 +51,7 @@ class SierraItemRecordTest
   it("throws an exception for valid JSON that doesn't contain bibIds") {
     assertCreatingFromDataFails(
       data = "{}",
-      expectedMessage = "Missing required field: DownField(bibIds)"
+      expectedMessage = "DecodingFailure at .bibIds: Missing required field"
     )
   }
 
@@ -59,7 +59,7 @@ class SierraItemRecordTest
     assertCreatingFromDataFails(
       data = """{"bibIds":[1,2,3]}""",
       expectedMessage =
-        "Got value '1' with wrong type, expecting string: DownArray,DownField(bibIds)"
+        "DecodingFailure at .bibIds[0]: Got value '1' with wrong type, expecting string"
     )
   }
 
@@ -67,7 +67,7 @@ class SierraItemRecordTest
     assertCreatingFromDataFails(
       data = """{"bibIds":"blah"}""",
       expectedMessage =
-        "Got value '\"blah\"' with wrong type, expecting array: DownField(bibIds)"
+        "DecodingFailure at .bibIds: Got value '\"blah\"' with wrong type, expecting array"
     )
   }
 
