@@ -4,6 +4,8 @@ import akka.Done
 import akka.stream.Materializer
 import akka.stream.scaladsl._
 import grizzled.slf4j.Logging
+import io.circe.Decoder
+import io.circe.generic.semiauto.deriveDecoder
 import software.amazon.awssdk.services.sqs.model.{Message => SQSMessage}
 import weco.json.JsonUtil._
 import weco.messaging.MessageSender
@@ -43,6 +45,8 @@ class CalmAdapterWorkerService[Destination](
     with Logging {
 
   type Key = Version[String, Int]
+
+  implicit val decoder: Decoder[CalmQuery] = deriveDecoder
 
   /** Encapsulates context to pass along each akka-stream stage. Newer versions
     * of akka-streams have the asSourceWithContext/ asFlowWithContext idioms for
