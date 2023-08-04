@@ -1,7 +1,7 @@
 package weco.pipeline.calm_api_client
 
-import io.circe.{Decoder, Encoder}
-import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
+//import io.circe.{Decoder, Encoder}
+//import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -17,24 +17,24 @@ import java.time.format.DateTimeFormatter
  * Where this fits into a SOAP query is documented here:
  * https://wt-calm.wellcome.ac.uk/CalmAPI/help/example_search.htm
  */
-sealed trait CalmQuery {
+sealed trait CalmQueryBase {
   def queryExpression: String
 }
 
 // Query leaves become expressions like `(key=value)` in full queries
-case class QueryLeaf(
-  key: String,
-  value: String,
-  relationalOperator: String = "="
-) extends CalmQuery {
+class QueryLeaf(
+  val key: String,
+  val value: String,
+  val relationalOperator: String = "="
+) extends CalmQueryBase {
   def queryExpression: String = s"($key$relationalOperator$value)"
 }
 // Query nodes join query leaves together with booleans like `(a=b)OR(c=d)`
-case class QueryNode(
-  left: CalmQuery,
-  right: CalmQuery,
-  logicalOperator: String = "OR"
-) extends CalmQuery {
+class QueryNode(
+  val left: CalmQueryBase,
+  val right: CalmQueryBase,
+  val logicalOperator: String = "OR"
+) extends CalmQueryBase {
   def queryExpression: String =
     left.queryExpression + logicalOperator + right.queryExpression
 }
@@ -45,40 +45,66 @@ object QueryLeaf {
 }
 
 object QueryNode {
-  def unapply(q: QueryNode): Option[(CalmQuery, CalmQuery, String)] =
+  def unapply(q: QueryNode): Option[(CalmQueryBase, CalmQueryBase, String)] =
     Some((q.left, q.right, q.logicalOperator))
 }
 
+object CalmQueryBase {
+  implicit class CalmQueryOps(queryA: CalmQueryBase) {
+    def or(queryB: CalmQueryBase): CalmQueryBase = new QueryNode(
+      left = queryA,
+      right = queryB,
+      logicalOperator = "OR"
+    )
+
+    def and(queryB: CalmQueryBase): CalmQueryBase = new QueryNode(
+      left = queryA,
+      right = queryB,
+      logicalOperator = "AND"
+    )
+  }
+}
+
+sealed trait CalmQuery extends CalmQueryBase
 object CalmQuery {
   // (Modified=<date>)
-  def ModifiedDate(date: LocalDate) =
-    new QueryLeaf(key = "Modified", value = formatDate(date))
+  case class ModifiedDate(date: LocalDate)
+      extends QueryLeaf(key = "Modified", value = formatDate(date))
+      with CalmQuery
 
   // (Created=<date>)
-  def CreatedDate(date: LocalDate) =
-    new QueryLeaf(key = "Created", value = formatDate(date))
+  case class CreatedDate(date: LocalDate)
+      extends QueryLeaf(key = "Created", value = formatDate(date))
+      with CalmQuery
 
   // (Modified=<date>)OR(Created=<date>)
-  def CreatedOrModifiedDate(date: LocalDate) = new QueryNode(
-    left = CreatedDate(date),
-    right = ModifiedDate(date),
-    logicalOperator = "OR"
-  )
+  case class CreatedOrModifiedDate(date: LocalDate)
+      extends QueryNode(
+        left = CreatedDate(date),
+        right = ModifiedDate(date),
+        logicalOperator = "OR"
+      )
+      with CalmQuery
 
   // (Created!=*)AND(Modified!=*)
-  def EmptyCreatedAndModifiedDate = new QueryNode(
-    left = emptyKey("Created"),
-    right = emptyKey("Modified"),
-    logicalOperator = "AND"
-  )
+  case object EmptyCreatedAndModifiedDate
+      extends QueryNode(
+        left = emptyKey("Created"),
+        right = emptyKey("Modified"),
+        logicalOperator = "AND"
+      )
+      with CalmQuery
 
   // (RefNo=refNo)
-  def RefNo(refNo: String) = new QueryLeaf(key = "RefNo", value = refNo)
+  case class RefNo(refNo: String)
+      extends QueryLeaf(key = "RefNo", value = refNo)
+      with CalmQuery
 
   // RecordId queries need to have double quotes for some reason
   // (RecordId="<id>")
-  def RecordId(id: String) =
-    new QueryLeaf(key = "RecordId", value = s""""$id"""")
+  case class RecordId(id: String)
+      extends QueryLeaf(key = "RecordId", value = s""""$id"""")
+      with CalmQuery
 
   // (key!=*)
   def emptyKey(key: String) =
@@ -87,21 +113,4 @@ object CalmQuery {
   def formatDate(date: LocalDate): String =
     date.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
 
-  implicit class CalmQueryOps(queryA: CalmQuery) {
-    def or(queryB: CalmQuery): CalmQuery = new QueryNode(
-      left = queryA,
-      right = queryB,
-      logicalOperator = "OR"
-    )
-
-    def and(queryB: CalmQuery): CalmQuery = new QueryNode(
-      left = queryA,
-      right = queryB,
-      logicalOperator = "AND"
-    )
-  }
-
-  // For some reason Circe no longer tolerates auto-deriving these
-  implicit val calmQueryDecoder: Decoder[CalmQuery] = deriveDecoder[CalmQuery]
-  implicit val calmQueryEncoder: Encoder[CalmQuery] = deriveEncoder[CalmQuery]
 }

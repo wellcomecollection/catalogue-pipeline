@@ -23,7 +23,7 @@ trait CalmXmlRequest {
     </soap12:Envelope>
 }
 
-case class CalmSearchRequest(query: CalmQuery, dbName: String = "Catalog")
+case class CalmSearchRequest(query: CalmQueryBase, dbName: String = "Catalog")
     extends CalmXmlRequest {
   type Response = CalmSession
   val action = "Search"

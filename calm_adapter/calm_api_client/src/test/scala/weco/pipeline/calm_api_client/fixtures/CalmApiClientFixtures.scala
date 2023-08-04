@@ -13,7 +13,7 @@ import weco.pipeline.calm_api_client.{
   CalmAbandonRequest,
   CalmApiClient,
   CalmHttpResponseParser,
-  CalmQuery,
+  CalmQueryBase,
   CalmSearchRequest,
   CalmSession,
   CalmSummaryRequest,
@@ -43,9 +43,9 @@ trait CalmApiClientFixtures extends Akka {
     }
 
   def withTestCalmApiClient[R](
-    handleSearch: CalmQuery => CalmSession = _ => throw new NotImplementedError,
-    handleSummary: Int => CalmRecord = _ => throw new NotImplementedError,
-    handleAbandon: Cookie => Done = _ => throw new NotImplementedError,
+                                handleSearch: CalmQueryBase => CalmSession = _ => throw new NotImplementedError,
+                                handleSummary: Int => CalmRecord = _ => throw new NotImplementedError,
+                                handleAbandon: Cookie => Done = _ => throw new NotImplementedError,
   )(testWith: TestWith[TestCalmApiClient, R]): R =
     withMaterializer { mat =>
       testWith(
@@ -83,9 +83,9 @@ trait CalmApiClientFixtures extends Akka {
   }
 
   class TestCalmApiClient(
-    handleSearch: CalmQuery => CalmSession,
-    handleSummary: Int => CalmRecord,
-    handleAbandon: Cookie => Done
+                           handleSearch: CalmQueryBase => CalmSession,
+                           handleSummary: Int => CalmRecord,
+                           handleAbandon: Cookie => Done
   ) extends CalmApiClient {
     var requests: List[(CalmXmlRequest, Option[Cookie])] = Nil
 

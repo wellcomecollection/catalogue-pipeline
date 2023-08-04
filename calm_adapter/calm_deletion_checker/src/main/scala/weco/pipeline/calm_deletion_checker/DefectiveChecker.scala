@@ -1,9 +1,8 @@
 package weco.pipeline.calm_deletion_checker
 
 import grizzled.slf4j.Logging
-import weco.pipeline.calm_api_client.CalmApiClient
+import weco.pipeline.calm_api_client.{CalmApiClient, CalmQuery, CalmQueryBase, CalmSession}
 import weco.catalogue.source_model.CalmSourcePayload
-import weco.pipeline.calm_api_client.{CalmApiClient, CalmQuery, CalmSession}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -74,7 +73,7 @@ class ApiDeletionChecker(calmApiClient: CalmApiClient)(
         .search(
           records
             .map(record => CalmQuery.RecordId(record.id))
-            .reduce[CalmQuery](_ or _)
+            .reduce[CalmQueryBase](_ or _)
         )
       // Performing a search creates a new session which we'll never use.
       // Abandon it here to give the Calm API a chance.

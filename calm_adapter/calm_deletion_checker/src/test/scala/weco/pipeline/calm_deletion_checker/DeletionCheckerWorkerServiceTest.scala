@@ -16,7 +16,7 @@ import weco.catalogue.source_model.CalmSourcePayload
 import weco.catalogue.source_model.generators.CalmRecordGenerators
 import weco.catalogue.source_model.Implicits._
 import weco.pipeline.calm_api_client.{
-  CalmQuery,
+  CalmQueryBase,
   CalmSession,
   QueryLeaf,
   QueryNode
@@ -127,7 +127,7 @@ class DeletionCheckerWorkerServiceTest
   it("sends messages to the DLQ if checking for deletions fails") {
     val storeRecords = (1 to 10).map(_ => createCalmRecord)
     val badRecordIds = randomSample(storeRecords, size = 2).map(_.id).toSet
-    val handleSearch = (q: CalmQuery) => {
+    val handleSearch = (q: CalmQueryBase) => {
       val queryIds = recordIds(q).toSet
       if ((queryIds intersect badRecordIds).nonEmpty) {
         throw new RuntimeException("boom!")
@@ -236,8 +236,8 @@ class DeletionCheckerWorkerServiceTest
         }
     }
 
-  def searchHandler(idsInApi: Set[String]): CalmQuery => CalmSession =
-    (q: CalmQuery) => {
+  def searchHandler(idsInApi: Set[String]): CalmQueryBase => CalmSession =
+    (q: CalmQueryBase) => {
       val extantRecordsInQuery = recordIds(q).toSet intersect idsInApi
       CalmSession(
         numHits = extantRecordsInQuery.size,
@@ -247,7 +247,7 @@ class DeletionCheckerWorkerServiceTest
 
   def abandonHandler: Cookie => Done = _ => Done
 
-  def recordIds(q: CalmQuery): Seq[String] = q match {
+  def recordIds(q: CalmQueryBase): Seq[String] = q match {
     case QueryLeaf("RecordId", id, _) => Seq(
       // Strip quotes from the query
       id.replace("\"", "")
