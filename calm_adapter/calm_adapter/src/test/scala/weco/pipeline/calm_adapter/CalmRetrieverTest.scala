@@ -27,44 +27,49 @@ class CalmRetrieverTest
 
   it("retrieves a list of CALM records from the API") {
     val existingRecords = List("1", "2").map(calmRecordWithId)
-    withMaterializer { implicit materializer =>
-      withCalmRetriever(existingRecords) {
-        case (calmRetriever, _) =>
-          whenReady(calmRetriever(query).runWith(Sink.seq[CalmRecord])) {
-            records =>
-              records shouldBe existingRecords
-          }
-      }
+    withMaterializer {
+      implicit materializer =>
+        withCalmRetriever(existingRecords) {
+          case (calmRetriever, _) =>
+            whenReady(calmRetriever(query).runWith(Sink.seq[CalmRecord])) {
+              records =>
+                records shouldBe existingRecords
+            }
+        }
     }
   }
 
   it("uses the cookie from the first response for subsequent API requests") {
     val existingRecords = List("1", "2").map(calmRecordWithId)
-    withMaterializer { implicit materializer =>
-      withCalmRetriever(existingRecords) {
-        case (calmRetriever, apiClient) =>
-          whenReady(calmRetriever(query).runWith(Sink.seq[CalmRecord])) { _ =>
-            val requestCookies = apiClient.requests.map {
-              case (_, requestCookie) => requestCookie
+    withMaterializer {
+      implicit materializer =>
+        withCalmRetriever(existingRecords) {
+          case (calmRetriever, apiClient) =>
+            whenReady(calmRetriever(query).runWith(Sink.seq[CalmRecord])) {
+              _ =>
+                val requestCookies = apiClient.requests.map {
+                  case (_, requestCookie) => requestCookie
+                }
+                every(requestCookies.tail) shouldBe Some(cookie)
             }
-            every(requestCookies.tail) shouldBe Some(cookie)
-          }
-      }
+        }
     }
   }
 
   it("uses num hits from the first response for subsequent API requests") {
     val existingRecords = List("1", "2", "3").map(calmRecordWithId)
-    withMaterializer { implicit materializer =>
-      withCalmRetriever(existingRecords) {
-        case (calmRetriever, apiClient) =>
-          whenReady(calmRetriever(query).runWith(Sink.seq[CalmRecord])) { _ =>
-            val hitPositions = apiClient.requests.collect {
-              case (req: CalmSummaryRequest, _) => req.pos
+    withMaterializer {
+      implicit materializer =>
+        withCalmRetriever(existingRecords) {
+          case (calmRetriever, apiClient) =>
+            whenReady(calmRetriever(query).runWith(Sink.seq[CalmRecord])) {
+              _ =>
+                val hitPositions = apiClient.requests.collect {
+                  case (req: CalmSummaryRequest, _) => req.pos
+                }
+                hitPositions should contain theSameElementsAs List(0, 1, 2)
             }
-            hitPositions should contain theSameElementsAs List(0, 1, 2)
-          }
-      }
+        }
     }
   }
 
@@ -78,13 +83,15 @@ class CalmRetrieverTest
     retrievedAt = randomInstant
   )
 
-  def withCalmRetriever[R](records: List[CalmRecord])(
-    testWith: TestWith[(CalmRetriever, TestCalmApiClient), R]): R = {
+  def withCalmRetriever[R](
+    records: List[CalmRecord]
+  )(testWith: TestWith[(CalmRetriever, TestCalmApiClient), R]): R = {
     withTestCalmApiClient(
       handleSearch = _ => CalmSession(records.length, cookie),
       handleSummary = recordIndex => records(recordIndex)
-    ) { apiClient =>
-      testWith((new ApiCalmRetriever(apiClient), apiClient))
+    ) {
+      apiClient =>
+        testWith((new ApiCalmRetriever(apiClient), apiClient))
     }
   }
 }

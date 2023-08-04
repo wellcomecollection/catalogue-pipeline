@@ -26,7 +26,7 @@ import weco.catalogue.source_model.calm.CalmRecord
 import weco.catalogue.source_model.fixtures.SourceVHSFixture
 import weco.catalogue.source_model.store.SourceVHS
 import weco.catalogue.source_model.Implicits._
-import weco.pipeline.calm_api_client.CalmQuery
+import weco.pipeline.calm_api_client.{CalmQuery, CalmQueryBase}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
@@ -130,7 +130,7 @@ class CalmAdapterWorkerServiceTest
 
   it("sends the message to the DLQ if publishing of any record fails") {
     val retriever = new CalmRetriever {
-      def apply(query: CalmQuery): Source[CalmRecord, NotUsed] = {
+      def apply(query: CalmQueryBase): Source[CalmRecord, NotUsed] = {
         val timestamp = Instant.now
         val records = List(
           CalmRecord("A", Map.empty, timestamp),
@@ -195,8 +195,8 @@ class CalmAdapterWorkerServiceTest
 
   def calmRetriever(records: List[CalmRecord]) =
     new CalmRetriever {
-      var previousQuery: Option[CalmQuery] = None
-      def apply(query: CalmQuery): Source[CalmRecord, NotUsed] = {
+      var previousQuery: Option[CalmQueryBase] = None
+      def apply(query: CalmQueryBase): Source[CalmRecord, NotUsed] = {
         previousQuery = Some(query)
         Source(records)
       }

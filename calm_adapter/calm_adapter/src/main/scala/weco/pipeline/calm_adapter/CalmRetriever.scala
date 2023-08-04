@@ -7,13 +7,13 @@ import weco.catalogue.source_model.calm.CalmRecord
 import weco.pipeline.calm_api_client.{
   CalmApiClient,
   CalmHttpResponseParser,
-  CalmQuery,
+  CalmQueryBase,
   CalmSession,
   CalmSummaryRequest
 }
 
 trait CalmRetriever {
-  def apply(query: CalmQuery): Source[CalmRecord, NotUsed]
+  def apply(query: CalmQueryBase): Source[CalmRecord, NotUsed]
 }
 
 class ApiCalmRetriever(
@@ -23,7 +23,7 @@ class ApiCalmRetriever(
 ) extends CalmRetriever
     with Logging {
 
-  def apply(query: CalmQuery): Source[CalmRecord, NotUsed] =
+  def apply(query: CalmQueryBase): Source[CalmRecord, NotUsed] =
     Source
       .future(apiClient.search(query))
       .mapConcat {
