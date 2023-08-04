@@ -1,7 +1,5 @@
 package weco.pipeline.calm_api_client
 
-//import io.circe.{Decoder, Encoder}
-//import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
