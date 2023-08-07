@@ -10,7 +10,7 @@ import weco.messaging.MessageSender
 import weco.messaging.sns.NotificationMessage
 import weco.messaging.sqs.SQSStream
 import weco.storage.Version
-import weco.storage.s3.S3ObjectLocation
+import weco.storage.providers.s3.S3ObjectLocation
 import weco.typesafe.Runnable
 import weco.catalogue.source_model.CalmSourcePayload
 import weco.catalogue.source_model.calm.CalmRecord

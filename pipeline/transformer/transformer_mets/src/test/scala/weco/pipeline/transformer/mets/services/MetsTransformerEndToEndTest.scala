@@ -19,7 +19,7 @@ import weco.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 import weco.pipeline_storage.memory.{MemoryIndexer, MemoryRetriever}
 import weco.sierra.generators.SierraIdentifierGenerators
 import weco.storage.generators.S3ObjectLocationGenerators
-import weco.storage.s3.{S3ObjectLocation, S3ObjectLocationPrefix}
+import weco.storage.providers.s3.{S3ObjectLocation, S3ObjectLocationPrefix}
 import weco.storage.store.memory.MemoryTypedStore
 
 import java.time.Instant

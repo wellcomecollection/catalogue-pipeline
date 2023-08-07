@@ -5,7 +5,7 @@ import weco.catalogue.source_model.miro.MiroSourceOverrides
 import weco.pipeline.transformer.SourceDataRetriever
 import weco.pipeline.transformer.miro.models.MiroMetadata
 import weco.pipeline.transformer.miro.source.MiroRecord
-import weco.storage.s3.S3ObjectLocation
+import weco.storage.providers.s3.S3ObjectLocation
 import weco.storage.store.Readable
 import weco.storage.{Identified, ReadError, Version}
 

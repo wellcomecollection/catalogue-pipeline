@@ -3,7 +3,7 @@ package weco.pipeline.transformer.sierra.services
 import weco.catalogue.source_model.SierraSourcePayload
 import weco.catalogue.source_model.sierra.SierraTransformable
 import weco.pipeline.transformer.SourceDataRetriever
-import weco.storage.s3.S3ObjectLocation
+import weco.storage.providers.s3.S3ObjectLocation
 import weco.storage.store.Readable
 import weco.storage.{Identified, ReadError, Version}
 

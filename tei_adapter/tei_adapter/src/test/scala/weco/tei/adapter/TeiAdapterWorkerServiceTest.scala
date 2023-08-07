@@ -12,7 +12,7 @@ import weco.messaging.memory.MemoryMessageSender
 import weco.messaging.sns.NotificationMessage
 import weco.messaging.sqs.SQSStream
 import weco.storage.Version
-import weco.storage.s3.S3ObjectLocation
+import weco.storage.providers.s3.S3ObjectLocation
 import weco.storage.store.memory.MemoryVersionedStore
 import weco.catalogue.source_model.TeiSourcePayload
 import weco.catalogue.source_model.tei.{

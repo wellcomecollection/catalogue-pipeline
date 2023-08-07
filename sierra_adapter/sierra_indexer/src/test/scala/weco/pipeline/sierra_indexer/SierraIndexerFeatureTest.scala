@@ -7,7 +7,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.messaging.fixtures.SQS.QueuePair
 import weco.storage.generators.S3ObjectLocationGenerators
-import weco.storage.s3.S3ObjectLocation
+import weco.storage.providers.s3.S3ObjectLocation
 import weco.storage.store.memory.MemoryTypedStore
 import weco.catalogue.source_model.SierraSourcePayload
 import weco.catalogue.source_model.generators.SierraRecordGenerators

@@ -6,7 +6,7 @@ import weco.catalogue.internal_model.work.generators.WorkGenerators
 import weco.catalogue.internal_model.work.{Work, WorkData}
 import weco.catalogue.source_model.CalmSourcePayload
 import weco.pipeline.transformer.{SourceDataRetriever, Transformer}
-import weco.storage.s3.S3ObjectLocation
+import weco.storage.providers.s3.S3ObjectLocation
 import weco.storage.store.VersionedStore
 import weco.storage.{Identified, ReadError, Version}
 

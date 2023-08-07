@@ -1,6 +1,6 @@
 package weco.pipeline.mets_adapter.models
 
-import weco.storage.s3.S3ObjectLocationPrefix
+import weco.storage.providers.s3.S3ObjectLocationPrefix
 
 import java.time.Instant
 import weco.catalogue.source_model.mets.{

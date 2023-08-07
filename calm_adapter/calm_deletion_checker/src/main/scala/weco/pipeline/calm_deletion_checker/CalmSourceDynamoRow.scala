@@ -1,6 +1,6 @@
 package weco.pipeline.calm_deletion_checker
 
-import weco.storage.s3.S3ObjectLocation
+import weco.storage.providers.s3.S3ObjectLocation
 import weco.catalogue.source_model.CalmSourcePayload
 
 case class CalmSourceDynamoRow(

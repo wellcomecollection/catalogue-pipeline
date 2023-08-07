@@ -18,7 +18,7 @@ import weco.pipeline.transformer.calm.models.CalmSourceData
 import weco.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 import weco.pipeline_storage.memory.{MemoryIndexer, MemoryRetriever}
 import weco.storage.generators.S3ObjectLocationGenerators
-import weco.storage.s3.S3ObjectLocation
+import weco.storage.providers.s3.S3ObjectLocation
 import weco.storage.store.memory.MemoryTypedStore
 
 import scala.collection.mutable

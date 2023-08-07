@@ -10,7 +10,7 @@ import weco.storage.Version
 import weco.storage.fixtures.DynamoFixtures
 import weco.storage.generators.S3ObjectLocationGenerators
 import weco.storage.maxima.Maxima
-import weco.storage.s3.S3ObjectLocation
+import weco.storage.providers.s3.S3ObjectLocation
 import weco.storage.store.dynamo.DynamoHashStore
 import weco.storage.store.memory.MemoryTypedStore
 import weco.storage.store.{

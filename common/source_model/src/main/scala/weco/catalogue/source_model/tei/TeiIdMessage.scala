@@ -1,6 +1,6 @@
 package weco.catalogue.source_model.tei
 
-import weco.storage.s3.S3ObjectLocation
+import weco.storage.providers.s3.S3ObjectLocation
 
 import java.time.Instant
 // Represents a message for the tei_adapter with changes to id instead of file path

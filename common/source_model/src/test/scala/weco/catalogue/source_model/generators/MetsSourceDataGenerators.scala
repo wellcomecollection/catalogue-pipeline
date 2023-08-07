@@ -2,7 +2,7 @@ package weco.catalogue.source_model.generators
 
 import java.time.Instant
 import weco.storage.generators.S3ObjectLocationGenerators
-import weco.storage.s3.S3ObjectLocationPrefix
+import weco.storage.providers.s3.S3ObjectLocationPrefix
 import weco.catalogue.source_model.mets.MetsFileWithImages
 
 trait MetsSourceDataGenerators extends S3ObjectLocationGenerators {

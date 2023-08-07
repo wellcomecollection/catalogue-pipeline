@@ -10,7 +10,7 @@ import weco.json.JsonUtil.fromJson
 import weco.messaging.sns.NotificationMessage
 import weco.messaging.sqs.SQSStream
 import weco.storage.Identified
-import weco.storage.s3.S3ObjectLocation
+import weco.storage.providers.s3.S3ObjectLocation
 import weco.storage.store.Readable
 import weco.typesafe.Runnable
 import weco.catalogue.source_model.SierraSourcePayload
