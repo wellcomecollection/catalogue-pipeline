@@ -16,7 +16,7 @@ import weco.fixtures.TestWith
 import weco.messaging.fixtures.SQS
 import weco.messaging.fixtures.SQS.Queue
 import weco.messaging.sns.NotificationMessage
-import weco.storage.s3.S3ObjectLocation
+import weco.storage.providers.s3.S3ObjectLocation
 import weco.storage.store.memory.MemoryTypedStore
 import weco.catalogue.source_model.sierra.SierraTransformable
 import weco.pipeline.sierra_indexer.services.Worker

@@ -4,7 +4,7 @@ import scalikejdbc.TxBoundary.Try._
 import scalikejdbc._
 import weco.catalogue.source_model.Implicits._
 import weco.messaging.MessageSender
-import weco.storage.s3.S3ObjectLocation
+import weco.storage.providers.s3.S3ObjectLocation
 import weco.storage.store.Writable
 import weco.catalogue.source_model.tei.{
   TeiIdChangeMessage,

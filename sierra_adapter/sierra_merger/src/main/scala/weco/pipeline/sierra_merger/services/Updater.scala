@@ -8,7 +8,7 @@ import weco.catalogue.source_model.sierra.{
 import weco.catalogue.source_model.store.SourceVHS
 import weco.pipeline.sierra_merger.models.{RecordOps, TransformableOps}
 import weco.sierra.models.identifiers.SierraBibNumber
-import weco.storage.s3.S3ObjectLocation
+import weco.storage.providers.s3.S3ObjectLocation
 import weco.storage.{Identified, StorageError, UpdateNotApplied, Version}
 
 class Updater[Record <: AbstractSierraRecord[_]](

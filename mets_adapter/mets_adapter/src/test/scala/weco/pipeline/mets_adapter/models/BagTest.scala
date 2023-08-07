@@ -2,7 +2,7 @@ package weco.pipeline.mets_adapter.models
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.storage.s3.S3ObjectLocationPrefix
+import weco.storage.providers.s3.S3ObjectLocationPrefix
 
 import java.time.Instant
 import weco.catalogue.source_model.mets.{DeletedMetsFile, MetsFileWithImages}
