@@ -29,39 +29,13 @@ def deploy_to(root, pipeline_date):
     )
 
 
-def get_pipeline_names_from_terraform_file(root):
-    with open(f"{root}/pipeline/terraform/main.tf", "r") as maintf:
-        return get_pipeline_names_from_terraform_data(maintf.read())
-
-
-def get_pipeline_names_from_terraform_data(tf_data):
-    """
-    returns any pipeline date definitions found in a terraform file
-    >>> get_pipeline_names_from_terraform_data('\t"1999-12-25" = {')
-    ['1999-12-25']
-
-    ignores other lines
-    >>> get_pipeline_names_from_terraform_data('''
-    ... locals {
-    ... pipelines = {
-    ... "1999-12-25" = {
-    ... listen_to_reindexer      = false
-    ... scale_up_tasks           = false
-    ... scale_up_elastic_cluster = false
-    ... scale_up_id_minter_db    = false
-    ... scale_up_matcher_db      = false
-    ... }
-    ...
-    ... "2022-12-25" = {
-    ... listen_to_reindexer      = true
-    ... }
-    ... ''')
-    ['1999-12-25', '2022-12-25']
-    """
-    pipeline_date_regex = re.compile(
-        r'^\s*"(?P<date>\d\d\d\d-\d\d-\d\d)" = {', re.MULTILINE
-    )
-    return pipeline_date_regex.findall(tf_data)
+def get_pipeline_names_from_terraform_dir(root):
+    tf_dir = f"{root}/pipeline/terraform"
+    pipeline_date_regex = re.compile(r"^(?P<date>\d\d\d\d-\d\d-\d\d)")
+    subdirectories = [
+        file for file in os.listdir(tf_dir) if os.path.isdir(os.path.join(tf_dir, file))
+    ]
+    return [dir for dir in subdirectories if pipeline_date_regex.match(dir)]
 
 
 if __name__ == "__main__":
@@ -83,7 +57,7 @@ if __name__ == "__main__":
         .decode("utf8")
         .strip()
     )
-    candidate_pipelines = get_pipeline_names_from_terraform_file(root)
+    candidate_pipelines = get_pipeline_names_from_terraform_dir(root)
     print(f"possible existing pipelines are: {', '.join(candidate_pipelines)}")
     latest_pipeline = sorted(candidate_pipelines, reverse=True)[0]
     print(f"most recent pipeline is: {latest_pipeline}")

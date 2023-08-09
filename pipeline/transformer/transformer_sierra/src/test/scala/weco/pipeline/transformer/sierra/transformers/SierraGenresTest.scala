@@ -67,6 +67,29 @@ class SierraGenresTest
       }
     }
 
+    it("does not return genres with an empty label") {
+      val bibData = createSierraBibDataWith(
+        varFields = List(
+          VarField(
+            marcTag = "655",
+            subfields = List(
+              Subfield(tag = "2", content = "rbgenr"),
+            )
+          ),
+          VarField(
+            marcTag = "655",
+            subfields = List(
+              Subfield(tag = "a", content = "A2 Content"),
+              Subfield(tag = "v", content = "V2 Content")
+            )
+          )
+        )
+      )
+      val result = SierraGenres(bibData)
+      result should have length 1
+      result.head.label shouldBe "A2 Content - V2 Content"
+    }
+
     it("deduplicates transformed genres") {
       info(
         """

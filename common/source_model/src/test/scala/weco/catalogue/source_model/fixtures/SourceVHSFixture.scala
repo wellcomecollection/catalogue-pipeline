@@ -5,7 +5,7 @@ import weco.storage.Version
 import weco.storage.generators.S3ObjectLocationGenerators
 import weco.storage.maxima.Maxima
 import weco.storage.maxima.memory.MemoryMaxima
-import weco.storage.s3.S3ObjectLocation
+import weco.storage.providers.s3.S3ObjectLocation
 import weco.storage.store.{
   HybridStoreWithMaxima,
   Store,

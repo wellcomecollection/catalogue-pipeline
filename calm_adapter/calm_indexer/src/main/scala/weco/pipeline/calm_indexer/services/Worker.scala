@@ -12,7 +12,7 @@ import weco.messaging.sns.NotificationMessage
 import weco.messaging.sqs.SQSStream
 import weco.pipeline.calm_indexer.index.CalmIndexConfig
 import weco.storage.Identified
-import weco.storage.s3.S3ObjectLocation
+import weco.storage.providers.s3.S3ObjectLocation
 import weco.storage.store.Readable
 import weco.typesafe.Runnable
 

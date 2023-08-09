@@ -4,7 +4,7 @@ import weco.catalogue.source_model.CalmSourcePayload
 import weco.catalogue.source_model.calm.CalmRecord
 import weco.pipeline.transformer.SourceDataRetriever
 import weco.pipeline.transformer.calm.models.CalmSourceData
-import weco.storage.s3.S3ObjectLocation
+import weco.storage.providers.s3.S3ObjectLocation
 import weco.storage.store.Readable
 import weco.storage.{Identified, ReadError, Version}
 

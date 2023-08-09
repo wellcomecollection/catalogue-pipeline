@@ -8,7 +8,7 @@ import weco.fixtures.LocalResources
 import weco.pipeline.transformer.mets.generators.MetsGenerators
 import weco.pipeline.transformer.result.Result
 import weco.sierra.generators.SierraIdentifierGenerators
-import weco.storage.s3.{S3ObjectLocation, S3ObjectLocationPrefix}
+import weco.storage.providers.s3.{S3ObjectLocation, S3ObjectLocationPrefix}
 import weco.storage.store.memory.MemoryStore
 
 import java.time.Instant

@@ -5,7 +5,7 @@ import scalikejdbc._
 import weco.fixtures.TestWith
 import weco.messaging.memory.MemoryMessageSender
 import weco.storage.fixtures.S3Fixtures.Bucket
-import weco.storage.s3.S3ObjectLocation
+import weco.storage.providers.s3.S3ObjectLocation
 import weco.storage.store.memory.MemoryStore
 import weco.catalogue.tei.id_extractor.PathIdManager.insertPathId
 import weco.catalogue.tei.id_extractor.database.PathIdTable

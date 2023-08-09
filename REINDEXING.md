@@ -11,47 +11,17 @@ To run a reindex follow these steps:
 
 ### Terraform a new pipeline
 
-You will now need to create a new pipeline module in [./pipeline/terraform/main.tf](./pipeline/terraform/main.tf).
+Copy one of the per-pipeline folders in `pipeline/terraform` – these are labelled with the date of the pipeline.
+Rename the new folder with the date of your pipeline (usually the current date).
 
-Copy and paste an existing pipeline making sure to update the new pipeline:
+Update the `reindexing_state` variables in `main.tf` – you want them all to be `true` if you're about to do a complete reindex, as this adds extra capacity and scaling to the pipeline.
 
-- `key`: References secrets required to access ES and to sets internal infrastructure labels, and sets the ECR label to use on the service deployment images, created in the above deployment process. Set to pipeline deployment date.
-- `value`: Sets ES cluster/service scaling limits while reindexing, and connects reindexing topics. Enabling this will incur above normal costs for a pipeline.
-
-See the following example:
-
-```tf
-locals {
-  pipelines = {
-    // existing pipeline
-    "2023-06-09" = {
-      listen_to_reindexer      = false
-      scale_up_tasks           = false
-      scale_up_elastic_cluster = false
-      scale_up_id_minter_db    = false
-      scale_up_matcher_db      = false
-    },
-    // pipeline to create and reindex
-    "2023-06-26" = {
-      // connect reindexing topics
-      listen_to_reindexer      = true 
-      // scale up to handle reindexing the whole catalogue
-      scale_up_tasks           = true 
-      scale_up_elastic_cluster = true
-      scale_up_id_minter_db    = true
-      scale_up_matcher_db      = true
-    }
-  }
-}
-```
-NOTE: once the reindexing of the new pipeline has completed, change `true` to `false` then `terraform apply` the changes to scale ES clusters/services down. 
+NOTE: once the reindexing of the new pipeline has completed, change `true` to `false` then `terraform apply` the changes to scale ES clusters/services down.
 ⚠️ This can only be performed once a day so time it right!
-
-
 
 Remember to create a pull request with this change.
 
-You can now run `terraform` in  [./pipeline/terraform](./pipeline/terraform):
+You can now run `terraform` inside the folder you've created:
 
 ```
 # Use the run_terraform.sh script to get Elastic Cloud credentials

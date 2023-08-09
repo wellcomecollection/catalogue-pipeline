@@ -25,7 +25,7 @@ trait CalmApiClient {
   ): Future[Request#Response]
 
   def search(
-    query: CalmQuery,
+    query: CalmQueryBase,
     cookie: Option[Cookie] = None
   ): Future[CalmSession] =
     request(request = CalmSearchRequest(query), cookie = cookie)

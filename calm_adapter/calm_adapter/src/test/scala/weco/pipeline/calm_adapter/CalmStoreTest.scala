@@ -3,7 +3,7 @@ package weco.pipeline.calm_adapter
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.{Assertion, EitherValues}
-import weco.storage.s3.S3ObjectLocation
+import weco.storage.providers.s3.S3ObjectLocation
 import weco.storage.{Identified, Version}
 import weco.catalogue.source_model.calm.CalmRecord
 import weco.catalogue.source_model.fixtures.SourceVHSFixture
