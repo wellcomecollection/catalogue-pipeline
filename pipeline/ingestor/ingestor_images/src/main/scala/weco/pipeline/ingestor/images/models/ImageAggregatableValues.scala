@@ -1,12 +1,8 @@
 package weco.pipeline.ingestor.images.models
+
 import io.circe.generic.extras.JsonKey
 import weco.catalogue.internal_model.identifiers.DataState
-import weco.catalogue.internal_model.image.{
-  Image,
-  ImageSource,
-  ImageState,
-  ParentWork
-}
+import weco.catalogue.internal_model.image.{ImageSource, ParentWork}
 import weco.catalogue.internal_model.work.WorkData
 import weco.pipeline.ingestor.common.models.AggregatableValues
 
@@ -22,13 +18,6 @@ case object ImageAggregatableValues extends AggregatableValues {
     source match {
       case ParentWork(_, workData, _) => fromWorkData(workData)
     }
-
-  def apply(image: Image[ImageState.Augmented]): ImageAggregatableValues = {
-    val workValues = this(image.source)
-    workValues.copy(
-      licenses = workValues.licenses ++ image.licenseAggregatableValues
-    )
-  }
 
   private def fromWorkData(
     workData: WorkData[DataState.Identified]
