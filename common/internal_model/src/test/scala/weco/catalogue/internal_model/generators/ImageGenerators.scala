@@ -61,8 +61,22 @@ trait ImageGenerators
     )
   )
 
-  def createMetsImageData = createImageDataWith(
-    locations = List(createImageLocation, createManifestLocation),
+  def createMetsImageData: ImageData[IdState.Identifiable] =
+    createMetsImageDataWith(locationLicence = Some(License.CCBY))
+
+  def createMetsImageDataWith(
+    locationLicence: Option[License]
+  ): ImageData[IdState.Identifiable] = createImageDataWith(
+    locations = List(
+      createDigitalLocationWith(
+        locationType = LocationType.IIIFImageAPI,
+        license = locationLicence
+      ),
+      createDigitalLocationWith(
+        locationType = LocationType.IIIFPresentationAPI,
+        license = locationLicence
+      )
+    ),
     identifierType = IdentifierType.METSImage
   )
 
