@@ -1,9 +1,10 @@
 package weco.pipeline.merger.models
 
+import grizzled.slf4j.Logging
 import weco.catalogue.internal_model.image.ImageData
 import weco.catalogue.internal_model.locations.License
 
-case class MergerImageData[State](imageData: ImageData[State]) {
+case class MergerImageData[State](imageData: ImageData[State]) extends Logging {
   def copyLicenceFrom(
     sources: Seq[ImageData[State]]
   ): ImageData[State] = {
@@ -12,8 +13,14 @@ case class MergerImageData[State](imageData: ImageData[State]) {
       // The purpose of this is to harmonise the licences on a work when the source overrides the target
       // if there are multiple conflicting sources, then we might as well leave it as it is.
       case Seq(licence) => insertLicence(licence)
-      case _ =>
-        imageData // Probably log that nothing has changed, particularly if there are more than one licence
+      case Nil =>
+        info("no source licences present, leaving original licence")
+        imageData
+      case seq: Seq[License] =>
+        warn(
+          s"multiple source licences present: ${seq.mkString(", ")}, cannot choose, leaving original licence"
+        )
+        imageData
     }
   }
 
