@@ -67,9 +67,8 @@ class ImagesIngestorFeatureTest
                 inferredData = image.state.inferredData,
                 source = image.source
               )
-
               storedImage.aggregatableValues shouldBe ImageAggregatableValues(
-                image
+                image.source
               )
 
               storedJson shouldBe expectedJson

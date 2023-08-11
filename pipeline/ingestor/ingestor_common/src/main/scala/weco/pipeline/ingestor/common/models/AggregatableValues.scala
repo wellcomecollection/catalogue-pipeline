@@ -7,7 +7,6 @@ import weco.catalogue.display_model.languages.DisplayLanguage
 import weco.catalogue.display_model.locations.DisplayLicense
 import weco.catalogue.display_model.work._
 import weco.catalogue.internal_model.identifiers.DataState
-import weco.catalogue.internal_model.image.{Image, ImageState}
 import weco.catalogue.internal_model.languages.MarcLanguageCodeList
 import weco.catalogue.internal_model.work.{Availability, WorkData}
 
@@ -24,13 +23,6 @@ import java.time.{LocalDate, ZoneOffset}
   * https://github.com/wellcomecollection/docs/tree/main/rfcs/049-catalogue-api-aggregations-modelling
   */
 trait AggregatableValues {
-  implicit class ImageDataOps(imageData: Image[ImageState.Augmented]) {
-    def licenseAggregatableValues: List[String] =
-      imageData.locations
-        .flatMap(_.license)
-        .map(DisplayLicense(_))
-        .asJson()
-  }
   implicit class WorkDataOps(workData: WorkData[DataState.Identified]) {
     def genreAggregatableValues: List[String] =
       workData.genres
