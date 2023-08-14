@@ -1,9 +1,3 @@
-data "archive_file" "lambda" {
-  type        = "zip"
-  source_dir  = "${path.module}/../../sierra_reader"
-  output_path = "${path.module}/sierra_reader.zip"
-}
-
 locals {
   # Max runtime is 15 minutes, we want to give this as long as possible
   # in case it gets a lot of updates in a window.
