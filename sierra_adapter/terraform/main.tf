@@ -1,8 +1,7 @@
 module "sierra-adapter-20200604" {
   source = "./stack"
 
-  namespace     = "sierra-adapter-20200604"
-  release_label = "latest"
+  namespace = "sierra-adapter-20200604"
 
   dlq_alarm_arn          = local.dlq_alarm_arn
   infra_bucket           = var.infra_bucket

@@ -13,8 +13,6 @@ module "sierra_indexer" {
     var.reporting_reindex_topic_arn,
   ]
 
-  lambda_error_alarm_arn = var.lambda_error_alarm_arn
-
   namespace_id = aws_service_discovery_private_dns_namespace.namespace.id
   namespace    = local.namespace_hyphen
 
