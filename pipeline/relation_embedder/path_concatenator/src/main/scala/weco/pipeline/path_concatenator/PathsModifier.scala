@@ -29,7 +29,7 @@ import scala.concurrent.{ExecutionContext, Future}
 case class PathsModifier(pathsService: PathsService)(
   implicit ec: ExecutionContext
 ) extends Logging {
-
+  import PathOps._
   def modifyPaths(path: String): Future[Seq[Work.Visible[Merged]]] = {
     modifyCurrentPath(path) flatMap {
       case None => modifyChildPaths(path)
@@ -45,12 +45,23 @@ case class PathsModifier(pathsService: PathsService)(
     path: String
   ): Future[Option[Work.Visible[Merged]]] =
     pathsService.getParentPath(path) flatMap {
+      // If the parent of the current path is not root,
+      // then the work corresponding to this path needs to
+      // be modified in order to contain the path all the
+      // way up to the root.
       case Some(parentPath) =>
         pathsService.getWorkWithPath(path) map {
           work: Work.Visible[Merged] =>
             Some(ChildWork(parentPath, work))
         }
-      case _ => Future.successful(None) // This is expected, if parent is root
+      // This is expected and common.
+      // If the current path represents a child of the root,
+      // then there are no paths that end with the parent fragment.
+      // This is root/branch, so there are no .../root
+      //
+      // This scenario may also occur if there is something wrong with the
+      // path (or one of its ancestors)
+      case _ => Future.successful(None)
 
     }
 
@@ -72,13 +83,17 @@ case class PathsModifier(pathsService: PathsService)(
   private def getWorksUnderPath(
     path: String
   ): Future[Seq[Work.Visible[Merged]]] = {
-    pathsService
-      .getChildWorks(path)
-      .map {
-        childWorks =>
-          info(s"Received ${childWorks.size} children under $path")
-          childWorks
-      }
+    if (path.isCircular) {
+      Future(Nil)
+    } else {
+      pathsService
+        .getChildWorks(path)
+        .map {
+          childWorks: Seq[Work.Visible[Merged]] =>
+            info(s"Received ${childWorks.size} children under $path")
+            childWorks.filterNot(_.data.collectionPath.get.path.isCircular)
+        }
+    }
   }
 
 }

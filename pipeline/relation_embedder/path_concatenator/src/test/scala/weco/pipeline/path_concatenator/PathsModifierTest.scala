@@ -27,33 +27,42 @@ class PathsModifierTest
       .collectionPath(CollectionPath(path = path))
       .title(path)
 
-  private def withContext[R](works: List[Work[Merged]])(
-    testWith: TestWith[PathsModifier, R]): R =
-    withLocalMergedWorksIndex { index =>
-      insertIntoElasticsearch(index, works: _*)
-      val pathModifier = PathsModifier(
-        new PathsService(
-          elasticClient = elasticClient,
-          index = index,
-        ))
-      testWith(pathModifier)
+  private def withContext[R](
+    works: List[Work[Merged]]
+  )(testWith: TestWith[PathsModifier, R]): R =
+    withLocalMergedWorksIndex {
+      index =>
+        insertIntoElasticsearch(index, works: _*)
+        val pathModifier = PathsModifier(
+          new PathsService(
+            elasticClient = elasticClient,
+            index = index
+          )
+        )
+        testWith(pathModifier)
     }
 
-  private def assertDoesNothing(worksInDB: List[Work[Merged]],
-                                path: String): Assertion =
-    withContext(worksInDB) { pathsModifier =>
-      whenReady(pathsModifier.modifyPaths(path)) {
-        _ shouldBe empty
-      }
+  private def assertDoesNothing(
+    worksInDB: List[Work[Merged]],
+    path: String
+  ): Assertion =
+    withContext(worksInDB) {
+      pathsModifier =>
+        whenReady(pathsModifier.modifyPaths(path)) {
+          _ shouldBe empty
+        }
     }
 
-  private def assertFails(worksInDB: List[Work[Merged]],
-                          path: String): Assertion =
-    withContext(worksInDB) { pathsModifier =>
-      pathsModifier
-        .modifyPaths(path)
-        .failed
-        .futureValue shouldBe a[RuntimeException]
+  private def assertFails(
+    worksInDB: List[Work[Merged]],
+    path: String
+  ): Assertion =
+    withContext(worksInDB) {
+      pathsModifier =>
+        pathsModifier
+          .modifyPaths(path)
+          .failed
+          .futureValue shouldBe a[RuntimeException]
     }
 
   describe("PathsModifier") {
@@ -66,7 +75,8 @@ class PathsModifierTest
         worksInDB = List(
           work(path = "grandparent/parent")
         ),
-        path = "grandparent/parent")
+        path = "grandparent/parent"
+      )
     }
 
     it("does nothing if the parent work is the root of its own path") {
@@ -77,6 +87,79 @@ class PathsModifierTest
         ),
         path = "grandparent/parent"
       )
+    }
+
+    describe("ignoring circular paths") {
+      // This should not happen, but if it does, don't make things worse by
+      // producing weird trees.
+
+      it("does nothing if the path is self-referential") {
+        // Paths that are self-referential in themselves should be ignored.
+        assertDoesNothing(
+          worksInDB = List(
+            work(path = "parent/parent"),
+            work(path = "parent/child")
+          ),
+          path = "parent/parent"
+        )
+      }
+      describe("raising exceptions for circular subsections") {
+        it("fails if the parent is circular") {
+          assertFails(
+            worksInDB = List(
+              work(path = "parent/parent"),
+              work(path = "parent/child")
+            ),
+            path = "parent/child"
+          )
+        }
+
+        it("fails if the grandparent is also the child") {
+          assertFails(
+            worksInDB = List(
+              work(path = "parent/child"),
+              work(path = "child/parent")
+            ),
+            path = "child/parent"
+          )
+        }
+
+        it(
+          "fails if the eventual path becomes circular through multiple concatenations"
+        ) {
+          assertFails(
+            worksInDB = List(
+              work(path = "grandparent/parent"),
+              work(path = "parent/child"),
+              work(path = "child/grandparent")
+            ),
+            path = "child/grandparent"
+          )
+        }
+
+        it(
+          "fails if the parent work has a multi-level path that yields a circular path after concatenation"
+        ) {
+          assertFails(
+            worksInDB = List(
+              work(path = "grandparent/parent/child"),
+              work(path = "child/parent")
+            ),
+            path = "child/parent"
+          )
+        }
+        it(
+          "fails even if the circularity is buried somewhere in the middle of long paths"
+        ) {
+          assertFails(
+            worksInDB = List(
+              work(path = "a/b/c/d/e"),
+              work(path = "e/f/c/g/h")
+            ),
+            path = "e/f/c/g/h"
+          )
+        }
+      }
     }
 
     it("fails if more than one possible match exists for the requested path") {
@@ -106,11 +189,13 @@ class PathsModifierTest
         work(path = "grandparent/parent"),
         work(path = "parent/child")
       )
-      withContext(works) { pathsModifier =>
-        whenReady(pathsModifier.modifyPaths("parent/child")) { resultWorks =>
-          resultWorks.head.data.collectionPath.get.path shouldBe "grandparent/parent/child"
-          resultWorks.length shouldBe 1
-        }
+      withContext(works) {
+        pathsModifier =>
+          whenReady(pathsModifier.modifyPaths("parent/child")) {
+            resultWorks =>
+              resultWorks.head.data.collectionPath.get.path shouldBe "grandparent/parent/child"
+              resultWorks.length shouldBe 1
+          }
       }
     }
 
@@ -119,12 +204,13 @@ class PathsModifierTest
         work(path = "grandparent/parent"),
         work(path = "parent/child")
       )
-      withContext(works) { pathsModifier =>
-        whenReady(pathsModifier.modifyPaths("grandparent/parent")) {
-          resultWorks =>
-            resultWorks.head.data.collectionPath.get.path shouldBe "grandparent/parent/child"
-            resultWorks.length shouldBe 1
-        }
+      withContext(works) {
+        pathsModifier =>
+          whenReady(pathsModifier.modifyPaths("grandparent/parent")) {
+            resultWorks =>
+              resultWorks.head.data.collectionPath.get.path shouldBe "grandparent/parent/child"
+              resultWorks.length shouldBe 1
+          }
       }
     }
 
@@ -134,14 +220,17 @@ class PathsModifierTest
       val works = work(path = "grandparent/parent") +: (0 to 100)
         .map(i => work(path = s"parent/$i"))
         .toList
-      withContext(works) { pathsModifier =>
-        whenReady(pathsModifier.modifyPaths("grandparent/parent")) {
-          resultWorks =>
-            resultWorks map { resultWork =>
-              resultWork.data.collectionPath.get.path
-            } should contain theSameElementsAs (0 to 100).map(i =>
-              s"grandparent/parent/$i")
-        }
+      withContext(works) {
+        pathsModifier =>
+          whenReady(pathsModifier.modifyPaths("grandparent/parent")) {
+            resultWorks =>
+              resultWorks map {
+                resultWork =>
+                  resultWork.data.collectionPath.get.path
+              } should contain theSameElementsAs (0 to 100).map(
+                i => s"grandparent/parent/$i"
+              )
+          }
       }
     }
 
@@ -155,12 +244,15 @@ class PathsModifierTest
         "grandparent/parent/child",
         "grandparent/parent/child/grandchild"
       )
-      withContext(works) { pathsModifier =>
-        whenReady(pathsModifier.modifyPaths("parent/child")) { resultWorks =>
-          resultWorks map { resultWork =>
-            resultWork.data.collectionPath.get.path
-          } should contain theSameElementsAs expectedPaths
-        }
+      withContext(works) {
+        pathsModifier =>
+          whenReady(pathsModifier.modifyPaths("parent/child")) {
+            resultWorks =>
+              resultWorks map {
+                resultWork =>
+                  resultWork.data.collectionPath.get.path
+              } should contain theSameElementsAs expectedPaths
+          }
       }
     }
   }
