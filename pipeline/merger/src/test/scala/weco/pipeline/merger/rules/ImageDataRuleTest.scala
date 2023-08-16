@@ -210,20 +210,3 @@ class ImageDataRuleTest
 
 }
 
-/*
-
-
-
-val s = sources map {
-  case thistarget: Work.Visible[Identified] =>
-    val metsBeatsMiroResult = FieldMergeResult(
-      data = mergeMetsLicenceIntoMiroLocation(thistarget, sources)
-        .getOrElse(Nil),
-      sources =
-        mergeMetsLicenceIntoMiroLocation.mergedSources(thistarget, sources)
-    )
-    metsBeatsMiroResult
-}
-println(s)
-
- * */
