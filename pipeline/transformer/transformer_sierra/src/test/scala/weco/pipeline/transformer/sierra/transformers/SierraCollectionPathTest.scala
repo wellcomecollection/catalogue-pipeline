@@ -14,23 +14,22 @@ class SierraCollectionPathTest
     with TableDrivenPropertyChecks {
   info(
     """
-     A collectionPath should only be created for documents that exist within a hierarchy.
-       i.e. it is a parent (with a 774 field) or a child (with a 773 field).
-
-     Whether parent or child, a document can only take part in the hierarchy if it
-       has a 001 field allowing it to be referred to in 773/774 fields in other documents.
-
-     In order to represent a relationship from child to parent,
-       the 773 field must contain an identifier,
-       and that identifier must refer to a different document.
-
-     Simply the presence of a 774 field signifies that this document is a parent of something.
-
-     The actual content of a 774 field is not important, as the Relation Embedder only
-       understands paths ending at _this_ document, and cannot insert children
-       based on data from the parent.
-
-    """
+      |A collectionPath should only be created for documents that exist within a hierarchy.
+      |       i.e. it is a parent (with a 774 field) or a child (with a 773 field).
+      |
+      |     Whether parent or child, a document can only take part in the hierarchy if it
+      |       has a 001 field allowing it to be referred to in 773/774 fields in other documents.
+      |
+      |     In order to represent a relationship from child to parent,
+      |       the 773 field must contain an identifier,
+      |       and that identifier must refer to a different document.
+      |
+      |     Simply the presence of a 774 field signifies that this document is a parent of something.
+      |
+      |     The actual content of a 774 field is not important, as the Relation Embedder only
+      |       understands paths ending at _this_ document, and cannot insert children
+      |       based on data from the parent.
+      |""".stripMargin
   )
 
   describe("choosing not to create a collectionPath") {
