@@ -1,12 +1,7 @@
 package weco.pipeline.merger.models
 
 import cats.data.NonEmptyList
-import weco.catalogue.internal_model.locations.{
-  DigitalLocation,
-  License,
-  LocationType,
-  PhysicalLocation
-}
+import weco.catalogue.internal_model.locations.LocationType
 import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.catalogue.internal_model.work.{Item, Work}
 
