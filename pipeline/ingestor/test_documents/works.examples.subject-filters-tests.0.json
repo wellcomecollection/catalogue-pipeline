@@ -1,6 +1,6 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2023-03-24T14:12:13.324100Z",
+  "createdAt" : "2023-08-22T11:49:35.861105Z",
   "id" : "inoolbps",
   "document" : {
     "debug" : {
@@ -144,7 +144,7 @@
         "sanitati"
       ],
       "subjects.label" : [
-        "Sanitation."
+        "Sanitation"
       ],
       "subjects.concepts.label" : [
         "485o02DxPLXKke6",
@@ -187,7 +187,7 @@
       "production.dates" : [
       ],
       "subjects.label" : [
-        "{\"label\":\"Sanitation.\",\"concepts\":[],\"type\":\"Subject\"}"
+        "{\"label\":\"Sanitation\",\"concepts\":[],\"type\":\"Subject\"}"
       ],
       "languages" : [
       ],

@@ -1,6 +1,6 @@
 {
   "description" : "examples for the genre tests",
-  "createdAt" : "2023-03-24T14:12:13.307075Z",
+  "createdAt" : "2023-08-22T11:49:35.849469Z",
   "id" : "gqd3shrq",
   "document" : {
     "debug" : {
@@ -206,7 +206,7 @@
       "subjects.concepts.label" : [
       ],
       "genres.label" : [
-        "Pamphlets.",
+        "Pamphlets",
         "Psychology, Pathological",
         "Darwin \"Jones\", Charles"
       ],
