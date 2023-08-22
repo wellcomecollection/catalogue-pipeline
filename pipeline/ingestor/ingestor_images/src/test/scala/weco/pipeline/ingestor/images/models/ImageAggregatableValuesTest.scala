@@ -84,12 +84,12 @@ class ImageAggregatableValuesTest
             ),
             agent = Meeting(label = "People Professionals"),
             roles = List()
-          ),
+          )
         ),
         items = List(
           createDigitalItemWith(license = None),
           createDigitalItemWith(license = Some(License.CCBY)),
-          createDigitalItemWith(license = Some(License.PDM)),
+          createDigitalItemWith(license = Some(License.PDM))
         )
       ),
       version = 1
@@ -103,7 +103,7 @@ class ImageAggregatableValuesTest
       contributors = List(
         """{"label":"Polly Person","type":"Person"}""",
         """{"label":"Printer Parsons","type":"Organisation"}""",
-        """{"label":"People Professionals","type":"Meeting"}""",
+        """{"label":"People Professionals","type":"Meeting"}"""
       ),
       genres = List(
         """{"label":"genial giraffes","concepts":[],"type":"Genre"}""",
@@ -136,7 +136,7 @@ class ImageAggregatableValuesTest
           ),
           label = "ill-fated ideas"
         ),
-        Subject(label = "illicit implications", concepts = List()),
+        Subject(label = "illicit implications", concepts = List())
       )
     )
 
@@ -156,5 +156,58 @@ class ImageAggregatableValuesTest
       """{"label":"ill-fated ideas","concepts":[],"type":"Subject"}""",
       """{"label":"illicit implications","concepts":[],"type":"Subject"}"""
     )
+  }
+  describe("normalising labels") {
+    info(
+      "labels are normalised in aggregations to remove punctuation that is not deliberately contrastive"
+    )
+    it("normalises subject labels") {
+      val data = WorkData[DataState.Identified](
+        subjects = List(
+          Subject(
+            label = "salty sandwiches.",
+            concepts = Nil
+          )
+        )
+      )
+      val w = ParentWork(
+        id = IdState.Identified(
+          canonicalId = createCanonicalId,
+          sourceIdentifier = createSourceIdentifier
+        ),
+        data = data,
+        version = 1
+      )
+      ImageAggregatableValues(
+        w
+      ).subjects shouldBe List(
+        """{"label":"salty sandwiches","concepts":[],"type":"Subject"}"""
+      )
+    }
+
+    it("normalises contributor labels") {
+      val data = WorkData[DataState.Identified](
+        contributors = List(
+          Contributor(
+            id = IdState.Unidentifiable,
+            agent = Person(label = "Pablo Picasso."),
+            roles = List(ContributionRole("painter"))
+          )
+        )
+      )
+      val w = ParentWork(
+        id = IdState.Identified(
+          canonicalId = createCanonicalId,
+          sourceIdentifier = createSourceIdentifier
+        ),
+        data = data,
+        version = 1
+      )
+      ImageAggregatableValues(
+        w
+      ).contributors shouldBe List(
+        """{"label":"Pablo Picasso","type":"Person"}"""
+      )
+    }
   }
 }

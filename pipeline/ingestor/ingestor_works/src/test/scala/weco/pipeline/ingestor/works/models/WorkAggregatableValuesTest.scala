@@ -206,7 +206,7 @@ class WorkAggregatableValuesTest
       )
     }
 
-    it("normalises contributors") {
+    it("normalises contributor labels") {
       val data = WorkData[DataState.Identified](
         contributors = List(
           Contributor(
