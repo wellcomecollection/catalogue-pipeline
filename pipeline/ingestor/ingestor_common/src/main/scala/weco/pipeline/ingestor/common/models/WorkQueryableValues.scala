@@ -83,10 +83,12 @@ case object WorkQueryableValues {
       itemLicenseIds = locations.flatMap(_.license).map(_.id),
       itemLocationTypeIds = locations.map(_.locationType.id),
       subjectIds = workData.subjects.map(_.id).canonicalIds,
-      subjectLabels = workData.subjects.map(_.label),
-      subjectConceptLabels = workData.subjects.flatMap(_.concepts).map(_.label),
-      genreLabels = workData.genres.map(_.label),
-      genreConceptLabels = workData.genres.flatMap(_.concepts).map(_.label),
+      subjectLabels = workData.subjects.map(_.label).map(queryableLabel),
+      subjectConceptLabels =
+        workData.subjects.flatMap(_.concepts).map(_.label).map(queryableLabel),
+      genreLabels = workData.genres.map(_.label).map(queryableLabel),
+      genreConceptLabels =
+        workData.genres.flatMap(_.concepts).map(_.label).map(queryableLabel),
       genreConceptIds = workData.genres
         // Only the first concept counts, the others include things like places and periods that help
         // a reader understand more about the genre of a given item, but do not contribute meaningfully
@@ -97,7 +99,8 @@ case object WorkQueryableValues {
       languageIds = workData.languages.map(_.id),
       languageLabels = workData.languages.map(_.label),
       contributorAgentIds = workData.contributors.map(_.agent.id).canonicalIds,
-      contributorAgentLabels = workData.contributors.map(_.agent.label),
+      contributorAgentLabels =
+        workData.contributors.map(_.agent.label).map(queryableLabel),
       productionLabels = workData.production.flatMap(
         p =>
           p.places.map(_.label) ++ p.agents.map(_.label) ++ p.dates.map(_.label)
@@ -120,6 +123,14 @@ case object WorkQueryableValues {
     )
   }
 
+  // Trailing full stops are inconsistently present on concept and subject labels.
+  // Because the filters that operate on these fields treat the whole field as a
+  // strict matching keyword, this inconsistency means that expected records are not
+  // found, and that multiple similar entries appear in the aggregations, differenced
+  // only by the existence of a trailing `.`
+  // If other systemic differences occur that are not deliberately contrasting, then
+  // they can be added here.
+  private def queryableLabel(label: String): String = label.stripSuffix(".")
   implicit class IdStateOps(ids: Seq[IdState.Minted]) {
     def canonicalIds: List[String] =
       ids.flatMap(_.maybeCanonicalId).map(_.underlying).toList

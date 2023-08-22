@@ -29,11 +29,13 @@ class WorkAggregatableValuesTest
       subjects = List(
         Subject(
           label = "salty sandwiches",
-          concepts = List(Concept("taste"), Concept("foodstuffs"))),
+          concepts = List(Concept("taste"), Concept("foodstuffs"))
+        ),
         Subject(
           label = "silly sausages",
-          concepts = List(Concept("foodstuffs"))),
-        Subject(label = "secret spies", concepts = List(Concept("espionage"))),
+          concepts = List(Concept("foodstuffs"))
+        ),
+        Subject(label = "secret spies", concepts = List(Concept("espionage")))
       ),
       contributors = List(
         Contributor(
@@ -53,7 +55,7 @@ class WorkAggregatableValuesTest
           ),
           agent = Meeting(label = "Pocket Pianos"),
           roles = List()
-        ),
+        )
       ),
       items = List(
         createDigitalItemWith(license = None),
@@ -63,7 +65,10 @@ class WorkAggregatableValuesTest
           locations = List(
             createPhysicalLocationWith(
               locationType = LocationType.ClosedStores,
-              license = None)))
+              license = None
+            )
+          )
+        )
       ),
       languages = List(
         Language(id = "eng", label = "English"),
@@ -78,7 +83,7 @@ class WorkAggregatableValuesTest
         ),
         createProductionEventWith(
           dates = List(
-            createPeriodForYearRange(startYear = "1900", endYear = "1950"),
+            createPeriodForYearRange(startYear = "1900", endYear = "1950")
           )
         ),
         createProductionEventWith(dates = List())
@@ -87,10 +92,13 @@ class WorkAggregatableValuesTest
 
     val availabilities: Set[Availability] = Set(
       Availability.Online,
-      Availability.ClosedStores,
+      Availability.ClosedStores
     )
 
-    WorkAggregatableValues(data, availabilities) shouldBe WorkAggregatableValues(
+    WorkAggregatableValues(
+      data,
+      availabilities
+    ) shouldBe WorkAggregatableValues(
       workTypes = List(
         """{"id":"m","label":"CD-Roms","type":"Format"}"""
       ),
@@ -101,7 +109,7 @@ class WorkAggregatableValuesTest
       productionDates = List(
         """{"label":"2000","type":"Period"}""",
         """{"label":"2010","type":"Period"}""",
-        """{"label":"1900","type":"Period"}""",
+        """{"label":"1900","type":"Period"}"""
       ),
       subjects = List(
         """{"label":"salty sandwiches","concepts":[],"type":"Subject"}""",
@@ -115,7 +123,7 @@ class WorkAggregatableValuesTest
       contributors = List(
         """{"label":"Pablo Picasso","type":"Person"}""",
         """{"label":"Peacekeeper Percy","type":"Organisation"}""",
-        """{"label":"Pocket Pianos","type":"Meeting"}""",
+        """{"label":"Pocket Pianos","type":"Meeting"}"""
       ),
       itemLicenses = List(
         """{"id":"pdm","label":"Public Domain Mark","url":"https://creativecommons.org/share-your-work/public-domain/pdm/","type":"License"}""",
@@ -124,7 +132,7 @@ class WorkAggregatableValuesTest
       availabilities = List(
         """{"id":"closed-stores","label":"Closed stores","type":"Availability"}""",
         """{"id":"online","label":"Online","type":"Availability"}"""
-      ),
+      )
     )
   }
 
@@ -146,7 +154,7 @@ class WorkAggregatableValuesTest
           ),
           label = "ill-fated ideas"
         ),
-        Subject(label = "illicit implications", concepts = List()),
+        Subject(label = "illicit implications", concepts = List())
       )
     )
 
@@ -165,12 +173,56 @@ class WorkAggregatableValuesTest
       title = Some("a work with different variants of Chinese"),
       languages = List(
         Language(id = "chi", label = "Chinese"),
-        Language(id = "chi", label = "Mandarin"),
+        Language(id = "chi", label = "Mandarin")
       )
     )
 
-    WorkAggregatableValues(data, availabilities = Set()).languages shouldBe List(
-      """{"id":"chi","label":"Chinese","type":"Language"}""",
+    WorkAggregatableValues(
+      data,
+      availabilities = Set()
+    ).languages shouldBe List(
+      """{"id":"chi","label":"Chinese","type":"Language"}"""
     )
+  }
+  describe("normalising labels") {
+    info(
+      "labels are normalised in aggregations to remove punctuation that is not deliberately contrastive"
+    )
+    it("normalises subject labels") {
+      val data = WorkData[DataState.Identified](
+        subjects = List(
+          Subject(
+            label = "salty sandwiches.",
+            concepts = Nil
+          )
+        )
+      )
+
+      WorkAggregatableValues(
+        data,
+        availabilities = Set()
+      ).subjects shouldBe List(
+        """{"label":"salty sandwiches","concepts":[],"type":"Subject"}"""
+      )
+    }
+
+    it("normalises contributors") {
+      val data = WorkData[DataState.Identified](
+        contributors = List(
+          Contributor(
+            id = IdState.Unidentifiable,
+            agent = Person(label = "Pablo Picasso."),
+            roles = List(ContributionRole("painter"))
+          )
+        )
+      )
+
+      WorkAggregatableValues(
+        data,
+        availabilities = Set()
+      ).contributors shouldBe List(
+        """{"label":"Pablo Picasso","type":"Person"}"""
+      )
+    }
   }
 }
