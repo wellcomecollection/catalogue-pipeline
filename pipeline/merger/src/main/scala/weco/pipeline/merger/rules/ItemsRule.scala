@@ -3,11 +3,10 @@ package weco.pipeline.merger.rules
 import weco.pipeline.merger.models.Sources.findFirstLinkedDigitisedSierraWorkFor
 import cats.data.NonEmptyList
 import weco.catalogue.internal_model.identifiers.IdState
-import weco.catalogue.internal_model.locations.LocationType
 import weco.catalogue.internal_model.work.{Item, Work}
 import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.pipeline.merger.logging.MergerLogging
-import weco.pipeline.merger.models.FieldMergeResult
+import weco.pipeline.merger.models.{FieldMergeResult, MergerItem}
 
 /** Items are merged as follows
   *
@@ -17,6 +16,9 @@ import weco.pipeline.merger.models.FieldMergeResult
   */
 object ItemsRule extends FieldMergeRule with MergerLogging {
   import WorkPredicates._
+
+  import scala.language.implicitConversions
+  implicit def _item[T](item: Item[T]): MergerItem[T] = MergerItem[T](item)
 
   type FieldData = List[Item[IdState.Minted]]
 
@@ -70,13 +72,7 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     ): FieldData =
       target.data.items match {
         case List(sierraItem) =>
-          List(
-            sierraItem.copy(
-              locations = sierraItem.locations ++ sources.toList
-                .flatMap(_.data.items)
-                .flatMap(_.locations)
-            )
-          )
+          List(sierraItem.appendLocationsFrom(sources))
         case _ => target.data.items ++ sources.toList.flatMap(_.data.items)
       }
   }
@@ -109,13 +105,7 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
       ): FieldData =
         target.data.items match {
           case List(sierraItem) =>
-            List(
-              sierraItem.copy(
-                locations = sierraItem.locations ++ sources.toList
-                  .flatMap(_.data.items)
-                  .flatMap(_.locations)
-              )
-            )
+            List(sierraItem.appendLocationsFrom(sources))
           case _ => sources.toList.flatMap(_.data.items)
         }
     }
@@ -200,13 +190,8 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
       findFirstLinkedDigitisedSierraWorkFor(target, sources.toList)
         .map {
           digitisedWork =>
-            val onlineItems = digitisedWork.data.items
-              .filter {
-                it =>
-                  it.locations.exists(
-                    _.locationType == LocationType.OnlineResource
-                  )
-              }
+            val onlineItems =
+              digitisedWork.data.items.filter(_.isAvailableOnline)
 
             target.data.items ++ onlineItems
         }
