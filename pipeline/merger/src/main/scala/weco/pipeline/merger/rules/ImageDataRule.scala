@@ -5,15 +5,10 @@ import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.catalogue.internal_model.image.ImageData
 import weco.catalogue.internal_model.work.Work
-import weco.pipeline.merger.models.{FieldMergeResult, MergerImageData}
+import weco.pipeline.merger.models.{FieldMergeResult, ImageDataOps}
 
-object ImageDataRule extends FieldMergeRule {
+object ImageDataRule extends FieldMergeRule with ImageDataOps {
   import WorkPredicates._
-
-  import scala.language.implicitConversions
-
-  implicit def _imageData[T](imageData: ImageData[T]): MergerImageData[T] =
-    MergerImageData[T](imageData)
 
   type FieldData = List[ImageData[IdState.Identified]]
 
