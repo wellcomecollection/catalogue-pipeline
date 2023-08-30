@@ -34,7 +34,7 @@ class ImagesIndexConfigTest
       val features2 = (0 until 3000).map(_ => Random.nextFloat() * 100).toList
       val reducedFeatures =
         (0 until 3000).map(_ => Random.nextFloat() * 100).toList
-      val paletteEmbedding = randomUnitLengthVector(216).toList
+      val paletteEmbedding = randomUnitLengthVector(1000).toList
       val averageColorHex = Some(randomHexString)
       val aspectRatio = Some(Random.nextFloat())
       val image = createImageData.toAugmentedImageWith(
@@ -59,7 +59,7 @@ class ImagesIndexConfigTest
       val features1 = List(2.0f)
       val features2 = List(2.0f)
       val reducedFeatures = List(2.0f)
-      val paletteEmbedding = randomUnitLengthVector(216).toList
+      val paletteEmbedding = randomUnitLengthVector(1000).toList
       val averageColorHex = Some(randomHexString)
       val aspectRatio = Some(Random.nextFloat())
       val image = createImageData.toAugmentedImageWith(
