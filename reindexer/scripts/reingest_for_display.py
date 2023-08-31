@@ -68,7 +68,7 @@ def main(reindex_date, document_type, test_doc_id):
         )
 
     with tqdm(total=reingest_docs_count) as pbar:
-        for (batch, _) in concurrently(
+        for batch, _ in concurrently(
             fn=lambda b: sns.publish_batch(
                 TopicArn=dest_topic_arn, PublishBatchRequestEntries=b
             ),

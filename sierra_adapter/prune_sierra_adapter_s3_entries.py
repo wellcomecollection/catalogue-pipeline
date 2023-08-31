@@ -72,7 +72,6 @@ if __name__ == "__main__":
 
     try:
         for vhs in sierra_vhs:
-
             print(f"Fetching entries from DynamoDB for {vhs['table']}...")
             dynamo_lookup = {}
 

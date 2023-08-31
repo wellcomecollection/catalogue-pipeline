@@ -17,7 +17,6 @@ def get_current_index_name():
 
 
 def deploy_to(root, pipeline_date):
-
     os.environ.update({"PIPELINE_DATE": pipeline_date})
 
     subprocess.check_call(
