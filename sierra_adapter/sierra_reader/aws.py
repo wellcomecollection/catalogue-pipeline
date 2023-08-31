@@ -31,7 +31,6 @@ def get_sns_batches(messages):
         # threshold, send all the other messages then start a new batch
         # with the latest message.
         if len(json.dumps(new_batch)) > 250 * 1024:
-
             # If we've just sent a batch of messages, old_batch may be
             # empty -- don't yield it unless there's something here.
             if old_batch:

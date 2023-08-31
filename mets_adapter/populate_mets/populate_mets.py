@@ -61,7 +61,6 @@ def publish_messages(manifests):
     sns = aws_resource("sns", role_arn=CATALOGUE_ROLE)
 
     for space, externalIdentifier in manifests:
-
         # This should mimic the format of the BagRegistrationNotification in
         # the storage service.
         message = {"space": space, "externalIdentifier": externalIdentifier}
