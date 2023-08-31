@@ -50,7 +50,7 @@ object Responses {
     paletteInferrerDeterministic(Random.nextInt())
 
   def randomPaletteVector(seed: Int): List[Float] =
-    List.fill(216)(new Random(seed).nextFloat)
+    List.fill(1000)(new Random(seed).nextFloat)
 
   def randomAverageColorHex(seed: Int): String =
     s"#${randomBytes(random = new Random(seed), length = 3).map(b => f"$b%02X").mkString}"
