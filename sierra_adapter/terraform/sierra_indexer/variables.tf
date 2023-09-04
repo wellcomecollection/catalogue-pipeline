@@ -8,8 +8,6 @@ variable "sierra_adapter_bucket" {
 
 variable "container_image" {}
 
-variable "lambda_error_alarm_arn" {}
-
 variable "namespace_id" {}
 variable "namespace" {}
 variable "interservice_security_group_id" {}

@@ -6,7 +6,7 @@ from joblib import Parallel, delayed
 class PaletteEncoder:
     """A class for embedding color information from an image."""
 
-    def __init__(self, n_bins: int = 6, alpha: float = 5):
+    def __init__(self, n_bins: int = 10, alpha: float = 30):
         """
         Initialise the encoder.
 
@@ -29,7 +29,7 @@ class PaletteEncoder:
         The embedding process involves resizing the image, converting it to RGB,
         and creating a color histogram. The histogram is composed of n_bins^3
         bins, where n_bins is the number of bins in each dimension (red, green,
-        blue). Each pixel in the image is repeated 10 times and some noise is
+        blue). Each pixel in the image is repeated 100 times and some noise is
         added to each pixel. This allows colours near the bin boundaries to fall
         into multiple bins, making the embedding more robust.
 
@@ -42,7 +42,7 @@ class PaletteEncoder:
                 The flattened color histogram as a 1D numpy array.
 
         """
-        repeated_pixel_array = np.repeat(pixel_array, 10, axis=0)
+        repeated_pixel_array = np.repeat(pixel_array, 100, axis=0)
         noise = np.random.normal(0, self.alpha, repeated_pixel_array.shape)
         pixel_array = repeated_pixel_array + noise
 
@@ -96,8 +96,8 @@ class PaletteEncoder:
 
     def __call__(self, images):
         """
-            process images in parallel
-            """
+        process images in parallel
+        """
         return Parallel(n_jobs=-2)(
             self.delayed_process_image(image) for image in images
         )

@@ -113,7 +113,6 @@ class SierraClient:
             try:
                 entries = response["entries"]
             except KeyError:
-
                 # If we get an error from Sierra, it probably means our
                 # access token has expired -- ask for a refreshed token
                 # and try again.
