@@ -9,4 +9,3 @@ resource "null_resource" "ecr_image_tags" {
     command = "AWS_PROFILE=platform-developer PIPELINE_DATE=${var.pipeline_date} bash scripts/ensure_ecr_tags_exist_for_pipeline.sh"
   }
 }
-set the
