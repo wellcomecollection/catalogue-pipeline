@@ -1,6 +1,6 @@
 {
   "description" : "examples for the genre tests",
-  "createdAt" : "2023-03-24T14:12:13.302902Z",
+  "createdAt" : "2023-08-22T11:49:35.845659Z",
   "id" : "oxbsq4ck",
   "document" : {
     "debug" : {
@@ -146,7 +146,7 @@
       "subjects.concepts.label" : [
       ],
       "genres.label" : [
-        "Annual reports."
+        "Annual reports"
       ],
       "genres.concepts.label" : [
         "YwsvmZKLOsIneEm",

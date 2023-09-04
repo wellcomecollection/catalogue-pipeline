@@ -23,6 +23,7 @@ class WorkQueryableValuesTest
     with ItemsGenerators
     with ImageGenerators
     with WorkGenerators {
+
   it("adds basic work info") {
     val id = createCanonicalId
     val format = Format.Books
@@ -645,6 +646,88 @@ class WorkQueryableValuesTest
       1663804800000L,
       1979424000000L
     )
+  }
+
+  describe("normalising labels") {
+    info(
+      """ In order to give a consistent experience when querying using labels,
+        | label values are normalised when stored for querying and aggregating.
+        | The normalisation strips trailing full stops.
+        |
+        | This normalisation is only to be applied to the queryable and aggregable
+        | versions of the label.  The label as displayed on documents should be shown
+        | as written by the author of the record.
+        |""".stripMargin
+    )
+
+    it("normalises subjects and subject concepts") {
+      val data = WorkData[DataState.Identified](
+        subjects = List(
+          Subject(
+            label = "Silly sausages.",
+            concepts = List(Concept("silliness"), Concept("cylinders."))
+          )
+        )
+      )
+
+      val q = WorkQueryableValues(
+        id = createCanonicalId,
+        sourceIdentifier = createSourceIdentifier,
+        workData = data,
+        relations = Relations(),
+        availabilities = Set()
+      )
+
+      q.subjectLabels shouldBe List(
+        "Silly sausages"
+      )
+      q.subjectConceptLabels shouldBe List("silliness", "cylinders")
+    }
+    it("normalises genres and genre concepts") {
+      val data = WorkData[DataState.Identified](
+        genres = List(
+          Genre(
+            label = "Green gerbils.",
+            concepts = List(Concept("generosity"), Concept("greebles."))
+          )
+        )
+      )
+
+      val q = WorkQueryableValues(
+        id = createCanonicalId,
+        sourceIdentifier = createSourceIdentifier,
+        workData = data,
+        relations = Relations(),
+        availabilities = Set()
+      )
+
+      q.genreLabels shouldBe List("Green gerbils")
+      q.genreConceptLabels shouldBe List("generosity", "greebles")
+    }
+    it("normalises contributors") {
+      val workData = WorkData[DataState.Identified](
+        contributors = List(
+          Contributor(
+            agent = Person(
+              id = IdState.Unidentifiable,
+              label = "Crafty Carol."
+            ),
+            roles = Nil
+          )
+        )
+      )
+
+      val q = WorkQueryableValues(
+        id = createCanonicalId,
+        sourceIdentifier = createSourceIdentifier,
+        workData = workData,
+        relations = Relations(),
+        availabilities = Set()
+      )
+      q.contributorAgentLabels shouldBe List(
+        "Crafty Carol"
+      )
+    }
   }
 
   private def relation(id: Option[String], title: Option[String]): Relation =
