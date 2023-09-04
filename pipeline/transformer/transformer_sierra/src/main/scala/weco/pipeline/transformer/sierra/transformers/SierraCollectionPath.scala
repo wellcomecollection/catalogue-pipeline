@@ -134,11 +134,12 @@ private object HostEntryFieldCollectionPath
       bibData.varfieldsWithTag("773").find(_.subfieldsWithTag("w").nonEmpty)
 
     if (hostEntryField.isDefined && bibId.nonEmpty) {
-      collectionPathString(hostEntryField.get, bibId.trim) map { path =>
-        CollectionPath(
-          path = path,
-          label = None
-        )
+      collectionPathString(hostEntryField.get, bibId.trim) map {
+        path =>
+          CollectionPath(
+            path = path,
+            label = None
+          )
       }
     } else {
       // Should not be possible to reach this point, SierraCollectionPath.apply will have
