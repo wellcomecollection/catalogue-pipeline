@@ -69,18 +69,29 @@ object SierraCollectionPath extends SierraQueryOps with Logging {
     else {
       (getControlNumber(bibData), bibData.varfieldsWithTag("774")) match {
         case (None, _) =>
+          // Without an identifier for the current document, we cannot hope
+          // to construct a path to it
           warn(
             f"Attempt to create CollectionPath for Sierra document without a control number field ${bibData}"
           )
           None
         case (Some(bibId), constituentUnits) =>
-          // This document does not contain any constituent unit entries
           // Optionally construct a `parent/this`
           // collectionPath from an appropriate 773 host entry field if available.
           val maybeHostPath = HostEntryFieldCollectionPath(bibData, bibId)
           (maybeHostPath, constituentUnits) match {
-            case (_, Nil)  => maybeHostPath
+            // This document does not contain any constituent unit entries,
+            // It is therefore probably a leaf in the hierarchy.
+            // So return the 'parent/this' path
+            case (_, Nil) => maybeHostPath
+            // This document does not have a host entry,
+            // but does contain constituent units.
+            // It is therefore probably the root of a hierarchy
+            // So return 'this' as a path
             case (None, _) => Some(CollectionPath(path = bibId, label = None))
+            // This document has both a host and constituent units,
+            // It is therefore probably a branch in the hierarchy
+            // again, return the 'parent/this' path
             case (Some(hostPath), _) =>
               Some(CollectionPath(path = hostPath.path, label = None))
           }
@@ -106,7 +117,7 @@ object SierraCollectionPath extends SierraQueryOps with Logging {
   * of them is expected to result in a CollectionPath. This will be the one with
   * a $w tag
   *
-  * It is possible, but unlikely, that a bib would have a mixture of both The
+  * It is possible, but unlikely, that a bib would have a mixture of both. The
   * more common scenario is that it would have either exactly one 773 field, and
   * that field has a $w subtag, or it would have multiple 773 fields, and none
   * of them have a $w subtag.
@@ -122,14 +133,15 @@ private object HostEntryFieldCollectionPath
     val hostEntryField: Option[VarField] =
       bibData.varfieldsWithTag("773").find(_.subfieldsWithTag("w").nonEmpty)
 
-    if (hostEntryField.isDefined && bibId.nonEmpty)
-      Some(
-        CollectionPath(
-          path = collectionPathString(hostEntryField.get, bibId.trim),
-          label = None
-        )
-      )
-    else {
+    if (hostEntryField.isDefined && bibId.nonEmpty) {
+      collectionPathString(hostEntryField.get, bibId.trim) map {
+        path =>
+          CollectionPath(
+            path = path,
+            label = None
+          )
+      }
+    } else {
       // Should not be possible to reach this point, SierraCollectionPath.apply will have
       // ensured that an appropriate 773 entry exists somewhere in the document.
       warn(
@@ -154,8 +166,15 @@ private object HostEntryFieldCollectionPath
   private def collectionPathString(
     hostEntryField: VarField,
     ownId: String
-  ): String = {
-    f"${getHostId(hostEntryField)}/${getRelatedPart(hostEntryField)}${ownId}"
+  ): Option[String] = {
+    val hostId = getHostId(hostEntryField)
+    if (hostId == ownId) {
+      warn(
+        s"self referential host ID - $hostEntryField refers to this document's own control number: $ownId"
+      )
+      None
+    } else
+      Some(f"$hostId/${getRelatedPart(hostEntryField)}$ownId")
   }
 
   /** Extract the Related Part value from a host entry field, if any. The

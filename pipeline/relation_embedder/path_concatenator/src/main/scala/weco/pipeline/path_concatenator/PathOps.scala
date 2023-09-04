@@ -8,6 +8,9 @@ object PathOps {
 
     lazy val lastNode: String =
       path.splitAt(path.lastIndexOf("/") + 1)._2
+
+    lazy val isCircular: Boolean =
+      path.indexOf("/") != -1 && firstNode == lastNode
   }
   def concatenatePaths(parentPath: String, childPath: String): String = {
     val childRoot = childPath.firstNode
@@ -18,7 +21,20 @@ object PathOps {
         s"$parentPath is not the parent of $childPath"
       )
     } else {
-      pathJoin(parentPath +: childPath.split("/").tail)
+      val pathFragments = parentPath.split("/") ++ childPath.split("/").tail
+      val repeatedFragments = pathFragments.groupBy(identity).collect {
+        case (fragment, occurrences) if occurrences.lengthCompare(1) != 0 =>
+          fragment
+      }
+
+      repeatedFragments match {
+        case Nil => pathJoin(pathFragments)
+        case seq =>
+          throw new IllegalArgumentException(
+            s"${pathJoin(pathFragments)} contains circular section(s) at ${seq.mkString(", ")}"
+          )
+      }
+
     }
   }
 

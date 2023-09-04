@@ -15,7 +15,7 @@ class PathConcatenatorRequestBuilder(index: Index) {
   import PathOps._
 
   /** 10K is the largest response size ES normally allows from non-scroll
-    * queries In reality, the largest possible response to a childWorks query
+    * queries. In reality, the largest possible response to a childWorks query
     * (given the current data) will be less than 1400.
     *   - The Fallaize collection is the largest set of works that will use this
     *     facility
