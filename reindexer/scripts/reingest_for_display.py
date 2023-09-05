@@ -18,7 +18,7 @@ def chunked_iterable(iterable, size):
         yield chunk
 
 
-def get_work_ids(es, api_index, query):
+def get_document_ids(es, api_index, query):
     for hit in scan(
         es, scroll="15m", index=api_index, query={"query": query}, _source=False
     ):
@@ -30,25 +30,36 @@ def get_work_ids(es, api_index, query):
 @click.option(
     "--type", "document_type", type=click.Choice(["works", "images"]), default="works"
 )
+@click.option(
+    "--source",
+    "source",
+    type=click.Choice(["api", "last_stage"]),
+    default="api",
+    help="whether to reingest documents that are already in the API, or those from the last stage of the pipeline. "
+    "The latter option is useful for when something has gone wrong in the ingest step or the API index.",
+)
 @click.option("--test-doc-id", type=str)
-def main(reindex_date, document_type, test_doc_id):
+def main(reindex_date, document_type, source, test_doc_id):
     es = get_pipeline_storage_es_client(reindex_date)
     session = get_session_with_role("arn:aws:iam::760097843905:role/platform-developer")
     sns = session.client("sns")
 
-    api_index = f"{document_type}-indexed-{reindex_date}"
     dest_topic_arn_prefix = (
         f"arn:aws:sns:eu-west-1:760097843905:catalogue-{reindex_date}"
     )
 
     if document_type == "works":
+        index_namespace = "indexed" if source == "api" else "denormalised"
+        source_index = f"{document_type}-{index_namespace}-{reindex_date}"
         dest_topic_arn = f"{dest_topic_arn_prefix}_relation_embedder_output"
-        api_index_query = {"term": {"type": "Visible"}}
+        api_index_query = {"term": {"type": "Visible"}} if source == "api" else None
     elif document_type == "images":
+        index_namespace = "indexed" if source == "api" else "augmented"
+        source_index = f"{document_type}-{index_namespace}-{reindex_date}"
         dest_topic_arn = f"{dest_topic_arn_prefix}_image_inferrer_output"
-        api_index_query = {"match_all": {}}
+        api_index_query = None
 
-    count_response = es.count(index=api_index, query=api_index_query)
+    count_response = es.count(index=source_index, query=api_index_query)
     reingest_docs_count = count_response["count"]
 
     if test_doc_id:
@@ -61,7 +72,7 @@ def main(reindex_date, document_type, test_doc_id):
     print(f"Reingesting {reingest_docs_count} documents...")
 
     def sns_batches():
-        doc_ids = get_work_ids(es, api_index, api_index_query)
+        doc_ids = get_document_ids(es, source_index, api_index_query)
         yield from chunked_iterable(
             iterable=({"Id": id, "Message": id} for id in doc_ids),
             size=10,  # Max SNS batch size
