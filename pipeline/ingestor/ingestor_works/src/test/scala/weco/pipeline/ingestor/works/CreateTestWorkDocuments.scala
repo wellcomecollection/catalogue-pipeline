@@ -520,14 +520,14 @@ class CreateTestWorkDocuments
 
   it("creates examples for the genre filter tests") {
     val annualReports = createGenreWith(
-      "Annual reports.",
+      "Annual reports",
       concepts = List(
         createGenreConcept(canonicalId = "g00dcafe"),
         createConcept("baadf00d")
       )
     )
     val pamphlets = createGenreWith(
-      label = "Pamphlets.",
+      label = "Pamphlets",
       concepts = List(createGenreConcept(canonicalId = "g00dcafe"))
     )
     val psychology = createGenreWith(
