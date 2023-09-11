@@ -43,7 +43,7 @@
       ],
       "genres" : [
         {
-          "label" : "Annual reports.",
+          "label" : "Annual reports",
           "concepts" : [
             {
               "id" : "g00dcafe",
@@ -181,7 +181,7 @@
       "workType" : [
       ],
       "genres.label" : [
-        "{\"label\":\"Annual reports.\",\"concepts\":[],\"type\":\"Genre\"}"
+        "{\"label\":\"Annual reports\",\"concepts\":[],\"type\":\"Genre\"}"
       ],
       "production.dates" : [
       ],
