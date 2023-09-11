@@ -1,8 +1,6 @@
 locals {
   namespace_hyphen = replace(var.namespace, "_", "-")
 
-  sierra_api_url = "https://libsys.wellcomelibrary.org/iii/sierra-api/v5"
-
   # See https://sandbox.iii.com/iii/sierra-api/swagger/index.html
 
   sierra_items_fields = join(",", [

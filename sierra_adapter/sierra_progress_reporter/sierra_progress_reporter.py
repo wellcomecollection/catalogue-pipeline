@@ -43,7 +43,6 @@ def process_report(sess, *, bucket, resource_type):
     consolidate_windows(sess, bucket=bucket, resource_type=resource_type)
 
     for iv in build_report(sess, bucket=bucket, resource_type=resource_type):
-
         # If the first gap is more than 6 hours old, we might have a
         # bug in the Sierra reader.  Raise an exception.
         hours = (dt.datetime.utcnow() - iv.end).total_seconds() / 3600

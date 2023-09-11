@@ -5,9 +5,9 @@ import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.catalogue.internal_model.image.ImageData
 import weco.catalogue.internal_model.work.Work
-import weco.pipeline.merger.models.FieldMergeResult
+import weco.pipeline.merger.models.{FieldMergeResult, ImageDataOps}
 
-object ImageDataRule extends FieldMergeRule {
+object ImageDataRule extends FieldMergeRule with ImageDataOps {
   import WorkPredicates._
 
   type FieldData = List[ImageData[IdState.Identified]]
@@ -28,16 +28,29 @@ object ImageDataRule extends FieldMergeRule {
 
   private def mergeSierraImages(
     sources: Seq[Work[Identified]]
-  )(sierraTarget: Work.Visible[Identified]) =
+  )(sierraTarget: Work.Visible[Identified]) = {
+    val metsRecords =
+      getMetsPictureAndEphemeraImages(sierraTarget, sources).getOrElse(Nil)
+    val miroImages = mergeMetsLicenceIntoMiroLocation(
+      getPairedMiroImages(sierraTarget, sources).getOrElse(Nil),
+      metsRecords
+    )
+
     FieldMergeResult(
-      data = getMetsPictureAndEphemeraImages(sierraTarget, sources)
-        .getOrElse(Nil) ++
-        getPairedMiroImages(sierraTarget, sources).getOrElse(Nil),
+      data = metsRecords ++ miroImages,
       sources = List(
         getMetsPictureAndEphemeraImages,
         getPairedMiroImages
       ).flatMap(_.mergedSources(sierraTarget, sources))
     )
+  }
+
+  private def mergeMetsLicenceIntoMiroLocation(
+    miroImageData: FieldData,
+    metsImageData: FieldData
+  ): FieldData = {
+    miroImageData.map(_.copyLicenceFrom(metsImageData))
+  }
 
   private lazy val getMetsPictureAndEphemeraImages = new FlatImageMergeRule {
     val isDefinedForTarget: WorkPredicate = sierraPictureOrEphemera
@@ -51,6 +64,9 @@ object ImageDataRule extends FieldMergeRule {
   }
 
   trait FlatImageMergeRule extends PartialRule {
+    /*
+     * Merge all the imageData for the target and sources.
+     */
     final override def rule(
       target: Work.Visible[Identified],
       sources: NonEmptyList[Work[Identified]]

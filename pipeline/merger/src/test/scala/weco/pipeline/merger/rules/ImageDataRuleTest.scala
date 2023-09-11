@@ -7,6 +7,7 @@ import weco.catalogue.internal_model.work.generators.SierraWorkGenerators
 import weco.catalogue.internal_model.work.WorkState.Identified
 import ImageDataRule.FlatImageMergeRule
 import WorkPredicates.WorkPredicate
+import weco.catalogue.internal_model.locations.{DigitalLocation, License}
 import weco.catalogue.internal_model.work.generators.{
   MetsWorkGenerators,
   MiroWorkGenerators,
@@ -75,7 +76,7 @@ class ImageDataRuleTest
       result should have length n + m
       result.map(_.locations) should contain theSameElementsAs
         metsWork.data.imageData.map(_.locations) ++
-          miroWorks.map(_.data.imageData.head.locations)
+        miroWorks.map(_.data.imageData.head.locations)
     }
 
     it(
@@ -84,15 +85,48 @@ class ImageDataRuleTest
       val n = 3
       val m = 4
       val miroWorks = (1 to m).map(_ => miroIdentifiedWork()).toList
-      val metsWork = createInvisibleMetsIdentifiedWorkWith(numImages = n)
+
+      val metsWork = createInvisibleMetsIdentifiedWorkWith(
+        numImages = n
+      )
+
       val sierraEphemeraWork = sierraIdentifiedWork().format(Format.Ephemera)
       val result =
         ImageDataRule.merge(sierraEphemeraWork, miroWorks :+ metsWork).data
 
       result should have length n + m
       result.map(_.locations) should contain theSameElementsAs
-        metsWork.data.imageData.map(_.locations) ++
-          miroWorks.map(_.data.imageData.head.locations)
+        metsWork.data.imageData.map(_.locations) ++ miroWorks.map(
+          _.data.imageData.head.locations
+        )
+    }
+
+    it(
+      "overrides the licence in Miro works with the licence from the METS work"
+    ) {
+      val n = 3
+      val m = 4
+      val miroWorks = (1 to m).map(_ => miroIdentifiedWork()).toList
+      val expectedMiroLocations: Seq[List[DigitalLocation]] = miroWorks map {
+        work =>
+          work.data.imageData flatMap {
+            imageData =>
+              imageData.locations.map(
+                _.copy(license = Some(License.InCopyright))
+              )
+          }
+      }
+      val metsWork = createInvisibleMetsIdentifiedWorkWith(
+        numImages = n,
+        imageLocationLicence = Some(License.InCopyright)
+      )
+      val sierraEphemeraWork = sierraIdentifiedWork().format(Format.Ephemera)
+      val result =
+        ImageDataRule.merge(sierraEphemeraWork, miroWorks :+ metsWork).data
+
+      result should have length n + m
+      result.map(_.locations) should contain theSameElementsAs
+        metsWork.data.imageData.map(_.locations) ++ expectedMiroLocations
     }
 
     it(
@@ -159,15 +193,20 @@ class ImageDataRuleTest
     }
   }
 
-  def createInvisibleMetsIdentifiedWorkWith(
-    numImages: Int
+  private def createInvisibleMetsIdentifiedWorkWith(
+    numImages: Int,
+    imageLocationLicence: Option[License] = Some(License.CCBY)
   ): Work.Invisible[Identified] = {
     val images =
-      (1 to numImages).map { _ =>
-        createMetsImageData.toIdentified
+      (1 to numImages).map {
+        _ =>
+          createMetsImageDataWith(locationLicence =
+            imageLocationLicence
+          ).toIdentified
       }.toList
 
     metsIdentifiedWork().imageData(images).invisible()
   }
 
 }
+

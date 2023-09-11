@@ -1,7 +1,7 @@
 package weco.pipeline.ingestor.common.models
 
 import io.circe.syntax._
-import io.circe.{Encoder, Json}
+import io.circe.{Encoder, Json, JsonObject}
 import weco.catalogue.display_model.Implicits._
 import weco.catalogue.display_model.languages.DisplayLanguage
 import weco.catalogue.display_model.locations.DisplayLicense
@@ -24,6 +24,14 @@ import java.time.{LocalDate, ZoneOffset}
   */
 trait AggregatableValues {
   implicit class WorkDataOps(workData: WorkData[DataState.Identified]) {
+    private def aggregableLabel(label: String): String = label.stripSuffix(".")
+
+    private def withAggregableLabel(json: JsonObject): JsonObject =
+      json("label") match {
+        case Some(label) if label.isString =>
+          json.add("label", aggregableLabel(label.asString.get).asJson)
+        case _ => json
+      }
     def genreAggregatableValues: List[String] =
       workData.genres
         .map(DisplayGenre(_, includesIdentifiers = false))
@@ -39,13 +47,16 @@ trait AggregatableValues {
     def subjectLabelAggregatableValues: List[String] =
       workData.subjects
         .map(DisplaySubject(_, includesIdentifiers = false))
+        .map(subject => subject.copy(label = aggregableLabel(subject.label)))
         .asJson(_.update("concepts", Json.fromValues(List())).remove("id"))
 
     def contributorAggregatableValues: List[String] =
       workData.contributors
         .map(_.agent)
         .map(DisplayAbstractRootConcept(_, includesIdentifiers = false))
-        .asJson(json => json.mapObject(_.remove("roles")))
+        .asJson(
+          json => json.mapObject(o => withAggregableLabel(o.remove("roles")))
+        )
 
     def licenseAggregatableValues: List[String] =
       workData.items

@@ -23,25 +23,35 @@ class PathsService(elasticClient: ElasticClient, index: Index)(
   implicit ec: ExecutionContext
 ) extends Logging {
   private val requestBuilder = new PathConcatenatorRequestBuilder(index)
+  import PathOps._
 
   def getParentPath(path: String): Future[Option[String]] = {
-    val request: SearchRequest = requestBuilder.parentPath(path)
-    elasticClient.execute(request).map {
-      response =>
-        {
-          val searchResponse = response.result
-          searchResponse.totalHits match {
-            case 0 => None
-            case 1 =>
-              Some(
-                searchResponse.hits.hits(0).to[PathHit].data.collectionPath.path
-              )
-            case n =>
-              throw new RuntimeException(
-                s"$path has $n possible parents, including ${searchResponse.ids}, at most one is expected"
-              )
+    if (path.isCircular) {
+      Future(None)
+    } else {
+      val request: SearchRequest = requestBuilder.parentPath(path)
+      elasticClient.execute(request).map {
+        response =>
+          {
+            val searchResponse = response.result
+            searchResponse.totalHits match {
+              case 0 => None
+              case 1 =>
+                Some(
+                  searchResponse.hits
+                    .hits(0)
+                    .to[PathHit]
+                    .data
+                    .collectionPath
+                    .path
+                )
+              case n =>
+                throw new RuntimeException(
+                  s"$path has $n possible parents, including ${searchResponse.ids}, at most one is expected"
+                )
+            }
           }
-        }
+      }
     }
   }
 

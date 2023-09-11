@@ -61,8 +61,22 @@ trait ImageGenerators
     )
   )
 
-  def createMetsImageData = createImageDataWith(
-    locations = List(createImageLocation, createManifestLocation),
+  def createMetsImageData: ImageData[IdState.Identifiable] =
+    createMetsImageDataWith(locationLicence = Some(License.CCBY))
+
+  def createMetsImageDataWith(
+    locationLicence: Option[License]
+  ): ImageData[IdState.Identifiable] = createImageDataWith(
+    locations = List(
+      createDigitalLocationWith(
+        locationType = LocationType.IIIFImageAPI,
+        license = locationLicence
+      ),
+      createDigitalLocationWith(
+        locationType = LocationType.IIIFPresentationAPI,
+        license = locationLicence
+      )
+    ),
     identifierType = IdentifierType.METSImage
   )
 
@@ -159,7 +173,7 @@ trait ImageGenerators
     val features = randomUnitLengthVector(4096)
     val (features1, features2) = features.splitAt(features.size / 2)
     val reducedFeatures = randomUnitLengthVector(1024)
-    val paletteEmbedding = randomUnitLengthVector(216)
+    val paletteEmbedding = randomUnitLengthVector(1000)
     InferredData(
       features1 = features1.toList,
       features2 = features2.toList,

@@ -14,7 +14,6 @@ from window_generator import (
 
 
 class WindowGenerator(_WindowGenerator):
-
     role_arn = "arn:aws:iam::760097843905:role/platform-developer"
     topic_arn = "arn:aws:sns:eu-west-1:760097843905:calm-windows"
 

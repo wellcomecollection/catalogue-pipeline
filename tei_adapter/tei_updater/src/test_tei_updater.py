@@ -113,7 +113,6 @@ def test_truncated_tree_results_in_error(
             "GITHUB_API_URL": "https://api.github.com/repos/wellcomecollection/wellcome-collection-tei/git/trees/master?recursive=true",
         },
     ):
-
         with pytest.raises(Exception):
             main({}, s3_client=mock_s3_client, sns_client=mock_sns_client)
 

@@ -34,22 +34,3 @@ data "aws_iam_policy_document" "tei_dynamo_full_access_policy" {
     ]
   }
 }
-
-data "aws_iam_policy_document" "tei_dynamo_read_policy" {
-  # This is based on the AmazonDynamoDBReadOnlyAccess
-  statement {
-    actions = [
-      "dynamodb:BatchGetItem",
-      "dynamodb:DescribeTable",
-      "dynamodb:GetItem",
-      "dynamodb:ListTables",
-      "dynamodb:Query",
-      "dynamodb:Scan",
-    ]
-
-    resources = [
-      aws_dynamodb_table.tei_adapter_table.arn,
-    ]
-  }
-}
-

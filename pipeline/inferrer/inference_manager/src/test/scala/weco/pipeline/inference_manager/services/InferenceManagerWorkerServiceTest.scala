@@ -162,7 +162,7 @@ class InferenceManagerWorkerServiceTest
                     features1 should have length 2048
                     features2 should have length 2048
                     reducedFeatures should have length 1024
-                    paletteEmbedding should have length 216
+                    paletteEmbedding should have length 1000
                     averageColorHex.get should have length 7
                     aspectRatio should not be empty
                 }
