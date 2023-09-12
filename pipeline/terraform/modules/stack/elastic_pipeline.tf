@@ -127,7 +127,9 @@ resource "null_resource" "elasticsearch_users" {
   ]
 
   provisioner "local-exec" {
-    command = "python3 scripts/create_pipeline_storage_users.py ${var.pipeline_date}"
+    # Use the root terraform directory, not the individual stacks' roots, as the working dir
+    working_dir = "${path.root}/.."
+    command     = "python3 scripts/create_pipeline_storage_users.py ${var.pipeline_date}"
   }
 }
 
