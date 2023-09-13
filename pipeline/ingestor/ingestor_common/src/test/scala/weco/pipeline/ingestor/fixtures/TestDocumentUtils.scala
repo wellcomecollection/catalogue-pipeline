@@ -43,6 +43,7 @@ trait TestDocumentUtils extends InstantGenerators with RandomGenerators {
         |
         |NOTE: test documents whose file name starts with `images.examples.color-filter-tests` and `images.similar-features` are not generated automatically by running the tests.
         |They're picked up from the ES index and copied over here, due to the complexity of creating random but meaningful colour/feature vectors.
+        |
         |""".stripMargin.trim)
     pw.close()
   }
