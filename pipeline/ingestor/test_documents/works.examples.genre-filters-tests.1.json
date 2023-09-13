@@ -43,7 +43,7 @@
       ],
       "genres" : [
         {
-          "label" : "Pamphlets.",
+          "label" : "Pamphlets",
           "concepts" : [
             {
               "id" : "g00dcafe",
@@ -164,7 +164,7 @@
       "workType" : [
       ],
       "genres.label" : [
-        "{\"label\":\"Pamphlets.\",\"concepts\":[],\"type\":\"Genre\"}"
+        "{\"label\":\"Pamphlets\",\"concepts\":[],\"type\":\"Genre\"}"
       ],
       "production.dates" : [
       ],
