@@ -102,37 +102,6 @@ resource "aws_secretsmanager_secret" "es_password_catalogue" {
   recovery_window_in_days = 0
 }
 
-# We can't attach the provisioner directly to the Elastic Cloud resource (I'm not
-# entirely sure why), so instead we create a null resource that will be recreated
-# whenever the cluster is created.
-#
-# The local-exec provisioner on this resource runs a script that sets up the
-# Elasticsearch users for the pipeline.
-#
-# Note: this must run *after* the cluster and secrets are created, or the script
-# won't work.
-#
-# TODO: Investigate why we can't attach the provisioner directly to the ec_deployment resource.
-# Some informal testing with a minimal TF configuration that just uses the EC provider
-# shows that this *should* work.
-resource "null_resource" "elasticsearch_users" {
-  triggers = {
-    pipeline_storage_elastic_id = local.pipeline_storage_elastic_id
-  }
-
-  depends_on = [
-    module.pipeline_storage_secrets,
-    aws_secretsmanager_secret.es_username,
-    aws_secretsmanager_secret.es_password,
-  ]
-
-  provisioner "local-exec" {
-    # Use the root terraform directory, not the individual stacks' roots, as the working dir
-    working_dir = "${path.root}/.."
-    command     = "python3 scripts/create_pipeline_storage_users.py ${var.pipeline_date}"
-  }
-}
-
 locals {
   pipeline_storage_elastic_id     = ec_deployment.pipeline.elasticsearch[0].resource_id
   pipeline_storage_elastic_region = ec_deployment.pipeline.elasticsearch[0].region
