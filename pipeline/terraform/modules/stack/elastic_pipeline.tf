@@ -241,3 +241,57 @@ module "pipeline_indices" {
   }
 
 }
+
+locals {
+  indices = module.pipeline_indices.indices
+  service_index_role_descriptors = {
+    transformer        = [local.indices.source.write]
+    id_minter          = [local.indices.source.write, local.indices.works_identified.write]
+    matcher            = [local.indices.works_identified.read]
+    merger             = [local.indices.works_identified.read, local.indices.works_merged.write, local.indices.images_initial.write]
+    router             = [local.indices.works_merged.read, local.indices.denormalised.write]
+    path_concatenator  = [local.indices.works_merged.read, local.indices.works_merged.write]
+    relation_embedder  = [local.indices.works_merged.read, local.indices.denormalised.write]
+    work_ingestor      = [local.indices.denormalised.read, local.indices.works_indexed.write]
+    inferrer           = [local.indices.images_initial.read, local.indices.images_augmented.write]
+    image_ingestor     = [local.indices.images_augmented.read, local.indices.images_indexed.write]
+    snapshot_generator = [local.indices.works_indexed.read, local.indices.images_indexed.read]
+    catalogue_api      = [local.indices.works_indexed.read, local.indices.images_indexed.read]
+  }
+}
+
+resource "elasticstack_elasticsearch_security_api_key" "pipeline_services" {
+  for_each = local.service_index_role_descriptors
+
+  name             = "${each.key}-${var.pipeline_date}"
+  role_descriptors = jsonencode(merge(each.value...))
+}
+
+resource "aws_secretsmanager_secret" "pipeline_services" {
+  for_each = elasticstack_elasticsearch_security_api_key.pipeline_services
+
+  name = "elasticsearch/pipeline_storage_${var.pipeline_date}/${each.key}/api_key"
+}
+
+resource "aws_secretsmanager_secret_version" "pipeline_services" {
+  for_each = elasticstack_elasticsearch_security_api_key.pipeline_services
+
+  secret_id     = "elasticsearch/pipeline_storage_${var.pipeline_date}/${each.key}/api_key"
+  secret_string = each.value.api_key
+}
+
+# This role isn't used by applications, but instead provided to give developer scripts
+# read-only access to the pipeline_storage cluster.
+resource "elasticstack_elasticsearch_security_role" "read_only" {
+  name = "read_only"
+
+  indices {
+    names      = [for idx in module.pipeline_indices.indices : idx.name]
+    privileges = ["read"]
+  }
+}
+
+resource "elasticstack_elasticsearch_security_user" "read_only" {
+  username = "read_only"
+  roles    = [elasticstack_elasticsearch_security_role.read_only.name]
+}
