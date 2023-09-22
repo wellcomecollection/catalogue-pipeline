@@ -1,5 +1,5 @@
 data "ec_stack" "latest_patch" {
-  version_regex = "8.5.?"
+  version_regex = "8.10.?"
   region        = "eu-west-1"
 }
 
