@@ -8,7 +8,6 @@ import org.apache.http.HttpHost
 import org.elasticsearch.client.RestClient
 import org.scalatest.{Assertion, EitherValues}
 import weco.catalogue.internal_model.fixtures.index.IndexFixtures
-import weco.elasticsearch.ElasticHttpClientConfig
 import weco.fixtures.TestWith
 import weco.json.JsonUtil._
 import weco.catalogue.internal_model.matchers.EventuallyInElasticsearch
@@ -222,9 +221,6 @@ class ElasticIndexerTest
     )(implicit index: Index): R = {
       val restClient = RestClient
         .builder(new HttpHost("localhost", 9200, "http"))
-        .setHttpClientConfigCallback(
-          new ElasticHttpClientConfig("elastic", "changeme", None)
-        )
         .build()
 
       val elasticClient = ElasticClient(JavaClient.fromRestClient(restClient))
