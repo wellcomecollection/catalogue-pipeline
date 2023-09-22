@@ -50,30 +50,6 @@ resource "ec_deployment" "pipeline" {
   }
 }
 
-# We create the username/password secrets in Terraform, and set the values in the
-# Python script.  This ensures the secrets will be properly cleaned up when we delete
-# a pipeline.
-#
-# We set the recovery window to 0 so that secrets are deleted immediately,
-# rather than hanging around for a 30 day recovery period.
-# See https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret#recovery_window_in_days
-#
-resource "aws_secretsmanager_secret" "es_username" {
-  for_each = toset(concat(local.pipeline_storage_service_list, ["image_ingestor", "work_ingestor", "read_only"]))
-
-  name = "elasticsearch/pipeline_storage_${var.pipeline_date}/${each.key}/es_username"
-
-  recovery_window_in_days = 0
-}
-
-resource "aws_secretsmanager_secret" "es_password" {
-  for_each = toset(concat(local.pipeline_storage_service_list, ["image_ingestor", "work_ingestor", "read_only"]))
-
-  name = "elasticsearch/pipeline_storage_${var.pipeline_date}/${each.key}/es_password"
-
-  recovery_window_in_days = 0
-}
-
 resource "aws_secretsmanager_secret" "es_username_catalogue" {
   provider = aws.catalogue
 
@@ -160,32 +136,6 @@ module "pipeline_storage_secrets_catalogue" {
   deletion_mode = "IMMEDIATE"
 }
 
-locals {
-  pipeline_storage_service_list = [
-    "id_minter",
-    "matcher",
-    "merger",
-    "transformer",
-    "path_concatenator",
-    "relation_embedder",
-    "router",
-    "inferrer",
-    "work_ingestor",
-    "image_ingestor",
-  ]
-
-  pipeline_storage_es_service_secrets = zipmap(local.pipeline_storage_service_list, [
-    for service in local.pipeline_storage_service_list :
-    {
-      es_host     = local.pipeline_storage_private_host
-      es_port     = local.pipeline_storage_port
-      es_protocol = local.pipeline_storage_protocol
-      es_username = "elasticsearch/pipeline_storage_${var.pipeline_date}/${service}/es_username"
-      es_password = "elasticsearch/pipeline_storage_${var.pipeline_date}/${service}/es_password"
-    }
-  ])
-}
-
 module "pipeline_indices" {
   source = "../pipeline_indices"
 
@@ -227,6 +177,13 @@ locals {
     snapshot_generator = [local.indices.works_indexed.read, local.indices.images_indexed.read]
     catalogue_api      = [local.indices.works_indexed.read, local.indices.images_indexed.read]
   }
+
+  pipeline_storage_es_service_secrets = { for service in keys(local.service_index_role_descriptors) : service => {
+    es_host     = local.pipeline_storage_private_host
+    es_port     = local.pipeline_storage_port
+    es_protocol = local.pipeline_storage_protocol
+    es_apikey   = "elasticsearch/pipeline_storage_${var.pipeline_date}/${service}/api_key"
+  } }
 }
 
 resource "elasticstack_elasticsearch_security_api_key" "pipeline_services" {
@@ -239,7 +196,8 @@ resource "elasticstack_elasticsearch_security_api_key" "pipeline_services" {
 resource "aws_secretsmanager_secret" "pipeline_services" {
   for_each = elasticstack_elasticsearch_security_api_key.pipeline_services
 
-  name = "elasticsearch/pipeline_storage_${var.pipeline_date}/${each.key}/api_key"
+  name                    = "elasticsearch/pipeline_storage_${var.pipeline_date}/${each.key}/api_key"
+  recovery_window_in_days = 0
 }
 
 resource "aws_secretsmanager_secret_version" "pipeline_services" {
