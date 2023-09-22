@@ -50,34 +50,6 @@ resource "ec_deployment" "pipeline" {
   }
 }
 
-resource "aws_secretsmanager_secret" "es_username_catalogue" {
-  provider = aws.catalogue
-
-  for_each = toset([
-    "snapshot_generator",
-    "catalogue_api",
-    "concepts_api",
-  ])
-
-  name = "elasticsearch/pipeline_storage_${var.pipeline_date}/${each.key}/es_username"
-
-  recovery_window_in_days = 0
-}
-
-resource "aws_secretsmanager_secret" "es_password_catalogue" {
-  provider = aws.catalogue
-
-  for_each = toset([
-    "snapshot_generator",
-    "catalogue_api",
-    "concepts_api",
-  ])
-
-  name = "elasticsearch/pipeline_storage_${var.pipeline_date}/${each.key}/es_password"
-
-  recovery_window_in_days = 0
-}
-
 locals {
   pipeline_storage_elastic_id     = ec_deployment.pipeline.elasticsearch[0].resource_id
   pipeline_storage_elastic_region = ec_deployment.pipeline.elasticsearch[0].region
@@ -184,6 +156,11 @@ locals {
     es_protocol = local.pipeline_storage_protocol
     es_apikey   = "elasticsearch/pipeline_storage_${var.pipeline_date}/${service}/api_key"
   } }
+
+  catalogue_account_services = toset([
+    "catalogue_api",
+    "snapshot_generator"
+  ])
 }
 
 resource "elasticstack_elasticsearch_security_api_key" "pipeline_services" {
@@ -199,6 +176,20 @@ module "pipeline_service_api_key_secrets" {
   deletion_mode = "IMMEDIATE"
   key_value_map = { for service, api_key in elasticstack_elasticsearch_security_api_key.pipeline_services :
     "elasticsearch/pipeline_storage_${var.pipeline_date}/${service}/api_key" => api_key.encoded
+  }
+}
+
+module "pipeline_catalogue_service_api_key_secrets" {
+  source = "github.com/wellcomecollection/terraform-aws-secrets?ref=v1.4.0"
+  providers = {
+    aws = aws.catalogue
+  }
+
+  deletion_mode = "IMMEDIATE"
+  key_value_map = {
+    for service, api_key in elasticstack_elasticsearch_security_api_key.pipeline_services :
+    "elasticsearch/pipeline_storage_${var.pipeline_date}/${service}/api_key" => api_key.encoded
+    if contains(local.catalogue_account_services, service)
   }
 }
 
