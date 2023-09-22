@@ -193,22 +193,13 @@ resource "elasticstack_elasticsearch_security_api_key" "pipeline_services" {
   role_descriptors = jsonencode(merge(each.value...))
 }
 
-resource "aws_secretsmanager_secret" "pipeline_services" {
-  for_each = elasticstack_elasticsearch_security_api_key.pipeline_services
+module "pipeline_service_api_key_secrets" {
+  source = "github.com/wellcomecollection/terraform-aws-secrets?ref=v1.4.0"
 
-  name                    = "elasticsearch/pipeline_storage_${var.pipeline_date}/${each.key}/api_key"
-  recovery_window_in_days = 0
-}
-
-resource "aws_secretsmanager_secret_version" "pipeline_services" {
-  for_each = elasticstack_elasticsearch_security_api_key.pipeline_services
-
-  secret_id = "elasticsearch/pipeline_storage_${var.pipeline_date}/${each.key}/api_key"
-  # More than just the API key, as used by services
-  # "API key credentials which is the Base64-encoding of the UTF-8 representation of the id and api_key joined by a colon"
-  # https://registry.terraform.io/providers/elastic/elasticstack/latest/docs/resources/elasticsearch_security_api_key#read-only
-  # https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-create-api-key.html#security-api-create-api-key-example
-  secret_string = each.value.encoded
+  deletion_mode = "IMMEDIATE"
+  key_value_map = { for service, api_key in elasticstack_elasticsearch_security_api_key.pipeline_services :
+    "elasticsearch/pipeline_storage_${var.pipeline_date}/${service}/api_key" => api_key.encoded
+  }
 }
 
 # This role isn't used by applications, but instead provided to give developer scripts
@@ -225,4 +216,14 @@ resource "elasticstack_elasticsearch_security_role" "read_only" {
 resource "elasticstack_elasticsearch_security_user" "read_only" {
   username = "read_only"
   roles    = [elasticstack_elasticsearch_security_role.read_only.name]
+}
+
+module "readonly_user_secrets" {
+  source = "github.com/wellcomecollection/terraform-aws-secrets?ref=v1.4.0"
+
+  deletion_mode = "IMMEDIATE"
+  key_value_map = {
+    "elasticsearch/pipeline_storage_${var.pipeline_date}/read_only/es_username" = elasticstack_elasticsearch_security_user.read_only.username
+    "elasticsearch/pipeline_storage_${var.pipeline_date}/read_only/es_password" = elasticstack_elasticsearch_security_user.read_only.password
+  }
 }
