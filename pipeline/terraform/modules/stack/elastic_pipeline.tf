@@ -245,8 +245,12 @@ resource "aws_secretsmanager_secret" "pipeline_services" {
 resource "aws_secretsmanager_secret_version" "pipeline_services" {
   for_each = elasticstack_elasticsearch_security_api_key.pipeline_services
 
-  secret_id     = "elasticsearch/pipeline_storage_${var.pipeline_date}/${each.key}/api_key"
-  secret_string = each.value.api_key
+  secret_id = "elasticsearch/pipeline_storage_${var.pipeline_date}/${each.key}/api_key"
+  # More than just the API key, as used by services
+  # "API key credentials which is the Base64-encoding of the UTF-8 representation of the id and api_key joined by a colon"
+  # https://registry.terraform.io/providers/elastic/elasticstack/latest/docs/resources/elasticsearch_security_api_key#read-only
+  # https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-create-api-key.html#security-api-create-api-key-example
+  secret_string = each.value.encoded
 }
 
 # This role isn't used by applications, but instead provided to give developer scripts
