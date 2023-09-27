@@ -3,7 +3,7 @@ output "read" {
     read = {
       indices = [
         {
-          names      = "${var.name}*"
+          names      = ["${var.name}*"]
           privileges = ["read"]
         }
       ]
@@ -16,7 +16,7 @@ output "write" {
     write = {
       indices = [
         {
-          names      = "${var.name}*"
+          names      = ["${var.name}*"]
           privileges = ["all"]
         }
       ]

@@ -204,8 +204,13 @@ resource "elasticstack_elasticsearch_security_role" "read_only" {
   }
 }
 
+resource "random_password" "read_only_user" {
+  length = 16
+}
+
 resource "elasticstack_elasticsearch_security_user" "read_only" {
   username = "read_only"
+  password = random_password.read_only_user.result
   roles    = [elasticstack_elasticsearch_security_role.read_only.name]
 }
 
