@@ -257,7 +257,7 @@ def suppress_image(*, miro_id, message: str):
     Hide a Miro image from wellcomecollection.org.
     """
     _set_image_availability(miro_id=miro_id, message=message, is_available=False)
-    # what if the lines below fail? image marked as not available to the API but still in ES/CF
+    # what if the lines below fail? image marked as not available to the API but still in ES/CF + will be added to miro-suppressions.md
     _remove_image_from_elasticsearch(miro_id=miro_id)
     _remove_image_from_dlcs(miro_id=miro_id)
     _remove_image_from_cloudfront(miro_id=miro_id)
