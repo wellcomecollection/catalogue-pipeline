@@ -128,7 +128,7 @@ module "pipeline_indices" {
 }
 
 locals {
-  indices = module.pipeline_indices.index_names
+  indices                   = module.pipeline_indices.index_names
   service_index_permissions = {
     transformer = {
       read  = []
@@ -205,7 +205,7 @@ module "pipeline_services" {
 
   pipeline_date       = var.pipeline_date
   expose_to_catalogue = contains(local.catalogue_account_services, each.key)
-  providers = {
+  providers           = {
     aws.catalogue = aws.catalogue
   }
 }
@@ -221,18 +221,15 @@ resource "elasticstack_elasticsearch_security_role" "read_only" {
   }
 }
 
-resource "random_password" "read_only" {
+
+resource "random_password" "read_only_user" {
   length = 16
 }
 
-
 resource "elasticstack_elasticsearch_security_user" "read_only" {
   username = "read_only"
-  password = resource.random_password.read_only.result
-
-  roles = [
-    elasticstack_elasticsearch_security_role.read_only.name
-  ]
+  password = random_password.read_only_user.result
+  roles    = [elasticstack_elasticsearch_security_role.read_only.name]
 }
 
 module "readonly_user_secrets" {
