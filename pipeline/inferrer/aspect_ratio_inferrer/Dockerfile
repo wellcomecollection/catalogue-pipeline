@@ -1,4 +1,4 @@
-FROM public.ecr.aws/docker/library/python:3.9-slim
+FROM public.ecr.aws/docker/library/python:3.8-slim
 
 RUN apt-get update && apt-get -y install gcc g++ libffi-dev curl
 
