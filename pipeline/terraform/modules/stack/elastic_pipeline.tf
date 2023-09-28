@@ -1,5 +1,5 @@
 data "ec_stack" "latest_patch" {
-  version_regex = "8.5.?"
+  version_regex = "8.10.?"
   region        = "eu-west-1"
 }
 
@@ -47,89 +47,6 @@ resource "ec_deployment" "pipeline" {
       # Elastic Cloud console and trigger it explicitly.
       version,
     ]
-  }
-}
-
-# We create the username/password secrets in Terraform, and set the values in the
-# Python script.  This ensures the secrets will be properly cleaned up when we delete
-# a pipeline.
-#
-# We set the recovery window to 0 so that secrets are deleted immediately,
-# rather than hanging around for a 30 day recovery period.
-# See https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret#recovery_window_in_days
-#
-resource "aws_secretsmanager_secret" "es_username" {
-  for_each = toset(concat(local.pipeline_storage_service_list, ["image_ingestor", "work_ingestor", "read_only"]))
-
-  name = "elasticsearch/pipeline_storage_${var.pipeline_date}/${each.key}/es_username"
-
-  recovery_window_in_days = 0
-}
-
-resource "aws_secretsmanager_secret" "es_password" {
-  for_each = toset(concat(local.pipeline_storage_service_list, ["image_ingestor", "work_ingestor", "read_only"]))
-
-  name = "elasticsearch/pipeline_storage_${var.pipeline_date}/${each.key}/es_password"
-
-  recovery_window_in_days = 0
-}
-
-resource "aws_secretsmanager_secret" "es_username_catalogue" {
-  provider = aws.catalogue
-
-  for_each = toset([
-    "snapshot_generator",
-    "catalogue_api",
-    "concepts_api",
-  ])
-
-  name = "elasticsearch/pipeline_storage_${var.pipeline_date}/${each.key}/es_username"
-
-  recovery_window_in_days = 0
-}
-
-resource "aws_secretsmanager_secret" "es_password_catalogue" {
-  provider = aws.catalogue
-
-  for_each = toset([
-    "snapshot_generator",
-    "catalogue_api",
-    "concepts_api",
-  ])
-
-  name = "elasticsearch/pipeline_storage_${var.pipeline_date}/${each.key}/es_password"
-
-  recovery_window_in_days = 0
-}
-
-# We can't attach the provisioner directly to the Elastic Cloud resource (I'm not
-# entirely sure why), so instead we create a null resource that will be recreated
-# whenever the cluster is created.
-#
-# The local-exec provisioner on this resource runs a script that sets up the
-# Elasticsearch users for the pipeline.
-#
-# Note: this must run *after* the cluster and secrets are created, or the script
-# won't work.
-#
-# TODO: Investigate why we can't attach the provisioner directly to the ec_deployment resource.
-# Some informal testing with a minimal TF configuration that just uses the EC provider
-# shows that this *should* work.
-resource "null_resource" "elasticsearch_users" {
-  triggers = {
-    pipeline_storage_elastic_id = local.pipeline_storage_elastic_id
-  }
-
-  depends_on = [
-    module.pipeline_storage_secrets,
-    aws_secretsmanager_secret.es_username,
-    aws_secretsmanager_secret.es_password,
-  ]
-
-  provisioner "local-exec" {
-    # Use the root terraform directory, not the individual stacks' roots, as the working dir
-    working_dir = "${path.root}/.."
-    command     = "python3 scripts/create_pipeline_storage_users.py ${var.pipeline_date}"
   }
 }
 
@@ -191,32 +108,6 @@ module "pipeline_storage_secrets_catalogue" {
   deletion_mode = "IMMEDIATE"
 }
 
-locals {
-  pipeline_storage_service_list = [
-    "id_minter",
-    "matcher",
-    "merger",
-    "transformer",
-    "path_concatenator",
-    "relation_embedder",
-    "router",
-    "inferrer",
-    "work_ingestor",
-    "image_ingestor",
-  ]
-
-  pipeline_storage_es_service_secrets = zipmap(local.pipeline_storage_service_list, [
-    for service in local.pipeline_storage_service_list :
-    {
-      es_host     = local.pipeline_storage_private_host
-      es_port     = local.pipeline_storage_port
-      es_protocol = local.pipeline_storage_protocol
-      es_username = "elasticsearch/pipeline_storage_${var.pipeline_date}/${service}/es_username"
-      es_password = "elasticsearch/pipeline_storage_${var.pipeline_date}/${service}/es_password"
-    }
-  ])
-}
-
 module "pipeline_indices" {
   source = "../pipeline_indices"
 
@@ -240,4 +131,95 @@ module "pipeline_indices" {
     endpoints = [ec_deployment.pipeline.elasticsearch[0].https_endpoint]
   }
 
+}
+
+locals {
+  indices = module.pipeline_indices.indices
+  service_index_role_descriptors = {
+    transformer        = [local.indices.source.write]
+    id_minter          = [local.indices.source.write, local.indices.works_identified.write]
+    matcher            = [local.indices.works_identified.read]
+    merger             = [local.indices.works_identified.read, local.indices.works_merged.write, local.indices.images_initial.write]
+    router             = [local.indices.works_merged.read, local.indices.denormalised.write]
+    path_concatenator  = [local.indices.works_merged.read, local.indices.works_merged.write]
+    relation_embedder  = [local.indices.works_merged.read, local.indices.denormalised.write]
+    work_ingestor      = [local.indices.denormalised.read, local.indices.works_indexed.write]
+    inferrer           = [local.indices.images_initial.read, local.indices.images_augmented.write]
+    image_ingestor     = [local.indices.images_augmented.read, local.indices.images_indexed.write]
+    snapshot_generator = [local.indices.works_indexed.read, local.indices.images_indexed.read]
+    catalogue_api      = [local.indices.works_indexed.read, local.indices.images_indexed.read]
+  }
+
+  pipeline_storage_es_service_secrets = { for service in keys(local.service_index_role_descriptors) : service => {
+    es_host     = local.pipeline_storage_private_host
+    es_port     = local.pipeline_storage_port
+    es_protocol = local.pipeline_storage_protocol
+    es_apikey   = "elasticsearch/pipeline_storage_${var.pipeline_date}/${service}/api_key"
+  } }
+
+  catalogue_account_services = toset([
+    "catalogue_api",
+    "snapshot_generator"
+  ])
+}
+
+resource "elasticstack_elasticsearch_security_api_key" "pipeline_services" {
+  for_each = local.service_index_role_descriptors
+
+  name             = "${each.key}-${var.pipeline_date}"
+  role_descriptors = jsonencode(merge(each.value...))
+}
+
+module "pipeline_service_api_key_secrets" {
+  source = "github.com/wellcomecollection/terraform-aws-secrets?ref=v1.4.0"
+
+  deletion_mode = "IMMEDIATE"
+  key_value_map = { for service, api_key in elasticstack_elasticsearch_security_api_key.pipeline_services :
+    "elasticsearch/pipeline_storage_${var.pipeline_date}/${service}/api_key" => api_key.encoded
+  }
+}
+
+module "pipeline_catalogue_service_api_key_secrets" {
+  source = "github.com/wellcomecollection/terraform-aws-secrets?ref=v1.4.0"
+  providers = {
+    aws = aws.catalogue
+  }
+
+  deletion_mode = "IMMEDIATE"
+  key_value_map = {
+    for service, api_key in elasticstack_elasticsearch_security_api_key.pipeline_services :
+    "elasticsearch/pipeline_storage_${var.pipeline_date}/${service}/api_key" => api_key.encoded
+    if contains(local.catalogue_account_services, service)
+  }
+}
+
+# This role isn't used by applications, but instead provided to give developer scripts
+# read-only access to the pipeline_storage cluster.
+resource "elasticstack_elasticsearch_security_role" "read_only" {
+  name = "read_only"
+
+  indices {
+    names      = [for idx in module.pipeline_indices.indices : idx.name]
+    privileges = ["read"]
+  }
+}
+
+resource "random_password" "read_only_user" {
+  length = 16
+}
+
+resource "elasticstack_elasticsearch_security_user" "read_only" {
+  username = "read_only"
+  password = random_password.read_only_user.result
+  roles    = [elasticstack_elasticsearch_security_role.read_only.name]
+}
+
+module "readonly_user_secrets" {
+  source = "github.com/wellcomecollection/terraform-aws-secrets?ref=v1.4.0"
+
+  deletion_mode = "IMMEDIATE"
+  key_value_map = {
+    "elasticsearch/pipeline_storage_${var.pipeline_date}/read_only/es_username" = elasticstack_elasticsearch_security_user.read_only.username
+    "elasticsearch/pipeline_storage_${var.pipeline_date}/read_only/es_password" = elasticstack_elasticsearch_security_user.read_only.password
+  }
 }
