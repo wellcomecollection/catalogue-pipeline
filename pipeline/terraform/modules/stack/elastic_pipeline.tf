@@ -125,7 +125,7 @@ module "pipeline_indices" {
 
   # Path to folder containing mappings and analysis settings for Elasticsearch Index creation
   es_config_path = "${path.root}/../../../index_config"
-  connection     = {
+  connection = {
     username  = ec_deployment.pipeline.elasticsearch_username
     password  = ec_deployment.pipeline.elasticsearch_password
     endpoints = [ec_deployment.pipeline.elasticsearch[0].https_endpoint]
@@ -134,7 +134,7 @@ module "pipeline_indices" {
 }
 
 locals {
-  indices                   = module.pipeline_indices.index_names
+  indices = module.pipeline_indices.index_names
   service_index_permissions = {
     transformer = {
       read  = []
@@ -211,7 +211,7 @@ module "pipeline_services" {
 
   pipeline_date       = var.pipeline_date
   expose_to_catalogue = contains(local.catalogue_account_services, each.key)
-  providers           = {
+  providers = {
     aws.catalogue = aws.catalogue
   }
 }
