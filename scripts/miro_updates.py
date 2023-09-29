@@ -255,6 +255,7 @@ def _remove_image_from_cloudfront(*, miro_id):
 def suppress_image(*, miro_id, message: str):
     """
     Hide a Miro image from wellcomecollection.org.
+    These operations must happen in a specific order: _set_image_availability first, as the DDB table is the source of truth for Miro images when building pipelines
     """
     _set_image_availability(miro_id=miro_id, message=message, is_available=False)
 
