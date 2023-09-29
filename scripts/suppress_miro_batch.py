@@ -6,7 +6,7 @@ def suppress_miro(miro_id):
     try:
         suppress_image(miro_id=miro_id, message=message)
     except Exception as error:
-        with open("suppress_miro_errors.txt", "a") as error_file
+        with open("suppress_miro_errors.txt", "a") as error_file:
             error_file.write(f"{miro_id} failed with error {error}\n")
         with open("suppress_miro_failed_ids.txt", "a") as failed_ids_file:
             failed_ids_file.write(f"{miro_id}\n")
