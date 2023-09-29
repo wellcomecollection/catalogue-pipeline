@@ -30,7 +30,7 @@ module "id_minter" {
     max_connections               = local.id_minter_task_max_connections
     es_source_index               = local.es_works_source_index
     es_identified_index           = local.es_works_identified_index
-    ingest_batch_size             = 100
+    ingest_batch_size             = 75
     ingest_flush_interval_seconds = 30
   }
 

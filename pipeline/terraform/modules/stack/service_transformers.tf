@@ -58,6 +58,12 @@ module "transformers" {
 
   source_name = each.key
 
+  depends_on = [
+    # This updates the API key.  If the transformer is not restarted, then the
+    # running container will continue using the old, defunct key, and will fail.
+    module.pipeline_services
+  ]
+
   adapter_config      = local.adapter_config[each.key]
   listen_to_reindexer = var.reindexing_state.listen_to_reindexer
 
