@@ -227,25 +227,14 @@ resource "elasticstack_elasticsearch_security_role" "read_only" {
   }
 }
 
-resource "random_password" "read_only" {
+resource "random_password" "read_only_user" {
   length = 16
 }
 
-
 resource "elasticstack_elasticsearch_security_user" "read_only" {
   username = "read_only"
-  password = resource.random_password.read_only.result
-
-  roles = [
-    elasticstack_elasticsearch_security_role.read_only.name
-  ]
-
-  elasticsearch_connection {
-    username  = ec_deployment.pipeline.elasticsearch_username
-    password  = ec_deployment.pipeline.elasticsearch_password
-    endpoints = [ec_deployment.pipeline.elasticsearch[0].https_endpoint]
-  }
-
+  password = random_password.read_only_user.result
+  roles    = [elasticstack_elasticsearch_security_role.read_only.name]
 }
 
 module "readonly_user_secrets" {
