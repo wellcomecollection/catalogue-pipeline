@@ -8,12 +8,14 @@ locals {
         # with the one you are trying to insert (which, in that case, would not).
         # This then breaks all of your running pipeline applications because they
         # are still trying to authenticate with the old key.
-        # This could (and probably also should) be avoided by the careful application
+        #
+        # This could (and possibly also should) be avoided by the careful application
         # of replace_triggered_by in the corresponding modules, but it is unlikely
         # that that corresponds to an actual use case we would have in a running pipeline.
         # We don't normally want to regenerate keys in a running pipeline, but we
         # do always terraform a pipeline twice, and would hope to be able to do so
         # without breaking anything.
+        #
         allow_restricted_indices = false,
         names                    = var.read_from
         privileges               = ["read"]
@@ -34,11 +36,11 @@ locals {
   role_descriptors = length(var.write_to) > 0 && length(var.read_from) > 0 ? {
     read  = local.read_descriptor
     write = local.write_descriptor
-    } : (length(var.read_from) > 0 ?
-    {
-      read = local.read_descriptor
-      } : {
-      write = local.write_descriptor
+  } : (length(var.read_from) > 0 ?
+  {
+    read = local.read_descriptor
+  } : {
+    write = local.write_descriptor
   })
 }
 

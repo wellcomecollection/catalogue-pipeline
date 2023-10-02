@@ -1,11 +1,13 @@
 variable "read_from" {
-  type    = list(string)
-  default = []
+  type        = list(string)
+  default     = []
+  description = "List of indices this API key allows reading from"
 }
 
 variable "write_to" {
-  type    = list(string)
-  default = []
+  type        = list(string)
+  default     = []
+  description = "List of indices this API key allows writing to"
 }
 
 variable "name" {
