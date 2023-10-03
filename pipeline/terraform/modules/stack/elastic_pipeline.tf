@@ -128,7 +128,7 @@ module "pipeline_indices" {
 }
 
 locals {
-  indices                   = module.pipeline_indices.index_names
+  indices = module.pipeline_indices.index_names
   service_index_permissions = {
     transformer = {
       read  = []
@@ -205,7 +205,7 @@ module "pipeline_services" {
 
   pipeline_date       = var.pipeline_date
   expose_to_catalogue = contains(local.catalogue_account_services, each.key)
-  providers           = {
+  providers = {
     aws.catalogue = aws.catalogue
   }
 }

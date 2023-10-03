@@ -36,11 +36,11 @@ locals {
   role_descriptors = length(var.write_to) > 0 && length(var.read_from) > 0 ? {
     read  = local.read_descriptor
     write = local.write_descriptor
-  } : (length(var.read_from) > 0 ?
-  {
-    read = local.read_descriptor
-  } : {
-    write = local.write_descriptor
+    } : (length(var.read_from) > 0 ?
+    {
+      read = local.read_descriptor
+      } : {
+      write = local.write_descriptor
   })
 }
 
