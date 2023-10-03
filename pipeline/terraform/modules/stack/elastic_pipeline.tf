@@ -221,7 +221,6 @@ resource "elasticstack_elasticsearch_security_role" "read_only" {
   }
 }
 
-
 resource "random_password" "read_only_user" {
   length = 16
 }
