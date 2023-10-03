@@ -24,10 +24,4 @@ resource "elasticstack_elasticsearch_index" "the_index" {
   analysis_char_filter = local.analysis.char_filter
   analysis_tokenizer   = local.analysis.tokenizer
   deletion_protection  = false
-
-  elasticsearch_connection {
-    endpoints = var.connection.endpoints
-    username  = var.connection.username
-    password  = var.connection.password
-  }
 }

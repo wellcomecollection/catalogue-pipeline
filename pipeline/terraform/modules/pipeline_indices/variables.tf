@@ -1,4 +1,3 @@
-
 variable "es_works_source_index" {
   type = string
 }
@@ -28,13 +27,6 @@ variable "es_config_path" {
   type = string
 }
 
-variable "connection" {
-  type = object({
-    username  = string
-    password  = string
-    endpoints = list(string)
-  })
-}
 
 variable "index_config" {
   type = object({
