@@ -180,6 +180,30 @@ class ImageDataRuleTest
     }
   }
 
+  it(
+    "correctly identifies a digmiro Sierra work regardless of other digcodes"
+  ) {
+    val metsWork = createInvisibleMetsIdentifiedWorkWith(numImages = 1)
+    val miroWork = miroIdentifiedWork()
+    val sierraDigmiroWork = sierraIdentifiedWork()
+      .format(Format.Pictures)
+      .otherIdentifiers(
+        List(
+          createDigcodeIdentifier("CBM"),
+          createDigcodeIdentifier("digmiro"),
+          createDigcodeIdentifier("WOAM")
+        )
+      )
+    val result =
+      ImageDataRule.merge(sierraDigmiroWork, List(miroWork, metsWork)).data
+
+    result should have length 1
+    result.map(
+      _.locations
+    ) should contain theSameElementsAs metsWork.data.imageData
+      .map(_.locations)
+  }
+
   describe("the flat image merging rule") {
     val testRule = new FlatImageMergeRule {
       override val isDefinedForTarget: WorkPredicate = _ => true
@@ -209,4 +233,3 @@ class ImageDataRuleTest
   }
 
 }
-
