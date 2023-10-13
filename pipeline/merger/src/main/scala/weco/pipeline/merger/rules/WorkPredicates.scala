@@ -153,7 +153,7 @@ object WorkPredicates {
 
   private def hasDigcode(digcode: String)(work: Work[Identified]): Boolean =
     work.data.otherIdentifiers
-      .find(_.identifierType == IdentifierType.WellcomeDigcode)
+      .filter(_.identifierType == IdentifierType.WellcomeDigcode)
       .exists(_.value == digcode)
 
   private def identifierTypeId(
