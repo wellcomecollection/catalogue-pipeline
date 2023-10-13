@@ -125,12 +125,6 @@ module "pipeline_indices" {
 
   # Path to folder containing mappings and analysis settings for Elasticsearch Index creation
   es_config_path = "${path.root}/../../../index_config"
-  connection = {
-    username  = ec_deployment.pipeline.elasticsearch_username
-    password  = ec_deployment.pipeline.elasticsearch_password
-    endpoints = [ec_deployment.pipeline.elasticsearch[0].https_endpoint]
-  }
-
 }
 
 locals {

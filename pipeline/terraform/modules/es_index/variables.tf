@@ -1,4 +1,3 @@
-
 variable "name" {
   type = string
 }
@@ -18,12 +17,4 @@ variable "config_path" {
   default = ""
 }
 
-
-variable "connection" {
-  type = object({
-    username  = string
-    password  = string
-    endpoints = list(string)
-  })
-}
 
