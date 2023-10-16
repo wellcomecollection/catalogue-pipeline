@@ -9,7 +9,7 @@ import weco.catalogue.internal_model.work._
 import weco.pipeline.merger.logging.MergerLogging
 import weco.pipeline.merger.models
 import weco.pipeline.merger.models.{
-  FieldMergeResult,
+  FieldMergeResultOps,
   ImageDataWithSource,
   MergeResult,
   MergerOutcome
@@ -28,7 +28,7 @@ import weco.pipeline.merger.rules._
  * - all redirected sources
  * - any other works untouched
  */
-trait Merger extends MergerLogging {
+trait Merger extends MergerLogging with FieldMergeResultOps {
   type MergeState = Map[Work[Identified], Boolean]
 
   protected def findTarget(
@@ -70,23 +70,6 @@ trait Merger extends MergerLogging {
             )
         }
     }
-
-  implicit class MergeResultAccumulation[T](val result: FieldMergeResult[T]) {
-    def redirectSources: State[MergeState, T] = shouldRedirect(true)
-    def retainSources: State[MergeState, T] = shouldRedirect(false)
-
-    // If the state already contains a source, then don't change the existing `redirect` value
-    // Otherwise, add the source with the current value.
-    private def shouldRedirect(redirect: Boolean): State[MergeState, T] =
-      State {
-        prevState =>
-          val nextState = result.sources.foldLeft(prevState) {
-            case (state, source) if state.contains(source) => state
-            case (state, source) => state + (source -> redirect)
-          }
-          (nextState, result.data)
-      }
-  }
 
   def merge(works: Seq[Work[Identified]]): MergerOutcome = {
     categoriseWorks(works)
