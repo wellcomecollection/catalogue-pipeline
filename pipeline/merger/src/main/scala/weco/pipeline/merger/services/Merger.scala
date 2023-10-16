@@ -12,7 +12,8 @@ import weco.pipeline.merger.models.{
   FieldMergeResultOps,
   ImageDataWithSource,
   MergeResult,
-  MergerOutcome
+  MergerOutcome,
+  WorkMergingOps
 }
 import weco.pipeline.merger.rules._
 
@@ -118,7 +119,7 @@ trait Merger extends MergerLogging with FieldMergeResultOps {
       .getOrElse(MergerOutcome.passThrough(works))
   }
 
-  private implicit class WorkOps(w: Work[Identified]) {
+  private implicit class WorkOps(w: Work.Visible[Identified]) {
     def internalWorksWith(
       thumbnail: Option[DigitalLocation],
       version: Int
@@ -179,24 +180,7 @@ trait Merger extends MergerLogging with FieldMergeResultOps {
   }
 }
 
-object Merger {
-  // Parameter can't be `State` as that shadows the Cats type
-  implicit class WorkMergingOps[StateT <: WorkState](
-    work: Work.Visible[StateT]
-  ) {
-    def mapData(
-      f: WorkData[StateT#WorkDataState] => WorkData[StateT#WorkDataState]
-    ): Work.Visible[StateT] =
-      work.copy(data = f(work.data))
-    def mapState(
-      f: StateT => StateT
-    ): Work.Visible[StateT] =
-      work.copy(state = f(work.state))
-  }
-}
-
-object PlatformMerger extends Merger {
-  import Merger.WorkMergingOps
+object PlatformMerger extends Merger with WorkMergingOps {
   import weco.catalogue.internal_model.image.ParentWork._
 
   override def findTarget(
@@ -211,7 +195,7 @@ object PlatformMerger extends Merger {
     if (sources.isEmpty)
       State.pure(
         models.MergeResult(
-          mergedTarget = modifyInternalWorks(target, target.data.items),
+          mergedTarget = target.withItemsInInternalWorks(target.data.items),
           imageDataWithSources = standaloneImages(target).map {
             image =>
               ImageDataWithSource(
@@ -241,7 +225,7 @@ object PlatformMerger extends Merger {
               )
           }
       } yield MergeResult(
-        mergedTarget = modifyInternalWorks(work, items),
+        mergedTarget = work.withItemsInInternalWorks(items),
         imageDataWithSources = sourceImageData.map {
           imageData =>
             ImageDataWithSource(
@@ -250,26 +234,6 @@ object PlatformMerger extends Merger {
             )
         }
       )
-
-  private def modifyInternalWorks(
-    work: Work.Visible[Identified],
-    items: List[Item[IdState.Minted]]
-  ) = {
-    // Internal works are in TEI works. If they are merged with Sierra, we want the Sierra
-    // items to be added to TEI internal works so that the user can request the item
-    // containing that work without having to find the wrapping work.
-    work
-      .mapState {
-        state =>
-          state.copy(internalWorkStubs = state.internalWorkStubs.map {
-            stub =>
-              stub.copy(
-                workData =
-                  stub.workData.copy[DataState.Identified](items = items)
-              )
-          })
-      }
-  }
 
   private def standaloneImages(
     target: Work.Visible[Identified]
