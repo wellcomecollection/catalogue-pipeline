@@ -41,7 +41,7 @@ trait ImageRule extends FieldMergeRule with ImageDataOps {
       sierraWork and not(sierraDigitisedMiro)
     val isDefinedForSource: WorkPredicate = singleDigitalItemMiroWork
   }
-  
+
   protected lazy val getMetsPictureAndEphemeraImages = new FlatImageMergeRule {
     val isDefinedForTarget: WorkPredicate = sierraPictureOrEphemera
     val isDefinedForSource: WorkPredicate = singleDigitalItemMetsWork
