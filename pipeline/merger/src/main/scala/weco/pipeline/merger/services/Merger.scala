@@ -247,6 +247,7 @@ object PlatformMerger extends Merger {
           sources
         ).redirectSources
         sourceImageData <- ImageDataRule(target, sources).redirectSources
+        redirectImageData <- ImagesRule(target, sources).redirectSources
         work = target
           .mapData {
             data =>
@@ -259,7 +260,7 @@ object PlatformMerger extends Merger {
           }
       } yield MergeResult(
         mergedTarget = modifyInternalWorks(work, items),
-        imageDataWithSources = sourceImageData.map {
+        imageDataWithSources = redirectImageData.map {
           imageData =>
             ImageDataWithSource(
               imageData = imageData,
