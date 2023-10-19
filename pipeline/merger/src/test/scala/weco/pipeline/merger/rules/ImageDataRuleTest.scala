@@ -55,62 +55,62 @@ class ImageDataRuleTest
       result.map(_.locations) should contain theSameElementsAs
         miroWorks.map(_.data.imageData.head.locations)
     }
-  }
 
-  describe("special handling for digmiro") {
-    info(
-      "digmiro refers to records where Miro images have been redigitised via Mets"
-    )
-    info(
-      "as such, the Miro images are to be ignored, as the Mets content replaces it"
-    )
-    info(
-      "two digcodes designate a Sierra document as digmiro - digmiro and digaids"
-    )
+    describe("discarding overridden images in digmiro works") {
+      info(
+        "digmiro refers to records where Miro images have been redigitised via Mets"
+      )
+      info(
+        "as such, the Miro images are to be ignored, as the Mets content replaces it"
+      )
+      info(
+        "there are two digcodes that designate a Sierra document as digmiro - digmiro and digaids"
+      )
 
-    forAll(Table("digcode", "digmiro", "digaids")) {
-      digcode =>
-        it(s"discards Miro images for Sierra works with digcode: $digcode") {
-          val sierraWork = sierraDigitalIdentifiedWork().otherIdentifiers(
-            List(
-              createDigcodeIdentifier(digcode)
+      forAll(Table("digcode", "digmiro", "digaids")) {
+        digcode =>
+          it(s"discards Miro images for Sierra works with digcode: $digcode") {
+            val sierraWork = sierraDigitalIdentifiedWork().otherIdentifiers(
+              List(
+                createDigcodeIdentifier(digcode)
+              )
             )
+            val miroWorks = (1 to 5).map(_ => miroIdentifiedWork())
+            ImageDataRule
+              .merge(sierraWork, miroWorks)
+              .data shouldBe empty
+          }
+      }
+
+      it(s"returns Miro images for Sierra works with non-digmiro digcodes") {
+        val sierraWork = sierraDigitalIdentifiedWork().otherIdentifiers(
+          List(
+            createDigcodeIdentifier("digicon")
           )
-          val miroWorks = (1 to 5).map(_ => miroIdentifiedWork())
-          ImageDataRule
-            .merge(sierraWork, miroWorks)
-            .data shouldBe empty
-        }
-    }
-
-    it(s"returns Miro images for Sierra works with non-digmiro digcodes") {
-      val sierraWork = sierraDigitalIdentifiedWork().otherIdentifiers(
-        List(
-          createDigcodeIdentifier("digicon")
         )
-      )
-      val miroWorks = (1 to 5).map(_ => miroIdentifiedWork())
-      ImageDataRule
-        .merge(sierraWork, miroWorks)
-        .data should contain theSameElementsAs miroWorks.flatMap(
-        _.data.imageData
-      )
-    }
-
-    it(
-      s"discards Miro images for Sierra works with a mixture of digmiro and non-digmiro digcodes"
-    ) {
-      val sierraWork = sierraDigitalIdentifiedWork().otherIdentifiers(
-        List(
-          createDigcodeIdentifier("digicon"),
-          createDigcodeIdentifier("digmiro"),
-          createDigcodeIdentifier("digpicture")
+        val miroWorks = (1 to 5).map(_ => miroIdentifiedWork())
+        ImageDataRule
+          .merge(sierraWork, miroWorks)
+          .data should contain theSameElementsAs miroWorks.flatMap(
+          _.data.imageData
         )
-      )
-      val miroWorks = (1 to 5).map(_ => miroIdentifiedWork())
-      ImageDataRule
-        .merge(sierraWork, miroWorks)
-        .data shouldBe empty
+      }
+
+      it(
+        s"discards Miro images for Sierra works with a mixture of digmiro and non-digmiro digcodes"
+      ) {
+        val sierraWork = sierraDigitalIdentifiedWork().otherIdentifiers(
+          List(
+            createDigcodeIdentifier("digicon"),
+            createDigcodeIdentifier("digmiro"),
+            createDigcodeIdentifier("digpicture")
+          )
+        )
+        val miroWorks = (1 to 5).map(_ => miroIdentifiedWork())
+        ImageDataRule
+          .merge(sierraWork, miroWorks)
+          .data shouldBe empty
+      }
     }
   }
 }

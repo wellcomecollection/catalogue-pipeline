@@ -13,7 +13,7 @@ import weco.pipeline.merger.models.{FieldMergeResult, ImageDataOps}
  * The imageData property is populated from the
  * */
 
-trait ImageRule extends FieldMergeRule with ImageDataOps {
+trait ImageRule extends FieldMergeRule {
 
   import WorkPredicates._
 
@@ -22,6 +22,7 @@ trait ImageRule extends FieldMergeRule with ImageDataOps {
   protected def mergeSierraImages(
     sources: Seq[Work[Identified]]
   )(sierraTarget: Work.Visible[Identified]): FieldMergeResult[FieldData]
+
   override def merge(
     target: Work.Visible[Identified],
     sources: Seq[Work[Identified]] = Nil
@@ -68,7 +69,7 @@ object ImageDataRule extends ImageRule {
     val miroImages = getPairedMiroImages(sierraTarget, sources).getOrElse(Nil)
 
     FieldMergeResult(
-      // Only Miro images contribute to the imageData list,
+      // Only Miro images contribute to the imageData list in the target Work,
       // Mets images are covered by being included in the items list.
       data = miroImages,
       sources = List(
@@ -78,7 +79,7 @@ object ImageDataRule extends ImageRule {
   }
 }
 
-object ImagesRule extends ImageRule {
+object ImagesRule extends ImageRule with ImageDataOps {
   private def mergeMetsLicenceIntoMiroLocation(
     miroImageData: FieldData,
     metsImageData: FieldData

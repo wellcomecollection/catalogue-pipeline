@@ -3,9 +3,6 @@ package weco.pipeline.merger.rules
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.{Inspectors, OptionValues, PrivateMethodTester}
-import weco.catalogue.internal_model.work.generators.SierraWorkGenerators
-import ImageDataRule.FlatImageMergeRule
-import WorkPredicates.WorkPredicate
 import weco.catalogue.internal_model.locations.{DigitalLocation, License}
 import weco.catalogue.internal_model.work.generators.{
   MetsWorkGenerators,
@@ -138,7 +135,7 @@ class ImagesRuleTest
       val metsWork = createInvisibleMetsIdentifiedWorkWith(numImages = 3)
       val miroWorks = (1 to n).map(_ => miroIdentifiedWork()).toList
       val sierraWork = sierraDigitalIdentifiedWork()
-      val result = ImageDataRule.merge(sierraWork, miroWorks :+ metsWork).data
+      val result = ImagesRule.merge(sierraWork, miroWorks :+ metsWork).data
 
       result should have length n
       result.map(_.locations) should contain theSameElementsAs
@@ -193,13 +190,11 @@ class ImagesRuleTest
         )
       )
     val result =
-      ImageDataRule.merge(sierraDigmiroWork, List(miroWork, metsWork)).data
+      ImagesRule.merge(sierraDigmiroWork, List(miroWork, metsWork)).data
 
-    result should have length 1
-    result.map(
-      _.locations
-    ) should contain theSameElementsAs miroWork.data.imageData
-      .map(_.locations)
+    result should have length 2
+
+    result should contain theSameElementsAs metsWork.data.imageData ++ miroWork.data.imageData
   }
 
   it(
@@ -217,22 +212,9 @@ class ImagesRuleTest
         )
       )
     val result =
-      ImageDataRule.merge(sierraDigmiroWork, List(miroWork, metsWork)).data
+      ImagesRule.merge(sierraDigmiroWork, List(miroWork, metsWork)).data
 
-    result should have length 0
-  }
-
-  describe("the flat image merging rule") {
-    val testRule = new FlatImageMergeRule {
-      override val isDefinedForTarget: WorkPredicate = _ => true
-      override val isDefinedForSource: WorkPredicate = _ => true
-    }
-
-    it("creates images from every source") {
-      val target = sierraDigitalIdentifiedWork()
-      val sources = (1 to 5).map(_ => miroIdentifiedWork())
-      testRule(target, sources).get should have length 5
-    }
+    result should contain theSameElementsAs (metsWork.data.imageData)
   }
 
 }
