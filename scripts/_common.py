@@ -2,6 +2,7 @@ import concurrent.futures
 import itertools
 import re
 import subprocess
+import base64
 
 import boto3
 from elasticsearch import Elasticsearch
@@ -50,16 +51,13 @@ def get_api_es_client(date):
     """
     session = get_session(role_arn="arn:aws:iam::756629837203:role/catalogue-developer")
     host, port, protocol = _get_pipeline_cluster(session, date=date)
-    username = get_secret_string(
+    api_key = get_secret_string(
         session,
-        secret_id=f"elasticsearch/pipeline_storage_{date}/catalogue_api/es_username",
+        secret_id=f"elasticsearch/pipeline_storage_{date}/catalogue_api/api_key",
     )
-    password = get_secret_string(
-        session,
-        secret_id=f"elasticsearch/pipeline_storage_{date}/catalogue_api/es_password",
-    )
+    decoded_api_id_and_key = base64.b64decode(api_key).decode('utf-8').split(":")
 
-    return Elasticsearch(f"{protocol}://{username}:{password}@{host}:{port}")
+    return Elasticsearch(f"{protocol}://{host}:{port}", api_key=(decoded_api_id_and_key[0], decoded_api_id_and_key[1]))
 
 
 def get_ingestor_es_client(date, doc_type):
@@ -68,16 +66,13 @@ def get_ingestor_es_client(date, doc_type):
     """
     session = get_session(role_arn="arn:aws:iam::760097843905:role/platform-developer")
     host, port, protocol = _get_pipeline_cluster(session, date=date)
-    username = get_secret_string(
+    api_key = get_secret_string(
         session,
-        secret_id=f"elasticsearch/pipeline_storage_{date}/{doc_type}_ingestor/es_username",
+        secret_id=f"elasticsearch/pipeline_storage_{date}/{doc_type}_ingestor/api_key",
     )
-    password = get_secret_string(
-        session,
-        secret_id=f"elasticsearch/pipeline_storage_{date}/{doc_type}_ingestor/es_password",
-    )
+    decoded_api_id_and_key = base64.b64decode(api_key).decode('utf-8').split(":")
 
-    return Elasticsearch(f"{protocol}://{username}:{password}@{host}:{port}")
+    return Elasticsearch(f"{protocol}://{host}:{port}", api_key=(decoded_api_id_and_key[0], decoded_api_id_and_key[1]))
 
 
 def get_date_from_index_name(index_name):
