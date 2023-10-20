@@ -178,7 +178,8 @@ def _remove_image_from_elasticsearch(*, miro_id):
 
     # Remove the work from the works index
     works_resp = api_es_client(pipeline_date).search(
-        index=works_index, body={"query": {"term": {"query.identifiers.value": miro_id}}}
+        index=works_index,
+        body={"query": {"term": {"query.identifiers.value": miro_id}}},
     )
 
     try:
