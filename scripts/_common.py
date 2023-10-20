@@ -55,9 +55,12 @@ def get_api_es_client(date):
         session,
         secret_id=f"elasticsearch/pipeline_storage_{date}/catalogue_api/api_key",
     )
-    decoded_api_id_and_key = base64.b64decode(api_key).decode('utf-8').split(":")
+    decoded_api_id_and_key = base64.b64decode(api_key).decode("utf-8").split(":")
 
-    return Elasticsearch(f"{protocol}://{host}:{port}", api_key=(decoded_api_id_and_key[0], decoded_api_id_and_key[1]))
+    return Elasticsearch(
+        f"{protocol}://{host}:{port}",
+        api_key=(decoded_api_id_and_key[0], decoded_api_id_and_key[1]),
+    )
 
 
 def get_ingestor_es_client(date, doc_type):
@@ -70,9 +73,12 @@ def get_ingestor_es_client(date, doc_type):
         session,
         secret_id=f"elasticsearch/pipeline_storage_{date}/{doc_type}_ingestor/api_key",
     )
-    decoded_api_id_and_key = base64.b64decode(api_key).decode('utf-8').split(":")
+    decoded_api_id_and_key = base64.b64decode(api_key).decode("utf-8").split(":")
 
-    return Elasticsearch(f"{protocol}://{host}:{port}", api_key=(decoded_api_id_and_key[0], decoded_api_id_and_key[1]))
+    return Elasticsearch(
+        f"{protocol}://{host}:{port}",
+        api_key=(decoded_api_id_and_key[0], decoded_api_id_and_key[1]),
+    )
 
 
 def get_date_from_index_name(index_name):
