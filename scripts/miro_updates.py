@@ -178,7 +178,8 @@ def _remove_image_from_elasticsearch(*, miro_id):
 
     # Remove the work from the works index
     works_resp = api_es_client(pipeline_date).search(
-        index=works_index, body={"query": {"term": {"query.allIdentifiers": miro_id}}}
+        index=works_index,
+        body={"query": {"term": {"query.identifiers.value": miro_id}}},
     )
 
     try:
@@ -236,8 +237,7 @@ def _remove_image_from_dlcs(*, miro_id):
     resp = dlcs_api_client().delete(
         f"https://api.dlcs.io/customers/2/spaces/8/images/{miro_id}"
     )
-    resp.raise_for_status()
-    assert resp.json()["success"] == "true", resp.json()
+    assert resp.status_code == 204, resp
 
 
 def _remove_image_from_cloudfront(*, miro_id):
@@ -255,6 +255,7 @@ def _remove_image_from_cloudfront(*, miro_id):
 def suppress_image(*, miro_id, message: str):
     """
     Hide a Miro image from wellcomecollection.org.
+    These operations must happen in a specific order: _set_image_availability first, as the DDB table is the source of truth for Miro images when building pipelines
     """
     _set_image_availability(miro_id=miro_id, message=message, is_available=False)
 
