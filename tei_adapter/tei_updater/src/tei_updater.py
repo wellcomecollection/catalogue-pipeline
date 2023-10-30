@@ -87,6 +87,17 @@ def diff_trees(old_tree, new_tree, time):
     return messages
 
 
+def get_authenticated_session(github_token_secret):
+    session = requests.Session()
+    if github_token_secret:
+        secrets = boto3.client("secretsmanager")
+        github_token = secrets.get_secret_value(SecretId=github_token_secret)[
+            "SecretString"
+        ]
+        session.headers.update({"Authorization": f"Bearer {github_token}"})
+    return session
+
+
 @log_on_error
 def main(event, _ctxt=None, s3_client=None, sns_client=None, session=None):
     topic_arn = os.environ["TOPIC_ARN"]
@@ -97,17 +108,10 @@ def main(event, _ctxt=None, s3_client=None, sns_client=None, session=None):
 
     s3_client = s3_client or boto3.client("s3")
     sns_client = sns_client or boto3.client("sns")
-
-    if github_token_secret and not session:
-        secrets = boto3.client("secretsmanager")
-        github_token = secrets.get_secret_value(SecretId=github_token_secret)[
-            "SecretString"
-        ]
-        session = requests.Session()
-        session.headers.update({"Authorization": f"Bearer {github_token}"})
+    authenticated_session = session or get_authenticated_session(github_token_secret)
 
     old_tree = get_stored_tree(s3_client, bucket_name, key)
-    new_tree, time = get_new_tree(github_api_url, session)
+    new_tree, time = get_new_tree(github_api_url, authenticated_session)
 
     if old_tree:
         messages = diff_trees(old_tree, new_tree, time)
