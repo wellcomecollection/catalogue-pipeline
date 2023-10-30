@@ -93,7 +93,7 @@ def main(event, _ctxt=None, s3_client=None, sns_client=None, session=None):
     bucket_name = os.environ["BUCKET_NAME"]
     key = os.environ["TREE_FILE_KEY"]
     github_api_url = os.environ["GITHUB_API_URL"]
-    github_token_secret = os.environ["GITHUB_TOKEN_SECRET"]
+    github_token_secret = os.environ.get("GITHUB_TOKEN_SECRET", None)
 
     s3_client = s3_client or boto3.client("s3")
     sns_client = sns_client or boto3.client("sns")
