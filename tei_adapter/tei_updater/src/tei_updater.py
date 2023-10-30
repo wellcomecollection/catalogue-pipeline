@@ -93,9 +93,18 @@ def main(event, _ctxt=None, s3_client=None, sns_client=None, session=None):
     bucket_name = os.environ["BUCKET_NAME"]
     key = os.environ["TREE_FILE_KEY"]
     github_api_url = os.environ["GITHUB_API_URL"]
+    github_token_secret = os.environ["GITHUB_TOKEN_SECRET"]
 
     s3_client = s3_client or boto3.client("s3")
     sns_client = sns_client or boto3.client("sns")
+
+    if github_token_secret and not session:
+        secrets = boto3.client("secretsmanager")
+        github_token = secrets.get_secret_value(SecretId=github_token_secret)["SecretString"]
+        session = requests.Session()
+        session.headers.update({
+            "Authorization": f"Bearer {github_token}"
+        })
 
     old_tree = get_stored_tree(s3_client, bucket_name, key)
     new_tree, time = get_new_tree(github_api_url, session)
