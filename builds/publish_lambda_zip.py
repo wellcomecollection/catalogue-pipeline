@@ -122,4 +122,4 @@ if __name__ == "__main__":
     name = os.path.basename(key)
     filename = build_lambda_local(path=lambda_dir, name=name)
 
-    subprocess.check_call(["aws", "s3", "cp", filename, f"s3://{bucket}/{key}"])
+    subprocess.check_call(["aws", "s3", "cp", filename, f"s3://{bucket}/{key}.zip"])

@@ -214,7 +214,8 @@ object PlatformMerger extends Merger with WorkMergingOps {
           target,
           sources
         ).redirectSources
-        sourceImageData <- ImageDataRule(target, sources).redirectSources
+        targetImageData <- ImageDataRule(target, sources).redirectSources
+        separateImageData <- ImagesRule(target, sources).redirectSources
         work = target
           .mapData {
             data =>
@@ -222,12 +223,12 @@ object PlatformMerger extends Merger with WorkMergingOps {
                 items = items,
                 thumbnail = thumbnail,
                 otherIdentifiers = otherIdentifiers,
-                imageData = sourceImageData
+                imageData = targetImageData
               )
           }
       } yield MergeResult(
         mergedTarget = work.withItemsInInternalWorks(items),
-        imageDataWithSources = sourceImageData.map {
+        imageDataWithSources = separateImageData.map {
           imageData =>
             ImageDataWithSource(
               imageData = imageData,

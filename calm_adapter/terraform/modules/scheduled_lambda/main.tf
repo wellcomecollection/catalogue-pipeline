@@ -5,7 +5,7 @@ module "scheduled_lambda" {
   description = var.description
 
   handler = "lambda.main"
-  runtime = "python3.7"
+  runtime = "python3.10"
   timeout = var.timeout
 
   s3_bucket         = data.aws_s3_object.package.bucket

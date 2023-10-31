@@ -2,18 +2,14 @@ package weco.pipeline.merger.rules
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.prop.TableDrivenPropertyChecks
 import org.scalatest.{Inspectors, OptionValues, PrivateMethodTester}
 import weco.catalogue.internal_model.work.generators.SierraWorkGenerators
-import weco.catalogue.internal_model.work.WorkState.Identified
-import ImageDataRule.FlatImageMergeRule
-import WorkPredicates.WorkPredicate
-import weco.catalogue.internal_model.locations.{DigitalLocation, License}
 import weco.catalogue.internal_model.work.generators.{
   MetsWorkGenerators,
   MiroWorkGenerators,
   SierraWorkGenerators
 }
-import weco.catalogue.internal_model.work.{Format, Work}
 
 class ImageDataRuleTest
     extends AnyFunSpec
@@ -23,213 +19,98 @@ class ImageDataRuleTest
     with MetsWorkGenerators
     with PrivateMethodTester
     with OptionValues
-    with Inspectors {
-  describe("image creation rules") {
-    it("creates n images from n Miro works and a single Sierra work") {
-      val n = 3
-      val miroWorks = (1 to n).map(_ => miroIdentifiedWork())
+    with Inspectors
+    with TableDrivenPropertyChecks {
+
+  describe("returning images for the imageData property") {
+    info(
+      "The imageData property of a Sierra merge target is only populated using Miro images."
+    )
+    info(
+      "Images from other sources are instead linked to the target via the items property."
+    )
+
+    it("returns an empty list if there are no sources to merge from") {
       val sierraWork = sierraDigitalIdentifiedWork()
-      val result = ImageDataRule.merge(sierraWork, miroWorks.toList).data
-
-      result should have length n
-      result.map(_.locations) should contain theSameElementsAs
-        miroWorks.map(_.data.imageData.head.locations)
+      ImageDataRule.merge(sierraWork, Nil).data shouldBe empty
     }
 
-    it(
-      "creates n images from a METS work containing n images, and a single Sierra picture work"
-    ) {
-      val n = 5
-      val metsWork = createInvisibleMetsIdentifiedWorkWith(numImages = n)
-      val sierraPictureWork = sierraIdentifiedWork().format(Format.Pictures)
-      val result = ImageDataRule.merge(sierraPictureWork, List(metsWork)).data
-
-      result should have length n
-      result.map(_.locations) should contain theSameElementsAs
-        metsWork.data.imageData.map(_.locations)
-    }
-
-    it(
-      "creates n images from a METS work containing n images, and a single Sierra ephemera work"
-    ) {
-      val n = 5
-      val metsWork = createInvisibleMetsIdentifiedWorkWith(numImages = n)
-      val sierraEphemeraWork = sierraIdentifiedWork().format(Format.Ephemera)
-      val result = ImageDataRule.merge(sierraEphemeraWork, List(metsWork)).data
-
-      result should have length n
-      result.map(_.locations) should contain theSameElementsAs
-        metsWork.data.imageData.map(_.locations)
-    }
-
-    it(
-      "creates n + m images from m Miro works, a METS work containing n images, and a single Sierra picture work"
-    ) {
-      val n = 3
-      val m = 4
-      val miroWorks = (1 to m).map(_ => miroIdentifiedWork()).toList
-      val metsWork = createInvisibleMetsIdentifiedWorkWith(numImages = n)
-      val sierraPictureWork = sierraIdentifiedWork().format(Format.Pictures)
-      val result =
-        ImageDataRule.merge(sierraPictureWork, miroWorks :+ metsWork).data
-
-      result should have length n + m
-      result.map(_.locations) should contain theSameElementsAs
-        metsWork.data.imageData.map(_.locations) ++
-        miroWorks.map(_.data.imageData.head.locations)
-    }
-
-    it(
-      "creates n + m images from m Miro works, a METS work containing n images, and a single Sierra ephemera work"
-    ) {
-      val n = 3
-      val m = 4
-      val miroWorks = (1 to m).map(_ => miroIdentifiedWork()).toList
-
-      val metsWork = createInvisibleMetsIdentifiedWorkWith(
-        numImages = n
+    it("returns images from Miro") {
+      val sierraWork = sierraDigitalIdentifiedWork()
+      val miroWorks = (1 to 5).map(_ => miroIdentifiedWork())
+      ImageDataRule
+        .merge(sierraWork, miroWorks)
+        .data should contain theSameElementsAs miroWorks.flatMap(
+        _.data.imageData
       )
-
-      val sierraEphemeraWork = sierraIdentifiedWork().format(Format.Ephemera)
-      val result =
-        ImageDataRule.merge(sierraEphemeraWork, miroWorks :+ metsWork).data
-
-      result should have length n + m
-      result.map(_.locations) should contain theSameElementsAs
-        metsWork.data.imageData.map(_.locations) ++ miroWorks.map(
-          _.data.imageData.head.locations
-        )
     }
 
-    it(
-      "overrides the licence in Miro works with the licence from the METS work"
-    ) {
-      val n = 3
-      val m = 4
-      val miroWorks = (1 to m).map(_ => miroIdentifiedWork()).toList
-      val expectedMiroLocations: Seq[List[DigitalLocation]] = miroWorks map {
-        work =>
-          work.data.imageData flatMap {
-            imageData =>
-              imageData.locations.map(
-                _.copy(license = Some(License.InCopyright))
-              )
-          }
-      }
-      val metsWork = createInvisibleMetsIdentifiedWorkWith(
-        numImages = n,
-        imageLocationLicence = Some(License.InCopyright)
-      )
-      val sierraEphemeraWork = sierraIdentifiedWork().format(Format.Ephemera)
-      val result =
-        ImageDataRule.merge(sierraEphemeraWork, miroWorks :+ metsWork).data
-
-      result should have length n + m
-      result.map(_.locations) should contain theSameElementsAs
-        metsWork.data.imageData.map(_.locations) ++ expectedMiroLocations
-    }
-
-    it(
-      "ignores METS images, but uses n Miro images, for a non-picture/ephemera Sierra work"
-    ) {
-      val n = 3
+    it("does not return images from METS") {
+      val miroWorks = (1 to 5).map(_ => miroIdentifiedWork())
       val metsWork = createInvisibleMetsIdentifiedWorkWith(numImages = 3)
-      val miroWorks = (1 to n).map(_ => miroIdentifiedWork()).toList
       val sierraWork = sierraDigitalIdentifiedWork()
       val result = ImageDataRule.merge(sierraWork, miroWorks :+ metsWork).data
 
-      result should have length n
+      result should have length 5
       result.map(_.locations) should contain theSameElementsAs
         miroWorks.map(_.data.imageData.head.locations)
     }
 
-    it(
-      "does not use Miro images when a METS image is present for a digaids Sierra work"
-    ) {
-      val metsWork = createInvisibleMetsIdentifiedWorkWith(numImages = 1)
-      val miroWork = miroIdentifiedWork()
-      val sierraDigaidsWork = sierraIdentifiedWork()
-        .format(Format.Pictures)
-        .otherIdentifiers(List(createDigcodeIdentifier("digaids")))
-      val result =
-        ImageDataRule.merge(sierraDigaidsWork, List(miroWork, metsWork)).data
-
-      result should have length 1
-      result.map(
-        _.locations
-      ) should contain theSameElementsAs metsWork.data.imageData
-        .map(_.locations)
-    }
-
-    it(
-      "does not use Miro images when a METS image is present for a digmiro Sierra work"
-    ) {
-      val metsWork = createInvisibleMetsIdentifiedWorkWith(numImages = 1)
-      val miroWork = miroIdentifiedWork()
-      val sierraDigmiroWork = sierraIdentifiedWork()
-        .format(Format.Pictures)
-        .otherIdentifiers(List(createDigcodeIdentifier("digmiro")))
-      val result =
-        ImageDataRule.merge(sierraDigmiroWork, List(miroWork, metsWork)).data
-
-      result should have length 1
-      result.map(
-        _.locations
-      ) should contain theSameElementsAs metsWork.data.imageData
-        .map(_.locations)
-    }
-  }
-
-  it(
-    "correctly identifies a digmiro Sierra work regardless of other digcodes"
-  ) {
-    val metsWork = createInvisibleMetsIdentifiedWorkWith(numImages = 1)
-    val miroWork = miroIdentifiedWork()
-    val sierraDigmiroWork = sierraIdentifiedWork()
-      .format(Format.Pictures)
-      .otherIdentifiers(
-        List(
-          createDigcodeIdentifier("CBM"),
-          createDigcodeIdentifier("digmiro"),
-          createDigcodeIdentifier("WOAM")
-        )
+    describe("discarding overridden images in digmiro works") {
+      info(
+        "digmiro refers to records where Miro images have been redigitised via Mets"
       )
-    val result =
-      ImageDataRule.merge(sierraDigmiroWork, List(miroWork, metsWork)).data
+      info(
+        "as such, the Miro images are to be ignored, as the Mets content replaces it"
+      )
+      info(
+        "there are two digcodes that designate a Sierra document as digmiro - digmiro and digaids"
+      )
 
-    result should have length 1
-    result.map(
-      _.locations
-    ) should contain theSameElementsAs metsWork.data.imageData
-      .map(_.locations)
-  }
+      forAll(Table("digcode", "digmiro", "digaids")) {
+        digcode =>
+          it(s"discards Miro images for Sierra works with digcode: $digcode") {
+            val sierraWork = sierraDigitalIdentifiedWork().otherIdentifiers(
+              List(
+                createDigcodeIdentifier(digcode)
+              )
+            )
+            val miroWorks = (1 to 5).map(_ => miroIdentifiedWork())
+            ImageDataRule
+              .merge(sierraWork, miroWorks)
+              .data shouldBe empty
+          }
+      }
 
-  describe("the flat image merging rule") {
-    val testRule = new FlatImageMergeRule {
-      override val isDefinedForTarget: WorkPredicate = _ => true
-      override val isDefinedForSource: WorkPredicate = _ => true
+      it(s"returns Miro images for Sierra works with non-digmiro digcodes") {
+        val sierraWork = sierraDigitalIdentifiedWork().otherIdentifiers(
+          List(
+            createDigcodeIdentifier("digicon")
+          )
+        )
+        val miroWorks = (1 to 5).map(_ => miroIdentifiedWork())
+        ImageDataRule
+          .merge(sierraWork, miroWorks)
+          .data should contain theSameElementsAs miroWorks.flatMap(
+          _.data.imageData
+        )
+      }
+
+      it(
+        s"discards Miro images for Sierra works with a mixture of digmiro and non-digmiro digcodes"
+      ) {
+        val sierraWork = sierraDigitalIdentifiedWork().otherIdentifiers(
+          List(
+            createDigcodeIdentifier("digicon"),
+            createDigcodeIdentifier("digmiro"),
+            createDigcodeIdentifier("digpicture")
+          )
+        )
+        val miroWorks = (1 to 5).map(_ => miroIdentifiedWork())
+        ImageDataRule
+          .merge(sierraWork, miroWorks)
+          .data shouldBe empty
+      }
     }
-
-    it("creates images from every source") {
-      val target = sierraDigitalIdentifiedWork()
-      val sources = (1 to 5).map(_ => miroIdentifiedWork())
-      testRule(target, sources).get should have length 5
-    }
   }
-
-  private def createInvisibleMetsIdentifiedWorkWith(
-    numImages: Int,
-    imageLocationLicence: Option[License] = Some(License.CCBY)
-  ): Work.Invisible[Identified] = {
-    val images =
-      (1 to numImages).map {
-        _ =>
-          createMetsImageDataWith(locationLicence =
-            imageLocationLicence
-          ).toIdentified
-      }.toList
-
-    metsIdentifiedWork().imageData(images).invisible()
-  }
-
 }
