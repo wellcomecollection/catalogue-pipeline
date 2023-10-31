@@ -4,7 +4,6 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.catalogue.internal_model.work.WorkFsm._
-import cats.data.State
 import weco.catalogue.internal_model.work.generators.SierraWorkGenerators
 import weco.catalogue.internal_model.identifiers.{
   DataState,
@@ -81,24 +80,25 @@ class MergerTest
     override protected def createMergeResult(
       target: Work.Visible[Identified],
       sources: Seq[Work[Identified]]
-    ): State[MergeState, MergeResult] =
-      for {
-        items <- CopyItemsRule(target, sources).redirectSources
-        otherIdentifiers <- CopyOtherIdentifiers(
-          target,
-          sources
-        ).redirectSources
-      } yield MergeResult(
-        mergedTarget = target
-          .mapData {
-            data =>
-              data.copy[DataState.Identified](
-                items = items,
-                otherIdentifiers = otherIdentifiers
-              )
-          },
-        imageDataWithSources = Nil
+    ): (Seq[Work[Identified]], MergeResult) = {
+      val items = CopyItemsRule(target, sources)
+      val otherIdentifiers = CopyOtherIdentifiers(target, sources)
+      (
+        items.sources ++ otherIdentifiers.sources,
+        MergeResult(
+          mergedTarget = target
+            .mapData {
+              data =>
+                data.copy[DataState.Identified](
+                  items = items.data,
+                  otherIdentifiers = otherIdentifiers.data
+                )
+            },
+          imageDataWithSources = Nil
+        )
       )
+
+    }
   }
 
   val mergedWorks = FirstWorkMerger.merge(inputWorks)

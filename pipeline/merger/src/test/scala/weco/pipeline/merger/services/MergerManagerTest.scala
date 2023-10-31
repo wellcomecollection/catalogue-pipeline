@@ -1,6 +1,5 @@
 package weco.pipeline.merger.services
 
-import cats.data.State
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.IdState
@@ -55,23 +54,25 @@ class MergerManagerTest extends AnyFunSpec with Matchers with WorkGenerators {
 
   val merger = new Merger {
 
-    /** Make every work a redirect to the first work in the list, and leave
-      * the first work intact.
+    /** Make every work a redirect to the first work in the list, and leave the
+      * first work intact.
       */
     override def merge(works: Seq[Work[Identified]]): MergerOutcome = {
-      val outputWorks = works.head +: works.tail.map { work =>
-        Work.Redirected[Identified](
-          state = Identified(
-            sourceIdentifier = work.sourceIdentifier,
-            canonicalId = work.state.canonicalId,
-            sourceModifiedTime = work.state.sourceModifiedTime,
-            internalWorkStubs = work.state.internalWorkStubs
-          ),
-          version = work.version,
-          redirectTarget = IdState.Identified(
-            works.head.state.canonicalId,
-            works.head.sourceIdentifier)
-        )
+      val outputWorks = works.head +: works.tail.map {
+        work =>
+          Work.Redirected[Identified](
+            state = Identified(
+              sourceIdentifier = work.sourceIdentifier,
+              canonicalId = work.state.canonicalId,
+              sourceModifiedTime = work.state.sourceModifiedTime,
+              internalWorkStubs = work.state.internalWorkStubs
+            ),
+            version = work.version,
+            redirectTarget = IdState.Identified(
+              works.head.state.canonicalId,
+              works.head.sourceIdentifier
+            )
+          )
       }
       MergerOutcome(
         resultWorks = outputWorks,
@@ -80,16 +81,15 @@ class MergerManagerTest extends AnyFunSpec with Matchers with WorkGenerators {
     }
 
     override def findTarget(
-      works: Seq[Work[Identified]]): Option[Work.Visible[Identified]] =
+      works: Seq[Work[Identified]]
+    ): Option[Work.Visible[Identified]] =
       works.headOption.map(_.asInstanceOf[Work.Visible[Identified]])
 
     override protected def createMergeResult(
       target: Work.Visible[Identified],
-      sources: Seq[Work[Identified]]): State[MergeState, MergeResult] =
-      State(
-        _ =>
-          (sources zip Stream.continually(true) toMap, MergeResult(target, Nil))
-      )
+      sources: Seq[Work[Identified]]
+    ): (Seq[Work[Identified]], MergeResult) =
+      (sources, MergeResult(target, Nil))
   }
 
   val mergerManager = new MergerManager(merger)

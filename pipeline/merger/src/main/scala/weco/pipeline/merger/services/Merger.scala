@@ -1,6 +1,5 @@
 package weco.pipeline.merger.services
 
-import cats.data.State
 import weco.catalogue.internal_model.identifiers.{DataState, IdState}
 import weco.catalogue.internal_model.locations.DigitalLocation
 import weco.catalogue.internal_model.work.WorkState.Identified
@@ -38,7 +37,7 @@ trait Merger extends MergerLogging with FieldMergeResultOps {
   protected def createMergeResult(
     target: Work.Visible[Identified],
     sources: Seq[Work[Identified]]
-  ): State[MergeState, MergeResult]
+  ): (Seq[Work[Identified]], MergeResult)
 
   private case class CategorisedWorks(
     target: Work.Visible[Identified],
@@ -88,13 +87,8 @@ trait Merger extends MergerLogging with FieldMergeResultOps {
               assert((sources ++ deleted :+ target).toSet == works.toSet)
 
               logIntentions(target, sources)
-              val (mergeResultSources, result) =
+              val (redirectedSources, result) =
                 createMergeResult(target, sources)
-                  .run(Map.empty)
-                  .value
-              val redirectedSources = mergeResultSources.collect {
-                case (source, true) => source
-              }
 
               val remaining = sources.toSet -- redirectedSources
               val redirects =
@@ -105,7 +99,7 @@ trait Merger extends MergerLogging with FieldMergeResultOps {
                 redirectedSources.map {
                   s =>
                     IdState.Identified(s.state.canonicalId, s.sourceIdentifier)
-                }.toSeq
+                }
 
               val internalWorks = result.mergedTarget.internalWorksWith(
                 thumbnail = result.mergedTarget.data.thumbnail,
@@ -203,38 +197,45 @@ object PlatformMerger extends Merger with WorkMergingOps {
   override def createMergeResult(
     target: Work.Visible[Identified],
     sources: Seq[Work[Identified]]
-  ): State[MergeState, MergeResult] =
+  ): (Seq[Work[Identified]], MergeResult) =
     if (sources.isEmpty)
-      State.pure(TargetOnlyMergeResult(target))
-    else
-      for {
-        items <- ItemsRule(target, sources).redirectSources
-        thumbnail <- ThumbnailRule(target, sources).redirectSources
-        otherIdentifiers <- OtherIdentifiersRule(
-          target,
-          sources
-        ).redirectSources
-        targetImageData <- ImageDataRule(target, sources).redirectSources
-        separateImageData <- ImagesRule(target, sources).redirectSources
-        work = target
-          .mapData {
-            data =>
-              data.copy[DataState.Identified](
-                items = items,
-                thumbnail = thumbnail,
-                otherIdentifiers = otherIdentifiers,
-                imageData = targetImageData
-              )
-          }
-      } yield MergeResult(
-        mergedTarget = work.withItemsInInternalWorks(items),
-        imageDataWithSources = separateImageData.map {
-          imageData =>
-            ImageDataWithSource(
-              imageData = imageData,
-              source = work.toParentWork
+      (Nil, TargetOnlyMergeResult(target))
+    else {
+      val items = ItemsRule(target, sources)
+      val thumbnail = ThumbnailRule(target, sources)
+      val otherIdentifiers = OtherIdentifiersRule(target, sources)
+      val targetImageData = ImageDataRule(target, sources)
+      val separateImageData = ImagesRule(target, sources)
+      val work = target
+        .mapData {
+          data =>
+            data.copy[DataState.Identified](
+              items = items.data,
+              thumbnail = thumbnail.data,
+              otherIdentifiers = otherIdentifiers.data,
+              imageData = targetImageData.data
             )
         }
+      val redirectSources = Seq(
+        items,
+        thumbnail,
+        otherIdentifiers,
+        targetImageData,
+        separateImageData
+      ).flatMap(_.sources).distinct
+      (
+        redirectSources,
+        MergeResult(
+          mergedTarget = work.withItemsInInternalWorks(items.data),
+          imageDataWithSources = separateImageData.data.map {
+            imageData =>
+              ImageDataWithSource(
+                imageData = imageData,
+                source = work.toParentWork
+              )
+          }
+        )
       )
+    }
 
 }
