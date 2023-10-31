@@ -76,8 +76,12 @@ trait Merger extends MergerLogging with FieldMergeResultOps {
         logIntentions(target, Nil)
         val result = TargetOnlyMergeResult(target)
         logResult(result, Nil, Nil)
+        val internalWorks = result.mergedTarget.internalWorksWith(
+          thumbnail = result.mergedTarget.data.thumbnail,
+          version = result.mergedTarget.version
+        )
         MergerOutcome(
-          resultWorks = Seq(result.mergedTarget),
+          resultWorks = internalWorks :+ result.mergedTarget,
           imagesWithSources = result.imageDataWithSources
         )
       case _ =>
@@ -197,45 +201,42 @@ object PlatformMerger extends Merger with WorkMergingOps {
   override def createMergeResult(
     target: Work.Visible[Identified],
     sources: Seq[Work[Identified]]
-  ): (Seq[Work[Identified]], MergeResult) =
-    if (sources.isEmpty)
-      (Nil, TargetOnlyMergeResult(target))
-    else {
-      val items = ItemsRule(target, sources)
-      val thumbnail = ThumbnailRule(target, sources)
-      val otherIdentifiers = OtherIdentifiersRule(target, sources)
-      val targetImageData = ImageDataRule(target, sources)
-      val separateImageData = ImagesRule(target, sources)
-      val work = target
-        .mapData {
-          data =>
-            data.copy[DataState.Identified](
-              items = items.data,
-              thumbnail = thumbnail.data,
-              otherIdentifiers = otherIdentifiers.data,
-              imageData = targetImageData.data
+  ): (Seq[Work[Identified]], MergeResult) = {
+    val items = ItemsRule(target, sources)
+    val thumbnail = ThumbnailRule(target, sources)
+    val otherIdentifiers = OtherIdentifiersRule(target, sources)
+    val targetImageData = ImageDataRule(target, sources)
+    val separateImageData = ImagesRule(target, sources)
+    val work = target
+      .mapData {
+        data =>
+          data.copy[DataState.Identified](
+            items = items.data,
+            thumbnail = thumbnail.data,
+            otherIdentifiers = otherIdentifiers.data,
+            imageData = targetImageData.data
+          )
+      }
+    val redirectSources = Seq(
+      items,
+      thumbnail,
+      otherIdentifiers,
+      targetImageData,
+      separateImageData
+    ).flatMap(_.sources).distinct
+    (
+      redirectSources,
+      MergeResult(
+        mergedTarget = work.withItemsInInternalWorks(items.data),
+        imageDataWithSources = separateImageData.data.map {
+          imageData =>
+            ImageDataWithSource(
+              imageData = imageData,
+              source = work.toParentWork
             )
         }
-      val redirectSources = Seq(
-        items,
-        thumbnail,
-        otherIdentifiers,
-        targetImageData,
-        separateImageData
-      ).flatMap(_.sources).distinct
-      (
-        redirectSources,
-        MergeResult(
-          mergedTarget = work.withItemsInInternalWorks(items.data),
-          imageDataWithSources = separateImageData.data.map {
-            imageData =>
-              ImageDataWithSource(
-                imageData = imageData,
-                source = work.toParentWork
-              )
-          }
-        )
       )
-    }
+    )
+  }
 
 }
