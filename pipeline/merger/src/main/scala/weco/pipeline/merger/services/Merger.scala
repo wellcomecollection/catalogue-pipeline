@@ -6,7 +6,6 @@ import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.catalogue.internal_model.work._
 import weco.pipeline.merger.logging.MergerLogging
 import weco.pipeline.merger.models.{
-  FieldMergeResultOps,
   ImageDataWithSource,
   MergeResult,
   MergerOutcome,
@@ -27,7 +26,7 @@ import weco.pipeline.merger.rules._
  * - all redirected sources
  * - any other works untouched
  */
-trait Merger extends MergerLogging with FieldMergeResultOps {
+trait Merger extends MergerLogging {
   type MergeState = Map[Work[Identified], Boolean]
 
   protected def findTarget(
@@ -76,10 +75,7 @@ trait Merger extends MergerLogging with FieldMergeResultOps {
         logIntentions(target, Nil)
         val result = TargetOnlyMergeResult(target)
         logResult(result, Nil, Nil)
-        val internalWorks = result.mergedTarget.internalWorksWith(
-          thumbnail = result.mergedTarget.data.thumbnail,
-          version = result.mergedTarget.version
-        )
+        val internalWorks = result.mergedTarget.internalWorks
         MergerOutcome(
           resultWorks = internalWorks :+ result.mergedTarget,
           imagesWithSources = result.imageDataWithSources
@@ -105,10 +101,7 @@ trait Merger extends MergerLogging with FieldMergeResultOps {
                     IdState.Identified(s.state.canonicalId, s.sourceIdentifier)
                 }
 
-              val internalWorks = result.mergedTarget.internalWorksWith(
-                thumbnail = result.mergedTarget.data.thumbnail,
-                version = result.mergedTarget.version
-              )
+              val internalWorks = result.mergedTarget.internalWorks
 
               val targetWork: Work.Visible[Identified] =
                 Work.Visible[Identified](
@@ -130,7 +123,10 @@ trait Merger extends MergerLogging with FieldMergeResultOps {
   }
 
   private implicit class WorkOps(w: Work.Visible[Identified]) {
-    def internalWorksWith(
+    def internalWorks: List[Work.Visible[Identified]] =
+      internalWorksWith(thumbnail = w.data.thumbnail, version = w.version)
+
+    private def internalWorksWith(
       thumbnail: Option[DigitalLocation],
       version: Int
     ): List[Work.Visible[Identified]] =
