@@ -85,7 +85,9 @@ def get_pipeline_storage_es_client(reindex_date):
     password = get_secret_string(
         session, secret_id=f"{secret_prefix}/read_only/es_password"
     )
-    return Elasticsearch(f"{protocol}://{username}:{password}@{host}:{port}")
+    return Elasticsearch(
+        f"{protocol}://{host}:{port}",
+        basic_auth=(username, password))
 
 
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=1, max=10))
@@ -152,7 +154,7 @@ def list_queue_urls_in_account(sess, *, prefixes):
 
     for prefix in prefixes:
         for page in sqs_client.get_paginator("list_queues").paginate(
-            QueueNamePrefix=prefix
+                QueueNamePrefix=prefix
         ):
             yield from page["QueueUrls"]
 
