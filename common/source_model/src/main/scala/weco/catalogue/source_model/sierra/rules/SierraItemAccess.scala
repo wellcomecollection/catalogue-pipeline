@@ -348,15 +348,6 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           )
         )
 
-      case (_, _, _, _, _) if itemData.hasDueDate =>
-        AccessCondition(
-          method = AccessMethod.NotRequestable,
-          status = Some(AccessStatus.TemporarilyUnavailable),
-          note = Some(
-            "Item is in use by another reader. Please ask at Library Enquiry Desk."
-          )
-        )
-
       // When an item is on display in an exhibition, it is not available for request.
       // In this case, the Reserves Note(s) should give some more detail.
       case (_, _, _, _, Some(LocationType.OnExhibition))
@@ -378,6 +369,15 @@ object SierraItemAccess extends SierraQueryOps with Logging {
         AccessCondition(
           method = AccessMethod.NotRequestable,
           note = Some(sanitisedReservesNotes.mkString("<br />"))
+        )
+
+      case (_, _, _, _, _) if itemData.hasDueDate =>
+        AccessCondition(
+          method = AccessMethod.NotRequestable,
+          status = Some(AccessStatus.TemporarilyUnavailable),
+          note = Some(
+            "Item is in use by another reader. Please ask at Library Enquiry Desk."
+          )
         )
 
       // If we can't work out how this item should be handled, then let's mark it
