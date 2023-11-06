@@ -4,7 +4,6 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.catalogue.internal_model.work.WorkFsm._
-import cats.data.State
 import weco.catalogue.internal_model.work.generators.SierraWorkGenerators
 import weco.catalogue.internal_model.identifiers.{
   DataState,
@@ -17,7 +16,11 @@ import weco.catalogue.internal_model.work.generators.{
   SierraWorkGenerators
 }
 import weco.catalogue.internal_model.work.{Item, Work}
-import weco.pipeline.merger.models.{FieldMergeResult, MergeResult}
+import weco.pipeline.merger.models.{
+  FieldMergeResult,
+  MergeResult,
+  WorkMergingOps
+}
 import weco.pipeline.merger.rules.FieldMergeRule
 
 class MergerTest
@@ -27,8 +30,9 @@ class MergerTest
     with MiroWorkGenerators
     with SierraWorkGenerators {
   val inputWorks: Seq[Work[Identified]] =
-    (0 to 5).map { _ =>
-      sierraDigitalIdentifiedWork()
+    (0 to 5).map {
+      _ =>
+        sierraDigitalIdentifiedWork()
     } ++
       (0 to 5).map(_ => miroIdentifiedWork()) ++
       (0 to 5).map(_ => metsIdentifiedWork().invisible())
@@ -43,7 +47,8 @@ class MergerTest
 
     override def merge(
       target: Work.Visible[Identified],
-      sources: Seq[Work[Identified]]): FieldMergeResult[FieldData] =
+      sources: Seq[Work[Identified]]
+    ): FieldMergeResult[FieldData] =
       FieldMergeResult(
         data = mergedTargetItems,
         sources = List(sources.tail.head)
@@ -56,37 +61,44 @@ class MergerTest
 
     override def merge(
       target: Work.Visible[Identified],
-      sources: Seq[Work[Identified]]): FieldMergeResult[FieldData] =
+      sources: Seq[Work[Identified]]
+    ): FieldMergeResult[FieldData] =
       FieldMergeResult(
         data = mergedOtherIdentifiers,
-        sources = sources.tail.tail)
+        sources = sources.tail.tail
+      )
   }
 
   // Merges everything into the first Work in a given input.
-  object FirstWorkMerger extends Merger {
-    import Merger.WorkMergingOps
+  object FirstWorkMerger extends Merger with WorkMergingOps {
 
     override protected def findTarget(
-      works: Seq[Work[Identified]]): Option[Work.Visible[Identified]] =
+      works: Seq[Work[Identified]]
+    ): Option[Work.Visible[Identified]] =
       works.headOption.map(_.asInstanceOf[Work.Visible[Identified]])
 
     override protected def createMergeResult(
       target: Work.Visible[Identified],
-      sources: Seq[Work[Identified]]): State[MergeState, MergeResult] =
-      for {
-        items <- CopyItemsRule(target, sources).redirectSources
-        otherIdentifiers <- CopyOtherIdentifiers(target, sources).redirectSources
-      } yield
+      sources: Seq[Work[Identified]]
+    ): (Seq[Work[Identified]], MergeResult) = {
+      val items = CopyItemsRule(target, sources)
+      val otherIdentifiers = CopyOtherIdentifiers(target, sources)
+      (
+        items.sources ++ otherIdentifiers.sources,
         MergeResult(
           mergedTarget = target
-            .mapData { data =>
-              data.copy[DataState.Identified](
-                items = items,
-                otherIdentifiers = otherIdentifiers
-              )
+            .mapData {
+              data =>
+                data.copy[DataState.Identified](
+                  items = items.data,
+                  otherIdentifiers = otherIdentifiers.data
+                )
             },
           imageDataWithSources = Nil
         )
+      )
+
+    }
   }
 
   val mergedWorks = FirstWorkMerger.merge(inputWorks)
@@ -94,8 +106,9 @@ class MergerTest
   it("returns a single target work as specified") {
     val mergedWork: Work.Visible[Identified] = mergedWorks
       .mergedWorksWithTime(now)
-      .filter { w =>
-        w.sourceIdentifier == inputWorks.head.sourceIdentifier
+      .filter {
+        w =>
+          w.sourceIdentifier == inputWorks.head.sourceIdentifier
       }
       .head
       .asInstanceOf[Work.Visible[Identified]]
@@ -110,20 +123,23 @@ class MergerTest
   it("sets the redirectSources on the merged work") {
     val mergedWork: Work.Visible[Identified] = mergedWorks
       .mergedWorksWithTime(now)
-      .filter { w =>
-        w.sourceIdentifier == inputWorks.head.sourceIdentifier
+      .filter {
+        w =>
+          w.sourceIdentifier == inputWorks.head.sourceIdentifier
       }
       .head
       .asInstanceOf[Work.Visible[Identified]]
 
     mergedWork.redirectSources should contain theSameElementsAs
-      inputWorks.tail.tail.map { w =>
-        IdState.Identified(w.state.canonicalId, w.sourceIdentifier)
+      inputWorks.tail.tail.map {
+        w =>
+          IdState.Identified(w.state.canonicalId, w.sourceIdentifier)
       }
   }
 
   it(
-    "returns redirects for all sources that were marked as such by any field rule") {
+    "returns redirects for all sources that were marked as such by any field rule"
+  ) {
     mergedWorks.mergedWorksWithTime(now).collect {
       case redirect: Work.Redirected[Merged] => redirect.sourceIdentifier
     } should contain theSameElementsAs
@@ -137,15 +153,17 @@ class MergerTest
   }
 
   it("preserves the existing redirectSources on a target work") {
-    val existingRedirectSources = (1 to 3).map { _ =>
-      IdState.Identified(createCanonicalId, createSourceIdentifier)
+    val existingRedirectSources = (1 to 3).map {
+      _ =>
+        IdState.Identified(createCanonicalId, createSourceIdentifier)
     }
 
     val targetWork = identifiedWork()
       .withRedirectSources(existingRedirectSources)
 
-    val sourceWorks = (1 to 5).map { _ =>
-      identifiedWork()
+    val sourceWorks = (1 to 5).map {
+      _ =>
+        identifiedWork()
     }
 
     val mergerOutput = FirstWorkMerger.merge(targetWork +: sourceWorks)
@@ -161,8 +179,9 @@ class MergerTest
 
     mergedWork.redirectSources should contain allElementsOf existingRedirectSources
     mergedWork.redirectSources should contain allElementsOf
-      sourceWorks.tail.map { w =>
-        IdState.Identified(w.state.canonicalId, w.sourceIdentifier)
+      sourceWorks.tail.map {
+        w =>
+          IdState.Identified(w.state.canonicalId, w.sourceIdentifier)
       }
   }
 }

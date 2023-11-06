@@ -1,18 +1,16 @@
 package weco.pipeline.merger.services
 
-import cats.data.State
 import weco.catalogue.internal_model.identifiers.{DataState, IdState}
-import weco.catalogue.internal_model.image.ImageData
 import weco.catalogue.internal_model.locations.DigitalLocation
 import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.catalogue.internal_model.work._
 import weco.pipeline.merger.logging.MergerLogging
-import weco.pipeline.merger.models
 import weco.pipeline.merger.models.{
-  FieldMergeResult,
   ImageDataWithSource,
   MergeResult,
-  MergerOutcome
+  MergerOutcome,
+  TargetOnlyMergeResult,
+  WorkMergingOps
 }
 import weco.pipeline.merger.rules._
 
@@ -38,7 +36,7 @@ trait Merger extends MergerLogging {
   protected def createMergeResult(
     target: Work.Visible[Identified],
     sources: Seq[Work[Identified]]
-  ): State[MergeState, MergeResult]
+  ): (Seq[Work[Identified]], MergeResult)
 
   private case class CategorisedWorks(
     target: Work.Visible[Identified],
@@ -71,72 +69,64 @@ trait Merger extends MergerLogging {
         }
     }
 
-  implicit class MergeResultAccumulation[T](val result: FieldMergeResult[T]) {
-    def redirectSources: State[MergeState, T] = shouldRedirect(true)
-    def retainSources: State[MergeState, T] = shouldRedirect(false)
-
-    // If the state already contains a source, then don't change the existing `redirect` value
-    // Otherwise, add the source with the current value.
-    private def shouldRedirect(redirect: Boolean): State[MergeState, T] =
-      State {
-        prevState =>
-          val nextState = result.sources.foldLeft(prevState) {
-            case (state, source) if state.contains(source) => state
-            case (state, source) => state + (source -> redirect)
-          }
-          (nextState, result.data)
-      }
-  }
-
   def merge(works: Seq[Work[Identified]]): MergerOutcome = {
-    categoriseWorks(works)
-      .map {
-        case CategorisedWorks(target, sources, deleted) =>
-          assert((sources ++ deleted :+ target).toSet == works.toSet)
+    works match {
+      case Seq(target: Work.Visible[Identified]) =>
+        logIntentions(target, Nil)
+        val result = TargetOnlyMergeResult(target)
+        logResult(result, Nil, Nil)
+        val internalWorks = result.mergedTarget.internalWorks
+        MergerOutcome(
+          resultWorks = internalWorks :+ result.mergedTarget,
+          imagesWithSources = result.imageDataWithSources
+        )
+      case _ =>
+        categoriseWorks(works)
+          .map {
+            case CategorisedWorks(target, sources, deleted) =>
+              assert((sources ++ deleted :+ target).toSet == works.toSet)
 
-          logIntentions(target, sources)
-          val (mergeResultSources, result) = createMergeResult(target, sources)
-            .run(Map.empty)
-            .value
-          val redirectedSources = mergeResultSources.collect {
-            case (source, true) => source
+              logIntentions(target, sources)
+              val (redirectedSources, result) =
+                createMergeResult(target, sources)
+
+              val remaining = sources.toSet -- redirectedSources
+              val redirects =
+                redirectedSources.map(redirectSourceToTarget(target))
+              logResult(result, redirects.toList, remaining.toList)
+
+              val redirectedIdentifiers =
+                redirectedSources.map {
+                  s =>
+                    IdState.Identified(s.state.canonicalId, s.sourceIdentifier)
+                }
+
+              val internalWorks = result.mergedTarget.internalWorks
+
+              val targetWork: Work.Visible[Identified] =
+                Work.Visible[Identified](
+                  version = result.mergedTarget.version,
+                  data = result.mergedTarget.data,
+                  state = result.mergedTarget.state,
+                  redirectSources =
+                    result.mergedTarget.redirectSources ++ redirectedIdentifiers
+                )
+
+              MergerOutcome(
+                resultWorks =
+                  redirects.toList ++ remaining ++ deleted ++ internalWorks :+ targetWork,
+                imagesWithSources = result.imageDataWithSources
+              )
           }
-
-          val remaining = sources.toSet -- redirectedSources
-          val redirects = redirectedSources.map(redirectSourceToTarget(target))
-          logResult(result, redirects.toList, remaining.toList)
-
-          val internalWorks = result.mergedTarget.internalWorksWith(
-            thumbnail = result.mergedTarget.data.thumbnail,
-            version = result.mergedTarget.version
-          )
-
-          val redirectedIdentifiers =
-            redirectedSources.map {
-              s =>
-                IdState.Identified(s.state.canonicalId, s.sourceIdentifier)
-            }.toSeq
-
-          val targetWork: Work.Visible[Identified] =
-            Work.Visible[Identified](
-              version = result.mergedTarget.version,
-              data = result.mergedTarget.data,
-              state = result.mergedTarget.state,
-              redirectSources =
-                result.mergedTarget.redirectSources ++ redirectedIdentifiers
-            )
-
-          MergerOutcome(
-            resultWorks =
-              redirects.toList ++ remaining ++ deleted ++ internalWorks :+ targetWork,
-            imagesWithSources = result.imageDataWithSources
-          )
-      }
-      .getOrElse(MergerOutcome.passThrough(works))
+          .getOrElse(MergerOutcome.passThrough(works))
+    }
   }
 
-  private implicit class WorkOps(w: Work[Identified]) {
-    def internalWorksWith(
+  private implicit class WorkOps(w: Work.Visible[Identified]) {
+    def internalWorks: List[Work.Visible[Identified]] =
+      internalWorksWith(thumbnail = w.data.thumbnail, version = w.version)
+
+    private def internalWorksWith(
       thumbnail: Option[DigitalLocation],
       version: Int
     ): List[Work.Visible[Identified]] =
@@ -196,24 +186,7 @@ trait Merger extends MergerLogging {
   }
 }
 
-object Merger {
-  // Parameter can't be `State` as that shadows the Cats type
-  implicit class WorkMergingOps[StateT <: WorkState](
-    work: Work.Visible[StateT]
-  ) {
-    def mapData(
-      f: WorkData[StateT#WorkDataState] => WorkData[StateT#WorkDataState]
-    ): Work.Visible[StateT] =
-      work.copy(data = f(work.data))
-    def mapState(
-      f: StateT => StateT
-    ): Work.Visible[StateT] =
-      work.copy(state = f(work.state))
-  }
-}
-
-object PlatformMerger extends Merger {
-  import Merger.WorkMergingOps
+object PlatformMerger extends Merger with WorkMergingOps {
   import weco.catalogue.internal_model.image.ParentWork._
 
   override def findTarget(
@@ -224,43 +197,34 @@ object PlatformMerger extends Merger {
   override def createMergeResult(
     target: Work.Visible[Identified],
     sources: Seq[Work[Identified]]
-  ): State[MergeState, MergeResult] =
-    if (sources.isEmpty)
-      State.pure(
-        models.MergeResult(
-          mergedTarget = modifyInternalWorks(target, target.data.items),
-          imageDataWithSources = standaloneImages(target).map {
-            image =>
-              ImageDataWithSource(
-                imageData = image,
-                source = target.toParentWork
-              )
-          }
-        )
-      )
-    else
-      for {
-        items <- ItemsRule(target, sources).redirectSources
-        thumbnail <- ThumbnailRule(target, sources).redirectSources
-        otherIdentifiers <- OtherIdentifiersRule(
-          target,
-          sources
-        ).redirectSources
-        targetImageData <- ImageDataRule(target, sources).redirectSources
-        separateImageData <- ImagesRule(target, sources).redirectSources
-        work = target
-          .mapData {
-            data =>
-              data.copy[DataState.Identified](
-                items = items,
-                thumbnail = thumbnail,
-                otherIdentifiers = otherIdentifiers,
-                imageData = targetImageData
-              )
-          }
-      } yield MergeResult(
-        mergedTarget = modifyInternalWorks(work, items),
-        imageDataWithSources = separateImageData.map {
+  ): (Seq[Work[Identified]], MergeResult) = {
+    val items = ItemsRule(target, sources)
+    val thumbnail = ThumbnailRule(target, sources)
+    val otherIdentifiers = OtherIdentifiersRule(target, sources)
+    val targetImageData = ImageDataRule(target, sources)
+    val separateImageData = ImagesRule(target, sources)
+    val work = target
+      .mapData {
+        data =>
+          data.copy[DataState.Identified](
+            items = items.data,
+            thumbnail = thumbnail.data,
+            otherIdentifiers = otherIdentifiers.data,
+            imageData = targetImageData.data
+          )
+      }
+    val redirectSources = Seq(
+      items,
+      thumbnail,
+      otherIdentifiers,
+      targetImageData,
+      separateImageData
+    ).flatMap(_.sources).distinct
+    (
+      redirectSources,
+      MergeResult(
+        mergedTarget = work.withItemsInInternalWorks(items.data),
+        imageDataWithSources = separateImageData.data.map {
           imageData =>
             ImageDataWithSource(
               imageData = imageData,
@@ -268,30 +232,7 @@ object PlatformMerger extends Merger {
             )
         }
       )
-
-  private def modifyInternalWorks(
-    work: Work.Visible[Identified],
-    items: List[Item[IdState.Minted]]
-  ) = {
-    // Internal works are in TEI works. If they are merged with Sierra, we want the Sierra
-    // items to be added to TEI internal works so that the user can request the item
-    // containing that work without having to find the wrapping work.
-    work
-      .mapState {
-        state =>
-          state.copy(internalWorkStubs = state.internalWorkStubs.map {
-            stub =>
-              stub.copy(
-                workData =
-                  stub.workData.copy[DataState.Identified](items = items)
-              )
-          })
-      }
+    )
   }
 
-  private def standaloneImages(
-    target: Work.Visible[Identified]
-  ): List[ImageData[IdState.Identified]] =
-    if (WorkPredicates.singleDigitalItemMiroWork(target)) target.data.imageData
-    else Nil
 }
