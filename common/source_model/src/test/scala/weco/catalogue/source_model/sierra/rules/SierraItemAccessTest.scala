@@ -19,8 +19,9 @@ class SierraItemAccessTest
 
   // Note: we capture the `display` value for debugging purposes, but
   // it's not actually used in the downstream code so we ignore it.
-  def createFixedFieldWith(label: String)(value: String,
-                                          display: String = ""): FixedField =
+  def createFixedFieldWith(
+    label: String
+  )(value: String, display: String = ""): FixedField =
     FixedField(
       label = label,
       value = value
@@ -43,7 +44,7 @@ class SierraItemAccessTest
             fixedFields = Map(
               "79" -> createLocationWith("scmac", "Closed stores Arch. & MSS"),
               "88" -> createStatusWith("-", "Available"),
-              "108" -> createOpacMsgWith("f", "Online request"),
+              "108" -> createOpacMsgWith("f", "Online request")
             )
           )
 
@@ -56,7 +57,7 @@ class SierraItemAccessTest
             method(AccessMethod.OnlineRequest),
             status(AccessStatus.Open),
             noTerms(),
-            noNote(),
+            noNote()
           )
         }
 
@@ -65,7 +66,7 @@ class SierraItemAccessTest
             fixedFields = Map(
               "79" -> createLocationWith("scmac", "Closed stores Arch. & MSS"),
               "88" -> createStatusWith("-", "Available"),
-              "108" -> createOpacMsgWith("c", "Restricted"),
+              "108" -> createOpacMsgWith("c", "Restricted")
             )
           )
 
@@ -78,7 +79,7 @@ class SierraItemAccessTest
             method(AccessMethod.OnlineRequest),
             status(AccessStatus.Restricted),
             noTerms(),
-            noNote(),
+            noNote()
           )
         }
       }
@@ -90,7 +91,7 @@ class SierraItemAccessTest
               "61" -> createItypeWith("4", "serial"),
               "79" -> createLocationWith("sgser", "Closed stores journals"),
               "88" -> createStatusWith("-", "Available"),
-              "108" -> createOpacMsgWith("n", "Manual request"),
+              "108" -> createOpacMsgWith("n", "Manual request")
             )
           )
 
@@ -104,7 +105,8 @@ class SierraItemAccessTest
             noStatus(),
             noTerms(),
             note(
-              "This item needs to be ordered manually. Please ask a member of staff, or email <a href=\"mailto:library@wellcomecollection.org\">library@wellcomecollection.org</a>."),
+              "This item needs to be ordered manually. Please ask a member of staff, or email <a href=\"mailto:library@wellcomecollection.org\">library@wellcomecollection.org</a>."
+            )
           )
         }
 
@@ -113,7 +115,7 @@ class SierraItemAccessTest
             fixedFields = Map(
               "79" -> createLocationWith("bwith", "bound in above"),
               "88" -> createStatusWith("b", "As above"),
-              "108" -> createOpacMsgWith("-", "-"),
+              "108" -> createOpacMsgWith("-", "-")
             )
           )
 
@@ -135,7 +137,7 @@ class SierraItemAccessTest
             fixedFields = Map(
               "79" -> createLocationWith("cwith", "contained in above"),
               "88" -> createStatusWith("c", "As above"),
-              "108" -> createOpacMsgWith("-", "-"),
+              "108" -> createOpacMsgWith("-", "-")
             )
           )
 
@@ -157,7 +159,7 @@ class SierraItemAccessTest
             fixedFields = Map(
               "79" -> createLocationWith("sc#ac", "Unrequestable Arch. & MSS"),
               "88" -> createStatusWith("h", "Closed"),
-              "108" -> createOpacMsgWith("u", "Unavailable"),
+              "108" -> createOpacMsgWith("u", "Unavailable")
             )
           )
 
@@ -179,7 +181,7 @@ class SierraItemAccessTest
             fixedFields = Map(
               "79" -> createLocationWith("sgser", "Closed stores journals"),
               "88" -> createStatusWith("r", "Unavailable"),
-              "108" -> createOpacMsgWith("u", "Unavailable"),
+              "108" -> createOpacMsgWith("u", "Unavailable")
             )
           )
 
@@ -192,7 +194,8 @@ class SierraItemAccessTest
             method(AccessMethod.NotRequestable),
             status(AccessStatus.TemporarilyUnavailable),
             note(
-              "This item is undergoing internal assessment or conservation work."),
+              "This item is undergoing internal assessment or conservation work."
+            ),
             noTerms()
           )
         }
@@ -202,7 +205,7 @@ class SierraItemAccessTest
             fixedFields = Map(
               "79" -> createLocationWith("sgser", "Closed stores journals"),
               "88" -> createStatusWith("r", "Unavailable"),
-              "108" -> createOpacMsgWith("b", "@ digitisation"),
+              "108" -> createOpacMsgWith("b", "@ digitisation")
             )
           )
 
@@ -224,7 +227,7 @@ class SierraItemAccessTest
             fixedFields = Map(
               "79" -> createLocationWith("sgser", "Closed stores journals"),
               "88" -> createStatusWith("r", "Unavailable"),
-              "108" -> createOpacMsgWith("b", "@ digitisation"),
+              "108" -> createOpacMsgWith("b", "@ digitisation")
             ),
             varFields = List(
               VarField(
@@ -253,7 +256,7 @@ class SierraItemAccessTest
             fixedFields = Map(
               "79" -> createLocationWith("scmac", "Closed stores Arch. & MSS"),
               "88" -> createStatusWith("y", "Permission required"),
-              "108" -> createOpacMsgWith("a", "By appointment"),
+              "108" -> createOpacMsgWith("a", "By appointment")
             )
           )
 
@@ -275,7 +278,7 @@ class SierraItemAccessTest
             fixedFields = Map(
               "79" -> createLocationWith("sc#ac", "Unrequestable Arch. & MSS"),
               "88" -> createStatusWith("y", "Permission required"),
-              "108" -> createOpacMsgWith("q", "Donor permission"),
+              "108" -> createOpacMsgWith("q", "Donor permission")
             )
           )
 
@@ -297,7 +300,7 @@ class SierraItemAccessTest
             fixedFields = Map(
               "79" -> createLocationWith("sghi2", "Closed stores Hist. 2"),
               "88" -> createStatusWith("m", "Missing"),
-              "108" -> createOpacMsgWith("f", "Online request"),
+              "108" -> createOpacMsgWith("f", "Online request")
             )
           )
 
@@ -319,7 +322,7 @@ class SierraItemAccessTest
             fixedFields = Map(
               "79" -> createLocationWith("sghx2", "Closed stores Hist. O/S 2"),
               "88" -> createStatusWith("x", "Withdrawn"),
-              "108" -> createOpacMsgWith("u", "Unavailable"),
+              "108" -> createOpacMsgWith("u", "Unavailable")
             )
           )
 
@@ -345,7 +348,7 @@ class SierraItemAccessTest
           fixedFields = Map(
             "79" -> createLocationWith("sgeph", "Closed stores ephemera"),
             "88" -> createStatusWith("-", "Available"),
-            "108" -> createOpacMsgWith("f", "Online request"),
+            "108" -> createOpacMsgWith("f", "Online request")
           )
         )
 
@@ -358,7 +361,8 @@ class SierraItemAccessTest
           method(AccessMethod.NotRequestable),
           status(AccessStatus.TemporarilyUnavailable),
           note(
-            "Item is in use by another reader. Please ask at Library Enquiry Desk."),
+            "Item is in use by another reader. Please ask at Library Enquiry Desk."
+          ),
           noTerms()
         )
       }
@@ -370,7 +374,7 @@ class SierraItemAccessTest
             "79" -> createLocationWith("sgeph", "Closed stores ephemera"),
             "87" -> createFixedFieldWith("LOANRULE")("5"),
             "88" -> createStatusWith("-", "Available"),
-            "108" -> createOpacMsgWith("f", "Online request"),
+            "108" -> createOpacMsgWith("f", "Online request")
           )
         )
 
@@ -383,7 +387,8 @@ class SierraItemAccessTest
           method(AccessMethod.NotRequestable),
           status(AccessStatus.TemporarilyUnavailable),
           note(
-            "Item is in use by another reader. Please ask at Library Enquiry Desk."),
+            "Item is in use by another reader. Please ask at Library Enquiry Desk."
+          ),
           noTerms()
         )
       }
@@ -395,7 +400,7 @@ class SierraItemAccessTest
             "61" -> createItypeWith("4", "serial"),
             "79" -> createLocationWith("sgser", "Closed stores journals"),
             "88" -> createStatusWith("-", "Available"),
-            "108" -> createOpacMsgWith("n", "Manual request"),
+            "108" -> createOpacMsgWith("n", "Manual request")
           )
         )
 
@@ -408,7 +413,8 @@ class SierraItemAccessTest
           method(AccessMethod.NotRequestable),
           status(AccessStatus.TemporarilyUnavailable),
           note(
-            "Item is in use by another reader. Please ask at Library Enquiry Desk."),
+            "Item is in use by another reader. Please ask at Library Enquiry Desk."
+          ),
           noTerms()
         )
       }
@@ -419,7 +425,7 @@ class SierraItemAccessTest
           fixedFields = Map(
             "79" -> createLocationWith("swms4", "Closed stores WMS 4"),
             "88" -> createStatusWith("!", "On holdshelf"),
-            "108" -> createOpacMsgWith("f", "Online request"),
+            "108" -> createOpacMsgWith("f", "Online request")
           )
         )
 
@@ -432,7 +438,8 @@ class SierraItemAccessTest
           method(AccessMethod.NotRequestable),
           status(AccessStatus.TemporarilyUnavailable),
           note(
-            "Item is in use by another reader. Please ask at Library Enquiry Desk."),
+            "Item is in use by another reader. Please ask at Library Enquiry Desk."
+          ),
           noTerms()
         )
       }
@@ -445,7 +452,7 @@ class SierraItemAccessTest
             "61" -> createItypeWith("4", "serial"),
             "79" -> createLocationWith("sgser", "Closed stores journals"),
             "88" -> createStatusWith("-", "Available"),
-            "108" -> createOpacMsgWith("n", "Manual request"),
+            "108" -> createOpacMsgWith("n", "Manual request")
           ),
           varFields = List(
             VarField(
@@ -464,7 +471,8 @@ class SierraItemAccessTest
         ac should have(
           method(AccessMethod.ManualRequest),
           note(
-            "Email library@wellcomecollection.org to tell us why you need access. We’ll reply within a week."),
+            "Email library@wellcomecollection.org to tell us why you need access. We’ll reply within a week."
+          ),
           noStatus(),
           noTerms()
         )
@@ -477,7 +485,7 @@ class SierraItemAccessTest
           fixedFields = Map(
             "79" -> createLocationWith("sgser", "Closed stores journals"),
             "88" -> createStatusWith("-", "Available"),
-            "108" -> createOpacMsgWith("f", "Online request"),
+            "108" -> createOpacMsgWith("f", "Online request")
           ),
           holdCount = Some(1),
           varFields = List(
@@ -496,7 +504,8 @@ class SierraItemAccessTest
 
         ac should have(
           note(
-            "Item is in use by another reader. Please ask at Library Enquiry Desk.")
+            "Item is in use by another reader. Please ask at Library Enquiry Desk."
+          )
         )
 
         itemNote shouldBe None
@@ -508,7 +517,7 @@ class SierraItemAccessTest
             "61" -> createItypeWith("4", "serial"),
             "79" -> createLocationWith("hgser", "Offsite"),
             "88" -> createStatusWith("y", "Permission required"),
-            "108" -> createOpacMsgWith("a", "By appointment"),
+            "108" -> createOpacMsgWith("a", "By appointment")
           ),
           varFields = List(
             VarField(
@@ -526,7 +535,8 @@ class SierraItemAccessTest
 
         ac should have(
           note(
-            "Email library@wellcomecollection.org to tell us why you need the physical copy. We'll reply within a week.")
+            "Email library@wellcomecollection.org to tell us why you need the physical copy. We'll reply within a week."
+          )
         )
       }
 
@@ -535,7 +545,7 @@ class SierraItemAccessTest
           fixedFields = Map(
             "79" -> createLocationWith("scmac", "Closed stores Arch. & MSS"),
             "88" -> createStatusWith("-", "Available"),
-            "108" -> createOpacMsgWith("f", "Online request"),
+            "108" -> createOpacMsgWith("f", "Online request")
           ),
           varFields = List(
             VarField(
@@ -562,7 +572,7 @@ class SierraItemAccessTest
           fixedFields = Map(
             "79" -> createLocationWith("wgmem", "Medical Collection"),
             "88" -> createStatusWith("-", "Available"),
-            "108" -> createOpacMsgWith("o", "Open shelves"),
+            "108" -> createOpacMsgWith("o", "Open shelves")
           )
         )
 
@@ -584,7 +594,7 @@ class SierraItemAccessTest
           fixedFields = Map(
             "79" -> createLocationWith("wgpvm", "History of Medicine"),
             "88" -> createStatusWith("-", "Available"),
-            "108" -> createOpacMsgWith("o", "Open shelves"),
+            "108" -> createOpacMsgWith("o", "Open shelves")
           ),
           varFields = List(
             VarField(
@@ -602,7 +612,8 @@ class SierraItemAccessTest
 
         ac should have(
           note(
-            "Shelved at the end of the Quick Ref. section with the oversize Quick Ref. books.")
+            "Shelved at the end of the Quick Ref. section with the oversize Quick Ref. books."
+          )
         )
       }
     }
@@ -612,7 +623,7 @@ class SierraItemAccessTest
         fixedFields = Map(
           "79" -> createLocationWith("wgmem", "Medical Collection"),
           "88" -> createStatusWith("m", "Missing"),
-          "108" -> createOpacMsgWith("o", "Open shelves"),
+          "108" -> createOpacMsgWith("o", "Open shelves")
         )
       )
 
@@ -649,7 +660,8 @@ class SierraItemAccessTest
         method(AccessMethod.OpenShelves),
         status(AccessStatus.TemporarilyUnavailable),
         note(
-          "Item is in use by another reader. Please ask at Library Enquiry Desk."),
+          "Item is in use by another reader. Please ask at Library Enquiry Desk."
+        ),
         noTerms()
       )
     }
@@ -673,7 +685,8 @@ class SierraItemAccessTest
         method(AccessMethod.OpenShelves),
         status(AccessStatus.TemporarilyUnavailable),
         note(
-          "Item is in use by another reader. Please ask at Library Enquiry Desk."),
+          "Item is in use by another reader. Please ask at Library Enquiry Desk."
+        ),
         noTerms()
       )
     }
@@ -701,6 +714,28 @@ class SierraItemAccessTest
         note(displayreservation)
       )
     }
+    it("has a note based on its Reserves Note even when it has a due date") {
+      val displayreservation =
+        "Locked filing cabinet, disused lavatory with a sign saying 'Beware of The Leopard'"
+      val itemData = createSierraItemDataWith(
+        fixedFields = Map(
+          "65" -> createFixedFieldWith("DUE DATE")("2020-09-01T03:00:00Z"),
+          "79" -> createLocationWith("exres", "On Exhibition")
+        ),
+        varFields = List(
+          VarField(fieldTag = "r", displayreservation)
+        )
+      )
+
+      val (ac, _) = SierraItemAccess(
+        location = Some(LocationType.OnExhibition),
+        itemData = itemData
+      )
+
+      ac should have(
+        note(displayreservation)
+      )
+    }
     it("can show multiple Reserves Notes") {
       val itemData = createSierraItemDataWith(
         fixedFields = Map(
@@ -711,8 +746,9 @@ class SierraItemAccessTest
           VarField(fieldTag = "r", "stuck in a disused lavatory"),
           VarField(
             fieldTag = "r",
-            "with a sign on the door saying 'Beware of The Leopard'")
-        ),
+            "with a sign on the door saying 'Beware of The Leopard'"
+          )
+        )
       )
 
       val (ac, _) = SierraItemAccess(
@@ -736,10 +772,12 @@ class SierraItemAccessTest
         varFields = List(
           VarField(
             fieldTag = "r",
-            "25-12-22 ON RESERVE FOR Beware of the Leopard"),
+            "25-12-22 ON RESERVE FOR Beware of the Leopard"
+          ),
           VarField(
             fieldTag = "r",
-            "25-12-22 OFF RESERVE FOR Beware of the Leopard CIRCED 2 TIMES"),
+            "25-12-22 OFF RESERVE FOR Beware of the Leopard CIRCED 2 TIMES"
+          ),
           VarField(fieldTag = "r", "In a locked filing cabinet")
         )
       )
@@ -764,7 +802,8 @@ class SierraItemAccessTest
       )
     }
     it(
-      "has the default 'contact the library' note if there are no Reserves Notes") {
+      "has the default 'contact the library' note if there are no Reserves Notes"
+    ) {
       val itemData = createSierraItemDataWith(
         fixedFields = Map(
           "79" -> createLocationWith("exres", "On Exhibition")
@@ -781,7 +820,8 @@ class SierraItemAccessTest
 
       ac should have(
         note(
-          s"""This item cannot be requested online. Please contact <a href="mailto:library@wellcomecollection.org">library@wellcomecollection.org</a> for more information.""")
+          s"""This item cannot be requested online. Please contact <a href="mailto:library@wellcomecollection.org">library@wellcomecollection.org</a> for more information."""
+        )
       )
     }
   }
@@ -790,7 +830,7 @@ class SierraItemAccessTest
       fixedFields = Map(
         "79" -> createLocationWith("scmac", "Closed stores Arch. & MSS"),
         "88" -> createStatusWith("?", "Unknown"),
-        "108" -> createOpacMsgWith("f", "Online request"),
+        "108" -> createOpacMsgWith("f", "Online request")
       )
     )
 
@@ -801,7 +841,8 @@ class SierraItemAccessTest
 
     ac should have(
       note(
-        s"""This item cannot be requested online. Please contact <a href="mailto:library@wellcomecollection.org">library@wellcomecollection.org</a> for more information.""")
+        s"""This item cannot be requested online. Please contact <a href="mailto:library@wellcomecollection.org">library@wellcomecollection.org</a> for more information."""
+      )
     )
   }
 }
