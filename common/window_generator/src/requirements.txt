@@ -12,7 +12,7 @@ botocore==1.31.79
     #   s3transfer
 click==8.1.7
     # via -r requirements.in
-daiquiri==3.2.3
+daiquiri==3.2.1
     # via wellcome-aws-utils
 jmespath==1.0.1
     # via
@@ -32,7 +32,7 @@ six==1.16.0
     # via python-dateutil
 tqdm==4.66.1
     # via -r requirements.in
-urllib3==2.0.7
+urllib3==1.26.18
     # via botocore
 wellcome-aws-utils==2.1.1
     # via -r requirements.in
