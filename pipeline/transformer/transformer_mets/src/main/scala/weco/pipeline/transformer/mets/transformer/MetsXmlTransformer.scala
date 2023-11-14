@@ -7,6 +7,7 @@ import weco.catalogue.source_model.mets.{
   MetsSourceData
 }
 import weco.pipeline.transformer.Transformer
+import weco.pipeline.transformer.mets.transformer.models.MetsAccessConditions
 import weco.pipeline.transformer.mets.transformers.MetsTitle
 import weco.pipeline.transformer.result.Result
 import weco.storage.Identified
@@ -53,43 +54,41 @@ class MetsXmlTransformer(store: Readable[S3ObjectLocation, String])
 
   private def transformWithoutManifestations(
     root: MetsXml
-  ): Result[InvisibleMetsData] =
+  ): Result[InvisibleMetsData] = {
+    val accessConditions = MetsAccessConditions(root.root)
     for {
       id <- root.recordIdentifier
       title <- MetsTitle(root.root)
-      accessConditionDz <- root.accessConditionDz
-      accessConditionStatus <- root.accessConditionStatus
-      accessConditionUsage <- root.accessConditionUsage
     } yield InvisibleMetsData(
       recordIdentifier = id,
       title = title,
-      accessConditionDz = accessConditionDz,
-      accessConditionStatus = accessConditionStatus,
-      accessConditionUsage = accessConditionUsage,
+      accessConditionDz = accessConditions.dz,
+      accessConditionStatus = accessConditions.status,
+      accessConditionUsage = accessConditions.usage,
       fileReferencesMapping = root.fileReferencesMapping(id),
       titlePageId = root.titlePageId
     )
+  }
 
   private def transformWithManifestations(
     root: MetsXml,
     manifestations: List[S3ObjectLocation]
-  ): Result[InvisibleMetsData] =
+  ): Result[InvisibleMetsData] = {
     for {
       id <- root.recordIdentifier
       title <- MetsTitle(root.root)
       firstManifestation <- getFirstManifestation(root, manifestations)
-      accessConditionDz <- firstManifestation.accessConditionDz
-      accessConditionStatus <- firstManifestation.accessConditionStatus
-      accessConditionUsage <- firstManifestation.accessConditionUsage
+      accessConditions <- Right(MetsAccessConditions(firstManifestation.root))
     } yield InvisibleMetsData(
       recordIdentifier = id,
       title = title,
-      accessConditionDz = accessConditionDz,
-      accessConditionStatus = accessConditionStatus,
-      accessConditionUsage = accessConditionUsage,
+      accessConditionDz = accessConditions.dz,
+      accessConditionStatus = accessConditions.status,
+      accessConditionUsage = accessConditions.usage,
       fileReferencesMapping = firstManifestation.fileReferencesMapping(id),
       titlePageId = firstManifestation.titlePageId
     )
+  }
 
   private def getFirstManifestation(
     root: MetsXml,

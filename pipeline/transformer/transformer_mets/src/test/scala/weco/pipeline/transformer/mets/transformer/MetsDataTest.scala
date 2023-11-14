@@ -14,6 +14,7 @@ import weco.pipeline.transformer.mets.generators.{
   MetsDataGenerators,
   MetsGenerators
 }
+import weco.pipeline.transformer.mets.transformer.models.FileReference
 
 class MetsDataTest
     extends AnyFunSpec
@@ -164,12 +165,12 @@ class MetsDataTest
 
     inside(metsData.toWork(1, Instant.now()).right.get.data.items) {
       case List(
-          Item(
-            IdState.Unidentifiable,
-            _,
-            _,
-            List(DigitalLocation(_, _, license, _, _, _))
-          )
+            Item(
+              IdState.Unidentifiable,
+              _,
+              _,
+              List(DigitalLocation(_, _, license, _, _, _))
+            )
           ) =>
         license shouldBe Some(License.InCopyright)
     }
@@ -182,12 +183,12 @@ class MetsDataTest
 
     inside(metsData.toWork(1, Instant.now()).right.get.data.items) {
       case List(
-          Item(
-            IdState.Unidentifiable,
-            _,
-            _,
-            List(DigitalLocation(_, _, license, _, _, _))
-          )
+            Item(
+              IdState.Unidentifiable,
+              _,
+              _,
+              List(DigitalLocation(_, _, license, _, _, _))
+            )
           ) =>
         license shouldBe Some(License.InCopyright)
     }
@@ -199,12 +200,12 @@ class MetsDataTest
     )
     inside(metsData.toWork(1, Instant.now()).right.get.data.items) {
       case List(
-          Item(
-            IdState.Unidentifiable,
-            _,
-            _,
-            List(DigitalLocation(_, _, license, _, _, _))
-          )
+            Item(
+              IdState.Unidentifiable,
+              _,
+              _,
+              List(DigitalLocation(_, _, license, _, _, _))
+            )
           ) =>
         license shouldBe Some(License.InCopyright)
     }
@@ -218,18 +219,20 @@ class MetsDataTest
 
     inside(result.right.get.data.items) {
       case List(
-          Item(
-            IdState.Unidentifiable,
-            _,
-            _,
-            List(DigitalLocation(_, _, license, _, _, _))
-          )
+            Item(
+              IdState.Unidentifiable,
+              _,
+              _,
+              List(DigitalLocation(_, _, license, _, _, _))
+            )
           ) =>
         license shouldBe Some(License.InCopyright)
     }
   }
 
-  it("can create a license for rightsstatements.org/page/InC/1.0/?language=en") {
+  it(
+    "can create a license for rightsstatements.org/page/InC/1.0/?language=en"
+  ) {
     val metsData = createMetsDataWith(
       accessConditionDz = Some("rightsstatements.org/page/InC/1.0/?language=en")
     )
@@ -237,12 +240,12 @@ class MetsDataTest
 
     inside(result.right.get.data.items) {
       case List(
-          Item(
-            IdState.Unidentifiable,
-            _,
-            _,
-            List(DigitalLocation(_, _, license, _, _, _))
-          )
+            Item(
+              IdState.Unidentifiable,
+              _,
+              _,
+              List(DigitalLocation(_, _, license, _, _, _))
+            )
           ) =>
         license shouldBe Some(License.InCopyright)
     }
@@ -256,12 +259,12 @@ class MetsDataTest
 
     inside(result.right.get.data.items) {
       case List(
-          Item(
-            IdState.Unidentifiable,
-            _,
-            _,
-            List(DigitalLocation(_, _, license, _, _, _))
-          )
+            Item(
+              IdState.Unidentifiable,
+              _,
+              _,
+              List(DigitalLocation(_, _, license, _, _, _))
+            )
           ) =>
         license shouldBe Some(License.InCopyright)
     }
@@ -426,7 +429,9 @@ class MetsDataTest
     result shouldBe a[Right[_, _]]
     val images = result.right.get.data.imageData
     images should have length 3
-    images.map(_.id.allSourceIdentifiers.head.value) should contain theSameElementsAs List(
+    images.map(
+      _.id.allSourceIdentifiers.head.value
+    ) should contain theSameElementsAs List(
       s"$bibNumber/A",
       s"$bibNumber/B",
       s"$bibNumber/C"

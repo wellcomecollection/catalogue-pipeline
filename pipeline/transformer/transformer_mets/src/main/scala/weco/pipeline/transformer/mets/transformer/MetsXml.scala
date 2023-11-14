@@ -1,24 +1,11 @@
 package weco.pipeline.transformer.mets.transformer
 
-import java.net.URLConnection
+import weco.pipeline.transformer.mets.transformer.models.{FileReference, XMLOps}
 
 import scala.util.Try
-import scala.xml.{Elem, NodeSeq, XML}
+import scala.xml.{Elem, XML}
 
-case class FileReference(
-  id: String,
-  location: String,
-  listedMimeType: Option[String] = None
-) {
-  // `guessContentTypeFromName` may still return a `null` (eg for `.jp2`)
-  // because of the limited internal list of MIME types.
-  lazy val mimeType: Option[String] =
-    Option(
-      listedMimeType.getOrElse(URLConnection.guessContentTypeFromName(location))
-    )
-}
-
-case class MetsXml(root: Elem) {
+case class MetsXml(root: Elem) extends XMLOps {
 
   /** The record identifier (generally the B number) is encoded in the METS. For
     * example:
@@ -37,70 +24,6 @@ case class MetsXml(root: Elem) {
       case Seq(node) => Right(node.text)
       case _ =>
         Left(new Exception("Could not parse recordIdentifier from METS XML"))
-    }
-  }
-
-  /** For licenses we are interested with the access condition with type `dz`.
-    * For example:
-    *
-    * <mets:dmdSec ID="DMDLOG_0000"> <mets:mdWrap MDTYPE="MODS"> <mets:xmlData>
-    * <mods:mods> ... <mods:accessCondition
-    * type="dz">CC-BY-NC</mods:accessCondition> <mods:accessCondition
-    * type="player">63</mods:accessCondition> <mods:accessCondition
-    * type="status">Open</mods:accessCondition> ... </mods:mods> </mets:xmlData>
-    * </mets:mdWrap> </mets:dmdSec>
-    *
-    * The expected output would be: "CC-BY-NC"
-    */
-  def accessConditionDz: Either[Exception, Option[String]] =
-    accessConditionWithType("dz")
-
-  /** Here we extract the accessCondition of type `status`: For example:
-    *
-    * <mets:dmdSec ID="DMDLOG_0000"> <mets:mdWrap MDTYPE="MODS"> <mets:xmlData>
-    * <mods:mods> ... <mods:accessCondition
-    * type="dz">CC-BY-NC</mods:accessCondition> <mods:accessCondition
-    * type="player">63</mods:accessCondition> <mods:accessCondition
-    * type="status">Open</mods:accessCondition> ... </mods:mods> </mets:xmlData>
-    * </mets:mdWrap> </mets:dmdSec>
-    *
-    * The expected output would be: "Open"
-    */
-  def accessConditionStatus: Either[Exception, Option[String]] =
-    accessConditionWithType("status")
-
-  /** Here we extract the accessCondition of type `usage`: For example:
-    *
-    * <mets:dmdSec ID="DMDLOG_0000"> <mets:mdWrap MDTYPE="MODS"> <mets:xmlData>
-    * <mods:mods> ... <mods:accessCondition
-    * type="dz">CC-BY-NC</mods:accessCondition> <mods:accessCondition
-    * type="player">63</mods:accessCondition> <mods:accessCondition
-    * type="status">Open</mods:accessCondition> <mods:accessCondition
-    * type="usage">Some terms</mods:accessCondition> ... </mods:mods>
-    * </mets:xmlData> </mets:mdWrap> </mets:dmdSec>
-    *
-    * The expected output would be: "Some terms"
-    */
-  def accessConditionUsage: Either[Exception, Option[String]] =
-    accessConditionWithType("usage")
-
-  /** Retrive the accessCondition node in the document with given type. */
-  def accessConditionWithType(
-    typeAttrib: String
-  ): Either[Exception, Option[String]] = {
-    val sec = (root \\ "dmdSec").headOption.toList
-    val nodes = (sec \ "mdWrap" \\ "accessCondition")
-      .filterByAttribute("type", typeAttrib)
-      .toList
-    nodes match {
-      case Nil                               => Right(None)
-      case nodes if nodes.distinct.size == 1 => Right(Some(nodes.head.text))
-      case _ =>
-        Left(
-          new Exception(
-            s"Found multiple accessConditions with type $typeAttrib in METS XML"
-          )
-        )
     }
   }
 
@@ -129,12 +52,7 @@ case class MetsXml(root: Elem) {
   def titlePageId: Option[String] =
     logicalStructMapForType
       .collectFirst { case (id, "TitlePage") => id }
-      .flatMap {
-        id =>
-          structLink.collectFirst {
-            case (from, to) if from == id => to
-          }
-      }
+      .flatMap(smLink(_))
 
   /** Valid METS documents should contain a physicalStructMap section, with the
     * bottom most divs each representing a physical page, and linking to files
@@ -266,58 +184,21 @@ case class MetsXml(root: Elem) {
 
   /** The structLink sections maps the logical and physical IDs represented in
     * the document:
-    *
-    * <mets:structLink> <mets:smLink xlink:from="LOG_0000" xlink:to="PHYS_0001"
-    * /> <mets:smLink xlink:from="LOG_0000" xlink:to="PHYS_0002" /> <mets:smLink
-    * xlink:from="LOG_0001" xlink:to="PHYS_0001" /> <mets:smLink
-    * xlink:from="LOG_0002" xlink:to="PHYS_0003" /> </mets:structLink>
-    *
-    * For this input we would expect the following output:
-    *
-    * Seq("LOG_0000" -> "PHYS_0001", "LOG_0000" -> "PHYS_0002", "LOG_0001" ->
-    * "PHYS_0001", "LOG_0002" -> "PHYS_0003")
+    * {{{
+    * <mets:structLink>
+    *   <mets:smLink xlink:from="LOG_0000" xlink:to="PHYS_0001" />
+    *   <mets:smLink xlink:from="LOG_0000" xlink:to="PHYS_0002" />
+    *   <mets:smLink xlink:from="LOG_0001" xlink:to="PHYS_0001" />
+    *   <mets:smLink xlink:from="LOG_0002" xlink:to="PHYS_0003" />
+    * </mets:structLink>
+    * }}}
+    * For this input we would expect smLink("LOG_0001") to return "PHYS_001"
     */
-  private def structLink: Seq[(String, String)] =
-    (root \ "structLink")
-      .childrenWithTag("smLink")
-      .toMapping(
-        keyAttrib = "{http://www.w3.org/1999/xlink}from",
-        valueAttrib = "{http://www.w3.org/1999/xlink}to"
-      )
-
-  implicit class NodeSeqOps(nodes: NodeSeq) {
-
-    def filterByAttribute(attrib: String, value: String) =
-      nodes.filter(_ \@ attrib == value)
-
-    def childrenWithTag(tag: String) =
-      nodes.flatMap(_ \ tag)
-
-    def descendentsWithTag(tag: String) =
-      nodes.flatMap(_ \\ tag)
-
-    def sortByAttribute(attrib: String) =
-      nodes.sortBy(_ \@ attrib)
-
-    def toMapping(
-      keyAttrib: String,
-      valueAttrib: String,
-      valueNode: Option[String] = None
-    ): Seq[(String, String)] =
-      nodes
-        .map {
-          node =>
-            val key = node \@ keyAttrib
-            val value = valueNode
-              .flatMap(tag => (node \ tag).headOption)
-              .orElse(Some(node))
-              .map(_ \@ valueAttrib)
-            (key, value)
-        }
-        .collect {
-          case (key, Some(value)) if key.nonEmpty && value.nonEmpty =>
-            (key, value)
-        }
+  private def smLink(from: String): Option[String] = {
+    (root \ "structLink" \ "smLink")
+      .filterByAttribute("{http://www.w3.org/1999/xlink}from", from)
+      .headOption
+      .map(_ \@ "{http://www.w3.org/1999/xlink}to")
   }
 }
 

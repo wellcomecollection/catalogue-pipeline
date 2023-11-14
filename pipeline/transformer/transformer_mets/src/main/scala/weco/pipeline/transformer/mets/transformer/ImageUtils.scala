@@ -4,6 +4,7 @@ import weco.catalogue.internal_model.identifiers.{
   IdentifierType,
   SourceIdentifier
 }
+import weco.pipeline.transformer.mets.transformer.models.FileReference
 
 object ImageUtils {
   def isThumbnail(fileReference: FileReference): Boolean =
