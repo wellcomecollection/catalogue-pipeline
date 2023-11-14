@@ -54,10 +54,10 @@ class MetsAccessConditionsTest
 
   }
 
-  it("does not parse a METS with multiple licenses") {
+  it("finds the first licence in document order") {
     MetsAccessConditions(
       MetsXml(xmlMultipleDistinctLicense).root
-    ).dz shouldBe a[Left[_, _]]
+    ).dz shouldBe Some("CC-BY-NC")
   }
 
   def xmlNoLicense =
