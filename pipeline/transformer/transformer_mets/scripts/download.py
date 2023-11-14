@@ -26,8 +26,10 @@ def main():
     s3_resource = aws_resource("s3", role_arn=STORAGE_ROLE)
     bd_bucket = s3_resource.Bucket("wellcomecollection-storage")
     i = 0
-    for s3_object in bd_bucket.objects.filter(Prefix="digitised/", Marker="digitised/b10283651/v1/manifest-sha256.txt"):
-        bare_name = s3_object.key.rpartition('/')[2]
+    for s3_object in bd_bucket.objects.filter(
+        Prefix="digitised/", Marker="digitised/b10283651/v1/manifest-sha256.txt"
+    ):
+        bare_name = s3_object.key.rpartition("/")[2]
         if RE_BNUMBER_METSFILE.match(bare_name):
             i += 1
             bd_bucket.download_file(s3_object.key, os.path.join("data", bare_name))
