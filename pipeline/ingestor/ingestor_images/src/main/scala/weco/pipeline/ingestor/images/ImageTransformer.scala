@@ -5,7 +5,9 @@ import weco.catalogue.internal_model.image.{Image, ImageState}
 import weco.pipeline.ingestor.images.models.{
   DebugInformation,
   ImageAggregatableValues,
+  ImageFilterableValues,
   ImageQueryableValues,
+  ImageVectorValues,
   IndexedImage
 }
 import weco.catalogue.display_model.Implicits._
@@ -19,14 +21,10 @@ trait ImageTransformer {
       IndexedImage(
         modifiedTime = image.modifiedTime,
         display = DisplayImage(image).asJson.deepDropNullValues,
-        query = ImageQueryableValues(
-          id = image.state.canonicalId,
-          sourceIdentifier = image.state.sourceIdentifier,
-          locations = image.locations,
-          inferredData = image.state.inferredData,
-          source = image.source
-        ),
-        aggregatableValues = ImageAggregatableValues(image.source),
+        query = ImageQueryableValues(image),
+        aggregatableValues = ImageAggregatableValues(image),
+        filterableValues = ImageFilterableValues(image),
+        vectorValues = ImageVectorValues(image),
         debug = DebugInformation(indexedTime = getIndexedTime)
       )
 

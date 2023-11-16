@@ -8,7 +8,8 @@ import weco.pipeline.ingestor.works.models.{
   DebugInformation,
   IndexedWork,
   SourceWorkDebugInformation,
-  WorkAggregatableValues
+  WorkAggregatableValues,
+  WorkFilterableValues
 }
 import weco.catalogue.display_model.Implicits._
 import weco.pipeline.ingestor.common.models.WorkQueryableValues
@@ -29,8 +30,8 @@ trait WorkTransformer {
       )
 
       work match {
-        case w @ Work.Visible(_, data, _, redirectSources) => {
-          val display = DisplayWork(w).asJson.deepDropNullValues
+        case visibleWork @ Work.Visible(_, _, _, redirectSources) => {
+          val display = DisplayWork(visibleWork).asJson.deepDropNullValues
 
           IndexedWork.Visible(
             debug = DebugInformation.Visible(
@@ -40,21 +41,13 @@ trait WorkTransformer {
               redirectSources = redirectSources
             ),
             display = display,
-            query = WorkQueryableValues(
-              id = w.state.canonicalId,
-              sourceIdentifier = w.state.sourceIdentifier,
-              workData = w.data,
-              relations = w.state.relations,
-              availabilities = w.state.availabilities
-            ),
-            aggregatableValues = WorkAggregatableValues(
-              w.data,
-              availabilities = work.state.availabilities
-            )
+            query = WorkQueryableValues(visibleWork),
+            filterableValues = WorkFilterableValues(visibleWork),
+            aggregatableValues = WorkAggregatableValues(visibleWork)
           )
         }
 
-        case Work.Invisible(_, data, _, invisibilityReasons) =>
+        case Work.Invisible(_, _, _, invisibilityReasons) =>
           IndexedWork.Invisible(
             debug = DebugInformation.Invisible(
               source = source,

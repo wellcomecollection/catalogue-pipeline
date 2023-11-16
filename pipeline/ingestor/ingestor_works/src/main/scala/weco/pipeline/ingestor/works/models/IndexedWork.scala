@@ -14,7 +14,8 @@ object IndexedWork {
     debug: DebugInformation.Visible,
     display: Json,
     query: WorkQueryableValues,
-    aggregatableValues: WorkAggregatableValues
+    aggregatableValues: WorkAggregatableValues,
+    filterableValues: WorkFilterableValues
   ) extends IndexedWork
 
   case class Redirected(
