@@ -76,11 +76,7 @@ class DigitisedMetsXmlTest
       )
     )
   }
-
-  it("parses title page ID from the XML when present") {
-    MetsXml(xml).value.titlePageId shouldBe Some("PHYS_0006")
-  }
-
+  
   it("parses thumbnail from XML") {
     MetsXml(xml).value
       .fileReferencesMapping("b30246039")

@@ -57,8 +57,7 @@ case class InvisibleMetsData(
   accessConditionStatus: Option[String] = None,
   accessConditionUsage: Option[String] = None,
   fileReferencesMapping: List[(String, FileReference)] = Nil,
-  thumbnailReference: Option[FileReference] = None,
-  titlePageId: Option[String] = None
+  thumbnailReference: Option[FileReference] = None
 ) extends MetsData {
 
   def toWork(version: Int, modifiedTime: Instant): Result[Work[Source]] =

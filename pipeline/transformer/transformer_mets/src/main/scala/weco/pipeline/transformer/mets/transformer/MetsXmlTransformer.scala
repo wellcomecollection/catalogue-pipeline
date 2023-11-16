@@ -68,7 +68,7 @@ class MetsXmlTransformer(store: Readable[S3ObjectLocation, String])
       accessConditionStatus = accessConditions.status,
       accessConditionUsage = accessConditions.usage,
       fileReferencesMapping = root.fileReferencesMapping(id),
-      titlePageId = root.titlePageId
+      thumbnailReference = root.thumbnailReference
     )
   }
 
@@ -101,7 +101,7 @@ class MetsXmlTransformer(store: Readable[S3ObjectLocation, String])
       accessConditionStatus = accessConditions.status,
       accessConditionUsage = accessConditions.usage,
       fileReferencesMapping = referenceManifestation.fileReferencesMapping(id),
-      titlePageId = referenceManifestation.titlePageId
+      thumbnailReference = referenceManifestation.thumbnailReference
     )
   }
 

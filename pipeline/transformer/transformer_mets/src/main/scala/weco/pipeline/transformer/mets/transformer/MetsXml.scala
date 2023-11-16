@@ -3,7 +3,6 @@ package weco.pipeline.transformer.mets.transformer
 import weco.pipeline.transformer.mets.transformer.models.{
   FileReference,
   ThumbnailReference,
-  TitlePageId,
   XMLOps
 }
 
@@ -11,7 +10,6 @@ import scala.util.Try
 import scala.xml.{Elem, XML}
 trait MetsXml {
   val root: Elem
-  val titlePageId: Option[String]
   val thumbnailReference: Option[FileReference]
   def firstManifestationFilename: Either[Exception, String]
   def fileReferencesMapping(bnumber: String): List[(String, FileReference)]
@@ -160,7 +158,6 @@ case class DigitisedMetsXml(root: Elem) extends MetsXml with XMLOps {
       Option(file \@ "MIMETYPE").filter(_.nonEmpty)
     )
 
-  lazy val titlePageId: Option[String] = TitlePageId(root)
   lazy val thumbnailReference: Option[FileReference] = ThumbnailReference(root)
 }
 

@@ -23,6 +23,8 @@ class MetsXmlTransformerTest
 
   it("transforms METS XML") {
     val xml = readResource("b30246039.xml")
+    val fileReferences = createFileReferences(6, "b30246039")
+    val thumbnailRef = fileReferences(5)._2
     transform(root = Some(xml), createdDate = Instant.now) shouldBe Right(
       InvisibleMetsData(
         recordIdentifier = "b30246039",
@@ -30,8 +32,10 @@ class MetsXmlTransformerTest
         accessConditionDz = Some("CC-BY-NC"),
         accessConditionStatus = Some("Open"),
         accessConditionUsage = Some("Some terms"),
-        fileReferencesMapping = createFileReferences(6, "b30246039"),
-        titlePageId = Some("PHYS_0006")
+        fileReferencesMapping = fileReferences,
+        // TODO: temp - when fileReferences stop normalising in the wrong place, this can be just thumbnailRef
+        thumbnailReference =
+          Some(thumbnailRef.copy(location = "objects/" + thumbnailRef.location))
       )
     )
   }
@@ -59,6 +63,9 @@ class MetsXmlTransformerTest
       "b22012692_0003.xml" -> Some(readResource("b22012692_0003.xml")),
       "b22012692_0001.xml" -> Some(readResource("b22012692_0001.xml"))
     )
+    val fileReferences = createFileReferences(2, "b22012692", Some(1))
+    val thumbnailRef = fileReferences.head._2
+
     transform(
       root = Some(xml),
       createdDate = Instant.now,
@@ -70,8 +77,10 @@ class MetsXmlTransformerTest
           "Enciclopedia anatomica che comprende l'anatomia descrittiva, l'anatomia generale, l'anatomia patologica, la storia dello sviluppo e delle razze umane /",
         accessConditionDz = Some("PDM"),
         accessConditionStatus = Some("Open"),
-        fileReferencesMapping = createFileReferences(2, "b22012692", Some(1)),
-        titlePageId = Some("PHYS_0005")
+        fileReferencesMapping = fileReferences,
+        // TODO: temp - when fileReferences stop normalising in the wrong place, this can be just thumbnailRef
+        thumbnailReference =
+          Some(thumbnailRef.copy(location = "objects/" + thumbnailRef.location))
       )
     )
   }

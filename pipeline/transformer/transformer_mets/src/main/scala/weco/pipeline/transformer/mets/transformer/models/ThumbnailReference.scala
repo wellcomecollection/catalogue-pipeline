@@ -36,10 +36,10 @@ object ThumbnailReference extends XMLOps {
   private def fileIdFromPhysicalId(
     id: String
   )(implicit root: Elem): Option[String] =
-    Option(
+    (
       ((root \ "structMap").filterByAttribute("TYPE", "PHYSICAL") \\ "div")
-        .filterByAttribute("ID", id) \ "fptr" \@ "FILEID"
-    ).filter(_.nonEmpty)
+        .filterByAttribute("ID", id) \ "fptr"
+    ).map(_ \@ "FILEID").find(_.nonEmpty)
 
   private def validFileNodeWithId(
     id: String
