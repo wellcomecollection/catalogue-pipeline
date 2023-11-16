@@ -273,16 +273,15 @@ class MetsDataTest
   it("creates a invisible work with a thumbnail location") {
     val metsData = createMetsDataWith(
       accessConditionDz = Some("CC-BY-NC"),
-      fileReferencesMapping = List(
-        "id" -> FileReference("l", "location.jp2", Some("image/jp2"))
-      )
+      thumbnailReference =
+        Some(FileReference("l", "location.jp2", Some("image/jp2")))
     )
     val result = metsData.toWork(1, Instant.now())
     result shouldBe a[Right[_, _]]
     result.right.get.data.thumbnail shouldBe Some(
       DigitalLocation(
         url =
-          "https://iiif.wellcomecollection.org/thumbs/location.jp2/full/!200,200/0/default.jpg",
+          s"https://iiif.wellcomecollection.org/thumbs/${metsData.recordIdentifier}_location.jp2/full/!200,200/0/default.jpg",
         locationType = LocationType.ThumbnailImage,
         license = Some(License.CCBYNC)
       )
@@ -296,14 +295,15 @@ class MetsDataTest
         "id" -> FileReference("l", "location.jp2", Some("image/jp2")),
         "title-id" -> FileReference("l", "title.jp2", Some("image/jp2"))
       ),
-      titlePageId = Some("title-id")
+      thumbnailReference =
+        Some(FileReference("l", "title.jp2", Some("image/jp2")))
     )
     val result = metsData.toWork(1, Instant.now())
     result shouldBe a[Right[_, _]]
     result.right.get.data.thumbnail shouldBe Some(
       DigitalLocation(
         url =
-          "https://iiif.wellcomecollection.org/thumbs/title.jp2/full/!200,200/0/default.jpg",
+          s"https://iiif.wellcomecollection.org/thumbs/${metsData.recordIdentifier}_title.jp2/full/!200,200/0/default.jpg",
         locationType = LocationType.ThumbnailImage,
         license = Some(License.CCBYNC)
       )
@@ -330,7 +330,8 @@ class MetsDataTest
       accessConditionDz = Some("CC-BY-NC"),
       fileReferencesMapping = List(
         "id" -> FileReference("l", "location.pdf")
-      )
+      ),
+      thumbnailReference = Some(FileReference("l", "location.pdf"))
     )
     val result = metsData.toWork(1, Instant.now())
     result shouldBe a[Right[_, _]]

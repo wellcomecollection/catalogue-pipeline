@@ -8,7 +8,8 @@ trait XMLOps {
 
     def filterByAttribute(attrib: String, value: String): NodeSeq =
       nodes.filter(_ \@ attrib == value)
-
+    def filterByHasChild(tag: String): NodeSeq =
+      nodes.filter(_ \ tag != Nil)
     def childrenWithTag(tag: String): NodeSeq =
       nodes.flatMap(_ \ tag)
 

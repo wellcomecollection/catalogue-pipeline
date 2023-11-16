@@ -113,7 +113,7 @@ class MetsXmlTransformerTest
       )
     )
   }
-
+  // TODO, I'm not sure this should error, it should warn and best-guess.
   it("errors if first manifestation doesn't exist in store") {
     val xml = readResource("b22012692.xml")
     val manifestations = Map(

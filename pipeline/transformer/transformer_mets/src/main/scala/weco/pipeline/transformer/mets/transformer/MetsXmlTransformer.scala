@@ -1,5 +1,6 @@
 package weco.pipeline.transformer.mets.transformer
 
+import grizzled.slf4j.Logging
 import weco.catalogue.internal_model.work.{Work, WorkState}
 import weco.catalogue.source_model.mets.{
   DeletedMetsFile,
@@ -15,7 +16,8 @@ import weco.storage.providers.s3.S3ObjectLocation
 import weco.storage.store.Readable
 
 class MetsXmlTransformer(store: Readable[S3ObjectLocation, String])
-    extends Transformer[MetsSourceData] {
+    extends Transformer[MetsSourceData]
+    with Logging {
 
   override def apply(
     id: String,
@@ -74,19 +76,32 @@ class MetsXmlTransformer(store: Readable[S3ObjectLocation, String])
     root: MetsXml,
     manifestations: List[S3ObjectLocation]
   ): Result[InvisibleMetsData] = {
+    // a METS file without separate manifestations is its own manifestation,
+    // otherwise, the first one is treated as representative of the whole.
+//    val referenceManifestation = getFirstManifestation(root, manifestations).getOrElse(root)
+//
+//    // If there are manifestation files in the bag, then they should be referenced in the main METS file
+//    // similarly, if there are MultipleManifestations in the METS file, then they should be in the bag.
+//    (manifestations, referenceManifestation) match {
+//      case (Nil, manifestation) if manifestation != root =>
+//
+//      case (_, manifestation) if manifestation == root =>
+//    }
     for {
       id <- root.recordIdentifier
       title <- MetsTitle(root.root)
-      firstManifestation <- getFirstManifestation(root, manifestations)
-      accessConditions <- Right(MetsAccessConditions(firstManifestation.root))
+      referenceManifestation <- getFirstManifestation(root, manifestations)
+      accessConditions <- Right(
+        MetsAccessConditions(referenceManifestation.root)
+      )
     } yield InvisibleMetsData(
       recordIdentifier = id,
       title = title,
       accessConditionDz = accessConditions.dz,
       accessConditionStatus = accessConditions.status,
       accessConditionUsage = accessConditions.usage,
-      fileReferencesMapping = firstManifestation.fileReferencesMapping(id),
-      titlePageId = firstManifestation.titlePageId
+      fileReferencesMapping = referenceManifestation.fileReferencesMapping(id),
+      titlePageId = referenceManifestation.titlePageId
     )
   }
 

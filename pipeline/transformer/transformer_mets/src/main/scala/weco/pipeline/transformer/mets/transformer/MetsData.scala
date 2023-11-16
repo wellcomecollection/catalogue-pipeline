@@ -14,7 +14,8 @@ import weco.pipeline.transformer.identifiers.SourceIdentifierValidation._
 import weco.pipeline.transformer.mets.transformer.models.FileReference
 import weco.pipeline.transformer.mets.transformers.{
   MetsAccessStatus,
-  MetsLocation
+  MetsLocation,
+  MetsThumbnail
 }
 import weco.pipeline.transformer.result.Result
 
@@ -56,6 +57,7 @@ case class InvisibleMetsData(
   accessConditionStatus: Option[String] = None,
   accessConditionUsage: Option[String] = None,
   fileReferencesMapping: List[(String, FileReference)] = Nil,
+  thumbnailReference: Option[FileReference] = None,
   titlePageId: Option[String] = None
 ) extends MetsData {
 
@@ -84,7 +86,12 @@ case class InvisibleMetsData(
         data = WorkData[DataState.Unidentified](
           title = Some(title),
           items = List(item),
-          thumbnail = thumbnail(sourceIdentifier.value, license, accessStatus),
+          thumbnail = MetsThumbnail(
+            thumbnailReference,
+            sourceIdentifier.value,
+            license,
+            accessStatus
+          ),
           imageData = imageData(version, license, accessStatus, location)
         ),
         invisibilityReasons = List(MetsWorksAreNotVisible)
@@ -143,31 +150,6 @@ case class InvisibleMetsData(
             Left(new Exception(s"Couldn't match $accessCondition to a license"))
         }
     }.sequence
-
-  private def titlePageFileReference: Option[FileReference] =
-    titlePageId
-      .flatMap {
-        titleId =>
-          fileReferencesMapping.collectFirst {
-            case (id, fileReference) if id == titleId => fileReference
-          }
-      }
-
-  private def thumbnail(
-    bnumber: String,
-    license: Option[License],
-    accessStatus: Option[AccessStatus]
-  ): Option[DigitalLocation] =
-    for {
-      fileReference <- titlePageFileReference
-        .orElse(fileReferences.find(ImageUtils.isThumbnail))
-      url <- ImageUtils.buildThumbnailUrl(bnumber, fileReference)
-      if !accessStatus.exists(_.hasRestrictions)
-    } yield DigitalLocation(
-      url = url,
-      locationType = LocationType.ThumbnailImage,
-      license = license
-    )
 
   private def imageData(
     version: Int,

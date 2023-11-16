@@ -7,7 +7,7 @@ import weco.fixtures.LocalResources
 import weco.pipeline.transformer.mets.generators.MetsGenerators
 import weco.pipeline.transformer.mets.transformer.models.FileReference
 
-class MetsXmlTest
+class DigitisedMetsXmlTest
     extends AnyFunSpec
     with Matchers
     with EitherValues
@@ -25,19 +25,25 @@ class MetsXmlTest
   }
 
   it("does not parse a mets if recordIdentifier is outside of dmdSec element") {
-    MetsXml(xmlNodmdSec).recordIdentifier shouldBe a[Left[_, _]]
+    DigitisedMetsXml(xmlNodmdSec).recordIdentifier shouldBe a[Left[_, _]]
   }
 
   it("does not parse if there is more than one recordIdentifier") {
-    MetsXml(xmlRepeatedIdNodes).recordIdentifier shouldBe Right("b30246039")
+    DigitisedMetsXml(xmlRepeatedIdNodes).recordIdentifier shouldBe Right(
+      "b30246039"
+    )
   }
 
   it("does not parse if there is more than one distinct recordIdentifier") {
-    MetsXml(xmlMultipleDistictIds).recordIdentifier shouldBe a[Left[_, _]]
+    DigitisedMetsXml(xmlMultipleDistictIds).recordIdentifier shouldBe a[
+      Left[_, _]
+    ]
   }
 
   it("parses file references mapping from XML") {
-    MetsXml(xml).value.fileReferencesMapping("b30246039") shouldBe List(
+    MetsXml(xml).value.fileReferencesMapping(
+      "b30246039"
+    ) shouldBe List(
       "PHYS_0001" -> FileReference(
         id = "FILE_0001_OBJECTS",
         location = "b30246039_0001.jp2",
@@ -154,19 +160,19 @@ class MetsXmlTest
     val xml = xmlWithManifestations(
       List(("LOG_0001", "01", "first.xml"), ("LOG_0002", "02", "second.xml"))
     )
-    MetsXml(xml).firstManifestationFilename shouldBe Right("first.xml")
+    DigitisedMetsXml(xml).firstManifestationFilename shouldBe Right("first.xml")
   }
 
   it("parses manifestation filename using ordering when present") {
     val xml = xmlWithManifestations(
       List(("LOG_0001", "02", "second.xml"), ("LOG_0002", "01", "first.xml"))
     )
-    MetsXml(xml).firstManifestationFilename shouldBe Right("first.xml")
+    DigitisedMetsXml(xml).firstManifestationFilename shouldBe Right("first.xml")
   }
 
   it("doesnt parse manifestation filename when not present") {
     val xml = xmlWithManifestations(Nil)
-    MetsXml(xml).firstManifestationFilename shouldBe a[Left[_, _]]
+    DigitisedMetsXml(xml).firstManifestationFilename shouldBe a[Left[_, _]]
   }
 
   def xmlNodmdSec =

@@ -2,7 +2,6 @@ package weco.pipeline.transformer.mets.generators
 
 import weco.pipeline.transformer.mets.transformer.models.FileReference
 import weco.pipeline.transformer.mets.transformer.InvisibleMetsData
-
 import weco.sierra.generators.SierraIdentifierGenerators
 
 trait MetsDataGenerators extends SierraIdentifierGenerators {
@@ -15,7 +14,7 @@ trait MetsDataGenerators extends SierraIdentifierGenerators {
     accessConditionStatus: Option[String] = None,
     accessConditionUsage: Option[String] = None,
     fileReferencesMapping: List[(String, FileReference)] = Nil,
-    titlePageId: Option[String] = None
+    thumbnailReference: Option[FileReference] = None
   ): InvisibleMetsData =
     InvisibleMetsData(
       recordIdentifier = bibNumber,
@@ -24,6 +23,6 @@ trait MetsDataGenerators extends SierraIdentifierGenerators {
       accessConditionStatus = accessConditionStatus,
       accessConditionUsage = accessConditionUsage,
       fileReferencesMapping = fileReferencesMapping,
-      titlePageId = titlePageId
+      thumbnailReference = thumbnailReference
     )
 }
