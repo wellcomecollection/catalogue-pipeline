@@ -6,8 +6,6 @@ import weco.pipeline.ingestor.common.models.WorkQueryableValues
 
 case class ImageQueryableValues(
   @JsonKey("id") id: String,
-  @JsonKey("sourceIdentifier.value") sourceIdentifierValue: String,
-  @JsonKey("locations.license.id") locationsLicenseId: List[String],
   @JsonKey("source") source: WorkQueryableValues
 )
 
@@ -17,8 +15,6 @@ case object ImageQueryableValues extends ImageValues {
   ): ImageQueryableValues =
     new ImageQueryableValues(
       id = image.state.canonicalId.underlying,
-      sourceIdentifierValue = image.state.sourceIdentifier.value,
-      locationsLicenseId = image.locations.flatMap(_.license).map(_.id),
       source = sourceQueryableValues(image.source)
     )
 

@@ -14,8 +14,6 @@ class ImageQueryableValuesTest
     val workSource = testImage.source.asInstanceOf[ParentWork]
     ImageQueryableValues(testImage) shouldBe ImageQueryableValues(
       id = "zswkgyan",
-      sourceIdentifierValue = "L0045108",
-      locationsLicenseId = List("cc-by"),
       source = WorkQueryableValues(
         canonicalId = workSource.id.canonicalId,
         sourceIdentifier = workSource.id.sourceIdentifier,
