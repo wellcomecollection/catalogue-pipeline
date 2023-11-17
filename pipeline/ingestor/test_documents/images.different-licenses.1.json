@@ -1,6 +1,6 @@
 {
   "description" : "images with different licenses",
-  "createdAt" : "2023-11-17T16:05:34.346075Z",
+  "createdAt" : "2023-11-17T16:36:37.172443Z",
   "id" : "waaqwfw4",
   "document" : {
     "modifiedTime" : "2026-10-17T08:23:38Z",
@@ -63,10 +63,6 @@
     },
     "query" : {
       "id" : "waaqwfw4",
-      "sourceIdentifier.value" : "juFuIOmo35",
-      "locations.license.id" : [
-        "cc-by"
-      ],
       "source" : {
         "collectionPath.label" : null,
         "collectionPath.path" : null,

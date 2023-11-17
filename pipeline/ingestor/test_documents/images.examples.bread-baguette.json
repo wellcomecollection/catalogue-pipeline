@@ -1,6 +1,6 @@
 {
   "description" : "an example of images with work metadata for the API tests",
-  "createdAt" : "2023-11-17T16:05:35.027581Z",
+  "createdAt" : "2023-11-17T16:36:37.853250Z",
   "id" : "risvmj7g",
   "document" : {
     "modifiedTime" : "2043-09-04T19:06:48Z",
@@ -63,10 +63,6 @@
     },
     "query" : {
       "id" : "risvmj7g",
-      "sourceIdentifier.value" : "4fu8Hj8pG3",
-      "locations.license.id" : [
-        "cc-by"
-      ],
       "source" : {
         "collectionPath.label" : null,
         "collectionPath.path" : null,

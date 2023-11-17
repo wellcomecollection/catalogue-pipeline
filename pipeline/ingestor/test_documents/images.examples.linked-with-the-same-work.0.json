@@ -1,6 +1,6 @@
 {
   "description" : "images linked with the same work",
-  "createdAt" : "2023-11-17T16:05:34.970553Z",
+  "createdAt" : "2023-11-17T16:36:37.790128Z",
   "id" : "442i1muy",
   "document" : {
     "modifiedTime" : "1994-09-19T04:49:23Z",
@@ -65,10 +65,6 @@
     },
     "query" : {
       "id" : "442i1muy",
-      "sourceIdentifier.value" : "zXzRGt9LJY",
-      "locations.license.id" : [
-        "cc-by"
-      ],
       "source" : {
         "collectionPath.label" : null,
         "collectionPath.path" : null,

@@ -1,6 +1,6 @@
 {
   "description" : "images with different licenses",
-  "createdAt" : "2023-11-17T16:05:34.380031Z",
+  "createdAt" : "2023-11-17T16:36:37.206487Z",
   "id" : "seb7gtx5",
   "document" : {
     "modifiedTime" : "1981-04-04T03:36:40Z",
@@ -65,10 +65,6 @@
     },
     "query" : {
       "id" : "seb7gtx5",
-      "sourceIdentifier.value" : "ygYu1bThOc",
-      "locations.license.id" : [
-        "pdm"
-      ],
       "source" : {
         "collectionPath.label" : null,
         "collectionPath.path" : null,

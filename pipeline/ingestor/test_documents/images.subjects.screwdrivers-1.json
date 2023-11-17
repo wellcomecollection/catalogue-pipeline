@@ -1,6 +1,6 @@
 {
   "description" : "images with different subjects",
-  "createdAt" : "2023-11-17T16:05:35.089495Z",
+  "createdAt" : "2023-11-17T16:36:37.910359Z",
   "id" : "608yinvr",
   "document" : {
     "modifiedTime" : "1952-12-18T13:47:18Z",
@@ -70,10 +70,6 @@
     },
     "query" : {
       "id" : "608yinvr",
-      "sourceIdentifier.value" : "oxCqXn9x8q",
-      "locations.license.id" : [
-        "cc-by"
-      ],
       "source" : {
         "collectionPath.label" : null,
         "collectionPath.path" : null,

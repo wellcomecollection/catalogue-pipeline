@@ -1,6 +1,6 @@
 {
   "description" : "images with different subjects",
-  "createdAt" : "2023-11-17T16:05:35.105929Z",
+  "createdAt" : "2023-11-17T16:36:37.930146Z",
   "id" : "hfwfbogx",
   "document" : {
     "modifiedTime" : "2068-12-13T11:19:09Z",
@@ -78,10 +78,6 @@
     },
     "query" : {
       "id" : "hfwfbogx",
-      "sourceIdentifier.value" : "ePSB3znSTi",
-      "locations.license.id" : [
-        "cc-by"
-      ],
       "source" : {
         "collectionPath.label" : null,
         "collectionPath.path" : null,

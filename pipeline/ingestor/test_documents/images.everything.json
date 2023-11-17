@@ -1,6 +1,6 @@
 {
   "description" : "an image with every include",
-  "createdAt" : "2023-11-17T16:05:34.948810Z",
+  "createdAt" : "2023-11-17T16:36:37.756427Z",
   "id" : "wp52vobn",
   "document" : {
     "modifiedTime" : "1959-06-25T19:38:02Z",
@@ -135,10 +135,6 @@
     },
     "query" : {
       "id" : "wp52vobn",
-      "sourceIdentifier.value" : "vRESRCmaPF",
-      "locations.license.id" : [
-        "cc-by"
-      ],
       "source" : {
         "collectionPath.label" : null,
         "collectionPath.path" : null,

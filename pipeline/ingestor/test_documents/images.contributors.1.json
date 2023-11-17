@@ -1,6 +1,6 @@
 {
   "description" : "images with different contributors",
-  "createdAt" : "2023-11-17T16:05:34.721824Z",
+  "createdAt" : "2023-11-17T16:36:37.502349Z",
   "id" : "q7isn7gh",
   "document" : {
     "modifiedTime" : "2055-10-11T18:35:24Z",
@@ -81,10 +81,6 @@
     },
     "query" : {
       "id" : "q7isn7gh",
-      "sourceIdentifier.value" : "dHqlfc1v0C",
-      "locations.license.id" : [
-        "cc-by"
-      ],
       "source" : {
         "collectionPath.label" : null,
         "collectionPath.path" : null,

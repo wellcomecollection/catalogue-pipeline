@@ -1,6 +1,6 @@
 {
   "description" : "images with different subjects",
-  "createdAt" : "2023-11-17T16:05:35.100237Z",
+  "createdAt" : "2023-11-17T16:36:37.920881Z",
   "id" : "vwtlblqa",
   "document" : {
     "modifiedTime" : "2019-11-02T09:06:12Z",
@@ -70,10 +70,6 @@
     },
     "query" : {
       "id" : "vwtlblqa",
-      "sourceIdentifier.value" : "89mX4KKXvx",
-      "locations.license.id" : [
-        "cc-by"
-      ],
       "source" : {
         "collectionPath.label" : null,
         "collectionPath.path" : null,

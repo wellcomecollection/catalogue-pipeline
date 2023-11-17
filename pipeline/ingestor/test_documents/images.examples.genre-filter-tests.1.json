@@ -1,6 +1,6 @@
 {
   "description" : "examples for the genre filter tests",
-  "createdAt" : "2023-11-17T16:05:34.915743Z",
+  "createdAt" : "2023-11-17T16:36:37.720612Z",
   "id" : "bah7vup6",
   "document" : {
     "modifiedTime" : "2049-05-23T13:53:19Z",
@@ -63,10 +63,6 @@
     },
     "query" : {
       "id" : "bah7vup6",
-      "sourceIdentifier.value" : "4ZranDf0qR",
-      "locations.license.id" : [
-        "cc-by"
-      ],
       "source" : {
         "collectionPath.label" : null,
         "collectionPath.path" : null,

@@ -1,6 +1,6 @@
 {
   "description" : "an image with a production event in 1904",
-  "createdAt" : "2023-11-17T16:05:35.159654Z",
+  "createdAt" : "2023-11-17T16:36:37.996614Z",
   "id" : "8r3h7lpn",
   "document" : {
     "modifiedTime" : "1963-02-05T12:54:03Z",
@@ -61,10 +61,6 @@
     },
     "query" : {
       "id" : "8r3h7lpn",
-      "sourceIdentifier.value" : "NQH9skgsOu",
-      "locations.license.id" : [
-        "cc-by"
-      ],
       "source" : {
         "collectionPath.label" : null,
         "collectionPath.path" : null,

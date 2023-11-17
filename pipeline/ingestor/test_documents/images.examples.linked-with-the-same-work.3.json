@@ -1,6 +1,6 @@
 {
   "description" : "images linked with the same work",
-  "createdAt" : "2023-11-17T16:05:34.973448Z",
+  "createdAt" : "2023-11-17T16:36:37.794079Z",
   "id" : "rzdabpna",
   "document" : {
     "modifiedTime" : "2005-03-11T21:05:37Z",
@@ -63,10 +63,6 @@
     },
     "query" : {
       "id" : "rzdabpna",
-      "sourceIdentifier.value" : "7QZjoe70JG",
-      "locations.license.id" : [
-        "cc-by"
-      ],
       "source" : {
         "collectionPath.label" : null,
         "collectionPath.path" : null,

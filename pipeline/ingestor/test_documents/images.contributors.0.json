@@ -1,6 +1,6 @@
 {
   "description" : "images with different contributors",
-  "createdAt" : "2023-11-17T16:05:34.705884Z",
+  "createdAt" : "2023-11-17T16:36:37.488508Z",
   "id" : "mherdyx0",
   "document" : {
     "modifiedTime" : "1984-06-19T23:29:34Z",
@@ -71,10 +71,6 @@
     },
     "query" : {
       "id" : "mherdyx0",
-      "sourceIdentifier.value" : "V74sVtQPzP",
-      "locations.license.id" : [
-        "cc-by"
-      ],
       "source" : {
         "collectionPath.label" : null,
         "collectionPath.path" : null,

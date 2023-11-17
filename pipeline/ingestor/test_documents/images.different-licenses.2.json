@@ -1,6 +1,6 @@
 {
   "description" : "images with different licenses",
-  "createdAt" : "2023-11-17T16:05:34.358434Z",
+  "createdAt" : "2023-11-17T16:36:37.185119Z",
   "id" : "sh4pa61s",
   "document" : {
     "modifiedTime" : "1966-02-22T19:31:55Z",
@@ -61,10 +61,6 @@
     },
     "query" : {
       "id" : "sh4pa61s",
-      "sourceIdentifier.value" : "buRO2Xbp0r",
-      "locations.license.id" : [
-        "cc-by"
-      ],
       "source" : {
         "collectionPath.label" : null,
         "collectionPath.path" : null,

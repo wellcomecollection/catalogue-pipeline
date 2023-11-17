@@ -1,6 +1,6 @@
 {
   "description" : "an image with a production event in 1098",
-  "createdAt" : "2023-11-17T16:05:35.185614Z",
+  "createdAt" : "2023-11-17T16:36:38.020242Z",
   "id" : "rcwca9kx",
   "document" : {
     "modifiedTime" : "2021-05-29T16:02:15Z",
@@ -61,10 +61,6 @@
     },
     "query" : {
       "id" : "rcwca9kx",
-      "sourceIdentifier.value" : "ReXpz5Qezk",
-      "locations.license.id" : [
-        "cc-by"
-      ],
       "source" : {
         "collectionPath.label" : null,
         "collectionPath.path" : null,

@@ -1,6 +1,6 @@
 {
   "description" : "images with different licenses",
-  "createdAt" : "2023-11-17T16:05:34.386078Z",
+  "createdAt" : "2023-11-17T16:36:37.211882Z",
   "id" : "gt4jeta0",
   "document" : {
     "modifiedTime" : "2068-06-15T19:26:53Z",
@@ -65,10 +65,6 @@
     },
     "query" : {
       "id" : "gt4jeta0",
-      "sourceIdentifier.value" : "tsCaVwgJtp",
-      "locations.license.id" : [
-        "pdm"
-      ],
       "source" : {
         "collectionPath.label" : null,
         "collectionPath.path" : null,

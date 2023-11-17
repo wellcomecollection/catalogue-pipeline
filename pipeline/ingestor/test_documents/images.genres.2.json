@@ -1,6 +1,6 @@
 {
   "description" : "images with different genres",
-  "createdAt" : "2023-11-17T16:05:34.780426Z",
+  "createdAt" : "2023-11-17T16:36:37.594506Z",
   "id" : "kcqsym0i",
   "document" : {
     "modifiedTime" : "2006-06-11T06:02:02Z",
@@ -83,10 +83,6 @@
     },
     "query" : {
       "id" : "kcqsym0i",
-      "sourceIdentifier.value" : "BhxxxQ1xUF",
-      "locations.license.id" : [
-        "cc-by"
-      ],
       "source" : {
         "collectionPath.label" : null,
         "collectionPath.path" : null,

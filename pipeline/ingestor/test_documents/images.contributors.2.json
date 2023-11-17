@@ -1,6 +1,6 @@
 {
   "description" : "images with different contributors",
-  "createdAt" : "2023-11-17T16:05:34.733293Z",
+  "createdAt" : "2023-11-17T16:36:37.518626Z",
   "id" : "cc8gnrfd",
   "document" : {
     "modifiedTime" : "1954-10-27T14:08:04Z",
@@ -85,10 +85,6 @@
     },
     "query" : {
       "id" : "cc8gnrfd",
-      "sourceIdentifier.value" : "vt6tmEywKE",
-      "locations.license.id" : [
-        "cc-by"
-      ],
       "source" : {
         "collectionPath.label" : null,
         "collectionPath.path" : null,

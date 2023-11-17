@@ -1,6 +1,6 @@
 {
   "description" : "an image with a production event in 1900",
-  "createdAt" : "2023-11-17T16:05:35.126584Z",
+  "createdAt" : "2023-11-17T16:36:37.960518Z",
   "id" : "ihnwqeiu",
   "document" : {
     "modifiedTime" : "1979-07-12T04:54:26Z",
@@ -63,10 +63,6 @@
     },
     "query" : {
       "id" : "ihnwqeiu",
-      "sourceIdentifier.value" : "CVam7i3Kts",
-      "locations.license.id" : [
-        "cc-by"
-      ],
       "source" : {
         "collectionPath.label" : null,
         "collectionPath.path" : null,

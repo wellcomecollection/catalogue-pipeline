@@ -1,6 +1,6 @@
 {
   "description" : "an example of images with work metadata for the API tests",
-  "createdAt" : "2023-11-17T16:05:35.031654Z",
+  "createdAt" : "2023-11-17T16:36:37.859089Z",
   "id" : "h34ad3uc",
   "document" : {
     "modifiedTime" : "1978-02-28T02:07:11Z",
@@ -65,10 +65,6 @@
     },
     "query" : {
       "id" : "h34ad3uc",
-      "sourceIdentifier.value" : "P6HNc8XWiC",
-      "locations.license.id" : [
-        "cc-by"
-      ],
       "source" : {
         "collectionPath.label" : null,
         "collectionPath.path" : null,

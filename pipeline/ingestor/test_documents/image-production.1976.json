@@ -1,6 +1,6 @@
 {
   "description" : "an image with a production event in 1976",
-  "createdAt" : "2023-11-17T16:05:35.139429Z",
+  "createdAt" : "2023-11-17T16:36:37.985822Z",
   "id" : "vgcwcshr",
   "document" : {
     "modifiedTime" : "2024-03-22T05:14:37Z",
@@ -61,10 +61,6 @@
     },
     "query" : {
       "id" : "vgcwcshr",
-      "sourceIdentifier.value" : "XBTh6XKxNl",
-      "locations.license.id" : [
-        "cc-by"
-      ],
       "source" : {
         "collectionPath.label" : null,
         "collectionPath.path" : null,

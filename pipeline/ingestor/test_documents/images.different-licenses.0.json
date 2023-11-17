@@ -1,6 +1,6 @@
 {
   "description" : "images with different licenses",
-  "createdAt" : "2023-11-17T16:05:34.336521Z",
+  "createdAt" : "2023-11-17T16:36:37.164658Z",
   "id" : "45peyutt",
   "document" : {
     "modifiedTime" : "1997-11-05T06:19:21Z",
@@ -61,10 +61,6 @@
     },
     "query" : {
       "id" : "45peyutt",
-      "sourceIdentifier.value" : "R8UNWutFRZ",
-      "locations.license.id" : [
-        "cc-by"
-      ],
       "source" : {
         "collectionPath.label" : null,
         "collectionPath.path" : null,

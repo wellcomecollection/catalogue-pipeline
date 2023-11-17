@@ -1,6 +1,6 @@
 {
   "description" : "images linked with another work",
-  "createdAt" : "2023-11-17T16:05:35.004709Z",
+  "createdAt" : "2023-11-17T16:36:37.832670Z",
   "id" : "zs6cxirr",
   "document" : {
     "modifiedTime" : "2010-10-05T23:16:10Z",
@@ -63,10 +63,6 @@
     },
     "query" : {
       "id" : "zs6cxirr",
-      "sourceIdentifier.value" : "y5MepkDWU2",
-      "locations.license.id" : [
-        "cc-by"
-      ],
       "source" : {
         "collectionPath.label" : null,
         "collectionPath.path" : null,

@@ -1,6 +1,6 @@
 {
   "description" : "images with different subjects",
-  "createdAt" : "2023-11-17T16:05:35.084869Z",
+  "createdAt" : "2023-11-17T16:36:37.903214Z",
   "id" : "lfbtqs12",
   "document" : {
     "modifiedTime" : "1962-05-21T20:46:43Z",
@@ -67,10 +67,6 @@
     },
     "query" : {
       "id" : "lfbtqs12",
-      "sourceIdentifier.value" : "yqDOIJfzS0",
-      "locations.license.id" : [
-        "cc-by"
-      ],
       "source" : {
         "collectionPath.label" : null,
         "collectionPath.path" : null,

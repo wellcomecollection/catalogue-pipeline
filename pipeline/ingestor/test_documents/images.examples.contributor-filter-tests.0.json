@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2023-11-17T16:05:34.837316Z",
+  "createdAt" : "2023-11-17T16:36:37.643549Z",
   "id" : "2asytm3k",
   "document" : {
     "modifiedTime" : "1984-08-19T17:29:37Z",
@@ -75,10 +75,6 @@
     },
     "query" : {
       "id" : "2asytm3k",
-      "sourceIdentifier.value" : "rxH65CFxmB",
-      "locations.license.id" : [
-        "cc-by"
-      ],
       "source" : {
         "collectionPath.label" : null,
         "collectionPath.path" : null,

@@ -1,6 +1,6 @@
 {
   "description" : "images with different licenses",
-  "createdAt" : "2023-11-17T16:05:34.371901Z",
+  "createdAt" : "2023-11-17T16:36:37.200193Z",
   "id" : "p72gjhle",
   "document" : {
     "modifiedTime" : "1941-01-01T21:13:28Z",
@@ -65,10 +65,6 @@
     },
     "query" : {
       "id" : "p72gjhle",
-      "sourceIdentifier.value" : "H2liBIb8Od",
-      "locations.license.id" : [
-        "cc-by"
-      ],
       "source" : {
         "collectionPath.label" : null,
         "collectionPath.path" : null,

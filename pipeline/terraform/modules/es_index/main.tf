@@ -16,6 +16,7 @@ locals {
 }
 
 resource "elasticstack_elasticsearch_index" "the_index" {
+  deletion_protection  = false
   name                 = local.full_name
   mappings             = file(local.mappings_file)
   analysis_analyzer    = local.analysis.analyzer

@@ -1,6 +1,6 @@
 {
   "description" : "images with different subjects",
-  "createdAt" : "2023-11-17T16:05:35.111250Z",
+  "createdAt" : "2023-11-17T16:36:37.935752Z",
   "id" : "30p2xtsf",
   "document" : {
     "modifiedTime" : "1984-03-03T23:20:51Z",
@@ -78,10 +78,6 @@
     },
     "query" : {
       "id" : "30p2xtsf",
-      "sourceIdentifier.value" : "oVAuwpnefU",
-      "locations.license.id" : [
-        "cc-by"
-      ],
       "source" : {
         "collectionPath.label" : null,
         "collectionPath.path" : null,

@@ -1,6 +1,6 @@
 {
   "description" : "images linked with the same work",
-  "createdAt" : "2023-11-17T16:05:34.971175Z",
+  "createdAt" : "2023-11-17T16:36:37.790962Z",
   "id" : "1wbpae6j",
   "document" : {
     "modifiedTime" : "2055-12-28T21:50:52Z",
@@ -61,10 +61,6 @@
     },
     "query" : {
       "id" : "1wbpae6j",
-      "sourceIdentifier.value" : "HQwoBp6AzL",
-      "locations.license.id" : [
-        "cc-by"
-      ],
       "source" : {
         "collectionPath.label" : null,
         "collectionPath.path" : null,
