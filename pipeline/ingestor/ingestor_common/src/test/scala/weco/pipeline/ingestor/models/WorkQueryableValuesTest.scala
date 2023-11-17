@@ -2,31 +2,18 @@ package weco.pipeline.ingestor.models
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.generators.ImageGenerators
 import weco.catalogue.internal_model.identifiers._
 import weco.catalogue.internal_model.work._
-import weco.catalogue.internal_model.work.generators.{
-  ContributorGenerators,
-  ItemsGenerators,
-  WorkGenerators
-}
-import weco.pipeline.ingestor.common.models.WorkQueryableValues
-import weco.json.JsonUtil._
+import weco.catalogue.internal_model.work.generators.WorkGenerators
 
-import scala.io.Source
+import weco.pipeline.ingestor.common.models.WorkQueryableValues
 
 class WorkQueryableValuesTest
     extends AnyFunSpec
     with Matchers
-    with ContributorGenerators
-    with ItemsGenerators
-    with ImageGenerators
+    with IngestorTestData
     with WorkGenerators {
 
-  lazy val testWork: Work.Visible[WorkState.Denormalised] =
-    fromJson[Work.Visible[WorkState.Denormalised]](
-      Source.fromResource("c4zj63fx-denormalised.json").mkString
-    ).get
   lazy val testWorkQueryableValues: WorkQueryableValues = WorkQueryableValues(
     testWork
   )
