@@ -1,6 +1,6 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2023-03-24T14:12:13.326746Z",
+  "createdAt" : "2023-11-17T16:05:57.356168Z",
   "id" : "igluyxyl",
   "document" : {
     "debug" : {
@@ -102,21 +102,20 @@
       "type" : "Work"
     },
     "query" : {
+      "collectionPath.label" : null,
+      "collectionPath.path" : null,
+      "alternativeTitles" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "description" : null,
+      "edition" : null,
+      "genres.concepts.label" : [
+      ],
       "id" : "igluyxyl",
-      "format.id" : null,
-      "workType" : "Standard",
       "identifiers.value" : [
         "R5Stsp385V"
       ],
-      "title" : "title-wWOedI3v8S",
-      "alternativeTitles" : [
-      ],
-      "description" : null,
-      "physicalDescription" : null,
-      "edition" : null,
-      "notes.contents" : [
-      ],
-      "lettering" : null,
       "images.id" : [
       ],
       "images.identifiers.value" : [
@@ -125,50 +124,23 @@
       ],
       "items.identifiers.value" : [
       ],
-      "items.locations.accessConditions.status.id" : [
+      "languages.label" : [
       ],
-      "items.locations.license.id" : [
+      "lettering" : null,
+      "notes.contents" : [
       ],
-      "items.locations.locationType.id" : [
+      "partOf.title" : [
       ],
-      "subjects.id" : [
-        "darwin01"
+      "physicalDescription" : null,
+      "production.label" : [
       ],
-      "subjects.label" : [
-        "Darwin \"Jones\", Charles"
-      ],
+      "referenceNumber" : null,
       "subjects.concepts.label" : [
         "LzJV7M3Kvqw9fGo",
         "l7E1K1L8XUhcLZh",
         "c35m9C4DAgxJAjE"
       ],
-      "genres.label" : [
-      ],
-      "genres.concepts.label" : [
-      ],
-      "genres.concepts.id" : [
-      ],
-      "languages.id" : [
-      ],
-      "languages.label" : [
-      ],
-      "contributors.agent.id" : [
-      ],
-      "contributors.agent.label" : [
-      ],
-      "production.label" : [
-      ],
-      "production.dates.range.from" : [
-      ],
-      "partOf.id" : [
-      ],
-      "partOf.title" : [
-      ],
-      "availabilities.id" : [
-      ],
-      "collectionPath.label" : null,
-      "collectionPath.path" : null,
-      "referenceNumber" : null
+      "title" : "title-wWOedI3v8S"
     },
     "aggregatableValues" : {
       "workType" : [
@@ -187,6 +159,42 @@
       "items.locations.license" : [
       ],
       "availabilities" : [
+      ]
+    },
+    "filterableValues" : {
+      "format.id" : null,
+      "workType" : "Standard",
+      "production.dates.range.from" : [
+      ],
+      "languages.id" : [
+      ],
+      "genres.label" : [
+      ],
+      "genres.concepts.id" : [
+      ],
+      "subjects.label" : [
+        "Darwin \"Jones\", Charles"
+      ],
+      "contributors.agent.label" : [
+      ],
+      "identifiers.value" : [
+        "R5Stsp385V"
+      ],
+      "items.locations.license.id" : [
+      ],
+      "items.locations.accessConditions.status.id" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
+      "items.locations.locationType.id" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
       ]
     },
     "type" : "Visible"

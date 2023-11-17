@@ -1,6 +1,6 @@
 {
   "description" : "examples for the access status tests",
-  "createdAt" : "2023-03-24T14:12:13.373078Z",
+  "createdAt" : "2023-11-17T16:05:57.425491Z",
   "id" : "vh87ts9v",
   "document" : {
     "debug" : {
@@ -120,21 +120,20 @@
       "type" : "Work"
     },
     "query" : {
+      "collectionPath.label" : null,
+      "collectionPath.path" : null,
+      "alternativeTitles" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "description" : null,
+      "edition" : null,
+      "genres.concepts.label" : [
+      ],
       "id" : "vh87ts9v",
-      "format.id" : null,
-      "workType" : "Standard",
       "identifiers.value" : [
         "TOMLJUBPsk"
       ],
-      "title" : "title-AfYGNPFh1c",
-      "alternativeTitles" : [
-      ],
-      "description" : null,
-      "physicalDescription" : null,
-      "edition" : null,
-      "notes.contents" : [
-      ],
-      "lettering" : null,
       "images.id" : [
       ],
       "images.identifiers.value" : [
@@ -145,48 +144,20 @@
       "items.identifiers.value" : [
         "Bhh45MMdul"
       ],
-      "items.locations.accessConditions.status.id" : [
-        "licensed-resources"
-      ],
-      "items.locations.license.id" : [
-        "cc-by"
-      ],
-      "items.locations.locationType.id" : [
-        "iiif-presentation"
-      ],
-      "subjects.id" : [
-      ],
-      "subjects.label" : [
-      ],
-      "subjects.concepts.label" : [
-      ],
-      "genres.label" : [
-      ],
-      "genres.concepts.label" : [
-      ],
-      "genres.concepts.id" : [
-      ],
-      "languages.id" : [
-      ],
       "languages.label" : [
       ],
-      "contributors.agent.id" : [
-      ],
-      "contributors.agent.label" : [
-      ],
-      "production.label" : [
-      ],
-      "production.dates.range.from" : [
-      ],
-      "partOf.id" : [
+      "lettering" : null,
+      "notes.contents" : [
       ],
       "partOf.title" : [
       ],
-      "availabilities.id" : [
+      "physicalDescription" : null,
+      "production.label" : [
       ],
-      "collectionPath.label" : null,
-      "collectionPath.path" : null,
-      "referenceNumber" : null
+      "referenceNumber" : null,
+      "subjects.concepts.label" : [
+      ],
+      "title" : "title-AfYGNPFh1c"
     },
     "aggregatableValues" : {
       "workType" : [
@@ -205,6 +176,46 @@
         "{\"id\":\"cc-by\",\"label\":\"Attribution 4.0 International (CC BY 4.0)\",\"url\":\"http://creativecommons.org/licenses/by/4.0/\",\"type\":\"License\"}"
       ],
       "availabilities" : [
+      ]
+    },
+    "filterableValues" : {
+      "format.id" : null,
+      "workType" : "Standard",
+      "production.dates.range.from" : [
+      ],
+      "languages.id" : [
+      ],
+      "genres.label" : [
+      ],
+      "genres.concepts.id" : [
+      ],
+      "subjects.label" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "identifiers.value" : [
+        "TOMLJUBPsk"
+      ],
+      "items.locations.license.id" : [
+        "cc-by"
+      ],
+      "items.locations.accessConditions.status.id" : [
+        "licensed-resources"
+      ],
+      "items.id" : [
+        "mzclelhe"
+      ],
+      "items.identifiers.value" : [
+        "Bhh45MMdul"
+      ],
+      "items.locations.locationType.id" : [
+        "iiif-presentation"
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
       ]
     },
     "type" : "Visible"

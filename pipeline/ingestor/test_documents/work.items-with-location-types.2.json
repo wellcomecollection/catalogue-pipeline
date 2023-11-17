@@ -1,6 +1,6 @@
 {
   "description" : "items with different location types",
-  "createdAt" : "2023-03-17T11:03:31.894698Z",
+  "createdAt" : "2023-11-17T16:05:57.224839Z",
   "id" : "xzwsggki",
   "document" : {
     "debug" : {
@@ -111,21 +111,20 @@
       "type" : "Work"
     },
     "query" : {
+      "collectionPath.label" : null,
+      "collectionPath.path" : null,
+      "alternativeTitles" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "description" : null,
+      "edition" : null,
+      "genres.concepts.label" : [
+      ],
       "id" : "xzwsggki",
-      "format.id" : null,
-      "workType" : "Standard",
       "identifiers.value" : [
         "G6KR1DmPfn"
       ],
-      "title" : "title-po5xNC2PnQ",
-      "alternativeTitles" : [
-      ],
-      "description" : null,
-      "physicalDescription" : null,
-      "edition" : null,
-      "notes.contents" : [
-      ],
-      "lettering" : null,
       "images.id" : [
       ],
       "images.identifiers.value" : [
@@ -136,48 +135,20 @@
       "items.identifiers.value" : [
         "k2sxFZY9hd"
       ],
-      "items.locations.accessConditions.status.id" : [
-      ],
-      "items.locations.license.id" : [
-        "pdm"
-      ],
-      "items.locations.locationType.id" : [
-        "closed-stores"
-      ],
-      "subjects.id" : [
-      ],
-      "subjects.label" : [
-      ],
-      "subjects.concepts.label" : [
-      ],
-      "genres.label" : [
-      ],
-      "genres.concepts.label" : [
-      ],
-      "genres.concepts.id" : [
-      ],
-      "languages.id" : [
-      ],
       "languages.label" : [
       ],
-      "contributors.agent.id" : [
-      ],
-      "contributors.agent.label" : [
-      ],
-      "production.label" : [
-      ],
-      "production.dates.range.from" : [
-      ],
-      "partOf.id" : [
+      "lettering" : null,
+      "notes.contents" : [
       ],
       "partOf.title" : [
       ],
-      "availabilities.id" : [
-        "closed-stores"
+      "physicalDescription" : null,
+      "production.label" : [
       ],
-      "collectionPath.label" : null,
-      "collectionPath.path" : null,
-      "referenceNumber" : null
+      "referenceNumber" : null,
+      "subjects.concepts.label" : [
+      ],
+      "title" : "title-po5xNC2PnQ"
     },
     "aggregatableValues" : {
       "workType" : [
@@ -197,6 +168,46 @@
       ],
       "availabilities" : [
         "{\"id\":\"closed-stores\",\"label\":\"Closed stores\",\"type\":\"Availability\"}"
+      ]
+    },
+    "filterableValues" : {
+      "format.id" : null,
+      "workType" : "Standard",
+      "production.dates.range.from" : [
+      ],
+      "languages.id" : [
+      ],
+      "genres.label" : [
+      ],
+      "genres.concepts.id" : [
+      ],
+      "subjects.label" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "identifiers.value" : [
+        "G6KR1DmPfn"
+      ],
+      "items.locations.license.id" : [
+        "pdm"
+      ],
+      "items.locations.accessConditions.status.id" : [
+      ],
+      "items.id" : [
+        "lacffliq"
+      ],
+      "items.identifiers.value" : [
+        "k2sxFZY9hd"
+      ],
+      "items.locations.locationType.id" : [
+        "closed-stores"
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
+        "closed-stores"
       ]
     },
     "type" : "Visible"
