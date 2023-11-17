@@ -1,6 +1,6 @@
 package weco.pipeline.ingestor.common.models
 
-import weco.catalogue.internal_model.identifiers.{DataState, IdState}
+import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.{AbstractConcept, Genre}
 
 object ValueTransforms {
