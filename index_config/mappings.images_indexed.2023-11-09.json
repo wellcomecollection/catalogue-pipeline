@@ -67,6 +67,30 @@
         }
       }
     },
+    "vectorValues": {
+      "properties": {
+        "features1": {
+          "type": "dense_vector",
+          "dims": 2048
+        },
+        "features2": {
+          "type": "dense_vector",
+          "dims": 2048
+        },
+        "paletteEmbedding": {
+          "type": "dense_vector",
+          "dims": 1000,
+          "index": true,
+          "similarity": "dot_product"
+        },
+        "reducedFeatures": {
+          "type": "dense_vector",
+          "dims": 1024,
+          "index": true,
+          "similarity": "dot_product"
+        }
+      }
+    },
     "debug": {
       "dynamic": "false",
       "properties": {
