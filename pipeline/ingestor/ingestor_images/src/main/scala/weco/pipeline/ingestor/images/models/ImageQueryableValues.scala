@@ -1,16 +1,7 @@
 package weco.pipeline.ingestor.images.models
 
 import io.circe.generic.extras.JsonKey
-import weco.catalogue.internal_model.identifiers.{CanonicalId, SourceIdentifier}
-import weco.catalogue.internal_model.image.{
-  Image,
-  ImageSource,
-  ImageState,
-  InferredData,
-  ParentWork
-}
-import weco.catalogue.internal_model.locations.DigitalLocation
-import weco.catalogue.internal_model.work.Relations
+import weco.catalogue.internal_model.image.{Image, ImageSource, ImageState}
 import weco.pipeline.ingestor.common.models.WorkQueryableValues
 
 case class ImageQueryableValues(
@@ -28,13 +19,16 @@ case object ImageQueryableValues extends ImageValues {
       id = image.state.canonicalId.underlying,
       sourceIdentifierValue = image.state.sourceIdentifier.value,
       locationsLicenseId = image.locations.flatMap(_.license).map(_.id),
-      source = fromParentWork(image.source) {
-        p =>
-          WorkQueryableValues(
-            canonicalId = p.id.canonicalId,
-            sourceIdentifier = p.id.sourceIdentifier,
-            data = p.data
-          )
-      }
+      source = sourceQueryableValues(image.source)
     )
+
+  private def sourceQueryableValues(imageSource: ImageSource): WorkQueryableValues =
+    fromParentWork(imageSource) {
+      p =>
+        WorkQueryableValues(
+          canonicalId = p.id.canonicalId,
+          sourceIdentifier = p.id.sourceIdentifier,
+          data = p.data
+        )
+    }
 }

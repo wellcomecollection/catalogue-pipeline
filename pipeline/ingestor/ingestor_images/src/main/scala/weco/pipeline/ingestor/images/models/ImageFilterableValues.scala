@@ -1,14 +1,10 @@
 package weco.pipeline.ingestor.images.models
 
 import io.circe.generic.extras.JsonKey
-import weco.catalogue.internal_model.identifiers.DataState
 import weco.catalogue.internal_model.image.{
   Image,
-  ImageSource,
-  ImageState,
-  ParentWork
+  ImageState
 }
-import weco.catalogue.internal_model.work.WorkData
 
 case class ImageFilterableValues(
   @JsonKey("locations.license.id") locationsLicenseId: List[String],

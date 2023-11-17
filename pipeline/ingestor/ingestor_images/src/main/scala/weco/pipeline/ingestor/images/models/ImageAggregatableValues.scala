@@ -1,14 +1,7 @@
 package weco.pipeline.ingestor.images.models
 
 import io.circe.generic.extras.JsonKey
-import weco.catalogue.internal_model.identifiers.DataState
-import weco.catalogue.internal_model.image.{
-  Image,
-  ImageSource,
-  ImageState,
-  ParentWork
-}
-import weco.catalogue.internal_model.work.WorkData
+import weco.catalogue.internal_model.image.{Image, ImageState}
 import weco.pipeline.ingestor.common.models.AggregatableValues
 
 case class ImageAggregatableValues(

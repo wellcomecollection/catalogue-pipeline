@@ -1,6 +1,6 @@
 package weco.pipeline.ingestor.images.models
 
-import weco.catalogue.internal_model.image.{Image, ImageState, InferredData}
+import weco.catalogue.internal_model.image.{Image, ImageState}
 
 case class ImageVectorValues(
   features1: List[Float],
