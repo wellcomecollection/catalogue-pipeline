@@ -1,10 +1,7 @@
 package weco.pipeline.ingestor.works.models
 
 import io.circe.generic.extras.JsonKey
-import weco.catalogue.internal_model.work.{
-  Work,
-  WorkState
-}
+import weco.catalogue.internal_model.work.{Work, WorkState}
 import weco.pipeline.ingestor.common.models.AggregatableValues
 
 case class WorkAggregatableValues(

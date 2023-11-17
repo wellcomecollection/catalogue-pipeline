@@ -22,7 +22,9 @@ case object ImageQueryableValues extends ImageValues {
       source = sourceQueryableValues(image.source)
     )
 
-  private def sourceQueryableValues(imageSource: ImageSource): WorkQueryableValues =
+  private def sourceQueryableValues(
+    imageSource: ImageSource
+  ): WorkQueryableValues =
     fromParentWork(imageSource) {
       p =>
         WorkQueryableValues(
