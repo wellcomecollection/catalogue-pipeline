@@ -17,6 +17,7 @@ case class WorkQueryableValues(
   @JsonKey("edition") edition: Option[String],
   @JsonKey("genres.concepts.label") genresConceptsLabel: List[String],
   @JsonKey("id") id: String,
+  @JsonKey("sourceIdentifier.value") sourceIdentifierValue: String,
   @JsonKey("identifiers.value") identifiersValue: List[String],
   @JsonKey("images.id") imagesId: List[String],
   @JsonKey("images.identifiers.value") imagesIdentifiersValue: List[String],
@@ -53,6 +54,7 @@ case object WorkQueryableValues {
       genresConceptsLabel =
         data.genres.flatMap(_.concepts).map(_.label).map(queryableLabel),
       id = canonicalId.underlying,
+      sourceIdentifierValue = sourceIdentifier.value,
       identifiersValue =
         (sourceIdentifier +: data.otherIdentifiers).map(_.value),
       imagesId = data.imageData.map(_.id).canonicalIds,

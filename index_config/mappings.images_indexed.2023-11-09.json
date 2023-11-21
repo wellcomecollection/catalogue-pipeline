@@ -260,6 +260,10 @@
               "type": "keyword",
               "normalizer": "lowercase"
             },
+            "sourceIdentifier.value": {
+              "type": "keyword",
+              "normalizer": "lowercase"
+            },
             "identifiers.value": {
               "type": "keyword",
               "normalizer": "lowercase"
