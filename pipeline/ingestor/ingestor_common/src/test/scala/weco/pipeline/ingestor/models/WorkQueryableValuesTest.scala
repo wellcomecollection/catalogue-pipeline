@@ -30,6 +30,7 @@ class WorkQueryableValuesTest
       edition = None,
       genresConceptsLabel = List("Ink drawings", "Drawings"),
       id = "c4zj63fx",
+      sourceIdentifierValue = "b16582962",
       identifiersValue = List("b16582962", "1658296", "658296i", "L0045108"),
       imagesId = List("zswkgyan"),
       imagesIdentifiersValue = List("L0045108"),
