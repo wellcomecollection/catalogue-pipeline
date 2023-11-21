@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2023-11-17T16:05:57.384998Z",
+  "createdAt" : "2023-11-21T15:39:35.263302Z",
   "id" : "moftow5b",
   "document" : {
     "debug" : {
@@ -105,6 +105,7 @@
       "genres.concepts.label" : [
       ],
       "id" : "moftow5b",
+      "sourceIdentifier.value" : "KWys5lZ5ra",
       "identifiers.value" : [
         "KWys5lZ5ra"
       ],

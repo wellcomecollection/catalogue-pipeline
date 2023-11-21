@@ -1,6 +1,6 @@
 {
   "description" : "images with different licenses",
-  "createdAt" : "2023-11-17T16:36:37.172443Z",
+  "createdAt" : "2023-11-21T14:25:43.513987Z",
   "id" : "waaqwfw4",
   "document" : {
     "modifiedTime" : "2026-10-17T08:23:38Z",
@@ -75,6 +75,7 @@
         "genres.concepts.label" : [
         ],
         "id" : "zfjvttw1",
+        "sourceIdentifier.value" : "Gcwoe0JJl0",
         "identifiers.value" : [
           "Gcwoe0JJl0",
           "hHbExOADOw",

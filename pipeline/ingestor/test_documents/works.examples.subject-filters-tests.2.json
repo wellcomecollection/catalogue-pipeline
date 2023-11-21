@@ -1,6 +1,6 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2023-11-17T16:05:57.355224Z",
+  "createdAt" : "2023-11-21T15:39:35.209365Z",
   "id" : "cerujhar",
   "document" : {
     "debug" : {
@@ -101,6 +101,7 @@
       "genres.concepts.label" : [
       ],
       "id" : "cerujhar",
+      "sourceIdentifier.value" : "xzBExh6kx6",
       "identifiers.value" : [
         "xzBExh6kx6"
       ],

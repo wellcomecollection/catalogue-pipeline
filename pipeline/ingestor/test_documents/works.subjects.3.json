@@ -1,6 +1,6 @@
 {
   "description" : "works with different subjects",
-  "createdAt" : "2023-11-17T16:05:57.081720Z",
+  "createdAt" : "2023-11-21T15:39:33.987107Z",
   "id" : "opaupm4b",
   "document" : {
     "debug" : {
@@ -119,6 +119,7 @@
       "genres.concepts.label" : [
       ],
       "id" : "opaupm4b",
+      "sourceIdentifier.value" : "spewkKE1s2",
       "identifiers.value" : [
         "spewkKE1s2"
       ],

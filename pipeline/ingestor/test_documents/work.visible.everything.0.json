@@ -1,6 +1,6 @@
 {
   "description" : "a list of work with all the include-able fields",
-  "createdAt" : "2023-11-17T16:05:56.817500Z",
+  "createdAt" : "2023-11-21T15:39:33.067849Z",
   "id" : "tmdfbk5k",
   "document" : {
     "debug" : {
@@ -557,6 +557,7 @@
         "VoGuWXqO9eqzvro"
       ],
       "id" : "tmdfbk5k",
+      "sourceIdentifier.value" : "Aic5qOhRoS",
       "identifiers.value" : [
         "Aic5qOhRoS",
         "UfcQYSxE7g"

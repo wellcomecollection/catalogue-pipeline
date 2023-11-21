@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2023-11-17T16:05:57.379277Z",
+  "createdAt" : "2023-11-21T15:39:35.242599Z",
   "id" : "dklf9ebg",
   "document" : {
     "debug" : {
@@ -94,6 +94,7 @@
       "genres.concepts.label" : [
       ],
       "id" : "dklf9ebg",
+      "sourceIdentifier.value" : "GGLKeJCppC",
       "identifiers.value" : [
         "GGLKeJCppC"
       ],

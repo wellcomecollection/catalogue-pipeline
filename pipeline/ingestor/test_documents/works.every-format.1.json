@@ -1,6 +1,6 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2023-11-17T16:05:57.154311Z",
+  "createdAt" : "2023-11-21T15:39:34.321997Z",
   "id" : "jminkez1",
   "document" : {
     "debug" : {
@@ -88,6 +88,7 @@
       "genres.concepts.label" : [
       ],
       "id" : "jminkez1",
+      "sourceIdentifier.value" : "cxE29kiXIm",
       "identifiers.value" : [
         "cxE29kiXIm"
       ],

@@ -1,6 +1,6 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2023-11-17T16:05:57.354023Z",
+  "createdAt" : "2023-11-21T15:39:35.203349Z",
   "id" : "inoolbps",
   "document" : {
     "debug" : {
@@ -122,6 +122,7 @@
       "genres.concepts.label" : [
       ],
       "id" : "inoolbps",
+      "sourceIdentifier.value" : "bh6q7wkoWR",
       "identifiers.value" : [
         "bh6q7wkoWR"
       ],

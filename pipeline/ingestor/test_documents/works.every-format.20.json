@@ -1,6 +1,6 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2023-11-17T16:05:57.168846Z",
+  "createdAt" : "2023-11-21T15:39:34.386217Z",
   "id" : "qph7iot8",
   "document" : {
     "debug" : {
@@ -88,6 +88,7 @@
       "genres.concepts.label" : [
       ],
       "id" : "qph7iot8",
+      "sourceIdentifier.value" : "kQ4UxBoirz",
       "identifiers.value" : [
         "kQ4UxBoirz"
       ],

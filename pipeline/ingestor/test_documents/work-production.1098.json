@@ -1,6 +1,6 @@
 {
   "description" : "a work with a production event in 1098",
-  "createdAt" : "2023-11-17T16:05:56.282591Z",
+  "createdAt" : "2023-11-21T15:39:30.574731Z",
   "id" : "guav7chy",
   "document" : {
     "debug" : {
@@ -97,6 +97,7 @@
       "genres.concepts.label" : [
       ],
       "id" : "guav7chy",
+      "sourceIdentifier.value" : "W9fptfa5Xn",
       "identifiers.value" : [
         "W9fptfa5Xn"
       ],

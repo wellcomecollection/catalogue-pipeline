@@ -1,6 +1,6 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2023-11-17T16:05:57.358074Z",
+  "createdAt" : "2023-11-21T15:39:35.219837Z",
   "id" : "t8hhmnzs",
   "document" : {
     "debug" : {
@@ -149,6 +149,7 @@
       "genres.concepts.label" : [
       ],
       "id" : "t8hhmnzs",
+      "sourceIdentifier.value" : "7erLcgxEad",
       "identifiers.value" : [
         "7erLcgxEad"
       ],

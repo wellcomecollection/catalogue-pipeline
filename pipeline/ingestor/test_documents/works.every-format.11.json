@@ -1,6 +1,6 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2023-11-17T16:05:57.163047Z",
+  "createdAt" : "2023-11-21T15:39:34.371319Z",
   "id" : "kkzdnfal",
   "document" : {
     "debug" : {
@@ -88,6 +88,7 @@
       "genres.concepts.label" : [
       ],
       "id" : "kkzdnfal",
+      "sourceIdentifier.value" : "J1fupAzsfb",
       "identifiers.value" : [
         "J1fupAzsfb"
       ],

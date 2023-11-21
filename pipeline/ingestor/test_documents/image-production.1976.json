@@ -1,6 +1,6 @@
 {
   "description" : "an image with a production event in 1976",
-  "createdAt" : "2023-11-17T16:36:37.985822Z",
+  "createdAt" : "2023-11-21T14:25:44.323395Z",
   "id" : "vgcwcshr",
   "document" : {
     "modifiedTime" : "2024-03-22T05:14:37Z",
@@ -73,6 +73,7 @@
         "genres.concepts.label" : [
         ],
         "id" : "lsk7bw9v",
+        "sourceIdentifier.value" : "mHEZk5gjNy",
         "identifiers.value" : [
           "mHEZk5gjNy"
         ],

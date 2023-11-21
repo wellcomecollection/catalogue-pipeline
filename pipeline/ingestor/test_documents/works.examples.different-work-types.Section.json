@@ -1,6 +1,6 @@
 {
   "description" : "examples of works with different types",
-  "createdAt" : "2023-11-17T16:05:57.295452Z",
+  "createdAt" : "2023-11-21T15:39:35.000950Z",
   "id" : "pflggfra",
   "document" : {
     "debug" : {
@@ -83,6 +83,7 @@
       "genres.concepts.label" : [
       ],
       "id" : "pflggfra",
+      "sourceIdentifier.value" : "4QwQTlrFnQ",
       "identifiers.value" : [
         "4QwQTlrFnQ"
       ],

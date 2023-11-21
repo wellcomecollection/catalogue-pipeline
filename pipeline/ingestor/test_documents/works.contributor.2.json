@@ -1,6 +1,6 @@
 {
   "description" : "works with different contributor",
-  "createdAt" : "2023-11-17T16:05:57.106494Z",
+  "createdAt" : "2023-11-21T15:39:34.112633Z",
   "id" : "toypx23i",
   "document" : {
     "debug" : {
@@ -105,6 +105,7 @@
       "genres.concepts.label" : [
       ],
       "id" : "toypx23i",
+      "sourceIdentifier.value" : "MhQvVMFf3I",
       "identifiers.value" : [
         "MhQvVMFf3I"
       ],

@@ -1,6 +1,6 @@
 {
   "description" : "examples for the access status tests",
-  "createdAt" : "2023-11-17T16:05:57.424192Z",
+  "createdAt" : "2023-11-21T15:39:35.349835Z",
   "id" : "phodmv5g",
   "document" : {
     "debug" : {
@@ -136,6 +136,7 @@
       "genres.concepts.label" : [
       ],
       "id" : "phodmv5g",
+      "sourceIdentifier.value" : "kSl7z2IaIy",
       "identifiers.value" : [
         "kSl7z2IaIy"
       ],

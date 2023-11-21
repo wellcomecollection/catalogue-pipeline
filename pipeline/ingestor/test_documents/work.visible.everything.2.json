@@ -1,6 +1,6 @@
 {
   "description" : "a list of work with all the include-able fields",
-  "createdAt" : "2023-11-17T16:05:56.858262Z",
+  "createdAt" : "2023-11-21T15:39:33.161811Z",
   "id" : "kspmagtl",
   "document" : {
     "debug" : {
@@ -540,6 +540,7 @@
         "vD5wGC18lSi8qtT"
       ],
       "id" : "kspmagtl",
+      "sourceIdentifier.value" : "bWRaGNi2Hd",
       "identifiers.value" : [
         "bWRaGNi2Hd",
         "Hq3k05Fqag"

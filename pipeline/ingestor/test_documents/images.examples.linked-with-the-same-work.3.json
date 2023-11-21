@@ -1,6 +1,6 @@
 {
   "description" : "images linked with the same work",
-  "createdAt" : "2023-11-17T16:36:37.794079Z",
+  "createdAt" : "2023-11-21T14:25:44.126121Z",
   "id" : "rzdabpna",
   "document" : {
     "modifiedTime" : "2005-03-11T21:05:37Z",
@@ -75,6 +75,7 @@
         "genres.concepts.label" : [
         ],
         "id" : "0gpwg18n",
+        "sourceIdentifier.value" : "Xa8L6WpxaN",
         "identifiers.value" : [
           "Xa8L6WpxaN",
           "GmIygfg3bH",

@@ -1,6 +1,6 @@
 {
   "description" : "a work with a production event in 1900",
-  "createdAt" : "2023-11-17T16:05:56.248744Z",
+  "createdAt" : "2023-11-21T15:39:30.404815Z",
   "id" : "rbnro6wx",
   "document" : {
     "debug" : {
@@ -97,6 +97,7 @@
       "genres.concepts.label" : [
       ],
       "id" : "rbnro6wx",
+      "sourceIdentifier.value" : "akaUmx5H3i",
       "identifiers.value" : [
         "akaUmx5H3i"
       ],

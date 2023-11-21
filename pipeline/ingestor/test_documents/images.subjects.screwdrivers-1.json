@@ -1,6 +1,6 @@
 {
   "description" : "images with different subjects",
-  "createdAt" : "2023-11-17T16:36:37.910359Z",
+  "createdAt" : "2023-11-21T14:25:44.263379Z",
   "id" : "608yinvr",
   "document" : {
     "modifiedTime" : "1952-12-18T13:47:18Z",
@@ -82,6 +82,7 @@
         "genres.concepts.label" : [
         ],
         "id" : "rpdwpyvz",
+        "sourceIdentifier.value" : "DxX9mIXAKE",
         "identifiers.value" : [
           "DxX9mIXAKE"
         ],

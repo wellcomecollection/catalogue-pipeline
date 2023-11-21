@@ -1,6 +1,6 @@
 {
   "description" : "examples for the works filtered aggregations tests",
-  "createdAt" : "2023-11-17T16:05:57.441598Z",
+  "createdAt" : "2023-11-21T15:39:35.410007Z",
   "id" : "vguputez",
   "document" : {
     "debug" : {
@@ -93,6 +93,7 @@
       "genres.concepts.label" : [
       ],
       "id" : "vguputez",
+      "sourceIdentifier.value" : "6Fz9KprYAw",
       "identifiers.value" : [
         "6Fz9KprYAw"
       ],

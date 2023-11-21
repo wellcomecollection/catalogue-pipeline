@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2023-11-17T16:36:37.654183Z",
+  "createdAt" : "2023-11-21T14:25:44.014874Z",
   "id" : "mbrx0yti",
   "document" : {
     "modifiedTime" : "1960-09-29T11:35:48Z",
@@ -73,6 +73,7 @@
         "genres.concepts.label" : [
         ],
         "id" : "tmsqfv4a",
+        "sourceIdentifier.value" : "nBAsnKFChT",
         "identifiers.value" : [
           "nBAsnKFChT",
           "UZEMvPpsm7",

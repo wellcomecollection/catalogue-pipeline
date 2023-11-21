@@ -1,6 +1,6 @@
 {
   "description" : "images with different subjects",
-  "createdAt" : "2023-11-17T16:36:37.935752Z",
+  "createdAt" : "2023-11-21T14:25:44.284918Z",
   "id" : "30p2xtsf",
   "document" : {
     "modifiedTime" : "1984-03-03T23:20:51Z",
@@ -90,6 +90,7 @@
         "genres.concepts.label" : [
         ],
         "id" : "fe68jiln",
+        "sourceIdentifier.value" : "FsMepHUXb0",
         "identifiers.value" : [
           "FsMepHUXb0"
         ],

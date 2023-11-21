@@ -1,6 +1,6 @@
 {
   "description" : "one of a list of works with a variety of languages",
-  "createdAt" : "2023-11-17T16:05:56.989458Z",
+  "createdAt" : "2023-11-21T15:39:33.639167Z",
   "id" : "mye6nsw6",
   "document" : {
     "debug" : {
@@ -88,6 +88,7 @@
       "genres.concepts.label" : [
       ],
       "id" : "mye6nsw6",
+      "sourceIdentifier.value" : "jswjHR3oqS",
       "identifiers.value" : [
         "jswjHR3oqS"
       ],

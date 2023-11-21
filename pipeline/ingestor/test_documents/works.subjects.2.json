@@ -1,6 +1,6 @@
 {
   "description" : "works with different subjects",
-  "createdAt" : "2023-11-17T16:05:57.080933Z",
+  "createdAt" : "2023-11-21T15:39:33.978227Z",
   "id" : "ixapupnn",
   "document" : {
     "debug" : {
@@ -101,6 +101,7 @@
       "genres.concepts.label" : [
       ],
       "id" : "ixapupnn",
+      "sourceIdentifier.value" : "DSV5vB01pf",
       "identifiers.value" : [
         "DSV5vB01pf"
       ],

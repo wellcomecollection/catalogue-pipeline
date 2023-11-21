@@ -1,6 +1,6 @@
 {
   "description" : "works with items with other identifiers",
-  "createdAt" : "2023-11-17T16:05:57.122900Z",
+  "createdAt" : "2023-11-21T15:39:34.235211Z",
   "id" : "rzcvxgso",
   "document" : {
     "debug" : {
@@ -126,6 +126,7 @@
       "genres.concepts.label" : [
       ],
       "id" : "rzcvxgso",
+      "sourceIdentifier.value" : "8CwvL5s2ax",
       "identifiers.value" : [
         "8CwvL5s2ax"
       ],

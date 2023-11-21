@@ -1,6 +1,6 @@
 {
   "description" : "images with different genres",
-  "createdAt" : "2023-11-17T16:36:37.588974Z",
+  "createdAt" : "2023-11-21T14:25:43.949780Z",
   "id" : "onjwqn3s",
   "document" : {
     "modifiedTime" : "2013-12-24T22:18:34Z",
@@ -73,6 +73,7 @@
         "genres.concepts.label" : [
         ],
         "id" : "peziohgi",
+        "sourceIdentifier.value" : "pikYTn72Hs",
         "identifiers.value" : [
           "pikYTn72Hs",
           "jdOoaoN4T6",

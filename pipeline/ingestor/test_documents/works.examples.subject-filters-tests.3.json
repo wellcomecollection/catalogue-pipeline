@@ -1,6 +1,6 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2023-11-17T16:05:57.356168Z",
+  "createdAt" : "2023-11-21T15:39:35.210827Z",
   "id" : "igluyxyl",
   "document" : {
     "debug" : {
@@ -113,6 +113,7 @@
       "genres.concepts.label" : [
       ],
       "id" : "igluyxyl",
+      "sourceIdentifier.value" : "R5Stsp385V",
       "identifiers.value" : [
         "R5Stsp385V"
       ],

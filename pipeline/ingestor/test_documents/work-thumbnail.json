@@ -1,6 +1,6 @@
 {
   "description" : "a work with a thumbnail",
-  "createdAt" : "2023-11-17T16:05:56.201885Z",
+  "createdAt" : "2023-11-21T15:39:30.223722Z",
   "id" : "sahqcluh",
   "document" : {
     "debug" : {
@@ -100,6 +100,7 @@
       "genres.concepts.label" : [
       ],
       "id" : "sahqcluh",
+      "sourceIdentifier.value" : "rRRYGQYiF7",
       "identifiers.value" : [
         "rRRYGQYiF7"
       ],

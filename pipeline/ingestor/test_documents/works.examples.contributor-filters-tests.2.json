@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2023-11-17T16:05:57.382285Z",
+  "createdAt" : "2023-11-21T15:39:35.249714Z",
   "id" : "wmvuppum",
   "document" : {
     "debug" : {
@@ -94,6 +94,7 @@
       "genres.concepts.label" : [
       ],
       "id" : "wmvuppum",
+      "sourceIdentifier.value" : "KzPZAnMiJN",
       "identifiers.value" : [
         "KzPZAnMiJN"
       ],

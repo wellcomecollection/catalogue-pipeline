@@ -1,6 +1,6 @@
 {
   "description" : "works with different subjects",
-  "createdAt" : "2023-11-17T16:05:57.079908Z",
+  "createdAt" : "2023-11-21T15:39:33.975270Z",
   "id" : "7xjjhlpg",
   "document" : {
     "debug" : {
@@ -101,6 +101,7 @@
       "genres.concepts.label" : [
       ],
       "id" : "7xjjhlpg",
+      "sourceIdentifier.value" : "47LFZN2ZgN",
       "identifiers.value" : [
         "47LFZN2ZgN"
       ],

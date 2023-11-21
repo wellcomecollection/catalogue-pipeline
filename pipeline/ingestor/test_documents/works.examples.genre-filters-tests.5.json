@@ -1,6 +1,6 @@
 {
   "description" : "examples for the genre tests",
-  "createdAt" : "2023-11-17T16:05:57.322853Z",
+  "createdAt" : "2023-11-21T15:39:35.044218Z",
   "id" : "90vab5q4",
   "document" : {
     "debug" : {
@@ -83,6 +83,7 @@
       "genres.concepts.label" : [
       ],
       "id" : "90vab5q4",
+      "sourceIdentifier.value" : "iZFAZvTVR4",
       "identifiers.value" : [
         "iZFAZvTVR4"
       ],

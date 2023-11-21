@@ -1,6 +1,6 @@
 {
   "description" : "a work with a collection path",
-  "createdAt" : "2023-11-17T16:05:57.143485Z",
+  "createdAt" : "2023-11-21T15:39:34.288810Z",
   "id" : "xngls6zs",
   "document" : {
     "debug" : {
@@ -83,6 +83,7 @@
       "genres.concepts.label" : [
       ],
       "id" : "xngls6zs",
+      "sourceIdentifier.value" : "cZctCb44q4",
       "identifiers.value" : [
         "cZctCb44q4"
       ],

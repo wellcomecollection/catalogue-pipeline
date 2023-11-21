@@ -1,6 +1,6 @@
 {
   "description" : "an example of images with work metadata for the API tests",
-  "createdAt" : "2023-11-17T16:36:37.853250Z",
+  "createdAt" : "2023-11-21T14:25:44.194961Z",
   "id" : "risvmj7g",
   "document" : {
     "modifiedTime" : "2043-09-04T19:06:48Z",
@@ -75,6 +75,7 @@
         "genres.concepts.label" : [
         ],
         "id" : "76n13j4t",
+        "sourceIdentifier.value" : "XpdahXotKm",
         "identifiers.value" : [
           "XpdahXotKm"
         ],

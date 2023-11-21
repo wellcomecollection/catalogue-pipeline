@@ -1,6 +1,6 @@
 {
   "description" : "an arbitrary list of visible works",
-  "createdAt" : "2023-11-17T16:05:56.011196Z",
+  "createdAt" : "2023-11-21T15:38:59.384069Z",
   "id" : "raob2ruv",
   "document" : {
     "debug" : {
@@ -83,6 +83,7 @@
       "genres.concepts.label" : [
       ],
       "id" : "raob2ruv",
+      "sourceIdentifier.value" : "wyJzS2SuiH",
       "identifiers.value" : [
         "wyJzS2SuiH"
       ],

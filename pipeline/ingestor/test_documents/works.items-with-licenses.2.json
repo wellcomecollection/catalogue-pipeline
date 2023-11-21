@@ -1,6 +1,6 @@
 {
   "description" : "a work with licensed digital items",
-  "createdAt" : "2023-11-17T16:05:57.038286Z",
+  "createdAt" : "2023-11-21T15:39:33.737959Z",
   "id" : "fxryjmiz",
   "document" : {
     "debug" : {
@@ -107,6 +107,7 @@
       "genres.concepts.label" : [
       ],
       "id" : "fxryjmiz",
+      "sourceIdentifier.value" : "D9r1zHmiHw",
       "identifiers.value" : [
         "D9r1zHmiHw"
       ],

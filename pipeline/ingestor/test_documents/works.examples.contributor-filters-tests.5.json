@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2023-11-17T16:05:57.385389Z",
+  "createdAt" : "2023-11-21T15:39:35.268782Z",
   "id" : "tru6joq4",
   "document" : {
     "debug" : {
@@ -83,6 +83,7 @@
       "genres.concepts.label" : [
       ],
       "id" : "tru6joq4",
+      "sourceIdentifier.value" : "NS7lxBF816",
       "identifiers.value" : [
         "NS7lxBF816"
       ],

@@ -1,6 +1,6 @@
 {
   "description" : "items with different location types",
-  "createdAt" : "2023-11-17T16:05:57.224839Z",
+  "createdAt" : "2023-11-21T15:39:34.684280Z",
   "id" : "xzwsggki",
   "document" : {
     "debug" : {
@@ -122,6 +122,7 @@
       "genres.concepts.label" : [
       ],
       "id" : "xzwsggki",
+      "sourceIdentifier.value" : "G6KR1DmPfn",
       "identifiers.value" : [
         "G6KR1DmPfn"
       ],

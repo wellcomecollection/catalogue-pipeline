@@ -1,6 +1,6 @@
 {
   "description" : "examples of works with different types",
-  "createdAt" : "2023-11-17T16:05:57.310495Z",
+  "createdAt" : "2023-11-21T15:39:35.005029Z",
   "id" : "velydjdv",
   "document" : {
     "debug" : {
@@ -83,6 +83,7 @@
       "genres.concepts.label" : [
       ],
       "id" : "velydjdv",
+      "sourceIdentifier.value" : "Rew3RmJ48v",
       "identifiers.value" : [
         "Rew3RmJ48v"
       ],

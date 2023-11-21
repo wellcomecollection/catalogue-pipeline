@@ -1,6 +1,6 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2023-11-17T16:05:57.260579Z",
+  "createdAt" : "2023-11-21T15:39:34.823687Z",
   "id" : "sihntejb",
   "document" : {
     "debug" : {
@@ -106,6 +106,7 @@
       "genres.concepts.label" : [
       ],
       "id" : "sihntejb",
+      "sourceIdentifier.value" : "lxE0qlBbPi",
       "identifiers.value" : [
         "lxE0qlBbPi"
       ],

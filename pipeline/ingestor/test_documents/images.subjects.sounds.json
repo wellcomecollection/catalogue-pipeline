@@ -1,6 +1,6 @@
 {
   "description" : "images with different subjects",
-  "createdAt" : "2023-11-17T16:36:37.903214Z",
+  "createdAt" : "2023-11-21T14:25:44.258608Z",
   "id" : "lfbtqs12",
   "document" : {
     "modifiedTime" : "1962-05-21T20:46:43Z",
@@ -79,6 +79,7 @@
         "genres.concepts.label" : [
         ],
         "id" : "067wkeun",
+        "sourceIdentifier.value" : "JVmYqeJv6q",
         "identifiers.value" : [
           "JVmYqeJv6q"
         ],

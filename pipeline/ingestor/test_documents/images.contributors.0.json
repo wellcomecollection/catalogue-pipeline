@@ -1,6 +1,6 @@
 {
   "description" : "images with different contributors",
-  "createdAt" : "2023-11-17T16:36:37.488508Z",
+  "createdAt" : "2023-11-21T14:25:43.866569Z",
   "id" : "mherdyx0",
   "document" : {
     "modifiedTime" : "1984-06-19T23:29:34Z",
@@ -84,6 +84,7 @@
         "genres.concepts.label" : [
         ],
         "id" : "finvqvzj",
+        "sourceIdentifier.value" : "Gaa78d1Wqw",
         "identifiers.value" : [
           "Gaa78d1Wqw"
         ],

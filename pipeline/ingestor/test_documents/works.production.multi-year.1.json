@@ -1,6 +1,6 @@
 {
   "description" : "works with multi-year production ranges",
-  "createdAt" : "2023-11-17T16:05:57.196168Z",
+  "createdAt" : "2023-11-21T15:39:34.517522Z",
   "id" : "bjh2wrdd",
   "document" : {
     "debug" : {
@@ -105,6 +105,7 @@
       "genres.concepts.label" : [
       ],
       "id" : "bjh2wrdd",
+      "sourceIdentifier.value" : "8IL7DS24A3",
       "identifiers.value" : [
         "8IL7DS24A3"
       ],

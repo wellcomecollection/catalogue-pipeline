@@ -1,6 +1,6 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2023-11-17T16:05:57.159925Z",
+  "createdAt" : "2023-11-21T15:39:34.352797Z",
   "id" : "cwpfpixj",
   "document" : {
     "debug" : {
@@ -88,6 +88,7 @@
       "genres.concepts.label" : [
       ],
       "id" : "cwpfpixj",
+      "sourceIdentifier.value" : "D1YQhdjF03",
       "identifiers.value" : [
         "D1YQhdjF03"
       ],

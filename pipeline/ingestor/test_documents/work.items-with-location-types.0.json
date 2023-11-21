@@ -1,6 +1,6 @@
 {
   "description" : "items with different location types",
-  "createdAt" : "2023-11-17T16:05:57.222997Z",
+  "createdAt" : "2023-11-21T15:39:34.678455Z",
   "id" : "tnnwysoe",
   "document" : {
     "debug" : {
@@ -119,6 +119,7 @@
       "genres.concepts.label" : [
       ],
       "id" : "tnnwysoe",
+      "sourceIdentifier.value" : "JC6PIObmiP",
       "identifiers.value" : [
         "JC6PIObmiP"
       ],

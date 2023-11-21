@@ -1,6 +1,6 @@
 {
   "description" : "one of a list of works with a variety of languages",
-  "createdAt" : "2023-11-17T16:05:57.016463Z",
+  "createdAt" : "2023-11-21T15:39:33.658782Z",
   "id" : "oagougti",
   "document" : {
     "debug" : {
@@ -98,6 +98,7 @@
       "genres.concepts.label" : [
       ],
       "id" : "oagougti",
+      "sourceIdentifier.value" : "c67fbITZO5",
       "identifiers.value" : [
         "c67fbITZO5"
       ],

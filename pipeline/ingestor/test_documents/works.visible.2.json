@@ -1,6 +1,6 @@
 {
   "description" : "an arbitrary list of visible works",
-  "createdAt" : "2023-11-17T16:05:56.006761Z",
+  "createdAt" : "2023-11-21T15:38:59.368168Z",
   "id" : "fyqts0co",
   "document" : {
     "debug" : {
@@ -83,6 +83,7 @@
       "genres.concepts.label" : [
       ],
       "id" : "fyqts0co",
+      "sourceIdentifier.value" : "ZvWebpA5WH",
       "identifiers.value" : [
         "ZvWebpA5WH"
       ],

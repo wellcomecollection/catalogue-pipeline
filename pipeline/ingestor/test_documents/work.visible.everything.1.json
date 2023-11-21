@@ -1,6 +1,6 @@
 {
   "description" : "a list of work with all the include-able fields",
-  "createdAt" : "2023-11-17T16:05:56.839296Z",
+  "createdAt" : "2023-11-21T15:39:33.142621Z",
   "id" : "dhzcyeul",
   "document" : {
     "debug" : {
@@ -542,6 +542,7 @@
         "7GkIFx8vXQyPLHO"
       ],
       "id" : "dhzcyeul",
+      "sourceIdentifier.value" : "LMVvWxgXRS",
       "identifiers.value" : [
         "LMVvWxgXRS",
         "mD7jxioppl"

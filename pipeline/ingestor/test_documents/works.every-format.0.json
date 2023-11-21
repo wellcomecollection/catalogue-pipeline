@@ -1,6 +1,6 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2023-11-17T16:05:57.152551Z",
+  "createdAt" : "2023-11-21T15:39:34.318612Z",
   "id" : "w2ap82cs",
   "document" : {
     "debug" : {
@@ -88,6 +88,7 @@
       "genres.concepts.label" : [
       ],
       "id" : "w2ap82cs",
+      "sourceIdentifier.value" : "UZlr85jkfd",
       "identifiers.value" : [
         "UZlr85jkfd"
       ],

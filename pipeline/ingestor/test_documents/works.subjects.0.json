@@ -1,6 +1,6 @@
 {
   "description" : "works with different subjects",
-  "createdAt" : "2023-11-17T16:05:57.077686Z",
+  "createdAt" : "2023-11-21T15:39:33.959940Z",
   "id" : "njj1gugw",
   "document" : {
     "debug" : {
@@ -101,6 +101,7 @@
       "genres.concepts.label" : [
       ],
       "id" : "njj1gugw",
+      "sourceIdentifier.value" : "JeGRUgE73g",
       "identifiers.value" : [
         "JeGRUgE73g"
       ],

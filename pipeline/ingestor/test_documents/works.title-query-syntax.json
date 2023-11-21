@@ -1,6 +1,6 @@
 {
   "description" : "a work whose title has lots of ES query syntax operators",
-  "createdAt" : "2023-11-17T16:05:56.977064Z",
+  "createdAt" : "2023-11-21T15:39:33.617819Z",
   "id" : "mdg1yvuv",
   "document" : {
     "debug" : {
@@ -83,6 +83,7 @@
       "genres.concepts.label" : [
       ],
       "id" : "mdg1yvuv",
+      "sourceIdentifier.value" : "9P6mnsoyfd",
       "identifiers.value" : [
         "9P6mnsoyfd"
       ],

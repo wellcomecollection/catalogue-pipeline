@@ -1,6 +1,6 @@
 {
   "description" : "examples of works with different types",
-  "createdAt" : "2023-11-17T16:05:57.305527Z",
+  "createdAt" : "2023-11-21T15:39:35.003600Z",
   "id" : "ujg4jncr",
   "document" : {
     "debug" : {
@@ -83,6 +83,7 @@
       "genres.concepts.label" : [
       ],
       "id" : "ujg4jncr",
+      "sourceIdentifier.value" : "ZEnp6i2y6i",
       "identifiers.value" : [
         "ZEnp6i2y6i"
       ],

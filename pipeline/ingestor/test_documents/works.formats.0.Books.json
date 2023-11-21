@@ -1,6 +1,6 @@
 {
   "description" : "one of a list of works with a variety of formats",
-  "createdAt" : "2023-11-17T16:05:56.932813Z",
+  "createdAt" : "2023-11-21T15:39:33.387267Z",
   "id" : "cfrzpe3b",
   "document" : {
     "debug" : {
@@ -88,6 +88,7 @@
       "genres.concepts.label" : [
       ],
       "id" : "cfrzpe3b",
+      "sourceIdentifier.value" : "yPjPNkcxB9",
       "identifiers.value" : [
         "yPjPNkcxB9"
       ],

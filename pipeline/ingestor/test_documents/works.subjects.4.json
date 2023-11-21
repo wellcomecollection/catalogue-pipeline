@@ -1,6 +1,6 @@
 {
   "description" : "works with different subjects",
-  "createdAt" : "2023-11-17T16:05:57.082242Z",
+  "createdAt" : "2023-11-21T15:39:33.987809Z",
   "id" : "el28gega",
   "document" : {
     "debug" : {
@@ -83,6 +83,7 @@
       "genres.concepts.label" : [
       ],
       "id" : "el28gega",
+      "sourceIdentifier.value" : "9qDYGFYXAa",
       "identifiers.value" : [
         "9qDYGFYXAa"
       ],

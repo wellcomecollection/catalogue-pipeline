@@ -1,6 +1,6 @@
 {
   "description" : "items with different location types",
-  "createdAt" : "2023-11-17T16:05:57.223719Z",
+  "createdAt" : "2023-11-21T15:39:34.681898Z",
   "id" : "feri8p7w",
   "document" : {
     "debug" : {
@@ -134,6 +134,7 @@
       "genres.concepts.label" : [
       ],
       "id" : "feri8p7w",
+      "sourceIdentifier.value" : "MM8GfuD4za",
       "identifiers.value" : [
         "MM8GfuD4za"
       ],

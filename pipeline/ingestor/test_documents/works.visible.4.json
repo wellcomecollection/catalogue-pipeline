@@ -1,6 +1,6 @@
 {
   "description" : "an arbitrary list of visible works",
-  "createdAt" : "2023-11-17T16:05:56.017351Z",
+  "createdAt" : "2023-11-21T15:38:59.396452Z",
   "id" : "vbi1ii19",
   "document" : {
     "debug" : {
@@ -83,6 +83,7 @@
       "genres.concepts.label" : [
       ],
       "id" : "vbi1ii19",
+      "sourceIdentifier.value" : "CzLNHBFHuR",
       "identifiers.value" : [
         "CzLNHBFHuR"
       ],

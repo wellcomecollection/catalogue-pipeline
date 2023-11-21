@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2023-11-17T16:05:57.381700Z",
+  "createdAt" : "2023-11-21T15:39:35.248180Z",
   "id" : "r7wachux",
   "document" : {
     "debug" : {
@@ -94,6 +94,7 @@
       "genres.concepts.label" : [
       ],
       "id" : "r7wachux",
+      "sourceIdentifier.value" : "GY2AKxyW0l",
       "identifiers.value" : [
         "GY2AKxyW0l"
       ],

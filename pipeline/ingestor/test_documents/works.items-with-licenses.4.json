@@ -1,6 +1,6 @@
 {
   "description" : "a work with licensed digital items",
-  "createdAt" : "2023-11-17T16:05:57.044873Z",
+  "createdAt" : "2023-11-21T15:39:33.758219Z",
   "id" : "abt11p2s",
   "document" : {
     "debug" : {
@@ -83,6 +83,7 @@
       "genres.concepts.label" : [
       ],
       "id" : "abt11p2s",
+      "sourceIdentifier.value" : "Jxv45oXcss",
       "identifiers.value" : [
         "Jxv45oXcss"
       ],

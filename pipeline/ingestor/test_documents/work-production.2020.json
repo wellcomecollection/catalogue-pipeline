@@ -1,6 +1,6 @@
 {
   "description" : "a work with a production event in 2020",
-  "createdAt" : "2023-11-17T16:05:56.278137Z",
+  "createdAt" : "2023-11-21T15:39:30.557158Z",
   "id" : "0fucriyr",
   "document" : {
     "debug" : {
@@ -97,6 +97,7 @@
       "genres.concepts.label" : [
       ],
       "id" : "0fucriyr",
+      "sourceIdentifier.value" : "KgSH5dUX0Z",
       "identifiers.value" : [
         "KgSH5dUX0Z"
       ],

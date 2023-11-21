@@ -1,6 +1,6 @@
 {
   "description" : "examples for the access status tests",
-  "createdAt" : "2023-11-17T16:05:57.425101Z",
+  "createdAt" : "2023-11-21T15:39:35.355242Z",
   "id" : "phdnojlc",
   "document" : {
     "debug" : {
@@ -136,6 +136,7 @@
       "genres.concepts.label" : [
       ],
       "id" : "phdnojlc",
+      "sourceIdentifier.value" : "s5auwvXuSK",
       "identifiers.value" : [
         "s5auwvXuSK"
       ],
