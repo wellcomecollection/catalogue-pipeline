@@ -1,6 +1,6 @@
 {
   "description" : "works with different subjects",
-  "createdAt" : "2023-03-17T11:03:31.797822Z",
+  "createdAt" : "2023-11-21T15:39:33.987809Z",
   "id" : "el28gega",
   "document" : {
     "debug" : {
@@ -72,21 +72,21 @@
       "type" : "Work"
     },
     "query" : {
+      "collectionPath.label" : null,
+      "collectionPath.path" : null,
+      "alternativeTitles" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "description" : null,
+      "edition" : null,
+      "genres.concepts.label" : [
+      ],
       "id" : "el28gega",
-      "format.id" : null,
-      "workType" : "Standard",
+      "sourceIdentifier.value" : "9qDYGFYXAa",
       "identifiers.value" : [
         "9qDYGFYXAa"
       ],
-      "title" : "title-be5yxr73Xc",
-      "alternativeTitles" : [
-      ],
-      "description" : null,
-      "physicalDescription" : null,
-      "edition" : null,
-      "notes.contents" : [
-      ],
-      "lettering" : null,
       "images.id" : [
       ],
       "images.identifiers.value" : [
@@ -95,45 +95,20 @@
       ],
       "items.identifiers.value" : [
       ],
-      "items.locations.accessConditions.status.id" : [
-      ],
-      "items.locations.license.id" : [
-      ],
-      "items.locations.locationType.id" : [
-      ],
-      "subjects.id" : [
-      ],
-      "subjects.label" : [
-      ],
-      "subjects.concepts.label" : [
-      ],
-      "genres.label" : [
-      ],
-      "genres.concepts.label" : [
-      ],
-      "genres.concepts.id" : [
-      ],
-      "languages.id" : [
-      ],
       "languages.label" : [
       ],
-      "contributors.agent.id" : [
-      ],
-      "contributors.agent.label" : [
-      ],
-      "production.label" : [
-      ],
-      "production.dates.range.from" : [
-      ],
-      "partOf.id" : [
+      "lettering" : null,
+      "notes.contents" : [
       ],
       "partOf.title" : [
       ],
-      "availabilities.id" : [
+      "physicalDescription" : null,
+      "production.label" : [
       ],
-      "collectionPath.label" : null,
-      "collectionPath.path" : null,
-      "referenceNumber" : null
+      "referenceNumber" : null,
+      "subjects.concepts.label" : [
+      ],
+      "title" : "title-be5yxr73Xc"
     },
     "aggregatableValues" : {
       "workType" : [
@@ -151,6 +126,41 @@
       "items.locations.license" : [
       ],
       "availabilities" : [
+      ]
+    },
+    "filterableValues" : {
+      "format.id" : null,
+      "workType" : "Standard",
+      "production.dates.range.from" : [
+      ],
+      "languages.id" : [
+      ],
+      "genres.label" : [
+      ],
+      "genres.concepts.id" : [
+      ],
+      "subjects.label" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "identifiers.value" : [
+        "9qDYGFYXAa"
+      ],
+      "items.locations.license.id" : [
+      ],
+      "items.locations.accessConditions.status.id" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
+      "items.locations.locationType.id" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
       ]
     },
     "type" : "Visible"

@@ -1,6 +1,6 @@
 {
   "description" : "one of a list of works with a variety of languages",
-  "createdAt" : "2023-03-17T11:03:31.757874Z",
+  "createdAt" : "2023-11-21T15:39:33.635518Z",
   "id" : "9pon81hb",
   "document" : {
     "debug" : {
@@ -77,21 +77,21 @@
       "type" : "Work"
     },
     "query" : {
+      "collectionPath.label" : null,
+      "collectionPath.path" : null,
+      "alternativeTitles" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "description" : null,
+      "edition" : null,
+      "genres.concepts.label" : [
+      ],
       "id" : "9pon81hb",
-      "format.id" : null,
-      "workType" : "Standard",
+      "sourceIdentifier.value" : "mVHoe2r6sk",
       "identifiers.value" : [
         "mVHoe2r6sk"
       ],
-      "title" : "A work with languages English",
-      "alternativeTitles" : [
-      ],
-      "description" : null,
-      "physicalDescription" : null,
-      "edition" : null,
-      "notes.contents" : [
-      ],
-      "lettering" : null,
       "images.id" : [
       ],
       "images.identifiers.value" : [
@@ -100,47 +100,21 @@
       ],
       "items.identifiers.value" : [
       ],
-      "items.locations.accessConditions.status.id" : [
-      ],
-      "items.locations.license.id" : [
-      ],
-      "items.locations.locationType.id" : [
-      ],
-      "subjects.id" : [
-      ],
-      "subjects.label" : [
-      ],
-      "subjects.concepts.label" : [
-      ],
-      "genres.label" : [
-      ],
-      "genres.concepts.label" : [
-      ],
-      "genres.concepts.id" : [
-      ],
-      "languages.id" : [
-        "eng"
-      ],
       "languages.label" : [
         "English"
       ],
-      "contributors.agent.id" : [
-      ],
-      "contributors.agent.label" : [
-      ],
-      "production.label" : [
-      ],
-      "production.dates.range.from" : [
-      ],
-      "partOf.id" : [
+      "lettering" : null,
+      "notes.contents" : [
       ],
       "partOf.title" : [
       ],
-      "availabilities.id" : [
+      "physicalDescription" : null,
+      "production.label" : [
       ],
-      "collectionPath.label" : null,
-      "collectionPath.path" : null,
-      "referenceNumber" : null
+      "referenceNumber" : null,
+      "subjects.concepts.label" : [
+      ],
+      "title" : "A work with languages English"
     },
     "aggregatableValues" : {
       "workType" : [
@@ -159,6 +133,42 @@
       "items.locations.license" : [
       ],
       "availabilities" : [
+      ]
+    },
+    "filterableValues" : {
+      "format.id" : null,
+      "workType" : "Standard",
+      "production.dates.range.from" : [
+      ],
+      "languages.id" : [
+        "eng"
+      ],
+      "genres.label" : [
+      ],
+      "genres.concepts.id" : [
+      ],
+      "subjects.label" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "identifiers.value" : [
+        "mVHoe2r6sk"
+      ],
+      "items.locations.license.id" : [
+      ],
+      "items.locations.accessConditions.status.id" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
+      "items.locations.locationType.id" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
       ]
     },
     "type" : "Visible"

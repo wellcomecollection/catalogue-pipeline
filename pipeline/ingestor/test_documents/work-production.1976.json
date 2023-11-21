@@ -1,6 +1,6 @@
 {
   "description" : "a work with a production event in 1976",
-  "createdAt" : "2023-03-23T12:52:18.670486Z",
+  "createdAt" : "2023-11-21T15:39:30.477810Z",
   "id" : "5vjghupy",
   "document" : {
     "debug" : {
@@ -86,21 +86,21 @@
       "type" : "Work"
     },
     "query" : {
+      "collectionPath.label" : null,
+      "collectionPath.path" : null,
+      "alternativeTitles" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "description" : null,
+      "edition" : null,
+      "genres.concepts.label" : [
+      ],
       "id" : "5vjghupy",
-      "format.id" : null,
-      "workType" : "Standard",
+      "sourceIdentifier.value" : "xrdlOL8J49",
       "identifiers.value" : [
         "xrdlOL8J49"
       ],
-      "title" : "Production event in 1976",
-      "alternativeTitles" : [
-      ],
-      "description" : null,
-      "physicalDescription" : null,
-      "edition" : null,
-      "notes.contents" : [
-      ],
-      "lettering" : null,
       "images.id" : [
       ],
       "images.identifiers.value" : [
@@ -109,47 +109,21 @@
       ],
       "items.identifiers.value" : [
       ],
-      "items.locations.accessConditions.status.id" : [
-      ],
-      "items.locations.license.id" : [
-      ],
-      "items.locations.locationType.id" : [
-      ],
-      "subjects.id" : [
-      ],
-      "subjects.label" : [
-      ],
-      "subjects.concepts.label" : [
-      ],
-      "genres.label" : [
-      ],
-      "genres.concepts.label" : [
-      ],
-      "genres.concepts.id" : [
-      ],
-      "languages.id" : [
-      ],
       "languages.label" : [
       ],
-      "contributors.agent.id" : [
-      ],
-      "contributors.agent.label" : [
-      ],
-      "production.label" : [
-        "1976"
-      ],
-      "production.dates.range.from" : [
-        189302400000
-      ],
-      "partOf.id" : [
+      "lettering" : null,
+      "notes.contents" : [
       ],
       "partOf.title" : [
       ],
-      "availabilities.id" : [
+      "physicalDescription" : null,
+      "production.label" : [
+        "1976"
       ],
-      "collectionPath.label" : null,
-      "collectionPath.path" : null,
-      "referenceNumber" : null
+      "referenceNumber" : null,
+      "subjects.concepts.label" : [
+      ],
+      "title" : "Production event in 1976"
     },
     "aggregatableValues" : {
       "workType" : [
@@ -168,6 +142,42 @@
       "items.locations.license" : [
       ],
       "availabilities" : [
+      ]
+    },
+    "filterableValues" : {
+      "format.id" : null,
+      "workType" : "Standard",
+      "production.dates.range.from" : [
+        189302400000
+      ],
+      "languages.id" : [
+      ],
+      "genres.label" : [
+      ],
+      "genres.concepts.id" : [
+      ],
+      "subjects.label" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "identifiers.value" : [
+        "xrdlOL8J49"
+      ],
+      "items.locations.license.id" : [
+      ],
+      "items.locations.accessConditions.status.id" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
+      "items.locations.locationType.id" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
       ]
     },
     "type" : "Visible"

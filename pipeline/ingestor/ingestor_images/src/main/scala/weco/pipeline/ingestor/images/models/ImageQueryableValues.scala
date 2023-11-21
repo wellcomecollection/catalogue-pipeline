@@ -1,46 +1,32 @@
 package weco.pipeline.ingestor.images.models
 
 import io.circe.generic.extras.JsonKey
-import weco.catalogue.internal_model.identifiers.{CanonicalId, SourceIdentifier}
-import weco.catalogue.internal_model.image.{
-  ImageSource,
-  InferredData,
-  ParentWork
-}
-import weco.catalogue.internal_model.locations.DigitalLocation
-import weco.catalogue.internal_model.work.Relations
+import weco.catalogue.internal_model.image.{Image, ImageSource, ImageState}
 import weco.pipeline.ingestor.common.models.WorkQueryableValues
 
 case class ImageQueryableValues(
   @JsonKey("id") id: String,
-  @JsonKey("sourceIdentifier.value") sourceIdentifier: String,
-  @JsonKey("locations.license.id") licenseIds: List[String],
-  @JsonKey("inferredData") inferredData: InferredData,
   @JsonKey("source") source: WorkQueryableValues
 )
 
-case object ImageQueryableValues {
+case object ImageQueryableValues extends ImageValues {
   def apply(
-    id: CanonicalId,
-    sourceIdentifier: SourceIdentifier,
-    inferredData: InferredData,
-    locations: List[DigitalLocation],
-    source: ImageSource
+    image: Image[ImageState.Augmented]
   ): ImageQueryableValues =
-    source match {
-      case ParentWork(workId, workData, _) =>
-        ImageQueryableValues(
-          id = id.underlying,
-          sourceIdentifier = sourceIdentifier.value,
-          inferredData = inferredData,
-          licenseIds = locations.flatMap(_.license).map(_.id),
-          source = WorkQueryableValues(
-            id = workId.canonicalId,
-            sourceIdentifier = workId.sourceIdentifier,
-            workData = workData,
-            relations = Relations.none,
-            availabilities = Set()
-          )
+    new ImageQueryableValues(
+      id = image.state.canonicalId.underlying,
+      source = sourceQueryableValues(image.source)
+    )
+
+  private def sourceQueryableValues(
+    imageSource: ImageSource
+  ): WorkQueryableValues =
+    fromParentWork(imageSource) {
+      p =>
+        WorkQueryableValues(
+          canonicalId = p.id.canonicalId,
+          sourceIdentifier = p.id.sourceIdentifier,
+          data = p.data
         )
     }
 }

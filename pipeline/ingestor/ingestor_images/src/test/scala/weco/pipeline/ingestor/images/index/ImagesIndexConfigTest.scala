@@ -4,7 +4,6 @@ import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.{ElasticError, Index}
 import org.scalatest.Assertion
 import org.scalatest.funspec.AnyFunSpec
-import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.generators.ImageGenerators
 import weco.catalogue.internal_model.image.{Image, ImageState, InferredData}
 import weco.catalogue.internal_model.fixtures.index.IndexFixtures

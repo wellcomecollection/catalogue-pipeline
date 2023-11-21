@@ -1,6 +1,6 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2023-08-22T11:49:35.861105Z",
+  "createdAt" : "2023-11-21T15:39:35.203349Z",
   "id" : "inoolbps",
   "document" : {
     "debug" : {
@@ -111,21 +111,21 @@
       "type" : "Work"
     },
     "query" : {
+      "collectionPath.label" : null,
+      "collectionPath.path" : null,
+      "alternativeTitles" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "description" : null,
+      "edition" : null,
+      "genres.concepts.label" : [
+      ],
       "id" : "inoolbps",
-      "format.id" : null,
-      "workType" : "Standard",
+      "sourceIdentifier.value" : "bh6q7wkoWR",
       "identifiers.value" : [
         "bh6q7wkoWR"
       ],
-      "title" : "title-jRX3FqozNG",
-      "alternativeTitles" : [
-      ],
-      "description" : null,
-      "physicalDescription" : null,
-      "edition" : null,
-      "notes.contents" : [
-      ],
-      "lettering" : null,
       "images.id" : [
       ],
       "images.identifiers.value" : [
@@ -134,50 +134,23 @@
       ],
       "items.identifiers.value" : [
       ],
-      "items.locations.accessConditions.status.id" : [
+      "languages.label" : [
       ],
-      "items.locations.license.id" : [
+      "lettering" : null,
+      "notes.contents" : [
       ],
-      "items.locations.locationType.id" : [
+      "partOf.title" : [
       ],
-      "subjects.id" : [
-        "sanitati"
+      "physicalDescription" : null,
+      "production.label" : [
       ],
-      "subjects.label" : [
-        "Sanitation"
-      ],
+      "referenceNumber" : null,
       "subjects.concepts.label" : [
         "485o02DxPLXKke6",
         "NacQ8QOPJdAXFgM",
         "zC1ICZOvNWbRfsA"
       ],
-      "genres.label" : [
-      ],
-      "genres.concepts.label" : [
-      ],
-      "genres.concepts.id" : [
-      ],
-      "languages.id" : [
-      ],
-      "languages.label" : [
-      ],
-      "contributors.agent.id" : [
-      ],
-      "contributors.agent.label" : [
-      ],
-      "production.label" : [
-      ],
-      "production.dates.range.from" : [
-      ],
-      "partOf.id" : [
-      ],
-      "partOf.title" : [
-      ],
-      "availabilities.id" : [
-      ],
-      "collectionPath.label" : null,
-      "collectionPath.path" : null,
-      "referenceNumber" : null
+      "title" : "title-jRX3FqozNG"
     },
     "aggregatableValues" : {
       "workType" : [
@@ -196,6 +169,42 @@
       "items.locations.license" : [
       ],
       "availabilities" : [
+      ]
+    },
+    "filterableValues" : {
+      "format.id" : null,
+      "workType" : "Standard",
+      "production.dates.range.from" : [
+      ],
+      "languages.id" : [
+      ],
+      "genres.label" : [
+      ],
+      "genres.concepts.id" : [
+      ],
+      "subjects.label" : [
+        "Sanitation"
+      ],
+      "contributors.agent.label" : [
+      ],
+      "identifiers.value" : [
+        "bh6q7wkoWR"
+      ],
+      "items.locations.license.id" : [
+      ],
+      "items.locations.accessConditions.status.id" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
+      "items.locations.locationType.id" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
       ]
     },
     "type" : "Visible"

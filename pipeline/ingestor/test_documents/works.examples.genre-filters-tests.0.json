@@ -1,6 +1,6 @@
 {
   "description" : "examples for the genre tests",
-  "createdAt" : "2023-08-22T11:49:35.845659Z",
+  "createdAt" : "2023-11-21T15:39:35.041320Z",
   "id" : "oxbsq4ck",
   "document" : {
     "debug" : {
@@ -110,21 +110,23 @@
       "type" : "Work"
     },
     "query" : {
+      "collectionPath.label" : null,
+      "collectionPath.path" : null,
+      "alternativeTitles" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "description" : null,
+      "edition" : null,
+      "genres.concepts.label" : [
+        "YwsvmZKLOsIneEm",
+        "UtqZmmbPJWDqmpb"
+      ],
       "id" : "oxbsq4ck",
-      "format.id" : null,
-      "workType" : "Standard",
+      "sourceIdentifier.value" : "xukacPWKUR",
       "identifiers.value" : [
         "xukacPWKUR"
       ],
-      "title" : "title-DrDsk2kCAG",
-      "alternativeTitles" : [
-      ],
-      "description" : null,
-      "physicalDescription" : null,
-      "edition" : null,
-      "notes.contents" : [
-      ],
-      "lettering" : null,
       "images.id" : [
       ],
       "images.identifiers.value" : [
@@ -133,49 +135,20 @@
       ],
       "items.identifiers.value" : [
       ],
-      "items.locations.accessConditions.status.id" : [
-      ],
-      "items.locations.license.id" : [
-      ],
-      "items.locations.locationType.id" : [
-      ],
-      "subjects.id" : [
-      ],
-      "subjects.label" : [
-      ],
-      "subjects.concepts.label" : [
-      ],
-      "genres.label" : [
-        "Annual reports"
-      ],
-      "genres.concepts.label" : [
-        "YwsvmZKLOsIneEm",
-        "UtqZmmbPJWDqmpb"
-      ],
-      "genres.concepts.id" : [
-        "g00dcafe"
-      ],
-      "languages.id" : [
-      ],
       "languages.label" : [
       ],
-      "contributors.agent.id" : [
-      ],
-      "contributors.agent.label" : [
-      ],
-      "production.label" : [
-      ],
-      "production.dates.range.from" : [
-      ],
-      "partOf.id" : [
+      "lettering" : null,
+      "notes.contents" : [
       ],
       "partOf.title" : [
       ],
-      "availabilities.id" : [
+      "physicalDescription" : null,
+      "production.label" : [
       ],
-      "collectionPath.label" : null,
-      "collectionPath.path" : null,
-      "referenceNumber" : null
+      "referenceNumber" : null,
+      "subjects.concepts.label" : [
+      ],
+      "title" : "title-DrDsk2kCAG"
     },
     "aggregatableValues" : {
       "workType" : [
@@ -194,6 +167,43 @@
       "items.locations.license" : [
       ],
       "availabilities" : [
+      ]
+    },
+    "filterableValues" : {
+      "format.id" : null,
+      "workType" : "Standard",
+      "production.dates.range.from" : [
+      ],
+      "languages.id" : [
+      ],
+      "genres.label" : [
+        "Annual reports"
+      ],
+      "genres.concepts.id" : [
+        "g00dcafe"
+      ],
+      "subjects.label" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "identifiers.value" : [
+        "xukacPWKUR"
+      ],
+      "items.locations.license.id" : [
+      ],
+      "items.locations.accessConditions.status.id" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
+      "items.locations.locationType.id" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
       ]
     },
     "type" : "Visible"

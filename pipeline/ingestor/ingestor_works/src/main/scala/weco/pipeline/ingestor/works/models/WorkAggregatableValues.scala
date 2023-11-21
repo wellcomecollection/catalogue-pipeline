@@ -1,8 +1,7 @@
 package weco.pipeline.ingestor.works.models
 
 import io.circe.generic.extras.JsonKey
-import weco.catalogue.internal_model.identifiers.DataState
-import weco.catalogue.internal_model.work.{Availability, WorkData}
+import weco.catalogue.internal_model.work.{Work, WorkState}
 import weco.pipeline.ingestor.common.models.AggregatableValues
 
 case class WorkAggregatableValues(
@@ -18,17 +17,16 @@ case class WorkAggregatableValues(
 
 case object WorkAggregatableValues extends AggregatableValues {
   def apply(
-    workData: WorkData[DataState.Identified],
-    availabilities: Set[Availability]
+    work: Work.Visible[WorkState.Denormalised]
   ): WorkAggregatableValues =
     WorkAggregatableValues(
-      workTypes = workData.workTypeAggregatableValues,
-      genres = workData.genreAggregatableValues,
-      productionDates = workData.productionDateAggregatableValues,
-      subjects = workData.subjectLabelAggregatableValues,
-      languages = workData.languageAggregatableValues,
-      contributors = workData.contributorAggregatableValues,
-      itemLicenses = workData.licenseAggregatableValues,
-      availabilities = availabilities.aggregatableValues
+      workTypes = work.data.workTypeAggregatableValues,
+      genres = work.data.genreAggregatableValues,
+      productionDates = work.data.productionDateAggregatableValues,
+      subjects = work.data.subjectLabelAggregatableValues,
+      languages = work.data.languageAggregatableValues,
+      contributors = work.data.contributorAggregatableValues,
+      itemLicenses = work.data.licenseAggregatableValues,
+      availabilities = work.state.availabilities.aggregatableValues
     )
 }

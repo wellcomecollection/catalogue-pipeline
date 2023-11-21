@@ -1,6 +1,6 @@
 {
   "description" : "examples for the genre tests",
-  "createdAt" : "2023-08-22T11:49:35.846438Z",
+  "createdAt" : "2023-11-21T15:39:35.042124Z",
   "id" : "wdnn2etp",
   "document" : {
     "debug" : {
@@ -94,21 +94,22 @@
       "type" : "Work"
     },
     "query" : {
+      "collectionPath.label" : null,
+      "collectionPath.path" : null,
+      "alternativeTitles" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "description" : null,
+      "edition" : null,
+      "genres.concepts.label" : [
+        "df4bTPrmWNKiLGp"
+      ],
       "id" : "wdnn2etp",
-      "format.id" : null,
-      "workType" : "Standard",
+      "sourceIdentifier.value" : "hx40zJbSlL",
       "identifiers.value" : [
         "hx40zJbSlL"
       ],
-      "title" : "title-zfssscK3St",
-      "alternativeTitles" : [
-      ],
-      "description" : null,
-      "physicalDescription" : null,
-      "edition" : null,
-      "notes.contents" : [
-      ],
-      "lettering" : null,
       "images.id" : [
       ],
       "images.identifiers.value" : [
@@ -117,48 +118,20 @@
       ],
       "items.identifiers.value" : [
       ],
-      "items.locations.accessConditions.status.id" : [
-      ],
-      "items.locations.license.id" : [
-      ],
-      "items.locations.locationType.id" : [
-      ],
-      "subjects.id" : [
-      ],
-      "subjects.label" : [
-      ],
-      "subjects.concepts.label" : [
-      ],
-      "genres.label" : [
-        "Pamphlets"
-      ],
-      "genres.concepts.label" : [
-        "df4bTPrmWNKiLGp"
-      ],
-      "genres.concepts.id" : [
-        "g00dcafe"
-      ],
-      "languages.id" : [
-      ],
       "languages.label" : [
       ],
-      "contributors.agent.id" : [
-      ],
-      "contributors.agent.label" : [
-      ],
-      "production.label" : [
-      ],
-      "production.dates.range.from" : [
-      ],
-      "partOf.id" : [
+      "lettering" : null,
+      "notes.contents" : [
       ],
       "partOf.title" : [
       ],
-      "availabilities.id" : [
+      "physicalDescription" : null,
+      "production.label" : [
       ],
-      "collectionPath.label" : null,
-      "collectionPath.path" : null,
-      "referenceNumber" : null
+      "referenceNumber" : null,
+      "subjects.concepts.label" : [
+      ],
+      "title" : "title-zfssscK3St"
     },
     "aggregatableValues" : {
       "workType" : [
@@ -177,6 +150,43 @@
       "items.locations.license" : [
       ],
       "availabilities" : [
+      ]
+    },
+    "filterableValues" : {
+      "format.id" : null,
+      "workType" : "Standard",
+      "production.dates.range.from" : [
+      ],
+      "languages.id" : [
+      ],
+      "genres.label" : [
+        "Pamphlets"
+      ],
+      "genres.concepts.id" : [
+        "g00dcafe"
+      ],
+      "subjects.label" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "identifiers.value" : [
+        "hx40zJbSlL"
+      ],
+      "items.locations.license.id" : [
+      ],
+      "items.locations.accessConditions.status.id" : [
+      ],
+      "items.id" : [
+      ],
+      "items.identifiers.value" : [
+      ],
+      "items.locations.locationType.id" : [
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
       ]
     },
     "type" : "Visible"

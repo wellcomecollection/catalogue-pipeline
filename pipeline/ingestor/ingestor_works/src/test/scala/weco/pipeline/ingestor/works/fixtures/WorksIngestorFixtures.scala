@@ -14,7 +14,11 @@ import weco.fixtures.{TestWith, TimeAssertions}
 import weco.messaging.fixtures.SQS.Queue
 import weco.pipeline.ingestor.fixtures.IngestorFixtures
 import weco.pipeline.ingestor.works.WorkTransformer
-import weco.pipeline.ingestor.works.models.{IndexedWork, WorkAggregatableValues}
+import weco.pipeline.ingestor.works.models.{
+  IndexedWork,
+  WorkAggregatableValues,
+  WorkFilterableValues
+}
 import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
 import weco.json.JsonUtil._
 import weco.pipeline.ingestor.common.models.WorkQueryableValues
@@ -46,19 +50,20 @@ trait WorksIngestorFixtures
         fromJson[IndexedWork](getResponse.sourceAsString).get
       val expectedWork = WorkTransformer.deriveData(work)
 
-      storedWork match {
-        case w @ IndexedWork.Visible(_, _, storedQuery, storedAggregations) =>
-          storedQuery shouldBe WorkQueryableValues(
-            id = work.state.canonicalId,
-            sourceIdentifier = work.state.sourceIdentifier,
-            workData = work.data,
-            relations = work.state.relations,
-            availabilities = work.state.availabilities
-          )
-          storedAggregations shouldBe WorkAggregatableValues(
-            work.data,
-            work.state.availabilities
-          )
+      (storedWork, work) match {
+        case (
+              IndexedWork.Visible(
+                _,
+                _,
+                storedQuery,
+                storedAggregations,
+                storedFilters
+              ),
+              visibleWork: Work.Visible[WorkState.Denormalised]
+            ) =>
+          storedQuery shouldBe WorkQueryableValues(visibleWork)
+          storedAggregations shouldBe WorkAggregatableValues(visibleWork)
+          storedFilters shouldBe WorkFilterableValues(visibleWork)
         case _ => ()
       }
 
