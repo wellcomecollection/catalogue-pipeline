@@ -76,23 +76,13 @@ class MetsXmlTransformer(store: Readable[S3ObjectLocation, String])
     root: MetsXml,
     manifestations: List[S3ObjectLocation]
   ): Result[InvisibleMetsData] = {
-    // a METS file without separate manifestations is its own manifestation,
-    // otherwise, the first one is treated as representative of the whole.
-//    val referenceManifestation = getFirstManifestation(root, manifestations).getOrElse(root)
-//
-//    // If there are manifestation files in the bag, then they should be referenced in the main METS file
-//    // similarly, if there are MultipleManifestations in the METS file, then they should be in the bag.
-//    (manifestations, referenceManifestation) match {
-//      case (Nil, manifestation) if manifestation != root =>
-//
-//      case (_, manifestation) if manifestation == root =>
-//    }
+
     for {
       id <- root.recordIdentifier
       title <- MetsTitle(root.root)
-      referenceManifestation <- getFirstManifestation(root, manifestations)
+      filesRoot <- getFirstManifestation(root, manifestations)
       accessConditions <- Right(
-        MetsAccessConditions(referenceManifestation.root)
+        MetsAccessConditions(filesRoot.root)
       )
     } yield InvisibleMetsData(
       recordIdentifier = id,
@@ -100,8 +90,8 @@ class MetsXmlTransformer(store: Readable[S3ObjectLocation, String])
       accessConditionDz = accessConditions.dz,
       accessConditionStatus = accessConditions.status,
       accessConditionUsage = accessConditions.usage,
-      fileReferencesMapping = referenceManifestation.fileReferencesMapping(id),
-      thumbnailReference = referenceManifestation.thumbnailReference
+      fileReferencesMapping = filesRoot.fileReferencesMapping(id),
+      thumbnailReference = filesRoot.thumbnailReference
     )
   }
 

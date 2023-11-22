@@ -108,6 +108,8 @@ class MetsXmlTransformerTest
         metsXmlWith(recordIdentifier = "b30246039", title = title)
       )
     )
+    val fileReferences = createFileReferences(2, "b30246039")
+    val thumbnailRef = fileReferences.head._2
     transform(
       root = Some(xml),
       createdDate = Instant.now,
@@ -118,7 +120,10 @@ class MetsXmlTransformerTest
         title = title,
         accessConditionDz = Some("INC"),
         accessConditionStatus = None,
-        fileReferencesMapping = createFileReferences(2, "b30246039")
+        fileReferencesMapping = createFileReferences(2, "b30246039"),
+        // TODO: temp - when fileReferences stop normalising in the wrong place, this can be just thumbnailRef
+        thumbnailReference =
+          Some(thumbnailRef.copy(location = "objects/" + thumbnailRef.location))
       )
     )
   }
