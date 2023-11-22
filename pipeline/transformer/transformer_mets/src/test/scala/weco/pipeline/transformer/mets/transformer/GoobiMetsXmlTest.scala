@@ -7,7 +7,7 @@ import weco.fixtures.LocalResources
 import weco.pipeline.transformer.mets.generators.MetsGenerators
 import weco.pipeline.transformer.mets.transformer.models.FileReference
 
-class DigitisedMetsXmlTest
+class GoobiMetsXmlTest
     extends AnyFunSpec
     with Matchers
     with EitherValues
@@ -25,63 +25,62 @@ class DigitisedMetsXmlTest
   }
 
   it("does not parse a mets if recordIdentifier is outside of dmdSec element") {
-    DigitisedMetsXml(xmlNodmdSec).recordIdentifier shouldBe a[Left[_, _]]
+    GoobiMetsXml(xmlNodmdSec).recordIdentifier shouldBe a[Left[_, _]]
   }
 
   it("does not parse if there is more than one recordIdentifier") {
-    DigitisedMetsXml(xmlRepeatedIdNodes).recordIdentifier shouldBe Right(
+    GoobiMetsXml(xmlRepeatedIdNodes).recordIdentifier shouldBe Right(
       "b30246039"
     )
   }
 
   it("does not parse if there is more than one distinct recordIdentifier") {
-    DigitisedMetsXml(xmlMultipleDistictIds).recordIdentifier shouldBe a[
+    GoobiMetsXml(xmlMultipleDistictIds).recordIdentifier shouldBe a[
       Left[_, _]
     ]
   }
 
   it("parses file references mapping from XML") {
-    MetsXml(xml).value.fileReferencesMapping(
+    MetsXml(xml).value.fileReferences(
       "b30246039"
     ) shouldBe List(
-      "PHYS_0001" -> FileReference(
+      FileReference(
         id = "FILE_0001_OBJECTS",
         location = "b30246039_0001.jp2",
         listedMimeType = Some("image/jp2")
       ),
-      "PHYS_0002" -> FileReference(
+      FileReference(
         id = "FILE_0002_OBJECTS",
         location = "b30246039_0002.jp2",
         listedMimeType = Some("image/jp2")
       ),
-      "PHYS_0003" -> FileReference(
+      FileReference(
         id = "FILE_0003_OBJECTS",
         location = "b30246039_0003.jp2",
         listedMimeType = Some("image/jp2")
       ),
-      "PHYS_0004" -> FileReference(
+      FileReference(
         id = "FILE_0004_OBJECTS",
         location = "b30246039_0004.jp2",
         listedMimeType = Some("image/jp2")
       ),
-      "PHYS_0005" -> FileReference(
+      FileReference(
         id = "FILE_0005_OBJECTS",
         location = "b30246039_0005.jp2",
         listedMimeType = Some("image/jp2")
       ),
-      "PHYS_0006" -> FileReference(
+      FileReference(
         id = "FILE_0006_OBJECTS",
         location = "b30246039_0006.jp2",
         listedMimeType = Some("image/jp2")
       )
     )
   }
-  
+
   it("parses thumbnail from XML") {
     MetsXml(xml).value
-      .fileReferencesMapping("b30246039")
+      .fileReferences("b30246039")
       .head
-      ._2
       .location shouldBe "b30246039_0001.jp2"
   }
 
@@ -92,17 +91,15 @@ class DigitisedMetsXmlTest
       structMap = structMap
     )
     MetsXml(str).value
-      .fileReferencesMapping("b30246039")
+      .fileReferences("b30246039")
       .head
-      ._2
       .location shouldBe "b30246039_0001.jp2"
   }
 
   it("parses thumbnail using ORDER attrib when non-sequential order") {
     MetsXml(xmlNonSequentialOrder("b30246039")).value
-      .fileReferencesMapping("b30246039")
+      .fileReferences("b30246039")
       .head
-      ._2
       .location shouldBe "b30246039_0001.jp2"
   }
 
@@ -120,9 +117,8 @@ class DigitisedMetsXmlTest
       ).value
 
     metsXml
-      .fileReferencesMapping(bnumber)
+      .fileReferences(bnumber)
       .head
-      ._2
       .location shouldBe s"${bnumber}_${filePrefix}_0001.jp2"
   }
 
@@ -140,15 +136,14 @@ class DigitisedMetsXmlTest
       ).value
 
     metsXml
-      .fileReferencesMapping(bnumber)
+      .fileReferences(bnumber)
       .head
-      ._2
       .location shouldBe s"${filePrefix}_0001.jp2"
   }
 
   it("cannot parse thumbnail when invalid file ID") {
     MetsXml(xmlInvalidFileId("b30246039")).value
-      .fileReferencesMapping("b30246039")
+      .fileReferences("b30246039")
       .headOption shouldBe None
   }
 
@@ -156,19 +151,19 @@ class DigitisedMetsXmlTest
     val xml = xmlWithManifestations(
       List(("LOG_0001", "01", "first.xml"), ("LOG_0002", "02", "second.xml"))
     )
-    DigitisedMetsXml(xml).firstManifestationFilename shouldBe Right("first.xml")
+    GoobiMetsXml(xml).firstManifestationFilename shouldBe Right("first.xml")
   }
 
   it("parses manifestation filename using ordering when present") {
     val xml = xmlWithManifestations(
       List(("LOG_0001", "02", "second.xml"), ("LOG_0002", "01", "first.xml"))
     )
-    DigitisedMetsXml(xml).firstManifestationFilename shouldBe Right("first.xml")
+    GoobiMetsXml(xml).firstManifestationFilename shouldBe Right("first.xml")
   }
 
   it("doesnt parse manifestation filename when not present") {
     val xml = xmlWithManifestations(Nil)
-    DigitisedMetsXml(xml).firstManifestationFilename shouldBe a[Left[_, _]]
+    GoobiMetsXml(xml).firstManifestationFilename shouldBe a[Left[_, _]]
   }
 
   def xmlNodmdSec =

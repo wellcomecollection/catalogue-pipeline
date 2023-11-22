@@ -13,7 +13,7 @@ trait MetsDataGenerators extends SierraIdentifierGenerators {
     accessConditionDz: Option[String] = None,
     accessConditionStatus: Option[String] = None,
     accessConditionUsage: Option[String] = None,
-    fileReferencesMapping: List[(String, FileReference)] = Nil,
+    fileReferences: List[FileReference] = Nil,
     thumbnailReference: Option[FileReference] = None
   ): InvisibleMetsData =
     InvisibleMetsData(
@@ -22,7 +22,7 @@ trait MetsDataGenerators extends SierraIdentifierGenerators {
       accessConditionDz = accessConditionDz,
       accessConditionStatus = accessConditionStatus,
       accessConditionUsage = accessConditionUsage,
-      fileReferencesMapping = fileReferencesMapping,
+      fileReferences = fileReferences,
       thumbnailReference = thumbnailReference
     )
 }

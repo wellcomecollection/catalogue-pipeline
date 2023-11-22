@@ -56,7 +56,7 @@ case class InvisibleMetsData(
   accessConditionDz: Option[String] = None,
   accessConditionStatus: Option[String] = None,
   accessConditionUsage: Option[String] = None,
-  fileReferencesMapping: List[(String, FileReference)] = Nil,
+  fileReferences: List[FileReference] = Nil,
   thumbnailReference: Option[FileReference] = None
 ) extends MetsData {
 
@@ -96,9 +96,6 @@ case class InvisibleMetsData(
         invisibilityReasons = List(MetsWorksAreNotVisible)
       )
     } yield work
-
-  private lazy val fileReferences: List[FileReference] =
-    fileReferencesMapping.map { case (_, fileReference) => fileReference }
 
   private def mergeCandidate = MergeCandidate(
     identifier = SourceIdentifier(

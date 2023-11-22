@@ -12,11 +12,11 @@ trait MetsXml {
   val root: Elem
   val thumbnailReference: Option[FileReference]
   def firstManifestationFilename: Either[Exception, String]
-  def fileReferencesMapping(bnumber: String): List[(String, FileReference)]
+  def fileReferences(bnumber: String): List[FileReference]
   def recordIdentifier: Either[Exception, String]
 }
 
-case class DigitisedMetsXml(root: Elem) extends MetsXml with XMLOps {
+case class GoobiMetsXml(root: Elem) extends MetsXml with XMLOps {
 
   /** The record identifier (generally the B number) is encoded in the METS. For
     * example:
@@ -48,11 +48,11 @@ case class DigitisedMetsXml(root: Elem) extends MetsXml with XMLOps {
   /** Here we use the the items defined in the physicalStructMap to look up file
     * IDs in the (normalised) fileObjects mapping
     */
-  def fileReferencesMapping(bnumber: String): List[(String, FileReference)] =
-    physicalFileIdsMapping.flatMap {
-      case (id, fileId) =>
+  def fileReferences(bnumber: String): List[FileReference] =
+    physicalFileIds.flatMap {
+      case fileId =>
         getFileReferences(fileId)
-          .map(ref => (id, normaliseLocation(bnumber, ref)))
+          .map(ref => normaliseLocation(bnumber, ref))
     }.toList
 
   /** Returns the first href to a manifestation in the logical structMap
@@ -93,16 +93,11 @@ case class DigitisedMetsXml(root: Elem) extends MetsXml with XMLOps {
     * Seq("PHYS_0001" -> "FILE_0001_OBJECTS", "PHYS_0002" ->
     * "FILE_0002_OBJECTS")
     */
-  private def physicalFileIdsMapping: Seq[(String, String)] =
-    (root \ "structMap")
+  private def physicalFileIds: Seq[String] =
+    ((root \ "structMap")
       .filterByAttribute("TYPE", "PHYSICAL")
       .descendentsWithTag("div")
-      .sortByAttribute("ORDER")
-      .toMapping(
-        keyAttrib = "ID",
-        valueNode = Some("fptr"),
-        valueAttrib = "FILEID"
-      )
+      .sortByAttribute("ORDER") \ "fptr").map(_ \@ "FILEID")
 
   /** Filenames in DLCS are always prefixed with the bnumber (uppercase or
     * lowercase) to ensure uniqueness. However they might not be prefixed with
@@ -163,7 +158,7 @@ case class DigitisedMetsXml(root: Elem) extends MetsXml with XMLOps {
 
 object MetsXml {
   def apply(root: Elem): MetsXml =
-    DigitisedMetsXml(root)
+    GoobiMetsXml(root)
   def apply(str: String): Either[Throwable, MetsXml] =
     Try(XML.loadString(str)).map(MetsXml(_)).toEither
 }

@@ -291,9 +291,9 @@ class MetsDataTest
   it("creates a invisible work with a title page thumbnail") {
     val metsData = createMetsDataWith(
       accessConditionDz = Some("CC-BY-NC"),
-      fileReferencesMapping = List(
-        "id" -> FileReference("l", "location.jp2", Some("image/jp2")),
-        "title-id" -> FileReference("l", "title.jp2", Some("image/jp2"))
+      fileReferences = List(
+        FileReference("l", "location.jp2", Some("image/jp2")),
+        FileReference("l", "title.jp2", Some("image/jp2"))
       ),
       thumbnailReference =
         Some(FileReference("l", "title.jp2", Some("image/jp2")))
@@ -314,8 +314,8 @@ class MetsDataTest
     val metsData = createMetsDataWith(
       accessConditionDz = Some("CC-BY-NC"),
       accessConditionStatus = Some("Restricted files"),
-      fileReferencesMapping = List(
-        "id" -> FileReference("l", "location.jp2", Some("image/jp2"))
+      fileReferences = List(
+        FileReference("l", "location.jp2", Some("image/jp2"))
       )
     )
     val result = metsData.toWork(1, Instant.now())
@@ -328,8 +328,8 @@ class MetsDataTest
     val metsData = createMetsDataWith(
       bibNumber = bibNumber,
       accessConditionDz = Some("CC-BY-NC"),
-      fileReferencesMapping = List(
-        "id" -> FileReference("l", "location.pdf")
+      fileReferences = List(
+        FileReference("l", "location.pdf")
       ),
       thumbnailReference = Some(FileReference("l", "location.pdf"))
     )
@@ -347,8 +347,8 @@ class MetsDataTest
   it("does not add a thumbnail if the file is a video") {
     val metsData = createMetsDataWith(
       accessConditionDz = Some("CC-BY-NC"),
-      fileReferencesMapping = List(
-        "id" -> FileReference("v", "video.mpg", Some("video/mpeg"))
+      fileReferences = List(
+        FileReference("v", "video.mpg", Some("video/mpeg"))
       )
     )
     val result = metsData.toWork(1, Instant.now())
@@ -359,8 +359,8 @@ class MetsDataTest
   it("does not add a thumbnail if the file is an audio") {
     val metsData = createMetsDataWith(
       accessConditionDz = Some("CC-BY-NC"),
-      fileReferencesMapping = List(
-        "id" -> FileReference("v", "video.mp3", Some("audio/x-mpeg-3"))
+      fileReferences = List(
+        FileReference("v", "video.mp3", Some("audio/x-mpeg-3"))
       )
     )
     val result = metsData.toWork(1, Instant.now())
@@ -371,8 +371,8 @@ class MetsDataTest
   it("uses both the IIIF manifest and image for imageData locations") {
     val metsData = createMetsDataWith(
       accessConditionDz = Some("CC-BY-NC"),
-      fileReferencesMapping = List(
-        "id" -> FileReference("l", "location.jp2", Some("image/jp2"))
+      fileReferences = List(
+        FileReference("l", "location.jp2", Some("image/jp2"))
       )
     )
     val result = metsData.toWork(1, Instant.now())
@@ -417,12 +417,12 @@ class MetsDataTest
     val metsData = createMetsDataWith(
       bibNumber = bibNumber,
       accessConditionDz = Some("CC-BY-NC"),
-      fileReferencesMapping = List(
-        "A" -> FileReference("A", "location1.jp2", Some("image/jp2")),
-        "B" -> FileReference("B", "location2.jp2", Some("image/jp2")),
-        "C" -> FileReference("C", "location3.jp2", Some("image/jp2")),
-        "D" -> FileReference("D", "location4.jp2", Some("application/pdf")),
-        "E" -> FileReference("E", "location4.jp2", Some("video/mpeg"))
+      fileReferences = List(
+        FileReference("A", "location1.jp2", Some("image/jp2")),
+        FileReference("B", "location2.jp2", Some("image/jp2")),
+        FileReference("C", "location3.jp2", Some("image/jp2")),
+        FileReference("D", "location4.jp2", Some("application/pdf")),
+        FileReference("E", "location4.jp2", Some("video/mpeg"))
       )
     )
 
@@ -443,9 +443,9 @@ class MetsDataTest
     val metsData = createMetsDataWith(
       accessConditionDz = Some("CC-BY-NC"),
       accessConditionStatus = Some("Restricted files"),
-      fileReferencesMapping = List(
-        "A" -> FileReference("A", "location1.jp2", Some("image/jp2")),
-        "B" -> FileReference("B", "location2.jp2", Some("image/jp2"))
+      fileReferences = List(
+        FileReference("A", "location1.jp2", Some("image/jp2")),
+        FileReference("B", "location2.jp2", Some("image/jp2"))
       )
     )
     val result = metsData.toWork(1, Instant.now())
