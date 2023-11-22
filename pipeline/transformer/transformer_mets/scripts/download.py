@@ -26,7 +26,7 @@ def main():
     bd_bucket = s3_resource.Bucket("wellcomecollection-storage")
     i = 0
     for s3_object in bd_bucket.objects.filter(
-            Prefix="digitised/", Marker="digitised/b10283651/v1/manifest-sha256.txt"
+        Prefix="digitised/", Marker="digitised/b10283651/v1/manifest-sha256.txt"
     ):
         bare_name = s3_object.key.rpartition("/")[2]
         if RE_BNUMBER_METSFILE.match(bare_name):
