@@ -78,6 +78,10 @@ def main(pipeline_date):
             print(f"⚠️  {test_document['id']} ({child.name}) does not exist in the {pipeline_date} index")
             continue
 
+        if json.dumps(test_document["document"]) == json.dumps(pipeline_doc):
+            print(f"✅ No changes for {child.name}")
+            continue
+
         test_document["document"] = pipeline_doc
         test_document["createdAt"] = datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')
 
