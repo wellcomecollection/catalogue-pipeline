@@ -14,6 +14,7 @@ import weco.pipeline.transformer.identifiers.SourceIdentifierValidation._
 import weco.pipeline.transformer.mets.transformer.models.FileReference
 import weco.pipeline.transformer.mets.transformers.{
   MetsAccessStatus,
+  MetsImageData,
   MetsLocation,
   MetsThumbnail
 }
@@ -158,27 +159,15 @@ case class InvisibleMetsData(
     } else {
       fileReferences
         .filter(ImageUtils.isImage)
-        .flatMap {
+        .map {
           fileReference =>
-            ImageUtils.buildImageUrl(fileReference).map {
-              url =>
-                ImageData[IdState.Identifiable](
-                  id = IdState.Identifiable(
-                    sourceIdentifier = ImageUtils
-                      .getImageSourceId(recordIdentifier, fileReference.id)
-                  ),
-                  version = version,
-                  locations = List(
-                    DigitalLocation(
-                      url = url,
-                      locationType = LocationType.IIIFImageAPI,
-                      license = license,
-                      accessConditions = manifestLocation.accessConditions
-                    ),
-                    manifestLocation
-                  )
-                )
-            }
+            MetsImageData(
+              recordIdentifier,
+              version,
+              license,
+              manifestLocation,
+              fileReference
+            )
         }
     }
 }

@@ -380,7 +380,7 @@ class MetsDataTest
     result.right.get.data.imageData.head.locations shouldBe List(
       DigitalLocation(
         url =
-          s"https://iiif.wellcomecollection.org/image/location.jp2/info.json",
+          s"https://iiif.wellcomecollection.org/image/${metsData.recordIdentifier}_location.jp2/info.json",
         locationType = LocationType.IIIFImageAPI,
         license = Some(License.CCBYNC)
       ),

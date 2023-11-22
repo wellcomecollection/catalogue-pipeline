@@ -13,7 +13,7 @@ import weco.pipeline.transformer.mets.transformer.models.FileReference
   * A Location will only be returned if there is a reference for it, and if
   * there are no restrictions preventing it
   */
-object MetsThumbnail {
+object MetsThumbnail extends DLCSFilenameNormaliser {
 
   def apply(
     thumbnailReference: Option[FileReference],
@@ -52,20 +52,4 @@ object MetsThumbnail {
       case _ => s"$othersThumbBaseUrl/$bNumber"
     }
 
-  /** Filenames in DLCS are always prefixed with the bnumber (uppercase or
-    * lowercase) to ensure uniqueness. However they might not be prefixed with
-    * the bnumber in the METS file. So we need to do two things:
-    *   - strip the "objects/" part of the location
-    *   - prepend the bnumber followed by an underscore if it's not already
-    *     present (uppercase or lowercase)
-    */
-  private def normaliseLocation(
-    bNumber: String,
-    fileLocation: String
-  ): String =
-    fileLocation.replaceFirst("objects/", "") match {
-      case fileName if fileName.toLowerCase.startsWith(bNumber.toLowerCase) =>
-        fileName
-      case fileName => s"${bNumber}_$fileName"
-    }
 }
