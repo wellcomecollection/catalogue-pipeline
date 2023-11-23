@@ -9,7 +9,10 @@ from pathlib import Path
 from elasticsearch import Elasticsearch
 
 test_docs_dir = Path("./test_documents")
-image_document_prefixes = ["images.examples.color-filter-tests", "images.similar-features"]
+image_document_prefixes = [
+    "images.examples.color-filter-tests",
+    "images.similar-features",
+]
 
 
 def get_session_with_role(role_arn):
@@ -71,11 +74,12 @@ def main(pipeline_date):
 
         try:
             pipeline_doc = pipeline_client.get(
-                index=f"images-indexed-{pipeline_date}",
-                id=test_document["id"]
+                index=f"images-indexed-{pipeline_date}", id=test_document["id"]
             )["_source"]
         except elasticsearch.NotFoundError:
-            print(f"⚠️  {test_document['id']} ({child.name}) does not exist in the {pipeline_date} index")
+            print(
+                f"⚠️  {test_document['id']} ({child.name}) does not exist in the {pipeline_date} index"
+            )
             continue
 
         if json.dumps(test_document["document"]) == json.dumps(pipeline_doc):
@@ -83,7 +87,7 @@ def main(pipeline_date):
             continue
 
         test_document["document"] = pipeline_doc
-        test_document["createdAt"] = datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')
+        test_document["createdAt"] = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
 
         with child.open("w+") as out_file:
             json.dump(test_document, out_file, indent=2, ensure_ascii=False)
