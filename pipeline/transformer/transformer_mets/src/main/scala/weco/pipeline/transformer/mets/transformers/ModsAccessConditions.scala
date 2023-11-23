@@ -1,6 +1,8 @@
-package weco.pipeline.transformer.mets.transformer.models
+package weco.pipeline.transformer.mets.transformers
 
 import grizzled.slf4j.Logging
+import weco.pipeline.transformer.mets.transformer.models.XMLOps
+import weco.pipeline.transformer.result.Result
 
 import scala.xml.Elem
 
@@ -8,12 +10,24 @@ case class ModsAccessConditions(
   dz: Option[String],
   status: Option[String],
   usage: Option[String]
-)
+) {
+  def parse: Result[MetsAccessConditions] = {
+    for {
+      licence <- MetsLicence(dz)
+      accessStatus <- MetsAccessStatus(status)
+    } yield MetsAccessConditions(
+      licence = licence,
+      accessStatus = accessStatus,
+      usage = usage
+    )
+  }
+
+}
 
 object ModsAccessConditions extends XMLOps with Logging {
   def apply(root: Elem): ModsAccessConditions = {
     implicit val r: Elem = root
-    new ModsAccessConditions(
+    ModsAccessConditions(
       dz = accessConditionDz,
       status = accessConditionStatus,
       usage = accessConditionUsage

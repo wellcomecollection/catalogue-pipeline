@@ -2,11 +2,12 @@ package weco.pipeline.transformer.mets.transformer
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.locations.License
+import weco.catalogue.internal_model.locations.{AccessStatus, License}
 import weco.catalogue.source_model.mets.{DeletedMetsFile, MetsFileWithImages}
 import weco.fixtures.LocalResources
 import weco.pipeline.transformer.mets.generators.MetsGenerators
 import weco.pipeline.transformer.mets.transformer.models.FileReference
+import weco.pipeline.transformer.mets.transformers.MetsAccessConditions
 import weco.pipeline.transformer.result.Result
 import weco.sierra.generators.SierraIdentifierGenerators
 import weco.storage.providers.s3.{S3ObjectLocation, S3ObjectLocationPrefix}
@@ -29,9 +30,11 @@ class MetsXmlTransformerTest
       InvisibleMetsData(
         recordIdentifier = "b30246039",
         title = "[Report 1942] /",
-        accessConditionDz = Some("CC-BY-NC"),
-        accessConditionStatus = Some("Open"),
-        accessConditionUsage = Some("Some terms"),
+        accessConditions = MetsAccessConditions(
+          licence = Some(License.CCBYNC),
+          accessStatus = Some(AccessStatus.Open),
+          usage = Some("Some terms")
+        ),
         fileReferences = fileReferences,
         // TODO: temp - when fileReferences stop normalising in the wrong place, this can be just thumbnailRef
         thumbnailReference =
@@ -75,8 +78,10 @@ class MetsXmlTransformerTest
         recordIdentifier = "b22012692",
         title =
           "Enciclopedia anatomica che comprende l'anatomia descrittiva, l'anatomia generale, l'anatomia patologica, la storia dello sviluppo e delle razze umane /",
-        accessConditionDz = Some("PDM"),
-        accessConditionStatus = Some("Open"),
+        MetsAccessConditions(
+          licence = Some(License.PDM),
+          accessStatus = Some(AccessStatus.Open)
+        ),
         fileReferences = fileReferences,
         // TODO: temp - when fileReferences stop normalising in the wrong place, this can be just thumbnailRef
         thumbnailReference =
@@ -118,8 +123,7 @@ class MetsXmlTransformerTest
       InvisibleMetsData(
         recordIdentifier = "b30246039",
         title = title,
-        accessConditionDz = Some("INC"),
-        accessConditionStatus = None,
+        MetsAccessConditions(licence = Some(License.InCopyright)),
         fileReferences = createFileReferences(2, "b30246039"),
         // TODO: temp - when fileReferences stop normalising in the wrong place, this can be just thumbnailRef
         thumbnailReference =

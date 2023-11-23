@@ -15,6 +15,7 @@ import weco.pipeline.transformer.mets.generators.{
   MetsGenerators
 }
 import weco.pipeline.transformer.mets.transformer.models.FileReference
+import weco.pipeline.transformer.mets.transformers.ModsAccessConditions
 
 class MetsDataTest
     extends AnyFunSpec
@@ -151,10 +152,11 @@ class MetsDataTest
   }
 
   it("fails creating a work if it cannot parse the license") {
-    val metsData = createMetsDataWith(accessConditionDz = Some("blah"))
-    val version = 1
-
-    metsData.toWork(version, Instant.now()).left.get shouldBe a[Exception]
+    ModsAccessConditions(
+      dz = Some("blah"),
+      status = None,
+      usage = None
+    ).parse.left.get shouldBe a[Exception]
 
   }
 
@@ -504,11 +506,11 @@ class MetsDataTest
   }
 
   it("fails creating a work when unknown AccessStatus") {
-    val metsData = createMetsDataWith(
-      accessConditionStatus = Some("Kanye West")
-    )
-    val result = metsData.toWork(1, Instant.now())
-    result shouldBe a[Left[_, _]]
+    ModsAccessConditions(
+      dz = None,
+      status = Some("Kanye West"),
+      usage = None
+    ).parse shouldBe a[Left[_, _]]
   }
 
   it("lowercases the b number") {

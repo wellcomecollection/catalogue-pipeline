@@ -1,10 +1,11 @@
-package weco.pipeline.transformer.mets.transformer.models
-import weco.pipeline.transformer.mets.transformer.MetsXml
+package weco.pipeline.transformer.mets.transformers
+
 import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.fixtures.LocalResources
 import weco.pipeline.transformer.mets.generators.MetsGenerators
+import weco.pipeline.transformer.mets.transformer.MetsXml
 
 class ModsAccessConditionsTest
     extends AnyFunSpec

@@ -8,8 +8,10 @@ import weco.catalogue.source_model.mets.{
   MetsSourceData
 }
 import weco.pipeline.transformer.Transformer
-import weco.pipeline.transformer.mets.transformer.models.ModsAccessConditions
-import weco.pipeline.transformer.mets.transformers.MetsTitle
+import weco.pipeline.transformer.mets.transformers.{
+  MetsTitle,
+  ModsAccessConditions
+}
 import weco.pipeline.transformer.result.Result
 import weco.storage.Identified
 import weco.storage.providers.s3.S3ObjectLocation
@@ -57,16 +59,14 @@ class MetsXmlTransformer(store: Readable[S3ObjectLocation, String])
   private def transformWithoutManifestations(
     root: MetsXml
   ): Result[InvisibleMetsData] = {
-    val accessConditions = ModsAccessConditions(root.root)
     for {
       id <- root.recordIdentifier
       title <- MetsTitle(root.root)
+      accessConditions <- ModsAccessConditions(root.root).parse
     } yield InvisibleMetsData(
       recordIdentifier = id,
       title = title,
-      accessConditionDz = accessConditions.dz,
-      accessConditionStatus = accessConditions.status,
-      accessConditionUsage = accessConditions.usage,
+      accessConditions = accessConditions,
       fileReferences = root.fileReferences(id),
       thumbnailReference = root.thumbnailReference
     )
@@ -81,15 +81,11 @@ class MetsXmlTransformer(store: Readable[S3ObjectLocation, String])
       id <- root.recordIdentifier
       title <- MetsTitle(root.root)
       filesRoot <- getFirstManifestation(root, manifestations)
-      accessConditions <- Right(
-        ModsAccessConditions(filesRoot.root)
-      )
+      accessConditions <- ModsAccessConditions(filesRoot.root).parse
     } yield InvisibleMetsData(
       recordIdentifier = id,
       title = title,
-      accessConditionDz = accessConditions.dz,
-      accessConditionStatus = accessConditions.status,
-      accessConditionUsage = accessConditions.usage,
+      accessConditions = accessConditions,
       fileReferences = filesRoot.fileReferences(id),
       thumbnailReference = filesRoot.thumbnailReference
     )

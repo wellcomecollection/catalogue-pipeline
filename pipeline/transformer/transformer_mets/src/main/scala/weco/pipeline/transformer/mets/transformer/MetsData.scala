@@ -1,8 +1,6 @@
 package weco.pipeline.transformer.mets.transformer
 
 import java.time.Instant
-import cats.syntax.traverse._
-import org.apache.commons.lang3.StringUtils.equalsIgnoreCase
 import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.internal_model.identifiers._
 import weco.catalogue.internal_model.image.ImageData
@@ -13,7 +11,7 @@ import weco.catalogue.internal_model.work.{Item, MergeCandidate, Work, WorkData}
 import weco.pipeline.transformer.identifiers.SourceIdentifierValidation._
 import weco.pipeline.transformer.mets.transformer.models.FileReference
 import weco.pipeline.transformer.mets.transformers.{
-  MetsAccessStatus,
+  MetsAccessConditions,
   MetsImageData,
   MetsLocation,
   MetsThumbnail
@@ -54,29 +52,25 @@ case class DeletedMetsData(recordIdentifier: String) extends MetsData {
 case class InvisibleMetsData(
   recordIdentifier: String,
   title: String,
-  accessConditionDz: Option[String] = None,
-  accessConditionStatus: Option[String] = None,
-  accessConditionUsage: Option[String] = None,
+  accessConditions: MetsAccessConditions,
   fileReferences: List[FileReference] = Nil,
   thumbnailReference: Option[FileReference] = None
 ) extends MetsData {
 
-  def toWork(version: Int, modifiedTime: Instant): Result[Work[Source]] =
-    for {
-      license <- parseLicense
-      accessStatus <- MetsAccessStatus(accessConditionStatus)
-      location = MetsLocation(
-        recordIdentifier = recordIdentifier,
-        license = license,
-        accessStatus = accessStatus,
-        accessConditionUsage = accessConditionUsage
-      )
-      item = Item[IdState.Unminted](
-        id = IdState.Unidentifiable,
-        locations = List(location)
-      )
+  def toWork(version: Int, modifiedTime: Instant): Result[Work[Source]] = {
+    val location = MetsLocation(
+      recordIdentifier = recordIdentifier,
+      license = accessConditions.licence,
+      accessStatus = accessConditions.accessStatus,
+      accessConditionUsage = accessConditions.usage
+    )
+    val item = Item[IdState.Unminted](
+      id = IdState.Unidentifiable,
+      locations = List(location)
+    )
 
-      work = Work.Invisible[Source](
+    Right(
+      Work.Invisible[Source](
         version = version,
         state = Source(
           sourceIdentifier = sourceIdentifier,
@@ -89,14 +83,20 @@ case class InvisibleMetsData(
           thumbnail = MetsThumbnail(
             thumbnailReference,
             sourceIdentifier.value,
-            license,
-            accessStatus
+            accessConditions.licence,
+            accessConditions.accessStatus
           ),
-          imageData = imageData(version, license, accessStatus, location)
+          imageData = imageData(
+            version,
+            accessConditions.licence,
+            accessConditions.accessStatus,
+            location
+          )
         ),
         invisibilityReasons = List(MetsWorksAreNotVisible)
       )
-    } yield work
+    )
+  }
 
   private def mergeCandidate = MergeCandidate(
     identifier = SourceIdentifier(
@@ -114,39 +114,6 @@ case class InvisibleMetsData(
     ),
     reason = "METS work"
   )
-
-  private def parseLicense: Result[Option[License]] =
-    accessConditionDz.map {
-      // A lot of METS record have "Copyright not cleared"
-      // or "rightsstatements.org/page/InC/1.0/?language=en" as dz access condition.
-      // They both need to be mapped to a InCopyright license so hardcoding here
-      //
-      // Discussion about whether it's okay to map "all rights reserved" to
-      // "in copyright": https://wellcome.slack.com/archives/CBT40CMKQ/p1621243064241400
-      case s if s.toLowerCase() == "copyright not cleared" =>
-        Right(License.InCopyright)
-      case s if s == "rightsstatements.org/page/InC/1.0/?language=en" =>
-        Right(License.InCopyright)
-      case s if s.toLowerCase == "all rights reserved" =>
-        Right(License.InCopyright)
-
-      // The access conditions in mets contains sometimes the license id (lowercase),
-      // sometimes the label (ie "in copyright")
-      // and sometimes the url of the license
-      case accessCondition =>
-        License.values.find {
-          license =>
-            equalsIgnoreCase(license.id, accessCondition) || equalsIgnoreCase(
-              license.label,
-              accessCondition
-            ) || license.url.equals(accessCondition)
-
-        } match {
-          case Some(license) => Right(license)
-          case None =>
-            Left(new Exception(s"Couldn't match $accessCondition to a license"))
-        }
-    }.sequence
 
   private def imageData(
     version: Int,
