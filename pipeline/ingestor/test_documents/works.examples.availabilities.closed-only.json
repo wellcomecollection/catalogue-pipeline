@@ -1,0 +1,217 @@
+{
+  "description" : "examples for availabilities tests",
+  "createdAt" : "2023-11-23T14:34:38.895626Z",
+  "id" : "vbi1ii19",
+  "document" : {
+    "debug" : {
+      "source" : {
+        "id" : "vbi1ii19",
+        "identifier" : {
+          "identifierType" : {
+            "id" : "miro-image-number"
+          },
+          "ontologyType" : "Work",
+          "value" : "CzLNHBFHuR"
+        },
+        "version" : 46,
+        "modifiedTime" : "2024-12-13T21:31:42Z"
+      },
+      "mergedTime" : "2024-12-13T21:31:42Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
+      "redirectSources" : [
+      ]
+    },
+    "display" : {
+      "id" : "vbi1ii19",
+      "title" : "title-jGGR8UNWut",
+      "alternativeTitles" : [
+      ],
+      "contributors" : [
+      ],
+      "identifiers" : [
+        {
+          "identifierType" : {
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
+            "type" : "IdentifierType"
+          },
+          "value" : "CzLNHBFHuR",
+          "type" : "Identifier"
+        }
+      ],
+      "subjects" : [
+      ],
+      "genres" : [
+      ],
+      "items" : [
+        {
+          "id" : "fyqts0co",
+          "identifiers" : [
+            {
+              "identifierType" : {
+                "id" : "sierra-system-number",
+                "label" : "Sierra system number",
+                "type" : "IdentifierType"
+              },
+              "value" : "XQqPyuxbr5",
+              "type" : "Identifier"
+            }
+          ],
+          "locations" : [
+            {
+              "locationType" : {
+                "id" : "closed-stores",
+                "label" : "Closed stores",
+                "type" : "LocationType"
+              },
+              "label" : "locationLabel",
+              "license" : {
+                "id" : "ogl",
+                "label" : "Open Government Licence",
+                "url" : "http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+                "type" : "License"
+              },
+              "shelfmark" : "Shelfmark: vWebpA5W",
+              "accessConditions" : [
+              ],
+              "type" : "PhysicalLocation"
+            }
+          ],
+          "type" : "Item"
+        }
+      ],
+      "holdings" : [
+      ],
+      "availabilities" : [
+        {
+          "id" : "closed-stores",
+          "label" : "Closed stores",
+          "type" : "Availability"
+        }
+      ],
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "notes" : [
+      ],
+      "formerFrequency" : [
+      ],
+      "designation" : [
+      ],
+      "images" : [
+      ],
+      "parts" : [
+      ],
+      "partOf" : [
+      ],
+      "precededBy" : [
+      ],
+      "succeededBy" : [
+      ],
+      "type" : "Work"
+    },
+    "query" : {
+      "collectionPath.label" : null,
+      "collectionPath.path" : null,
+      "alternativeTitles" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "description" : null,
+      "edition" : null,
+      "genres.concepts.label" : [
+      ],
+      "id" : "vbi1ii19",
+      "sourceIdentifier.value" : "CzLNHBFHuR",
+      "identifiers.value" : [
+        "CzLNHBFHuR"
+      ],
+      "images.id" : [
+      ],
+      "images.identifiers.value" : [
+      ],
+      "items.id" : [
+        "fyqts0co"
+      ],
+      "items.identifiers.value" : [
+        "XQqPyuxbr5"
+      ],
+      "languages.label" : [
+      ],
+      "lettering" : null,
+      "notes.contents" : [
+      ],
+      "partOf.title" : [
+      ],
+      "physicalDescription" : null,
+      "production.label" : [
+      ],
+      "referenceNumber" : null,
+      "subjects.concepts.label" : [
+      ],
+      "title" : "title-jGGR8UNWut"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+        "{\"id\":\"ogl\",\"label\":\"Open Government Licence\",\"url\":\"http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/\",\"type\":\"License\"}"
+      ],
+      "availabilities" : [
+        "{\"id\":\"closed-stores\",\"label\":\"Closed stores\",\"type\":\"Availability\"}"
+      ]
+    },
+    "filterableValues" : {
+      "format.id" : null,
+      "workType" : "Standard",
+      "production.dates.range.from" : [
+      ],
+      "languages.id" : [
+      ],
+      "genres.label" : [
+      ],
+      "genres.concepts.id" : [
+      ],
+      "subjects.label" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "identifiers.value" : [
+        "CzLNHBFHuR"
+      ],
+      "items.locations.license.id" : [
+        "ogl"
+      ],
+      "items.locations.accessConditions.status.id" : [
+      ],
+      "items.id" : [
+        "fyqts0co"
+      ],
+      "items.identifiers.value" : [
+        "XQqPyuxbr5"
+      ],
+      "items.locations.locationType.id" : [
+        "closed-stores"
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
+        "closed-stores"
+      ]
+    },
+    "type" : "Visible"
+  }
+}

@@ -1,0 +1,315 @@
+{
+  "description" : "examples for availabilities tests",
+  "createdAt" : "2023-11-23T14:34:38.948113Z",
+  "id" : "vm0zer7z",
+  "document" : {
+    "debug" : {
+      "source" : {
+        "id" : "vm0zer7z",
+        "identifier" : {
+          "identifierType" : {
+            "id" : "sierra-system-number"
+          },
+          "ontologyType" : "Work",
+          "value" : "LVIpJ1Ef6z"
+        },
+        "version" : 91,
+        "modifiedTime" : "2068-08-13T06:59:27Z"
+      },
+      "mergedTime" : "2068-08-13T06:59:27Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
+      "redirectSources" : [
+      ]
+    },
+    "display" : {
+      "id" : "vm0zer7z",
+      "title" : "title-0Y60eDuJsQ",
+      "alternativeTitles" : [
+      ],
+      "contributors" : [
+      ],
+      "identifiers" : [
+        {
+          "identifierType" : {
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
+            "type" : "IdentifierType"
+          },
+          "value" : "LVIpJ1Ef6z",
+          "type" : "Identifier"
+        }
+      ],
+      "subjects" : [
+      ],
+      "genres" : [
+      ],
+      "items" : [
+        {
+          "id" : "bcx2tere",
+          "identifiers" : [
+            {
+              "identifierType" : {
+                "id" : "calm-record-id",
+                "label" : "Calm RecordIdentifier",
+                "type" : "IdentifierType"
+              },
+              "value" : "kut0Uk2wzX",
+              "type" : "Identifier"
+            }
+          ],
+          "locations" : [
+            {
+              "locationType" : {
+                "id" : "closed-stores",
+                "label" : "Closed stores",
+                "type" : "LocationType"
+              },
+              "label" : "locationLabel",
+              "license" : {
+                "id" : "cc-by",
+                "label" : "Attribution 4.0 International (CC BY 4.0)",
+                "url" : "http://creativecommons.org/licenses/by/4.0/",
+                "type" : "License"
+              },
+              "accessConditions" : [
+              ],
+              "type" : "PhysicalLocation"
+            }
+          ],
+          "type" : "Item"
+        },
+        {
+          "id" : "zapciyop",
+          "identifiers" : [
+            {
+              "identifierType" : {
+                "id" : "calm-record-id",
+                "label" : "Calm RecordIdentifier",
+                "type" : "IdentifierType"
+              },
+              "value" : "Wz64nwkPrD",
+              "type" : "Identifier"
+            }
+          ],
+          "locations" : [
+            {
+              "locationType" : {
+                "id" : "open-shelves",
+                "label" : "Open shelves",
+                "type" : "LocationType"
+              },
+              "label" : "locationLabel",
+              "license" : {
+                "id" : "cc-by",
+                "label" : "Attribution 4.0 International (CC BY 4.0)",
+                "url" : "http://creativecommons.org/licenses/by/4.0/",
+                "type" : "License"
+              },
+              "shelfmark" : "Shelfmark: AlQcKN0hZ",
+              "accessConditions" : [
+              ],
+              "type" : "PhysicalLocation"
+            }
+          ],
+          "type" : "Item"
+        },
+        {
+          "identifiers" : [
+          ],
+          "locations" : [
+            {
+              "locationType" : {
+                "id" : "iiif-presentation",
+                "label" : "IIIF Presentation API",
+                "type" : "LocationType"
+              },
+              "url" : "https://iiif.wellcomecollection.org/image/Tye.jpg/info.json",
+              "credit" : "Credit line: d0v8N5yZNM",
+              "linkText" : "Link text: kIx0Ngqk",
+              "license" : {
+                "id" : "cc-by",
+                "label" : "Attribution 4.0 International (CC BY 4.0)",
+                "url" : "http://creativecommons.org/licenses/by/4.0/",
+                "type" : "License"
+              },
+              "accessConditions" : [
+                {
+                  "method" : {
+                    "id" : "not-requestable",
+                    "label" : "Not requestable",
+                    "type" : "AccessMethod"
+                  },
+                  "status" : {
+                    "id" : "open-with-advisory",
+                    "label" : "Open with advisory",
+                    "type" : "AccessStatus"
+                  },
+                  "type" : "AccessCondition"
+                }
+              ],
+              "type" : "DigitalLocation"
+            }
+          ],
+          "type" : "Item"
+        }
+      ],
+      "holdings" : [
+      ],
+      "availabilities" : [
+        {
+          "id" : "closed-stores",
+          "label" : "Closed stores",
+          "type" : "Availability"
+        },
+        {
+          "id" : "open-shelves",
+          "label" : "Open shelves",
+          "type" : "Availability"
+        },
+        {
+          "id" : "online",
+          "label" : "Online",
+          "type" : "Availability"
+        }
+      ],
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "notes" : [
+      ],
+      "formerFrequency" : [
+      ],
+      "designation" : [
+      ],
+      "images" : [
+      ],
+      "parts" : [
+      ],
+      "partOf" : [
+      ],
+      "precededBy" : [
+      ],
+      "succeededBy" : [
+      ],
+      "type" : "Work"
+    },
+    "query" : {
+      "collectionPath.label" : null,
+      "collectionPath.path" : null,
+      "alternativeTitles" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "description" : null,
+      "edition" : null,
+      "genres.concepts.label" : [
+      ],
+      "id" : "vm0zer7z",
+      "sourceIdentifier.value" : "LVIpJ1Ef6z",
+      "identifiers.value" : [
+        "LVIpJ1Ef6z"
+      ],
+      "images.id" : [
+      ],
+      "images.identifiers.value" : [
+      ],
+      "items.id" : [
+        "bcx2tere",
+        "zapciyop"
+      ],
+      "items.identifiers.value" : [
+        "kut0Uk2wzX",
+        "Wz64nwkPrD"
+      ],
+      "languages.label" : [
+      ],
+      "lettering" : null,
+      "notes.contents" : [
+      ],
+      "partOf.title" : [
+      ],
+      "physicalDescription" : null,
+      "production.label" : [
+      ],
+      "referenceNumber" : null,
+      "subjects.concepts.label" : [
+      ],
+      "title" : "title-0Y60eDuJsQ"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+        "{\"id\":\"cc-by\",\"label\":\"Attribution 4.0 International (CC BY 4.0)\",\"url\":\"http://creativecommons.org/licenses/by/4.0/\",\"type\":\"License\"}",
+        "{\"id\":\"cc-by\",\"label\":\"Attribution 4.0 International (CC BY 4.0)\",\"url\":\"http://creativecommons.org/licenses/by/4.0/\",\"type\":\"License\"}",
+        "{\"id\":\"cc-by\",\"label\":\"Attribution 4.0 International (CC BY 4.0)\",\"url\":\"http://creativecommons.org/licenses/by/4.0/\",\"type\":\"License\"}"
+      ],
+      "availabilities" : [
+        "{\"id\":\"closed-stores\",\"label\":\"Closed stores\",\"type\":\"Availability\"}",
+        "{\"id\":\"online\",\"label\":\"Online\",\"type\":\"Availability\"}",
+        "{\"id\":\"open-shelves\",\"label\":\"Open shelves\",\"type\":\"Availability\"}"
+      ]
+    },
+    "filterableValues" : {
+      "format.id" : null,
+      "workType" : "Standard",
+      "production.dates.range.from" : [
+      ],
+      "languages.id" : [
+      ],
+      "genres.label" : [
+      ],
+      "genres.concepts.id" : [
+      ],
+      "subjects.label" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "identifiers.value" : [
+        "LVIpJ1Ef6z"
+      ],
+      "items.locations.license.id" : [
+        "cc-by",
+        "cc-by",
+        "cc-by"
+      ],
+      "items.locations.accessConditions.status.id" : [
+        "open-with-advisory"
+      ],
+      "items.id" : [
+        "bcx2tere",
+        "zapciyop"
+      ],
+      "items.identifiers.value" : [
+        "kut0Uk2wzX",
+        "Wz64nwkPrD"
+      ],
+      "items.locations.locationType.id" : [
+        "closed-stores",
+        "open-shelves",
+        "iiif-presentation"
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
+        "closed-stores",
+        "open-shelves",
+        "online"
+      ]
+    },
+    "type" : "Visible"
+  }
+}
