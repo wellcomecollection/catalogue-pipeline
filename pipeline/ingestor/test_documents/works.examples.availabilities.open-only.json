@@ -1,29 +1,29 @@
 {
   "description" : "examples for availabilities tests",
-  "createdAt" : "2023-11-23T14:34:38.873049Z",
-  "id" : "aequ81tp",
+  "createdAt" : "2023-11-23T15:20:26.254403Z",
+  "id" : "jwvjyz6g",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "aequ81tp",
+        "id" : "jwvjyz6g",
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "GdgZfc8BAU"
+          "value" : "TXyrDnY4M5"
         },
-        "version" : 79,
-        "modifiedTime" : "1933-03-15T02:50:48Z"
+        "version" : 36,
+        "modifiedTime" : "2067-09-08T00:34:22Z"
       },
-      "mergedTime" : "1933-03-15T02:50:48Z",
+      "mergedTime" : "2067-09-08T00:34:22Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "aequ81tp",
-      "title" : "title-2TWOPFt15v",
+      "id" : "jwvjyz6g",
+      "title" : "title-bs7oCJMNnr",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -31,11 +31,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "GdgZfc8BAU",
+          "value" : "TXyrDnY4M5",
           "type" : "Identifier"
         }
       ],
@@ -45,15 +45,15 @@
       ],
       "items" : [
         {
-          "id" : "y4unjfix",
+          "id" : "mvr7oym6",
           "identifiers" : [
             {
               "identifierType" : {
-                "id" : "calm-record-id",
-                "label" : "Calm RecordIdentifier",
+                "id" : "miro-image-number",
+                "label" : "Miro image number",
                 "type" : "IdentifierType"
               },
-              "value" : "lrCzEKoCX5",
+              "value" : "gjgNk1LNtP",
               "type" : "Identifier"
             }
           ],
@@ -65,7 +65,12 @@
                 "type" : "LocationType"
               },
               "label" : "locationLabel",
-              "shelfmark" : "Shelfmark: xd8prf0",
+              "license" : {
+                "id" : "ogl",
+                "label" : "Open Government Licence",
+                "url" : "http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+                "type" : "License"
+              },
               "accessConditions" : [
               ],
               "type" : "PhysicalLocation"
@@ -116,20 +121,20 @@
       "edition" : null,
       "genres.concepts.label" : [
       ],
-      "id" : "aequ81tp",
-      "sourceIdentifier.value" : "GdgZfc8BAU",
+      "id" : "jwvjyz6g",
+      "sourceIdentifier.value" : "TXyrDnY4M5",
       "identifiers.value" : [
-        "GdgZfc8BAU"
+        "TXyrDnY4M5"
       ],
       "images.id" : [
       ],
       "images.identifiers.value" : [
       ],
       "items.id" : [
-        "y4unjfix"
+        "mvr7oym6"
       ],
       "items.identifiers.value" : [
-        "lrCzEKoCX5"
+        "gjgNk1LNtP"
       ],
       "languages.label" : [
       ],
@@ -144,7 +149,7 @@
       "referenceNumber" : null,
       "subjects.concepts.label" : [
       ],
-      "title" : "title-2TWOPFt15v"
+      "title" : "title-bs7oCJMNnr"
     },
     "aggregatableValues" : {
       "workType" : [
@@ -160,6 +165,7 @@
       "contributors.agent.label" : [
       ],
       "items.locations.license" : [
+        "{\"id\":\"ogl\",\"label\":\"Open Government Licence\",\"url\":\"http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/\",\"type\":\"License\"}"
       ],
       "availabilities" : [
         "{\"id\":\"open-shelves\",\"label\":\"Open shelves\",\"type\":\"Availability\"}"
@@ -181,17 +187,18 @@
       "contributors.agent.label" : [
       ],
       "identifiers.value" : [
-        "GdgZfc8BAU"
+        "TXyrDnY4M5"
       ],
       "items.locations.license.id" : [
+        "ogl"
       ],
       "items.locations.accessConditions.status.id" : [
       ],
       "items.id" : [
-        "y4unjfix"
+        "mvr7oym6"
       ],
       "items.identifiers.value" : [
-        "lrCzEKoCX5"
+        "gjgNk1LNtP"
       ],
       "items.locations.locationType.id" : [
         "open-shelves"

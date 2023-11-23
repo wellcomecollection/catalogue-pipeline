@@ -1,29 +1,29 @@
 {
   "description" : "examples for availabilities tests",
-  "createdAt" : "2023-11-23T14:34:38.948113Z",
-  "id" : "vm0zer7z",
+  "createdAt" : "2023-11-23T15:20:26.272086Z",
+  "id" : "ntlrk7nw",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "vm0zer7z",
+        "id" : "ntlrk7nw",
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "LVIpJ1Ef6z"
+          "value" : "9pCp7jd9rF"
         },
-        "version" : 91,
-        "modifiedTime" : "2068-08-13T06:59:27Z"
+        "version" : 85,
+        "modifiedTime" : "2003-11-23T19:57:31Z"
       },
-      "mergedTime" : "2068-08-13T06:59:27Z",
+      "mergedTime" : "2003-11-23T19:57:31Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ]
     },
     "display" : {
-      "id" : "vm0zer7z",
-      "title" : "title-0Y60eDuJsQ",
+      "id" : "ntlrk7nw",
+      "title" : "title-5hDXNpf0jl",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -31,11 +31,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "LVIpJ1Ef6z",
+          "value" : "9pCp7jd9rF",
           "type" : "Identifier"
         }
       ],
@@ -45,7 +45,7 @@
       ],
       "items" : [
         {
-          "id" : "bcx2tere",
+          "id" : "dc51h9g3",
           "identifiers" : [
             {
               "identifierType" : {
@@ -53,7 +53,7 @@
                 "label" : "Calm RecordIdentifier",
                 "type" : "IdentifierType"
               },
-              "value" : "kut0Uk2wzX",
+              "value" : "S97qOpHViO",
               "type" : "Identifier"
             }
           ],
@@ -65,12 +65,6 @@
                 "type" : "LocationType"
               },
               "label" : "locationLabel",
-              "license" : {
-                "id" : "cc-by",
-                "label" : "Attribution 4.0 International (CC BY 4.0)",
-                "url" : "http://creativecommons.org/licenses/by/4.0/",
-                "type" : "License"
-              },
               "accessConditions" : [
               ],
               "type" : "PhysicalLocation"
@@ -79,15 +73,15 @@
           "type" : "Item"
         },
         {
-          "id" : "zapciyop",
+          "id" : "tpxl396z",
           "identifiers" : [
             {
               "identifierType" : {
-                "id" : "calm-record-id",
-                "label" : "Calm RecordIdentifier",
+                "id" : "miro-image-number",
+                "label" : "Miro image number",
                 "type" : "IdentifierType"
               },
-              "value" : "Wz64nwkPrD",
+              "value" : "BZp7GTBM7U",
               "type" : "Identifier"
             }
           ],
@@ -105,7 +99,6 @@
                 "url" : "http://creativecommons.org/licenses/by/4.0/",
                 "type" : "License"
               },
-              "shelfmark" : "Shelfmark: AlQcKN0hZ",
               "accessConditions" : [
               ],
               "type" : "PhysicalLocation"
@@ -123,9 +116,7 @@
                 "label" : "IIIF Presentation API",
                 "type" : "LocationType"
               },
-              "url" : "https://iiif.wellcomecollection.org/image/Tye.jpg/info.json",
-              "credit" : "Credit line: d0v8N5yZNM",
-              "linkText" : "Link text: kIx0Ngqk",
+              "url" : "https://iiif.wellcomecollection.org/image/TvJ.jpg/info.json",
               "license" : {
                 "id" : "cc-by",
                 "label" : "Attribution 4.0 International (CC BY 4.0)",
@@ -205,22 +196,22 @@
       "edition" : null,
       "genres.concepts.label" : [
       ],
-      "id" : "vm0zer7z",
-      "sourceIdentifier.value" : "LVIpJ1Ef6z",
+      "id" : "ntlrk7nw",
+      "sourceIdentifier.value" : "9pCp7jd9rF",
       "identifiers.value" : [
-        "LVIpJ1Ef6z"
+        "9pCp7jd9rF"
       ],
       "images.id" : [
       ],
       "images.identifiers.value" : [
       ],
       "items.id" : [
-        "bcx2tere",
-        "zapciyop"
+        "dc51h9g3",
+        "tpxl396z"
       ],
       "items.identifiers.value" : [
-        "kut0Uk2wzX",
-        "Wz64nwkPrD"
+        "S97qOpHViO",
+        "BZp7GTBM7U"
       ],
       "languages.label" : [
       ],
@@ -235,7 +226,7 @@
       "referenceNumber" : null,
       "subjects.concepts.label" : [
       ],
-      "title" : "title-0Y60eDuJsQ"
+      "title" : "title-5hDXNpf0jl"
     },
     "aggregatableValues" : {
       "workType" : [
@@ -251,7 +242,6 @@
       "contributors.agent.label" : [
       ],
       "items.locations.license" : [
-        "{\"id\":\"cc-by\",\"label\":\"Attribution 4.0 International (CC BY 4.0)\",\"url\":\"http://creativecommons.org/licenses/by/4.0/\",\"type\":\"License\"}",
         "{\"id\":\"cc-by\",\"label\":\"Attribution 4.0 International (CC BY 4.0)\",\"url\":\"http://creativecommons.org/licenses/by/4.0/\",\"type\":\"License\"}",
         "{\"id\":\"cc-by\",\"label\":\"Attribution 4.0 International (CC BY 4.0)\",\"url\":\"http://creativecommons.org/licenses/by/4.0/\",\"type\":\"License\"}"
       ],
@@ -277,10 +267,9 @@
       "contributors.agent.label" : [
       ],
       "identifiers.value" : [
-        "LVIpJ1Ef6z"
+        "9pCp7jd9rF"
       ],
       "items.locations.license.id" : [
-        "cc-by",
         "cc-by",
         "cc-by"
       ],
@@ -288,12 +277,12 @@
         "open-with-advisory"
       ],
       "items.id" : [
-        "bcx2tere",
-        "zapciyop"
+        "dc51h9g3",
+        "tpxl396z"
       ],
       "items.identifiers.value" : [
-        "kut0Uk2wzX",
-        "Wz64nwkPrD"
+        "S97qOpHViO",
+        "BZp7GTBM7U"
       ],
       "items.locations.locationType.id" : [
         "closed-stores",
