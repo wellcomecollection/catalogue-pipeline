@@ -6,7 +6,7 @@ import org.scalatest.matchers.should.Matchers
 import weco.fixtures.LocalResources
 import weco.pipeline.transformer.mets.generators.MetsGenerators
 
-class MetsAccessConditionsTest
+class ModsAccessConditionsTest
     extends AnyFunSpec
     with Matchers
     with EitherValues
@@ -15,19 +15,19 @@ class MetsAccessConditionsTest
   val xml = MetsXml(readResource("b30246039.xml")).value.root
 
   it("parses accessConditionDz from XML") {
-    MetsAccessConditions(xml).dz shouldBe
+    ModsAccessConditions(xml).dz shouldBe
       Some("CC-BY-NC")
 
   }
 
   it("parses accessConditionStatus from XML") {
-    MetsAccessConditions(xml).status shouldBe
+    ModsAccessConditions(xml).status shouldBe
       Some("Open")
 
   }
 
   it("parses accessConditionUsage from XML") {
-    MetsAccessConditions(xml).usage shouldBe Some("Some terms")
+    ModsAccessConditions(xml).usage shouldBe Some("Some terms")
   }
 
   it("gets the first accessConditionStatus if there are more than one") {
@@ -37,27 +37,23 @@ class MetsAccessConditionsTest
       secondarySections =
         metsSecondarySection(accessConditionStatus = "Restricted")
     )
-    MetsAccessConditions(MetsXml(str).value.root).status shouldBe
+    ModsAccessConditions(MetsXml(str).value.root).status shouldBe
       Some("Open")
 
   }
 
   it("parses a METS with no access condition") {
-    MetsAccessConditions(MetsXml(xmlNoLicense).root).dz shouldBe None
+    ModsAccessConditions(xmlNoLicense).dz shouldBe None
   }
 
   it("parse a METS with a repeated license node") {
-    MetsAccessConditions(
-      MetsXml(xmlRepeatedLicenseNode).root
-    ).dz shouldBe
-      Some("CC-BY")
-
+    ModsAccessConditions(xmlRepeatedLicenseNode).dz shouldBe Some("CC-BY")
   }
 
   it("finds the first licence in document order") {
-    MetsAccessConditions(
-      MetsXml(xmlMultipleDistinctLicense).root
-    ).dz shouldBe Some("CC-BY-NC")
+    ModsAccessConditions(xmlMultipleDistinctLicense).dz shouldBe Some(
+      "CC-BY-NC"
+    )
   }
 
   def xmlNoLicense =

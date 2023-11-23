@@ -4,16 +4,16 @@ import grizzled.slf4j.Logging
 
 import scala.xml.Elem
 
-case class MetsAccessConditions(
+case class ModsAccessConditions(
   dz: Option[String],
   status: Option[String],
   usage: Option[String]
 )
 
-object MetsAccessConditions extends XMLOps with Logging {
-  def apply(root: Elem): MetsAccessConditions = {
+object ModsAccessConditions extends XMLOps with Logging {
+  def apply(root: Elem): ModsAccessConditions = {
     implicit val r: Elem = root
-    new MetsAccessConditions(
+    new ModsAccessConditions(
       dz = accessConditionDz,
       status = accessConditionStatus,
       usage = accessConditionUsage

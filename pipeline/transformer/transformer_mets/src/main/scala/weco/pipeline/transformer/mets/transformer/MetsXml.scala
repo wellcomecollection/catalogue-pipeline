@@ -8,6 +8,7 @@ import weco.pipeline.transformer.mets.transformer.models.{
 
 import scala.util.Try
 import scala.xml.{Elem, XML}
+
 trait MetsXml {
   val root: Elem
   val thumbnailReference: Option[FileReference]
@@ -157,8 +158,17 @@ case class GoobiMetsXml(root: Elem) extends MetsXml with XMLOps {
 }
 
 object MetsXml {
-  def apply(root: Elem): MetsXml =
-    GoobiMetsXml(root)
+  def apply(root: Elem): MetsXml = {
+    val agentName = (root \ "metsHdr" \ "agent" \ "name").text
+    if (agentName.contains("Goobi")) {
+      GoobiMetsXml(root)
+    } else {
+      throw new NotImplementedError(
+        "Could not determine which flavour of METS to parse"
+      )
+    }
+  }
+
   def apply(str: String): Either[Throwable, MetsXml] =
     Try(XML.loadString(str)).map(MetsXml(_)).toEither
 }
