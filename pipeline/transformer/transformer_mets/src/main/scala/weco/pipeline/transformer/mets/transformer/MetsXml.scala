@@ -80,15 +80,20 @@ case class GoobiMetsXml(root: Elem) extends MetsXml with XMLOps {
   /** Valid METS documents should contain a physicalStructMap section, with the
     * bottom most divs each representing a physical page, and linking to files
     * in the corresponding fileSec structures:
-    *
-    * <mets:structMap TYPE="PHYSICAL"> <mets:div DMDID="DMDPHYS_0000"
-    * ID="PHYS_0000" TYPE="physSequence"> <mets:div ADMID="AMD_0001"
-    * ID="PHYS_0001" ORDER="1" TYPE="page"> <mets:fptr
-    * FILEID="FILE_0001_OBJECTS" /> <mets:fptr FILEID="FILE_0001_ALTO" />
-    * </mets:div> <mets:div ADMID="AMD_0002" ID="PHYS_0002" ORDER="2"
-    * TYPE="page"> <mets:fptr FILEID="FILE_0002_OBJECTS" /> <mets:fptr
-    * FILEID="FILE_0002_ALTO" /> </mets:div> </mets:div> </mets:structMap>
-    *
+    * {{{
+    * <mets:structMap TYPE="PHYSICAL">
+    *   <mets:div DMDID="DMDPHYS_0000" ID="PHYS_0000" TYPE="physSequence">
+    *     <mets:div ADMID="AMD_0001" ID="PHYS_0001" ORDER="1" TYPE="page">
+    *       <mets:fptr FILEID="FILE_0001_OBJECTS" />
+    *       <mets:fptr FILEID="FILE_0001_ALTO" />
+    *     </mets:div>
+    *     <mets:div ADMID="AMD_0002" ID="PHYS_0002" ORDER="2" TYPE="page">
+    *        <mets:fptr FILEID="FILE_0002_OBJECTS" />
+    *        <mets:fptr FILEID="FILE_0002_ALTO" />
+    *      </mets:div>
+    *    </mets:div>
+    *  </mets:structMap>
+    * }}}
     * For this input we would expect the following output:
     *
     * Seq("PHYS_0001" -> "FILE_0001_OBJECTS", "PHYS_0002" ->
