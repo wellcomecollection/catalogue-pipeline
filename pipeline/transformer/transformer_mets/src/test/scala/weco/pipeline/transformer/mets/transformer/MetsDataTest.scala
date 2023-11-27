@@ -14,6 +14,8 @@ import weco.pipeline.transformer.mets.generators.{
   MetsDataGenerators,
   MetsGenerators
 }
+import weco.pipeline.transformer.mets.transformer.models.FileReference
+import weco.pipeline.transformer.mets.transformers.ModsAccessConditions
 
 class MetsDataTest
     extends AnyFunSpec
@@ -150,10 +152,11 @@ class MetsDataTest
   }
 
   it("fails creating a work if it cannot parse the license") {
-    val metsData = createMetsDataWith(accessConditionDz = Some("blah"))
-    val version = 1
-
-    metsData.toWork(version, Instant.now()).left.get shouldBe a[Exception]
+    ModsAccessConditions(
+      dz = Some("blah"),
+      status = None,
+      usage = None
+    ).parse.left.get shouldBe a[Exception]
 
   }
 
@@ -164,12 +167,12 @@ class MetsDataTest
 
     inside(metsData.toWork(1, Instant.now()).right.get.data.items) {
       case List(
-          Item(
-            IdState.Unidentifiable,
-            _,
-            _,
-            List(DigitalLocation(_, _, license, _, _, _))
-          )
+            Item(
+              IdState.Unidentifiable,
+              _,
+              _,
+              List(DigitalLocation(_, _, license, _, _, _))
+            )
           ) =>
         license shouldBe Some(License.InCopyright)
     }
@@ -182,12 +185,12 @@ class MetsDataTest
 
     inside(metsData.toWork(1, Instant.now()).right.get.data.items) {
       case List(
-          Item(
-            IdState.Unidentifiable,
-            _,
-            _,
-            List(DigitalLocation(_, _, license, _, _, _))
-          )
+            Item(
+              IdState.Unidentifiable,
+              _,
+              _,
+              List(DigitalLocation(_, _, license, _, _, _))
+            )
           ) =>
         license shouldBe Some(License.InCopyright)
     }
@@ -199,12 +202,12 @@ class MetsDataTest
     )
     inside(metsData.toWork(1, Instant.now()).right.get.data.items) {
       case List(
-          Item(
-            IdState.Unidentifiable,
-            _,
-            _,
-            List(DigitalLocation(_, _, license, _, _, _))
-          )
+            Item(
+              IdState.Unidentifiable,
+              _,
+              _,
+              List(DigitalLocation(_, _, license, _, _, _))
+            )
           ) =>
         license shouldBe Some(License.InCopyright)
     }
@@ -218,18 +221,20 @@ class MetsDataTest
 
     inside(result.right.get.data.items) {
       case List(
-          Item(
-            IdState.Unidentifiable,
-            _,
-            _,
-            List(DigitalLocation(_, _, license, _, _, _))
-          )
+            Item(
+              IdState.Unidentifiable,
+              _,
+              _,
+              List(DigitalLocation(_, _, license, _, _, _))
+            )
           ) =>
         license shouldBe Some(License.InCopyright)
     }
   }
 
-  it("can create a license for rightsstatements.org/page/InC/1.0/?language=en") {
+  it(
+    "can create a license for rightsstatements.org/page/InC/1.0/?language=en"
+  ) {
     val metsData = createMetsDataWith(
       accessConditionDz = Some("rightsstatements.org/page/InC/1.0/?language=en")
     )
@@ -237,12 +242,12 @@ class MetsDataTest
 
     inside(result.right.get.data.items) {
       case List(
-          Item(
-            IdState.Unidentifiable,
-            _,
-            _,
-            List(DigitalLocation(_, _, license, _, _, _))
-          )
+            Item(
+              IdState.Unidentifiable,
+              _,
+              _,
+              List(DigitalLocation(_, _, license, _, _, _))
+            )
           ) =>
         license shouldBe Some(License.InCopyright)
     }
@@ -256,12 +261,12 @@ class MetsDataTest
 
     inside(result.right.get.data.items) {
       case List(
-          Item(
-            IdState.Unidentifiable,
-            _,
-            _,
-            List(DigitalLocation(_, _, license, _, _, _))
-          )
+            Item(
+              IdState.Unidentifiable,
+              _,
+              _,
+              List(DigitalLocation(_, _, license, _, _, _))
+            )
           ) =>
         license shouldBe Some(License.InCopyright)
     }
@@ -270,16 +275,15 @@ class MetsDataTest
   it("creates a invisible work with a thumbnail location") {
     val metsData = createMetsDataWith(
       accessConditionDz = Some("CC-BY-NC"),
-      fileReferencesMapping = List(
-        "id" -> FileReference("l", "location.jp2", Some("image/jp2"))
-      )
+      thumbnailReference =
+        Some(FileReference("l", "location.jp2", Some("image/jp2")))
     )
     val result = metsData.toWork(1, Instant.now())
     result shouldBe a[Right[_, _]]
     result.right.get.data.thumbnail shouldBe Some(
       DigitalLocation(
         url =
-          "https://iiif.wellcomecollection.org/thumbs/location.jp2/full/!200,200/0/default.jpg",
+          s"https://iiif.wellcomecollection.org/thumbs/${metsData.recordIdentifier}_location.jp2/full/!200,200/0/default.jpg",
         locationType = LocationType.ThumbnailImage,
         license = Some(License.CCBYNC)
       )
@@ -289,18 +293,19 @@ class MetsDataTest
   it("creates a invisible work with a title page thumbnail") {
     val metsData = createMetsDataWith(
       accessConditionDz = Some("CC-BY-NC"),
-      fileReferencesMapping = List(
-        "id" -> FileReference("l", "location.jp2", Some("image/jp2")),
-        "title-id" -> FileReference("l", "title.jp2", Some("image/jp2"))
+      fileReferences = List(
+        FileReference("l", "location.jp2", Some("image/jp2")),
+        FileReference("l", "title.jp2", Some("image/jp2"))
       ),
-      titlePageId = Some("title-id")
+      thumbnailReference =
+        Some(FileReference("l", "title.jp2", Some("image/jp2")))
     )
     val result = metsData.toWork(1, Instant.now())
     result shouldBe a[Right[_, _]]
     result.right.get.data.thumbnail shouldBe Some(
       DigitalLocation(
         url =
-          "https://iiif.wellcomecollection.org/thumbs/title.jp2/full/!200,200/0/default.jpg",
+          s"https://iiif.wellcomecollection.org/thumbs/${metsData.recordIdentifier}_title.jp2/full/!200,200/0/default.jpg",
         locationType = LocationType.ThumbnailImage,
         license = Some(License.CCBYNC)
       )
@@ -311,8 +316,8 @@ class MetsDataTest
     val metsData = createMetsDataWith(
       accessConditionDz = Some("CC-BY-NC"),
       accessConditionStatus = Some("Restricted files"),
-      fileReferencesMapping = List(
-        "id" -> FileReference("l", "location.jp2", Some("image/jp2"))
+      fileReferences = List(
+        FileReference("l", "location.jp2", Some("image/jp2"))
       )
     )
     val result = metsData.toWork(1, Instant.now())
@@ -325,9 +330,10 @@ class MetsDataTest
     val metsData = createMetsDataWith(
       bibNumber = bibNumber,
       accessConditionDz = Some("CC-BY-NC"),
-      fileReferencesMapping = List(
-        "id" -> FileReference("l", "location.pdf")
-      )
+      fileReferences = List(
+        FileReference("l", "location.pdf")
+      ),
+      thumbnailReference = Some(FileReference("l", "location.pdf"))
     )
     val result = metsData.toWork(1, Instant.now())
     result shouldBe a[Right[_, _]]
@@ -343,8 +349,8 @@ class MetsDataTest
   it("does not add a thumbnail if the file is a video") {
     val metsData = createMetsDataWith(
       accessConditionDz = Some("CC-BY-NC"),
-      fileReferencesMapping = List(
-        "id" -> FileReference("v", "video.mpg", Some("video/mpeg"))
+      fileReferences = List(
+        FileReference("v", "video.mpg", Some("video/mpeg"))
       )
     )
     val result = metsData.toWork(1, Instant.now())
@@ -355,8 +361,8 @@ class MetsDataTest
   it("does not add a thumbnail if the file is an audio") {
     val metsData = createMetsDataWith(
       accessConditionDz = Some("CC-BY-NC"),
-      fileReferencesMapping = List(
-        "id" -> FileReference("v", "video.mp3", Some("audio/x-mpeg-3"))
+      fileReferences = List(
+        FileReference("v", "video.mp3", Some("audio/x-mpeg-3"))
       )
     )
     val result = metsData.toWork(1, Instant.now())
@@ -367,8 +373,8 @@ class MetsDataTest
   it("uses both the IIIF manifest and image for imageData locations") {
     val metsData = createMetsDataWith(
       accessConditionDz = Some("CC-BY-NC"),
-      fileReferencesMapping = List(
-        "id" -> FileReference("l", "location.jp2", Some("image/jp2"))
+      fileReferences = List(
+        FileReference("l", "location.jp2", Some("image/jp2"))
       )
     )
     val result = metsData.toWork(1, Instant.now())
@@ -376,7 +382,7 @@ class MetsDataTest
     result.right.get.data.imageData.head.locations shouldBe List(
       DigitalLocation(
         url =
-          s"https://iiif.wellcomecollection.org/image/location.jp2/info.json",
+          s"https://iiif.wellcomecollection.org/image/${metsData.recordIdentifier}_location.jp2/info.json",
         locationType = LocationType.IIIFImageAPI,
         license = Some(License.CCBYNC)
       ),
@@ -413,12 +419,12 @@ class MetsDataTest
     val metsData = createMetsDataWith(
       bibNumber = bibNumber,
       accessConditionDz = Some("CC-BY-NC"),
-      fileReferencesMapping = List(
-        "A" -> FileReference("A", "location1.jp2", Some("image/jp2")),
-        "B" -> FileReference("B", "location2.jp2", Some("image/jp2")),
-        "C" -> FileReference("C", "location3.jp2", Some("image/jp2")),
-        "D" -> FileReference("D", "location4.jp2", Some("application/pdf")),
-        "E" -> FileReference("E", "location4.jp2", Some("video/mpeg"))
+      fileReferences = List(
+        FileReference("A", "location1.jp2", Some("image/jp2")),
+        FileReference("B", "location2.jp2", Some("image/jp2")),
+        FileReference("C", "location3.jp2", Some("image/jp2")),
+        FileReference("D", "location4.jp2", Some("application/pdf")),
+        FileReference("E", "location4.jp2", Some("video/mpeg"))
       )
     )
 
@@ -426,7 +432,9 @@ class MetsDataTest
     result shouldBe a[Right[_, _]]
     val images = result.right.get.data.imageData
     images should have length 3
-    images.map(_.id.allSourceIdentifiers.head.value) should contain theSameElementsAs List(
+    images.map(
+      _.id.allSourceIdentifiers.head.value
+    ) should contain theSameElementsAs List(
       s"$bibNumber/A",
       s"$bibNumber/B",
       s"$bibNumber/C"
@@ -437,9 +445,9 @@ class MetsDataTest
     val metsData = createMetsDataWith(
       accessConditionDz = Some("CC-BY-NC"),
       accessConditionStatus = Some("Restricted files"),
-      fileReferencesMapping = List(
-        "A" -> FileReference("A", "location1.jp2", Some("image/jp2")),
-        "B" -> FileReference("B", "location2.jp2", Some("image/jp2"))
+      fileReferences = List(
+        FileReference("A", "location1.jp2", Some("image/jp2")),
+        FileReference("B", "location2.jp2", Some("image/jp2"))
       )
     )
     val result = metsData.toWork(1, Instant.now())
@@ -498,11 +506,11 @@ class MetsDataTest
   }
 
   it("fails creating a work when unknown AccessStatus") {
-    val metsData = createMetsDataWith(
-      accessConditionStatus = Some("Kanye West")
-    )
-    val result = metsData.toWork(1, Instant.now())
-    result shouldBe a[Left[_, _]]
+    ModsAccessConditions(
+      dz = None,
+      status = Some("Kanye West"),
+      usage = None
+    ).parse shouldBe a[Left[_, _]]
   }
 
   it("lowercases the b number") {

@@ -3,7 +3,7 @@ package weco.pipeline.transformer.mets.generators
 import weco.catalogue.internal_model.locations.License
 import weco.fixtures.RandomGenerators
 
-import scala.xml.NodeSeq
+import scala.xml.{Elem, NodeSeq}
 
 trait MetsGenerators extends RandomGenerators {
   def metsXmlWith(
@@ -17,6 +17,8 @@ trait MetsGenerators extends RandomGenerators {
     structMap: NodeSeq = NodeSeq.Empty
   ) =
     <mets:mets xmlns:dv="http://dfg-viewer.de/" xmlns:mets="http://www.loc.gov/METS/" xmlns:mods="http://www.loc.gov/mods/v3" xmlns:premis="http://www.loc.gov/premis/v3" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" OBJID="276914" xsi:schemaLocation="http://www.loc.gov/standards/premis/ http://www.loc.gov/standards/premis/v2/premis-v2-0.xsd http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-7.xsd http://www.loc.gov/METS/ http://www.loc.gov/standards/mets/mets.xsd http://www.loc.gov/standards/mix/ http://www.loc.gov/standards/mix/mix.xsd">
+
+      {goobiHeader}
       {
       rootSection(
         recordIdentifier = recordIdentifier,
@@ -31,9 +33,12 @@ trait MetsGenerators extends RandomGenerators {
       {structMap}
      </mets:mets>.toString()
 
-  def xmlWithManifestations(manifestations: List[(String, String, String)],
-                            title: String = randomAlphanumeric()) =
+  def xmlWithManifestations(
+    manifestations: List[(String, String, String)],
+    title: String = randomAlphanumeric()
+  ) =
     <mets:mets xmlns:mets="http://www.loc.gov/METS/" xmlns:mods="http://www.loc.gov/mods/v3" xmlns:xlink="http://www.w3.org/1999/xlink">
+      {goobiHeader}
       {
       rootSection(
         recordIdentifier = "b30246039",
@@ -57,6 +62,14 @@ trait MetsGenerators extends RandomGenerators {
       </mets:structMap>
     </mets:mets>
 
+  protected val goobiHeader: Elem =
+    <mets:metsHdr CREATEDATE="2016-09-07T09:38:57">
+      <mets:agent OTHERTYPE="SOFTWARE" ROLE="CREATOR" TYPE="OTHER">
+        <mets:name>Goobi - ugh-3.0-ugh-2.0.0-24-gb21188e - 15−January−2016</mets:name>
+        <mets:note>Goobi</mets:note>
+      </mets:agent>
+    </mets:metsHdr>
+
   def rootSection(
     recordIdentifier: String,
     title: String,
@@ -69,24 +82,31 @@ trait MetsGenerators extends RandomGenerators {
         <mets:xmlData>
           <mods:mods>
             <mods:recordInfo>
-              <mods:recordIdentifier source="gbv-ppn">{recordIdentifier}</mods:recordIdentifier>
+              <mods:recordIdentifier source="gbv-ppn">{
+      recordIdentifier
+    }</mods:recordIdentifier>
             </mods:recordInfo>
             <mods:titleInfo>
               <mods:title>{title}</mods:title>
             </mods:titleInfo>
             {
-      license.fold(ifEmpty = NodeSeq.Empty) { l =>
-        <mods:accessCondition type="dz">{l.id.toUpperCase}</mods:accessCondition>
+      license.fold(ifEmpty = NodeSeq.Empty) {
+        l =>
+          <mods:accessCondition type="dz">{
+            l.id.toUpperCase
+          }</mods:accessCondition>
       }
     }
             {
-      accessConditionStatus.fold(ifEmpty = NodeSeq.Empty) { a =>
-        <mods:accessCondition type="status">{a}</mods:accessCondition>
+      accessConditionStatus.fold(ifEmpty = NodeSeq.Empty) {
+        a =>
+          <mods:accessCondition type="status">{a}</mods:accessCondition>
       }
     }
             {
-      accessConditionUsage.fold(ifEmpty = NodeSeq.Empty) { a =>
-        <mods:accessCondition type="usage">{a}</mods:accessCondition>
+      accessConditionUsage.fold(ifEmpty = NodeSeq.Empty) {
+        a =>
+          <mods:accessCondition type="usage">{a}</mods:accessCondition>
       }
     }
           </mods:mods>
@@ -99,7 +119,9 @@ trait MetsGenerators extends RandomGenerators {
       <mets:mdWrap MDTYPE="MODS">
         <mets:xmlData>
           <mods:mods>
-            <mods:accessCondition type="status">{accessConditionStatus}</mods:accessCondition>
+            <mods:accessCondition type="status">{
+      accessConditionStatus
+    }</mods:accessCondition>
           </mods:mods>
         </mets:xmlData>
       </mets:mdWrap>
@@ -121,7 +143,9 @@ trait MetsGenerators extends RandomGenerators {
       </mets:fileGrp>
       <mets:fileGrp USE="ALTO">
         <mets:file ID="FILE_0001_ALTO" MIMETYPE="application/xml">
-          <mets:FLocat LOCTYPE="URL" xlink:href={s"alto/${filePrefix}_0001.xml"} />
+          <mets:FLocat LOCTYPE="URL" xlink:href={
+      s"alto/${filePrefix}_0001.xml"
+    } />
         </mets:file>
       </mets:fileGrp>
     </mets:fileSec>

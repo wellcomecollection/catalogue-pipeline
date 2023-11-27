@@ -1,5 +1,6 @@
 package weco.pipeline.transformer.mets.transformer
 
+import grizzled.slf4j.Logging
 import weco.catalogue.internal_model.work.{Work, WorkState}
 import weco.catalogue.source_model.mets.{
   DeletedMetsFile,
@@ -14,7 +15,8 @@ import weco.storage.providers.s3.S3ObjectLocation
 import weco.storage.store.Readable
 
 class MetsXmlTransformer(store: Readable[S3ObjectLocation, String])
-    extends Transformer[MetsSourceData] {
+    extends Transformer[MetsSourceData]
+    with Logging {
 
   override def apply(
     id: String,
@@ -53,43 +55,38 @@ class MetsXmlTransformer(store: Readable[S3ObjectLocation, String])
 
   private def transformWithoutManifestations(
     root: MetsXml
-  ): Result[InvisibleMetsData] =
+  ): Result[InvisibleMetsData] = {
     for {
       id <- root.recordIdentifier
       title <- MetsTitle(root.root)
-      accessConditionDz <- root.accessConditionDz
-      accessConditionStatus <- root.accessConditionStatus
-      accessConditionUsage <- root.accessConditionUsage
+      accessConditions <- root.accessConditions
     } yield InvisibleMetsData(
       recordIdentifier = id,
       title = title,
-      accessConditionDz = accessConditionDz,
-      accessConditionStatus = accessConditionStatus,
-      accessConditionUsage = accessConditionUsage,
-      fileReferencesMapping = root.fileReferencesMapping(id),
-      titlePageId = root.titlePageId
+      accessConditions = accessConditions,
+      fileReferences = root.fileReferences(id),
+      thumbnailReference = root.thumbnailReference
     )
+  }
 
   private def transformWithManifestations(
     root: MetsXml,
     manifestations: List[S3ObjectLocation]
-  ): Result[InvisibleMetsData] =
+  ): Result[InvisibleMetsData] = {
+
     for {
       id <- root.recordIdentifier
       title <- MetsTitle(root.root)
-      firstManifestation <- getFirstManifestation(root, manifestations)
-      accessConditionDz <- firstManifestation.accessConditionDz
-      accessConditionStatus <- firstManifestation.accessConditionStatus
-      accessConditionUsage <- firstManifestation.accessConditionUsage
+      filesRoot <- getFirstManifestation(root, manifestations)
+      accessConditions <- filesRoot.accessConditions
     } yield InvisibleMetsData(
       recordIdentifier = id,
       title = title,
-      accessConditionDz = accessConditionDz,
-      accessConditionStatus = accessConditionStatus,
-      accessConditionUsage = accessConditionUsage,
-      fileReferencesMapping = firstManifestation.fileReferencesMapping(id),
-      titlePageId = firstManifestation.titlePageId
+      accessConditions = accessConditions,
+      fileReferences = filesRoot.fileReferences(id),
+      thumbnailReference = filesRoot.thumbnailReference
     )
+  }
 
   private def getFirstManifestation(
     root: MetsXml,

@@ -1,9 +1,8 @@
 package weco.pipeline.transformer.mets.generators
 
-import weco.pipeline.transformer.mets.transformer.{
-  FileReference,
-  InvisibleMetsData
-}
+import weco.pipeline.transformer.mets.transformer.models.FileReference
+import weco.pipeline.transformer.mets.transformer.InvisibleMetsData
+import weco.pipeline.transformer.mets.transformers.ModsAccessConditions
 import weco.sierra.generators.SierraIdentifierGenerators
 
 trait MetsDataGenerators extends SierraIdentifierGenerators {
@@ -15,15 +14,18 @@ trait MetsDataGenerators extends SierraIdentifierGenerators {
     accessConditionDz: Option[String] = None,
     accessConditionStatus: Option[String] = None,
     accessConditionUsage: Option[String] = None,
-    fileReferencesMapping: List[(String, FileReference)] = Nil,
-    titlePageId: Option[String] = None): InvisibleMetsData =
+    fileReferences: List[FileReference] = Nil,
+    thumbnailReference: Option[FileReference] = None
+  ): InvisibleMetsData =
     InvisibleMetsData(
       recordIdentifier = bibNumber,
       title = title,
-      accessConditionDz = accessConditionDz,
-      accessConditionStatus = accessConditionStatus,
-      accessConditionUsage = accessConditionUsage,
-      fileReferencesMapping = fileReferencesMapping,
-      titlePageId = titlePageId
+      ModsAccessConditions(
+        dz = accessConditionDz,
+        status = accessConditionStatus,
+        usage = accessConditionUsage
+      ).parse.right.get,
+      fileReferences = fileReferences,
+      thumbnailReference = thumbnailReference
     )
 }
