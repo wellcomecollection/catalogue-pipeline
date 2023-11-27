@@ -1,0 +1,216 @@
+{
+  "description" : "examples for availabilities tests",
+  "createdAt" : "2023-11-23T15:20:26.262787Z",
+  "id" : "bb4tv6zd",
+  "document" : {
+    "debug" : {
+      "source" : {
+        "id" : "bb4tv6zd",
+        "identifier" : {
+          "identifierType" : {
+            "id" : "sierra-system-number"
+          },
+          "ontologyType" : "Work",
+          "value" : "rXrfr8eL5R"
+        },
+        "version" : 47,
+        "modifiedTime" : "1969-11-05T18:12:49Z"
+      },
+      "mergedTime" : "1969-11-05T18:12:49Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
+      "redirectSources" : [
+      ]
+    },
+    "display" : {
+      "id" : "bb4tv6zd",
+      "title" : "title-uptWXSBlJF",
+      "alternativeTitles" : [
+      ],
+      "contributors" : [
+      ],
+      "identifiers" : [
+        {
+          "identifierType" : {
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
+            "type" : "IdentifierType"
+          },
+          "value" : "rXrfr8eL5R",
+          "type" : "Identifier"
+        }
+      ],
+      "subjects" : [
+      ],
+      "genres" : [
+      ],
+      "items" : [
+        {
+          "id" : "lbwsensp",
+          "identifiers" : [
+            {
+              "identifierType" : {
+                "id" : "miro-image-number",
+                "label" : "Miro image number",
+                "type" : "IdentifierType"
+              },
+              "value" : "JJ01MHKXQ3",
+              "type" : "Identifier"
+            }
+          ],
+          "locations" : [
+            {
+              "locationType" : {
+                "id" : "closed-stores",
+                "label" : "Closed stores",
+                "type" : "LocationType"
+              },
+              "label" : "locationLabel",
+              "license" : {
+                "id" : "cc-by",
+                "label" : "Attribution 4.0 International (CC BY 4.0)",
+                "url" : "http://creativecommons.org/licenses/by/4.0/",
+                "type" : "License"
+              },
+              "accessConditions" : [
+              ],
+              "type" : "PhysicalLocation"
+            }
+          ],
+          "type" : "Item"
+        }
+      ],
+      "holdings" : [
+      ],
+      "availabilities" : [
+        {
+          "id" : "closed-stores",
+          "label" : "Closed stores",
+          "type" : "Availability"
+        }
+      ],
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "notes" : [
+      ],
+      "formerFrequency" : [
+      ],
+      "designation" : [
+      ],
+      "images" : [
+      ],
+      "parts" : [
+      ],
+      "partOf" : [
+      ],
+      "precededBy" : [
+      ],
+      "succeededBy" : [
+      ],
+      "type" : "Work"
+    },
+    "query" : {
+      "collectionPath.label" : null,
+      "collectionPath.path" : null,
+      "alternativeTitles" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "description" : null,
+      "edition" : null,
+      "genres.concepts.label" : [
+      ],
+      "id" : "bb4tv6zd",
+      "sourceIdentifier.value" : "rXrfr8eL5R",
+      "identifiers.value" : [
+        "rXrfr8eL5R"
+      ],
+      "images.id" : [
+      ],
+      "images.identifiers.value" : [
+      ],
+      "items.id" : [
+        "lbwsensp"
+      ],
+      "items.identifiers.value" : [
+        "JJ01MHKXQ3"
+      ],
+      "languages.label" : [
+      ],
+      "lettering" : null,
+      "notes.contents" : [
+      ],
+      "partOf.title" : [
+      ],
+      "physicalDescription" : null,
+      "production.label" : [
+      ],
+      "referenceNumber" : null,
+      "subjects.concepts.label" : [
+      ],
+      "title" : "title-uptWXSBlJF"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+        "{\"id\":\"cc-by\",\"label\":\"Attribution 4.0 International (CC BY 4.0)\",\"url\":\"http://creativecommons.org/licenses/by/4.0/\",\"type\":\"License\"}"
+      ],
+      "availabilities" : [
+        "{\"id\":\"closed-stores\",\"label\":\"Closed stores\",\"type\":\"Availability\"}"
+      ]
+    },
+    "filterableValues" : {
+      "format.id" : null,
+      "workType" : "Standard",
+      "production.dates.range.from" : [
+      ],
+      "languages.id" : [
+      ],
+      "genres.label" : [
+      ],
+      "genres.concepts.id" : [
+      ],
+      "subjects.label" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "identifiers.value" : [
+        "rXrfr8eL5R"
+      ],
+      "items.locations.license.id" : [
+        "cc-by"
+      ],
+      "items.locations.accessConditions.status.id" : [
+      ],
+      "items.id" : [
+        "lbwsensp"
+      ],
+      "items.identifiers.value" : [
+        "JJ01MHKXQ3"
+      ],
+      "items.locations.locationType.id" : [
+        "closed-stores"
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
+        "closed-stores"
+      ]
+    },
+    "type" : "Visible"
+  }
+}

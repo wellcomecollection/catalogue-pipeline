@@ -750,6 +750,31 @@ class CreateTestWorkDocuments
     )
   }
 
+  it("creates examples to use in availabilities tests") {
+    Map(
+      "closed-only" -> denormalisedWork().items(List(createClosedStoresItem)),
+      "online-only" -> denormalisedWork().items(
+        List(createDigitalItemWith(accessStatus = AccessStatus.Open))
+      ),
+      "open-only" -> denormalisedWork().items(List(createOpenShelvesItem)),
+      "everywhere" -> denormalisedWork().items(
+        List(
+          createClosedStoresItem,
+          createOpenShelvesItem,
+          createDigitalItemWith(accessStatus = AccessStatus.OpenWithAdvisory)
+        )
+      ),
+      "nowhere" -> denormalisedWork()
+    ) foreach {
+      case (id, work) =>
+        saveWork(
+          work = work,
+          description = "examples for availabilities tests",
+          id = s"works.examples.availabilities.$id"
+        )
+    }
+  }
+
   private def saveWork(
     work: Work[WorkState.Denormalised],
     description: String,

@@ -1,0 +1,216 @@
+{
+  "description" : "examples for availabilities tests",
+  "createdAt" : "2023-11-23T15:20:26.254403Z",
+  "id" : "jwvjyz6g",
+  "document" : {
+    "debug" : {
+      "source" : {
+        "id" : "jwvjyz6g",
+        "identifier" : {
+          "identifierType" : {
+            "id" : "miro-image-number"
+          },
+          "ontologyType" : "Work",
+          "value" : "TXyrDnY4M5"
+        },
+        "version" : 36,
+        "modifiedTime" : "2067-09-08T00:34:22Z"
+      },
+      "mergedTime" : "2067-09-08T00:34:22Z",
+      "indexedTime" : "2001-01-01T01:01:01Z",
+      "redirectSources" : [
+      ]
+    },
+    "display" : {
+      "id" : "jwvjyz6g",
+      "title" : "title-bs7oCJMNnr",
+      "alternativeTitles" : [
+      ],
+      "contributors" : [
+      ],
+      "identifiers" : [
+        {
+          "identifierType" : {
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
+            "type" : "IdentifierType"
+          },
+          "value" : "TXyrDnY4M5",
+          "type" : "Identifier"
+        }
+      ],
+      "subjects" : [
+      ],
+      "genres" : [
+      ],
+      "items" : [
+        {
+          "id" : "mvr7oym6",
+          "identifiers" : [
+            {
+              "identifierType" : {
+                "id" : "miro-image-number",
+                "label" : "Miro image number",
+                "type" : "IdentifierType"
+              },
+              "value" : "gjgNk1LNtP",
+              "type" : "Identifier"
+            }
+          ],
+          "locations" : [
+            {
+              "locationType" : {
+                "id" : "open-shelves",
+                "label" : "Open shelves",
+                "type" : "LocationType"
+              },
+              "label" : "locationLabel",
+              "license" : {
+                "id" : "ogl",
+                "label" : "Open Government Licence",
+                "url" : "http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+                "type" : "License"
+              },
+              "accessConditions" : [
+              ],
+              "type" : "PhysicalLocation"
+            }
+          ],
+          "type" : "Item"
+        }
+      ],
+      "holdings" : [
+      ],
+      "availabilities" : [
+        {
+          "id" : "open-shelves",
+          "label" : "Open shelves",
+          "type" : "Availability"
+        }
+      ],
+      "production" : [
+      ],
+      "languages" : [
+      ],
+      "notes" : [
+      ],
+      "formerFrequency" : [
+      ],
+      "designation" : [
+      ],
+      "images" : [
+      ],
+      "parts" : [
+      ],
+      "partOf" : [
+      ],
+      "precededBy" : [
+      ],
+      "succeededBy" : [
+      ],
+      "type" : "Work"
+    },
+    "query" : {
+      "collectionPath.label" : null,
+      "collectionPath.path" : null,
+      "alternativeTitles" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "description" : null,
+      "edition" : null,
+      "genres.concepts.label" : [
+      ],
+      "id" : "jwvjyz6g",
+      "sourceIdentifier.value" : "TXyrDnY4M5",
+      "identifiers.value" : [
+        "TXyrDnY4M5"
+      ],
+      "images.id" : [
+      ],
+      "images.identifiers.value" : [
+      ],
+      "items.id" : [
+        "mvr7oym6"
+      ],
+      "items.identifiers.value" : [
+        "gjgNk1LNtP"
+      ],
+      "languages.label" : [
+      ],
+      "lettering" : null,
+      "notes.contents" : [
+      ],
+      "partOf.title" : [
+      ],
+      "physicalDescription" : null,
+      "production.label" : [
+      ],
+      "referenceNumber" : null,
+      "subjects.concepts.label" : [
+      ],
+      "title" : "title-bs7oCJMNnr"
+    },
+    "aggregatableValues" : {
+      "workType" : [
+      ],
+      "genres.label" : [
+      ],
+      "production.dates" : [
+      ],
+      "subjects.label" : [
+      ],
+      "languages" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "items.locations.license" : [
+        "{\"id\":\"ogl\",\"label\":\"Open Government Licence\",\"url\":\"http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/\",\"type\":\"License\"}"
+      ],
+      "availabilities" : [
+        "{\"id\":\"open-shelves\",\"label\":\"Open shelves\",\"type\":\"Availability\"}"
+      ]
+    },
+    "filterableValues" : {
+      "format.id" : null,
+      "workType" : "Standard",
+      "production.dates.range.from" : [
+      ],
+      "languages.id" : [
+      ],
+      "genres.label" : [
+      ],
+      "genres.concepts.id" : [
+      ],
+      "subjects.label" : [
+      ],
+      "contributors.agent.label" : [
+      ],
+      "identifiers.value" : [
+        "TXyrDnY4M5"
+      ],
+      "items.locations.license.id" : [
+        "ogl"
+      ],
+      "items.locations.accessConditions.status.id" : [
+      ],
+      "items.id" : [
+        "mvr7oym6"
+      ],
+      "items.identifiers.value" : [
+        "gjgNk1LNtP"
+      ],
+      "items.locations.locationType.id" : [
+        "open-shelves"
+      ],
+      "partOf.id" : [
+      ],
+      "partOf.title" : [
+      ],
+      "availabilities.id" : [
+        "open-shelves"
+      ]
+    },
+    "type" : "Visible"
+  }
+}
