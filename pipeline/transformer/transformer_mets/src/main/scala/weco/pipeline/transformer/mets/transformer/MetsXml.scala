@@ -5,6 +5,10 @@ import weco.pipeline.transformer.mets.transformer.models.{
   ThumbnailReference,
   XMLOps
 }
+import weco.pipeline.transformer.mets.transformers.{
+  MetsAccessConditions,
+  ModsAccessConditions
+}
 
 import scala.util.Try
 import scala.xml.{Elem, XML}
@@ -15,6 +19,8 @@ trait MetsXml {
   def firstManifestationFilename: Either[Exception, String]
   def fileReferences(bnumber: String): List[FileReference]
   def recordIdentifier: Either[Exception, String]
+
+  def accessConditions: Either[Throwable, MetsAccessConditions]
 }
 
 case class GoobiMetsXml(root: Elem) extends MetsXml with XMLOps {
@@ -160,6 +166,8 @@ case class GoobiMetsXml(root: Elem) extends MetsXml with XMLOps {
     )
 
   lazy val thumbnailReference: Option[FileReference] = ThumbnailReference(root)
+  lazy val accessConditions: Either[Throwable, MetsAccessConditions] =
+    ModsAccessConditions(root).parse
 }
 
 object MetsXml {
