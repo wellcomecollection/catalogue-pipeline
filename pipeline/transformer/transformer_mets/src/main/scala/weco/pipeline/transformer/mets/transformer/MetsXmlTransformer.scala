@@ -8,7 +8,6 @@ import weco.catalogue.source_model.mets.{
   MetsSourceData
 }
 import weco.pipeline.transformer.Transformer
-import weco.pipeline.transformer.mets.transformers.MetsTitle
 import weco.pipeline.transformer.result.Result
 import weco.storage.Identified
 import weco.storage.providers.s3.S3ObjectLocation
