@@ -16,12 +16,11 @@ import weco.pipeline.transformer.mets.transformers.{
   MetsLocation,
   MetsThumbnail
 }
-import weco.pipeline.transformer.result.Result
 
 sealed trait MetsData {
   val recordIdentifier: String
 
-  def toWork(version: Int, modifiedTime: Instant): Result[Work[Source]]
+  def toWork(version: Int, modifiedTime: Instant): Work[Source]
 
   protected def sourceIdentifier: SourceIdentifier =
     SourceIdentifier(
@@ -39,13 +38,11 @@ case class DeletedMetsData(recordIdentifier: String) extends MetsData {
   override def toWork(
     version: Int,
     modifiedTime: Instant
-  ): Either[Throwable, Work[Source]] =
-    Right(
-      Work.Deleted[Source](
-        version = version,
-        state = Source(sourceIdentifier, modifiedTime),
-        deletedReason = DeletedFromSource("Mets")
-      )
+  ): Work[Source] =
+    Work.Deleted[Source](
+      version = version,
+      state = Source(sourceIdentifier, modifiedTime),
+      deletedReason = DeletedFromSource("Mets")
     )
 }
 
@@ -57,7 +54,7 @@ case class InvisibleMetsData(
   thumbnailReference: Option[FileReference] = None
 ) extends MetsData {
 
-  def toWork(version: Int, modifiedTime: Instant): Result[Work[Source]] = {
+  def toWork(version: Int, modifiedTime: Instant): Work[Source] = {
     val location = MetsLocation(
       recordIdentifier = recordIdentifier,
       license = accessConditions.licence,
@@ -69,32 +66,30 @@ case class InvisibleMetsData(
       locations = List(location)
     )
 
-    Right(
-      Work.Invisible[Source](
-        version = version,
-        state = Source(
-          sourceIdentifier = sourceIdentifier,
-          sourceModifiedTime = modifiedTime,
-          mergeCandidates = List(mergeCandidate)
+    Work.Invisible[Source](
+      version = version,
+      state = Source(
+        sourceIdentifier = sourceIdentifier,
+        sourceModifiedTime = modifiedTime,
+        mergeCandidates = List(mergeCandidate)
+      ),
+      data = WorkData[DataState.Unidentified](
+        title = Some(title),
+        items = List(item),
+        thumbnail = MetsThumbnail(
+          thumbnailReference,
+          sourceIdentifier.value,
+          accessConditions.licence,
+          accessConditions.accessStatus
         ),
-        data = WorkData[DataState.Unidentified](
-          title = Some(title),
-          items = List(item),
-          thumbnail = MetsThumbnail(
-            thumbnailReference,
-            sourceIdentifier.value,
-            accessConditions.licence,
-            accessConditions.accessStatus
-          ),
-          imageData = imageData(
-            version,
-            accessConditions.licence,
-            accessConditions.accessStatus,
-            location
-          )
-        ),
-        invisibilityReasons = List(MetsWorksAreNotVisible)
-      )
+        imageData = imageData(
+          version,
+          accessConditions.licence,
+          accessConditions.accessStatus,
+          location
+        )
+      ),
+      invisibilityReasons = List(MetsWorksAreNotVisible)
     )
   }
 
