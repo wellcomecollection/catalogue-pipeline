@@ -23,13 +23,16 @@ class MetsXmlTransformer(store: Readable[S3ObjectLocation, String])
     metsSourceData: MetsSourceData,
     version: Int
   ): Result[Work[WorkState.Source]] =
-    for {
-      metsData <- transform(id, metsSourceData)
-      work <- metsData.toWork(
-        version = metsSourceData.version,
-        modifiedTime = metsSourceData.createdDate
-      )
-    } yield work
+    transform(id, metsSourceData) match {
+      case Right(metsData: MetsData) =>
+        Right(
+          metsData.toWork(
+            version = metsSourceData.version,
+            modifiedTime = metsSourceData.createdDate
+          )
+        )
+      case Left(t) => Left(t)
+    }
 
   def transform(id: String, metsSourceData: MetsSourceData): Result[MetsData] =
     metsSourceData match {
