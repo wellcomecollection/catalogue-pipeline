@@ -46,32 +46,32 @@ class GoobiMetsXmlTest
     ) shouldBe List(
       FileReference(
         id = "FILE_0001_OBJECTS",
-        location = "b30246039_0001.jp2",
+        location = "objects/b30246039_0001.jp2",
         listedMimeType = Some("image/jp2")
       ),
       FileReference(
         id = "FILE_0002_OBJECTS",
-        location = "b30246039_0002.jp2",
+        location = "objects/b30246039_0002.jp2",
         listedMimeType = Some("image/jp2")
       ),
       FileReference(
         id = "FILE_0003_OBJECTS",
-        location = "b30246039_0003.jp2",
+        location = "objects/b30246039_0003.jp2",
         listedMimeType = Some("image/jp2")
       ),
       FileReference(
         id = "FILE_0004_OBJECTS",
-        location = "b30246039_0004.jp2",
+        location = "objects/b30246039_0004.jp2",
         listedMimeType = Some("image/jp2")
       ),
       FileReference(
         id = "FILE_0005_OBJECTS",
-        location = "b30246039_0005.jp2",
+        location = "objects/b30246039_0005.jp2",
         listedMimeType = Some("image/jp2")
       ),
       FileReference(
         id = "FILE_0006_OBJECTS",
-        location = "b30246039_0006.jp2",
+        location = "objects/b30246039_0006.jp2",
         listedMimeType = Some("image/jp2")
       )
     )
@@ -81,7 +81,7 @@ class GoobiMetsXmlTest
     MetsXml(xml).value
       .fileReferences("b30246039")
       .head
-      .location shouldBe "b30246039_0001.jp2"
+      .location shouldBe "objects/b30246039_0001.jp2"
   }
 
   it("parses first thumbnail when no ORDER attribute") {
@@ -93,14 +93,14 @@ class GoobiMetsXmlTest
     MetsXml(str).value
       .fileReferences("b30246039")
       .head
-      .location shouldBe "b30246039_0001.jp2"
+      .location shouldBe "objects/b30246039_0001.jp2"
   }
 
   it("parses thumbnail using ORDER attrib when non-sequential order") {
     MetsXml(xmlNonSequentialOrder("b30246039")).value
       .fileReferences("b30246039")
       .head
-      .location shouldBe "b30246039_0001.jp2"
+      .location shouldBe "objects/b30246039_0001.jp2"
   }
 
   it("cannot parse thumbnail when invalid file ID") {
