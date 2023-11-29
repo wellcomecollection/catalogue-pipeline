@@ -17,7 +17,6 @@ import weco.pipeline.transformer.mets.transformers.{
   MetsThumbnail,
   MetsTitle
 }
-import weco.pipeline.transformer.result.Result
 
 sealed trait MetsData {
   val recordIdentifier: String
