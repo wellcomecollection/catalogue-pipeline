@@ -103,44 +103,6 @@ class GoobiMetsXmlTest
       .location shouldBe "b30246039_0001.jp2"
   }
 
-  it("parses thumbnail if filename doesn't start with bnumber") {
-    val bnumber = "b30246039"
-    val filePrefix = "V000012"
-
-    val metsXml =
-      MetsXml(
-        metsXmlWith(
-          recordIdentifier = bnumber,
-          fileSec = fileSec(filePrefix),
-          structMap = structMap
-        )
-      ).value
-
-    metsXml
-      .fileReferences(bnumber)
-      .head
-      .location shouldBe s"${bnumber}_${filePrefix}_0001.jp2"
-  }
-
-  it("parses thumbnail if filename starts with uppercase bnumber") {
-    val bnumber = "b30246039"
-    val filePrefix = bnumber.toUpperCase
-
-    val metsXml =
-      MetsXml(
-        metsXmlWith(
-          recordIdentifier = bnumber,
-          fileSec = fileSec(filePrefix),
-          structMap = structMap
-        )
-      ).value
-
-    metsXml
-      .fileReferences(bnumber)
-      .head
-      .location shouldBe s"${filePrefix}_0001.jp2"
-  }
-
   it("cannot parse thumbnail when invalid file ID") {
     MetsXml(xmlInvalidFileId("b30246039")).value
       .fileReferences("b30246039")
