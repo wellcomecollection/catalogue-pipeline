@@ -7,8 +7,6 @@ module "lambda" {
   s3_key      = "lambdas/sierra_adapter/update_embargoed_holdings.zip"
   module_name = "update_embargoed_holdings"
 
-  runtime = "python3.8"
-
   description     = "Trigger an update of holdings whose electronic access is under embargo"
   alarm_topic_arn = var.lambda_error_alarm_arn
 
