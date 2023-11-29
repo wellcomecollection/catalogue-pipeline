@@ -17,7 +17,7 @@ trait MetsXml {
   val root: Elem
   val thumbnailReference: Option[FileReference]
   def firstManifestationFilename: Either[Exception, String]
-  def fileReferences(bnumber: String): List[FileReference]
+  def fileReferences: List[FileReference]
   def recordIdentifier: Either[Exception, String]
 
   def accessConditions: Either[Throwable, MetsAccessConditions]
@@ -55,7 +55,7 @@ case class GoobiMetsXml(root: Elem) extends MetsXml with XMLOps {
   /** Here we use the the items defined in the physicalStructMap to look up file
     * IDs in the (normalised) fileObjects mapping
     */
-  def fileReferences(bnumber: String): List[FileReference] =
+  def fileReferences: List[FileReference] =
     physicalFileIds.flatMap(fileId => getFileReferences(fileId)).toList
 
   /** Returns the first href to a manifestation in the logical structMap
