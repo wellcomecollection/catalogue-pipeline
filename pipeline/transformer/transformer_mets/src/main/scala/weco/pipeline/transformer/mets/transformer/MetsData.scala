@@ -14,8 +14,10 @@ import weco.pipeline.transformer.mets.transformers.{
   MetsAccessConditions,
   MetsImageData,
   MetsLocation,
-  MetsThumbnail
+  MetsThumbnail,
+  MetsTitle
 }
+import weco.pipeline.transformer.result.Result
 
 sealed trait MetsData {
   val recordIdentifier: String
@@ -132,4 +134,20 @@ case class InvisibleMetsData(
             )
         }
     }
+}
+
+object InvisibleMetsData {
+  def apply(root: MetsXml, filesRoot: MetsXml): Result[InvisibleMetsData] = {
+    for {
+      id <- root.recordIdentifier
+      title <- MetsTitle(root.root)
+      accessConditions <- filesRoot.accessConditions
+    } yield InvisibleMetsData(
+      recordIdentifier = id,
+      title = title,
+      accessConditions = accessConditions,
+      fileReferences = filesRoot.fileReferences(id),
+      thumbnailReference = filesRoot.thumbnailReference
+    )
+  }
 }

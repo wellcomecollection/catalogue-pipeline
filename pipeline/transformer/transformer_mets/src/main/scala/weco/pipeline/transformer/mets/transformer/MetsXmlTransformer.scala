@@ -8,7 +8,6 @@ import weco.catalogue.source_model.mets.{
   MetsSourceData
 }
 import weco.pipeline.transformer.Transformer
-import weco.pipeline.transformer.mets.transformers.MetsTitle
 import weco.pipeline.transformer.result.Result
 import weco.storage.Identified
 import weco.storage.providers.s3.S3ObjectLocation
@@ -59,36 +58,18 @@ class MetsXmlTransformer(store: Readable[S3ObjectLocation, String])
   private def transformWithoutManifestations(
     root: MetsXml
   ): Result[InvisibleMetsData] = {
-    for {
-      id <- root.recordIdentifier
-      title <- MetsTitle(root.root)
-      accessConditions <- root.accessConditions
-    } yield InvisibleMetsData(
-      recordIdentifier = id,
-      title = title,
-      accessConditions = accessConditions,
-      fileReferences = root.fileReferences(id),
-      thumbnailReference = root.thumbnailReference
-    )
+    InvisibleMetsData(root, root)
   }
 
   private def transformWithManifestations(
     root: MetsXml,
     manifestations: List[S3ObjectLocation]
   ): Result[InvisibleMetsData] = {
-
-    for {
-      id <- root.recordIdentifier
-      title <- MetsTitle(root.root)
-      filesRoot <- getFirstManifestation(root, manifestations)
-      accessConditions <- filesRoot.accessConditions
-    } yield InvisibleMetsData(
-      recordIdentifier = id,
-      title = title,
-      accessConditions = accessConditions,
-      fileReferences = filesRoot.fileReferences(id),
-      thumbnailReference = filesRoot.thumbnailReference
-    )
+    getFirstManifestation(root, manifestations) match {
+      case Right(filesRoot) =>
+        InvisibleMetsData(root, filesRoot)
+      case Left(t) => Left(t)
+    }
   }
 
   private def getFirstManifestation(
