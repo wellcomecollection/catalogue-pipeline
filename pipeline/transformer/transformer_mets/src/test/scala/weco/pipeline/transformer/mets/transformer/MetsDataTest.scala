@@ -11,8 +11,8 @@ import weco.catalogue.internal_model.work.DeletedReason.DeletedFromSource
 import weco.catalogue.internal_model.work.InvisibilityReason.MetsWorksAreNotVisible
 import weco.catalogue.internal_model.work._
 import weco.pipeline.transformer.mets.generators.{
-  MetsDataGenerators,
-  MetsGenerators
+  GoobiMetsGenerators,
+  MetsDataGenerators
 }
 import weco.pipeline.transformer.mets.transformer.models.FileReference
 import weco.pipeline.transformer.mets.transformers.ModsAccessConditions
@@ -23,7 +23,7 @@ class MetsDataTest
     with EitherValues
     with Inside
     with MetsDataGenerators
-    with MetsGenerators {
+    with GoobiMetsGenerators {
 
   it("creates a invisible work with an item and a license") {
     val bibNumber = createBibNumberString

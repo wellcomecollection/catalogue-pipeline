@@ -5,7 +5,7 @@ import weco.fixtures.RandomGenerators
 
 import scala.xml.{Elem, NodeSeq}
 
-trait MetsGenerators extends RandomGenerators {
+trait GoobiMetsGenerators extends RandomGenerators {
   def metsXmlWith(
     recordIdentifier: String,
     title: String = randomAlphanumeric(),

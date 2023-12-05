@@ -5,7 +5,7 @@ import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.locations.{AccessStatus, License}
 import weco.catalogue.source_model.mets.{DeletedMetsFile, MetsFileWithImages}
 import weco.fixtures.LocalResources
-import weco.pipeline.transformer.mets.generators.MetsGenerators
+import weco.pipeline.transformer.mets.generators.GoobiMetsGenerators
 import weco.pipeline.transformer.mets.transformer.models.FileReference
 import weco.pipeline.transformer.mets.transformers.MetsAccessConditions
 import weco.pipeline.transformer.result.Result
@@ -18,7 +18,7 @@ import java.time.Instant
 class MetsXmlTransformerTest
     extends AnyFunSpec
     with Matchers
-    with MetsGenerators
+    with GoobiMetsGenerators
     with SierraIdentifierGenerators
     with LocalResources {
 

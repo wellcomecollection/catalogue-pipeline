@@ -5,14 +5,14 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks
 import weco.fixtures.LocalResources
-import weco.pipeline.transformer.mets.generators.MetsGenerators
+import weco.pipeline.transformer.mets.generators.GoobiMetsGenerators
 
 class ThumbnailReferenceTest
     extends AnyFunSpec
     with Matchers
     with EitherValues
     with LocalResources
-    with MetsGenerators
+    with GoobiMetsGenerators
     with TableDrivenPropertyChecks {
 
   describe("finding the file to be used for a thumbnail") {
