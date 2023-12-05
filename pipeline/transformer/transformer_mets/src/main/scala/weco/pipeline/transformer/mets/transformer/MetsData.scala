@@ -22,7 +22,7 @@ import weco.pipeline.transformer.result.Result
 sealed trait MetsData {
   val recordIdentifier: String
 
-  def toWork(version: Int, modifiedTime: Instant): Work[Source]
+  def toWork: Work[Source]
 
   protected def sourceIdentifier: SourceIdentifier =
     SourceIdentifier(
@@ -36,11 +36,12 @@ sealed trait MetsData {
     )
 }
 
-case class DeletedMetsData(recordIdentifier: String) extends MetsData {
-  override def toWork(
-    version: Int,
-    modifiedTime: Instant
-  ): Work[Source] =
+case class DeletedMetsData(
+  recordIdentifier: String,
+  version: Int,
+  modifiedTime: Instant
+) extends MetsData {
+  override def toWork: Work[Source] =
     Work.Deleted[Source](
       version = version,
       state = Source(sourceIdentifier, modifiedTime),
@@ -53,10 +54,12 @@ case class InvisibleMetsData(
   title: String,
   accessConditions: MetsAccessConditions,
   fileReferences: List[FileReference] = Nil,
-  thumbnailReference: Option[FileReference] = None
+  thumbnailReference: Option[FileReference] = None,
+  version: Int,
+  modifiedTime: Instant
 ) extends MetsData {
 
-  def toWork(version: Int, modifiedTime: Instant): Work[Source] = {
+  def toWork: Work[Source] = {
     val location = MetsLocation(
       recordIdentifier = recordIdentifier,
       license = accessConditions.licence,
@@ -137,7 +140,12 @@ case class InvisibleMetsData(
 }
 
 object InvisibleMetsData {
-  def apply(root: MetsXml, filesRoot: MetsXml): Result[InvisibleMetsData] = {
+  def apply(
+    root: MetsXml,
+    filesRoot: MetsXml,
+    version: Int,
+    modifiedTime: Instant
+  ): Result[InvisibleMetsData] = {
     for {
       id <- root.recordIdentifier
       title <- MetsTitle(root.root)
@@ -147,7 +155,9 @@ object InvisibleMetsData {
       title = title,
       accessConditions = accessConditions,
       fileReferences = filesRoot.fileReferences,
-      thumbnailReference = filesRoot.thumbnailReference
+      thumbnailReference = filesRoot.thumbnailReference,
+      version: Int,
+      modifiedTime: Instant
     )
   }
 }

@@ -25,52 +25,42 @@ class MetsXmlTransformer(store: Readable[S3ObjectLocation, String])
     transform(id, metsSourceData) match {
       case Right(metsData: MetsData) =>
         Right(
-          metsData.toWork(
-            version = metsSourceData.version,
-            modifiedTime = metsSourceData.createdDate
-          )
+          metsData.toWork
         )
       case Left(t) => Left(t)
     }
 
   def transform(id: String, metsSourceData: MetsSourceData): Result[MetsData] =
     metsSourceData match {
-      case DeletedMetsFile(_, _) =>
+      case DeletedMetsFile(createdDate, version) =>
         Right(
-          DeletedMetsData(recordIdentifier = id)
+          DeletedMetsData(recordIdentifier = id, version, createdDate)
         )
 
-      case metsFile @ MetsFileWithImages(_, _, manifestations, _, _) =>
+      case metsFile @ MetsFileWithImages(
+            _,
+            _,
+            manifestations,
+            createdDate,
+            version
+          ) =>
         getMetsXml(metsFile.xmlLocation)
           .flatMap {
             root =>
-              if (manifestations.isEmpty) {
-                transformWithoutManifestations(root)
-              } else {
-                transformWithManifestations(
-                  root,
-                  metsFile.manifestationLocations
-                )
+              (manifestations match {
+                case Nil => Right(root)
+                case _ =>
+                  getFirstManifestation(
+                    root,
+                    metsFile.manifestationLocations
+                  )
+              }) match {
+                case Right(filesRoot) =>
+                  InvisibleMetsData(root, filesRoot, version, createdDate)
+                case Left(t) => Left(t)
               }
           }
     }
-
-  private def transformWithoutManifestations(
-    root: MetsXml
-  ): Result[InvisibleMetsData] = {
-    InvisibleMetsData(root, root)
-  }
-
-  private def transformWithManifestations(
-    root: MetsXml,
-    manifestations: List[S3ObjectLocation]
-  ): Result[InvisibleMetsData] = {
-    getFirstManifestation(root, manifestations) match {
-      case Right(filesRoot) =>
-        InvisibleMetsData(root, filesRoot)
-      case Left(t) => Left(t)
-    }
-  }
 
   private def getFirstManifestation(
     root: MetsXml,

@@ -28,15 +28,18 @@ class MetsDataTest
   it("creates a invisible work with an item and a license") {
     val bibNumber = createBibNumberString
     val title = randomAlphanumeric()
+    val version = 1
+    val createdDate = Instant.now()
 
     val metsData =
       createMetsDataWith(
         bibNumber = bibNumber,
         title = title,
-        accessConditionDz = Some("CC-BY-NC")
+        accessConditionDz = Some("CC-BY-NC"),
+        version = version,
+        modifiedTime = createdDate
       )
 
-    val version = 1
     val expectedSourceIdentifier = SourceIdentifier(
       identifierType = IdentifierType.METS,
       ontologyType = "Work",
@@ -50,11 +53,9 @@ class MetsDataTest
       license = Some(License.CCBYNC)
     )
 
-    val createdDate = Instant.now()
-
     val unidentifiableItem =
       Item(id = IdState.Unidentifiable, locations = List(digitalLocation))
-    metsData.toWork(version, createdDate) shouldBe Work
+    metsData.toWork shouldBe Work
       .Invisible[Source](
         version = version,
         state = Source(
@@ -81,17 +82,20 @@ class MetsDataTest
 
   it("creates a deleted work") {
     val bibNumber = createBibNumberString
-    val metsData = DeletedMetsData(bibNumber)
     val version = 1
+    val createdDate = Instant.now()
+    val metsData = DeletedMetsData(
+      recordIdentifier = bibNumber,
+      version = version,
+      modifiedTime = createdDate
+    )
     val expectedSourceIdentifier = SourceIdentifier(
       identifierType = IdentifierType.METS,
       ontologyType = "Work",
       value = bibNumber
     )
 
-    val createdDate = Instant.now()
-
-    metsData.toWork(version, createdDate) shouldBe Work
+    metsData.toWork shouldBe Work
       .Deleted[Source](
         version = version,
         state = Source(expectedSourceIdentifier, createdDate),
@@ -102,12 +106,15 @@ class MetsDataTest
   it("creates a invisible work with an item and no license") {
     val bibNumber = createBibNumberString
     val title = randomAlphanumeric()
+    val createdDate = Instant.now()
+
     val metsData = createMetsDataWith(
       bibNumber = bibNumber,
       title = title,
-      accessConditionDz = None
+      accessConditionDz = None,
+      version = 1,
+      modifiedTime = createdDate
     )
-    val version = 1
     val expectedSourceIdentifier = SourceIdentifier(
       identifierType = IdentifierType.METS,
       ontologyType = "Work",
@@ -122,13 +129,11 @@ class MetsDataTest
         license = None
       )
 
-    val createdDate = Instant.now()
-
     val unidentifiableItem =
       Item(id = IdState.Unidentifiable, locations = List(digitalLocation))
-    metsData.toWork(version, createdDate) shouldBe Work
+    metsData.toWork shouldBe Work
       .Invisible[Source](
-        version = version,
+        version = 1,
         state = Source(
           sourceIdentifier = expectedSourceIdentifier,
           sourceModifiedTime = createdDate,
@@ -165,7 +170,7 @@ class MetsDataTest
       accessConditionDz = Some("in copyright")
     )
 
-    inside(metsData.toWork(1, Instant.now()).data.items) {
+    inside(metsData.toWork.data.items) {
       case List(
             Item(
               IdState.Unidentifiable,
@@ -183,7 +188,7 @@ class MetsDataTest
       accessConditionDz = Some("In copyright")
     )
 
-    inside(metsData.toWork(1, Instant.now()).data.items) {
+    inside(metsData.toWork.data.items) {
       case List(
             Item(
               IdState.Unidentifiable,
@@ -200,7 +205,7 @@ class MetsDataTest
     val metsData = createMetsDataWith(
       accessConditionDz = Some(License.InCopyright.url)
     )
-    inside(metsData.toWork(1, Instant.now()).data.items) {
+    inside(metsData.toWork.data.items) {
       case List(
             Item(
               IdState.Unidentifiable,
@@ -217,7 +222,7 @@ class MetsDataTest
     val metsData = createMetsDataWith(
       accessConditionDz = Some("Copyright not cleared")
     )
-    val result = metsData.toWork(1, Instant.now())
+    val result = metsData.toWork
 
     inside(result.data.items) {
       case List(
@@ -238,7 +243,7 @@ class MetsDataTest
     val metsData = createMetsDataWith(
       accessConditionDz = Some("rightsstatements.org/page/InC/1.0/?language=en")
     )
-    val result = metsData.toWork(1, Instant.now())
+    val result = metsData.toWork
 
     inside(result.data.items) {
       case List(
@@ -257,7 +262,7 @@ class MetsDataTest
     val metsData = createMetsDataWith(
       accessConditionDz = Some("All Rights Reserved")
     )
-    val result = metsData.toWork(1, Instant.now())
+    val result = metsData.toWork
 
     inside(result.data.items) {
       case List(
@@ -278,7 +283,7 @@ class MetsDataTest
       thumbnailReference =
         Some(FileReference("l", "location.jp2", Some("image/jp2")))
     )
-    val result = metsData.toWork(1, Instant.now())
+    val result = metsData.toWork
     result.data.thumbnail shouldBe Some(
       DigitalLocation(
         url =
@@ -299,7 +304,7 @@ class MetsDataTest
       thumbnailReference =
         Some(FileReference("l", "title.jp2", Some("image/jp2")))
     )
-    val result = metsData.toWork(1, Instant.now())
+    val result = metsData.toWork
     result.data.thumbnail shouldBe Some(
       DigitalLocation(
         url =
@@ -318,7 +323,7 @@ class MetsDataTest
         FileReference("l", "location.jp2", Some("image/jp2"))
       )
     )
-    val result = metsData.toWork(1, Instant.now())
+    val result = metsData.toWork
     result.data.thumbnail shouldBe None
   }
 
@@ -332,7 +337,7 @@ class MetsDataTest
       ),
       thumbnailReference = Some(FileReference("l", "location.pdf"))
     )
-    val result = metsData.toWork(1, Instant.now())
+    val result = metsData.toWork
     result.data.thumbnail shouldBe Some(
       DigitalLocation(
         url = s"https://iiif.wellcomecollection.org/thumb/$bibNumber",
@@ -349,7 +354,7 @@ class MetsDataTest
         FileReference("v", "video.mpg", Some("video/mpeg"))
       )
     )
-    val result = metsData.toWork(1, Instant.now())
+    val result = metsData.toWork
     result.data.thumbnail shouldBe None
   }
 
@@ -360,7 +365,7 @@ class MetsDataTest
         FileReference("v", "video.mp3", Some("audio/x-mpeg-3"))
       )
     )
-    val result = metsData.toWork(1, Instant.now())
+    val result = metsData.toWork
     result.data.thumbnail shouldBe None
   }
 
@@ -371,7 +376,7 @@ class MetsDataTest
         FileReference("l", "location.jp2", Some("image/jp2"))
       )
     )
-    val result = metsData.toWork(1, Instant.now())
+    val result = metsData.toWork
     result.data.imageData.head.locations shouldBe List(
       DigitalLocation(
         url =
@@ -393,7 +398,7 @@ class MetsDataTest
       accessConditionStatus = Some("Requires registration")
     )
 
-    val result = metsData.toWork(1, Instant.now())
+    val result = metsData.toWork
     inside(result.data.items.head.locations.head) {
       case DigitalLocation(_, _, _, _, _, accessConditions) =>
         accessConditions shouldBe List(
@@ -420,7 +425,7 @@ class MetsDataTest
       )
     )
 
-    val result = metsData.toWork(1, Instant.now())
+    val result = metsData.toWork
     val images = result.data.imageData
     images should have length 3
     images.map(
@@ -443,7 +448,7 @@ class MetsDataTest
       )
     )
 
-    val result = metsData.toWork(1, Instant.now())
+    val result = metsData.toWork
     val images = result.data.imageData
     images.map(
       _.locations.head.url
@@ -462,7 +467,7 @@ class MetsDataTest
         FileReference("B", "location2.jp2", Some("image/jp2"))
       )
     )
-    val result = metsData.toWork(1, Instant.now())
+    val result = metsData.toWork
     result.data.imageData shouldBe empty
   }
 
@@ -471,7 +476,7 @@ class MetsDataTest
       accessConditionStatus = Some("Clinical images"),
       accessConditionUsage = Some("Please ask nicely")
     )
-    val result = metsData.toWork(1, Instant.now())
+    val result = metsData.toWork
     inside(result.data.items.head.locations.head) {
       case DigitalLocation(_, _, _, _, _, accessConditions) =>
         accessConditions shouldBe List(
@@ -489,7 +494,7 @@ class MetsDataTest
       accessConditionStatus = None,
       accessConditionUsage = None
     )
-    val result = metsData.toWork(1, Instant.now())
+    val result = metsData.toWork
     inside(result.data.items.head.locations.head) {
       case DigitalLocation(_, _, _, _, _, accessConditions) =>
         accessConditions shouldBe List()
@@ -500,7 +505,7 @@ class MetsDataTest
     val metsData = createMetsDataWith(
       accessConditionStatus = Some("Restricted files")
     )
-    val result = metsData.toWork(1, Instant.now())
+    val result = metsData.toWork
     inside(result.data.items.head.locations.head) {
       case DigitalLocation(_, _, _, _, _, accessConditions) =>
         accessConditions shouldBe
@@ -524,7 +529,7 @@ class MetsDataTest
   it("lowercases the b number") {
     val metsData = createMetsDataWith(bibNumber = "B12345678")
 
-    val work = metsData.toWork(version = 1, modifiedTime = Instant.now())
+    val work = metsData.toWork
 
     work.sourceIdentifier shouldBe SourceIdentifier(
       identifierType = IdentifierType.METS,
