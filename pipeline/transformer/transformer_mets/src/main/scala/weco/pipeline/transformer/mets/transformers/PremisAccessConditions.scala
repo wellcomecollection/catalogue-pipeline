@@ -1,7 +1,7 @@
 package weco.pipeline.transformer.mets.transformers
 import weco.pipeline.transformer.result.Result
 
-import scala.xml.Elem
+import scala.xml.Node
 
 case class PremisAccessConditions(
   copyrightNote: Option[String],
@@ -19,7 +19,7 @@ case class PremisAccessConditions(
 }
 
 object PremisAccessConditions {
-  def apply(rightsMd: Elem): PremisAccessConditions = {
+  def apply(rightsMd: Node): PremisAccessConditions = {
     val rightsStatement = rightsMd \ "mdWrap" \ "xmlData" \ "rightsStatement"
     val copyrightNoteElem =
       (rightsStatement \ "copyrightInformation" \ "copyrightNote").headOption

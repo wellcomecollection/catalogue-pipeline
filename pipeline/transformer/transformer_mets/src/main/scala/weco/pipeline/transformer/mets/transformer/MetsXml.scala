@@ -1,5 +1,6 @@
 package weco.pipeline.transformer.mets.transformer
 
+import org.apache.commons.lang3.NotImplementedException
 import weco.pipeline.transformer.mets.transformer.models.{
   FileReference,
   ThumbnailReference,
@@ -7,10 +8,11 @@ import weco.pipeline.transformer.mets.transformer.models.{
 }
 import weco.pipeline.transformer.mets.transformers.{
   MetsAccessConditions,
-  ModsAccessConditions
+  ModsAccessConditions,
+  PremisAccessConditions
 }
 
-import scala.util.Try
+import scala.util.{Left, Try}
 import scala.xml.{Elem, XML}
 
 trait MetsXml {
@@ -22,7 +24,34 @@ trait MetsXml {
 
   def accessConditions: Either[Throwable, MetsAccessConditions]
 }
+case class ArchivematicaMetsXML(root: Elem) extends MetsXml with XMLOps {
+  lazy val thumbnailReference: Option[FileReference] = ???
 
+  // I don't yet have any examples of records with separate manifestations
+  def firstManifestationFilename: Either[Exception, String] = Left(
+    new NotImplementedException
+  )
+
+  def fileReferences: List[FileReference] = Nil
+
+  def recordIdentifier: Either[Exception, String] = Left(
+    new NotImplementedException
+  )
+
+  def accessConditions: Either[Throwable, MetsAccessConditions] =
+    (root \ "amdSec" \ "rightsMD").headOption
+      .map(PremisAccessConditions(_)) match {
+      case Some(conditions) => conditions.parse
+      case None =>
+        Left(
+          new RuntimeException(
+            // I don't yet know if this is strictly true, or whether we can define
+            // a default value for any missing ones.
+            "Archivematica Mets file must contain a premis-compatible rightsMD element"
+          )
+        )
+    }
+}
 case class GoobiMetsXml(root: Elem) extends MetsXml with XMLOps {
 
   /** The record identifier (generally the B number) is encoded in the METS. For

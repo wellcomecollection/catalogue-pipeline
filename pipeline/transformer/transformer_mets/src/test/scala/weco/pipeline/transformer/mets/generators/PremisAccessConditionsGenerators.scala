@@ -16,14 +16,10 @@ trait PremisAccessConditionsGenerators {
           <premis:rightsStatementIdentifierType>UUID</premis:rightsStatementIdentifierType>
           <premis:rightsStatementIdentifierValue>3392668a-4503-462c-ba68-1d17c853f17c</premis:rightsStatementIdentifierValue>
         </premis:rightsStatementIdentifier>
-        <premis:rightsBasis>Copyright</premis:rightsBasis>
+        <premis:rightsBasis>???</premis:rightsBasis>
         {copyrightInformation}
         {licenceInformation}
         {rightsGranted}
-        <premis:linkingObjectIdentifier>
-          <premis:linkingObjectIdentifierType>UUID</premis:linkingObjectIdentifierType>
-          <premis:linkingObjectIdentifierValue>3eecb018-4569-4fa1-bc3d-eb06c8eaeabd</premis:linkingObjectIdentifierValue>
-        </premis:linkingObjectIdentifier>
       </premis:rightsStatement>
     </mets:xmlData>
   </mets:mdWrap>
