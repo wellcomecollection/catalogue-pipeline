@@ -345,6 +345,13 @@
       ],
       "type": "custom",
       "tokenizer": "whitespace"
+    },
+    "lowercase_whitespace_tokens": {
+      "filter": [
+        "lowercase"
+      ],
+      "type": "custom",
+      "tokenizer": "whitespace"
     }
   }
 }
