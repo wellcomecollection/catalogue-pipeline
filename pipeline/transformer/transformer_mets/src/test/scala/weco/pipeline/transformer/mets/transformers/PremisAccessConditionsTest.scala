@@ -40,6 +40,7 @@ class PremisAccessConditionsTest
           None
         ).parse shouldBe a[Left[_, _]]
       }
+
       it("fails if the accessStatus is something unexpected") {
         PremisAccessConditions(
           None,
@@ -50,16 +51,61 @@ class PremisAccessConditionsTest
 
     describe("extracting values from a rightsMD section") {
       it("pulls out the copyrightNote for the licence") {
-        PremisAccessConditions(inCopyrightRightsMD).copyrightNote shouldBe Some(
+        PremisAccessConditions(
+          openInCopyrightRightsMD
+        ).copyrightNote shouldBe Some(
           "In copyright"
         )
       }
       it("pulls out the rightsGrantedNote for the access status") {
         PremisAccessConditions(
-          inCopyrightRightsMD
+          openInCopyrightRightsMD
         ).useRightsGrantedNote shouldBe Some("Open")
       }
 
+      it("creates empty accessConditions if the relevant fields are absent") {
+        val conditions = PremisAccessConditions(
+          emptyRightsMD
+        )
+        conditions.copyrightNote shouldBe None
+        conditions.useRightsGrantedNote shouldBe None
+      }
+
+      it("ignores a rightsGrantedNote if it is not for the 'use' act") {
+        // act could contain various things.  "use" is the one we care about
+        // https://docs.rockarch.org/premis-rights-guidelines/guidelines#act-rightsgranted
+        val conditions = PremisAccessConditions(
+          rightsMDWith(
+            rightsGranted = Seq(<premis:rightsGranted>
+              <premis:act>disseminate</premis:act>
+              <premis:rightsGrantedNote>Open</premis:rightsGrantedNote>
+            </premis:rightsGranted>)
+          )
+        )
+        conditions.useRightsGrantedNote shouldBe None
+      }
+
+      it(
+        "finds the correct a rightsGrantedNote if there are more than one"
+      ) {
+        // act could contain various things.  "use" is the one we care about
+        // https://docs.rockarch.org/premis-rights-guidelines/guidelines#act-rightsgranted
+        val conditions = PremisAccessConditions(
+          rightsMDWith(
+            rightsGranted = Seq(
+              <premis:rightsGranted>
+                <premis:act>replicate</premis:act>
+                <premis:rightsGrantedNote>Open</premis:rightsGrantedNote>
+              </premis:rightsGranted>,
+              <premis:rightsGranted>
+                <premis:act>use</premis:act>
+                <premis:rightsGrantedNote>Open with advisory</premis:rightsGrantedNote>
+              </premis:rightsGranted>
+            )
+          )
+        )
+        conditions.useRightsGrantedNote.get shouldBe "Open with advisory"
+      }
     }
   }
 }
