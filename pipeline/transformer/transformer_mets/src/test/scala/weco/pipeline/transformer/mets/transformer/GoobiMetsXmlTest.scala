@@ -40,6 +40,23 @@ class GoobiMetsXmlTest
     ]
   }
 
+  it("only fetches one fileReference per file") {
+    info(
+      "according to the schema (https://www.loc.gov/standards/mets/mets.xsd)"
+    )
+    info(
+      "each FLocat underneath a single file element should identify/contain identical copies of a single file."
+    )
+    info("we normally only have one <FLocat> per <file>.")
+    MetsXml(xmlMultiFlocats).value.fileReferences shouldBe List(
+      FileReference(
+        id = "FILE_0001_OBJECTS",
+        location = "objects/hello_0001.jp2",
+        listedMimeType = Some("image/jp2")
+      )
+    )
+  }
+
   it("parses file references mapping from XML") {
     MetsXml(xml).value.fileReferences shouldBe List(
       FileReference(
@@ -193,4 +210,15 @@ class GoobiMetsXmlTest
           </mets:div>
         </mets:structMap>
     )
+
+  def xmlMultiFlocats: String = metsXmlWith(
+    recordIdentifier = "deadbeef",
+    fileSec = <mets:fileSec><mets:fileGrp USE="OBJECTS">
+      <mets:file ID="FILE_0001_OBJECTS" MIMETYPE="image/jp2">
+        <mets:FLocat LOCTYPE="URL" xlink:href="objects/hello_0001.jp2"/>
+        <mets:FLocat LOCTYPE="URL" xlink:href="objects/hello_0002.jp2"/>
+      </mets:file>
+    </mets:fileGrp></mets:fileSec>,
+    structMap = structMap
+  )
 }
