@@ -5,7 +5,7 @@ steps:
       ./builds/run_linting.sh
     label: "autoformat"
     agents:
-      queue: "test-upgrade"
+      queue: "scala"
 
   - label: "{{ matrix }} (library)"
     command: "./builds/run_sbt_tests.sh {{ matrix }}"
@@ -31,7 +31,7 @@ steps:
     timeout_in_minutes: 13
 
     agents:
-      queue: "test-upgrade"
+      queue: "scala"
 
   - label: "{{ matrix }} (app)"
     command: |
@@ -68,7 +68,7 @@ steps:
       - "transformer_tei"
 
     agents:
-      queue: "test-upgrade"
+      queue: "scala"
 
   - label: "{{ matrix }} (app)"
     command: |
@@ -121,7 +121,7 @@ steps:
       - "palette_inferrer"
 
     agents:
-      queue: "test-upgrade"
+      queue: "scala"
 
   - label: "{{ matrix }} (Lambda)"
     command: |
