@@ -13,7 +13,7 @@ import weco.pipeline.transformer.mets.transformers.{
 }
 
 import scala.util.{Left, Try}
-import scala.xml.{Elem, XML}
+import scala.xml.{Elem, NodeSeq, XML}
 
 trait MetsXml {
   val root: Elem
@@ -34,9 +34,16 @@ case class ArchivematicaMetsXML(root: Elem) extends MetsXml with XMLOps {
 
   def fileReferences: List[FileReference] = Nil
 
-  def recordIdentifier: Either[Exception, String] = Left(
-    new NotImplementedException
-  )
+  def recordIdentifier: Either[Exception, String] =
+    root \ "dmdSec" \ "mdWrap" \ "xmlData" \ "dublincore" \ "identifier" match {
+      case NodeSeq.Empty =>
+        Left(new RuntimeException("could not find record identifier"))
+      case nodeseq if nodeseq.length == 1 => Right(nodeseq.head.text)
+      case _ =>
+        Left(
+          new RuntimeException("multiple candidate record identifiers found")
+        )
+    }
 
   def accessConditions: Either[Throwable, MetsAccessConditions] =
     (root \ "amdSec" \ "rightsMD").headOption

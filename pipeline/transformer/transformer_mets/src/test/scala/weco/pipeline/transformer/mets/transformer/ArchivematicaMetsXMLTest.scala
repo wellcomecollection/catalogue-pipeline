@@ -27,9 +27,27 @@ class ArchivematicaMetsXMLTest
           )
 
       }
+      it("extracts the identifier from a dublincore identifier element") {
+        ArchivematicaMetsXML(
+          archivematicaMetsWith(identifier = "BA/AD/FO/OD")
+        ).recordIdentifier.right.get shouldBe
+          "BA/AD/FO/OD"
+      }
 
     }
 
-    describe("failure conditions") {}
+    describe("failure conditions") {
+      it("fails if a document has multiple identifiers") {
+        ArchivematicaMetsXML(
+          archivematicaMetsWithMultipleIdentifiers
+        ).recordIdentifier shouldBe a[Left[_, _]]
+      }
+      it("fails if a document has no rights information") {
+        ArchivematicaMetsXML(
+          archiveMaticaMetsWithNoRights
+        ).accessConditions shouldBe a[Left[_, _]]
+      }
+
+    }
   }
 }
