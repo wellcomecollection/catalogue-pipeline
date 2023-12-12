@@ -5,7 +5,7 @@ steps:
       ./builds/run_linting.sh
     label: "autoformat"
     agents:
-      queue: "scala"
+      queue: "test-upgrade"
 
   - label: "{{ matrix }} (library)"
     command: "./builds/run_sbt_tests.sh {{ matrix }}"
