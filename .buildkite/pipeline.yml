@@ -68,7 +68,7 @@ steps:
       - "transformer_tei"
 
     agents:
-      queue: "tets-upgrade"
+      queue: "test-upgrade"
 
   - label: "{{ matrix }} (app)"
     command: |
