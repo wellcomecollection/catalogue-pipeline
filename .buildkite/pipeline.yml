@@ -31,7 +31,7 @@ steps:
     timeout_in_minutes: 13
 
     agents:
-      queue: "scala"
+      queue: "test-upgrade"
 
   - label: "{{ matrix }} (app)"
     command: |
@@ -68,7 +68,7 @@ steps:
       - "transformer_tei"
 
     agents:
-      queue: "scala"
+      queue: "tets-upgrade"
 
   - label: "{{ matrix }} (app)"
     command: |
@@ -90,7 +90,7 @@ steps:
       - "ingestor_images"
 
     agents:
-      queue: "scala"
+      queue: "test-upgrade"
 
   - label: "inference_manager (app)"
     command: |
