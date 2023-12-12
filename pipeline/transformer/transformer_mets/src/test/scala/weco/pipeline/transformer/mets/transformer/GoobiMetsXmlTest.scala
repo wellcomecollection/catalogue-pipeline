@@ -48,13 +48,73 @@ class GoobiMetsXmlTest
       "each FLocat underneath a single file element should identify/contain identical copies of a single file."
     )
     info("we normally only have one <FLocat> per <file>.")
-    MetsXml(xmlMultiFlocats).value.fileReferences shouldBe List(
+    MetsXml(
+      metsXmlWith(
+        recordIdentifier = "deadbeef",
+        fileSec = <mets:fileSec><mets:fileGrp USE="OBJECTS">
+        <mets:file ID="FILE_0001_OBJECTS" MIMETYPE="image/jp2">
+          <mets:FLocat LOCTYPE="URL" xlink:href="objects/hello_0001.jp2"/>
+          <mets:FLocat LOCTYPE="URL" xlink:href="objects/hello_0002.jp2"/>
+        </mets:file>
+      </mets:fileGrp></mets:fileSec>,
+        structMap = structMap
+      )
+    ).value.fileReferences shouldBe List(
       FileReference(
         id = "FILE_0001_OBJECTS",
         location = "objects/hello_0001.jp2",
         listedMimeType = Some("image/jp2")
       )
     )
+  }
+
+  it("skips over unusable file definitions, but returns good ones") {
+    MetsXml(
+      metsXmlWith(
+        recordIdentifier = "deadbeef",
+        fileSec = <mets:fileSec><mets:fileGrp USE="OBJECTS">
+        <mets:file ID="FILE_0001_OBJECTS" MIMETYPE="image/jp2">
+        </mets:file>
+        <mets:file ID="FILE_0002_OBJECTS" MIMETYPE="image/jp2">
+          <mets:FLocat LOCTYPE="URL" xlink:href="objects/hello_0002.jp2"/>
+        </mets:file>
+      </mets:fileGrp></mets:fileSec>,
+        structMap = structMap
+      )
+    ).value.fileReferences shouldBe List(
+      FileReference(
+        id = "FILE_0002_OBJECTS",
+        location = "objects/hello_0002.jp2",
+        listedMimeType = Some("image/jp2")
+      )
+    )
+  }
+
+  it("does not return a filereference if a file has no FLocat ") {
+    MetsXml(
+      metsXmlWith(
+        recordIdentifier = "deadbeef",
+        fileSec = <mets:fileSec><mets:fileGrp USE="OBJECTS">
+        <mets:file ID="FILE_0001_OBJECTS" MIMETYPE="image/jp2">
+        </mets:file>
+      </mets:fileGrp></mets:fileSec>,
+        structMap = structMap
+      )
+    ).value.fileReferences shouldBe Nil
+  }
+
+  it("does not return a filereference if an FLocat has no href") {
+    MetsXml(
+      metsXmlWith(
+        recordIdentifier = "deadbeef",
+        fileSec = <mets:fileSec><mets:fileGrp USE="OBJECTS">
+        <mets:file ID="FILE_0001_OBJECTS" MIMETYPE="image/jp2">
+          <mets:FLocat LOCTYPE="URL"/>
+        </mets:file>
+      </mets:fileGrp></mets:fileSec>,
+        structMap = structMap
+      )
+    ).value.fileReferences shouldBe Nil
   }
 
   it("parses file references mapping from XML") {
@@ -210,15 +270,4 @@ class GoobiMetsXmlTest
           </mets:div>
         </mets:structMap>
     )
-
-  def xmlMultiFlocats: String = metsXmlWith(
-    recordIdentifier = "deadbeef",
-    fileSec = <mets:fileSec><mets:fileGrp USE="OBJECTS">
-      <mets:file ID="FILE_0001_OBJECTS" MIMETYPE="image/jp2">
-        <mets:FLocat LOCTYPE="URL" xlink:href="objects/hello_0001.jp2"/>
-        <mets:FLocat LOCTYPE="URL" xlink:href="objects/hello_0002.jp2"/>
-      </mets:file>
-    </mets:fileGrp></mets:fileSec>,
-    structMap = structMap
-  )
 }
