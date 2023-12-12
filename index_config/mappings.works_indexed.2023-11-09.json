@@ -143,7 +143,7 @@
                 "path": {
                   "type": "text",
                   "analyzer": "path_analyzer",
-                  "search_analyzer": "whitespace"
+                  "search_analyzer": "lowercase_whitespace_tokens"
                 }
               }
             },
@@ -154,7 +154,7 @@
                 "path": {
                   "type": "text",
                   "analyzer": "path_analyzer",
-                  "search_analyzer": "whitespace"
+                  "search_analyzer": "lowercase_whitespace_tokens"
                 }
               }
             }
@@ -535,7 +535,7 @@
             "path": {
               "type": "text",
               "analyzer": "path_analyzer",
-              "search_analyzer": "whitespace"
+              "search_analyzer": "lowercase_whitespace_tokens"
             }
           }
         },
