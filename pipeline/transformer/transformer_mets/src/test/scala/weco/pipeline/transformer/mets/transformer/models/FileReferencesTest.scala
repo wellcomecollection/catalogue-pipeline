@@ -26,7 +26,7 @@ class FileReferencesTest
     info("we normally only have one <FLocat> per <file>.")
     FileReferences(
       MetsXml(
-        metsXmlWith(
+        goobiMetsXmlWith(
           recordIdentifier = "deadbeef",
           fileSec = <mets:fileSec><mets:fileGrp USE="OBJECTS">
           <mets:file ID="FILE_0001_OBJECTS" MIMETYPE="image/jp2">
@@ -49,7 +49,7 @@ class FileReferencesTest
   it("skips over unusable file definitions, but returns good ones") {
     FileReferences(
       MetsXml(
-        metsXmlWith(
+        goobiMetsXmlWith(
           recordIdentifier = "deadbeef",
           fileSec = <mets:fileSec><mets:fileGrp USE="OBJECTS">
           <mets:file ID="FILE_0001_OBJECTS" MIMETYPE="image/jp2">
@@ -73,7 +73,7 @@ class FileReferencesTest
   it("guesses the mime type if none is provided") {
     val reference = FileReferences(
       MetsXml(
-        metsXmlWith(
+        goobiMetsXmlWith(
           recordIdentifier = "deadbeef",
           fileSec = <mets:fileSec><mets:fileGrp USE="OBJECTS">
           <mets:file ID="FILE_0001_OBJECTS">
@@ -96,7 +96,7 @@ class FileReferencesTest
   it("treats an empty mimetype the same as an absent mimetype") {
     val reference = FileReferences(
       MetsXml(
-        metsXmlWith(
+        goobiMetsXmlWith(
           recordIdentifier = "deadbeef",
           fileSec = <mets:fileSec><mets:fileGrp USE="OBJECTS">
           <mets:file ID="FILE_0001_OBJECTS">
@@ -119,7 +119,7 @@ class FileReferencesTest
   it("returns no mime type if it cannot be guessed") {
     val reference = FileReferences(
       MetsXml(
-        metsXmlWith(
+        goobiMetsXmlWith(
           recordIdentifier = "deadbeef",
           fileSec = <mets:fileSec><mets:fileGrp USE="OBJECTS">
           <mets:file ID="FILE_0001_OBJECTS">
@@ -142,7 +142,7 @@ class FileReferencesTest
   it("does not return a filereference if a file has no FLocat ") {
     FileReferences(
       MetsXml(
-        metsXmlWith(
+        goobiMetsXmlWith(
           recordIdentifier = "deadbeef",
           fileSec = <mets:fileSec><mets:fileGrp USE="OBJECTS">
           <mets:file ID="FILE_0001_OBJECTS" MIMETYPE="image/jp2">
@@ -157,7 +157,7 @@ class FileReferencesTest
   it("does not return a filereference if an FLocat has no href") {
     FileReferences(
       MetsXml(
-        metsXmlWith(
+        goobiMetsXmlWith(
           recordIdentifier = "deadbeef",
           fileSec = <mets:fileSec><mets:fileGrp USE="OBJECTS">
           <mets:file ID="FILE_0001_OBJECTS" MIMETYPE="image/jp2">

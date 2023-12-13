@@ -46,7 +46,7 @@ class GoobiMetsXmlTest
   }
 
   it("parses first thumbnail when no ORDER attribute") {
-    val str = metsXmlWith(
+    val str = goobiMetsXmlWith(
       recordIdentifier = "b30246039",
       fileSec = fileSec(filePrefix = "b30246039"),
       structMap = structMap
@@ -131,7 +131,7 @@ class GoobiMetsXmlTest
     </mets:mets>
 
   def xmlNonSequentialOrder(recordIdentifier: String) =
-    metsXmlWith(
+    goobiMetsXmlWith(
       recordIdentifier,
       fileSec = fileSec(recordIdentifier),
       structMap = <mets:structMap TYPE="PHYSICAL">
@@ -148,7 +148,7 @@ class GoobiMetsXmlTest
     )
 
   def xmlInvalidFileId(recordIdentifier: String) =
-    metsXmlWith(
+    goobiMetsXmlWith(
       recordIdentifier,
       fileSec = fileSec(recordIdentifier),
       structMap = <mets:structMap TYPE="PHYSICAL">

@@ -44,7 +44,7 @@ class MetsXmlTransformerTest
     )
   }
   it("returns empty MetsData if the MetsLocation is marked as deleted") {
-    val str = metsXmlWith(
+    val str = goobiMetsXmlWith(
       recordIdentifier = "b30246039",
       accessConditionStatus = Some("Open"),
       license = Some(License.CC0)
@@ -103,7 +103,7 @@ class MetsXmlTransformerTest
 
     val manifestations = Map(
       "first.xml" -> Some(
-        metsXmlWith(
+        goobiMetsXmlWith(
           recordIdentifier = "b30246039",
           title = title,
           license = Some(License.InCopyright),
@@ -112,7 +112,7 @@ class MetsXmlTransformerTest
         )
       ),
       "second.xml" -> Some(
-        metsXmlWith(recordIdentifier = "b30246039", title = title)
+        goobiMetsXmlWith(recordIdentifier = "b30246039", title = title)
       )
     )
     val fileReferences = createFileReferences(2, "b30246039")
