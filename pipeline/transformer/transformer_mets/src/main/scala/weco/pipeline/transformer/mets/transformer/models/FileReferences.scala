@@ -32,7 +32,7 @@ object FileReferences extends XMLOps {
     implicit metsXml: MetsXml
   ): Seq[FileReference] = for {
     fileGrp <- metsXml.root \ "fileSec" \ "fileGrp"
-    objects <- fileGrp.find(_ \@ "USE" == "OBJECTS")
+    objects <- fileGrp.find(_ \@ "USE" == metsXml.objectsFileGroupUse)
     listedFiles = objects \ "file"
     file <- listedFiles.find(_ \@ "ID" == id)
     objectHref <- (file \ "FLocat").headOption

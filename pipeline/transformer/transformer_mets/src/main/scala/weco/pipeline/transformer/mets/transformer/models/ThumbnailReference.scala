@@ -31,12 +31,15 @@ object ThumbnailReference extends XMLOps {
   private def firstThumbnailableFileNode(
     order: Seq[String]
   )(implicit root: Elem): Option[Node] = {
-    order.view.map(validFileNodeWithId).collectFirst {
-      case Some(node) =>
-        node \@ "MIMETYPE" match {
-          case mime if mime == "application/pdf" || mime.startsWith("image") =>
-            node
+    order.view map {
+      fileId =>
+        validFileNodeWithId(fileId).map {
+          node => (node, node \@ "MIMETYPE")
         }
+    } collectFirst {
+      case Some((node, mime))
+          if mime == "application/pdf" || mime.startsWith("image") =>
+        node
     }
   }
 

@@ -13,6 +13,7 @@ import scala.xml.{Elem, NodeSeq, XML}
 
 trait MetsXml extends XMLOps {
   val root: Elem
+  def objectsFileGroupUse: String
   def firstManifestationFilename: Either[Exception, String]
   def recordIdentifier: Either[Exception, String]
 
@@ -46,8 +47,7 @@ trait MetsXml extends XMLOps {
       .sortByAttribute("ORDER") \ "fptr").map(_ \@ "FILEID")
 }
 case class ArchivematicaMetsXML(root: Elem) extends MetsXml {
-  lazy val thumbnailReference: Option[FileReference] = ???
-
+  val objectsFileGroupUse: String = "original"
   // I don't yet have any examples of records with separate manifestations
   def firstManifestationFilename: Either[Exception, String] = Left(
     new NotImplementedException
@@ -81,6 +81,7 @@ case class ArchivematicaMetsXML(root: Elem) extends MetsXml {
     }
 }
 case class GoobiMetsXml(root: Elem) extends MetsXml {
+  val objectsFileGroupUse: String = "OBJECTS"
 
   /** The record identifier (generally the B number) is encoded in the METS. For
     * example:
