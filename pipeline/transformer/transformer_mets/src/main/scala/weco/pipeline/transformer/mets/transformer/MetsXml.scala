@@ -137,15 +137,22 @@ case class GoobiMetsXml(root: Elem) extends MetsXml {
 
 object MetsXml {
   def apply(root: Elem): MetsXml = {
-    val agentName = (root \ "metsHdr" \ "agent" \ "name").text
-    if (agentName.contains("Goobi")) {
+    if (isGoobi(root)) {
       GoobiMetsXml(root)
+    } else if (isArchiveMatica(root)) {
+      ArchivematicaMetsXML(root)
     } else {
       throw new NotImplementedError(
         "Could not determine which flavour of METS to parse"
       )
     }
   }
+  private def isGoobi(root: Elem): Boolean =
+    (root \ "metsHdr" \ "agent" \ "name").text.contains("Goobi")
+
+  private def isArchiveMatica(root: Elem): Boolean =
+    (root \ "amdSec" \ "digiprovMD" \ "mdWrap" \ "xmlData" \ "agent" \ "agentName").text
+      .contains("Archivematica")
 
   def apply(str: String): Either[Throwable, MetsXml] =
     Try(XML.loadString(str)).map(MetsXml(_)).toEither

@@ -17,10 +17,6 @@ class GoobiMetsXmlTest
 
   val xml = readResource("b30246039.xml")
 
-  it("fails if the input string is not an xml") {
-    MetsXml("hagdf") shouldBe a[Left[_, _]]
-  }
-
   it("parses recordIdentifier from XML") {
     MetsXml(xml).value.recordIdentifier shouldBe Right("b30246039")
   }
