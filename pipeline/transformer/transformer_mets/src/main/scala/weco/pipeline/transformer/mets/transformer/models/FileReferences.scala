@@ -5,7 +5,7 @@ import weco.pipeline.transformer.mets.transformer.MetsXml
 object FileReferences extends XMLOps {
   def apply(metsXml: MetsXml): List[FileReference] = {
     implicit val x: MetsXml = metsXml
-    physicalFileIds.flatMap(fileId => getFileReferences(fileId)).toList
+    metsXml.physicalFileIds.flatMap(fileId => getFileReferences(fileId)).toList
   }
 
   /** The METS XML contains locations of associated files, contained in a
@@ -44,31 +44,4 @@ object FileReferences extends XMLOps {
     Option(file \@ "MIMETYPE").filter(_.nonEmpty)
   )
 
-  /** Valid METS documents should contain a physicalStructMap section, with the
-    * bottom most divs each representing a physical page, and linking to files
-    * in the corresponding fileSec structures:
-    * {{{
-    * <mets:structMap TYPE="PHYSICAL">
-    *   <mets:div DMDID="DMDPHYS_0000" ID="PHYS_0000" TYPE="physSequence">
-    *     <mets:div ADMID="AMD_0001" ID="PHYS_0001" ORDER="1" TYPE="page">
-    *       <mets:fptr FILEID="FILE_0001_OBJECTS" />
-    *       <mets:fptr FILEID="FILE_0001_ALTO" />
-    *     </mets:div>
-    *     <mets:div ADMID="AMD_0002" ID="PHYS_0002" ORDER="2" TYPE="page">
-    *        <mets:fptr FILEID="FILE_0002_OBJECTS" />
-    *        <mets:fptr FILEID="FILE_0002_ALTO" />
-    *      </mets:div>
-    *    </mets:div>
-    *  </mets:structMap>
-    * }}}
-    * For this input we would expect the following output:
-    *
-    * Seq("PHYS_0001" -> "FILE_0001_OBJECTS", "PHYS_0002" ->
-    * "FILE_0002_OBJECTS")
-    */
-  private def physicalFileIds(implicit metsXml: MetsXml): Seq[String] =
-    ((metsXml.root \ "structMap")
-      .filter(node => "physical".equalsIgnoreCase(node \@ "TYPE"))
-      .descendentsWithTag("div")
-      .sortByAttribute("ORDER") \ "fptr").map(_ \@ "FILEID")
 }

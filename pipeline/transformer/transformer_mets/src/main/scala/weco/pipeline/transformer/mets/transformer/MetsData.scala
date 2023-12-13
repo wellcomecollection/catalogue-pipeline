@@ -11,7 +11,8 @@ import weco.catalogue.internal_model.work.{Item, MergeCandidate, Work, WorkData}
 import weco.pipeline.transformer.identifiers.SourceIdentifierValidation._
 import weco.pipeline.transformer.mets.transformer.models.{
   FileReference,
-  FileReferences
+  FileReferences,
+  ThumbnailReference
 }
 import weco.pipeline.transformer.mets.transformers.{
   MetsAccessConditions,
@@ -158,7 +159,7 @@ object InvisibleMetsData {
       title = title,
       accessConditions = accessConditions,
       fileReferences = FileReferences(filesRoot),
-      thumbnailReference = filesRoot.thumbnailReference,
+      thumbnailReference = ThumbnailReference(filesRoot),
       version: Int,
       modifiedTime: Instant
     )

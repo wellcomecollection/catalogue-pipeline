@@ -1,11 +1,16 @@
 package weco.pipeline.transformer.mets.transformer.models
 
+import org.apache.commons.lang3.NotImplementedException
 import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks
 import weco.fixtures.LocalResources
 import weco.pipeline.transformer.mets.generators.GoobiMetsGenerators
+import weco.pipeline.transformer.mets.transformer.MetsXml
+import weco.pipeline.transformer.mets.transformers.MetsAccessConditions
+
+import scala.xml.Elem
 
 class ThumbnailReferenceTest
     extends AnyFunSpec
@@ -46,7 +51,7 @@ class ThumbnailReferenceTest
             </mets:fileSec>
           </mets:mets>
 
-        ThumbnailReference(root).get shouldBe FileReference(
+        ThumbnailReference(ThumbnailMetsXml(root)).get shouldBe FileReference(
           id = "FILE_0002_OBJECTS",
           location = "objects/b10915357_hin-wel-all-00001096_0002.jp2",
           listedMimeType = Some("image/jp2")
@@ -82,9 +87,24 @@ class ThumbnailReferenceTest
                     </mets:file>
                   </mets:fileGrp>
                 </mets:fileSec>
+                <mets:structMap TYPE="PHYSICAL">
+                  <mets:div DMDID="DMDPHYS_0000" ID="PHYS_0000" TYPE="physSequence">
+                    <mets:div ADMID="AMD_0002" ID="PHYS_0001" ORDER="1" ORDERLABEL=" - " TYPE="page">
+                      <mets:fptr FILEID="FILE_0001_OBJECTS"/>
+                    </mets:div>
+                    <mets:div ADMID="AMD_0002" ID="PHYS_0002" ORDER="2" ORDERLABEL=" - " TYPE="page">
+                      <mets:fptr FILEID="FILE_0002_OBJECTS"/>
+                    </mets:div>
+                    <mets:div ADMID="AMD_0002" ID="PHYS_0003" ORDER="3" ORDERLABEL=" - " TYPE="page">
+                      <mets:fptr FILEID="FILE_0003_OBJECTS"/>
+                    </mets:div>
+                  </mets:div>
+                </mets:structMap>
               </mets:mets>
 
-            ThumbnailReference(root).get.location shouldBe "this one"
+            ThumbnailReference(
+              ThumbnailMetsXml(root)
+            ).get.location shouldBe "this one"
         }
 
       }
@@ -118,7 +138,7 @@ class ThumbnailReferenceTest
             </mets:fileSec>
           </mets:mets>
 
-        ThumbnailReference(root) shouldBe None
+        ThumbnailReference(ThumbnailMetsXml(root)) shouldBe None
       }
 
       it("returns None if fileSec is missing") {
@@ -142,8 +162,21 @@ class ThumbnailReferenceTest
 
           </mets:mets>
 
-        ThumbnailReference(root) shouldBe None
+        ThumbnailReference(ThumbnailMetsXml(root)) shouldBe None
       }
     }
   }
+}
+
+case class ThumbnailMetsXml(root: Elem) extends MetsXml {
+  def firstManifestationFilename: Either[Exception, String] = Left(
+    new NotImplementedException
+  )
+  def recordIdentifier: Either[Exception, String] = Left(
+    new NotImplementedException
+  )
+  def accessConditions: Either[Throwable, MetsAccessConditions] = Left(
+    new NotImplementedException
+  )
+
 }

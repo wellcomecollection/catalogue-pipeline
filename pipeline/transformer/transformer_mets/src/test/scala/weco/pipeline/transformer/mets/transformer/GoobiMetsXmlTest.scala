@@ -5,7 +5,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.fixtures.LocalResources
 import weco.pipeline.transformer.mets.generators.GoobiMetsGenerators
-import weco.pipeline.transformer.mets.transformer.models.FileReference
+import weco.pipeline.transformer.mets.transformer.models.ThumbnailReference
 
 class GoobiMetsXmlTest
     extends AnyFunSpec
@@ -42,9 +42,11 @@ class GoobiMetsXmlTest
   }
 
   it("parses thumbnail from XML") {
-    MetsXml(
-      xml
-    ).value.fileReferences.head.location shouldBe "objects/b30246039_0001.jp2"
+    ThumbnailReference(
+      MetsXml(
+        xml
+      ).value
+    ).get.location shouldBe "objects/b30246039_0006.jp2"
   }
 
   it("parses first thumbnail when no ORDER attribute") {
@@ -53,21 +55,27 @@ class GoobiMetsXmlTest
       fileSec = fileSec(filePrefix = "b30246039"),
       structMap = structMap
     )
-    MetsXml(
-      str
-    ).value.fileReferences.head.location shouldBe "objects/b30246039_0001.jp2"
+    ThumbnailReference(
+      MetsXml(
+        str
+      ).value
+    ).get.location shouldBe "objects/b30246039_0001.jp2"
   }
 
   it("parses thumbnail using ORDER attrib when non-sequential order") {
-    MetsXml(
-      xmlNonSequentialOrder("b30246039")
-    ).value.fileReferences.head.location shouldBe "objects/b30246039_0001.jp2"
+    ThumbnailReference(
+      MetsXml(
+        xmlNonSequentialOrder("b30246039")
+      ).value
+    ).get.location shouldBe "objects/b30246039_0001.jp2"
   }
 
   it("cannot parse thumbnail when invalid file ID") {
-    MetsXml(
-      xmlInvalidFileId("b30246039")
-    ).value.fileReferences.headOption shouldBe None
+    ThumbnailReference(
+      MetsXml(
+        xmlInvalidFileId("b30246039")
+      ).value
+    ) shouldBe None
   }
 
   it("parses first manifestation filename when present") {

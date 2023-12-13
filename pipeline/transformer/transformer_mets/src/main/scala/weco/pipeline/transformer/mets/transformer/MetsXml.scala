@@ -1,11 +1,7 @@
 package weco.pipeline.transformer.mets.transformer
 
 import org.apache.commons.lang3.NotImplementedException
-import weco.pipeline.transformer.mets.transformer.models.{
-  FileReference,
-  ThumbnailReference,
-  XMLOps
-}
+import weco.pipeline.transformer.mets.transformer.models.{FileReference, XMLOps}
 import weco.pipeline.transformer.mets.transformers.{
   MetsAccessConditions,
   ModsAccessConditions,
@@ -15,15 +11,41 @@ import weco.pipeline.transformer.mets.transformers.{
 import scala.util.{Left, Try}
 import scala.xml.{Elem, NodeSeq, XML}
 
-trait MetsXml {
+trait MetsXml extends XMLOps {
   val root: Elem
-  val thumbnailReference: Option[FileReference]
   def firstManifestationFilename: Either[Exception, String]
   def recordIdentifier: Either[Exception, String]
 
   def accessConditions: Either[Throwable, MetsAccessConditions]
+
+  /** Valid METS documents should contain a physicalStructMap section, with the
+    * bottom most divs each representing a physical page, and linking to files
+    * in the corresponding fileSec structures:
+    * {{{
+    * <mets:structMap TYPE="PHYSICAL">
+    *   <mets:div DMDID="DMDPHYS_0000" ID="PHYS_0000" TYPE="physSequence">
+    *     <mets:div ADMID="AMD_0001" ID="PHYS_0001" ORDER="1" TYPE="page">
+    *       <mets:fptr FILEID="FILE_0001_OBJECTS" />
+    *       <mets:fptr FILEID="FILE_0001_ALTO" />
+    *     </mets:div>
+    *     <mets:div ADMID="AMD_0002" ID="PHYS_0002" ORDER="2" TYPE="page">
+    *        <mets:fptr FILEID="FILE_0002_OBJECTS" />
+    *        <mets:fptr FILEID="FILE_0002_ALTO" />
+    *      </mets:div>
+    *    </mets:div>
+    *  </mets:structMap>
+    * }}}
+    * For this input we would expect the following output:
+    *
+    * Seq("FILE_0001_OBJECTS", "FILE_0002_OBJECTS")
+    */
+  def physicalFileIds: Seq[String] =
+    ((root \ "structMap")
+      .filter(node => "physical".equalsIgnoreCase(node \@ "TYPE"))
+      .descendentsWithTag("div")
+      .sortByAttribute("ORDER") \ "fptr").map(_ \@ "FILEID")
 }
-case class ArchivematicaMetsXML(root: Elem) extends MetsXml with XMLOps {
+case class ArchivematicaMetsXML(root: Elem) extends MetsXml {
   lazy val thumbnailReference: Option[FileReference] = ???
 
   // I don't yet have any examples of records with separate manifestations
@@ -58,7 +80,7 @@ case class ArchivematicaMetsXML(root: Elem) extends MetsXml with XMLOps {
         )
     }
 }
-case class GoobiMetsXml(root: Elem) extends MetsXml with XMLOps {
+case class GoobiMetsXml(root: Elem) extends MetsXml {
 
   /** The record identifier (generally the B number) is encoded in the METS. For
     * example:
@@ -108,7 +130,6 @@ case class GoobiMetsXml(root: Elem) extends MetsXml with XMLOps {
     }
   }
 
-  lazy val thumbnailReference: Option[FileReference] = ThumbnailReference(root)
   lazy val accessConditions: Either[Throwable, MetsAccessConditions] =
     ModsAccessConditions(root).parse
 }
