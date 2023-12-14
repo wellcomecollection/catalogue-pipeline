@@ -17,7 +17,7 @@ trait MetsXml {
   val root: Elem
   val thumbnailReference: Option[FileReference]
   def firstManifestationFilename: Either[Exception, String]
-  def fileReferences(bnumber: String): List[FileReference]
+  def fileReferences: List[FileReference]
   def recordIdentifier: Either[Exception, String]
 
   def accessConditions: Either[Throwable, MetsAccessConditions]
@@ -55,12 +55,8 @@ case class GoobiMetsXml(root: Elem) extends MetsXml with XMLOps {
   /** Here we use the the items defined in the physicalStructMap to look up file
     * IDs in the (normalised) fileObjects mapping
     */
-  def fileReferences(bnumber: String): List[FileReference] =
-    physicalFileIds.flatMap {
-      case fileId =>
-        getFileReferences(fileId)
-          .map(ref => normaliseLocation(bnumber, ref))
-    }.toList
+  def fileReferences: List[FileReference] =
+    physicalFileIds.flatMap(fileId => getFileReferences(fileId)).toList
 
   /** Returns the first href to a manifestation in the logical structMap
     */
@@ -110,25 +106,6 @@ case class GoobiMetsXml(root: Elem) extends MetsXml with XMLOps {
       .filterByAttribute("TYPE", "PHYSICAL")
       .descendentsWithTag("div")
       .sortByAttribute("ORDER") \ "fptr").map(_ \@ "FILEID")
-
-  /** Filenames in DLCS are always prefixed with the bnumber (uppercase or
-    * lowercase) to ensure uniqueness. However they might not be prefixed with
-    * the bnumber in the METS file. So we need to do two things:
-    *   - strip the "objects/" part of the location
-    *   - prepend the bnumber followed by an underscore if it's not already
-    *     present (uppercase or lowercase)
-    */
-  private def normaliseLocation(
-    bnumber: String,
-    fileReference: FileReference
-  ): FileReference =
-    fileReference.copy(
-      location = fileReference.location.replaceFirst("objects/", "") match {
-        case fileName if fileName.toLowerCase.startsWith(bnumber.toLowerCase) =>
-          fileName
-        case fileName => s"${bnumber}_$fileName"
-      }
-    )
 
   /** The METS XML contains locations of associated files, contained in a
     * mapping with the following format:

@@ -146,7 +146,7 @@ object InvisibleMetsData {
       recordIdentifier = id,
       title = title,
       accessConditions = accessConditions,
-      fileReferences = filesRoot.fileReferences(id),
+      fileReferences = filesRoot.fileReferences,
       thumbnailReference = filesRoot.thumbnailReference
     )
   }

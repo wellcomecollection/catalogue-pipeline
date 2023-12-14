@@ -36,9 +36,7 @@ class MetsXmlTransformerTest
           usage = Some("Some terms")
         ),
         fileReferences = fileReferences,
-        // TODO: temp - when fileReferences stop normalising in the wrong place, this can be just thumbnailRef
-        thumbnailReference =
-          Some(thumbnailRef.copy(location = "objects/" + thumbnailRef.location))
+        thumbnailReference = Some(thumbnailRef)
       )
     )
   }
@@ -83,9 +81,7 @@ class MetsXmlTransformerTest
           accessStatus = Some(AccessStatus.Open)
         ),
         fileReferences = fileReferences,
-        // TODO: temp - when fileReferences stop normalising in the wrong place, this can be just thumbnailRef
-        thumbnailReference =
-          Some(thumbnailRef.copy(location = "objects/" + thumbnailRef.location))
+        thumbnailReference = Some(thumbnailRef)
       )
     )
   }
@@ -125,9 +121,7 @@ class MetsXmlTransformerTest
         title = title,
         MetsAccessConditions(licence = Some(License.InCopyright)),
         fileReferences = createFileReferences(2, "b30246039"),
-        // TODO: temp - when fileReferences stop normalising in the wrong place, this can be just thumbnailRef
-        thumbnailReference =
-          Some(thumbnailRef.copy(location = "objects/" + thumbnailRef.location))
+        thumbnailReference = Some(thumbnailRef)
       )
     )
   }
@@ -189,8 +183,8 @@ class MetsXmlTransformerTest
         FileReference(
           f"FILE_$i%04d_OBJECTS",
           manifestN match {
-            case None    => f"$bumber%s_$i%04d.jp2"
-            case Some(n) => f"$bumber%s_$n%04d_$i%04d.jp2"
+            case None    => f"objects/$bumber%s_$i%04d.jp2"
+            case Some(n) => f"objects/$bumber%s_$n%04d_$i%04d.jp2"
           },
           Some("image/jp2")
         )

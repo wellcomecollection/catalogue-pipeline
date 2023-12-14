@@ -432,6 +432,27 @@ class MetsDataTest
     )
   }
 
+  it("normalises image locations for use with DLCS") {
+    val bibNumber = createBibNumberString
+    val metsData = createMetsDataWith(
+      bibNumber = bibNumber,
+      accessConditionDz = Some("CC-BY-NC"),
+      fileReferences = List(
+        FileReference("A", "location1.jp2", Some("image/jp2")),
+        FileReference("B", "objects/location2.jp2", Some("image/jp2"))
+      )
+    )
+
+    val result = metsData.toWork(1, Instant.now())
+    val images = result.data.imageData
+    images.map(
+      _.locations.head.url
+    ) should contain theSameElementsAs List(
+      s"https://iiif.wellcomecollection.org/image/${bibNumber}_location1.jp2/info.json",
+      s"https://iiif.wellcomecollection.org/image/${bibNumber}_location2.jp2/info.json"
+    )
+  }
+
   it("creates a work without images for restricted access statuses") {
     val metsData = createMetsDataWith(
       accessConditionDz = Some("CC-BY-NC"),

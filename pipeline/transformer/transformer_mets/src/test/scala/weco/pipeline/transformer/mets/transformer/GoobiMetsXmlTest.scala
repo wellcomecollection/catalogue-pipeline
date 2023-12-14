@@ -41,47 +41,44 @@ class GoobiMetsXmlTest
   }
 
   it("parses file references mapping from XML") {
-    MetsXml(xml).value.fileReferences(
-      "b30246039"
-    ) shouldBe List(
+    MetsXml(xml).value.fileReferences shouldBe List(
       FileReference(
         id = "FILE_0001_OBJECTS",
-        location = "b30246039_0001.jp2",
+        location = "objects/b30246039_0001.jp2",
         listedMimeType = Some("image/jp2")
       ),
       FileReference(
         id = "FILE_0002_OBJECTS",
-        location = "b30246039_0002.jp2",
+        location = "objects/b30246039_0002.jp2",
         listedMimeType = Some("image/jp2")
       ),
       FileReference(
         id = "FILE_0003_OBJECTS",
-        location = "b30246039_0003.jp2",
+        location = "objects/b30246039_0003.jp2",
         listedMimeType = Some("image/jp2")
       ),
       FileReference(
         id = "FILE_0004_OBJECTS",
-        location = "b30246039_0004.jp2",
+        location = "objects/b30246039_0004.jp2",
         listedMimeType = Some("image/jp2")
       ),
       FileReference(
         id = "FILE_0005_OBJECTS",
-        location = "b30246039_0005.jp2",
+        location = "objects/b30246039_0005.jp2",
         listedMimeType = Some("image/jp2")
       ),
       FileReference(
         id = "FILE_0006_OBJECTS",
-        location = "b30246039_0006.jp2",
+        location = "objects/b30246039_0006.jp2",
         listedMimeType = Some("image/jp2")
       )
     )
   }
 
   it("parses thumbnail from XML") {
-    MetsXml(xml).value
-      .fileReferences("b30246039")
-      .head
-      .location shouldBe "b30246039_0001.jp2"
+    MetsXml(
+      xml
+    ).value.fileReferences.head.location shouldBe "objects/b30246039_0001.jp2"
   }
 
   it("parses first thumbnail when no ORDER attribute") {
@@ -90,61 +87,21 @@ class GoobiMetsXmlTest
       fileSec = fileSec(filePrefix = "b30246039"),
       structMap = structMap
     )
-    MetsXml(str).value
-      .fileReferences("b30246039")
-      .head
-      .location shouldBe "b30246039_0001.jp2"
+    MetsXml(
+      str
+    ).value.fileReferences.head.location shouldBe "objects/b30246039_0001.jp2"
   }
 
   it("parses thumbnail using ORDER attrib when non-sequential order") {
-    MetsXml(xmlNonSequentialOrder("b30246039")).value
-      .fileReferences("b30246039")
-      .head
-      .location shouldBe "b30246039_0001.jp2"
-  }
-
-  it("parses thumbnail if filename doesn't start with bnumber") {
-    val bnumber = "b30246039"
-    val filePrefix = "V000012"
-
-    val metsXml =
-      MetsXml(
-        metsXmlWith(
-          recordIdentifier = bnumber,
-          fileSec = fileSec(filePrefix),
-          structMap = structMap
-        )
-      ).value
-
-    metsXml
-      .fileReferences(bnumber)
-      .head
-      .location shouldBe s"${bnumber}_${filePrefix}_0001.jp2"
-  }
-
-  it("parses thumbnail if filename starts with uppercase bnumber") {
-    val bnumber = "b30246039"
-    val filePrefix = bnumber.toUpperCase
-
-    val metsXml =
-      MetsXml(
-        metsXmlWith(
-          recordIdentifier = bnumber,
-          fileSec = fileSec(filePrefix),
-          structMap = structMap
-        )
-      ).value
-
-    metsXml
-      .fileReferences(bnumber)
-      .head
-      .location shouldBe s"${filePrefix}_0001.jp2"
+    MetsXml(
+      xmlNonSequentialOrder("b30246039")
+    ).value.fileReferences.head.location shouldBe "objects/b30246039_0001.jp2"
   }
 
   it("cannot parse thumbnail when invalid file ID") {
-    MetsXml(xmlInvalidFileId("b30246039")).value
-      .fileReferences("b30246039")
-      .headOption shouldBe None
+    MetsXml(
+      xmlInvalidFileId("b30246039")
+    ).value.fileReferences.headOption shouldBe None
   }
 
   it("parses first manifestation filename when present") {
