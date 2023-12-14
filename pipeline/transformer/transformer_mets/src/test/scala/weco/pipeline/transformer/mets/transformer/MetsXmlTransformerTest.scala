@@ -26,7 +26,8 @@ class MetsXmlTransformerTest
     val xml = readResource("b30246039.xml")
     val fileReferences = createFileReferences(6, "b30246039")
     val thumbnailRef = fileReferences(5)
-    transform(root = Some(xml), createdDate = Instant.now) shouldBe Right(
+    val now = Instant.now
+    transform(root = Some(xml), createdDate = now) shouldBe Right(
       InvisibleMetsData(
         recordIdentifier = "b30246039",
         title = "[Report 1942] /",
@@ -36,7 +37,9 @@ class MetsXmlTransformerTest
           usage = Some("Some terms")
         ),
         fileReferences = fileReferences,
-        thumbnailReference = Some(thumbnailRef)
+        thumbnailReference = Some(thumbnailRef),
+        1,
+        now
       )
     )
   }
@@ -46,12 +49,13 @@ class MetsXmlTransformerTest
       accessConditionStatus = Some("Open"),
       license = Some(License.CC0)
     )
+    val now = Instant.now
     transform(
       id = "b30246039",
       root = Some(str),
-      createdDate = Instant.now,
+      createdDate = now,
       deleted = true
-    ) shouldBe Right(DeletedMetsData("b30246039"))
+    ) shouldBe Right(DeletedMetsData("b30246039", 1, now))
   }
 
   it("errors when the root XML doesn't exist in the store") {
@@ -66,10 +70,10 @@ class MetsXmlTransformerTest
     )
     val fileReferences = createFileReferences(2, "b22012692", Some(1))
     val thumbnailRef = fileReferences.head
-
+    val now = Instant.now
     transform(
       root = Some(xml),
-      createdDate = Instant.now,
+      createdDate = now,
       manifestations = manifestations
     ) shouldBe Right(
       InvisibleMetsData(
@@ -81,7 +85,9 @@ class MetsXmlTransformerTest
           accessStatus = Some(AccessStatus.Open)
         ),
         fileReferences = fileReferences,
-        thumbnailReference = Some(thumbnailRef)
+        thumbnailReference = Some(thumbnailRef),
+        version = 1,
+        modifiedTime = now
       )
     )
   }
@@ -111,9 +117,10 @@ class MetsXmlTransformerTest
     )
     val fileReferences = createFileReferences(2, "b30246039")
     val thumbnailRef = fileReferences.head
+    val now = Instant.now
     transform(
       root = Some(xml),
-      createdDate = Instant.now,
+      createdDate = now,
       manifestations = manifestations
     ) shouldBe Right(
       InvisibleMetsData(
@@ -121,7 +128,9 @@ class MetsXmlTransformerTest
         title = title,
         MetsAccessConditions(licence = Some(License.InCopyright)),
         fileReferences = createFileReferences(2, "b30246039"),
-        thumbnailReference = Some(thumbnailRef)
+        thumbnailReference = Some(thumbnailRef),
+        version = 1,
+        modifiedTime = now
       )
     )
   }

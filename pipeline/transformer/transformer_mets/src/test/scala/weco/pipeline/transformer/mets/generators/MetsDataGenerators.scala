@@ -5,6 +5,8 @@ import weco.pipeline.transformer.mets.transformer.InvisibleMetsData
 import weco.pipeline.transformer.mets.transformers.ModsAccessConditions
 import weco.sierra.generators.SierraIdentifierGenerators
 
+import java.time.Instant
+
 trait MetsDataGenerators extends SierraIdentifierGenerators {
   def createBibNumberString: String = createSierraBibNumber.withCheckDigit
 
@@ -15,7 +17,9 @@ trait MetsDataGenerators extends SierraIdentifierGenerators {
     accessConditionStatus: Option[String] = None,
     accessConditionUsage: Option[String] = None,
     fileReferences: List[FileReference] = Nil,
-    thumbnailReference: Option[FileReference] = None
+    thumbnailReference: Option[FileReference] = None,
+    version: Int = 0,
+    modifiedTime: Instant = Instant.ofEpochMilli(0)
   ): InvisibleMetsData =
     InvisibleMetsData(
       recordIdentifier = bibNumber,
@@ -26,6 +30,8 @@ trait MetsDataGenerators extends SierraIdentifierGenerators {
         usage = accessConditionUsage
       ).parse.right.get,
       fileReferences = fileReferences,
-      thumbnailReference = thumbnailReference
+      thumbnailReference = thumbnailReference,
+      version = version,
+      modifiedTime = modifiedTime
     )
 }
