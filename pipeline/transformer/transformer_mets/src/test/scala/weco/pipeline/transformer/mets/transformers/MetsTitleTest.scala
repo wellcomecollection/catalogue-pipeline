@@ -24,7 +24,7 @@ class MetsTitleTest extends AnyFunSpec with Matchers with EitherValues {
     MetsTitle(elem).value shouldBe "[Report 1942] /"
   }
 
-  it("fails if there is no mods:title element") {
+  it("returns an empty string if there is no mods:title element") {
     val elem =
       <mets:mets xmlns:mets="http://www.loc.gov/METS/" xmlns:mods="http://www.loc.gov/mods/v3">
         <mets:dmdSec ID="DMDLOG_0000">
@@ -39,7 +39,7 @@ class MetsTitleTest extends AnyFunSpec with Matchers with EitherValues {
         </mets:dmdSec>
       </mets:mets>
 
-    MetsTitle(elem).left.value.getMessage shouldBe "Could not parse title from METS XML"
+    MetsTitle(elem).value shouldBe ""
   }
 
   it("combines multiple instances of mods:title") {
@@ -60,6 +60,8 @@ class MetsTitleTest extends AnyFunSpec with Matchers with EitherValues {
         </mets:dmdSec>
       </mets:mets>
 
-    MetsTitle(elem).value shouldBe "Analyse der Fette und Wachse : sowie der Erzeugnisse der Fettindustrie"
+    MetsTitle(
+      elem
+    ).value shouldBe "Analyse der Fette und Wachse : sowie der Erzeugnisse der Fettindustrie"
   }
 }

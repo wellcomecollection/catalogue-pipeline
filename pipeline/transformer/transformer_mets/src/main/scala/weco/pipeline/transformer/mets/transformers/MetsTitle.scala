@@ -28,7 +28,7 @@ object MetsTitle {
       (root \\ "dmdSec" \ "mdWrap" \\ "titleInfo" \ "title").toList.distinct
 
     titleNodes match {
-      case Nil   => Left(new Throwable("Could not parse title from METS XML"))
+      case Nil   => Right("")
       case nodes => Right(nodes.map(_.text).mkString(" "))
     }
   }
