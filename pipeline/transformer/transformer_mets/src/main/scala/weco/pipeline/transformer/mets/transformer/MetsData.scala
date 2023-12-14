@@ -7,13 +7,13 @@ import weco.catalogue.internal_model.image.ImageData
 import weco.catalogue.internal_model.locations._
 import weco.catalogue.internal_model.work.DeletedReason.DeletedFromSource
 import weco.catalogue.internal_model.work.InvisibilityReason.MetsWorksAreNotVisible
-import weco.catalogue.internal_model.work.{Item, MergeCandidate, Work, WorkData}
-import weco.pipeline.transformer.identifiers.SourceIdentifierValidation._
+import weco.catalogue.internal_model.work.{Item, Work, WorkData}
 import weco.pipeline.transformer.mets.transformer.models.FileReference
 import weco.pipeline.transformer.mets.transformers.{
   MetsAccessConditions,
   MetsImageData,
   MetsLocation,
+  MetsMergeCandidate,
   MetsThumbnail,
   MetsTitle
 }
@@ -76,7 +76,7 @@ case class InvisibleMetsData(
       state = Source(
         sourceIdentifier = sourceIdentifier,
         sourceModifiedTime = modifiedTime,
-        mergeCandidates = List(mergeCandidate)
+        mergeCandidates = List(MetsMergeCandidate(recordIdentifier))
       ),
       data = WorkData[DataState.Unidentified](
         title = Some(title),
@@ -97,23 +97,6 @@ case class InvisibleMetsData(
       invisibilityReasons = List(MetsWorksAreNotVisible)
     )
   }
-
-  private def mergeCandidate = MergeCandidate(
-    identifier = SourceIdentifier(
-      identifierType = IdentifierType.SierraSystemNumber,
-      ontologyType = "Work",
-      // We lowercase the b number in the METS file so it matches the
-      // case used by Sierra.
-      // e.g. b20442233 has the identifier "B20442233" in the METS file,
-      //
-      value = recordIdentifier.toLowerCase
-    ).validatedWithWarning.getOrElse(
-      throw new RuntimeException(
-        s"METS works must have a valid Sierra merge candidate: ${recordIdentifier.toLowerCase} is not valid."
-      )
-    ),
-    reason = "METS work"
-  )
 
   private def imageData(
     version: Int,
