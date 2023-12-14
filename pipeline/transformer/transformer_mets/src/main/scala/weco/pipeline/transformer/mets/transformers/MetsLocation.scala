@@ -14,11 +14,12 @@ object MetsLocation {
     recordIdentifier: String,
     license: Option[License],
     accessStatus: Option[AccessStatus],
-    accessConditionUsage: Option[String]
+    accessConditionUsage: Option[String],
+    locationPrefix: String
   ): DigitalLocation =
     DigitalLocation(
       url =
-        s"https://iiif.wellcomecollection.org/presentation/v2/$recordIdentifier",
+        s"https://iiif.wellcomecollection.org/presentation/$locationPrefix/$recordIdentifier",
       locationType = LocationType.IIIFPresentationAPI,
       license = license,
       accessConditions = accessConditions(accessStatus, accessConditionUsage)

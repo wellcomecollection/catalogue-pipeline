@@ -57,10 +57,11 @@ case class InvisibleMetsData(
   recordIdentifier: String,
   title: String,
   accessConditions: MetsAccessConditions,
-  fileReferences: List[FileReference] = Nil,
-  thumbnailReference: Option[FileReference] = None,
   version: Int,
-  modifiedTime: Instant
+  modifiedTime: Instant,
+  locationPrefix: String,
+  fileReferences: List[FileReference] = Nil,
+  thumbnailReference: Option[FileReference] = None
 ) extends MetsData {
 
   def toWork: Work[Source] = {
@@ -68,7 +69,8 @@ case class InvisibleMetsData(
       recordIdentifier = recordIdentifier,
       license = accessConditions.licence,
       accessStatus = accessConditions.accessStatus,
-      accessConditionUsage = accessConditions.usage
+      accessConditionUsage = accessConditions.usage,
+      locationPrefix = locationPrefix
     )
     val item = Item[IdState.Unminted](
       id = IdState.Unidentifiable,
@@ -150,6 +152,10 @@ object InvisibleMetsData {
     version: Int,
     modifiedTime: Instant
   ): Result[InvisibleMetsData] = {
+    val locationPrefix = filesRoot match {
+      case _: GoobiMetsXml         => "v2"
+      case _: ArchivematicaMetsXML => "collections/archives"
+    }
     for {
       id <- root.recordIdentifier
       title <- MetsTitle(root.root)
@@ -158,10 +164,11 @@ object InvisibleMetsData {
       recordIdentifier = id,
       title = title,
       accessConditions = accessConditions,
+      version = version,
+      modifiedTime = modifiedTime,
+      locationPrefix = locationPrefix,
       fileReferences = FileReferences(filesRoot),
-      thumbnailReference = ThumbnailReference(filesRoot),
-      version: Int,
-      modifiedTime: Instant
+      thumbnailReference = ThumbnailReference(filesRoot)
     )
   }
 }
