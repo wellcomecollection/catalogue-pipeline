@@ -64,14 +64,6 @@ class MetsXmlTransformerTest
     transform(root = None, createdDate = Instant.now) shouldBe a[Left[_, _]]
   }
 
-  it("transforms A METS XML") {
-    val xml = readResource("with-rights.xml")
-    val now = Instant.now
-    val transformed = transform(root = Some(xml), createdDate = now)
-    val w = transformed.right.get.toWork
-    println(w)
-  }
-
   it("transforms METS XML with manifestations") {
     val xml = readResource("b22012692.xml")
     val manifestations = Map(
