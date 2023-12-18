@@ -6,6 +6,7 @@ import weco.catalogue.internal_model.identifiers.{
   SourceIdentifier
 }
 import weco.catalogue.internal_model.work.MergeCandidate
+import weco.pipeline.transformer.identifiers.IdentifierRegexes.sierraSystemNumber
 import weco.pipeline.transformer.identifiers.SourceIdentifierValidation._
 
 /** A Merge candidate from METS can be a record from either
@@ -19,7 +20,8 @@ object MetsMergeCandidate {
       // It's slightly crude to make this guess based solely on the format of the
       // identifier, as any path-like string could look like a CALM refno.
       // However, it should work for the values we expect to be given here.
-      case bnumber if Seq('b', 'B').contains(bnumber.charAt(0)) =>
+      case bnumber
+          if sierraSystemNumber.findFirstIn(bnumber.toLowerCase).isDefined =>
         mergeCandidate(
           identifierType = IdentifierType.SierraSystemNumber,
           identifier = recordIdentifier.toLowerCase
