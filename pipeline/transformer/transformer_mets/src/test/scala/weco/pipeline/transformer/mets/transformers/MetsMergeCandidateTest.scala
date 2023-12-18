@@ -15,6 +15,13 @@ class MetsMergeCandidateTest extends AnyFunSpec with Matchers {
         "b12345678"
       ).id.sourceIdentifier.identifierType shouldBe IdentifierType.SierraSystemNumber
     }
+    it(
+      "also works with uppercase B-Numbers"
+    ) {
+      MetsMergeCandidate(
+        "B12345678"
+      ).id.sourceIdentifier.identifierType shouldBe IdentifierType.SierraSystemNumber
+    }
 
     it("returns a CALM merge candidate if the id is a CALM reference number") {
       MetsMergeCandidate(
