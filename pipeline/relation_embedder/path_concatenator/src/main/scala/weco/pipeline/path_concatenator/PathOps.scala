@@ -11,6 +11,9 @@ object PathOps {
 
     lazy val isCircular: Boolean =
       path.indexOf("/") != -1 && firstNode == lastNode
+
+    lazy val isSimple: Boolean =
+      path.indexOf("/") == -1
   }
   def concatenatePaths(parentPath: String, childPath: String): String = {
     val childRoot = childPath.firstNode
