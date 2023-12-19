@@ -7,6 +7,6 @@ services:
     ports:
       - "4566:4566"
   dynamodb:
-    image: "public.ecr.aws/aws-dynamodb-local/aws-dynamodb-local"
+    image: "public.ecr.aws/aws-dynamodb-local/aws-dynamodb-local:2.1.0"
     ports:
       - "45678:8000"
