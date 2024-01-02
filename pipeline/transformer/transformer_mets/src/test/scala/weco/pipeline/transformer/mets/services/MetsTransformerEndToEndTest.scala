@@ -13,7 +13,7 @@ import weco.fixtures.TestWith
 import weco.messaging.fixtures.SQS.QueuePair
 import weco.messaging.memory.MemoryMessageSender
 import weco.pipeline.transformer.TransformerWorker
-import weco.pipeline.transformer.mets.generators.MetsGenerators
+import weco.pipeline.transformer.mets.generators.GoobiMetsGenerators
 import weco.pipeline.transformer.mets.transformer.MetsXmlTransformer
 import weco.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 import weco.pipeline_storage.memory.{MemoryIndexer, MemoryRetriever}
@@ -34,13 +34,14 @@ class MetsTransformerEndToEndTest
     with S3ObjectLocationGenerators
     with Eventually
     with IntegrationPatience
-    with MetsGenerators {
+    with GoobiMetsGenerators {
   it("receives a payload, transforms into a work and sends it on") {
     withWorker() {
       case (_, QueuePair(queue, dlq), indexer, messageSender, store) =>
         val metsPayload =
           createAndStorePayloadWith(createSierraBibNumber.withCheckDigit, 1)(
-            store)
+            store
+          )
         sendNotificationToSQS(queue, metsPayload)
 
         eventually {
@@ -61,43 +62,50 @@ class MetsTransformerEndToEndTest
   }
 
   def withWorker[R](
-    workIndexer: MemoryIndexer[Work[Source]] = new MemoryIndexer[Work[Source]](),
+    workIndexer: MemoryIndexer[Work[Source]] =
+      new MemoryIndexer[Work[Source]](),
     workKeySender: MemoryMessageSender = new MemoryMessageSender(),
     store: MemoryTypedStore[S3ObjectLocation, String] =
       MemoryTypedStore[S3ObjectLocation, String](initialEntries = Map.empty)
   )(
     testWith: TestWith[
-      (TransformerWorker[MetsSourcePayload, MetsSourceData, String],
-       QueuePair,
-       MemoryIndexer[Work[Source]],
-       MemoryMessageSender,
-       MemoryTypedStore[S3ObjectLocation, String]),
-      R]
+      (
+        TransformerWorker[MetsSourcePayload, MetsSourceData, String],
+        QueuePair,
+        MemoryIndexer[Work[Source]],
+        MemoryMessageSender,
+        MemoryTypedStore[S3ObjectLocation, String]
+      ),
+      R
+    ]
   ): R =
     withLocalSqsQueuePair(visibilityTimeout = 1.second) {
       case q @ QueuePair(queue, _) =>
         withPipelineStream[Work[Source], R](
           queue = queue,
           indexer = workIndexer,
-          sender = workKeySender) { pipelineStream =>
-          val retriever =
-            new MemoryRetriever[Work[Source]](index = mutable.Map())
+          sender = workKeySender
+        ) {
+          pipelineStream =>
+            val retriever =
+              new MemoryRetriever[Work[Source]](index = mutable.Map())
 
-          val worker =
-            new TransformerWorker[MetsSourcePayload, MetsSourceData, String](
-              transformer = new MetsXmlTransformer(store),
-              pipelineStream = pipelineStream,
-              retriever = retriever,
-              sourceDataRetriever = new MetsSourceDataRetriever
-            )
-          worker.run()
+            val worker =
+              new TransformerWorker[MetsSourcePayload, MetsSourceData, String](
+                transformer = new MetsXmlTransformer(store),
+                pipelineStream = pipelineStream,
+                retriever = retriever,
+                sourceDataRetriever = new MetsSourceDataRetriever
+              )
+            worker.run()
 
-          testWith((worker, q, workIndexer, workKeySender, store))
+            testWith((worker, q, workIndexer, workKeySender, store))
 
         }
     }
   def createAndStorePayloadWith(id: String, version: Int)(
-    store: MemoryTypedStore[S3ObjectLocation, String]): MetsSourcePayload = {
+    store: MemoryTypedStore[S3ObjectLocation, String]
+  ): MetsSourcePayload = {
 
     val metsXML = metsXmlWith(
       recordIdentifier = id,
