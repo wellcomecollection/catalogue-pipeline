@@ -170,6 +170,7 @@ class ThumbnailReferenceTest
 
 case class ThumbnailMetsXml(root: Elem) extends MetsXml {
   val objectsFileGroupUse: String = ""
+
   def firstManifestationFilename: Either[Exception, String] = Left(
     new NotImplementedException
   )
