@@ -4,7 +4,7 @@ import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.fixtures.LocalResources
-import weco.pipeline.transformer.mets.generators.MetsGenerators
+import weco.pipeline.transformer.mets.generators.GoobiMetsGenerators
 import weco.pipeline.transformer.mets.transformer.MetsXml
 
 class ModsAccessConditionsTest
@@ -12,7 +12,7 @@ class ModsAccessConditionsTest
     with Matchers
     with EitherValues
     with LocalResources
-    with MetsGenerators {
+    with GoobiMetsGenerators {
   val xml = MetsXml(readResource("b30246039.xml")).value.root
 
   it("parses accessConditionDz from XML") {
