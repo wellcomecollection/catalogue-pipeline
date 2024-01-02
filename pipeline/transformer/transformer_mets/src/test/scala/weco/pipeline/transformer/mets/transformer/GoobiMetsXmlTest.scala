@@ -4,7 +4,7 @@ import org.scalatest.{EitherValues, LoneElement}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.fixtures.LocalResources
-import weco.pipeline.transformer.mets.generators.MetsGenerators
+import weco.pipeline.transformer.mets.generators.GoobiMetsGenerators
 import weco.pipeline.transformer.mets.transformer.models.FileReference
 
 class GoobiMetsXmlTest
@@ -12,7 +12,7 @@ class GoobiMetsXmlTest
     with Matchers
     with EitherValues
     with LocalResources
-    with MetsGenerators
+    with GoobiMetsGenerators
     with LoneElement {
 
   val xml = readResource("b30246039.xml")

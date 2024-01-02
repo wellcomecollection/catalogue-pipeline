@@ -3,14 +3,14 @@ import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.fixtures.LocalResources
-import weco.pipeline.transformer.mets.generators.MetsGenerators
+import weco.pipeline.transformer.mets.generators.GoobiMetsGenerators
 
 class TitlePageIdTest
     extends AnyFunSpec
     with Matchers
     with EitherValues
     with LocalResources
-    with MetsGenerators {
+    with GoobiMetsGenerators {
 
   describe("finding the title page id") {
 
