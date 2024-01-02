@@ -26,7 +26,7 @@ class PathsService(elasticClient: ElasticClient, index: Index)(
   import PathOps._
 
   def getParentPath(path: String): Future[Option[String]] = {
-    if (path.isCircular) {
+    if (path.isCircular || path.isSimple) {
       Future(None)
     } else {
       val request: SearchRequest = requestBuilder.parentPath(path)
