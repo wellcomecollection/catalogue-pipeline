@@ -1,5 +1,7 @@
 package weco.pipeline.transformer.mets.transformer.models
 
+import weco.pipeline.transformer.mets.transformer.MetsXml
+
 import scala.xml.{Elem, Node, NodeSeq}
 
 /*
@@ -10,26 +12,37 @@ import scala.xml.{Elem, Node, NodeSeq}
  * */
 object ThumbnailReference extends XMLOps {
 
-  def apply(root: Elem): Option[FileReference] = {
-    implicit val r: Elem = root
-    titlePageFileNode.orElse(firstThumbnailableFileNode).map {
-      fileElement =>
-        val href =
-          fileElement \ "FLocat" \@ "{http://www.w3.org/1999/xlink}href"
-        FileReference(
-          id = fileElement \@ "ID",
-          location = href,
-          listedMimeType = Option(fileElement \@ "MIMETYPE").filter(_.nonEmpty)
-        )
+  def apply(metsXml: MetsXml): Option[FileReference] = {
+    implicit val r: Elem = metsXml.root
+    titlePageFileNode
+      .orElse(firstThumbnailableFileNode(metsXml.physicalFileIds))
+      .map {
+        fileElement =>
+          val href =
+            fileElement \ "FLocat" \@ "{http://www.w3.org/1999/xlink}href"
+          FileReference(
+            id = fileElement \@ "ID",
+            location = href,
+            listedMimeType =
+              Option(fileElement \@ "MIMETYPE").filter(_.nonEmpty)
+          )
+      }
+  }
+  private def firstThumbnailableFileNode(
+    order: Seq[String]
+  )(implicit root: Elem): Option[Node] = {
+    order.view map {
+      fileId =>
+        validFileNodeWithId(fileId).map {
+          node => (node, node \@ "MIMETYPE")
+        }
+    } collectFirst {
+      case Some((node, mime))
+          if mime == "application/pdf" || mime.startsWith("image") =>
+        node
     }
   }
-  private def firstThumbnailableFileNode(implicit root: Elem): Option[Node] =
-    fileNodes.find {
-      node =>
-        val mime = node \@ "MIMETYPE"
-        isValidForFileReference(node) && (mime == "application/pdf" || mime
-          .startsWith("image"))
-    }
+
   private def titlePageFileNode(implicit root: Elem): Option[Node] = {
     TitlePageId(root).flatMap(fileIdFromPhysicalId).flatMap(validFileNodeWithId)
   }

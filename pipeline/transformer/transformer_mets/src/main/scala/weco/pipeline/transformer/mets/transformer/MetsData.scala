@@ -8,7 +8,10 @@ import weco.catalogue.internal_model.locations._
 import weco.catalogue.internal_model.work.DeletedReason.DeletedFromSource
 import weco.catalogue.internal_model.work.InvisibilityReason.MetsWorksAreNotVisible
 import weco.catalogue.internal_model.work.{Item, Work, WorkData}
-import weco.pipeline.transformer.mets.transformer.models.FileReference
+import weco.pipeline.transformer.mets.transformer.models.{
+  FileReference,
+  ThumbnailReference
+}
 import weco.pipeline.transformer.mets.transformers.{
   MetsAccessConditions,
   MetsImageData,
@@ -138,7 +141,7 @@ object InvisibleMetsData {
       title = title,
       accessConditions = accessConditions,
       fileReferences = filesRoot.fileReferences,
-      thumbnailReference = filesRoot.thumbnailReference,
+      thumbnailReference = ThumbnailReference(filesRoot),
       version: Int,
       modifiedTime: Instant
     )
