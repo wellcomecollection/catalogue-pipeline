@@ -27,61 +27,37 @@ variable "release_label" {
   type = string
 }
 
-# This allows us to choose the size of the Elasticsearch cluster.
-#
-# There are three sizes we can choose from:
-#
-#     * 58GB x 2 = a 2-node instance with lots of memory, when we know we're
-#       going to be sending the cluster lots of traffic.
-#
-#       This is what we use when reindexing.  It's auto-selected if you
-#       enable `scale_up_elastic_cluster` = true.
-#
-#       Cost: ~$130/day
-#
-#     * 8GB x 3 = a 3-node, HA instance with enough memory to serve
-#       prod API traffic.
-#
-#       Cost: ~$30/day
-#
-#     * 2GB x 2 = a 2-node instance with just enough memory and storage,
-#       when we want to keep a cluster around (e.g. for investigation, or
-#       if we want to keep it just-in-case we need a rollback), but don't
-#       need it ready to serve traffic immediately.
-#
-#       Cost: ~$6.50/day
-#
-variable "es_cluster_size" {
-  description = "How big should the Elastic cluster be?"
-  default     = "3x8g"
+variable "es_cluster_nodes" {
+  type        = number
+  description = "How many nodes should the cluster have?"
+  default     = 3
+}
 
-  validation {
-    condition     = contains(["2x58g", "3x8g", "3x2g"], var.es_cluster_size)
-    error_message = "Cooldown period should be one of: 2x58g, 3x8g, 3x2g."
-  }
+variable "es_cluster_memory" {
+  type        = string
+  description = "How much memory should the cluster have?"
+  default     = "8g"
+}
+
+variable "es_cluster_deployment_template" {
+  type        = string
+  description = "Which hardware profile should the cluster use? Choose from https://www.elastic.co/guide/en/cloud/current/ec-regions-templates-instances.html#eu-west-1"
+  default     = "aws-io-optimized-v2"
 }
 
 locals {
-  es_memory_lookup = {
-    "2x58g" : "58g"
-    "3x8g" : "8g"
-    "3x2g" : "2g"
-  }
-
-  es_node_lookup = {
-    "2x58g" : 2
-    "3x8g" : 3
-    "3x2g" : 3
-  }
-
-  es_memory = var.reindexing_state.scale_up_elastic_cluster ? "58g" : local.es_memory_lookup[var.es_cluster_size]
+  es_memory = var.reindexing_state.scale_up_elastic_cluster ? "58g" : var.es_cluster_memory
 
   # When we're reindexing, this cluster isn't depended on for anything.
   # It's ephemeral data (and at 58GB of memory, expensive).
   #
   # Once we stop reindexing and make the pipeline live, we want it to be
   # highly available, because it's serving API traffic.
-  es_node_count = var.reindexing_state.scale_up_elastic_cluster ? 2 : local.es_node_lookup[var.es_cluster_size]
+  es_node_count = var.reindexing_state.scale_up_elastic_cluster ? 2 : var.es_cluster_nodes
+
+  # aws-storage-optimized uses the same instances as the old (deprecated) default we used of "aws-io-optimized-v2"
+  # CPU-optimized might be best for reindexing as well but now (3/1/2024) we are just looking at search performance
+  es_deployment_template_id = var.reindexing_state.scale_up_elastic_cluster ? "aws-storage-optimized" : var.es_cluster_deployment_template
 }
 
 variable "index_config" {
