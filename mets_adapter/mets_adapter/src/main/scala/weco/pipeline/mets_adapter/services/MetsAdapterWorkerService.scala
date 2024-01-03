@@ -55,7 +55,7 @@ class MetsAdapterWorkerService[Destination](
       source => {
         source
           .via(unwrapMessage)
-          .via(filterDigitised)
+          .via(filterBySpace)
           .via(retrieveBag)
           .via(parseMetsSourceData)
           .via(storeMetsSourceData)
@@ -80,16 +80,17 @@ class MetsAdapterWorkerService[Destination](
   // Bags in the storage service are grouped by "space", e.g. "digitised" or
   // "born-digital".
   //
-  // For the catalogue pipeline, we're only interested in the digitised content,
+  // For the catalogue pipeline, we're only interested in the digitised and born-digital content,
   // so we can discard everything else.
-  def filterDigitised =
+  def filterBySpace =
     Flow[(Context, BagRegistrationNotification)]
       .map {
-        case (ctx, notification) if notification.space == "digitised" =>
+        case (ctx, notification)
+            if Seq("digitised", "born-digital").contains(notification.space) =>
           (ctx, Some(notification))
         case (ctx, notification) =>
           info(
-            s"Skipping notification $notification because it is not in the digitised space"
+            s"Skipping notification $notification because it is not in either of the digitised or born-digital space"
           )
           (ctx, None)
       }
