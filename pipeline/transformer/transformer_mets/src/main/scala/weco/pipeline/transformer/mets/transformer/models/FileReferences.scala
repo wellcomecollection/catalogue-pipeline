@@ -4,8 +4,9 @@ import weco.pipeline.transformer.mets.transformer.MetsXml
 
 object FileReferences extends XMLOps {
   def apply(metsXml: MetsXml): List[FileReference] = {
-    implicit val x: MetsXml = metsXml
-    metsXml.physicalFileIds.flatMap(fileId => getFileReferences(fileId)).toList
+    metsXml.physicalFileIds
+      .flatMap(fileId => getFileReferences(metsXml, fileId))
+      .toList
   }
 
   /** The METS XML contains locations of associated files, contained in a
@@ -28,20 +29,22 @@ object FileReferences extends XMLOps {
     *  FileReference("FILE_0002_OBJECTS", "objects/b30246039_0002.jp2", Some("image/jp2"))
     * }}}
     */
-  private def getFileReferences(id: String)(
-    implicit metsXml: MetsXml
-  ): Seq[FileReference] = for {
-    fileGrp <- metsXml.root \ "fileSec" \ "fileGrp"
-    objects <- fileGrp.find(_ \@ "USE" == metsXml.objectsFileGroupUse)
-    listedFiles = objects \ "file"
-    file <- listedFiles.find(_ \@ "ID" == id)
-    objectHref <- (file \ "FLocat").headOption
-      .map(_ \@ "{http://www.w3.org/1999/xlink}href")
-    if objectHref.nonEmpty
-  } yield FileReference(
-    id,
-    objectHref,
-    Option(file \@ "MIMETYPE").filter(_.nonEmpty)
-  )
+  private def getFileReferences(
+    metsXml: MetsXml,
+    id: String
+  ): Seq[FileReference] =
+    for {
+      fileGrp <- metsXml.root \ "fileSec" \ "fileGrp"
+      objects <- fileGrp.find(_ \@ "USE" == metsXml.objectsFileGroupUse)
+      listedFiles = objects \ "file"
+      file <- listedFiles.find(_ \@ "ID" == id)
+      objectHref <- (file \ "FLocat").headOption
+        .map(_ \@ "{http://www.w3.org/1999/xlink}href")
+      if objectHref.nonEmpty
+    } yield FileReference(
+      id,
+      objectHref,
+      Option(file \@ "MIMETYPE").filter(_.nonEmpty)
+    )
 
 }
