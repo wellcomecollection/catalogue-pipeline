@@ -150,7 +150,7 @@ object MetsXml {
   private def isGoobi(root: Elem): Boolean =
     (root \ "metsHdr" \ "agent" \ "name").text.contains("Goobi")
 
-  private def isArchiveMatica(root: Elem): Boolean =
+  private def isArchivematica(root: Elem): Boolean =
     (root \ "amdSec" \ "digiprovMD" \ "mdWrap" \ "xmlData" \ "agent" \ "agentName").text
       .contains("Archivematica")
 
