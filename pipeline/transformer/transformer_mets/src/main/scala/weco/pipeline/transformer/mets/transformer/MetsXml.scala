@@ -139,7 +139,7 @@ object MetsXml {
   def apply(root: Elem): MetsXml = {
     if (isGoobi(root)) {
       GoobiMetsXml(root)
-    } else if (isArchiveMatica(root)) {
+    } else if (isArchivematica(root)) {
       ArchivematicaMetsXML(root)
     } else {
       throw new NotImplementedError(

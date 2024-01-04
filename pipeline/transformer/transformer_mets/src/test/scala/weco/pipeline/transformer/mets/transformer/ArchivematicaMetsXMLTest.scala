@@ -44,7 +44,7 @@ class ArchivematicaMetsXMLTest
       }
       it("fails if a document has no rights information") {
         ArchivematicaMetsXML(
-          archiveMaticaMetsWithNoRights
+          archivematicaMetsWithNoRights
         ).accessConditions shouldBe a[Left[_, _]]
       }
 
