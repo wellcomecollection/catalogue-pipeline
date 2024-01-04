@@ -5,7 +5,11 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.fixtures.LocalResources
 import weco.pipeline.transformer.mets.generators.GoobiMetsGenerators
-import weco.pipeline.transformer.mets.transformer.models.FileReference
+import weco.pipeline.transformer.mets.transformer.models.{
+  FileReference,
+  FileReferences,
+  ThumbnailReference
+}
 
 class GoobiMetsXmlTest
     extends AnyFunSpec
@@ -16,10 +20,6 @@ class GoobiMetsXmlTest
     with LoneElement {
 
   val xml = readResource("b30246039.xml")
-
-  it("fails if the input string is not an xml") {
-    MetsXml("hagdf") shouldBe a[Left[_, _]]
-  }
 
   it("parses recordIdentifier from XML") {
     MetsXml(xml).value.recordIdentifier shouldBe Right("b30246039")
@@ -41,6 +41,14 @@ class GoobiMetsXmlTest
     ]
   }
 
+  it("parses thumbnail from XML") {
+    ThumbnailReference(
+      MetsXml(
+        xml
+      ).value
+    ).get.location shouldBe "objects/b30246039_0006.jp2"
+  }
+
   it("only fetches one fileReference per file") {
     info(
       "according to the schema (https://www.loc.gov/standards/mets/mets.xsd)"
@@ -49,18 +57,20 @@ class GoobiMetsXmlTest
       "each FLocat underneath a single file element should identify/contain identical copies of a single file."
     )
     info("we normally only have one <FLocat> per <file>.")
-    MetsXml(
-      metsXmlWith(
-        recordIdentifier = "deadbeef",
-        fileSec = <mets:fileSec><mets:fileGrp USE="OBJECTS">
+    FileReferences(
+      MetsXml(
+        goobiMetsXmlWith(
+          recordIdentifier = "deadbeef",
+          fileSec = <mets:fileSec><mets:fileGrp USE="OBJECTS">
         <mets:file ID="FILE_0001_OBJECTS" MIMETYPE="image/jp2">
           <mets:FLocat LOCTYPE="URL" xlink:href="objects/hello_0001.jp2"/>
           <mets:FLocat LOCTYPE="URL" xlink:href="objects/hello_0002.jp2"/>
         </mets:file>
       </mets:fileGrp></mets:fileSec>,
-        structMap = structMap
-      )
-    ).value.fileReferences shouldBe List(
+          structMap = structMap
+        )
+      ).value
+    ) shouldBe List(
       FileReference(
         id = "FILE_0001_OBJECTS",
         location = "objects/hello_0001.jp2",
@@ -70,19 +80,21 @@ class GoobiMetsXmlTest
   }
 
   it("skips over unusable file definitions, but returns good ones") {
-    MetsXml(
-      metsXmlWith(
-        recordIdentifier = "deadbeef",
-        fileSec = <mets:fileSec><mets:fileGrp USE="OBJECTS">
+    FileReferences(
+      MetsXml(
+        goobiMetsXmlWith(
+          recordIdentifier = "deadbeef",
+          fileSec = <mets:fileSec><mets:fileGrp USE="OBJECTS">
         <mets:file ID="FILE_0001_OBJECTS" MIMETYPE="image/jp2">
         </mets:file>
         <mets:file ID="FILE_0002_OBJECTS" MIMETYPE="image/jp2">
           <mets:FLocat LOCTYPE="URL" xlink:href="objects/hello_0002.jp2"/>
         </mets:file>
       </mets:fileGrp></mets:fileSec>,
-        structMap = structMap
-      )
-    ).value.fileReferences shouldBe List(
+          structMap = structMap
+        )
+      ).value
+    ) shouldBe List(
       FileReference(
         id = "FILE_0002_OBJECTS",
         location = "objects/hello_0002.jp2",
@@ -92,17 +104,19 @@ class GoobiMetsXmlTest
   }
 
   it("guesses the mime type if none is provided") {
-    val reference = MetsXml(
-      metsXmlWith(
-        recordIdentifier = "deadbeef",
-        fileSec = <mets:fileSec><mets:fileGrp USE="OBJECTS">
+    val reference = FileReferences(
+      MetsXml(
+        goobiMetsXmlWith(
+          recordIdentifier = "deadbeef",
+          fileSec = <mets:fileSec><mets:fileGrp USE="OBJECTS">
           <mets:file ID="FILE_0001_OBJECTS">
             <mets:FLocat LOCTYPE="URL" xlink:href="objects/hello_0001.pdf"/>
           </mets:file>
         </mets:fileGrp></mets:fileSec>,
-        structMap = structMap
-      )
-    ).value.fileReferences.loneElement
+          structMap = structMap
+        )
+      ).value
+    ).loneElement
 
     reference shouldBe FileReference(
       id = "FILE_0001_OBJECTS",
@@ -113,17 +127,19 @@ class GoobiMetsXmlTest
   }
 
   it("treats an empty mimetype the same as an absent mimetype") {
-    val reference = MetsXml(
-      metsXmlWith(
-        recordIdentifier = "deadbeef",
-        fileSec = <mets:fileSec><mets:fileGrp USE="OBJECTS">
+    val reference = FileReferences(
+      MetsXml(
+        goobiMetsXmlWith(
+          recordIdentifier = "deadbeef",
+          fileSec = <mets:fileSec><mets:fileGrp USE="OBJECTS">
           <mets:file ID="FILE_0001_OBJECTS">
             <mets:FLocat LOCTYPE="URL" xlink:href="objects/hello_0001.pdf" MIMETYPE=""/>
           </mets:file>
         </mets:fileGrp></mets:fileSec>,
-        structMap = structMap
-      )
-    ).value.fileReferences.loneElement
+          structMap = structMap
+        )
+      ).value
+    ).loneElement
 
     reference shouldBe FileReference(
       id = "FILE_0001_OBJECTS",
@@ -134,17 +150,19 @@ class GoobiMetsXmlTest
   }
 
   it("returns no mime type if it cannot be guessed") {
-    val reference = MetsXml(
-      metsXmlWith(
-        recordIdentifier = "deadbeef",
-        fileSec = <mets:fileSec><mets:fileGrp USE="OBJECTS">
+    val reference = FileReferences(
+      MetsXml(
+        goobiMetsXmlWith(
+          recordIdentifier = "deadbeef",
+          fileSec = <mets:fileSec><mets:fileGrp USE="OBJECTS">
           <mets:file ID="FILE_0001_OBJECTS">
             <mets:FLocat LOCTYPE="URL" xlink:href="objects/hello_0001.unknownextension"/>
           </mets:file>
         </mets:fileGrp></mets:fileSec>,
-        structMap = structMap
-      )
-    ).value.fileReferences.loneElement
+          structMap = structMap
+        )
+      ).value
+    ).loneElement
 
     reference shouldBe FileReference(
       id = "FILE_0001_OBJECTS",
@@ -155,34 +173,38 @@ class GoobiMetsXmlTest
   }
 
   it("does not return a filereference if a file has no FLocat ") {
-    MetsXml(
-      metsXmlWith(
-        recordIdentifier = "deadbeef",
-        fileSec = <mets:fileSec><mets:fileGrp USE="OBJECTS">
+    FileReferences(
+      MetsXml(
+        goobiMetsXmlWith(
+          recordIdentifier = "deadbeef",
+          fileSec = <mets:fileSec><mets:fileGrp USE="OBJECTS">
         <mets:file ID="FILE_0001_OBJECTS" MIMETYPE="image/jp2">
         </mets:file>
       </mets:fileGrp></mets:fileSec>,
-        structMap = structMap
-      )
-    ).value.fileReferences shouldBe Nil
+          structMap = structMap
+        )
+      ).value
+    ) shouldBe Nil
   }
 
   it("does not return a filereference if an FLocat has no href") {
-    MetsXml(
-      metsXmlWith(
-        recordIdentifier = "deadbeef",
-        fileSec = <mets:fileSec><mets:fileGrp USE="OBJECTS">
+    FileReferences(
+      MetsXml(
+        goobiMetsXmlWith(
+          recordIdentifier = "deadbeef",
+          fileSec = <mets:fileSec><mets:fileGrp USE="OBJECTS">
           <mets:file ID="FILE_0001_OBJECTS" MIMETYPE="image/jp2">
             <mets:FLocat LOCTYPE="URL"/>
           </mets:file>
         </mets:fileGrp></mets:fileSec>,
-        structMap = structMap
-      )
-    ).value.fileReferences shouldBe Nil
+          structMap = structMap
+        )
+      ).value
+    ) shouldBe Nil
   }
 
   it("parses file references mapping from XML") {
-    MetsXml(xml).value.fileReferences shouldBe List(
+    FileReferences(MetsXml(xml).value) shouldBe List(
       FileReference(
         id = "FILE_0001_OBJECTS",
         location = "objects/b30246039_0001.jp2",
@@ -216,33 +238,34 @@ class GoobiMetsXmlTest
     )
   }
 
-  it("parses thumbnail from XML") {
-    MetsXml(
-      xml
-    ).value.fileReferences.head.location shouldBe "objects/b30246039_0001.jp2"
-  }
-
   it("parses first thumbnail when no ORDER attribute") {
-    val str = metsXmlWith(
+    val str = goobiMetsXmlWith(
       recordIdentifier = "b30246039",
       fileSec = fileSec(filePrefix = "b30246039"),
       structMap = structMap
     )
-    MetsXml(
-      str
-    ).value.fileReferences.head.location shouldBe "objects/b30246039_0001.jp2"
+    ThumbnailReference(
+      MetsXml(
+        str
+      ).value
+    ).get.location shouldBe "objects/b30246039_0001.jp2"
   }
 
   it("parses thumbnail using ORDER attrib when non-sequential order") {
-    MetsXml(
-      xmlNonSequentialOrder("b30246039")
-    ).value.fileReferences.head.location shouldBe "objects/b30246039_0001.jp2"
+    ThumbnailReference(
+      MetsXml(
+        xmlNonSequentialOrder("b30246039")
+      ).value
+    ).get.location shouldBe "objects/b30246039_0001.jp2"
   }
 
   it("cannot parse thumbnail when invalid file ID") {
-    MetsXml(
-      xmlInvalidFileId("b30246039")
-    ).value.fileReferences.headOption shouldBe None
+    ThumbnailReference(
+      MetsXml(
+        xmlInvalidFileId("b30246039")
+      ).value
+    ) shouldBe None
+
   }
 
   it("parses first manifestation filename when present") {
@@ -302,7 +325,7 @@ class GoobiMetsXmlTest
     </mets:mets>
 
   def xmlNonSequentialOrder(recordIdentifier: String) =
-    metsXmlWith(
+    goobiMetsXmlWith(
       recordIdentifier,
       fileSec = fileSec(recordIdentifier),
       structMap = <mets:structMap TYPE="PHYSICAL">
@@ -319,7 +342,7 @@ class GoobiMetsXmlTest
     )
 
   def xmlInvalidFileId(recordIdentifier: String) =
-    metsXmlWith(
+    goobiMetsXmlWith(
       recordIdentifier,
       fileSec = fileSec(recordIdentifier),
       structMap = <mets:structMap TYPE="PHYSICAL">

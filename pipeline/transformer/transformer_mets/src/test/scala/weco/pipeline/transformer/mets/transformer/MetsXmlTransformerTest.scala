@@ -38,13 +38,15 @@ class MetsXmlTransformerTest
         ),
         fileReferences = fileReferences,
         thumbnailReference = Some(thumbnailRef),
-        1,
-        now
+        version = 1,
+        modifiedTime = now,
+        locationPrefix = "v2"
       )
     )
   }
+
   it("returns empty MetsData if the MetsLocation is marked as deleted") {
-    val str = metsXmlWith(
+    val str = goobiMetsXmlWith(
       recordIdentifier = "b30246039",
       accessConditionStatus = Some("Open"),
       license = Some(License.CC0)
@@ -87,7 +89,8 @@ class MetsXmlTransformerTest
         fileReferences = fileReferences,
         thumbnailReference = Some(thumbnailRef),
         version = 1,
-        modifiedTime = now
+        modifiedTime = now,
+        locationPrefix = "v2"
       )
     )
   }
@@ -103,7 +106,7 @@ class MetsXmlTransformerTest
 
     val manifestations = Map(
       "first.xml" -> Some(
-        metsXmlWith(
+        goobiMetsXmlWith(
           recordIdentifier = "b30246039",
           title = title,
           license = Some(License.InCopyright),
@@ -112,7 +115,7 @@ class MetsXmlTransformerTest
         )
       ),
       "second.xml" -> Some(
-        metsXmlWith(recordIdentifier = "b30246039", title = title)
+        goobiMetsXmlWith(recordIdentifier = "b30246039", title = title)
       )
     )
     val fileReferences = createFileReferences(2, "b30246039")
@@ -126,11 +129,13 @@ class MetsXmlTransformerTest
       InvisibleMetsData(
         recordIdentifier = "b30246039",
         title = title,
-        MetsAccessConditions(licence = Some(License.InCopyright)),
-        fileReferences = createFileReferences(2, "b30246039"),
-        thumbnailReference = Some(thumbnailRef),
+        accessConditions =
+          MetsAccessConditions(licence = Some(License.InCopyright)),
         version = 1,
-        modifiedTime = now
+        modifiedTime = now,
+        locationPrefix = "v2",
+        fileReferences = createFileReferences(2, "b30246039"),
+        thumbnailReference = Some(thumbnailRef)
       )
     )
   }

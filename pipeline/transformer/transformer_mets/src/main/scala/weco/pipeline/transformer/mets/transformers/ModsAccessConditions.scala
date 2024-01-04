@@ -10,7 +10,7 @@ case class ModsAccessConditions(
   dz: Option[String],
   status: Option[String],
   usage: Option[String]
-) {
+) extends AccessConditionsParser {
   def parse: Result[MetsAccessConditions] = {
     for {
       licence <- MetsLicence(dz)

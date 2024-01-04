@@ -10,6 +10,7 @@ import weco.catalogue.internal_model.work.InvisibilityReason.MetsWorksAreNotVisi
 import weco.catalogue.internal_model.work.{Item, Work, WorkData}
 import weco.pipeline.transformer.mets.transformer.models.{
   FileReference,
+  FileReferences,
   ThumbnailReference
 }
 import weco.pipeline.transformer.mets.transformers.{
@@ -56,10 +57,11 @@ case class InvisibleMetsData(
   recordIdentifier: String,
   title: String,
   accessConditions: MetsAccessConditions,
-  fileReferences: List[FileReference] = Nil,
-  thumbnailReference: Option[FileReference] = None,
   version: Int,
-  modifiedTime: Instant
+  modifiedTime: Instant,
+  locationPrefix: String,
+  fileReferences: List[FileReference] = Nil,
+  thumbnailReference: Option[FileReference] = None
 ) extends MetsData {
 
   def toWork: Work[Source] = {
@@ -67,7 +69,8 @@ case class InvisibleMetsData(
       recordIdentifier = recordIdentifier,
       license = accessConditions.licence,
       accessStatus = accessConditions.accessStatus,
-      accessConditionUsage = accessConditions.usage
+      accessConditionUsage = accessConditions.usage,
+      locationPrefix = locationPrefix
     )
     val item = Item[IdState.Unminted](
       id = IdState.Unidentifiable,
@@ -132,6 +135,10 @@ object InvisibleMetsData {
     version: Int,
     modifiedTime: Instant
   ): Result[InvisibleMetsData] = {
+    val locationPrefix = filesRoot match {
+      case _: GoobiMetsXml         => "v2"
+      case _: ArchivematicaMetsXML => "collections/archives"
+    }
     for {
       id <- root.recordIdentifier
       title <- MetsTitle(root.root)
@@ -140,10 +147,11 @@ object InvisibleMetsData {
       recordIdentifier = id,
       title = title,
       accessConditions = accessConditions,
-      fileReferences = filesRoot.fileReferences,
-      thumbnailReference = ThumbnailReference(filesRoot),
-      version: Int,
-      modifiedTime: Instant
+      version = version,
+      modifiedTime = modifiedTime,
+      locationPrefix = locationPrefix,
+      fileReferences = FileReferences(filesRoot),
+      thumbnailReference = ThumbnailReference(filesRoot)
     )
   }
 }

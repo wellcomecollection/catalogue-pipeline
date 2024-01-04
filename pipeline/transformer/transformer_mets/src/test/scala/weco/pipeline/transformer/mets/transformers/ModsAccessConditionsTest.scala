@@ -32,7 +32,7 @@ class ModsAccessConditionsTest
   }
 
   it("gets the first accessConditionStatus if there are more than one") {
-    val str = metsXmlWith(
+    val str = goobiMetsXmlWith(
       recordIdentifier = "b30246039",
       accessConditionStatus = Some("Open"),
       secondarySections =

@@ -1,18 +1,20 @@
 package weco.pipeline.transformer.mets.transformer
 
+import org.apache.commons.lang3.NotImplementedException
 import weco.pipeline.transformer.mets.transformer.models.{FileReference, XMLOps}
 import weco.pipeline.transformer.mets.transformers.{
   MetsAccessConditions,
-  ModsAccessConditions
+  ModsAccessConditions,
+  PremisAccessConditions
 }
 
-import scala.util.Try
-import scala.xml.{Elem, XML}
+import scala.util.{Left, Try}
+import scala.xml.{Elem, NodeSeq, XML}
 
 trait MetsXml extends XMLOps {
   val root: Elem
+  def objectsFileGroupUse: String
   def firstManifestationFilename: Either[Exception, String]
-  def fileReferences: List[FileReference]
   def recordIdentifier: Either[Exception, String]
 
   def accessConditions: Either[Throwable, MetsAccessConditions]
@@ -43,10 +45,43 @@ trait MetsXml extends XMLOps {
       .filter(node => "physical".equalsIgnoreCase(node \@ "TYPE"))
       .descendentsWithTag("div")
       .sortByAttribute("ORDER") \ "fptr").map(_ \@ "FILEID")
-
 }
+case class ArchivematicaMetsXML(root: Elem) extends MetsXml {
+  val objectsFileGroupUse: String = "original"
+  // I don't yet have any examples of records with separate manifestations
+  def firstManifestationFilename: Either[Exception, String] = Left(
+    new NotImplementedException
+  )
 
+  def fileReferences: List[FileReference] = Nil
+
+  def recordIdentifier: Either[Exception, String] =
+    root \ "dmdSec" \ "mdWrap" \ "xmlData" \ "dublincore" \ "identifier" match {
+      case NodeSeq.Empty =>
+        Left(new RuntimeException("could not find record identifier"))
+      case nodeseq if nodeseq.length == 1 => Right(nodeseq.head.text)
+      case _ =>
+        Left(
+          new RuntimeException("multiple candidate record identifiers found")
+        )
+    }
+
+  def accessConditions: Either[Throwable, MetsAccessConditions] =
+    (root \ "amdSec" \ "rightsMD").headOption
+      .map(PremisAccessConditions(_)) match {
+      case Some(conditions) => conditions.parse
+      case None =>
+        Left(
+          new RuntimeException(
+            // I don't yet know if this is strictly true, or whether we can define
+            // a default value for any missing ones.
+            "Archivematica Mets file must contain a premis-compatible rightsMD element"
+          )
+        )
+    }
+}
 case class GoobiMetsXml(root: Elem) extends MetsXml {
+  val objectsFileGroupUse: String = "OBJECTS"
 
   /** The record identifier (generally the B number) is encoded in the METS. For
     * example:
@@ -75,12 +110,6 @@ case class GoobiMetsXml(root: Elem) extends MetsXml {
     }
   }
 
-  /** Here we use the the items defined in the physicalStructMap to look up file
-    * IDs in the (normalised) fileObjects mapping
-    */
-  def fileReferences: List[FileReference] =
-    physicalFileIds.flatMap(fileId => getFileReferences(fileId)).toList
-
   /** Returns the first href to a manifestation in the logical structMap
     */
   def firstManifestationFilename: Either[Exception, String] = {
@@ -102,56 +131,28 @@ case class GoobiMetsXml(root: Elem) extends MetsXml {
     }
   }
 
-  /** The METS XML contains locations of associated files, contained in a
-    * mapping with the following format:
-    *
-    * {{{
-    * <mets:fileSec>
-    *   <mets:fileGrp USE="OBJECTS">
-    *     <mets:file ID="FILE_0001_OBJECTS" MIMETYPE="image/jp2">
-    *       <mets:FLocat LOCTYPE="URL" xlink:href="objects/b30246039_0001.jp2" />
-    *     </mets:file>
-    *     <mets:file ID="FILE_0002_OBJECTS" MIMETYPE="image/jp2">
-    *       <mets:FLocat LOCTYPE="URL" xlink:href="objects/b30246039_0002.jp2" />
-    *     </mets:file>
-    *   </mets:fileGrp>
-    * </mets:fileSec>
-    * }}}
-    * For the id "FILE_0002_OBJECTS", this function would return:
-    * {{{
-    *  FileReference("FILE_0002_OBJECTS", "objects/b30246039_0002.jp2", Some("image/jp2"))
-    * }}}
-    */
-  private def getFileReferences(id: String): Seq[FileReference] =
-    for {
-      fileGrp <- root \ "fileSec" \ "fileGrp"
-      objects <- fileGrp.find(_ \@ "USE" == "OBJECTS")
-      listedFiles = objects \ "file"
-      file <- listedFiles.find(_ \@ "ID" == id)
-      objectHref <- (file \ "FLocat").headOption
-        .map(_ \@ "{http://www.w3.org/1999/xlink}href")
-      if objectHref.nonEmpty
-    } yield FileReference(
-      id,
-      objectHref,
-      Option(file \@ "MIMETYPE").filter(_.nonEmpty)
-    )
-
   lazy val accessConditions: Either[Throwable, MetsAccessConditions] =
     ModsAccessConditions(root).parse
 }
 
 object MetsXml {
   def apply(root: Elem): MetsXml = {
-    val agentName = (root \ "metsHdr" \ "agent" \ "name").text
-    if (agentName.contains("Goobi")) {
+    if (isGoobi(root)) {
       GoobiMetsXml(root)
+    } else if (isArchivematica(root)) {
+      ArchivematicaMetsXML(root)
     } else {
       throw new NotImplementedError(
         "Could not determine which flavour of METS to parse"
       )
     }
   }
+  private def isGoobi(root: Elem): Boolean =
+    (root \ "metsHdr" \ "agent" \ "name").text.contains("Goobi")
+
+  private def isArchivematica(root: Elem): Boolean =
+    (root \ "amdSec" \ "digiprovMD" \ "mdWrap" \ "xmlData" \ "agent" \ "agentName").text
+      .contains("Archivematica")
 
   def apply(str: String): Either[Throwable, MetsXml] =
     Try(XML.loadString(str)).map(MetsXml(_)).toEither

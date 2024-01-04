@@ -107,7 +107,7 @@ class MetsTransformerEndToEndTest
     store: MemoryTypedStore[S3ObjectLocation, String]
   ): MetsSourcePayload = {
 
-    val metsXML = metsXmlWith(
+    val metsXML = goobiMetsXmlWith(
       recordIdentifier = id,
       accessConditionStatus = Some("Open"),
       license = Some(License.CC0)
