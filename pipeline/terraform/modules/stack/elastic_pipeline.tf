@@ -1,5 +1,5 @@
 data "ec_stack" "latest_patch" {
-  version_regex = "8.10.?"
+  version_regex = "8.11.?"
   region        = "eu-west-1"
 }
 
@@ -8,8 +8,8 @@ resource "ec_deployment" "pipeline" {
 
   version = data.ec_stack.latest_patch.version
 
-  region                 = "eu-west-1"
-  deployment_template_id = "aws-io-optimized-v2"
+  region                 = data.ec_stack.latest_patch.region
+  deployment_template_id = local.es_deployment_template_id
 
   traffic_filter = local.network_config.traffic_filters
 
