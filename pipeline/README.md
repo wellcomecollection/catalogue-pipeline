@@ -5,42 +5,45 @@
 How this all fits together
 
 ```mermaid
-flowchart TD
-    start([Source Data Service]) --> Adapter
+flowchart TB
+ start([Source Data Service]) --> Adapter
     storage[(Storage)]
-    matcher_graph[(Matcher Graph)]
-    id_database[(id database)]
-    works_source[(works_source)]
-    works_identified[(works_identified)]
-    works_merged[(works_merged)]
-    works_denormalised[(works_denormalised)]
-    works_indexed[(works_indexed)]
-    router{router}
+
     subgraph Adapter
         direction LR
         adapter --> storage
     end
+
+    works_source[(works_source)]
     subgraph Transformer
         direction LR
         transformer --> works_source
     end
+
+    id_database[(id database)]
+    works_identified[(works_identified)]
     subgraph ID_Minter
         direction LR
         id_minter <--> id_database
         id_minter --> works_identified
     end
 
-    subgraph Matcher/Merger
+    matchergraph[(matcher graph)]
+    works_merged[(works_merged)]
+    subgraph MatcherMerger
         direction LR
-        matcher <--> matcher_graph
+        matcher <--> matchergraph
         matcher --> merger
         merger --> works_merged
+
     end
 
+    works_denormalised[(works_denormalised)]
+    router{router}
     subgraph RelationEmbedder
         direction LR
         router --> path_concatenator
-        path_concatenator <-.-> works_merged
+        path_concatenator <--> works_merged
         path_concatenator --> batcher
         router --> batcher
         batcher --> relation_embedder
@@ -48,6 +51,7 @@ flowchart TD
         router --> works_denormalised
     end
 
+    works_indexed[(works_indexed)]
     subgraph Ingestor
         direction LR
         ingestor --> works_indexed
@@ -55,8 +59,9 @@ flowchart TD
 
     Adapter --> Transformer
     Transformer --> ID_Minter
-    ID_Minter --> Matcher/Merger
-    Matcher/Merger --> RelationEmbedder
+    ID_Minter --> MatcherMerger
+    MatcherMerger --> RelationEmbedder
     RelationEmbedder --> Ingestor
+
 ```
 
