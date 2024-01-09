@@ -39,12 +39,13 @@ flowchart TD
 
     subgraph RelationEmbedder
         direction LR
-        router --> batcher
         router --> path_concatenator
+        path_concatenator <-.-> works_merged
         path_concatenator --> batcher
-        router --> works_denormalised
+        router --> batcher
         batcher --> relation_embedder
         relation_embedder --> works_denormalised
+        router --> works_denormalised
     end
 
     subgraph Ingestor
