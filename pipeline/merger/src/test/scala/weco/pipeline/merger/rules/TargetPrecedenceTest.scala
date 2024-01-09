@@ -26,42 +26,64 @@ class TargetPrecedenceTest
       TargetPrecedence
         .getTarget(
           Seq(
-            tei,
             calm,
             videoSierra,
+            tei,
             multiItemPhysicalSierra,
             digitalSierra,
-            miro)
+            miro
+          )
         )
         .value shouldBe tei
     }
     it("second, chooses a Calm work") {
       TargetPrecedence
         .getTarget(
-          Seq(calm, videoSierra, multiItemPhysicalSierra, digitalSierra, miro)
+          Seq(videoSierra, multiItemPhysicalSierra, digitalSierra, calm, miro)
         )
         .value shouldBe calm
     }
     it("third, chooses a Sierra e-video") {
       TargetPrecedence
         .getTarget(
-          Seq(videoSierra, multiItemPhysicalSierra, digitalSierra, miro)
+          Seq(multiItemPhysicalSierra, digitalSierra, miro, videoSierra)
         )
         .value shouldBe videoSierra
     }
     it("fourth, chooses a physical Sierra work") {
       TargetPrecedence
         .getTarget(
-          Seq(multiItemPhysicalSierra, digitalSierra, miro)
+          Seq(digitalSierra, multiItemPhysicalSierra, miro)
         )
         .value shouldBe multiItemPhysicalSierra
     }
     it("finally, chooses any remaining Sierra work") {
       TargetPrecedence
         .getTarget(
-          Seq(digitalSierra, miro)
+          Seq(miro, digitalSierra)
         )
         .value shouldBe digitalSierra
+    }
+
+    describe("when multiple works have the same precedence") {
+      it("chooses the first of them") {
+        // This test exists to document existing behaviour.
+        // If a better method for ensuring consistency is defined,
+        // then this test should be revised.
+        val digitalSierra2 = sierraDigitalIdentifiedWork()
+        TargetPrecedence
+          .getTarget(
+            Seq(miro, digitalSierra, digitalSierra2)
+          )
+          .value shouldBe digitalSierra
+
+        TargetPrecedence
+          .getTarget(
+            Seq(digitalSierra2, miro, digitalSierra)
+          )
+          .value shouldBe digitalSierra2
+
+      }
     }
   }
 
