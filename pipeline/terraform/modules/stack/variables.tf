@@ -74,3 +74,8 @@ variable "index_config" {
     })
   })
 }
+
+variable "allow_delete_indices" {
+  type    = bool
+  default = false
+}

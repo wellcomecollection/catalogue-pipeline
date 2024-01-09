@@ -17,4 +17,7 @@ variable "config_path" {
   default = ""
 }
 
-
+variable "allow_delete" {
+  type    = bool
+  default = false
+}

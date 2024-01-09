@@ -111,6 +111,8 @@ module "pipeline_storage_secrets_catalogue" {
 module "pipeline_indices" {
   source = "../pipeline_indices"
 
+  allow_delete = var.allow_delete_indices
+
   es_works_source_index       = local.es_works_source_index
   es_works_merged_index       = local.es_works_merged_index
   es_works_identified_index   = local.es_works_identified_index
