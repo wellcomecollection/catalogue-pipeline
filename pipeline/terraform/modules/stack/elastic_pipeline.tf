@@ -9,7 +9,7 @@ resource "ec_deployment" "pipeline" {
   version = data.ec_stack.latest_patch.version
 
   region                 = data.ec_stack.latest_patch.region
-  deployment_template_id = local.es_deployment_template_id
+  deployment_template_id = var.es_cluster_deployment_template
 
   traffic_filter = local.network_config.traffic_filters
 
@@ -110,6 +110,8 @@ module "pipeline_storage_secrets_catalogue" {
 
 module "pipeline_indices" {
   source = "../pipeline_indices"
+
+  allow_delete = var.allow_delete_indices
 
   es_works_source_index       = local.es_works_source_index
   es_works_merged_index       = local.es_works_merged_index

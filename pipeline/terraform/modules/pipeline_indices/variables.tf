@@ -42,3 +42,8 @@ variable "index_config" {
     })
   })
 }
+
+variable "allow_delete" {
+  type    = bool
+  default = false
+}
