@@ -25,15 +25,13 @@ How this fits into the pipeline.
 ```mermaid
 sequenceDiagram
     participant Upstream Queue
-    create participant Matcher
-    Upstream Queue -) Matcher: abc123
+    participant Matcher
     participant Merger
     participant works-merged 🗄
-participant Downstream Queue
+    participant Downstream Queue
 
+Upstream Queue -) Matcher: abc123
 Matcher -) Merger: [abc123, def456, ghi789]
-destroy Matcher
-Matcher --) Upstream Queue: OK
 Merger ->> Merger: Which is the target?
 Note right of Merger: def456 is the target
 
