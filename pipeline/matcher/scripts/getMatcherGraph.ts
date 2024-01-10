@@ -4,7 +4,7 @@ import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocument, QueryCommandInput } from '@aws-sdk/lib-dynamodb';
 import { getCreds } from '@weco/ts-aws/sts';
 import { digraph, INode, RootCluster, toDot } from 'ts-graphviz';
-import { exec } from 'child_process';
+import { execSync } from 'child_process';
 import { SourceWork } from './models';
 import { getAttributes } from './graphAttributes';
 
@@ -20,11 +20,16 @@ type ElasticConfig = {
 
 async function getInput(): Promise<UserInput> {
   let id: string;
-  if (process.argv.length !== 3) {
-    console.error('Usage: getGraph <WORK_ID>');
-    process.exit(1);
-  } else {
+  let specifiedPipelineDate: string | undefined;
+
+  if (process.argv.length === 4) {
+    specifiedPipelineDate = process.argv[3];
     id = process.argv[2];
+  } else if (process.argv.length === 3) {
+    id = process.argv[2];
+  } else {
+    console.error('Usage: getGraph <WORK_ID> [<PIPELINE_DATE>]');
+    process.exit(1);
   }
 
   const resp = await fetch(
@@ -36,7 +41,9 @@ async function getInput(): Promise<UserInput> {
   }
 
   const elasticConfig: ElasticConfig = await resp.json();
-  const pipelineDate = elasticConfig.worksIndex.replace('works-indexed-', '');
+  const pipelineDate =
+    specifiedPipelineDate ??
+    elasticConfig.worksIndex.replace('works-indexed-', '');
 
   return {
     canonicalId: id,
@@ -67,6 +74,8 @@ async function getRelevantWorks(
   input: UserInput
 ): Promise<SourceWork[]> {
   const tableName = `catalogue-${input.pipelineDate}_works-graph`;
+
+  console.log(`Querying ${tableName} for ${input.canonicalId}`);
 
   const output = await client.get({
     TableName: tableName,
@@ -100,20 +109,19 @@ async function getRelevantWorks(
       mergeCandidateIds: item.sourceWork?.mergeCandidateIds,
       suppressed: item.sourceWork?.suppressed,
       componentIds: item.componentIds,
-      sourceIdentifier:
-        item.sourceWork
-          ? {
-              value: item.sourceWork.id.value,
+      sourceIdentifier: item.sourceWork
+        ? {
+            value: item.sourceWork.id.value,
 
-              // This is an artefact of a slightly weird format in DynamoDB,
-              // where the identifierType is recorded as e.g.
-              //
-              //    {"identifierType": {"METS": "METS"}, ...}
-              //
-              // We might simplify this at some point.
-              identifierType: Object.keys(item.sourceWork.id.identifierType)[0],
-            }
-          : undefined,
+            // This is an artefact of a slightly weird format in DynamoDB,
+            // where the identifierType is recorded as e.g.
+            //
+            //    {"identifierType": {"METS": "METS"}, ...}
+            //
+            // We might simplify this at some point.
+            identifierType: Object.keys(item.sourceWork.id.identifierType)[0],
+          }
+        : undefined,
     };
   });
 }
@@ -172,7 +180,20 @@ function createPdf(canonicalId: string, g: RootCluster): string {
   }
 
   writeFileSync(`_graphs/${canonicalId}.dot`, toDot(g));
-  exec(`dot -Tpdf _graphs/${canonicalId}.dot -o _graphs/${canonicalId}.pdf`);
+  try {
+    execSync(
+      `dot -Tpdf _graphs/${canonicalId}.dot -o _graphs/${canonicalId}.pdf`
+    );
+  } catch (error) {
+    if (error.message.includes('not found')) {
+      console.log(
+        'dot, not found try installing it with `brew install graphviz`'
+      );
+      process.exit(1);
+    } else {
+      throw error;
+    }
+  }
   return `_graphs/${canonicalId}.pdf`;
 }
 
@@ -192,8 +213,9 @@ export default async function getGraph(): Promise<void> {
 
   const filename = createPdf(input.canonicalId, g);
 
-  console.log(filename);
-  exec(`open ${filename}`);
+  console.log(`Written ${filename}`);
+
+  execSync(`open ${filename}`);
 }
 
 getGraph();

@@ -12,7 +12,7 @@ const downloadFile = async (url: string | undefined, path: string) => {
   // Ensure the directory exists.  Theoretically can throw an error if the dir
   // pops into existence before we call mkdirSync(), but unlikely.
   if (!existsSync(dirname(path))) {
-    mkdirSync(dirname(path));
+    mkdirSync(dirname(path), { recursive: true });
   }
 
   const res = await fetch(url);
@@ -81,7 +81,9 @@ function getLabelAttributes(
 ): Record<string, string> | Promise<Record<string, string>> {
   switch (w.sourceIdentifier?.identifierType) {
     case 'SierraSystemNumber':
-      return { label: `Sierra\n${w.sourceIdentifier.value}\n(${w.canonicalId})` };
+      return {
+        label: `Sierra\n${w.sourceIdentifier.value}\n(${w.canonicalId})`,
+      };
 
     case 'CalmRecordIdentifier':
       return { label: `CALM\n${w.sourceIdentifier.value}\n(${w.canonicalId})` };
@@ -121,7 +123,6 @@ export async function getAttributes(
   const labelAttributes = w.suppressed
     ? { label: `${label}\n(suppressed)` }
     : { label };
-
 
   const styleAttributes = w.suppressed ? { style: 'dashed' } : {};
 
