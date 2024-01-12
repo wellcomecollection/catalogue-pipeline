@@ -27,11 +27,21 @@ class ArchivematicaMetsXMLTest
           )
 
       }
-      it("extracts the identifier from a dublincore identifier element") {
+
+      it("extracts the recordIdentifier from a dublincore identifier element") {
         ArchivematicaMetsXML(
-          archivematicaMetsWith(identifier = "BA/AD/FO/OD")
+          archivematicaMetsWith(recordIdentifier = "BA/AD/FO/OD")
         ).recordIdentifier.right.get shouldBe
           "BA/AD/FO/OD"
+      }
+
+      it("extracts the metsIdentifier from a premis objectIdentifier element") {
+        ArchivematicaMetsXML(
+          archivematicaMetsWith(metsIdentifier =
+            "baadf00d-beef-cafe-beefcafef00d"
+          )
+        ).metsIdentifier.right.get shouldBe
+          "baadf00d-beef-cafe-beefcafef00d"
       }
 
     }

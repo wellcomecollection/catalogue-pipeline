@@ -177,6 +177,10 @@ case class ThumbnailMetsXml(root: Elem) extends MetsXml {
   def recordIdentifier: Either[Exception, String] = Left(
     new NotImplementedException
   )
+
+  override def metsIdentifier: Either[Exception, String] = Left(
+    new NotImplementedException
+  )
   def accessConditions: Either[Throwable, MetsAccessConditions] = Left(
     new NotImplementedException
   )

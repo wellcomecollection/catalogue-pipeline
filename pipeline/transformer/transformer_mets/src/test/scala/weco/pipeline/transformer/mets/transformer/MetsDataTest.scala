@@ -85,7 +85,7 @@ class MetsDataTest
     val version = 1
     val createdDate = Instant.now()
     val metsData = DeletedMetsData(
-      recordIdentifier = bibNumber,
+      metsIdentifier = bibNumber,
       version = version,
       modifiedTime = createdDate
     )
