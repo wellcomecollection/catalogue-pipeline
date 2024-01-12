@@ -24,7 +24,7 @@ import weco.pipeline.transformer.mets.transformers.{
 import weco.pipeline.transformer.result.Result
 
 sealed trait MetsData {
-  val recordIdentifier: String
+  val metsIdentifier: String
 
   def toWork: Work[Source]
 
@@ -36,12 +36,12 @@ sealed trait MetsData {
       // case used by Sierra.
       // e.g. b20442233 has the identifier "B20442233" in the METS file,
       //
-      value = recordIdentifier.toLowerCase
+      value = metsIdentifier.toLowerCase
     )
 }
 
 case class DeletedMetsData(
-  recordIdentifier: String,
+  metsIdentifier: String,
   version: Int,
   modifiedTime: Instant
 ) extends MetsData {
@@ -54,6 +54,7 @@ case class DeletedMetsData(
 }
 
 case class InvisibleMetsData(
+  metsIdentifier: String,
   recordIdentifier: String,
   title: String,
   accessConditions: MetsAccessConditions,
@@ -140,11 +141,13 @@ object InvisibleMetsData {
       case _: ArchivematicaMetsXML => "collections/archives"
     }
     for {
-      id <- root.recordIdentifier
+      recordIdentifier <- root.recordIdentifier
+      metsIdentifier <- root.metsIdentifier
       title <- MetsTitle(root.root)
       accessConditions <- filesRoot.accessConditions
     } yield InvisibleMetsData(
-      recordIdentifier = id,
+      metsIdentifier = metsIdentifier,
+      recordIdentifier = recordIdentifier,
       title = title,
       accessConditions = accessConditions,
       version = version,
