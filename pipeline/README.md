@@ -37,8 +37,6 @@ flowchart TB
         merger --> works_merged
     end
 
-click matcher "./matcher/README.md"
-
     works_denormalised[(works_denormalised)]
     router{router}
     subgraph RelationEmbedder
