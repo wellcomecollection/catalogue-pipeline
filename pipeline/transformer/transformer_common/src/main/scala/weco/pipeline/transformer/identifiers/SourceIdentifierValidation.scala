@@ -40,8 +40,8 @@ object SourceIdentifierValidation {
         case IdentifierType.CalmRefNo          => calmRefNo.toPredicate
         case IdentifierType.CalmAltRefNo       => calmRefNo.toPredicate
         case IdentifierType.CalmRecordIdentifier => tryParseUUID(_).isSuccess
-        case IdentifierType.METS               => sierraSystemNumber.toPredicate
-        case IdentifierType.WellcomeDigcode    => wellcomeDigcode.toPredicate
+        case IdentifierType.METS                 => isValidMetsId
+        case IdentifierType.WellcomeDigcode      => wellcomeDigcode.toPredicate
         case IdentifierType.IconographicNumber => iconographicNumber.toPredicate
         // For other identifier types, we don't do validation
         case _ => const(true)
@@ -56,7 +56,8 @@ object SourceIdentifierValidation {
      * see: `https://search.wellcomelibrary.org/iii/encore/record/C__Rb1971204?marcData=Y`
      */
     private def tryParseUUID(str: String): Try[UUID] = Try(UUID.fromString(str))
-
+    private def isValidMetsId(str: String): Boolean =
+      sierraSystemNumber.toPredicate(str) || tryParseUUID(str).isSuccess
     private implicit class RegexOps(regex: Regex) {
       def toPredicate: String => Boolean = regex.findFirstIn(_).isDefined
     }
