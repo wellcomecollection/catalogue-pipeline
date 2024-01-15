@@ -26,6 +26,9 @@ class GoobiMetsXmlTest
   }
 
   it("returns the same value as the recordIdentifier fro the metsIdentifier") {
+    info(
+      "Goobi files do not have a distinct identifier from the Sierra record they link to"
+    )
     MetsXml(xml).value.metsIdentifier shouldBe Right("b30246039")
   }
 

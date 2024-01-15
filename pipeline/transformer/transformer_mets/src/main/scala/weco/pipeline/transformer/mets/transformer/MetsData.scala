@@ -32,10 +32,13 @@ sealed trait MetsData {
     SourceIdentifier(
       identifierType = IdentifierType.METS,
       ontologyType = "Work",
-      // We lowercase the b number in the METS file so it matches the
-      // case used by Sierra.
-      // e.g. b20442233 has the identifier "B20442233" in the METS file,
-      //
+      /* Lowercase the b number for consistency.
+       In the case of a Goobi file, B Numbers are prefixed with `B`
+       whereas in the corresponding Sierra record, it is `b`
+       e.g. b20442233 has the identifier "B20442233" in the METS file,
+
+       In the case of Archivematica files, this value will already be a lowercase UUID.
+       */
       value = metsIdentifier.toLowerCase
     )
 }
