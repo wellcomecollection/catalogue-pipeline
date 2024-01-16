@@ -5,6 +5,7 @@ module "source_index" {
   name          = var.es_works_source_index
   mappings_name = "empty"
   config_path   = var.es_config_path
+  allow_delete  = var.allow_delete
 }
 
 module "denormalised_index" {
@@ -12,6 +13,7 @@ module "denormalised_index" {
   name          = var.es_works_denormalised_index
   mappings_name = "empty"
   config_path   = var.es_config_path
+  allow_delete  = var.allow_delete
 }
 
 module "images_initial_index" {
@@ -19,6 +21,7 @@ module "images_initial_index" {
   name          = var.es_images_initial_index
   mappings_name = "empty"
   config_path   = var.es_config_path
+  allow_delete  = var.allow_delete
 }
 
 module "images_augmented_index" {
@@ -26,6 +29,7 @@ module "images_augmented_index" {
   name          = var.es_images_augmented_index
   mappings_name = "empty"
   config_path   = var.es_config_path
+  allow_delete  = var.allow_delete
 }
 
 # Indices with their own specific mapping and analysis configurations
@@ -35,6 +39,7 @@ module "works_identified_index" {
   name          = var.es_works_identified_index
   mappings_name = var.index_config["works"]["identified"]
   config_path   = var.es_config_path
+  allow_delete  = var.allow_delete
 }
 
 
@@ -43,6 +48,7 @@ module "works_merged_index" {
   name          = var.es_works_merged_index
   mappings_name = var.index_config["works"]["merged"]
   config_path   = var.es_config_path
+  allow_delete  = var.allow_delete
 }
 
 module "works_indexed_index" {
@@ -50,6 +56,7 @@ module "works_indexed_index" {
   name          = var.es_works_index
   mappings_name = var.index_config["works"]["indexed"]
   config_path   = var.es_config_path
+  allow_delete  = var.allow_delete
 }
 
 module "images_indexed_index" {
@@ -61,4 +68,5 @@ module "images_indexed_index" {
   # The images-specific fields do not use any extra custom analysis.
   analysis_name = var.index_config["images"]["works_analysis"]
   config_path   = var.es_config_path
+  allow_delete  = var.allow_delete
 }

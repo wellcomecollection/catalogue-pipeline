@@ -99,7 +99,7 @@ module "ingestor_works" {
   secret_env_vars = local.pipeline_storage_es_service_secrets["work_ingestor"]
 
   cpu    = 2048
-  memory = 4096
+  memory = 8192
 
   min_capacity = var.min_capacity
   max_capacity = local.max_capacity
