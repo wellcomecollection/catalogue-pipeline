@@ -24,8 +24,8 @@ module "sierra_indexer" {
   omit_queue_url = true
 
   secret_env_vars = {
-    es_password = "reporting/sierra_indexer/es_password"
-    es_host     = "reporting/es_host"
+    es_apikey = "reporting/sierra_indexer/es_apikey"
+    es_host   = "reporting/es_host"
   }
 
   cpu    = 1024

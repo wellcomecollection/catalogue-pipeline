@@ -28,8 +28,8 @@ module "calm_indexer" {
   omit_queue_url = true
 
   secret_env_vars = {
-    es_password = "reporting/calm_indexer/es_password"
-    es_host     = "reporting/es_host"
+    es_apikey = "reporting/calm_indexer/es_apikey"
+    es_host   = "reporting/es_host"
   }
 
   cpu    = 512
