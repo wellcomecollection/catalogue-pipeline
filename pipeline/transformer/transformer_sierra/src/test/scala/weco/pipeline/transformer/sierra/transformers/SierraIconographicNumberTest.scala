@@ -68,7 +68,7 @@ class SierraIconographicNumberTest
     )
     forAll(badINumbers) {
       case (iNumber, label) =>
-        it(s"An i-number can $label") {
+        it(s"An i-number cannot $label") {
           val bibData = createSierraBibDataWith(
             materialType = Some(SierraMaterialType("k")),
             varFields = List(
