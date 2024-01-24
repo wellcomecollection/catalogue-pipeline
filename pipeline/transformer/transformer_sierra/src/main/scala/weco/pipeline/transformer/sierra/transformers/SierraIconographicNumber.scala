@@ -9,7 +9,7 @@ object SierraIconographicNumber
     with SierraQueryOps {
   override type Output = Option[String]
 
-  private val IconographicNumberMatch = "^([0-9]+i)$".r
+  private val IconographicNumberMatch = "^([0-9]+i(\\.[0-9]+)?)$".r
 
   override def apply(bibData: SierraBibData): Option[String] =
     bibData match {
@@ -20,7 +20,7 @@ object SierraIconographicNumber
           .collectFirst {
             // There are a handful of cases where the value in this field doesn't
             // look like an i-number, in which case we discard it.
-            case IconographicNumberMatch(number) => number
+            case IconographicNumberMatch(number, _) => number
           }
 
       case _ => None
