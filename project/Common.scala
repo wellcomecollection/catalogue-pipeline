@@ -6,7 +6,8 @@ object Common {
     scalaVersion := "2.12.8",
     organization := "weco",
     resolvers ++= Seq(
-      "Wellcome releases" at "s3://releases.mvn-repo.wellcomecollection.org/"),
+      "Wellcome releases" at "s3://releases.mvn-repo.wellcomecollection.org/"
+    ),
     scalacOptions ++= Seq(
       "-deprecation",
       "-unchecked",
@@ -21,9 +22,9 @@ object Common {
       "-Xcheckinit"
     ),
     updateOptions := updateOptions.value.withCachedResolution(true),
-    parallelExecution in Test := false,
+    Test / parallelExecution := false,
     // Don't build scaladocs
     // https://www.scala-sbt.org/sbt-native-packager/formats/universal.html#skip-packagedoc-task-on-stage
-    mappings in (Compile, packageDoc) := Nil
+    Compile / packageDoc / mappings := Nil
   )
 }
