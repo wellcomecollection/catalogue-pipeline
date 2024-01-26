@@ -20,11 +20,11 @@ import weco.typesafe.Runnable
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
-/** Processes SQS messages representing bag ingests on storage-service, and
-  * publishes METS data for use in the pipeline.
+/** Processes SQS messages representing bag ingests on storage-service, and publishes METS data for
+  * use in the pipeline.
   *
   * Consists of the following stages:
-  *   - Retrieve the bag from storarge-service with the given ID
+  *   - Retrieve the bag from storage-service with the given ID
   *   - Parse METS data (which contains paths to the XML files) from the bag
   *   - Store the METS data in the VHS
   *   - Publish the VHS key to SNS
@@ -41,9 +41,9 @@ class MetsAdapterWorkerService[Destination](
     with FlowOps
     with Logging {
 
-  /** Encapsulates context to pass along each akka-stream stage. Newer versions
-    * of akka-streams have the asSourceWithContext/ asFlowWithContext idioms for
-    * this purpose, which we can migrate to if the library is updated.
+  /** Encapsulates context to pass along each akka-stream stage. Newer versions of akka-streams have
+    * the asSourceWithContext/ asFlowWithContext idioms for this purpose, which we can migrate to if
+    * the library is updated.
     */
   case class Context(msg: SQSMessage, bagId: String)
 
