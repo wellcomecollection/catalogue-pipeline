@@ -1,4 +1,4 @@
-import { createWriteStream, existsSync, mkdirSync } from 'fs';
+import { createWriteStream, existsSync, mkdirSync, copyFile } from 'fs';
 import fetch from 'node-fetch';
 import { dirname } from 'path';
 import { SourceIdentifier, SourceWork } from './models';
@@ -21,7 +21,15 @@ const downloadFile = async (url: string | undefined, path: string) => {
     res.body.pipe(fileStream);
     res.body.on('error', reject);
     fileStream.on('finish', resolve);
-  });
+  }).then(async _=>{
+    if(!res.ok) {
+        console.log("not ok")
+        console.log(path)
+        console.log(url)
+        copyFile('404.jpg', path, (err)=>{console.log("Error Found:", err);})
+    }
+
+  })
 };
 
 async function getImageAttributes(
@@ -42,6 +50,7 @@ async function getImageAttributes(
         <table cellspacing="0" border="0" cellborder="0">
           <tr><td><img src="${outPath}"/></td></tr>
           <tr><td>${label.replaceAll('\n', '<br/>')}</td></tr>
+          <tr><td></td></tr>
         </table>
       >`,
     };
@@ -76,22 +85,26 @@ async function getMetsThumbnail(bnumber: string): Promise<string | undefined> {
   return json.results.map(w => w.thumbnail?.url)?.[0];
 }
 
+function getLabelText(w:SourceWork): string {
+    return `${w.sourceIdentifier.value}\n(${w.canonicalId})\n${w.suppressed?"(suppressed)":""}`
+}
+
 function getLabelAttributes(
   w: SourceWork
 ): Record<string, string> | Promise<Record<string, string>> {
   switch (w.sourceIdentifier?.identifierType) {
     case 'SierraSystemNumber':
       return {
-        label: `Sierra\n${w.sourceIdentifier.value}\n(${w.canonicalId})`,
+        label: `Sierra\n${getLabelText(w)}`,
       };
 
     case 'CalmRecordIdentifier':
-      return { label: `CALM\n${w.sourceIdentifier.value}\n(${w.canonicalId})` };
+      return { label: `CALM\n${getLabelText(w)}` };
 
     case 'MiroImageNumber':
       return getImageAttributes(
         w.sourceIdentifier,
-        `Miro\n${w.sourceIdentifier.value}\n(${w.canonicalId})`,
+        `Miro\n${getLabelText(w)}`,
         async () =>
           `https://iiif.wellcomecollection.org/thumbs/${w.sourceIdentifier.value}/full/!100,100/0/default.jpg`
       );
@@ -99,7 +112,7 @@ function getLabelAttributes(
     case 'METS':
       return getImageAttributes(
         w.sourceIdentifier,
-        `METS\n${w.sourceIdentifier.value}\n(${w.canonicalId})`,
+        `METS\n${getLabelText(w)}`,
         async () => getMetsThumbnail(w.sourceIdentifier.value)
       );
 
@@ -120,9 +133,7 @@ export async function getAttributes(
 ): Promise<Record<string, string>> {
   const { label } = await getLabelAttributes(w);
 
-  const labelAttributes = w.suppressed
-    ? { label: `${label}\n(suppressed)` }
-    : { label };
+  const labelAttributes = { label }
 
   const styleAttributes = w.suppressed ? { style: 'dashed' } : {};
 
