@@ -15,8 +15,8 @@ object SourceIdentifierEmbedder extends Logging {
 
   /** Find all the source identifiers within this JSON.
     *
-    * It looks at every object in the JSON and looks for a "sourceIdentifier"
-    * key which contains a SourceIdentifier object.
+    * It looks at every object in the JSON and looks for a "sourceIdentifier" key which contains a
+    * SourceIdentifier object.
     */
   def scan(inputJson: Json): Try[List[SourceIdentifier]] =
     Try(
@@ -33,25 +33,23 @@ object SourceIdentifierEmbedder extends Logging {
     *
     * In particular:
     *
-    *   - It looks at every object in the JSON. If it has a "sourceIdentifier"
-    *     key, it adds an "canonicalId" with the corresponding canonical ID.
+    *   - It looks at every object in the JSON. If it has a "sourceIdentifier" key, it adds an
+    *     "canonicalId" with the corresponding canonical ID.
     *
-    *   - It renamed the "identifiedType" key to "type". The latter is used by
-    *     Circe as a type discriminator, so now Circe will decode this value as
-    *     the identified version.
+    *   - It renamed the "identifiedType" key to "type". The latter is used by Circe as a type
+    *     discriminator, so now Circe will decode this value as the identified version.
     *
     * e.g. you might have the Identifiable JSON:
     *
-    * { "sourceIdentifier" : { "identifierType" : {"id" : "lc-subjects"},
-    * "ontologyType" : "Subject", "value" : "sh85002427" }, "identifiedType" :
-    * "Identified", "type" : "Identifiable" }
+    * { "sourceIdentifier" : { "identifierType" : {"id" : "lc-subjects"}, "ontologyType" :
+    * "Subject", "value" : "sh85002427" }, "identifiedType" : "Identified", "type" : "Identifiable"
+    * }
     *
-    * Circe would decode this as type "IdState.Identifiable". Once it passes
-    * through this method, it becomes
+    * Circe would decode this as type "IdState.Identifiable". Once it passes through this method, it
+    * becomes
     *
-    * { "canonicalId": "jsywryz7", "sourceIdentifier" : { "identifierType" :
-    * {"id" : "lc-subjects"}, "ontologyType" : "Subject", "value" : "sh85002427"
-    * }, "type" : "Identified" }
+    * { "canonicalId": "jsywryz7", "sourceIdentifier" : { "identifierType" : {"id" : "lc-subjects"},
+    * "ontologyType" : "Subject", "value" : "sh85002427" }, "type" : "Identified" }
     *
     * which now gets decoded as "IdState.Identified".
     */
@@ -68,8 +66,7 @@ object SourceIdentifierEmbedder extends Logging {
       Plated.transform[Json](updateNode)(updatedRoot)
     }
 
-  /** Rename the "identifiedType" field to "type", and remove the old "type"
-    * field.
+  /** Rename the "identifiedType" field to "type", and remove the old "type" field.
     */
   private def updateNodeType(node: Json): Json =
     root.identifiedType.json
@@ -85,8 +82,8 @@ object SourceIdentifierEmbedder extends Logging {
       }
       .getOrElse(node)
 
-  /** Given a JSON object, add the canonical ID that corresponds to the source
-    * identifier (if specified).
+  /** Given a JSON object, add the canonical ID that corresponds to the source identifier (if
+    * specified).
     */
   private def addCanonicalIdToNode(
     identifiers: Map[SourceIdentifier, CanonicalId]

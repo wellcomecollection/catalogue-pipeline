@@ -22,8 +22,7 @@ import scala.util.{Failure, Success}
 sealed abstract class TransformerWorkerError(msg: String) extends Exception(msg)
 case class DecodePayloadError[T](t: Throwable, message: NotificationMessage)
     extends TransformerWorkerError(t.getMessage)
-case class StoreReadError[T](err: ReadError, key: T)
-    extends TransformerWorkerError(err.toString)
+case class StoreReadError[T](err: ReadError, key: T) extends TransformerWorkerError(err.toString)
 case class TransformerError[SourceData, Key](
   t: Throwable,
   sourceData: SourceData,
@@ -39,8 +38,7 @@ trait SourceDataRetriever[Payload, SourceData] {
 /** A TransformerWorker:
   *   - Takes an SQS stream that emits VHS keys
   *   - Gets the record of type `SourceData`
-  *   - Runs it through a transformer and transforms the `SourceData` to
-  *     `Work[Source]`
+  *   - Runs it through a transformer and transforms the `SourceData` to `Work[Source]`
   *   - Emits the message via `MessageSender` to SNS
   */
 final class TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest](

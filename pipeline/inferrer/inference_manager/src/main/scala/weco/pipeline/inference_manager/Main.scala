@@ -21,10 +21,7 @@ import weco.pipeline.inference_manager.adapters.{
   PaletteInferrerAdapter
 }
 import weco.pipeline.inference_manager.models.DownloadedImage
-import weco.pipeline.inference_manager.services.{
-  ImageDownloader,
-  InferenceManagerWorkerService
-}
+import weco.pipeline.inference_manager.services.{ImageDownloader, InferenceManagerWorkerService}
 import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
 import weco.pipeline_storage.typesafe.PipelineStorageStreamBuilder
 

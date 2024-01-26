@@ -4,10 +4,7 @@ import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work._
 import weco.pipeline.transformer.sierra.exceptions.CataloguingException
 import weco.pipeline.transformer.sierra.transformers.parsers.Marc008Parser
-import weco.pipeline.transformer.transformers.{
-  ConceptsTransformer,
-  ParsedPeriod
-}
+import weco.pipeline.transformer.transformers.{ConceptsTransformer, ParsedPeriod}
 import weco.sierra.models.SierraQueryOps
 import weco.sierra.models.data.SierraBibData
 import weco.sierra.models.identifiers.SierraBibNumber
@@ -182,8 +179,7 @@ object SierraProduction
             case other =>
               throw CataloguingException(
                 bibId,
-                message =
-                  s"Unrecognised second indicator for production function: [$other]"
+                message = s"Unrecognised second indicator for production function: [$other]"
               )
           }
 
@@ -217,8 +213,8 @@ object SierraProduction
 
   /** Populate the production data if both 260 and 264 are present.
     *
-    * In general, this is a cataloguing error, but sometimes we can do something
-    * more sensible depending on if/how they're duplicated.
+    * In general, this is a cataloguing error, but sometimes we can do something more sensible
+    * depending on if/how they're duplicated.
     */
   private def getProductionFromBothFields(
     bibId: SierraBibNumber,

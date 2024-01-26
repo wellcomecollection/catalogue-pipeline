@@ -21,14 +21,12 @@ import weco.pipeline.calm_api_client.CalmQuery
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
-/** Processes SQS messages consisting of a daily window, and publishes any CALM
-  * records to the transformer that have been modified within this window.
+/** Processes SQS messages consisting of a daily window, and publishes any CALM records to the
+  * transformer that have been modified within this window.
   *
   * Consists of the following stages:
-  *   - Retrieve all CALM records which have modified field the same date as the
-  *     window
-  *   - Store these records in VHS, filtering out ones older than what is
-  *     currently in the store
+  *   - Retrieve all CALM records which have modified field the same date as the window
+  *   - Store these records in VHS, filtering out ones older than what is currently in the store
   *   - Publish the VHS key to SNS
   */
 class CalmAdapterWorkerService[Destination](
@@ -44,9 +42,9 @@ class CalmAdapterWorkerService[Destination](
 
   type Key = Version[String, Int]
 
-  /** Encapsulates context to pass along each akka-stream stage. Newer versions
-    * of akka-streams have the asSourceWithContext/ asFlowWithContext idioms for
-    * this purpose, which we can migrate to if the library is updated.
+  /** Encapsulates context to pass along each akka-stream stage. Newer versions of akka-streams have
+    * the asSourceWithContext/ asFlowWithContext idioms for this purpose, which we can migrate to if
+    * the library is updated.
     */
   case class Context(msg: SQSMessage)
 
@@ -70,9 +68,9 @@ class CalmAdapterWorkerService[Destination](
       }
       .via(catchErrors)
 
-  /** We process the whole window as a single batch, rather than demultiplexing
-    * into stream of individual records. This is because we need to emit exactly
-    * one delete action per message received.
+  /** We process the whole window as a single batch, rather than demultiplexing into stream of
+    * individual records. This is because we need to emit exactly one delete action per message
+    * received.
     */
   def processWindow =
     Flow[(Context, CalmQuery)]

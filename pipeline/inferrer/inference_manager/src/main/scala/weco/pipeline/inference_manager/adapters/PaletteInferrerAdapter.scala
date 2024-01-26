@@ -4,10 +4,7 @@ import akka.http.scaladsl.model.{HttpMethods, HttpRequest, Uri}
 import io.circe.Decoder
 import io.circe.generic.semiauto.deriveDecoder
 import weco.catalogue.internal_model.image.InferredData
-import weco.pipeline.inference_manager.models.{
-  DownloadedImage,
-  PaletteInferrerResponse
-}
+import weco.pipeline.inference_manager.models.{DownloadedImage, PaletteInferrerResponse}
 import AdapterCommon.decodeBase64ToFloatList
 
 class PaletteInferrerAdapter(host: String, port: Int) extends InferrerAdapter {

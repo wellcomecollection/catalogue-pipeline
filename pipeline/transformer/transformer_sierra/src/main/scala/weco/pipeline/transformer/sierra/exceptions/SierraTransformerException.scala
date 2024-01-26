@@ -1,7 +1,6 @@
 package weco.pipeline.transformer.sierra.exceptions
 
-case class SierraTransformerException(e: Throwable)
-    extends Exception(e.getMessage)
+case class SierraTransformerException(e: Throwable) extends Exception(e.getMessage)
 
 case object SierraTransformerException {
   def apply(message: String): SierraTransformerException =

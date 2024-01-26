@@ -9,8 +9,8 @@ import java.time.Instant
 
 /** Work is the core model in the pipeline / API.
   *
-  * It is parameterised by State, meaning the same type of Work can be in a
-  * number of possible states depending on where in the pipeline it is.
+  * It is parameterised by State, meaning the same type of Work can be in a number of possible
+  * states depending on where in the pipeline it is.
   */
 sealed trait Work[State <: WorkState] {
 
@@ -96,8 +96,7 @@ object Work {
   }
 }
 
-/** WorkData contains data common to all types of works that can exist at any
-  * stage of the pipeline.
+/** WorkData contains data common to all types of works that can exist at any stage of the pipeline.
   */
 case class WorkData[State <: DataState](
   title: Option[String] = None,
@@ -130,13 +129,12 @@ case class WorkData[State <: DataState](
   designation: List[String] = Nil
 )
 
-/** WorkState represents the state of the work in the pipeline, and contains
-  * different data depending on what state it is. This allows us to consider the
-  * Work model as a finite state machine with the following stages corresponding
-  * to stages of the pipeline:
+/** WorkState represents the state of the work in the pipeline, and contains different data
+  * depending on what state it is. This allows us to consider the Work model as a finite state
+  * machine with the following stages corresponding to stages of the pipeline:
   *
-  * \| \| (transformer) ▼ Source \| \| (id minter) ▼ Identified \| \| (matcher /
-  * merger) ▼ Merged \| \| (relation embedder) ▼ Denormalised
+  * \| \| (transformer) ▼ Source \| \| (id minter) ▼ Identified \| \| (matcher / merger) ▼ Merged \|
+  * \| (relation embedder) ▼ Denormalised
   */
 sealed trait WorkState {
 
@@ -251,8 +249,8 @@ object WorkState {
 
 /** The WorkFsm contains all possible transitions between work states.
   *
-  * The `transition` method on `Work` allows invocation of these transitions by
-  * providing the type parameter of the new state and it's respective arguments.
+  * The `transition` method on `Work` allows invocation of these transitions by providing the type
+  * parameter of the new state and it's respective arguments.
   */
 object WorkFsm {
 

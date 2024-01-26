@@ -134,9 +134,7 @@ object CalmTermsOfUse extends CalmRecordOps with Logging {
           warn(s"Unclear how to create a TermsOfUse note for item ${record.id}")
           val parts = Seq(
             conditions,
-            restrictedUntil.map(
-              d => s"Restricted until ${d.format(displayFormat)}."
-            ),
+            restrictedUntil.map(d => s"Restricted until ${d.format(displayFormat)}."),
             closedUntil.map(d => s"Closed until ${d.format(displayFormat)}.")
           ).flatten
 
@@ -144,9 +142,7 @@ object CalmTermsOfUse extends CalmRecordOps with Logging {
       }
 
     terms
-      .map(
-        contents => Note(contents = contents, noteType = NoteType.TermsOfUse)
-      )
+      .map(contents => Note(contents = contents, noteType = NoteType.TermsOfUse))
       .toList
   }
 

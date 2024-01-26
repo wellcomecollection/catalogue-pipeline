@@ -8,10 +8,9 @@ sealed trait AbstractRootConcept[+State] extends HasId[State] {
 
 object AbstractRootConcept {
 
-  private val conceptTypeMap
-    : Map[String, (IdState.Identifiable, String) => AbstractRootConcept[
-      IdState.Identifiable
-    ]] = Map(
+  private val conceptTypeMap: Map[String, (IdState.Identifiable, String) => AbstractRootConcept[
+    IdState.Identifiable
+  ]] = Map(
     "Concept" -> (new Concept[IdState.Identifiable](_, _)),
     "Agent" -> (new Agent[IdState.Identifiable](_, _)),
     "Place" -> (new Place[IdState.Identifiable](_, _)),

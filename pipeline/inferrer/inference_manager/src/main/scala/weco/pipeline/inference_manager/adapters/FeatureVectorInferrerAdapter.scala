@@ -4,16 +4,12 @@ import akka.http.scaladsl.model.{HttpMethods, HttpRequest, Uri}
 import io.circe.Decoder
 import io.circe.generic.semiauto.deriveDecoder
 import weco.catalogue.internal_model.image.InferredData
-import weco.pipeline.inference_manager.models.{
-  DownloadedImage,
-  FeatureVectorInferrerResponse
-}
+import weco.pipeline.inference_manager.models.{DownloadedImage, FeatureVectorInferrerResponse}
 import AdapterCommon.decodeBase64ToFloatList
 
 // The InferrerAdaptor for feature vectors, consuming Image[Identified] and
 // augmenting them into Image[Augmented]
-class FeatureVectorInferrerAdapter(val host: String, port: Int)
-    extends InferrerAdapter {
+class FeatureVectorInferrerAdapter(val host: String, port: Int) extends InferrerAdapter {
   type Response = FeatureVectorInferrerResponse
 
   def createRequest(image: DownloadedImage): HttpRequest =

@@ -25,16 +25,14 @@ object RDSBuilder {
 
     ConnectionPool.add(
       name = 'primary,
-      url =
-        s"jdbc:mysql://${rdsClientConfig.primaryHost}:${rdsClientConfig.port}",
+      url = s"jdbc:mysql://${rdsClientConfig.primaryHost}:${rdsClientConfig.port}",
       user = rdsClientConfig.username,
       password = rdsClientConfig.password,
       settings = connectionPoolSettings
     )
     ConnectionPool.add(
       name = 'replica,
-      url =
-        s"jdbc:mysql://${rdsClientConfig.replicaHost}:${rdsClientConfig.port}",
+      url = s"jdbc:mysql://${rdsClientConfig.replicaHost}:${rdsClientConfig.port}",
       user = rdsClientConfig.username,
       password = rdsClientConfig.password,
       settings = connectionPoolSettings

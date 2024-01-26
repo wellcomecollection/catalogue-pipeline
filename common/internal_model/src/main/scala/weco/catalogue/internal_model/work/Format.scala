@@ -21,9 +21,7 @@ object Format extends Enum[Format] {
     Encoder.forProduct2("id", "label")(format => (format.id, format.label))
 
   implicit val formatDecoder: Decoder[Format] =
-    Decoder.forProduct2("id", "label")(
-      (id: String, _: String) => Format.withName(id)
-    )
+    Decoder.forProduct2("id", "label")((id: String, _: String) => Format.withName(id))
 
   def fromCode(id: String): Option[Format] =
     Format.withNameOption(id)

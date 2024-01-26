@@ -32,8 +32,7 @@ trait WorkMergingOps {
             state.copy(internalWorkStubs = state.internalWorkStubs.map {
               stub =>
                 stub.copy(
-                  workData =
-                    stub.workData.copy[DataState.Identified](items = items)
+                  workData = stub.workData.copy[DataState.Identified](items = items)
                 )
             })
         }

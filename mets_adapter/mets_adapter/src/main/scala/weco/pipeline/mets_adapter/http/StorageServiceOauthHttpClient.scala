@@ -1,11 +1,7 @@
 package weco.pipeline.mets_adapter.http
 
 import akka.actor.ActorSystem
-import akka.http.scaladsl.model.headers.{
-  Authorization,
-  BasicHttpCredentials,
-  OAuth2BearerToken
-}
+import akka.http.scaladsl.model.headers.{Authorization, BasicHttpCredentials, OAuth2BearerToken}
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.unmarshalling.{FromEntityUnmarshaller, Unmarshal}
 import weco.json.JsonUtil._

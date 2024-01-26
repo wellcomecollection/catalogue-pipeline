@@ -3,9 +3,7 @@ package weco.pipeline.transformer.sierra.transformers
 import weco.sierra.models.SierraQueryOps
 import weco.sierra.models.data.SierraBibData
 
-object SierraCurrentFrequency
-    extends SierraDataTransformer
-    with SierraQueryOps {
+object SierraCurrentFrequency extends SierraDataTransformer with SierraQueryOps {
   override type Output = Option[String]
 
   // We use MARC field "310".  We join ǂa and ǂb with a space.

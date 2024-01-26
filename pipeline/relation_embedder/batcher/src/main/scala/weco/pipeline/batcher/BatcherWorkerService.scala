@@ -46,9 +46,9 @@ class BatcherWorkerService[MsgDestination](
           .flatMapConcat(identity)
     )
 
-  /** Process a list of input paths by generating appropriate batches to send to
-    * the relation embedder, deleting input paths from the SQS queue when the
-    * corresponding batches have been succesfully sent.
+  /** Process a list of input paths by generating appropriate batches to send to the relation
+    * embedder, deleting input paths from the SQS queue when the corresponding batches have been
+    * succesfully sent.
     */
   private def processPaths(
     msgs: List[SQSMessage],
@@ -78,9 +78,8 @@ class BatcherWorkerService[MsgDestination](
             }
       }
 
-  /** Given a list of input paths, generate the minimal set of selectors
-    * matching works needing to be denormalised, and group these according to
-    * tree and within a maximum `batchSize`.
+  /** Given a list of input paths, generate the minimal set of selectors matching works needing to
+    * be denormalised, and group these according to tree and within a maximum `batchSize`.
     */
   private def generateBatches(
     paths: List[String]

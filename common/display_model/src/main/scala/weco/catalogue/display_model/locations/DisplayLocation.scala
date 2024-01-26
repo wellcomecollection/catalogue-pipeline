@@ -1,11 +1,7 @@
 package weco.catalogue.display_model.locations
 
 import io.circe.generic.extras.JsonKey
-import weco.catalogue.internal_model.locations.{
-  DigitalLocation,
-  Location,
-  PhysicalLocation
-}
+import weco.catalogue.internal_model.locations.{DigitalLocation, Location, PhysicalLocation}
 
 sealed trait DisplayLocation
 
@@ -37,8 +33,7 @@ object DisplayDigitalLocation {
       linkText = location.linkText,
       credit = location.credit,
       license = location.license.map(DisplayLicense(_)),
-      accessConditions =
-        location.accessConditions.map(DisplayAccessCondition(_))
+      accessConditions = location.accessConditions.map(DisplayAccessCondition(_))
     )
 }
 
@@ -58,7 +53,6 @@ object DisplayPhysicalLocation {
       label = location.label,
       license = location.license.map(DisplayLicense(_)),
       shelfmark = location.shelfmark,
-      accessConditions =
-        location.accessConditions.map(DisplayAccessCondition(_))
+      accessConditions = location.accessConditions.map(DisplayAccessCondition(_))
     )
 }

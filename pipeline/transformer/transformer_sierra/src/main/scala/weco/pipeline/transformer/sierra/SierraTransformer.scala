@@ -5,13 +5,7 @@ import weco.catalogue.internal_model.identifiers._
 import weco.catalogue.internal_model.work.DeletedReason._
 import weco.catalogue.internal_model.work.InvisibilityReason._
 import weco.catalogue.internal_model.work.WorkState.Source
-import weco.catalogue.internal_model.work.{
-  Contributor,
-  Relations,
-  Subject,
-  Work,
-  WorkData
-}
+import weco.catalogue.internal_model.work.{Contributor, Relations, Subject, Work, WorkData}
 import weco.catalogue.source_model.sierra._
 import weco.catalogue.source_model.Implicits._
 import weco.json.JsonUtil.fromJson
@@ -21,23 +15,13 @@ import weco.pipeline.transformer.sierra.exceptions.{
   SierraTransformerException
 }
 import weco.pipeline.transformer.sierra.transformers._
-import weco.sierra.models.data.{
-  SierraBibData,
-  SierraHoldingsData,
-  SierraItemData,
-  SierraOrderData
-}
-import weco.sierra.models.identifiers.{
-  SierraBibNumber,
-  SierraHoldingsNumber,
-  SierraOrderNumber
-}
+import weco.sierra.models.data.{SierraBibData, SierraHoldingsData, SierraItemData, SierraOrderData}
+import weco.sierra.models.identifiers.{SierraBibNumber, SierraHoldingsNumber, SierraOrderNumber}
 
 import java.time.Instant
 import scala.util.{Failure, Success, Try}
 
-class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
-    extends Logging {
+class SierraTransformer(sierraTransformable: SierraTransformable, version: Int) extends Logging {
 
   def transform: Try[Work[Source]] =
     sierraTransformable.maybeBibRecord

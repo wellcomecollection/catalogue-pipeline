@@ -6,11 +6,7 @@ import weco.catalogue.source_model.Implicits._
 import weco.messaging.MessageSender
 import weco.storage.providers.s3.S3ObjectLocation
 import weco.storage.store.Writable
-import weco.catalogue.source_model.tei.{
-  TeiIdChangeMessage,
-  TeiIdDeletedMessage,
-  TeiIdMessage
-}
+import weco.catalogue.source_model.tei.{TeiIdChangeMessage, TeiIdDeletedMessage, TeiIdMessage}
 import weco.catalogue.tei.id_extractor.PathIdManager._
 import weco.catalogue.tei.id_extractor.database.PathIdTable
 import weco.catalogue.tei.id_extractor.models.PathId

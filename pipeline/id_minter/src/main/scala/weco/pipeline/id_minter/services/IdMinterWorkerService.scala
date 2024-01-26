@@ -9,21 +9,12 @@ import weco.json.JsonUtil.fromJson
 import weco.messaging.sns.NotificationMessage
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.work.WorkState.Identified
-import weco.pipeline_storage.PipelineStorageStream.{
-  batchRetrieveFlow,
-  processFlow
-}
+import weco.pipeline_storage.PipelineStorageStream.{batchRetrieveFlow, processFlow}
 import weco.typesafe.Runnable
 import weco.catalogue.internal_model.work.Work
-import weco.pipeline.id_minter.config.models.{
-  IdentifiersTableConfig,
-  RDSClientConfig
-}
+import weco.pipeline.id_minter.config.models.{IdentifiersTableConfig, RDSClientConfig}
 import weco.pipeline.id_minter.database.TableProvisioner
-import weco.pipeline.id_minter.steps.{
-  IdentifierGenerator,
-  SourceIdentifierEmbedder
-}
+import weco.pipeline.id_minter.steps.{IdentifierGenerator, SourceIdentifierEmbedder}
 import weco.pipeline_storage.{PipelineStorageStream, Retriever}
 
 import scala.concurrent.{ExecutionContext, Future}

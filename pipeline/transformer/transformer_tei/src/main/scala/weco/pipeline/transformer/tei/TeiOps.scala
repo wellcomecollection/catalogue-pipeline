@@ -7,12 +7,10 @@ import scala.xml.{Node, NodeSeq}
 
 object TeiOps {
 
-  /** The summary of the TEI is in the `summary` node under `msContents`. There
-    * is supposed to be only one summary node <TEI
-    * xmlns="http://www.tei-c.org/ns/1.0" xml:id="manuscript_15651"> <teiHeader>
-    * <fileDesc> <sourceDesc> <msDesc xml:lang="en" xml:id="MS_Arabic_1">
-    * <msContents> <summary>1 copy of al-Qānūn fī al-ṭibb by Avicenna,
-    * 980-1037</summary> ... </TEI>
+  /** The summary of the TEI is in the `summary` node under `msContents`. There is supposed to be
+    * only one summary node <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id="manuscript_15651">
+    * <teiHeader> <fileDesc> <sourceDesc> <msDesc xml:lang="en" xml:id="MS_Arabic_1"> <msContents>
+    * <summary>1 copy of al-Qānūn fī al-ṭibb by Avicenna, 980-1037</summary> ... </TEI>
     */
   def summary(nodeSeq: NodeSeq): Result[Option[String]] = {
     (nodeSeq \ "msContents" \ "summary").toList match {

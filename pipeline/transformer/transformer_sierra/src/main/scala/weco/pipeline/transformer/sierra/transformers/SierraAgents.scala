@@ -1,19 +1,12 @@
 package weco.pipeline.transformer.sierra.transformers
 
-import weco.catalogue.internal_model.identifiers.{
-  IdState,
-  IdentifierType,
-  SourceIdentifier
-}
+import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, SourceIdentifier}
 import weco.catalogue.internal_model.work.{Meeting, Organisation, Person}
 import weco.pipeline.transformer.transformers.ConceptsTransformer
 import weco.sierra.models.SierraQueryOps
 import weco.sierra.models.marc.{Subfield, VarField}
 
-trait SierraAgents
-    extends SierraQueryOps
-    with ConceptsTransformer
-    with SierraAbstractConcepts {
+trait SierraAgents extends SierraQueryOps with ConceptsTransformer with SierraAbstractConcepts {
   // This is used to construct a Person from MARc tags 100, 700 and 600.
   // For all these cases:
   //  - subfield $a populates the person label

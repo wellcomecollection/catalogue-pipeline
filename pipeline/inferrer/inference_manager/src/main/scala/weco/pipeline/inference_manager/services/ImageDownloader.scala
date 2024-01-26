@@ -4,13 +4,7 @@ import java.nio.file.{Files, Path, Paths}
 import akka.{Done, NotUsed}
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.{
-  HttpMethods,
-  HttpRequest,
-  HttpResponse,
-  StatusCodes,
-  Uri
-}
+import akka.http.scaladsl.model.{HttpMethods, HttpRequest, HttpResponse, StatusCodes, Uri}
 import akka.stream.scaladsl.FlowWithContext
 import akka.stream.{IOResult, Materializer}
 import akka.stream.scaladsl.{FileIO, Flow, Keep, Sink}

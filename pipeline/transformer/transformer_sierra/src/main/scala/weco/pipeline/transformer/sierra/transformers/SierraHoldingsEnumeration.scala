@@ -393,8 +393,7 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
 
   /** Given an 86X varField from Sierra, try to create a Value.
     *
-    * A Value contains the original varField, the link number and the sequence
-    * number.
+    * A Value contains the original varField, the link number and the sequence number.
     */
   private def createValue(
     id: TypedSierraRecordNumber,

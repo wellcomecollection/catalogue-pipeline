@@ -1,10 +1,6 @@
 package weco.pipeline.transformer.miro.transformers
 
-import weco.catalogue.internal_model.identifiers.{
-  IdState,
-  IdentifierType,
-  SourceIdentifier
-}
+import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, SourceIdentifier}
 import weco.catalogue.internal_model.image.ImageData
 import weco.catalogue.source_model.miro.MiroSourceOverrides
 import weco.pipeline.transformer.miro.source.MiroRecord

@@ -4,13 +4,9 @@ import akka.http.scaladsl.model.{HttpMethods, HttpRequest, Uri}
 import io.circe.Decoder
 import io.circe.generic.semiauto.deriveDecoder
 import weco.catalogue.internal_model.image.InferredData
-import weco.pipeline.inference_manager.models.{
-  AspectRatioInferrerResponse,
-  DownloadedImage
-}
+import weco.pipeline.inference_manager.models.{AspectRatioInferrerResponse, DownloadedImage}
 
-class AspectRatioInferrerAdapter(host: String, port: Int)
-    extends InferrerAdapter {
+class AspectRatioInferrerAdapter(host: String, port: Int) extends InferrerAdapter {
   type Response = AspectRatioInferrerResponse
 
   def createRequest(image: DownloadedImage): HttpRequest =

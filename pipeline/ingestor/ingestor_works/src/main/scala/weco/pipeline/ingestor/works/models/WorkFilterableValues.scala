@@ -45,12 +45,9 @@ object WorkFilterableValues {
         id <- concept.id.maybeCanonicalId
       } yield id.underlying,
       subjectsLabel = work.data.subjects.map(_.label).map(queryableLabel),
-      contributorsAgentLabel =
-        work.data.contributors.map(_.agent.label).map(queryableLabel),
-      identifiersValue =
-        (work.sourceIdentifier +: work.data.otherIdentifiers).map(_.value),
-      itemsLocationsLicenseId =
-        work.data.items.flatMap(_.locations).flatMap(_.license).map(_.id),
+      contributorsAgentLabel = work.data.contributors.map(_.agent.label).map(queryableLabel),
+      identifiersValue = (work.sourceIdentifier +: work.data.otherIdentifiers).map(_.value),
+      itemsLocationsLicenseId = work.data.items.flatMap(_.locations).flatMap(_.license).map(_.id),
       itemsLocationsAccessConditionsStatusId = for {
         item <- work.data.items
         location <- item.locations
@@ -58,10 +55,8 @@ object WorkFilterableValues {
         status <- accessCondition.status
       } yield status.id,
       itemsId = work.data.items.map(_.id).canonicalIds,
-      itemsIdentifiersValue =
-        work.data.items.flatMap(_.id.allSourceIdentifiers).map(_.value),
-      itemsLocationsLocationTypeId =
-        work.data.items.flatMap(_.locations).map(_.locationType.id),
+      itemsIdentifiersValue = work.data.items.flatMap(_.id.allSourceIdentifiers).map(_.value),
+      itemsLocationsLocationTypeId = work.data.items.flatMap(_.locations).map(_.locationType.id),
       partOfId = work.state.relations.ancestors.flatMap(_.id).map(_.underlying),
       partOfTitle = work.state.relations.ancestors.flatMap(_.title),
       availabilitiesId = work.state.availabilities.map(_.id).toList

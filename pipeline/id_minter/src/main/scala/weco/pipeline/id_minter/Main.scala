@@ -12,10 +12,7 @@ import weco.elasticsearch.typesafe.ElasticBuilder
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.Identified
-import weco.pipeline.id_minter.config.builders.{
-  IdentifiersTableBuilder,
-  RDSBuilder
-}
+import weco.pipeline.id_minter.config.builders.{IdentifiersTableBuilder, RDSBuilder}
 import weco.pipeline.id_minter.database.IdentifiersDao
 import weco.pipeline.id_minter.models.IdentifiersTable
 import weco.pipeline.id_minter.services.IdMinterWorkerService

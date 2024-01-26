@@ -9,11 +9,10 @@ object TitlePageId extends XMLOps {
     logicalTitlePageId.flatMap(smLink)
   }
 
-  /** Find the id of the div in the logical structMap that corresponds to the
-    * TitlePage, if present.
+  /** Find the id of the div in the logical structMap that corresponds to the TitlePage, if present.
     *
-    * A METS document should contain a LOGICAL structMap section, with
-    * descendent divs containing an ID and a TYPE attribute:
+    * A METS document should contain a LOGICAL structMap section, with descendent divs containing an
+    * ID and a TYPE attribute:
     *
     * {{{
     * <mets:structMap TYPE="LOGICAL">
@@ -30,8 +29,7 @@ object TitlePageId extends XMLOps {
     ).filterByAttribute("TYPE", "TitlePage").headOption.map(_ \@ "ID")
   }
 
-  /** The structLink sections maps the logical and physical IDs represented in
-    * the document:
+  /** The structLink sections maps the logical and physical IDs represented in the document:
     * {{{
     * <mets:structLink>
     *   <mets:smLink xlink:from="LOG_0000" xlink:to="PHYS_0001" />

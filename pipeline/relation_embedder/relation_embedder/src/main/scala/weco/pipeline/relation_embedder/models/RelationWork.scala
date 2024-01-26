@@ -3,8 +3,7 @@ package weco.pipeline.relation_embedder.models
 import weco.catalogue.internal_model.identifiers.CanonicalId
 import weco.catalogue.internal_model.work._
 
-/** Contains the minimal set of fields on a Work needed for generating a
-  * Relation object.
+/** Contains the minimal set of fields on a Work needed for generating a Relation object.
   */
 case class RelationWork(
   data: RelationWorkData,

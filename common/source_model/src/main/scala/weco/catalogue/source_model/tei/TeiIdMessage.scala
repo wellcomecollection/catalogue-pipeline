@@ -12,8 +12,7 @@ case class TeiIdChangeMessage(
   s3Location: S3ObjectLocation,
   timeModified: Instant
 ) extends TeiIdMessage
-case class TeiIdDeletedMessage(id: String, timeDeleted: Instant)
-    extends TeiIdMessage
+case class TeiIdDeletedMessage(id: String, timeDeleted: Instant) extends TeiIdMessage
 
 object TeiIdMessage {
   implicit class TeiIdMessageToTeiMetadata(message: TeiIdMessage) {

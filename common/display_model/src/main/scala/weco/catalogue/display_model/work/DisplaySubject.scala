@@ -1,10 +1,7 @@
 package weco.catalogue.display_model.work
 
 import io.circe.generic.extras.JsonKey
-import weco.catalogue.display_model.identifiers.{
-  DisplayIdentifier,
-  GetIdentifiers
-}
+import weco.catalogue.display_model.identifiers.{DisplayIdentifier, GetIdentifiers}
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.Subject
 
@@ -29,8 +26,7 @@ object DisplaySubject extends GetIdentifiers {
           id = id.maybeCanonicalId.map { _.underlying },
           identifiers = getIdentifiers(id, includesIdentifiers),
           label = label,
-          concepts =
-            concepts.map(DisplayAbstractRootConcept(_, includesIdentifiers))
+          concepts = concepts.map(DisplayAbstractRootConcept(_, includesIdentifiers))
         )
     }
 }

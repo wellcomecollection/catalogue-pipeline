@@ -1,10 +1,6 @@
 package weco.pipeline_storage.memory
 
-import weco.pipeline_storage.{
-  Retriever,
-  RetrieverMultiResult,
-  RetrieverNotFoundException
-}
+import weco.pipeline_storage.{Retriever, RetrieverMultiResult, RetrieverNotFoundException}
 
 import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, Future}

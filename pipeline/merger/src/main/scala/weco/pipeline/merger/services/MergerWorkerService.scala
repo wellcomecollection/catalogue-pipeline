@@ -54,8 +54,7 @@ class MergerWorkerService[WorkDestination, ImageDestination](
       )
     } yield Done
 
-  val batchIndexAndSendWorksAndImages
-    : Flow[(Message, List[WorkOrImage]), Message, NotUsed] =
+  val batchIndexAndSendWorksAndImages: Flow[(Message, List[WorkOrImage]), Message, NotUsed] =
     batchIndexAndSendFlow(config, sendWorkOrImage, workOrImageIndexer)
 
   private def processMessage(

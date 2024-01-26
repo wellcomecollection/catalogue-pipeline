@@ -2,12 +2,12 @@ package weco.pipeline.transformer.mets.transformers
 
 trait DLCSFilenameNormaliser {
 
-  /** Filenames in DLCS are always prefixed with the bnumber (uppercase or
-    * lowercase) to ensure uniqueness. However they might not be prefixed with
-    * the bnumber in the METS file. So we need to do two things:
+  /** Filenames in DLCS are always prefixed with the bnumber (uppercase or lowercase) to ensure
+    * uniqueness. However they might not be prefixed with the bnumber in the METS file. So we need
+    * to do two things:
     *   - strip the "objects/" part of the location
-    *   - prepend the bnumber followed by an underscore if it's not already
-    *     present (uppercase or lowercase)
+    *   - prepend the bnumber followed by an underscore if it's not already present (uppercase or
+    *     lowercase)
     */
   protected def normaliseLocation(
     bNumber: String,

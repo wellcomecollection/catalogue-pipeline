@@ -3,11 +3,7 @@ package weco.pipeline.reindex_worker.services
 import grizzled.slf4j.Logging
 import org.scanamo.DynamoFormat
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import weco.pipeline.reindex_worker.dynamo.{
-  MaxRecordsScanner,
-  MultiItemGetter,
-  ParallelScanner
-}
+import weco.pipeline.reindex_worker.dynamo.{MaxRecordsScanner, MultiItemGetter, ParallelScanner}
 import weco.pipeline.reindex_worker.models.{
   CompleteReindexParameters,
   PartialReindexParameters,
@@ -17,8 +13,7 @@ import weco.pipeline.reindex_worker.models.{
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class RecordReader(implicit dynamoClient: DynamoDbClient, ec: ExecutionContext)
-    extends Logging {
+class RecordReader(implicit dynamoClient: DynamoDbClient, ec: ExecutionContext) extends Logging {
 
   private val maxRecordsScanner = new MaxRecordsScanner()
   private val parallelScanner = new ParallelScanner()

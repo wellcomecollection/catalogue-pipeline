@@ -132,9 +132,9 @@ class TeiIdExtractorWorkerService[Dest](
     isXmlFile && !isInRootOfRepo && !isInExcludedDir
   }
 
-  /** Encapsulates context to pass along each akka-stream stage. Newer versions
-    * of akka-streams have the asSourceWithContext/ asFlowWithContext idioms for
-    * this purpose, which we can migrate to if the library is updated.
+  /** Encapsulates context to pass along each akka-stream stage. Newer versions of akka-streams have
+    * the asSourceWithContext/ asFlowWithContext idioms for this purpose, which we can migrate to if
+    * the library is updated.
     */
   case class Context(msg: SQSMessage)
 }

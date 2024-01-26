@@ -12,12 +12,11 @@ import weco.catalogue.internal_model.work.{Availability, WorkData}
 
 import java.time.{LocalDate, ZoneOffset}
 
-/** We store aggregatable values in the Elasticsearch documents we store for the
-  * API.
+/** We store aggregatable values in the Elasticsearch documents we store for the API.
   *
-  * These values are serialised with the display models, so the API can read
-  * these values and drop them directly into an API response, without needing to
-  * know about what the display models look like.
+  * These values are serialised with the display models, so the API can read these values and drop
+  * them directly into an API response, without needing to know about what the display models look
+  * like.
   *
   * See
   * https://github.com/wellcomecollection/docs/tree/main/rfcs/049-catalogue-api-aggregations-modelling
@@ -54,9 +53,7 @@ trait AggregatableValues {
       workData.contributors
         .map(_.agent)
         .map(DisplayAbstractRootConcept(_, includesIdentifiers = false))
-        .asJson(
-          json => json.mapObject(o => withAggregableLabel(o.remove("roles")))
-        )
+        .asJson(json => json.mapObject(o => withAggregableLabel(o.remove("roles"))))
 
     def licenseAggregatableValues: List[String] =
       workData.items

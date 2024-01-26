@@ -36,8 +36,7 @@ case class CalmSearchRequest(query: CalmQueryBase, dbName: String = "Catalog")
     </Search>
 }
 
-case class CalmSummaryRequest(pos: Int, dbName: String = "Catalog")
-    extends CalmXmlRequest {
+case class CalmSummaryRequest(pos: Int, dbName: String = "Catalog") extends CalmXmlRequest {
   type Response = CalmRecord
   val action = "SummaryHeader"
 

@@ -2,8 +2,7 @@ package weco.pipeline.transformer.tei.transformers
 
 import scala.xml.Elem
 
-/** Implementation of the datable.w3c attributes that can be present on certain
-  * TEI Elements
+/** Implementation of the datable.w3c attributes that can be present on certain TEI Elements
   * https://www.tei-c.org/release/doc/tei-p5-doc/en/html/ref-att.datable.w3c.html
   */
 trait Datable {

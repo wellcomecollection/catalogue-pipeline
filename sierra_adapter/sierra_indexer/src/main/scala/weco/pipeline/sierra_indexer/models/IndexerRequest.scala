@@ -1,11 +1,6 @@
 package weco.pipeline.sierra_indexer.models
 
-import com.sksamuel.elastic4s.ElasticApi.{
-  must,
-  rangeQuery,
-  termQuery,
-  termsQuery
-}
+import com.sksamuel.elastic4s.ElasticApi.{must, rangeQuery, termQuery, termsQuery}
 import com.sksamuel.elastic4s.requests.delete.DeleteByQueryRequest
 import com.sksamuel.elastic4s.{Index, Indexes}
 import com.sksamuel.elastic4s.requests.indexes.IndexRequest
@@ -13,10 +8,7 @@ import io.circe.{Encoder, Json}
 import io.circe.syntax._
 import weco.json.JsonUtil._
 import weco.pipeline.sierra_indexer.services.SierraJsonOps._
-import weco.sierra.models.identifiers.{
-  SierraRecordTypes,
-  TypedSierraRecordNumber
-}
+import weco.sierra.models.identifiers.{SierraRecordTypes, TypedSierraRecordNumber}
 
 object IndexerRequest {
   def mainRecords(
@@ -40,12 +32,10 @@ object IndexerRequest {
     Index(s"${indexPrefix}_fixedfields")
 
   implicit val recordNumberEncoder: Encoder[TypedSierraRecordNumber] =
-    (number: TypedSierraRecordNumber) =>
-      Json.fromString(number.withoutCheckDigit)
+    (number: TypedSierraRecordNumber) => Json.fromString(number.withoutCheckDigit)
 
   implicit val encoder: Encoder[SierraRecordTypes.Value] =
-    (recordType: SierraRecordTypes.Value) =>
-      Json.fromString(recordType.toString)
+    (recordType: SierraRecordTypes.Value) => Json.fromString(recordType.toString)
 
   private case class IndexedVarField(
     parent: Parent,

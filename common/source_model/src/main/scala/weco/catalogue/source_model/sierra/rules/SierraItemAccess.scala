@@ -12,19 +12,17 @@ import weco.catalogue.source_model.sierra.source.{OpacMsg, Status}
 import weco.sierra.models.SierraQueryOps
 import weco.sierra.models.data.SierraItemData
 
-/** There are multiple sources of truth for item information in Sierra, and
-  * whether a given item can be requested online.
+/** There are multiple sources of truth for item information in Sierra, and whether a given item can
+  * be requested online.
   *
-  * This object tries to create a single, consistent view of this data. It
-  * returns three values:
+  * This object tries to create a single, consistent view of this data. It returns three values:
   *
-  *   - An access condition that can be added to a location on an Item. This
-  *     would be set in the Catalogue API.
-  *   - A note that can be used to distinguish between different items. This
-  *     should be copied to the top-level item model.
-  *   - An ItemStatus that returns a simpler "is this available right now". This
-  *     would be returned from the items API with the most up-to-date data from
-  *     Sierra.
+  *   - An access condition that can be added to a location on an Item. This would be set in the
+  *     Catalogue API.
+  *   - A note that can be used to distinguish between different items. This should be copied to the
+  *     top-level item model.
+  *   - An ItemStatus that returns a simpler "is this available right now". This would be returned
+  *     from the items API with the most up-to-date data from Sierra.
   */
 object SierraItemAccess extends SierraQueryOps with Logging {
   def apply(
@@ -49,11 +47,9 @@ object SierraItemAccess extends SierraQueryOps with Logging {
       // access condition, we discard the item note.
       //
       // Otherwise, we copy the item note onto the access condition.
-      case (ac, Some(displayNote))
-          if ac.note.isDefined && displayNote.isAccessNote =>
+      case (ac, Some(displayNote)) if ac.note.isDefined && displayNote.isAccessNote =>
         (ac, None)
-      case (ac, Some(displayNote))
-          if ac.note.isEmpty && displayNote.isAccessNote =>
+      case (ac, Some(displayNote)) if ac.note.isEmpty && displayNote.isAccessNote =>
         (ac.copy(note = Some(displayNote)), None)
 
       // If the item note is nothing to do with the access condition, we return it to
@@ -199,8 +195,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
         AccessCondition(
           method = AccessMethod.NotRequestable,
           status = Some(AccessStatus.TemporarilyUnavailable),
-          note =
-            Some("This item is being digitised and is currently unavailable.")
+          note = Some("This item is being digitised and is currently unavailable.")
         )
 
       // An item which is restricted can be requested online -- the user will have to fill in
@@ -289,8 +284,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
       // It is possible for an item to have a non-zero hold count but still be available
       // for requesting, e.g. some of our long-lived test holds didn't get cleared properly.
       // If an item seems to be stuck on a non-zero hold count, ask somebody to check Sierra.
-      case (Some(holdCount), _, _, _, Some(LocationType.ClosedStores))
-          if holdCount > 0 =>
+      case (Some(holdCount), _, _, _, Some(LocationType.ClosedStores)) if holdCount > 0 =>
         AccessCondition(
           method = AccessMethod.NotRequestable,
           status = Some(AccessStatus.TemporarilyUnavailable),
@@ -338,8 +332,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           )
         )
 
-      case (_, _, _, _, Some(LocationType.OpenShelves))
-          if itemData.hasDueDate =>
+      case (_, _, _, _, Some(LocationType.OpenShelves)) if itemData.hasDueDate =>
         AccessCondition(
           method = AccessMethod.OpenShelves,
           status = Some(AccessStatus.TemporarilyUnavailable),

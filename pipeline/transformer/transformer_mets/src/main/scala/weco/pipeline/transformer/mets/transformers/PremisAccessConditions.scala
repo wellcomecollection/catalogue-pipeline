@@ -20,8 +20,7 @@ case class PremisAccessConditions(
 
 object PremisAccessConditions {
 
-  /** The access conditions are encoded a premis elementin the METS. For
-    * example:
+  /** The access conditions are encoded a premis elementin the METS. For example:
     * {{{
     *     <mets:rightsMD ID="rightsMD_1">
     *         <mets:mdWrap MDTYPE="PREMIS:RIGHTS">

@@ -10,9 +10,8 @@ import weco.pipeline.merger.models.{FieldMergeResult, MergerItem}
 
 /** Items are merged as follows
   *
-  * * Sierra - Single items or zero items * METS works * Single Miro works, only
-  * if the Sierra work has format Picture/Digital Image/3D Object * Sierra -
-  * Multi item * METS works
+  * * Sierra - Single items or zero items * METS works * Single Miro works, only if the Sierra work
+  * has format Picture/Digital Image/3D Object * Sierra - Multi item * METS works
   */
 object ItemsRule extends FieldMergeRule with MergerLogging {
   import WorkPredicates._
@@ -56,11 +55,10 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     )
   }
 
-  /** When there is only 1 Sierra item, we assume that the METS work item is
-    * associated with that and merge the locations onto the Sierra item.
+  /** When there is only 1 Sierra item, we assume that the METS work item is associated with that
+    * and merge the locations onto the Sierra item.
     *
-    * Otherwise (including if there are no Sierra items) we append the METS item
-    * to the Sierra items
+    * Otherwise (including if there are no Sierra items) we append the METS item to the Sierra items
     */
   private val mergeMetsIntoSierraTarget = new PartialRule {
     val isDefinedForTarget: WorkPredicate = sierraWork
@@ -77,19 +75,16 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
       }
   }
 
-  /** When there is only 1 Sierra item and 1 Miro item, we assume that the Miro
-    * work item is associated with the Sierra item and merge the locations onto
-    * the Sierra item.
+  /** When there is only 1 Sierra item and 1 Miro item, we assume that the Miro work item is
+    * associated with the Sierra item and merge the locations onto the Sierra item.
     *
     * When there are no Sierra items, we add the Miro item.
     *
-    * This is restricted to the case that the Sierra work is a Picture/Digital
-    * Image/3D Object
+    * This is restricted to the case that the Sierra work is a Picture/Digital Image/3D Object
     *
-    * When there are multiple Sierra items, we assume the linked Miro work is
-    * definitely associated with * one of them, but unsure of which. Thus we
-    * don't append it to the Sierra items to avoid certain duplication, and
-    * leave the works unmerged.
+    * When there are multiple Sierra items, we assume the linked Miro work is definitely associated
+    * with * one of them, but unsure of which. Thus we don't append it to the Sierra items to avoid
+    * certain duplication, and leave the works unmerged.
     */
   private val mergeSingleMiroIntoSingleOrZeroItemSierraTarget =
     new PartialRule {
@@ -120,24 +115,22 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     target: Work.Visible[Identified],
     sources: Seq[Work[Identified]]
   ): Seq[Work[Identified]] =
-    if (
-      sierraDigitisedMiro(target) && sources.exists(singleDigitalItemMetsWork)
-    ) {
+    if (sierraDigitisedMiro(target) && sources.exists(singleDigitalItemMetsWork)) {
       sources.filter(singleDigitalItemMiroWork)
     } else {
       Nil
     }
 
-  /** When records are harvested from Calm, both a bib and an item record are
-    * created in Sierra. The Sierra item will have more interesting information
-    * about access status, hold count, etc. The Calm items are just stubs.
+  /** When records are harvested from Calm, both a bib and an item record are created in Sierra. The
+    * Sierra item will have more interesting information about access status, hold count, etc. The
+    * Calm items are just stubs.
     *
     * See CalmItems.scala -- the Calm item is only:
     *
     * Item { locations: [ Location { locationType = ClosedStores } ] }
     *
-    * For this reason, we keep all the items *except* the Calm item. This means
-    * we'll also pick up any items linked to the Sierra work from METS or Miro.
+    * For this reason, we keep all the items *except* the Calm item. This means we'll also pick up
+    * any items linked to the Sierra work from METS or Miro.
     */
   private val mergeIntoCalmTarget = new PartialRule {
     val isDefinedForTarget: WorkPredicate = singlePhysicalItemCalmWork
@@ -167,9 +160,8 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
       sources.map(_.data.items).toList.flatten
   }
 
-  /** If we're merging a physical/digitised Sierra work pair, make sure we copy
-    * any items from the digitised bib that are stored in the 856 web link
-    * field.
+  /** If we're merging a physical/digitised Sierra work pair, make sure we copy any items from the
+    * digitised bib that are stored in the 856 web link field.
     */
   private val mergeDigitalIntoPhysicalSierraTarget = new PartialRule {
 

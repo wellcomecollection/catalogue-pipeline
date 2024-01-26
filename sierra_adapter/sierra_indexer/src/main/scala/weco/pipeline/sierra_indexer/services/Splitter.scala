@@ -12,8 +12,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 // This object splits a SierraTransformable into indexable pieces
 // that can be sent to Elasticsearch.
-class Splitter(indexPrefix: String)(implicit ec: ExecutionContext)
-    extends Logging {
+class Splitter(indexPrefix: String)(implicit ec: ExecutionContext) extends Logging {
   def split(
     t: SierraTransformable
   ): Future[(Seq[IndexRequest], Seq[DeleteByQueryRequest])] = Future {

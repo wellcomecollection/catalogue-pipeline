@@ -13,9 +13,8 @@ object Main extends WellcomeTypesafeApp {
 
   val transformer = new TransformerMain(
     sourceName = "Sierra",
-    transformer =
-      (id: String, transformable: SierraTransformable, version: Int) =>
-        SierraTransformer(transformable, version).toEither,
+    transformer = (id: String, transformable: SierraTransformable, version: Int) =>
+      SierraTransformer(transformable, version).toEither,
     sourceDataRetriever = new SierraSourceDataRetriever(
       S3TypedStore[SierraTransformable]
     )

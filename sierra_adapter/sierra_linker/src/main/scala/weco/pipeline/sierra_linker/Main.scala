@@ -53,26 +53,23 @@ object Main extends WellcomeTypesafeApp {
         case SierraRecordTypes.items =>
           new SierraLinkerWorker(
             sqsStream = sqsStream,
-            linkStore =
-              createLinkStore[SierraItemNumber, SierraItemRecord](config),
+            linkStore = createLinkStore[SierraItemNumber, SierraItemRecord](config),
             messageSender = messageSender
           )
 
         case SierraRecordTypes.holdings =>
           new SierraLinkerWorker(
             sqsStream = sqsStream,
-            linkStore =
-              createLinkStore[SierraHoldingsNumber, SierraHoldingsRecord](
-                config
-              ),
+            linkStore = createLinkStore[SierraHoldingsNumber, SierraHoldingsRecord](
+              config
+            ),
             messageSender = messageSender
           )
 
         case SierraRecordTypes.orders =>
           new SierraLinkerWorker(
             sqsStream = sqsStream,
-            linkStore =
-              createLinkStore[SierraOrderNumber, SierraOrderRecord](config),
+            linkStore = createLinkStore[SierraOrderNumber, SierraOrderRecord](config),
             messageSender = messageSender
           )
 

@@ -1,10 +1,6 @@
 package weco.pipeline.transformer.tei.transformers
 
-import weco.catalogue.internal_model.identifiers.{
-  IdState,
-  IdentifierType,
-  SourceIdentifier
-}
+import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, SourceIdentifier}
 import weco.catalogue.internal_model.work.{Concept, Subject}
 import weco.pipeline.transformer.identifiers.LabelDerivedIdentifiers
 import weco.pipeline.transformer.tei.NormaliseText
@@ -13,10 +9,9 @@ import scala.xml.{Elem, Node}
 
 object TeiSubjects extends LabelDerivedIdentifiers {
 
-  /** Subjects live in the profileDesc block of the tei which looks like this:
-    * <profileDesc> <textClass> <keywords scheme="#LCSH"> <list> <item> <term
-    * ref="subject_sh85083116">Medicine, Arab</term> </item> </list> </keywords>
-    * </textClass> </profileDesc>
+  /** Subjects live in the profileDesc block of the tei which looks like this: <profileDesc>
+    * <textClass> <keywords scheme="#LCSH"> <list> <item> <term ref="subject_sh85083116">Medicine,
+    * Arab</term> </item> </list> </keywords> </textClass> </profileDesc>
     */
   def apply(xml: Elem): List[Subject[IdState.Unminted]] =
     (xml \\ "profileDesc" \\ "keywords").flatMap {
@@ -65,16 +60,15 @@ object TeiSubjects extends LabelDerivedIdentifiers {
     }
   }
 
-  /** Extract the identifier from a term. * The relevant attributes are those in
-    * the att.canonical group
-    * https://tei-c.org/release/doc/tei-p5-doc/en/html/ref-att.canonical.html
+  /** Extract the identifier from a term. * The relevant attributes are those in the att.canonical
+    * group https://tei-c.org/release/doc/tei-p5-doc/en/html/ref-att.canonical.html
     *
-    * `key` should contain a "coded value of some kind" and `ref` should contain
-    * one or more URIs to locate the full definition.
+    * `key` should contain a "coded value of some kind" and `ref` should contain one or more URIs to
+    * locate the full definition.
     *
-    * However, in practice, these have been mostly used interchangeably. As
-    * such, we prefer to return the key, which is expected to contain an
-    * "externally-defined string identifying the referent"
+    * However, in practice, these have been mostly used interchangeably. As such, we prefer to
+    * return the key, which is expected to contain an "externally-defined string identifying the
+    * referent"
     */
   private def parseReference(term: Node) = {
     val referenceString = term \@ "ref"

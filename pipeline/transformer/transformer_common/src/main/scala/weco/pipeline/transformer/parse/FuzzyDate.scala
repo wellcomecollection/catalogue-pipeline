@@ -21,8 +21,7 @@ case class CenturyAndDecade(century: Int, decade: Int) extends FuzzyDate
   * @param to
   *   The end date
   */
-case class FuzzyDateRange[F <: FuzzyDate, T <: FuzzyDate](from: F, to: T)
-    extends TimePeriod
+case class FuzzyDateRange[F <: FuzzyDate, T <: FuzzyDate](from: F, to: T) extends TimePeriod
 
 object FuzzyDateRange {
   def combine[

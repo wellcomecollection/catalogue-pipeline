@@ -6,18 +6,17 @@ object MiroContributorCredit extends MiroContributorCodes {
 
   /** Quoting an email from Sabrina Tanner, 12 October 2022:
     *
-    * The 3 letter contributor code was a unique identifier applied to an image
-    * creator’s overall account (contributor account). All of their images would
-    * sit within this account. When creating the contributor record, a credit
-    * line was specified and this was automatically applied to all images in
-    * this account.
+    * The 3 letter contributor code was a unique identifier applied to an image creator’s overall
+    * account (contributor account). All of their images would sit within this account. When
+    * creating the contributor record, a credit line was specified and this was automatically
+    * applied to all images in this account.
     *
-    * For individual images, we had the option of specifying a different credit
-    * line, which is the ‘credit’ field in the image record. This would override
-    * the credit line supplied by the contributor record.
+    * For individual images, we had the option of specifying a different credit line, which is the
+    * ‘credit’ field in the image record. This would override the credit line supplied by the
+    * contributor record.
     *
-    * So for image credits, we use the image_credit_line if available, otherwise
-    * we fall back to the image_source_code.
+    * So for image credits, we use the image_credit_line if available, otherwise we fall back to the
+    * image_source_code.
     */
   def getCredit(miroRecord: MiroRecord): Option[String] = {
     miroRecord.creditLine match {

@@ -37,30 +37,26 @@ class TeiXml(val xml: Elem) extends Logging {
       subjects = TeiSubjects(xml)
     )
 
-  /** All the identifiers of the TEI file are in a `msIdentifier` bloc. We need
-    * the `altIdentifier` node where `type` is `Sierra.` <TEI> <teiHeader>
-    * <fileDesc> <sourceDesc> <msDesc xml:lang="en" xml:id="MS_Arabic_1">
-    * <msIdentifier> <altIdentifier type="former"> <idno>WMS. Or. 1a
-    * (Iskandar)</idno> </altIdentifier> <altIdentifier type="former">
-    * <idno>WMS. Or. 1a</idno> </altIdentifier> <altIdentifier type="Sierra">
-    * <idno>b1234567</idno> </altIdentifier> </msIdentifier> ... </TEI>
+  /** All the identifiers of the TEI file are in a `msIdentifier` bloc. We need the `altIdentifier`
+    * node where `type` is `Sierra.` <TEI> <teiHeader> <fileDesc> <sourceDesc> <msDesc xml:lang="en"
+    * xml:id="MS_Arabic_1"> <msIdentifier> <altIdentifier type="former"> <idno>WMS. Or. 1a
+    * (Iskandar)</idno> </altIdentifier> <altIdentifier type="former"> <idno>WMS. Or. 1a</idno>
+    * </altIdentifier> <altIdentifier type="Sierra"> <idno>b1234567</idno> </altIdentifier>
+    * </msIdentifier> ... </TEI>
     */
   private def bNumber: Result[Option[String]] = {
     val identifiersNodes = xml \\ "msDesc" \ "msIdentifier" \ "altIdentifier"
-    val seq = (identifiersNodes.filter(
-      n => (n \@ "type").toLowerCase == "sierra"
-    ) \ "idno").toList
+    val seq = (identifiersNodes.filter(n => (n \@ "type").toLowerCase == "sierra") \ "idno").toList
     seq match {
       case List(node) => Right(Some(node.text.trim))
       case Nil        => Right(None)
-      case _ => Left(new RuntimeException("More than one sierra bnumber node!"))
+      case _          => Left(new RuntimeException("More than one sierra bnumber node!"))
     }
   }
 
   private def summary: Result[Option[String]] = TeiOps.summary(xml \\ "msDesc")
 
-  /** For now, we use the reference number as the title. We don't use the
-    * <title> node because:
+  /** For now, we use the reference number as the title. We don't use the <title> node because:
     *
     *   - On Arabic manuscripts, the <title> is just "Wellcome Library"
     *   - On other manuscripts, it's the reference number repeated

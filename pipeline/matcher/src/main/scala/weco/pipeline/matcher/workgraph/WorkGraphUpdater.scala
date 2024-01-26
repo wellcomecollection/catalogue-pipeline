@@ -47,8 +47,7 @@ object WorkGraphUpdater extends Logging {
     affectedWorks: Map[CanonicalId, WorkNode]
   ): Unit =
     affectedWorks.get(work.id).flatMap(_.sourceWork) match {
-      case Some(SourceWorkData(_, existingVersion, _, _))
-          if existingVersion > work.version =>
+      case Some(SourceWorkData(_, existingVersion, _, _)) if existingVersion > work.version =>
         val versionConflictMessage =
           s"update failed, work:${work.id} v${work.version} is not newer than existing work v$existingVersion"
         debug(versionConflictMessage)

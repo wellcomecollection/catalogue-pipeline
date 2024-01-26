@@ -14,8 +14,7 @@ object Main extends WellcomeTypesafeApp {
   val transformer = new TransformerMain(
     sourceName = "CALM",
     transformer = CalmTransformer,
-    sourceDataRetriever =
-      new CalmSourceDataRetriever(recordReadable = S3TypedStore[CalmRecord])
+    sourceDataRetriever = new CalmSourceDataRetriever(recordReadable = S3TypedStore[CalmRecord])
   )
 
   runWithConfig {

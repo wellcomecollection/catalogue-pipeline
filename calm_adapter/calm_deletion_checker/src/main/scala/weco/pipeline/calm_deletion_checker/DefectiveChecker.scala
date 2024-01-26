@@ -1,12 +1,7 @@
 package weco.pipeline.calm_deletion_checker
 
 import grizzled.slf4j.Logging
-import weco.pipeline.calm_api_client.{
-  CalmApiClient,
-  CalmQuery,
-  CalmQueryBase,
-  CalmSession
-}
+import weco.pipeline.calm_api_client.{CalmApiClient, CalmQuery, CalmQueryBase, CalmSession}
 import weco.catalogue.source_model.CalmSourcePayload
 
 import scala.concurrent.{ExecutionContext, Future}

@@ -1,11 +1,7 @@
 package weco.pipeline.transformer.miro
 
 import grizzled.slf4j.Logging
-import weco.catalogue.internal_model.identifiers.{
-  DataState,
-  IdentifierType,
-  SourceIdentifier
-}
+import weco.catalogue.internal_model.identifiers.{DataState, IdentifierType, SourceIdentifier}
 import weco.catalogue.internal_model.work.DeletedReason.SuppressedFromSource
 import weco.catalogue.internal_model.work.InvisibilityReason.UnableToTransform
 import weco.catalogue.internal_model.work.WorkState.Source
@@ -89,8 +85,7 @@ class MiroRecordTransformer
         Work.Deleted[Source](
           version = version,
           state = state,
-          deletedReason =
-            SuppressedFromSource("Miro: isClearedForCatalogueAPI = false")
+          deletedReason = SuppressedFromSource("Miro: isClearedForCatalogueAPI = false")
         )
       )
     }

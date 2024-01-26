@@ -32,34 +32,28 @@ case class Relations(
     Relations(
       ancestors = RelationSet(this.ancestors, that.ancestors),
       children = RelationSet(this.children, that.children),
-      siblingsPreceding =
-        RelationSet(this.siblingsPreceding, that.siblingsPreceding),
-      siblingsSucceeding =
-        RelationSet(this.siblingsSucceeding, that.siblingsSucceeding)
+      siblingsPreceding = RelationSet(this.siblingsPreceding, that.siblingsPreceding),
+      siblingsSucceeding = RelationSet(this.siblingsSucceeding, that.siblingsSucceeding)
     )
   }
 }
 
-/** When merging lists of relations, all identified relations are preserved, but
-  * relations without identifiers are subject to being overwritten by a later
-  * relation with the same title.
+/** When merging lists of relations, all identified relations are preserved, but relations without
+  * identifiers are subject to being overwritten by a later relation with the same title.
   *
-  * The situation can arise where an early stage sets up some relations but only
-  * knows the title of a given relation, but a later stage then then finds that
-  * same relation using an identifier. In that case, the newer, identifier-based
-  * one supersedes the older name-only one.
+  * The situation can arise where an early stage sets up some relations but only knows the title of
+  * a given relation, but a later stage then then finds that same relation using an identifier. In
+  * that case, the newer, identifier-based one supersedes the older name-only one.
   *
-  * Sometimes, that early name-only relation is not identified later, so should
-  * be preserved.
+  * Sometimes, that early name-only relation is not identified later, so should be preserved.
   *
-  * A concrete example of this is where a Sierra document contains a 773 field.
-  * During transformation, we do not know whether this will result in it
-  * becoming a member of a Series or a Hierarchy, because that distinction is
-  * driven by the presence of a reciprocal 774 relationship on the parent.
+  * A concrete example of this is where a Sierra document contains a 773 field. During
+  * transformation, we do not know whether this will result in it becoming a member of a Series or a
+  * Hierarchy, because that distinction is driven by the presence of a reciprocal 774 relationship
+  * on the parent.
   *
-  * So, during the transformer phase, a candidate Series ancestor is created.
-  * If, during the relation embedder phase, the other end is found, then the
-  * Series ancestor is to be discarded.
+  * So, during the transformer phase, a candidate Series ancestor is created. If, during the
+  * relation embedder phase, the other end is found, then the Series ancestor is to be discarded.
   */
 object RelationSet {
   def apply(
@@ -81,22 +75,20 @@ object RelationSet {
   }
 
   /** The title used in a relation may come from one of two places:
-    *   1. The title of the related document 2. The title of the link to the
-    *      document
+    *   1. The title of the related document 2. The title of the link to the document
     *
-    * Unfortunately, these may be subject to different conventions in trailing
-    * punctuation, e.g. the title in the link might be intended to be followed
-    * by a page or volume number, separated by something like a colon or comma,
-    * whereas the title of the related document is complete and may finish with
-    * a full stop.
+    * Unfortunately, these may be subject to different conventions in trailing punctuation, e.g. the
+    * title in the link might be intended to be followed by a page or volume number, separated by
+    * something like a colon or comma, whereas the title of the related document is complete and may
+    * finish with a full stop.
     *
-    * Where the title only differs by this form of trailing punctuation, they
-    * should be treated as matching. At this point, the trailing punctuation is
-    * expected to already have been removed from unidentified link titles, so we
-    * only need to remove it from the Work titles for comparison.
+    * Where the title only differs by this form of trailing punctuation, they should be treated as
+    * matching. At this point, the trailing punctuation is expected to already have been removed
+    * from unidentified link titles, so we only need to remove it from the Work titles for
+    * comparison.
     *
-    * Where more specific punctuation exists - e.g. ? or !, it is likely to be
-    * present in both, so does not need to be disguised.
+    * Where more specific punctuation exists - e.g. ? or !, it is likely to be present in both, so
+    * does not need to be disguised.
     */
   private def removeTerminalPunctuation(title: Option[String]): String =
     title.getOrElse("").stripSuffix(".").trim
@@ -123,13 +115,12 @@ case class Relation(
   numDescendents: Int
 )
 
-/** A Relation can be created with just a String representing the title of a
-  * Series. A Series is not an entity in its own right, so does not have an id
-  * of its own.
+/** A Relation can be created with just a String representing the title of a Series. A Series is not
+  * an entity in its own right, so does not have an id of its own.
   *
-  * Practically, a Series does not exist in a hierarchy, so does not have depth
-  * or children or descendants, nor does it have a collectionPath, even though
-  * (obviously) there are objects that are "partOf" the series.
+  * Practically, a Series does not exist in a hierarchy, so does not have depth or children or
+  * descendants, nor does it have a collectionPath, even though (obviously) there are objects that
+  * are "partOf" the series.
   */
 object SeriesRelation {
   def apply(series: String): Relation =

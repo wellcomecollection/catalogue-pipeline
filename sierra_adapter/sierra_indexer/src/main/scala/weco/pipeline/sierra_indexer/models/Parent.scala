@@ -1,9 +1,6 @@
 package weco.pipeline.sierra_indexer.models
 
-import weco.sierra.models.identifiers.{
-  SierraRecordTypes,
-  TypedSierraRecordNumber
-}
+import weco.sierra.models.identifiers.{SierraRecordTypes, TypedSierraRecordNumber}
 
 case class Parent(
   recordType: SierraRecordTypes.Value,

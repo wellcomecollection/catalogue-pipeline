@@ -12,8 +12,7 @@ case class DisplayIdentifier(
 object DisplayIdentifier {
   def apply(sourceIdentifier: SourceIdentifier): DisplayIdentifier =
     DisplayIdentifier(
-      identifierType =
-        DisplayIdentifierType(identifierType = sourceIdentifier.identifierType),
+      identifierType = DisplayIdentifierType(identifierType = sourceIdentifier.identifierType),
       value = sourceIdentifier.value
     )
 }

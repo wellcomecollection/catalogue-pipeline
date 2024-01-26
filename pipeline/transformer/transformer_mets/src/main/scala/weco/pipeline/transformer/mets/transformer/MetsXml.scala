@@ -19,9 +19,9 @@ trait MetsXml extends XMLOps {
 
   def accessConditions: Either[Throwable, MetsAccessConditions]
 
-  /** Valid METS documents should contain a physicalStructMap section, with the
-    * bottom most divs each representing a physical page, and linking to files
-    * in the corresponding fileSec structures:
+  /** Valid METS documents should contain a physicalStructMap section, with the bottom most divs
+    * each representing a physical page, and linking to files in the corresponding fileSec
+    * structures:
     * {{{
     * <mets:structMap TYPE="PHYSICAL">
     *   <mets:div DMDID="DMDPHYS_0000" ID="PHYS_0000" TYPE="physSequence">
@@ -83,8 +83,7 @@ case class ArchivematicaMetsXML(root: Elem) extends MetsXml {
 case class GoobiMetsXml(root: Elem) extends MetsXml {
   val objectsFileGroupUse: String = "OBJECTS"
 
-  /** The record identifier (generally the B number) is encoded in the METS. For
-    * example:
+  /** The record identifier (generally the B number) is encoded in the METS. For example:
     * {{{
     * <mets:dmdSec ID="DMDLOG_0000">
     *    <mets:mdWrap MDTYPE="MODS">

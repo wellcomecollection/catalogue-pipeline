@@ -20,8 +20,8 @@ trait CalmXmlResponse[T] {
   /** CALM SOAP responses are of the form:
     *
     * <?xml version="1.0" encoding="utf-8"?> <soap:Envelope
-    * xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" ...> <soap:Body>
-    * <responseTag> ... data ... </responseTag> </soap:Body> </soap:Envelope>
+    * xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" ...> <soap:Body> <responseTag> ... data
+    * ... </responseTag> </soap:Body> </soap:Envelope>
     *
     * Here we return the data nested under the `responseTag` node
     */
@@ -39,15 +39,14 @@ trait CalmXmlResponse[T] {
   }
 }
 
-case class CalmSearchResponse(root: Elem, cookie: Cookie)
-    extends CalmXmlResponse[CalmSession] {
+case class CalmSearchResponse(root: Elem, cookie: Cookie) extends CalmXmlResponse[CalmSession] {
 
   val responseTag = "SearchResponse"
 
   /** The search response XML is of the form:
     *
-    * <SearchResponse xmlns="http://ds.co.uk/cs/webservices/">
-    * <SearchResult>n</SearchResult> </SearchResponse>
+    * <SearchResponse xmlns="http://ds.co.uk/cs/webservices/"> <SearchResult>n</SearchResult>
+    * </SearchResponse>
     *
     * Here we extract an integer containing n (the number of hits)
     */
@@ -89,12 +88,11 @@ case class CalmSummaryResponse(
 
   /** The summary response XML is of the form:
     *
-    * <SummaryHeaderResponse xmlns="http://ds.co.uk/cs/webservices/">
-    * <SummaryHeaderResult> <SummaryList> <Summary> <tag>value</tag> ...
-    * </Summary> </SummaryList> </SummaryHeaderResult> </SummaryHeaderResponse>
+    * <SummaryHeaderResponse xmlns="http://ds.co.uk/cs/webservices/"> <SummaryHeaderResult>
+    * <SummaryList> <Summary> <tag>value</tag> ... </Summary> </SummaryList> </SummaryHeaderResult>
+    * </SummaryHeaderResponse>
     *
-    * Here we extract a CalmRecord, which contains a mapping between each `tag`
-    * and `value`.
+    * Here we extract a CalmRecord, which contains a mapping between each `tag` and `value`.
     */
   def parse: Either[Throwable, CalmRecord] =
     responseNode

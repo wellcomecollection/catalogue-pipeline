@@ -12,10 +12,9 @@ object TeiProduction {
 
   def apply(node: NodeSeq): List[ProductionEvent[Unminted]] = origin(node)
 
-  /** The origin tag contains information about where and when the manuscript
-    * was written. This is an example: <history> <origin> <origPlace>
-    * <country><!-- insert --></country>, <region><!-- insert --></region>,
-    * <settlement><!-- insert --></settlement>, <orgName><!-- insert
+  /** The origin tag contains information about where and when the manuscript was written. This is
+    * an example: <history> <origin> <origPlace> <country><!-- insert --></country>, <region><!--
+    * insert --></region>, <settlement><!-- insert --></settlement>, <orgName><!-- insert
     * --></orgName> </origPlace> <origDate calendar=""><!-- insert
     * --></origDate> </origin> </history>
     */
@@ -48,15 +47,13 @@ object TeiProduction {
 
   }
 
-  /** Dates are in a origDate tag and can be in different calendars, so we need
-    * to look for the one in the gregorian calendar. Also, sometimes the date
-    * can contain notes, as in this example, so we need to strip them: <origDate
-    * calendar="Gregorian">ca.1732-63AD <note>from watermarks</note> </origDate>
+  /** Dates are in a origDate tag and can be in different calendars, so we need to look for the one
+    * in the gregorian calendar. Also, sometimes the date can contain notes, as in this example, so
+    * we need to strip them: <origDate calendar="Gregorian">ca.1732-63AD <note>from
+    * watermarks</note> </origDate>
     */
   private def parseDate(origin: NodeSeq) = {
-    val dateNodes = (origin \ "origDate").filter(
-      n => (n \@ "calendar").toLowerCase == "gregorian"
-    )
+    val dateNodes = (origin \ "origDate").filter(n => (n \@ "calendar").toLowerCase == "gregorian")
     val date =
       if (dateNodes.exists(_.child.size > 1))
         dateNodes

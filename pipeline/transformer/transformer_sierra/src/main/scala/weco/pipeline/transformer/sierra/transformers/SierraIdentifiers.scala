@@ -1,9 +1,6 @@
 package weco.pipeline.transformer.sierra.transformers
 
-import weco.catalogue.internal_model.identifiers.{
-  IdentifierType,
-  SourceIdentifier
-}
+import weco.catalogue.internal_model.identifiers.{IdentifierType, SourceIdentifier}
 import weco.sierra.models.SierraQueryOps
 import weco.sierra.models.data.SierraBibData
 import weco.sierra.models.identifiers.SierraBibNumber
@@ -11,9 +8,7 @@ import weco.sierra.models.marc.Subfield
 
 import scala.util.matching.Regex
 
-object SierraIdentifiers
-    extends SierraIdentifiedDataTransformer
-    with SierraQueryOps {
+object SierraIdentifiers extends SierraIdentifiedDataTransformer with SierraQueryOps {
 
   type Output = List[SourceIdentifier]
 
@@ -30,8 +25,7 @@ object SierraIdentifiers
 
   /** Create a seven-digit ID based on the internal ID.
     *
-    * We use the eight-digit ID with check digit as the sourceIdentifier on the
-    * Work.
+    * We use the eight-digit ID with check digit as the sourceIdentifier on the Work.
     */
   private def createSierraIdentifier(
     bibId: SierraBibNumber
@@ -46,8 +40,7 @@ object SierraIdentifiers
 
   /** Find ISBN (International Serial Book Number) identifiers from MARC 020 ǂa.
     *
-    * This field is repeatable. See
-    * https://www.loc.gov/marc/bibliographic/bd020.html
+    * This field is repeatable. See https://www.loc.gov/marc/bibliographic/bd020.html
     */
   private def getIsbnIdentifiers(
     bibData: SierraBibData
@@ -65,11 +58,9 @@ object SierraIdentifiers
           )
       }
 
-  /** Find ISSN (International Standard Serial Number) identifiers from MARC 022
-    * ǂa.
+  /** Find ISSN (International Standard Serial Number) identifiers from MARC 022 ǂa.
     *
-    * This field is repeatable. See
-    * https://www.loc.gov/marc/bibliographic/bd022.html
+    * This field is repeatable. See https://www.loc.gov/marc/bibliographic/bd022.html
     */
   private def getIssnIdentifiers(
     bibData: SierraBibData
@@ -89,13 +80,12 @@ object SierraIdentifiers
 
   /** Find the digcodes from MARC 759 ǂa.
     *
-    * A digcode is a Wellcome-specific identifier that identifies the
-    * digitisation project under which the item was digitised. These are used by
-    * staff to quickly locate, for example, all the MOH reports or everything
-    * digitised from a partner institution.
+    * A digcode is a Wellcome-specific identifier that identifies the digitisation project under
+    * which the item was digitised. These are used by staff to quickly locate, for example, all the
+    * MOH reports or everything digitised from a partner institution.
     *
-    * The value of the digcode should only be the contiguous alphabetic string
-    * that starts with `dig`.
+    * The value of the digcode should only be the contiguous alphabetic string that starts with
+    * `dig`.
     *
     * Note: MARC 759 is not assigned by the MARC spec.
     */
@@ -135,8 +125,8 @@ object SierraIdentifiers
 
   /** Add the iconographic numbers as identifiers.
     *
-    * These are also included as the reference number on a Work; we add them
-    * here so they're easily searchable.
+    * These are also included as the reference number on a Work; we add them here so they're easily
+    * searchable.
     */
   private def getIconographicNumbers(
     bibData: SierraBibData
@@ -152,8 +142,8 @@ object SierraIdentifiers
 
   /** Add the ESTC references from MARC 510 ǂc.
     *
-    * These are also included in the notes field on a Work; we add them here so
-    * they're easily searchable.
+    * These are also included in the notes field on a Work; we add them here so they're easily
+    * searchable.
     */
   private def getEstcReferences(
     bibData: SierraBibData

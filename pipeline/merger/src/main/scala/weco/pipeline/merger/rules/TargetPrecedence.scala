@@ -19,9 +19,7 @@ object TargetPrecedence {
     additionalPredicate: WorkPredicate
   )(works: Seq[Work[Identified]]): Option[Work.Visible[Identified]] =
     targetPrecedence.view
-      .flatMap(
-        pred => works.find(work => pred(work) && additionalPredicate(work))
-      )
+      .flatMap(pred => works.find(work => pred(work) && additionalPredicate(work)))
       .headOption
       .collect(visibleWork)
 
@@ -30,8 +28,7 @@ object TargetPrecedence {
   ): Option[Work.Visible[Identified]] =
     targetSatisfying(anyWork)(works)
 
-  def visibleWork
-    : PartialFunction[Work[Identified], Work.Visible[Identified]] = {
+  def visibleWork: PartialFunction[Work[Identified], Work.Visible[Identified]] = {
     case work: Work.Visible[Identified] => work
   }
 }

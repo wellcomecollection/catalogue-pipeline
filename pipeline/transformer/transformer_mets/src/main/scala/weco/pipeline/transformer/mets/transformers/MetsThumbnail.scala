@@ -10,8 +10,8 @@ import weco.pipeline.transformer.mets.transformer.models.FileReference
 
 /** Constructs a DigitalLocation representing a thumbnail, if appropriate.
   *
-  * A Location will only be returned if there is a reference for it, and if
-  * there are no restrictions preventing it
+  * A Location will only be returned if there is a reference for it, and if there are no
+  * restrictions preventing it
   */
 object MetsThumbnail extends DLCSFilenameNormaliser {
 

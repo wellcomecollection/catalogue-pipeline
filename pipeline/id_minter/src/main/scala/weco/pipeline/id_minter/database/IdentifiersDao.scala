@@ -2,10 +2,7 @@ package weco.pipeline.id_minter.database
 
 import grizzled.slf4j.Logging
 import scalikejdbc._
-import weco.catalogue.internal_model.identifiers.{
-  IdentifierType,
-  SourceIdentifier
-}
+import weco.catalogue.internal_model.identifiers.{IdentifierType, SourceIdentifier}
 import weco.pipeline.id_minter.models.{Identifier, IdentifiersTable}
 
 import java.sql.{BatchUpdateException, Statement}
@@ -203,8 +200,7 @@ class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
     rs: WrappedResultSet
   ): SourceIdentifier =
     SourceIdentifier(
-      identifierType =
-        IdentifierType.apply(rs.string(i.resultName.SourceSystem)),
+      identifierType = IdentifierType.apply(rs.string(i.resultName.SourceSystem)),
       ontologyType = rs.string(i.resultName.OntologyType),
       value = rs.string(i.resultName.SourceId)
     )

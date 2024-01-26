@@ -10,10 +10,7 @@ import weco.catalogue.source_model.mets.MetsSourceData
 import weco.http.client.AkkaHttpClient
 import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import weco.pipeline.mets_adapter.http.StorageServiceOauthHttpClient
-import weco.pipeline.mets_adapter.services.{
-  HttpBagRetriever,
-  MetsAdapterWorkerService
-}
+import weco.pipeline.mets_adapter.services.{HttpBagRetriever, MetsAdapterWorkerService}
 import weco.storage.store.dynamo.DynamoSingleVersionStore
 import weco.storage.typesafe.DynamoBuilder
 import weco.typesafe.WellcomeTypesafeApp

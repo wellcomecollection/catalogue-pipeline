@@ -108,8 +108,7 @@ trait Merger extends MergerLogging {
                   version = result.mergedTarget.version,
                   data = result.mergedTarget.data,
                   state = result.mergedTarget.state,
-                  redirectSources =
-                    result.mergedTarget.redirectSources ++ redirectedIdentifiers
+                  redirectSources = result.mergedTarget.redirectSources ++ redirectedIdentifiers
                 )
 
               MergerOutcome(
@@ -155,8 +154,7 @@ trait Merger extends MergerLogging {
         sourceModifiedTime = source.state.sourceModifiedTime,
         internalWorkStubs = Nil
       ),
-      redirectTarget =
-        IdState.Identified(target.state.canonicalId, target.sourceIdentifier)
+      redirectTarget = IdState.Identified(target.state.canonicalId, target.sourceIdentifier)
     )
 
   private def logIntentions(

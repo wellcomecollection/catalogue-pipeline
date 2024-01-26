@@ -14,14 +14,12 @@ trait SierraAbstractConcepts extends Logging with LabelDerivedIdentifiers {
     identifierSubfieldContent: String
   ): IdState.Unminted
 
-  /** Returns an IdState populated by looking at the identifier ($0) subfields
-    * in the given varField
+  /** Returns an IdState populated by looking at the identifier ($0) subfields in the given varField
     *
     * There are three-and-a-half possible scenarios:
     *
     *   - Exactly one identifier field: use that
-    *     - unless it is to be ignored for type-specific reasons in
-    *       maybeAddIdentifier
+    *     - unless it is to be ignored for type-specific reasons in maybeAddIdentifier
     *   - No identifier fields: create an identifier for it
     *   - Multiple identifier fields: unidentifiable, we don't know what to use
     */

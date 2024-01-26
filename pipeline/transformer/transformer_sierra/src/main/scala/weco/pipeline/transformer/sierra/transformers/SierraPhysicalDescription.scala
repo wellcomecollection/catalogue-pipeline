@@ -24,9 +24,7 @@ import weco.sierra.models.data.SierraBibData
 //
 // https://www.loc.gov/marc/bibliographic/bd300.html
 //
-object SierraPhysicalDescription
-    extends SierraDataTransformer
-    with SierraQueryOps {
+object SierraPhysicalDescription extends SierraDataTransformer with SierraQueryOps {
 
   type Output = Option[String]
 

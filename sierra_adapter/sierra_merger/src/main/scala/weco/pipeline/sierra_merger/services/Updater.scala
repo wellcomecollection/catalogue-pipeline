@@ -1,10 +1,7 @@
 package weco.pipeline.sierra_merger.services
 
 import cats.implicits._
-import weco.catalogue.source_model.sierra.{
-  AbstractSierraRecord,
-  SierraTransformable
-}
+import weco.catalogue.source_model.sierra.{AbstractSierraRecord, SierraTransformable}
 import weco.catalogue.source_model.store.SourceVHS
 import weco.pipeline.sierra_merger.models.{RecordOps, TransformableOps}
 import weco.sierra.models.identifiers.SierraBibNumber

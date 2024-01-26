@@ -46,14 +46,11 @@ object Main extends WellcomeTypesafeApp {
         relationsService = new PathQueryRelationsService(
           esClient,
           identifiedIndex,
-          completeTreeScroll =
-            config.requireInt("es.works.scroll.complete_tree"),
-          affectedWorksScroll =
-            config.requireInt("es.works.scroll.affected_works")
+          completeTreeScroll = config.requireInt("es.works.scroll.complete_tree"),
+          affectedWorksScroll = config.requireInt("es.works.scroll.affected_works")
         ),
         indexBatchSize = config.requireInt("es.works.batch_size"),
-        indexFlushInterval =
-          config.requireInt("es.works.flush_interval_seconds").seconds
+        indexFlushInterval = config.requireInt("es.works.flush_interval_seconds").seconds
       )
   }
 }

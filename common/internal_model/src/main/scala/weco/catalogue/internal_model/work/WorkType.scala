@@ -1,9 +1,6 @@
 package weco.catalogue.internal_model.work
 
-import io.circe.generic.extras.semiauto.{
-  deriveEnumerationDecoder,
-  deriveEnumerationEncoder
-}
+import io.circe.generic.extras.semiauto.{deriveEnumerationDecoder, deriveEnumerationEncoder}
 import io.circe.syntax._
 import io.circe.{Decoder, Encoder}
 

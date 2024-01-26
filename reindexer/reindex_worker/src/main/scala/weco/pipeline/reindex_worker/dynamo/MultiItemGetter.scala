@@ -12,8 +12,8 @@ import scala.concurrent.{ExecutionContext, Future}
   * This uses the BatchGet API, see
   * https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_BatchGetItem.html
   *
-  * If an ID doesn't exist, then no item is returned. It returns up to 100 items
-  * or 16 MB of data, whichever comes first.
+  * If an ID doesn't exist, then no item is returned. It returns up to 100 items or 16 MB of data,
+  * whichever comes first.
   */
 class MultiItemGetter(
   implicit val dynamoClient: DynamoDbClient,

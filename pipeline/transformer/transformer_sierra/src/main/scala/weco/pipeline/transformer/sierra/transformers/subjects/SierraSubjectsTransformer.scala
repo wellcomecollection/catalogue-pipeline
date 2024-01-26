@@ -32,8 +32,8 @@ trait SierraSubjectsTransformer
     varFields: List[VarField]
   ): Output
 
-  /** Given a varField and a list of subfield tags, create a label by
-    * concatenating the contents of every subfield with one of the given tags.
+  /** Given a varField and a list of subfield tags, create a label by concatenating the contents of
+    * every subfield with one of the given tags.
     *
     * The order is the same as that in the original MARC.
     */
@@ -46,9 +46,9 @@ trait SierraSubjectsTransformer
 
   /** Create an identifier for a subject created from an Agent.
     *
-    * Note that these rules are different from the rules for Agents created for
-    * contributors, because subjects and contributors are drawn from different
-    * MARC fields with different behaviours.
+    * Note that these rules are different from the rules for Agents created for contributors,
+    * because subjects and contributors are drawn from different MARC fields with different
+    * behaviours.
     */
   def identifyAgentSubject(
     varfield: VarField,

@@ -14,8 +14,8 @@ import weco.pipeline.merger.models.FieldMergeResult
   *
   *   - All source identifiers are merged into Calm works
   *   - Miro identifiers are merged into single or zero item Sierra works
-  *   - Sierra works with linked digitised Sierra works have the first of these
-  *     linked IDs merged into them
+  *   - Sierra works with linked digitised Sierra works have the first of these linked IDs merged
+  *     into them
   *   - METS identifiers are not merged as they are not useful
   */
 object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {

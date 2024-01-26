@@ -11,8 +11,7 @@ object MetsAccessStatus {
       case Some(s) if s == "Open" => Right(Some(AccessStatus.Open))
 
       // e.g. b30468115 / b19912730
-      case Some(s)
-          if s == "Open with advisory" || s == "Requires registration" =>
+      case Some(s) if s == "Open with advisory" || s == "Requires registration" =>
         Right(Some(AccessStatus.OpenWithAdvisory))
 
       // e.g. b16469434 / b21072061

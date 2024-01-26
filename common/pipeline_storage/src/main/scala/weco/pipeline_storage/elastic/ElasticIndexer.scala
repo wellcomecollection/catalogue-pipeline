@@ -3,11 +3,7 @@ package weco.pipeline_storage.elastic
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.bulk.BulkResponseItem
 import com.sksamuel.elastic4s.requests.common.VersionType.ExternalGte
-import com.sksamuel.elastic4s.{
-  ElasticClient,
-  Index,
-  Indexable => ElasticIndexable
-}
+import com.sksamuel.elastic4s.{ElasticClient, Index, Indexable => ElasticIndexable}
 import grizzled.slf4j.Logging
 import io.circe.{Encoder, Printer}
 import weco.pipeline_storage.{Indexable, Indexer}
@@ -154,8 +150,7 @@ class ElasticIndexer[T: Indexable](
             }
       }
 
-  /** Did we try to PUT a document with a lower version than the existing
-    * version?
+  /** Did we try to PUT a document with a lower version than the existing version?
     */
   private def isVersionConflictException(
     bulkResponseItem: BulkResponseItem
@@ -163,10 +158,7 @@ class ElasticIndexer[T: Indexable](
     // This error is returned by Elasticsearch when we try to PUT a document
     // with a lower version than the existing version.
     val alreadyIndexedHasHigherVersion = bulkResponseItem.error
-      .exists(
-        bulkError =>
-          bulkError.`type`.contains("version_conflict_engine_exception")
-      )
+      .exists(bulkError => bulkError.`type`.contains("version_conflict_engine_exception"))
 
     if (alreadyIndexedHasHigherVersion) {
       info(

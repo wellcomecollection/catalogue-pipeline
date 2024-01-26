@@ -34,8 +34,7 @@ object Implicits {
     case genre: DisplayGenreConcept => genre.asJson
   }
 
-  implicit val abstractRootConceptEncoder
-    : Encoder[DisplayAbstractRootConcept] = {
+  implicit val abstractRootConceptEncoder: Encoder[DisplayAbstractRootConcept] = {
     case agent: DisplayAbstractAgent     => agent.asJson
     case concept: DisplayAbstractConcept => concept.asJson
   }

@@ -1,10 +1,7 @@
 package weco.pipeline.transformer.sierra.transformers
 
 import weco.catalogue.internal_model.locations._
-import weco.catalogue.source_model.sierra.rules.{
-  SierraItemAccess,
-  SierraPhysicalLocationType
-}
+import weco.catalogue.source_model.sierra.rules.{SierraItemAccess, SierraPhysicalLocationType}
 import weco.sierra.models.data.{SierraBibData, SierraItemData}
 
 trait SierraPhysicalLocation {

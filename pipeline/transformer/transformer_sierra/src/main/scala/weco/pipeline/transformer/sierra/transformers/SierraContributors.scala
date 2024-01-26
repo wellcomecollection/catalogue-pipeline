@@ -1,10 +1,6 @@
 package weco.pipeline.transformer.sierra.transformers
 
-import weco.catalogue.internal_model.identifiers.{
-  IdState,
-  IdentifierType,
-  SourceIdentifier
-}
+import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, SourceIdentifier}
 import weco.catalogue.internal_model.work._
 import weco.pipeline.transformer.identifiers.LabelDerivedIdentifiers
 import weco.sierra.models.SierraQueryOps

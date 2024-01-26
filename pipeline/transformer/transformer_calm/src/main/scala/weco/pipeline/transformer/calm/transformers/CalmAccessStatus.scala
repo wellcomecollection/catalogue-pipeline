@@ -14,8 +14,7 @@ object CalmAccessStatus extends CalmRecordOps with Logging {
       case Some("Restricted")         => Some(AccessStatus.Restricted)
       case Some(s) if s.toLowerCase == "certain restrictions apply" =>
         Some(AccessStatus.Restricted)
-      case Some(s)
-          if s.toLowerCase == "restricted access (data protection act)" =>
+      case Some(s) if s.toLowerCase == "restricted access (data protection act)" =>
         Some(AccessStatus.Restricted)
       case Some("By Appointment")   => Some(AccessStatus.ByAppointment)
       case Some("Donor Permission") => Some(AccessStatus.PermissionRequired)

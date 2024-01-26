@@ -1,10 +1,7 @@
 package weco.catalogue.source_model.sierra.rules
 
 import grizzled.slf4j.Logging
-import weco.catalogue.internal_model.locations.{
-  LocationType,
-  PhysicalLocationType
-}
+import weco.catalogue.internal_model.locations.{LocationType, PhysicalLocationType}
 import weco.sierra.models.identifiers.TypedSierraRecordNumber
 
 object SierraPhysicalLocationType extends Logging {

@@ -4,9 +4,7 @@ import weco.sierra.models.SierraQueryOps
 import weco.sierra.models.data.SierraBibData
 import weco.sierra.models.fields.SierraMaterialType
 
-object SierraIconographicNumber
-    extends SierraDataTransformer
-    with SierraQueryOps {
+object SierraIconographicNumber extends SierraDataTransformer with SierraQueryOps {
   override type Output = Option[String]
 
   private val IconographicNumberMatch = "^([0-9]+i)$".r

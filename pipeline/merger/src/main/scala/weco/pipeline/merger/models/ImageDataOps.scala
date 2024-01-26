@@ -5,8 +5,7 @@ import weco.catalogue.internal_model.image.ImageData
 import weco.catalogue.internal_model.locations.License
 
 trait ImageDataOps {
-  implicit class ImageDataOps[State](imageData: ImageData[State])
-      extends Logging {
+  implicit class ImageDataOps[State](imageData: ImageData[State]) extends Logging {
     def copyLicenceFrom(
       sources: Seq[ImageData[State]]
     ): ImageData[State] = {
@@ -36,8 +35,6 @@ trait ImageDataOps {
     private def insertLicence[T](
       newLicence: License
     ): ImageData[State] =
-      imageData.copy(locations =
-        imageData.locations.map(_.copy(license = Some(newLicence)))
-      )
+      imageData.copy(locations = imageData.locations.map(_.copy(license = Some(newLicence))))
   }
 }

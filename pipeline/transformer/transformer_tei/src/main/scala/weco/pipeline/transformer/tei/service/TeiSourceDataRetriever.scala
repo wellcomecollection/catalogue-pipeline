@@ -5,8 +5,7 @@ import weco.catalogue.source_model.tei.TeiMetadata
 import weco.pipeline.transformer.SourceDataRetriever
 import weco.storage.{Identified, ReadError, Version}
 
-class TeiSourceDataRetriever
-    extends SourceDataRetriever[TeiSourcePayload, TeiMetadata] {
+class TeiSourceDataRetriever extends SourceDataRetriever[TeiSourcePayload, TeiMetadata] {
 
   override def lookupSourceData(
     payload: TeiSourcePayload

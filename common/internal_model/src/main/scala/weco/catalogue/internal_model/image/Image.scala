@@ -1,10 +1,6 @@
 package weco.catalogue.internal_model.image
 
-import weco.catalogue.internal_model.identifiers.{
-  CanonicalId,
-  HasId,
-  SourceIdentifier
-}
+import weco.catalogue.internal_model.identifiers.{CanonicalId, HasId, SourceIdentifier}
 import weco.catalogue.internal_model.locations.DigitalLocation
 
 import java.time.Instant
@@ -46,11 +42,9 @@ sealed trait ImageState {
   def id: String = canonicalId.toString
 }
 
-/** ImageState represents the state of the image in the pipeline. Its stages are
-  * as follows:
+/** ImageState represents the state of the image in the pipeline. Its stages are as follows:
   *
-  * \| \| (merger) ▼ Initial \| \| (inferrer) ▼ Augmented \| \| (ingestor) ▼
-  * Indexed
+  * \| \| (merger) ▼ Initial \| \| (inferrer) ▼ Augmented \| \| (ingestor) ▼ Indexed
   */
 object ImageState {
 

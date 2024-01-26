@@ -2,28 +2,23 @@ package weco.catalogue.source_model.sierra.rules
 
 import weco.sierra.models.data.SierraItemData
 
-/** The Rules for Requesting are a set of rules in Sierra that can block an item
-  * from being requested, and if so, optionally explain to the user why an item
-  * can't be requested.
+/** The Rules for Requesting are a set of rules in Sierra that can block an item from being
+  * requested, and if so, optionally explain to the user why an item can't be requested.
   *
-  * This object translates the rules from the MARC-like syntax into Scala. The
-  * original rules are included for reference and to help apply updates, along
-  * with explanations of the syntax.
+  * This object translates the rules from the MARC-like syntax into Scala. The original rules are
+  * included for reference and to help apply updates, along with explanations of the syntax.
   *
   * If you disagree with one of these rules, you have two options:
   *
-  * 1) Discuss the change with Library Systems Support and get it changed in
-  * Sierra proper, then update this object to match 2) Work around it elsewhere
-  * in our applications
+  * 1) Discuss the change with Library Systems Support and get it changed in Sierra proper, then
+  * update this object to match 2) Work around it elsewhere in our applications
   *
-  * But don't modify these rules without updating the canonical set in Sierra --
-  * this is meant to be a 1:1 reflection of those rules, not a mix of Sierra
-  * rules and platform logic.
+  * But don't modify these rules without updating the canonical set in Sierra -- this is meant to be
+  * a 1:1 reflection of those rules, not a mix of Sierra rules and platform logic.
   *
-  * The type hierarchy for NotRequestable is to allow us to pattern match in our
-  * downstream applications without being tied to the exact wording of the
-  * messages -- so if they get changed in Sierra, we can change them without
-  * breaking our other code.
+  * The type hierarchy for NotRequestable is to allow us to pattern match in our downstream
+  * applications without being tied to the exact wording of the messages -- so if they get changed
+  * in Sierra, we can change them without breaking our other code.
   *
   * Relevant Sierra docs:
   *
@@ -34,8 +29,8 @@ import weco.sierra.models.data.SierraItemData
   *   - Variable length fields on items
   *     https://documentation.iii.com/sierrahelp/Content/sril/sril_records_varfld_types_item.html
   *
-  * This was last checked against Sierra based on a set of rules sent from Liz
-  * Richens on 31 January 2022.
+  * This was last checked against Sierra based on a set of rules sent from Liz Richens on 31 January
+  * 2022.
   */
 object SierraRulesForRequesting {
   def apply(itemData: SierraItemData): RulesForRequestingResult =

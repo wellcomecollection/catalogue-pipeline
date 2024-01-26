@@ -3,19 +3,10 @@ package weco.pipeline_storage.elastic
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 import com.sksamuel.elastic4s.requests.get.{GetRequest, GetResponse}
-import com.sksamuel.elastic4s.{
-  ElasticClient,
-  Index,
-  RequestFailure,
-  RequestSuccess
-}
+import com.sksamuel.elastic4s.{ElasticClient, Index, RequestFailure, RequestSuccess}
 import com.sksamuel.elastic4s.ElasticDsl._
 import grizzled.slf4j.Logging
-import weco.pipeline_storage.{
-  Retriever,
-  RetrieverMultiResult,
-  RetrieverNotFoundException
-}
+import weco.pipeline_storage.{Retriever, RetrieverMultiResult, RetrieverNotFoundException}
 
 trait ElasticRetriever[T] extends Retriever[T] with Logging {
   val client: ElasticClient
@@ -43,8 +34,7 @@ trait ElasticRetriever[T] extends Retriever[T] with Logging {
         }
         .map {
           case RequestFailure(_, _, _, error) => throw error.asException
-          case RequestSuccess(_, _, _, result)
-              if result.docs.size != ids.size =>
+          case RequestSuccess(_, _, _, result) if result.docs.size != ids.size =>
             warn(
               s"Asked for ${ids.size} IDs in index $index, only got ${result.docs.size}"
             )

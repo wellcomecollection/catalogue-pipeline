@@ -18,8 +18,7 @@ class MemoryIndexer[T: Indexable](
     documents.foreach {
       doc =>
         index.get(indexable.id(doc)) match {
-          case Some(storedDoc)
-              if indexable.version(storedDoc) > indexable.version(doc) =>
+          case Some(storedDoc) if indexable.version(storedDoc) > indexable.version(doc) =>
             info(
               s"Skipping ${indexable.id(doc)} because already indexed item has a higher version"
             )

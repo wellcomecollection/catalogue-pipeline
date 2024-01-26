@@ -23,8 +23,7 @@ object ThumbnailReference extends XMLOps {
           FileReference(
             id = fileElement \@ "ID",
             location = href,
-            listedMimeType =
-              Option(fileElement \@ "MIMETYPE").filter(_.nonEmpty)
+            listedMimeType = Option(fileElement \@ "MIMETYPE").filter(_.nonEmpty)
           )
       }
   }
@@ -37,8 +36,7 @@ object ThumbnailReference extends XMLOps {
           node => (node, node \@ "MIMETYPE")
         }
     } collectFirst {
-      case Some((node, mime))
-          if mime == "application/pdf" || mime.startsWith("image") =>
+      case Some((node, mime)) if mime == "application/pdf" || mime.startsWith("image") =>
         node
     }
   }

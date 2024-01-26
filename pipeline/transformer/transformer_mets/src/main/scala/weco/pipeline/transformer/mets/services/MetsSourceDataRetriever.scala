@@ -5,8 +5,7 @@ import weco.catalogue.source_model.mets.MetsSourceData
 import weco.pipeline.transformer.SourceDataRetriever
 import weco.storage.{Identified, ReadError, Version}
 
-class MetsSourceDataRetriever
-    extends SourceDataRetriever[MetsSourcePayload, MetsSourceData] {
+class MetsSourceDataRetriever extends SourceDataRetriever[MetsSourcePayload, MetsSourceData] {
 
   override def lookupSourceData(
     p: MetsSourcePayload

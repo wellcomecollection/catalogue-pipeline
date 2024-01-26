@@ -1,16 +1,8 @@
 package weco.pipeline.transformer.mets.transformers
 
-import weco.catalogue.internal_model.identifiers.{
-  IdState,
-  IdentifierType,
-  SourceIdentifier
-}
+import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, SourceIdentifier}
 import weco.catalogue.internal_model.image.ImageData
-import weco.catalogue.internal_model.locations.{
-  DigitalLocation,
-  License,
-  LocationType
-}
+import weco.catalogue.internal_model.locations.{DigitalLocation, License, LocationType}
 import weco.pipeline.transformer.mets.transformer.models.FileReference
 
 object MetsImageData extends DLCSFilenameNormaliser {

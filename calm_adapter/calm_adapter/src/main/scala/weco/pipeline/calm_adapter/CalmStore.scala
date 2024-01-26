@@ -69,9 +69,9 @@ class CalmStore(store: SourceVHS[CalmRecord]) extends Logging {
     record.retrievedAt.isAfter(storedRecord.retrievedAt) &&
       (record.data != storedRecord.data || !storedRecord.published)
 
-  /** Errors in the storage library sometimes wrap empty Exception objects with
-    * no message, meaning if we return them directly we lose any indication as
-    * to what has occured. Here we make sure the Exception is somewhat readable.
+  /** Errors in the storage library sometimes wrap empty Exception objects with no message, meaning
+    * if we return them directly we lose any indication as to what has occured. Here we make sure
+    * the Exception is somewhat readable.
     */
   def toReadableException(err: StorageError): Throwable =
     if (Option(err.e.getMessage).exists(_.trim.nonEmpty))

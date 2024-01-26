@@ -6,13 +6,12 @@ import weco.catalogue.internal_model.languages.{Language, MarcLanguageCodeList}
 /** The TEI language data uses the IANA language codes from:
   * https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
   *
-  * In the rest of the pipeline, we use MARC language codes. We need to be
-  * consistent so we can filter/aggregate languages across sources.
+  * In the rest of the pipeline, we use MARC language codes. We need to be consistent so we can
+  * filter/aggregate languages across sources.
   *
-  * This object maps languages from the TEI files into MARC-based language
-  * codes. Trying to create a complete IANA-to-MARC mapper is beyond the scope
-  * of the pipeline, and unnecessary -- our TEI files only use a small subset of
-  * IANA languages.
+  * This object maps languages from the TEI files into MARC-based language codes. Trying to create a
+  * complete IANA-to-MARC mapper is beyond the scope of the pipeline, and unnecessary -- our TEI
+  * files only use a small subset of IANA languages.
   */
 object TeiLanguageData extends Logging {
 

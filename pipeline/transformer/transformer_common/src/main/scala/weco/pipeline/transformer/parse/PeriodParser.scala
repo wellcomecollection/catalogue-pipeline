@@ -212,8 +212,7 @@ object PeriodParser extends Parser[InstantRange] with DateParserUtils {
     P(writtenMonth ~ ws ~ writtenDay map MonthAndDay.tupled)
 
   // A standardised section of a year, for example a season
-  private def yearDivision[_: P]
-    : P[FuzzyDateRange[MonthAndYear, MonthAndYear]] =
+  private def yearDivision[_: P]: P[FuzzyDateRange[MonthAndYear, MonthAndYear]] =
     seasonYear | lawTermYear
 
   // Any specified day/date/month

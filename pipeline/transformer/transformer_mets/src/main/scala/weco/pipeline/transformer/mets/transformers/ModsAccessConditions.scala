@@ -34,8 +34,7 @@ object ModsAccessConditions extends XMLOps with Logging {
     )
   }
 
-  /** For licenses we are interested with the access condition with type `dz`.
-    * For example:
+  /** For licenses we are interested with the access condition with type `dz`. For example:
     *
     * {{{
     * <mets:dmdSec ID="DMDLOG_0000">

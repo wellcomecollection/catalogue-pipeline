@@ -18,8 +18,7 @@ case object SierraItemRecord {
 
   private case class SierraAPIData(bibIds: List[String])
 
-  /** This apply method is for parsing JSON bodies that come from the Sierra
-    * API.
+  /** This apply method is for parsing JSON bodies that come from the Sierra API.
     */
   def apply(
     id: String,

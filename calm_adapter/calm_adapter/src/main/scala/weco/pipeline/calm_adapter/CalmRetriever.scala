@@ -37,7 +37,6 @@ class ApiCalmRetriever(
           apiClient.summary(pos, Some(cookie))
       }
 
-  private implicit val suppressedSummaryParser
-    : CalmHttpResponseParser[CalmSummaryRequest] =
+  private implicit val suppressedSummaryParser: CalmHttpResponseParser[CalmSummaryRequest] =
     CalmHttpResponseParser.createSummaryResponseParser(suppressedFields)
 }

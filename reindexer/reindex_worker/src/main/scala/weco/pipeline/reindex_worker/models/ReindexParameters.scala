@@ -4,10 +4,10 @@ package weco.pipeline.reindex_worker.models
   *
   * The two classes represent the two ways you might use the reindexer:
   *
-  * 1) For a "complete" reindex -- every record in the table should be sent to
-  * the downstream applications. Use this when you want to reprocess the entire
-  * data set. 2) For a "partial" reindex -- when you want to test the downstream
-  * applications without swamping them with records. Use this for smoke tests.
+  * 1) For a "complete" reindex -- every record in the table should be sent to the downstream
+  * applications. Use this when you want to reprocess the entire data set. 2) For a "partial"
+  * reindex -- when you want to test the downstream applications without swamping them with records.
+  * Use this for smoke tests.
   */
 sealed trait ReindexParameters
 

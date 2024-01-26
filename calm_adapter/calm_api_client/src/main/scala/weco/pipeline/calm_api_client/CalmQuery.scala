@@ -93,9 +93,7 @@ object CalmQuery {
       with CalmQuery
 
   // (RefNo=refNo)
-  case class RefNo(refNo: String)
-      extends QueryLeaf(key = "RefNo", value = refNo)
-      with CalmQuery
+  case class RefNo(refNo: String) extends QueryLeaf(key = "RefNo", value = refNo) with CalmQuery
 
   // RecordId queries need to have double quotes for some reason
   // (RecordId="<id>")

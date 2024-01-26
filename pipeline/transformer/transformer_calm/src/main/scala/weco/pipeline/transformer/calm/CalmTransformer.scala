@@ -2,10 +2,7 @@ package weco.pipeline.transformer.calm
 
 import grizzled.slf4j.Logging
 import weco.catalogue.internal_model.identifiers._
-import weco.catalogue.internal_model.work.DeletedReason.{
-  DeletedFromSource,
-  SuppressedFromSource
-}
+import weco.catalogue.internal_model.work.DeletedReason.{DeletedFromSource, SuppressedFromSource}
 import weco.catalogue.internal_model.work.InvisibilityReason._
 import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.internal_model.work._
@@ -21,10 +18,7 @@ import weco.pipeline.transformer.calm.transformers._
 import weco.pipeline.transformer.result.Result
 import weco.pipeline.transformer.transformers.ParsedPeriod
 
-object CalmTransformer
-    extends Transformer[CalmSourceData]
-    with CalmRecordOps
-    with Logging {
+object CalmTransformer extends Transformer[CalmSourceData] with CalmRecordOps with Logging {
 
   val identifierMapping = Map(
     "RefNo" -> IdentifierType.CalmRefNo,
@@ -98,8 +92,7 @@ object CalmTransformer
                 state = Source(sourceIdentifier(record), record.retrievedAt),
                 version = version,
                 data = WorkData(),
-                invisibilityReasons =
-                  List(knownErrToUntransformableReason(knownErr))
+                invisibilityReasons = List(knownErrToUntransformableReason(knownErr))
               )
             )
           case err: Exception => Left(err)

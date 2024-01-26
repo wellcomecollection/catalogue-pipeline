@@ -46,7 +46,7 @@ object SierraHoldings extends SierraQueryOps {
           case (_, holdingsData) =>
             holdingsData.fixedFields.get("40") match {
               case Some(FixedField(_, value, _)) if value.trim == "elro" => true
-              case _ => false
+              case _                                                     => false
             }
         }
 

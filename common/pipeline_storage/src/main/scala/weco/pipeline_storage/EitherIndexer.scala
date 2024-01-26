@@ -2,8 +2,8 @@ package weco.pipeline_storage
 
 import scala.concurrent.{ExecutionContext, Future}
 
-/** An indexer for either values which defers to one of two internal indexers
-  * dependning on whether a Left or Right is received.
+/** An indexer for either values which defers to one of two internal indexers dependning on whether
+  * a Left or Right is received.
   */
 class EitherIndexer[L: Indexable, R: Indexable](
   leftIndexer: Indexer[L],

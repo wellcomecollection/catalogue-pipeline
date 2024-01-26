@@ -92,8 +92,7 @@ object Availabilities {
         case t if t.contains("at King's College London") => true
         case t if t.contains("at the Army Medical Services Museum") =>
           true
-        case t
-            if t.contains("currently remains with the Martin Leake family") =>
+        case t if t.contains("currently remains with the Martin Leake family") =>
           true
 
         case _ => false

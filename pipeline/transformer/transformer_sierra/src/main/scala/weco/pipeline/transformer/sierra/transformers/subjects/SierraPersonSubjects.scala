@@ -22,9 +22,7 @@ import weco.sierra.models.marc.{Subfield, VarField}
 // The person can be identified if there is an identifier in subfield $0 and the second indicator is "0".
 // If second indicator is anything other than 0, we don't expose the identifier for now.
 //
-object SierraPersonSubjects
-    extends SierraSubjectsTransformer
-    with SierraAgents {
+object SierraPersonSubjects extends SierraSubjectsTransformer with SierraAgents {
 
   val subjectVarFields = List("600")
 

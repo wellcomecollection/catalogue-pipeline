@@ -10,8 +10,7 @@ import weco.catalogue.source_model.CalmSourcePayload
 
 import scala.util.{Failure, Success, Try}
 
-class DeletionMarker(sourceTable: String)(implicit client: DynamoDbClient)
-    extends Logging {
+class DeletionMarker(sourceTable: String)(implicit client: DynamoDbClient) extends Logging {
   import scala.language.higherKinds
 
   def apply(record: CalmSourcePayload): Try[CalmSourcePayload] =

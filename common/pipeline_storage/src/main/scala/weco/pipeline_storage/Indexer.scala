@@ -17,8 +17,8 @@ abstract class Indexer[T: Indexable] {
     * @param documents
     *   The documents to be indexed
     * @return
-    *   A future either containing a Left with the failed documents or a Right
-    *   with the succesfully indexed documents
+    *   A future either containing a Left with the failed documents or a Right with the succesfully
+    *   indexed documents
     */
   def apply(documents: Seq[T]): Future[Either[Seq[T], Seq[T]]]
 
@@ -63,8 +63,7 @@ object Indexable extends Logging {
         )
     }
 
-  implicit def eitherIndexable[L: Indexable, R: Indexable]
-    : Indexable[Either[L, R]] =
+  implicit def eitherIndexable[L: Indexable, R: Indexable]: Indexable[Either[L, R]] =
     new Indexable[Either[L, R]] {
       def id(either: Either[L, R]): String =
         either match {

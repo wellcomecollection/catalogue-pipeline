@@ -11,17 +11,13 @@ case class ImageAggregatableValues(
   @JsonKey("source.subjects.label") subjects: List[String]
 )
 
-case object ImageAggregatableValues
-    extends AggregatableValues
-    with ImageValues {
+case object ImageAggregatableValues extends AggregatableValues with ImageValues {
   def apply(image: Image[ImageState.Augmented]): ImageAggregatableValues =
     ImageAggregatableValues(
       licenses = fromParentWork(image.source)(_.data.licenseAggregatableValues),
-      contributors =
-        fromParentWork(image.source)(_.data.contributorAggregatableValues),
+      contributors = fromParentWork(image.source)(_.data.contributorAggregatableValues),
       genres = fromParentWork(image.source)(_.data.genreAggregatableValues),
-      subjects =
-        fromParentWork(image.source)(_.data.subjectLabelAggregatableValues)
+      subjects = fromParentWork(image.source)(_.data.subjectLabelAggregatableValues)
     )
 
 }

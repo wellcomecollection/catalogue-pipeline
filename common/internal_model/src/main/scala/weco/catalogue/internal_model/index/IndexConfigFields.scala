@@ -1,12 +1,7 @@
 package weco.catalogue.internal_model.index
 
 import com.sksamuel.elastic4s.ElasticDsl._
-import com.sksamuel.elastic4s.fields.{
-  IntegerField,
-  KeywordField,
-  ObjectField,
-  TextField
-}
+import com.sksamuel.elastic4s.fields.{IntegerField, KeywordField, ObjectField, TextField}
 import weco.catalogue.internal_model.index.WorksAnalysis._
 import weco.elasticsearch.ElasticFieldOps
 
@@ -64,9 +59,9 @@ trait IndexConfigFields extends ElasticFieldOps {
   def asciifoldingTextFieldWithKeyword(name: String): TextField =
     textField(name)
       .fields(
-        /** Having a keyword and lowercaseKeyword allows you to aggregate
-          * accurately on the field i.e. `ID123` does not become `id123` but
-          * also allows you to do keyword searches e.g. `id123` matches `ID123`
+        /** Having a keyword and lowercaseKeyword allows you to aggregate accurately on the field
+          * i.e. `ID123` does not become `id123` but also allows you to do keyword searches e.g.
+          * `id123` matches `ID123`
           */
         keywordField("keyword"),
         lowercaseKeyword("lowercaseKeyword")

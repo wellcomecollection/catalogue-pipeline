@@ -9,8 +9,8 @@ object FileReferences extends XMLOps {
       .toList
   }
 
-  /** The METS XML contains locations of associated files, contained in a
-    * mapping with the following format:
+  /** The METS XML contains locations of associated files, contained in a mapping with the following
+    * format:
     *
     * {{{
     * <mets:fileSec>

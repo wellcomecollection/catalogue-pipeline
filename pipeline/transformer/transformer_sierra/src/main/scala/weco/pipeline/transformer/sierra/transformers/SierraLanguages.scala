@@ -7,10 +7,7 @@ import weco.sierra.models.data.SierraBibData
 import weco.sierra.models.fields.SierraLanguage
 import weco.sierra.models.identifiers.SierraBibNumber
 
-object SierraLanguages
-    extends SierraIdentifiedDataTransformer
-    with SierraQueryOps
-    with Logging {
+object SierraLanguages extends SierraIdentifiedDataTransformer with SierraQueryOps with Logging {
   type Output = List[Language]
 
   // We only want to display languages that actually correspond to languages.

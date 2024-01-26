@@ -33,8 +33,7 @@ object Main extends WellcomeTypesafeApp {
           username = config.requireString("calm.api.username"),
           password = config.requireString("calm.api.password")
         ),
-        batchSize =
-          config.getIntOption("calm.deletion_checker.batch_size").getOrElse(500)
+        batchSize = config.getIntOption("calm.deletion_checker.batch_size").getOrElse(500)
       )
   }
 }

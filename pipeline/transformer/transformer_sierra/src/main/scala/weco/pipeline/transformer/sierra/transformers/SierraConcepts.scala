@@ -3,17 +3,11 @@ package weco.pipeline.transformer.sierra.transformers
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.{AbstractConcept, Concept, Place}
 import weco.pipeline.transformer.text.TextNormalisation._
-import weco.pipeline.transformer.transformers.{
-  ConceptsTransformer,
-  ParsedPeriod
-}
+import weco.pipeline.transformer.transformers.{ConceptsTransformer, ParsedPeriod}
 import weco.sierra.models.SierraQueryOps
 import weco.sierra.models.marc.{Subfield, VarField}
 
-trait SierraConcepts
-    extends SierraQueryOps
-    with ConceptsTransformer
-    with SierraAbstractConcepts {
+trait SierraConcepts extends SierraQueryOps with ConceptsTransformer with SierraAbstractConcepts {
 
   // Get the label.  This is populated by the label of subfield $a, followed
   // by other subfields, in the order they come from MARC.  The labels are
@@ -41,8 +35,8 @@ trait SierraConcepts
       .subfieldsWithTags("a", "v", "x", "y", "z")
       .partition { _.tag == "a" }
 
-  /** Return a list of the distinct contents of every subfield 0 on this
-    * varField, which is a commonly-used subfield for identifiers.
+  /** Return a list of the distinct contents of every subfield 0 on this varField, which is a
+    * commonly-used subfield for identifiers.
     */
   def getIdentifierSubfieldContents(varField: VarField): List[String] =
     varField

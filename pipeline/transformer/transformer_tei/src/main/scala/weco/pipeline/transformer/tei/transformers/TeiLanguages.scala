@@ -15,12 +15,12 @@ object TeiLanguages extends Logging {
 
   /** The languages of the TEI are in `textLang` nodes under `msContents`.
     *
-    * <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id={id}> <teiHeader>
-    * <fileDesc> <sourceDesc> <msDesc xml:lang="en" xml:id="MS_Arabic_1">
-    * <msContents> <textLang mainLang={id} source="IANA">{label}</textLang>
+    * <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id={id}> <teiHeader> <fileDesc> <sourceDesc>
+    * <msDesc xml:lang="en" xml:id="MS_Arabic_1"> <msContents> <textLang mainLang={id}
+    * source="IANA">{label}</textLang>
     *
-    * This function extracts all the nodes from a parsed XML and returns a list
-    * of (id, label) pairs.
+    * This function extracts all the nodes from a parsed XML and returns a list of (id, label)
+    * pairs.
     */
   def parseLanguages(value: NodeSeq): Result[(List[Language], List[Note])] =
     (value \ "textLang")

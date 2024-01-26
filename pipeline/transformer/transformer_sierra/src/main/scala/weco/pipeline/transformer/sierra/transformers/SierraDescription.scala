@@ -10,10 +10,7 @@ import weco.sierra.models.marc.{Subfield, VarField}
 
 import scala.util.Try
 
-object SierraDescription
-    extends SierraIdentifiedDataTransformer
-    with SierraQueryOps
-    with Logging {
+object SierraDescription extends SierraIdentifiedDataTransformer with SierraQueryOps with Logging {
 
   type Output = Option[String]
 

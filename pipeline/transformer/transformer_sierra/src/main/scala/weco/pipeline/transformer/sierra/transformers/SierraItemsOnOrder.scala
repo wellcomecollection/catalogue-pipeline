@@ -5,40 +5,31 @@ import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.locations.{LocationType, PhysicalLocation}
 import weco.catalogue.internal_model.work.Item
 import weco.sierra.models.data.{SierraBibData, SierraOrderData}
-import weco.sierra.models.identifiers.{
-  SierraOrderNumber,
-  TypedSierraRecordNumber
-}
+import weco.sierra.models.identifiers.{SierraOrderNumber, TypedSierraRecordNumber}
 
 import java.text.SimpleDateFormat
 import java.util.Date
 import scala.util.Try
 
-/** This transformer creates catalogue items that correspond to items that are
-  * "on order" or "awaiting cataloguing" -- which don't have their own item
-  * record yet.
+/** This transformer creates catalogue items that correspond to items that are "on order" or
+  * "awaiting cataloguing" -- which don't have their own item record yet.
   *
-  * To understand how this works, it's useful to understand the ordering
-  * process:
+  * To understand how this works, it's useful to understand the ordering process:
   *
-  * 1) A staff member orders a book. They create a skeleton bib record in
-  * Sierra, which is linked to an order record with status 'o' ("on order"). At
-  * this point, there are no item records.
+  * 1) A staff member orders a book. They create a skeleton bib record in Sierra, which is linked to
+  * an order record with status 'o' ("on order"). At this point, there are no item records.
   *
-  * 2) When the book arrives, it's "received". The RDATE on the order record
-  * gets populated, the status is updated to 'a' ("fully paid"), and invoice
-  * information gets attached to the order record.
+  * 2) When the book arrives, it's "received". The RDATE on the order record gets populated, the
+  * status is updated to 'a' ("fully paid"), and invoice information gets attached to the order
+  * record.
   *
-  * 3) At some point after that, an item record is created. This supercedes the
-  * order record.
+  * 3) At some point after that, an item record is created. This supercedes the order record.
   *
-  * Note that born-digital objects do not necessarily get item records: that can
-  * be supplied separately, e.g. from the METS. In this case, we should look at
-  * the CAT DATE (cataloguing date) fixed field to see we shouldn't add any
-  * order items.
+  * Note that born-digital objects do not necessarily get item records: that can be supplied
+  * separately, e.g. from the METS. In this case, we should look at the CAT DATE (cataloguing date)
+  * fixed field to see we shouldn't add any order items.
   *
-  * The Sierra documentation for fixed fields on order records is useful
-  * reading:
+  * The Sierra documentation for fixed fields on order records is useful reading:
   * https://documentation.iii.com/sierrahelp/Default.htm#sril/sril_records_fixed_field_types_order.html%3FTocPath%3DSierra%2520Reference%7CHow%2520Innovative%2520Systems%2520Store%2520Information%7CFixed-length%2520Fields%7C_____11
   */
 object SierraItemsOnOrder extends Logging {
@@ -92,8 +83,7 @@ object SierraItemsOnOrder extends Logging {
       // We create an item with a message like "Awaiting cataloguing for Wellcome Collection"
       // We don't expose the received date publicly (in case an item has been in the queue
       // for a long time) -- but we do expect it to be there for these records.
-      case (Some(status), _, receivedDate)
-          if status == "a" && receivedDate.isDefined =>
+      case (Some(status), _, receivedDate) if status == "a" && receivedDate.isDefined =>
         Some(
           Item(
             title = None,
@@ -109,8 +99,7 @@ object SierraItemsOnOrder extends Logging {
       // We're deliberately quite conservative here -- if we're not sure what an order
       // means, we ignore it.  I don't know how many orders this will affect, and how many
       // will be ignored because they're suppressed/there are other items.
-      case (Some(status), _, receivedDate)
-          if status == "a" && receivedDate.isEmpty =>
+      case (Some(status), _, receivedDate) if status == "a" && receivedDate.isEmpty =>
         warn(
           s"${id.withCheckDigit}: order has STATUS 'a' (fully paid) but no RDATE.  Where is this item?"
         )

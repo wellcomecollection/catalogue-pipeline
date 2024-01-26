@@ -42,11 +42,9 @@ trait CalmHttpResponseParser[Request <: CalmXmlRequest] extends Logging {
 object CalmHttpResponseParser {
 
   implicit val searchResponseParser: CalmHttpResponseParser[CalmSearchRequest] =
-    (resp: HttpResponse, bytes: Array[Byte]) =>
-      CalmSearchResponse(bytes, parseCookie(resp))
+    (resp: HttpResponse, bytes: Array[Byte]) => CalmSearchResponse(bytes, parseCookie(resp))
 
-  implicit val abandonResponseParser
-    : CalmHttpResponseParser[CalmAbandonRequest.type] =
+  implicit val abandonResponseParser: CalmHttpResponseParser[CalmAbandonRequest.type] =
     (_, bytes: Array[Byte]) => CalmAbandonResponse(bytes)
 
   def createSummaryResponseParser(

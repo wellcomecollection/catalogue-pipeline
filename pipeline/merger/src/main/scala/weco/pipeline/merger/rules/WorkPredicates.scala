@@ -1,15 +1,8 @@
 package weco.pipeline.merger.rules
 
 import weco.catalogue.internal_model.work.WorkState.Identified
-import weco.catalogue.internal_model.identifiers.{
-  IdState,
-  IdentifierType,
-  SourceIdentifier
-}
-import weco.catalogue.internal_model.locations.{
-  DigitalLocation,
-  PhysicalLocation
-}
+import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, SourceIdentifier}
+import weco.catalogue.internal_model.locations.{DigitalLocation, PhysicalLocation}
 import weco.catalogue.internal_model.work.{Format, Work}
 
 import scala.Function.const
@@ -29,8 +22,7 @@ object WorkPredicates {
   private val teiIdentified: WorkPredicate = identifierTypeId(
     IdentifierType.Tei
   )
-  private val isVisible: WorkPredicate = work =>
-    work.isInstanceOf[Work.Visible[_]]
+  private val isVisible: WorkPredicate = work => work.isInstanceOf[Work.Visible[_]]
   private val miroIdentified: WorkPredicate = identifierTypeId(
     IdentifierType.MiroImageNumber
   )
@@ -51,9 +43,8 @@ object WorkPredicates {
     isVisible
   )
 
-  /** This is the shape in which we expect the works from the transformers.
-    * We're specific here as the merging rules often rely on the shape of the
-    * transformers outputs.
+  /** This is the shape in which we expect the works from the transformers. We're specific here as
+    * the merging rules often rely on the shape of the transformers outputs.
     */
   val singlePhysicalItemCalmWork: WorkPredicate = satisfiesAll(
     calmIdentified,

@@ -18,8 +18,7 @@ object TextNormalisation {
 
     /** Is this string just whitespace?
       *
-      * Note that this includes non-breaking spaces as whitespace, which aren't
-      * removed by .trim().
+      * Note that this includes non-breaking spaces as whitespace, which aren't removed by .trim().
       */
     def isWhitespace: Boolean =
       s.replace('\u00a0', ' ').trim.isEmpty

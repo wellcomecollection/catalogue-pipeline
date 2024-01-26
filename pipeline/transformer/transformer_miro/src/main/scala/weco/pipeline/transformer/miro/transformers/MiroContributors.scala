@@ -5,9 +5,7 @@ import weco.catalogue.internal_model.work.{Agent, Contributor}
 import weco.pipeline.transformer.identifiers.LabelDerivedIdentifiers
 import weco.pipeline.transformer.miro.source.MiroRecord
 
-trait MiroContributors
-    extends MiroContributorCodes
-    with LabelDerivedIdentifiers {
+trait MiroContributors extends MiroContributorCodes with LabelDerivedIdentifiers {
   def getContributors(
     miroRecord: MiroRecord
   ): List[Contributor[IdState.Unminted]] = {

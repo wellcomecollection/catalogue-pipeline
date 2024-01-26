@@ -23,9 +23,7 @@ import weco.sierra.models.marc.VarField
 //
 // https://www.loc.gov/marc/bibliographic/bd610.html
 //
-object SierraOrganisationSubjects
-    extends SierraSubjectsTransformer
-    with SierraAgents {
+object SierraOrganisationSubjects extends SierraSubjectsTransformer with SierraAgents {
 
   val subjectVarFields = List("610")
 
@@ -65,8 +63,7 @@ object SierraOrganisationSubjects
 
     Organisation(
       label = label,
-      id =
-        identifyAgentSubject(varfield = varField, ontologyType = "Organisation")
+      id = identifyAgentSubject(varfield = varField, ontologyType = "Organisation")
     )
   }
 }

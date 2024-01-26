@@ -1,11 +1,7 @@
 package weco.pipeline.transformer.sierra.transformers
 
 import grizzled.slf4j.Logging
-import weco.catalogue.internal_model.identifiers.{
-  IdState,
-  IdentifierType,
-  SourceIdentifier
-}
+import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, SourceIdentifier}
 import weco.catalogue.internal_model.work.MergeCandidate
 import weco.pipeline.transformer.identifiers.SourceIdentifierValidation._
 import weco.pipeline.transformer.sierra.transformers.parsers.MiroIdParsing
@@ -37,14 +33,14 @@ object SierraMergeCandidates
   // inconsistencies in the source data that it's easier to handle that here.
   private val uklwPrefixRegex: Regex = """\((?i:UkLW)\)[\s]*(.+)""".r.anchored
 
-  /** We can merge a bib and the digitised version of that bib. The number of
-    * the other bib comes from MARC tag 776 subfield $w.
+  /** We can merge a bib and the digitised version of that bib. The number of the other bib comes
+    * from MARC tag 776 subfield $w.
     *
-    * If the identifier starts with (UkLW), we strip the prefix and use the bib
-    * number as a merge candidate.
+    * If the identifier starts with (UkLW), we strip the prefix and use the bib number as a merge
+    * candidate.
     *
-    * We ignore any values in 776 subfield ǂw that don't start with (UkLW), e.g.
-    * identifiers that start (OCLC).
+    * We ignore any values in 776 subfield ǂw that don't start with (UkLW), e.g. identifiers that
+    * start (OCLC).
     */
   private def get776mergeCandidates(
     bibId: SierraBibNumber,
@@ -92,11 +88,10 @@ object SierraMergeCandidates
     }
   }
 
-  /** When we harvest the Calm data into Sierra, the `RecordID` is stored in
-    * Marcfield 035$a.
+  /** When we harvest the Calm data into Sierra, the `RecordID` is stored in Marcfield 035$a.
     *
-    * This field is also used for other "system control numbers" from UKMHL,
-    * LSHTM etc. e.g: (OCoLC)927468903, (lshtm)a60032 see:
+    * This field is also used for other "system control numbers" from UKMHL, LSHTM etc. e.g:
+    * (OCoLC)927468903, (lshtm)a60032 see:
     * `https://search.wellcomelibrary.org/iii/encore/record/C__Rb1187988?marcData=Y`
     */
   private def get035CalmMergeCandidates(

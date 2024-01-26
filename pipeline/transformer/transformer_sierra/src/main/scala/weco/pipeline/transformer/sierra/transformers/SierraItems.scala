@@ -1,40 +1,29 @@
 package weco.pipeline.transformer.sierra.transformers
 
 import grizzled.slf4j.Logging
-import weco.catalogue.internal_model.identifiers.{
-  IdState,
-  IdentifierType,
-  SourceIdentifier
-}
+import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, SourceIdentifier}
 import weco.catalogue.internal_model.locations.{
   LocationType,
   PhysicalLocation,
   PhysicalLocationType
 }
 import weco.catalogue.internal_model.work.Item
-import weco.catalogue.source_model.sierra.rules.{
-  SierraItemAccess,
-  SierraPhysicalLocationType
-}
+import weco.catalogue.source_model.sierra.rules.{SierraItemAccess, SierraPhysicalLocationType}
 import weco.pipeline.transformer.sierra.data.SierraPhysicalItemOrder
 import weco.sierra.models.SierraQueryOps
 import weco.sierra.models.data.{SierraBibData, SierraItemData}
 import weco.sierra.models.identifiers.SierraBibNumber
 import weco.sierra.models.marc.VarField
 
-object SierraItems
-    extends Logging
-    with SierraPhysicalLocation
-    with SierraQueryOps {
+object SierraItems extends Logging with SierraPhysicalLocation with SierraQueryOps {
 
   type Output = List[Item[IdState.Unminted]]
 
-  /** We don't get the digital items from Sierra. The `dlnk` was previously
-    * used, but we now use the METS source.
+  /** We don't get the digital items from Sierra. The `dlnk` was previously used, but we now use the
+    * METS source.
     *
-    * So the output is deterministic here we sort all items by the
-    * sierra-identifier. We want to revisit this at some point. See
-    * https://github.com/wellcomecollection/platform/issues/4993
+    * So the output is deterministic here we sort all items by the sierra-identifier. We want to
+    * revisit this at some point. See https://github.com/wellcomecollection/platform/issues/4993
     */
   def apply(
     bibId: SierraBibNumber,
@@ -171,12 +160,12 @@ object SierraItems
     *   - field tag `v` for VOLUME. This is written by a cataloguer.
     *     https://documentation.iii.com/sierrahelp/Content/sril/sril_records_varfld_types_item.html
     *
-    *   - The copyNo field from the Sierra API response, which we use to create
-    *     a string like "Copy 2".
+    *   - The copyNo field from the Sierra API response, which we use to create a string like "Copy
+    *     2".
     *
-    * Elsewhere in this class, this is called an "automated title", because
-    * we're creating the title automatically rather than using text written by a
-    * cataloguer. In general, we prefer the human-written title where possible.
+    * Elsewhere in this class, this is called an "automated title", because we're creating the title
+    * automatically rather than using text written by a cataloguer. In general, we prefer the
+    * human-written title where possible.
     */
   private def getItemTitle(
     data: SierraItemData
@@ -218,18 +207,16 @@ object SierraItems
 
   /** Tidy up the automated titles (Copy 1, Copy 2, Copy 3, etc.)
     *
-    * The purpose of a title is to help users distinguish between multiple
-    * items. We remove the automated title if they aren't doing that, in
-    * particular if:
+    * The purpose of a title is to help users distinguish between multiple items. We remove the
+    * automated title if they aren't doing that, in particular if:
     *
-    * 1) There's only one item, and it has an inferred title 2) Every item has
-    * the same inferred title
+    * 1) There's only one item, and it has an inferred title 2) Every item has the same inferred
+    * title
     *
-    * Note: (1) is really a special case of (2) for the case when there's a
-    * single item.
+    * Note: (1) is really a special case of (2) for the case when there's a single item.
     *
-    * Note: we can't do this when we add the title to the individual items,
-    * because this rule can only be applied when looking at the items together.
+    * Note: we can't do this when we add the title to the individual items, because this rule can
+    * only be applied when looking at the items together.
     */
   private def tidyTitles(
     items: List[(Item[IdState.Identifiable], HasAutomatedTitle)]
@@ -253,8 +240,7 @@ object SierraItems
   /** Create a note for the item.
     *
     * Note that this isn't as simple as just using the contents of field tag "n"
-    * -- we may have copied the note to the access conditions instead, or
-    * decided to discard it.
+    * -- we may have copied the note to the access conditions instead, or decided to discard it.
     */
   private def getItemNote(
     itemData: SierraItemData,

@@ -3,11 +3,7 @@ package weco.pipeline.calm_api_client
 import akka.Done
 import akka.actor.ActorSystem
 import akka.http.scaladsl.model._
-import akka.http.scaladsl.model.headers.{
-  BasicHttpCredentials,
-  Cookie,
-  RawHeader
-}
+import akka.http.scaladsl.model.headers.{BasicHttpCredentials, Cookie, RawHeader}
 import akka.stream.{Materializer, RestartSettings}
 import weco.catalogue.source_model.calm.CalmRecord
 import weco.http.client.{AkkaHttpClient, HttpClient}

@@ -1,22 +1,12 @@
 package weco.catalogue.tei.id_extractor.github
 
-import akka.http.scaladsl.model.{
-  HttpCharsets,
-  HttpRequest,
-  HttpResponse,
-  MediaType
-}
-import akka.http.scaladsl.model.headers.{
-  Accept,
-  Authorization,
-  OAuth2BearerToken
-}
+import akka.http.scaladsl.model.{HttpCharsets, HttpRequest, HttpResponse, MediaType}
+import akka.http.scaladsl.model.headers.{Accept, Authorization, OAuth2BearerToken}
 import weco.http.client.HttpClient
 
 import scala.concurrent.Future
 
-class GitHubAuthenticatedHttpClient(underlying: HttpClient, token: String)
-    extends HttpClient {
+class GitHubAuthenticatedHttpClient(underlying: HttpClient, token: String) extends HttpClient {
   override def singleRequest(request: HttpRequest): Future[HttpResponse] =
     underlying.singleRequest(
       request.withHeaders(

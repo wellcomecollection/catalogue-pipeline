@@ -7,6 +7,5 @@ import java.time.Instant
 sealed trait TeiMetadata {
   val time: Instant
 }
-case class TeiChangedMetadata(s3Location: S3ObjectLocation, time: Instant)
-    extends TeiMetadata
+case class TeiChangedMetadata(s3Location: S3ObjectLocation, time: Instant) extends TeiMetadata
 case class TeiDeletedMetadata(time: Instant) extends TeiMetadata

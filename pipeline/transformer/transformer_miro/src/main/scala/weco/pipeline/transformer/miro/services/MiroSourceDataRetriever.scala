@@ -31,9 +31,7 @@ class MiroSourceDataRetriever(
             (
               miroRecord,
               p.overrides.getOrElse(MiroSourceOverrides.empty),
-              MiroMetadata(isClearedForCatalogueAPI =
-                p.isClearedForCatalogueAPI
-              )
+              MiroMetadata(isClearedForCatalogueAPI = p.isClearedForCatalogueAPI)
             )
           )
       }

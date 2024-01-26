@@ -3,11 +3,7 @@ package weco.pipeline.mets_adapter.models
 import weco.storage.providers.s3.S3ObjectLocationPrefix
 
 import java.time.Instant
-import weco.catalogue.source_model.mets.{
-  DeletedMetsFile,
-  MetsFileWithImages,
-  MetsSourceData
-}
+import weco.catalogue.source_model.mets.{DeletedMetsFile, MetsFileWithImages, MetsSourceData}
 
 /** The response received from the storage-service bag API.
   */

@@ -15,11 +15,9 @@ trait FlowOps extends Logging {
 
   /** Allows mapping a flow with a function, where:
     *   - Context is passed through.
-    *   - Any errors are caught and the message prevented from propagating
-    *     downstream, resulting in the message being put back on the queue / on
-    *     the dlq.
-    *   - None values are ignored but passed through (so they don't end up on
-    *     the dlq)
+    *   - Any errors are caught and the message prevented from propagating downstream, resulting in
+    *     the message being put back on the queue / on the dlq.
+    *   - None values are ignored but passed through (so they don't end up on the dlq)
     */
   implicit class ContextFlowOps[Ctx, In, Out](
     val flow: Flow[(Ctx, In), (Ctx, Option[Out]), NotUsed]
