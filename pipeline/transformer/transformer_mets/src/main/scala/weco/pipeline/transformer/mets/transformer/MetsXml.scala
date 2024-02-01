@@ -16,7 +16,7 @@ trait MetsXml extends XMLOps {
   def objectsFileGroupUse: String
   def firstManifestationFilename: Either[Exception, String]
   def recordIdentifier: Either[Exception, String]
-
+  def metsIdentifier: Either[Exception, String]
   def accessConditions: Either[Throwable, MetsAccessConditions]
 
   /** Valid METS documents should contain a physicalStructMap section, with the
@@ -65,7 +65,32 @@ case class ArchivematicaMetsXML(root: Elem) extends MetsXml {
           new RuntimeException("multiple candidate record identifiers found")
         )
     }
-
+  /*
+   *   <mets:dmdSec ID="dmdSec_1">
+      <mets:mdWrap MDTYPE="PREMIS:OBJECT">
+        <mets:xmlData>
+          <premis:object xmlns:premis="http://www.loc.gov/premis/v3" xsi:type="premis:intellectualEntity" xsi:schemaLocation="http://www.loc.gov/premis/v3 http://www.loc.gov/standards/premis/v3/premis.xsd" version="3.0">
+            <premis:objectIdentifier>
+              <premis:objectIdentifierType>UUID</premis:objectIdentifierType>
+              <premis:objectIdentifierValue>a765b7de-d8dd-45fe-94c9-8c4632e02178</premis:objectIdentifierValue>
+            </premis:objectIdentifier>
+            <premis:originalName>GC253_A_34_9-a765b7de-d8dd-45fe-94c9-8c4632e02178</premis:originalName>
+          </premis:object>
+        </mets:xmlData>
+      </mets:mdWrap>
+    </mets:dmdSec>
+   * */
+  def metsIdentifier: Either[Exception, String] = {
+    root \ "dmdSec" \ "mdWrap" \ "xmlData" \ "object" \ "objectIdentifier" \ "objectIdentifierValue" match {
+      case NodeSeq.Empty =>
+        Left(new RuntimeException("could not find mets identifier"))
+      case nodeseq if nodeseq.length == 1 => Right(nodeseq.head.text.trim)
+      case _ =>
+        Left(
+          new RuntimeException("multiple candidate mets identifiers found")
+        )
+    }
+  }
   def accessConditions: Either[Throwable, MetsAccessConditions] =
     (root \ "amdSec" \ "rightsMD").headOption
       .map(PremisAccessConditions(_)) match {
@@ -109,6 +134,8 @@ case class GoobiMetsXml(root: Elem) extends MetsXml {
         Left(new Exception("Could not parse recordIdentifier from METS XML"))
     }
   }
+
+  lazy val metsIdentifier: Either[Exception, String] = recordIdentifier
 
   /** Returns the first href to a manifestation in the logical structMap
     */

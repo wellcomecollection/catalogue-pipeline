@@ -13,7 +13,8 @@ import weco.pipeline.transformer.identifiers.SourceIdentifierValidation._
 object CalmMergeCandidates extends CalmRecordOps {
   def apply(record: CalmRecord): List[MergeCandidate[IdState.Identifiable]] =
     List(
-      sierraMergeCandidate(record)
+      sierraMergeCandidate(record),
+      metsMergeCandidate(record)
     ).flatten
 
   private def sierraMergeCandidate(record: CalmRecord) =
@@ -32,6 +33,24 @@ object CalmMergeCandidates extends CalmRecordOps {
           MergeCandidate(
             identifier = sourceIdentifier,
             reason = "CALM/Sierra harvest work"
+          )
+      }
+  private def metsMergeCandidate(record: CalmRecord) =
+    record
+      .get("SDB_URL")
+      .flatMap {
+        id =>
+          SourceIdentifier(
+            identifierType = IdentifierType.METS,
+            ontologyType = "Work",
+            value = id
+          ).validatedWithWarning
+      }
+      .map {
+        sourceIdentifier =>
+          MergeCandidate(
+            identifier = sourceIdentifier,
+            reason = "Archivematica work"
           )
       }
 }

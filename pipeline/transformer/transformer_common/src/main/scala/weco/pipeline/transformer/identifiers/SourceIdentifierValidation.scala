@@ -40,8 +40,8 @@ object SourceIdentifierValidation {
         case IdentifierType.CalmRefNo          => calmRefNo.toPredicate
         case IdentifierType.CalmAltRefNo       => calmRefNo.toPredicate
         case IdentifierType.CalmRecordIdentifier => tryParseUUID(_).isSuccess
-        case IdentifierType.METS               => sierraSystemNumber.toPredicate
-        case IdentifierType.WellcomeDigcode    => wellcomeDigcode.toPredicate
+        case IdentifierType.METS                 => isValidMetsId
+        case IdentifierType.WellcomeDigcode      => wellcomeDigcode.toPredicate
         case IdentifierType.IconographicNumber => iconographicNumber.toPredicate
         // For other identifier types, we don't do validation
         case _ => const(true)
@@ -57,6 +57,20 @@ object SourceIdentifierValidation {
      */
     private def tryParseUUID(str: String): Try[UUID] = Try(UUID.fromString(str))
 
+    /*
+     * Validate a METS id.
+     *
+     * There are two options for a METS id, depending on the source of the file.
+     *  - b number
+     *      - A Goobi METS file is identified using the b number of the corresponding Sierra record
+     *  - UUID
+     *      - An Archivematica METS file is identified using a UUID.
+     *
+     * From the perspective of anything wanting to validate a possible METS ID, this distinction is
+     * irrelevant.  All a caller needs to know is whether the string in question looks like METS.
+     */
+    private def isValidMetsId(str: String): Boolean =
+      sierraSystemNumber.toPredicate(str) || tryParseUUID(str).isSuccess
     private implicit class RegexOps(regex: Regex) {
       def toPredicate: String => Boolean = regex.findFirstIn(_).isDefined
     }
