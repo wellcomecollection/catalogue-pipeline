@@ -177,9 +177,10 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     // original bib records often contain different data.
     //
     // See the comment on Sources.findFirstLinkedDigitisedSierraWorkFor
-    val isDefinedForTarget: WorkPredicate = physicalSierra and not(
-      isAudiovisual
-    )
+    val isDefinedForTarget: WorkPredicate =
+      physicalSierra and physicalDigital and not(
+        isAudiovisual
+      )
 
     val isDefinedForSource: WorkPredicate = sierraWork
 
