@@ -38,15 +38,15 @@ sequenceDiagram
     participant Upstream Index 🗄
     participant Matcher
     participant Graph Store
-    Upstream Queue -) Matcher: b32888491
+    Upstream Queue -) Matcher: dunrz35z
     participant Merger
-    Matcher ->> Upstream Index 🗄: GET b32888491
-    Upstream Index 🗄 -->> Matcher: OK
+    Matcher ->> Upstream Index 🗄: GET dunrz35z
+    Upstream Index 🗄 -->> Matcher: JSON doc dunrz35z, which is derived from Mets:b32888491
     Matcher ->> Matcher: extract mergeCandidates
-    Note right of Matcher: Mets:b32888491 contains mergeCandidate Sierra:b32888491
-    Matcher ->> Graph Store: What else is in the graph for b32888491 and b32888491?
-    Graph Store -->> Matcher: Sierra:b10546595
-    Matcher -) Merger: [Mets:b32888491, Sierra:b32888491, Sierra:b10546595]
+    Note right of Matcher: dunrz35z(Mets:b32888491) contains mergeCandidate yc7v8r7p(Sierra:b32888491)
+    Matcher ->> Graph Store: What else is in the graph for dunrz35z and yc7v8r7p?
+    Graph Store -->> Matcher: x5zg9f72(Sierra:b10546595)
+    Matcher -) Merger: [dunrz35z, yc7v8r7p, x5zg9f72]
 
 ```
 

@@ -1,8 +1,9 @@
 import sbt._
-
+import scala.language.reflectiveCalls
 object WellcomeDependencies {
 
-  val defaultVersion = "32.40.0" // This is automatically bumped by the scala-libs release process, do not edit this line manually
+  val defaultVersion =
+    "32.40.4" // This is automatically bumped by the scala-libs release process, do not edit this line manually
 
   lazy val versions = new {
     val typesafe = defaultVersion
@@ -94,7 +95,7 @@ object WellcomeDependencies {
 object ExternalDependencies {
   lazy val versions = new {
     val apacheCommons = "1.9"
-    val circe = "0.13.0"
+    val circe = "0.14.1"
     val diffJson = "4.1.1"
     val fastparse = "2.3.0"
     val scalatest = "3.2.3"

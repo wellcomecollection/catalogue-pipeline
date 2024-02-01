@@ -9,7 +9,14 @@ object SierraIconographicNumber
     with SierraQueryOps {
   override type Output = Option[String]
 
-  private val IconographicNumberMatch = "^([0-9]+i)$".r
+  // This expression could be made slightly more exclusive.
+  // In practice, an i-number is between 1 and 8 digits before the `i`,
+  // and between 1 and 3 after the `.` if present.
+  // However, it is preferable to be slightly more permissive than necessary here.
+  // This will match any string that a human author would immediately recognise as an i-number
+  // and reject those that are obviously not.
+  // If a new i-number is coined with 9 leading digits, or four trailing ones, this will still work.
+  private val IconographicNumberMatch = "^([0-9]+i(\\.[0-9]+)?)$".r
 
   override def apply(bibData: SierraBibData): Option[String] =
     bibData match {
@@ -20,7 +27,7 @@ object SierraIconographicNumber
           .collectFirst {
             // There are a handful of cases where the value in this field doesn't
             // look like an i-number, in which case we discard it.
-            case IconographicNumberMatch(number) => number
+            case IconographicNumberMatch(number, _) => number
           }
 
       case _ => None
