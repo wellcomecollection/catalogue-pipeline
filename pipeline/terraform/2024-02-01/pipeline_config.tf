@@ -3,7 +3,7 @@
 # Edits to this file may be reverted!
 
 locals {
-  pipeline_date = "2024-01-16"
+  pipeline_date = "2024-02-01"
 }
 
 terraform {
@@ -11,7 +11,7 @@ terraform {
     role_arn = "arn:aws:iam::760097843905:role/platform-developer"
 
     bucket         = "wellcomecollection-platform-infra"
-    key            = "terraform/catalogue-pipeline/pipeline/2024-01-16.tfstate"
+    key            = "terraform/catalogue-pipeline/pipeline/2024-02-01.tfstate"
     dynamodb_table = "terraform-locktable"
     region         = "eu-west-1"
   }

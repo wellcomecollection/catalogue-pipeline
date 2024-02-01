@@ -5,11 +5,11 @@ module "pipeline" {
   es_cluster_deployment_template = "aws-cpu-optimized-arm"
 
   reindexing_state = {
-    listen_to_reindexer      = false
-    scale_up_tasks           = false
-    scale_up_elastic_cluster = false
-    scale_up_id_minter_db    = false
-    scale_up_matcher_db      = false
+    listen_to_reindexer      = true
+    scale_up_tasks           = true
+    scale_up_elastic_cluster = true
+    scale_up_id_minter_db    = true
+    scale_up_matcher_db      = true
   }
 
   index_config = {
@@ -24,8 +24,9 @@ module "pipeline" {
     }
   }
 
-  pipeline_date = local.pipeline_date
-  release_label = local.pipeline_date
+  pipeline_date        = local.pipeline_date
+  release_label        = local.pipeline_date
+  allow_delete_indices = true
 
   providers = {
     aws.catalogue = aws.catalogue
