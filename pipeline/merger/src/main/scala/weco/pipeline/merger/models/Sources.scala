@@ -33,15 +33,19 @@ object Sources {
         val digitisedLinkedIds = target.state.mergeCandidates
           .filter(_.reason.contains("Physical/digitised Sierra work"))
           .map(_.id.canonicalId)
+        val sourcesByID = sources
+          .filter(
+            source => digitisedLinkedIds.contains(source.state.canonicalId)
+          )
+          .map(source => source.state.canonicalId -> source)
+          .toMap
 
+        // TODO warn if there are more than one matching source
         digitisedLinkedIds.collectFirst {
-          case linkedId =>
-            sources.find(_.state.canonicalId == linkedId).orNull
+          case linkedId if sourcesByID.contains(linkedId) =>
+            sourcesByID(linkedId)
         }
-//TODO        warn if there are more than one.
-//        sources.find(
-//          source => digitisedLinkedIds.contains(source.state.canonicalId)
-//        )
+      // TODO: warn if the above line yields nothing, it should not be possible
 
       // Handle the case where the e-bib links to the physical bib, but not
       // the other way round.

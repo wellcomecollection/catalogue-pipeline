@@ -41,8 +41,7 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
         mergeIntoTeiTarget,
         mergeIntoCalmTarget,
         mergeMetsIntoSierraTarget,
-        mergeSingleMiroIntoSingleOrZeroItemSierraTarget,
-        mergeDigitalIntoPhysicalSierraTarget
+        mergeSingleMiroIntoSingleOrZeroItemSierraTarget
       ).flatMap {
         rule =>
           rule.mergedSources(target, sources)
