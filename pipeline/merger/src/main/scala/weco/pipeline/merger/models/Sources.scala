@@ -34,9 +34,14 @@ object Sources {
           .filter(_.reason.contains("Physical/digitised Sierra work"))
           .map(_.id.canonicalId)
 
-        sources.find(
-          source => digitisedLinkedIds.contains(source.state.canonicalId)
-        )
+        digitisedLinkedIds.collectFirst {
+          case linkedId =>
+            sources.find(_.state.canonicalId == linkedId).orNull
+        }
+//TODO        warn if there are more than one.
+//        sources.find(
+//          source => digitisedLinkedIds.contains(source.state.canonicalId)
+//        )
 
       // Handle the case where the e-bib links to the physical bib, but not
       // the other way round.
