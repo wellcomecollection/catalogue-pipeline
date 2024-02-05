@@ -242,8 +242,19 @@ class ItemsRuleTest
           mergedSources.loneElement shouldBe digitisedWork0
       }
     }
+
+    it("does not merge sierra items if the target is not physical/digital") {
+      inside(
+        ItemsRule
+          .merge(multiItemPhysicalSierra, List(miroWork, physicalMapsSierra))
+      ) {
+        case FieldMergeResult(items, mergedSources) =>
+          items shouldBe multiItemPhysicalSierra.data.items
+          mergedSources shouldBe empty
+      }
+    }
   }
-  
+
   // Sierra single item
   it("merges locations from Miro items into single-item Sierra works") {
     inside(ItemsRule.merge(physicalPictureSierra, List(miroWork))) {
