@@ -99,9 +99,8 @@ class ItemsRuleTest
     }
   }
 
-  describe("Indirectly linked Sierra items ") {}
   describe("Sierra physical/digital items") {
-    def createMergableDigitalItem = createDigitalItemWith(locations =
+    def createMergeableDigitalItem = createDigitalItemWith(locations =
       List(
         createDigitalLocationWith(
           locationType = LocationType.OnlineResource,
@@ -118,28 +117,30 @@ class ItemsRuleTest
     it("merges an 856 item from a digitised Sierra work into a physical work") {
 
       val digitisedWork =
-        sierraIdentifiedWork().items(List(createMergableDigitalItem))
-      val physicalItem = createIdentifiedPhysicalItem
+        sierraIdentifiedWork().items(List(createMergeableDigitalItem))
       val physicalWork =
         sierraIdentifiedWork()
           .mergeCandidates(
             List(createSierraPairMergeCandidateFor(digitisedWork))
           )
-          .items(List(physicalItem))
+          .items(List(createIdentifiedPhysicalItem))
 
       inside(ItemsRule.merge(physicalWork, List(digitisedWork))) {
         case FieldMergeResult(items, mergedSources) =>
           items should contain theSameElementsAs Seq(
-            physicalItem,
+            physicalWork.data.items.loneElement,
             digitisedWork.data.items.loneElement
           )
           mergedSources.loneElement shouldBe digitisedWork
       }
     }
-    it("a source list that also contains non-digital sierra works") {
+
+    it(
+      "chooses the first digital work from a source list that also contains non-digital sierra works"
+    ) {
 
       val digitisedWork =
-        sierraIdentifiedWork().items(List(createMergableDigitalItem))
+        sierraIdentifiedWork().items(List(createMergeableDigitalItem))
 
       val physicalWork =
         sierraIdentifiedWork()
@@ -164,14 +165,15 @@ class ItemsRuleTest
           mergedSources.loneElement shouldBe digitisedWork
       }
     }
-    it("an empty source list") {
+
+    it("retains the target's items when presented with an empty source list") {
 
       val physicalWork =
         sierraIdentifiedWork()
           .mergeCandidates(
             List(
               createSierraPairMergeCandidateFor(
-                sierraIdentifiedWork().items(List(createMergableDigitalItem))
+                sierraIdentifiedWork().items(List(createMergeableDigitalItem))
               )
             )
           )
@@ -185,12 +187,37 @@ class ItemsRuleTest
           mergedSources shouldBe empty
       }
     }
+
+    it(
+      "retains the target's items if no corresponding digital record can be found in the source list"
+    ) {
+
+      val physicalWork =
+        sierraIdentifiedWork()
+          .mergeCandidates(
+            List(
+              createSierraPairMergeCandidateFor(
+                sierraIdentifiedWork().items(List(createMergeableDigitalItem))
+              )
+            )
+          )
+          .items(List(createIdentifiedPhysicalItem))
+
+      inside(ItemsRule.merge(physicalWork, Seq(sierraIdentifiedWork()))) {
+        case FieldMergeResult(items, mergedSources) =>
+          items should contain theSameElementsAs Seq(
+            physicalWork.data.items.loneElement
+          )
+          mergedSources shouldBe empty
+      }
+    }
+
     it("only merges the first 856 item it finds in the mergeCandidates list") {
 
       val digitisedWork0 =
-        sierraIdentifiedWork().items(List(createMergableDigitalItem))
+        sierraIdentifiedWork().items(List(createMergeableDigitalItem))
       val digitisedWork1 =
-        sierraIdentifiedWork().items(List(createMergableDigitalItem))
+        sierraIdentifiedWork().items(List(createMergeableDigitalItem))
       val physicalItem = createIdentifiedPhysicalItem
       val physicalWork =
         sierraIdentifiedWork()
@@ -216,6 +243,7 @@ class ItemsRuleTest
       }
     }
   }
+  
   // Sierra single item
   it("merges locations from Miro items into single-item Sierra works") {
     inside(ItemsRule.merge(physicalPictureSierra, List(miroWork))) {

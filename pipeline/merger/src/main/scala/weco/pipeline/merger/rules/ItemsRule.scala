@@ -195,6 +195,6 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
 
             target.data.items ++ onlineItems
         }
-        .getOrElse(Nil) // target.data.items)
+        .getOrElse(target.data.items)
   }
 }
