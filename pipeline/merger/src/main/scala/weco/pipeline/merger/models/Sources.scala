@@ -3,8 +3,9 @@ package weco.pipeline.merger.models
 import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.catalogue.internal_model.work.Work
 import weco.pipeline.merger.rules.WorkPredicates
+import grizzled.slf4j.Logging
 
-object Sources {
+object Sources extends Logging {
   import WorkPredicates._
 
   def findFirstLinkedDigitisedSierraWorkFor(
@@ -33,6 +34,7 @@ object Sources {
         val digitisedLinkedIds = target.state.mergeCandidates
           .filter(_.reason.contains("Physical/digitised Sierra work"))
           .map(_.id.canonicalId)
+
         val sourcesByID = sources
           .filter(
             source => digitisedLinkedIds.contains(source.state.canonicalId)
@@ -40,12 +42,25 @@ object Sources {
           .map(source => source.state.canonicalId -> source)
           .toMap
 
-        // TODO warn if there are more than one matching source
-        digitisedLinkedIds.collectFirst {
+        if (sourcesByID.size > 1 || digitisedLinkedIds.size > 1) {
+          warn(
+            s"more than one candidate source for physical/digital merge, expected candidates [${digitisedLinkedIds
+                .mkString(",")}], actual sources=[${sourcesByID.mkString(",")}]"
+          )
+        }
+
+        val linkedWork = digitisedLinkedIds.collectFirst {
           case linkedId if sourcesByID.contains(linkedId) =>
             sourcesByID(linkedId)
         }
-      // TODO: warn if the above line yields nothing, it should not be possible
+
+        if (linkedWork.isEmpty) {
+          warn(
+            s"could not find digitised Sierra work for ${t.id}, expected candidates [${digitisedLinkedIds
+                .mkString(",")}], actual sources=[${sourcesByID.mkString(",")}]"
+          )
+        }
+        linkedWork
 
       // Handle the case where the e-bib links to the physical bib, but not
       // the other way round.
