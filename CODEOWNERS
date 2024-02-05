@@ -5,3 +5,6 @@
 # from @wellcomecollection/developers when updating pipeline config
 /CODEOWNERS	@wellcomecollection/developers
 /.buildkite/    @wellcomecollection/developers
+
+# Allow reviews from all developers on infrastructure changes
+/pipeline/terraform @wellcomecollection/developers
