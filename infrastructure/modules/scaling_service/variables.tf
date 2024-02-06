@@ -114,7 +114,6 @@ variable "queue_config" {
     visibility_timeout_seconds = number
     message_retention_seconds  = number
     max_receive_count          = number
-    message_retention_seconds  = number
     cooldown_period            = string
     dlq_alarm_arn              = string
   })
