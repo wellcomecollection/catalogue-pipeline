@@ -206,6 +206,7 @@ def start_reindex(ctx, src, dst, mode):
                 continue
             ctx.invoke(start_reindex, src=source, dst=dst, mode=mode)
             print("")
+        return
 
     print(f"Starting a reindex {src} ~> {dst}")
 
