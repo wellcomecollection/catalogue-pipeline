@@ -36,6 +36,6 @@ module "pipeline" {
   providers = {
     aws.catalogue = aws.catalogue
   }
-  
+
   ami_id = data.aws_ami.container_host_ami.image_id
 }
