@@ -32,4 +32,6 @@ module "inference_capacity_provider" {
   security_group_ids = [
     aws_security_group.egress.id,
   ]
+
+  ami_id = var.ami_id
 }

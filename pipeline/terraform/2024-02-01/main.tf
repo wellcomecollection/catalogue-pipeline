@@ -1,3 +1,12 @@
+data "aws_ami" "container_host_ami" {
+  most_recent = true
+  owners      = ["self"]
+  filter {
+    name   = "name"
+    values = ["weco-amzn2-ecs-optimised-hvm-x86_64*"]
+  }
+}
+
 module "pipeline" {
   source = "../modules/stack"
 
@@ -27,4 +36,6 @@ module "pipeline" {
   providers = {
     aws.catalogue = aws.catalogue
   }
+
+  ami_id = data.aws_ami.container_host_ami.image_id
 }
