@@ -1,6 +1,6 @@
 {
   "description" : "an arbitrary list of redirected works",
-  "createdAt" : "2022-10-03T10:25:18.789Z",
+  "createdAt" : "2024-02-16T15:36:44.094272Z",
   "id" : "4nwkprdt",
   "document" : {
     "debug" : {
@@ -17,7 +17,9 @@
         "modifiedTime" : "2044-05-21T11:37:26Z"
       },
       "mergedTime" : "2044-05-21T11:37:26Z",
-      "indexedTime" : "2001-01-01T01:01:01Z"
+      "indexedTime" : "2001-01-01T01:01:01Z",
+      "mergeCandidates" : [
+      ]
     },
     "redirectTarget" : {
       "canonicalId" : "mv6kix0n",

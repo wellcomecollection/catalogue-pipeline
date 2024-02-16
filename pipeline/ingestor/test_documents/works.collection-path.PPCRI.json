@@ -1,6 +1,6 @@
 {
   "description" : "a work with a collection path",
-  "createdAt" : "2023-11-21T15:39:34.267974Z",
+  "createdAt" : "2024-02-16T15:36:44.880426Z",
   "id" : "ynrhjtvf",
   "document" : {
     "debug" : {
@@ -19,6 +19,8 @@
       "mergedTime" : "2059-06-02T08:31:27Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
+      ],
+      "mergeCandidates" : [
       ]
     },
     "display" : {

@@ -1,6 +1,6 @@
 {
   "description" : "works with multi-year production ranges",
-  "createdAt" : "2023-11-21T15:39:34.536309Z",
+  "createdAt" : "2024-02-16T15:36:44.931264Z",
   "id" : "ukbghz72",
   "document" : {
     "debug" : {
@@ -19,6 +19,8 @@
       "mergedTime" : "2004-01-03T14:20:07Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
+      ],
+      "mergeCandidates" : [
       ]
     },
     "display" : {

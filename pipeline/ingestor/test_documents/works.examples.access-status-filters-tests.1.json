@@ -1,6 +1,6 @@
 {
   "description" : "examples for the access status tests",
-  "createdAt" : "2023-11-21T15:39:35.344370Z",
+  "createdAt" : "2024-02-16T15:36:45.088997Z",
   "id" : "lqwyh6sk",
   "document" : {
     "debug" : {
@@ -19,6 +19,8 @@
       "mergedTime" : "2025-11-25T23:47:59Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
+      ],
+      "mergeCandidates" : [
       ]
     },
     "display" : {

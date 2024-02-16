@@ -1,6 +1,6 @@
 {
   "description" : "works with items with other identifiers",
-  "createdAt" : "2023-11-21T15:39:34.235211Z",
+  "createdAt" : "2024-02-16T15:36:44.872360Z",
   "id" : "rzcvxgso",
   "document" : {
     "debug" : {
@@ -19,6 +19,8 @@
       "mergedTime" : "1974-02-26T09:34:25Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
+      ],
+      "mergeCandidates" : [
       ]
     },
     "display" : {

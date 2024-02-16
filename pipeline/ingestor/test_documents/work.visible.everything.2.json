@@ -1,6 +1,6 @@
 {
   "description" : "a list of work with all the include-able fields",
-  "createdAt" : "2023-11-21T15:39:33.161811Z",
+  "createdAt" : "2024-02-16T15:36:44.706563Z",
   "id" : "kspmagtl",
   "document" : {
     "debug" : {
@@ -19,6 +19,8 @@
       "mergedTime" : "2040-10-31T18:04:56Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
+      ],
+      "mergeCandidates" : [
       ]
     },
     "display" : {

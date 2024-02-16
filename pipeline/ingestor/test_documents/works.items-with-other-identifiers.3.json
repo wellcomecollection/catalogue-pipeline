@@ -1,6 +1,6 @@
 {
   "description" : "works with items with other identifiers",
-  "createdAt" : "2023-11-21T15:39:34.233749Z",
+  "createdAt" : "2024-02-16T15:36:44.871148Z",
   "id" : "pdufpdhz",
   "document" : {
     "debug" : {
@@ -19,6 +19,8 @@
       "mergedTime" : "1978-09-15T00:40:32Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
+      ],
+      "mergeCandidates" : [
       ]
     },
     "display" : {

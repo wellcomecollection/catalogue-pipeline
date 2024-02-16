@@ -1,6 +1,6 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2023-11-21T15:39:34.321997Z",
+  "createdAt" : "2024-02-16T15:36:44.888746Z",
   "id" : "jminkez1",
   "document" : {
     "debug" : {
@@ -19,6 +19,8 @@
       "mergedTime" : "1999-04-12T11:49:15Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
+      ],
+      "mergeCandidates" : [
       ]
     },
     "display" : {

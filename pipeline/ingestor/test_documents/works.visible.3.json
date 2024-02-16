@@ -1,6 +1,6 @@
 {
   "description" : "an arbitrary list of visible works",
-  "createdAt" : "2023-11-21T15:38:59.384069Z",
+  "createdAt" : "2024-02-16T15:36:44.008952Z",
   "id" : "raob2ruv",
   "document" : {
     "debug" : {
@@ -19,6 +19,8 @@
       "mergedTime" : "1966-03-23T00:51:51Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
+      ],
+      "mergeCandidates" : [
       ]
     },
     "display" : {

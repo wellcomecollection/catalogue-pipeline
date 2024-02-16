@@ -63,6 +63,9 @@
         "properties": {
           "indexedTime": {
             "type": "date"
+          },
+          "mergeCandidates.id.canonicalId": {
+            "type": "keyword"
           }
         }
       },

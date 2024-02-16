@@ -1,6 +1,6 @@
 {
   "description" : "one of a list of works with a variety of formats",
-  "createdAt" : "2023-11-21T15:39:33.588938Z",
+  "createdAt" : "2024-02-16T15:36:44.770933Z",
   "id" : "o5wujppw",
   "document" : {
     "debug" : {
@@ -19,6 +19,8 @@
       "mergedTime" : "2064-12-19T06:39:42Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
+      ],
+      "mergeCandidates" : [
       ]
     },
     "display" : {

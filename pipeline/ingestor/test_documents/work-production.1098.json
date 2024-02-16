@@ -1,6 +1,6 @@
 {
   "description" : "a work with a production event in 1098",
-  "createdAt" : "2023-11-21T15:39:30.574731Z",
+  "createdAt" : "2024-02-16T15:36:44.229565Z",
   "id" : "guav7chy",
   "document" : {
     "debug" : {
@@ -19,6 +19,8 @@
       "mergedTime" : "1947-04-11T10:50:49Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
+      ],
+      "mergeCandidates" : [
       ]
     },
     "display" : {

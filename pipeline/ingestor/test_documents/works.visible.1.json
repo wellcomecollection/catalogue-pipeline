@@ -1,6 +1,6 @@
 {
   "description" : "an arbitrary list of visible works",
-  "createdAt" : "2023-11-21T15:38:59.351372Z",
+  "createdAt" : "2024-02-16T15:36:44.001281Z",
   "id" : "dph7sjip",
   "document" : {
     "debug" : {
@@ -19,6 +19,8 @@
       "mergedTime" : "1971-11-19T03:42:42Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
+      ],
+      "mergeCandidates" : [
       ]
     },
     "display" : {

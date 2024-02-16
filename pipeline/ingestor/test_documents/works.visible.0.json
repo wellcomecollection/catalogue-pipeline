@@ -1,6 +1,6 @@
 {
   "description" : "an arbitrary list of visible works",
-  "createdAt" : "2023-11-21T15:38:56.668994Z",
+  "createdAt" : "2024-02-16T15:36:43.992275Z",
   "id" : "2twopft1",
   "document" : {
     "debug" : {
@@ -19,6 +19,8 @@
       "mergedTime" : "1972-02-10T18:53:31Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
+      ],
+      "mergeCandidates" : [
       ]
     },
     "display" : {

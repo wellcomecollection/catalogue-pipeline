@@ -1,6 +1,6 @@
 {
   "description" : "examples for the genre tests",
-  "createdAt" : "2023-11-21T15:39:35.042645Z",
+  "createdAt" : "2024-02-16T15:36:45.022420Z",
   "id" : "d5kj1fx3",
   "document" : {
     "debug" : {
@@ -19,6 +19,8 @@
       "mergedTime" : "2047-04-18T16:27:14Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
+      ],
+      "mergeCandidates" : [
       ]
     },
     "display" : {

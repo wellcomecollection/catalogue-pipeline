@@ -1,6 +1,6 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2023-11-21T15:39:34.318612Z",
+  "createdAt" : "2024-02-16T15:36:44.887738Z",
   "id" : "w2ap82cs",
   "document" : {
     "debug" : {
@@ -19,6 +19,8 @@
       "mergedTime" : "1966-01-30T11:53:55Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
+      ],
+      "mergeCandidates" : [
       ]
     },
     "display" : {
