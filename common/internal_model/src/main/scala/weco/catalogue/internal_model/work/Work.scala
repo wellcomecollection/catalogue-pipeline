@@ -237,7 +237,7 @@ object WorkState {
     sourceModifiedTime: Instant,
     availabilities: Set[Availability],
     relations: Relations = Relations.none,
-    mergeCandidates: List[MergeCandidate[IdState.Identified]] = Nil,
+    mergeCandidates: List[MergeCandidate[IdState.Identified]] = Nil
   ) extends WorkState {
 
     type WorkDataState = DataState.Identified
