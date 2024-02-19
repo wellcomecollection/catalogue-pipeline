@@ -1,6 +1,6 @@
 {
   "description" : "works with different subjects",
-  "createdAt" : "2023-11-21T15:39:33.987809Z",
+  "createdAt" : "2024-02-16T15:36:44.838807Z",
   "id" : "el28gega",
   "document" : {
     "debug" : {
@@ -19,6 +19,8 @@
       "mergedTime" : "1997-06-19T05:13:34Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
+      ],
+      "mergeCandidates" : [
       ]
     },
     "display" : {

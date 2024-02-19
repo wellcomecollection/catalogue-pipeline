@@ -71,7 +71,8 @@ trait WorkGenerators
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     canonicalId: CanonicalId = createCanonicalId,
     modifiedTime: Instant = randomInstant,
-    relations: Relations = Relations.none
+    relations: Relations = Relations.none,
+    mergeCandidates: List[MergeCandidate[IdState.Identified]] = Nil
   ): Work.Visible[Denormalised] = {
     val data = initData[DataState.Identified]
     Work.Visible[Denormalised](
@@ -81,7 +82,8 @@ trait WorkGenerators
         mergedTime = modifiedTime,
         sourceModifiedTime = modifiedTime,
         availabilities = Availabilities.forWorkData(data),
-        relations = relations
+        relations = relations,
+        mergeCandidates = mergeCandidates
       ),
       data = data,
       version = createVersion

@@ -1,6 +1,6 @@
 {
   "description" : "works with different subjects",
-  "createdAt" : "2023-11-21T15:39:33.987107Z",
+  "createdAt" : "2024-02-16T15:36:44.838390Z",
   "id" : "opaupm4b",
   "document" : {
     "debug" : {
@@ -19,6 +19,8 @@
       "mergedTime" : "1963-02-18T22:51:22Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
+      ],
+      "mergeCandidates" : [
       ]
     },
     "display" : {

@@ -1,6 +1,6 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2023-11-21T15:39:34.386217Z",
+  "createdAt" : "2024-02-16T15:36:44.900335Z",
   "id" : "qph7iot8",
   "document" : {
     "debug" : {
@@ -19,6 +19,8 @@
       "mergedTime" : "2068-04-15T09:23:35Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
+      ],
+      "mergeCandidates" : [
       ]
     },
     "display" : {

@@ -1,6 +1,6 @@
 {
   "description" : "works with different contributor",
-  "createdAt" : "2023-11-21T15:39:34.100726Z",
+  "createdAt" : "2024-02-16T15:36:44.853574Z",
   "id" : "a8uyvixy",
   "document" : {
     "debug" : {
@@ -19,6 +19,8 @@
       "mergedTime" : "1959-06-29T05:37:32Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
+      ],
+      "mergeCandidates" : [
       ]
     },
     "display" : {

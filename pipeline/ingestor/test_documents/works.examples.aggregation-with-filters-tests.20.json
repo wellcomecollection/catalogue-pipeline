@@ -1,6 +1,6 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2023-11-21T15:39:34.828116Z",
+  "createdAt" : "2024-02-16T15:36:44.977595Z",
   "id" : "kldauk4g",
   "document" : {
     "debug" : {
@@ -19,6 +19,8 @@
       "mergedTime" : "2064-03-27T14:42:18Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
+      ],
+      "mergeCandidates" : [
       ]
     },
     "display" : {

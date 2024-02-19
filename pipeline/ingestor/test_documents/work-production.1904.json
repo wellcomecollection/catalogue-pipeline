@@ -1,6 +1,6 @@
 {
   "description" : "a work with a production event in 1904",
-  "createdAt" : "2023-11-21T15:39:30.487946Z",
+  "createdAt" : "2024-02-16T15:36:44.209947Z",
   "id" : "aiv95swj",
   "document" : {
     "debug" : {
@@ -19,6 +19,8 @@
       "mergedTime" : "1949-02-28T00:19:38Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
+      ],
+      "mergeCandidates" : [
       ]
     },
     "display" : {

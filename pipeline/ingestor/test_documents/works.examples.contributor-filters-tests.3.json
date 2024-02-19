@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2023-11-21T15:39:35.250267Z",
+  "createdAt" : "2024-02-16T15:36:45.064708Z",
   "id" : "vcba0kh0",
   "document" : {
     "debug" : {
@@ -19,6 +19,8 @@
       "mergedTime" : "2043-08-15T21:52:17Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
+      ],
+      "mergeCandidates" : [
       ]
     },
     "display" : {

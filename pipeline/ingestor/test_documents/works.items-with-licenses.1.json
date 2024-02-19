@@ -1,6 +1,6 @@
 {
   "description" : "a work with licensed digital items",
-  "createdAt" : "2023-11-21T15:39:33.737394Z",
+  "createdAt" : "2024-02-16T15:36:44.814531Z",
   "id" : "sojyedta",
   "document" : {
     "debug" : {
@@ -19,6 +19,8 @@
       "mergedTime" : "2030-04-29T05:27:13Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
+      ],
+      "mergeCandidates" : [
       ]
     },
     "display" : {

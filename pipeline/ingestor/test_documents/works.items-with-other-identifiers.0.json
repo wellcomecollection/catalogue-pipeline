@@ -1,6 +1,6 @@
 {
   "description" : "works with items with other identifiers",
-  "createdAt" : "2023-11-21T15:39:34.204242Z",
+  "createdAt" : "2024-02-16T15:36:44.866711Z",
   "id" : "hdjyypp6",
   "document" : {
     "debug" : {
@@ -19,6 +19,8 @@
       "mergedTime" : "2066-12-22T15:52:01Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
+      ],
+      "mergeCandidates" : [
       ]
     },
     "display" : {

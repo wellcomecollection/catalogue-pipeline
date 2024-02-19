@@ -30,7 +30,7 @@ trait WorkTransformer {
       )
 
       work match {
-        case visibleWork @ Work.Visible(_, _, _, redirectSources) => {
+        case visibleWork @ Work.Visible(_, _, state, redirectSources) => {
           val display = DisplayWork(visibleWork).asJson.deepDropNullValues
 
           IndexedWork.Visible(
@@ -38,7 +38,8 @@ trait WorkTransformer {
               source = source,
               mergedTime = mergedTime,
               indexedTime = indexedTime,
-              redirectSources = redirectSources
+              redirectSources = redirectSources,
+              mergeCandidates = state.mergeCandidates
             ),
             display = display,
             query = WorkQueryableValues(visibleWork),
@@ -47,33 +48,36 @@ trait WorkTransformer {
           )
         }
 
-        case Work.Invisible(_, _, _, invisibilityReasons) =>
+        case Work.Invisible(_, _, state, invisibilityReasons) =>
           IndexedWork.Invisible(
             debug = DebugInformation.Invisible(
               source = source,
               mergedTime = mergedTime,
               indexedTime = indexedTime,
-              invisibilityReasons = invisibilityReasons
+              invisibilityReasons = invisibilityReasons,
+              mergeCandidates = state.mergeCandidates
             )
           )
 
-        case Work.Redirected(_, redirectTarget, _) =>
+        case Work.Redirected(_, redirectTarget, state) =>
           IndexedWork.Redirected(
             debug = DebugInformation.Redirected(
               source = source,
               mergedTime = mergedTime,
-              indexedTime = indexedTime
+              indexedTime = indexedTime,
+              mergeCandidates = state.mergeCandidates
             ),
             redirectTarget = redirectTarget
           )
 
-        case Work.Deleted(_, _, deletedReason) =>
+        case Work.Deleted(_, state, deletedReason) =>
           IndexedWork.Deleted(
             debug = DebugInformation.Deleted(
               source = source,
               mergedTime = mergedTime,
               indexedTime = indexedTime,
-              deletedReason = deletedReason
+              deletedReason = deletedReason,
+              mergeCandidates = state.mergeCandidates
             )
           )
       }

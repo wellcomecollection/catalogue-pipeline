@@ -1,6 +1,6 @@
 {
   "description" : "a work whose title has lots of ES query syntax operators",
-  "createdAt" : "2023-11-21T15:39:33.617819Z",
+  "createdAt" : "2024-02-16T15:36:44.782951Z",
   "id" : "mdg1yvuv",
   "document" : {
     "debug" : {
@@ -19,6 +19,8 @@
       "mergedTime" : "1967-11-04T04:23:34Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
+      ],
+      "mergeCandidates" : [
       ]
     },
     "display" : {

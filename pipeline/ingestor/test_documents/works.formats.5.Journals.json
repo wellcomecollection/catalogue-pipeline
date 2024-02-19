@@ -1,6 +1,6 @@
 {
   "description" : "one of a list of works with a variety of formats",
-  "createdAt" : "2023-11-21T15:39:33.584710Z",
+  "createdAt" : "2024-02-16T15:36:44.769242Z",
   "id" : "ftxlgr2v",
   "document" : {
     "debug" : {
@@ -19,6 +19,8 @@
       "mergedTime" : "1985-11-10T14:57:32Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
+      ],
+      "mergeCandidates" : [
       ]
     },
     "display" : {

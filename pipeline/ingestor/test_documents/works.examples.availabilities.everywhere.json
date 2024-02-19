@@ -1,6 +1,6 @@
 {
   "description" : "examples for availabilities tests",
-  "createdAt" : "2023-11-23T15:20:26.272086Z",
+  "createdAt" : "2024-02-16T15:36:45.131921Z",
   "id" : "ntlrk7nw",
   "document" : {
     "debug" : {
@@ -19,6 +19,8 @@
       "mergedTime" : "2003-11-23T19:57:31Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
+      ],
+      "mergeCandidates" : [
       ]
     },
     "display" : {

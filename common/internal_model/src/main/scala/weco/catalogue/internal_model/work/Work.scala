@@ -216,7 +216,8 @@ object WorkState {
     mergedTime: Instant,
     sourceModifiedTime: Instant,
     availabilities: Set[Availability] = Set.empty,
-    relations: Relations = Relations.none
+    relations: Relations = Relations.none,
+    mergeCandidates: List[MergeCandidate[IdState.Identified]] = Nil
   ) extends WorkState {
 
     type WorkDataState = DataState.Identified
@@ -235,7 +236,8 @@ object WorkState {
     mergedTime: Instant,
     sourceModifiedTime: Instant,
     availabilities: Set[Availability],
-    relations: Relations = Relations.none
+    relations: Relations = Relations.none,
+    mergeCandidates: List[MergeCandidate[IdState.Identified]] = Nil
   ) extends WorkState {
 
     type WorkDataState = DataState.Identified
@@ -285,7 +287,8 @@ object WorkFsm {
         mergedTime = mergedTime,
         sourceModifiedTime = state.sourceModifiedTime,
         availabilities = Availabilities.forWorkData(data),
-        relations = state.relations
+        relations = state.relations,
+        mergeCandidates = state.mergeCandidates
       )
 
     def data(data: WorkData[DataState.Identified]) = data
@@ -306,7 +309,8 @@ object WorkFsm {
           mergedTime = state.mergedTime,
           sourceModifiedTime = state.sourceModifiedTime,
           availabilities = state.availabilities,
-          relations = state.relations + relations
+          relations = state.relations + relations,
+          mergeCandidates = state.mergeCandidates
         )
 
       def data(data: WorkData[DataState.Identified]) = data

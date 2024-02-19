@@ -1,6 +1,6 @@
 {
   "description" : "a list of work with all the include-able fields",
-  "createdAt" : "2023-11-21T15:39:33.067849Z",
+  "createdAt" : "2024-02-16T15:36:44.682166Z",
   "id" : "tmdfbk5k",
   "document" : {
     "debug" : {
@@ -19,6 +19,8 @@
       "mergedTime" : "2033-04-23T09:14:15Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
+      ],
+      "mergeCandidates" : [
       ]
     },
     "display" : {

@@ -1,6 +1,6 @@
 {
   "description" : "an arbitrary list of invisible works",
-  "createdAt" : "2022-10-03T10:25:18.781Z",
+  "createdAt" : "2024-02-16T15:36:44.080467Z",
   "id" : "60edujsq",
   "document" : {
     "debug" : {
@@ -19,6 +19,8 @@
       "mergedTime" : "2030-05-24T10:04:01Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "invisibilityReasons" : [
+      ],
+      "mergeCandidates" : [
       ]
     },
     "type" : "Invisible"

@@ -1,6 +1,6 @@
 {
   "description" : "examples of works with different types",
-  "createdAt" : "2023-11-21T15:39:35.003600Z",
+  "createdAt" : "2024-02-16T15:36:45.015019Z",
   "id" : "ujg4jncr",
   "document" : {
     "debug" : {
@@ -19,6 +19,8 @@
       "mergedTime" : "1951-02-24T01:30:35Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
+      ],
+      "mergeCandidates" : [
       ]
     },
     "display" : {
