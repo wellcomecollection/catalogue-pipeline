@@ -41,8 +41,7 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
         mergeIntoTeiTarget,
         mergeIntoCalmTarget,
         mergeMetsIntoSierraTarget,
-        mergeSingleMiroIntoSingleOrZeroItemSierraTarget,
-        mergeDigitalIntoPhysicalSierraTarget
+        mergeSingleMiroIntoSingleOrZeroItemSierraTarget
       ).flatMap {
         rule =>
           rule.mergedSources(target, sources)
@@ -177,9 +176,10 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     // original bib records often contain different data.
     //
     // See the comment on Sources.findFirstLinkedDigitisedSierraWorkFor
-    val isDefinedForTarget: WorkPredicate = physicalSierra and not(
-      isAudiovisual
-    )
+    val isDefinedForTarget: WorkPredicate =
+      physicalSierra and physicalDigital and not(
+        isAudiovisual
+      )
 
     val isDefinedForSource: WorkPredicate = sierraWork
 
@@ -195,6 +195,6 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
 
             target.data.items ++ onlineItems
         }
-        .getOrElse(Nil)
+        .getOrElse(target.data.items)
   }
 }

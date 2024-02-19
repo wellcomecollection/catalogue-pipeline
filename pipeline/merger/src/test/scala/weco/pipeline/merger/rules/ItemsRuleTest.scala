@@ -1,12 +1,11 @@
 package weco.pipeline.merger.rules
 
-import org.scalatest.Inside
+import org.scalatest.{Inside, LoneElement}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.locations._
 import weco.catalogue.internal_model.work.generators.SourceWorkGenerators
-import weco.catalogue.internal_model.work.{Format, Item, Work, WorkState}
+import weco.catalogue.internal_model.work.{Format, Work, WorkState}
 import weco.pipeline.matcher.generators.MergeCandidateGenerators
 import weco.pipeline.merger.models.FieldMergeResult
 
@@ -15,7 +14,8 @@ class ItemsRuleTest
     with Matchers
     with SourceWorkGenerators
     with MergeCandidateGenerators
-    with Inside {
+    with Inside
+    with LoneElement {
   val tei: Work.Visible[WorkState.Identified] =
     teiIdentifiedWork()
 
@@ -31,8 +31,9 @@ class ItemsRuleTest
 
   val multiItemPhysicalSierra: Work.Visible[WorkState.Identified] =
     sierraIdentifiedWork()
-      .items((1 to 2).map { _ =>
-        createIdentifiedPhysicalItem
+      .items((1 to 2).map {
+        _ =>
+          createIdentifiedPhysicalItem
       }.toList)
 
   val metsWork: Work.Invisible[WorkState.Identified] =
@@ -79,7 +80,8 @@ class ItemsRuleTest
   }
 
   it(
-    "When merging items from sierra and calm, it replaces the calm item with the sierra one") {
+    "When merging items from sierra and calm, it replaces the calm item with the sierra one"
+  ) {
     inside(ItemsRule.merge(tei, List(physicalPictureSierra, calmWork))) {
       case FieldMergeResult(items, mergedSources) =>
         items should have size 1
@@ -97,12 +99,10 @@ class ItemsRuleTest
     }
   }
 
-  it("merges an 856 item from a digitised Sierra work into a physical work") {
-    val item = Item(
-      id = IdState.Unidentifiable,
-      locations = List(
-        DigitalLocation(
-          url = "https://example.org/b12345678",
+  describe("Sierra physical/digital items") {
+    def createMergeableDigitalItem = createDigitalItemWith(locations =
+      List(
+        createDigitalLocationWith(
           locationType = LocationType.OnlineResource,
           accessConditions = List(
             AccessCondition(
@@ -114,19 +114,144 @@ class ItemsRuleTest
       )
     )
 
-    val digitisedWork = sierraIdentifiedWork().items(List(item))
+    it("merges an 856 item from a digitised Sierra work into a physical work") {
 
-    val physicalWork =
-      sierraIdentifiedWork()
-        .mergeCandidates(
-          List(createSierraPairMergeCandidateFor(digitisedWork))
-        )
-        .items(List(createIdentifiedPhysicalItem))
+      val digitisedWork =
+        sierraIdentifiedWork().items(List(createMergeableDigitalItem))
+      val physicalWork =
+        sierraIdentifiedWork()
+          .mergeCandidates(
+            List(createSierraPairMergeCandidateFor(digitisedWork))
+          )
+          .items(List(createIdentifiedPhysicalItem))
 
-    inside(ItemsRule.merge(physicalWork, List(digitisedWork))) {
-      case FieldMergeResult(items, mergedSources) =>
-        items should contain(item)
-        mergedSources should be(Seq(digitisedWork))
+      inside(ItemsRule.merge(physicalWork, List(digitisedWork))) {
+        case FieldMergeResult(items, mergedSources) =>
+          items should contain theSameElementsAs Seq(
+            physicalWork.data.items.loneElement,
+            digitisedWork.data.items.loneElement
+          )
+          mergedSources.loneElement shouldBe digitisedWork
+      }
+    }
+
+    it(
+      "chooses the first digital work from a source list that also contains non-digital sierra works"
+    ) {
+
+      val digitisedWork =
+        sierraIdentifiedWork().items(List(createMergeableDigitalItem))
+
+      val physicalWork =
+        sierraIdentifiedWork()
+          .mergeCandidates(
+            List(createSierraPairMergeCandidateFor(digitisedWork))
+          )
+          .items(List(createIdentifiedPhysicalItem))
+
+      val otherPhysicalWork =
+        sierraIdentifiedWork()
+          .mergeCandidates(Nil)
+          .items(List(createIdentifiedPhysicalItem))
+
+      inside(
+        ItemsRule.merge(physicalWork, List(otherPhysicalWork, digitisedWork))
+      ) {
+        case FieldMergeResult(items, mergedSources) =>
+          items should contain theSameElementsAs Seq(
+            physicalWork.data.items.loneElement,
+            digitisedWork.data.items.loneElement
+          )
+          mergedSources.loneElement shouldBe digitisedWork
+      }
+    }
+
+    it("retains the target's items when presented with an empty source list") {
+
+      val physicalWork =
+        sierraIdentifiedWork()
+          .mergeCandidates(
+            List(
+              createSierraPairMergeCandidateFor(
+                sierraIdentifiedWork().items(List(createMergeableDigitalItem))
+              )
+            )
+          )
+          .items(List(createIdentifiedPhysicalItem))
+
+      inside(ItemsRule.merge(physicalWork, Nil)) {
+        case FieldMergeResult(items, mergedSources) =>
+          items should contain theSameElementsAs Seq(
+            physicalWork.data.items.loneElement
+          )
+          mergedSources shouldBe empty
+      }
+    }
+
+    it(
+      "retains the target's items if no corresponding digital record can be found in the source list"
+    ) {
+
+      val physicalWork =
+        sierraIdentifiedWork()
+          .mergeCandidates(
+            List(
+              createSierraPairMergeCandidateFor(
+                sierraIdentifiedWork().items(List(createMergeableDigitalItem))
+              )
+            )
+          )
+          .items(List(createIdentifiedPhysicalItem))
+
+      inside(ItemsRule.merge(physicalWork, Seq(sierraIdentifiedWork()))) {
+        case FieldMergeResult(items, mergedSources) =>
+          items should contain theSameElementsAs Seq(
+            physicalWork.data.items.loneElement
+          )
+          mergedSources shouldBe empty
+      }
+    }
+
+    it("only merges the first 856 item it finds in the mergeCandidates list") {
+
+      val digitisedWork0 =
+        sierraIdentifiedWork().items(List(createMergeableDigitalItem))
+      val digitisedWork1 =
+        sierraIdentifiedWork().items(List(createMergeableDigitalItem))
+      val physicalItem = createIdentifiedPhysicalItem
+      val physicalWork =
+        sierraIdentifiedWork()
+          .mergeCandidates(
+            List(
+              createSierraPairMergeCandidateFor(digitisedWork0),
+              createSierraPairMergeCandidateFor(digitisedWork1)
+            )
+          )
+          .items(List(physicalItem))
+      // The order of source works is the reverse of the order of the mergeCandidate list
+      // This shows that the mergeCandidate list has primacy in choosing the "first" one
+      inside(
+        ItemsRule.merge(physicalWork, List(digitisedWork1, digitisedWork0))
+      ) {
+        case FieldMergeResult(items, mergedSources) =>
+          items should contain theSameElementsAs Seq(
+            physicalItem,
+            digitisedWork0.data.items.loneElement
+          )
+          // Only the digitised work that contributed to the merge is included in the mergedSources list.
+          mergedSources.loneElement shouldBe digitisedWork0
+      }
+    }
+
+    it("does not merge sierra items if the target is not physical/digital") {
+      inside(
+        ItemsRule
+          .merge(multiItemPhysicalSierra, List(miroWork, physicalMapsSierra))
+      ) {
+        case FieldMergeResult(items, mergedSources) =>
+          items shouldBe multiItemPhysicalSierra.data.items
+          mergedSources shouldBe empty
+      }
     }
   }
 
@@ -148,7 +273,7 @@ class ItemsRuleTest
         items should have size 1
         items.head.locations shouldBe
           physicalPictureSierra.data.items.head.locations ++
-            metsWork.data.items.head.locations
+          metsWork.data.items.head.locations
 
         mergedSources should be(Seq(metsWork))
     }
@@ -183,7 +308,7 @@ class ItemsRuleTest
         items should have size 1
         items.head.locations shouldBe
           physicalPictureSierra.data.items.head.locations ++
-            metsWork.data.items.head.locations
+          metsWork.data.items.head.locations
 
         mergedSources should contain theSameElementsAs Seq(metsWork, miroWork)
     }

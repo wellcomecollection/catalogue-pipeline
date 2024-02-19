@@ -113,6 +113,10 @@ object WorkPredicates {
       zeroIdentifiedItems
     )
 
+  val physicalDigital: WorkPredicate = hasMergeReason(
+    "Physical/digitised Sierra work"
+  )
+
   def not(pred: WorkPredicate): WorkPredicate = !pred(_)
 
   def sierraWorkWithId(id: SourceIdentifier)(work: Work[Identified]): Boolean =
@@ -156,6 +160,8 @@ object WorkPredicates {
       .filter(_.identifierType == IdentifierType.WellcomeDigcode)
       .exists(_.value == digcode)
 
+  private def hasMergeReason(reason: String)(work: Work[Identified]): Boolean =
+    work.state.mergeCandidates.exists(_.reason.contains(reason))
   private def identifierTypeId(
     id: IdentifierType
   )(work: Work[Identified]): Boolean =
