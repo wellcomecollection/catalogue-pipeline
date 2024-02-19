@@ -9,7 +9,6 @@ import boto3
 import click
 import tqdm
 
-
 SOURCES = {
     "miro": "vhs-sourcedata-miro",
     "sierra": "vhs-sierra-sierra-adapter-20200604",
@@ -167,7 +166,10 @@ def verify_specific_ids(*, source, specific_ids):
 @click.command()
 @click.option(
     "--src",
-    type=click.Choice(["all"] + list(SOURCES.keys())),
+    # To run a reindex, avoiding the creation of unwanted Image records,
+    # we need to first run everything that is not miro, then once that
+    # has all made it through the matcher/merger, run miro.
+    type=click.Choice(["all"] + ["notmiro"] + list(SOURCES.keys())),
     required=True,
     prompt="Which source do you want to reindex?",
     help="Name of the source to reindex, or all to reindex all sources",
@@ -188,13 +190,23 @@ def verify_specific_ids(*, source, specific_ids):
 )
 @click.pass_context
 def start_reindex(ctx, src, dst, mode):
-    if src == "all" and mode == "complete":
+    if src in ["all", "notmiro"]:
+        if mode != "complete":
+            sys.exit("All-source reindexes only support --mode=complete")
+
+        if src == "all":
+            warning_message = (
+                f"Warning: Sending Miro at the same time as everything else "
+                "may result in the erroneous creation of Image records.\nContinue?"
+            )
+            click.confirm(click.style(warning_message, "yellow"), abort=True)
+
         for source in SOURCES.keys():
+            if source == "miro" and src == "notmiro":
+                continue
             ctx.invoke(start_reindex, src=source, dst=dst, mode=mode)
             print("")
-        sys.exit(0)
-    elif src == "all" and mode != "complete":
-        sys.exit("All-source reindexes only support --mode=complete")
+        return
 
     print(f"Starting a reindex {src} ~> {dst}")
 
