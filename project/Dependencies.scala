@@ -253,6 +253,8 @@ object CatalogueDependencies {
       ExternalDependencies.scalacsvDependencies ++
       WellcomeDependencies.jsonLibrary
 
+  val ebscoTransformerDependencies: Seq[ModuleID] = Nil
+
   val metsTransformerDependencies: Seq[ModuleID] =
     ExternalDependencies.apacheCommonsDependencies
 

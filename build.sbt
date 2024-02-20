@@ -225,6 +225,13 @@ lazy val transformer_sierra = setupProject(
   externalDependencies = CatalogueDependencies.sierraTransformerDependencies
 )
 
+lazy val transformer_ebsco = setupProject(
+  project,
+  folder = "pipeline/transformer/transformer_ebsco",
+  localDependencies = Seq(transformer_common),
+  externalDependencies = CatalogueDependencies.ebscoTransformerDependencies
+)
+
 lazy val transformer_mets = setupProject(
   project,
   folder = "pipeline/transformer/transformer_mets",
