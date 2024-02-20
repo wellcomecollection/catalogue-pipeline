@@ -88,7 +88,8 @@ class MetsAdapterWorkerServiceTest
           assertQueueEmpty(dlq)
 
           messageSender.getMessages[Version[String, Int]]() shouldBe Seq(
-            expectedVersion)
+            expectedVersion
+          )
           messageSender.getMessages[MetsSourcePayload] shouldBe Seq(
             MetsSourcePayload(
               id = expectedVersion.id,
@@ -108,7 +109,8 @@ class MetsAdapterWorkerServiceTest
     createTableWithHashKey(
       table,
       keyName = "id",
-      keyType = ScalarAttributeType.S)
+      keyType = ScalarAttributeType.S
+    )
 
   it("can receive the same update twice") {
     // DynamoDB can only handle second-level precision, so if we get a bag that has
@@ -127,44 +129,47 @@ class MetsAdapterWorkerServiceTest
           Future.successful(bag.copy(createdDate = createdDate))
       }
 
-    withLocalDynamoDbTable { table =>
-      val store = new DynamoSingleVersionStore[String, MetsSourceData](
-        createDynamoConfigWith(table)
-      )
+    withLocalDynamoDbTable {
+      table =>
+        val store = new DynamoSingleVersionStore[String, MetsSourceData](
+          createDynamoConfigWith(table)
+        )
 
-      withWorkerService(bagRetrieverWithMilliseconds, store) {
-        case (_, QueuePair(queue, dlq), messageSender) =>
-          sendNotificationToSQS(queue, notification)
+        withWorkerService(bagRetrieverWithMilliseconds, store) {
+          case (_, QueuePair(queue, dlq), messageSender) =>
+            sendNotificationToSQS(queue, notification)
 
-          eventually {
-            assertQueueEmpty(queue)
-            assertQueueEmpty(dlq)
-          }
+            eventually {
+              assertQueueEmpty(queue)
+              assertQueueEmpty(dlq)
+            }
 
-          sendNotificationToSQS(queue, notification)
+            sendNotificationToSQS(queue, notification)
 
-          eventually {
-            assertQueueEmpty(queue)
-            assertQueueEmpty(dlq)
+            eventually {
+              assertQueueEmpty(queue)
+              assertQueueEmpty(dlq)
 
-            messageSender.messages should have size 2
+              messageSender.messages should have size 2
 
-            messageSender
-              .getMessages[Version[String, Int]]()
-              .distinct shouldBe Seq(expectedVersion)
-            messageSender.getMessages[MetsSourcePayload].distinct shouldBe Seq(
-              MetsSourcePayload(
-                id = expectedVersion.id,
-                version = expectedVersion.version,
-                sourceData = expectedDataWithMilliseconds
+              messageSender
+                .getMessages[Version[String, Int]]()
+                .distinct shouldBe Seq(expectedVersion)
+              messageSender
+                .getMessages[MetsSourcePayload]
+                .distinct shouldBe Seq(
+                MetsSourcePayload(
+                  id = expectedVersion.id,
+                  version = expectedVersion.version,
+                  sourceData = expectedDataWithMilliseconds
+                )
               )
-            )
 
-            store.getLatest(id = externalIdentifier) shouldBe Right(
-              Identified(expectedVersion, expectedDataWithMilliseconds)
-            )
-          }
-      }
+              store.getLatest(id = externalIdentifier) shouldBe Right(
+                Identified(expectedVersion, expectedDataWithMilliseconds)
+              )
+            }
+        }
     }
   }
 
@@ -181,7 +186,8 @@ class MetsAdapterWorkerServiceTest
         assertQueueEmpty(dlq)
 
         messageSender.getMessages[Version[String, Int]]() shouldBe Seq(
-          expectedVersion)
+          expectedVersion
+        )
         messageSender.getMessages[MetsSourcePayload]() shouldBe Seq(
           MetsSourcePayload(
             id = expectedVersion.id,
@@ -211,7 +217,8 @@ class MetsAdapterWorkerServiceTest
         }
 
         messageSender.getMessages[Version[String, Int]]() shouldBe Seq(
-          expectedVersion)
+          expectedVersion
+        )
         messageSender.getMessages[MetsSourcePayload] shouldBe Seq(
           MetsSourcePayload(
             id = expectedVersion.id,
@@ -302,7 +309,8 @@ class MetsAdapterWorkerServiceTest
   }
 
   it(
-    "sends message to the dlq if message is not wrapped in NotificationMessage") {
+    "sends message to the dlq if message is not wrapped in NotificationMessage"
+  ) {
     withWorkerService(bagRetriever) {
       case (_, QueuePair(queue, dlq), messageSender) =>
         sendSqsMessage(queue, notification)
@@ -316,26 +324,75 @@ class MetsAdapterWorkerServiceTest
     }
   }
 
-  it("doesn't process the update when storageSpace isn't equal to 'digitised'") {
-    val store = createMetsStore
+  describe("filtering by space") {
+    it("processes updates in the digitised space") {
+      val store = createMetsStore
 
-    val notification = BagRegistrationNotification(
-      space = "something-different",
-      externalIdentifier = "123"
-    )
+      val notification = BagRegistrationNotification(
+        space = "digitised",
+        externalIdentifier = "123"
+      )
 
-    withWorkerService(bagRetriever, store) {
-      case (_, QueuePair(queue, dlq), messageSender) =>
-        sendNotificationToSQS(queue, notification)
+      withWorkerService(bagRetriever, store) {
+        case (_, QueuePair(queue, dlq), messageSender) =>
+          sendNotificationToSQS(queue, notification)
 
-        eventually {
-          assertQueueEmpty(queue)
-          assertQueueEmpty(dlq)
+          eventually {
+            assertQueueEmpty(queue)
+            assertQueueEmpty(dlq)
 
-          messageSender.messages shouldBe empty
+            messageSender.getMessages[Version[String, Int]]() shouldBe Seq(
+              expectedVersion
+            )
+            store.getLatest(id = externalIdentifier) shouldBe a[Right[_, _]]
+          }
+      }
+    }
+    it("processes updates in the born-digital space") {
+      val store = createMetsStore
 
-          store.getLatest(id = externalIdentifier) shouldBe a[Left[_, _]]
-        }
+      val notification = BagRegistrationNotification(
+        space = "born-digital",
+        externalIdentifier = "123"
+      )
+
+      withWorkerService(bagRetriever, store) {
+        case (_, QueuePair(queue, dlq), messageSender) =>
+          sendNotificationToSQS(queue, notification)
+
+          eventually {
+            assertQueueEmpty(queue)
+            assertQueueEmpty(dlq)
+
+            messageSender.getMessages[Version[String, Int]]() shouldBe Seq(
+              expectedVersion
+            )
+            
+            store.getLatest(id = externalIdentifier) shouldBe a[Right[_, _]]
+          }
+      }
+    }
+    it("doesn't process the update when storageSpace is something different") {
+      val store = createMetsStore
+
+      val notification = BagRegistrationNotification(
+        space = "something-different",
+        externalIdentifier = "123"
+      )
+
+      withWorkerService(bagRetriever, store) {
+        case (_, QueuePair(queue, dlq), messageSender) =>
+          sendNotificationToSQS(queue, notification)
+
+          eventually {
+            assertQueueEmpty(queue)
+            assertQueueEmpty(dlq)
+
+            messageSender.messages shouldBe empty
+
+            store.getLatest(id = externalIdentifier) shouldBe a[Left[_, _]]
+          }
+      }
     }
   }
 
@@ -343,8 +400,8 @@ class MetsAdapterWorkerServiceTest
     createMetsStoreWith(entries = Map())
 
   private def createMetsStoreWith(
-    entries: Map[Version[String, Int], MetsSourceData])
-    : MemoryVersionedStore[String, MetsSourceData] =
+    entries: Map[Version[String, Int], MetsSourceData]
+  ): MemoryVersionedStore[String, MetsSourceData] =
     MemoryVersionedStore[String, MetsSourceData](
       initialEntries = entries
     )
@@ -352,24 +409,28 @@ class MetsAdapterWorkerServiceTest
   def withWorkerService[R](
     bagRetriever: BagRetriever,
     metsStore: VersionedStore[String, Int, MetsSourceData] = createMetsStore,
-    messageSender: MemoryMessageSender = new MemoryMessageSender())(
-    testWith: TestWith[(MetsAdapterWorkerService[String],
-                        QueuePair,
-                        MemoryMessageSender),
-                       R]): R =
-    withActorSystem { implicit actorSystem =>
-      withLocalSqsQueuePair(visibilityTimeout = 3 seconds) {
-        case QueuePair(queue, dlq) =>
-          withSQSStream[NotificationMessage, R](queue) { stream =>
-            val workerService = new MetsAdapterWorkerService(
-              msgStream = stream,
-              msgSender = messageSender,
-              bagRetriever = bagRetriever,
-              metsStore = metsStore
-            )
-            workerService.run()
-            testWith((workerService, QueuePair(queue, dlq), messageSender))
-          }
-      }
+    messageSender: MemoryMessageSender = new MemoryMessageSender()
+  )(
+    testWith: TestWith[
+      (MetsAdapterWorkerService[String], QueuePair, MemoryMessageSender),
+      R
+    ]
+  ): R =
+    withActorSystem {
+      implicit actorSystem =>
+        withLocalSqsQueuePair(visibilityTimeout = 3 seconds) {
+          case QueuePair(queue, dlq) =>
+            withSQSStream[NotificationMessage, R](queue) {
+              stream =>
+                val workerService = new MetsAdapterWorkerService(
+                  msgStream = stream,
+                  msgSender = messageSender,
+                  bagRetriever = bagRetriever,
+                  metsStore = metsStore
+                )
+                workerService.run()
+                testWith((workerService, QueuePair(queue, dlq), messageSender))
+            }
+        }
     }
 }
