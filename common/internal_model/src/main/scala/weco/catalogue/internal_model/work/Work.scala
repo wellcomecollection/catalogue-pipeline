@@ -197,7 +197,7 @@ object WorkState {
     sourceIdentifier: SourceIdentifier,
     canonicalId: CanonicalId,
     sourceModifiedTime: Instant,
-    mergeCandidates: List[MergeCandidate[IdState.Identified]] = Nil,
+    mergeCandidates: List[MergeCandidate[IdState.Identified]],
     internalWorkStubs: List[InternalWork.Identified] = Nil,
     relations: Relations = Relations.none
   ) extends WorkState {
