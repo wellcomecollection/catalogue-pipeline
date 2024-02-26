@@ -153,6 +153,7 @@ trait Merger extends MergerLogging {
         sourceIdentifier = source.sourceIdentifier,
         canonicalId = source.state.canonicalId,
         sourceModifiedTime = source.state.sourceModifiedTime,
+        mergeCandidates = source.state.mergeCandidates,
         internalWorkStubs = Nil
       ),
       redirectTarget =
