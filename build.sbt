@@ -211,6 +211,13 @@ lazy val transformer_common = setupProject(
   externalDependencies = CatalogueDependencies.transformerCommonDependencies
 )
 
+lazy val transformer_marc_common = setupProject(
+  project,
+  folder = "pipeline/transformer/transformer_marc_common",
+  localDependencies = Seq(transformer_common),
+  externalDependencies = CatalogueDependencies.transformerMarcCommonDependencies
+)
+
 lazy val transformer_miro = setupProject(
   project,
   folder = "pipeline/transformer/transformer_miro",
@@ -221,7 +228,7 @@ lazy val transformer_miro = setupProject(
 lazy val transformer_sierra = setupProject(
   project,
   folder = "pipeline/transformer/transformer_sierra",
-  localDependencies = Seq(transformer_common),
+  localDependencies = Seq(transformer_common, transformer_marc_common),
   externalDependencies = CatalogueDependencies.sierraTransformerDependencies
 )
 

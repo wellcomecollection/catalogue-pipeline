@@ -3,7 +3,6 @@ package weco.pipeline.transformer.sierra.transformers
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks._
-import weco.pipeline.transformer.sierra.exceptions.ShouldNotTransformException
 import weco.sierra.generators.SierraDataGenerators
 import weco.sierra.models.marc.{Subfield, VarField}
 
@@ -12,7 +11,7 @@ class SierraTitleTest
     with Matchers
     with SierraDataGenerators {
 
-  val titleTestCases = Table(
+  private val titleTestCases = Table(
     ("subfields", "expectedTitle"),
     (
       List(Subfield(tag = "a", content = "[Man smoking at window].")),
@@ -24,7 +23,8 @@ class SierraTitleTest
         Subfield(
           tag = "b",
           content =
-            "official organ of the American Association for Cancer Research, Inc.")
+            "official organ of the American Association for Cancer Research, Inc."
+        )
       ),
       "Cancer research : official organ of the American Association for Cancer Research, Inc."
     ),
@@ -52,7 +52,8 @@ class SierraTitleTest
         Subfield(tag = "n", content = "Embryology /"),
         Subfield(
           tag = "c",
-          content = "edited by Edward Albert Schäfer and George Dancer Thane.")
+          content = "edited by Edward Albert Schäfer and George Dancer Thane."
+        )
       ),
       "Quain's elements of anatomy. Vol. I, Part I, Embryology / edited by Edward Albert Schäfer and George Dancer Thane."
     ),
@@ -63,7 +64,8 @@ class SierraTitleTest
         Subfield(tag = "h", content = "[electronic resource] :"),
         Subfield(
           tag = "b",
-          content = "a Christian perspective on issues in bioethics.")
+          content = "a Christian perspective on issues in bioethics."
+        )
       ),
       "Ethics & medicine : a Christian perspective on issues in bioethics."
     ),
@@ -72,11 +74,12 @@ class SierraTitleTest
       List(
         Subfield(
           tag = "a",
-          content = "Nordic Journal of International Law, The"),
-        Subfield(tag = "h", content = "[electronic resource]."),
+          content = "Nordic Journal of International Law, The"
+        ),
+        Subfield(tag = "h", content = "[electronic resource].")
       ),
       "Nordic Journal of International Law, The"
-    ),
+    )
   )
 
   it("constructs a title from MARC 245") {
@@ -118,10 +121,12 @@ class SierraTitleTest
             Subfield(tag = "a", content = "The Book of common prayer:"),
             Subfield(
               tag = "b",
-              content = "together with the Psalter or Psalms of David,"),
+              content = "together with the Psalter or Psalms of David,"
+            ),
             Subfield(
               tag = "b",
-              content = "and the form and manner of making bishops")
+              content = "and the form and manner of making bishops"
+            )
           )
         )
       )
@@ -132,32 +137,4 @@ class SierraTitleTest
     )
   }
 
-  describe("throws a ShouldNotTransformException if it can't create a title") {
-    it("if there is no MARC field 245") {
-      val bibData = createSierraBibDataWith(
-        varFields = List.empty
-      )
-      val caught = intercept[ShouldNotTransformException] {
-        SierraTitle(bibData)
-      }
-      caught.getMessage should startWith(
-        "Could not find field 245 to create title")
-    }
-
-    it("if there are no subfields a, b or c") {
-      val bibData = createSierraBibDataWith(
-        varFields = List(
-          VarField(
-            marcTag = "245",
-            subfields = List()
-          )
-        )
-      )
-      val caught = intercept[ShouldNotTransformException] {
-        SierraTitle(bibData)
-      }
-      caught.getMessage should startWith(
-        "No subfields in field 245 for constructing the title")
-    }
-  }
 }
