@@ -14,6 +14,10 @@ A reindex operation runs the source data from the [adapters](adapters/README.md)
 
 If you want to perform a reindex, follow the instructions in [REINDEXING.md](../REINDEXING.md).
 
+#### Lambdas
+
+Some information for [working with Python lambdas](./lambdas/README.md).
+
 #### Scripts
 
 Generally small things you might want to do irregularly involving the
