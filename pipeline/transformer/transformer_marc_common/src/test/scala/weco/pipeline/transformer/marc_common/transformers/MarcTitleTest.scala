@@ -98,7 +98,7 @@ class MarcTitleTest extends AnyFunSpec with Matchers {
       ).get shouldBe "cyntaf ail trydydd pedwerydd pumed chweched saithfed"
     }
 
-    it("ignores a trailing 'h' subfield") {
+    it("ignores a trailing h subfield") {
       MarcTitle(
         MarcTestRecord(
           fields = Seq(
@@ -166,6 +166,7 @@ class MarcTitleTest extends AnyFunSpec with Matchers {
         "No subfields in field 245 for constructing the title"
       )
     }
+
     it("throws if the only suitable subfield has tag h") {
       info("although h is a suitable subfield, a trailing h is discarded")
       info("as a result, this is the same as there being no subfields at all")
