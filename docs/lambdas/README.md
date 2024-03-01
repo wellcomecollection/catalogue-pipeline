@@ -91,7 +91,7 @@ aws-azure-login
 # Switch to the correct python version
 pyenv shell 3.6 
 # Build and publish project, specify location of src folder for your project
-AWS_PROFILE=platform-developer ./builds/publish_lambda_zip.py ebsco_adapter/ebsco_adapter
+AWS_PROFILE=platform-developer ./builds/deploy_lambda_zip.sh ebsco_adapter/ebsco_adapter
 ```
 
 ### `./builds/deploy_lambda_zip.sh`
