@@ -7,7 +7,7 @@ provider "aws" {
 
   default_tags {
     tags = {
-      TerraformConfigurationURL = "https://github.com/wellcomecollection/content-api/tree/main/infrastructure"
+      TerraformConfigurationURL = "https://github.com/wellcomecollection/catalogue-pipeline/tree/main/infrastructure"
       Department                = "Digital Platform"
     }
   }
