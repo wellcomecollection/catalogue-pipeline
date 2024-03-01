@@ -1,0 +1,3 @@
+locals {
+  namespace = "ebsco-adapter"
+}
