@@ -37,19 +37,27 @@ object SierraMergeCandidates
   // inconsistencies in the source data that it's easier to handle that here.
   private val uklwPrefixRegex: Regex = """\((?i:UkLW)\)[\s]*(.+)""".r.anchored
 
+  private val ebscoAltLookupRegex: Regex = """^(ebs\d+e)$""".r.anchored
+
   private def getEbscoMergeCandidates(
     bibData: SierraBibData
-  ): List[MergeCandidate[IdState.Identifiable]] = {
-    List(
-      MergeCandidate(
-        identifier = SourceIdentifier(
-          identifierType = IdentifierType.EbscoAltLookup,
-          ontologyType = "Work",
-          value = "ebs12345e"
-        ),
-        reason = "EBSCO/Sierra e-resource"
-      )
-    )
+  ): Option[MergeCandidate[IdState.Identifiable]] = {
+    bibData.nonrepeatableVarfieldWithTag("001")
+      .flatMap(_.content)
+      .flatMap {
+        case ebscoAltLookupRegex(ebscoId) =>
+            Some(
+              MergeCandidate(
+                  identifier = SourceIdentifier(
+                  identifierType = IdentifierType.EbscoAltLookup,
+                  ontologyType = "Work",
+                  value = ebscoId
+                  ),
+                  reason = "EBSCO/Sierra e-resource"
+              )
+            )
+        case _ => None
+    }
   }
 
   /** We can merge a bib and the digitised version of that bib. The number of
