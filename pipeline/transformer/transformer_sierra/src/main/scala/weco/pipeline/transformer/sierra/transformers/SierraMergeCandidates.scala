@@ -43,9 +43,12 @@ object SierraMergeCandidates
   private val ebscoAltLookupRegex: Regex = """^(ebs\d+e)$""".r.anchored
 
   /** We can merge a sierra bib with an EBSCO e-resource record.  The
-    * identifier is stored in the MARC 001 control field. Sierra bibs
-    * with an 001 field that matches the ebscoAltLookupRegex are merge
-    * candidates.
+    * identifier is stored in the MARC 001 control number field. Sierra
+    * bibs with an 001 field that matches the ebscoAltLookupRegex are
+    * merge candidates.
+    *
+    * We perform an extra check that the 003 field is set to "EBZ",
+    * ensuring the control ngumber identifier is for an EBSCO e-resource.
     *
     * This allows us to move to EBSCO e-resource records as the primary
     * source of metadata for e-resources while maintaining redirection
@@ -57,21 +60,30 @@ object SierraMergeCandidates
   private def getEbscoMergeCandidates(
     bibData: SierraBibData
   ): Option[MergeCandidate[IdState.Identifiable]] = {
-    bibData.nonrepeatableVarfieldWithTag("001")
-      .flatMap(_.content)
-      .flatMap {
-        case ebscoAltLookupRegex(ebscoId) =>
+    // EBZ is the control number identifier for EBSCO e-resources
+    val ebzControlNumberIdentifier = bibData.nonrepeatableVarfieldWithTag("003")
+      .flatMap(_.content).exists(_.equals("EBZ"))
+
+    // If the bib has an 003 field with the value "EBZ", we look for an 001 field
+    if (ebzControlNumberIdentifier) {
+      bibData.nonrepeatableVarfieldWithTag("001")
+        .flatMap(_.content)
+        .flatMap {
+          case ebscoAltLookupRegex(ebscoId) =>
             Some(
               MergeCandidate(
-                  identifier = SourceIdentifier(
+                identifier = SourceIdentifier(
                   identifierType = IdentifierType.EbscoAltLookup,
                   ontologyType = "Work",
                   value = ebscoId
-                  ),
-                  reason = "EBSCO/Sierra e-resource"
+                ),
+                reason = "EBSCO/Sierra e-resource"
               )
             )
-        case _ => None
+          case _ => None
+        }
+    } else {
+      None
     }
   }
 

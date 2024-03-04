@@ -298,7 +298,7 @@ class SierraMergeCandidatesTest
 
   describe("EBSCO/Sierra e-resource") {
     it("creates an EBSCO merge candidate from the 001 control number field") {
-      val bibData = bibDataWith001("ebs12345e")
+      val bibData = bibDataWith001And003("ebs12345e", "EBZ")
 
       getMergeCandidates(bibData) should contain theSameElementsAs List(
         MergeCandidate(
@@ -314,21 +314,30 @@ class SierraMergeCandidatesTest
 
     it("only creates an EBSCO merge candidate if the control number matches the expected format") {
       // These are all control numbers that we've seen in Sierra records
-      val bibDataA = bibDataWith001("23734725")
+      val bibDataA = bibDataWith001And003("23734725", "DE-He213")
       getMergeCandidates(bibDataA) should be(empty)
 
-      val bibDataB = bibDataWith001("EPH607A:215")
+      val bibDataB = bibDataWith001And003("EPH607A:215", "DE-He213")
       getMergeCandidates(bibDataB) should be(empty)
 
-      val bibDataC = bibDataWith001("SA/MWF/E")
+      val bibDataC = bibDataWith001And003("SA/MWF/E", "DE-He213")
       getMergeCandidates(bibDataC) should be(empty)
 
-      val bibDataD = bibDataWith001("978-1-4939-0320-7")
+      val bibDataD = bibDataWith001And003("978-1-4939-0320-7", "DE-He213")
       getMergeCandidates(bibDataD) should be(empty)
 
-      // Hypothetical control numbers with the right prefix and suffix, but not the right format
-      val bibDataE = bibDataWith001("ebse")
+      // Hypothetical control numbers
+      val bibDataE = bibDataWith001And003("ebs12345e", "DE-He213")
       getMergeCandidates(bibDataE) should be(empty)
+
+      val bibDataF = bibDataWith001And003("ebse", "EBZ")
+      getMergeCandidates(bibDataF) should be(empty)
+
+      val bibDataG = bibDataWith001And003("12345e", "EBZ")
+      getMergeCandidates(bibDataG) should be(empty)
+
+      val bibDataH = bibDataWith001And003("ebs12345", "EBZ")
+      getMergeCandidates(bibDataH) should be(empty)
     }
   }
 
@@ -405,9 +414,14 @@ class SierraMergeCandidatesTest
     }
   }
 
-  private def bibDataWith001(controlNumber: String) =
+  private def bibDataWith001And003(controlNumber: String, controlNumberIdentifier: String) =
     createSierraBibDataWith(
       varFields = List(
+        VarField(
+          content = Some(controlNumberIdentifier),
+          marcTag = Some("003"),
+          fieldTag = Some("y")
+        ),
         VarField(
           content = Some(controlNumber),
           marcTag = Some("001"),
