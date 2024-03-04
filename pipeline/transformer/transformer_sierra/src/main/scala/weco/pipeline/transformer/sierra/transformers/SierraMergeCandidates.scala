@@ -27,7 +27,7 @@ object SierraMergeCandidates
     get776mergeCandidates(bibId, bibData) ++
       getSinglePageMiroMergeCandidates(bibData) ++ get035CalmMergeCandidates(
         bibData
-      )
+      ) ++ getEbscoMergeCandidates(bibData)
 
   // This regex matches any string starting with (UkLW), followed by
   // any number of spaces, and then captures everything after the
@@ -36,6 +36,21 @@ object SierraMergeCandidates
   // The UkLW match is case insensitive because there are sufficient
   // inconsistencies in the source data that it's easier to handle that here.
   private val uklwPrefixRegex: Regex = """\((?i:UkLW)\)[\s]*(.+)""".r.anchored
+
+  private def getEbscoMergeCandidates(
+    bibData: SierraBibData
+  ): List[MergeCandidate[IdState.Identifiable]] = {
+    List(
+      MergeCandidate(
+        identifier = SourceIdentifier(
+          identifierType = IdentifierType.EbscoAltLookup,
+          ontologyType = "Work",
+          value = "ebs12345e"
+        ),
+        reason = "EBSCO/Sierra e-resource"
+      )
+    )
+  }
 
   /** We can merge a bib and the digitised version of that bib. The number of
     * the other bib comes from MARC tag 776 subfield $w.

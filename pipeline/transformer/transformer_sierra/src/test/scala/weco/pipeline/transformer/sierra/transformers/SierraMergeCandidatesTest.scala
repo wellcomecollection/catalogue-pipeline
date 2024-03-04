@@ -22,7 +22,8 @@ class SierraMergeCandidatesTest
   val miroID = "A0123456"
 
   def getMergeCandidates(
-    bibData: SierraBibData): List[MergeCandidate[IdState.Identifiable]] =
+    bibData: SierraBibData
+  ): List[MergeCandidate[IdState.Identifiable]] =
     SierraMergeCandidates(createSierraBibNumber, bibData)
 
   describe("physical/digital Sierra work") {
@@ -76,12 +77,13 @@ class SierraMergeCandidatesTest
 
     it("checks for the (UkLW) prefix case-insensitively") {
       val casingVariations = List("UkLW", "uklw", "UkLw", "UKLW")
-      val sierraData = casingVariations.map { uklw =>
-        createSierraBibDataWith(
-          varFields = create776subfieldsWith(
-            ids = List(s"($uklw)$mergeCandidateBibNumber")
+      val sierraData = casingVariations.map {
+        uklw =>
+          createSierraBibDataWith(
+            varFields = create776subfieldsWith(
+              ids = List(s"($uklw)$mergeCandidateBibNumber")
+            )
           )
-        )
       }
       val mergeCandidates = sierraData.map(getMergeCandidates)
 
@@ -100,7 +102,8 @@ class SierraMergeCandidatesTest
     }
 
     it(
-      "does not create a merge candidate if there are multiple distinct instances of 776$$w") {
+      "does not create a merge candidate if there are multiple distinct instances of 776$$w"
+    ) {
       val bibData = createSierraBibDataWith(
         varFields = create776subfieldsWith(
           ids = List(s"(UkLW)  $mergeCandidateBibNumber", "(UkLW)b12345678")
@@ -111,13 +114,14 @@ class SierraMergeCandidatesTest
     }
 
     it(
-      "creates a merge candidate if there are multiple 776$$w for the same value") {
+      "creates a merge candidate if there are multiple 776$$w for the same value"
+    ) {
       val bibData = createSierraBibDataWith(
         varFields = create776subfieldsWith(
           ids = List(
             s"(UkLW)  $mergeCandidateBibNumber",
             s"(UkLW)  $mergeCandidateBibNumber",
-            s"(UkLW)$mergeCandidateBibNumber",
+            s"(UkLW)$mergeCandidateBibNumber"
           )
         )
       )
@@ -131,7 +135,7 @@ class SierraMergeCandidatesTest
         varFields = create776subfieldsWith(
           ids = List(
             s"(OCLC)123456789",
-            s"(UkLW)$mergeCandidateBibNumber",
+            s"(UkLW)$mergeCandidateBibNumber"
           )
         )
       )
@@ -145,7 +149,7 @@ class SierraMergeCandidatesTest
         varFields = create776subfieldsWith(
           ids = List(
             s"(UkLW)bxxxxxxxx",
-            s"(UkLW)$mergeCandidateBibNumber",
+            s"(UkLW)$mergeCandidateBibNumber"
           )
         )
       )
@@ -165,7 +169,8 @@ class SierraMergeCandidatesTest
     }
 
     it(
-      "Puts a merge candidate for multiple distinct instances of 962 subfield u") {
+      "Puts a merge candidate for multiple distinct instances of 962 subfield u"
+    ) {
       val bibData = createPictureWithUrls(
         urls = List(
           s"http://wellcomeimages.org/indexplus/image/$miroID.html",
@@ -192,7 +197,8 @@ class SierraMergeCandidatesTest
     it("does not create a merge candidate if the URL is unrecognised") {
       val bibData = createPictureWithUrls(
         urls = List(
-          "http://film.wellcome.ac.uk:15151/mediaplayer.html?fug_7340-1&pw=524ph=600.html")
+          "http://film.wellcome.ac.uk:15151/mediaplayer.html?fug_7340-1&pw=524ph=600.html"
+        )
       )
 
       getMergeCandidates(bibData) shouldBe Nil
@@ -211,23 +217,27 @@ class SierraMergeCandidatesTest
 
     // - - - - - - -  089 fields - - - - - - -
     it(
-      "merges a MIRO ID for a picture with MARC tag 089 subfield a if there is no 962 tag") {
+      "merges a MIRO ID for a picture with MARC tag 089 subfield a if there is no 962 tag"
+    ) {
       val bibData = createPictureWith(
         varFields = create089subfieldsWith(List("V 13889"))
       )
 
       getMergeCandidates(bibData) shouldBe miroMergeCandidate(
-        miroID = "V0013889")
+        miroID = "V0013889"
+      )
     }
 
     it(
-      "merges a MIRO ID for a digital image with MARC tag 089 subfield a if there is no 962 tag") {
+      "merges a MIRO ID for a digital image with MARC tag 089 subfield a if there is no 962 tag"
+    ) {
       val bibData = createDigitalImageWith(
         varFields = create089subfieldsWith(List("V 13889"))
       )
 
       getMergeCandidates(bibData) shouldBe miroMergeCandidate(
-        miroID = "V0013889")
+        miroID = "V0013889"
+      )
     }
 
     it("Merges multiple ids in MARC tag 089") {
@@ -242,9 +252,8 @@ class SierraMergeCandidatesTest
 
     it("Merge from tag 962 as well as 089 tag") {
       val bibData = createPictureWith(
-        varFields =
-          create962subfieldsForWellcomeImageUrl(miroID)
-            ++ create089subfieldsWith(List("V 13889"))
+        varFields = create962subfieldsForWellcomeImageUrl(miroID)
+          ++ create089subfieldsWith(List("V 13889"))
       )
 
       getMergeCandidates(bibData) should contain theSameElementsAs
@@ -252,7 +261,8 @@ class SierraMergeCandidatesTest
     }
 
     it(
-      "overrides non-suffixed Miro IDs with suffixed ones where those are present") {
+      "overrides non-suffixed Miro IDs with suffixed ones where those are present"
+    ) {
       val bibData = createPictureWith(
         varFields = create089subfieldsWith(List("V0036036")) ++
           create962subfieldsForWellcomeImageUrl("V0036036EL")
@@ -268,12 +278,14 @@ class SierraMergeCandidatesTest
           create962subfieldsForWellcomeImageUrl(miroID)
       )
 
-      getMergeCandidates(bibData) should contain theSameElementsAs miroMergeCandidate(
-        miroID)
+      getMergeCandidates(
+        bibData
+      ) should contain theSameElementsAs miroMergeCandidate(miroID)
     }
 
     it(
-      "retains non-suffixed Miro IDs when there is no matching suffixed ID present") {
+      "retains non-suffixed Miro IDs when there is no matching suffixed ID present"
+    ) {
       val bibData = createPictureWith(
         varFields = create089subfieldsWith(List("V0036036")) ++
           create962subfieldsForWellcomeImageUrl("V0012345EBR")
@@ -284,9 +296,27 @@ class SierraMergeCandidatesTest
     }
   }
 
+  describe("EBSCO/Sierra e-resource") {
+    it("creates an EBSCO merge candidate from the 001 control number field") {
+      val bibData = bibDataWith001("ebs12345e")
+
+      getMergeCandidates(bibData) should contain theSameElementsAs List(
+        MergeCandidate(
+          identifier = SourceIdentifier(
+            identifierType = IdentifierType.EbscoAltLookup,
+            ontologyType = "Work",
+            value = "ebs12345e"
+          ),
+          reason = "EBSCO/Sierra e-resource"
+        )
+      )
+    }
+  }
+
   describe("physical/digital and single-page merges across works") {
     it(
-      "creates merge candidates for both physical/digital Sierra works and Miro works") {
+      "creates merge candidates for both physical/digital Sierra works and Miro works"
+    ) {
       val varFields =
         create776subfieldsWith(ids = List(s"(UkLW)$mergeCandidateBibNumber")) ++
           create962subfieldsForWellcomeImageUrl(miroID)
@@ -316,7 +346,8 @@ class SierraMergeCandidatesTest
       val bibData = bibDataWith035(List(calmId))
 
       getMergeCandidates(bibData) shouldBe List(
-        createCalmMergeCandidate(calmId))
+        createCalmMergeCandidate(calmId)
+      )
     }
     it("adds multiple Calm IDs as mergeCandidates") {
       val calmIds = (1 to 5).map(_ => randomUUID.toString)
@@ -332,7 +363,8 @@ class SierraMergeCandidatesTest
       getMergeCandidates(bibData) shouldBe calmIds.map(createCalmMergeCandidate)
     }
     it(
-      "creates calm merge candidates if it has a mix of calm and non calm identifiers") {
+      "creates calm merge candidates if it has a mix of calm and non calm identifiers"
+    ) {
       val calmIds = (1 to 5).map(_ => randomUUID.toString)
       val otherIds = (1 to 5).map(_.toString)
       val bibData = bibDataWith035(otherIds ++ calmIds)
@@ -354,13 +386,26 @@ class SierraMergeCandidatesTest
     }
   }
 
+  private def bibDataWith001(controlNumber: String) =
+    createSierraBibDataWith(
+      varFields = List(
+        VarField(
+          content = Some(controlNumber),
+          marcTag = Some("001"),
+          fieldTag = Some("o")
+        )
+      )
+    )
+
   private def bibDataWith035(calmIds: Seq[String]) =
     createSierraBibDataWith(
       varFields = List(
         VarField(
           marcTag = "035",
           subfields = calmIds.map(Subfield("a", _)).toList
-        )))
+        )
+      )
+    )
 
   private def createCalmMergeCandidate(calmId: String) = MergeCandidate(
     identifier = SourceIdentifier(
@@ -380,8 +425,10 @@ class SierraMergeCandidatesTest
   private def createDigitalImageWith(varFields: List[VarField]): SierraBibData =
     createBibDataWith(varFields = varFields, materialTypeCode = 'q')
 
-  private def createBibDataWith(varFields: List[VarField],
-                                materialTypeCode: Char) = {
+  private def createBibDataWith(
+    varFields: List[VarField],
+    materialTypeCode: Char
+  ) = {
     createSierraBibDataWith(
       materialType = Some(SierraMaterialType(code = materialTypeCode.toString)),
       varFields = varFields
@@ -389,23 +436,25 @@ class SierraMergeCandidatesTest
   }
 
   private def create776subfieldsWith(ids: List[String]): List[VarField] =
-    ids.map { idString =>
-      VarField(
-        marcTag = "776",
-        subfields = List(
-          Subfield(tag = "w", content = idString)
+    ids.map {
+      idString =>
+        VarField(
+          marcTag = "776",
+          subfields = List(
+            Subfield(tag = "w", content = idString)
+          )
         )
-      )
     }
 
   private def create962subfieldsWith(urls: List[String]): List[VarField] =
-    urls.map { url =>
-      VarField(
-        marcTag = "962",
-        subfields = List(
-          Subfield(tag = "u", content = url)
+    urls.map {
+      url =>
+        VarField(
+          marcTag = "962",
+          subfields = List(
+            Subfield(tag = "u", content = url)
+          )
         )
-      )
     }
 
   private def create962subfieldsForWellcomeImageUrl(miroId: String) =
@@ -414,17 +463,19 @@ class SierraMergeCandidatesTest
     )
 
   private def create089subfieldsWith(miroIds: List[String]): List[VarField] =
-    miroIds.map { miroId =>
-      VarField(
-        marcTag = "089",
-        subfields = List(
-          Subfield(tag = "a", content = miroId)
+    miroIds.map {
+      miroId =>
+        VarField(
+          marcTag = "089",
+          subfields = List(
+            Subfield(tag = "a", content = miroId)
+          )
         )
-      )
     }
 
   private def physicalAndDigitalSierraMergeCandidate(
-    bibNumber: String): List[MergeCandidate[IdState.Identifiable]] =
+    bibNumber: String
+  ): List[MergeCandidate[IdState.Identifiable]] =
     List(
       MergeCandidate(
         identifier = SourceIdentifier(
@@ -436,9 +487,10 @@ class SierraMergeCandidatesTest
       )
     )
 
-  private def miroMergeCandidate(miroID: String,
-                                 reason: String = "Miro/Sierra work")
-    : List[MergeCandidate[IdState.Identifiable]] =
+  private def miroMergeCandidate(
+    miroID: String,
+    reason: String = "Miro/Sierra work"
+  ): List[MergeCandidate[IdState.Identifiable]] =
     List(
       MergeCandidate(
         identifier = SourceIdentifier(
