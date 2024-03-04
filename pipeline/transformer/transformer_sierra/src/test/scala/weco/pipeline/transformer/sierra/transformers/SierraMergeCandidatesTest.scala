@@ -311,6 +311,25 @@ class SierraMergeCandidatesTest
         )
       )
     }
+
+    it("only creates an EBSCO merge candidate if the control number matches the expected format") {
+      // These are all control numbers that we've seen in Sierra records
+      val bibDataA = bibDataWith001("23734725")
+      getMergeCandidates(bibDataA) should be(empty)
+
+      val bibDataB = bibDataWith001("EPH607A:215")
+      getMergeCandidates(bibDataB) should be(empty)
+
+      val bibDataC = bibDataWith001("SA/MWF/E")
+      getMergeCandidates(bibDataC) should be(empty)
+
+      val bibDataD = bibDataWith001("978-1-4939-0320-7")
+      getMergeCandidates(bibDataD) should be(empty)
+
+      // Hypothetical control numbers with the right prefix and suffix, but not the right format
+      val bibDataE = bibDataWith001("ebse")
+      getMergeCandidates(bibDataE) should be(empty)
+    }
   }
 
   describe("physical/digital and single-page merges across works") {

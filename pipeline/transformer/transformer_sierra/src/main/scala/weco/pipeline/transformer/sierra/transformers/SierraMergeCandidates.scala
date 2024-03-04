@@ -37,8 +37,23 @@ object SierraMergeCandidates
   // inconsistencies in the source data that it's easier to handle that here.
   private val uklwPrefixRegex: Regex = """\((?i:UkLW)\)[\s]*(.+)""".r.anchored
 
+  // This regex matches any string starting with (ebs), followed by any
+  // number of digits, and then ending with (e), which seems to be the
+  // pattern for EBSCO alt lookup identifiers.
   private val ebscoAltLookupRegex: Regex = """^(ebs\d+e)$""".r.anchored
 
+  /** We can merge a sierra bib with an EBSCO e-resource record.  The
+    * identifier is stored in the MARC 001 control field. Sierra bibs
+    * with an 001 field that matches the ebscoAltLookupRegex are merge
+    * candidates.
+    *
+    * This allows us to move to EBSCO e-resource records as the primary
+    * source of metadata for e-resources while maintaining redirection
+    * from the original work identifiers generated from Sierra records.
+    *
+    * If the identifier matches the ebscoAltLookupRegex, we use the control
+    * field value as a merge candidate.
+    */
   private def getEbscoMergeCandidates(
     bibData: SierraBibData
   ): Option[MergeCandidate[IdState.Identifiable]] = {
