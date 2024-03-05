@@ -1,19 +1,20 @@
-package weco.pipeline.transformer.sierra.transformers
+package weco.pipeline.transformer.marc_common.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.work._
-import weco.pipeline.transformer.marc_common.transformers.MarcNotes
-import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
-import weco.sierra.models.data.SierraBibData
-import weco.sierra.models.fields.SierraMaterialType
-import weco.sierra.models.marc.{Subfield, VarField}
+import weco.catalogue.internal_model.work.{Note, NoteType}
+import weco.pipeline.transformer.marc_common.generators.MarcTestRecord
+import weco.pipeline.transformer.marc_common.models.{MarcField, MarcSubfield}
 
-class SierraNotesTest
-    extends AnyFunSpec
-    with Matchers
-    with MarcGenerators
-    with SierraDataGenerators {
+class MarcNotesTest extends AnyFunSpec with Matchers {
+  private def recordWithNotes(notes: Seq[(String, Note)]): MarcTestRecord =
+    MarcTestRecord(fields = notes.map {
+      case (tag, note) =>
+        MarcField(
+          marcTag = tag,
+          subfields = Seq(MarcSubfield(tag = "a", content = note.contents))
+        )
+    })
 
   it("extracts notes from all fields") {
     val notes = List(
@@ -122,7 +123,7 @@ class SierraNotesTest
       ),
       "593" -> Note(contents = "copyright b", noteType = NoteType.CopyrightNote)
     )
-    SierraNotes(bibData(notes)) shouldBe notes.map(_._2)
+    MarcNotes(recordWithNotes(notes)) shouldBe notes.map(_._2)
   }
 
   it("extracts all notes when duplicate fields") {
@@ -130,40 +131,46 @@ class SierraNotesTest
       "500" -> Note(contents = "note a", noteType = NoteType.GeneralNote),
       "500" -> Note(contents = "note b", noteType = NoteType.GeneralNote)
     )
-    SierraNotes(bibData(notes)) shouldBe notes.map(_._2)
+    MarcNotes(recordWithNotes(notes)) shouldBe notes.map(_._2)
   }
 
   it("does not extract notes from non-note fields") {
-    val notes = List(
+    val fields = List(
       "100" -> "not a note",
       "530" -> "not a note"
     )
-    SierraNotes(bibData(notes: _*)) shouldBe Nil
+    MarcNotes(MarcTestRecord(fields = fields map {
+      case (tag, content) =>
+        MarcField(
+          marcTag = tag,
+          subfields = Seq(MarcSubfield(tag = "a", content = content))
+        )
+    })) shouldBe Nil
   }
 
   it("preserves HTML in notes fields") {
     val notes = List(
       "500" -> Note(contents = "<p>note</p>", noteType = NoteType.GeneralNote)
     )
-    SierraNotes(bibData(notes)) shouldBe notes.map(_._2)
+    MarcNotes(recordWithNotes(notes)) shouldBe notes.map(_._2)
   }
 
   it(
     "concatenate all the subfields on a single MARC field into a single note"
   ) {
-    val bibData = createSierraBibDataWith(
-      varFields = List(
-        VarField(
+    val recordWithNotes = MarcTestRecord(
+      fields = List(
+        MarcField(
           marcTag = "500",
           subfields = List(
-            Subfield(tag = "a", content = "1st part."),
-            Subfield(tag = "b", content = "2nd part."),
-            Subfield(tag = "c", content = "3rd part.")
+            MarcSubfield(tag = "a", content = "1st part."),
+            MarcSubfield(tag = "b", content = "2nd part."),
+            MarcSubfield(tag = "c", content = "3rd part.")
           )
         )
       )
     )
-    SierraNotes(bibData) shouldBe List(
+    MarcNotes(recordWithNotes) shouldBe List(
       Note(
         contents = "1st part. 2nd part. 3rd part.",
         noteType = NoteType.GeneralNote
@@ -176,28 +183,29 @@ class SierraNotesTest
       "500" -> Note(contents = "1st note.", noteType = NoteType.GeneralNote),
       "500" -> Note(contents = "2nd note.", noteType = NoteType.GeneralNote)
     )
-    SierraNotes(bibData(notes)) shouldBe notes.map(_._2)
+    MarcNotes(recordWithNotes(notes)) shouldBe notes.map(_._2)
   }
 
   it("distinguishes based on the first indicator of 535") {
-    val bibData = createSierraBibDataWith(
-      varFields = List(
-        createVarFieldWith(
+    val recordWithNotes = MarcTestRecord(
+      fields = List(
+        MarcField(
           marcTag = "535",
-          indicator1 = Some("1"),
+          indicator1 = "1",
           subfields =
-            List(Subfield(tag = "a", content = "The originals are in Oman"))
+            List(MarcSubfield(tag = "a", content = "The originals are in Oman"))
         ),
-        createVarFieldWith(
+        MarcField(
           marcTag = "535",
-          indicator1 = Some("2"),
-          subfields =
-            List(Subfield(tag = "a", content = "The duplicates are in Denmark"))
+          indicator1 = "2",
+          subfields = List(
+            MarcSubfield(tag = "a", content = "The duplicates are in Denmark")
+          )
         )
       )
     )
 
-    SierraNotes(bibData) shouldBe List(
+    MarcNotes(recordWithNotes) shouldBe List(
       Note(
         contents = "The originals are in Oman",
         noteType = NoteType.LocationOfOriginalNote
@@ -210,33 +218,32 @@ class SierraNotesTest
   }
 
   it("only gets an ownership note if 561 1st indicator is 1") {
-    val bibData = createSierraBibDataWith(
-      varFields = List(
-        VarField(
-          marcTag = Some("561"),
-          indicator1 = Some("1"),
+    val recordWithNotes = MarcTestRecord(
+      fields = List(
+        MarcField(
+          marcTag = "561",
+          indicator1 = "1",
           subfields = List(
-            Subfield(
+            MarcSubfield(
               tag = "a",
               content = "Provenance: one plate in the set of plates"
             )
           )
         ),
-        VarField(
-          marcTag = Some("561"),
-          indicator1 = Some("0"),
+        MarcField(
+          marcTag = "561",
+          indicator1 = "0",
           subfields = List(
-            Subfield(
+            MarcSubfield(
               tag = "a",
               content = "Purchased from John Smith on 01/01/2001"
             )
           )
         ),
-        VarField(
-          marcTag = Some("561"),
-          indicator1 = None,
+        MarcField(
+          marcTag = "561",
           subfields = List(
-            Subfield(
+            MarcSubfield(
               tag = "a",
               content = "Private contact details for John Smith"
             )
@@ -244,7 +251,7 @@ class SierraNotesTest
         )
       )
     )
-    SierraNotes(bibData) shouldBe List(
+    MarcNotes(recordWithNotes) shouldBe List(
       Note(
         contents = "Provenance: one plate in the set of plates",
         noteType = NoteType.OwnershipNote
@@ -252,51 +259,58 @@ class SierraNotesTest
     )
   }
 
-  it("suppresses subfield ǂ5 universally") {
-    val varFields = MarcNotes.notesFields.keys.map(
+  it("suppresses MarcSubfield ǂ5 universally") {
+    val notesFields = MarcNotes.notesFields.keys.map(
       key => {
-        VarField(
+        MarcField(
           marcTag = key,
           subfields = List(
-            Subfield(tag = "a", content = "Main bit."),
-            Subfield(tag = "5", content = "UkLW")
+            MarcSubfield(tag = "a", content = "Main bit."),
+            MarcSubfield(tag = "5", content = "UkLW")
           )
         )
       }
     )
-
-    val bibDataWithSubfield5 = createSierraBibDataWith(
-      varFields = varFields.toList
+    val recordWithNotes = MarcTestRecord(
+      fields = notesFields.toList
     )
 
-    val bibDataWithoutSubfield5 = createSierraBibDataWith(
-      varFields = varFields.toList
-    )
+    val notes = MarcNotes.notesFields.values
+      .map(
+        createNote =>
+          createNote(
+            MarcField(
+              marcTag = "000",
+              subfields = List(
+                MarcSubfield(tag = "a", content = "Main bit.")
+              )
+            )
+          )
+      )
+      .toList
 
-    SierraNotes(
-      bibDataWithSubfield5
-    ) should contain theSameElementsAs SierraNotes(bibDataWithoutSubfield5)
+    MarcNotes(recordWithNotes) should contain theSameElementsAs notes
   }
 
-  it("skips 591 subfield ǂ9 (barcode)") {
-    val varFields = List(
-      VarField(
+  it("skips 591 MarcSubfield ǂ9 (barcode)") {
+    val fields = List(
+      MarcField(
         marcTag = "591",
         subfields = List(
-          Subfield(tag = "z", content = "Copy 1."),
-          Subfield(
+          MarcSubfield(tag = "z", content = "Copy 1."),
+          MarcSubfield(
             tag = "e",
             content =
               "Note: The author's presentation inscription on verso of 2nd leaf."
           ),
-          Subfield(tag = "9", content = "X8253")
+          MarcSubfield(tag = "9", content = "X8253")
         )
       )
     )
 
-    val bibData = createSierraBibDataWith(varFields = varFields)
+    val recordWithNotes = MarcTestRecord(fields = fields)
 
-    SierraNotes(bibData) should contain theSameElementsAs List(
+    MarcNotes(recordWithNotes) should contain theSameElementsAs List(
       Note(
         contents =
           "Copy 1. Note: The author's presentation inscription on verso of 2nd leaf.",
@@ -306,78 +320,80 @@ class SierraNotesTest
   }
 
   it("skips notes which are just whitespace") {
-    val varFields =
+    val fields =
       List("\u00a0", "", "\t\n").map {
         content =>
-          VarField(
+          MarcField(
             marcTag = "535",
             subfields = List(
-              Subfield(tag = "a", content = content)
+              MarcSubfield(tag = "a", content = content)
             )
           )
       }
 
-    val bibData = createSierraBibDataWith(varFields = varFields)
+    val recordWithNotes = MarcTestRecord(fields)
 
-    SierraNotes(bibData) shouldBe empty
+    MarcNotes(recordWithNotes) shouldBe empty
   }
 
-  it("creates a clickable link for subfield ǂu") {
+  it("creates a clickable link for MarcSubfield ǂu") {
     // This example is taken from b30173140
-    val varFields = List(
-      VarField(
+    val fields = List(
+      MarcField(
         marcTag = "540",
         subfields = List(
-          Subfield(
+          MarcSubfield(
             tag = "a",
             content =
               "The National Library of Medicine believes this item to be in the public domain."
           ),
-          Subfield(
+          MarcSubfield(
             tag = "u",
             content = "https://creativecommons.org/publicdomain/mark/1.0/"
           ),
-          Subfield(tag = "5", content = "DNLM")
+          MarcSubfield(tag = "5", content = "DNLM")
         )
       )
     )
 
-    val bibData = createSierraBibDataWith(varFields = varFields)
+    val recordWithNotes = MarcTestRecord(fields = fields)
 
-    SierraNotes(bibData).map(_.contents) shouldBe List(
+    MarcNotes(recordWithNotes).map(_.contents) shouldBe List(
       "The National Library of Medicine believes this item to be in the public domain. <a href=\"https://creativecommons.org/publicdomain/mark/1.0/\">https://creativecommons.org/publicdomain/mark/1.0/</a>"
     )
   }
 
-  it("doesn't create a clickable link if subfield ǂu doesn't look like a URL") {
-    val varFields = List(
-      VarField(
+  it(
+    "doesn't create a clickable link if MarcSubfield ǂu doesn't look like a URL"
+  ) {
+    val fields = List(
+      MarcField(
         marcTag = "540",
         subfields = List(
-          Subfield(
+          MarcSubfield(
             tag = "a",
             content =
               "The National Library of Medicine believes this item to be in the public domain."
           ),
-          Subfield(tag = "u", content = "CC-0 license")
+          MarcSubfield(tag = "u", content = "CC-0 license")
         )
       )
     )
 
-    val bibData = createSierraBibDataWith(varFields = varFields)
+    val recordWithNotes = MarcTestRecord(fields)
 
-    SierraNotes(bibData).map(_.contents) shouldBe List(
+    MarcNotes(recordWithNotes).map(_.contents) shouldBe List(
       "The National Library of Medicine believes this item to be in the public domain. CC-0 license"
     )
   }
 
-  it("strips whitespace from the subfield ǂu") {
+  it("strips whitespace from the MarcSubfield ǂu") {
     // This example is based on b33032440
-    val varFields = List(
-      VarField(
+    val fields = List(
+      MarcField(
         marcTag = "540",
         subfields = List(
-          Subfield(
+          MarcSubfield(
             tag = "u",
             content = "https://wellcomecollection.org/works/a65fex5m "
           )
@@ -385,9 +401,9 @@ class SierraNotesTest
       )
     )
 
-    val bibData = createSierraBibDataWith(varFields = varFields)
+    val recordWithNotes = MarcTestRecord(fields)
 
-    SierraNotes(bibData).map(_.contents) shouldBe List(
+    MarcNotes(recordWithNotes).map(_.contents) shouldBe List(
       "<a href=\"https://wellcomecollection.org/works/a65fex5m\">https://wellcomecollection.org/works/a65fex5m</a>"
     )
   }
@@ -395,19 +411,20 @@ class SierraNotesTest
   describe("related material in MARC field 787") {
     it("gets a related material note from 787") {
       // This example is based on b33032440
-      val varFields = List(
-        VarField(
+      val fields = List(
+        MarcField(
           marcTag = "787",
           subfields = List(
-            Subfield(tag = "t", content = "Daily telegraph."),
-            Subfield(tag = "g", content = "1989")
+            MarcSubfield(tag = "t", content = "Daily telegraph."),
+            MarcSubfield(tag = "g", content = "1989")
           )
         )
       )
 
-      val bibData = createSierraBibDataWith(varFields = varFields)
+      val recordWithNotes =
+        MarcTestRecord(fields)
 
-      SierraNotes(bibData) shouldBe List(
+      MarcNotes(recordWithNotes) shouldBe List(
         Note(
           contents = "Daily telegraph. 1989",
           noteType = NoteType.RelatedMaterial
@@ -417,20 +434,21 @@ class SierraNotesTest
 
     it("creates a search link for b-numbers in ǂw") {
       // This example is based on b33039136
-      val varFields = List(
-        VarField(
+      val fields = List(
+        MarcField(
           marcTag = "787",
           subfields = List(
-            Subfield(tag = "i", content = "Complemented by (work):"),
-            Subfield(tag = "t", content = "Depression ain't the sads."),
-            Subfield(tag = "w", content = "(UkLW)b33039112")
+            MarcSubfield(tag = "i", content = "Complemented by (work):"),
+            MarcSubfield(tag = "t", content = "Depression ain't the sads."),
+            MarcSubfield(tag = "w", content = "(UkLW)b33039112")
           )
         )
       )
 
-      val bibData = createSierraBibDataWith(varFields = varFields)
+      val recordWithNotes =
+        MarcTestRecord(fields)
 
-      SierraNotes(bibData) shouldBe List(
+      MarcNotes(recordWithNotes) shouldBe List(
         Note(
           contents =
             "Complemented by (work): Depression ain't the sads. (<a href=\"https://wellcomecollection.org/search/works?query=b33039112\">b33039112</a>)",
@@ -441,20 +459,24 @@ class SierraNotesTest
 
     it("doesn't create a search link if ǂw isn't a b number") {
       // This example is based on b15900976
-      val varFields = List(
-        VarField(
+      val fields = List(
+        MarcField(
           marcTag = "787",
           subfields = List(
-            Subfield(tag = "s", content = "Times (London, England :  1788)."),
-            Subfield(tag = "g", content = "May 27, 2004."),
-            Subfield(tag = "w", content = "(OCoLC)6967919")
+            MarcSubfield(
+              tag = "s",
+              content = "Times (London, England :  1788)."
+            ),
+            MarcSubfield(tag = "g", content = "May 27, 2004."),
+            MarcSubfield(tag = "w", content = "(OCoLC)6967919")
           )
         )
       )
 
-      val bibData = createSierraBibDataWith(varFields = varFields)
+      val recordWithNotes =
+        MarcTestRecord(fields)
 
-      SierraNotes(bibData) shouldBe List(
+      MarcNotes(recordWithNotes) shouldBe List(
         Note(
           contents =
             "Times (London, England :  1788). May 27, 2004. (OCoLC)6967919",
@@ -467,24 +489,24 @@ class SierraNotesTest
   describe("lettering note") {
     it("doesn't create a note from 246 .6 ǂa or 514 for visual material") {
       // This is based on b16529888
-      val bibData = createSierraBibDataWith(
-        materialType = Some(SierraMaterialType("k")),
-        varFields = List(
-          VarField(
+      val recordWithNotes = MarcTestRecord(
+        materialTypeId = Some("k"),
+        fields = List(
+          MarcField(
             marcTag = "514",
             subfields = List(
-              Subfield(
+              MarcSubfield(
                 tag = "a",
                 content =
                   "Lettering continues: Comment va  le malade? H\\u00e9las Monsieur, il est mort ce matin \\u00e0 six heures! Ah il est mort le gaillard! .. Il n'a donc pas pris ma potion? Si Monsieur. Il en a donc trop pris? Non Monsieur. C'est qu'il n'en a assez pris. H.D."
               )
             )
           ),
-          VarField(
-            marcTag = Some("246"),
-            indicator2 = Some("6"),
+          MarcField(
+            marcTag = "246",
+            indicator2 = "6",
             subfields = List(
-              Subfield(
+              MarcSubfield(
                 tag = "a",
                 content = "Le m\u00e9decin et la garde malade. H.D. ..."
               )
@@ -493,28 +515,28 @@ class SierraNotesTest
         )
       )
 
-      SierraNotes(bibData) shouldBe empty
+      MarcNotes(recordWithNotes) shouldBe empty
     }
 
     it("uses 514 for non-visual material") {
-      val bibData = createSierraBibDataWith(
-        materialType = Some(SierraMaterialType("not-k")),
-        varFields = List(
-          VarField(
+      val recordWithNotes = MarcTestRecord(
+        materialTypeId = Some("not-k"),
+        fields = List(
+          MarcField(
             marcTag = "514",
             subfields = List(
-              Subfield(
+              MarcSubfield(
                 tag = "a",
                 content =
                   "Lettering continues: Comment va  le malade? H\\u00e9las Monsieur, il est mort ce matin \\u00e0 six heures! Ah il est mort le gaillard! .. Il n'a donc pas pris ma potion? Si Monsieur. Il en a donc trop pris? Non Monsieur. C'est qu'il n'en a assez pris. H.D."
               )
             )
           ),
-          VarField(
-            marcTag = Some("246"),
-            indicator2 = Some("6"),
+          MarcField(
+            marcTag = "246",
+            indicator2 = "6",
             subfields = List(
-              Subfield(
+              MarcSubfield(
                 tag = "a",
                 content = "Le m\u00e9decin et la garde malade. H.D. ..."
               )
@@ -523,7 +545,7 @@ class SierraNotesTest
         )
       )
 
-      SierraNotes(bibData) shouldBe List(
+      MarcNotes(recordWithNotes) shouldBe List(
         Note(
           noteType = NoteType.LetteringNote,
           contents =
@@ -533,17 +555,4 @@ class SierraNotesTest
     }
   }
 
-  def bibData(contents: List[(String, Note)]): SierraBibData =
-    bibData(contents.map { case (tag, note) => (tag, note.contents) }: _*)
-
-  def bibData(contents: (String, String)*): SierraBibData =
-    createSierraBibDataWith(
-      varFields = contents.toList.map {
-        case (tag, content) =>
-          VarField(
-            marcTag = tag,
-            subfields = List(Subfield(tag = "a", content = content))
-          )
-      }
-    )
 }
