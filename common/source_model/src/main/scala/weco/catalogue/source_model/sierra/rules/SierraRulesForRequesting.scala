@@ -34,8 +34,8 @@ import weco.sierra.models.data.SierraItemData
   *   - Variable length fields on items
   *     https://documentation.iii.com/sierrahelp/Content/sril/sril_records_varfld_types_item.html
   *
-  * This was last checked against Sierra based on a set of rules sent from Liz
-  * Richens on 31 January 2022.
+  * This was last checked against Sierra based on a set of rules provided by
+  * Natalie Pollecutt on 8th February 2024
   */
 object SierraRulesForRequesting {
   def apply(itemData: SierraItemData): RulesForRequestingResult =
@@ -50,6 +50,7 @@ object SierraRulesForRequesting {
       //    q|i||88||=|z||
       //    q|i||88||=|v||This item is with conservation.
       //    q|i||88||=|h||This item is closed.
+      //    q|i||88||=|g||Safeguarded item.
       //
       // These rules mean "if fixed field 88 on the item has a given value,
       // show this message".
@@ -67,6 +68,8 @@ object SierraRulesForRequesting {
         NotRequestable.AtConservation("This item is with conservation.")
       case i if i.fixedField("88").contains("h") =>
         NotRequestable.ItemClosed("This item is closed.")
+      case i if i.fixedField("88").contains("g") =>
+        NotRequestable.SafeguardedItem("Safeguarded item.")
 
       // These cases cover the lines:
       //

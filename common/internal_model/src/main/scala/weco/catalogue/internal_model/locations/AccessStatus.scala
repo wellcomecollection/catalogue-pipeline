@@ -47,7 +47,7 @@ object AccessStatus extends Enum[AccessStatus] {
   // Wellcome Collection's Access Policy.
   // See https://wellcomecollection.org/pages/Wvmu3yAAAIUQ4C7F#access-policy
   //
-  // This is based on §12 Research access, as retrieved 8 February 2021
+  // This is based on §12 Research access, as retrieved 5 March 2024
   //
   case object Open extends AccessStatus {
     override val id: String = "open"
@@ -62,6 +62,11 @@ object AccessStatus extends Enum[AccessStatus] {
   case object Restricted extends AccessStatus {
     override val id: String = "restricted"
     override val label: String = "Restricted"
+  }
+
+  case object Safeguarded extends AccessStatus {
+    override val id: String = "safeguarded"
+    override val label: String = "Safeguarded"
   }
 
   case object ByAppointment extends AccessStatus {
