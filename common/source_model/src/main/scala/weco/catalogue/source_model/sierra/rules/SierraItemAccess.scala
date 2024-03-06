@@ -276,7 +276,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           note = Some(message)
         )
 
-        //
+      //
       case (
             _,
             Some(Status.Safeguarded),
