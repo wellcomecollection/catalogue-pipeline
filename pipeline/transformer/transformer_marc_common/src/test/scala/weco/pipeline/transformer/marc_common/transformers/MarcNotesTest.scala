@@ -376,7 +376,7 @@ class MarcNotesTest extends AnyFunSpec with Matchers {
     val recordWithNotes = MarcTestRecord(fields)
 
     MarcNotes(recordWithNotes).map(_.contents) shouldBe List(
-      "<a href=\"https://wellcomecollection.org/works/a65fex5m\">https://wellcomecollection.org/works/a65fex5m</a>"
+      "<a href=\"https://example.com/works/a65fex5m\">https://example.com/works/a65fex5m</a>"
     )
   }
 }
