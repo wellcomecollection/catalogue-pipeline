@@ -253,7 +253,8 @@ class SierraNotesTest
   }
 
   it("suppresses subfield ǂ5 universally") {
-    val varFields = MarcNotes.notesFields.keys.map(
+    // TODO: this should be driven from a list in here, rather than the SUT.
+    val varFieldsWith5 = MarcNotes.notesFields.keys.map(
       key => {
         VarField(
           marcTag = key,
@@ -265,12 +266,23 @@ class SierraNotesTest
       }
     )
 
+    val varFieldsWithout5 = MarcNotes.notesFields.keys.map(
+      key => {
+        VarField(
+          marcTag = key,
+          subfields = List(
+            Subfield(tag = "a", content = "Main bit.")
+          )
+        )
+      }
+    )
+
     val bibDataWithSubfield5 = createSierraBibDataWith(
-      varFields = varFields.toList
+      varFields = varFieldsWith5.toList
     )
 
     val bibDataWithoutSubfield5 = createSierraBibDataWith(
-      varFields = varFields.toList
+      varFields = varFieldsWithout5.toList
     )
 
     SierraNotes(
@@ -302,93 +314,6 @@ class SierraNotesTest
           "Copy 1. Note: The author's presentation inscription on verso of 2nd leaf.",
         noteType = NoteType.GeneralNote
       )
-    )
-  }
-
-  it("skips notes which are just whitespace") {
-    val varFields =
-      List("\u00a0", "", "\t\n").map {
-        content =>
-          VarField(
-            marcTag = "535",
-            subfields = List(
-              Subfield(tag = "a", content = content)
-            )
-          )
-      }
-
-    val bibData = createSierraBibDataWith(varFields = varFields)
-
-    SierraNotes(bibData) shouldBe empty
-  }
-
-  it("creates a clickable link for subfield ǂu") {
-    // This example is taken from b30173140
-    val varFields = List(
-      VarField(
-        marcTag = "540",
-        subfields = List(
-          Subfield(
-            tag = "a",
-            content =
-              "The National Library of Medicine believes this item to be in the public domain."
-          ),
-          Subfield(
-            tag = "u",
-            content = "https://creativecommons.org/publicdomain/mark/1.0/"
-          ),
-          Subfield(tag = "5", content = "DNLM")
-        )
-      )
-    )
-
-    val bibData = createSierraBibDataWith(varFields = varFields)
-
-    SierraNotes(bibData).map(_.contents) shouldBe List(
-      "The National Library of Medicine believes this item to be in the public domain. <a href=\"https://creativecommons.org/publicdomain/mark/1.0/\">https://creativecommons.org/publicdomain/mark/1.0/</a>"
-    )
-  }
-
-  it("doesn't create a clickable link if subfield ǂu doesn't look like a URL") {
-    val varFields = List(
-      VarField(
-        marcTag = "540",
-        subfields = List(
-          Subfield(
-            tag = "a",
-            content =
-              "The National Library of Medicine believes this item to be in the public domain."
-          ),
-          Subfield(tag = "u", content = "CC-0 license")
-        )
-      )
-    )
-
-    val bibData = createSierraBibDataWith(varFields = varFields)
-
-    SierraNotes(bibData).map(_.contents) shouldBe List(
-      "The National Library of Medicine believes this item to be in the public domain. CC-0 license"
-    )
-  }
-
-  it("strips whitespace from the subfield ǂu") {
-    // This example is based on b33032440
-    val varFields = List(
-      VarField(
-        marcTag = "540",
-        subfields = List(
-          Subfield(
-            tag = "u",
-            content = "https://wellcomecollection.org/works/a65fex5m "
-          )
-        )
-      )
-    )
-
-    val bibData = createSierraBibDataWith(varFields = varFields)
-
-    SierraNotes(bibData).map(_.contents) shouldBe List(
-      "<a href=\"https://wellcomecollection.org/works/a65fex5m\">https://wellcomecollection.org/works/a65fex5m</a>"
     )
   }
 

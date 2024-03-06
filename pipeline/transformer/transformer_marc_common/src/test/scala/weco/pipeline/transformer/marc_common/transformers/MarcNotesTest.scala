@@ -116,12 +116,7 @@ class MarcNotesTest extends AnyFunSpec with Matchers {
         contents = "exhibitions",
         noteType = NoteType.ExhibitionsNote
       ),
-      "586" -> Note(contents = "awards", noteType = NoteType.AwardsNote),
-      "591" -> Note(
-        contents = "A general, unspecified note",
-        noteType = NoteType.GeneralNote
-      ),
-      "593" -> Note(contents = "copyright b", noteType = NoteType.CopyrightNote)
+      "586" -> Note(contents = "awards", noteType = NoteType.AwardsNote)
     )
     MarcNotes(recordWithNotes(notes)) shouldBe notes.map(_._2)
   }
@@ -178,7 +173,7 @@ class MarcNotesTest extends AnyFunSpec with Matchers {
     )
   }
 
-  it("does not concatenate separate varfields") {
+  it("does not concatenate separate fields") {
     val notes = List(
       "500" -> Note(contents = "1st note.", noteType = NoteType.GeneralNote),
       "500" -> Note(contents = "2nd note.", noteType = NoteType.GeneralNote)
@@ -260,10 +255,11 @@ class MarcNotesTest extends AnyFunSpec with Matchers {
   }
 
   it("suppresses MarcSubfield ǂ5 universally") {
-    val notesFields = MarcNotes.notesFields.keys.map(
+    val notesWith5 = MarcNotes.notesFields.keys.map(
       key => {
         MarcField(
           marcTag = key,
+          indicator1 = "1",
           subfields = List(
             MarcSubfield(tag = "a", content = "Main bit."),
             MarcSubfield(tag = "5", content = "UkLW")
@@ -271,52 +267,29 @@ class MarcNotesTest extends AnyFunSpec with Matchers {
         )
       }
     )
-    val recordWithNotes = MarcTestRecord(
-      fields = notesFields.toList
+
+    val notesWithout5 = MarcNotes.notesFields.keys.map(
+      key => {
+        MarcField(
+          marcTag = key,
+          indicator1 = "1",
+          subfields = List(
+            MarcSubfield(tag = "a", content = "Main bit.")
+          )
+        )
+      }
     )
 
-    val notes = MarcNotes.notesFields.values
-      .map(
-        createNote =>
-          createNote(
-            MarcField(
-              marcTag = "000",
-              subfields = List(
-                MarcSubfield(tag = "a", content = "Main bit.")
-              )
-            )
-          )
+    MarcNotes(
+      MarcTestRecord(
+        fields = notesWith5.toList
       )
-      .toList
-
-    MarcNotes(recordWithNotes) should contain theSameElementsAs notes
-  }
-
-  it("skips 591 MarcSubfield ǂ9 (barcode)") {
-    val fields = List(
-      MarcField(
-        marcTag = "591",
-        subfields = List(
-          MarcSubfield(tag = "z", content = "Copy 1."),
-          MarcSubfield(
-            tag = "e",
-            content =
-              "Note: The author's presentation inscription on verso of 2nd leaf."
-          ),
-          MarcSubfield(tag = "9", content = "X8253")
+    ) should contain theSameElementsAs
+      MarcNotes(
+        MarcTestRecord(
+          fields = notesWithout5.toList
         )
       )
-    )
-
-    val recordWithNotes = MarcTestRecord(fields = fields)
-
-    MarcNotes(recordWithNotes) should contain theSameElementsAs List(
-      Note(
-        contents =
-          "Copy 1. Note: The author's presentation inscription on verso of 2nd leaf.",
-        noteType = NoteType.GeneralNote
-      )
-    )
   }
 
   it("skips notes which are just whitespace") {
@@ -388,14 +361,13 @@ class MarcNotesTest extends AnyFunSpec with Matchers {
   }
 
   it("strips whitespace from the MarcSubfield ǂu") {
-    // This example is based on b33032440
     val fields = List(
       MarcField(
         marcTag = "540",
         subfields = List(
           MarcSubfield(
             tag = "u",
-            content = "https://wellcomecollection.org/works/a65fex5m "
+            content = "   https://example.com/works/a65fex5m   "
           )
         )
       )
@@ -407,152 +379,4 @@ class MarcNotesTest extends AnyFunSpec with Matchers {
       "<a href=\"https://wellcomecollection.org/works/a65fex5m\">https://wellcomecollection.org/works/a65fex5m</a>"
     )
   }
-
-  describe("related material in MARC field 787") {
-    it("gets a related material note from 787") {
-      // This example is based on b33032440
-      val fields = List(
-        MarcField(
-          marcTag = "787",
-          subfields = List(
-            MarcSubfield(tag = "t", content = "Daily telegraph."),
-            MarcSubfield(tag = "g", content = "1989")
-          )
-        )
-      )
-
-      val recordWithNotes =
-        MarcTestRecord(fields)
-
-      MarcNotes(recordWithNotes) shouldBe List(
-        Note(
-          contents = "Daily telegraph. 1989",
-          noteType = NoteType.RelatedMaterial
-        )
-      )
-    }
-
-    it("creates a search link for b-numbers in ǂw") {
-      // This example is based on b33039136
-      val fields = List(
-        MarcField(
-          marcTag = "787",
-          subfields = List(
-            MarcSubfield(tag = "i", content = "Complemented by (work):"),
-            MarcSubfield(tag = "t", content = "Depression ain't the sads."),
-            MarcSubfield(tag = "w", content = "(UkLW)b33039112")
-          )
-        )
-      )
-
-      val recordWithNotes =
-        MarcTestRecord(fields)
-
-      MarcNotes(recordWithNotes) shouldBe List(
-        Note(
-          contents =
-            "Complemented by (work): Depression ain't the sads. (<a href=\"https://wellcomecollection.org/search/works?query=b33039112\">b33039112</a>)",
-          noteType = NoteType.RelatedMaterial
-        )
-      )
-    }
-
-    it("doesn't create a search link if ǂw isn't a b number") {
-      // This example is based on b15900976
-      val fields = List(
-        MarcField(
-          marcTag = "787",
-          subfields = List(
-            MarcSubfield(
-              tag = "s",
-              content = "Times (London, England :  1788)."
-            ),
-            MarcSubfield(tag = "g", content = "May 27, 2004."),
-            MarcSubfield(tag = "w", content = "(OCoLC)6967919")
-          )
-        )
-      )
-
-      val recordWithNotes =
-        MarcTestRecord(fields)
-
-      MarcNotes(recordWithNotes) shouldBe List(
-        Note(
-          contents =
-            "Times (London, England :  1788). May 27, 2004. (OCoLC)6967919",
-          noteType = NoteType.RelatedMaterial
-        )
-      )
-    }
-  }
-
-  describe("lettering note") {
-    it("doesn't create a note from 246 .6 ǂa or 514 for visual material") {
-      // This is based on b16529888
-      val recordWithNotes = MarcTestRecord(
-        materialTypeId = Some("k"),
-        fields = List(
-          MarcField(
-            marcTag = "514",
-            subfields = List(
-              MarcSubfield(
-                tag = "a",
-                content =
-                  "Lettering continues: Comment va  le malade? H\\u00e9las Monsieur, il est mort ce matin \\u00e0 six heures! Ah il est mort le gaillard! .. Il n'a donc pas pris ma potion? Si Monsieur. Il en a donc trop pris? Non Monsieur. C'est qu'il n'en a assez pris. H.D."
-              )
-            )
-          ),
-          MarcField(
-            marcTag = "246",
-            indicator2 = "6",
-            subfields = List(
-              MarcSubfield(
-                tag = "a",
-                content = "Le m\u00e9decin et la garde malade. H.D. ..."
-              )
-            )
-          )
-        )
-      )
-
-      MarcNotes(recordWithNotes) shouldBe empty
-    }
-
-    it("uses 514 for non-visual material") {
-      val recordWithNotes = MarcTestRecord(
-        materialTypeId = Some("not-k"),
-        fields = List(
-          MarcField(
-            marcTag = "514",
-            subfields = List(
-              MarcSubfield(
-                tag = "a",
-                content =
-                  "Lettering continues: Comment va  le malade? H\\u00e9las Monsieur, il est mort ce matin \\u00e0 six heures! Ah il est mort le gaillard! .. Il n'a donc pas pris ma potion? Si Monsieur. Il en a donc trop pris? Non Monsieur. C'est qu'il n'en a assez pris. H.D."
-              )
-            )
-          ),
-          MarcField(
-            marcTag = "246",
-            indicator2 = "6",
-            subfields = List(
-              MarcSubfield(
-                tag = "a",
-                content = "Le m\u00e9decin et la garde malade. H.D. ..."
-              )
-            )
-          )
-        )
-      )
-
-      MarcNotes(recordWithNotes) shouldBe List(
-        Note(
-          noteType = NoteType.LetteringNote,
-          contents =
-            "Lettering continues: Comment va  le malade? H\\u00e9las Monsieur, il est mort ce matin \\u00e0 six heures! Ah il est mort le gaillard! .. Il n'a donc pas pris ma potion? Si Monsieur. Il en a donc trop pris? Non Monsieur. C'est qu'il n'en a assez pris. H.D."
-        )
-      )
-    }
-  }
-
 }
