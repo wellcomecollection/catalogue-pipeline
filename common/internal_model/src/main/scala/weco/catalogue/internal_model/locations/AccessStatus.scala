@@ -32,6 +32,7 @@ sealed trait AccessStatus extends EnumEntry { this: AccessStatus =>
     case AccessStatus.ByAppointment      => true
     case AccessStatus.Closed             => true
     case AccessStatus.PermissionRequired => true
+    case AccessStatus.Safeguarded        => true
     case _                               => false
   }
 }
