@@ -157,7 +157,7 @@ steps:
       - docker-compose#v4.11.0:
           config: "{{ matrix }}/docker-compose.yml"
           run: test
-          command: ["cp", "*.zip", "/target/"]
+          command: ["cp *.zip /target/"]
 
     matrix:
       - "ebsco_adapter/ebsco_adapter"
