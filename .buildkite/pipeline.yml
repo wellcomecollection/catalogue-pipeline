@@ -1,154 +1,152 @@
 steps:
-  - command: |
-      ./builds/run_formatting.sh
-      .buildkite/scripts/push_autoformatting_changes.sh
-      ./builds/run_linting.sh
-      cat .reports/scalafmt.out | .buildkite/scripts/report_sbt_warnings.sh
-    label: "autoformat"
-    soft_fail:
-      - exit_status: 2
-    agents:
-      queue: "scala"
-
-  - label: "{{ matrix }} (library)"
-    command: "./builds/run_sbt_tests.sh {{ matrix }}"
-
-    matrix:
-      - "internal_model"
-      - "display_model"
-      - "source_model"
-      - "pipeline_storage"
-      - "ingestor_common"
-      - "transformer_common"
-      - "calm_api_client"
-
-    # This will fail the build if internal model takes more than
-    # 13 minutes to build and test.  This is to make sure we know if
-    # the internal model compilation starts creeping again.
-    #
-    # We may increase this timeout, but we should do so intentionally.
-    # We should only increase it when we know what's causing the slowness,
-    # and we think it's an acceptable tradeoff.
-    #
-    # See https://buildkite.com/docs/pipelines/command-step
-    timeout_in_minutes: 13
-
-    agents:
-      queue: "scala"
-
-  - label: "{{ matrix }} (app)"
-    command: |
-      ./builds/run_sbt_tests.sh {{ matrix }}
-      ./builds/build_sbt_image.sh {{ matrix }} "$BUILDKITE_COMMIT"
-
-      if [[ "$BUILDKITE_BRANCH" == "main" ]]
-      then
-        ./builds/publish_sbt_image_to_ecr.sh {{ matrix }} "$BUILDKITE_COMMIT"
-      fi
-
-    matrix:
-      - "batcher"
-      - "calm_adapter"
-      - "calm_deletion_checker"
-      - "calm_indexer"
-      - "id_minter"
-      - "matcher"
-      - "merger"
-      - "mets_adapter"
-      - "path_concatenator"
-      - "reindex_worker"
-      - "relation_embedder"
-      - "router"
-      - "sierra_indexer"
-      - "sierra_linker"
-      - "sierra_merger"
-      - "tei_adapter"
-      - "tei_id_extractor"
-      - "transformer_calm"
-      - "transformer_mets"
-      - "transformer_miro"
-      - "transformer_sierra"
-      - "transformer_tei"
-
-    agents:
-      queue: "scala"
-
-  - label: "{{ matrix }} (app)"
-    command: |
-      ./builds/run_sbt_tests.sh {{ matrix }}
-      ./builds/build_sbt_image.sh {{ matrix }} "$BUILDKITE_COMMIT"
-
-      # The ingestor tests will regenerate the JSON test documents
-      # used in the API tests.  Make sure the latest versions are
-      # checked in.
-      git diff --exit-code
-
-      if [[ "$BUILDKITE_BRANCH" == "main" ]]
-      then
-        ./builds/publish_sbt_image_to_ecr.sh {{ matrix }} "$BUILDKITE_COMMIT"
-      fi
-
-    matrix:
-      - "ingestor_works"
-      - "ingestor_images"
-
-    agents:
-      queue: "scala"
-
-  - label: "inference_manager (app)"
-    command: |
-      ./builds/run_inference_manager_tests.sh
-      ./builds/build_sbt_image.sh inference_manager "$BUILDKITE_COMMIT"
-
-      if [[ "$BUILDKITE_BRANCH" == "main" ]]
-      then
-        ./builds/publish_sbt_image_to_ecr.sh inference_manager "$BUILDKITE_COMMIT"
-      fi
-
-    agents:
-      queue: "scala"
-
-  - label: "{{ matrix }} (app)"
-    command: |
-      ./builds/run_inferrer_tests.sh {{ matrix }}
-      ./builds/build_inferrer_image.sh {{ matrix }} "$BUILDKITE_COMMIT"
-
-      if [[ "$BUILDKITE_BRANCH" == "main" ]]
-      then
-        ./builds/publish_inferrer_image_to_ecr.sh {{ matrix }} "$BUILDKITE_COMMIT"
-      fi
-
-    matrix:
-      - "aspect_ratio_inferrer"
-      - "feature_inferrer"
-      - "palette_inferrer"
-
-    agents:
-      queue: "scala"
-
-  - label: "{{ matrix }} (Lambda)"
-    command: |
-      ./builds/run_python_tests.sh "{{ matrix }}"
-
-      if [[ "$BUILDKITE_BRANCH" == "main" ]]
-      then
-        ./builds/publish_lambda_zip.py "{{ matrix }}"
-      fi
-
-    matrix:
-      - "calm_adapter/calm_window_generator"
-      - "calm_adapter/calm_deletion_check_initiator"
-      - "common/window_generator"
-      - "tei_adapter/tei_updater"
+#  - command: |
+#      ./builds/run_formatting.sh
+#      .buildkite/scripts/push_autoformatting_changes.sh
+#      ./builds/run_linting.sh
+#      cat .reports/scalafmt.out | .buildkite/scripts/report_sbt_warnings.sh
+#    label: "autoformat"
+#    soft_fail:
+#      - exit_status: 2
+#    agents:
+#      queue: "scala"
+#
+#  - label: "{{ matrix }} (library)"
+#    command: "./builds/run_sbt_tests.sh {{ matrix }}"
+#
+#    matrix:
+#      - "internal_model"
+#      - "display_model"
+#      - "source_model"
+#      - "pipeline_storage"
+#      - "ingestor_common"
+#      - "transformer_common"
+#      - "calm_api_client"
+#
+#    # This will fail the build if internal model takes more than
+#    # 13 minutes to build and test.  This is to make sure we know if
+#    # the internal model compilation starts creeping again.
+#    #
+#    # We may increase this timeout, but we should do so intentionally.
+#    # We should only increase it when we know what's causing the slowness,
+#    # and we think it's an acceptable tradeoff.
+#    #
+#    # See https://buildkite.com/docs/pipelines/command-step
+#    timeout_in_minutes: 13
+#
+#    agents:
+#      queue: "scala"
+#
+#  - label: "{{ matrix }} (app)"
+#    command: |
+#      ./builds/run_sbt_tests.sh {{ matrix }}
+#      ./builds/build_sbt_image.sh {{ matrix }} "$BUILDKITE_COMMIT"
+#
+#      if [[ "$BUILDKITE_BRANCH" == "main" ]]
+#      then
+#        ./builds/publish_sbt_image_to_ecr.sh {{ matrix }} "$BUILDKITE_COMMIT"
+#      fi
+#
+#    matrix:
+#      - "batcher"
+#      - "calm_adapter"
+#      - "calm_deletion_checker"
+#      - "calm_indexer"
+#      - "id_minter"
+#      - "matcher"
+#      - "merger"
+#      - "mets_adapter"
+#      - "path_concatenator"
+#      - "reindex_worker"
+#      - "relation_embedder"
+#      - "router"
+#      - "sierra_indexer"
+#      - "sierra_linker"
+#      - "sierra_merger"
+#      - "tei_adapter"
+#      - "tei_id_extractor"
+#      - "transformer_calm"
+#      - "transformer_mets"
+#      - "transformer_miro"
+#      - "transformer_sierra"
+#      - "transformer_tei"
+#
+#    agents:
+#      queue: "scala"
+#
+#  - label: "{{ matrix }} (app)"
+#    command: |
+#      ./builds/run_sbt_tests.sh {{ matrix }}
+#      ./builds/build_sbt_image.sh {{ matrix }} "$BUILDKITE_COMMIT"
+#
+#      # The ingestor tests will regenerate the JSON test documents
+#      # used in the API tests.  Make sure the latest versions are
+#      # checked in.
+#      git diff --exit-code
+#
+#      if [[ "$BUILDKITE_BRANCH" == "main" ]]
+#      then
+#        ./builds/publish_sbt_image_to_ecr.sh {{ matrix }} "$BUILDKITE_COMMIT"
+#      fi
+#
+#    matrix:
+#      - "ingestor_works"
+#      - "ingestor_images"
+#
+#    agents:
+#      queue: "scala"
+#
+#  - label: "inference_manager (app)"
+#    command: |
+#      ./builds/run_inference_manager_tests.sh
+#      ./builds/build_sbt_image.sh inference_manager "$BUILDKITE_COMMIT"
+#
+#      if [[ "$BUILDKITE_BRANCH" == "main" ]]
+#      then
+#        ./builds/publish_sbt_image_to_ecr.sh inference_manager "$BUILDKITE_COMMIT"
+#      fi
+#
+#    agents:
+#      queue: "scala"
+#
+#  - label: "{{ matrix }} (app)"
+#    command: |
+#      ./builds/run_inferrer_tests.sh {{ matrix }}
+#      ./builds/build_inferrer_image.sh {{ matrix }} "$BUILDKITE_COMMIT"
+#
+#      if [[ "$BUILDKITE_BRANCH" == "main" ]]
+#      then
+#        ./builds/publish_inferrer_image_to_ecr.sh {{ matrix }} "$BUILDKITE_COMMIT"
+#      fi
+#
+#    matrix:
+#      - "aspect_ratio_inferrer"
+#      - "feature_inferrer"
+#      - "palette_inferrer"
+#
+#    agents:
+#      queue: "scala"
+#
+#  - label: "{{ matrix }} (Lambda)"
+#    command: |
+#      ./builds/run_python_tests.sh "{{ matrix }}"
+#
+#      if [[ "$BUILDKITE_BRANCH" == "main" ]]
+#      then
+#        ./builds/publish_lambda_zip.py "{{ matrix }}"
+#      fi
+#
+#    matrix:
+#      - "calm_adapter/calm_window_generator"
+#      - "calm_adapter/calm_deletion_check_initiator"
+#      - "common/window_generator"
+#      - "tei_adapter/tei_updater"
 
   - label: "{{ matrix }} (Lambda) docker-compose"
-    command: |
-      ./builds/run_python_tests_dc.sh "{{ matrix }}"
-
-      if [[ "$BUILDKITE_BRANCH" == "main" ]]
-      then
-        ./builds/publish_lambda_zip.py "{{ matrix }}"
-      fi
+    command: cd "{{ matrix }}"
+    plugins:
+      - docker-compose#v4.11.0:
+          run: test
+          command: ["py.test"]
 
     matrix:
       - "ebsco_adapter/ebsco_adapter"

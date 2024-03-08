@@ -1,5 +1,5 @@
 services:
-  app:
+  test:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: test.Dockerfile
