@@ -142,9 +142,9 @@ steps:
 #      - "tei_adapter/tei_updater"
 
   - label: "{{ matrix }} (Lambda) docker-compose"
-    command: cd "{{ matrix }}"
     plugins:
       - docker-compose#v4.11.0:
+          config: {{ matrix }}/docker-compose.yml
           run: test
           command: ["py.test"]
 
