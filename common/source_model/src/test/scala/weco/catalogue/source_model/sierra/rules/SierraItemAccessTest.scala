@@ -338,6 +338,28 @@ class SierraItemAccessTest
             noTerms()
           )
         }
+
+        it("if the item is safeguarded") {
+          val itemData = createSierraItemDataWith(
+            fixedFields = Map(
+              "79" -> createLocationWith("scmac", "Closed stores Arch. & MSS"),
+              "88" -> createStatusWith("g", "Safeguarded"),
+              "108" -> createOpacMsgWith("p", "Safeguarded item.")
+            )
+          )
+
+          val (ac, _) = SierraItemAccess(
+            location = Some(LocationType.ClosedStores),
+            itemData = itemData
+          )
+
+          ac should have(
+            method(AccessMethod.NotRequestable),
+            status(AccessStatus.Safeguarded),
+            noTerms(),
+            note("Safeguarded item.")
+          )
+        }
       }
     }
 
