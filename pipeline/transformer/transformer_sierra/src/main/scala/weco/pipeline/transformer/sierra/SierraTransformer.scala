@@ -16,10 +16,8 @@ import weco.catalogue.source_model.sierra._
 import weco.catalogue.source_model.Implicits._
 import weco.json.JsonUtil.fromJson
 import weco.json.exceptions.JsonDecodingError
-import weco.pipeline.transformer.sierra.exceptions.{
-  ShouldNotTransformException,
-  SierraTransformerException
-}
+import weco.pipeline.transformer.exceptions.ShouldNotTransformException
+import weco.pipeline.transformer.sierra.exceptions.SierraTransformerException
 import weco.pipeline.transformer.sierra.transformers._
 import weco.sierra.models.data.{
   SierraBibData,

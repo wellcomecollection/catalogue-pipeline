@@ -1,0 +1,9 @@
+package weco.pipeline.transformer.marc_common.models
+
+/*
+ * Represents a MARC record,
+ * This provides an interface for retrieving fields, subfields, and values
+ * */
+trait MarcRecord {
+  def fieldsWithTags(tags: String*): Seq[MarcField]
+}

@@ -211,6 +211,9 @@ object CatalogueDependencies {
     WellcomeDependencies.storageLibrary ++
       ExternalDependencies.parseDependencies ++ ExternalDependencies.circeOpticsDependencies
 
+  val transformerMarcCommonDependencies: Seq[ModuleID] =
+    Nil
+
   val idminterDependencies: Seq[ModuleID] =
     ExternalDependencies.mySqlDependencies ++
       ExternalDependencies.circeOpticsDependencies ++
