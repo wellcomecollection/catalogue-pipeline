@@ -53,12 +53,12 @@ python main.py # You may need to set the appropriate environment variables to pa
 
 ### Running tests
 
-We use [`tox`](https://tox.wiki/en/4.13.0/) and [`pytest`](https://docs.pytest.org/en/8.0.x/) to manage running tests, and you should find a `tox.ini` above your project directory.
+We use [`pytest`](https://docs.pytest.org/en/8.0.x/) to manage running tests.
 
 To run tests from the project directory, ensure you have the correct python version and environment set up then run:
 
 ```console
-tox
+py.test
 ```
 
 ### Adding dependencies
