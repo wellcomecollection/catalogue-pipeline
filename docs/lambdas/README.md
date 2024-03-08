@@ -86,7 +86,7 @@ This repository has two scripts to help with this process:
 This script downloads all the dependencies specified by requirements.txt, and packages them alongside your application code in a `.zip` file in `.lambda_zip` at the root of the repository. It then uploads them to S3 in `s3://wellcomecollection-platform-infra/lambdas/project_name`. The script requires AWS credentials. You can run the script locally (ensure you have selected the Python 3.6 env using pyenv):
 
 ```console
-# Get AWS credentials
+# Get AWS credentials
 aws-azure-login 
 # Switch to the correct python version
 pyenv shell 3.6 

@@ -142,6 +142,18 @@ steps:
       - "tei_adapter/tei_updater"
 #      - "ebsco_adapter/ebsco_adapter" removed pending build fix
 
+  - label: "{{ matrix }} (Lambda) docker-compose"
+    command: |
+      ./builds/run_python_tests_dc.sh "{{ matrix }}"
+
+      if [[ "$BUILDKITE_BRANCH" == "main" ]]
+      then
+        ./builds/publish_lambda_zip.py "{{ matrix }}"
+      fi
+
+    matrix:
+      - "ebsco_adapter/ebsco_adapter"
+
   - wait
 
   - label: trigger adapter deployments
