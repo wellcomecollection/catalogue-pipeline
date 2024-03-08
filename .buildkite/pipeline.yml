@@ -151,17 +151,6 @@ steps:
     matrix:
       - "ebsco_adapter/ebsco_adapter"
 
-  - label: "{{ matrix }} (Publish Lambda) docker-compose"
-#    if: build.branch == "main"
-    plugins:
-      - docker-compose#v4.11.0:
-          config: "{{ matrix }}/docker-compose.yml"
-          run: test
-          command: ["cp *.zip /target/"]
-
-    matrix:
-      - "ebsco_adapter/ebsco_adapter"
-
   - wait
 
   - label: trigger adapter deployments

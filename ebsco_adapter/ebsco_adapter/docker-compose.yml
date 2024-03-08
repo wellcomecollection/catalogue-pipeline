@@ -3,9 +3,3 @@ services:
     build:
       context: .
       dockerfile: test.Dockerfile
-  build:
-    build:
-      context: .
-      dockerfile: build.Dockerfile
-    volumes:
-      - ../../.lambda_zips:/target
