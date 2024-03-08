@@ -144,7 +144,7 @@ steps:
   - label: "{{ matrix }} (Lambda) docker-compose"
     plugins:
       - docker-compose#v4.11.0:
-          config: {{ matrix }}/docker-compose.yml
+          config: "{{ matrix }}/docker-compose.yml"
           run: test
           command: ["py.test"]
 
