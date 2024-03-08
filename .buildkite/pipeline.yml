@@ -141,7 +141,7 @@ steps:
 #      - "common/window_generator"
 #      - "tei_adapter/tei_updater"
 
-  - label: "{{ matrix }} (Lambda) docker-compose"
+  - label: "{{ matrix }} (Test Lambda) docker-compose"
     plugins:
       - docker-compose#v4.11.0:
           config: "{{ matrix }}/docker-compose.yml"
@@ -151,13 +151,13 @@ steps:
     matrix:
       - "ebsco_adapter/ebsco_adapter"
 
-  - label: "{{ matrix }} (Lambda) docker-compose"
+  - label: "{{ matrix }} (Publish Lambda) docker-compose"
 #    if: build.branch == "main"
     plugins:
       - docker-compose#v4.11.0:
           config: "{{ matrix }}/docker-compose.yml"
           run: test
-          command: ["cp", "lambda.zip", "/target/"]
+          command: ["cp", "*.zip", "/target/"]
 
     matrix:
       - "ebsco_adapter/ebsco_adapter"

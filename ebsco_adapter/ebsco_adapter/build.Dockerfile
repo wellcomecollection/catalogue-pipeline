@@ -11,8 +11,8 @@ WORKDIR /app
 
 RUN pip install --no-cache-dir --target ./package -r /app/requirements.txt
 RUN cd package
-RUN zip -r ../lambda.zip .
+RUN zip -r ../ebsco-adapter.zip .
 RUN cd ..
-RUN zip lambda.zip *.py
+RUN zip ebsco-adapter.zip *.py
 
 
