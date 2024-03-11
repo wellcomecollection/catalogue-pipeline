@@ -218,6 +218,13 @@ lazy val transformer_marc_common = setupProject(
   externalDependencies = CatalogueDependencies.transformerMarcCommonDependencies
 )
 
+lazy val transformer_marc_xml = setupProject(
+  project,
+  folder = "pipeline/transformer/transformer_marc_xml",
+  localDependencies = Seq(transformer_marc_common),
+  externalDependencies = CatalogueDependencies.transformerMarcXMLDependencies
+)
+
 lazy val transformer_miro = setupProject(
   project,
   folder = "pipeline/transformer/transformer_miro",
