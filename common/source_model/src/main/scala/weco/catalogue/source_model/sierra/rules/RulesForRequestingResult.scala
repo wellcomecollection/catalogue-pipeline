@@ -10,6 +10,7 @@ object NotRequestable {
   case class NeedsManualRequest(message: String) extends NotRequestable
 
   case class ItemClosed(message: String) extends NotRequestable
+  case class SafeguardedItem(message: String) extends NotRequestable
   case class ItemMissing(message: String) extends NotRequestable
   case class ItemOnSearch(message: String) extends NotRequestable
   case class ItemUnavailable(message: String) extends NotRequestable

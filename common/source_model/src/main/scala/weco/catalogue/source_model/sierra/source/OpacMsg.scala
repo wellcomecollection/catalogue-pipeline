@@ -11,4 +11,5 @@ object OpacMsg {
   val StaffUseOnly = "s"
   val AskAtDesk = "i"
   val Restricted = "c"
+  val ByApproval = "p"
 }

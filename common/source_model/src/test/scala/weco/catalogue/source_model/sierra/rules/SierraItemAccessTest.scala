@@ -338,6 +338,28 @@ class SierraItemAccessTest
             noTerms()
           )
         }
+
+        it("if the item is safeguarded") {
+          val itemData = createSierraItemDataWith(
+            fixedFields = Map(
+              "79" -> createLocationWith("scmac", "Closed stores Arch. & MSS"),
+              "88" -> createStatusWith("g", "Safeguarded"),
+              "108" -> createOpacMsgWith("p", "Safeguarded item.")
+            )
+          )
+
+          val (ac, _) = SierraItemAccess(
+            location = Some(LocationType.ClosedStores),
+            itemData = itemData
+          )
+
+          ac should have(
+            method(AccessMethod.NotRequestable),
+            status(AccessStatus.Safeguarded),
+            noTerms(),
+            noNote()
+          )
+        }
       }
     }
 
@@ -561,6 +583,34 @@ class SierraItemAccessTest
         )
 
         itemNote shouldBe "uncoloured impression on paper mount"
+      }
+
+      it("if there's a display note about access for a safeguarded item") {
+        val itemData = createSierraItemDataWith(
+          fixedFields = Map(
+            "79" -> createLocationWith("scmac", "Closed stores Arch. & MSS"),
+            "88" -> createStatusWith("g", "Safeguarded"),
+            "108" -> createOpacMsgWith("p", "Safeguarded item.")
+          ),
+          varFields = List(
+            VarField(
+              fieldTag = "n",
+              content =
+                "This item requires safeguarded access. You will need to complete an application form before you will be allowed to view this item. Requests are considered on a case by case basis. Please contact collections@wellcomecollection.org for more details."
+            )
+          )
+        )
+
+        val (ac, _) = SierraItemAccess(
+          location = Some(LocationType.ClosedStores),
+          itemData = itemData
+        )
+
+        ac should have(
+          note(
+            "This item requires safeguarded access. You will need to complete an application form before you will be allowed to view this item. Requests are considered on a case by case basis. Please contact collections@wellcomecollection.org for more details."
+          )
+        )
       }
     }
   }
