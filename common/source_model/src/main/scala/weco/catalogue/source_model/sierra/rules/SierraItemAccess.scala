@@ -281,13 +281,12 @@ object SierraItemAccess extends SierraQueryOps with Logging {
             _,
             Some(Status.Safeguarded),
             Some(OpacMsg.ByApproval),
-            NotRequestable.SafeguardedItem(message),
+            _: NotRequestable.SafeguardedItem,
             _
           ) =>
         AccessCondition(
           method = AccessMethod.NotRequestable,
-          status = Some(AccessStatus.Safeguarded),
-          note = Some(message)
+          status = Some(AccessStatus.Safeguarded)
         )
 
       // If an item is on hold for another reader, it can't be requested -- even
