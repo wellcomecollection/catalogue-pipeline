@@ -3,7 +3,6 @@ module "ftp_lambda" {
 
   name    = "ebsco-adapter-ftp"
   runtime = "python3.10"
-  handler = "main.lambda_handler"
 
   filename    = data.archive_file.empty_zip.output_path
   memory_size = 512

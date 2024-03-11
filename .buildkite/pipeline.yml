@@ -156,7 +156,6 @@ steps:
       - "calm_adapter/calm_deletion_check_initiator"
       - "common/window_generator"
       - "tei_adapter/tei_updater"
-      - "ebsco_adapter/ebsco_adapter"
 
   - wait
 
