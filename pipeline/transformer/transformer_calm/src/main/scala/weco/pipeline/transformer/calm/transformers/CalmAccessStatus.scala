@@ -12,6 +12,7 @@ object CalmAccessStatus extends CalmRecordOps with Logging {
       case Some("Open with advisory") => Some(AccessStatus.OpenWithAdvisory)
       case Some("Closed")             => Some(AccessStatus.Closed)
       case Some("Restricted")         => Some(AccessStatus.Restricted)
+      case Some("Safeguarded")        => Some(AccessStatus.Safeguarded)
       case Some(s) if s.toLowerCase == "certain restrictions apply" =>
         Some(AccessStatus.Restricted)
       case Some(s)
