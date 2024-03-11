@@ -144,7 +144,7 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
       production = SierraProduction(bibId, bibData),
       languages = SierraLanguages(bibId, bibData),
       edition = SierraEdition(bibData),
-      notes = SierraNotes(bibData),
+      notes = SierraNotes(bibData).toList,
       duration = SierraDuration(bibData),
       items = SierraItemsOnOrder(
         bibId,

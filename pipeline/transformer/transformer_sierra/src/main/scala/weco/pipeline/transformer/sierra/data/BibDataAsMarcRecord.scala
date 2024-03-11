@@ -39,7 +39,9 @@ object SierraMarcDataConversions extends SierraMarcDataConversions {}
 class BibDataAsMarcRecord(bibData: SierraBibData)
     extends MarcRecord
     with SierraQueryOps {
-
+  lazy val fields: Seq[MarcField] =
+    bibData.varFields.map(SierraMarcDataConversions.varFieldToMarcField)
+  lazy val materialTypeId: Option[String] = bibData.materialType.map(_.code)
   override def fieldsWithTags(tags: String*): Seq[MarcField] =
     bibData
       .varfieldsWithTags(tags: _*)
