@@ -23,7 +23,7 @@ object MarcXMLRecordTransformer {
         value = record.controlField("001").get
       ),
       // TODO: I don't think we get sourceModifiedTime in the XML records from EBSCO,
-      // but we might be able to work something out
+      //   but we might be able to work something out
       sourceModifiedTime = Instant.now
     )
     Work.Visible[Source](

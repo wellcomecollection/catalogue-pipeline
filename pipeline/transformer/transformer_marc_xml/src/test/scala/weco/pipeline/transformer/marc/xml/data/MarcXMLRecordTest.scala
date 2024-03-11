@@ -61,10 +61,10 @@ class MarcXMLRecordTest extends AnyFunSpec with Matchers with LoneElement {
         val datafield = MarcXMLRecord(
           <record  xmlns="http://www.loc.gov/MARC21/slim">
             <datafield tag="022">
-              <subfield tag="a">1234-5678</subfield>
+              <subfield code="a">1234-5678</subfield>
             </datafield>
             <datafield tag="999">
-              <subfield tag="x">baad-f00d</subfield>
+              <subfield code="x">baad-f00d</subfield>
             </datafield>
           </record>
         ).fieldsWithTag("022").loneElement
@@ -82,13 +82,13 @@ class MarcXMLRecordTest extends AnyFunSpec with Matchers with LoneElement {
         val Seq(first, second) = MarcXMLRecord(
           <record>
             <datafield tag="022">
-              <subfield tag="a">1234-5678</subfield>
+              <subfield code="a">1234-5678</subfield>
             </datafield>
             <datafield tag="999">
-              <subfield tag="x">baad-f00d</subfield>
+              <subfield code="x">baad-f00d</subfield>
             </datafield>
             <datafield tag="022">
-              <subfield tag="b">g00d-cafe</subfield>
+              <subfield code="b">g00d-cafe</subfield>
             </datafield>
           </record>
         ).fieldsWithTag("022")

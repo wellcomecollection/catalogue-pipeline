@@ -22,9 +22,6 @@ class MarcXMLRecordTransformerTest extends AnyFunSpec with Matchers {
         )
       )
       work.state.sourceIdentifier.value shouldBe "3PaDhRp"
-      // TODO: The SUT currently assigns a type of EBSCO to the source identifier, but it shouldn't
-      //    that belongs in the ebsco-specific transformer.  Sort that all out when it's time.
-
       work.data should equal(
         WorkData[DataState.Unidentified](title = Some("matacologian"))
       )
