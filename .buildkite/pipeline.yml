@@ -126,22 +126,16 @@ steps:
     agents:
       queue: "scala"
 
-  - label: "{{ matrix }} (Lambda)"
+  - label: "{{ matrix }} (Test/Lambda)"
     command: |
       ./builds/run_python_tests.sh "{{ matrix }}"
 
-      if [[ "$BUILDKITE_BRANCH" == "main" ]]
-      then
-        ./builds/publish_lambda_zip.py "{{ matrix }}"
-      fi
-
     matrix:
-      - "calm_adapter/calm_window_generator"
       - "calm_adapter/calm_deletion_check_initiator"
       - "common/window_generator"
       - "tei_adapter/tei_updater"
 
-  - label: "{{ matrix }} (Lambda) docker-compose"
+  - label: "{{ matrix }} (Test/Lambda) docker-compose"
     plugins:
       - docker-compose#v4.11.0:
           config: "{{ matrix }}/docker-compose.yml"
@@ -149,6 +143,19 @@ steps:
           command: ["py.test"]
 
     matrix:
+      - "calm_adapter/calm_window_generator"
+      - "ebsco_adapter/ebsco_adapter"
+
+  - label: "{{ matrix }} (Publish/Lambda)"
+    if: build.branch == "main"
+    command: |
+      ./builds/publish_lambda_zip.py "{{ matrix }}"
+
+    matrix:
+      - "calm_adapter/calm_window_generator"
+      - "calm_adapter/calm_deletion_check_initiator"
+      - "common/window_generator"
+      - "tei_adapter/tei_updater"
       - "ebsco_adapter/ebsco_adapter"
 
   - wait
