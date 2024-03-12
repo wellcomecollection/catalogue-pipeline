@@ -9,12 +9,11 @@ import requests
 from betamax import Betamax
 import boto3
 from botocore.exceptions import ClientError
-from moto import mock_s3
 
 from tei_updater import main
 from tei_updater import diff_trees
 
-from aws_test_helpers import *
+from aws_test_helpers import mock_sns_client, test_topic_arn, get_test_topic_messages, mock_s3_client
 
 with Betamax.configure() as config:
     config.cassette_library_dir = "."
@@ -28,13 +27,11 @@ def session():
         yield session
 
 
-@mock_s3
 def test_tree_does_not_exist(
-    mock_sns_client, test_topic_arn, get_test_topic_messages, session
+        mock_s3_client, mock_sns_client, test_topic_arn, get_test_topic_messages, session
 ):
     bucket = "bukkit"
     key = "tree.json"
-    mock_s3_client = boto3.client("s3", region_name="us-east-1")
     mock_s3_client.create_bucket(Bucket=bucket)
 
     with mock.patch.dict(
@@ -61,9 +58,8 @@ def test_tree_does_not_exist(
     assert len(saved_tree.keys()) == 653
 
 
-@mock_s3
 def test_changes_to_old_tree_sent(
-    mock_sns_client, test_topic_arn, get_test_topic_messages, session
+        mock_s3_client, mock_sns_client, test_topic_arn, get_test_topic_messages, session
 ):
     bucket = "bukkit"
     key = "tree.json"

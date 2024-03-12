@@ -16,6 +16,10 @@ def mock_sqs_client():
     with mock_aws():
         yield boto3.client("sqs", region_name="eu-west-1")
 
+@pytest.fixture(scope="function")
+def mock_s3_client():
+    with mock_aws():
+        yield boto3.client("s3", region_name="eu-west-1")
 
 @pytest.fixture(scope="function")
 def test_topic_arn(mock_sns_client):
