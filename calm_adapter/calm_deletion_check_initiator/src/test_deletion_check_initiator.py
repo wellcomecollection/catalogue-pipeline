@@ -1,16 +1,15 @@
 import boto3
 import pytest
-from moto import mock_dynamodb2
+from moto import mock_aws
 from deletion_check_initiator import DeletionCheckInitiator
 
-from test_aws import *
+from aws_test_helpers import *
 
 
 @pytest.fixture(scope="function")
 def mock_dynamo_client():
-    with mock_dynamodb2():
+    with mock_aws():
         yield boto3.client("dynamodb", region_name="eu-west-1")
-
 
 @pytest.fixture(scope="function")
 def test_dynamo_table(mock_dynamo_client):
@@ -18,6 +17,7 @@ def test_dynamo_table(mock_dynamo_client):
         TableName="test-table",
         AttributeDefinitions=[{"AttributeName": "id", "AttributeType": "S"}],
         KeySchema=[{"AttributeName": "id", "KeyType": "HASH"}],
+        BillingMode="PAY_PER_REQUEST",
     )
     table_name = table["TableDescription"]["TableName"]
 

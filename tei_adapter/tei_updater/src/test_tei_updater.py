@@ -14,7 +14,7 @@ from moto import mock_s3
 from tei_updater import main
 from tei_updater import diff_trees
 
-from test_aws import *
+from aws_test_helpers import *
 
 with Betamax.configure() as config:
     config.cassette_library_dir = "."

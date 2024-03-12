@@ -6,7 +6,7 @@ from unittest import mock
 
 from window_generator import build_window, main
 
-from test_aws import *
+from aws_test_helpers import *
 
 
 class patched_datetime(dt.datetime):
