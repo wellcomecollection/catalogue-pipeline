@@ -140,7 +140,6 @@ steps:
       - "tei_adapter/tei_updater"
       - "common/window_generator"
 
-
   - label: "{{ matrix }} (Publish/Lambda)"
     if: build.branch == "main"
     command: |
