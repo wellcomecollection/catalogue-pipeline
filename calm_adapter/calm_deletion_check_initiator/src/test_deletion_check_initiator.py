@@ -11,6 +11,7 @@ def mock_dynamo_client():
     with mock_aws():
         yield boto3.client("dynamodb", region_name="eu-west-1")
 
+
 @pytest.fixture(scope="function")
 def test_dynamo_table(mock_dynamo_client):
     table = mock_dynamo_client.create_table(
