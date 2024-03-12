@@ -3,6 +3,7 @@ import pytest
 from moto import mock_dynamodb2
 from deletion_check_initiator import DeletionCheckInitiator
 
+from test_aws import *
 
 @pytest.fixture(scope="function")
 def mock_dynamo_client():

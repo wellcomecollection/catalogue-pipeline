@@ -6,8 +6,7 @@ from unittest import mock
 
 from window_generator import build_window, main
 
-pytest_plugins = "catalogue_aws_fixtures"
-
+from test_aws import *
 
 class patched_datetime(dt.datetime):
     @classmethod
