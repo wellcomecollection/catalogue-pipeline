@@ -131,7 +131,6 @@ steps:
       - docker-compose#v4.11.0:
           config: "{{ matrix }}/docker-compose.yml"
           run: test
-          command: ["py.test"]
 
     matrix:
       - "calm_adapter/calm_deletion_check_initiator"

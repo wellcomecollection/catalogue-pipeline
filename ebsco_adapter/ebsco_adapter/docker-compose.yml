@@ -2,4 +2,5 @@ services:
   test:
     build:
       context: .
-      dockerfile: test.Dockerfile
+      dockerfile: ../../builds/test.python.Dockerfile
+    command: ["py.test"]
