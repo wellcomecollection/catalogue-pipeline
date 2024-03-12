@@ -6,8 +6,10 @@ from unittest import mock
 
 from window_generator import build_window, main
 
-from aws_test_helpers import mock_sns_client, test_topic_arn, get_test_topic_messages
 
+pytest_plugins = [
+    "aws_test_helpers"
+]
 
 class patched_datetime(dt.datetime):
     @classmethod
