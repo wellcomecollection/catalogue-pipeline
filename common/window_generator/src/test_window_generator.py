@@ -6,7 +6,7 @@ from unittest import mock
 
 from window_generator import build_window, main
 
-from aws_test_helpers import *
+from aws_test_helpers import mock_sns_client, test_topic_arn, get_test_topic_messages
 
 
 class patched_datetime(dt.datetime):
@@ -23,7 +23,7 @@ def test_build_window():
     }
 
 
-def test_end_to_end(mock_sns_client, test_topic_arn, get_test_topic_messages):
+def test_end_to_end(test_topic_arn, get_test_topic_messages, mock_sns_client):
     env = {"WINDOW_LENGTH_MINUTES": "25", "TOPIC_ARN": test_topic_arn}
     os.environ["WINDOW_LENGTH_MINUTES"] = "25"
 

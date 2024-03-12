@@ -24,7 +24,7 @@ def test_topic_arn(mock_sns_client):
 
 
 @pytest.fixture(scope="function")
-def get_test_topic_messages(test_topic_arn, mock_sqs_client, mock_sns_client):
+def get_test_topic_messages(test_topic_arn, mock_sns_client, mock_sqs_client):
     """
     Because sns topics don't know what messages they're broadcasting, we need
     to subscribe something (an SQS queue in this case) to our test topic in order
