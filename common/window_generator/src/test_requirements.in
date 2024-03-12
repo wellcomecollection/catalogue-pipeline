@@ -3,11 +3,4 @@
 moto
 mock
 boto3
-botocore
-docutils
-docker
-jmespath
-python-dateutil
 pytest
-pytz
-six

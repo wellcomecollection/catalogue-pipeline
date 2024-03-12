@@ -6,7 +6,7 @@
 #
 click==8.1.7
     # via -r requirements.in
-pytz==2023.3.post1
+pytz==2024.1
     # via -r requirements.in
-tqdm==4.66.1
+tqdm==4.66.2
     # via -r requirements.in

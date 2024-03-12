@@ -4,126 +4,81 @@
 #
 #    pip-compile test_requirements.in
 #
-aws-xray-sdk==0.95
-    # via moto
-boto==2.49.0
-    # via moto
-boto3==1.7.31
+boto3==1.34.60
     # via
     #   -r test_requirements.in
     #   moto
-botocore==1.10.31
+botocore==1.34.60
     # via
-    #   -r test_requirements.in
     #   boto3
     #   moto
     #   s3transfer
-certifi==2022.9.24
+certifi==2024.2.2
     # via requests
-cffi==1.15.1
+cffi==1.16.0
     # via cryptography
-charset-normalizer==2.0.12
+charset-normalizer==3.3.2
     # via requests
 click==8.1.7
     # via -r requirements.txt
-cookies==2.2.1
+cryptography==42.0.5
     # via moto
-cryptography==38.0.3
-    # via moto
-docker==5.0.0
-    # via
-    #   -r test_requirements.in
-    #   moto
-docutils==0.14
-    # via
-    #   -r test_requirements.in
-    #   botocore
-ecdsa==0.18.0
-    # via python-jose
 exceptiongroup==1.2.0
     # via pytest
-future==0.18.2
-    # via python-jose
-idna==3.4
+idna==3.6
     # via requests
 iniconfig==2.0.0
     # via pytest
-jinja2==3.0.3
+jinja2==3.1.3
     # via moto
-jmespath==0.9.3
+jmespath==1.0.1
     # via
-    #   -r test_requirements.in
     #   boto3
     #   botocore
-jsondiff==1.1.1
-    # via moto
-jsonpickle==2.2.0
-    # via aws-xray-sdk
-markupsafe==2.0.1
-    # via jinja2
-mock==4.0.3
+markupsafe==2.1.5
     # via
-    #   -r test_requirements.in
-    #   moto
-moto==1.3.6
+    #   jinja2
+    #   werkzeug
+mock==5.1.0
+    # via -r test_requirements.in
+moto==5.0.3
     # via -r test_requirements.in
 packaging==24.0
     # via pytest
 pluggy==1.4.0
     # via pytest
-pyaml==21.10.1
-    # via moto
 pycparser==2.21
     # via cffi
-pycryptodome==3.15.0
-    # via python-jose
 pytest==8.1.1
     # via -r test_requirements.in
-python-dateutil==2.7.3
+python-dateutil==2.9.0.post0
     # via
-    #   -r test_requirements.in
     #   botocore
     #   moto
-python-jose==2.0.2
-    # via moto
-pytz==2023.3.post1
+pytz==2024.1
+    # via -r requirements.txt
+pyyaml==6.0.1
+    # via responses
+requests==2.31.0
     # via
-    #   -r requirements.txt
-    #   -r test_requirements.in
-    #   moto
-pyyaml==6.0
-    # via pyaml
-requests==2.27.1
-    # via
-    #   aws-xray-sdk
-    #   docker
     #   moto
     #   responses
-responses==0.17.0
+responses==0.25.0
     # via moto
-s3transfer==0.1.13
+s3transfer==0.10.0
     # via boto3
-six==1.11.0
-    # via
-    #   -r test_requirements.in
-    #   ecdsa
-    #   moto
-    #   python-dateutil
-    #   python-jose
-    #   responses
+six==1.16.0
+    # via python-dateutil
 tomli==2.0.1
     # via pytest
-tqdm==4.66.1
+tqdm==4.66.2
     # via -r requirements.txt
-urllib3==1.26.12
+urllib3==2.0.7
     # via
+    #   botocore
     #   requests
     #   responses
-websocket-client==1.3.0
-    # via docker
-werkzeug==2.0.3
+werkzeug==3.0.1
     # via moto
-wrapt==1.14.1
-    # via aws-xray-sdk
 xmltodict==0.13.0
     # via moto

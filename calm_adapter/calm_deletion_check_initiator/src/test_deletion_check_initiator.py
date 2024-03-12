@@ -3,8 +3,9 @@ import pytest
 from moto import mock_aws
 from deletion_check_initiator import DeletionCheckInitiator
 
-from aws_test_helpers import *
-
+pytest_plugins = [
+    "aws_test_helpers"
+]
 
 @pytest.fixture(scope="function")
 def mock_dynamo_client():
