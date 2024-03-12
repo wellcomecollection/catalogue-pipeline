@@ -4,27 +4,18 @@
 #
 #    pip-compile test_requirements.in
 #
-attrs==21.2.0
-    # via
-    #   -r requirements.txt
-    #   wellcome-aws-utils
 betamax==0.8.1
     # via -r test_requirements.in
 boto3==1.17.76
-    # via
-    #   -r requirements.txt
-    #   moto
-    #   wellcome-aws-utils
+    # via moto
 botocore==1.20.76
     # via
-    #   -r requirements.txt
     #   boto3
     #   moto
     #   s3transfer
 certifi==2020.12.5
     # via
     #   -r requirements.txt
-    #   elasticsearch
     #   requests
 cffi==1.14.5
     # via cryptography
@@ -34,18 +25,10 @@ chardet==4.0.0
     #   requests
 cryptography==3.4.7
     # via moto
-daiquiri==3.0.0
-    # via
-    #   -r requirements.txt
-    #   wellcome-aws-utils
 deepdiff==5.5.0
     # via -r requirements.txt
 docker==5.0.0
     # via -r test_requirements.in
-elasticsearch==7.12.1
-    # via
-    #   -r requirements.txt
-    #   wellcome-aws-utils
 exceptiongroup==1.2.0
     # via pytest
 idna==2.10
@@ -58,7 +41,6 @@ jinja2==3.0.1
     # via moto
 jmespath==0.10.0
     # via
-    #   -r requirements.txt
     #   boto3
     #   botocore
 markupsafe==2.0.1
@@ -85,14 +67,8 @@ pytest==8.1.1
     # via -r test_requirements.in
 python-dateutil==2.8.1
     # via
-    #   -r requirements.txt
     #   botocore
     #   moto
-    #   wellcome-aws-utils
-python-json-logger==2.0.1
-    # via
-    #   -r requirements.txt
-    #   daiquiri
 pytz==2021.1
     # via
     #   -r requirements.txt
@@ -107,12 +83,9 @@ requests==2.25.1
 responses==0.13.3
     # via moto
 s3transfer==0.4.2
-    # via
-    #   -r requirements.txt
-    #   boto3
+    # via boto3
 six==1.16.0
     # via
-    #   -r requirements.txt
     #   moto
     #   python-dateutil
     #   responses
@@ -122,13 +95,10 @@ urllib3==1.26.5
     # via
     #   -r requirements.txt
     #   botocore
-    #   elasticsearch
     #   requests
     #   responses
 websocket-client==1.0.1
     # via docker
-wellcome-aws-utils==3.2.0
-    # via -r requirements.txt
 werkzeug==2.0.1
     # via moto
 xmltodict==0.12.0
