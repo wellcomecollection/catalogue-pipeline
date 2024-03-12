@@ -8,5 +8,6 @@ docutils
 docker
 jmespath
 python-dateutil
+pytest
 pytz
 six

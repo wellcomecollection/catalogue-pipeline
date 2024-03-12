@@ -40,10 +40,14 @@ docutils==0.14
     #   botocore
 ecdsa==0.18.0
     # via python-jose
+exceptiongroup==1.2.0
+    # via pytest
 future==0.18.2
     # via python-jose
 idna==3.4
     # via requests
+iniconfig==2.0.0
+    # via pytest
 jinja2==3.0.3
     # via moto
 jmespath==0.9.3
@@ -58,15 +62,23 @@ jsonpickle==2.2.0
 markupsafe==2.0.1
     # via jinja2
 mock==4.0.3
-    # via moto
+    # via
+    #   -r test_requirements.in
+    #   moto
 moto==1.3.6
     # via -r test_requirements.in
+packaging==24.0
+    # via pytest
+pluggy==1.4.0
+    # via pytest
 pyaml==21.10.1
     # via moto
 pycparser==2.21
     # via cffi
 pycryptodome==3.15.0
     # via python-jose
+pytest==8.1.1
+    # via -r test_requirements.in
 python-dateutil==2.7.3
     # via
     #   -r test_requirements.in
@@ -99,6 +111,8 @@ six==1.11.0
     #   python-dateutil
     #   python-jose
     #   responses
+tomli==2.0.1
+    # via pytest
 tqdm==4.66.1
     # via -r requirements.txt
 urllib3==1.26.12
