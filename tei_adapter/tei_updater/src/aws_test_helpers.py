@@ -7,9 +7,11 @@ from random import randint
 
 @pytest.fixture(scope="function")
 def mock_sns_client():
+    """
+    This fixture provides a boto3 client for SNS that is mocked by moto!.
+    """
     with mock_aws():
         yield boto3.client("sns", region_name="eu-west-1")
-
 
 @pytest.fixture(scope="function")
 def mock_sqs_client():
@@ -19,7 +21,8 @@ def mock_sqs_client():
 @pytest.fixture(scope="function")
 def mock_s3_client():
     with mock_aws():
-        yield boto3.client("s3", region_name="eu-west-1")
+        yield boto3.client("s3", region_name="us-east-1")
+
 
 @pytest.fixture(scope="function")
 def test_topic_arn(mock_sns_client):

@@ -13,11 +13,12 @@ from botocore.exceptions import ClientError
 from tei_updater import main
 from tei_updater import diff_trees
 
-from aws_test_helpers import mock_sns_client, test_topic_arn, get_test_topic_messages, mock_s3_client
-
 with Betamax.configure() as config:
     config.cassette_library_dir = "."
 
+pytest_plugins = [
+    "aws_test_helpers"
+]
 
 @pytest.fixture
 def session():
@@ -63,7 +64,6 @@ def test_changes_to_old_tree_sent(
 ):
     bucket = "bukkit"
     key = "tree.json"
-    mock_s3_client = boto3.client("s3", region_name="us-east-1")
     mock_s3_client.create_bucket(Bucket=bucket)
 
     with open("tei_tree.json", "rb") as f:
