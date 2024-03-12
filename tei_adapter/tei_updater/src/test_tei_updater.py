@@ -14,7 +14,7 @@ from moto import mock_s3
 from tei_updater import main
 from tei_updater import diff_trees
 
-pytest_plugins = "catalogue_aws_fixtures"
+from test_aws import *
 
 with Betamax.configure() as config:
     config.cassette_library_dir = "."
@@ -70,7 +70,7 @@ def test_changes_to_old_tree_sent(
     mock_s3_client = boto3.client("s3", region_name="us-east-1")
     mock_s3_client.create_bucket(Bucket=bucket)
 
-    with open("src/tei_tree.json", "rb") as f:
+    with open("tei_tree.json", "rb") as f:
         mock_s3_client.put_object(Bucket=bucket, Key=key, Body=f)
     with mock.patch.dict(
         os.environ,

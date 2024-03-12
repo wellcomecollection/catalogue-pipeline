@@ -133,7 +133,6 @@ steps:
     matrix:
       - "calm_adapter/calm_deletion_check_initiator"
       - "common/window_generator"
-      - "tei_adapter/tei_updater"
 
   - label: "{{ matrix }} (Test/Lambda) docker-compose"
     plugins:
@@ -145,6 +144,7 @@ steps:
     matrix:
       - "calm_adapter/calm_window_generator"
       - "ebsco_adapter/ebsco_adapter"
+      - "tei_adapter/tei_updater"
 
   - label: "{{ matrix }} (Publish/Lambda)"
     if: build.branch == "main"
