@@ -8,6 +8,7 @@ from window_generator import build_window, main
 
 from test_aws import *
 
+
 class patched_datetime(dt.datetime):
     @classmethod
     def now(cls, tz=None):

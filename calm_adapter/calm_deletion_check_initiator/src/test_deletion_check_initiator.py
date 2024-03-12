@@ -5,6 +5,7 @@ from deletion_check_initiator import DeletionCheckInitiator
 
 from test_aws import *
 
+
 @pytest.fixture(scope="function")
 def mock_dynamo_client():
     with mock_dynamodb2():

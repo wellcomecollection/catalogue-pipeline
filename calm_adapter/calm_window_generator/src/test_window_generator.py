@@ -26,6 +26,9 @@ def test_window_generator():
     window_generator = WindowGenerator(sns_client, "topic_arn", queries)
     window_generator.run()
 
-    assert (sns_client.publish_calls == [(
-        'topic_arn', CalmQuery("CreatedOrModifiedDate", date="2021-01-01T00:00:00").sns_message
-    )])
+    assert sns_client.publish_calls == [
+        (
+            "topic_arn",
+            CalmQuery("CreatedOrModifiedDate", date="2021-01-01T00:00:00").sns_message,
+        )
+    ]
