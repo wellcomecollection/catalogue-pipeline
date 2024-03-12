@@ -45,6 +45,8 @@ markupsafe==2.1.5
     # via
     #   jinja2
     #   werkzeug
+mock==5.1.0
+    # via -r test_requirements.in
 moto==5.0.3
     # via -r test_requirements.in
 packaging==24.0
