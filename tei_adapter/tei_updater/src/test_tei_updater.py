@@ -16,9 +16,8 @@ from tei_updater import diff_trees
 with Betamax.configure() as config:
     config.cassette_library_dir = "."
 
-pytest_plugins = [
-    "aws_test_helpers"
-]
+pytest_plugins = ["aws_test_helpers"]
+
 
 @pytest.fixture
 def session():
@@ -29,7 +28,7 @@ def session():
 
 
 def test_tree_does_not_exist(
-        mock_s3_client, mock_sns_client, test_topic_arn, get_test_topic_messages, session
+    mock_s3_client, mock_sns_client, test_topic_arn, get_test_topic_messages, session
 ):
     bucket = "bukkit"
     key = "tree.json"
@@ -60,7 +59,7 @@ def test_tree_does_not_exist(
 
 
 def test_changes_to_old_tree_sent(
-        mock_s3_client, mock_sns_client, test_topic_arn, get_test_topic_messages, session
+    mock_s3_client, mock_sns_client, test_topic_arn, get_test_topic_messages, session
 ):
     bucket = "bukkit"
     key = "tree.json"
