@@ -13,8 +13,6 @@ class FakeSnsClient:
 
         self.publish_calls.append((TopicArn, Message))
 
-        pass
-
 
 def test_window_generator():
     sns_client = FakeSnsClient()
