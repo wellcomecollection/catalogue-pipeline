@@ -44,7 +44,7 @@ case class MarcXMLRecord(recordElement: Node) extends MarcRecord {
   private def hasTag(values: String*)(node: Node) = {
     values.contains(node \@ "tag")
   }
-  
+
   private def hasCode(values: String*)(node: Node) = {
     values.contains(node \@ "code")
   }
