@@ -41,6 +41,9 @@ class MarcXMLRecordTransformerTest extends AnyFunSpec with Matchers {
           <datafield tag ="022">
             <subfield code="a">1477-4615</subfield>
           </datafield>
+          <datafield tag ="250">
+            <subfield code="a">Director's cut</subfield>
+          </datafield>
         </record>
       )
     )
@@ -49,6 +52,10 @@ class MarcXMLRecordTransformerTest extends AnyFunSpec with Matchers {
       work.data.otherIdentifiers.map(
         _.value
       ) should contain theSameElementsAs Seq("8601416781396", "1477-4615")
+    }
+
+    it("extracts the edition statement") {
+      work.data.edition.get shouldBe "Director's cut"
     }
   }
 }
