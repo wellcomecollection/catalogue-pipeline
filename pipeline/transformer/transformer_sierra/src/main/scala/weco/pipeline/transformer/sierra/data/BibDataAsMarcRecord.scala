@@ -40,7 +40,13 @@ class BibDataAsMarcRecord(bibData: SierraBibData)
     extends MarcRecord
     with SierraQueryOps {
   lazy val fields: Seq[MarcField] =
-    bibData.varFields.map(SierraMarcDataConversions.varFieldToMarcField)
+    bibData.varFields
+      // Only actual MARC varfields, with an actual MARC tag, are exercised
+      // as fields by the clients of MarcRecord.  However, the leader surfaces
+      // as a Varfield in Sierra content.
+      // Anything that doesn't have a tag can be ignored at this point.
+      .filter(_.marcTag.nonEmpty)
+      .map(SierraMarcDataConversions.varFieldToMarcField)
   lazy val materialTypeId: Option[String] = bibData.materialType.map(_.code)
   override def fieldsWithTags(tags: String*): Seq[MarcField] =
     bibData
