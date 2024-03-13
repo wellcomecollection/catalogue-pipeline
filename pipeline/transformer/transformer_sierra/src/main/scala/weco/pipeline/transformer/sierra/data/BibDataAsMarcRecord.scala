@@ -53,4 +53,12 @@ class BibDataAsMarcRecord(bibData: SierraBibData)
       .varfieldsWithTags(tags: _*)
       .map(SierraMarcDataConversions.varFieldToMarcField)
 
+  def subfieldsWithTags(tags: (String, String)*): List[MarcSubfield] =
+    tags.toList.flatMap {
+      case (tag, subfieldTag) =>
+        fieldsWithTags(tag).flatMap(_.subfields).filter(_.tag == subfieldTag)
+    }
+
+  override def subfieldsWithTag(tag: (String, String)): List[MarcSubfield] =
+    subfieldsWithTags(tag)
 }

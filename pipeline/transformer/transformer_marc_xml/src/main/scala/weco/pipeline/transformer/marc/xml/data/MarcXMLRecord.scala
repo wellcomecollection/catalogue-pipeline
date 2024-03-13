@@ -52,4 +52,8 @@ case class MarcXMLRecord(recordElement: Node) extends MarcRecord {
   //    }
   //  }
 
+  override val fields: Seq[MarcField] =
+    recordElement \ "datafield" map MarcXMLDataField
+
+  override def subfieldsWithTag(tag: (String, String)): List[MarcSubfield] = Nil
 }
