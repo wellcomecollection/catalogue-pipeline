@@ -38,22 +38,20 @@ case class MarcXMLRecord(recordElement: Node) extends MarcRecord {
       case (tag, subfieldTag) =>
         (recordElement \ "datafield" filter hasTag(
           tag
-        )) \ "subfield" filter hasTag(subfieldTag) map (MarcXMLSubfield(_))
+        )) \ "subfield" filter hasCode(subfieldTag) map (MarcXMLSubfield(_))
     }
 
   private def hasTag(values: String*)(node: Node) = {
     values.contains(node \@ "tag")
   }
-  //  private def hasTagAndSubfieldTag(values: (String, String)*)(node: Node) = {
-  //    values.exists {
-  //      value =>
-  //        node \@ "tag" == value._1
-  //        node \ "subfield" \@ "tag" == value._2
-  //    }
-  //  }
+  
+  private def hasCode(values: String*)(node: Node) = {
+    values.contains(node \@ "code")
+  }
 
   override val fields: Seq[MarcField] =
-    recordElement \ "datafield" map MarcXMLDataField
+    recordElement \ "datafield" map (node => MarcXMLDataField(node))
 
-  override def subfieldsWithTag(tag: (String, String)): List[MarcSubfield] = Nil
+  override def subfieldsWithTag(tagPair: (String, String)): List[MarcSubfield] =
+    subfieldsWithTags(tagPair)
 }
