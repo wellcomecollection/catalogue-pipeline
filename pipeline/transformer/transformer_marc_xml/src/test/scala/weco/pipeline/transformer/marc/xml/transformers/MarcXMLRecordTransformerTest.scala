@@ -27,4 +27,28 @@ class MarcXMLRecordTransformerTest extends AnyFunSpec with Matchers {
       )
     }
   }
+  describe("a maximal XML record") {
+    val work = MarcXMLRecordTransformer(
+      MarcXMLRecord(
+        <record xmlns="http://www.loc.gov/MARC21/slim">
+          <controlfield tag="001">3PaDhRp</controlfield>
+          <datafield tag ="245">
+            <subfield code="a">matacologian</subfield>
+          </datafield>
+          <datafield tag ="020">
+            <subfield code="a">8601416781396</subfield>
+          </datafield>
+          <datafield tag ="022">
+            <subfield code="a">1477-4615</subfield>
+          </datafield>
+        </record>
+      )
+    )
+
+    it("extracts ISBN and ISSN") {
+      work.data.otherIdentifiers.map(
+        _.value
+      ) should contain theSameElementsAs Seq("8601416781396", "1477-4615")
+    }
+  }
 }

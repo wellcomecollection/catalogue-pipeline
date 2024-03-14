@@ -8,7 +8,10 @@ import weco.catalogue.internal_model.identifiers.{
 import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.internal_model.work.{Work, WorkData}
 import weco.pipeline.transformer.marc.xml.data.MarcXMLRecord
-import weco.pipeline.transformer.marc_common.transformers.MarcTitle
+import weco.pipeline.transformer.marc_common.transformers.{
+  MarcInternationalStandardIdentifiers,
+  MarcTitle
+}
 
 import java.time.Instant
 
@@ -37,7 +40,8 @@ object MarcXMLRecordTransformer {
     record: MarcXMLRecord
   ): WorkData[DataState.Unidentified] = {
     WorkData[DataState.Unidentified](
-      title = MarcTitle(record)
+      title = MarcTitle(record),
+      otherIdentifiers = MarcInternationalStandardIdentifiers(record).toList
     )
   }
 }

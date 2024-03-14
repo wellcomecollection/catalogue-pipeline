@@ -8,4 +8,6 @@ trait MarcRecord {
 
   val fields: Seq[MarcField]
   def fieldsWithTags(tags: String*): Seq[MarcField]
+
+  def subfieldsWithTag(tagPair: (String, String)): List[MarcSubfield]
 }
