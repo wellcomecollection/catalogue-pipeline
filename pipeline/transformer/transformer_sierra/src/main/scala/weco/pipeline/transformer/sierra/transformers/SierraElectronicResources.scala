@@ -34,7 +34,7 @@ import scala.util.Try
 object SierraElectronicResources
     extends MarcElectronicResources
     with SierraMarcDataConversions {
-  
+
   // We get the label by concatenating the contents of three subfields:
   //
   //  - ǂz (public note)
