@@ -1,6 +1,4 @@
 -r requirements.txt
 
-moto
-mock
-boto3
+coverage
 pytest
