@@ -1,4 +1,7 @@
-betamax
+-r requirements.txt
+
 moto
+pytest
+betamax
 mock
 docker

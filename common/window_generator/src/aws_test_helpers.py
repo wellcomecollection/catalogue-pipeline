@@ -1,19 +1,19 @@
 import boto3
 import json
-from moto import mock_sns, mock_sqs
+from moto import mock_aws
 import pytest
 from random import randint
 
 
 @pytest.fixture(scope="function")
 def mock_sns_client():
-    with mock_sns():
+    with mock_aws():
         yield boto3.client("sns", region_name="eu-west-1")
 
 
 @pytest.fixture(scope="function")
 def mock_sqs_client():
-    with mock_sqs():
+    with mock_aws():
         yield boto3.client("sqs", region_name="eu-west-1")
 
 
@@ -24,7 +24,7 @@ def test_topic_arn(mock_sns_client):
 
 
 @pytest.fixture(scope="function")
-def get_test_topic_messages(test_topic_arn, mock_sqs_client, mock_sns_client):
+def get_test_topic_messages(test_topic_arn, mock_sns_client, mock_sqs_client):
     """
     Because sns topics don't know what messages they're broadcasting, we need
     to subscribe something (an SQS queue in this case) to our test topic in order
