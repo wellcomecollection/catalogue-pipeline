@@ -20,8 +20,7 @@ import weco.pipeline.transformer.marc_common.models.{
 
 import java.net.URL
 import scala.util.{Failure, Success, Try}
-//TODO: TEST THIS INDEPENDENTLY FROM SIERRA!
-//TODO: IMPLEMENT AN EBSCO SPECIALISATION!
+
 trait MarcElectronicResources extends Logging {
 
   protected def toItems(
