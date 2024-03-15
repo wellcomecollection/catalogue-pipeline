@@ -20,7 +20,8 @@ import weco.pipeline.transformer.marc_common.models.{
 
 import java.net.URL
 import scala.util.{Failure, Success, Try}
-
+//TODO: TEST THIS INDEPENDENTLY FROM SIERRA!
+//TODO: IMPLEMENT AN EBSCO SPECIALISATION!
 trait MarcElectronicResources extends Logging {
 
   protected def toItems(
@@ -30,7 +31,14 @@ trait MarcElectronicResources extends Logging {
       .fieldsWithTags("856")
       .flatMap(field => toItem(field))
 
-  protected def toItem(
+  protected def getLabel(field: MarcField): String =
+    field.subfields.filter(_.tag == "y").mkString(" ")
+
+  protected def getTitleAndLinkText(
+    field: MarcField
+  ): (Option[String], Option[String]) = (Some(getLabel(field)), None)
+
+  private def toItem(
     field: MarcField
   )(implicit ctx: LoggingContext): Option[Item[IdState.Unminted]] =
     getUrl(field) match {
@@ -38,16 +46,9 @@ trait MarcElectronicResources extends Logging {
         warn(ctx(exception.getMessage))
         None
       case Success(url) =>
-        val (title, linkText) = getTitleAndLinkText(getLabel(field))
+        val (title, linkText) = getTitleAndLinkText(field)
         Some(toItem(url, status(field), title, linkText))
     }
-
-  protected def getLabel(field: MarcField): String =
-    field.subfields.filter(_.tag == "y").mkString(" ")
-
-  protected def getTitleAndLinkText(
-    label: String
-  ): (Option[String], Option[String]) = (Some(label), None)
 
   // We take the URL from subfield ǂu.  If subfield ǂu is missing, repeated,
   // or contains something other than a URL, we discard it.
@@ -128,9 +129,8 @@ trait MarcElectronicResources extends Logging {
 }
 
 object MarcElectronicResources extends MarcElectronicResources {
-  def apply(record: MarcRecord): Seq[Item[IdState.Unminted]] = {
-    implicit val ctx: LoggingContext = new LoggingContext("")
+  def apply(record: MarcRecord)(
+    implicit ctx: LoggingContext
+  ): Seq[Item[IdState.Unminted]] =
     toItems(record)
-  }
-
 }

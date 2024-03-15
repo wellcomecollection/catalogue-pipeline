@@ -1,26 +1,13 @@
 package weco.pipeline.transformer.sierra.transformers
 
-import grizzled.slf4j.Logging
-import weco.catalogue.internal_model.locations.LocationType.OnlineResource
 import weco.catalogue.internal_model.identifiers.IdState
-import weco.catalogue.internal_model.locations.AccessStatus.LicensedResources
-import weco.catalogue.internal_model.locations.{
-  AccessCondition,
-  AccessMethod,
-  AccessStatus,
-  DigitalLocation
-}
 import weco.catalogue.internal_model.work.Item
 import weco.pipeline.transformer.marc_common.logging.LoggingContext
 import weco.pipeline.transformer.marc_common.models.MarcField
 import weco.pipeline.transformer.marc_common.transformers.MarcElectronicResources
 import weco.pipeline.transformer.sierra.data.SierraMarcDataConversions
-import weco.sierra.models.SierraQueryOps
 import weco.sierra.models.identifiers.TypedSierraRecordNumber
-import weco.sierra.models.marc.{Subfield, VarField}
-
-import java.net.URL
-import scala.util.Try
+import weco.sierra.models.marc.VarField
 
 // Create items with a DigitalLocation based on the contents of field 856.
 //
@@ -48,11 +35,11 @@ object SierraElectronicResources
       .mkString(" ")
 
   override def getTitleAndLinkText(
-    label: String
+    field: MarcField
   ): (Option[String], Option[String]) =
-    label match {
+    getLabel(field) match {
       case "" => (None, None)
-      case _ =>
+      case label =>
         if (
           label.split(" ").length <= 7 &&
           label.containsAnyOf("access", "view", "connect")

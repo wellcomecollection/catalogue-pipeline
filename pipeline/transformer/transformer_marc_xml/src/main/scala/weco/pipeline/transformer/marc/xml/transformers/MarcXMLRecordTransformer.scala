@@ -8,8 +8,10 @@ import weco.catalogue.internal_model.identifiers.{
 import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.internal_model.work.{Work, WorkData}
 import weco.pipeline.transformer.marc.xml.data.MarcXMLRecord
+import weco.pipeline.transformer.marc_common.logging.LoggingContext
 import weco.pipeline.transformer.marc_common.transformers.{
   MarcEdition,
+  MarcElectronicResources,
   MarcInternationalStandardIdentifiers,
   MarcTitle
 }
@@ -30,6 +32,9 @@ object MarcXMLRecordTransformer {
       //   but we might be able to work something out
       sourceModifiedTime = Instant.now
     )
+    implicit val ctx: LoggingContext = new LoggingContext(
+      state.sourceIdentifier.value
+    )
     Work.Visible[Source](
       version = 0,
       state = state,
@@ -39,11 +44,14 @@ object MarcXMLRecordTransformer {
 
   def workDataFromMarcRecord(
     record: MarcXMLRecord
+  )(
+    implicit ctx: LoggingContext
   ): WorkData[DataState.Unidentified] = {
     WorkData[DataState.Unidentified](
       title = MarcTitle(record),
       otherIdentifiers = MarcInternationalStandardIdentifiers(record).toList,
-      edition = MarcEdition(record)
+      edition = MarcEdition(record),
+      items = MarcElectronicResources(record).toList
     )
   }
 }
