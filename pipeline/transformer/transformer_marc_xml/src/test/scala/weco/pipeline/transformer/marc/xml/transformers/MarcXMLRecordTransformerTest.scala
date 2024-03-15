@@ -66,6 +66,7 @@ class MarcXMLRecordTransformerTest
     it("extracts the edition statement") {
       work.data.edition.get shouldBe "Director's cut"
     }
+
     it("extracts an electronic resource") {
       val resource = work.data.items.loneElement
       resource.title.get shouldBe "Hampster Dance"

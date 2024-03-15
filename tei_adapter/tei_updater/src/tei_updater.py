@@ -1,6 +1,9 @@
 # -*- encoding: utf-8 -*-
+import datetime
 import dateutil.parser as parser
+import decimal
 import json
+import logging
 import os
 import pytz
 import requests
@@ -9,8 +12,8 @@ import boto3
 from botocore.exceptions import ClientError
 from deepdiff import DeepDiff
 
-from wellcome_aws_utils import sns_utils
-from wellcome_aws_utils.lambda_utils import log_on_error
+
+logger = logging.getLogger(__name__)
 
 tzinfos = {tz: pytz.timezone(tz) for tz in pytz.all_timezones}
 
@@ -98,7 +101,40 @@ def get_authenticated_session(github_token_secret):
     return session
 
 
-@log_on_error
+class EnhancedJSONEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, datetime.datetime):
+            return obj.isoformat()
+
+        if isinstance(obj, decimal.Decimal):
+            if float(obj).is_integer():
+                return int(obj)
+            else:
+                return float(obj)
+
+        return json.JSONEncoder.default(self, obj)
+
+
+def publish_sns_message(sns_client, topic_arn, message, subject="default-subject"):
+    """
+    Given a topic ARN and a series of key-value pairs, publish the key-value
+    data to the SNS topic.
+    """
+    response = sns_client.publish(
+        TopicArn=topic_arn,
+        MessageStructure="json",
+        Message=json.dumps({"default": json.dumps(message, cls=EnhancedJSONEncoder)}),
+        Subject=subject,
+    )
+
+    if response["ResponseMetadata"]["HTTPStatusCode"] == 200:
+        logger.debug("SNS: sent notification %s", response["MessageId"])
+    else:
+        raise RuntimeError(repr(response))
+
+    return response
+
+
 def main(event, _ctxt=None, s3_client=None, sns_client=None, session=None):
     topic_arn = os.environ["TOPIC_ARN"]
     bucket_name = os.environ["BUCKET_NAME"]
@@ -122,11 +158,12 @@ def main(event, _ctxt=None, s3_client=None, sns_client=None, session=None):
         ]
 
     for message in messages:
-        sns_utils.publish_sns_message(
+        publish_sns_message(
             sns_client=sns_client,
             topic_arn=topic_arn,
             message=message,
             subject="source: tei_tree_updater.main",
         )
+
     new_tree_json = json.dumps(new_tree).encode("UTF-8")
     s3_client.put_object(Body=(bytes(new_tree_json)), Bucket=bucket_name, Key=key)

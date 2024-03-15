@@ -8,10 +8,15 @@ import weco.catalogue.internal_model.identifiers.{
 import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.internal_model.work.{Work, WorkData}
 import weco.pipeline.transformer.marc.xml.data.MarcXMLRecord
+<<<<<<< HEAD
 import weco.pipeline.transformer.marc_common.logging.LoggingContext
 import weco.pipeline.transformer.marc_common.transformers.{
   MarcEdition,
   MarcElectronicResources,
+=======
+import weco.pipeline.transformer.marc_common.transformers.{
+  MarcEdition,
+>>>>>>> main
   MarcInternationalStandardIdentifiers,
   MarcTitle
 }

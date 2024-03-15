@@ -2,8 +2,7 @@ module "ftp_lambda" {
   source = "git@github.com:wellcomecollection/terraform-aws-lambda?ref=v1.2.0"
 
   name    = "ebsco-adapter-ftp"
-  runtime = "python3.9"
-  handler = "main.lambda_handler"
+  runtime = "python3.10"
 
   filename    = data.archive_file.empty_zip.output_path
   memory_size = 512
