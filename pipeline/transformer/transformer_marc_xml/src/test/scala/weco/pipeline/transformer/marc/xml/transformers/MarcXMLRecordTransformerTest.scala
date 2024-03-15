@@ -1,12 +1,17 @@
 package weco.pipeline.transformer.marc.xml.transformers
 
+import org.scalatest.LoneElement
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.DataState
+import weco.catalogue.internal_model.locations.DigitalLocation
 import weco.catalogue.internal_model.work.WorkData
 import weco.pipeline.transformer.marc.xml.data.MarcXMLRecord
 
-class MarcXMLRecordTransformerTest extends AnyFunSpec with Matchers {
+class MarcXMLRecordTransformerTest
+    extends AnyFunSpec
+    with Matchers
+    with LoneElement {
 
   describe("a minimal XML record") {
     it("generates a Work with a sourceIdentifier") {
@@ -44,6 +49,10 @@ class MarcXMLRecordTransformerTest extends AnyFunSpec with Matchers {
           <datafield tag ="250">
             <subfield code="a">Director's cut</subfield>
           </datafield>
+          <datafield tag ="856">
+            <subfield code="y">Hampster Dance</subfield>
+            <subfield code="u">https://example.com/hamsterdance</subfield>
+          </datafield>
         </record>
       )
     )
@@ -56,6 +65,13 @@ class MarcXMLRecordTransformerTest extends AnyFunSpec with Matchers {
 
     it("extracts the edition statement") {
       work.data.edition.get shouldBe "Director's cut"
+    }
+    it("extracts an electronic resource") {
+      val resource = work.data.items.loneElement
+      resource.title.get shouldBe "Hampster Dance"
+      resource.locations.loneElement
+        .asInstanceOf[DigitalLocation]
+        .url shouldBe "https://example.com/hampsterdance"
     }
   }
 }

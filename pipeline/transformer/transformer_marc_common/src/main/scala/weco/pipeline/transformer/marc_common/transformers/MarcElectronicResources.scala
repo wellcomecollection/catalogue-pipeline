@@ -32,11 +32,12 @@ trait MarcElectronicResources extends Logging {
       .flatMap(field => toItem(field))
 
   protected def getLabel(field: MarcField): String =
-    field.subfields.filter(_.tag == "y").mkString(" ")
+    field.subfields.filter(_.tag == "y").map(_.content).mkString(" ")
 
-  protected def getTitleAndLinkText(
+  // Return title as Left or linkText as Right
+  protected def getTitleOrLinkText(
     field: MarcField
-  ): (Option[String], Option[String]) = (Some(getLabel(field)), None)
+  ): Either[String, String] = Left(getLabel(field))
 
   private def toItem(
     field: MarcField
@@ -46,8 +47,15 @@ trait MarcElectronicResources extends Logging {
         warn(ctx(exception.getMessage))
         None
       case Success(url) =>
-        val (title, linkText) = getTitleAndLinkText(field)
-        Some(toItem(url, status(field), title, linkText))
+        val label = getTitleOrLinkText(field)
+        Some(
+          toItem(
+            url = url,
+            status = status(field),
+            title = label.left.toOption,
+            linkText = label.right.toOption
+          )
+        )
     }
 
   // We take the URL from subfield ǂu.  If subfield ǂu is missing, repeated,

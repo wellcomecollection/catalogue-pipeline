@@ -34,40 +34,55 @@ object SierraElectronicResources
       .map { _.content.trim }
       .mkString(" ")
 
-  override def getTitleAndLinkText(
+  // The labels derived from the subfields of 856 in Sierra are not consistent
+  // in their intent.  Some represent a name for the resource, others are a
+  // call to action, e.g. inviting the user to access some remote service.
+  // Some are terse, others exceptionally verbose.
+  //
+  // In order to be consistent, the link text is expected to contain a call to
+  // action, whereas the title contains a name for the resource.
+  //
+  // By maintaining this distinction, we can allow clients to consistently
+  // present Call-To-Action links without worrying that the title is also
+  // imperative.
+  //
+  // We don't want the link text to be too long (at most seven words), so
+  // we apply the following heuristic to the label:
+  //
+  // If the concatenated string is seven words or less, and contains "access",
+  // "view" or "connect", we put it in the location "linkText" field.
+  // Otherwise, we put it in the item's "title" field.
+  override def getTitleOrLinkText(
     field: MarcField
-  ): (Option[String], Option[String]) =
+  ): Either[String, String] =
     getLabel(field) match {
-      case "" => (None, None)
+      case "" => Right("View resource")
       case label =>
         if (
           label.split(" ").length <= 7 &&
           label.containsAnyOf("access", "view", "connect")
         )
-          (
-            None,
-            Some(
-              label
-                // e.g. "View resource." ~> "View resource"
-                .stripSuffix(".")
-                .stripSuffix(":")
-                // e.g. "view resource" ~> "View resource"
-                .replaceFirst("^view ", "View ")
-                // These are hard-coded fixes for a couple of known weird records.
-                // We could also fix these in the catalogue, but fixing them here
-                // is cheap and easy.
-                .replace("VIEW FULL TEXT", "View full text")
-                .replace("via  MyiLibrary", "via MyiLibrary")
-                .replace("youtube", "YouTube")
-                .replace("View resource {PDF", "View resource [PDF")
-                .replace(
-                  "View resource 613.7 KB]",
-                  "View resource [613.7 KB]"
-                )
-            )
+          Right(
+            label
+              // e.g. "View resource." ~> "View resource"
+              .stripSuffix(".")
+              .stripSuffix(":")
+              // e.g. "view resource" ~> "View resource"
+              .replaceFirst("^view ", "View ")
+              // These are hard-coded fixes for a couple of known weird records.
+              // We could also fix these in the catalogue, but fixing them here
+              // is cheap and easy.
+              .replace("VIEW FULL TEXT", "View full text")
+              .replace("via  MyiLibrary", "via MyiLibrary")
+              .replace("youtube", "YouTube")
+              .replace("View resource {PDF", "View resource [PDF")
+              .replace(
+                "View resource 613.7 KB]",
+                "View resource [613.7 KB]"
+              )
           )
         else
-          (Some(label), None)
+          Left(label)
     }
 
   def apply(

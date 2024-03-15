@@ -42,7 +42,7 @@ object MarcXMLRecordTransformer {
     )
   }
 
-  def workDataFromMarcRecord(
+  private def workDataFromMarcRecord(
     record: MarcXMLRecord
   )(
     implicit ctx: LoggingContext
