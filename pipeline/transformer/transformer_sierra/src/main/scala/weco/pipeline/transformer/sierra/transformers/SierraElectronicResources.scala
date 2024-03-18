@@ -8,6 +8,7 @@ import weco.pipeline.transformer.marc_common.transformers.MarcElectronicResource
 import weco.pipeline.transformer.sierra.data.SierraMarcDataConversions
 import weco.sierra.models.identifiers.TypedSierraRecordNumber
 import weco.sierra.models.marc.VarField
+import scala.util.{Failure, Success, Try}
 
 // Create items with a DigitalLocation based on the contents of field 856.
 //
@@ -54,35 +55,40 @@ object SierraElectronicResources
   // Otherwise, we put it in the item's "title" field.
   override def getTitleOrLinkText(
     field: MarcField
-  ): Either[String, String] =
+  ): Try[Either[String, String]] =
     getLabel(field) match {
-      case "" => Right("View resource")
-      case label =>
-        if (
-          label.split(" ").length <= 7 &&
-          label.containsAnyOf("access", "view", "connect")
+      case "" =>
+        Failure(
+          new Exception(s"could not construct a label from 856 field $field")
         )
-          Right(
-            label
-              // e.g. "View resource." ~> "View resource"
-              .stripSuffix(".")
-              .stripSuffix(":")
-              // e.g. "view resource" ~> "View resource"
-              .replaceFirst("^view ", "View ")
-              // These are hard-coded fixes for a couple of known weird records.
-              // We could also fix these in the catalogue, but fixing them here
-              // is cheap and easy.
-              .replace("VIEW FULL TEXT", "View full text")
-              .replace("via  MyiLibrary", "via MyiLibrary")
-              .replace("youtube", "YouTube")
-              .replace("View resource {PDF", "View resource [PDF")
-              .replace(
-                "View resource 613.7 KB]",
-                "View resource [613.7 KB]"
-              )
+      case label =>
+        Success(
+          if (
+            label.split(" ").length <= 7 &&
+            label.containsAnyOf("access", "view", "connect")
           )
-        else
-          Left(label)
+            Right(
+              label
+                // e.g. "View resource." ~> "View resource"
+                .stripSuffix(".")
+                .stripSuffix(":")
+                // e.g. "view resource" ~> "View resource"
+                .replaceFirst("^view ", "View ")
+                // These are hard-coded fixes for a couple of known weird records.
+                // We could also fix these in the catalogue, but fixing them here
+                // is cheap and easy.
+                .replace("VIEW FULL TEXT", "View full text")
+                .replace("via  MyiLibrary", "via MyiLibrary")
+                .replace("youtube", "YouTube")
+                .replace("View resource {PDF", "View resource [PDF")
+                .replace(
+                  "View resource 613.7 KB]",
+                  "View resource [613.7 KB]"
+                )
+            )
+          else
+            Left(label)
+        )
     }
 
   def apply(

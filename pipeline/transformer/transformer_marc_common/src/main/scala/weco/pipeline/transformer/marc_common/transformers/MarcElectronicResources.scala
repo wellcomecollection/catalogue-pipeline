@@ -36,7 +36,13 @@ trait MarcElectronicResources extends Logging {
   // Return title as Left or linkText as Right
   protected def getTitleOrLinkText(
     field: MarcField
-  ): Either[String, String] = Left(getLabel(field))
+  ): Try[Either[String, String]] = getLabel(field) match {
+    case "" =>
+      Failure(
+        new Exception(s"could not construct a label from 856 field $field")
+      )
+    case label => Success(Left(label))
+  }
 
   private def toItem(
     field: MarcField
@@ -46,15 +52,21 @@ trait MarcElectronicResources extends Logging {
         warn(ctx(exception.getMessage))
         None
       case Success(url) =>
-        val label = getTitleOrLinkText(field)
+        val (title, linkText) = getTitleOrLinkText(field) match {
+          case Success(label) => (label.left.toOption, label.right.toOption)
+          case Failure(exception) =>
+            warn(ctx(exception.getMessage))
+            (None, None)
+        }
         Some(
           toItem(
             url = url,
             status = status(field),
-            title = label.left.toOption,
-            linkText = label.right.toOption
+            title = title,
+            linkText = linkText
           )
         )
+
     }
 
   // We take the URL from subfield ǂu.  If subfield ǂu is missing, repeated,

@@ -36,7 +36,6 @@ class SierraElectronicResourcesTest
         locations = List(
           DigitalLocation(
             url = "https://example.org/journal",
-            linkText = Some("View resource"),
             locationType = OnlineResource,
             accessConditions = List(
               AccessCondition(
@@ -75,7 +74,6 @@ class SierraElectronicResourcesTest
           DigitalLocation(
             url = "https://example.org/journal",
             locationType = OnlineResource,
-            linkText = Some("View resource"),
             accessConditions = List(
               AccessCondition(
                 method = AccessMethod.ViewOnline,
@@ -91,7 +89,6 @@ class SierraElectronicResourcesTest
           DigitalLocation(
             url = "https://example.org/another-journal",
             locationType = OnlineResource,
-            linkText = Some("View resource"),
             accessConditions = List(
               AccessCondition(
                 method = AccessMethod.ViewOnline,
@@ -122,7 +119,6 @@ class SierraElectronicResourcesTest
           DigitalLocation(
             url = "https://example.org/journal",
             locationType = OnlineResource,
-            linkText = Some("View resource"),
             accessConditions = List(
               AccessCondition(
                 method = AccessMethod.ViewOnline,
