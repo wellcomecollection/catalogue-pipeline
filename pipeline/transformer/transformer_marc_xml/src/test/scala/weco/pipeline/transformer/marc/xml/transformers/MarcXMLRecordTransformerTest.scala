@@ -51,7 +51,7 @@ class MarcXMLRecordTransformerTest
           </datafield>
           <datafield tag ="856">
             <subfield code="y">Hampster Dance</subfield>
-            <subfield code="u">https://example.com/hamsterdance</subfield>
+            <subfield code="u">https://example.com/hampsterdance</subfield>
           </datafield>
         </record>
       )

@@ -51,7 +51,7 @@ class MarcXMLRecordTest extends AnyFunSpec with Matchers with LoneElement {
         MarcXMLRecord(
           <record>
             <datafield tag="321">
-              <subfield tag="a">1234-5678</subfield>
+              <subfield code="a">1234-5678</subfield>
             </datafield>
           </record>
         ).fieldsWithTag("123") shouldBe empty
@@ -147,10 +147,10 @@ class MarcXMLRecordTest extends AnyFunSpec with Matchers with LoneElement {
       MarcXMLRecord(
         <record>
           <datafield tag="655">
-            <subfield tag="x">Hello Mike</subfield>
+            <subfield code="x">Hello Mike</subfield>
           </datafield>
           <datafield tag="651">
-            <subfield tag="a">Hello Joe</subfield>
+            <subfield code="a">Hello Joe</subfield>
           </datafield>
         </record>
       ).subfieldsWithTags("655" -> "a", "651" -> "x") shouldBe empty
@@ -163,15 +163,15 @@ class MarcXMLRecordTest extends AnyFunSpec with Matchers with LoneElement {
       MarcXMLRecord(
         <record>
           <datafield tag="650">
-            <subfield tag="a">Hello Mike</subfield>
+            <subfield code="a">Hello Mike</subfield>
           </datafield>
           <datafield tag="655">
-            <subfield tag="a">Hello Robert</subfield>
-            <subfield tag="0">n93000068</subfield>
+            <subfield code="a">Hello Robert</subfield>
+            <subfield code="0">n93000068</subfield>
           </datafield>
           <datafield tag="651">
-            <subfield tag="a">Hello Joe</subfield>
-            <subfield tag="0">n93000065</subfield>
+            <subfield code="a">Hello Joe</subfield>
+            <subfield code="0">n93000065</subfield>
           </datafield>
         </record>
       ).subfieldsWithTags(
