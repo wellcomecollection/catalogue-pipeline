@@ -36,12 +36,15 @@ class SierraElectronicResourcesTest
         locations = List(
           DigitalLocation(
             url = "https://example.org/journal",
+            linkText = Some("View resource"),
             locationType = OnlineResource,
             accessConditions = List(
               AccessCondition(
                 method = AccessMethod.ViewOnline,
                 status = AccessStatus.LicensedResources(
-                  relationship = LicensedResources.Resource))
+                  relationship = LicensedResources.Resource
+                )
+              )
             )
           )
         )
@@ -72,10 +75,12 @@ class SierraElectronicResourcesTest
           DigitalLocation(
             url = "https://example.org/journal",
             locationType = OnlineResource,
+            linkText = Some("View resource"),
             accessConditions = List(
               AccessCondition(
                 method = AccessMethod.ViewOnline,
-                status = AccessStatus.LicensedResources())
+                status = AccessStatus.LicensedResources()
+              )
             )
           )
         )
@@ -86,10 +91,12 @@ class SierraElectronicResourcesTest
           DigitalLocation(
             url = "https://example.org/another-journal",
             locationType = OnlineResource,
+            linkText = Some("View resource"),
             accessConditions = List(
               AccessCondition(
                 method = AccessMethod.ViewOnline,
-                status = AccessStatus.LicensedResources())
+                status = AccessStatus.LicensedResources()
+              )
             )
           )
         )
@@ -115,11 +122,14 @@ class SierraElectronicResourcesTest
           DigitalLocation(
             url = "https://example.org/journal",
             locationType = OnlineResource,
+            linkText = Some("View resource"),
             accessConditions = List(
               AccessCondition(
                 method = AccessMethod.ViewOnline,
                 status = AccessStatus.LicensedResources(
-                  relationship = LicensedResources.RelatedResource))
+                  relationship = LicensedResources.RelatedResource
+                )
+              )
             )
           )
         )
@@ -138,7 +148,7 @@ class SierraElectronicResourcesTest
             Subfield(tag = "u", content = "https://example.org/journal"),
             Subfield(tag = "3", content = "Related archival materials:"),
             Subfield(tag = "z", content = "available to library members."),
-            Subfield(tag = "z", content = "Cambridge Books Online."),
+            Subfield(tag = "z", content = "Cambridge Books Online.")
           )
         )
       )
@@ -146,7 +156,8 @@ class SierraElectronicResourcesTest
       getElectronicResources(varFields) shouldBe List(
         Item(
           title = Some(
-            "Related archival materials: available to library members. Cambridge Books Online."),
+            "Related archival materials: available to library members. Cambridge Books Online."
+          ),
           locations = List(
             DigitalLocation(
               url = "https://example.org/journal",
@@ -154,7 +165,8 @@ class SierraElectronicResourcesTest
               accessConditions = List(
                 AccessCondition(
                   method = AccessMethod.ViewOnline,
-                  status = AccessStatus.LicensedResources())
+                  status = AccessStatus.LicensedResources()
+                )
               )
             )
           )
@@ -163,7 +175,8 @@ class SierraElectronicResourcesTest
     }
 
     it(
-      "puts the label in the linkText if it's ≤7 words and contains 'view', 'access' or 'connect'") {
+      "puts the label in the linkText if it's ≤7 words and contains 'view', 'access' or 'connect'"
+    ) {
       val varFields = List(
         VarField(
           marcTag = "856",
@@ -199,7 +212,8 @@ class SierraElectronicResourcesTest
               accessConditions = List(
                 AccessCondition(
                   method = AccessMethod.ViewOnline,
-                  status = AccessStatus.LicensedResources())
+                  status = AccessStatus.LicensedResources()
+                )
               )
             )
           )
@@ -214,7 +228,8 @@ class SierraElectronicResourcesTest
               accessConditions = List(
                 AccessCondition(
                   method = AccessMethod.ViewOnline,
-                  status = AccessStatus.LicensedResources())
+                  status = AccessStatus.LicensedResources()
+                )
               )
             )
           )
@@ -229,7 +244,8 @@ class SierraElectronicResourcesTest
               accessConditions = List(
                 AccessCondition(
                   method = AccessMethod.ViewOnline,
-                  status = AccessStatus.LicensedResources())
+                  status = AccessStatus.LicensedResources()
+                )
               )
             )
           )
@@ -238,7 +254,8 @@ class SierraElectronicResourcesTest
     }
 
     it(
-      "puts the label in the item title if it's ≤7 words but doesn't contain 'view', 'access' or 'connect'") {
+      "puts the label in the item title if it's ≤7 words but doesn't contain 'view', 'access' or 'connect'"
+    ) {
       val varFields = List(
         VarField(
           marcTag = "856",
@@ -259,7 +276,8 @@ class SierraElectronicResourcesTest
               accessConditions = List(
                 AccessCondition(
                   method = AccessMethod.ViewOnline,
-                  status = AccessStatus.LicensedResources())
+                  status = AccessStatus.LicensedResources()
+                )
               )
             )
           )
@@ -289,7 +307,8 @@ class SierraElectronicResourcesTest
               accessConditions = List(
                 AccessCondition(
                   method = AccessMethod.ViewOnline,
-                  status = AccessStatus.LicensedResources())
+                  status = AccessStatus.LicensedResources()
+                )
               )
             )
           )
@@ -319,7 +338,8 @@ class SierraElectronicResourcesTest
               accessConditions = List(
                 AccessCondition(
                   method = AccessMethod.ViewOnline,
-                  status = AccessStatus.LicensedResources())
+                  status = AccessStatus.LicensedResources()
+                )
               )
             )
           )
@@ -349,7 +369,8 @@ class SierraElectronicResourcesTest
               accessConditions = List(
                 AccessCondition(
                   method = AccessMethod.ViewOnline,
-                  status = AccessStatus.LicensedResources())
+                  status = AccessStatus.LicensedResources()
+                )
               )
             )
           )
@@ -379,7 +400,8 @@ class SierraElectronicResourcesTest
               accessConditions = List(
                 AccessCondition(
                   method = AccessMethod.ViewOnline,
-                  status = AccessStatus.LicensedResources())
+                  status = AccessStatus.LicensedResources()
+                )
               )
             )
           )
