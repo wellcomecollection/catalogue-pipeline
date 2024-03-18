@@ -17,7 +17,7 @@ class MarcElectronicResourcesTest
 
   private implicit val ctx: LoggingContext = LoggingContext("")
 
-  describe("extracting Electronic resourced from MARC 856 fields") {
+  describe("extracting Electronic resources from MARC 856 fields") {
     it("turns an 856 into an Item with a DigitalLocation") {
       val record = MarcTestRecord(fields =
         Seq(
