@@ -1,9 +1,12 @@
 package weco.pipeline.transformer.sierra.transformers
 
-import weco.sierra.models.SierraQueryOps
+import weco.pipeline.transformer.marc_common.transformers.MarcDesignation
+import weco.pipeline.transformer.sierra.data.SierraMarcDataConversions
 import weco.sierra.models.data.SierraBibData
 
-object SierraDesignation extends SierraDataTransformer with SierraQueryOps {
+object SierraDesignation
+    extends SierraDataTransformer
+    with SierraMarcDataConversions {
   override type Output = List[String]
 
   // We use MARC field "362" subfield ǂa.
@@ -15,7 +18,5 @@ object SierraDesignation extends SierraDataTransformer with SierraQueryOps {
   // See https://www.loc.gov/marc/bibliographic/bd362.html
   //
   override def apply(bibData: SierraBibData): List[String] =
-    bibData
-      .varfieldsWithTag("362")
-      .map(vf => vf.subfieldsWithTags("a").map(_.content).mkString(" ").trim)
+    MarcDesignation(bibData).toList
 }
