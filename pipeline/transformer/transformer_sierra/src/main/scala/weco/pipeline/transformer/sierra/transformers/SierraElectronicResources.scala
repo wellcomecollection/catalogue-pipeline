@@ -53,9 +53,9 @@ object SierraElectronicResources
   // If the concatenated string is seven words or less, and contains "access",
   // "view" or "connect", we put it in the location "linkText" field.
   // Otherwise, we put it in the item's "title" field.
-  override def getTitleOrLinkText(
+  override protected def getTitleOrLinkText(
     field: MarcField
-  ): Try[Either[String, String]] =
+  )(implicit ctx: LoggingContext): Try[Either[String, String]] =
     getLabel(field) match {
       case "" =>
         Failure(
