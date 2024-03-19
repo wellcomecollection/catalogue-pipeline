@@ -1,11 +1,12 @@
 package weco.pipeline.transformer.sierra.transformers
 
-import weco.sierra.models.SierraQueryOps
+import weco.pipeline.transformer.marc_common.transformers.MarcCurrentFrequency
+import weco.pipeline.transformer.sierra.data.SierraMarcDataConversions
 import weco.sierra.models.data.SierraBibData
 
 object SierraCurrentFrequency
     extends SierraDataTransformer
-    with SierraQueryOps {
+    with SierraMarcDataConversions {
   override type Output = Option[String]
 
   // We use MARC field "310".  We join ǂa and ǂb with a space.
@@ -17,12 +18,6 @@ object SierraCurrentFrequency
   //
   // See https://www.loc.gov/marc/bibliographic/bd310.html
   //
-  override def apply(bibData: SierraBibData): Option[String] = {
-    val result = bibData
-      .varfieldsWithTag("310")
-      .map(vf => vf.subfieldsWithTags("a", "b").map(_.content).mkString(" "))
-      .mkString(" ")
-
-    if (result.isEmpty) None else Some(result)
-  }
+  override def apply(bibData: SierraBibData): Option[String] =
+    MarcCurrentFrequency(bibData)
 }
