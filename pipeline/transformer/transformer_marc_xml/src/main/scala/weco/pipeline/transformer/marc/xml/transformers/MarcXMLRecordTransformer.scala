@@ -33,7 +33,7 @@ object MarcXMLRecordTransformer {
       //   but we might be able to work something out
       sourceModifiedTime = Instant.now
     )
-    implicit val ctx: LoggingContext = new LoggingContext(
+    implicit val ctx: LoggingContext = LoggingContext(
       state.sourceIdentifier.value
     )
     Work.Visible[Source](

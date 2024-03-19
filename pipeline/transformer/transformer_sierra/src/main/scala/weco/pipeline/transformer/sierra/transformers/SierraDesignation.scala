@@ -1,11 +1,13 @@
 package weco.pipeline.transformer.sierra.transformers
 
+import weco.pipeline.transformer.marc_common.logging.LoggingContext
 import weco.pipeline.transformer.marc_common.transformers.MarcDesignation
 import weco.pipeline.transformer.sierra.data.SierraMarcDataConversions
 import weco.sierra.models.data.SierraBibData
+import weco.sierra.models.identifiers.SierraBibNumber
 
 object SierraDesignation
-    extends SierraDataTransformer
+    extends SierraIdentifiedDataTransformer
     with SierraMarcDataConversions {
   override type Output = List[String]
 
@@ -17,6 +19,11 @@ object SierraDesignation
   //
   // See https://www.loc.gov/marc/bibliographic/bd362.html
   //
-  override def apply(bibData: SierraBibData): List[String] =
+  override def apply(
+    bibId: SierraBibNumber,
+    bibData: SierraBibData
+  ): List[String] = {
+    implicit val ctx: LoggingContext = LoggingContext(bibId.withCheckDigit)
     MarcDesignation(bibData).toList
+  }
 }

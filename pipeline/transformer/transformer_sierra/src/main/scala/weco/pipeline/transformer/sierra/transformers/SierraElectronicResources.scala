@@ -95,7 +95,7 @@ object SierraElectronicResources
     id: TypedSierraRecordNumber,
     varFields: List[VarField]
   ): List[Item[IdState.Unminted]] = {
-    implicit val ctx: LoggingContext = new LoggingContext(id.withCheckDigit)
+    implicit val ctx: LoggingContext = LoggingContext(id.withCheckDigit)
     toItems(varFieldsAsMarcRecord(varFields)).toList
   }
 
