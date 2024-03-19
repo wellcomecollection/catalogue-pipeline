@@ -10,6 +10,7 @@ import weco.catalogue.internal_model.work.{Work, WorkData}
 import weco.pipeline.transformer.marc.xml.data.MarcXMLRecord
 import weco.pipeline.transformer.marc_common.logging.LoggingContext
 import weco.pipeline.transformer.marc_common.transformers.{
+  MarcDescription,
   MarcDesignation,
   MarcEdition,
   MarcElectronicResources,
@@ -52,6 +53,7 @@ object MarcXMLRecordTransformer {
       title = MarcTitle(record),
       otherIdentifiers = MarcInternationalStandardIdentifiers(record).toList,
       designation = MarcDesignation(record).toList,
+      description = MarcDescription(record),
       edition = MarcEdition(record),
       items = MarcElectronicResources(record).toList
     )
