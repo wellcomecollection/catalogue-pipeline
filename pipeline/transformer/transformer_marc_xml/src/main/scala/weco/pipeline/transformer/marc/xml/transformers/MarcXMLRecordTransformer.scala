@@ -10,6 +10,7 @@ import weco.catalogue.internal_model.work.{Work, WorkData}
 import weco.pipeline.transformer.marc.xml.data.MarcXMLRecord
 import weco.pipeline.transformer.marc_common.logging.LoggingContext
 import weco.pipeline.transformer.marc_common.transformers.{
+  MarcDesignation,
   MarcEdition,
   MarcElectronicResources,
   MarcInternationalStandardIdentifiers,
@@ -32,7 +33,7 @@ object MarcXMLRecordTransformer {
       //   but we might be able to work something out
       sourceModifiedTime = Instant.now
     )
-    implicit val ctx: LoggingContext = new LoggingContext(
+    implicit val ctx: LoggingContext = LoggingContext(
       state.sourceIdentifier.value
     )
     Work.Visible[Source](
@@ -50,6 +51,7 @@ object MarcXMLRecordTransformer {
     WorkData[DataState.Unidentified](
       title = MarcTitle(record),
       otherIdentifiers = MarcInternationalStandardIdentifiers(record).toList,
+      designation = MarcDesignation(record).toList,
       edition = MarcEdition(record),
       items = MarcElectronicResources(record).toList
     )

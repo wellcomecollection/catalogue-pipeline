@@ -159,7 +159,7 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
       collectionPath = SierraCollectionPath(bibData),
       currentFrequency = SierraCurrentFrequency(bibData),
       formerFrequency = SierraFormerFrequency(bibData),
-      designation = SierraDesignation(bibData)
+      designation = SierraDesignation(bibId, bibData)
     )
   }
 
