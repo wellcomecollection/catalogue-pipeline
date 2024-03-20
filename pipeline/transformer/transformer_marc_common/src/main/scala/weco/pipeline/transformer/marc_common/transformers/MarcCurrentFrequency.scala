@@ -24,9 +24,8 @@ object MarcCurrentFrequency extends MarcDataTransformer {
           field =>
             field.subfields
               .collect {
-                case MarcSubfield(tag, content)
-                    if Seq("a", "b").contains(tag) =>
-                  content
+                case MarcSubfield("a", content) => content
+                case MarcSubfield("b", content) => content
               }
               .mkString(" ")
         )
