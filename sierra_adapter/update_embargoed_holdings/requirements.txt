@@ -4,19 +4,26 @@
 #
 #    pip-compile
 #
+anyio==3.7.1
+    # via httpcore
 certifi==2021.5.30
-    # via httpx
+    # via
+    #   httpcore
+    #   httpx
 h11==0.12.0
     # via httpcore
-httpcore==0.13.3
+httpcore==0.15.0
     # via httpx
-httpx==0.18.1
+httpx==0.23.0
     # via -r requirements.in
 idna==3.2
-    # via rfc3986
+    # via
+    #   anyio
+    #   rfc3986
 rfc3986[idna2008]==1.5.0
     # via httpx
 sniffio==1.2.0
     # via
+    #   anyio
     #   httpcore
     #   httpx
