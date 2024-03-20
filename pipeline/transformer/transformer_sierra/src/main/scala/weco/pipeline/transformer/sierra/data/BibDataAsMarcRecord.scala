@@ -30,9 +30,11 @@ trait SierraMarcDataConversions {
       indicator1 = varField.indicator1.getOrElse(" "),
       indicator2 = varField.indicator2.getOrElse(" ")
     )
-
   implicit def sierraSubfieldToMarcSubField(subfield: Subfield): MarcSubfield =
     MarcSubfield(tag = subfield.tag, content = subfield.content)
+
+  def varFieldsAsMarcRecord(varFields: List[VarField]) =
+    new BibDataAsMarcRecord(SierraBibData(varFields = varFields))
 }
 object SierraMarcDataConversions extends SierraMarcDataConversions {}
 
