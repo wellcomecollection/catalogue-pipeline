@@ -62,6 +62,13 @@ class MarcXMLRecordTransformerTest
             <subfield code="y">Hampster Dance</subfield>
             <subfield code="u">https://example.com/hampsterdance</subfield>
           </datafield>
+          <datafield tag ="310">
+            <subfield code="a">Sizdah Behar on even-numbered years</subfield>
+          </datafield>
+          <datafield tag ="856">
+            <subfield code="y">Hampster Dance</subfield>
+            <subfield code="u">https://example.com/hampsterdance</subfield>
+          </datafield>
         </record>
       )
     )
@@ -78,6 +85,10 @@ class MarcXMLRecordTransformerTest
       work.data.otherIdentifiers.map(
         _.value
       ) should contain theSameElementsAs Seq("8601416781396", "1477-4615")
+    }
+    
+    it("extracts the current frequency") {
+      work.data.currentFrequency.get shouldBe "Sizdah Behar on even-numbered years"
     }
 
     it("extracts the current frequency") {
