@@ -12,7 +12,6 @@ locals {
     "ingestor_works",
     "inference_manager",
     "feature_inferrer",
-    "feature_training",
     "palette_inferrer",
     "aspect_ratio_inferrer",
     "ingestor_images",
